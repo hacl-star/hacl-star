@@ -101,105 +101,107 @@ Hacl_HPKE_P256_CP256_SHA256_setupBaseS(
             {
               res2 = (uint32_t)1U;
             }
-            if (res2 == (uint32_t)0U)
             {
               uint8_t o_kemcontext[130U] = { 0U };
-              memcpy(o_kemcontext, o_pkE, (uint32_t)65U * sizeof (uint8_t));
+              if (res2 == (uint32_t)0U)
               {
-                uint8_t *o_pkRm = o_kemcontext + (uint32_t)65U;
-                uint8_t *o_pkR = o_pkRm + (uint32_t)1U;
-                memcpy(o_pkR, pkR, (uint32_t)64U * sizeof (uint8_t));
-                o_pkRm[0U] = (uint8_t)4U;
+                memcpy(o_kemcontext, o_pkE, (uint32_t)65U * sizeof (uint8_t));
                 {
-                  uint8_t *o_dhm = o_dh;
-                  uint8_t o_eae_prk[32U] = { 0U };
-                  uint8_t suite_id_kem[5U] = { 0U };
-                  uint8_t *uu____0 = suite_id_kem;
-                  uu____0[0U] = (uint8_t)0x4bU;
-                  uu____0[1U] = (uint8_t)0x45U;
-                  uu____0[2U] = (uint8_t)0x4dU;
+                  uint8_t *o_pkRm = o_kemcontext + (uint32_t)65U;
+                  uint8_t *o_pkR = o_pkRm + (uint32_t)1U;
+                  memcpy(o_pkR, pkR, (uint32_t)64U * sizeof (uint8_t));
+                  o_pkRm[0U] = (uint8_t)4U;
                   {
-                    uint8_t *uu____1 = suite_id_kem + (uint32_t)3U;
-                    uu____1[0U] = (uint8_t)0U;
-                    uu____1[1U] = (uint8_t)16U;
+                    uint8_t *o_dhm = o_dh;
+                    uint8_t o_eae_prk[32U] = { 0U };
+                    uint8_t suite_id_kem[5U] = { 0U };
+                    uint8_t *uu____0 = suite_id_kem;
+                    uu____0[0U] = (uint8_t)0x4bU;
+                    uu____0[1U] = (uint8_t)0x45U;
+                    uu____0[2U] = (uint8_t)0x4dU;
                     {
-                      uint8_t *empty = suite_id_kem;
-                      uint8_t
-                      label_eae_prk[7U] =
-                        {
-                          (uint8_t)0x65U, (uint8_t)0x61U, (uint8_t)0x65U, (uint8_t)0x5fU,
-                          (uint8_t)0x70U, (uint8_t)0x72U, (uint8_t)0x6bU
-                        };
-                      uint32_t len0 = (uint32_t)7U + (uint32_t)5U + (uint32_t)7U + (uint32_t)32U;
-                      KRML_CHECK_SIZE(sizeof (uint8_t), len0);
+                      uint8_t *uu____1 = suite_id_kem + (uint32_t)3U;
+                      uu____1[0U] = (uint8_t)0U;
+                      uu____1[1U] = (uint8_t)16U;
                       {
-                        uint8_t tmp1[len0];
-                        memset(tmp1, 0U, len0 * sizeof (uint8_t));
-                        {
-                          uint8_t *uu____2 = tmp1;
-                          uu____2[0U] = (uint8_t)0x48U;
-                          uu____2[1U] = (uint8_t)0x50U;
-                          uu____2[2U] = (uint8_t)0x4bU;
-                          uu____2[3U] = (uint8_t)0x45U;
-                          uu____2[4U] = (uint8_t)0x2dU;
-                          uu____2[5U] = (uint8_t)0x76U;
-                          uu____2[6U] = (uint8_t)0x31U;
-                          memcpy(tmp1 + (uint32_t)7U,
-                            suite_id_kem,
-                            (uint32_t)5U * sizeof (uint8_t));
-                          memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U,
-                            label_eae_prk,
-                            (uint32_t)7U * sizeof (uint8_t));
-                          memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U + (uint32_t)7U,
-                            o_dhm,
-                            (uint32_t)32U * sizeof (uint8_t));
-                          Hacl_HKDF_extract_sha2_256(o_eae_prk, empty, (uint32_t)0U, tmp1, len0);
+                        uint8_t *empty = suite_id_kem;
+                        uint8_t
+                        label_eae_prk[7U] =
                           {
-                            uint8_t
-                            label_shared_secret[13U] =
-                              {
-                                (uint8_t)0x73U, (uint8_t)0x68U, (uint8_t)0x61U, (uint8_t)0x72U,
-                                (uint8_t)0x65U, (uint8_t)0x64U, (uint8_t)0x5fU, (uint8_t)0x73U,
-                                (uint8_t)0x65U, (uint8_t)0x63U, (uint8_t)0x72U, (uint8_t)0x65U,
-                                (uint8_t)0x74U
-                              };
-                            uint32_t
-                            len = (uint32_t)9U + (uint32_t)5U + (uint32_t)13U + (uint32_t)130U;
-                            KRML_CHECK_SIZE(sizeof (uint8_t), len);
+                            (uint8_t)0x65U, (uint8_t)0x61U, (uint8_t)0x65U, (uint8_t)0x5fU,
+                            (uint8_t)0x70U, (uint8_t)0x72U, (uint8_t)0x6bU
+                          };
+                        uint32_t len0 = (uint32_t)7U + (uint32_t)5U + (uint32_t)7U + (uint32_t)32U;
+                        KRML_CHECK_SIZE(sizeof (uint8_t), len0);
+                        {
+                          uint8_t tmp1[len0];
+                          memset(tmp1, 0U, len0 * sizeof (uint8_t));
+                          {
+                            uint8_t *uu____2 = tmp1;
+                            uu____2[0U] = (uint8_t)0x48U;
+                            uu____2[1U] = (uint8_t)0x50U;
+                            uu____2[2U] = (uint8_t)0x4bU;
+                            uu____2[3U] = (uint8_t)0x45U;
+                            uu____2[4U] = (uint8_t)0x2dU;
+                            uu____2[5U] = (uint8_t)0x76U;
+                            uu____2[6U] = (uint8_t)0x31U;
+                            memcpy(tmp1 + (uint32_t)7U,
+                              suite_id_kem,
+                              (uint32_t)5U * sizeof (uint8_t));
+                            memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U,
+                              label_eae_prk,
+                              (uint32_t)7U * sizeof (uint8_t));
+                            memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U + (uint32_t)7U,
+                              o_dhm,
+                              (uint32_t)32U * sizeof (uint8_t));
+                            Hacl_HKDF_extract_sha2_256(o_eae_prk, empty, (uint32_t)0U, tmp1, len0);
                             {
-                              uint8_t tmp[len];
-                              memset(tmp, 0U, len * sizeof (uint8_t));
-                              {
-                                uint8_t *uu____3 = tmp;
-                                store32_be(uu____3, (uint32_t)32U);
-                                memcpy(uu____3,
-                                  uu____3 + (uint32_t)2U,
-                                  (uint32_t)2U * sizeof (uint8_t));
+                              uint8_t
+                              label_shared_secret[13U] =
                                 {
-                                  uint8_t *uu____4 = tmp + (uint32_t)2U;
-                                  uu____4[0U] = (uint8_t)0x48U;
-                                  uu____4[1U] = (uint8_t)0x50U;
-                                  uu____4[2U] = (uint8_t)0x4bU;
-                                  uu____4[3U] = (uint8_t)0x45U;
-                                  uu____4[4U] = (uint8_t)0x2dU;
-                                  uu____4[5U] = (uint8_t)0x76U;
-                                  uu____4[6U] = (uint8_t)0x31U;
-                                  memcpy(tmp + (uint32_t)9U,
-                                    suite_id_kem,
-                                    (uint32_t)5U * sizeof (uint8_t));
-                                  memcpy(tmp + (uint32_t)9U + (uint32_t)5U,
-                                    label_shared_secret,
-                                    (uint32_t)13U * sizeof (uint8_t));
-                                  memcpy(tmp + (uint32_t)9U + (uint32_t)5U + (uint32_t)13U,
-                                    o_kemcontext,
-                                    (uint32_t)130U * sizeof (uint8_t));
-                                  Hacl_HKDF_expand_sha2_256(o_shared,
-                                    o_eae_prk,
-                                    (uint32_t)32U,
-                                    tmp,
-                                    len,
-                                    (uint32_t)32U);
-                                  res = (uint32_t)0U;
+                                  (uint8_t)0x73U, (uint8_t)0x68U, (uint8_t)0x61U, (uint8_t)0x72U,
+                                  (uint8_t)0x65U, (uint8_t)0x64U, (uint8_t)0x5fU, (uint8_t)0x73U,
+                                  (uint8_t)0x65U, (uint8_t)0x63U, (uint8_t)0x72U, (uint8_t)0x65U,
+                                  (uint8_t)0x74U
+                                };
+                              uint32_t
+                              len = (uint32_t)9U + (uint32_t)5U + (uint32_t)13U + (uint32_t)130U;
+                              KRML_CHECK_SIZE(sizeof (uint8_t), len);
+                              {
+                                uint8_t tmp[len];
+                                memset(tmp, 0U, len * sizeof (uint8_t));
+                                {
+                                  uint8_t *uu____3 = tmp;
+                                  store32_be(uu____3, (uint32_t)32U);
+                                  memcpy(uu____3,
+                                    uu____3 + (uint32_t)2U,
+                                    (uint32_t)2U * sizeof (uint8_t));
+                                  {
+                                    uint8_t *uu____4 = tmp + (uint32_t)2U;
+                                    uu____4[0U] = (uint8_t)0x48U;
+                                    uu____4[1U] = (uint8_t)0x50U;
+                                    uu____4[2U] = (uint8_t)0x4bU;
+                                    uu____4[3U] = (uint8_t)0x45U;
+                                    uu____4[4U] = (uint8_t)0x2dU;
+                                    uu____4[5U] = (uint8_t)0x76U;
+                                    uu____4[6U] = (uint8_t)0x31U;
+                                    memcpy(tmp + (uint32_t)9U,
+                                      suite_id_kem,
+                                      (uint32_t)5U * sizeof (uint8_t));
+                                    memcpy(tmp + (uint32_t)9U + (uint32_t)5U,
+                                      label_shared_secret,
+                                      (uint32_t)13U * sizeof (uint8_t));
+                                    memcpy(tmp + (uint32_t)9U + (uint32_t)5U + (uint32_t)13U,
+                                      o_kemcontext,
+                                      (uint32_t)130U * sizeof (uint8_t));
+                                    Hacl_HKDF_expand_sha2_256(o_shared,
+                                      o_eae_prk,
+                                      (uint32_t)32U,
+                                      tmp,
+                                      len,
+                                      (uint32_t)32U);
+                                    res = (uint32_t)0U;
+                                  }
                                 }
                               }
                             }
@@ -210,10 +212,10 @@ Hacl_HPKE_P256_CP256_SHA256_setupBaseS(
                   }
                 }
               }
-            }
-            else
-            {
-              res = (uint32_t)1U;
+              else
+              {
+                res = (uint32_t)1U;
+              }
             }
           }
         }
@@ -551,173 +553,175 @@ Hacl_HPKE_P256_CP256_SHA256_setupBaseR(
   {
     res1 = (uint32_t)1U;
   }
-  if (res1 == (uint32_t)0U)
   {
     uint8_t shared[32U] = { 0U };
-    uint8_t *pkE = enc + (uint32_t)1U;
-    uint8_t dh[64U] = { 0U };
-    uint8_t tmp0[64U] = { 0U };
-    uint64_t resultBufferFelem[12U] = { 0U };
-    uint64_t *resultBufferFelemX = resultBufferFelem;
-    uint64_t *resultBufferFelemY = resultBufferFelem + (uint32_t)4U;
-    uint8_t *resultX1 = tmp0;
-    uint8_t *resultY1 = tmp0 + (uint32_t)32U;
-    uint64_t publicKeyAsFelem[8U] = { 0U };
-    uint64_t *publicKeyFelemX = publicKeyAsFelem;
-    uint64_t *publicKeyFelemY = publicKeyAsFelem + (uint32_t)4U;
-    uint8_t *pubKeyX = pkE;
-    uint8_t *pubKeyY = pkE + (uint32_t)32U;
-    Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-    Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+    if (res1 == (uint32_t)0U)
     {
-      uint64_t flag1 = Hacl_Impl_P256_DH__ecp256dh_r(resultBufferFelem, publicKeyAsFelem, skR);
-      Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemX);
-      Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemY);
-      Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX1);
-      Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY1);
+      uint8_t *pkE = enc + (uint32_t)1U;
+      uint8_t dh[64U] = { 0U };
+      uint8_t tmp0[64U] = { 0U };
+      uint64_t resultBufferFelem[12U] = { 0U };
+      uint64_t *resultBufferFelemX = resultBufferFelem;
+      uint64_t *resultBufferFelemY = resultBufferFelem + (uint32_t)4U;
+      uint8_t *resultX1 = tmp0;
+      uint8_t *resultY1 = tmp0 + (uint32_t)32U;
+      uint64_t publicKeyAsFelem[8U] = { 0U };
+      uint64_t *publicKeyFelemX = publicKeyAsFelem;
+      uint64_t *publicKeyFelemY = publicKeyAsFelem + (uint32_t)4U;
+      uint8_t *pubKeyX = pkE;
+      uint8_t *pubKeyY = pkE + (uint32_t)32U;
+      Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+      Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
       {
-        bool res0 = flag1 == (uint64_t)0U;
-        memcpy(dh, tmp0, (uint32_t)64U * sizeof (uint8_t));
+        uint64_t flag1 = Hacl_Impl_P256_DH__ecp256dh_r(resultBufferFelem, publicKeyAsFelem, skR);
+        Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemX);
+        Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemY);
+        Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX1);
+        Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY1);
         {
-          uint32_t res11;
-          if (res0)
+          bool res0 = flag1 == (uint64_t)0U;
+          memcpy(dh, tmp0, (uint32_t)64U * sizeof (uint8_t));
           {
-            res11 = (uint32_t)0U;
-          }
-          else
-          {
-            res11 = (uint32_t)1U;
-          }
-          {
-            uint32_t res20;
-            if (res11 == (uint32_t)0U)
+            uint32_t res11;
+            if (res0)
             {
+              res11 = (uint32_t)0U;
+            }
+            else
+            {
+              res11 = (uint32_t)1U;
+            }
+            {
+              uint32_t res20;
               uint8_t kemcontext[130U] = { 0U };
-              uint8_t *pkRm = kemcontext + (uint32_t)65U;
-              uint8_t *pkR1 = pkRm + (uint32_t)1U;
-              uint64_t tempBuffer[100U] = { 0U };
-              uint64_t resultBuffer[12U] = { 0U };
-              uint64_t *resultBufferX = resultBuffer;
-              uint64_t *resultBufferY = resultBuffer + (uint32_t)4U;
-              uint8_t *resultX = pkR1;
-              uint8_t *resultY = pkR1 + (uint32_t)32U;
-              Hacl_Impl_P256_Core_secretToPublic(resultBuffer, skR, tempBuffer);
+              if (res11 == (uint32_t)0U)
               {
-                uint64_t flag = Hacl_Impl_P256_Core_isPointAtInfinityPrivate(resultBuffer);
-                Hacl_Impl_P256_LowLevel_changeEndian(resultBufferX);
-                Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
-                Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX);
-                Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY);
+                uint8_t *pkRm = kemcontext + (uint32_t)65U;
+                uint8_t *pkR1 = pkRm + (uint32_t)1U;
+                uint64_t tempBuffer[100U] = { 0U };
+                uint64_t resultBuffer[12U] = { 0U };
+                uint64_t *resultBufferX = resultBuffer;
+                uint64_t *resultBufferY = resultBuffer + (uint32_t)4U;
+                uint8_t *resultX = pkR1;
+                uint8_t *resultY = pkR1 + (uint32_t)32U;
+                Hacl_Impl_P256_Core_secretToPublic(resultBuffer, skR, tempBuffer);
                 {
-                  bool res3 = flag == (uint64_t)0U;
-                  uint32_t res2;
-                  if (res3)
+                  uint64_t flag = Hacl_Impl_P256_Core_isPointAtInfinityPrivate(resultBuffer);
+                  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferX);
+                  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
+                  Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX);
+                  Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY);
                   {
-                    res2 = (uint32_t)0U;
-                  }
-                  else
-                  {
-                    res2 = (uint32_t)1U;
-                  }
-                  if (res2 == (uint32_t)0U)
-                  {
-                    memcpy(kemcontext, enc, (uint32_t)65U * sizeof (uint8_t));
-                    pkRm[0U] = (uint8_t)4U;
+                    bool res3 = flag == (uint64_t)0U;
+                    uint32_t res2;
+                    if (res3)
                     {
-                      uint8_t *dhm = dh;
-                      uint8_t o_eae_prk[32U] = { 0U };
-                      uint8_t suite_id_kem[5U] = { 0U };
-                      uint8_t *uu____0 = suite_id_kem;
-                      uu____0[0U] = (uint8_t)0x4bU;
-                      uu____0[1U] = (uint8_t)0x45U;
-                      uu____0[2U] = (uint8_t)0x4dU;
+                      res2 = (uint32_t)0U;
+                    }
+                    else
+                    {
+                      res2 = (uint32_t)1U;
+                    }
+                    if (res2 == (uint32_t)0U)
+                    {
+                      memcpy(kemcontext, enc, (uint32_t)65U * sizeof (uint8_t));
+                      pkRm[0U] = (uint8_t)4U;
                       {
-                        uint8_t *uu____1 = suite_id_kem + (uint32_t)3U;
-                        uu____1[0U] = (uint8_t)0U;
-                        uu____1[1U] = (uint8_t)16U;
+                        uint8_t *dhm = dh;
+                        uint8_t o_eae_prk[32U] = { 0U };
+                        uint8_t suite_id_kem[5U] = { 0U };
+                        uint8_t *uu____0 = suite_id_kem;
+                        uu____0[0U] = (uint8_t)0x4bU;
+                        uu____0[1U] = (uint8_t)0x45U;
+                        uu____0[2U] = (uint8_t)0x4dU;
                         {
-                          uint8_t *empty = suite_id_kem;
-                          uint8_t
-                          label_eae_prk[7U] =
-                            {
-                              (uint8_t)0x65U, (uint8_t)0x61U, (uint8_t)0x65U, (uint8_t)0x5fU,
-                              (uint8_t)0x70U, (uint8_t)0x72U, (uint8_t)0x6bU
-                            };
-                          uint32_t
-                          len0 = (uint32_t)7U + (uint32_t)5U + (uint32_t)7U + (uint32_t)32U;
-                          KRML_CHECK_SIZE(sizeof (uint8_t), len0);
+                          uint8_t *uu____1 = suite_id_kem + (uint32_t)3U;
+                          uu____1[0U] = (uint8_t)0U;
+                          uu____1[1U] = (uint8_t)16U;
                           {
-                            uint8_t tmp1[len0];
-                            memset(tmp1, 0U, len0 * sizeof (uint8_t));
-                            {
-                              uint8_t *uu____2 = tmp1;
-                              uu____2[0U] = (uint8_t)0x48U;
-                              uu____2[1U] = (uint8_t)0x50U;
-                              uu____2[2U] = (uint8_t)0x4bU;
-                              uu____2[3U] = (uint8_t)0x45U;
-                              uu____2[4U] = (uint8_t)0x2dU;
-                              uu____2[5U] = (uint8_t)0x76U;
-                              uu____2[6U] = (uint8_t)0x31U;
-                              memcpy(tmp1 + (uint32_t)7U,
-                                suite_id_kem,
-                                (uint32_t)5U * sizeof (uint8_t));
-                              memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U,
-                                label_eae_prk,
-                                (uint32_t)7U * sizeof (uint8_t));
-                              memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U + (uint32_t)7U,
-                                dhm,
-                                (uint32_t)32U * sizeof (uint8_t));
-                              Hacl_HKDF_extract_sha2_256(o_eae_prk,
-                                empty,
-                                (uint32_t)0U,
-                                tmp1,
-                                len0);
+                            uint8_t *empty = suite_id_kem;
+                            uint8_t
+                            label_eae_prk[7U] =
                               {
-                                uint8_t
-                                label_shared_secret[13U] =
-                                  {
-                                    (uint8_t)0x73U, (uint8_t)0x68U, (uint8_t)0x61U, (uint8_t)0x72U,
-                                    (uint8_t)0x65U, (uint8_t)0x64U, (uint8_t)0x5fU, (uint8_t)0x73U,
-                                    (uint8_t)0x65U, (uint8_t)0x63U, (uint8_t)0x72U, (uint8_t)0x65U,
-                                    (uint8_t)0x74U
-                                  };
-                                uint32_t
-                                len = (uint32_t)9U + (uint32_t)5U + (uint32_t)13U + (uint32_t)130U;
-                                KRML_CHECK_SIZE(sizeof (uint8_t), len);
+                                (uint8_t)0x65U, (uint8_t)0x61U, (uint8_t)0x65U, (uint8_t)0x5fU,
+                                (uint8_t)0x70U, (uint8_t)0x72U, (uint8_t)0x6bU
+                              };
+                            uint32_t
+                            len0 = (uint32_t)7U + (uint32_t)5U + (uint32_t)7U + (uint32_t)32U;
+                            KRML_CHECK_SIZE(sizeof (uint8_t), len0);
+                            {
+                              uint8_t tmp1[len0];
+                              memset(tmp1, 0U, len0 * sizeof (uint8_t));
+                              {
+                                uint8_t *uu____2 = tmp1;
+                                uu____2[0U] = (uint8_t)0x48U;
+                                uu____2[1U] = (uint8_t)0x50U;
+                                uu____2[2U] = (uint8_t)0x4bU;
+                                uu____2[3U] = (uint8_t)0x45U;
+                                uu____2[4U] = (uint8_t)0x2dU;
+                                uu____2[5U] = (uint8_t)0x76U;
+                                uu____2[6U] = (uint8_t)0x31U;
+                                memcpy(tmp1 + (uint32_t)7U,
+                                  suite_id_kem,
+                                  (uint32_t)5U * sizeof (uint8_t));
+                                memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U,
+                                  label_eae_prk,
+                                  (uint32_t)7U * sizeof (uint8_t));
+                                memcpy(tmp1 + (uint32_t)7U + (uint32_t)5U + (uint32_t)7U,
+                                  dhm,
+                                  (uint32_t)32U * sizeof (uint8_t));
+                                Hacl_HKDF_extract_sha2_256(o_eae_prk,
+                                  empty,
+                                  (uint32_t)0U,
+                                  tmp1,
+                                  len0);
                                 {
-                                  uint8_t tmp[len];
-                                  memset(tmp, 0U, len * sizeof (uint8_t));
-                                  {
-                                    uint8_t *uu____3 = tmp;
-                                    store32_be(uu____3, (uint32_t)32U);
-                                    memcpy(uu____3,
-                                      uu____3 + (uint32_t)2U,
-                                      (uint32_t)2U * sizeof (uint8_t));
+                                  uint8_t
+                                  label_shared_secret[13U] =
                                     {
-                                      uint8_t *uu____4 = tmp + (uint32_t)2U;
-                                      uu____4[0U] = (uint8_t)0x48U;
-                                      uu____4[1U] = (uint8_t)0x50U;
-                                      uu____4[2U] = (uint8_t)0x4bU;
-                                      uu____4[3U] = (uint8_t)0x45U;
-                                      uu____4[4U] = (uint8_t)0x2dU;
-                                      uu____4[5U] = (uint8_t)0x76U;
-                                      uu____4[6U] = (uint8_t)0x31U;
-                                      memcpy(tmp + (uint32_t)9U,
-                                        suite_id_kem,
-                                        (uint32_t)5U * sizeof (uint8_t));
-                                      memcpy(tmp + (uint32_t)9U + (uint32_t)5U,
-                                        label_shared_secret,
-                                        (uint32_t)13U * sizeof (uint8_t));
-                                      memcpy(tmp + (uint32_t)9U + (uint32_t)5U + (uint32_t)13U,
-                                        kemcontext,
-                                        (uint32_t)130U * sizeof (uint8_t));
-                                      Hacl_HKDF_expand_sha2_256(shared,
-                                        o_eae_prk,
-                                        (uint32_t)32U,
-                                        tmp,
-                                        len,
-                                        (uint32_t)32U);
-                                      res20 = (uint32_t)0U;
+                                      (uint8_t)0x73U, (uint8_t)0x68U, (uint8_t)0x61U, (uint8_t)0x72U,
+                                      (uint8_t)0x65U, (uint8_t)0x64U, (uint8_t)0x5fU, (uint8_t)0x73U,
+                                      (uint8_t)0x65U, (uint8_t)0x63U, (uint8_t)0x72U, (uint8_t)0x65U,
+                                      (uint8_t)0x74U
+                                    };
+                                  uint32_t
+                                  len = (uint32_t)9U + (uint32_t)5U + (uint32_t)13U + (uint32_t)130U;
+                                  KRML_CHECK_SIZE(sizeof (uint8_t), len);
+                                  {
+                                    uint8_t tmp[len];
+                                    memset(tmp, 0U, len * sizeof (uint8_t));
+                                    {
+                                      uint8_t *uu____3 = tmp;
+                                      store32_be(uu____3, (uint32_t)32U);
+                                      memcpy(uu____3,
+                                        uu____3 + (uint32_t)2U,
+                                        (uint32_t)2U * sizeof (uint8_t));
+                                      {
+                                        uint8_t *uu____4 = tmp + (uint32_t)2U;
+                                        uu____4[0U] = (uint8_t)0x48U;
+                                        uu____4[1U] = (uint8_t)0x50U;
+                                        uu____4[2U] = (uint8_t)0x4bU;
+                                        uu____4[3U] = (uint8_t)0x45U;
+                                        uu____4[4U] = (uint8_t)0x2dU;
+                                        uu____4[5U] = (uint8_t)0x76U;
+                                        uu____4[6U] = (uint8_t)0x31U;
+                                        memcpy(tmp + (uint32_t)9U,
+                                          suite_id_kem,
+                                          (uint32_t)5U * sizeof (uint8_t));
+                                        memcpy(tmp + (uint32_t)9U + (uint32_t)5U,
+                                          label_shared_secret,
+                                          (uint32_t)13U * sizeof (uint8_t));
+                                        memcpy(tmp + (uint32_t)9U + (uint32_t)5U + (uint32_t)13U,
+                                          kemcontext,
+                                          (uint32_t)130U * sizeof (uint8_t));
+                                        Hacl_HKDF_expand_sha2_256(shared,
+                                          o_eae_prk,
+                                          (uint32_t)32U,
+                                          tmp,
+                                          len,
+                                          (uint32_t)32U);
+                                        res20 = (uint32_t)0U;
+                                      }
                                     }
                                   }
                                 }
@@ -727,307 +731,315 @@ Hacl_HPKE_P256_CP256_SHA256_setupBaseR(
                         }
                       }
                     }
-                  }
-                  else
-                  {
-                    res20 = (uint32_t)1U;
+                    else
+                    {
+                      res20 = (uint32_t)1U;
+                    }
                   }
                 }
               }
-            }
-            else
-            {
-              res20 = (uint32_t)1U;
-            }
-            if (res20 == (uint32_t)0U)
-            {
-              uint8_t o_context[65U] = { 0U };
-              uint8_t o_secret[32U] = { 0U };
-              uint8_t suite_id[10U] = { 0U };
-              uint8_t *uu____5 = suite_id;
-              uu____5[0U] = (uint8_t)0x48U;
-              uu____5[1U] = (uint8_t)0x50U;
-              uu____5[2U] = (uint8_t)0x4bU;
-              uu____5[3U] = (uint8_t)0x45U;
+              else
               {
-                uint8_t *uu____6 = suite_id + (uint32_t)4U;
-                uu____6[0U] = (uint8_t)0U;
-                uu____6[1U] = (uint8_t)16U;
+                res20 = (uint32_t)1U;
+              }
+              if (res20 == (uint32_t)0U)
+              {
+                uint8_t o_context[65U] = { 0U };
+                uint8_t o_secret[32U] = { 0U };
+                uint8_t suite_id[10U] = { 0U };
+                uint8_t *uu____5 = suite_id;
+                uu____5[0U] = (uint8_t)0x48U;
+                uu____5[1U] = (uint8_t)0x50U;
+                uu____5[2U] = (uint8_t)0x4bU;
+                uu____5[3U] = (uint8_t)0x45U;
                 {
-                  uint8_t *uu____7 = suite_id + (uint32_t)6U;
-                  uu____7[0U] = (uint8_t)0U;
-                  uu____7[1U] = (uint8_t)1U;
+                  uint8_t *uu____6 = suite_id + (uint32_t)4U;
+                  uu____6[0U] = (uint8_t)0U;
+                  uu____6[1U] = (uint8_t)16U;
                   {
-                    uint8_t *uu____8 = suite_id + (uint32_t)8U;
-                    uu____8[0U] = (uint8_t)0U;
-                    uu____8[1U] = (uint8_t)3U;
+                    uint8_t *uu____7 = suite_id + (uint32_t)6U;
+                    uu____7[0U] = (uint8_t)0U;
+                    uu____7[1U] = (uint8_t)1U;
                     {
-                      uint8_t
-                      label_psk_id_hash[11U] =
-                        {
-                          (uint8_t)0x70U, (uint8_t)0x73U, (uint8_t)0x6bU, (uint8_t)0x5fU,
-                          (uint8_t)0x69U, (uint8_t)0x64U, (uint8_t)0x5fU, (uint8_t)0x68U,
-                          (uint8_t)0x61U, (uint8_t)0x73U, (uint8_t)0x68U
-                        };
-                      uint8_t o_psk_id_hash[32U] = { 0U };
-                      uint8_t *empty = suite_id;
-                      uint32_t len0 = (uint32_t)7U + (uint32_t)10U + (uint32_t)11U + (uint32_t)0U;
-                      KRML_CHECK_SIZE(sizeof (uint8_t), len0);
+                      uint8_t *uu____8 = suite_id + (uint32_t)8U;
+                      uu____8[0U] = (uint8_t)0U;
+                      uu____8[1U] = (uint8_t)3U;
                       {
-                        uint8_t tmp1[len0];
-                        memset(tmp1, 0U, len0 * sizeof (uint8_t));
-                        {
-                          uint8_t *uu____9 = tmp1;
-                          uu____9[0U] = (uint8_t)0x48U;
-                          uu____9[1U] = (uint8_t)0x50U;
-                          uu____9[2U] = (uint8_t)0x4bU;
-                          uu____9[3U] = (uint8_t)0x45U;
-                          uu____9[4U] = (uint8_t)0x2dU;
-                          uu____9[5U] = (uint8_t)0x76U;
-                          uu____9[6U] = (uint8_t)0x31U;
-                          memcpy(tmp1 + (uint32_t)7U, suite_id, (uint32_t)10U * sizeof (uint8_t));
-                          memcpy(tmp1 + (uint32_t)7U + (uint32_t)10U,
-                            label_psk_id_hash,
-                            (uint32_t)11U * sizeof (uint8_t));
-                          memcpy(tmp1 + (uint32_t)7U + (uint32_t)10U + (uint32_t)11U,
-                            empty,
-                            (uint32_t)0U * sizeof (uint8_t));
-                          Hacl_HKDF_extract_sha2_256(o_psk_id_hash,
-                            empty,
-                            (uint32_t)0U,
-                            tmp1,
-                            len0);
+                        uint8_t
+                        label_psk_id_hash[11U] =
                           {
-                            uint8_t
-                            label_info_hash[9U] =
-                              {
-                                (uint8_t)0x69U, (uint8_t)0x6eU, (uint8_t)0x66U, (uint8_t)0x6fU,
-                                (uint8_t)0x5fU, (uint8_t)0x68U, (uint8_t)0x61U, (uint8_t)0x73U,
-                                (uint8_t)0x68U
-                              };
-                            uint8_t o_info_hash[32U] = { 0U };
-                            uint32_t len1 = (uint32_t)7U + (uint32_t)10U + (uint32_t)9U + infolen;
-                            KRML_CHECK_SIZE(sizeof (uint8_t), len1);
+                            (uint8_t)0x70U, (uint8_t)0x73U, (uint8_t)0x6bU, (uint8_t)0x5fU,
+                            (uint8_t)0x69U, (uint8_t)0x64U, (uint8_t)0x5fU, (uint8_t)0x68U,
+                            (uint8_t)0x61U, (uint8_t)0x73U, (uint8_t)0x68U
+                          };
+                        uint8_t o_psk_id_hash[32U] = { 0U };
+                        uint8_t *empty = suite_id;
+                        uint32_t len0 = (uint32_t)7U + (uint32_t)10U + (uint32_t)11U + (uint32_t)0U;
+                        KRML_CHECK_SIZE(sizeof (uint8_t), len0);
+                        {
+                          uint8_t tmp1[len0];
+                          memset(tmp1, 0U, len0 * sizeof (uint8_t));
+                          {
+                            uint8_t *uu____9 = tmp1;
+                            uu____9[0U] = (uint8_t)0x48U;
+                            uu____9[1U] = (uint8_t)0x50U;
+                            uu____9[2U] = (uint8_t)0x4bU;
+                            uu____9[3U] = (uint8_t)0x45U;
+                            uu____9[4U] = (uint8_t)0x2dU;
+                            uu____9[5U] = (uint8_t)0x76U;
+                            uu____9[6U] = (uint8_t)0x31U;
+                            memcpy(tmp1 + (uint32_t)7U, suite_id, (uint32_t)10U * sizeof (uint8_t));
+                            memcpy(tmp1 + (uint32_t)7U + (uint32_t)10U,
+                              label_psk_id_hash,
+                              (uint32_t)11U * sizeof (uint8_t));
+                            memcpy(tmp1 + (uint32_t)7U + (uint32_t)10U + (uint32_t)11U,
+                              empty,
+                              (uint32_t)0U * sizeof (uint8_t));
+                            Hacl_HKDF_extract_sha2_256(o_psk_id_hash,
+                              empty,
+                              (uint32_t)0U,
+                              tmp1,
+                              len0);
                             {
-                              uint8_t tmp2[len1];
-                              memset(tmp2, 0U, len1 * sizeof (uint8_t));
-                              {
-                                uint8_t *uu____10 = tmp2;
-                                uu____10[0U] = (uint8_t)0x48U;
-                                uu____10[1U] = (uint8_t)0x50U;
-                                uu____10[2U] = (uint8_t)0x4bU;
-                                uu____10[3U] = (uint8_t)0x45U;
-                                uu____10[4U] = (uint8_t)0x2dU;
-                                uu____10[5U] = (uint8_t)0x76U;
-                                uu____10[6U] = (uint8_t)0x31U;
-                                memcpy(tmp2 + (uint32_t)7U,
-                                  suite_id,
-                                  (uint32_t)10U * sizeof (uint8_t));
-                                memcpy(tmp2 + (uint32_t)7U + (uint32_t)10U,
-                                  label_info_hash,
-                                  (uint32_t)9U * sizeof (uint8_t));
-                                memcpy(tmp2 + (uint32_t)7U + (uint32_t)10U + (uint32_t)9U,
-                                  info,
-                                  infolen * sizeof (uint8_t));
-                                Hacl_HKDF_extract_sha2_256(o_info_hash,
-                                  empty,
-                                  (uint32_t)0U,
-                                  tmp2,
-                                  len1);
-                                o_context[0U] = (uint8_t)0U;
-                                memcpy(o_context + (uint32_t)1U,
-                                  o_psk_id_hash,
-                                  (uint32_t)32U * sizeof (uint8_t));
-                                memcpy(o_context + (uint32_t)33U,
-                                  o_info_hash,
-                                  (uint32_t)32U * sizeof (uint8_t));
+                              uint8_t
+                              label_info_hash[9U] =
                                 {
-                                  uint8_t
-                                  label_secret[6U] =
-                                    {
-                                      (uint8_t)0x73U, (uint8_t)0x65U, (uint8_t)0x63U, (uint8_t)0x72U,
-                                      (uint8_t)0x65U, (uint8_t)0x74U
-                                    };
-                                  uint32_t
-                                  len2 = (uint32_t)7U + (uint32_t)10U + (uint32_t)6U + (uint32_t)0U;
-                                  KRML_CHECK_SIZE(sizeof (uint8_t), len2);
+                                  (uint8_t)0x69U, (uint8_t)0x6eU, (uint8_t)0x66U, (uint8_t)0x6fU,
+                                  (uint8_t)0x5fU, (uint8_t)0x68U, (uint8_t)0x61U, (uint8_t)0x73U,
+                                  (uint8_t)0x68U
+                                };
+                              uint8_t o_info_hash[32U] = { 0U };
+                              uint32_t len1 = (uint32_t)7U + (uint32_t)10U + (uint32_t)9U + infolen;
+                              KRML_CHECK_SIZE(sizeof (uint8_t), len1);
+                              {
+                                uint8_t tmp2[len1];
+                                memset(tmp2, 0U, len1 * sizeof (uint8_t));
+                                {
+                                  uint8_t *uu____10 = tmp2;
+                                  uu____10[0U] = (uint8_t)0x48U;
+                                  uu____10[1U] = (uint8_t)0x50U;
+                                  uu____10[2U] = (uint8_t)0x4bU;
+                                  uu____10[3U] = (uint8_t)0x45U;
+                                  uu____10[4U] = (uint8_t)0x2dU;
+                                  uu____10[5U] = (uint8_t)0x76U;
+                                  uu____10[6U] = (uint8_t)0x31U;
+                                  memcpy(tmp2 + (uint32_t)7U,
+                                    suite_id,
+                                    (uint32_t)10U * sizeof (uint8_t));
+                                  memcpy(tmp2 + (uint32_t)7U + (uint32_t)10U,
+                                    label_info_hash,
+                                    (uint32_t)9U * sizeof (uint8_t));
+                                  memcpy(tmp2 + (uint32_t)7U + (uint32_t)10U + (uint32_t)9U,
+                                    info,
+                                    infolen * sizeof (uint8_t));
+                                  Hacl_HKDF_extract_sha2_256(o_info_hash,
+                                    empty,
+                                    (uint32_t)0U,
+                                    tmp2,
+                                    len1);
+                                  o_context[0U] = (uint8_t)0U;
+                                  memcpy(o_context + (uint32_t)1U,
+                                    o_psk_id_hash,
+                                    (uint32_t)32U * sizeof (uint8_t));
+                                  memcpy(o_context + (uint32_t)33U,
+                                    o_info_hash,
+                                    (uint32_t)32U * sizeof (uint8_t));
                                   {
-                                    uint8_t tmp3[len2];
-                                    memset(tmp3, 0U, len2 * sizeof (uint8_t));
-                                    {
-                                      uint8_t *uu____11 = tmp3;
-                                      uu____11[0U] = (uint8_t)0x48U;
-                                      uu____11[1U] = (uint8_t)0x50U;
-                                      uu____11[2U] = (uint8_t)0x4bU;
-                                      uu____11[3U] = (uint8_t)0x45U;
-                                      uu____11[4U] = (uint8_t)0x2dU;
-                                      uu____11[5U] = (uint8_t)0x76U;
-                                      uu____11[6U] = (uint8_t)0x31U;
-                                      memcpy(tmp3 + (uint32_t)7U,
-                                        suite_id,
-                                        (uint32_t)10U * sizeof (uint8_t));
-                                      memcpy(tmp3 + (uint32_t)7U + (uint32_t)10U,
-                                        label_secret,
-                                        (uint32_t)6U * sizeof (uint8_t));
-                                      memcpy(tmp3 + (uint32_t)7U + (uint32_t)10U + (uint32_t)6U,
-                                        empty,
-                                        (uint32_t)0U * sizeof (uint8_t));
-                                      Hacl_HKDF_extract_sha2_256(o_secret,
-                                        shared,
-                                        (uint32_t)32U,
-                                        tmp3,
-                                        len2);
+                                    uint8_t
+                                    label_secret[6U] =
                                       {
-                                        uint8_t
-                                        label_exp[3U] =
-                                          { (uint8_t)0x65U, (uint8_t)0x78U, (uint8_t)0x70U };
-                                        uint32_t
-                                        len3 =
-                                          (uint32_t)9U
-                                          + (uint32_t)10U
-                                          + (uint32_t)3U
-                                          + (uint32_t)65U;
-                                        KRML_CHECK_SIZE(sizeof (uint8_t), len3);
+                                        (uint8_t)0x73U, (uint8_t)0x65U, (uint8_t)0x63U,
+                                        (uint8_t)0x72U, (uint8_t)0x65U, (uint8_t)0x74U
+                                      };
+                                    uint32_t
+                                    len2 =
+                                      (uint32_t)7U
+                                      + (uint32_t)10U
+                                      + (uint32_t)6U
+                                      + (uint32_t)0U;
+                                    KRML_CHECK_SIZE(sizeof (uint8_t), len2);
+                                    {
+                                      uint8_t tmp3[len2];
+                                      memset(tmp3, 0U, len2 * sizeof (uint8_t));
+                                      {
+                                        uint8_t *uu____11 = tmp3;
+                                        uu____11[0U] = (uint8_t)0x48U;
+                                        uu____11[1U] = (uint8_t)0x50U;
+                                        uu____11[2U] = (uint8_t)0x4bU;
+                                        uu____11[3U] = (uint8_t)0x45U;
+                                        uu____11[4U] = (uint8_t)0x2dU;
+                                        uu____11[5U] = (uint8_t)0x76U;
+                                        uu____11[6U] = (uint8_t)0x31U;
+                                        memcpy(tmp3 + (uint32_t)7U,
+                                          suite_id,
+                                          (uint32_t)10U * sizeof (uint8_t));
+                                        memcpy(tmp3 + (uint32_t)7U + (uint32_t)10U,
+                                          label_secret,
+                                          (uint32_t)6U * sizeof (uint8_t));
+                                        memcpy(tmp3 + (uint32_t)7U + (uint32_t)10U + (uint32_t)6U,
+                                          empty,
+                                          (uint32_t)0U * sizeof (uint8_t));
+                                        Hacl_HKDF_extract_sha2_256(o_secret,
+                                          shared,
+                                          (uint32_t)32U,
+                                          tmp3,
+                                          len2);
                                         {
-                                          uint8_t tmp4[len3];
-                                          memset(tmp4, 0U, len3 * sizeof (uint8_t));
+                                          uint8_t
+                                          label_exp[3U] =
+                                            { (uint8_t)0x65U, (uint8_t)0x78U, (uint8_t)0x70U };
+                                          uint32_t
+                                          len3 =
+                                            (uint32_t)9U
+                                            + (uint32_t)10U
+                                            + (uint32_t)3U
+                                            + (uint32_t)65U;
+                                          KRML_CHECK_SIZE(sizeof (uint8_t), len3);
                                           {
-                                            uint8_t *uu____12 = tmp4;
-                                            store32_be(uu____12, (uint32_t)32U);
-                                            memcpy(uu____12,
-                                              uu____12 + (uint32_t)2U,
-                                              (uint32_t)2U * sizeof (uint8_t));
+                                            uint8_t tmp4[len3];
+                                            memset(tmp4, 0U, len3 * sizeof (uint8_t));
                                             {
-                                              uint8_t *uu____13 = tmp4 + (uint32_t)2U;
-                                              uu____13[0U] = (uint8_t)0x48U;
-                                              uu____13[1U] = (uint8_t)0x50U;
-                                              uu____13[2U] = (uint8_t)0x4bU;
-                                              uu____13[3U] = (uint8_t)0x45U;
-                                              uu____13[4U] = (uint8_t)0x2dU;
-                                              uu____13[5U] = (uint8_t)0x76U;
-                                              uu____13[6U] = (uint8_t)0x31U;
-                                              memcpy(tmp4 + (uint32_t)9U,
-                                                suite_id,
-                                                (uint32_t)10U * sizeof (uint8_t));
-                                              memcpy(tmp4 + (uint32_t)9U + (uint32_t)10U,
-                                                label_exp,
-                                                (uint32_t)3U * sizeof (uint8_t));
-                                              memcpy(tmp4
-                                                + (uint32_t)9U + (uint32_t)10U + (uint32_t)3U,
-                                                o_context,
-                                                (uint32_t)65U * sizeof (uint8_t));
-                                              Hacl_HKDF_expand_sha2_256(o_ctx.ctx_exporter,
-                                                o_secret,
-                                                (uint32_t)32U,
-                                                tmp4,
-                                                len3,
-                                                (uint32_t)32U);
+                                              uint8_t *uu____12 = tmp4;
+                                              store32_be(uu____12, (uint32_t)32U);
+                                              memcpy(uu____12,
+                                                uu____12 + (uint32_t)2U,
+                                                (uint32_t)2U * sizeof (uint8_t));
                                               {
-                                                uint8_t
-                                                label_key[3U] =
-                                                  { (uint8_t)0x6bU, (uint8_t)0x65U, (uint8_t)0x79U };
-                                                uint32_t
-                                                len4 =
-                                                  (uint32_t)9U
-                                                  + (uint32_t)10U
-                                                  + (uint32_t)3U
-                                                  + (uint32_t)65U;
-                                                KRML_CHECK_SIZE(sizeof (uint8_t), len4);
+                                                uint8_t *uu____13 = tmp4 + (uint32_t)2U;
+                                                uu____13[0U] = (uint8_t)0x48U;
+                                                uu____13[1U] = (uint8_t)0x50U;
+                                                uu____13[2U] = (uint8_t)0x4bU;
+                                                uu____13[3U] = (uint8_t)0x45U;
+                                                uu____13[4U] = (uint8_t)0x2dU;
+                                                uu____13[5U] = (uint8_t)0x76U;
+                                                uu____13[6U] = (uint8_t)0x31U;
+                                                memcpy(tmp4 + (uint32_t)9U,
+                                                  suite_id,
+                                                  (uint32_t)10U * sizeof (uint8_t));
+                                                memcpy(tmp4 + (uint32_t)9U + (uint32_t)10U,
+                                                  label_exp,
+                                                  (uint32_t)3U * sizeof (uint8_t));
+                                                memcpy(tmp4
+                                                  + (uint32_t)9U + (uint32_t)10U + (uint32_t)3U,
+                                                  o_context,
+                                                  (uint32_t)65U * sizeof (uint8_t));
+                                                Hacl_HKDF_expand_sha2_256(o_ctx.ctx_exporter,
+                                                  o_secret,
+                                                  (uint32_t)32U,
+                                                  tmp4,
+                                                  len3,
+                                                  (uint32_t)32U);
                                                 {
-                                                  uint8_t tmp5[len4];
-                                                  memset(tmp5, 0U, len4 * sizeof (uint8_t));
-                                                  {
-                                                    uint8_t *uu____14 = tmp5;
-                                                    store32_be(uu____14, (uint32_t)32U);
-                                                    memcpy(uu____14,
-                                                      uu____14 + (uint32_t)2U,
-                                                      (uint32_t)2U * sizeof (uint8_t));
+                                                  uint8_t
+                                                  label_key[3U] =
                                                     {
-                                                      uint8_t *uu____15 = tmp5 + (uint32_t)2U;
-                                                      uu____15[0U] = (uint8_t)0x48U;
-                                                      uu____15[1U] = (uint8_t)0x50U;
-                                                      uu____15[2U] = (uint8_t)0x4bU;
-                                                      uu____15[3U] = (uint8_t)0x45U;
-                                                      uu____15[4U] = (uint8_t)0x2dU;
-                                                      uu____15[5U] = (uint8_t)0x76U;
-                                                      uu____15[6U] = (uint8_t)0x31U;
-                                                      memcpy(tmp5 + (uint32_t)9U,
-                                                        suite_id,
-                                                        (uint32_t)10U * sizeof (uint8_t));
-                                                      memcpy(tmp5 + (uint32_t)9U + (uint32_t)10U,
-                                                        label_key,
-                                                        (uint32_t)3U * sizeof (uint8_t));
-                                                      memcpy(tmp5
-                                                        +
-                                                          (uint32_t)9U
-                                                          + (uint32_t)10U
-                                                          + (uint32_t)3U,
-                                                        o_context,
-                                                        (uint32_t)65U * sizeof (uint8_t));
-                                                      Hacl_HKDF_expand_sha2_256(o_ctx.ctx_key,
-                                                        o_secret,
-                                                        (uint32_t)32U,
-                                                        tmp5,
-                                                        len4,
-                                                        (uint32_t)32U);
+                                                      (uint8_t)0x6bU,
+                                                      (uint8_t)0x65U,
+                                                      (uint8_t)0x79U
+                                                    };
+                                                  uint32_t
+                                                  len4 =
+                                                    (uint32_t)9U
+                                                    + (uint32_t)10U
+                                                    + (uint32_t)3U
+                                                    + (uint32_t)65U;
+                                                  KRML_CHECK_SIZE(sizeof (uint8_t), len4);
+                                                  {
+                                                    uint8_t tmp5[len4];
+                                                    memset(tmp5, 0U, len4 * sizeof (uint8_t));
+                                                    {
+                                                      uint8_t *uu____14 = tmp5;
+                                                      store32_be(uu____14, (uint32_t)32U);
+                                                      memcpy(uu____14,
+                                                        uu____14 + (uint32_t)2U,
+                                                        (uint32_t)2U * sizeof (uint8_t));
                                                       {
-                                                        uint8_t
-                                                        label_base_nonce[10U] =
-                                                          {
-                                                            (uint8_t)0x62U, (uint8_t)0x61U,
-                                                            (uint8_t)0x73U, (uint8_t)0x65U,
-                                                            (uint8_t)0x5fU, (uint8_t)0x6eU,
-                                                            (uint8_t)0x6fU, (uint8_t)0x6eU,
-                                                            (uint8_t)0x63U, (uint8_t)0x65U
-                                                          };
-                                                        uint32_t
-                                                        len =
-                                                          (uint32_t)9U
-                                                          + (uint32_t)10U
-                                                          + (uint32_t)10U
-                                                          + (uint32_t)65U;
-                                                        KRML_CHECK_SIZE(sizeof (uint8_t), len);
+                                                        uint8_t *uu____15 = tmp5 + (uint32_t)2U;
+                                                        uu____15[0U] = (uint8_t)0x48U;
+                                                        uu____15[1U] = (uint8_t)0x50U;
+                                                        uu____15[2U] = (uint8_t)0x4bU;
+                                                        uu____15[3U] = (uint8_t)0x45U;
+                                                        uu____15[4U] = (uint8_t)0x2dU;
+                                                        uu____15[5U] = (uint8_t)0x76U;
+                                                        uu____15[6U] = (uint8_t)0x31U;
+                                                        memcpy(tmp5 + (uint32_t)9U,
+                                                          suite_id,
+                                                          (uint32_t)10U * sizeof (uint8_t));
+                                                        memcpy(tmp5 + (uint32_t)9U + (uint32_t)10U,
+                                                          label_key,
+                                                          (uint32_t)3U * sizeof (uint8_t));
+                                                        memcpy(tmp5
+                                                          +
+                                                            (uint32_t)9U
+                                                            + (uint32_t)10U
+                                                            + (uint32_t)3U,
+                                                          o_context,
+                                                          (uint32_t)65U * sizeof (uint8_t));
+                                                        Hacl_HKDF_expand_sha2_256(o_ctx.ctx_key,
+                                                          o_secret,
+                                                          (uint32_t)32U,
+                                                          tmp5,
+                                                          len4,
+                                                          (uint32_t)32U);
                                                         {
-                                                          uint8_t tmp[len];
-                                                          memset(tmp, 0U, len * sizeof (uint8_t));
-                                                          {
-                                                            uint8_t *uu____16 = tmp;
-                                                            store32_be(uu____16, (uint32_t)12U);
-                                                            memcpy(uu____16,
-                                                              uu____16 + (uint32_t)2U,
-                                                              (uint32_t)2U * sizeof (uint8_t));
+                                                          uint8_t
+                                                          label_base_nonce[10U] =
                                                             {
-                                                              uint8_t
-                                                              *uu____17 = tmp + (uint32_t)2U;
-                                                              uu____17[0U] = (uint8_t)0x48U;
-                                                              uu____17[1U] = (uint8_t)0x50U;
-                                                              uu____17[2U] = (uint8_t)0x4bU;
-                                                              uu____17[3U] = (uint8_t)0x45U;
-                                                              uu____17[4U] = (uint8_t)0x2dU;
-                                                              uu____17[5U] = (uint8_t)0x76U;
-                                                              uu____17[6U] = (uint8_t)0x31U;
-                                                              memcpy(tmp + (uint32_t)9U,
-                                                                suite_id,
-                                                                (uint32_t)10U * sizeof (uint8_t));
-                                                              memcpy(tmp
-                                                                + (uint32_t)9U + (uint32_t)10U,
-                                                                label_base_nonce,
-                                                                (uint32_t)10U * sizeof (uint8_t));
-                                                              memcpy(tmp
-                                                                +
-                                                                  (uint32_t)9U
-                                                                  + (uint32_t)10U
-                                                                  + (uint32_t)10U,
-                                                                o_context,
-                                                                (uint32_t)65U * sizeof (uint8_t));
-                                                              Hacl_HKDF_expand_sha2_256(o_ctx.ctx_nonce,
-                                                                o_secret,
-                                                                (uint32_t)32U,
-                                                                tmp,
-                                                                len,
-                                                                (uint32_t)12U);
-                                                              o_ctx.ctx_seq[0U] = (uint64_t)0U;
-                                                              ite = (uint32_t)0U;
+                                                              (uint8_t)0x62U, (uint8_t)0x61U,
+                                                              (uint8_t)0x73U, (uint8_t)0x65U,
+                                                              (uint8_t)0x5fU, (uint8_t)0x6eU,
+                                                              (uint8_t)0x6fU, (uint8_t)0x6eU,
+                                                              (uint8_t)0x63U, (uint8_t)0x65U
+                                                            };
+                                                          uint32_t
+                                                          len =
+                                                            (uint32_t)9U
+                                                            + (uint32_t)10U
+                                                            + (uint32_t)10U
+                                                            + (uint32_t)65U;
+                                                          KRML_CHECK_SIZE(sizeof (uint8_t), len);
+                                                          {
+                                                            uint8_t tmp[len];
+                                                            memset(tmp, 0U, len * sizeof (uint8_t));
+                                                            {
+                                                              uint8_t *uu____16 = tmp;
+                                                              store32_be(uu____16, (uint32_t)12U);
+                                                              memcpy(uu____16,
+                                                                uu____16 + (uint32_t)2U,
+                                                                (uint32_t)2U * sizeof (uint8_t));
+                                                              {
+                                                                uint8_t
+                                                                *uu____17 = tmp + (uint32_t)2U;
+                                                                uu____17[0U] = (uint8_t)0x48U;
+                                                                uu____17[1U] = (uint8_t)0x50U;
+                                                                uu____17[2U] = (uint8_t)0x4bU;
+                                                                uu____17[3U] = (uint8_t)0x45U;
+                                                                uu____17[4U] = (uint8_t)0x2dU;
+                                                                uu____17[5U] = (uint8_t)0x76U;
+                                                                uu____17[6U] = (uint8_t)0x31U;
+                                                                memcpy(tmp + (uint32_t)9U,
+                                                                  suite_id,
+                                                                  (uint32_t)10U * sizeof (uint8_t));
+                                                                memcpy(tmp
+                                                                  + (uint32_t)9U + (uint32_t)10U,
+                                                                  label_base_nonce,
+                                                                  (uint32_t)10U * sizeof (uint8_t));
+                                                                memcpy(tmp
+                                                                  +
+                                                                    (uint32_t)9U
+                                                                    + (uint32_t)10U
+                                                                    + (uint32_t)10U,
+                                                                  o_context,
+                                                                  (uint32_t)65U * sizeof (uint8_t));
+                                                                Hacl_HKDF_expand_sha2_256(o_ctx.ctx_nonce,
+                                                                  o_secret,
+                                                                  (uint32_t)32U,
+                                                                  tmp,
+                                                                  len,
+                                                                  (uint32_t)12U);
+                                                                o_ctx.ctx_seq[0U] = (uint64_t)0U;
+                                                                ite = (uint32_t)0U;
+                                                              }
                                                             }
                                                           }
                                                         }
@@ -1052,21 +1064,21 @@ Hacl_HPKE_P256_CP256_SHA256_setupBaseR(
                   }
                 }
               }
-            }
-            else
-            {
-              ite = (uint32_t)1U;
+              else
+              {
+                ite = (uint32_t)1U;
+              }
             }
           }
         }
       }
     }
+    else
+    {
+      ite = (uint32_t)1U;
+    }
+    return ite;
   }
-  else
-  {
-    ite = (uint32_t)1U;
-  }
-  return ite;
 }
 
 uint32_t

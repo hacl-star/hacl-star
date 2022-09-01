@@ -29,12 +29,8 @@
 static inline void
 sha224_update8(Hacl_Impl_SHA2_Types_uint8_8p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
-  Lib_IntVector_Intrinsics_vec256 hash_old[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    hash_old[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-  Lib_IntVector_Intrinsics_vec256 ws[16U];
-  for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
-    ws[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 hash_old[8U] = { 0U };
+  Lib_IntVector_Intrinsics_vec256 ws[16U] = { 0U };
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec256));
   uint8_t *b7 = block.snd.snd.snd.snd.snd.snd.snd;
   uint8_t *b6 = block.snd.snd.snd.snd.snd.snd.fst;
@@ -415,9 +411,7 @@ Hacl_SHA2_Vec256_sha224_8(
         }
       }
     };
-  Lib_IntVector_Intrinsics_vec256 st[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 st[8U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     Lib_IntVector_Intrinsics_vec256 *os = st;
@@ -755,12 +749,8 @@ Hacl_SHA2_Vec256_sha224_8(
 static inline void
 sha256_update8(Hacl_Impl_SHA2_Types_uint8_8p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
-  Lib_IntVector_Intrinsics_vec256 hash_old[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    hash_old[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-  Lib_IntVector_Intrinsics_vec256 ws[16U];
-  for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
-    ws[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 hash_old[8U] = { 0U };
+  Lib_IntVector_Intrinsics_vec256 ws[16U] = { 0U };
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec256));
   uint8_t *b7 = block.snd.snd.snd.snd.snd.snd.snd;
   uint8_t *b6 = block.snd.snd.snd.snd.snd.snd.fst;
@@ -1141,9 +1131,7 @@ Hacl_SHA2_Vec256_sha256_8(
         }
       }
     };
-  Lib_IntVector_Intrinsics_vec256 st[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 st[8U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     Lib_IntVector_Intrinsics_vec256 *os = st;
@@ -1481,12 +1469,8 @@ Hacl_SHA2_Vec256_sha256_8(
 static inline void
 sha384_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
-  Lib_IntVector_Intrinsics_vec256 hash_old[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    hash_old[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-  Lib_IntVector_Intrinsics_vec256 ws[16U];
-  for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
-    ws[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 hash_old[8U] = { 0U };
+  Lib_IntVector_Intrinsics_vec256 ws[16U] = { 0U };
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec256));
   uint8_t *b3 = block.snd.snd.snd;
   uint8_t *b2 = block.snd.snd.fst;
@@ -1730,9 +1714,7 @@ Hacl_SHA2_Vec256_sha384_4(
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
   Hacl_Impl_SHA2_Types_uint8_4p
   rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
-  Lib_IntVector_Intrinsics_vec256 st[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 st[8U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     Lib_IntVector_Intrinsics_vec256 *os = st;
@@ -1910,12 +1892,8 @@ Hacl_SHA2_Vec256_sha384_4(
 static inline void
 sha512_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
-  Lib_IntVector_Intrinsics_vec256 hash_old[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    hash_old[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-  Lib_IntVector_Intrinsics_vec256 ws[16U];
-  for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
-    ws[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 hash_old[8U] = { 0U };
+  Lib_IntVector_Intrinsics_vec256 ws[16U] = { 0U };
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec256));
   uint8_t *b3 = block.snd.snd.snd;
   uint8_t *b2 = block.snd.snd.fst;
@@ -2159,9 +2137,7 @@ Hacl_SHA2_Vec256_sha512_4(
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
   Hacl_Impl_SHA2_Types_uint8_4p
   rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
-  Lib_IntVector_Intrinsics_vec256 st[8U];
-  for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
-    st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 st[8U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     Lib_IntVector_Intrinsics_vec256 *os = st;

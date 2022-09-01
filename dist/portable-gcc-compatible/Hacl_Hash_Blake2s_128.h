@@ -113,26 +113,6 @@ Hacl_Blake2s_128_blake2s(
 
 /* SNIPPET_END: Hacl_Blake2s_128_blake2s */
 
-/* SNIPPET_START: Hacl_Blake2s_128_store_state128s_to_state32 */
-
-void
-Hacl_Blake2s_128_store_state128s_to_state32(
-  uint32_t *st32,
-  Lib_IntVector_Intrinsics_vec128 *st
-);
-
-/* SNIPPET_END: Hacl_Blake2s_128_store_state128s_to_state32 */
-
-/* SNIPPET_START: Hacl_Blake2s_128_load_state128s_from_state32 */
-
-void
-Hacl_Blake2s_128_load_state128s_from_state32(
-  Lib_IntVector_Intrinsics_vec128 *st,
-  uint32_t *st32
-);
-
-/* SNIPPET_END: Hacl_Blake2s_128_load_state128s_from_state32 */
-
 #if defined(__cplusplus)
 }
 #endif

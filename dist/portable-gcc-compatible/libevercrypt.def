@@ -7,10 +7,8 @@ EXPORTS
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
   Hacl_Hash_Definitions_hash_len
-  Hacl_Hash_Core_Blake2_init_blake2s_32
   Hacl_Hash_Core_Blake2_update_blake2s_32
   Hacl_Hash_Core_Blake2_finish_blake2s_32
-  Hacl_Hash_Core_Blake2_init_blake2b_32
   Hacl_Hash_Core_Blake2_update_blake2b_32
   Hacl_Hash_Core_Blake2_finish_blake2b_32
   Hacl_Hash_Blake2_update_multi_blake2s_32
@@ -31,8 +29,6 @@ EXPORTS
   Hacl_Blake2s_32_blake2s_update_last
   Hacl_Blake2s_32_blake2s_finish
   Hacl_Blake2s_32_blake2s
-  Hacl_Hash_Blake2b_256_init_blake2b_256
-  Hacl_Hash_Blake2b_256_update_blake2b_256
   Hacl_Hash_Blake2b_256_finish_blake2b_256
   Hacl_Hash_Blake2b_256_update_multi_blake2b_256
   Hacl_Hash_Blake2b_256_update_last_blake2b_256
@@ -43,10 +39,6 @@ EXPORTS
   Hacl_Blake2b_256_blake2b_update_last
   Hacl_Blake2b_256_blake2b_finish
   Hacl_Blake2b_256_blake2b
-  Hacl_Blake2b_256_load_state256b_from_state32
-  Hacl_Blake2b_256_store_state256b_to_state32
-  Hacl_Hash_Blake2s_128_init_blake2s_128
-  Hacl_Hash_Blake2s_128_update_blake2s_128
   Hacl_Hash_Blake2s_128_finish_blake2s_128
   Hacl_Hash_Blake2s_128_update_multi_blake2s_128
   Hacl_Hash_Blake2s_128_update_last_blake2s_128
@@ -57,8 +49,6 @@ EXPORTS
   Hacl_Blake2s_128_blake2s_update_last
   Hacl_Blake2s_128_blake2s_finish
   Hacl_Blake2s_128_blake2s
-  Hacl_Blake2s_128_store_state128s_to_state32
-  Hacl_Blake2s_128_load_state128s_from_state32
   Hacl_Hash_Core_MD5_legacy_init
   Hacl_Hash_Core_MD5_legacy_update
   Hacl_Hash_Core_MD5_legacy_finish
@@ -128,9 +118,7 @@ EXPORTS
   EverCrypt_Hash_uu___is_SHA2_384_s
   EverCrypt_Hash_uu___is_SHA2_512_s
   EverCrypt_Hash_uu___is_Blake2S_s
-  EverCrypt_Hash_uu___is_Blake2S_128_s
   EverCrypt_Hash_uu___is_Blake2B_s
-  EverCrypt_Hash_uu___is_Blake2B_256_s
   EverCrypt_Hash_alg_of_state
   EverCrypt_Hash_create_in
   EverCrypt_Hash_create

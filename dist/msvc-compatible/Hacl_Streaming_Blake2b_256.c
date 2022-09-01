@@ -40,13 +40,9 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state
         Hacl_Impl_Blake2_Core_M256),
       sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
-  *wv = KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)4U);
-  for (uint32_t _i = 0U; _i < (uint32_t)4U; ++_i)
-    wv[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  *wv = KRML_HOST_CALLOC((uint32_t)4U, sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256
-  *b = KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)4U);
-  for (uint32_t _i = 0U; _i < (uint32_t)4U; ++_i)
-    b[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  *b = KRML_HOST_CALLOC((uint32_t)4U, sizeof (Lib_IntVector_Intrinsics_vec256));
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2b_256_blake2b_256_state
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };

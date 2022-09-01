@@ -1,6 +1,9 @@
 LIBRARY libevercrypt
 
 EXPORTS
+  Hacl_Hash_SHA1_legacy_update_multi
+  Hacl_Hash_SHA1_legacy_update_last
+  Hacl_Hash_SHA1_legacy_hash
   Hacl_Impl_SHA3_rotl
   Hacl_Impl_SHA3_state_permute
   Hacl_Impl_SHA3_loadState

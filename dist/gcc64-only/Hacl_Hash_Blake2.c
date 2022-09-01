@@ -26,41 +26,6 @@
 
 #include "internal/Hacl_Krmllib.h"
 
-uint64_t Hacl_Hash_Core_Blake2_init_blake2s_32(uint32_t *s)
-{
-  uint32_t *r0 = s + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *r1 = s + (uint32_t)1U * (uint32_t)4U;
-  uint32_t *r2 = s + (uint32_t)2U * (uint32_t)4U;
-  uint32_t *r3 = s + (uint32_t)3U * (uint32_t)4U;
-  uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
-  uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
-  uint32_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
-  uint32_t iv3 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
-  uint32_t iv4 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
-  uint32_t iv5 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
-  uint32_t iv6 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
-  uint32_t iv7 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
-  r2[0U] = iv0;
-  r2[1U] = iv1;
-  r2[2U] = iv2;
-  r2[3U] = iv3;
-  r3[0U] = iv4;
-  r3[1U] = iv5;
-  r3[2U] = iv6;
-  r3[3U] = iv7;
-  uint32_t kk_shift_8 = (uint32_t)0U;
-  uint32_t iv0_ = iv0 ^ ((uint32_t)0x01010000U ^ (kk_shift_8 ^ (uint32_t)32U));
-  r0[0U] = iv0_;
-  r0[1U] = iv1;
-  r0[2U] = iv2;
-  r0[3U] = iv3;
-  r1[0U] = iv4;
-  r1[1U] = iv5;
-  r1[2U] = iv6;
-  r1[3U] = iv7;
-  return (uint64_t)0U;
-}
-
 uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block)
 {
   uint32_t wv[16U] = { 0U };
@@ -100,7 +65,7 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
     uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
     uint32_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -489,41 +454,6 @@ void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *
   Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
 }
 
-uint128_t Hacl_Hash_Core_Blake2_init_blake2b_32(uint64_t *s)
-{
-  uint64_t *r0 = s + (uint32_t)0U * (uint32_t)4U;
-  uint64_t *r1 = s + (uint32_t)1U * (uint32_t)4U;
-  uint64_t *r2 = s + (uint32_t)2U * (uint32_t)4U;
-  uint64_t *r3 = s + (uint32_t)3U * (uint32_t)4U;
-  uint64_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
-  uint64_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
-  uint64_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
-  uint64_t iv3 = Hacl_Impl_Blake2_Constants_ivTable_B[3U];
-  uint64_t iv4 = Hacl_Impl_Blake2_Constants_ivTable_B[4U];
-  uint64_t iv5 = Hacl_Impl_Blake2_Constants_ivTable_B[5U];
-  uint64_t iv6 = Hacl_Impl_Blake2_Constants_ivTable_B[6U];
-  uint64_t iv7 = Hacl_Impl_Blake2_Constants_ivTable_B[7U];
-  r2[0U] = iv0;
-  r2[1U] = iv1;
-  r2[2U] = iv2;
-  r2[3U] = iv3;
-  r3[0U] = iv4;
-  r3[1U] = iv5;
-  r3[2U] = iv6;
-  r3[3U] = iv7;
-  uint64_t kk_shift_8 = (uint64_t)(uint32_t)0U << (uint32_t)8U;
-  uint64_t iv0_ = iv0 ^ ((uint64_t)0x01010000U ^ (kk_shift_8 ^ (uint64_t)(uint32_t)64U));
-  r0[0U] = iv0_;
-  r0[1U] = iv1;
-  r0[2U] = iv2;
-  r0[3U] = iv3;
-  r1[0U] = iv4;
-  r1[1U] = iv5;
-  r1[2U] = iv6;
-  r1[3U] = iv7;
-  return (uint128_t)(uint64_t)0U;
-}
-
 uint128_t
 Hacl_Hash_Core_Blake2_update_blake2b_32(uint64_t *s, uint128_t totlen, uint8_t *block)
 {
@@ -564,7 +494,7 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(uint64_t *s, uint128_t totlen, uint8_t *
     uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
     uint64_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -1076,7 +1006,7 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
     uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
     uint32_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -1523,7 +1453,7 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
     uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
     uint64_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -1945,7 +1875,7 @@ blake2b_update_block(uint64_t *wv, uint64_t *hash, bool flag, uint128_t totlen, 
     uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
     uint64_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -2544,7 +2474,7 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
     uint32_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];

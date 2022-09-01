@@ -536,48 +536,29 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
   uint8_t cb[64U] = { 0U };
   memcpy(cb, src1, hash_size * sizeof (uint8_t));
   memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (uint8_t));
-  uint32_t buf0[4U];
-  uint32_t buf1[5U];
-  uint32_t buf2[8U];
-  uint32_t buf3[8U];
-  uint64_t buf4[8U];
-  uint64_t buf5[8U];
-  uint32_t buf6[16U];
-  uint32_t buf7[16U];
-  Lib_IntVector_Intrinsics_vec128 buf8[4U];
-  uint64_t buf9[16U];
-  uint64_t buf10[16U];
-  Lib_IntVector_Intrinsics_vec256 buf[4U];
   EverCrypt_Hash_state_s s;
+  uint32_t buf0[4U] = { 0U };
+  uint32_t buf1[5U] = { 0U };
+  uint32_t buf2[8U] = { 0U };
+  uint32_t buf3[8U] = { 0U };
+  uint64_t buf4[8U] = { 0U };
+  uint64_t buf5[8U] = { 0U };
+  uint32_t buf6[16U] = { 0U };
+  uint64_t buf[16U] = { 0U };
   switch (hash_alg)
   {
     case Spec_Hash_Definitions_MD5:
       {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          buf0[i] = init;
-        }
         s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_MD5_s, { .case_MD5_s = buf0 } });
         break;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
-        {
-          buf1[i] = init;
-        }
         s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = buf1 } });
         break;
       }
     case Spec_Hash_Definitions_SHA2_224:
       {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf2[i] = init;
-        }
         s =
           (
             (EverCrypt_Hash_state_s){
@@ -589,11 +570,6 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf3[i] = init;
-        }
         s =
           (
             (EverCrypt_Hash_state_s){
@@ -605,11 +581,6 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf4[i] = init;
-        }
         s =
           (
             (EverCrypt_Hash_state_s){
@@ -621,11 +592,6 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf5[i] = init;
-        }
         s =
           (
             (EverCrypt_Hash_state_s){
@@ -637,92 +603,13 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     case Spec_Hash_Definitions_Blake2S:
       {
-        bool vec128 = EverCrypt_AutoConfig2_has_vec128();
-        #if HACL_CAN_COMPILE_VEC128
-        if (vec128)
-        {
-          Lib_IntVector_Intrinsics_vec128 init = Lib_IntVector_Intrinsics_vec128_zero;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-          {
-            buf8[i] = init;
-          }
-          s =
-            (
-              (EverCrypt_Hash_state_s){
-                .tag = EverCrypt_Hash_Blake2S_128_s,
-                { .case_Blake2S_128_s = buf8 }
-              }
-            );
-        }
-        else
-        {
-          uint32_t init = (uint32_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-          {
-            buf7[i] = init;
-          }
-          s =
-            (
-              (EverCrypt_Hash_state_s){
-                .tag = EverCrypt_Hash_Blake2S_s,
-                { .case_Blake2S_s = buf7 }
-              }
-            );
-        }
-        #else
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-        {
-          buf6[i] = init;
-        }
         s =
           ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = buf6 } });
-        #endif
         break;
       }
     case Spec_Hash_Definitions_Blake2B:
       {
-        bool vec256 = EverCrypt_AutoConfig2_has_vec256();
-        #if HACL_CAN_COMPILE_VEC256
-        if (vec256)
-        {
-          Lib_IntVector_Intrinsics_vec256 init = Lib_IntVector_Intrinsics_vec256_zero;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-          {
-            buf[i] = init;
-          }
-          s =
-            (
-              (EverCrypt_Hash_state_s){
-                .tag = EverCrypt_Hash_Blake2B_256_s,
-                { .case_Blake2B_256_s = buf }
-              }
-            );
-        }
-        else
-        {
-          uint64_t init = (uint64_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-          {
-            buf10[i] = init;
-          }
-          s =
-            (
-              (EverCrypt_Hash_state_s){
-                .tag = EverCrypt_Hash_Blake2B_s,
-                { .case_Blake2B_s = buf10 }
-              }
-            );
-        }
-        #else
-        uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-        {
-          buf9[i] = init;
-        }
-        s =
-          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = buf9 } });
-        #endif
+        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = buf } });
         break;
       }
     default:
