@@ -100,6 +100,12 @@ void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, 
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_256_hash_blake2b_256 */
 
+/* SNIPPET_START: Hacl_Hash_Blake2b_256_malloc_blake2b_256 */
+
+Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_256_malloc_blake2b_256();
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_256_malloc_blake2b_256 */
+
 #if defined(__cplusplus)
 }
 #endif

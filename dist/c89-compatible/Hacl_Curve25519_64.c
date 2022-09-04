@@ -378,13 +378,11 @@ static void encode_point(uint8_t *o, uint64_t *i)
   finv(tmp, z, tmp_w);
   fmul0(tmp, tmp, x, tmp_w);
   store_felem(u64s, tmp);
-  {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-    {
-      store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
-    }
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store64_le(o + i0 * (uint32_t)8U, u64s[i0]););
 }
 
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
@@ -394,18 +392,16 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
   uint64_t tmp3;
   uint64_t *x;
   uint64_t *z;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-    {
-      uint64_t *os = tmp;
-      uint8_t *bj = pub + i * (uint32_t)8U;
-      uint64_t u = load64_le(bj);
-      uint64_t r = u;
-      uint64_t x0 = r;
-      os[i] = x0;
-    }
-  }
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = tmp;
+    uint8_t *bj = pub + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x0 = r;
+    os[i] = x0;);
   tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (uint64_t)0x7fffffffffffffffU;
   x = init;

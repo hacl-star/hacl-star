@@ -35,31 +35,21 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
   n_blocks = len / (uint32_t)16U;
   n_extra = len % (uint32_t)16U;
   {
-    uint8_t tmp[16U];
+    uint8_t tmp[16U] = { 0U };
     if (n_extra == (uint32_t)0U)
     {
       uint64_t scrut = x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U);
     }
     else
     {
-      uint8_t init = (uint8_t)0U;
+      uint32_t len16 = n_blocks * (uint32_t)16U;
+      uint8_t *src16 = src;
+      memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
+        uint64_t scrut = x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
+        memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
         {
-          tmp[i] = init;
-        }
-      }
-      {
-        uint32_t len16 = n_blocks * (uint32_t)16U;
-        uint8_t *src16 = src;
-        memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
-        {
-          uint64_t scrut = x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
-          memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-          {
-            uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
-          }
+          uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
         }
       }
     }

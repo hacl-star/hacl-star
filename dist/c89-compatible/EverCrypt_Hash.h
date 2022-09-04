@@ -54,37 +54,7 @@ typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg13;
 
 typedef void *EverCrypt_Hash_e_alg;
 
-#define EverCrypt_Hash_MD5_s 0
-#define EverCrypt_Hash_SHA1_s 1
-#define EverCrypt_Hash_SHA2_224_s 2
-#define EverCrypt_Hash_SHA2_256_s 3
-#define EverCrypt_Hash_SHA2_384_s 4
-#define EverCrypt_Hash_SHA2_512_s 5
-#define EverCrypt_Hash_Blake2S_s 6
-#define EverCrypt_Hash_Blake2S_128_s 7
-#define EverCrypt_Hash_Blake2B_s 8
-#define EverCrypt_Hash_Blake2B_256_s 9
-
-typedef uint8_t EverCrypt_Hash_state_s_tags;
-
-typedef struct EverCrypt_Hash_state_s_s
-{
-  EverCrypt_Hash_state_s_tags tag;
-  union {
-    uint32_t *case_MD5_s;
-    uint32_t *case_SHA1_s;
-    uint32_t *case_SHA2_224_s;
-    uint32_t *case_SHA2_256_s;
-    uint64_t *case_SHA2_384_s;
-    uint64_t *case_SHA2_512_s;
-    uint32_t *case_Blake2S_s;
-    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_s;
-    uint64_t *case_Blake2B_s;
-    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_s;
-  }
-  val;
-}
-EverCrypt_Hash_state_s;
+typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(

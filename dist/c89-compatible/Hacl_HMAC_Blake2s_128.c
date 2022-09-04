@@ -94,102 +94,81 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
               }
             }
             {
-              Lib_IntVector_Intrinsics_vec128 s0[4U];
+              Lib_IntVector_Intrinsics_vec128 s0[4U] = { 0U };
+              Lib_IntVector_Intrinsics_vec128 *r0 = s0 + (uint32_t)0U * (uint32_t)1U;
+              Lib_IntVector_Intrinsics_vec128 *r1 = s0 + (uint32_t)1U * (uint32_t)1U;
+              Lib_IntVector_Intrinsics_vec128 *r2 = s0 + (uint32_t)2U * (uint32_t)1U;
+              Lib_IntVector_Intrinsics_vec128 *r3 = s0 + (uint32_t)3U * (uint32_t)1U;
+              uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
+              uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
+              uint32_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
+              uint32_t iv3 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
+              uint32_t iv4 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
+              uint32_t iv5 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
+              uint32_t iv6 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
+              uint32_t iv7 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
+              uint32_t kk_shift_8;
+              uint32_t iv0_;
+              uint64_t es;
+              r2[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0, iv1, iv2, iv3);
+              r3[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
+              kk_shift_8 = (uint32_t)0U;
+              iv0_ = iv0 ^ ((uint32_t)0x01010000U ^ (kk_shift_8 ^ (uint32_t)32U));
+              r0[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv1, iv2, iv3);
+              r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
+              es = (uint64_t)0U;
               {
-                uint32_t _i;
-                for (_i = 0U; _i < (uint32_t)4U; ++_i)
-                  s0[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-              }
-              {
-                Lib_IntVector_Intrinsics_vec128 *r0 = s0 + (uint32_t)0U * (uint32_t)1U;
-                Lib_IntVector_Intrinsics_vec128 *r1 = s0 + (uint32_t)1U * (uint32_t)1U;
-                Lib_IntVector_Intrinsics_vec128 *r2 = s0 + (uint32_t)2U * (uint32_t)1U;
-                Lib_IntVector_Intrinsics_vec128 *r3 = s0 + (uint32_t)3U * (uint32_t)1U;
-                uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
-                uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
-                uint32_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
-                uint32_t iv3 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
-                uint32_t iv4 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
-                uint32_t iv5 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
-                uint32_t iv6 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
-                uint32_t iv7 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
-                uint32_t kk_shift_8;
-                uint32_t iv0_;
-                uint64_t es;
-                r2[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0, iv1, iv2, iv3);
-                r3[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
-                kk_shift_8 = (uint32_t)0U;
-                iv0_ = iv0 ^ ((uint32_t)0x01010000U ^ (kk_shift_8 ^ (uint32_t)32U));
-                r0[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv1, iv2, iv3);
-                r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
-                es = (uint64_t)0U;
+                ___Lib_IntVector_Intrinsics_vec128__uint64_t scrut;
+                Lib_IntVector_Intrinsics_vec128 *s;
+                uint8_t *dst1;
+                uint64_t ev0;
+                uint64_t ev10;
+                uint8_t *hash1;
+                uint64_t ev;
+                uint64_t ev11;
+                uint64_t ev2;
+                uint64_t ev1;
+                scrut.fst = s0;
+                scrut.snd = es;
+                s = scrut.fst;
+                dst1 = ipad;
+                ev0 = Hacl_Hash_Blake2s_128_init_blake2s_128(s);
+                if (data_len == (uint32_t)0U)
                 {
-                  ___Lib_IntVector_Intrinsics_vec128__uint64_t scrut;
-                  Lib_IntVector_Intrinsics_vec128 *s;
-                  uint8_t *dst1;
-                  uint64_t ev0;
-                  uint64_t ev10;
-                  uint8_t *hash1;
-                  uint64_t ev;
-                  uint64_t ev11;
-                  scrut.fst = s0;
-                  scrut.snd = es;
-                  s = scrut.fst;
-                  dst1 = ipad;
-                  ev0 = Hacl_Hash_Blake2s_128_init_blake2s_128(s);
-                  if (data_len == (uint32_t)0U)
-                  {
-                    uint64_t
-                    ev1 =
-                      Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
-                        ev0,
-                        (uint64_t)0U,
-                        ipad,
-                        (uint32_t)64U);
-                    ev10 = ev1;
-                  }
-                  else
-                  {
-                    uint64_t
-                    ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev0, ipad, (uint32_t)1U);
-                    uint64_t
-                    ev2 =
-                      Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
-                        ev1,
-                        (uint64_t)(uint32_t)64U,
-                        data,
-                        data_len);
-                    ev10 = ev2;
-                  }
-                  Hacl_Hash_Blake2s_128_finish_blake2s_128(s, ev10, dst1);
-                  hash1 = ipad;
-                  ev = Hacl_Hash_Blake2s_128_init_blake2s_128(s);
-                  if ((uint32_t)32U == (uint32_t)0U)
-                  {
-                    uint64_t
-                    ev1 =
-                      Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
-                        ev,
-                        (uint64_t)0U,
-                        opad,
-                        (uint32_t)64U);
-                    ev11 = ev1;
-                  }
-                  else
-                  {
-                    uint64_t
-                    ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev, opad, (uint32_t)1U);
-                    uint64_t
-                    ev2 =
-                      Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
-                        ev1,
-                        (uint64_t)(uint32_t)64U,
-                        hash1,
-                        (uint32_t)32U);
-                    ev11 = ev2;
-                  }
-                  Hacl_Hash_Blake2s_128_finish_blake2s_128(s, ev11, dst);
+                  uint64_t
+                  ev12 =
+                    Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
+                      ev0,
+                      (uint64_t)0U,
+                      ipad,
+                      (uint32_t)64U);
+                  ev10 = ev12;
                 }
+                else
+                {
+                  uint64_t
+                  ev12 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev0, ipad, (uint32_t)1U);
+                  uint64_t
+                  ev20 =
+                    Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
+                      ev12,
+                      (uint64_t)(uint32_t)64U,
+                      data,
+                      data_len);
+                  ev10 = ev20;
+                }
+                Hacl_Hash_Blake2s_128_finish_blake2s_128(s, ev10, dst1);
+                hash1 = ipad;
+                ev = Hacl_Hash_Blake2s_128_init_blake2s_128(s);
+                ev11 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev, opad, (uint32_t)1U);
+                ev2 =
+                  Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
+                    ev11,
+                    (uint64_t)(uint32_t)64U,
+                    hash1,
+                    (uint32_t)32U);
+                ev1 = ev2;
+                Hacl_Hash_Blake2s_128_finish_blake2s_128(s, ev1, dst);
               }
             }
           }

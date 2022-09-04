@@ -134,31 +134,16 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   Hacl_Hash_Blake2b_256_finish_blake2b_256(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
   FStar_UInt128_uint128 ev = Hacl_Hash_Blake2b_256_init_blake2b_256(s0);
-  FStar_UInt128_uint128 ev11;
-  if ((uint32_t)64U == (uint32_t)0U)
-  {
-    FStar_UInt128_uint128
-    ev1 =
-      Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
-        ev,
-        FStar_UInt128_uint64_to_uint128((uint64_t)0U),
-        opad,
-        (uint32_t)128U);
-    ev11 = ev1;
-  }
-  else
-  {
-    FStar_UInt128_uint128
-    ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev, opad, (uint32_t)1U);
-    FStar_UInt128_uint128
-    ev2 =
-      Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
-        ev1,
-        FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
-        hash1,
-        (uint32_t)64U);
-    ev11 = ev2;
-  }
+  FStar_UInt128_uint128
+  ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev, opad, (uint32_t)1U);
+  FStar_UInt128_uint128
+  ev2 =
+    Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
+      ev1,
+      FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+      hash1,
+      (uint32_t)64U);
+  FStar_UInt128_uint128 ev11 = ev2;
   Hacl_Hash_Blake2b_256_finish_blake2b_256(s0, ev11, dst);
 }
 

@@ -98,15 +98,8 @@ Hacl_HMAC_legacy_compute_sha1(
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_Core_SHA1_legacy_init(s);
-  if ((uint32_t)20U == (uint32_t)0U)
-  {
-    Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)0U, opad, (uint32_t)64U);
-  }
-  else
-  {
-    Hacl_Hash_SHA1_legacy_update_multi(s, opad, (uint32_t)1U);
-    Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)20U);
-  }
+  Hacl_Hash_SHA1_legacy_update_multi(s, opad, (uint32_t)1U);
+  Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)20U);
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
 }
 
@@ -180,15 +173,8 @@ Hacl_HMAC_compute_sha2_256(
   Hacl_Hash_Core_SHA2_finish_256(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_Core_SHA2_init_256(s);
-  if ((uint32_t)32U == (uint32_t)0U)
-  {
-    Hacl_Hash_SHA2_update_last_256(s, (uint64_t)0U, opad, (uint32_t)64U);
-  }
-  else
-  {
-    Hacl_Hash_SHA2_update_multi_256(s, opad, (uint32_t)1U);
-    Hacl_Hash_SHA2_update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
-  }
+  Hacl_Hash_SHA2_update_multi_256(s, opad, (uint32_t)1U);
+  Hacl_Hash_SHA2_update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
 }
 
@@ -263,15 +249,8 @@ Hacl_HMAC_compute_sha2_384(
   Hacl_Hash_Core_SHA2_finish_384(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_Core_SHA2_init_384(s);
-  if ((uint32_t)48U == (uint32_t)0U)
-  {
-    Hacl_Hash_SHA2_update_last_384(s, (uint128_t)(uint64_t)0U, opad, (uint32_t)128U);
-  }
-  else
-  {
-    Hacl_Hash_SHA2_update_multi_384(s, opad, (uint32_t)1U);
-    Hacl_Hash_SHA2_update_last_384(s, (uint128_t)(uint64_t)(uint32_t)128U, hash1, (uint32_t)48U);
-  }
+  Hacl_Hash_SHA2_update_multi_384(s, opad, (uint32_t)1U);
+  Hacl_Hash_SHA2_update_last_384(s, (uint128_t)(uint64_t)(uint32_t)128U, hash1, (uint32_t)48U);
   Hacl_Hash_Core_SHA2_finish_384(s, dst);
 }
 
@@ -346,15 +325,8 @@ Hacl_HMAC_compute_sha2_512(
   Hacl_Hash_Core_SHA2_finish_512(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_Core_SHA2_init_512(s);
-  if ((uint32_t)64U == (uint32_t)0U)
-  {
-    Hacl_Hash_SHA2_update_last_512(s, (uint128_t)(uint64_t)0U, opad, (uint32_t)128U);
-  }
-  else
-  {
-    Hacl_Hash_SHA2_update_multi_512(s, opad, (uint32_t)1U);
-    Hacl_Hash_SHA2_update_last_512(s, (uint128_t)(uint64_t)(uint32_t)128U, hash1, (uint32_t)64U);
-  }
+  Hacl_Hash_SHA2_update_multi_512(s, opad, (uint32_t)1U);
+  Hacl_Hash_SHA2_update_last_512(s, (uint128_t)(uint64_t)(uint32_t)128U, hash1, (uint32_t)64U);
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
 }
 
@@ -460,25 +432,15 @@ Hacl_HMAC_compute_blake2s_32(
   Hacl_Hash_Core_Blake2_finish_blake2s_32(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
   uint64_t ev = Hacl_Hash_Core_Blake2_init_blake2s_32(s0);
-  uint64_t ev11;
-  if ((uint32_t)32U == (uint32_t)0U)
-  {
-    uint64_t
-    ev1 = Hacl_Hash_Blake2_update_last_blake2s_32(s0, ev, (uint64_t)0U, opad, (uint32_t)64U);
-    ev11 = ev1;
-  }
-  else
-  {
-    uint64_t ev1 = Hacl_Hash_Blake2_update_multi_blake2s_32(s0, ev, opad, (uint32_t)1U);
-    uint64_t
-    ev2 =
-      Hacl_Hash_Blake2_update_last_blake2s_32(s0,
-        ev1,
-        (uint64_t)(uint32_t)64U,
-        hash1,
-        (uint32_t)32U);
-    ev11 = ev2;
-  }
+  uint64_t ev1 = Hacl_Hash_Blake2_update_multi_blake2s_32(s0, ev, opad, (uint32_t)1U);
+  uint64_t
+  ev2 =
+    Hacl_Hash_Blake2_update_last_blake2s_32(s0,
+      ev1,
+      (uint64_t)(uint32_t)64U,
+      hash1,
+      (uint32_t)32U);
+  uint64_t ev11 = ev2;
   Hacl_Hash_Core_Blake2_finish_blake2s_32(s0, ev11, dst);
 }
 
@@ -594,30 +556,15 @@ Hacl_HMAC_compute_blake2b_32(
   Hacl_Hash_Core_Blake2_finish_blake2b_32(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
   uint128_t ev = Hacl_Hash_Core_Blake2_init_blake2b_32(s0);
-  uint128_t ev11;
-  if ((uint32_t)64U == (uint32_t)0U)
-  {
-    uint128_t
-    ev1 =
-      Hacl_Hash_Blake2_update_last_blake2b_32(s0,
-        ev,
-        (uint128_t)(uint64_t)0U,
-        opad,
-        (uint32_t)128U);
-    ev11 = ev1;
-  }
-  else
-  {
-    uint128_t ev1 = Hacl_Hash_Blake2_update_multi_blake2b_32(s0, ev, opad, (uint32_t)1U);
-    uint128_t
-    ev2 =
-      Hacl_Hash_Blake2_update_last_blake2b_32(s0,
-        ev1,
-        (uint128_t)(uint64_t)(uint32_t)128U,
-        hash1,
-        (uint32_t)64U);
-    ev11 = ev2;
-  }
+  uint128_t ev1 = Hacl_Hash_Blake2_update_multi_blake2b_32(s0, ev, opad, (uint32_t)1U);
+  uint128_t
+  ev2 =
+    Hacl_Hash_Blake2_update_last_blake2b_32(s0,
+      ev1,
+      (uint128_t)(uint64_t)(uint32_t)128U,
+      hash1,
+      (uint32_t)64U);
+  uint128_t ev11 = ev2;
   Hacl_Hash_Core_Blake2_finish_blake2b_32(s0, ev11, dst);
 }
 

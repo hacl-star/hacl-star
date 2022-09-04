@@ -76,6 +76,8 @@ Hacl_Hash_Blake2b_256_update_last_blake2b_256(
 
 void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
+Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_256_malloc_blake2b_256();
+
 #if defined(__cplusplus)
 }
 #endif

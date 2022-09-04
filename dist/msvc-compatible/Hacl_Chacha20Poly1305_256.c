@@ -50,9 +50,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
       uint8_t *block = text1 + i * bs;
-      Lib_IntVector_Intrinsics_vec256 e[5U];
-      for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-        e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+      Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
       Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load64_le(block);
       Lib_IntVector_Intrinsics_vec256
       hi = Lib_IntVector_Intrinsics_vec256_load64_le(block + (uint32_t)32U);
@@ -277,9 +275,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = t10 + i * (uint32_t)16U;
-    Lib_IntVector_Intrinsics_vec256 e[5U];
-    for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-      e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
     uint64_t u0 = load64_le(block);
     uint64_t lo = u0;
     uint64_t u = load64_le(block + (uint32_t)8U);
@@ -486,9 +482,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   if (rem1 > (uint32_t)0U)
   {
     uint8_t *last = t10 + nb * (uint32_t)16U;
-    Lib_IntVector_Intrinsics_vec256 e[5U];
-    for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-      e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
     memcpy(tmp, last, rem1 * sizeof (uint8_t));
     uint64_t u0 = load64_le(tmp);
@@ -700,9 +694,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   {
     Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
     Lib_IntVector_Intrinsics_vec256 *acc = ctx;
-    Lib_IntVector_Intrinsics_vec256 e[5U];
-    for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-      e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -919,9 +911,7 @@ poly1305_do_256(
   uint8_t *out
 )
 {
-  Lib_IntVector_Intrinsics_vec256 ctx[25U];
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    ctx[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 ctx[25U] = { 0U };
   uint8_t block[16U] = { 0U };
   Hacl_Poly1305_256_poly1305_init(ctx, k);
   if (aadlen != (uint32_t)0U)
@@ -936,9 +926,7 @@ poly1305_do_256(
   store64_le(block + (uint32_t)8U, (uint64_t)mlen);
   Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
   Lib_IntVector_Intrinsics_vec256 *acc = ctx;
-  Lib_IntVector_Intrinsics_vec256 e[5U];
-  for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
   uint64_t u0 = load64_le(block);
   uint64_t lo = u0;
   uint64_t u = load64_le(block + (uint32_t)8U);
@@ -1181,11 +1169,12 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
   uint8_t *key = tmp;
   poly1305_do_256(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-  {
+  KRML_MAYBE_FOR16(i,
+    (uint32_t)0U,
+    (uint32_t)16U,
+    (uint32_t)1U,
     uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
-    res = uu____0 & res;
-  }
+    res = uu____0 & res;);
   uint8_t z = res;
   if (z == (uint8_t)255U)
   {

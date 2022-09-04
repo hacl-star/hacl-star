@@ -128,25 +128,15 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   Hacl_Hash_Blake2s_128_finish_blake2s_128(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
   uint64_t ev = Hacl_Hash_Blake2s_128_init_blake2s_128(s0);
-  uint64_t ev11;
-  if ((uint32_t)32U == (uint32_t)0U)
-  {
-    uint64_t
-    ev1 = Hacl_Hash_Blake2s_128_update_last_blake2s_128(s0, ev, (uint64_t)0U, opad, (uint32_t)64U);
-    ev11 = ev1;
-  }
-  else
-  {
-    uint64_t ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s0, ev, opad, (uint32_t)1U);
-    uint64_t
-    ev2 =
-      Hacl_Hash_Blake2s_128_update_last_blake2s_128(s0,
-        ev1,
-        (uint64_t)(uint32_t)64U,
-        hash1,
-        (uint32_t)32U);
-    ev11 = ev2;
-  }
+  uint64_t ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s0, ev, opad, (uint32_t)1U);
+  uint64_t
+  ev2 =
+    Hacl_Hash_Blake2s_128_update_last_blake2s_128(s0,
+      ev1,
+      (uint64_t)(uint32_t)64U,
+      hash1,
+      (uint32_t)32U);
+  uint64_t ev11 = ev2;
   Hacl_Hash_Blake2s_128_finish_blake2s_128(s0, ev11, dst);
 }
 

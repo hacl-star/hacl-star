@@ -455,28 +455,25 @@ static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
 
 static void finish_256(uint32_t *s, uint8_t *dst)
 {
-  uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
+    store32_be(dst + i * (uint32_t)4U, s[i]);
   }
 }
 
 static void finish_384(uint64_t *s, uint8_t *dst)
 {
-  uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)6U; i++)
   {
-    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
+    store64_be(dst + i * (uint32_t)8U, s[i]);
   }
 }
 
 static void finish_512(uint64_t *s, uint8_t *dst)
 {
-  uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
+    store64_be(dst + i * (uint32_t)8U, s[i]);
   }
 }
 
@@ -850,10 +847,9 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
 
 static void legacy_finish(uint32_t *s, uint8_t *dst)
 {
-  uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
-    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
+    store32_be(dst + i * (uint32_t)4U, s[i]);
   }
 }
 
@@ -999,15 +995,8 @@ legacy_compute_sha1(
   legacy_finish(s, dst1);
   uint8_t *hash1 = ipad;
   legacy_init(s);
-  if ((uint32_t)20U == (uint32_t)0U)
-  {
-    legacy_update_last(s, (uint64_t)0U, opad, (uint32_t)64U);
-  }
-  else
-  {
-    legacy_update_multi(s, opad, (uint32_t)1U);
-    legacy_update_last(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)20U);
-  }
+  legacy_update_multi(s, opad, (uint32_t)1U);
+  legacy_update_last(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)20U);
   legacy_finish(s, dst);
 }
 
@@ -1081,15 +1070,8 @@ compute_sha2_256(
   finish_256(s, dst1);
   uint8_t *hash1 = ipad;
   init_256(s);
-  if ((uint32_t)32U == (uint32_t)0U)
-  {
-    update_last_256(s, (uint64_t)0U, opad, (uint32_t)64U);
-  }
-  else
-  {
-    update_multi_256(s, opad, (uint32_t)1U);
-    update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
-  }
+  update_multi_256(s, opad, (uint32_t)1U);
+  update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
   finish_256(s, dst);
 }
 
@@ -1164,18 +1146,11 @@ compute_sha2_384(
   finish_384(s, dst1);
   uint8_t *hash1 = ipad;
   init_384(s);
-  if ((uint32_t)48U == (uint32_t)0U)
-  {
-    update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), opad, (uint32_t)128U);
-  }
-  else
-  {
-    update_multi_384(s, opad, (uint32_t)1U);
-    update_last_384(s,
-      FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
-      hash1,
-      (uint32_t)48U);
-  }
+  update_multi_384(s, opad, (uint32_t)1U);
+  update_last_384(s,
+    FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+    hash1,
+    (uint32_t)48U);
   finish_384(s, dst);
 }
 
@@ -1250,18 +1225,11 @@ compute_sha2_512(
   finish_512(s, dst1);
   uint8_t *hash1 = ipad;
   init_512(s);
-  if ((uint32_t)64U == (uint32_t)0U)
-  {
-    update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), opad, (uint32_t)128U);
-  }
-  else
-  {
-    update_multi_512(s, opad, (uint32_t)1U);
-    update_last_512(s,
-      FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
-      hash1,
-      (uint32_t)64U);
-  }
+  update_multi_512(s, opad, (uint32_t)1U);
+  update_last_512(s,
+    FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+    hash1,
+    (uint32_t)64U);
   finish_512(s, dst);
 }
 
@@ -1291,6 +1259,12 @@ static bool is_supported_alg(hash_alg uu___)
       }
   }
 }
+
+extern void LowStar_Printf_print_string(Prims_string uu___);
+
+extern void LowStar_Printf_print_u32(uint32_t uu___);
+
+extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *b);
 
 static uint32_t reseed_interval = (uint32_t)1024U;
 
@@ -2259,12 +2233,6 @@ generate(
       }
   }
 }
-
-extern void LowStar_Printf_print_string(Prims_string uu___);
-
-extern void LowStar_Printf_print_u32(uint32_t uu___);
-
-extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *b);
 
 static uint8_t
 vectors_low0[16U] =
@@ -4682,34 +4650,35 @@ vectors_low176[255U] =
     (uint8_t)251U, (uint8_t)239U, (uint8_t)172U
   };
 
-typedef struct vec8_s
+typedef struct lbuffer__uint8_t_s
 {
   uint32_t len;
   uint8_t *b;
 }
-vec8;
+lbuffer__uint8_t;
 
-typedef struct __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8_s
+typedef struct __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
-  vec8 fst;
-  vec8 snd;
+  lbuffer__uint8_t fst;
+  lbuffer__uint8_t snd;
 }
-__Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8;
+__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
-typedef struct vector_s
+typedef struct
+__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
   hash_alg fst;
-  vec8 snd;
-  vec8 thd;
-  vec8 f3;
-  vec8 f4;
-  vec8 f5;
-  __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8 f6;
-  vec8 f7;
+  lbuffer__uint8_t snd;
+  lbuffer__uint8_t thd;
+  lbuffer__uint8_t f3;
+  lbuffer__uint8_t f4;
+  lbuffer__uint8_t f5;
+  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t f6;
+  lbuffer__uint8_t f7;
 }
-vector;
+__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
-static vector
+static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 vectors_low177[28U] =
   {
     {
@@ -4975,14 +4944,16 @@ vectors_low177[28U] =
     }
   };
 
-typedef struct lbuffer__Hacl_Test_HMAC_DRBG_vector_s
+typedef struct
+lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
   uint32_t len;
-  vector *b;
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  *b;
 }
-lbuffer__Hacl_Test_HMAC_DRBG_vector;
+lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
-static lbuffer__Hacl_Test_HMAC_DRBG_vector
+static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 vectors_low = { .len = (uint32_t)28U, .b = vectors_low177 };
 
 static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
@@ -5012,7 +4983,11 @@ static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
   return b;
 }
 
-static void test_one(vector vec)
+static void
+test_one(
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  vec
+)
 {
   uint8_t *returned_bits = vec.f7.b;
   uint32_t returned_bits_len = vec.f7.len;
@@ -5055,50 +5030,30 @@ static void test_one(vector vec)
     KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
     uint8_t output[returned_bits_len];
     memset(output, 0U, returned_bits_len * sizeof (uint8_t));
-    uint8_t buf0[20U];
-    uint8_t buf1[32U];
-    uint8_t buf2[48U];
-    uint8_t buf3[64U];
     uint8_t *k;
+    uint8_t buf0[20U] = { 0U };
+    uint8_t buf1[32U] = { 0U };
+    uint8_t buf2[48U] = { 0U };
+    uint8_t buf3[64U] = { 0U };
     switch (a)
     {
       case SHA1:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)20U; i++)
-          {
-            buf0[i] = init;
-          }
           k = buf0;
           break;
         }
       case SHA2_256:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
-          {
-            buf1[i] = init;
-          }
           k = buf1;
           break;
         }
       case SHA2_384:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)48U; i++)
-          {
-            buf2[i] = init;
-          }
           k = buf2;
           break;
         }
       case SHA2_512:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-          {
-            buf3[i] = init;
-          }
           k = buf3;
           break;
         }
@@ -5108,50 +5063,30 @@ static void test_one(vector vec)
           KRML_HOST_EXIT(253U);
         }
     }
-    uint8_t buf4[20U];
-    uint8_t buf5[32U];
-    uint8_t buf6[48U];
-    uint8_t buf[64U];
     uint8_t *v;
+    uint8_t buf4[20U] = { 0U };
+    uint8_t buf5[32U] = { 0U };
+    uint8_t buf6[48U] = { 0U };
+    uint8_t buf[64U] = { 0U };
     switch (a)
     {
       case SHA1:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)20U; i++)
-          {
-            buf4[i] = init;
-          }
           v = buf4;
           break;
         }
       case SHA2_256:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
-          {
-            buf5[i] = init;
-          }
           v = buf5;
           break;
         }
       case SHA2_384:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)48U; i++)
-          {
-            buf6[i] = init;
-          }
           v = buf6;
           break;
         }
       case SHA2_512:
         {
-          uint8_t init = (uint8_t)0U;
-          for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-          {
-            buf[i] = init;
-          }
           v = buf;
           break;
         }
@@ -5208,7 +5143,8 @@ exit_code main()
   C_String_print("[HMAC_DRBG]");
   C_String_print("\n");
   uint32_t len = vectors_low.len;
-  vector *vs = vectors_low.b;
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer_uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  *vs = vectors_low.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     LowStar_Printf_print_string("HMAC-DRBG Test ");
