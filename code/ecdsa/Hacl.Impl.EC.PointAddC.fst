@@ -40,7 +40,6 @@ val lemma_multiplication_is_pointEqual_l0: #c: curve
     pX * (qZ * qZ) % prime * modp_inv2 #c (pZ * pZ) % prime * modp_inv2 #c (qZ * qZ) % prime == pX * modp_inv2 #c (pZ * pZ) % prime /\ 
     qX * (pZ * pZ) % prime * modp_inv2 #c (pZ * pZ) % prime * modp_inv2 #c (qZ * qZ) % prime == qX * modp_inv2 #c (qZ * qZ)  % prime)
 
-
 let lemma_multiplication_is_pointEqual_l0 #c p q = 
   let prime = getPrime c in 
 
@@ -82,7 +81,6 @@ val lemma_multiplication_is_pointEqual_l1: #c: curve
     pY * (qZ * qZ * qZ) % prime * modp_inv2 #c (pZ * pZ * pZ) % prime * modp_inv2 #c (qZ * qZ * qZ) % prime == pY * modp_inv2 #c (pZ * pZ * pZ) % prime /\ 
     qY * (pZ * pZ * pZ) % prime * modp_inv2 #c (pZ * pZ * pZ) % prime * modp_inv2 #c (qZ * qZ * qZ) % prime == qY * modp_inv2 #c (qZ * qZ * qZ) % prime)
 
-
 let lemma_multiplication_is_pointEqual_l1 #c p q = 
   let prime = getPrime c in 
 
@@ -114,7 +112,6 @@ let lemma_multiplication_is_pointEqual_l1 #c p q =
       qY * modp_inv2 #c (qZ * qZ * qZ) % prime; }
 
 
-
 val lemma_multiplication_is_pointEqual_l: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
   -> q: point_nat_prime #c {~ (isPointAtInfinity q)} -> 
   Lemma (
@@ -122,7 +119,6 @@ val lemma_multiplication_is_pointEqual_l: #c: curve -> p: point_nat_prime #c {~ 
     let qX, qY, qZ = q in 
     ((pX * (qZ * qZ) % getPrime c == qX * (pZ * pZ) % getPrime c) /\
     (pY * (qZ * qZ * qZ) % getPrime c == qY * (pZ * pZ * pZ) % getPrime c)) ==> pointEqual #c p q)
-
 
 let lemma_multiplication_is_pointEqual_l #c p q = 
   let prime = getPrime c in 
@@ -191,7 +187,6 @@ let lemma_multiplication_is_pointEqual_r0 #c p q =
   qX * (pZ * pZ) * (modp_inv2 #c (qZ * qZ) * (qZ * qZ) % prime) % prime;
     (==) {lemma_mod_inv2_mult_prime prime (qZ * qZ)}
   qX * (pZ * pZ) % prime; }
-
 
 
 val lemma_multiplication_is_pointEqual_r1: #c: curve 

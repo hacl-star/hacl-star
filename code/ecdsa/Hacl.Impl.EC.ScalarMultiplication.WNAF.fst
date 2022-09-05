@@ -1155,307 +1155,6 @@ let scalar_multiplication_cmb_step #c scalar rnaf result k pointPrecomputed temp
     assert(pointEqual (wnaf_step2 #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf)) (v k) pD) result)
 
 
-val scalar_mult_lemma_points_not_equal0: #c: curve -> d: nat -> Lemma 
-  (requires (
-    let n = v (getScalarLen c) in 
-    let f = pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) in 
-    f < pow2 (n / w * w)))
-  (ensures (
-    let n = v (getScalarLen c) in 
-    let o = getOrder #c in 
-    let f = pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) in 
-    f % o <> (pow2 (n / w * w)) % o))
-
-
-let scalar_mult_lemma_points_not_equal0 #c d = 
-  let n = v (getScalarLen c) in 
-  let o = getOrder #c in 
-  let f = pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) in 
-  
-  assume (pow2 (n / w * w) - o < o);
-
-  if pow2 (n / w * w) >= o then 
-    begin
-      FStar.Math.Lemmas.small_mod (pow2 (n / w * w) - o) o;
-      if (f >= o) then
-	begin
-	  FStar.Math.Lemmas.small_mod (f - o) o;
-	  FStar.Math.Lemmas.lemma_mod_sub f o 1;
-	  FStar.Math.Lemmas.lemma_mod_sub (pow2 (n / w * w)) o 1;
-	  assert (f % o <> (pow2 (n / w * w)) % o)
-	end
-      else 
-	begin
-	  assert(f < o);
-	  assert(pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) < o);
-
-	  if (f % o = pow2 (n / w * w) % o) then
-	    begin
-	      assert(pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) % o == pow2 (n / w * w) % o);
-	      FStar.Math.Lemmas.pow2_plus w (n / w * w - w);
-  
-	      assert ( (d / pow2 (n / w * w + 1) * 2 + 1) * pow2 (n / w * w - w) % o ==  pow2 w *  pow2 (n / w * w - w) % o);
-	     
-	      assume ((pow2 (n / w * w - w) % o <> 0));
-	      FStar.Math.Fermat.mod_mult_congr o (d / pow2 (n / w * w + 1) * 2 + 1) (pow2 w) (pow2 (n / w * w - w));
-
-	      assert_norm (pow2 w < o);
-	      assume ((d / pow2 (n / w * w + 1) * 2 + 1) < o);
-	      
-	      FStar.Math.Lemmas.small_mod (pow2 w) o;
-	      FStar.Math.Lemmas.small_mod ((d / pow2 (n / w * w + 1) * 2 + 1)) o;
-
-	      assert(d / pow2 (n / w * w + 1) * 2 + 1 == pow2 w);
-	      FStar.Math.Lemmas.pow2_double_mult (w - 1);
-	      assert (d / pow2 (n / w * w + 1) * 2 + 1 == pow2 (w - 1) * 2);
-
-	      assert(False)
-	    end;
-	  assert (f % o <> (pow2 (n / w * w)) % o)  
-	end
-    end
-    else
-      begin
-	assert(pow2 (n / w * w) < o);
-	assert(f < (pow2 (n / w * w)));
-	FStar.Math.Lemmas.small_mod (pow2 (n / w * w)) o;
-	FStar.Math.Lemmas.small_mod f o;
-	assert(f % o <> (pow2 (n / w * w)) % o)
-      end
-
-
-
-val scalar_mult_lemma_points_not_equal_: #c: curve -> scalar: scalar_bytes #c -> r: Spec.ECC.point #c ->
-  j: nat {j <= v (getLenWnaf #c)} ->
-  Lemma
-  (requires (
-    let d = scalar_as_nat scalar in
-    let n = v (getScalarLen c) in 
-    let len = n / w + 1 in d % 2 == 1 /\ d < pow2 n /\ (
-    let s = to_wnaf n d in  
-    pointEqual #c r (point_mult #c 
-    ((d / pow2 ((len - j) * w + 1) * 2 + 1) * pow2 (w * (len - j))) (basePoint #c)))))
-  (ensures (
-    let d = scalar_as_nat scalar in
-    let n = v (getScalarLen c) in 
-    let j = n / w - j in 
-    let s = to_wnaf n d in 
-    let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
-    ~ (pointEqual #c r (point_mult #c b (basePoint #c)))))
-    
-
-let scalar_mult_lemma_points_not_equal_ #c scalar r j = 
-  let d = scalar_as_nat scalar in
-  let n = v (getScalarLen c) in 
-  let j = v (getLenWnaf #c) - j in 
-  let s = to_wnaf n d in 
-  let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
-  assume (~ (pointEqual #c r (point_mult #c b (basePoint #c))))
-
-
-(*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-val scalar_mult_lemma_points_not_equal: #c: curve -> scalar: scalar_bytes #c -> r: Spec.ECC.point #c ->
-  j: nat {j <= v (getLenWnaf #c)} ->
-  Lemma
-  (requires (
-    let d = scalar_as_nat scalar in
-    let len = v (getScalarLen c) / w + 1 in 
-    let n = v (getScalarLen c) in 
-      d % 2 == 1 /\ d < pow2 n /\ (
-    let s = to_wnaf (v (getScalarLen c)) d in  
-    pointEqual #c r (point_mult #c 
-    ((d / pow2 ((len - j) * w + 1) * 2 + 1) * pow2 (w * (len - j))) (basePoint #c)))))
-  (ensures (
-    let d = scalar_as_nat scalar in
-    let n = v (getScalarLen c) in 
-    let j = v (getLenWnaf #c) - j in 
-    let s = to_wnaf n d in 
-    let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
-    ~ (pointEqual #c r (point_mult #c b (basePoint #c)))))
-
-
-let scalar_mult_lemma_points_not_equal #c scalar r j = 
-  let d = scalar_as_nat scalar in
-  let n = v (getScalarLen c) in 
-  
-  let len = n / w + 1 in 
-  let s = to_wnaf n d in  
-
-  let p0 = basePoint #c in 
-  let i = len - j in 
-
-  assert(pointEqual #c r (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0));
-  assert(len - j - 1 == v (getScalarLen c) / w - j);
-        let o = getOrder #c in 
-
-  if j = 0 then 
-    begin
-      admit(); 
-      let a = point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0 in 
-      let b = point_mult #c (pow2 ((i - 1) * w) * (d / pow2 (n / w * w + 1) * 2 + 1) % getOrder #c) p0 in 
-
-      
-      assert(pointEqual #c r (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0));
-      assume (~ (isPointAtInfinity (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0)));
-
-      assume (pointEqual a b <==> ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) % o == (pow2 ((i - 1) * w) * (d / pow2 (n / w * w + 1) * 2 + 1)) % getOrder #c);
-
-
-      assert(d < pow2 n);
-      assert(n / w * w + w + 1 > n);
-      FStar.Math.Lemmas.pow2_lt_compat (n / w * w + w + 1) n;
-      assert(pow2 n < pow2 ( n / w * w + w + 1));
-
-      small_div d (pow2 ( n / w * w + w + 1));
-
-      assume (pow2 (w * len) % getOrder #c == pow2 (w * (len - 1)) * pow2 w % getOrder #c);
-
-      assert (d < pow2 n);
-      
-	  if pow2 (n / w * w) * (d / pow2 (n / w * w + 1) * 2 + 1) % o = pow2 (n / w * w) * pow2 w % o then
-	    begin
-	      assume ((pow2 (n / w * w)) % o <> 0);
-	      FStar.Math.Fermat.mod_mult_congr o (d / pow2 (n / w * w + 1) * 2 + 1) (pow2 w) (pow2 (n / w * w));
-	      assert((d / pow2 (n / w * w + 1) * 2 + 1) % o == (pow2 w) % o);
-	      
-	      assume (pow2 w % o == 2 * pow2 (w - 1));
-	      
-	      if n / w * w + 1 <= n then 
-		begin
-		  FStar.Math.Lemmas.lemma_div_lt_nat d n (n / w * w + 1);
-		  assert(d / pow2 (n / w * w + 1) < pow2 (n % w - 1));
-		  assume (pow2 (n % w - 1) < pow2 (w - 1));
-		  assert(d / pow2 (n / w * w + 1) * 2 + 1 < pow2 (w - 1) * 2 + 1);
-		  assert_norm (pow2 (w - 1) * 2 + 1 < o);
-		  assert (d / pow2 (n / w * w + 1) * 2 + 1 < o);
-		  assume ((d / pow2 (n / w * w + 1) * 2 + 1) % o  == (d / pow2 (n / w * w + 1) * 2 + 1));
-		  assert(d / pow2 (n / w * w + 1) * 2 + 1 == (pow2 w) );
-		  assume (pow2 w = 2 * pow2 (w - 1));
-		  assert(False)
-	      end
-	      else
-		begin
-		  assert(n / w * w + 1 > n);
-		  assume (pow2 (n / w * w + 1) > pow2 n);
-		  assume (d / pow2 (n / w * w + 1) = 0);
-		  assert ((d / pow2 (n / w * w + 1) * 2 + 1) % o == 1);
-		  assert(d / pow2 (n / w * w + 1) * 2 + 1 == pow2 w);
-		  assert(False)
-		end
-      
-
-	end;
-      assert (pow2 (n / w * w) * (d / pow2 (n / w * w + 1) * 2 + 1) % o <> pow2 (n / w * w) * pow2 w % o) end
-  else
-    begin
-
-      assert(Seq.index s (n / w - j) == (2 * (d / pow2 (w * (i - 1) + 1)) + 1) % (2 * m) - m);
-      assert(Seq.index s (i - 1) == (2 * (d / pow2 (w * (i - 1) + 1)) + 1) % (2 * m) - m);
-
-      let k = pow2 ((i - 1) * w) in 
-      let a = (2 * (d / pow2 (w * (i - 1) + 1)) + 1) % (2 * m) - m in 
-      let b = (d / pow2 (i * w + 1) * 2 + 1) * pow2 w in 
-
-      assert(b == (d / pow2 ((n / w + 1 - j) * w + 1) * 2 + 1) * pow2 w);
-      
-      assume (b * k == (d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i));
-
-      assert(pointEqual #c r (point_mult #c (b * k) p0));
-      assume (pointEqual #c r (point_mult #c (b * k % o) p0));
-      assume (pointEqual (point_mult #c (a * k % o) p0) (point_mult #c (b * k) p0) <==> a * k % o == b * k % o);
-      assume (pointEqual #c r (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * k * pow2 w) p0));
-
-      if a * k % o = b * k % o then 
-      begin
-	assume (k % o <> 0);
-	
-	FStar.Math.Fermat.mod_mult_congr o a b k; 
-
-	assert(a % o == b % o);
-      
-	if a  >= 0 then
-	  begin
-	    assert_norm (2 * m < o);
-	    FStar.Math.Lemmas.small_mod a o;
-	    assert(a == (d / pow2 (i * w + 1) * 2 + 1) * pow2 w % o);
-	    assert(d < pow2 n);
-	    assume (d / pow2 (i * w + 1) < pow2 (n - i * w - 1));
-	    assert (d / pow2 (i * w + 1) * 2 + 1 < pow2 (n - i * w - 1) * 2 + 1);
-	    assume (d / pow2 (i * w + 1) * 2 + 1 < pow2 (n - i * w) + 1);
-	    assert (d / pow2 (i * w + 1) * 2 + 1 <= pow2 (n - i * w));
-	    assume ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 (n - i * w) * pow2 w);
-	      FStar.Math.Lemmas.pow2_plus (n - i * w) w;
-	    assert ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 (n % w + j * w));
-	    assume ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 (n % w + j * w));
-	    assume ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 n);
-	    assert (b <= pow2 n);
-	    if b < o then
-	      begin
-		assume (b >= 0);
-		FStar.Math.Lemmas.small_mod b o;
-		assert(a == b);
-		assert(a = (d / pow2 (i * w + 1) * 2 + 1) * pow2 w);
-		assert(a < m);
-		assert((d / pow2 (i * w + 1) * 2 + 1) >= 1);
-		assume((d / pow2 (i * w + 1) * 2 + 1) * pow2 w >= m);
-		assert(False)
-	      end
-	    else
-	      begin
-		assert(b - o <= o);
-		assert(a % o == b % o);
-		assume((b - o) % o == (b - o));
-		assume(b % o == (b - o));
-		assert(a == (b - o))
-	      end
-
-	  end
-	else
-	  begin
-	    admit()
-	  end;
-	  
-  
-
-	assert((((d / pow2 (w * (i - 1) + 1)) * 2 + 1) % (2 * m) - m < m));
-	assert((((d / pow2 (w * (i - 1) + 1)) * 2 + 1) % (2 * m) - m >= -m ));
-
-	admit();
-	assert(False)
-
-      end;
-	
-      assert (~ (pointEqual #c r (point_mult #c (a * k % o) p0)))
-      end
-
-*)
-
-
 inline_for_extraction noextract
 val scalar_multiplication_cmb_loop: #c: curve -> result: point c 
   -> scalar: scalar_t #MUT #c 
@@ -1486,106 +1185,37 @@ let scalar_multiplication_cmb_loop #c result scalar rnaf temp tempBuffer =
     
     let d = scalar_as_nat (as_seq h scalar) in
     let n = v (getScalarLen c) in 
-       d % 2 == 1 /\ d < pow2 n /\ (
+       d % 2 == 1 /\ d < getOrder #c /\ (
     let len = v (getScalarLen c) / w + 1 in 
     let s = to_wnaf (v (getScalarLen c)) d in  
     let b = from_wnaf_ s (len - j) * pow2 (w * (len - j)) in 
     pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c)))) in 
 
-
-
   eq_repeati0 (v (getLenWnaf #c +! 1ul)) (wnaf_step2 #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf))) (0, 0, 0);
-  
-  assume (
-    let d = scalar_as_nat (as_seq h0 scalar) in
-    let n = v (getScalarLen c) in  
-       d % 2 == 1 /\ d < pow2 n);
-
-  assume (
-    let d = scalar_as_nat (as_seq h0 scalar) in
-    let n = v (getScalarLen c) in  
-    let len = n / w + 1 in 
-    let s = to_wnaf n d in  
-    from_wnaf_ s (Seq.length s) == 0);
-
-
-
-  assert (
-    let d = scalar_as_nat (as_seq h0 scalar) in
-    let n = v (getScalarLen c) in  
-    let len = n / w + 1 in 
-    let s = to_wnaf n d in  
-    pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h0 result)) (point_mult #c 0 (basePoint #c)));
-
-
-  assert (invJ h0 0);
-
-  admit();
+  assume (invJ h0 0);
 
   Lib.Loops.for 0ul (lenWnaf -! 1ul) invJ (fun j -> 
     let h0_ = ST.get() in 
     let h = ST.get() in 
 
-    lemma_from_domain #c (scalar_as_nat (as_seq h scalar));
-    
+
+    assert(v j >= 0 /\ v j <= v (getLenWnaf #c));
+
     assert (
       let d = scalar_as_nat (as_seq h scalar) in
-      let len = v (getScalarLen c) / w + 1 in 
-      let s = to_wnaf (v (getScalarLen c)) d in  
-      pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c 
-	(from_wnaf_ s (len - v j) * pow2 (w * (len - v j))) (basePoint #c)));
+      d % 2 == 1 /\ d < getOrder #c);
+
+    lemma_from_domain_is_not_equal_index_main #c (as_seq h scalar) (v j) (fromDomainPoint #c #DH (point_as_nat c h result));
 
       assume (
 	let d = scalar_as_nat (as_seq h scalar) in
 	let n = v (getScalarLen c) in 
 	let j = v (getLenWnaf #c) - v j in 
-	d % 2 == 1 /\ d < pow2 n /\ rnaf_to_spec #c (as_seq h rnaf) == to_wnaf n d);
-
-    if v j = 0 then 
-      begin
-      from_wnaf_lemma_0 (to_wnaf (v (getScalarLen c)) (scalar_as_nat (as_seq h scalar)));
-
-      assert (
-	let d = scalar_as_nat (as_seq h scalar) in
-	let len = v (getScalarLen c) / w + 1 in 
-	let s = to_wnaf (v (getScalarLen c)) d in  
-	pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c 0 (basePoint #c)));
-
-
-      (* all the points are not point at infinity *)
-
-      assume (
-	let d = scalar_as_nat (as_seq h scalar) in
-	let n = v (getScalarLen c) in 
-	let j = v (getLenWnaf #c) - v j in
+	d % 2 == 1 /\ d < pow2 n /\ rnaf_to_spec #c (as_seq h rnaf) == to_wnaf n d /\ (
 	let s = to_wnaf n d in 
 	let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
-	  ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))))
-
-      end
-    else
-      begin 
-
-      scalar_mult_lemma_points_not_equal_ (as_seq h scalar) (fromDomainPoint #c #DH (point_as_nat c h result)) (v j);
-
-      assert (
-	let d = scalar_as_nat (as_seq h scalar) in
-	let len = v (getScalarLen c) / w + 1 in 
-	let s = to_wnaf (v (getScalarLen c)) d in  
-	pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c 
-	  ((d / pow2 ((len - v j) * w + 1) * 2 + 1) * pow2 (w * (len - v j))) (basePoint #c)));
-
-      assert (
-	let d = scalar_as_nat (as_seq h scalar) in
-	let n = v (getScalarLen c) in 
-	let j = v (getLenWnaf #c) - v j in 
-	let s = to_wnaf n d in 
-	let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
-	  ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))))
-
-    end;
-
-
+	  ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c)))));
+    
     scalar_multiplication_cmb_step scalar rnaf result j temp tempBuffer;
 
 
@@ -1610,7 +1240,9 @@ let scalar_multiplication_cmb_loop #c result scalar rnaf temp tempBuffer =
     lemma_test #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf))  pD (repeati (v j) f (0, 0, 0)) (v j)
     
     
-    )
+    );
+
+  admit()
 
 
 

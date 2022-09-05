@@ -295,19 +295,36 @@ let scalar_rwnaf_lemma0 #c scalar =
     assert(scalar_as_nat scalar % pow2 8 = v (Lib.Sequence.index scalar q))
 
 
+val logor_definition_i: i: pos -> a: UInt.uint_t i -> b : UInt.uint_t i -> Lemma (
+  forall (j: nat {j < i}). UInt.nth #i (UInt.logor a b) j = (UInt.nth a j) || (UInt.nth b j))
+
+let logor_definition_i i a b = 
+  let t: Type0 = j: nat {j < i} in 
+  let p: (t -> GTot Type) = (fun (j: t) -> UInt.nth #i (UInt.logor a b) j = (UInt.nth a j) || (UInt.nth b j)) in 
+  let r: (x : t -> Lemma (p x)) = UInt.logor_definition #i a b in 
+
+  Classical.forall_intro #t #p r
+
+
+#push-options "--max_ifuel 1 --max_fuel 1"
+
 val logor_mask: a: uint64 -> Lemma (v (logor (u64 1) a) == v a / 2 * 2 + 1)
 
 let logor_mask a = 
   if v a % 2 = 0 then 
     begin
-      logor_disjoint (u64 1) a 1;
-      assert(v a + 1 == v (logor (u64 1) a))
+      logor_disjoint (u64 1) a 1
     end
   else
     begin
-      assume (v (logor (u64 1) a) == v a)
+      logor_spec (u64 1) a;
+      UInt.one_nth_lemma #64 1; 
+      UInt.logor_definition #64 1 (v a) 63;
+      logor_definition_i 64 (v a) 1;
+      UInt.nth_lemma #64 (v a) (v (logor (u64 1) a))
     end
 
+#pop-options
 
 
 val scalar_rwnaf_lemma_tail: #c: curve -> s: nat {s < pow2 (v (getScalarLen c))} -> 
@@ -791,23 +808,6 @@ val lemma_from_domain: #c: curve -> d: nat {d < pow2 (v (getScalarLen c)) /\ d %
 let lemma_from_domain #c d = 
   Classical.forall_intro (fun i -> lemma_from_domain_ #c d i)
 
-
-val lemma_from_domain_is_not_equal_index: #c: curve
-  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c /\ scalar_as_nat s % 2 == 1}
-  -> i: nat {
-    let scalarNat = scalar_as_nat #c s in 
-    let scalar_as_wnaf = to_wnaf (getPower c) scalarNat in 
-    let len = Seq.length scalar_as_wnaf in 
-    i < len - 1 /\ i > 0} -> 
-  Lemma (
-    let scalarNat = scalar_as_nat #c s in 
-    let scalar_as_wnaf = to_wnaf (getPower c) scalarNat in 
-    let len = Seq.length scalar_as_wnaf in 
-    let i' = len - (i + 1) in 
-    let o = getOrder #c in 
-    from_wnaf_ scalar_as_wnaf (len - i) * pow2 (w * (len - i)) % o <> Seq.index scalar_as_wnaf i' * pow2 (w * i') % o)
-
-
 open FStar.Tactics.Canon
 open FStar.Tactics 
 
@@ -957,6 +957,22 @@ let lemma_from_domain_is_not_equal_1 #c s i =
 #push-options "--z3rlimit 300" 
 
 
+val lemma_from_domain_is_not_equal_index: #c: curve
+  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c /\ scalar_as_nat s % 2 == 1}
+  -> i: nat {
+    let scalarNat = scalar_as_nat #c s in 
+    let scalar_as_wnaf = to_wnaf (getPower c) scalarNat in 
+    let len = Seq.length scalar_as_wnaf in 
+    i < len - 1 /\ i > 0} -> 
+  Lemma (
+    let scalarNat = scalar_as_nat #c s in 
+    let scalar_as_wnaf = to_wnaf (getPower c) scalarNat in 
+    let len = Seq.length scalar_as_wnaf in 
+    let i' = len - (i + 1) in
+    let o = getOrder #c in 
+    from_wnaf_ scalar_as_wnaf (len - i) * pow2 (w * (len - i)) % o <> Seq.index scalar_as_wnaf i' * pow2 (w * i') % o)
+
+
 let lemma_from_domain_is_not_equal_index #c s i = 
   let d = scalar_as_nat #c s in 
   let n = getPower c in 
@@ -1004,4 +1020,43 @@ let lemma_from_domain_is_not_equal_index #c s i =
 	  assert (si % o > pow2 (n - w + 1));
 	  assert(False)
 	end
+    end
+
+
+val lemma_from_domain_is_not_equal_index_main: #c: curve
+  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c /\ scalar_as_nat s % 2 == 1}
+  -> i: nat {i >= 0 /\ i <= v (getLenWnaf #c) - 1}
+  -> result: Spec.ECC.point #c {
+    let d = scalar_as_nat #c s in 
+    let s = to_wnaf (getPower c) d in 
+    let len = Seq.length s in
+    pointEqual result (point_mult #c (from_wnaf_ s (len - i) * pow2 (w * (len - i))) (basePoint #c))} -> 
+  Lemma (
+    let d = scalar_as_nat s in
+    let n = v (getScalarLen c) in 
+    let j = v (getLenWnaf #c) - i in 
+    let s = to_wnaf n d in 
+    ~ (pointEqual #c result (point_mult #c (pow2 (j * w) * (Seq.index s j) % getOrder #c) (basePoint #c))))
+
+let lemma_from_domain_is_not_equal_index_main #c s i result = 
+  if i = 0 then 
+    begin
+      admit()
+    end
+  else
+    begin
+      lemma_from_domain_is_not_equal_index s i;
+      let d = scalar_as_nat #c s in 
+      let s = to_wnaf (getPower c) d in  
+      let len = Seq.length s in 
+      let o = getOrder #c in    
+      let i' = len - (i + 1) in 
+
+      let b = from_wnaf_ s (len - i) * pow2 (w * (len - i)) in 
+      let d = Seq.index s i' * pow2 (w * i') % o in 
+      let p0 = basePoint #c in 
+
+      Hacl.Impl.EC.ScalarMult.Radix.lemma_two_points_different_coeff_not_equal #c p0 (b % o) (point_mult #c (b % o) p0) d (point_mult #c d p0);
+      lemma_scalar_reduce #c p0 b;
+      assert_by_tactic (Seq.index s i' * pow2 (w * i') == pow2 (w * i') * Seq.index s i') canon
     end
