@@ -58,7 +58,7 @@ Hacl_Hash_Blake2b_256_update_blake2b_256(
   uint8_t *block
 )
 {
-  Lib_IntVector_Intrinsics_vec256 wv[4U] = { 0U };
+  Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) wv[4U] KRML_POST_ALIGN(32) = { 0U };
   FStar_UInt128_uint128
   totlen1 =
     FStar_UInt128_add_mod(totlen,
@@ -82,7 +82,7 @@ Hacl_Hash_Blake2b_256_update_blake2b_256(
       FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen1, (uint32_t)64U)),
       wv_14,
       wv_15);
-  memcpy(wv, s, (uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  memcpy(wv, s, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *wv3 = wv + (uint32_t)3U * (uint32_t)1U;
   wv3[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv3[0U], mask);
   KRML_MAYBE_FOR12(i,
@@ -90,10 +90,7 @@ Hacl_Hash_Blake2b_256_update_blake2b_256(
     (uint32_t)12U,
     (uint32_t)1U,
     uint32_t start_idx = i % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), (uint32_t)4U * (uint32_t)1U);
-    Lib_IntVector_Intrinsics_vec256 m_st[(uint32_t)4U * (uint32_t)1U];
-    for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-      m_st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) m_st[4U] KRML_POST_ALIGN(32) = { 0U };
     Lib_IntVector_Intrinsics_vec256 *r0 = m_st + (uint32_t)0U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
@@ -319,10 +316,7 @@ Hacl_Hash_Blake2b_256_update_last_blake2b_256(
   uint8_t *rest = scrut0.f4;
   FStar_UInt128_uint128
   ev_ = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s, ev, blocks, num_blocks);
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), (uint32_t)4U * (uint32_t)1U);
-  Lib_IntVector_Intrinsics_vec256 wv[(uint32_t)4U * (uint32_t)1U];
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    wv[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) wv[4U] KRML_POST_ALIGN(32) = { 0U };
   uint8_t tmp[128U] = { 0U };
   uint8_t *tmp_rest = tmp;
   memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
@@ -347,7 +341,7 @@ Hacl_Hash_Blake2b_256_update_last_blake2b_256(
       FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen, (uint32_t)64U)),
       wv_14,
       wv_15);
-  memcpy(wv, s, (uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  memcpy(wv, s, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *wv3 = wv + (uint32_t)3U * (uint32_t)1U;
   wv3[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv3[0U], mask);
   KRML_MAYBE_FOR12(i,
@@ -355,10 +349,7 @@ Hacl_Hash_Blake2b_256_update_last_blake2b_256(
     (uint32_t)12U,
     (uint32_t)1U,
     uint32_t start_idx = i % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), (uint32_t)4U * (uint32_t)1U);
-    Lib_IntVector_Intrinsics_vec256 m_st[(uint32_t)4U * (uint32_t)1U];
-    for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-      m_st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) m_st[4U] KRML_POST_ALIGN(32) = { 0U };
     Lib_IntVector_Intrinsics_vec256 *r0 = m_st + (uint32_t)0U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
@@ -506,7 +497,8 @@ void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, 
 Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_256_malloc_blake2b_256()
 {
   Lib_IntVector_Intrinsics_vec256
-  *buf = KRML_HOST_CALLOC((uint32_t)4U, sizeof (Lib_IntVector_Intrinsics_vec256));
+  *buf = KRML_ALIGNED_MALLOC(32, sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)4U);
+  memset(buf, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   return buf;
 }
 
@@ -546,7 +538,7 @@ blake2b_update_block(
       FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen, (uint32_t)64U)),
       wv_14,
       wv_15);
-  memcpy(wv, hash, (uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  memcpy(wv, hash, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *wv3 = wv + (uint32_t)3U * (uint32_t)1U;
   wv3[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv3[0U], mask);
   KRML_MAYBE_FOR12(i,
@@ -554,10 +546,7 @@ blake2b_update_block(
     (uint32_t)12U,
     (uint32_t)1U,
     uint32_t start_idx = i % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), (uint32_t)4U * (uint32_t)1U);
-    Lib_IntVector_Intrinsics_vec256 m_st[(uint32_t)4U * (uint32_t)1U];
-    for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-      m_st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) m_st[4U] KRML_POST_ALIGN(32) = { 0U };
     Lib_IntVector_Intrinsics_vec256 *r0 = m_st + (uint32_t)0U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
@@ -870,21 +859,13 @@ Hacl_Blake2b_256_blake2b(
   uint8_t *k
 )
 {
-  uint32_t stlen = (uint32_t)4U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec256 stzero = Lib_IntVector_Intrinsics_vec256_zero;
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), stlen);
-  Lib_IntVector_Intrinsics_vec256 b[stlen];
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b[_i] = stzero;
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), stlen);
-  Lib_IntVector_Intrinsics_vec256 b1[stlen];
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b1[_i] = stzero;
+  Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) b[4U] KRML_POST_ALIGN(32) = { 0U };
+  Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) b1[4U] KRML_POST_ALIGN(32) = { 0U };
   Hacl_Blake2b_256_blake2b_init(b, kk, nn);
   blake2b_update(b1, b, kk, k, ll, d);
   Hacl_Blake2b_256_blake2b_finish(nn, output, b);
-  Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)4U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)4U * sizeof (b[0U]));
 }
 
 void

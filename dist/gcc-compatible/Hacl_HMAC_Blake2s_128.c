@@ -82,7 +82,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
     uint8_t yi = key_block[i];
     opad[i] = xi ^ yi;
   }
-  Lib_IntVector_Intrinsics_vec128 s[4U] = { 0U };
+  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) s[4U] KRML_POST_ALIGN(16) = { 0U };
   Lib_IntVector_Intrinsics_vec128 *r0 = s + (uint32_t)0U * (uint32_t)1U;
   Lib_IntVector_Intrinsics_vec128 *r1 = s + (uint32_t)1U * (uint32_t)1U;
   Lib_IntVector_Intrinsics_vec128 *r2 = s + (uint32_t)2U * (uint32_t)1U;

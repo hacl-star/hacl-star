@@ -83,7 +83,7 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
   mask[1U] = (uint32_t)(totlen1 >> (uint32_t)32U);
   mask[2U] = wv_14;
   mask[3U] = wv_15;
-  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+  memcpy(wv, s, (uint32_t)16U * sizeof (uint32_t));
   uint32_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -97,9 +97,7 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
     (uint32_t)10U,
     (uint32_t)1U,
     uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
-    uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
-    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+    uint32_t m_st[16U] = { 0U };
     uint32_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
     uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
@@ -591,7 +589,7 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
   mask[1U] = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen1, (uint32_t)64U));
   mask[2U] = wv_14;
   mask[3U] = wv_15;
-  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+  memcpy(wv, s, (uint32_t)16U * sizeof (uint64_t));
   uint64_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -605,9 +603,7 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
     (uint32_t)12U,
     (uint32_t)1U,
     uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
-    uint64_t m_st[(uint32_t)4U * (uint32_t)4U];
-    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+    uint64_t m_st[16U] = { 0U };
     uint64_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
     uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
@@ -1119,9 +1115,7 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
   uint8_t *blocks = scrut0.f3;
   uint8_t *rest = scrut0.f4;
   uint64_t ev_ = Hacl_Hash_Blake2_update_multi_blake2s_32(s, ev, blocks, num_blocks);
-  KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
-  uint32_t wv[(uint32_t)4U * (uint32_t)4U];
-  memset(wv, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+  uint32_t wv[16U] = { 0U };
   uint8_t tmp[64U] = { 0U };
   uint8_t *tmp_rest = tmp;
   memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
@@ -1144,7 +1138,7 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
   mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
   mask[2U] = wv_14;
   mask[3U] = wv_15;
-  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+  memcpy(wv, s, (uint32_t)16U * sizeof (uint32_t));
   uint32_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -1158,9 +1152,7 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
     (uint32_t)10U,
     (uint32_t)1U,
     uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
-    uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
-    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+    uint32_t m_st[16U] = { 0U };
     uint32_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
     uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
@@ -1602,9 +1594,7 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
   uint8_t *rest = scrut0.f4;
   FStar_UInt128_uint128
   ev_ = Hacl_Hash_Blake2_update_multi_blake2b_32(s, ev, blocks, num_blocks);
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
-  uint64_t wv[(uint32_t)4U * (uint32_t)4U];
-  memset(wv, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+  uint64_t wv[16U] = { 0U };
   uint8_t tmp[128U] = { 0U };
   uint8_t *tmp_rest = tmp;
   memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
@@ -1628,7 +1618,7 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
   mask[1U] = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen, (uint32_t)64U));
   mask[2U] = wv_14;
   mask[3U] = wv_15;
-  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+  memcpy(wv, s, (uint32_t)16U * sizeof (uint64_t));
   uint64_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -1642,9 +1632,7 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
     (uint32_t)12U,
     (uint32_t)1U,
     uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
-    uint64_t m_st[(uint32_t)4U * (uint32_t)4U];
-    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+    uint64_t m_st[16U] = { 0U };
     uint64_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
     uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
@@ -2091,7 +2079,7 @@ blake2b_update_block(
   mask[1U] = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen, (uint32_t)64U));
   mask[2U] = wv_14;
   mask[3U] = wv_15;
-  memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+  memcpy(wv, hash, (uint32_t)16U * sizeof (uint64_t));
   uint64_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -2105,9 +2093,7 @@ blake2b_update_block(
     (uint32_t)12U,
     (uint32_t)1U,
     uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
-    uint64_t m_st[(uint32_t)4U * (uint32_t)4U];
-    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+    uint64_t m_st[16U] = { 0U };
     uint64_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
     uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
@@ -2689,21 +2675,13 @@ Hacl_Blake2b_32_blake2b(
   uint8_t *k
 )
 {
-  uint32_t stlen = (uint32_t)4U * (uint32_t)4U;
-  uint64_t stzero = (uint64_t)0U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), stlen);
-  uint64_t b[stlen];
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b[_i] = stzero;
-  KRML_CHECK_SIZE(sizeof (uint64_t), stlen);
-  uint64_t b1[stlen];
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b1[_i] = stzero;
+  uint64_t b[16U] = { 0U };
+  uint64_t b1[16U] = { 0U };
   Hacl_Blake2b_32_blake2b_init(b, kk, nn);
   blake2b_update(b1, b, kk, k, ll, d);
   Hacl_Blake2b_32_blake2b_finish(nn, output, b);
-  Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
 }
 
 static inline void
@@ -2735,7 +2713,7 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
   mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
   mask[2U] = wv_14;
   mask[3U] = wv_15;
-  memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+  memcpy(wv, hash, (uint32_t)16U * sizeof (uint32_t));
   uint32_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -2749,9 +2727,7 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     (uint32_t)10U,
     (uint32_t)1U,
     uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
-    uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
-    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+    uint32_t m_st[16U] = { 0U };
     uint32_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
     uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
     uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
@@ -3325,20 +3301,12 @@ Hacl_Blake2s_32_blake2s(
   uint8_t *k
 )
 {
-  uint32_t stlen = (uint32_t)4U * (uint32_t)4U;
-  uint32_t stzero = (uint32_t)0U;
-  KRML_CHECK_SIZE(sizeof (uint32_t), stlen);
-  uint32_t b[stlen];
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b[_i] = stzero;
-  KRML_CHECK_SIZE(sizeof (uint32_t), stlen);
-  uint32_t b1[stlen];
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b1[_i] = stzero;
+  uint32_t b[16U] = { 0U };
+  uint32_t b1[16U] = { 0U };
   Hacl_Blake2s_32_blake2s_init(b, kk, nn);
   blake2s_update(b1, b, kk, k, ll, d);
   Hacl_Blake2s_32_blake2s_finish(nn, output, b);
-  Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
 }
 

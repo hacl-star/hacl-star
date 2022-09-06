@@ -46,6 +46,38 @@
 #  define KRML_HOST_FREE free
 #endif
 
+#ifndef KRML_PRE_ALIGN
+#  ifdef _MSC_VER
+#    define KRML_PRE_ALIGN(X) __declspec(align(X))
+#  else
+#    define KRML_PRE_ALIGN(X)
+#  endif
+#endif
+
+#ifndef KRML_POST_ALIGN
+#  ifdef _MSC_VER
+#    define KRML_POST_ALIGN(X)
+#  else
+#    define KRML_POST_ALIGN(X) __attribute__((aligned(X)))
+#  endif
+#endif
+
+#ifndef KRML_ALIGNED_MALLOC
+#  ifdef _MSC_VER
+#    define KRML_ALIGNED_MALLOC(X, Y) _aligned_malloc(X, Y)
+#  else
+#    define KRML_ALIGNED_MALLOC(X, Y) aligned_alloc(X, Y)
+#  endif
+#endif
+
+#ifndef KRML_ALIGNED_FREE
+#  ifdef _MSC_VER
+#    define KRML_ALIGNED_FREE(X) _aligned_free(X)
+#  else
+#    define KRML_ALIGNED_FREE(X) free(X)
+#  endif
+#endif
+
 #ifndef KRML_HOST_TIME
 
 #  include <time.h>
