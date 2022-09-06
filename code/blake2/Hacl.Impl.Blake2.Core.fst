@@ -311,11 +311,27 @@ noextract inline_for_extraction
 let gather_row #a #ms r m i0 i1 i2 i3 =
     create_row r m.(i0) m.(i1) m.(i2) m.(i3)
 
+noextract inline_for_extraction
+let le_sigh (a:Spec.alg) (m:m_spec): x:size_t { x ==  4ul *. row_len a m } =
+  let open FStar.Mul in
+  assert_norm ((4 * 1) % pow2 32 = 4);
+  assert_norm ((4 * 4) % pow2 32 = 16);
+  Lib.IntTypes.mul_mod_lemma 4ul 1ul;
+  Lib.IntTypes.mul_mod_lemma 4ul 4ul;
+  match a,m with
+  | Spec.Blake2S,M128 -> 4ul
+  | Spec.Blake2S,M256 -> 4ul
+  | Spec.Blake2B,M256 -> 4ul
+  | _ -> 16ul
+
+noextract inline_for_extraction
 let alloc_state a m =
-  create (4ul *. row_len a m) (zero_element a m)
+  // See git blame below. I never managed to get the previous expression (4ul *.
+  // row_len a m) to reduce, which generated VLAs in the C code.
+  create (le_sigh a m) (zero_element a m)
 
 let copy_state #a #m st2 st1 =
-  copy #_ #_ #(4ul *. row_len a m) st2 st1
+  copy #_ #_ #(le_sigh a m) st2 st1
 
 #push-options "--z3rlimit 100"
 let load_state_from_state32 #a #m st st32 =

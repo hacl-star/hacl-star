@@ -166,7 +166,7 @@ val mk_blake2_update_last_block (a : hash_alg{is_blake a}) (m : m_spec a) :
 let mk_blake2_update_last_block a m s ev input input_len =
   (**) let h0 = ST.get () in
   ST.push_frame ();
-  let wv = Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
+  let wv = Lib.Buffer.create (Core.le_sigh (to_blake_alg a) m)
                              (Core.zero_element (to_blake_alg a) m) in
   (**) let pad_len : Ghost.erased _ = block_len a -! input_len in
   (**) assert(v input_len + v pad_len == v (block_len a));
