@@ -212,6 +212,9 @@ val gather_row: #a:Spec.alg -> #ms:m_spec -> r:row_p a ms -> m:block_w a ->
 				row_v h1 r == Spec.(gather_row (as_seq h0 m) i0 i1 i2 i3)))
 
 noextract inline_for_extraction
+val le_sigh (a:Spec.alg) (m:m_spec): x:size_t { x ==  4ul *. row_len a m }
+
+noextract inline_for_extraction
 val alloc_state: a:Spec.alg -> m:m_spec ->
 	  StackInline (state_p a m)
 	  (requires (fun h -> True))

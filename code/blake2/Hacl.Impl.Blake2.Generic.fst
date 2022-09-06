@@ -790,7 +790,9 @@ val blake2:
 
 #push-options "--z3rlimit 100"
 let blake2 #al #ms blake2_init blake2_update blake2_finish nn output ll d kk k =
-  let stlen = 4ul *. row_len al ms in
+  [@inline_let]
+  let stlen = le_sigh al ms in
+  [@inline_let]
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]
