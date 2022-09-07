@@ -270,7 +270,7 @@ Hacl_Streaming_Poly1305_128_finish(
     r = (uint32_t)(total_len % (uint64_t)(uint32_t)32U);
   }
   uint8_t *buf_1 = buf_;
-  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) r1[25U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 r1[25U] KRML_POST_ALIGN(16) = { 0U };
   Lib_IntVector_Intrinsics_vec128 *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec128));
   uint32_t ite0;
@@ -314,7 +314,7 @@ Hacl_Streaming_Poly1305_128_finish(
     ite2 = r % (uint32_t)16U;
   }
   Hacl_Poly1305_128_poly1305_update(tmp_block_state, ite2, buf_last);
-  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) tmp[25U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 tmp[25U] KRML_POST_ALIGN(16) = { 0U };
   memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec128));
   Hacl_Poly1305_128_poly1305_finish(dst, k_, tmp);
 }

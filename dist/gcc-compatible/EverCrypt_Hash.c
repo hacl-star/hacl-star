@@ -2111,7 +2111,7 @@ EverCrypt_Hash_Incremental_finish_blake2s(
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   EverCrypt_Hash_state_s s;
   #if HACL_CAN_COMPILE_VEC128
-  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) buf0[4U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 buf0[4U] KRML_POST_ALIGN(16) = { 0U };
   uint32_t buf[16U] = { 0U };
   if (vec128)
   {
@@ -2182,7 +2182,7 @@ EverCrypt_Hash_Incremental_finish_blake2b(
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   EverCrypt_Hash_state_s s;
   #if HACL_CAN_COMPILE_VEC256
-  Lib_IntVector_Intrinsics_vec256 KRML_PRE_ALIGN(32) buf0[4U] KRML_POST_ALIGN(32) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec256 buf0[4U] KRML_POST_ALIGN(16) = { 0U };
   uint64_t buf[16U] = { 0U };
   if (vec256)
   {

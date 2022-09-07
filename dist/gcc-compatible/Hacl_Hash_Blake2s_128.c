@@ -57,7 +57,7 @@ Hacl_Hash_Blake2s_128_update_blake2s_128(
   uint8_t *block
 )
 {
-  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) wv[4U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
   uint64_t totlen1 = totlen + (uint64_t)(uint32_t)64U;
   uint32_t m_w[16U] = { 0U };
   KRML_MAYBE_FOR16(i,
@@ -86,7 +86,7 @@ Hacl_Hash_Blake2s_128_update_blake2s_128(
     (uint32_t)10U,
     (uint32_t)1U,
     uint32_t start_idx = i % (uint32_t)10U * (uint32_t)16U;
-    Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) m_st[4U] KRML_POST_ALIGN(16) = { 0U };
+    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 m_st[4U] KRML_POST_ALIGN(16) = { 0U };
     Lib_IntVector_Intrinsics_vec128 *r0 = m_st + (uint32_t)0U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
@@ -308,7 +308,7 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
   uint8_t *blocks = scrut0.f3;
   uint8_t *rest = scrut0.f4;
   uint64_t ev_ = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev, blocks, num_blocks);
-  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) wv[4U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
   uint8_t tmp[64U] = { 0U };
   uint8_t *tmp_rest = tmp;
   memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
@@ -340,7 +340,7 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
     (uint32_t)10U,
     (uint32_t)1U,
     uint32_t start_idx = i % (uint32_t)10U * (uint32_t)16U;
-    Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) m_st[4U] KRML_POST_ALIGN(16) = { 0U };
+    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 m_st[4U] KRML_POST_ALIGN(16) = { 0U };
     Lib_IntVector_Intrinsics_vec128 *r0 = m_st + (uint32_t)0U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
@@ -537,7 +537,7 @@ blake2s_update_block(
     (uint32_t)10U,
     (uint32_t)1U,
     uint32_t start_idx = i % (uint32_t)10U * (uint32_t)16U;
-    Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) m_st[4U] KRML_POST_ALIGN(16) = { 0U };
+    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 m_st[4U] KRML_POST_ALIGN(16) = { 0U };
     Lib_IntVector_Intrinsics_vec128 *r0 = m_st + (uint32_t)0U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
@@ -842,8 +842,8 @@ Hacl_Blake2s_128_blake2s(
   uint8_t *k
 )
 {
-  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) b[4U] KRML_POST_ALIGN(16) = { 0U };
-  Lib_IntVector_Intrinsics_vec128 KRML_PRE_ALIGN(16) b1[4U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 b[4U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 b1[4U] KRML_POST_ALIGN(16) = { 0U };
   Hacl_Blake2s_128_blake2s_init(b, kk, nn);
   blake2s_update(b1, b, kk, k, ll, d);
   Hacl_Blake2s_128_blake2s_finish(nn, output, b);
