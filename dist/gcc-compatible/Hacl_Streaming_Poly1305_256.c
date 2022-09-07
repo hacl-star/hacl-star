@@ -31,7 +31,7 @@ Hacl_Streaming_Poly1305_256_poly1305_256_state
 {
   uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
-  *r1 = KRML_ALIGNED_MALLOC(16, sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)25U);
+  *r1 = KRML_ALIGNED_MALLOC(32, sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)25U);
   memset(r1, 0U, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *block_state = r1;
   uint8_t *k_ = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
@@ -270,7 +270,7 @@ Hacl_Streaming_Poly1305_256_finish(
     r = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
   }
   uint8_t *buf_1 = buf_;
-  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec256 r1[25U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 r1[25U] KRML_POST_ALIGN(32) = { 0U };
   Lib_IntVector_Intrinsics_vec256 *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   uint32_t ite0;
@@ -314,7 +314,7 @@ Hacl_Streaming_Poly1305_256_finish(
     ite2 = r % (uint32_t)16U;
   }
   Hacl_Poly1305_256_poly1305_update(tmp_block_state, ite2, buf_last);
-  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec256 tmp[25U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 tmp[25U] KRML_POST_ALIGN(32) = { 0U };
   memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Hacl_Poly1305_256_poly1305_finish(dst, k_, tmp);
 }
