@@ -4,7 +4,8 @@ This document lists the Maintainers of the Project. Maintainers may be added onc
 
 | **NAME** | **Organization** |
 | --- | --- |
-| Karthikeyan Bhargavan | Inria |
+| Karthikeyan Bhargavan | Inria              |
+| Jonathan Protzenko    | Microsoft Research |
 
 
 ---
