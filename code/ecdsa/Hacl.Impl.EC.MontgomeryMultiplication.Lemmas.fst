@@ -277,3 +277,4 @@ val fromDomain_zero: #c: curve -> Lemma (fromDomain_ #c #DH 0 == 0)
 let fromDomain_zero #c = 
   lemmaFromDomain #c #DH 0;
   Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c 0
+

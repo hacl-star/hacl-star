@@ -13,7 +13,6 @@ open Spec.ECC.Curves
 open Spec.ECC
 open Spec.ECC.Radix
 
-
 open FStar.Seq
 open FStar.Math.Lib
 
@@ -50,6 +49,11 @@ val lemma_from_wnaf_next: l: seq int -> i: nat {i < Seq.length l} -> Lemma (
   from_wnaf_ l i == Seq.index l i + from_wnaf_ l (i + 1) * m)
 
 let lemma_from_wnaf_next l i = ()
+
+
+val lemma_from_wnaf_last0: l: seq int {Seq.length l > 0} -> Lemma (from_wnaf_ l (Seq.length l) == 0)
+
+let lemma_from_wnaf_last0 l = ()
 
 
 val to_wnaf_: d: nat {d % 2 == 1} -> n: nat {d < pow2 n} -> l: seq int {Seq.length l == n / w + 1}
@@ -256,19 +260,34 @@ let wnaf_spec_pred0 #c l p0 =
   Classical.forall_intro_4 pred
 
 
+let scalarToOdd (n: pos) (d: nat{d < pow2 n}) : (r: nat {r % 2 == 1 /\ r < pow2 n /\ (d % 2 == 1 ==> r == d) /\ (d % 2 == 0 ==> r == d + 1)}) = 
+  if d % 2 = 1 then d else 
+    begin
+      FStar.Math.Lemmas.lemma_mod_add_distr (-1) (pow2 n) 2;
+      FStar.Math.Lemmas.pow2_double_mult (n - 1);
+      FStar.Math.Lemmas.lemma_mod_sub_1 1 2;
+      d + 1
+    end
 
 val wnaf_spec: #c: curve 
-  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c /\ scalar_as_nat s % 2 == 1} 
+  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c} 
   -> p0: point #c #Jacobian {~ (isPointAtInfinity p0)}
   -> r: point #c #Jacobian {
-    pointEqual r (point_mult #c (scalar_as_nat #c s) p0)}
+    pointEqual r (point_mult #c (scalar_as_nat #c s) p0) /\ (
+      let scalarNat = scalar_as_nat #c s in 
+      let scalar_as_wnaf = to_wnaf (getPower c) (scalarToOdd (getPower c) scalarNat) in 
+      let r0 = repeati (getPower c / w + 1) (wnaf_step2 p0 scalar_as_wnaf) (0, 0, 0) in 
+      if scalarNat % 2 = 1 then 
+	pointEqual r r0
+      else 
+	pointEqual r (pointAdd r0 (point_mult (-1) p0)))}
 
 let wnaf_spec #c s p0 = 
   let scalarNat = scalar_as_nat #c s in 
-  
-  let scalar_as_wnaf = to_wnaf (getPower c) scalarNat in 
-  let len = Seq.length scalar_as_wnaf in 
 
+  let scalar_as_wnaf = to_wnaf (getPower c) (scalarToOdd (getPower c) scalarNat) in 
+  
+  let len = Seq.length scalar_as_wnaf in 
   let pred (i: nat {i <= len}) (p: point #c #Jacobian) : Type0 = 
     let partialScalar = from_wnaf_ scalar_as_wnaf (len - i) * pow2 (w * (len - i)) in  
     pointEqual p (point_mult partialScalar p0) in 
@@ -280,57 +299,18 @@ let wnaf_spec #c s p0 =
   point_mult_0 p0 0;  
 
   wnaf_spec_pred0 #c scalar_as_wnaf p0;
+  let r = repeati_inductive' #(point #c #Jacobian) len pred f q in 
 
+  if scalarNat % 2 = 1 then
+    assert(pointEqual r (point_mult scalarNat p0))
+  else
+    assert(pointEqual r (point_mult (scalarNat + 1) p0));
 
-  repeati_inductive' #(point #c #Jacobian) len pred f q
-
-
-
-assume val lemma_from_domain: #c: curve -> d: nat {d < pow2 (getPower c) /\ d % 2 == 1} ->
-  Lemma (
-    let n = (getPower c)in 
-    let s = to_wnaf n d in  
-    forall (i: nat {i < Seq.length s}).
-      from_wnaf_ s i == d / pow2 (i * w + 1) * 2 + 1)
-
-
-val lemma_test: #c: curve
-  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c /\ scalar_as_nat s % 2 == 1}
-  -> i: nat {
-    let scalarNat = scalar_as_nat #c s in 
-    let scalar_as_wnaf = to_wnaf (getPower c) scalarNat in 
-    let len = Seq.length scalar_as_wnaf in 
-    i < len - 1 /\ i > 0} -> 
-  Lemma (
-    let len = getPower c / w in 
-    let scalarNat = scalar_as_nat #c s in 
-    let scalar_as_wnaf = to_wnaf (getPower c) scalarNat in 
-    let len = length scalar_as_wnaf in 
-    let i' = len - (i + 1) in 
-    from_wnaf_ scalar_as_wnaf (len - i) * pow2 (w * (len - i)) <> index scalar_as_wnaf i' * pow2 (w * i'))
-
-
-let lemma_test #c s i = 
-  let len = getPower c / w in 
-  let d = scalar_as_nat #c s in 
-  let scalar_as_wnaf = to_wnaf (getPower c) d in 
-  let len = length scalar_as_wnaf in 
-  let i' = len - (i + 1) in 
-
-  let o = getOrder #c in 
-
-
-  FStar.Math.Lemmas.pow2_plus (w * (len - 1 - i)) w;
-  assert (pow2 (w * (len - i)) == pow2 (w * (len - 1 - i)) * pow2 w);
-
-  lemma_from_domain #c d;
-
-  assert(from_wnaf_ scalar_as_wnaf (len - i) == d / pow2 ((getPower c / w - i) * w + 1) * 2 + 1);
-
+  if scalarNat % 2 = 0 then begin
+    let r0 = pointAdd r (point_mult (-1) p0) in 
+    lemmaApplPointAdd p0 (scalarNat + 1) r (-1) (point_mult (-1) p0);
+    r0
+    end
+  else
+    r
   
-  
-
-  assume ((d / pow2 ((len - i) * w + 1) * 2 + 1) * pow2 w % o <> index scalar_as_wnaf i' % o);
-  assert (from_wnaf_ scalar_as_wnaf (len - i) * pow2 w % o <> index scalar_as_wnaf i' % o);
-
-  assume(from_wnaf_ scalar_as_wnaf (len - i) * (pow2 (w * (len - 1 - i)) * pow2 w) % o <> index scalar_as_wnaf i' * pow2 (w * (len - i - 1)) % o)
