@@ -1413,7 +1413,8 @@ let sq3 f f4 result memory tempBuffer =
 val sq: f: felem -> out: widefelem -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat h0 f * as_nat h0 f)
-      
+
+#push-options "--z3rlimit 500 --z3rlimit_factor 4"
 let sq f out =
   push_frame();
       assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -1457,14 +1458,14 @@ let sq f out =
     assert(Lib.Sequence.index (as_seq h3 bk2) 0 == Lib.Sequence.index (as_seq h3 out) 0);
     assert(Lib.Sequence.index (as_seq h3 bk2) 1 == Lib.Sequence.index (as_seq h3 out) 1);
     assert(Lib.Sequence.index (as_seq h3 bk2) 2 == Lib.Sequence.index (as_seq h3 out) 2);
-
   let b3 = sub out (size 3) (size 4) in 
   let c3 = sq3 f b3 b3 memory tb in 
     upd out (size 7) c3;
 
     let h4 = ST.get() in 
 
- assert(
+ // Solver stumbles at this assertion, would be nice to expand it a little
+ assert (
     uint_v f0 * as_nat h0 f + 
     uint_v f1 * as_nat h0 f * pow2 64 + 
     uint_v f2 * as_nat h0 f * pow2 64 * pow2 64 + 
@@ -1476,7 +1477,6 @@ let sq f out =
     uint_v (Lib.Sequence.index (as_seq h4 out) 2) * pow2 64 * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 0));
-
 
     calc (==) {
     as_nat h4 b3  * pow2 64 * pow2 64 * pow2 64 + 
@@ -1504,6 +1504,7 @@ let sq f out =
     };
 
   pop_frame()
+#pop-options
 
 val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
   Stack unit
