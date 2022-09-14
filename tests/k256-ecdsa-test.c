@@ -8,13 +8,14 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <secp256k1.h>
 
 #include "Hacl_K256_ECDSA.h"
 
 #include "test_helpers.h"
 #include "k256-ecdsa_vectors.h"
 
-#define ROUNDS 16384
+#define ROUNDS 32768
 
 static uint8_t sk2[32U] = {
     (uint8_t)0xebU, (uint8_t)0xb2U, (uint8_t)0xc0U, (uint8_t)0x82U, (uint8_t)0xfdU, (uint8_t)0x77U,
@@ -201,6 +202,59 @@ int main() {
   print_time(count,diff1,cyc1);
   printf("\n ECDSA K256 Verifying:\n");
   print_time(count,diff2,cyc2);
+
+
+  // Benchmarking for signing (libsecp256k-latest)
+  secp256k1_pubkey pubkey;
+  secp256k1_ecdsa_signature sig;
+  unsigned char serialized_signature[64];
+  unsigned char compressed_pubkey[33];
+  secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+
+  int b3 = 1;
+  int b4 = 1;
+
+  for (int j = 0; j < ROUNDS; j++) {
+    b3 &= secp256k1_ecdsa_sign(ctx, &sig, msgHash2, sk2, NULL, NULL);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    b3 &= secp256k1_ecdsa_sign(ctx, &sig, msgHash2, sk2, NULL, NULL);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff3 = t2 - t1;
+  uint64_t cyc3 = b - a;
+
+  //b3 &= secp256k1_ecdsa_signature_serialize_compact(ctx, serialized_signature, &sig);
+  b3 &= secp256k1_ecdsa_signature_parse_compact(ctx, &sig, sgnt2);
+  Hacl_K256_ECDSA_public_key_compressed_from_raw(compressed_pubkey, pk2);
+  b3 &= secp256k1_ec_pubkey_parse(ctx, &pubkey, compressed_pubkey, sizeof(compressed_pubkey));
+
+
+  for (int j = 0; j < ROUNDS; j++) {
+    b4 &= secp256k1_ecdsa_verify(ctx, &sig, msgHash2, &pubkey);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    b4 &= secp256k1_ecdsa_verify(ctx, &sig, msgHash2, &pubkey);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff4 = t2 - t1;
+  uint64_t cyc4 = b - a;
+
+
+  printf("\n libsecp256k: \n");
+  printf("\n ECDSA K256 Signing:\n");
+  print_time(count,diff3,cyc3);
+  printf("\n ECDSA K256 Verifying:\n");
+  print_time(count,diff4,cyc4);
+
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

@@ -64,6 +64,7 @@ endif
 CFLAGS += -I$(KRML_HOME)/include -I../dist/gcc-compatible \
   -I$(KRML_HOME)/krmllib/dist/minimal \
   -I../secure_api/merkle_tree \
+  -I../../../secp256k1/include \
   -O3 $(USER_CFLAGS)
 
 all: $(TARGETS)
@@ -90,8 +91,11 @@ curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 	$(CC) -I../lib/c $(CFLAGS) $(CFLAGS_128) $(LDFLAGS) vec-128-test.c -o vec-128-test.exe
 
+# %.exe: %.o
+# 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto
+
 %.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../code/k256/dist/libk256.a ../../../secp256k1/.libs/libsecp256k1.a -o $@ -lcrypto
 
 # Running tests
 
