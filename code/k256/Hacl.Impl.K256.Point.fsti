@@ -93,6 +93,17 @@ val make_g: g:point -> Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc g) h0 h1 /\
     point_inv h1 g /\ point_eval h1 g == S.g)
 
+
+inline_for_extraction noextract
+val copy_point (out p:point) : Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ eq_or_disjoint out p /\
+    point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    point_inv h1 out /\
+    point_eval h1 out == point_eval h0 p)
+
+
 ///  Conversion functions between affine and projective coordinates
 
 inline_for_extraction noextract

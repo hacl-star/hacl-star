@@ -63,6 +63,16 @@ let make_g g =
   set_one gz
 
 
+let copy_point out p =
+  let px, py, pz = getx p, gety p, getz p in
+  let ox, oy, oz = getx out, gety out, getz out in
+  copy_felem ox px;
+  copy_felem oy py;
+  copy_felem oz pz
+
+
+///  Conversion functions between affine and projective coordinates
+
 let to_proj_point p x y =
   let x1, y1, z1 = getx p, gety p, getz p in
   copy x1 x;

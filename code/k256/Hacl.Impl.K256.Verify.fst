@@ -17,6 +17,7 @@ module SE = Spec.Exponentiation
 open Hacl.K256.Field
 open Hacl.Impl.K256.Point
 open Hacl.Impl.K256.PointMul
+open Hacl.Impl.K256.GLV
 
 module QA = Hacl.K256.Scalar
 module QI = Hacl.Impl.K256.Qinv
@@ -70,7 +71,8 @@ let ecdsa_verify_qelem res p z r s =
   QI.qinv sinv s;
   QA.qmul u1 z sinv;
   QA.qmul u2 r sinv;
-  point_mul_g_double_vartime res u1 u2 p;
+  //point_mul_g_double_vartime res u1 u2 p;
+  point_mul_g_double_split_lambda_vartime res u1 u2 p;
   pop_frame ()
 
 
