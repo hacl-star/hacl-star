@@ -93,8 +93,36 @@ let g : proj_point = (g_x, g_y, one)
 
 ///  Point addition in affine coordinates
 
-assume
-val aff_point_add (p:aff_point) (y:aff_point) : aff_point
+let aff_point_double (p:aff_point) : aff_point =
+  let (px, py) = p in
+  if is_aff_point_at_inf p then p
+  else begin
+    if py = 0 then aff_point_at_inf
+    else begin
+      let lambda = 3 *% px *% px /% (2 *% py) in
+      let rx = lambda *% lambda -% px -% px in
+      let ry = lambda *% (px -% rx) -% py in
+      (rx, ry) end
+  end
+
+let aff_point_add (p:aff_point) (q:aff_point) : aff_point =
+  let (px, py) = p in let (qx, qy) = q in
+  if is_aff_point_at_inf p then q
+  else begin
+    if is_aff_point_at_inf q then p
+    else begin
+      if p = q then aff_point_double p
+      else begin
+        if qx = px then aff_point_at_inf
+        else begin
+          let lambda = (qy -% py) /% (qx -% px) in
+          let rx = lambda *% lambda -% px -% qx in
+          let ry = lambda *% (px -% rx) -% py in
+          (rx, ry)
+        end
+      end
+    end
+  end
 
 let aff_point_negate (p:aff_point) : aff_point =
   let x, y = p in x, (-y) % prime
