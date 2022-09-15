@@ -170,3 +170,16 @@ let mod_lseq a =
 
   let mask = u64 0 -. (c0 +. c1) in
   map2 (BB.mask_select mask) out r
+
+
+noextract
+let qmul_shift_384 (a b:qelem_lseq) : qelem_lseq =
+  let l = SB.bn_mul a b in
+  let res_b = SB.bn_rshift l 6 in
+  let res_b_padded = create 4 (u64 0) in
+  let res_b_padded = update_sub res_b_padded 0 2 res_b in
+  let _, res1_b = SB.bn_add1 res_b_padded (u64 1) in
+
+  let flag = l.[5] >>. 63ul in
+  let mask = u64 0 -. flag in // mask = if flag is set then ones_v U64 else 0
+  map2 (BB.mask_select mask) res1_b res_b_padded // res = if flag is set then res1_b else res_b
