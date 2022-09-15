@@ -115,17 +115,15 @@ chacha20_constants[4U] =
 
 static inline void chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
-  uint32_t *uu____0 = ctx;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint32_t *os = uu____0;
+    uint32_t *os = ctx;
     uint32_t x = chacha20_constants[i];
     os[i] = x;
   }
-  uint32_t *uu____1 = ctx + (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx + (uint32_t)4U;
     uint8_t *bj = k + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -133,10 +131,9 @@ static inline void chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t
     os[i] = x;
   }
   ctx[12U] = ctr;
-  uint32_t *uu____2 = ctx + (uint32_t)13U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)3U; i++)
   {
-    uint32_t *os = uu____2;
+    uint32_t *os = ctx + (uint32_t)13U;
     uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;

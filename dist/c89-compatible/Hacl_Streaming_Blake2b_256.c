@@ -42,46 +42,32 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state
         sizeof (uint8_t));
     Lib_IntVector_Intrinsics_vec256
     *wv =
-      (Lib_IntVector_Intrinsics_vec256 *)KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec256)
-        * (uint32_t)4U);
+      (Lib_IntVector_Intrinsics_vec256 *)KRML_HOST_CALLOC((uint32_t)4U,
+        sizeof (Lib_IntVector_Intrinsics_vec256));
+    Lib_IntVector_Intrinsics_vec256
+    *b =
+      (Lib_IntVector_Intrinsics_vec256 *)KRML_HOST_CALLOC((uint32_t)4U,
+        sizeof (Lib_IntVector_Intrinsics_vec256));
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state lit;
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state;
+    lit.fst = wv;
+    lit.snd = b;
+    block_state = lit;
     {
-      uint32_t _i;
-      for (_i = 0U; _i < (uint32_t)4U; ++_i)
-        wv[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-    }
-    {
-      Lib_IntVector_Intrinsics_vec256
-      *b =
-        (Lib_IntVector_Intrinsics_vec256 *)KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec256)
-          * (uint32_t)4U);
+      Hacl_Streaming_Blake2b_256_blake2b_256_state s;
+      s.block_state = block_state;
+      s.buf = buf;
+      s.total_len = (uint64_t)0U;
+      KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2b_256_blake2b_256_state), (uint32_t)1U);
       {
-        uint32_t _i;
-        for (_i = 0U; _i < (uint32_t)4U; ++_i)
-          b[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-      }
-      {
-        Hacl_Streaming_Blake2b_256_blake2b_256_block_state lit;
-        Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state;
-        lit.fst = wv;
-        lit.snd = b;
-        block_state = lit;
-        {
-          Hacl_Streaming_Blake2b_256_blake2b_256_state s;
-          s.block_state = block_state;
-          s.buf = buf;
-          s.total_len = (uint64_t)0U;
-          KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2b_256_blake2b_256_state), (uint32_t)1U);
-          {
-            Hacl_Streaming_Blake2b_256_blake2b_256_state
-            *p =
-              (Hacl_Streaming_Blake2b_256_blake2b_256_state *)KRML_HOST_MALLOC(sizeof (
-                  Hacl_Streaming_Blake2b_256_blake2b_256_state
-                ));
-            p[0U] = s;
-            Hacl_Blake2b_256_blake2b_init(block_state.snd, (uint32_t)0U, (uint32_t)64U);
-            return p;
-          }
-        }
+        Hacl_Streaming_Blake2b_256_blake2b_256_state
+        *p =
+          (Hacl_Streaming_Blake2b_256_blake2b_256_state *)KRML_HOST_MALLOC(sizeof (
+              Hacl_Streaming_Blake2b_256_blake2b_256_state
+            ));
+        p[0U] = s;
+        Hacl_Blake2b_256_blake2b_init(block_state.snd, (uint32_t)0U, (uint32_t)64U);
+        return p;
       }
     }
   }

@@ -31,7 +31,9 @@ let merkle_tree = MTNL.merkle_tree
 let mt_p = MTNL.mt_p
 let const_mt_p = MTNL.const_mt_p
 
+inline_for_extraction noextract
 let pf = fun _ -> False
+inline_for_extraction noextract
 let pt = fun _ _ _ -> True
 
 [@ (Comment "  Constructor for hashes") "c_inline"]

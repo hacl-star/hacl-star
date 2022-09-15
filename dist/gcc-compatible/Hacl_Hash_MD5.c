@@ -1126,10 +1126,9 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
 
 void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
 {
-  uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    store32_le(dst + i * (uint32_t)4U, uu____0[i]);
+    store32_le(dst + i * (uint32_t)4U, s[i]);
   }
 }
 

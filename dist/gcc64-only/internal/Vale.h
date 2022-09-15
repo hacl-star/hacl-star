@@ -69,20 +69,6 @@ extern uint64_t check_avx_xcr0();
 
 extern uint64_t check_avx512_xcr0();
 
-extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);
-
-extern uint64_t fsqr_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
-extern uint64_t fsqr2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
-extern uint64_t fmul_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
-
-extern uint64_t fmul2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
-
-extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
-
-extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
 extern uint64_t
 gcm128_decrypt_opt(
   uint8_t *x0,
@@ -184,6 +170,20 @@ gcm256_encrypt_opt(
 extern uint64_t aes128_keyhash_init(uint8_t *x0, uint8_t *x1);
 
 extern uint64_t aes256_keyhash_init(uint8_t *x0, uint8_t *x1);
+
+extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);
+
+extern uint64_t fsqr_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+extern uint64_t fsqr2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+extern uint64_t fmul_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
+
+extern uint64_t fmul2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
+
+extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
+
+extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
 extern uint64_t
 gctr128_bytes(

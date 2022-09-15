@@ -15,10 +15,15 @@ open LowStar.Regional
 /// A declaration whose sole purpose is to align the .fsti with the .fst
 noextract val _align : unit
 
+inline_for_extraction noextract
 let hash #hash_size = MTLD.hash #hash_size
+inline_for_extraction noextract
 let mt_p = MerkleTree.Low.mt_p
+inline_for_extraction noextract
 let mt_loc = MerkleTree.Low.mt_loc
+inline_for_extraction noextract
 let mt_safe = MerkleTree.Low.mt_safe
+inline_for_extraction noextract
 let mt_lift = MerkleTree.Low.mt_lift
 
 [@ (Comment "  Default hash function")]
