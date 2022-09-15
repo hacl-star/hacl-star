@@ -11,6 +11,7 @@ module M = Lib.NatMod
 
 assume val prime_lemma: unit -> Lemma (Euclid.is_prime prime)
 
+
 val mul_zero_lemma: n:pos{Euclid.is_prime n} -> x:int -> y:int ->
   Lemma (x * y % n == 0 <==> (x % n == 0 \/ y % n == 0))
 
@@ -91,18 +92,52 @@ let lemma_proj_aff_id p =
   M.lemma_div_mod_prime_one #prime pY;
   assert (rx = pX /\ ry = pY)
 
-let aff_point_at_inf_lemma p = admit()
+let aff_point_at_inf_lemma p = ()
 
 let aff_point_add_assoc_lemma p q s = admit()
 
 let aff_point_add_comm_lemma p q = admit()
 
-let to_aff_point_at_infinity_lemma () = admit()
+let aff_point_negate_lemma p =
+  let p_neg = aff_point_negate p in
+  let px, py = p in
+  let qx, qy = p_neg in
+  assert (qx = px /\ qy = (-py) % prime);
+  assert (aff_point_add p_neg p == aff_point_at_inf)
+
+
+let to_aff_point_at_infinity_lemma () =
+  let px, py = to_aff_point point_at_inf in
+  assert (px == zero /% zero /\ py == one /% zero);
+  assert (px == zero *% M.pow_mod #prime zero (prime - 2));
+  M.lemma_pow_mod #prime zero (prime - 2);
+  assert (px == zero *% (M.pow zero (prime - 2) % prime));
+  M.lemma_pow_zero (prime - 2);
+  assert (px == zero /\ py == zero)
 
 let to_aff_point_add_lemma p q = admit()
 
 let to_aff_point_double_lemma p = admit()
 
+let to_aff_point_negate_lemma p =
+  let px, py, pz = p in
+  let qx, qy = to_aff_point (point_negate p) in
+  assert (qx == px /% pz /\ qy == (- py) % prime /% pz);
+  let ax, ay = aff_point_negate (to_aff_point p) in
+  assert (ax == px /% pz /\ ay == (- py /% pz) % prime);
+  let pz_inv = M.pow_mod #prime pz (prime - 2) in
+
+  calc (==) { // (-py) % prime /% pz;
+    ((- py) % prime * pz_inv) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- py) pz_inv prime }
+    (- py * pz_inv) % prime;
+    (==) { Math.Lemmas.neg_mul_left py pz_inv }
+    (- (py * pz_inv)) % prime;
+    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (py * pz_inv) prime }
+    (- (py * pz_inv) % prime) % prime; // (- py /% pz) % prime;
+  }
+
+//----------------------------------
 
 val lemma_div_mod_eq_mul_mod (a b c:felem) : Lemma
   (requires b <> 0)
