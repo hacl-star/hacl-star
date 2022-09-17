@@ -14,6 +14,7 @@ module Error : sig
     | AuthenticationFailure
     | InvalidIVLength
     | DecodeError
+    | MaximumLengthExceeded
   type 'a result =
     | Success of 'a
     | Error of error_code
