@@ -214,7 +214,6 @@ val sub_bytes_state:
   (requires (fun h -> live h st))
   (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
-#push-options "--z3rlimit 20"
 let sub_bytes_state (st:state) =
   let st0 = st.(size 0) in
   let st1 = st.(size 1) in
@@ -231,15 +230,31 @@ let sub_bytes_state (st:state) =
   in
   let (((st0,st1),(st2,st3)),((st4,st5),(st6,st7))) =
     Trans.transpose_bits64x8_inv (((st0,st1),(st2,st3)),((st4,st5),(st6,st7))) in
+  let h0 = FStar.HyperStack.ST.get () in
   st.(size 0) <- st0;
+  let h1 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h1);
   st.(size 1) <- st1;
+  let h2 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h2);
   st.(size 2) <- st2;
+  let h3 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h3);
   st.(size 3) <- st3;
+  let h4 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h4);
   st.(size 4) <- st4;
+  let h5 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h5);
   st.(size 5) <- st5;
+  let h6 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h6);
   st.(size 6) <- st6;
-  st.(size 7) <- st7
-#pop-options
+  let h7 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h7);
+  st.(size 7) <- st7;
+  let h8 = FStar.HyperStack.ST.get () in
+  assert(modifies1 st h0 h8)
 
 
 val shift_rows_state:
