@@ -634,15 +634,13 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(
   {
     uint64_t templong0 = (uint64_t)0U;
     uint64_t templong;
-    {
-      uint32_t i0;
-      for (i0 = (uint32_t)0U; i0 < (uint32_t)8U; i0++)
-      {
-        uint16_t aik = a[i * n + i0];
-        uint16_t res1 = (aik + ((uint16_t)1U << (logq - b - (uint32_t)1U))) >> (logq - b);
-        templong0 = templong0 | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i0;
-      }
-    }
+    KRML_MAYBE_FOR8(i0,
+      (uint32_t)0U,
+      (uint32_t)8U,
+      (uint32_t)1U,
+      uint16_t aik = a[i * n + i0];
+      uint16_t res1 = (aik + ((uint16_t)1U << (logq - b - (uint32_t)1U))) >> (logq - b);
+      templong0 = templong0 | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i0;);
     templong = templong0;
     {
       uint8_t v8[8U] = { 0U };

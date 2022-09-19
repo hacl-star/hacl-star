@@ -41,10 +41,7 @@ _h0[5U] =
 
 void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
 {
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
-  {
-    s[i] = _h0[i];
-  }
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, s[i] = _h0[i];);
 }
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_init */
@@ -177,10 +174,11 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
 
 void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
 {
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
-  {
-    store32_be(dst + i * (uint32_t)4U, s[i]);
-  }
+  KRML_MAYBE_FOR5(i,
+    (uint32_t)0U,
+    (uint32_t)5U,
+    (uint32_t)1U,
+    store32_be(dst + i * (uint32_t)4U, s[i]););
 }
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_finish */
