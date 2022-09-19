@@ -9,6 +9,7 @@ module S = Lib.Sliceable
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
+open FStar.Tactics
 
 #set-options "--fuel 0 --ifuel 0"
 
@@ -48,11 +49,49 @@ match s with
 | 240 -> 0x8c | 241 -> 0xa1 | 242 -> 0x89 | 243 -> 0x0d | 244 -> 0xbf | 245 -> 0xe6 | 246 -> 0x42 | 247 -> 0x68
 | 248 -> 0x41 | 249 -> 0x99 | 250 -> 0x2d | 251 -> 0x0f | 252 -> 0xb0 | 253 -> 0x54 | 254 -> 0xbb | 255 -> 0x16
 
+inline_for_extraction noextract
+let sbox_inv s =
+match s with
+|   0 -> 0x52 |   1 -> 0x09 |   2 -> 0x6a |   3 -> 0xd5 |   4 -> 0x30 |   5 -> 0x36 |   6 -> 0xa5 |   7 -> 0x38
+|   8 -> 0xbf |   9 -> 0x40 |  10 -> 0xa3 |  11 -> 0x9e |  12 -> 0x81 |  13 -> 0xf3 |  14 -> 0xd7 |  15 -> 0xfb
+|  16 -> 0x7c |  17 -> 0xe3 |  18 -> 0x39 |  19 -> 0x82 |  20 -> 0x9b |  21 -> 0x2f |  22 -> 0xff |  23 -> 0x87
+|  24 -> 0x34 |  25 -> 0x8e |  26 -> 0x43 |  27 -> 0x44 |  28 -> 0xc4 |  29 -> 0xde |  30 -> 0xe9 |  31 -> 0xcb
+|  32 -> 0x54 |  33 -> 0x7b |  34 -> 0x94 |  35 -> 0x32 |  36 -> 0xa6 |  37 -> 0xc2 |  38 -> 0x23 |  39 -> 0x3d
+|  40 -> 0xee |  41 -> 0x4c |  42 -> 0x95 |  43 -> 0x0b |  44 -> 0x42 |  45 -> 0xfa |  46 -> 0xc3 |  47 -> 0x4e
+|  48 -> 0x08 |  49 -> 0x2e |  50 -> 0xa1 |  51 -> 0x66 |  52 -> 0x28 |  53 -> 0xd9 |  54 -> 0x24 |  55 -> 0xb2
+|  56 -> 0x76 |  57 -> 0x5b |  58 -> 0xa2 |  59 -> 0x49 |  60 -> 0x6d |  61 -> 0x8b |  62 -> 0xd1 |  63 -> 0x25
+|  64 -> 0x72 |  65 -> 0xf8 |  66 -> 0xf6 |  67 -> 0x64 |  68 -> 0x86 |  69 -> 0x68 |  70 -> 0x98 |  71 -> 0x16
+|  72 -> 0xd4 |  73 -> 0xa4 |  74 -> 0x5c |  75 -> 0xcc |  76 -> 0x5d |  77 -> 0x65 |  78 -> 0xb6 |  79 -> 0x92
+|  80 -> 0x6c |  81 -> 0x70 |  82 -> 0x48 |  83 -> 0x50 |  84 -> 0xfd |  85 -> 0xed |  86 -> 0xb9 |  87 -> 0xda
+|  88 -> 0x5e |  89 -> 0x15 |  90 -> 0x46 |  91 -> 0x57 |  92 -> 0xa7 |  93 -> 0x8d |  94 -> 0x9d |  95 -> 0x84
+|  96 -> 0x90 |  97 -> 0xd8 |  98 -> 0xab |  99 -> 0x00 | 100 -> 0x8c | 101 -> 0xbc | 102 -> 0xd3 | 103 -> 0x0a
+| 104 -> 0xf7 | 105 -> 0xe4 | 106 -> 0x58 | 107 -> 0x05 | 108 -> 0xb8 | 109 -> 0xb3 | 110 -> 0x45 | 111 -> 0x06
+| 112 -> 0xd0 | 113 -> 0x2c | 114 -> 0x1e | 115 -> 0x8f | 116 -> 0xca | 117 -> 0x3f | 118 -> 0x0f | 119 -> 0x02
+| 120 -> 0xc1 | 121 -> 0xaf | 122 -> 0xbd | 123 -> 0x03 | 124 -> 0x01 | 125 -> 0x13 | 126 -> 0x8a | 127 -> 0x6b
+| 128 -> 0x3a | 129 -> 0x91 | 130 -> 0x11 | 131 -> 0x41 | 132 -> 0x4f | 133 -> 0x67 | 134 -> 0xdc | 135 -> 0xea
+| 136 -> 0x97 | 137 -> 0xf2 | 138 -> 0xcf | 139 -> 0xce | 140 -> 0xf0 | 141 -> 0xb4 | 142 -> 0xe6 | 143 -> 0x73
+| 144 -> 0x96 | 145 -> 0xac | 146 -> 0x74 | 147 -> 0x22 | 148 -> 0xe7 | 149 -> 0xad | 150 -> 0x35 | 151 -> 0x85
+| 152 -> 0xe2 | 153 -> 0xf9 | 154 -> 0x37 | 155 -> 0xe8 | 156 -> 0x1c | 157 -> 0x75 | 158 -> 0xdf | 159 -> 0x6e
+| 160 -> 0x47 | 161 -> 0xf1 | 162 -> 0x1a | 163 -> 0x71 | 164 -> 0x1d | 165 -> 0x29 | 166 -> 0xc5 | 167 -> 0x89
+| 168 -> 0x6f | 169 -> 0xb7 | 170 -> 0x62 | 171 -> 0x0e | 172 -> 0xaa | 173 -> 0x18 | 174 -> 0xbe | 175 -> 0x1b
+| 176 -> 0xfc | 177 -> 0x56 | 178 -> 0x3e | 179 -> 0x4b | 180 -> 0xc6 | 181 -> 0xd2 | 182 -> 0x79 | 183 -> 0x20
+| 184 -> 0x9a | 185 -> 0xdb | 186 -> 0xc0 | 187 -> 0xfe | 188 -> 0x78 | 189 -> 0xcd | 190 -> 0x5a | 191 -> 0xf4
+| 192 -> 0x1f | 193 -> 0xdd | 194 -> 0xa8 | 195 -> 0x33 | 196 -> 0x88 | 197 -> 0x07 | 198 -> 0xc7 | 199 -> 0x31
+| 200 -> 0xb1 | 201 -> 0x12 | 202 -> 0x10 | 203 -> 0x59 | 204 -> 0x27 | 205 -> 0x80 | 206 -> 0xec | 207 -> 0x5f
+| 208 -> 0x60 | 209 -> 0x51 | 210 -> 0x7f | 211 -> 0xa9 | 212 -> 0x19 | 213 -> 0xb5 | 214 -> 0x4a | 215 -> 0x0d
+| 216 -> 0x2d | 217 -> 0xe5 | 218 -> 0x7a | 219 -> 0x9f | 220 -> 0x93 | 221 -> 0xc9 | 222 -> 0x9c | 223 -> 0xef
+| 224 -> 0xa0 | 225 -> 0xe0 | 226 -> 0x3b | 227 -> 0x4d | 228 -> 0xae | 229 -> 0x2a | 230 -> 0xf5 | 231 -> 0xb0
+| 232 -> 0xc8 | 233 -> 0xeb | 234 -> 0xbb | 235 -> 0x3c | 236 -> 0x83 | 237 -> 0x53 | 238 -> 0x99 | 239 -> 0x61
+| 240 -> 0x17 | 241 -> 0x2b | 242 -> 0x04 | 243 -> 0x7e | 244 -> 0xba | 245 -> 0x77 | 246 -> 0xd6 | 247 -> 0x26
+| 248 -> 0xe1 | 249 -> 0x69 | 250 -> 0x14 | 251 -> 0x63 | 252 -> 0x55 | 253 -> 0x21 | 254 -> 0x0c | 255 -> 0x7d
+
+let sbox_inv_theorem s = assert_norm (S.bruteforce_aux 8 (fun i -> sbox_inv (sbox i) = i) == true)
+
 // http://cs-www.cs.yale.edu/homes/peralta/CircuitStuff/CMT.html
 inline_for_extraction noextract
-let circ_size : nat = 121
+let sub_bytes_circ_size : nat = 121
 inline_for_extraction noextract
-private let circ : S.circuit 8 circ_size =
+private let sub_bytes_circ : S.circuit 8 sub_bytes_circ_size =
 fun i -> match i with
 | 0 -> S.Input 0 | 1 -> S.Input 1 | 2 -> S.Input 2 | 3 -> S.Input 3
 | 4 -> S.Input 4 | 5 -> S.Input 5 | 6 -> S.Input 6 | 7 -> S.Input 7
@@ -86,7 +125,7 @@ fun i -> match i with
 | 116 ->  S.Xor 106 107 | 117 -> S.Xnor 107 108 | 118 ->  S.Xor 109 112 | 119 -> S.Xnor 118  92
 | 120 ->  S.Xor 113 109
 inline_for_extraction noextract
-let circ_outputs (i:nat{i<8}) : (j:nat{j<circ_size}) =
+let sub_bytes_circ_outputs (i:nat{i<8}) : (j:nat{j<sub_bytes_circ_size}) =
 match i with
 | 0 -> 114
 | 1 -> 117
@@ -98,29 +137,26 @@ match i with
 | 7 -> 111
 
 inline_for_extraction noextract
-let sub_bytes_spec #n #xN x =
-  S.reduce_output (S.circuit_spec circ) 8 circ_outputs x
+let sub_bytes #n #xN x =
+  S.reduce_output (S.circuit_spec sub_bytes_circ) 8 sub_bytes_circ_outputs x
 
-open FStar.Tactics
-
-let sub_bytes_sliceable : squash (S.sliceable sub_bytes_spec) =
-  S.reduce_output_sliceable (S.circuit_spec circ) 8 circ_outputs
+let sub_bytes_sliceable : squash (S.sliceable sub_bytes) =
+  S.reduce_output_sliceable (S.circuit_spec sub_bytes_circ) 8 sub_bytes_circ_outputs
 
 let sub_bytes_bruteforce_lemma (_:unit) : Lemma (
-    S.bruteforce sub_bytes_spec sbox == true
+    S.bruteforce sub_bytes sbox == true
   ) =
-  admit ()
-  //assert (
-  //  S.bruteforce sub_bytes_spec sbox == true
-  //) by (
-  //  norm [ delta; zeta; primops; iota; nbe ];
-  //  trefl ()
-  //)
+  assert (
+    S.bruteforce sub_bytes sbox == true
+  ) by (
+    norm [ delta; zeta; primops; iota; nbe ];
+    trefl ()
+  )
 
-let sub_bytes_spec_theorem (#n:IT.size_nat) (#xN:S.sig n) (x:S.xNxM xN 8) (j:nat{j<n})
-  : Lemma ( S.column j (sub_bytes_spec x) == S.of_uint (sbox (S.to_uint (S.column j x))) )
+let sub_bytes_theorem (#n:IT.size_nat) (#xN:S.sig n) (x:S.xNxM xN 8) (j:nat{j<n})
   =
-  sub_bytes_bruteforce_lemma ()
+  sub_bytes_bruteforce_lemma ();
+  S.bruteforce_lemma sub_bytes sbox
 
 #push-options "--z3rlimit 20"
 let sub_bytes64x8 st0 st1 st2 st3 st4 st5 st6 st7 =
@@ -130,26 +166,133 @@ let sub_bytes64x8 st0 st1 st2 st3 st4 st5 st6 st7 =
   let output : B.lbuffer u64.t 8ul = B.create _ u64.zeros_ in
   let h0 = FStar.HyperStack.ST.get () in
   S.reduce_output_lowstar
-    (S.circuit_spec circ) u64
-    (S.circuit_lowstar circ u64)
-    8 circ_outputs
+    (S.circuit_spec sub_bytes_circ) u64
+    (S.circuit_lowstar sub_bytes_circ u64)
+    8 sub_bytes_circ_outputs
     input output;
   let h1 = FStar.HyperStack.ST.get () in
-  assert(S.xNxM_of_lbuffer h1 output == sub_bytes_spec (S.xNxM_of_lbuffer h0 input));
-  let o0:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 0}) = B.index output 0ul in
-  let o1:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 1}) = B.index output 1ul in
-  let o2:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 2}) = B.index output 2ul in
-  let o3:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 3}) = B.index output 3ul in
-  let o4:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 4}) = B.index output 4ul in
-  let o5:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 5}) = B.index output 5ul in
-  let o6:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 6}) = B.index output 6ul in
-  let o7:(v:u64.t{v == S.index (sub_bytes_spec (S.xNxM_of_lbuffer h0 input)) 7}) = B.index output 7ul in
+  assert(S.xNxM_of_lbuffer h1 output == sub_bytes (S.xNxM_of_lbuffer h0 input));
+  let o0:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 0}) = B.index output 0ul in
+  let o1:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 1}) = B.index output 1ul in
+  let o2:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 2}) = B.index output 2ul in
+  let o3:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 3}) = B.index output 3ul in
+  let o4:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 4}) = B.index output 4ul in
+  let o5:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 5}) = B.index output 5ul in
+  let o6:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 6}) = B.index output 6ul in
+  let o7:(v:u64.t{v == S.index (sub_bytes (S.xNxM_of_lbuffer h0 input)) 7}) = B.index output 7ul in
   S.xNxM_eq_intro
     (S.xNxM_of_lbuffer h0 input)
     (S.uNx8_mk st0 st1 st2 st3 st4 st5 st6 st7);
   S.xNxM_eq_intro
     (S.uNx8_mk o0 o1 o2 o3 o4 o5 o6 o7)
-    (sub_bytes_spec (S.uNx8_mk st0 st1 st2 st3 st4 st5 st6 st7));
+    (sub_bytes (S.uNx8_mk st0 st1 st2 st3 st4 st5 st6 st7));
+  pop_frame();
+  (o0, o1, o2, o3, o4, o5, o6, o7)
+#pop-options
+
+// http://cs-www.cs.yale.edu/homes/peralta/CircuitStuff/CMT.html
+inline_for_extraction noextract
+let sub_bytes_inv_circ_size : nat = 129
+inline_for_extraction noextract
+private let sub_bytes_inv_circ : S.circuit 8 sub_bytes_inv_circ_size =
+fun i -> match i with
+| 0 -> S.Input 0 | 1 -> S.Input 1 | 2 -> S.Input 2 | 3 -> S.Input 3
+| 4 -> S.Input 4 | 5 -> S.Input 5 | 6 -> S.Input 6 | 7 -> S.Input 7
+|   8 -> S.Xor    0   3 |   9 -> S.Xnor   1   3 |  10 -> S.Xor    0   9 |  11 -> S.Xor    6   7
+|  12 -> S.Xor    9  11 |  13 -> S.Xnor   2  12 |  14 -> S.Xor    3   4 |  15 -> S.Xnor   7  14
+|  16 -> S.Xor   12  14 |  17 -> S.Xnor   0   2 |  18 -> S.Xor    5  17 |  19 -> S.Xor    8   9
+|  20 -> S.Xor   12  16 |  21 -> S.Xor   10  15 |  22 -> S.Xor   18  13 |  23 -> S.Xor    8  12
+|  24 -> S.Xor    9  16 |  25 -> S.Xor   20  19 |  26 -> S.Xor   10  18 |  27 -> S.Xor   15  13
+|  28 -> S.Xor   22  21 |  29 -> S.Xor   20  22 |  30 -> S.Xor   24  27 |  31 -> S.Xor   16  13
+|  32 -> S.Xor   19  21 |  33 -> S.And   23  26 |  34 -> S.And    8  10 |  35 -> S.Xor   29  33
+|  36 -> S.And   12  18 |  37 -> S.Xor   36  33 |  38 -> S.And   24  27 |  39 -> S.And    9  15
+|  40 -> S.Xor   30  38 |  41 -> S.And   16  13 |  42 -> S.Xor   41  38 |  43 -> S.And   20  22
+|  44 -> S.And   25  28 |  45 -> S.Xor   44  43 |  46 -> S.And   19  21 |  47 -> S.Xor   46  43
+|  48 -> S.Xor   35  34 |  49 -> S.Xor   37  32 |  50 -> S.Xor   40  39 |  51 -> S.Xor   42  47
+|  52 -> S.Xor   48  45 |  53 -> S.Xor   49  47 |  54 -> S.Xor   50  45 |  55 -> S.Xor   51  31
+|  56 -> S.Xor   54  55 |  57 -> S.And   54  52 |  58 -> S.Xor   53  57 |  59 -> S.Xor   52  53
+|  60 -> S.Xor   55  57 |  61 -> S.And   60  59 |  62 -> S.And   58  56 |  63 -> S.Xor   55  62
+|  64 -> S.Xor   53  61 |  65 -> S.And   52  55 |  66 -> S.And   59  65 |  67 -> S.Xor   59  57
+|  68 -> S.Xor   66  67 |  69 -> S.And   53  54 |  70 -> S.And   56  69 |  71 -> S.Xor   56  57
+|  72 -> S.Xor   70  71 |  73 -> S.Xor   68  72 |  74 -> S.Xor   64  63 |  75 -> S.Xor   64  68
+|  76 -> S.Xor   63  72 |  77 -> S.Xor   74  73 |  78 -> S.And   76  26 |  79 -> S.And   72  10
+|  80 -> S.And   63  18 |  81 -> S.And   75  27 |  82 -> S.And   68  15 |  83 -> S.And   64  13
+|  84 -> S.And   74  22 |  85 -> S.And   77  28 |  86 -> S.And   73  21 |  87 -> S.And   76  23
+|  88 -> S.And   72   8 |  89 -> S.And   63  12 |  90 -> S.And   75  24 |  91 -> S.And   68   9
+|  92 -> S.And   64  16 |  93 -> S.And   74  20 |  94 -> S.And   77  25 |  95 -> S.And   73  19
+|  96 -> S.Xor   79  78 |  97 -> S.Xor   80  78 |  98 -> S.Xor   82  81 |  99 -> S.Xor   83  81
+| 100 -> S.Xor   85  84 | 101 -> S.Xor   86  84 | 102 -> S.Xor   96 100 | 103 -> S.Xor   97 101
+| 104 -> S.Xor   98 100 | 105 -> S.Xor   99 101 | 106 -> S.Xor   88  87 | 107 -> S.Xor   89  87
+| 108 -> S.Xor   91  90 | 109 -> S.Xor   92  90 | 110 -> S.Xor   94  93 | 111 -> S.Xor   95  93
+| 112 -> S.Xor  106 110 | 113 -> S.Xor  107 111 | 114 -> S.Xor  108 110 | 115 -> S.Xor  109 111
+| 116 -> S.Xor  103 114 | 117 -> S.Xor  104 114 | 118 -> S.Xor  105 114 | 119 -> S.Xor  102 104
+| 120 -> S.Xor  118 119 | 121 -> S.Xor  112 115 | 122 -> S.Xor  119 121 | 123 -> S.Xor  116 122
+| 124 -> S.Xor  103 113 | 125 -> S.Xor  122 124 | 126 -> S.Xor  102 112 | 127 -> S.Xor  120 124
+| 128 -> S.Xor  126 127
+inline_for_extraction noextract
+let sub_bytes_inv_circ_outputs (i:nat{i<8}) : (j:nat{j<sub_bytes_inv_circ_size}) =
+match i with
+| 0 -> 118
+| 1 -> 123
+| 2 -> 125
+| 3 -> 116
+| 4 -> 128
+| 5 -> 120
+| 6 -> 117
+| 7 -> 113
+
+inline_for_extraction noextract
+let sub_bytes_inv #n #xN x =
+  S.reduce_output (S.circuit_spec sub_bytes_inv_circ) 8 sub_bytes_inv_circ_outputs x
+
+let sub_bytes_inv_sliceable : squash (S.sliceable sub_bytes_inv) =
+  S.reduce_output_sliceable (S.circuit_spec sub_bytes_inv_circ) 8 sub_bytes_inv_circ_outputs
+
+let sub_bytes_inv_bruteforce_lemma (_:unit) : Lemma (
+    S.bruteforce sub_bytes_inv sbox_inv == true
+  ) =
+  assert (
+    S.bruteforce sub_bytes_inv sbox_inv == true
+  ) by (
+    norm [ delta; zeta; primops; iota; nbe ];
+    trefl ()
+  )
+
+#push-options "--z3rlimit 20"
+let sub_bytes_inv_theorem (#n:IT.size_nat) (#xN:S.sig n) (x:S.xNxM xN 8) (j:nat{j<n})
+  =
+  sub_bytes_inv_bruteforce_lemma ();
+  S.bruteforce_lemma sub_bytes_inv sbox_inv
+#pop-options
+
+#push-options "--z3rlimit 20"
+let sub_bytes_inv64x8 st0 st1 st2 st3 st4 st5 st6 st7 =
+  push_frame();
+  let input : B.lbuffer u64.t 8ul = B.create _ u64.zeros_ in
+  B.create8 input st0 st1 st2 st3 st4 st5 st6 st7;
+  let output : B.lbuffer u64.t 8ul = B.create _ u64.zeros_ in
+  let h0 = FStar.HyperStack.ST.get () in
+  S.reduce_output_lowstar
+    (S.circuit_spec sub_bytes_inv_circ) u64
+    (S.circuit_lowstar sub_bytes_inv_circ u64)
+    8 sub_bytes_inv_circ_outputs
+    input output;
+  let h1 = FStar.HyperStack.ST.get () in
+  assert(S.xNxM_of_lbuffer h1 output == sub_bytes_inv (S.xNxM_of_lbuffer h0 input));
+  let o0:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 0}) = B.index output 0ul in
+  let o1:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 1}) = B.index output 1ul in
+  let o2:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 2}) = B.index output 2ul in
+  let o3:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 3}) = B.index output 3ul in
+  let o4:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 4}) = B.index output 4ul in
+  let o5:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 5}) = B.index output 5ul in
+  let o6:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 6}) = B.index output 6ul in
+  let o7:(v:u64.t{v == S.index (sub_bytes_inv (S.xNxM_of_lbuffer h0 input)) 7}) = B.index output 7ul in
+  S.xNxM_eq_intro
+    (S.xNxM_of_lbuffer h0 input)
+    (S.uNx8_mk st0 st1 st2 st3 st4 st5 st6 st7);
+  S.xNxM_eq_intro
+    (S.uNx8_mk o0 o1 o2 o3 o4 o5 o6 o7)
+    (sub_bytes_inv (S.uNx8_mk st0 st1 st2 st3 st4 st5 st6 st7));
   pop_frame();
   (o0, o1, o2, o3, o4, o5, o6, o7)
 #pop-options
