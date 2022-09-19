@@ -1,21 +1,23 @@
 {
-  inputs = {
-    fstar-src.url     = github:fstarlang/fstar?ref=master;
-    fstar-src.flake   = false;
-    karamel-src.url   = github:fstarlang/karamel?ref=master;
-    karamel-src.flake = false;
-    
-    everest = {
-      url = github:project-everest/everest-nix?dir=projects;
-      inputs.fstar-src.follows    = "fstar-src";
-      inputs.karamel-src.follows  = "karamel-src";
-      # `/` means `self` (see NixOS/nix#4931)
-      inputs.hacl-src.follows     = "/";
-    };
+  description = "Hacl*";
 
-    flake-utils.url = "flake-utils";
-    nixpkgs.url = "nixpkgs";
+  inputs = {
+    fstar-src = {
+      url = "github:fstarlang/fstar";
+      flake = false;
+    };
+    karamel-src = {
+      url = "github:fstarlang/karamel";
+      flake = false;
+    };
+    hacl-nix = {
+      url = "github:hacl-star/hacl-nix";
+      inputs.fstar-src.follows = "fstar-src";
+      inputs.karamel-src.follows = "karamel-src";
+      # `/` means `self` (see NixOS/nix#4931)
+      inputs.hacl-src.follows = "/";
+    };
   };
 
-  outputs = {everest, ...}: everest;
+  outputs = { hacl-nix, ... }: hacl-nix;
 }
