@@ -66,10 +66,14 @@ static inline void sha224_update1(uint8_t *block, uint32_t *hash)
   ws[14U] = u13;
   uint32_t u14 = load32_be(b + (uint32_t)60U);
   ws[15U] = u14;
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    KRML_MAYBE_FOR16(i,
+      (uint32_t)0U,
+      (uint32_t)16U,
+      (uint32_t)1U,
       uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * i0 + i];
       uint32_t ws_t = ws[i];
       uint32_t a0 = hash[0U];
@@ -114,12 +118,13 @@ static inline void sha224_update1(uint8_t *block, uint32_t *hash)
       hash[4U] = e1;
       hash[5U] = f1;
       hash[6U] = g1;
-      hash[7U] = h12;
-    }
+      hash[7U] = h12;);
     if (i0 < (uint32_t)4U - (uint32_t)1U)
     {
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-      {
+      KRML_MAYBE_FOR16(i,
+        (uint32_t)0U,
+        (uint32_t)16U,
+        (uint32_t)1U,
         uint32_t t16 = ws[i];
         uint32_t t15 = ws[(i + (uint32_t)1U) % (uint32_t)16U];
         uint32_t t7 = ws[(i + (uint32_t)9U) % (uint32_t)16U];
@@ -132,16 +137,15 @@ static inline void sha224_update1(uint8_t *block, uint32_t *hash)
         s0 =
           (t15 << ((uint32_t)32U - (uint32_t)7U) | t15 >> (uint32_t)7U)
           ^ ((t15 << ((uint32_t)32U - (uint32_t)18U) | t15 >> (uint32_t)18U) ^ t15 >> (uint32_t)3U);
-        ws[i] = s1 + t7 + s0 + t16;
-      }
-    }
-  }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+        ws[i] = s1 + t7 + s0 + t16;);
+    });
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint32_t *os = hash;
     uint32_t x = hash[i] + hash_old[i];
-    os[i] = x;
-  }
+    os[i] = x;);
 }
 
 /* SNIPPET_END: sha224_update1 */
@@ -153,12 +157,13 @@ void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input)
   uint8_t *ib = input;
   uint8_t *rb = dst;
   uint32_t st[8U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint32_t *os = st;
     uint32_t x = Hacl_Impl_SHA2_Generic_h224[i];
-    os[i] = x;
-  }
+    os[i] = x;);
   uint32_t rem = input_len % (uint32_t)64U;
   uint64_t len_ = (uint64_t)input_len;
   uint32_t blocks0 = input_len / (uint32_t)64U;
@@ -207,10 +212,11 @@ void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input)
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)1U * (uint32_t)8U * (uint32_t)4U);
   uint8_t hbuf[(uint32_t)1U * (uint32_t)8U * (uint32_t)4U];
   memset(hbuf, 0U, (uint32_t)1U * (uint32_t)8U * (uint32_t)4U * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
-    store32_be(hbuf + i * (uint32_t)4U, st[i]);
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    store32_be(hbuf + i * (uint32_t)4U, st[i]););
   memcpy(rb, hbuf, (uint32_t)28U * sizeof (uint8_t));
 }
 
@@ -256,10 +262,14 @@ static inline void sha256_update1(uint8_t *block, uint32_t *hash)
   ws[14U] = u13;
   uint32_t u14 = load32_be(b + (uint32_t)60U);
   ws[15U] = u14;
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    KRML_MAYBE_FOR16(i,
+      (uint32_t)0U,
+      (uint32_t)16U,
+      (uint32_t)1U,
       uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * i0 + i];
       uint32_t ws_t = ws[i];
       uint32_t a0 = hash[0U];
@@ -304,12 +314,13 @@ static inline void sha256_update1(uint8_t *block, uint32_t *hash)
       hash[4U] = e1;
       hash[5U] = f1;
       hash[6U] = g1;
-      hash[7U] = h12;
-    }
+      hash[7U] = h12;);
     if (i0 < (uint32_t)4U - (uint32_t)1U)
     {
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-      {
+      KRML_MAYBE_FOR16(i,
+        (uint32_t)0U,
+        (uint32_t)16U,
+        (uint32_t)1U,
         uint32_t t16 = ws[i];
         uint32_t t15 = ws[(i + (uint32_t)1U) % (uint32_t)16U];
         uint32_t t7 = ws[(i + (uint32_t)9U) % (uint32_t)16U];
@@ -322,16 +333,15 @@ static inline void sha256_update1(uint8_t *block, uint32_t *hash)
         s0 =
           (t15 << ((uint32_t)32U - (uint32_t)7U) | t15 >> (uint32_t)7U)
           ^ ((t15 << ((uint32_t)32U - (uint32_t)18U) | t15 >> (uint32_t)18U) ^ t15 >> (uint32_t)3U);
-        ws[i] = s1 + t7 + s0 + t16;
-      }
-    }
-  }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+        ws[i] = s1 + t7 + s0 + t16;);
+    });
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint32_t *os = hash;
     uint32_t x = hash[i] + hash_old[i];
-    os[i] = x;
-  }
+    os[i] = x;);
 }
 
 /* SNIPPET_END: sha256_update1 */
@@ -343,12 +353,13 @@ void Hacl_SHA2_Scalar32_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input)
   uint8_t *ib = input;
   uint8_t *rb = dst;
   uint32_t st[8U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint32_t *os = st;
     uint32_t x = Hacl_Impl_SHA2_Generic_h256[i];
-    os[i] = x;
-  }
+    os[i] = x;);
   uint32_t rem = input_len % (uint32_t)64U;
   uint64_t len_ = (uint64_t)input_len;
   uint32_t blocks0 = input_len / (uint32_t)64U;
@@ -397,10 +408,11 @@ void Hacl_SHA2_Scalar32_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input)
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)1U * (uint32_t)8U * (uint32_t)4U);
   uint8_t hbuf[(uint32_t)1U * (uint32_t)8U * (uint32_t)4U];
   memset(hbuf, 0U, (uint32_t)1U * (uint32_t)8U * (uint32_t)4U * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
-    store32_be(hbuf + i * (uint32_t)4U, st[i]);
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    store32_be(hbuf + i * (uint32_t)4U, st[i]););
   memcpy(rb, hbuf, (uint32_t)32U * sizeof (uint8_t));
 }
 
@@ -446,10 +458,14 @@ static inline void sha384_update1(uint8_t *block, uint64_t *hash)
   ws[14U] = u13;
   uint64_t u14 = load64_be(b + (uint32_t)120U);
   ws[15U] = u14;
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)5U; i0++)
-  {
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
+  KRML_MAYBE_FOR5(i0,
+    (uint32_t)0U,
+    (uint32_t)5U,
+    (uint32_t)1U,
+    KRML_MAYBE_FOR16(i,
+      (uint32_t)0U,
+      (uint32_t)16U,
+      (uint32_t)1U,
       uint64_t k_t = Hacl_Impl_SHA2_Generic_k384_512[(uint32_t)16U * i0 + i];
       uint64_t ws_t = ws[i];
       uint64_t a0 = hash[0U];
@@ -494,12 +510,13 @@ static inline void sha384_update1(uint8_t *block, uint64_t *hash)
       hash[4U] = e1;
       hash[5U] = f1;
       hash[6U] = g1;
-      hash[7U] = h12;
-    }
+      hash[7U] = h12;);
     if (i0 < (uint32_t)5U - (uint32_t)1U)
     {
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-      {
+      KRML_MAYBE_FOR16(i,
+        (uint32_t)0U,
+        (uint32_t)16U,
+        (uint32_t)1U,
         uint64_t t16 = ws[i];
         uint64_t t15 = ws[(i + (uint32_t)1U) % (uint32_t)16U];
         uint64_t t7 = ws[(i + (uint32_t)9U) % (uint32_t)16U];
@@ -512,16 +529,15 @@ static inline void sha384_update1(uint8_t *block, uint64_t *hash)
         s0 =
           (t15 << ((uint32_t)64U - (uint32_t)1U) | t15 >> (uint32_t)1U)
           ^ ((t15 << ((uint32_t)64U - (uint32_t)8U) | t15 >> (uint32_t)8U) ^ t15 >> (uint32_t)7U);
-        ws[i] = s1 + t7 + s0 + t16;
-      }
-    }
-  }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+        ws[i] = s1 + t7 + s0 + t16;);
+    });
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint64_t *os = hash;
     uint64_t x = hash[i] + hash_old[i];
-    os[i] = x;
-  }
+    os[i] = x;);
 }
 
 /* SNIPPET_END: sha384_update1 */
@@ -533,12 +549,13 @@ void Hacl_SHA2_Scalar32_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input)
   uint8_t *ib = input;
   uint8_t *rb = dst;
   uint64_t st[8U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint64_t *os = st;
     uint64_t x = Hacl_Impl_SHA2_Generic_h384[i];
-    os[i] = x;
-  }
+    os[i] = x;);
   uint32_t rem = input_len % (uint32_t)128U;
   FStar_UInt128_uint128 len_ = FStar_UInt128_uint64_to_uint128((uint64_t)input_len);
   uint32_t blocks0 = input_len / (uint32_t)128U;
@@ -587,10 +604,11 @@ void Hacl_SHA2_Scalar32_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input)
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)1U * (uint32_t)8U * (uint32_t)8U);
   uint8_t hbuf[(uint32_t)1U * (uint32_t)8U * (uint32_t)8U];
   memset(hbuf, 0U, (uint32_t)1U * (uint32_t)8U * (uint32_t)8U * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
-    store64_be(hbuf + i * (uint32_t)8U, st[i]);
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    store64_be(hbuf + i * (uint32_t)8U, st[i]););
   memcpy(rb, hbuf, (uint32_t)48U * sizeof (uint8_t));
 }
 
@@ -636,10 +654,14 @@ static inline void sha512_update1(uint8_t *block, uint64_t *hash)
   ws[14U] = u13;
   uint64_t u14 = load64_be(b + (uint32_t)120U);
   ws[15U] = u14;
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)5U; i0++)
-  {
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
+  KRML_MAYBE_FOR5(i0,
+    (uint32_t)0U,
+    (uint32_t)5U,
+    (uint32_t)1U,
+    KRML_MAYBE_FOR16(i,
+      (uint32_t)0U,
+      (uint32_t)16U,
+      (uint32_t)1U,
       uint64_t k_t = Hacl_Impl_SHA2_Generic_k384_512[(uint32_t)16U * i0 + i];
       uint64_t ws_t = ws[i];
       uint64_t a0 = hash[0U];
@@ -684,12 +706,13 @@ static inline void sha512_update1(uint8_t *block, uint64_t *hash)
       hash[4U] = e1;
       hash[5U] = f1;
       hash[6U] = g1;
-      hash[7U] = h12;
-    }
+      hash[7U] = h12;);
     if (i0 < (uint32_t)5U - (uint32_t)1U)
     {
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-      {
+      KRML_MAYBE_FOR16(i,
+        (uint32_t)0U,
+        (uint32_t)16U,
+        (uint32_t)1U,
         uint64_t t16 = ws[i];
         uint64_t t15 = ws[(i + (uint32_t)1U) % (uint32_t)16U];
         uint64_t t7 = ws[(i + (uint32_t)9U) % (uint32_t)16U];
@@ -702,16 +725,15 @@ static inline void sha512_update1(uint8_t *block, uint64_t *hash)
         s0 =
           (t15 << ((uint32_t)64U - (uint32_t)1U) | t15 >> (uint32_t)1U)
           ^ ((t15 << ((uint32_t)64U - (uint32_t)8U) | t15 >> (uint32_t)8U) ^ t15 >> (uint32_t)7U);
-        ws[i] = s1 + t7 + s0 + t16;
-      }
-    }
-  }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+        ws[i] = s1 + t7 + s0 + t16;);
+    });
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint64_t *os = hash;
     uint64_t x = hash[i] + hash_old[i];
-    os[i] = x;
-  }
+    os[i] = x;);
 }
 
 /* SNIPPET_END: sha512_update1 */
@@ -723,12 +745,13 @@ void Hacl_SHA2_Scalar32_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input)
   uint8_t *ib = input;
   uint8_t *rb = dst;
   uint64_t st[8U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint64_t *os = st;
     uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
-    os[i] = x;
-  }
+    os[i] = x;);
   uint32_t rem = input_len % (uint32_t)128U;
   FStar_UInt128_uint128 len_ = FStar_UInt128_uint64_to_uint128((uint64_t)input_len);
   uint32_t blocks0 = input_len / (uint32_t)128U;
@@ -777,10 +800,11 @@ void Hacl_SHA2_Scalar32_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input)
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)1U * (uint32_t)8U * (uint32_t)8U);
   uint8_t hbuf[(uint32_t)1U * (uint32_t)8U * (uint32_t)8U];
   memset(hbuf, 0U, (uint32_t)1U * (uint32_t)8U * (uint32_t)8U * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
-    store64_be(hbuf + i * (uint32_t)8U, st[i]);
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    store64_be(hbuf + i * (uint32_t)8U, st[i]););
   memcpy(rb, hbuf, (uint32_t)64U * sizeof (uint8_t));
 }
 

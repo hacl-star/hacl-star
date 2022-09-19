@@ -119,18 +119,16 @@ static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
   uint64_t f2;
   uint64_t f3;
   uint64_t f4;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-    {
-      uint64_t *os = tmp;
-      uint8_t *bj = b + i * (uint32_t)8U;
-      uint64_t u = load64_be(bj);
-      uint64_t r = u;
-      uint64_t x = r;
-      os[i] = x;
-    }
-  }
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = tmp;
+    uint8_t *bj = b + i * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;);
   s0 = tmp[3U];
   s1 = tmp[2U];
   s2 = tmp[1U];
@@ -205,13 +203,11 @@ static inline void Hacl_K256_Field_store_felem(uint8_t *b, uint64_t *f)
   tmp[1U] = f2;
   tmp[2U] = f1;
   tmp[3U] = f0;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-    {
-      store64_be(b + i * (uint32_t)8U, tmp[i]);
-    }
-  }
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store64_be(b + i * (uint32_t)8U, tmp[i]););
 }
 
 static inline void Hacl_K256_Field_fmul_small_num(uint64_t *out, uint64_t *f, uint64_t num)

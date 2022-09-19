@@ -457,18 +457,16 @@ void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i)
 
 void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o)
 {
-  {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-    {
-      uint64_t *os = o;
-      uint8_t *bj = i + i0 * (uint32_t)8U;
-      uint64_t u = load64_be(bj);
-      uint64_t r = u;
-      uint64_t x = r;
-      os[i0] = x;
-    }
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = o;
+    uint8_t *bj = i + i0 * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i0] = x;);
   Hacl_Impl_P256_LowLevel_changeEndian(o);
 }
 
@@ -731,19 +729,11 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t t[8U] = { 0U };
   uint64_t round2[8U] = { 0U };
   uint64_t round4[8U] = { 0U };
-  uint32_t size_0 = (uint32_t)0U;
-  uint32_t size_1 = (uint32_t)1U;
-  uint32_t size_2 = (uint32_t)2U;
-  uint32_t size_3 = (uint32_t)3U;
-  uint32_t size_4 = (uint32_t)4U;
-  uint32_t size_5 = (uint32_t)5U;
-  uint32_t size_6 = (uint32_t)6U;
-  uint32_t size_7 = (uint32_t)7U;
   uint64_t f0 = a[0U];
   uint64_t f10 = a[1U];
   uint64_t f20 = a[2U];
   uint64_t f30 = a[3U];
-  uint64_t *b0 = t + size_0;
+  uint64_t *b0 = t;
   uint64_t temp2 = (uint64_t)0U;
   uint64_t f110 = b[1U];
   uint64_t f210 = b[2U];
@@ -780,8 +770,8 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l2, h2, o30);
   temp00 = temp2;
   c0 = c30 + temp00;
-  t[size_4] = c0;
-  b1 = t + size_1;
+  t[4U] = c0;
+  b1 = t + (uint32_t)1U;
   {
     uint64_t temp3[4U] = { 0U };
     uint64_t temp10 = (uint64_t)0U;
@@ -824,8 +814,8 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
     c4 = c31 + temp01;
     c32 = add4(temp3, b1, b1);
     c13 = c4 + c32;
-    t[size_5] = c13;
-    b2 = t + size_2;
+    t[5U] = c13;
+    b2 = t + (uint32_t)2U;
     {
       uint64_t temp4[4U] = { 0U };
       uint64_t temp11 = (uint64_t)0U;
@@ -868,8 +858,8 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
       c5 = c33 + temp02;
       c34 = add4(temp4, b2, b2);
       c24 = c5 + c34;
-      t[size_6] = c24;
-      b3 = t + size_3;
+      t[6U] = c24;
+      b3 = t + (uint32_t)3U;
       {
         uint64_t temp5[4U] = { 0U };
         uint64_t temp1 = (uint64_t)0U;
@@ -911,7 +901,7 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
         c6 = c35 + temp03;
         c36 = add4(temp5, b3, b3);
         c37 = c6 + c36;
-        t[size_7] = c37;
+        t[7U] = c37;
         {
           uint64_t tempRound[8U] = { 0U };
           uint64_t t20[8U] = { 0U };
@@ -2155,19 +2145,11 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
   uint64_t round4[8U] = { 0U };
   uint64_t prime_p256_orderBuffer[4U] = { 0U };
   uint64_t k0 = (uint64_t)14758798090332847183U;
-  uint32_t size_0 = (uint32_t)0U;
-  uint32_t size_1 = (uint32_t)1U;
-  uint32_t size_2 = (uint32_t)2U;
-  uint32_t size_3 = (uint32_t)3U;
-  uint32_t size_4 = (uint32_t)4U;
-  uint32_t size_5 = (uint32_t)5U;
-  uint32_t size_6 = (uint32_t)6U;
-  uint32_t size_7 = (uint32_t)7U;
   uint64_t f0 = a[0U];
   uint64_t f1 = a[1U];
   uint64_t f2 = a[2U];
   uint64_t f3 = a[3U];
-  uint64_t *b0 = t + size_0;
+  uint64_t *b0 = t;
   uint64_t temp2 = (uint64_t)0U;
   uint64_t f110 = b[1U];
   uint64_t f210 = b[2U];
@@ -2204,8 +2186,8 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
   c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l2, h2, o30);
   temp00 = temp2;
   c0 = c30 + temp00;
-  t[size_4] = c0;
-  b1 = t + size_1;
+  t[4U] = c0;
+  b1 = t + (uint32_t)1U;
   {
     uint64_t temp3[4U] = { 0U };
     uint64_t temp10 = (uint64_t)0U;
@@ -2248,8 +2230,8 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
     c4 = c31 + temp01;
     c32 = add4(temp3, b1, b1);
     c1 = c4 + c32;
-    t[size_5] = c1;
-    b2 = t + size_2;
+    t[5U] = c1;
+    b2 = t + (uint32_t)2U;
     {
       uint64_t temp4[4U] = { 0U };
       uint64_t temp11 = (uint64_t)0U;
@@ -2292,8 +2274,8 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
       c5 = c33 + temp02;
       c34 = add4(temp4, b2, b2);
       c2 = c5 + c34;
-      t[size_6] = c2;
-      b3 = t + size_3;
+      t[6U] = c2;
+      b3 = t + (uint32_t)3U;
       {
         uint64_t temp[4U] = { 0U };
         uint64_t temp1 = (uint64_t)0U;
@@ -2335,7 +2317,7 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
         c = c35 + temp0;
         c36 = add4(temp, b3, b3);
         c3 = c + c36;
-        t[size_7] = c3;
+        t[7U] = c3;
         montgomery_multiplication_round_twice(t, round2, k0);
         montgomery_multiplication_round_twice(round2, round4, k0);
         reduction_prime_2prime_with_carry(round4, result);

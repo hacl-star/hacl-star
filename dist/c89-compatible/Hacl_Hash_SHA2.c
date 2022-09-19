@@ -220,15 +220,13 @@ static void update_224(uint32_t *hash, uint8_t *block)
       hash1[7U] = g0;
     }
   }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint32_t xi = hash[i];
-      uint32_t yi = hash1[i];
-      hash[i] = xi + yi;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint32_t xi = hash[i];
+    uint32_t yi = hash1[i];
+    hash[i] = xi + yi;);
 }
 
 static void update_256(uint32_t *hash, uint8_t *block)
@@ -306,15 +304,13 @@ static void update_256(uint32_t *hash, uint8_t *block)
       hash1[7U] = g0;
     }
   }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint32_t xi = hash[i];
-      uint32_t yi = hash1[i];
-      hash[i] = xi + yi;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint32_t xi = hash[i];
+    uint32_t yi = hash1[i];
+    hash[i] = xi + yi;);
 }
 
 void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
@@ -392,15 +388,13 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
       hash1[7U] = g0;
     }
   }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint64_t xi = hash[i];
-      uint64_t yi = hash1[i];
-      hash[i] = xi + yi;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint64_t xi = hash[i];
+    uint64_t yi = hash1[i];
+    hash[i] = xi + yi;);
 }
 
 void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block)
@@ -478,15 +472,13 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block)
       hash1[7U] = g0;
     }
   }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint64_t xi = hash[i];
-      uint64_t yi = hash1[i];
-      hash[i] = xi + yi;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint64_t xi = hash[i];
+    uint64_t yi = hash1[i];
+    hash[i] = xi + yi;);
 }
 
 static void pad_224(uint64_t len, uint8_t *dst)
