@@ -124,7 +124,7 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
-P256_BUNDLE=-bundle Hacl.P256=Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*[rename=Hacl_P256]
+P256_BUNDLE= -bundle Hacl.P256=Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.ECDSA.*,Hacl.Impl.EC.*,Hacl.Impl.SolinasReduction.*,Hacl.Impl.P256.*,Hacl.Impl.P384.*,Hacl.Impl.P521.*[rename=Hacl_P256]
 K256_BUNDLE=-bundle Hacl.K256.Field,Hacl.Impl.K256.Finv[rename=Hacl_Bignum_K256] -static-header Hacl.K256.Field,Hacl.Impl.K256.Finv \
 	-bundle Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*
 FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak' -static-header Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Keccak
