@@ -26,7 +26,7 @@ let key_and_data_fits (a: hash_alg): Lemma
   assert_norm (8 * 16 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
-inline_for_extraction
+inline_for_extraction noextract
 let compute_st (a: hash_alg) =
   tag: B.buffer uint8 {B.length tag == hash_length a} ->
   key: B.buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->

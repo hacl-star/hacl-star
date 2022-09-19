@@ -808,6 +808,7 @@ uint64_t
           {
             return pkey2;
           }
+          KRML_HOST_FREE(pkey2);
           return NULL;
         }
       }
@@ -908,6 +909,7 @@ uint64_t
               {
                 return skey2;
               }
+              KRML_HOST_FREE(skey2);
               return NULL;
             }
           }

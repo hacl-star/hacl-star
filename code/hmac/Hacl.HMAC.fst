@@ -168,7 +168,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
   (**) let init_v : Ghost.erased (init_t a) = Spec.Agile.Hash.init a in
   (**) assert ((D.as_seq h1 s, ev) == Ghost.reveal init_v);
   let ev =
-    if len =. 0ul then
+    if len = 0ul then
       begin
       let ev = update_last s ev (zero_to_len a) key (D.block_len a) in
       (**) let h2 = ST.get () in

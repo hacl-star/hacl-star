@@ -48,14 +48,6 @@ static bool cpu_has_rdrand[1U] = { false };
 
 static bool cpu_has_avx512[1U] = { false };
 
-static bool user_wants_hacl[1U] = { true };
-
-static bool user_wants_vale[1U] = { true };
-
-static bool user_wants_openssl[1U] = { true };
-
-static bool user_wants_bcrypt[1U] = { false };
-
 bool EverCrypt_AutoConfig2_has_shaext()
 {
   return cpu_has_shaext[0U];
@@ -111,28 +103,6 @@ bool EverCrypt_AutoConfig2_has_avx512()
   return cpu_has_avx512[0U];
 }
 
-KRML_DEPRECATED("")
-
-bool EverCrypt_AutoConfig2_wants_vale()
-{
-  return user_wants_vale[0U];
-}
-
-bool EverCrypt_AutoConfig2_wants_hacl()
-{
-  return user_wants_hacl[0U];
-}
-
-bool EverCrypt_AutoConfig2_wants_openssl()
-{
-  return user_wants_openssl[0U];
-}
-
-bool EverCrypt_AutoConfig2_wants_bcrypt()
-{
-  return user_wants_bcrypt[0U];
-}
-
 void EverCrypt_AutoConfig2_recall()
 {
 
@@ -141,102 +111,94 @@ void EverCrypt_AutoConfig2_recall()
 void EverCrypt_AutoConfig2_init()
 {
   #if HACL_CAN_COMPILE_VALE
-  uint64_t scrut = check_aesni();
-  if (scrut != (uint64_t)0U)
+  uint64_t scrut0 = check_aesni();
+  uint64_t scrut1;
+  uint64_t scrut2;
+  uint64_t scrut3;
+  uint64_t scrut4;
+  uint64_t scrut5;
+  uint64_t scrut6;
+  uint64_t scrut7;
+  uint64_t scrut;
+  if (scrut0 != (uint64_t)0U)
   {
     cpu_has_aesni[0U] = true;
     cpu_has_pclmulqdq[0U] = true;
   }
+  scrut1 = check_sha();
+  if (scrut1 != (uint64_t)0U)
   {
-    uint64_t scrut0 = check_sha();
-    if (scrut0 != (uint64_t)0U)
+    cpu_has_shaext[0U] = true;
+  }
+  scrut2 = check_adx_bmi2();
+  if (scrut2 != (uint64_t)0U)
+  {
+    cpu_has_bmi2[0U] = true;
+    cpu_has_adx[0U] = true;
+  }
+  scrut3 = check_avx();
+  if (scrut3 != (uint64_t)0U)
+  {
+    uint64_t scrut8 = check_osxsave();
+    if (scrut8 != (uint64_t)0U)
     {
-      cpu_has_shaext[0U] = true;
-    }
-    {
-      uint64_t scrut1 = check_adx_bmi2();
-      if (scrut1 != (uint64_t)0U)
+      uint64_t scrut9 = check_avx_xcr0();
+      if (scrut9 != (uint64_t)0U)
       {
-        cpu_has_bmi2[0U] = true;
-        cpu_has_adx[0U] = true;
-      }
-      {
-        uint64_t scrut2 = check_avx();
-        if (scrut2 != (uint64_t)0U)
-        {
-          uint64_t scrut3 = check_osxsave();
-          if (scrut3 != (uint64_t)0U)
-          {
-            uint64_t scrut4 = check_avx_xcr0();
-            if (scrut4 != (uint64_t)0U)
-            {
-              cpu_has_avx[0U] = true;
-            }
-          }
-        }
-        {
-          uint64_t scrut3 = check_avx2();
-          if (scrut3 != (uint64_t)0U)
-          {
-            uint64_t scrut4 = check_osxsave();
-            if (scrut4 != (uint64_t)0U)
-            {
-              uint64_t scrut5 = check_avx_xcr0();
-              if (scrut5 != (uint64_t)0U)
-              {
-                cpu_has_avx2[0U] = true;
-              }
-            }
-          }
-          {
-            uint64_t scrut4 = check_sse();
-            if (scrut4 != (uint64_t)0U)
-            {
-              cpu_has_sse[0U] = true;
-            }
-            {
-              uint64_t scrut5 = check_movbe();
-              if (scrut5 != (uint64_t)0U)
-              {
-                cpu_has_movbe[0U] = true;
-              }
-              {
-                uint64_t scrut6 = check_rdrand();
-                if (scrut6 != (uint64_t)0U)
-                {
-                  cpu_has_rdrand[0U] = true;
-                }
-                {
-                  uint64_t scrut7 = check_avx512();
-                  if (scrut7 != (uint64_t)0U)
-                  {
-                    uint64_t scrut8 = check_osxsave();
-                    if (scrut8 != (uint64_t)0U)
-                    {
-                      uint64_t scrut9 = check_avx_xcr0();
-                      if (scrut9 != (uint64_t)0U)
-                      {
-                        uint64_t scrut10 = check_avx512_xcr0();
-                        if (scrut10 != (uint64_t)0U)
-                        {
-                          cpu_has_avx512[0U] = true;
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        cpu_has_avx[0U] = true;
       }
     }
   }
+  scrut4 = check_avx2();
+  if (scrut4 != (uint64_t)0U)
+  {
+    uint64_t scrut8 = check_osxsave();
+    if (scrut8 != (uint64_t)0U)
+    {
+      uint64_t scrut9 = check_avx_xcr0();
+      if (scrut9 != (uint64_t)0U)
+      {
+        cpu_has_avx2[0U] = true;
+      }
+    }
+  }
+  scrut5 = check_sse();
+  if (scrut5 != (uint64_t)0U)
+  {
+    cpu_has_sse[0U] = true;
+  }
+  scrut6 = check_movbe();
+  if (scrut6 != (uint64_t)0U)
+  {
+    cpu_has_movbe[0U] = true;
+  }
+  scrut7 = check_rdrand();
+  if (scrut7 != (uint64_t)0U)
+  {
+    cpu_has_rdrand[0U] = true;
+  }
+  scrut = check_avx512();
+  if (scrut != (uint64_t)0U)
+  {
+    uint64_t scrut8 = check_osxsave();
+    if (scrut8 != (uint64_t)0U)
+    {
+      uint64_t scrut9 = check_avx_xcr0();
+      if (scrut9 != (uint64_t)0U)
+      {
+        uint64_t scrut10 = check_avx512_xcr0();
+        if (scrut10 != (uint64_t)0U)
+        {
+          cpu_has_avx512[0U] = true;
+          return;
+        }
+        return;
+      }
+      return;
+    }
+    return;
+  }
   #endif
-  user_wants_hacl[0U] = true;
-  user_wants_vale[0U] = true;
-  user_wants_bcrypt[0U] = false;
-  user_wants_openssl[0U] = true;
 }
 
 void EverCrypt_AutoConfig2_disable_avx2()
@@ -292,26 +254,6 @@ void EverCrypt_AutoConfig2_disable_rdrand()
 void EverCrypt_AutoConfig2_disable_avx512()
 {
   cpu_has_avx512[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_vale()
-{
-  user_wants_vale[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_hacl()
-{
-  user_wants_hacl[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_openssl()
-{
-  user_wants_openssl[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_bcrypt()
-{
-  user_wants_bcrypt[0U] = false;
 }
 
 bool EverCrypt_AutoConfig2_has_vec128()

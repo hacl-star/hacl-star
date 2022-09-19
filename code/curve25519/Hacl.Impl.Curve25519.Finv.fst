@@ -116,11 +116,8 @@ let fsquare_times #s o inp tmp n =
   (fun i ->
     let h2 = ST.get () in
     fsqr_s #s o o tmp;
-    S.lemma_pow_one (feval h2 o);
-    S.lemma_pow_add (feval h2 o) 1 1;
-    S.lemma_pow_mul (feval #s h0 inp) (pow2 (v i + 1)) (pow2 1);
-    Math.Lemmas.pow2_plus (v i + 1) 1;
-    assert (pow2 (v i + 1) * pow2 1 = pow2 (v i + 2)))
+    S.lemma_pow_add (feval #s h0 inp) (pow2 (v i + 1)) (pow2 (v i + 1));
+    Math.Lemmas.pow2_double_sum (v i + 1))
 
 
 val finv1:

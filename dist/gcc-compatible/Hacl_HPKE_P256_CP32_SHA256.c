@@ -94,14 +94,9 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseS(
     {
       res2 = (uint32_t)1U;
     }
-    uint8_t o_kemcontext[130U];
+    uint8_t o_kemcontext[130U] = { 0U };
     if (res2 == (uint32_t)0U)
     {
-      uint8_t init = (uint8_t)0U;
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)130U; i++)
-      {
-        o_kemcontext[i] = init;
-      }
       memcpy(o_kemcontext, o_pkE, (uint32_t)65U * sizeof (uint8_t));
       uint8_t *o_pkRm = o_kemcontext + (uint32_t)65U;
       uint8_t *o_pkR = o_pkRm + (uint32_t)1U;
@@ -395,14 +390,9 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseR(
   {
     res1 = (uint32_t)1U;
   }
-  uint8_t shared[32U];
+  uint8_t shared[32U] = { 0U };
   if (res1 == (uint32_t)0U)
   {
-    uint8_t init = (uint8_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
-    {
-      shared[i] = init;
-    }
     uint8_t *pkE = enc + (uint32_t)1U;
     uint8_t dh[64U] = { 0U };
     uint8_t tmp0[64U] = { 0U };
@@ -434,15 +424,10 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseR(
     {
       res11 = (uint32_t)1U;
     }
-    uint8_t kemcontext[130U];
     uint32_t res20;
+    uint8_t kemcontext[130U] = { 0U };
     if (res11 == (uint32_t)0U)
     {
-      uint8_t init = (uint8_t)0U;
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)130U; i++)
-      {
-        kemcontext[i] = init;
-      }
       uint8_t *pkRm = kemcontext + (uint32_t)65U;
       uint8_t *pkR1 = pkRm + (uint32_t)1U;
       uint64_t tempBuffer[100U] = { 0U };

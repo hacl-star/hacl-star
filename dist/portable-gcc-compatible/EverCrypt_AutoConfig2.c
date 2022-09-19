@@ -92,30 +92,6 @@ static bool cpu_has_avx512[1U] = { false };
 
 /* SNIPPET_END: cpu_has_avx512 */
 
-/* SNIPPET_START: user_wants_hacl */
-
-static bool user_wants_hacl[1U] = { true };
-
-/* SNIPPET_END: user_wants_hacl */
-
-/* SNIPPET_START: user_wants_vale */
-
-static bool user_wants_vale[1U] = { true };
-
-/* SNIPPET_END: user_wants_vale */
-
-/* SNIPPET_START: user_wants_openssl */
-
-static bool user_wants_openssl[1U] = { true };
-
-/* SNIPPET_END: user_wants_openssl */
-
-/* SNIPPET_START: user_wants_bcrypt */
-
-static bool user_wants_bcrypt[1U] = { false };
-
-/* SNIPPET_END: user_wants_bcrypt */
-
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_shaext */
 
 bool EverCrypt_AutoConfig2_has_shaext()
@@ -215,44 +191,6 @@ bool EverCrypt_AutoConfig2_has_avx512()
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_avx512 */
 
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_vale */
-
-KRML_DEPRECATED("")
-
-bool EverCrypt_AutoConfig2_wants_vale()
-{
-  return user_wants_vale[0U];
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_vale */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_hacl */
-
-bool EverCrypt_AutoConfig2_wants_hacl()
-{
-  return user_wants_hacl[0U];
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_hacl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_openssl */
-
-bool EverCrypt_AutoConfig2_wants_openssl()
-{
-  return user_wants_openssl[0U];
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_openssl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_bcrypt */
-
-bool EverCrypt_AutoConfig2_wants_bcrypt()
-{
-  return user_wants_bcrypt[0U];
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_bcrypt */
-
 /* SNIPPET_START: EverCrypt_AutoConfig2_recall */
 
 void EverCrypt_AutoConfig2_recall()
@@ -338,15 +276,15 @@ void EverCrypt_AutoConfig2_init()
         if (scrut10 != (uint64_t)0U)
         {
           cpu_has_avx512[0U] = true;
+          return;
         }
+        return;
       }
+      return;
     }
+    return;
   }
   #endif
-  user_wants_hacl[0U] = true;
-  user_wants_vale[0U] = true;
-  user_wants_bcrypt[0U] = false;
-  user_wants_openssl[0U] = true;
 }
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_init */
@@ -449,42 +387,6 @@ void EverCrypt_AutoConfig2_disable_avx512()
 }
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx512 */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_vale */
-
-void EverCrypt_AutoConfig2_disable_vale()
-{
-  user_wants_vale[0U] = false;
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_vale */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_hacl */
-
-void EverCrypt_AutoConfig2_disable_hacl()
-{
-  user_wants_hacl[0U] = false;
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_hacl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_openssl */
-
-void EverCrypt_AutoConfig2_disable_openssl()
-{
-  user_wants_openssl[0U] = false;
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_openssl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_bcrypt */
-
-void EverCrypt_AutoConfig2_disable_bcrypt()
-{
-  user_wants_bcrypt[0U] = false;
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_bcrypt */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_vec128 */
 

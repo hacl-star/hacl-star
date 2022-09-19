@@ -312,6 +312,7 @@ let new_rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     not (B.g_is_null pkey) ==> (
       LS.pkey_len_pre t (v modBits) (v eBits) /\
       B.(fresh_loc (loc_buffer pkey) h0 h1) /\
+      B.freeable pkey /\
       B.(loc_includes (loc_region_only false r) (loc_buffer pkey)) /\
      (let bits = size (bits t) in
       let nLen = blocks modBits bits in
@@ -356,7 +357,9 @@ let new_rsapss_load_pkey #t ke modBits kc r eBits nb eb =
       let h2 = ST.get () in
       B.(modifies_only_not_unused_in loc_none h0 h2);
       LS.rsapss_load_pkey_lemma #t (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb);
-      if b then pkey else B.null
+      if b then pkey else begin
+        B.free (pkey <: buffer (limb t));
+        B.null end
 
 
 inline_for_extraction noextract
@@ -376,6 +379,7 @@ let new_rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     not (B.g_is_null skey) ==> (
       LS.skey_len_pre t (v modBits) (v eBits) (v dBits) /\
       B.(fresh_loc (loc_buffer skey) h0 h1) /\
+      B.freeable skey /\
       B.(loc_includes (loc_region_only false r) (loc_buffer skey)) /\
      (let bits = size (bits t) in
       let nLen = blocks modBits bits in
@@ -426,4 +430,7 @@ let new_rsapss_load_skey #t ke modBits kc r eBits dBits nb eb db =
       B.(modifies_only_not_unused_in loc_none h0 h2);
       LS.rsapss_load_skey_lemma #t (v modBits) (v eBits) (v dBits)
 	(as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db);
-      if b then skey else B.null end
+      if b then skey else begin
+        B.free (skey <: buffer (limb t));
+        B.null end
+  end

@@ -26,6 +26,7 @@
 
 
 
+<<<<<<< HEAD
 #define AES128_OPENSSL 0
 #define AES128_BCRYPT 1
 #define AES128_VALE 2
@@ -169,6 +170,8 @@ EverCrypt__ecdh_state;
 
 typedef EverCrypt__ecdh_state EverCrypt_ecdh_state_s;
 
+=======
+>>>>>>> main
 typedef struct EverCrypt_AEAD_state_s_s
 {
   Spec_Cipher_Expansion_impl impl;
