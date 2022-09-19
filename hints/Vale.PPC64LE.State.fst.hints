@@ -1,0 +1,145 @@
+[
+  "”]d¯çuì˙\u0012˛rÚ\\◊}Ù",
+  [
+    [
+      "Vale.PPC64LE.State.same_heap_types",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "a2abd81e22e7f0b5edcd92b1a76ccffe"
+    ],
+    [
+      "Vale.PPC64LE.State.coerce",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_754b00004f4a881ff74d076ab276dfe1"
+      ],
+      0,
+      "560706c46eaa01d4b49b2c5f50fe8169"
+    ],
+    [
+      "Vale.PPC64LE.State.eval_mem",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "a19d8961025b9622c85f8ff6eb1df0a7"
+    ],
+    [
+      "Vale.PPC64LE.State.eval_cmp_opr",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.PPC64LE.Machine_s.CImm",
+        "disc_equation_Vale.PPC64LE.Machine_s.CReg",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.cmp_opr",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "42eaba59b3a2474fcc2c8bbfe7f4bf27"
+    ],
+    [
+      "Vale.PPC64LE.State.update_reg",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Vale.PPC64LE.Machine_s.reg",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "41ba85b23024dbcc97e2894db87d0ee4"
+    ],
+    [
+      "Vale.PPC64LE.State.update_vec",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Vale.PPC64LE.Machine_s.vec",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "4ecac87909e8f815553db64033b7455d"
+    ],
+    [
+      "Vale.PPC64LE.State.valid_maddr",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "22ae0bc029c6797c9f703c6a21800af4"
+    ],
+    [
+      "Vale.PPC64LE.State.valid_mem128",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "d0be0f9cf28d7812013fd38b2a7775d3"
+    ],
+    [
+      "Vale.PPC64LE.State.state_eta",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "6beb82cf576276d77acf3880d08ed150"
+    ],
+    [
+      "Vale.PPC64LE.State.state_eq",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "357fc6db8776d04e74530f2b06941463"
+    ],
+    [
+      "Vale.PPC64LE.State.use_machine_state_equal",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.PPC64LE.Machine_s.regs_t",
+        "equation_Vale.PPC64LE.Regs.t",
+        "equation_Vale.PPC64LE.State.machine_state_eq",
+        "equation_Vale.PPC64LE.State.machine_state_equal",
+        "equation_Vale.PPC64LE.Vecs.t",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
+        "lemma_Vale.PPC64LE.Regs.lemma_equal_elim",
+        "lemma_Vale.PPC64LE.Vecs.lemma_equal_elim",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_cr0",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_heap",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_stack",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_stackTaint",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ok",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_regs",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_vecs",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_xer",
+        "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__regs",
+        "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__vecs"
+      ],
+      0,
+      "c7c0d4ec8a1ebdd47e016b586a75cdbd"
+    ]
+  ]
+]

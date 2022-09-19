@@ -1,0 +1,233 @@
+include "Vale.PPC64LE.InsBasic.vaf"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Arch.HeapTypes_s"
+include{:fstar}{:open} "Vale.Arch.HeapImpl"
+include{:fstar}{:open} "Vale.PPC64LE.Memory"
+include{:fstar}{:open} "Vale.PPC64LE.Memory_Sems"
+include{:fstar}{:open} "Vale.Lib.Seqs"
+include{:fstar}{:open Seq} "FStar.Seq.Base"
+
+module Vale.PPC64LE.InsMem
+
+#verbatim{:interface}
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.QuickCode
+open FStar.Seq
+open Vale.Def.Types_s
+open Vale.Arch.HeapTypes_s
+open Vale.Arch.HeapImpl
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.InsBasic
+open Vale.Lib.Seqs
+#endverbatim
+
+#verbatim
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.State
+open Vale.PPC64LE.StateLemmas
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.Arch.Heap
+open Vale.Arch.HeapImpl
+module S = Vale.PPC64LE.Semantics_s
+
+friend Vale.PPC64LE.Decls
+#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
+#endverbatim
+
+procedure Mem64_in(in address:reg_opr, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint)
+    returns(o:opr)
+    {:operand}
+    extern;
+
+procedure Mem64_lemma(ghost h:heaplet_id, ghost address:reg_opr, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
+    {:public}
+    {:quick exportOnly}
+    {:typecheck false}
+    lets
+        heap_h := va_get_mem_heaplet(h, this);
+    reads
+        mem; memLayout;
+    requires
+        valid_src_addr(heap_h, b, index);
+        valid_layout_buffer(b, memLayout, heap_h, false);
+        valid_taint_buf64(b, heap_h, memLayout.vl_taint, t);
+        eval_reg(address, this) + offset == buffer_addr(b, heap_h) + 8 * index;
+    ensures
+        valid_mem_addr(va_opr_code_Mem64(h, address, offset, t), this);
+        load_mem64(buffer_addr(b, heap_h) + 8 * index, mem) == buffer_read(b, index, heap_h);
+{
+    lemma_opr_Mem64(h, this, address, offset, b, index, t);
+}
+
+#verbatim
+let create_heaplets_this (buffers:list buffer_info) (s:state) : GTot state =
+  {s with ms_heap = Vale.PPC64LE.Memory_Sems.create_heaplets buffers s.ms_heap}
+
+let destroy_heaplets_this (s:state) : Ghost state
+  (requires state_inv s)
+  (ensures fun _ -> True)
+  =
+  {s with ms_heap = Vale.PPC64LE.Memory_Sems.destroy_heaplets s.ms_heap}
+#endverbatim
+
+#verbatim{:interface}
+let buffer64_write (b:buffer64) (i:int) (v:nat64) (h:vale_heap) : Ghost vale_heap
+  (requires buffer_readable h b /\ buffer_writeable b)
+  (ensures fun _ -> True)
+  =
+  buffer_write b i v h
+
+let heaplet_id_is_none (h:vale_heap) =
+  get_heaplet_id h == None
+
+let heaplet_id_is_some (h:vale_heap) (i:heaplet_id) =
+  get_heaplet_id h == Some i
+
+unfold let norm_list (p:prop) : prop =
+  norm [zeta; iota; delta_only [`%list_to_seq_post]] p
+
+irreducible let norm_loc_attr = ()
+
+unfold let norm_loc (l:loc) : loc =
+  norm [zeta; iota; delta_only [`%loc_mutable_buffers]; delta_attr [`%norm_loc_attr]] l
+
+let trigger_create_heaplet (h:heaplet_id) = True
+
+[@norm_loc_attr]
+unfold let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:mutability) : buffer_info =
+  Mkbuffer_info TUInt64 b hid t mut
+
+[@norm_loc_attr]
+unfold let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) : buffer_info =
+  Mkbuffer_info TUInt128 b hid t mut
+
+let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
+  forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
+    let Mkbuffer_info t b hid _ mut = Seq.index bs i in
+    trigger_create_heaplet hid /\
+    valid_layout_buffer_id t b layout (Some hid) false /\
+    valid_layout_buffer_id t b layout (Some hid) (mut = Mutable))
+#endverbatim
+
+function create_heaplets_this(buffers:list(buffer_info), s:state):state extern;
+function destroy_heaplets_this(s:state):state extern;
+function buffer64_write(b:buffer64, i:int, v:nat64, h:vale_heap):vale_heap extern;
+function heaplet_id_is_none(h:vale_heap):prop extern;
+function heaplet_id_is_some(h:vale_heap, heaplet_id:int):prop extern;
+function norm_list(p:prop):prop extern;
+function norm_loc(l:loc):loc extern;
+function trigger_create_heaplet(h:heaplet_id):prop extern;
+function declare_buffer64(b:buffer64, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
+function declare_buffer128(b:buffer128, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
+function create_post(layout:vale_heap_layout, bs:Seq.seq(buffer_info)):prop extern;
+
+// For efficiency, when calling CreateHeaplets, write 'buffers' so that
+// the mutable buffers are last and are in the same order as in the modifies location.
+// Write the modifies location as:
+//   loc_union (loc_buffer b1) (loc_union (loc_buffer b2) (loc_union (... (loc_buffer bn)...).
+// CreateHeaplets and DestroyHeaplets will ensure a modifies of exactly this form.
+// Matching the modifies exactly will minimize reliance on the loc_includes lemmas in Vale.X64.Memory.
+procedure CreateHeaplets(ghost buffers:list(buffer_info))
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Ghost())}
+    lets
+        bs := list_to_seq(buffers);
+    reads
+        mem;
+    modifies
+        memLayout;
+    requires
+        is_initial_heap(memLayout, mem);
+        norm_list(list_to_seq_post(buffers, bs, 0)) ==> init_heaplets_req(mem, bs);
+    ensures
+        norm_list(list_to_seq_post(buffers, bs, 0));
+        layout_modifies_loc(memLayout.vl_inner) == norm_loc(loc_mutable_buffers(buffers));
+        layout_old_heap(memLayout.vl_inner) == old(mem);
+        layout_buffers(memLayout.vl_inner) == bs;
+        layout_heaplets_initialized(memLayout.vl_inner);
+        memLayout.vl_taint == old(memLayout.vl_taint);
+        create_post(memLayout, bs);
+        heaplet_id_is_none(mem);
+        forall(h:heaplet_id){trigger_create_heaplet(h)} trigger_create_heaplet(h) ==>
+            heaplet_id_is_some(va_get_mem_heaplet(h, this), h) &&
+            heaps_match(bs, memLayout.vl_taint, mem, va_get_mem_heaplet(h, this), h);
+        forall(i:nat){Seq.index(bs, i)} i < Seq.length(bs) ==>
+            buffer_info_has_id(bs, i, Seq.index(bs, i).bi_heaplet);
+{
+    lemma_list_to_seq(buffers);
+    this := create_heaplets_this(buffers, this);
+    lemma_create_heaplets(buffers, from_heap_impl(old(this).ms_heap));
+    use_machine_state_equal();
+}
+
+procedure DestroyHeaplets()
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Ghost())}
+    reads
+        mem;
+    modifies
+        memLayout;
+    requires
+        layout_heaplets_initialized(memLayout.vl_inner);
+    ensures
+        modifies_mem(layout_modifies_loc(old(memLayout).vl_inner), layout_old_heap(old(memLayout).vl_inner), mem);
+        memLayout.vl_taint == old(memLayout.vl_taint);
+        heaplet_id_is_none(mem);
+        forall(h:heaplet_id){trigger_create_heaplet(h)} trigger_create_heaplet(h) ==>
+            heaps_match(layout_buffers(old(memLayout).vl_inner), memLayout.vl_taint, mem, va_get_mem_heaplet(h, this), h);
+{
+    this := destroy_heaplets_this(this);
+    lemma_destroy_heaplets(from_heap_impl(old(this).ms_heap));
+    use_machine_state_equal();
+}
+
+procedure MemLoad64(in h:heaplet, out dst:reg_opr, in base:reg_opr, inline offset:int, inline t:taint,
+        ghost b:buffer64, ghost index:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Load64(dst, base, offset))}
+    reads
+        memLayout;
+    requires
+        valid_addr_mem(@base, offset, this);
+        valid_src_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, false);
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
+        base + offset == buffer_addr(b, h) + 8 * index;
+    ensures
+        dst == buffer64_read(b, index, h);
+{
+    low_lemma_load_mem64_full(b, #nat(index), from_heap_impl(this.ms_heap), t, @h);
+}
+
+procedure MemStore64(inout h:heaplet, in src:reg_opr, in base:reg_opr, inline offset:int, inline t:taint,
+        ghost b:buffer64, ghost index:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Store64(src, base, offset))}
+    reads
+        memLayout;
+    modifies
+        mem;
+    requires
+        valid_addr_mem(@base, offset, this);
+        valid_dst_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, true);
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
+        base + offset == buffer_addr(b, h) + 8 * index;
+    ensures
+        h == old(buffer64_write(b, index, src, h));
+{
+    low_lemma_store_mem64_full(b, #nat(index), old(src), from_heap_impl(old(this).ms_heap), t, @h);
+}

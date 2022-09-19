@@ -1,0 +1,76 @@
+[
+  ";b\u007fuíú;ç{\u0012ÿ³wòM”",
+  [
+    [
+      "Vale.PPC64LE.StateLemmas.lemma_valid_mem_addr64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "function_token_typing_Vale.PPC64LE.State.same_heap_types",
+        "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
+      ],
+      0,
+      "403771c63658864f35ab81090e5be9c3"
+    ],
+    [
+      "Vale.PPC64LE.StateLemmas.lemma_valid_mem_addr128",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "function_token_typing_Vale.PPC64LE.State.same_heap_types",
+        "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
+      ],
+      0,
+      "f85c4b7c8b5334dd57877e69e73634eb"
+    ],
+    [
+      "Vale.PPC64LE.StateLemmas.lemma_load_mem_get64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "function_token_typing_Vale.PPC64LE.State.same_heap_types",
+        "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
+      ],
+      0,
+      "c5f827d59ecf5cc80574f3bf19b308bd"
+    ],
+    [
+      "Vale.PPC64LE.StateLemmas.lemma_load_mem_get128",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "function_token_typing_Vale.PPC64LE.State.same_heap_types",
+        "refinement_interpretation_Tm_refine_1c27afc834d559c90ed8939585279b1e"
+      ],
+      0,
+      "b51e5722def774f7afde311adcdfdd04"
+    ],
+    [
+      "Vale.PPC64LE.StateLemmas.lemma_load_buffer_read64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt64",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.PPC64LE.Memory.base_typ_as_vale_type",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "4dace5752c78191e9bc2da07b7baf5d6"
+    ]
+  ]
+]

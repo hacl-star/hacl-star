@@ -1,0 +1,131 @@
+include "Vale.PPC64LE.InsBasic.vaf"
+include "Vale.PPC64LE.InsVector.vaf"
+include{:fstar}{:open} "Vale.Def.Words.Seq_s"
+include{:fstar}{:open} "Vale.Def.Words.Two_s"
+include{:fstar}{:open} "Vale.Def.Words.Four_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.Memory"
+include{:fstar}{:open} "Vale.PPC64LE.Stack_i"
+include{:fstar}{:open} "Vale.PPC64LE.Memory_Sems"
+include{:fstar}{:open} "Vale.PPC64LE.Stack_Sems"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+
+module Vale.PPC64LE.InsStack
+
+#verbatim{:interface}
+open Vale.Def.Words_s
+open Vale.Def.Words.Seq_s
+open Vale.Def.Words.Two_s
+open Vale.Def.Words.Four_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.Stack_i
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.Stack_Sems
+#endverbatim
+
+#verbatim
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.Stack_i
+open Vale.PPC64LE.State
+open Vale.PPC64LE.StateLemmas
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.Stack_Sems
+module S = Vale.PPC64LE.Semantics_s
+module P = Vale.PPC64LE.Print_s
+
+friend Vale.PPC64LE.Decls
+friend Vale.PPC64LE.Stack_i
+friend Vale.PPC64LE.Stack_Sems
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 200"
+#endverbatim
+
+procedure Stack_in(in base:reg_opr, inline offset:int, inline t:taint) returns(o:opr)
+    {:operand}
+    reads
+        stack;
+    extern;
+
+procedure Stack_lemma(ghost base:reg_opr, ghost offset:int, ghost t:taint)
+    {:public}
+    {:quick exportOnly}
+{
+}
+
+procedure Alloc_stack(inline n:nat64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Alloc(n))}
+    modifies
+        r1;
+    requires
+        n % 16 == 0;
+        r1 <= init_r1(stack);
+        init_r1(stack) - 65536 <= r1 - n;
+    ensures
+        r1 == old(r1) - n;
+{
+}
+
+procedure Dealloc_stack(inline n:nat64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Dealloc(n))}  
+    modifies
+        r1; stack;
+    requires
+        n % 16 == 0;
+        r1 >= init_r1(stack) - 65536;
+        r1 + n <= init_r1(stack);
+    ensures
+        r1 == old(r1) + n;
+        stack == free_stack64(r1-n, r1, old(stack));
+{
+}
+
+procedure Store_stack128(in src:vec_opr, inline offset:nat8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.StoreStack128(src, Secret, offset))}
+    reads
+        r1;
+    modifies
+        stack; stackTaint;
+    requires
+        offset % 16 == 0;
+        r1 + offset <= init_r1(stack) - 16;
+    ensures
+        stack == store_stack128(r1 + offset, old(src), old(stack));
+        stackTaint == store_taint_stack128(r1 + offset, Secret, old(stackTaint));
+{
+}
+
+procedure Load_stack128(out dst:vec_opr, inline offset:nat8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.LoadStack128(dst, Secret, offset))}
+    reads
+        r1; stack; stackTaint;
+    requires
+        offset % 16 == 0;
+        r1 + offset + 16 <= init_r1(stack);
+        valid_src_stack128(r1 + offset, stack);
+        valid_taint_stack128(r1 + offset, Secret, stackTaint);
+    ensures
+        dst == old(load_stack128(r1 + offset, stack));
+{
+    lemma_valid_taint_stack128(old(r1 + offset), Secret, old(stackTaint));
+}
