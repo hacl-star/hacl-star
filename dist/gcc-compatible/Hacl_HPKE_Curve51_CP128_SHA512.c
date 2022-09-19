@@ -667,12 +667,13 @@ Hacl_HPKE_Curve51_CP128_SHA512_sealBase(
     uint64_t s = o_ctx.ctx_seq[0U];
     uint8_t enc[12U] = { 0U };
     store64_be(enc + (uint32_t)4U, s);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)12U; i++)
-    {
+    KRML_MAYBE_FOR12(i,
+      (uint32_t)0U,
+      (uint32_t)12U,
+      (uint32_t)1U,
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;
-    }
+      nonce[i] = xi ^ yi;);
     Hacl_Chacha20Poly1305_128_aead_encrypt(o_ctx.ctx_key,
       nonce,
       aadlen,
@@ -731,12 +732,13 @@ Hacl_HPKE_Curve51_CP128_SHA512_openBase(
     uint64_t s = o_ctx.ctx_seq[0U];
     uint8_t enc[12U] = { 0U };
     store64_be(enc + (uint32_t)4U, s);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)12U; i++)
-    {
+    KRML_MAYBE_FOR12(i,
+      (uint32_t)0U,
+      (uint32_t)12U,
+      (uint32_t)1U,
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;
-    }
+      nonce[i] = xi ^ yi;);
     uint32_t
     res1 =
       Hacl_Chacha20Poly1305_128_aead_decrypt(o_ctx.ctx_key,

@@ -273,13 +273,14 @@ uint32_t Hacl_Frodo64_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint16_t mask = b1 & b2;
   uint16_t mask0 = mask;
   uint8_t kp_s[16U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-  {
+  KRML_MAYBE_FOR16(i,
+    (uint32_t)0U,
+    (uint32_t)16U,
+    (uint32_t)1U,
     uint8_t *os = kp_s;
     uint8_t uu____0 = s[i];
     uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[i] ^ uu____0));
-    os[i] = x;
-  }
+    os[i] = x;);
   uint32_t ss_init_len = (uint32_t)1096U;
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
   uint8_t *ss_init = alloca(ss_init_len * sizeof (uint8_t));

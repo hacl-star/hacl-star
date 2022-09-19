@@ -1011,15 +1011,13 @@ Hacl_HPKE_Curve51_CP256_SHA256_sealBase(
     uint64_t s = o_ctx.ctx_seq[0U];
     uint8_t enc[12U] = { 0U };
     store64_be(enc + (uint32_t)4U, s);
-    {
-      uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)12U; i++)
-      {
-        uint8_t xi = enc[i];
-        uint8_t yi = o_ctx.ctx_nonce[i];
-        nonce[i] = xi ^ yi;
-      }
-    }
+    KRML_MAYBE_FOR12(i,
+      (uint32_t)0U,
+      (uint32_t)12U,
+      (uint32_t)1U,
+      uint8_t xi = enc[i];
+      uint8_t yi = o_ctx.ctx_nonce[i];
+      nonce[i] = xi ^ yi;);
     Hacl_Chacha20Poly1305_256_aead_encrypt(o_ctx.ctx_key,
       nonce,
       aadlen,
@@ -1085,15 +1083,13 @@ Hacl_HPKE_Curve51_CP256_SHA256_openBase(
     uint64_t s = o_ctx.ctx_seq[0U];
     uint8_t enc[12U] = { 0U };
     store64_be(enc + (uint32_t)4U, s);
-    {
-      uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)12U; i++)
-      {
-        uint8_t xi = enc[i];
-        uint8_t yi = o_ctx.ctx_nonce[i];
-        nonce[i] = xi ^ yi;
-      }
-    }
+    KRML_MAYBE_FOR12(i,
+      (uint32_t)0U,
+      (uint32_t)12U,
+      (uint32_t)1U,
+      uint8_t xi = enc[i];
+      uint8_t yi = o_ctx.ctx_nonce[i];
+      nonce[i] = xi ^ yi;);
     {
       uint32_t
       res10 =

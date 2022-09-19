@@ -118,15 +118,13 @@ static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
   ctr_u32 = ctr;
   k[12U] = k[12U] + ctr_u32;
   rounds(k);
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os = k;
-      uint32_t x = k[i] + ctx[i];
-      os[i] = x;
-    }
-  }
+  KRML_MAYBE_FOR16(i,
+    (uint32_t)0U,
+    (uint32_t)16U,
+    (uint32_t)1U,
+    uint32_t *os = k;
+    uint32_t x = k[i] + ctx[i];
+    os[i] = x;);
   k[12U] = k[12U] + ctr_u32;
 }
 
@@ -139,27 +137,23 @@ inline void
 Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
   uint32_t i;
-  {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-    {
-      uint32_t *os = ctx;
-      uint32_t x = chacha20_constants[i0];
-      os[i0] = x;
-    }
-  }
-  {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < (uint32_t)8U; i0++)
-    {
-      uint32_t *os = ctx + (uint32_t)4U;
-      uint8_t *bj = k + i0 * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i0] = x;
-    }
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint32_t *os = ctx;
+    uint32_t x = chacha20_constants[i0];
+    os[i0] = x;);
+  KRML_MAYBE_FOR8(i0,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint32_t *os = ctx + (uint32_t)4U;
+    uint8_t *bj = k + i0 * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i0] = x;);
   ctx[12U] = ctr;
   for (i = (uint32_t)0U; i < (uint32_t)3U; i++)
   {
@@ -184,34 +178,28 @@ Hacl_Impl_Chacha20_chacha20_encrypt_block(
   chacha20_core(k, ctx, incr);
   {
     uint32_t bl[16U] = { 0U };
-    {
-      uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-      {
-        uint32_t *os = bl;
-        uint8_t *bj = text + i * (uint32_t)4U;
-        uint32_t u = load32_le(bj);
-        uint32_t r = u;
-        uint32_t x = r;
-        os[i] = x;
-      }
-    }
-    {
-      uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-      {
-        uint32_t *os = bl;
-        uint32_t x = bl[i] ^ k[i];
-        os[i] = x;
-      }
-    }
-    {
-      uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-      {
-        store32_le(out + i * (uint32_t)4U, bl[i]);
-      }
-    }
+    KRML_MAYBE_FOR16(i,
+      (uint32_t)0U,
+      (uint32_t)16U,
+      (uint32_t)1U,
+      uint32_t *os = bl;
+      uint8_t *bj = text + i * (uint32_t)4U;
+      uint32_t u = load32_le(bj);
+      uint32_t r = u;
+      uint32_t x = r;
+      os[i] = x;);
+    KRML_MAYBE_FOR16(i,
+      (uint32_t)0U,
+      (uint32_t)16U,
+      (uint32_t)1U,
+      uint32_t *os = bl;
+      uint32_t x = bl[i] ^ k[i];
+      os[i] = x;);
+    KRML_MAYBE_FOR16(i,
+      (uint32_t)0U,
+      (uint32_t)16U,
+      (uint32_t)1U,
+      store32_le(out + i * (uint32_t)4U, bl[i]););
   }
 }
 
