@@ -522,6 +522,7 @@ dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
+obj/vale-sha256-ppc64le.exe: vale/code/crypto/sha/ShaMainPPC64LE.ml
 obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
