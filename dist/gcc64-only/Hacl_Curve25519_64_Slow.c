@@ -66,31 +66,23 @@ static inline uint64_t add1_(uint64_t *out, uint64_t *f1, uint64_t f2)
 static inline void fadd_(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t1 = f1[(uint32_t)4U * i];
-    uint64_t t20 = f2[(uint32_t)4U * i];
-    uint64_t *res_i0 = out + (uint32_t)4U * i;
+    uint64_t t1 = f1[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t20 = f2[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = out + (uint32_t)4U * (uint32_t)0U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, res_i0);
-    uint64_t t10 = f1[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = f2[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = out + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t10 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t21 = f2[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, res_i1);
-    uint64_t t11 = f1[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = f2[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = out + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t11 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t22 = f2[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, res_i2);
-    uint64_t t12 = f1[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = f2[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = out + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t12 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t2 = f2[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t t1 = f1[i];
-    uint64_t t2 = f2[i];
-    uint64_t *res_i = out + i;
-    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, res_i);
   }
   uint64_t c00 = c0;
   uint64_t
@@ -136,31 +128,23 @@ static inline void fadd_(uint64_t *out, uint64_t *f1, uint64_t *f2)
 static inline void fsub_(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t1 = f1[(uint32_t)4U * i];
-    uint64_t t20 = f2[(uint32_t)4U * i];
-    uint64_t *res_i0 = out + (uint32_t)4U * i;
+    uint64_t t1 = f1[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t20 = f2[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = out + (uint32_t)4U * (uint32_t)0U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
-    uint64_t t10 = f1[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = f2[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = out + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t10 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t21 = f2[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
-    uint64_t t11 = f1[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = f2[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = out + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t11 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t22 = f2[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
-    uint64_t t12 = f1[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = f2[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = out + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t12 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t2 = f2[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t t1 = f1[i];
-    uint64_t t2 = f2[i];
-    uint64_t *res_i = out + i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
   }
   uint64_t c00 = c0;
   uint64_t
@@ -207,59 +191,46 @@ static inline void fmul_(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tm
 {
   uint64_t *tmp0 = tmp;
   memset(tmp0, 0U, (uint32_t)8U * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t bj = f2[i0];
     uint64_t *res_j = tmp0 + i0;
     uint64_t c = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
     {
-      uint64_t a_i = f1[(uint32_t)4U * i];
-      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      uint64_t a_i = f1[(uint32_t)4U * (uint32_t)0U];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
-      uint64_t a_i0 = f1[(uint32_t)4U * i + (uint32_t)1U];
-      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      uint64_t a_i0 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
-      uint64_t a_i1 = f1[(uint32_t)4U * i + (uint32_t)2U];
-      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      uint64_t a_i1 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
-      uint64_t a_i2 = f1[(uint32_t)4U * i + (uint32_t)3U];
-      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      uint64_t a_i2 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
     }
-    for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-    {
-      uint64_t a_i = f1[i];
-      uint64_t *res_i = res_j + i;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i);
-    }
     uint64_t r = c;
-    tmp0[(uint32_t)4U + i0] = r;
-  }
+    tmp0[(uint32_t)4U + i0] = r;);
   uint64_t *uu____0 = tmp0 + (uint32_t)4U;
   uint64_t *uu____1 = tmp0;
   uint64_t *res_j = uu____1;
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t a_i = uu____0[(uint32_t)4U * i];
-    uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+    uint64_t a_i = uu____0[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
     c0 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, (uint64_t)38U, c0, res_i0);
-    uint64_t a_i0 = uu____0[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t a_i0 = uu____0[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c0 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, (uint64_t)38U, c0, res_i1);
-    uint64_t a_i1 = uu____0[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t a_i1 = uu____0[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c0 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, (uint64_t)38U, c0, res_i2);
-    uint64_t a_i2 = uu____0[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t a_i2 = uu____0[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c0 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, (uint64_t)38U, c0, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t a_i = uu____0[i];
-    uint64_t *res_i = res_j + i;
-    c0 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, (uint64_t)38U, c0, res_i);
   }
   uint64_t r = c0;
   uint64_t c00 = r;
@@ -323,26 +294,19 @@ static inline void fmul2_(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *t
 static inline void fmul1_(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t a_i = f1[(uint32_t)4U * i];
-    uint64_t *res_i0 = out + (uint32_t)4U * i;
+    uint64_t a_i = f1[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = out + (uint32_t)4U * (uint32_t)0U;
     c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i, f2, c0, res_i0);
-    uint64_t a_i0 = f1[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = out + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t a_i0 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i0, f2, c0, res_i1);
-    uint64_t a_i1 = f1[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = out + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t a_i1 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i1, f2, c0, res_i2);
-    uint64_t a_i2 = f1[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = out + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t a_i2 = f1[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i2, f2, c0, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t a_i = f1[i];
-    uint64_t *res_i = out + i;
-    c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i, f2, c0, res_i);
   }
   uint64_t c00 = c0;
   uint64_t
@@ -388,8 +352,10 @@ static inline void fmul1_(uint64_t *out, uint64_t *f1, uint64_t f2)
 static inline void fsqr_(uint64_t *out, uint64_t *f1, uint64_t *tmp)
 {
   memset(tmp, 0U, (uint32_t)8U * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t *ab = f1;
     uint64_t a_j = f1[i0];
     uint64_t *res_j = tmp + i0;
@@ -416,43 +382,36 @@ static inline void fsqr_(uint64_t *out, uint64_t *f1, uint64_t *tmp)
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
     }
     uint64_t r = c;
-    tmp[i0 + i0] = r;
-  }
+    tmp[i0 + i0] = r;);
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, tmp, tmp, tmp);
   uint64_t tmp1[8U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint128_t res = (uint128_t)f1[i] * f1[i];
     uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
     uint64_t lo = (uint64_t)res;
     tmp1[(uint32_t)2U * i] = lo;
-    tmp1[(uint32_t)2U * i + (uint32_t)1U] = hi;
-  }
+    tmp1[(uint32_t)2U * i + (uint32_t)1U] = hi;);
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, tmp, tmp1, tmp);
   uint64_t *uu____0 = tmp + (uint32_t)4U;
   uint64_t *uu____1 = tmp;
   uint64_t *res_j = uu____1;
   uint64_t c2 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t a_i = uu____0[(uint32_t)4U * i];
-    uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+    uint64_t a_i = uu____0[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
     c2 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, (uint64_t)38U, c2, res_i0);
-    uint64_t a_i0 = uu____0[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t a_i0 = uu____0[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c2 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, (uint64_t)38U, c2, res_i1);
-    uint64_t a_i1 = uu____0[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t a_i1 = uu____0[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c2 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, (uint64_t)38U, c2, res_i2);
-    uint64_t a_i2 = uu____0[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t a_i2 = uu____0[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c2 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, (uint64_t)38U, c2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t a_i = uu____0[i];
-    uint64_t *res_i = res_j + i;
-    c2 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, (uint64_t)38U, c2, res_i);
   }
   uint64_t r = c2;
   uint64_t c00 = r;
@@ -514,12 +473,13 @@ static inline void fsqr2_(uint64_t *out, uint64_t *f, uint64_t *tmp)
 static inline void cswap2_(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-  {
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
     uint64_t dummy = mask & (p1[i] ^ p2[i]);
     p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
-  }
+    p2[i] = p2[i] ^ dummy;);
 }
 
 static const uint8_t g25519[32U] = { (uint8_t)9U };
@@ -737,25 +697,27 @@ static void encode_point(uint8_t *o, uint64_t *i)
   finv(tmp, z, tmp_w);
   fmul_(tmp, tmp, x, tmp_w);
   store_felem(u64s, tmp);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
-    store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store64_le(o + i0 * (uint32_t)8U, u64s[i0]););
 }
 
 void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init[8U] = { 0U };
   uint64_t tmp[4U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t *os = tmp;
     uint8_t *bj = pub + i * (uint32_t)8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i] = x;
-  }
+    os[i] = x;);
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (uint64_t)0x7fffffffffffffffU;
   uint64_t *x = init;

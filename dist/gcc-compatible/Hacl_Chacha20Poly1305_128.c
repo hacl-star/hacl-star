@@ -1167,11 +1167,12 @@ Hacl_Chacha20Poly1305_128_aead_decrypt(
   uint8_t *key = tmp;
   poly1305_do_128(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-  {
+  KRML_MAYBE_FOR16(i,
+    (uint32_t)0U,
+    (uint32_t)16U,
+    (uint32_t)1U,
     uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
-    res = uu____0 & res;
-  }
+    res = uu____0 & res;);
   uint8_t z = res;
   if (z == (uint8_t)255U)
   {

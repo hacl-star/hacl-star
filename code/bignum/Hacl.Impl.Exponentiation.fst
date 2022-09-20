@@ -419,6 +419,7 @@ val bn_get_bits_l:
   (ensures  fun h0 r h1 -> h0 == h1 /\
     v r == LE.get_bits_l (v bBits) (BD.bn_v h0 b) (v l) (v i))
 
+#push-options "--z3rlimit 200"
 let bn_get_bits_l #b_t bLen bBits b l i =
   assert (v (bBits -! bBits %. l) = v bBits - v bBits % v l);
   let bk = bBits -! bBits %. l in
@@ -426,6 +427,7 @@ let bn_get_bits_l #b_t bLen bBits b l i =
 
   Math.Lemmas.lemma_mult_le_left (v l) (v i + 1) (v bBits / v l);
   assert (v l * (v i + 1) <= v bk);
+  // Solver could use some help proving this assertion
   assert (v (bk -! l *! i -! l) == v bk - v l * v i - v l);
 
   [@ inline_let]
@@ -437,7 +439,7 @@ let bn_get_bits_l #b_t bLen bBits b l i =
   let h0 = ST.get () in
   SN.bn_get_bits_lemma (as_seq h0 b) (v k) (v l);
   BN.bn_get_bits bLen b k l
-
+#pop-options
 
 inline_for_extraction noextract
 val bn_get_bits_c:
