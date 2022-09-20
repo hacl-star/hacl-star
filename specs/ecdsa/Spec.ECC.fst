@@ -79,6 +79,14 @@ let _norm #c (p: point #c #Jacobian) : point #c #Jacobian =
   (x3, y3, z3)
 
 
+val _norm_modification_of_x: #c: curve -> p: point #c #Jacobian -> Lemma (
+  let x, y, z = p in 
+  let nX, nY, nZ = _norm p in 
+  nX == (modp_inv2 #c (z * z) * x) % getPrime c)
+
+let _norm_modification_of_x #c p = ()
+
+
 val _norm_modification_of_y: #c: curve -> p: point #c #Jacobian -> Lemma (
   let x, y, z = p in 
   let nX, nY, nZ = _norm p in 

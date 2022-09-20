@@ -203,6 +203,51 @@ sqPower_buffer_p384[48U] =
     (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)63U
   };
 
+static void uploadBasePointAffine_p256(uint64_t *p)
+{
+  p[0U] = (uint64_t)0x1fb38ab1388ad777U;
+  p[1U] = (uint64_t)0x1dfee06615fa309dU;
+  p[2U] = (uint64_t)0xfcac986c3afea4a7U;
+  p[3U] = (uint64_t)0xdf65c2da29fb821aU;
+  p[4U] = (uint64_t)0xeff44e23f63f8f6dU;
+  p[5U] = (uint64_t)0xaa02cd3ed4b681a4U;
+  p[6U] = (uint64_t)0xdd5fda3363818af8U;
+  p[7U] = (uint64_t)0xfc53bc2629fbf0b3U;
+}
+
+static void uploadBasePointAffine(Spec_ECC_Curves_curve c, uint64_t *p)
+{
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        uploadBasePointAffine_p256(p);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        p[0U] = (uint64_t)0x32f2345cb5536b82U;
+        p[1U] = (uint64_t)0x33ba95da2f7d6018U;
+        p[2U] = (uint64_t)0xf2cd7729b1c03094U;
+        p[3U] = (uint64_t)0x3159972fc3a90663U;
+        p[4U] = (uint64_t)0x5827e6777fec9ce6U;
+        p[5U] = (uint64_t)0x1af1e42821b04e1bU;
+        p[6U] = (uint64_t)0xbbacc6d281184b31U;
+        p[7U] = (uint64_t)0x5a08d98b36984428U;
+        p[8U] = (uint64_t)0x73ba86bb86816030U;
+        p[9U] = (uint64_t)0xe77b3c32da8c0cacU;
+        p[10U] = (uint64_t)0x594336a7bc787585U;
+        p[11U] = (uint64_t)0x7d25d16cde0af6c9U;
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 static inline void felem_add_p256(uint64_t *a, uint64_t *b, uint64_t *out)
 {
   uint32_t len0 = (uint32_t)4U;
@@ -7963,46 +8008,6 @@ static uint64_t conditional_subtraction_compute_mask(Spec_ECC_Curves_curve c, vo
   uint32_t len = sw * (uint32_t)8U - (uint32_t)1U;
   uint8_t i0 = ((uint8_t *)scalar)[len];
   return ~((uint64_t)0U - (uint64_t)(i0 & (uint8_t)1U));
-}
-
-static void uploadBasePointAffine(Spec_ECC_Curves_curve c, uint64_t *p)
-{
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        p[0U] = (uint64_t)0x1fb38ab1388ad777U;
-        p[1U] = (uint64_t)0x1dfee06615fa309dU;
-        p[2U] = (uint64_t)0xfcac986c3afea4a7U;
-        p[3U] = (uint64_t)0xdf65c2da29fb821aU;
-        p[4U] = (uint64_t)0xeff44e23f63f8f6dU;
-        p[5U] = (uint64_t)0xaa02cd3ed4b681a4U;
-        p[6U] = (uint64_t)0xdd5fda3363818af8U;
-        p[7U] = (uint64_t)0xfc53bc2629fbf0b3U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        p[0U] = (uint64_t)0x32f2345cb5536b82U;
-        p[1U] = (uint64_t)0x33ba95da2f7d6018U;
-        p[2U] = (uint64_t)0xf2cd7729b1c03094U;
-        p[3U] = (uint64_t)0x3159972fc3a90663U;
-        p[4U] = (uint64_t)0x5827e6777fec9ce6U;
-        p[5U] = (uint64_t)0x1af1e42821b04e1bU;
-        p[6U] = (uint64_t)0xbbacc6d281184b31U;
-        p[7U] = (uint64_t)0x5a08d98b36984428U;
-        p[8U] = (uint64_t)0x73ba86bb86816030U;
-        p[9U] = (uint64_t)0xe77b3c32da8c0cacU;
-        p[10U] = (uint64_t)0x594336a7bc787585U;
-        p[11U] = (uint64_t)0x7d25d16cde0af6c9U;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
 }
 
 static void

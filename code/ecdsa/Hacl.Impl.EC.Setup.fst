@@ -437,17 +437,15 @@ let basePointX_p384 x =
 
   let bpX, _, _ = basePoint #P384 in 
   lemmaToDomain #P384 #DH bpX;
-  assert_norm(bpX * pow2 384 % prime384 ==   0x3dd0756649c0b528 +
+  assert_norm(bpX * pow2 384 % prime384 ==  0x3dd0756649c0b528 +
       0x20e378e2a0d6ce38 * pow2 64 +
       0x879c3afc541b4d6e * pow2 (64 * 2) + 
       0x6454868459a30eff * pow2 (64 * 3) + 
       0x812ff723614ede2b * pow2 (64 * 4) + 
-      0x4d3aadc2299e1513 * pow2 (64 * 5));
-
-  assert(toDomain_ #P384 #DH bpX == lseq_as_nat x)
+      0x4d3aadc2299e1513 * pow2 (64 * 5))
 
 
-assume val basePointY_p384: x: Lib.Sequence.lseq uint64 6 -> Lemma
+val basePointY_p384: x: Lib.Sequence.lseq uint64 6 -> Lemma
   (requires (lseq_as_nat x ==
       0x23043dad4b03a4fe +
       0xa1bfa8bf7bb4a9ac * pow2 64 +
@@ -457,10 +455,27 @@ assume val basePointY_p384: x: Lib.Sequence.lseq uint64 6 -> Lemma
       0x2b78abc25a15c5e9 * pow2 (64 * 5)))
   (ensures (
     let _, bpY, _ = basePoint #P384 in 
-    lseq_as_nat x < prime384 /\ toDomain_ #P384 #DH bpY == lseq_as_nat x))
+    lseq_as_nat x < prime384 /\ bpY == fromDomain_ #P384 #DH (lseq_as_nat x)))
 
+let basePointY_p384 x = 
+  assert_norm(0x23043dad4b03a4fe +
+      0xa1bfa8bf7bb4a9ac * pow2 64 +
+      0x8bade7562e83b050 * pow2 (64 * 2) + 
+      0xc6c3521968f4ffd9 * pow2 (64 * 3) + 
+      0xdd8002263969a840 * pow2 (64 * 4) + 
+      0x2b78abc25a15c5e9 * pow2 (64 * 5) < prime384);
+  
+  let _, bpY, _ = basePoint #P384 in 
+  lemmaToDomain #P384 #DH bpY;
+  assert_norm(bpY * pow2 384 % prime384 == 0x23043dad4b03a4fe +
+      0xa1bfa8bf7bb4a9ac * pow2 64 +
+      0x8bade7562e83b050 * pow2 (64 * 2) + 
+      0xc6c3521968f4ffd9 * pow2 (64 * 3) + 
+      0xdd8002263969a840 * pow2 (64 * 4) + 
+      0x2b78abc25a15c5e9 * pow2 (64 * 5))
+  
 
-assume val basePointZ_p384: x: Lib.Sequence.lseq uint64 6 -> Lemma
+val basePointZ_p384: x: Lib.Sequence.lseq uint64 6 -> Lemma
   (requires (lseq_as_nat x ==
       0xffffffff00000001 +
       0xffffffff * pow2 64 +
@@ -469,8 +484,33 @@ assume val basePointZ_p384: x: Lib.Sequence.lseq uint64 6 -> Lemma
       0 * pow2 (64 * 4) + 
       0 * pow2 (64 * 5)))
   (ensures (
-    let _, bpY, _ = basePoint #P384 in 
-    lseq_as_nat x < prime384 /\ lseq_as_nat x = fromDomain_ #P384 #DH bpY /\ lseq_as_nat x <> 0))
+    let _, _, bpZ = basePoint #P384 in 
+    lseq_as_nat x < prime384 /\ bpZ  = fromDomain_ #P384 #DH (lseq_as_nat x) /\ lseq_as_nat x <> 0))
+
+let basePointZ_p384 x = 
+  assert_norm(      0xffffffff00000001 +
+      0xffffffff * pow2 64 +
+      0x1 * pow2 (64 * 2) + 
+      0 * pow2 (64 * 3) + 
+      0 * pow2 (64 * 4) + 
+      0 * pow2 (64 * 5) < prime384);
+      
+  assert_norm (      0xffffffff00000001 +
+      0xffffffff * pow2 64 +
+      0x1 * pow2 (64 * 2) + 
+      0 * pow2 (64 * 3) + 
+      0 * pow2 (64 * 4) + 
+      0 * pow2 (64 * 5) <> 0);
+
+  let _, _, bpZ = basePoint #P384 in 
+  lemmaToDomain #P384 #DH bpZ;
+  assert_norm(bpZ * pow2 384 % prime384 ==       0xffffffff00000001 +
+      0xffffffff * pow2 64 +
+      0x1 * pow2 (64 * 2) + 
+      0 * pow2 (64 * 3) + 
+      0 * pow2 (64 * 4) + 
+      0 * pow2 (64 * 5))
+
 
 
 inline_for_extraction noextract
@@ -522,17 +562,32 @@ let uploadBasePoint_p384 p =
     basePointZ_p384 (as_seq h1 z)
 
 
-assume val basePointX_p256: x: Lib.Sequence.lseq uint64 4 -> Lemma
+val basePointX_p256: x: Lib.Sequence.lseq uint64 4 -> Lemma
   (requires (lseq_as_nat x ==
       0x79e730d418a9143c +
       0x75ba95fc5fedb601 * pow2 64 +
       0x79fb732b77622510 * pow2 (64 * 2) + 
       0x18905f76a53755c6 * pow2 (64 * 3)))
   (ensures (
-    let _, bpY, _ = basePoint #P256 in 
-    lseq_as_nat x < prime256 /\ lseq_as_nat x = fromDomain_ #P256 #DH bpY))
+    let bpX, _, _ = basePoint #P256 in 
+    lseq_as_nat x < prime256 /\ bpX = fromDomain_ #P256 #DH (lseq_as_nat x)))
 
-assume val basePointY_p256: x: Lib.Sequence.lseq uint64 4 -> Lemma
+let basePointX_p256 x = 
+  assert_norm(
+    0x79e730d418a9143c +
+      0x75ba95fc5fedb601 * pow2 64 +
+      0x79fb732b77622510 * pow2 (64 * 2) + 
+      0x18905f76a53755c6 * pow2 (64 * 3) < prime256);
+
+  let bpX, _, _ = basePoint #P256 in 
+  lemmaToDomain #P256 #DH bpX;
+  assert_norm(bpX * pow2 256 % prime256 ==  0x79e730d418a9143c +
+      0x75ba95fc5fedb601 * pow2 64 +
+      0x79fb732b77622510 * pow2 (64 * 2) + 
+      0x18905f76a53755c6 * pow2 (64 * 3))
+
+
+val basePointY_p256: x: Lib.Sequence.lseq uint64 4 -> Lemma
   (requires (lseq_as_nat x ==
       0xddf25357ce95560a +
       0x8b4ab8e4ba19e45c * pow2 64 +
@@ -540,18 +595,55 @@ assume val basePointY_p256: x: Lib.Sequence.lseq uint64 4 -> Lemma
       0x8571ff1825885d85 * pow2 (64 * 3)))
   (ensures (
     let _, bpY, _ = basePoint #P256 in 
-    lseq_as_nat x < prime256 /\ lseq_as_nat x = fromDomain_ #P256 #DH bpY))
+    lseq_as_nat x < prime256 /\ bpY = fromDomain_ #P256 #DH (lseq_as_nat x)))
 
-assume val basePointZ_p256: x: Lib.Sequence.lseq uint64 4 -> Lemma
+let basePointY_p256 x = 
+  assert_norm(
+    0xddf25357ce95560a +
+      0x8b4ab8e4ba19e45c * pow2 64 +
+      0xd2e88688dd21f325 * pow2 (64 * 2) + 
+      0x8571ff1825885d85 * pow2 (64 * 3) < prime256);
+
+  let _, bpY, _ = basePoint #P256 in 
+  lemmaToDomain #P256 #DH bpY;
+  assert_norm(bpY * pow2 256 % prime256 ==  0xddf25357ce95560a +
+      0x8b4ab8e4ba19e45c * pow2 64 +
+      0xd2e88688dd21f325 * pow2 (64 * 2) + 
+      0x8571ff1825885d85 * pow2 (64 * 3))
+
+
+val basePointZ_p256: x: Lib.Sequence.lseq uint64 4 -> Lemma
   (requires (lseq_as_nat x ==
       0x1 +
       0xffffffff00000000 * pow2 64 +
       0xffffffffffffffff * pow2 (64 * 2) + 
       0xfffffffe * pow2 (64 * 3)))
   (ensures (
-    let _, bpY, _ = basePoint #P256 in 
-    lseq_as_nat x < prime256 /\ lseq_as_nat x = fromDomain_ #P256 #DH bpY /\ lseq_as_nat x <> 0))
+    let _, _, bpZ = basePoint #P256 in 
+    lseq_as_nat x < prime256 /\ bpZ = fromDomain_ #P256 #DH (lseq_as_nat x) /\ lseq_as_nat x <> 0))
 
+let basePointZ_p256 x = 
+  assert_norm(
+    0x1 + 
+      0xffffffff00000000 * pow2 64 +
+      0xffffffffffffffff * pow2 (64 * 2) + 
+      0xfffffffe * pow2 (64 * 3)
+      < prime256);
+
+  assert_norm(
+    0x1 + 
+      0xffffffff00000000 * pow2 64 +
+      0xffffffffffffffff * pow2 (64 * 2) + 
+      0xfffffffe * pow2 (64 * 3)
+      <> 0);
+
+  let _, _, bpZ = basePoint #P256 in 
+  lemmaToDomain #P256 #DH bpZ;
+  assert_norm(bpZ * pow2 256 % prime256 ==  0x1 + 
+      0xffffffff00000000 * pow2 64 +
+      0xffffffffffffffff * pow2 (64 * 2) + 
+      0xfffffffe * pow2 (64 * 3))
+  
 
 inline_for_extraction noextract
 val uploadBasePoint_p256: p: point P256 -> Stack unit 
@@ -591,48 +683,8 @@ let uploadBasePoint_p256 p =
     basePointX_p256 (as_seq h1 x);
     basePointY_p256 (as_seq h1 y);
     basePointZ_p256 (as_seq h1 z)
-
-
-
-(*
-  let h1 = ST.get() in 
-
-  let x = gsub p (size 0) (size 4) in 
-  let y = gsub p (size 4) (size 4) in 
-  let z = gsub p (size 8) (size 4) in 
-  
-  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 x);
-  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 y);
-  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 z);
-  lemmaFromDomain #P256 #DH (as_nat P256 h1 x); 
-  lemmaFromDomain #P256 #DH (as_nat P256 h1 y); 
-  lemmaFromDomain #P256 #DH (as_nat P256 h1 z); 
-
-  let bX, bY, bZ = basePoint #P256 in 
-
-  assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + 
-    pow2 (64 * 2) * 8789745728267363600 + 
-    pow2 (64 * 3) * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948); 
-  assert_norm(bX == 11110593207902424140321080247206512405358633331993495164878354046817554469948 * modp_inv2_prime (pow2 256) prime256 % prime256);
-
-  assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + 
-    pow2 (64 * 2) * 15197544864945402661 + 
-    pow2 (64 * 3) * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-  assert_norm(bY == 60359023176204190920225817201443260813112970217682417638161152432929735267850 * modp_inv2_prime (pow2 256) prime256 % prime256);
-
-  
-  assert_norm (1 + pow2 64 * 18446744069414584320 + 
-    pow2 (64 * 2) * 18446744073709551615 + 
-    pow2 (64 * 3) * 4294967294 == 26959946660873538059280334323183841250350249843923952699046031785985);
-  assert_norm (bZ = 26959946660873538059280334323183841250350249843923952699046031785985 * modp_inv2_prime (pow2 256) prime256 % prime256);
-
-  assert(fromDomain_ #c #DH (as_nat P256 h1 x) == bX); 
-  assert(fromDomain_ #c #DH (as_nat P256 h1 y) == bY);
-  assert(fromDomain_ #c #DH (as_nat P256 h1 z) == bZ); *)
-
-
-
-
+    
+    
 inline_for_extraction noextract
 val uploadBasePoint: #c: curve -> p: point c -> Stack unit 
   (requires fun h -> live h p)
@@ -647,10 +699,88 @@ let uploadBasePoint #c p =
   |P256 -> uploadBasePoint_p256 p
 
 
+assume val basePointAffine_p256_x: x: Lib.Sequence.lseq uint64 4 -> 
+  Lemma (requires (lseq_as_nat x == 0x1fb38ab1388ad777 + 0x1dfee06615fa309d * pow2 64 + 0xfcac986c3afea4a7 * pow2 (64 * 2) + 0xdf65c2da29fb821a * pow2 (64 * 3)))
+  (ensures (lseq_as_nat x < prime256 /\  (
+    let bpX, bpY, bpZ = basePoint #P256 in 
+    let pX = fromDomain_ #P256 #DH (lseq_as_nat x) in 
+    let pZ = fromDomain_ #P256 #DH 1 in 
+    modp_inv2 #P256 (bpZ * bpZ) * bpX % prime256 == modp_inv2 #P256 (pZ * pZ) * pX % prime256)))
+
+
+assume val basePointAffine_p256_y: y: Lib.Sequence.lseq uint64 4 -> 
+  Lemma (requires (lseq_as_nat y == 0xeff44e23f63f8f6d + 0xaa02cd3ed4b681a4 * pow2 64 + 0xdd5fda3363818af8 * pow2 (64 * 2) + 0xfc53bc2629fbf0b3 * pow2 (64 * 3)))
+  (ensures (lseq_as_nat y < prime256 /\  (
+    let bpX, bpY, bpZ = basePoint #P256 in 
+    let pY = fromDomain_ #P256 #DH (lseq_as_nat y) in 
+    let pZ = fromDomain_ #P256 #DH 1 in 
+    modp_inv2 #P256 (bpZ * bpZ * bpZ) * bpY % prime256 == modp_inv2 #P256 (pZ * pZ * pZ) * pY % prime256)))
+
+
+val uploadBasePointAffine_p256: p: pointAffine P256 -> Stack unit 
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_aff_eval P256 h1 p /\
+    pointEqual #P256 (basePoint #P256) (fromDomainPoint #P256 #DH (toJacobianCoordinates (point_affine_as_nat P256 h1 p))))
+
+let uploadBasePointAffine_p256 p = 
+  upd p (size 0) (u64 0x1fb38ab1388ad777);
+  upd p (size 1) (u64 0x1dfee06615fa309d);
+  upd p (size 2) (u64 0xfcac986c3afea4a7);
+  upd p (size 3) (u64 0xdf65c2da29fb821a);
+    
+  upd p (size 4) (u64 0xeff44e23f63f8f6d);
+  upd p (size 5) (u64 0xaa02cd3ed4b681a4);
+  upd p (size 6) (u64 0xdd5fda3363818af8);
+  upd p (size 7) (u64 0xfc53bc2629fbf0b3);
+
+  let h1 = ST.get() in 
+  let len = getCoordinateLenU64 P256 in 
+
+  let x = gsub p (size 0) len in 
+  let y = gsub p len len in 
+    
+  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 x);
+  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 y);
+    
+  let pX, pY, pZ = fromDomain_ #P256 #DH (lseq_as_nat (as_seq h1 x)), fromDomain_ #P256 #DH (as_nat P256 h1 y), fromDomain_ #P256 #DH 1 in 
+
+  assume (~ (isPointAtInfinity (pX, pY, pZ)));
+
+  let pNx, pNy, pNz = _norm #P256 (pX, pY, pZ) in 
+  basePointAffine_p256_x (as_seq h1 x); 
+  basePointAffine_p256_y (as_seq h1 y)
+
+
+
+val uploadBasePointAffine: #c: curve -> p: pointAffine c -> Stack unit 
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_aff_eval c h1 p /\
+    pointEqual #c (basePoint #c) (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 p))))
+   
+let uploadBasePointAffine #c p = 
+  let h0 = ST.get() in 
+  match c with 
+  |P256 -> uploadBasePointAffine_p256 p
+  |P384 -> 
+    admit();
+    upd p (size 0) (u64 0x32f2345cb5536b82);
+    upd p (size 1) (u64 0x33ba95da2f7d6018);
+    upd p (size 2) (u64 0xf2cd7729b1c03094);
+    upd p (size 3) (u64 0x3159972fc3a90663);
+    upd p (size 4) (u64 0x5827e6777fec9ce6);
+    upd p (size 5) (u64 0x1af1e42821b04e1b);
+    
+    upd p (size 6) (u64 0xbbacc6d281184b31);
+    upd p (size 7) (u64 0x5a08d98b36984428);
+    upd p (size 8) (u64 0x73ba86bb86816030);
+    upd p (size 9) (u64 0xe77b3c32da8c0cac);
+    upd p (size 10) (u64 0x594336a7bc787585);
+    upd p (size 11) (u64 0x7d25d16cde0af6c9)
+
+
 
 inline_for_extraction noextract
-let order_u8_list (c: curve) : x: list uint8 {List.Tot.length x == v (getCoordinateLenU P256)
- /\ lst_as_nat x == getPrime P256 - 2} = 
+let order_u8_list (c: curve) : x: list uint8 {List.Tot.length x == v (getCoordinateLenU P256) /\ lst_as_nat x == getPrime P256 - 2} = 
   [@inline_let]
   let x = [
     u8 253; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;

@@ -796,41 +796,6 @@ let conditional_subtraction_compute_mask #c scalar =
   lognot(u64 0 -. to_u64 (logand i0 (u8 1)))
 
 
-val uploadBasePointAffine: #c: curve -> p: pointAffine c 
-  -> Stack unit 
-  (requires fun h -> live h p)
-  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_aff_eval c h1 p /\
-    pointEqual #c (basePoint #c) (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 p))))
-   
-let uploadBasePointAffine #c p = 
-  admit();
-  match c with 
-  |P256 -> 
-    upd p (size 0) (u64 0x1fb38ab1388ad777);
-    upd p (size 1) (u64 0x1dfee06615fa309d);
-    upd p (size 2) (u64 0xfcac986c3afea4a7);
-    upd p (size 3) (u64 0xdf65c2da29fb821a);
-    
-    upd p (size 4) (u64 0xeff44e23f63f8f6d);
-    upd p (size 5) (u64 0xaa02cd3ed4b681a4);
-    upd p (size 6) (u64 0xdd5fda3363818af8);
-    upd p (size 7) (u64 0xfc53bc2629fbf0b3)
-  |P384 -> 
-    upd p (size 0) (u64 0x32f2345cb5536b82);
-    upd p (size 1) (u64 0x33ba95da2f7d6018);
-    upd p (size 2) (u64 0xf2cd7729b1c03094);
-    upd p (size 3) (u64 0x3159972fc3a90663);
-    upd p (size 4) (u64 0x5827e6777fec9ce6);
-    upd p (size 5) (u64 0x1af1e42821b04e1b);
-    
-    upd p (size 6) (u64 0xbbacc6d281184b31);
-    upd p (size 7) (u64 0x5a08d98b36984428);
-    upd p (size 8) (u64 0x73ba86bb86816030);
-    upd p (size 9) (u64 0xe77b3c32da8c0cac);
-    upd p (size 10) (u64 0x594336a7bc787585);
-    upd p (size 11) (u64 0x7d25d16cde0af6c9)
-
-
 val uploadMinusBasePointAffine: #c: curve 
   -> basePointNegative: pointAffine c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
@@ -842,7 +807,7 @@ val uploadMinusBasePointAffine: #c: curve
 
 let uploadMinusBasePointAffine #c p tempBuffer = 
   let tempBasePoint = sub tempBuffer (size 0) (getCoordinateLenU64 c *! 2ul) in 
-  uploadBasePointAffine #c tempBasePoint;
+  Hacl.Impl.EC.Setup.uploadBasePointAffine #c tempBasePoint;
     let h1 = ST.get() in 
     point_mult_1 #c (basePoint #c);
   point_affine_neg #c tempBasePoint p;
