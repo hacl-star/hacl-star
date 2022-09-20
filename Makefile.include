@@ -19,6 +19,7 @@ VALE_DIRS	= \
   $(HACL_HOME)/vale/code/arch \
   $(HACL_HOME)/vale/code/arch/x64 \
   $(HACL_HOME)/vale/code/arch/x64/interop \
+  $(HACL_HOME)/vale/code/arch/ppc64le \
   $(HACL_HOME)/vale/code/crypto/aes \
   $(HACL_HOME)/vale/code/crypto/aes/x64 \
   $(HACL_HOME)/vale/code/crypto/bignum \
@@ -44,14 +45,6 @@ VALE_DIRS	= \
   $(HACL_HOME)/vale/specs/hardware \
   $(HACL_HOME)/vale/specs/interop \
   $(HACL_HOME)/vale/specs/math
-
-ifneq (,$(ENABLEPOWERPC))
-  VALE_DIRS	:= $(VALE_DIRS) \
-    $(HACL_HOME)/vale/specs/hardware/ppc64le \
-    $(HACL_HOME)/vale/code/arch/ppc64le \
-    $(HACL_HOME)/vale/code/crypto/sha/ppc64le \
-    $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/sha/ppc64le
-endif
 
 ALL_HACL_SOURCE_DIRS = \
   $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \

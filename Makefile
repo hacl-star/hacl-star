@@ -16,7 +16,6 @@
 # - SKIPDEPEND=1 disables even *including* .depend files (not meant for end users)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
-# - ENABLEPOWERPC=1 enables PowerPC-specific modules
 #
 # This is a staged Makefile, because we first need to generate .fst files out of
 # .vaf files in order to get a full dependency graph for the .fst files. So,
