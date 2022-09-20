@@ -207,22 +207,22 @@ val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
       (
 	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0) &&
 	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
-          Spec.ECDSAP256.Definition.prime_p256_order)))
+          Spec.ECC.Curves.getOrder #Spec.ECC.Curves.P256)))
 
 let check_bound b =
   let open FStar.Mul in
   let open Lib.ByteSequence in
-  let open Spec.ECDSAP256.Definition in
+  let open Spec.ECC.Curves in
   [@inline_let]
-  let q1 = normalize_term (prime_p256_order % pow2 64) in 
+  let q1 = normalize_term (getOrder #P256 % pow2 64) in 
   [@inline_let]
-  let q2 = normalize_term ((prime_p256_order / pow2 64) % pow2 64) in
+  let q2 = normalize_term ((getOrder #P256 / pow2 64) % pow2 64) in
   [@inline_let]
-  let q3 = normalize_term ((prime_p256_order / pow2 128) % pow2 64) in
+  let q3 = normalize_term ((getOrder #P256 / pow2 128) % pow2 64) in
   [@inline_let]
-  let q4 = normalize_term (((prime_p256_order / pow2 128) / pow2 64) % pow2 64) in
+  let q4 = normalize_term (((getOrder #P256 / pow2 128) / pow2 64) % pow2 64) in
   assert_norm (pow2 128 * pow2 64 == pow2 192);
-  assert (prime_p256_order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4); 
+  assert (getOrder #P256 == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4); 
 
   let zero = mk_int #U64 #PUB 0 in
   
