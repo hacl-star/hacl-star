@@ -13,6 +13,8 @@ module LSeq = Lib.Sequence
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
+module PT = Hacl.Impl.PrecompTable
+module BPT = Hacl.Spec.K256.PrecompTable
 
 module S = Spec.K256
 module SL = Spec.K256.Lemmas
@@ -161,6 +163,36 @@ let point_mul_double_vartime out scalar1 q1 scalar2 q2 =
     (point_eval h0 q2) (qas_nat h0 scalar2) 4;
   ME.lexp_double_fw_vartime 15ul 0ul mk_k256_concrete_ops 4ul (null uint64) q1 4ul 256ul scalar1 q2 scalar2 out
 
+////////////////////////////////////////
+
+inline_for_extraction noextract
+let table_inv : BE.table_inv_t U64 15ul 16ul =
+  [@inline_let] let len = 15ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_k256_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+  BE.table_inv_precomp len ctx_len k l table_len
+
+
+// Precomputed table for a base point [0Q, 1Q, 2Q, .., 15Q]
+inline_for_extraction noextract
+val mk_precomp_base_point_table: g:point ->
+  StackInline (lbuffer uint64 240ul)
+    (requires fun h ->
+      live h g /\ point_inv h g /\ point_eval h g == S.g)
+    (ensures  fun h0 table h1 -> live h1 table /\
+      stack_allocated table h0 h1 BPT.precomp_basepoint_table_lseq /\
+      table_inv (as_seq h0 g) (as_seq h1 table))
+
+let mk_precomp_base_point_table g =
+  assert_norm (List.Tot.length BPT.precomp_basepoint_table_list == 240);
+  let h0 = ST.get () in
+  let res = createL BPT.precomp_basepoint_table_list in
+  let h1 = ST.get () in
+  BPT.precomp_basepoint_table_lemma ();
+  res
+
 
 val point_mul_g: out:point -> scalar:qelem -> Stack unit
   (requires fun h ->
@@ -174,9 +206,34 @@ val point_mul_g: out:point -> scalar:qelem -> Stack unit
 [@CInline]
 let point_mul_g out scalar =
   push_frame ();
+  [@inline_let] let len = 15ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_k256_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+  [@inline_let] let bLen = 4ul in
+  [@inline_let] let bBits = 256ul in
   let g = create 15ul (u64 0) in
   make_g g;
-  point_mul out scalar g;
+  let h0 = ST.get () in
+  assert (point_inv h0 g /\ point_eval h0 g == S.g);
+  SE.exp_fw_lemma S.mk_k256_concrete_ops (point_eval h0 g) 256 (qas_nat h0 scalar) 4;
+
+  // let table = create (table_len *! len) (u64 0) in
+  // PT.lprecomp_table len ctx_len k (null uint64) g table_len table;
+  let table = mk_precomp_base_point_table g in
+
+  [@inline_let]
+  let table_inv : BE.table_inv_t U64 len table_len =
+    BE.table_inv_precomp len ctx_len k l table_len in
+  let h1 = ST.get () in
+  assert (table_inv (as_seq h1 g) (as_seq h1 table));
+  assert (point_eval h1 g == S.g);
+
+  BE.mk_lexp_fw_table len ctx_len k l table_len
+    table_inv
+    (BE.lprecomp_get_consttime len ctx_len k l table_len)
+    (null uint64) g bLen bBits scalar table out;
   pop_frame ()
 
 
