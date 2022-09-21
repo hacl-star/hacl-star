@@ -159,6 +159,8 @@ module Hash = struct
   let update ~st:(_alg, t) ~msg =
     check_max_buffer_len (C.size msg);
     let e = everCrypt_Hash_Incremental_update t (C.ctypes_buf msg) (C.size_uint32 msg) in
+    (* can return `MaximumLengthExceeded` if total length exceeds limit, as defined
+     * in Spec.Hash.Definitions.max_input_length *)
     assert (Error.get_result e = Error.Success ())
   let finish ~st:(alg, t) =
     let digest = C.make (digest_len alg) in
