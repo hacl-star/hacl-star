@@ -175,23 +175,9 @@ let table_inv : BE.table_inv_t U64 15ul 16ul =
   BE.table_inv_precomp len ctx_len k l table_len
 
 
-// Precomputed table for a base point [0Q, 1Q, 2Q, .., 15Q]
-inline_for_extraction noextract
-val mk_precomp_base_point_table: g:point ->
-  StackInline (lbuffer uint64 240ul)
-    (requires fun h ->
-      live h g /\ point_inv h g /\ point_eval h g == S.g)
-    (ensures  fun h0 table h1 -> live h1 table /\
-      stack_allocated table h0 h1 BPT.precomp_basepoint_table_lseq /\
-      table_inv (as_seq h0 g) (as_seq h1 table))
-
-let mk_precomp_base_point_table g =
-  assert_norm (List.Tot.length BPT.precomp_basepoint_table_list == 240);
-  let h0 = ST.get () in
-  let res = createL BPT.precomp_basepoint_table_list in
-  let h1 = ST.get () in
-  BPT.precomp_basepoint_table_lemma ();
-  res
+let precomp_basepoint_table:
+  x:glbuffer uint64 240ul{witnessed x BPT.precomp_basepoint_table_lseq /\ recallable x} =
+  createL_global BPT.precomp_basepoint_table_list
 
 
 val point_mul_g: out:point -> scalar:qelem -> Stack unit
@@ -218,22 +204,20 @@ let point_mul_g out scalar =
   let h0 = ST.get () in
   assert (point_inv h0 g /\ point_eval h0 g == S.g);
   SE.exp_fw_lemma S.mk_k256_concrete_ops (point_eval h0 g) 256 (qas_nat h0 scalar) 4;
-
-  // let table = create (table_len *! len) (u64 0) in
-  // PT.lprecomp_table len ctx_len k (null uint64) g table_len table;
-  let table = mk_precomp_base_point_table g in
+  recall_contents precomp_basepoint_table BPT.precomp_basepoint_table_lseq;
 
   [@inline_let]
   let table_inv : BE.table_inv_t U64 len table_len =
     BE.table_inv_precomp len ctx_len k l table_len in
   let h1 = ST.get () in
-  assert (table_inv (as_seq h1 g) (as_seq h1 table));
+  BPT.precomp_basepoint_table_lemma ();
+  assert (table_inv (as_seq h1 g) (as_seq h1 precomp_basepoint_table));
   assert (point_eval h1 g == S.g);
 
   BE.mk_lexp_fw_table len ctx_len k l table_len
     table_inv
     (BE.lprecomp_get_consttime len ctx_len k l table_len)
-    (null uint64) g bLen bBits scalar table out;
+    (null uint64) g bLen bBits scalar (to_const precomp_basepoint_table) out;
   pop_frame ()
 
 

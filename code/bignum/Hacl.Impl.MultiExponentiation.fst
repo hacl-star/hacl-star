@@ -35,8 +35,8 @@ let lexp_double_fw_f_st
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> i:size_t{v i < v bBits / v l}
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
@@ -100,8 +100,8 @@ let lexp_double_fw_acc0_st
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h -> v bBits % v l <> 0 /\
@@ -166,8 +166,8 @@ let lexp_double_fw_loop_st
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
@@ -270,7 +270,7 @@ let lexp_double_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a1 bLen b
   mk_lexp_double_fw_tables len ctx_len k l table_len
     (table_inv_precomp len ctx_len k l table_len)
     (table_inv_precomp len ctx_len k l table_len)
-    lprecomp_get lprecomp_get ctx a1 bLen bBits b1 a2 b2 table1 table2 acc;
+    lprecomp_get lprecomp_get ctx a1 bLen bBits b1 a2 b2 (to_const table1) (to_const table2) acc;
   pop_frame ()
 #pop-options
 
@@ -324,10 +324,10 @@ let lexp_four_fw_f_st
   -> b3:lbuffer (uint_t a_t SEC) bLen
   -> a4:lbuffer (uint_t a_t SEC) len
   -> b4:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table3:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table4:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table3:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table4:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> i:size_t{v i < v bBits / v l}
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
@@ -419,10 +419,10 @@ let lexp_four_fw_acc0_st
   -> b3:lbuffer (uint_t a_t SEC) bLen
   -> a4:lbuffer (uint_t a_t SEC) len
   -> b4:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table3:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table4:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table3:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table4:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h -> v bBits % v l <> 0 /\
@@ -516,10 +516,10 @@ let lexp_four_fw_loop_st
   -> b3:lbuffer (uint_t a_t SEC) bLen
   -> a4:lbuffer (uint_t a_t SEC) len
   -> b4:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table3:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table4:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table3:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table4:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
@@ -732,17 +732,22 @@ let lexp_four_fw_gen #a_t len ctx_len k l table_len lprecomp_get
   let table4 = create (table_len *! len) (uint #a_t #SEC 0) in
   mk_four_tables_for_fw_exp #a_t len ctx_len k l table_len
     ctx a1 a2 a3 a4 table1 table2 table3 table4;
+
+  [@inline_let]
+  let table_inv : table_inv_t a_t len table_len =
+    table_inv_precomp len ctx_len k l table_len in
   let h2 = ST.get () in
   assert (modifies (loc table1 |+| loc table2 |+| loc table3 |+| loc table4) h1 h2);
+  assert (table_inv (as_seq h0 a1) (as_seq h2 table1));
+  assert (table_inv (as_seq h0 a2) (as_seq h2 table2));
+  assert (table_inv (as_seq h0 a3) (as_seq h2 table3));
+  assert (table_inv (as_seq h0 a4) (as_seq h2 table4));
 
   mk_lexp_four_fw_tables len ctx_len k l table_len
-    (table_inv_precomp len ctx_len k l table_len)
-    (table_inv_precomp len ctx_len k l table_len)
-    (table_inv_precomp len ctx_len k l table_len)
-    (table_inv_precomp len ctx_len k l table_len)
+    table_inv table_inv table_inv table_inv
     lprecomp_get lprecomp_get lprecomp_get lprecomp_get
     ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4
-    table1 table2 table3 table4 res;
+    (to_const table1) (to_const table2) (to_const table3) (to_const table4) res;
 
   let h3 = ST.get () in
   assert (modifies (loc res) h2 h3);

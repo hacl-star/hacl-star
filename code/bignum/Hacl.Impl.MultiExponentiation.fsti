@@ -36,8 +36,8 @@ let lexp_double_fw_tables_st
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
@@ -164,10 +164,10 @@ let lexp_four_fw_tables_st
   -> b3:lbuffer (uint_t a_t SEC) bLen
   -> a4:lbuffer (uint_t a_t SEC) len
   -> b4:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table3:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table4:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table3:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table4:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
