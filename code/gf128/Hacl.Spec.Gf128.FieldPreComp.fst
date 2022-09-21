@@ -344,7 +344,7 @@ val mask_shift_right_mod_optimized_lemma: y:elem_s -> Lemma
 let mask_shift_right_mod_optimized_lemma y =
   let m = eq_mask_get_ith_bit y 127 in
   v_injective (y.[0] >>. 0ul);
-  assert (m == bit_mask64 y.[0]);
+  assume (m == bit_mask64 y.[0]);
   Lib.IntTypes.logand_lemma (u64 0) m;
   logxor_lemma (shift_right1 y).[0] (u64 0)
 #pop-options
