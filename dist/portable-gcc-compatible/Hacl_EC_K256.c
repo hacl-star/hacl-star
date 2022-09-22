@@ -215,13 +215,7 @@ Write the point at infinity (additive identity) in `p`.
 */
 void Hacl_EC_K256_mk_point_at_inf(uint64_t *p)
 {
-  uint64_t *px = p;
-  uint64_t *py = p + (uint32_t)5U;
-  uint64_t *pz = p + (uint32_t)10U;
-  memset(px, 0U, (uint32_t)5U * sizeof (uint64_t));
-  memset(py, 0U, (uint32_t)5U * sizeof (uint64_t));
-  py[0U] = (uint64_t)1U;
-  memset(pz, 0U, (uint32_t)5U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointMul_make_point_at_inf(p);
 }
 
 /* SNIPPET_END: Hacl_EC_K256_mk_point_at_inf */

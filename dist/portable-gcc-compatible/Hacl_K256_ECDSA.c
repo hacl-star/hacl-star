@@ -1009,28 +1009,41 @@ void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
 
 /* SNIPPET_END: Hacl_Impl_K256_PointAdd_point_add */
 
-/* SNIPPET_START: Hacl_Impl_K256_PointMul_point_mul */
+/* SNIPPET_START: Hacl_Impl_K256_PointMul_make_point_at_inf */
 
-void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t *q)
+void Hacl_Impl_K256_PointMul_make_point_at_inf(uint64_t *p)
 {
-  uint64_t *px = out;
-  uint64_t *py = out + (uint32_t)5U;
-  uint64_t *pz = out + (uint32_t)10U;
+  uint64_t *px = p;
+  uint64_t *py = p + (uint32_t)5U;
+  uint64_t *pz = p + (uint32_t)10U;
   memset(px, 0U, (uint32_t)5U * sizeof (uint64_t));
   memset(py, 0U, (uint32_t)5U * sizeof (uint64_t));
   py[0U] = (uint64_t)1U;
   memset(pz, 0U, (uint32_t)5U * sizeof (uint64_t));
+}
+
+/* SNIPPET_END: Hacl_Impl_K256_PointMul_make_point_at_inf */
+
+/* SNIPPET_START: Hacl_Impl_K256_PointMul_point_mul */
+
+void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t *q)
+{
   uint64_t table[240U] = { 0U };
-  memcpy(table, out, (uint32_t)15U * sizeof (uint64_t));
+  uint64_t *t0 = table;
   uint64_t *t1 = table + (uint32_t)15U;
+  Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
   memcpy(t1, q, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
+  KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
-    (uint32_t)15U,
+    (uint32_t)7U,
     (uint32_t)1U,
-    uint64_t *t11 = table + i * (uint32_t)15U;
-    uint64_t *t2 = table + i * (uint32_t)15U + (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11););
+    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)15U;
+    uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointDouble_point_double(t2, t11);
+    uint64_t *t20 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
+    uint64_t *t3 = table + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t3, q, t20););
+  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -1085,35 +1098,37 @@ point_mul_double_vartime(
   uint64_t *q2
 )
 {
-  uint64_t *px = out;
-  uint64_t *py = out + (uint32_t)5U;
-  uint64_t *pz = out + (uint32_t)10U;
-  memset(px, 0U, (uint32_t)5U * sizeof (uint64_t));
-  memset(py, 0U, (uint32_t)5U * sizeof (uint64_t));
-  py[0U] = (uint64_t)1U;
-  memset(pz, 0U, (uint32_t)5U * sizeof (uint64_t));
   uint64_t table1[240U] = { 0U };
-  memcpy(table1, out, (uint32_t)15U * sizeof (uint64_t));
+  uint64_t *t00 = table1;
   uint64_t *t10 = table1 + (uint32_t)15U;
+  Hacl_Impl_K256_PointMul_make_point_at_inf(t00);
   memcpy(t10, q1, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
+  KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
-    (uint32_t)15U,
+    (uint32_t)7U,
     (uint32_t)1U,
-    uint64_t *t11 = table1 + i * (uint32_t)15U;
-    uint64_t *t2 = table1 + i * (uint32_t)15U + (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11););
+    uint64_t *t11 = table1 + (i + (uint32_t)1U) * (uint32_t)15U;
+    uint64_t *t2 = table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointDouble_point_double(t2, t11);
+    uint64_t *t20 = table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
+    uint64_t *t3 = table1 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t3, q1, t20););
   uint64_t table2[240U] = { 0U };
-  memcpy(table2, out, (uint32_t)15U * sizeof (uint64_t));
+  uint64_t *t0 = table2;
   uint64_t *t1 = table2 + (uint32_t)15U;
+  Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
   memcpy(t1, q2, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
+  KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
-    (uint32_t)15U,
+    (uint32_t)7U,
     (uint32_t)1U,
-    uint64_t *t11 = table2 + i * (uint32_t)15U;
-    uint64_t *t2 = table2 + i * (uint32_t)15U + (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11););
+    uint64_t *t11 = table2 + (i + (uint32_t)1U) * (uint32_t)15U;
+    uint64_t *t2 = table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointDouble_point_double(t2, t11);
+    uint64_t *t20 = table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
+    uint64_t *t3 = table2 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t3, q2, t20););
+  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     KRML_MAYBE_FOR4(i0,
@@ -1125,11 +1140,11 @@ point_mul_double_vartime(
     uint64_t mask_l0 = (uint64_t)16U - (uint64_t)1U;
     uint32_t i10 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j0 = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p10 = scalar1[i10] >> j0;
+    uint64_t p10 = scalar2[i10] >> j0;
     uint64_t ite0;
     if (i10 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j0)
     {
-      ite0 = p10 | scalar1[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
+      ite0 = p10 | scalar2[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
     }
     else
     {
@@ -1138,18 +1153,18 @@ point_mul_double_vartime(
     uint64_t bits_l = ite0 & mask_l0;
     uint64_t a_bits_l0[15U] = { 0U };
     uint32_t bits_l320 = (uint32_t)bits_l;
-    uint64_t *a_bits_l1 = table1 + bits_l320 * (uint32_t)15U;
+    uint64_t *a_bits_l1 = table2 + bits_l320 * (uint32_t)15U;
     memcpy(a_bits_l0, a_bits_l1, (uint32_t)15U * sizeof (uint64_t));
     Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l0);
     uint32_t bk0 = (uint32_t)256U;
     uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
     uint32_t i1 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j = (bk0 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p1 = scalar2[i1] >> j;
+    uint64_t p1 = scalar1[i1] >> j;
     uint64_t ite;
     if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
     {
-      ite = p1 | scalar2[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+      ite = p1 | scalar1[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
     }
     else
     {
@@ -1158,7 +1173,7 @@ point_mul_double_vartime(
     uint64_t bits_l0 = ite & mask_l;
     uint64_t a_bits_l[15U] = { 0U };
     uint32_t bits_l32 = (uint32_t)bits_l0;
-    uint64_t *a_bits_l10 = table2 + bits_l32 * (uint32_t)15U;
+    uint64_t *a_bits_l10 = table1 + bits_l32 * (uint32_t)15U;
     memcpy(a_bits_l, a_bits_l10, (uint32_t)15U * sizeof (uint64_t));
     Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l);
   }
@@ -1186,7 +1201,128 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
   gy[4U] = (uint64_t)0x483ada7726a3U;
   memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
   gz[0U] = (uint64_t)1U;
-  Hacl_Impl_K256_PointMul_point_mul(out, scalar, g);
+  uint64_t
+  res[240U] =
+    {
+      (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)1U,
+      (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)0U,
+      (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)705178180786072U,
+      (uint64_t)3855836460717471U, (uint64_t)4089131105950716U, (uint64_t)3301581525494108U,
+      (uint64_t)133858670344668U, (uint64_t)2199641648059576U, (uint64_t)1278080618437060U,
+      (uint64_t)3959378566518708U, (uint64_t)3455034269351872U, (uint64_t)79417610544803U,
+      (uint64_t)1U, (uint64_t)0U, (uint64_t)0U, (uint64_t)0U, (uint64_t)0U,
+      (uint64_t)1282049064345544U, (uint64_t)971732600440099U, (uint64_t)1014594595727339U,
+      (uint64_t)4392159187541980U, (uint64_t)268327875692285U, (uint64_t)2411661712280539U,
+      (uint64_t)1092576199280126U, (uint64_t)4328619610718051U, (uint64_t)3535440816471627U,
+      (uint64_t)95182251488556U, (uint64_t)1893725512243753U, (uint64_t)3619861457111820U,
+      (uint64_t)879374960417905U, (uint64_t)2868056058129113U, (uint64_t)273195291893682U,
+      (uint64_t)2044797305960112U, (uint64_t)2357106853933780U, (uint64_t)3563112438336058U,
+      (uint64_t)2430811541762558U, (uint64_t)106443809495428U, (uint64_t)2231357633909668U,
+      (uint64_t)3641705835951936U, (uint64_t)80642569314189U, (uint64_t)2254841882373268U,
+      (uint64_t)149848031966573U, (uint64_t)2304615661367764U, (uint64_t)2410957403736446U,
+      (uint64_t)2712754805859804U, (uint64_t)2440183877540536U, (uint64_t)99784623895865U,
+      (uint64_t)3667773127482758U, (uint64_t)1354899394473308U, (uint64_t)3636602998800808U,
+      (uint64_t)2709296679846364U, (uint64_t)7253362091963U, (uint64_t)3585950735562744U,
+      (uint64_t)935775991758415U, (uint64_t)4108078106735201U, (uint64_t)556081800336307U,
+      (uint64_t)229585977163057U, (uint64_t)4055594186679801U, (uint64_t)1767681004944933U,
+      (uint64_t)1432634922083242U, (uint64_t)534935602949197U, (uint64_t)251753159522567U,
+      (uint64_t)2846474078499321U, (uint64_t)4488649590348702U, (uint64_t)2437476916025038U,
+      (uint64_t)3040577412822874U, (uint64_t)79405234918614U, (uint64_t)3030621226551508U,
+      (uint64_t)2801117003929806U, (uint64_t)1642927515498422U, (uint64_t)2802725079726297U,
+      (uint64_t)8472780626107U, (uint64_t)866068070352655U, (uint64_t)188080768545106U,
+      (uint64_t)2152119998903058U, (uint64_t)3391239985029665U, (uint64_t)23820026013564U,
+      (uint64_t)2965064154891949U, (uint64_t)1846516097921398U, (uint64_t)4418379948133146U,
+      (uint64_t)3137755426942400U, (uint64_t)47705291301781U, (uint64_t)4278533051105665U,
+      (uint64_t)3453643211214931U, (uint64_t)3379734319145156U, (uint64_t)3762442192097039U,
+      (uint64_t)40243003528694U, (uint64_t)4063448994211201U, (uint64_t)5697015368785U,
+      (uint64_t)1006545411838613U, (uint64_t)4242291693755210U, (uint64_t)135184629190512U,
+      (uint64_t)264898689131035U, (uint64_t)611796474823597U, (uint64_t)3255382250029089U,
+      (uint64_t)3490429246984696U, (uint64_t)236558595864362U, (uint64_t)2055934691551704U,
+      (uint64_t)1487711670114502U, (uint64_t)1823930698221632U, (uint64_t)2130937287438472U,
+      (uint64_t)154610053389779U, (uint64_t)2746573287023216U, (uint64_t)2430987262221221U,
+      (uint64_t)1668741642878689U, (uint64_t)904982541243977U, (uint64_t)56087343124948U,
+      (uint64_t)393905062353536U, (uint64_t)412681877350188U, (uint64_t)3153602040979977U,
+      (uint64_t)4466820876224989U, (uint64_t)146579165617857U, (uint64_t)2628741216508991U,
+      (uint64_t)747994231529806U, (uint64_t)750506569317681U, (uint64_t)1887492790748779U,
+      (uint64_t)35259008682771U, (uint64_t)2085116434894208U, (uint64_t)543291398921711U,
+      (uint64_t)1144362007901552U, (uint64_t)679305136036846U, (uint64_t)141090902244489U,
+      (uint64_t)632480954474859U, (uint64_t)2384513102652591U, (uint64_t)2225529790159790U,
+      (uint64_t)692258664851625U, (uint64_t)198681843567699U, (uint64_t)2397092587228181U,
+      (uint64_t)145862822166614U, (uint64_t)196976540479452U, (uint64_t)3321831130141455U,
+      (uint64_t)69266673089832U, (uint64_t)4469644227342284U, (uint64_t)3899271145504796U,
+      (uint64_t)1261890974076660U, (uint64_t)525357673886694U, (uint64_t)182135997828583U,
+      (uint64_t)4292760618810332U, (uint64_t)3404186545541683U, (uint64_t)312297386688768U,
+      (uint64_t)204377466824608U, (uint64_t)230900767857952U, (uint64_t)3871485172339693U,
+      (uint64_t)779449329662955U, (uint64_t)978655822464694U, (uint64_t)2278252139594027U,
+      (uint64_t)104641527040382U, (uint64_t)3528840153625765U, (uint64_t)4484699080275273U,
+      (uint64_t)1463971951102316U, (uint64_t)4013910812844749U, (uint64_t)228915589433620U,
+      (uint64_t)1209641433482461U, (uint64_t)4043178788774759U, (uint64_t)3008668238856634U,
+      (uint64_t)1448425089071412U, (uint64_t)26269719725037U, (uint64_t)3330785027545223U,
+      (uint64_t)852657975349259U, (uint64_t)227245054466105U, (uint64_t)1534632353984777U,
+      (uint64_t)207715098574660U, (uint64_t)3209837527352280U, (uint64_t)4051688046309066U,
+      (uint64_t)3839009590725955U, (uint64_t)1321506437398842U, (uint64_t)68340219159928U,
+      (uint64_t)1806950276956275U, (uint64_t)3923908055275295U, (uint64_t)743963253393575U,
+      (uint64_t)42162407478783U, (uint64_t)261334584474610U, (uint64_t)3728224928885214U,
+      (uint64_t)4004701081842869U, (uint64_t)709043201644674U, (uint64_t)4267294249150171U,
+      (uint64_t)255540582975025U, (uint64_t)875490593722211U, (uint64_t)796393708218375U,
+      (uint64_t)14774425627956U, (uint64_t)1500040516752097U, (uint64_t)141076627721678U,
+      (uint64_t)2634539368480628U, (uint64_t)1106488853550103U, (uint64_t)2346231921151930U,
+      (uint64_t)897108283954283U, (uint64_t)64616679559843U, (uint64_t)400244949840943U,
+      (uint64_t)1731263826831733U, (uint64_t)1649996579904651U, (uint64_t)3643693449640761U,
+      (uint64_t)172543068638991U, (uint64_t)329537981097182U, (uint64_t)2029799860802869U,
+      (uint64_t)4377737515208862U, (uint64_t)29103311051334U, (uint64_t)265583594111499U,
+      (uint64_t)3798074876561255U, (uint64_t)184749333259352U, (uint64_t)3117395073661801U,
+      (uint64_t)3695784565008833U, (uint64_t)64282709896721U, (uint64_t)1618968913246422U,
+      (uint64_t)3185235128095257U, (uint64_t)3288745068118692U, (uint64_t)1963818603508782U,
+      (uint64_t)281054350739495U, (uint64_t)1658639050810346U, (uint64_t)3061097601679552U,
+      (uint64_t)3023781433263746U, (uint64_t)2770283391242475U, (uint64_t)144508864751908U,
+      (uint64_t)173576288079856U, (uint64_t)46114579547054U, (uint64_t)1679480127300211U,
+      (uint64_t)1683062051644007U, (uint64_t)117183826129323U, (uint64_t)1894068608117440U,
+      (uint64_t)3846899838975733U, (uint64_t)4289279019496192U, (uint64_t)176995887914031U,
+      (uint64_t)78074942938713U, (uint64_t)454207263265292U, (uint64_t)972683614054061U,
+      (uint64_t)808474205144361U, (uint64_t)942703935951735U, (uint64_t)134460241077887U
+    };
+  uint64_t *table = res;
+  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
+  {
+    KRML_MAYBE_FOR4(i,
+      (uint32_t)0U,
+      (uint32_t)4U,
+      (uint32_t)1U,
+      Hacl_Impl_K256_PointDouble_point_double(out, out););
+    uint32_t bk = (uint32_t)256U;
+    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+    uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
+    uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
+    uint64_t p1 = scalar[i1] >> j;
+    uint64_t ite;
+    if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
+    {
+      ite = p1 | scalar[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+    }
+    else
+    {
+      ite = p1;
+    }
+    uint64_t bits_l = ite & mask_l;
+    uint64_t a_bits_l[15U] = { 0U };
+    memcpy(a_bits_l, table, (uint32_t)15U * sizeof (uint64_t));
+    KRML_MAYBE_FOR15(i2,
+      (uint32_t)0U,
+      (uint32_t)15U,
+      (uint32_t)1U,
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
+      uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)15U;
+      KRML_MAYBE_FOR15(i,
+        (uint32_t)0U,
+        (uint32_t)15U,
+        (uint32_t)1U,
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
+        os[i] = x;););
+    Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l);
+  }
 }
 
 /* SNIPPET_END: point_mul_g */

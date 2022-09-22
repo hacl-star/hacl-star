@@ -100,12 +100,12 @@ let ( ** ) (x y:nat5) : nat5 =
   (x0 * y0, x1 * y1, x2 * y2, x3 * y3, x4 * y4)
 
 
-noextract
+[@@ noextract_to "krml"]
 let max52 : pos =
   assert_norm (pow2 52 - 1 > 0);
   pow2 52 - 1
 
-noextract
+[@@ noextract_to "krml"]
 let max48 : pos =
   assert_norm (pow2 48 - 1 > 0);
   pow2 48 - 1

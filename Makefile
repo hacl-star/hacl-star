@@ -452,16 +452,18 @@ min-test-unstaged: $(filter-out \
 # Tactic (not covered by --extract, intentionally) #
 ####################################################
 
+# JP: even though these are not covered by --extract, F* still writes out
+# correct dependency information in .fstar-depend-full, so we don't need to add
+# dependency edges from %.ml to %.checked -- this is already handled.
+
 obj/Meta_Interface.ml: CODEGEN = Plugin
-obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
-
-obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
-	$(OCAMLSHARED) $< -o $@
-
+obj/Meta_K256_PrecompTable.ml: CODEGEN = Plugin
 obj/Test_Lowstarize.ml: CODEGEN = Plugin
-obj/Test_Lowstarize.ml: obj/Test.Lowstarize.fst.checked
 
-obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
+# Not running ocamldep, so need to add dependency edges manually
+obj/Meta_K256_PrecompTable.ml: obj/Spec_K256_PointOps.cmx
+
+obj/%.cmxs: obj/%.ml
 	$(OCAMLSHARED) $< -o $@
 
 # IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.
@@ -481,6 +483,9 @@ obj/Test.Vectors.checked: obj/Test_Lowstarize.cmxs
 
 obj/Test.Vectors.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
 $(filter obj/Test.Vectors.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
+
+# obj/Hacl.Spec.K256.PrecompTable.fst.checked: FSTAR_FLAGS += --load Meta.K256.PrecompTable
+# obj/Hacl.Spec.K256.PrecompTable.fst.checked: obj/Meta_K256_PrecompTable.cmxs
 
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
