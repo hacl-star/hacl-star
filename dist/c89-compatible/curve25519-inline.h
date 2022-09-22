@@ -5,42 +5,38 @@
 
 // Computes the addition of four-element f1 with value in f2
 // and returns the carry (if any)
-static inline uint64_t add_scalar (uint64_t *out, uint64_t *f1, uint64_t f2) 
+static inline void add_scalar (uint64_t *out, uint64_t *f1, uint64_t f2) 
 {
-  uint64_t carry_r;
-
-  asm volatile(
+  __asm__ volatile(
     // Clear registers to propagate the carry bit
     "  xor %%r8d, %%r8d;"
     "  xor %%r9d, %%r9d;"
     "  xor %%r10d, %%r10d;"
     "  xor %%r11d, %%r11d;"
-    "  xor %k1, %k1;"
+    "  xor %%eax, %%eax;"
 
     // Begin addition chain
-    "  addq 0(%3), %0;"
-    "  movq %0, 0(%2);"
-    "  adcxq 8(%3), %%r8;"
-    "  movq %%r8, 8(%2);"
-    "  adcxq 16(%3), %%r9;"
-    "  movq %%r9, 16(%2);"
-    "  adcxq 24(%3), %%r10;"
-    "  movq %%r10, 24(%2);"
+    "  addq 0(%2), %0;"
+    "  movq %0, 0(%1);"
+    "  adcxq 8(%2), %%r8;"
+    "  movq %%r8, 8(%1);"
+    "  adcxq 16(%2), %%r9;"
+    "  movq %%r9, 16(%1);"
+    "  adcxq 24(%2), %%r10;"
+    "  movq %%r10, 24(%1);"
 
     // Return the carry bit in a register
-    "  adcx %%r11, %1;"
-  : "+&r" (f2), "=&r" (carry_r)
+    "  adcx %%r11, %%rax;"
+  : "+&r" (f2)
   : "r" (out), "r" (f1)
-  : "%r8", "%r9", "%r10", "%r11", "memory", "cc"
+  : "%rax", "%r8", "%r9", "%r10", "%r11", "memory", "cc"
   );
-
-  return carry_r;
 }
 
 // Computes the field addition of two field elements
 static inline void fadd (uint64_t *out, uint64_t *f1, uint64_t *f2) 
 {
-  asm volatile(
+  __asm__ volatile(
     // Compute the raw addition of f1 + f2
     "  movq 0(%0), %%r8;"
     "  addq 0(%2), %%r8;"
@@ -82,7 +78,7 @@ static inline void fadd (uint64_t *out, uint64_t *f1, uint64_t *f2)
 // Computes the field substraction of two field elements
 static inline void fsub (uint64_t *out, uint64_t *f1, uint64_t *f2) 
 {
-  asm volatile(
+  __asm__ volatile(
     // Compute the raw substraction of f1-f2
     "  movq 0(%1), %%r8;"
     "  subq 0(%2), %%r8;"
@@ -126,7 +122,7 @@ static inline void fsub (uint64_t *out, uint64_t *f1, uint64_t *f2)
 // Uses the 8-element buffer tmp for intermediate results
 static inline void fmul (uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tmp) 
 {
-  asm volatile(
+  __asm__ volatile(
 
     /////// Compute the raw multiplication: tmp <- src1 * src2 ////// 
 
@@ -214,7 +210,7 @@ static inline void fmul (uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tm
 // Uses the 16-element buffer tmp for intermediate results:
 static inline void fmul2 (uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tmp) 
 {
-  asm volatile(
+  __asm__ volatile(
 
     /////// Compute the raw multiplication tmp[0] <- f1[0] * f2[0] ////// 
 
@@ -369,9 +365,9 @@ static inline void fmul2 (uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *t
 // Requires f2 to be smaller than 2^17
 static inline void fmul_scalar (uint64_t *out, uint64_t *f1, uint64_t f2) 
 {
-  register uint64_t f2_r asm("rdx") = f2;
+  register uint64_t f2_r __asm__("rdx") = f2;
 
-  asm volatile(
+  __asm__ volatile(
     // Compute the raw multiplication of f1*f2
     "  mulxq 0(%2), %%r8, %%rcx;"      // f1[0]*f2
     "  mulxq 8(%2), %%r9, %%rbx;"      // f1[1]*f2
@@ -412,7 +408,7 @@ static inline void fmul_scalar (uint64_t *out, uint64_t *f1, uint64_t f2)
 // Computes p1 <- bit ? p2 : p1 in constant time
 static inline void cswap2 (uint64_t bit, uint64_t *p1, uint64_t *p2) 
 {
-  asm volatile(
+  __asm__ volatile(
     // Transfer bit into CF flag
     "  add $18446744073709551615, %0;"
 
@@ -497,7 +493,7 @@ static inline void cswap2 (uint64_t bit, uint64_t *p1, uint64_t *p2)
 // Uses the 8-element buffer tmp for intermediate results
 static inline void fsqr (uint64_t *out, uint64_t *f, uint64_t *tmp) 
 {
-  asm volatile(
+  __asm__ volatile(
 
     /////// Compute the raw multiplication: tmp <- f * f ////// 
 
@@ -591,7 +587,7 @@ static inline void fsqr (uint64_t *out, uint64_t *f, uint64_t *tmp)
 // Uses the 16-element buffer tmp for intermediate results
 static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp) 
 {
-  asm volatile(
+  __asm__ volatile(
     // Step 1: Compute all partial products
     "  movq 0(%0), %%rdx;"                                       // f[0]
     "  mulxq 8(%0), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"     // f[1]*f[0]
