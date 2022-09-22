@@ -26,7 +26,7 @@ val add_scalar
   (out:u256)
   (f1:u256)
   (f2:UInt64.t)
-  : Stack UInt64.t
+  : Stack (Ghost.erased UInt64.t)
   (requires fun h ->
     adx_enabled /\ bmi2_enabled /\
     B.live h out /\ B.live h f1 /\

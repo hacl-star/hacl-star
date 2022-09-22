@@ -382,7 +382,7 @@ val cswap2: #s:field_spec -> cswap2_t s True
 
 inline_for_extraction
 let add1_t (p: Type0) = out:felem M64 -> f1:felem M64 -> f2:uint64
-  -> Stack uint64
+  -> Stack (Ghost.erased uint64)
     (requires fun h ->
       p /\
       live h f1 /\ live h out /\
