@@ -8,12 +8,13 @@ open Spec.Hash.Definitions
 (** Shared implementations of the pad and finish functions, across all hash algorithms. *)
 
 noextract inline_for_extraction
-val pad: a:hash_alg -> pad_st a
+val pad: a:md_alg -> pad_st a
 
 (* Allows the caller to compute which length to allocate for padding. *)
 inline_for_extraction noextract
-val pad_len: a:hash_alg -> len:len_t a ->
+val pad_len: a:md_alg -> len:len_t a ->
   x:U32.t { U32.v x = pad_length a (len_v a len) }
 
 noextract inline_for_extraction
 val finish (i:impl) : finish_st i
+

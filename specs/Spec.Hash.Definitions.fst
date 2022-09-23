@@ -55,6 +55,7 @@ let is_md = function
 
 let sha2_alg = a:hash_alg { is_sha2 a }
 let blake_alg = a:hash_alg { is_blake a }
+let md_alg = a:hash_alg { is_md a }
 
  inline_for_extraction
 let to_blake_alg (a:blake_alg) = match a with
@@ -265,9 +266,8 @@ let pad0_length (a:hash_alg{is_md a}) (len:nat): Tot (n:nat{(len + 1 + n + len_l
   (block_length a - (len + len_length a + 1)) % block_length a
 
 (* Total length for the padding, a.k.a. the suffix length. *)
-let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % block_length a = 0 }) =
-  if is_blake a then (block_length a - len) % block_length a
-  else pad0_length a len + 1 + len_length a
+let pad_length (a: md_alg) (len: nat): Tot (n:nat { (len + n) % block_length a = 0 }) =
+  pad0_length a len + 1 + len_length a
 
 (** Endian-ness *)
 

@@ -76,11 +76,7 @@ let alloca_blake2s_32 = mk_alloca Blake2S Core.M32 (mk_init Blake2S Core.M32)
 let update_blake2s_32 = mk_update Blake2S Core.M32
 let finish_blake2s_32 = mk_finish Blake2S Core.M32
 
-let pad_blake2s = Hacl.Hash.PadFinish.pad Blake2S
-
 let init_blake2b_32 = mk_init Blake2B Core.M32
 let alloca_blake2b_32 = mk_alloca Blake2B Core.M32 (mk_init Blake2B Core.M32)
 let update_blake2b_32 = mk_update Blake2B Core.M32
 let finish_blake2b_32 = mk_finish Blake2B Core.M32
-
-let pad_blake2b = Hacl.Hash.PadFinish.pad Blake2B
