@@ -98,7 +98,7 @@ let block_length_smaller_than_max_input (a:hash_alg) :
   
 #reset-options "--using_facts_from 'Prims Spec.Hash.Definitions'"
 #push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=false"
-let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
+let pad_invariant_block (a: md_alg) (blocks: nat) (rest: nat): Lemma
   (requires blocks % block_length a = 0)
   (ensures (pad_length a rest = pad_length a (blocks + rest)))
 = 
@@ -148,16 +148,6 @@ let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   ()
 #pop-options
 
-(* A useful lemma for all the operations that involve going from bytes to bits. *)
-let max_input_size_len (a: hash_alg{is_md a}):
-  Lemma (FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
-=
-  let open FStar.Mul in
-  (* Small trick to ensure proper normalization: depending on the algorithm
-   * there are two possible values for the max input length. However, we need
-   * to normalize the quantities on specific algorithm values, otherwise the
-   * prover fails. *)
-  let f a = Spec.Hash.Definitions.max_input_length a * 8 + 8 = pow2 (Spec.Hash.Definitions.len_length a * 8) in
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> assert_norm(f MD5)
-  | SHA2_384 | SHA2_512 -> assert_norm(f SHA2_384)
+#reset-options
+let reveal_init_blake2 a =
+  ()

@@ -66,5 +66,6 @@ val pad_invariant_block (a: md_alg) (blocks: nat) (rest: nat): Lemma
   (ensures (pad_length a rest = pad_length a (blocks + rest)))
 
 val reveal_init_blake2 (a : Spec.Blake2.alg): Lemma (
+  let _ = allow_inversion Spec.Blake2.alg in
   let ws: words_state' (to_hash_alg a) = Spec.Blake2.blake2_init_hash a 0 (Spec.Blake2.max_output a) in
   Spec.Agile.Hash.init (to_hash_alg a) == (ws, nat_to_extra_state (to_hash_alg a) 0))
