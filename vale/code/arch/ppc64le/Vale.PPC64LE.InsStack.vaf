@@ -53,18 +53,6 @@ friend Vale.PPC64LE.Stack_Sems
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 200"
 #endverbatim
 
-procedure Stack_in(in base:reg_opr, inline offset:int, inline t:taint) returns(o:opr)
-    {:operand}
-    reads
-        stack;
-    extern;
-
-procedure Stack_lemma(ghost base:reg_opr, ghost offset:int, ghost t:taint)
-    {:public}
-    {:quick exportOnly}
-{
-}
-
 procedure Alloc_stack(inline n:nat64)
     {:public}
     {:quick exportOnly}
@@ -96,7 +84,7 @@ procedure Dealloc_stack(inline n:nat64)
 {
 }
 
-procedure Store_stack128(in src:vec_opr, inline offset:nat8)
+procedure Store_stack128(in src:vec_opr, inline offset:int)
     {:public}
     {:quick exportOnly}
     {:instruction Ins(S.StoreStack128(src, Secret, offset))}
@@ -105,7 +93,7 @@ procedure Store_stack128(in src:vec_opr, inline offset:nat8)
     modifies
         stack; stackTaint;
     requires
-        offset % 16 == 0;
+        valid_maddr_offset128(offset);
         r1 + offset <= init_r1(stack) - 16;
     ensures
         stack == store_stack128(r1 + offset, old(src), old(stack));
@@ -113,14 +101,14 @@ procedure Store_stack128(in src:vec_opr, inline offset:nat8)
 {
 }
 
-procedure Load_stack128(out dst:vec_opr, inline offset:nat8)
+procedure Load_stack128(out dst:vec_opr, inline offset:int)
     {:public}
     {:quick exportOnly}
     {:instruction Ins(S.LoadStack128(dst, Secret, offset))}
     reads
         r1; stack; stackTaint;
     requires
-        offset % 16 == 0;
+        valid_maddr_offset128(offset);
         r1 + offset + 16 <= init_r1(stack);
         valid_src_stack128(r1 + offset, stack);
         valid_taint_stack128(r1 + offset, Secret, stackTaint);

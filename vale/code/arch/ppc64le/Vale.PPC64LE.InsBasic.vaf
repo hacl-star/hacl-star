@@ -21,8 +21,8 @@ unfold let vale_stack = Vale.PPC64LE.Stack_i.vale_stack
 open Vale.PPC64LE.Machine_s
 open Vale.PPC64LE.State
 open Vale.PPC64LE.Decls
-open Vale.X64.Memory
-open Vale.X64.Stack_i
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.Stack_i
 friend Vale.PPC64LE.Decls
 module S = Vale.PPC64LE.Semantics_s
 #endverbatim
@@ -98,11 +98,6 @@ operand_type reg_opr:nat64 @ reg :=
 | inout r24 | inout r25 | inout r26 | inout r27
 | inout r28 | inout r29 | inout r30 | inout r31
 ;
-// 64-bit Memory operand
-operand_type Mem64(in h:heaplet, in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
-operand_type Stack(in base:reg_opr, inline offset:int, inline t:taint):int;
-type simm16:Type(0) := int_range((-32768), 32767);
-type nsimm16:Type(0) := int_range((-32767), 32768);
 
 operand_type heaplet:vale_heap @ heaplet_id :=
 | inout heap0 | inout heap1 | inout heap2 | inout heap3
@@ -110,6 +105,9 @@ operand_type heaplet:vale_heap @ heaplet_id :=
 | inout heap8 | inout heap9 | inout heap10 | inout heap11
 | inout heap12 | inout heap13 | inout heap14 | inout heap15
 ;
+
+type simm16:Type(0) := int_range((-32768), 32767);
+type nsimm16:Type(0) := int_range((-32767), 32768);
 
 procedure Move(out dst:reg_opr, in src:reg_opr)
     {:public}

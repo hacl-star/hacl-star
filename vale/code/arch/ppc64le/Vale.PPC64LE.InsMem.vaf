@@ -43,31 +43,6 @@ friend Vale.PPC64LE.Decls
 #reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
-procedure Mem64_in(in address:reg_opr, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint)
-    returns(o:opr)
-    {:operand}
-    extern;
-
-procedure Mem64_lemma(ghost h:heaplet_id, ghost address:reg_opr, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
-    {:public}
-    {:quick exportOnly}
-    {:typecheck false}
-    lets
-        heap_h := va_get_mem_heaplet(h, this);
-    reads
-        mem; memLayout;
-    requires
-        valid_src_addr(heap_h, b, index);
-        valid_layout_buffer(b, memLayout, heap_h, false);
-        valid_taint_buf64(b, heap_h, memLayout.vl_taint, t);
-        eval_reg(address, this) + offset == buffer_addr(b, heap_h) + 8 * index;
-    ensures
-        valid_mem_addr(va_opr_code_Mem64(h, address, offset, t), this);
-        load_mem64(buffer_addr(b, heap_h) + 8 * index, mem) == buffer_read(b, index, heap_h);
-{
-    lemma_opr_Mem64(h, this, address, offset, b, index, t);
-}
-
 #verbatim
 let create_heaplets_this (buffers:list buffer_info) (s:state) : GTot state =
   {s with ms_heap = Vale.PPC64LE.Memory_Sems.create_heaplets buffers s.ms_heap}

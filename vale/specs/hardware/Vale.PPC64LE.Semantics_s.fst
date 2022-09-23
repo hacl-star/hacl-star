@@ -58,8 +58,8 @@ type ins =
   | Vshasigmaw3  : dst:vec -> src:vec -> ins
   | Alloc        : n:nat64 -> ins
   | Dealloc      : n:nat64 -> ins
-  | StoreStack128: src:vec -> t:taint -> offset:nat8 -> ins
-  | LoadStack128 : dst:vec -> t:taint -> offset:nat8 -> ins
+  | StoreStack128: src:vec -> t:taint -> offset:int -> ins
+  | LoadStack128 : dst:vec -> t:taint -> offset:int -> ins
   | Ghost        : (_:unit) -> ins
 
 type ocmp =
@@ -289,6 +289,9 @@ let valid_mem (m:maddr) (s:state) : bool =
 
 let valid_mem128 (r:reg) (i:reg) (s:state) : bool =
   valid_addr128 (eval_reg r s + eval_reg i s) (heap_get s.ms_heap)
+
+let valid_mem128' (m:maddr) (s:state) : bool =
+  valid_maddr_offset128 m.offset && valid_addr128 (eval_maddr m s) (heap_get s.ms_heap)
 
 let valid_mem_and_taint (m:maddr) (t:taint) (s:state) : bool =
   let ptr = eval_maddr m s in
@@ -605,13 +608,13 @@ let eval_ins (ins:ins) : st unit =
     free_stack old_r1 new_r1
 
   | StoreStack128 src t offset ->
-    check (fun s -> offset % 16 = 0);;
+    check (fun s -> valid_maddr_offset128 offset);;
     let r1_pos = eval_reg 1 s + offset in
     check (fun s -> r1_pos <= s.ms_stack.initial_r1 - 16);;
     set (update_stack128_and_taint r1_pos (eval_vec src s) s t)
 
   | LoadStack128 dst t offset ->
-    check (fun s -> offset % 16 = 0);;
+    check (fun s -> valid_maddr_offset128 offset);;
     let r1_pos = eval_reg 1 s + offset in
     check (fun s -> r1_pos + 16 <= s.ms_stack.initial_r1);;
     check (fun s -> valid_src_stack128_and_taint r1_pos s t);;
