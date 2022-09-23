@@ -36,6 +36,7 @@ type hash_alg =
   | MD5
   | Blake2S
   | Blake2B
+  | SHA3_256
 
 // BB. Remove when renamed.
 let algorithm = hash_alg
@@ -44,7 +45,11 @@ let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false
 
- inline_for_extraction
+let is_sha3 = function
+  | SHA3_256 -> true
+  | _ -> false
+
+inline_for_extraction
 let is_blake = function
   | Blake2S | Blake2B -> true
   | _ -> false
@@ -73,20 +78,23 @@ let to_hash_alg (a : Spec.Blake2.alg) =
 (* In bytes. *)
 
 // BB. Needs to be renamed...
-inline_for_extraction 
-let max_input_length: hash_alg -> Tot pos = function
+inline_for_extraction
+let max_input_length: hash_alg -> option pos = function
   | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> pow2 61 - 1
-  | SHA2_384 | SHA2_512 -> pow2 125 - 1
-  | Blake2S -> pow2 64 - 1
-  | Blake2B -> pow2 128 - 1
+  | SHA2_224 | SHA2_256 -> Some (pow2 61 - 1)
+  | SHA2_384 | SHA2_512 -> Some (pow2 125 - 1)
+  | Blake2S -> Some (pow2 64 - 1)
+  | Blake2B -> Some (pow2 128 - 1)
+  | SHA3_256 -> None
 
 // BB. Removed once renamed...
 let max_input = max_input_length
 
+let maxed_hash_alg = a:hash_alg { Some? (max_input_length a) }
+
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
-let len_int_type: hash_alg -> inttype = function
+let len_int_type: maxed_hash_alg -> inttype = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> U64
   | SHA2_384 | SHA2_512 -> U128
@@ -94,19 +102,19 @@ let len_int_type: hash_alg -> inttype = function
   | Blake2B -> U128
 
 inline_for_extraction
-let nat_to_len (a:hash_alg) (n:nat{n <= maxint (len_int_type a)}) =
+let nat_to_len (a:maxed_hash_alg) (n:nat{n <= maxint (len_int_type a)}) =
   mk_int #(len_int_type a ) #PUB n
 
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
-let len_t: hash_alg -> Type = function
+let len_t: maxed_hash_alg -> Type = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pub_uint64
   | SHA2_384 | SHA2_512 -> pub_uint128
   | Blake2S -> pub_uint64
   | Blake2B -> pub_uint128
 
-val len_v: a:hash_alg -> len_t a -> nat
+val len_v: a:maxed_hash_alg -> len_t a -> nat
 let len_v = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> uint_v #U64 #PUB
@@ -116,7 +124,7 @@ let len_v = function
 
 (* Number of bytes occupied by a len_t, i.e. the size of the encoded length in
    the padding. *)
-let len_length: hash_alg -> Tot nat = function
+let len_length: maxed_hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> 8
   | SHA2_384 | SHA2_512 -> 16
@@ -125,7 +133,7 @@ let len_length: hash_alg -> Tot nat = function
 
 (* Same thing, as a machine integer *)
 inline_for_extraction
-let len_len: a:hash_alg -> Tot (n:size_t{v n = len_length a}) = function
+let len_len: a:maxed_hash_alg -> Tot (n:size_t{v n = len_length a}) = function
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
   | Blake2S -> 8ul
@@ -141,13 +149,14 @@ let word_t: hash_alg -> Tot inttype = function
   | SHA2_384 | SHA2_512 -> U64
   | Blake2S -> U32
   | Blake2B -> U64
+  | SHA3_256 -> U64
 
 inline_for_extraction
 let row (a:blake_alg) = lseq (uint_t (word_t a) SEC) 4
 
 inline_for_extraction
 let word (a: hash_alg) = match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> uint_t (word_t a) SEC
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> uint_t (word_t a) SEC
   | Blake2S | Blake2B -> row a
 
 (* In bytes *)
@@ -155,19 +164,23 @@ let word_length: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> 4
   | SHA2_384 | SHA2_512 -> 8
+  | SHA3_256 -> 8
   | Blake2S -> 4
   | Blake2B -> 8
 
 (* Number of words for a block size *)
 
-let block_word_length = 16
+let block_word_length (a: hash_alg) =
+  match a with
+  | SHA3_256 -> normalize_term (1088 / 8 / 8) // 17
+  | _ -> 16
 
 (* Define the size block in bytes *)
 // BB. Needs to be renamed
 
 let block_length a =
   let open FStar.Mul in
-  word_length a * block_word_length
+  word_length a * block_word_length a
 
 // BB. Removed once renamed
 let size_block = block_length
@@ -179,11 +192,12 @@ let state_word_length a =
   | MD5 -> 4
   | SHA1 -> 5
   | Blake2S | Blake2B -> 4
+  | SHA3_256 -> 25
   | _ -> 8
 
 inline_for_extraction 
 let extra_state a = match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> unit
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
   // Directly storing the length instead of the number of blocks to avoid
   // nonlinear operations in the spec
   // We use uints to avoid reasoning about max bounds.
@@ -194,7 +208,7 @@ let extra_state a = match a with
 inline_for_extraction 
 let extra_state_v (#a:hash_alg) (s:extra_state a) : nat =
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 0
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> 0
   | Blake2S -> v #U64 #SEC s
   | Blake2B -> v #U128 #SEC s
 
@@ -244,6 +258,7 @@ let hash_word_length: hash_alg -> Tot nat = function
   | SHA1 -> 5
   | SHA2_224 -> 7
   | SHA2_256 -> 8
+  | SHA3_256 -> 4
   | SHA2_384 -> 6
   | SHA2_512 -> 8
   | Blake2S | Blake2B -> 8
@@ -309,8 +324,13 @@ let update_t (a: hash_alg) =
   l:bytes { Seq.length l = block_length a } ->
   words_state a
 
+let less_than_max_input_length l a =
+  match max_input_length a with
+  | Some max -> l <= max
+  | None -> true
+
 let pad_t (a: hash_alg) =
-  l:nat { l <= max_input_length a } ->
+  l:nat { l `less_than_max_input_length` a } ->
   b:bytes { (Seq.length b + l) % block_length a = 0 }
 
 let finish_t (a: hash_alg) =

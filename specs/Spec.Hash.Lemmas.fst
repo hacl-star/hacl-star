@@ -96,6 +96,5 @@ let block_length_smaller_than_max_input (a:hash_alg) :
   normalize_term_spec(pow2 125 - 1);
   normalize_term_spec(pow2 64 - 1)
 
-#reset-options
 let reveal_init_blake2 a =
   ()
