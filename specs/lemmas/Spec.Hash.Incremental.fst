@@ -39,7 +39,7 @@ let blake2_split_props (a:Blake2.alg) (len:nat) :
 #push-options "--z3rlimit 100"
 let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
   Lemma
-  (requires (S.length input <= max_input_length a))
+  (requires (S.length input `less_than_max_input_length` a))
   (ensures (
     let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
     let bs, l = split_blocks a input in
@@ -70,7 +70,7 @@ let last_split_blake_props (a:hash_alg{is_blake a}) (input : bytes) :
 
 let last_split_blake_get_last_padded_block_eq (a:hash_alg{is_blake a}) (input : bytes) :
   Lemma
-  (requires S.length input <= max_input_length a)
+  (requires S.length input `less_than_max_input_length` a)
   (ensures (
     let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
     let bs, l = split_blocks a input in
@@ -357,7 +357,7 @@ let extra_state_v_nat_to_extra_state_is_id (a : hash_alg{is_blake a})
 /// The alternative blake2 function
 let blake2'
   (a:hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a}) :
+  (input : bytes {S.length input `less_than_max_input_length` a}) :
   r:lbytes (Spec.Blake2.max_output (to_blake_alg a)) {
     r == Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))}
   =
@@ -375,7 +375,7 @@ let blake2'
 /// The alternative incremental blake2 function
 let blake2_hash_incremental'
   (a:hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a}) :
+  (input : bytes {S.length input `less_than_max_input_length` a}) :
   r:lbytes (hash_length a) {
     r == hash_incremental a input } =
   let bs, l = split_blocks a input in
@@ -390,7 +390,7 @@ let blake2_hash_incremental'
 
 val blake2_is_hash_incremental_aux1
   (a:hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a}) :
+  (input : bytes {S.length input `less_than_max_input_length` a}) :
   Lemma(
     (**)
     let nn = Spec.Blake2.max_output (to_blake_alg a) in
@@ -406,7 +406,7 @@ let blake2_is_hash_incremental_aux1 a input = ()
 
 val blake2_is_hash_incremental_aux2
   (a:hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a})
+  (input : bytes {S.length input `less_than_max_input_length` a})
   (s1 : Blake2.state (to_blake_alg a)) :
   Lemma(
 //    let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
@@ -452,7 +452,7 @@ let blake2_is_hash_incremental_aux2 a input s1 =
 
 val blake2_is_hash_incremental_aux3
   (a:hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a})
+  (input : bytes {S.length input `less_than_max_input_length` a})
   (s2 : Blake2.state (to_blake_alg a)) :
   Lemma(
     let prev0 = 0 in
@@ -497,7 +497,7 @@ let blake2_is_hash_incremental_aux3 a input s2 =
   let h' : words_state a = update_multi a is2 S.empty in
   update_multi_zero a is2;
   assert(h' == is2);
-  assert_norm(max_input_length a == max_extra_state a);
+  assert_norm(Some?.v (max_input_length a) == max_extra_state a);
   assert(snd h' == nat_to_extra_state a (prev0 + S.length bs));
   calc(==) {
     extra_state_v (snd h');
@@ -540,7 +540,7 @@ let blake2_is_hash_incremental_aux3 a input s2 =
 
 val blake2_is_hash_incremental_aux4
   (a:hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a})
+  (input : bytes {S.length input `less_than_max_input_length` a})
   (s3 : Blake2.state (to_blake_alg a)) :
   Lemma(
     let s4 = Blake2.blake2_finish (to_blake_alg a) s3 (Spec.Blake2.max_output (to_blake_alg a)) in
@@ -552,7 +552,7 @@ let blake2_is_hash_incremental_aux4 a input s3 = ()
 /// The final theorem about blake2
 let blake2_is_hash_incremental
   (a : hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a}) :
+  (input : bytes {S.length input `less_than_max_input_length` a}) :
   Lemma (
     S.equal (Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a)))
             (hash_incremental a input))
@@ -574,7 +574,7 @@ let blake2_is_hash_incremental
 #push-options "--z3rlimit 100"
 let md_is_hash_incremental
   (a:hash_alg{is_md a})
-  (input: bytes { S.length input <= max_input_length a })
+  (input: bytes { S.length input `less_than_max_input_length` a })
   (s:words_state a)
   : Lemma (
       let blocks, rest = split_blocks a input in
@@ -596,10 +596,291 @@ let md_is_hash_incremental
      }
 #pop-options
 
-let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
+let sha3_is_incremental1
+  (a: sha3_alg)
+  (input: bytes): Lemma (hash_incremental a input `S.equal` (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s, _ = update_multi a s bs in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s))
+=
+  calc (S.equal) {
+    hash_incremental a input;
+  (S.equal) { } (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let bs, l = split_blocks a input in
+    let s = update_multi a s bs in
+    let s = update_last a s (S.length bs) l in
+    finish a s
+  );
+  (S.equal) { } (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    // Also the block size
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last_lazy rateInBytes input in
+    let s = update_multi a s bs in
+    let s = update_last a s (S.length bs) l in
+    finish a s
+  );
+  (S.equal) { } (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    // Also the block size
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last_lazy rateInBytes input in
+    let s = update_multi a s bs in
+    if S.length l = rateInBytes then
+      let s, _ = update SHA3_256 s l in
+      let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes 0 S.empty s, () in
+      finish a s
+    else
+      let s, _ = s in
+      let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+      finish a s
+  );
+  (S.equal) {
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let rateInBytes = 1088 / 8 in
+    let bs, l = UpdateMulti.split_at_last_lazy rateInBytes input in
+    let s = update_multi a s bs in
+    if S.length l = rateInBytes then
+      Lib.UpdateMulti.update_multi_associative rateInBytes (update a) s bs l
+    else
+      ()
+  } (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    // Also the block size
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    if S.length l = rateInBytes then
+      let s, _ = update_multi a s (bs `S.append` l) in
+      let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes 0 S.empty s, () in
+      finish a s
+    else
+      let s, _ = update_multi a s bs in
+      let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+      finish a s
+  );
+  (S.equal) {
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let rateInBytes = 1088 / 8 in
+    let bs, l = UpdateMulti.split_at_last_lazy rateInBytes input in
+    let s = update_multi a s bs in
+    if S.length l = rateInBytes then begin
+      let bs', l' = UpdateMulti.split_at_last rateInBytes input in
+      // TODO: strengthen this... NL arith!
+      assert (bs' `S.equal` (bs `S.append` l));
+      assert (l' `S.equal` S.empty)
+    end else
+      ()
+  } (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    // Also the block size
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s, _ = update_multi a s bs in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s
+  );
+  }
+
+let sha3_update (a: sha3_alg) (s: words_state' a) (b: bytes { S.length b = block_length a }): words_state' a =
+    let rateInBytes = 1088 / 8 in
+  Spec.SHA3.absorb_inner rateInBytes b s
+
+let sha3_update_last (a: sha3_alg) (s: words_state' a) (l: bytes { S.length l < block_length a }):
+  words_state' a
+=
+  let rateInBytes = 1088 / 8 in
+  let delimitedSuffix = byte 0x06 in
+  Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s
+
+#push-options "--fuel 1"
+let rec sha3_ignores_extra_state (a: sha3_alg) (acc: words_state' a) (bs: bytes): Lemma
+  (requires S.length bs % block_length a = 0)
+  (ensures (
+    let acc1, () = Lib.UpdateMulti.mk_update_multi (block_length a) (update a) (acc, ()) bs in
+    let acc2 = Lib.UpdateMulti.mk_update_multi (block_length a) (sha3_update a) acc bs in
+    acc1 == acc2))
+  (decreases S.length bs)
+=
+  if S.length bs = 0 then
+    ()
+  else
+    let block, rem = Lib.UpdateMulti.split_block (block_length a) bs 1 in
+    let acc = sha3_update a acc block in
+    sha3_ignores_extra_state a acc rem
+#pop-options
+
+#push-options "--print_implicits"
+let helper_lemma (): Lemma (words_state' SHA3_256 == Spec.SHA3.state) =
+  calc (==) {
+    words_state' SHA3_256;
+  (==) { _ by (FStar.Tactics.trefl ()) }
+    m:Seq.seq (word SHA3_256) {Seq.length m = state_word_length SHA3_256};
+  (==) { }
+    m:Seq.seq (word SHA3_256) {(Seq.length m <: nat) == (state_word_length SHA3_256 <: nat)};
+  (==) { _ by (FStar.Tactics.norm [ delta_only [ `%lseq; `%seq ] ]; FStar.Tactics.trefl ())  }
+    lseq (word SHA3_256) (state_word_length SHA3_256);
+  (==) { }
+    Spec.SHA3.state;
+  }
+#pop-options
+
+let sha3_is_incremental2
+  (a: sha3_alg)
+  (input: bytes): Lemma (hash a input `S.equal` (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s, _ = update_multi a s bs in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s))
+=
+  calc (S.equal) { (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s, _ = update_multi a s bs in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s
+  );
+  (S.equal) {
+  } (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s, _ = Lib.UpdateMulti.mk_update_multi (block_length a) (update a) s bs in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s
+  );
+  (S.equal) {
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    sha3_ignores_extra_state a s bs
+  } (
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s, () = Lib.UpdateMulti.mk_update_multi #(words_state' a) (block_length a) (sha3_update a) s bs, () in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s
+  );
+  // This step does not work unless the type argument to update_multi is
+  // explicitly instantiated. The trefl is here only to help debug. Use
+  // #set-options "--print_implicits" to see the issue.
+  (==) {
+    (_ by (FStar.Tactics.trefl()))
+  } (
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s = Lib.UpdateMulti.mk_update_multi #(words_state' a) (block_length a) (sha3_update a) s bs in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s
+  );
+  (S.equal) {
+  } (
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s = Lib.UpdateMulti.mk_update_multi #(words_state' a) (block_length a) (sha3_update a) s bs in
+    let s = sha3_update_last a s l, () in
+    finish a s
+  );
+  (==) {
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    Lib.UpdateMulti.Lemmas.update_full_is_repeat_blocks rateInBytes (sha3_update a) (sha3_update_last a) s input input
+  } (
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let s = Lib.Sequence.repeat_blocks #uint8 rateInBytes input
+      (Lib.UpdateMulti.Lemmas.repeat_f rateInBytes (sha3_update a))
+      (Lib.UpdateMulti.Lemmas.repeat_l rateInBytes (sha3_update_last a) input)
+      s, ()
+    in
+    finish a s
+  );
+  (==) {
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    Lib.Sequence.Lemmas.repeat_blocks_extensionality #uint8 #(words_state' a) #(words_state' a) rateInBytes input
+      (Lib.UpdateMulti.Lemmas.repeat_f rateInBytes (sha3_update a))
+      (Spec.SHA3.absorb_inner rateInBytes)
+      (Lib.UpdateMulti.Lemmas.repeat_l rateInBytes (sha3_update_last a) input)
+      (Spec.SHA3.absorb_last delimitedSuffix rateInBytes)
+      s
+  } (
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let s = Lib.Sequence.repeat_blocks #uint8 #(words_state' a) #(words_state' a) rateInBytes input
+      (Spec.SHA3.absorb_inner rateInBytes)
+      (Spec.SHA3.absorb_last delimitedSuffix rateInBytes)
+      s, ()
+    in
+    finish a s
+  );
+  (==) {
+    helper_lemma ()
+  } (
+    let s = Lib.Sequence.create 25 (u64 0) in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let s = Lib.Sequence.repeat_blocks #uint8 #Spec.SHA3.state #Spec.SHA3.state rateInBytes input
+      (Spec.SHA3.absorb_inner rateInBytes)
+      (Spec.SHA3.absorb_last delimitedSuffix rateInBytes)
+      s
+    in
+    Spec.SHA3.squeeze s rateInBytes 32
+  );
+  (==) {
+  }
+    Spec.SHA3.sha3_256 (S.length input) input;
+  }
+
+let sha3_is_incremental
+  (a: sha3_alg)
+  (input: bytes): Lemma (hash_incremental a input `S.equal` hash a input)
+=
+  calc (S.equal) {
+    hash_incremental a input;
+  (S.equal) { sha3_is_incremental1 a input } (
+    let s = Lib.Sequence.create 25 (u64 0), () in
+    let rateInBytes = 1088 / 8 in
+    let delimitedSuffix = byte 0x06 in
+    let bs, l = UpdateMulti.split_at_last rateInBytes input in
+    let s, _ = update_multi a s bs in
+    let s = Spec.SHA3.absorb_last delimitedSuffix rateInBytes (S.length l) l s, () in
+    finish a s);
+  (S.equal) { sha3_is_incremental2 a input }
+    hash a input;
+  }
+
+let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input `less_than_max_input_length` a }):
   Lemma (S.equal (hash a input) (hash_incremental a input))
   =
   if is_blake a then
     blake2_is_hash_incremental a input
+  else if is_sha3 a then
+    sha3_is_incremental a input
   else
     md_is_hash_incremental a input (init a)
+

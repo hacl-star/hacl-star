@@ -59,15 +59,16 @@ let is_md = function
   | _ -> false
 
 let sha2_alg = a:hash_alg { is_sha2 a }
+let sha3_alg = a:hash_alg { is_sha3 a }
 let blake_alg = a:hash_alg { is_blake a }
 let md_alg = a:hash_alg { is_md a }
 
- inline_for_extraction
+inline_for_extraction
 let to_blake_alg (a:blake_alg) = match a with
   | Blake2S -> Spec.Blake2.Blake2S
   | Blake2B -> Spec.Blake2.Blake2B
 
- inline_for_extraction
+inline_for_extraction
 let to_hash_alg (a : Spec.Blake2.alg) =
   match a with
   | Spec.Blake2.Blake2S -> Blake2S
@@ -329,7 +330,7 @@ let less_than_max_input_length l a =
   | Some max -> l <= max
   | None -> true
 
-let pad_t (a: hash_alg) =
+let pad_t (a: md_alg) =
   l:nat { l `less_than_max_input_length` a } ->
   b:bytes { (Seq.length b + l) % block_length a = 0 }
 

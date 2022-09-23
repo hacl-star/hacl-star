@@ -59,9 +59,10 @@ val update_multi_associative (a: hash_alg)
   [ SMTPat (update_multi a (update_multi a h input1) input2) ]
 
 val block_length_smaller_than_max_input (a:hash_alg) :
-  Lemma(block_length a <= max_input_length a)
+  Lemma(block_length a `less_than_max_input_length` a)
 
 val reveal_init_blake2 (a : Spec.Blake2.alg): Lemma (
   let _ = allow_inversion Spec.Blake2.alg in
   let ws: words_state' (to_hash_alg a) = Spec.Blake2.blake2_init_hash a 0 (Spec.Blake2.max_output a) in
   Spec.Agile.Hash.init (to_hash_alg a) == (ws, nat_to_extra_state (to_hash_alg a) 0))
+
