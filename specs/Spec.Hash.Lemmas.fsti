@@ -61,10 +61,6 @@ val update_multi_associative (a: hash_alg)
 val block_length_smaller_than_max_input (a:hash_alg) :
   Lemma(block_length a <= max_input_length a)
 
-val pad_invariant_block (a: md_alg) (blocks: nat) (rest: nat): Lemma
-  (requires blocks % block_length a = 0)
-  (ensures (pad_length a rest = pad_length a (blocks + rest)))
-
 val reveal_init_blake2 (a : Spec.Blake2.alg): Lemma (
   let _ = allow_inversion Spec.Blake2.alg in
   let ws: words_state' (to_hash_alg a) = Spec.Blake2.blake2_init_hash a 0 (Spec.Blake2.max_output a) in
