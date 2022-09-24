@@ -8,7 +8,7 @@ open Lib.IntTypes
 
 let wrap
   (a: hash_alg)
-  (key: bytes{Seq.length key <= max_input_length a})
+  (key: bytes{Seq.length key `less_than_max_input_length` a})
   : lbytes (block_length a)
 =
   let key0 = if Seq.length key <= block_length a then key else Spec.Agile.Hash.hash a key in
