@@ -64,7 +64,7 @@ let pad_length_mod (a: hash_alg{is_md a}) (base_len len: nat): Lemma
 val pad_len_bound :
   a : md_alg ->
   prev_len:len_t a { len_v a prev_len % block_length a = 0 } ->
-  input_len:U32.t { U32.v input_len + len_v a prev_len <= max_input_length a} ->
+  input_len:U32.t { (U32.v input_len + len_v a prev_len) `less_than_max_input_length` a} ->
   Lemma(
     (U32.v input_len % block_length a) +
       pad_length a (len_v a prev_len + U32.v input_len) <= 2 * block_length a)
@@ -75,7 +75,7 @@ let pad_len_bound a prev_len input_len = ()
 noextract inline_for_extraction
 let len_add32 (a: hash_alg{is_md a})
   (prev_len: len_t a)
-  (input_len: U32.t { U32.v input_len + len_v a prev_len <= max_input_length a }):
+  (input_len: U32.t { (U32.v input_len + len_v a prev_len) `less_than_max_input_length` a }):
   x:len_t a { len_v a x = len_v a prev_len + U32.v input_len }
 =
   let open FStar.Int.Cast.Full in
@@ -237,7 +237,7 @@ noextract inline_for_extraction
 val split_blocks (a : hash_alg) (input:B.buffer Int.uint8)
                  (input_len : Int.size_t { B.length input = U32.v input_len }) :
   ST.Stack (Int.size_t & Int.size_t & B.buffer Int.uint8 & Int.size_t & B.buffer Int.uint8)
-  (requires fun h -> B.live h input /\ B.length input <= max_input_length a)
+  (requires fun h -> B.live h input /\ B.length input `less_than_max_input_length` a)
   (ensures fun h0 (blocks_n, blocks_len, blocks, rest_len, rest) h1 ->
            h0 == h1 /\
            U32.v blocks_len + U32.v rest_len == U32.v input_len /\

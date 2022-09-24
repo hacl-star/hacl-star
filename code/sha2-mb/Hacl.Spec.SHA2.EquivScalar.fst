@@ -573,8 +573,8 @@ val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
 let update_lemma a block hash' =
   let hash, _ = hash' in
   reveal_opaque (`%Spec.update) Spec.update;
-  let block_w = BSeq.uints_from_bytes_be #(word_t a) #SEC #block_word_length block in
-  assert (block_w == words_of_bytes a #block_word_length block);
+  let block_w = BSeq.uints_from_bytes_be #(word_t a) #SEC #(block_word_length a) block in
+  assert (block_w == words_of_bytes a #(block_word_length a) block);
   let hash_1 = shuffle a block_w hash in
   shuffle_lemma a block_w hash;
   assert (hash_1 == Spec.shuffle a hash block_w);
@@ -722,7 +722,7 @@ let append_pad_last_length_lemma a len =
 
 val load_last_lemma:
      a:sha2_alg
-  -> totlen:size_nat{totlen <= max_input_length a}
+  -> totlen:size_nat{totlen `less_than_max_input_length` a}
   -> totlen_seq:lseq uint8 (len_length a)
   -> b:bytes{length b = totlen % block_length a} ->
   Lemma
@@ -778,7 +778,7 @@ let load_last_lemma a totlen totlen_seq b =
 
 val load_last_pad_lemma:
      a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
+  -> len:size_nat{len `less_than_max_input_length` a}
   -> fin:size_nat{fin == block_length a \/ fin == 2 * block_length a}
   -> rem:size_nat{rem < block_length a}
   -> b:bytes{length b = rem} ->
@@ -806,7 +806,7 @@ let load_last_pad_lemma a len fin rem b =
 
 val update_last_lemma:
      a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
+  -> len:size_nat{len `less_than_max_input_length` a}
   -> b:lseq uint8 (len % block_length a) ->
   Lemma
   (let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
@@ -838,7 +838,7 @@ let update_last_lemma a len b =
 
 val update_last_is_repeat_blocks_multi:
      a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
+  -> len:size_nat{len `less_than_max_input_length` a}
   -> last:lseq uint8 (len % block_length a)
   -> st1:words_state a ->
   Lemma
@@ -889,7 +889,7 @@ let update_last_is_repeat_blocks_multi a len last st1 =
 #push-options "--z3rlimit 150"
 val hash_is_repeat_blocks_multi:
     a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
+  -> len:size_nat{len `less_than_max_input_length` a}
   -> b:lseq uint8 len
   -> st0:words_state a ->
   Lemma

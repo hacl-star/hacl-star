@@ -47,7 +47,7 @@ let xor_bytes_inplace a b len =
 inline_for_extraction noextract
 let wrap_key_st (a: hash_alg) =
   output: B.buffer uint8 { B.length output == block_length a } ->
-  key: B.buffer uint8 {B.length key <= max_input_length a /\ B.disjoint output key} ->
+  key: B.buffer uint8 {B.length key `less_than_max_input_length` a /\ B.disjoint output key} ->
   len: UInt32.t {v len = B.length key} ->
   Stack unit
     (requires fun h0 ->
@@ -59,7 +59,7 @@ let wrap_key_st (a: hash_alg) =
 
 /// This one is only to avoid a warning about a pattern that is not encoding properly.
 inline_for_extraction
-let helper_smtpat (a: hash_alg) (len: uint32_t{ v len <= max_input_length a }):
+let helper_smtpat (a: hash_alg) (len: uint32_t{ v len `less_than_max_input_length` a }):
   x:uint32_t { x <= D.block_len a } =
   if len <= D.block_len a then len else D.hash_len a
 
@@ -103,23 +103,6 @@ let block_len_as_len (a: hash_alg):
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | Blake2S -> uint32_to_uint64 (D.block_len a)
   | SHA2_384 | SHA2_512 | Blake2B -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
-inline_for_extraction noextract
-let len_add32 (a: hash_alg) (l: len_t a) (x: UInt32.t):
-  Pure (len_t a)
-    (requires len_v a l + UInt32.v x <= max_input_length a)
-    (ensures fun l' -> len_v a l' = len_v a l + UInt32.v x)
-=
-  let open FStar.Int.Cast.Full in
-  assert_norm (128 < pow2 32);
-  assert_norm (pow2 61 < pow2 64);
-  assert_norm (pow2 125 < pow2 128);
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | Blake2S ->
-      let x = uint32_to_uint64 x in
-      l `FStar.UInt64.add` x
-  | SHA2_384 | SHA2_512 | Blake2B ->
-      let x = uint64_to_uint128 (uint32_to_uint64 x) in
-      l `FStar.UInt128.add` x
 
 /// This implementation is optimized by reusing an existing hash state ``s``
 /// rather than allocating a new one. Note that the disjointness hypotheses are
@@ -211,7 +194,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
       let rem = B.sub data full_blocks_len rem_len in
       let ev2 = update_multi s ev1 full_blocks n_blocks in
       (**) update_multi_extra_state_eq' a (D.as_seq h2 s, ev1) (B.as_seq h0 full_blocks);
-      let ev3 = update_last s ev2 (len_add32 a (block_len_as_len a) full_blocks_len) rem rem_len in
+      let ev3 = update_last s ev2 (Hacl.Hash.MD.len_add32 a (block_len_as_len a) full_blocks_len) rem rem_len in
       (**) let h3 = ST.get () in
       (**) assert ((D.as_seq h3 s, ev3) ==
       (**) Spec.Hash.Incremental.update_last a

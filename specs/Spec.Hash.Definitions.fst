@@ -108,18 +108,20 @@ let nat_to_len (a:maxed_hash_alg) (n:nat{n <= maxint (len_int_type a)}) =
 
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
-let len_t: maxed_hash_alg -> Type = function
+let len_t: hash_alg -> Type = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pub_uint64
   | SHA2_384 | SHA2_512 -> pub_uint128
+  | SHA3_256 -> unit
   | Blake2S -> pub_uint64
   | Blake2B -> pub_uint128
 
-val len_v: a:maxed_hash_alg -> len_t a -> nat
+val len_v: a:hash_alg -> len_t a -> nat
 let len_v = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> uint_v #U64 #PUB
   | SHA2_384 | SHA2_512 -> uint_v #U128 #PUB
+  | SHA3_256 -> fun _ -> 0
   | Blake2S -> uint_v #U64 #PUB
   | Blake2B -> uint_v #U128 #PUB
 

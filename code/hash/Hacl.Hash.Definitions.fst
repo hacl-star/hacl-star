@@ -226,7 +226,7 @@ let finish_st (i:impl) =
   (requires (fun h ->
     B.live h s /\ B.live h dst /\ B.disjoint s dst))
   (ensures (fun h0 _ h1 ->
-    M.(modifies (loc_buffer dst) h0 h1) /\
+    M.(modifies (loc_buffer dst `loc_union` loc_buffer s) h0 h1) /\
     Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish (get_alg i) (as_seq h0 s, ev))))
 
 noextract inline_for_extraction

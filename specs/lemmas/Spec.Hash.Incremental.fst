@@ -719,7 +719,7 @@ let rec sha3_ignores_extra_state (a: sha3_alg) (acc: words_state' a) (bs: bytes)
 #pop-options
 
 #push-options "--print_implicits"
-let helper_lemma (): Lemma (words_state' SHA3_256 == Spec.SHA3.state) =
+let sha3_state_is_hash_state: squash (words_state' SHA3_256 == Spec.SHA3.state) =
   calc (==) {
     words_state' SHA3_256;
   (==) { _ by (FStar.Tactics.trefl ()) }
@@ -839,7 +839,7 @@ let sha3_is_incremental2
     finish a s
   );
   (==) {
-    helper_lemma ()
+    // sha3_state_is_hash_state
   } (
     let s = Lib.Sequence.create 25 (u64 0) in
     let rateInBytes = 1088 / 8 in
