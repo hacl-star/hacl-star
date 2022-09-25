@@ -29,7 +29,7 @@ val sha224_8
   (dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 : lbuffer uint8 28ul)
   (input_len:size_t) (input0 input1 input2 input3 input4 input5 input6 input7 : lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_224 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_224 /\
     live8 h0 input0 input1 input2 input3 input4 input5 input6 input7 /\
     live8 h0 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 /\
     internally_disjoint8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7)
@@ -76,7 +76,7 @@ val sha256_8
   (dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 : lbuffer uint8 32ul)
   (input_len:size_t) (input0 input1 input2 input3 input4 input5 input6 input7 : lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_256 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_256 /\
     live8 h0 input0 input1 input2 input3 input4 input5 input6 input7 /\
     live8 h0 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 /\
     internally_disjoint8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7)
@@ -120,7 +120,7 @@ let sha384_update4 block hash = update #SHA2_384 #M256 block hash
 
 val sha384_4 (dst0 dst1 dst2 dst3: lbuffer uint8 48ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_384 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_384 /\
     live4 h0 input0 input1 input2 input3 /\
     live4 h0 dst0 dst1 dst2 dst3 /\
     internally_disjoint4 dst0 dst1 dst2 dst3)
@@ -156,7 +156,7 @@ let sha512_update4 block hash = update #SHA2_512 #M256 block hash
 
 val sha512_4 (dst0 dst1 dst2 dst3: lbuffer uint8 64ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_512 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_512 /\
     live4 h0 input0 input1 input2 input3 /\
     live4 h0 dst0 dst1 dst2 dst3 /\
     internally_disjoint4 dst0 dst1 dst2 dst3)

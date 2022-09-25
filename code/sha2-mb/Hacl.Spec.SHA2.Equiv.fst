@@ -390,7 +390,7 @@ val load_ws_lemma_l:
   -> #m:m_spec{is_supported a m}
   -> b:multiblock_spec a m
   -> j:nat{j < lanes a m} ->
-  Lemma ((ws_spec_v (load_ws b)).[j] == BSeq.uints_from_bytes_be #(word_t a) #SEC #block_word_length b.(|j|))
+  Lemma ((ws_spec_v (load_ws b)).[j] == BSeq.uints_from_bytes_be #(word_t a) #SEC #(block_word_length a) b.(|j|))
 
 let load_ws_lemma_l #a #m b j =
   let lp = Seq.index (ws_spec_v (load_ws b)) j in
@@ -684,7 +684,7 @@ let hash_lemma #a #m len b =
 val hash_agile_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat{len <= max_input_length a}
+  -> len:size_nat{len `less_than_max_input_length` a}
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
   Lemma ((hash #a #m len b).(|l|) == Spec.Agile.Hash.hash a b.(|l|))
@@ -697,7 +697,7 @@ let hash_agile_lemma_l #a #m len b l =
 val hash_agile_lemma:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat{len <= max_input_length a}
+  -> len:size_nat{len `less_than_max_input_length` a}
   -> b:multiseq (lanes a m) len ->
   Lemma (forall (l:nat{l < lanes a m}).
     (hash #a #m len b).(|l|) == Spec.Agile.Hash.hash a b.(|l|))

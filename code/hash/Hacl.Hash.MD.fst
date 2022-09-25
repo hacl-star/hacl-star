@@ -73,17 +73,13 @@ let pad_len_bound a prev_len input_len = ()
 
 (* Avoiding an ill-formed pattern error... *)
 noextract inline_for_extraction
-let len_add32 (a: hash_alg{is_md a})
-  (prev_len: len_t a)
-  (input_len: U32.t { (U32.v input_len + len_v a prev_len) `less_than_max_input_length` a }):
-  x:len_t a { len_v a x = len_v a prev_len + U32.v input_len }
-=
+let len_add32 a prev_len input_len =
   let open FStar.Int.Cast.Full in
   match a with
-  | SHA2_224 | SHA2_256 | MD5 | SHA1 ->
+  | SHA2_224 | SHA2_256 | MD5 | SHA1 | Blake2S ->
       assert_norm (pow2 61 < pow2 64);
       U64.(prev_len +^ uint32_to_uint64 input_len)
-  | SHA2_384 | SHA2_512 ->
+  | SHA2_384 | SHA2_512 | Blake2B ->
       assert_norm (pow2 125 < pow2 128);
       U128.(prev_len +^ uint64_to_uint128 (uint32_to_uint64 input_len))
 
@@ -275,14 +271,18 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   (**) let input_v0 : Ghost.erased _ = B.as_seq h0 input in
   (**) assert(input_v0 `S.equal` S.append blocks_v0 rest_v0);
   update_multi s () blocks blocks_n;
+  let h01 = ST.get () in
+  assert ((as_seq h01 s, ()) == Spec.Agile.Hash.(update_multi a (init a) blocks_v0));
   update_last s () (u32_to_len a blocks_len) rest rest_len;
-  finish s () dst;
-  (**) let h1 = ST.get () in
-  (**) assert((as_seq h1 s, ()) ==
+  let h02 = ST.get () in
+  (**) assert((as_seq h02 s, ()) ==
          Spec.Hash.Incremental.update_last a
            (Spec.Agile.Hash.(update_multi a (init a) blocks_v0)) (U32.v blocks_len) rest_v0);
-  (**) assert((as_seq h1 s, ()) ==
+  (**) assert((as_seq h02 s, ()) ==
          Spec.Hash.Incremental.hash_incremental_body a input_v0 (Spec.Agile.Hash.init a));
+  finish s () dst;
+  assert B.(disjoint s dst);
+  (**) let h1 = ST.get () in
   (**) assert(
          B.as_seq h1 dst `S.equal`
          Spec.Hash.PadFinish.finish a (

@@ -17,15 +17,20 @@ open Lib.IntTypes
 
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
+let less_strict_than_max_input_length l a =
+  match max_input_length a with
+  | Some max -> l < max
+  | None -> true
+
 let key_and_data_fits (a:hash_alg) :
-  Lemma (block_length a + pow2 32 <= max_input_length a)
+  Lemma ((block_length a + pow2 32) `less_than_max_input_length` a)
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
 let hash_block_length_fits (a:hash_alg) :
-  Lemma (hash_length a + pow2 32 + block_length a < max_input_length a)
+  Lemma ((hash_length a + pow2 32 + block_length a) `less_strict_than_max_input_length` a)
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);

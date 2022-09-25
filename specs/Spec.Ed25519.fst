@@ -22,7 +22,7 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let max_input_length_sha512 = Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512
+let max_input_length_sha512 = Some?.v (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512)
 let _: squash(max_input_length_sha512 > pow2 32 + 64) =
   assert_norm (max_input_length_sha512 > pow2 32 + 64)
 

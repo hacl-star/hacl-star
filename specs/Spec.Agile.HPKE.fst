@@ -510,6 +510,7 @@ let sealPSK cs skE pkR info aad pt psk psk_id =
     | None -> None
     | Some (_, ct) -> Some (enc, ct)
 
+#restart-solver
 let openPSK cs enc skR info aad ct psk psk_id =
   match setupPSKR cs enc skR info psk psk_id with
   | None -> None

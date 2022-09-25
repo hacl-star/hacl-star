@@ -126,16 +126,16 @@ let init_512: init_st (|SHA2_512, ()|) = init SHA2_512
 
 inline_for_extraction
 let block_w (a: sha2_alg) =
-  b:B.buffer (word a) { B.length b = Helpers.block_word_length }
+  b:B.buffer (word a) { B.length b = Helpers.block_word_length a }
 
 let block_b (a: sha2_alg) =
-  b:B.buffer uint8 { FStar.Mul.(B.length b = block_word_length * word_length a) }
+  b:B.buffer uint8 { FStar.Mul.(B.length b = block_word_length a * word_length a) }
 
 inline_for_extraction
 let ws_w (a: sha2_alg) = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
 
 let block_words_be (a: sha2_alg) (h: HS.mem) (b: block_b a) =
-  words_of_bytes a #block_word_length (B.as_seq h b)
+  words_of_bytes a #(block_word_length a) (B.as_seq h b)
 
 inline_for_extraction
 val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
@@ -152,14 +152,14 @@ let index_be (a: sha2_alg) (b: block_b a) (i: U32.t):
   ST.Stack (word a)
     (requires (fun h ->
       B.live h b /\
-      U32.v i < block_word_length))
+      U32.v i < (block_word_length a)))
     (ensures (fun h0 r h1 ->
        M.(modifies loc_none h0 h1) /\
        r == S.index (words_of_bytes a #(B.length b / word_length a) (B.as_seq h0 b)) (U32.v i)))
 =
   match a with
-  | SHA2_224 | SHA2_256 -> Lib.ByteBuffer.uint_at_index_be #U32 #SEC #(size block_word_length) b i
-  | SHA2_384 | SHA2_512 -> Lib.ByteBuffer.uint_at_index_be #U64 #SEC #(size block_word_length) b i
+  | SHA2_224 | SHA2_256 -> Lib.ByteBuffer.uint_at_index_be #U32 #SEC #(size (block_word_length a)) b i
+  | SHA2_384 | SHA2_512 -> Lib.ByteBuffer.uint_at_index_be #U64 #SEC #(size (block_word_length a)) b i
 
 #set-options "--max_fuel 1 --z3rlimit 20"
 
@@ -365,7 +365,7 @@ let update a hash ev block =
   (**) assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
   shuffle a (G.hide block) hash1 computed_ws;
   (**) let h2 = ST.get () in
-  (**) assert (let block_w = words_of_bytes a #block_word_length (B.as_seq h1 block) in
+  (**) assert (let block_w = words_of_bytes a #(block_word_length a) (B.as_seq h1 block) in
 	       S.equal (B.as_seq h2 hash1) (Spec.shuffle a (B.as_seq h1 hash1) block_w));
   C.Loops.in_place_map2 hash hash1 8ul ( (+. ) #(word_t a) #SEC );
   (**) let h3 = ST.get () in
