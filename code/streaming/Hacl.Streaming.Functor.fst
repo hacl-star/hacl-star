@@ -1255,9 +1255,9 @@ let mk_finish #index c i t t' p dst =
     }
   end;
 
-  c.state.frame_invariant #i (B.loc_buffer dst) block_state h5 h6;
-  stateful_frame_preserves_freeable #index #c.state #i (B.loc_buffer dst) block_state h5 h6;
-  optional_frame #_ #i #c.km #c.key (B.loc_buffer dst) k' h5 h6;
+  c.state.frame_invariant #i B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
+  stateful_frame_preserves_freeable #index #c.state #i B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
+  optional_frame #_ #i #c.km #c.key B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) k' h5 h6;
 
   pop_frame ();
   let h7 = ST.get () in

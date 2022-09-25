@@ -2,7 +2,9 @@ module Hacl.Streaming.MD
 
 open FStar.HyperStack.ST
 
-/// A streaming version of MD-based hashes
+/// This file is poorly named. It contains a generic type class instantiation
+/// for the streaming functor for any algorithm that fits within the agile hash
+/// infrastructure.
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -13,6 +15,8 @@ module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module F = Hacl.Streaming.Functor
+
+module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
 open FStar.Mul
@@ -35,7 +39,7 @@ open Spec.Hash.Definitions
 /// up to 2^125 for SHA384/512.
 
 inline_for_extraction noextract
-let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length a } =
+let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x `less_than_max_input_length` a } =
   let _ = allow_inversion hash_alg in
   match a with
   | MD5 | SHA1
@@ -43,6 +47,7 @@ let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length 
   | SHA2_384 | SHA2_512 -> assert_norm (pow2 64 < pow2 125 - 1); pow2 64 - 1
   | Blake2S -> pow2 64 - 1
   | Blake2B -> assert_norm (pow2 64 < pow2 128); pow2 64 - 1
+  | SHA3_256 -> pow2 64 - 1 // TODO: relax this?
 
 open Hacl.Streaming.Interface
 
@@ -51,7 +56,9 @@ module D = Hacl.Hash.Definitions
 module Agile = Spec.Agile.Hash
 
 inline_for_extraction noextract
-let alg = a:hash_alg{is_md a}
+let alg = a:hash_alg{not (is_blake a)}
+
+let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
 inline_for_extraction noextract
 let init_elem (a : alg) : word a =
@@ -59,6 +66,7 @@ let init_elem (a : alg) : word a =
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> Lib.IntTypes.u32 0
   | SHA2_384 | SHA2_512 -> Lib.IntTypes.u64 0
+  | SHA3_256 -> Lib.IntTypes.u64 0
 
 inline_for_extraction noextract
 let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a)
@@ -70,9 +78,10 @@ let update_multi_s (a : alg) () acc (prevlen : nat) input =
 noextract
 let update_multi_zero (a : alg) () acc (prevlen : nat) :
   Lemma(update_multi_s a () acc prevlen S.empty == acc) = ()
-  
+
 #push-options "--ifuel 1"
 
+// TODO: this is the third copy of this lemma!! why?!
 noextract
 let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
                              (input1 input2 : S.seq uint8) :
@@ -88,12 +97,12 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
 #pop-options
 
-
 /// This proof usually succeeds fast but we increase the rlimit for safety
 #push-options "--z3rlimit 200 --ifuel 1"
 inline_for_extraction noextract
 let hacl_md (a:alg)// : block unit =
   =
+  assert_norm (word SHA3_256 == Lib.IntTypes.uint64);
   Block
     Erased
     (state_t a)
@@ -124,7 +133,8 @@ let hacl_md (a:alg)// : block unit =
       | SHA2_224 -> Hacl.Hash.SHA2.init_224 s
       | SHA2_256 -> Hacl.Hash.SHA2.init_256 s
       | SHA2_384 -> Hacl.Hash.SHA2.init_384 s
-      | SHA2_512 -> Hacl.Hash.SHA2.init_512 s)
+      | SHA2_512 -> Hacl.Hash.SHA2.init_512 s
+      | SHA3_256 -> Hacl.Hash.SHA3.init_256 s)
 
     (fun _ s prevlen blocks len ->
       [@inline_let]
@@ -136,6 +146,7 @@ let hacl_md (a:alg)// : block unit =
         | SHA2_256 -> Hacl.Hash.SHA2.update_multi_256
         | SHA2_384 -> Hacl.Hash.SHA2.update_multi_384
         | SHA2_512 -> Hacl.Hash.SHA2.update_multi_512
+        | SHA3_256 -> Hacl.Hash.SHA3.update_multi_256
       in
       update_multi s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
 
@@ -149,6 +160,7 @@ let hacl_md (a:alg)// : block unit =
         | SHA2_256 -> Hacl.Hash.SHA2.update_last_256
         | SHA2_384 -> Hacl.Hash.SHA2.update_last_384
         | SHA2_512 -> Hacl.Hash.SHA2.update_last_512
+        | SHA3_256 -> Hacl.Hash.SHA3.update_last_256
       in
       [@inline_let]
       let prevlen =
@@ -156,6 +168,7 @@ let hacl_md (a:alg)// : block unit =
         | MD5 | SHA1
         | SHA2_224 | SHA2_256 -> prevlen
         | SHA2_384 | SHA2_512 -> FStar.Int.Cast.Full.uint64_to_uint128 prevlen
+        | SHA3_256 -> ()
       in
       update_last s () prevlen last last_len)
 
@@ -169,6 +182,7 @@ let hacl_md (a:alg)// : block unit =
         | SHA2_256 -> Hacl.Hash.SHA2.finish_256
         | SHA2_384 -> Hacl.Hash.SHA2.finish_384
         | SHA2_512 -> Hacl.Hash.SHA2.finish_512
+        | SHA3_256 -> Hacl.Hash.SHA3.finish_256
       in
       finish s () dst)
 #pop-options

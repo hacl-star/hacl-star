@@ -229,9 +229,9 @@ let k = stateful_key
 #push-options "--z3cliopt smt.arith.nl=false"
 noextract
 let max_total_hash_length (a : alg) :
-  n:nat{n <= Spec.Hash.Definitions.max_input_length (to_hash_alg a)} =
+  n:nat{n `Spec.Hash.Definitions.less_than_max_input_length` (to_hash_alg a)} =
   assert_norm(
-    Spec.max_limb Spec.Blake2S <= Spec.Hash.Definitions.max_input_length (to_hash_alg a));
+    Spec.max_limb Spec.Blake2S <= Some?.v(Spec.Hash.Definitions.max_input_length (to_hash_alg a)));
   Spec.max_limb Spec.Blake2S
 #pop-options
 

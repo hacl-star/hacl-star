@@ -30,6 +30,7 @@ let string_of_alg =
   | SHA2_256 -> !$"SHA2_256"
   | SHA2_384 -> !$"SHA2_384"
   | SHA2_512 -> !$"SHA2_512"
+  | SHA3_256 -> !$"SHA3_256"
   | Blake2S -> !$"Blake2S"
   | Blake2B -> !$"Blake2B"
 
@@ -42,7 +43,7 @@ let blake2_spec = Hacl.Impl.Blake2.Core.M32
 inline_for_extraction noextract
 let impl_of_alg (a:alg) : impl =
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> (|a, ()|)
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> (|a, ()|)
   | Blake2S | Blake2B -> (|a, blake2_spec|)
 
 
@@ -58,6 +59,7 @@ type state_s: alg -> Type0 =
 | SHA2_256_s: p:Hacl.Hash.Definitions.state (|SHA2_256, ()|) -> state_s SHA2_256
 | SHA2_384_s: p:Hacl.Hash.Definitions.state (|SHA2_384, ()|) -> state_s SHA2_384
 | SHA2_512_s: p:Hacl.Hash.Definitions.state (|SHA2_512, ()|) -> state_s SHA2_512
+| SHA3_256_s: p:Hacl.Hash.Definitions.state (|SHA3_256, ()|) -> state_s SHA3_256
 | Blake2S_s: p:Hacl.Hash.Definitions.state (|Blake2S, blake2_spec|) -> state_s Blake2S
 | Blake2B_s: p:Hacl.Hash.Definitions.state (|Blake2B, blake2_spec|) -> state_s Blake2B
 
@@ -77,6 +79,7 @@ let mk_state_s (#a:alg) (p:Hacl.Hash.Definitions.state (impl_of_alg a)) :
   | SHA2_256 -> SHA2_256_s p
   | SHA2_384 -> SHA2_384_s p
   | SHA2_512 -> SHA2_512_s p
+  | SHA3_256 -> SHA3_256_s p
   | Blake2S -> Blake2S_s p
   | Blake2B -> Blake2B_s p
 
@@ -89,6 +92,7 @@ let p #a (s: state_s a): Hacl.Hash.Definitions.state (impl_of_alg a) =
   | SHA2_256_s p -> p
   | SHA2_384_s p -> p
   | SHA2_512_s p -> p
+  | SHA3_256_s p -> p
   | Blake2S_s p -> p
   | Blake2B_s p -> p
 
@@ -113,6 +117,7 @@ let alg_of_state a s =
   | SHA2_256_s _ -> SHA2_256
   | SHA2_384_s _ -> SHA2_384
   | SHA2_512_s _ -> SHA2_512
+  | SHA3_256_s _ -> SHA3_256
   | Blake2S_s _ -> Blake2S
   | Blake2B_s _ -> Blake2B
 
@@ -137,6 +142,7 @@ let alloca a =
     | SHA2_256 -> SHA2_256_s (B.alloca 0ul 8ul)
     | SHA2_384 -> SHA2_384_s (B.alloca 0UL 8ul)
     | SHA2_512 -> SHA2_512_s (B.alloca 0UL 8ul)
+    | SHA3_256 -> SHA3_256_s (B.alloca 0UL 25ul)
     | Blake2S -> Blake2S_s (B.alloca 0ul 16ul)
     | Blake2B -> Blake2B_s (B.alloca 0uL 16ul)
   in
@@ -151,6 +157,7 @@ let create_in a r =
     | SHA2_256 -> SHA2_256_s (B.malloc r 0ul 8ul)
     | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
     | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
+    | SHA3_256 -> SHA3_256_s (B.malloc r 0UL 25ul)
     | Blake2S -> Blake2S_s (B.malloc r 0ul 16ul)
     | Blake2B -> Blake2B_s (B.malloc r 0uL 16ul)
   in
@@ -169,6 +176,7 @@ let init #a s =
   | SHA2_256_s p -> Hacl.Hash.SHA2.init_256 p
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
   | SHA2_512_s p -> Hacl.Hash.SHA2.init_512 p
+  | SHA3_256_s p -> Hacl.Hash.SHA3.init_256 p
   | Blake2S_s p -> let _ = Hacl.Hash.Blake2.init_blake2s_32 p in ()
   | Blake2B_s p -> let _ = Hacl.Hash.Blake2.init_blake2b_32 p in ()
 #pop-options
@@ -214,6 +222,7 @@ let update2 #a s prevlen block =
   | SHA2_256_s p -> update_multi_256 p () block 1ul
   | SHA2_384_s p -> Hacl.Hash.SHA2.update_384 p () block
   | SHA2_512_s p -> Hacl.Hash.SHA2.update_512 p () block
+  | SHA3_256_s p -> Hacl.Hash.SHA3.update_256 p () block
   | Blake2S_s p ->
       let _ = Hacl.Hash.Blake2.update_blake2s_32 p prevlen block in
       ()
@@ -249,6 +258,9 @@ let update_multi2 #a s prevlen blocks len =
   | SHA2_512_s p ->
       let n = len / block_len SHA2_512 in
       Hacl.Hash.SHA2.update_multi_512 p () blocks n
+  | SHA3_256_s p ->
+      let n = len / block_len SHA3_256 in
+      Hacl.Hash.SHA3.update_multi_256 p () blocks n
   | Blake2S_s p ->
       let n = len / block_len Blake2S in
       let _ = Hacl.Hash.Blake2.update_multi_blake2s_32 p prevlen blocks n in
@@ -293,9 +305,9 @@ let update_last_st (#a:e_alg) =
   last:uint8_p { B.length last <= block_length a } ->
   last_len:uint32_t {
     v last_len = B.length last /\
-    v prev_len + v last_len <= max_input_length a /\
+    (v prev_len + v last_len) `less_than_max_input_length` a /\
     v prev_len % block_length a = 0 /\
-    extra_state_v ev + B.length last <= max_input_length a
+    (extra_state_v ev + B.length last) `less_than_max_input_length` a
     } ->
   Stack (extra_state a)
   (requires fun h0 ->
@@ -311,7 +323,7 @@ let update_last_st (#a:e_alg) =
 inline_for_extraction
 val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\
                               G.reveal a <> SHA2_512 /\
-                              G.reveal a <> Blake2B })
+                              G.reveal a <> Blake2B /\ not (is_sha3 a)})
   (update_last: Hacl.Hash.Definitions.update_last_st (impl_of_alg (G.reveal a))):
   update_last_st #a
 inline_for_extraction
@@ -321,7 +333,7 @@ let update_last_64 a update_last p ev prev_len last last_len =
 inline_for_extraction
 val update_last_128 (a: e_alg{ G.reveal a = SHA2_384 \/
                                G.reveal a = SHA2_512 \/
-                               G.reveal a = Blake2B})
+                               G.reveal a = Blake2B })
   (update_last: Hacl.Hash.Definitions.update_last_st (impl_of_alg (G.reveal a))):
   update_last_st #a
 inline_for_extraction
@@ -346,7 +358,7 @@ let update_last_with_internal_st (a : alg) =
   last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
   last_len:uint32_t {
     v last_len = B.length last /\
-    v prev_len + v last_len <= max_input_length a /\
+    (v prev_len + v last_len) `less_than_max_input_length` a /\
     v prev_len % block_length a = 0
     } ->
   Stack unit
@@ -355,7 +367,7 @@ let update_last_with_internal_st (a : alg) =
     invariant_s s h0 /\
     B.live h0 last /\
     B.(loc_disjoint (footprint_s s) (loc_buffer last) /\
-    v prev_len + v last_len <= max_input_length a))
+    (v prev_len + v last_len) `less_than_max_input_length` a))
   (ensures fun h0 _ h1 ->
     let s = mk_state_s p in
     invariant_s s h1 /\
@@ -402,6 +414,8 @@ let update_last2 #a s prev_len last last_len =
       update_last_128 a Hacl.Hash.SHA2.update_last_384 p () prev_len last last_len
   | SHA2_512_s p ->
       update_last_128 a Hacl.Hash.SHA2.update_last_512 p () prev_len last last_len
+  | SHA3_256_s p ->
+      Hacl.Hash.SHA3.update_last_256 p () () last last_len
   | Blake2S_s p ->
       update_last_blake2s p prev_len last last_len
   | Blake2B_s p ->
@@ -464,7 +478,7 @@ let update_last #ga s last total_len =
   [@inline_let]
   let last_len = Int.Cast.uint64_to_uint32 last_len in
   (**) assert(U32.v last_len < Spec.Hash.Definitions.block_length a);  
-  (**) assert(v prev_len + v last_len <= max_input_length a);
+  (**) assert((v prev_len + v last_len) `less_than_max_input_length` a);
   (**) assert(v prev_len = v total_len - v last_len);
   (**) Math.Lemmas.cancel_mul_mod (v total_len / block_length a) (block_length a);
   (**) assert(v prev_len % block_length a = 0);
@@ -494,6 +508,7 @@ let finish #a s dst =
   | SHA2_256_s p -> Hacl.Hash.SHA2.finish_256 p () dst
   | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p () dst
   | SHA2_512_s p -> Hacl.Hash.SHA2.finish_512 p () dst
+  | SHA3_256_s p -> Hacl.Hash.SHA3.finish_256 p () dst
   | Blake2S_s p -> Hacl.Hash.Blake2.finish_blake2s_32 p 0UL dst
   | Blake2B_s p ->
     Hacl.Hash.Blake2.finish_blake2b_32 p (Int.Cast.Full.uint64_to_uint128
@@ -509,6 +524,7 @@ let free #ea s =
   | SHA2_256_s p -> B.free p
   | SHA2_384_s p -> B.free p
   | SHA2_512_s p -> B.free p
+  | SHA3_256_s p -> B.free p
   | Blake2S_s p -> B.free p
   | Blake2B_s p -> B.free p
   end;
@@ -548,6 +564,11 @@ let copy #a s_src s_dst =
       let s_dst: state SHA2_512 = s_dst in
       let p_dst = SHA2_512_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 8ul
+  | SHA3_256_s p_src ->
+      [@inline_let]
+      let s_dst: state SHA3_256 = s_dst in
+      let p_dst = SHA3_256_s?.p !*s_dst in
+      B.blit p_src 0ul p_dst 0ul 25ul
   | Blake2S_s p_src ->
       [@inline_let]
       let s_dst: state Blake2S = s_dst in
@@ -578,5 +599,6 @@ let hash a dst input len =
   | SHA2_256 -> hash_256 input len dst
   | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input len dst
   | SHA2_512 -> Hacl.Hash.SHA2.hash_512 input len dst
+  | SHA3_256 -> Hacl.SHA3.sha3_256 len input dst
   | Blake2S -> Hacl.Hash.Blake2.hash_blake2s_32 input len dst
   | Blake2B -> Hacl.Hash.Blake2.hash_blake2b_32 input len dst
