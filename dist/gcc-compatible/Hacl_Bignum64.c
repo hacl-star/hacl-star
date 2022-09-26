@@ -791,10 +791,9 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
-  uint32_t numb = (uint32_t)8U;
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
-    store64_be(tmp + i * numb, b[bnLen - i - (uint32_t)1U]);
+    store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
   }
   memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
 }

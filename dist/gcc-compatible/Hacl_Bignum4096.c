@@ -1337,17 +1337,12 @@ Serialize a bignum into big-endian memory.
 */
 void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
 {
-  uint32_t bnLen = (uint32_t)64U;
-  uint32_t tmpLen = (uint32_t)8U * bnLen;
-  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
-  uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
-  uint32_t numb = (uint32_t)8U;
-  for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
+  uint8_t tmp[512U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    store64_be(tmp + i * numb, b[bnLen - i - (uint32_t)1U]);
+    store64_be(tmp + i * (uint32_t)8U, b[(uint32_t)64U - i - (uint32_t)1U]);
   }
-  memcpy(res, tmp + tmpLen - (uint32_t)512U, (uint32_t)512U * sizeof (uint8_t));
+  memcpy(res, tmp, (uint32_t)512U * sizeof (uint8_t));
 }
 
 /*
@@ -1358,12 +1353,8 @@ Serialize a bignum into little-endian memory.
 */
 void Hacl_Bignum4096_bn_to_bytes_le(uint64_t *b, uint8_t *res)
 {
-  uint32_t bnLen = (uint32_t)64U;
-  uint32_t tmpLen = (uint32_t)8U * bnLen;
-  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
-  uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
+  uint8_t tmp[512U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     store64_le(tmp + i * (uint32_t)8U, b[i]);
   }

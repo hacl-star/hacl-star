@@ -72,7 +72,7 @@ let new_bn_from_bytes_be #t r len b =
       let res: Lib.Buffer.buffer (limb t) = res in
       assert (B.length res == FStar.UInt32.v (blocks len numb));
       let res: lbignum t (blocks len numb) = res in
-      BC.mk_bn_from_bytes_be len b res;
+      BC.mk_bn_from_bytes_be false len b res;
       let h2 = ST.get () in
       B.(modifies_only_not_unused_in loc_none h0 h2);
       res
@@ -116,7 +116,7 @@ let new_bn_from_bytes_le #t r len b =
       let res: Lib.Buffer.buffer (limb t) = res in
       assert (B.length res == FStar.UInt32.v (blocks len numb));
       let res: lbignum t (blocks len numb) = res in
-      BC.mk_bn_from_bytes_le len b res;
+      BC.mk_bn_from_bytes_le false len b res;
       let h2 = ST.get () in
       B.(modifies_only_not_unused_in loc_none h0 h2);
       res
