@@ -62,11 +62,10 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
   uint64_t c00 = c0;
   if (bLen < aLen)
   {
-    uint32_t rLen = aLen - bLen;
     uint64_t *a1 = a + bLen;
     uint64_t *res1 = res + bLen;
     uint64_t c = c00;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (aLen - bLen) / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -81,7 +80,7 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for (uint32_t i = (aLen - bLen) / (uint32_t)4U * (uint32_t)4U; i < aLen - bLen; i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;

@@ -560,11 +560,10 @@ Hacl_GenericField64_inverse(
   uint64_t c1;
   if ((uint32_t)1U < len1)
   {
-    uint32_t rLen = len1 - (uint32_t)1U;
     uint64_t *a1 = k1.n + (uint32_t)1U;
     uint64_t *res1 = n2 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (len1 - (uint32_t)1U) / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -579,7 +578,12 @@ Hacl_GenericField64_inverse(
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for
+    (uint32_t
+      i = (len1 - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+      i
+      < len1 - (uint32_t)1U;
+      i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;

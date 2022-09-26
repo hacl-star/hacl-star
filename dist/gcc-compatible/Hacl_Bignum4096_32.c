@@ -987,11 +987,10 @@ bool Hacl_Bignum4096_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t
   {
     uint32_t n2[128U] = { 0U };
     uint32_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32((uint32_t)0U, n[0U], (uint32_t)2U, n2);
-    uint32_t rLen = (uint32_t)127U;
     uint32_t *a1 = n + (uint32_t)1U;
     uint32_t *res1 = n2 + (uint32_t)1U;
     uint32_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)31U; i++)
     {
       uint32_t t1 = a1[(uint32_t)4U * i];
       uint32_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -1006,12 +1005,13 @@ bool Hacl_Bignum4096_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t
       uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
-    {
+    KRML_MAYBE_FOR3(i,
+      (uint32_t)124U,
+      (uint32_t)127U,
+      (uint32_t)1U,
       uint32_t t1 = a1[i];
       uint32_t *res_i = res1 + i;
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i);
-    }
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i););
     uint32_t c1 = c;
     uint32_t c2 = c1;
     exp_vartime(nBits, n, a, (uint32_t)4096U, n2, res);
@@ -1180,11 +1180,10 @@ Hacl_Bignum4096_32_mod_inv_prime_vartime_precomp(
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
   uint32_t n2[128U] = { 0U };
   uint32_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32((uint32_t)0U, k1.n[0U], (uint32_t)2U, n2);
-  uint32_t rLen = (uint32_t)127U;
   uint32_t *a1 = k1.n + (uint32_t)1U;
   uint32_t *res1 = n2 + (uint32_t)1U;
   uint32_t c = c0;
-  for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)31U; i++)
   {
     uint32_t t1 = a1[(uint32_t)4U * i];
     uint32_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -1199,12 +1198,13 @@ Hacl_Bignum4096_32_mod_inv_prime_vartime_precomp(
     uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
   }
-  for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
-  {
+  KRML_MAYBE_FOR3(i,
+    (uint32_t)124U,
+    (uint32_t)127U,
+    (uint32_t)1U,
     uint32_t t1 = a1[i];
     uint32_t *res_i = res1 + i;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i);
-  }
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i););
   uint32_t c1 = c;
   uint32_t c2 = c1;
   exp_vartime_precomp(k1.n, k1.mu, k1.r2, a, (uint32_t)4096U, n2, res);
