@@ -335,7 +335,7 @@ Hacl_GenericField64_exp_consttime(
       Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aMc, t11, t2););
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i0 = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)64U;
       uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)64U;
       uint64_t p1 = b[i0] >> j;
@@ -371,7 +371,7 @@ Hacl_GenericField64_exp_consttime(
         (uint32_t)1U,
         Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM););
       uint32_t bk = bBits - bBits % (uint32_t)4U;
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
       uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
       uint64_t p1 = b[i1] >> j;
@@ -482,7 +482,7 @@ Hacl_GenericField64_exp_vartime(
       Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aMc, t11, t2););
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)64U;
       uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)64U;
       uint64_t p1 = b[i] >> j;
@@ -508,7 +508,7 @@ Hacl_GenericField64_exp_vartime(
         (uint32_t)1U,
         Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM););
       uint32_t bk = bBits - bBits % (uint32_t)4U;
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i1 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
       uint32_t j = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
       uint64_t p1 = b[i1] >> j;
