@@ -74,7 +74,7 @@ update_blake2b_256(
     Lib_IntVector_Intrinsics_vec256 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r30 = m_st + (uint32_t)3U * (uint32_t)1U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -339,7 +339,7 @@ Hacl_Hash_Blake2b_256_update_last_blake2b_256(
     Lib_IntVector_Intrinsics_vec256 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r30 = m_st + (uint32_t)3U * (uint32_t)1U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -531,7 +531,7 @@ blake2b_update_block(
     Lib_IntVector_Intrinsics_vec256 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 *r30 = m_st + (uint32_t)3U * (uint32_t)1U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];

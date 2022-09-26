@@ -528,7 +528,8 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
   uint32_t buf3[8U] = { 0U };
   uint64_t buf4[8U] = { 0U };
   uint64_t buf5[8U] = { 0U };
-  uint32_t buf6[16U] = { 0U };
+  uint64_t buf6[25U] = { 0U };
+  uint32_t buf7[16U] = { 0U };
   uint64_t buf[16U] = { 0U };
   switch (hash_alg)
   {
@@ -586,10 +587,21 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
           );
         break;
       }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        s =
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA3_256_s,
+              { .case_SHA3_256_s = buf6 }
+            }
+          );
+        break;
+      }
     case Spec_Hash_Definitions_Blake2S:
       {
         s =
-          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = buf6 } });
+          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = buf7 } });
         break;
       }
     case Spec_Hash_Definitions_Blake2B:

@@ -67,7 +67,7 @@ update_blake2s_128(Lib_IntVector_Intrinsics_vec128 *s, uint64_t totlen, uint8_t 
     Lib_IntVector_Intrinsics_vec128 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r30 = m_st + (uint32_t)3U * (uint32_t)1U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -323,7 +323,7 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
     Lib_IntVector_Intrinsics_vec128 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r30 = m_st + (uint32_t)3U * (uint32_t)1U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
@@ -515,7 +515,7 @@ blake2s_update_block(
     Lib_IntVector_Intrinsics_vec128 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r20 = m_st + (uint32_t)2U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *r30 = m_st + (uint32_t)3U * (uint32_t)1U;
-    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)0U];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
     uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];

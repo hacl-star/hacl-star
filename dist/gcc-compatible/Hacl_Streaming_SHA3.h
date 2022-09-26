@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Spec_H
-#define __Hacl_Spec_H
+#ifndef __Hacl_Streaming_SHA3_H
+#define __Hacl_Streaming_SHA3_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,57 +35,30 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-
+#include "Lib_Memzero0.h"
+#include "Hacl_Streaming_SHA2.h"
+#include "Hacl_SHA3.h"
 #include "evercrypt_targetconfig.h"
-#define Spec_Blake2_Blake2S 0
-#define Spec_Blake2_Blake2B 1
+typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA3_state_sha3_256;
 
-typedef uint8_t Spec_Blake2_alg;
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256();
 
-#define Spec_Hash_Definitions_SHA2_224 0
-#define Spec_Hash_Definitions_SHA2_256 1
-#define Spec_Hash_Definitions_SHA2_384 2
-#define Spec_Hash_Definitions_SHA2_512 3
-#define Spec_Hash_Definitions_SHA1 4
-#define Spec_Hash_Definitions_MD5 5
-#define Spec_Hash_Definitions_Blake2S 6
-#define Spec_Hash_Definitions_Blake2B 7
-#define Spec_Hash_Definitions_SHA3_256 8
+void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
-typedef uint8_t Spec_Hash_Definitions_hash_alg;
+void
+Hacl_Streaming_SHA3_update_256(
+  Hacl_Streaming_SHA2_state_sha2_384 *p,
+  uint8_t *data,
+  uint32_t len
+);
 
-#define Spec_FFDHE_FFDHE2048 0
-#define Spec_FFDHE_FFDHE3072 1
-#define Spec_FFDHE_FFDHE4096 2
-#define Spec_FFDHE_FFDHE6144 3
-#define Spec_FFDHE_FFDHE8192 4
+void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
 
-typedef uint8_t Spec_FFDHE_ffdhe_alg;
-
-#define Spec_Agile_Cipher_AES128 0
-#define Spec_Agile_Cipher_AES256 1
-#define Spec_Agile_Cipher_CHACHA20 2
-
-typedef uint8_t Spec_Agile_Cipher_cipher_alg;
-
-#define Spec_Agile_AEAD_AES128_GCM 0
-#define Spec_Agile_AEAD_AES256_GCM 1
-#define Spec_Agile_AEAD_CHACHA20_POLY1305 2
-#define Spec_Agile_AEAD_AES128_CCM 3
-#define Spec_Agile_AEAD_AES256_CCM 4
-#define Spec_Agile_AEAD_AES128_CCM8 5
-#define Spec_Agile_AEAD_AES256_CCM8 6
-
-typedef uint8_t Spec_Agile_AEAD_alg;
-
-#define Spec_Frodo_Params_SHAKE128 0
-#define Spec_Frodo_Params_AES128 1
-
-typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
+void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Spec_H_DEFINED
+#define __Hacl_Streaming_SHA3_H_DEFINED
 #endif
