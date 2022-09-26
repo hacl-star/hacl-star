@@ -41,10 +41,12 @@ type hash_alg =
 // BB. Remove when renamed.
 let algorithm = hash_alg
 
+inline_for_extraction
 let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false
 
+inline_for_extraction
 let is_sha3 = function
   | SHA3_256 -> true
   | _ -> false
@@ -54,6 +56,7 @@ let is_blake = function
   | Blake2S | Blake2B -> true
   | _ -> false
 
+inline_for_extraction
 let is_md = function
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false

@@ -17,6 +17,7 @@ open Lib.IntTypes
 
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
 let less_strict_than_max_input_length l a =
   match max_input_length a with
   | Some max -> l < max
