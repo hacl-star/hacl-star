@@ -157,6 +157,19 @@ let make_g g =
   assert (F51.point_eval h1 g == Spec.Ed25519.g)
 
 
+inline_for_extraction noextract
+val convert_scalar: scalar:lbuffer uint8 32ul -> bscalar:lbuffer uint64 4ul ->
+  Stack unit
+  (requires fun h -> live h scalar /\ live h bscalar /\ disjoint scalar bscalar)
+  (ensures fun h0 _ h1 -> modifies (loc bscalar) h0 h1 /\
+    BD.bn_v h1 bscalar == BSeq.nat_from_bytes_le (as_seq h0 scalar))
+
+let convert_scalar scalar bscalar =
+  let h0 = ST.get () in
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
+  Hacl.Bignum.Convert.mk_bn_from_bytes_le true 32ul scalar bscalar
+
+
 val point_mul:
     result:point
   -> scalar:lbuffer uint8 32ul
@@ -175,11 +188,7 @@ let point_mul result scalar q =
   let h0 = ST.get () in
   push_frame ();
   let bscalar = create 4ul (u64 0) in
-  Lib.ByteBuffer.uints_from_bytes_le bscalar scalar;
-  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar);
-  let h1 = ST.get () in
-  assert (as_seq h1 bscalar == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar));
-  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
+  convert_scalar scalar bscalar;
 
   make_point_inf result;
   BE.lexp_fw_consttime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q 4ul 256ul bscalar result 4ul;
@@ -231,21 +240,12 @@ val point_mul_double_vartime:
 
 [@CInline]
 let point_mul_double_vartime result scalar1 q1 scalar2 q2 =
-  let h0 = ST.get () in
   push_frame ();
   let bscalar1 = create 4ul (u64 0) in
-  Lib.ByteBuffer.uints_from_bytes_le bscalar1 scalar1;
-  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar1);
-  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar1);
+  convert_scalar scalar1 bscalar1;
 
   let bscalar2 = create 4ul (u64 0) in
-  Lib.ByteBuffer.uints_from_bytes_le bscalar2 scalar2;
-  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar2);
-  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar2);
-
-  let h1 = ST.get () in
-  assert (as_seq h1 bscalar1 == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar1));
-  assert (as_seq h1 bscalar2 == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar2));
+  convert_scalar scalar2 bscalar2;
 
   make_point_inf result;
   ME.lexp_double_fw_vartime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q1 4ul 256ul bscalar1 q2 bscalar2 result 4ul;
