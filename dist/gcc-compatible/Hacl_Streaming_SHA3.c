@@ -24,7 +24,7 @@
 
 #include "Hacl_Streaming_SHA3.h"
 
-#include "internal/Hacl_Krmllib.h"
+
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256()
 {
@@ -284,8 +284,9 @@ void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8
   {
     Hacl_Impl_SHA3_loadState((uint32_t)136U, buf_last, tmp_block_state);
     Hacl_Impl_SHA3_state_permute(tmp_block_state);
+    uint8_t *uu____0 = buf_last + r;
     uint8_t b[136U] = { 0U };
-    memcpy(b, NULL, (uint32_t)0U * sizeof (void *));
+    memcpy(b, uu____0, (uint32_t)0U * sizeof (uint8_t));
     b[0U] = (uint8_t)0x06U;
     Hacl_Impl_SHA3_loadState((uint32_t)136U, b, tmp_block_state);
     uint8_t b1[136U] = { 0U };

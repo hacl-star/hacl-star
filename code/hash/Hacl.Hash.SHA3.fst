@@ -24,7 +24,7 @@ let update_last_256: update_last_st (| SHA3_256, () |) = fun s () () input input
   let open Lib.IntTypes in
   if input_len = 136ul then begin
     Hacl.Impl.SHA3.absorb_inner 136ul input s;
-    Hacl.Impl.SHA3.absorb_last (byte 0x06) 136ul 0ul (B.null #Lib.IntTypes.uint8) s
+    Hacl.Impl.SHA3.absorb_last (byte 0x06) 136ul 0ul (B.sub input input_len 0ul) s
   end else
     Hacl.Impl.SHA3.absorb_last (byte 0x06) 136ul input_len input s
 

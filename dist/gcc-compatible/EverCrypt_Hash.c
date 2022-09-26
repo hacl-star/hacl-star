@@ -25,7 +25,6 @@
 #include "EverCrypt_Hash.h"
 
 #include "internal/Vale.h"
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
@@ -740,8 +739,9 @@ EverCrypt_Hash_update_last2(
     {
       Hacl_Impl_SHA3_loadState((uint32_t)136U, last, p1);
       Hacl_Impl_SHA3_state_permute(p1);
+      uint8_t *uu____0 = last + last_len;
       uint8_t b[136U] = { 0U };
-      memcpy(b, NULL, (uint32_t)0U * sizeof (void *));
+      memcpy(b, uu____0, (uint32_t)0U * sizeof (uint8_t));
       b[0U] = (uint8_t)0x06U;
       Hacl_Impl_SHA3_loadState((uint32_t)136U, b, p1);
       uint8_t b1[136U] = { 0U };
