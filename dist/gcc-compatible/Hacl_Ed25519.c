@@ -1291,14 +1291,12 @@ void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out)
 void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
 {
   uint64_t bscalar[4U] = { 0U };
-  uint8_t tmp[32U] = { 0U };
-  memcpy(tmp, scalar, (uint32_t)32U * sizeof (uint8_t));
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = bscalar;
-    uint8_t *bj = tmp + i * (uint32_t)8U;
+    uint8_t *bj = scalar + i * (uint32_t)8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -1418,27 +1416,23 @@ point_mul_double_vartime(
 )
 {
   uint64_t bscalar1[4U] = { 0U };
-  uint8_t tmp0[32U] = { 0U };
-  memcpy(tmp0, scalar1, (uint32_t)32U * sizeof (uint8_t));
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = bscalar1;
-    uint8_t *bj = tmp0 + i * (uint32_t)8U;
+    uint8_t *bj = scalar1 + i * (uint32_t)8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
     os[i] = x;);
   uint64_t bscalar2[4U] = { 0U };
-  uint8_t tmp[32U] = { 0U };
-  memcpy(tmp, scalar2, (uint32_t)32U * sizeof (uint8_t));
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = bscalar2;
-    uint8_t *bj = tmp + i * (uint32_t)8U;
+    uint8_t *bj = scalar2 + i * (uint32_t)8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;

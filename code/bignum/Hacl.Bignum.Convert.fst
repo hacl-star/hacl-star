@@ -71,9 +71,12 @@ let mk_bn_from_bytes_be #t is_known_len len b res =
     [@inline_let] let numb = size (numbytes t) in
     [@inline_let] let bnLen = blocks len numb in
     [@inline_let] let tmpLen = numb *! bnLen in
-    let tmp = create tmpLen (u8 0) in
-    update_sub tmp (tmpLen -! len) len b;
-    bn_from_bytes_be_ bnLen tmp res end
+    if tmpLen =. len then
+      bn_from_bytes_be_ bnLen b res
+    else begin
+      let tmp = create tmpLen (u8 0) in
+      update_sub tmp (tmpLen -! len) len b;
+      bn_from_bytes_be_ bnLen tmp res end end
   else begin
     [@inline_let] let numb = size (numbytes t) in
     let bnLen = blocks len numb in
@@ -116,9 +119,12 @@ let mk_bn_from_bytes_le #t is_known_len len b res =
     [@inline_let] let numb = size (numbytes t) in
     [@inline_let] let bnLen = blocks len numb in
     [@inline_let] let tmpLen = numb *! bnLen in
-    let tmp = create tmpLen (u8 0) in
-    update_sub tmp 0ul len b;
-    uints_from_bytes_le res tmp end
+    if tmpLen =. len then
+      uints_from_bytes_le res b
+    else begin
+      let tmp = create tmpLen (u8 0) in
+      update_sub tmp 0ul len b;
+      uints_from_bytes_le res tmp end end
   else begin
     [@inline_let] let numb = size (numbytes t) in
     let bnLen = blocks len numb in
@@ -191,8 +197,11 @@ let mk_bn_to_bytes_be #t is_known_len len b res =
     [@inline_let] let bnLen = blocks len numb in
     [@inline_let] let tmpLen = numb *! bnLen in
     let tmp = create tmpLen (u8 0) in
-    bn_to_bytes_be_ bnLen b tmp;
-    copy res (sub tmp (tmpLen -! len) len) end
+    if tmpLen =. len then
+      bn_to_bytes_be_ bnLen b res
+    else begin
+      bn_to_bytes_be_ bnLen b tmp;
+      copy res (sub tmp (tmpLen -! len) len) end end
   else begin
     [@inline_let] let numb = size (numbytes t) in
     let bnLen = blocks len numb in
@@ -241,8 +250,11 @@ let mk_bn_to_bytes_le #t is_known_len len b res =
     [@inline_let] let bnLen = blocks len numb in
     [@inline_let] let tmpLen = numb *! bnLen in
     let tmp = create tmpLen (u8 0) in
-    uints_to_bytes_le bnLen tmp b;
-    copy res (sub tmp 0ul len) end
+    if tmpLen =. len then
+      uints_to_bytes_le bnLen res b
+    else begin
+      uints_to_bytes_le bnLen tmp b;
+      copy res (sub tmp 0ul len) end end
   else begin
     [@inline_let] let numb = size (numbytes t) in
     let bnLen = blocks len numb in

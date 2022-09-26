@@ -267,14 +267,12 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
 {
   uint64_t scalar_q[4U] = { 0U };
-  uint8_t tmp[32U] = { 0U };
-  memcpy(tmp, scalar, (uint32_t)32U * sizeof (uint8_t));
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = scalar_q;
-    uint64_t u = load64_be(tmp + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
+    uint64_t u = load64_be(scalar + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
     uint64_t x = u;
     os[i] = x;);
   Hacl_Impl_K256_PointMul_point_mul(out, scalar_q, p);

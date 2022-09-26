@@ -329,14 +329,12 @@ static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
   n[1U] = (uint64_t)0xbaaedce6af48a03bU;
   n[2U] = (uint64_t)0xfffffffffffffffeU;
   n[3U] = (uint64_t)0xffffffffffffffffU;
-  uint8_t tmp[32U] = { 0U };
-  memcpy(tmp, b, (uint32_t)32U * sizeof (uint8_t));
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = f;
-    uint64_t u = load64_be(tmp + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
+    uint64_t u = load64_be(b + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
     uint64_t x = u;
     os[i] = x;);
   uint64_t is_zero = is_qelem_zero(f);
@@ -354,14 +352,12 @@ static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
 
 static inline bool load_qelem_vartime(uint64_t *f, uint8_t *b)
 {
-  uint8_t tmp[32U] = { 0U };
-  memcpy(tmp, b, (uint32_t)32U * sizeof (uint8_t));
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = f;
-    uint64_t u = load64_be(tmp + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
+    uint64_t u = load64_be(b + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
     uint64_t x = u;
     os[i] = x;);
   bool is_zero = is_qelem_zero_vartime(f);
@@ -418,14 +414,12 @@ static inline void modq_short(uint64_t *out, uint64_t *a)
 static inline void load_qelem_modq(uint64_t *f, uint8_t *b)
 {
   uint64_t tmp[4U] = { 0U };
-  uint8_t tmp1[32U] = { 0U };
-  memcpy(tmp1, b, (uint32_t)32U * sizeof (uint8_t));
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = f;
-    uint64_t u = load64_be(tmp1 + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
+    uint64_t u = load64_be(b + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
     uint64_t x = u;
     os[i] = x;);
   memcpy(tmp, f, (uint32_t)4U * sizeof (uint64_t));
@@ -439,8 +433,7 @@ static inline void store_qelem(uint8_t *b, uint64_t *f)
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
-    store64_be(tmp + i * (uint32_t)8U, f[(uint32_t)4U - i - (uint32_t)1U]););
-  memcpy(b, tmp, (uint32_t)32U * sizeof (uint8_t));
+    store64_be(b + i * (uint32_t)8U, f[(uint32_t)4U - i - (uint32_t)1U]););
 }
 
 static inline void qadd(uint64_t *out, uint64_t *f1, uint64_t *f2)

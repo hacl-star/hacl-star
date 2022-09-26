@@ -1432,8 +1432,7 @@ void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res)
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
-    store64_be(tmp + i * (uint32_t)8U, b[(uint32_t)4U - i - (uint32_t)1U]););
-  memcpy(res, tmp, (uint32_t)32U * sizeof (uint8_t));
+    store64_be(res + i * (uint32_t)8U, b[(uint32_t)4U - i - (uint32_t)1U]););
 }
 
 /*
@@ -1449,8 +1448,7 @@ void Hacl_Bignum256_bn_to_bytes_le(uint64_t *b, uint8_t *res)
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
-    store64_le(tmp + i * (uint32_t)8U, b[i]););
-  memcpy(res, tmp, (uint32_t)32U * sizeof (uint8_t));
+    store64_le(res + i * (uint32_t)8U, b[i]););
 }
 
 
