@@ -76,19 +76,8 @@ endif
 endif
 endif
 
-# Backwards-compat, remove
-ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
-endif
-
 ifeq (,$(NOOPENSSLCHECK))
-ifeq (,$(OPENSSL_HOME))
-  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
-endif
-
-ifeq (,$(OPENSSL_HOME)/libcrypto.a)
-  $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
-endif
+include Makefile.openssl
 endif
 
 ifneq (,$(HACL_HOME))
@@ -130,7 +119,11 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-hpke vale_testInline test-wasm test-bindings-ocaml
+test-unstaged: test-handwritten test-c test-ml test-hpke test-wasm test-bindings-ocaml
+
+ifeq ($(shell uname -m),x86_64)
+test-unstaged: vale_testInline
+endif
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -1022,6 +1015,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
+	  -add-include '"libintvector.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
@@ -1047,17 +1041,14 @@ compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmlli
 # C tests (from F* files) #
 ###########################
 
-ifeq ($(OS),Windows_NT)
-OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
-LDFLAGS		+= -lbcrypt
-endif
-LDFLAGS 	+= -L$(OPENSSL_HOME)
-
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
-  -I$(OPENSSL_HOME)/include \
-  -O3 -march=native -mtune=native -I$(KRML_HOME)/krmllib/dist/minimal \
+  -O3 -I$(KRML_HOME)/krmllib/dist/minimal \
   -I$(KRML_HOME)/include -Idist/gcc-compatible
+
+ifneq ($(shell uname -m),arm64)
+CFLAGS += -march=native -mtune=native
+endif
 
 # The C test files need the extracted headers to compile
 dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
@@ -1074,14 +1065,6 @@ dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
-
-ifeq ($(OS),Windows_NT)
-  LD_EXTRA = PATH="$(OPENSSL_HOME):$(shell cygpath -u $$(ocamlfind c -where))/../stublibs:$$PATH"
-else ifeq ($(shell uname -s),Darwin)
-  LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
-else
-  LD_EXTRA = LD_LIBRARY_PATH="$(OPENSSL_HOME)"
-endif
 
 .PHONY: %.test
 %.test: %.exe
