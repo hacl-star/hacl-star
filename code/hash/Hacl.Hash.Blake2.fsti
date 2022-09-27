@@ -18,6 +18,8 @@ open Hacl.Hash.Definitions
 
 include Hacl.Hash.Core.Blake2
 
+// NO VECTORIZED VARIANTS HERE!
+
 noextract inline_for_extraction
 val mk_update_multi:
      a:hash_alg{is_blake a}
@@ -47,3 +49,10 @@ val mk_hash:
 
 val hash_blake2s_32: hash_st Blake2S
 val hash_blake2b_32: hash_st Blake2B
+
+noextract inline_for_extraction
+val mk_malloc:
+    a:hash_alg{is_blake a}
+  -> m:m_spec a{Impl.is_valid_blake2_config (to_blake_alg a) m}
+  ->
+  malloc_st (| a, m |)

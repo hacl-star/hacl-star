@@ -38,3 +38,8 @@ let blake2s_finish : Impl.blake2_finish_st Spec.Blake2S Core.M128 =
 (* The one-shot hash *)
 let blake2s : Impl.blake2_st Spec.Blake2S Core.M128 =
   Impl.blake2 #Spec.Blake2S #Core.M128 blake2s_init blake2s_update blake2s_finish
+
+let store_state128s_to_state32: Core.store_state_st Spec.Blake2S Core.M128 =
+  Core.store_state_to_state32 #Spec.Blake2S #Core.M128
+let load_state128s_from_state32: Core.load_state_st Spec.Blake2S Core.M128  =
+  Core.load_state_from_state32 #Spec.Blake2S #Core.M128
