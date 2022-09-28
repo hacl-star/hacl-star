@@ -609,7 +609,8 @@ REQUIRED_BUNDLES = \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   $(VALE_BUNDLES) \
   -bundle Hacl.Impl.Poly1305.Fields \
-  -bundle 'EverCrypt.Spec.*'
+  -bundle 'EverCrypt.Spec.*' \
+  -bundle EverCrypt.Error
 
 REQUIRED_DROP = \
   -drop EverCrypt.TargetConfig
