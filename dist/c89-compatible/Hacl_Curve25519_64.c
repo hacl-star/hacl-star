@@ -26,13 +26,12 @@
 
 #include "internal/Vale.h"
 #include "curve25519-inline.h"
-static inline uint64_t add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
+static inline void add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
   #if HACL_CAN_COMPILE_INLINE_ASM
-  return add_scalar(out, f1, f2);
+  add_scalar(out, f1, f2);
   #else
-  uint64_t scrut = add_scalar_e(out, f1, f2);
-  return scrut;
+  uint64_t uu____0 = add_scalar_e(out, f1, f2);
   #endif
 }
 
@@ -318,10 +317,8 @@ static void store_felem(uint64_t *b, uint64_t *f)
 {
   uint64_t f30 = f[3U];
   uint64_t top_bit0 = f30 >> (uint32_t)63U;
-  uint64_t carry0;
   uint64_t f31;
   uint64_t top_bit;
-  uint64_t carry;
   uint64_t f0;
   uint64_t f1;
   uint64_t f2;
@@ -340,11 +337,11 @@ static void store_felem(uint64_t *b, uint64_t *f)
   uint64_t o2;
   uint64_t o3;
   f[3U] = f30 & (uint64_t)0x7fffffffffffffffU;
-  carry0 = add_scalar0(f, f, (uint64_t)19U * top_bit0);
+  add_scalar0(f, f, (uint64_t)19U * top_bit0);
   f31 = f[3U];
   top_bit = f31 >> (uint32_t)63U;
   f[3U] = f31 & (uint64_t)0x7fffffffffffffffU;
-  carry = add_scalar0(f, f, (uint64_t)19U * top_bit);
+  add_scalar0(f, f, (uint64_t)19U * top_bit);
   f0 = f[0U];
   f1 = f[1U];
   f2 = f[2U];

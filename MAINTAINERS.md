@@ -5,6 +5,8 @@ This document lists the Maintainers of the Project. Maintainers may be added onc
 | **NAME** | **Organization** |
 | --- | --- |
 | Karthikeyan Bhargavan | Inria              |
+| Aymeric Fromherz      | Inria              |
+| Marina Polubelova     | Nomadic Labs       |
 | Jonathan Protzenko    | Microsoft Research |
 
 

@@ -23,12 +23,15 @@ lib_gen/Hacl_Hash_SHA1_gen.exe: lib/Hacl_Hash_SHA1_bindings.cmx lib_gen/Hacl_Has
 lib/Hacl_Hash_SHA2_bindings.cmx: 
 lib_gen/Hacl_Hash_SHA2_gen.cmx: lib/Hacl_Hash_SHA2_bindings.cmx
 lib_gen/Hacl_Hash_SHA2_gen.exe: lib/Hacl_Hash_SHA2_bindings.cmx lib_gen/Hacl_Hash_SHA2_gen.cmx 
+lib/EverCrypt_Error_bindings.cmx: 
+lib_gen/EverCrypt_Error_gen.cmx: lib/EverCrypt_Error_bindings.cmx
+lib_gen/EverCrypt_Error_gen.exe: lib/EverCrypt_Error_bindings.cmx lib_gen/EverCrypt_Error_gen.cmx 
 lib/EverCrypt_AutoConfig2_bindings.cmx: 
 lib_gen/EverCrypt_AutoConfig2_gen.cmx: lib/EverCrypt_AutoConfig2_bindings.cmx
 lib_gen/EverCrypt_AutoConfig2_gen.exe: lib/EverCrypt_AutoConfig2_bindings.cmx lib_gen/EverCrypt_AutoConfig2_gen.cmx 
-lib/EverCrypt_Hash_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
+lib/EverCrypt_Hash_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx 
 lib_gen/EverCrypt_Hash_gen.cmx: lib/EverCrypt_Hash_bindings.cmx
-lib_gen/EverCrypt_Hash_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_Hash_bindings.cmx lib_gen/EverCrypt_Hash_gen.cmx 
+lib_gen/EverCrypt_Hash_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx lib/EverCrypt_Error_c_stubs.o lib/EverCrypt_Hash_bindings.cmx lib_gen/EverCrypt_Hash_gen.cmx 
 lib/Hacl_SHA3_bindings.cmx: 
 lib_gen/Hacl_SHA3_gen.cmx: lib/Hacl_SHA3_bindings.cmx
 lib_gen/Hacl_SHA3_gen.exe: lib/Hacl_SHA3_bindings.cmx lib_gen/Hacl_SHA3_gen.cmx 
@@ -77,9 +80,6 @@ lib_gen/Hacl_Poly1305_256_gen.exe: lib/Hacl_Poly1305_256_bindings.cmx lib_gen/Ha
 lib/Hacl_NaCl_bindings.cmx: 
 lib_gen/Hacl_NaCl_gen.cmx: lib/Hacl_NaCl_bindings.cmx
 lib_gen/Hacl_NaCl_gen.exe: lib/Hacl_NaCl_bindings.cmx lib_gen/Hacl_NaCl_gen.cmx 
-lib/EverCrypt_Error_bindings.cmx: 
-lib_gen/EverCrypt_Error_gen.cmx: lib/EverCrypt_Error_bindings.cmx
-lib_gen/EverCrypt_Error_gen.exe: lib/EverCrypt_Error_bindings.cmx lib_gen/EverCrypt_Error_gen.cmx 
 lib/EverCrypt_CTR_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx 
 lib_gen/EverCrypt_CTR_gen.cmx: lib/EverCrypt_CTR_bindings.cmx
 lib_gen/EverCrypt_CTR_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx lib/EverCrypt_Error_c_stubs.o lib/EverCrypt_CTR_bindings.cmx lib_gen/EverCrypt_CTR_gen.cmx 

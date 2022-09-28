@@ -108,6 +108,7 @@ BLAKE2_BUNDLE_BASE= \
 BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
   -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
+  
 HASH_BUNDLE= \
   -bundle Hacl.Hash.MD5=Hacl.Hash.Core.MD5 \
   -bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 \

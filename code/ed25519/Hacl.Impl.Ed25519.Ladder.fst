@@ -174,11 +174,8 @@ val convert_scalar: scalar:lbuffer uint8 32ul -> bscalar:lbuffer uint64 4ul ->
 
 let convert_scalar scalar bscalar =
   let h0 = ST.get () in
-  Lib.ByteBuffer.uints_from_bytes_le bscalar scalar;
-  let h1 = ST.get () in
-  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar);
-  assert (as_seq h1 bscalar == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar));
-  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar)
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
+  Hacl.Bignum.Convert.mk_bn_from_bytes_le true 32ul scalar bscalar
 
 
 val point_mul:
