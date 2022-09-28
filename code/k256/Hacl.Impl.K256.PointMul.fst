@@ -15,6 +15,7 @@ module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
 module PT = Hacl.Impl.PrecompTable
 module BPT = Hacl.Spec.K256.PrecompTable
+module BPTL = Hacl.Spec.K256.PrecompTable.Lemmas
 
 module S = Spec.K256
 module SL = Spec.K256.Lemmas
@@ -210,7 +211,7 @@ let point_mul_g out scalar =
   let table_inv : BE.table_inv_t U64 len table_len =
     BE.table_inv_precomp len ctx_len k l table_len in
   let h1 = ST.get () in
-  BPT.precomp_basepoint_table_lemma ();
+  BPTL.precomp_basepoint_table_lemma ();
   assert (table_inv (as_seq h1 g) (as_seq h1 precomp_basepoint_table));
   assert (point_eval h1 g == S.g);
 
