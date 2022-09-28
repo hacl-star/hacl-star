@@ -27,6 +27,7 @@ module Error = struct
     | AuthenticationFailure
     | InvalidIVLength
     | DecodeError
+    | MaximumLengthExceeded
   type 'a result =
     | Success of 'a
     | Error of error_code
@@ -37,6 +38,7 @@ module Error = struct
       | 3 -> AuthenticationFailure
       | 4 -> InvalidIVLength
       | 5 -> DecodeError
+      | 6 -> MaximumLengthExceeded
       | _ -> failwith "Impossible"
     in
     Error err
@@ -142,27 +144,27 @@ module Hash = struct
       assert (C.size digest = digest_len alg);
       assert (C.disjoint digest msg);
       everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf msg) (C.size_uint32 msg)
-    let finish ~st:(alg, _, t) ~digest =
+    let finish ~st:(alg, t) ~digest =
       assert (C.size digest = digest_len alg);
       everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest)
   end
-  type t = alg * Z.t ref * hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ptr
+  type t = alg * hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ptr
   let init ~alg =
     Lazy.force at_exit_full_major;
     let alg_spec = alg_definition alg in
     let st = everCrypt_Hash_Incremental_create_in alg_spec in
     everCrypt_Hash_Incremental_init st;
-    let incr_len = ref Z.zero in
     Gc.finalise everCrypt_Hash_Incremental_free st;
-    (alg, incr_len, st)
-  let update ~st:(_alg, incr_len, t) ~msg =
+    alg, st
+  let update ~st:(_alg, t) ~msg =
     check_max_buffer_len (C.size msg);
-    incr_len := Z.add !incr_len (Z.of_int (C.size msg));
-    assert (Z.lt !incr_len max_uint64);
-    everCrypt_Hash_Incremental_update t (C.ctypes_buf msg) (C.size_uint32 msg)
-  let finish ~st:(alg, incr_len, t) =
+    let e = everCrypt_Hash_Incremental_update t (C.ctypes_buf msg) (C.size_uint32 msg) in
+    (* can return `MaximumLengthExceeded` if total length exceeds limit, as defined
+     * in Spec.Hash.Definitions.max_input_length *)
+    assert (Error.get_result e = Error.Success ())
+  let finish ~st:(alg, t) =
     let digest = C.make (digest_len alg) in
-    Noalloc.finish ~st:(alg, incr_len, t) ~digest;
+    Noalloc.finish ~st:(alg, t) ~digest;
     digest
   let hash ~alg ~msg =
     let digest = C.make (digest_len alg) in

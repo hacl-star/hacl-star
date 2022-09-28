@@ -166,7 +166,7 @@ val mk_blake2_update_last_block (a : hash_alg{is_blake a}) (m : m_spec a) :
 let mk_blake2_update_last_block a m s ev input input_len =
   (**) let h0 = ST.get () in
   ST.push_frame ();
-  let wv = Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
+  let wv = Lib.Buffer.create (Core.le_sigh (to_blake_alg a) m)
                              (Core.zero_element (to_blake_alg a) m) in
   (**) let pad_len : Ghost.erased _ = block_len a -! input_len in
   (**) assert(v input_len + v pad_len == v (block_len a));
@@ -260,3 +260,6 @@ let mk_hash a m blake2 = fun input input_len dst ->
 
 let hash_blake2s_32: hash_st Blake2S = mk_hash Blake2S Core.M32 Hacl.Blake2s_32.blake2s
 let hash_blake2b_32: hash_st Blake2B = mk_hash Blake2B Core.M32 Hacl.Blake2b_32.blake2b
+
+let mk_malloc a m r =
+  LowStar.Buffer.malloc r (Hacl.Impl.Blake2.Core.zero_element (to_blake_alg a) m) (impl_state_len (|a,m|))

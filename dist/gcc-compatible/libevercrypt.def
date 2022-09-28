@@ -155,6 +155,7 @@ EXPORTS
   EverCrypt_Hash_Incremental_block_len
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
+  EverCrypt_Hash_Incremental_max_input_len64
   EverCrypt_Hash_Incremental_update
   EverCrypt_Hash_Incremental_finish_md5
   EverCrypt_Hash_Incremental_finish_sha1
@@ -379,12 +380,6 @@ EXPORTS
   MerkleTree_Low_Serialization_mt_deserialize_path
   MerkleTree_Low_Hashfunctions_init_hash
   MerkleTree_Low_Hashfunctions_free_hash
-  EverCrypt_Error_uu___is_Success
-  EverCrypt_Error_uu___is_UnsupportedAlgorithm
-  EverCrypt_Error_uu___is_InvalidKey
-  EverCrypt_Error_uu___is_AuthenticationFailure
-  EverCrypt_Error_uu___is_InvalidIVLength
-  EverCrypt_Error_uu___is_DecodeError
   EverCrypt_CTR_uu___is_State
   EverCrypt_CTR_xor8
   EverCrypt_CTR_alg_of_state

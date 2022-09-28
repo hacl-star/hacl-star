@@ -231,7 +231,7 @@ let get_sigma' (start: size_t { v start <= 144 }) (i: size_t { normalize (i <=. 
     (ensures  (fun h0 z h1 ->
       h0 == h1 /\ z == Lib.Sequence.(Spec.sigmaTable.[v start + v i])))
 =
-  get_sigma (start +. i)
+  get_sigma (start +! i)
 
 #push-options "--z3rlimit 500"
 let gather_state #a #ms st m start =
@@ -790,7 +790,9 @@ val blake2:
 
 #push-options "--z3rlimit 100"
 let blake2 #al #ms blake2_init blake2_update blake2_finish nn output ll d kk k =
-  let stlen = 4ul *. row_len al ms in
+  [@inline_let]
+  let stlen = le_sigh al ms in
+  [@inline_let]
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]

@@ -69,9 +69,7 @@ open LowStar.BufferOps
 /// do not use as argument of ghost functions
 type e_alg = G.erased alg
 
-// abstract implementation state
-(* [@CAbstractStruct] *)
-(* ^ this should be restored once karamel is fixed *)
+[@CAbstractStruct]
 val state_s: alg -> Type0
 
 // pointer to abstract implementation state

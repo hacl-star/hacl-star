@@ -1344,7 +1344,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint6
       (uint32_t)1U,
       Hacl_Impl_Ed25519_PointDouble_point_double(result, result););
     uint32_t bk = (uint32_t)256U;
-    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+    uint64_t mask_l = (uint64_t)15U;
     uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
     uint64_t p1 = bscalar[i1] >> j;
@@ -1491,7 +1491,7 @@ point_mul_double_vartime(
       (uint32_t)1U,
       Hacl_Impl_Ed25519_PointDouble_point_double(result, result););
     uint32_t bk = (uint32_t)256U;
-    uint64_t mask_l0 = (uint64_t)16U - (uint64_t)1U;
+    uint64_t mask_l0 = (uint64_t)15U;
     uint32_t i10 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j0 = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
     uint64_t p10 = bscalar1[i10] >> j0;
@@ -1511,7 +1511,7 @@ point_mul_double_vartime(
     memcpy(a_bits_l0, a_bits_l1, (uint32_t)20U * sizeof (uint64_t));
     Hacl_Impl_Ed25519_PointAdd_point_add(result, result, a_bits_l0);
     uint32_t bk0 = (uint32_t)256U;
-    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+    uint64_t mask_l = (uint64_t)15U;
     uint32_t i1 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j = (bk0 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
     uint64_t p1 = bscalar2[i1] >> j;

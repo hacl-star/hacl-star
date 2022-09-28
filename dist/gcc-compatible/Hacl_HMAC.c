@@ -570,10 +570,10 @@ Hacl_HMAC_compute_blake2s_32(
     opad[i] = xi ^ yi;
   }
   uint32_t s[16U] = { 0U };
-  uint32_t *r00 = s + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *r10 = s + (uint32_t)1U * (uint32_t)4U;
-  uint32_t *r20 = s + (uint32_t)2U * (uint32_t)4U;
-  uint32_t *r30 = s + (uint32_t)3U * (uint32_t)4U;
+  uint32_t *r00 = s;
+  uint32_t *r10 = s + (uint32_t)4U;
+  uint32_t *r20 = s + (uint32_t)8U;
+  uint32_t *r30 = s + (uint32_t)12U;
   uint32_t iv00 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
   uint32_t iv10 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
   uint32_t iv20 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
@@ -604,10 +604,10 @@ Hacl_HMAC_compute_blake2s_32(
   K____uint32_t__uint64_t scrut0 = { .fst = s, .snd = es };
   uint32_t *s0 = scrut0.fst;
   uint8_t *dst1 = ipad;
-  uint32_t *r01 = s0 + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *r11 = s0 + (uint32_t)1U * (uint32_t)4U;
-  uint32_t *r21 = s0 + (uint32_t)2U * (uint32_t)4U;
-  uint32_t *r31 = s0 + (uint32_t)3U * (uint32_t)4U;
+  uint32_t *r01 = s0;
+  uint32_t *r11 = s0 + (uint32_t)4U;
+  uint32_t *r21 = s0 + (uint32_t)8U;
+  uint32_t *r31 = s0 + (uint32_t)12U;
   uint32_t iv01 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
   uint32_t iv11 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
   uint32_t iv21 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
@@ -675,10 +675,10 @@ Hacl_HMAC_compute_blake2s_32(
   }
   Hacl_Hash_Core_Blake2_finish_blake2s_32(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
-  uint32_t *r0 = s0 + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *r1 = s0 + (uint32_t)1U * (uint32_t)4U;
-  uint32_t *r2 = s0 + (uint32_t)2U * (uint32_t)4U;
-  uint32_t *r3 = s0 + (uint32_t)3U * (uint32_t)4U;
+  uint32_t *r0 = s0;
+  uint32_t *r1 = s0 + (uint32_t)4U;
+  uint32_t *r2 = s0 + (uint32_t)8U;
+  uint32_t *r3 = s0 + (uint32_t)12U;
   uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
   uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
   uint32_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
@@ -788,10 +788,10 @@ Hacl_HMAC_compute_blake2b_32(
     opad[i] = xi ^ yi;
   }
   uint64_t s[16U] = { 0U };
-  uint64_t *r00 = s + (uint32_t)0U * (uint32_t)4U;
-  uint64_t *r10 = s + (uint32_t)1U * (uint32_t)4U;
-  uint64_t *r20 = s + (uint32_t)2U * (uint32_t)4U;
-  uint64_t *r30 = s + (uint32_t)3U * (uint32_t)4U;
+  uint64_t *r00 = s;
+  uint64_t *r10 = s + (uint32_t)4U;
+  uint64_t *r20 = s + (uint32_t)8U;
+  uint64_t *r30 = s + (uint32_t)12U;
   uint64_t iv00 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
   uint64_t iv10 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
   uint64_t iv20 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
@@ -822,10 +822,10 @@ Hacl_HMAC_compute_blake2b_32(
   K____uint64_t__FStar_UInt128_uint128 scrut0 = { .fst = s, .snd = es };
   uint64_t *s0 = scrut0.fst;
   uint8_t *dst1 = ipad;
-  uint64_t *r01 = s0 + (uint32_t)0U * (uint32_t)4U;
-  uint64_t *r11 = s0 + (uint32_t)1U * (uint32_t)4U;
-  uint64_t *r21 = s0 + (uint32_t)2U * (uint32_t)4U;
-  uint64_t *r31 = s0 + (uint32_t)3U * (uint32_t)4U;
+  uint64_t *r01 = s0;
+  uint64_t *r11 = s0 + (uint32_t)4U;
+  uint64_t *r21 = s0 + (uint32_t)8U;
+  uint64_t *r31 = s0 + (uint32_t)12U;
   uint64_t iv01 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
   uint64_t iv11 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
   uint64_t iv21 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
@@ -901,10 +901,10 @@ Hacl_HMAC_compute_blake2b_32(
   }
   Hacl_Hash_Core_Blake2_finish_blake2b_32(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
-  uint64_t *r0 = s0 + (uint32_t)0U * (uint32_t)4U;
-  uint64_t *r1 = s0 + (uint32_t)1U * (uint32_t)4U;
-  uint64_t *r2 = s0 + (uint32_t)2U * (uint32_t)4U;
-  uint64_t *r3 = s0 + (uint32_t)3U * (uint32_t)4U;
+  uint64_t *r0 = s0;
+  uint64_t *r1 = s0 + (uint32_t)4U;
+  uint64_t *r2 = s0 + (uint32_t)8U;
+  uint64_t *r3 = s0 + (uint32_t)12U;
   uint64_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
   uint64_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
   uint64_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];

@@ -57,7 +57,7 @@ let mk_words_state (#a : hash_alg) (s : words_state' a)
  if is_blake a then
    (s, nat_to_extra_state a counter)
  else (s, ())
-#pop-options    
+#pop-options
 
 (* Adding some non-inlined definitions to factorize code *)
 let hash_len a = Hacl.Hash.Definitions.hash_len a
@@ -122,11 +122,43 @@ let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erase
 
 let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
-let update (i: G.erased hash_alg) =
+let max_input_len64 (a: Spec.Agile.Hash.hash_alg): x:U64.t { U64.v x == Hacl.Streaming.MD.max_input_length64 a } =
+  let _ = allow_inversion hash_alg in
+  match a with
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> normalize_term_spec (pow2 61 - 1); FStar.UInt64.uint_to_t (normalize_term (pow2 61 - 1))
+  | SHA2_384 | SHA2_512 -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
+  | Blake2S -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
+  | Blake2B -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
+
+let update (i: G.erased hash_alg)
+  (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
+  (data: B.buffer uint8)
+  (len: UInt32.t):
+  Stack EverCrypt.Error.error_code
+    (requires fun h0 -> F.update_pre0 evercrypt_hash i s data len h0)
+    (ensures fun h0 e h1 ->
+      match e with
+      | EverCrypt.Error.Success -> F.update_post evercrypt_hash i s data len h0 h1
+      | EverCrypt.Error.MaximumLengthExceeded ->
+          h0 == h1 /\
+          not (S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= evercrypt_hash.max_input_length i)
+      | _ -> False)
+=
   let _ = allow_inversion Spec.Agile.Hash.hash_alg in
   assert_norm (pow2 61 - 1 < pow2 64);
   assert_norm (pow2 64 < pow2 125 - 1);
-  F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit)
+  let h0 = ST.get () in
+  F.seen_bounded evercrypt_hash i h0 s;
+  let alg = F.index_of_state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s in
+  if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 len <=^
+     max_input_len64 alg -^
+    F.seen_length evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s)
+  then begin
+    F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s data len;
+    EverCrypt.Error.Success
+  end else
+    EverCrypt.Error.MaximumLengthExceeded
 
 inline_for_extraction noextract
 let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
