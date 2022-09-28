@@ -96,6 +96,10 @@ let max_input = max_input_length
 
 let maxed_hash_alg = a:hash_alg { Some? (max_input_length a) }
 
+let sha2_alg_is_maxed (a: hash_alg): Lemma (requires (is_sha2 a)) (ensures (Some? (max_input_length a))) [ SMTPat (is_sha2 a) ] = ()
+let md_alg_is_maxed (a: hash_alg): Lemma (requires (is_md a)) (ensures (Some? (max_input_length a))) [ SMTPat (is_md a) ] = ()
+let blake_alg_is_maxed (a: hash_alg): Lemma (requires (is_blake a)) (ensures (Some? (max_input_length a))) [ SMTPat (is_blake a) ] = ()
+
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
 let len_int_type: maxed_hash_alg -> inttype = function
