@@ -335,7 +335,7 @@ Hacl_GenericField64_exp_consttime(
       Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aMc, t11, t2););
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i0 = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)64U;
       uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)64U;
       uint64_t p1 = b[i0] >> j;
@@ -371,7 +371,7 @@ Hacl_GenericField64_exp_consttime(
         (uint32_t)1U,
         Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM););
       uint32_t bk = bBits - bBits % (uint32_t)4U;
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
       uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
       uint64_t p1 = b[i1] >> j;
@@ -482,7 +482,7 @@ Hacl_GenericField64_exp_vartime(
       Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aMc, t11, t2););
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)64U;
       uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)64U;
       uint64_t p1 = b[i] >> j;
@@ -508,7 +508,7 @@ Hacl_GenericField64_exp_vartime(
         (uint32_t)1U,
         Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM););
       uint32_t bk = bBits - bBits % (uint32_t)4U;
-      uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+      uint64_t mask_l = (uint64_t)15U;
       uint32_t i1 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
       uint32_t j = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
       uint64_t p1 = b[i1] >> j;
@@ -560,11 +560,10 @@ Hacl_GenericField64_inverse(
   uint64_t c1;
   if ((uint32_t)1U < len1)
   {
-    uint32_t rLen = len1 - (uint32_t)1U;
     uint64_t *a1 = k1.n + (uint32_t)1U;
     uint64_t *res1 = n2 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (len1 - (uint32_t)1U) / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -579,7 +578,12 @@ Hacl_GenericField64_inverse(
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for
+    (uint32_t
+      i = (len1 - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+      i
+      < len1 - (uint32_t)1U;
+      i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;
