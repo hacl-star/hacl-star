@@ -1,5 +1,5 @@
 [
-  " ãSÖ€2ÿ¬Ïå7ıü\u000eüù",
+  "-ãúA\u000bO™®ß\u0001di9Ó6\u0014",
   [
     [
       "Test.Lowstarize.as_uint8s",
@@ -43,7 +43,7 @@
         "typing_FStar.Char.char"
       ],
       0,
-      "6fbf1e51cd47fcbcbf0c3f31ad620fcd"
+      "64953dae0d7f0d5422d680a2888ec95e"
     ],
     [
       "Test.Lowstarize.is_some",
@@ -59,7 +59,7 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "a7c4a5a078d9baa97ee0bf731caf0452"
+      "55e42dbe37bd6a1afc76b93e290776fa"
     ],
     [
       "Test.Lowstarize.must",
@@ -75,7 +75,7 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "1ce540738691a618f98824c6631527dc"
+      "5f0f0f95121e67a0ff1fa1f35f6237fc"
     ],
     [
       "Test.Lowstarize.destruct_list",
@@ -117,7 +117,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "57f3294bc921bb40c32479133b0ff1f6"
+      "c6cbee9fc26ac782765c3e71200f4d6a"
     ],
     [
       "Test.Lowstarize.is_tuple",
@@ -131,7 +131,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "958596a99ec135b6f482712afc572898"
+      "0644955b47597904d2129adbd137bc5c"
     ],
     [
       "Test.Lowstarize.destruct_hex",
@@ -151,7 +151,7 @@
         "typing_FStar.List.Tot.Base.length"
       ],
       0,
-      "4e155a45f562aaec3b80d859aa1d2172"
+      "8a0c85c971800c72ae2ad8a80ff0febe"
     ],
     [
       "Test.Lowstarize.fresh",
@@ -177,7 +177,7 @@
         "typing_FStar.Pervasives.Native.snd"
       ],
       0,
-      "3b8cb8f73a0a50996466a0ef1bde5244"
+      "91b8b06f07c745ec3ee51169fbd3b566"
     ],
     [
       "Test.Lowstarize.mk_gcmalloc_of_list",
@@ -206,7 +206,7 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "5024e910fa16cd9989a5d4891ca26fc4"
+      "cd5190403a34dbf40c47d27feef041e2"
     ],
     [
       "Test.Lowstarize.lowstarize_hex",
@@ -241,7 +241,7 @@
         "typing_FStar.String.list_of_string", "typing_FStar.String.strlen"
       ],
       0,
-      "07e89f6f212adb1be2343e30b031e4b3"
+      "8393e917a77d4d7bd21e72647e444611"
     ],
     [
       "Test.Lowstarize.lowstarize_expr",
@@ -265,7 +265,21 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "997a12ef29bf8300f55b104857af0235"
+      "3937b9aa4e862e95f9dc0bc431fa91c8"
+    ],
+    [
+      "Test.Lowstarize.lowstarize_expr",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Tactics.Result.__result",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "ed48a25cf6ad73fd044df52d74506164"
     ]
   ]
 ]
