@@ -377,9 +377,9 @@ let blake2_hash_incremental'
   (a:hash_alg{is_blake a})
   (input : bytes {S.length input <= max_input_length a}) :
   r:lbytes (hash_length a) {
-    r == blake2_hash_incremental a input } =
+    r == hash_incremental a input } =
   let bs, l = split_blocks a input in
-  let is1 = blake2_init a in
+  let is1 = init a in
   let is2 = update_multi a is1 bs in
   let is3 = update_last a is2 (S.length bs) l in
   let is4 = finish a is3 in
@@ -399,7 +399,7 @@ val blake2_is_hash_incremental_aux1
     let s1 = Blake2.blake2_init_hash (to_blake_alg a) kk nn in
     (**)
     let bs, l = split_blocks a input in
-    let is1 = blake2_init a in
+    let is1 = init a in
     ((s1 <: words_state' a), nat_to_extra_state a prev0) == is1)
 
 let blake2_is_hash_incremental_aux1 a input = ()
@@ -555,7 +555,7 @@ let blake2_is_hash_incremental
   (input : bytes {S.length input <= max_input_length a}) :
   Lemma (
     S.equal (Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a)))
-            (blake2_hash_incremental a input))
+            (hash_incremental a input))
   =
   blake2_is_hash_incremental_aux1 a input;
   let nn = Spec.Blake2.max_output (to_blake_alg a) in
@@ -596,18 +596,10 @@ let md_is_hash_incremental
      }
 #pop-options
 
-let blake2_hash_incremental_no_key_eq
-  (a: hash_alg{is_blake a}) (input: bytes { S.length input <= max_input_length a }) :
-  Lemma(Seq.equal (blake2_hash_incremental a input)
-                  (hash_incremental a input)) =
-  assert(init a == blake2_init a)
-
 let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (S.equal (hash a input) (hash_incremental a input))
   =
   if is_blake a then
-    begin
-    blake2_is_hash_incremental a input;
-    blake2_hash_incremental_no_key_eq a input
-    end
-  else md_is_hash_incremental a input (init a)
+    blake2_is_hash_incremental a input
+  else
+    md_is_hash_incremental a input (init a)
