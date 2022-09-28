@@ -130,6 +130,7 @@ let max_input_len64 (a: Spec.Agile.Hash.hash_alg): x:U64.t { U64.v x == Hacl.Str
   | SHA2_384 | SHA2_512 -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
   | Blake2S -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
   | Blake2B -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
+  | SHA3_256 -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
 
 let update (i: G.erased hash_alg)
   (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
