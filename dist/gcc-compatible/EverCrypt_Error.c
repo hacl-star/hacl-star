@@ -116,3 +116,18 @@ bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee)
   }
 }
 
+bool EverCrypt_Error_uu___is_MaximumLengthExceeded(EverCrypt_Error_error_code projectee)
+{
+  switch (projectee)
+  {
+    case EverCrypt_Error_MaximumLengthExceeded:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
+

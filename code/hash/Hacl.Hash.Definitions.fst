@@ -150,6 +150,17 @@ let alloca_st (i:impl) = unit -> ST.StackInline (state i & extra_state (get_alg 
     B.fresh_loc (M.loc_buffer s) h0 h1))
 
 noextract inline_for_extraction
+let malloc_st (i:impl) = r:HS.rid -> ST.ST (state i)
+  (requires (fun h ->
+    ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    B.live h1 s /\
+    M.(modifies M.loc_none h0 h1) /\
+    B.fresh_loc (M.loc_addr_of_buffer s) h0 h1 /\
+    M.(loc_includes (loc_region_only true r) (loc_addr_of_buffer s)) /\
+    B.freeable s))
+
+noextract inline_for_extraction
 let init_st (i:impl) = s:state i -> ST.Stack (extra_state (get_alg i))
   (requires (fun h ->
     B.live h s))

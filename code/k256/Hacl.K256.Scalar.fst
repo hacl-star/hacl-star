@@ -119,8 +119,8 @@ let is_qelem_eq_vartime f1 f2 =
 
 let load_qelem f b =
   let h0 = ST.get () in
-  SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
-  BN.bn_from_bytes_be 32ul b f
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
+  Hacl.Bignum.Convert.mk_bn_from_bytes_be true 32ul b f
 
 
 [@CInline]
@@ -191,8 +191,8 @@ let load_qelem_modq f b =
 [@CInline]
 let store_qelem b f =
   let h0 = ST.get () in
-  SN.bn_to_bytes_be_lemma #U64 32 (as_seq h0 f);
-  BN.bn_to_bytes_be 32ul f b
+  Hacl.Spec.Bignum.Convert.bn_to_bytes_be_lemma #U64 32 (as_seq h0 f);
+  Hacl.Bignum.Convert.mk_bn_to_bytes_be true 32ul f b
 
 
 [@CInline]

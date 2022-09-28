@@ -10,5 +10,6 @@ type error_code =
 | AuthenticationFailure
 | InvalidIVLength
 | DecodeError
+| MaximumLengthExceeded
 
 let _: squash (inversion error_code) = allow_inversion error_code

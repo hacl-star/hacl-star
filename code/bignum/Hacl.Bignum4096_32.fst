@@ -166,9 +166,9 @@ let new_bn_from_bytes_be = BS.new_bn_from_bytes_be
 
 let new_bn_from_bytes_le = BS.new_bn_from_bytes_le
 
-let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n_bytes
+let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be true n_bytes
 
-let bn_to_bytes_le = Hacl.Bignum.Convert.mk_bn_to_bytes_le n_bytes
+let bn_to_bytes_le = Hacl.Bignum.Convert.mk_bn_to_bytes_le true n_bytes
 
 let lt_mask = BN.bn_lt_mask n_limbs
 

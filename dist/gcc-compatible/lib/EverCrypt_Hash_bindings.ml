@@ -4,6 +4,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     open F
     module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
     open Hacl_Spec_applied
+    module EverCrypt_Error_applied =
+      (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
+    open EverCrypt_Error_applied
     type everCrypt_Hash_alg = spec_Hash_Definitions_hash_alg
     let everCrypt_Hash_alg =
       typedef spec_Hash_Definitions_hash_alg "EverCrypt_Hash_alg"
@@ -164,10 +167,15 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_Hash_Incremental_init"
         ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
            @-> (returning void))
+    let everCrypt_Hash_Incremental_max_input_len64 =
+      foreign "EverCrypt_Hash_Incremental_max_input_len64"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint64_t))
     let everCrypt_Hash_Incremental_update =
       foreign "EverCrypt_Hash_Incremental_update"
         ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
-           @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+           @->
+           (ocaml_bytes @->
+              (uint32_t @-> (returning everCrypt_Error_error_code))))
     let everCrypt_Hash_Incremental_finish_md5 =
       foreign "EverCrypt_Hash_Incremental_finish_md5"
         ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)

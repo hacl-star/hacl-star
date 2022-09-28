@@ -72,11 +72,17 @@ let mk_finish a m =
   Hacl.Hash.PadFinish.finish (mk_impl a m)
 
 let init_blake2s_32 = mk_init Blake2S Core.M32
+
 let alloca_blake2s_32 = mk_alloca Blake2S Core.M32 (mk_init Blake2S Core.M32)
+
 let update_blake2s_32 = mk_update Blake2S Core.M32
+
 let finish_blake2s_32 = mk_finish Blake2S Core.M32
 
 let init_blake2b_32 = mk_init Blake2B Core.M32
+
 let alloca_blake2b_32 = mk_alloca Blake2B Core.M32 (mk_init Blake2B Core.M32)
+
 let update_blake2b_32 = mk_update Blake2B Core.M32
+
 let finish_blake2b_32 = mk_finish Blake2B Core.M32
