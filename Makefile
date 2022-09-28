@@ -76,19 +76,8 @@ endif
 endif
 endif
 
-# Backwards-compat, remove
-ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
-endif
-
 ifeq (,$(NOOPENSSLCHECK))
-ifeq (,$(OPENSSL_HOME))
-  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
-endif
-
-ifeq (,$(OPENSSL_HOME)/libcrypto.a)
-  $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
-endif
+include Makefile.openssl
 endif
 
 ifneq (,$(HACL_HOME))
@@ -104,7 +93,7 @@ endif
 all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
-  compile-evercrypt-external-headers compile-c89-compatible \
+  compile-c89-compatible \
   compile-portable-gcc-compatible \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic \
   obj/libhaclml.cmxa compile-election-guard
@@ -130,7 +119,11 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-hpke vale_testInline test-wasm test-bindings-ocaml
+test-unstaged: test-handwritten test-c test-ml test-hpke test-wasm test-bindings-ocaml
+
+ifeq ($(shell uname -m),x86_64)
+test-unstaged: vale_testInline
+endif
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -669,7 +662,7 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
   -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
@@ -764,9 +757,6 @@ dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
 # Must appear early on because of the left-to-right semantics of -bundle flags.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
 
-# Doesn't work in WASM because one function has some heap allocation
-dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
-
 # Doesn't work in WASM because un-materialized externals for AES128
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
 
@@ -797,10 +787,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 dist/wasm/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE = $(BLAKE2_BUNDLE_BASE) \
-  -bundle 'Hacl.Hash.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2b_256,Hacl.Blake2b_256' \
-  -bundle 'Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256' \
-  -bundle 'Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
@@ -851,7 +837,7 @@ test-wasm: dist/wasm/package.json
 
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -ctypes EverCrypt.*,Hacl.*
+  -ctypes EverCrypt.*,Hacl.* #-funroll-loops 16
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_BINDINGS += \
   $(wildcard lib/ml/*_bindings.ml)
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_GEN += \
@@ -999,22 +985,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	  cp dist/config.mozilla.h $(dir $@)/config.h; \
 	fi
 
-dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) -silent \
-	  -minimal \
-	  -header $(HACL_HOME)/dist/LICENSE.txt \
-	  -bundle EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
-	  -library EverCrypt.* \
-	  -add-early-include '<inttypes.h>' \
-	  -add-early-include '<stdbool.h>' \
-	  -add-early-include '<krml/internal/types.h>' \
-	  -add-early-include '<krml/internal/target.h>' \
-	  -header dist/LICENSE.txt \
-	  -skip-compilation \
-	  -fextern-c \
-	  -tmpdir $(dir $@) \
-	  $^
-
 # Auto-generates a single C test file. Note that this rule will trigger multiple
 # times, for multiple KaRaMeL invocations in the test/ directory -- this may
 # cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
@@ -1029,6 +999,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
+	  -add-include '"libintvector.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
@@ -1054,17 +1025,14 @@ compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmlli
 # C tests (from F* files) #
 ###########################
 
-ifeq ($(OS),Windows_NT)
-OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
-LDFLAGS		+= -lbcrypt
-endif
-LDFLAGS 	+= -L$(OPENSSL_HOME)
-
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
-  -I$(OPENSSL_HOME)/include \
-  -O3 -march=native -mtune=native -I$(KRML_HOME)/krmllib/dist/minimal \
+  -O3 -I$(KRML_HOME)/krmllib/dist/minimal \
   -I$(KRML_HOME)/include -Idist/gcc-compatible
+
+ifneq ($(shell uname -m),arm64)
+CFLAGS += -march=native -mtune=native
+endif
 
 # The C test files need the extracted headers to compile
 dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
@@ -1081,14 +1049,6 @@ dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
-
-ifeq ($(OS),Windows_NT)
-  LD_EXTRA = PATH="$(OPENSSL_HOME):$(shell cygpath -u $$(ocamlfind c -where))/../stublibs:$$PATH"
-else ifeq ($(shell uname -s),Darwin)
-  LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
-else
-  LD_EXTRA = LD_LIBRARY_PATH="$(OPENSSL_HOME)"
-endif
 
 .PHONY: %.test
 %.test: %.exe
