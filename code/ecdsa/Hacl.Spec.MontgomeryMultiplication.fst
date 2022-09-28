@@ -56,39 +56,41 @@ let lemma_mod_inv2_mult_prime prime a =
 #set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 
-let lemma_norm #c p q = 
+val lemma_norm_x: #c: curve -> pX: nat {pX < getPrime c} -> pZ: nat {pZ * pZ % getPrime c <> 0} -> Lemma
+  ((pX * modp_inv2 #c (pZ * pZ)) % getPrime c * (pZ * pZ) % getPrime c == pX)
+
+let lemma_norm_x #c pX pZ = 
   let prime = getPrime c in 
-  let pX, pY, pZ = p in
-  let qX, qY, qZ = q in 
-  let pNX, pNY, pNZ = _norm #c p in 
-  let qNX, qNY, qNZ = _norm #c q in 
-
-  small_mod pZ prime;
-  small_mod qZ prime;
-
-  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime pZ pZ; 
-  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (pZ * pZ) pZ; 
-  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime qZ qZ;
-  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (qZ * qZ) qZ;
-
+   
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
-
+  
   calc (==)
   {
     (pX * modp_inv2 #c (pZ * pZ)) % prime * (pZ * pZ) % prime;
     (==) {lemma_mod_mul_distr_l (pX * modp_inv2 #c (pZ * pZ)) (pZ * pZ) prime}
-    pX * modp_inv2 #c (pZ * pZ) * (pZ * pZ) % prime;
+    pX * modp_inv2 #c (pZ * pZ) * (pZ * pZ) % prime; 
     (==) {assert_by_tactic (pX * modp_inv2 #c (pZ * pZ) * (pZ * pZ) == pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ))) canon}
-    pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ)) % prime;
+    pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ)) % prime; 
     (==) {lemma_mod_mul_distr_r pX (modp_inv2 #c (pZ * pZ) * (pZ * pZ)) prime}
-    pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ) % prime) % prime;
+    pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ) % prime) % prime; 
     (==) {lemma_mod_inv2_mult_prime prime (pZ * pZ)}
-    pX % prime;
+    pX % prime; 
     (==) {small_mod pX prime}
-    pX;
-  };
+    pX; 
+  }
 
+
+val lemma_norm_y: #c: curve -> pY: nat {pY < getPrime c} -> pZ: nat {pZ * pZ * pZ % getPrime c <> 0} -> Lemma
+  ((pY * modp_inv2 #c (pZ * pZ * pZ)) % getPrime c * (pZ * pZ * pZ) % getPrime c == pY)
+
+let lemma_norm_y #c pY pZ = 
+  let prime = getPrime c in 
+   
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  
   calc (==)
   {
     (pY * modp_inv2 #c (pZ * pZ * pZ)) % prime * (pZ * pZ * pZ) % prime;
@@ -102,42 +104,44 @@ let lemma_norm #c p q =
     pY % prime;
     (==) {small_mod pY prime}
     pY; 
-  };
+  }
 
-  calc (==)
-  {
-    (qX * modp_inv2 #c (qZ * qZ)) % prime * (qZ * qZ) % prime;
-    (==) {lemma_mod_mul_distr_l (qX * modp_inv2 #c (qZ * qZ)) (qZ * qZ) prime}
-    qX * modp_inv2 #c (qZ * qZ) * (qZ * qZ) % prime;
-    (==) {assert_by_tactic (qX * modp_inv2 #c (qZ * qZ) * (qZ * qZ) == qX * (modp_inv2 #c (qZ * qZ) * (qZ * qZ))) canon}
-    qX * (modp_inv2 #c (qZ * qZ) * (qZ * qZ)) % prime;
-    (==) {lemma_mod_mul_distr_r qX (modp_inv2 #c (qZ * qZ) * (qZ * qZ)) prime}
-    qX * (modp_inv2 #c (qZ * qZ) * (qZ * qZ) % prime) % prime;
-    (==) {lemma_mod_inv2_mult_prime prime (qZ * qZ)}
-    qX % prime;
-    (==) {small_mod qX prime}
-    qX;
-  };
 
-  calc (==)
-  {
-    (qY * modp_inv2 #c (qZ * qZ * qZ)) % prime * (qZ * qZ * qZ) % prime;
-    (==) {lemma_mod_mul_distr_l (qY * modp_inv2 #c (qZ * qZ * qZ)) (qZ * qZ * qZ) prime}
-    qY * modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ) % prime; 
-    (==) {assert_by_tactic (qY * modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ) == qY * (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ))) canon}
-    qY * (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ)) % prime; 
-    (==) {lemma_mod_mul_distr_r qY (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ)) prime}
-    qY * (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ) % prime) % prime; 
-    (==) {lemma_mod_inv2_mult_prime prime (qZ * qZ * qZ)}
-    qY % prime;
-    (==) {small_mod qY prime}
-    qY; 
-  };
+val lemma_point_nat_z_less_prime: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity p)} ->
+  Lemma (let pX, pY, pZ = p in pZ % getPrime c <> 0)
 
+let lemma_point_nat_z_less_prime #c p = 
+  let prime = getPrime c in 
+  let pX, pY, pZ  = p in 
+  small_mod pZ prime
+
+
+let lemma_norm #c p q = 
+  let prime = getPrime c in 
+  let pX, pY, pZ = p in
+  let qX, qY, qZ = q in 
+  let pNX, pNY, pNZ = _norm #c p in 
+  let qNX, qNY, qNZ = _norm #c q in 
+
+  lemma_point_nat_z_less_prime #c p;
+  lemma_point_nat_z_less_prime #c q;
+  
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime pZ pZ; 
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (pZ * pZ) pZ; 
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime qZ qZ;
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (qZ * qZ) qZ;
+
+
+  lemma_norm_x #c pX pZ; 
+  lemma_norm_x #c qX qZ;
+
+  lemma_norm_y #c pY pZ;
+  lemma_norm_y #c qY qZ;
 
   assert(pX == qX <==> pNX * (pZ * pZ) % prime == qNX * (qZ * qZ) % prime);
   assert(pY == qY <==> pNY * (pZ * pZ * pZ) % prime == qNY * (qZ * qZ * qZ) % prime)
-
+  
 
 let lemmaToDomainFromDomain #c #m a =
   let power = pow2 (getPower c) in 
@@ -389,10 +393,9 @@ val lemma_exponen_spec: #c: curve
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getModePrime m c)
 
 
-val lemma_exponen_spec_0: #c: curve 
-  -> #m: mode 
+val lemma_exponen_spec_0: #c: curve -> #m: mode 
   -> k: scalar_bytes #c
-  -> start:tuple2 nat nat {let st0, st1 = start in st0 == 1 /\ st1 < getModePrime m c} 
+  -> start: tuple2 nat nat {let st0, st1 = start in st0 == 1 /\ st1 < getModePrime m c} 
   -> Lemma (
     let prime = getModePrime m c in 
     let start0, start1 = start in
@@ -400,20 +403,24 @@ val lemma_exponen_spec_0: #c: curve
     let newIndex = v (getScalarLen c) in
     let f0, f1 = Lib.LoopCombinators.repeati 0 (_pow_step #c #m k) (start0, start1) in
     f0 == pow start1 (arithmetic_shift_right number newIndex) % prime /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime
-  )
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime)
 
-let lemma_exponen_spec_0 #c #m k start =
+let lemma_exponen_spec_0 #c #m k (st0, st1) =
   let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
 
-  let st0, st1 = start in
-  let number = nat_from_bytes_le #SEC k in
-    assert (arithmetic_shift_right number (v (getScalarLen c)) == number / power);
-  FStar.Math.Lemmas.lemma_div_lt_nat number (v (getScalarLen c)) (v (getScalarLen c));
-    assert (arithmetic_shift_right number (v (getScalarLen c)) == 0);
+  let k_nat = nat_from_bytes_le #SEC k in
+    assert (arithmetic_shift_right k_nat (v (getScalarLen c)) == k_nat / power);
+  FStar.Math.Lemmas.lemma_div_lt_nat k_nat (v (getScalarLen c)) (v (getScalarLen c));
+    assert (arithmetic_shift_right k_nat (v (getScalarLen c)) == 0);
+    
   Lib.LoopCombinators.eq_repeati0 (v (getScalarLen c)) (_pow_step #c #m k) (st0, st1);
-  FStar.Math.Lemmas.small_modulo_lemma_1 st1 prime
+  FStar.Math.Lemmas.small_modulo_lemma_1 st1 prime;
+
+  let f0, f1 = Lib.LoopCombinators.repeati 0 (_pow_step #c #m k) (st0, st1) in
+  assert (f1 == st1);
+  assert (f0 == pow st1 0 % prime);
+  assert (f1 == pow st1 1 % prime)
 
 
 #pop-options

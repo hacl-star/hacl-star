@@ -19,9 +19,9 @@ val ecp256_dh_i: #c: curve
 let ecp256_dh_i #c s =
   let p = secret_to_public #c s in 
   if isPointAtInfinity p then 
-    (fromJacobianCoordinatesTest #c (_norm p), false)
+    (fromJacobianCoordinates (_norm p), false)
   else
-    (fromJacobianCoordinatesTest #c (_norm p), true)
+    (fromJacobianCoordinates #c (_norm p), true)
 
 (* Responder *)
 val ecp256_dh_r: #c: curve 
@@ -36,6 +36,6 @@ let ecp256_dh_r #c pubKey scalar  =
   else
     let pk_scalar = scalar_multiplication #c scalar pk in
     if isPointAtInfinity pk_scalar then 
-      (fromJacobianCoordinatesTest #c (_norm pk_scalar), false)
+      (fromJacobianCoordinates #c (_norm pk_scalar), false)
     else 
-      (fromJacobianCoordinatesTest #c (_norm pk_scalar), true)
+      (fromJacobianCoordinates #c (_norm pk_scalar), true)

@@ -1,5 +1,5 @@
 [
-  "˘g¨:@êè§ü’_\u0015{wP\u001e",
+  "ófÒÃM\\Ä£@sÚ[ê:\u001e∑",
   [
     [
       "Hacl.Impl.ECDSA.MM.Exponent.montgomery_ladder_exponent",
@@ -7,13 +7,25 @@
       2,
       1,
       [
-        "@query", "equation_Hacl.Impl.ECDSA.MontgomeryMultiplication.prime",
-        "equation_Spec.ECDSA.prime",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Hacl.Spec.MontgomeryMultiplication.DSA",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Hacl.Spec.MontgomeryMultiplication.DSA@tok",
+        "equation_FStar.Math.Euclid.is_prime",
+        "equation_Hacl.Spec.MontgomeryMultiplication.getModePrime",
+        "equation_Spec.ECC.Curves.getOrder",
+        "equation_Spec.ECC.Curves.getPower",
+        "equation_Spec.ECC.Curves.getPrime", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c629a04b359772efbb31a127ec60e3d1",
+        "refinement_interpretation_Tm_refine_d9a7c326689c4a485c7d247f9b491c0d",
+        "refinement_interpretation_Tm_refine_e05b42b3c50c7d0f7eb883e5a1664d64",
+        "typing_Spec.ECC.Curves.getOrder", "typing_Spec.ECC.Curves.getPower",
+        "typing_Spec.ECC.Curves.getPrime"
       ],
       0,
-      "bcfb8aad8fc885415a5c72e84e95b27c"
+      "cb03337336efcd31dd814d126b5c0b3b"
     ],
     [
       "Hacl.Impl.ECDSA.MM.Exponent.multPower",
@@ -21,11 +33,20 @@
       2,
       1,
       [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime",
+        "equation_Spec.ECC.Curves.getOrder",
+        "equation_Spec.ECC.Curves.getPower",
+        "equation_Spec.ECC.Curves.getPrime", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c629a04b359772efbb31a127ec60e3d1",
+        "refinement_interpretation_Tm_refine_d9a7c326689c4a485c7d247f9b491c0d",
+        "refinement_interpretation_Tm_refine_e05b42b3c50c7d0f7eb883e5a1664d64",
+        "typing_Spec.ECC.Curves.getOrder", "typing_Spec.ECC.Curves.getPower",
+        "typing_Spec.ECC.Curves.getPrime"
       ],
       0,
-      "6dca38bd0520f7316a9df76d78d115bf"
+      "53fa995274ab9bc4a442366800ced740"
     ],
     [
       "Hacl.Impl.ECDSA.MM.Exponent.multPowerPartial",
@@ -33,13 +54,27 @@
       2,
       1,
       [
-        "@query", "equation_Hacl.Impl.ECDSA.MontgomeryMultiplication.prime",
-        "equation_Spec.ECDSA.prime",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Hacl.Spec.MontgomeryMultiplication.DSA",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Hacl.Spec.MontgomeryMultiplication.DSA@tok",
+        "equation_FStar.Math.Euclid.is_prime",
+        "equation_Hacl.Spec.MontgomeryMultiplication.getModePrime",
+        "equation_Spec.ECC.Curves.getOrder",
+        "equation_Spec.ECC.Curves.getPower",
+        "equation_Spec.ECC.Curves.getPrime", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_75a5eaf2be890e88b5e8560d06f51d26",
+        "refinement_interpretation_Tm_refine_c629a04b359772efbb31a127ec60e3d1",
+        "refinement_interpretation_Tm_refine_d9a7c326689c4a485c7d247f9b491c0d",
+        "refinement_interpretation_Tm_refine_e05b42b3c50c7d0f7eb883e5a1664d64",
+        "typing_Spec.ECC.Curves.getOrder", "typing_Spec.ECC.Curves.getPower",
+        "typing_Spec.ECC.Curves.getPrime"
       ],
       0,
-      "c4b10d0b24800dab0214c95a710b9e47"
+      "620ad1ae1f8b106c9d61696da3b40c69"
     ]
   ]
 ]

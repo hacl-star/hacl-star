@@ -406,7 +406,7 @@ val ecp256dh_i_ml:
     rX < getPrime P256 /\ rX < getPrime P256 /\ flag == success /\ (
     success ==> 
       (rX, rY) == p /\ ~ (isPointAtInfinity (secret_to_public #P256 (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #P256 (_norm (secret_to_public #P256 (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #P256 (_norm (secret_to_public #P256 (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public #P256 (as_seq h0 scalar)))))
 
 
@@ -426,7 +426,7 @@ val ecp256dh_i_radix:
     rX < getPrime P256 /\ rX < getPrime P256 /\ flag == success /\ (
     success ==> 
       (rX, rY) == p /\ ~ (isPointAtInfinity (secret_to_public #P256 (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #P256 (_norm (secret_to_public #P256 (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #P256 (_norm (secret_to_public #P256 (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public #P256 (as_seq h0 scalar)))))
 
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
@@ -445,7 +445,7 @@ val ecp256dh_i_wnaf:
     rX < getPrime P256 /\ rX < getPrime P256 /\ flag == success /\ (
     success ==> 
       (rX, rY) == p /\ ~ (isPointAtInfinity (secret_to_public #P256 (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #P256 (_norm (secret_to_public #P256 (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #P256 (_norm (secret_to_public #P256 (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public #P256 (as_seq h0 scalar)))))
 
 
@@ -462,7 +462,7 @@ val ecp384dh_i_ml:
     rX < getPrime P384 /\ rX < getPrime P384 /\ flag == success /\ (
     success ==> 
       (rX, rY) == p /\ ~ (isPointAtInfinity (secret_to_public #P384 (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #P384 (_norm (secret_to_public #P384 (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #P384 (_norm (secret_to_public #P384 (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public #P384 (as_seq h0 scalar)))))
 
 
@@ -479,7 +479,7 @@ val ecp384dh_i_radix:
     rX < getPrime P384 /\ rX < getPrime P384 /\ flag == success /\ (
     success ==> 
       (rX, rY) == p /\ ~ (isPointAtInfinity (secret_to_public #P384 (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #P384 (_norm (secret_to_public #P384 (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #P384 (_norm (secret_to_public #P384 (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public #P384 (as_seq h0 scalar)))))
 
 
@@ -496,7 +496,7 @@ val ecp384dh_i_wnaf:
     rX < getPrime P384 /\ rX < getPrime P384 /\ flag == success /\ (
     success ==> 
       (rX, rY) == p /\ ~ (isPointAtInfinity (secret_to_public #P384 (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #P384 (_norm (secret_to_public #P384 (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #P384 (_norm (secret_to_public #P384 (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public #P384 (as_seq h0 scalar)))))
 
 
@@ -671,7 +671,7 @@ Not side-channel resistant")]
 val point_add_out: p: point P256 -> q: point P256 -> result: point P256 -> 
   Stack unit
   (requires fun h -> live h p /\ live h q /\ live h result /\ 
-    eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
+    disjoint q result /\ disjoint p q /\ disjoint p result /\
      point_eval P256 h p /\ point_eval P256 h q /\ ~ (isPointAtInfinity (point_as_nat P256 h p)) /\ 
      ~ (isPointAtInfinity (point_as_nat P256 h q)))
    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval P256 h1 result /\ (

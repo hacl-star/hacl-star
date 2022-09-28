@@ -165,6 +165,7 @@ val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
     as_nat c h1 out == toDomain #c ((fromDomain #c (as_nat c h0 a) - fromDomain #c (as_nat c h0 b)) % getPrime c)))
 
 
+inline_for_extraction noextract
 val felem_sub_zero: #c: curve -> b: felem c -> out: felem c ->
   Stack unit
   (requires (fun h0 -> live h0 out /\ live h0 b /\ disjoint b out /\ as_nat c h0 b < getPrime c))

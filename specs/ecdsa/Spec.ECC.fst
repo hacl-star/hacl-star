@@ -95,9 +95,7 @@ val _norm_modification_of_y: #c: curve -> p: point #c #Jacobian -> Lemma (
 let _norm_modification_of_y #c p = ()
 
 
-let fromJacobianCoordinates #c = _norm #c
-
-let fromJacobianCoordinatesTest #c (p: point #c #Jacobian {let x, y, z = p in z == 1}) : point #c #Affine = 
+let fromJacobianCoordinates #c (p: point #c #Jacobian) : point #c #Affine = 
   let x, y, z = p in 
   (x, y)
 
@@ -719,3 +717,4 @@ val secret_to_public: #c: curve -> scalar_bytes #c -> point_nat_prime #c
 
 let secret_to_public #c k =
   point_mult #c  (scalar_as_nat #c k) (basePoint #c)
+

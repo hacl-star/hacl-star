@@ -474,12 +474,12 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> #l: ladder -> p: point c 
     ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
-    let qD = point_as_nat c h1 result in
+    let qD : Spec.ECC.point #c = point_as_nat c h1 result in
     pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\ 
     (not (isPointAtInfinity #Jacobian (scalar_multiplication (as_seq h0 scalar) p0)) ==>
-      qD == fromJacobianCoordinates #c (scalar_multiplication (as_seq h0 scalar) p0))))
+      qD == _norm #c (scalar_multiplication (as_seq h0 scalar) p0))))
 
-let scalarMultiplication_t #c #t #l p result scalar tempBuffer  = 
+ let scalarMultiplication_t #c #t #l p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer; 

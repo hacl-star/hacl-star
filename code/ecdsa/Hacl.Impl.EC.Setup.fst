@@ -41,9 +41,30 @@ val lst_as_nat_definiton: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> i:
 let lst_as_nat_definiton b i = ()
 
 
-val lst_as_nat_first: #t:inttype{unsigned t} -> a: list (uint_t t SEC)  {List.Tot.Base.length a > 0} -> Lemma (lst_as_nat_ a 1 == v (List.Tot.Base.index a 0))
+val lst_as_nat_first: #t:inttype{unsigned t} 
+  -> a: list (uint_t t SEC)  {List.Tot.Base.length a > 0} ->
+  Lemma (lst_as_nat_ a 1 == v (List.Tot.Base.index a 0))
 
-let lseq_as_nat_first a = ()
+let lst_as_nat_first a = ()
+
+
+val lemma_list_nat_from_bytes: a: list uint8 { List.Tot.length a <= max_size_t} -> 
+  i: nat {i > 0 /\ i <= List.Tot.length a} ->
+  Lemma (Lib.ByteSequence.nat_from_intseq_le (Lib.Sequence.slice (Lib.Sequence.of_list a) 0 i) == Hacl.Impl.EC.Setup.lst_as_nat_ a i)
+
+let rec lemma_list_nat_from_bytes a i = 
+  let l = List.Tot.length a in 
+  let al = (Lib.Sequence.of_list a) in 
+  let sl = (Lib.Sequence.slice al 0 i) in 
+  match i with 
+  |1 -> Lib.ByteSequence.nat_from_intseq_le_lemma0 sl; lst_as_nat_first a
+  |_ -> lemma_list_nat_from_bytes a (i - 1);
+    let i1 = i - 1 in 
+    Lib.ByteSequence.nat_from_intseq_le_slice_lemma al i1;
+    Lib.ByteSequence.nat_from_intseq_le_slice_lemma sl (i - 1);
+    Lib.ByteSequence.nat_from_intseq_le_lemma0 (Lib.Sequence.slice sl i1 i); 
+    lst_as_nat_definiton a i
+
 
 
 #set-options "--z3rlimit 100"
@@ -828,6 +849,156 @@ let uploadBasePointAffine_p256 p =
   basePointAffine_p256_z ()
 
 
+val basePointAffine_p384_x: x: Lib.Sequence.lseq uint64 6 -> 
+  Lemma (requires (lseq_as_nat x == 
+    0x32f2345cb5536b82 + 
+    0x33ba95da2f7d6018 * pow2 64 + 
+    0xf2cd7729b1c03094 * pow2 (64 * 2) +  
+    0x3159972fc3a90663 * pow2 (64 * 3) + 
+    0x5827e6777fec9ce6 * pow2 (64 * 4) + 
+    0x1af1e42821b04e1b * pow2 (64 * 5)))
+  (ensures (lseq_as_nat x < prime384 /\  (
+    let bpX, bpY, bpZ = basePoint #P384 in 
+    let pX = fromDomain_ #P384 #DH (lseq_as_nat x) in 
+    let pZ = fromDomain_ #P384 #DH 1 in 
+    modp_inv2 #P384 (bpZ * bpZ) * bpX % prime384 == modp_inv2 #P384 (pZ * pZ) * pX % prime384)))
+
+let basePointAffine_p384_x x = 
+  let bpX, bpY, bpZ = basePoint #P384 in 
+    assert_norm ( 0x32f2345cb5536b82 + 
+    0x33ba95da2f7d6018 * pow2 64 + 
+    0xf2cd7729b1c03094 * pow2 (64 * 2) +  
+    0x3159972fc3a90663 * pow2 (64 * 3) + 
+    0x5827e6777fec9ce6 * pow2 (64 * 4) + 
+    0x1af1e42821b04e1b * pow2 (64 * 5) < prime384);
+
+  lemmaFromDomain #P384 #DH (lseq_as_nat x);
+  lemmaFromDomain #P384 #DH 1;
+
+  assert_norm (0x32f2345cb5536b82 + 0x33ba95da2f7d6018 * pow2 64 + 0xf2cd7729b1c03094 * pow2 (64 * 2) +  0x3159972fc3a90663 * pow2 (64 * 3) + 0x5827e6777fec9ce6 * pow2 (64 * 4) + 0x1af1e42821b04e1b * pow2 (64 * 5) == 0x1af1e42821b04e1b5827e6777fec9ce63159972fc3a90663f2cd7729b1c0309433ba95da2f7d601832f2345cb5536b82);
+  
+  assert(lseq_as_nat x == 0x1af1e42821b04e1b5827e6777fec9ce63159972fc3a90663f2cd7729b1c0309433ba95da2f7d601832f2345cb5536b82);
+
+  assert_norm (0x4aafab55afa32e5fe475038bdc3546dfa3b02052b2d202f49d1626d6aa514f824b7a7ef91d702641542d6df33f58cc6c = 
+  0x1af1e42821b04e1b5827e6777fec9ce63159972fc3a90663f2cd7729b1c0309433ba95da2f7d601832f2345cb5536b82 * modp_inv2_prime (pow2 384) prime384 % prime384);
+
+  assert_norm (0x14000000140000000c00000002fffffffcfffffffafffffffbfffffffdffffffebffffffd8ffffffe100000006 == modp_inv2_prime (pow2 384) prime384 % prime384);
+
+
+  assert(fromDomain_ #P384 #DH (lseq_as_nat x) == 0x4aafab55afa32e5fe475038bdc3546dfa3b02052b2d202f49d1626d6aa514f824b7a7ef91d702641542d6df33f58cc6c);
+
+  assert(fromDomain_ #P384 #DH 1 == 0x14000000140000000c00000002fffffffcfffffffafffffffbfffffffdffffffebffffffd8ffffffe100000006);
+
+
+  assert(modp_inv2 #P384 1 == exp #prime384 (1 % prime384) (prime384 - 2));
+  assert_norm (1 % prime384 == 1);
+  assert_norm (1 == exp #prime384 1 (prime384 - 2));
+  let pX = fromDomain_ #P384 #DH (lseq_as_nat x) in 
+  let pZ = fromDomain_ #P384 #DH 1 in 
+
+  small_mod bpX prime384;
+  assert_norm (0xfffffc63ffffff12000000e00000018100000141000000a10000000bffffffb60000034100000449fffffff5fffffa08 == pZ * pZ % prime384);
+
+  assert_norm (exp #prime384 0xfffffc63ffffff12000000e00000018100000141000000a10000000bffffffb60000034100000449fffffff5fffffa08 (prime384 - 2) * 0x4aafab55afa32e5fe475038bdc3546dfa3b02052b2d202f49d1626d6aa514f824b7a7ef91d702641542d6df33f58cc6c % prime384 == 0xaa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7) 
+
+
+val basePointAffine_p384_y: y: Lib.Sequence.lseq uint64 6 -> 
+  Lemma (requires (lseq_as_nat y == 
+    0xbbacc6d281184b31 + 
+    0x5a08d98b36984428 * pow2 64 + 
+    0x73ba86bb86816030 * pow2 (64 * 2) +  
+    0xe77b3c32da8c0cac * pow2 (64 * 3) + 
+    0x594336a7bc787585 * pow2 (64 * 4) + 
+    0x7d25d16cde0af6c9 * pow2 (64 * 5)))
+  (ensures (lseq_as_nat y < prime384 /\  (
+    let bpX, bpY, bpZ = basePoint #P384 in 
+    let pY = fromDomain_ #P384 #DH (lseq_as_nat y) in 
+    let pZ = fromDomain_ #P384 #DH 1 in 
+    modp_inv2 #P384 (bpZ * bpZ * bpZ) * bpY % prime384 == modp_inv2 #P384 (pZ * pZ * pZ) * pY % prime384)))
+
+let basePointAffine_p384_y y = 
+  let bpX, bpY, bpZ = basePoint #P384 in 
+  assert_norm  (0xbbacc6d281184b31 + 
+    0x5a08d98b36984428 * pow2 64 + 
+    0x73ba86bb86816030 * pow2 (64 * 2) +  
+    0xe77b3c32da8c0cac * pow2 (64 * 3) + 
+    0x594336a7bc787585 * pow2 (64 * 4) + 
+    0x7d25d16cde0af6c9 * pow2 (64 * 5) < prime384);
+
+  lemmaFromDomain #P384 #DH (lseq_as_nat y);
+  lemmaFromDomain #P384 #DH 1;
+
+
+  assert_norm (0xbbacc6d281184b31 + 
+    0x5a08d98b36984428 * pow2 64 + 
+    0x73ba86bb86816030 * pow2 (64 * 2) +  
+    0xe77b3c32da8c0cac * pow2 (64 * 3) + 
+    0x594336a7bc787585 * pow2 (64 * 4) + 
+    0x7d25d16cde0af6c9 * pow2 (64 * 5) == 0x7d25d16cde0af6c9594336a7bc787585e77b3c32da8c0cac73ba86bb868160305a08d98b36984428bbacc6d281184b31);
+
+  
+  assert_norm (0x1c7b85c46eaff48d5f128b948a2d02779a64831f36ad807d88a060e14f1e7824a862c2a2aaa9e871fe8ea01644c0aad = 
+  0x7d25d16cde0af6c9594336a7bc787585e77b3c32da8c0cac73ba86bb868160305a08d98b36984428bbacc6d281184b31 * modp_inv2_prime (pow2 384) prime384 % prime384);
+
+   assert_norm (0x14000000140000000c00000002fffffffcfffffffafffffffbfffffffdffffffebffffffd8ffffffe100000006 == modp_inv2_prime (pow2 384) prime384 % prime384);
+
+  assert(modp_inv2 #P384 1 == exp #prime384 (1 % prime384) (prime384 - 2));
+  assert_norm (1 % prime384 == 1);
+  assert_norm (1 == exp #prime384 1 (prime384 - 2));
+
+  let pY = fromDomain_ #P384 #DH (lseq_as_nat y) in 
+  let pZ = fromDomain_ #P384 #DH 1 in 
+
+  small_mod bpY prime384;
+  assert(pZ == 0x14000000140000000c00000002fffffffcfffffffafffffffbfffffffdffffffebffffffd8ffffffe100000006);
+  assert_norm (0xffffbd04ffff8cb5ffff9fd0ffffcfb6fffffc5e000015cf00001af70000133000004a7b0000b48d0000cd7800004785 == pZ * pZ * pZ % prime384);
+
+  assert_norm (exp #prime384 0xffffbd04ffff8cb5ffff9fd0ffffcfb6fffffc5e000015cf00001af70000133000004a7b0000b48d0000cd7800004785 (prime384 - 2) * 0x1c7b85c46eaff48d5f128b948a2d02779a64831f36ad807d88a060e14f1e7824a862c2a2aaa9e871fe8ea01644c0aad % prime384 == 0x3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f)
+
+
+val basePointAffine_p384_z: unit -> Lemma (fromDomain_ #P384 #DH 1 <> 0)
+
+let basePointAffine_p384_z () = 
+  lemmaFromDomain #P384 #DH 1;
+  assert(fromDomain_ #P384 #DH 1 == exp #prime384 (pow2 384 % prime384) (prime384 - 2) % prime384); 
+  assert_norm (0 <> exp #prime384 (pow2 384 % prime384) (prime384 - 2) % prime384)
+
+
+val uploadBasePointAffine_p384: p: pointAffine P384 -> Stack unit 
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_aff_eval P384 h1 p /\
+    pointEqual #P384 (basePoint #P384) (fromDomainPoint #P384 #DH (toJacobianCoordinates (point_affine_as_nat P384 h1 p))))
+
+let uploadBasePointAffine_p384 p = 
+  upd p (size 0) (u64 0x32f2345cb5536b82);
+  upd p (size 1) (u64 0x33ba95da2f7d6018);
+  upd p (size 2) (u64 0xf2cd7729b1c03094);
+  upd p (size 3) (u64 0x3159972fc3a90663);
+  upd p (size 4) (u64 0x5827e6777fec9ce6);
+  upd p (size 5) (u64 0x1af1e42821b04e1b);
+    
+  upd p (size 6) (u64 0xbbacc6d281184b31);
+  upd p (size 7) (u64 0x5a08d98b36984428);
+  upd p (size 8) (u64 0x73ba86bb86816030);
+  upd p (size 9) (u64 0xe77b3c32da8c0cac);
+  upd p (size 10) (u64 0x594336a7bc787585);
+  upd p (size 11) (u64 0x7d25d16cde0af6c9);
+
+  let h1 = ST.get() in 
+  let len = getCoordinateLenU64 P384 in 
+
+  let x = gsub p (size 0) len in 
+  let y = gsub p len len in 
+    
+  Hacl.Impl.P384.LowLevel.lemma_lseq_nat_instant_6 (as_seq h1 x);
+  Hacl.Impl.P384.LowLevel.lemma_lseq_nat_instant_6 (as_seq h1 y);
+
+  basePointAffine_p384_x (as_seq h1 x); 
+  basePointAffine_p384_y (as_seq h1 y);
+  basePointAffine_p384_z ()
+  
+
+inline_for_extraction noextract
 val uploadBasePointAffine: #c: curve -> p: pointAffine c -> Stack unit 
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_aff_eval c h1 p /\
@@ -837,55 +1008,7 @@ let uploadBasePointAffine #c p =
   let h0 = ST.get() in 
   match c with 
   |P256 -> uploadBasePointAffine_p256 p
-  |P384 -> 
-    admit();
-    upd p (size 0) (u64 0x32f2345cb5536b82);
-    upd p (size 1) (u64 0x33ba95da2f7d6018);
-    upd p (size 2) (u64 0xf2cd7729b1c03094);
-    upd p (size 3) (u64 0x3159972fc3a90663);
-    upd p (size 4) (u64 0x5827e6777fec9ce6);
-    upd p (size 5) (u64 0x1af1e42821b04e1b);
-    
-    upd p (size 6) (u64 0xbbacc6d281184b31);
-    upd p (size 7) (u64 0x5a08d98b36984428);
-    upd p (size 8) (u64 0x73ba86bb86816030);
-    upd p (size 9) (u64 0xe77b3c32da8c0cac);
-    upd p (size 10) (u64 0x594336a7bc787585);
-    upd p (size 11) (u64 0x7d25d16cde0af6c9)
-
-
-
-inline_for_extraction noextract
-let order_u8_list (c: curve) : x: list uint8 {List.Tot.length x == v (getCoordinateLenU P256) /\ lst_as_nat x == getPrime P256 - 2} = 
-  [@inline_let]
-  let x = [
-    u8 253; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-    u8 255; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
-    u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
-    u8 1;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255;  u8 255] in
-  assert_norm (List.Tot.Base.length x == v (getScalarLenBytes P256));
-  admit();
-  x
-
-
-inline_for_extraction noextract
-let order_list_ (c: curve) : x: list uint8 {List.Tot.length x == v (getCoordinateLenU c) /\ 
-  lst_as_nat x == getPrime c - 2} = 
-  match c with 
-  |P256 -> order_u8_list c
-  |_ -> admit()
-
-
-inline_for_extraction
-let prime256_order_: x: glbuffer uint8 32ul {
-  witnessed #uint8 #(size 32) x (Lib.Sequence.of_list p256_inverse_list) /\ recallable x} = 
-  createL_global (order_u8_list P256)
-
-
-inline_for_extraction
-let order_u8_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
-  {witnessed #uint8 #(getCoordinateLenU c) x (Lib.Sequence.of_list (prime_inverse_list c)) /\ recallable x}) = 
-  prime256_order_
+  |P384 -> uploadBasePointAffine_p384 p
 
 
 inline_for_extraction noextract
@@ -975,3 +1098,4 @@ let uploadB #c b =
 
     let h1 = ST.get() in 
      Hacl.Impl.P384.LowLevel.lemma_lseq_nat_instant_6 (as_seq h1 b)
+

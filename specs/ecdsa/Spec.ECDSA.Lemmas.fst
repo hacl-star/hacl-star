@@ -51,6 +51,12 @@ let rec nat_from_intlist_be #t #l = function
   | hd :: tl -> pow2 (FStar.List.Tot.Base.length tl * bits t) * v hd + nat_from_intlist_be tl
 
 
+val nat_from_intlist_0: #t:inttype{unsigned t} -> #l:secrecy_level 
+  -> lst: list (uint_t t l){List.Tot.Base.length lst == 0} -> Lemma (nat_from_intlist_le lst == 0)
+
+let nat_from_intlist_0 #t #l lst = ()
+
+
 val nat_from_intlist_seq_be: #t: inttype {unsigned t} -> #l: secrecy_level
   -> len: size_nat -> b: list (uint_t t l) {FStar.List.Tot.Base.length b = len}
   -> Lemma (nat_from_intlist_be b == nat_from_intseq_be (of_list b))

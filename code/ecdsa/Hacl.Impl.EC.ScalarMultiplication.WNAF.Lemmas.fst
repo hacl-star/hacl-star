@@ -181,6 +181,51 @@ let scalar_as_nat_is_same_as_scalar_to_odd #c scalar t =
       pow2_double_mult (t - 1)
     end
 
+
+val scalar_compute_window_lemma0: #c: curve 
+  -> scalar: scalar_bytes #c {scalar_as_nat scalar < pow2 (getPower c)}
+  -> i: size_t {v i < getPower c / Spec.ECC.WNAF.w - 1} ->
+  Lemma (
+    let t = (v i + 1) * w  in 
+    let len = getPower c in 
+    let sh0 = v (ith_bit scalar (t + 1)) in 
+    let sh1 = v (ith_bit scalar (t + 2)) in 
+    let sh2 = v (ith_bit scalar (t + 3)) in 
+    let sh3 = v (ith_bit scalar (t + 4)) in 
+    let sh4 = v (ith_bit scalar (t + 5)) in 
+    let i = sh0 * pow2 1 + sh1 * pow2 2 + sh2 * pow2 3 + sh3 * pow2 4 + sh4 * pow2 5 in 
+    2 * scalar_as_nat_ scalar (len - (t + 1)) == pow2 6 * scalar_as_nat_ scalar (len - (t + 6)) + i)
+
+let scalar_compute_window_lemma0 #c scalar k = 
+  let t = (v k + 1) * w  in 
+  let sh0 = v (ith_bit scalar (t + 1)) in 
+  let sh1 = v (ith_bit scalar (t + 2)) in 
+  let sh2 = v (ith_bit scalar (t + 3)) in 
+  let sh3 = v (ith_bit scalar (t + 4)) in 
+  let sh4 = v (ith_bit scalar (t + 5)) in 
+
+  let i = sh0 * pow2 1 + 
+    sh1 * pow2 2 +
+    sh2 * pow2 3 +
+    sh3 * pow2 4 +
+    sh4 * pow2 5 in 
+    
+  scalar_as_nat_def #c scalar (getPower c - (t + 1));
+    assert(scalar_as_nat_ scalar (getPower c - (t + 1)) = 2 * scalar_as_nat_ scalar (getPower c - (t + 2)) + sh0);
+    
+  scalar_as_nat_def #c scalar (getPower c - (t + 2));
+  scalar_as_nat_def #c scalar (getPower c - (t + 3));
+  scalar_as_nat_def #c scalar (getPower c - (t + 4));
+  scalar_as_nat_def #c scalar (getPower c - (t + 5));
+
+  scalar_compute_window_lemma_lemma_powers ();
+
+  let len = getPower c in 
+  
+  assert (2 * scalar_as_nat_ scalar (len - (t + 1)) == pow2 6 * scalar_as_nat_ scalar (len - (t + 6)) + i)
+
+
+
 val scalar_compute_window_lemma: #c: curve 
   -> scalar: scalar_bytes #c {scalar_as_nat scalar < pow2 (getPower c)}
   -> i: size_t {v i < getPower c / Spec.ECC.WNAF.w - 1} ->
@@ -213,15 +258,9 @@ let scalar_compute_window_lemma #c scalar k =
     sh3 * pow2 4 +
     sh4 * pow2 5 in 
     
-  scalar_as_nat_def #c scalar (getPower c - (t + 1));
-  scalar_as_nat_def #c scalar (getPower c - (t + 2));
-  scalar_as_nat_def #c scalar (getPower c - (t + 3));
-  scalar_as_nat_def #c scalar (getPower c - (t + 4));
-  scalar_as_nat_def #c scalar (getPower c - (t + 5));
-
+  scalar_compute_window_lemma0 scalar k; 
   scalar_compute_window_lemma_lemma_powers ();
 
-  let d = scalar_as_nat scalar in 
   let len = v (getScalarLen c) in 
   
   assert (2 * scalar_as_nat_ scalar (len - (t + 1)) == pow2 6 * scalar_as_nat_ scalar (len - (t + 6)) + i);
@@ -239,8 +278,8 @@ let scalar_compute_window_lemma #c scalar k =
   Hacl.Impl.EC.Masking.ScalarAccess.Lemmas.test #c scalar (len - (t + 1));
   assert(scalar_as_nat_ scalar (len - (t + 1)) % pow2 5 * 2 == i);
 
-  assert(scalar_as_nat_ scalar (len - (t + 1)) == d / pow2 (t + 1));
-  assert(d / pow2 (t + 1) % m * 2 == i);
+  assert(scalar_as_nat_ scalar (len - (t + 1)) == scalar_as_nat scalar / pow2 (t + 1));
+  assert(scalar_as_nat scalar / pow2 (t + 1) % m * 2 == i);
   scalar_as_nat_is_same_as_scalar_to_odd scalar (t + 1)
 
 
@@ -1270,11 +1309,11 @@ val lemma_last_bit: #c: curve
     let n = getPower c in
     let d = scalarToOdd n d in 
     let s = to_wnaf n d in 
-    scalar_as_nat #c scalar % 2 == 0 /\
     pointEqual #c result (Lib.LoopCombinators.repeati (n / w + 1) (wnaf_step2 #c (basePoint #c) s) (0, 0, 0))))
-  (ensures (~ (pointEqual #c result (Spec.ECC.point_mult #c (- 1) (basePoint #c)))))
+  (ensures (scalar_as_nat #c scalar % 2 == 0 ==> ~ (pointEqual #c result (Spec.ECC.point_mult #c (- 1) (basePoint #c)))))
 
 let lemma_last_bit #c scalar result = 
+  if scalar_as_nat #c scalar % 2 = 0 then begin
   let d = scalar_as_nat #c scalar in 
   let n = getPower c in
   let d = scalarToOdd n d in 
@@ -1326,7 +1365,7 @@ let lemma_last_bit #c scalar result =
 
       assert(False)
     end
-
+    end
 
 
 val scalar_rwnaf_to_invariant_lemma0_j: #c: curve 

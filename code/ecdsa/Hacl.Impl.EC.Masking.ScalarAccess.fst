@@ -142,7 +142,7 @@ let getScalar_4 #c scalar i =
 inline_for_extraction noextract
 val getScalar_byBit_oneBit: #c: curve
   -> #buf_type: buftype 
-  -> s: scalar_t #MUT #c
+  -> s: scalar_t #buf_type #c
   -> bit: size_t {v bit < v (getScalarLen c)}
   -> j: size_t {v j < 4} -> 
   Stack uint64 
@@ -153,7 +153,7 @@ val getScalar_byBit_oneBit: #c: curve
 let getScalar_byBit_oneBit #c s bit j = shift_left (getScalarBit_leftEndian s bit) j
 
 
-
+inline_for_extraction noextract 
 val computeBit: #c: curve -> i: size_t {v i < v (getScalarLenBytes c) * 2} -> 
   Tot (bit: size_t {v bit == v (getScalarLen c) - 1 - 4 * v i})
 

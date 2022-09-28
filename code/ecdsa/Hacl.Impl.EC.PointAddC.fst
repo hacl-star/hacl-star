@@ -112,7 +112,49 @@ let lemma_multiplication_is_pointEqual_l1 #c p q =
       qY * modp_inv2 #c (qZ * qZ * qZ) % prime; }
 
 
-val lemma_multiplication_is_pointEqual_l: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
+val lemma_point_nat_z_less_prime: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity p)} ->
+  Lemma (let pX, pY, pZ = p in pZ % getPrime c <> 0)
+
+let lemma_point_nat_z_less_prime #c p = 
+  let prime = getPrime c in 
+  let pX, pY, pZ  = p in 
+  small_mod pZ prime
+
+
+val lemma_point_equal_l0: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
+  -> q: point_nat_prime #c {~ (isPointAtInfinity q)} -> 
+  Lemma (
+    let pX, pY, pZ = p in
+    let qX, qY, qZ = q in 
+    let prime = getPrime c in (
+    (pX * modp_inv2 #c (pZ * pZ) % prime == qX * modp_inv2 #c (qZ * qZ)  % prime) /\ 
+    (pY * modp_inv2 #c (pZ * pZ * pZ) % prime  == qY * modp_inv2 #c (qZ * qZ * qZ) % prime)) ==> pointEqual #c p q)
+
+let lemma_point_equal_l0 #c p q = 
+  let pX, pY, pZ = p in
+  let qX, qY, qZ = q in 
+
+  let pAffineX, pAffineY, pAffineZ = _norm #c p in 
+  let qAffineX, qAffineY, qAffineZ = _norm #c q in 
+
+  assert ((isPointAtInfinity #Jacobian (pAffineX, pAffineY, pAffineZ) = false) && 
+    (isPointAtInfinity #Jacobian (qAffineX, qAffineY, qAffineZ)) = false);
+
+  let prime = getPrime c in
+  if ((pX * modp_inv2 #c (pZ * pZ) % prime = qX * modp_inv2 #c (qZ * qZ)  % prime) &&
+    (pY * modp_inv2 #c (pZ * pZ * pZ) % prime  = qY * modp_inv2 #c (qZ * qZ * qZ) % prime)) then 
+    begin
+      assert(((pAffineX = qAffineX && pAffineY = qAffineY)));
+      assert(pAffineX == pX * modp_inv2 #c (pZ * pZ) % prime);
+      assert(pointEqual #c p q <==> pAffineX = qAffineX && pAffineY = qAffineY)
+    end
+
+
+
+val lemma_multiplication_is_pointEqual_l: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
   -> q: point_nat_prime #c {~ (isPointAtInfinity q)} -> 
   Lemma (
     let pX, pY, pZ = p in
@@ -129,21 +171,25 @@ let lemma_multiplication_is_pointEqual_l #c p q =
   let pNX, pNY, pNZ = _norm #c p in 
   let qNX, qNY, qNZ = _norm #c q in 
 
+  lemma_point_nat_z_less_prime p;
+  lemma_point_nat_z_less_prime q;
+
   Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime qZ qZ; 
   Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime pZ pZ;
   
   Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (pZ * pZ) pZ; 
   Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (qZ * qZ) qZ;
 
-  
   if pX * (qZ * qZ) % prime = qX * (pZ * pZ) % prime then begin
-    assert(pX * (qZ * qZ) % prime * modp_inv2 #c (pZ * pZ) % prime * modp_inv2 #c (qZ * qZ) % prime = qX * (pZ * pZ) % prime * modp_inv2 #c (pZ * pZ) % prime * modp_inv2 #c (qZ * qZ) % prime);
+    assert (pX * (qZ * qZ) % prime * modp_inv2 #c (pZ * pZ) % prime * modp_inv2 #c (qZ * qZ) % prime = qX * (pZ * pZ) % prime * modp_inv2 #c (pZ * pZ) % prime * modp_inv2 #c (qZ * qZ) % prime);
     lemma_multiplication_is_pointEqual_l0 p q end;
 
   if pY * (qZ * qZ * qZ) % prime = qY * (pZ * pZ * pZ) % prime then begin
-    assert(pY * (qZ * qZ * qZ) % prime * modp_inv2 #c (pZ * pZ * pZ) % prime * modp_inv2 #c (qZ * qZ * qZ) % prime = qY * (pZ * pZ * pZ) % prime * modp_inv2 #c (pZ * pZ * pZ) % prime * modp_inv2 #c (qZ * qZ * qZ) % prime);
     lemma_multiplication_is_pointEqual_l1 p q 
-  end
+  end;
+
+  lemma_point_equal_l0 p q
+
 
 
 val lemma_multiplication_is_pointEqual_r0: #c: curve 
@@ -241,6 +287,93 @@ val lemma_not_infinity_z_is_not_zero: #c: curve
 let lemma_not_infinity_z_is_not_zero #c p = let pX, pY, pZ = p in small_mod pZ (getPrime c)
 
 
+val lemma_multiplication_is_pointEqual_r0__: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p)}
+  -> q: point_nat_prime #c {~ (isPointAtInfinity #Jacobian q)}
+  -> Lemma (
+    let pX, pY, pZ = p in
+    let qX, qY, qZ = q in 
+    let prime = getPrime c in 
+    let pNX, pNY, pNZ = _norm #c p in 
+    let qNX, qNY, qNZ = _norm #c q in 
+    pNX = qNX ==> pX * modp_inv2 #c (pZ * pZ) % prime * (pZ * pZ) * (qZ * qZ) % prime = qX * modp_inv2 #c (qZ * qZ) % prime * (pZ * pZ) * (qZ * qZ) % prime)
+
+
+let lemma_multiplication_is_pointEqual_r0__ #c p q = 
+  let pX, pY, pZ = p in
+  let qX, qY, qZ = q in 
+
+  let prime = getPrime c in 
+  
+  let pNX, pNY, pNZ = _norm #c p in 
+  let qNX, qNY, qNZ = _norm #c q in 
+
+  if pNX = qNX then begin
+    assert (pX * modp_inv2 #c (pZ * pZ) % prime * (pZ * pZ) * (qZ * qZ) % prime = qX * modp_inv2 #c (qZ * qZ) % prime * (pZ * pZ) * (qZ * qZ) % prime)
+  end
+    
+
+val lemma_multiplication_is_pointEqual_r0_0: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p) /\ (let pX, pY, pZ = p in pZ * pZ % getPrime c <> 0)}
+  -> q: point_nat_prime #c {~ (isPointAtInfinity #Jacobian q) /\ (let qX, qY, qZ = q in qZ * qZ % getPrime c <> 0)}
+  -> Lemma (
+    let pX, pY, pZ = p in
+    let qX, qY, qZ = q in 
+    let prime = getPrime c in 
+    let pNX, pNY, pNZ = _norm #c p in 
+    let qNX, qNY, qNZ = _norm #c q in 
+    pNX = qNX ==> pX * (qZ * qZ) % prime = qX * (pZ * pZ) % prime)
+
+let lemma_multiplication_is_pointEqual_r0_0 #c p q = 
+  lemma_multiplication_is_pointEqual_r0__ p q;
+  lemma_multiplication_is_pointEqual_r0 p q
+
+
+
+val lemma_multiplication_is_pointEqual_r1__: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p)} 
+  -> q: point_nat_prime #c {~ (isPointAtInfinity #Jacobian q)} 
+  -> Lemma (
+    let pX, pY, pZ = p in
+    let qX, qY, qZ = q in 
+    let prime = getPrime c in 
+    let pNX, pNY, pNZ = _norm #c p in 
+    let qNX, qNY, qNZ = _norm #c q in 
+    pNY = qNY ==> pY * modp_inv2 #c (pZ * pZ * pZ) % prime * (pZ * pZ * pZ) * (qZ * qZ * qZ) % prime = qY * modp_inv2 #c (qZ * qZ * qZ) % prime * (pZ * pZ * pZ) * (qZ * qZ * qZ) % prime)
+
+
+let lemma_multiplication_is_pointEqual_r1__ #c p q = 
+  let pX, pY, pZ = p in
+  let qX, qY, qZ = q in 
+
+  let prime = getPrime c in 
+  
+  let pNX, pNY, pNZ = _norm #c p in 
+  let qNX, qNY, qNZ = _norm #c q in 
+
+  if pNY = qNY then begin
+    assert (pY * modp_inv2 #c (pZ * pZ * pZ) % prime * (pZ * pZ * pZ) * (qZ * qZ * qZ) % prime = qY * modp_inv2 #c (qZ * qZ * qZ) % prime * (pZ * pZ * pZ) * (qZ * qZ * qZ) % prime)
+    end
+
+
+val lemma_multiplication_is_pointEqual_r1_0: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p) /\ (let pX, pY, pZ = p in pZ * pZ * pZ % getPrime c <> 0)}
+  -> q: point_nat_prime #c {~ (isPointAtInfinity #Jacobian q) /\ (let qX, qY, qZ = q in qZ * qZ * qZ % getPrime c <> 0)}
+  -> Lemma (
+    let pX, pY, pZ = p in
+    let qX, qY, qZ = q in 
+    let prime = getPrime c in 
+    let pNX, pNY, pNZ = _norm #c p in 
+    let qNX, qNY, qNZ = _norm #c q in 
+    pNY = qNY ==> pY * (qZ * qZ * qZ) % prime = qY * (pZ * pZ * pZ) % prime)
+
+
+let lemma_multiplication_is_pointEqual_r1_0 #c p q = 
+  lemma_multiplication_is_pointEqual_r1__ #c p q;
+  lemma_multiplication_is_pointEqual_r1 #c p q
+  
+
+
 val lemma_multiplication_is_pointEqual_r: #c: curve 
   -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p)} 
   -> q: point_nat_prime #c {~ (isPointAtInfinity #Jacobian q)} -> 
@@ -259,8 +392,8 @@ let lemma_multiplication_is_pointEqual_r #c p q =
   let pNX, pNY, pNZ = _norm #c p in 
   let qNX, qNY, qNZ = _norm #c q in 
 
-  lemma_not_infinity_z_is_not_zero #c p;
-  lemma_not_infinity_z_is_not_zero #c q;
+  lemma_point_nat_z_less_prime p;
+  lemma_point_nat_z_less_prime q;
 
   Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime pZ pZ;
   Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (pZ * pZ) pZ; 
@@ -268,20 +401,10 @@ let lemma_multiplication_is_pointEqual_r #c p q =
   Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (qZ * qZ) qZ;
 
 
-  if pNX = qNX then begin
-    assert(pX * modp_inv2 #c (pZ * pZ) % prime * (pZ * pZ) * (qZ * qZ) % prime = qX * modp_inv2 #c (qZ * qZ) % prime * (pZ * pZ) * (qZ * qZ) % prime);
-    lemma_multiplication_is_pointEqual_r0 #c p q;
-    assert(qX * (pZ * pZ) % prime == pX * (qZ * qZ) % prime)
-    end;
-    
-  assert(pNX == qNX ==> pX * (qZ * qZ) % prime == qX * (pZ * pZ) % prime );
+  if pNX = qNX then lemma_multiplication_is_pointEqual_r0_0 p q;
+  assert(pNX == qNX ==> pX * (qZ * qZ) % prime == qX * (pZ * pZ) % prime);
 
-  if pY * modp_inv2 #c (pZ * pZ * pZ) % prime = qY * modp_inv2 #c (qZ * qZ * qZ) % prime then begin
-    assert(pY * modp_inv2 #c (pZ * pZ * pZ) % prime * (pZ * pZ * pZ) * (qZ * qZ * qZ) % prime = qY * modp_inv2 #c (qZ * qZ * qZ) % prime * (pZ * pZ * pZ) * (qZ * qZ * qZ) % prime);
-    lemma_multiplication_is_pointEqual_r1 #c p q;
-    assert ((pY * (qZ * qZ * qZ) % getPrime c == qY * (pZ * pZ * pZ) % getPrime c))
-    end
-
+  if pNY = qNY then lemma_multiplication_is_pointEqual_r1_0 #c p q
 
 
 (* 

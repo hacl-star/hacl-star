@@ -554,6 +554,10 @@ let _point_add_if_second_branch_impl #c result p q x3hCube t5 =
   let s1 = sub x3hCube (size 6 *! len) len in 
   let s2 = sub x3hCube (size 7 *! len) len in 
 
+  assert (eq_or_disjoint s1 hCube /\ 
+    eq_or_disjoint p result /\ disjoint result t5 /\ disjoint p q /\ disjoint hCube t5 /\ disjoint uh t5 /\ disjoint r t5 /\ 
+    disjoint t5 s1 /\ disjoint t5 h /\ disjoint t5 p /\ disjoint t5 q);
+    
   computeXYZ result p q u1 u2 s1 s2 r h uh hCube t5
 
 

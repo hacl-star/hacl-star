@@ -147,8 +147,18 @@ let _add_dep_prime #c x p t result =
   carry
 
 
-assume val lemma_lseq_as_list: l: size_nat -> a: list uint64 {List.Tot.Base.length a == l} -> 
+assume val lst_as_nat_is_nat_from_intlist_le: l: size_nat -> a: list uint64 {List.Tot.Base.length a == l} -> 
+  Lemma (Lib.ByteSequence.nat_from_intseq_le (Lib.Sequence.of_list a) == lst_as_nat_ a l)
+
+
+val lemma_lseq_as_list: l: size_nat {l > 0} -> a: list uint64 {List.Tot.Base.length a == l} -> 
   Lemma (lseq_as_nat #l (Seq.seq_of_list a) == lst_as_nat a)
+
+let lemma_lseq_as_list l a = 
+  let b = Seq.seq_of_list a in 
+  Hacl.Impl.EC.Intro.lemma_lseq_nat_from_bytes #l b;
+  Spec.ECDSA.Lemmas.nat_from_intlist_seq_le l a;
+  lst_as_nat_is_nat_from_intlist_le l a
 
 
 inline_for_extraction noextract
@@ -335,13 +345,30 @@ let reduction_prime_2prime_with_carry #c x result =
 
 let reduction_prime_2prime #c x result =
   push_frame();
-  let len = getCoordinateLenU64 c in
-  let tempBuffer = create len (u64 0) in
-  let h0 = ST.get() in
-  let r = sub_bn_prime x tempBuffer in
-  cmovznz4 r tempBuffer x result;
-  lseq_upperbound #(v (getCoordinateLenU64 c)) (as_seq h0 x);
-  pop_frame()
+    let len = getCoordinateLenU64 c in
+    let tempBuffer = create len (u64 0) in
+      let h0 = ST.get() in
+    let r = sub_bn_prime x tempBuffer in
+      let h1 = ST.get() in 
+    cmovznz4 r tempBuffer x result;
+      let h2 = ST.get() in 
+      lseq_upperbound #(v (getCoordinateLenU64 c)) (as_seq h0 x);
+  
+  pop_frame();
+  
+  if as_nat c h0 x >= getPrime c then
+    begin
+      small_mod (as_nat c h0 x - getPrime c) (getPrime c);
+      lemma_mod_plus (as_nat c h0 x) (- 1) (getPrime c);
+      assert(as_nat c h0 x - getPrime c < getPrime c);
+      assert(as_nat c h2 result == (as_nat c h0 x - getPrime c) % getPrime c)
+    end 
+     else 
+     begin
+       small_mod (as_nat c h0 x) (getPrime c);
+       assert(as_nat c h2 result == as_nat c h0 x % getPrime c)
+     end;
+  assert(as_nat c h2 result == as_nat c h0 x % getPrime c)
 
 
 (** Field Addition **)
@@ -526,7 +553,15 @@ let felem_sub #c a b out =
   |P384 -> felem_sub_p384 a b out
 
 
-let felem_sub_zero #c arg2 out =  
+inline_for_extraction noextract
+val felem_sub_zero_: #c: curve -> b: felem c -> out: felem c ->
+  Stack unit
+  (requires (fun h0 -> live h0 out /\ live h0 b /\ disjoint b out /\ as_nat c h0 b < getPrime c))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_nat c h1 out == (0 - as_nat c h0 b) % getPrime c /\
+    as_nat c h1 out == toDomain #c ((fromDomain #c 0 - fromDomain #c (as_nat c h0 b)) % getPrime c)))
+
+let felem_sub_zero_ #c arg2 out =  
   uploadZeroImpl out;
     let h0 = ST.get() in  
   let t = sub_bn #c out arg2 out in
@@ -560,6 +595,17 @@ let felem_sub_zero #c arg2 out =
 
   substractionInDomain #c #DH (as_nat c h0 out) (as_nat c h0 arg2); 
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 out) - fromDomain #c (as_nat c h0 arg2))
+
+
+let felem_sub_zero_p256 = felem_sub_zero_ #P256 
+
+let felem_sub_zero_p384 = felem_sub_zero_ #P384
+
+
+let felem_sub_zero #c b out = 
+  match c with 
+  |P256 -> felem_sub_zero_p256 b out
+  |P384 -> felem_sub_zero_p384 b out
 
 
 let mul #c f r out =

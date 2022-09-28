@@ -179,7 +179,7 @@ val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c
 let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 #c p 0
 
 
-
+inline_for_extraction noextract
 val ecdsa_verification_step5_0_0: #c: curve 
   -> #l: ladder
   -> points:lbuffer uint64 (getCoordinateLenU64 c *! 6ul)
@@ -232,7 +232,7 @@ let lemma_pointAtInfInDomain #c p =
   let x, y, z = p in 
   Hacl.Spec.MontgomeryMultiplication.lemma_pointAtInfInDomain #c x y z
 
-
+inline_for_extraction noextract
 val ecdsa_verification_step5_0: #c: curve 
   -> #l: ladder
   -> points:lbuffer uint64 (getCoordinateLenU64 c *! 6ul)
@@ -443,7 +443,7 @@ let rec lemma_pow_not_zero p a k =
     FStar.Math.Lemmas.small_mod a p;
     pow_plus a (k - 1) 1
 
-
+inline_for_extraction noextract
 val ecdsa_verification_step45: #c: curve 
   -> #l: ladder 
   -> u1: scalar_t #MUT #c

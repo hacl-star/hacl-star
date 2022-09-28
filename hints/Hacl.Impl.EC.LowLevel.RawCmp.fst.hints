@@ -1,0 +1,104 @@
+[
+  "ã\bUÓP\u001d`S ›\tk∏d”d",
+  [
+    [
+      "Hacl.Impl.EC.LowLevel.RawCmp.eq_u8_nCT",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "c861dd4af943e0593fee8fb8348a4e47"
+    ],
+    [
+      "Hacl.Impl.EC.LowLevel.RawCmp.eq_u8_nCT",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.eq",
+        "equation_FStar.UInt8.eq", "primitive_Prims.op_Equality",
+        "refinement_interpretation_Tm_refine_b1fbdc9f9ff4dd3dae07c3522faeb561",
+        "typing_Lib.RawIntTypes.u8_to_UInt8"
+      ],
+      0,
+      "e9dd4c707813309cb9228ab61baad8c9"
+    ],
+    [
+      "Hacl.Impl.EC.LowLevel.RawCmp.eq_u64_nCT",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "7a0ed4753428237cdb11b335c44c009e"
+    ],
+    [
+      "Hacl.Impl.EC.LowLevel.RawCmp.eq_u64_nCT",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.eq",
+        "equation_FStar.UInt64.eq", "primitive_Prims.op_Equality",
+        "refinement_interpretation_Tm_refine_a6fce85b67bdd71ab9416e435ac3b18a",
+        "typing_Lib.RawIntTypes.u64_to_UInt64"
+      ],
+      0,
+      "8a6270351e9e997ff2ef2a071b6e3752"
+    ],
+    [
+      "Hacl.Impl.EC.LowLevel.RawCmp.eq_0_u64",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_b47cabb890633249ae7f38d35cac724e",
+        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
+        "typing_tok_Lib.IntTypes.U64@tok"
+      ],
+      0,
+      "b87dd5c4813dde0a9a73e6cd6615930c"
+    ],
+    [
+      "Hacl.Impl.EC.LowLevel.RawCmp.unsafe_bool_of_u64",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.eq",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt64.eq",
+        "equation_Lib.IntTypes.v", "int_typing", "lemma_FStar.UInt64.uv_inv",
+        "lemma_FStar.UInt64.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_a6fce85b67bdd71ab9416e435ac3b18a",
+        "refinement_interpretation_Tm_refine_ea00864f59112084603b9e9c26fa7914",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt64.v", "typing_Lib.RawIntTypes.u64_to_UInt64"
+      ],
+      0,
+      "7f0ad7e1a17102888013d211d1eb01ba"
+    ]
+  ]
+]

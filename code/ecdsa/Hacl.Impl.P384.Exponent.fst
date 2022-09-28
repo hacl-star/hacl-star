@@ -976,6 +976,10 @@ let lemma_exponent_h2_t4 tD =
   toDomain__ (pow tD (63 * (pow2_57 + pow2_51 + pow2_45 + pow2_39 + pow2_33 +  pow2_25 +  pow2_19 + pow2_13 + pow2_7 + pow2 1) + 3 * pow2_31 + 1) % prime384);}
 
 
+
+#push-options "--z3rlimit 500 --ifuel 0 --fuel 0"
+
+
 val lemma_exponent_h3_t4_0: tD: nat -> Lemma (
   toDomain__  (pow (pow tD 7 % prime384) (pow2 33) * pow (pow tD (63 * (pow2 57 + pow2 51 + pow2 45 + pow2 39 + pow2 33 + pow2 25 + pow2 19 + pow2 13 + pow2 7 + pow2 1) + 3 * pow2 31 + 1) % prime384) (pow2 225 + pow2 162 + pow2 99 + pow2 36) * 
   (pow tD (63 * (pow2 26 + pow2 20 + pow2 2 + pow2 14 + pow2 8) + 3) % prime384) % prime384) ==
@@ -1057,9 +1061,6 @@ let lemma_exponent_h3_t4_0 tD =
     pow tD (63 * (pow2 26 + pow2 20 + pow2 2 + pow2 14 + pow2 8) + 3) * 
     pow (pow tD (63 * (pow2 57 + pow2 51 + pow2 45 + pow2 39 + pow2 33 + pow2 25 + pow2 19 + pow2 13 + pow2 7 + pow2 1) + 3 * pow2 31 + 1)) (pow2 225 + pow2 162 + pow2 99 + pow2 36)) % prime384))
 
-
-
-#push-options "--z3rlimit 500 --ifuel 0 --fuel 0"
 
 
 val lemma_exponent_h3_t4_1: unit -> Lemma (

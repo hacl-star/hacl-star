@@ -68,6 +68,58 @@ let scalar_rwnaf_step_compute_di w out mask r i =
 
 #set-options "--z3rlimit 300"
 
+val getIndex_compute_window: #c: curve ->  
+  k: size_t {v k < getPower c / Spec.ECC.WNAF.w - 1} ->  
+  Stack size_t
+  (requires fun h -> True)
+  (ensures fun h0 r h1 -> v r == (v k + 1) * w /\ modifies0 h0 h1)
+
+let getIndex_compute_window #c k = 
+  (size 1 +! k) *! radix_u32
+
+inline_for_extraction noextract
+val scalar_rwnaf_step_compute_window_first_three_bits: #c: curve 
+  -> wStart: uint64 {v wStart < pow2 (64 - 5)}
+  -> scalar: scalar_t #MUT #c 
+  -> k: size_t {v k < getPower c / Spec.ECC.WNAF.w - 1} -> 
+  Stack uint64 
+  (requires fun h -> live h scalar)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ v r = 
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 1)) * pow2 1 + 
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 2)) * pow2 2 +
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 3)) * pow2 3)
+
+let scalar_rwnaf_step_compute_window_first_three_bits #c wStart scalar k = 
+  let h0 = ST.get() in 
+  
+  let i = getIndex_compute_window #c k in 
+  let b0 = (shift_left (getScalarBit_leftEndian #c scalar (i +! size 1)) (size 1)) in 
+  let b1 = b0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! size 2)) (size 2)) in 
+  b1 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! size 3)) (size 3))
+
+inline_for_extraction noextract
+val scalar_rwnaf_step_compute_window_all_bits: #c: curve 
+  -> wStart: uint64 {v wStart < pow2 (64 - 5)}
+  -> scalar: scalar_t #MUT #c 
+  -> k: size_t {v k < getPower c / Spec.ECC.WNAF.w - 1} -> 
+  Stack uint64 
+  (requires fun h -> live h scalar)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ v r = 
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 1)) * pow2 1 + 
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 2)) * pow2 2 +
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 3)) * pow2 3 +
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 4)) * pow2 4 + 
+    v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 5)) * pow2 5 )
+
+let scalar_rwnaf_step_compute_window_all_bits #c wStart scalar k = 
+  let i = getIndex_compute_window #c k in 
+    assert_norm (pow2 (64 - 5) + pow2 1 + pow2 2 + pow2 3 + pow2 4 + pow2 5 < pow2 64);
+  let w0 = (scalar_rwnaf_step_compute_window_first_three_bits wStart scalar k) in 
+  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 4))) (size 4)) in 
+  w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 5))) (size 5))
+  
+  
+inline_for_extraction noextract
 val scalar_rwnaf_step_compute_window_: #c: curve 
   -> wStart: uint64 {v wStart < pow2 (64 - 5)}
   -> scalar: scalar_t #MUT #c 
@@ -82,24 +134,8 @@ val scalar_rwnaf_step_compute_window_: #c: curve
     v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 5)) * pow2 5)
 
 let scalar_rwnaf_step_compute_window_ #c wStart scalar k = 
-  let h0 = ST.get() in 
     assert_norm (pow2 (64 - 5) + pow2 1 + pow2 2 + pow2 3 + pow2 4 + pow2 5 < pow2 64);
-
-  let i = (size 1 +! k) *! radix_u32 in 
-  let w0 = wStart +! (shift_left (getScalarBit_leftEndian #c scalar (i +! size 1)) (size 1)) in 
-  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 2))) (size 2)) in 
-  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 3))) (size 3)) in 
-  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 4))) (size 4)) in 
-  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 5))) (size 5)) in 
-
-    assert(v w0 - v wStart = 
-      v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 1)) * pow2 1 + 
-      v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 2)) * pow2 2 +
-      v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 3)) * pow2 3 +
-      v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 4)) * pow2 4 +
-      v (ith_bit (as_seq h0 scalar) ((v k + 1) * w + 5)) * pow2 5);
-  
-  w0
+  wStart +! scalar_rwnaf_step_compute_window_all_bits #c wStart scalar k 
 
 
 inline_for_extraction noextract
@@ -896,18 +932,18 @@ let conditional_substraction #c result p scalar tempBuffer =
   pop_frame()
 
 
+open Lib.LoopCombinators
+open Lib.Loops
+
 val getPointDoubleNTimes: #c: curve 
   -> p: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
   -> k: size_t ->
   Stack unit
   (requires fun h -> live h p /\ live h tempBuffer /\ disjoint p tempBuffer /\ point_eval c h p)
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 p /\
-    fromDomainPoint #c #DH (point_as_nat c h1 p) == Spec.ECC.Radix.getPointDoubleNTimes #c
-      (fromDomainPoint #c #DH (point_as_nat c h0 p)) (v k))
-
-open Lib.LoopCombinators
-open Lib.Loops
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 p /\ (
+    let r : Spec.ECC.point #c = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
+    r == Spec.ECC.Radix.getPointDoubleNTimes #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (v k)))
 
 let getPointDoubleNTimes #c p tempBuffer k = 
   let h0 = ST.get() in 
@@ -1488,6 +1524,11 @@ let scalar_multiplication_cmb_loop_last_bit #c result scalar rnaf temp tempBuffe
   scalar_multiplication_cmb_loop_last_bit_ result scalar rnaf temp tempBuffer;
     let h1 = ST.get() in 
     lemma_last_bit #c (as_seq h0 scalar) (fromDomainPoint #c #DH (point_as_nat c h1 result));
+    assert(scalar_as_nat #c (as_seq h0 scalar) % 2 == 0 ==> ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h1 result)) (Spec.ECC.point_mult #c (- 1) (basePoint #c))));
+
+  Hacl.Impl.EC.Masking.ScalarAccess.Lemmas.lemma_index_scalar_as_nat #c (as_seq h0 scalar) (v (getScalarLenBytes c) - 1);
+    pow2_modulo_modulo_lemma_2 (scalar_as_nat #c (as_seq h0 scalar) / pow2 (v (getScalarLen c) - 8 * (v (getScalarLenBytes c)))) 8 1;
+    
   conditional_substraction #c result result scalar tempBuffer;
     let h2 = ST.get() in 
 

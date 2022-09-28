@@ -1,0 +1,482 @@
+[
+  "∏è«Ê»\u001f6–:;âπª\u0012X¶",
+  [
+    [
+      "Hacl.Impl.EC.Math.mod_sub",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "14c96c5af2ea777e0014e3804829535d"
+    ],
+    [
+      "Hacl.Impl.EC.Math.mod_sub",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Minus",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "01bc7301a788502bb057c176741612df"
+    ],
+    [
+      "Hacl.Impl.EC.Math.sub_mod",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "88542ffcd0aa1bf415c59d418fb3a0b6"
+    ],
+    [
+      "Hacl.Impl.EC.Math.sub_mod",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "10e3c7eea936fad1a0888a0a1ef7fe3e"
+    ],
+    [
+      "Hacl.Impl.EC.Math.mod_same",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "51282b8ec94dcbb73e704ca08ffa08ee"
+    ],
+    [
+      "Hacl.Impl.EC.Math.mod_same",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "a168f9e707951b02db782066608e30fe"
+    ],
+    [
+      "Hacl.Impl.EC.Math.euclid",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "36787f07dd65f87bd860d5a50c8e1405"
+    ],
+    [
+      "Hacl.Impl.EC.Math.euclid",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "3c3fc089db90a337ec8dec5d0c8d937d"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero_",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8"
+      ],
+      0,
+      "4874bd9dbebb35dc22a4ef2715a0675f"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero_",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8"
+      ],
+      0,
+      "285567b33ebc4e36219330acac1801b0"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero_",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.Math.Euclid.is_prime",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_b43068ba154d44ab3905bdd0d1103ae4"
+      ],
+      0,
+      "a8f58f85715be3b50cff2a3d9674613f"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8"
+      ],
+      0,
+      "4dc0fe746c7ee5cc5bbe466a02a697cc"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8"
+      ],
+      0,
+      "625dd494373c448cde4b957a9df5c10d"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_0",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "986ff0ad9e8c43dbb1e10e1d10d5d33a"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_0",
+      2,
+      0,
+      0,
+      [
+        "@query", "equation_FStar.Math.Euclid.is_prime",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "2bf6394d3eb07414514be9ba61ba4f83"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_0",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Spec.ECC.Curves.pow.fuel_instrumented",
+        "@query", "equation_FStar.Math.Euclid.is_prime",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_b43068ba154d44ab3905bdd0d1103ae4"
+      ],
+      0,
+      "570cde34603a125efb6e245cbefe5ff1"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_exp_not_zero_0",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_39df8d29380e6969edd244cad5059985",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_99c44f87e8db7c2b2518f780068deb58"
+      ],
+      0,
+      "a8cb832eb83675fbb6d07f790ec29f11"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_exp_not_zero_0",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Spec.ECC.Curves.pow.fuel_instrumented",
+        "@query", "equation_Prims.nat", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_39df8d29380e6969edd244cad5059985",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_99c44f87e8db7c2b2518f780068deb58",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "710a38846cd73e9cd9fa3aa3d4fa96c2"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_exp_not_zero",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8"
+      ],
+      0,
+      "c4135ee05fc824a7f8ffeaa04febae94"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_exp_not_zero",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8"
+      ],
+      0,
+      "5fed3c217f891a39e61627019316ff83"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_exp_not_zero",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Spec.ECC.Curves.exp.fuel_instrumented",
+        "@query", "binder_x_1cdce20636eb23aa73e8fc723991414d_0",
+        "binder_x_4f0caffc2a3541fe07fc9eb66f4b0f8e_1",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_2",
+        "equation_FStar.Math.Euclid.is_prime", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
+        "int_inversion", "int_typing", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2b9ce40d78cf90248691b4b572551ac8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_a3a4ea4fa0e5476e0cd1c90ffcb4fac3",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Spec.ECC.Curves.exp", "well-founded-ordering-on-nat"
+      ],
+      0,
+      "7b83ad71af7e2cc9ee821dc83d3123c3"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_4783a91d80d834fa2d2c731dd1aa3863",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7cf3c424c15e8ae21f6dcc3415be7f07"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.ECC.Curves.getPower",
+        "equation_Spec.ECC.Curves.getPrime",
+        "equation_Spec.ECC.Curves.modp_inv2",
+        "equation_Spec.ECC.Curves.modp_inv2_prime",
+        "equation_Spec.ECC.Curves.modp_inv_prime",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4783a91d80d834fa2d2c731dd1aa3863",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c629a04b359772efbb31a127ec60e3d1",
+        "refinement_interpretation_Tm_refine_e05b42b3c50c7d0f7eb883e5a1664d64",
+        "typing_Spec.ECC.Curves.getPower", "typing_Spec.ECC.Curves.getPrime"
+      ],
+      0,
+      "3f5c9f78976fe5cfc0e86659759907b1"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_modular_multiplication",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.ECC.Curves.getPrime",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4783a91d80d834fa2d2c731dd1aa3863",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "ed955d313a57c3241bb5ee120216c8f9"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_modular_multiplication",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.ECC.Curves.elem",
+        "equation_Spec.ECC.Curves.getPower",
+        "equation_Spec.ECC.Curves.getPrime",
+        "equation_Spec.ECC.Curves.modp_inv2",
+        "equation_Spec.ECC.Curves.modp_inv2_prime",
+        "equation_Spec.ECC.Curves.modp_inv_prime",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4783a91d80d834fa2d2c731dd1aa3863",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c629a04b359772efbb31a127ec60e3d1",
+        "refinement_interpretation_Tm_refine_e05b42b3c50c7d0f7eb883e5a1664d64",
+        "typing_Spec.ECC.Curves.getPower", "typing_Spec.ECC.Curves.getPrime"
+      ],
+      0,
+      "44cf490381d6509d550b4ab791c9e285"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_modular_multiplication_toDomain",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_4783a91d80d834fa2d2c731dd1aa3863",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "6582aea1ba1679654cc024bc9f8af205"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_modular_multiplication_toDomain",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat", "equation_Spec.ECC.Curves.getPower",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_4783a91d80d834fa2d2c731dd1aa3863",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c629a04b359772efbb31a127ec60e3d1",
+        "typing_Spec.ECC.Curves.getPower"
+      ],
+      0,
+      "88a1bfb152e1576cf849e2abcecf327b"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_fermat_exp",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Math.Euclid.is_prime",
+        "equation_Spec.ECC.Curves.getOrder",
+        "fuel_guarded_inversion_Spec.ECC.Curves.curve", "inversion-interp",
+        "lemma_Spec.ECC.Curves.invert_state_s",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_d9a7c326689c4a485c7d247f9b491c0d"
+      ],
+      0,
+      "5f0143151d09c665bccdbcd9cb3a9b21"
+    ],
+    [
+      "Hacl.Impl.EC.Math.lemma_fermat_exp",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Math.Euclid.is_prime",
+        "equation_Spec.ECC.Curves.getOrder",
+        "equation_Spec.ECC.Curves.modp_inv2_prime",
+        "equation_Spec.ECC.Curves.modp_inv_prime",
+        "fuel_guarded_inversion_Spec.ECC.Curves.curve", "inversion-interp",
+        "lemma_Spec.ECC.Curves.invert_state_s",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_d9a7c326689c4a485c7d247f9b491c0d"
+      ],
+      0,
+      "ee9fffb1b43b0f1de4e76469040deacf"
+    ]
+  ]
+]

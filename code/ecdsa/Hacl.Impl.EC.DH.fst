@@ -41,7 +41,7 @@ val ecp256_dh_i_: #c: curve -> #l: ladder -> resultBuffer: point c
     success ==> 
       (rX, rY) == p /\ 
       ~ (isPointAtInfinity (secret_to_public (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #c (_norm (secret_to_public (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #c (_norm (secret_to_public (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public (as_seq h0 scalar)))))
 
 
@@ -91,7 +91,7 @@ val _ecp256dh_r_public: #c: curve
       if isPointAtInfinity #Jacobian pk_scalar then
 	r == false
       else
-	r == true /\ (x3, y3, z3) == fromJacobianCoordinates #c pk_scalar
+	r == true /\ (x3, y3, z3) == _norm #c pk_scalar
       end))
 
 
@@ -149,7 +149,7 @@ val _ecp256dh_r_private: #c: curve
       if isPointAtInfinity #Jacobian pk_scalar then
 	r == false
       else
-	r == true /\ (x3, y3, z3) == fromJacobianCoordinates #c pk_scalar
+	r == true /\ (x3, y3, z3) == _norm #c pk_scalar
       end))
 
 

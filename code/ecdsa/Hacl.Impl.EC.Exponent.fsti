@@ -25,7 +25,7 @@ val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer 
     as_nat c h1 result < getPrime c /\ 
     as_nat c h1 result = toDomain_ #c #DH (pow k (getPrime c - 2) % getPrime c))
 
-[@CInline]
+inline_for_extraction noextract
 val square_root: #c: curve -> a: felem c -> result: felem c -> Stack unit 
   (requires fun h -> live h a /\ live h result /\ as_nat c h a < getPrime c)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\

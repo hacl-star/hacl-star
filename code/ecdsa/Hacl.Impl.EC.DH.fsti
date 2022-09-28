@@ -35,7 +35,7 @@ val ecp256dh_i: c: curve
     success ==> 
       (rX, rY) == p /\ 
       ~ (isPointAtInfinity (secret_to_public (as_seq h0 scalar))) /\ 
-      (rX, rY) == fromJacobianCoordinatesTest #c (_norm (secret_to_public (as_seq h0 scalar)))) /\
+      (rX, rY) == fromJacobianCoordinates #c (_norm (secret_to_public (as_seq h0 scalar)))) /\
     (not success ==> isPointAtInfinity (secret_to_public (as_seq h0 scalar)))))
 
 

@@ -325,11 +325,11 @@ val multByOrder: #c: curve {isPrimeGroup c == false} -> #l: ladder -> result: po
     live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result])
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
-    scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
+    scalar_multiplication (Lib.Sequence.of_list (order_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
 let multByOrder #c #l result p tempBuffer =
-  recall_contents (order_u8_buffer #c) (Lib.Sequence.of_list (order_u8_list c));
-  scalarMultiplication #c #CONST #l p result (order_u8_buffer #c) tempBuffer
+  recall_contents (prime_inverse_buffer #c) (Lib.Sequence.of_list (order_list c));
+  scalarMultiplication #c #CONST #l p result (order_buffer #c) tempBuffer
 
 
 inline_for_extraction noextract
@@ -339,7 +339,7 @@ val multByOrder2: #c: curve {isPrimeGroup c == false} -> #l: ladder -> result: p
     live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result])
   (ensures fun h0 _ h1  -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
-    scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
+    scalar_multiplication (Lib.Sequence.of_list (order_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
 let multByOrder2 #c #l result p tempBuffer = 
     let h0 = ST.get() in 
@@ -361,7 +361,7 @@ val isOrderCorrect_public: #c: curve {isPrimeGroup c == false} -> #l: ladder -> 
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ point_eval c h p)
   (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
-    let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
+    let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_list c)) (point_as_nat c h0 p) in 
      r == Spec.ECC.isPointAtInfinity pointMultOrder))
 
 let isOrderCorrect_public #c #l p tempBuffer = 
@@ -387,7 +387,7 @@ val isOrderCorrect_private: #c: curve {isPrimeGroup c == false} -> #l: ladder ->
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; ] /\
     ~ (isPointAtInfinity (point_as_nat c h p)) *))
   (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
-    let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
+    let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_list c)) (point_as_nat c h0 p) in 
      r == Spec.ECC.isPointAtInfinity pointMultOrder))
      
 let isOrderCorrect_private #c #l p tempBuffer = 

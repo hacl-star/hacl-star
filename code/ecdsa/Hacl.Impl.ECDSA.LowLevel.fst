@@ -15,7 +15,7 @@ open FStar.Mul
 open Lib.IntTypes.Intrinsics
 
 
-#reset-options "--z3rlimit 300"
+#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
 
 val lemma_reduction_prime_2prime_with_carry_cin: 
   c: curve ->
@@ -46,6 +46,7 @@ let lemma_reduction_prime_2prime_with_carry_cin c cin x carry0 result =
       small_mod result prime;
       assert(result = (x + cin * pow2 (getPower c)) % prime)
     end
+
 
 inline_for_extraction noextract
 val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c -> result: felem c ->
@@ -96,7 +97,6 @@ val reduction_prime_2prime_order_: #c: curve -> x: felem c -> result: felem c ->
   Stack unit 
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result == as_nat c h0 x % getOrder #c)  
-
 
 let reduction_prime_2prime_order_ #c x result  =
    push_frame();

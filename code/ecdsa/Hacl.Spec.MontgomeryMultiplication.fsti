@@ -58,7 +58,8 @@ val lemmaToDomain: #c: curve -> #m: mode -> a: int -> Lemma (toDomain_ #c #m a =
 val lemma_mod_inv2_mult_prime: prime: pos {prime > 3 /\ Math.Euclid.is_prime prime} -> a: nat {a % prime <> 0} -> 
   Lemma (a * modp_inv2_prime a prime % prime == 1)
 
-val lemma_norm: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p)} 
+val lemma_norm: #c: curve 
+  -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p)} 
   -> q: point_nat_prime #c {~ (isPointAtInfinity #Jacobian q)} ->  Lemma (
   let pX, pY, pZ = p in
   let qX, qY, qZ = q in 

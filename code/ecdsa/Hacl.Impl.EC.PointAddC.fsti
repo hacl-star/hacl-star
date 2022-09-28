@@ -48,7 +48,7 @@ val point_add_c_ct: #c: curve -> p: point c -> q: point c -> result: point c
 inline_for_extraction noextract
 val point_add_c_out: #c: curve -> p: point c -> q: point c -> result: point c ->
   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
-    eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
+  disjoint q result /\ disjoint p q /\ disjoint p result /\
      point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 
      ~ (isPointAtInfinity (point_as_nat c h q)))
    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (

@@ -158,7 +158,7 @@ let from_wnaf_lemma_0 l = ()
 #pop-options
 
 
-val pred0: #c: curve -> l: seq int 
+(* val pred0: #c: curve -> l: seq int 
   -> p0: point #c #Jacobian {~ (isPointAtInfinity p0)}
   -> i: nat {i < length l} -> x: point #c #Jacobian -> Lemma (
     let len = length l in 
@@ -196,7 +196,7 @@ let pred0 #c l p0 i x =
     assert(from_wnaf_ l (len - (i + 1)) == index l (len - (i + 1)) + from_wnaf_ l (len - i) * m)
 
    end
-
+ *)
 
 val pred1: #c: curve -> l: seq int 
   -> p0: point #c #Jacobian {~ (isPointAtInfinity p0)}

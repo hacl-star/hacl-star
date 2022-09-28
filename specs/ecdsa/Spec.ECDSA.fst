@@ -324,13 +324,12 @@ val verifyQValidCurvePointSpec: #c: curve
 let verifyQValidCurvePointSpec #c publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
   let prime = getPrime c in 
-  x < prime &&
-  y < prime &&
-  z < prime &&
-  isPointOnCurve #c (x, y, z) && (
-  if (isPrimeGroup c) then true else 
-    isPointAtInfinity #Jacobian (scalar_multiplication #c (prime_order_seq #c) publicKey))
-
+  let r = x < prime && y < prime && z < prime &&
+    isPointOnCurve #c (x, y, z) && (
+    if (isPrimeGroup c) then true else isPointAtInfinity #Jacobian (scalar_multiplication #c (prime_order_seq #c) publicKey)) in 
+   (* the point at inf is not on urv *)
+   admit();
+   r
 
 (* Check that {\displaystyle Q_{A}}Q_{A} is not equal to the identity element O, and its coordinates are otherwise valid *)
 val checkCoordinates: #c: curve -> r: nat -> s: nat -> bool
