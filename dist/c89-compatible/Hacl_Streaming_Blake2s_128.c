@@ -462,173 +462,145 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   }
   {
     uint8_t *buf_1 = buf_;
-    KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
+    Lib_IntVector_Intrinsics_vec128 wv[4U] = { 0U };
+    Lib_IntVector_Intrinsics_vec128 b[4U] = { 0U };
+    Hacl_Streaming_Blake2s_128_blake2s_128_block_state lit;
+    Hacl_Streaming_Blake2s_128_blake2s_128_block_state tmp_block_state;
+    Lib_IntVector_Intrinsics_vec128 *src_b;
+    Lib_IntVector_Intrinsics_vec128 *dst_b;
+    uint64_t prev_len;
+    uint32_t ite0;
+    uint8_t *buf_last;
+    uint8_t *buf_multi;
+    uint32_t ite1;
+    uint32_t nb;
+    uint32_t ite2;
+    uint32_t ite3;
+    uint64_t prev_len_last;
+    uint32_t ite4;
+    uint32_t ite;
+    lit.fst = wv;
+    lit.snd = b;
+    tmp_block_state = lit;
+    src_b = block_state.snd;
+    dst_b = tmp_block_state.snd;
+    memcpy(dst_b, src_b, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    prev_len = total_len - (uint64_t)r;
+    if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
     {
-      Lib_IntVector_Intrinsics_vec128 wv[(uint32_t)4U * (uint32_t)1U];
-      {
-        uint32_t _i;
-        for (_i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-          wv[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-      }
-      KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
-      {
-        Lib_IntVector_Intrinsics_vec128 b[(uint32_t)4U * (uint32_t)1U];
-        {
-          uint32_t _i;
-          for (_i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-            b[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-        }
-        {
-          Hacl_Streaming_Blake2s_128_blake2s_128_block_state lit;
-          Hacl_Streaming_Blake2s_128_blake2s_128_block_state tmp_block_state;
-          Lib_IntVector_Intrinsics_vec128 *src_b;
-          Lib_IntVector_Intrinsics_vec128 *dst_b;
-          uint64_t prev_len;
-          uint32_t ite0;
-          uint8_t *buf_last;
-          uint8_t *buf_multi;
-          uint32_t ite1;
-          uint32_t nb;
-          uint32_t ite2;
-          uint32_t ite3;
-          uint64_t prev_len_last;
-          uint32_t ite4;
-          uint32_t ite;
-          lit.fst = wv;
-          lit.snd = b;
-          tmp_block_state = lit;
-          src_b = block_state.snd;
-          dst_b = tmp_block_state.snd;
-          memcpy(dst_b, src_b, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
-          prev_len = total_len - (uint64_t)r;
-          if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite0 = (uint32_t)64U;
-          }
-          else
-          {
-            ite0 = r % (uint32_t)64U;
-          }
-          buf_last = buf_1 + r - ite0;
-          buf_multi = buf_1;
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite1 = (uint32_t)0U;
-          }
-          else
-          {
-            uint32_t ite5;
-            if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-            {
-              ite5 = (uint32_t)64U;
-            }
-            else
-            {
-              ite5 = r % (uint32_t)64U;
-            }
-            ite1 = r - ite5;
-          }
-          nb = ite1 / (uint32_t)64U;
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite2 = (uint32_t)0U;
-          }
-          else
-          {
-            uint32_t ite5;
-            if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-            {
-              ite5 = (uint32_t)64U;
-            }
-            else
-            {
-              ite5 = r % (uint32_t)64U;
-            }
-            ite2 = r - ite5;
-          }
-          Hacl_Blake2s_128_blake2s_update_multi(ite2,
-            tmp_block_state.fst,
-            tmp_block_state.snd,
-            prev_len,
-            buf_multi,
-            nb);
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite3 = r;
-          }
-          else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite3 = (uint32_t)64U;
-          }
-          else
-          {
-            ite3 = r % (uint32_t)64U;
-          }
-          prev_len_last = total_len - (uint64_t)ite3;
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite4 = r;
-          }
-          else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite4 = (uint32_t)64U;
-          }
-          else
-          {
-            ite4 = r % (uint32_t)64U;
-          }
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite = r;
-          }
-          else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite = (uint32_t)64U;
-          }
-          else
-          {
-            ite = r % (uint32_t)64U;
-          }
-          Hacl_Blake2s_128_blake2s_update_last(ite4,
-            tmp_block_state.fst,
-            tmp_block_state.snd,
-            prev_len_last,
-            ite,
-            buf_last);
-          Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
-        }
-      }
+      ite0 = (uint32_t)64U;
     }
+    else
+    {
+      ite0 = r % (uint32_t)64U;
+    }
+    buf_last = buf_1 + r - ite0;
+    buf_multi = buf_1;
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite1 = (uint32_t)0U;
+    }
+    else
+    {
+      uint32_t ite5;
+      if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+      {
+        ite5 = (uint32_t)64U;
+      }
+      else
+      {
+        ite5 = r % (uint32_t)64U;
+      }
+      ite1 = r - ite5;
+    }
+    nb = ite1 / (uint32_t)64U;
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite2 = (uint32_t)0U;
+    }
+    else
+    {
+      uint32_t ite5;
+      if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+      {
+        ite5 = (uint32_t)64U;
+      }
+      else
+      {
+        ite5 = r % (uint32_t)64U;
+      }
+      ite2 = r - ite5;
+    }
+    Hacl_Blake2s_128_blake2s_update_multi(ite2,
+      tmp_block_state.fst,
+      tmp_block_state.snd,
+      prev_len,
+      buf_multi,
+      nb);
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite3 = r;
+    }
+    else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+    {
+      ite3 = (uint32_t)64U;
+    }
+    else
+    {
+      ite3 = r % (uint32_t)64U;
+    }
+    prev_len_last = total_len - (uint64_t)ite3;
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite4 = r;
+    }
+    else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+    {
+      ite4 = (uint32_t)64U;
+    }
+    else
+    {
+      ite4 = r % (uint32_t)64U;
+    }
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite = r;
+    }
+    else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+    {
+      ite = (uint32_t)64U;
+    }
+    else
+    {
+      ite = r % (uint32_t)64U;
+    }
+    Hacl_Blake2s_128_blake2s_update_last(ite4,
+      tmp_block_state.fst,
+      tmp_block_state.snd,
+      prev_len_last,
+      ite,
+      buf_last);
+    Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
   }
 }
 

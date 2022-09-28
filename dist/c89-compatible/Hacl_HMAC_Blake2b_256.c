@@ -95,10 +95,10 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
             }
             {
               Lib_IntVector_Intrinsics_vec256 s0[4U] = { 0U };
-              Lib_IntVector_Intrinsics_vec256 *r00 = s0 + (uint32_t)0U * (uint32_t)1U;
-              Lib_IntVector_Intrinsics_vec256 *r10 = s0 + (uint32_t)1U * (uint32_t)1U;
-              Lib_IntVector_Intrinsics_vec256 *r20 = s0 + (uint32_t)2U * (uint32_t)1U;
-              Lib_IntVector_Intrinsics_vec256 *r30 = s0 + (uint32_t)3U * (uint32_t)1U;
+              Lib_IntVector_Intrinsics_vec256 *r00 = s0;
+              Lib_IntVector_Intrinsics_vec256 *r10 = s0 + (uint32_t)1U;
+              Lib_IntVector_Intrinsics_vec256 *r20 = s0 + (uint32_t)2U;
+              Lib_IntVector_Intrinsics_vec256 *r30 = s0 + (uint32_t)3U;
               uint64_t iv00 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
               uint64_t iv10 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
               uint64_t iv20 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
@@ -160,10 +160,10 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
                 scrut.snd = es;
                 s = scrut.fst;
                 dst1 = ipad;
-                r01 = s + (uint32_t)0U * (uint32_t)1U;
-                r11 = s + (uint32_t)1U * (uint32_t)1U;
-                r21 = s + (uint32_t)2U * (uint32_t)1U;
-                r31 = s + (uint32_t)3U * (uint32_t)1U;
+                r01 = s;
+                r11 = s + (uint32_t)1U;
+                r21 = s + (uint32_t)2U;
+                r31 = s + (uint32_t)3U;
                 iv01 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
                 iv11 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
                 iv21 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
@@ -205,10 +205,10 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
                 }
                 Hacl_Hash_Blake2b_256_finish_blake2b_256(s, ev10, dst1);
                 hash1 = ipad;
-                r0 = s + (uint32_t)0U * (uint32_t)1U;
-                r1 = s + (uint32_t)1U * (uint32_t)1U;
-                r2 = s + (uint32_t)2U * (uint32_t)1U;
-                r3 = s + (uint32_t)3U * (uint32_t)1U;
+                r0 = s;
+                r1 = s + (uint32_t)1U;
+                r2 = s + (uint32_t)2U;
+                r3 = s + (uint32_t)3U;
                 iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
                 iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
                 iv2 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];

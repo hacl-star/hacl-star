@@ -909,11 +909,11 @@ void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p)
   a2 = py[2U];
   a3 = py[3U];
   a4 = py[4U];
-  r0 = (uint64_t)0xffffefffffc2fU * (uint64_t)2U * (uint64_t)2U - a0;
-  r1 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)2U - a1;
-  r2 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)2U - a2;
-  r3 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)2U - a3;
-  r4 = (uint64_t)0xffffffffffffU * (uint64_t)2U * (uint64_t)2U - a4;
+  r0 = (uint64_t)18014381329608892U - a0;
+  r1 = (uint64_t)18014398509481980U - a1;
+  r2 = (uint64_t)18014398509481980U - a2;
+  r3 = (uint64_t)18014398509481980U - a3;
+  r4 = (uint64_t)1125899906842620U - a4;
   f0 = r0;
   f1 = r1;
   f2 = r2;
@@ -1086,7 +1086,7 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
           Hacl_Impl_K256_PointDouble_point_double(out, out););
         {
           uint32_t bk = (uint32_t)256U;
-          uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+          uint64_t mask_l = (uint64_t)15U;
           uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
           uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
           uint64_t p1 = scalar[i1] >> j;
@@ -1177,7 +1177,7 @@ point_mul_double_vartime(
             Hacl_Impl_K256_PointDouble_point_double(out, out););
           {
             uint32_t bk = (uint32_t)256U;
-            uint64_t mask_l0 = (uint64_t)16U - (uint64_t)1U;
+            uint64_t mask_l0 = (uint64_t)15U;
             uint32_t i10 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
             uint32_t j0 = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
             uint64_t p10 = scalar1[i10] >> j0;
@@ -1199,7 +1199,7 @@ point_mul_double_vartime(
               Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l0);
               {
                 uint32_t bk0 = (uint32_t)256U;
-                uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+                uint64_t mask_l = (uint64_t)15U;
                 uint32_t i1 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
                 uint32_t j = (bk0 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
                 uint64_t p1 = scalar2[i1] >> j;

@@ -421,16 +421,8 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
           Hacl_Impl_Blake2_Core_M128));
   }
   uint8_t *buf_1 = buf_;
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
-  Lib_IntVector_Intrinsics_vec128
-  *wv = alloca((uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec128));
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    wv[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
-  Lib_IntVector_Intrinsics_vec128
-  *b = alloca((uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec128));
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    b[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+  Lib_IntVector_Intrinsics_vec128 wv[4U] = { 0U };
+  Lib_IntVector_Intrinsics_vec128 b[4U] = { 0U };
   Hacl_Streaming_Blake2s_128_blake2s_128_block_state tmp_block_state = { .fst = wv, .snd = b };
   Lib_IntVector_Intrinsics_vec128 *src_b = block_state.snd;
   Lib_IntVector_Intrinsics_vec128 *dst_b = tmp_block_state.snd;

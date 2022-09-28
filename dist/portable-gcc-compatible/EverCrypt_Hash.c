@@ -386,10 +386,10 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == EverCrypt_Hash_Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
-    uint32_t *r0 = p1 + (uint32_t)0U * (uint32_t)4U;
-    uint32_t *r1 = p1 + (uint32_t)1U * (uint32_t)4U;
-    uint32_t *r2 = p1 + (uint32_t)2U * (uint32_t)4U;
-    uint32_t *r3 = p1 + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r0 = p1;
+    uint32_t *r1 = p1 + (uint32_t)4U;
+    uint32_t *r2 = p1 + (uint32_t)8U;
+    uint32_t *r3 = p1 + (uint32_t)12U;
     uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
     uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
     uint32_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
@@ -422,10 +422,10 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == EverCrypt_Hash_Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
-    uint64_t *r0 = p1 + (uint32_t)0U * (uint32_t)4U;
-    uint64_t *r1 = p1 + (uint32_t)1U * (uint32_t)4U;
-    uint64_t *r2 = p1 + (uint32_t)2U * (uint32_t)4U;
-    uint64_t *r3 = p1 + (uint32_t)3U * (uint32_t)4U;
+    uint64_t *r0 = p1;
+    uint64_t *r1 = p1 + (uint32_t)4U;
+    uint64_t *r2 = p1 + (uint32_t)8U;
+    uint64_t *r3 = p1 + (uint32_t)12U;
     uint64_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
     uint64_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
     uint64_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
