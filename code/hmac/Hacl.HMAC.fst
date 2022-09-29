@@ -8,7 +8,6 @@ module MB = LowStar.Monotonic.Buffer
 module C = Hacl.Impl.Blake2.Core
 
 open FStar.HyperStack.ST
-open FStar.Integers
 open LowStar.BufferOps
 
 open Spec.Hash.Definitions
@@ -60,8 +59,8 @@ let wrap_key_st (a: hash_alg) =
 /// This one is only to avoid a warning about a pattern that is not encoding properly.
 inline_for_extraction
 let helper_smtpat (a: hash_alg) (len: uint32_t{ v len `less_than_max_input_length` a }):
-  x:uint32_t { x <= D.block_len a } =
-  if len <= D.block_len a then len else D.hash_len a
+  x:uint32_t { x `FStar.UInt32.lte` D.block_len a } =
+  if len `FStar.UInt32.lte` D.block_len a then len else D.hash_len a
 
 #set-options "--z3rlimit 40"
 
@@ -71,11 +70,11 @@ fun output key len ->
   //[@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = helper_smtpat a len in
   let nkey = B.sub output 0ul i in
-  let zeroes = B.sub output i (D.block_len a - i) in
+  let zeroes = B.sub output i (D.block_len a `FStar.UInt32.sub` i) in
   (**) assert B.(loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));
   (**) let h0 = ST.get () in
-  (**) assert (Seq.equal (B.as_seq h0 zeroes) (Seq.create (v (D.block_len a - i)) (u8 0)));
-  if len <= D.block_len a then begin
+  (**) assert (Seq.equal (B.as_seq h0 zeroes) (Seq.create (v (D.block_len a `FStar.UInt32.sub` i)) (u8 0)));
+  if len `FStar.UInt32.lte` D.block_len a then begin
     B.blit key 0ul nkey 0ul len;
     let h1 = ST.get () in
     (**) assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
@@ -160,12 +159,19 @@ let zero_to_len (a:hash_alg) : x:(if is_sha3 a then unit else uint_t (len_int_ty
 
 let block_len_pos a: Lemma (block_length a > 0) = ()
 
+let blake2_add_zero a (ev: extra_state a) (l: nat): Lemma
+  (requires is_blake a /\ extra_state_v ev == 0 /\ l <= maxint (extra_state_int_type a))
+  (ensures (extra_state_v (extra_state_add_nat ev l) == l))
+=
+  ()
+
 #push-options "--print_implicits" // --z3cliopt smt.arith.nl=false"
 
 let lemma_mod_one (b:pos): Lemma (b % b = 0) = ()
 
+open FStar.Mul
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 let part2 a m init update_multi update_last finish s dst key data len =
   block_len_pos a;
@@ -200,6 +206,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
       (**)           Spec.Agile.Hash.(update_multi a (init a) key_v0));
       (**) update_multi_extra_state_eq' a (D.as_seq h1 s, ev) key_v0;
       (**) assert(is_blake a ==> (ev1 == extra_state_add_nat ev (Seq.length key_v0)));
+      (**) if is_blake a then blake2_add_zero a ev (Seq.length key_v0);
       (**) assert(is_blake a ==> (extra_state_v ev1 == extra_state_v ev + Seq.length key_v0));
       (**) assert(is_blake a ==> (extra_state_v ev1 == block_length a));
       let block_len = D.block_len a in
@@ -231,24 +238,13 @@ let part2 a m init update_multi update_last finish s dst key data len =
       assert (UInt32.v rem_len = B.length rem);
       let ev3: extra_state a = update_last s ev2 prev_len rem rem_len in
       (**) let h3 = ST.get () in
-      assert ((((D.as_seq #i h3 s <: words_state' a), ev3) <: words_state a)
-        ==
-        (Spec.Hash.Incremental.update_last a
-          (((D.as_seq #i h20 s <: words_state' a), ev2) <: words_state a)
-          (len_v (D.get_alg i) prev_len)
-          (B.as_seq h20 rem) <: words_state a));
-      //admit () in admit ()
-      (*calc (==) { 
-        (((D.as_seq #i h3 s <: words_state' a), ev3) <: words_state a));
-      (==) {
-        //_ by (Tactics.trefl ())
-      } (
-        (Spec.Hash.Incremental.update_last a
-          (((D.as_seq #i h20 s <: words_state' a), ev2) <: words_state a)
-          (len_v (D.get_alg i) prev_len)
-          (B.as_seq h20 rem)) <: words_state a);
-      };
-      admit () in admit ()*)
+      // PROOF IS NOT RELYING ON NL ARITH UP TO THIS POINT
+      (**) assert ((((D.as_seq #i h3 s <: words_state' a), ev3) <: words_state a)
+            ==
+            (Spec.Hash.Incremental.update_last a
+              (((D.as_seq #i h20 s <: words_state' a), ev2) <: words_state a)
+              (len_v (D.get_alg i) prev_len)
+              (B.as_seq h20 rem) <: words_state a));
       (**) assert ((D.as_seq h3 s, ev3) ==
            Spec.Hash.Incremental.update_last a
               (Spec.Agile.Hash.update_multi a
@@ -256,7 +252,8 @@ let part2 a m init update_multi update_last finish s dst key data len =
                 (B.as_seq h0 full_blocks))
               (block_length a + UInt32.v full_blocks_len)
               (B.as_seq h0 rem));
-      (**) Lib.UpdateMulti.update_multi_associative (block_length a) (update a) (Spec.Agile.Hash.init a) key_v0 (B.as_seq h0 full_blocks);
+      (**) Lib.UpdateMulti.update_multi_associative (block_length a) (update a)
+        (Spec.Agile.Hash.init a) key_v0 (B.as_seq h0 full_blocks);
       (**) assert ((D.as_seq h3 s, ev3) ==
       (**) Spec.Hash.Incremental.update_last a
               (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) (key_v0 `Seq.append` B.as_seq h0 full_blocks))
@@ -265,48 +262,8 @@ let part2 a m init update_multi update_last finish s dst key data len =
       (**)  Spec.Hash.Incremental.Lemmas.lemma_split_blocks_assoc a key_v0 (B.as_seq h0 data);
       (**)  assert (Spec.Hash.Incremental.split_blocks a (key_v0 `S.append` B.as_seq h0 data) ==
               (key_v0 `S.append` B.as_seq h0 full_blocks, B.as_seq h0 rem));
-      // JP: this is the difficult proof. Works fine in interactive mode,
-      // doesn't work in batch mode unless with split queries. Probably need to
-      // do a case analysis manually (need to prove prev_len irrelevant in sha3
-      // case).
-      (*if is_sha3 a then*)
-        (**) assert ((D.as_seq h3 s, ev3) ==
-        (**)   Spec.Hash.Incremental.hash_incremental_body a (key_v0 `S.append` B.as_seq h0 data) (Spec.Agile.Hash.init a));
-      (*else begin
-        // admit () end in admit ()
-        calc (==) {
-          (D.as_seq h3 s, ev3);
-        (==) { admit () (* as above *) }
-          Spec.Hash.Incremental.update_last a
-             (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) (key_v0 `Seq.append` B.as_seq h0 full_blocks))
-             (block_length a + UInt32.v full_blocks_len)
-             (B.as_seq h0 rem);
-        (==) { admit () } (
-          let init = Spec.Agile.Hash.init a in
-          Spec.Hash.Incremental.update_last a
-             (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) (key_v0 `Seq.append` B.as_seq h0 full_blocks))
-             (block_length a + UInt32.v full_blocks_len)
-             (B.as_seq h0 rem));
-        (==) { admit() } (
-          let init = Spec.Agile.Hash.init a in
-          let bs, l = Spec.Hash.Incremental.split_blocks a (key_v0 `S.append` B.as_seq h0 data) in
-          Spec.Hash.Incremental.update_last a
-             (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) bs)
-             (block_length a + UInt32.v full_blocks_len)
-             l);
-        (==) { admit (); assert ((key_v0 `S.append` B.as_seq h0 full_blocks) `S.equal` fst (Spec.Hash.Incremental.split_blocks a (key_v0 `S.append` B.as_seq h0 data))); assert (S.length key_v0 == block_length a) } (
-          let init = Spec.Agile.Hash.init a in
-          let bs, l = Spec.Hash.Incremental.split_blocks a (key_v0 `S.append` B.as_seq h0 data) in
-          Spec.Hash.Incremental.update_last a
-             (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) bs)
-             (block_length a + UInt32.v full_blocks_len)
-             l);
-        };
-        admit ()
-      end;*)
       ev3
   in
-  //admit ()
   (**) let h3 = ST.get () in
   (**) assert(B.(modifies (loc_buffer s) h0 h3));
   finish s ev dst;
