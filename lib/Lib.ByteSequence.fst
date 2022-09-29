@@ -836,7 +836,6 @@ let rec nat_from_intseq_le_public_to_secret #t len b =
     () end
 
 
-noextract inline_for_extraction
 let lemma_uints_to_bytes_le_sub #t #l #len s i =
   let lemma_uints_to_bytes_le_i_j (#t : inttype{unsigned t /\ ~(U1? t)})
     (#l : secrecy_level)
