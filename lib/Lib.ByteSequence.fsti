@@ -297,3 +297,18 @@ val nat_from_intseq_be_public_to_secret:
 val nat_from_intseq_le_public_to_secret:
   #t:inttype{unsigned t} -> len:size_pos{len * bits t < pow2 32} -> b:lseq (uint_t t PUB) len ->
   Lemma (nat_from_intseq_le b == nat_from_intseq_le (map secret b))
+
+val lemma_uints_to_bytes_le_sub :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  #len:size_nat{len * numbytes t < pow2 32} ->
+  s : lseq (uint_t t l) len ->
+  i : size_nat {i < len} ->
+  Lemma(sub (uints_to_bytes_le #t #l s) (i * numbytes t) (numbytes t) == uint_to_bytes_le (index s i))
+
+val lemma_uints_to_from_bytes_le_preserves_value :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  #len:size_nat{len * numbytes t < pow2 32} ->
+  s : lseq (uint_t t l) len ->
+  Lemma(uints_from_bytes_le #t #l (uints_to_bytes_le #t #l s) == s)

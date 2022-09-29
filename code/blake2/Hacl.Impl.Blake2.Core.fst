@@ -236,60 +236,6 @@ let store_row #a #m b r =
   | _ ->
     uints_to_bytes_le #(Spec.wt a) 4ul b r
 
-(* The following lemma should move to Lib.ByteSequence *)
-noextract inline_for_extraction
-val lemma_uints_to_bytes_le_sub :
-  #t : inttype{unsigned t /\ ~(U1? t)} ->
-  #l : secrecy_level ->
-  #len:size_nat{len * numbytes t < pow2 32} ->
-  s : Lib.Sequence.lseq (uint_t t l) len ->
-  i : size_nat {i < len} ->
-  Lemma(Lib.Sequence.sub (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i * numbytes t) (numbytes t) == Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i))
-
-noextract inline_for_extraction
-let lemma_uints_to_bytes_le_sub #t #l #len s i =
-  let lemma_uints_to_bytes_le_i_j (#t : inttype{unsigned t /\ ~(U1? t)})
-    (#l : secrecy_level)
-    (#len:size_nat{len * numbytes t < pow2 32})
-    (s : Lib.Sequence.lseq (uint_t t l) len)
-    (i : size_nat {i < len})
-    (j : size_nat {j < numbytes t}):
-      Lemma(Lib.Sequence.index (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i * numbytes t + j) == Lib.Sequence.index (Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i)) j) =
-    Lib.ByteSequence.index_uints_to_bytes_le #t #l #len s (i*numbytes t + j);
-    assert (Lib.Sequence.index (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i*numbytes t + j) ==
-           Lib.Sequence.index (Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i)) j) in
-  
-  Classical.forall_intro (lemma_uints_to_bytes_le_i_j #t #l #len s i);
-  Lib.Sequence.eq_intro (Lib.Sequence.sub (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i * numbytes t) (numbytes t)) (Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i))
-
-(* The following lemma should move to Lib.ByteSequence *)
-noextract inline_for_extraction
-val lemma_uints_to_from_bytes_le_preserves_value :
-  #t : inttype{unsigned t /\ ~(U1? t)} ->
-  #l : secrecy_level ->
-  #len:size_nat{len * numbytes t < pow2 32} ->
-  s : Lib.Sequence.lseq (uint_t t l) len ->
-  Lemma(Lib.ByteSequence.uints_from_bytes_le #t #l (Lib.ByteSequence.uints_to_bytes_le #t #l s) == s)
-
-let lemma_uints_to_from_bytes_le_preserves_value #t #l #len s =
-  let lemma_uints_to_from_bytes_le_preserves_value_i
-  (#t : inttype{unsigned t /\ ~(U1? t)})
-  (#l : secrecy_level)
-  (#len:size_nat{len * numbytes t < pow2 32})
-  (s : Lib.Sequence.lseq (uint_t t l) len)
-  (i : size_nat {i < len}) :
-  Lemma(Lib.Sequence.index (Lib.ByteSequence.uints_from_bytes_le #t #l (Lib.ByteSequence.uints_to_bytes_le #t #l s)) i == Lib.Sequence.index s i) =
-  let b8 = Lib.ByteSequence.uints_to_bytes_le #t #l s in
-  Lib.ByteSequence.index_uints_from_bytes_le #t #l #len b8 i;
-  assert (Lib.Sequence.index (Lib.ByteSequence.uints_from_bytes_le b8) i ==
-          Lib.ByteSequence.uint_from_bytes_le (Lib.Sequence.sub b8 (i * numbytes t) (numbytes t)));
-  lemma_uints_to_bytes_le_sub s i;
-  assert (Lib.Sequence.sub b8 (i * numbytes t) (numbytes t) == Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i));
-  Lib.ByteSequence.lemma_uint_to_from_bytes_le_preserves_value (Lib.Sequence.index s i) in
-
-  Classical.forall_intro (lemma_uints_to_from_bytes_le_preserves_value_i #t #l #len s);
-  Lib.Sequence.eq_intro (Lib.ByteSequence.uints_from_bytes_le #t #l (Lib.ByteSequence.uints_to_bytes_le #t #l s)) s
-
 noextract inline_for_extraction
 let store_row32 #a #m b r =
   push_frame();
