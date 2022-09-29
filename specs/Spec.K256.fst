@@ -56,6 +56,13 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
   SE.sqr = point_double_c;
 }
 
+// [a]P in affine coordinates
+let aff_point_mul (a:nat) (p:aff_point) : aff_point =
+  LE.pow mk_k256_comm_monoid p a
+
+// [a1]P1 + [a2]P2
+let aff_point_mul_double (a1:qelem) (p1:aff_point) (a2:qelem) (p2:aff_point) : aff_point =
+  aff_point_add (aff_point_mul a1 p1) (aff_point_mul a2 p2)
 
 // [a]P
 let point_mul (a:qelem) (p:proj_point) : proj_point =
@@ -124,7 +131,7 @@ let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64)
     let sinv = qinv s in
     let u1 = z *^ sinv in
     let u2 = r *^ sinv in
-    let _X, _Y, _Z = point_mul_double_g u1 u2 (pk_x, pk_y, one) in
+    let _X, _Y, _Z = point_mul_double_g u1 u2 (to_proj_point (pk_x, pk_y)) in
 
     if is_proj_point_at_inf (_X, _Y, _Z) then false
     else begin

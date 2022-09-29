@@ -49,6 +49,8 @@ let qelem = x:nat{x < q}
 let qadd (x y:qelem) : qelem = (x + y) % q
 let qmul (x y:qelem) : qelem = (x * y) % q
 let qinv (x:qelem) : qelem = M.pow_mod #q x (q - 2)
+let qnegate (x:qelem) : qelem = (- x) % q
+let scalar_is_high (x:qelem) : bool = x > q / 2
 
 let ( +^ ) = qadd
 let ( *^ ) = qmul
@@ -67,10 +69,14 @@ let is_on_curve (p:aff_point) =
 let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
 let point_at_inf : proj_point = (zero, one, zero)
 
+let is_aff_point_at_inf (p:aff_point) : bool =
+  let (x, y) = p in x = zero && y = zero
+
 let is_proj_point_at_inf (p:proj_point) : bool =
   let (_, _, z) = p in z = zero
 
 let to_aff_point (p:proj_point) : aff_point =
+  // if is_proj_point_at_inf p then aff_point_at_inf
   let (px, py, pz) = p in
   let zinv = finv pz in
   let x = px *% zinv in
@@ -89,6 +95,10 @@ let g : proj_point = (g_x, g_y, one)
 
 assume
 val aff_point_add (p:aff_point) (y:aff_point) : aff_point
+
+let aff_point_negate (p:aff_point) : aff_point =
+  let x, y = p in x, (-y) % prime
+
 
 ///  Point addition and doubling in projective coordinates
 

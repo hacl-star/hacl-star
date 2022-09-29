@@ -55,3 +55,9 @@ val g_is_on_curve: unit -> Lemma (point_inv g /\ to_aff_point g == aff_g)
 
 val point_decompress_lemma: s:Lib.ByteSequence.lbytes 32 ->
   Lemma (let p = point_decompress s in Some? p ==> point_inv (Some?.v p))
+
+val point_equal_lemma: p:ext_point -> q:ext_point -> s:ext_point -> Lemma
+  (requires
+    is_ext p /\ is_ext q /\ is_ext s /\
+    to_aff_point p == to_aff_point q)
+  (ensures  point_equal p s == point_equal q s)

@@ -192,30 +192,7 @@ Write the point at infinity (additive identity) in `p`.
 */
 void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p)
 {
-  uint64_t *x = p;
-  uint64_t *y = p + (uint32_t)5U;
-  uint64_t *z = p + (uint32_t)10U;
-  uint64_t *t = p + (uint32_t)15U;
-  x[0U] = (uint64_t)0U;
-  x[1U] = (uint64_t)0U;
-  x[2U] = (uint64_t)0U;
-  x[3U] = (uint64_t)0U;
-  x[4U] = (uint64_t)0U;
-  y[0U] = (uint64_t)1U;
-  y[1U] = (uint64_t)0U;
-  y[2U] = (uint64_t)0U;
-  y[3U] = (uint64_t)0U;
-  y[4U] = (uint64_t)0U;
-  z[0U] = (uint64_t)1U;
-  z[1U] = (uint64_t)0U;
-  z[2U] = (uint64_t)0U;
-  z[3U] = (uint64_t)0U;
-  z[4U] = (uint64_t)0U;
-  t[0U] = (uint64_t)0U;
-  t[1U] = (uint64_t)0U;
-  t[2U] = (uint64_t)0U;
-  t[3U] = (uint64_t)0U;
-  t[4U] = (uint64_t)0U;
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(p);
 }
 
 /*
