@@ -719,7 +719,6 @@ let append_pad_last_length_lemma a len =
   assert (b_len == (blocksize - x) % blocksize + x)
   //if x < blocksize then b_len = blocksize else b_len = 2 * blocksize
 
-
 val load_last_lemma:
      a:sha2_alg
   -> totlen:size_nat{totlen `less_than_max_input_length` a}
