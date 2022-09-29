@@ -271,7 +271,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
       // case).
       (*if is_sha3 a then*)
         (**) assert ((D.as_seq h3 s, ev3) ==
-        (**)   Spec.Hash.Incremental.hash_incremental_body a (key_v0 `S.append` B.as_seq h0 data) (Spec.Agile.Hash.init a))
+        (**)   Spec.Hash.Incremental.hash_incremental_body a (key_v0 `S.append` B.as_seq h0 data) (Spec.Agile.Hash.init a));
       (*else begin
         // admit () end in admit ()
         calc (==) {
