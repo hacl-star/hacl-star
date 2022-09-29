@@ -21,16 +21,6 @@ module UpdateMulti = Lib.UpdateMulti
 [@must_erase_for_extraction]
 private val _sync_decl : Type0
 
-/// IMPORTANT:
-/// Incremental hash is defined only for hash **without keys**.
-/// When we use keyed hash, everything becomes a lot more complicated, so as we
-/// don't use keyed incremental (nor streaming) hash, we decided to ignore this
-/// mode.
-let blake2_init (a : hash_alg{is_blake a}) : init_t a =
-  match a with
-  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32, u64 0
-  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64, u128 0
-
 let last_split_blake (a:hash_alg{is_blake a}) (input:bytes)
   : Pure (bytes & bytes & nat)
     (requires True)
@@ -74,13 +64,6 @@ let update_last (a:hash_alg)
   (**) assert(S.length S.(input @| padding) % block_length a = 0);
   update_multi a hash S.(input @| padding)
 
-let pad (a:hash_alg)
-  (total_len:nat{total_len <= max_input_length a}):
-  Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
-= if is_blake a then pad_blake a total_len
-  else pad_md a total_len
-
-
 let split_blocks (a:hash_alg) (input:bytes)
   : Pure (bytes & bytes)
     (requires S.length input <= max_input_length a)
@@ -102,13 +85,6 @@ let hash_incremental_body
 let hash_incremental (a:hash_alg) (input:bytes{S.length input <= max_input_length a}):
   Tot (hash:bytes{S.length hash = (hash_length a)})
 = let s = init a in
-  let s = hash_incremental_body a input s in
-  finish a s
-
-let blake2_hash_incremental
-  (a : hash_alg{is_blake a})
-  (input : bytes {S.length input <= max_input_length a}) =
-  let s = blake2_init a in
   let s = hash_incremental_body a input s in
   finish a s
 
@@ -151,7 +127,7 @@ val blake2_is_hash_incremental
     let kk = 0 in
     let k = Seq.empty in
     S.equal (Blake2.blake2 (to_blake_alg a) input kk k (Spec.Blake2.max_output (to_blake_alg a)))
-            (blake2_hash_incremental a input))
+            (hash_incremental a input))
 
 val hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (S.equal (hash a input) (hash_incremental a input))

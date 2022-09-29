@@ -202,7 +202,7 @@ let print_modified_registers
     else "\"%" ^ P.print_reg_name a ^ "\", " ^ aux q
   in aux [rRax; rRbx; rRcx; rRdx; rRsi; rRdi; rRbp; rRsp; rR8; rR9; rR10; rR11; rR12; rR13; rR14; rR15]
 
-// Prints "register uint64_t *argi_r asm("[reg]") = argi;\n"
+// Prints "register uint64_t *argi_r __asm__("[reg]") = argi;\n"
 let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
   let ty = match a with
     | TD_Base _ -> "uint64_t "
@@ -210,7 +210,7 @@ let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n 
   in
   if reserved (of_arg i) then
     // If the associated register is reserved, we really this argument in it. For instance if it is Rdx and we have Mul(x) instructions
-    true, "  register " ^ ty ^ names i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = " ^ names i ^ ";\n"
+    true, "  register " ^ ty ^ names i ^ "_r __asm__(\"" ^ P.print_reg_name (of_arg i) ^ "\") = " ^ names i ^ ";\n"
   else false, ""
 
 let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
@@ -221,10 +221,10 @@ let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.leng
     let are_explicit, rest_str = print_explicit_register_args n q (i+1) of_arg reserved names in
     was_explicit || are_explicit, explicit_str ^ rest_str
 
-// If we have a return parameter with a reserved register, print "register uint64_t [name] asm("rax");\n"
+// If we have a return parameter with a reserved register, print "register uint64_t [name] __asm__("rax");\n"
 let print_register_ret (reserved:reg_64 -> bool) = function
   | None -> ""
-  | Some name -> if reserved rRax then "  register uint64_t " ^ name ^ " asm(\"rax\");\n" else "  uint64_t " ^ name ^ ";\n"
+  | Some name -> if reserved rRax then "  register uint64_t " ^ name ^ " __asm__(\"rax\");\n" else "  uint64_t " ^ name ^ ";\n"
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
    each line should be in quotes, and end by a semicolon in inline assembly *)
@@ -356,8 +356,8 @@ let print_inline
   // Explicitly allocate registers when needed
   let has_explicit, explicit_regs = print_explicit_register_args n args 0 of_arg reserved_regs arg_names in
 
-  // Start printing the code, need the asm volatile header
-  let start_code = (if Some? ret_val || has_explicit then "\n" else "") ^ "  asm volatile(\n" in
+  // Start printing the code, need the __asm__ volatile header
+  let start_code = (if Some? ret_val || has_explicit then "\n" else "") ^ "  __asm__ volatile(\n" in
 
   // Initially, the register names are the same as in assembly
   // This function will be modified to address arguments by their number instead of explicitly allocating them

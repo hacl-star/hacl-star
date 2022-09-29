@@ -103,6 +103,24 @@ let block_len_as_len (a: hash_alg):
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | Blake2S -> uint32_to_uint64 (D.block_len a)
   | SHA2_384 | SHA2_512 | Blake2B -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
+inline_for_extraction noextract
+let len_add32 (a: hash_alg) (l: len_t a) (x: UInt32.t):
+  Pure (len_t a)
+    (requires len_v a l + UInt32.v x <= max_input_length a)
+    (ensures fun l' -> len_v a l' = len_v a l + UInt32.v x)
+=
+  let open FStar.Int.Cast.Full in
+  assert_norm (128 < pow2 32);
+  assert_norm (pow2 61 < pow2 64);
+  assert_norm (pow2 125 < pow2 128);
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | Blake2S ->
+      let x = uint32_to_uint64 x in
+      l `FStar.UInt64.add` x
+  | SHA2_384 | SHA2_512 | Blake2B ->
+      let x = uint64_to_uint128 (uint32_to_uint64 x) in
+      l `FStar.UInt128.add` x
+
 /// This implementation is optimized by reusing an existing hash state ``s``
 /// rather than allocating a new one. Note that the disjointness hypotheses are
 /// voluntarily very loose (in particular, the hash state and the key are not
@@ -142,7 +160,7 @@ let update_multi_extra_state_eq'
          extra_state_add_nat (snd h) (Seq.length input)))) =
   if is_blake a then update_multi_extra_state_eq a h input else ()
 
-#push-options "--z3rlimit 100 --ifuel 1"
+#push-options "--z3rlimit 100"
 
 // TODO: move
 (* We can't directly introduce uint128 literals *)
@@ -168,8 +186,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
   (**) let init_v : Ghost.erased (init_t a) = Spec.Agile.Hash.init a in
   (**) assert ((D.as_seq h1 s, ev) == Ghost.reveal init_v);
   let ev =
-    if len = 0ul then
-      begin
+    if len = 0ul then begin
       let ev = update_last s ev (zero_to_len a) key (D.block_len a) in
       (**) let h2 = ST.get () in
       (**) Spec.Hash.Lemmas.block_length_smaller_than_max_input a;
@@ -178,9 +195,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
       (**) assert((D.as_seq h2 s, ev) ==
       (**)  Spec.Hash.Incremental.hash_incremental_body a key_data_v0 init_v);
       ev
-      end
-    else
-      begin
+    end else begin
       let ev1 = update_multi s ev key 1ul in
       (**) let h2 = ST.get () in
       (**) assert ((D.as_seq h2 s, ev1) ==
@@ -189,13 +204,33 @@ let part2 a m init update_multi update_last finish s dst key data len =
       (**) assert(is_blake a ==> (ev1 == extra_state_add_nat ev (Seq.length key_v0)));
       (**) assert(extra_state_v ev == 0);
       (**) assert(is_blake a ==> (extra_state_v ev1 == block_length a));
-      let ev2 = update_last s ev1 (block_len_as_len a) data len in
+      let block_len = D.block_len a in
+      let n_blocks, rem_len = Lib.UpdateMulti.split_at_last_st block_len len in
+      let full_blocks_len = n_blocks `FStar.UInt32.mul` block_len in
+      let full_blocks = B.sub data 0ul full_blocks_len in
+      let rem = B.sub data full_blocks_len rem_len in
+      let ev2 = update_multi s ev1 full_blocks n_blocks in
+      (**) update_multi_extra_state_eq' a (D.as_seq h2 s, ev1) (B.as_seq h0 full_blocks);
+      let ev3 = update_last s ev2 (len_add32 a (block_len_as_len a) full_blocks_len) rem rem_len in
       (**) let h3 = ST.get () in
-      (**) assert ((D.as_seq h3 s, ev2) ==
-      (**)  Spec.Hash.Incremental.update_last a
-      (**)    (Spec.Agile.Hash.(update_multi a (init a) key_v0)) (block_length a) data_v0);
+      (**) assert ((D.as_seq h3 s, ev3) ==
+      (**) Spec.Hash.Incremental.update_last a
+             (Spec.Agile.Hash.update_multi a
+               (Spec.Agile.Hash.(update_multi a (init a) key_v0))
+               (B.as_seq h0 full_blocks))
+             (block_length a + UInt32.v full_blocks_len)
+             (B.as_seq h0 rem));
+      (**) Spec.Hash.Lemmas.update_multi_associative a (Spec.Agile.Hash.init a) key_v0 (B.as_seq h0 full_blocks);
+      (**) assert ((D.as_seq h3 s, ev3) ==
+      (**) Spec.Hash.Incremental.update_last a
+             (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) (key_v0 `Seq.append` B.as_seq h0 full_blocks))
+             (block_length a + UInt32.v full_blocks_len)
+             (B.as_seq h0 rem));
+           Spec.Hash.Incremental.Lemmas.lemma_split_blocks_assoc a key_v0 (B.as_seq h0 data);
+           assert (Spec.Hash.Incremental.split_blocks a (key_v0 `S.append` B.as_seq h0 data) ==
+             (key_v0 `S.append` B.as_seq h0 full_blocks, B.as_seq h0 rem));
       ev2
-      end
+    end
   in
   (**) let h3 = ST.get () in
   (**) assert(B.(modifies (loc_buffer s) h0 h3));
@@ -203,28 +238,19 @@ let part2 a m init update_multi update_last finish s dst key data len =
   (**) let h4 = ST.get () in
   (**) assert(B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h3 h4));
   (**) assert(B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h0 h4));
-  (**) begin
   (**) let open Spec.Hash.PadFinish in
   (**) let open Spec.Hash.Incremental in
   (**) let open Spec.Agile.Hash in
   (**) let open Spec.Hash.Lemmas in
-  (**) if len =. 0ul then
-  (**) begin
+  (**) if len =. 0ul then begin
   (**)   (* TODO: doesn't work if we put a calc here *)
   (**)   assert(B.as_seq h4 dst `S.equal` finish a (hash_incremental_body a key_data_v0 init_v));
   (**)   assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
-  (**) end
-  (**) else
-  (**) begin
-  (**)   assert(B.as_seq h4 dst `S.equal`
-  (**)            finish a (update_last a (update_multi a (init a) key_v0)
-  (**)                   (block_length a) data_v0));
-  (**)   Spec.Hash.Incremental.Lemmas.concatenated_hash_incremental a key_v0 data_v0;
+  (**) end else begin
   (**)   assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
   (**) end;
   (**) Spec.Hash.Incremental.hash_is_hash_incremental a key_data_v0;
   (**) assert(B.as_seq h4 dst `S.equal` hash a key_data_v0)
-  (**) end
 
 #pop-options
 

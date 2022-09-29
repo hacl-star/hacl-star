@@ -105,15 +105,16 @@ static inline bool Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(uint64_
 static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
 {
   uint64_t tmp[4U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t *os = tmp;
     uint8_t *bj = b + i * (uint32_t)8U;
     uint64_t u = load64_be(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i] = x;
-  }
+    os[i] = x;);
   uint64_t s0 = tmp[3U];
   uint64_t s1 = tmp[2U];
   uint64_t s2 = tmp[1U];
@@ -178,10 +179,11 @@ static inline void Hacl_K256_Field_store_felem(uint8_t *b, uint64_t *f)
   tmp[1U] = f2;
   tmp[2U] = f1;
   tmp[3U] = f0;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
-    store64_be(b + i * (uint32_t)8U, tmp[i]);
-  }
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store64_be(b + i * (uint32_t)8U, tmp[i]););
 }
 
 static inline void Hacl_K256_Field_fmul_small_num(uint64_t *out, uint64_t *f, uint64_t num)
@@ -249,11 +251,11 @@ static inline void Hacl_K256_Field_fsub(uint64_t *out, uint64_t *f1, uint64_t *f
   uint64_t b2 = f2[2U];
   uint64_t b3 = f2[3U];
   uint64_t b4 = f2[4U];
-  uint64_t r00 = (uint64_t)0xffffefffffc2fU * (uint64_t)2U * x - b0;
-  uint64_t r10 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * x - b1;
-  uint64_t r20 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * x - b2;
-  uint64_t r30 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * x - b3;
-  uint64_t r40 = (uint64_t)0xffffffffffffU * (uint64_t)2U * x - b4;
+  uint64_t r00 = (uint64_t)9007190664804446U * x - b0;
+  uint64_t r10 = (uint64_t)9007199254740990U * x - b1;
+  uint64_t r20 = (uint64_t)9007199254740990U * x - b2;
+  uint64_t r30 = (uint64_t)9007199254740990U * x - b3;
+  uint64_t r40 = (uint64_t)562949953421310U * x - b4;
   uint64_t r0 = r00;
   uint64_t r1 = r10;
   uint64_t r2 = r20;
@@ -591,11 +593,11 @@ static inline void Hacl_K256_Field_fnegate_conditional_vartime(uint64_t *f, bool
     uint64_t a2 = f[2U];
     uint64_t a3 = f[3U];
     uint64_t a4 = f[4U];
-    uint64_t r0 = (uint64_t)0xffffefffffc2fU * (uint64_t)2U * (uint64_t)1U - a0;
-    uint64_t r1 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a1;
-    uint64_t r2 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a2;
-    uint64_t r3 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a3;
-    uint64_t r4 = (uint64_t)0xffffffffffffU * (uint64_t)2U * (uint64_t)1U - a4;
+    uint64_t r0 = (uint64_t)9007190664804446U - a0;
+    uint64_t r1 = (uint64_t)9007199254740990U - a1;
+    uint64_t r2 = (uint64_t)9007199254740990U - a2;
+    uint64_t r3 = (uint64_t)9007199254740990U - a3;
+    uint64_t r4 = (uint64_t)562949953421310U - a4;
     uint64_t f0 = r0;
     uint64_t f1 = r1;
     uint64_t f2 = r2;

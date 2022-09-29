@@ -24,7 +24,7 @@ module AH = Spec.Agile.Hash
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-let padding_round (a: hash_alg) (len: len_t a): Lemma
+let padding_round (a: md_alg) (len: len_t a): Lemma
   ((len_v a len + pad_length a (len_v a len)) % block_length a = 0)
 =
   ()
@@ -62,7 +62,7 @@ let pad_length_mod (a: hash_alg{is_md a}) (base_len len: nat): Lemma
 = pad0_length_mod a base_len len
 
 val pad_len_bound :
-  a : hash_alg ->
+  a : md_alg ->
   prev_len:len_t a { len_v a prev_len % block_length a = 0 } ->
   input_len:U32.t { U32.v input_len + len_v a prev_len <= max_input_length a} ->
   Lemma(

@@ -95,15 +95,13 @@ static inline void salsa20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
   ctr_u32 = ctr;
   k[8U] = k[8U] + ctr_u32;
   rounds(k);
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os = k;
-      uint32_t x = k[i] + ctx[i];
-      os[i] = x;
-    }
-  }
+  KRML_MAYBE_FOR16(i,
+    (uint32_t)0U,
+    (uint32_t)16U,
+    (uint32_t)1U,
+    uint32_t *os = k;
+    uint32_t x = k[i] + ctx[i];
+    os[i] = x;);
   k[8U] = k[8U] + ctr_u32;
 }
 
@@ -115,30 +113,26 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
   uint32_t n32[2U] = { 0U };
   uint32_t *k0;
   uint32_t *k1;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint32_t *os = k32;
-      uint8_t *bj = key + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)2U; i++)
-    {
-      uint32_t *os = n32;
-      uint8_t *bj = n + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
+  KRML_MAYBE_FOR2(i,
+    (uint32_t)0U,
+    (uint32_t)2U,
+    (uint32_t)1U,
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
   ctx[0U] = (uint32_t)0x61707865U;
   k0 = k32;
   k1 = k32 + (uint32_t)4U;
@@ -151,13 +145,11 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
   memcpy(ctx + (uint32_t)11U, k1, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
   salsa20_core(k, ctx, (uint32_t)0U);
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      store32_le(out + i * (uint32_t)4U, k[i]);
-    }
-  }
+  KRML_MAYBE_FOR16(i,
+    (uint32_t)0U,
+    (uint32_t)16U,
+    (uint32_t)1U,
+    store32_le(out + i * (uint32_t)4U, k[i]););
 }
 
 static inline void
@@ -175,30 +167,26 @@ salsa20_encrypt(
   uint32_t n32[2U] = { 0U };
   uint32_t *k0;
   uint32_t *k10;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint32_t *os = k32;
-      uint8_t *bj = key + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)2U; i++)
-    {
-      uint32_t *os = n32;
-      uint8_t *bj = n + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
+  KRML_MAYBE_FOR2(i,
+    (uint32_t)0U,
+    (uint32_t)2U,
+    (uint32_t)1U,
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
   ctx[0U] = (uint32_t)0x61707865U;
   k0 = k32;
   k10 = k32 + (uint32_t)4U;
@@ -225,34 +213,28 @@ salsa20_encrypt(
         salsa20_core(k1, ctx, i0);
         {
           uint32_t bl[16U] = { 0U };
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint8_t *bj = uu____1 + i * (uint32_t)4U;
-              uint32_t u = load32_le(bj);
-              uint32_t r = u;
-              uint32_t x = r;
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint32_t x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              store32_le(uu____0 + i * (uint32_t)4U, bl[i]);
-            }
-          }
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint8_t *bj = uu____1 + i * (uint32_t)4U;
+            uint32_t u = load32_le(bj);
+            uint32_t r = u;
+            uint32_t x = r;
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint32_t x = bl[i] ^ k1[i];
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            store32_le(uu____0 + i * (uint32_t)4U, bl[i]););
         }
       }
     }
@@ -267,34 +249,28 @@ salsa20_encrypt(
         salsa20_core(k1, ctx, nb);
         {
           uint32_t bl[16U] = { 0U };
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint8_t *bj = plain + i * (uint32_t)4U;
-              uint32_t u = load32_le(bj);
-              uint32_t r = u;
-              uint32_t x = r;
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint32_t x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              store32_le(plain + i * (uint32_t)4U, bl[i]);
-            }
-          }
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint8_t *bj = plain + i * (uint32_t)4U;
+            uint32_t u = load32_le(bj);
+            uint32_t r = u;
+            uint32_t x = r;
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint32_t x = bl[i] ^ k1[i];
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            store32_le(plain + i * (uint32_t)4U, bl[i]););
           memcpy(uu____2, plain, rem * sizeof (uint8_t));
         }
       }
@@ -317,30 +293,26 @@ salsa20_decrypt(
   uint32_t n32[2U] = { 0U };
   uint32_t *k0;
   uint32_t *k10;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint32_t *os = k32;
-      uint8_t *bj = key + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)2U; i++)
-    {
-      uint32_t *os = n32;
-      uint8_t *bj = n + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
+  KRML_MAYBE_FOR2(i,
+    (uint32_t)0U,
+    (uint32_t)2U,
+    (uint32_t)1U,
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
   ctx[0U] = (uint32_t)0x61707865U;
   k0 = k32;
   k10 = k32 + (uint32_t)4U;
@@ -367,34 +339,28 @@ salsa20_decrypt(
         salsa20_core(k1, ctx, i0);
         {
           uint32_t bl[16U] = { 0U };
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint8_t *bj = uu____1 + i * (uint32_t)4U;
-              uint32_t u = load32_le(bj);
-              uint32_t r = u;
-              uint32_t x = r;
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint32_t x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              store32_le(uu____0 + i * (uint32_t)4U, bl[i]);
-            }
-          }
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint8_t *bj = uu____1 + i * (uint32_t)4U;
+            uint32_t u = load32_le(bj);
+            uint32_t r = u;
+            uint32_t x = r;
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint32_t x = bl[i] ^ k1[i];
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            store32_le(uu____0 + i * (uint32_t)4U, bl[i]););
         }
       }
     }
@@ -409,34 +375,28 @@ salsa20_decrypt(
         salsa20_core(k1, ctx, nb);
         {
           uint32_t bl[16U] = { 0U };
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint8_t *bj = plain + i * (uint32_t)4U;
-              uint32_t u = load32_le(bj);
-              uint32_t r = u;
-              uint32_t x = r;
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              uint32_t *os = bl;
-              uint32_t x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-            {
-              store32_le(plain + i * (uint32_t)4U, bl[i]);
-            }
-          }
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint8_t *bj = plain + i * (uint32_t)4U;
+            uint32_t u = load32_le(bj);
+            uint32_t r = u;
+            uint32_t x = r;
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            uint32_t *os = bl;
+            uint32_t x = bl[i] ^ k1[i];
+            os[i] = x;);
+          KRML_MAYBE_FOR16(i,
+            (uint32_t)0U,
+            (uint32_t)16U,
+            (uint32_t)1U,
+            store32_le(plain + i * (uint32_t)4U, bl[i]););
           memcpy(uu____2, plain, rem * sizeof (uint8_t));
         }
       }
@@ -460,30 +420,26 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
   uint32_t r6;
   uint32_t r7;
   uint32_t res[8];
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      uint32_t *os = k32;
-      uint8_t *bj = key + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-    {
-      uint32_t *os = n32;
-      uint8_t *bj = n + i * (uint32_t)4U;
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
   k0 = k32;
   k1 = k32 + (uint32_t)4U;
   ctx[0U] = (uint32_t)0x61707865U;
@@ -510,13 +466,11 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
   res[5U] = r5;
   res[6U] = r6;
   res[7U] = r7;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
-      store32_le(out + i * (uint32_t)4U, res[i]);
-    }
-  }
+  KRML_MAYBE_FOR8(i,
+    (uint32_t)0U,
+    (uint32_t)8U,
+    (uint32_t)1U,
+    store32_le(out + i * (uint32_t)4U, res[i]););
 }
 
 void

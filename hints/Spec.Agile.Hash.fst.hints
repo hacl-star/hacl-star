@@ -90,7 +90,7 @@
         "typing_tok_Spec.Blake2.Blake2B@tok"
       ],
       0,
-      "2cc63b4c5ffe32cc0e487ad0e893acde"
+      "e92377a30d6b6db4907a451efd86e32c"
     ],
     [
       "Spec.Agile.Hash.update",
@@ -175,22 +175,22 @@
         "refinement_interpretation_Tm_refine_313945d6e5dd9a1523b4f94bb56574eb",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_550847d58e6a38975ad7c78d957daabe",
         "refinement_interpretation_Tm_refine_778cda52ca3898c9d0220c148d4775e7",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.v",
-        "typing_Spec.Blake2.wt", "typing_Spec.Hash.Definitions.block_length",
-        "typing_Spec.Hash.Definitions.extra_state_int_type",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_Lib.IntTypes.v", "typing_Spec.Blake2.wt",
+        "typing_Spec.Hash.Definitions.block_length",
         "typing_Spec.Hash.Definitions.word_length",
         "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U128@tok",
+        "typing_tok_Lib.IntTypes.U64@tok",
         "typing_tok_Spec.Blake2.Blake2S@tok",
         "typing_tok_Spec.Hash.Definitions.Blake2B@tok",
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok"
       ],
       0,
-      "75b897600605df1c4d5ca99733b64590"
+      "7f545918d5f2123514ab866de08504b6"
     ],
     [
       "Spec.Agile.Hash.update_multi",
@@ -218,7 +218,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "04ff001b92cb3707be7530161ac2a28f"
+      "6f5189c0d7ea9ec0a88f85eb5b0a10ba"
     ],
     [
       "Spec.Agile.Hash.hash",
@@ -239,7 +239,7 @@
         "typing_Spec.Hash.Definitions.hash_word_length"
       ],
       0,
-      "81e2526dd7d82e077764f2ef110e9117"
+      "b0ea3faeebf695194231309debb4fc31"
     ],
     [
       "Spec.Agile.Hash.hash",
@@ -251,7 +251,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "Spec.Blake2_pretyping_db784d5da91640e63403e359daacba94",
-        "constructor_distinct_Lib.IntTypes.S16",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S64",
         "constructor_distinct_Lib.IntTypes.S8",
@@ -281,6 +281,8 @@
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.is_blake",
+        "equation_Spec.Hash.Definitions.is_md",
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.to_blake_alg",
         "equation_Spec.Hash.Definitions.word_length",
@@ -296,10 +298,11 @@
         "typing_FStar.Seq.Base.length",
         "typing_Spec.Hash.Definitions.hash_length",
         "typing_Spec.Hash.Definitions.hash_word_length",
+        "typing_Spec.Hash.Definitions.is_md",
         "typing_Spec.Hash.Definitions.word_length", "unit_typing"
       ],
       0,
-      "3ceb7eb239b6bd062a90f2719ff0b488"
+      "54b30d3649f44e9a5af86b9194bcf2ed"
     ]
   ]
 ]

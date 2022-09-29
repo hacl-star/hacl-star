@@ -307,13 +307,9 @@ Hacl_FFDHE_ffdhe_secret_to_public_precomp(
     {
       uint8_t g = (uint8_t)0U;
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)1U; i++)
-        {
-          uint8_t *os = &g;
-          uint8_t x = Hacl_Impl_FFDHE_Constants_ffdhe_g2[i];
-          os[i] = x;
-        }
+        uint8_t *os = &g;
+        uint8_t x = Hacl_Impl_FFDHE_Constants_ffdhe_g2[0U];
+        os[0U] = x;
       }
       Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)1U, &g, g_n);
       KRML_CHECK_SIZE(sizeof (uint64_t), nLen);

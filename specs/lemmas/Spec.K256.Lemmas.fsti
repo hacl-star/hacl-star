@@ -9,6 +9,10 @@ module LM = Lib.NatMod
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
 
+val lemma_proj_aff_id (p:aff_point) :
+  Lemma (to_aff_point (to_proj_point p) == p)
+
+
 val aff_point_at_inf_lemma (p:aff_point) :
   Lemma (aff_point_add p aff_point_at_inf = p)
 

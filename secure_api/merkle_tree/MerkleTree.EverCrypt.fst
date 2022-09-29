@@ -29,6 +29,7 @@ noextract let _align = ()
 #push-options "--z3rlimit 150 --ifuel 1"
 let mt_sha256_compress src1 src2 dst =
   let hash_size = 32ul in
+  [@inline_let]
   let hash_alg = Spec.Hash.Definitions.SHA2_256 in
   let hh0 = HST.get () in
   HST.push_frame ();
@@ -38,7 +39,7 @@ let mt_sha256_compress src1 src2 dst =
   B.blit src2 0ul cb 32ul hash_size;
 
   // ONLY WORKS BECAUSE hash_alg is inline_for_extraction and is known to be SHA2_256
-  let st = EHS.alloca hash_alg in
+  let st = EHS.create_in hash_alg HyperStack.root in
   EHS.init #(Ghost.hide hash_alg) st;
   let hh1 = HST.get () in
   assert (S.equal (S.append
@@ -64,6 +65,7 @@ let mt_sha256_compress src1 src2 dst =
                   (MTH.sha256_compress
                     (Rgl?.r_repr(hreg hash_size) hh0 src1)
                     (Rgl?.r_repr(hreg hash_size) hh0 src2)));
+  EHS.free st;
   HST.pop_frame ();
 
   let hh4 = HST.get () in

@@ -38,6 +38,10 @@ let rec lemma_pow_nat_is_pow a b =
     () end
 
 
+let lemma_pow_zero b =
+  lemma_pow_unfold 0 b
+
+
 let lemma_pow_one b =
   let k = mk_nat_comm_monoid in
   LE.lemma_pow_one k b;

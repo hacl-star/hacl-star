@@ -41,6 +41,7 @@ extern "C" {
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "Hacl_Hash_MD5.h"
+#include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
@@ -215,9 +216,11 @@ Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
 void
 EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
-void
+uint64_t EverCrypt_Hash_Incremental_max_input_len64(Spec_Hash_Definitions_hash_alg a);
+
+EverCrypt_Error_error_code
 EverCrypt_Hash_Incremental_update(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s,
   uint8_t *data,
   uint32_t len
 );

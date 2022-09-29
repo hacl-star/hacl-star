@@ -1,5 +1,5 @@
 [
-  "0H“ï\u0007ÒŒY´˜,ÝªRQF",
+  "vN\u000b_úÙ,Õ¥¡ü\u00027½éÓ",
   [
     [
       "Lib.NatMod.mk_nat_comm_monoid",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "39823b193d24ede4fb87fb93b4987ebc"
+      "f6274d2e946955bae91ebd9571bf3d08"
     ],
     [
       "Lib.NatMod.pow",
@@ -28,7 +28,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c30359f3ee78cfd56dd50527e504a1ba"
+      "ff7c487613b421df5498a5e654ba49c6"
     ],
     [
       "Lib.NatMod.lemma_pow_unfold",
@@ -41,7 +41,16 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "b4435ffe0ef12588cce73400aa1dd0ec"
+      "4639280a77895fdd13a942fb7eb86448"
+    ],
+    [
+      "Lib.NatMod.lemma_pow_zero",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "7350585a4bb95c86474c849d45fd0204"
     ],
     [
       "Lib.NatMod.lemma_pow_add",
@@ -54,7 +63,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d8314630ec56df7a86e2ce2966148893"
+      "2626587aa9cd0b9947d123592b793eca"
     ],
     [
       "Lib.NatMod.lemma_pow_mul",
@@ -67,7 +76,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "984dae601b35b33864b90dbaed3ebc47"
+      "a095bf5bb4a734aeda5a4271173236a8"
     ],
     [
       "Lib.NatMod.lemma_pow_double",
@@ -80,7 +89,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "0b88811b9831429e1381602270514bdb"
+      "33d6716df30be44d7d2ec5e4e822f829"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_base",
@@ -92,7 +101,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "b1baba44fdc0c4df06052cac8e113b6a"
+      "e80a8c2c028f0903c3eb2c5b810715d3"
     ],
     [
       "Lib.NatMod.one_mod",
@@ -106,7 +115,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "fba9ef2d16ea7cebfe8fe68897de23f1"
+      "6a7bf8e150ebac59afc9ccfc95a43780"
     ],
     [
       "Lib.NatMod.mul_mod",
@@ -120,7 +129,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "c3732ce79dd4b030f986ac4561f0d3a7"
+      "d94038370f02a77ff5fc45ff3d13891c"
     ],
     [
       "Lib.NatMod.add_mod",
@@ -134,7 +143,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "ba801a63d1138d3c142ecfa430a9f5eb"
+      "17b82a26886e396ad25408fc65f2b41d"
     ],
     [
       "Lib.NatMod.sub_mod",
@@ -148,7 +157,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "3e9ffa6f28057fd69824ff11b137f7f7"
+      "65f83df5fae8a86463b61a58bca3ef99"
     ],
     [
       "Lib.NatMod.lemma_pow_mod",
@@ -160,7 +169,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "e07bb4aaa5ae2e39abc7e1c9fc329583"
+      "c9b17cc97d56de88366d17096ef10adf"
     ],
     [
       "Lib.NatMod.lemma_pow_nat_mod_is_pow",
@@ -172,7 +181,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "708abff4de4918c14e95703fd3525375"
+      "a3b67955cd3484f34378754efc76a4c5"
     ],
     [
       "Lib.NatMod.lemma_add_mod_one",
@@ -184,7 +193,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "7d475bfed3c6933cd04125b3665664f4"
+      "de75525456b013e8146b04ba1ae3f051"
     ],
     [
       "Lib.NatMod.inv_mod",
@@ -192,12 +201,21 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.prime",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb"
       ],
       0,
-      "c370c57ca6aa598c561d299c08a5fa94"
+      "6d3b85cac80b5b48087fe0043b452c67"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_prime",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "2933573d0991aa07449fcb3967a44c9c"
     ],
     [
       "Lib.NatMod.lemma_div_mod_prime_one",
@@ -205,11 +223,20 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.prime",
-        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb"
       ],
       0,
-      "2264bc192a30587712f54962d3bd6b6f"
+      "17846faf74e40ac448c0254c8a7face6"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_prime_cancel",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "094eb86c87bf40e8d398f8f6a77a32e0"
     ],
     [
       "Lib.NatMod.lemma_div_mod_eq_mul_mod",
@@ -228,7 +255,7 @@
         "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
       ],
       0,
-      "6022a9a38d958a051bd5f189e53d9a4a"
+      "630f50e8907c9428c8d8d0b55a9b6eb2"
     ]
   ]
 ]
