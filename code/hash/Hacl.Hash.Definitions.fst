@@ -182,7 +182,7 @@ let update_st (i:impl) =
         Spec.Agile.Hash.update (get_alg i) (as_seq h0 s, v) (B.as_seq h0 block)))
 
 noextract inline_for_extraction
-let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
+let pad_st (a: md_alg) = len:len_t a -> dst:B.buffer uint8 ->
   ST.Stack unit
     (requires (fun h ->
       len_v a len <= max_input_length a /\
