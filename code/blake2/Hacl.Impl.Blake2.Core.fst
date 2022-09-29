@@ -250,7 +250,7 @@ let store_row32 #a #m b r =
   Lib.Sequence.eq_intro (as_seq h2 b) (Spec.load_row (as_seq h2 b));
   assert (Spec.load_row (as_seq  h2 b) ==
           Lib.ByteSequence.uints_from_bytes_le (as_seq h1 b8));
-  lemma_uints_to_from_bytes_le_preserves_value (row_v h0 r);
+  Lib.ByteSequence.lemma_uints_to_from_bytes_le_preserves_value (row_v h0 r);
   pop_frame()
 
 noextract inline_for_extraction
