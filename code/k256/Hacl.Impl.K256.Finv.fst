@@ -15,6 +15,7 @@ module LSeq = Lib.Sequence
 module S = Spec.K256
 module SI = Hacl.Spec.K256.Finv
 
+module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -34,9 +35,9 @@ let refl (a:LSeq.lseq uint64 5{linv a}) : GTot S.felem =
 
 
 inline_for_extraction noextract
-let mk_to_k256_prime_concrete_ops : BE.to_concrete_ops U64 5ul 0ul = {
-  BE.t_spec = S.felem;
-  BE.concr_ops = SI.mk_nat_mod_concrete_ops;
+let mk_to_k256_prime_comm_monoid : BE.to_comm_monoid U64 5ul 0ul = {
+  BE.a_spec = S.felem;
+  BE.comm_monoid = SI.nat_mod_comm_monoid;
   BE.linv_ctx = linv_ctx;
   BE.linv = linv;
   BE.refl = refl;
@@ -44,18 +45,24 @@ let mk_to_k256_prime_concrete_ops : BE.to_concrete_ops U64 5ul 0ul = {
 
 
 inline_for_extraction noextract
-val mul_mod : BE.lmul_st U64 5ul 0ul mk_to_k256_prime_concrete_ops
+val one_mod : BE.lone_st U64 5ul 0ul mk_to_k256_prime_comm_monoid
+let one_mod ctx one = make_u52_5 one (u64 1, u64 0, u64 0, u64 0, u64 0)
+
+
+inline_for_extraction noextract
+val mul_mod : BE.lmul_st U64 5ul 0ul mk_to_k256_prime_comm_monoid
 let mul_mod ctx x y xy = fmul xy x y
 
 
 inline_for_extraction noextract
-val sqr_mod : BE.lsqr_st U64 5ul 0ul mk_to_k256_prime_concrete_ops
+val sqr_mod : BE.lsqr_st U64 5ul 0ul mk_to_k256_prime_comm_monoid
 let sqr_mod ctx x xx = fsqr xx x
 
 
 inline_for_extraction noextract
 let mk_k256_prime_concrete_ops : BE.concrete_ops U64 5ul 0ul = {
-  BE.to = mk_to_k256_prime_concrete_ops;
+  BE.to = mk_to_k256_prime_comm_monoid;
+  BE.lone = one_mod;
   BE.lmul = mul_mod;
   BE.lsqr = sqr_mod;
 }
@@ -69,7 +76,9 @@ val fsquare_times_in_place (out:felem) (b:size_t) : Stack unit
 
 [@CInline]
 let fsquare_times_in_place out b =
-  BE.lexp_pow_in_place 5ul 0ul mk_k256_prime_concrete_ops (null uint64) out b
+  let h0 = ST.get () in
+  SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (feval h0 out) (v b);
+  BE.lexp_pow2_in_place 5ul 0ul mk_k256_prime_concrete_ops (null uint64) out b
 
 
 val fsquare_times (out a:felem) (b:size_t) : Stack unit
@@ -81,6 +90,8 @@ val fsquare_times (out a:felem) (b:size_t) : Stack unit
 
 [@CInline]
 let fsquare_times out a b =
+  let h0 = ST.get () in
+  SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (feval h0 a) (v b);
   BE.lexp_pow2 5ul 0ul mk_k256_prime_concrete_ops (null uint64) a b out
 
 

@@ -36,6 +36,11 @@ let verify_all_valid_hb sb hb a' r' =
   let exp_d = create 20ul (u64 0) in
   PM.point_negate_mul_double_g_vartime exp_d sb hb a';
   let b = Hacl.Impl.Ed25519.PointEqual.point_equal exp_d r' in
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.point_equal_lemma
+    (F51.point_eval h0 exp_d)
+    (Spec.Ed25519.point_negate_mul_double_g (as_seq h0 sb) (as_seq h0 hb) (F51.point_eval h0 a'))
+    (F51.point_eval h0 r');
   pop_frame ();
   b
 
