@@ -132,6 +132,8 @@ let exp_fw_lemma #t k a bBits b l =
 
   exp_fw_lemma_loop #t k a bBits b l acc0 (bBits / l)
 
+// Double exponentiation [a1^b1 `mul` a2^b2]
+//-------------------------------------------
 
 val exp_double_fw_lemma_loop: #t:Type -> k:concrete_ops t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
@@ -175,3 +177,68 @@ let exp_double_fw_lemma #t k a1 bBits b1 a2 b2 l =
       k.mul acc_a1 acc_a2 end in
 
   exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 (bBits / l)
+
+// [a1^b1 `mul` a2^b2 `mul` a3^b3 `mul` a4^b4]
+//----------------------------------------------
+
+val exp_four_fw_lemma_loop:
+    #t:Type -> k:concrete_ops t
+  -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits}
+  -> a3:t -> b3:nat{b3 < pow2 bBits}
+  -> a4:t -> b4:nat{b4 < pow2 bBits}
+  -> l:pos -> acc0:t -> i:nat{i <= bBits / l} ->
+  Lemma
+   (let acc = Loops.repeati i (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 in
+    let accs = Loops.repeati i
+      (S.exp_four_fw_f
+        k.to.comm_monoid (k.to.refl a1) bBits b1
+        (k.to.refl a2) b2 (k.to.refl a3) b3 (k.to.refl a4) b4 l) (k.to.refl acc0) in
+    k.to.refl acc == accs)
+
+let rec exp_four_fw_lemma_loop #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l acc0 i =
+  let f0 = exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l in
+  let f1 = S.exp_four_fw_f k.to.comm_monoid (k.to.refl a1) bBits b1
+    (k.to.refl a2) b2 (k.to.refl a3) b3 (k.to.refl a4) b4 l in
+
+  if i = 0 then begin
+    Loops.eq_repeati0 i f0 acc0;
+    Loops.eq_repeati0 i f1 (k.to.refl acc0) end
+  else begin
+    let acc1 = Loops.repeati (i - 1) f0 acc0 in
+    let bits_l1 = S.get_bits_l bBits b1 l (i - 1) in
+    let bits_l2 = S.get_bits_l bBits b2 l (i - 1) in
+    let bits_l3 = S.get_bits_l bBits b3 l (i - 1) in
+    let bits_l4 = S.get_bits_l bBits b4 l (i - 1) in
+    exp_four_fw_lemma_loop #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l acc0 (i - 1);
+    Loops.unfold_repeati i f0 acc0 (i - 1);
+    Loops.unfold_repeati i f1 (k.to.refl acc0) (i - 1);
+    exp_pow2_lemma k acc1 l;
+    pow_lemma k a1 bits_l1;
+    pow_lemma k a2 bits_l2;
+    pow_lemma k a3 bits_l3;
+    pow_lemma k a4 bits_l4 end
+
+
+let exp_four_fw_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
+  let acc0 =
+    if bBits % l = 0 then one ()
+    else begin
+      let bits_c1 = S.get_ith_lbits bBits b1 (bBits / l * l) l in
+      let bits_c2 = S.get_ith_lbits bBits b2 (bBits / l * l) l in
+      let bits_c3 = S.get_ith_lbits bBits b3 (bBits / l * l) l in
+      let bits_c4 = S.get_ith_lbits bBits b4 (bBits / l * l) l in
+      let acc_a1 = pow k a1 bits_c1 in
+      let acc_a2 = pow k a2 bits_c2 in
+      let acc_a3 = pow k a3 bits_c3 in
+      let acc_a4 = pow k a4 bits_c4 in
+      pow_lemma k a1 bits_c1;
+      pow_lemma k a2 bits_c2;
+      pow_lemma k a3 bits_c3;
+      pow_lemma k a4 bits_c4;
+      let acc = k.mul acc_a1 acc_a2 in
+      let acc = k.mul acc acc_a3 in
+      let acc = k.mul acc acc_a4 in
+      acc end in
+
+  exp_four_fw_lemma_loop #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l acc0 (bBits / l)

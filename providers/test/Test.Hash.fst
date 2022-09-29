@@ -47,7 +47,7 @@ let test_incremental_api (): St unit =
   assert (S.seen HI.evercrypt_hash SHA2_256 h0 st `Seq.equal` Seq.empty);
 
   assert_norm (4 < pow2 61);
-  HI.update (G.hide SHA2_256) st b1 4ul;
+  let EverCrypt.Error.Success = HI.update (G.hide SHA2_256) st b1 4ul in
   let h1 = ST.get () in
   assert (HI.hashed h1 st `Seq.equal` (Seq.append Seq.empty (B.as_seq h0 b1)));
   Seq.append_empty_l (B.as_seq h0 b1);
@@ -55,7 +55,7 @@ let test_incremental_api (): St unit =
 
   assert (Seq.length (Ghost.reveal (Ghost.hide (B.as_seq h0 b1))) = 4);
   assert_norm (8 < pow2 61);
-  HI.update (G.hide SHA2_256) st b2 4ul;
+  let EverCrypt.Error.Success = HI.update (G.hide SHA2_256) st b2 4ul in
   let h2 = ST.get () in
   assert (HI.hashed h2 st `Seq.equal` (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2)));
 

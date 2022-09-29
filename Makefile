@@ -76,19 +76,8 @@ endif
 endif
 endif
 
-# Backwards-compat, remove
-ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
-endif
-
 ifeq (,$(NOOPENSSLCHECK))
-ifeq (,$(OPENSSL_HOME))
-  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
-endif
-
-ifeq (,$(OPENSSL_HOME)/libcrypto.a)
-  $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
-endif
+include Makefile.openssl
 endif
 
 ifneq (,$(HACL_HOME))
@@ -130,7 +119,11 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-hpke vale_testInline test-wasm test-bindings-ocaml
+test-unstaged: test-handwritten test-c test-ml test-hpke test-wasm test-bindings-ocaml
+
+ifeq ($(shell uname -m),x86_64)
+test-unstaged: vale_testInline
+endif
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -283,7 +276,7 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:*' \
-	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
+	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -519,9 +512,13 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 	$< > $@
 
+dist/vale/%-ppc64le.S: obj/vale-%-ppc64le.exe | dist/vale
+	$< > $@
+
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
+obj/vale-sha256-ppc64le.exe: vale/code/crypto/sha/ShaMainPPC64LE.ml
 obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
@@ -549,7 +546,7 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
-  dist/vale/curve25519-inline.h
+  dist/vale/curve25519-inline.h dist/vale/sha256-ppc64le.S
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
@@ -616,7 +613,8 @@ REQUIRED_BUNDLES = \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   $(VALE_BUNDLES) \
   -bundle Hacl.Impl.Poly1305.Fields \
-  -bundle 'EverCrypt.Spec.*'
+  -bundle 'EverCrypt.Spec.*' \
+  -bundle EverCrypt.Error
 
 REQUIRED_DROP = \
   -drop EverCrypt.TargetConfig
@@ -764,9 +762,6 @@ dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
 # Must appear early on because of the left-to-right semantics of -bundle flags.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
 
-# Doesn't work in WASM because one function has some heap allocation
-dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
-
 # Doesn't work in WASM because un-materialized externals for AES128
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
 
@@ -797,10 +792,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 dist/wasm/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE = $(BLAKE2_BUNDLE_BASE) \
-  -bundle 'Hacl.Hash.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2b_256,Hacl.Blake2b_256' \
-  -bundle 'Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256' \
-  -bundle 'Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
@@ -1013,6 +1004,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
+	  -add-include '"libintvector.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
@@ -1038,17 +1030,14 @@ compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmlli
 # C tests (from F* files) #
 ###########################
 
-ifeq ($(OS),Windows_NT)
-OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
-LDFLAGS		+= -lbcrypt
-endif
-LDFLAGS 	+= -L$(OPENSSL_HOME)
-
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
-  -I$(OPENSSL_HOME)/include \
-  -O3 -march=native -mtune=native -I$(KRML_HOME)/krmllib/dist/minimal \
+  -O3 -I$(KRML_HOME)/krmllib/dist/minimal \
   -I$(KRML_HOME)/include -Idist/gcc-compatible
+
+ifneq ($(shell uname -m),arm64)
+CFLAGS += -march=native -mtune=native
+endif
 
 # The C test files need the extracted headers to compile
 dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
@@ -1065,14 +1054,6 @@ dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
-
-ifeq ($(OS),Windows_NT)
-  LD_EXTRA = PATH="$(OPENSSL_HOME):$(shell cygpath -u $$(ocamlfind c -where))/../stublibs:$$PATH"
-else ifeq ($(shell uname -s),Darwin)
-  LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
-else
-  LD_EXTRA = LD_LIBRARY_PATH="$(OPENSSL_HOME)"
-endif
 
 .PHONY: %.test
 %.test: %.exe

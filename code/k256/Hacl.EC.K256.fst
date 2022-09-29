@@ -228,7 +228,7 @@ Comment "Write the point at infinity (additive identity) in `p`.
 val mk_point_at_inf: p:P.point -> Stack unit
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    P.point_inv h1 p /\ P.point_eval h1 p == S.point_at_inf)
+    P.point_inv h1 p /\ S.to_aff_point (P.point_eval h1 p) == S.aff_point_at_inf)
 
 let mk_point_at_inf p =
   PM.make_point_at_inf p
@@ -322,7 +322,8 @@ val point_mul: scalar:lbuffer uint8 32ul -> p:P.point -> out:P.point -> Stack un
     BSeq.nat_from_bytes_be (as_seq h scalar) < S.q) // it's still safe to invoke this function with scalar >= S.q
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     P.point_inv h1 out /\
-    P.point_eval h1 out == S.point_mul (BSeq.nat_from_bytes_be (as_seq h0 scalar)) (P.point_eval h0 p))
+    S.to_aff_point (P.point_eval h1 out) ==
+    S.to_aff_point (S.point_mul (BSeq.nat_from_bytes_be (as_seq h0 scalar)) (P.point_eval h0 p)))
 
 let point_mul scalar p out =
   push_frame ();

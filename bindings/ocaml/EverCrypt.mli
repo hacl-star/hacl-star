@@ -14,6 +14,7 @@ module Error : sig
     | AuthenticationFailure
     | InvalidIVLength
     | DecodeError
+    | MaximumLengthExceeded
   type 'a result =
     | Success of 'a
     | Error of error_code
@@ -114,6 +115,8 @@ module Hash : sig
     When using the streaming interface, the total number of bytes passed through {!update} must not exceed
     - 2{^61} for SHA-224, SHA-256, and the legacy algorithms
     - 2{^125} for SHA-384 and SHA-512
+    - 2{^64} for BLAKE2s
+    - 2{^128} for BLAKE2b
 *)
 
   type t
