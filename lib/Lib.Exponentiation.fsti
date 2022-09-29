@@ -17,12 +17,39 @@ class comm_monoid (t:Type) = {
   lemma_mul_comm: a:t -> b:t -> Lemma (mul a b == mul b a)
   }
 
+
+inline_for_extraction
+class abelian_group (t:Type) = {
+  cm:comm_monoid t;
+  inverse: t -> t;
+  lemma_inverse: a:t -> Lemma (mul (inverse a) a == one)
+  }
+
 let sqr (#t:Type) (k:comm_monoid t) (a:t) : t = mul a a
 
+
+[@(strict_on_arguments [3])]
 let rec pow (#t:Type) (k:comm_monoid t) (x:t) (n:nat) : t =
   if n = 0 then one
   else mul x (pow k x (n - 1))
 
+let pow_neg (#t:Type) (k:abelian_group t) (x:t) (n:int) : t =
+  if n >= 0 then pow k.cm x n else k.inverse (pow k.cm x (- n))
+
+// Properties of an inverse function
+//---------------------------------
+
+val lemma_inverse_one: #t:Type -> k:abelian_group t ->
+  Lemma (inverse k.cm.one == k.cm.one)
+
+val lemma_inverse_id: #t:Type -> k:abelian_group t -> a:t ->
+  Lemma (inverse (inverse a) == a)
+
+val lemma_inverse_mul: #t:Type -> k:abelian_group t -> a:t -> b:t ->
+  Lemma (inverse (cm.mul a b) == cm.mul (inverse a) (inverse b))
+
+// Properties of an exponentiation function
+//--------------------------------------
 
 val lemma_pow0: #t:Type -> k:comm_monoid t -> x:t -> Lemma (pow k x 0 == one)
 
@@ -46,6 +73,26 @@ val lemma_pow_mul_base: #t:Type -> k:comm_monoid t -> a:t -> b:t -> n:nat ->
 val lemma_pow_double: #t:Type -> k:comm_monoid t -> x:t -> b:nat ->
   Lemma (pow k (mul x x) b == pow k x (b + b))
 
+
+val lemma_inverse_pow: #t:Type -> k:abelian_group t -> x:t -> n:nat ->
+  Lemma (inverse (pow cm x n) == pow cm (inverse x) n)
+
+val lemma_pow_neg_one: #t:Type -> k:abelian_group t -> n:int ->
+  Lemma (pow_neg k cm.one n == cm.one)
+
+val lemma_pow_neg_add: #t:Type -> k:abelian_group t -> x:t -> n:int -> m:int ->
+  Lemma (cm.mul (pow_neg k x n) (pow_neg k x m) == pow_neg k x (n + m))
+
+val lemma_pow_neg_mul: #t:Type -> k:abelian_group t -> x:t -> n:int -> m:int ->
+  Lemma (pow_neg k (pow_neg k x n) m == pow_neg k x (n * m))
+
+val lemma_pow_neg_mul_base: #t:Type -> k:abelian_group t -> a:t -> b:t -> n:int ->
+  Lemma (cm.mul (pow_neg k a n) (pow_neg k b n) == pow_neg k (cm.mul a b) n)
+
+val lemma_pow_neg_double: #t:Type -> k:abelian_group t -> x:t -> b:int ->
+  Lemma (pow_neg k (cm.mul x x) b == pow_neg k x (b + b))
+
+//-----------------------------
 
 let get_ith_bit (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i < bBits}) =
   b / pow2 i % 2
@@ -167,27 +214,86 @@ val exp_fw_lemma: #t:Type -> k:comm_monoid t -> a:t -> bBits:nat -> b:nat{b < po
   Lemma (exp_fw k a bBits b l == pow k a b)
 
 
-// double exponentiation
+///  Multi-Exponentiation
+
+// Double exponentiation [a1^b1 `mul` a2^b2]
+//-------------------------------------------
+
 let exp_double_fw_f (#t:Type) (k:comm_monoid t)
   (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
   (a2:t) (b2:nat{b2 < pow2 bBits})
   (l:pos) (i:nat{i < bBits / l}) (acc:t) : t
  =
-  let acc1 = exp_fw_f k a1 bBits b1 l i acc in
-  mul_acc_pow_a_bits_l k a2 bBits b2 l i acc1
+  let acc1 = exp_fw_f k a2 bBits b2 l i acc in
+  mul_acc_pow_a_bits_l k a1 bBits b1 l i acc1
 
 let exp_double_fw_acc0 (#t:Type) (k:comm_monoid t)
-  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits}) (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{bBits % l <> 0}) : t =
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{bBits % l <> 0}) : t =
   let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
   let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
   mul acc_a1 acc_a2
 
-let exp_double_fw (#t:Type) (k:comm_monoid t) (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits}) (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t =
+let exp_double_fw (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t =
   let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
-  let res = Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
-  res
+  Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0
 
 val exp_double_fw_lemma: #t:Type -> k:comm_monoid t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
   -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos ->
   Lemma (exp_double_fw k a1 bBits b1 a2 b2 l == mul (pow k a1 b1) (pow k a2 b2))
+
+
+// [a1^b1 `mul` a2^b2 `mul` a3^b3 `mul` a4^b4]
+//----------------------------------------------
+
+let exp_four_fw_f (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits})
+  (a3:t) (b3:nat{b3 < pow2 bBits})
+  (a4:t) (b4:nat{b4 < pow2 bBits})
+  (l:pos) (i:nat{i < bBits / l}) (acc:t) : t
+ =
+  let acc = exp_fw_f k a4 bBits b4 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a3 bBits b3 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a2 bBits b2 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a1 bBits b1 l i acc in
+  acc
+
+let exp_four_fw_acc0 (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits})
+  (a3:t) (b3:nat{b3 < pow2 bBits})
+  (a4:t) (b4:nat{b4 < pow2 bBits})
+  (l:pos{bBits % l <> 0}) : t =
+  let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
+  let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
+  let acc_a3 = exp_fw_acc0 k a3 bBits b3 l in
+  let acc_a4 = exp_fw_acc0 k a4 bBits b4 l in
+  let acc = mul acc_a1 acc_a2 in
+  let acc = mul acc acc_a3 in
+  let acc = mul acc acc_a4 in
+  acc
+
+let exp_four_fw (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits})
+  (a3:t) (b3:nat{b3 < pow2 bBits})
+  (a4:t) (b4:nat{b4 < pow2 bBits})
+  (l:pos) : t =
+  let acc0 =
+    if bBits % l = 0 then one
+    else exp_four_fw_acc0 k a1 bBits b1 a2 b2 a3 b3 a4 b4 l in
+  Loops.repeati (bBits / l)
+    (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0
+
+val exp_four_fw_lemma: #t:Type -> k:comm_monoid t
+  -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits}
+  -> a3:t -> b3:nat{b3 < pow2 bBits}
+  -> a4:t -> b4:nat{b4 < pow2 bBits}
+  -> l:pos ->
+  Lemma (exp_four_fw k a1 bBits b1 a2 b2 a3 b3 a4 b4 l ==
+    mul (mul (mul (pow k a1 b1) (pow k a2 b2)) (pow k a3 b3)) (pow k a4 b4))
