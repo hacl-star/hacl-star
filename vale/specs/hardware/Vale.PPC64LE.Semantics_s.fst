@@ -48,10 +48,14 @@ type ins =
   | Vsel         : dst:vec -> src1:vec -> src2:vec -> sel:vec -> ins
   | Load128      : dst:vec -> base:reg -> offset:reg -> ins
   | Store128     : src:vec -> base:reg -> offset:reg -> ins
-  | Load128Word4 : dst:vec -> base:reg -> offset:reg -> ins
-  | Store128Word4: src:vec -> base:reg -> offset:reg -> ins
-  | Load128Byte16: dst:vec -> base:reg -> offset:reg -> ins
-  | Store128Byte16: src:vec -> base:reg -> offset:reg -> ins
+  | Load128Word4 : dst:vec -> base:reg -> ins
+  | Load128Word4Index : dst:vec -> base:reg -> offset:reg -> ins
+  | Store128Word4: src:vec -> base:reg -> ins
+  | Store128Word4Index: src:vec -> base:reg -> offset:reg -> ins
+  | Load128Byte16: dst:vec -> base:reg -> ins
+  | Load128Byte16Index: dst:vec -> base:reg -> offset:reg -> ins
+  | Store128Byte16: src:vec -> base:reg -> ins
+  | Store128Byte16Index: src:vec -> base:reg -> offset:reg -> ins
   | Vshasigmaw0  : dst:vec -> src:vec -> ins
   | Vshasigmaw1  : dst:vec -> src:vec -> ins
   | Vshasigmaw2  : dst:vec -> src:vec -> ins
@@ -289,6 +293,9 @@ let valid_mem (m:maddr) (s:state) : bool =
 
 let valid_mem128 (r:reg) (i:reg) (s:state) : bool =
   valid_addr128 (eval_reg r s + eval_reg i s) (heap_get s.ms_heap)
+
+let valid_mem128_reg (r:reg) (s:state) : bool =
+  valid_addr128 (eval_reg r s) (heap_get s.ms_heap)
 
 let valid_mem128' (m:maddr) (s:state) : bool =
   valid_maddr_offset128 m.offset && valid_addr128 (eval_maddr m s) (heap_get s.ms_heap)
@@ -546,21 +553,43 @@ let eval_ins (ins:ins) : st unit =
     check (valid_mem128 base offset);;
     set (update_mem128 (eval_reg base s + eval_reg offset s) (eval_vec src s) s)
   
-  | Load128Word4 dst base offset ->
+  | Load128Word4 dst base ->
+    check (valid_mem128_reg base);;
+    let src_q = eval_mem128 (eval_reg base s) s in
+    update_vec dst (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0)
+  
+  | Load128Word4Index dst base offset ->
+    check (fun s -> offset <> 0);;
     check (valid_mem128 base offset);;
     let src_q = eval_mem128 (eval_reg base s + eval_reg offset s) s in
     update_vec dst (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0)
 
-  | Store128Word4 src base offset ->
+  | Store128Word4 src base ->
+    check (valid_mem128_reg base);;
+    let src_q = eval_vec src s in
+    set (update_mem128 (eval_reg base s) (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0) s)
+  
+  | Store128Word4Index src base offset ->
+    check (fun s -> offset <> 0);;
     check (valid_mem128 base offset);;
     let src_q = eval_vec src s in
     set (update_mem128 (eval_reg base s + eval_reg offset s) (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0) s)
 
-  | Load128Byte16 dst base offset ->
+  | Load128Byte16 dst base ->
+    check (valid_mem128_reg base);;
+    update_vec dst (reverse_bytes_quad32 (eval_mem128 (eval_reg base s) s))
+  
+  | Load128Byte16Index dst base offset ->
+    check (fun s -> offset <> 0);;
     check (valid_mem128 base offset);;
     update_vec dst (reverse_bytes_quad32 (eval_mem128 (eval_reg base s + eval_reg offset s) s))
   
-  | Store128Byte16 src base offset ->
+  | Store128Byte16 src base ->
+    check (valid_mem128_reg base);;
+    set (update_mem128 (eval_reg base s) (reverse_bytes_quad32 (eval_vec src s)) s)
+  
+  | Store128Byte16Index src base offset ->
+    check (fun s -> offset <> 0);;
     check (valid_mem128 base offset);;
     set (update_mem128 (eval_reg base s + eval_reg offset s) (reverse_bytes_quad32 (eval_vec src s)) s)
   

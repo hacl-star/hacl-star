@@ -124,14 +124,18 @@ let print_ins (ins:ins) (p:printer) =
   | Vsel dst src1 src2 sel -> "  vsel " ^ print_vec_quadruple dst src1 src2 sel false
   | Load128 dst base offset -> "  lvx " ^ print_vec_reg_pair dst offset base false
   | Store128 src base offset -> "  stvx " ^ print_vec_reg_pair src offset base false
-  | Load128Word4 dst base offset -> "  lxvw4x " ^ print_vec_reg_pair dst offset base true
-  | Store128Word4 src base offset -> "  stxvw4x " ^ print_vec_reg_pair src offset base true
-  | Load128Byte16 dst base offset -> "  lxvb16x " ^ print_vec_reg_pair dst offset base true
-  | Store128Byte16 src base offset -> "  stxvb16x " ^ print_vec_reg_pair src offset base true
+  | Load128Word4 dst base -> "  lxvw4x " ^ print_vec_reg_pair dst 0 base true
+  | Load128Word4Index dst base offset -> "  lxvw4x " ^ print_vec_reg_pair dst offset base true
+  | Store128Word4 src base -> "  stxvw4x " ^ print_vec_reg_pair src 0 base true
+  | Store128Word4Index src base offset -> "  stxvw4x " ^ print_vec_reg_pair src offset base true
+  | Load128Byte16 dst base -> "  lxvb16x " ^ print_vec_reg_pair dst 0 base true
+  | Load128Byte16Index dst base offset -> "  lxvb16x " ^ print_vec_reg_pair dst offset base true
+  | Store128Byte16 src base -> "  stxvb16x " ^ print_vec_reg_pair src 0 base true
+  | Store128Byte16Index src base offset -> "  stxvb16x " ^ print_vec_reg_pair src offset base true
   | Vshasigmaw0 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 0 0 false
-  | Vshasigmaw1 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 0 1 false
+  | Vshasigmaw1 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 0 15 false
   | Vshasigmaw2 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 1 0 false
-  | Vshasigmaw3 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 1 1 false
+  | Vshasigmaw3 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 1 15 false
   | Alloc n -> "  subi " ^ print_reg_pair_imm 1 1 n
   | Dealloc n -> "  addi " ^ print_reg_pair_imm 1 1 n
   | StoreStack128 src t offset -> "  stxv " ^ print_vec_mem src ({ address = 1; offset = offset }) true

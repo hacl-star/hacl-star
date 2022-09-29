@@ -519,6 +519,9 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 	$< > $@
 
+dist/vale/%-ppc64le.S: obj/vale-%-ppc64le.exe | dist/vale
+	$< > $@
+
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
@@ -550,7 +553,7 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
-  dist/vale/curve25519-inline.h
+  dist/vale/curve25519-inline.h dist/vale/sha256-ppc64le.S
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)

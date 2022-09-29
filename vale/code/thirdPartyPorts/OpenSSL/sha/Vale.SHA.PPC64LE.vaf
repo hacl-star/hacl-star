@@ -62,7 +62,7 @@ procedure Preamble(ghost ctx_b:buffer128)
     reads
         ctx; memLayout; heap0;
     modifies
-        r9; r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec;
+        r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec;
     requires
         validSrcAddrs128(heap0, ctx,  ctx_b,  2, memLayout, Secret);
     ensures
@@ -88,10 +88,9 @@ procedure Preamble(ghost ctx_b:buffer128)
     let f := hgfe.lo1;
     let g := hgfe.hi2;
     let h := hgfe.hi3;
-    LoadImm64(r9, 0);
     LoadImm64(r10, 16);
-    Load128_word4_buffer(heap0, a_vec, ctx,  r9, Secret, ctx_b, 0);
-    Load128_word4_buffer(heap0, e_vec, ctx, r10, Secret, ctx_b, 1);
+    Load128_word4_buffer(heap0, a_vec, ctx, Secret, ctx_b, 0);
+    Load128_word4_buffer_index(heap0, e_vec, ctx, r10, Secret, ctx_b, 1);
 
     Vsldoi(b_vec, a_vec, a_vec, 4);
     Vsldoi(c_vec, a_vec, a_vec, 8);
@@ -115,7 +114,7 @@ procedure Loop_rounds_3_7_11_body(
     reads
         heap0; memLayout;
     modifies
-        inp; r10;
+        inp;
     requires        
         0 <= i /\ i < 15 /\ (i % 4) == 3;
 
@@ -127,8 +126,7 @@ procedure Loop_rounds_3_7_11_body(
         msg == reverse_bytes_quad32(buffer128_read(in_b, offset, heap0));
         inp == old(inp) + 16;
 {
-    LoadImm64(r10, 0);
-    Load128_byte16_buffer(heap0, msg, inp, r10, Secret, in_b, offset);
+    Load128_byte16_buffer(heap0, msg, inp, Secret, in_b, offset);
     AddImm(inp, inp, 16);
 }
 
@@ -309,7 +307,7 @@ procedure Loop_prologue(ghost in_b:buffer128, ghost offset:nat, ghost k_b:buffer
     reads
         heap0; memLayout;
     modifies
-        inp; tbl; r10; msg0; h_vec; Wi;
+        inp; tbl; msg0; h_vec; Wi;
     requires
         let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(0, block, hash_orig));
         validSrcAddrsOffset128(heap0, inp, in_b, offset, 1, memLayout, Secret);
@@ -326,9 +324,8 @@ procedure Loop_prologue(ghost in_b:buffer128, ghost offset:nat, ghost k_b:buffer
         h_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 7)), ks.lo0);
         Wi.hi3 == ks.lo1 && Wi.hi2 == ks.hi2 && Wi.lo1 == ks.hi3;
 {
-    LoadImm64(r10, 0);
-    Load128_byte16_buffer(heap0, msg0, inp, r10, Secret, in_b, offset);
-    Load128_word4_buffer(heap0, Wi, tbl, r10, Secret, k_b, 0);
+    Load128_byte16_buffer(heap0, msg0, inp, Secret, in_b, offset);
+    Load128_word4_buffer(heap0, Wi, tbl, Secret, k_b, 0);
     AddImm(inp, inp, 16);
     AddImm(tbl, tbl, 16);
     Vadduwm(h_vec, h_vec, Wi);
@@ -342,7 +339,7 @@ procedure Loop_round_0_61_body(inline i:nat, ghost k_b:buffer128)
     reads
         heap0; memLayout;
     modifies
-        r10; tbl; Wi;
+        tbl; Wi;
     requires
         0 <= i /\ i < 62;
         let ks := buffer128_read(k_b, (i+2)/4, heap0);
@@ -359,8 +356,7 @@ procedure Loop_round_0_61_body(inline i:nat, ghost k_b:buffer128)
 {
     inline if (i % 4 = 2)
     {
-        LoadImm64(r10, 0);
-        Load128_word4_buffer(heap0, Wi, tbl, r10, Secret, k_b, (i+2)/4);
+        Load128_word4_buffer(heap0, Wi, tbl, Secret, k_b, (i+2)/4);
         AddImm(tbl, tbl, 16);
     }
     else
@@ -384,7 +380,7 @@ procedure Loop_rounds_0_59_a(
         heap0; memLayout;
         v0; v1; v2; v3;
     modifies
-        tbl; r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         i == 0 \/ i == 16 \/ i == 32 \/ i == 48;
         tbl + 16 < pow2_64;
@@ -442,7 +438,7 @@ procedure Loop_rounds_0_59_b(
         heap0; memLayout;
         v4; v5; v6; v7;
     modifies
-        tbl; r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         i == 4 \/ i == 20 \/ i == 36 \/ i == 52;
         tbl + 16 < pow2_64;
@@ -500,7 +496,7 @@ procedure Loop_rounds_0_59_c(
         heap0; memLayout;
         v8; v9; v10; v11;
     modifies
-        tbl; r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         i == 8 \/ i == 24 \/ i == 40 \/ i == 56;
         tbl + 16 < pow2_64;
@@ -558,7 +554,7 @@ procedure Loop_rounds_0_59_d(
         heap0; memLayout;
         v12; v13; v14; v15;
     modifies
-        tbl; r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         i == 12 \/ i == 28 \/ i == 44;
         tbl + 16 < pow2_64;
@@ -615,7 +611,7 @@ procedure Loop_rounds_60_63_b(
         heap0; memLayout;
         v12; v13; v14; v15;
     modifies
-        tbl; r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         validSrcAddrs128(heap0, tbl, k_b, 16, memLayout, Secret);
         let ks := buffer128_as_seq(heap0, k_b);
@@ -871,7 +867,7 @@ procedure Loop_rounds_0_15(
     reads
         heap0; memLayout;
     modifies
-        inp; tbl; r10; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        inp; tbl; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         validSrcAddrsOffset128(heap0, inp, in_b, offset+1, 3, memLayout, Secret);
         validSrcAddrsOffset128(heap0, tbl, k_b, 1, 4, memLayout, Secret);
@@ -952,7 +948,7 @@ procedure Loop_rounds_16_47(
     reads
         heap0; memLayout;
     modifies
-        tbl; r10; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        tbl; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         i == 16 \/ i == 32;
         validSrcAddrsOffset128(heap0, tbl, k_b, i/4+1, 4, memLayout, Secret);
@@ -1021,7 +1017,7 @@ procedure Loop_rounds_48_63(
     reads
         heap0; memLayout;
     modifies
-        tbl; r10; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+        tbl; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
     requires
         validSrcAddrs128(heap0, tbl, k_b, 16, memLayout, Secret);
         validSrcAddrsOffset128(heap0, tbl, k_b, 13, 3, memLayout, Secret);
@@ -1075,7 +1071,7 @@ procedure Loop_rounds(
     reads
         heap0; memLayout;
     modifies
-        inp; tbl; r10; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2; v28; v29; v30; v31;
+        inp; tbl; v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2; v28; v29; v30; v31;
     requires
         validSrcAddrsOffset128(heap0, inp, in_b, offset, 4, memLayout, Secret);
         validSrcAddrs128(heap0, tbl,    k_b, 16, memLayout, Secret);
@@ -1153,7 +1149,7 @@ procedure Loop(ghost in_b:buffer128, ghost k_b:buffer128)
     reads
         heap0; memLayout;
     modifies
-        inp; tbl; num; r10; cr0;
+        inp; tbl; num; cr0;
         v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; v24; v25; v26; v28; v29; v30; v31;
     requires
         validSrcAddrs128(heap0, inp,   in_b,  4*num, memLayout, Secret);
@@ -1207,7 +1203,7 @@ procedure Epilogue(ghost ctx_b:buffer128)
     reads
         ctx; b_vec; d_vec; f_vec; h_vec; memLayout;
     modifies
-        r9; r10; a_vec; c_vec; e_vec; g_vec; heap0;
+        r10; a_vec; c_vec; e_vec; g_vec; heap0;
     requires
         validDstAddrs128(heap0, ctx,  ctx_b,  2, memLayout, Secret);
     ensures
@@ -1227,10 +1223,9 @@ procedure Epilogue(ghost ctx_b:buffer128)
     Vmrghw(g_vec, g_vec, h_vec);
     Xxmrghd(e_vec, e_vec, g_vec);
 
-    LoadImm64(r9, 0);
     LoadImm64(r10, 16);
-    Store128_word4_buffer(heap0, a_vec, ctx,  r9, Secret, ctx_b, 0);
-    Store128_word4_buffer(heap0, e_vec, ctx, r10, Secret, ctx_b, 1);
+    Store128_word4_buffer(heap0, a_vec, ctx, Secret, ctx_b, 0);
+    Store128_word4_buffer_index(heap0, e_vec, ctx, r10, Secret, ctx_b, 1);
     let dcba := buffer128_read(ctx_b, 0, heap0);
     let hgfe := buffer128_read(ctx_b, 1, heap0);
     assert equal(#(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(old(make_seperated_hash_quad32(a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec))), #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(make_ordered_hash(dcba, hgfe)));
@@ -1246,7 +1241,7 @@ procedure Sha_update(
     reads
         ctx;
     modifies
-        inp; num; tbl; r9; r10; cr0;
+        inp; num; tbl; r10; cr0;
         v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; v16; v17; v18; v19; v20; v21; v22; v23; v24; v25; v26; v28; v29; v30; v31;
         heap0; memLayout;
     requires
@@ -1287,7 +1282,7 @@ procedure Sha_update_bytes(
     reads
         ctx;
     modifies
-        inp; num; tbl; r9; r10; cr0;
+        inp; num; tbl; r10; cr0;
         v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; v16; v17; v18; v19; v20; v21; v22; v23; v24; v25; v26; v28; v29; v30; v31;
         heap0; memLayout;
     requires
@@ -1343,7 +1338,7 @@ procedure Sha_update_bytes_main(
     reads
         ctx;
     modifies
-        r1; inp; num; tbl; r9; r10; cr0;
+        r1; inp; num; tbl; r10; cr0;
         v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; v16; v17; v18; v19; v20; v21; v22; v23; v24; v25; v26; v28; v29; v30; v31;
         heap0; memLayout; stack; stackTaint;
     requires
