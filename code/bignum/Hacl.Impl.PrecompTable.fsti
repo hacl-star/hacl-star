@@ -19,6 +19,21 @@ include Hacl.Impl.Exponentiation.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val lemma_table_sub_len: len:nat -> table_len:nat -> i:nat{i < table_len} ->
+  Lemma (i * len + len <= table_len * len)
+
+inline_for_extraction noextract
+let spec_table_sub_len
+  (#t:BD.limb_t)
+  (len:pos)
+  (table_len:size_nat{table_len * len <= max_size_t})
+  (table:LSeq.lseq (uint_t t SEC) (table_len * len))
+  (i:nat{i < table_len}) : LSeq.lseq (uint_t t SEC) len =
+
+  lemma_table_sub_len len table_len i;
+  LSeq.sub table (i * len) len
+
+
 inline_for_extraction noextract
 val table_select_consttime:
     #t:BD.limb_t
@@ -29,10 +44,9 @@ val table_select_consttime:
   -> res:lbuffer (uint_t t SEC) len ->
   Stack unit
   (requires fun h ->
-    (v i + 1) * v len <= v table_len * v len /\
     live h table /\ live h res /\ disjoint table res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == LSeq.sub (as_seq h0 table) (v i * v len) (v len))
+    as_seq h1 res == spec_table_sub_len (v len) (v table_len) (as_seq h0 table) (v i))
 
 
 // Precomputed table [a^0 = one; a^1; a^2; ..; a^(table_len - 1)]
@@ -49,8 +63,7 @@ let precomp_table_inv
   (table:LSeq.lseq (uint_t a_t SEC) (v table_len * v len))
   (j:nat{j < v table_len}) : Type0
  =
-  Math.Lemmas.lemma_mult_le_right (v len) (j + 1) (v table_len);
-  let bj = LSeq.sub table (j * v len) (v len) in
+  let bj = spec_table_sub_len (v len) (v table_len) table j in
   k.to.linv bj /\ k.to.linv a /\
   k.to.refl bj == S.pow k.to.comm_monoid (k.to.refl a) j
 
