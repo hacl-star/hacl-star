@@ -53,6 +53,8 @@ let store_len a len b =
 
 #set-options "--z3rlimit 20"
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3seed 1"
+
 inline_for_extraction noextract
 let len_mod_32 (a: md_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = len_v a len % Helpers.block_length a })
@@ -71,8 +73,6 @@ let len_mod_32 (a: md_alg) (len: len_t a):
       Math.lemma_mod_lt (U64.v len) (U32.v (block_len a));
       Math.modulo_lemma (U64.v len % U32.v (block_len a)) (pow2 32);
       Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (block_len a)))
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3seed 1"
 
 // JP: this proof works instantly in interactive mode, not in batch mode unless
 // there's a high rlimit
