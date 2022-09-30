@@ -171,6 +171,7 @@ let lemma_mod_one (b:pos): Lemma (b % b = 0) = ()
 
 open FStar.Mul
 
+#restart-solver
 #push-options "--z3rlimit 100"
 inline_for_extraction noextract
 let part2 a m init update_multi update_last finish s dst key data len =
@@ -317,7 +318,7 @@ let part1 a m init update_multi update_last finish s key data len =
   let dst = B.sub key 0ul (D.hash_len a) in
   part2 a m init update_multi update_last finish s dst key data len
 
-let block_len_positive (a: hash_alg): Lemma (D.block_len a > 0ul) = ()
+let block_len_positive (a: hash_alg): Lemma (D.block_len a `FStar.UInt32.gt` 0ul) = ()
 let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
 
 #set-options "--z3rlimit 100"
