@@ -199,10 +199,14 @@ let part2 a m init update_multi update_last finish s dst key data len =
       (**) Spec.Hash.Incremental.Lemmas.hash_incremental_block_is_update_last a init_v key_v0;
       (**) assert((D.as_seq h2 s, ev) ==
       (**)  Spec.Hash.Incremental.hash_incremental_body a key_data_v0 init_v);
+      (**) B.(modifies_trans
+          (loc_union (loc_buffer s) (loc_buffer dst)) h0 h1 (loc_union (loc_buffer s) (loc_buffer dst)) h2);
       ev
     else
       let ev1 = update_multi s ev key 1ul in
       (**) let h2 = ST.get () in
+      (**) B.(modifies_trans
+          (loc_union (loc_buffer s) (loc_buffer dst)) h0 h1 (loc_union (loc_buffer s) (loc_buffer dst)) h2);
       (**) assert ((D.as_seq h2 s, ev1) ==
       (**)           Spec.Agile.Hash.(update_multi a (init a) key_v0));
       (**) update_multi_extra_state_eq' a (D.as_seq h1 s, ev) key_v0;
@@ -225,6 +229,8 @@ let part2 a m init update_multi update_last finish s dst key data len =
       (**) update_multi_extra_state_eq' a (D.as_seq h2 s, ev1) (B.as_seq h0 full_blocks);
 
       let h20 = ST.get () in
+      (**) B.(modifies_trans
+          (loc_union (loc_buffer s) (loc_buffer dst)) h0 h2 (loc_union (loc_buffer s) (loc_buffer dst)) h20);
       let i: Ghost.erased D.impl = (| a, m |) in
       [@inline_let]
       let prev_len: prev_len:len_t (D.get_alg i)
@@ -246,6 +252,8 @@ let part2 a m init update_multi update_last finish s dst key data len =
               (((D.as_seq #i h20 s <: words_state' a), ev2) <: words_state a)
               (len_v (D.get_alg i) prev_len)
               (B.as_seq h20 rem) <: words_state a));
+      (**) B.(modifies_trans
+          (loc_union (loc_buffer s) (loc_buffer dst)) h0 h20 (loc_union (loc_buffer s) (loc_buffer dst)) h3);
       (**) assert ((D.as_seq h3 s, ev3) ==
            Spec.Hash.Incremental.update_last a
               (Spec.Agile.Hash.update_multi a
@@ -266,11 +274,12 @@ let part2 a m init update_multi update_last finish s dst key data len =
       ev3
   in
   (**) let h3 = ST.get () in
-  (**) assert(B.(modifies (loc_buffer s) h0 h3));
+  (**) B.(modifies_trans
+      (loc_union (loc_buffer s) (loc_buffer dst)) h0 h1 (loc_union (loc_buffer s) (loc_buffer dst)) h3);
   finish s ev dst;
   (**) let h4 = ST.get () in
-  (**) assert(B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h3 h4));
-  (**) assert(B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h0 h4));
+  (**) B.(modifies_trans
+      (loc_union (loc_buffer s) (loc_buffer dst)) h0 h3 (loc_union (loc_buffer s) (loc_buffer dst)) h4);
   (**) let open Spec.Hash.PadFinish in
   (**) let open Spec.Hash.Incremental in
   (**) let open Spec.Agile.Hash in
