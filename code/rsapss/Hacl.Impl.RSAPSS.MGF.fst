@@ -26,6 +26,7 @@ let hash_len a =
 inline_for_extraction noextract
 let max_input_length = Hash.max_input_length
 
+inline_for_extraction noextract
 let less_than_max_input_length = Spec.Hash.Definitions.less_than_max_input_length
 
 val hash:
