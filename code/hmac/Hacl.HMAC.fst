@@ -14,6 +14,7 @@ open Spec.Hash.Definitions
 open Spec.Agile.HMAC
 open Spec.Agile.Hash
 open Spec.Hash.Incremental
+open Spec.Hash.Incremental.Definitions
 open Spec.Hash.Incremental.Lemmas
 open Spec.Hash.PadFinish
 open Spec.Hash.Lemmas
@@ -292,7 +293,11 @@ let part2 a m init update_multi update_last finish s dst key data len =
   (**)   assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
   (**) end;
   (**) Spec.Hash.Incremental.hash_is_hash_incremental a key_data_v0;
-  (**) assert(B.as_seq h4 dst `S.equal` hash a key_data_v0)
+  (**) assert(B.as_seq h4 dst `S.equal` hash a key_data_v0);
+  assert (ST.equal_domains h0 h1);
+  assert (ST.equal_domains h1 h3);
+  assert (ST.equal_domains h3 h4);
+  assert (ST.equal_domains h0 h4)
 
 #pop-options
 
