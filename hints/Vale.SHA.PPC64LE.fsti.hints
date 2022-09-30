@@ -1,0 +1,77 @@
+[
+  "}§³´™Nü\u0010ãG}•ýdáS",
+  [
+    [
+      "Vale.SHA.PPC64LE.va_req_Sha_update_bytes_main",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.l_and",
+        "equation_Prims.squash", "equation_Prims.subtype_of",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "dbcbfd7050688e8ab1feaf0a18e6b15d"
+    ],
+    [
+      "Vale.SHA.PPC64LE.va_ens_Sha_update_bytes_main",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.l_and",
+        "equation_Prims.squash", "equation_Prims.subtype_of",
+        "equation_Vale.PPC64LE.Decls.va_state_eq",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.block_length",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.byte",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.size_block_w_256",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "7929874585e8fa261d86aaa9a94f8304"
+    ],
+    [
+      "Vale.SHA.PPC64LE.va_lemma_Sha_update_bytes_main",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.SHA.PPC64LE.SHA_helpers.block_length",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.byte",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.size_block_w_256",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "1b34c15eccbd70af95f77f3a94534f7c"
+    ],
+    [
+      "Vale.SHA.PPC64LE.va_wp_Sha_update_bytes_main",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.SHA.PPC64LE.SHA_helpers.block_length",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.byte",
+        "equation_Vale.SHA.PPC64LE.SHA_helpers.size_block_w_256",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "c1b4ce3a4e543c2fc1b94c75b285412b"
+    ],
+    [
+      "Vale.SHA.PPC64LE.va_quick_Sha_update_bytes_main",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "bd9a1d0ef407fe515426141f6aabf530"
+    ]
+  ]
+]

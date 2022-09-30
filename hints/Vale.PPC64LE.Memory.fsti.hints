@@ -1,0 +1,138 @@
+[
+  "æ\u000exÀ∞áæ+èi÷πeﬂ\u000e˝",
+  [
+    [
+      "Vale.PPC64LE.Memory.base_typ_as_vale_type",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.Arch.HeapTypes_s.TUInt128",
+        "disc_equation_Vale.Arch.HeapTypes_s.TUInt16",
+        "disc_equation_Vale.Arch.HeapTypes_s.TUInt32",
+        "disc_equation_Vale.Arch.HeapTypes_s.TUInt64",
+        "disc_equation_Vale.Arch.HeapTypes_s.TUInt8",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat16", "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Def.Words_s.natN",
+        "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "f9bf41b0a24244028892161284c04b64"
+    ],
+    [
+      "Vale.PPC64LE.Memory.buffer_read",
+      1,
+      1,
+      0,
+      [ "@query", "lemma_Vale.PPC64LE.Memory.buffer_length_buffer_as_seq" ],
+      0,
+      "2b37c0395793d9763ddbe166ce3d5f00"
+    ],
+    [
+      "Vale.PPC64LE.Memory.buffer_write",
+      1,
+      1,
+      0,
+      [ "@query", "lemma_Vale.PPC64LE.Memory.buffer_length_buffer_as_seq" ],
+      0,
+      "c4db8a5b341df94f9baa31520d330018"
+    ],
+    [
+      "Vale.PPC64LE.Memory.lemma_load_mem64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt64",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.PPC64LE.Memory.base_typ_as_vale_type",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "956859259411fa75a1be73de3a5aab2c"
+    ],
+    [
+      "Vale.PPC64LE.Memory.lemma_store_mem64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_9d8ba432fbcc943a170042a18df53c51"
+      ],
+      0,
+      "e2de92b162be51eca1462d7162914f53"
+    ],
+    [
+      "Vale.PPC64LE.Memory.lemma_store_mem128",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_f7f9851fe45163d02a90affc758a7995"
+      ],
+      0,
+      "ed8cb3d279bbd64d0b2461e48fde7706"
+    ],
+    [
+      "Vale.PPC64LE.Memory.init_heaplets_req",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "454a28137c7136a4a5c9ded9cffdddcb"
+    ],
+    [
+      "Vale.PPC64LE.Memory.loc_mutable_buffers",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_3f2ea7e07cd8972f5ae069cf16ee234e_0",
+        "data_elim_Prims.Cons", "disc_equation_Prims.Cons",
+        "disc_equation_Prims.Nil",
+        "disc_equation_Vale.Arch.HeapImpl.Immutable",
+        "disc_equation_Vale.Arch.HeapImpl.Mutable",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_Vale.Arch.HeapImpl.buffer_info",
+        "fuel_guarded_inversion_Vale.Arch.HeapImpl.mutability",
+        "proj_equation_Prims.Cons_hd",
+        "proj_equation_Vale.Arch.HeapImpl.Mkbuffer_info_bi_mutable",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Cons_tl", "subterm_ordering_Prims.Cons",
+        "typing_Vale.Arch.HeapImpl.__proj__Mkbuffer_info__item__bi_mutable"
+      ],
+      0,
+      "3a7fba126d726927e08a1f8b39982978"
+    ],
+    [
+      "Vale.PPC64LE.Memory.lemma_heaps_match",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.PPC64LE.Memory.buffer_info_has_id",
+        "refinement_interpretation_Tm_refine_33ed508bdf7f015768d4253598488b4b"
+      ],
+      0,
+      "acb91c214d5c0d39f348976a070a213f"
+    ]
+  ]
+]

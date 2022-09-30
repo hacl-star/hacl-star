@@ -276,7 +276,7 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:*' \
-	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
+	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -512,9 +512,13 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 	$< > $@
 
+dist/vale/%-ppc64le.S: obj/vale-%-ppc64le.exe | dist/vale
+	$< > $@
+
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
+obj/vale-sha256-ppc64le.exe: vale/code/crypto/sha/ShaMainPPC64LE.ml
 obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
@@ -542,7 +546,7 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
-  dist/vale/curve25519-inline.h
+  dist/vale/curve25519-inline.h dist/vale/sha256-ppc64le.S
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
