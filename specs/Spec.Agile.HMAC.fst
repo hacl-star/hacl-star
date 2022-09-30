@@ -1,7 +1,6 @@
 module Spec.Agile.HMAC
 
 open Spec.Hash.Definitions
-open FStar.Integers
 open Lib.IntTypes
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"

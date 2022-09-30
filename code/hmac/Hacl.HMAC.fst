@@ -298,7 +298,8 @@ let part2 a m init update_multi update_last finish s dst key data len =
   (**) Spec.Hash.Incremental.hash_is_hash_incremental a key_data_v0;
   (**) assert(B.as_seq h4 dst `S.equal` hash a key_data_v0);
   ST.lemma_equal_domains_trans h0 h1 h3;
-  ST.lemma_equal_domains_trans h0 h3 h4
+  ST.lemma_equal_domains_trans h0 h3 h4;
+  assert (ST.equal_domains h0 h4)
 
 #pop-options
 

@@ -22,7 +22,7 @@ open EverCrypt.Helpers
 let key_and_data_fits (a: hash_alg): Lemma
   (ensures ((block_length a + pow2 32) `less_than_max_input_length` a))
 =
-  let open FStar.Integers in
+  let open FStar.Mul in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
