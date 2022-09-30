@@ -8,6 +8,8 @@ open Spec.Hash.Incremental.Definitions
 open Spec.Hash.PadFinish
 open Spec.Hash.Lemmas
 
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
 val md_is_hash_incremental
   (a:hash_alg{is_md a})
   (input: bytes { S.length input `less_than_max_input_length` a })

@@ -11,7 +11,9 @@ friend Spec.Agile.Hash
 
 open FStar.Mul
 
-#push-options "--z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
+#push-options "--z3rlimit 150"
 let md_is_hash_incremental
   (a:hash_alg{is_md a})
   (input: bytes { S.length input `less_than_max_input_length` a })
