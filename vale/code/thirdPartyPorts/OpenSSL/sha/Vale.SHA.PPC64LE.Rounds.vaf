@@ -2,7 +2,7 @@ include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
 include "../../../arch/ppc64le/Vale.PPC64LE.InsMem.vaf"
 include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
 include "../../../arch/ppc64le/Vale.PPC64LE.InsStack.vaf"
-include "Vale.SHA.PPC64LE.Rounds.vaf"
+include "Vale.SHA.PPC64LE.Rounds.Core.vaf"
 
 include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "FStar.Seq.Properties"
