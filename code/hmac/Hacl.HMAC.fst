@@ -173,7 +173,7 @@ let lemma_mod_one (b:pos): Lemma (b % b = 0) = ()
 open FStar.Mul
 
 #restart-solver
-#push-options "--z3rlimit 100 --log_queries --z3seed 1"
+#push-options "--z3rlimit 100 --z3seed 1"
 inline_for_extraction noextract
 let part2 a m init update_multi update_last finish s dst key data len =
   block_len_pos a;
