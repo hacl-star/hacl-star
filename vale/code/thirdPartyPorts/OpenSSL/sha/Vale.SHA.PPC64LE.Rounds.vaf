@@ -22,7 +22,7 @@ include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
 include{:fstar}{:open} "Spec.Loops"
 include{:fstar}{:open} "Vale.SHA2.Wrapper"
 
-module Vale.SHA.PPC64LE
+module Vale.SHA.PPC64LE.Rounds
 
 #verbatim{:interface}{:implementation}
 open Vale.Def.Opaque_s
