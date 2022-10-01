@@ -90,12 +90,10 @@ let update_multi_associative (a: hash_alg)
   Lib.UpdateMulti.update_multi_associative (block_length a) (Spec.Agile.Hash.update a) h input1 input2
 
 (* *)
-let block_length_smaller_than_max_input (a:hash_alg) :
-  Lemma(block_length a <= max_input_length a) =
+let block_length_smaller_than_max_input (a:hash_alg) =
   normalize_term_spec(pow2 61 - 1);
   normalize_term_spec(pow2 125 - 1);
   normalize_term_spec(pow2 64 - 1)
 
-#reset-options
 let reveal_init_blake2 a =
   ()

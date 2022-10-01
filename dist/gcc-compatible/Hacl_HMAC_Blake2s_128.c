@@ -25,6 +25,7 @@
 #include "Hacl_HMAC_Blake2s_128.h"
 
 #include "internal/Hacl_Hash_Blake2s_128.h"
+#include "internal/Hacl_Hash_Blake2.h"
 
 typedef struct ___Lib_IntVector_Intrinsics_vec128__uint64_t_s
 {
@@ -102,8 +103,8 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   r00[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv10, iv20, iv30);
   r10[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv40, iv50, iv60, iv70);
   uint64_t es = (uint64_t)0U;
-  ___Lib_IntVector_Intrinsics_vec128__uint64_t scrut = { .fst = s, .snd = es };
-  Lib_IntVector_Intrinsics_vec128 *s0 = scrut.fst;
+  ___Lib_IntVector_Intrinsics_vec128__uint64_t scrut0 = { .fst = s, .snd = es };
+  Lib_IntVector_Intrinsics_vec128 *s0 = scrut0.fst;
   uint8_t *dst1 = ipad;
   Lib_IntVector_Intrinsics_vec128 *r01 = s0;
   Lib_IntVector_Intrinsics_vec128 *r11 = s0 + (uint32_t)1U;
@@ -134,14 +135,33 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   else
   {
     uint64_t ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s0, ev, ipad, (uint32_t)1U);
+    uint32_t block_len = (uint32_t)64U;
+    uint32_t n_blocks0 = data_len / block_len;
+    uint32_t rem0 = data_len % block_len;
+    K___uint32_t_uint32_t scrut;
+    if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
+    {
+      uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
+      scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks_, .snd = data_len - n_blocks_ * block_len });
+    }
+    else
+    {
+      scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
+    }
+    uint32_t n_blocks = scrut.fst;
+    uint32_t rem_len = scrut.snd;
+    uint32_t full_blocks_len = n_blocks * block_len;
+    uint8_t *full_blocks = data;
+    uint8_t *rem = data + full_blocks_len;
+    uint64_t ev2 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s0, ev1, full_blocks, n_blocks);
     uint64_t
-    ev2 =
+    ev3 =
       Hacl_Hash_Blake2s_128_update_last_blake2s_128(s0,
-        ev1,
-        (uint64_t)(uint32_t)64U,
-        data,
-        data_len);
-    ev10 = ev2;
+        ev2,
+        (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
+        rem,
+        rem_len);
+    ev10 = ev3;
   }
   Hacl_Hash_Blake2s_128_finish_blake2s_128(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
@@ -165,14 +185,34 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
   uint64_t ev0 = (uint64_t)0U;
   uint64_t ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s0, ev0, opad, (uint32_t)1U);
+  uint32_t block_len = (uint32_t)64U;
+  uint32_t n_blocks0 = (uint32_t)32U / block_len;
+  uint32_t rem0 = (uint32_t)32U % block_len;
+  K___uint32_t_uint32_t scrut;
+  if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
+  {
+    uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
+    scrut =
+      ((K___uint32_t_uint32_t){ .fst = n_blocks_, .snd = (uint32_t)32U - n_blocks_ * block_len });
+  }
+  else
+  {
+    scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
+  }
+  uint32_t n_blocks = scrut.fst;
+  uint32_t rem_len = scrut.snd;
+  uint32_t full_blocks_len = n_blocks * block_len;
+  uint8_t *full_blocks = hash1;
+  uint8_t *rem = hash1 + full_blocks_len;
+  uint64_t ev2 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s0, ev1, full_blocks, n_blocks);
   uint64_t
-  ev2 =
+  ev3 =
     Hacl_Hash_Blake2s_128_update_last_blake2s_128(s0,
-      ev1,
-      (uint64_t)(uint32_t)64U,
-      hash1,
-      (uint32_t)32U);
-  uint64_t ev11 = ev2;
+      ev2,
+      (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
+      rem,
+      rem_len);
+  uint64_t ev11 = ev3;
   Hacl_Hash_Blake2s_128_finish_blake2s_128(s0, ev11, dst);
 }
 

@@ -209,6 +209,7 @@ let split_at_last_lazy_nb_rem
     end
 #pop-options
 
+inline_for_extraction noextract
 let split_at_last_st (block_length: UInt32.t) (data_length: UInt32.t):
   Pure (UInt32.t & UInt32.t)
     (requires block_length <> 0ul)
