@@ -37,8 +37,8 @@ let min_length (a:supported_alg) =
 val state: supported_alg -> Type0
 
 val hmac_input_bound: a:supported_alg -> Lemma
-  (hash_length a + pow2 32 + pow2 32
-    + 1 + block_length a + block_length a <= max_input_length a)
+  ((hash_length a + pow2 32 + pow2 32
+    + 1 + block_length a + block_length a) `less_than_max_input_length` a)
 
 val instantiate: #a:supported_alg
   -> entropy_input:bytes
@@ -46,11 +46,11 @@ val instantiate: #a:supported_alg
   -> personalization_string:bytes
   -> Pure (state a)
   (requires
-    hash_length a
+    (hash_length a
     + Seq.length entropy_input
     + Seq.length nonce
     + Seq.length personalization_string
-    + 1 + block_length a <= max_input_length a)
+    + 1 + block_length a) `less_than_max_input_length` a)
   (ensures fun _ -> True)
 
 val reseed: #a:supported_alg
@@ -59,10 +59,10 @@ val reseed: #a:supported_alg
   -> additional_input:bytes
   -> Pure (state a)
   (requires
-    hash_length a +
+    (hash_length a +
     Seq.length entropy_input +
     Seq.length additional_input +
-    1 + block_length a <= max_input_length a)
+    1 + block_length a) `less_than_max_input_length` a)
   (ensures fun _ -> True)
 
 (* n is the number of **bytes** requested *)
@@ -73,6 +73,6 @@ val generate: #a:supported_alg
   -> Pure (option (lbytes n & state a))
   (requires
     n <= max_output_length /\
-    hash_length a + Seq.length additional_input
-      + 1 + block_length a <= max_input_length a)
+    (hash_length a + Seq.length additional_input
+      + 1 + block_length a) `less_than_max_input_length` a)
   (ensures fun _ -> True)

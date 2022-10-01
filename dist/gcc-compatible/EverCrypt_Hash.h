@@ -35,7 +35,9 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "Lib_Memzero0.h"
 #include "Hacl_Spec.h"
+#include "Hacl_SHA3.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
@@ -60,8 +62,9 @@ typedef void *EverCrypt_Hash_e_alg;
 #define EverCrypt_Hash_SHA2_256_s 3
 #define EverCrypt_Hash_SHA2_384_s 4
 #define EverCrypt_Hash_SHA2_512_s 5
-#define EverCrypt_Hash_Blake2S_s 6
-#define EverCrypt_Hash_Blake2B_s 7
+#define EverCrypt_Hash_SHA3_256_s 6
+#define EverCrypt_Hash_Blake2S_s 7
+#define EverCrypt_Hash_Blake2B_s 8
 
 typedef uint8_t EverCrypt_Hash_state_s_tags;
 
@@ -75,6 +78,7 @@ typedef struct EverCrypt_Hash_state_s_s
     uint32_t *case_SHA2_256_s;
     uint64_t *case_SHA2_384_s;
     uint64_t *case_SHA2_512_s;
+    uint64_t *case_SHA3_256_s;
     uint32_t *case_Blake2S_s;
     uint64_t *case_Blake2B_s;
   }
@@ -114,6 +118,12 @@ EverCrypt_Hash_uu___is_SHA2_384_s(
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+bool
+EverCrypt_Hash_uu___is_SHA3_256_s(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
@@ -245,6 +255,12 @@ EverCrypt_Hash_Incremental_finish_sha224(
 
 void
 EverCrypt_Hash_Incremental_finish_sha256(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+void
+EverCrypt_Hash_Incremental_finish_sha3_256(
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
   uint8_t *dst
 );

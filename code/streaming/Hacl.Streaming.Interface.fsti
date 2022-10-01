@@ -408,7 +408,7 @@ type block (index: Type0) =
           B.(loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s))))
     (ensures fun h0 _ h1 ->
       state.invariant #i h1 s /\
-      B.(modifies (loc_buffer dst) h0 h1) /\
+      B.(modifies (loc_buffer dst `loc_union` (state.footprint #i h0 s)) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->

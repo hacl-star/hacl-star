@@ -149,8 +149,8 @@ let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64)
 
 ///  ECDSA
 
-let _: squash(Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32) =
- assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32)
+let _: squash(Some?.v (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256) > pow2 32) =
+ assert_norm (Some?.v (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256) > pow2 32)
 
 
 let ecdsa_sign_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (private_key nonce:lbytes 32) : option (lbytes 64) =

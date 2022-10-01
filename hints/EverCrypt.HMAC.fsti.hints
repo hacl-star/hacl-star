@@ -1,5 +1,5 @@
 [
-  ">‘\u0012®\u001cŠ\u007fSÕÚ\u001fítyÞj",
+  "(RY$Õƒ01˜vê\b fÙo",
   [
     [
       "EverCrypt.HMAC.key_and_data_fits",
@@ -9,20 +9,33 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Tm_unit", "equation_Prims.nat",
-        "equation_Spec.Hash.Definitions.block_length",
+        "equation_Prims.pos", "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.less_than_max_input_length",
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.word_length", "int_inversion",
         "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Some_v",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Spec.Hash.Definitions.block_length",
+        "typing_Spec.Hash.Definitions.less_than_max_input_length",
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "f05878776a42f693f2d60d263f97df11"
+      "24fce911eb8a7dd8e29496be4acab647"
     ],
     [
       "EverCrypt.HMAC.compute_st",
@@ -30,24 +43,34 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "bool_inversion", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.uint8",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
+        "equation_Spec.Agile.HMAC.keysized",
         "equation_Spec.Hash.Definitions.block_length",
-        "equation_Spec.Hash.Definitions.block_word_length",
-        "equation_Spec.Hash.Definitions.word_length",
-        "function_token_typing_Lib.IntTypes.uint8",
+        "equation_Spec.Hash.Definitions.less_than_max_input_length",
+        "function_token_typing_Lib.IntTypes.uint8", "int_typing",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_45fb1fe6d11e460ce7fa5c267d49a18f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_dd0acc6b0a6d213c976d90b31ff4bbf0",
         "refinement_interpretation_Tm_refine_e887a8e6ee6a76633ceebf23311c2363",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_Spec.Hash.Definitions.word_length"
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.length",
+        "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "3d5cd8b9ae9bd0f1d65e3ed18cc2c5fb"
+      "cd0ff4e112b332db9d5752bf2ae656dd"
     ]
   ]
 ]
