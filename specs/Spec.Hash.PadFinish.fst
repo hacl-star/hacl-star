@@ -15,7 +15,7 @@ open Spec.Hash.Definitions
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
 let pad_md (a:md_alg)
-  (total_len:nat{total_len <= max_input_length a}):
+  (total_len:nat{total_len `less_than_max_input_length` a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
   = let open FStar.Mul in
     let firstbyte = S.create 1 (u8 0x80) in
@@ -31,7 +31,7 @@ let pad_md (a:md_alg)
     S.(firstbyte @| zeros @| encodedlen)
 
 let pad (a:md_alg)
-  (total_len:nat{total_len <= max_input_length a}):
+  (total_len:nat{total_len `less_than_max_input_length` a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
 = pad_md a total_len
 
@@ -47,11 +47,21 @@ let finish_blake (a:blake_alg) (hashw:words_state a): Tot (lbytes (hash_length a
   let alg = to_blake_alg a in
   Spec.Blake2.blake2_finish alg (fst hashw) (Spec.Blake2.max_output alg)
 
+let finish_sha3 (a: sha3_alg) (s: words_state a): Tot (lbytes (hash_length a)) =
+  match a with
+  | SHA3_256 ->
+      let rateInBytes = 1088 / 8 in
+      let outputByteLen = 32 in
+      let s, _ = s in
+      Spec.SHA3.squeeze s rateInBytes outputByteLen
+
 (* Note that the ``extra_state`` in the ``words_state`` parameter is useless -
  * we use this fact pervasively in the proofs and some definitions by providing
  * dummy extra-states when we don't manipulate "full" words states *)
 let finish (a:hash_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
   if is_blake a then
     finish_blake a hashw
+  else if is_sha3 a then
+    finish_sha3 a hashw
   else
     finish_md a hashw

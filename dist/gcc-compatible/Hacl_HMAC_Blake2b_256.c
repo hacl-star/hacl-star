@@ -25,6 +25,7 @@
 #include "Hacl_HMAC_Blake2b_256.h"
 
 #include "internal/Hacl_Hash_Blake2b_256.h"
+#include "internal/Hacl_Hash_Blake2.h"
 
 typedef struct ___Lib_IntVector_Intrinsics_vec256__FStar_UInt128_uint128_s
 {
@@ -102,8 +103,8 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   r00[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv10, iv20, iv30);
   r10[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv40, iv50, iv60, iv70);
   FStar_UInt128_uint128 es = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
-  ___Lib_IntVector_Intrinsics_vec256__FStar_UInt128_uint128 scrut = { .fst = s, .snd = es };
-  Lib_IntVector_Intrinsics_vec256 *s0 = scrut.fst;
+  ___Lib_IntVector_Intrinsics_vec256__FStar_UInt128_uint128 scrut0 = { .fst = s, .snd = es };
+  Lib_IntVector_Intrinsics_vec256 *s0 = scrut0.fst;
   uint8_t *dst1 = ipad;
   Lib_IntVector_Intrinsics_vec256 *r01 = s0;
   Lib_IntVector_Intrinsics_vec256 *r11 = s0 + (uint32_t)1U;
@@ -140,14 +141,35 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   {
     FStar_UInt128_uint128
     ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev, ipad, (uint32_t)1U);
+    uint32_t block_len = (uint32_t)128U;
+    uint32_t n_blocks0 = data_len / block_len;
+    uint32_t rem0 = data_len % block_len;
+    K___uint32_t_uint32_t scrut;
+    if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
+    {
+      uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
+      scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks_, .snd = data_len - n_blocks_ * block_len });
+    }
+    else
+    {
+      scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
+    }
+    uint32_t n_blocks = scrut.fst;
+    uint32_t rem_len = scrut.snd;
+    uint32_t full_blocks_len = n_blocks * block_len;
+    uint8_t *full_blocks = data;
+    uint8_t *rem = data + full_blocks_len;
     FStar_UInt128_uint128
-    ev2 =
+    ev2 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev1, full_blocks, n_blocks);
+    FStar_UInt128_uint128
+    ev3 =
       Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
-        ev1,
-        FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
-        data,
-        data_len);
-    ev10 = ev2;
+        ev2,
+        FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+          FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
+        rem,
+        rem_len);
+    ev10 = ev3;
   }
   Hacl_Hash_Blake2b_256_finish_blake2b_256(s0, ev10, dst1);
   uint8_t *hash1 = ipad;
@@ -172,14 +194,36 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   FStar_UInt128_uint128 ev0 = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   FStar_UInt128_uint128
   ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev0, opad, (uint32_t)1U);
+  uint32_t block_len = (uint32_t)128U;
+  uint32_t n_blocks0 = (uint32_t)64U / block_len;
+  uint32_t rem0 = (uint32_t)64U % block_len;
+  K___uint32_t_uint32_t scrut;
+  if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
+  {
+    uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
+    scrut =
+      ((K___uint32_t_uint32_t){ .fst = n_blocks_, .snd = (uint32_t)64U - n_blocks_ * block_len });
+  }
+  else
+  {
+    scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
+  }
+  uint32_t n_blocks = scrut.fst;
+  uint32_t rem_len = scrut.snd;
+  uint32_t full_blocks_len = n_blocks * block_len;
+  uint8_t *full_blocks = hash1;
+  uint8_t *rem = hash1 + full_blocks_len;
   FStar_UInt128_uint128
-  ev2 =
+  ev2 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev1, full_blocks, n_blocks);
+  FStar_UInt128_uint128
+  ev3 =
     Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
-      ev1,
-      FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
-      hash1,
-      (uint32_t)64U);
-  FStar_UInt128_uint128 ev11 = ev2;
+      ev2,
+      FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+        FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
+      rem,
+      rem_len);
+  FStar_UInt128_uint128 ev11 = ev3;
   Hacl_Hash_Blake2b_256_finish_blake2b_256(s0, ev11, dst);
 }
 

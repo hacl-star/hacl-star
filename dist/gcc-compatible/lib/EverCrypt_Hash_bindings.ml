@@ -34,10 +34,12 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 4
     let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA2_512_s =
       Unsigned.UInt8.of_int 5
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2S_s =
+    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA3_256_s =
       Unsigned.UInt8.of_int 6
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2B_s =
+    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2S_s =
       Unsigned.UInt8.of_int 7
+    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2B_s =
+      Unsigned.UInt8.of_int 8
     type everCrypt_Hash_state_s = [ `everCrypt_Hash_state_s ] structure
     let (everCrypt_Hash_state_s : [ `everCrypt_Hash_state_s ] structure typ)
       = structure "EverCrypt_Hash_state_s_s"
@@ -57,6 +59,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       field everCrypt_Hash_state_s_val "case_SHA2_384_s" (ptr uint64_t)
     let everCrypt_Hash_state_s_val_case_SHA2_512_s =
       field everCrypt_Hash_state_s_val "case_SHA2_512_s" (ptr uint64_t)
+    let everCrypt_Hash_state_s_val_case_SHA3_256_s =
+      field everCrypt_Hash_state_s_val "case_SHA3_256_s" (ptr uint64_t)
     let everCrypt_Hash_state_s_val_case_Blake2S_s =
       field everCrypt_Hash_state_s_val "case_Blake2S_s" (ptr uint32_t)
     let everCrypt_Hash_state_s_val_case_Blake2B_s =
@@ -190,6 +194,10 @@ module Bindings(F:Cstubs.FOREIGN) =
            @-> (ocaml_bytes @-> (returning void)))
     let everCrypt_Hash_Incremental_finish_sha256 =
       foreign "EverCrypt_Hash_Incremental_finish_sha256"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_sha3_256 =
+      foreign "EverCrypt_Hash_Incremental_finish_sha3_256"
         ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
            @-> (ocaml_bytes @-> (returning void)))
     let everCrypt_Hash_Incremental_finish_sha384 =

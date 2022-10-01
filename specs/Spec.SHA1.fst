@@ -24,15 +24,15 @@ let init = ( h0, () )
 
 (* Section 6.1.2 Step 1: message schedule *)
 
-let rec w' (mi: Seq.lseq (word SHA1) block_word_length) (t: nat {t <= 79}) : GTot (word SHA1) (decreases (t)) =
+let rec w' (mi: Seq.lseq (word SHA1) (block_word_length SHA1)) (t: nat {t <= 79}) : GTot (word SHA1) (decreases (t)) =
   if t < 16
   then Seq.index mi (t)
   else (w' mi (t - 3) ^. w' mi (t - 8) ^. w' mi (t - 14) ^. w' mi (t - 16)) <<<. 1ul
 
-let w (mi: Seq.lseq (word SHA1) block_word_length) (t: size_t {v t <= 79}) : GTot (word SHA1) = w' mi (v t)
+let w (mi: Seq.lseq (word SHA1) (block_word_length SHA1)) (t: size_t {v t <= 79}) : GTot (word SHA1) = w' mi (v t)
 
 let compute_w_post
-  (mi: Seq.lseq (word SHA1) block_word_length)
+  (mi: Seq.lseq (word SHA1) (block_word_length SHA1))
   (n: nat)
   (res: Seq.lseq (word SHA1) n)
 : GTot Type0
@@ -41,7 +41,7 @@ let compute_w_post
   ))
 
 let compute_w_post_intro
-  (mi: Seq.lseq (word SHA1) block_word_length)
+  (mi: Seq.lseq (word SHA1) (block_word_length SHA1))
   (n: nat)
   (res: Seq.lseq (word SHA1) n)
   (u: squash (n <= 80))
@@ -53,9 +53,8 @@ let compute_w_post_intro
 = Classical.forall_intro (Classical.move_requires f)
 
 inline_for_extraction
-
 let compute_w_n'
-  (mi: Seq.lseq (word SHA1) block_word_length)
+  (mi: Seq.lseq (word SHA1) (block_word_length SHA1))
   (n: nat { n <= 79 } )
   (w: ((i: nat {i < n}) -> Tot (y: word SHA1 {y == w' mi i})))
 : Tot (y: word SHA1 {y == w' mi n})
@@ -67,9 +66,8 @@ let compute_w_n'
   r
 
 inline_for_extraction
-
 let compute_w_n
-  (mi: Seq.lseq (word SHA1) block_word_length)
+  (mi: Seq.lseq (word SHA1) (block_word_length SHA1))
   (n: nat { n <= 79 } )
   (accu: Seq.lseq (word SHA1) n)
 : Pure (word SHA1)
@@ -80,9 +78,8 @@ let compute_w_n
   compute_w_n' mi n w
 
 inline_for_extraction
-
 let compute_w_next
-  (mi: Seq.lseq (word SHA1) block_word_length)
+  (mi: Seq.lseq (word SHA1) (block_word_length SHA1))
   (n: nat { n <= 79 } )
   (accu: Seq.lseq (word SHA1) n)
 : Pure (Seq.lseq (word SHA1) (n + 1))
@@ -104,7 +101,7 @@ let compute_w_next
   accu'
 
 let rec compute_w
-  (mi: Seq.lseq (word SHA1) block_word_length)
+  (mi: Seq.lseq (word SHA1) (block_word_length SHA1))
   (n: nat)
   (accu: Seq.lseq (word SHA1) n)
 : Pure (Seq.lseq (word SHA1) 80)
@@ -143,7 +140,7 @@ let k (t: size_t { v t <= 79 } ) : Tot (word SHA1) =
 
 (* Section 6.1.2 Step 3 *)
 
-let word_block = Seq.lseq (word SHA1) block_word_length
+let word_block = Seq.lseq (word SHA1) (block_word_length SHA1)
 
 let step3_body'_aux
   (mi: word_block)
@@ -236,7 +233,7 @@ let step4 = step4_aux
 let words_of_bytes_block
   (l: bytes { Seq.length l == block_length SHA1 } )
 : Tot word_block
-= words_of_bytes SHA1 #(block_word_length) l
+= words_of_bytes SHA1 #((block_word_length SHA1)) l
 
 (* Section 6.1.2: outer loop body *)
 

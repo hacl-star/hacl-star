@@ -180,8 +180,9 @@ val encap:
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
 #restart-solver
-#set-options "--z3rlimit 600 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 let encap cs skE pkR =
+  let _ = allow_inversion Spec.Agile.DH.algorithm in
   match DH.secret_to_public (kem_dh_of_cs cs) skE with
   | None -> None
   | Some pkE ->
@@ -204,8 +205,10 @@ val decap:
   -> skR: key_dh_secret_s cs ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 300 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 let decap cs enc skR =
+  let _ = allow_inversion Spec.Agile.DH.algorithm in
+  let _ = allow_inversion Spec.Agile.Hash.algorithm in
   let pkE = deserialize_public_key cs enc in
   match DH.dh (kem_dh_of_cs cs) skR pkE with
   | None -> None
@@ -228,8 +231,9 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 1000 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 let auth_encap cs skE pkR skS =
+  let _ = allow_inversion Spec.Agile.DH.algorithm in
   match DH.secret_to_public (kem_dh_of_cs cs) skE with
   | None -> None
   | Some pkE ->
@@ -269,8 +273,9 @@ val auth_decap:
   Tot (option (key_kem_s cs))
 
 #restart-solver
-#set-options "--z3rlimit 1000 --fuel 0 --ifuel 4"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 let auth_decap cs enc skR pkS =
+  let _ = allow_inversion Spec.Agile.DH.algorithm in
   let pkE = deserialize_public_key cs enc in
   match DH.dh (kem_dh_of_cs cs) skR pkE with
   | None -> None
@@ -510,6 +515,7 @@ let sealPSK cs skE pkR info aad pt psk psk_id =
     | None -> None
     | Some (_, ct) -> Some (enc, ct)
 
+#restart-solver
 let openPSK cs enc skR info aad ct psk psk_id =
   match setupPSKR cs enc skR info psk psk_id with
   | None -> None

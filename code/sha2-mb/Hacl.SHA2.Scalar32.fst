@@ -27,7 +27,7 @@ let sha224_update1 block hash = update #SHA2_224 #M32 block hash
 
 val sha224: dst:lbuffer uint8 28ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_224 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_224 /\
     live h0 input /\ live h0 dst /\ disjoint dst input)
   (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
     as_seq h1 dst == Spec.hash SHA2_224 (as_seq h0 input))
@@ -51,7 +51,7 @@ let sha256_update1 block hash = update #SHA2_256 #M32 block hash
 
 val sha256: dst:lbuffer uint8 32ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_256 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_256 /\
     live h0 input /\ live h0 dst /\ disjoint dst input)
   (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
     as_seq h1 dst == Spec.hash SHA2_256 (as_seq h0 input))
@@ -75,7 +75,7 @@ let sha384_update1 block hash = update #SHA2_384 #M32 block hash
 
 val sha384: dst:lbuffer uint8 48ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_384 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_384 /\
     live h0 input /\ live h0 dst /\ disjoint dst input)
   (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
     as_seq h1 dst == Spec.hash SHA2_384 (as_seq h0 input))
@@ -99,7 +99,7 @@ let sha512_update1 block hash = update #SHA2_512 #M32 block hash
 
 val sha512: dst:lbuffer uint8 64ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_512 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_512 /\
     live h0 input /\ live h0 dst /\ disjoint dst input)
   (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
     as_seq h1 dst == Spec.hash SHA2_512 (as_seq h0 input))

@@ -14,14 +14,14 @@ open Lib.IntTypes
 /// Auxiliary lemmas
 
 let key_and_data_fits (a:hash_alg) :
-  Lemma (block_length a + pow2 32 <= max_input_length a)
+  Lemma ((block_length a + pow2 32) `less_than_max_input_length` a)
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
 let hash_block_length_fits (a:hash_alg) :
-  Lemma (hash_length a + pow2 32 + block_length a < max_input_length a)
+  Lemma (if is_sha3 a then True else hash_length a + pow2 32 + block_length a < Some?.v(max_input_length a))
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);
@@ -136,11 +136,3 @@ val expand: a:EverCrypt.HMAC.supported_alg -> expand_st a
 (** @type: true
 *)
 val extract: a:EverCrypt.HMAC.supported_alg -> extract_st a
-
-[@(deprecated "expand")]
-let hkdf_expand a okm prk prklen info infolen len =
-  expand a okm prk prklen info infolen len
-
-[@(deprecated "extract")]
-let hkdf_extract a prk salt saltlen ikm ikmlen =
-  extract a prk salt saltlen ikm ikmlen
