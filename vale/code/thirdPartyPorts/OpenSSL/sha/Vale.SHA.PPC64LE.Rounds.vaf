@@ -778,6 +778,7 @@ procedure Loop_rounds_0_15(
         ghost hash_orig:hash256,
         ghost input_BE:seq(quad32))
     {:quick}
+    {:public}
     lets
         inp @= r4; tbl @= r6;
         a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
@@ -858,6 +859,7 @@ procedure Loop_rounds_16_47(
         ghost block:block_w,
         ghost hash_orig:hash256)
     {:quick}
+    {:public}
     {:typecheck false}
     lets
         tbl @= r6;
@@ -928,6 +930,7 @@ procedure Loop_rounds_48_63(
         ghost block:block_w,
         ghost hash_orig:hash256)
     {:quick}
+    {:public}
     lets
         tbl @= r6;
         a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
