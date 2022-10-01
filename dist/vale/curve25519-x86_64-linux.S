@@ -983,4 +983,4 @@ cswap2_e:
   movq %r9, 56(%rdx)
   ret
 
-
+.section .note.GNU-stack,"",%progbits
