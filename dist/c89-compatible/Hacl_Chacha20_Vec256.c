@@ -256,7 +256,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
   uint32_t ctr
 )
 {
-  Lib_IntVector_Intrinsics_vec256 ctx[16U] = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 ctx[16U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rem;
   uint32_t nb;
   uint32_t rem1;
@@ -270,7 +270,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     {
       uint8_t *uu____0 = out + i * (uint32_t)512U;
       uint8_t *uu____1 = text + i * (uint32_t)512U;
-      Lib_IntVector_Intrinsics_vec256 k[16U] = { 0U };
+      KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 k[16U] KRML_POST_ALIGN(32) = { 0U };
       chacha20_core_256(k, ctx, i);
       {
         Lib_IntVector_Intrinsics_vec256 st0 = k[0U];
@@ -515,7 +515,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     uint8_t plain[512U] = { 0U };
     memcpy(plain, uu____3, rem * sizeof (uint8_t));
     {
-      Lib_IntVector_Intrinsics_vec256 k[16U] = { 0U };
+      KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 k[16U] KRML_POST_ALIGN(32) = { 0U };
       chacha20_core_256(k, ctx, nb);
       {
         Lib_IntVector_Intrinsics_vec256 st0 = k[0U];
@@ -766,7 +766,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
   uint32_t ctr
 )
 {
-  Lib_IntVector_Intrinsics_vec256 ctx[16U] = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 ctx[16U] KRML_POST_ALIGN(32) = { 0U };
   uint32_t rem;
   uint32_t nb;
   uint32_t rem1;
@@ -780,7 +780,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     {
       uint8_t *uu____0 = out + i * (uint32_t)512U;
       uint8_t *uu____1 = cipher + i * (uint32_t)512U;
-      Lib_IntVector_Intrinsics_vec256 k[16U] = { 0U };
+      KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 k[16U] KRML_POST_ALIGN(32) = { 0U };
       chacha20_core_256(k, ctx, i);
       {
         Lib_IntVector_Intrinsics_vec256 st0 = k[0U];
@@ -1025,7 +1025,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     uint8_t plain[512U] = { 0U };
     memcpy(plain, uu____3, rem * sizeof (uint8_t));
     {
-      Lib_IntVector_Intrinsics_vec256 k[16U] = { 0U };
+      KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 k[16U] KRML_POST_ALIGN(32) = { 0U };
       chacha20_core_256(k, ctx, nb);
       {
         Lib_IntVector_Intrinsics_vec256 st0 = k[0U];

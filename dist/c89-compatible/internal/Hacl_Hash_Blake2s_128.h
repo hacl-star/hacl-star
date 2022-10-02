@@ -39,6 +39,15 @@ extern "C" {
 #include "../Hacl_Hash_Blake2s_128.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
+uint64_t Hacl_Hash_Blake2s_128_init_blake2s_128(Lib_IntVector_Intrinsics_vec128 *s);
+
+uint64_t
+Hacl_Hash_Blake2s_128_update_blake2s_128(
+  Lib_IntVector_Intrinsics_vec128 *s,
+  uint64_t totlen,
+  uint8_t *block
+);
+
 void
 Hacl_Hash_Blake2s_128_finish_blake2s_128(
   Lib_IntVector_Intrinsics_vec128 *s,
@@ -64,6 +73,8 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
 );
 
 void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, uint8_t *dst);
+
+Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_128_malloc_blake2s_128();
 
 #if defined(__cplusplus)
 }

@@ -32,8 +32,6 @@
 
 typedef uint8_t buftype;
 
-extern void C_String_print(C_String_t uu___);
-
 extern void
 Hacl_Impl_SHA3_keccak(
   uint32_t rate,
@@ -44,6 +42,8 @@ Hacl_Impl_SHA3_keccak(
   uint32_t outputByteLen,
   uint8_t *output
 );
+
+extern void C_String_print(C_String_t uu___);
 
 static void
 shake128_hacl(uint32_t inputByteLen, uint8_t *input, uint32_t outputByteLen, uint8_t *output)

@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "Hacl_Krmllib.h"
 #include "Hacl_Bignum_K256.h"
 #include "evercrypt_targetconfig.h"
 /* SNIPPET_START: Hacl_EC_K256_mk_felem_zero */

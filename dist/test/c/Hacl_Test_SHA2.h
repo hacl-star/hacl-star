@@ -29,6 +29,7 @@
 
 
 #include "krmllib.h"
+#include "libintvector.h"
 static inline FStar_UInt128_uint128
 FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 

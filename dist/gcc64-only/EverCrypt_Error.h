@@ -43,20 +43,9 @@ extern "C" {
 #define EverCrypt_Error_AuthenticationFailure 3
 #define EverCrypt_Error_InvalidIVLength 4
 #define EverCrypt_Error_DecodeError 5
+#define EverCrypt_Error_MaximumLengthExceeded 6
 
 typedef uint8_t EverCrypt_Error_error_code;
-
-bool EverCrypt_Error_uu___is_Success(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_UnsupportedAlgorithm(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_InvalidKey(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_AuthenticationFailure(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_InvalidIVLength(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee);
 
 #if defined(__cplusplus)
 }

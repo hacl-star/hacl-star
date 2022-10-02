@@ -25,7 +25,6 @@
 #include "Hacl_EC_K256.h"
 
 #include "internal/Hacl_K256_ECDSA.h"
-#include "internal/Hacl_Bignum.h"
 
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^256 - 0x1000003D1.
@@ -177,13 +176,7 @@ Write the point at infinity (additive identity) in `p`.
 */
 void Hacl_EC_K256_mk_point_at_inf(uint64_t *p)
 {
-  uint64_t *px = p;
-  uint64_t *py = p + (uint32_t)5U;
-  uint64_t *pz = p + (uint32_t)10U;
-  memset(px, 0U, (uint32_t)5U * sizeof (uint64_t));
-  memset(py, 0U, (uint32_t)5U * sizeof (uint64_t));
-  py[0U] = (uint64_t)1U;
-  memset(pz, 0U, (uint32_t)5U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointMul_make_point_at_inf(p);
 }
 
 /*
@@ -268,7 +261,14 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
 {
   uint64_t scalar_q[4U] = { 0U };
-  Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)32U, scalar, scalar_q);
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = scalar_q;
+    uint64_t u = load64_be(scalar + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
+    uint64_t x = u;
+    os[i] = x;);
   Hacl_Impl_K256_PointMul_point_mul(out, scalar_q, p);
 }
 

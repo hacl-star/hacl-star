@@ -100,6 +100,12 @@ void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out);
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_PointNegate_point_negate */
 
+/* SNIPPET_START: Hacl_Impl_Ed25519_Ladder_make_point_inf */
+
+void Hacl_Impl_Ed25519_Ladder_make_point_inf(uint64_t *b);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_Ladder_make_point_inf */
+
 /* SNIPPET_START: Hacl_Impl_Ed25519_Ladder_point_mul */
 
 void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
