@@ -35,12 +35,16 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "Lib_Memzero0.h"
 #include "Hacl_Spec.h"
+#include "Hacl_SHA3.h"
 #include "Hacl_Krmllib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "Hacl_Hash_MD5.h"
+#include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2b_256.h"
+#include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
 /* SNIPPET_START: EverCrypt_Hash_alg */
@@ -73,39 +77,9 @@ typedef void *EverCrypt_Hash_e_alg;
 
 /* SNIPPET_END: EverCrypt_Hash_e_alg */
 
-/* SNIPPET_START: EverCrypt_Hash_state_s_tags */
-
-#define EverCrypt_Hash_MD5_s 0
-#define EverCrypt_Hash_SHA1_s 1
-#define EverCrypt_Hash_SHA2_224_s 2
-#define EverCrypt_Hash_SHA2_256_s 3
-#define EverCrypt_Hash_SHA2_384_s 4
-#define EverCrypt_Hash_SHA2_512_s 5
-#define EverCrypt_Hash_Blake2S_s 6
-#define EverCrypt_Hash_Blake2B_s 7
-
-/* SNIPPET_END: EverCrypt_Hash_state_s_tags */
-
-typedef uint8_t EverCrypt_Hash_state_s_tags;
-
 /* SNIPPET_START: EverCrypt_Hash_state_s */
 
-typedef struct EverCrypt_Hash_state_s_s
-{
-  EverCrypt_Hash_state_s_tags tag;
-  union {
-    uint32_t *case_MD5_s;
-    uint32_t *case_SHA1_s;
-    uint32_t *case_SHA2_224_s;
-    uint32_t *case_SHA2_256_s;
-    uint64_t *case_SHA2_384_s;
-    uint64_t *case_SHA2_512_s;
-    uint32_t *case_Blake2S_s;
-    uint64_t *case_Blake2B_s;
-  }
-  ;
-}
-EverCrypt_Hash_state_s;
+typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
 
 /* SNIPPET_END: EverCrypt_Hash_state_s */
 
@@ -169,6 +143,16 @@ EverCrypt_Hash_uu___is_SHA2_512_s(
 
 /* SNIPPET_END: EverCrypt_Hash_uu___is_SHA2_512_s */
 
+/* SNIPPET_START: EverCrypt_Hash_uu___is_SHA3_256_s */
+
+bool
+EverCrypt_Hash_uu___is_SHA3_256_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+/* SNIPPET_END: EverCrypt_Hash_uu___is_SHA3_256_s */
+
 /* SNIPPET_START: EverCrypt_Hash_uu___is_Blake2S_s */
 
 bool
@@ -179,6 +163,16 @@ EverCrypt_Hash_uu___is_Blake2S_s(
 
 /* SNIPPET_END: EverCrypt_Hash_uu___is_Blake2S_s */
 
+/* SNIPPET_START: EverCrypt_Hash_uu___is_Blake2S_128_s */
+
+bool
+EverCrypt_Hash_uu___is_Blake2S_128_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+/* SNIPPET_END: EverCrypt_Hash_uu___is_Blake2S_128_s */
+
 /* SNIPPET_START: EverCrypt_Hash_uu___is_Blake2B_s */
 
 bool
@@ -188,6 +182,16 @@ EverCrypt_Hash_uu___is_Blake2B_s(
 );
 
 /* SNIPPET_END: EverCrypt_Hash_uu___is_Blake2B_s */
+
+/* SNIPPET_START: EverCrypt_Hash_uu___is_Blake2B_256_s */
+
+bool
+EverCrypt_Hash_uu___is_Blake2B_256_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+/* SNIPPET_END: EverCrypt_Hash_uu___is_Blake2B_256_s */
 
 /* SNIPPET_START: EverCrypt_Hash_state */
 
@@ -371,11 +375,17 @@ EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_init */
 
+/* SNIPPET_START: EverCrypt_Hash_Incremental_max_input_len64 */
+
+uint64_t EverCrypt_Hash_Incremental_max_input_len64(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_max_input_len64 */
+
 /* SNIPPET_START: EverCrypt_Hash_Incremental_update */
 
-void
+EverCrypt_Error_error_code
 EverCrypt_Hash_Incremental_update(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s,
   uint8_t *data,
   uint32_t len
 );
@@ -421,6 +431,16 @@ EverCrypt_Hash_Incremental_finish_sha256(
 );
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha256 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_sha3_256 */
+
+void
+EverCrypt_Hash_Incremental_finish_sha3_256(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha3_256 */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_finish_sha384 */
 

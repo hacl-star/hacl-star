@@ -128,11 +128,10 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
   uint64_t c1;
   if ((uint32_t)1U < nLen)
   {
-    uint32_t rLen = nLen - (uint32_t)1U;
     uint64_t *a1 = p_n + (uint32_t)1U;
     uint64_t *res1 = p_n1 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (nLen - (uint32_t)1U) / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -147,7 +146,12 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for
+    (uint32_t
+      i = (nLen - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+      i
+      < nLen - (uint32_t)1U;
+      i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;

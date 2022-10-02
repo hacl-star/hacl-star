@@ -22,14 +22,43 @@
  */
 
 
-#include "EverCrypt.h"
+#ifndef __Hacl_Streaming_SHA3_H
+#define __Hacl_Streaming_SHA3_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
+#include "Lib_Memzero0.h"
+#include "Hacl_Streaming_SHA2.h"
+#include "Hacl_SHA3.h"
+#include "evercrypt_targetconfig.h"
+typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA3_state_sha3_256;
 
-typedef struct EverCrypt_AEAD_state_s_s
-{
-  Spec_Cipher_Expansion_impl impl;
-  uint8_t *ek;
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256();
+
+void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
+
+void
+Hacl_Streaming_SHA3_update_256(
+  Hacl_Streaming_SHA2_state_sha2_384 *p,
+  uint8_t *data,
+  uint32_t len
+);
+
+void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
+
+void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
+
+#if defined(__cplusplus)
 }
-EverCrypt_AEAD_state_s;
+#endif
 
+#define __Hacl_Streaming_SHA3_H_DEFINED
+#endif
