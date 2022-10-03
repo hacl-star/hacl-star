@@ -10,12 +10,12 @@ open Lib.Buffer
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 
+module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
 module PT = Hacl.Impl.PrecompTable
-module BPT = Hacl.Spec.K256.PrecompTable
-module BPTL = Hacl.Spec.K256.PrecompTable.Lemmas
+module SPT = Hacl.Spec.PrecompBaseTable
 
 module S = Spec.K256
 module SL = Spec.K256.Lemmas
@@ -90,6 +90,67 @@ let mk_k256_concrete_ops : BE.concrete_ops U64 15ul 0ul = {
 //////////////////////////////////////////////////////
 
 inline_for_extraction noextract
+val proj_point_to_list: p:S.proj_point
+  -> x:list uint64{FStar.List.Tot.length x = 15 /\
+    mk_to_k256_comm_monoid.BE.linv (Seq.seq_of_list x)}
+
+let proj_point_to_list p =
+  Hacl.Spec.K256.PrecompTable.proj_point_to_list_lemma p;
+  Hacl.Spec.K256.PrecompTable.proj_point_to_list p
+
+val lemma_refl: x:S.proj_point ->
+  Lemma (S.mk_k256_concrete_ops.SE.to.SE.refl x ==
+    mk_to_k256_comm_monoid.BE.refl (Seq.seq_of_list (proj_point_to_list x)))
+
+let lemma_refl x =
+  assert (S.mk_k256_concrete_ops.SE.to.SE.refl x == S.to_aff_point x);
+  assert (mk_to_k256_comm_monoid.BE.refl (Seq.seq_of_list (proj_point_to_list x)) ==
+    S.to_aff_point (point_eval_lseq (Seq.seq_of_list (proj_point_to_list x))));
+  Hacl.Spec.K256.PrecompTable.proj_point_to_list_eval x;
+  assert (Hacl.Spec.K256.PrecompTable.point_eval_list (proj_point_to_list x) == x);
+  assert (point_eval_lseq (Seq.seq_of_list (proj_point_to_list x)) == x)
+
+
+inline_for_extraction noextract
+let mk_k256_precomp_base_table: SPT.mk_precomp_base_table S.proj_point U64 15ul 0ul = {
+  SPT.concr_ops = S.mk_k256_concrete_ops;
+  SPT.to_cm = mk_to_k256_comm_monoid;
+  SPT.to_list = proj_point_to_list;
+  SPT.lemma_refl = lemma_refl;
+}
+
+unfold let precomp_basepoint_table_list: x:list uint64{FStar.List.Tot.length x = 240} =
+  normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 15)
+
+inline_for_extraction noextract
+let precomp_basepoint_table_lseq : LSeq.lseq uint64 240 =
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 15);
+  Seq.seq_of_list precomp_basepoint_table_list
+
+inline_for_extraction noextract
+let pow_base_point (k:nat) =
+  LE.pow S.mk_k256_comm_monoid (S.to_aff_point S.g) k
+
+unfold
+let precomp_table_acc_inv
+  (table_len:nat{table_len * 15 <= max_size_t})
+  (table:LSeq.lseq uint64 (table_len * 15))
+  (j:nat{j < table_len})
+=
+  Math.Lemmas.lemma_mult_lt_right 15 j table_len;
+  Math.Lemmas.lemma_mult_le_right 15 (j + 1) table_len;
+  let bj = LSeq.sub table (j * 15) 15 in
+  point_inv_lseq bj /\ S.to_aff_point (point_eval_lseq bj) == pow_base_point j
+
+val precomp_basepoint_table_lemma: unit ->
+  Lemma (forall (i:nat{i < 16}). precomp_table_acc_inv 16 precomp_basepoint_table_lseq i)
+let precomp_basepoint_table_lemma () =
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 15);
+  SPT.precomp_base_table_lemma mk_k256_precomp_base_table S.g 16 precomp_basepoint_table_lseq
+
+/////////////////////////////////////////////////////
+
+inline_for_extraction noextract
 val make_g: g:point -> Stack unit
   (requires fun h -> live h g)
   (ensures  fun h0 _ h1 -> modifies (loc g) h0 h1 /\
@@ -153,8 +214,8 @@ let table_inv : BE.table_inv_t U64 15ul 16ul =
 
 
 let precomp_basepoint_table:
-  x:glbuffer uint64 240ul{witnessed x BPT.precomp_basepoint_table_lseq /\ recallable x} =
-  createL_global BPT.precomp_basepoint_table_list
+  x:glbuffer uint64 240ul{witnessed x precomp_basepoint_table_lseq /\ recallable x} =
+  createL_global precomp_basepoint_table_list
 
 
 inline_for_extraction noextract
@@ -181,9 +242,9 @@ let point_mul_g_noalloc out scalar g =
   let h0 = ST.get () in
   SE.exp_fw_lemma S.mk_k256_concrete_ops (point_eval h0 g) 256 (qas_nat h0 scalar) 4;
 
-  recall_contents precomp_basepoint_table BPT.precomp_basepoint_table_lseq;
+  recall_contents precomp_basepoint_table precomp_basepoint_table_lseq;
   let h1 = ST.get () in
-  BPTL.precomp_basepoint_table_lemma ();
+  precomp_basepoint_table_lemma ();
   assert (table_inv (as_seq h1 g) (as_seq h1 precomp_basepoint_table));
   assert (point_eval h1 g == S.g);
 
@@ -244,9 +305,9 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let bBits = 256ul in
 
   let h0 = ST.get () in
-  recall_contents precomp_basepoint_table BPT.precomp_basepoint_table_lseq;
+  recall_contents precomp_basepoint_table precomp_basepoint_table_lseq;
   let h1 = ST.get () in
-  BPTL.precomp_basepoint_table_lemma ();
+  precomp_basepoint_table_lemma ();
   assert (table_inv (as_seq h1 q1) (as_seq h1 precomp_basepoint_table));
   assert (table_inv (as_seq h1 q2) (as_seq h1 table2));
 
