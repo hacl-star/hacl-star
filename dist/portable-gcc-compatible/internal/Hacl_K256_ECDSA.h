@@ -76,6 +76,12 @@ void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
 
 /* SNIPPET_END: Hacl_Impl_K256_PointAdd_point_add */
 
+/* SNIPPET_START: Hacl_Impl_K256_PointMul_make_point_at_inf */
+
+void Hacl_Impl_K256_PointMul_make_point_at_inf(uint64_t *p);
+
+/* SNIPPET_END: Hacl_Impl_K256_PointMul_make_point_at_inf */
+
 /* SNIPPET_START: Hacl_Impl_K256_PointMul_point_mul */
 
 void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t *q);

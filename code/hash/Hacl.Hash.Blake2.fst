@@ -129,7 +129,7 @@ let blake2_update_last_block_st (a : hash_alg{is_blake a}) (m : m_spec a) =
   input:B.buffer uint8 ->
   input_len:size_t { B.length input == v input_len /\ v input_len <= block_length a /\
                      (* If the algorithm is not blake, ``extra_state_v ev`` is 0 *)
-                     (extra_state_v ev) + v input_len <= max_input a } ->
+                     (extra_state_v ev + v input_len) `less_than_max_input_length` a } ->
   ST.Stack unit
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input))
@@ -228,7 +228,7 @@ let mk_update_last_ a m update_multi blake2_update_last_block s ev prev_len inpu
   (**)                                                            (B.as_seq h0 blocks);
   (**) Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 ev (B.length blocks);
   (**) assert(extra_state_v ev' = extra_state_v ev + B.length blocks);
-  (**) assert(extra_state_v ev' + U32.v rest_len <= max_input a);
+  (**) assert((extra_state_v ev' + U32.v rest_len) `less_than_max_input_length` a);
   blake2_update_last_block s ev' rest rest_len;
   initial_extra_state a
 
