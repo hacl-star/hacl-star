@@ -338,7 +338,7 @@ if [ ! -z "$build_target" ]; then
     CROSS_TARGET="-target arm64-apple-ios13.0"
     CROSS_SYSROOT="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch arm64"
     # CROSS_INCLUDES="-I$SYSROOT/usr/include/"
-  elif [[ "$build_target" == "x86_64-apple-ios-simulator" ]]; then
+  elif [[ "$build_target" == "x86_64-apple-ios-simulator13.0" ]]; then
     # Cross compiling for x86_64-apple-ios (emulator only)
     # (presumably on x86_64-apple-darwin).
     target_arch="x86_64"
