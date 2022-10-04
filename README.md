@@ -1,6 +1,6 @@
 # A High-Assurance Cryptographic Library
 
-This repository contains verified code for a library of modern
+Thi repository contains verified code for a library of modern
 cryptographic algorithms, including Curve25519, Ed25519, AES-GCM,
 Chacha20, Poly1305, SHA-2, SHA-3, HMAC, and HKDF. This set of algorithms
 is enough to support the full NaCl API and several TLS 1.3 ciphersuites.
