@@ -493,34 +493,3 @@ EverCrypt_HKDF_extract(
   }
 }
 
-KRML_DEPRECATED("expand")
-
-void
-EverCrypt_HKDF_hkdf_expand(
-  Spec_Hash_Definitions_hash_alg a,
-  uint8_t *okm,
-  uint8_t *prk,
-  uint32_t prklen,
-  uint8_t *info,
-  uint32_t infolen,
-  uint32_t len
-)
-{
-  EverCrypt_HKDF_expand(a, okm, prk, prklen, info, infolen, len);
-}
-
-KRML_DEPRECATED("extract")
-
-void
-EverCrypt_HKDF_hkdf_extract(
-  Spec_Hash_Definitions_hash_alg a,
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
-{
-  EverCrypt_HKDF_extract(a, prk, salt, saltlen, ikm, ikmlen);
-}
-

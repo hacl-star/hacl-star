@@ -31,8 +31,8 @@
 static inline void
 sha224_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec128 *hash)
 {
-  Lib_IntVector_Intrinsics_vec128 hash_old[8U] = { 0U };
-  Lib_IntVector_Intrinsics_vec128 ws[16U] = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 hash_old[8U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 ws[16U] KRML_POST_ALIGN(16) = { 0U };
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec128));
   uint8_t *b3 = block.snd.snd.snd;
   uint8_t *b2 = block.snd.snd.fst;
@@ -239,7 +239,7 @@ sha224_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec
       hash[5U] = f1;
       hash[6U] = g1;
       hash[7U] = h12;);
-    if (i0 < (uint32_t)4U - (uint32_t)1U)
+    if (i0 < (uint32_t)3U)
     {
       KRML_MAYBE_FOR16(i,
         (uint32_t)0U,
@@ -300,7 +300,7 @@ Hacl_SHA2_Vec128_sha224_4(
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
   Hacl_Impl_SHA2_Types_uint8_4p
   rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
-  Lib_IntVector_Intrinsics_vec128 st[8U] = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 st[8U] KRML_POST_ALIGN(16) = { 0U };
   KRML_MAYBE_FOR8(i,
     (uint32_t)0U,
     (uint32_t)8U,
@@ -403,9 +403,7 @@ Hacl_SHA2_Vec128_sha224_4(
   {
     sha224_update4(last1, st);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)4U * (uint32_t)8U * (uint32_t)4U);
-  uint8_t hbuf[(uint32_t)4U * (uint32_t)8U * (uint32_t)4U];
-  memset(hbuf, 0U, (uint32_t)4U * (uint32_t)8U * (uint32_t)4U * sizeof (uint8_t));
+  uint8_t hbuf[128U] = { 0U };
   Lib_IntVector_Intrinsics_vec128 v00 = st[0U];
   Lib_IntVector_Intrinsics_vec128 v10 = st[1U];
   Lib_IntVector_Intrinsics_vec128 v20 = st[2U];
@@ -492,8 +490,8 @@ Hacl_SHA2_Vec128_sha224_4(
 static inline void
 sha256_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec128 *hash)
 {
-  Lib_IntVector_Intrinsics_vec128 hash_old[8U] = { 0U };
-  Lib_IntVector_Intrinsics_vec128 ws[16U] = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 hash_old[8U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 ws[16U] KRML_POST_ALIGN(16) = { 0U };
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec128));
   uint8_t *b3 = block.snd.snd.snd;
   uint8_t *b2 = block.snd.snd.fst;
@@ -700,7 +698,7 @@ sha256_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec
       hash[5U] = f1;
       hash[6U] = g1;
       hash[7U] = h12;);
-    if (i0 < (uint32_t)4U - (uint32_t)1U)
+    if (i0 < (uint32_t)3U)
     {
       KRML_MAYBE_FOR16(i,
         (uint32_t)0U,
@@ -761,7 +759,7 @@ Hacl_SHA2_Vec128_sha256_4(
   ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
   Hacl_Impl_SHA2_Types_uint8_4p
   rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
-  Lib_IntVector_Intrinsics_vec128 st[8U] = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 st[8U] KRML_POST_ALIGN(16) = { 0U };
   KRML_MAYBE_FOR8(i,
     (uint32_t)0U,
     (uint32_t)8U,
@@ -864,9 +862,7 @@ Hacl_SHA2_Vec128_sha256_4(
   {
     sha256_update4(last1, st);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)4U * (uint32_t)8U * (uint32_t)4U);
-  uint8_t hbuf[(uint32_t)4U * (uint32_t)8U * (uint32_t)4U];
-  memset(hbuf, 0U, (uint32_t)4U * (uint32_t)8U * (uint32_t)4U * sizeof (uint8_t));
+  uint8_t hbuf[128U] = { 0U };
   Lib_IntVector_Intrinsics_vec128 v00 = st[0U];
   Lib_IntVector_Intrinsics_vec128 v10 = st[1U];
   Lib_IntVector_Intrinsics_vec128 v20 = st[2U];

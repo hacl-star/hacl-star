@@ -32,29 +32,32 @@ Hacl_Streaming_Poly1305_128_poly1305_128_state
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec128
   *r1 =
-    (Lib_IntVector_Intrinsics_vec128 *)KRML_HOST_CALLOC((uint32_t)25U,
-      sizeof (Lib_IntVector_Intrinsics_vec128));
-  Lib_IntVector_Intrinsics_vec128 *block_state = r1;
-  uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-  uint8_t *k_0;
-  memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
-  k_0 = k_;
+    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+      sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)25U);
+  memset(r1, 0U, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec128));
   {
-    Hacl_Streaming_Poly1305_128_poly1305_128_state s;
-    s.block_state = block_state;
-    s.buf = buf;
-    s.total_len = (uint64_t)0U;
-    s.p_key = k_0;
-    KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Poly1305_128_poly1305_128_state), (uint32_t)1U);
+    Lib_IntVector_Intrinsics_vec128 *block_state = r1;
+    uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+    uint8_t *k_0;
+    memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
+    k_0 = k_;
     {
-      Hacl_Streaming_Poly1305_128_poly1305_128_state
-      *p =
-        (Hacl_Streaming_Poly1305_128_poly1305_128_state *)KRML_HOST_MALLOC(sizeof (
-            Hacl_Streaming_Poly1305_128_poly1305_128_state
-          ));
-      p[0U] = s;
-      Hacl_Poly1305_128_poly1305_init(block_state, k);
-      return p;
+      Hacl_Streaming_Poly1305_128_poly1305_128_state s;
+      s.block_state = block_state;
+      s.buf = buf;
+      s.total_len = (uint64_t)0U;
+      s.p_key = k_0;
+      KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Poly1305_128_poly1305_128_state), (uint32_t)1U);
+      {
+        Hacl_Streaming_Poly1305_128_poly1305_128_state
+        *p =
+          (Hacl_Streaming_Poly1305_128_poly1305_128_state *)KRML_HOST_MALLOC(sizeof (
+              Hacl_Streaming_Poly1305_128_poly1305_128_state
+            ));
+        p[0U] = s;
+        Hacl_Poly1305_128_poly1305_init(block_state, k);
+        return p;
+      }
     }
   }
 }
@@ -302,7 +305,7 @@ Hacl_Streaming_Poly1305_128_finish(
   }
   {
     uint8_t *buf_1 = buf_;
-    Lib_IntVector_Intrinsics_vec128 r1[25U] = { 0U };
+    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 r1[25U] KRML_POST_ALIGN(16) = { 0U };
     Lib_IntVector_Intrinsics_vec128 *tmp_block_state = r1;
     uint32_t ite0;
     uint8_t *buf_last;
@@ -350,7 +353,7 @@ Hacl_Streaming_Poly1305_128_finish(
     }
     Hacl_Poly1305_128_poly1305_update(tmp_block_state, ite, buf_last);
     {
-      Lib_IntVector_Intrinsics_vec128 tmp[25U] = { 0U };
+      KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 tmp[25U] KRML_POST_ALIGN(16) = { 0U };
       memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec128));
       Hacl_Poly1305_128_poly1305_finish(dst, k_, tmp);
     }
@@ -364,7 +367,7 @@ void Hacl_Streaming_Poly1305_128_free(Hacl_Streaming_Poly1305_128_poly1305_128_s
   uint8_t *buf = scrut.buf;
   Lib_IntVector_Intrinsics_vec128 *block_state = scrut.block_state;
   KRML_HOST_FREE(k_);
-  KRML_HOST_FREE(block_state);
+  KRML_ALIGNED_FREE(block_state);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(s);
 }

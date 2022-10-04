@@ -39,10 +39,11 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
 #include "Hacl_Krmllib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "Hacl_Hash_MD5.h"
+#include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2b_256.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
@@ -56,35 +57,7 @@ typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg13;
 
 typedef void *EverCrypt_Hash_e_alg;
 
-#define EverCrypt_Hash_MD5_s 0
-#define EverCrypt_Hash_SHA1_s 1
-#define EverCrypt_Hash_SHA2_224_s 2
-#define EverCrypt_Hash_SHA2_256_s 3
-#define EverCrypt_Hash_SHA2_384_s 4
-#define EverCrypt_Hash_SHA2_512_s 5
-#define EverCrypt_Hash_SHA3_256_s 6
-#define EverCrypt_Hash_Blake2S_s 7
-#define EverCrypt_Hash_Blake2B_s 8
-
-typedef uint8_t EverCrypt_Hash_state_s_tags;
-
-typedef struct EverCrypt_Hash_state_s_s
-{
-  EverCrypt_Hash_state_s_tags tag;
-  union {
-    uint32_t *case_MD5_s;
-    uint32_t *case_SHA1_s;
-    uint32_t *case_SHA2_224_s;
-    uint32_t *case_SHA2_256_s;
-    uint64_t *case_SHA2_384_s;
-    uint64_t *case_SHA2_512_s;
-    uint64_t *case_SHA3_256_s;
-    uint32_t *case_Blake2S_s;
-    uint64_t *case_Blake2B_s;
-  }
-  ;
-}
-EverCrypt_Hash_state_s;
+typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
@@ -135,7 +108,19 @@ EverCrypt_Hash_uu___is_Blake2S_s(
 );
 
 bool
+EverCrypt_Hash_uu___is_Blake2S_128_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+bool
 EverCrypt_Hash_uu___is_Blake2B_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+bool
+EverCrypt_Hash_uu___is_Blake2B_256_s(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );

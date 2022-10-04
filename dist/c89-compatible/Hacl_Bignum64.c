@@ -487,13 +487,12 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
                     uint64_t c1;
                     if ((uint32_t)1U < len)
                     {
-                      uint32_t rLen = len - (uint32_t)1U;
                       uint64_t *a1 = n + (uint32_t)1U;
                       uint64_t *res1 = n2 + (uint32_t)1U;
                       uint64_t c = c0;
                       {
                         uint32_t i;
-                        for (i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+                        for (i = (uint32_t)0U; i < (len - (uint32_t)1U) / (uint32_t)4U; i++)
                         {
                           uint64_t t1 = a1[(uint32_t)4U * i];
                           uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -525,7 +524,12 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
                       }
                       {
                         uint32_t i;
-                        for (i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+                        for
+                        (i
+                          = (len - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+                          i
+                          < len - (uint32_t)1U;
+                          i++)
                         {
                           uint64_t t1 = a1[i];
                           uint64_t *res_i = res1 + i;
@@ -770,13 +774,12 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
       uint64_t c1;
       if ((uint32_t)1U < len1)
       {
-        uint32_t rLen = len1 - (uint32_t)1U;
         uint64_t *a1 = k1.n + (uint32_t)1U;
         uint64_t *res1 = n2 + (uint32_t)1U;
         uint64_t c = c0;
         {
           uint32_t i;
-          for (i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+          for (i = (uint32_t)0U; i < (len1 - (uint32_t)1U) / (uint32_t)4U; i++)
           {
             uint64_t t1 = a1[(uint32_t)4U * i];
             uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -800,7 +803,12 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
         }
         {
           uint32_t i;
-          for (i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+          for
+          (i
+            = (len1 - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+            i
+            < len1 - (uint32_t)1U;
+            i++)
           {
             uint64_t t1 = a1[i];
             uint64_t *res_i = res1 + i;
@@ -967,16 +975,13 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
     uint8_t tmp[tmpLen];
     memset(tmp, 0U, tmpLen * sizeof (uint8_t));
     {
-      uint32_t numb = (uint32_t)8U;
+      uint32_t i;
+      for (i = (uint32_t)0U; i < bnLen; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < bnLen; i++)
-        {
-          store64_be(tmp + i * numb, b[bnLen - i - (uint32_t)1U]);
-        }
+        store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
       }
-      memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
     }
+    memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
   }
 }
 
