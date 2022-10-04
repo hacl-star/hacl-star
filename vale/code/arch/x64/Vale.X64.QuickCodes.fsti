@@ -437,10 +437,9 @@ unfold let normal_steps : list string =
     `%FStar.FunctionalExtensionality.on_dom;
   ]
 
-unfold let normal (x:Type0) : Type0 = norm [iota; zeta; simplify; primops; delta_attr [`%va_qattr]; delta_only normal_steps] x
+unfold let normal (x:Type0) : Type0 = norm [nbe; iota; zeta; simplify; primops; delta_attr [`%va_qattr]; delta_only normal_steps] x
 
 val va_wp_sound_code_norm (#a:Type0) (c:code) (qc:quickCode a c) (s0:va_state) (k:(s0':va_state{s0 == s0'}) -> va_state -> a -> Type0) :
   Ghost (va_state & fuel & a)
     (t_require s0 /\ normal (wp_sound_code_pre qc s0 k))
     (wp_sound_code_post qc s0 k)
-
