@@ -344,7 +344,7 @@ if [ ! -z "$build_target" ]; then
     target_arch="x86_64"
     target_sys="apple"
     target_abi="ios-simulator"
-    CROSS_TARGET="-target x86_64-apple-ios-simulator13.0"
+    CROSS_TARGET="-target x86_64-apple-ios-simulator -mios-simulator-version-min=13.0"
     CROSS_SYSROOT="-isysroot $(xcrun --sdk iphonesimulator --show-sdk-path)"
   else
     show_help
