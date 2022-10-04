@@ -229,7 +229,7 @@ val mk_point_at_inf: p:F51.point ->
   Stack unit
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    F51.point_inv_t h1 p /\ ML.inv_ext_point (as_seq h1 p) /\
+    F51.point_inv_t h1 p /\ F51.inv_ext_point (as_seq h1 p) /\
     SE.to_aff_point (F51.point_eval h1 p) == SE.aff_point_at_infinity)
 
 let mk_point_at_inf p =
@@ -243,7 +243,7 @@ val mk_base_point: p:F51.point ->
   Stack unit
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    F51.point_inv_t h1 p /\ ML.inv_ext_point (as_seq h1 p) /\
+    F51.point_inv_t h1 p /\ F51.inv_ext_point (as_seq h1 p) /\
     SE.to_aff_point (F51.point_eval h1 p) == SE.aff_g)
 
 let mk_base_point p =
@@ -262,14 +262,14 @@ val point_negate: p:F51.point -> out:F51.point ->
   Stack unit
   (requires fun h ->
     live h out /\ live h p /\ disjoint out p /\
-    F51.point_inv_t h p /\ ML.inv_ext_point (as_seq h p))
+    F51.point_inv_t h p /\ F51.inv_ext_point (as_seq h p))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
+    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
     F51.point_eval h1 out == Spec.Ed25519.point_negate (F51.point_eval h0 p))
 
 let point_negate p out =
   let h0 = ST.get () in
-  Spec.Ed25519.Lemmas.to_aff_point_negate (ML.refl_ext_point (as_seq h0 p));
+  Spec.Ed25519.Lemmas.to_aff_point_negate (F51.refl_ext_point (as_seq h0 p));
   Hacl.Impl.Ed25519.PointNegate.point_negate p out
 
 
@@ -286,18 +286,18 @@ val point_add: p:F51.point -> q:F51.point -> out:F51.point ->
     live h out /\ live h p /\ live h q /\
     eq_or_disjoint p q /\
     eq_or_disjoint p out /\ eq_or_disjoint q out /\
-    F51.point_inv_t h p /\ ML.inv_ext_point (as_seq h p) /\
-    F51.point_inv_t h q /\ ML.inv_ext_point (as_seq h q))
+    F51.point_inv_t h p /\ F51.inv_ext_point (as_seq h p) /\
+    F51.point_inv_t h q /\ F51.inv_ext_point (as_seq h q))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
+    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
     F51.point_eval h1 out ==
     SE.point_add (F51.point_eval h0 p) (F51.point_eval h0 q))
 
 let point_add p q out =
   let h0 = ST.get () in
   Spec.Ed25519.Lemmas.to_aff_point_add_lemma
-    (ML.refl_ext_point (as_seq h0 p))
-    (ML.refl_ext_point (as_seq h0 q));
+    (F51.refl_ext_point (as_seq h0 p))
+    (F51.refl_ext_point (as_seq h0 q));
   Hacl.Impl.Ed25519.PointAdd.point_add out p q
 
 
@@ -313,14 +313,14 @@ val point_double: p:F51.point -> out:F51.point ->
   (requires fun h ->
     live h out /\ live h p /\
     eq_or_disjoint p out /\
-    F51.point_inv_t h p /\ ML.inv_ext_point (as_seq h p))
+    F51.point_inv_t h p /\ F51.inv_ext_point (as_seq h p))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
+    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
     F51.point_eval h1 out == SE.point_double (F51.point_eval h0 p))
 
 let point_double p out =
   let h0 = ST.get () in
-  Spec.Ed25519.Lemmas.to_aff_point_double_lemma (ML.refl_ext_point (as_seq h0 p));
+  Spec.Ed25519.Lemmas.to_aff_point_double_lemma (F51.refl_ext_point (as_seq h0 p));
   Hacl.Impl.Ed25519.PointDouble.point_double out p
 
 
@@ -341,9 +341,9 @@ val point_mul: scalar:lbuffer uint8 32ul -> p:F51.point -> out:F51.point ->
     live h scalar /\ live h p /\ live h out /\
     disjoint out p /\ disjoint out scalar /\
     disjoint p scalar /\
-    F51.point_inv_t h p /\ ML.inv_ext_point (as_seq h p))
+    F51.point_inv_t h p /\ F51.inv_ext_point (as_seq h p))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
+    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
     SE.to_aff_point (F51.point_eval h1 out) ==
     SE.to_aff_point (SE.point_mul (as_seq h0 scalar) (F51.point_eval h0 p)))
 
@@ -411,7 +411,7 @@ val point_decompress: s:lbuffer uint8 32ul -> out:F51.point ->
   (requires fun h ->
     live h out /\ live h s /\ disjoint s out)
   (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
-    (b ==> F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out)) /\
+    (b ==> F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out)) /\
     (b <==> Some? (SE.point_decompress (as_seq h0 s))) /\
     (b ==> (F51.point_eval h1 out == Some?.v (SE.point_decompress (as_seq h0 s)))))
 
