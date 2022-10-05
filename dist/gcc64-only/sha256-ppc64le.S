@@ -1180,4 +1180,4 @@ L1:
 
   blr
 
-
+.section .note.GNU-stack,"",%progbits
