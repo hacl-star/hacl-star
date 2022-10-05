@@ -55,6 +55,10 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)64U;
       }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)32U;
@@ -635,6 +639,7 @@ uint64_t
   {
     return pkey2;
   }
+  KRML_HOST_FREE(pkey2);
   return NULL;
 }
 
@@ -722,6 +727,7 @@ uint64_t
   {
     return skey2;
   }
+  KRML_HOST_FREE(skey2);
   return NULL;
 }
 

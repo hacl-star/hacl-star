@@ -64,23 +64,32 @@ let bn_from_bytes_be_st (t:limb_t) =
 
 
 inline_for_extraction noextract
-val mk_bn_from_bytes_be: #t:limb_t -> bn_from_bytes_be_st t
-let mk_bn_from_bytes_be #t len b res =
-  [@inline_let]
-  let numb = size (numbytes t) in
-  let h0 = ST.get () in
+val mk_bn_from_bytes_be: #t:limb_t -> is_known_len:bool -> bn_from_bytes_be_st t
+let mk_bn_from_bytes_be #t is_known_len len b res =
   push_frame ();
-  let bnLen = blocks len numb in
-  let tmpLen = numb *! bnLen in
-  let tmp = create tmpLen (u8 0) in
-  update_sub tmp (tmpLen -! len) len b;
-  bn_from_bytes_be_ bnLen tmp res;
+  if is_known_len then begin
+    [@inline_let] let numb = size (numbytes t) in
+    [@inline_let] let bnLen = blocks len numb in
+    [@inline_let] let tmpLen = numb *! bnLen in
+    if tmpLen =. len then
+      bn_from_bytes_be_ bnLen b res
+    else begin
+      let tmp = create tmpLen (u8 0) in
+      update_sub tmp (tmpLen -! len) len b;
+      bn_from_bytes_be_ bnLen tmp res end end
+  else begin
+    [@inline_let] let numb = size (numbytes t) in
+    let bnLen = blocks len numb in
+    let tmpLen = numb *! bnLen in
+    let tmp = create tmpLen (u8 0) in
+    update_sub tmp (tmpLen -! len) len b;
+    bn_from_bytes_be_ bnLen tmp res end;
   pop_frame ()
 
 
 [@CInline]
-let bn_from_bytes_be_uint32 : bn_from_bytes_be_st U32 = mk_bn_from_bytes_be #U32
-let bn_from_bytes_be_uint64 : bn_from_bytes_be_st U64 = mk_bn_from_bytes_be #U64
+let bn_from_bytes_be_uint32 : bn_from_bytes_be_st U32 = mk_bn_from_bytes_be #U32 false
+let bn_from_bytes_be_uint64 : bn_from_bytes_be_st U64 = mk_bn_from_bytes_be #U64 false
 
 
 inline_for_extraction noextract
@@ -103,24 +112,33 @@ let bn_from_bytes_le_st (t:limb_t) =
 
 
 inline_for_extraction noextract
-val mk_bn_from_bytes_le: #t:limb_t -> bn_from_bytes_le_st t
-let mk_bn_from_bytes_le #t len b res =
-  [@inline_let]
-  let numb = size (numbytes t) in
-  let h0 = ST.get () in
+val mk_bn_from_bytes_le: #t:limb_t -> is_known_len:bool -> bn_from_bytes_le_st t
+let mk_bn_from_bytes_le #t is_known_len len b res =
   push_frame ();
-  let bnLen = blocks len numb in
-  let tmpLen = numb *! bnLen in
-  let tmp = create tmpLen (u8 0) in
-  update_sub tmp 0ul len b;
-  uints_from_bytes_le res tmp;
+  if is_known_len then begin
+    [@inline_let] let numb = size (numbytes t) in
+    [@inline_let] let bnLen = blocks len numb in
+    [@inline_let] let tmpLen = numb *! bnLen in
+    if tmpLen =. len then
+      uints_from_bytes_le res b
+    else begin
+      let tmp = create tmpLen (u8 0) in
+      update_sub tmp 0ul len b;
+      uints_from_bytes_le res tmp end end
+  else begin
+    [@inline_let] let numb = size (numbytes t) in
+    let bnLen = blocks len numb in
+    let tmpLen = numb *! bnLen in
+    let tmp = create tmpLen (u8 0) in
+    update_sub tmp 0ul len b;
+    uints_from_bytes_le res tmp end;
   pop_frame ()
 
 
 [@CInline]
-let bn_from_bytes_le_uint32 : bn_from_bytes_le_st U32 = mk_bn_from_bytes_le #U32
+let bn_from_bytes_le_uint32 : bn_from_bytes_le_st U32 = mk_bn_from_bytes_le #U32 false
 [@CInline]
-let bn_from_bytes_le_uint64 : bn_from_bytes_le_st U64 = mk_bn_from_bytes_le #U64
+let bn_from_bytes_le_uint64 : bn_from_bytes_le_st U64 = mk_bn_from_bytes_le #U64 false
 
 
 inline_for_extraction noextract
@@ -143,7 +161,7 @@ val bn_to_bytes_be_:
     as_seq h1 res == S.bn_to_bytes_be_ (v len) (as_seq h0 b))
 
 let bn_to_bytes_be_ #t len b res =
-  let numb = size (numbytes t) in
+  [@inline_let] let numb = size (numbytes t) in
   let h0 = ST.get () in
   [@ inline_let]
   let a_spec (i:nat{i <= v len}) = unit in
@@ -168,25 +186,35 @@ let bn_to_bytes_be_st (t:limb_t) (len:size_t{0 < v len /\ numbytes t * v (blocks
 inline_for_extraction noextract
 val mk_bn_to_bytes_be:
     #t:limb_t
+  -> is_known_len:bool
   -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t} ->
   bn_to_bytes_be_st t len
 
-let mk_bn_to_bytes_be #t len b res =
-  [@inline_let]
-  let numb = size (numbytes t) in
-  let h0 = ST.get () in
+let mk_bn_to_bytes_be #t is_known_len len b res =
   push_frame ();
-  let bnLen = blocks len numb in
-  let tmpLen = numb *! bnLen in
-  let tmp = create tmpLen (u8 0) in
-  bn_to_bytes_be_ bnLen b tmp;
-  copy res (sub tmp (tmpLen -! len) len);
+  if is_known_len then begin
+    [@inline_let] let numb = size (numbytes t) in
+    [@inline_let] let bnLen = blocks len numb in
+    [@inline_let] let tmpLen = numb *! bnLen in
+    let tmp = create tmpLen (u8 0) in
+    if tmpLen =. len then
+      bn_to_bytes_be_ bnLen b res
+    else begin
+      bn_to_bytes_be_ bnLen b tmp;
+      copy res (sub tmp (tmpLen -! len) len) end end
+  else begin
+    [@inline_let] let numb = size (numbytes t) in
+    let bnLen = blocks len numb in
+    let tmpLen = numb *! bnLen in
+    let tmp = create tmpLen (u8 0) in
+    bn_to_bytes_be_ bnLen b tmp;
+    copy res (sub tmp (tmpLen -! len) len) end;
   pop_frame ()
 
 
 [@CInline]
-let bn_to_bytes_be_uint32 len : bn_to_bytes_be_st U32 len = mk_bn_to_bytes_be #U32 len
-let bn_to_bytes_be_uint64 len : bn_to_bytes_be_st U64 len = mk_bn_to_bytes_be #U64 len
+let bn_to_bytes_be_uint32 len : bn_to_bytes_be_st U32 len = mk_bn_to_bytes_be #U32 false len
+let bn_to_bytes_be_uint64 len : bn_to_bytes_be_st U64 len = mk_bn_to_bytes_be #U64 false len
 
 
 inline_for_extraction noextract
@@ -211,26 +239,36 @@ let bn_to_bytes_le_st (t:limb_t) (len:size_t{0 < v len /\ numbytes t * v (blocks
 inline_for_extraction noextract
 val mk_bn_to_bytes_le:
     #t:limb_t
+  -> is_known_len:bool
   -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t} ->
   bn_to_bytes_le_st t len
 
-let mk_bn_to_bytes_le #t len b res =
-  [@inline_let]
-  let numb = size (numbytes t) in
-  let h0 = ST.get () in
+let mk_bn_to_bytes_le #t is_known_len len b res =
   push_frame ();
-  let bnLen = blocks len numb in
-  let tmpLen = numb *! bnLen in
-  let tmp = create tmpLen (u8 0) in
-  uints_to_bytes_le bnLen tmp b;
-  copy res (sub tmp 0ul len);
+  if is_known_len then begin
+    [@inline_let] let numb = size (numbytes t) in
+    [@inline_let] let bnLen = blocks len numb in
+    [@inline_let] let tmpLen = numb *! bnLen in
+    let tmp = create tmpLen (u8 0) in
+    if tmpLen =. len then
+      uints_to_bytes_le bnLen res b
+    else begin
+      uints_to_bytes_le bnLen tmp b;
+      copy res (sub tmp 0ul len) end end
+  else begin
+    [@inline_let] let numb = size (numbytes t) in
+    let bnLen = blocks len numb in
+    let tmpLen = numb *! bnLen in
+    let tmp = create tmpLen (u8 0) in
+    uints_to_bytes_le bnLen tmp b;
+    copy res (sub tmp 0ul len) end;
   pop_frame ()
 
 
 [@CInline]
-let bn_to_bytes_le_uint32 len : bn_to_bytes_le_st U32 len = mk_bn_to_bytes_le #U32 len
+let bn_to_bytes_le_uint32 len : bn_to_bytes_le_st U32 len = mk_bn_to_bytes_le #U32 false len
 [@CInline]
-let bn_to_bytes_le_uint64 len : bn_to_bytes_le_st U64 len = mk_bn_to_bytes_le #U64 len
+let bn_to_bytes_le_uint64 len : bn_to_bytes_le_st U64 len = mk_bn_to_bytes_le #U64 false len
 
 
 inline_for_extraction noextract

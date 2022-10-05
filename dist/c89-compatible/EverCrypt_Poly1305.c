@@ -35,31 +35,21 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
   n_blocks = len / (uint32_t)16U;
   n_extra = len % (uint32_t)16U;
   {
-    uint8_t tmp[16U];
+    uint8_t tmp[16U] = { 0U };
     if (n_extra == (uint32_t)0U)
     {
       uint64_t scrut = x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U);
     }
     else
     {
-      uint8_t init = (uint8_t)0U;
+      uint32_t len16 = n_blocks * (uint32_t)16U;
+      uint8_t *src16 = src;
+      memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
+        uint64_t scrut = x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
+        memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
         {
-          tmp[i] = init;
-        }
-      }
-      {
-        uint32_t len16 = n_blocks * (uint32_t)16U;
-        uint8_t *src16 = src;
-        memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
-        {
-          uint64_t scrut = x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
-          memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-          {
-            uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
-          }
+          uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
         }
       }
     }
@@ -69,11 +59,8 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
 
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
-  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
-  bool vale = EverCrypt_AutoConfig2_wants_vale();
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
@@ -89,12 +76,9 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   }
   #endif
   #if HACL_CAN_COMPILE_VALE
-  if (vale)
-  {
-    poly1305_vale(dst, src, len, key);
-    return;
-  }
-  #endif
+  poly1305_vale(dst, src, len, key);
+  #else
   Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
+  #endif
 }
 

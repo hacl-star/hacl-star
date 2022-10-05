@@ -40,7 +40,7 @@ let num_rounds16 (a:sha2_alg) : n:pos{16 * n == size_k_w a} =
   | SHA2_224 | SHA2_256 -> 4
   | SHA2_384 | SHA2_512 -> 5
 
-let k_w   (a: sha2_alg) = lseq (word a) block_word_length
+let k_w   (a: sha2_alg) = lseq (word a) (block_word_length a)
 let block_t (a: sha2_alg) = lseq uint8 (block_length a)
 let counter = nat
 
@@ -225,7 +225,7 @@ let init (a:sha2_alg) = h0 a, ()
 
 let update (a:sha2_alg) (block:block_t a) (hash:words_state a): Tot (words_state a) =
   let hash, _ = hash in
-  let block_w = Lib.ByteSequence.uints_from_bytes_be #(word_t a) #SEC #block_word_length block in
+  let block_w = Lib.ByteSequence.uints_from_bytes_be #(word_t a) #SEC #(block_word_length a) block in
   let hash_1 = shuffle a block_w hash in
   map2 #_ #_ #_ #8 ( +. ) hash_1 hash, ()
 

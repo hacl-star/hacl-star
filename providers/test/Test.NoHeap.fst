@@ -58,7 +58,7 @@ let test_one_hash vec =
       C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
     );
     EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
-    assert (v total_input_len <= Spec.Hash.Definitions.max_input_length a + 1);
+    assert (v total_input_len `Spec.Hash.Definitions.less_than_max_input_length` a);
 
     EverCrypt.Hash.hash a computed total_input total_input_len;
 
@@ -73,15 +73,9 @@ let test_hash = test_many !$"Hashes" test_one_hash
 /// HMAC
 /// ----
 
-let supported_hmac_algorithm a =
-  let open Spec.Hash.Definitions in
-  match a with
-  | MD5 | SHA2_224 -> false
-  | _ -> true
-
 let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> Spec.Agile.HMAC.keysized a (UInt32.v l) }) =
   EverCrypt.Hash.uint32_fits_maxLength a l;
-  assert (v l <= Spec.Hash.Definitions.max_input_length a);
+  assert (v l `Spec.Hash.Definitions.less_than_max_input_length` a);
   assert_norm (v 0xfffffffful = pow2 32 - 1);
   l <= 0xfffffffful - Hacl.Hash.Definitions.block_len a
 
@@ -94,7 +88,7 @@ let test_one_hmac vec =
     failwith !$"Keysized predicate not satisfied\n"
   else if not (datalen <= 0xfffffffful - Hacl.Hash.Definitions.block_len ha) then
     failwith !$"Datalen predicate not satisfied\n"
-  else if supported_hmac_algorithm ha then
+  else if EverCrypt.HMAC.is_supported_alg ha then
     begin
     push_frame();
     assert (Spec.Agile.HMAC.keysized ha (v keylen));
@@ -191,7 +185,7 @@ let test_one_hkdf vec =
   else if not (infolen <= 0xfffffffful -
     Hacl.Hash.Definitions.(block_len ha + hash_len ha + 1ul)) then
     failwith !$"infolen is too large\n"
-  else if supported_hmac_algorithm ha then begin
+  else if EverCrypt.HMAC.is_supported_alg ha then begin
     push_frame();
     assert (Spec.Agile.HMAC.keysized ha (v saltlen));
     assert (v ikmlen + Spec.Hash.Definitions.block_length ha < pow2 32);

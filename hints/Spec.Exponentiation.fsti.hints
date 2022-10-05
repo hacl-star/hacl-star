@@ -1,5 +1,5 @@
 [
-  ";0J\u0005Q²tYœ\u0013A@åD%t",
+  "ú\u001a…{ä’\u001e£p‚œbH¬2‰",
   [
     [
       "Spec.Exponentiation.exp_mont_ladder_swap_f",
@@ -16,7 +16,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "a82432a9df83698b62cc35a68f6221c5"
+      "ac708dbc7abd14125ff995e6a8d325b7"
     ],
     [
       "Spec.Exponentiation.pow",
@@ -35,7 +35,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c914e239ea88b75801c1e8ca2b37d9fd"
+      "560889f20dbcc8c37680dbceaf8f1808"
     ],
     [
       "Spec.Exponentiation.pow_unfold",
@@ -48,7 +48,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "980ce907f400d202024c277868a52706"
+      "01560ffe5c5d8634de98acdaa4d788c4"
     ],
     [
       "Spec.Exponentiation.exp_fw_acc0",
@@ -57,7 +57,7 @@
       0,
       [ "@query" ],
       0,
-      "3e488cf10fa837c5c464d754c3b1d9b4"
+      "20a07ae803b5de5d4665166081682298"
     ],
     [
       "Spec.Exponentiation.exp_fw_acc0",
@@ -78,7 +78,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "dc4f32aa300316dd4524fb28c4314a39"
+      "f1282a483ae585a964eadf95cf91b4ce"
     ],
     [
       "Spec.Exponentiation.mul_acc_pow_a_bits_l",
@@ -87,7 +87,7 @@
       0,
       [ "@query" ],
       0,
-      "8d4140fa92f3f06fdb3631c77b5ef5f3"
+      "6f2722ee21e070abff70bf393a129050"
     ],
     [
       "Spec.Exponentiation.mul_acc_pow_a_bits_l",
@@ -96,7 +96,7 @@
       0,
       [ "@query" ],
       0,
-      "0a58fc6487becebe4d69218b7d8882cc"
+      "d5aeefc45be1c47bc2f51937fa6f745c"
     ],
     [
       "Spec.Exponentiation.exp_fw_f",
@@ -105,7 +105,7 @@
       0,
       [ "@query" ],
       0,
-      "63dbbb46fbb31a5560c6d5ac3aa63701"
+      "11b2d095a04b74aa1f7753719ee41e8c"
     ],
     [
       "Spec.Exponentiation.exp_fw_f",
@@ -114,7 +114,7 @@
       0,
       [ "@query" ],
       0,
-      "03a0403dd1a20621d1570361611320fc"
+      "597e1878a15fdd104784f8fe27739e5a"
     ],
     [
       "Spec.Exponentiation.exp_fw",
@@ -134,7 +134,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "2ee2857e1aa2d0fcba7a7214e5627304"
+      "d327af14e7cc8c3107004b959fd4b41f"
     ],
     [
       "Spec.Exponentiation.exp_double_fw_acc0",
@@ -143,7 +143,7 @@
       0,
       [ "@query" ],
       0,
-      "00354bd72b66919f00ecdf19c917ca98"
+      "47e8a1ea7df9ac5a219a4322bdc2f5de"
     ],
     [
       "Spec.Exponentiation.exp_double_fw_f",
@@ -152,7 +152,7 @@
       0,
       [ "@query" ],
       0,
-      "31d80548551437c76c7c518d02c3b142"
+      "4ff1d1bfbb06339423a563ed785a6ce7"
     ],
     [
       "Spec.Exponentiation.exp_double_fw",
@@ -172,7 +172,45 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "09619ddb4a48a8c73c764213dc2b1dd7"
+      "21a34108527835d022aee3faa4e42571"
+    ],
+    [
+      "Spec.Exponentiation.exp_four_fw_acc0",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "6048f45396d45d006ed041a8157ea9d8"
+    ],
+    [
+      "Spec.Exponentiation.exp_four_fw_f",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "49c3f91e9720fd35857d6624ac122053"
+    ],
+    [
+      "Spec.Exponentiation.exp_four_fw",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "ed21270aabbf39de5a908dd0c5ca7fde"
     ]
   ]
 ]

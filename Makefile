@@ -1,5 +1,4 @@
 # This Makefile covers all of the present repository (HACL* + Vale + EverCrypt)
-# with the exclusion of legacy code found in secure_api, code/old and specs/old.
 #
 # From a high-level perspective, the coarse-grained dependency graph is:
 #
@@ -17,8 +16,6 @@
 # - SKIPDEPEND=1 disables even *including* .depend files (not meant for end users)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
-# - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
-#   going through the all target, we properly invalidate the checked file.
 #
 # This is a staged Makefile, because we first need to generate .fst files out of
 # .vaf files in order to get a full dependency graph for the .fst files. So,
@@ -79,19 +76,8 @@ endif
 endif
 endif
 
-# Backwards-compat, remove
-ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
-endif
-
 ifeq (,$(NOOPENSSLCHECK))
-ifeq (,$(OPENSSL_HOME))
-  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
-endif
-
-ifeq (,$(OPENSSL_HOME)/libcrypto.a)
-  $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
-endif
+include Makefile.openssl
 endif
 
 ifneq (,$(HACL_HOME))
@@ -104,14 +90,12 @@ endif
 # Top-level entry points #
 ##########################
 
-all:
-	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
-	$(MAKE) all-staged
+all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
-  compile-evercrypt-external-headers compile-c89-compatible \
+  compile-c89-compatible \
   compile-portable-gcc-compatible \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
+  dist/wasm/package.json dist/merkle-tree/Makefile.basic \
   obj/libhaclml.cmxa compile-election-guard
 
 # Mozilla does not want to run the configure script, so this means that the
@@ -135,7 +119,11 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-hpke vale_testInline test-wasm test-bindings-ocaml
+test-unstaged: test-handwritten test-c test-ml test-hpke test-wasm test-bindings-ocaml
+
+ifeq ($(shell uname -m),x86_64)
+test-unstaged: vale_testInline
+endif
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -159,7 +147,6 @@ mozilla-ci-unstaged: compile-mozilla test-c
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm doc-ocaml
-	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
@@ -289,7 +276,7 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:*' \
-	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
+	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -525,9 +512,13 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 	$< > $@
 
+dist/vale/%-ppc64le.S: obj/vale-%-ppc64le.exe | dist/vale
+	$< > $@
+
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
+obj/vale-sha256-ppc64le.exe: vale/code/crypto/sha/ShaMainPPC64LE.ml
 obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
@@ -555,12 +546,7 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
-  $(wildcard \
-    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.S \
-    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.asm \
-    $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
-    $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
-  dist/vale/curve25519-inline.h
+  dist/vale/curve25519-inline.h dist/vale/sha256-ppc64le.S
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
@@ -580,16 +566,6 @@ obj/%.krml:
 	  touch $@ \
 	  ,[EXTRACT-KRML] $*,$@)
 
-# For the time being, we rely on the old extraction to give us self-contained
-# files for algorithms that haven't been rewritten for HACLv2.
-
-.PHONY: old-%
-old-%:
-	$(call run-with-log,\
-	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
-	  ,[OLD-MAKE $*],obj/old-$*)
-
-
 ########################################
 # Distributions of EverCrypt and HACL* #
 ########################################
@@ -602,8 +578,7 @@ old-%:
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer.System
 
 # Always copied into the destination directory, always passed to karamel.
-HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
-  $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
+HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c)
 
 # Always copied into the destination directory, not passed to karamel.
 HAND_WRITTEN_H_FILES	= $(filter-out $(LIB_DIR)/c/libintvector_debug.h, \
@@ -638,7 +613,8 @@ REQUIRED_BUNDLES = \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   $(VALE_BUNDLES) \
   -bundle Hacl.Impl.Poly1305.Fields \
-  -bundle 'EverCrypt.Spec.*'
+  -bundle 'EverCrypt.Spec.*' \
+  -bundle EverCrypt.Error
 
 REQUIRED_DROP = \
   -drop EverCrypt.TargetConfig
@@ -661,7 +637,7 @@ REQUIRED_FLAGS	= \
   -add-include 'Hacl_Curve25519_64.c:"curve25519-inline.h"' \
   -no-prefix 'MerkleTree' \
   -no-prefix 'MerkleTree.EverCrypt' \
-  -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
+  -library EverCrypt.AutoConfig \
   -static-header 'EverCrypt.TargetConfig' \
   -no-prefix 'EverCrypt.TargetConfig' \
   $(BASE_FLAGS)
@@ -691,7 +667,7 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
   -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
@@ -722,9 +698,9 @@ LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
   $(BLAKE2_BUNDLE) \
+  $(SHA3_BUNDLE) \
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
-  $(SHA3_BUNDLE) \
   $(SHA2MB_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
@@ -786,9 +762,6 @@ dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
 # Must appear early on because of the left-to-right semantics of -bundle flags.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
 
-# Doesn't work in WASM because one function has some heap allocation
-dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
-
 # Doesn't work in WASM because un-materialized externals for AES128
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
 
@@ -819,10 +792,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 dist/wasm/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE = $(BLAKE2_BUNDLE_BASE) \
-  -bundle 'Hacl.Hash.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2b_256,Hacl.Blake2b_256' \
-  -bundle 'Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256' \
-  -bundle 'Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
@@ -833,7 +802,7 @@ dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle EverCrypt.TargetConfig \
-  -bundle 'EverCrypt,EverCrypt.*'
+  -bundle 'EverCrypt.*'
 dist/wasm/Makefile.basic: REQUIRED_DROP =
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
@@ -873,7 +842,7 @@ test-wasm: dist/wasm/package.json
 
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -ctypes EverCrypt.*,Hacl.*
+  -ctypes EverCrypt.*,Hacl.* #-funroll-loops 16
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_BINDINGS += \
   $(wildcard lib/ml/*_bindings.ml)
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_GEN += \
@@ -895,23 +864,6 @@ doc-ocaml: test-bindings-ocaml
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
 dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
-
-# miTLS
-# -----
-dist/mitls/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
-dist/mitls/Makefile.basic: LEGACY_BUNDLE =
-# This is a broken AES... used by the (awful) EverCrypt.fst which in turns calls
-# EverCrypt.HACL.fsti which in turns calls (via C #ifdefs) Crypto.Symmetric.AES
-dist/mitls/Makefile.basic: HACL_OLD_FILES = \
-  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
-
-
-# Not passed to karamel, meaning that they don't end up in the Makefile.basic
-# list of C source files. They're added manually in dist/Makefile (see ifneq
-# tests).
-dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
-  $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
-
 
 # C89 distribution
 # ----------------
@@ -943,7 +895,7 @@ dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
 dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
 dist/election-guard/Makefile.basic: VALE_ASMS =
 dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercrypt_vale_stubs.c %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
+dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
 dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
 dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
   -bundle '\*[rename=Should_not_be_here]' \
@@ -963,7 +915,7 @@ dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128
 dist/mozilla/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2_Vec256,Hacl.SHA2_Vec128,Hacl.SHA2_Scalar32
-dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
+dist/mozilla/Makefile.basic: HASH_BUNDLE=-bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/mozilla/Makefile.basic: K256_BUNDLE= -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
@@ -1009,35 +961,11 @@ dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
 dist/merkle-tree/Makefile.basic: INTRINSIC_FLAGS =
 
-# EVERCRYPT_CONFIG tweaks
-# -----------------------
-#
-# This is another level that will eventually go aways once we wean ourselves off
-# of OpenSSL and BCrypt.
-
-# This will eventually go. OpenSSL and BCrypt disabled
-ifeq ($(EVERCRYPT_CONFIG),everest)
-HAND_WRITTEN_OPTIONAL_FILES :=
-endif
-
-# Customizations for Kaizala. No BCrypt, no Vale.
-ifeq ($(EVERCRYPT_CONFIG),kaizala)
-dist/gcc-compatible/Makefile.basic: \
-  HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
-dist/gcc-compatible/Makefile.basic: \
-  HAND_WRITTEN_FILES := $(filter-out %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/gcc-compatible/Makefile.basic: \
-  VALE_ASMS :=
-endif
-
 # Actual KaRaMeL invocations
 # --------------------------
 
-.PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
-  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS)
 	mkdir -p $(dir $@)
-	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_BINDINGS)" != x ] && mkdir -p $(dir $@)/lib && cp $(HAND_WRITTEN_ML_BINDINGS) $(dir $@)lib/ || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
@@ -1050,7 +978,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  -warn-error @2@4-6@15@18@21+22 \
 	  -fparentheses \
 	  -fextern-c \
-	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
 	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
@@ -1063,22 +990,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  cp dist/config.mozilla.h $(dir $@)/config.h; \
 	fi
 
-dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) -silent \
-	  -minimal \
-	  -header $(HACL_HOME)/dist/LICENSE.txt \
-	  -bundle EverCrypt+EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
-	  -library EverCrypt,EverCrypt.* \
-	  -add-early-include '<inttypes.h>' \
-	  -add-early-include '<stdbool.h>' \
-	  -add-early-include '<krml/internal/types.h>' \
-	  -add-early-include '<krml/internal/target.h>' \
-	  -header dist/LICENSE.txt \
-	  -skip-compilation \
-	  -fextern-c \
-	  -tmpdir $(dir $@) \
-	  $^
-
 # Auto-generates a single C test file. Note that this rule will trigger multiple
 # times, for multiple KaRaMeL invocations in the test/ directory -- this may
 # cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
@@ -1090,9 +1001,10 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt,EverCrypt.* \
+	  -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
+	  -add-include '"libintvector.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
@@ -1118,17 +1030,14 @@ compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmlli
 # C tests (from F* files) #
 ###########################
 
-ifeq ($(OS),Windows_NT)
-OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
-LDFLAGS		+= -lbcrypt
-endif
-LDFLAGS 	+= -L$(OPENSSL_HOME)
-
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
-  -I$(OPENSSL_HOME)/include \
-  -O3 -march=native -mtune=native -I$(KRML_HOME)/krmllib/dist/minimal \
+  -O3 -I$(KRML_HOME)/krmllib/dist/minimal \
   -I$(KRML_HOME)/include -Idist/gcc-compatible
+
+ifneq ($(shell uname -m),arm64)
+CFLAGS += -march=native -mtune=native
+endif
 
 # The C test files need the extracted headers to compile
 dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
@@ -1145,14 +1054,6 @@ dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
-
-ifeq ($(OS),Windows_NT)
-  LD_EXTRA = PATH="$(OPENSSL_HOME):$(shell cygpath -u $$(ocamlfind c -where))/../stublibs:$$PATH"
-else ifeq ($(shell uname -s),Darwin)
-  LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
-else
-  LD_EXTRA = LD_LIBRARY_PATH="$(OPENSSL_HOME)"
-endif
 
 .PHONY: %.test
 %.test: %.exe

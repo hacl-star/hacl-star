@@ -70,5 +70,5 @@ Contact the maintainers if you have other licensing requirements.
 
 This repository contains contributions from many students and researchers at INRIA, Microsoft Research, and Carnegie Mellon University,
 and it is under active development. The primary authors of each verified algorithm are noted in the corresponding AUTHORS.md file.
-For questions and comments, or if you want to contribute to the project, contact the current maintainers at hacl-star-maintainers@lists.gforge.inria.fr.
+For questions and comments, or if you want to contribute to the project, contact the current maintainers at hacl-star-maintainers@inria.fr.
 

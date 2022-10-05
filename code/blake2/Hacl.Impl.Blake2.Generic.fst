@@ -224,6 +224,15 @@ val gather_state: #a:Spec.alg -> #ms:m_spec -> st:state_p a ms -> m:block_w a ->
 		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 					state_v h1 st == Spec.gather_state a (as_seq h0 m) (v start)))
 
+inline_for_extraction noextract
+let get_sigma' (start: size_t { v start <= 144 }) (i: size_t { normalize (i <=. 15ul) }):
+  Stack Spec.sigma_elt_t
+    (requires (fun h -> True))
+    (ensures  (fun h0 z h1 ->
+      h0 == h1 /\ z == Lib.Sequence.(Spec.sigmaTable.[v start + v i])))
+=
+  get_sigma (start +! i)
+
 #push-options "--z3rlimit 500"
 let gather_state #a #ms st m start =
   let h0 = ST.get() in
@@ -231,22 +240,22 @@ let gather_state #a #ms st m start =
   let r1 = rowi st 1ul in
   let r2 = rowi st 2ul in
   let r3 = rowi st 3ul in
-  let s0 = get_sigma start in
-  let s1 = get_sigma (start +. 1ul) in
-  let s2 = get_sigma (start +. 2ul) in
-  let s3 = get_sigma (start +. 3ul) in
-  let s4 = get_sigma (start +. 4ul) in
-  let s5 = get_sigma (start +. 5ul) in
-  let s6 = get_sigma (start +. 6ul)in
-  let s7 = get_sigma (start +. 7ul) in
-  let s8 = get_sigma (start +. 8ul) in
-  let s9 = get_sigma (start +. 9ul) in
-  let s10 = get_sigma (start +. 10ul) in
-  let s11 = get_sigma (start +. 11ul) in
-  let s12 = get_sigma (start +. 12ul) in
-  let s13 = get_sigma (start +. 13ul) in
-  let s14 = get_sigma (start +. 14ul) in
-  let s15 = get_sigma (start +. 15ul) in
+  let s0 = get_sigma' start 0ul in
+  let s1 = get_sigma' start 1ul in
+  let s2 = get_sigma' start 2ul in
+  let s3 = get_sigma' start 3ul in
+  let s4 = get_sigma' start 4ul in
+  let s5 = get_sigma' start 5ul in
+  let s6 = get_sigma' start 6ul in
+  let s7 = get_sigma' start 7ul in
+  let s8 = get_sigma' start 8ul in
+  let s9 = get_sigma' start 9ul in
+  let s10 = get_sigma' start 10ul in
+  let s11 = get_sigma' start 11ul in
+  let s12 = get_sigma' start 12ul in
+  let s13 = get_sigma' start 13ul in
+  let s14 = get_sigma' start 14ul in
+  let s15 = get_sigma' start 15ul in
   let h1 = ST.get() in
   gather_row r0 m s0 s2 s4 s6;
   let h2 = ST.get() in
@@ -781,7 +790,9 @@ val blake2:
 
 #push-options "--z3rlimit 100"
 let blake2 #al #ms blake2_init blake2_update blake2_finish nn output ll d kk k =
-  let stlen = 4ul *. row_len al ms in
+  [@inline_let]
+  let stlen = le_sigh al ms in
+  [@inline_let]
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]

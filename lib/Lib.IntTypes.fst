@@ -1065,18 +1065,7 @@ let mod_lemma #t a b =
   | S64 -> Int.pow2_values 64
 
 let eq #t x y =
-  match t with
-  | U1   -> UInt8.eq x y
-  | U8   -> UInt8.eq x y
-  | U16  -> UInt16.eq x y
-  | U32  -> UInt32.eq x y
-  | U64  -> UInt64.eq x y
-  | U128 -> UInt128.eq x y
-  | S8   -> Int8.eq x y
-  | S16  -> Int16.eq x y
-  | S32  -> Int32.eq x y
-  | S64  -> Int64.eq x y
-  | S128 -> Int128.eq x y
+  x = y
 
 let eq_lemma #t x y = ()
 

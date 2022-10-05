@@ -232,6 +232,21 @@ val index_of_state:
   (fun h0 -> invariant c i h0 s)
   (fun h0 i' h1 -> h0 == h1 /\ i' == i))
 
+// The number of bytes fed so far into the hash, so that the client doesn't have
+// to track it themselves, since this module does it anyhow.
+inline_for_extraction noextract
+val seen_length:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
+  Stack U64.t
+  (fun h0 -> invariant c i h0 s)
+  (fun h0 l h1 -> h0 == h1 /\ U64.v l == S.length (seen c i h0 s)))
+
 inline_for_extraction noextract
 let create_in_st
   (#index: Type0)
@@ -325,7 +340,7 @@ val init:
   init_st #index c i t t')
 
 unfold noextract
-let update_pre
+let update_pre0
   #index
   (c: block index)
   (i: index)
@@ -337,8 +352,22 @@ let update_pre
   invariant c i h0 s /\
   B.live h0 data /\
   U32.v len = B.length data /\
-  S.length (seen c i h0 s) + U32.v len <= c.max_input_length i /\
   B.(loc_disjoint (loc_buffer data) (footprint c i h0 s))
+
+/// We isolate update_pre0 so that a high-level API (like EverCrypt) can opt in
+/// to run-time length checks and possibly return a suitable error type.
+unfold noextract
+let update_pre
+  #index
+  (c: block index)
+  (i: index)
+  (s: state' c i)
+  (data: B.buffer uint8)
+  (len: UInt32.t)
+  (h0: HS.mem)
+=
+  update_pre0 c i s data len h0 /\
+  S.length (seen c i h0 s) + U32.v len <= c.max_input_length i
 
 unfold noextract
 let update_post
