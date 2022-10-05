@@ -171,4 +171,4 @@ val lemma_bounded_effects_series :
         (bounded_effects rw2 f2)))
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
-        (bounded_effects (rw_set_in_series rw1 rw2) (f1;;f2))))
+        (bounded_effects (rw_set_in_series rw1 rw2) (f1;*f2))))
