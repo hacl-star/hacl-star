@@ -201,7 +201,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
         TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
         B.recall tag;
         TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
-      | _ -> 
+      | _ ->
         C.Failure.failwith !$"Failure AEAD decrypt\n");
       pop_frame ()
     end;
@@ -413,7 +413,7 @@ let rec test_aes128_ctr_loop (i: U32.t): St unit =
 let test_aes128_ctr () : St unit =
   test_aes128_ctr_loop 0ul
 
-let rec test_rng (ctr:UInt32.t) : St unit = ()
+let test_rng (ctr:UInt32.t) : St unit = ()
   // AR: 09/07: B.alloca won't work, we don't know is_stack_region (get_tip h0)
   // let open FStar.Integers in
   // if ctr = 0ul then ()
