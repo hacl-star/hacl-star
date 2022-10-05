@@ -698,9 +698,9 @@ LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
   $(BLAKE2_BUNDLE) \
+  $(SHA3_BUNDLE) \
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
-  $(SHA3_BUNDLE) \
   $(SHA2MB_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \

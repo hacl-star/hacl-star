@@ -6,7 +6,7 @@ open Spec.Hash.Definitions
 let lbytes (l:nat) = b:bytes {Seq.length b = l}
 
 let extract_ikm_length_pred (a:hash_alg) (ikm_length:nat) =
-  ikm_length + block_length a <= max_input_length a
+  (ikm_length + block_length a) `less_than_max_input_length` a
 
 val extract:
   a: hash_alg ->
@@ -19,7 +19,7 @@ val extract:
     (ensures fun _ -> True)
 
 let expand_info_length_pred (a:hash_alg) (info_length:nat) =
-  hash_length a + info_length + 1 + block_length a <= max_input_length a
+  (hash_length a + info_length + 1 + block_length a) `less_than_max_input_length` a
 
 let expand_output_length_pred (a:hash_alg) (len:nat) =
   len <= 255 * hash_length a

@@ -171,6 +171,8 @@ val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
     b <==> (if S.is_proj_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
 
+#push-options "--z3rlimit 100"
+
 let ecdsa_verify_qelem_aff pk_x pk_y z r s =
   let h0 = ST.get () in
   KL.lemma_proj_aff_id (S.g_x, S.g_y);
@@ -188,6 +190,7 @@ let ecdsa_verify_qelem_aff pk_x pk_y z r s =
   pop_frame ();
   b
 
+#pop-options
 
 inline_for_extraction noextract
 val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool

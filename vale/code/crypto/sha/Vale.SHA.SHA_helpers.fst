@@ -476,7 +476,7 @@ let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
   }
 
 let ws_computed (b:block_w) (t:counter{t < size_k_w_256}): Tot (UInt32.t) =
-  if t < block_word_length then to_uint32 (ws_opaque b t)
+  if t < block_word_length SHA2_256 then to_uint32 (ws_opaque b t)
   else
     let t16 = to_uint32 (ws_opaque b (t - 16)) in
     let t15 = to_uint32 (ws_opaque b (t - 15)) in
@@ -492,7 +492,7 @@ let lemma_ws_computed_is_ws (b:block_w) (t:counter{t < size_k_w_256}) :
   Lemma (ws_computed b t == ws SHA2_256 b t)
   =
   Pervasives.reveal_opaque (`%ws) ws;
-  if t < block_word_length then (
+  if t < block_word_length SHA2_256 then (
     assert (vv (ws_computed b t) == ws_opaque b t);
     assert (to_uint32 (ws_opaque b t) == ws SHA2_256 b t);
     ()
@@ -652,11 +652,11 @@ let update_block (hash:hash256) (block:block_w): Tot (hash256) =
   Spec.Loops.seq_map2 ( +. ) hash hash_1
 
 let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_length}) :
-  Lemma (update_block hash (words_of_bytes SHA2_256 #block_word_length block) == fst (update SHA2_256 (hash, ()) block))
+  Lemma (update_block hash (words_of_bytes SHA2_256 #(block_word_length SHA2_256) block) == fst (update SHA2_256 (hash, ()) block))
   =
   Pervasives.reveal_opaque (`%Spec.SHA2.update) Spec.SHA2.update;
   Pervasives.reveal_opaque (`%Spec.SHA2.shuffle) Spec.SHA2.shuffle;
-  assert (equal (update_block hash (words_of_bytes SHA2_256 #block_word_length block)) (fst (update SHA2_256 (hash, ()) block)));
+  assert (equal (update_block hash (words_of_bytes SHA2_256 #(block_word_length SHA2_256) block)) (fst (update SHA2_256 (hash, ()) block)));
   ()
 
 let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
@@ -799,10 +799,10 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
             qs == reverse_bytes_nat32_quad32_seq quads /\
             input2 == seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads))
-  (ensures  quads_to_block qs == words_of_bytes SHA2_256 #block_word_length input2)
+  (ensures  quads_to_block qs == words_of_bytes SHA2_256 #(block_word_length SHA2_256) input2)
   =
   let fi (i:nat{i < length (quads_to_block qs)}) : Lemma
-    ((quads_to_block qs).[i] == (words_of_bytes SHA2_256 #block_word_length input2).[i])
+    ((quads_to_block qs).[i] == (words_of_bytes SHA2_256 #(block_word_length SHA2_256) input2).[i])
     =
     let open Vale.Def.Words.Four_s in
     let open Vale.Lib.Seqs_s in
@@ -828,10 +828,10 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
     };
     let open Lib.IntTypes in
     calc (==) {
-      (words_of_bytes SHA2_256 #block_word_length input2).[i];
+      (words_of_bytes SHA2_256 #(block_word_length SHA2_256) input2).[i];
       == { }
-      (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length input2).[i];
-      == { Lib.ByteSequence.index_uints_from_bytes_be #U32 #SEC #block_word_length input2 i }
+      (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA2_256) input2).[i];
+      == { Lib.ByteSequence.index_uints_from_bytes_be #U32 #SEC #(block_word_length SHA2_256) input2 i }
       Lib.ByteSequence.uint_from_bytes_be (Lib.Sequence.sub #uint8 #64 input2 (i * 4) 4);
       == { let open Lib.Sequence in
            calc (==) {
@@ -865,7 +865,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
     }
     in
   FStar.Classical.forall_intro fi;
-  assert (equal (quads_to_block qs) (words_of_bytes SHA2_256 #block_word_length input2))
+  assert (equal (quads_to_block qs) (words_of_bytes SHA2_256 #(block_word_length SHA2_256) input2))
 
 let lemma_mod_transform (quads:seq quad32) : Lemma
   (requires length quads % 4 == 0)

@@ -322,19 +322,15 @@ let labeled_expand_info_length_pred (a:hash_algorithm) (info_length:nat) =
 let pow2_61_1 : _:unit{pow2 61 - 1 == 2305843009213693951} = assert_norm(pow2 61 - 1 == 2305843009213693951)
 let pow2_125_1 : _:unit{pow2 125 - 1 == 42535295865117307932921825928971026431} = assert_norm(pow2 125 - 1 == 42535295865117307932921825928971026431)
 
-let hash_max_input_length (a:hash_algorithm) =
-  match a with
-  | Hash.MD5 | Hash.SHA1
-  | Hash.SHA2_224 | Hash.SHA2_256 -> 2305843009213693951 // pow2 61 - 1
-  | Hash.SHA2_384 | Hash.SHA2_512 -> 42535295865117307932921825928971026431 // pow2 125 - 1
-
-let lemma_hash_max_input_lengths_equality (a:hash_algorithm) : Lemma (hash_max_input_length a == Spec.Hash.Definitions.max_input_length a) = ()
-
 let labeled_extract_max_length_ikm (a:hash_algorithm) (size_suite_id:size_nat) (size_local_label:size_nat) =
-  hash_max_input_length a - size_label_version - size_suite_id - size_local_label - Spec.Hash.Definitions.block_length a
+  match a with
+  | Hash.SHA3_256 -> None
+  | _ -> Some (Some?.v(Hash.max_input_length a) - size_label_version - size_suite_id - size_local_label - Spec.Hash.Definitions.block_length a)
 
 let labeled_expand_max_length_info (a:hash_algorithm) (size_suite_id:size_nat) (size_local_label:size_nat) =
-  hash_max_input_length a - Spec.Hash.Definitions.hash_length a - 2 - size_label_version - size_suite_id - size_local_label - 1 - Spec.Hash.Definitions.block_length a
+  match a with
+  | Hash.SHA3_256 -> None
+  | _ -> Some (Some?.v (Hash.max_input_length a) - Spec.Hash.Definitions.hash_length a - 2 - size_label_version - size_suite_id - size_local_label - 1 - Spec.Hash.Definitions.block_length a)
 
 let max_length_psk (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_secret
 let max_length_psk_id (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_psk_id_hash
@@ -344,6 +340,11 @@ let max_length_dkp_ikm (a:hash_algorithm) = labeled_extract_max_length_ikm a siz
 
 /// Types
 
+let maybe_lte (n1: int) (n2: option int) =
+  match n2 with
+  | None -> true
+  | Some n2 -> n1 <= n2
+
 type key_dh_public_s (cs:ciphersuite) = lbytes (size_dh_public cs)
 type key_dh_secret_s (cs:ciphersuite) = lbytes (size_dh_key cs)
 type key_kem_s (cs:ciphersuite) = lbytes (size_kem_key cs)
@@ -351,11 +352,11 @@ type key_aead_s (cs:ciphersuite) = lbytes (size_aead_key cs)
 type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
 type seq_aead_s (cs:ciphersuite) = n:nat{n <= max_seq cs}
 type exporter_secret_s (cs:ciphersuite) = lbytes (size_kdf cs)
-type psk_s (cs:ciphersuite) = b:bytes{Seq.length b >= 32 /\ Seq.length b <= max_length_psk (hash_of_cs cs)}
-type psk_id_s (cs:ciphersuite) = b:bytes{Seq.length b >= 1 /\ Seq.length b <= max_length_psk_id (hash_of_cs cs)}
-type info_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_info (hash_of_cs cs)}
-type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx (hash_of_cs cs)}
-type dkp_ikm_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_dkp_ikm (kem_hash_of_cs cs) /\ Seq.length b >= size_dh_key cs}
+type psk_s (cs:ciphersuite) = b:bytes{Seq.length b >= 32 /\ Seq.length b `maybe_lte` (max_length_psk (hash_of_cs cs))}
+type psk_id_s (cs:ciphersuite) = b:bytes{Seq.length b >= 1 /\ Seq.length b `maybe_lte` (max_length_psk_id (hash_of_cs cs))}
+type info_s (cs:ciphersuite) = b:bytes{Seq.length b `maybe_lte` (max_length_info (hash_of_cs cs))}
+type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b `maybe_lte` (max_length_exp_ctx (hash_of_cs cs))}
+type dkp_ikm_s (cs:ciphersuite) = b:bytes{Seq.length b `maybe_lte` (max_length_dkp_ikm (kem_hash_of_cs cs)) /\ Seq.length b >= size_dh_key cs}
 
 // deserialize returns a serialized point, this is due to HPKE
 // using a different format (the extra byte)

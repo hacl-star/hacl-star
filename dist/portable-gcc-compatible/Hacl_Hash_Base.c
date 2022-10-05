@@ -56,6 +56,10 @@ uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)8U;
       }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)8U;
+      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)4U;
@@ -103,6 +107,10 @@ uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a)
     case Spec_Hash_Definitions_SHA2_512:
       {
         return (uint32_t)128U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)136U;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
@@ -152,6 +160,10 @@ uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)8U;
       }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)4U;
+      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)8U;
@@ -199,6 +211,10 @@ uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a)
     case Spec_Hash_Definitions_SHA2_512:
       {
         return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
