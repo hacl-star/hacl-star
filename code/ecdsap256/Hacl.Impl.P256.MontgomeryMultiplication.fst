@@ -21,7 +21,7 @@ open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Lib.Loops
 open Spec.P256.MontgomeryMultiplication
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val add8_without_carry1: t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
@@ -143,7 +143,10 @@ let montgomery_multiplication_buffer_by_one a result =
 
 
 val montgomery_multiplication_buffer: a: felem -> b: felem -> result: felem ->  Stack unit
-  (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h b /\ live h result /\ as_nat h b < prime256)) 
+  (requires (fun h ->
+    live h a /\ live h b /\ live h result /\
+    eq_or_disjoint a b /\
+    as_nat h a < prime256  /\ as_nat h b < prime256))
   (ensures (fun h0 _ h1 -> 
     modifies (loc result) h0 h1 /\  
     as_nat h1 result < prime256 /\
