@@ -806,7 +806,7 @@ let lemma_machine_eval_code_Ins_bounded_effects_aux4 (i:ins) (fuel:nat) s1 s2 :
         let rw = rw_set_of_ins i in
         (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
   let filt s = { s with ms_trace = [] } in
-  let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) @ s_orig.ms_trace } in
+  let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) `L.append` s_orig.ms_trace } in
   let f : st unit = machine_eval_code_Ins i fuel in
   let rw = rw_set_of_ins i in
   lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
