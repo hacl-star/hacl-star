@@ -337,7 +337,7 @@ let return (#a:Type) (x:a) :st a =
   fun s -> x, s
 
 unfold
-let bind (#a:Type) (#b:Type) (m:st a) (f:a -> st b) :st b =
+let (let*) (#a:Type) (#b:Type) (m:st a) (f:a -> st b) :st b =
 fun s0 ->
   let x, s1 = m s0 in
   let y, s2 = f x s1 in
@@ -357,7 +357,7 @@ let fail :st unit =
 
 unfold
 let check (valid: state -> bool) : st unit =
-  s <-- get;
+  let* s = get in
   if valid s then
     return ()
   else
@@ -367,46 +367,46 @@ unfold
 let run (f:st unit) (s:state) : state = snd (f s)
 
 let update_reg (r:reg) (v:nat64) :st unit =
-  s <-- get;
+  let* s = get in
   set (update_reg' r v s)
 
 let update_vec (vr:vec) (v:quad32) :st unit =
-  s <-- get;
+  let* s = get in
   set (update_vec' vr v s)
 
 let update_xer (new_xer:xer_t) :st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with xer = new_xer } )
 
 let update_cr0 (new_cr0:cr0_t) :st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with cr0 = new_cr0 } )
 
 unfold
 let update_r1 (i:int) : st unit =
   // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
- check (fun s -> i >= s.ms_stack.initial_r1 - 65536);;
- check (fun s -> i <= s.ms_stack.initial_r1);;
- s <-- get;
+ check (fun s -> i >= s.ms_stack.initial_r1 - 65536);*
+ check (fun s -> i <= s.ms_stack.initial_r1);*
+ let* s = get in
  set (update_r1' i s)
 
 let free_stack (start finish:int) : st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with ms_stack = free_stack' start finish s.ms_stack} )
 
 // Core definition of instruction semantics
 let eval_ins (ins:ins) : st unit =
-  s <-- get;
+  let* s = get in
   match ins with
   | Move dst src ->
     update_reg dst (eval_reg src s)
 
   | Load64 dst base offset ->
-    check (valid_mem ({ address=base; offset=offset }));;
+    check (valid_mem ({ address=base; offset=offset }));*
     update_reg dst (eval_mem (eval_reg base s + offset) s)
 
   | Store64 src base offset ->
-    check (valid_mem ({ address=base; offset=offset }));;
+    check (valid_mem ({ address=base; offset=offset }));*
     set (update_mem (eval_reg base s + offset) (eval_reg src s) s)
 
   | LoadImm64 dst src ->
@@ -425,14 +425,14 @@ let eval_ins (ins:ins) : st unit =
     let old_carry = if xer_ca(s.xer) then 1 else 0 in
     let sum = (eval_reg src1 s) + (eval_reg src2 s) + old_carry in
     let new_carry = sum >= pow2_64 in
-    update_reg dst (sum % pow2_64);;
+    update_reg dst (sum % pow2_64);*
     update_xer (update_xer_ca s.xer new_carry)
 
   | AddExtendedOV dst src1 src2 ->
     let old_carry = if xer_ov(s.xer) then 1 else 0 in
     let sum = (eval_reg src1 s) + (eval_reg src2 s) + old_carry in
     let new_carry = sum >= pow2_64 in
-    update_reg dst (sum % pow2_64);;
+    update_reg dst (sum % pow2_64);*
     update_xer (update_xer_ov s.xer new_carry)
 
   | Sub dst src1 src2 ->
@@ -440,31 +440,31 @@ let eval_ins (ins:ins) : st unit =
 
   | SubImm dst src1 src2 ->
     update_reg dst ((eval_reg src1 s - int_to_nat64 src2) % pow2_64)
-  
+
   | MulLow64 dst src1 src2 ->
     update_reg dst ((eval_reg src1 s * eval_reg src2 s) % pow2_64)
 
   | MulHigh64U dst src1 src2 ->
     update_reg dst (FStar.UInt.mul_div #64 (eval_reg src1 s) (eval_reg src2 s))
-  
+
   | Xor dst src1 src2 ->
     update_reg dst (ixor (eval_reg src1 s) (eval_reg src2 s))
-  
+
   | And dst src1 src2 ->
     update_reg dst (iand (eval_reg src1 s) (eval_reg src2 s))
-  
+
   | Sr64Imm dst src1 src2 ->
     update_reg dst (ishr (eval_reg src1 s) src2)
-  
+
   | Sl64Imm dst src1 src2 ->
     update_reg dst (ishl (eval_reg src1 s) src2)
-  
+
   | Mfvsrd dst src ->
     let src_q = eval_vec src s in
     let src_two = four_to_two_two src_q in
     let extracted_nat64 = two_to_nat 32 (two_select src_two 1) in
     update_reg dst extracted_nat64
-  
+
   | Mfvsrld dst src ->
     let src_q = eval_vec src s in
     let src_two = four_to_two_two src_q in
@@ -479,13 +479,13 @@ let eval_ins (ins:ins) : st unit =
       (val_src2 / pow2_32)
       (val_src1 % pow2_32)
       (val_src1 / pow2_32))
-  
+
   | Vadduwm dst src1 src2 ->
     update_vec dst (add_wrap_quad32 (eval_vec src1 s) (eval_vec src2 s))
-  
+
   | Vxor dst src1 src2 ->
     update_vec dst (quad32_xor (eval_vec src1 s) (eval_vec src2 s))
-  
+
   | Vslw dst src1 src2 ->
     let src1_q = eval_vec src1 s in
     let src2_q = eval_vec src2 s in
@@ -515,9 +515,9 @@ let eval_ins (ins:ins) : st unit =
       (eq_result (src1_q.hi3 = src2_q.hi3))
     in
     update_vec dst eq_val
-  
+
   | Vsldoi dst src1 src2 count ->
-    check (fun s -> (count = 4 || count = 8 || count = 12));;  // We only spec the one very special case we need
+    check (fun s -> (count = 4 || count = 8 || count = 12));*  // We only spec the one very special case we need
     let src1_q = eval_vec src1 s in
     let src2_q = eval_vec src2 s in
     if count = 4 then update_vec dst (Mkfour src2_q.hi3 src1_q.lo0 src1_q.lo1 src1_q.hi2)
@@ -534,7 +534,7 @@ let eval_ins (ins:ins) : st unit =
     let src1_q = eval_vec src1 s in
     let src2_q = eval_vec src2 s in
     update_vec dst (Mkfour src2_q.hi2 src2_q.hi3 src1_q.hi2 src1_q.hi3)
-  
+
   | Vsel dst src1 src2 sel ->
     let src1_q = eval_vec src1 s in
     let src2_q = eval_vec src2 s in
@@ -546,53 +546,53 @@ let eval_ins (ins:ins) : st unit =
       (isel32 src2_q.hi3 src1_q.hi3 sel_q.hi3))
 
   | Load128 dst base offset ->
-    check (valid_mem128 base offset);;
+    check (valid_mem128 base offset);*
     update_vec dst (eval_mem128 (eval_reg base s + eval_reg offset s) s)
-  
+
   | Store128 src base offset ->
-    check (valid_mem128 base offset);;
+    check (valid_mem128 base offset);*
     set (update_mem128 (eval_reg base s + eval_reg offset s) (eval_vec src s) s)
-  
+
   | Load128Word4 dst base ->
-    check (valid_mem128_reg base);;
+    check (valid_mem128_reg base);*
     let src_q = eval_mem128 (eval_reg base s) s in
     update_vec dst (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0)
-  
+
   | Load128Word4Index dst base offset ->
-    check (fun s -> offset <> 0);;
-    check (valid_mem128 base offset);;
+    check (fun s -> offset <> 0);*
+    check (valid_mem128 base offset);*
     let src_q = eval_mem128 (eval_reg base s + eval_reg offset s) s in
     update_vec dst (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0)
 
   | Store128Word4 src base ->
-    check (valid_mem128_reg base);;
+    check (valid_mem128_reg base);*
     let src_q = eval_vec src s in
     set (update_mem128 (eval_reg base s) (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0) s)
-  
+
   | Store128Word4Index src base offset ->
-    check (fun s -> offset <> 0);;
-    check (valid_mem128 base offset);;
+    check (fun s -> offset <> 0);*
+    check (valid_mem128 base offset);*
     let src_q = eval_vec src s in
     set (update_mem128 (eval_reg base s + eval_reg offset s) (Mkfour src_q.hi3 src_q.hi2 src_q.lo1 src_q.lo0) s)
 
   | Load128Byte16 dst base ->
-    check (valid_mem128_reg base);;
+    check (valid_mem128_reg base);*
     update_vec dst (reverse_bytes_quad32 (eval_mem128 (eval_reg base s) s))
-  
+
   | Load128Byte16Index dst base offset ->
-    check (fun s -> offset <> 0);;
-    check (valid_mem128 base offset);;
+    check (fun s -> offset <> 0);*
+    check (valid_mem128 base offset);*
     update_vec dst (reverse_bytes_quad32 (eval_mem128 (eval_reg base s + eval_reg offset s) s))
-  
+
   | Store128Byte16 src base ->
-    check (valid_mem128_reg base);;
+    check (valid_mem128_reg base);*
     set (update_mem128 (eval_reg base s) (reverse_bytes_quad32 (eval_vec src s)) s)
-  
+
   | Store128Byte16Index src base offset ->
-    check (fun s -> offset <> 0);;
-    check (valid_mem128 base offset);;
+    check (fun s -> offset <> 0);*
+    check (valid_mem128 base offset);*
     set (update_mem128 (eval_reg base s + eval_reg offset s) (reverse_bytes_quad32 (eval_vec src s)) s)
-  
+
   | Vshasigmaw0 dst src ->
     let src_q = eval_vec src s in
     update_vec dst (Mkfour
@@ -608,7 +608,7 @@ let eval_ins (ins:ins) : st unit =
       (sigma256_0_1 src_q.lo1)
       (sigma256_0_1 src_q.hi2)
       (sigma256_0_1 src_q.hi3))
-  
+
   | Vshasigmaw2 dst src ->
     let src_q = eval_vec src s in
     update_vec dst (Mkfour
@@ -616,7 +616,7 @@ let eval_ins (ins:ins) : st unit =
       (sigma256_1_0 src_q.lo1)
       (sigma256_1_0 src_q.hi2)
       (sigma256_1_0 src_q.hi3))
-  
+
   | Vshasigmaw3 dst src ->
     let src_q = eval_vec src s in
     update_vec dst (Mkfour
@@ -624,29 +624,29 @@ let eval_ins (ins:ins) : st unit =
       (sigma256_1_1 src_q.lo1)
       (sigma256_1_1 src_q.hi2)
       (sigma256_1_1 src_q.hi3))
-  
+
   | Alloc n ->
-    check (fun s -> n % 16 = 0);;
+    check (fun s -> n % 16 = 0);*
     update_r1 (eval_reg 1 s - n)
 
   | Dealloc n ->
     let old_r1 = eval_reg 1 s in
     let new_r1 = old_r1 + n in
-    update_r1 new_r1;;
+    update_r1 new_r1;*
     // The deallocated stack memory should now be considered invalid
     free_stack old_r1 new_r1
 
   | StoreStack128 src t offset ->
-    check (fun s -> valid_maddr_offset128 offset);;
+    check (fun s -> valid_maddr_offset128 offset);*
     let r1_pos = eval_reg 1 s + offset in
-    check (fun s -> r1_pos <= s.ms_stack.initial_r1 - 16);;
+    check (fun s -> r1_pos <= s.ms_stack.initial_r1 - 16);*
     set (update_stack128_and_taint r1_pos (eval_vec src s) s t)
 
   | LoadStack128 dst t offset ->
-    check (fun s -> valid_maddr_offset128 offset);;
+    check (fun s -> valid_maddr_offset128 offset);*
     let r1_pos = eval_reg 1 s + offset in
-    check (fun s -> r1_pos + 16 <= s.ms_stack.initial_r1);;
-    check (fun s -> valid_src_stack128_and_taint r1_pos s t);;
+    check (fun s -> r1_pos + 16 <= s.ms_stack.initial_r1);*
+    check (fun s -> valid_src_stack128_and_taint r1_pos s t);*
     update_vec dst (eval_stack128 r1_pos s.ms_stack)
 
   | Ghost _ ->

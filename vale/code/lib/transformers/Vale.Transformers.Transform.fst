@@ -49,9 +49,9 @@ let reorder orig hint =
   transformation_result_of_possibly_codes (
     if code_modifies_ghost orig then Err "code directly modifies ghost state (via ins_Ghost instruction)" else
     let orig' = IR.purge_empty_codes [orig] in
-    ts <-- IR.find_transformation_hints orig' [hint];
-    transformed <-- IR.perform_reordering_with_hints ts orig';
-    prints_to_same_code (Block transformed) hint;;
+    let+ ts = IR.find_transformation_hints orig' [hint] in
+    let+ transformed = IR.perform_reordering_with_hints ts orig' in
+    prints_to_same_code (Block transformed) hint;+
     return transformed
   ) orig
 
