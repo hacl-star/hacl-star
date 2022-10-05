@@ -34,6 +34,7 @@
 #define MD5 5
 #define Blake2S 6
 #define Blake2B 7
+#define SHA3_256 8
 
 typedef uint8_t hash_alg;
 
@@ -84,8 +85,11 @@ extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___);
 #define SHA2_256_s 3
 #define SHA2_384_s 4
 #define SHA2_512_s 5
-#define Blake2S_s 6
-#define Blake2B_s 7
+#define SHA3_256_s 6
+#define Blake2S_s 7
+#define Blake2S_128_s 8
+#define Blake2B_s 9
+#define Blake2B_256_s 10
 
 typedef uint8_t state_s_tags;
 
@@ -99,8 +103,11 @@ typedef struct state_s_s
     uint32_t *case_SHA2_256_s;
     uint64_t *case_SHA2_384_s;
     uint64_t *case_SHA2_512_s;
+    uint64_t *case_SHA3_256_s;
     uint32_t *case_Blake2S_s;
+    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_s;
     uint64_t *case_Blake2B_s;
+    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_s;
   }
   ;
 }
@@ -187,6 +194,7 @@ static bool is_supported_alg(alg a)
 #define AuthenticationFailure 3
 #define InvalidIVLength 4
 #define DecodeError 5
+#define MaximumLengthExceeded 6
 
 typedef uint8_t error_code;
 
@@ -226,6 +234,8 @@ EverCrypt_AEAD_decrypt(
 );
 
 extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
+
+extern bool EverCrypt_HMAC_is_supported_alg(hash_alg uu___);
 
 extern void
 EverCrypt_HMAC_compute(
@@ -10225,6 +10235,11 @@ test_one_hash(
         tlen = (uint32_t)64U;
         break;
       }
+    case SHA3_256:
+      {
+        tlen = (uint32_t)32U;
+        break;
+      }
     case Blake2S:
       {
         tlen = (uint32_t)32U;
@@ -10290,25 +10305,6 @@ test_hash(
   }
 }
 
-static bool supported_hmac_algorithm(hash_alg a)
-{
-  switch (a)
-  {
-    case MD5:
-      {
-        return false;
-      }
-    case SHA2_224:
-      {
-        return false;
-      }
-    default:
-      {
-        return true;
-      }
-  }
-}
-
 static bool keysized(hash_alg a, uint32_t l)
 {
   uint32_t sw;
@@ -10342,6 +10338,11 @@ static bool keysized(hash_alg a, uint32_t l)
     case SHA2_512:
       {
         sw = (uint32_t)128U;
+        break;
+      }
+    case SHA3_256:
+      {
+        sw = (uint32_t)136U;
         break;
       }
     case Blake2S:
@@ -10409,6 +10410,11 @@ test_one_hmac(
         sw0 = (uint32_t)64U;
         break;
       }
+    case SHA3_256:
+      {
+        sw0 = (uint32_t)32U;
+        break;
+      }
     case Blake2S:
       {
         sw0 = (uint32_t)32U;
@@ -10468,6 +10474,11 @@ test_one_hmac(
           sw1 = (uint32_t)128U;
           break;
         }
+      case SHA3_256:
+        {
+          sw1 = (uint32_t)136U;
+          break;
+        }
       case Blake2S:
         {
           sw1 = (uint32_t)64U;
@@ -10488,7 +10499,7 @@ test_one_hmac(
     {
       failwith____("Datalen predicate not satisfied\n");
     }
-    else if (supported_hmac_algorithm(ha))
+    else if (EverCrypt_HMAC_is_supported_alg(ha))
     {
       uint32_t sw2;
       switch (ha)
@@ -10521,6 +10532,11 @@ test_one_hmac(
         case SHA2_512:
           {
             sw2 = (uint32_t)64U;
+            break;
+          }
+        case SHA3_256:
+          {
+            sw2 = (uint32_t)32U;
             break;
           }
         case Blake2S:
@@ -10575,6 +10591,11 @@ test_one_hmac(
         case SHA2_512:
           {
             sw = (uint32_t)64U;
+            break;
+          }
+        case SHA3_256:
+          {
+            sw = (uint32_t)32U;
             break;
           }
         case Blake2S:
@@ -11082,6 +11103,11 @@ test_one_hkdf(
         sw0 = (uint32_t)64U;
         break;
       }
+    case SHA3_256:
+      {
+        sw0 = (uint32_t)32U;
+        break;
+      }
     case Blake2S:
       {
         sw0 = (uint32_t)32U;
@@ -11135,6 +11161,11 @@ test_one_hkdf(
       case SHA2_512:
         {
           sw1 = (uint32_t)64U;
+          break;
+        }
+      case SHA3_256:
+        {
+          sw1 = (uint32_t)32U;
           break;
         }
       case Blake2S:
@@ -11200,6 +11231,11 @@ test_one_hkdf(
             sw2 = (uint32_t)128U;
             break;
           }
+        case SHA3_256:
+          {
+            sw2 = (uint32_t)136U;
+            break;
+          }
         case Blake2S:
           {
             sw2 = (uint32_t)64U;
@@ -11255,6 +11291,11 @@ test_one_hkdf(
               sw3 = (uint32_t)128U;
               break;
             }
+          case SHA3_256:
+            {
+              sw3 = (uint32_t)136U;
+              break;
+            }
           case Blake2S:
             {
               sw3 = (uint32_t)64U;
@@ -11304,6 +11345,11 @@ test_one_hkdf(
               sw4 = (uint32_t)64U;
               break;
             }
+          case SHA3_256:
+            {
+              sw4 = (uint32_t)32U;
+              break;
+            }
           case Blake2S:
             {
               sw4 = (uint32_t)32U;
@@ -11324,7 +11370,7 @@ test_one_hkdf(
         {
           failwith____("infolen is too large\n");
         }
-        else if (supported_hmac_algorithm(ha))
+        else if (EverCrypt_HMAC_is_supported_alg(ha))
         {
           C_String_t str = EverCrypt_Hash_string_of_alg(ha);
           uint32_t sw5;
@@ -11358,6 +11404,11 @@ test_one_hkdf(
             case SHA2_512:
               {
                 sw5 = (uint32_t)64U;
+                break;
+              }
+            case SHA3_256:
+              {
+                sw5 = (uint32_t)32U;
                 break;
               }
             case Blake2S:
@@ -11411,6 +11462,11 @@ test_one_hkdf(
             case SHA2_512:
               {
                 sw = (uint32_t)64U;
+                break;
+              }
+            case SHA3_256:
+              {
+                sw = (uint32_t)32U;
                 break;
               }
             case Blake2S:

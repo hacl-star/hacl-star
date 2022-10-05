@@ -140,8 +140,7 @@ chacha20_constants[4U] =
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_init */
 
-inline void
-Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
+void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -177,7 +176,7 @@ Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_encrypt_block */
 
-inline void
+void
 Hacl_Impl_Chacha20_chacha20_encrypt_block(
   uint32_t *ctx,
   uint8_t *out,
@@ -229,7 +228,7 @@ chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr, 
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_update */
 
-inline void
+void
 Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text)
 {
   uint32_t rem = len % (uint32_t)64U;
