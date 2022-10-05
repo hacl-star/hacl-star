@@ -334,7 +334,7 @@ let rec stack_args' (max_arity:nat)
 let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.machine_heap) (j:int) : Lemma
   (requires ptr >= j + 8)
   (ensures BS.get_heap_val64 j mem == BS.get_heap_val64 j (BS.update_heap64 ptr v mem))
-  =  
+  =
   BS.get_heap_val64_reveal ();
   BS.update_heap64_reveal ()
 
@@ -380,7 +380,7 @@ let rec stack_of_args_stack_args'_aux
      )
 
 #push-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 150 --z3refresh"
-let rec stack_of_args_stack_args'
+let stack_of_args_stack_args'
     (max_arity:nat)
     (n:nat)
     (args:IX64.arg_list{List.Tot.length args = n})
@@ -659,4 +659,3 @@ let rec __test__wrap
           (elim_1 pre x)
           (elim_1 post x)
           (VSig.elim_vale_sig_cons hd tl args pre post v x)
-

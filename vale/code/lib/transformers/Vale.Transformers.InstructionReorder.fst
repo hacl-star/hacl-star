@@ -116,7 +116,7 @@ let rec lemma_write_same_constants_symmetric (c1 c2:locations_with_values) :
     lemma_write_same_constants_symmetric xs c2;
     lemma_write_same_constants_symmetric xs ys
 
-let rec lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
+let lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
   Lemma
     (ensures (!!(write_exchange_allowed w1 w2 c1 c2) = !!(write_exchange_allowed w2 w1 c2 c1))) =
   lemma_write_same_constants_symmetric c1 c2
