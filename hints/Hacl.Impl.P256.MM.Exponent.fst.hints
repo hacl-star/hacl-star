@@ -43,7 +43,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "bbc227442afde02991d00a162688325a"
+      "2f52e1bfe11a1aa813b354775a4254e5"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.cswap",
@@ -157,7 +157,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "756c1ee20d33a3c273ced4c797a9df32"
+      "4e906b866acac198219f24504268b97e"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.upload_one_montg_form",
@@ -230,7 +230,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "99b68d52dc28bd0edd551626c9afaaac"
+      "2eb3ccc27847e5fca50b8080cb05fb15"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power_step0",
@@ -239,7 +239,7 @@
       0,
       [ "@query" ],
       0,
-      "b738d13fdded123cc3bfc56104e036f2"
+      "772557a8d2512b23ecb27b4b4b88c833"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power_step0",
@@ -254,11 +254,12 @@
         "equation_Hacl.Spec.P256.Felem.as_nat",
         "equation_Hacl.Spec.P256.Felem.felem", "equation_Lib.Buffer.as_seq",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.eq_or_disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
         "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
         "equation_Lib.IntTypes.uint64", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
         "equation_Spec.P256.Definitions.nat_prime",
         "equation_Spec.P256.MontgomeryMultiplication._pow_step0",
         "equation_Spec.P256.MontgomeryMultiplication.op_Star_Percent",
@@ -281,16 +282,18 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
         "refinement_interpretation_Tm_refine_41615747e0e7a31d03959244fb603dca",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9bb527a48dedeb573e0b90b591c6222b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_a9af88ca89abdab26a5b66cce8c5ebc7",
         "refinement_interpretation_Tm_refine_aa26d215d2b8332f539211763042f673",
-        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_Hacl.Spec.P256.Felem.as_nat", "typing_Lib.Buffer.loc",
+        "typing_Lib.Buffer.op_Bar_Plus_Bar",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_Spec.P256.MontgomeryMultiplication.prime",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a5757b56f033c59d12fc19afc4870cfe"
+      "bff0b0298937f078c39323539140c97c"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power_step",
@@ -320,7 +323,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1a48feb992e3f47f7c9ba32d74ec9057"
+      "050c96b9727c3c014f885c1ee2c2b320"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power_step",
@@ -338,7 +341,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "68d29744f9eb72fdc664cd5accbabb55"
+      "4808ce43a721c8d49dd5c71082a1df99"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power_step",
@@ -436,7 +439,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "badb3852a6ae01a10d18f33941599bce"
+      "947adadf48d2c90a4018de9f8d8c1849"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent._montgomery_ladder_power",
@@ -461,7 +464,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "274eb45091b74ef14518798c62b98981"
+      "8442e527942c5f69b215ff42a9c44fdc"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent._montgomery_ladder_power",
@@ -479,7 +482,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d90328da690b086eb7a4e30fbc374491"
+      "99a212cd530f13c09cf2d3c07f06cef1"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent._montgomery_ladder_power",
@@ -578,7 +581,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "38621145b18df92f389716b57e57aff9"
+      "8b45c5002277e26e48085b5ecc5af061"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power",
@@ -603,7 +606,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e93573dbf2944247e386e7bd288feb39"
+      "59bfadd8b3b0bbd99b8245e0c92212b1"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power",
@@ -621,7 +624,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d5896cc23b10582cab2615de8917145b"
+      "ee03203fbc34225ccced0fbeb60cdc9e"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.montgomery_ladder_power",
@@ -794,7 +797,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "69fd372bd424c895a4a979b5724381bb"
+      "7a0e48722dd0ccb389fcc98db8bb7261"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.sqPower_list",
@@ -817,7 +820,7 @@
         "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d3af005afc8d9ababf5db2d5ef4b6b3f"
+      "e77ef495d069ff41de0ce888af88aede"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.sqPower_seq",
@@ -854,7 +857,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a935a6f4f3922e610362df4c52b1df04"
+      "0b7cff9d26498430a1448ed8bae0faf8"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.sqPower_buffer",
@@ -913,7 +916,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a64e52a8db16a38877a46538614aa623"
+      "be62adabb6d3f8a42d326289328c4395"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.square_root",
@@ -938,7 +941,7 @@
         "typing_Spec.P256.MontgomeryMultiplication.prime"
       ],
       0,
-      "86cd15162d133f0c2a48a780337cfb7a"
+      "5b3d06512d5c536a3b4571f6964af7f5"
     ],
     [
       "Hacl.Impl.P256.MM.Exponent.square_root",
@@ -1011,7 +1014,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "095a2e0c61ea82654a6895943b85ae41"
+      "60e6891d45e2f610f7c78a87c931745b"
     ]
   ]
 ]

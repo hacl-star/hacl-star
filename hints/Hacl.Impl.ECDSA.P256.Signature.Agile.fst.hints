@@ -1,5 +1,5 @@
 [
-  "\u0014»Év\u000eÖR‡Sg(X$€×Ÿ",
+  "c·p™C9á\u0005<urÆù1œ²",
   [
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step12",
@@ -80,7 +80,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "73f46ade04a20d1cf00613059363ab1b"
+      "d7af12bd33d0552a68431a263cf19cc1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step12",
@@ -307,7 +307,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9a5305ecc855a20bc7c0fe58823a7174"
+      "92311bf6032e28add29c3ba59af051ff"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step45",
@@ -351,7 +351,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "465c76f727475fed4441b9925b912329"
+      "f7a4110a535261a0d8e8b879b6aa542a"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step45",
@@ -371,7 +371,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f39fd661f0a950d13c82ea465b8926ad"
+      "dd14dd702da3dbd1f64b9623f1fb4533"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step45",
@@ -555,7 +555,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d52c415e38aff6ccf519c4c65bb7c648"
+      "6f45545e827dbbbbe0e638f98c523533"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.lemma_power_step6",
@@ -569,7 +569,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "0e94c397e8e4264eead4e8d68967ce39"
+      "562be857903b3464620f249a696c9ccf"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.lemma_power_step6",
@@ -600,7 +600,7 @@
         "typing_Spec.P256.Lemmas.exp"
       ],
       0,
-      "190c1d570ea5a9eac3314b8987731afe"
+      "fc366c3c292d8dd89fd2f2e076046e64"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -608,11 +608,25 @@
       0,
       0,
       [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
+        "equation_Spec.GaloisField.gf", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "011580e94d80c9c0f09d31500db3b454"
+      "7c7bebf4b5e98b25df46b7b06b451e6b"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -792,7 +806,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "89020fd25318d4fe6ada884372f1c92c"
+      "57e177db22d8c44bfd4cf20a624025c1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -804,7 +818,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c903330d5ea0f8c2228293fcdefc8f28"
+      "c63b53846c6ef82eae5fdd4ea523307e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -816,7 +830,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1a26c46cfe1ef967e328207f16ae2b5a"
+      "629992cb322764bb7334426cd496c0ef"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -828,7 +842,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3e5603035c9e8089a167172bb4c77fbd"
+      "7c0c88fac74e4a371cec4e05d15127c1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -840,7 +854,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "f014ddad9d22c92dc26e83e107fe7525"
+      "ea283f9a4a272f4a2ec9767a1d79cd18"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -852,7 +866,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "faa465dea0202795dd0d28520df8aaf3"
+      "d860e15db91e14e9239e8d1a4159007d"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -864,7 +878,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "862b3ac9567c85364d52dd5fad1dea2f"
+      "2663e2db3ab567934d11aa5d34cf0d3f"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -876,7 +890,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "b5768d10e481cdc632b7bc1a6054bfe9"
+      "301122b095f8a9628aa65607e8ace8a7"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -888,7 +902,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "872354f3541a3cad056f3bfcb139d857"
+      "57078aad3d692642713ed24ca8258027"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -900,7 +914,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "e9f0db28482770e1d1e450ed1f83c1bb"
+      "afb7880f06f3d13609bd61043f5ff1cf"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -912,7 +926,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ff74810897fa9b62b278ca9a9686544a"
+      "5b32bf964aaafc7ccd0b2fffa83ab328"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -924,7 +938,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "fe87ac42ebb11d548a5f28a8507caa2e"
+      "78cb296e5a3183ef9c9f83143ae67fd1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -936,7 +950,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "4a72eaa5d80cb1ea7b79d137b934dc8c"
+      "b83e2d647eb09a0e142c28b753669692"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -948,7 +962,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "f9e7e1433b351b8434f6e98fa72de5e6"
+      "c5e0cd251b7f1e9536aba9f68b012a10"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -960,7 +974,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "10dea87ce77d6a2532a94978e5690091"
+      "d368599bf2c55cd524ee5d60a4a60cd9"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -972,7 +986,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8aceef9c4b35101f096b80c751278203"
+      "83918146911e9bd3acedeeeb7d638648"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -984,7 +998,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ff531b10a84fb92d8801f2192ca9383f"
+      "b17ea54f9420fb1fbcf9db4512ad032e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -996,7 +1010,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "2feb2bf95f9c2770ba903a9ea7ff2713"
+      "8aa56ac90bcbd50c418a115f2db1bb49"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1008,7 +1022,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "34e1e4b90eafcc1b2dfc35f1d4298fa2"
+      "38def9b97649910af9ef5353cdb9d161"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1020,7 +1034,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d05c1c3f9ae7f20bc40d0e9d6d71171e"
+      "8ae1663b8d802cb67db92dd7b64ba3d3"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1032,7 +1046,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "e66f1538692983414b230cccdd6c8f37"
+      "363e8ca2e22699a01afc882b5e134198"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1044,7 +1058,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "324d0d7592d4d118c1a20969c931dd47"
+      "8e612814459580a785c94e6b86ab922b"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1056,7 +1070,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d25e8f3cb779fc29e6b05f7cae1e1044"
+      "6b9d8f53b9fce2666b995fb2d490a03b"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1068,7 +1082,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a9495dbb70329dca13eecf0ddf43d47d"
+      "0acde3d21e50e83c7bb360dbd06567f1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1080,7 +1094,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c3077010ebb0e4b0d3d9d3226cebfdc6"
+      "9fac2d35d4817d11d2927df249bcaccc"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1092,7 +1106,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "93f6c47458ae0f2b8135c541bc4c9a03"
+      "7e3d543f1ccf99c514baf578a8e0ef53"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1104,7 +1118,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "956a2d3f32a51c6a4128eae8a84d4e50"
+      "5f0e9c104710914c4231f7d475a7d3be"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1116,7 +1130,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "6b10fe2b3654fe097fef834c102add63"
+      "0162a6cbe395b4fb85d6d249b1e2ffba"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1128,7 +1142,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "beaa0a2b808a91dd5bceeee4d0e77453"
+      "41d86282f41804d30c3679060423c2b6"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1140,7 +1154,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a94a7948c683ee597611825686f282cf"
+      "b225b0185ec1993d97e380e7492bdc43"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1152,7 +1166,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "7d458b52ec9601b509218b621051eba7"
+      "8167ea3d4fdc0be70f899b60bda4b01c"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1164,7 +1178,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1a136db4dfbe45931fc6ba704e48e201"
+      "4351d7ad432721f7497fc7700574363e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1176,7 +1190,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "565fc8678fd47789ac6ac5217f566c97"
+      "9b3bb1b59c466f96b65d622742602b23"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1188,7 +1202,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "833e964d9978217b679b09c73cc4837a"
+      "978df030f73e02ce6ceed607a5db9ec8"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1200,7 +1214,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1c5cae11cf25888212e67069784f2a4e"
+      "4ebe0a8fef9c43f646f9dcc77b108867"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1212,7 +1226,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "271e650254c83a8eb831d025d48223bd"
+      "0efb54ba213afd34f89f617bc287c30a"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1224,7 +1238,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "722e3accf63aeeb0cd4ea2877f64c82f"
+      "d7567beabeb449f070d176c2e6a2d6bb"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1236,7 +1250,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "084d1dc8f56e6abd5a8fbaccef6f7327"
+      "1b185e201a81e81890903238cd5c4196"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1248,7 +1262,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "24a9872157093cc6ebaa20a0d6617c5a"
+      "d5614c4eea8a2c363ecbbfb402ea429b"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1260,7 +1274,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3a75e00bb7e4f7ae7e2860daa2eb8bf2"
+      "60458238c3f5b8bcbe5563ab2becf3e4"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1272,7 +1286,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d7dd45b049d73d1c83ba28df5935b2cc"
+      "6329a848363d47e251d99dcc3c18303b"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1284,7 +1298,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "9ade31214ea8c9dfb94efaaa00b0595c"
+      "d5de7038a49575cf55982fbef4039d5e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1296,7 +1310,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c667a75c52fd7128959c1ea8114f7376"
+      "654e0d310a1584af4186e56445eda34a"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1308,7 +1322,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cd9fdb5661c2200e9a531e2de1d138c7"
+      "d33fe5fdb4e7ec880c6f6cd08f8a3881"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1320,7 +1334,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "fd9c49b25c095a4c94f546feb2c3ae5d"
+      "f6ff2ae07c01122a38383fc6e6b1a6fd"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1332,7 +1346,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "9c085de0ff9bddc028f8b31853d1de65"
+      "0c05ec6c3f16e2ea9266fb7d27a94f02"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1344,7 +1358,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "76943ffe5f1f5b032991bfa93962680c"
+      "93656230a04c48104f5c55f63f891f9b"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1356,7 +1370,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d08c6813e9ec4f4b88b0d9cb744cdb61"
+      "a04c3f6781a691f8108f8779769287cb"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1368,7 +1382,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "812b2a4b7bdf63052703c5bfb3a68e96"
+      "29259a8f30691b89a5a52943fc408f61"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1385,7 +1399,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "6a182f195c002089954f797250bb5c42"
+      "6281e0f6791e86c69c37fd84ce0f3946"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1403,7 +1417,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "b7fa43c220f1d680105668950433c902"
+      "be2598aa48d9dfb7da3922f9cb7c28da"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1415,7 +1429,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "2bc8a65dbef63c3386d7adc5b8082baa"
+      "cae75470061ecb998cd0a56eb3ec99ee"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1433,7 +1447,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "de2caab98b223001bad167317fa3c264"
+      "70df84c05912a4568f58626c8a413789"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1451,7 +1465,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "2353b17c4ee65815d3b955c2354f7f1f"
+      "53a59987222614e37ee26bcbf9a59b66"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1463,7 +1477,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "f39b0bfc3b58545cf788d36b750c523b"
+      "ade87140ab4c0c511fbd6e469ee6d618"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1481,7 +1495,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "8c5fa720138fc5b28aefde08d87c4a66"
+      "d254b2c31a580b110b0c13cb7c41c26a"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1499,7 +1513,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "6804806dcf0de165c97dbec0a75cabdd"
+      "c76192353808b81aed6c6a23a255e2cb"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1511,7 +1525,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "82a734c41dd35adea725a6aba762f30c"
+      "3814678c88ab5eeb6febf7f01989c521"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1528,7 +1542,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "64ca953f3fa6efe1b02cf4269f236d6a"
+      "638f5cdb9a0ec5a812d481cd5ba7b9d9"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1546,7 +1560,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "ec0722df15060bbc8e13ade76323cff8"
+      "330040a953a76c352912a888d0ba843b"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1558,7 +1572,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "6fbc531988c71f6b50fa577d6cc0b746"
+      "3f5c9b8f643060e9d319976f66a3435e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1576,7 +1590,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "8170f3619ca8002fd561905372eaab7b"
+      "a410f8cde31a191803711348ec596325"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1594,7 +1608,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "27003e65544cbf7746d13d7ecf6e5746"
+      "93caf53d3911f4bb15f2ec0f72e75dd4"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1612,7 +1626,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "7c831e0ae62a11f301cf9f2e8f14760c"
+      "ee21d493b367949d30f6be6b373aa248"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1624,7 +1638,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c0e6ce2be8f9ec8245fb2b4d349f76df"
+      "bc6cb7bd6d4859e0a74858d9147753b9"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1641,7 +1655,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "7a1a1401d47065b2394d713ac778a0b6"
+      "83221018a1fae11d620647c07ef532ba"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1659,7 +1673,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "0064fbce904d68d9d36a0015122b48b5"
+      "ea9ff840d0b47c325a035bd4193d368e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1671,7 +1685,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "028fde629fc7d4af623880d9c77e2965"
+      "8cb766778f8e796909134e941a7a3611"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1689,7 +1703,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "e4c6e294c7de5eba87a3971b7b699ac6"
+      "0f13e14c625bce2b4614921cf36823c1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1707,7 +1721,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "134be888292eeecaa76662e3a1d72d9a"
+      "d112396fd28c8b1d3fed6824fb02239f"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1719,7 +1733,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "aeac68c41514cc3be413c94f6a6a45da"
+      "08d7aabdd34940d885e1972f9b7c9540"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1736,7 +1750,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "81040f4bf3f99ad4429028fb2a04673b"
+      "bbfb07bd714e056618149d4031aef1b9"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1754,7 +1768,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "9d515f231d3ab472e947c2a927000d71"
+      "ba0194c2a78b5046383c69d6aaf9fd91"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1766,7 +1780,7 @@
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "07abcf7fdc75a6d28b2145c4168491c1"
+      "162e7f65280b2ddf5f54feac2eb9c43c"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1784,7 +1798,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "fadba47f6c2f837fadb3049ce9d6a8d6"
+      "6f7b86431a0867bb0529828b51540489"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1802,7 +1816,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "511bbd152f745ba8376d98b1a73bc816"
+      "864f7887cce53d9a6bac9626dd95ab68"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1820,7 +1834,7 @@
         "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "0167493694c505f5700e4fa1c9672c7b"
+      "5aa57fa2c40657e16fbde92a2467a73c"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -1882,7 +1896,6 @@
         "equation_Spec.AES.irred",
         "equation_Spec.ECDSAP256.Definition.prime_p256_order",
         "equation_Spec.GaloisField.gf",
-        "equation_Spec.P256.Definitions.as_nat4",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Prims.int",
@@ -1940,19 +1953,15 @@
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
-        "refinement_interpretation_Tm_refine_23901fd1a00bbbb7a1fde69f8ee925b2",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_56c3919dda5153be7f87d90b0a6641c4",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
+        "refinement_interpretation_Tm_refine_66fb613beb1b4640675863846da10f20",
         "refinement_interpretation_Tm_refine_74bb33e41f007dbc44c496ebc7422911",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
@@ -1962,7 +1971,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
-        "refinement_interpretation_Tm_refine_eed1d421faaa74a5f4114a511f0aa2eb",
+        "refinement_interpretation_Tm_refine_df6acea2d60ed7cfc03a98b9668693ec",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f59cf85ff3b52d40c97f5b32cfca2788",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -1981,8 +1990,8 @@
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt32.v", "typing_Hacl.Spec.P256.Felem.as_nat",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.unsigned",
-        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.index",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
+        "typing_Lib.Sequence.index",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -2001,7 +2010,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c82342b7c7db9a531e072c7b203184fe"
+      "bf6dac453e40d641a6810957e3af4343"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_core",
@@ -2086,7 +2095,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "47621afa7d054b0a7dc4ca88c81297a4"
+      "59f2fe51e846ec28a9dbb87608f62e05"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_core",
@@ -2112,7 +2121,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4c0cd2da01632c2185e8c244fd373352"
+      "dda215d6d0287b54cab1903f333ca89d"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_core",
@@ -2155,6 +2164,7 @@
         "equation_Hacl.Spec.P256.Felem.as_nat",
         "equation_Hacl.Spec.P256.Felem.felem", "equation_Lib.Buffer.as_seq",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.eq_or_disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies0",
@@ -2162,12 +2172,12 @@
         "equation_Lib.Buffer.stack_allocated", "equation_Lib.Buffer.union",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.ones_v",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint64",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.ones_v", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.ECDSA.min_input_length",
@@ -2229,16 +2239,13 @@
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
         "refinement_interpretation_Tm_refine_188f4de01fe5b95cdd4a7397d11f3f2e",
-        "refinement_interpretation_Tm_refine_23901fd1a00bbbb7a1fde69f8ee925b2",
-        "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_3c1c1c4b68fcb122dfb7a7b246512b53",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
@@ -2250,8 +2257,11 @@
         "refinement_interpretation_Tm_refine_97be06f9061364acb45354bc2c236f6f",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_d04563a34fa3020b1b62a9c585886c77",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
+        "refinement_interpretation_Tm_refine_df6acea2d60ed7cfc03a98b9668693ec",
         "refinement_interpretation_Tm_refine_e78736bff9ff6ab87efd9a77db3e9577",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -2269,11 +2279,11 @@
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
-        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.logor", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.index",
+        "typing_FStar.UInt32.v", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.logor",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.v",
+        "typing_Lib.Sequence.index",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -2291,7 +2301,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "36434144b418629a3d90eb98de546c33"
+      "1cc74fd01b79a7a5347f4e4d25138bad"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature",
@@ -2339,7 +2349,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d5597649e0c804b6e59b2767ed14ace4"
+      "1c54898b2c3e5a97a3cfbb8bfea3626e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature",
@@ -2367,7 +2377,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6341c76cceb444f77f5c8105382e3e0c"
+      "9018e529e0f2dca694755b6817ca975a"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature",
@@ -2573,7 +2583,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "65d275738958e2b3a31fd0e8a7627861"
+      "7fb423d6e5308b5e1f034e6c122167d9"
     ]
   ]
 ]
