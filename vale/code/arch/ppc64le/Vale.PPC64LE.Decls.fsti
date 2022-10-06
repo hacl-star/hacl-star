@@ -29,8 +29,8 @@ unfold let heaplet_id = M.heaplet_id
 
 val xer_ov (xer:xer_t) : bool
 val xer_ca (xer:xer_t) : bool
-val update_xer_ov (xer:xer_t) (new_xer_ov:bool) : (new_xer:xer_t)
-val update_xer_ca (xer:xer_t) (new_xer_ca:bool) : (new_xer:xer_t)
+val update_xer_ov (xer:xer_t) (new_xer_ov:bool) : xer_t
+val update_xer_ca (xer:xer_t) (new_xer_ca:bool) : xer_t
 
 //unfold let va_subscript = Map.sel
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y
@@ -454,7 +454,7 @@ val lemma_valid_cmp_gt : s:va_state -> o1:cmp_opr -> o2:cmp_opr -> Lemma
 
 val va_compute_merge_total (f0:va_fuel) (fM:va_fuel) : va_fuel
 
-val va_lemma_merge_total (b0:va_codes) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost (fN:va_fuel)
+val va_lemma_merge_total (b0:va_codes) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost va_fuel
   (requires
     Cons? b0 /\
     eval_code (Cons?.hd b0) s0 f0 sM /\
@@ -524,7 +524,7 @@ val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (
     eval_code (While b c) s0 f1 s1
   )
 
-val va_lemma_whileMerge_total (c:va_code) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost (fN:va_fuel)
+val va_lemma_whileMerge_total (c:va_code) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost va_fuel
   (requires While? c /\ (
     let cond = While?.whileCond c in
     sN.ok /\

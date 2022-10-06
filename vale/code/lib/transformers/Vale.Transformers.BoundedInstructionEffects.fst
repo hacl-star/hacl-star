@@ -660,7 +660,7 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
   lemma_eval_instr_unchanged_at' it oprs ann s1 s2
 
 #push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine_state) :
+let lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine_state) :
   Lemma
     (ensures (constant_on_execution (rw_set_of_ins i).loc_constant_writes (machine_eval_ins_st i) s)) =
   if s.ms_ok then (
@@ -806,7 +806,7 @@ let lemma_machine_eval_code_Ins_bounded_effects_aux4 (i:ins) (fuel:nat) s1 s2 :
         let rw = rw_set_of_ins i in
         (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
   let filt s = { s with ms_trace = [] } in
-  let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) @ s_orig.ms_trace } in
+  let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) `L.append` s_orig.ms_trace } in
   let f : st unit = machine_eval_code_Ins i fuel in
   let rw = rw_set_of_ins i in
   lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
@@ -952,7 +952,7 @@ let rec lemma_unchanged_at_difference_elim (l1 l2:locations) (s1 s2:machine_stat
       lemma_unchanged_at_difference_elim xs l2 s1 s2
     )
 
-let rec lemma_unchanged_at_sym_diff_implies_difference (l1 l2:locations) (s1 s2:machine_state) :
+let lemma_unchanged_at_sym_diff_implies_difference (l1 l2:locations) (s1 s2:machine_state) :
   Lemma
     (requires (unchanged_at (sym_difference l1 l2) s1 s2))
     (ensures (unchanged_at (l1 `difference` l2) s1 s2 /\ unchanged_at (l2 `difference` l1) s1 s2)) =
