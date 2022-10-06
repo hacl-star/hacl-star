@@ -1,0 +1,145 @@
+[
+  "”]d¯çuì˙\u0012˛rÚ\\◊}Ù",
+  [
+    [
+      "Vale.PPC64LE.State.same_heap_types",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "4f5d1e75c8d1e28760e84f582cb615c0"
+    ],
+    [
+      "Vale.PPC64LE.State.coerce",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_754b00004f4a881ff74d076ab276dfe1"
+      ],
+      0,
+      "12f4b8227f835d243bf76371ca939212"
+    ],
+    [
+      "Vale.PPC64LE.State.eval_mem",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "bb7e12934a7acd2c04bc6adcf1118d9d"
+    ],
+    [
+      "Vale.PPC64LE.State.eval_cmp_opr",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.PPC64LE.Machine_s.CImm",
+        "disc_equation_Vale.PPC64LE.Machine_s.CReg",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.cmp_opr",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "c680b702de9c66391b891b539ec86e42"
+    ],
+    [
+      "Vale.PPC64LE.State.update_reg",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Vale.PPC64LE.Machine_s.reg",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "0547d5b91343901ad5607cf0cd60e140"
+    ],
+    [
+      "Vale.PPC64LE.State.update_vec",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Vale.PPC64LE.Machine_s.vec",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_10933b2b7d83031ac55f8752406bdc16",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "4772d2a8a7b605612d2237e66b4832a4"
+    ],
+    [
+      "Vale.PPC64LE.State.valid_maddr",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "240feabe0e4d38ec9a9202e648196312"
+    ],
+    [
+      "Vale.PPC64LE.State.valid_mem128",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "5d04a1c79c6130fff2f251490a5f4522"
+    ],
+    [
+      "Vale.PPC64LE.State.state_eta",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "b80658a3982a11e41c943bd8fad76834"
+    ],
+    [
+      "Vale.PPC64LE.State.state_eq",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "a0c4421115a0f10364c8c866123832a2"
+    ],
+    [
+      "Vale.PPC64LE.State.use_machine_state_equal",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.PPC64LE.Machine_s.regs_t",
+        "equation_Vale.PPC64LE.Regs.t",
+        "equation_Vale.PPC64LE.State.machine_state_eq",
+        "equation_Vale.PPC64LE.State.machine_state_equal",
+        "equation_Vale.PPC64LE.Vecs.t",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
+        "lemma_Vale.PPC64LE.Regs.lemma_equal_elim",
+        "lemma_Vale.PPC64LE.Vecs.lemma_equal_elim",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_cr0",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_heap",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_stack",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ms_stackTaint",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_ok",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_regs",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_vecs",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_xer",
+        "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__regs",
+        "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__vecs"
+      ],
+      0,
+      "e33c725e23bea2eac7a4efa953754383"
+    ]
+  ]
+]

@@ -36,7 +36,7 @@ extern "C" {
 #include "krml/internal/builtin.h"
 
 
-#include "Hacl_Krmllib.h"
+#include "../Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 uint32_t

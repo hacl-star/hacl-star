@@ -429,10 +429,11 @@ static void uploadOneImpl(uint64_t *f)
 
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o)
 {
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
-    store64_be(o + i0 * (uint32_t)8U, i[i0]);
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store64_be(o + i0 * (uint32_t)8U, i[i0]););
 }
 
 /* SNIPPET_END: Hacl_Impl_P256_LowLevel_toUint8 */
@@ -457,15 +458,16 @@ void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i)
 
 void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o)
 {
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t *os = o;
     uint8_t *bj = i + i0 * (uint32_t)8U;
     uint64_t u = load64_be(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i0] = x;
-  }
+    os[i0] = x;);
   Hacl_Impl_P256_LowLevel_changeEndian(o);
 }
 
@@ -1610,12 +1612,13 @@ uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p)
 static inline void cswap(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)12U; i++)
-  {
+  KRML_MAYBE_FOR12(i,
+    (uint32_t)0U,
+    (uint32_t)12U,
+    (uint32_t)1U,
     uint64_t dummy = mask & (p1[i] ^ p2[i]);
     p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
-  }
+    p2[i] = p2[i] ^ dummy;);
 }
 
 /* SNIPPET_END: cswap */
@@ -2272,12 +2275,13 @@ uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8
 static inline void cswap0(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t dummy = mask & (p1[i] ^ p2[i]);
     p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
-  }
+    p2[i] = p2[i] ^ dummy;);
 }
 
 /* SNIPPET_END: cswap0 */
@@ -2451,6 +2455,11 @@ ecdsa_verification_(
       case Spec_Hash_Definitions_SHA2_512:
         {
           sz = (uint32_t)64U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_256:
+        {
+          sz = (uint32_t)32U;
           break;
         }
       case Spec_Hash_Definitions_Blake2S:
@@ -2641,6 +2650,11 @@ ecdsa_signature_core(
           sz = (uint32_t)64U;
           break;
         }
+      case Spec_Hash_Definitions_SHA3_256:
+        {
+          sz = (uint32_t)32U;
+          break;
+        }
       case Spec_Hash_Definitions_Blake2S:
         {
           sz = (uint32_t)32U;
@@ -2739,12 +2753,13 @@ ecdsa_signature_core(
 static inline void cswap1(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t dummy = mask & (p1[i] ^ p2[i]);
     p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
-  }
+    p2[i] = p2[i] ^ dummy;);
 }
 
 /* SNIPPET_END: cswap1 */

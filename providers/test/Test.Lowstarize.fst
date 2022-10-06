@@ -226,7 +226,9 @@ and lowstarize_tuple (uniq: gensym) (es: list term): Tac (gensym * list sigelt *
     uniq, List.Tot.rev_acc se ses, e :: es
   ) (uniq, [], []) es in
   let es = List.rev es in
-  uniq, List.rev ses, mktuple_n es
+  if List.Tot.length es <= 8 then
+    uniq, List.rev ses, mktuple_n es
+  else fail "Tuples of more than 8 elements are not supported"
 
 noextract
 let lowstarize_toplevel src dst: Tac decls =

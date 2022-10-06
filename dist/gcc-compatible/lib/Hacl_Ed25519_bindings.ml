@@ -33,6 +33,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Impl_Ed25519_PointNegate_point_negate =
       foreign "Hacl_Impl_Ed25519_PointNegate_point_negate"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
+    let hacl_Impl_Ed25519_Ladder_make_point_inf =
+      foreign "Hacl_Impl_Ed25519_Ladder_make_point_inf"
+        ((ptr uint64_t) @-> (returning void))
     let hacl_Impl_Ed25519_Ladder_point_mul =
       foreign "Hacl_Impl_Ed25519_Ladder_point_mul"
         ((ptr uint64_t) @->

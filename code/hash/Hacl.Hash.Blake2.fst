@@ -129,7 +129,7 @@ let blake2_update_last_block_st (a : hash_alg{is_blake a}) (m : m_spec a) =
   input:B.buffer uint8 ->
   input_len:size_t { B.length input == v input_len /\ v input_len <= block_length a /\
                      (* If the algorithm is not blake, ``extra_state_v ev`` is 0 *)
-                     (extra_state_v ev) + v input_len <= max_input a } ->
+                     (extra_state_v ev + v input_len) `less_than_max_input_length` a } ->
   ST.Stack unit
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input))
@@ -166,7 +166,7 @@ val mk_blake2_update_last_block (a : hash_alg{is_blake a}) (m : m_spec a) :
 let mk_blake2_update_last_block a m s ev input input_len =
   (**) let h0 = ST.get () in
   ST.push_frame ();
-  let wv = Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
+  let wv = Lib.Buffer.create (Core.le_sigh (to_blake_alg a) m)
                              (Core.zero_element (to_blake_alg a) m) in
   (**) let pad_len : Ghost.erased _ = block_len a -! input_len in
   (**) assert(v input_len + v pad_len == v (block_len a));
@@ -228,7 +228,7 @@ let mk_update_last_ a m update_multi blake2_update_last_block s ev prev_len inpu
   (**)                                                            (B.as_seq h0 blocks);
   (**) Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 ev (B.length blocks);
   (**) assert(extra_state_v ev' = extra_state_v ev + B.length blocks);
-  (**) assert(extra_state_v ev' + U32.v rest_len <= max_input a);
+  (**) assert((extra_state_v ev' + U32.v rest_len) `less_than_max_input_length` a);
   blake2_update_last_block s ev' rest rest_len;
   initial_extra_state a
 
@@ -260,3 +260,6 @@ let mk_hash a m blake2 = fun input input_len dst ->
 
 let hash_blake2s_32: hash_st Blake2S = mk_hash Blake2S Core.M32 Hacl.Blake2s_32.blake2s
 let hash_blake2b_32: hash_st Blake2B = mk_hash Blake2B Core.M32 Hacl.Blake2b_32.blake2b
+
+let mk_malloc a m r =
+  LowStar.Buffer.malloc r (Hacl.Impl.Blake2.Core.zero_element (to_blake_alg a) m) (impl_state_len (|a,m|))

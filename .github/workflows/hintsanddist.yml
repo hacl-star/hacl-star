@@ -19,7 +19,7 @@ jobs:
         run: |
           STATUS_SUCCEEDED=0 # from https://github.com/NixOS/hydra/blob/cf9f38e43fd81f9298e3f2ff50c8a6ee0acc3af0/hydra-api.yaml#L927-L941
           baseUrl="https://everest-ci.paris.inria.fr"
-          latestFinishedEval=$(curl -sLH 'Content-Type: application/json' "$baseUrl/jobset/hacl-star/branch-master/latest-eval")
+          latestFinishedEval=$(curl -sLH 'Content-Type: application/json' "$baseUrl/jobset/hacl-star/branch-main/latest-eval")
 
           rev=$(echo "$latestFinishedEval" | jq -r '.flake | split("/") | last')
           id=$(echo "$latestFinishedEval" | jq -r '.id')
@@ -47,8 +47,8 @@ jobs:
 
       - name: commit changes
         run: |
-          git config --local user.name "Dzomo, the Everest Yak"
-          git config --local user.email "everbld@microsoft.com"
+          git config --local user.name "Hacl Bot"
+          git config --local user.email "hacl-star@mailo.com"
           git add hints dist
           git commit -m "[CI] regenerate hints and dist"
 
@@ -58,6 +58,8 @@ jobs:
 
       - name: create pull request
         uses: peter-evans/create-pull-request@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.HACL_BOT }}
         with:
-          branch: "hints-and-dist-master"
+          branch: "hints-and-dist-main"
           title: "[CI] regenerate hints and dist"

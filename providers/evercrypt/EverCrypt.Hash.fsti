@@ -36,7 +36,7 @@ type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 /// No pattern (would fire too often)!
 let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
   (requires True)
-  (ensures UInt32.v x <= max_input_length a)
+  (ensures UInt32.v x `less_than_max_input_length` a)
 =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
@@ -69,9 +69,7 @@ open LowStar.BufferOps
 /// do not use as argument of ghost functions
 type e_alg = G.erased alg
 
-// abstract implementation state
-(* [@CAbstractStruct] *)
-(* ^ this should be restored once karamel is fixed *)
+[@CAbstractStruct]
 val state_s: alg -> Type0
 
 // pointer to abstract implementation state
@@ -356,7 +354,7 @@ val update_last2:
   last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
   last_len:uint32_t {
     v last_len = B.length last /\
-    v prev_len + v last_len <= max_input_length a /\
+    (v prev_len + v last_len) `less_than_max_input_length` a /\
     v prev_len % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
@@ -379,7 +377,7 @@ val update_last:
   s:state a ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last < block_length a } ->
   total_len:uint64_t {
-    v total_len <= max_input_length a /\
+    v total_len `less_than_max_input_length` a /\
     (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
@@ -410,7 +408,7 @@ val finish:
     M.(loc_disjoint (footprint s h0) (loc_buffer dst)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    M.(modifies (loc_buffer dst) h0 h1) /\
+    M.(modifies (loc_buffer dst `loc_union` footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     (* The 0UL value is dummy: it is actually useless *)
     B.as_seq h1 dst == Spec.Hash.PadFinish.finish a (repr_with_counter s h0 0UL) /\
@@ -456,7 +454,7 @@ val hash:
   a:alg ->
   dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
   input:B.buffer Lib.IntTypes.uint8 ->
-  len:uint32_t {B.length input = v len /\ v len <= max_input_length a} ->
+  len:uint32_t {B.length input = v len /\ v len `less_than_max_input_length` a} ->
   Stack unit
   (requires fun h0 ->
     B.live h0 dst /\

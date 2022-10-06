@@ -1,5 +1,5 @@
 [
-  "\u0011F\u000fRô;¦Ft”uøJü3N",
+  "×©¬Á{z´“ÌŸ\"™ë^O‹",
   [
     [
       "Hacl.Hash.Blake2.mk_update_multi",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_550847d58e6a38975ad7c78d957daabe"
       ],
       0,
-      "27b736405d773ea258035f84fb18b699"
+      "3a0d4fe185db0773b09355067149c11c"
     ],
     [
       "Hacl.Hash.Blake2.mk_update_last",
@@ -45,7 +45,7 @@
         "refinement_interpretation_Tm_refine_550847d58e6a38975ad7c78d957daabe"
       ],
       0,
-      "c81f8c6557c7ebb797c71ce530476f0e"
+      "343aa128a8d57ffa48f7a8faabba377d"
     ],
     [
       "Hacl.Hash.Blake2.mk_hash",
@@ -78,7 +78,30 @@
         "typing_Spec.Hash.Definitions.is_blake"
       ],
       0,
-      "7a7bf8c08bad1acc2a2ce924ba81b144"
+      "7cdc83e395eeeee1e12ce94bc045b824"
+    ],
+    [
+      "Hacl.Hash.Blake2.mk_malloc",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equation_Hacl.Hash.Definitions.m_spec",
+        "equation_Spec.Hash.Definitions.is_blake",
+        "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_550847d58e6a38975ad7c78d957daabe"
+      ],
+      0,
+      "3c1028a734e84a99f5ca1c8eef6fcb5e"
     ]
   ]
 ]

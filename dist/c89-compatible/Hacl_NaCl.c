@@ -103,14 +103,12 @@ secretbox_open_detached(
       uint8_t res0 = (uint8_t)255U;
       uint8_t z;
       uint32_t res;
-      {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-        {
-          uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
-          res0 = uu____0 & res0;
-        }
-      }
+      KRML_MAYBE_FOR16(i,
+        (uint32_t)0U,
+        (uint32_t)16U,
+        (uint32_t)1U,
+        uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
+        res0 = uu____0 & res0;);
       z = res0;
       if (z == (uint8_t)255U)
       {

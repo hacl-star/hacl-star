@@ -457,18 +457,16 @@ void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i)
 
 void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o)
 {
-  {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-    {
-      uint64_t *os = o;
-      uint8_t *bj = i + i0 * (uint32_t)8U;
-      uint64_t u = load64_be(bj);
-      uint64_t r = u;
-      uint64_t x = r;
-      os[i0] = x;
-    }
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = o;
+    uint8_t *bj = i + i0 * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i0] = x;);
   Hacl_Impl_P256_LowLevel_changeEndian(o);
 }
 
@@ -2648,6 +2646,11 @@ ecdsa_verification_(
               sz = (uint32_t)64U;
               break;
             }
+          case Spec_Hash_Definitions_SHA3_256:
+            {
+              sz = (uint32_t)32U;
+              break;
+            }
           case Spec_Hash_Definitions_Blake2S:
             {
               sz = (uint32_t)32U;
@@ -2853,6 +2856,11 @@ ecdsa_signature_core(
         case Spec_Hash_Definitions_SHA2_512:
           {
             sz = (uint32_t)64U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_256:
+          {
+            sz = (uint32_t)32U;
             break;
           }
         case Spec_Hash_Definitions_Blake2S:

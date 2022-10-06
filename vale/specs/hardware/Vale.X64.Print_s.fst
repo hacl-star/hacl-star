@@ -371,3 +371,8 @@ let gcc : printer =
   ret        = ret;
   sha256rnds2_explicit_xmm0 = (fun unit -> false);
   }
+
+
+let gcc_linux : printer =
+  let footer () : string = ".section .note.GNU-stack,\"\",%progbits\n" in
+  {gcc with footer}

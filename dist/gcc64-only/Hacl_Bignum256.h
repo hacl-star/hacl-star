@@ -37,6 +37,7 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "Hacl_Bignum_Base.h"
+#include "Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
 /*******************************************************************************
 
@@ -205,15 +206,6 @@ Write `a ^ (-1) mod n` in `res`.
   • a < n
 */
 bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *res);
-
-typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
-{
-  uint32_t len;
-  uint64_t *n;
-  uint64_t mu;
-  uint64_t *r2;
-}
-Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
 
 
 /**********************************************/

@@ -248,6 +248,11 @@ let index_of_state #index c i t t' s =
   let State block_state _ _ _ _ = !*s in
   c.index_of_state i block_state
 
+let seen_length #index c i t t' s =
+  let open LowStar.BufferOps in
+  let State _ _ total_len _ _ = !*s in
+  total_len
+
 (* TODO: create_in and alloca have big portions of proofs in common, so it may
  * be possible to factorize them, but it is not clear how *)
 let create_in #index c i t t' k r =
@@ -731,11 +736,11 @@ let disjointness #index c (i: index) (p: state' c i) (l: B.loc) (h: HS.mem): Lem
 // This rlimit is a bit crazy, but this proof is not stable. It usually
 // goes through fast, but a high rlimit is a security against regression failures.
 #restart-solver
-#push-options "--z3rlimit 600 --z3cliopt smt.arith.nl=false --z3refresh \
+#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh \
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice'"//,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r '"
 let update_small #index c i t t' p data len =
-  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
+  // [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
+  // [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
 
   let open LowStar.BufferOps in
   let h00 = ST.get () in
@@ -746,9 +751,16 @@ let update_small #index c i t t' p data len =
   [@inline_let]
   let block_state: c.state.s i = block_state in
 
+  c.state.invariant_loc_in_footprint h00 block_state;
+  if c.km = Runtime then
+    c.key.invariant_loc_in_footprint #i h00 k';
+
   let sz = rest c i total_len in
   add_len_small c i total_len len;
   let h0 = ST.get () in
+  c.state.invariant_loc_in_footprint h0 block_state;
+  if c.km = Runtime then
+    c.key.invariant_loc_in_footprint #i h0 k';
   assert B.(modifies_none h0 h00);
   let buf1 = B.sub buf 0ul sz in
   let buf2 = B.sub buf sz len in
@@ -827,8 +839,11 @@ let update_small #index c i t t' p data len =
   assert (seen c i h2 p `S.equal` (S.append (G.reveal seen_) (B.as_seq h0 data)));
   assert (footprint c i h0 p == footprint c i h2 p);
   assert (equal_domains h00 h2);
-  assert(invariant c i h2 p);
-  assert(update_post c i p data len h00 h2)
+  assert (invariant c i h2 p);
+  c.state.invariant_loc_in_footprint h2 block_state;
+  if c.km = Runtime then
+    c.key.invariant_loc_in_footprint #i h2 k';
+  assert (update_post c i p data len h00 h2)
 
 #pop-options
 
@@ -1048,7 +1063,7 @@ let update #index c i t t' p data len =
   let s = !*p in
   let State block_state buf_ total_len seen k' = s in
   let i = c.index_of_state i block_state in
-  let sz = rest c i total_len in  
+  let sz = rest c i total_len in
   if len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
     update_small c (G.hide i) t t' p data len
   else if sz = 0ul then
@@ -1255,9 +1270,9 @@ let mk_finish #index c i t t' p dst =
     }
   end;
 
-  c.state.frame_invariant #i (B.loc_buffer dst) block_state h5 h6;
-  stateful_frame_preserves_freeable #index #c.state #i (B.loc_buffer dst) block_state h5 h6;
-  optional_frame #_ #i #c.km #c.key (B.loc_buffer dst) k' h5 h6;
+  c.state.frame_invariant #i B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
+  stateful_frame_preserves_freeable #index #c.state #i B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
+  optional_frame #_ #i #c.km #c.key B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) k' h5 h6;
 
   pop_frame ();
   let h7 = ST.get () in

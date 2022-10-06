@@ -101,9 +101,7 @@ let bn_sub_eq_len #t aLen a b res =
   pop_frame ();
   res
 
-[@CInline]
 let bn_sub_eq_len_u32 (aLen:size_t) : bn_sub_eq_len_st U32 aLen = bn_sub_eq_len aLen
-[@CInline]
 let bn_sub_eq_len_u64 (aLen:size_t) : bn_sub_eq_len_st U64 aLen = bn_sub_eq_len aLen
 
 inline_for_extraction noextract
@@ -137,7 +135,7 @@ let bn_sub #t aLen a bLen b res =
   let c0 = bn_sub_eq_len bLen a0 b res0 in
   let h1 = ST.get () in
   if bLen <. aLen then begin
-    let rLen = aLen -! bLen in
+    [@inline_let] let rLen = aLen -! bLen in
     let a1 = sub a bLen rLen in
     let res1 = sub res bLen rLen in
     let c1 = bn_sub_carry rLen a1 c0 res1 in
@@ -167,7 +165,7 @@ let bn_sub1 #t aLen a b1 res =
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 1) (LSeq.create 1 (LSeq.index (as_seq h0 res) 0));
 
   if 1ul <. aLen then begin
-    let rLen = aLen -! 1ul in
+    [@inline_let] let rLen = aLen -! 1ul in
     let a1 = sub a 1ul rLen in
     let res1 = sub res 1ul rLen in
     let c1 = bn_sub_carry rLen a1 c0 res1 in
@@ -260,9 +258,7 @@ let bn_add_eq_len #t aLen a b res =
   res
 
 
-[@CInline]
 let bn_add_eq_len_u32 (aLen:size_t) : bn_add_eq_len_st U32 aLen = bn_add_eq_len aLen
-[@CInline]
 let bn_add_eq_len_u64 (aLen:size_t) : bn_add_eq_len_st U64 aLen = bn_add_eq_len aLen
 
 inline_for_extraction noextract
@@ -295,7 +291,7 @@ let bn_add #t aLen a bLen b res =
   let c0 = bn_add_eq_len bLen a0 b res0 in
   let h1 = ST.get () in
   if bLen <. aLen then begin
-    let rLen = aLen -! bLen in
+    [@inline_let] let rLen = aLen -! bLen in
     let a1 = sub a bLen rLen in
     let res1 = sub res bLen rLen in
     let c1 = bn_add_carry rLen a1 c0 res1 in
@@ -325,7 +321,7 @@ let bn_add1 #t aLen a b1 res =
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 1) (LSeq.create 1 (LSeq.index (as_seq h0 res) 0));
 
   if 1ul <. aLen then begin
-    let rLen = aLen -! 1ul in
+    [@inline_let] let rLen = aLen -! 1ul in
     let a1 = sub a 1ul rLen in
     let res1 = sub res 1ul rLen in
     let c1 = bn_add_carry rLen a1 c0 res1 in

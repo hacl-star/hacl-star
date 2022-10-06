@@ -86,7 +86,8 @@ BASE_FLAGS = \
   -add-early-include '<string.h>' \
   -add-early-include '"krml/internal/types.h"' \
   -add-early-include '"krml/lowstar_endianness.h"' \
-  -header $(HACL_HOME)/dist/LICENSE.txt
+  -header $(HACL_HOME)/dist/LICENSE.txt \
+  -funroll-loops 16
 
 CURVE_BUNDLE_SLOW= \
   -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
@@ -107,6 +108,7 @@ BLAKE2_BUNDLE_BASE= \
 BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
   -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
+  
 HASH_BUNDLE= \
   -bundle Hacl.Hash.MD5=Hacl.Hash.Core.MD5 \
   -bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 \
@@ -114,7 +116,7 @@ HASH_BUNDLE= \
   -bundle Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash_Base]
 SHA2MB_BUNDLE= -bundle Hacl.Impl.SHA2.Types=[rename=Hacl_SHA2_Types] \
   -bundle Hacl.Impl.SHA2.Generic=Hacl.Impl.SHA2.*[rename=Hacl_SHA2_Generic] -static-header Hacl.Impl.SHA2.Generic
-SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
+SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=Hacl.Hash.SHA3[rename=Hacl_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305

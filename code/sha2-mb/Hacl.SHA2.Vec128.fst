@@ -28,7 +28,7 @@ let sha224_update4 block hash = update #SHA2_224 #M128 block hash
 
 val sha224_4 (dst0 dst1 dst2 dst3: lbuffer uint8 28ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_224 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_224 /\
     live4 h0 input0 input1 input2 input3 /\
     live4 h0 dst0 dst1 dst2 dst3 /\
     internally_disjoint4 dst0 dst1 dst2 dst3)
@@ -63,7 +63,7 @@ let sha256_update4 block hash = update #SHA2_256 #M128 block hash
 
 val sha256_4 (dst0 dst1 dst2 dst3: lbuffer uint8 32ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v input_len <= max_input_length SHA2_256 /\
+  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_256 /\
     live4 h0 input0 input1 input2 input3 /\
     live4 h0 dst0 dst1 dst2 dst3 /\
     internally_disjoint4 dst0 dst1 dst2 dst3)

@@ -45,6 +45,8 @@ typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;
 bool
 EverCrypt_CTR_uu___is_State(Spec_Agile_Cipher_cipher_alg a, EverCrypt_CTR_state_s projectee);
 
+typedef EverCrypt_CTR_state_s *EverCrypt_CTR_state;
+
 typedef uint8_t EverCrypt_CTR_uint8;
 
 uint8_t EverCrypt_CTR_xor8(uint8_t a, uint8_t b);

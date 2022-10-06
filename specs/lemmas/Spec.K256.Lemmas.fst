@@ -9,6 +9,16 @@ module M = Lib.NatMod
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
+let lemma_proj_aff_id p =
+  let (px, py) = p in
+  let (pX, pY, pZ) = to_proj_point p in
+  assert (pX = px /\ pY = pY /\ pZ = one);
+  let (rx, ry) = to_aff_point (pX, pY, pZ) in
+  assert (rx = (pX /% pZ) /\ ry = (pY /% pZ));
+  M.lemma_div_mod_prime_one #prime pX;
+  M.lemma_div_mod_prime_one #prime pY;
+  assert (rx = pX /\ ry = pY)
+
 let aff_point_at_inf_lemma p = admit()
 
 let aff_point_add_assoc_lemma p q s = admit()

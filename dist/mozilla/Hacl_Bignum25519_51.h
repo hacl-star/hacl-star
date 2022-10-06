@@ -661,12 +661,13 @@ static inline void
 Hacl_Impl_Curve25519_Field51_cswap2(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)10U; i++)
-  {
+  KRML_MAYBE_FOR10(i,
+    (uint32_t)0U,
+    (uint32_t)10U,
+    (uint32_t)1U,
     uint64_t dummy = mask & (p1[i] ^ p2[i]);
     p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
-  }
+    p2[i] = p2[i] ^ dummy;);
 }
 
 #if defined(__cplusplus)
