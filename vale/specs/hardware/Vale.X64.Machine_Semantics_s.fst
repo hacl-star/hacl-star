@@ -1,6 +1,7 @@
 module Vale.X64.Machine_Semantics_s
 
 open FStar.Mul
+open FStar.List.Tot
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 include Vale.Arch.MachineHeap_s
