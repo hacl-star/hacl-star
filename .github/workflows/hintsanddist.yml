@@ -58,8 +58,7 @@ jobs:
 
       - name: create pull request
         uses: peter-evans/create-pull-request@v4
-        env:
-          GITHUB_TOKEN: ${{ secrets.HACL_BOT }}
         with:
+          token: ${{ secrets.HACL_BOT }}
           branch: "hints-and-dist-main"
           title: "[CI] regenerate hints and dist"
