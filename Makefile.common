@@ -56,11 +56,15 @@ endif
 # 272: top-level bindings must be total
 # 274: shadowing
 # 247: checked file not written because some of its dependencies...
+# 319: effectful argument, consider let binding it
+# 328: definition is recursive but not used in its body
+# 331: name is being ignored
 # 332: abstract keyword
+# 337: special treatment of @ is deprecated + Multiple decreases clauses on definition
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
-  --warn_error '+241@247-272-274@332' \
+  --warn_error '+241@247-272-274@319@328@331@332@337' \
   --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
@@ -108,7 +112,7 @@ BLAKE2_BUNDLE_BASE= \
 BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
   -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
-  
+
 HASH_BUNDLE= \
   -bundle Hacl.Hash.MD5=Hacl.Hash.Core.MD5 \
   -bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 \

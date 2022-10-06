@@ -178,7 +178,8 @@ val lemma_whileFalse_total (b:ocmp) (c:code) (s0:state) (sW:state) (fW:fuel) : P
     eval_code (While b c) s0 f1 s1
   )
 
-val lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (sN:state) : Pure (fN:fuel)
+val lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (sN:state)
+  : Pure fuel
   (requires While? c /\ (
     let cond = While?.whileCond c in
     sN.ok /\
@@ -190,4 +191,3 @@ val lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (s
   (ensures (fun fN ->
     eval_while_inv c s0 fN sN
   ))
-

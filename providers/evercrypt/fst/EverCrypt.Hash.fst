@@ -308,8 +308,10 @@ let update_multi_256 s ev blocks n =
     let n = Int.Cast.Full.uint32_to_uint64 n in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
-    IB.buffer_immutable_buffer_disjoint s k224_256 (ST.get ());
-    IB.buffer_immutable_buffer_disjoint blocks k224_256 (ST.get ());
+    let h1 = ST.get () in
+    IB.buffer_immutable_buffer_disjoint s k224_256 h1;
+    let h2 = ST.get () in
+    IB.buffer_immutable_buffer_disjoint blocks k224_256 h2;
     Vale.Wrapper.X64.Sha.sha256_update s blocks n k224_256
   end else
     Hacl.Hash.SHA2.update_multi_256 s () blocks n
@@ -640,7 +642,7 @@ let update_last #ga s last total_len =
   (**) assert(U64.v last_len = U32.v (Int.Cast.uint64_to_uint32 last_len));
   [@inline_let]
   let last_len = Int.Cast.uint64_to_uint32 last_len in
-  (**) assert(U32.v last_len < Spec.Hash.Definitions.block_length a);  
+  (**) assert(U32.v last_len < Spec.Hash.Definitions.block_length a);
   (**) assert((v prev_len + v last_len) `less_than_max_input_length` a);
   (**) assert(v prev_len = v total_len - v last_len);
   (**) Math.Lemmas.cancel_mul_mod (v total_len / block_length a) (block_length a);

@@ -1,5 +1,6 @@
 module Vale.X64.Print_s
 open FStar.Mul
+open FStar.List.Tot
 
 // Trusted code for producing assembly code
 
