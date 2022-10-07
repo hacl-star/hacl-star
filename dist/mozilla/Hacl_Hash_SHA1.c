@@ -22,9 +22,21 @@
  */
 
 
-#include "Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_SHA1.h"
 
 
+
+static uint32_t
+_h0[5U] =
+  {
+    (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
+    (uint32_t)0xc3d2e1f0U
+  };
+
+void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
+{
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, s[i] = _h0[i];);
+}
 
 static void legacy_update(uint32_t *h, uint8_t *l)
 {
@@ -142,7 +154,7 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
-static void legacy_finish(uint32_t *s, uint8_t *dst)
+void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
 {
   KRML_MAYBE_FOR5(i,
     (uint32_t)0U,
@@ -225,6 +237,6 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint8_t *rest = rest0;
   Hacl_Hash_SHA1_legacy_update_multi(s, blocks, blocks_n);
   Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  legacy_finish(s, dst);
+  Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
 }
 
