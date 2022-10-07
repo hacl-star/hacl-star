@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Streaming_Poly1305_32_H
-#define __Hacl_Streaming_Poly1305_32_H
+#ifndef __internal_Hacl_Hash_SHA1_H
+#define __internal_Hacl_Hash_SHA1_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,15 @@ extern "C" {
 #include <stdbool.h>
 
 
-#include "Hacl_Poly1305_32.h"
+#include "../Hacl_Hash_SHA1.h"
 
-typedef struct Hacl_Streaming_Poly1305_32_poly1305_32_state_s
-{
-  uint64_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-  uint8_t *p_key;
-}
-Hacl_Streaming_Poly1305_32_poly1305_32_state;
+void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
 
-Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_in(uint8_t *k);
-
-void
-Hacl_Streaming_Poly1305_32_init(uint8_t *k, Hacl_Streaming_Poly1305_32_poly1305_32_state *s);
-
-void
-Hacl_Streaming_Poly1305_32_update(
-  Hacl_Streaming_Poly1305_32_poly1305_32_state *p,
-  uint8_t *data,
-  uint32_t len
-);
-
-void
-Hacl_Streaming_Poly1305_32_finish(
-  Hacl_Streaming_Poly1305_32_poly1305_32_state *p,
-  uint8_t *dst
-);
-
-void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Poly1305_32_poly1305_32_state *s);
+void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Streaming_Poly1305_32_H_DEFINED
+#define __internal_Hacl_Hash_SHA1_H_DEFINED
 #endif
