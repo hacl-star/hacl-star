@@ -32,8 +32,6 @@
 
 typedef uint8_t buftype;
 
-extern void C_String_print(C_String_t uu___);
-
 extern void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
 extern void
@@ -52,6 +50,8 @@ Hacl_Impl_SHA3_squeeze(
   uint32_t outputByteLen,
   uint8_t *output
 );
+
+extern void C_String_print(C_String_t uu___);
 
 extern bool
 Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);

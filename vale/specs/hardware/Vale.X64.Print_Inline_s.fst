@@ -1,6 +1,7 @@
 module Vale.X64.Print_Inline_s
 
 open FStar.Mul
+open FStar.List.Tot
 open Vale.X64.Machine_s
 open Vale.X64.Bytes_Code_s
 open Vale.X64.Machine_Semantics_s

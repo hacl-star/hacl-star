@@ -18,7 +18,6 @@ val update_multi_extra_state_eq
   (requires True)
   (ensures
     (snd (update_multi a h input) == extra_state_add_nat (snd h) (Seq.length input)))
-  (decreases (Seq.length input))
 
 val hash_incremental_block_is_update_last (a:hash_alg)
   (s:words_state a)
@@ -36,7 +35,7 @@ val block_hash_incremental (a:hash_alg) (input:bytes_block a)
 val lemma_split_blocks_assoc (a:hash_alg) (s1 s2:bytes)
   : Lemma
       (requires
-        S.length s1 + S.length s2 <= max_input_length a /\
+        (S.length s1 + S.length s2) `less_than_max_input_length` a /\
         S.length s1 % block_length a == 0 /\ S.length s2 > 0)
       (ensures (
         let b1, l1 = split_blocks a (s1 `S.append` s2) in

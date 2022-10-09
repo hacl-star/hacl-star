@@ -52,6 +52,8 @@ void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p);
 
 void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
 
+void Hacl_Impl_K256_PointMul_make_point_at_inf(uint64_t *p);
+
 void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t *q);
 
 #if defined(__cplusplus)

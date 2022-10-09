@@ -1288,28 +1288,17 @@ void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out)
   Hacl_Bignum25519_reduce_513(t1);
 }
 
-void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
+void Hacl_Impl_Ed25519_Ladder_make_point_inf(uint64_t *b)
 {
-  uint64_t bscalar[4U] = { 0U };
-  KRML_MAYBE_FOR4(i,
-    (uint32_t)0U,
-    (uint32_t)4U,
-    (uint32_t)1U,
-    uint64_t *os = bscalar;
-    uint8_t *bj = scalar + i * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i] = x;);
-  uint64_t *x0 = result;
-  uint64_t *y = result + (uint32_t)5U;
-  uint64_t *z = result + (uint32_t)10U;
-  uint64_t *t = result + (uint32_t)15U;
-  x0[0U] = (uint64_t)0U;
-  x0[1U] = (uint64_t)0U;
-  x0[2U] = (uint64_t)0U;
-  x0[3U] = (uint64_t)0U;
-  x0[4U] = (uint64_t)0U;
+  uint64_t *x = b;
+  uint64_t *y = b + (uint32_t)5U;
+  uint64_t *z = b + (uint32_t)10U;
+  uint64_t *t = b + (uint32_t)15U;
+  x[0U] = (uint64_t)0U;
+  x[1U] = (uint64_t)0U;
+  x[2U] = (uint64_t)0U;
+  x[3U] = (uint64_t)0U;
+  x[4U] = (uint64_t)0U;
   y[0U] = (uint64_t)1U;
   y[1U] = (uint64_t)0U;
   y[2U] = (uint64_t)0U;
@@ -1325,17 +1314,42 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint6
   t[2U] = (uint64_t)0U;
   t[3U] = (uint64_t)0U;
   t[4U] = (uint64_t)0U;
-  uint64_t table[320U] = { 0U };
-  memcpy(table, result, (uint32_t)20U * sizeof (uint64_t));
-  uint64_t *t1 = table + (uint32_t)20U;
-  memcpy(t1, q, (uint32_t)20U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
+}
+
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
+{
+  uint64_t bscalar[4U] = { 0U };
+  KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
-    (uint32_t)15U,
+    (uint32_t)4U,
     (uint32_t)1U,
-    uint64_t *t11 = table + i * (uint32_t)20U;
-    uint64_t *t2 = table + i * (uint32_t)20U + (uint32_t)20U;
-    Hacl_Impl_Ed25519_PointAdd_point_add(t2, q, t11););
+    uint64_t *os = bscalar;
+    uint8_t *bj = scalar + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;);
+  uint64_t table[320U] = { 0U };
+  uint64_t tmp[20U] = { 0U };
+  uint64_t *t0 = table;
+  uint64_t *t1 = table + (uint32_t)20U;
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(t0);
+  memcpy(t1, q, (uint32_t)20U * sizeof (uint64_t));
+  KRML_MAYBE_FOR7(i,
+    (uint32_t)0U,
+    (uint32_t)7U,
+    (uint32_t)1U,
+    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)20U;
+    Hacl_Impl_Ed25519_PointDouble_point_double(tmp, t11);
+    memcpy(table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U,
+      tmp,
+      (uint32_t)20U * sizeof (uint64_t));
+    uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U;
+    Hacl_Impl_Ed25519_PointAdd_point_add(tmp, q, t2);
+    memcpy(table + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)20U,
+      tmp,
+      (uint32_t)20U * sizeof (uint64_t)););
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(result);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -1344,7 +1358,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint6
       (uint32_t)1U,
       Hacl_Impl_Ed25519_PointDouble_point_double(result, result););
     uint32_t bk = (uint32_t)256U;
-    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+    uint64_t mask_l = (uint64_t)15U;
     uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
     uint64_t p1 = bscalar[i1] >> j;
@@ -1437,52 +1451,47 @@ point_mul_double_vartime(
     uint64_t r = u;
     uint64_t x = r;
     os[i] = x;);
-  uint64_t *x = result;
-  uint64_t *y = result + (uint32_t)5U;
-  uint64_t *z = result + (uint32_t)10U;
-  uint64_t *t = result + (uint32_t)15U;
-  x[0U] = (uint64_t)0U;
-  x[1U] = (uint64_t)0U;
-  x[2U] = (uint64_t)0U;
-  x[3U] = (uint64_t)0U;
-  x[4U] = (uint64_t)0U;
-  y[0U] = (uint64_t)1U;
-  y[1U] = (uint64_t)0U;
-  y[2U] = (uint64_t)0U;
-  y[3U] = (uint64_t)0U;
-  y[4U] = (uint64_t)0U;
-  z[0U] = (uint64_t)1U;
-  z[1U] = (uint64_t)0U;
-  z[2U] = (uint64_t)0U;
-  z[3U] = (uint64_t)0U;
-  z[4U] = (uint64_t)0U;
-  t[0U] = (uint64_t)0U;
-  t[1U] = (uint64_t)0U;
-  t[2U] = (uint64_t)0U;
-  t[3U] = (uint64_t)0U;
-  t[4U] = (uint64_t)0U;
   uint64_t table1[320U] = { 0U };
-  memcpy(table1, result, (uint32_t)20U * sizeof (uint64_t));
+  uint64_t tmp0[20U] = { 0U };
+  uint64_t *t00 = table1;
   uint64_t *t10 = table1 + (uint32_t)20U;
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(t00);
   memcpy(t10, q1, (uint32_t)20U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
+  KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
-    (uint32_t)15U,
+    (uint32_t)7U,
     (uint32_t)1U,
-    uint64_t *t11 = table1 + i * (uint32_t)20U;
-    uint64_t *t2 = table1 + i * (uint32_t)20U + (uint32_t)20U;
-    Hacl_Impl_Ed25519_PointAdd_point_add(t2, q1, t11););
+    uint64_t *t11 = table1 + (i + (uint32_t)1U) * (uint32_t)20U;
+    Hacl_Impl_Ed25519_PointDouble_point_double(tmp0, t11);
+    memcpy(table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U,
+      tmp0,
+      (uint32_t)20U * sizeof (uint64_t));
+    uint64_t *t2 = table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U;
+    Hacl_Impl_Ed25519_PointAdd_point_add(tmp0, q1, t2);
+    memcpy(table1 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)20U,
+      tmp0,
+      (uint32_t)20U * sizeof (uint64_t)););
   uint64_t table2[320U] = { 0U };
-  memcpy(table2, result, (uint32_t)20U * sizeof (uint64_t));
+  uint64_t tmp[20U] = { 0U };
+  uint64_t *t0 = table2;
   uint64_t *t1 = table2 + (uint32_t)20U;
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(t0);
   memcpy(t1, q2, (uint32_t)20U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
+  KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
-    (uint32_t)15U,
+    (uint32_t)7U,
     (uint32_t)1U,
-    uint64_t *t11 = table2 + i * (uint32_t)20U;
-    uint64_t *t2 = table2 + i * (uint32_t)20U + (uint32_t)20U;
-    Hacl_Impl_Ed25519_PointAdd_point_add(t2, q2, t11););
+    uint64_t *t11 = table2 + (i + (uint32_t)1U) * (uint32_t)20U;
+    Hacl_Impl_Ed25519_PointDouble_point_double(tmp, t11);
+    memcpy(table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U,
+      tmp,
+      (uint32_t)20U * sizeof (uint64_t));
+    uint64_t *t2 = table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U;
+    Hacl_Impl_Ed25519_PointAdd_point_add(tmp, q2, t2);
+    memcpy(table2 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)20U,
+      tmp,
+      (uint32_t)20U * sizeof (uint64_t)););
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(result);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     KRML_MAYBE_FOR4(i0,
@@ -1491,14 +1500,14 @@ point_mul_double_vartime(
       (uint32_t)1U,
       Hacl_Impl_Ed25519_PointDouble_point_double(result, result););
     uint32_t bk = (uint32_t)256U;
-    uint64_t mask_l0 = (uint64_t)16U - (uint64_t)1U;
+    uint64_t mask_l0 = (uint64_t)15U;
     uint32_t i10 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j0 = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p10 = bscalar1[i10] >> j0;
+    uint64_t p10 = bscalar2[i10] >> j0;
     uint64_t ite0;
     if (i10 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j0)
     {
-      ite0 = p10 | bscalar1[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
+      ite0 = p10 | bscalar2[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
     }
     else
     {
@@ -1507,18 +1516,18 @@ point_mul_double_vartime(
     uint64_t bits_l = ite0 & mask_l0;
     uint64_t a_bits_l0[20U] = { 0U };
     uint32_t bits_l320 = (uint32_t)bits_l;
-    uint64_t *a_bits_l1 = table1 + bits_l320 * (uint32_t)20U;
+    uint64_t *a_bits_l1 = table2 + bits_l320 * (uint32_t)20U;
     memcpy(a_bits_l0, a_bits_l1, (uint32_t)20U * sizeof (uint64_t));
     Hacl_Impl_Ed25519_PointAdd_point_add(result, result, a_bits_l0);
     uint32_t bk0 = (uint32_t)256U;
-    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+    uint64_t mask_l = (uint64_t)15U;
     uint32_t i1 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j = (bk0 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p1 = bscalar2[i1] >> j;
+    uint64_t p1 = bscalar1[i1] >> j;
     uint64_t ite;
     if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
     {
-      ite = p1 | bscalar2[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+      ite = p1 | bscalar1[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
     }
     else
     {
@@ -1527,7 +1536,7 @@ point_mul_double_vartime(
     uint64_t bits_l0 = ite & mask_l;
     uint64_t a_bits_l[20U] = { 0U };
     uint32_t bits_l32 = (uint32_t)bits_l0;
-    uint64_t *a_bits_l10 = table2 + bits_l32 * (uint32_t)20U;
+    uint64_t *a_bits_l10 = table1 + bits_l32 * (uint32_t)20U;
     memcpy(a_bits_l, a_bits_l10, (uint32_t)20U * sizeof (uint64_t));
     Hacl_Impl_Ed25519_PointAdd_point_add(result, result, a_bits_l);
   }

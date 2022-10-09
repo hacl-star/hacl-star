@@ -1,5 +1,6 @@
 module Test.Lowstarize
 
+open FStar.List.Tot
 open FStar.Tactics
 open LowStar.BufferOps
 open Lib.Meta

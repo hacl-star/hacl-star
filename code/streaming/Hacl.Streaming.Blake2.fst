@@ -229,9 +229,9 @@ let k = stateful_key
 #push-options "--z3cliopt smt.arith.nl=false"
 noextract
 let max_total_hash_length (a : alg) :
-  n:nat{n <= Spec.Hash.Definitions.max_input_length (to_hash_alg a)} =
+  n:nat{n `Spec.Hash.Definitions.less_than_max_input_length` (to_hash_alg a)} =
   assert_norm(
-    Spec.max_limb Spec.Blake2S <= Spec.Hash.Definitions.max_input_length (to_hash_alg a));
+    Spec.max_limb Spec.Blake2S <= Some?.v(Spec.Hash.Definitions.max_input_length (to_hash_alg a)));
   Spec.max_limb Spec.Blake2S
 #pop-options
 
@@ -456,7 +456,7 @@ val spec_is_incremental:
 let spec_is_incremental a i input =
   blake2_hash_incremental_s_is_hash_incremental a i input;
   (**) size_block_props a;
-  Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) input
+  Spec.Blake2.Incremental.blake2_is_hash_incremental (to_hash_alg a) input
 #pop-options
 
 noextract
@@ -480,7 +480,7 @@ let update_multi_eq #a nb acc prevlen blocks =
   let blocks', _ = Seq.split blocks (nb * Hash.block_length (to_hash_alg a)) in
   assert(blocks' `Seq.equal` blocks);
   let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen in
-  Spec.Hash.Incremental.repeati_blake2_update1_is_update_multi (to_hash_alg a)
+  Spec.Blake2.Incremental.repeati_blake2_update1_is_update_multi (to_hash_alg a)
                                                                nb prevlen
                                                                blocks acc;
   Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 #(to_hash_alg a) es (S.length blocks);

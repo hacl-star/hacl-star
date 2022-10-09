@@ -1,5 +1,5 @@
 [
-  "5ƒ!ֲ7ֱ״Z<מ\u0016מˆS\u0010",
+  "₪±ׂ׀q\u0000\u0011פת_#'ץ€F”",
   [
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.prime256order_buffer",
@@ -99,7 +99,7 @@
         "typing_tok_LowStar.ConstBuffer.IMMUTABLE@tok"
       ],
       0,
-      "b4eba4d9191b684adb12eaeed20cba6e"
+      "950d87597e144be37e9e64a00a10aa19"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.order_inverse_buffer",
@@ -159,7 +159,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1f2f854e4feb08aa340d23d91fd0797d"
+      "8fdb3eca991a562aa1fa7adbd2aa9164"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.order_buffer",
@@ -219,7 +219,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cf51e62986eb29ac08b3c247eff44e0d"
+      "21ccf3067ab09d0e4ac1a6f2daa720a4"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.reduction_prime_2prime_with_carry",
@@ -240,7 +240,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "692944a2394702a2a7a4ae87de1b98a3"
+      "dbff45d20e40476bcdffbc32e261a7c8"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.reduction_prime_2prime_with_carry2",
@@ -281,7 +281,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "1548956e6c367c918dd9c697c4011cd8"
+      "351276a9553564140398fa3995ef38f7"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.reduction_prime_2prime_order",
@@ -302,7 +302,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "fba41a56cfa6c4543421d8e5994bf762"
+      "a35c08e2453abb29dd74cc8de7f686f6"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.lemmaFromDomain",
@@ -314,7 +314,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "4326ab39a6447b70f010ea1c637d073d"
+      "45169e1852a969943f604388f664964b"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.lemmaToDomain",
@@ -323,7 +323,7 @@
       1,
       [ "@query" ],
       0,
-      "73ca6b8341b6a94544d75b4dc13642ed"
+      "bbf245e22880d5e7e8b8bbf0bf428d77"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.lemmaToDomainFromDomain",
@@ -332,7 +332,7 @@
       1,
       [ "@query" ],
       0,
-      "f9e93b94d61f4ecf9f4ff2ecf69016f0"
+      "611743d593f5bce5d304e15f82aa545e"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.montgomery_multiplication_ecdsa_module",
@@ -340,16 +340,23 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32", "equation_Prims.eqtype",
         "equation_Prims.nat",
         "equation_Spec.ECDSAP256.Definition.prime_p256_order",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3f931b897f886dbe88f3e84d9690d0d3"
+      "a1a3e24c5cb3d77643124d7376462ab7"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.felem_add",
@@ -370,7 +377,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "66d2b9840cc9ab1ce1e40f48daf1b488"
+      "92b39f493b2c887b65f4eab65d817b14"
     ],
     [
       "Hacl.Impl.ECDSA.MontgomeryMultiplication.lemma_felem_add",
@@ -384,7 +391,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "61b547f4e395d55d917445a51b507a17"
+      "36391fb5e542afdb1d28d187e5b3b24a"
     ]
   ]
 ]

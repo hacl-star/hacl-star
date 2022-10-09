@@ -49,7 +49,7 @@ val expand_loop:
     (requires
       hash_length a <= Seq.length prk /\
       HMAC.keysized a (Seq.length prk) /\
-      hash_length a + Seq.length info + 1 + block_length a <= max_input_length a /\
+      (hash_length a + Seq.length info + 1 + block_length a) `less_than_max_input_length` a /\
       n <= 255)
     (ensures fun _ -> True)
 let expand_loop a prk info n i tag =

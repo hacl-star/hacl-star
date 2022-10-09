@@ -38,9 +38,13 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Hash_Blake2.h"
 #include "evercrypt_targetconfig.h"
+uint64_t Hacl_Hash_Core_Blake2_init_blake2s_32(uint32_t *s);
+
 uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block);
 
 void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst);
+
+FStar_UInt128_uint128 Hacl_Hash_Core_Blake2_init_blake2b_32(uint64_t *s);
 
 FStar_UInt128_uint128
 Hacl_Hash_Core_Blake2_update_blake2b_32(

@@ -37,6 +37,7 @@ extern "C" {
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum.h"
 #include "../Hacl_P256.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"

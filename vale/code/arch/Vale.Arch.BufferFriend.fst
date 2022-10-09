@@ -148,5 +148,5 @@ let rec lemma_le_to_n_indexed_rec b i =
   FE.reveal_le_to_n (slice b (length b - i) (length b));
   if i > 0 then lemma_le_to_n_indexed_rec b (i - 1)
 
-let rec lemma_le_to_n_indexed b =
+let lemma_le_to_n_indexed b =
   lemma_le_to_n_indexed_rec b (length b)

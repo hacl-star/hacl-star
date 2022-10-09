@@ -47,8 +47,8 @@ jobs:
 
       - name: commit changes
         run: |
-          git config --local user.name "Dzomo, the Everest Yak"
-          git config --local user.email "everbld@microsoft.com"
+          git config --local user.name "Hacl Bot"
+          git config --local user.email "hacl-star@mailo.com"
           git add hints dist
           git commit -m "[CI] regenerate hints and dist"
 
@@ -59,5 +59,6 @@ jobs:
       - name: create pull request
         uses: peter-evans/create-pull-request@v4
         with:
+          token: ${{ secrets.HACL_BOT }}
           branch: "hints-and-dist-main"
           title: "[CI] regenerate hints and dist"

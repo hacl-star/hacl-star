@@ -1,6 +1,7 @@
 module Vale.X64.Machine_Semantics_s
 
 open FStar.Mul
+open FStar.List.Tot
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 include Vale.Arch.MachineHeap_s
@@ -366,7 +367,7 @@ let return (#a:Type) (x:a) : st a =
   fun s -> (x, s)
 
 unfold
-let bind (#a:Type) (#b:Type) (m:st a) (f:a -> st b) : st b =
+let (let*) (#a:Type) (#b:Type) (m:st a) (f:a -> st b) : st b =
 fun s0 ->
   let (x, s1) = m s0 in
   let (y, s2) = f x s1 in
@@ -393,7 +394,7 @@ let check_imm (valid:bool) : st unit =
 
 unfold
 let check (valid: machine_state -> bool) : st unit =
-  s <-- get;
+  let* s = get in
   if valid s then
     return ()
   else
@@ -414,48 +415,48 @@ let run (f:st unit) (s:machine_state) : machine_state = snd (f s)
 // Monadic update operations
 unfold
 let update_operand64_preserve_flags (dst:operand64) (v:nat64) : st unit =
-  check (valid_dst_operand64 dst);;
-  s <-- get;
+  check (valid_dst_operand64 dst);*
+  let* s = get in
   set (update_operand64_preserve_flags' dst v s)
 
 unfold
 let update_rsp (i:int) : st unit =
   // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
- check (fun s -> i >= s.ms_stack.initial_rsp - 4096);;
- check (fun s -> i <= s.ms_stack.initial_rsp);;
- s <-- get;
+ check (fun s -> i >= s.ms_stack.initial_rsp - 4096);*
+ check (fun s -> i <= s.ms_stack.initial_rsp);*
+ let* s = get in
  set (update_rsp' i s)
 
 let update_reg_64 (r:reg_64) (v:nat64) : st unit =
-  s <-- get;
+  let* s = get in
   set (update_reg_64' r v s)
 
 let update_reg_xmm (x:reg_xmm)  (ins:ins) (v:quad32) : st unit =
-  s <-- get;
+  let* s = get in
   set (  { (update_reg_xmm' x v s) with ms_flags = havoc_flags } )
 
 let update_xmm_preserve_flags (x:reg_xmm) (v:quad32) : st unit =
-  s <-- get;
+  let* s = get in
   set ( update_reg_xmm' x v s )
 
 let update_flags (new_flags:flags_t) : st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with ms_flags = new_flags } )
 
 let update_cf (new_cf:bool) : st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with ms_flags = update_cf' s.ms_flags new_cf } )
 
 let update_of (new_of:bool) : st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with ms_flags = update_of' s.ms_flags new_of } )
 
 let update_cf_of (new_cf new_of:bool) : st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with ms_flags = update_cf' (update_of' s.ms_flags new_of) new_cf } )
 
 let free_stack (start finish:int) : st unit =
-  s <-- get;
+  let* s = get in
   set ( { s with ms_stack = free_stack' start finish s.ms_stack} )
 
 let bind_option (#a #b:Type) (v:option a) (f:a -> option b) : option b =
@@ -669,26 +670,26 @@ let eval_instr
 // Core definition of instruction semantics
 [@instr_attr]
 let machine_eval_ins_st (ins:ins) : st unit =
-  s <-- get;
+  let* s = get in
   match ins with
   | BC.Instr it oprs ann ->
     apply_option (eval_instr it oprs ann s) set
 
   | BC.Push src t ->
-    check (valid_src_operand64_and_taint src);;
+    check (valid_src_operand64_and_taint src);*
     let new_src = eval_operand src s in            // Evaluate value on initial state
     let new_rsp = eval_reg_64 rRsp s - 8 in           // Compute the new stack pointer
-    update_rsp new_rsp;;                           // Actually modify the stack pointer
+    update_rsp new_rsp;*                           // Actually modify the stack pointer
     let o_new = OStack (MConst new_rsp, t) in
     update_operand64_preserve_flags o_new new_src  // Store the element at the new stack pointer
 
   | BC.Pop dst t ->
     let stack_op = OStack (MReg (Reg 0 rRsp) 0, t) in
-    check (valid_src_operand64_and_taint stack_op);;  // Ensure that we can read at the initial stack pointer
+    check (valid_src_operand64_and_taint stack_op);*  // Ensure that we can read at the initial stack pointer
     let new_dst = eval_operand stack_op s in          // Get the element currently on top of the stack
     let new_rsp = (eval_reg_64 rRsp s + 8) % pow2_64 in  // Compute the new stack pointer
-    update_operand64_preserve_flags dst new_dst;;     // Store it in the dst operand
-    free_stack (new_rsp - 8) new_rsp;;                // Free the memory that is popped
+    update_operand64_preserve_flags dst new_dst;*     // Store it in the dst operand
+    free_stack (new_rsp - 8) new_rsp;*                // Free the memory that is popped
     update_rsp new_rsp                                // Finally, update the stack pointer
 
   | BC.Alloc n ->
@@ -698,7 +699,7 @@ let machine_eval_ins_st (ins:ins) : st unit =
   | BC.Dealloc n ->
     let old_rsp = eval_reg_64 rRsp s in
     let new_rsp = old_rsp + n in
-    update_rsp new_rsp;;
+    update_rsp new_rsp;*
     // The deallocated stack memory should now be considered invalid
     free_stack old_rsp new_rsp
 

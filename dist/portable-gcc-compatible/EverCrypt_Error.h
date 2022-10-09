@@ -45,46 +45,11 @@ extern "C" {
 #define EverCrypt_Error_AuthenticationFailure 3
 #define EverCrypt_Error_InvalidIVLength 4
 #define EverCrypt_Error_DecodeError 5
+#define EverCrypt_Error_MaximumLengthExceeded 6
 
 /* SNIPPET_END: EverCrypt_Error_error_code */
 
 typedef uint8_t EverCrypt_Error_error_code;
-
-/* SNIPPET_START: EverCrypt_Error_uu___is_Success */
-
-bool EverCrypt_Error_uu___is_Success(EverCrypt_Error_error_code projectee);
-
-/* SNIPPET_END: EverCrypt_Error_uu___is_Success */
-
-/* SNIPPET_START: EverCrypt_Error_uu___is_UnsupportedAlgorithm */
-
-bool EverCrypt_Error_uu___is_UnsupportedAlgorithm(EverCrypt_Error_error_code projectee);
-
-/* SNIPPET_END: EverCrypt_Error_uu___is_UnsupportedAlgorithm */
-
-/* SNIPPET_START: EverCrypt_Error_uu___is_InvalidKey */
-
-bool EverCrypt_Error_uu___is_InvalidKey(EverCrypt_Error_error_code projectee);
-
-/* SNIPPET_END: EverCrypt_Error_uu___is_InvalidKey */
-
-/* SNIPPET_START: EverCrypt_Error_uu___is_AuthenticationFailure */
-
-bool EverCrypt_Error_uu___is_AuthenticationFailure(EverCrypt_Error_error_code projectee);
-
-/* SNIPPET_END: EverCrypt_Error_uu___is_AuthenticationFailure */
-
-/* SNIPPET_START: EverCrypt_Error_uu___is_InvalidIVLength */
-
-bool EverCrypt_Error_uu___is_InvalidIVLength(EverCrypt_Error_error_code projectee);
-
-/* SNIPPET_END: EverCrypt_Error_uu___is_InvalidIVLength */
-
-/* SNIPPET_START: EverCrypt_Error_uu___is_DecodeError */
-
-bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee);
-
-/* SNIPPET_END: EverCrypt_Error_uu___is_DecodeError */
 
 #if defined(__cplusplus)
 }

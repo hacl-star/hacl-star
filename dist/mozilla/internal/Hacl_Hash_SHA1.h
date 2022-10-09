@@ -22,14 +22,28 @@
  */
 
 
-#include "EverCrypt.h"
+#ifndef __internal_Hacl_Hash_SHA1_H
+#define __internal_Hacl_Hash_SHA1_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include <stdbool.h>
 
 
+#include "../Hacl_Hash_SHA1.h"
 
-typedef struct EverCrypt_AEAD_state_s_s
-{
-  Spec_Cipher_Expansion_impl impl;
-  uint8_t *ek;
+void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
+
+void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
+
+#if defined(__cplusplus)
 }
-EverCrypt_AEAD_state_s;
+#endif
 
+#define __internal_Hacl_Hash_SHA1_H_DEFINED
+#endif

@@ -210,7 +210,7 @@ let gcc : printer =
   let const (n:int) = string_of_int n in
   let align() = ".align" in
   let header() = ".text\n" in
-  let footer() = "\n" in
+  let footer() = ".section .note.GNU-stack,\"\",%progbits\n" in
   let proc_name (name:string) = ".global " ^ name ^ "\n" ^ name ^ ":\n" in
   let branch_link (name:string) = "  blr\n\n" in
   {

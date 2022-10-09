@@ -40,9 +40,11 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state
         Hacl_Impl_Blake2_Core_M256),
       sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
-  *wv = KRML_HOST_CALLOC((uint32_t)4U, sizeof (Lib_IntVector_Intrinsics_vec256));
+  *wv = KRML_ALIGNED_MALLOC(32, sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)4U);
+  memset(wv, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256
-  *b = KRML_HOST_CALLOC((uint32_t)4U, sizeof (Lib_IntVector_Intrinsics_vec256));
+  *b = KRML_ALIGNED_MALLOC(32, sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)4U);
+  memset(b, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2b_256_blake2b_256_state
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
@@ -421,16 +423,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
           Hacl_Impl_Blake2_Core_M256));
   }
   uint8_t *buf_1 = buf_;
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), (uint32_t)4U * (uint32_t)1U);
-  Lib_IntVector_Intrinsics_vec256
-  *wv = alloca((uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec256));
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    wv[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), (uint32_t)4U * (uint32_t)1U);
-  Lib_IntVector_Intrinsics_vec256
-  *b = alloca((uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec256));
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    b[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state tmp_block_state = { .fst = wv, .snd = b };
   Lib_IntVector_Intrinsics_vec256 *src_b = block_state.snd;
   Lib_IntVector_Intrinsics_vec256 *dst_b = tmp_block_state.snd;
@@ -572,8 +566,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   Lib_IntVector_Intrinsics_vec256 *wv = block_state.fst;
   Lib_IntVector_Intrinsics_vec256 *b = block_state.snd;
-  KRML_HOST_FREE(wv);
-  KRML_HOST_FREE(b);
+  KRML_ALIGNED_FREE(wv);
+  KRML_ALIGNED_FREE(b);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(s);
 }

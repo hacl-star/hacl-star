@@ -29,6 +29,7 @@
 
 
 #include "krmllib.h"
+#include "libintvector.h"
 #include "lib_intrinsics.h"
 exit_code main();
 
