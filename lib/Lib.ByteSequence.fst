@@ -835,39 +835,30 @@ let rec nat_from_intseq_le_public_to_secret #t len b =
     eq_intro (slice (map secret b) 1 len) (map secret (slice b 1 len));
     () end
 
-
+ 
 let lemma_uints_to_bytes_le_sub #t #l #len s i =
-  let lemma_uints_to_bytes_le_i_j (#t : inttype{unsigned t /\ ~(U1? t)})
-    (#l : secrecy_level)
-    (#len:size_nat{len * numbytes t < pow2 32})
-    (s : lseq (uint_t t l) len)
-    (i : size_nat {i < len})
-    (j : size_nat {j < numbytes t}):
+  let lemma_uints_to_bytes_le_i_j (j : size_nat {j < numbytes t}):
       Lemma(index (uints_to_bytes_le #t #l s) (i * numbytes t + j) == index (uint_to_bytes_le (index s i)) j) =
-    index_uints_to_bytes_le #t #l #len s (i*numbytes t + j);
-    assert (index (uints_to_bytes_le #t #l s) (i*numbytes t + j) ==
-           index (uint_to_bytes_le (index s i)) j) in
+        index_uints_to_bytes_le #t #l #len s (i*numbytes t + j);
+        assert (index (uints_to_bytes_le #t #l s) (i*numbytes t + j) ==
+                index (uint_to_bytes_le (index s i)) j) in
   
-  Classical.forall_intro (lemma_uints_to_bytes_le_i_j #t #l #len s i);
+  Classical.forall_intro lemma_uints_to_bytes_le_i_j;
   eq_intro (sub (uints_to_bytes_le #t #l s) (i * numbytes t) (numbytes t)) (uint_to_bytes_le (index s i))
+  
 
 
 let lemma_uints_to_from_bytes_le_preserves_value #t #l #len s =
-  let lemma_uints_to_from_bytes_le_preserves_value_i
-  (#t : inttype{unsigned t /\ ~(U1? t)})
-  (#l : secrecy_level)
-  (#len:size_nat{len * numbytes t < pow2 32})
-  (s : lseq (uint_t t l) len)
-  (i : size_nat {i < len}) :
-  Lemma(index (uints_from_bytes_le #t #l (uints_to_bytes_le #t #l s)) i == index s i) =
-  let b8 = uints_to_bytes_le #t #l s in
-  index_uints_from_bytes_le #t #l #len b8 i;
-  assert (index (uints_from_bytes_le b8) i ==
-          uint_from_bytes_le (sub b8 (i * numbytes t) (numbytes t)));
-  lemma_uints_to_bytes_le_sub s i;
-  assert (sub b8 (i * numbytes t) (numbytes t) == uint_to_bytes_le (index s i));
-  lemma_uint_to_from_bytes_le_preserves_value (index s i) in
+  let lemma_uints_to_from_bytes_le_preserves_value_i (i : size_nat {i < len}) :
+      Lemma(index (uints_from_bytes_le #t #l (uints_to_bytes_le #t #l s)) i == index s i) =
+        let b8 = uints_to_bytes_le #t #l s in
+        index_uints_from_bytes_le #t #l #len b8 i;
+        assert (index (uints_from_bytes_le b8) i ==
+                uint_from_bytes_le (sub b8 (i * numbytes t) (numbytes t)));
+        lemma_uints_to_bytes_le_sub s i;
+        assert (sub b8 (i * numbytes t) (numbytes t) == uint_to_bytes_le (index s i));
+        lemma_uint_to_from_bytes_le_preserves_value (index s i) in
 
-  Classical.forall_intro (lemma_uints_to_from_bytes_le_preserves_value_i #t #l #len s);
+  Classical.forall_intro lemma_uints_to_from_bytes_le_preserves_value_i;
   eq_intro (uints_from_bytes_le #t #l (uints_to_bytes_le #t #l s)) s
 
