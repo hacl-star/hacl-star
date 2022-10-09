@@ -1,5 +1,5 @@
 [
-  "\b õ!iÁ9©\u0015-ðÙ\u0006o\u0013^",
+  "\u0000p´¯ôx‰8\u0015d¨ØñàRZ",
   [
     [
       "Vale.SHA.PPC64LE.SHA_helpers.vv",
@@ -2561,28 +2561,6 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
-        "kinding_Vale.Def.Words_s.four@tok",
-        "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_d2569e59c5a6d9770a2caa7ebea40a80",
-        "typing_FStar.Seq.Base.length"
-      ],
-      0,
-      "8e9b8598191d5ebcf04e19c7f1bfe858"
-    ],
-    [
-      "Vale.SHA.PPC64LE.SHA_helpers.lemma_update_multi_quads",
-      3,
-      1,
-      0,
-      [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.SHA.PPC64LE.SHA_helpers.update_multi_quads.fuel_instrumented",
         "@fuel_irrelevance_Vale.SHA.PPC64LE.SHA_helpers.update_multi_quads.fuel_instrumented",
@@ -2591,9 +2569,6 @@
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "FStar.Seq.Base_pretyping_7efa52b424e80c83ad68a652aa3561e4",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "binder_x_4a80df3fc4903c821bb9e457dd1988ce_1",
-        "binder_x_611f4d9b9b7ca657fff97fd0b29bf02c_0",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_2",
         "equation_FStar.Seq.Properties.split", "equation_Prims.nat",
         "equation_Prims.squash",
         "equation_Vale.Arch.Types.reverse_bytes_quad32_seq",
@@ -2611,6 +2586,7 @@
         "lemma_FStar.Seq.Base.init_index_",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro",
+        "lemma_FStar.Seq.Base.lemma_eq_refl",
         "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_init_len",
         "lemma_FStar.Seq.Base.lemma_len_slice",
@@ -2624,11 +2600,11 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_Tm_refine_1ba8fd8bb363097813064c67740b2de5",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_320939d023262f2cbea84852ab051cb6",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
-        "refinement_interpretation_Tm_refine_46ff6445a55ccc12cce752faeb810bb5",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_8117376fa751a9089be3b927d5831062",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_920c587c17d58971495bd37cf4db50c5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
@@ -2638,7 +2614,7 @@
         "typing_Vale.Arch.Types.reverse_bytes_quad32_seq"
       ],
       0,
-      "9ce259ecbc94ced4fe5750f31d044110"
+      "c001219dead1e1b08ea84cd3d1328885"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.le_bytes_to_hash",
@@ -2682,7 +2658,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "8c683ab4cfd4fb24597b1cd211df8625"
+      "2e0cddf67dc38c2718fc90e3366ee246"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_update_multi_quads_unfold",
@@ -2701,7 +2677,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "d22ce3d16672f1228e4def61aa4dce7a"
+      "19dd8f69d7e7034d4057a1bdf4ce315b"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_update_multi_quads_short",
@@ -2716,7 +2692,7 @@
         "primitive_Prims.op_LessThan", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "33117c35cd24cd562f1be56c7b29374c"
+      "11f49e8cfcea3366479df3bbf83919ee"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_le_bytes_to_hash_quads_part1",
@@ -2737,7 +2713,7 @@
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def"
       ],
       0,
-      "4d2877d2f280e5a1f6143c3841032c93"
+      "348ad4906630a504d190187b7620e50d"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_le_bytes_to_hash_quads",
@@ -2794,7 +2770,7 @@
         "typing_Vale.SHA.PPC64LE.SHA_helpers.le_bytes_to_hash"
       ],
       0,
-      "baa678c1d39f327e91fa676b363f4eae"
+      "f39231424d290e6397c7c5871821b5f2"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_hash_to_bytes",
@@ -2806,7 +2782,7 @@
         "refinement_interpretation_Tm_refine_3f8c34e2426fdb9996c80929acbc566d"
       ],
       0,
-      "4a4db88293ba519884b96379564bb7f6"
+      "560cc4301b3cb5704cb2cb4236a66a5b"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_hash_to_bytes",
@@ -2842,7 +2818,7 @@
         "typing_Vale.SHA.PPC64LE.SHA_helpers.le_bytes_to_hash"
       ],
       0,
-      "409b41e7271cd49fd74cc910e4ecabfb"
+      "cb3aef5ce819e64e80c81b7e774b9676"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_endian_relation",
@@ -3013,7 +2989,7 @@
         "typing_Vale.SHA.PPC64LE.SHA_helpers.quads_to_block_be"
       ],
       0,
-      "b4cb9825b7269d56b763ab9708c71a11"
+      "135d860f7095e87f4f14f63cf340e1bf"
     ],
     [
       "Vale.SHA.PPC64LE.SHA_helpers.lemma_update_multi_equiv_vale",
@@ -3126,7 +3102,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "b30aacd00d3b54e2d397fe236ee436e8"
+      "52b04a1265fb550d2f0f85d491df5a2f"
     ]
   ]
 ]
