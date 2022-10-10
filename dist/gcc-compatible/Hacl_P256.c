@@ -519,29 +519,49 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t round2[8U] = { 0U };
   uint64_t round4[8U] = { 0U };
   memset(t, 0U, (uint32_t)8U * sizeof (uint64_t));
-  KRML_MAYBE_FOR4(i0,
-    (uint32_t)0U,
+  uint64_t b0 = b[0U];
+  uint64_t *uu____0 = t;
+  uint64_t c0 = (uint64_t)0U;
+  {
+    uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = uu____0 + (uint32_t)4U * (uint32_t)0U;
+    c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i, b0, c0, res_i0);
+    uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = uu____0 + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
+    c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i0, b0, c0, res_i1);
+    uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = uu____0 + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
+    c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i1, b0, c0, res_i2);
+    uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = uu____0 + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
+    c0 = Hacl_Bignum_Base_mul_wide_add_u64(a_i2, b0, c0, res_i);
+  }
+  uint64_t r = c0;
+  uint64_t c2 = r;
+  t[4U] = c2;
+  KRML_MAYBE_FOR3(i0,
+    (uint32_t)1U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t bj = b[i0];
     uint64_t *res_j = t + i0;
-    uint64_t c = (uint64_t)0U;
+    uint64_t c1 = (uint64_t)0U;
     {
       uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
       uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c1, res_i0);
       uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
       uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c1, res_i1);
       uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
       uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c1, res_i2);
       uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
       uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c1, res_i);
     }
-    uint64_t r = c;
-    t[(uint32_t)4U + i0] = r;);
+    uint64_t r0 = c1;
+    t[(uint32_t)4U + i0] = r0;);
   uint64_t tempRound[8U] = { 0U };
   uint64_t t20[8U] = { 0U };
   uint64_t t30[8U] = { 0U };
@@ -564,15 +584,15 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t h1 = temp1;
   mul64(f20, t10, o20, &temp1);
   uint64_t l1 = o20[0U];
-  uint64_t c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, l1, h1, o20);
+  uint64_t c20 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, l1, h1, o20);
   uint64_t h2 = temp1;
   mul64(f30, t10, o30, &temp1);
   uint64_t l2 = o30[0U];
-  uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l2, h2, o30);
+  uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l2, h2, o30);
   uint64_t temp00 = temp1;
-  uint64_t c0 = c3 + temp00;
-  t20[4U] = c0;
-  uint64_t uu____0 = add8(t, t20, t30);
+  uint64_t c4 = c3 + temp00;
+  t20[4U] = c4;
+  uint64_t uu____1 = add8(t, t20, t30);
   shift8(t30, tempRound);
   uint64_t t21[8U] = { 0U };
   uint64_t t31[8U] = { 0U };
@@ -595,15 +615,15 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t h4 = temp2;
   mul64(f21, t11, o21, &temp2);
   uint64_t l4 = o21[0U];
-  uint64_t c20 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l4, h4, o21);
+  uint64_t c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l4, h4, o21);
   uint64_t h5 = temp2;
   mul64(f31, t11, o31, &temp2);
   uint64_t l5 = o31[0U];
-  uint64_t c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l5, h5, o31);
+  uint64_t c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l5, h5, o31);
   uint64_t temp01 = temp2;
-  uint64_t c4 = c30 + temp01;
-  t21[4U] = c4;
-  uint64_t uu____1 = add8(tempRound, t21, t31);
+  uint64_t c5 = c30 + temp01;
+  t21[4U] = c5;
+  uint64_t uu____2 = add8(tempRound, t21, t31);
   shift8(t31, round2);
   uint64_t tempRound0[8U] = { 0U };
   uint64_t t2[8U] = { 0U };
@@ -627,15 +647,15 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t h7 = temp3;
   mul64(f22, t12, o22, &temp3);
   uint64_t l7 = o22[0U];
-  uint64_t c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, l7, h7, o22);
+  uint64_t c22 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, l7, h7, o22);
   uint64_t h8 = temp3;
   mul64(f32, t12, o32, &temp3);
   uint64_t l8 = o32[0U];
-  uint64_t c31 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l8, h8, o32);
+  uint64_t c31 = Lib_IntTypes_Intrinsics_add_carry_u64(c22, l8, h8, o32);
   uint64_t temp02 = temp3;
-  uint64_t c5 = c31 + temp02;
-  t2[4U] = c5;
-  uint64_t uu____2 = add8(round2, t2, t32);
+  uint64_t c6 = c31 + temp02;
+  t2[4U] = c6;
+  uint64_t uu____3 = add8(round2, t2, t32);
   shift8(t32, tempRound0);
   uint64_t t22[8U] = { 0U };
   uint64_t t3[8U] = { 0U };
@@ -658,15 +678,15 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t h10 = temp;
   mul64(f2, t1, o2, &temp);
   uint64_t l10 = o2[0U];
-  uint64_t c22 = Lib_IntTypes_Intrinsics_add_carry_u64(c12, l10, h10, o2);
+  uint64_t c23 = Lib_IntTypes_Intrinsics_add_carry_u64(c12, l10, h10, o2);
   uint64_t h = temp;
   mul64(f3, t1, o3, &temp);
   uint64_t l = o3[0U];
-  uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64(c22, l, h, o3);
+  uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64(c23, l, h, o3);
   uint64_t temp0 = temp;
-  uint64_t c6 = c32 + temp0;
-  t22[4U] = c6;
-  uint64_t uu____3 = add8(tempRound0, t22, t3);
+  uint64_t c7 = c32 + temp0;
+  t22[4U] = c7;
+  uint64_t uu____4 = add8(tempRound0, t22, t3);
   shift8(t3, round4);
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
@@ -1554,29 +1574,49 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
   uint64_t prime_p256_orderBuffer[4U] = { 0U };
   uint64_t k0 = (uint64_t)14758798090332847183U;
   memset(t, 0U, (uint32_t)8U * sizeof (uint64_t));
-  KRML_MAYBE_FOR4(i0,
-    (uint32_t)0U,
+  uint64_t b0 = b[0U];
+  uint64_t *uu____0 = t;
+  uint64_t c = (uint64_t)0U;
+  {
+    uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = uu____0 + (uint32_t)4U * (uint32_t)0U;
+    c = Hacl_Bignum_Base_mul_wide_add_u64(a_i, b0, c, res_i0);
+    uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = uu____0 + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
+    c = Hacl_Bignum_Base_mul_wide_add_u64(a_i0, b0, c, res_i1);
+    uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = uu____0 + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
+    c = Hacl_Bignum_Base_mul_wide_add_u64(a_i1, b0, c, res_i2);
+    uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = uu____0 + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
+    c = Hacl_Bignum_Base_mul_wide_add_u64(a_i2, b0, c, res_i);
+  }
+  uint64_t r = c;
+  uint64_t c0 = r;
+  t[4U] = c0;
+  KRML_MAYBE_FOR3(i0,
+    (uint32_t)1U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t bj = b[i0];
     uint64_t *res_j = t + i0;
-    uint64_t c = (uint64_t)0U;
+    uint64_t c1 = (uint64_t)0U;
     {
       uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
       uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c1, res_i0);
       uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
       uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c1, res_i1);
       uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
       uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c1, res_i2);
       uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
       uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c1, res_i);
     }
-    uint64_t r = c;
-    t[(uint32_t)4U + i0] = r;);
+    uint64_t r0 = c1;
+    t[(uint32_t)4U + i0] = r0;);
   montgomery_multiplication_round_twice(t, round2, k0);
   montgomery_multiplication_round_twice(round2, round4, k0);
   reduction_prime_2prime_with_carry(round4, result);
