@@ -148,22 +148,22 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     Spec.Agile.AEAD.is_supported_alg alg
   )
   then
-    C.Failure.failwith !$"Error: skipping a test_aead_st instance because algo unsupported etc.\n"
+    LowStar.Failure.failwith "Error: skipping a test_aead_st instance because algo unsupported etc.\n"
   else
   if not (key_len = aead_key_length32 alg)
-  then C.Failure.failwith !$"test_aead_st: not (key_len = aead_key_length32 alg)"
+  then LowStar.Failure.failwith "test_aead_st: not (key_len = aead_key_length32 alg)"
   else if not (tag_len = aead_tag_length32 alg)
-  then C.Failure.failwith !$"test_aead_st: not (tag_len = aead_tag_length32 alg)"
+  then LowStar.Failure.failwith "test_aead_st: not (tag_len = aead_tag_length32 alg)"
   else if not (ciphertext_len = plaintext_len)
-  then C.Failure.failwith !$"test_aead_st: not (ciphertext_len = plaintext_len)"
+  then LowStar.Failure.failwith "test_aead_st: not (ciphertext_len = plaintext_len)"
   else if not (aead_iv_length32 alg iv_len)
-  then C.Failure.failwith !$"test_aead_st: not (iv_len = aead_iv_length32 alg)"
+  then LowStar.Failure.failwith "test_aead_st: not (iv_len = aead_iv_length32 alg)"
   else if not (aad_len `U32.lte` max_len)
-  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` max_len)"
+  then LowStar.Failure.failwith "test_aead_st: not (aad_len `U32.lte` max_len)"
   else if not (aad_len `U32.lte` 2147483648ul)
-  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` 2147483648ul)"
+  then LowStar.Failure.failwith "test_aead_st: not (aad_len `U32.lte` 2147483648ul)"
   else if not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)
-  then C.Failure.failwith !$"test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)"
+  then LowStar.Failure.failwith "test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)"
   else begin
     push_frame();
     B.recall key;
@@ -173,7 +173,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     let st = B.alloca B.null 1ul in
     let e = EverCrypt.AEAD.create_in #alg HyperStack.root st key in
     begin match e with
-    | UnsupportedAlgorithm -> () // Non-fatal since, say, some CI machines may not have AESNI. Was: C.Failure.failwith !$"Failure: AEAD create_in UnsupportedAlgorithm"
+    | UnsupportedAlgorithm -> () // Non-fatal since, say, some CI machines may not have AESNI. Was: LowStar.Failure.failwith "Failure: AEAD create_in UnsupportedAlgorithm"
     | Success ->
       let h1 = HST.get () in
       let st = B.index st 0ul in
@@ -192,7 +192,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       EverCrypt.AEAD.frame_invariant B.loc_none st h1 h2;
 
       if EverCrypt.AEAD.(encrypt #(G.hide alg) st iv iv_len aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
-        C.Failure.failwith !$"Failure AEAD encrypt\n";
+        LowStar.Failure.failwith "Failure AEAD encrypt\n";
       let h3 = HST.get () in
       (match EverCrypt.AEAD.decrypt #(G.hide alg) st iv iv_len aad aad_len ciphertext' ciphertext_len tag' plaintext' with
       | Success ->
@@ -202,7 +202,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
         B.recall tag;
         TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
       | _ ->
-        C.Failure.failwith !$"Failure AEAD decrypt\n");
+        LowStar.Failure.failwith "Failure AEAD decrypt\n");
       pop_frame ()
     end;
     //EverCrypt.aead_free st;
@@ -309,15 +309,15 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   let open EverCrypt.CTR in
 
   if not (k_len = key_len a) then
-    C.Failure.failwith !$"test_ctr_st: not (key_len = key_len a)"
+    LowStar.Failure.failwith "test_ctr_st: not (key_len = key_len a)"
   else if not (counter_len = 4ul) then
-    C.Failure.failwith !$"test_ctr_st: not (counter_len = 4)"
+    LowStar.Failure.failwith "test_ctr_st: not (counter_len = 4)"
   else if not (nonce_bound a nonce_len) then
-    C.Failure.failwith !$"test_ctr_st: not (nonce_bound a nonce_len)"
+    LowStar.Failure.failwith "test_ctr_st: not (nonce_bound a nonce_len)"
   else if not (input_len = output_len) then
-    C.Failure.failwith !$"test_ctr_st: not (input_len = output_len)"
+    LowStar.Failure.failwith "test_ctr_st: not (input_len = output_len)"
   else if not (input_len `U32.gte` block_len a) then
-    C.Failure.failwith !$"test_ctr_st: not (input_len >= block_len a)"
+    LowStar.Failure.failwith "test_ctr_st: not (input_len >= block_len a)"
 
   else begin
     B.recall k;
@@ -328,7 +328,7 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
     // Might only be correct for AES
     let ctr = LowStar.Endianness.load32_be counter in
     if ctr = 0xfffffffful then
-      C.Failure.failwith !$"test_ctr_st: ctr = max_uint32"
+      LowStar.Failure.failwith "test_ctr_st: ctr = max_uint32"
     else begin
       push_frame ();
       let output' = B.alloca 0uy (block_len a) in
@@ -336,7 +336,7 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
       let s = B.alloca B.null 1ul in
       let r = EverCrypt.CTR.create_in a HyperStack.root s k nonce nonce_len ctr in
       if r <> Success then
-        C.Failure.failwith !$"test_ctr_st: create_in <> Success"
+        LowStar.Failure.failwith "test_ctr_st: create_in <> Success"
       else begin
         let s = B.index s 0ul in
         let input_block = B.sub input 0ul (block_len a) in
@@ -372,7 +372,7 @@ let rec test_chacha20_ctr_loop (vs: lbuffer chacha20_vector): St unit =
     B.recall key;
     B.recall iv;
     if cipher_len <> plain_len then
-      failwith !$"chacha-ctr: cipher len and plain len don't match"
+      LowStar.Failure.failwith "chacha-ctr: cipher len and plain len don't match"
     else begin
       let plain = B.sub plain 0ul round_len in
       let cipher = B.sub cipher 0ul round_len in
