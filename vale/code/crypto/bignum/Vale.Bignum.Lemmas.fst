@@ -44,7 +44,7 @@ let rec lemma_sum_pow_seq_bound_rec (#n:nat) (s:seq (natN n)) (i:nat{i <= length
     }
   )
 
-let rec lemma_sum_pow_seq_bound #n s =
+let lemma_sum_pow_seq_bound #n s =
   lemma_sum_pow_seq_bound_rec s (length s)
 
 let lemma_seq_add_is_norm #n as0 bs c0 i =
@@ -172,4 +172,3 @@ let lemma_scale_add #n l a d bs rs ys zs qs xs =
   lemma_seq_add rs zs o1;
   lemma_seq_scale a bs d;
   ()
-

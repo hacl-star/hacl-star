@@ -158,7 +158,7 @@ let rec lemma_sum_swap (j k:int) (ff gg:int -> int -> bool) (f g:int -> bool) : 
   )
 
 // Corollary for lemma_mul_associate
-let rec lemma_sum_swap_mul_associate (k:int) (ff gg:int -> int -> bool) (f g:int -> bool) : Lemma
+let lemma_sum_swap_mul_associate (k:int) (ff gg:int -> int -> bool) (f g:int -> bool) : Lemma
   (requires
     k > 0 /\
     (forall (x:nat).{:pattern (f x)} f x == sum_of_bools 0 (x + 1) (ff x)) /\
@@ -296,7 +296,7 @@ let lemma_mul_distribute_left (a b c:poly) : Lemma ((a +. b) *. c =. (a *. c) +.
   lemma_mul_commute b c;
   lemma_mul_distribute c a b
 
-let rec lemma_shift_is_mul (a:poly) (n:nat) : Lemma (shift a n =. a *. (monomial n)) =
+let lemma_shift_is_mul (a:poly) (n:nat) : Lemma (shift a n =. a *. (monomial n)) =
   let an = shift a n in
   let b = monomial n in
   let lem (k:nat) : Lemma (an.[k] == mul_element a b k) =
@@ -429,4 +429,3 @@ let rec lemma_mod_degree (a b:poly) : Lemma
     let a' = add a (shift b n) in
     lemma_mod_degree a' b
   )
-

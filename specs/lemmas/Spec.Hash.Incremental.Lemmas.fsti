@@ -18,7 +18,6 @@ val update_multi_extra_state_eq
   (requires True)
   (ensures
     (snd (update_multi a h input) == extra_state_add_nat (snd h) (Seq.length input)))
-  (decreases (Seq.length input))
 
 val hash_incremental_block_is_update_last (a:hash_alg)
   (s:words_state a)

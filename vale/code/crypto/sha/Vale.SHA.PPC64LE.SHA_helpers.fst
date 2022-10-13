@@ -343,7 +343,7 @@ let lemma_vsel32 (a b c:nat32) : Lemma
   reveal_ixor_all 32;
   lemma_equal_nth 32 (isel32 a b c) ((iand32 c a) *^ (iand32 (inot32 c) b))
 
-let ch_256_def (x y z:nat32) : 
+let ch_256_def (x y z:nat32) :
   (a:nat32 {a == (iand32 x y) *^ (iand32 (inot32 x) z)})
   =
   reveal_iand_all 32;
@@ -360,7 +360,7 @@ let lemma_eq_maj_xvsel32 (a b c:nat32) : Lemma
   reveal_ixor_all 32;
   lemma_equal_nth 32 (isel32 c b (a *^ b)) ((iand32 a b) *^ ((iand32 a c) *^ (iand32 b c)))
 
-let maj_256_def (x y z:nat32) : 
+let maj_256_def (x y z:nat32) :
   (a:nat32 {a == (iand32 x y) *^ ((iand32 x z) *^ (iand32 y z))})
   =
   reveal_iand_all 32;
@@ -591,7 +591,7 @@ let lemma_slice_commutes_reverse_bytes_quad32_seq (s:seq quad32) (pivot:nat) : L
     assert (equal srs rss)
   )
 
-let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
+let lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
     (requires bound + 4 <= length s)
     (ensures (let prefix_LE = slice s 0 bound in
               let prefix_BE = reverse_bytes_quad32_seq prefix_LE in
@@ -796,7 +796,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     let h_prefix = update_multi_quads prefix hash in
     let h_final = update_block h_prefix (quads_to_block_be qs) in
     lemma_update_multi_quads_unfold r_quads hash;
-    
+
     (* Step 1: Show that h_prefix == h_bytes1 *)
 
     let r_prefix = reverse_bytes_quad32_seq prefix in
@@ -813,9 +813,9 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     assert (Seq.equal h_prefix (fst h_bytes1));  // Conclusion of Step 1
     Vale.Lib.Seqs.slice_seq_map_commute reverse_bytes_quad32 quads (length quads - 4) (length quads);
     slice_commutes_le_seq_quad32_to_bytes quads (bytes_pivot/16) ((length blocks)/16);
-    
+
     (* Step 2: Show that update_block SHA2_256 h_prefix (quads_to_block qs) == update_multi SHA2_256 h_bytes1 input2 *)
-    
+
     assert (equal input2 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (slice quads (length quads - 4) (length quads)))));
     lemma_endian_relation (slice quads (length quads - 4) (length quads)) qs
                           input2;  // ==> quads_to_block qs == words_of_bytes SHA2_256 (block_word_length SHA2_256) input2

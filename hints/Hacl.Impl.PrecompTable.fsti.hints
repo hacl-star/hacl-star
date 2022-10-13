@@ -1,6 +1,72 @@
 [
-  "R=Ô”\u000bêöt«ﬁú¥g(ôH",
+  "é\u0000ò\u000eƒü@kﬂ˘GÓº\u0018•",
   [
+    [
+      "Hacl.Impl.PrecompTable.spec_table_sub_len",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Hacl.Bignum.Definitions.limb_t",
+        "equation_Hacl.Spec.Bignum.Definitions.limb_t",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_bc58b8fff90cc3fafa487745217b1125",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
+      ],
+      0,
+      "3d62bc9fc686f0c6fe3235675c69e66e"
+    ],
+    [
+      "Hacl.Impl.PrecompTable.spec_table_sub_len",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Hacl.Bignum.Definitions.limb_t",
+        "equation_Hacl.Spec.Bignum.Definitions.limb_t",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_bc58b8fff90cc3fafa487745217b1125",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.int_t",
+        "typing_tok_Lib.IntTypes.SEC@tok"
+      ],
+      0,
+      "97b1587c03cb01294a642ee5b7f6ad9b"
+    ],
     [
       "Hacl.Impl.PrecompTable.table_select_consttime",
       1,
@@ -63,7 +129,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "28bcf0554e84de734dbfb77dac89034f"
+      "d2782f48294129d703c80786aa8dbad2"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv",
@@ -107,7 +173,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d3590806e1e4b23ab93252da3c315a42"
+      "b506d0be55ebb43e7c2113e5957d4d02"
     ],
     [
       "Hacl.Impl.PrecompTable.precomp_table_inv",
@@ -151,7 +217,7 @@
         "typing_Lib.IntTypes.int_t", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "aae81084ba66295e0291928c8d3fcc76"
+      "e8df73564b275393c395ff1cb72b170f"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_table",
@@ -196,7 +262,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1539e6b602ab93b3018881de9d068beb"
+      "422b514c534b8c3194da31968ce0336b"
     ],
     [
       "Hacl.Impl.PrecompTable.lprecomp_get_st",
@@ -244,7 +310,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "31c56c7d8cbc1d03e2e586d5cbe1251c"
+      "bb744295243d3fd5707c3019a52afb19"
     ]
   ]
 ]

@@ -1004,7 +1004,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
 
 //
 #push-options "--max_fuel 1"  // Without this, F* refuses to do even one unfolding of update_multi_quads :(
-let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
+let lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
     (requires bound + 4 <= length s)
     (ensures (let prefix_LE = slice s 0 bound in
               let prefix_BE = reverse_bytes_nat32_quad32_seq prefix_LE in

@@ -146,7 +146,7 @@ let w (m: block_t) (b: w_t) : HST.Stack unit
   (requires (fun h -> B.live h m /\ B.live h b /\ B.disjoint m b))
   (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ w_inv
 		       (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq h m)) b h'))
-= let h = Ghost.hide (HST.get ()) in
+= let h = HST.get () in
   C.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
 
 inline_for_extraction

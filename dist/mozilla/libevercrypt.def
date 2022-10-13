@@ -14,6 +14,8 @@ EXPORTS
   Hacl_SHA3_sha3_256
   Hacl_SHA3_sha3_384
   Hacl_SHA3_sha3_512
+  Hacl_Hash_Core_SHA1_legacy_init
+  Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
@@ -59,6 +61,11 @@ EXPORTS
   Hacl_Poly1305_256_poly1305_update
   Hacl_Poly1305_256_poly1305_finish
   Hacl_Poly1305_256_poly1305_mac
+  Hacl_Streaming_SHA1_legacy_create_in_sha1
+  Hacl_Streaming_SHA1_legacy_init_sha1
+  Hacl_Streaming_SHA1_legacy_update_sha1
+  Hacl_Streaming_SHA1_legacy_finish_sha1
+  Hacl_Streaming_SHA1_legacy_free_sha1
   Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
