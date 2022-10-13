@@ -673,6 +673,7 @@ INTRINSIC_FLAGS = \
 INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"' \
   -add-include 'Hacl_Bignum:"lib_intrinsics.h"' \
+  -add-include 'Hacl_Bignum_Base:"lib_intrinsics.h"' \
   -add-include 'Hacl_K256_ECDSA:"lib_intrinsics.h"'
 
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.

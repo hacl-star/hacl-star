@@ -73,6 +73,7 @@ function testBignumMontgomery64(Hacl) {
 let modules = [
   "WasmSupport",
   "FStar",
+  "Hacl_Bignum_Base",
   "Hacl_Bignum",
   "Hacl_GenericField64",
   "Hacl_Bignum64",
