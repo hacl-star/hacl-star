@@ -105,12 +105,12 @@ let test_box_noalloc (v: Bytes.t box_test) =
   let test_result = Test_utils.test_result ("Hacl.NaCl.Noalloc.Detached.box " ^ v.name) in
   let buf = Bytes.copy v.pt in
   let tag = Test_utils.init_bytes 16 in
-  if Hacl.NaCl.Noalloc.Detached.box ~buf ~tag ~n:v.n ~pk:v.pk ~sk:v.sk then
+  if Hacl.NaCl.Noalloc.Detached.box ~buf ~tag ~n:v.n ~pk:v.pk ~sk:v.sk () then
     let combined_ct = Bytes.(cat tag buf) in
     if not (Bytes.equal combined_ct v.expected_ct) then
       test_result Failure "ciphertext mismatch"
     else
-    if Hacl.NaCl.Noalloc.Detached.box_open ~buf ~tag ~n:v.n ~pk:v.pk ~sk:v.sk then
+    if Hacl.NaCl.Noalloc.Detached.box_open ~buf ~tag ~n:v.n ~pk:v.pk ~sk:v.sk () then
       if not (Bytes.equal pt v.pt) then
         test_result Failure "decrypted plaintext mismatch"
       else
@@ -160,8 +160,27 @@ let test_box_noalloc (v: Bytes.t box_test) =
     else
       test_result Failure "Decryption failed"
   else
-    test_result Failure "Encryption failed"
+    test_result Failure "Encryption failed";
 
+  (* TODO test wit non-zero len, integrate with box tests *)
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Noalloc.Detached.box (with offset) " ^ v.name) in
+  let offset = 10 in
+  Bytes.fill tag 0 (Bytes.length tag) '\x00';
+  let buf = Bytes.cat (Bytes.make offset '\x00') v.pt in
+  if Hacl.NaCl.Noalloc.Detached.box ~buf ~tag ~offset ~n:v.n ~pk:v.pk ~sk:v.sk () then
+    let combined_ct = Bytes.(cat tag (sub buf offset (length v.pt))) in
+    if not (Bytes.equal combined_ct v.expected_ct) then
+      test_result Failure "ciphertext mismatch"
+    else
+    if Hacl.NaCl.Noalloc.Detached.box_open ~buf ~tag ~offset ~n:v.n ~pk:v.pk ~sk:v.sk () then
+      if not Bytes.(equal (sub buf offset (length v.pt)) v.pt) then
+        test_result Failure "decrypted plaintext mismatch"
+      else
+        test_result Success ""
+    else
+      test_result Failure "Decryption failed"
+  else
+    test_result Failure "Encryption failed"
 
 let test_secretbox (v: Bytes.t secretbox_test) =
   let test_result = Test_utils.test_result ("Hacl.NaCl.secretbox " ^ v.name) in

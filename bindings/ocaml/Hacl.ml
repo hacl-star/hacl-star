@@ -255,7 +255,7 @@ module NaCl = struct
     assert (C.size tag = 16);
     assert (C.size n = 24);
     assert (C.disjoint tag buf);
-    assert (C.disjoint n buf);
+    assert (C.disjoint n buf)
   module Noalloc = struct
     let box_beforenm ~pk ~sk ~ck =
       check_key_sizes pk sk;
@@ -290,30 +290,48 @@ module NaCl = struct
         get_result @@ hacl_NaCl_crypto_secretbox_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf key)
     end
     module Detached = struct
-      let box ~buf ~tag ~n ~pk ~sk =
+      let get_sub_buffer buf offset len =
+        assert (0 <= offset && offset <= C.size buf);
+        let max_len = C.size buf - offset in
+        let p = C.ctypes_buf_with_offset buf offset in
+        let size = match len with
+          | None ->
+            UInt32.of_int max_len
+          | Some len ->
+            assert (0 <= len && len <= max_len);
+            UInt32.of_int len
+        in
+        p, size
+      let box ~buf ~tag ?(offset=0) ?len ~n ~pk ~sk () =
         check_key_sizes pk sk;
         check_detached buf tag n;
-        get_result @@ hacl_NaCl_crypto_box_detached (C.ctypes_buf buf) (C.ctypes_buf tag) (C.ctypes_buf buf) (C.size_uint32 buf) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-      let box_open ~buf ~tag ~n ~pk ~sk =
+        let p, size = get_sub_buffer buf offset len in
+        get_result @@ hacl_NaCl_crypto_box_detached p (C.ctypes_buf tag) p size (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+      let box_open ~buf ~tag ?(offset=0) ?len ~n ~pk ~sk () =
         check_key_sizes pk sk;
         check_detached buf tag n;
-        get_result @@ hacl_NaCl_crypto_box_open_detached (C.ctypes_buf buf) (C.ctypes_buf buf) (C.ctypes_buf tag) (C.size_uint32 buf) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-      let box_afternm ~buf ~tag ~n ~ck =
+        let p, size = get_sub_buffer buf offset len in
+        get_result @@ hacl_NaCl_crypto_box_open_detached p p (C.ctypes_buf tag) size (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+      let box_afternm ~buf ~tag ?(offset=0) ?len ~n ~ck () =
         assert (C.size ck = 32);
         check_detached buf tag n;
-        get_result @@ hacl_NaCl_crypto_box_detached_afternm (C.ctypes_buf buf) (C.ctypes_buf tag) (C.ctypes_buf buf) (C.size_uint32 buf) (C.ctypes_buf n) (C.ctypes_buf ck)
-      let box_open_afternm ~buf ~tag ~n ~ck =
+        let p, size = get_sub_buffer buf offset len in
+        get_result @@ hacl_NaCl_crypto_box_detached_afternm p (C.ctypes_buf tag) p size (C.ctypes_buf n) (C.ctypes_buf ck)
+      let box_open_afternm ~buf ~tag ?(offset=0) ?len ~n ~ck () =
         assert (C.size ck = 32);
         check_detached buf tag n;
-        get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (C.ctypes_buf buf) (C.ctypes_buf buf) (C.ctypes_buf tag) (C.size_uint32 buf) (C.ctypes_buf n) (C.ctypes_buf ck)
-      let secretbox ~buf ~tag ~n ~key =
+        let p, size = get_sub_buffer buf offset len in
+        get_result @@ hacl_NaCl_crypto_box_open_detached_afternm p p (C.ctypes_buf tag) size (C.ctypes_buf n) (C.ctypes_buf ck)
+      let secretbox ~buf ~tag ?(offset=0) ?len ~n ~key () =
         assert (C.size key = 32);
         check_detached buf tag n;
-        get_result @@ hacl_NaCl_crypto_secretbox_detached (C.ctypes_buf buf) (C.ctypes_buf tag) (C.ctypes_buf buf) (C.size_uint32 buf) (C.ctypes_buf n) (C.ctypes_buf key)
-      let secretbox_open ~buf ~tag ~n ~key =
+        let p, size = get_sub_buffer buf offset len in
+        get_result @@ hacl_NaCl_crypto_secretbox_detached p (C.ctypes_buf tag) p size (C.ctypes_buf n) (C.ctypes_buf key)
+      let secretbox_open ~buf ~tag ?(offset=0) ?len ~n ~key () =
         assert (C.size key = 32);
         check_detached buf tag n;
-        get_result @@ hacl_NaCl_crypto_secretbox_open_detached (C.ctypes_buf buf) (C.ctypes_buf buf) (C.ctypes_buf tag) (C.size_uint32 buf) (C.ctypes_buf n) (C.ctypes_buf key)
+        let p, size = get_sub_buffer buf offset len in
+        get_result @@ hacl_NaCl_crypto_secretbox_open_detached p p (C.ctypes_buf tag) size (C.ctypes_buf n) (C.ctypes_buf key)
     end
   end
   let box ~pt ~n ~pk ~sk =
