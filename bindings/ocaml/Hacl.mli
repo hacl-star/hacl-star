@@ -455,45 +455,47 @@ module NaCl : sig
       (** {1 Box}
           {2 One-shot interface} *)
 
-      val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> tag:bytes -> bool
-      (** [box pt n pk sk ct tag] authenticates and encrypts plaintext [pt] using public key [pk],
-          secret key [sk], and nonce [n] and writes the ciphertext in [ct] and
-          the message authentication tag in [tag].
+      val box : buf:bytes -> tag:bytes -> n:bytes -> pk:bytes -> sk:bytes -> bool
+      (** [box buf tag n pk sk] authenticates and encrypts in-place the plaintext
+          in [buf] using public key [pk], secret key [sk], and nonce [n] and
+          writes the message authentication tag in [tag].
           Returns true if successful. *)
 
-      val box_open : ct:bytes -> tag:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
-      (** [box_open ct tag n pk sk pt] attempts to verify and decrypt ciphertext [ct] and
-          message authentication tag [tag] using public key [pk],
-          secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
-          and returns true. *)
+      val box_open : buf:bytes -> tag:bytes -> n:bytes -> pk:bytes -> sk:bytes-> bool
+      (** [box_open buf tag n pk sk] attempts to verify and decrypt in-place the
+          ciphertext in [ct] and message authentication tag [tag] using public
+          key [pk], secret key [sk], and nonce [n].
+          Returns true if successful.  *)
 
       (** {2 Precomputation interface }
-          The shared key [ck] is obtained using {!NaCl.box_beforenm} or {!NaCl.Noalloc.box_beforenm}. *)
+          The shared key [ck] is obtained using {!NaCl.box_beforenm} or
+          {!NaCl.Noalloc.box_beforenm}. *)
 
-      val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> tag:bytes -> bool
-      (** [box_afternm pt n ck ct tag] authenticates and encrypts [pt] using shared key [ck] and
-          nonce [n] and writes the ciphertext in [ct] and the message authentication tag in [tag].
+      val box_afternm : buf:bytes -> tag:bytes -> n:bytes -> ck:bytes -> bool
+      (** [box buf tag n pk sk] authenticates and encrypts in-place the plaintext
+          in [buf] using shared key [ck] and nonce [n] and writes the message
+          authentication tag in [tag].
           Returns true if successful. *)
 
-      val box_open_afternm : ct:bytes -> tag:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
-      (** [box_open_afternm ct tag n ck pt] attempts to verify and decrypt ciphertext [ct] and
-          message authentication tag [tag] using
-          shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
-          and returns true. *)
+      val box_open_afternm : buf:bytes -> tag:bytes -> n:bytes -> ck:bytes -> bool
+      (** [box_open buf tag n pk sk] attempts to verify and decrypt in-place the
+          ciphertext in [ct] and message authentication tag [tag] using shared
+          key [ck] and nonce [n].
+          Returns true if successful.  *)
 
       (** {1 Secretbox} *)
 
-      val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> tag:bytes -> bool
-      (** [secretbox pt n key ct tag] authenticates and encrypts plaintext [pt] using
-          secret key [key] and nonce [n] and writes the ciphertext in [ct]
-          and the message authentication tag in [tag].
+      val secretbox : buf:bytes -> tag:bytes -> n:bytes -> key:bytes -> bool
+      (** [secretbox buf tag n key] authenticates and encrypts in-place the
+          plaintext in [buf] using secret key [key] and nonce [n] and writes
+          the message authentication tag in [tag].
           Returns true if successful. *)
 
-      val secretbox_open : ct:bytes -> tag:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
-      (** [secretbox_open ct tag n key pt] attempts to verify and decrypt ciphertext [ct] and
-          message authentication tag [tag] using
-          secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
-          and returns true. *)
+      val secretbox_open : buf:bytes -> tag:bytes -> n:bytes -> key:bytes -> bool
+      (** [secretbox_open buf tag n key] attempts to verify and decrypt in-place
+          the ciphertext in [buf] and message authentication tag [tag] using
+          secret key [key] and nonce [n].
+          Returns true if successful. *)
     end
     (** The {i detached} interface uses 2 separate buffers for the ciphertext and
         the message authentication tag. This allows users to encrypt and decrypt data in-place,
