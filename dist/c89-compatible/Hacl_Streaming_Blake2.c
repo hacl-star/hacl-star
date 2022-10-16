@@ -99,7 +99,7 @@ Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_alg a, Hacl_Impl_Blake2_Core_
   }
 }
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in()
@@ -139,7 +139,7 @@ Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_
   }
 }
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2s_32_no_key_init(Hacl_Streaming_Blake2_blake2s_32_state *s1)
@@ -157,7 +157,7 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_init(Hacl_Streaming_Blake2_blake2s_
   }
 }
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -487,7 +487,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
   }
 }
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -665,7 +665,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
   }
 }
 
-/*
+/**
   Free state function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_32_state *s1)
@@ -681,7 +681,7 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_
   KRML_HOST_FREE(s1);
 }
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_create_in()
@@ -721,7 +721,7 @@ Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_
   }
 }
 
-/*
+/**
   (Re)-initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_32_state *s1)
@@ -739,7 +739,7 @@ void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_
   }
 }
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -1069,7 +1069,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
   }
 }
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -1247,7 +1247,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
   }
 }
 
-/*
+/**
   Free state function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_free(Hacl_Streaming_Blake2_blake2b_32_state *s1)

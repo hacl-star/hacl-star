@@ -56,13 +56,13 @@ typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s
 }
 Hacl_Streaming_Blake2b_256_blake2b_256_state;
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in();
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void
@@ -70,7 +70,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
   Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 );
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -80,7 +80,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
   uint32_t len
 );
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -89,7 +89,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
   uint8_t *dst
 );
 
-/*
+/**
   Free state function when there is no key
 */
 void

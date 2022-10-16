@@ -1769,7 +1769,7 @@ static inline void secret_expand(uint8_t *expanded, uint8_t *secret)
 ********************************************************************************/
 
 
-/*
+/**
 Compute the public key from the private key.
 
   The outparam `public_key`  points to 32 bytes of valid memory, i.e., uint8_t[32].
@@ -1783,7 +1783,7 @@ void Hacl_Ed25519_secret_to_public(uint8_t *public_key, uint8_t *private_key)
   point_mul_g_compress(public_key, a);
 }
 
-/*
+/**
 Compute the expanded keys for an Ed25519 signature.
 
   The outparam `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
@@ -1801,7 +1801,7 @@ void Hacl_Ed25519_expand_keys(uint8_t *expanded_keys, uint8_t *private_key)
   point_mul_g_compress(public_key, s);
 }
 
-/*
+/**
 Create an Ed25519 signature with the (precomputed) expanded keys.
 
   The outparam `signature`     points to 64 bytes of valid memory, i.e., uint8_t[64].
@@ -1840,7 +1840,7 @@ Hacl_Ed25519_sign_expanded(
   store_56(ss, aq);
 }
 
-/*
+/**
 Create an Ed25519 signature.
 
   The outparam `signature`   points to 64 bytes of valid memory, i.e., uint8_t[64].
@@ -1860,7 +1860,7 @@ Hacl_Ed25519_sign(uint8_t *signature, uint8_t *private_key, uint32_t msg_len, ui
   Hacl_Ed25519_sign_expanded(signature, expanded_keys, msg_len, msg);
 }
 
-/*
+/**
 Verify an Ed25519 signature.
 
   The function returns `true` if the signature is valid and `false` otherwise.

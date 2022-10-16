@@ -52,7 +52,7 @@ have the ability to switch easily to a 64-bit optimized version in the future.
 /************************/
 
 
-/*
+/**
 Write `a + b mod 2^4096` in `res`.
 
   This functions returns the carry.
@@ -93,7 +93,7 @@ uint32_t Hacl_Bignum4096_32_add(uint32_t *a, uint32_t *b, uint32_t *res)
   return c;
 }
 
-/*
+/**
 Write `a - b mod 2^4096` in `res`.
 
   This functions returns the carry.
@@ -134,7 +134,7 @@ uint32_t Hacl_Bignum4096_32_sub(uint32_t *a, uint32_t *b, uint32_t *res)
   return c;
 }
 
-/*
+/**
 Write `(a + b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -224,7 +224,7 @@ void Hacl_Bignum4096_32_add_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t 
   }
 }
 
-/*
+/**
 Write `(a - b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -314,7 +314,7 @@ void Hacl_Bignum4096_32_sub_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t 
   }
 }
 
-/*
+/**
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -326,7 +326,7 @@ void Hacl_Bignum4096_32_mul(uint32_t *a, uint32_t *b, uint32_t *res)
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32((uint32_t)128U, a, b, tmp, res);
 }
 
-/*
+/**
 Write `a * a` in `res`.
 
   The argument a is meant to be a 4096-bit bignum, i.e. uint32_t[128].
@@ -605,7 +605,7 @@ bn_slow_precomp(uint32_t *n, uint32_t mu, uint32_t *r2, uint32_t *a, uint32_t *r
   }
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 8192-bit bignum, i.e. uint32_t[256].
@@ -1182,7 +1182,7 @@ exp_consttime(
   exp_consttime_precomp(n, mu, r2, a, bBits, b, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -1224,7 +1224,7 @@ Hacl_Bignum4096_32_mod_exp_vartime(
   return is_valid_m == (uint32_t)0xFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -1266,7 +1266,7 @@ Hacl_Bignum4096_32_mod_exp_consttime(
   return is_valid_m == (uint32_t)0xFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -1400,7 +1400,7 @@ bool Hacl_Bignum4096_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t
 /**********************************************/
 
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be a 4096-bit bignum, i.e. uint32_t[128].
@@ -1444,7 +1444,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum4096_32_mont_ctx_init(uin
   }
 }
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_Bignum4096_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
@@ -1459,7 +1459,7 @@ void Hacl_Bignum4096_32_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   KRML_HOST_FREE(k);
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 8192-bit bignum, i.e. uint32_t[256].
@@ -1477,7 +1477,7 @@ Hacl_Bignum4096_32_mod_precomp(
   bn_slow_precomp(k1.n, k1.mu, k1.r2, a, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -1509,7 +1509,7 @@ Hacl_Bignum4096_32_mod_exp_vartime_precomp(
   exp_vartime_precomp(k1.n, k1.mu, k1.r2, a, bBits, b, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -1541,7 +1541,7 @@ Hacl_Bignum4096_32_mod_exp_consttime_precomp(
   exp_consttime_precomp(k1.n, k1.mu, k1.r2, a, bBits, b, res);
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -1610,7 +1610,7 @@ Hacl_Bignum4096_32_mod_inv_prime_vartime_precomp(
 /********************/
 
 
-/*
+/**
 Load a bid-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
@@ -1668,7 +1668,7 @@ uint32_t *Hacl_Bignum4096_32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   }
 }
 
-/*
+/**
 Load a little-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
@@ -1728,7 +1728,7 @@ uint32_t *Hacl_Bignum4096_32_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   }
 }
 
-/*
+/**
 Serialize a bignum into big-endian memory.
 
   The argument b points to a 4096-bit bignum.
@@ -1746,7 +1746,7 @@ void Hacl_Bignum4096_32_bn_to_bytes_be(uint32_t *b, uint8_t *res)
   }
 }
 
-/*
+/**
 Serialize a bignum into little-endian memory.
 
   The argument b points to a 4096-bit bignum.
@@ -1770,7 +1770,7 @@ void Hacl_Bignum4096_32_bn_to_bytes_le(uint32_t *b, uint8_t *res)
 /***************/
 
 
-/*
+/**
 Returns 2^32 - 1 if a < b, otherwise returns 0.
 
  The arguments a and b are meant to be 4096-bit bignums, i.e. uint32_t[128].
@@ -1790,7 +1790,7 @@ uint32_t Hacl_Bignum4096_32_lt_mask(uint32_t *a, uint32_t *b)
   return acc;
 }
 
-/*
+/**
 Returns 2^32 - 1 if a = b, otherwise returns 0.
 
  The arguments a and b are meant to be 4096-bit bignums, i.e. uint32_t[128].

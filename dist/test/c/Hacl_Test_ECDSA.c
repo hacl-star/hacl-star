@@ -47,7 +47,7 @@ between various point representations, and ECDH key agreement.
   using one of the three combined hash-and-sign variants.
 */
 
-/*
+/**
 Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
@@ -68,7 +68,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *k
 );
 
-/*
+/**
 Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
@@ -89,7 +89,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *k
 );
 
-/*
+/**
 Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
@@ -120,7 +120,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 */
 
 
-/*
+/**
  The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   
@@ -140,7 +140,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
   uint8_t *s
 );
 
-/*
+/**
   The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   
@@ -160,7 +160,7 @@ Hacl_P256_ecdsa_verif_p256_sha384(
   uint8_t *s
 );
 
-/*
+/**
   The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   

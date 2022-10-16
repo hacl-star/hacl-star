@@ -42,7 +42,7 @@ Montgomery form.
 *******************************************************************************/
 
 
-/*
+/**
 Check whether this library will work for a modulus `n`.
 
   The function returns false if any of the following preconditions are violated,
@@ -56,7 +56,7 @@ bool Hacl_GenericField32_field_modulus_check(uint32_t len, uint32_t *n)
   return m == (uint32_t)0xFFFFFFFFU;
 }
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -107,7 +107,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   }
 }
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_GenericField32_field_init.
 
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
@@ -122,7 +122,7 @@ void Hacl_GenericField32_field_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *
   KRML_HOST_FREE(k);
 }
 
-/*
+/**
 Return the size of a modulus `n` in limbs.
 
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
@@ -133,7 +133,7 @@ uint32_t Hacl_GenericField32_field_get_len(Hacl_Bignum_MontArithmetic_bn_mont_ct
   return k1.len;
 }
 
-/*
+/**
 Convert a bignum from the regular representation to the Montgomery representation.
 
   Write `a * R mod n` in `aM`.
@@ -153,7 +153,7 @@ Hacl_GenericField32_to_field(
   Hacl_Bignum_Montgomery_bn_to_mont_u32(len1, k1.n, k1.mu, k1.r2, a, aM);
 }
 
-/*
+/**
 Convert a result back from the Montgomery representation to the regular representation.
 
   Write `aM / R mod n` in `a`, i.e.
@@ -174,7 +174,7 @@ Hacl_GenericField32_from_field(
   Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, k1.n, k1.mu, aM, a);
 }
 
-/*
+/**
 Write `aM + bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -193,7 +193,7 @@ Hacl_GenericField32_add(
   Hacl_Bignum_bn_add_mod_n_u32(len1, k1.n, aM, bM, cM);
 }
 
-/*
+/**
 Write `aM - bM mod n` to `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -212,7 +212,7 @@ Hacl_GenericField32_sub(
   Hacl_Bignum_bn_sub_mod_n_u32(len1, k1.n, aM, bM, cM);
 }
 
-/*
+/**
 Write `aM * bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -231,7 +231,7 @@ Hacl_GenericField32_mul(
   Hacl_Bignum_Montgomery_bn_mont_mul_u32(len1, k1.n, k1.mu, aM, bM, cM);
 }
 
-/*
+/**
 Write `aM * aM mod n` in `cM`.
 
   The argument aM and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -249,7 +249,7 @@ Hacl_GenericField32_sqr(
   Hacl_Bignum_Montgomery_bn_mont_sqr_u32(len1, k1.n, k1.mu, aM, cM);
 }
 
-/*
+/**
 Convert a bignum `one` to its Montgomery representation.
 
   The outparam oneM is meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -262,7 +262,7 @@ void Hacl_GenericField32_one(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k, uint
   Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, k1.n, k1.mu, k1.r2, oneM);
 }
 
-/*
+/**
 Write `aM ^ b mod n` in `resM`.
 
   The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -511,7 +511,7 @@ Hacl_GenericField32_exp_consttime(
   }
 }
 
-/*
+/**
 Write `aM ^ b mod n` in `resM`.
 
   The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -713,7 +713,7 @@ Hacl_GenericField32_exp_vartime(
   }
 }
 
-/*
+/**
 Write `aM ^ (-1) mod n` in `aInvM`.
 
   The argument aM and the outparam aInvM are meant to be `len` limbs in size, i.e. uint32_t[len].
