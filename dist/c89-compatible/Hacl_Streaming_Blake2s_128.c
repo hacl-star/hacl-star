@@ -26,7 +26,7 @@
 
 
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2s_128_blake2s_128_state
@@ -79,7 +79,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
   }
 }
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void
@@ -100,7 +100,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
   }
 }
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -432,7 +432,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   }
 }
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -610,7 +610,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   }
 }
 
-/*
+/**
   Free state function when there is no key
 */
 void

@@ -36,7 +36,7 @@
 *******************************************************************************/
 
 
-/*
+/**
 Write the additive identity in `f`.
 
   The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -54,7 +54,7 @@ void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_mk_felem_one */
 
-/*
+/**
 Write the multiplicative identity in `f`.
 
   The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -72,7 +72,7 @@ void Hacl_EC_Ed25519_mk_felem_one(uint64_t *b)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_felem_add */
 
-/*
+/**
 Write `a + b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -91,7 +91,7 @@ void Hacl_EC_Ed25519_felem_add(uint64_t *a, uint64_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_felem_sub */
 
-/*
+/**
 Write `a - b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -110,7 +110,7 @@ void Hacl_EC_Ed25519_felem_sub(uint64_t *a, uint64_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_felem_mul */
 
-/*
+/**
 Write `a * b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -131,7 +131,7 @@ void Hacl_EC_Ed25519_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_felem_sqr */
 
-/*
+/**
 Write `a * a mod p` in `out`.
 
   The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -152,7 +152,7 @@ void Hacl_EC_Ed25519_felem_sqr(uint64_t *a, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_felem_inv */
 
-/*
+/**
 Write `a ^ (p - 2) mod p` in `out`.
 
   The function computes modular multiplicative inverse if `a` <> zero.
@@ -173,7 +173,7 @@ void Hacl_EC_Ed25519_felem_inv(uint64_t *a, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_felem_load */
 
-/*
+/**
 Load a little-endian field element from memory.
 
   The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
@@ -194,7 +194,7 @@ void Hacl_EC_Ed25519_felem_load(uint8_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_felem_store */
 
-/*
+/**
 Serialize a field element into little-endian memory.
 
   The argument `a` points to a field element of 5 limbs in size, i.e., uint64_t[5].
@@ -223,7 +223,7 @@ void Hacl_EC_Ed25519_felem_store(uint64_t *a, uint8_t *out)
 *******************************************************************************/
 
 
-/*
+/**
 Write the point at infinity (additive identity) in `p`.
 
   The outparam `p` is meant to be 20 limbs in size, i.e., uint64_t[20].
@@ -237,7 +237,7 @@ void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_mk_base_point */
 
-/*
+/**
 Write the base point (generator) in `p`.
 
   The outparam `p` is meant to be 20 limbs in size, i.e., uint64_t[20].
@@ -274,7 +274,7 @@ void Hacl_EC_Ed25519_mk_base_point(uint64_t *p)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_point_negate */
 
-/*
+/**
 Write `-p` in `out` (point negation).
 
   The argument `p` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
@@ -292,7 +292,7 @@ void Hacl_EC_Ed25519_point_negate(uint64_t *p, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_point_add */
 
-/*
+/**
 Write `p + q` in `out` (point addition).
 
   The arguments `p`, `q` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
@@ -310,7 +310,7 @@ void Hacl_EC_Ed25519_point_add(uint64_t *p, uint64_t *q, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_point_double */
 
-/*
+/**
 Write `p + p` in `out` (point doubling).
 
   The argument `p` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
@@ -328,7 +328,7 @@ void Hacl_EC_Ed25519_point_double(uint64_t *p, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_point_mul */
 
-/*
+/**
 Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 
   The argument `p` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
@@ -350,7 +350,7 @@ void Hacl_EC_Ed25519_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_point_eq */
 
-/*
+/**
 Checks whether `p` is equal to `q` (point equality).
 
   The function returns `true` if `p` is equal to `q` and `false` otherwise.
@@ -370,7 +370,7 @@ bool Hacl_EC_Ed25519_point_eq(uint64_t *p, uint64_t *q)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_point_compress */
 
-/*
+/**
 Compress a point in extended homogeneous coordinates to its compressed form.
 
   The argument `p` points to a point of 20 limbs in size, i.e., uint64_t[20].
@@ -392,7 +392,7 @@ void Hacl_EC_Ed25519_point_compress(uint64_t *p, uint8_t *out)
 
 /* SNIPPET_START: Hacl_EC_Ed25519_point_decompress */
 
-/*
+/**
 Decompress a point in extended homogeneous coordinates from its compressed form.
 
   The function returns `true` for successful decompression of a compressed point

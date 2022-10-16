@@ -37,7 +37,6 @@ extern "C" {
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Bignum.h"
 #include "../Hacl_P256.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
@@ -74,7 +73,7 @@ Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *
 
 /* SNIPPET_START: Hacl_Impl_P256_DH__ecp256dh_r */
 
-/*
+/**
   The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
 */

@@ -25,7 +25,6 @@
 #include "internal/Hacl_K256_ECDSA.h"
 
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: bn_add */
 
@@ -1333,7 +1332,7 @@ static inline bool fmul_eq_vartime(uint64_t *r, uint64_t *z, uint64_t *x)
 *******************************************************************************/
 
 
-/*
+/**
 Create an ECDSA signature.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
@@ -1399,7 +1398,7 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
 
 /* SNIPPET_START: Hacl_K256_ECDSA_ecdsa_sign_sha256 */
 
-/*
+/**
 Create an ECDSA signature.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
@@ -1431,7 +1430,7 @@ Hacl_K256_ECDSA_ecdsa_sign_sha256(
 
 /* SNIPPET_START: Hacl_K256_ECDSA_ecdsa_verify_hashed_msg */
 
-/*
+/**
 Verify an ECDSA signature.
 
   The function returns `true` if the signature is valid and `false` otherwise.
@@ -1518,7 +1517,7 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
 
 /* SNIPPET_START: Hacl_K256_ECDSA_ecdsa_verify_sha256 */
 
-/*
+/**
 Verify an ECDSA signature.
 
   The function returns `true` if the signature is valid and `false` otherwise.
@@ -1548,7 +1547,7 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
 
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize */
 
-/*
+/**
 Compute canonical lowest S value for `signature` (R || S).
 
   The function returns `true` for successful normalization of S and `false` otherwise.
@@ -1574,7 +1573,7 @@ bool Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(uint8_t *signature)
 
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized */
 
-/*
+/**
 Check whether `signature` (R || S) is in canonical form.
 
   The function returns `true` if S is low-S normalized and `false` otherwise.
@@ -1594,7 +1593,7 @@ bool Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(uint8_t *signature)
 
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg */
 
-/*
+/**
 Create an ECDSA signature.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
@@ -1628,7 +1627,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
 
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256 */
 
-/*
+/**
 Create an ECDSA signature.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
@@ -1661,7 +1660,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256(
 
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg */
 
-/*
+/**
 Verify an ECDSA signature.
 
   The function returns `true` if the signature is valid and `false` otherwise.
@@ -1695,7 +1694,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
 
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256 */
 
-/*
+/**
 Verify an ECDSA signature.
 
   The function returns `true` if the signature is valid and `false` otherwise.
@@ -1738,7 +1737,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256(
 *******************************************************************************/
 
 
-/*
+/**
 Convert a public key from uncompressed to its raw form.
 
   The function returns `true` for successful conversion of a public key and `false` otherwise.
@@ -1763,7 +1762,7 @@ bool Hacl_K256_ECDSA_public_key_uncompressed_to_raw(uint8_t *pk_raw, uint8_t *pk
 
 /* SNIPPET_START: Hacl_K256_ECDSA_public_key_uncompressed_from_raw */
 
-/*
+/**
 Convert a public key from raw to its uncompressed form.
 
   The outparam `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
@@ -1781,7 +1780,7 @@ void Hacl_K256_ECDSA_public_key_uncompressed_from_raw(uint8_t *pk, uint8_t *pk_r
 
 /* SNIPPET_START: Hacl_K256_ECDSA_public_key_compressed_to_raw */
 
-/*
+/**
 Convert a public key from compressed to its raw form.
 
   The function returns `true` for successful conversion of a public key and `false` otherwise.
@@ -1809,7 +1808,7 @@ bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
 
 /* SNIPPET_START: Hacl_K256_ECDSA_public_key_compressed_from_raw */
 
-/*
+/**
 Convert a public key from raw to its compressed form.
 
   The outparam `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].

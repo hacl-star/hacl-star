@@ -46,21 +46,21 @@ extern "C" {
 *******************************************************************************/
 
 
-/*
+/**
 Write the additive identity in `f`.
 
   The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
 */
 void Hacl_EC_K256_mk_felem_zero(uint64_t *f);
 
-/*
+/**
 Write the multiplicative identity in `f`.
 
   The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
 */
 void Hacl_EC_K256_mk_felem_one(uint64_t *f);
 
-/*
+/**
 Write `a + b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -71,7 +71,7 @@ Write `a + b mod p` in `out`.
 */
 void Hacl_EC_K256_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
 
-/*
+/**
 Write `a - b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -82,7 +82,7 @@ Write `a - b mod p` in `out`.
 */
 void Hacl_EC_K256_felem_sub(uint64_t *a, uint64_t *b, uint64_t *out);
 
-/*
+/**
 Write `a * b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -93,7 +93,7 @@ Write `a * b mod p` in `out`.
 */
 void Hacl_EC_K256_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out);
 
-/*
+/**
 Write `a * a mod p` in `out`.
 
   The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -104,7 +104,7 @@ Write `a * a mod p` in `out`.
 */
 void Hacl_EC_K256_felem_sqr(uint64_t *a, uint64_t *out);
 
-/*
+/**
 Write `a ^ (p - 2) mod p` in `out`.
 
   The function computes modular multiplicative inverse if `a` <> zero.
@@ -117,7 +117,7 @@ Write `a ^ (p - 2) mod p` in `out`.
 */
 void Hacl_EC_K256_felem_inv(uint64_t *a, uint64_t *out);
 
-/*
+/**
 Load a bid-endian field element from memory.
 
   The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
@@ -129,7 +129,7 @@ Load a bid-endian field element from memory.
 */
 void Hacl_EC_K256_felem_load(uint8_t *b, uint64_t *out);
 
-/*
+/**
 Serialize a field element into big-endian memory.
 
   The argument `a` points to a field element of 5 limbs in size, i.e., uint64_t[5].
@@ -149,21 +149,21 @@ void Hacl_EC_K256_felem_store(uint64_t *a, uint8_t *out);
 *******************************************************************************/
 
 
-/*
+/**
 Write the point at infinity (additive identity) in `p`.
 
   The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
 */
 void Hacl_EC_K256_mk_point_at_inf(uint64_t *p);
 
-/*
+/**
 Write the base point (generator) in `p`.
 
   The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
 */
 void Hacl_EC_K256_mk_base_point(uint64_t *p);
 
-/*
+/**
 Write `-p` in `out` (point negation).
 
   The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -174,7 +174,7 @@ Write `-p` in `out` (point negation).
 */
 void Hacl_EC_K256_point_negate(uint64_t *p, uint64_t *out);
 
-/*
+/**
 Write `p + q` in `out` (point addition).
 
   The arguments `p`, `q` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -185,7 +185,7 @@ Write `p + q` in `out` (point addition).
 */
 void Hacl_EC_K256_point_add(uint64_t *p, uint64_t *q, uint64_t *out);
 
-/*
+/**
 Write `p + p` in `out` (point doubling).
 
   The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -196,7 +196,7 @@ Write `p + p` in `out` (point doubling).
 */
 void Hacl_EC_K256_point_double(uint64_t *p, uint64_t *out);
 
-/*
+/**
 Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 
   The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -211,7 +211,7 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 */
 void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out);
 
-/*
+/**
 Checks whether `p` is equal to `q` (point equality).
 
   The function returns `true` if `p` is equal to `q` and `false` otherwise.
@@ -224,7 +224,7 @@ Checks whether `p` is equal to `q` (point equality).
 */
 bool Hacl_EC_K256_point_eq(uint64_t *p, uint64_t *q);
 
-/*
+/**
 Compress a point in projective coordinates to its compressed form.
 
   The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
@@ -239,7 +239,7 @@ Compress a point in projective coordinates to its compressed form.
 */
 void Hacl_EC_K256_point_compress(uint64_t *p, uint8_t *out);
 
-/*
+/**
 Decompress a point in projective coordinates from its compressed form.
 
   The function returns `true` for successful decompression of a compressed point

@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "internal/Hacl_Bignum.h"
 #include "../Hacl_K256_ECDSA.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"

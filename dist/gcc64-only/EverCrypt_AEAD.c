@@ -449,7 +449,7 @@ EverCrypt_AEAD_encrypt(
   }
 }
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -593,7 +593,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   #endif
 }
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -1442,7 +1442,7 @@ EverCrypt_AEAD_decrypt(
   }
 }
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -1591,7 +1591,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   #endif
 }
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
