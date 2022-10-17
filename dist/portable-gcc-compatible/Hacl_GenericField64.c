@@ -45,7 +45,7 @@ Montgomery form.
 *******************************************************************************/
 
 
-/*
+/**
 Check whether this library will work for a modulus `n`.
 
   The function returns false if any of the following preconditions are violated,
@@ -63,7 +63,7 @@ bool Hacl_GenericField64_field_modulus_check(uint32_t len, uint64_t *n)
 
 /* SNIPPET_START: Hacl_GenericField64_field_init */
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -101,7 +101,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
 
 /* SNIPPET_START: Hacl_GenericField64_field_free */
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_GenericField64_field_init.
 
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
@@ -120,7 +120,7 @@ void Hacl_GenericField64_field_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *
 
 /* SNIPPET_START: Hacl_GenericField64_field_get_len */
 
-/*
+/**
 Return the size of a modulus `n` in limbs.
 
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
@@ -135,7 +135,7 @@ uint32_t Hacl_GenericField64_field_get_len(Hacl_Bignum_MontArithmetic_bn_mont_ct
 
 /* SNIPPET_START: Hacl_GenericField64_to_field */
 
-/*
+/**
 Convert a bignum from the regular representation to the Montgomery representation.
 
   Write `a * R mod n` in `aM`.
@@ -159,7 +159,7 @@ Hacl_GenericField64_to_field(
 
 /* SNIPPET_START: Hacl_GenericField64_from_field */
 
-/*
+/**
 Convert a result back from the Montgomery representation to the regular representation.
 
   Write `aM / R mod n` in `a`, i.e.
@@ -184,7 +184,7 @@ Hacl_GenericField64_from_field(
 
 /* SNIPPET_START: Hacl_GenericField64_add */
 
-/*
+/**
 Write `aM + bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -207,7 +207,7 @@ Hacl_GenericField64_add(
 
 /* SNIPPET_START: Hacl_GenericField64_sub */
 
-/*
+/**
 Write `aM - bM mod n` to `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -230,7 +230,7 @@ Hacl_GenericField64_sub(
 
 /* SNIPPET_START: Hacl_GenericField64_mul */
 
-/*
+/**
 Write `aM * bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -253,7 +253,7 @@ Hacl_GenericField64_mul(
 
 /* SNIPPET_START: Hacl_GenericField64_sqr */
 
-/*
+/**
 Write `aM * aM mod n` in `cM`.
 
   The argument aM and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -275,7 +275,7 @@ Hacl_GenericField64_sqr(
 
 /* SNIPPET_START: Hacl_GenericField64_one */
 
-/*
+/**
 Convert a bignum `one` to its Montgomery representation.
 
   The outparam oneM is meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -292,7 +292,7 @@ void Hacl_GenericField64_one(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k, uint
 
 /* SNIPPET_START: Hacl_GenericField64_exp_consttime */
 
-/*
+/**
 Write `aM ^ b mod n` in `resM`.
 
   The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -488,7 +488,7 @@ Hacl_GenericField64_exp_consttime(
 
 /* SNIPPET_START: Hacl_GenericField64_exp_vartime */
 
-/*
+/**
 Write `aM ^ b mod n` in `resM`.
 
   The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -651,7 +651,7 @@ Hacl_GenericField64_exp_vartime(
 
 /* SNIPPET_START: Hacl_GenericField64_inverse */
 
-/*
+/**
 Write `aM ^ (-1) mod n` in `aInvM`.
 
   The argument aM and the outparam aInvM are meant to be `len` limbs in size, i.e. uint64_t[len].

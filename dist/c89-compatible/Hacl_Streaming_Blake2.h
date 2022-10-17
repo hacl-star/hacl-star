@@ -72,17 +72,17 @@ typedef struct Hacl_Streaming_Blake2_blake2b_32_state_s
 }
 Hacl_Streaming_Blake2_blake2b_32_state;
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in();
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2s_32_no_key_init(Hacl_Streaming_Blake2_blake2s_32_state *s1);
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -92,7 +92,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
   uint32_t len
 );
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -101,22 +101,22 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
   uint8_t *dst
 );
 
-/*
+/**
   Free state function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_32_state *s1);
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_create_in();
 
-/*
+/**
   (Re)-initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_32_state *s1);
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -126,7 +126,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
   uint32_t len
 );
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -135,7 +135,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
   uint8_t *dst
 );
 
-/*
+/**
   Free state function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_free(Hacl_Streaming_Blake2_blake2b_32_state *s1);

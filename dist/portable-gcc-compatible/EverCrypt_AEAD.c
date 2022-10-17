@@ -491,7 +491,7 @@ EverCrypt_AEAD_encrypt(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -639,7 +639,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -1524,7 +1524,7 @@ EverCrypt_AEAD_decrypt(
 
 /* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -1677,7 +1677,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
 
 /* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
