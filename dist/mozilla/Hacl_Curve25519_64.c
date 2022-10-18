@@ -26,7 +26,7 @@
 
 #include "internal/Vale.h"
 #include "internal/Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+#include "config.h"
 #include "curve25519-inline.h"
 static inline void add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 {

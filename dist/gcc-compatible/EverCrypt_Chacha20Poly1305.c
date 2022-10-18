@@ -25,7 +25,7 @@
 #include "EverCrypt_Chacha20Poly1305.h"
 
 
-#include "evercrypt_targetconfig.h"
+#include "config.h"
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,

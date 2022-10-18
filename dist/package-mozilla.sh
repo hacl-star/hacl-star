@@ -56,7 +56,3 @@ USER_C_FILES=Lib_Memzero0.c
 ALL_C_FILES=$(ls mozilla/*.c | xargs basename -a | xargs echo)
 ALL_H_FILES=$(ls mozilla/*.h | xargs basename -a | xargs echo)
 EOF
-
-cat <<EOF > mozilla/evercrypt_targetconfig.h
-#include "config.h"
-EOF

@@ -678,16 +678,15 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # (and are not subject to bundling). Erased by distributions that don't need
 # those files.
 HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer= -bundle Lib.Memzero0=
-# Disabling by pure-HACL distributions
 TARGETCONFIG_FLAGS = \
-  -add-include 'Hacl_Curve25519_64.c:"evercrypt_targetconfig.h"' \
-  -add-include 'EverCrypt_AEAD.c:"evercrypt_targetconfig.h"' \
+  -add-include 'Hacl_Curve25519_64.c:"config.h"' \
+  -add-include 'EverCrypt_AEAD.c:"config.h"' \
   -add-include 'EverCrypt_AutoConfig2.c:"evercrypt_targetconfig.h"' \
-  -add-include 'EverCrypt_CTR.c:"evercrypt_targetconfig.h"' \
-  -add-include 'EverCrypt_Chacha20Poly1305.c:"evercrypt_targetconfig.h"' \
-  -add-include 'EverCrypt_Curve25519.c:"evercrypt_targetconfig.h"' \
-  -add-include 'EverCrypt_Hash.c:"evercrypt_targetconfig.h"' \
-  -add-include 'EverCrypt_Poly1305.c:"evercrypt_targetconfig.h"'
+  -add-include 'EverCrypt_CTR.c:"config.h"' \
+  -add-include 'EverCrypt_Chacha20Poly1305.c:"config.h"' \
+  -add-include 'EverCrypt_Curve25519.c:"config.h"' \
+  -add-include 'EverCrypt_Hash.c:"config.h"' \
+  -add-include 'EverCrypt_Poly1305.c:"config.h"'
 
 # By default, we strive to do one file per algorithm for HACL, and one file for
 # logical unit for EverCrypt (e.g. E_HASH_BUNDLE).
@@ -989,7 +988,7 @@ copy-krmllib:
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 
 .PHONY: dist/mozilla/libevercrypt.a
-dist/mozilla/libevercrypt.a:
+dist/mozilla/libevercrypt.a: compile-gcc-compatible
 	cd dist && ./package-mozilla.sh
 	$(MAKE) -C dist/mozilla
 
