@@ -140,9 +140,6 @@ test-hpke: specs/tests/hpke/test_hpke.exe
 specs/tests/hpke/test_hpke.exe: obj/libhaclml.cmxa specs/tests/hpke/Test_Spec_Agile_HPKE.ml
 	$(OCAMLOPT) $^ -o $@
 
-mozilla-ci: mozilla-ci-staged
-mozilla-ci-unstaged: compile-mozilla test-c
-
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
@@ -642,7 +639,6 @@ REQUIRED_FLAGS	= \
   -no-prefix 'EverCrypt.TargetConfig' \
   $(BASE_FLAGS)
 
-# Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
 TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 
 # Note: we include libintvector.h in C files whenever possible, but fall back to
@@ -683,7 +679,15 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # those files.
 HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer= -bundle Lib.Memzero0=
 # Disabling by pure-HACL distributions
-TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
+TARGETCONFIG_FLAGS = \
+  -add-include 'Hacl_Curve25519_64.c:"evercrypt_targetconfig.h"' \
+  -add-include 'EverCrypt_AEAD.c:"evercrypt_targetconfig.h"' \
+  -add-include 'EverCrypt_AutoConfig2.c:"evercrypt_targetconfig.h"' \
+  -add-include 'EverCrypt_CTR.c:"evercrypt_targetconfig.h"' \
+  -add-include 'EverCrypt_Chacha20Poly1305.c:"evercrypt_targetconfig.h"' \
+  -add-include 'EverCrypt_Curve25519.c:"evercrypt_targetconfig.h"' \
+  -add-include 'EverCrypt_Hash.c:"evercrypt_targetconfig.h"' \
+  -add-include 'EverCrypt_Poly1305.c:"evercrypt_targetconfig.h"'
 
 # By default, we strive to do one file per algorithm for HACL, and one file for
 # logical unit for EverCrypt (e.g. E_HASH_BUNDLE).
@@ -902,42 +906,6 @@ dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
   -bundle '\*[rename=Should_not_be_here]' \
   -falloca -ftail-calls -fc89 -add-early-include '"krml/internal/builtin.h"'
 
-# Mozilla distribution
-# --------------------
-#
-# Disable the EverCrypt and MerkleTree layers. Only keep Chacha20, Poly1305,
-# Curve25519 for now. Everything else in Hacl is disabled.
-dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
-dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
-dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
-dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
-dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
-dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
-dist/mozilla/Makefile.basic: CTR_BUNDLE =
-dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128
-dist/mozilla/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2_Vec256,Hacl.SHA2_Vec128,Hacl.SHA2_Scalar32
-dist/mozilla/Makefile.basic: HASH_BUNDLE=-bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
-dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
-dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/mozilla/Makefile.basic: K256_BUNDLE= -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
-dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
-dist/mozilla/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
-dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum256_32,Hacl.Bignum4096_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
-dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.SHA1=Hacl.Streaming.*
-dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Impl.Frodo.*,Hacl.Frodo.*,Hacl.Keccak,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
-dist/mozilla/Makefile.basic: \
-  BUNDLE_FLAGS += \
-    -bundle EverCrypt.* \
-    -bundle Hacl.Impl.*,Hacl.Bignum25519.*,Hacl.Bignum25519 \
-    -bundle Hacl.Chacha20.Vec32
-dist/mozilla/Makefile.basic: VALE_ASMS := $(filter dist/vale/curve25519-%,$(VALE_ASMS))
-dist/mozilla/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/mozilla/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/libintvector.h,$(HAND_WRITTEN_H_FILES))
-dist/mozilla/Makefile.basic: HAND_WRITTEN_FILES =
-dist/mozilla/Makefile.basic: TARGETCONFIG_FLAGS =
-dist/mozilla/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
-dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-early-include '<stdbool.h>'
-
 # Portable distribution
 # ---------------------
 #
@@ -986,10 +954,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	echo "KaRaMeL version: $(shell cd $(KRML_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 	if [ "$*" == "wasm" ]; then touch $@; fi
-	if [ x"$*" == xmozilla ]; then \
-	  cp dist/Makefile.mozilla.config $(dir $@)/Makefile.config; \
-	  cp dist/config.mozilla.h $(dir $@)/config.h; \
-	fi
 
 # Auto-generates a single C test file. Note that this rule will trigger multiple
 # times, for multiple KaRaMeL invocations in the test/ directory -- this may
@@ -1022,9 +986,15 @@ copy-krmllib:
 	mkdir -p dist/karamel
 	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal include) | (cd dist/karamel && tar xf -)
 
+compile-mozilla: dist/mozilla/libevercrypt.a
+
+dist/mozilla/libevercrypt.a:
+	cd dist && ./package-mozilla.sh
+	$(MAKE) -C dist/mozilla
+
 compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmllib
 	cp $< dist/$*/Makefile
-	(if [ -f dist/$*/libintvector.h -a $* != mozilla ]; then cp dist/configure dist/$*/configure; fi;)
+	(if [ -f dist/$*/libintvector.h ]; then cp dist/configure dist/$*/configure; fi;)
 	$(MAKE) -C dist/$*
 
 ###########################
