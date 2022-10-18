@@ -40,7 +40,7 @@ of `len` unsigned 64-bit integers, i.e. uint64_t[len].
 /************************/
 
 
-/*
+/**
 Write `a + b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
@@ -52,7 +52,7 @@ uint64_t Hacl_Bignum64_add(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res
   return Hacl_Bignum_Addition_bn_add_eq_len_u64(len, a, b, res);
 }
 
-/*
+/**
 Write `a - b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
@@ -64,7 +64,7 @@ uint64_t Hacl_Bignum64_sub(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res
   return Hacl_Bignum_Addition_bn_sub_eq_len_u64(len, a, b, res);
 }
 
-/*
+/**
 Write `(a + b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -79,7 +79,7 @@ void Hacl_Bignum64_add_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *b, 
   Hacl_Bignum_bn_add_mod_n_u64(len, n, a, b, res);
 }
 
-/*
+/**
 Write `(a - b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -94,7 +94,7 @@ void Hacl_Bignum64_sub_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *b, 
   Hacl_Bignum_bn_sub_mod_n_u64(len, n, a, b, res);
 }
 
-/*
+/**
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -110,7 +110,7 @@ void Hacl_Bignum64_mul(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
-/*
+/**
 Write `a * a` in `res`.
 
   The argument a is meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -234,7 +234,7 @@ bn_slow_precomp(
   }
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
@@ -300,7 +300,7 @@ bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
   }
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -343,7 +343,7 @@ Hacl_Bignum64_mod_exp_vartime(
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -386,7 +386,7 @@ Hacl_Bignum64_mod_exp_consttime(
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -574,7 +574,7 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
 /**********************************************/
 
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -625,7 +625,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
   }
 }
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_Bignum64_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
@@ -640,7 +640,7 @@ void Hacl_Bignum64_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
   KRML_HOST_FREE(k);
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
@@ -660,7 +660,7 @@ Hacl_Bignum64_mod_precomp(
   bn_slow_precomp(len1, k1.n, k1.mu, k1.r2, a, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -701,7 +701,7 @@ Hacl_Bignum64_mod_exp_vartime_precomp(
     res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -742,7 +742,7 @@ Hacl_Bignum64_mod_exp_consttime_precomp(
     res);
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -842,7 +842,7 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
 /********************/
 
 
-/*
+/**
 Load a bid-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -900,7 +900,7 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   }
 }
 
-/*
+/**
 Load a little-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -960,7 +960,7 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   }
 }
 
-/*
+/**
 Serialize a bignum into big-endian memory.
 
   The argument b points to a bignum of ⌈len / 8⌉ size.
@@ -985,7 +985,7 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
   }
 }
 
-/*
+/**
 Serialize a bignum into little-endian memory.
 
   The argument b points to a bignum of ⌈len / 8⌉ size.
@@ -1016,7 +1016,7 @@ void Hacl_Bignum64_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res)
 /***************/
 
 
-/*
+/**
 Returns 2^64 - 1 if a < b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -1036,7 +1036,7 @@ uint64_t Hacl_Bignum64_lt_mask(uint32_t len, uint64_t *a, uint64_t *b)
   return acc;
 }
 
-/*
+/**
 Returns 2^64 - 1 if a = b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].

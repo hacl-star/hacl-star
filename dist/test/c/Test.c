@@ -38,18 +38,11 @@
 
 typedef uint8_t hash_alg;
 
-extern void portable_exit(int32_t uu___);
-
 extern void C_String_print(C_String_t uu___);
 
 extern uint32_t C_String_strlen(C_String_t uu___);
 
 extern void C_String_memcpy(uint8_t *uu___, C_String_t uu___1, uint32_t uu___2);
-
-static bool whatever()
-{
-  return true;
-}
 
 extern bool EverCrypt_AutoConfig2_has_shaext();
 
@@ -10179,18 +10172,6 @@ extern void EverCrypt_CTR_update_block(state_s2 *p, uint8_t *dst, uint8_t *src);
 
 extern void EverCrypt_CTR_free(state_s2 *p);
 
-KRML_DEPRECATED("LowStar.Failure.failwith")
-
-static void failwith____(C_String_t s)
-{
-  C_String_print(s);
-  if (whatever())
-  {
-    portable_exit((int32_t)255);
-  }
-  failwith____(s);
-}
-
 static void
 test_one_hash(
   __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t vec
@@ -10258,15 +10239,27 @@ test_one_hash(
   }
   if (expected_len != tlen)
   {
-    failwith____("Wrong length of expected tag\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Wrong length of expected tag\n");
+    KRML_HOST_EXIT(255U);
   }
   else if (repeat == (uint32_t)0U)
   {
-    failwith____("Repeat must be non-zero\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Repeat must be non-zero\n");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(input_len <= (uint32_t)4294967294U / repeat))
   {
-    failwith____("Repeated input is too large\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Repeated input is too large\n");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
@@ -10433,11 +10426,19 @@ test_one_hmac(
   }
   if (expectedlen != sw0)
   {
-    failwith____("Wrong length of expected tag\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Wrong length of expected tag\n");
+    KRML_HOST_EXIT(255U);
   }
   else if (!keysized(ha, keylen))
   {
-    failwith____("Keysized predicate not satisfied\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Keysized predicate not satisfied\n");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
@@ -10497,7 +10498,11 @@ test_one_hmac(
     }
     if (!(datalen <= (uint32_t)0xffffffffU - sw1))
     {
-      failwith____("Datalen predicate not satisfied\n");
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Datalen predicate not satisfied\n");
+      KRML_HOST_EXIT(255U);
     }
     else if (EverCrypt_HMAC_is_supported_alg(ha))
     {
@@ -11126,7 +11131,11 @@ test_one_hkdf(
   }
   if (prklen != sw0)
   {
-    failwith____("Wrong length of expected PRK\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Wrong length of expected PRK\n");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
@@ -11186,15 +11195,27 @@ test_one_hkdf(
     }
     if (okmlen > (uint32_t)255U * sw1)
     {
-      failwith____("Wrong output length\n");
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Wrong output length\n");
+      KRML_HOST_EXIT(255U);
     }
     else if (!keysized(ha, saltlen))
     {
-      failwith____("Saltlen is not keysized\n");
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Saltlen is not keysized\n");
+      KRML_HOST_EXIT(255U);
     }
     else if (!keysized(ha, prklen))
     {
-      failwith____("Prklen is not keysized\n");
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Prklen is not keysized\n");
+      KRML_HOST_EXIT(255U);
     }
     else
     {
@@ -11254,7 +11275,11 @@ test_one_hkdf(
       }
       if (!(ikmlen <= (uint32_t)0xffffffffU - sw2))
       {
-        failwith____("ikmlen is too large\n");
+        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+          __FILE__,
+          __LINE__,
+          "ikmlen is too large\n");
+        KRML_HOST_EXIT(255U);
       }
       else
       {
@@ -11368,7 +11393,11 @@ test_one_hkdf(
         }
         if (!(infolen <= (uint32_t)0xffffffffU - (sw3 + sw4 + (uint32_t)1U)))
         {
-          failwith____("infolen is too large\n");
+          KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+            __FILE__,
+            __LINE__,
+            "infolen is too large\n");
+          KRML_HOST_EXIT(255U);
         }
         else if (EverCrypt_HMAC_is_supported_alg(ha))
         {
@@ -11532,23 +11561,31 @@ test_one_chacha20(
   uint32_t key_len = v.fst.len;
   if (cipher_len == (uint32_t)0xffffffffU)
   {
-    failwith____("Cipher too long");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n", __FILE__, __LINE__, "Cipher too long");
+    KRML_HOST_EXIT(255U);
   }
   else if (cipher_len != plain_len)
   {
-    failwith____("Cipher len and plain len don\'t match");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Cipher len and plain len don\'t match");
+    KRML_HOST_EXIT(255U);
   }
   else if (key_len != (uint32_t)32U)
   {
-    failwith____("invalid key len");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n", __FILE__, __LINE__, "invalid key len");
+    KRML_HOST_EXIT(255U);
   }
   else if (iv_len != (uint32_t)12U)
   {
-    failwith____("invalid iv len");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n", __FILE__, __LINE__, "invalid iv len");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(ctr <= (uint32_t)0xffffffffU - cipher_len / (uint32_t)64U))
   {
-    failwith____("invalid len");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n", __FILE__, __LINE__, "invalid len");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
@@ -11589,7 +11626,11 @@ static void test_one_poly1305(vector1 v)
   uint8_t dst[16U] = { 0U };
   if (!((uint32_t)4294967279U >= input_len))
   {
-    failwith____("Error: skipping a test_poly1305 instance because bounds do not hold\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Error: skipping a test_poly1305 instance because bounds do not hold\n");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
@@ -11662,23 +11703,43 @@ static void test_one_chacha20poly1305(vector v)
   uint32_t key_len = v.key_len;
   if (!(key_len == (uint32_t)32U))
   {
-    failwith____("chacha20poly1305: not (key_len = 32ul)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "chacha20poly1305: not (key_len = 32ul)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(nonce_len == (uint32_t)12U))
   {
-    failwith____("chacha20poly1305: not (nonce_len = 12ul)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "chacha20poly1305: not (nonce_len = 12ul)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!((uint32_t)4294967279U >= plain_len))
   {
-    failwith____("chacha20poly1305: not ((4294967295ul `U32.sub` 16ul) `U32.gte` plain_len)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "chacha20poly1305: not ((4294967295ul `U32.sub` 16ul) `U32.gte` plain_len)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(plain_len / (uint32_t)64U <= (uint32_t)4294967295U - aad_len))
   {
-    failwith____("chacha20poly1305: not ((plain_len `U32.div` 64ul) `U32.lte` (4294967295ul `U32.sub` aad_len))");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "chacha20poly1305: not ((plain_len `U32.div` 64ul) `U32.lte` (4294967295ul `U32.sub` aad_len))");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(cipher_and_tag_len == plain_len + (uint32_t)16U))
   {
-    failwith____("chacha20poly1305: not (cipher_and_tag_len = plain_len `U32.add` 16ul)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "chacha20poly1305: not (cipher_and_tag_len = plain_len `U32.add` 16ul)");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
@@ -11717,7 +11778,11 @@ static void test_one_chacha20poly1305(vector v)
     }
     else
     {
-      failwith____("Failure: chacha20poly1305 aead_decrypt returned nonzero value");
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Failure: chacha20poly1305 aead_decrypt returned nonzero value");
+      KRML_HOST_EXIT(255U);
     }
   }
 }
@@ -12114,35 +12179,67 @@ test_aead_st(
   uint32_t max_len = aead_max_length32(alg0);
   if (!is_supported_alg(alg0))
   {
-    failwith____("Error: skipping a test_aead_st instance because algo unsupported etc.\n");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "Error: skipping a test_aead_st instance because algo unsupported etc.\n");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(key_len == aead_key_length32(alg0)))
   {
-    failwith____("test_aead_st: not (key_len = aead_key_length32 alg)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_aead_st: not (key_len = aead_key_length32 alg)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(tag_len == aead_tag_length32(alg0)))
   {
-    failwith____("test_aead_st: not (tag_len = aead_tag_length32 alg)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_aead_st: not (tag_len = aead_tag_length32 alg)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(ciphertext_len == plaintext_len))
   {
-    failwith____("test_aead_st: not (ciphertext_len = plaintext_len)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_aead_st: not (ciphertext_len = plaintext_len)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!aead_iv_length32(alg0, iv_len))
   {
-    failwith____("test_aead_st: not (iv_len = aead_iv_length32 alg)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_aead_st: not (iv_len = aead_iv_length32 alg)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(aad_len <= max_len))
   {
-    failwith____("test_aead_st: not (aad_len `U32.lte` max_len)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_aead_st: not (aad_len `U32.lte` max_len)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(aad_len <= (uint32_t)2147483648U))
   {
-    failwith____("test_aead_st: not (aad_len `U32.lte` 2147483648ul)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_aead_st: not (aad_len `U32.lte` 2147483648ul)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(max_len - tag_len >= ciphertext_len))
   {
-    failwith____("test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
@@ -12210,7 +12307,11 @@ test_aead_st(
             != Success
           )
           {
-            failwith____("Failure AEAD encrypt\n");
+            KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+              __FILE__,
+              __LINE__,
+              "Failure AEAD encrypt\n");
+            KRML_HOST_EXIT(255U);
           }
           switch
           (
@@ -12237,7 +12338,11 @@ test_aead_st(
               }
             default:
               {
-                failwith____("Failure AEAD decrypt\n");
+                KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+                  __FILE__,
+                  __LINE__,
+                  "Failure AEAD decrypt\n");
+                KRML_HOST_EXIT(255U);
               }
           }
           break;
@@ -12443,30 +12548,54 @@ test_ctr_st(
 {
   if (!(k_len == key_len(a)))
   {
-    failwith____("test_ctr_st: not (key_len = key_len a)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_ctr_st: not (key_len = key_len a)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(counter_len == (uint32_t)4U))
   {
-    failwith____("test_ctr_st: not (counter_len = 4)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_ctr_st: not (counter_len = 4)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!nonce_bound(a, nonce_len))
   {
-    failwith____("test_ctr_st: not (nonce_bound a nonce_len)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_ctr_st: not (nonce_bound a nonce_len)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(input_len == output_len))
   {
-    failwith____("test_ctr_st: not (input_len = output_len)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_ctr_st: not (input_len = output_len)");
+    KRML_HOST_EXIT(255U);
   }
   else if (!(input_len >= block_len(a)))
   {
-    failwith____("test_ctr_st: not (input_len >= block_len a)");
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "test_ctr_st: not (input_len >= block_len a)");
+    KRML_HOST_EXIT(255U);
   }
   else
   {
     uint32_t ctr = load32_be(counter);
     if (ctr == (uint32_t)0xffffffffU)
     {
-      failwith____("test_ctr_st: ctr = max_uint32");
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "test_ctr_st: ctr = max_uint32");
+      KRML_HOST_EXIT(255U);
     }
     else
     {
@@ -12477,7 +12606,11 @@ test_ctr_st(
       error_code r = EverCrypt_CTR_create_in(a, &s, k, nonce, nonce_len, ctr);
       if (r != Success)
       {
-        failwith____("test_ctr_st: create_in <> Success");
+        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+          __FILE__,
+          __LINE__,
+          "test_ctr_st: create_in <> Success");
+        KRML_HOST_EXIT(255U);
       }
       else
       {
@@ -12534,7 +12667,11 @@ test_chacha20_ctr_loop(
     uint32_t round_len = plain_len / (uint32_t)64U * (uint32_t)64U;
     if (cipher_len != plain_len)
     {
-      failwith____("chacha-ctr: cipher len and plain len don\'t match");
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "chacha-ctr: cipher len and plain len don\'t match");
+      KRML_HOST_EXIT(255U);
     }
     else
     {

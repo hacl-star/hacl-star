@@ -1592,7 +1592,7 @@ static void bufferToJac(uint64_t *p, uint64_t *result)
   result[11U] = (uint64_t)0U;
 }
 
-/*
+/**
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
@@ -1609,7 +1609,7 @@ static bool isPointAtInfinityPublic(uint64_t *p)
   return z0_zero && z1_zero && z2_zero && z3_zero;
 }
 
-/*
+/**
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
@@ -1654,7 +1654,7 @@ static bool isCoordinateValid(uint64_t *p)
   return lessX && lessY;
 }
 
-/*
+/**
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
@@ -1668,7 +1668,7 @@ static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
   return result;
 }
 
-/*
+/**
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
@@ -1697,7 +1697,7 @@ static bool isMoreThanZeroLessThanOrder(uint8_t *x)
   return ~result == (uint64_t)0U;
 }
 
-/*
+/**
   The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
 */
@@ -1764,7 +1764,7 @@ static void multPowerPartial(uint64_t *a, uint64_t *b, uint64_t *result)
   montgomery_multiplication_ecdsa_module(a, buffFromDB, result);
 }
 
-/*
+/**
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
@@ -1785,7 +1785,7 @@ static bool isMoreThanZeroLessThanOrderMinusOne(uint64_t *f)
   return less && !more;
 }
 
-/*
+/**
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
@@ -1802,7 +1802,7 @@ static bool compare_felem_bool(uint64_t *a, uint64_t *b)
   return a_0 == b_0 && a_1 == b_1 && a_2 == b_2 && a_3 == b_3;
 }
 
-/*
+/**
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
@@ -2249,7 +2249,7 @@ between various point representations, and ECDH key agreement.
   using one of the three combined hash-and-sign variants.
 */
 
-/*
+/**
 Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
@@ -2294,7 +2294,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   return flag == (uint64_t)0U;
 }
 
-/*
+/**
 Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
@@ -2339,7 +2339,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   return flag == (uint64_t)0U;
 }
 
-/*
+/**
 Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
@@ -2384,7 +2384,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
   return flag == (uint64_t)0U;
 }
 
-/*
+/**
 P256 signature WITHOUT hashing first.
 
 This function is intended to receive a hash of the input. For convenience, we
@@ -2449,7 +2449,7 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
 */
 
 
-/*
+/**
  The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   
@@ -2493,7 +2493,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
   return result;
 }
 
-/*
+/**
   The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   
@@ -2537,7 +2537,7 @@ Hacl_P256_ecdsa_verif_p256_sha384(
   return result;
 }
 
-/*
+/**
   The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   
@@ -2581,7 +2581,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   return result;
 }
 
-/*
+/**
  The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   
@@ -2631,7 +2631,7 @@ Hacl_P256_ecdsa_verif_without_hash(
 /******************/
 
 
-/*
+/**
 Validate a public key.
 
   
@@ -2665,7 +2665,7 @@ bool Hacl_P256_validate_public_key(uint8_t *pubKey)
   return r;
 }
 
-/*
+/**
 Validate a private key, e.g. prior to signing.
 
 Input: scalar: uint8[32].
@@ -2693,7 +2693,7 @@ bool Hacl_P256_validate_private_key(uint8_t *x)
 */
 
 
-/*
+/**
 Convert 65-byte uncompressed to raw.
 
 The function errors out if the first byte is incorrect, or if the resulting point is invalid.
@@ -2717,7 +2717,7 @@ bool Hacl_P256_uncompressed_to_raw(uint8_t *b, uint8_t *result)
   return correctIdentifier;
 }
 
-/*
+/**
 Convert 33-byte compressed to raw.
 
 The function errors out if the first byte is incorrect, or if the resulting point is invalid.
@@ -2762,7 +2762,7 @@ bool Hacl_P256_compressed_to_raw(uint8_t *b, uint8_t *result)
   return false;
 }
 
-/*
+/**
 Convert raw to 65-byte uncompressed.
 
 This function effectively prepends a 0x04 byte.
@@ -2777,7 +2777,7 @@ void Hacl_P256_raw_to_uncompressed(uint8_t *b, uint8_t *result)
   result[0U] = (uint8_t)4U;
 }
 
-/*
+/**
 Convert raw to 33-byte compressed.
 
   Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
@@ -2799,7 +2799,7 @@ void Hacl_P256_raw_to_compressed(uint8_t *b, uint8_t *result)
 /* ECDH agreement */
 /******************/
 
-/*
+/**
 Convert a private key into a raw public key.
 
 This function performs no key validation.
@@ -2829,7 +2829,7 @@ bool Hacl_P256_dh_initiator(uint8_t *result, uint8_t *scalar)
   return flag == (uint64_t)0U;
 }
 
-/*
+/**
 ECDH key agreement.
 
 This function takes a 32-byte secret key, another party's 64-byte raw public
