@@ -53,9 +53,6 @@ static inline FStar_UInt128_uint128
 FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 
 static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128
 FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s);
 
 static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
@@ -63,8 +60,6 @@ static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
 static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
 
 static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
 
 #if defined(__cplusplus)
 }
