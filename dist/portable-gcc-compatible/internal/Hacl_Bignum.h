@@ -39,58 +39,6 @@ extern "C" {
 #include "../Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-/* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
-
-void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
-
-/* SNIPPET_START: Hacl_Bignum_Convert_bn_to_bytes_be_uint64 */
-
-void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Convert_bn_to_bytes_be_uint64 */
-
-/* SNIPPET_START: Hacl_Bignum_Lib_bn_get_top_index_u32 */
-
-uint32_t Hacl_Bignum_Lib_bn_get_top_index_u32(uint32_t len, uint32_t *b);
-
-/* SNIPPET_END: Hacl_Bignum_Lib_bn_get_top_index_u32 */
-
-/* SNIPPET_START: Hacl_Bignum_Lib_bn_get_top_index_u64 */
-
-uint64_t Hacl_Bignum_Lib_bn_get_top_index_u64(uint32_t len, uint64_t *b);
-
-/* SNIPPET_END: Hacl_Bignum_Lib_bn_get_top_index_u64 */
-
-/* SNIPPET_START: Hacl_Bignum_Addition_bn_sub_eq_len_u32 */
-
-uint32_t
-Hacl_Bignum_Addition_bn_sub_eq_len_u32(uint32_t aLen, uint32_t *a, uint32_t *b, uint32_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Addition_bn_sub_eq_len_u32 */
-
-/* SNIPPET_START: Hacl_Bignum_Addition_bn_sub_eq_len_u64 */
-
-uint64_t
-Hacl_Bignum_Addition_bn_sub_eq_len_u64(uint32_t aLen, uint64_t *a, uint64_t *b, uint64_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Addition_bn_sub_eq_len_u64 */
-
-/* SNIPPET_START: Hacl_Bignum_Addition_bn_add_eq_len_u32 */
-
-uint32_t
-Hacl_Bignum_Addition_bn_add_eq_len_u32(uint32_t aLen, uint32_t *a, uint32_t *b, uint32_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Addition_bn_add_eq_len_u32 */
-
-/* SNIPPET_START: Hacl_Bignum_Addition_bn_add_eq_len_u64 */
-
-uint64_t
-Hacl_Bignum_Addition_bn_add_eq_len_u64(uint32_t aLen, uint64_t *a, uint64_t *b, uint64_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Addition_bn_add_eq_len_u64 */
-
 /* SNIPPET_START: Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32 */
 
 void

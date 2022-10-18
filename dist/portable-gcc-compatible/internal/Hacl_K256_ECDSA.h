@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Bignum.h"
 #include "../Hacl_K256_ECDSA.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
@@ -75,6 +74,12 @@ void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p);
 void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
 
 /* SNIPPET_END: Hacl_Impl_K256_PointAdd_point_add */
+
+/* SNIPPET_START: Hacl_Impl_K256_PointMul_make_point_at_inf */
+
+void Hacl_Impl_K256_PointMul_make_point_at_inf(uint64_t *p);
+
+/* SNIPPET_END: Hacl_Impl_K256_PointMul_make_point_at_inf */
 
 /* SNIPPET_START: Hacl_Impl_K256_PointMul_point_mul */
 

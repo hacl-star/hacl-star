@@ -25,7 +25,6 @@
 #include "Hacl_EC_K256.h"
 
 #include "internal/Hacl_K256_ECDSA.h"
-#include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: Hacl_EC_K256_mk_felem_zero */
 
@@ -37,7 +36,7 @@
 *******************************************************************************/
 
 
-/*
+/**
 Write the additive identity in `f`.
 
   The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -51,7 +50,7 @@ void Hacl_EC_K256_mk_felem_zero(uint64_t *f)
 
 /* SNIPPET_START: Hacl_EC_K256_mk_felem_one */
 
-/*
+/**
 Write the multiplicative identity in `f`.
 
   The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -66,7 +65,7 @@ void Hacl_EC_K256_mk_felem_one(uint64_t *f)
 
 /* SNIPPET_START: Hacl_EC_K256_felem_add */
 
-/*
+/**
 Write `a + b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -85,7 +84,7 @@ void Hacl_EC_K256_felem_add(uint64_t *a, uint64_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_felem_sub */
 
-/*
+/**
 Write `a - b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -104,7 +103,7 @@ void Hacl_EC_K256_felem_sub(uint64_t *a, uint64_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_felem_mul */
 
-/*
+/**
 Write `a * b mod p` in `out`.
 
   The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -122,7 +121,7 @@ void Hacl_EC_K256_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_felem_sqr */
 
-/*
+/**
 Write `a * a mod p` in `out`.
 
   The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
@@ -140,7 +139,7 @@ void Hacl_EC_K256_felem_sqr(uint64_t *a, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_felem_inv */
 
-/*
+/**
 Write `a ^ (p - 2) mod p` in `out`.
 
   The function computes modular multiplicative inverse if `a` <> zero.
@@ -160,7 +159,7 @@ void Hacl_EC_K256_felem_inv(uint64_t *a, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_felem_load */
 
-/*
+/**
 Load a bid-endian field element from memory.
 
   The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
@@ -179,7 +178,7 @@ void Hacl_EC_K256_felem_load(uint8_t *b, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_felem_store */
 
-/*
+/**
 Serialize a field element into big-endian memory.
 
   The argument `a` points to a field element of 5 limbs in size, i.e., uint64_t[5].
@@ -208,27 +207,21 @@ void Hacl_EC_K256_felem_store(uint64_t *a, uint8_t *out)
 *******************************************************************************/
 
 
-/*
+/**
 Write the point at infinity (additive identity) in `p`.
 
   The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
 */
 void Hacl_EC_K256_mk_point_at_inf(uint64_t *p)
 {
-  uint64_t *px = p;
-  uint64_t *py = p + (uint32_t)5U;
-  uint64_t *pz = p + (uint32_t)10U;
-  memset(px, 0U, (uint32_t)5U * sizeof (uint64_t));
-  memset(py, 0U, (uint32_t)5U * sizeof (uint64_t));
-  py[0U] = (uint64_t)1U;
-  memset(pz, 0U, (uint32_t)5U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointMul_make_point_at_inf(p);
 }
 
 /* SNIPPET_END: Hacl_EC_K256_mk_point_at_inf */
 
 /* SNIPPET_START: Hacl_EC_K256_mk_base_point */
 
-/*
+/**
 Write the base point (generator) in `p`.
 
   The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -256,7 +249,7 @@ void Hacl_EC_K256_mk_base_point(uint64_t *p)
 
 /* SNIPPET_START: Hacl_EC_K256_point_negate */
 
-/*
+/**
 Write `-p` in `out` (point negation).
 
   The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -274,7 +267,7 @@ void Hacl_EC_K256_point_negate(uint64_t *p, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_point_add */
 
-/*
+/**
 Write `p + q` in `out` (point addition).
 
   The arguments `p`, `q` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -292,7 +285,7 @@ void Hacl_EC_K256_point_add(uint64_t *p, uint64_t *q, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_point_double */
 
-/*
+/**
 Write `p + p` in `out` (point doubling).
 
   The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -310,7 +303,7 @@ void Hacl_EC_K256_point_double(uint64_t *p, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_point_mul */
 
-/*
+/**
 Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 
   The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
@@ -326,7 +319,14 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
 {
   uint64_t scalar_q[4U] = { 0U };
-  Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)32U, scalar, scalar_q);
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = scalar_q;
+    uint64_t u = load64_be(scalar + ((uint32_t)4U - i - (uint32_t)1U) * (uint32_t)8U);
+    uint64_t x = u;
+    os[i] = x;);
   Hacl_Impl_K256_PointMul_point_mul(out, scalar_q, p);
 }
 
@@ -334,7 +334,7 @@ void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_point_eq */
 
-/*
+/**
 Checks whether `p` is equal to `q` (point equality).
 
   The function returns `true` if `p` is equal to `q` and `false` otherwise.
@@ -354,7 +354,7 @@ bool Hacl_EC_K256_point_eq(uint64_t *p, uint64_t *q)
 
 /* SNIPPET_START: Hacl_EC_K256_point_compress */
 
-/*
+/**
 Compress a point in projective coordinates to its compressed form.
 
   The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
@@ -385,7 +385,7 @@ void Hacl_EC_K256_point_compress(uint64_t *p, uint8_t *out)
 
 /* SNIPPET_START: Hacl_EC_K256_point_decompress */
 
-/*
+/**
 Decompress a point in projective coordinates from its compressed form.
 
   The function returns `true` for successful decompression of a compressed point

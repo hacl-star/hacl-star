@@ -20,7 +20,7 @@ let rec list_append_index #a x y i =
   | [] -> ()
   | h::t -> (if i > 0 then list_append_index t y (i - 1))
 
-let rec append_list_seq #a x y =
+let append_list_seq #a x y =
   list_append_length x y;
   let n = List.length (x @ y) in
   let index_of_x_y (i:nat{i < n}) : a = index (seq_of_list (x @ y)) i in

@@ -1,23 +1,42 @@
 [
-  "­cK›È\u000eÙ­Ô>l½ó¼Š´",
+  "’í\"¶h²Ý£<•wó0{q`",
   [
     [
       "Spec.HMAC_DRBG.Test.Vectors.vec",
       1,
       0,
       0,
-      [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
+      [
+        "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq",
+        "equation_Spec.HMAC_DRBG.Test.Vectors.supported_alg",
+        "haseqTm_refine_c2f9fcb2e6a894f178fc4d40f115cea0"
+      ],
       0,
-      "c273aeefac2e212683d34aa32aeb427a"
+      "c63d9cc62086280fe13c112879f3e079"
     ],
     [
       "Spec.HMAC_DRBG.Test.Vectors.test_vectors",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA1",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
+        "equality_tok_Spec.Hash.Definitions.SHA1@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
+        "equation_Spec.HMAC_DRBG.Test.Vectors.is_supported_alg",
+        "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "4280a56b69b7b74632a2df40efdf6073"
+      "29f30faa2366b2fd4d5e980b3ce6c2b8"
     ]
   ]
 ]

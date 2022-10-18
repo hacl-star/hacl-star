@@ -17,7 +17,7 @@ friend Spec.Agile.Hash
 
 (* Recursive Version *)
 let rec ws_aux (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
-  if t < block_word_length then b.[t]
+  if t < block_word_length a then b.[t]
   else
     let t16 = ws_aux a b (t - 16) in
     let t15 = ws_aux a b (t - 15) in
@@ -124,7 +124,7 @@ let shuffle_is_shuffle_pre a hash block =
 (* Compression function *)
 let update_aux (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
   let hash, _ = hash in
-  let block_w = words_of_bytes a #block_word_length block in
+  let block_w = words_of_bytes a #(block_word_length a) block in
   let hash_1 = shuffle_aux a hash block_w in
   Lib.Sequence.map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1, ()
 
@@ -132,7 +132,7 @@ val update_is_update_pre: a:sha2_alg -> hash:words_state a -> block:bytes{S.leng
   Lemma (update a hash block == update_aux a hash block)
 let update_is_update_pre a hash block =
   let hash, _ = hash in
-  let block_w = words_of_bytes a #block_word_length block in
+  let block_w = words_of_bytes a #(block_word_length a) block in
   let hash_1 = shuffle a hash block_w in
   shuffle_is_shuffle_pre a hash block_w;
   let hash:Lib.Sequence.lseq (word a) (state_word_length a) = hash in
@@ -188,7 +188,7 @@ let update_224_256 hash block =
     norm_spec steps (_sigma1 SHA2_224);
 
     // assert_norm (word_add_mod SHA2_256 == word_add_mod SHA2_224);
-    if t < block_word_length then
+    if t < block_word_length SHA2_256 then
       ()
     else begin
       ws_224_256 b (t - 16);
@@ -239,7 +239,7 @@ let update_224_256 hash block =
     else
       seq_map2_f f g (S.tail s) (S.tail s')
   in
-  assert_norm (words_of_bytes SHA2_256 #block_word_length == words_of_bytes SHA2_224 #block_word_length);
+  assert_norm (words_of_bytes SHA2_256 #(block_word_length SHA2_256) == words_of_bytes SHA2_224 #(block_word_length SHA2_224));
   reveal_opaque (`%shuffle) shuffle;
   reveal_opaque (`%update) update
 

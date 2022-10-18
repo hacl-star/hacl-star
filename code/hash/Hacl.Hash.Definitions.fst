@@ -20,7 +20,7 @@ open FStar.Mul
 inline_for_extraction noextract
 let m_spec (a:hash_alg) : Type0 =
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> unit
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
   | Blake2S | Blake2B -> Blake2.m_spec
 
 inline_for_extraction
@@ -41,14 +41,14 @@ inline_for_extraction noextract
 let impl_word (i:impl) =
   [@inline_let] let a = get_alg i in
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> word a
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> word a
   | Blake2S | Blake2B -> Blake2.element_t (to_blake_alg a) (get_spec i)
 
 inline_for_extraction noextract
 let impl_state_length (i:impl) =
   [@inline_let] let a = get_alg i in
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> state_word_length a
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> state_word_length a
   | Blake2S | Blake2B -> UInt32.v (4ul *. Blake2.row_len (to_blake_alg a) (get_spec i))
 
 inline_for_extraction noextract
@@ -59,6 +59,7 @@ let impl_state_len (i:impl) : s:size_t{size_v s == impl_state_length i} =
   | MD5 -> 4ul
   | SHA1 -> 5ul
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 8ul
+  | SHA3_256 -> 25ul
   | _ ->
     (**) mul_mod_lemma 4ul (Blake2.row_len (to_blake_alg a) (get_spec i));
     match a, m with
@@ -74,7 +75,7 @@ type state (i:impl) =
 inline_for_extraction noextract
 let as_seq (#i:impl) (h:HS.mem) (s:state i) : GTot (words_state' (get_alg i)) =
   match get_alg i with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> B.as_seq h s
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> B.as_seq h s
   | Blake2S -> Blake2.state_v #Spec.Blake2.Blake2S #(get_spec i) h s
   | Blake2B -> Blake2.state_v #Spec.Blake2.Blake2B #(get_spec i) h s
 
@@ -82,7 +83,7 @@ inline_for_extraction
 let word_len (a: hash_alg) : n:size_t { v n = word_length a } =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 4ul
-  | SHA2_384 | SHA2_512 -> 8ul
+  | SHA2_384 | SHA2_512 | SHA3_256 -> 8ul
   | Blake2S -> 4ul
   | Blake2B -> 8ul
 
@@ -91,6 +92,7 @@ let block_len (a: hash_alg): n:size_t { v n = block_length a } =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 64ul
   | SHA2_384 | SHA2_512 -> 128ul
+  | SHA3_256 -> assert_norm (1088/8/8*8 = 136); 136ul
   | Blake2S -> 64ul
   | Blake2B -> 128ul
 
@@ -103,6 +105,7 @@ let hash_word_len (a: hash_alg): n:size_t { v n = hash_word_length a } =
   | SHA2_256 -> 8ul
   | SHA2_384 -> 6ul
   | SHA2_512 -> 8ul
+  | SHA3_256 -> 4ul
   | Blake2S | Blake2B -> 8ul
 
 inline_for_extraction
@@ -114,6 +117,7 @@ let hash_len (a: hash_alg): n:size_t { v n = hash_length a } =
   | SHA2_256 -> 32ul
   | SHA2_384 -> 48ul
   | SHA2_512 -> 64ul
+  | SHA3_256 -> 32ul
   | Blake2S -> 32ul
   | Blake2B -> 64ul
 
@@ -182,10 +186,10 @@ let update_st (i:impl) =
         Spec.Agile.Hash.update (get_alg i) (as_seq h0 s, v) (B.as_seq h0 block)))
 
 noextract inline_for_extraction
-let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
+let pad_st (a: md_alg) = len:len_t a -> dst:B.buffer uint8 ->
   ST.Stack unit
     (requires (fun h ->
-      len_v a len <= max_input_length a /\
+      len_v a len `less_than_max_input_length` a /\
       B.live h dst /\
       B.length dst = pad_length a (len_v a len)))
     (ensures (fun h0 _ h1 ->
@@ -213,13 +217,13 @@ let update_last_st (i:impl) =
   s:state i ->
   ev:extra_state (get_alg i) ->
   prev_len:len_t (get_alg i) { len_v (get_alg i) prev_len % block_length (get_alg i) = 0 } ->
-  input:B.buffer uint8 { B.length input + len_v (get_alg i) prev_len <= max_input_length (get_alg i) } ->
+  input:B.buffer uint8 { (B.length input + len_v (get_alg i) prev_len) `less_than_max_input_length` (get_alg i) /\ B.length input <= block_length (get_alg i) } ->
   input_len:size_t { B.length input = v input_len } ->
   ST.Stack (extra_state (get_alg i))
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input /\
       (* ``extra_state_v ev`` is equal to 0 if the algorithm is not blake *)
-      B.length input + extra_state_v ev <= max_input_length (get_alg i)))
+      (B.length input + extra_state_v ev) `less_than_max_input_length` (get_alg i)))
     (ensures (fun h0 ev' h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       (as_seq h1 s, ev') ==
@@ -233,7 +237,7 @@ let finish_st (i:impl) =
   (requires (fun h ->
     B.live h s /\ B.live h dst /\ B.disjoint s dst))
   (ensures (fun h0 _ h1 ->
-    M.(modifies (loc_buffer dst) h0 h1) /\
+    M.(modifies (loc_buffer dst `loc_union` loc_buffer s) h0 h1) /\
     Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish (get_alg i) (as_seq h0 s, ev))))
 
 noextract inline_for_extraction
@@ -246,7 +250,7 @@ let hash_st (a: hash_alg) =
       B.live h input /\
       B.live h dst /\
       B.disjoint input dst /\
-      B.length input <= max_input_length a))
+      B.length input `less_than_max_input_length` a))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
       Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (B.as_seq h0 input))))

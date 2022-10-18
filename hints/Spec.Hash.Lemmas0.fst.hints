@@ -1,5 +1,5 @@
 [
-  "@SÂ\u0018ÔÜzhS^ü<;÷\r\u0004",
+  "€Gß>þ€tm‹G\u0017b¹9“K",
   [
     [
       "Spec.Hash.Lemmas0.max_input_size_len",
@@ -11,8 +11,10 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.Some",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
@@ -22,6 +24,8 @@
         "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
         "disc_equation_Spec.Hash.Definitions.MD5",
         "disc_equation_Spec.Hash.Definitions.SHA1",
         "disc_equation_Spec.Hash.Definitions.SHA2_224",
@@ -40,21 +44,25 @@
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "lemma_Lib.IntTypes.pow2_127", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "int_inversion", "int_typing", "lemma_FStar.Pervasives.invertOption",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_127",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_FStar.Pervasives.Native.Some_v",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Some_a",
+        "projection_inverse_FStar.Pervasives.Native.Some_v",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_e7c5f4e71af26642dc90739b89f6278e",
+        "refinement_kinding_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "token_correspondence_Prims.pow2.fuel_instrumented",
-        "typing_Prims.pow2", "typing_Spec.Hash.Definitions.is_md",
-        "typing_Spec.Hash.Definitions.len_length"
+        "typing_Spec.Hash.Definitions.is_md",
+        "typing_Spec.Hash.Definitions.max_input_length"
       ],
       0,
-      "9d9bdf19bc5995c59cbd2523c2a28461"
+      "97519f5004aa8ec123eb2e39cd8dcbcf"
     ]
   ]
 ]

@@ -8098,4 +8098,4 @@ L235:
   mov %rcx, %rax
   ret
 
-
+.section .note.GNU-stack,"",%progbits

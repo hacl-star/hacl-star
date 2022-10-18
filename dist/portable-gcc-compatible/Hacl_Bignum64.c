@@ -43,7 +43,7 @@ of `len` unsigned 64-bit integers, i.e. uint64_t[len].
 /************************/
 
 
-/*
+/**
 Write `a + b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
@@ -59,7 +59,7 @@ uint64_t Hacl_Bignum64_add(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res
 
 /* SNIPPET_START: Hacl_Bignum64_sub */
 
-/*
+/**
 Write `a - b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
@@ -75,7 +75,7 @@ uint64_t Hacl_Bignum64_sub(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res
 
 /* SNIPPET_START: Hacl_Bignum64_add_mod */
 
-/*
+/**
 Write `(a + b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -94,7 +94,7 @@ void Hacl_Bignum64_add_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *b, 
 
 /* SNIPPET_START: Hacl_Bignum64_sub_mod */
 
-/*
+/**
 Write `(a - b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -113,7 +113,7 @@ void Hacl_Bignum64_sub_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *b, 
 
 /* SNIPPET_START: Hacl_Bignum64_mul */
 
-/*
+/**
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -131,7 +131,7 @@ void Hacl_Bignum64_mul(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res)
 
 /* SNIPPET_START: Hacl_Bignum64_sqr */
 
-/*
+/**
 Write `a * a` in `res`.
 
   The argument a is meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -226,7 +226,7 @@ bn_slow_precomp(
 
 /* SNIPPET_START: Hacl_Bignum64_mod */
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
@@ -276,7 +276,7 @@ bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
 
 /* SNIPPET_START: Hacl_Bignum64_mod_exp_vartime */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -323,7 +323,7 @@ Hacl_Bignum64_mod_exp_vartime(
 
 /* SNIPPET_START: Hacl_Bignum64_mod_exp_consttime */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -370,7 +370,7 @@ Hacl_Bignum64_mod_exp_consttime(
 
 /* SNIPPET_START: Hacl_Bignum64_mod_inv_prime_vartime */
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -435,11 +435,10 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
     uint64_t c1;
     if ((uint32_t)1U < len)
     {
-      uint32_t rLen = len - (uint32_t)1U;
       uint64_t *a1 = n + (uint32_t)1U;
       uint64_t *res1 = n2 + (uint32_t)1U;
       uint64_t c = c0;
-      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < (len - (uint32_t)1U) / (uint32_t)4U; i++)
       {
         uint64_t t1 = a1[(uint32_t)4U * i];
         uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -454,7 +453,12 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
         uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
       }
-      for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+      for
+      (uint32_t
+        i = (len - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+        i
+        < len - (uint32_t)1U;
+        i++)
       {
         uint64_t t1 = a1[i];
         uint64_t *res_i = res1 + i;
@@ -492,7 +496,7 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
 /**********************************************/
 
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -530,7 +534,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
 
 /* SNIPPET_START: Hacl_Bignum64_mont_ctx_free */
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_Bignum64_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
@@ -549,7 +553,7 @@ void Hacl_Bignum64_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
 
 /* SNIPPET_START: Hacl_Bignum64_mod_precomp */
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
@@ -573,7 +577,7 @@ Hacl_Bignum64_mod_precomp(
 
 /* SNIPPET_START: Hacl_Bignum64_mod_exp_vartime_precomp */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -618,7 +622,7 @@ Hacl_Bignum64_mod_exp_vartime_precomp(
 
 /* SNIPPET_START: Hacl_Bignum64_mod_exp_consttime_precomp */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -663,7 +667,7 @@ Hacl_Bignum64_mod_exp_consttime_precomp(
 
 /* SNIPPET_START: Hacl_Bignum64_mod_inv_prime_vartime_precomp */
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -692,11 +696,10 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
   uint64_t c1;
   if ((uint32_t)1U < len1)
   {
-    uint32_t rLen = len1 - (uint32_t)1U;
     uint64_t *a1 = k1.n + (uint32_t)1U;
     uint64_t *res1 = n2 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (len1 - (uint32_t)1U) / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -711,7 +714,12 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for
+    (uint32_t
+      i = (len1 - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+      i
+      < len1 - (uint32_t)1U;
+      i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;
@@ -744,7 +752,7 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
 /********************/
 
 
-/*
+/**
 Load a bid-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -795,7 +803,7 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
 
 /* SNIPPET_START: Hacl_Bignum64_new_bn_from_bytes_le */
 
-/*
+/**
 Load a little-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -848,7 +856,7 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
 
 /* SNIPPET_START: Hacl_Bignum64_bn_to_bytes_be */
 
-/*
+/**
 Serialize a bignum into big-endian memory.
 
   The argument b points to a bignum of ⌈len / 8⌉ size.
@@ -861,10 +869,9 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
-  uint32_t numb = (uint32_t)8U;
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
-    store64_be(tmp + i * numb, b[bnLen - i - (uint32_t)1U]);
+    store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
   }
   memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
 }
@@ -873,7 +880,7 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
 
 /* SNIPPET_START: Hacl_Bignum64_bn_to_bytes_le */
 
-/*
+/**
 Serialize a bignum into little-endian memory.
 
   The argument b points to a bignum of ⌈len / 8⌉ size.
@@ -903,7 +910,7 @@ void Hacl_Bignum64_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res)
 /***************/
 
 
-/*
+/**
 Returns 2^64 - 1 if a < b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -924,7 +931,7 @@ uint64_t Hacl_Bignum64_lt_mask(uint32_t len, uint64_t *a, uint64_t *b)
 
 /* SNIPPET_START: Hacl_Bignum64_eq_mask */
 
-/*
+/**
 Returns 2^64 - 1 if a = b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].

@@ -105,7 +105,7 @@ Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_alg a, Hacl_Impl_Blake2_Core_
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_create_in */
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in()
@@ -134,7 +134,7 @@ Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_init */
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2s_32_no_key_init(Hacl_Streaming_Blake2_blake2s_32_state *s1)
@@ -157,7 +157,7 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_init(Hacl_Streaming_Blake2_blake2s_
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_update */
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -471,7 +471,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_finish */
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -506,12 +506,8 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
           Hacl_Impl_Blake2_Core_M32));
   }
   uint8_t *buf_1 = buf_;
-  KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
-  uint32_t wv[(uint32_t)4U * (uint32_t)4U];
-  memset(wv, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
-  KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
-  uint32_t b[(uint32_t)4U * (uint32_t)4U];
-  memset(b, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+  uint32_t wv[16U] = { 0U };
+  uint32_t b[16U] = { 0U };
   Hacl_Streaming_Blake2_blake2s_32_block_state tmp_block_state = { .fst = wv, .snd = b };
   uint32_t *src_b = block_state.snd;
   uint32_t *dst_b = tmp_block_state.snd;
@@ -644,7 +640,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_free */
 
-/*
+/**
   Free state function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_32_state *s1)
@@ -664,7 +660,7 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_create_in */
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_create_in()
@@ -693,7 +689,7 @@ Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_init */
 
-/*
+/**
   (Re)-initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_32_state *s1)
@@ -716,7 +712,7 @@ void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_update */
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -1030,7 +1026,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_finish */
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -1065,12 +1061,8 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
           Hacl_Impl_Blake2_Core_M32));
   }
   uint8_t *buf_1 = buf_;
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
-  uint64_t wv[(uint32_t)4U * (uint32_t)4U];
-  memset(wv, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
-  uint64_t b[(uint32_t)4U * (uint32_t)4U];
-  memset(b, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+  uint64_t wv[16U] = { 0U };
+  uint64_t b[16U] = { 0U };
   Hacl_Streaming_Blake2_blake2b_32_block_state tmp_block_state = { .fst = wv, .snd = b };
   uint64_t *src_b = block_state.snd;
   uint64_t *dst_b = tmp_block_state.snd;
@@ -1203,7 +1195,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_free */
 
-/*
+/**
   Free state function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_free(Hacl_Streaming_Blake2_blake2b_32_state *s1)

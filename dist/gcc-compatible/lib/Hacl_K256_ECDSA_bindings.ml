@@ -23,6 +23,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Impl_K256_PointAdd_point_add"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_Impl_K256_PointMul_make_point_at_inf =
+      foreign "Hacl_Impl_K256_PointMul_make_point_at_inf"
+        ((ptr uint64_t) @-> (returning void))
     let hacl_Impl_K256_PointMul_point_mul =
       foreign "Hacl_Impl_K256_PointMul_point_mul"
         ((ptr uint64_t) @->

@@ -50,6 +50,7 @@ typedef uint8_t Spec_Blake2_alg;
 #define Spec_Hash_Definitions_MD5 5
 #define Spec_Hash_Definitions_Blake2S 6
 #define Spec_Hash_Definitions_Blake2B 7
+#define Spec_Hash_Definitions_SHA3_256 8
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 

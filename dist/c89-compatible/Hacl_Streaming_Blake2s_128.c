@@ -26,7 +26,7 @@
 
 
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2s_128_blake2s_128_state
@@ -42,38 +42,44 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
         sizeof (uint8_t));
     Lib_IntVector_Intrinsics_vec128
     *wv =
-      (Lib_IntVector_Intrinsics_vec128 *)KRML_HOST_CALLOC((uint32_t)4U,
-        sizeof (Lib_IntVector_Intrinsics_vec128));
-    Lib_IntVector_Intrinsics_vec128
-    *b =
-      (Lib_IntVector_Intrinsics_vec128 *)KRML_HOST_CALLOC((uint32_t)4U,
-        sizeof (Lib_IntVector_Intrinsics_vec128));
-    Hacl_Streaming_Blake2s_128_blake2s_128_block_state lit;
-    Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state;
-    lit.fst = wv;
-    lit.snd = b;
-    block_state = lit;
+      (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+        sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+    memset(wv, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
     {
-      Hacl_Streaming_Blake2s_128_blake2s_128_state s;
-      s.block_state = block_state;
-      s.buf = buf;
-      s.total_len = (uint64_t)0U;
-      KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2s_128_blake2s_128_state), (uint32_t)1U);
+      Lib_IntVector_Intrinsics_vec128
+      *b =
+        (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+          sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+      memset(b, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
       {
-        Hacl_Streaming_Blake2s_128_blake2s_128_state
-        *p =
-          (Hacl_Streaming_Blake2s_128_blake2s_128_state *)KRML_HOST_MALLOC(sizeof (
-              Hacl_Streaming_Blake2s_128_blake2s_128_state
-            ));
-        p[0U] = s;
-        Hacl_Blake2s_128_blake2s_init(block_state.snd, (uint32_t)0U, (uint32_t)32U);
-        return p;
+        Hacl_Streaming_Blake2s_128_blake2s_128_block_state lit;
+        Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state;
+        lit.fst = wv;
+        lit.snd = b;
+        block_state = lit;
+        {
+          Hacl_Streaming_Blake2s_128_blake2s_128_state s;
+          s.block_state = block_state;
+          s.buf = buf;
+          s.total_len = (uint64_t)0U;
+          KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2s_128_blake2s_128_state), (uint32_t)1U);
+          {
+            Hacl_Streaming_Blake2s_128_blake2s_128_state
+            *p =
+              (Hacl_Streaming_Blake2s_128_blake2s_128_state *)KRML_HOST_MALLOC(sizeof (
+                  Hacl_Streaming_Blake2s_128_blake2s_128_state
+                ));
+            p[0U] = s;
+            Hacl_Blake2s_128_blake2s_init(block_state.snd, (uint32_t)0U, (uint32_t)32U);
+            return p;
+          }
+        }
       }
     }
   }
 }
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void
@@ -94,7 +100,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
   }
 }
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -426,7 +432,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   }
 }
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -462,177 +468,149 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   }
   {
     uint8_t *buf_1 = buf_;
-    KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
+    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
+    KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 b[4U] KRML_POST_ALIGN(16) = { 0U };
+    Hacl_Streaming_Blake2s_128_blake2s_128_block_state lit;
+    Hacl_Streaming_Blake2s_128_blake2s_128_block_state tmp_block_state;
+    Lib_IntVector_Intrinsics_vec128 *src_b;
+    Lib_IntVector_Intrinsics_vec128 *dst_b;
+    uint64_t prev_len;
+    uint32_t ite0;
+    uint8_t *buf_last;
+    uint8_t *buf_multi;
+    uint32_t ite1;
+    uint32_t nb;
+    uint32_t ite2;
+    uint32_t ite3;
+    uint64_t prev_len_last;
+    uint32_t ite4;
+    uint32_t ite;
+    lit.fst = wv;
+    lit.snd = b;
+    tmp_block_state = lit;
+    src_b = block_state.snd;
+    dst_b = tmp_block_state.snd;
+    memcpy(dst_b, src_b, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+    prev_len = total_len - (uint64_t)r;
+    if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
     {
-      Lib_IntVector_Intrinsics_vec128 wv[(uint32_t)4U * (uint32_t)1U];
-      {
-        uint32_t _i;
-        for (_i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-          wv[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-      }
-      KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
-      {
-        Lib_IntVector_Intrinsics_vec128 b[(uint32_t)4U * (uint32_t)1U];
-        {
-          uint32_t _i;
-          for (_i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-            b[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-        }
-        {
-          Hacl_Streaming_Blake2s_128_blake2s_128_block_state lit;
-          Hacl_Streaming_Blake2s_128_blake2s_128_block_state tmp_block_state;
-          Lib_IntVector_Intrinsics_vec128 *src_b;
-          Lib_IntVector_Intrinsics_vec128 *dst_b;
-          uint64_t prev_len;
-          uint32_t ite0;
-          uint8_t *buf_last;
-          uint8_t *buf_multi;
-          uint32_t ite1;
-          uint32_t nb;
-          uint32_t ite2;
-          uint32_t ite3;
-          uint64_t prev_len_last;
-          uint32_t ite4;
-          uint32_t ite;
-          lit.fst = wv;
-          lit.snd = b;
-          tmp_block_state = lit;
-          src_b = block_state.snd;
-          dst_b = tmp_block_state.snd;
-          memcpy(dst_b, src_b, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
-          prev_len = total_len - (uint64_t)r;
-          if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite0 = (uint32_t)64U;
-          }
-          else
-          {
-            ite0 = r % (uint32_t)64U;
-          }
-          buf_last = buf_1 + r - ite0;
-          buf_multi = buf_1;
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite1 = (uint32_t)0U;
-          }
-          else
-          {
-            uint32_t ite5;
-            if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-            {
-              ite5 = (uint32_t)64U;
-            }
-            else
-            {
-              ite5 = r % (uint32_t)64U;
-            }
-            ite1 = r - ite5;
-          }
-          nb = ite1 / (uint32_t)64U;
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite2 = (uint32_t)0U;
-          }
-          else
-          {
-            uint32_t ite5;
-            if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-            {
-              ite5 = (uint32_t)64U;
-            }
-            else
-            {
-              ite5 = r % (uint32_t)64U;
-            }
-            ite2 = r - ite5;
-          }
-          Hacl_Blake2s_128_blake2s_update_multi(ite2,
-            tmp_block_state.fst,
-            tmp_block_state.snd,
-            prev_len,
-            buf_multi,
-            nb);
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite3 = r;
-          }
-          else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite3 = (uint32_t)64U;
-          }
-          else
-          {
-            ite3 = r % (uint32_t)64U;
-          }
-          prev_len_last = total_len - (uint64_t)ite3;
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite4 = r;
-          }
-          else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite4 = (uint32_t)64U;
-          }
-          else
-          {
-            ite4 = r % (uint32_t)64U;
-          }
-          if
-          (
-            (uint32_t)64U
-            ==
-              Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-                Hacl_Impl_Blake2_Core_M128)
-          )
-          {
-            ite = r;
-          }
-          else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-          {
-            ite = (uint32_t)64U;
-          }
-          else
-          {
-            ite = r % (uint32_t)64U;
-          }
-          Hacl_Blake2s_128_blake2s_update_last(ite4,
-            tmp_block_state.fst,
-            tmp_block_state.snd,
-            prev_len_last,
-            ite,
-            buf_last);
-          Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
-        }
-      }
+      ite0 = (uint32_t)64U;
     }
+    else
+    {
+      ite0 = r % (uint32_t)64U;
+    }
+    buf_last = buf_1 + r - ite0;
+    buf_multi = buf_1;
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite1 = (uint32_t)0U;
+    }
+    else
+    {
+      uint32_t ite5;
+      if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+      {
+        ite5 = (uint32_t)64U;
+      }
+      else
+      {
+        ite5 = r % (uint32_t)64U;
+      }
+      ite1 = r - ite5;
+    }
+    nb = ite1 / (uint32_t)64U;
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite2 = (uint32_t)0U;
+    }
+    else
+    {
+      uint32_t ite5;
+      if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+      {
+        ite5 = (uint32_t)64U;
+      }
+      else
+      {
+        ite5 = r % (uint32_t)64U;
+      }
+      ite2 = r - ite5;
+    }
+    Hacl_Blake2s_128_blake2s_update_multi(ite2,
+      tmp_block_state.fst,
+      tmp_block_state.snd,
+      prev_len,
+      buf_multi,
+      nb);
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite3 = r;
+    }
+    else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+    {
+      ite3 = (uint32_t)64U;
+    }
+    else
+    {
+      ite3 = r % (uint32_t)64U;
+    }
+    prev_len_last = total_len - (uint64_t)ite3;
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite4 = r;
+    }
+    else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+    {
+      ite4 = (uint32_t)64U;
+    }
+    else
+    {
+      ite4 = r % (uint32_t)64U;
+    }
+    if
+    (
+      (uint32_t)64U
+      == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M128)
+    )
+    {
+      ite = r;
+    }
+    else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+    {
+      ite = (uint32_t)64U;
+    }
+    else
+    {
+      ite = r % (uint32_t)64U;
+    }
+    Hacl_Blake2s_128_blake2s_update_last(ite4,
+      tmp_block_state.fst,
+      tmp_block_state.snd,
+      prev_len_last,
+      ite,
+      buf_last);
+    Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
   }
 }
 
-/*
+/**
   Free state function when there is no key
 */
 void
@@ -645,8 +623,8 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
   Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state = scrut.block_state;
   Lib_IntVector_Intrinsics_vec128 *wv = block_state.fst;
   Lib_IntVector_Intrinsics_vec128 *b = block_state.snd;
-  KRML_HOST_FREE(wv);
-  KRML_HOST_FREE(b);
+  KRML_ALIGNED_FREE(wv);
+  KRML_ALIGNED_FREE(b);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(s);
 }

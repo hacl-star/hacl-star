@@ -89,6 +89,18 @@ Hacl_Blake2b_256_blake2b(
   uint8_t *k
 );
 
+void
+Hacl_Blake2b_256_load_state256b_from_state32(
+  Lib_IntVector_Intrinsics_vec256 *st,
+  uint64_t *st32
+);
+
+void
+Hacl_Blake2b_256_store_state256b_to_state32(
+  uint64_t *st32,
+  Lib_IntVector_Intrinsics_vec256 *st
+);
+
 #if defined(__cplusplus)
 }
 #endif

@@ -165,7 +165,7 @@ static void hash_vec_r_free(uint32_t hsz, MerkleTree_Low_Datastructures_hash_vec
 
 /* SNIPPET_START: mt_init_hash */
 
-/*
+/**
   Constructor for hashes
 */
 inline uint8_t *mt_init_hash(uint32_t hash_size)
@@ -177,7 +177,7 @@ inline uint8_t *mt_init_hash(uint32_t hash_size)
 
 /* SNIPPET_START: mt_free_hash */
 
-/*
+/**
   Destructor for hashes
 */
 inline void mt_free_hash(uint8_t *h)
@@ -189,7 +189,7 @@ inline void mt_free_hash(uint8_t *h)
 
 /* SNIPPET_START: mt_init_path */
 
-/*
+/**
   Constructor for paths
 */
 inline MerkleTree_Low_path *mt_init_path(uint32_t hash_size)
@@ -201,7 +201,7 @@ inline MerkleTree_Low_path *mt_init_path(uint32_t hash_size)
 
 /* SNIPPET_START: mt_free_path */
 
-/*
+/**
   Destructor for paths
 */
 inline void mt_free_path(MerkleTree_Low_path *path1)
@@ -213,7 +213,7 @@ inline void mt_free_path(MerkleTree_Low_path *path1)
 
 /* SNIPPET_START: mt_get_path_length */
 
-/*
+/**
   Length of a path
 
   @param[in] p Path
@@ -257,7 +257,7 @@ insert___uint8_t_(MerkleTree_Low_Datastructures_hash_vec vec, uint8_t *v)
 
 /* SNIPPET_START: mt_path_insert */
 
-/*
+/**
   Insert hash into path
 
   @param[in] p Path
@@ -277,7 +277,7 @@ inline void mt_path_insert(MerkleTree_Low_path *path1, uint8_t *hash1)
 
 /* SNIPPET_START: mt_get_path_step */
 
-/*
+/**
   Get step on a path
 
   @param[in] p Path
@@ -294,7 +294,7 @@ inline uint8_t *mt_get_path_step(const MerkleTree_Low_path *path1, uint32_t i)
 
 /* SNIPPET_START: mt_get_path_step_pre */
 
-/*
+/**
   Precondition predicate for mt_get_path_step
 */
 inline bool mt_get_path_step_pre(const MerkleTree_Low_path *path1, uint32_t i)
@@ -306,7 +306,7 @@ inline bool mt_get_path_step_pre(const MerkleTree_Low_path *path1, uint32_t i)
 
 /* SNIPPET_START: mt_create_custom */
 
-/*
+/**
   Construction with custom hash functions
 
   @param[in]  hash_size Hash size (in bytes)
@@ -328,7 +328,7 @@ inline MerkleTree_Low_merkle_tree
 
 /* SNIPPET_START: mt_free */
 
-/*
+/**
   Destruction
 
   @param[in]  mt  The Merkle tree
@@ -342,7 +342,7 @@ inline void mt_free(MerkleTree_Low_merkle_tree *mt)
 
 /* SNIPPET_START: mt_insert */
 
-/*
+/**
   Insertion
 
   @param[in]  mt  The Merkle tree
@@ -359,7 +359,7 @@ inline void mt_insert(MerkleTree_Low_merkle_tree *mt, uint8_t *v)
 
 /* SNIPPET_START: mt_insert_pre */
 
-/*
+/**
   Precondition predicate for mt_insert
 */
 inline bool mt_insert_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *v)
@@ -371,7 +371,7 @@ inline bool mt_insert_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *v)
 
 /* SNIPPET_START: mt_get_root */
 
-/*
+/**
   Getting the Merkle root
 
   @param[in]  mt   The Merkle tree
@@ -386,7 +386,7 @@ inline void mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *root)
 
 /* SNIPPET_START: mt_get_root_pre */
 
-/*
+/**
   Precondition predicate for mt_get_root
 */
 inline bool mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *root)
@@ -398,7 +398,7 @@ inline bool mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *root)
 
 /* SNIPPET_START: mt_get_path */
 
-/*
+/**
   Getting a Merkle path
 
   @param[in]  mt   The Merkle tree
@@ -429,7 +429,7 @@ mt_get_path(
 
 /* SNIPPET_START: mt_get_path_pre */
 
-/*
+/**
   Precondition predicate for mt_get_path
 */
 inline bool
@@ -447,7 +447,7 @@ mt_get_path_pre(
 
 /* SNIPPET_START: mt_flush */
 
-/*
+/**
   Flush the Merkle tree
 
   @param[in]  mt   The Merkle tree
@@ -461,7 +461,7 @@ inline void mt_flush(MerkleTree_Low_merkle_tree *mt)
 
 /* SNIPPET_START: mt_flush_pre */
 
-/*
+/**
   Precondition predicate for mt_flush
 */
 inline bool mt_flush_pre(const MerkleTree_Low_merkle_tree *mt)
@@ -473,7 +473,7 @@ inline bool mt_flush_pre(const MerkleTree_Low_merkle_tree *mt)
 
 /* SNIPPET_START: mt_flush_to */
 
-/*
+/**
   Flush the Merkle tree up to a given index
 
   @param[in]  mt   The Merkle tree
@@ -488,7 +488,7 @@ inline void mt_flush_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx)
 
 /* SNIPPET_START: mt_flush_to_pre */
 
-/*
+/**
   Precondition predicate for mt_flush_to
 */
 bool mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx)
@@ -500,7 +500,7 @@ bool mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx)
 
 /* SNIPPET_START: mt_retract_to */
 
-/*
+/**
   Retract the Merkle tree down to a given index
 
   @param[in]  mt   The Merkle tree
@@ -517,7 +517,7 @@ inline void mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx)
 
 /* SNIPPET_START: mt_retract_to_pre */
 
-/*
+/**
   Precondition predicate for mt_retract_to
 */
 inline bool mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx)
@@ -529,7 +529,7 @@ inline bool mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx
 
 /* SNIPPET_START: mt_verify */
 
-/*
+/**
   Client-side verification
 
   @param[in]  mt   The Merkle tree
@@ -558,7 +558,7 @@ mt_verify(
 
 /* SNIPPET_START: mt_verify_pre */
 
-/*
+/**
   Precondition predicate for mt_verify
 */
 inline bool
@@ -577,7 +577,7 @@ mt_verify_pre(
 
 /* SNIPPET_START: mt_serialize_size */
 
-/*
+/**
   Serialization size
 
   @param[in]  mt   The Merkle tree
@@ -593,7 +593,7 @@ inline uint64_t mt_serialize_size(const MerkleTree_Low_merkle_tree *mt)
 
 /* SNIPPET_START: mt_serialize */
 
-/*
+/**
   Merkle tree serialization
 
   @param[in]  mt   The Merkle tree
@@ -614,7 +614,7 @@ inline uint64_t mt_serialize(const MerkleTree_Low_merkle_tree *mt, uint8_t *buf,
 
 /* SNIPPET_START: mt_deserialize */
 
-/*
+/**
   Merkle tree deserialization
 
   @param[in]  expected_hash_size Expected hash size to match hash_fun
@@ -640,7 +640,7 @@ inline MerkleTree_Low_merkle_tree
 
 /* SNIPPET_START: mt_serialize_path */
 
-/*
+/**
   Path serialization
 
   @param[in]  path The path
@@ -658,7 +658,7 @@ inline uint64_t mt_serialize_path(const MerkleTree_Low_path *path1, uint8_t *buf
 
 /* SNIPPET_START: mt_deserialize_path */
 
-/*
+/**
   Path deserialization
 
   @param[in]  buf  The buffer to deserialize the path from
@@ -677,109 +677,27 @@ inline MerkleTree_Low_path *mt_deserialize_path(const uint8_t *buf, uint64_t len
 
 /* SNIPPET_START: mt_sha256_compress */
 
-/*
+/**
   Default hash function
 */
 void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
 {
   uint32_t hash_size = (uint32_t)32U;
-  Spec_Hash_Definitions_hash_alg hash_alg = Spec_Hash_Definitions_SHA2_256;
   uint8_t cb[64U] = { 0U };
   memcpy(cb, src1, hash_size * sizeof (uint8_t));
   memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (uint8_t));
-  EverCrypt_Hash_state_s s;
-  uint32_t buf0[4U] = { 0U };
-  uint32_t buf1[5U] = { 0U };
-  uint32_t buf2[8U] = { 0U };
-  uint32_t buf3[8U] = { 0U };
-  uint64_t buf4[8U] = { 0U };
-  uint64_t buf5[8U] = { 0U };
-  uint32_t buf6[16U] = { 0U };
-  uint64_t buf[16U] = { 0U };
-  switch (hash_alg)
-  {
-    case Spec_Hash_Definitions_MD5:
-      {
-        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_MD5_s, { .case_MD5_s = buf0 } });
-        break;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = buf1 } });
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        s =
-          (
-            (EverCrypt_Hash_state_s){
-              .tag = EverCrypt_Hash_SHA2_224_s,
-              { .case_SHA2_224_s = buf2 }
-            }
-          );
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        s =
-          (
-            (EverCrypt_Hash_state_s){
-              .tag = EverCrypt_Hash_SHA2_256_s,
-              { .case_SHA2_256_s = buf3 }
-            }
-          );
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        s =
-          (
-            (EverCrypt_Hash_state_s){
-              .tag = EverCrypt_Hash_SHA2_384_s,
-              { .case_SHA2_384_s = buf4 }
-            }
-          );
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        s =
-          (
-            (EverCrypt_Hash_state_s){
-              .tag = EverCrypt_Hash_SHA2_512_s,
-              { .case_SHA2_512_s = buf5 }
-            }
-          );
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        s =
-          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = buf6 } });
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = buf } });
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  EverCrypt_Hash_state_s st = s;
-  EverCrypt_Hash_init(&st);
-  EverCrypt_Hash_update2(&st, (uint64_t)0U, cb);
-  EverCrypt_Hash_finish(&st, dst);
+  EverCrypt_Hash_state_s *st = EverCrypt_Hash_create_in(Spec_Hash_Definitions_SHA2_256);
+  EverCrypt_Hash_init(st);
+  EverCrypt_Hash_update2(st, (uint64_t)0U, cb);
+  EverCrypt_Hash_finish(st, dst);
+  EverCrypt_Hash_free(st);
 }
 
 /* SNIPPET_END: mt_sha256_compress */
 
 /* SNIPPET_START: mt_create */
 
-/*
+/**
   Construction wired to sha256 from EverCrypt
 
   @param[in]  init   The initial hash

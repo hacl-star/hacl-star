@@ -209,6 +209,24 @@ let split_at_last_lazy_nb_rem
     end
 #pop-options
 
+inline_for_extraction noextract
+let split_at_last_st (block_length: UInt32.t) (data_length: UInt32.t):
+  Pure (UInt32.t & UInt32.t)
+    (requires block_length <> 0ul)
+    (ensures (fun r ->
+      let n_blocks, rem = r in
+      let n_blocks', rem' = split_at_last_lazy_nb_rem (UInt32.v block_length) (UInt32.v data_length) in
+      UInt32.v n_blocks == n_blocks' /\ UInt32.v rem == rem'))
+=
+  let open FStar.UInt32 in
+  let n_blocks = data_length /^ block_length in
+  let rem = data_length %^ block_length in
+  if n_blocks >^ 0ul && rem = 0ul then
+    let n_blocks' = n_blocks -^ 1ul in
+    n_blocks', data_length -^ (n_blocks' *^ block_length)
+  else
+    n_blocks, rem
+
 #push-options "--z3cliopt smt.arith.nl=false"
 let split_at_last_lazy
   (l: pos)

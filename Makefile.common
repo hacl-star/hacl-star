@@ -56,11 +56,15 @@ endif
 # 272: top-level bindings must be total
 # 274: shadowing
 # 247: checked file not written because some of its dependencies...
+# 319: effectful argument, consider let binding it
+# 328: definition is recursive but not used in its body
+# 331: name is being ignored
 # 332: abstract keyword
+# 337: special treatment of @ is deprecated + Multiple decreases clauses on definition
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
-  --warn_error '+241@247-272-274@332' \
+  --warn_error '+241@247-272-274@319@328@331@332@337' \
   --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
@@ -108,7 +112,7 @@ BLAKE2_BUNDLE_BASE= \
 BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
   -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
-  
+
 HASH_BUNDLE= \
   -bundle Hacl.Hash.MD5=Hacl.Hash.Core.MD5 \
   -bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 \
@@ -116,7 +120,7 @@ HASH_BUNDLE= \
   -bundle Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash_Base]
 SHA2MB_BUNDLE= -bundle Hacl.Impl.SHA2.Types=[rename=Hacl_SHA2_Types] \
   -bundle Hacl.Impl.SHA2.Generic=Hacl.Impl.SHA2.*[rename=Hacl_SHA2_Generic] -static-header Hacl.Impl.SHA2.Generic
-SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
+SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=Hacl.Hash.SHA3[rename=Hacl_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
@@ -138,7 +142,10 @@ INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.I
 INTTYPES_128_BUNDLE=-bundle Hacl.IntTypes.Intrinsics_128= -static-header Hacl.IntTypes.Intrinsics_128
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 FFDHE_BUNDLE=-bundle Hacl.Impl.FFDHE.Constants -static-header Hacl.Impl.FFDHE.Constants -bundle Hacl.FFDHE=Hacl.Impl.FFDHE[rename=Hacl_FFDHE]
-BIGNUM_BUNDLE=-bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
+BIGNUM_BUNDLE= \
+  -bundle Hacl.Bignum.Base,Hacl.Bignum.Addition,Hacl.Bignum.Convert,Hacl.Bignum.Lib,Hacl.Bignum.Multiplication[rename=Hacl_Bignum_Base] \
+  -static-header Hacl.Bignum.Base,Hacl.Bignum.Addition,Hacl.Bignum.Convert,Hacl.Bignum.Lib,Hacl.Bignum.Multiplication \
+  -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
 
 # 3. OCaml
 

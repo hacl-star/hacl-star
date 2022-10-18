@@ -229,39 +229,6 @@ EverCrypt_HKDF_extract(
 
 /* SNIPPET_END: EverCrypt_HKDF_extract */
 
-/* SNIPPET_START: EverCrypt_HKDF_hkdf_expand */
-
-KRML_DEPRECATED("expand")
-
-void
-EverCrypt_HKDF_hkdf_expand(
-  Spec_Hash_Definitions_hash_alg a,
-  uint8_t *okm,
-  uint8_t *prk,
-  uint32_t prklen,
-  uint8_t *info,
-  uint32_t infolen,
-  uint32_t len
-);
-
-/* SNIPPET_END: EverCrypt_HKDF_hkdf_expand */
-
-/* SNIPPET_START: EverCrypt_HKDF_hkdf_extract */
-
-KRML_DEPRECATED("extract")
-
-void
-EverCrypt_HKDF_hkdf_extract(
-  Spec_Hash_Definitions_hash_alg a,
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-);
-
-/* SNIPPET_END: EverCrypt_HKDF_hkdf_extract */
-
 #if defined(__cplusplus)
 }
 #endif

@@ -1,5 +1,6 @@
 module Vale.Lib.Lists
 
+open FStar.List.Tot
 open FStar.Seq
 open FStar.UInt
 open FStar.Mul

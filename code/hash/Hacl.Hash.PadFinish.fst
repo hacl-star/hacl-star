@@ -53,8 +53,10 @@ let store_len a len b =
 
 #set-options "--z3rlimit 20"
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3seed 1"
+
 inline_for_extraction noextract
-let len_mod_32 (a: hash_alg) (len: len_t a):
+let len_mod_32 (a: md_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = len_v a len % Helpers.block_length a })
 =
   assert (block_len a <> 0ul);
@@ -71,8 +73,6 @@ let len_mod_32 (a: hash_alg) (len: len_t a):
       Math.lemma_mod_lt (U64.v len) (U32.v (block_len a));
       Math.modulo_lemma (U64.v len % U32.v (block_len a)) (pow2 32);
       Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (block_len a)))
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3seed 1"
 
 // JP: this proof works instantly in interactive mode, not in batch mode unless
 // there's a high rlimit
@@ -159,7 +159,7 @@ inline_for_extraction
 let pad_3 (a: hash_alg{is_md a}) (len: len_t a) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
-      len_v a len <= max_input_length a /\
+      len_v a len `less_than_max_input_length` a /\
       B.live h dst /\ B.length dst = len_length a))
     (ensures (fun h0 _ h1 ->
       max_input_size_len a;
@@ -194,10 +194,7 @@ let pad_3 (a: hash_alg{is_md a}) (len: len_t a) (dst: B.buffer uint8):
 #push-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 200"
 
 noextract inline_for_extraction
-val pad_md: a:hash_alg{is_md a} -> pad_st a
-
-noextract inline_for_extraction
-let pad_md a len dst =
+let pad a len dst =
   (* i) Append a single 1 bit. *)
   let dst1 = B.sub dst 0ul 1ul in
   pad_1 a dst1;
@@ -221,49 +218,12 @@ let pad_md a len dst =
   (**)   S.equal s (S.append s1 (S.append s2 s3)) /\
   (**)   True)
 
-noextract inline_for_extraction
-val pad_blake: a:hash_alg{is_blake a} -> pad_st a
-
-inline_for_extraction
-let pad_len_blake (a: hash_alg{is_blake a}) (len: len_t a):
-  Tot (n:U32.t { U32.v n = pad_length a (len_v a len) })
-  = let open U32 in
-    (block_len a -^ len_mod_32 a len) %^ block_len a
-
-noextract inline_for_extraction
-let pad_blake a len dst =
-  let h0 = ST.get () in
-  let len_zero = pad_len_blake a len in
-  assert (Spec.Hash.PadFinish.pad a (len_v a len) == S.create (U32.v len_zero) (u8 0));
-
-  let inv h1 (i: nat) =
-    M.(modifies (loc_buffer dst) h0 h1) /\
-    i <= U32.v len_zero /\
-    S.equal (S.slice (B.as_seq h1 dst) 0 i) (S.slice (S.create (U32.v len_zero) (u8 0)) 0 i)
-  in
-  let f (i:U32.t { U32.(0 <= v i /\ v i < U32.v len_zero)}):
-    ST.Stack unit
-      (requires (fun h -> inv h (U32.v i)))
-      (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 U32.(v i + 1)))
-    =
-    dst.(i) <- u8 0;
-    (**) let h' = ST.get () in
-    (**) create_next (B.as_seq h' dst) (u8 0) (U32.v i)
-  in
-  C.Loops.for 0ul len_zero inv f
-
-let pad a len dst =
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> pad_md a len dst
-  | Blake2S | Blake2B -> pad_blake a len dst
-
 
 inline_for_extraction noextract
-let pad_len (a: hash_alg) (len: len_t a) =
+let pad_len a len =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       U32.(1ul +^ pad0_len a len +^ len_len a)
-  | Blake2S | Blake2B -> pad_len_blake a len
 
 #set-options "--max_ifuel 1"
 inline_for_extraction
@@ -275,9 +235,20 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
   | SHA2_256 -> 8ul
   | SHA2_384 -> 6ul
   | SHA2_512 -> 8ul
+  | SHA3_256 -> 4ul
   | Blake2S | Blake2B -> 8ul
 
 #set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
+
+noextract inline_for_extraction
+let finish_sha3: finish_st (| SHA3_256, () |) = fun s _ dst ->
+  assert_norm (1088/8 = 136);
+  let h0 = ST.get () in
+  Hacl.Impl.SHA3.squeeze s 136ul 32ul dst;
+  let h1 = ST.get () in
+  let _ = Spec.Hash.Incremental.sha3_state_is_hash_state in
+  assert (B.as_seq h1 dst `S.equal` Spec.SHA3.squeeze (B.as_seq h0 s) 136 32)
+
 
 noextract inline_for_extraction
 let finish i s ev dst =
@@ -289,4 +260,6 @@ let finish i s ev dst =
     Hacl.Impl.Blake2.Generic.blake2_finish #Spec.Blake2.Blake2S #m 32ul dst s
   | Blake2B ->
     Hacl.Impl.Blake2.Generic.blake2_finish #Spec.Blake2.Blake2B #m 64ul dst s
+  | SHA3_256 ->
+    finish_sha3 s ev dst
   | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))

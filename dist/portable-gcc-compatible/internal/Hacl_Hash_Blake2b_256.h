@@ -40,6 +40,24 @@ extern "C" {
 #include "../Hacl_Hash_Blake2b_256.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
+/* SNIPPET_START: Hacl_Hash_Blake2b_256_init_blake2b_256 */
+
+FStar_UInt128_uint128
+Hacl_Hash_Blake2b_256_init_blake2b_256(Lib_IntVector_Intrinsics_vec256 *s);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_256_init_blake2b_256 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_256_update_blake2b_256 */
+
+FStar_UInt128_uint128
+Hacl_Hash_Blake2b_256_update_blake2b_256(
+  Lib_IntVector_Intrinsics_vec256 *s,
+  FStar_UInt128_uint128 totlen,
+  uint8_t *block
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_256_update_blake2b_256 */
+
 /* SNIPPET_START: Hacl_Hash_Blake2b_256_finish_blake2b_256 */
 
 void
@@ -81,6 +99,12 @@ Hacl_Hash_Blake2b_256_update_last_blake2b_256(
 void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_256_hash_blake2b_256 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_256_malloc_blake2b_256 */
+
+Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_256_malloc_blake2b_256();
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_256_malloc_blake2b_256 */
 
 #if defined(__cplusplus)
 }
