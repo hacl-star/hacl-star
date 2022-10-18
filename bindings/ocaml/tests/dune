@@ -10,7 +10,7 @@
         nacl_test
         drbg_test
         p256_test)
- (libraries hacl-star)
+ (libraries hacl-star alcotest)
  (preprocessor_deps config.h)
  (preprocess (action (run %{bin:cppo} %{input-file})))
  (flags (:standard -open Hacl_star -warn-error -3)))
