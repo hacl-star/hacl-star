@@ -31,19 +31,22 @@ FILES=" \
   curve25519-x86_64-linux \
   curve25519-x86_64-mingw \
   curve25519-x86_64-msvc \
-  libintvector"
+  libintvector \
+  Makefile \
+  Makefile.basic"
 
 mkdir -p mozilla/internal
 cp Makefile.mozilla.config mozilla/Makefile.config
 cp config.mozilla.h mozilla/config.h
-cp gcc-compatible/Makefile mozilla/
-cp gcc-compatible/Makefile.basic mozilla/
 cp gcc-compatible/Hacl_Streaming_SHA2.h mozilla/
 cp gcc-compatible/Hacl_Hash_SHA2.h mozilla/
 for f in $FILES; do
-  [ -f gcc-compatible/$f.h ] && cp gcc-compatible/$f.h mozilla/ || true
-  [ -f gcc-compatible/$f.c ] && cp gcc-compatible/$f.c mozilla/ || true
+  for ext in h c asm S; do
+    [ -f gcc-compatible/$f.$ext ] && cp gcc-compatible/$f.$ext mozilla/ || true
+  done
   [ -f gcc-compatible/internal/$f.h ] && cp gcc-compatible/internal/$f.h mozilla/internal || true
+  # Makefile, etc.
+  [ -f gcc-compatible/$f ] && cp gcc-compatible/$f mozilla || true
 done
 
 cat <<EOF > mozilla/Makefile.include
