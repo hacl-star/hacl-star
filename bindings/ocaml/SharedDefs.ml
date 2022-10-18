@@ -10,6 +10,7 @@ module type Buffer = sig
   val empty: bytes
   val size_uint32 : bytes -> uint32
   val ctypes_buf : bytes -> buf
+  val ctypes_buf_with_offset : bytes -> int -> buf
   val size : bytes -> int
   val equal : bytes -> bytes -> bool
   val make : int -> bytes
@@ -20,11 +21,15 @@ end
 (** Abstract representation of buffers *)
 
 module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml = struct
+  open Ctypes
   type t = Bytes.t
   type buf = Bytes.t Ctypes.ocaml
   let empty = Bytes.empty
   let size_uint32 b = Unsigned.UInt32.of_int (Bytes.length b)
-  let ctypes_buf = Ctypes.ocaml_bytes_start
+  let ctypes_buf = ocaml_bytes_start
+  let ctypes_buf_with_offset bytes offset =
+    let buf = ocaml_bytes_start bytes in
+    buf +@ offset
   let size = Bytes.length
   let equal = Bytes.equal
   let make l = Bytes.make l '\x00'

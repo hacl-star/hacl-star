@@ -28,7 +28,7 @@
 
 /* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in */
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2b_256_blake2b_256_state
@@ -62,7 +62,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state
 
 /* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init */
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void
@@ -88,7 +88,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
 
 /* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update */
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -402,7 +402,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
 
 /* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish */
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -571,7 +571,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
 
 /* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free */
 
-/*
+/**
   Free state function when there is no key
 */
 void

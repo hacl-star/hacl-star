@@ -41,7 +41,7 @@ of `len` unsigned 32-bit integers, i.e. uint32_t[len].
 /************************/
 
 
-/*
+/**
 Write `a + b mod 2 ^ (32 * len)` in `res`.
 
   This functions returns the carry.
@@ -53,7 +53,7 @@ uint32_t Hacl_Bignum32_add(uint32_t len, uint32_t *a, uint32_t *b, uint32_t *res
   return Hacl_Bignum_Addition_bn_add_eq_len_u32(len, a, b, res);
 }
 
-/*
+/**
 Write `a - b mod 2 ^ (32 * len)` in `res`.
 
   This functions returns the carry.
@@ -65,7 +65,7 @@ uint32_t Hacl_Bignum32_sub(uint32_t len, uint32_t *a, uint32_t *b, uint32_t *res
   return Hacl_Bignum_Addition_bn_sub_eq_len_u32(len, a, b, res);
 }
 
-/*
+/**
 Write `(a + b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -80,7 +80,7 @@ void Hacl_Bignum32_add_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *b, 
   Hacl_Bignum_bn_add_mod_n_u32(len, n, a, b, res);
 }
 
-/*
+/**
 Write `(a - b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -95,7 +95,7 @@ void Hacl_Bignum32_sub_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *b, 
   Hacl_Bignum_bn_sub_mod_n_u32(len, n, a, b, res);
 }
 
-/*
+/**
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -109,7 +109,7 @@ void Hacl_Bignum32_mul(uint32_t len, uint32_t *a, uint32_t *b, uint32_t *res)
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a, b, tmp, res);
 }
 
-/*
+/**
 Write `a * a` in `res`.
 
   The argument a is meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -196,7 +196,7 @@ bn_slow_precomp(
   Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c, res);
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
@@ -242,7 +242,7 @@ bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
   return is_valid_m == (uint32_t)0xFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -285,7 +285,7 @@ Hacl_Bignum32_mod_exp_vartime(
   return is_valid_m == (uint32_t)0xFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -328,7 +328,7 @@ Hacl_Bignum32_mod_exp_consttime(
   return is_valid_m == (uint32_t)0xFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -450,7 +450,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
 /**********************************************/
 
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -484,7 +484,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   return buf;
 }
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_Bignum32_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
@@ -499,7 +499,7 @@ void Hacl_Bignum32_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k)
   KRML_HOST_FREE(k);
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
@@ -519,7 +519,7 @@ Hacl_Bignum32_mod_precomp(
   bn_slow_precomp(len1, k1.n, k1.mu, k1.r2, a, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -560,7 +560,7 @@ Hacl_Bignum32_mod_exp_vartime_precomp(
     res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -601,7 +601,7 @@ Hacl_Bignum32_mod_exp_consttime_precomp(
     res);
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -682,7 +682,7 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
 /********************/
 
 
-/*
+/**
 Load a bid-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -729,7 +729,7 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   return res2;
 }
 
-/*
+/**
 Load a little-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -778,7 +778,7 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   return res2;
 }
 
-/*
+/**
 Serialize a bignum into big-endian memory.
 
   The argument b points to a bignum of ⌈len / 4⌉ size.
@@ -798,7 +798,7 @@ void Hacl_Bignum32_bn_to_bytes_be(uint32_t len, uint32_t *b, uint8_t *res)
   memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
 }
 
-/*
+/**
 Serialize a bignum into little-endian memory.
 
   The argument b points to a bignum of ⌈len / 4⌉ size.
@@ -824,7 +824,7 @@ void Hacl_Bignum32_bn_to_bytes_le(uint32_t len, uint32_t *b, uint8_t *res)
 /***************/
 
 
-/*
+/**
 Returns 2^32 - 1 if a < b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -841,7 +841,7 @@ uint32_t Hacl_Bignum32_lt_mask(uint32_t len, uint32_t *a, uint32_t *b)
   return acc;
 }
 
-/*
+/**
 Returns 2^32 - 1 if a = b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].

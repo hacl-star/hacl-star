@@ -25,7 +25,6 @@
 #include "Hacl_Curve25519_64_Slow.h"
 
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: add1_ */
 

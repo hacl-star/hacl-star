@@ -49,7 +49,7 @@ have the ability to switch easily to a 32-bit optimized version in the future.
 /************************/
 
 
-/*
+/**
 Write `a + b mod 2^256` in `res`.
 
   This functions returns the carry.
@@ -80,7 +80,7 @@ uint64_t Hacl_Bignum256_add(uint64_t *a, uint64_t *b, uint64_t *res)
   return c;
 }
 
-/*
+/**
 Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
@@ -111,7 +111,7 @@ uint64_t Hacl_Bignum256_sub(uint64_t *a, uint64_t *b, uint64_t *res)
   return c;
 }
 
-/*
+/**
 Write `(a + b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -174,7 +174,7 @@ void Hacl_Bignum256_add_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res
     os[i] = x;);
 }
 
-/*
+/**
 Write `(a - b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -237,7 +237,7 @@ void Hacl_Bignum256_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res
     os[i] = x;);
 }
 
-/*
+/**
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -271,7 +271,7 @@ void Hacl_Bignum256_mul(uint64_t *a, uint64_t *b, uint64_t *res)
     res[(uint32_t)4U + i0] = r;);
 }
 
-/*
+/**
 Write `a * a` in `res`.
 
   The argument a is meant to be a 256-bit bignum, i.e. uint64_t[4].
@@ -580,7 +580,7 @@ bn_slow_precomp(uint64_t *n, uint64_t mu, uint64_t *r2, uint64_t *a, uint64_t *r
   reduction(n, mu, c, res);
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
@@ -1045,7 +1045,7 @@ exp_consttime(
   exp_consttime_precomp(n, mu, r2, a, bBits, b, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -1088,7 +1088,7 @@ Hacl_Bignum256_mod_exp_vartime(
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -1131,7 +1131,7 @@ Hacl_Bignum256_mod_exp_consttime(
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -1217,7 +1217,7 @@ bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *re
 /**********************************************/
 
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be a 256-bit bignum, i.e. uint64_t[4].
@@ -1250,7 +1250,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_
   return buf;
 }
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_Bignum256_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
@@ -1265,7 +1265,7 @@ void Hacl_Bignum256_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
   KRML_HOST_FREE(k);
 }
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
@@ -1283,7 +1283,7 @@ Hacl_Bignum256_mod_precomp(
   bn_slow_precomp(k1.n, k1.mu, k1.r2, a, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -1315,7 +1315,7 @@ Hacl_Bignum256_mod_exp_vartime_precomp(
   exp_vartime_precomp(k1.n, k1.mu, k1.r2, a, bBits, b, res);
 }
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -1347,7 +1347,7 @@ Hacl_Bignum256_mod_exp_consttime_precomp(
   exp_consttime_precomp(k1.n, k1.mu, k1.r2, a, bBits, b, res);
 }
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -1390,7 +1390,7 @@ Hacl_Bignum256_mod_inv_prime_vartime_precomp(
 /********************/
 
 
-/*
+/**
 Load a bid-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
@@ -1437,7 +1437,7 @@ uint64_t *Hacl_Bignum256_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   return res2;
 }
 
-/*
+/**
 Load a little-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
@@ -1486,7 +1486,7 @@ uint64_t *Hacl_Bignum256_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   return res2;
 }
 
-/*
+/**
 Serialize a bignum into big-endian memory.
 
   The argument b points to a 256-bit bignum.
@@ -1502,7 +1502,7 @@ void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res)
     store64_be(res + i * (uint32_t)8U, b[(uint32_t)4U - i - (uint32_t)1U]););
 }
 
-/*
+/**
 Serialize a bignum into little-endian memory.
 
   The argument b points to a 256-bit bignum.
@@ -1524,7 +1524,7 @@ void Hacl_Bignum256_bn_to_bytes_le(uint64_t *b, uint8_t *res)
 /***************/
 
 
-/*
+/**
 Returns 2^64 - 1 if a < b, otherwise returns 0.
 
  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -1542,7 +1542,7 @@ uint64_t Hacl_Bignum256_lt_mask(uint64_t *a, uint64_t *b)
   return acc;
 }
 
-/*
+/**
 Returns 2^64 - 1 if a = b, otherwise returns 0.
 
  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
