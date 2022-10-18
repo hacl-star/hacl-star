@@ -26,7 +26,7 @@
 
 
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2b_256_blake2b_256_state
@@ -56,7 +56,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state
   return p;
 }
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void
@@ -78,7 +78,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
     );
 }
 
-/*
+/**
   Update function when there is no key
 */
 void
@@ -388,7 +388,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
     );
 }
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -553,7 +553,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
   Hacl_Blake2b_256_blake2b_finish((uint32_t)64U, dst, tmp_block_state.snd);
 }
 
-/*
+/**
   Free state function when there is no key
 */
 void

@@ -37,6 +37,7 @@ extern "C" {
 
 #include "Hacl_Spec.h"
 #include "Hacl_Hash_SHA2.h"
+#include "Hacl_Bignum_Base.h"
 #include "evercrypt_targetconfig.h"
 bool
 Hacl_RSAPSS_rsapss_sign(
