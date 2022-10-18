@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Krmllib_H
-#define __Hacl_Krmllib_H
+#ifndef __internal_Hacl_Bignum_H
+#define __internal_Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,49 @@ extern "C" {
 #include <stdbool.h>
 
 
+#include "Hacl_Krmllib.h"
+#include "lib_intrinsics.h"
+void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res);
 
+void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);
 
-static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
+uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
 
-static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
+void
+Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
+  uint32_t len,
+  uint32_t nBits,
+  uint64_t *n,
+  uint64_t *res
+);
 
-static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
+void
+Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t mu,
+  uint64_t *r2,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
-
-static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+void
+Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t mu,
+  uint64_t *r2,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Krmllib_H_DEFINED
+#define __internal_Hacl_Bignum_H_DEFINED
 #endif

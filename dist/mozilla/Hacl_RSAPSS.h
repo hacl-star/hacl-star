@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Krmllib_H
-#define __Hacl_Krmllib_H
+#ifndef __Hacl_RSAPSS_H
+#define __Hacl_RSAPSS_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,81 @@ extern "C" {
 #include <stdbool.h>
 
 
+#include "Hacl_Spec.h"
 
+bool
+Hacl_RSAPSS_rsapss_sign(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint64_t *skey,
+  uint32_t saltLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint8_t *sgnt
+);
 
-static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
+bool
+Hacl_RSAPSS_rsapss_verify(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint64_t *pkey,
+  uint32_t saltLen,
+  uint32_t sgntLen,
+  uint8_t *sgnt,
+  uint32_t msgLen,
+  uint8_t *msg
+);
 
-static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb);
 
-static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_skey(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+bool
+Hacl_RSAPSS_rsapss_skey_sign(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db,
+  uint32_t saltLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint8_t *sgnt
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
-
-static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+bool
+Hacl_RSAPSS_rsapss_pkey_verify(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint32_t saltLen,
+  uint32_t sgntLen,
+  uint8_t *sgnt,
+  uint32_t msgLen,
+  uint8_t *msg
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Krmllib_H_DEFINED
+#define __Hacl_RSAPSS_H_DEFINED
 #endif

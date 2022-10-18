@@ -14,6 +14,9 @@ EXPORTS
   Hacl_SHA3_sha3_256
   Hacl_SHA3_sha3_384
   Hacl_SHA3_sha3_512
+  Hacl_Hash_SHA2_hash_256
+  Hacl_Hash_SHA2_hash_384
+  Hacl_Hash_SHA2_hash_512
   Hacl_Hash_Core_SHA1_legacy_init
   Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
@@ -21,6 +24,12 @@ EXPORTS
   Hacl_Hash_SHA1_legacy_hash
   Hacl_Chacha20_chacha20_encrypt
   Hacl_Chacha20_chacha20_decrypt
+  Hacl_Bignum_Convert_bn_from_bytes_be_uint64
+  Hacl_Bignum_Convert_bn_to_bytes_be_uint64
+  Hacl_Bignum_ModInvLimb_mod_inv_uint64
+  Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64
   Hacl_Curve25519_64_scalarmult
   Hacl_Curve25519_64_secret_to_public
   Hacl_Curve25519_64_ecdh
@@ -66,6 +75,12 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   Hacl_IntTypes_Intrinsics_128_add_carry_u64
   Hacl_IntTypes_Intrinsics_128_sub_borrow_u64
+  Hacl_RSAPSS_rsapss_sign
+  Hacl_RSAPSS_rsapss_verify
+  Hacl_RSAPSS_new_rsapss_load_pkey
+  Hacl_RSAPSS_new_rsapss_load_skey
+  Hacl_RSAPSS_rsapss_skey_sign
+  Hacl_RSAPSS_rsapss_pkey_verify
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt
