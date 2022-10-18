@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Spec.h"
-#include "Hacl_Bignum_Base.h"
 
 bool
 Hacl_RSAPSS_rsapss_sign(
