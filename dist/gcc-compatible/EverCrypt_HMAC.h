@@ -41,7 +41,7 @@ extern "C" {
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "EverCrypt_Hash.h"
-#include "evercrypt_targetconfig.h"
+
 void
 EverCrypt_HMAC_compute_sha1(
   uint8_t *dst,

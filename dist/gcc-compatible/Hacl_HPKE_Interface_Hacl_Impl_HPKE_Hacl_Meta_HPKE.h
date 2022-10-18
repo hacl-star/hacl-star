@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 typedef struct Hacl_Impl_HPKE_context_s_s
 {
   uint8_t *ctx_key;

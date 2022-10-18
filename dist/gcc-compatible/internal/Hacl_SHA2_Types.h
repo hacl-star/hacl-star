@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "../Hacl_SHA2_Types.h"
-#include "evercrypt_targetconfig.h"
+
 typedef struct Hacl_Impl_SHA2_Types_uint8_2p_s
 {
   uint8_t *fst;

@@ -37,7 +37,6 @@ extern "C" {
 
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_K256_ECDSA.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s);
 

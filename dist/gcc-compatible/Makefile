@@ -170,12 +170,12 @@ dllocamlevercrypt.$(SO): ocamlevercrypt.cmxa ocamlevercrypt.cma
 
 install-hacl-star-raw: dllocamlevercrypt.$(SO)
 	ocamlfind remove hacl-star-raw || true
-	ocamlfind install hacl-star-raw META
-	ocamlfind install -add hacl-star-raw $(CTYPES_ML)
-	ocamlfind install -add hacl-star-raw $(CTYPES_CMX)
-	ocamlfind install -add hacl-star-raw $(CTYPES_CMO)
-	ocamlfind install -add hacl-star-raw $(CTYPES_CMI)
-	ocamlfind install -add hacl-star-raw \
+	ocamlfind install $(OCAMLFIND_OPTS) hacl-star-raw META
+	ocamlfind install $(OCAMLFIND_OPTS) -add hacl-star-raw $(CTYPES_ML)
+	ocamlfind install $(OCAMLFIND_OPTS) -add hacl-star-raw $(CTYPES_CMX)
+	ocamlfind install $(OCAMLFIND_OPTS) -add hacl-star-raw $(CTYPES_CMO)
+	ocamlfind install $(OCAMLFIND_OPTS) -add hacl-star-raw $(CTYPES_CMI)
+	ocamlfind install $(OCAMLFIND_OPTS) -add hacl-star-raw \
          libevercrypt.a libevercrypt.$(SO) ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
          libocamlevercrypt.a dllocamlevercrypt.$(SO) config.h
 

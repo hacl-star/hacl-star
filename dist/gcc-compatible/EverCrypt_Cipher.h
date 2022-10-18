@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 void
 EverCrypt_Cipher_chacha20(
   uint32_t len,

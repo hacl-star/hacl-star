@@ -38,7 +38,6 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 void
 Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);

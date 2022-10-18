@@ -38,7 +38,7 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "evercrypt_targetconfig.h"
+
 #define Hacl_Impl_Blake2_Core_M32 0
 #define Hacl_Impl_Blake2_Core_M128 1
 #define Hacl_Impl_Blake2_Core_M256 2

@@ -101,7 +101,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
 ifeq ($(shell uname -m),x86_64)
-all-unstaged: compile-mozilla
+all-unstaged: package-compile-mozilla
 endif
 
 # Automatic staging.
@@ -986,8 +986,9 @@ copy-krmllib:
 	mkdir -p dist/karamel
 	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal include) | (cd dist/karamel && tar xf -)
 
-compile-mozilla: dist/mozilla/libevercrypt.a
+package-compile-mozilla: dist/mozilla/libevercrypt.a
 
+.PHONY: dist/mozilla/libevercrypt.a
 dist/mozilla/libevercrypt.a:
 	cd dist && ./package-mozilla.sh
 	$(MAKE) -C dist/mozilla

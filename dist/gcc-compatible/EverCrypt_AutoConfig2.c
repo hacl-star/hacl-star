@@ -25,7 +25,7 @@
 #include "EverCrypt_AutoConfig2.h"
 
 #include "internal/Vale.h"
-
+#include "evercrypt_targetconfig.h"
 static bool cpu_has_shaext[1U] = { false };
 
 static bool cpu_has_aesni[1U] = { false };

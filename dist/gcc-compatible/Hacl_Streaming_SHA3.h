@@ -38,7 +38,7 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_SHA3.h"
-#include "evercrypt_targetconfig.h"
+
 typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA3_state_sha3_256;
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256();

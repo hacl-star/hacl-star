@@ -37,7 +37,6 @@ extern "C" {
 
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Bignum.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 void
 Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(

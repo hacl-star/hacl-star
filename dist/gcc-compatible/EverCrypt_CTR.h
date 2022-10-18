@@ -39,7 +39,7 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
-#include "evercrypt_targetconfig.h"
+
 typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;
 
 bool

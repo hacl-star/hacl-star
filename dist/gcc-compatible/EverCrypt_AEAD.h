@@ -39,7 +39,7 @@ extern "C" {
 #include "EverCrypt_Error.h"
 #include "EverCrypt_Chacha20Poly1305.h"
 #include "EverCrypt_AutoConfig2.h"
-#include "evercrypt_targetconfig.h"
+
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
@@ -62,7 +62,7 @@ EverCrypt_AEAD_encrypt(
   uint8_t *tag
 );
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -83,7 +83,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   uint8_t *tag
 );
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -170,7 +170,7 @@ EverCrypt_AEAD_decrypt(
   uint8_t *dst
 );
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -191,7 +191,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   uint8_t *dst
 );
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
