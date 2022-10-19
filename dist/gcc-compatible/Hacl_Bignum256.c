@@ -22,7 +22,7 @@
  */
 
 
-#include "Hacl_Bignum256.h"
+#include "internal/Hacl_Bignum256.h"
 
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
@@ -337,7 +337,7 @@ static inline void precompr2(uint32_t nBits, uint64_t *n, uint64_t *res)
   }
 }
 
-static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
+void Hacl_Bignum256_reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   KRML_MAYBE_FOR4(i0,
@@ -403,7 +403,7 @@ static inline void from(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *
 {
   uint64_t tmp[8U] = { 0U };
   memcpy(tmp, aM, (uint32_t)4U * sizeof (uint64_t));
-  reduction(n, nInv_u64, tmp, a);
+  Hacl_Bignum256_reduction(n, nInv_u64, tmp, a);
 }
 
 static inline void areduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
@@ -577,7 +577,7 @@ bn_slow_precomp(uint64_t *n, uint64_t mu, uint64_t *r2, uint64_t *a, uint64_t *r
     os[i] = x;);
   uint64_t c[8U] = { 0U };
   Hacl_Bignum256_mul(a_mod, r2, c);
-  reduction(n, mu, c, res);
+  Hacl_Bignum256_reduction(n, mu, c, res);
 }
 
 /**
@@ -702,7 +702,7 @@ exp_vartime_precomp(
     uint64_t aM[4U] = { 0U };
     uint64_t c[8U] = { 0U };
     Hacl_Bignum256_mul(a, r2, c);
-    reduction(n, mu, c, aM);
+    Hacl_Bignum256_reduction(n, mu, c, aM);
     uint64_t resM[4U] = { 0U };
     uint64_t ctx[8U] = { 0U };
     memcpy(ctx, n, (uint32_t)4U * sizeof (uint64_t));
@@ -726,13 +726,13 @@ exp_vartime_precomp(
     }
     uint64_t tmp[8U] = { 0U };
     memcpy(tmp, resM, (uint32_t)4U * sizeof (uint64_t));
-    reduction(n, mu, tmp, res);
+    Hacl_Bignum256_reduction(n, mu, tmp, res);
     return;
   }
   uint64_t aM[4U] = { 0U };
   uint64_t c[8U] = { 0U };
   Hacl_Bignum256_mul(a, r2, c);
-  reduction(n, mu, c, aM);
+  Hacl_Bignum256_reduction(n, mu, c, aM);
   uint64_t resM[4U] = { 0U };
   uint32_t bLen;
   if (bBits == (uint32_t)0U)
@@ -828,7 +828,7 @@ exp_vartime_precomp(
   }
   uint64_t tmp0[8U] = { 0U };
   memcpy(tmp0, resM, (uint32_t)4U * sizeof (uint64_t));
-  reduction(n, mu, tmp0, res);
+  Hacl_Bignum256_reduction(n, mu, tmp0, res);
 }
 
 static inline void
@@ -847,7 +847,7 @@ exp_consttime_precomp(
     uint64_t aM[4U] = { 0U };
     uint64_t c[8U] = { 0U };
     Hacl_Bignum256_mul(a, r2, c);
-    reduction(n, mu, c, aM);
+    Hacl_Bignum256_reduction(n, mu, c, aM);
     uint64_t resM[4U] = { 0U };
     uint64_t ctx[8U] = { 0U };
     memcpy(ctx, n, (uint32_t)4U * sizeof (uint64_t));
@@ -886,13 +886,13 @@ exp_consttime_precomp(
       aM[i] = aM[i] ^ dummy;);
     uint64_t tmp[8U] = { 0U };
     memcpy(tmp, resM, (uint32_t)4U * sizeof (uint64_t));
-    reduction(n, mu, tmp, res);
+    Hacl_Bignum256_reduction(n, mu, tmp, res);
     return;
   }
   uint64_t aM[4U] = { 0U };
   uint64_t c0[8U] = { 0U };
   Hacl_Bignum256_mul(a, r2, c0);
-  reduction(n, mu, c0, aM);
+  Hacl_Bignum256_reduction(n, mu, c0, aM);
   uint64_t resM[4U] = { 0U };
   uint32_t bLen;
   if (bBits == (uint32_t)0U)
@@ -1010,7 +1010,7 @@ exp_consttime_precomp(
   }
   uint64_t tmp0[8U] = { 0U };
   memcpy(tmp0, resM, (uint32_t)4U * sizeof (uint64_t));
-  reduction(n, mu, tmp0, res);
+  Hacl_Bignum256_reduction(n, mu, tmp0, res);
 }
 
 static inline void

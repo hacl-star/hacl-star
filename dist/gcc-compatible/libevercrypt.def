@@ -285,6 +285,30 @@ EXPORTS
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
+  Hacl_Bignum256_add
+  Hacl_Bignum256_sub
+  Hacl_Bignum256_add_mod
+  Hacl_Bignum256_sub_mod
+  Hacl_Bignum256_mul
+  Hacl_Bignum256_sqr
+  Hacl_Bignum256_reduction
+  Hacl_Bignum256_mod
+  Hacl_Bignum256_mod_exp_vartime
+  Hacl_Bignum256_mod_exp_consttime
+  Hacl_Bignum256_mod_inv_prime_vartime
+  Hacl_Bignum256_mont_ctx_init
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t
+  Hacl_Bignum256_mont_ctx_free
+  Hacl_Bignum256_mod_precomp
+  Hacl_Bignum256_mod_exp_vartime_precomp
+  Hacl_Bignum256_mod_exp_consttime_precomp
+  Hacl_Bignum256_mod_inv_prime_vartime_precomp
+  Hacl_Bignum256_new_bn_from_bytes_be
+  Hacl_Bignum256_new_bn_from_bytes_le
+  Hacl_Bignum256_bn_to_bytes_be
+  Hacl_Bignum256_bn_to_bytes_le
+  Hacl_Bignum256_lt_mask
+  Hacl_Bignum256_eq_mask
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -574,29 +598,6 @@ EXPORTS
   Hacl_GenericField32_exp_consttime
   Hacl_GenericField32_exp_vartime
   Hacl_GenericField32_inverse
-  Hacl_Bignum256_add
-  Hacl_Bignum256_sub
-  Hacl_Bignum256_add_mod
-  Hacl_Bignum256_sub_mod
-  Hacl_Bignum256_mul
-  Hacl_Bignum256_sqr
-  Hacl_Bignum256_mod
-  Hacl_Bignum256_mod_exp_vartime
-  Hacl_Bignum256_mod_exp_consttime
-  Hacl_Bignum256_mod_inv_prime_vartime
-  Hacl_Bignum256_mont_ctx_init
-  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t
-  Hacl_Bignum256_mont_ctx_free
-  Hacl_Bignum256_mod_precomp
-  Hacl_Bignum256_mod_exp_vartime_precomp
-  Hacl_Bignum256_mod_exp_consttime_precomp
-  Hacl_Bignum256_mod_inv_prime_vartime_precomp
-  Hacl_Bignum256_new_bn_from_bytes_be
-  Hacl_Bignum256_new_bn_from_bytes_le
-  Hacl_Bignum256_bn_to_bytes_be
-  Hacl_Bignum256_bn_to_bytes_le
-  Hacl_Bignum256_lt_mask
-  Hacl_Bignum256_eq_mask
   Hacl_SHA2_Vec256_sha224_8
   Hacl_SHA2_Vec256_sha256_8
   Hacl_SHA2_Vec256_sha384_4
@@ -641,13 +642,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod
