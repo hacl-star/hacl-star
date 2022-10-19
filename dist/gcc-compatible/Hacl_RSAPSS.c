@@ -610,7 +610,7 @@ uint64_t
   uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t pkeyLen = nLen + nLen + eLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), pkeyLen);
-  uint64_t *pkey = KRML_HOST_CALLOC(pkeyLen, sizeof (uint64_t));
+  uint64_t *pkey = (uint64_t *)KRML_HOST_CALLOC(pkeyLen, sizeof (uint64_t));
   if (pkey == NULL)
   {
     return pkey;
@@ -689,7 +689,7 @@ uint64_t
   uint32_t dLen = (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t skeyLen = nLen + nLen + eLen + dLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), skeyLen);
-  uint64_t *skey = KRML_HOST_CALLOC(skeyLen, sizeof (uint64_t));
+  uint64_t *skey = (uint64_t *)KRML_HOST_CALLOC(skeyLen, sizeof (uint64_t));
   if (skey == NULL)
   {
     return skey;
