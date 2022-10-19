@@ -3,6 +3,8 @@
 set -o pipefail
 set -e
 
+# If FOO appears in FILES, then FOO.h, FOO.c, internal/FOO.h, FOO.asm, FOO.S and
+# FOO all get copied unconditionally to dist/mozilla (as long as they exist)
 FILES=" \
   Hacl_Bignum25519_51 \
   Hacl_Chacha20 \
@@ -16,7 +18,6 @@ FILES=" \
   Hacl_Hash_SHA1 \
   Hacl_IntTypes_Intrinsics \
   Hacl_IntTypes_Intrinsics_128 \
-  Hacl_Krmllib \
   Hacl_Lib \
   Hacl_Poly1305_128 \
   Hacl_Poly1305_256 \
@@ -38,8 +39,13 @@ FILES=" \
 mkdir -p mozilla/internal
 cp Makefile.mozilla.config mozilla/Makefile.config
 cp config.mozilla.h mozilla/config.h
+
+# For these, we want just the header
+cp gcc-compatible/Hacl_Krmllib.h mozilla/
+cp gcc-compatible/internal/Hacl_Krmllib.h mozilla/internal/
 cp gcc-compatible/Hacl_Streaming_SHA2.h mozilla/
 cp gcc-compatible/Hacl_Hash_SHA2.h mozilla/
+
 for f in $FILES; do
   for ext in h c asm S; do
     [ -f gcc-compatible/$f.$ext ] && cp gcc-compatible/$f.$ext mozilla/ || true
