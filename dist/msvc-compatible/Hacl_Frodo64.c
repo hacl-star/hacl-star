@@ -161,7 +161,7 @@ uint32_t Hacl_Frodo64_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   Lib_Memzero0_memzero(epp_matrix, (uint32_t)64U * sizeof (epp_matrix[0U]));
   uint32_t ss_init_len = (uint32_t)1096U;
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
-  uint8_t *shake_input_ss = alloca(ss_init_len * sizeof (uint8_t));
+  uint8_t *shake_input_ss = (uint8_t *)alloca(ss_init_len * sizeof (uint8_t));
   memset(shake_input_ss, 0U, ss_init_len * sizeof (uint8_t));
   memcpy(shake_input_ss, ct, (uint32_t)1080U * sizeof (uint8_t));
   memcpy(shake_input_ss + (uint32_t)1080U, k, (uint32_t)16U * sizeof (uint8_t));
@@ -202,7 +202,7 @@ uint32_t Hacl_Frodo64_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t seed_se_k[32U] = { 0U };
   uint32_t pkh_mu_decode_len = (uint32_t)32U;
   KRML_CHECK_SIZE(sizeof (uint8_t), pkh_mu_decode_len);
-  uint8_t *pkh_mu_decode = alloca(pkh_mu_decode_len * sizeof (uint8_t));
+  uint8_t *pkh_mu_decode = (uint8_t *)alloca(pkh_mu_decode_len * sizeof (uint8_t));
   memset(pkh_mu_decode, 0U, pkh_mu_decode_len * sizeof (uint8_t));
   uint8_t *pkh = sk + (uint32_t)2016U;
   memcpy(pkh_mu_decode, pkh, (uint32_t)16U * sizeof (uint8_t));
@@ -283,7 +283,7 @@ uint32_t Hacl_Frodo64_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
     os[i] = x;);
   uint32_t ss_init_len = (uint32_t)1096U;
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
-  uint8_t *ss_init = alloca(ss_init_len * sizeof (uint8_t));
+  uint8_t *ss_init = (uint8_t *)alloca(ss_init_len * sizeof (uint8_t));
   memset(ss_init, 0U, ss_init_len * sizeof (uint8_t));
   memcpy(ss_init, ct, (uint32_t)1080U * sizeof (uint8_t));
   memcpy(ss_init + (uint32_t)1080U, kp_s, (uint32_t)16U * sizeof (uint8_t));

@@ -173,7 +173,7 @@ Hacl_Impl_SHA3_absorb(
   }
   uint8_t *last = input + nb * rateInBytes;
   KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
-  uint8_t *b = alloca(rateInBytes * sizeof (uint8_t));
+  uint8_t *b = (uint8_t *)alloca(rateInBytes * sizeof (uint8_t));
   memset(b, 0U, rateInBytes * sizeof (uint8_t));
   memcpy(b, last, rem * sizeof (uint8_t));
   b[rem] = delimitedSuffix;
@@ -183,7 +183,7 @@ Hacl_Impl_SHA3_absorb(
     Hacl_Impl_SHA3_state_permute(s);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
-  uint8_t *b1 = alloca(rateInBytes * sizeof (uint8_t));
+  uint8_t *b1 = (uint8_t *)alloca(rateInBytes * sizeof (uint8_t));
   memset(b1, 0U, rateInBytes * sizeof (uint8_t));
   b1[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
   Hacl_Impl_SHA3_loadState(rateInBytes, b1, s);

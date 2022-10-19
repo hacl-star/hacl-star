@@ -503,7 +503,7 @@ void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *
 {
   uint32_t double_row = (uint32_t)32U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t *b = alloca(double_row * sizeof (uint8_t));
+  uint8_t *b = (uint8_t *)alloca(double_row * sizeof (uint8_t));
   memset(b, 0U, double_row * sizeof (uint8_t));
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)16U;
@@ -1010,7 +1010,7 @@ Hacl_Hash_Core_Blake2_finish_blake2b_32(uint64_t *s, FStar_UInt128_uint128 ev, u
 {
   uint32_t double_row = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t *b = alloca(double_row * sizeof (uint8_t));
+  uint8_t *b = (uint8_t *)alloca(double_row * sizeof (uint8_t));
   memset(b, 0U, double_row * sizeof (uint8_t));
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)32U;
@@ -2644,7 +2644,7 @@ void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash
 {
   uint32_t double_row = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t *b = alloca(double_row * sizeof (uint8_t));
+  uint8_t *b = (uint8_t *)alloca(double_row * sizeof (uint8_t));
   memset(b, 0U, double_row * sizeof (uint8_t));
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)32U;
@@ -3270,7 +3270,7 @@ void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash
 {
   uint32_t double_row = (uint32_t)32U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t *b = alloca(double_row * sizeof (uint8_t));
+  uint8_t *b = (uint8_t *)alloca(double_row * sizeof (uint8_t));
   memset(b, 0U, double_row * sizeof (uint8_t));
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)16U;

@@ -1904,7 +1904,7 @@ ecdsa_verification_(
     sz = KRML_EABORT(uint32_t, "unreachable (pattern matches are exhaustive in F*)");
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
-  uint8_t *mHash = alloca(sz * sizeof (uint8_t));
+  uint8_t *mHash = (uint8_t *)alloca(sz * sizeof (uint8_t));
   memset(mHash, 0U, sz * sizeof (uint8_t));
   if (alg.tag == Spec_ECDSA_NoHash)
   {
@@ -2093,7 +2093,7 @@ ecdsa_signature_core(
     sz = KRML_EABORT(uint32_t, "unreachable (pattern matches are exhaustive in F*)");
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
-  uint8_t *mHash = alloca(sz * sizeof (uint8_t));
+  uint8_t *mHash = (uint8_t *)alloca(sz * sizeof (uint8_t));
   memset(mHash, 0U, sz * sizeof (uint8_t));
   if (alg.tag == Spec_ECDSA_NoHash)
   {

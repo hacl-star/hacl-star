@@ -69,9 +69,10 @@ Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
 static EverCrypt_Error_error_code
 create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
-  uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+  uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-  EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+  EverCrypt_AEAD_state_s
+  *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
   p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek });
   memcpy(ek, k, (uint32_t)32U * sizeof (uint8_t));
   dst[0U] = p;
@@ -89,13 +90,14 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t *ek = KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
+    uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)176U;
     uint64_t scrut = aes128_key_expansion(k, keys_b);
     uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-    EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+    EverCrypt_AEAD_state_s
+    *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek });
     *dst = p;
     return EverCrypt_Error_Success;
@@ -115,13 +117,14 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t *ek = KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
+    uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)240U;
     uint64_t scrut = aes256_key_expansion(k, keys_b);
     uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-    EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+    EverCrypt_AEAD_state_s
+    *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek });
     *dst = p;
     return EverCrypt_Error_Success;
