@@ -12,8 +12,8 @@ module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.BignumQ.Mul
-module S56 = Hacl.Spec.BignumQ.Definitions
+module BQ = Hacl.Impl.BignumQ
+module BD = Hacl.Bignum.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -33,23 +33,21 @@ let point_mul_g_compress out s =
 
 
 inline_for_extraction noextract
-val sign_compute_s (r hs:lbuffer uint64 5ul) (a s:lbuffer uint8 32ul) : Stack unit
+val sign_compute_s (r hs:lbuffer uint64 4ul) (a s:lbuffer uint8 32ul) : Stack unit
   (requires fun h ->
     live h r /\ live h hs /\ live h a /\ live h s /\
     disjoint s r /\ disjoint s hs /\ disjoint s a /\
-    F56.scalar_inv_full_t h r /\ F56.scalar_inv_full_t h hs)
+    BD.bn_v h r < Spec.Ed25519.q /\ BD.bn_v h hs < Spec.Ed25519.q)
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == BSeq.nat_to_bytes_le 32 ((F56.as_nat h0 r +
-      (F56.as_nat h0 hs * BSeq.nat_from_bytes_le (as_seq h0 a)) % Spec.Ed25519.q) % Spec.Ed25519.q))
+    as_seq h1 s == BSeq.nat_to_bytes_le 32 ((BD.bn_v h0 r +
+      (BD.bn_v h0 hs * BSeq.nat_from_bytes_le (as_seq h0 a)) % Spec.Ed25519.q) % Spec.Ed25519.q))
 
 let sign_compute_s r hs a s =
   push_frame ();
-  let aq = create 5ul (u64 0) in
-  Hacl.Impl.Load56.load_32_bytes aq a;
-  Hacl.Impl.BignumQ.Mul.mul_modq aq hs aq;
-  Hacl.Impl.BignumQ.Mul.add_modq aq r aq;
-  assert_norm (0x100000000000000 == pow2 56);
-  Hacl.Impl.Store56.store_56 s aq;
+  let aq = create 4ul (u64 0) in
+  BQ.load_32_bytes aq a;
+  BQ.mul_add_modq hs aq r aq;
+  BQ.store_32_bytes s aq;
   pop_frame ()
 
 
@@ -75,8 +73,8 @@ let sign_expanded signature expanded_keys msg_len msg =
   let rs = sub signature 0ul 32ul in
   let ss = sub signature 32ul 32ul in
 
-  let rq = create 5ul (u64 0) in
-  let hq = create 5ul (u64 0) in
+  let rq = create 4ul (u64 0) in
+  let hq = create 4ul (u64 0) in
   let rb = create 32ul (u8 0) in
 
   // expanded_keys = [ public_key; s; prefix ]

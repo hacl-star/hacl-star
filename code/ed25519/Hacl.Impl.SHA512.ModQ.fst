@@ -11,7 +11,9 @@ module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
 
 module Hash = Hacl.Streaming.SHA2
-module F56 = Hacl.Impl.BignumQ.Mul
+
+module BQ = Hacl.Impl.BignumQ
+module BD = Hacl.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -71,7 +73,7 @@ let sha512_pre_pre2_msg hash prefix prefix2 len input =
 
 
 val sha512_modq_pre:
-    out:lbuffer uint64 5ul
+    out:lbuffer uint64 4ul
   -> prefix:lbuffer uint8 32ul
   -> len:size_t
   -> input:lbuffer uint8 len ->
@@ -80,24 +82,24 @@ val sha512_modq_pre:
       live h input /\ live h out /\ live h prefix /\
       disjoint prefix out /\ disjoint out input)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F56.scalar_inv_full_t h1 out /\
-      F56.as_nat h1 out == Spec.Ed25519.sha512_modq (32 + v len)
+      BD.bn_v h1 out == Spec.Ed25519.sha512_modq (32 + v len)
         (Seq.append (as_seq h0 prefix) (as_seq h0 input)))
 
 [@CInline]
 let sha512_modq_pre out prefix len input =
   push_frame();
-  let tmp = create 10ul (u64 0) in
+  let tmp = create 8ul (u64 0) in
   let hash = create 64ul (u8 0) in
   sha512_pre_msg hash prefix len input;
-  Hacl.Impl.Load56.load_64_bytes tmp hash;
-  Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
-  assert_norm (pow2 56 == 0x100000000000000);
+  let h0 = ST.get () in
+  Hacl.Bignum.Convert.mk_bn_from_bytes_le true 64ul hash tmp;
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 64 (as_seq h0 hash);
+  BQ.modq tmp out;
   pop_frame()
 
 
 val sha512_modq_pre_pre2:
-    out:lbuffer uint64 5ul
+    out:lbuffer uint64 4ul
   -> prefix:lbuffer uint8 32ul
   -> prefix2:lbuffer uint8 32ul
   -> len:size_t
@@ -107,26 +109,26 @@ val sha512_modq_pre_pre2:
       live h input /\ live h out /\ live h prefix /\ live h prefix2 /\
       disjoint prefix out /\ disjoint prefix2 out /\ disjoint out input)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F56.scalar_inv_full_t h1 out /\
-      F56.as_nat h1 out == Spec.Ed25519.sha512_modq (64 + v len)
+      BD.bn_v h1 out == Spec.Ed25519.sha512_modq (64 + v len)
         (Seq.append (Seq.append (as_seq h0 prefix) (as_seq h0 prefix2)) (as_seq h0 input)))
 
 [@CInline]
 let sha512_modq_pre_pre2 out prefix prefix2 len input =
   push_frame();
-  let tmp = create 10ul (u64 0) in
+  let tmp = create 8ul (u64 0) in
   let hash = create 64ul (u8 0) in
   sha512_pre_pre2_msg hash prefix prefix2 len input;
-  Hacl.Impl.Load56.load_64_bytes tmp hash;
-  Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
-  assert_norm (pow2 56 == 0x100000000000000);
+  let h0 = ST.get () in
+  Hacl.Bignum.Convert.mk_bn_from_bytes_le true 64ul hash tmp;
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 64 (as_seq h0 hash);
+  BQ.modq tmp out;
   pop_frame()
 
 
 inline_for_extraction noextract
 val store_sha512_modq_pre:
     out:lbuffer uint8 32ul
-  -> outq:lbuffer uint64 5ul
+  -> outq:lbuffer uint64 4ul
   -> prefix:lbuffer uint8 32ul
   -> len:size_t
   -> input:lbuffer uint8 len ->
@@ -136,13 +138,12 @@ val store_sha512_modq_pre:
       disjoint prefix out /\ disjoint out input /\ disjoint out outq /\
       disjoint prefix outq /\ disjoint outq input)
     (ensures  fun h0 _ h1 -> modifies (loc out |+| loc outq) h0 h1 /\
-      F56.scalar_inv_full_t h1 outq /\
-      F56.as_nat h1 outq == Spec.Ed25519.sha512_modq (32 + v len) (Seq.append (as_seq h0 prefix) (as_seq h0 input)) /\
-      as_seq h1 out == BSeq.nat_to_bytes_le 32 (F56.as_nat h1 outq))
+      BD.bn_v h1 outq == Spec.Ed25519.sha512_modq (32 + v len) (Seq.append (as_seq h0 prefix) (as_seq h0 input)) /\
+      as_seq h1 out == BSeq.nat_to_bytes_le 32 (BD.bn_v h1 outq))
 
 let store_sha512_modq_pre out outq prefix len input =
   sha512_modq_pre outq prefix len input;
-  Hacl.Impl.Store56.store_56 out outq
+  BQ.store_32_bytes out outq
 
 
 inline_for_extraction noextract
@@ -162,7 +163,7 @@ val store_sha512_modq_pre_pre2:
 
 let store_sha512_modq_pre_pre2 out prefix prefix2 len input =
   push_frame ();
-  let tmp = create 5ul (u64 0) in
+  let tmp = create 4ul (u64 0) in
   sha512_modq_pre_pre2 tmp prefix prefix2 len input;
-  Hacl.Impl.Store56.store_56 out tmp;
+  BQ.store_32_bytes out tmp;
   pop_frame ()

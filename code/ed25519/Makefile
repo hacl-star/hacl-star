@@ -27,6 +27,7 @@ dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(BASE_FLAGS) $(HASH_BUNDLE) $(STREAMING_BUNDLE) $(BLAKE2_BUNDLE) \
 	$(CURVE_BUNDLE) $(BIGNUM_BUNDLE) $(ED_BUNDLE) \
 	-tmpdir dist \
+	-add-include '"lib_intrinsics.h"' \
 	-no-prefix 'Hacl.Test.Ed25519' \
 	-fbuiltin-uint128 \
 	-skip-compilation

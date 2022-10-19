@@ -49,7 +49,7 @@ let mont_check: BM.bn_check_modulus_st t_limbs n_limbs =
 let precompr2: BM.bn_precomp_r2_mod_n_st t_limbs n_limbs =
   BM.bn_precomp_r2_mod_n bn_inst
 
-[@CInline]
+//[@CInline]
 let reduction: BM.bn_mont_reduction_st t_limbs n_limbs =
   BM.bn_mont_reduction bn_inst
 

@@ -53,9 +53,9 @@ val verify_sb: sb:lbuffer uint8 32ul -> Stack bool
 
 let verify_sb sb =
   push_frame ();
-  let tmp = create 5ul (u64 0) in
-  Hacl.Impl.Load56.load_32_bytes tmp sb;
-  let b = Hacl.Impl.Ed25519.PointEqual.gte_q tmp in
+  let tmp = create 4ul (u64 0) in
+  Hacl.Impl.BignumQ.load_32_bytes tmp sb;
+  let b = Hacl.Impl.BignumQ.gte_q tmp in
   pop_frame ();
   b
 
