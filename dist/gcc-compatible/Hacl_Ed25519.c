@@ -28,14 +28,14 @@
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Curve25519_51.h"
 
-static inline void fsum(uint64_t *a, uint64_t *b)
+static inline void fsum(uint64_t *out, uint64_t *a, uint64_t *b)
 {
-  Hacl_Impl_Curve25519_Field51_fadd(a, a, b);
+  Hacl_Impl_Curve25519_Field51_fadd(out, a, b);
 }
 
-static inline void fdifference(uint64_t *a, uint64_t *b)
+static inline void fdifference(uint64_t *out, uint64_t *a, uint64_t *b)
 {
-  Hacl_Impl_Curve25519_Field51_fsub(a, b, a);
+  Hacl_Impl_Curve25519_Field51_fsub(out, a, b);
 }
 
 void Hacl_Bignum25519_reduce_513(uint64_t *a)
@@ -239,50 +239,45 @@ void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input)
 
 void Hacl_Impl_Ed25519_PointDouble_point_double(uint64_t *out, uint64_t *p)
 {
-  uint64_t tmp[30U] = { 0U };
+  uint64_t tmp[20U] = { 0U };
+  uint64_t *tmp1 = tmp;
+  uint64_t *tmp20 = tmp + (uint32_t)5U;
+  uint64_t *tmp30 = tmp + (uint32_t)10U;
+  uint64_t *tmp40 = tmp + (uint32_t)15U;
+  uint64_t *x10 = p;
+  uint64_t *y10 = p + (uint32_t)5U;
+  uint64_t *z1 = p + (uint32_t)10U;
+  fsquare(tmp1, x10);
+  fsquare(tmp20, y10);
+  fsum(tmp30, tmp1, tmp20);
+  fdifference(tmp40, tmp1, tmp20);
+  fsquare(tmp1, z1);
+  times_2(tmp1, tmp1);
+  uint64_t *tmp10 = tmp;
   uint64_t *tmp2 = tmp + (uint32_t)5U;
   uint64_t *tmp3 = tmp + (uint32_t)10U;
   uint64_t *tmp4 = tmp + (uint32_t)15U;
-  uint64_t *tmp6 = tmp + (uint32_t)25U;
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + (uint32_t)5U;
+  fsum(tmp2, x1, y1);
+  fsquare(tmp2, tmp2);
+  Hacl_Bignum25519_reduce_513(tmp3);
+  fdifference(tmp2, tmp3, tmp2);
+  Hacl_Bignum25519_reduce_513(tmp10);
+  Hacl_Bignum25519_reduce_513(tmp4);
+  fsum(tmp10, tmp10, tmp4);
+  uint64_t *tmp_f = tmp;
+  uint64_t *tmp_e = tmp + (uint32_t)5U;
+  uint64_t *tmp_h = tmp + (uint32_t)10U;
+  uint64_t *tmp_g = tmp + (uint32_t)15U;
   uint64_t *x3 = out;
   uint64_t *y3 = out + (uint32_t)5U;
   uint64_t *z3 = out + (uint32_t)10U;
   uint64_t *t3 = out + (uint32_t)15U;
-  uint64_t *tmp11 = tmp;
-  uint64_t *tmp210 = tmp + (uint32_t)5U;
-  uint64_t *tmp310 = tmp + (uint32_t)10U;
-  uint64_t *tmp410 = tmp + (uint32_t)15U;
-  uint64_t *x10 = p;
-  uint64_t *y10 = p + (uint32_t)5U;
-  uint64_t *z1 = p + (uint32_t)10U;
-  fsquare(tmp11, x10);
-  fsquare(tmp210, y10);
-  fsquare(tmp310, z1);
-  times_2(tmp410, tmp310);
-  memcpy(tmp310, tmp11, (uint32_t)5U * sizeof (uint64_t));
-  fsum(tmp310, tmp210);
-  uint64_t *tmp110 = tmp;
-  uint64_t *tmp21 = tmp + (uint32_t)5U;
-  uint64_t *tmp31 = tmp + (uint32_t)10U;
-  uint64_t *tmp41 = tmp + (uint32_t)15U;
-  uint64_t *tmp51 = tmp + (uint32_t)20U;
-  uint64_t *tmp61 = tmp + (uint32_t)25U;
-  uint64_t *x1 = p;
-  uint64_t *y1 = p + (uint32_t)5U;
-  memcpy(tmp51, x1, (uint32_t)5U * sizeof (uint64_t));
-  fsum(tmp51, y1);
-  fsquare(tmp61, tmp51);
-  memcpy(tmp51, tmp31, (uint32_t)5U * sizeof (uint64_t));
-  Hacl_Bignum25519_reduce_513(tmp51);
-  fdifference(tmp61, tmp51);
-  fdifference(tmp21, tmp110);
-  Hacl_Bignum25519_reduce_513(tmp21);
-  Hacl_Bignum25519_reduce_513(tmp41);
-  fsum(tmp41, tmp21);
-  fmul0(x3, tmp4, tmp6);
-  fmul0(y3, tmp2, tmp3);
-  fmul0(t3, tmp6, tmp3);
-  fmul0(z3, tmp4, tmp2);
+  fmul0(x3, tmp_e, tmp_f);
+  fmul0(y3, tmp_g, tmp_h);
+  fmul0(t3, tmp_e, tmp_h);
+  fmul0(z3, tmp_f, tmp_g);
 }
 
 static inline void pow2_252m2(uint64_t *out, uint64_t *z)
@@ -350,7 +345,7 @@ static inline void mul_modp_sqrt_m1(uint64_t *x)
 
 static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
 {
-  uint64_t tmp[20U] = { 0U };
+  uint64_t tmp[15U] = { 0U };
   uint64_t *x2 = tmp;
   uint64_t x00 = y[0U];
   uint64_t x1 = y[1U];
@@ -372,7 +367,7 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
   }
   else
   {
-    uint64_t tmp1[25U] = { 0U };
+    uint64_t tmp1[20U] = { 0U };
     uint64_t *one = tmp1;
     uint64_t *y2 = tmp1 + (uint32_t)5U;
     uint64_t *dyyi = tmp1 + (uint32_t)10U;
@@ -384,11 +379,11 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
     one[4U] = (uint64_t)0U;
     fsquare(y2, y);
     times_d(dyy, y2);
-    fsum(dyy, one);
+    fsum(dyy, dyy, one);
     Hacl_Bignum25519_reduce_513(dyy);
     Hacl_Bignum25519_inverse(dyyi, dyy);
-    fdifference(one, y2);
-    fmul0(x2, one, dyyi);
+    fdifference(x2, y2, one);
+    fmul0(x2, x2, dyyi);
     reduce(x2);
     bool x2_is_0 = is_0(x2);
     uint8_t z;
@@ -425,28 +420,24 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       uint64_t *x210 = tmp;
       uint64_t *x31 = tmp + (uint32_t)5U;
       uint64_t *t00 = tmp + (uint32_t)10U;
-      uint64_t *t10 = tmp + (uint32_t)15U;
       pow2_252m2(x31, x210);
       fsquare(t00, x31);
-      memcpy(t10, x210, (uint32_t)5U * sizeof (uint64_t));
-      fdifference(t10, t00);
-      Hacl_Bignum25519_reduce_513(t10);
-      reduce(t10);
-      bool t1_is_0 = is_0(t10);
-      if (!t1_is_0)
+      fdifference(t00, t00, x210);
+      Hacl_Bignum25519_reduce_513(t00);
+      reduce(t00);
+      bool t0_is_0 = is_0(t00);
+      if (!t0_is_0)
       {
         mul_modp_sqrt_m1(x31);
       }
       uint64_t *x211 = tmp;
       uint64_t *x3 = tmp + (uint32_t)5U;
       uint64_t *t01 = tmp + (uint32_t)10U;
-      uint64_t *t1 = tmp + (uint32_t)15U;
       fsquare(t01, x3);
-      memcpy(t1, x211, (uint32_t)5U * sizeof (uint64_t));
-      fdifference(t1, t01);
-      Hacl_Bignum25519_reduce_513(t1);
-      reduce(t1);
-      bool z1 = is_0(t1);
+      fdifference(t01, t01, x211);
+      Hacl_Bignum25519_reduce_513(t01);
+      reduce(t01);
+      bool z1 = is_0(t01);
       if (z1 == false)
       {
         res = false;
@@ -465,7 +456,7 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
           t0[2U] = (uint64_t)0U;
           t0[3U] = (uint64_t)0U;
           t0[4U] = (uint64_t)0U;
-          fdifference(x32, t0);
+          fdifference(x32, t0, x32);
           Hacl_Bignum25519_reduce_513(x32);
           reduce(x32);
         }
@@ -1218,48 +1209,42 @@ void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *
   uint64_t *y1 = p + (uint32_t)5U;
   uint64_t *x2 = q;
   uint64_t *y2 = q + (uint32_t)5U;
-  memcpy(tmp1, x1, (uint32_t)5U * sizeof (uint64_t));
-  memcpy(tmp20, x2, (uint32_t)5U * sizeof (uint64_t));
-  fdifference(tmp1, y1);
-  fdifference(tmp20, y2);
+  fdifference(tmp1, y1, x1);
+  fdifference(tmp20, y2, x2);
   fmul0(tmp30, tmp1, tmp20);
-  memcpy(tmp1, y1, (uint32_t)5U * sizeof (uint64_t));
-  memcpy(tmp20, y2, (uint32_t)5U * sizeof (uint64_t));
-  fsum(tmp1, x1);
-  fsum(tmp20, x2);
+  fsum(tmp1, y1, x1);
+  fsum(tmp20, y2, x2);
   fmul0(tmp40, tmp1, tmp20);
   uint64_t *tmp10 = tmp;
   uint64_t *tmp2 = tmp + (uint32_t)5U;
   uint64_t *tmp3 = tmp + (uint32_t)10U;
-  uint64_t *tmp41 = tmp + (uint32_t)15U;
-  uint64_t *tmp50 = tmp + (uint32_t)20U;
-  uint64_t *tmp60 = tmp + (uint32_t)25U;
+  uint64_t *tmp4 = tmp + (uint32_t)15U;
+  uint64_t *tmp5 = tmp + (uint32_t)20U;
+  uint64_t *tmp6 = tmp + (uint32_t)25U;
   uint64_t *z1 = p + (uint32_t)10U;
   uint64_t *t1 = p + (uint32_t)15U;
   uint64_t *z2 = q + (uint32_t)10U;
   uint64_t *t2 = q + (uint32_t)15U;
   times_2d(tmp10, t1);
-  fmul0(tmp2, tmp10, t2);
-  times_2(tmp10, z1);
-  fmul0(tmp50, tmp10, z2);
-  memcpy(tmp10, tmp3, (uint32_t)5U * sizeof (uint64_t));
-  memcpy(tmp60, tmp2, (uint32_t)5U * sizeof (uint64_t));
-  fdifference(tmp10, tmp41);
-  fdifference(tmp60, tmp50);
-  fsum(tmp50, tmp2);
-  fsum(tmp41, tmp3);
-  uint64_t *tmp11 = tmp;
-  uint64_t *tmp4 = tmp + (uint32_t)15U;
-  uint64_t *tmp5 = tmp + (uint32_t)20U;
-  uint64_t *tmp6 = tmp + (uint32_t)25U;
+  fmul0(tmp10, tmp10, t2);
+  times_2(tmp2, z1);
+  fmul0(tmp2, tmp2, z2);
+  fdifference(tmp5, tmp4, tmp3);
+  fdifference(tmp6, tmp2, tmp10);
+  fsum(tmp10, tmp2, tmp10);
+  fsum(tmp2, tmp4, tmp3);
+  uint64_t *tmp_g = tmp;
+  uint64_t *tmp_h = tmp + (uint32_t)5U;
+  uint64_t *tmp_e = tmp + (uint32_t)20U;
+  uint64_t *tmp_f = tmp + (uint32_t)25U;
   uint64_t *x3 = out;
   uint64_t *y3 = out + (uint32_t)5U;
   uint64_t *z3 = out + (uint32_t)10U;
   uint64_t *t3 = out + (uint32_t)15U;
-  fmul0(x3, tmp11, tmp6);
-  fmul0(y3, tmp5, tmp4);
-  fmul0(t3, tmp11, tmp4);
-  fmul0(z3, tmp6, tmp5);
+  fmul0(x3, tmp_e, tmp_f);
+  fmul0(y3, tmp_g, tmp_h);
+  fmul0(t3, tmp_e, tmp_h);
+  fmul0(z3, tmp_f, tmp_g);
 }
 
 void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out)
@@ -1278,13 +1263,11 @@ void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out)
   uint64_t *y1 = out + (uint32_t)5U;
   uint64_t *z1 = out + (uint32_t)10U;
   uint64_t *t1 = out + (uint32_t)15U;
-  memcpy(x1, x, (uint32_t)5U * sizeof (uint64_t));
-  fdifference(x1, zero);
+  fdifference(x1, zero, x);
   Hacl_Bignum25519_reduce_513(x1);
   memcpy(y1, y, (uint32_t)5U * sizeof (uint64_t));
   memcpy(z1, z, (uint32_t)5U * sizeof (uint64_t));
-  memcpy(t1, t, (uint32_t)5U * sizeof (uint64_t));
-  fdifference(t1, zero);
+  fdifference(t1, zero, t);
   Hacl_Bignum25519_reduce_513(t1);
 }
 
