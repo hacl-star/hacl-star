@@ -74,9 +74,9 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
 *Hacl_GenericField64_field_init(uint32_t len, uint64_t *n)
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
-  uint64_t *r2 = KRML_HOST_CALLOC(len, sizeof (uint64_t));
+  uint64_t *r2 = (uint64_t *)KRML_HOST_CALLOC(len, sizeof (uint64_t));
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
-  uint64_t *n1 = KRML_HOST_CALLOC(len, sizeof (uint64_t));
+  uint64_t *n1 = (uint64_t *)KRML_HOST_CALLOC(len, sizeof (uint64_t));
   uint64_t *r21 = r2;
   uint64_t *n11 = n1;
   memcpy(n11, n, len * sizeof (uint64_t));
@@ -86,7 +86,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 res = { .len = len, .n = n11, .mu = mu, .r2 = r21 };
   KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
-  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64));
+  *buf =
+    (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+      ));
   buf[0U] = res;
   return buf;
 }
@@ -276,13 +279,13 @@ Hacl_GenericField64_exp_consttime(
   uint32_t len1 = Hacl_GenericField64_field_get_len(k);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   KRML_CHECK_SIZE(sizeof (uint64_t), k1.len);
-  uint64_t *aMc = alloca(k1.len * sizeof (uint64_t));
+  uint64_t *aMc = (uint64_t *)alloca(k1.len * sizeof (uint64_t));
   memset(aMc, 0U, k1.len * sizeof (uint64_t));
   memcpy(aMc, aM, k1.len * sizeof (uint64_t));
   if (bBits < (uint32_t)200U)
   {
     KRML_CHECK_SIZE(sizeof (uint64_t), len1 + len1);
-    uint64_t *ctx = alloca((len1 + len1) * sizeof (uint64_t));
+    uint64_t *ctx = (uint64_t *)alloca((len1 + len1) * sizeof (uint64_t));
     memset(ctx, 0U, (len1 + len1) * sizeof (uint64_t));
     memcpy(ctx, k1.n, len1 * sizeof (uint64_t));
     memcpy(ctx + len1, k1.r2, len1 * sizeof (uint64_t));
@@ -329,15 +332,15 @@ Hacl_GenericField64_exp_consttime(
       bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     }
     KRML_CHECK_SIZE(sizeof (uint64_t), len1 + len1);
-    uint64_t *ctx = alloca((len1 + len1) * sizeof (uint64_t));
+    uint64_t *ctx = (uint64_t *)alloca((len1 + len1) * sizeof (uint64_t));
     memset(ctx, 0U, (len1 + len1) * sizeof (uint64_t));
     memcpy(ctx, k1.n, len1 * sizeof (uint64_t));
     memcpy(ctx + len1, k1.r2, len1 * sizeof (uint64_t));
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U * len1);
-    uint64_t *table = alloca((uint32_t)16U * len1 * sizeof (uint64_t));
+    uint64_t *table = (uint64_t *)alloca((uint32_t)16U * len1 * sizeof (uint64_t));
     memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint64_t));
     KRML_CHECK_SIZE(sizeof (uint64_t), len1);
-    uint64_t *tmp = alloca(len1 * sizeof (uint64_t));
+    uint64_t *tmp = (uint64_t *)alloca(len1 * sizeof (uint64_t));
     memset(tmp, 0U, len1 * sizeof (uint64_t));
     uint64_t *t0 = table;
     uint64_t *t1 = table + len1;
@@ -417,7 +420,7 @@ Hacl_GenericField64_exp_consttime(
       }
       uint64_t bits_l = ite & mask_l;
       KRML_CHECK_SIZE(sizeof (uint64_t), len1);
-      uint64_t *a_bits_l = alloca(len1 * sizeof (uint64_t));
+      uint64_t *a_bits_l = (uint64_t *)alloca(len1 * sizeof (uint64_t));
       memset(a_bits_l, 0U, len1 * sizeof (uint64_t));
       memcpy(a_bits_l, table + (uint32_t)0U * len1, len1 * sizeof (uint64_t));
       KRML_MAYBE_FOR15(i2,
@@ -468,13 +471,13 @@ Hacl_GenericField64_exp_vartime(
   uint32_t len1 = Hacl_GenericField64_field_get_len(k);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   KRML_CHECK_SIZE(sizeof (uint64_t), k1.len);
-  uint64_t *aMc = alloca(k1.len * sizeof (uint64_t));
+  uint64_t *aMc = (uint64_t *)alloca(k1.len * sizeof (uint64_t));
   memset(aMc, 0U, k1.len * sizeof (uint64_t));
   memcpy(aMc, aM, k1.len * sizeof (uint64_t));
   if (bBits < (uint32_t)200U)
   {
     KRML_CHECK_SIZE(sizeof (uint64_t), len1 + len1);
-    uint64_t *ctx = alloca((len1 + len1) * sizeof (uint64_t));
+    uint64_t *ctx = (uint64_t *)alloca((len1 + len1) * sizeof (uint64_t));
     memset(ctx, 0U, (len1 + len1) * sizeof (uint64_t));
     memcpy(ctx, k1.n, len1 * sizeof (uint64_t));
     memcpy(ctx + len1, k1.r2, len1 * sizeof (uint64_t));
@@ -508,15 +511,15 @@ Hacl_GenericField64_exp_vartime(
       bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     }
     KRML_CHECK_SIZE(sizeof (uint64_t), len1 + len1);
-    uint64_t *ctx = alloca((len1 + len1) * sizeof (uint64_t));
+    uint64_t *ctx = (uint64_t *)alloca((len1 + len1) * sizeof (uint64_t));
     memset(ctx, 0U, (len1 + len1) * sizeof (uint64_t));
     memcpy(ctx, k1.n, len1 * sizeof (uint64_t));
     memcpy(ctx + len1, k1.r2, len1 * sizeof (uint64_t));
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U * len1);
-    uint64_t *table = alloca((uint32_t)16U * len1 * sizeof (uint64_t));
+    uint64_t *table = (uint64_t *)alloca((uint32_t)16U * len1 * sizeof (uint64_t));
     memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint64_t));
     KRML_CHECK_SIZE(sizeof (uint64_t), len1);
-    uint64_t *tmp = alloca(len1 * sizeof (uint64_t));
+    uint64_t *tmp = (uint64_t *)alloca(len1 * sizeof (uint64_t));
     memset(tmp, 0U, len1 * sizeof (uint64_t));
     uint64_t *t0 = table;
     uint64_t *t1 = table + len1;
@@ -586,7 +589,7 @@ Hacl_GenericField64_exp_vartime(
       }
       uint64_t bits_l = ite & mask_l;
       KRML_CHECK_SIZE(sizeof (uint64_t), len1);
-      uint64_t *a_bits_l = alloca(len1 * sizeof (uint64_t));
+      uint64_t *a_bits_l = (uint64_t *)alloca(len1 * sizeof (uint64_t));
       memset(a_bits_l, 0U, len1 * sizeof (uint64_t));
       uint32_t bits_l32 = (uint32_t)bits_l;
       uint64_t *a_bits_l1 = table + bits_l32 * len1;
@@ -618,7 +621,7 @@ Hacl_GenericField64_inverse(
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   uint32_t len1 = k1.len;
   KRML_CHECK_SIZE(sizeof (uint64_t), len1);
-  uint64_t *n2 = alloca(len1 * sizeof (uint64_t));
+  uint64_t *n2 = (uint64_t *)alloca(len1 * sizeof (uint64_t));
   memset(n2, 0U, len1 * sizeof (uint64_t));
   uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, k1.n[0U], (uint64_t)2U, n2);
   uint64_t c1;

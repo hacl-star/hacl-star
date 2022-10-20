@@ -28,13 +28,16 @@
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256()
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)136U, sizeof (uint8_t));
-  uint64_t *block_state = KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)136U, sizeof (uint8_t));
+  uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_384), (uint32_t)1U);
   Hacl_Streaming_SHA2_state_sha2_384
-  *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_384));
+  *p =
+    (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_SHA2_state_sha2_384
+      ));
   p[0U] = s;
   memset(block_state, 0U, (uint32_t)25U * sizeof (uint64_t));
   return p;

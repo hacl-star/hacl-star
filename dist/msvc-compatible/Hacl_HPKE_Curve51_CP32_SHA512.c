@@ -89,7 +89,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
         };
       uint32_t len0 = (uint32_t)51U;
       KRML_CHECK_SIZE(sizeof (uint8_t), len0);
-      uint8_t *tmp0 = alloca(len0 * sizeof (uint8_t));
+      uint8_t *tmp0 = (uint8_t *)alloca(len0 * sizeof (uint8_t));
       memset(tmp0, 0U, len0 * sizeof (uint8_t));
       uint8_t *uu____3 = tmp0;
       uu____3[0U] = (uint8_t)0x48U;
@@ -112,7 +112,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
         };
       uint32_t len = (uint32_t)91U;
       KRML_CHECK_SIZE(sizeof (uint8_t), len);
-      uint8_t *tmp = alloca(len * sizeof (uint8_t));
+      uint8_t *tmp = (uint8_t *)alloca(len * sizeof (uint8_t));
       memset(tmp, 0U, len * sizeof (uint8_t));
       uint8_t *uu____4 = tmp;
       store32_be(uu____4, (uint32_t)32U);
@@ -170,7 +170,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
     uint8_t *empty = suite_id;
     uint32_t len0 = (uint32_t)28U;
     KRML_CHECK_SIZE(sizeof (uint8_t), len0);
-    uint8_t *tmp0 = alloca(len0 * sizeof (uint8_t));
+    uint8_t *tmp0 = (uint8_t *)alloca(len0 * sizeof (uint8_t));
     memset(tmp0, 0U, len0 * sizeof (uint8_t));
     uint8_t *uu____10 = tmp0;
     uu____10[0U] = (uint8_t)0x48U;
@@ -193,7 +193,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
     uint8_t o_info_hash[64U] = { 0U };
     uint32_t len1 = (uint32_t)26U + infolen;
     KRML_CHECK_SIZE(sizeof (uint8_t), len1);
-    uint8_t *tmp1 = alloca(len1 * sizeof (uint8_t));
+    uint8_t *tmp1 = (uint8_t *)alloca(len1 * sizeof (uint8_t));
     memset(tmp1, 0U, len1 * sizeof (uint8_t));
     uint8_t *uu____11 = tmp1;
     uu____11[0U] = (uint8_t)0x48U;
@@ -218,7 +218,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
       };
     uint32_t len2 = (uint32_t)23U;
     KRML_CHECK_SIZE(sizeof (uint8_t), len2);
-    uint8_t *tmp2 = alloca(len2 * sizeof (uint8_t));
+    uint8_t *tmp2 = (uint8_t *)alloca(len2 * sizeof (uint8_t));
     memset(tmp2, 0U, len2 * sizeof (uint8_t));
     uint8_t *uu____12 = tmp2;
     uu____12[0U] = (uint8_t)0x48U;
@@ -235,7 +235,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
     uint8_t label_exp[3U] = { (uint8_t)0x65U, (uint8_t)0x78U, (uint8_t)0x70U };
     uint32_t len3 = (uint32_t)151U;
     KRML_CHECK_SIZE(sizeof (uint8_t), len3);
-    uint8_t *tmp3 = alloca(len3 * sizeof (uint8_t));
+    uint8_t *tmp3 = (uint8_t *)alloca(len3 * sizeof (uint8_t));
     memset(tmp3, 0U, len3 * sizeof (uint8_t));
     uint8_t *uu____13 = tmp3;
     store32_be(uu____13, (uint32_t)64U);
@@ -260,7 +260,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
     uint8_t label_key[3U] = { (uint8_t)0x6bU, (uint8_t)0x65U, (uint8_t)0x79U };
     uint32_t len4 = (uint32_t)151U;
     KRML_CHECK_SIZE(sizeof (uint8_t), len4);
-    uint8_t *tmp4 = alloca(len4 * sizeof (uint8_t));
+    uint8_t *tmp4 = (uint8_t *)alloca(len4 * sizeof (uint8_t));
     memset(tmp4, 0U, len4 * sizeof (uint8_t));
     uint8_t *uu____15 = tmp4;
     store32_be(uu____15, (uint32_t)32U);
@@ -285,7 +285,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS(
       };
     uint32_t len = (uint32_t)158U;
     KRML_CHECK_SIZE(sizeof (uint8_t), len);
-    uint8_t *tmp = alloca(len * sizeof (uint8_t));
+    uint8_t *tmp = (uint8_t *)alloca(len * sizeof (uint8_t));
     memset(tmp, 0U, len * sizeof (uint8_t));
     uint8_t *uu____17 = tmp;
     store32_be(uu____17, (uint32_t)12U);
@@ -374,7 +374,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
           };
         uint32_t len0 = (uint32_t)51U;
         KRML_CHECK_SIZE(sizeof (uint8_t), len0);
-        uint8_t *tmp0 = alloca(len0 * sizeof (uint8_t));
+        uint8_t *tmp0 = (uint8_t *)alloca(len0 * sizeof (uint8_t));
         memset(tmp0, 0U, len0 * sizeof (uint8_t));
         uint8_t *uu____3 = tmp0;
         uu____3[0U] = (uint8_t)0x48U;
@@ -397,7 +397,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
           };
         uint32_t len = (uint32_t)91U;
         KRML_CHECK_SIZE(sizeof (uint8_t), len);
-        uint8_t *tmp = alloca(len * sizeof (uint8_t));
+        uint8_t *tmp = (uint8_t *)alloca(len * sizeof (uint8_t));
         memset(tmp, 0U, len * sizeof (uint8_t));
         uint8_t *uu____4 = tmp;
         store32_be(uu____4, (uint32_t)32U);
@@ -455,7 +455,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
       uint8_t *empty = suite_id;
       uint32_t len0 = (uint32_t)28U;
       KRML_CHECK_SIZE(sizeof (uint8_t), len0);
-      uint8_t *tmp0 = alloca(len0 * sizeof (uint8_t));
+      uint8_t *tmp0 = (uint8_t *)alloca(len0 * sizeof (uint8_t));
       memset(tmp0, 0U, len0 * sizeof (uint8_t));
       uint8_t *uu____10 = tmp0;
       uu____10[0U] = (uint8_t)0x48U;
@@ -478,7 +478,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
       uint8_t o_info_hash[64U] = { 0U };
       uint32_t len1 = (uint32_t)26U + infolen;
       KRML_CHECK_SIZE(sizeof (uint8_t), len1);
-      uint8_t *tmp1 = alloca(len1 * sizeof (uint8_t));
+      uint8_t *tmp1 = (uint8_t *)alloca(len1 * sizeof (uint8_t));
       memset(tmp1, 0U, len1 * sizeof (uint8_t));
       uint8_t *uu____11 = tmp1;
       uu____11[0U] = (uint8_t)0x48U;
@@ -503,7 +503,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
         };
       uint32_t len2 = (uint32_t)23U;
       KRML_CHECK_SIZE(sizeof (uint8_t), len2);
-      uint8_t *tmp2 = alloca(len2 * sizeof (uint8_t));
+      uint8_t *tmp2 = (uint8_t *)alloca(len2 * sizeof (uint8_t));
       memset(tmp2, 0U, len2 * sizeof (uint8_t));
       uint8_t *uu____12 = tmp2;
       uu____12[0U] = (uint8_t)0x48U;
@@ -520,7 +520,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
       uint8_t label_exp[3U] = { (uint8_t)0x65U, (uint8_t)0x78U, (uint8_t)0x70U };
       uint32_t len3 = (uint32_t)151U;
       KRML_CHECK_SIZE(sizeof (uint8_t), len3);
-      uint8_t *tmp3 = alloca(len3 * sizeof (uint8_t));
+      uint8_t *tmp3 = (uint8_t *)alloca(len3 * sizeof (uint8_t));
       memset(tmp3, 0U, len3 * sizeof (uint8_t));
       uint8_t *uu____13 = tmp3;
       store32_be(uu____13, (uint32_t)64U);
@@ -545,7 +545,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
       uint8_t label_key[3U] = { (uint8_t)0x6bU, (uint8_t)0x65U, (uint8_t)0x79U };
       uint32_t len4 = (uint32_t)151U;
       KRML_CHECK_SIZE(sizeof (uint8_t), len4);
-      uint8_t *tmp4 = alloca(len4 * sizeof (uint8_t));
+      uint8_t *tmp4 = (uint8_t *)alloca(len4 * sizeof (uint8_t));
       memset(tmp4, 0U, len4 * sizeof (uint8_t));
       uint8_t *uu____15 = tmp4;
       store32_be(uu____15, (uint32_t)32U);
@@ -570,7 +570,7 @@ Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR(
         };
       uint32_t len = (uint32_t)158U;
       KRML_CHECK_SIZE(sizeof (uint8_t), len);
-      uint8_t *tmp = alloca(len * sizeof (uint8_t));
+      uint8_t *tmp = (uint8_t *)alloca(len * sizeof (uint8_t));
       memset(tmp, 0U, len * sizeof (uint8_t));
       uint8_t *uu____17 = tmp;
       store32_be(uu____17, (uint32_t)12U);

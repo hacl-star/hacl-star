@@ -654,7 +654,7 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
   if (bBits < (uint32_t)64U * bLen)
   {
     KRML_CHECK_SIZE(sizeof (uint64_t), bLen);
-    uint64_t *b2 = alloca(bLen * sizeof (uint64_t));
+    uint64_t *b2 = (uint64_t *)alloca(bLen * sizeof (uint64_t));
     memset(b2, 0U, bLen * sizeof (uint64_t));
     uint32_t i0 = bBits / (uint32_t)64U;
     uint32_t j = bBits % (uint32_t)64U;
@@ -1232,8 +1232,8 @@ Heap-allocate and initialize a montgomery context.
 */
 Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_t *n)
 {
-  uint64_t *r2 = KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
-  uint64_t *n1 = KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
+  uint64_t *r2 = (uint64_t *)KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
+  uint64_t *n1 = (uint64_t *)KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
   uint64_t *r21 = r2;
   uint64_t *n11 = n1;
   memcpy(n11, n, (uint32_t)4U * sizeof (uint64_t));
@@ -1245,7 +1245,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_
   res = { .len = (uint32_t)4U, .n = n11, .mu = mu, .r2 = r21 };
   KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
-  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64));
+  *buf =
+    (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+      ));
   buf[0U] = res;
   return buf;
 }
@@ -1414,7 +1417,9 @@ uint64_t *Hacl_Bignum256_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U);
   uint64_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, sizeof (uint64_t));
+  *res =
+    (uint64_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U,
+      sizeof (uint64_t));
   if (res == NULL)
   {
     return res;
@@ -1424,7 +1429,7 @@ uint64_t *Hacl_Bignum256_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
-  uint8_t *tmp = alloca(tmpLen * sizeof (uint8_t));
+  uint8_t *tmp = (uint8_t *)alloca(tmpLen * sizeof (uint8_t));
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
   memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
@@ -1461,7 +1466,9 @@ uint64_t *Hacl_Bignum256_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U);
   uint64_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, sizeof (uint64_t));
+  *res =
+    (uint64_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U,
+      sizeof (uint64_t));
   if (res == NULL)
   {
     return res;
@@ -1471,7 +1478,7 @@ uint64_t *Hacl_Bignum256_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
-  uint8_t *tmp = alloca(tmpLen * sizeof (uint8_t));
+  uint8_t *tmp = (uint8_t *)alloca(tmpLen * sizeof (uint8_t));
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
   memcpy(tmp, b, len * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U; i++)
