@@ -278,6 +278,7 @@ let key_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.key_length a }) 
   | Spec.Agile.Cipher.AES128 -> 16ul
   | Spec.Agile.Cipher.AES256 -> 32ul
 
+(*
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   (counter: B.buffer UInt8.t)
@@ -358,7 +359,6 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
     end
   end
 
-
 let rec test_chacha20_ctr_loop (vs: lbuffer chacha20_vector): St unit =
   let LB len vs = vs in
   if len <> 0ul then begin
@@ -412,6 +412,7 @@ let rec test_aes128_ctr_loop (i: U32.t): St unit =
 
 let test_aes128_ctr () : St unit =
   test_aes128_ctr_loop 0ul
+*)
 
 let test_rng (ctr:UInt32.t) : St unit = ()
   // AR: 09/07: B.alloca won't work, we don't know is_stack_region (get_tip h0)
@@ -711,6 +712,7 @@ let test_aes_gcm_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
     test_aes128_gcm ()
 
+(*
 inline_for_extraction
 noextract
 let test_aes_ctr_body (print: C.String.t -> St unit) : St unit =
@@ -722,6 +724,7 @@ noextract
 let test_chacha20_ctr_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> CTR (CHACHA20 vectors)\n";
     test_chacha20_ctr ()
+*)
 
 inline_for_extraction
 let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
@@ -777,10 +780,12 @@ let test_all () : St unit =
   print_sep ();
   aes_gcm_test_set          test_aes_gcm_body;
   print_sep ();
+  (*
   aes_gcm_test_set          test_aes_ctr_body;
   print_sep ();
   chacha20_test_set         test_chacha20_ctr_body;
   print_sep ();
+  *)
   chacha20poly1305_test_set test_chacha20poly1305_body;
   print_sep ();
   hash_test_set             test_hash_body;

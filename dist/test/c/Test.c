@@ -136,12 +136,6 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *tag
 );
 
-#define AES128 0
-#define AES256 1
-#define CHACHA20 2
-
-typedef uint8_t cipher_alg;
-
 #define Hacl_CHACHA20 0
 #define Vale_AES128 1
 #define Vale_AES256 2
@@ -9992,152 +9986,6 @@ EverCrypt_DRBG_generate(
   uint32_t additional_input_len
 );
 
-static uint8_t
-input01[16U] =
-  {
-    (uint8_t)0x53U, (uint8_t)0x69U, (uint8_t)0x6EU, (uint8_t)0x67U, (uint8_t)0x6CU, (uint8_t)0x65U,
-    (uint8_t)0x20U, (uint8_t)0x62U, (uint8_t)0x6CU, (uint8_t)0x6FU, (uint8_t)0x63U, (uint8_t)0x6BU,
-    (uint8_t)0x20U, (uint8_t)0x6DU, (uint8_t)0x73U, (uint8_t)0x67U
-  };
-
-static uint8_t
-key01[16U] =
-  {
-    (uint8_t)0xAEU, (uint8_t)0x68U, (uint8_t)0x52U, (uint8_t)0xF8U, (uint8_t)0x12U, (uint8_t)0x10U,
-    (uint8_t)0x67U, (uint8_t)0xCCU, (uint8_t)0x4BU, (uint8_t)0xF7U, (uint8_t)0xA5U, (uint8_t)0x76U,
-    (uint8_t)0x55U, (uint8_t)0x77U, (uint8_t)0xF3U, (uint8_t)0x9EU
-  };
-
-static uint8_t
-nonce00[16U] =
-  {
-    (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x30U, (uint8_t)0x00U, (uint8_t)0x00U,
-    (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
-    (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U
-  };
-
-static uint8_t
-counter0[4U] = { (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x01U };
-
-static uint8_t
-output00[16U] =
-  {
-    (uint8_t)0xE4U, (uint8_t)0x09U, (uint8_t)0x5DU, (uint8_t)0x4FU, (uint8_t)0xB7U, (uint8_t)0xA7U,
-    (uint8_t)0xB3U, (uint8_t)0x79U, (uint8_t)0x2DU, (uint8_t)0x61U, (uint8_t)0x75U, (uint8_t)0xA3U,
-    (uint8_t)0x26U, (uint8_t)0x13U, (uint8_t)0x11U, (uint8_t)0xB8U
-  };
-
-static uint8_t
-input111[16U] =
-  {
-    (uint8_t)0x6bU, (uint8_t)0xc1U, (uint8_t)0xbeU, (uint8_t)0xe2U, (uint8_t)0x2eU, (uint8_t)0x40U,
-    (uint8_t)0x9fU, (uint8_t)0x96U, (uint8_t)0xe9U, (uint8_t)0x3dU, (uint8_t)0x7eU, (uint8_t)0x11U,
-    (uint8_t)0x73U, (uint8_t)0x93U, (uint8_t)0x17U, (uint8_t)0x2aU
-  };
-
-static uint8_t
-key111[16U] =
-  {
-    (uint8_t)0x2bU, (uint8_t)0x7eU, (uint8_t)0x15U, (uint8_t)0x16U, (uint8_t)0x28U, (uint8_t)0xaeU,
-    (uint8_t)0xd2U, (uint8_t)0xa6U, (uint8_t)0xabU, (uint8_t)0xf7U, (uint8_t)0x15U, (uint8_t)0x88U,
-    (uint8_t)0x09U, (uint8_t)0xcfU, (uint8_t)0x4fU, (uint8_t)0x3cU
-  };
-
-static uint8_t
-nonce12[12U] =
-  {
-    (uint8_t)0xf0U, (uint8_t)0xf1U, (uint8_t)0xf2U, (uint8_t)0xf3U, (uint8_t)0xf4U, (uint8_t)0xf5U,
-    (uint8_t)0xf6U, (uint8_t)0xf7U, (uint8_t)0xf8U, (uint8_t)0xf9U, (uint8_t)0xfaU, (uint8_t)0xfbU
-  };
-
-static uint8_t
-counter1[4U] = { (uint8_t)0xfcU, (uint8_t)0xfdU, (uint8_t)0xfeU, (uint8_t)0xffU };
-
-static uint8_t
-output12[16U] =
-  {
-    (uint8_t)0x87U, (uint8_t)0x4dU, (uint8_t)0x61U, (uint8_t)0x91U, (uint8_t)0xb6U, (uint8_t)0x20U,
-    (uint8_t)0xe3U, (uint8_t)0x26U, (uint8_t)0x1bU, (uint8_t)0xefU, (uint8_t)0x68U, (uint8_t)0x64U,
-    (uint8_t)0x99U, (uint8_t)0x0dU, (uint8_t)0xb6U, (uint8_t)0xceU
-  };
-
-static uint8_t
-input210[32U] =
-  {
-    (uint8_t)0x00U, (uint8_t)0x01U, (uint8_t)0x02U, (uint8_t)0x03U, (uint8_t)0x04U, (uint8_t)0x05U,
-    (uint8_t)0x06U, (uint8_t)0x07U, (uint8_t)0x08U, (uint8_t)0x09U, (uint8_t)0x0AU, (uint8_t)0x0BU,
-    (uint8_t)0x0CU, (uint8_t)0x0DU, (uint8_t)0x0EU, (uint8_t)0x0FU, (uint8_t)0x10U, (uint8_t)0x11U,
-    (uint8_t)0x12U, (uint8_t)0x13U, (uint8_t)0x14U, (uint8_t)0x15U, (uint8_t)0x16U, (uint8_t)0x17U,
-    (uint8_t)0x18U, (uint8_t)0x19U, (uint8_t)0x1AU, (uint8_t)0x1BU, (uint8_t)0x1CU, (uint8_t)0x1DU,
-    (uint8_t)0x1EU, (uint8_t)0x1FU
-  };
-
-static uint8_t
-key210[16U] =
-  {
-    (uint8_t)0x7EU, (uint8_t)0x24U, (uint8_t)0x06U, (uint8_t)0x78U, (uint8_t)0x17U, (uint8_t)0xFAU,
-    (uint8_t)0xE0U, (uint8_t)0xD7U, (uint8_t)0x43U, (uint8_t)0xD6U, (uint8_t)0xCEU, (uint8_t)0x1FU,
-    (uint8_t)0x32U, (uint8_t)0x53U, (uint8_t)0x91U, (uint8_t)0x63U
-  };
-
-static uint8_t
-nonce20[12U] =
-  {
-    (uint8_t)0x00U, (uint8_t)0x6CU, (uint8_t)0xB6U, (uint8_t)0xDBU, (uint8_t)0xC0U, (uint8_t)0x54U,
-    (uint8_t)0x3BU, (uint8_t)0x59U, (uint8_t)0xDAU, (uint8_t)0x48U, (uint8_t)0xD9U, (uint8_t)0x0BU
-  };
-
-static uint8_t
-counter2[4U] = { (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x01U };
-
-static uint8_t
-output20[32U] =
-  {
-    (uint8_t)0x51U, (uint8_t)0x04U, (uint8_t)0xA1U, (uint8_t)0x06U, (uint8_t)0x16U, (uint8_t)0x8AU,
-    (uint8_t)0x72U, (uint8_t)0xD9U, (uint8_t)0x79U, (uint8_t)0x0DU, (uint8_t)0x41U, (uint8_t)0xEEU,
-    (uint8_t)0x8EU, (uint8_t)0xDAU, (uint8_t)0xD3U, (uint8_t)0x88U, (uint8_t)0xEBU, (uint8_t)0x2EU,
-    (uint8_t)0x1EU, (uint8_t)0xFCU, (uint8_t)0x46U, (uint8_t)0xDAU, (uint8_t)0x57U, (uint8_t)0xC8U,
-    (uint8_t)0xFCU, (uint8_t)0xE6U, (uint8_t)0x30U, (uint8_t)0xDFU, (uint8_t)0x91U, (uint8_t)0x41U,
-    (uint8_t)0xBEU, (uint8_t)0x28U
-  };
-
-typedef struct vector2_s
-{
-  uint8_t *output;
-  uint32_t output_len;
-  uint8_t *counter;
-  uint32_t counter_len;
-  uint8_t *nonce;
-  uint32_t nonce_len;
-  uint8_t *key;
-  uint32_t key_len;
-  uint8_t *input;
-  uint32_t input_len;
-}
-vector2;
-
-static vector2
-vectors2[3U] =
-  {
-    {
-      .output = output00, .output_len = (uint32_t)16U, .counter = counter0,
-      .counter_len = (uint32_t)4U, .nonce = nonce00, .nonce_len = (uint32_t)16U, .key = key01,
-      .key_len = (uint32_t)16U, .input = input01, .input_len = (uint32_t)16U
-    },
-    {
-      .output = output12, .output_len = (uint32_t)16U, .counter = counter1,
-      .counter_len = (uint32_t)4U, .nonce = nonce12, .nonce_len = (uint32_t)12U, .key = key111,
-      .key_len = (uint32_t)16U, .input = input111, .input_len = (uint32_t)16U
-    },
-    {
-      .output = output20, .output_len = (uint32_t)32U, .counter = counter2,
-      .counter_len = (uint32_t)4U, .nonce = nonce20, .nonce_len = (uint32_t)12U, .key = key210,
-      .key_len = (uint32_t)16U, .input = input210, .input_len = (uint32_t)32U
-    }
-  };
-
-static uint32_t vectors_len2 = (uint32_t)3U;
-
 extern void
 EverCrypt_Cipher_chacha20(
   uint32_t len,
@@ -10147,30 +9995,6 @@ EverCrypt_Cipher_chacha20(
   uint8_t *iv,
   uint32_t ctr
 );
-
-typedef struct state_s2_s
-{
-  impl i;
-  uint8_t *iv;
-  uint32_t iv_len;
-  uint8_t *xkey;
-  uint32_t ctr;
-}
-state_s2;
-
-extern error_code
-EverCrypt_CTR_create_in(
-  cipher_alg a,
-  state_s2 **dst,
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint32_t c
-);
-
-extern void EverCrypt_CTR_update_block(state_s2 *p, uint8_t *dst, uint8_t *src);
-
-extern void EverCrypt_CTR_free(state_s2 *p);
 
 static void
 test_one_hash(
@@ -11800,7 +11624,7 @@ static void test_chacha20poly1305()
 }
 
 static uint8_t
-key02[16U] =
+key01[16U] =
   {
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
@@ -11808,7 +11632,7 @@ key02[16U] =
   };
 
 static uint8_t
-nonce01[12U] =
+nonce00[12U] =
   {
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U
@@ -11816,7 +11640,7 @@ nonce01[12U] =
 
 static uint8_t aad00[0U] = {  };
 
-static uint8_t input02[0U] = {  };
+static uint8_t input01[0U] = {  };
 
 static uint8_t
 tag00[16U] =
@@ -11826,10 +11650,10 @@ tag00[16U] =
     (uint8_t)0xa4U, (uint8_t)0xe7U, (uint8_t)0x45U, (uint8_t)0x5aU
   };
 
-static uint8_t output01[0U] = {  };
+static uint8_t output00[0U] = {  };
 
 static uint8_t
-key112[16U] =
+key111[16U] =
   {
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
@@ -11837,7 +11661,7 @@ key112[16U] =
   };
 
 static uint8_t
-nonce13[12U] =
+nonce12[12U] =
   {
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U
@@ -11846,7 +11670,7 @@ nonce13[12U] =
 static uint8_t aad12[0U] = {  };
 
 static uint8_t
-input112[16U] =
+input111[16U] =
   {
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U,
@@ -11862,7 +11686,7 @@ tag110[16U] =
   };
 
 static uint8_t
-output13[16U] =
+output12[16U] =
   {
     (uint8_t)0x03U, (uint8_t)0x88U, (uint8_t)0xdaU, (uint8_t)0xceU, (uint8_t)0x60U, (uint8_t)0xb6U,
     (uint8_t)0xa3U, (uint8_t)0x92U, (uint8_t)0xf3U, (uint8_t)0x28U, (uint8_t)0xc2U, (uint8_t)0xb9U,
@@ -11870,7 +11694,7 @@ output13[16U] =
   };
 
 static uint8_t
-key211[16U] =
+key210[16U] =
   {
     (uint8_t)0xfeU, (uint8_t)0xffU, (uint8_t)0xe9U, (uint8_t)0x92U, (uint8_t)0x86U, (uint8_t)0x65U,
     (uint8_t)0x73U, (uint8_t)0x1cU, (uint8_t)0x6dU, (uint8_t)0x6aU, (uint8_t)0x8fU, (uint8_t)0x94U,
@@ -11878,7 +11702,7 @@ key211[16U] =
   };
 
 static uint8_t
-nonce21[12U] =
+nonce20[12U] =
   {
     (uint8_t)0xcaU, (uint8_t)0xfeU, (uint8_t)0xbaU, (uint8_t)0xbeU, (uint8_t)0xfaU, (uint8_t)0xceU,
     (uint8_t)0xdbU, (uint8_t)0xadU, (uint8_t)0xdeU, (uint8_t)0xcaU, (uint8_t)0xf8U, (uint8_t)0x88U
@@ -11887,7 +11711,7 @@ nonce21[12U] =
 static uint8_t aad20[0U] = {  };
 
 static uint8_t
-input211[64U] =
+input210[64U] =
   {
     (uint8_t)0xd9U, (uint8_t)0x31U, (uint8_t)0x32U, (uint8_t)0x25U, (uint8_t)0xf8U, (uint8_t)0x84U,
     (uint8_t)0x06U, (uint8_t)0xe5U, (uint8_t)0xa5U, (uint8_t)0x59U, (uint8_t)0x09U, (uint8_t)0xc5U,
@@ -11911,7 +11735,7 @@ tag210[16U] =
   };
 
 static uint8_t
-output21[64U] =
+output20[64U] =
   {
     (uint8_t)0x42U, (uint8_t)0x83U, (uint8_t)0x1eU, (uint8_t)0xc2U, (uint8_t)0x21U, (uint8_t)0x77U,
     (uint8_t)0x74U, (uint8_t)0x24U, (uint8_t)0x4bU, (uint8_t)0x72U, (uint8_t)0x21U, (uint8_t)0xb7U,
@@ -11988,7 +11812,7 @@ output30[60U] =
     (uint8_t)0xacU, (uint8_t)0x97U, (uint8_t)0x3dU, (uint8_t)0x58U, (uint8_t)0xe0U, (uint8_t)0x91U
   };
 
-typedef struct vector3_s
+typedef struct vector2_s
 {
   uint8_t *output;
   uint32_t output_len;
@@ -12003,25 +11827,25 @@ typedef struct vector3_s
   uint8_t *key;
   uint32_t key_len;
 }
-vector3;
+vector2;
 
-static vector3
-vectors3[4U] =
+static vector2
+vectors2[4U] =
   {
     {
-      .output = output01, .output_len = (uint32_t)0U, .tag = tag00, .tag_len = (uint32_t)16U,
-      .input = input02, .input_len = (uint32_t)0U, .aad = aad00, .aad_len = (uint32_t)0U,
-      .nonce = nonce01, .nonce_len = (uint32_t)12U, .key = key02, .key_len = (uint32_t)16U
+      .output = output00, .output_len = (uint32_t)0U, .tag = tag00, .tag_len = (uint32_t)16U,
+      .input = input01, .input_len = (uint32_t)0U, .aad = aad00, .aad_len = (uint32_t)0U,
+      .nonce = nonce00, .nonce_len = (uint32_t)12U, .key = key01, .key_len = (uint32_t)16U
     },
     {
-      .output = output13, .output_len = (uint32_t)16U, .tag = tag110, .tag_len = (uint32_t)16U,
-      .input = input112, .input_len = (uint32_t)16U, .aad = aad12, .aad_len = (uint32_t)0U,
-      .nonce = nonce13, .nonce_len = (uint32_t)12U, .key = key112, .key_len = (uint32_t)16U
+      .output = output12, .output_len = (uint32_t)16U, .tag = tag110, .tag_len = (uint32_t)16U,
+      .input = input111, .input_len = (uint32_t)16U, .aad = aad12, .aad_len = (uint32_t)0U,
+      .nonce = nonce12, .nonce_len = (uint32_t)12U, .key = key111, .key_len = (uint32_t)16U
     },
     {
-      .output = output21, .output_len = (uint32_t)64U, .tag = tag210, .tag_len = (uint32_t)16U,
-      .input = input211, .input_len = (uint32_t)64U, .aad = aad20, .aad_len = (uint32_t)0U,
-      .nonce = nonce21, .nonce_len = (uint32_t)12U, .key = key211, .key_len = (uint32_t)16U
+      .output = output20, .output_len = (uint32_t)64U, .tag = tag210, .tag_len = (uint32_t)16U,
+      .input = input210, .input_len = (uint32_t)64U, .aad = aad20, .aad_len = (uint32_t)0U,
+      .nonce = nonce20, .nonce_len = (uint32_t)12U, .key = key210, .key_len = (uint32_t)16U
     },
     {
       .output = output30, .output_len = (uint32_t)60U, .tag = tag35, .tag_len = (uint32_t)16U,
@@ -12030,7 +11854,7 @@ vectors3[4U] =
     }
   };
 
-static uint32_t vectors_len3 = (uint32_t)4U;
+static uint32_t vectors_len2 = (uint32_t)4U;
 
 static uint32_t aead_key_length32(alg al)
 {
@@ -12440,9 +12264,9 @@ static void test_aead(cipher alg0)
 
 static void test_aes128_gcm_loop(uint32_t i)
 {
-  if (!(i >= vectors_len3))
+  if (!(i >= vectors_len2))
   {
-    vector3 scrut = vectors3[i];
+    vector2 scrut = vectors2[i];
     uint8_t *output = scrut.output;
     uint32_t output_len = scrut.output_len;
     uint8_t *tag = scrut.tag;
@@ -12475,269 +12299,6 @@ static void test_aes128_gcm_loop(uint32_t i)
 static void test_aes128_gcm()
 {
   test_aes128_gcm_loop((uint32_t)0U);
-}
-
-static bool nonce_bound(cipher_alg a, uint32_t len)
-{
-  switch (a)
-  {
-    case CHACHA20:
-      {
-        return len == (uint32_t)12U;
-      }
-    default:
-      {
-        return len <= (uint32_t)16U;
-      }
-  }
-}
-
-static uint32_t block_len(cipher_alg a)
-{
-  switch (a)
-  {
-    case CHACHA20:
-      {
-        return (uint32_t)64U;
-      }
-    default:
-      {
-        return (uint32_t)16U;
-      }
-  }
-}
-
-static uint32_t key_len(cipher_alg a)
-{
-  switch (a)
-  {
-    case CHACHA20:
-      {
-        return (uint32_t)32U;
-      }
-    case AES128:
-      {
-        return (uint32_t)16U;
-      }
-    case AES256:
-      {
-        return (uint32_t)32U;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static void
-test_ctr_st(
-  cipher_alg a,
-  uint8_t *counter,
-  uint32_t counter_len,
-  uint8_t *nonce,
-  uint32_t nonce_len,
-  uint8_t *k,
-  uint32_t k_len,
-  uint8_t *input,
-  uint32_t input_len,
-  uint8_t *output,
-  uint32_t output_len
-)
-{
-  if (!(k_len == key_len(a)))
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "test_ctr_st: not (key_len = key_len a)");
-    KRML_HOST_EXIT(255U);
-  }
-  else if (!(counter_len == (uint32_t)4U))
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "test_ctr_st: not (counter_len = 4)");
-    KRML_HOST_EXIT(255U);
-  }
-  else if (!nonce_bound(a, nonce_len))
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "test_ctr_st: not (nonce_bound a nonce_len)");
-    KRML_HOST_EXIT(255U);
-  }
-  else if (!(input_len == output_len))
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "test_ctr_st: not (input_len = output_len)");
-    KRML_HOST_EXIT(255U);
-  }
-  else if (!(input_len >= block_len(a)))
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "test_ctr_st: not (input_len >= block_len a)");
-    KRML_HOST_EXIT(255U);
-  }
-  else
-  {
-    uint32_t ctr = load32_be(counter);
-    if (ctr == (uint32_t)0xffffffffU)
-    {
-      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-        __FILE__,
-        __LINE__,
-        "test_ctr_st: ctr = max_uint32");
-      KRML_HOST_EXIT(255U);
-    }
-    else
-    {
-      KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
-      uint8_t output_[block_len(a)];
-      memset(output_, 0U, block_len(a) * sizeof (uint8_t));
-      state_s2 *s = NULL;
-      error_code r = EverCrypt_CTR_create_in(a, &s, k, nonce, nonce_len, ctr);
-      if (r != Success)
-      {
-        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-          __FILE__,
-          __LINE__,
-          "test_ctr_st: create_in <> Success");
-        KRML_HOST_EXIT(255U);
-      }
-      else
-      {
-        state_s2 *s1 = s;
-        uint8_t *input_block = input;
-        uint8_t *output_block = output;
-        EverCrypt_CTR_update_block(s1, output_, input_block);
-        EverCrypt_CTR_free(s1);
-        TestLib_compare_and_print("of CTR", output_block, output_, block_len(a));
-        uint32_t rest = input_len - block_len(a);
-        if (rest > (uint32_t)0U)
-        {
-          store32_be(counter, ctr + (uint32_t)1U);
-          uint8_t *uu____0 = input + block_len(a);
-          test_ctr_st(a,
-            counter,
-            counter_len,
-            nonce,
-            nonce_len,
-            k,
-            k_len,
-            uu____0,
-            rest,
-            output + block_len(a),
-            rest);
-        }
-      }
-    }
-  }
-}
-
-static void
-test_chacha20_ctr_loop(
-  lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vs
-)
-{
-  uint32_t len = vs.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs1 = vs.b;
-  if (len != (uint32_t)0U)
-  {
-    __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-    v = vs1[0U];
-    uint8_t *cipher0 = v.f4.b;
-    uint32_t cipher_len = v.f4.len;
-    uint8_t *plain = v.f3.b;
-    uint32_t plain_len = v.f3.len;
-    uint32_t ctr = v.thd;
-    uint8_t *iv = v.snd.b;
-    uint32_t iv_len = v.snd.len;
-    uint8_t *key = v.fst.b;
-    uint32_t key_len1 = v.fst.len;
-    uint32_t round_len = plain_len / (uint32_t)64U * (uint32_t)64U;
-    if (cipher_len != plain_len)
-    {
-      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-        __FILE__,
-        __LINE__,
-        "chacha-ctr: cipher len and plain len don\'t match");
-      KRML_HOST_EXIT(255U);
-    }
-    else
-    {
-      uint8_t *plain1 = plain;
-      uint8_t *cipher1 = cipher0;
-      uint8_t counter[4U] = { 0U };
-      store32_be(counter, ctr);
-      test_ctr_st(CHACHA20,
-        counter,
-        (uint32_t)4U,
-        iv,
-        iv_len,
-        key,
-        key_len1,
-        plain1,
-        round_len,
-        cipher1,
-        round_len);
-    }
-    test_chacha20_ctr_loop((
-        (lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
-          .len = len - (uint32_t)1U,
-          .b = vs1 + (uint32_t)1U
-        }
-      ));
-  }
-}
-
-static void test_chacha20_ctr()
-{
-  test_chacha20_ctr_loop(chacha20_vectors_low);
-}
-
-static void test_aes128_ctr_loop(uint32_t i)
-{
-  if (!(i >= vectors_len2))
-  {
-    vector2 scrut = vectors2[i];
-    uint8_t *output = scrut.output;
-    uint32_t output_len = scrut.output_len;
-    uint8_t *counter = scrut.counter;
-    uint32_t counter_len = scrut.counter_len;
-    uint8_t *nonce = scrut.nonce;
-    uint32_t nonce_len = scrut.nonce_len;
-    uint8_t *key = scrut.key;
-    uint32_t key_len1 = scrut.key_len;
-    uint8_t *input = scrut.input;
-    uint32_t input_len = scrut.input_len;
-    test_ctr_st(AES128,
-      counter,
-      counter_len,
-      nonce,
-      nonce_len,
-      key,
-      key_len1,
-      input,
-      input_len,
-      output,
-      output_len);
-    test_aes128_ctr_loop(i + (uint32_t)1U);
-  }
-}
-
-static void test_aes128_ctr()
-{
-  test_aes128_ctr_loop((uint32_t)0U);
 }
 
 static void print_sep()
@@ -12914,11 +12475,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx6 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx26 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
   bool no_bmi25 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx5 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni5 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext6 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
   bool ite3;
   if (no_avx6 || false || false || false || no_aesni5 || false)
   {
@@ -12956,68 +12517,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx7 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_avx26 = !EverCrypt_AutoConfig2_has_avx2();
   bool no_bmi26 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx6 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni6 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
-  bool ite4;
-  if (no_avx7 || false || false || false || no_aesni6 || false)
-  {
-    ite4 = false;
-  }
-  else
-  {
-    ite4 = true;
-  }
-  if (ite4)
-  {
-    EverCrypt_AutoConfig2_disable_avx2();
-    EverCrypt_AutoConfig2_disable_bmi2();
-    EverCrypt_AutoConfig2_disable_adx();
-    EverCrypt_AutoConfig2_disable_shaext();
-    C_String_print(" avx");
-    C_String_print(" aesni");
-    C_String_print("  >>>>>>>>> CTR (AES128_CTR vectors)\n");
-    test_aes128_ctr();
-  }
-  else
-  {
-    C_String_print(" avx");
-    C_String_print(" aesni");
-    C_String_print(" SKIP because not in static config\n");
-  }
-  print_sep();
-  EverCrypt_AutoConfig2_init();
-  bool no_avx8 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx27 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi27 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx7 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni7 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext7 = !EverCrypt_AutoConfig2_has_shaext();
-  if (true)
-  {
-    EverCrypt_AutoConfig2_disable_avx();
-    EverCrypt_AutoConfig2_disable_avx2();
-    EverCrypt_AutoConfig2_disable_bmi2();
-    EverCrypt_AutoConfig2_disable_adx();
-    EverCrypt_AutoConfig2_disable_aesni();
-    EverCrypt_AutoConfig2_disable_shaext();
-    C_String_print("  >>>>>>>>> CTR (CHACHA20 vectors)\n");
-    test_chacha20_ctr();
-  }
-  else
-  {
-    C_String_print(" SKIP because not in static config\n");
-  }
-  print_sep();
-  EverCrypt_AutoConfig2_init();
-  bool no_avx9 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx28 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi28 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx8 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni8 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext8 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_shaext6 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -13037,12 +12541,12 @@ static void test_all()
   }
   print_sep();
   EverCrypt_AutoConfig2_init();
-  bool no_avx10 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx29 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi29 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx9 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni9 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext9 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx8 = !EverCrypt_AutoConfig2_has_avx();
+  bool no_avx27 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi27 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx7 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni7 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext7 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -13067,14 +12571,14 @@ static void test_all()
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  bool no_avx11 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx210 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi210 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx10 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni10 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext10 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx9 = !EverCrypt_AutoConfig2_has_avx();
+  bool no_avx28 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi28 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx8 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni8 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext8 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite;
-  if (no_shaext10)
+  if (no_shaext8)
   {
     ite = false;
   }
@@ -13111,12 +12615,12 @@ static void test_all()
     C_String_print(" SKIP because not in static config\n");
   }
   EverCrypt_AutoConfig2_init();
-  bool no_avx12 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx211 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi211 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx11 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni11 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext11 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx10 = !EverCrypt_AutoConfig2_has_avx();
+  bool no_avx29 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi29 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx9 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni9 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext9 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
@@ -13142,12 +12646,12 @@ static void test_all()
   }
   print_sep();
   EverCrypt_AutoConfig2_init();
-  bool no_avx13 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx212 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi212 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx12 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni12 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext12 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx11 = !EverCrypt_AutoConfig2_has_avx();
+  bool no_avx210 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi210 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx10 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni10 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext10 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_avx();
