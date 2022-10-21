@@ -978,6 +978,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	  -ccopt -Wno-unused \
 	  -warn-error @2@4-6@15@18@21+22 \
 	  -fparentheses \
+	  -fcast-allocations \
 	  -fextern-c \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a

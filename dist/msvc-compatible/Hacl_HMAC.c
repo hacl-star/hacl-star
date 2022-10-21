@@ -39,7 +39,7 @@ Hacl_HMAC_legacy_compute_sha1(
 {
   uint32_t l = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = alloca(l * sizeof (uint8_t));
+  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
   uint32_t i0;
   if (key_len <= (uint32_t)64U)
@@ -60,7 +60,7 @@ Hacl_HMAC_legacy_compute_sha1(
     Hacl_Hash_SHA1_legacy_hash(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = alloca(l * sizeof (uint8_t));
+  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -69,7 +69,7 @@ Hacl_HMAC_legacy_compute_sha1(
     ipad[i] = xi ^ yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = alloca(l * sizeof (uint8_t));
+  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -159,7 +159,7 @@ Hacl_HMAC_compute_sha2_256(
 {
   uint32_t l = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = alloca(l * sizeof (uint8_t));
+  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
   uint32_t i0;
   if (key_len <= (uint32_t)64U)
@@ -180,7 +180,7 @@ Hacl_HMAC_compute_sha2_256(
     Hacl_Hash_SHA2_hash_256(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = alloca(l * sizeof (uint8_t));
+  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -189,7 +189,7 @@ Hacl_HMAC_compute_sha2_256(
     ipad[i] = xi ^ yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = alloca(l * sizeof (uint8_t));
+  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -279,7 +279,7 @@ Hacl_HMAC_compute_sha2_384(
 {
   uint32_t l = (uint32_t)128U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = alloca(l * sizeof (uint8_t));
+  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
   uint32_t i0;
   if (key_len <= (uint32_t)128U)
@@ -300,7 +300,7 @@ Hacl_HMAC_compute_sha2_384(
     Hacl_Hash_SHA2_hash_384(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = alloca(l * sizeof (uint8_t));
+  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -309,7 +309,7 @@ Hacl_HMAC_compute_sha2_384(
     ipad[i] = xi ^ yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = alloca(l * sizeof (uint8_t));
+  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -405,7 +405,7 @@ Hacl_HMAC_compute_sha2_512(
 {
   uint32_t l = (uint32_t)128U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = alloca(l * sizeof (uint8_t));
+  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
   uint32_t i0;
   if (key_len <= (uint32_t)128U)
@@ -426,7 +426,7 @@ Hacl_HMAC_compute_sha2_512(
     Hacl_Hash_SHA2_hash_512(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = alloca(l * sizeof (uint8_t));
+  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -435,7 +435,7 @@ Hacl_HMAC_compute_sha2_512(
     ipad[i] = xi ^ yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = alloca(l * sizeof (uint8_t));
+  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -531,7 +531,7 @@ Hacl_HMAC_compute_blake2s_32(
 {
   uint32_t l = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = alloca(l * sizeof (uint8_t));
+  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
   uint32_t i0;
   if (key_len <= (uint32_t)64U)
@@ -552,7 +552,7 @@ Hacl_HMAC_compute_blake2s_32(
     Hacl_Hash_Blake2_hash_blake2s_32(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = alloca(l * sizeof (uint8_t));
+  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -561,7 +561,7 @@ Hacl_HMAC_compute_blake2s_32(
     ipad[i] = xi ^ yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = alloca(l * sizeof (uint8_t));
+  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -689,7 +689,7 @@ Hacl_HMAC_compute_blake2b_32(
 {
   uint32_t l = (uint32_t)128U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *key_block = alloca(l * sizeof (uint8_t));
+  uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
   uint32_t i0;
   if (key_len <= (uint32_t)128U)
@@ -710,7 +710,7 @@ Hacl_HMAC_compute_blake2b_32(
     Hacl_Hash_Blake2_hash_blake2b_32(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *ipad = alloca(l * sizeof (uint8_t));
+  uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
@@ -719,7 +719,7 @@ Hacl_HMAC_compute_blake2b_32(
     ipad[i] = xi ^ yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
-  uint8_t *opad = alloca(l * sizeof (uint8_t));
+  uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < l; i++)
   {

@@ -192,7 +192,7 @@ static inline void
 Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x(uint32_t n, uint8_t *seed, uint16_t *res)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)8U * n);
-  uint8_t *r = alloca((uint32_t)8U * n * sizeof (uint8_t));
+  uint8_t *r = (uint8_t *)alloca((uint32_t)8U * n * sizeof (uint8_t));
   memset(r, 0U, (uint32_t)8U * n * sizeof (uint8_t));
   uint8_t tmp_seed[72U] = { 0U };
   memcpy(tmp_seed + (uint32_t)2U, seed, (uint32_t)16U * sizeof (uint8_t));

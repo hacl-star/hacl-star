@@ -29,19 +29,24 @@
 Hacl_Streaming_Poly1305_256_poly1305_256_state
 *Hacl_Streaming_Poly1305_256_create_in(uint8_t *k)
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
-  *r1 = KRML_ALIGNED_MALLOC(32, sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)25U);
+  *r1 =
+    (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
+      sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)25U);
   memset(r1, 0U, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *block_state = r1;
-  uint8_t *k_ = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+  uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_0 = k_;
   Hacl_Streaming_Poly1305_256_poly1305_256_state
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Poly1305_256_poly1305_256_state), (uint32_t)1U);
   Hacl_Streaming_Poly1305_256_poly1305_256_state
-  *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Poly1305_256_poly1305_256_state));
+  *p =
+    (Hacl_Streaming_Poly1305_256_poly1305_256_state *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_Poly1305_256_poly1305_256_state
+      ));
   p[0U] = s;
   Hacl_Poly1305_256_poly1305_init(block_state, k);
   return p;
