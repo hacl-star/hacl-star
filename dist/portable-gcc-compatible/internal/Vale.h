@@ -313,36 +313,6 @@ extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
 /* SNIPPET_END: fsub_e */
 
-/* SNIPPET_START: gctr128_bytes */
-
-extern uint64_t
-gctr128_bytes(
-  uint8_t *x0,
-  uint64_t x1,
-  uint8_t *x2,
-  uint8_t *x3,
-  uint8_t *x4,
-  uint8_t *x5,
-  uint64_t x6
-);
-
-/* SNIPPET_END: gctr128_bytes */
-
-/* SNIPPET_START: gctr256_bytes */
-
-extern uint64_t
-gctr256_bytes(
-  uint8_t *x0,
-  uint64_t x1,
-  uint8_t *x2,
-  uint8_t *x3,
-  uint8_t *x4,
-  uint8_t *x5,
-  uint64_t x6
-);
-
-/* SNIPPET_END: gctr256_bytes */
-
 #if defined(__cplusplus)
 }
 #endif

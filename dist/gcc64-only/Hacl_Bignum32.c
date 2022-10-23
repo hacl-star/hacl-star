@@ -467,9 +467,9 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
 *Hacl_Bignum32_mont_ctx_init(uint32_t len, uint32_t *n)
 {
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
-  uint32_t *r2 = KRML_HOST_CALLOC(len, sizeof (uint32_t));
+  uint32_t *r2 = (uint32_t *)KRML_HOST_CALLOC(len, sizeof (uint32_t));
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
-  uint32_t *n1 = KRML_HOST_CALLOC(len, sizeof (uint32_t));
+  uint32_t *n1 = (uint32_t *)KRML_HOST_CALLOC(len, sizeof (uint32_t));
   uint32_t *r21 = r2;
   uint32_t *n11 = n1;
   memcpy(n11, n, len * sizeof (uint32_t));
@@ -479,7 +479,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 res = { .len = len, .n = n11, .mu = mu, .r2 = r21 };
   KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
-  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32));
+  *buf =
+    (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
+      ));
   buf[0U] = res;
   return buf;
 }
@@ -706,7 +709,9 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), (len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U);
   uint32_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U, sizeof (uint32_t));
+  *res =
+    (uint32_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U,
+      sizeof (uint32_t));
   if (res == NULL)
   {
     return res;
@@ -753,7 +758,9 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), (len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U);
   uint32_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U, sizeof (uint32_t));
+  *res =
+    (uint32_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U,
+      sizeof (uint32_t));
   if (res == NULL)
   {
     return res;
