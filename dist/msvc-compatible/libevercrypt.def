@@ -1,7 +1,6 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   LowStar_Vector_new_capacity
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
@@ -184,7 +183,6 @@ EXPORTS
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
   Hacl_Impl_Chacha20_chacha20_init
-  Hacl_Impl_Chacha20_chacha20_encrypt_block
   Hacl_Impl_Chacha20_chacha20_update
   Hacl_Chacha20_chacha20_encrypt
   Hacl_Chacha20_chacha20_decrypt
@@ -399,13 +397,6 @@ EXPORTS
   MerkleTree_Low_Serialization_mt_deserialize_path
   MerkleTree_Low_Hashfunctions_init_hash
   MerkleTree_Low_Hashfunctions_free_hash
-  EverCrypt_CTR_uu___is_State
-  EverCrypt_CTR_xor8
-  EverCrypt_CTR_alg_of_state
-  EverCrypt_CTR_create_in
-  EverCrypt_CTR_init
-  EverCrypt_CTR_update_block
-  EverCrypt_CTR_free
   Hacl_Impl_P256_LowLevel_toUint8
   Hacl_Impl_P256_LowLevel_changeEndian
   Hacl_Impl_P256_LowLevel_toUint64ChangeEndian
@@ -830,11 +821,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
-  EverCrypt_Poly1305_poly1305
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
+  EverCrypt_Poly1305_poly1305
   Hacl_Streaming_Poly1305_32_create_in
   Hacl_Streaming_Poly1305_32_init
   Hacl_Streaming_Poly1305_32_update

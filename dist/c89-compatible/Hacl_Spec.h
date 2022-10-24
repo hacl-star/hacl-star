@@ -62,12 +62,6 @@ typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
 typedef uint8_t Spec_FFDHE_ffdhe_alg;
 
-#define Spec_Agile_Cipher_AES128 0
-#define Spec_Agile_Cipher_AES256 1
-#define Spec_Agile_Cipher_CHACHA20 2
-
-typedef uint8_t Spec_Agile_Cipher_cipher_alg;
-
 #define Spec_Agile_AEAD_AES128_GCM 0
 #define Spec_Agile_AEAD_AES256_GCM 1
 #define Spec_Agile_AEAD_CHACHA20_POLY1305 2

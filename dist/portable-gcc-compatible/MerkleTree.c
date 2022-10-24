@@ -31,7 +31,7 @@
 static uint8_t *hash_r_alloc(uint32_t s)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), s);
-  uint8_t *buf = KRML_HOST_CALLOC(s, sizeof (uint8_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(s, sizeof (uint8_t));
   return buf;
 }
 
@@ -61,7 +61,7 @@ static MerkleTree_Low_Datastructures_hash_vec
 alloc_reserve___uint8_t_(uint32_t len, uint8_t *ia)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t *), len);
-  uint8_t **buf = KRML_HOST_MALLOC(sizeof (uint8_t *) * len);
+  uint8_t **buf = (uint8_t **)KRML_HOST_MALLOC(sizeof (uint8_t *) * len);
   for (uint32_t _i = 0U; _i < len; ++_i)
     buf[_i] = ia;
   return ((MerkleTree_Low_Datastructures_hash_vec){ .sz = (uint32_t)0U, .cap = len, .vs = buf });
@@ -239,7 +239,7 @@ insert___uint8_t_(MerkleTree_Low_Datastructures_hash_vec vec, uint8_t *v)
   {
     uint32_t ncap = LowStar_Vector_new_capacity(cap);
     KRML_CHECK_SIZE(sizeof (uint8_t *), ncap);
-    uint8_t **nvs = KRML_HOST_MALLOC(sizeof (uint8_t *) * ncap);
+    uint8_t **nvs = (uint8_t **)KRML_HOST_MALLOC(sizeof (uint8_t *) * ncap);
     for (uint32_t _i = 0U; _i < ncap; ++_i)
       nvs[_i] = v;
     memcpy(nvs, vs, sz * sizeof (uint8_t *));
@@ -794,7 +794,11 @@ alloc_rid__LowStar_Vector_vector_str__uint8_t_(
 {
   KRML_CHECK_SIZE(sizeof (MerkleTree_Low_Datastructures_hash_vec), len);
   MerkleTree_Low_Datastructures_hash_vec
-  *buf = KRML_HOST_MALLOC(sizeof (MerkleTree_Low_Datastructures_hash_vec) * len);
+  *buf =
+    (MerkleTree_Low_Datastructures_hash_vec *)KRML_HOST_MALLOC(sizeof (
+        MerkleTree_Low_Datastructures_hash_vec
+      )
+      * len);
   for (uint32_t _i = 0U; _i < len; ++_i)
     buf[_i] = v;
   return ((MerkleTree_Low_Datastructures_hash_vv){ .sz = len, .cap = len, .vs = buf });
@@ -870,7 +874,7 @@ alloc_rid__LowStar_Vector_vector_str__uint8_t__uint32_t(
 static MerkleTree_Low_Datastructures_hash_vec alloc_rid___uint8_t_(uint32_t len, uint8_t *v)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t *), len);
-  uint8_t **buf = KRML_HOST_MALLOC(sizeof (uint8_t *) * len);
+  uint8_t **buf = (uint8_t **)KRML_HOST_MALLOC(sizeof (uint8_t *) * len);
   for (uint32_t _i = 0U; _i < len; ++_i)
     buf[_i] = v;
   return ((MerkleTree_Low_Datastructures_hash_vec){ .sz = len, .cap = len, .vs = buf });
@@ -953,7 +957,8 @@ static MerkleTree_Low_merkle_tree
   x0 = { .state = hsz, .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   uint8_t *mroot = x00.r_alloc(x0.state);
   KRML_CHECK_SIZE(sizeof (MerkleTree_Low_merkle_tree), (uint32_t)1U);
-  MerkleTree_Low_merkle_tree *mt = KRML_HOST_MALLOC(sizeof (MerkleTree_Low_merkle_tree));
+  MerkleTree_Low_merkle_tree
+  *mt = (MerkleTree_Low_merkle_tree *)KRML_HOST_MALLOC(sizeof (MerkleTree_Low_merkle_tree));
   mt[0U]
   =
     (
@@ -1242,7 +1247,8 @@ MerkleTree_Low_path *MerkleTree_Low_init_path(uint32_t hsz)
       .r_free = hash_vec_r_free
     };
   KRML_CHECK_SIZE(sizeof (MerkleTree_Low_path), (uint32_t)1U);
-  MerkleTree_Low_path *buf = KRML_HOST_MALLOC(sizeof (MerkleTree_Low_path));
+  MerkleTree_Low_path
+  *buf = (MerkleTree_Low_path *)KRML_HOST_MALLOC(sizeof (MerkleTree_Low_path));
   buf[0U] = ((MerkleTree_Low_path){ .hash_size = hsz, .hashes = x00.r_alloc(x0.state) });
   return buf;
 }
@@ -2989,7 +2995,8 @@ MerkleTree_Low_merkle_tree
     return NULL;
   }
   KRML_CHECK_SIZE(sizeof (MerkleTree_Low_merkle_tree), (uint32_t)1U);
-  MerkleTree_Low_merkle_tree *buf = KRML_HOST_MALLOC(sizeof (MerkleTree_Low_merkle_tree));
+  MerkleTree_Low_merkle_tree
+  *buf = (MerkleTree_Low_merkle_tree *)KRML_HOST_MALLOC(sizeof (MerkleTree_Low_merkle_tree));
   buf[0U]
   =
     (
@@ -3062,7 +3069,8 @@ MerkleTree_Low_path
     return NULL;
   }
   KRML_CHECK_SIZE(sizeof (MerkleTree_Low_path), (uint32_t)1U);
-  MerkleTree_Low_path *buf = KRML_HOST_MALLOC(sizeof (MerkleTree_Low_path));
+  MerkleTree_Low_path
+  *buf = (MerkleTree_Low_path *)KRML_HOST_MALLOC(sizeof (MerkleTree_Low_path));
   buf[0U] = ((MerkleTree_Low_path){ .hash_size = hash_size, .hashes = hs });
   return buf;
 }

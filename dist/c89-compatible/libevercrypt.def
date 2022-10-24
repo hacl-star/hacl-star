@@ -1,7 +1,6 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
@@ -183,7 +182,6 @@ EXPORTS
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
   Hacl_Impl_Chacha20_chacha20_init
-  Hacl_Impl_Chacha20_chacha20_encrypt_block
   Hacl_Impl_Chacha20_chacha20_update
   Hacl_Chacha20_chacha20_encrypt
   Hacl_Chacha20_chacha20_decrypt
@@ -333,13 +331,6 @@ EXPORTS
   Hacl_NaCl_crypto_box_easy
   Hacl_NaCl_crypto_box_open_easy_afternm
   Hacl_NaCl_crypto_box_open_easy
-  EverCrypt_CTR_uu___is_State
-  EverCrypt_CTR_xor8
-  EverCrypt_CTR_alg_of_state
-  EverCrypt_CTR_create_in
-  EverCrypt_CTR_init
-  EverCrypt_CTR_update_block
-  EverCrypt_CTR_free
   Hacl_Impl_P256_LowLevel_toUint8
   Hacl_Impl_P256_LowLevel_changeEndian
   Hacl_Impl_P256_LowLevel_toUint64ChangeEndian
