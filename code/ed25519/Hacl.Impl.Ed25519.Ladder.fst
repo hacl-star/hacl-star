@@ -163,12 +163,11 @@ val point_mul_g_double_vartime_noalloc:
     disjoint out scalar1 /\ disjoint out scalar2 /\ disjoint out table2 /\
 
     BD.bn_v h scalar1 < pow2 256 /\ BD.bn_v h scalar2 < pow2 256 /\
-    F51.point_inv_t h q1 /\ F51.inv_ext_point (as_seq h q1) /\
+    F51.linv (as_seq h q1) /\ F51.linv (as_seq h q2) /\
     F51.point_eval h q1 == g_c /\
-    F51.point_inv_t h q2 /\ F51.inv_ext_point (as_seq h q2) /\
     table_inv_w5 (as_seq h q2) (as_seq h table2))
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
+    F51.linv (as_seq h1 out) /\
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h0 scalar1)
@@ -212,11 +211,10 @@ val point_mul_g_double_vartime_table:
     disjoint out scalar1 /\ disjoint out scalar2 /\
 
     BD.bn_v h scalar1 < pow2 256 /\ BD.bn_v h scalar2 < pow2 256 /\
-    F51.point_inv_t h q1 /\ F51.inv_ext_point (as_seq h q1) /\
-    F51.point_eval h q1 == g_c /\
-    F51.point_inv_t h q2 /\ F51.inv_ext_point (as_seq h q2))
+    F51.linv (as_seq h q1) /\ F51.linv (as_seq h q2) /\
+    F51.point_eval h q1 == g_c)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
+    F51.linv (as_seq h1 out) /\
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h0 scalar1)
@@ -228,7 +226,7 @@ let point_mul_g_double_vartime_table out scalar1 q1 scalar2 q2 =
   [@inline_let] let k = mk_ed25519_concrete_ops in
   [@inline_let] let table_len = 32ul in
   assert_norm (pow2 5 == v table_len);
-  
+
   push_frame ();
   let table2 = create (table_len *! len) (u64 0) in
   PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
@@ -255,11 +253,10 @@ val point_mul_g_double_vartime_aux:
     disjoint bscalar2 q1 /\ disjoint bscalar2 q2 /\ eq_or_disjoint q1 q2 /\
     disjoint q1 out /\ disjoint q2 out /\ disjoint scalar1 out /\ disjoint scalar2 out /\
 
-    F51.point_inv_t h q1 /\ F51.inv_ext_point (as_seq h q1) /\
-    F51.point_eval h q1 == g_c /\
-    F51.point_inv_t h q2 /\ F51.inv_ext_point (as_seq h q2))
+    F51.linv (as_seq h q1) /\ F51.linv (as_seq h q2) /\
+    F51.point_eval h q1 == g_c)
   (ensures fun h0 _ h1 -> modifies (loc out |+| loc bscalar1 |+| loc bscalar2) h0 h1 /\
-    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
+    F51.linv (as_seq h1 out) /\
     BD.bn_v h1 bscalar1 == BSeq.nat_from_bytes_le (as_seq h0 scalar1) /\
     BD.bn_v h1 bscalar2 == BSeq.nat_from_bytes_le (as_seq h0 scalar2) /\
     S.to_aff_point (F51.point_eval h1 out) ==
@@ -287,9 +284,9 @@ val point_mul_g_double_vartime:
     live h out /\ live h scalar1 /\
     live h scalar2 /\ live h q2 /\
     disjoint q2 out /\ disjoint scalar1 out /\ disjoint scalar2 out /\
-    F51.point_inv_t h q2 /\ F51.inv_ext_point (as_seq h q2))
+    F51.linv (as_seq h q2))
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
+    F51.linv (as_seq h1 out) /\
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point g_c) 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar1))
@@ -298,11 +295,11 @@ val point_mul_g_double_vartime:
 [@CInline]
 let point_mul_g_double_vartime out scalar1 scalar2 q2 =
   push_frame ();
-  let g = create 20ul (u64 0) in
+  let tmp = create 28ul (u64 0) in
+  let g = sub tmp 0ul 20ul in
+  let bscalar1 = sub tmp 20ul 4ul in
+  let bscalar2 = sub tmp 24ul 4ul in
   make_g g;
-
-  let bscalar1 = create 4ul (u64 0) in
-  let bscalar2 = create 4ul (u64 0) in
   point_mul_g_double_vartime_aux out scalar1 g scalar2 q2 bscalar1 bscalar2;
   pop_frame ()
 
