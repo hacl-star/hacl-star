@@ -33,17 +33,6 @@ let table_inv_w4 : BE.table_inv_t U64 15ul 16ul =
   [@inline_let] let table_len = 16ul in
   BE.table_inv_precomp len ctx_len k l table_len
 
-(*
-inline_for_extraction noextract
-let table_inv_w5 : BE.table_inv_t U64 15ul 32ul =
-  [@inline_let] let len = 15ul in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = mk_k256_concrete_ops in
-  [@inline_let] let l = 5ul in
-  [@inline_let] let table_len = 32ul in
-  assert_norm (pow2 (v l) == v table_len);
-  BE.table_inv_precomp len ctx_len k l table_len
-*)
 
 let point_mul out scalar q =
   let h0 = ST.get () in

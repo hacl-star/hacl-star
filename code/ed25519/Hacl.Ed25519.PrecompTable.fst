@@ -31,69 +31,24 @@ include Hacl.Impl.Ed25519.Group
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-inline_for_extraction noextract
-val ext_point_to_list: p:S.ext_point_c
-  -> x:list uint64{FStar.List.Tot.length x = 20 /\
-    mk_to_ed25519_comm_monoid.BE.linv (Seq.seq_of_list x)}
-
 let ext_point_to_list p =
   Hacl.Spec.Ed25519.PrecompTable.ext_point_to_list_lemma p;
   Hacl.Spec.Ed25519.PrecompTable.ext_point_to_list p
 
 
-val lemma_refl: x:S.ext_point_c ->
-  Lemma (S.mk_ed25519_concrete_ops.SE.to.SE.refl x ==
-    mk_to_ed25519_comm_monoid.BE.refl (Seq.seq_of_list (ext_point_to_list x)))
-
 let lemma_refl x =
   Hacl.Spec.Ed25519.PrecompTable.ext_point_to_list_lemma x
 
-
-inline_for_extraction noextract
-let mk_ed25519_precomp_base_table: SPT.mk_precomp_base_table S.ext_point_c U64 20ul 0ul = {
-  SPT.concr_ops = S.mk_ed25519_concrete_ops;
-  SPT.to_cm = mk_to_ed25519_comm_monoid;
-  SPT.to_list = ext_point_to_list;
-  SPT.lemma_refl = lemma_refl;
-}
-
-
-inline_for_extraction noextract
-let g_c : S.ext_point_c =
-  Spec.Ed25519.Lemmas.g_is_on_curve ();
-  S.g
-
-
-inline_for_extraction noextract
-let pow_base_point (k:nat) =
-  LE.pow S.mk_ed25519_comm_monoid (S.to_aff_point g_c) k
-
-unfold
-let precomp_table_acc_inv
-  (table_len:nat{table_len * 20 <= max_size_t})
-  (table:LSeq.lseq uint64 (table_len * 20))
-  (j:nat{j < table_len})
-=
-  Math.Lemmas.lemma_mult_lt_right 20 j table_len;
-  Math.Lemmas.lemma_mult_le_right 20 (j + 1) table_len;
-  let bj = LSeq.sub table (j * 20) 20 in
-  F51.linv bj /\ refl bj == pow_base_point j
-
-
 ///  window size = 4
 
-unfold let precomp_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 320} =
+let precomp_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 320} =
   normalize_term (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 15)
 
 
-inline_for_extraction noextract
 let precomp_basepoint_table_lseq_w4 : LSeq.lseq uint64 320 =
   normalize_term_spec (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 15);
   Seq.seq_of_list precomp_basepoint_table_list_w4
 
-
-val precomp_basepoint_table_lemma_w4: unit ->
-  Lemma (forall (i:nat{i < 16}). precomp_table_acc_inv 16 precomp_basepoint_table_lseq_w4 i)
 
 let precomp_basepoint_table_lemma_w4 () =
   normalize_term_spec (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 15);
