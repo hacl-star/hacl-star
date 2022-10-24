@@ -143,9 +143,9 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
   {
     case Spec_Hash_Definitions_SHA1:
       {
-        uint8_t *k = KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
-        uint8_t *v = KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
-        uint32_t *ctr = KRML_HOST_MALLOC(sizeof (uint32_t));
+        uint8_t *k = (uint8_t *)KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
+        uint8_t *v = (uint8_t *)KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
+        uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
         ctr[0U] = (uint32_t)1U;
         st =
           (
@@ -158,9 +158,9 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        uint8_t *k = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-        uint8_t *v = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-        uint32_t *ctr = KRML_HOST_MALLOC(sizeof (uint32_t));
+        uint8_t *k = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+        uint8_t *v = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+        uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
         ctr[0U] = (uint32_t)1U;
         st =
           (
@@ -173,9 +173,9 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        uint8_t *k = KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
-        uint8_t *v = KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
-        uint32_t *ctr = KRML_HOST_MALLOC(sizeof (uint32_t));
+        uint8_t *k = (uint8_t *)KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
+        uint8_t *v = (uint8_t *)KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
+        uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
         ctr[0U] = (uint32_t)1U;
         st =
           (
@@ -188,9 +188,9 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        uint8_t *k = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
-        uint8_t *v = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
-        uint32_t *ctr = KRML_HOST_MALLOC(sizeof (uint32_t));
+        uint8_t *k = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+        uint8_t *v = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+        uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
         ctr[0U] = (uint32_t)1U;
         st =
           (
@@ -208,7 +208,8 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
       }
   }
   KRML_CHECK_SIZE(sizeof (EverCrypt_DRBG_state_s), (uint32_t)1U);
-  EverCrypt_DRBG_state_s *buf = KRML_HOST_MALLOC(sizeof (EverCrypt_DRBG_state_s));
+  EverCrypt_DRBG_state_s
+  *buf = (EverCrypt_DRBG_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_DRBG_state_s));
   buf[0U] = st;
   return buf;
 }

@@ -133,12 +133,6 @@ static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t 
 
 /* SNIPPET_END: FStar_UInt128_mul_wide */
 
-/* SNIPPET_START: store128_le */
-
-static inline void store128_le(uint8_t *x0, FStar_UInt128_uint128 x1);
-
-/* SNIPPET_END: store128_le */
-
 /* SNIPPET_START: store128_be */
 
 static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);

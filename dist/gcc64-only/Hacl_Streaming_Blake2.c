@@ -108,17 +108,20 @@ Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_
     Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32));
   uint8_t
   *buf =
-    KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
+    (uint8_t *)KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
         Hacl_Impl_Blake2_Core_M32),
       sizeof (uint8_t));
-  uint32_t *wv = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
-  uint32_t *b = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
+  uint32_t *wv = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
+  uint32_t *b = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
   Hacl_Streaming_Blake2_blake2s_32_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2_blake2s_32_state
   s1 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2_blake2s_32_state), (uint32_t)1U);
   Hacl_Streaming_Blake2_blake2s_32_state
-  *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Blake2_blake2s_32_state));
+  *p =
+    (Hacl_Streaming_Blake2_blake2s_32_state *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_Blake2_blake2s_32_state
+      ));
   p[0U] = s1;
   Hacl_Blake2s_32_blake2s_init(block_state.snd, (uint32_t)0U, (uint32_t)32U);
   return p;
@@ -643,17 +646,20 @@ Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_
     Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32));
   uint8_t
   *buf =
-    KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
+    (uint8_t *)KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
         Hacl_Impl_Blake2_Core_M32),
       sizeof (uint8_t));
-  uint64_t *wv = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
-  uint64_t *b = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
+  uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
+  uint64_t *b = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
   Hacl_Streaming_Blake2_blake2b_32_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2_blake2b_32_state
   s1 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2_blake2b_32_state), (uint32_t)1U);
   Hacl_Streaming_Blake2_blake2b_32_state
-  *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Blake2_blake2b_32_state));
+  *p =
+    (Hacl_Streaming_Blake2_blake2b_32_state *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_Blake2_blake2b_32_state
+      ));
   p[0U] = s1;
   Hacl_Blake2b_32_blake2b_init(block_state.snd, (uint32_t)0U, (uint32_t)64U);
   return p;
