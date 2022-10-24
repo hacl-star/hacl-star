@@ -389,8 +389,8 @@ let lexp_four_fw_f #a_t len ctx_len k l table_len table_inv1 table_inv2 table_in
   pow_a_to_small_b1 pow_a_to_small_b2 pow_a_to_small_b3 pow_a_to_small_b4
   ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4 table1 table2 table3 table4 i acc
  =
-  lexp_fw_f len ctx_len k l table_len table_inv4 pow_a_to_small_b4 ctx a4 bLen bBits b4 table4 i acc;
-  lmul_acc_pow_a_bits_l len ctx_len k l table_len table_inv3 pow_a_to_small_b3 ctx a3 bLen bBits b3 table3 i acc;
+  lexp_double_fw_f len ctx_len k l table_len table_inv3 table_inv4
+    pow_a_to_small_b3 pow_a_to_small_b4 ctx a3 bLen bBits b3 a4 b4 table3 table4 i acc;   
   lmul_acc_pow_a_bits_l len ctx_len k l table_len table_inv2 pow_a_to_small_b2 ctx a2 bLen bBits b2 table2 i acc;
   lmul_acc_pow_a_bits_l len ctx_len k l table_len table_inv1 pow_a_to_small_b1 ctx a1 bLen bBits b1 table1 i acc
 
@@ -485,9 +485,7 @@ let lexp_four_fw_acc0 #a_t len ctx_len k l table_len table_inv1 table_inv2 table
   push_frame ();
   let tmp = create len (uint #a_t #SEC 0) in
   lexp_double_fw_acc0 len ctx_len k l table_len table_inv1 table_inv2 pow_a_to_small_b1 pow_a_to_small_b2 ctx a1 bLen bBits b1 a2 b2 table1 table2 acc;
-  lexp_fw_acc0 len ctx_len k l table_len table_inv3 pow_a_to_small_b3 ctx a3 bLen bBits b3 table3 tmp;
-  k.lmul ctx acc tmp acc;
-  lexp_fw_acc0 len ctx_len k l table_len table_inv4 pow_a_to_small_b4 ctx a4 bLen bBits b4 table4 tmp;
+  lexp_double_fw_acc0 len ctx_len k l table_len table_inv3 table_inv4 pow_a_to_small_b3 pow_a_to_small_b4 ctx a3 bLen bBits b3 a4 b4 table3 table4 tmp;
   k.lmul ctx acc tmp acc;
   pop_frame ()
 
