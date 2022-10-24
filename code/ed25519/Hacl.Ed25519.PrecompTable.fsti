@@ -86,3 +86,19 @@ val precomp_basepoint_table_lemma_w4: unit ->
 
 val precomp_basepoint_table_w4:
   x:glbuffer uint64 320ul{witnessed x precomp_basepoint_table_lseq_w4 /\ recallable x}
+
+
+///  window size = 5
+
+inline_for_extraction noextract
+val precomp_basepoint_table_list_w5: x:list uint64{FStar.List.Tot.length x = 640}
+
+inline_for_extraction noextract
+val precomp_basepoint_table_lseq_w5 : LSeq.lseq uint64 640
+
+val precomp_basepoint_table_lemma_w5: unit ->
+  Lemma (forall (i:nat{i < 32}). precomp_table_acc_inv 32 precomp_basepoint_table_lseq_w5 i)
+
+
+val precomp_basepoint_table_w5:
+  x:glbuffer uint64 640ul{witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x}

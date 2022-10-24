@@ -38,6 +38,17 @@ let table_inv_w4 : BE.table_inv_t U64 20ul 16ul =
 
 
 inline_for_extraction noextract
+let table_inv_w5 : BE.table_inv_t U64 20ul 32ul =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
+  assert_norm (pow2 (v l) = v table_len);
+  BE.table_inv_precomp len ctx_len k l table_len
+
+
+inline_for_extraction noextract
 val convert_scalar: scalar:lbuffer uint8 32ul -> bscalar:lbuffer uint64 4ul ->
   Stack unit
   (requires fun h -> live h scalar /\ live h bscalar /\ disjoint scalar bscalar)
@@ -142,7 +153,7 @@ val point_mul_g_double_vartime_noalloc:
     out:point
   -> scalar1:lbuffer uint64 4ul -> q1:point
   -> scalar2:lbuffer uint64 4ul -> q2:point
-  -> table2: lbuffer uint64 320ul ->
+  -> table2: lbuffer uint64 640ul ->
   Stack unit
   (requires fun h ->
     live h out /\ live h scalar1 /\ live h q1 /\
@@ -155,36 +166,36 @@ val point_mul_g_double_vartime_noalloc:
     F51.point_inv_t h q1 /\ F51.inv_ext_point (as_seq h q1) /\
     F51.point_eval h q1 == g_c /\
     F51.point_inv_t h q2 /\ F51.inv_ext_point (as_seq h q2) /\
-    table_inv_w4 (as_seq h q2) (as_seq h table2))
+    table_inv_w5 (as_seq h q2) (as_seq h table2))
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h0 scalar1)
-      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h0 scalar2) 4)
+      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h0 scalar2) 5)
 
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let len = 20ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_ed25519_concrete_ops in
-  [@inline_let] let l = 4ul in
-  [@inline_let] let table_len = 16ul in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
   [@inline_let] let bLen = 4ul in
   [@inline_let] let bBits = 256ul in
-
+  assert_norm (pow2 (v l) == v table_len);
   let h0 = ST.get () in
-  recall_contents precomp_basepoint_table_w4 precomp_basepoint_table_lseq_w4;
+  recall_contents precomp_basepoint_table_w5 precomp_basepoint_table_lseq_w5;
   let h1 = ST.get () in
-  precomp_basepoint_table_lemma_w4 ();
-  assert (table_inv_w4 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w4));
-  assert (table_inv_w4 (as_seq h1 q2) (as_seq h1 table2));
+  precomp_basepoint_table_lemma_w5 ();
+  assert (table_inv_w5 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w5));
+  assert (table_inv_w5 (as_seq h1 q2) (as_seq h1 table2));
 
   ME.mk_lexp_double_fw_tables len ctx_len k l table_len
-    table_inv_w4 table_inv_w4
+    table_inv_w5 table_inv_w5
     (BE.lprecomp_get_vartime len ctx_len k l table_len)
     (BE.lprecomp_get_vartime len ctx_len k l table_len)
     (null uint64) q1 bLen bBits scalar1 q2 scalar2
-    (to_const precomp_basepoint_table_w4) (to_const table2) out
+    (to_const precomp_basepoint_table_w5) (to_const table2) out
 
 
 inline_for_extraction noextract
@@ -209,14 +220,15 @@ val point_mul_g_double_vartime_table:
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h0 scalar1)
-      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h0 scalar2) 4)
+      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h0 scalar2) 5)
 
 let point_mul_g_double_vartime_table out scalar1 q1 scalar2 q2 =
   [@inline_let] let len = 20ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_ed25519_concrete_ops in
-  [@inline_let] let table_len = 16ul in
-
+  [@inline_let] let table_len = 32ul in
+  assert_norm (pow2 5 == v table_len);
+  
   push_frame ();
   let table2 = create (table_len *! len) (u64 0) in
   PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
@@ -253,7 +265,7 @@ val point_mul_g_double_vartime_aux:
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h1 bscalar1)
-      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h1 bscalar2) 4)
+      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h1 bscalar2) 5)
 
 let point_mul_g_double_vartime_aux out scalar1 q1 scalar2 q2 bscalar1 bscalar2 =
   let h0 = ST.get () in
@@ -281,7 +293,7 @@ val point_mul_g_double_vartime:
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
       (S.to_aff_point g_c) 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar1))
-      (S.to_aff_point (F51.point_eval h0 q2)) (BSeq.nat_from_bytes_le (as_seq h0 scalar2)) 4)
+      (S.to_aff_point (F51.point_eval h0 q2)) (BSeq.nat_from_bytes_le (as_seq h0 scalar2)) 5)
 
 [@CInline]
 let point_mul_g_double_vartime out scalar1 scalar2 q2 =
@@ -306,5 +318,5 @@ let point_negate_mul_double_g_vartime out scalar1 scalar2 q2 =
   point_mul_g_double_vartime out scalar1 scalar2 q2_neg;
   SE.exp_double_fw_lemma S.mk_ed25519_concrete_ops
     g_c 256 (BSeq.nat_from_bytes_le (as_seq h1 scalar1))
-    (F51.point_eval h1 q2_neg) (BSeq.nat_from_bytes_le (as_seq h1 scalar2)) 4;
+    (F51.point_eval h1 q2_neg) (BSeq.nat_from_bytes_le (as_seq h1 scalar2)) 5;
   pop_frame ()

@@ -59,3 +59,25 @@ let precomp_basepoint_table_lemma_w4 () =
 let precomp_basepoint_table_w4:
   x:glbuffer uint64 320ul{witnessed x precomp_basepoint_table_lseq_w4 /\ recallable x} =
   createL_global precomp_basepoint_table_list_w4
+
+
+///  window size = 5
+
+let precomp_basepoint_table_list_w5: x:list uint64{FStar.List.Tot.length x = 640} =
+  normalize_term (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 31)
+
+
+let precomp_basepoint_table_lseq_w5 : LSeq.lseq uint64 640 =
+  normalize_term_spec (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 31);
+  Seq.seq_of_list precomp_basepoint_table_list_w5
+
+
+let precomp_basepoint_table_lemma_w5 () =
+  normalize_term_spec (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 31);
+  SPT.precomp_base_table_lemma
+    mk_ed25519_precomp_base_table g_c 32 precomp_basepoint_table_lseq_w5
+
+
+let precomp_basepoint_table_w5:
+  x:glbuffer uint64 640ul{witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x} =
+  createL_global precomp_basepoint_table_list_w5
