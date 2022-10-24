@@ -233,7 +233,7 @@ val mk_point_at_inf: p:F51.point ->
     SE.to_aff_point (F51.point_eval h1 p) == SE.aff_point_at_infinity)
 
 let mk_point_at_inf p =
-  Hacl.Impl.Ed25519.Ladder.make_point_inf p
+  Hacl.Impl.Ed25519.PointConstants.make_point_inf p
 
 
 [@@ Comment "Write the base point (generator) in `p`.
@@ -248,7 +248,7 @@ val mk_base_point: p:F51.point ->
 
 let mk_base_point p =
   Spec.Ed25519.Lemmas.g_is_on_curve ();
-  Hacl.Impl.Ed25519.Ladder.make_g p
+  Hacl.Impl.Ed25519.PointConstants.make_g p
 
 
 [@@ Comment "Write `-p` in `out` (point negation).
