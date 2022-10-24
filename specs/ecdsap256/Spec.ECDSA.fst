@@ -382,8 +382,7 @@ let verifyQValidCurvePointSpec publicKey =
   x < Spec.P256.Definitions.prime256 &&
   y < Spec.P256.Definitions.prime256 &&
   z < Spec.P256.Definitions.prime256 &&
-  isPointOnCurve (x, y, z) &&
-  isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey)
+  isPointOnCurve (x, y, z)
 
 
 val checkCoordinates: r:nat -> s:nat -> bool
