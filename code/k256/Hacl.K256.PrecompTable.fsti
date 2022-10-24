@@ -31,7 +31,6 @@ val lemma_refl: x:S.proj_point ->
   Lemma (S.mk_k256_concrete_ops.SE.to.SE.refl x ==
     mk_to_k256_comm_monoid.BE.refl (Seq.seq_of_list (proj_point_to_list x)))
 
-
 inline_for_extraction noextract
 let mk_k256_precomp_base_table: SPT.mk_precomp_base_table S.proj_point U64 15ul 0ul = {
   SPT.concr_ops = S.mk_k256_concrete_ops;
@@ -71,3 +70,17 @@ val precomp_basepoint_table_lemma_w4: unit ->
 
 val precomp_basepoint_table_w4:
   x:glbuffer uint64 240ul{witnessed x precomp_basepoint_table_lseq_w4 /\ recallable x}
+
+///  window size = 5
+
+inline_for_extraction noextract
+val precomp_basepoint_table_list_w5: x:list uint64{FStar.List.Tot.length x = 480}
+
+inline_for_extraction noextract
+val precomp_basepoint_table_lseq_w5 : LSeq.lseq uint64 480
+
+val precomp_basepoint_table_lemma_w5: unit ->
+  Lemma (forall (i:nat{i < 32}). precomp_table_acc_inv 32 precomp_basepoint_table_lseq_w5 i)
+
+val precomp_basepoint_table_w5:
+  x:glbuffer uint64 480ul{witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x}
