@@ -686,65 +686,15 @@ static inline void qinv(uint64_t *out, uint64_t *f)
   qmul(out, out, x6);
 }
 
-bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s)
+void Hacl_Impl_K256_Point_make_point_at_inf(uint64_t *p)
 {
-  uint8_t s0 = s[0U];
-  if (!(s0 == (uint8_t)0x02U || s0 == (uint8_t)0x03U))
-  {
-    return false;
-  }
-  uint8_t *xb = s + (uint32_t)1U;
-  bool is_x_valid = Hacl_K256_Field_load_felem_vartime(x, xb);
-  bool is_y_odd = s0 == (uint8_t)0x03U;
-  if (!is_x_valid)
-  {
-    return false;
-  }
-  uint64_t y2[5U] = { 0U };
-  uint64_t b[5U] = { 0U };
-  b[0U] = (uint64_t)0x7U;
-  b[1U] = (uint64_t)0U;
-  b[2U] = (uint64_t)0U;
-  b[3U] = (uint64_t)0U;
-  b[4U] = (uint64_t)0U;
-  Hacl_K256_Field_fsqr(y2, x);
-  Hacl_K256_Field_fmul(y2, y2, x);
-  Hacl_K256_Field_fadd(y2, y2, b);
-  Hacl_K256_Field_fnormalize(y2, y2);
-  Hacl_Impl_K256_Finv_fsqrt(y, y2);
-  Hacl_K256_Field_fnormalize(y, y);
-  uint64_t y2_comp[5U] = { 0U };
-  Hacl_K256_Field_fsqr(y2_comp, y);
-  Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
-  bool res = Hacl_K256_Field_is_felem_eq_vartime(y2, y2_comp);
-  bool is_y_valid = res;
-  if (!is_y_valid)
-  {
-    return false;
-  }
-  uint64_t x0 = y[0U];
-  bool is_y_odd1 = (x0 & (uint64_t)1U) == (uint64_t)1U;
-  Hacl_K256_Field_fnegate_conditional_vartime(y, is_y_odd1 != is_y_odd);
-  return true;
-}
-
-void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, uint64_t *y)
-{
-  Hacl_K256_Field_fnormalize(y, y);
-  Hacl_K256_Field_fnormalize(x, x);
-  uint64_t x0 = y[0U];
-  bool is_y_odd = (x0 & (uint64_t)1U) == (uint64_t)1U;
-  uint8_t ite;
-  if (is_y_odd)
-  {
-    ite = (uint8_t)0x03U;
-  }
-  else
-  {
-    ite = (uint8_t)0x02U;
-  }
-  s[0U] = ite;
-  Hacl_K256_Field_store_felem(s + (uint32_t)1U, x);
+  uint64_t *px = p;
+  uint64_t *py = p + (uint32_t)5U;
+  uint64_t *pz = p + (uint32_t)10U;
+  memset(px, 0U, (uint32_t)5U * sizeof (uint64_t));
+  memset(py, 0U, (uint32_t)5U * sizeof (uint64_t));
+  py[0U] = (uint64_t)1U;
+  memset(pz, 0U, (uint32_t)5U * sizeof (uint64_t));
 }
 
 void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p)
@@ -814,6 +764,67 @@ bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q)
     return false;
   }
   return fmul_fmul_eq_vartime(py, qz, qy, pz);
+}
+
+bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s)
+{
+  uint8_t s0 = s[0U];
+  if (!(s0 == (uint8_t)0x02U || s0 == (uint8_t)0x03U))
+  {
+    return false;
+  }
+  uint8_t *xb = s + (uint32_t)1U;
+  bool is_x_valid = Hacl_K256_Field_load_felem_vartime(x, xb);
+  bool is_y_odd = s0 == (uint8_t)0x03U;
+  if (!is_x_valid)
+  {
+    return false;
+  }
+  uint64_t y2[5U] = { 0U };
+  uint64_t b[5U] = { 0U };
+  b[0U] = (uint64_t)0x7U;
+  b[1U] = (uint64_t)0U;
+  b[2U] = (uint64_t)0U;
+  b[3U] = (uint64_t)0U;
+  b[4U] = (uint64_t)0U;
+  Hacl_K256_Field_fsqr(y2, x);
+  Hacl_K256_Field_fmul(y2, y2, x);
+  Hacl_K256_Field_fadd(y2, y2, b);
+  Hacl_K256_Field_fnormalize(y2, y2);
+  Hacl_Impl_K256_Finv_fsqrt(y, y2);
+  Hacl_K256_Field_fnormalize(y, y);
+  uint64_t y2_comp[5U] = { 0U };
+  Hacl_K256_Field_fsqr(y2_comp, y);
+  Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
+  bool res = Hacl_K256_Field_is_felem_eq_vartime(y2, y2_comp);
+  bool is_y_valid = res;
+  if (!is_y_valid)
+  {
+    return false;
+  }
+  uint64_t x0 = y[0U];
+  bool is_y_odd1 = (x0 & (uint64_t)1U) == (uint64_t)1U;
+  Hacl_K256_Field_fnegate_conditional_vartime(y, is_y_odd1 != is_y_odd);
+  return true;
+}
+
+void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, uint64_t *y)
+{
+  Hacl_K256_Field_fnormalize(y, y);
+  Hacl_K256_Field_fnormalize(x, x);
+  uint64_t x0 = y[0U];
+  bool is_y_odd = (x0 & (uint64_t)1U) == (uint64_t)1U;
+  uint8_t ite;
+  if (is_y_odd)
+  {
+    ite = (uint8_t)0x03U;
+  }
+  else
+  {
+    ite = (uint8_t)0x02U;
+  }
+  s[0U] = ite;
+  Hacl_K256_Field_store_felem(s + (uint32_t)1U, x);
 }
 
 void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p)
@@ -913,24 +924,13 @@ void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   Hacl_K256_Field_fnormalize_weak(z3, z3);
 }
 
-void Hacl_Impl_K256_PointMul_make_point_at_inf(uint64_t *p)
-{
-  uint64_t *px = p;
-  uint64_t *py = p + (uint32_t)5U;
-  uint64_t *pz = p + (uint32_t)10U;
-  memset(px, 0U, (uint32_t)5U * sizeof (uint64_t));
-  memset(py, 0U, (uint32_t)5U * sizeof (uint64_t));
-  py[0U] = (uint64_t)1U;
-  memset(pz, 0U, (uint32_t)5U * sizeof (uint64_t));
-}
-
 void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t *q)
 {
   uint64_t table[240U] = { 0U };
   uint64_t tmp[15U] = { 0U };
   uint64_t *t0 = table;
   uint64_t *t1 = table + (uint32_t)15U;
-  Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
+  Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, q, (uint32_t)15U * sizeof (uint64_t));
   KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
@@ -946,7 +946,7 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
     memcpy(table + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U,
       tmp,
       (uint32_t)15U * sizeof (uint64_t)););
-  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
+  Hacl_Impl_K256_Point_make_point_at_inf(out);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -970,13 +970,79 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
     }
     uint64_t bits_l = ite & mask_l;
     uint64_t a_bits_l[15U] = { 0U };
-    memcpy(a_bits_l, table, (uint32_t)15U * sizeof (uint64_t));
+    memcpy(a_bits_l, (uint64_t *)table, (uint32_t)15U * sizeof (uint64_t));
     KRML_MAYBE_FOR15(i2,
       (uint32_t)0U,
       (uint32_t)15U,
       (uint32_t)1U,
       uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
-      uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)15U;
+      const uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)15U;
+      KRML_MAYBE_FOR15(i,
+        (uint32_t)0U,
+        (uint32_t)15U,
+        (uint32_t)1U,
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
+        os[i] = x;););
+    Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l);
+  }
+}
+
+static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
+{
+  uint64_t g[15U] = { 0U };
+  uint64_t *gx = g;
+  uint64_t *gy = g + (uint32_t)5U;
+  uint64_t *gz = g + (uint32_t)10U;
+  gx[0U] = (uint64_t)0x2815b16f81798U;
+  gx[1U] = (uint64_t)0xdb2dce28d959fU;
+  gx[2U] = (uint64_t)0xe870b07029bfcU;
+  gx[3U] = (uint64_t)0xbbac55a06295cU;
+  gx[4U] = (uint64_t)0x79be667ef9dcU;
+  gy[0U] = (uint64_t)0x7d08ffb10d4b8U;
+  gy[1U] = (uint64_t)0x48a68554199c4U;
+  gy[2U] = (uint64_t)0xe1108a8fd17b4U;
+  gy[3U] = (uint64_t)0xc4655da4fbfc0U;
+  gy[4U] = (uint64_t)0x483ada7726a3U;
+  memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
+  gz[0U] = (uint64_t)1U;
+  Hacl_Impl_K256_Point_make_point_at_inf(out);
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
+  {
+    KRML_MAYBE_FOR4(i,
+      (uint32_t)0U,
+      (uint32_t)4U,
+      (uint32_t)1U,
+      Hacl_Impl_K256_PointDouble_point_double(out, out););
+    uint32_t bk = (uint32_t)256U;
+    uint64_t mask_l = (uint64_t)15U;
+    uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
+    uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
+    uint64_t p1 = scalar[i1] >> j;
+    uint64_t ite;
+    if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
+    {
+      ite = p1 | scalar[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+    }
+    else
+    {
+      ite = p1;
+    }
+    uint64_t bits_l = ite & mask_l;
+    uint64_t a_bits_l[15U] = { 0U };
+    memcpy(a_bits_l,
+      (uint64_t *)Hacl_K256_PrecompTable_precomp_basepoint_table_w4,
+      (uint32_t)15U * sizeof (uint64_t));
+    KRML_MAYBE_FOR15(i2,
+      (uint32_t)0U,
+      (uint32_t)15U,
+      (uint32_t)1U,
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
+      const
+      uint64_t
+      *res_j =
+        Hacl_K256_PrecompTable_precomp_basepoint_table_w4
+        + (i2 + (uint32_t)1U) * (uint32_t)15U;
       KRML_MAYBE_FOR15(i,
         (uint32_t)0U,
         (uint32_t)15U,
@@ -989,39 +1055,29 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
 }
 
 static inline void
-point_mul_double_vartime(
-  uint64_t *out,
-  uint64_t *scalar1,
-  uint64_t *q1,
-  uint64_t *scalar2,
-  uint64_t *q2
-)
+point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, uint64_t *q2)
 {
-  uint64_t table1[240U] = { 0U };
-  uint64_t tmp0[15U] = { 0U };
-  uint64_t *t00 = table1;
-  uint64_t *t10 = table1 + (uint32_t)15U;
-  Hacl_Impl_K256_PointMul_make_point_at_inf(t00);
-  memcpy(t10, q1, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR7(i,
-    (uint32_t)0U,
-    (uint32_t)7U,
-    (uint32_t)1U,
-    uint64_t *t11 = table1 + (i + (uint32_t)1U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointDouble_point_double(tmp0, t11);
-    memcpy(table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U,
-      tmp0,
-      (uint32_t)15U * sizeof (uint64_t));
-    uint64_t *t2 = table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(tmp0, q1, t2);
-    memcpy(table1 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U,
-      tmp0,
-      (uint32_t)15U * sizeof (uint64_t)););
+  uint64_t q1[15U] = { 0U };
+  uint64_t *gx = q1;
+  uint64_t *gy = q1 + (uint32_t)5U;
+  uint64_t *gz = q1 + (uint32_t)10U;
+  gx[0U] = (uint64_t)0x2815b16f81798U;
+  gx[1U] = (uint64_t)0xdb2dce28d959fU;
+  gx[2U] = (uint64_t)0xe870b07029bfcU;
+  gx[3U] = (uint64_t)0xbbac55a06295cU;
+  gx[4U] = (uint64_t)0x79be667ef9dcU;
+  gy[0U] = (uint64_t)0x7d08ffb10d4b8U;
+  gy[1U] = (uint64_t)0x48a68554199c4U;
+  gy[2U] = (uint64_t)0xe1108a8fd17b4U;
+  gy[3U] = (uint64_t)0xc4655da4fbfc0U;
+  gy[4U] = (uint64_t)0x483ada7726a3U;
+  memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
+  gz[0U] = (uint64_t)1U;
   uint64_t table2[240U] = { 0U };
   uint64_t tmp[15U] = { 0U };
   uint64_t *t0 = table2;
   uint64_t *t1 = table2 + (uint32_t)15U;
-  Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
+  Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, q2, (uint32_t)15U * sizeof (uint64_t));
   KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
@@ -1037,7 +1093,7 @@ point_mul_double_vartime(
     memcpy(table2 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U,
       tmp,
       (uint32_t)15U * sizeof (uint64_t)););
-  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
+  Hacl_Impl_K256_Point_make_point_at_inf(out);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     KRML_MAYBE_FOR4(i0,
@@ -1062,8 +1118,8 @@ point_mul_double_vartime(
     uint64_t bits_l = ite0 & mask_l0;
     uint64_t a_bits_l0[15U] = { 0U };
     uint32_t bits_l320 = (uint32_t)bits_l;
-    uint64_t *a_bits_l1 = table2 + bits_l320 * (uint32_t)15U;
-    memcpy(a_bits_l0, a_bits_l1, (uint32_t)15U * sizeof (uint64_t));
+    const uint64_t *a_bits_l1 = table2 + bits_l320 * (uint32_t)15U;
+    memcpy(a_bits_l0, (uint64_t *)a_bits_l1, (uint32_t)15U * sizeof (uint64_t));
     Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l0);
     uint32_t bk0 = (uint32_t)256U;
     uint64_t mask_l = (uint64_t)15U;
@@ -1082,53 +1138,12 @@ point_mul_double_vartime(
     uint64_t bits_l0 = ite & mask_l;
     uint64_t a_bits_l[15U] = { 0U };
     uint32_t bits_l32 = (uint32_t)bits_l0;
-    uint64_t *a_bits_l10 = table1 + bits_l32 * (uint32_t)15U;
-    memcpy(a_bits_l, a_bits_l10, (uint32_t)15U * sizeof (uint64_t));
+    const
+    uint64_t
+    *a_bits_l10 = Hacl_K256_PrecompTable_precomp_basepoint_table_w4 + bits_l32 * (uint32_t)15U;
+    memcpy(a_bits_l, (uint64_t *)a_bits_l10, (uint32_t)15U * sizeof (uint64_t));
     Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l);
   }
-}
-
-static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
-{
-  uint64_t g[15U] = { 0U };
-  uint64_t *gx = g;
-  uint64_t *gy = g + (uint32_t)5U;
-  uint64_t *gz = g + (uint32_t)10U;
-  gx[0U] = (uint64_t)0x2815b16f81798U;
-  gx[1U] = (uint64_t)0xdb2dce28d959fU;
-  gx[2U] = (uint64_t)0xe870b07029bfcU;
-  gx[3U] = (uint64_t)0xbbac55a06295cU;
-  gx[4U] = (uint64_t)0x79be667ef9dcU;
-  gy[0U] = (uint64_t)0x7d08ffb10d4b8U;
-  gy[1U] = (uint64_t)0x48a68554199c4U;
-  gy[2U] = (uint64_t)0xe1108a8fd17b4U;
-  gy[3U] = (uint64_t)0xc4655da4fbfc0U;
-  gy[4U] = (uint64_t)0x483ada7726a3U;
-  memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
-  gz[0U] = (uint64_t)1U;
-  Hacl_Impl_K256_PointMul_point_mul(out, scalar, g);
-}
-
-static inline void
-point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, uint64_t *q2)
-{
-  uint64_t g[15U] = { 0U };
-  uint64_t *gx = g;
-  uint64_t *gy = g + (uint32_t)5U;
-  uint64_t *gz = g + (uint32_t)10U;
-  gx[0U] = (uint64_t)0x2815b16f81798U;
-  gx[1U] = (uint64_t)0xdb2dce28d959fU;
-  gx[2U] = (uint64_t)0xe870b07029bfcU;
-  gx[3U] = (uint64_t)0xbbac55a06295cU;
-  gx[4U] = (uint64_t)0x79be667ef9dcU;
-  gy[0U] = (uint64_t)0x7d08ffb10d4b8U;
-  gy[1U] = (uint64_t)0x48a68554199c4U;
-  gy[2U] = (uint64_t)0xe1108a8fd17b4U;
-  gy[3U] = (uint64_t)0xc4655da4fbfc0U;
-  gy[4U] = (uint64_t)0x483ada7726a3U;
-  memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
-  gz[0U] = (uint64_t)1U;
-  point_mul_double_vartime(out, scalar1, g, scalar2, q2);
 }
 
 static inline bool load_public_key(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y)
