@@ -12,11 +12,6 @@
    All the computations are done for the fixed-window method.
 */
 
-// TODO: add the cost of `point_add` and `point double` in `fmul` and `fsqr`
-// to compare formulas given in
-// - projective coordinates
-// - jacobian coordinates
-// - mixed coordinates
 static inline void print_end_line(bool is_print) {
   if (is_print) {
     printf("-----------------------------------------------------------\n");
@@ -38,16 +33,16 @@ static inline void print_header_for_number_of_ops(bool is_print,
 }
 
 static inline void print_header_for_aggregated_table(bool is_ec_ops,
-                                                     uint32_t ratio_ec,
-                                                     uint32_t ratio_ff,
-                                                     bool is_wNAF) {
+                                                     double ratio_ec,
+                                                     double ratio_ff,
+                                                     bool is_wnaf) {
   printf("\n\n");
   char *mul_str = is_ec_ops ? "point_add" : "fmul";
   char *sqr_str = is_ec_ops ? "point_double" : "fsqr";
-  uint32_t ratio = is_ec_ops ? ratio_ec : ratio_ff;
-  char *wnaf_str = is_wNAF ? "[wNAF]" : "";
+  double ratio = is_ec_ops ? ratio_ec : ratio_ff;
+  char *wnaf_str = is_wnaf ? "[wNAF]" : "";
 
-  printf("%s Aggregated table with ~#%s, where %s = %d / 5 * %s \n", wnaf_str,
+  printf("%s Aggregated table with ~#%s, where %s = %5.2f * %s \n", wnaf_str,
          mul_str, sqr_str, ratio, mul_str);
   print_end_line(true);
 }
@@ -57,8 +52,8 @@ typedef struct {
   uint32_t padd_fsqr;
   uint32_t pdouble_fmul;
   uint32_t pdouble_fsqr;
-  // todo: uint32_t pmixed_fmul;
-  // todo: uint32_t pmixed_fsqr;
+  // ?todo: uint32_t pmixed_fmul;
+  // ?todo: uint32_t pmixed_fsqr;
 } cost_of_ec_ops;
 
 typedef struct {
@@ -74,42 +69,61 @@ typedef struct {
 } number_of_ec_ops_table;
 
 typedef struct {
-  number_of_ec_ops_table precomp;
   uint32_t main_add;
   uint32_t main_double;
   uint32_t rem_add;
-  // todo: uint32_t main_mixed;
-  // todo: uint32_t rem_mixed;
-  // todo: uint32_t extra_fmul; e.g., for GLV or precomp
-  // todo: uint32_t extra_fsqr; e.g., for GLV or precomp
+  uint32_t extra_fmul; // needed for GLV when multiplying X coordinate by beta
+  // ?todo: uint32_t main_mixed;
+  // ?todo: uint32_t rem_mixed;
+} number_of_ec_ops_main;
+
+typedef struct {
+  number_of_ec_ops_table precomp;
+  number_of_ec_ops_main loop;
 } number_of_ec_ops;
 
-static inline uint32_t
-print_number_of_point_ops(bool is_print, bool is_ec_ops, uint32_t ratio_ec,
-                          uint32_t ratio_ff, cost_of_ec_ops cs,
+typedef struct {
+  uint32_t total_add;
+  uint32_t total_double;
+  double total_appr_ec;
+  uint32_t total_fmul;
+  uint32_t total_fsqr;
+  double total_appr_ff;
+} total_number_of_ops;
+
+static inline total_number_of_ops
+print_number_of_point_ops(bool is_print, bool is_ec_ops, double ratio_ec,
+                          double ratio_ff, cost_of_ec_ops cs,
                           table_precomp_params tp, number_of_ec_ops ks) {
 
-  uint32_t total_add = ks.precomp.precomp_add + ks.main_add + ks.rem_add;
-  uint32_t total_double = ks.precomp.precomp_double + ks.main_double;
-  uint32_t total_appr_ec = total_add + (total_double * ratio_ec / 5U);
+  uint32_t total_add =
+      ks.precomp.precomp_add + ks.loop.main_add + ks.loop.rem_add;
+  uint32_t total_double = ks.precomp.precomp_double + ks.loop.main_double;
+  double total_appr_ec = total_add + total_double * ratio_ec;
 
-  uint32_t total_fmul =
-      total_add * cs.padd_fmul + total_double * cs.pdouble_fmul;
+  uint32_t total_fmul = total_add * cs.padd_fmul +
+                        total_double * cs.pdouble_fmul + ks.loop.extra_fmul;
   uint32_t total_fsqr =
       total_add * cs.padd_fsqr + total_double * cs.pdouble_fsqr;
-  uint32_t total_appr_ff = total_fmul + (total_fsqr * ratio_ff / 5U);
-
-  uint32_t total_appr = is_ec_ops ? total_appr_ec : total_appr_ff;
+  double total_appr_ff = total_fmul + total_fsqr * ratio_ff;
 
   if (is_print) {
     uint32_t total_mul = is_ec_ops ? total_add : total_fmul;
     uint32_t total_sqr = is_ec_ops ? total_double : total_fsqr;
+    double total_appr = is_ec_ops ? total_appr_ec : total_appr_ff;
 
-    printf("%-5d %-5d %-15d %-15d %-15d \n", tp.l, tp.l_g, total_mul, total_sqr,
-           total_appr);
+    printf("%-5d %-5d %-15d %-15d %-15.2f \n", tp.l, tp.l_g, total_mul,
+           total_sqr, total_appr);
   }
 
-  return total_appr;
+  total_number_of_ops res;
+  res.total_add = total_add;
+  res.total_double = total_double;
+  res.total_fmul = total_fmul;
+  res.total_fsqr = total_fsqr;
+  res.total_appr_ec = total_appr_ec;
+  res.total_appr_ff = total_appr_ff;
+  return res;
 }
 
 /* a precomputed table for wNAF: [1P; 3P; 5P; 7P; ..]
@@ -167,72 +181,159 @@ count_number_of_ops_2_ecsm_precomp(table_precomp_params tp) {
   return res;
 }
 
-// 1 ECSM: [main], [precomp_g]
-uint32_t count_number_of_ops_1_ecsm(bool is_print, bool is_ec_ops,
-                                    uint32_t ratio_ec, uint32_t ratio_ff,
-                                    cost_of_ec_ops cs, table_precomp_params tp,
-                                    uint32_t bBits) {
-
-  bBits = tp.is_wnaf ? (bBits + 1) : bBits;
-  number_of_ec_ops res;
-  res.precomp = count_number_of_ops_1_ecsm_precomp(tp);
+static inline number_of_ec_ops_main
+count_number_of_ops_1_ecsm_loop(table_precomp_params tp, uint32_t bBits) {
+  number_of_ec_ops_main res;
   // init step
   res.rem_add = 0U; // we skip mul by `one`
   // main loop
   uint32_t n = bBits / tp.l;
   res.main_double = n * tp.l;
   res.main_add = n;
+  res.extra_fmul = 0;
+  return res;
+}
 
+static inline number_of_ec_ops_main
+count_number_of_ops_2_ecsm_loop_l_eq(table_precomp_params tp, uint32_t bBits) {
+  number_of_ec_ops_main res;
+  // init step
+  res.rem_add = (bBits % tp.l == 0U) ? 0U : 1U;
+  // main loop
+  uint32_t n = bBits / tp.l;
+  res.main_double = n * tp.l;
+  res.main_add = n + n;
+  res.extra_fmul = 0;
+  return res;
+}
+
+static inline number_of_ec_ops_main
+count_number_of_ops_2_ecsm_loop_l_diff(table_precomp_params tp,
+                                       uint32_t bBits) {
+  number_of_ec_ops_main res;
+  // init step
+  res.rem_add = 0U;
+  // main loop
+  uint32_t rem_l = (bBits % tp.l == 0U) ? 0U : 1U;
+  uint32_t rem_l_g = (bBits % tp.l_g == 0U) ? 0U : 1U;
+  uint32_t n_l = bBits / tp.l + rem_l;
+  uint32_t n_l_g = bBits / tp.l_g + rem_l_g;
+  res.main_double = bBits;
+  res.main_add = n_l + n_l_g;
+  res.extra_fmul = 0;
+  return res;
+}
+
+static inline number_of_ec_ops_main
+count_number_of_ops_4_ecsm_loop_l_eq(table_precomp_params tp, uint32_t bBits) {
+  number_of_ec_ops_main res;
+  // init step
+  res.rem_add = (bBits % tp.l == 0U) ? 0U : 3U;
+  // main loop
+  uint32_t n = bBits / tp.l;
+  res.main_double = n * tp.l;
+  res.main_add = n + n + n + n;
+
+  uint32_t extra_fmul = (bBits % tp.l == 0U) ? 0U : 2U;
+  res.extra_fmul = n + n + extra_fmul; // account for mul by beta = (n + n) M
+
+  return res;
+}
+
+static inline number_of_ec_ops_main
+count_number_of_ops_4_ecsm_loop_l_diff(table_precomp_params tp,
+                                       uint32_t bBits) {
+  number_of_ec_ops_main res;
+  // init step
+  res.rem_add = 0U;
+  // main loop
+  uint32_t rem_l = (bBits % tp.l == 0U) ? 0U : 1U;
+  uint32_t rem_l_g = (bBits % tp.l_g == 0U) ? 0U : 1U;
+  uint32_t n_l = bBits / tp.l + rem_l;
+  uint32_t n_l_g = bBits / tp.l_g + rem_l_g;
+  res.main_double = bBits;
+  res.main_add = n_l + n_l + n_l_g + n_l_g;
+
+  res.extra_fmul = n_l + n_l_g; // account for mul by beta = (n + n) M
+
+  return res;
+}
+
+// 1 ECSM: [main], [precomp_g] + [wnaf]
+static inline total_number_of_ops
+count_number_of_ops_1_ecsm(bool is_print, bool is_ec_ops, double ratio_ec,
+                           double ratio_ff, cost_of_ec_ops cs,
+                           table_precomp_params tp, uint32_t bBits) {
+
+  bBits = tp.is_wnaf ? (bBits + 1) : bBits;
+  number_of_ec_ops res;
+  res.precomp = count_number_of_ops_1_ecsm_precomp(tp);
+  res.loop = count_number_of_ops_1_ecsm_loop(tp, bBits);
   return print_number_of_point_ops(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
                                    tp, res);
 }
 
-// 2 ECSM: [main], [precomp_g], [precomp_g_large]
-uint32_t count_number_of_ops_2_ecsm(bool is_print, bool is_ec_ops,
-                                    uint32_t ratio_ec, uint32_t ratio_ff,
-                                    cost_of_ec_ops cs, table_precomp_params tp,
-                                    uint32_t bBits) {
+// 2 ECSM: [main], [precomp_g], [precomp_g_large] + [wnaf]
+static inline total_number_of_ops
+count_number_of_ops_2_ecsm(bool is_print, bool is_ec_ops, double ratio_ec,
+                           double ratio_ff, cost_of_ec_ops cs,
+                           table_precomp_params tp, uint32_t bBits) {
 
   bBits = tp.is_wnaf ? (bBits + 1) : bBits;
   number_of_ec_ops res;
   res.precomp = count_number_of_ops_2_ecsm_precomp(tp);
-  // init step
-  uint32_t rem_l = bBits % tp.l;
-  uint32_t rem_l_g = bBits % tp.l_g;
-  res.rem_add = (rem_l != 0U && rem_l_g != 0U) ? 1U : 0U;
-  // main loop
-  uint32_t min_rem = (rem_l < rem_l_g) ? rem_l : rem_l_g;
-  res.main_double = bBits - min_rem;
-  res.main_add = bBits / tp.l + bBits / tp.l_g;
+  if (tp.l == tp.l_g) {
+    res.loop = count_number_of_ops_2_ecsm_loop_l_eq(tp, bBits);
+  } else {
+    res.loop = count_number_of_ops_2_ecsm_loop_l_diff(tp, bBits);
+  }
 
   return print_number_of_point_ops(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
                                    tp, res);
 }
 
-// 4ECSM: [glv], [glv_precomp_g], [glv_precomp_g_large]
-uint32_t count_number_of_ops_4_ecsm(bool is_print, bool is_ec_ops,
-                                    uint32_t ratio_ec, uint32_t ratio_ff,
-                                    cost_of_ec_ops cs, table_precomp_params tp,
-                                    uint32_t bBits_glv) {
+// 4ECSM: [glv], [glv_precomp_g], [glv_precomp_g_large] + [wnaf]
+static inline total_number_of_ops
+count_number_of_ops_4_ecsm(bool is_print, bool is_ec_ops, double ratio_ec,
+                           double ratio_ff, cost_of_ec_ops cs,
+                           table_precomp_params tp, uint32_t bBits_glv) {
 
   bBits_glv = tp.is_wnaf ? (bBits_glv + 1) : bBits_glv;
   number_of_ec_ops res;
   res.precomp = count_number_of_ops_2_ecsm_precomp(tp);
-  // init step
-  uint32_t rem_l = bBits_glv % tp.l;
-  uint32_t rem_l_g = bBits_glv % tp.l_g;
-  res.rem_add = (rem_l == 0U && rem_l_g == 0U)
-                    ? 0U
-                    : ((rem_l != 0U && rem_l_g != 0U) ? 3U : 1U);
-  // main loop
-  uint32_t min_rem = (rem_l < rem_l_g) ? rem_l : rem_l_g;
-  res.main_double = bBits_glv - min_rem;
-  res.main_add = bBits_glv / tp.l + bBits_glv / tp.l + bBits_glv / tp.l_g +
-                 bBits_glv / tp.l_g; // four scalars + acc
+  if (tp.l == tp.l_g) {
+    res.loop = count_number_of_ops_4_ecsm_loop_l_eq(tp, bBits_glv);
+  } else {
+    res.loop = count_number_of_ops_4_ecsm_loop_l_diff(tp, bBits_glv);
+  }
 
-  // TODO: account for mul by beta = (n + n) M
   return print_number_of_point_ops(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
                                    tp, res);
+}
+
+static inline total_number_of_ops
+count_number_of_ops_n_ecsm(bool is_print, bool is_ec_ops, double ratio_ec,
+                           double ratio_ff, cost_of_ec_ops cs,
+                           table_precomp_params tp, uint32_t bBits,
+                           uint32_t n_ecsm) {
+
+  if (n_ecsm == 1U) {
+    return count_number_of_ops_1_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff,
+                                      cs, tp, bBits);
+  }
+
+  if (n_ecsm == 2U) {
+    return count_number_of_ops_2_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff,
+                                      cs, tp, bBits);
+  }
+
+  if (n_ecsm == 4U) {
+    return count_number_of_ops_4_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff,
+                                      cs, tp, bBits);
+  }
+
+  printf("\n\n Invalid n_ecsm = %d!. Possible values are 1, 2, and 4. \n",
+         n_ecsm);
 }
 
 #define N_MIN 3 // included
@@ -241,8 +342,8 @@ uint32_t count_number_of_ops_4_ecsm(bool is_print, bool is_ec_ops,
 #define N_MAX_G 16
 #define N_LEN_G (N_LEN * (N_MAX_G - N_MIN))
 
-void print_minimum(bool is_print, uint32_t appr[N_LEN]) {
-  uint32_t min = appr[0];
+void print_minimum(bool is_print, double appr[N_LEN]) {
+  double min = appr[0];
   int ind = 0;
 
   for (int i = 0; i < N_LEN; i++) {
@@ -251,13 +352,13 @@ void print_minimum(bool is_print, uint32_t appr[N_LEN]) {
   }
 
   if (is_print) {
-    printf("\n Minimum is w = %d, ~#ops = %d \n", N_MIN + ind, min);
+    printf("\n Minimum is w = %d, ~#ops = %8.2f \n", N_MIN + ind, min);
   }
 }
 
-void print_minimum_l_g(bool is_print, uint32_t appr[N_LEN_G]) {
+void print_minimum_l_g(bool is_print, double appr[N_LEN_G]) {
   uint32_t len = N_MAX_G - N_MIN;
-  uint32_t min = appr[0];
+  double min = appr[0];
   int ind_i = 0;
   int ind_j = 0;
   int ind = 0;
@@ -272,254 +373,260 @@ void print_minimum_l_g(bool is_print, uint32_t appr[N_LEN_G]) {
   }
 
   if (is_print) {
-    printf("\n Minimum is w = %d, w_g = %d, ~#ops = %d \n", ind_i, ind_j, min);
+    printf("\n Minimum is w = %d, w_g = %d, ~#ops = %8.2f \n", ind_i, ind_j,
+           min);
   }
 }
 
-void print_statistics_glv(bool is_print, bool is_ec_ops, uint32_t ratio_ec,
-                          uint32_t ratio_ff, cost_of_ec_ops cs,
-                          uint32_t bBits_glv, bool is_wNAF,
-                          uint32_t glv_appr[N_LEN],
-                          uint32_t glv_precomp_g_appr[N_LEN]) {
+void get_field_total_number_of_ops(bool is_ec_ops, bool is_diff_window_g,
+                                   total_number_of_ops *no, double *res) {
+
+  int n = is_diff_window_g ? N_LEN_G : N_LEN;
+  if (is_ec_ops) {
+    for (int i = 0; i < n; i++) {
+      res[i] = no[i].total_appr_ec;
+    }
+  } else {
+    for (int i = 0; i < n; i++) {
+      res[i] = no[i].total_appr_ff;
+    }
+  }
+}
+
+void print_minimum_ec_or_ff(bool is_ec_ops, bool is_diff_window_g,
+                            total_number_of_ops *res) {
+
+  if (is_diff_window_g) {
+    double appr[N_LEN_G] = {0};
+    get_field_total_number_of_ops(is_ec_ops, is_diff_window_g, res, appr);
+    print_minimum_l_g(true, appr);
+  } else {
+    double appr[N_LEN] = {0};
+    get_field_total_number_of_ops(is_ec_ops, is_diff_window_g, res, appr);
+    print_minimum(true, appr);
+  }
+}
+
+// total_number_of_ops res[N_LEN_G]; if is_diff_window_g
+// total_number_of_ops res[N_LEN]; otherwise
+static inline void print_count_number_of_ops_n_ecsm(
+    bool is_print, bool is_ec_ops, double ratio_ec, double ratio_ff,
+    cost_of_ec_ops cs, uint32_t bBits, bool is_wnaf, bool is_precomp_g_const,
+    bool is_diff_window_g, uint32_t n_ecsm, total_number_of_ops *res) {
 
   table_precomp_params tp;
-
-  char *wnaf_str = is_wNAF ? "+ [wNAF]" : "";
-  printf("\n[glv] %s precomp_table_g is computed in 4 ECSM \n", wnaf_str);
+  tp.is_precomp_g_const = is_precomp_g_const;
+  tp.is_wnaf = is_wnaf;
 
   print_header_for_number_of_ops(is_print, is_ec_ops);
-  for (int i = N_MIN; i < N_MAX; i++) {
-    tp.l = i;
-    tp.l_g = i;
-    tp.is_precomp_g_const = false;
-    tp.is_wnaf = is_wNAF;
-    glv_appr[i - N_MIN] = count_number_of_ops_4_ecsm(
-        is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits_glv);
+
+  if (is_diff_window_g) {
+    uint32_t len = N_MAX_G - N_MIN;
+    for (int i = N_MIN; i < N_MAX; i++) {
+      for (int j = i; j < N_MAX_G; j++) {
+        tp.l = i;
+        tp.l_g = j;
+        res[len * (i - N_MIN) + (j - N_MIN)] = count_number_of_ops_n_ecsm(
+            is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits, n_ecsm);
+      }
+      print_end_line(is_print);
+    }
+  } else {
+    for (int i = N_MIN; i < N_MAX; i++) {
+      tp.l = i;
+      tp.l_g = i;
+      res[i - N_MIN] = count_number_of_ops_n_ecsm(
+          is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits, n_ecsm);
+    }
   }
   print_end_line(is_print);
-  print_minimum(true, glv_appr);
+  print_minimum_ec_or_ff(is_ec_ops, is_diff_window_g, res);
   print_end_line(is_print);
+}
+
+void print_statistics_glv(
+    bool is_print, bool is_print_precomp_g_large, bool is_ec_ops,
+    double ratio_ec, double ratio_ff, cost_of_ec_ops cs, uint32_t bBits_glv,
+    bool is_wnaf, total_number_of_ops res_glv[N_LEN],
+    total_number_of_ops res_glv_precomp_g[N_LEN],
+    total_number_of_ops res_glv_precomp_g_large[N_LEN_G]) {
+
+  char *wnaf_str = is_wnaf ? "+ [wNAF]" : "";
+  bool is_precomp_g_const;
+  bool is_diff_window_g;
+
+  printf("\n[glv] %s precomp_table_g is computed in 4 ECSM \n", wnaf_str);
+  is_precomp_g_const = false;
+  is_diff_window_g = false; // ==> N_LEN
+  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
+                                   bBits_glv, is_wnaf, is_precomp_g_const,
+                                   is_diff_window_g, 4, res_glv);
 
   printf("\n[glv_precomp_g] %s precomp_table_g as constant in 4 ECSM \n",
          wnaf_str);
+  is_precomp_g_const = true;
+  is_diff_window_g = false; // ==> N_LEN
+  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
+                                   bBits_glv, is_wnaf, is_precomp_g_const,
+                                   is_diff_window_g, 4, res_glv_precomp_g);
 
-  print_header_for_number_of_ops(is_print, is_ec_ops);
-  for (int i = N_MIN; i < N_MAX; i++) {
-    tp.l = i;
-    tp.l_g = i;
-    tp.is_precomp_g_const = true;
-    tp.is_wnaf = is_wNAF;
-    glv_precomp_g_appr[i - N_MIN] = count_number_of_ops_4_ecsm(
-        is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits_glv);
+  if (is_print_precomp_g_large) {
+    printf(
+        "\n[glv_precomp_g_large] %s precomp_table_g as constant in 4 ECSM \n",
+        wnaf_str);
+    is_precomp_g_const = true;
+    is_diff_window_g = true; // ==> N_LEN_G
+    print_count_number_of_ops_n_ecsm(
+        is_print, is_ec_ops, ratio_ec, ratio_ff, cs, bBits_glv, is_wnaf,
+        is_precomp_g_const, is_diff_window_g, 4, res_glv_precomp_g_large);
   }
-  print_end_line(is_print);
-  print_minimum(true, glv_precomp_g_appr);
-  print_end_line(is_print);
 }
 
-void print_statistics(bool is_print, bool is_ec_ops, uint32_t ratio_ec,
-                      uint32_t ratio_ff, cost_of_ec_ops cs, uint32_t bBits,
-                      bool is_glv, uint32_t bBits_glv, bool is_wNAF) {
+void print_statistics(bool is_print, bool is_print_precomp_g_large,
+                      bool is_ec_ops, double ratio_ec, double ratio_ff,
+                      cost_of_ec_ops cs, uint32_t bBits, bool is_glv,
+                      uint32_t bBits_glv, bool is_wnaf) {
 
-  table_precomp_params tp;
-  char *wnaf_str = is_wNAF ? "+ [wNAF]" : "";
+  char *wnaf_str = is_wnaf ? "+ [wNAF]" : "";
+  bool is_precomp_g_const;
+  bool is_diff_window_g;
 
-  uint32_t main_appr[N_LEN] = {0};
+  total_number_of_ops res_main[N_LEN];
+  total_number_of_ops res_precomp_g[N_LEN];
+  total_number_of_ops res_precomp_g_large[N_LEN_G];
+
   printf("\n[main] %s precomp_table_g is computed in 2 ECSM \n", wnaf_str);
+  is_precomp_g_const = false;
+  is_diff_window_g = false; // ==> N_LEN
+  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
+                                   bBits, is_wnaf, is_precomp_g_const,
+                                   is_diff_window_g, 2, res_main);
 
-  print_header_for_number_of_ops(is_print, is_ec_ops);
-  for (int i = N_MIN; i < N_MAX; i++) {
-    tp.l = i;
-    tp.l_g = i;
-    tp.is_precomp_g_const = false;
-    tp.is_wnaf = is_wNAF;
-    main_appr[i - N_MIN] = count_number_of_ops_2_ecsm(
-        is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits);
-  }
-  print_end_line(is_print);
-  print_minimum(true, main_appr);
-  print_end_line(is_print);
-
-  uint32_t precomp_g_appr[N_LEN] = {0};
   printf("\n[precomp_g] %s precomp_table_g as constant in 2 ECSM\n", wnaf_str);
+  is_precomp_g_const = true;
+  is_diff_window_g = false; // ==> N_LEN
+  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
+                                   bBits, is_wnaf, is_precomp_g_const,
+                                   is_diff_window_g, 2, res_precomp_g);
 
-  print_header_for_number_of_ops(is_print, is_ec_ops);
-  for (int i = N_MIN; i < N_MAX; i++) {
-    tp.l = i;
-    tp.l_g = i;
-    tp.is_precomp_g_const = true;
-    tp.is_wnaf = is_wNAF;
-    precomp_g_appr[i - N_MIN] = count_number_of_ops_2_ecsm(
-        is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits);
+  if (is_print_precomp_g_large) {
+    printf("\n[precomp_g_large] %s precomp_table_g as constant in 2 ECSM\n",
+           wnaf_str);
+    is_precomp_g_const = true;
+    is_diff_window_g = true; // ==> N_LEN_G
+    print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff,
+                                     cs, bBits, is_wnaf, is_precomp_g_const,
+                                     is_diff_window_g, 2, res_precomp_g_large);
   }
-  print_end_line(is_print);
-  print_minimum(true, precomp_g_appr);
-  print_end_line(is_print);
+
+  double appr_main[N_LEN] = {0};
+  double appr_precomp_g[N_LEN] = {0};
+  get_field_total_number_of_ops(is_ec_ops, false, res_main, appr_main);
+  get_field_total_number_of_ops(is_ec_ops, false, res_precomp_g,
+                                appr_precomp_g);
 
   if (is_glv) {
-    uint32_t glv_appr[N_LEN] = {0};
-    uint32_t glv_precomp_g_appr[N_LEN] = {0};
-    print_statistics_glv(is_print, is_ec_ops, ratio_ec, ratio_ff, cs, bBits_glv,
-                         is_wNAF, glv_appr, glv_precomp_g_appr);
+    total_number_of_ops res_glv[N_LEN];
+    total_number_of_ops res_glv_precomp_g[N_LEN];
+    total_number_of_ops res_glv_precomp_g_large[N_LEN_G];
 
-    print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wNAF);
+    print_statistics_glv(is_print, is_print_precomp_g_large, is_ec_ops,
+                         ratio_ec, ratio_ff, cs, bBits_glv, is_wnaf, res_glv,
+                         res_glv_precomp_g, res_glv_precomp_g_large);
+
+    double appr_glv[N_LEN] = {0};
+    double appr_glv_precomp_g[N_LEN] = {0};
+    get_field_total_number_of_ops(is_ec_ops, false, res_glv, appr_glv);
+    get_field_total_number_of_ops(is_ec_ops, false, res_glv_precomp_g,
+                                  appr_glv_precomp_g);
+
+    print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wnaf);
     printf("%-5s %-10s %-10s %-10s %-10s \n", "w", "main", "precomp_g", "glv",
            "glv_precomp_g");
     print_end_line(true);
     for (int i = N_MIN; i < N_MAX; i++) {
-      printf("%-5d %-10d %-10d %-10d %-10d\n", i, main_appr[i - N_MIN],
-             precomp_g_appr[i - N_MIN], glv_appr[i - N_MIN],
-             glv_precomp_g_appr[i - N_MIN]);
+      printf("%-5d %-10.2f %-10.2f %-10.2f %-10.2f\n", i, appr_main[i - N_MIN],
+             appr_precomp_g[i - N_MIN], appr_glv[i - N_MIN],
+             appr_glv_precomp_g[i - N_MIN]);
     }
     print_end_line(true);
   } else {
-    print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wNAF);
+    print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wnaf);
     printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
     print_end_line(true);
     for (int i = N_MIN; i < N_MAX; i++) {
-      printf("%-5d %-15d %-15d \n", i, main_appr[i - N_MIN],
-             precomp_g_appr[i - N_MIN]);
+      printf("%-5d %-15.2f %-15.2f \n", i, appr_main[i - N_MIN],
+             appr_precomp_g[i - N_MIN]);
     }
     print_end_line(true);
   }
 }
 
 // for 1 ECSM
-void print_statistics_1(bool is_print, bool is_ec_ops, uint32_t ratio_ec,
-                        uint32_t ratio_ff, cost_of_ec_ops cs, uint32_t bBits,
-                        bool is_wNAF) {
-  table_precomp_params tp;
-  char *wnaf_str = is_wNAF ? "+ [wNAF]" : "";
+void print_statistics_1(bool is_print, bool is_ec_ops, double ratio_ec,
+                        double ratio_ff, cost_of_ec_ops cs, uint32_t bBits,
+                        bool is_wnaf) {
 
-  uint32_t main_appr[N_LEN] = {0};
+  char *wnaf_str = is_wnaf ? "+ [wNAF]" : "";
+  bool is_precomp_g_const;
+  bool is_diff_window_g = false; // 1 ECSM
+
+  total_number_of_ops res_main[N_LEN];
+  total_number_of_ops res_precomp_g[N_LEN];
+
   printf("\n[main] %s precomp_table_g is computed in 1 ECSM \n", wnaf_str);
+  is_precomp_g_const = false;
+  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
+                                   bBits, is_wnaf, is_precomp_g_const,
+                                   is_diff_window_g, 1, res_main);
 
-  print_header_for_number_of_ops(is_print, is_ec_ops);
-  for (int i = N_MIN; i < N_MAX; i++) {
-    tp.l = i;
-    tp.l_g = i;
-    tp.is_precomp_g_const = false;
-    tp.is_wnaf = is_wNAF;
-    main_appr[i - N_MIN] = count_number_of_ops_1_ecsm(
-        is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits);
-  }
-  print_end_line(is_print);
-
-  uint32_t precomp_g_appr[N_LEN] = {0};
   printf("\n[precomp_g] %s precomp_table_g as constant in 1 ECSM\n", wnaf_str);
+  is_precomp_g_const = true;
+  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff, cs,
+                                   bBits, is_wnaf, is_precomp_g_const,
+                                   is_diff_window_g, 1, res_precomp_g);
 
-  print_header_for_number_of_ops(is_print, is_ec_ops);
-  for (int i = N_MIN; i < N_MAX; i++) {
-    tp.l = i;
-    tp.l_g = i;
-    tp.is_precomp_g_const = true;
-    tp.is_wnaf = is_wNAF;
-    precomp_g_appr[i - N_MIN] = count_number_of_ops_1_ecsm(
-        is_print, is_ec_ops, ratio_ec, ratio_ff, cs, tp, bBits);
-  }
-  print_end_line(is_print);
+  double appr_main[N_LEN] = {0};
+  double appr_precomp_g[N_LEN] = {0};
+  get_field_total_number_of_ops(is_ec_ops, false, res_main, appr_main);
+  get_field_total_number_of_ops(is_ec_ops, false, res_precomp_g,
+                                appr_precomp_g);
 
-  print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wNAF);
+  print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wnaf);
   printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
   print_end_line(true);
   for (int i = N_MIN; i < N_MAX; i++) {
-    printf("%-5d %-15d %-15d \n", i, main_appr[i - N_MIN],
-           precomp_g_appr[i - N_MIN]);
+    printf("%-5d %-15.2f %-15.2f \n", i, appr_main[i - N_MIN],
+           appr_precomp_g[i - N_MIN]);
   }
   print_end_line(true);
 }
 
-void print_statistics_l_g(bool is_print, bool is_ec_ops, uint32_t ratio_ec,
-                          uint32_t ratio_ff, cost_of_ec_ops cs, uint32_t bBits,
-                          bool is_glv, uint32_t bBits_glv, bool is_wNAF) {
-  table_precomp_params tp;
-  uint32_t len = N_MAX_G - N_MIN;
-  char *wnaf_str = is_wNAF ? "+ [wNAF]" : "";
+/*
+secp256k1_point_add: 859 cycles
+ secp256k1_point_double: 567 cycles
+ secp256k1_fmul: 70 cycles
+ secp256k1_fsqr: 60 cycles
+ fsqr = 0.85 * fmul
+ point_double = 0.66 * point_add
 
-  uint32_t precomp_g_large_appr[N_LEN_G] = {0};
-
-  printf("\n[precomp_g_large] %s precomp_table_g as constant in 2 ECSM\n",
-         wnaf_str);
-
-  print_header_for_number_of_ops(is_print, is_ec_ops);
-  for (int i = N_MIN; i < N_MAX; i++) {
-    for (int j = i; j < N_MAX_G; j++) {
-      tp.l = i;
-      tp.l_g = j;
-      tp.is_precomp_g_const = true;
-      tp.is_wnaf = is_wNAF;
-      precomp_g_large_appr[len * (i - N_MIN) + (j - N_MIN)] =
-          count_number_of_ops_2_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff,
-                                     cs, tp, bBits);
-    }
-    print_end_line(is_print);
-  }
-  print_end_line(is_print);
-  print_minimum_l_g(true, precomp_g_large_appr);
-  print_end_line(is_print);
-
-  if (is_glv) {
-    uint32_t glv_precomp_g_large_appr[N_LEN_G] = {0};
-    printf(
-        "\n\n[glv_precomp_g_large] %s precomp_table_g as constant in 4 ECSM \n",
-        wnaf_str);
-
-    print_header_for_number_of_ops(is_print, is_ec_ops);
-    for (int i = N_MIN; i < N_MAX; i++) {
-      for (int j = i; j < N_MAX_G; j++) {
-        tp.l = i;
-        tp.l_g = j;
-        tp.is_precomp_g_const = true;
-        tp.is_wnaf = is_wNAF;
-        glv_precomp_g_large_appr[len * (i - N_MIN) + (j - N_MIN)] =
-            count_number_of_ops_4_ecsm(is_print, is_ec_ops, ratio_ec, ratio_ff,
-                                       cs, tp, bBits_glv);
-      }
-      print_end_line(is_print);
-    }
-    print_end_line(is_print);
-    print_minimum_l_g(true, glv_precomp_g_large_appr);
-    print_end_line(is_print);
-
-    print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wNAF);
-    printf("%-5s %-5s %-10s %-10s \n", "w", "w_g", "precomp_g_large",
-           "glv_precomp_g_large");
-    print_end_line(true);
-    for (int i = N_MIN; i < N_MAX; i++) {
-      for (int j = i; j < N_MAX_G; j++) {
-        printf("%-5d %-5d %-10d %-10d \n", i, j,
-               precomp_g_large_appr[len * (i - N_MIN) + (j - N_MIN)],
-               glv_precomp_g_large_appr[len * (i - N_MIN) + (j - N_MIN)]);
-      }
-      print_end_line(true);
-    }
-    print_end_line(true);
-  } else {
-    print_header_for_aggregated_table(is_ec_ops, ratio_ec, ratio_ff, is_wNAF);
-    printf("%-5s %-5s %-10s \n", "w", "w_g", "precomp_g_large");
-    print_end_line(true);
-    for (int i = N_MIN; i < N_MAX; i++) {
-      for (int j = i; j < N_MAX_G; j++) {
-        printf("%-5d %-5d %-10d \n", i, j,
-               precomp_g_large_appr[len * (i - N_MIN) + (j - N_MIN)]);
-      }
-      print_end_line(true);
-    }
-    print_end_line(true);
-  }
-}
-
+ ed25519_point_add:462 cycles
+ ed25519_point_double: 388 cycles
+ ed25519_fmul: 59 cycles
+ ed25519_fsqr: 49 cycles
+ fsqr = 0.83 * fmul
+ point_double = 0.83 * point_add
+*/
 int main() {
-
-  // for secp256k1, point_double = 0.6 * point_add in projective coordinates
   bool is_print_secp256k1 = false;
-  bool is_ec_ops_secp256k1 = true;
-  uint32_t ratio_ec_secp256k1 = 3;
-  uint32_t ratio_ff_secp256k1 = 3; // TODO: check
+  bool is_print_precomp_g_large_secp256k1 = true;
+  bool is_ec_ops_secp256k1 = false;
+  double ratio_ec_secp256k1 = 0.66;
+  double ratio_ff_secp256k1 = 0.85;
   uint32_t bBits_secp256k1 = 256U;
   bool is_glv_secp256k1 = true;
   uint32_t bBits_glv_secp256k1 = 128U; // w/o wNAF
-  bool is_wNAF_secp256k1 = false;
+  bool is_wnaf_secp256k1 = false;
 
   cost_of_ec_ops cs_secp256k1;
   cs_secp256k1.padd_fmul = 12U;
@@ -527,55 +634,76 @@ int main() {
   cs_secp256k1.pdouble_fmul = 6U;
   cs_secp256k1.pdouble_fsqr = 2U;
 
-  printf("\n\nHACL secp256k1-ecdsa-verify:\n");
-  // [main], [precomp_g], [glv], [glv_precomp_g]
-  print_statistics(is_print_secp256k1, is_ec_ops_secp256k1, ratio_ec_secp256k1,
-                   ratio_ff_secp256k1, cs_secp256k1, bBits_secp256k1,
-                   is_glv_secp256k1, bBits_glv_secp256k1, is_wNAF_secp256k1);
+  printf("\n\n[projective] secp256k1-ecdsa-verify:\n");
+  // [main], [precomp_g], [glv], [glv_precomp_g], [precomp_g_large],
+  // [glv_precomp_g_large]
+  print_statistics(is_print_secp256k1, is_print_precomp_g_large_secp256k1,
+                   is_ec_ops_secp256k1, ratio_ec_secp256k1, ratio_ff_secp256k1,
+                   cs_secp256k1, bBits_secp256k1, is_glv_secp256k1,
+                   bBits_glv_secp256k1, is_wnaf_secp256k1);
 
-  // [precomp_g_large], [glv_precomp_g_large]
-  print_statistics_l_g(is_print_secp256k1, is_ec_ops_secp256k1,
-                       ratio_ec_secp256k1, ratio_ff_secp256k1, cs_secp256k1,
-                       bBits_secp256k1, is_glv_secp256k1, bBits_glv_secp256k1,
-                       is_wNAF_secp256k1);
-
-  printf("\n\nHACL secp256k1-ecdsa-sign:\n");
+  printf("\n\n[projective] secp256k1-ecdsa-sign:\n");
   // [main], [precomp_g]
   print_statistics_1(is_print_secp256k1, is_ec_ops_secp256k1,
                      ratio_ec_secp256k1, ratio_ff_secp256k1, cs_secp256k1,
-                     bBits_secp256k1, is_wNAF_secp256k1);
+                     bBits_secp256k1, is_wnaf_secp256k1);
 
-  // for ed25519, point_double = 0.8 * point_add
+  printf("\n\n");
+  print_end_line(true);
+  print_end_line(true);
+
+  cost_of_ec_ops cs_secp256k1_jac;
+
+  printf("\n\n [jacobian-mixed] secp256k1-ecdsa-verify:\n");
+  double ratio_ec_secp256k1_jac = 0.6; // for mixed
+  cs_secp256k1_jac.padd_fmul = 8U;     // for mixed
+  cs_secp256k1_jac.padd_fsqr = 3U;     // for mixed
+
+  // printf("\n\n [jacobian] secp256k1-ecdsa-verify:\n");
+  // double ratio_ec_secp256k1_jac = 0.8;
+  // cs_secp256k1_jac.padd_fmul = 12U;
+  // cs_secp256k1_jac.padd_fsqr = 4U;
+
+  cs_secp256k1_jac.pdouble_fmul = 3U;
+  cs_secp256k1_jac.pdouble_fsqr = 4U;
+
+  // [main], [precomp_g], [glv], [glv_precomp_g], [precomp_g_large],
+  // [glv_precomp_g_large]
+  print_statistics(is_print_secp256k1, is_print_precomp_g_large_secp256k1,
+                   is_ec_ops_secp256k1, ratio_ec_secp256k1_jac,
+                   ratio_ff_secp256k1, cs_secp256k1_jac, bBits_secp256k1,
+                   is_glv_secp256k1, bBits_glv_secp256k1, is_wnaf_secp256k1);
+
+  // For ed25519, it's better to set `is_ec_ops_secp256k1 = false`,
+  // as we don't compare different point addition and doubling formulas
   bool is_print_ed25519 = false;
+  bool is_print_precomp_g_large_ed25519 = true;
   bool is_ec_ops_ed25519 = true;
-  uint32_t ratio_ec_ed25519 = 4;
-  uint32_t ratio_ff_ed25519 = 3; // TODO: check
+  double ratio_ec_ed25519 = 0.83;
+  double ratio_ff_ed25519 = 0.83;
   uint32_t bBits_ed25519 = 256U;
   bool is_glv_ed25519 = false;
   uint32_t bBits_glv_ed25519 = 0U;
-  bool is_wNAF_ed25519 = false;
+  bool is_wnaf_ed25519 = false;
 
   cost_of_ec_ops cs_ed25519;
-  cs_ed25519.padd_fmul = 9U; // 9M + 1D
+  cs_ed25519.padd_fmul = 9U; // 8M + 1D
   cs_ed25519.padd_fsqr = 0U;
   cs_ed25519.pdouble_fmul = 4U;
   cs_ed25519.pdouble_fsqr = 4U;
 
   printf("\n\nHACL ed25519-verify:\n");
-  // [main], [precomp_g]
-  print_statistics(is_print_ed25519, is_ec_ops_ed25519, ratio_ec_ed25519,
-                   ratio_ff_ed25519, cs_ed25519, bBits_ed25519, is_glv_ed25519,
-                   bBits_glv_ed25519, is_wNAF_ed25519);
-
-  // [precomp_g_large]
-  print_statistics_l_g(is_print_ed25519, is_ec_ops_ed25519, ratio_ec_ed25519,
-                       ratio_ff_ed25519, cs_ed25519, bBits_ed25519,
-                       is_glv_ed25519, bBits_glv_ed25519, is_wNAF_ed25519);
+  // [main], [precomp_g], [precomp_g_large]
+  print_statistics(is_print_ed25519, is_print_precomp_g_large_ed25519,
+                   is_ec_ops_ed25519, ratio_ec_ed25519, ratio_ff_ed25519,
+                   cs_ed25519, bBits_ed25519, is_glv_ed25519, bBits_glv_ed25519,
+                   is_wnaf_ed25519);
 
   printf("\n\nHACL ed25519-sign:\n");
   // [main], [precomp_g]
   print_statistics_1(is_print_ed25519, is_ec_ops_ed25519, ratio_ec_ed25519,
                      ratio_ff_ed25519, cs_ed25519, bBits_ed25519,
-                     is_wNAF_ed25519);
+                     is_wnaf_ed25519);
+
   return EXIT_SUCCESS;
 }
