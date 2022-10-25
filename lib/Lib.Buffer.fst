@@ -516,15 +516,15 @@ let mapT #t #a #b clen out f inp =
      f x)
 
 inline_for_extraction
-let map2T #t #a1 #a2 #b clen out f inp1 inp2 =
+let map2T #t1 #t2 #a1 #a2 #b clen out f inp1 inp2 =
   let h0 = ST.get () in
   [@inline_let]
   let spec (h:mem) = Seq.map2_inner #a1 #a2 #b #(v clen) f (as_seq h inp1) (as_seq h inp2) in
   fill h0 clen out spec
     (fun i ->
       let h1 = ST.get () in
-      lemma_eq_disjoint #t clen clen out inp1 i h0 h1;
-      lemma_eq_disjoint #t clen clen out inp2 i h0 h1;
+      lemma_eq_disjoint #t1 clen clen out inp1 i h0 h1;
+      lemma_eq_disjoint #t2 clen clen out inp2 i h0 h1;
       f inp1.(i) inp2.(i))
 
 let mapiT #t #a #b clen out f inp =

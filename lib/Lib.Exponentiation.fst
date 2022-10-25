@@ -1086,15 +1086,21 @@ val exp_four_fw_acc0_lemma: #t:Type -> k:comm_monoid t
      if bBits % l = 0 then one
      else exp_four_fw_acc0 k a1 bBits b1 a2 b2 a3 b3 a4 b4 l in
     let bk = bBits - bBits % l in
+    let b1_rem = b1 / pow2 bk in
+    let b2_rem = b2 / pow2 bk in
+    let b3_rem = b3 / pow2 bk in
+    let b4_rem = b4 / pow2 bk in
     acc0 ==
     mul
-      (mul
-        (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
-        (pow k a3 (b3 / pow2 bk)))
-      (pow k a4 (b4 / pow2 bk)))
+      (mul (pow k a1 b1_rem) (pow k a2 b2_rem))
+      (mul (pow k a3 b3_rem) (pow k a4 b4_rem)))
 
 let exp_four_fw_acc0_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
   let bk = bBits - bBits % l in
+  let b1_rem = b1 / pow2 bk in
+  let b2_rem = b2 / pow2 bk in
+  let b3_rem = b3 / pow2 bk in
+  let b4_rem = b4 / pow2 bk in
   if bBits % l = 0 then begin
     assert (bBits / l * l == bBits);
     Math.Lemmas.small_div b1 (pow2 bBits);
@@ -1108,11 +1114,9 @@ let exp_four_fw_acc0_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
     lemma_pow0 k a4;
     assert (
     mul
-      (mul
-        (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
-        (pow k a3 (b3 / pow2 bk)))
-      (pow k a4 (b4 / pow2 bk)) ==
-    mul (mul (mul one one) one) one);
+      (mul (pow k a1 b1_rem) (pow k a2 b2_rem))
+      (mul (pow k a3 b3_rem) (pow k a4 b4_rem)) ==
+    mul (mul one one) (mul one one));
     lemma_one k.one;
     () end
   else begin
@@ -1125,18 +1129,25 @@ let exp_four_fw_acc0_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
     exp_fw_acc0_lemma k a3 bBits b3 l;
     exp_fw_acc0_lemma k a4 bBits b4 l;
     Math.Lemmas.euclidean_division_definition bBits l;
-    assert (acc_a1 == pow k a1 (b1 / pow2 bk));
-    assert (acc_a2 == pow k a2 (b2 / pow2 bk));
-    assert (acc_a3 == pow k a3 (b3 / pow2 bk));
-    assert (acc_a4 == pow k a4 (b4 / pow2 bk)) end
+    assert (acc_a1 == pow k a1 b1_rem);
+    assert (acc_a2 == pow k a2 b2_rem);
+    assert (acc_a3 == pow k a3 b3_rem);
+    assert (acc_a4 == pow k a4 b4_rem) end
 
 
 let exp_four_fw_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
   let bk = bBits - bBits % l in
+  let b1_rem = b1 / pow2 bk in
+  let b2_rem = b2 / pow2 bk in
+  let b3_rem = b3 / pow2 bk in
+  let b4_rem = b4 / pow2 bk in
+
   let acc0 =
     if bBits % l = 0 then one
     else exp_four_fw_acc0 k a1 bBits b1 a2 b2 a3 b3 a4 b4 l in
   exp_four_fw_acc0_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l;
+  k.lemma_mul_assoc (k.mul (pow k a1 b1_rem) (pow k a2 b2_rem))
+    (pow k a3 b3_rem) (pow k a4 b4_rem);
 
   let res =
     Loops.repeati (bBits / l)

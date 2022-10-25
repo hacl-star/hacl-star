@@ -70,7 +70,7 @@ let point_mul (a:qelem) (p:proj_point) : proj_point =
 
 // [a1]P1 + [a2]P2
 let point_mul_double (a1:qelem) (p1:proj_point) (a2:qelem) (p2:proj_point) : proj_point =
-  SE.exp_double_fw mk_k256_concrete_ops p1 256 a1 p2 a2 4
+  SE.exp_double_fw mk_k256_concrete_ops p1 256 a1 p2 a2 5
 
 // [a]G
 let point_mul_g (a:qelem) : proj_point = point_mul a g

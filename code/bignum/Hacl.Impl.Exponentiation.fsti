@@ -140,7 +140,7 @@ let pow_a_to_small_b_st
   (table_inv:table_inv_t a_t len table_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:Ghost.erased (LSeq.lseq (uint_t a_t SEC) (v len))
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> b:uint_t a_t SEC{v b < pow2 (v l)}
   -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
@@ -168,7 +168,7 @@ let lexp_fw_table_st
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
