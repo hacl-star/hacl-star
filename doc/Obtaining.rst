@@ -14,13 +14,8 @@ options passed to KaRaMeL (the F*-to-C compiler) that influence how the
 generated C code looks like.
 
 There is a total order on distributions:
-``c89-compatible <= msvc-compatible <= gcc-compatible <= gcc64-only``
+``msvc-compatible <= gcc-compatible <= gcc64-only``
 
-- The C89 distribution will work with the most C compilers; it relies on
-  ``alloca``; eliminates compound literals and enforces C89 scope to generate
-  syntactically C89-compliant code; code still relies on inttypes.h and other
-  headers that you may have to provide depending on your target. It does not
-  include Merkle Trees and the code is incredibly verbose.
 - The MSVC distribution relies on ``alloca`` to avoid C11 VLA for the sake of
   MSVC; relies on KaRaMeL for tail-call optimizations. It also does not use GCC
   inline assembly for Curve25519 and uses external linkage instead.
