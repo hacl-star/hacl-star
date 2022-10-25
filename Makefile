@@ -93,7 +93,6 @@ endif
 all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
-  compile-c89-compatible \
   compile-portable-gcc-compatible \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic \
   obj/libhaclml.cmxa compile-election-guard
@@ -865,14 +864,6 @@ doc-ocaml: test-bindings-ocaml
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
 dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
-
-# C89 distribution
-# ----------------
-#
-# - MerkleTree doesn't compile in C89 mode (FIXME?)
-# - Use C89 versions of ancient HACL code
-dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
-dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 
 
 # Election Guard distribution
