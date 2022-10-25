@@ -491,6 +491,80 @@ let blake2_update a kk k d s =
      else blake2_update_blocks a (size_block a) d s
   else blake2_update_blocks a 0 d s
 
+val blake2_key_block:
+    a:alg
+  -> kk:size_nat{0 < kk /\ kk <= max_key a}
+  -> k:lbytes kk
+  -> block_s a
+let blake2_key_block a kk k =
+  let key_block = create (size_block a) (u8 0) in
+  let key_block = update_sub key_block 0 kk k in
+  key_block
+
+val blake2_update':
+    a:alg
+  -> kk:size_nat{kk <= max_key a}
+  -> k:lbytes kk
+  -> d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a}
+  -> s:state a ->
+  Tot (state a)
+let blake2_update' a kk k d s =
+  let ll = length d in
+  let key_block: bytes = if kk > 0 then blake2_key_block a kk k else Seq.empty in
+  blake2_update_blocks a 0 (key_block `Seq.append` d) s
+
+val lemma_same_thing:
+    a:alg
+  -> kk:size_nat{kk <= max_key a}
+  -> k:lbytes kk
+  -> d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a}
+  -> s:state a ->
+  Lemma (blake2_update a kk k d s `Seq.equal` blake2_update' a kk k d s)
+
+let lemma_append #a (s: Seq.seq a): Lemma ((s `Seq.append` Seq.empty) `Seq.equal` s) = ()
+
+let lemma_zero #a (s: Seq.seq a): Lemma (requires Seq.length s == 0) (ensures s `Seq.equal` Seq.empty) = ()
+
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 1000"
+let lemma_same_thing a kk k d s =
+  let ll = length d in
+  let key_block: bytes = if kk > 0 then blake2_key_block a kk k else Seq.empty in
+  if kk = 0 then begin
+    assert (key_block `Seq.equal` Seq.empty);
+    assert ((key_block `Seq.append` d) `Seq.equal` d);
+    ()
+  end else if ll = 0 then
+    let (nb,rem) = split a (length (blake2_key_block a kk k)) in
+    // let s = repeati nb (blake2_update1 a prev (blake2_key_block a kk k)) s in
+    calc (Seq.equal) {
+      blake2_update a kk k d s;
+    (Seq.equal) {}
+      blake2_update_key a kk k ll s;
+    (Seq.equal) {}
+      blake2_update_block a true (size_block a) (blake2_key_block a kk k) s;
+    (Seq.equal) { Lib.LoopCombinators.eq_repeati0 nb (blake2_update1 a 0 (blake2_key_block a kk k)) s }
+      blake2_update_blocks a 0 (blake2_key_block a kk k) s;
+    (Seq.equal) { lemma_append (blake2_key_block a kk k) }
+      blake2_update_blocks a 0 (blake2_key_block a kk k `Seq.append` Seq.empty) s;
+    (Seq.equal) { lemma_zero d }
+      blake2_update_blocks a 0 (blake2_key_block a kk k `Seq.append` d) s;
+    (Seq.equal) { }
+      blake2_update' a kk k d s;
+    };
+    ()
+  else
+    let (nb,rem) = split a (length (blake2_key_block a kk k `Seq.append` d)) in
+    calc (Seq.equal) {
+      blake2_update a kk k d s;
+    (Seq.equal) {}
+      blake2_update_blocks a (size_block a) d (blake2_update_key a kk k ll s);
+    (Seq.equal) {}
+      blake2_update_blocks a (size_block a) d (blake2_update_block a false (size_block a) (blake2_key_block a kk k) s);
+    (Seq.equal) { admit () }
+      blake2_update_blocks a 0 (blake2_key_block a kk k `Seq.append` d) s;
+    }
+#pop-options
+
 val blake2_finish:
     a:alg
   -> s:state a

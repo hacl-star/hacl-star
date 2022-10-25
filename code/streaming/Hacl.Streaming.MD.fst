@@ -56,7 +56,7 @@ module D = Hacl.Hash.Definitions
 module Agile = Spec.Agile.Hash
 
 inline_for_extraction noextract
-let alg = a:hash_alg{not (is_blake a)}
+let alg = md_alg
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
