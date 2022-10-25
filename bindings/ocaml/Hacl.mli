@@ -405,13 +405,13 @@ module NaCl : sig
       (** {1 Box}
           {2 One-shot interface} *)
 
-      val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> bool
+      val box : pt:bytes -> ?pt_offset:int -> ?pt_len:int -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> ?ct_offset:int -> unit -> bool
       (** [box pt n pk sk ct] authenticates and encrypts plaintext [pt] using public key [pk],
           secret key [sk], and nonce [n] and writes both the message authentication tag
           and the ciphertext in [ct].
           Returns true if successful. *)
 
-      val box_open : ct:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
+      val box_open : ct:bytes -> ?ct_offset:int -> ?ct_len:int -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> ?pt_offset:int -> unit -> bool
       (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using public key [pk],
           secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
           and returns true. *)
@@ -419,36 +419,54 @@ module NaCl : sig
       (** {2 Precomputation interface }
           The shared key [ck] is obtained using {!NaCl.box_beforenm} or {!NaCl.Noalloc.box_beforenm}. *)
 
-      val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> bool
+      val box_afternm : pt:bytes -> ?pt_offset:int -> ?pt_len:int -> n:bytes -> ck:bytes -> ct:bytes -> ?ct_offset:int -> unit -> bool
       (** [box_afternm pt n ck ct] authenticates and encrypts [pt] using shared key [ck] and
           nonce [n] and writes both the message authentication tag and the ciphertext in [ct].
           Returns true if successful. *)
 
-      val box_open_afternm : ct:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
+      val box_open_afternm : ct:bytes -> ?ct_offset:int -> ?ct_len:int -> n:bytes -> ck:bytes -> pt:bytes -> ?pt_offset:int -> unit -> bool
       (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using
           shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
           and returns true. *)
 
       (** {1 Secretbox} *)
 
-      val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> bool
+      val secretbox : pt:bytes -> ?pt_offset:int -> ?pt_len:int -> n:bytes -> key:bytes -> ct:bytes -> ?ct_offset:int -> unit -> bool
       (** [secretbox pt n key ct] authenticates and encrypts plaintext [pt] using
           secret key [key] and nonce [n] and writes both the message authentication tag
           and the ciphertext in [ct].
           Returns true if successful. *)
 
-      val secretbox_open : ct:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
+      val secretbox_open : ct:bytes -> ?ct_offset:int -> ?ct_len:int -> n:bytes -> key:bytes -> pt:bytes -> ?pt_offset:int -> unit -> bool
       (** [secretbox_open ct n key pt] attempts to verify and decrypt ciphertext [ct] using
           secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
           and returns true. *)
     end
-    (** The {i easy} interface concatenates the ciphertext and the 16-byte long message
-        authentication tag into a single buffer.
+    (** The {i easy} interface concatenates the ciphertext and the 16-byte long
+        message authentication tag into a single buffer.
+
+        By default, these functions use the whole of [pt] and [ct], but users
+        can choose to only pass portions of these buffers, by passing some of
+        these optional arguments:
+        - [pt_offset], [ct_offset]: start at the specified position in [pt] or
+          [ct] (0 by default)
+        - [pt_len] or [ct_len]: specify the number of bytes to take in [pt] or
+          [ct] (by default, the entire buffer)
+
+        {i Note 1:} Since it must always be the case that [ct] be 16 bytes
+        longer than [pt], functions accept only one of these arguments
+        ([pt_len] for encryption functions, [ct_len] for decryption functions)
+
+        {i Note 2:} As opposed to not passing [pt_len] at all, passing
+        [pt_len=0] will result in using an empty buffer.
 
         Buffers have the following size requirements:
         - [ct]: at least 16 bytes
         - [pk], [sk], [ck]: 32 bytes
         - [n]: 24 bytes
+        - [pt_offset], [ct_offset]: positive, <= size of buffer
+        - [pt_len]: positive, <= size of [pt] - [pt_offset]
+        - [ct_len]: >= 16, <= size of [ct] - [ct_offset]
     *)
 
     module Detached : sig
@@ -506,15 +524,15 @@ module NaCl : sig
         optional arguments:
         - [offset]: start at position [offset] in [buf] (0 by default)
         - [len]: take only the first [len] bytes in [buf], starting at
-        [offset] (Note: As opposed to not passing [len] at all, passing [len=0] will
-        result in using an empty buffer)
+        [offset] ({i Note:} As opposed to not passing [len] at all, passing
+        [len=0] will result in using an empty buffer.)
 
         Buffers have the following size requirements:
         - [tag]: 16 bytes
         - [pk], [sk], [ck]: 32 bytes
         - [n]: 24 bytes
         - [offset]: positive, <= size of [buf]
-        - [len]: positive, <= size of [buf] - offset
+        - [len]: positive, <= size of [buf] - [offset]
     *)
   end
 end

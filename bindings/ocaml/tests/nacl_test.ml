@@ -76,20 +76,32 @@ let box =
   ]
 
 let box_noalloc =
-  let test_box_noalloc_easy () =
+  let test_box_noalloc_easy ~pt_offset ~ct_offset () =
     List.iter (fun (v: Bytes.t box_test) ->
-        let ct = Test_utils.init_bytes (Bytes.length v.pt + 16) in
-        let pt = Test_utils.init_bytes (Bytes.length v.pt) in
-        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.box ~pt:v.pt ~n:v.n ~pk:v.pk ~sk:v.sk ~ct) true);
-        Alcotest.(check bytes "Ciphertext" ct v.expected_ct);
-        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.box_open ~ct ~n:v.n ~pk:v.pk ~sk:v.sk ~pt) true);
-        Alcotest.(check bytes "Decrypted plaintext" pt v.pt)
+        let pt_len = Bytes.length v.pt in
+        let pt = Bytes.(cat (make pt_offset '\x00')) v.pt in
+        let ct = Test_utils.init_bytes (ct_offset + 16 + pt_len) in
+        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.box ~pt ~pt_offset ~n:v.n ~pk:v.pk ~sk:v.sk ~ct ~ct_offset ()) true);
+        Alcotest.(check bytes "Ciphertext" (Bytes.sub ct ct_offset (pt_len + 16)) v.expected_ct);
+        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.box_open ~ct ~ct_offset ~n:v.n ~pk:v.pk ~sk:v.sk ~pt ~pt_offset ()) true);
+        Alcotest.(check bytes "Decrypted plaintext" (Bytes.sub pt pt_offset pt_len) v.pt)
+      ) box_tests
+  in
+  let test_box_noalloc_easy_with_len ~pt_offset ~ct_offset () =
+    List.iter (fun (v: Bytes.t box_test) ->
+        let pt_len = Bytes.length v.pt in
+        let pt = Bytes.(concat empty [make pt_offset '\x00'; v.pt; v.pt]) in
+        let ct = Test_utils.init_bytes (ct_offset + 16 + 2 * pt_len) in
+        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.box ~pt ~pt_offset ~pt_len ~n:v.n ~pk:v.pk ~sk:v.sk ~ct ~ct_offset ()) true);
+        Alcotest.(check bytes "Ciphertext" (Bytes.sub ct ct_offset (pt_len + 16)) v.expected_ct);
+        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.box_open ~ct ~ct_offset ~ct_len:(pt_len + 16) ~n:v.n ~pk:v.pk ~sk:v.sk ~pt ~pt_offset ()) true);
+        Alcotest.(check bytes "Decrypted plaintext" (Bytes.sub pt pt_offset pt_len) v.pt)
       ) box_tests
   in
   let test_box_noalloc_detached ~offset () =
     List.iter (fun (v: Bytes.t box_test) ->
         let tag = Test_utils.init_bytes 16 in
-        let buf = Bytes.cat (Bytes.make offset '\x00') v.pt in
+        let buf = Bytes.(cat (make offset '\x00') v.pt) in
         Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Detached.box ~buf ~tag ~offset ~n:v.n ~pk:v.pk ~sk:v.sk ()) true);
         let combined_ct = Bytes.(cat tag (sub buf offset (length v.pt))) in
         Alcotest.(check bytes "Ciphertext" combined_ct v.expected_ct);
@@ -109,16 +121,30 @@ let box_noalloc =
         Alcotest.(check bytes "Decrypted plaintext" Bytes.(sub buf offset (length v.pt)) v.pt)
       ) box_tests
   in
-  let test_box_noalloc_easy_afternm () =
+  let test_box_noalloc_easy_afternm ~pt_offset ~ct_offset () =
     List.iter (fun (v: Bytes.t box_test) ->
         let ck = Test_utils.init_bytes 32 in
         Alcotest.(check bool "Generating combined key" (Hacl.NaCl.Noalloc.box_beforenm ~pk:v.pk ~sk:v.sk ~ck) true);
-        let ct = Test_utils.init_bytes (Bytes.length v.pt + 16) in
-        let pt = Test_utils.init_bytes (Bytes.length v.pt) in
-        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.box_afternm ~pt:v.pt ~n:v.n ~ck ~ct) true);
-        Alcotest.(check bytes "Ciphertext" ct v.expected_ct);
-        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.box_open_afternm ~ct ~n:v.n ~ck ~pt) true);
-        Alcotest.(check bytes "Decrypted plaintext" pt v.pt)
+        let pt_len = Bytes.length v.pt in
+        let pt = Bytes.(cat (make pt_offset '\x00') v.pt) in
+        let ct = Test_utils.init_bytes (ct_offset + 16 + pt_len) in
+        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.box_afternm ~pt:pt ~pt_offset ~n:v.n ~ck ~ct ~ct_offset ()) true);
+        Alcotest.(check bytes "Ciphertext" (Bytes.sub ct ct_offset (pt_len + 16)) v.expected_ct);
+        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.box_open_afternm ~ct ~ct_offset ~n:v.n ~ck ~pt ~pt_offset ()) true);
+        Alcotest.(check bytes "Decrypted plaintext" (Bytes.sub pt pt_offset pt_len) v.pt)
+      ) box_tests
+  in
+  let test_box_noalloc_easy_afternm_with_len ~pt_offset ~ct_offset () =
+    List.iter (fun (v: Bytes.t box_test) ->
+        let ck = Test_utils.init_bytes 32 in
+        Alcotest.(check bool "Generating combined key" (Hacl.NaCl.Noalloc.box_beforenm ~pk:v.pk ~sk:v.sk ~ck) true);
+        let pt_len = Bytes.length v.pt in
+        let pt = Bytes.(concat empty [make pt_offset '\x00'; v.pt; v.pt]) in
+        let ct = Test_utils.init_bytes (ct_offset + 16 + 2 * pt_len) in
+        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.box_afternm ~pt:pt ~pt_offset ~pt_len ~n:v.n ~ck ~ct ~ct_offset ()) true);
+        Alcotest.(check bytes "Ciphertext" (Bytes.sub ct ct_offset (pt_len + 16)) v.expected_ct);
+        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.box_open_afternm ~ct ~ct_len:(pt_len + 16) ~ct_offset ~n:v.n ~ck ~pt ~pt_offset ()) true);
+        Alcotest.(check bytes "Decrypted plaintext" (Bytes.sub pt pt_offset pt_len) v.pt)
       ) box_tests
   in
   let test_box_noalloc_detached_afternm ~offset () =
@@ -126,7 +152,7 @@ let box_noalloc =
         let ck = Test_utils.init_bytes 32 in
         Alcotest.(check bool "Generating combined key" (Hacl.NaCl.Noalloc.box_beforenm ~pk:v.pk ~sk:v.sk ~ck) true);
         let tag = Test_utils.init_bytes 16 in
-        let buf = Bytes.cat (Bytes.make offset '\x00') v.pt in
+        let buf = Bytes.(cat (make offset '\x00') v.pt) in
         Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Detached.box_afternm ~buf ~tag ~offset ~n:v.n ~ck ()) true);
         let combined_ct = Bytes.(cat tag (sub buf offset (length v.pt))) in
         Alcotest.(check bytes "Ciphertext" combined_ct v.expected_ct);
@@ -149,12 +175,18 @@ let box_noalloc =
       ) box_tests
   in
   [
-    ("Easy (one-shot)", `Quick, test_box_noalloc_easy);
+    ("Easy (one-shot)", `Quick, test_box_noalloc_easy ~pt_offset:0 ~ct_offset:0);
+    ("Easy (one-shot) w/ offset", `Quick, test_box_noalloc_easy ~pt_offset:7 ~ct_offset:2);
+    ("Easy (one-shot) truncated", `Quick, test_box_noalloc_easy_with_len ~pt_offset:0 ~ct_offset:0);
+    ("Easy (one-shot) w/ offset, truncated", `Quick, test_box_noalloc_easy_with_len ~pt_offset:0 ~ct_offset:10);
     ("Detached (one-shot)", `Quick, test_box_noalloc_detached ~offset:0);
     ("Detached (one-shot) w/ offset", `Quick, test_box_noalloc_detached ~offset:2);
     ("Detached (one-shot) truncated", `Quick, test_box_noalloc_detached_with_len ~offset:0);
     ("Detached (one-shot) w/ offset, truncated", `Quick, test_box_noalloc_detached_with_len ~offset:8);
-    ("Easy (precomputed)", `Quick, test_box_noalloc_easy_afternm);
+    ("Easy (precomputed)", `Quick, test_box_noalloc_easy_afternm ~pt_offset:0 ~ct_offset:0);
+    ("Easy (precomputed) w/ offset", `Quick, test_box_noalloc_easy_afternm ~pt_offset:27 ~ct_offset:9);
+    ("Easy (precomputed) truncated", `Quick, test_box_noalloc_easy_afternm_with_len ~pt_offset:0 ~ct_offset:0);
+    ("Easy (precomputed) w/ offset, truncated", `Quick, test_box_noalloc_easy_afternm_with_len ~pt_offset:1 ~ct_offset:7);
     ("Detached (precomputed)", `Quick, test_box_noalloc_detached_afternm ~offset:0);
     ("Detached (precomputed) w/ offset", `Quick, test_box_noalloc_detached_afternm ~offset:5);
     ("Detached (precomputed) truncated", `Quick, test_box_noalloc_detached_afternm_with_len ~offset:0);
@@ -178,20 +210,32 @@ let secretbox =
   [ ("Secretbox", `Quick, test_secretbox); ]
 
 let secretbox_noalloc =
-  let test_secretbox_noalloc_easy () =
+  let test_secretbox_noalloc_easy ~pt_offset ~ct_offset () =
     List.iter (fun (v: Bytes.t secretbox_test) ->
-        let ct = Test_utils.init_bytes (Bytes.length v.pt + 16) in
-        let pt = Test_utils.init_bytes (Bytes.length v.pt) in
-        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.secretbox ~pt:v.pt ~n:v.n ~key:v.key ~ct) true);
-        Alcotest.(check bytes "Ciphertext" ct v.expected_ct);
-        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.secretbox_open ~ct ~n:v.n ~key:v.key ~pt) true);
-        Alcotest.(check bytes "Decrypted plaintext" pt v.pt)
+        let pt_len = Bytes.length v.pt in
+        let pt = Bytes.(cat (make pt_offset '\x00') v.pt) in
+        let ct = Test_utils.init_bytes (ct_offset + 16 + pt_len) in
+        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.secretbox ~pt ~pt_offset ~n:v.n ~key:v.key ~ct ~ct_offset ()) true);
+        Alcotest.(check bytes "Ciphertext" (Bytes.sub ct ct_offset (pt_len + 16)) v.expected_ct);
+        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.secretbox_open ~ct ~ct_offset ~n:v.n ~key:v.key ~pt ~pt_offset ()) true);
+        Alcotest.(check bytes "Decrypted plaintext" (Bytes.sub pt pt_offset pt_len) v.pt)
+      ) secretbox_tests
+  in
+  let test_secretbox_noalloc_easy_with_len ~pt_offset ~ct_offset () =
+    List.iter (fun (v: Bytes.t secretbox_test) ->
+        let pt_len = Bytes.length v.pt in
+        let pt = Bytes.(concat empty [make pt_offset '\x00'; v.pt; v.pt]) in
+        let ct = Test_utils.init_bytes (ct_offset + 16 + 2 * pt_len) in
+        Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Easy.secretbox ~pt ~pt_offset ~pt_len ~n:v.n ~key:v.key ~ct ~ct_offset ()) true);
+        Alcotest.(check bytes "Ciphertext" (Bytes.sub ct ct_offset (pt_len + 16)) v.expected_ct);
+        Alcotest.(check bool "Decryption" (Hacl.NaCl.Noalloc.Easy.secretbox_open ~ct ~ct_offset ~ct_len:(pt_len + 16) ~n:v.n ~key:v.key ~pt ~pt_offset ()) true);
+        Alcotest.(check bytes "Decrypted plaintext" (Bytes.sub pt pt_offset pt_len) v.pt)
       ) secretbox_tests
   in
   let test_secretbox_noalloc_detached ~offset () =
     List.iter (fun (v: Bytes.t secretbox_test) ->
         let tag = Test_utils.init_bytes 16 in
-        let buf = Bytes.cat (Bytes.make offset '\x00') v.pt in
+        let buf = Bytes.(cat (make offset '\x00') v.pt) in
         Alcotest.(check bool "Encryption" (Hacl.NaCl.Noalloc.Detached.secretbox ~buf ~tag ~offset ~n:v.n ~key:v.key ()) true);
         let combined_ct = Bytes.(cat tag (sub buf offset (length v.pt))) in
         Alcotest.(check bytes "Ciphertext" combined_ct v.expected_ct);
@@ -212,7 +256,10 @@ let secretbox_noalloc =
       ) secretbox_tests
   in
   [
-    ("Easy", `Quick, test_secretbox_noalloc_easy);
+    ("Easy", `Quick, test_secretbox_noalloc_easy ~pt_offset:0 ~ct_offset:0);
+    ("Easy w/ offset", `Quick, test_secretbox_noalloc_easy ~pt_offset:7 ~ct_offset:130);
+    ("Easy truncated", `Quick, test_secretbox_noalloc_easy_with_len ~pt_offset:0 ~ct_offset:0);
+    ("Easy w/ offset, truncated", `Quick, test_secretbox_noalloc_easy_with_len ~pt_offset:34 ~ct_offset:5);
     ("Detached", `Quick, test_secretbox_noalloc_detached ~offset:0);
     ("Detached w/ offset", `Quick, test_secretbox_noalloc_detached ~offset:10);
     ("Detached truncated", `Quick, test_secretbox_noalloc_detached_with_len ~offset:0);
