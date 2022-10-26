@@ -525,8 +525,10 @@ val lemma_shift_update_last:
     blake2_update_last a (size_block a) rem d s
   )
 
-let lemma_shift_update_last a rem b d s = admit ()
-
+let lemma_shift_update_last a rem b d s =
+  let m = b `Seq.append` d in
+  assert (Seq.slice m (length m - rem) (length m) `Seq.equal` Seq.slice d (length d - rem) (length d));
+  assert (get_last_padded_block a (b `Seq.append` d) rem == get_last_padded_block a d rem)
 
 val repeati_right_shift:
     #a:Type
@@ -598,12 +600,23 @@ val lemma_unfold_update_blocks:
     blake2_update_blocks a (size_block a) d (blake2_update_block a false (size_block a) b s)
   )
 
+val split_one_more_block:
+    a:alg
+  -> b:block_s a
+  -> d:bytes{length d > 0} ->
+  Lemma (
+    let nb, rem = split a (length (b `Seq.append` d)) in
+    let nb', rem' = split a (length d) in
+    nb == nb' + 1 /\ rem == rem')
+
+let split_one_more_block a b d = ()
+
 let lemma_unfold_update_blocks a b d s =
   let nb, rem = split a (length (b `Seq.append` d)) in
   let nb', rem' = split a (length d) in
   // The condition `length d > 0` is needed for this assertion, otherwise,
   // we would have rem = size_block a and rem' = 0
-  assert (nb == nb' + 1 /\ rem == rem');
+  split_one_more_block a b d;
   repeati_update1 a b d nb s;
   let s_int = repeati nb (blake2_update1 a 0 (b `Seq.append` d)) s in
   lemma_shift_update_last a rem b d s_int
