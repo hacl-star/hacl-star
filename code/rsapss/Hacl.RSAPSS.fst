@@ -86,7 +86,6 @@ let rsapss_pkey_verify a modBits eBits nb eb saltLen sgntLen sgnt msgLen msg =
     (load_pkey modBits) (rsapss_verify a modBits) eBits nb eb saltLen sgntLen sgnt msgLen msg
 
 [@ (Comment "Miscellaneous functions")]
-
 val mgf_hash: a:Hash.algorithm{S.hash_is_supported a} -> Hacl.Impl.RSAPSS.MGF.mgf_hash_st a
 
 let mgf_hash a len mgfseed maskLen res = Hacl.Impl.RSAPSS.MGF.mgf_hash a len mgfseed maskLen res
