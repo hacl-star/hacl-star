@@ -51,6 +51,7 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   | IMMUT -> IB.length (b <: ibuffer a)
   | CONST -> CB.length (b <: cbuffer a)
 
+inline_for_extraction
 let to_const #a #t (b:buffer_t t a) : r:cbuffer a {length r == length b}=
   match t with
   | MUT -> CB.of_buffer (b <: buffer a)
@@ -1094,15 +1095,16 @@ val mapT:
 
 inline_for_extraction
 val map2T:
-    #t:buftype
+    #t1:buftype
+  -> #t2:buftype  
   -> #a1:Type
   -> #a2:Type
   -> #b:Type
   -> clen:size_t
   -> o:lbuffer b clen
   -> f:(a1 -> a2 -> Tot b)
-  -> i1:lbuffer_t t a1 clen
-  -> i2:lbuffer_t t a2 clen ->
+  -> i1:lbuffer_t t1 a1 clen
+  -> i2:lbuffer_t t2 a2 clen ->
   Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i1 /\ live h0 i2 /\
 		     eq_or_disjoint o i1 /\ eq_or_disjoint o i2)

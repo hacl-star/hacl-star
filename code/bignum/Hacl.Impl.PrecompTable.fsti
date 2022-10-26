@@ -39,7 +39,7 @@ val table_select_consttime:
     #t:BD.limb_t
   -> len:size_t{v len > 0}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> table:lbuffer (uint_t t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t t SEC) (table_len *! len)
   -> i:uint_t t SEC{v i < v table_len}
   -> res:lbuffer (uint_t t SEC) len ->
   Stack unit
@@ -97,7 +97,7 @@ let lprecomp_get_st
   (k:concrete_ops a_t len ctx_len) =
     a:Ghost.erased (LSeq.lseq (uint_t a_t SEC) (v len))
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> bits_l:uint_t a_t SEC{v bits_l < v table_len}
   -> tmp:lbuffer (uint_t a_t SEC) len ->
   Stack unit

@@ -268,14 +268,9 @@ let exp_four_fw_acc0 (#t:Type) (k:comm_monoid t)
   (a3:t) (b3:nat{b3 < pow2 bBits})
   (a4:t) (b4:nat{b4 < pow2 bBits})
   (l:pos{bBits % l <> 0}) : t =
-  let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
-  let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
-  let acc_a3 = exp_fw_acc0 k a3 bBits b3 l in
-  let acc_a4 = exp_fw_acc0 k a4 bBits b4 l in
-  let acc = mul acc_a1 acc_a2 in
-  let acc = mul acc acc_a3 in
-  let acc = mul acc acc_a4 in
-  acc
+  let acc_a12 = exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
+  let acc_a34 = exp_double_fw_acc0 k a3 bBits b3 a4 b4 l in
+  mul acc_a12 acc_a34
 
 let exp_four_fw (#t:Type) (k:comm_monoid t)
   (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})

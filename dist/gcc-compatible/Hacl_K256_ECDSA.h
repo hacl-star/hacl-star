@@ -36,6 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
+#include "Hacl_K256_PrecompTable.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Bignum_K256.h"
 #include "Hacl_Bignum_Base.h"
