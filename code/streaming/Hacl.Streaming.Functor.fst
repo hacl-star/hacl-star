@@ -191,7 +191,7 @@ let invariant_s #index (c: block index) (i: index) h s =
   // Formerly, the "hashes" predicate
   S.length blocks + S.length rest = U64.v total_len /\
   S.length seen = U64.v total_len /\
-  U64.v total_len <= c.max_input_length i /\
+  U64.v total_len <= U64.v (c.max_input_len i) /\
 
   // Note the double equals here, we now no longer know that this is a sequence.  
   c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) 0 blocks /\
@@ -343,7 +343,7 @@ let create_in #index c i t t' k r =
     let blocks, rest = split_at_last c i seen in
     // JP: unclear why I need to assert this... but without it the proof doesn't
     // go through.
-    U64.v total_len < c.max_input_length i
+    U64.v total_len < U64.v (c.max_input_len i)
   );
   (**) assert (invariant c i h8 p);
   (**) assert (seen c i h8 p == S.empty);
@@ -442,7 +442,8 @@ let alloca #index c i t t' k =
     let blocks, rest = split_at_last c i seen in
     // JP: unclear why I need to assert this... but without it the proof doesn't
     // go through.
-    U64.v total_len < c.max_input_length i
+    U64.v total_len = 0 /\
+    U64.v total_len < U64.v (c.max_input_len i)
   );
   (**) assert (invariant c i h8 p);
   (**) assert (seen c i h8 p == S.empty);
@@ -519,7 +520,7 @@ let init #index c i t t' k s =
   (**)   // Formerly, the "hashes" predicate
   (**)   S.length blocks + S.length rest = U64.v total_len /\
   (**)   S.length seen = U64.v total_len /\
-  (**)   U64.v total_len < c.max_input_length i
+  (**)   U64.v total_len < U64.v (c.max_input_len i)
   (**) );
   (**) assert (invariant_s c i h3 (B.get h3 s 0));
   (**) assert(preserves_freeable c i s h1 h3)
@@ -628,8 +629,8 @@ let rest_finish #index (c: block index) (i: index)
 inline_for_extraction noextract
 let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t):
   Pure UInt64.t
-    (requires U64.v total_len + U32.v len <= c.max_input_length i)
-    (ensures fun x -> U64.v x = U64.v total_len + U32.v len /\ U64.v x <= c.max_input_length i)
+    (requires U64.v total_len + U32.v len <= U64.v (c.max_input_len i))
+    (ensures fun x -> U64.v x = U64.v total_len + U32.v len /\ U64.v x <= U64.v (c.max_input_len i))
 =
   total_len `U64.add` Int.Cast.uint32_to_uint64 len
 
@@ -638,7 +639,7 @@ inline_for_extraction noextract
 let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t): Lemma
   (requires
     U32.v len <= U32.v (c.blocks_state_len i) - U32.v (rest c i total_len) /\
-    U64.v total_len + U32.v len <= c.max_input_length i)
+    U64.v total_len + U32.v len <= U64.v (c.max_input_len i))
   (ensures (rest c i (add_len c i total_len len) = rest c i total_len `U32.add` len))
 =
   let total_len_v = U64.v total_len in
@@ -686,6 +687,7 @@ val update_small:
   Stack unit
     (requires fun h0 ->
       update_pre c i s data len h0 /\
+      S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
       U32.v len <= U32.v (c.blocks_state_len i) - U32.v (rest c i (total_len_h c i h0 s)))
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
@@ -820,7 +822,7 @@ let update_small #index c i t t' p data len =
     let blocks, rest = split_at_last c i b in
     S.length blocks + S.length rest = U64.v total_len /\
     S.length b = U64.v total_len /\
-    U64.v total_len <= c.max_input_length i /\
+    U64.v total_len <= U64.v (c.max_input_len i) /\
     S.equal (B.as_seq h1 buf) (B.as_seq h2 buf) /\
     B.as_seq h1 buf == B.as_seq h2 buf /\
     S.equal (S.slice (B.as_seq h1 buf) 0 (S.length rest)) rest
@@ -867,6 +869,7 @@ val update_empty_or_full_buf:
   Stack unit
     (requires fun h0 ->
       update_pre c i s data len h0 /\
+      S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
       (rest c i (total_len_h c i h0 s) = 0ul \/
        rest c i (total_len_h c i h0 s) = c.blocks_state_len i) /\
        U32.v len > 0)
@@ -1026,7 +1029,8 @@ val update_round:
   len: UInt32.t ->
   Stack unit
     (requires fun h0 ->
-      update_pre c i s data len h0 /\ (
+      update_pre c i s data len h0 /\
+      S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\ (
       let r = rest c i (total_len_h c i h0 s) in
       U32.v len + U32.v r = U32.v (c.blocks_state_len i) /\
       r <> 0ul))
@@ -1063,33 +1067,38 @@ let update #index c i t t' p data len =
   let s = !*p in
   let State block_state buf_ total_len seen k' = s in
   let i = c.index_of_state i block_state in
-  let sz = rest c i total_len in
-  if len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
-    update_small c (G.hide i) t t' p data len
-  else if sz = 0ul then
-    update_empty_or_full_buf c (G.hide i) t t' p data len
-  else begin
-    let h0 = ST.get () in
-    let diff = c.blocks_state_len i `U32.sub` sz in
-    let data1 = B.sub data 0ul diff in
-    let data2 = B.sub data diff (len `U32.sub` diff) in
-    update_round c (G.hide i) t t' p data1 diff;
-    let h1 = ST.get () in
-    update_empty_or_full_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
-    let h2 = ST.get () in
-    (
-      let seen = G.reveal seen in
-      assert (seen_h c i h1 p `S.equal` (S.append seen (B.as_seq h0 data1)));
-      assert (seen_h c i h2 p `S.equal` (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2)));
-      S.append_assoc seen (B.as_seq h0 data1) (B.as_seq h0 data2);
-      assert (S.equal (S.append (B.as_seq h0 data1) (B.as_seq h0 data2)) (B.as_seq h0 data));
-      assert (S.equal
-        (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2))
-        (S.append seen (B.as_seq h0 data)));
-      assert (seen_h c i h2 p `S.equal` (S.append seen (B.as_seq h0 data)));
-      ()
-    )
-  end
+
+  if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 len >^ c.max_input_len i -^ total_len) then
+    1ul
+  else
+    let sz = rest c i total_len in
+    if len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
+      update_small c (G.hide i) t t' p data len
+    else if sz = 0ul then
+      update_empty_or_full_buf c (G.hide i) t t' p data len
+    else begin
+      let h0 = ST.get () in
+      let diff = c.blocks_state_len i `U32.sub` sz in
+      let data1 = B.sub data 0ul diff in
+      let data2 = B.sub data diff (len `U32.sub` diff) in
+      update_round c (G.hide i) t t' p data1 diff;
+      let h1 = ST.get () in
+      update_empty_or_full_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
+      let h2 = ST.get () in
+      (
+        let seen = G.reveal seen in
+        assert (seen_h c i h1 p `S.equal` (S.append seen (B.as_seq h0 data1)));
+        assert (seen_h c i h2 p `S.equal` (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2)));
+        S.append_assoc seen (B.as_seq h0 data1) (B.as_seq h0 data2);
+        assert (S.equal (S.append (B.as_seq h0 data1) (B.as_seq h0 data2)) (B.as_seq h0 data));
+        assert (S.equal
+          (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2))
+          (S.append seen (B.as_seq h0 data)));
+        assert (seen_h c i h2 p `S.equal` (S.append seen (B.as_seq h0 data)));
+        ()
+      )
+    end;
+    0ul
 #pop-options
 
 #restart-solver
