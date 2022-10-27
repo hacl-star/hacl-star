@@ -11,6 +11,8 @@ open Lib.LoopCombinators
 module Lems = Lib.Sequence.Lemmas
 module UpdateMulti = Lib.UpdateMulti
 
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
 val lemma_shift_update_last:
     a:alg
   -> rem: nat
@@ -51,6 +53,7 @@ val repeati_update1:
     repeati (nb - 1) (blake2_update1 a (size_block a) d) (blake2_update_block a false (size_block a) b s)
   )
 
+#push-options "--z3rlimit 100"
 let repeati_update1 a b d nb s =
   let f = blake2_update1 a 0 (b `Seq.append` d) in
   let f' = blake2_update1 a (size_block a) d in
@@ -60,6 +63,7 @@ let repeati_update1 a b d nb s =
   Lems.repeati_right_shift (nb - 1) f' f s;
   assert (get_blocki a (b `Seq.append` d) 0 `Seq.equal` b);
   assert (s' == f 0 s)
+#pop-options
 
 val lemma_unfold_update_blocks:
     a:alg
