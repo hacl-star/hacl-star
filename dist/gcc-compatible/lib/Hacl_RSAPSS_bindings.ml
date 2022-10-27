@@ -65,4 +65,10 @@ module Bindings(F:Cstubs.FOREIGN) =
                              (ocaml_bytes @->
                                 (uint32_t @->
                                    (ocaml_bytes @-> (returning bool)))))))))))
+    let hacl_RSAPSS_mgf_hash =
+      foreign "Hacl_RSAPSS_mgf_hash"
+        (spec_Hash_Definitions_hash_alg @->
+           (uint32_t @->
+              (ocaml_bytes @->
+                 (uint32_t @-> (ocaml_bytes @-> (returning void))))))
   end

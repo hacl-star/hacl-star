@@ -137,23 +137,15 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s);
 
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
-void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
-
-KRML_DEPRECATED("Use update2 instead")
-
-void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block);
+void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
 
 void
-EverCrypt_Hash_update_multi2(
+EverCrypt_Hash_update_multi(
   EverCrypt_Hash_state_s *s,
   uint64_t prevlen,
   uint8_t *blocks,
   uint32_t len
 );
-
-KRML_DEPRECATED("Use update_multi2 instead")
-
-void EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uint32_t len);
 
 void
 EverCrypt_Hash_update_last_256(
@@ -164,16 +156,12 @@ EverCrypt_Hash_update_last_256(
 );
 
 void
-EverCrypt_Hash_update_last2(
+EverCrypt_Hash_update_last(
   EverCrypt_Hash_state_s *s,
   uint64_t prev_len,
   uint8_t *last,
   uint32_t last_len
 );
-
-KRML_DEPRECATED("Use update_last2 instead")
-
-void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len);
 
 void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *s, uint8_t *dst);
 

@@ -522,7 +522,7 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
   memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (uint8_t));
   EverCrypt_Hash_state_s *st = EverCrypt_Hash_create_in(Spec_Hash_Definitions_SHA2_256);
   EverCrypt_Hash_init(st);
-  EverCrypt_Hash_update2(st, (uint64_t)0U, cb);
+  EverCrypt_Hash_update(st, (uint64_t)0U, cb);
   EverCrypt_Hash_finish(st, dst);
   EverCrypt_Hash_free(st);
 }

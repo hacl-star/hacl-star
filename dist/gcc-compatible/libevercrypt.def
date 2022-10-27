@@ -151,12 +151,9 @@ EXPORTS
   EverCrypt_Hash_create
   EverCrypt_Hash_init
   EverCrypt_Hash_update_multi_256
-  EverCrypt_Hash_update2
   EverCrypt_Hash_update
-  EverCrypt_Hash_update_multi2
   EverCrypt_Hash_update_multi
   EverCrypt_Hash_update_last_256
-  EverCrypt_Hash_update_last2
   EverCrypt_Hash_update_last
   EverCrypt_Hash_finish
   EverCrypt_Hash_free
@@ -492,6 +489,7 @@ EXPORTS
   Hacl_RSAPSS_new_rsapss_load_skey
   Hacl_RSAPSS_rsapss_skey_sign
   Hacl_RSAPSS_rsapss_pkey_verify
+  Hacl_RSAPSS_mgf_hash
   Hacl_FFDHE_ffdhe_len
   Hacl_FFDHE_new_ffdhe_precomp_p
   Hacl_FFDHE_ffdhe_secret_to_public_precomp
@@ -632,13 +630,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod
