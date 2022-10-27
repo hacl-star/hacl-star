@@ -27,32 +27,6 @@ let lemma_shift_update_last a rem b d s =
   assert (Seq.slice m (length m - rem) (length m) `Seq.equal` Seq.slice d (length d - rem) (length d));
   assert (get_last_padded_block a (b `Seq.append` d) rem == get_last_padded_block a d rem)
 
-val repeati_right_shift:
-    #a:Type
-  -> n:nat
-  -> f:(i:nat{i < n} -> a -> a)
-  -> g:(i:nat{i < 1 + n} -> a -> a)
-  -> acc0:a ->
-  Lemma
-  (requires (forall (i:nat{i < n}) (acc:a). f i acc == g (i + 1) acc))
-  (ensures repeati n f (g 0 acc0) == repeati (n + 1) g acc0)
-
-let repeati_right_shift #a n f g acc0 =
-  let acc1 = g 0 acc0 in
-  Lems.repeati_right_extensionality n 1 f g acc1;
-  // Got:
-  // repeat_right 0 n (fun _ -> a) f acc1 == repeat_right 1 (n + 1) (fun _ -> a) g acc1
-  repeati_def n f acc1;
-  // Got:
-  // repeati n f acc1 == repeat_right 0 n (fun _ -> a) f acc1
-  repeat_right_plus 0 1 (n + 1) (fixed_a a) g acc0;
-  // Got:
-  // repeat_right 0 (n + 1) (fixed_a a) g acc0 ==
-  //   repeat_right 1 (n + 1) (fixed_a a) g (repeat_right 0 1 (fixed_a a) g acc0)
-  unfold_repeat_right 0 (n + 1) (fixed_a a) g acc0 0;
-  eq_repeat_right 0 (n + 1) (fixed_a a) g acc0;
-  repeati_def (n + 1) g acc0
-
 val lemma_update1_shift:
     a:alg
   -> b:block_s a
@@ -83,7 +57,7 @@ let repeati_update1 a b d nb s =
   let s' = blake2_update_block a false (size_block a) b s in
   Classical.forall_intro_2 (lemma_update1_shift a b d);
   assert (forall i s. f (i + 1) s == f' i s);
-  repeati_right_shift (nb - 1) f' f s;
+  Lems.repeati_right_shift (nb - 1) f' f s;
   assert (get_blocki a (b `Seq.append` d) 0 `Seq.equal` b);
   assert (s' == f 0 s)
 

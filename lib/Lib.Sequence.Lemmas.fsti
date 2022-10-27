@@ -98,6 +98,18 @@ val repeati_right_extensionality:
     Loops.repeat_right 0 n (Loops.fixed_a a) f acc0 ==
     Loops.repeat_right lo_g (lo_g + n) (Loops.fixed_a a) g acc0)
 
+/// A specialized version of the lemma above, for only shifting one computation,
+/// but specified using repeati instead
+val repeati_right_shift:
+    #a:Type
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> a)
+  -> g:(i:nat{i < 1 + n} -> a -> a)
+  -> acc0:a ->
+  Lemma
+  (requires (forall (i:nat{i < n}) (acc:a). f i acc == g (i + 1) acc))
+  (ensures Loops.repeati n f (g 0 acc0) == Loops.repeati (n + 1) g acc0)
+
 ///
 ///   `repeat_gen_blocks` is defined here to prove all the properties
 ///   needed for `map_blocks` and `repeat_blocks` once
