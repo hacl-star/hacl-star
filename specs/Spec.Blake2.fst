@@ -460,6 +460,16 @@ let blake2_init_hash a kk nn =
   let s_iv = createL [r0';r1;r0;r1] in
   s_iv
 
+val blake2_key_block:
+    a:alg
+  -> kk:size_nat{0 < kk /\ kk <= max_key a}
+  -> k:lbytes kk
+  -> block_s a
+let blake2_key_block a kk k =
+  let key_block = create (size_block a) (u8 0) in
+  let key_block = update_sub key_block 0 kk k in
+  key_block
+
 /// This function must be called only if the key is non empty (see the precondition)
 val blake2_update_key:
     a:alg
@@ -469,8 +479,7 @@ val blake2_update_key:
   -> s:state a ->
   Tot (state a)
 let blake2_update_key a kk k ll s =
-  let key_block = create (size_block a) (u8 0) in
-  let key_block = update_sub key_block 0 kk k in
+  let key_block = blake2_key_block a kk k in
   if ll = 0 then
       blake2_update_block a true (size_block a) key_block s
   else
@@ -490,17 +499,6 @@ let blake2_update a kk k d s =
      if ll = 0 then s // Skip update_last if ll = 0 (but kk > 0)
      else blake2_update_blocks a (size_block a) d s
   else blake2_update_blocks a 0 d s
-
-val blake2_key_block:
-    a:alg
-  -> kk:size_nat{0 < kk /\ kk <= max_key a}
-  -> k:lbytes kk
-  -> block_s a
-let blake2_key_block a kk k =
-  let key_block = create (size_block a) (u8 0) in
-  let key_block = update_sub key_block 0 kk k in
-  key_block
-
 
 val blake2_finish:
     a:alg
