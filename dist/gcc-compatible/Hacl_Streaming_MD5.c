@@ -28,13 +28,16 @@
 
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5()
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
-  uint32_t *block_state = KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint32_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint32_t));
   Hacl_Streaming_SHA2_state_sha2_224
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_224), (uint32_t)1U);
   Hacl_Streaming_SHA2_state_sha2_224
-  *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_224));
+  *p =
+    (Hacl_Streaming_SHA2_state_sha2_224 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_SHA2_state_sha2_224
+      ));
   p[0U] = s;
   Hacl_Hash_Core_MD5_legacy_init(block_state);
   return p;

@@ -235,7 +235,7 @@ Hacl_Hash_Blake2s_128_finish_blake2s_128(
 {
   uint32_t double_row = (uint32_t)32U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t *b = alloca(double_row * sizeof (uint8_t));
+  uint8_t *b = (uint8_t *)alloca(double_row * sizeof (uint8_t));
   memset(b, 0U, double_row * sizeof (uint8_t));
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)16U;
@@ -488,7 +488,9 @@ void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, 
 Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_128_malloc_blake2s_128()
 {
   Lib_IntVector_Intrinsics_vec128
-  *buf = KRML_ALIGNED_MALLOC(16, sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+  *buf =
+    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+      sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
   memset(buf, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   return buf;
 }
@@ -819,7 +821,7 @@ Hacl_Blake2s_128_blake2s_finish(
 {
   uint32_t double_row = (uint32_t)32U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t *b = alloca(double_row * sizeof (uint8_t));
+  uint8_t *b = (uint8_t *)alloca(double_row * sizeof (uint8_t));
   memset(b, 0U, double_row * sizeof (uint8_t));
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)16U;

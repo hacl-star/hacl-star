@@ -1336,32 +1336,6 @@ scalarMultiplicationL(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *
   norm(q, result, buff);
 }
 
-static void
-scalarMultiplicationC(
-  uint64_t *p,
-  uint64_t *result,
-  const uint8_t *scalar,
-  uint64_t *tempBuffer
-)
-{
-  uint64_t *q = tempBuffer;
-  zero_buffer(q);
-  uint64_t *buff = tempBuffer + (uint32_t)12U;
-  pointToDomain(p, result);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
-  {
-    uint32_t bit0 = (uint32_t)255U - i;
-    uint64_t
-    bit =
-      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
-    cswap(bit, q, result);
-    point_add(q, result, result, buff);
-    point_double(q, q, buff);
-    cswap(bit, q, result);
-  }
-  norm(q, result, buff);
-}
-
 static void uploadBasePoint(uint64_t *p)
 {
   p[0U] = (uint64_t)8784043285714375740U;
@@ -1467,18 +1441,6 @@ order_inverse_buffer[32U] =
     (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U,
     (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U,
     (uint8_t)255U
-  };
-
-static const
-uint8_t
-order_buffer[32U] =
-  {
-    (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)0U, (uint8_t)0U,
-    (uint8_t)0U, (uint8_t)0U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U,
-    (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)188U, (uint8_t)230U,
-    (uint8_t)250U, (uint8_t)173U, (uint8_t)167U, (uint8_t)23U, (uint8_t)158U, (uint8_t)132U,
-    (uint8_t)243U, (uint8_t)185U, (uint8_t)202U, (uint8_t)194U, (uint8_t)252U, (uint8_t)99U,
-    (uint8_t)37U, (uint8_t)81U
   };
 
 static void montgomery_multiplication_round(uint64_t *t, uint64_t *round, uint64_t k0)
@@ -1658,21 +1620,7 @@ static bool isCoordinateValid(uint64_t *p)
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
-static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
-{
-  uint64_t multResult[12U] = { 0U };
-  uint64_t pBuffer[12U] = { 0U };
-  memcpy(pBuffer, p, (uint32_t)12U * sizeof (uint64_t));
-  scalarMultiplicationC(pBuffer, multResult, order_buffer, tempBuffer);
-  bool result = isPointAtInfinityPublic(multResult);
-  return result;
-}
-
-/**
-   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.
-*/
-static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer)
+static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint)
 {
   bool coordinatesValid = isCoordinateValid(pubKeyAsPoint);
   if (!coordinatesValid)
@@ -1680,8 +1628,7 @@ static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer
     return false;
   }
   bool belongsToCurve = isPointOnCurvePublic(pubKeyAsPoint);
-  bool orderCorrect = isOrderCorrect(pubKeyAsPoint, tempBuffer);
-  return coordinatesValid && belongsToCurve && orderCorrect;
+  return coordinatesValid && belongsToCurve;
 }
 
 static bool isMoreThanZeroLessThanOrder(uint8_t *x)
@@ -1706,7 +1653,7 @@ uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8
   uint64_t tempBuffer[100U] = { 0U };
   uint64_t publicKeyBuffer[12U] = { 0U };
   bufferToJac(pubKey, publicKeyBuffer);
-  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer);
   if (publicKeyCorrect)
   {
     scalarMultiplicationL(publicKeyBuffer, result, scalar, tempBuffer);
@@ -1822,7 +1769,7 @@ ecdsa_verification_(
   uint64_t *tempBuffer = tempBufferU64 + (uint32_t)16U;
   uint64_t *xBuffer = tempBufferU64 + (uint32_t)116U;
   bufferToJac(pubKey, publicKeyBuffer);
-  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer);
   if (publicKeyCorrect == false)
   {
     return false;
@@ -2633,35 +2580,26 @@ Hacl_P256_ecdsa_verif_without_hash(
 
 /**
 Validate a public key.
-
   
-  The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: pub(lic)Key: uint8[64]. 
-  
- Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
- Verify that the public key is not the “point at infinity”, represented as O. 
- Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
- Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
- Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
-  
- The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+  Input: pub(lic)Key: uint8[64].
+  Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:
+    • Verify that the public key is not the “point at infinity”, represented as O.
+    • Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field.
+    • Verify that y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
 bool Hacl_P256_validate_public_key(uint8_t *pubKey)
 {
   uint8_t *pubKeyX = pubKey;
   uint8_t *pubKeyY = pubKey + (uint32_t)32U;
-  uint64_t tempBuffer[120U] = { 0U };
-  uint64_t *tempBufferV = tempBuffer;
-  uint64_t *publicKeyJ = tempBuffer + (uint32_t)100U;
-  uint64_t *publicKeyB = tempBuffer + (uint32_t)112U;
+  uint64_t publicKeyJ[12U] = { 0U };
+  uint64_t publicKeyB[8U] = { 0U };
   uint64_t *publicKeyX = publicKeyB;
   uint64_t *publicKeyY = publicKeyB + (uint32_t)4U;
   Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyX);
   Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyY);
   bufferToJac(publicKeyB, publicKeyJ);
-  bool r = verifyQValidCurvePoint(publicKeyJ, tempBufferV);
+  bool r = verifyQValidCurvePoint(publicKeyJ);
   return r;
 }
 

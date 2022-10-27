@@ -77,25 +77,25 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
   {
     case Spec_Hash_Definitions_SHA1:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
         k = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
         k = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
         k = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
         k = buf;
         break;
       }
@@ -110,25 +110,25 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
   {
     case Spec_Hash_Definitions_SHA1:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
         v = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
         v = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
         v = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
         v = buf;
         break;
       }
@@ -138,7 +138,7 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
         KRML_HOST_EXIT(253U);
       }
   }
-  uint32_t *ctr = KRML_HOST_MALLOC(sizeof (uint32_t));
+  uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
   ctr[0U] = (uint32_t)1U;
   return ((Hacl_HMAC_DRBG_state){ .k = k, .v = v, .reseed_counter = ctr });
 }

@@ -40,7 +40,7 @@ Hacl_HKDF_Blake2s_128_expand_blake2s_128(
   uint32_t n = len / tlen;
   uint8_t *output = okm;
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
-  uint8_t *text = alloca((tlen + infolen + (uint32_t)1U) * sizeof (uint8_t));
+  uint8_t *text = (uint8_t *)alloca((tlen + infolen + (uint32_t)1U) * sizeof (uint8_t));
   memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (uint8_t));
   uint8_t *text0 = text + tlen;
   uint8_t *tag = text;

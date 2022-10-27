@@ -661,8 +661,8 @@ exp_vartime_precomp(
     }
     uint32_t bits_c = ite & mask_l;
     uint32_t bits_l32 = bits_c;
-    uint32_t *a_bits_l = table + bits_l32 * (uint32_t)128U;
-    memcpy(resM, a_bits_l, (uint32_t)128U * sizeof (uint32_t));
+    const uint32_t *a_bits_l = table + bits_l32 * (uint32_t)128U;
+    memcpy(resM, (uint32_t *)a_bits_l, (uint32_t)128U * sizeof (uint32_t));
   }
   else
   {
@@ -695,8 +695,8 @@ exp_vartime_precomp(
     uint32_t bits_l = ite & mask_l;
     uint32_t a_bits_l[128U] = { 0U };
     uint32_t bits_l32 = bits_l;
-    uint32_t *a_bits_l1 = table + bits_l32 * (uint32_t)128U;
-    memcpy(a_bits_l, a_bits_l1, (uint32_t)128U * sizeof (uint32_t));
+    const uint32_t *a_bits_l1 = table + bits_l32 * (uint32_t)128U;
+    memcpy(a_bits_l, (uint32_t *)a_bits_l1, (uint32_t)128U * sizeof (uint32_t));
     uint32_t *ctx_n = ctx;
     amont_mul(ctx_n, mu, resM, a_bits_l, resM);
   }
@@ -818,13 +818,13 @@ exp_consttime_precomp(
       ite = p1;
     }
     uint32_t bits_c = ite & mask_l;
-    memcpy(resM, table, (uint32_t)128U * sizeof (uint32_t));
+    memcpy(resM, (uint32_t *)table, (uint32_t)128U * sizeof (uint32_t));
     KRML_MAYBE_FOR15(i1,
       (uint32_t)0U,
       (uint32_t)15U,
       (uint32_t)1U,
       uint32_t c = FStar_UInt32_eq_mask(bits_c, i1 + (uint32_t)1U);
-      uint32_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)128U;
+      const uint32_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)128U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
       {
         uint32_t *os = resM;
@@ -862,13 +862,13 @@ exp_consttime_precomp(
     }
     uint32_t bits_l = ite & mask_l;
     uint32_t a_bits_l[128U] = { 0U };
-    memcpy(a_bits_l, table, (uint32_t)128U * sizeof (uint32_t));
+    memcpy(a_bits_l, (uint32_t *)table, (uint32_t)128U * sizeof (uint32_t));
     KRML_MAYBE_FOR15(i2,
       (uint32_t)0U,
       (uint32_t)15U,
       (uint32_t)1U,
       uint32_t c = FStar_UInt32_eq_mask(bits_l, i2 + (uint32_t)1U);
-      uint32_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)128U;
+      const uint32_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)128U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
       {
         uint32_t *os = a_bits_l;
@@ -1111,8 +1111,8 @@ Heap-allocate and initialize a montgomery context.
 */
 Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum4096_32_mont_ctx_init(uint32_t *n)
 {
-  uint32_t *r2 = KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint32_t));
-  uint32_t *n1 = KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint32_t));
+  uint32_t *r2 = (uint32_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint32_t));
+  uint32_t *n1 = (uint32_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint32_t));
   uint32_t *r21 = r2;
   uint32_t *n11 = n1;
   memcpy(n11, n, (uint32_t)128U * sizeof (uint32_t));
@@ -1123,7 +1123,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum4096_32_mont_ctx_init(uin
   res = { .len = (uint32_t)128U, .n = n11, .mu = mu, .r2 = r21 };
   KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
-  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32));
+  *buf =
+    (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
+      ));
   buf[0U] = res;
   return buf;
 }
@@ -1307,7 +1310,9 @@ uint32_t *Hacl_Bignum4096_32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), (len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U);
   uint32_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U, sizeof (uint32_t));
+  *res =
+    (uint32_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U,
+      sizeof (uint32_t));
   if (res == NULL)
   {
     return res;
@@ -1354,7 +1359,9 @@ uint32_t *Hacl_Bignum4096_32_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), (len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U);
   uint32_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U, sizeof (uint32_t));
+  *res =
+    (uint32_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U,
+      sizeof (uint32_t));
   if (res == NULL)
   {
     return res;

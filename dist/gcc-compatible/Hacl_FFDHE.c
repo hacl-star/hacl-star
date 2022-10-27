@@ -228,7 +228,7 @@ uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a)
 {
   uint32_t nLen = (ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
-  uint64_t *res = KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
+  uint64_t *res = (uint64_t *)KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
   if (res == NULL)
   {
     return res;

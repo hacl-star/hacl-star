@@ -65,7 +65,7 @@ static inline void ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a, uint64_t *p_r2_n)
   uint64_t *p_n = p_r2_n;
   uint64_t *r2_n = p_r2_n + nLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), ffdhe_len(a));
-  uint8_t *p_s = alloca(ffdhe_len(a) * sizeof (uint8_t));
+  uint8_t *p_s = (uint8_t *)alloca(ffdhe_len(a) * sizeof (uint8_t));
   memset(p_s, 0U, ffdhe_len(a) * sizeof (uint8_t));
   const uint8_t *p;
   switch (a)
@@ -121,7 +121,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
 {
   uint32_t nLen = (ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *p_n1 = alloca(nLen * sizeof (uint64_t));
+  uint64_t *p_n1 = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(p_n1, 0U, nLen * sizeof (uint64_t));
   uint64_t
   c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, p_n[0U], (uint64_t)1U, p_n1);
@@ -165,7 +165,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
     c1 = c0;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *b2 = alloca(nLen * sizeof (uint64_t));
+  uint64_t *b2 = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(b2, 0U, nLen * sizeof (uint64_t));
   uint32_t i0 = (uint32_t)0U;
   uint32_t j = (uint32_t)0U;
@@ -203,7 +203,7 @@ ffdhe_compute_exp(
   uint64_t *p_n = p_r2_n;
   uint64_t *r2_n = p_r2_n + nLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *res_n = alloca(nLen * sizeof (uint64_t));
+  uint64_t *res_n = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(res_n, 0U, nLen * sizeof (uint64_t));
   uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(p_n[0U]);
   Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64((ffdhe_len(a) - (uint32_t)1U)
@@ -228,7 +228,7 @@ uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a)
 {
   uint32_t nLen = (ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
-  uint64_t *res = KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
+  uint64_t *res = (uint64_t *)KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
   if (res == NULL)
   {
     return res;
@@ -250,7 +250,7 @@ Hacl_FFDHE_ffdhe_secret_to_public_precomp(
   uint32_t len = ffdhe_len(a);
   uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *g_n = alloca(nLen * sizeof (uint64_t));
+  uint64_t *g_n = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(g_n, 0U, nLen * sizeof (uint64_t));
   uint8_t g = (uint8_t)0U;
   {
@@ -260,7 +260,7 @@ Hacl_FFDHE_ffdhe_secret_to_public_precomp(
   }
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)1U, &g, g_n);
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *sk_n = alloca(nLen * sizeof (uint64_t));
+  uint64_t *sk_n = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(sk_n, 0U, nLen * sizeof (uint64_t));
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, sk, sk_n);
   ffdhe_compute_exp(a, p_r2_n, sk_n, g_n, pk);
@@ -271,7 +271,7 @@ void Hacl_FFDHE_ffdhe_secret_to_public(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint
   uint32_t len = ffdhe_len(a);
   uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
-  uint64_t *p_r2_n = alloca((nLen + nLen) * sizeof (uint64_t));
+  uint64_t *p_r2_n = (uint64_t *)alloca((nLen + nLen) * sizeof (uint64_t));
   memset(p_r2_n, 0U, (nLen + nLen) * sizeof (uint64_t));
   ffdhe_precomp_p(a, p_r2_n);
   Hacl_FFDHE_ffdhe_secret_to_public_precomp(a, p_r2_n, sk, pk);
@@ -290,10 +290,10 @@ Hacl_FFDHE_ffdhe_shared_secret_precomp(
   uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint64_t *p_n = p_r2_n;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *sk_n = alloca(nLen * sizeof (uint64_t));
+  uint64_t *sk_n = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(sk_n, 0U, nLen * sizeof (uint64_t));
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *pk_n = alloca(nLen * sizeof (uint64_t));
+  uint64_t *pk_n = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(pk_n, 0U, nLen * sizeof (uint64_t));
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, sk, sk_n);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, pk, pk_n);
@@ -311,7 +311,7 @@ Hacl_FFDHE_ffdhe_shared_secret(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk,
   uint32_t len = ffdhe_len(a);
   uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
-  uint64_t *p_n = alloca((nLen + nLen) * sizeof (uint64_t));
+  uint64_t *p_n = (uint64_t *)alloca((nLen + nLen) * sizeof (uint64_t));
   memset(p_n, 0U, (nLen + nLen) * sizeof (uint64_t));
   ffdhe_precomp_p(a, p_n);
   uint64_t m = Hacl_FFDHE_ffdhe_shared_secret_precomp(a, p_n, sk, pk, ss);

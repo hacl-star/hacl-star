@@ -35,7 +35,6 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
 
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")] 
-
 val isPointAtInfinityPublic: p:point -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
@@ -58,16 +57,13 @@ val isPointOnCurvePublic: p:point -> Stack bool
 
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")] 
-val verifyQValidCurvePoint: pubKeyAsPoint:point
-  -> tempBuffer:lbuffer uint64 (size 100) -> Stack bool
+val verifyQValidCurvePoint: pubKeyAsPoint:point -> Stack bool
   (requires fun h ->
     live h pubKeyAsPoint /\
-    live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc pubKeyAsPoint; loc tempBuffer] /\
     point_z_as_nat h pubKeyAsPoint == 1
   )
   (ensures  fun h0 r h1 ->
-    modifies (loc tempBuffer) h0 h1 /\
+    modifies0 h0 h1 /\
     r == verifyQValidCurvePointSpec (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
 
 inline_for_extraction

@@ -49,18 +49,6 @@ void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uin
 
 /* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_init */
 
-/* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_encrypt_block */
-
-void
-Hacl_Impl_Chacha20_chacha20_encrypt_block(
-  uint32_t *ctx,
-  uint8_t *out,
-  uint32_t incr,
-  uint8_t *text
-);
-
-/* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_encrypt_block */
-
 /* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_update */
 
 void

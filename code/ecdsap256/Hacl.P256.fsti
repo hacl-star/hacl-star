@@ -291,12 +291,13 @@ val ecdsa_verif_without_hash:
 /******************/
 ";
 Comment "Validate a public key.
-
-  \n  The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  \n Input: pub(lic)Key: uint8[64]. 
-  \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
-  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
+  
+  Input: pub(lic)Key: uint8[64].
+  Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:
+    • Verify that the public key is not the “point at infinity”, represented as O.
+    • Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field.
+    • Verify that y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
 val validate_public_key: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool

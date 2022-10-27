@@ -262,33 +262,30 @@ let isOrderCorrect p tempBuffer =
     result
 
 
-let verifyQValidCurvePoint pubKeyAsPoint tempBuffer = 
+let verifyQValidCurvePoint pubKeyAsPoint = 
   let coordinatesValid = isCoordinateValid pubKeyAsPoint in 
   if not coordinatesValid then false else 
     let belongsToCurve = isPointOnCurvePublic pubKeyAsPoint in 
-    let orderCorrect = isOrderCorrect pubKeyAsPoint tempBuffer in 
-    coordinatesValid && belongsToCurve && orderCorrect
+    coordinatesValid && belongsToCurve
 
 
-let verifyQ pubKey = 
+let verifyQ pubKey =
   push_frame();
     let h0 = ST.get() in
-    let pubKeyX = sub pubKey (size 0) (size 32) in 
-    let pubKeyY = sub pubKey (size 32) (size 32) in 
-    let tempBuffer = create (size 120) (u64 0) in 
-      let tempBufferV = sub tempBuffer (size 0) (size 100) in 
-      let publicKeyJ = sub tempBuffer (size 100) (size 12) in 
-      let publicKeyB = sub tempBuffer (size 112) (size 8) in  
-	let publicKeyX = sub publicKeyB (size 0) (size 4) in 
-	let publicKeyY = sub publicKeyB (size 4) (size 4) in 
+    let pubKeyX = sub pubKey (size 0) (size 32) in
+    let pubKeyY = sub pubKey (size 32) (size 32) in
+    let publicKeyJ = create (size 12) (u64 0) in
+    let publicKeyB = create (size 8) (u64 0) in
+	let publicKeyX = sub publicKeyB (size 0) (size 4) in
+	let publicKeyY = sub publicKeyB (size 4) (size 4) in
     
     toUint64ChangeEndian pubKeyX publicKeyX;
     toUint64ChangeEndian pubKeyY publicKeyY;
-  let h1 = ST.get() in 
+  let h1 = ST.get() in
       lemma_core_0 publicKeyX h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
+      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);
       lemma_core_0 publicKeyY h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY); 
+      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
 
       changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
@@ -297,7 +294,7 @@ let verifyQ pubKey =
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
 
   bufferToJac publicKeyB publicKeyJ;
-  let r = verifyQValidCurvePoint publicKeyJ tempBufferV in 
+  let r = verifyQValidCurvePoint publicKeyJ in
   pop_frame();
   r
 

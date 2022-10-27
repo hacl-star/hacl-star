@@ -20,8 +20,6 @@ dist/libk256.a: dist/Makefile.basic
 HASH_BUNDLE=-bundle Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash]
 STREAMING_BUNDLE=-bundle Hacl.Streaming.*
 BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
-K256_BUNDLE= -bundle Hacl.K256.Field,Hacl.Impl.K256.Finv[rename=Hacl_Bignum_K256] -static-header Hacl.K256.Field,Hacl.Impl.K256.Finv \
-	-bundle 'Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*'
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libk256.a \

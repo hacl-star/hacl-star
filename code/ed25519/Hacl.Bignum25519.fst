@@ -60,13 +60,13 @@ let make_one b =
 
 
 [@CInline]
-let fsum a b =
-  BN.fadd a a b
+let fsum out a b =
+  BN.fadd out a b
 
 
 [@CInline]
-let fdifference a b =
-  BN.fsub a b a
+let fdifference out a b =
+  BN.fsub out a b
 
 
 inline_for_extraction noextract

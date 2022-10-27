@@ -10,7 +10,6 @@
         document.getElementById("terminal").appendChild(
           document.createTextNode(msg + "\n"));
     </script>
-    <script type="application/javascript" src="browser.js"></script>
     <script type="application/javascript" src="loader.js"></script>
     <script type="application/javascript" src="api.js"></script>
     <script type="application/javascript">
@@ -72,6 +71,7 @@
         let modules = [
           "WasmSupport",
           "FStar",
+          "Hacl_Bignum_Base",
           "Hacl_Bignum",
           "Hacl_GenericField64",
           "Hacl_Bignum64",

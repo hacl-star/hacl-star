@@ -36,8 +36,8 @@ let lexp_double_fw_tables_st
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
@@ -164,10 +164,10 @@ let lexp_four_fw_tables_st
   -> b3:lbuffer (uint_t a_t SEC) bLen
   -> a4:lbuffer (uint_t a_t SEC) len
   -> b4:lbuffer (uint_t a_t SEC) bLen
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table3:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table4:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table1:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table3:clbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table4:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
@@ -222,79 +222,3 @@ val mk_lexp_four_fw_tables:
   -> pow_a_to_small_b3:pow_a_to_small_b_st a_t len ctx_len k l table_len table_inv3
   -> pow_a_to_small_b4:pow_a_to_small_b_st a_t len ctx_len k l table_len table_inv4 ->
   lexp_four_fw_tables_st a_t len ctx_len k l table_len table_inv1 table_inv2 table_inv3 table_inv4
-
-
-// Fixed-window method with four precomputed tables
-// table1 = [a1^0 = one; a1^1; a1^2; ..; a1^(table_len - 1)]
-// table2 = [a2^0 = one; a2^1; a2^2; ..; a2^(table_len - 1)]
-// table3 = [a3^0 = one; a3^1; a3^2; ..; a3^(table_len - 1)]
-// table4 = [a4^0 = one; a4^1; a4^2; ..; a4^(table_len - 1)]
-//-----------------------------------------------------------
-
-inline_for_extraction noextract
-let lexp_four_fw_st
-  (a_t:inttype_a)
-  (len:size_t{v len > 0})
-  (ctx_len:size_t)
-  (k:concrete_ops a_t len ctx_len)
-  (l:size_window_t a_t len) =
-    ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a1:lbuffer (uint_t a_t SEC) len
-  -> bLen:size_t
-  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
-  -> b1:lbuffer (uint_t a_t SEC) bLen
-  -> a2:lbuffer (uint_t a_t SEC) len
-  -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> a3:lbuffer (uint_t a_t SEC) len
-  -> b3:lbuffer (uint_t a_t SEC) bLen
-  -> a4:lbuffer (uint_t a_t SEC) len
-  -> b4:lbuffer (uint_t a_t SEC) bLen
-  -> res:lbuffer (uint_t a_t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    live h a1 /\ live h b1 /\ live h a2 /\ live h b2 /\
-    live h a3 /\ live h b3 /\ live h a4 /\ live h b4 /\
-    live h res /\ live h ctx /\
-
-    eq_or_disjoint a1 a2 /\ eq_or_disjoint a1 a3 /\ eq_or_disjoint a1 a4 /\
-    eq_or_disjoint a2 a3 /\ eq_or_disjoint a2 a4 /\ eq_or_disjoint a3 a4 /\
-    disjoint a1 res /\ disjoint a1 ctx /\ disjoint a2 res /\ disjoint a2 ctx /\
-    disjoint a3 res /\ disjoint a3 ctx /\ disjoint a4 res /\ disjoint a4 ctx /\
-    disjoint b1 res /\ disjoint b2 res /\ disjoint b3 res /\ disjoint b4 res /\
-    disjoint res ctx /\
-
-    BD.bn_v h b1 < pow2 (v bBits) /\
-    BD.bn_v h b2 < pow2 (v bBits) /\
-    BD.bn_v h b3 < pow2 (v bBits) /\
-    BD.bn_v h b4 < pow2 (v bBits) /\
-    k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
-    k.to.linv (as_seq h a3) /\ k.to.linv (as_seq h a4))
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    k.to.linv (as_seq h1 res) /\
-    k.to.refl (as_seq h1 res) ==
-    S.exp_four_fw k.to.comm_monoid
-      (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
-      (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
-      (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)
-      (k.to.refl (as_seq h0 a4)) (BD.bn_v h0 b4) (v l))
-
-
-inline_for_extraction noextract
-val lexp_four_fw_vartime:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len
-  -> l:size_window_t a_t len ->
-  lexp_four_fw_st a_t len ctx_len k l
-
-
-inline_for_extraction noextract
-val lexp_four_fw_consttime:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len
-  -> l:size_window_t a_t len ->
-  lexp_four_fw_st a_t len ctx_len k l

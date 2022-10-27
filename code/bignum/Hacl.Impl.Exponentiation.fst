@@ -266,7 +266,7 @@ let lmul_acc_pow_a_bits_l_st
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> i:size_t{v i < v bBits / v l}
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
@@ -324,7 +324,7 @@ let lexp_fw_f_st
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> i:size_t{v i < v bBits / v l}
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
@@ -375,7 +375,7 @@ let lexp_fw_loop_st
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
@@ -442,7 +442,7 @@ let lexp_fw_acc0_st
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h -> v bBits % v l <> 0 /\
@@ -522,9 +522,15 @@ let lexp_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a bLen bBits b r
   let table = create (table_len *! len) (uint #a_t #SEC 0) in
   PT.lprecomp_table #a_t len ctx_len k ctx a table_len table;
 
+  [@inline_let]
+  let table_inv : table_inv_t a_t len table_len =
+    table_inv_precomp len ctx_len k l table_len in
+  let h1 = ST.get () in
+  assert (table_inv (as_seq h1 a) (as_seq h1 table));
+
   mk_lexp_fw_table len ctx_len k l table_len
-    (table_inv_precomp len ctx_len k l table_len)
-    lprecomp_get ctx a bLen bBits b table res;
+    table_inv lprecomp_get
+    ctx a bLen bBits b (to_const table) res;
   pop_frame ()
 
 

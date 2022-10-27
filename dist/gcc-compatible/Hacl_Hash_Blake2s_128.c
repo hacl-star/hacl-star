@@ -488,7 +488,9 @@ void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, 
 Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_128_malloc_blake2s_128()
 {
   Lib_IntVector_Intrinsics_vec128
-  *buf = KRML_ALIGNED_MALLOC(16, sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+  *buf =
+    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+      sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
   memset(buf, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
   return buf;
 }

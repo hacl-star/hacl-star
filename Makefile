@@ -93,7 +93,6 @@ endif
 all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
-  compile-c89-compatible \
   compile-portable-gcc-compatible \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic \
   obj/libhaclml.cmxa compile-election-guard
@@ -696,7 +695,7 @@ TARGETCONFIG_FLAGS = \
 # corresponding feature, one of these variables needs to be overridden.
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
 MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
-CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
+CTR_BUNDLE=-bundle EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
@@ -869,14 +868,6 @@ dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
 dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 
-# C89 distribution
-# ----------------
-#
-# - MerkleTree doesn't compile in C89 mode (FIXME?)
-# - Use C89 versions of ancient HACL code
-dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
-dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
-
 
 # Election Guard distribution
 # ---------------------------
@@ -945,6 +936,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	  -ccopt -Wno-unused \
 	  -warn-error @2@4-6@15@18@21+22 \
 	  -fparentheses \
+	  -fcast-allocations \
 	  -fextern-c \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a

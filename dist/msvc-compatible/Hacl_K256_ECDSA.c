@@ -456,7 +456,7 @@ mul_pow2_256_minus_q_add(
 )
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len + (uint32_t)2U);
-  uint64_t *tmp = alloca((len + (uint32_t)2U) * sizeof (uint64_t));
+  uint64_t *tmp = (uint64_t *)alloca((len + (uint32_t)2U) * sizeof (uint64_t));
   memset(tmp, 0U, (len + (uint32_t)2U) * sizeof (uint64_t));
   memset(tmp, 0U, (len + (uint32_t)2U) * sizeof (uint64_t));
   KRML_MAYBE_FOR2(i0,

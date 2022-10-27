@@ -42,14 +42,6 @@ extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
 
 void
-Hacl_Impl_Chacha20_chacha20_encrypt_block(
-  uint32_t *ctx,
-  uint8_t *out,
-  uint32_t incr,
-  uint8_t *text
-);
-
-void
 Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text);
 
 #if defined(__cplusplus)

@@ -99,29 +99,33 @@ val make_one:
     )
 
 val fsum:
-    a:felem
+    out:felem
+  -> a:felem
   -> b:felem ->
   Stack unit
-    (requires fun h -> live h a /\ live h b /\ disjoint a b /\
+    (requires fun h -> live h a /\ live h b /\ live h out /\
+      eq_or_disjoint a b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
       F51.felem_fits h a (1, 2, 1, 1, 1) /\
       F51.felem_fits h b (1, 2, 1, 1, 1)
     )
-    (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-      F51.felem_fits h1 a (2, 4, 2, 2, 2) /\
-      F51.fevalh h1 a == F51.fevalh h0 a `SC.fadd` F51.fevalh h0 b
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (2, 4, 2, 2, 2) /\
+      F51.fevalh h1 out == F51.fevalh h0 a `SC.fadd` F51.fevalh h0 b
     )
 
 val fdifference:
-    a:felem
+    out:felem
+  -> a:felem
   -> b:felem ->
   Stack unit
-    (requires fun h -> live h a /\ live h b /\ disjoint a b /\
+    (requires fun h -> live h a /\ live h b /\ live h out /\
+      eq_or_disjoint a b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
       F51.felem_fits h a (1, 2, 1, 1, 1) /\
       F51.felem_fits h b (1, 2, 1, 1, 1)
     )
-    (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-      F51.felem_fits h1 a (9, 10, 9, 9, 9) /\
-      F51.fevalh h1 a == F51.fevalh h0 b `SC.fsub` F51.fevalh h0 a
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (9, 10, 9, 9, 9) /\
+      F51.fevalh h1 out == F51.fevalh h0 a `SC.fsub` F51.fevalh h0 b
     )
 
 val reduce_513:
@@ -187,7 +191,7 @@ val fsquare:
     out:felem
   -> a:felem ->
   Stack unit
-    (requires fun h -> live h out /\ live h a /\ disjoint a out /\
+    (requires fun h -> live h out /\ live h a /\ eq_or_disjoint a out /\
       F51.felem_fits h a (9, 10, 9, 9, 9)
     )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
