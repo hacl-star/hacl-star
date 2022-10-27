@@ -85,7 +85,9 @@ let rsapss_pkey_verify a modBits eBits nb eb saltLen sgntLen sgnt msgLen msg =
   RI.rsapss_pkey_verify (ke modBits) a modBits
     (load_pkey modBits) (rsapss_verify a modBits) eBits nb eb saltLen sgntLen sgnt msgLen msg
 
-[@ (Comment "Miscellaneous functions")]
+
+[@@ Comment "  The mask generation function defined in the Public Key Cryptography Standard #1 
+  (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) "]
 val mgf_hash: a:Hash.algorithm{S.hash_is_supported a} -> Hacl.Impl.RSAPSS.MGF.mgf_hash_st a
 
 let mgf_hash a len mgfseed maskLen res = Hacl.Impl.RSAPSS.MGF.mgf_hash a len mgfseed maskLen res
