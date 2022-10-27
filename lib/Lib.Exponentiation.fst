@@ -1134,7 +1134,7 @@ let exp_four_fw_acc0_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
     assert (acc_a3 == pow k a3 b3_rem);
     assert (acc_a4 == pow k a4 b4_rem) end
 
-
+#push-options "--z3rlimit 100"
 let exp_four_fw_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
   let bk = bBits - bBits % l in
   let b1_rem = b1 / pow2 bk in
@@ -1155,3 +1155,4 @@ let exp_four_fw_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
   exp_four_fw_lemma_loop k a1 bBits b1 a2 b2 a3 b3 a4 b4 l (bBits / l);
   Math.Lemmas.euclidean_division_definition bBits l;
   assert_norm (pow2 0 = 1)
+#pop-options
