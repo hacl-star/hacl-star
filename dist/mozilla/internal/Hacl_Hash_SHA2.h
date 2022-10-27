@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Chacha20_H
-#define __internal_Hacl_Chacha20_H
+#ifndef __internal_Hacl_Hash_SHA2_H
+#define __internal_Hacl_Hash_SHA2_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,18 +35,33 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "../Hacl_Chacha20.h"
+#include "../Hacl_Hash_SHA2.h"
 
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
+void Hacl_Hash_Core_SHA2_init_224(uint32_t *s);
 
-void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
+void Hacl_Hash_Core_SHA2_init_256(uint32_t *s);
 
-void
-Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text);
+void Hacl_Hash_Core_SHA2_init_384(uint64_t *s);
+
+void Hacl_Hash_Core_SHA2_init_512(uint64_t *s);
+
+void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block);
+
+void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block);
+
+void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Chacha20_H_DEFINED
+#define __internal_Hacl_Hash_SHA2_H_DEFINED
 #endif

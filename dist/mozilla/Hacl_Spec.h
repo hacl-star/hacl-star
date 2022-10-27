@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Chacha20_H
-#define __internal_Hacl_Chacha20_H
+#ifndef __Hacl_Spec_H
+#define __Hacl_Spec_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,18 +35,51 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "../Hacl_Chacha20.h"
 
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 
-void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
+#define Spec_Blake2_Blake2S 0
+#define Spec_Blake2_Blake2B 1
 
-void
-Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text);
+typedef uint8_t Spec_Blake2_alg;
+
+#define Spec_Hash_Definitions_SHA2_224 0
+#define Spec_Hash_Definitions_SHA2_256 1
+#define Spec_Hash_Definitions_SHA2_384 2
+#define Spec_Hash_Definitions_SHA2_512 3
+#define Spec_Hash_Definitions_SHA1 4
+#define Spec_Hash_Definitions_MD5 5
+#define Spec_Hash_Definitions_Blake2S 6
+#define Spec_Hash_Definitions_Blake2B 7
+#define Spec_Hash_Definitions_SHA3_256 8
+
+typedef uint8_t Spec_Hash_Definitions_hash_alg;
+
+#define Spec_FFDHE_FFDHE2048 0
+#define Spec_FFDHE_FFDHE3072 1
+#define Spec_FFDHE_FFDHE4096 2
+#define Spec_FFDHE_FFDHE6144 3
+#define Spec_FFDHE_FFDHE8192 4
+
+typedef uint8_t Spec_FFDHE_ffdhe_alg;
+
+#define Spec_Agile_AEAD_AES128_GCM 0
+#define Spec_Agile_AEAD_AES256_GCM 1
+#define Spec_Agile_AEAD_CHACHA20_POLY1305 2
+#define Spec_Agile_AEAD_AES128_CCM 3
+#define Spec_Agile_AEAD_AES256_CCM 4
+#define Spec_Agile_AEAD_AES128_CCM8 5
+#define Spec_Agile_AEAD_AES256_CCM8 6
+
+typedef uint8_t Spec_Agile_AEAD_alg;
+
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Chacha20_H_DEFINED
+#define __Hacl_Spec_H_DEFINED
 #endif

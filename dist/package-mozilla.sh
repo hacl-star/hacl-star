@@ -6,7 +6,9 @@ set -e
 # If FOO appears in FILES, then FOO.h, FOO.c, internal/FOO.h, FOO.asm, FOO.S and
 # FOO all get copied unconditionally to dist/mozilla (as long as they exist)
 FILES=" \
+  Hacl_Bignum \
   Hacl_Bignum25519_51 \
+  Hacl_Bignum_Base \
   Hacl_Chacha20 \
   Hacl_Chacha20Poly1305_128 \
   Hacl_Chacha20Poly1305_256 \
@@ -16,13 +18,16 @@ FILES=" \
   Hacl_Curve25519_51 \
   Hacl_Curve25519_64 \
   Hacl_Hash_SHA1 \
+  Hacl_Hash_SHA2 \
   Hacl_IntTypes_Intrinsics \
   Hacl_IntTypes_Intrinsics_128 \
   Hacl_Lib \
   Hacl_Poly1305_128 \
   Hacl_Poly1305_256 \
   Hacl_Poly1305_32 \
+  Hacl_RSAPSS \
   Hacl_SHA3 \
+  Hacl_Spec \
   Hacl_Streaming_SHA1 \
   Lib_Memzero0 \
   TestLib \
@@ -33,6 +38,7 @@ FILES=" \
   curve25519-x86_64-mingw \
   curve25519-x86_64-msvc \
   libintvector \
+  lib_intrinsics \
   Makefile \
   Makefile.basic"
 

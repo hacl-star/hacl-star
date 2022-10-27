@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Chacha20_H
-#define __internal_Hacl_Chacha20_H
+#ifndef __internal_Hacl_Spec_H
+#define __internal_Hacl_Spec_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,18 +35,29 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "../Hacl_Chacha20.h"
+#include "../Hacl_Spec.h"
 
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
+#define Spec_ECDSA_NoHash 0
+#define Spec_ECDSA_Hash 1
 
-void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
+typedef uint8_t Spec_ECDSA_hash_alg_ecdsa_tags;
 
-void
-Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text);
+typedef struct Spec_ECDSA_hash_alg_ecdsa_s
+{
+  Spec_ECDSA_hash_alg_ecdsa_tags tag;
+  Spec_Hash_Definitions_hash_alg _0;
+}
+Spec_ECDSA_hash_alg_ecdsa;
+
+#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
+#define Spec_Cipher_Expansion_Vale_AES128 1
+#define Spec_Cipher_Expansion_Vale_AES256 2
+
+typedef uint8_t Spec_Cipher_Expansion_impl;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Chacha20_H_DEFINED
+#define __internal_Hacl_Spec_H_DEFINED
 #endif

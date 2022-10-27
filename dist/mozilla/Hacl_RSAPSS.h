@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Chacha20_H
-#define __internal_Hacl_Chacha20_H
+#ifndef __Hacl_RSAPSS_H
+#define __Hacl_RSAPSS_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,18 +35,83 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "../Hacl_Chacha20.h"
+#include "Hacl_Spec.h"
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Bignum_Base.h"
 
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
+bool
+Hacl_RSAPSS_rsapss_sign(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint64_t *skey,
+  uint32_t saltLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint8_t *sgnt
+);
 
-void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
+bool
+Hacl_RSAPSS_rsapss_verify(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint64_t *pkey,
+  uint32_t saltLen,
+  uint32_t sgntLen,
+  uint8_t *sgnt,
+  uint32_t msgLen,
+  uint8_t *msg
+);
 
-void
-Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text);
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb);
+
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_skey(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db
+);
+
+bool
+Hacl_RSAPSS_rsapss_skey_sign(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db,
+  uint32_t saltLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint8_t *sgnt
+);
+
+bool
+Hacl_RSAPSS_rsapss_pkey_verify(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint32_t saltLen,
+  uint32_t sgntLen,
+  uint8_t *sgnt,
+  uint32_t msgLen,
+  uint8_t *msg
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Chacha20_H_DEFINED
+#define __Hacl_RSAPSS_H_DEFINED
 #endif
