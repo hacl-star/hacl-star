@@ -238,6 +238,9 @@ let max_total_hash_length (a : alg) :
 noextract
 let max_input_length (a : alg) : nat = max_total_hash_length a
 
+noextract inline_for_extraction
+let max_input_len (a: alg): (x:U64.t { U64.v x == max_input_length a }) = 0xffffffffffffffffUL
+
 inline_for_extraction noextract
 let block (a : alg) = (block: S.seq uint8 { S.length block = Spec.size_block a })
 
@@ -688,7 +691,7 @@ let blake2 (a : alg) (m : valid_m_spec a)
     (stateful_blake2 a m)     (* state *)
     (I.stateful_unused unit)  (* key *)
     
-    (fun () -> max_input_length a ) (* max_input_length *)
+    (fun () -> max_input_len a ) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
     (fun () -> blocks_state_len a m) (* blocks_state_len *)
