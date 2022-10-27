@@ -231,7 +231,7 @@ val mk_point_at_inf: p:P.point -> Stack unit
     P.point_inv h1 p /\ S.to_aff_point (P.point_eval h1 p) == S.aff_point_at_inf)
 
 let mk_point_at_inf p =
-  PM.make_point_at_inf p
+  P.make_point_at_inf p
 
 
 [@@ Comment "Write the base point (generator) in `p`.
@@ -243,7 +243,7 @@ val mk_base_point: p:P.point -> Stack unit
     P.point_inv h1 p /\ P.point_eval h1 p == S.g)
 
 let mk_base_point p =
-  PM.make_g p
+  P.make_g p
 
 
 [@@ Comment "Write `-p` in `out` (point negation).

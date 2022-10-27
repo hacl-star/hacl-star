@@ -236,9 +236,9 @@ let exp_four_fw_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
       pow_lemma k a2 bits_c2;
       pow_lemma k a3 bits_c3;
       pow_lemma k a4 bits_c4;
-      let acc = k.mul acc_a1 acc_a2 in
-      let acc = k.mul acc acc_a3 in
-      let acc = k.mul acc acc_a4 in
+      let acc_a12 = k.mul acc_a1 acc_a2 in
+      let acc_a34 = k.mul acc_a3 acc_a4 in
+      let acc = k.mul acc_a12 acc_a34 in
       acc end in
 
   exp_four_fw_lemma_loop #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l acc0 (bBits / l)

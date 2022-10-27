@@ -79,7 +79,7 @@ let point_mul (a:lbytes 32) (p:ext_point_c) : ext_point_c =
 
 // [a1]P1 + [a2]P2
 let point_mul_double (a1:lbytes 32) (p1:ext_point_c) (a2:lbytes 32) (p2:ext_point_c) : ext_point_c =
-  SE.exp_double_fw mk_ed25519_concrete_ops p1 256 (nat_from_bytes_le a1) p2 (nat_from_bytes_le a2) 4
+  SE.exp_double_fw mk_ed25519_concrete_ops p1 256 (nat_from_bytes_le a1) p2 (nat_from_bytes_le a2) 5
 
 // [a]G
 let point_mul_g (a:lbytes 32) : ext_point_c =

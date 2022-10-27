@@ -30,11 +30,12 @@ let lemma_table_sub_len len table_len i =
 
 inline_for_extraction noextract
 let table_gsub_len
+  (#bt:buftype)
   (#t:BD.limb_t)
   (len:size_t{v len > 0})
   (table_len:size_t{v table_len * v len <= max_size_t})
-  (table:lbuffer (uint_t t SEC) (table_len *! len))
-  (i:size_t{v i < v table_len}) : GTot (lbuffer (uint_t t SEC) len) =
+  (table:lbuffer_t bt (uint_t t SEC) (table_len *! len))
+  (i:size_t{v i < v table_len}) : GTot (lbuffer_t bt (uint_t t SEC) len) =
 
   lemma_table_sub_len (v len) (v table_len) (v i);
   gsub table (i *! len) len
@@ -42,12 +43,13 @@ let table_gsub_len
 
 inline_for_extraction noextract
 val table_sub_len:
-    #t:BD.limb_t
+    #bt:buftype
+  -> #t:BD.limb_t
   -> len:size_t{v len > 0}
   -> table_len:size_t{v table_len * v len <= max_size_t}
-  -> table:lbuffer (uint_t t SEC) (table_len *! len)
+  -> table:lbuffer_t bt (uint_t t SEC) (table_len *! len)
   -> i:size_t{v i < v table_len} ->
-  Stack (lbuffer (uint_t t SEC) len)
+  Stack (lbuffer_t bt (uint_t t SEC) len)
   (requires fun h -> live h table)
   (ensures  fun h0 r h1 -> h0 == h1 /\ live h1 r /\
     r == table_gsub_len len table_len table i /\
@@ -99,7 +101,7 @@ val table_select_consttime_f:
     #t:BD.limb_t
   -> len:size_t{v len > 0}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> table:lbuffer (uint_t t SEC) (table_len *! len)
+  -> table:clbuffer (uint_t t SEC) (table_len *! len)
   -> i:uint_t t SEC{v i < v table_len}
   -> j:size_t{v j < v table_len - 1}
   -> acc:lbuffer (uint_t t SEC) len ->

@@ -156,6 +156,50 @@ let ecdsa_verify_avoid_finv p r =
 
 
 inline_for_extraction noextract
+val ecdsa_verify_qelem_aff_noalloc (p res:point) (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
+  (requires fun h ->
+    live h pk_x /\ live h pk_y /\ live h z /\
+    live h r /\ live h s /\ live h p /\ live h res /\
+    disjoint p res /\ disjoint p pk_x /\ disjoint p pk_y /\
+    disjoint p z /\ disjoint p r /\ disjoint p s /\
+    disjoint res pk_x /\ disjoint res pk_y /\ disjoint res z /\
+    disjoint res r /\ disjoint res s /\
+
+    QA.qas_nat h z < S.q /\ QA.qas_nat h s < S.q /\
+    0 < QA.qas_nat h r /\ QA.qas_nat h r < S.q /\
+    inv_fully_reduced h pk_x /\ inv_fully_reduced h pk_y)
+  (ensures  fun h0 b h1 -> modifies (loc res |+| loc p) h0 h1 /\
+   (let sinv = S.qinv (QA.qas_nat h0 s) in
+    let u1 = S.qmul (QA.qas_nat h0 z) sinv in
+    let u2 = S.qmul (QA.qas_nat h0 r) sinv in
+    let p = (feval h0 pk_x, feval h0 pk_y, S.one) in
+    let _X, _Y, _Z = S.point_mul_double_g u1 u2 p in
+    b <==> (if S.is_proj_point_at_inf (_X, _Y, _Z) then false
+      else S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
+
+let ecdsa_verify_qelem_aff_noalloc p res pk_x pk_y z r s =
+  let h0 = ST.get () in
+  let sinv = Ghost.hide (S.qinv (QA.qas_nat h0 s)) in
+  let u1 = Ghost.hide (S.qmul (QA.qas_nat h0 z) sinv) in
+  let u2 = Ghost.hide (S.qmul (QA.qas_nat h0 r) sinv) in
+
+  to_proj_point p pk_x pk_y;
+  let h1 = ST.get () in
+  ecdsa_verify_qelem res p z r s;
+  let h2 = ST.get () in
+  assert (S.to_aff_point (point_eval h2 res) ==
+    S.to_aff_point (S.point_mul_double_g u1 u2 (point_eval h1 p)));
+
+  KL.lemma_aff_is_point_at_inf (point_eval h2 res);
+  KL.lemma_aff_is_point_at_inf (S.point_mul_double_g u1 u2 (point_eval h1 p));
+
+  let b =
+    if is_proj_point_at_inf_vartime res then false
+    else ecdsa_verify_avoid_finv res r in
+  b
+
+
+inline_for_extraction noextract
 val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
   (requires fun h ->
     live h pk_x /\ live h pk_y /\ live h z /\ live h r /\ live h s /\
@@ -171,26 +215,14 @@ val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
     b <==> (if S.is_proj_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
 
-#push-options "--z3rlimit 100"
-
 let ecdsa_verify_qelem_aff pk_x pk_y z r s =
-  let h0 = ST.get () in
-  KL.lemma_proj_aff_id (S.g_x, S.g_y);
-  KL.lemma_proj_aff_id (feval h0 pk_x, feval h0 pk_y);
   push_frame ();
   let p = create_point () in
   let res = create_point () in
-
-  to_proj_point p pk_x pk_y;
-  ecdsa_verify_qelem res p z r s;
-
-  let b =
-    if is_proj_point_at_inf_vartime res then false
-    else ecdsa_verify_avoid_finv res r in
+  let b = ecdsa_verify_qelem_aff_noalloc p res pk_x pk_y z r s in
   pop_frame ();
   b
 
-#pop-options
 
 inline_for_extraction noextract
 val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool

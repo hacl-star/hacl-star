@@ -18,7 +18,7 @@ module PM = Hacl.Impl.Ed25519.Ladder
 
 inline_for_extraction noextract
 let point_inv_full_t (h:mem) (p:point) =
-  F51.point_inv_t h p /\ PM.inv_ext_point (as_seq h p)
+  F51.point_inv_t h p /\ F51.inv_ext_point (as_seq h p)
 
 
 inline_for_extraction noextract
