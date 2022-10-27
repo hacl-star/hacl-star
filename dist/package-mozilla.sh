@@ -39,12 +39,11 @@ FILES=" \
   curve25519-x86_64-msvc \
   libintvector \
   lib_intrinsics \
+  configure \
   Makefile \
   Makefile.basic"
 
 mkdir -p mozilla/internal
-cp Makefile.mozilla.config mozilla/Makefile.config
-cp config.mozilla.h mozilla/config.h
 
 # For these, we want just the header
 cp gcc-compatible/Hacl_Krmllib.h mozilla/
