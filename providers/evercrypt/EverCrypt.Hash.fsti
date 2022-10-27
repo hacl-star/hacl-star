@@ -241,14 +241,14 @@ val update_multi_256: Hacl.Hash.Definitions.update_multi_st (|SHA2_256, ()|)
 inline_for_extraction noextract
 val update_multi_224: Hacl.Hash.Definitions.update_multi_st (|SHA2_224, ()|)
 
-/// The new ``update`` method (with support for blake2)
+/// The ``update`` method (with support for blake2)
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/karamel and that we know that machine integers and secret integers
 // are the same. In the long run, we should standardize on a secret integer type
 // in F*'s ulib and have evercrypt use it.
 (** @type: true
 *)
-val update2:
+val update:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
@@ -267,30 +267,11 @@ val update2:
                                              (B.as_seq h0 block)) /\
     preserves_freeable s h0 h1))
 
-/// The deprecated ``update`` method with no support for blake2
-[@(deprecated "Use update2 instead") ]
-val update:
-  #a:e_alg{is_md a} -> (
-  let a = Ghost.reveal a in
-  s:state a ->
-  block:B.buffer Lib.IntTypes.uint8 { B.length block = block_length a } ->
-  Stack unit
-  (requires fun h0 ->
-    invariant s h0 /\
-    B.live h0 block /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer block)))
-  (ensures fun h0 _ h1 ->
-    M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    invariant s h1 /\
-    repr s h1 == fst(Spec.Agile.Hash.update a (repr s h0, ()) (B.as_seq h0 block)) /\
-    preserves_freeable s h0 h1))
-
-/// The new ``update_multi`` method
+/// The ``update_multi`` method
 // Note that we pass the data length in bytes (rather than blocks).
 (** @type: true
 *)
-val update_multi2:
+val update_multi:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
@@ -310,32 +291,12 @@ val update_multi2:
                                                    (B.as_seq h0 blocks)) /\
     preserves_freeable s h0 h1))
 
-/// The deprecated ``update_multi`` method with no support for blake2
-[@(deprecated "Use update_multi2 instead") ]
-val update_multi:
-  #a:e_alg{is_md a} -> (
-  let a = Ghost.reveal a in
-  s:state a ->
-  blocks:B.buffer Lib.IntTypes.uint8 { B.length blocks % block_length a = 0 } ->
-  len: UInt32.t { v len = B.length blocks } ->
-  Stack unit
-  (requires fun h0 ->
-    invariant s h0 /\
-    B.live h0 blocks /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer blocks)))
-  (ensures fun h0 _ h1 ->
-    M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    invariant s h1 /\
-    repr s h1 == fst(Spec.Agile.Hash.update_multi a (repr s h0, ()) (B.as_seq h0 blocks)) /\
-    preserves_freeable s h0 h1))
-
 val update_last_256: Hacl.Hash.Definitions.update_last_st (|SHA2_256, ()|)
 
 inline_for_extraction noextract
 val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
 
-/// The new ``update_last`` method with support for blake2
+/// The ``update_last`` method with support for blake2
 // 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.
 // 18-03-03 the last block is *never* complete so there is room for the 1st byte of padding.
@@ -346,7 +307,7 @@ val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
 //   about that sequence concatenation
 (** @type: true
 *)
-val update_last2:
+val update_last:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
@@ -366,30 +327,6 @@ val update_last2:
     repr s h1 ==
       fst (Spec.Hash.Incremental.update_last a (repr_with_counter s h0 prev_len) (v prev_len)
                                              (B.as_seq h0 last)) /\
-    M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    preserves_freeable s h0 h1))
-
-[@(deprecated "Use update_last2 instead") ]
-val update_last:
-  #a:e_alg{is_md a} -> (
-  let a = Ghost.reveal a in
-  s:state a ->
-  last:B.buffer Lib.IntTypes.uint8 { B.length last < block_length a } ->
-  total_len:uint64_t {
-    v total_len `less_than_max_input_length` a /\
-    (v total_len - B.length last) % block_length a = 0 } ->
-  Stack unit
-  (requires fun h0 ->
-    invariant s h0 /\
-    B.live h0 last /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer last)))
-  (ensures fun h0 _ h1 ->
-    invariant s h1 /\
-    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
-    repr s h1 ==
-      fst(Spec.Agile.Hash.update_multi a (repr s h0, ())
-        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len)))) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))

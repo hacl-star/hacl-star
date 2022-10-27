@@ -327,7 +327,7 @@ let update_multi_224 s ev blocks n =
 
 // Need to unroll the definition of update_multi once to prove that it's update
 #push-options "--fuel 1 --ifuel 1"
-let update2 #a s prevlen block =
+let update #a s prevlen block =
   match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_update p () block
   | SHA1_s p -> Hacl.Hash.SHA1.legacy_update p () block
@@ -354,13 +354,9 @@ let update2 #a s prevlen block =
         ()
 #pop-options
 
-// The deprecated update just calls the new update
-let update #a s block =
-  update2 #a s 0UL block
-
 #push-options "--ifuel 1"
 
-let update_multi2 #a s prevlen blocks len =
+let update_multi #a s prevlen blocks len =
   match !*s with
   | MD5_s p ->
       let n = len / block_len MD5 in
@@ -405,10 +401,6 @@ let update_multi2 #a s prevlen blocks len =
         ()
 
 #pop-options
-
-// The deprecated update_multi just calls the new update_multi
-let update_multi #a s blocks len =
-  update_multi2 #a s 0UL blocks len
 
 // Re-using the higher-order stateful combinator to get an instance of
 // update_last that is capable of calling Vale under the hood
@@ -559,7 +551,7 @@ let update_last_blake2b_256 p prev_len last last_len =
                     prev_len last last_len in
   ()
 
-let update_last2 #a s prev_len last last_len =
+let update_last #a s prev_len last last_len =
   match !*s with
   | MD5_s p ->
       update_last_64 md5 Hacl.Hash.MD5.legacy_update_last p () prev_len last last_len
@@ -621,47 +613,6 @@ let modulo_sub_lemma a b c =
   assert(d * c = 0);
   assert(a % c - b = 0);
   assert(a % c = b)
-
-// The deprecated update_last just calls the new update_last.
-// This one is a bit trickier than the others because we need to recompute
-// the length of the data seen so far.
-#push-options "--z3rlimit 800"
-let update_last #ga s last total_len =
-  let a = alg_of_state ga s in
-  (**) assert_norm(v (block_len a) > 0);
-  let last_len = U64.(total_len %^ Int.Cast.uint32_to_uint64 (block_len a)) in
-  (**) Math.Lemmas.euclidean_division_definition (U64.v total_len) (block_length a);
-  (**) Math.Lemmas.nat_over_pos_is_nat (U64.v total_len) (block_length a);
-  (**) Math.Lemmas.nat_times_nat_is_nat (U64.v total_len / block_length a) (block_length a);
-  (**) Math.Lemmas.modulo_range_lemma (U64.v total_len) (block_length a);
-  (**) assert(U64.v last_len = U64.v total_len % block_length a);
-  (**) assert(UInt64.v last_len <= UInt64.v total_len);
-  let prev_len = U64.(total_len -^ last_len) in
-  (**) assert(block_length a < pow2 32);
-  (**) Math.Lemmas.modulo_lemma (U64.v last_len) (pow2 32);
-  (**) assert(U64.v last_len = U32.v (Int.Cast.uint64_to_uint32 last_len));
-  [@inline_let]
-  let last_len = Int.Cast.uint64_to_uint32 last_len in
-  (**) assert(U32.v last_len < Spec.Hash.Definitions.block_length a);
-  (**) assert((v prev_len + v last_len) `less_than_max_input_length` a);
-  (**) assert(v prev_len = v total_len - v last_len);
-  (**) Math.Lemmas.cancel_mul_mod (v total_len / block_length a) (block_length a);
-  (**) assert(v prev_len % block_length a = 0);
-  (**) let h0 = ST.get () in
-  (**) modulo_sub_lemma (v total_len) (B.length last) (block_length a);
-  (**) assert(v last_len = B.length last);
-  update_last2 #ga s prev_len last last_len;
-  (**) let h1 = ST.get () in
-  // The following assertions need non-linear arithmetic.
-  // Note that for now, the proof is stable as it is.
-  (**) assert(
-  (**)   (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len)))
-  (**)     % block_length a = 0);
-  (**) assert(
-  (**)   repr s h1 ==
-  (**)   fst (Spec.Agile.Hash.update_multi a (repr s h0, ())
-  (**)         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len)))))
-#pop-options
 
 #push-options "--ifuel 1"
 
