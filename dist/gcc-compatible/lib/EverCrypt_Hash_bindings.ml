@@ -53,33 +53,22 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_Hash_update_multi_256 =
       foreign "EverCrypt_Hash_update_multi_256"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
-    let everCrypt_Hash_update2 =
-      foreign "EverCrypt_Hash_update2"
-        ((ptr everCrypt_Hash_state_s) @->
-           (uint64_t @-> (ocaml_bytes @-> (returning void))))
     let everCrypt_Hash_update =
       foreign "EverCrypt_Hash_update"
-        ((ptr everCrypt_Hash_state_s) @-> (ocaml_bytes @-> (returning void)))
-    let everCrypt_Hash_update_multi2 =
-      foreign "EverCrypt_Hash_update_multi2"
         ((ptr everCrypt_Hash_state_s) @->
-           (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+           (uint64_t @-> (ocaml_bytes @-> (returning void))))
     let everCrypt_Hash_update_multi =
       foreign "EverCrypt_Hash_update_multi"
         ((ptr everCrypt_Hash_state_s) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning void))))
+           (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let everCrypt_Hash_update_last_256 =
       foreign "EverCrypt_Hash_update_last_256"
         ((ptr uint32_t) @->
            (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
-    let everCrypt_Hash_update_last2 =
-      foreign "EverCrypt_Hash_update_last2"
-        ((ptr everCrypt_Hash_state_s) @->
-           (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let everCrypt_Hash_update_last =
       foreign "EverCrypt_Hash_update_last"
         ((ptr everCrypt_Hash_state_s) @->
-           (ocaml_bytes @-> (uint64_t @-> (returning void))))
+           (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let everCrypt_Hash_finish =
       foreign "EverCrypt_Hash_finish"
         ((ptr everCrypt_Hash_state_s) @-> (ocaml_bytes @-> (returning void)))
