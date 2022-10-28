@@ -9,7 +9,7 @@ open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module S = Lib.Exponentiation
+module S = Lib.Exponentiation.Definition
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
