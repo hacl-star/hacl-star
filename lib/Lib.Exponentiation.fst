@@ -19,10 +19,11 @@ let lemma_b_mod_pow2i bBits b i =
     b / pow2 (i - 1) % 2 * pow2 (i - 1) + b % pow2 (i - 1);
   }
 
+let b_acc (l:pos) (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i <= bBits / l}) : nat =
+  b / pow2 (bBits - bBits % l - l * i)
 
-val lemma_b_div_pow2ki: bBits:nat -> b:nat{b < pow2 bBits} -> k:pos -> i:pos{k * i <= bBits - bBits % k} ->
-  Lemma (let bk = bBits - bBits % k in
-    b / pow2 (bk - k * (i - 1)) * pow2 k + b / pow2 (bk - k * (i - 1) - k) % pow2 k == b / pow2 (bk - k * i))
+val lemma_b_div_pow2ki: bBits:nat -> b:nat{b < pow2 bBits} -> k:pos -> i:pos{i <= bBits / k} ->
+  Lemma (b_acc k bBits b (i - 1) * pow2 k + b_acc k bBits b i % pow2 k == b_acc k bBits b i)
 let lemma_b_div_pow2ki bBits b k i =
   let bk = bBits - bBits % k in
   let c = b / pow2 (bk - k * i) in
@@ -302,18 +303,16 @@ val exp_fw_lemma_step:
     #t:Type -> k:comm_monoid t
   -> a:t -> bBits:nat -> b:nat{b < pow2 bBits}
   -> l:pos -> i:pos{i <= bBits / l} -> acc1:t -> Lemma
-  (requires
-    acc1 == pow k a (b / pow2 (bBits - bBits % l - l * (i - 1))))
-  (ensures
-    exp_fw_f k a bBits b l (i - 1) acc1 == pow k a (b / pow2 (bBits - bBits % l - l * i)))
+  (requires acc1 == pow k a (b_acc l bBits b (i - 1)))
+  (ensures  exp_fw_f k a bBits b l (i - 1) acc1 == pow k a (b_acc l bBits b i))
 
 let exp_fw_lemma_step #t k a bBits b l i acc1 =
-  let bk = bBits - bBits % l in
   let acc = exp_fw_f k a bBits b l (i - 1) acc1 in
   exp_pow2_lemma k acc1 l;
 
-  let r1 = b / pow2 (bk - l * (i - 1)) in
-  let r2 = b / pow2 (bk - l * (i - 1) - l) % pow2 l in
+  let r1 = b_acc l bBits b (i - 1) in
+  let r2 = b_acc l bBits b i % pow2 l in
+  Math.Lemmas.distributivity_sub_right l i 1;
   assert (acc == k.mul (pow k acc1 (pow2 l)) (pow k a r2));
 
   calc (==) {
@@ -325,7 +324,7 @@ let exp_fw_lemma_step #t k a bBits b l i acc1 =
     (==) { lemma_pow_add k a (r1 * pow2 l) r2 }
     pow k a (r1 * pow2 l + r2);
     (==) { lemma_b_div_pow2ki bBits b l i }
-    pow k a (b / pow2 (bk - l * i));
+    pow k a (b_acc l bBits b i);
   }
 
 
@@ -334,14 +333,12 @@ val exp_fw_lemma_loop:
   -> a:t -> bBits:nat -> b:nat{b < pow2 bBits}
   -> l:pos -> i:nat{i <= bBits / l} ->
   Lemma (
-    let bk = bBits - bBits % l in
-    let acc0 = pow k a (b / pow2 bk) in
+    let acc0 = pow k a (b_acc l bBits b 0) in
     let acc = Loops.repeati i (exp_fw_f k a bBits b l) acc0 in
-    acc == pow k a (b / pow2 (bk - l * i)))
+    acc == pow k a (b_acc l bBits b i))
 
 let rec exp_fw_lemma_loop #t k a bBits b l i =
-  let bk = bBits - bBits % l in
-  let acc0 = pow k a (b / pow2 bk) in
+  let acc0 = pow k a (b_acc l bBits b 0) in
   let acc = Loops.repeati i (exp_fw_f k a bBits b l) acc0 in
   if i = 0 then
     Loops.eq_repeati0 i (exp_fw_f k a bBits b l) acc0
@@ -350,9 +347,7 @@ let rec exp_fw_lemma_loop #t k a bBits b l i =
     let acc1 = Loops.repeati (i - 1) (exp_fw_f k a bBits b l) acc0 in
     assert (acc == exp_fw_f k a bBits b l (i - 1) acc1);
     exp_fw_lemma_loop k a bBits b l (i - 1);
-    assert (acc1 == pow k a (b / pow2 (bk - l * (i - 1))));
     exp_fw_lemma_step k a bBits b l i acc1;
-    assert (acc == pow k a (b / pow2 (bk - l * i)));
     () end
 
 
@@ -360,7 +355,7 @@ val exp_fw_acc0_lemma:
     #t:Type -> k:comm_monoid t
   -> a:t -> bBits:nat -> b:nat{b < pow2 bBits}
   -> l:pos{bBits % l <> 0} ->
-  Lemma (exp_fw_acc0 k a bBits b l == pow k a (b / pow2 (bBits / l * l)))
+  Lemma (exp_fw_acc0 k a bBits b l == pow k a (b_acc l bBits b 0))
 
 let exp_fw_acc0_lemma #t k a bBits b l =
   let bits_c = get_ith_lbits bBits b (bBits / l * l) l in
@@ -380,7 +375,7 @@ val exp_fw_acc0_aux_lemma:
   -> a:t -> bBits:nat -> b:nat{b < pow2 bBits}
   -> l:pos ->
   Lemma (let acc0 = if bBits % l = 0 then one else exp_fw_acc0 k a bBits b l in
-    acc0 == pow k a (b / pow2 (bBits / l * l)))
+    acc0 == pow k a (b_acc l bBits b 0))
 
 let exp_fw_acc0_aux_lemma #t k a bBits b l =
   if bBits % l = 0 then begin
@@ -396,16 +391,15 @@ let exp_fw_acc0_aux_lemma #t k a bBits b l =
 
 
 let exp_fw_lemma #t k a bBits b l =
-  let bk = bBits - bBits % l in
+  let b_rem = b_acc l bBits b 0 in
   let acc0 = if bBits % l = 0 then one else exp_fw_acc0 k a bBits b l in
   exp_fw_acc0_aux_lemma k a bBits b l;
-  assert (acc0 == pow k a (b / pow2 (bBits / l * l)));
-  Math.Lemmas.euclidean_division_definition bBits l;
-  assert (acc0 == pow k a (b / pow2 bk));
+  assert (acc0 == pow k a b_rem);
 
   let res = Loops.repeati (bBits / l) (exp_fw_f k a bBits b l) acc0 in
   exp_fw_lemma_loop k a bBits b l (bBits / l);
-  assert (res == pow k a (b / pow2 (bk - l * (bBits / l))));
+  assert (res == pow k a (b_acc l bBits b (bBits / l)));
+  Math.Lemmas.euclidean_division_definition bBits l;
   assert (res == pow k a (b / pow2 0));
   assert_norm (pow2 0 = 1)
 
@@ -435,23 +429,21 @@ val exp_double_fw_lemma_step:
   -> a2:t -> b2:nat{b2 < pow2 bBits}
   -> l:pos -> i:pos{i <= bBits / l} -> acc:t -> Lemma
   (requires
-   (let bk = bBits - bBits % l in
-    acc == mul (pow k a1 (b1 / pow2 (bk - l * (i - 1)))) (pow k a2 (b2 / pow2 (bk - l * (i - 1))))))
+    acc == mul (pow k a1 (b_acc l bBits b1 (i - 1))) (pow k a2 (b_acc l bBits b2 (i - 1))))
   (ensures
-   (let bk = bBits - bBits % l in
     exp_double_fw_f k a1 bBits b1 a2 b2 l (i - 1) acc ==
-    mul (pow k a1 (b1 / pow2 (bk - l * i))) (pow k a2 (b2 / pow2 (bk - l * i)))))
+    mul (pow k a1 (b_acc l bBits b1 i)) (pow k a2 (b_acc l bBits b2 i)))
 
 let exp_double_fw_lemma_step #t k a1 bBits b1 a2 b2 l i acc =
-  let bk = bBits - bBits % l in
   let acc1 = exp_pow2 k acc l in
-  let r11 = b1 / pow2 (bk - l * (i - 1)) in
-  let r12 = b1 / pow2 (bk - l * (i - 1) - l) % pow2 l in
-  let r21 = b2 / pow2 (bk - l * (i - 1)) in
-  let r22 = b2 / pow2 (bk - l * (i - 1) - l) % pow2 l in
+  let r11 = b_acc l bBits b1 (i - 1) in
+  let r12 = b_acc l bBits b1 i % pow2 l in
+  let r21 = b_acc l bBits b2 (i - 1) in
+  let r22 = b_acc l bBits b2 i % pow2 l in
+  Math.Lemmas.distributivity_sub_right l i 1;
 
-  let res_a1 = pow k a1 (b1 / pow2 (bk - l * i)) in
-  let res_a2 = pow k a2 (b2 / pow2 (bk - l * i)) in
+  let res_a1 = pow k a1 (b_acc l bBits b1 i) in
+  let res_a2 = pow k a2 (b_acc l bBits b2 i) in
 
   calc (==) {
     k.mul acc1 (pow k a2 r22);
@@ -484,14 +476,12 @@ val exp_double_fw_lemma_loop:
   -> a2:t -> b2:nat{b2 < pow2 bBits}
   -> l:pos -> i:nat{i <= bBits / l} ->
   Lemma (
-    let bk = bBits - bBits % l in
-    let acc0 = mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)) in
+    let acc0 = mul (pow k a1 (b_acc l bBits b1 0)) (pow k a2 (b_acc l bBits b2 0)) in
     let acc = Loops.repeati i (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
-    acc == mul (pow k a1 (b1 / pow2 (bk - l * i))) (pow k a2 (b2 / pow2 (bk - l * i))))
+    acc == mul (pow k a1 (b_acc l bBits b1 i)) (pow k a2 (b_acc l bBits b2 i)))
 
 let rec exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l i =
-  let bk = bBits - bBits % l in
-  let acc0 = mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)) in
+  let acc0 = mul (pow k a1 (b_acc l bBits b1 0)) (pow k a2 (b_acc l bBits b2 0)) in
   let acc = Loops.repeati i (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
 
   if i = 0 then
@@ -508,8 +498,7 @@ val exp_double_fw_acc0_lemma: #t:Type -> k:comm_monoid t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
   -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos ->
   Lemma (let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
-    let bk = bBits - bBits % l in
-    acc0 == mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
+    acc0 == mul (pow k a1 (b_acc l bBits b1 0)) (pow k a2 (b_acc l bBits b2 0)))
 
 let exp_double_fw_acc0_lemma #t k a1 bBits b1 a2 b2 l =
   let bk = bBits - bBits % l in
@@ -530,22 +519,16 @@ let exp_double_fw_acc0_lemma #t k a1 bBits b1 a2 b2 l =
 
 
 let exp_double_fw_lemma #t k a1 bBits b1 a2 b2 l =
-  let bk = bBits - bBits % l in
   let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
   exp_double_fw_acc0_lemma #t k a1 bBits b1 a2 b2 l;
-  assert (acc0 == mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)));
+  assert (acc0 == mul (pow k a1 (b_acc l bBits b1 0)) (pow k a2 (b_acc l bBits b2 0)));
 
   let res = Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
   exp_double_fw_lemma_loop k a1 bBits b1 a2 b2 l (bBits / l);
-  //assert (res == mul (pow k a1 (b1 / pow2 (bk - l * (bBits / l)))) (pow k a2 (b2 / pow2 (bk - l * (bBits / l)))));
   Math.Lemmas.euclidean_division_definition bBits l;
-  //assert (res == mul (pow k a1 (b1 / pow2 0)) (pow k a2 (b2 / pow2 0)));
   assert_norm (pow2 0 = 1)
-  //assert (res == mul (pow k a1 b1) (pow k a2 b2))
 
-
-let b_acc (l:pos) (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i <= bBits / l}) : nat =
-  b / pow2 (bBits - bBits % l - l * i)
+//-------------------------
 
 val lemma_mul_assoc4: #t:Type -> k:comm_monoid t -> a1:t -> a2:t -> a3:t -> a4:t ->
   Lemma (k.mul a1 (k.mul (k.mul a2 a3) a4) == k.mul (k.mul (k.mul a1 a2) a3) a4)
@@ -587,21 +570,21 @@ val exp_four_fw_lemma_step:
     (pow k a4 (b_acc l bBits b4 i)))
 
 let exp_four_fw_lemma_step #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l i acc =
-  let bk = bBits - bBits % l in
   let acc1 = exp_pow2 k acc l in
-  let r11 = b1 / pow2 (bk - l * (i - 1)) in
-  let r12 = b1 / pow2 (bk - l * (i - 1) - l) % pow2 l in
-  let r21 = b2 / pow2 (bk - l * (i - 1)) in
-  let r22 = b2 / pow2 (bk - l * (i - 1) - l) % pow2 l in
-  let r31 = b3 / pow2 (bk - l * (i - 1)) in
-  let r32 = b3 / pow2 (bk - l * (i - 1) - l) % pow2 l in
-  let r41 = b4 / pow2 (bk - l * (i - 1)) in
-  let r42 = b4 / pow2 (bk - l * (i - 1) - l) % pow2 l in
+  let r11 = b_acc l bBits b1 (i - 1) in
+  let r12 = b_acc l bBits b1 i % pow2 l in
+  let r21 = b_acc l bBits b2 (i - 1) in
+  let r22 = b_acc l bBits b2 i % pow2 l in
+  let r31 = b_acc l bBits b3 (i - 1) in
+  let r32 = b_acc l bBits b3 i % pow2 l in
+  let r41 = b_acc l bBits b4 (i - 1) in
+  let r42 = b_acc l bBits b4 i % pow2 l in
+  Math.Lemmas.distributivity_sub_right l i 1;
 
-  let res_a1 = pow k a1 (b1 / pow2 (bk - l * i)) in
-  let res_a2 = pow k a2 (b2 / pow2 (bk - l * i)) in
-  let res_a3 = pow k a3 (b3 / pow2 (bk - l * i)) in
-  let res_a4 = pow k a4 (b4 / pow2 (bk - l * i)) in
+  let res_a1 = pow k a1 (b_acc l bBits b1 i) in
+  let res_a2 = pow k a2 (b_acc l bBits b2 i) in
+  let res_a3 = pow k a3 (b_acc l bBits b3 i) in
+  let res_a4 = pow k a4 (b_acc l bBits b4 i) in
 
   let acc_1 = pow k a1 r11 in
   let acc_1_l = pow k acc_1 (pow2 l) in
@@ -681,13 +664,12 @@ val exp_four_fw_lemma_loop:
   -> a4:t -> b4:nat{b4 < pow2 bBits}
   -> l:pos -> i:nat{i <= bBits / l} ->
   Lemma (
-    let bk = bBits - bBits % l in
     let acc0 =
       mul
         (mul
-          (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
-          (pow k a3 (b3 / pow2 bk)))
-        (pow k a4 (b4 / pow2 bk)) in
+          (mul (pow k a1 (b_acc l bBits b1 0)) (pow k a2 (b_acc l bBits b2 0)))
+          (pow k a3 (b_acc l bBits b3 0)))
+        (pow k a4 (b_acc l bBits b4 0)) in
     let acc = Loops.repeati i (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 in
     acc ==
       mul
@@ -697,13 +679,12 @@ val exp_four_fw_lemma_loop:
         (pow k a4 (b_acc l bBits b4 i)))
 
 let rec exp_four_fw_lemma_loop #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l i =
-  let bk = bBits - bBits % l in
     let acc0 =
       mul
         (mul
-          (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
-          (pow k a3 (b3 / pow2 bk)))
-        (pow k a4 (b4 / pow2 bk)) in
+          (mul (pow k a1 (b_acc l bBits b1 0)) (pow k a2 (b_acc l bBits b2 0)))
+          (pow k a3 (b_acc l bBits b3 0)))
+        (pow k a4 (b_acc l bBits b4 0)) in
   let acc = Loops.repeati i (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 in
 
   if i = 0 then
