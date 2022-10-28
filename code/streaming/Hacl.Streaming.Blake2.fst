@@ -770,7 +770,7 @@ let blake2s_32_no_key_create_in =
 let blake2s_32_no_key_init =
   F.init blake2s_32 () (s Spec.Blake2S M32) unit_key
 
-[@ (Comment "  Update function when there is no key")]
+[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let blake2s_32_no_key_update =
   F.update blake2s_32 (G.hide ()) (s Spec.Blake2S M32) unit_key
 
@@ -795,7 +795,7 @@ let blake2b_32_no_key_create_in =
 let blake2b_32_no_key_init =
   F.init blake2b_32 () (s Spec.Blake2B M32) unit_key
 
-[@ (Comment "  Update function when there is no key")]
+[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let blake2b_32_no_key_update =
   F.update blake2b_32 (G.hide ()) (s Spec.Blake2B M32) unit_key
 
