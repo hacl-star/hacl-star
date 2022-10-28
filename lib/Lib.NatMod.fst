@@ -1,6 +1,6 @@
 module Lib.NatMod
 
-module LE = Lib.Exponentiation
+module LE = Lib.Exponentiation.Definition
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 

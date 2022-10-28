@@ -11,22 +11,9 @@ open Hacl.Bignum25519
 module F51 = Hacl.Impl.Ed25519.Field51
 
 module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
-
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
-module BE = Hacl.Impl.Exponentiation
-module ME = Hacl.Impl.MultiExponentiation
-module PT = Hacl.Impl.PrecompTable
 module SPT = Hacl.Spec.PrecompBaseTable
-
-module BD = Hacl.Bignum.Definitions
-module BC = Hacl.Bignum.Convert
-module SC = Hacl.Spec.Bignum.Convert
-
 module S = Spec.Ed25519
 
-open Hacl.Impl.Ed25519.PointConstants
 include Hacl.Impl.Ed25519.Group
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

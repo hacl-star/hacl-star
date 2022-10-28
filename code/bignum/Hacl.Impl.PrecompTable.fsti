@@ -12,7 +12,7 @@ open Lib.Buffer
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 
-module S = Lib.Exponentiation
+module S = Lib.Exponentiation.Definition
 module BD = Hacl.Bignum.Definitions
 
 include Hacl.Impl.Exponentiation.Definitions
