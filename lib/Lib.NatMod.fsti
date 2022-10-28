@@ -5,7 +5,7 @@ open FStar.Mul
 module Fermat = FStar.Math.Fermat
 module Euclid = FStar.Math.Euclid
 
-module LE = Lib.Exponentiation
+module LE = Lib.Exponentiation.Definition
 
 #set-options "--z3rlimit 10 --fuel 0 --ifuel 0"
 

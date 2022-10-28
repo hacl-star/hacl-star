@@ -9,10 +9,6 @@ open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
-module BE = Hacl.Impl.Exponentiation.Definitions
 module SPT = Hacl.Spec.PrecompBaseTable
 
 module S = Spec.K256
