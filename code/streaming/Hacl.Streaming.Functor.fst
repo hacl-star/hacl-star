@@ -813,8 +813,8 @@ let modifies_footprint' c i p data len h0 h1 =
 // This rlimit is a bit crazy, but this proof is not stable. It usually
 // goes through fast, but a high rlimit is a security against regression failures.
 #restart-solver
-#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh \
-  --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
+#push-options "--z3rlimit 600 --z3cliopt smt.arith.nl=false --z3refresh \
+  --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice'"//,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
 let update_small #index c i t t' p data len =
   let open LowStar.BufferOps in
   let s = !*p in
@@ -897,6 +897,7 @@ let update_small #index c i t t' p data len =
   assert (seen c i h2 p `S.equal` (S.append (G.reveal seen_) (B.as_seq h0 data)));
   assert (footprint c i h0 p == footprint c i h2 p);
   assert (equal_domains h0 h2);
+  ST.lemma_equal_domains_trans h0 h1 h2;
   assert (invariant c i h2 p);
   c.state.invariant_loc_in_footprint h2 block_state;
   if c.km = Runtime then
