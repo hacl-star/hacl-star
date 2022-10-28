@@ -30,7 +30,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Poly1305_32_update =
       foreign "Hacl_Streaming_Poly1305_32_update"
         ((ptr hacl_Streaming_Poly1305_32_poly1305_32_state) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning void))))
+           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
     let hacl_Streaming_Poly1305_32_finish =
       foreign "Hacl_Streaming_Poly1305_32_finish"
         ((ptr hacl_Streaming_Poly1305_32_poly1305_32_state) @->

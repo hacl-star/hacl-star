@@ -62,7 +62,10 @@ Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224();
 
 void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_224(
   Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
@@ -77,7 +80,10 @@ Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256();
 
 void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_256(
   Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
@@ -92,7 +98,10 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384();
 
 void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_384(
   Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,
@@ -107,7 +116,10 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512();
 
 void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_512(
   Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,
