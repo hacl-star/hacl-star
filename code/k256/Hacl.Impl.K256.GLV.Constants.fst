@@ -194,15 +194,6 @@ let scalar_split_lambda r1 r2 k =
  Fast computation of [lambda]P as (beta * px, py, pz) in projective coordinates
 *)
 
-// [lambda]P = (beta * px, py, pz)
-val point_mul_lambda: res:point -> p:point -> Stack unit
-  (requires fun h ->
-    live h res /\ live h p /\ eq_or_disjoint res p /\
-    point_inv h p)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-    point_eval h1 res == SG.point_mul_lambda (point_eval h0 p))
-
 [@CInline]
 let point_mul_lambda res p =
   push_frame ();
@@ -216,14 +207,6 @@ let point_mul_lambda res p =
   copy_felem rz pz;
   pop_frame ()
 
-
-// [lambda]P = (beta * px, py, pz)
-val point_mul_lambda_inplace: res:point -> Stack unit
-  (requires fun h ->
-    live h res /\ point_inv h res)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-    point_eval h1 res == SG.point_mul_lambda (point_eval h0 res))
 
 [@CInline]
 let point_mul_lambda_inplace res =
@@ -255,13 +238,6 @@ let point_mul_lambda_and_split_lambda r1 r2 lambda_q scalar q =
   point_mul_lambda lambda_q q // lambda_q = [lambda]Q
 
 
-inline_for_extraction noextract
-val point_negate_conditional_vartime: p:point -> is_negate:bool -> Stack unit
-  (requires fun h -> live h p /\ point_inv h p)
-  (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\
-    point_eval h1 p == SG.point_negate_cond (point_eval h0 p) is_negate)
-
 let point_negate_conditional_vartime p is_negate =
   if is_negate then point_negate p p
 
@@ -283,31 +259,6 @@ let negate_point_and_scalar_cond_vartime k p =
   point_negate_conditional_vartime p if_high;
   if_high
 
-
-inline_for_extraction noextract
-val ecmult_endo_split:
-    r1:qelem -> r2:qelem
-  -> q1:point -> q2:point
-  -> scalar:qelem -> q:point -> Stack (bool & bool)
-  (requires fun h ->
-    live h r1 /\ live h r2 /\ live h q1 /\
-    live h q2 /\ live h scalar /\ live h q /\
-    disjoint r1 r2 /\ disjoint r1 q1 /\ disjoint r1 q2 /\
-    disjoint r1 scalar /\ disjoint r1 q /\ disjoint r2 q1 /\
-    disjoint r2 q2 /\ disjoint r2 scalar /\ disjoint r2 q /\
-    disjoint q1 q2 /\ disjoint q1 scalar /\ disjoint q1 q /\
-    disjoint q2 scalar /\ disjoint q2 q /\
-    point_inv h q /\ qas_nat h scalar < S.q)
-  (ensures fun h0 (is_high1, is_high2) h1 ->
-    modifies (loc r1 |+| loc r2 |+| loc q1 |+| loc q2) h0 h1 /\
-    point_inv h1 q1 /\ point_inv h1 q2 /\
-   (let r1_s0, r2_s0 = SG.scalar_split_lambda (qas_nat h0 scalar) in
-    let r1_s, q1_s, r2_s, q2_s = SG.ecmult_endo_split (qas_nat h0 scalar) (point_eval h0 q) in
-    qas_nat h1 r1 == r1_s /\ r1_s < pow2 128 /\
-    qas_nat h1 r2 == r2_s /\ r2_s < pow2 128 /\
-    point_eval h1 q1 == q1_s /\ point_eval h1 q2 == q2_s /\
-    is_high1 == S.scalar_is_high r1_s0 /\
-    is_high2 == S.scalar_is_high r2_s0))
 
 let ecmult_endo_split r1 r2 q1 q2 scalar q =
   let h0 = ST.get () in
