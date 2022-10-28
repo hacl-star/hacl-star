@@ -717,29 +717,41 @@ let split_at_last_rest_eq (#index : Type0) (c: block index)
   let sz = rest c i total_len in
   ()
 
-let disjointness #index c (i: index) (p: state' c i) (l: B.loc) (h: HS.mem): Lemma
-  (requires B.(loc_disjoint l (footprint c i h p)))
-  (ensures B.(
-    let s = B.deref h p in
-    let State block_state buf _ _ k' = s in
-    loc_disjoint l (footprint_s c i h s) /\
-    loc_disjoint l (loc_addr_of_buffer buf) /\
-    loc_disjoint l (loc_addr_of_buffer p) /\
-    loc_disjoint l (loc_buffer buf) /\
-    loc_disjoint l (c.state.footprint h block_state) /\
-    loc_disjoint l (optional_footprint #_ #i #c.km #c.key h k')
-  ))
-=
-  let s = B.deref h p in
-  let State block_state buf_ _ _ k' = s in
-  B.(loc_disjoint_includes_r l (footprint_s c i h s) (loc_addr_of_buffer buf_));
-  ()
+val modifies_footprint:
+  #index:Type0 ->
+  (c: block index) ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  s:state' c i ->
+  data: B.buffer uint8 ->
+  len: UInt32.t ->
+  h0: HS.mem ->
+  h1: HS.mem ->
+  Lemma
+    (requires (
+      let State _ buf_ _ _ _ = B.deref h0 s in (
+      update_pre c i s data len h0 /\
+      B.(modifies (loc_buffer buf_) h0 h1))))
+    (ensures
+      footprint c i h0 s == footprint c i h1 s /\
+      preserves_freeable c i s h0 h1))
+
+let modifies_footprint c i p data len h0 h1 =
+  let _ = c.state.frame_freeable #i in
+  let _ = c.key.frame_freeable #i in
+  let s0 = B.deref h0 p in
+  let s1 = B.deref h0 p in
+  let State bs0 buf0 _ _ k0 = s0 in
+  let State bs1 buf0 _ _ k1 = s1 in
+  c.state.frame_invariant (B.loc_buffer buf0) bs0 h0 h1;
+  if c.km = Runtime then
+    c.key.frame_invariant #i (B.loc_buffer buf0) k0 h0 h1
 
 // This rlimit is a bit crazy, but this proof is not stable. It usually
 // goes through fast, but a high rlimit is a security against regression failures.
 #restart-solver
 #push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh \
-  --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice'"//,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r '"
+  --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
 let update_small #index c i t t' p data len =
   // [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   // [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -769,9 +781,8 @@ let update_small #index c i t t' p data len =
 
   let buf_ = buf in
   let index_ = index in
-  disjointness #index_ c i p B.(loc_buffer data) h00;
+  B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h00 p) (loc_addr_of_buffer buf_));
   B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h00 p) (loc_buffer buf1));
-  B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h00 p) (loc_buffer buf2));
   B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h00 p) (loc_buffer buf2));
   B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h00 s) (loc_buffer buf1));
   B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h00 s) (loc_buffer buf2));
@@ -782,6 +793,7 @@ let update_small #index c i t t' p data len =
   B.(loc_disjoint_includes_r (c.state.footprint h00 block_state) (loc_buffer buf_) (loc_buffer buf2));
   B.(loc_disjoint_includes_r (optional_footprint #_ #i #c.km #c.key h00 k') (loc_buffer buf_) (loc_buffer buf2));
 
+  // FIRST STATEFUL OPERATION
   B.blit data 0ul buf2 0ul len;
   let h1 = ST.get () in
   assert B.(modifies (loc_buffer buf2) h0 h1);
@@ -797,6 +809,20 @@ let update_small #index c i t t' p data len =
   assert (c.state.invariant h0 block_state);
   stateful_frame_preserves_freeable #index #(Block?.state c) #i (B.loc_buffer buf2)
                                     (State?.block_state s) h00 h1;
+  modifies_footprint c i p data len h0 h1;
+  B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h1 s) (loc_buffer buf1));
+  B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h1 s) (loc_buffer buf2));
+  B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h1 s) (loc_buffer buf_));
+  B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h1 s) (loc_addr_of_buffer buf_));
+  B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h1 s) (c.state.footprint h1 block_state));
+  B.(loc_disjoint_includes_r (loc_addr_of_buffer p) (footprint_s c i h1 s) (optional_footprint #_ #i #c.km #c.key h1 k'));
+  B.(loc_disjoint_includes_r (c.state.footprint h1 block_state) (loc_buffer buf_) (loc_buffer buf2));
+  B.(loc_disjoint_includes_r (optional_footprint #_ #i #c.km #c.key h1 k') (loc_buffer buf_) (loc_buffer buf2));
+  B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h1 p) (loc_addr_of_buffer buf2));
+  B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h1 p) (loc_addr_of_buffer buf_));
+  B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h1 p) (loc_buffer buf1));
+  B.(loc_disjoint_includes_r (loc_buffer data) (footprint c i h1 p) (loc_buffer buf2));
+
   assert(preserves_freeable c i p h00 h1);
   Seq.lemma_eq_intro (B.as_seq h1 data) (B.as_seq h0 data);
 
@@ -806,10 +832,13 @@ let update_small #index c i t t' p data len =
     State #index #c #i block_state buf total_len
           (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data))) k'
   in
+  // SECOND STATEFUL OPERATION
   p *= tmp;
   let h2 = ST.get () in
+  assume (footprint c i h00 p == footprint c i h2 p);
   B.modifies_trans (footprint c i h00 p) h00 h0 (footprint c i h00 p) h2;
   Seq.lemma_eq_intro (B.as_seq h2 data) (B.as_seq h1 data);
+  admit ()
   c.state.frame_invariant (B.loc_buffer p) block_state h1 h2;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h1 h2;
   stateful_frame_preserves_freeable #index #(Block?.state c) #i
