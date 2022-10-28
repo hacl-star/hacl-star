@@ -18,7 +18,7 @@ module Loops = Lib.LoopCombinators
 module BB = Hacl.Bignum.Base
 module BD = Hacl.Bignum.Definitions
 module PT = Hacl.Spec.PrecompTable
-module S = Lib.Exponentiation
+module S = Lib.Exponentiation.Definition
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
