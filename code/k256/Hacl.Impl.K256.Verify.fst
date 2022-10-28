@@ -11,8 +11,6 @@ module ST = FStar.HyperStack.ST
 
 module S = Spec.K256
 module KL = Spec.K256.Lemmas
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
 
 open Hacl.K256.Field
 open Hacl.Impl.K256.Point
@@ -193,10 +191,8 @@ let ecdsa_verify_qelem_aff_noalloc p res pk_x pk_y z r s =
   KL.lemma_aff_is_point_at_inf (point_eval h2 res);
   KL.lemma_aff_is_point_at_inf (S.point_mul_double_g u1 u2 (point_eval h1 p));
 
-  let b =
-    if is_proj_point_at_inf_vartime res then false
-    else ecdsa_verify_avoid_finv res r in
-  b
+  if is_proj_point_at_inf_vartime res then false
+  else ecdsa_verify_avoid_finv res r
 
 
 inline_for_extraction noextract
