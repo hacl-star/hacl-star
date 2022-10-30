@@ -50,19 +50,19 @@ void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input);
 
 void Hacl_Impl_Ed25519_PointDouble_point_double(uint64_t *out, uint64_t *p);
 
+void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
+
+void Hacl_Impl_Ed25519_PointConstants_make_point_inf(uint64_t *b);
+
 bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s);
 
 void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p);
 
 bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
 
-void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
-
 void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out);
 
-void Hacl_Impl_Ed25519_Ladder_make_point_inf(uint64_t *b);
-
-void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t *q);
 
 #if defined(__cplusplus)
 }

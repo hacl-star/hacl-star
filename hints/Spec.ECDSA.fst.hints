@@ -1,5 +1,5 @@
 [
-  "\u0010×`\u00173á›i‰ýSÁ+÷rJ",
+  "\u0012w<D¾iïR–ýãD\u001eè)Ž",
   [
     [
       "Spec.ECDSA.lemma_scalar_ith",
@@ -652,14 +652,14 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "refinement_interpretation_Tm_refine_20243dce370bae2ae7be17fef94a36a1",
         "refinement_interpretation_Tm_refine_2a75ac9e9041407930877285ccf479d9",
+        "refinement_interpretation_Tm_refine_3ef78b59bb6e1aa652643337e6dc52a9",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5b69e90b97d8991e731f0f059afb1344",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_db59d33fd5488dc400043e56ab57cca9",
         "typing_FStar.Math.Lib.div", "typing_Prims.pow2"
       ],
       0,
-      "c4119f1a4ddcfc1c002e5d815c4b3714"
+      "07aa10a5c0a6b1ac04c4289ab24f7cce"
     ],
     [
       "Spec.ECDSA.lemma_exponen_spec",
@@ -714,7 +714,7 @@
         "unit_inversion", "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "c9cef9ac4ab19b30921b8aaf10be54cc"
+      "e0f26a006da2997a1a5eff27ad6671c2"
     ],
     [
       "Spec.ECDSA.prime_p256_order_inverse_list",
@@ -1129,7 +1129,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3"
       ],
       0,
-      "fc31c34cad5288045d7271f425c3489b"
+      "29b757fc10ac7382220f49773653cc6c"
     ],
     [
       "Spec.ECDSA.hash_alg_ecdsa",
@@ -1138,7 +1138,7 @@
       0,
       [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
       0,
-      "6da4da61c56661aa6cc27da92c712def"
+      "7e1dbf2bc15eb39a89a352fdf8e1d130"
     ],
     [
       "Spec.ECDSA.__proj__Hash__item___0",
@@ -1151,7 +1151,7 @@
         "refinement_interpretation_Tm_refine_c7a73210445bd39cd87a9cd5a7b972aa"
       ],
       0,
-      "9d8303340f5ad90d8bd76a76f439a667"
+      "f929ad07340c2db0b08ffeed22365599"
     ],
     [
       "Spec.ECDSA.min_input_length",
@@ -1165,7 +1165,7 @@
         "inversion-interp", "lemma_Spec.ECDSA.invert_state_s"
       ],
       0,
-      "0501d85e582140d9adccde6d2eed3780"
+      "0e4c01412538ea7ce4594f2656337a00"
     ],
     [
       "Spec.ECDSA.hashSpec",
@@ -1201,7 +1201,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "daedbad57af3b37873baa216ba4e6f4a"
+      "e30da2283fed62fb35fcc9e04b5da833"
     ],
     [
       "Spec.ECDSA.hashSpec",
@@ -1254,7 +1254,7 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "2a88143e5a8e38732c566a0c7924f680"
+      "04b5b6d94c371ca1a0cf83457d47faea"
     ],
     [
       "Spec.ECDSA.ecdsa_verification_agile",
@@ -1266,6 +1266,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.Pervasives.Native.tuple3__uu___haseq",
+        "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
@@ -1277,18 +1278,15 @@
         "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
         "data_elim_Spec.ECDSA.Hash", "disc_equation_Spec.ECDSA.Hash",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.ECDSA.hashSpec",
+        "equation_Lib.IntTypes.bits", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.ECDSA.hashSpec",
         "equation_Spec.ECDSA.min_input_length",
-        "equation_Spec.ECDSA.prime_p256_order_seq",
         "equation_Spec.ECDSA.verifyQValidCurvePointSpec",
         "equation_Spec.ECDSAP256.Definition.prime_p256_order",
         "equation_Spec.Hash.Definitions.hash_length",
@@ -1297,47 +1295,42 @@
         "equation_Spec.P256.Definitions.point_nat",
         "equation_Spec.P256.Definitions.point_nat_prime",
         "equation_Spec.P256.bCoordinateP256",
-        "equation_Spec.P256.isPointAtInfinity", "equation_Spec.P256.scalar",
+        "equation_Spec.P256.isPointAtInfinity",
         "equation_Spec.P256.toJacobianCoordinates",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Spec.ECDSA.hash_alg_ecdsa",
-        "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "haseqTm_refine_3952aa58162b0446b1249aba52d1eb89",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
-        "inversion-interp", "lemma_FStar.UInt.pow2_values",
+        "int_typing", "inversion-interp", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
         "projection_inverse_Spec.ECDSA.Hash__0",
         "refinement_interpretation_Tm_refine_2420de9f68a4c2a48b6f2796a459baf9",
+        "refinement_interpretation_Tm_refine_40b6df1dde53871107e7b51f8cc2d867",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_562ff0d1f6682f6c9709b622af466ac0",
-        "refinement_interpretation_Tm_refine_6eeac991301bace2d87f9caddf5ce8ac",
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "refinement_interpretation_Tm_refine_9324ac3635b7099a2b95de7bf696cc8d",
         "refinement_interpretation_Tm_refine_9f909af992651b106a7804f4d5a6ef5d",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_da1b0dfb8283502ec162998a8bbb6431",
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
         "refinement_interpretation_Tm_refine_ff87a0b6edd7d117b18cc3d5116b5cf5",
-        "refinement_interpretation_Tm_refine_ff8d51d518adead938b5914c7a8dbcd8",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_FStar.Seq.Base.length",
-        "typing_Spec.ECDSA.prime_p256_order_seq",
         "typing_Spec.ECDSAP256.Definition.prime_p256_order",
         "typing_Spec.P256.bCoordinateP256"
       ],
       0,
-      "ba3a9f53e5fa0f3b4429f2a2715c00de"
+      "9a208fec3a077bff14e7c9c767f690b5"
     ],
     [
       "Spec.ECDSA.ecdsa_signature_agile",
@@ -1356,7 +1349,7 @@
         "refinement_interpretation_Tm_refine_9324ac3635b7099a2b95de7bf696cc8d"
       ],
       0,
-      "efb5da3908f91f4a65ceafef890c13d6"
+      "78b5584b75db0626053d32306f4f2e75"
     ],
     [
       "Spec.ECDSA.ecdsa_signature_agile",
@@ -1375,7 +1368,7 @@
         "refinement_interpretation_Tm_refine_9324ac3635b7099a2b95de7bf696cc8d"
       ],
       0,
-      "bd131ccc0f1f7fcd7d6e1d473b2e38eb"
+      "2ccdfbe6293694c14e91925b7c30980d"
     ],
     [
       "Spec.ECDSA.ecdsa_signature_agile",
@@ -1442,7 +1435,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "fd9033bbbcb1195bfdeeec69aa9627c3"
+      "5182127d92cf7a2a57c61f8ff5c9d954"
     ]
   ]
 ]

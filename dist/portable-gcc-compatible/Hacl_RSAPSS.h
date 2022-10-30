@@ -133,6 +133,23 @@ Hacl_RSAPSS_rsapss_pkey_verify(
 
 /* SNIPPET_END: Hacl_RSAPSS_rsapss_pkey_verify */
 
+/* SNIPPET_START: Hacl_RSAPSS_mgf_hash */
+
+/**
+  The mask generation function defined in the Public Key Cryptography Standard #1 
+  (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) 
+*/
+void
+Hacl_RSAPSS_mgf_hash(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t len,
+  uint8_t *mgfseed,
+  uint32_t maskLen,
+  uint8_t *res
+);
+
+/* SNIPPET_END: Hacl_RSAPSS_mgf_hash */
+
 #if defined(__cplusplus)
 }
 #endif

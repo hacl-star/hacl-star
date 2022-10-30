@@ -26,12 +26,6 @@
 
 
 
-#define MUT 0
-#define IMMUT 1
-#define CONST 2
-
-typedef uint8_t buftype;
-
 extern void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
 extern void
@@ -56,30 +50,6 @@ extern void C_String_print(C_String_t uu___);
 extern bool
 Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
 
-static const uint8_t *to_const__uint8_t(buftype t, void *b)
-{
-  switch (t)
-  {
-    case MUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case IMMUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case CONST:
-      {
-        return (const uint8_t *)(void *)b;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
 static void
 test_cshake128(
   uint32_t msg_len,
@@ -101,12 +71,7 @@ test_cshake128(
   Hacl_Impl_SHA3_state_permute(s);
   Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, msg_len, msg_, (uint8_t)0x04U);
   Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, out_len, test);
-  if
-  (
-    !Lib_PrintBuffer_result_compare_display(out_len,
-      to_const__uint8_t(MUT, (void *)test),
-      expected)
-  )
+  if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
     exit((int32_t)255);
   }
