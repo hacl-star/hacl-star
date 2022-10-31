@@ -66,7 +66,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Blake2_blake2s_32_no_key_update =
       foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_update"
         ((ptr hacl_Streaming_Blake2_blake2s_32_state) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning void))))
+           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
     let hacl_Streaming_Blake2_blake2s_32_no_key_finish =
       foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_finish"
         ((ptr hacl_Streaming_Blake2_blake2s_32_state) @->
@@ -83,7 +83,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Blake2_blake2b_32_no_key_update =
       foreign "Hacl_Streaming_Blake2_blake2b_32_no_key_update"
         ((ptr hacl_Streaming_Blake2_blake2b_32_state) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning void))))
+           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
     let hacl_Streaming_Blake2_blake2b_32_no_key_finish =
       foreign "Hacl_Streaming_Blake2_blake2b_32_no_key_finish"
         ((ptr hacl_Streaming_Blake2_blake2b_32_state) @->

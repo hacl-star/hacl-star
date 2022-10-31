@@ -36,6 +36,8 @@ noextract
 let legacy_alloca_md5 = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 let legacy_create_in_md5 = F.create_in hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 let legacy_init_md5 = F.init hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+
+[@@ Comment "0 = success, 1 = max length exceeded" ]
 let legacy_update_md5 = F.update hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 let legacy_finish_md5 = F.mk_finish hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 let legacy_free_md5 = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)

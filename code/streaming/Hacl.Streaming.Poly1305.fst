@@ -408,7 +408,7 @@ let poly1305 (fs : field_spec) : I.block unit =
     (stateful_poly1305_ctx fs)
     k
 
-    (fun () -> pow2 32 - 1)
+    (fun () -> 0xffffffffUL)
     (fun () -> 16ul)
     (fun () -> 16ul)
     (fun () ->

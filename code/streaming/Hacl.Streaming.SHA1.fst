@@ -36,6 +36,7 @@ noextract
 let legacy_alloca_sha1 = F.alloca hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
 let legacy_create_in_sha1 = F.create_in hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
 let legacy_init_sha1 = F.init hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
+[@@ Comment "0 = success, 1 = max length exceeded" ]
 let legacy_update_sha1 = F.update hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
 let legacy_finish_sha1 = F.mk_finish hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
 let legacy_free_sha1 = F.free hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)

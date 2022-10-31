@@ -1374,51 +1374,37 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
   uint64_t tmp[5U] = { 0U };
   uint64_t *pz = res + (uint32_t)10U;
   Hacl_K256_Field_fnormalize(tmp, pz);
-  bool b0 = Hacl_K256_Field_is_felem_zero_vartime(tmp);
-  bool b;
-  if (b0)
+  bool b = Hacl_K256_Field_is_felem_zero_vartime(tmp);
+  if (b)
   {
-    b = false;
+    return false;
   }
-  else
+  uint64_t *x = res;
+  uint64_t *z1 = res + (uint32_t)10U;
+  uint8_t r_bytes[32U] = { 0U };
+  uint64_t r_fe[5U] = { 0U };
+  uint64_t tmp_q[5U] = { 0U };
+  uint64_t tmp_x[5U] = { 0U };
+  store_qelem(r_bytes, r_q);
+  Hacl_K256_Field_load_felem(r_fe, r_bytes);
+  Hacl_K256_Field_fnormalize(tmp_x, x);
+  bool is_rz_x = fmul_eq_vartime(r_fe, z1, tmp_x);
+  if (!is_rz_x)
   {
-    uint64_t *x = res;
-    uint64_t *z1 = res + (uint32_t)10U;
-    uint8_t r_bytes[32U] = { 0U };
-    uint64_t r_fe[5U] = { 0U };
-    uint64_t tmp_q[5U] = { 0U };
-    uint64_t tmp_x[5U] = { 0U };
-    store_qelem(r_bytes, r_q);
-    Hacl_K256_Field_load_felem(r_fe, r_bytes);
-    Hacl_K256_Field_fnormalize(tmp_x, x);
-    bool is_rz_x = fmul_eq_vartime(r_fe, z1, tmp_x);
-    bool res1;
-    if (!is_rz_x)
+    bool is_r_lt_p_m_q = Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(r_fe);
+    if (is_r_lt_p_m_q)
     {
-      bool is_r_lt_p_m_q = Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(r_fe);
-      if (is_r_lt_p_m_q)
-      {
-        tmp_q[0U] = (uint64_t)0x25e8cd0364141U;
-        tmp_q[1U] = (uint64_t)0xe6af48a03bbfdU;
-        tmp_q[2U] = (uint64_t)0xffffffebaaedcU;
-        tmp_q[3U] = (uint64_t)0xfffffffffffffU;
-        tmp_q[4U] = (uint64_t)0xffffffffffffU;
-        Hacl_K256_Field_fadd(tmp_q, r_fe, tmp_q);
-        res1 = fmul_eq_vartime(tmp_q, z1, tmp_x);
-      }
-      else
-      {
-        res1 = false;
-      }
+      tmp_q[0U] = (uint64_t)0x25e8cd0364141U;
+      tmp_q[1U] = (uint64_t)0xe6af48a03bbfdU;
+      tmp_q[2U] = (uint64_t)0xffffffebaaedcU;
+      tmp_q[3U] = (uint64_t)0xfffffffffffffU;
+      tmp_q[4U] = (uint64_t)0xffffffffffffU;
+      Hacl_K256_Field_fadd(tmp_q, r_fe, tmp_q);
+      return fmul_eq_vartime(tmp_q, z1, tmp_x);
     }
-    else
-    {
-      res1 = true;
-    }
-    b = res1;
+    return false;
   }
-  bool b1 = b;
-  return b1;
+  return true;
 }
 
 /**

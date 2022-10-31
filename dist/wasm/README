@@ -1,0 +1,20 @@
+How to run the WASM output of KaRaMeL?
+
+# With node, from the console
+
+    node main.js
+
+# With Chakra, from the console
+
+Install and build ChakraCore, which should give a ch binary. Then:
+
+    ch -Wasm main.js
+
+# With Chrome, from the browser
+
+Chrome won't run this from the file:// URL, so you'll need to start an HTTP
+server from this directory. If you don't have one already:
+
+    npm install -g http-server
+
+Then, run `http-server .` and navigate to http://localhost:8080/main.html

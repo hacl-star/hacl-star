@@ -126,9 +126,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_Hash_Incremental_init"
         ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
            @-> (returning void))
-    let everCrypt_Hash_Incremental_max_input_len64 =
-      foreign "EverCrypt_Hash_Incremental_max_input_len64"
-        (spec_Hash_Definitions_hash_alg @-> (returning uint64_t))
     let everCrypt_Hash_Incremental_update =
       foreign "EverCrypt_Hash_Incremental_update"
         ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)

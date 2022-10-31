@@ -33,7 +33,7 @@ let blake2s_128_no_key_create_in =
 let blake2s_128_no_key_init =
   F.init blake2s_128 () (s Spec.Blake2S M128) unit_key
 
-[@ (Comment "  Update function when there is no key")]
+[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let blake2s_128_no_key_update =
   F.update blake2s_128 (G.hide ()) (s Spec.Blake2S M128) unit_key
 

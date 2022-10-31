@@ -33,8 +33,8 @@ let sha512_pre_msg hash prefix len input =
   push_frame ();
   let h0 = ST.get () in
   let st = Hash.alloca_512 () in
-  Hash.update_512 st prefix 32ul;
-  Hash.update_512 st input len;
+  let _ = Hash.update_512 st prefix 32ul in
+  let _ = Hash.update_512 st input len in
   Hash.finish_512 st hash;
   let h1 = ST.get () in
   assert (as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
@@ -62,9 +62,9 @@ let sha512_pre_pre2_msg hash prefix prefix2 len input =
   push_frame ();
   let h0 = ST.get () in
   let st = Hash.alloca_512 () in
-  Hash.update_512 st prefix 32ul;
-  Hash.update_512 st prefix2 32ul;
-  Hash.update_512 st input len;
+  let _ = Hash.update_512 st prefix 32ul in
+  let _ = Hash.update_512 st prefix2 32ul in
+  let _ = Hash.update_512 st input len in
   Hash.finish_512 st hash;
   Seq.append_empty_l (as_seq h0 prefix);
   pop_frame ()
