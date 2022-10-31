@@ -72,7 +72,7 @@ let evercrypt_hash : block hash_alg =
     (stateful_unused hash_alg)
 
     (* TODO: this general max length definition shouldn't be in the MD file! *)
-    Hacl.Streaming.MD.max_input_length64
+    Hacl.Streaming.MD.max_input_len64
     hash_len
     block_len
     block_len // No vectorization
@@ -108,13 +108,13 @@ let evercrypt_hash : block hash_alg =
 
     EverCrypt.Hash.alg_of_state
     (fun i _ -> EverCrypt.Hash.init #i)
-    (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi2 #i s prevlen blocks len)
+    (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->
        (**) if is_blake i then
        (**)   assert(
        (**)    Lib.IntTypes.cast (extra_state_int_type i) Lib.IntTypes.SEC prevlen ==
        (**)    nat_to_extra_state i (U64.v prevlen));
-       EverCrypt.Hash.update_last2 #i s prevlen last last_len)
+       EverCrypt.Hash.update_last #i s prevlen last last_len)
     (fun i _ -> EverCrypt.Hash.finish #i)
 #pop-options
 
@@ -122,44 +122,25 @@ let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erase
 
 let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
-let max_input_len64 (a: Spec.Agile.Hash.hash_alg): x:U64.t { U64.v x == Hacl.Streaming.MD.max_input_length64 a } =
-  let _ = allow_inversion hash_alg in
-  match a with
-  | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> normalize_term_spec (pow2 61 - 1); FStar.UInt64.uint_to_t (normalize_term (pow2 61 - 1))
-  | SHA2_384 | SHA2_512 -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
-  | Blake2S -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
-  | Blake2B -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
-  | SHA3_256 -> FStar.UInt64.uint_to_t (normalize_term (pow2 64 - 1))
-
 let update (i: G.erased hash_alg)
   (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
   (data: B.buffer uint8)
   (len: UInt32.t):
   Stack EverCrypt.Error.error_code
-    (requires fun h0 -> F.update_pre0 evercrypt_hash i s data len h0)
+    (requires fun h0 -> F.update_pre evercrypt_hash i s data len h0)
     (ensures fun h0 e h1 ->
       match e with
-      | EverCrypt.Error.Success -> F.update_post evercrypt_hash i s data len h0 h1
+      | EverCrypt.Error.Success ->
+          S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i) /\
+          F.update_post evercrypt_hash i s data len h0 h1
       | EverCrypt.Error.MaximumLengthExceeded ->
           h0 == h1 /\
-          not (S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= evercrypt_hash.max_input_length i)
+          not (S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i))
       | _ -> False)
 =
-  let _ = allow_inversion Spec.Agile.Hash.hash_alg in
-  assert_norm (pow2 61 - 1 < pow2 64);
-  assert_norm (pow2 64 < pow2 125 - 1);
-  let h0 = ST.get () in
-  F.seen_bounded evercrypt_hash i h0 s;
-  let alg = F.index_of_state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s in
-  if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 len <=^
-     max_input_len64 alg -^
-    F.seen_length evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s)
-  then begin
-    F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s data len;
-    EverCrypt.Error.Success
-  end else
-    EverCrypt.Error.MaximumLengthExceeded
+  match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s data len with
+  | 0ul -> EverCrypt.Error.Success
+  | 1ul -> EverCrypt.Error.MaximumLengthExceeded
 
 inline_for_extraction noextract
 let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)

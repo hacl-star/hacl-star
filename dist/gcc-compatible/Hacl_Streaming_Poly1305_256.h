@@ -52,7 +52,10 @@ Hacl_Streaming_Poly1305_256_poly1305_256_state
 void
 Hacl_Streaming_Poly1305_256_init(uint8_t *k, Hacl_Streaming_Poly1305_256_poly1305_256_state *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_Poly1305_256_update(
   Hacl_Streaming_Poly1305_256_poly1305_256_state *p,
   uint8_t *data,

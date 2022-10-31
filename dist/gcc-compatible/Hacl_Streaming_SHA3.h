@@ -45,7 +45,10 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256();
 
 void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
-void
+/**
+0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
+*/
+uint32_t
 Hacl_Streaming_SHA3_update_256(
   Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,

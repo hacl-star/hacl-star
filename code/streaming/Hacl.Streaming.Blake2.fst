@@ -238,6 +238,9 @@ let max_total_hash_length (a : alg) :
 noextract
 let max_input_length (a : alg) : nat = max_total_hash_length a
 
+noextract inline_for_extraction
+let max_input_len (a: alg): (x:U64.t { U64.v x == max_input_length a }) = 0xffffffffffffffffUL
+
 inline_for_extraction noextract
 let block (a : alg) = (block: S.seq uint8 { S.length block = Spec.size_block a })
 
@@ -688,7 +691,7 @@ let blake2 (a : alg) (m : valid_m_spec a)
     (stateful_blake2 a m)     (* state *)
     (I.stateful_unused unit)  (* key *)
     
-    (fun () -> max_input_length a ) (* max_input_length *)
+    (fun () -> max_input_len a ) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
     (fun () -> blocks_state_len a m) (* blocks_state_len *)
@@ -767,7 +770,7 @@ let blake2s_32_no_key_create_in =
 let blake2s_32_no_key_init =
   F.init blake2s_32 () (s Spec.Blake2S M32) unit_key
 
-[@ (Comment "  Update function when there is no key")]
+[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let blake2s_32_no_key_update =
   F.update blake2s_32 (G.hide ()) (s Spec.Blake2S M32) unit_key
 
@@ -792,7 +795,7 @@ let blake2b_32_no_key_create_in =
 let blake2b_32_no_key_init =
   F.init blake2b_32 () (s Spec.Blake2B M32) unit_key
 
-[@ (Comment "  Update function when there is no key")]
+[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let blake2b_32_no_key_update =
   F.update blake2b_32 (G.hide ()) (s Spec.Blake2B M32) unit_key
 

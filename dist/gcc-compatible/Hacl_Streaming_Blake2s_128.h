@@ -70,9 +70,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
 );
 
 /**
-  Update function when there is no key
+  Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-void
+uint32_t
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *data,

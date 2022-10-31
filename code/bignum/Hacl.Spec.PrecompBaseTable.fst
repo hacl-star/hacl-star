@@ -6,7 +6,7 @@ open Lib.IntTypes
 module FL = FStar.List.Tot
 module LSeq = Lib.Sequence
 
-module LE = Lib.Exponentiation
+module LE = Lib.Exponentiation.Definition
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation.Definitions
 

@@ -16,6 +16,7 @@ noextract
 let alloca = F.alloca (poly1305 M32) () (t M32) (k.I.s ())
 let create_in = F.create_in (poly1305 M32) () (t M32) (k.I.s ())
 let init = F.init (poly1305 M32) (G.hide ()) (t M32) (k.I.s ())
+[@@ Comment "0 = success, 1 = max length exceeded" ]
 let update = F.update (poly1305 M32) (G.hide ()) (t M32) (k.I.s ())
 let finish = F.mk_finish (poly1305 M32) () (t M32) (k.I.s ())
 let free = F.free (poly1305 M32) (G.hide ()) (t M32) (k.I.s ())
