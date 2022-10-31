@@ -29,6 +29,7 @@ FILES=" \
   Hacl_SHA3 \
   Hacl_Spec \
   Hacl_Streaming_SHA1 \
+  Hacl_Streaming_SHA3 \
   Lib_Memzero0 \
   TestLib \
   Vale \

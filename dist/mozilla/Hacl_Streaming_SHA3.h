@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Streaming_SHA1_H
-#define __Hacl_Streaming_SHA1_H
+#ifndef __Hacl_Streaming_SHA3_H
+#define __Hacl_Streaming_SHA3_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,33 +35,33 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "Lib_Memzero0.h"
 #include "Hacl_Streaming_SHA2.h"
-#include "Hacl_Hash_SHA1.h"
+#include "Hacl_SHA3.h"
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
+typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA3_state_sha3_256;
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256();
 
-void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 /**
-0 = success, 1 = max length exceeded
+0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
 */
 uint32_t
-Hacl_Streaming_SHA1_legacy_update_sha1(
-  Hacl_Streaming_SHA2_state_sha2_224 *p,
+Hacl_Streaming_SHA3_update_256(
+  Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,
   uint32_t len
 );
 
-void
-Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
+void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
 
-void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Streaming_SHA1_H_DEFINED
+#define __Hacl_Streaming_SHA3_H_DEFINED
 #endif
