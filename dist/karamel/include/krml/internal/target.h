@@ -108,7 +108,7 @@ inline static int32_t krml_time() {
  * *elements*. Do an ugly, run-time check (some of which KaRaMeL can eliminate).
  */
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 4))
 #  define _KRML_CHECK_SIZE_PRAGMA                                              \
     _Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
 #else
@@ -133,7 +133,7 @@ inline static int32_t krml_time() {
 #  define KRML_HOST_SNPRINTF(buf, sz, fmt, arg) snprintf(buf, sz, fmt, arg)
 #endif
 
-#if defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ > 4
+#if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 4))
 #  define KRML_DEPRECATED(x) __attribute__((deprecated(x)))
 #elif  defined(__GNUC__)
 /* deprecated attribute is not defined in GCC < 4.5. */

@@ -1580,54 +1580,6 @@ EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_
     );
 }
 
-uint64_t EverCrypt_Hash_Incremental_max_input_len64(Spec_Hash_Definitions_hash_alg a)
-{
-  switch (a)
-  {
-    case Spec_Hash_Definitions_MD5:
-      {
-        return (uint64_t)2305843009213693951U;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        return (uint64_t)2305843009213693951U;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        return (uint64_t)2305843009213693951U;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        return (uint64_t)2305843009213693951U;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        return (uint64_t)18446744073709551615U;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        return (uint64_t)18446744073709551615U;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        return (uint64_t)18446744073709551615U;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        return (uint64_t)18446744073709551615U;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        return (uint64_t)18446744073709551615U;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
 EverCrypt_Error_error_code
 EverCrypt_Hash_Incremental_update(
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s,
@@ -1635,17 +1587,71 @@ EverCrypt_Hash_Incremental_update(
   uint32_t len
 )
 {
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ scrut0 = *s;
-  EverCrypt_Hash_state_s *block_state0 = scrut0.block_state;
-  Spec_Hash_Definitions_hash_alg alg = EverCrypt_Hash_alg_of_state(block_state0);
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ scrut = *s;
-  uint64_t uu____0 = scrut.total_len;
-  if ((uint64_t)len <= EverCrypt_Hash_Incremental_max_input_len64(alg) - uu____0)
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ s1 = *s;
+  EverCrypt_Hash_state_s *block_state = s1.block_state;
+  uint64_t total_len = s1.total_len;
+  Spec_Hash_Definitions_hash_alg i1 = EverCrypt_Hash_alg_of_state(block_state);
+  uint64_t sw;
+  switch (i1)
   {
-    Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ s1 = *s;
-    EverCrypt_Hash_state_s *block_state = s1.block_state;
-    uint64_t total_len = s1.total_len;
-    Spec_Hash_Definitions_hash_alg i1 = EverCrypt_Hash_alg_of_state(block_state);
+    case Spec_Hash_Definitions_MD5:
+      {
+        sw = (uint64_t)2305843009213693951U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        sw = (uint64_t)2305843009213693951U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        sw = (uint64_t)2305843009213693951U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        sw = (uint64_t)2305843009213693951U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        sw = (uint64_t)18446744073709551615U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        sw = (uint64_t)18446744073709551615U;
+        break;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        sw = (uint64_t)18446744073709551615U;
+        break;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        sw = (uint64_t)18446744073709551615U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        sw = (uint64_t)18446744073709551615U;
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint32_t ite;
+  if ((uint64_t)len > sw - total_len)
+  {
+    ite = (uint32_t)1U;
+  }
+  else
+  {
     uint32_t sz;
     if
     (
@@ -1726,7 +1732,7 @@ EverCrypt_Hash_Incremental_update(
           buf,
           EverCrypt_Hash_Incremental_block_len(i2));
       }
-      uint32_t ite;
+      uint32_t ite0;
       if
       (
         (uint64_t)len
@@ -1735,13 +1741,13 @@ EverCrypt_Hash_Incremental_update(
         && (uint64_t)len > (uint64_t)0U
       )
       {
-        ite = EverCrypt_Hash_Incremental_block_len(i2);
+        ite0 = EverCrypt_Hash_Incremental_block_len(i2);
       }
       else
       {
-        ite = (uint32_t)((uint64_t)len % (uint64_t)EverCrypt_Hash_Incremental_block_len(i2));
+        ite0 = (uint32_t)((uint64_t)len % (uint64_t)EverCrypt_Hash_Incremental_block_len(i2));
       }
-      uint32_t n_blocks = (len - ite) / EverCrypt_Hash_Incremental_block_len(i2);
+      uint32_t n_blocks = (len - ite0) / EverCrypt_Hash_Incremental_block_len(i2);
       uint32_t data1_len = n_blocks * EverCrypt_Hash_Incremental_block_len(i2);
       uint32_t data2_len = len - data1_len;
       uint8_t *data1 = data;
@@ -1824,7 +1830,7 @@ EverCrypt_Hash_Incremental_update(
           buf,
           EverCrypt_Hash_Incremental_block_len(i2));
       }
-      uint32_t ite;
+      uint32_t ite0;
       if
       (
         (uint64_t)(len - diff)
@@ -1833,14 +1839,14 @@ EverCrypt_Hash_Incremental_update(
         && (uint64_t)(len - diff) > (uint64_t)0U
       )
       {
-        ite = EverCrypt_Hash_Incremental_block_len(i2);
+        ite0 = EverCrypt_Hash_Incremental_block_len(i2);
       }
       else
       {
-        ite =
+        ite0 =
           (uint32_t)((uint64_t)(len - diff) % (uint64_t)EverCrypt_Hash_Incremental_block_len(i2));
       }
-      uint32_t n_blocks = (len - diff - ite) / EverCrypt_Hash_Incremental_block_len(i2);
+      uint32_t n_blocks = (len - diff - ite0) / EverCrypt_Hash_Incremental_block_len(i2);
       uint32_t data1_len = n_blocks * EverCrypt_Hash_Incremental_block_len(i2);
       uint32_t data2_len = len - diff - data1_len;
       uint8_t *data11 = data2;
@@ -1858,9 +1864,24 @@ EverCrypt_Hash_Incremental_update(
           }
         );
     }
-    return EverCrypt_Error_Success;
+    ite = (uint32_t)0U;
   }
-  return EverCrypt_Error_MaximumLengthExceeded;
+  switch (ite)
+  {
+    case 0U:
+      {
+        return EverCrypt_Error_Success;
+      }
+    case 1U:
+      {
+        return EverCrypt_Error_MaximumLengthExceeded;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
 }
 
 void

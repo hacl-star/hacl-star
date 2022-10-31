@@ -39,15 +39,30 @@ open Spec.Hash.Definitions
 /// up to 2^125 for SHA384/512.
 
 inline_for_extraction noextract
-let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x `less_than_max_input_length` a } =
+let max_input_len64 a: U64.(x:t { 0 < v x /\ v x `less_than_max_input_length` a }) =
   let _ = allow_inversion hash_alg in
   match a with
   | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64); pow2 61 - 1
-  | SHA2_384 | SHA2_512 -> assert_norm (pow2 64 < pow2 125 - 1); pow2 64 - 1
-  | Blake2S -> pow2 64 - 1
-  | Blake2B -> assert_norm (pow2 64 < pow2 128); pow2 64 - 1
-  | SHA3_256 -> pow2 64 - 1 // TODO: relax this?
+  | SHA2_224 | SHA2_256 ->
+      assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64);
+      normalize_term_spec (pow2 61 - 1);
+      U64.uint_to_t (normalize_term (pow2 61 - 1))
+  | SHA2_384 | SHA2_512 ->
+      assert_norm (pow2 64 < pow2 125 - 1);
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
+  | Blake2S ->
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
+  | Blake2B ->
+      assert_norm (pow2 64 < pow2 128);
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
+  | SHA3_256 ->
+      // TODO: relax this?
+      assert_norm (pow2 64 < pow2 128);
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
 
 open Hacl.Streaming.Interface
 
@@ -98,7 +113,7 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
 #pop-options
 
 /// This proof usually succeeds fast but we increase the rlimit for safety
-#push-options "--z3rlimit 200 --ifuel 1"
+#push-options "--z3rlimit 400 --ifuel 1"
 inline_for_extraction noextract
 let hacl_md (a:alg)// : block unit =
   =
@@ -108,7 +123,7 @@ let hacl_md (a:alg)// : block unit =
     (state_t a)
     (stateful_unused unit)
 
-    (fun () -> max_input_length64 a)
+    (fun () -> max_input_len64 a)
     (fun () -> Hacl.Hash.Definitions.hash_len a)
     (fun () -> Hacl.Hash.Definitions.block_len a)
     (fun () -> Hacl.Hash.Definitions.block_len a)

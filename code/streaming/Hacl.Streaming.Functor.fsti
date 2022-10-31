@@ -162,7 +162,7 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
   (requires (
     invariant c i h s))
   (ensures (
-    S.length (seen c i h s) <= c.max_input_length i))
+    S.length (seen c i h s) <= U64.v (c.max_input_len i)))
 
 /// A fine design point here... There are two styles that have been used in
 /// EverCrypt and throughout for key management.
@@ -340,7 +340,7 @@ val init:
   init_st #index c i t t')
 
 unfold noextract
-let update_pre0
+let update_pre
   #index
   (c: block index)
   (i: index)
@@ -353,21 +353,6 @@ let update_pre0
   B.live h0 data /\
   U32.v len = B.length data /\
   B.(loc_disjoint (loc_buffer data) (footprint c i h0 s))
-
-/// We isolate update_pre0 so that a high-level API (like EverCrypt) can opt in
-/// to run-time length checks and possibly return a suitable error type.
-unfold noextract
-let update_pre
-  #index
-  (c: block index)
-  (i: index)
-  (s: state' c i)
-  (data: B.buffer uint8)
-  (len: UInt32.t)
-  (h0: HS.mem)
-=
-  update_pre0 c i s data len h0 /\
-  S.length (seen c i h0 s) + U32.v len <= c.max_input_length i
 
 unfold noextract
 let update_post
@@ -396,9 +381,18 @@ let update_st
   s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
-  Stack unit
+  Stack UInt32.t
     (requires fun h0 -> update_pre c i s data len h0)
-    (ensures fun h0 s' h1 -> update_post c i s data len h0 h1)
+    (ensures fun h0 s' h1 ->
+      match s' with
+      | 0ul ->
+          S.length (seen c i h0 s) + UInt32.v len <= U64.v (c.max_input_len i) /\
+          update_post c i s data len h0 h1
+      | 1ul ->
+          S.length (seen c i h0 s) + UInt32.v len > U64.v (c.max_input_len i) /\
+          h0 == h1
+      | _ ->
+          False)
 
 inline_for_extraction noextract
 val update:

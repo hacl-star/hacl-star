@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <assert.h>
 
 #include "test_helpers.h"
 #include "Hacl_Streaming_Poly1305_128.h"
@@ -26,27 +27,27 @@ int main() {
     poly1305_test_vector *v = vectors;
 
     poly1305_state *s = Hacl_Streaming_Poly1305_128_create_in(v->key);
-    Hacl_Streaming_Poly1305_128_update(s, v->input, 8);
-    Hacl_Streaming_Poly1305_128_update(s, v->input+8, 6);
-    Hacl_Streaming_Poly1305_128_update(s, v->input+14, v->input_len - 14);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input, 8) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input+8, 6) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input+14, v->input_len - 14) == 0);
     Hacl_Streaming_Poly1305_128_finish(s, tag);
     ok &= compare_and_print(16, tag, v->tag);
 
     v++;
     Hacl_Streaming_Poly1305_128_init(v->key, s);
-    Hacl_Streaming_Poly1305_128_update(s, NULL, 0);
-    Hacl_Streaming_Poly1305_128_update(s, v->input, v->input_len);
+    assert(Hacl_Streaming_Poly1305_128_update(s, NULL, 0) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input, v->input_len) == 0);
     Hacl_Streaming_Poly1305_128_finish(s, tag);
     ok &= compare_and_print(16, tag, v->tag);
 
     v++;
     Hacl_Streaming_Poly1305_128_init(v->key, s);
-    Hacl_Streaming_Poly1305_128_update(s, NULL, 0);
-    Hacl_Streaming_Poly1305_128_update(s, v->input, 8);
-    Hacl_Streaming_Poly1305_128_update(s, v->input+8, 8);
-    Hacl_Streaming_Poly1305_128_update(s, v->input+16, 16);
-    Hacl_Streaming_Poly1305_128_update(s, v->input+32, 8);
-    Hacl_Streaming_Poly1305_128_update(s, v->input+40, v->input_len - 40);
+    assert(Hacl_Streaming_Poly1305_128_update(s, NULL, 0) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input, 8) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input+8, 8) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input+16, 16) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input+32, 8) == 0);
+    assert(Hacl_Streaming_Poly1305_128_update(s, v->input+40, v->input_len - 40) == 0);
     Hacl_Streaming_Poly1305_128_finish(s, tag);
     ok &= compare_and_print(16, tag, v->tag);
 

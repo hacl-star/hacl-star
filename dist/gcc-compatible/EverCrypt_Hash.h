@@ -199,8 +199,6 @@ Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
 void
 EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
-uint64_t EverCrypt_Hash_Incremental_max_input_len64(Spec_Hash_Definitions_hash_alg a);
-
 EverCrypt_Error_error_code
 EverCrypt_Hash_Incremental_update(
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s,
