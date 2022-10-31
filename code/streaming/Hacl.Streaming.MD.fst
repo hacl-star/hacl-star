@@ -113,7 +113,7 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
 #pop-options
 
 /// This proof usually succeeds fast but we increase the rlimit for safety
-#push-options "--z3rlimit 200 --ifuel 1"
+#push-options "--z3rlimit 400 --ifuel 1"
 inline_for_extraction noextract
 let hacl_md (a:alg)// : block unit =
   =
