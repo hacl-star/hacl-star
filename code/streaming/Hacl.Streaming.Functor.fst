@@ -717,6 +717,15 @@ let split_at_last_rest_eq (#index : Type0) (c: block index)
   let sz = rest c i total_len in
   ()
 
+/// Particularly difficult proof. Z3 profiling indicates that a pattern goes off
+/// the rails. So I disabled all of the known "bad" patterns, then did the proof
+/// by hand. Fortunately, there were only two stateful operations. The idea was
+/// to do all ofthe modifies-reasoning in the two lemmas above, then disable the
+/// bad pattern for the main function.
+///
+/// This style is a little tedious, because it requires a little bit of digging
+/// to understand what needs to hold in order to be able to prove that e.g. the
+/// sequence remains unmodified from h0 to h2, but this seems more robust?
 val modifies_footprint:
   #index:Type0 ->
   (c: block index) ->
@@ -739,13 +748,23 @@ val modifies_footprint:
       preserves_freeable c i s h0 h1 /\
       bs0 == bs1 /\ buf0 == buf1 /\ k0 == k1 /\
       c.state.invariant h1 bs1 /\
+      c.state.v i h1 bs1 == c.state.v i h0 bs0 /\
+      c.state.footprint h1 bs1 == c.state.footprint h0 bs0 /\
       B.(loc_disjoint (loc_addr_of_buffer s) (loc_buffer buf1)) /\
       B.(loc_disjoint (loc_addr_of_buffer s) (loc_buffer data)) /\
+      B.(loc_disjoint (loc_addr_of_buffer s) (loc_addr_of_buffer buf1)) /\
       B.(loc_disjoint (loc_addr_of_buffer s) (c.state.footprint h1 bs1)) /\
+      B.(loc_disjoint (loc_buffer s) (loc_buffer buf1)) /\
+      B.(loc_disjoint (loc_buffer s) (loc_buffer data)) /\
+      B.(loc_disjoint (loc_buffer s) (c.state.footprint h1 bs1)) /\
       (if c.km = Runtime then
         c.key.invariant #i h1 k1 /\
-        B.(loc_disjoint (loc_addr_of_buffer s) (c.key.footprint #i h1 k1))
+        c.key.v i h1 k1 == c.key.v i h0 k0 /\
+        c.key.footprint #i h1 k1 == c.key.footprint #i h0 k0 /\
+        B.(loc_disjoint (loc_addr_of_buffer s) (c.key.footprint #i h1 k1)) /\
+        B.(loc_disjoint (loc_buffer s) (c.key.footprint #i h1 k1))
       else
+        B.(loc_disjoint (loc_addr_of_buffer s) loc_none) /\
         True)))))
 
 let modifies_footprint c i p data len h0 h1 =
@@ -775,46 +794,59 @@ val modifies_footprint':
       let State bs1 buf1 _ _ k1 = B.deref h1 p in (
       B.live h0 p /\
       B.(loc_disjoint (loc_addr_of_buffer p) (c.state.footprint #i h0 bs0)) /\
+      B.(loc_disjoint (loc_addr_of_buffer p) (loc_addr_of_buffer buf0)) /\
       c.state.invariant h0 bs0 /\
       (if c.km = Runtime then
         B.(loc_disjoint (loc_addr_of_buffer p) (c.key.footprint #i h0 k0)) /\
         c.key.invariant #i h0 k0
       else
-        True) /\
-      B.(modifies (loc_addr_of_buffer p) h0 h1)) /\
+        B.(loc_disjoint (loc_addr_of_buffer p) loc_none)) /\
+      B.(modifies (loc_buffer p) h0 h1)) /\
       bs0 == bs1 /\ buf0 == buf1 /\ k0 == k1))
     (ensures (
       let State bs0 buf0 _ _ k0 = B.deref h0 p in
       let State bs1 buf1 _ _ k1 = B.deref h1 p in (
+      B.live h1 p /\
       footprint c i h0 p == footprint c i h1 p /\
       preserves_freeable c i p h0 h1 /\
+      B.(loc_disjoint (loc_addr_of_buffer p) (footprint_s c i h1 (B.deref h1 p))) /\
       B.(loc_disjoint (loc_addr_of_buffer p) (c.state.footprint #i h1 bs1)) /\
+      B.(loc_disjoint (loc_buffer p) (c.state.footprint #i h1 bs1)) /\
       c.state.invariant h1 bs1 /\
+      c.state.v i h1 bs1 == c.state.v i h0 bs0 /\
+      c.state.footprint h1 bs1 == c.state.footprint h0 bs0 /\
       (if c.km = Runtime then
+        c.key.invariant #i h1 k1 /\
+        c.key.v i h1 k1 == c.key.v i h0 k0 /\
+        c.key.footprint #i h1 k1 == c.key.footprint #i h0 k0 /\
         B.(loc_disjoint (loc_addr_of_buffer p) (c.key.footprint #i h1 k1)) /\
-        c.key.invariant #i h1 k1
+        B.(loc_disjoint (loc_buffer p) (c.key.footprint #i h1 k1))
       else
-        True)))))
+        B.(loc_disjoint (loc_addr_of_buffer p) loc_none))))))
 
 let modifies_footprint' c i p data len h0 h1 =
   let _ = c.state.frame_freeable #i in
   let _ = c.key.frame_freeable #i in
   let _ = c.state.frame_invariant #i in
   let _ = c.key.frame_invariant #i in
+  let _ = allow_inversion key_management in
   let s0 = B.deref h0 p in
   let s1 = B.deref h0 p in
   let State bs0 buf0 _ _ k0 = s0 in
-  let State bs1 buf0 _ _ k1 = s1 in
+  let State bs1 buf1 _ _ k1 = s1 in
   c.state.frame_invariant (B.loc_addr_of_buffer p) bs0 h0 h1;
   if c.km = Runtime then
     c.key.frame_invariant #i (B.loc_addr_of_buffer p) k0 h0 h1
 
-
-// This rlimit is a bit crazy, but this proof is not stable. It usually
-// goes through fast, but a high rlimit is a security against regression failures.
+// The absence of loc_disjoint_includes makes reasoning a little more difficult.
+// Notably, we lose all of the important disjointness properties between the
+// outer point p and the buffer within B.deref h p. These need to be
+// re-established by hand. Another thing that we lose without this pattern is
+// knowing that loc_buffer b is included within loc_addr_of_buffer b. This is
+// important for reasoning about the preservation of e.g. the contents of data.
 #restart-solver
-#push-options "--z3rlimit 600 --z3cliopt smt.arith.nl=false --z3refresh \
-  --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice'"//,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
+#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh --log_queries \
+  --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
 let update_small #index c i t t' p data len =
   let open LowStar.BufferOps in
   let s = !*p in
@@ -823,6 +855,7 @@ let update_small #index c i t t' p data len =
   [@inline_let]
   let block_state: c.state.s i = block_state in
 
+  // Functional reasoning.
   let sz = rest c i total_len in
   add_len_small c i total_len len;
 
@@ -830,6 +863,7 @@ let update_small #index c i t t' p data len =
   let buf1 = B.sub buf 0ul sz in
   let buf2 = B.sub buf sz len in
 
+  // Memory reasoning.
   c.state.invariant_loc_in_footprint h0 block_state;
   if c.km = Runtime then
     c.key.invariant_loc_in_footprint #i h0 k';
@@ -837,13 +871,15 @@ let update_small #index c i t t' p data len =
 
   // FIRST STATEFUL OPERATION
   B.blit data 0ul buf2 0ul len;
+
+  // Memory reasoning.
   let h1 = ST.get () in
   modifies_footprint c i p data len h0 h1;
-  c.state.frame_invariant (B.loc_buffer buf) block_state h0 h1;
-  optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h0 h1;
-  assert (c.state.invariant h0 block_state);
-  stateful_frame_preserves_freeable #index #(Block?.state c) #i (B.loc_buffer buf2)
-                                    (State?.block_state s) h0 h1;
+  c.state.invariant_loc_in_footprint h1 block_state;
+  if c.km = Runtime then
+    c.key.invariant_loc_in_footprint #i h1 k';
+
+  // Functional reasoning.
   split_at_last_rest_eq c i t t' p h0;
   assert(
     let _, r = split_at_last c i (Ghost.reveal seen_) in
@@ -851,28 +887,25 @@ let update_small #index c i t t' p data len =
   split_at_last_small c i (G.reveal seen_) (B.as_seq h0 data);
   Seq.lemma_eq_intro (B.as_seq h1 data) (B.as_seq h0 data);
 
+  // SECOND STATEFUL OPERATION
   let total_len = add_len c i total_len len in
   [@inline_let]
   let tmp: state_s c i t t' =
     State #index #c #i block_state buf total_len
           (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data))) k'
   in
-  // SECOND STATEFUL OPERATION
   p *= tmp;
+
+  // Memory reasoning.
   let h2 = ST.get () in
   modifies_footprint' c i p data len h1 h2;
+  c.state.invariant_loc_in_footprint h2 block_state;
+  if c.km = Runtime then
+    c.key.invariant_loc_in_footprint #i h2 k';
+  ST.lemma_equal_domains_trans h0 h1 h2;
+
+  // Functional reasoning.
   Seq.lemma_eq_intro (B.as_seq h2 data) (B.as_seq h1 data);
-  c.state.frame_invariant (B.loc_buffer p) block_state h1 h2;
-  optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h1 h2;
-  stateful_frame_preserves_freeable #index #(Block?.state c) #i
-                                    (B.loc_buffer p)
-                                    (State?.block_state s) h1 h2;
-  assert (footprint c i h1 p == footprint c i h2 p);
-  assert (c.state.invariant #i h2 block_state);
-  assert (preserves_freeable c i p h1 h2);
-
-  // PROOF GOOD UP TO HERE WITHOUT THE includes_r problematic lemma
-
   assert (
     let b = S.append (G.reveal seen_) (B.as_seq h0 data) in
     let blocks, rest = split_at_last c i b in
@@ -893,16 +926,7 @@ let update_small #index c i t t' p data len =
     (==) { }
       S.slice (B.as_seq h2 buf) 0 (S.length rest);
     }
-  end;
-  assert (seen c i h2 p `S.equal` (S.append (G.reveal seen_) (B.as_seq h0 data)));
-  assert (footprint c i h0 p == footprint c i h2 p);
-  assert (equal_domains h0 h2);
-  ST.lemma_equal_domains_trans h0 h1 h2;
-  assert (invariant c i h2 p);
-  c.state.invariant_loc_in_footprint h2 block_state;
-  if c.km = Runtime then
-    c.key.invariant_loc_in_footprint #i h2 k';
-  assert (update_post c i p data len h0 h2)
+  end
 
 #pop-options
 
