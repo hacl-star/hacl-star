@@ -845,7 +845,7 @@ let modifies_footprint' c i p data len h0 h1 =
 // knowing that loc_buffer b is included within loc_addr_of_buffer b. This is
 // important for reasoning about the preservation of e.g. the contents of data.
 #restart-solver
-#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh --log_queries \
+#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh \
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
 let update_small #index c i t t' p data len =
   let open LowStar.BufferOps in
