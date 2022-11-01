@@ -21,6 +21,7 @@ module SL = Spec.K256.Lemmas
 module SG = Hacl.Spec.K256.GLV
 module SGL = Hacl.Spec.K256.GLV.Lemmas
 module PML = Hacl.Spec.K256.ECSM.Lemmas
+module PM = Hacl.Impl.K256.PointMul
 
 open Hacl.K256.Field
 open Hacl.K256.Scalar
@@ -250,7 +251,6 @@ let point_mul_g_double_split_lambda_table_noalloc out table2 r1 q1 r2 q2 r3 q3 r
     (to_const table2) (to_const table2) out
 
 
-inline_for_extraction noextract
 val point_mul_g_double_split_lambda_table:
     out:point
   -> r1:qelem -> q1:point
@@ -289,6 +289,7 @@ val point_mul_g_double_split_lambda_table:
         (refl (as_seq h0 q3)) (qas_nat h0 r3)
         (refl (as_seq h0 q4)) (qas_nat h0 r4) 5)
 
+[@CInline]
 let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   p1 p2 is_negate1 is_negate2 is_negate3 is_negate4 =
   [@inline_let] let len = 15ul in
@@ -360,10 +361,8 @@ val point_mul_g_double_split_lambda_vartime_endo_split:
     let r3_s0, r4_s0 = SG.scalar_split_lambda (qas_nat h0 scalar2) in
     let r1_s, q1_s, r2_s, q2_s = SG.ecmult_endo_split (qas_nat h0 scalar1) (point_eval h0 p1) in
     let r3_s, q3_s, r4_s, q4_s = SG.ecmult_endo_split (qas_nat h0 scalar2) (point_eval h0 p2) in
-    qas_nat h1 r1 == r1_s /\ r1_s < pow2 128 /\
-    qas_nat h1 r2 == r2_s /\ r2_s < pow2 128 /\
-    qas_nat h1 r3 == r3_s /\ r3_s < pow2 128 /\
-    qas_nat h1 r4 == r4_s /\ r4_s < pow2 128 /\
+    qas_nat h1 r1 == r1_s /\ qas_nat h1 r2 == r2_s /\
+    qas_nat h1 r3 == r3_s /\ qas_nat h1 r4 == r4_s /\
     point_eval h1 q1 == q1_s /\ point_eval h1 q2 == q2_s /\
     point_eval h1 q3 == q3_s /\ point_eval h1 q4 == q4_s /\
     is_high1 == S.scalar_is_high r1_s0 /\
@@ -376,6 +375,26 @@ let point_mul_g_double_split_lambda_vartime_endo_split r1 q1 r2 q2 r3 q3 r4 q4
   let is_high1, is_high2 = ecmult_endo_split r1 r2 q1 q2 scalar1 p1 in
   let is_high3, is_high4 = ecmult_endo_split r3 r4 q3 q4 scalar2 p2 in
   (is_high1, is_high2, is_high3, is_high4)
+
+
+val check_ecmult_endo_split (r1 r2 r3 r4 : qelem) :
+  Stack bool
+  (requires fun h ->
+    live h r1 /\ live h r2 /\ live h r3 /\ live h r4)
+  (ensures fun h0 b h1 -> modifies0 h0 h1 /\
+    b ==
+      (qas_nat h0 r1 < pow2 128 &&
+       qas_nat h0 r2 < pow2 128 &&
+       qas_nat h0 r3 < pow2 128 &&
+       qas_nat h0 r4 < pow2 128))
+
+[@CInline]
+let check_ecmult_endo_split r1 r2 r3 r4 =
+  let b1 = is_qelem_lt_pow2_128_vartime r1 in
+  let b2 = is_qelem_lt_pow2_128_vartime r2 in
+  let b3 = is_qelem_lt_pow2_128_vartime r3 in
+  let b4 = is_qelem_lt_pow2_128_vartime r4 in
+  b1 && b2 && b3 && b4
 
 
 inline_for_extraction noextract
@@ -439,8 +458,12 @@ let point_mul_g_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4
   let is_high1, is_high2, is_high3, is_high4 =
    point_mul_g_double_split_lambda_vartime_endo_split
      r1 q1 r2 q2 r3 q3 r4 q4 scalar1 scalar2 p1 p2 in
-  point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
-    p1 p2 is_high1 is_high2 is_high3 is_high4;
+  let is_r1234_valid = check_ecmult_endo_split r1 r2 r3 r4 in
+  if is_r1234_valid then
+    point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
+      p1 p2 is_high1 is_high2 is_high3 is_high4
+  else
+    PM.point_mul_g_double_vartime out scalar1 scalar2 p2;
   let h1 = ST.get () in
   assert (S.to_aff_point (point_eval h1 out) ==
     SGL.aff_proj_point_mul_double_split_lambda

@@ -41,7 +41,6 @@ val point_mul_lambda_inplace: res:point -> Stack unit
     point_eval h1 res == SG.point_mul_lambda (point_eval h0 res))
 
 
-inline_for_extraction noextract
 val ecmult_endo_split:
     r1:qelem -> r2:qelem
   -> q1:point -> q2:point
@@ -60,8 +59,7 @@ val ecmult_endo_split:
     point_inv h1 q1 /\ point_inv h1 q2 /\
    (let r1_s0, r2_s0 = SG.scalar_split_lambda (qas_nat h0 scalar) in
     let r1_s, q1_s, r2_s, q2_s = SG.ecmult_endo_split (qas_nat h0 scalar) (point_eval h0 q) in
-    qas_nat h1 r1 == r1_s /\ r1_s < pow2 128 /\
-    qas_nat h1 r2 == r2_s /\ r2_s < pow2 128 /\
+    qas_nat h1 r1 == r1_s /\ qas_nat h1 r2 == r2_s /\
     point_eval h1 q1 == q1_s /\ point_eval h1 q2 == q2_s /\
     is_high1 == S.scalar_is_high r1_s0 /\
     is_high2 == S.scalar_is_high r2_s0))

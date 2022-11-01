@@ -256,6 +256,7 @@ let negate_point_and_scalar_cond_vartime k p =
   if_high
 
 
+[@CInline]
 let ecmult_endo_split r1 r2 q1 q2 scalar q =
   let h0 = ST.get () in
   // modifies r1, r2, q2 s.t. r1 + r2 * lambda = scalar /\ q2 = [lambda]q
@@ -265,5 +266,4 @@ let ecmult_endo_split r1 r2 q1 q2 scalar q =
   let is_high1 = negate_point_and_scalar_cond_vartime r1 q1 in
   // modifies r2, q2
   let is_high2 = negate_point_and_scalar_cond_vartime r2 q2 in
-  SGL.lemma_scalar_split_lambda_fits (qas_nat h0 scalar) (point_eval h0 q);
   is_high1, is_high2
