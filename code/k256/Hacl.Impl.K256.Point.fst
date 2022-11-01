@@ -194,6 +194,11 @@ let point_negate out p =
   assert (feval h2 oy == (- feval h0 py) % S.prime)
 
 
+[@CInline]
+let point_negate_conditional_vartime p is_negate =
+  if is_negate then point_negate p p
+
+
 val fmul_fmul_eq_vartime (a bz c dz: felem) : Stack bool
   (requires fun h ->
     live h a /\ live h bz /\ live h c /\ live h dz /\

@@ -150,6 +150,14 @@ val point_negate (out p:point) : Stack unit
     point_inv h1 out /\ point_eval h1 out == S.point_negate (point_eval h0 p))
 
 
+val point_negate_conditional_vartime: p:point -> is_negate:bool -> Stack unit
+  (requires fun h -> live h p /\ point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
+    point_inv h1 p /\
+    point_eval h1 p ==
+      (if is_negate then S.point_negate (point_eval h0 p) else point_eval h0 p))
+
+
 val point_eq (p q:point) : Stack bool
   (requires fun h ->
     live h p /\ live h q /\ eq_or_disjoint p q /\

@@ -238,10 +238,6 @@ let point_mul_lambda_and_split_lambda r1 r2 lambda_q scalar q =
   point_mul_lambda lambda_q q // lambda_q = [lambda]Q
 
 
-let point_negate_conditional_vartime p is_negate =
-  if is_negate then point_negate p p
-
-
 inline_for_extraction noextract
 val negate_point_and_scalar_cond_vartime: k:qelem -> p:point -> Stack bool
   (requires fun h ->

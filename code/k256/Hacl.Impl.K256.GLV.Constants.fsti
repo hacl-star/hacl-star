@@ -42,14 +42,6 @@ val point_mul_lambda_inplace: res:point -> Stack unit
 
 
 inline_for_extraction noextract
-val point_negate_conditional_vartime: p:point -> is_negate:bool -> Stack unit
-  (requires fun h -> live h p /\ point_inv h p)
-  (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\
-    point_eval h1 p == SG.point_negate_cond (point_eval h0 p) is_negate)
-
-
-inline_for_extraction noextract
 val ecmult_endo_split:
     r1:qelem -> r2:qelem
   -> q1:point -> q2:point
