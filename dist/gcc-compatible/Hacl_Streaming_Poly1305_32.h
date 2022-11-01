@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Poly1305_32.h"
-#include "evercrypt_targetconfig.h"
+
 typedef struct Hacl_Streaming_Poly1305_32_poly1305_32_state_s
 {
   uint64_t *block_state;

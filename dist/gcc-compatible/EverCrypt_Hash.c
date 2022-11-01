@@ -31,7 +31,7 @@
 #include "internal/Hacl_Hash_Blake2s_128.h"
 #include "internal/Hacl_Hash_Blake2b_256.h"
 #include "internal/Hacl_Hash_Blake2.h"
-
+#include "config.h"
 C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___)
 {
   switch (uu___)

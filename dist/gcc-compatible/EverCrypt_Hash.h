@@ -46,7 +46,7 @@ extern "C" {
 #include "Hacl_Hash_Blake2b_256.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
-#include "evercrypt_targetconfig.h"
+
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
 C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___);

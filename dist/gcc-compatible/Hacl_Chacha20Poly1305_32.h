@@ -38,7 +38,7 @@ extern "C" {
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Chacha20.h"
-#include "evercrypt_targetconfig.h"
+
 void
 Hacl_Chacha20Poly1305_32_aead_encrypt(
   uint8_t *k,
