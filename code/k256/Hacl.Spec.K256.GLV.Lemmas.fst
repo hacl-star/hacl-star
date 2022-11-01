@@ -14,36 +14,8 @@ open Hacl.Spec.K256.GLV
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// val lambda_is_primitive_cube_root_unity: unit -> Lemma
-//   (lambda <> 1 /\
-//   S.(lambda *^ lambda *^ lambda = 1) /\
-//   S.(lambda *^ lambda +^ lambda +^ 1 = 0))
-
-// let lambda_is_primitive_cube_root_unity () =
-//   assert (lambda <> 1);
-//   assert (S.(lambda *^ lambda *^ lambda = 1));
-//   assert (S.(lambda *^ lambda +^ lambda +^ 1 = 0))
-
-
-// val beta_is_primitive_cube_root_unity: unit -> Lemma
-//   (beta <> 1 /\
-//    S.(beta *% beta *% beta = 1) /\
-//    S.(beta *% beta +% beta +% 1 = 0))
-
-// let beta_is_primitive_cube_root_unity () =
-//   assert (beta <> 1);
-//   assert (S.(beta *% beta *% beta = 1));
-//   assert (S.(beta *% beta +% beta +% 1 = 0))
-
-//--------------------------------------------
-
 assume
 val lemma_glv_aff : p:S.aff_point -> Lemma (aff_point_mul lambda p == aff_point_mul_lambda p)
-
-val lemma_glv_g_aff : unit -> Lemma (aff_point_mul_g lambda == aff_point_mul_g_lambda ())
-let lemma_glv_g_aff () = lemma_glv_aff S.(g_x, g_y)
-// or, we can prove it by assert_norm
-
 
 val lemma_glv : p:S.proj_point ->
   Lemma (S.to_aff_point (point_mul_lambda p) == aff_point_mul lambda (S.to_aff_point p))
@@ -68,40 +40,6 @@ let lemma_glv p =
   assert (S.(beta *% (pX /% pZ)) = S.(beta *% (pX *% S.finv pZ)));
   M.lemma_mul_mod_assoc #S.prime beta pX (S.finv pZ);
   assert (S.(beta *% pX *% S.finv pZ) = S.(beta *% (pX *% S.finv pZ)))
-
-
-// val lemma_glv_g : unit ->
-//   Lemma (S.to_aff_point (point_mul_g_lambda ()) == aff_point_mul_g lambda)
-
-// let lemma_glv_g () =
-//   SM.lemma_proj_aff_id (S.(beta *% S.g_x), S.g_y);
-//   lemma_glv_aff S.(g_x, g_y)
-
-//--------------------------------------------
-
-// val lemma_check_a_and_b : unit -> Lemma
-//   ((a1 + minus_b1 * minus_lambda) % S.q = 0 /\
-//    (a1 + b1 * lambda) % S.q = 0 /\
-//    (a2 + b2 * lambda) % S.q = 0 /\
-//     a1 * b2 + minus_b1 * a2 = S.q)
-
-// let lemma_check_a_and_b () =
-//   assert (a1 * b2 + minus_b1 * a2 = S.q)
-
-// // a1 = b2
-// val lemma_a_and_b_fits: unit -> Lemma
-//   (minus_b1 < pow2 128 /\
-//    minus_b2 < pow2 256 /\
-//    b1 < pow2 256 /\
-//    b2 < pow2 126 /\
-//    a2 < pow2 129)
-
-// let lemma_a_and_b_fits () =
-//   assert (minus_b1 < pow2 128);
-//   assert (minus_b2 < pow2 256);
-//   assert_norm (b2 < pow2 126);
-//   assert_norm (a2 < pow2 129);
-//   assert_norm ((a1 + a2) / 2 < pow2 128)
 
 //--------------------------------------------
 
@@ -135,158 +73,6 @@ let lemma_scalar_split_lambda_eval k =
     k;
   }
 
-
-val lemma_mod_add_mul_zero (a b c d e:int) (n:pos) : Lemma
-  (requires (c * d + e) % n == 0)
-  (ensures  (a + b * c * d) % n == (a - e * b) % n)
-
-let lemma_mod_add_mul_zero a b c d e n =
-  calc (==) {
-    (a + b * c * d) % n;
-    (==) { assert ((c * d + e) % n * b % n = 0) }
-    (a + b * c * d - ((c * d + e) % n) * b % n) % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (c * d + e) b n }
-    (a + b * c * d - (c * d + e) * b % n) % n;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (a + b * c * d) ((c * d + e) * b) n }
-    (a + b * c * d - (c * d + e) * b) % n;
-    (==) { Math.Lemmas.distributivity_add_left (c * d) e b }
-    (a + b * c * d - (c * d * b + e * b)) % n;
-    (==) { Math.Lemmas.paren_mul_right b c d; Math.Lemmas.swap_mul b (c * d) }
-    (a + c * d * b - (c * d * b + e * b)) % n;
-    (==) { }
-    (a - e * b) % n;
-  }
-
-
-val lemma_scalar_split_lambda_r1_and_r2 (k:S.qelem) :
-  Lemma (let r1, r2 = scalar_split_lambda k in
-    let c1 = qmul_shift_384 k g1 in
-    let c2 = qmul_shift_384 k g2 in
-    let k1 = k - a1 * c1 - a2 * c2 in
-    let k2 = c1 * minus_b1 + c2 * minus_b2 in // or: k2 = - b1 * c1 - b2 * c2
-    r1 == k1 % S.q /\ r2 == k2 % S.q)
-
-let lemma_scalar_split_lambda_r1_and_r2 k =
-  qmul_shift_384_lemma k g1;
-  qmul_shift_384_lemma k g2;
-  let c1 : S.qelem = qmul_shift_384 k g1 in
-  let c2 : S.qelem = qmul_shift_384 k g2 in
-
-  let r1, r2 = scalar_split_lambda k in
-  assert (r2 = S.(c1 *^ minus_b1 +^ c2 *^ minus_b2));
-  assert (r1 = S.(k +^ r2 *^ minus_lambda));
-
-  // let k2 = - c1 * b1 - c2 * b2 in
-  // calc (==) { // r2
-  //   S.(c1 *^ minus_b1 +^ c2 *^ minus_b2);
-  //   (==) { assert_norm (minus_b1 = (-b1) % S.q) }
-  //   S.(c1 *^ ((-b1) % S.q) +^ c2 *^ minus_b2);
-  //   (==) { assert_norm (minus_b2 = (-b2) % S.q) }
-  //   S.(c1 *^ ((-b1) % S.q) +^ c2 *^ ((-b2) % S.q));
-  //   (==) { }
-  //   ((c1 * ((-b1) % S.q) % S.q) + (c2 * ((-b2) % S.q) % S.q)) % S.q;
-  //   (==) { Math.Lemmas.lemma_mod_mul_distr_r c1 (-b1) S.q }
-  //   ((c1 * (-b1) % S.q) + (c2 * ((-b2) % S.q) % S.q)) % S.q;
-  //   (==) { Math.Lemmas.lemma_mod_mul_distr_r c2 (-b2) S.q }
-  //   ((c1 * (-b1) % S.q) + (c2 * (-b2) % S.q)) % S.q;
-  //   (==) { Math.Lemmas.lemma_mod_plus_distr_l (c1 * (-b1)) (c2 * (-b2) % S.q) S.q }
-  //   (c1 * (-b1) + (c2 * (-b2) % S.q)) % S.q;
-  //   (==) { Math.Lemmas.lemma_mod_plus_distr_r (c1 * (-b1)) (c2 * (-b2)) S.q }
-  //   (c1 * (-b1) + c2 * (-b2)) % S.q;
-  //   (==) { Math.Lemmas.neg_mul_right c1 b1 }
-  //   (- c1 * b1 + c2 * (-b2)) % S.q;
-  //   (==) { Math.Lemmas.neg_mul_right c2 b2 }
-  //   (- c1 * b1 - c2 * b2) % S.q;
-  //   (==) { }
-  //   k2 % S.q;
-  //   };
-
-  // let k1 = k - a1 * c1 - a2 * c2 in
-  // calc (==) { // r1
-  //   S.(k +^ r2 *^ minus_lambda);
-  //   (==) { }
-  //   (k + ((k2 % S.q) * minus_lambda % S.q)) % S.q;
-  //   (==) { Math.Lemmas.lemma_mod_mul_distr_l k2 minus_lambda S.q }
-  //   (k + (k2 * minus_lambda % S.q)) % S.q;
-  //   (==) { assert_norm (minus_lambda = (- lambda) % S.q) }
-  //   (k + (k2 * ((- lambda) % S.q) % S.q)) % S.q;
-  //   (==) { Math.Lemmas.lemma_mod_mul_distr_r k2 (- lambda) S.q }
-  //   (k + (k2 * (- lambda) % S.q)) % S.q;
-  //   (==) { Math.Lemmas.lemma_mod_plus_distr_r k (k2 * (- lambda)) S.q }
-  //   (k + k2 * (- lambda)) % S.q;
-  //   (==) { Math.Lemmas.neg_mul_right k2 lambda }
-  //   (k - k2 * lambda) % S.q;
-  //   (==) { }
-  //   (k - (- c1 * b1 - c2 * b2) * lambda) % S.q;
-  //   (==) { Math.Lemmas.neg_mul_left (c1 * b1 + c2 * b2) lambda }
-  //   (k + (c1 * b1 + c2 * b2) * lambda) % S.q;
-  //   (==) { Math.Lemmas.distributivity_add_left (c1 * b1) (c2 * b2) lambda }
-  //   (k + c1 * b1 * lambda + c2 * b2 * lambda) % S.q;
-  //   (==) {
-  //     assert_norm ((b1 * lambda + a1) % S.q = 0);
-  //     lemma_mod_add_mul_zero (k + c2 * b2 * lambda) c1 b1 lambda a1 S.q }
-  //   (k + c2 * b2 * lambda - a1 * c1) % S.q;
-  //   (==) {
-  //     assert_norm ((b2 * lambda + a2) % S.q = 0);
-  //     lemma_mod_add_mul_zero (k - a1 * c1) c2 b2 lambda a2 S.q }
-  //   (k - a1 * c1 - a2 * c2) % S.q;
-  //   (==) { }
-  //   k1 % S.q;
-  // };
-
-  let k2 = c1 * minus_b1 + c2 * minus_b2 in
-  calc (==) { // r2
-    S.(c1 *^ minus_b1 +^ c2 *^ minus_b2);
-    (==) { }
-    ((c1 * minus_b1 % S.q) + (c2 * minus_b2 % S.q)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (c1 * minus_b1) (c2 * minus_b2 % S.q) S.q }
-    (c1 * minus_b1 + (c2 * minus_b2 % S.q)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r (c1 * minus_b1) (c2 * minus_b2) S.q }
-    (c1 * minus_b1 + c2 * minus_b2) % S.q;
-    (==) { }
-    k2 % S.q;
-  };
-
-  let k1 = k - a1 * c1 - a2 * c2 in
-  calc (==) { // r1
-    S.(k +^ r2 *^ minus_lambda);
-    (==) { }
-    (k + ((k2 % S.q) * minus_lambda % S.q)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l k2 minus_lambda S.q }
-    (k + (k2 * minus_lambda % S.q)) % S.q;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r k (k2 * minus_lambda) S.q }
-    (k + (c1 * minus_b1 + c2 * minus_b2) * minus_lambda) % S.q;
-    (==) { Math.Lemmas.distributivity_add_left (c1 * minus_b1) (c2 * minus_b2) minus_lambda }
-    (k + c1 * minus_b1 * minus_lambda + c2 * minus_b2 * minus_lambda) % S.q;
-    (==) {
-      assert_norm ((minus_b1 * minus_lambda + a1) % S.q = 0);
-      lemma_mod_add_mul_zero (k + c2 * minus_b2 * minus_lambda) c1 minus_b1 minus_lambda a1 S.q }
-    (k + c2 * minus_b2 * minus_lambda - a1 * c1) % S.q;
-    (==) {
-      assert_norm ((minus_b2 * minus_lambda + a2) % S.q = 0);
-      lemma_mod_add_mul_zero (k - a1 * c1) c2 minus_b2 minus_lambda a2 S.q }
-    (k - a1 * c1 - a2 * c2) % S.q;
-    (==) { }
-    k1 % S.q;
-  }
-
-
-// val lemma_ecmult_endo_split: k:S.qelem -> p:S.proj_point ->
-//   Lemma (let r1, p1, r2, p2 = ecmult_endo_split k p in
-//     let lambda_p = point_mul_lambda p in
-//     let r1_0, r2_0 = scalar_split_lambda k in
-//     let is_high1 = S.scalar_is_high r1_0 in
-//     let is_high2 = S.scalar_is_high r2_0 in
-//     p1 == (if is_high1 then S.point_negate p else p) /\
-//     p2 == (if is_high2 then S.point_negate lambda_p else lambda_p))
-
-// let lemma_ecmult_endo_split k p = ()
-
-
-// TODO: prove that r1 and r2 are ~128 bits long
-// val lemma_scalar_split_lambda_fits (k:S.qelem) (p:S.proj_point) :
-//   Lemma (let r1, p1, r2, p2 = ecmult_endo_split k p in
-//     r1 < pow2 128 /\ r2 < pow2 128)
 
 (**
  Fast computation of [k]P in affine coordinates
@@ -411,38 +197,6 @@ let lemma_ecmult_endo_split_to_aff k p =
       end
     end
   end
-
-
-// [k]P
-let aff_proj_point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.aff_point =
-  let r1, p1, r2, p2 = ecmult_endo_split k p in
-  if r1 < pow2 128 && r2 < pow2 128 then
-    LE.exp_double_fw S.mk_k256_comm_monoid (S.to_aff_point p1) 128 r1 (S.to_aff_point p2) r2 5
-  else
-    S.to_aff_point (S.point_mul k p)
-
-
-val lemma_aff_proj_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
-  Lemma (aff_proj_point_mul_split_lambda k p == aff_point_mul k (S.to_aff_point p))
-
-let lemma_aff_proj_point_mul_split_lambda k p =
-  let r1, p1, r2, p2 = ecmult_endo_split k p in
-
-  if r1 < pow2 128 && r2 < pow2 128 then begin
-    let p_aff  = S.to_aff_point p in
-    let p1_aff = S.to_aff_point p1 in
-    let p2_aff = S.to_aff_point p2 in
-    calc (==) {
-      aff_proj_point_mul_split_lambda k p;
-      (==) { LE.exp_double_fw_lemma S.mk_k256_comm_monoid p1_aff 128 r1 p2_aff r2 5 }
-      S.aff_point_add (aff_point_mul r1 p1_aff) (aff_point_mul r2 p2_aff);
-      (==) { lemma_aff_point_mul_endo_split k p_aff; lemma_ecmult_endo_split_to_aff k p }
-      aff_point_mul k p_aff;
-    } end
-  else begin
-    SE.exp_fw_lemma S.mk_k256_concrete_ops p 256 k 4;
-    LE.exp_fw_lemma S.mk_k256_comm_monoid (S.to_aff_point p) 256 k 4 end
-
 
 (**
   Fast computation of [k1]P1 + [k2]P2 in projective coordinates
