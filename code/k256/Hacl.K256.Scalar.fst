@@ -345,6 +345,18 @@ let is_qelem_le_q_halved_vartime f =
   is_qelem_le_q_halved_vartime4 (a0,a1,a2,a3)
 
 
+let is_qelem_lt_pow2_128_vartime f =
+  let open Lib.RawIntTypes in
+  let h0 = ST.get () in
+  KL.qas_nat4_is_qas_nat (as_seq h0 f);
+  let f0 = Ghost.hide (LSeq.index (as_seq h0 f) 0) in
+  let f1 = Ghost.hide (LSeq.index (as_seq h0 f) 1) in
+  let f2 = f.(2ul) in
+  let f3 = f.(3ul) in
+  KL.is_qelem_lt_pow2_128_vartime4_lemma (Ghost.reveal f0, Ghost.reveal f1,f2,f3);
+  u64_to_UInt64 f2 =. 0uL && u64_to_UInt64 f3 =. 0uL
+
+
 inline_for_extraction noextract
 val rshift_update_sub: res:qelem -> l:lbuffer uint64 8ul -> Stack unit
   (requires fun h -> live h res /\ live h l /\ disjoint res l /\

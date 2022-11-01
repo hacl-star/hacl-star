@@ -100,6 +100,12 @@ let is_qelem_eq_vartime4 ((a0,a1,a2,a3): qelem4) ((b0,b1,b2,b3): qelem4) : bool 
   u64_to_UInt64 a3 =. u64_to_UInt64 b3
 
 
+inline_for_extraction noextract
+let is_qelem_lt_pow2_128_vartime4 ((a0,a1,a2,a3): qelem4) : bool =
+  let open Lib.RawIntTypes in
+  u64_to_UInt64 a2 =. 0uL && u64_to_UInt64 a3 =. 0uL
+
+
 noextract
 val mod_short_lseq: a:qelem_lseq -> qelem_lseq
 let mod_short_lseq a =

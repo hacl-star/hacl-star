@@ -168,6 +168,13 @@ val is_qelem_le_q_halved_vartime: f:qelem -> Stack bool
     b == (qas_nat h0 f <= S.q / 2))
 
 
+inline_for_extraction noextract
+val is_qelem_lt_pow2_128_vartime: f:qelem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    b == (qas_nat h0 f < pow2 128))
+
+
 val qmul_shift_384 (res a b: qelem) : Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\

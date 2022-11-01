@@ -67,6 +67,19 @@ let is_qelem_eq_vartime4_lemma f1 f2 =
 #pop-options
 
 
+val is_qelem_lt_pow2_128_vartime4_lemma: f:qelem4 ->
+  Lemma (is_qelem_lt_pow2_128_vartime4 f == (qas_nat4 f < pow2 128))
+
+let is_qelem_lt_pow2_128_vartime4_lemma f =
+  let (f0, f1, f2, f3) = f in
+  assert (qas_nat4 f == v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192);
+  assert (v f0 + v f1 * pow2 64 < pow2 128);
+  if v f2 = 0 && v f3 = 0 then ()
+  else begin
+    Math.Lemmas.pow2_lt_compat 192 128;
+    assert (pow2 128 <= qas_nat4 f) end
+
+
 val lemma_check_overflow: b:nat{b < pow2 256} ->
   Lemma (let overflow = (b + (pow2 256 - S.q)) / pow2 256 in
     overflow = (if b < S.q then 0 else 1))
