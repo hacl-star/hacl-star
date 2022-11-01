@@ -39,7 +39,7 @@ extern "C" {
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Curve25519_51.h"
 #include "../Hacl_Ed25519.h"
-#include "evercrypt_targetconfig.h"
+
 void Hacl_Bignum25519_reduce_513(uint64_t *a);
 
 void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a);

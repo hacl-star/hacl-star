@@ -39,7 +39,7 @@ extern "C" {
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
-#include "evercrypt_targetconfig.h"
+
 void
 Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst,

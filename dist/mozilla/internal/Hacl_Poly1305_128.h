@@ -32,7 +32,7 @@ extern "C" {
 #include <string.h>
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
-#include <stdbool.h>
+#include "krml/internal/target.h"
 
 
 #include "../Hacl_Poly1305_128.h"

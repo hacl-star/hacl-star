@@ -40,7 +40,7 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2b_256.h"
 #include "Hacl_Hash_Blake2.h"
-#include "evercrypt_targetconfig.h"
+
 typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_block_state_s
 {
   Lib_IntVector_Intrinsics_vec256 *fst;

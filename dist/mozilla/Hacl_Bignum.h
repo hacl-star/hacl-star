@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_AES128_H
-#define __Hacl_AES128_H
+#ifndef __Hacl_Bignum_H
+#define __Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -32,19 +32,32 @@ extern "C" {
 #include <string.h>
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
-#include <stdbool.h>
+#include "krml/internal/target.h"
 
 
+#include "Hacl_Bignum_Base.h"
+#include "lib_intrinsics.h"
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
+{
+  uint32_t len;
+  uint32_t *n;
+  uint32_t mu;
+  uint32_t *r2;
+}
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32;
 
-
-extern void Hacl_AES128_aes128_key_expansion(uint8_t *key, uint8_t *expanded_key);
-
-extern void
-Hacl_AES128_aes128_encrypt_block(uint16_t *cipher, uint16_t *plain, uint8_t *expanded_key);
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
+{
+  uint32_t len;
+  uint64_t *n;
+  uint64_t mu;
+  uint64_t *r2;
+}
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_AES128_H_DEFINED
+#define __Hacl_Bignum_H_DEFINED
 #endif

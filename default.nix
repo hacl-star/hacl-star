@@ -12,6 +12,7 @@ let
     postPatch = ''
       patchShebangs tools
       patchShebangs dist/configure
+      patchShebangs dist/package-mozilla.sh
       substituteInPlace Makefile --replace "NOSHORTLOG=1" ""
       echo "0.3.19" > vale/.vale_version
     '';

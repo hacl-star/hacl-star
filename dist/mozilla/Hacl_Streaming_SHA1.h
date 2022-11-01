@@ -32,33 +32,32 @@ extern "C" {
 #include <string.h>
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
-#include <stdbool.h>
+#include "krml/internal/target.h"
 
 
+#include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 
-typedef struct Hacl_Streaming_SHA1_state_sha1_s
-{
-  uint32_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Streaming_SHA1_state_sha1;
+typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
 
-Hacl_Streaming_SHA1_state_sha1 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
 
-void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA1_legacy_update_sha1(
-  Hacl_Streaming_SHA1_state_sha1 *p,
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
   uint32_t len
 );
 
-void Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA1_state_sha1 *p, uint8_t *dst);
+void
+Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
-void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 #if defined(__cplusplus)
 }

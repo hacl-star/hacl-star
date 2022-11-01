@@ -114,7 +114,7 @@ uint32_t
 chacha20_constants[4U] =
   { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
 
-static void chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
+void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -184,7 +184,8 @@ chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr, 
   memcpy(out, plain, len * sizeof (uint8_t));
 }
 
-static void chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text)
+void
+Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text)
 {
   uint32_t rem = len % (uint32_t)64U;
   uint32_t nb = len / (uint32_t)64U;
@@ -210,8 +211,8 @@ Hacl_Chacha20_chacha20_encrypt(
 )
 {
   uint32_t ctx[16U] = { 0U };
-  chacha20_init(ctx, key, n, ctr);
-  chacha20_update(ctx, len, out, text);
+  Hacl_Impl_Chacha20_chacha20_init(ctx, key, n, ctr);
+  Hacl_Impl_Chacha20_chacha20_update(ctx, len, out, text);
 }
 
 void
@@ -225,7 +226,7 @@ Hacl_Chacha20_chacha20_decrypt(
 )
 {
   uint32_t ctx[16U] = { 0U };
-  chacha20_init(ctx, key, n, ctr);
-  chacha20_update(ctx, len, out, cipher);
+  Hacl_Impl_Chacha20_chacha20_init(ctx, key, n, ctr);
+  Hacl_Impl_Chacha20_chacha20_update(ctx, len, out, cipher);
 }
 

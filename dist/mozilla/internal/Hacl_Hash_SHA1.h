@@ -32,12 +32,14 @@ extern "C" {
 #include <string.h>
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
-#include <stdbool.h>
+#include "krml/internal/target.h"
 
 
 #include "../Hacl_Hash_SHA1.h"
 
 void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
+
+void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l);
 
 void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
 
