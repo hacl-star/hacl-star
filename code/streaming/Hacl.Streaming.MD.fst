@@ -281,6 +281,7 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let last_lib = lib_of_buffer #last_len last in
+        admit ();
         update_last #a #M32 (update #a #M32) (Hacl.Hash.MD.len_add32 a prevlen last_len) last_len last_lib s
       else
         [@inline_let]
@@ -308,6 +309,7 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let dst_lib = lib_of_buffer #32ul dst in
+        admit ();
         finish #a #M32 s dst_lib
       else
         [@inline_let]
