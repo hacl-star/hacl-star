@@ -51,14 +51,38 @@ val mk_compute:
   finish: D.finish_st i ->
   compute_st (D.get_alg i)
 
+[@@ Comment "Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
+`dst` must point to 20 bytes of memory."]
 val legacy_compute_sha1: compute_st SHA1
 
+[@@ Comment "Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 32 bytes of memory."]
 val compute_sha2_256: compute_st SHA2_256
 
+[@@ Comment "Write the HMAC-SHA-2-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 48 bytes of memory."]
 val compute_sha2_384: compute_st SHA2_384
 
+[@@ Comment "Write the HMAC-SHA-2-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory."]
 val compute_sha2_512: compute_st SHA2_512
 
+[@@ Comment "Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 32 bytes of memory."]
 val compute_blake2s_32: compute_st Blake2S
 
+[@@ Comment "Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory."]
 val compute_blake2b_32: compute_st Blake2B
