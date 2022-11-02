@@ -99,6 +99,26 @@ let _ = assert_norm (
   let open Hacl.Spec.SHA2.Vec in
   state_t SHA2_256 M32 == sha2_mb_state)
 
+let multiseq_is_seq a l: Lemma
+  (requires is_mb a)
+  (ensures (
+    let open Hacl.Impl.SHA2.Core in
+    let open Hacl.Spec.SHA2.Vec in
+    multiseq (lanes a M32) l == s:S.seq uint8 { S.length s = l }))
+=
+  let open Hacl.Impl.SHA2.Core in
+  let open Hacl.Spec.SHA2.Vec in
+  let open Lib.NTuple in
+  let open Lib.Sequence in
+  assert (lanes a M32 == 1);
+  calc (==) {
+    m:S.seq uint8 { S.length m = l };
+  (==) { }
+    m:S.seq uint8 { (S.length m <: nat) == (l <: nat) };
+  (==) { _ by (FStar.Tactics.trefl ()) }
+    S.lseq uint8 l;
+  }
+
 let multiseq_hash_is_hash a: Lemma
   (requires is_mb a)
   (ensures (
@@ -115,9 +135,7 @@ let multiseq_hash_is_hash a: Lemma
     Spec.Hash.Definitions.bytes_hash a;
   (==) { _ by (FStar.Tactics.trefl ()) }
     m:S.seq uint8 { S.length m = Spec.Agile.Hash.hash_length a };
-  (==) { }
-    m:S.seq uint8 { (S.length m <: nat) == (Spec.Agile.Hash.hash_length a <: nat) };
-  (==) { _ by (FStar.Tactics.trefl ()) }
+  (==) { multiseq_is_seq a (Spec.Agile.Hash.hash_length a) }
     S.lseq uint8 (hash_length a);
   }
 
@@ -167,6 +185,12 @@ let update_multi_s (a : alg) () acc (prevlen : nat) input =
 noextract
 let update_multi_zero (a : alg) () acc (prevlen : nat) :
   Lemma(update_multi_s a () acc prevlen S.empty == acc) = ()
+
+noextract
+let multiseq_empty (a: alg { is_mb a }): Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) 0) =
+  let open Hacl.Spec.SHA2.Vec in
+  multiseq_is_seq a 0;
+  coerce #(multiseq (lanes a M32) 0) #(s:S.seq uint8 { S.length s == 0 }) (S.empty #uint8)
 
 #push-options "--ifuel 1"
 
@@ -230,7 +254,8 @@ let hacl_md (a:alg)// : block unit =
 
     (fun i h prevlen ->
       if is_mb a then
-        admit ()
+        let open Hacl.Spec.SHA2.Vec in
+        Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (update_block #a #M32 0 (multiseq_empty a)) h
       else
         update_multi_zero a i h prevlen) (* update_multi_zero *)
     (fun i acc prevlen1 prevlen2 input1 input2 ->
@@ -240,7 +265,9 @@ let hacl_md (a:alg)// : block unit =
         update_multi_associative a i acc prevlen1 prevlen2 input1 input2) (* update_multi_associative *)
     (fun _ _ input ->
       if is_mb a then
-        admit ()
+        let open Hacl.Spec.SHA2 in
+        admit ();
+        Hacl.Spec.SHA2.EquivScalar.hash_agile_lemma #a (S.length input) input
       else
         Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
