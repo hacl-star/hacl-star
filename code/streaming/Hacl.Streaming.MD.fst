@@ -111,15 +111,14 @@ let multiseq_hash_is_hash a: Lemma
   let open Lib.NTuple in
   let open Lib.Sequence in
   assert (lanes a M32 == 1);
-  assert (multiseq (lanes a M32) (hash_length a) == lseq uint8 (hash_length a));
   calc (==) {
     Spec.Hash.Definitions.bytes_hash a;
   (==) { _ by (FStar.Tactics.trefl ()) }
     m:S.seq uint8 { S.length m = Spec.Agile.Hash.hash_length a };
   (==) { }
     m:S.seq uint8 { (S.length m <: nat) == (Spec.Agile.Hash.hash_length a <: nat) };
-  (==) { _ by (FStar.Tactics.norm [ delta_only [ `%lseq; `%seq ] ]; FStar.Tactics.trefl ()) }
-    lseq uint8 (hash_length a);
+  (==) { _ by (FStar.Tactics.trefl ()) }
+    S.lseq uint8 (hash_length a);
   }
 
 let multibuf_is_buf (len: Lib.IntTypes.size_t): Lemma
@@ -137,17 +136,26 @@ let multibuf_is_buf (len: Lib.IntTypes.size_t): Lemma
 // Big up for Aymeric who dug this one to help me make the coercion work.
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
+inline_for_extraction noextract
 let lib_of_agile (#a: alg { is_mb a }) (x: Spec.Agile.Hash.bytes_hash a):
   y:Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) (Spec.Agile.Hash.hash_length a)) { x === y }
 =
   multiseq_hash_is_hash a;
   coerce #Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) (Spec.Agile.Hash.hash_length a)) x
 
+inline_for_extraction noextract
 let agile_of_lib (#a: alg { is_mb a }) (y:Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) (Spec.Agile.Hash.hash_length a))):
   x: Spec.Agile.Hash.bytes_hash a { x === y }
 =
   multiseq_hash_is_hash a;
   coerce #(Spec.Agile.Hash.bytes_hash a) y
+
+inline_for_extraction noextract
+let lib_of_buffer #len (x: B.buffer uint8):
+  Pure (Lib.MultiBuffer.multibuf 1 len) (requires B.length x == Lib.IntTypes.v len) (ensures fun _ -> True)
+=
+  multibuf_is_buf len;
+  coerce #(Lib.MultiBuffer.multibuf 1 len) #(x:B.buffer uint8 { B.length x == Lib.IntTypes.v len }) x
 
 inline_for_extraction noextract
 let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a)
@@ -207,7 +215,9 @@ let hacl_md (a:alg)// : block unit =
         update_multi_s a () acc prevlen blocks)
     (fun () acc prevlen input ->
       if is_mb a then
-        Hacl.Spec.SHA2.Vec.(update_last #a #M32 prevlen (S.length input) (input <: multiseq 1 (S.length input)) acc)
+        let open Hacl.Spec.SHA2 in
+        let totlen: len_t a = mk_len_t a (prevlen + S.length input) in
+        Hacl.Spec.SHA2.Vec.(update_last #a #M32 totlen (S.length input) (input <: multiseq 1 (S.length input)) acc)
       else
         fst Spec.Hash.Incremental.(update_last a (acc, ()) prevlen input))
     (fun () _ acc ->
@@ -218,7 +228,11 @@ let hacl_md (a:alg)// : block unit =
         Spec.Hash.PadFinish.(finish a (acc, ())))
     (fun () _ s -> Spec.Agile.Hash.(hash a s))
 
-    (fun i h prevlen -> update_multi_zero a i h prevlen) (* update_multi_zero *)
+    (fun i h prevlen ->
+      if is_mb a then
+        admit ()
+      else
+        update_multi_zero a i h prevlen) (* update_multi_zero *)
     (fun i acc prevlen1 prevlen2 input1 input2 ->
       if is_mb a then
         admit ()
@@ -246,10 +260,8 @@ let hacl_md (a:alg)// : block unit =
       if is_mb a then
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
-        multibuf_is_buf len;
-        [@inline_let] let blocks_lib =
-          coerce #(Lib.MultiBuffer.multibuf (lanes a M32) len) blocks
-        in
+        [@inline_let] let blocks_lib = lib_of_buffer #len blocks in
+        admit ();
         update_nblocks #a #M32 (update #a #M32) len blocks_lib s
       else
         [@inline_let]
@@ -268,11 +280,8 @@ let hacl_md (a:alg)// : block unit =
       if is_mb a then
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
-        multibuf_is_buf last_len;
-        [@inline_let] let last_lib =
-          coerce #(Lib.MultiBuffer.multibuf (lanes a M32) last_len) last
-        in
-        update_last #a #M32 (update #a #M32) Lib.IntTypes.(prevlen +. last_len) last_len last_lib s
+        [@inline_let] let last_lib = lib_of_buffer #last_len last in
+        update_last #a #M32 (update #a #M32) (Hacl.Hash.MD.len_add32 a prevlen last_len) last_len last_lib s
       else
         [@inline_let]
         let update_last : update_last_st (|a,()|) =
@@ -298,10 +307,7 @@ let hacl_md (a:alg)// : block unit =
       if is_mb a then
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
-        multibuf_is_buf 32ul;
-        [@inline_let] let dst_lib =
-          coerce #(Lib.MultiBuffer.multibuf (lanes a M32) 32ul) dst
-        in
+        [@inline_let] let dst_lib = lib_of_buffer #32ul dst in
         finish #a #M32 s dst_lib
       else
         [@inline_let]
