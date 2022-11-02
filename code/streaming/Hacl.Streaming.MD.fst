@@ -70,8 +70,10 @@ open Hacl.Hash.Definitions
 module D = Hacl.Hash.Definitions
 module Agile = Spec.Agile.Hash
 
+// It would be better to define this as md_alg, but Hacl.Streaming.SHA3 uses hacl_md,
+// while SHA3 is not an MD algorithm
 inline_for_extraction noextract
-let alg = md_alg
+let alg = a:hash_alg{not (is_blake a)}
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
