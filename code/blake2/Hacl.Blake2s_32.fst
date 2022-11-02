@@ -35,5 +35,13 @@ let blake2s_finish : Impl.blake2_finish_st Spec.Blake2S Core.M32 =
   Impl.blake2_finish #Spec.Blake2S #Core.M32
 
 (* The one-shot hash *)
+[@@ Comment "Write the BLAKE2s digest of message `d` using key `k` into `output`.
+
+@param nn Length of to-be-generated digest with 1 <= `nn` <= 32.
+@param output Pointer to `nn` bytes of memory where the digest is written to.
+@param ll Length of the input message.
+@param d Pointer to `ll` bytes of memory where the input message is read from.
+@param kk Length of the key. Can be 0.
+@param k Pointer to `kk` bytes of memory where the key is read from."]
 let blake2s : Impl.blake2_st Spec.Blake2S Core.M32 =
   Impl.blake2 #Spec.Blake2S #Core.M32 blake2s_init blake2s_update blake2s_finish
