@@ -264,6 +264,22 @@ let repeati_associative (a : alg { is_mb a }) acc (input1 input2 : S.seq uint8) 
 =
   admit ()
 
+let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
+    Lemma (requires S.length input <= Some?.v (Spec.Agile.Hash.max_input_length a))
+    (ensures (
+      let blocks, last = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+      (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
+      let open Hacl.Spec.SHA2.Vec in
+      let hash0 = init a M32 in
+      let hash1 = update_nblocks #a #M32 (S.length blocks) (blocks <: multiseq 1 (S.length blocks)) hash0 in
+      let totlen: len_t a = Hacl.Spec.SHA2.mk_len_t a (S.length input) in
+      let hash2 = update_last #a #M32 totlen (S.length last) (last <: multiseq 1 (S.length last)) hash1 in
+      let hash3 = finish hash2 in
+      agile_of_lib hash3 `S.equal` Spec.Agile.Hash.hash a input))
+=
+  admit ()
+
+
 let live_multi_of_live #len (h:HS.mem) (b:Lib.MultiBuffer.multibuf 1 len): Lemma
   (requires (
     B.live h (buffer_of_lib #len b)))
@@ -351,8 +367,7 @@ let hacl_md (a:alg)// : block unit =
     (fun _ _ input ->
       if is_mb a then
         let open Hacl.Spec.SHA2 in
-        admit ();
-        Hacl.Spec.SHA2.EquivScalar.hash_agile_lemma #a (S.length input) input
+        sha2_mb_is_incremental a input
       else
         Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
