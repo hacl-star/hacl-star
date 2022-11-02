@@ -185,20 +185,31 @@ let buffer_of_lib #len (x: Lib.MultiBuffer.multibuf 1 len):
 inline_for_extraction noextract
 let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a)
 
-#push-options "--print_implicits"
+let eq_word_element (a:alg { is_mb a }) : Lemma (word a == Hacl.Spec.SHA2.Vec.(element_t a M32))
+  = ()
+
+let eq_length_lib_state (a:alg { is_mb a }) (b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32))
+  : Lemma ( (B.len b == D.impl_state_len (| a, () |)) == (B.length b == Lib.IntTypes.v 8ul))
+  = FStar.PropositionalExtensionality.apply
+      (B.len b == D.impl_state_len (| a, () |))
+      (B.length b == Lib.IntTypes.v 8ul)
+
 let lib_of_state (a: alg { is_mb a }) (s: (state_t a).s ()): Lemma
   (ensures (state_t a).s () == Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul)
 =
   let open Lib.Buffer in
   assert (D.impl_state_len (| a, () |) == 8ul);
-  let eq (a: alg { is_mb a }): Lemma (ensures (word a == Hacl.Spec.SHA2.Vec.(element_t a M32))) = () in
   calc (==) {
     (state_t a).s ();
   (==) { _ by FStar.Tactics.(trefl ()) }
     b:B.buffer (word a) { B.len b == D.impl_state_len (| a, () |) };
-  (==) { admit () (*_ by FStar.Tactics.(l_to_r [ `(eq a) ]; trefl ()) *) }
+  // Somehow, having eq_word_element as a local definition leads to a tactic failure,
+  // where the lemma application cannot be typechecked in the current context because
+  // eq_word_element is not found in the context
+  (==) { _ by FStar.Tactics.(l_to_r [`eq_word_element]) }
+  // Same issue for eq_length_lib_state
     b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.len b == D.impl_state_len (| a, () |) };
-  (==) { admit () }
+  (==) { _ by FStar.Tactics.(l_to_r [`eq_length_lib_state]) }
     b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.length b == Lib.IntTypes.v 8ul };
   (==) { _ by FStar.Tactics.(norm [ zeta; iota; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ] ]; trefl ()) }
     Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul;
