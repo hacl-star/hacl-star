@@ -176,6 +176,13 @@ let lib_of_buffer #len (x: B.buffer uint8):
   coerce #(Lib.MultiBuffer.multibuf 1 len) #(x:B.buffer uint8 { B.length x == Lib.IntTypes.v len }) x
 
 inline_for_extraction noextract
+let buffer_of_lib #len (x: Lib.MultiBuffer.multibuf 1 len):
+  Pure (B.buffer uint8) (requires True) (ensures fun x -> B.length x == Lib.IntTypes.v len)
+=
+  multibuf_is_buf len;
+  coerce #(x:B.buffer uint8 { B.length x == Lib.IntTypes.v len }) #(Lib.MultiBuffer.multibuf 1 len) x
+
+inline_for_extraction noextract
 let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a)
 
 #push-options "--print_implicits"
@@ -229,8 +236,39 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
 #pop-options
 
+let live_multi_of_live #len (h:HS.mem) (b:Lib.MultiBuffer.multibuf 1 len): Lemma
+  (requires (
+    B.live h (buffer_of_lib #len b)))
+  (ensures Lib.MultiBuffer.live_multi h b)
+=
+  let open Lib.Buffer in
+  let open Lib.NTuple in
+  let foo (i: nat): Lemma (requires (i < 1)) (ensures live h b.(|i|)) [ SMTPat (live h b.(|i|)) ]=
+    assert (Lib.MultiBuffer.multibuf 1 len == Lib.Buffer.lbuffer uint8 len);
+    assert (live h (b <: Lib.Buffer.lbuffer uint8 len));
+    Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 len) #1 b;
+    assert (b.(|i|) == b)
+  in
+  ()
+
+let disjoint_multi_of_disjoint #a #len #len' (b:Lib.MultiBuffer.multibuf 1 len)
+  (b': Lib.Buffer.lbuffer a len'): Lemma
+  (requires (
+    B.disjoint (buffer_of_lib #len b) (b' <: B.buffer a)))
+  (ensures Lib.MultiBuffer.disjoint_multi b b')
+=
+  let open Lib.Buffer in
+  let open Lib.NTuple in
+  let foo (i: nat): Lemma (requires (i < 1)) (ensures disjoint b.(|i|) b') [ SMTPat (disjoint b.(|i|) b') ]=
+    assert (Lib.MultiBuffer.multibuf 1 len == Lib.Buffer.lbuffer uint8 len);
+    assert (disjoint (b <: Lib.Buffer.lbuffer uint8 len) b');
+    Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 len) #1 b;
+    assert (b.(|i|) == b)
+  in
+  ()
+
 /// This proof usually succeeds fast but we increase the rlimit for safety
-#push-options "--z3rlimit 400 --ifuel 1"
+#push-options "--z3rlimit 500 --ifuel 1"
 inline_for_extraction noextract
 let hacl_md (a:alg)// : block unit =
   =
@@ -310,8 +348,8 @@ let hacl_md (a:alg)// : block unit =
         lib_of_state a s;
         [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
         let h0 = ST.get () in
-        assume (Lib.MultiBuffer.live_multi h0 blocks_lib);
-        assume (Lib.MultiBuffer.disjoint_multi blocks_lib state_lib);
+        live_multi_of_live h0 blocks_lib;
+        disjoint_multi_of_disjoint blocks_lib state_lib;
         update_nblocks #a #M32 (update #a #M32) len blocks_lib s;
         admit ()
       else
@@ -332,8 +370,13 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let last_lib = lib_of_buffer #last_len last in
-        admit ();
-        update_last #a #M32 (update #a #M32) (Hacl.Hash.MD.len_add32 a prevlen last_len) last_len last_lib s
+        lib_of_state a s;
+        [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
+        let h0 = ST.get () in
+        live_multi_of_live h0 last_lib;
+        disjoint_multi_of_disjoint last_lib state_lib;
+        update_last #a #M32 (update #a #M32) (Hacl.Hash.MD.len_add32 a prevlen last_len) last_len last_lib s;
+        admit ()
       else
         [@inline_let]
         let update_last : update_last_st (|a,()|) =
@@ -360,8 +403,17 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let dst_lib = lib_of_buffer #32ul dst in
-        admit ();
-        finish #a #M32 s dst_lib
+        lib_of_state a s;
+        [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
+        let h0 = ST.get () in
+        live_multi_of_live h0 dst_lib;
+        disjoint_multi_of_disjoint dst_lib state_lib;
+        finish #a #M32 s dst_lib;
+        Lib.MultiBuffer.loc_multi1 dst_lib;
+        Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 32ul) #1 dst;
+        let h1 = ST.get () in
+        Lib.MultiBuffer.as_seq_multi_lemma h1 dst_lib 0;
+        Lib.NTuple.ntup1_lemma #(multiseq (lanes a M32) (hash_length a)) #1 (Lib.MultiBuffer.as_seq_multi h1 dst_lib)
       else
         [@inline_let]
         let finish : finish_st (|a,()|) =
