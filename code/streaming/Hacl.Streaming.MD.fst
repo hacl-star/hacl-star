@@ -178,6 +178,25 @@ let lib_of_buffer #len (x: B.buffer uint8):
 inline_for_extraction noextract
 let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a)
 
+#push-options "--print_implicits"
+let lib_of_state (a: alg { is_mb a }) (s: (state_t a).s ()): Lemma
+  (ensures (state_t a).s () == Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul)
+=
+  let open Lib.Buffer in
+  assert (D.impl_state_len (| a, () |) == 8ul);
+  let eq (a: alg { is_mb a }): Lemma (ensures (word a == Hacl.Spec.SHA2.Vec.(element_t a M32))) = () in
+  calc (==) {
+    (state_t a).s ();
+  (==) { _ by FStar.Tactics.(trefl ()) }
+    b:B.buffer (word a) { B.len b == D.impl_state_len (| a, () |) };
+  (==) { admit () (*_ by FStar.Tactics.(l_to_r [ `(eq a) ]; trefl ()) *) }
+    b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.len b == D.impl_state_len (| a, () |) };
+  (==) { admit () }
+    b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.length b == Lib.IntTypes.v 8ul };
+  (==) { _ by FStar.Tactics.(norm [ zeta; iota; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ] ]; trefl ()) }
+    Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul;
+  }
+
 inline_for_extraction noextract
 let update_multi_s (a : alg) () acc (prevlen : nat) input =
   fst Agile.(update_multi a (acc, ()) input)
@@ -288,8 +307,13 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let blocks_lib = lib_of_buffer #len blocks in
-        admit ();
-        update_nblocks #a #M32 (update #a #M32) len blocks_lib s
+        lib_of_state a s;
+        [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
+        let h0 = ST.get () in
+        assume (Lib.MultiBuffer.live_multi h0 blocks_lib);
+        assume (Lib.MultiBuffer.disjoint_multi blocks_lib state_lib);
+        update_nblocks #a #M32 (update #a #M32) len blocks_lib s;
+        admit ()
       else
         [@inline_let]
         let update_multi : update_multi_st (|a,()|) =
