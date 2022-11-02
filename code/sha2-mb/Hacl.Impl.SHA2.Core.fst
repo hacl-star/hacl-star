@@ -780,6 +780,14 @@ noextract
 let preserves_disjoint_multi #lanes #len #len' (b:multibuf lanes len) (r:multibuf lanes len') =
     (forall a l (x:lbuffer a l). disjoint_multi b x ==> disjoint_multi r x)
 
+val lemma_len_lt_max_a_fits_size_t: a:sha2_alg -> len:size_t ->
+  Lemma (v len `less_than_max_input_length` a)
+
+let lemma_len_lt_max_a_fits_size_t a len =
+  match a with
+  | SHA2_224 | SHA2_256 -> Math.Lemmas.pow2_lt_compat 61 32
+  | SHA2_384 | SHA2_512 -> Math.Lemmas.pow2_lt_compat 125 32
+
 
 inline_for_extraction noextract
 let get_multiblock_t (a:sha2_alg) (m:m_spec) =
@@ -789,12 +797,14 @@ let get_multiblock_t (a:sha2_alg) (m:m_spec) =
   Stack (multibuf (lanes a m) (HD.block_len a))
   (requires fun h -> live_multi h b)
   (ensures  fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\ preserves_disjoint_multi b r /\
-    as_seq_multi h1 r == SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i))
+   (lemma_len_lt_max_a_fits_size_t a len;
+    as_seq_multi h1 r == SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i)))
 
 
 inline_for_extraction noextract
 val get_multiblock: #a:sha2_alg -> #m:m_spec{is_supported a m} -> get_multiblock_t a m
 let get_multiblock #a #m len b i =
+  lemma_len_lt_max_a_fits_size_t a len;
   let h0 = ST.get() in
   match lanes a m with
   | 1 ->
@@ -837,12 +847,14 @@ let get_multilast_t (a:sha2_alg) (m:m_spec) =
   Stack (multibuf (lanes a m) (len %. HD.block_len a))
   (requires fun h -> live_multi h b)
   (ensures  fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\ preserves_disjoint_multi b r /\
-    as_seq_multi h1 r == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b))
+    (lemma_len_lt_max_a_fits_size_t a len;
+    as_seq_multi h1 r == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)))
 
 inline_for_extraction noextract
 val get_multilast: #a:sha2_alg -> #m:m_spec{is_supported a m} -> get_multilast_t a m
 #push-options "--z3rlimit 300"
 let get_multilast #a #m len b =
+  lemma_len_lt_max_a_fits_size_t a len;
   let h0 = ST.get() in
   let rem = len %. HD.block_len a in
   assert (v (len -! rem) == v len - v rem);

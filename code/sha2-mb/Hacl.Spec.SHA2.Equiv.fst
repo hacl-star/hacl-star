@@ -131,7 +131,7 @@ let shuffle_core_spec_lemma_l #a #m k_t ws_t st l =
 val ws_next_inner_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
-  -> i:size_nat{i < 16}
+  -> i:nat{i < 16}
   -> ws:ws_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma ((ws_spec_v (ws_next_inner i ws)).[l] == Spec.ws_next_inner a i (ws_spec_v ws).[l])
@@ -187,8 +187,8 @@ val shuffle_inner_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
   -> ws:ws_spec a m
-  -> i:size_nat{i < Spec.num_rounds16 a}
-  -> j:size_nat{j < 16}
+  -> i:nat{i < Spec.num_rounds16 a}
+  -> j:nat{j < 16}
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma
@@ -204,7 +204,7 @@ let shuffle_inner_lemma_l #a #m ws i j st l =
 val shuffle_inner_loop_lemma:
     #a:sha2_alg
   -> #m:m_spec
-  -> i:size_nat{i < Spec.num_rounds16 a}
+  -> i:nat{i < Spec.num_rounds16 a}
   -> ws0:ws_spec a m
   -> st0:state_spec a m
   -> l:nat{l < lanes a m}
@@ -235,7 +235,7 @@ let rec shuffle_inner_loop_lemma #a #m i ws0 st0 l n =
 val shuffle_inner_loop_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
-  -> i:size_nat{i < Spec.num_rounds16 a}
+  -> i:nat{i < Spec.num_rounds16 a}
   -> ws_st:tuple2 (ws_spec a m) (state_spec a m)
   -> l:nat{l < lanes a m} ->
   Lemma
@@ -307,8 +307,10 @@ val load_blocks_lemma_ij:
   -> j:nat{j < lanes a m}
   -> i:nat{i < 16} ->
   Lemma (let l = lanes a m in
+    let ind = (i / l * l + j) * word_length a in
     (vec_v (load_blocks b).[i]).[j] ==
-    BSeq.uint_from_bytes_be (sub b.(|i % l|) ((i / l * l + j) * word_length a) (word_length a)))
+    BSeq.uint_from_bytes_be
+      (Seq.slice b.(|i % l|) ind (ind + word_length a)))
 
 let load_blocks_lemma_ij #a #m b j i =
   let l = lanes a m in
@@ -317,13 +319,13 @@ let load_blocks_lemma_ij #a #m b j i =
 
   let blocksize = word_length a in
   let blocksize_l = l * blocksize in
-  let b_j = sub b.(|idx_i|) (idx_j * blocksize_l) blocksize_l in
+  let b_j = Seq.slice b.(|idx_i|) (idx_j * blocksize_l) (idx_j * blocksize_l + blocksize_l) in
 
   //assert ((load_blocks b).[i] == vec_from_bytes_be (word_t a) l b_j);
   assert (vec_v ((load_blocks b).[i]) == BSeq.uints_from_bytes_be b_j);
   BSeq.index_uints_from_bytes_be #(word_t a) #SEC #(lanes a m) b_j j;
   assert ((vec_v ((load_blocks b).[i])).[j] ==
-    BSeq.uint_from_bytes_be (sub b_j (j * blocksize) blocksize));
+    BSeq.uint_from_bytes_be (Seq.slice b_j (j * blocksize) (j * blocksize + blocksize)));
 
   calc (==) {
     idx_j * blocksize_l + j * blocksize;
@@ -337,7 +339,9 @@ let load_blocks_lemma_ij #a #m b j i =
     (j * blocksize) (j * blocksize + blocksize);
 
   assert ((vec_v ((load_blocks b).[i])).[j] ==
-    BSeq.uint_from_bytes_be (sub b.(|idx_i|) ((idx_j * l + j) * blocksize) blocksize))
+    BSeq.uint_from_bytes_be
+      (Seq.slice b.(|idx_i|) ((idx_j * l + j) * blocksize)
+        ((idx_j * l + j) * blocksize + blocksize)))
 
 
 val load_blocks_lemma_ij_subst:
@@ -348,7 +352,8 @@ val load_blocks_lemma_ij_subst:
   -> i:nat{i < 16} ->
   Lemma (let l = lanes a m in
     (vec_v (load_blocks b).[i / l * l + j]).[i % l] ==
-    BSeq.uint_from_bytes_be (sub b.(|j|) (i * word_length a) (word_length a)))
+    BSeq.uint_from_bytes_be
+      (Seq.slice b.(|j|) (i * word_length a) (i * word_length a + word_length a)))
 
 let load_blocks_lemma_ij_subst #a #m b j i =
   let l = lanes a m in
@@ -399,7 +404,8 @@ let load_ws_lemma_l #a #m b j =
   let aux (i:nat{i < 16}) : Lemma (Seq.index lp i == Seq.index rp i) =
     let l = lanes a m in
     BSeq.index_uints_from_bytes_be #(word_t a) #SEC #16 b.(|j|) i;
-    assert (Seq.index rp i == BSeq.uint_from_bytes_be (sub b.(|j|) (i * word_length a) (word_length a)));
+    assert (Seq.index rp i == BSeq.uint_from_bytes_be
+      (Seq.slice b.(|j|) (i * word_length a) (i * word_length a + word_length a)));
 
     assert (Seq.index lp i == Seq.index (Seq.index (ws_spec_v (transpose_ws (load_blocks b))) j) i);
     Lemmas.transpose_ws_lemma_ij (load_blocks b) j i;
@@ -451,7 +457,7 @@ val load_last_lemma_l:
   -> #m:m_spec{is_supported a m}
   -> totlen_seq:lseq uint8 (len_length a)
   -> fin:nat{fin == block_length a \/ fin == 2 * block_length a}
-  -> len:size_nat{len < block_length a}
+  -> len:nat{len < block_length a}
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
   Lemma
@@ -469,7 +475,7 @@ val update_last_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
   -> totlen:len_t a
-  -> len:size_nat{len < block_length a}
+  -> len:nat{len < block_length a}
   -> b:multiseq (lanes a m) len
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
@@ -478,7 +484,7 @@ val update_last_lemma_l:
 
 let update_last_lemma_l #a #m totlen len b st0 l =
   let blocks = padded_blocks a len in
-  let fin : size_nat = blocks * block_length a in
+  let fin : nat = blocks * block_length a in
   let total_len_bits = secret (shift_left #(len_int_type a) totlen 3ul) in
   let totlen_seq = Lib.ByteSequence.uint_to_bytes_be #(len_int_type a) total_len_bits in
   let (b0,b1) = load_last #a #m totlen_seq fin len b in
@@ -588,7 +594,7 @@ let finish_lemma_l #a #m st l =
 val update_block_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat
+  -> len:Spec.len_lt_max_a_t a
   -> b:multiseq (lanes a m) len
   -> i:nat{i < len / block_length a}
   -> st:state_spec a m
@@ -605,7 +611,7 @@ let update_block_lemma_l #a #m len b i st l =
 val update_nblocks_loop_lemma:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat
+  -> len:Spec.len_lt_max_a_t a
   -> b:multiseq (lanes a m) len
   -> st:state_spec a m
   -> l:nat{l < lanes a m}
@@ -635,7 +641,7 @@ let rec update_nblocks_loop_lemma #a #m len b st l n =
 val update_nblocks_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat
+  -> len:Spec.len_lt_max_a_t a
   -> b:multiseq (lanes a m) len
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
@@ -651,13 +657,13 @@ let update_nblocks_lemma_l #a #m len b st l =
 val hash_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat
+  -> len:Spec.len_lt_max_a_t a
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
   Lemma ((hash #a #m len b).(|l|) == Spec.hash len b.(|l|))
 
 let hash_lemma_l #a #m len b l =
-  let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let len' : len_t a = Spec.mk_len_t a len in
   let st0 = init a m in
   init_lemma_l a m l;
   let st1 = update_nblocks #a #m len b st0 in
@@ -672,7 +678,7 @@ let hash_lemma_l #a #m len b l =
 val hash_lemma:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat
+  -> len:Spec.len_lt_max_a_t a
   -> b:multiseq (lanes a m) len ->
   Lemma (forall (l:nat{l < lanes a m}).
     (hash #a #m len b).(|l|) == Spec.hash len b.(|l|))
@@ -684,7 +690,7 @@ let hash_lemma #a #m len b =
 val hash_agile_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat{len `less_than_max_input_length` a}
+  -> len:Spec.len_lt_max_a_t a
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
   Lemma ((hash #a #m len b).(|l|) == Spec.Agile.Hash.hash a b.(|l|))
@@ -697,7 +703,7 @@ let hash_agile_lemma_l #a #m len b l =
 val hash_agile_lemma:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
-  -> len:size_nat{len `less_than_max_input_length` a}
+  -> len:Spec.len_lt_max_a_t a
   -> b:multiseq (lanes a m) len ->
   Lemma (forall (l:nat{l < lanes a m}).
     (hash #a #m len b).(|l|) == Spec.Agile.Hash.hash a b.(|l|))

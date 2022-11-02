@@ -126,9 +126,6 @@ noextract
 let state_spec (a:sha2_alg) (m:m_spec) = lseq (element_t a m) 8
 
 noextract
-let block_spec (a:sha2_alg) = lseq uint8 (block_length a)
-
-noextract
 let ws_spec (a:sha2_alg) (m:m_spec) = lseq (element_t a m) 16
 
 noextract
@@ -184,8 +181,8 @@ let num_rounds16 (a:sha2_alg) : n:size_t{v n > 0 /\ 16 * v n == Spec.size_k_w a}
   | SHA2_384 | SHA2_512 -> 5ul
 
 noextract
-let multiseq (lanes:lanes_t) (len:size_nat) =
-  ntuple (lseq uint8 len) lanes
+let multiseq (lanes:lanes_t) (len:nat) =
+  ntuple (Seq.lseq uint8 len) lanes
 
 unfold let multiblock_spec (a:sha2_alg) (m:m_spec) =
   multiseq (lanes a m) (block_length a)
@@ -238,7 +235,7 @@ let load_ws (#a:sha2_alg) (#m:m_spec{is_supported a m}) (b:multiblock_spec a m) 
 
 noextract
 let ws_next_inner (#a:sha2_alg) (#m:m_spec)
-                  (i:size_nat{i < 16})
+                  (i:nat{i < 16})
                   (ws:ws_spec a m) : ws_spec a m =
       let t16 = ws.[i] in
       let t15 = ws.[(i+1) % 16] in
@@ -254,13 +251,13 @@ let ws_next (#a:sha2_alg) (#m:m_spec)
     repeati 16 (ws_next_inner #a #m) ws
 
 noextract
-let shuffle_inner (#a:sha2_alg) (#m:m_spec) (ws:ws_spec a m) (i:size_nat{i < v (num_rounds16 a)}) (j:size_nat{j < 16}) (st:state_spec a m) : state_spec a m =
+let shuffle_inner (#a:sha2_alg) (#m:m_spec) (ws:ws_spec a m) (i:nat{i < v (num_rounds16 a)}) (j:nat{j < 16}) (st:state_spec a m) : state_spec a m =
   let k_t = Seq.index (Spec.k0 a) (16 * i + j) in
   let ws_t = ws.[j] in
   shuffle_core_spec k_t ws_t st
 
 noextract
-let shuffle_inner_loop (#a:sha2_alg) (#m:m_spec) (i:size_nat{i < v (num_rounds16 a)})
+let shuffle_inner_loop (#a:sha2_alg) (#m:m_spec) (i:nat{i < v (num_rounds16 a)})
                        (ws_st:ws_spec a m & state_spec a m) : ws_spec a m & state_spec a m =
   let (ws,st) = ws_st in
   let st' = repeati 16 (shuffle_inner ws i) st in
@@ -285,14 +282,14 @@ let update (#a:sha2_alg) (#m:m_spec{is_supported a m}) (b:multiblock_spec a m) (
   map2 (+|) st_new st_old
 
 noextract
-let padded_blocks (a:sha2_alg) (len:size_nat{len < block_length a}) : n:nat{n <= 2} =
+let padded_blocks (a:sha2_alg) (len:nat{len < block_length a}) : n:nat{n <= 2} =
   if (len + len_length a + 1 <= block_length a) then 1 else 2
 
 noextract
 let load_last_blocks (#a:sha2_alg)
                      (totlen_seq:lseq uint8 (len_length a))
-                     (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
-                     (len:size_nat{len < block_length a})
+                     (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
+                     (len:nat{len < block_length a})
                      (b:lseq uint8 len) :
                      lseq uint8 (block_length a) & lseq uint8 (block_length a) =
     let last = create (2 * block_length a) (u8 0) in
@@ -306,8 +303,8 @@ let load_last_blocks (#a:sha2_alg)
 noextract
 let load_last1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
                (totlen_seq:lseq uint8 (len_length a))
-               (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
-               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+               (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
+               (len:nat{len < block_length a}) (b:multiseq (lanes a m) len) :
                multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
     let b = b.(|0|) in
     let (l0,l1) = load_last_blocks #a totlen_seq fin len b in
@@ -319,8 +316,8 @@ let load_last1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
 noextract
 let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
                (totlen_seq:lseq uint8 (len_length a))
-               (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
-               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+               (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
+               (len:nat{len < block_length a}) (b:multiseq (lanes a m) len) :
                multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
     let b0 = b.(|0|) in
     let b1 = b.(|1|) in
@@ -337,8 +334,8 @@ let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
 noextract
 let load_last8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
                (totlen_seq:lseq uint8 (len_length a))
-               (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
-               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+               (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
+               (len:nat{len < block_length a}) (b:multiseq (lanes a m) len) :
                multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
     let b0 = b.(|0|) in
     let b1 = b.(|1|) in
@@ -365,7 +362,7 @@ let load_last8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
 noextract
 let load_last (#a:sha2_alg) (#m:m_spec{is_supported a m}) (totlen_seq:lseq uint8 (len_length a))
               (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
-              (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+              (len:nat{len < block_length a}) (b:multiseq (lanes a m) len) :
               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
     match lanes a m with
     | 1 -> load_last1 #a #m totlen_seq fin len b
@@ -374,10 +371,10 @@ let load_last (#a:sha2_alg) (#m:m_spec{is_supported a m}) (totlen_seq:lseq uint8
 
 noextract
 let update_last (#a:sha2_alg) (#m:m_spec{is_supported a m}) (totlen:len_t a)
-                (len:size_nat{len < block_length a})
+                (len:nat{len < block_length a})
                 (b:multiseq (lanes a m) len) (st:state_spec a m): state_spec a m =
   let blocks = padded_blocks a len in
-  let fin : size_nat = blocks * block_length a in
+  let fin : nat = blocks * block_length a in
   let total_len_bits = secret (shift_left #(len_int_type a) totlen 3ul) in
   let totlen_seq = Lib.ByteSequence.uint_to_bytes_be #(len_int_type a) total_len_bits in
   let (b0,b1) = load_last #a #m totlen_seq fin len b in
@@ -432,34 +429,34 @@ noextract
 let emit (#a:sha2_alg) (#m:m_spec)
          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
          multiseq (lanes a m) (hash_length a) =
-    Lib.NTuple.createi (lanes a m)
+    Lib.NTuple.createi #(Seq.lseq uint8 (hash_length a)) (lanes a m)
       (fun i -> sub hseq (i * 8 * word_length a) (hash_length a))
 
 noextract
 let get_multiblock_spec (#a:sha2_alg) (#m:m_spec)
-                        (len:size_nat) (b:multiseq (lanes a m) len)
-                        (i:size_nat{i < len / block_length a})
+                        (len:Spec.len_lt_max_a_t a) (b:multiseq (lanes a m) len)
+                        (i:nat{i < len / block_length a})
                         : multiseq (lanes a m) (block_length a) =
 
-    Lib.NTuple.createi #(lseq uint8 (block_length a)) (lanes a m)
-      (fun j -> sub b.(|j|) (i * block_length a) (block_length a))
+    Lib.NTuple.createi #(Seq.lseq uint8 (block_length a)) (lanes a m)
+      (fun j -> Seq.slice b.(|j|) (i * block_length a) (i * block_length a + block_length a))
 
 noextract
 let get_multilast_spec (#a:sha2_alg) (#m:m_spec)
-                        (len:size_nat) (b:multiseq (lanes a m) len)
+                        (len:Spec.len_lt_max_a_t a) (b:multiseq (lanes a m) len)
                         : multiseq (lanes a m) (len % block_length a) =
     let rem = len % block_length a in
-    Lib.NTuple.createi #(lseq uint8 rem) (lanes a m)
-      (fun j -> sub b.(|j|) (len - rem) rem)
+    Lib.NTuple.createi #(Seq.lseq uint8 rem) (lanes a m)
+      (fun j -> Seq.slice b.(|j|) (len - rem) len)
 
 noextract
-let update_block (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:size_nat) (b:multiseq (lanes a m) len)
+let update_block (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:Spec.len_lt_max_a_t a) (b:multiseq (lanes a m) len)
                  (i:nat{i < len / block_length a}) (st:state_spec a m) : state_spec a m =
   let mb = get_multiblock_spec len b i in
   update mb st
 
 noextract
-let update_nblocks (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:size_nat) (b:multiseq (lanes a m) len) (st:state_spec a m) : state_spec a m =
+let update_nblocks (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:Spec.len_lt_max_a_t a) (b:multiseq (lanes a m) len) (st:state_spec a m) : state_spec a m =
     let blocks = len / block_length a in
     let st = repeati blocks (update_block #a #m len b) st in
     st
@@ -471,8 +468,8 @@ let finish (#a:sha2_alg) (#m:m_spec{is_supported a m}) (st:state_spec a m) :
     emit hseq
 
 noextract
-let hash (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:size_nat) (b:multiseq (lanes a m) len) =
-    let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+let hash (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:Spec.len_lt_max_a_t a) (b:multiseq (lanes a m) len) =
+    let len' : len_t a = Spec.mk_len_t a len in
     let st = init a m in
     let st = update_nblocks #a #m len b st in
     let rem = len % block_length a in
@@ -481,17 +478,17 @@ let hash (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:size_nat) (b:multiseq 
     finish st
 
 noextract
-let sha256 (len:size_nat) (b:lseq uint8 len) =
+let sha256 (len:Spec.len_lt_max_a_t SHA2_256) (b:seq uint8{length b = len}) =
   hash #SHA2_256 #M32 len b
 
 noextract
-let sha256_4 (len:size_nat) (b:multiseq 4 len) =
+let sha256_4 (len:Spec.len_lt_max_a_t SHA2_256) (b:multiseq 4 len) =
   hash #SHA2_256 #M128 len b
 
 noextract
-let sha512 (len:size_nat) (b:lseq uint8 len) =
+let sha512 (len:Spec.len_lt_max_a_t SHA2_512) (b:seq uint8{length b = len}) =
   hash #SHA2_512 #M32 len b
 
 noextract
-let sha512_4 (len:size_nat) (b:multiseq 4 len) =
+let sha512_4 (len:Spec.len_lt_max_a_t SHA2_512) (b:multiseq 4 len) =
   hash #SHA2_512 #M256 len b
