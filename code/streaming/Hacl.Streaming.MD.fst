@@ -75,13 +75,79 @@ let alg = a:hash_alg{not (is_blake a)}
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
+// In this module, we re-reroute the agile hash implementation to use sha2_mb.
+inline_for_extraction noextract
+let is_mb = function SHA2_256 -> true | _ -> false
+
+inline_for_extraction noextract
+let word (a: alg) = if is_mb a then Hacl.Spec.SHA2.Vec.(element_t a M32) else word a
+
 inline_for_extraction noextract
 let init_elem (a : alg) : word a =
   match a with
   | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> Lib.IntTypes.u32 0
+  | SHA2_224 -> Lib.IntTypes.u32 0
+  | SHA2_256 -> Hacl.Spec.SHA2.Vec.(zero_element SHA2_256 M32)
   | SHA2_384 | SHA2_512 -> Lib.IntTypes.u64 0
   | SHA3_256 -> Lib.IntTypes.u64 0
+
+inline_for_extraction noextract
+let sha2_mb_state = Lib.Buffer.lbuffer (Lib.IntVector.vec_t Lib.IntTypes.U32 1) 8ul
+
+let _ = assert_norm (
+  let open Hacl.Impl.SHA2.Core in
+  let open Hacl.Spec.SHA2.Vec in
+  state_t SHA2_256 M32 == sha2_mb_state)
+
+let multiseq_hash_is_hash a: Lemma
+  (requires is_mb a)
+  (ensures (
+    let open Hacl.Impl.SHA2.Core in
+    let open Hacl.Spec.SHA2.Vec in
+    multiseq (lanes a M32) (hash_length a) == Spec.Agile.Hash.bytes_hash a))
+=
+  let open Hacl.Impl.SHA2.Core in
+  let open Hacl.Spec.SHA2.Vec in
+  let open Lib.NTuple in
+  let open Lib.Sequence in
+  assert (lanes a M32 == 1);
+  assert (multiseq (lanes a M32) (hash_length a) == lseq uint8 (hash_length a));
+  calc (==) {
+    Spec.Hash.Definitions.bytes_hash a;
+  (==) { _ by (FStar.Tactics.trefl ()) }
+    m:S.seq uint8 { S.length m = Spec.Agile.Hash.hash_length a };
+  (==) { }
+    m:S.seq uint8 { (S.length m <: nat) == (Spec.Agile.Hash.hash_length a <: nat) };
+  (==) { _ by (FStar.Tactics.norm [ delta_only [ `%lseq; `%seq ] ]; FStar.Tactics.trefl ()) }
+    lseq uint8 (hash_length a);
+  }
+
+let multibuf_is_buf (len: Lib.IntTypes.size_t): Lemma
+  (ensures Lib.MultiBuffer.multibuf 1 len == x:B.buffer uint8 { B.length x == Lib.IntTypes.v len })
+=
+  let open Lib.Buffer in
+  calc (==) {
+    Lib.MultiBuffer.multibuf 1 len;
+  (==) { }
+    Lib.Buffer.lbuffer uint8 len;
+  (==) { _ by FStar.Tactics.(norm [ iota; zeta; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ]]; trefl ()) }
+    x:B.buffer uint8 { B.length x == Lib.IntTypes.v len };
+  }
+
+// Big up for Aymeric who dug this one to help me make the coercion work.
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
+
+let lib_of_agile (#a: alg { is_mb a }) (x: Spec.Agile.Hash.bytes_hash a):
+  y:Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) (Spec.Agile.Hash.hash_length a)) { x === y }
+=
+  multiseq_hash_is_hash a;
+  coerce #Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) (Spec.Agile.Hash.hash_length a)) x
+
+let agile_of_lib (#a: alg { is_mb a }) (y:Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) (Spec.Agile.Hash.hash_length a))):
+  x: Spec.Agile.Hash.bytes_hash a { x === y }
+=
+  multiseq_hash_is_hash a;
+  coerce #(Spec.Agile.Hash.bytes_hash a) y
 
 inline_for_extraction noextract
 let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a)
@@ -128,16 +194,41 @@ let hacl_md (a:alg)// : block unit =
     (fun () -> Hacl.Hash.Definitions.block_len a)
     (fun () -> Hacl.Hash.Definitions.block_len a)
 
-    (fun () _ -> fst (Spec.Agile.Hash.init a))
-    (fun () acc prevlen blocks -> update_multi_s a () acc prevlen blocks)
-    (fun () acc prevlen input -> fst Spec.Hash.Incremental.(update_last a (acc, ()) prevlen input))
-    (fun () _ acc -> Spec.Hash.PadFinish.(finish a (acc, ())))
+    (fun () _ ->
+      if is_mb a then
+        Hacl.Spec.SHA2.Vec.(init a M32)
+      else
+        fst (Spec.Agile.Hash.init a))
+    (fun () acc prevlen blocks ->
+      if is_mb a then
+        let open Hacl.Spec.SHA2.Vec in
+        update_nblocks #a #M32 (S.length blocks) (blocks <: multiseq 1 (S.length blocks)) acc
+      else
+        update_multi_s a () acc prevlen blocks)
+    (fun () acc prevlen input ->
+      if is_mb a then
+        Hacl.Spec.SHA2.Vec.(update_last #a #M32 prevlen (S.length input) (input <: multiseq 1 (S.length input)) acc)
+      else
+        fst Spec.Hash.Incremental.(update_last a (acc, ()) prevlen input))
+    (fun () _ acc ->
+      if is_mb a then
+        let _ = multiseq_hash_is_hash a in
+        agile_of_lib Hacl.Spec.SHA2.Vec.(finish #a #M32 acc)
+      else
+        Spec.Hash.PadFinish.(finish a (acc, ())))
     (fun () _ s -> Spec.Agile.Hash.(hash a s))
 
     (fun i h prevlen -> update_multi_zero a i h prevlen) (* update_multi_zero *)
     (fun i acc prevlen1 prevlen2 input1 input2 ->
-      update_multi_associative a i acc prevlen1 prevlen2 input1 input2) (* update_multi_associative *)
-    (fun _ _ input -> Spec.Hash.Incremental.hash_is_hash_incremental a input)
+      if is_mb a then
+        admit ()
+      else
+        update_multi_associative a i acc prevlen1 prevlen2 input1 input2) (* update_multi_associative *)
+    (fun _ _ input ->
+      if is_mb a then
+        admit ()
+      else
+        Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
     (fun _ _ -> ())
 
@@ -146,58 +237,82 @@ let hacl_md (a:alg)// : block unit =
       | MD5 -> Hacl.Hash.MD5.legacy_init s
       | SHA1 -> Hacl.Hash.SHA1.legacy_init s
       | SHA2_224 -> Hacl.Hash.SHA2.init_224 s
-      | SHA2_256 -> Hacl.Hash.SHA2.init_256 s
+      | SHA2_256 -> Hacl.Impl.SHA2.Generic.init #SHA2_256 #Hacl.Spec.SHA2.Vec.M32 s
       | SHA2_384 -> Hacl.Hash.SHA2.init_384 s
       | SHA2_512 -> Hacl.Hash.SHA2.init_512 s
       | SHA3_256 -> Hacl.Hash.SHA3.init_256 s)
 
     (fun _ s prevlen blocks len ->
-      [@inline_let]
-      let update_multi : update_multi_st (|a,()|) =
-        match a with
-        | MD5 -> Hacl.Hash.MD5.legacy_update_multi
-        | SHA1 -> Hacl.Hash.SHA1.legacy_update_multi
-        | SHA2_224 -> Hacl.Hash.SHA2.update_multi_224
-        | SHA2_256 -> Hacl.Hash.SHA2.update_multi_256
-        | SHA2_384 -> Hacl.Hash.SHA2.update_multi_384
-        | SHA2_512 -> Hacl.Hash.SHA2.update_multi_512
-        | SHA3_256 -> Hacl.Hash.SHA3.update_multi_256
-      in
-      update_multi s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
+      if is_mb a then
+        let open Hacl.Spec.SHA2.Vec in
+        let open Hacl.Impl.SHA2.Generic in
+        multibuf_is_buf len;
+        [@inline_let] let blocks_lib =
+          coerce #(Lib.MultiBuffer.multibuf (lanes a M32) len) blocks
+        in
+        update_nblocks #a #M32 (update #a #M32) len blocks_lib s
+      else
+        [@inline_let]
+        let update_multi : update_multi_st (|a,()|) =
+          match a with
+          | MD5 -> Hacl.Hash.MD5.legacy_update_multi
+          | SHA1 -> Hacl.Hash.SHA1.legacy_update_multi
+          | SHA2_224 -> Hacl.Hash.SHA2.update_multi_224
+          | SHA2_384 -> Hacl.Hash.SHA2.update_multi_384
+          | SHA2_512 -> Hacl.Hash.SHA2.update_multi_512
+          | SHA3_256 -> Hacl.Hash.SHA3.update_multi_256
+        in
+        update_multi s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
 
     (fun _ s prevlen last last_len ->
-      [@inline_let]
-      let update_last : update_last_st (|a,()|) =
-        match a with
-        | MD5 -> Hacl.Hash.MD5.legacy_update_last
-        | SHA1 -> Hacl.Hash.SHA1.legacy_update_last
-        | SHA2_224 -> Hacl.Hash.SHA2.update_last_224
-        | SHA2_256 -> Hacl.Hash.SHA2.update_last_256
-        | SHA2_384 -> Hacl.Hash.SHA2.update_last_384
-        | SHA2_512 -> Hacl.Hash.SHA2.update_last_512
-        | SHA3_256 -> Hacl.Hash.SHA3.update_last_256
-      in
-      [@inline_let]
-      let prevlen =
-        match a with
-        | MD5 | SHA1
-        | SHA2_224 | SHA2_256 -> prevlen
-        | SHA2_384 | SHA2_512 -> FStar.Int.Cast.Full.uint64_to_uint128 prevlen
-        | SHA3_256 -> ()
-      in
-      update_last s () prevlen last last_len)
+      if is_mb a then
+        let open Hacl.Spec.SHA2.Vec in
+        let open Hacl.Impl.SHA2.Generic in
+        multibuf_is_buf last_len;
+        [@inline_let] let last_lib =
+          coerce #(Lib.MultiBuffer.multibuf (lanes a M32) last_len) last
+        in
+        update_last #a #M32 (update #a #M32) Lib.IntTypes.(prevlen +. last_len) last_len last_lib s
+      else
+        [@inline_let]
+        let update_last : update_last_st (|a,()|) =
+          match a with
+          | MD5 -> Hacl.Hash.MD5.legacy_update_last
+          | SHA1 -> Hacl.Hash.SHA1.legacy_update_last
+          | SHA2_224 -> Hacl.Hash.SHA2.update_last_224
+          | SHA2_384 -> Hacl.Hash.SHA2.update_last_384
+          | SHA2_512 -> Hacl.Hash.SHA2.update_last_512
+          | SHA3_256 -> Hacl.Hash.SHA3.update_last_256
+        in
+        [@inline_let]
+        let prevlen =
+          match a with
+          | MD5 | SHA1
+          | SHA2_224 | SHA2_256 -> prevlen
+          | SHA2_384 | SHA2_512 -> FStar.Int.Cast.Full.uint64_to_uint128 prevlen
+          | SHA3_256 -> ()
+        in
+        update_last s () prevlen last last_len)
 
     (fun _ _ s dst ->
-      [@inline_let]
-      let finish : finish_st (|a,()|) =
-        match a with
-        | MD5 -> Hacl.Hash.MD5.legacy_finish
-        | SHA1 -> Hacl.Hash.SHA1.legacy_finish
-        | SHA2_224 -> Hacl.Hash.SHA2.finish_224
-        | SHA2_256 -> Hacl.Hash.SHA2.finish_256
-        | SHA2_384 -> Hacl.Hash.SHA2.finish_384
-        | SHA2_512 -> Hacl.Hash.SHA2.finish_512
-        | SHA3_256 -> Hacl.Hash.SHA3.finish_256
-      in
-      finish s () dst)
+      if is_mb a then
+        let open Hacl.Spec.SHA2.Vec in
+        let open Hacl.Impl.SHA2.Generic in
+        multibuf_is_buf 32ul;
+        [@inline_let] let dst_lib =
+          coerce #(Lib.MultiBuffer.multibuf (lanes a M32) 32ul) dst
+        in
+        finish #a #M32 s dst_lib
+      else
+        [@inline_let]
+        let finish : finish_st (|a,()|) =
+          match a with
+          | MD5 -> Hacl.Hash.MD5.legacy_finish
+          | SHA1 -> Hacl.Hash.SHA1.legacy_finish
+          | SHA2_224 -> Hacl.Hash.SHA2.finish_224
+          | SHA2_384 -> Hacl.Hash.SHA2.finish_384
+          | SHA2_512 -> Hacl.Hash.SHA2.finish_512
+          | SHA3_256 -> Hacl.Hash.SHA3.finish_256
+        in
+        finish s () dst)
 #pop-options
