@@ -236,6 +236,23 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
 #pop-options
 
+noextract
+let repeati_associative (a : alg { is_mb a }) acc (input1 input2 : S.seq uint8) :
+    Lemma
+    (requires (
+      S.length input1 + S.length input2 <= Some?.v (Spec.Agile.Hash.max_input_length a) /\
+      S.length input1 % U32.v (D.block_len a) = 0 /\
+      S.length input2 % U32.v (D.block_len a) = 0))
+    (ensures (
+      let open Hacl.Spec.SHA2.Vec in
+      let input = S.append input1 input2 in
+      S.length input % U32.v (D.block_len a) = 0 /\
+      update_nblocks #a #M32 (S.length input) (input <: multiseq 1 (S.length input)) acc ==
+      update_nblocks #a #M32 (S.length input2) (input2 <: multiseq 1 (S.length input2))
+        (update_nblocks #a #M32 (S.length input1) (input1 <: multiseq 1 (S.length input1)) acc)))
+=
+  admit ()
+
 let live_multi_of_live #len (h:HS.mem) (b:Lib.MultiBuffer.multibuf 1 len): Lemma
   (requires (
     B.live h (buffer_of_lib #len b)))
@@ -317,7 +334,7 @@ let hacl_md (a:alg)// : block unit =
         update_multi_zero a i h prevlen) (* update_multi_zero *)
     (fun i acc prevlen1 prevlen2 input1 input2 ->
       if is_mb a then
-        admit ()
+        repeati_associative a acc input1 input2
       else
         update_multi_associative a i acc prevlen1 prevlen2 input1 input2) (* update_multi_associative *)
     (fun _ _ input ->
