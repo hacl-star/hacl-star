@@ -351,7 +351,10 @@ let hacl_md (a:alg)// : block unit =
         live_multi_of_live h0 blocks_lib;
         disjoint_multi_of_disjoint blocks_lib state_lib;
         update_nblocks #a #M32 (update #a #M32) len blocks_lib s;
-        admit ()
+        Lib.MultiBuffer.loc_multi1 blocks_lib;
+        Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 len) #1 blocks;
+        Lib.MultiBuffer.as_seq_multi_lemma h0 blocks_lib 0;
+        Lib.NTuple.ntup1_lemma #(multiseq (lanes a M32) (Lib.IntTypes.v len)) #1 (Lib.MultiBuffer.as_seq_multi h0 blocks_lib)
       else
         [@inline_let]
         let update_multi : update_multi_st (|a,()|) =
@@ -376,7 +379,10 @@ let hacl_md (a:alg)// : block unit =
         live_multi_of_live h0 last_lib;
         disjoint_multi_of_disjoint last_lib state_lib;
         update_last #a #M32 (update #a #M32) (Hacl.Hash.MD.len_add32 a prevlen last_len) last_len last_lib s;
-        admit ()
+        Lib.MultiBuffer.loc_multi1 last_lib;
+        Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 last_len) #1 last;
+        Lib.MultiBuffer.as_seq_multi_lemma h0 last_lib 0;
+        Lib.NTuple.ntup1_lemma #(multiseq (lanes a M32) (Lib.IntTypes.v last_len)) #1 (Lib.MultiBuffer.as_seq_multi h0 last_lib)
       else
         [@inline_let]
         let update_last : update_last_st (|a,()|) =
