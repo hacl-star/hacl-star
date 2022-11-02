@@ -351,7 +351,7 @@ let load_ws #a #m b ws =
 
 
 inline_for_extraction noextract
-let padded_blocks (a:sha2_alg) (len:size_t{v len < block_length a}) :
+let padded_blocks (a:sha2_alg) (len:size_t{v len <= block_length a}) :
   n:size_t{v n == SpecVec.padded_blocks a (v len)}
  =
   if (len +! len_len a +! 1ul <=. HD.block_len a) then 1ul else 2ul
@@ -360,7 +360,7 @@ let padded_blocks (a:sha2_alg) (len:size_t{v len < block_length a}) :
 inline_for_extraction noextract
 val load_last_blocks: #a:sha2_alg
   -> totlen_buf:lbuffer uint8 (len_len a)
-  -> len:size_t{v len < block_length a}
+  -> len:size_t{v len <= block_length a}
   -> b:lbuffer uint8 len
   -> fin:size_t{v fin == block_length a \/ v fin == 2 * block_length a}
   -> last:lbuffer uint8 (2ul *! HD.block_len a)  ->
@@ -395,7 +395,7 @@ let preserves_sub_disjoint_multi #lanes #len #len' (b:lbuffer uint8 len) (r:mult
 inline_for_extraction noextract
 let load_last_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     totlen_buf:lbuffer uint8 (len_len a)
-  -> len:size_t{v len < block_length a}
+  -> len:size_t{v len <= block_length a}
   -> b:multibuf (lanes a m) len
   -> fin:size_t{v fin == block_length a \/ v fin == 2 * block_length a}
   -> last:lbuffer uint8 (size (lanes a m) *! 2ul *! HD.block_len a) ->

@@ -236,7 +236,7 @@ inline_for_extraction noextract
 let update_last_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     upd:update_vec_t a m
   -> totlen:len_t a
-  -> len:size_t{v len < block_length a}
+  -> len:size_t{v len <= block_length a}
   -> b:multibuf (lanes a m) len
   -> hash:state_t a m ->
   Stack unit
