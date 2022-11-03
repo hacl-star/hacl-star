@@ -454,6 +454,12 @@ let repeati_associative (a : alg { is_mb a })
   in
 
 
+  // TODO: this proof could be greatly simplified by following the structure of
+  // hash_is_repeat_blocks in Hacl.Spec.SHA2.EquivScalar. Sketch:
+  // update_nblocks --> repeati [def]
+  // repeati --> repeat_blocks [repeati_extensionality]
+  // repeat_blocks --> repeat_blocks (repeat_blocks ...) [repeat_blocks_split]
+  // and conversely
   calc (==) {
     update_nblocks #a #M32 (S.length input) input acc;
   (==) { (* def *) } (
