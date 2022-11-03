@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 static const
 uint64_t
 Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w4[320U] =

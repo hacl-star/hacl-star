@@ -310,6 +310,8 @@ let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
   Hacl.Spec.SHA2.EquivScalar.hash_agile_lemma #a (S.length input) input;
   admit ()
 
+// Extraction loops otherwise. Using every flavor of noextract known to man.
+noextract [@@ noextract_to "krml" ]
 let live_multi_of_live #len (h:HS.mem) (b:Lib.MultiBuffer.multibuf 1 len): Lemma
   (requires (
     B.live h (buffer_of_lib #len b)))
@@ -325,6 +327,7 @@ let live_multi_of_live #len (h:HS.mem) (b:Lib.MultiBuffer.multibuf 1 len): Lemma
   in
   ()
 
+noextract [@@ noextract_to "krml" ]
 let disjoint_multi_of_disjoint #a #len #len' (b:Lib.MultiBuffer.multibuf 1 len)
   (b': Lib.Buffer.lbuffer a len'): Lemma
   (requires (
