@@ -247,8 +247,9 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
 #pop-options
 
-noextract
-let repeati_associative (a : alg { is_mb a }) acc (input1 input2 : S.seq uint8) :
+let repeati_associative (a : alg { is_mb a })
+  (acc: Hacl.Spec.SHA2.Vec.(state_spec a M32))
+  (input1 input2 : S.seq uint8) :
     Lemma
     (requires (
       S.length input1 + S.length input2 <= Some?.v (Spec.Agile.Hash.max_input_length a) /\
@@ -262,6 +263,35 @@ let repeati_associative (a : alg { is_mb a }) acc (input1 input2 : S.seq uint8) 
       update_nblocks #a #M32 (S.length input2) (input2 <: multiseq 1 (S.length input2))
         (update_nblocks #a #M32 (S.length input1) (input1 <: multiseq 1 (S.length input1)) acc)))
 =
+  let open Hacl.Spec.SHA2.Vec in
+  let input = S.append input1 input2 in
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (S.length input1) (S.length input2) (Spec.Agile.Hash.block_length a);
+  assert (S.length input % U32.v (D.block_len a) = 0);
+
+  let open Lib.LoopCombinators in
+  let len = S.length input in
+  let n_blocks = len / block_length a in
+  let len1 = S.length input1 in
+  let n_blocks1 = len1 / block_length a in
+  let len2 = S.length input2 in
+  let n_blocks2 = len2 / block_length a in
+  let input = input <: multiseq 1 (S.length input) in
+  assert (n_blocks = n_blocks1 + n_blocks2);
+  calc (==) {
+    update_nblocks #a #M32 (S.length input) (input <: multiseq 1 (S.length input)) acc;
+  (==) { (* def *) } (
+    repeati n_blocks (update_block #a #M32 len input) acc
+  );
+  (==) { repeati_def n_blocks (update_block #a #M32 len input) acc } (
+    repeat_right 0 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc
+  );
+  // Typing error on n_blocks. Need to do a case analysis on whether input2 is
+  // empty or not. Use eq_repeati0 for that case where the sequence is empty.
+  (*(==) { repeat_right_plus 0 len1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc } (
+    repeat_right (len1 + 1) n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
+      (repeat_right 0 len1 (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc)
+  );*)
+  };
   admit ()
 
 let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
@@ -277,8 +307,8 @@ let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
       let hash3 = finish hash2 in
       agile_of_lib hash3 `S.equal` Spec.Agile.Hash.hash a input))
 =
+  Hacl.Spec.SHA2.EquivScalar.hash_agile_lemma #a (S.length input) input;
   admit ()
-
 
 let live_multi_of_live #len (h:HS.mem) (b:Lib.MultiBuffer.multibuf 1 len): Lemma
   (requires (
