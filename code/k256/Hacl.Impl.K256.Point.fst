@@ -63,6 +63,16 @@ let make_g g =
   set_one gz
 
 
+let copy_point out p =
+  let px, py, pz = getx p, gety p, getz p in
+  let ox, oy, oz = getx out, gety out, getz out in
+  copy_felem ox px;
+  copy_felem oy py;
+  copy_felem oz pz
+
+
+///  Conversion functions between affine and projective coordinates
+
 let to_proj_point p x y =
   let x1, y1, z1 = getx p, gety p, getz p in
   copy x1 x;
@@ -182,6 +192,11 @@ let point_negate out p =
   Math.Lemmas.modulo_addition_lemma (- as_nat h0 py) S.prime 4;
   Math.Lemmas.lemma_mod_sub_distr 0 (as_nat h0 py) S.prime;
   assert (feval h2 oy == (- feval h0 py) % S.prime)
+
+
+[@CInline]
+let point_negate_conditional_vartime p is_negate =
+  if is_negate then point_negate p p
 
 
 val fmul_fmul_eq_vartime (a bz c dz: felem) : Stack bool
