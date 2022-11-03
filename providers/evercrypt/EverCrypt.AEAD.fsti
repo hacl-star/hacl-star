@@ -40,6 +40,9 @@ open EverCrypt.Error
 /// first.
 
 [@CAbstractStruct]
+
+[@@ Comment "Both encryption and decryption require a state that holds the key.
+The state may be reused as many times as desired."]
 val state_s: alg -> Type0
 
 inline_for_extraction noextract
@@ -127,6 +130,11 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
 noextract
 let bytes = Seq.seq uint8
 
+[@@ Comment "Return the algorithm used in the AEAD state.
+
+@param s State of the AEAD algorithm.
+
+@return Algorithm used in the AEAD state."]
 val alg_of_state (a: G.erased alg) (s: state (G.reveal a)): Stack alg
   (requires (fun h0 -> invariant #(G.reveal a) h0 s))
   (ensures (fun h0 a' h1 ->
@@ -199,6 +207,14 @@ let alloca_st (a: alg) =
 /// required for encrypt.
 (** @type: true
 *)
+[@@ Comment "Create the context element for the AEAD algorithm.
+
+@param a The argument `a` must be either of:
+  * `Spec_Agile_AEAD_AES128_GCM`,
+  * `Spec_Agile_AEAD_AES256_GCM`, or
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305`.
+@param dst A caller allocated reference where the context will be written to.
+@param k Pointer to memory where the key is read from. The size depends on the used algorithm."]
 val create_in: #a:alg -> create_in_st a
 
 inline_for_extraction noextract
@@ -319,6 +335,19 @@ let encrypt_st (a: supported_alg) =
 /// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
 (** @type: true
 *)
+[@@ Comment "Encrypt and authenticate a message (`plain`) with associated data (`ad`).
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param plain Pointer to `plain_len` bytes of memory where the to-be-encrypted plaintext is read from.
+@param plain_len Length of the to-be-encrypted plaintext.
+@param cipher Pointer to `plain_len` bytes of memory where the ciphertext is written to.
+@param tag Pointer to the tag. The length of the `tag` must be of a suitable length for the chosen algorithm. There is no length parameter for `tag`.
+
+@return `EverCrypt_AEAD_encrypt` may return either `EverCrypt_Error_Success` or `EverCrypt_Error_InvalidKey` (`EverCrypt_error.h`). The latter is returned if and only if the `s` parameter is `NULL`."]
 val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
 
 /// Encryption (no pre-allocated state)
@@ -473,6 +502,31 @@ let decrypt_st (a: supported_alg) =
 /// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
 (** @type: true
 *)
+[@@ Comment "Verify the authenticity of `ad` || `cipher` and decrypt `cipher` into `dst`.
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param cipher Pointer to `cipher_len` bytes of memory where the ciphertext is read from.
+@param cipher_len Length of the ciphertext.
+@param tag Pointer to the tag. The length of the `tag` must be of a suitable length for the chosen algorithm. There is no length parameter for `tag`.
+@param dst Pointer to `cipher_len` bytes of memory where the decrypted plaintext will be written to.
+
+@return `EverCrypt_AEAD_decrypt` returns ...
+
+  * `EverCrypt_Error_Success`
+
+... on success and either of ...
+
+  * `EverCrypt_Error_InvalidKey` (returned if and only if the `s` parameter is `NULL`),
+  * `EverCrypt_Error_InvalidIVLength` (see note about requirements on IV size above), or
+  * `EverCrypt_Error_AuthenticationFailure` (in case the ciphertext could not be authenticated, e.g., due to modifications)
+
+... on failure (`EverCrypt_error.h`).
+
+Upon success, the plaintext will be written into `dst`."]
 val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)
 
 /// Decryption (no pre-allocated state)
@@ -551,6 +605,9 @@ val decrypt_expand: #a:supported_alg -> decrypt_expand_st true (G.reveal a)
 
 (** @type: true
 *)
+[@@ Comment "Cleanup and free the AEAD state.
+
+@param s State of the AEAD algorithm."]
 val free:
   #a:G.erased supported_alg -> (
   let a = Ghost.reveal a in
