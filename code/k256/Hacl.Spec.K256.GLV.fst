@@ -19,25 +19,13 @@ let beta : S.felem = 0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c287
 // [a]P in affine coordinates
 let aff_point_mul = S.aff_point_mul
 
-// [a]G in affine coordinates
-let aff_point_mul_g (a:nat) : S.aff_point =
-  aff_point_mul a S.(g_x, g_y)
-
 // fast computation of [lambda]P in affine coordinates
 let aff_point_mul_lambda (p:S.aff_point) : S.aff_point =
   let (px, py) = p in (S.(beta *% px), py)
 
-// fast computation of [lambda]G in affine coordinates
-let aff_point_mul_g_lambda () : S.aff_point =
-  (S.(beta *% S.g_x), S.g_y)
-
 // fast computation of [lambda]P in projective coordinates
 let point_mul_lambda (p:S.proj_point) : S.proj_point =
   let (_X, _Y, _Z) = p in (S.(beta *% _X), _Y, _Z)
-
-// fast computation of [lambda]G in projective coordinates
-let point_mul_g_lambda () : S.proj_point =
-  (S.(beta *% S.g_x), S.g_y, S.one)
 
 (**
   Representing a scalar k as (r1 + r2 * lambda) mod S.q,
@@ -127,6 +115,11 @@ let aff_ecmult_endo_split (k:S.qelem) (p:S.aff_point) :
   let r2, p2 = aff_negate_point_and_scalar_cond r2 lambda_p in
   (r1, p1, r2, p2)
 
+// [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
+// which can be computed as a double exponentiation ([a]P + [b]Q)
+let aff_point_mul_endo_split (k:S.qelem) (p:S.aff_point) : S.aff_point =
+  let r1, p1, r2, p2 = aff_ecmult_endo_split k p in
+  S.aff_point_add (aff_point_mul r1 p1) (aff_point_mul r2 p2)
 
 (**
  Fast computation of [k]P in projective coordinates
