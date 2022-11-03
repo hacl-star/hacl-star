@@ -247,6 +247,8 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
 #pop-options
 
+let eq_lanes (a: alg { is_mb a }): Lemma Hacl.Spec.SHA2.Vec.(1 == lanes a M32) = ()
+
 let repeati_associative (a : alg { is_mb a })
   (acc: Hacl.Spec.SHA2.Vec.(state_spec a M32))
   (input1 input2 : S.seq uint8) :
@@ -274,16 +276,103 @@ let repeati_associative (a : alg { is_mb a })
   let n_blocks1 = len1 / block_length a in
   let len2 = S.length input2 in
   let n_blocks2 = len2 / block_length a in
+  eq_lanes a;
+  calc (==) {
+    multiseq 1 (S.length input);
+  (==) { }
+    multiseq (lanes a M32) (S.length input);
+  };
   let input = input <: multiseq 1 (S.length input) in
+  let input' = coerce #(multiseq (lanes a M32) (S.length input)) input in
   let input1 = input1 <: multiseq 1 (S.length input1) in
+  let input1' = coerce #(multiseq (lanes a M32) (S.length input1)) input1 in
   let input2 = input2 <: multiseq 1 (S.length input2) in
+  let input2' = coerce #(multiseq (lanes a M32) (S.length input2)) input2 in
+  assert (input1 == input1' /\ input2 == input2' /\ input == input');
   assert (n_blocks = n_blocks1 + n_blocks2);
+  let eq (): Lemma (input1 == input1') = () in
 
   let f = update_block #a #M32 len input in
   let f1 = update_block #a #M32 len1 input1 in
   let f2 = update_block #a #M32 len2 input2 in
-  let ext1 (i:nat{i < n_blocks1}) (acc: fixed_a (state_spec a M32) i) : Lemma (f i acc == f1 i acc)
-    = admit () in
+  let ext1 (i:nat{i < n_blocks1}) (acc: fixed_a (state_spec a M32) i) : Lemma (f i acc == f1 i acc) =
+    calc (==) {
+      Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a)));
+    (==) {
+      Lib.NTuple.(
+        ntup1_lemma #_ #1 (createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+          (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))))
+    }
+      Lib.NTuple.((createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))).(|0|));
+    (==) {
+      Lib.NTuple.(createi_lemma 1
+        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))
+        0)
+    }
+      Lib.NTuple.((fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))) 0;
+    (==) { }
+      Lib.NTuple.(Seq.slice input'.(|0|) (i * block_length a) (i * block_length a + block_length a));
+    (==) { Lib.NTuple.(ntup1_lemma #_ #1 input') }
+      Seq.slice (input <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a);
+    (==) { S.lemma_eq_intro
+      (Seq.slice (input <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a))
+      (Seq.slice (input1 <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a))
+    }
+      Seq.slice (input1 <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a);
+    (==) { Lib.NTuple.(ntup1_lemma #_ #1 input1') }
+      Lib.NTuple.(Seq.slice input1'.(|0|) (i * block_length a) (i * block_length a + block_length a));
+    (==) { }
+      Lib.NTuple.((fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))) 0;
+    (==) {
+      Lib.NTuple.(createi_lemma 1
+        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))
+        0)
+    }
+      Lib.NTuple.((createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))).(|0|));
+    (==) {
+      Lib.NTuple.(
+        ntup1_lemma #_ #1 (createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+          (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))))
+    }
+      Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a)));
+
+    };
+    calc (==) {
+      f1 i acc;
+    (==) { }
+      update (get_multiblock_spec (S.length input1) input1' i) acc;
+    (==) { _ by FStar.Tactics.(norm [ delta_only [ `%get_multiblock_spec; `%uint8 ]]; trefl ()) } (
+      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) (lanes a M32)
+        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
+      in
+      update ms acc
+    );
+    (==) { _ by FStar.Tactics.(l_to_r [`eq_lanes]) } (
+      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
+      in
+      update ms acc
+    );
+    (==) { (* above *) } (
+      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
+        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
+      in
+      update ms acc
+    );
+    (==) { _ by FStar.Tactics.(l_to_r [`eq_lanes]) } (
+      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) (lanes a M32)
+        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
+      in
+      update ms acc
+    );
+    (==) { _ by FStar.Tactics.(norm [ delta_only [ `%get_multiblock_spec; `%uint8 ]]; trefl ()) }
+      update (get_multiblock_spec (S.length input) input' i) acc;
+    }
+  in
   let ext2 (i:nat{i < n_blocks2}) (acc: fixed_a (state_spec a M32) i) : Lemma (f2 i acc == f (i + n_blocks1) acc)
     = admit () in
 
