@@ -276,23 +276,40 @@ let repeati_associative (a : alg { is_mb a })
   let len2 = S.length input2 in
   let n_blocks2 = len2 / block_length a in
   let input = input <: multiseq 1 (S.length input) in
+  let input1 = input1 <: multiseq 1 (S.length input1) in
+  let input2 = input2 <: multiseq 1 (S.length input2) in
   assert (n_blocks = n_blocks1 + n_blocks2);
   calc (==) {
-    update_nblocks #a #M32 (S.length input) (input <: multiseq 1 (S.length input)) acc;
+    update_nblocks #a #M32 (S.length input) input acc;
   (==) { (* def *) } (
     repeati n_blocks (update_block #a #M32 len input) acc
   );
   (==) { repeati_def n_blocks (update_block #a #M32 len input) acc } (
     repeat_right 0 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc
   );
-  // Typing error on n_blocks. Need to do a case analysis on whether input2 is
-  // empty or not. Use eq_repeati0 for that case where the sequence is empty.
-  (*(==) { repeat_right_plus 0 len1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc } (
-    repeat_right (len1 + 1) n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
-      (repeat_right 0 len1 (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc)
-  );*)
-  };
-  admit ()
+
+  (==) { repeat_right_plus 0 n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc } (
+    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
+      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc)
+    );
+  (==) { admit() // Need to call Lib.Sequence.Lemmas.repeati_extensionality
+    } (
+    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
+      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) (update_block #a #M32 len1 input1) acc)
+    );
+  (==) { repeati_def n_blocks1 (update_block #a #M32 len1 input1) acc } (
+    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
+      (update_nblocks #a #M32 (S.length input1) input1 acc)
+    );
+
+  (==) { admit () // Need to call Lib.Sequence.Lemmas.repeati_right_extensionality
+    } (
+    repeat_right 0 n_blocks2 (fixed_a (state_spec a M32)) (update_block #a #M32 len2 input2)
+      (update_nblocks #a #M32 (S.length input1) input1 acc)
+    );
+  (==) { repeati_def n_blocks2 (update_block #a #M32 len2 input2) (update_nblocks #a #M32 (S.length input1) input1 acc) }
+    update_nblocks #a #M32 len2 input2 (update_nblocks #a #M32 len1 input1 acc);
+  }
 
 let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
     Lemma (requires S.length input <= Some?.v (Spec.Agile.Hash.max_input_length a))
