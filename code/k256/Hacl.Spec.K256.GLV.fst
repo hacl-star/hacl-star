@@ -6,7 +6,38 @@ module S = Spec.K256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// For more comments see https://github.com/bitcoin-core/secp256k1/blob/master/src/scalar_impl.h
+(**
+ This module implements the following two functions from libsecp256k1:
+ secp256k1_scalar_split_lambda [1] and secp256k1_ecmult_endo_split [2].
+
+ For the secp256k1 curve, we can replace the EC scalar multiplication
+ by `lambda` with one modular multiplication by `beta`:
+
+    [lambda](px, py) = (beta *% px, py) for any point on the curve P = (px, py),
+
+ where `lambda` and `beta` are primitive cube roots of unity and can be
+ fixed for the curve.
+
+ The main idea is to slit a 256-bit scalar k into k1 and k2 s.t.
+ k = (k1 + lambda * k2) % q, where k1 and k2 are 128-bit numbers:
+
+     [k]P = [(k1 + lambda * k2) % q]P = [k1]P + [k2]([lambda]P)
+      = [k1](px, py) + [k2](beta *% px, py).
+
+ Using a double fixed-window method, we can save 128 point_double:
+
+               |  before       | after
+  ----------------------------------------------------------------------
+  point_double | 256           | 128
+  point_add    | 256 / 5 = 51  | 128 / 5 + 128 / 5 + 1 = 25 + 25 + 1 = 51
+
+ Note that one precomputed table is enough for [k]P, as [r_small]([lambda]P)
+ can be obtained via [r_small]P.
+
+[1]https://github.com/bitcoin-core/secp256k1/blob/a43e982bca580f4fba19d7ffaf9b5ee3f51641cb/src/scalar_impl.h#L123
+[2]https://github.com/bitcoin-core/secp256k1/blob/a43e982bca580f4fba19d7ffaf9b5ee3f51641cb/src/ecmult_impl.h#L618
+*)
+
 
 (**
  Fast computation of [lambda]P as (beta * x, y) in affine and projective coordinates
