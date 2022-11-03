@@ -51,6 +51,7 @@ cp gcc-compatible/Hacl_Krmllib.h mozilla/
 cp gcc-compatible/internal/Hacl_Krmllib.h mozilla/internal/
 cp gcc-compatible/Hacl_Streaming_SHA2.h mozilla/
 cp gcc-compatible/Hacl_Hash_SHA2.h mozilla/
+cp gcc-compatible/Hacl_SHA2_Generic.h mozilla/
 
 for f in $FILES; do
   for ext in h c asm S; do
