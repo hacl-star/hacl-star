@@ -267,7 +267,6 @@ let repeati_associative (a : alg { is_mb a })
   let input = S.append input1 input2 in
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (S.length input1) (S.length input2) (Spec.Agile.Hash.block_length a);
   assert (S.length input % U32.v (D.block_len a) = 0);
-
   let open Lib.LoopCombinators in
   let len = S.length input in
   let n_blocks = len / block_length a in
@@ -279,35 +278,44 @@ let repeati_associative (a : alg { is_mb a })
   let input1 = input1 <: multiseq 1 (S.length input1) in
   let input2 = input2 <: multiseq 1 (S.length input2) in
   assert (n_blocks = n_blocks1 + n_blocks2);
+
+  let f = update_block #a #M32 len input in
+  let f1 = update_block #a #M32 len1 input1 in
+  let f2 = update_block #a #M32 len2 input2 in
+  let ext1 (i:nat{i < n_blocks1}) (acc: fixed_a (state_spec a M32) i) : Lemma (f i acc == f1 i acc)
+    = admit () in
+  let ext2 (i:nat{i < n_blocks2}) (acc: fixed_a (state_spec a M32) i) : Lemma (f2 i acc == f (i + n_blocks1) acc)
+    = admit () in
+
+
   calc (==) {
     update_nblocks #a #M32 (S.length input) input acc;
   (==) { (* def *) } (
     repeati n_blocks (update_block #a #M32 len input) acc
   );
-  (==) { repeati_def n_blocks (update_block #a #M32 len input) acc } (
-    repeat_right 0 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc
-  );
-
-  (==) { repeat_right_plus 0 n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc } (
-    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
-      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) (update_block #a #M32 len input) acc)
-    );
-  (==) { admit() // Need to call Lib.Sequence.Lemmas.repeati_extensionality
-    } (
-    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
-      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) (update_block #a #M32 len1 input1) acc)
-    );
-  (==) { repeati_def n_blocks1 (update_block #a #M32 len1 input1) acc } (
-    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) (update_block #a #M32 len input)
-      (update_nblocks #a #M32 (S.length input1) input1 acc)
-    );
-
-  (==) { admit () // Need to call Lib.Sequence.Lemmas.repeati_right_extensionality
-    } (
-    repeat_right 0 n_blocks2 (fixed_a (state_spec a M32)) (update_block #a #M32 len2 input2)
-      (update_nblocks #a #M32 (S.length input1) input1 acc)
-    );
-  (==) { repeati_def n_blocks2 (update_block #a #M32 len2 input2) (update_nblocks #a #M32 (S.length input1) input1 acc) }
+  (==) { repeati_def n_blocks f acc }
+    repeat_right 0 n_blocks (fixed_a (state_spec a M32)) f acc;
+  (==) { repeat_right_plus 0 n_blocks1 n_blocks (fixed_a (state_spec a M32)) f acc }
+    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) f
+      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) f acc);
+  (==) {Classical.forall_intro_2 ext1;
+    Lib.Sequence.Lemmas.repeat_right_extensionality n_blocks1 0
+       (fixed_a (state_spec a M32)) (fixed_a (state_spec a M32)) f f1
+       acc
+    }
+    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) f
+      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) f1 acc);
+  (==) { repeati_def n_blocks1 f1 acc }
+    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) f
+      (update_nblocks #a #M32 (S.length input1) input1 acc);
+  (==) {
+    Classical.forall_intro_2 ext2;
+    Lib.Sequence.Lemmas.repeati_right_extensionality n_blocks2 n_blocks1 f2 f
+       (update_nblocks #a #M32 (S.length input1) input1 acc)
+    }
+    repeat_right 0 n_blocks2 (fixed_a (state_spec a M32)) f2
+      (update_nblocks #a #M32 (S.length input1) input1 acc);
+  (==) { repeati_def n_blocks2 f2 (update_nblocks #a #M32 (S.length input1) input1 acc) }
     update_nblocks #a #M32 len2 input2 (update_nblocks #a #M32 len1 input1 acc);
   }
 
