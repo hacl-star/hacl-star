@@ -94,18 +94,78 @@ val mk_expand:
   hmac: Hacl.HMAC.compute_st a ->
   expand_st a
 
+[@@ Comment "Expand pseudorandom key to desired length.
+
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from. Can be a zero-length string.
+@param infolen Length of context and application specific information.
+@param len Length of output keying material."]
 val expand_sha2_256: expand_st SHA2_256
 
+[@@ Comment "Extract a fixed-length pseudorandom key from input keying material.
+
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material."]
 val extract_sha2_256: extract_st SHA2_256
 
+[@@ Comment "Expand pseudorandom key to desired length.
+
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from. Can be a zero-length string.
+@param infolen Length of context and application specific information.
+@param len Length of output keying material."]
 val expand_sha2_512: expand_st SHA2_512
 
+[@@ Comment "Extract a fixed-length pseudorandom key from input keying material.
+
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material."]
 val extract_sha2_512: extract_st SHA2_512
 
+[@@ Comment "Expand pseudorandom key to desired length.
+
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from. Can be a zero-length string.
+@param infolen Length of context and application specific information.
+@param len Length of output keying material."]
 val expand_blake2s_32: expand_st Blake2S
 
+[@@ Comment "Extract a fixed-length pseudorandom key from input keying material.
+
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material."]
 val extract_blake2s_32: extract_st Blake2S
 
+[@@ Comment "Expand pseudorandom key to desired length.
+
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from. Can be a zero-length string.
+@param infolen Length of context and application specific information.
+@param len Length of output keying material."]
 val expand_blake2b_32: expand_st Blake2B
 
+[@@ Comment "Extract a fixed-length pseudorandom key from input keying material.
+
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material."]
 val extract_blake2b_32: extract_st Blake2B
