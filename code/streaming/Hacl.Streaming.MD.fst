@@ -375,7 +375,6 @@ let repeati_associative (a : alg { is_mb a })
   // assert (acc3_m32_t == acc2_m32_t);
   state_spec_v_extensionality a acc2 acc3
 
-
 val hash_vec_m32_is_repeat_blocks:
      a:sha2_alg
   -> len:Hacl.Spec.SHA2.len_lt_max_a_t a
@@ -439,7 +438,6 @@ let hash_vec_m32_is_repeat_blocks a len b st0 =
   tup1_lemma mb;
   assert (mb.(|0|) == mb);
   assert (st2_m32 == Pervasives.fst st2_spec_m32)
-
 
 val update_nblocks_with_last_sliced:
      a:alg { is_mb a }
@@ -533,6 +531,44 @@ let lemma_split_at_last_lazy (l:pos) (b: S.seq uint8) :
   let n, rem = Lib.UpdateMulti.split_at_last_lazy_nb_rem l len in
   assert (rem % l == len % l)
 
+val update_last_one_block (a: alg { is_mb a })
+  (totlen:len_t a)
+  (b : Hacl.Spec.SHA2.Vec.multiseq Hacl.Spec.SHA2.Vec.(lanes a M32) (block_length a))
+  (s : Hacl.Spec.SHA2.Vec.multiseq Hacl.Spec.SHA2.Vec.(lanes a M32) 0)
+  (st : Hacl.Spec.SHA2.Vec.state_spec a Hacl.Spec.SHA2.Vec.M32)
+  : Lemma
+      // Why is that not automatically derived
+      (requires block_length a `less_than_max_input_length` a)
+      (ensures Hacl.Spec.SHA2.Vec.(
+         update_last totlen (block_length a) b st ==
+          update_last totlen 0 s (update_block #a #M32 (block_length a) b 0 st)))
+
+let update_last_one_block a totlen b s st =
+  let open Lib.IntTypes in
+  let open Hacl.Spec.SHA2.Vec in
+  let len1 = 0 in
+  let len2 = block_length a in
+
+  let blocks1 = padded_blocks a len1 in
+  assert (blocks1 == 1);
+  let blocks2 = padded_blocks a len2 in
+  assert (blocks2 == 2);
+
+  let total_len_bits = secret (shift_left #(len_int_type a) totlen 3ul) in
+  let totlen_seq = Lib.ByteSequence.uint_to_bytes_be #(len_int_type a) total_len_bits in
+
+  let (b01, b11) = load_last #a #M32 totlen_seq (1 * block_length a) len1 s in
+  let (b02, b12) = load_last #a #M32 totlen_seq (2 * block_length a) len2 b in
+
+  assert (update_last totlen len2 b st == update b12 (update b02 st));
+  assume (b02 == b);
+  assume (get_multiblock_spec len2 b 0 == b);
+  assert (update_block #a #M32 len2 b 0 st == update b st);
+
+  assert (update_last totlen 0 s (update b st) == update b01 (update b st));
+
+  assume (b12 == b01)
+
 let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
     Lemma (requires S.length input <= Some?.v (Spec.Agile.Hash.max_input_length a))
     (ensures (
@@ -587,8 +623,15 @@ let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
     // with an unfold of update_nblocks/repeati obtain update_nblocks (blocks @@ last).
     // We also need that update_last of an empty sequence is a noop to prove that
     // st == st_last
-    assume (st == st_last);
-    assume (hash2 == st_last);
+//    assume (st == st_last);
+    repeati_associative a hash0 blocks last;
+    assert (st == update_nblocks #a #M32 (block_length a) last hash1);
+    Lib.LoopCombinators.unfold_repeati 1 (update_block #a #M32 (block_length a) last) hash1 0;
+    Lib.LoopCombinators.eq_repeati0 1 (update_block #a #M32 (block_length a) last) hash1;
+    assert (st == update_block #a #M32 (block_length a) last 0 hash1);
+
+    update_last_one_block a totlen last mb hash1;
+    assert (hash2 == st_last);
 
     assert ((get_multilast_spec #a #M32 len input).(|0|) ==
       Seq.slice input.(|0|) (len - rem) len);
