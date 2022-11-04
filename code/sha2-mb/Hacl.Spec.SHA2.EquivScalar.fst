@@ -674,18 +674,19 @@ let update_multi_is_repeat_blocks_multi a len b st0 pad_s =
   repeat_blocks_multi_extensionality (block_length a) blocks repeat_f (update a) st0
 
 
-val hash_is_repeat_blocks:
-     a:sha2_alg
-  -> len:len_lt_max_a_t a
-  -> b:seq uint8{length b = len}
-  -> st0:words_state a ->
-  Lemma
-   (let len' : len_t a = mk_len_t a len in
-    let st = update_nblocks a len b st0 in
-    let rem = len % block_length a in
-    let mb = Seq.slice b (len - rem) len in
-    update_last a len' rem mb st ==
-    LSeq.repeat_blocks (block_length a) b (update a) (update_last a len') st0)
+let update_nblocks_is_repeat_blocks_multi a len b st0 =
+  let bs = block_length a in
+  let nb = len / bs in
+  let acc = Loops.repeati nb (repeat_blocks_f bs b (update a) nb) st0 in
+
+  let aux (i:nat{i < nb}) (acc:words_state a) :
+    Lemma (repeat_blocks_f bs b (update a) nb i acc == update_block a len b i acc) = () in
+  Classical.forall_intro_2 aux;
+  LSeqLemmas.repeati_extensionality nb (repeat_blocks_f bs b (update a) nb) (update_block a len b) st0;
+  assert (acc == update_nblocks a len b st0);
+
+  LSeq.lemma_repeat_blocks_multi bs b (update a) st0
+
 
 let hash_is_repeat_blocks a len b st0 =
   let bs = block_length a in

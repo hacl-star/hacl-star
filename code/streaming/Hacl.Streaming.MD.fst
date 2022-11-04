@@ -247,7 +247,73 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
 #pop-options
 
-let eq_lanes (a: alg { is_mb a }): Lemma Hacl.Spec.SHA2.Vec.(1 == lanes a M32) = ()
+val update_nblocks_vec_m32_is_repeat_blocks_multi:
+     a:sha2_alg
+  -> len:Hacl.Spec.SHA2.len_lt_max_a_t a{len % block_length a = 0}
+  -> b:Seq.lseq uint8 len
+  -> st0:Hacl.Spec.SHA2.Vec.(state_spec a M32) ->
+  Lemma
+   (let open Lib.Sequence in
+    let open Hacl.Spec.SHA2.Vec in
+    let b = b <: multiseq 1 len in
+    let st = update_nblocks #a #M32 len b st0 in
+
+    let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
+    let st0_m32 = (st0_m32, ()) <: words_state a in
+    let st_m32 = (state_spec_v st).[0] <: words_state' a in
+    let st_m32 = (st_m32, ()) <: words_state a in
+    st_m32 == repeat_blocks_multi (block_length a) b (Hacl.Spec.SHA2.update a) st0_m32)
+
+let update_nblocks_vec_m32_is_repeat_blocks_multi a len b st0 =
+  let open Lib.NTuple in
+  let open Lib.Sequence in
+  let open Hacl.Spec.SHA2.Vec in
+  let b = b <: multiseq 1 len in
+  let st1 = update_nblocks #a #M32 len b st0 in
+
+  let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
+  let st0_m32_t = (st0_m32, ()) <: words_state a in
+  let st1_m32 = (state_spec_v st1).[0] <: words_state' a in
+  let st1_m32_t = (st1_m32, ()) <: words_state a in
+  let st1_spec_m32 = Hacl.Spec.SHA2.update_nblocks a len b st0_m32_t in
+
+  Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi a len b st0_m32_t;
+  assert (st1_spec_m32 ==
+    repeat_blocks_multi (block_length a) b (Hacl.Spec.SHA2.update a) st0_m32_t);
+
+  Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #a #M32 len b st0 0;
+  tup1_lemma b;
+  assert (b.(|0|) == b);
+  assert (st1_m32 == Pervasives.fst st1_spec_m32);
+  assert (Pervasives.snd st1_spec_m32 = ());
+  assert (st1_m32_t == st1_spec_m32)
+
+
+let state_spec_v_extensionality (a : alg { is_mb a })
+  (acc1: Hacl.Spec.SHA2.Vec.(state_spec a M32))
+  (acc2: Hacl.Spec.SHA2.Vec.(state_spec a M32)) :
+  Lemma
+  (requires (let open Hacl.Spec.SHA2.Vec in
+     Lib.Sequence.index (state_spec_v acc1) 0 ==
+     Lib.Sequence.index (state_spec_v acc2) 0))
+  (ensures acc1 == acc2) =
+
+  let open Lib.Sequence in
+  let open Lib.IntVector in
+  let open Hacl.Spec.SHA2.Vec in
+  allow_inversion alg;
+  let acc1_s = (state_spec_v acc1).[0] <: lseq (word a) 8 in
+  let acc2_s = (state_spec_v acc2).[0] <: lseq (word a) 8 in
+
+  let aux (i:nat{i < 8}) : Lemma (acc1.[i] == acc2.[i]) =
+    assert (index (vec_v acc1.[i]) 0 == index #(word a) #8 acc1_s i);
+    assert (index (vec_v acc2.[i]) 0 == index #(word a) #8 acc2_s i);
+    assert (index (vec_v acc1.[i]) 0 == index (vec_v acc2.[i]) 0);
+    eq_intro (vec_v acc1.[i]) (vec_v acc2.[i]);
+    vecv_extensionality acc1.[i] acc2.[i] in
+
+  Classical.forall_intro aux;
+  eq_intro acc1 acc2
 
 let repeati_associative (a : alg { is_mb a })
   (acc: Hacl.Spec.SHA2.Vec.(state_spec a M32))
@@ -265,231 +331,209 @@ let repeati_associative (a : alg { is_mb a })
       update_nblocks #a #M32 (S.length input2) (input2 <: multiseq 1 (S.length input2))
         (update_nblocks #a #M32 (S.length input1) (input1 <: multiseq 1 (S.length input1)) acc)))
 =
+  let open Lib.NTuple in
+  let open Lib.Sequence in
   let open Hacl.Spec.SHA2.Vec in
   let input = S.append input1 input2 in
-  FStar.Math.Lemmas.lemma_mod_plus_distr_l (S.length input1) (S.length input2) (Spec.Agile.Hash.block_length a);
-  assert (S.length input % U32.v (D.block_len a) = 0);
-  let open Lib.LoopCombinators in
   let len = S.length input in
-  let n_blocks = len / block_length a in
   let len1 = S.length input1 in
-  let n_blocks1 = len1 / block_length a in
   let len2 = S.length input2 in
-  let n_blocks2 = len2 / block_length a in
-  eq_lanes a;
-  calc (==) {
-    multiseq 1 (S.length input);
-  (==) { }
-    multiseq (lanes a M32) (S.length input);
-  };
-  let input = input <: multiseq 1 (S.length input) in
-  let input' = coerce #(multiseq (lanes a M32) (S.length input)) input in
-  let input1 = input1 <: multiseq 1 (S.length input1) in
-  let input1' = coerce #(multiseq (lanes a M32) (S.length input1)) input1 in
-  let input2 = input2 <: multiseq 1 (S.length input2) in
-  let input2' = coerce #(multiseq (lanes a M32) (S.length input2)) input2 in
-  assert (input1 == input1' /\ input2 == input2' /\ input == input');
-  assert (n_blocks = n_blocks1 + n_blocks2);
-  let eq (): Lemma (input1 == input1') = () in
+  let input = input <: multiseq 1 len in
+  let input1 = input1 <: multiseq 1 len1 in
+  let input2 = input2 <: multiseq 1 len2 in
 
-  let f = update_block #a #M32 len input in
-  let f1 = update_block #a #M32 len1 input1 in
-  let f2 = update_block #a #M32 len2 input2 in
-  let ext1 (i:nat{i < n_blocks1}) (acc: fixed_a (state_spec a M32) i) : Lemma (f i acc == f1 i acc) =
-    calc (==) {
-      Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a)));
-    (==) {
-      Lib.NTuple.(
-        ntup1_lemma #_ #1 (createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-          (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))))
-    }
-      Lib.NTuple.((createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))).(|0|));
-    (==) {
-      Lib.NTuple.(createi_lemma 1
-        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))
-        0)
-    }
-      Lib.NTuple.((fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a))) 0;
-    (==) { }
-      Lib.NTuple.(Seq.slice input'.(|0|) (i * block_length a) (i * block_length a + block_length a));
-    (==) { Lib.NTuple.(ntup1_lemma #_ #1 input') }
-      Seq.slice (input <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a);
-    (==) { S.lemma_eq_intro
-      (Seq.slice (input <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a))
-      (Seq.slice (input1 <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a))
-    }
-      Seq.slice (input1 <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a);
-    (==) { Lib.NTuple.(ntup1_lemma #_ #1 input1') }
-      Lib.NTuple.(Seq.slice input1'.(|0|) (i * block_length a) (i * block_length a + block_length a));
-    (==) { }
-      Lib.NTuple.((fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))) 0;
-    (==) {
-      Lib.NTuple.(createi_lemma 1
-        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))
-        0)
-    }
-      Lib.NTuple.((createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))).(|0|));
-    (==) {
-      Lib.NTuple.(
-        ntup1_lemma #_ #1 (createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-          (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a))))
-    }
-      Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a)));
+  let acc_m32 = (state_spec_v acc).[0] <: words_state' a in
+  let acc_m32 = (acc_m32, ()) <: words_state a in
+  let bl = block_length a in
+  Lib.Sequence.Lemmas.repeat_blocks_multi_split bl
+    len1 input (Hacl.Spec.SHA2.update a) acc_m32;
 
-    };
-    calc (==) {
-      f1 i acc;
-    (==) { }
-      update (get_multiblock_spec (S.length input1) input1' i) acc;
-    (==) { _ by FStar.Tactics.(norm [ delta_only [ `%get_multiblock_spec; `%uint8 ]]; trefl ()) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) (lanes a M32)
-        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { _ by FStar.Tactics.(l_to_r [`eq_lanes]) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input1'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { (* above *) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { _ by FStar.Tactics.(l_to_r [`eq_lanes]) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) (lanes a M32)
-        (fun j -> Seq.slice input'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { _ by FStar.Tactics.(norm [ delta_only [ `%get_multiblock_spec; `%uint8 ]]; trefl ()) }
-      update (get_multiblock_spec (S.length input) input' i) acc;
-    }
-  in
-  let ext2 (i:nat{i < n_blocks2}) (acc: fixed_a (state_spec a M32) i) : Lemma (f2 i acc == f (i + n_blocks1) acc) =
-    let i' = i + n_blocks1 in
-    calc (==) {
-      Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input'.(|j|) (i' * block_length a) (i' * block_length a + block_length a)));
-    (==) {
-      Lib.NTuple.(
-        ntup1_lemma #_ #1 (createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-          (fun j -> Seq.slice input'.(|j|) (i' * block_length a) (i' * block_length a + block_length a))))
-    }
-      Lib.NTuple.((createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input'.(|j|) (i' * block_length a) (i' * block_length a + block_length a))).(|0|));
-    (==) {
-      Lib.NTuple.(createi_lemma 1
-        (fun j -> Seq.slice input'.(|j|) (i' * block_length a) (i' * block_length a + block_length a))
-        0)
-    }
-      Lib.NTuple.((fun j -> Seq.slice input'.(|j|) (i' * block_length a) (i' * block_length a + block_length a))) 0;
-    (==) { }
-      Lib.NTuple.(Seq.slice input'.(|0|) (i' * block_length a) (i' * block_length a + block_length a));
-    (==) { Lib.NTuple.(ntup1_lemma #_ #1 input') }
-      Seq.slice (input <: S.seq uint8) (i' * block_length a) (i' * block_length a + block_length a);
-    (==) { S.lemma_eq_intro
-      (Seq.slice (input <: S.seq uint8) (i' * block_length a) (i' * block_length a + block_length a))
-      (Seq.slice (input2 <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a))
-    }
-      Seq.slice (input2 <: S.seq uint8) (i * block_length a) (i * block_length a + block_length a);
-    (==) { Lib.NTuple.(ntup1_lemma #_ #1 input2') }
-      Lib.NTuple.(Seq.slice input2'.(|0|) (i * block_length a) (i * block_length a + block_length a));
-    (==) { }
-      Lib.NTuple.((fun j -> Seq.slice input2'.(|j|) (i * block_length a) (i * block_length a + block_length a))) 0;
-    (==) {
-      Lib.NTuple.(createi_lemma 1
-        (fun j -> Seq.slice input2'.(|j|) (i * block_length a) (i * block_length a + block_length a))
-        0)
-    }
-      Lib.NTuple.((createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input2'.(|j|) (i * block_length a) (i * block_length a + block_length a))).(|0|));
-    (==) {
-      Lib.NTuple.(
-        ntup1_lemma #_ #1 (createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-          (fun j -> Seq.slice input2'.(|j|) (i * block_length a) (i * block_length a + block_length a))))
-    }
-      Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input2'.(|j|) (i * block_length a) (i * block_length a + block_length a)));
+  Seq.lemma_eq_intro (Seq.slice input 0 len1) input1;
+  Seq.lemma_eq_intro (Seq.slice input len1 len) input2;
+  assert (Seq.slice input 0 len1 == input1);
+  assert (Seq.slice input len1 len == input2);
+  assert (repeat_blocks_multi bl input (Hacl.Spec.SHA2.update a) acc_m32 ==
+    repeat_blocks_multi bl input2 (Hacl.Spec.SHA2.update a)
+      (repeat_blocks_multi bl input1 (Hacl.Spec.SHA2.update a) acc_m32));
 
-    };
-    calc (==) {
-      f2 i acc;
-    (==) { }
-      update (get_multiblock_spec (S.length input2) input2' i) acc;
-    (==) { _ by FStar.Tactics.(norm [ delta_only [ `%get_multiblock_spec; `%uint8 ]]; trefl ()) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) (lanes a M32)
-        (fun j -> Seq.slice input2'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { _ by FStar.Tactics.(l_to_r [`eq_lanes]) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input2'.(|j|) (i * block_length a) (i * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { (* above *) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) 1
-        (fun j -> Seq.slice input'.(|j|) (i' * block_length a) (i' * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { _ by FStar.Tactics.(l_to_r [`eq_lanes]) } (
-      let ms = Lib.NTuple.(createi #(Seq.lseq Lib.IntTypes.uint8 (block_length a)) (lanes a M32)
-        (fun j -> Seq.slice input'.(|j|) (i' * block_length a) (i' * block_length a + block_length a)))
-      in
-      update ms acc
-    );
-    (==) { _ by FStar.Tactics.(norm [ delta_only [ `%get_multiblock_spec; `%uint8 ]]; trefl ()) }
-      update (get_multiblock_spec (S.length input) input' i') acc;
-    }
-  in
+  let acc1 = update_nblocks #a #M32 len1 input1 acc in
+  let acc2 = update_nblocks #a #M32 len2 input2 acc1 in
+  let acc3 = update_nblocks #a #M32 len input acc in
+  // let acc1_m32 = (state_spec_v acc1).[0] <: words_state' a in
+  // let acc1_m32_t = (acc1_m32, ()) <: words_state a in
+  // let acc2_m32 = (state_spec_v acc2).[0] <: words_state' a in
+  // let acc2_m32_t = (acc2_m32, ()) <: words_state a in
+  // let acc3_m32 = (state_spec_v acc3).[0] <: words_state' a in
+  // let acc3_m32_t = (acc3_m32, ()) <: words_state a in
+
+  update_nblocks_vec_m32_is_repeat_blocks_multi a len input acc;
+  update_nblocks_vec_m32_is_repeat_blocks_multi a len1 input1 acc;
+  update_nblocks_vec_m32_is_repeat_blocks_multi a len2 input2 acc1;
+  // assert (acc1_m32_t == repeat_blocks_multi bl input1 (Hacl.Spec.SHA2.update a) acc_m32);
+  // assert (acc2_m32_t == repeat_blocks_multi bl input2 (Hacl.Spec.SHA2.update a) acc1_m32_t);
+  // assert (acc3_m32_t == repeat_blocks_multi bl input (Hacl.Spec.SHA2.update a) acc_m32);
+  // assert (acc3_m32_t == acc2_m32_t);
+  state_spec_v_extensionality a acc2 acc3
 
 
-  // TODO: this proof could be greatly simplified by following the structure of
-  // hash_is_repeat_blocks in Hacl.Spec.SHA2.EquivScalar. Sketch:
-  // update_nblocks --> repeati [def]
-  // repeati --> repeat_blocks [repeati_extensionality]
-  // repeat_blocks --> repeat_blocks (repeat_blocks ...) [repeat_blocks_split]
-  // and conversely
-  calc (==) {
-    update_nblocks #a #M32 (S.length input) input acc;
-  (==) { (* def *) } (
-    repeati n_blocks (update_block #a #M32 len input) acc
-  );
-  (==) { repeati_def n_blocks f acc }
-    repeat_right 0 n_blocks (fixed_a (state_spec a M32)) f acc;
-  (==) { repeat_right_plus 0 n_blocks1 n_blocks (fixed_a (state_spec a M32)) f acc }
-    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) f
-      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) f acc);
-  (==) {Classical.forall_intro_2 ext1;
-    Lib.Sequence.Lemmas.repeat_right_extensionality n_blocks1 0
-       (fixed_a (state_spec a M32)) (fixed_a (state_spec a M32)) f f1
-       acc
-    }
-    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) f
-      (repeat_right 0 n_blocks1 (fixed_a (state_spec a M32)) f1 acc);
-  (==) { repeati_def n_blocks1 f1 acc }
-    repeat_right n_blocks1 n_blocks (fixed_a (state_spec a M32)) f
-      (update_nblocks #a #M32 (S.length input1) input1 acc);
-  (==) {
-    Classical.forall_intro_2 ext2;
-    Lib.Sequence.Lemmas.repeati_right_extensionality n_blocks2 n_blocks1 f2 f
-       (update_nblocks #a #M32 (S.length input1) input1 acc)
-    }
-    repeat_right 0 n_blocks2 (fixed_a (state_spec a M32)) f2
-      (update_nblocks #a #M32 (S.length input1) input1 acc);
-  (==) { repeati_def n_blocks2 f2 (update_nblocks #a #M32 (S.length input1) input1 acc) }
-    update_nblocks #a #M32 len2 input2 (update_nblocks #a #M32 len1 input1 acc);
-  }
+val hash_vec_m32_is_repeat_blocks:
+     a:sha2_alg
+  -> len:Hacl.Spec.SHA2.len_lt_max_a_t a
+  -> b:Seq.lseq uint8 len
+  -> st0:Hacl.Spec.SHA2.Vec.(state_spec a M32) ->
+  Lemma
+   (let open Lib.Sequence in
+    let open Hacl.Spec.SHA2.Vec in
+    let totlen : len_t a = Hacl.Spec.SHA2.mk_len_t a len in
+    let b = b <: multiseq 1 len in
+    let st = update_nblocks #a #M32 len b st0 in
+    let rem = len % block_length a in
+    let mb = Seq.slice b (len - rem) len in
+    let mb = mb <: multiseq 1 rem in
+    let st_last = update_last #a #M32 totlen rem mb st in
+
+    let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
+    let st0_m32 = (st0_m32, ()) <: words_state a in
+    let st_last_m32 = (state_spec_v st_last).[0] <: words_state' a in
+    let st_last_m32 = (st_last_m32, ()) <: words_state a in
+
+    st_last_m32 == repeat_blocks (block_length a) b
+      (Hacl.Spec.SHA2.update a) (Hacl.Spec.SHA2.update_last a totlen) st0_m32)
+
+let hash_vec_m32_is_repeat_blocks a len b st0 =
+  let open Lib.NTuple in
+  let open Lib.Sequence in
+  let open Hacl.Spec.SHA2.Vec in
+  let totlen : len_t a = Hacl.Spec.SHA2.mk_len_t a len in
+  let rem = len % block_length a in
+  let mb = Seq.slice b (len - rem) len in
+  let b = b <: multiseq 1 len in
+  let mb = mb <: multiseq 1 rem in
+  let st1 = update_nblocks #a #M32 len b st0 in
+  let st2 = update_last #a #M32 totlen rem mb st1 in
+
+  let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
+  let st0_m32_t = (st0_m32, ()) <: words_state a in
+  let st1_m32 = (state_spec_v st1).[0] <: words_state' a in
+  let st1_m32_t = (st1_m32, ()) <: words_state a in
+  let st2_m32 = (state_spec_v st2).[0] <: words_state' a in
+  let st2_m32_t = (st2_m32, ()) <: words_state a in
+
+  let st1_spec_m32 = Hacl.Spec.SHA2.update_nblocks a len b st0_m32_t in
+  let st2_spec_m32 = Hacl.Spec.SHA2.update_last a totlen rem mb st1_spec_m32 in
+  Hacl.Spec.SHA2.EquivScalar.hash_is_repeat_blocks a len b st0_m32_t;
+  assert (st2_spec_m32 ==
+    Lib.Sequence.repeat_blocks (block_length a) b
+      (Hacl.Spec.SHA2.update a) (Hacl.Spec.SHA2.update_last a totlen) st0_m32_t);
+
+  Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #a #M32 len b st0 0;
+  // assert ((state_spec_v (update_nblocks len b st0)).[0] ==
+  //   Pervasives.fst (Hacl.Spec.SHA2.update_nblocks a len b.(|0|) ((state_spec_v st0).[0], ())));
+  // assert ((state_spec_v st1).[0] ==
+  //   Pervasives.fst (Hacl.Spec.SHA2.update_nblocks a len b.(|0|) st0_m32_t));
+  tup1_lemma b;
+  assert (b.(|0|) == b);
+  assert (st1_m32 == Pervasives.fst st1_spec_m32);
+
+  Hacl.Spec.SHA2.Equiv.update_last_lemma_l totlen rem mb st1 0;
+  tup1_lemma mb;
+  assert (mb.(|0|) == mb);
+  assert (st2_m32 == Pervasives.fst st2_spec_m32)
+
+
+val update_nblocks_with_last_sliced:
+     a:alg { is_mb a }
+  -> len:Hacl.Spec.SHA2.len_lt_max_a_t a
+  -> b:Seq.lseq uint8 len
+  -> st0:Hacl.Spec.SHA2.Vec.(state_spec a M32) ->
+  Lemma
+   (let open Hacl.Spec.SHA2.Vec in
+    let b = b <: multiseq 1 len in
+    let st = update_nblocks #a #M32 len b st0 in
+
+    let rem = len % block_length a in
+    let blocks = Seq.slice b 0 (len - rem) in
+    let blocks = blocks <: multiseq 1 (len - rem) in
+    let st_sliced = update_nblocks #a #M32 (len - rem) blocks st0 in
+
+    let totlen : len_t a = Hacl.Spec.SHA2.mk_len_t a len in
+    let mb = Seq.slice b (len - rem) len in
+    let mb = mb <: multiseq 1 rem in
+
+    update_last #a #M32 totlen rem mb st ==
+    update_last #a #M32 totlen rem mb st_sliced)
+
+let update_nblocks_with_last_sliced a len b st0 =
+  let open Lib.NTuple in
+  let open Lib.Sequence in
+  let open Hacl.Spec.SHA2.Vec in
+  let totlen : len_t a = Hacl.Spec.SHA2.mk_len_t a len in
+  let b = b <: multiseq 1 len in
+  let st = update_nblocks #a #M32 len b st0 in
+  let rem = len % block_length a in
+  let mb = Seq.slice b (len - rem) len in
+  let mb = mb <: multiseq 1 rem in
+  let st_last = update_last #a #M32 totlen rem mb st in
+
+  let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
+  let st0_m32_t = (st0_m32, ()) <: words_state a in
+  //let st_m32 = (state_spec_v st).[0] <: words_state' a in
+  //let st_m32_t = (st_m32, ()) <: words_state a in
+  let st_last_m32 = (state_spec_v st_last).[0] <: words_state' a in
+  let st_last_m32_t = (st_last_m32, ()) <: words_state a in
+
+  hash_vec_m32_is_repeat_blocks a len b st0;
+  assert (st_last_m32_t == repeat_blocks (block_length a) b
+    (Hacl.Spec.SHA2.update a) (Hacl.Spec.SHA2.update_last a totlen) st0_m32_t);
+  Lib.Sequence.Lemmas.lemma_repeat_blocks_via_multi (block_length a) b
+    (Hacl.Spec.SHA2.update a) (Hacl.Spec.SHA2.update_last a totlen) st0_m32_t;
+
+  let blocks = Seq.slice b 0 (len - rem) in
+  let blocks = blocks <: multiseq 1 (len - rem) in
+  assert (st_last_m32_t ==
+    Hacl.Spec.SHA2.update_last a totlen rem mb
+      (repeat_blocks_multi (block_length a) blocks
+        (Hacl.Spec.SHA2.update a) st0_m32_t));
+
+  let st_sliced = update_nblocks #a #M32 (len - rem) blocks st0 in
+  let st_sliced_last = update_last #a #M32 totlen rem mb st_sliced in
+
+  let st_sliced_m32 = (state_spec_v st_sliced).[0] <: words_state' a in
+  let st_sliced_m32_t = (st_sliced_m32, ()) <: words_state a in
+  let st_slicedl_m32 = (state_spec_v st_sliced_last).[0] <: words_state' a in
+  let st_slicedl_m32_t = (st_slicedl_m32, ()) <: words_state a in
+
+  update_nblocks_vec_m32_is_repeat_blocks_multi a (len - rem) blocks st0;
+  assert (st_sliced_m32_t ==
+    repeat_blocks_multi (block_length a) blocks
+      (Hacl.Spec.SHA2.update a) st0_m32_t);
+
+  Hacl.Spec.SHA2.Equiv.update_last_lemma_l totlen rem mb st_sliced 0;
+  tup1_lemma mb;
+  assert (mb.(|0|) == mb);
+  assert (st_slicedl_m32 == st_last_m32);
+  state_spec_v_extensionality a st_last st_sliced_last
+
+
+let lemma_split_at_last_lazy (l:pos) (b: S.seq uint8) :
+  Lemma (let blocks, last = Lib.UpdateMulti.split_at_last_lazy l b in
+    let len = Seq.length b in
+    let rem = len % l in
+    let blocks_s = Seq.slice b 0 (len - rem) in
+    let last_s = Seq.slice b (len - rem) len in
+    blocks == blocks_s /\ last == last_s) =
+
+  let blocks, last = Lib.UpdateMulti.split_at_last_lazy l b in
+  let len = Seq.length b in
+  let rem_s = len % l in
+  let blocks_s = Seq.slice b 0 (len - rem_s) in
+  let last_s = Seq.slice b (len - rem_s) len in
+
+  let n, rem = Lib.UpdateMulti.split_at_last_lazy_nb_rem l len in
+  assert (rem % l == len % l);
+  //Seq.lemma_eq_intro last_s last;
+  admit()
+
 
 let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
     Lemma (requires S.length input <= Some?.v (Spec.Agile.Hash.max_input_length a))
@@ -504,8 +548,63 @@ let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
       let hash3 = finish hash2 in
       agile_of_lib hash3 `S.equal` Spec.Agile.Hash.hash a input))
 =
-  Hacl.Spec.SHA2.EquivScalar.hash_agile_lemma #a (S.length input) input;
-  admit ()
+  let open Lib.NTuple in
+  let open Lib.Sequence in
+  let open Hacl.Spec.SHA2.Vec in
+  let blocks, last = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
+
+  let hash0 = init a M32 in
+
+  let len = S.length input in
+  let totlen: len_t a = Hacl.Spec.SHA2.mk_len_t a len in
+  let input = input <: multiseq 1 len in
+
+  let rem = len % block_length a in
+  let input_blocks = Seq.slice input 0 (len - rem) in
+  let input_blocks = input_blocks <: multiseq 1 (len - rem) in
+  let mb = Seq.slice input (len - rem) len in
+  let mb = mb <: multiseq 1 rem in
+
+  lemma_split_at_last_lazy (block_length a) input;
+  assert (mb == last /\ input_blocks == blocks);
+  let blocks = blocks <: multiseq 1 (S.length blocks) in
+  let last = last <: multiseq 1 (S.length last) in
+
+  let hash1 = update_nblocks #a #M32 (len - rem) blocks hash0 in
+  let hash2 = update_last #a #M32 totlen rem last hash1 in
+  let hash3 = finish hash2 in
+
+  let st = update_nblocks #a #M32 len input hash0 in
+  let st_last = update_last #a #M32 totlen rem mb st in
+  let st_finish = finish st_last in
+
+  update_nblocks_with_last_sliced a len input hash0;
+  assert (hash2 == st_last);
+  assert (hash3 == st_finish);
+
+  assert ((get_multilast_spec #a #M32 len input).(|0|) ==
+    Seq.slice input.(|0|) (len - rem) len);
+  tup1_lemma input;
+  assert (input.(|0|) == input);
+  tup1_lemma mb;
+  assert (mb.(|0|) == mb);
+  assert ((get_multilast_spec #a #M32 len input).(|0|) == mb.(|0|));
+  Lib.NTuple.eq_intro (get_multilast_spec #a #M32 len input) mb;
+  assert (get_multilast_spec #a #M32 len input == mb);
+  assert (hash3 == hash len input);
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #a #M32 len input;
+  assert ((hash #a #M32 len input).(|0|) == Spec.Agile.Hash.hash a input.(|0|));
+  assert (hash3.(|0|) == Spec.Agile.Hash.hash a input.(|0|));
+  assert (hash3.(|0|) == Spec.Agile.Hash.hash a input);
+  //let hash3 = hash3.(|0|) <: lseq uint8 (hash_length a) in
+  //assert (hash3 == Spec.Agile.Hash.hash a input);
+  //let hash3_s = hash3 <: multiseq 1 (hash_length a) in
+  //assert (agile_of_lib #a hash3_s == hash3);
+  ntup1_lemma #_ #1 hash3;
+  assert (agile_of_lib #a hash3 == hash3.(|0|));
+  assert (agile_of_lib #a hash3 == Spec.Agile.Hash.hash a input)
+
 
 // Extraction loops otherwise. Using every flavor of noextract known to man.
 noextract [@@ noextract_to "krml" ]
