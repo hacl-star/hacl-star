@@ -77,17 +77,20 @@ let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
 // In this module, we re-reroute the agile hash implementation to use sha2_mb.
 inline_for_extraction noextract
-let is_mb = function SHA2_256 -> true | _ -> false
+let is_mb = function SHA2_224 | SHA2_256 -> true | _ -> false
 
 inline_for_extraction noextract
 let word (a: alg) = if is_mb a then Hacl.Spec.SHA2.Vec.(element_t a M32) else word a
 
+// Big up for Aymeric who dug this one to help me make the coercion work.
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
+
 inline_for_extraction noextract
 let init_elem (a : alg) : word a =
-  match a with
-  | MD5 | SHA1
-  | SHA2_224 -> Lib.IntTypes.u32 0
-  | SHA2_256 -> Hacl.Spec.SHA2.Vec.(zero_element SHA2_256 M32)
+  if is_mb a then
+    Hacl.Spec.SHA2.Vec.(zero_element a M32)
+  else match a with
+  | MD5 | SHA1 -> Lib.IntTypes.u32 0
   | SHA2_384 | SHA2_512 -> Lib.IntTypes.u64 0
   | SHA3_256 -> Lib.IntTypes.u64 0
 
@@ -150,9 +153,6 @@ let multibuf_is_buf (len: Lib.IntTypes.size_t): Lemma
   (==) { _ by FStar.Tactics.(norm [ iota; zeta; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ]]; trefl ()) }
     x:B.buffer uint8 { B.length x == Lib.IntTypes.v len };
   }
-
-// Big up for Aymeric who dug this one to help me make the coercion work.
-unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
 inline_for_extraction noextract
 let lib_of_agile (#a: alg { is_mb a }) (x: Spec.Agile.Hash.bytes_hash a):
@@ -607,7 +607,7 @@ let hacl_md (a:alg)// : block unit =
       match a with
       | MD5 -> Hacl.Hash.MD5.legacy_init s
       | SHA1 -> Hacl.Hash.SHA1.legacy_init s
-      | SHA2_224 -> Hacl.Hash.SHA2.init_224 s
+      | SHA2_224 -> Hacl.Impl.SHA2.Generic.init #SHA2_224 #Hacl.Spec.SHA2.Vec.M32 s
       | SHA2_256 -> Hacl.Impl.SHA2.Generic.init #SHA2_256 #Hacl.Spec.SHA2.Vec.M32 s
       | SHA2_384 -> Hacl.Hash.SHA2.init_384 s
       | SHA2_512 -> Hacl.Hash.SHA2.init_512 s
@@ -634,7 +634,6 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_update_multi
           | SHA1 -> Hacl.Hash.SHA1.legacy_update_multi
-          | SHA2_224 -> Hacl.Hash.SHA2.update_multi_224
           | SHA2_384 -> Hacl.Hash.SHA2.update_multi_384
           | SHA2_512 -> Hacl.Hash.SHA2.update_multi_512
           | SHA3_256 -> Hacl.Hash.SHA3.update_multi_256
@@ -662,7 +661,6 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_update_last
           | SHA1 -> Hacl.Hash.SHA1.legacy_update_last
-          | SHA2_224 -> Hacl.Hash.SHA2.update_last_224
           | SHA2_384 -> Hacl.Hash.SHA2.update_last_384
           | SHA2_512 -> Hacl.Hash.SHA2.update_last_512
           | SHA3_256 -> Hacl.Hash.SHA3.update_last_256
@@ -670,8 +668,7 @@ let hacl_md (a:alg)// : block unit =
         [@inline_let]
         let prevlen =
           match a with
-          | MD5 | SHA1
-          | SHA2_224 | SHA2_256 -> prevlen
+          | MD5 | SHA1 -> prevlen
           | SHA2_384 | SHA2_512 -> FStar.Int.Cast.Full.uint64_to_uint128 prevlen
           | SHA3_256 -> ()
         in
@@ -681,7 +678,7 @@ let hacl_md (a:alg)// : block unit =
       if is_mb a then
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
-        [@inline_let] let dst_lib = lib_of_buffer #32ul dst in
+        [@inline_let] let dst_lib = lib_of_buffer #(Hacl.Hash.Definitions.hash_len a) dst in
         lib_of_state a s;
         [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
         let h0 = ST.get () in
@@ -689,7 +686,7 @@ let hacl_md (a:alg)// : block unit =
         disjoint_multi_of_disjoint dst_lib state_lib;
         finish #a #M32 s dst_lib;
         Lib.MultiBuffer.loc_multi1 dst_lib;
-        Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 32ul) #1 dst;
+        Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 (Hacl.Hash.Definitions.hash_len a)) #1 dst;
         let h1 = ST.get () in
         Lib.MultiBuffer.as_seq_multi_lemma h1 dst_lib 0;
         Lib.NTuple.ntup1_lemma #(multiseq (lanes a M32) (hash_length a)) #1 (Lib.MultiBuffer.as_seq_multi h1 dst_lib)
@@ -699,7 +696,6 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_finish
           | SHA1 -> Hacl.Hash.SHA1.legacy_finish
-          | SHA2_224 -> Hacl.Hash.SHA2.finish_224
           | SHA2_384 -> Hacl.Hash.SHA2.finish_384
           | SHA2_512 -> Hacl.Hash.SHA2.finish_512
           | SHA3_256 -> Hacl.Hash.SHA3.finish_256
