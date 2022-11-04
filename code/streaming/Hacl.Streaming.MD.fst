@@ -514,14 +514,15 @@ let update_nblocks_with_last_sliced a len b st0 =
   assert (st_slicedl_m32 == st_last_m32);
   state_spec_v_extensionality a st_last st_sliced_last
 
-
 let lemma_split_at_last_lazy (l:pos) (b: S.seq uint8) :
-  Lemma (let blocks, last = Lib.UpdateMulti.split_at_last_lazy l b in
-    let len = Seq.length b in
-    let rem = len % l in
-    let blocks_s = Seq.slice b 0 (len - rem) in
-    let last_s = Seq.slice b (len - rem) len in
-    blocks == blocks_s /\ last == last_s) =
+  Lemma
+     (requires S.length b % l <> 0 \/ S.length b == 0)
+     (ensures (let blocks, last = Lib.UpdateMulti.split_at_last_lazy l b in
+        let len = Seq.length b in
+        let rem = len % l in
+        let blocks_s = Seq.slice b 0 (len - rem) in
+        let last_s = Seq.slice b (len - rem) len in
+        blocks == blocks_s /\ last == last_s)) =
 
   let blocks, last = Lib.UpdateMulti.split_at_last_lazy l b in
   let len = Seq.length b in
@@ -530,10 +531,7 @@ let lemma_split_at_last_lazy (l:pos) (b: S.seq uint8) :
   let last_s = Seq.slice b (len - rem_s) len in
 
   let n, rem = Lib.UpdateMulti.split_at_last_lazy_nb_rem l len in
-  assert (rem % l == len % l);
-  //Seq.lemma_eq_intro last_s last;
-  admit()
-
+  assert (rem % l == len % l)
 
 let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
     Lemma (requires S.length input <= Some?.v (Spec.Agile.Hash.max_input_length a))
@@ -566,45 +564,88 @@ let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
   let mb = Seq.slice input (len - rem) len in
   let mb = mb <: multiseq 1 rem in
 
-  lemma_split_at_last_lazy (block_length a) input;
-  assert (mb == last /\ input_blocks == blocks);
+
   let blocks = blocks <: multiseq 1 (S.length blocks) in
   let last = last <: multiseq 1 (S.length last) in
-
-  let hash1 = update_nblocks #a #M32 (len - rem) blocks hash0 in
-  let hash2 = update_last #a #M32 totlen rem last hash1 in
-  let hash3 = finish hash2 in
 
   let st = update_nblocks #a #M32 len input hash0 in
   let st_last = update_last #a #M32 totlen rem mb st in
   let st_finish = finish st_last in
 
-  update_nblocks_with_last_sliced a len input hash0;
-  assert (hash2 == st_last);
-  assert (hash3 == st_finish);
 
-  assert ((get_multilast_spec #a #M32 len input).(|0|) ==
-    Seq.slice input.(|0|) (len - rem) len);
-  tup1_lemma input;
-  assert (input.(|0|) == input);
-  tup1_lemma mb;
-  assert (mb.(|0|) == mb);
-  assert ((get_multilast_spec #a #M32 len input).(|0|) == mb.(|0|));
-  Lib.NTuple.eq_intro (get_multilast_spec #a #M32 len input) mb;
-  assert (get_multilast_spec #a #M32 len input == mb);
-  assert (hash3 == hash len input);
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #a #M32 len input;
-  assert ((hash #a #M32 len input).(|0|) == Spec.Agile.Hash.hash a input.(|0|));
-  assert (hash3.(|0|) == Spec.Agile.Hash.hash a input.(|0|));
-  assert (hash3.(|0|) == Spec.Agile.Hash.hash a input);
-  //let hash3 = hash3.(|0|) <: lseq uint8 (hash_length a) in
-  //assert (hash3 == Spec.Agile.Hash.hash a input);
-  //let hash3_s = hash3 <: multiseq 1 (hash_length a) in
-  //assert (agile_of_lib #a hash3_s == hash3);
-  ntup1_lemma #_ #1 hash3;
-  assert (agile_of_lib #a hash3 == hash3.(|0|));
-  assert (agile_of_lib #a hash3 == Spec.Agile.Hash.hash a input)
+  if rem = 0 && len <> 0 then (
+    assert (mb == S.empty);
+    assert (input_blocks `Seq.equal` (blocks `S.append` last));
 
+    let hash1 = update_nblocks #a #M32 (len - block_length a) blocks hash0 in
+    let hash2 = update_last #a #M32 totlen (block_length a) last hash1 in
+    let hash3 = finish hash2 in
+
+    // We need some reasoning about update_last here. In particular,
+    // that update_last of a block corresponds to update of this block to prove that
+    // hash2 == update_block last (update_nblocks blocks hash0) and combine it
+    // with an unfold of update_nblocks/repeati obtain update_nblocks (blocks @@ last).
+    // We also need that update_last of an empty sequence is a noop to prove that
+    // st == st_last
+    assume (st == st_last);
+    assume (hash2 == st_last);
+
+    assert ((get_multilast_spec #a #M32 len input).(|0|) ==
+      Seq.slice input.(|0|) (len - rem) len);
+    tup1_lemma input;
+    assert (input.(|0|) == input);
+    tup1_lemma mb;
+    assert (mb.(|0|) == mb);
+    assert ((get_multilast_spec #a #M32 len input).(|0|) == mb.(|0|));
+    Lib.NTuple.eq_intro (get_multilast_spec #a #M32 len input) mb;
+    assert (get_multilast_spec #a #M32 len input == mb);
+    assert (hash3 == hash len input);
+    Hacl.Spec.SHA2.Equiv.hash_agile_lemma #a #M32 len input;
+    assert ((hash #a #M32 len input).(|0|) == Spec.Agile.Hash.hash a input.(|0|));
+    assert (hash3.(|0|) == Spec.Agile.Hash.hash a input.(|0|));
+    assert (hash3.(|0|) == Spec.Agile.Hash.hash a input);
+    //let hash3 = hash3.(|0|) <: lseq uint8 (hash_length a) in
+    //assert (hash3 == Spec.Agile.Hash.hash a input);
+    //let hash3_s = hash3 <: multiseq 1 (hash_length a) in
+    //assert (agile_of_lib #a hash3_s == hash3);
+    ntup1_lemma #_ #1 hash3;
+    assert (agile_of_lib #a hash3 == hash3.(|0|));
+    assert (agile_of_lib #a hash3 == Spec.Agile.Hash.hash a input)
+
+  ) else (
+    lemma_split_at_last_lazy (block_length a) input;
+    assert (mb == last /\ input_blocks == blocks);
+
+    let hash1 = update_nblocks #a #M32 (len - rem) blocks hash0 in
+    let hash2 = update_last #a #M32 totlen rem last hash1 in
+    let hash3 = finish hash2 in
+
+    update_nblocks_with_last_sliced a len input hash0;
+    assert (hash2 == st_last);
+    assert (hash3 == st_finish);
+
+    assert ((get_multilast_spec #a #M32 len input).(|0|) ==
+      Seq.slice input.(|0|) (len - rem) len);
+    tup1_lemma input;
+    assert (input.(|0|) == input);
+    tup1_lemma mb;
+    assert (mb.(|0|) == mb);
+    assert ((get_multilast_spec #a #M32 len input).(|0|) == mb.(|0|));
+    Lib.NTuple.eq_intro (get_multilast_spec #a #M32 len input) mb;
+    assert (get_multilast_spec #a #M32 len input == mb);
+    assert (hash3 == hash len input);
+    Hacl.Spec.SHA2.Equiv.hash_agile_lemma #a #M32 len input;
+    assert ((hash #a #M32 len input).(|0|) == Spec.Agile.Hash.hash a input.(|0|));
+    assert (hash3.(|0|) == Spec.Agile.Hash.hash a input.(|0|));
+    assert (hash3.(|0|) == Spec.Agile.Hash.hash a input);
+    //let hash3 = hash3.(|0|) <: lseq uint8 (hash_length a) in
+    //assert (hash3 == Spec.Agile.Hash.hash a input);
+    //let hash3_s = hash3 <: multiseq 1 (hash_length a) in
+    //assert (agile_of_lib #a hash3_s == hash3);
+    ntup1_lemma #_ #1 hash3;
+    assert (agile_of_lib #a hash3 == hash3.(|0|));
+    assert (agile_of_lib #a hash3 == Spec.Agile.Hash.hash a input)
+  )
 
 // Extraction loops otherwise. Using every flavor of noextract known to man.
 noextract [@@ noextract_to "krml" ]
