@@ -43,6 +43,23 @@ let repeati_right_extensionality #a n lo_g f g acc0 =
   repeat_gen_right_extensionality n lo_g (Loops.fixed_a a) (Loops.fixed_a a) f g acc0
 
 
+let repeati_right_shift #a n f g acc0 =
+  let acc1 = g 0 acc0 in
+  repeati_right_extensionality n 1 f g acc1;
+  // Got:
+  // repeat_right 0 n (fun _ -> a) f acc1 == repeat_right 1 (n + 1) (fun _ -> a) g acc1
+  Loops.repeati_def n f acc1;
+  // Got:
+  // repeati n f acc1 == repeat_right 0 n (fun _ -> a) f acc1
+  Loops.repeat_right_plus 0 1 (n + 1) (Loops.fixed_a a) g acc0;
+  // Got:
+  // repeat_right 0 (n + 1) (fixed_a a) g acc0 ==
+  //   repeat_right 1 (n + 1) (fixed_a a) g (repeat_right 0 1 (fixed_a a) g acc0)
+  Loops.unfold_repeat_right 0 (n + 1) (Loops.fixed_a a) g acc0 0;
+  Loops.eq_repeat_right 0 (n + 1) (Loops.fixed_a a) g acc0;
+  Loops.repeati_def (n + 1) g acc0
+
+
 let repeat_gen_blocks_multi #inp_t blocksize mi hi n inp a f acc0 =
   Loops.repeat_right mi (mi + n) a (repeat_gen_blocks_f blocksize mi hi n inp a f) acc0
 
