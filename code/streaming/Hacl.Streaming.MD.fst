@@ -543,8 +543,28 @@ val update_last_one_block (a: alg { is_mb a })
          update_last totlen (block_length a) b st ==
           update_last totlen 0 s (update_block #a #M32 (block_length a) b 0 st)))
 
+let sub_update_sub (#a:Type) (len:Lib.IntTypes.size_nat)
+  (sub_st:Lib.IntTypes.size_nat{sub_st <= len})
+  (sub_len:Lib.IntTypes.size_nat{sub_st + sub_len <= len})
+  (i:Lib.Sequence.lseq a len)
+  (start:Lib.IntTypes.size_nat)
+  (n:Lib.IntTypes.size_nat{start + n <= sub_len})
+  (x:Lib.Sequence.lseq a n)
+  : Lemma (Lib.Sequence.(update_sub (sub i sub_st sub_len) start n x ==
+      sub (update_sub i (sub_st + start) n x) sub_st sub_len))
+  = let open Lib.Sequence in
+    let s1 = update_sub (sub i sub_st sub_len) start n x in
+    let s2 = sub (update_sub i (sub_st + start) n x) sub_st sub_len in
+    let aux (k:nat{k < sub_len}) : Lemma (index s1 k == index s2 k) =
+      admit()
+    in Classical.forall_intro aux;
+    assert (s1 `equal` s2)
+
+
 let update_last_one_block a totlen b s st =
+  let open Lib.NTuple in
   let open Lib.IntTypes in
+  let open Lib.Sequence in
   let open Hacl.Spec.SHA2.Vec in
   let len1 = 0 in
   let len2 = block_length a in
@@ -561,13 +581,69 @@ let update_last_one_block a totlen b s st =
   let (b02, b12) = load_last #a #M32 totlen_seq (2 * block_length a) len2 b in
 
   assert (update_last totlen len2 b st == update b12 (update b02 st));
-  assume (b02 == b);
-  assume (get_multiblock_spec len2 b 0 == b);
+
+  let l01, _ = load_last_blocks #a totlen_seq (block_length a) 0 s.(|0|) in
+  let l02, l12 = load_last_blocks #a totlen_seq (2 * block_length a) len2 b.(|0|) in
+
+  let last = create (2 * block_length a) (u8 0) in
+  let last1 = update_sub last 0 len2 b.(|0|) in
+  let last2 = last1.[len2] <- u8 0x80 in
+  let start = 2 * block_length a - len_length a in
+  let last3 = update_sub last2 start (len_length a) totlen_seq in
+
+  assert (l02 `Lib.Sequence.equal` b.(|0|));
+
+  let open FStar.Tactics in
+  assert (load_last #a #M32 totlen_seq (2 * block_length a) len2 b ==
+    load_last1 #a totlen_seq (2 * block_length a) len2 b) by (norm [delta_only [`%load_last]]);
+
+  tup1_lemma b02;
+  tup1_lemma b;
+  assert (b02 == b);
+
+  let last1' = update_sub last 0 len1 s.(|0|) in
+  assert (last `Lib.Sequence.equal` last1');
+
+  let last2' = last.[len1] <- u8 0x80 in
+  let last3' = update_sub last2' (block_length a - len_length a) (len_length a) totlen_seq in
+  assert (l01 == sub last3' 0 (block_length a));
+  assert (l12 == sub last3 (block_length a) (block_length a));
+
+  // To trigger the right patterns, we need to alternate between
+  // Seq.equal and Lib.Sequence.equal...
+  let lastone = create len2 (u8 0) in
+  assert (lastone `S.equal` S.create len2 (u8 0));
+  assert (sub last1 len2 len2 `Lib.Sequence.equal` S.create len2 (u8 0));
+  let last2one = lastone.[0] <- u8 0x80 in
+  assert (last2one `Lib.Sequence.equal` (sub last2 len2 len2));
+  assert (last2one `S.equal` (sub last2' 0 len2));
+
+  let last3one = update_sub last2one (len2 - len_length a) (len_length a) totlen_seq in
+
+  assert (last3one == update_sub (sub last2 len2 len2) (len2 - len_length a) (len_length a) totlen_seq);
+
+  sub_update_sub (2 * block_length a) len2 len2 last2 (len2 - len_length a) (len_length a) totlen_seq;
+
+  assert (last3one == sub last3 len2 len2);
+
+  sub_update_sub (2 * block_length a) 0 len2 last2' (len2 - len_length a) (len_length a) totlen_seq;
+  assert (last3one == sub last3' 0 len2);
+  assert (l01 == l12);
+
+  assert (load_last #a #M32 totlen_seq (block_length a) 0 s ==
+    load_last1 #a totlen_seq (block_length a) 0 s) by (norm [delta_only [`%load_last]]);
+
+  tup1_lemma b12;
+  tup1_lemma b01;
+
+  assert (b12 == b01);
+
+  Lib.NTuple.eq_intro (get_multiblock_spec #a #M32 len2 b 0) b;
+  assert (get_multiblock_spec len2 b 0 == b);
   assert (update_block #a #M32 len2 b 0 st == update b st);
 
-  assert (update_last totlen 0 s (update b st) == update b01 (update b st));
+  assert (update_last totlen 0 s (update b st) == update b01 (update b st))
 
-  assume (b12 == b01)
 
 let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
     Lemma (requires S.length input <= Some?.v (Spec.Agile.Hash.max_input_length a))
@@ -617,13 +693,6 @@ let sha2_mb_is_incremental (a: alg { is_mb a }) (input: S.seq uint8):
     let hash2 = update_last #a #M32 totlen (block_length a) last hash1 in
     let hash3 = finish hash2 in
 
-    // We need some reasoning about update_last here. In particular,
-    // that update_last of a block corresponds to update of this block to prove that
-    // hash2 == update_block last (update_nblocks blocks hash0) and combine it
-    // with an unfold of update_nblocks/repeati obtain update_nblocks (blocks @@ last).
-    // We also need that update_last of an empty sequence is a noop to prove that
-    // st == st_last
-//    assume (st == st_last);
     repeati_associative a hash0 blocks last;
     assert (st == update_nblocks #a #M32 (block_length a) last hash1);
     Lib.LoopCombinators.unfold_repeati 1 (update_block #a #M32 (block_length a) last) hash1 0;
