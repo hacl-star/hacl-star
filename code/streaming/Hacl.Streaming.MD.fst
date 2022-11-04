@@ -553,13 +553,24 @@ let sub_update_sub (#a:Type) (len:Lib.IntTypes.size_nat)
   : Lemma (Lib.Sequence.(update_sub (sub i sub_st sub_len) start n x ==
       sub (update_sub i (sub_st + start) n x) sub_st sub_len))
   = let open Lib.Sequence in
-    let s1 = update_sub (sub i sub_st sub_len) start n x in
-    let s2 = sub (update_sub i (sub_st + start) n x) sub_st sub_len in
+    let s1:lseq a sub_len = update_sub (sub i sub_st sub_len) start n x in
+    let s2:lseq a sub_len = sub (update_sub i (sub_st + start) n x) sub_st sub_len in
     let aux (k:nat{k < sub_len}) : Lemma (index s1 k == index s2 k) =
-      admit()
+      if k < start || k >= start + n then ()
+      else
+      calc (==) {
+        index s2 k;
+        (eq2 #a) { } // Unrolling sub. Need to expand == to help with typing
+        index (update_sub i (sub_st + start) n x) (sub_st + k);
+        (==) { }
+        index (sub (update_sub i (sub_st + start) n x) (sub_st + start) n) (k - start);
+        (==) { } // By postcondition of update_sub
+        index x (k - start);
+        (==) { () }
+        index s1 k;
+      }
     in Classical.forall_intro aux;
     assert (s1 `equal` s2)
-
 
 let update_last_one_block a totlen b s st =
   let open Lib.NTuple in
