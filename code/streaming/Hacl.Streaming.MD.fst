@@ -79,7 +79,7 @@ let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
 // In this module, we re-reroute the agile hash implementation to use sha2_mb.
 inline_for_extraction noextract
-let is_mb = function SHA2_224 | SHA2_256 -> true | _ -> false
+let is_mb = function SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true | _ -> false
 
 inline_for_extraction noextract
 let word (a: alg) = if is_mb a then Hacl.Spec.SHA2.Vec.(element_t a M32) else word a
@@ -93,7 +93,6 @@ let init_elem (a : alg) : word a =
     Hacl.Spec.SHA2.Vec.(zero_element a M32)
   else match a with
   | MD5 | SHA1 -> Lib.IntTypes.u32 0
-  | SHA2_384 | SHA2_512 -> Lib.IntTypes.u64 0
   | SHA3_256 -> Lib.IntTypes.u64 0
 
 inline_for_extraction noextract
@@ -874,8 +873,8 @@ let hacl_md (a:alg)// : block unit =
       | SHA1 -> Hacl.Hash.SHA1.legacy_init s
       | SHA2_224 -> Hacl.Impl.SHA2.Generic.init #SHA2_224 #Hacl.Spec.SHA2.Vec.M32 s
       | SHA2_256 -> Hacl.Impl.SHA2.Generic.init #SHA2_256 #Hacl.Spec.SHA2.Vec.M32 s
-      | SHA2_384 -> Hacl.Hash.SHA2.init_384 s
-      | SHA2_512 -> Hacl.Hash.SHA2.init_512 s
+      | SHA2_384 -> Hacl.Impl.SHA2.Generic.init #SHA2_384 #Hacl.Spec.SHA2.Vec.M32 s
+      | SHA2_512 -> Hacl.Impl.SHA2.Generic.init #SHA2_512 #Hacl.Spec.SHA2.Vec.M32 s
       | SHA3_256 -> Hacl.Hash.SHA3.init_256 s)
 
     (fun _ s prevlen blocks len ->
@@ -899,8 +898,6 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_update_multi
           | SHA1 -> Hacl.Hash.SHA1.legacy_update_multi
-          | SHA2_384 -> Hacl.Hash.SHA2.update_multi_384
-          | SHA2_512 -> Hacl.Hash.SHA2.update_multi_512
           | SHA3_256 -> Hacl.Hash.SHA3.update_multi_256
         in
         update_multi s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
@@ -915,7 +912,7 @@ let hacl_md (a:alg)// : block unit =
         let h0 = ST.get () in
         live_multi_of_live h0 last_lib;
         disjoint_multi_of_disjoint last_lib state_lib;
-        update_last #a #M32 (update #a #M32) (Hacl.Hash.MD.len_add32 a prevlen last_len) last_len last_lib s;
+        update_last #a #M32 (update #a #M32) (Hacl.Hash.MD.len_add32 a (if a = SHA2_384 || a = SHA2_512 then FStar.Int.Cast.Full.uint64_to_uint128 prevlen else prevlen) last_len) last_len last_lib s;
         Lib.MultiBuffer.loc_multi1 last_lib;
         Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 last_len) #1 last;
         Lib.MultiBuffer.as_seq_multi_lemma h0 last_lib 0;
@@ -926,15 +923,12 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_update_last
           | SHA1 -> Hacl.Hash.SHA1.legacy_update_last
-          | SHA2_384 -> Hacl.Hash.SHA2.update_last_384
-          | SHA2_512 -> Hacl.Hash.SHA2.update_last_512
           | SHA3_256 -> Hacl.Hash.SHA3.update_last_256
         in
         [@inline_let]
         let prevlen =
           match a with
           | MD5 | SHA1 -> prevlen
-          | SHA2_384 | SHA2_512 -> FStar.Int.Cast.Full.uint64_to_uint128 prevlen
           | SHA3_256 -> ()
         in
         update_last s () prevlen last last_len)
@@ -961,8 +955,6 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_finish
           | SHA1 -> Hacl.Hash.SHA1.legacy_finish
-          | SHA2_384 -> Hacl.Hash.SHA2.finish_384
-          | SHA2_512 -> Hacl.Hash.SHA2.finish_512
           | SHA3_256 -> Hacl.Hash.SHA3.finish_256
         in
         finish s () dst)
