@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 static inline void
 Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res)

@@ -5,10 +5,12 @@
 #define __KRML_TARGET_H
 
 #include <stdlib.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <assert.h>
 
 #include "krml/internal/callconv.h"
 

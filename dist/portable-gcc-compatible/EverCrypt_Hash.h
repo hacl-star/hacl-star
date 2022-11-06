@@ -46,7 +46,7 @@ extern "C" {
 #include "Hacl_Hash_Blake2b_256.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: EverCrypt_Hash_alg */
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
@@ -229,37 +229,21 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
 /* SNIPPET_END: EverCrypt_Hash_update_multi_256 */
 
-/* SNIPPET_START: EverCrypt_Hash_update2 */
-
-void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
-
-/* SNIPPET_END: EverCrypt_Hash_update2 */
-
 /* SNIPPET_START: EverCrypt_Hash_update */
 
-KRML_DEPRECATED("Use update2 instead")
-
-void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block);
+void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
 
 /* SNIPPET_END: EverCrypt_Hash_update */
 
-/* SNIPPET_START: EverCrypt_Hash_update_multi2 */
+/* SNIPPET_START: EverCrypt_Hash_update_multi */
 
 void
-EverCrypt_Hash_update_multi2(
+EverCrypt_Hash_update_multi(
   EverCrypt_Hash_state_s *s,
   uint64_t prevlen,
   uint8_t *blocks,
   uint32_t len
 );
-
-/* SNIPPET_END: EverCrypt_Hash_update_multi2 */
-
-/* SNIPPET_START: EverCrypt_Hash_update_multi */
-
-KRML_DEPRECATED("Use update_multi2 instead")
-
-void EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uint32_t len);
 
 /* SNIPPET_END: EverCrypt_Hash_update_multi */
 
@@ -275,23 +259,15 @@ EverCrypt_Hash_update_last_256(
 
 /* SNIPPET_END: EverCrypt_Hash_update_last_256 */
 
-/* SNIPPET_START: EverCrypt_Hash_update_last2 */
+/* SNIPPET_START: EverCrypt_Hash_update_last */
 
 void
-EverCrypt_Hash_update_last2(
+EverCrypt_Hash_update_last(
   EverCrypt_Hash_state_s *s,
   uint64_t prev_len,
   uint8_t *last,
   uint32_t last_len
 );
-
-/* SNIPPET_END: EverCrypt_Hash_update_last2 */
-
-/* SNIPPET_START: EverCrypt_Hash_update_last */
-
-KRML_DEPRECATED("Use update_last2 instead")
-
-void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len);
 
 /* SNIPPET_END: EverCrypt_Hash_update_last */
 
@@ -374,12 +350,6 @@ void
 EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_init */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental_max_input_len64 */
-
-uint64_t EverCrypt_Hash_Incremental_max_input_len64(Spec_Hash_Definitions_hash_alg a);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental_max_input_len64 */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_update */
 

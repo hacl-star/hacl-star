@@ -38,7 +38,7 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Bignum_Base.h"
 #include "Hacl_Bignum.h"
-#include "evercrypt_targetconfig.h"
+
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum64_pbn_mont_ctx_u64;
 
 /*******************************************************************************

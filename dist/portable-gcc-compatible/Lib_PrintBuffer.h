@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Lib_PrintBuffer_print_bytes */
 
 extern void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t *buf);

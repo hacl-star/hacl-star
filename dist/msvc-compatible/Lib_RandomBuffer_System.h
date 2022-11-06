@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 KRML_DEPRECATED("random_crypto")
 
 extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf, uint32_t len);

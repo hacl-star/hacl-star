@@ -36,10 +36,10 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
+#include "Hacl_K256_PrecompTable.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Bignum_K256.h"
 #include "Hacl_Bignum_Base.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: Hacl_K256_ECDSA_ecdsa_sign_hashed_msg */
 

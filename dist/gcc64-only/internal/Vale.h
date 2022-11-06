@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
 extern uint64_t fadd_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);

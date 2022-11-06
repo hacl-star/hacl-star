@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "../Hacl_Spec.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa_tags */
 
 #define Spec_ECDSA_NoHash 0

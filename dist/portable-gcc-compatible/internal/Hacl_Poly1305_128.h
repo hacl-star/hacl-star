@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "../Hacl_Poly1305_128.h"
-#include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
 
