@@ -39,9 +39,15 @@ extern "C" {
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_HMAC_legacy_compute_sha1 */
 
+/**
+Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
+`dst` must point to 20 bytes of memory.
+*/
 void
 Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst,
@@ -55,6 +61,12 @@ Hacl_HMAC_legacy_compute_sha1(
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha2_256 */
 
+/**
+Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 32 bytes of memory.
+*/
 void
 Hacl_HMAC_compute_sha2_256(
   uint8_t *dst,
@@ -68,6 +80,12 @@ Hacl_HMAC_compute_sha2_256(
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha2_384 */
 
+/**
+Write the HMAC-SHA-2-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 48 bytes of memory.
+*/
 void
 Hacl_HMAC_compute_sha2_384(
   uint8_t *dst,
@@ -81,6 +99,12 @@ Hacl_HMAC_compute_sha2_384(
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha2_512 */
 
+/**
+Write the HMAC-SHA-2-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory.
+*/
 void
 Hacl_HMAC_compute_sha2_512(
   uint8_t *dst,
@@ -94,6 +118,12 @@ Hacl_HMAC_compute_sha2_512(
 
 /* SNIPPET_START: Hacl_HMAC_compute_blake2s_32 */
 
+/**
+Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 32 bytes of memory.
+*/
 void
 Hacl_HMAC_compute_blake2s_32(
   uint8_t *dst,
@@ -107,6 +137,12 @@ Hacl_HMAC_compute_blake2s_32(
 
 /* SNIPPET_START: Hacl_HMAC_compute_blake2b_32 */
 
+/**
+Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory.
+*/
 void
 Hacl_HMAC_compute_blake2b_32(
   uint8_t *dst,

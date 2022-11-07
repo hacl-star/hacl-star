@@ -39,7 +39,7 @@ extern "C" {
 #include "Hacl_Chacha20Poly1305_256.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "EverCrypt_AutoConfig2.h"
-#include "evercrypt_targetconfig.h"
+
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,

@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 static const
 uint32_t
 Hacl_Impl_SHA2_Generic_h224[8U] =

@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Poly1305_32.h"
-#include "evercrypt_targetconfig.h"
+
 typedef struct Hacl_Streaming_Poly1305_32_poly1305_32_state_s
 {
   uint64_t *block_state;
@@ -51,7 +51,10 @@ Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_
 void
 Hacl_Streaming_Poly1305_32_init(uint8_t *k, Hacl_Streaming_Poly1305_32_poly1305_32_state *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_Poly1305_32_update(
   Hacl_Streaming_Poly1305_32_poly1305_32_state *p,
   uint8_t *data,

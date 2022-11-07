@@ -39,7 +39,7 @@ extern "C" {
 #include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_32.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_HPKE_P256_CP32_SHA256_setupBaseS */
 
 uint32_t

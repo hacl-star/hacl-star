@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: EverCrypt_Error_error_code */
 
 #define EverCrypt_Error_Success 0

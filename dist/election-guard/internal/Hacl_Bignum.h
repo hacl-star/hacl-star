@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "../Hacl_Bignum.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 uint32_t
 Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out);

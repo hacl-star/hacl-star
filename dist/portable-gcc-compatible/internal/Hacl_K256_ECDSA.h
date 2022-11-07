@@ -37,19 +37,12 @@ extern "C" {
 
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_K256_ECDSA.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
+/* SNIPPET_START: Hacl_Impl_K256_Point_make_point_at_inf */
 
-bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s);
+void Hacl_Impl_K256_Point_make_point_at_inf(uint64_t *p);
 
-/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
-
-/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_compress_vartime */
-
-void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, uint64_t *y);
-
-/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_compress_vartime */
+/* SNIPPET_END: Hacl_Impl_K256_Point_make_point_at_inf */
 
 /* SNIPPET_START: Hacl_Impl_K256_Point_point_negate */
 
@@ -63,6 +56,18 @@ bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q);
 
 /* SNIPPET_END: Hacl_Impl_K256_Point_point_eq */
 
+/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
+
+bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s);
+
+/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
+
+/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_compress_vartime */
+
+void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, uint64_t *y);
+
+/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_compress_vartime */
+
 /* SNIPPET_START: Hacl_Impl_K256_PointDouble_point_double */
 
 void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p);
@@ -74,12 +79,6 @@ void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p);
 void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
 
 /* SNIPPET_END: Hacl_Impl_K256_PointAdd_point_add */
-
-/* SNIPPET_START: Hacl_Impl_K256_PointMul_make_point_at_inf */
-
-void Hacl_Impl_K256_PointMul_make_point_at_inf(uint64_t *p);
-
-/* SNIPPET_END: Hacl_Impl_K256_PointMul_make_point_at_inf */
 
 /* SNIPPET_START: Hacl_Impl_K256_PointMul_point_mul */
 
