@@ -121,6 +121,10 @@ let
         src = hacl;
         buildInputs = [ git ];
         buildPhase = ''
+          rm -r dist/hacl-star-raw
+
+          sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/configure
+          sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/package-mozilla.sh
           for target in election-guard gcc-compatible gcc64-only msvc-compatible portable-gcc-compatible
           do
             sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/$target/configure

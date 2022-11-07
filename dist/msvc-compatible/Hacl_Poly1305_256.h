@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 typedef Lib_IntVector_Intrinsics_vec256 *Hacl_Poly1305_256_poly1305_ctx;
 

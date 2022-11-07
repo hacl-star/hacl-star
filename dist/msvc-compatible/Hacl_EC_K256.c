@@ -176,7 +176,7 @@ Write the point at infinity (additive identity) in `p`.
 */
 void Hacl_EC_K256_mk_point_at_inf(uint64_t *p)
 {
-  Hacl_Impl_K256_PointMul_make_point_at_inf(p);
+  Hacl_Impl_K256_Point_make_point_at_inf(p);
 }
 
 /**

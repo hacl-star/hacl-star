@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_shaext */
 
 bool EverCrypt_AutoConfig2_has_shaext();

@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Ed25519.h"
-#include "evercrypt_targetconfig.h"
+
 void EverCrypt_Ed25519_secret_to_public(uint8_t *public_key, uint8_t *private_key);
 
 void EverCrypt_Ed25519_expand_keys(uint8_t *expanded_keys, uint8_t *private_key);
