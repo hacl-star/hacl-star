@@ -933,6 +933,12 @@ typedef struct __uint32_t_uint32_t_s
 }
 __uint32_t_uint32_t;
 
+/**
+Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
+`dst` must point to 20 bytes of memory.
+*/
 static void
 legacy_compute_sha1(
   uint8_t *dst,
@@ -1047,6 +1053,12 @@ legacy_compute_sha1(
   legacy_finish(s, dst);
 }
 
+/**
+Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
+`dst` must point to 32 bytes of memory.
+*/
 static void
 compute_sha2_256(
   uint8_t *dst,
@@ -1161,6 +1173,12 @@ compute_sha2_256(
   finish_256(s, dst);
 }
 
+/**
+Write the HMAC-SHA-2-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 48 bytes of memory.
+*/
 static void
 compute_sha2_384(
   uint8_t *dst,
@@ -1284,6 +1302,12 @@ compute_sha2_384(
   finish_384(s, dst);
 }
 
+/**
+Write the HMAC-SHA-2-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory.
+*/
 static void
 compute_sha2_512(
   uint8_t *dst,
@@ -1450,6 +1474,11 @@ static uint32_t max_personalization_string_length = (uint32_t)65536U;
 
 static uint32_t max_additional_input_length = (uint32_t)65536U;
 
+/**
+Return the minimal entropy input length of the desired hash function.
+
+@param a Hash algorithm to use.
+*/
 static uint32_t min_length(hash_alg a)
 {
   switch (a)
@@ -1486,6 +1515,18 @@ typedef struct state_s
 }
 state;
 
+/**
+Instantiate the DRBG.
+
+@param a Hash algorithm to use. (Value must match the value used in `Hacl_HMAC_DRBG_create_in`.)
+@param st Pointer to DRBG state.
+@param entropy_input_len Length of entropy input.
+@param entropy_input Pointer to `entropy_input_len` bytes of memory where entropy input is read from.
+@param nonce_len Length of nonce.
+@param nonce Pointer to `nonce_len` bytes of memory where nonce is read from.
+@param personalization_string_len length of personalization string.
+@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
+*/
 static void
 instantiate(
   hash_alg a,
@@ -1740,6 +1781,16 @@ instantiate(
   }
 }
 
+/**
+Reseed the DRBG.
+
+@param a Hash algorithm to use. (Value must match the value used in `Hacl_HMAC_DRBG_create_in`.)
+@param st Pointer to DRBG state.
+@param entropy_input_len Length of entropy input.
+@param entropy_input Pointer to `entropy_input_len` bytes of memory where entropy input is read from.
+@param additional_input_input_len Length of additional input.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+*/
 static void
 reseed(
   hash_alg a,
@@ -1972,6 +2023,16 @@ reseed(
   }
 }
 
+/**
+Generate output.
+
+@param a Hash algorithm to use. (Value must match the value used in `create_in`.)
+@param output Pointer to `n` bytes of memory where random output is written to.
+@param st Pointer to DRBG state.
+@param n Length of desired output.
+@param additional_input_input_len Length of additional input.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+*/
 static bool
 generate(
   hash_alg a,

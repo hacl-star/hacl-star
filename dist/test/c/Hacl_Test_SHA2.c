@@ -26,12 +26,6 @@
 
 
 
-#define MUT 0
-#define IMMUT 1
-#define CONST 2
-
-typedef uint8_t buftype;
-
 static uint32_t
 k224_256[64U] =
   {
@@ -842,30 +836,6 @@ extern void C_String_print(C_String_t uu___);
 extern void
 Lib_PrintBuffer_print_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
 
-static const uint8_t *to_const__uint8_t(buftype t, void *b)
-{
-  switch (t)
-  {
-    case MUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case IMMUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case CONST:
-      {
-        return (const uint8_t *)(void *)b;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
 static void
 test_sha2(
   uint32_t msg_len,
@@ -888,18 +858,10 @@ test_sha2(
   hash_256(msg_, msg_len, test256);
   hash_384(msg_, msg_len, test384);
   hash_512(msg_, msg_len, test512);
-  Lib_PrintBuffer_print_compare_display((uint32_t)28U,
-    to_const__uint8_t(MUT, (void *)test224),
-    expected224);
-  Lib_PrintBuffer_print_compare_display((uint32_t)32U,
-    to_const__uint8_t(MUT, (void *)test256),
-    expected256);
-  Lib_PrintBuffer_print_compare_display((uint32_t)48U,
-    to_const__uint8_t(MUT, (void *)test384),
-    expected384);
-  Lib_PrintBuffer_print_compare_display((uint32_t)64U,
-    to_const__uint8_t(MUT, (void *)test512),
-    expected512);
+  Lib_PrintBuffer_print_compare_display((uint32_t)28U, test224, expected224);
+  Lib_PrintBuffer_print_compare_display((uint32_t)32U, test256, expected256);
+  Lib_PrintBuffer_print_compare_display((uint32_t)48U, test384, expected384);
+  Lib_PrintBuffer_print_compare_display((uint32_t)64U, test512, expected512);
 }
 
 static const uint8_t test1_plaintext[3U] = { (uint8_t)0x61U, (uint8_t)0x62U, (uint8_t)0x63U };

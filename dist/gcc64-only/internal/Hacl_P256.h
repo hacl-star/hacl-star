@@ -38,7 +38,6 @@ extern "C" {
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_P256.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
 

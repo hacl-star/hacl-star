@@ -37,7 +37,7 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_224 */
 
 typedef struct Hacl_Streaming_SHA2_state_sha2_224_s
@@ -88,7 +88,10 @@ void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_update_224 */
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_224(
   Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
@@ -123,7 +126,10 @@ void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_update_256 */
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_256(
   Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
@@ -158,7 +164,10 @@ void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_update_384 */
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_384(
   Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,
@@ -193,7 +202,10 @@ void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_update_512 */
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA2_update_512(
   Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,

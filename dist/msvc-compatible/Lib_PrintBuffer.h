@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 extern void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t *buf);
 
 extern void Lib_PrintBuffer_print_compare(uint32_t len, uint8_t *buf0, uint8_t *buf1);

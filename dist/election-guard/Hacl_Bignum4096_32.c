@@ -863,8 +863,8 @@ exp_vartime_precomp(
             {
               uint32_t bits_c = ite & mask_l;
               uint32_t bits_l32 = bits_c;
-              uint32_t *a_bits_l = table + bits_l32 * (uint32_t)128U;
-              memcpy(resM, a_bits_l, (uint32_t)128U * sizeof (uint32_t));
+              const uint32_t *a_bits_l = table + bits_l32 * (uint32_t)128U;
+              memcpy(resM, (uint32_t *)a_bits_l, (uint32_t)128U * sizeof (uint32_t));
             }
           }
           else
@@ -902,8 +902,8 @@ exp_vartime_precomp(
                   uint32_t bits_l = ite & mask_l;
                   uint32_t a_bits_l[128U] = { 0U };
                   uint32_t bits_l32 = bits_l;
-                  uint32_t *a_bits_l1 = table + bits_l32 * (uint32_t)128U;
-                  memcpy(a_bits_l, a_bits_l1, (uint32_t)128U * sizeof (uint32_t));
+                  const uint32_t *a_bits_l1 = table + bits_l32 * (uint32_t)128U;
+                  memcpy(a_bits_l, (uint32_t *)a_bits_l1, (uint32_t)128U * sizeof (uint32_t));
                   {
                     uint32_t *ctx_n = ctx;
                     amont_mul(ctx_n, mu, resM, a_bits_l, resM);
@@ -1061,13 +1061,13 @@ exp_consttime_precomp(
             }
             {
               uint32_t bits_c = ite & mask_l;
-              memcpy(resM, table, (uint32_t)128U * sizeof (uint32_t));
+              memcpy(resM, (uint32_t *)table, (uint32_t)128U * sizeof (uint32_t));
               KRML_MAYBE_FOR15(i1,
                 (uint32_t)0U,
                 (uint32_t)15U,
                 (uint32_t)1U,
                 uint32_t c = FStar_UInt32_eq_mask(bits_c, i1 + (uint32_t)1U);
-                uint32_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)128U;
+                const uint32_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)128U;
                 {
                   uint32_t i;
                   for (i = (uint32_t)0U; i < (uint32_t)128U; i++)
@@ -1113,13 +1113,13 @@ exp_consttime_precomp(
                 {
                   uint32_t bits_l = ite & mask_l;
                   uint32_t a_bits_l[128U] = { 0U };
-                  memcpy(a_bits_l, table, (uint32_t)128U * sizeof (uint32_t));
+                  memcpy(a_bits_l, (uint32_t *)table, (uint32_t)128U * sizeof (uint32_t));
                   KRML_MAYBE_FOR15(i2,
                     (uint32_t)0U,
                     (uint32_t)15U,
                     (uint32_t)1U,
                     uint32_t c = FStar_UInt32_eq_mask(bits_l, i2 + (uint32_t)1U);
-                    uint32_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)128U;
+                    const uint32_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)128U;
                     {
                       uint32_t i;
                       for (i = (uint32_t)0U; i < (uint32_t)128U; i++)

@@ -1,5 +1,5 @@
 [
-  "¯o¶ÂF4Ä ÑZ˚e\u0000q∑ç",
+  "\u0006·\bÅV˜uïK◊™*4SfÃ",
   [
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_tables_st",
@@ -27,10 +27,10 @@
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_235927d57e4a0d6eb1c5170868f9aeed",
         "refinement_interpretation_Tm_refine_2be0681fbf8400b3f2383abcc3fc2050",
         "refinement_interpretation_Tm_refine_70770d0e8837514978d14487d8435141",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_881f06f24c655b5654e97cbcad665718",
         "refinement_interpretation_Tm_refine_c26b4c682dd068e311ffb561f3031d8d",
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
@@ -38,7 +38,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1d54046ff0a97850d5ca2df4f78c18f6"
+      "0d52a6f5bfed9f0cead7aa6e14edfb0b"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_st",
@@ -70,7 +70,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "84ab452a9c44c3a0d0190a7da2998703"
+      "1f518e28e902eb4536fa27cbb78cf148"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_tables_st",
@@ -78,8 +78,8 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
@@ -88,65 +88,35 @@
         "disc_equation_Lib.IntTypes.S128", "disc_equation_Lib.IntTypes.U128",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
         "equation_Hacl.Impl.Exponentiation.Definitions.inttype_a",
         "equation_Hacl.Impl.Exponentiation.size_window_t",
         "equation_Hacl.Impl.Exponentiation.table_len_t",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Prims.nat",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v",
         "fuel_guarded_inversion_Hacl.Impl.Exponentiation.Definitions.concrete_ops",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2be0681fbf8400b3f2383abcc3fc2050",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_70770d0e8837514978d14487d8435141",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_ba9550c012fc05846725ccf5f43c5cca",
         "refinement_interpretation_Tm_refine_c26b4c682dd068e311ffb561f3031d8d",
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
-        "typing_Lib.IntTypes.v", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_d8c2e2299f69327edffffb6094760ecb",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v", "typing_Lib.IntTypes.v",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6ea15e9ad7bddeb5330b2e2d4466fdaa"
-    ],
-    [
-      "Hacl.Impl.MultiExponentiation.lexp_four_fw_st",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U64@tok",
-        "equation_Hacl.Impl.Exponentiation.Definitions.inttype_a",
-        "equation_Hacl.Impl.Exponentiation.size_window_t",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "fuel_guarded_inversion_Hacl.Impl.Exponentiation.Definitions.concrete_ops",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_5ba4ea9c0c2a7b39e5c53ed7b0871ec4",
-        "refinement_interpretation_Tm_refine_70770d0e8837514978d14487d8435141",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_c26b4c682dd068e311ffb561f3031d8d",
-        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
-        "typing_Lib.IntTypes.v", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
-      ],
-      0,
-      "0b52b9a7b8f253928220246efa932a74"
+      "e04bfd42032efe4f71289faad99539b4"
     ]
   ]
 ]

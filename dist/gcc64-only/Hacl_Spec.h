@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 #define Spec_Blake2_Blake2S 0
 #define Spec_Blake2_Blake2B 1
 

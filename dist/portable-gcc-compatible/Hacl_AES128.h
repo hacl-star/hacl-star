@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_AES128_aes128_key_expansion */
 
 extern void Hacl_AES128_aes128_key_expansion(uint8_t *key, uint8_t *expanded_key);

@@ -25,7 +25,7 @@
 #include "EverCrypt_AutoConfig2.h"
 
 #include "internal/Vale.h"
-
+#include "evercrypt_targetconfig.h"
 /* SNIPPET_START: cpu_has_shaext */
 
 static bool cpu_has_shaext[1U] = { false };
