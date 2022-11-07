@@ -805,6 +805,17 @@ let disjoint_multi_of_disjoint #a #len #len' (b:Lib.MultiBuffer.multibuf 1 len)
   in
   ()
 
+open Hacl.Streaming.SHA2.Internal
+
+inline_for_extraction noextract
+val update_nblocks': #a:alg{is_mb a} -> update_nblocks_vec_t' a Hacl.Spec.SHA2.Vec.M32
+let update_nblocks' #a =
+  match a with
+  | SHA2_224 -> coerce update_nblocks_224
+  | SHA2_256 -> coerce update_nblocks_256
+  | SHA2_384 -> coerce update_nblocks_384
+  | SHA2_512 -> coerce update_nblocks_512
+
 /// This proof usually succeeds fast but we increase the rlimit for safety
 #push-options "--z3rlimit 500 --ifuel 1"
 inline_for_extraction noextract
@@ -880,14 +891,14 @@ let hacl_md (a:alg)// : block unit =
     (fun _ s prevlen blocks len ->
       if is_mb a then
         let open Hacl.Spec.SHA2.Vec in
-        let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let blocks_lib = lib_of_buffer #len blocks in
         lib_of_state a s;
         [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
         let h0 = ST.get () in
         live_multi_of_live h0 blocks_lib;
         disjoint_multi_of_disjoint blocks_lib state_lib;
-        update_nblocks #a #M32 (update #a #M32) len blocks_lib s;
+        Hacl.Impl.SHA2.Core.lemma_len_lt_max_a_fits_size_t a len;
+        update_nblocks' #a len blocks_lib s;
         Lib.MultiBuffer.loc_multi1 blocks_lib;
         Lib.NTuple.ntup1_lemma #(Lib.Buffer.lbuffer uint8 len) #1 blocks;
         Lib.MultiBuffer.as_seq_multi_lemma h0 blocks_lib 0;

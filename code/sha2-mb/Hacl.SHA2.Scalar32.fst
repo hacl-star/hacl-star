@@ -113,3 +113,4 @@ let sha512 dst input_len input =
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_512 #M32 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+
