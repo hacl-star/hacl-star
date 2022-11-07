@@ -25,7 +25,7 @@
 #include "EverCrypt_Curve25519.h"
 
 
-
+#include "config.h"
 /* SNIPPET_START: has_adx_bmi2 */
 
 static inline bool has_adx_bmi2()

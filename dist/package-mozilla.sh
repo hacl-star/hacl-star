@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/nix/store/p7bpdnxqd3i5hwm92mrscf7mvxk66404-bash-5.1-p16/bin/bash
 
 set -o pipefail
 set -e

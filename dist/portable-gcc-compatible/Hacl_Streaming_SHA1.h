@@ -37,7 +37,7 @@ extern "C" {
 
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Streaming_SHA1_state_sha1 */
 
 typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
@@ -58,7 +58,10 @@ void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s)
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_update_sha1 */
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_SHA1_legacy_update_sha1(
   Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,

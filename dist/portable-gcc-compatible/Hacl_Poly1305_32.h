@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Poly1305_32_poly1305_ctx */
 
 typedef uint64_t *Hacl_Poly1305_32_poly1305_ctx;

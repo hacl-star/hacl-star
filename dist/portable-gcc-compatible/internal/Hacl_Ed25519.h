@@ -39,7 +39,7 @@ extern "C" {
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Curve25519_51.h"
 #include "../Hacl_Ed25519.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Bignum25519_reduce_513 */
 
 void Hacl_Bignum25519_reduce_513(uint64_t *a);
@@ -70,6 +70,18 @@ void Hacl_Impl_Ed25519_PointDouble_point_double(uint64_t *out, uint64_t *p);
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_PointDouble_point_double */
 
+/* SNIPPET_START: Hacl_Impl_Ed25519_PointAdd_point_add */
+
+void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_PointAdd_point_add */
+
+/* SNIPPET_START: Hacl_Impl_Ed25519_PointConstants_make_point_inf */
+
+void Hacl_Impl_Ed25519_PointConstants_make_point_inf(uint64_t *b);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_PointConstants_make_point_inf */
+
 /* SNIPPET_START: Hacl_Impl_Ed25519_PointDecompress_point_decompress */
 
 bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s);
@@ -88,27 +100,15 @@ bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_PointEqual_point_equal */
 
-/* SNIPPET_START: Hacl_Impl_Ed25519_PointAdd_point_add */
-
-void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
-
-/* SNIPPET_END: Hacl_Impl_Ed25519_PointAdd_point_add */
-
 /* SNIPPET_START: Hacl_Impl_Ed25519_PointNegate_point_negate */
 
 void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out);
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_PointNegate_point_negate */
 
-/* SNIPPET_START: Hacl_Impl_Ed25519_Ladder_make_point_inf */
-
-void Hacl_Impl_Ed25519_Ladder_make_point_inf(uint64_t *b);
-
-/* SNIPPET_END: Hacl_Impl_Ed25519_Ladder_make_point_inf */
-
 /* SNIPPET_START: Hacl_Impl_Ed25519_Ladder_point_mul */
 
-void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t *q);
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_Ladder_point_mul */
 

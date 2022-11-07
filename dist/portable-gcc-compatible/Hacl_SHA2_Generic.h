@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Impl_SHA2_Generic_h224 */
 
 static const

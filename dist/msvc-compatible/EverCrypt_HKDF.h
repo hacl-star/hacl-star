@@ -37,7 +37,7 @@ extern "C" {
 
 #include "Hacl_Spec.h"
 #include "EverCrypt_HMAC.h"
-#include "evercrypt_targetconfig.h"
+
 void
 EverCrypt_HKDF_expand_sha1(
   uint8_t *okm,

@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Bignum_Base.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 */
 
