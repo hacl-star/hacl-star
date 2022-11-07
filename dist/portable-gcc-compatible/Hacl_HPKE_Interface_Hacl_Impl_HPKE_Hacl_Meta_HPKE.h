@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Impl_HPKE_context_s */
 
 typedef struct Hacl_Impl_HPKE_context_s_s

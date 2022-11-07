@@ -230,7 +230,7 @@ Write the point at infinity (additive identity) in `p`.
 */
 void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p)
 {
-  Hacl_Impl_Ed25519_Ladder_make_point_inf(p);
+  Hacl_Impl_Ed25519_PointConstants_make_point_inf(p);
 }
 
 /* SNIPPET_END: Hacl_EC_Ed25519_mk_point_at_inf */

@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: add_scalar_e */
 
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);

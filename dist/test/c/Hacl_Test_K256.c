@@ -26,12 +26,6 @@
 
 
 
-#define MUT 0
-#define IMMUT 1
-#define CONST 2
-
-typedef uint8_t buftype;
-
 extern void C_String_print(C_String_t uu___);
 
 extern void
@@ -301,30 +295,6 @@ static void test_verify()
   }
 }
 
-static const uint8_t *to_const__uint8_t(buftype t, void *b)
-{
-  switch (t)
-  {
-    case MUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case IMMUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case CONST:
-      {
-        return (const uint8_t *)(void *)b;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
 static void test_sign_and_verify()
 {
   uint8_t sgnt[64U] = { 0U };
@@ -334,9 +304,7 @@ static void test_sign_and_verify()
       const_to_buffer__uint8_t(msgHash2),
       const_to_buffer__uint8_t(sk2),
       const_to_buffer__uint8_t(nonce2));
-  Lib_PrintBuffer_print_compare_display((uint32_t)64U,
-    to_const__uint8_t(MUT, (void *)sgnt),
-    sgnt2);
+  Lib_PrintBuffer_print_compare_display((uint32_t)64U, sgnt, sgnt2);
   bool
   b =
     Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(const_to_buffer__uint8_t(msgHash2),
@@ -361,9 +329,7 @@ static void test_public_key_compressed()
   if (b)
   {
     C_String_print("Test K256 pk_compressed (Some): \n");
-    Lib_PrintBuffer_print_compare_display((uint32_t)64U,
-      pk1,
-      to_const__uint8_t(MUT, (void *)pk_raw_c));
+    Lib_PrintBuffer_print_compare_display((uint32_t)64U, pk1, pk_raw_c);
   }
   else
   {
@@ -380,9 +346,7 @@ static void test_public_key_uncompressed()
   if (b)
   {
     C_String_print("Test K256 pk_uncompressed (Some): \n");
-    Lib_PrintBuffer_print_compare_display((uint32_t)64U,
-      pk1,
-      to_const__uint8_t(MUT, (void *)pk_raw_u));
+    Lib_PrintBuffer_print_compare_display((uint32_t)64U, pk1, pk_raw_u);
   }
   else
   {

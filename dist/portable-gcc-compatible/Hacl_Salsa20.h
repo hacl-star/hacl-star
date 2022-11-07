@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Salsa20_salsa20_encrypt */
 
 void

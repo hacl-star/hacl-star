@@ -37,7 +37,7 @@ extern "C" {
 
 #include "Hacl_SHA2_Generic.h"
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 void
 Hacl_SHA2_Vec256_sha224_8(
   uint8_t *dst0,

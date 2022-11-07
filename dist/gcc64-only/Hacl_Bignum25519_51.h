@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 static inline void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t f10 = f1[0U];

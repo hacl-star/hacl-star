@@ -26,12 +26,6 @@
 
 
 
-#define MUT 0
-#define IMMUT 1
-#define CONST 2
-
-typedef uint8_t buftype;
-
 extern void
 Hacl_Impl_SHA3_keccak(
   uint32_t rate,
@@ -116,30 +110,6 @@ static void sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 extern bool
 Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
 
-static const uint8_t *to_const__uint8_t(buftype t, void *b)
-{
-  switch (t)
-  {
-    case MUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case IMMUT:
-      {
-        return (const uint8_t *)(void *)(uint8_t *)b;
-      }
-    case CONST:
-      {
-        return (const uint8_t *)(void *)b;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
 static void
 test_sha3(
   uint32_t msg_len,
@@ -162,39 +132,19 @@ test_sha3(
   sha3_256(msg_len, msg_, test256);
   sha3_384(msg_len, msg_, test384);
   sha3_512(msg_len, msg_, test512);
-  if
-  (
-    !Lib_PrintBuffer_result_compare_display((uint32_t)28U,
-      to_const__uint8_t(MUT, (void *)test224),
-      expected224)
-  )
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)28U, test224, expected224))
   {
     exit((int32_t)255);
   }
-  if
-  (
-    !Lib_PrintBuffer_result_compare_display((uint32_t)32U,
-      to_const__uint8_t(MUT, (void *)test256),
-      expected256)
-  )
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)32U, test256, expected256))
   {
     exit((int32_t)255);
   }
-  if
-  (
-    !Lib_PrintBuffer_result_compare_display((uint32_t)48U,
-      to_const__uint8_t(MUT, (void *)test384),
-      expected384)
-  )
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)48U, test384, expected384))
   {
     exit((int32_t)255);
   }
-  if
-  (
-    !Lib_PrintBuffer_result_compare_display((uint32_t)64U,
-      to_const__uint8_t(MUT, (void *)test512),
-      expected512)
-  )
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)64U, test512, expected512))
   {
     exit((int32_t)255);
   }
@@ -211,12 +161,7 @@ test_shake128(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
   uint8_t test[out_len];
   memset(test, 0U, out_len * sizeof (uint8_t));
   shake128_hacl(msg_len, msg_, out_len, test);
-  if
-  (
-    !Lib_PrintBuffer_result_compare_display(out_len,
-      to_const__uint8_t(MUT, (void *)test),
-      expected)
-  )
+  if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
     exit((int32_t)255);
   }
@@ -233,12 +178,7 @@ test_shake256(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
   uint8_t test[out_len];
   memset(test, 0U, out_len * sizeof (uint8_t));
   shake256_hacl(msg_len, msg_, out_len, test);
-  if
-  (
-    !Lib_PrintBuffer_result_compare_display(out_len,
-      to_const__uint8_t(MUT, (void *)test),
-      expected)
-  )
+  if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
     exit((int32_t)255);
   }
