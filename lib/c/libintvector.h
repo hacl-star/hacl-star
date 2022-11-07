@@ -23,9 +23,13 @@
 
 #if defined(HACL_CAN_COMPILE_VEC128)
 
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#include <smmintrin.h>
+#if defined(_MSC_VER)
+  #include <intrin.h> 
+#else 
+  #include <emmintrin.h>
+  #include <tmmintrin.h>
+  #include <smmintrin.h>
+#endif
 
 typedef __m128i Lib_IntVector_Intrinsics_vec128;
 
@@ -225,8 +229,14 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 
 #if defined(HACL_CAN_COMPILE_VEC256)
 
-#include <immintrin.h>
-#include <wmmintrin.h>
+
+#if defined(_MSC_VER)
+  #include <intrin.h> 
+#else 
+  #include <immintrin.h>
+  #include <wmmintrin.h>
+#endif
+
 
 typedef __m256i Lib_IntVector_Intrinsics_vec256;
 
