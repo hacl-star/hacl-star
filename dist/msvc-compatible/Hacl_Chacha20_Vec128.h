@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 void
 Hacl_Chacha20_Vec128_chacha20_encrypt_128(
   uint32_t len,

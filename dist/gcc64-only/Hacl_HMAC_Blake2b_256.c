@@ -34,6 +34,12 @@ typedef struct ___Lib_IntVector_Intrinsics_vec256__FStar_UInt128_uint128_s
 }
 ___Lib_IntVector_Intrinsics_vec256__FStar_UInt128_uint128;
 
+/**
+Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
+
+The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
+`dst` must point to 64 bytes of memory.
+*/
 void
 Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   uint8_t *dst,

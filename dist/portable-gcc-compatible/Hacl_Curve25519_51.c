@@ -259,6 +259,13 @@ static void encode_point(uint8_t *o, uint64_t *i)
 
 /* SNIPPET_START: Hacl_Curve25519_51_scalarmult */
 
+/**
+Compute the scalar multiple of a point.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where the public point is read from.
+*/
 void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init[10U] = { 0U };
@@ -303,6 +310,14 @@ void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 
 /* SNIPPET_START: Hacl_Curve25519_51_secret_to_public */
 
+/**
+Calculate a public point from a secret/private key.
+
+This computes a scalar multiplication of the secret/private key with the curve's basepoint.
+
+@param pub Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+*/
 void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   uint8_t basepoint[32U] = { 0U };
@@ -319,6 +334,13 @@ void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv)
 
 /* SNIPPET_START: Hacl_Curve25519_51_ecdh */
 
+/**
+Execute the diffie-hellmann key exchange.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where **their** public point is read from.
+*/
 bool Hacl_Curve25519_51_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint8_t zeros[32U] = { 0U };

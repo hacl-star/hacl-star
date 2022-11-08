@@ -27,7 +27,7 @@
 #include "internal/Vale.h"
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
-
+#include "config.h"
 typedef struct EverCrypt_AEAD_state_s_s
 {
   Spec_Cipher_Expansion_impl impl;

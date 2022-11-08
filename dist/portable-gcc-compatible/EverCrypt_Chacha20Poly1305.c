@@ -25,7 +25,7 @@
 #include "EverCrypt_Chacha20Poly1305.h"
 
 
-
+#include "config.h"
 /* SNIPPET_START: EverCrypt_Chacha20Poly1305_aead_encrypt */
 
 void

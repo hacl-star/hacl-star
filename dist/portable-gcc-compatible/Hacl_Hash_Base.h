@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Spec.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Hash_Definitions_word_len */
 
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);

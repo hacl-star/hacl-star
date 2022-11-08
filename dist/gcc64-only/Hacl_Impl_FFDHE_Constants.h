@@ -36,7 +36,7 @@ extern "C" {
 
 
 
-#include "evercrypt_targetconfig.h"
+
 static const uint8_t Hacl_Impl_FFDHE_Constants_ffdhe_g2[1U] = { (uint8_t)0x02U };
 
 static const

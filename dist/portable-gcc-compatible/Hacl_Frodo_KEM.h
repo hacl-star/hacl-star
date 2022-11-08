@@ -39,7 +39,7 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Keccak_shake128_4x */
 
 static inline void

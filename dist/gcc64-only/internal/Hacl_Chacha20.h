@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "../Hacl_Chacha20.h"
-#include "evercrypt_targetconfig.h"
+
 extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 
 void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);

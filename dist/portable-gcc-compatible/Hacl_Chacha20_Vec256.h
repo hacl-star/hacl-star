@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 /* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_encrypt_256 */
 
 void

@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Poly1305_128.h"
-#include "evercrypt_targetconfig.h"
+
 typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s
 {
   Lib_IntVector_Intrinsics_vec128 *block_state;
@@ -52,7 +52,10 @@ Hacl_Streaming_Poly1305_128_poly1305_128_state
 void
 Hacl_Streaming_Poly1305_128_init(uint8_t *k, Hacl_Streaming_Poly1305_128_poly1305_128_state *s);
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_Poly1305_128_update(
   Hacl_Streaming_Poly1305_128_poly1305_128_state *p,
   uint8_t *data,

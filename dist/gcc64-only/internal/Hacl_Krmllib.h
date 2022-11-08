@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "../Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 uint32_t LowStar_Vector_new_capacity(uint32_t cap);
 
 #if defined(__cplusplus)

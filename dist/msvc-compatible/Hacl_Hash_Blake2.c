@@ -2665,6 +2665,16 @@ void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash
   Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
 }
 
+/**
+Write the BLAKE2b digest of message `d` using key `k` into `output`.
+
+@param nn Length of the to-be-generated digest with 1 <= `nn` <= 64.
+@param output Pointer to `nn` bytes of memory where the digest is written to.
+@param ll Length of the input message.
+@param d Pointer to `ll` bytes of memory where the input message is read from.
+@param kk Length of the key. Can be 0.
+@param k Pointer to `kk` bytes of memory where the key is read from.
+*/
 void
 Hacl_Blake2b_32_blake2b(
   uint32_t nn,
@@ -3291,6 +3301,16 @@ void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash
   Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
 }
 
+/**
+Write the BLAKE2s digest of message `d` using key `k` into `output`.
+
+@param nn Length of to-be-generated digest with 1 <= `nn` <= 32.
+@param output Pointer to `nn` bytes of memory where the digest is written to.
+@param ll Length of the input message.
+@param d Pointer to `ll` bytes of memory where the input message is read from.
+@param kk Length of the key. Can be 0.
+@param k Pointer to `kk` bytes of memory where the key is read from.
+*/
 void
 Hacl_Blake2s_32_blake2s(
   uint32_t nn,

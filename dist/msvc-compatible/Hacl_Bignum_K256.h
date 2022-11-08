@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "evercrypt_targetconfig.h"
+
 static inline bool Hacl_K256_Field_is_felem_zero_vartime(uint64_t *f)
 {
   uint64_t f0 = f[0U];

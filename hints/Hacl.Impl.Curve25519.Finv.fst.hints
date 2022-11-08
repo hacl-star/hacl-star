@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "5ea093739b34ebd4cbd2030679dd55d1"
+      "627ad88260d15306fd1409bced0b12fb"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsquare_times_inv",
@@ -28,7 +28,7 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b"
       ],
       0,
-      "8579dfc27e10730518ad3793246d2a34"
+      "dded590a52e2e619ced7c3900f66643e"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsqr_s",
@@ -81,7 +81,7 @@
         "typing_Hacl.Spec.Curve25519.Field51.Definition.pow51"
       ],
       0,
-      "fe2a702023e3beb7c49440c32b628f39"
+      "21705c6dce079c80e491eda3ce179860"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fmuls_pre",
@@ -101,7 +101,7 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b"
       ],
       0,
-      "03158929204c7f1daea23b3e5b3d7f78"
+      "59fe7f1621115cf52cd870b096e9ef3a"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fmul_s",
@@ -151,7 +151,7 @@
         "true_interp", "typing_Hacl.Spec.Curve25519.Field51.Definition.pow51"
       ],
       0,
-      "eb7f629d1bea8cb3dc79cf75200b29fc"
+      "54acd080b94481ff778437c3438849b0"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsquare_times",
@@ -163,7 +163,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
       ],
       0,
-      "73ad997038d02596e34bd2cfde1565f4"
+      "ed280fdb7bb942535e9abba13c13e9b2"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsquare_times",
@@ -259,7 +259,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bad1a692d4e989f1f4977920c9e899dc"
+      "96b775d8be8c8b88d8636772c61a1bb8"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv1",
@@ -334,7 +334,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "144e47a96aeca2b13cd515bb84be4ac4"
+      "b5ade4c52d05eef8ed7dd3e1de72e940"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv1",
@@ -386,7 +386,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "0ba219d38ad31e5f3ac51d0608786695"
+      "e32edfb31e364e3e2e2b5101aaa5af06"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv1",
@@ -526,7 +526,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9c50ba754b7590c8e9ae431af76cb3ca"
+      "4b6d8a39b0de1e9b09c202f33bb750b5"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv2",
@@ -593,7 +593,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "82ca45abadccdc71c1474f766920c825"
+      "2708049d0b6db1951cd3cecc2a086b74"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv2",
@@ -633,7 +633,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "9ebc216a2b9dee898fc213908ad82cb7"
+      "478eb643f5265859866eb901200c547e"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv2",
@@ -704,6 +704,7 @@
         "lemma_Lib.IntTypes.mul_lemma",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
@@ -738,6 +739,7 @@
         "refinement_interpretation_Tm_refine_499730153d592fba918453ee6e36a61a",
         "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_628780cc7471967d7ca1a3e32dd5b8a5",
         "refinement_interpretation_Tm_refine_6acce70a2a0ed6dbac96da1e7080ccaa",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
@@ -761,8 +763,7 @@
         "typing_Hacl.Spec.Curve25519.Finv.fsquare_times",
         "typing_Hacl.Spec.Curve25519.Finv.pow", "typing_Lib.Buffer.length",
         "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
-        "typing_Lib.IntTypes.pub_int_v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
@@ -774,7 +775,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e04e8ec3cf366a15fd8cf5992ac303fd"
+      "94ac44db1959f69cf2850a94ddb3d7bc"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv3",
@@ -841,7 +842,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "adc04ae722877aa44b23729f33733510"
+      "f4104e366cbdee491ca0ad0c9c4ff2ca"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv3",
@@ -881,7 +882,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "bcf4866b9294e35810213c587229ec88"
+      "7a626aec79a7e8c3415f23253a17f307"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv3",
@@ -1019,7 +1020,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "46d832d102e27b421a70d26d8a0379ec"
+      "8f04be357265094a603cd9d5dd408854"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv0",
@@ -1079,7 +1080,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b122c79b6077185f106338a81b7df3ac"
+      "028bbe2ad970729a1ec7783138ccfebb"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv0",
@@ -1130,7 +1131,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "fa7fcab0a8faa84c1bed40c7fe5b5e13"
+      "5156600f5aece9f927e14720bb8b34c5"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv0",
@@ -1227,7 +1228,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0e35d6d65c06c13db20cb7a089f2e51a"
+      "6e7d9597e46805931f9aa9522423f394"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv",
@@ -1435,7 +1436,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "615e72918fc8ebf2e53129fffd15771b"
+      "f2ca7f210daa62a29ae09867e6d522e4"
     ]
   ]
 ]
