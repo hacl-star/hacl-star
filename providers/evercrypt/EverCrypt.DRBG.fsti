@@ -183,6 +183,15 @@ val create_in: a:supported_alg -> r:HS.rid -> ST (state a)
 
 (** @type: true
 *)
+[@@ Comment "Create a DRBG state.
+
+@param a Hash algorithm to use. The possible instantiations are ...
+  * `Spec_Hash_Definitions_SHA2_256`,
+  * `Spec_Hash_Definitions_SHA2_384`,
+  * `Spec_Hash_Definitions_SHA2_512`, and
+  * `Spec_Hash_Definitions_SHA1`.
+
+@return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`."]
 inline_for_extraction
 val create: a:supported_alg -> ST (state a)
   (requires fun _ -> True)
@@ -365,16 +374,42 @@ val uninstantiate_sha2_512: uninstantiate_st SHA2_512
 
 (** @type: true 
 *)
+[@@ Comment "Instantiate the DRBG.
+
+@param st Pointer to DRBG state.
+@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
+@param personalization_string_len Length of personalization string.
+
+@return True if and only if instantiation was successful."]
 val instantiate: a:(Ghost.erased supported_alg) -> instantiate_st (Ghost.reveal a)
 
 (** @type: true 
 *)
+[@@ Comment "Reseed the DRBG.
+
+@param st Pointer to DRBG state.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if reseed was successful."]
 val reseed: a:(Ghost.erased supported_alg) -> reseed_st (Ghost.reveal a)
 
 (** @type: true 
 *)
+[@@ Comment "Generate output.
+
+@param output Pointer to `n` bytes of memory where random output is written to.
+@param st Pointer to DRBG state.
+@param n Length of desired output.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if generate was successful."]
 val generate:  a:(Ghost.erased supported_alg) -> generate_st (Ghost.reveal a)
 
 (** @type: true
 *)
+[@@ Comment "Uninstantiate and free the DRBG.
+
+@param st Pointer to DRBG state."]
 val uninstantiate: a:(Ghost.erased supported_alg) -> uninstantiate_st (Ghost.reveal a)
