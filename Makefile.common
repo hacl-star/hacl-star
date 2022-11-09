@@ -8,7 +8,7 @@ define newline
 
 endef
 
-HACL_HOME 	?= .
+HACL_HOME 	?= $(shell pwd)
 
 # Put your local configuration (e.g. HACL_HOME, KRML_HOME, etc.) in
 # Makefile.config
