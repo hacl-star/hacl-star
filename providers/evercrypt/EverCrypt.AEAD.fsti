@@ -39,9 +39,7 @@ open EverCrypt.Error
 /// of arguments to be in line with ``B.as_seq``, etc. which take the memory
 /// first.
 
-[@CAbstractStruct]
-
-[@@ Comment "Both encryption and decryption require a state that holds the key.
+[@@ CAbstractStruct; Comment "Both encryption and decryption require a state that holds the key.
 The state may be reused as many times as desired."]
 val state_s: alg -> Type0
 
@@ -207,14 +205,20 @@ let alloca_st (a: alg) =
 /// required for encrypt.
 (** @type: true
 *)
-[@@ Comment "Create the context element for the AEAD algorithm.
+[@@ Comment "Create the required AEAD state for the algorithm.
+
+Note: The caller must free the AEAD state by calling `EverCrypt_AEAD_free`.
 
 @param a The argument `a` must be either of:
-  * `Spec_Agile_AEAD_AES128_GCM`,
-  * `Spec_Agile_AEAD_AES256_GCM`, or
-  * `Spec_Agile_AEAD_CHACHA20_POLY1305`.
-@param dst A caller allocated reference where the context will be written to.
-@param k Pointer to memory where the key is read from. The size depends on the used algorithm."]
+  * `Spec_Agile_AEAD_AES128_GCM` (KEY_LEN=16),
+  * `Spec_Agile_AEAD_AES256_GCM` (KEY_LEN=32), or
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (KEY_LEN=32).
+@param dst Pointer to a pointer where the address of the allocated AEAD state will be written to.
+@param k Pointer to `KEY_LEN` bytes of memory where the key is read from. The size depends on the used algorithm, see above.
+
+@return The function returns `EverCrypt_Error_Success` on success or
+  `EverCrypt_Error_UnsupportedAlgorithm` in case of a bad algorithm identifier.
+  (See `EverCrypt_Error.h`.)"]
 val create_in: #a:alg -> create_in_st a
 
 inline_for_extraction noextract
@@ -345,7 +349,11 @@ let encrypt_st (a: supported_alg) =
 @param plain Pointer to `plain_len` bytes of memory where the to-be-encrypted plaintext is read from.
 @param plain_len Length of the to-be-encrypted plaintext.
 @param cipher Pointer to `plain_len` bytes of memory where the ciphertext is written to.
-@param tag Pointer to the tag. The length of the `tag` must be of a suitable length for the chosen algorithm. There is no length parameter for `tag`.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is written to.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
 
 @return `EverCrypt_AEAD_encrypt` may return either `EverCrypt_Error_Success` or `EverCrypt_Error_InvalidKey` (`EverCrypt_error.h`). The latter is returned if and only if the `s` parameter is `NULL`."]
 val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
@@ -511,22 +519,26 @@ let decrypt_st (a: supported_alg) =
 @param ad_len Length of the associated data.
 @param cipher Pointer to `cipher_len` bytes of memory where the ciphertext is read from.
 @param cipher_len Length of the ciphertext.
-@param tag Pointer to the tag. The length of the `tag` must be of a suitable length for the chosen algorithm. There is no length parameter for `tag`.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is read from.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
 @param dst Pointer to `cipher_len` bytes of memory where the decrypted plaintext will be written to.
 
 @return `EverCrypt_AEAD_decrypt` returns ...
 
   * `EverCrypt_Error_Success`
 
-... on success and either of ...
+  ... on success and either of ...
 
   * `EverCrypt_Error_InvalidKey` (returned if and only if the `s` parameter is `NULL`),
   * `EverCrypt_Error_InvalidIVLength` (see note about requirements on IV size above), or
   * `EverCrypt_Error_AuthenticationFailure` (in case the ciphertext could not be authenticated, e.g., due to modifications)
 
-... on failure (`EverCrypt_error.h`).
+  ... on failure (`EverCrypt_error.h`).
 
-Upon success, the plaintext will be written into `dst`."]
+  Upon success, the plaintext will be written into `dst`."]
 val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)
 
 /// Decryption (no pre-allocated state)
