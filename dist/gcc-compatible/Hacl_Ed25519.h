@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Streaming_SHA2.h"
-#include "Hacl_SHA2_Generic.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Ed25519_PrecompTable.h"

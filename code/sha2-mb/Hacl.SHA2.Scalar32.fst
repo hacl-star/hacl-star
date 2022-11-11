@@ -1,8 +1,8 @@
 module Hacl.SHA2.Scalar32
 
-open FStar.HyperStack
-open FStar.HyperStack.All
-open FStar.Mul
+open FStar.HyperStack.ST
+
+module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.NTuple
@@ -10,107 +10,75 @@ open Lib.Buffer
 open Lib.MultiBuffer
 
 open Spec.Hash.Definitions
+open Spec.Agile.Hash
 open Hacl.Spec.SHA2.Vec
 open Hacl.Impl.SHA2.Generic
 
-module ST = FStar.HyperStack.ST
-module Spec = Spec.Agile.Hash
-module SpecVec = Hacl.Spec.SHA2.Vec
+// This module only contains internal helpers that are in support of either the
+// full hash function, or the streaming functor. The top-level API is now
+// exposed in Hacl.Streaming.SHA2.fst
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+[@CInline] let sha224_init = init #SHA2_224 #M32
+[@CInline] let sha224_update = update #SHA2_224 #M32
+[@CInline] let sha224_update_nblocks = update_nblocks #SHA2_224 #M32 sha224_update
+[@CInline] let sha224_update_last = update_last #SHA2_224 #M32 sha224_update
+[@CInline] let sha224_finish = finish #SHA2_224 #M32
 
-[@CInline]
-private
-val sha224_update1: update_vec_t SHA2_224 M32
-let sha224_update1 block hash = update #SHA2_224 #M32 block hash
+[@CInline] let sha256_init = init #SHA2_256 #M32
+[@CInline] let sha256_update = update #SHA2_256 #M32
+[@CInline] let sha256_update_nblocks = update_nblocks #SHA2_256 #M32 sha256_update
+[@CInline] let sha256_update_last = update_last #SHA2_256 #M32 sha256_update
+[@CInline] let sha256_finish = finish #SHA2_256 #M32
 
+[@CInline] let sha384_init = init #SHA2_384 #M32
+[@CInline] let sha384_update = update #SHA2_384 #M32
+[@CInline] let sha384_update_nblocks = update_nblocks #SHA2_384 #M32 sha384_update
+[@CInline] let sha384_update_last = update_last #SHA2_384 #M32 sha384_update
+[@CInline] let sha384_finish = finish #SHA2_384 #M32
 
-val sha224: dst:lbuffer uint8 28ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
-  Stack unit
-  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_224 /\
-    live h0 input /\ live h0 dst /\ disjoint dst input)
-  (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
-    as_seq h1 dst == Spec.hash SHA2_224 (as_seq h0 input))
+[@CInline] let sha512_init = init #SHA2_512 #M32
+[@CInline] let sha512_update = update #SHA2_512 #M32
+[@CInline] let sha512_update_nblocks = update_nblocks #SHA2_512 #M32 sha512_update
+[@CInline] let sha512_update_last = update_last #SHA2_512 #M32 sha512_update
+[@CInline] let sha512_finish = finish #SHA2_512 #M32
 
-let sha224 dst input_len input =
-  let ib = ntup1 input in
-  let rb = ntup1 dst in
-  let h0 = ST.get() in
-  loc_multi1 rb;
-  hash #SHA2_224 #M32 (sha224_update1 <: update_vec_t SHA2_224 M32) rb input_len ib;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+// Big up for Aymeric who dug this one to help me make the coercion work.
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
+// Agility patterns for the streaming functor
+inline_for_extraction noextract
+val init: #a:sha2_alg -> init_vec_t a Hacl.Spec.SHA2.Vec.M32
+let init #a =
+  match a with
+  | SHA2_224 -> coerce sha224_init
+  | SHA2_256 -> coerce sha256_init
+  | SHA2_384 -> coerce sha384_init
+  | SHA2_512 -> coerce sha512_init
 
-[@CInline]
-private
-val sha256_update1: update_vec_t SHA2_256 M32
-let sha256_update1 block hash = update #SHA2_256 #M32 block hash
+inline_for_extraction noextract
+val update_nblocks: #a:sha2_alg -> update_nblocks_vec_t' a Hacl.Spec.SHA2.Vec.M32
+let update_nblocks #a =
+  match a with
+  | SHA2_224 -> coerce sha224_update_nblocks
+  | SHA2_256 -> coerce sha256_update_nblocks
+  | SHA2_384 -> coerce sha384_update_nblocks
+  | SHA2_512 -> coerce sha512_update_nblocks
 
+inline_for_extraction noextract
+val update_last: #a:sha2_alg -> update_last_vec_t' a Hacl.Spec.SHA2.Vec.M32
+let update_last #a =
+  match a with
+  | SHA2_224 -> coerce sha224_update_last
+  | SHA2_256 -> coerce sha256_update_last
+  | SHA2_384 -> coerce sha384_update_last
+  | SHA2_512 -> coerce sha512_update_last
 
-val sha256: dst:lbuffer uint8 32ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
-  Stack unit
-  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_256 /\
-    live h0 input /\ live h0 dst /\ disjoint dst input)
-  (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
-    as_seq h1 dst == Spec.hash SHA2_256 (as_seq h0 input))
-
-let sha256 dst input_len input =
-  let ib = ntup1 input in
-  let rb = ntup1 dst in
-  let h0 = ST.get() in
-  loc_multi1 rb;
-  hash #SHA2_256 #M32 (sha256_update1 <: update_vec_t SHA2_256 M32) rb input_len ib;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_256 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
-
-
-[@CInline]
-private
-val sha384_update1: update_vec_t SHA2_384 M32
-let sha384_update1 block hash = update #SHA2_384 #M32 block hash
-
-
-val sha384: dst:lbuffer uint8 48ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
-  Stack unit
-  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_384 /\
-    live h0 input /\ live h0 dst /\ disjoint dst input)
-  (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
-    as_seq h1 dst == Spec.hash SHA2_384 (as_seq h0 input))
-
-let sha384 dst input_len input =
-  let ib = ntup1 input in
-  let rb = ntup1 dst in
-  let h0 = ST.get() in
-  loc_multi1 rb;
-  hash #SHA2_384 #M32 (sha384_update1 <: update_vec_t SHA2_384 M32) rb input_len ib;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
-
-
-[@CInline]
-private
-val sha512_update1: update_vec_t SHA2_512 M32
-let sha512_update1 block hash = update #SHA2_512 #M32 block hash
-
-
-val sha512: dst:lbuffer uint8 64ul -> input_len:size_t -> input:lbuffer uint8 input_len ->
-  Stack unit
-  (requires fun h0 -> v input_len `less_than_max_input_length` SHA2_512 /\
-    live h0 input /\ live h0 dst /\ disjoint dst input)
-  (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
-    as_seq h1 dst == Spec.hash SHA2_512 (as_seq h0 input))
-
-let sha512 dst input_len input =
-  let ib = ntup1 input in
-  let rb = ntup1 dst in
-  let h0 = ST.get() in
-  loc_multi1 rb;
-  hash #SHA2_512 #M32 (sha512_update1 <: update_vec_t SHA2_512 M32) rb input_len ib;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_512 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+inline_for_extraction noextract
+val finish: #a:sha2_alg -> finish_vec_t a Hacl.Spec.SHA2.Vec.M32
+let finish #a =
+  match a with
+  | SHA2_224 -> coerce sha224_finish
+  | SHA2_256 -> coerce sha256_finish
+  | SHA2_384 -> coerce sha384_finish
+  | SHA2_512 -> coerce sha512_finish
 

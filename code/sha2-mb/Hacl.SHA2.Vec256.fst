@@ -19,10 +19,11 @@ module SpecVec = Hacl.Spec.SHA2.Vec
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-[@CInline]
-private
-val sha224_update8: update_vec_t SHA2_224 M256
-let sha224_update8 block hash = update #SHA2_224 #M256 block hash
+[@CInline] private let sha224_init8 = init #SHA2_224 #M256
+[@CInline] private let sha224_update8 = update #SHA2_224 #M256
+[@CInline] private let sha224_update_nblocks8 = update_nblocks #SHA2_224 #M256 sha224_update8
+[@CInline] private let sha224_update_last8 = update_last #SHA2_224 #M256 sha224_update8
+[@CInline] private let sha224_finish8 = finish #SHA2_224 #M256
 
 
 val sha224_8
@@ -52,7 +53,7 @@ let sha224_8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 input_len input0 input1 inp
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi8 rb;
-  hash #SHA2_224 #M256 sha224_update8 rb input_len ib;
+  hash #SHA2_224 #M256 sha224_init8 sha224_update_nblocks8 sha224_update_last8 sha224_finish8 rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M256 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);
@@ -66,10 +67,11 @@ let sha224_8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 input_len input0 input1 inp
 
 
 
-[@CInline]
-private
-val sha256_update8: update_vec_t SHA2_256 M256
-let sha256_update8 block hash = update #SHA2_256 #M256 block hash
+[@CInline] private let sha256_init8 = init #SHA2_256 #M256
+[@CInline] private let sha256_update8 = update #SHA2_256 #M256
+[@CInline] private let sha256_update_nblocks8 = update_nblocks #SHA2_256 #M256 sha256_update8
+[@CInline] private let sha256_update_last8 = update_last #SHA2_256 #M256 sha256_update8
+[@CInline] private let sha256_finish8 = finish #SHA2_256 #M256
 
 
 val sha256_8
@@ -99,7 +101,7 @@ let sha256_8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 input_len input0 input1 inp
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi8 rb;
-  hash #SHA2_256 #M256 sha256_update8 rb input_len ib;
+  hash #SHA2_256 #M256 sha256_init8 sha256_update_nblocks8 sha256_update_last8 sha256_finish8 rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_256 #M256 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);
@@ -112,11 +114,11 @@ let sha256_8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 input_len input0 input1 inp
   assert ((as_seq_multi h1 rb).(|7|) == as_seq h1 dst7)
 
 
-[@CInline]
-private
-val sha384_update4: update_vec_t SHA2_384 M256
-let sha384_update4 block hash = update #SHA2_384 #M256 block hash
-
+[@CInline] private let sha384_init4 = init #SHA2_384 #M256
+[@CInline] private let sha384_update4 = update #SHA2_384 #M256
+[@CInline] private let sha384_update_nblocks4 = update_nblocks #SHA2_384 #M256 sha384_update4
+[@CInline] private let sha384_update_last4 = update_last #SHA2_384 #M256 sha384_update4
+[@CInline] private let sha384_finish4 = finish #SHA2_384 #M256
 
 val sha384_4 (dst0 dst1 dst2 dst3: lbuffer uint8 48ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
   Stack unit
@@ -138,7 +140,7 @@ let sha384_4 dst0 dst1 dst2 dst3 input_len input0 input1 input2 input3 =
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi4 rb;
-  hash #SHA2_384 #M256 sha384_update4 rb input_len ib;
+  hash #SHA2_384 #M256 sha384_init4 sha384_update_nblocks4 sha384_update_last4 sha384_finish4 rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M256 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);
@@ -148,10 +150,11 @@ let sha384_4 dst0 dst1 dst2 dst3 input_len input0 input1 input2 input3 =
 
 
 
-[@CInline]
-private
-val sha512_update4: update_vec_t SHA2_512 M256
-let sha512_update4 block hash = update #SHA2_512 #M256 block hash
+[@CInline] private let sha512_init4 = init #SHA2_512 #M256
+[@CInline] private let sha512_update4 = update #SHA2_512 #M256
+[@CInline] private let sha512_update_nblocks4 = update_nblocks #SHA2_512 #M256 sha512_update4
+[@CInline] private let sha512_update_last4 = update_last #SHA2_512 #M256 sha512_update4
+[@CInline] private let sha512_finish4 = finish #SHA2_512 #M256
 
 
 val sha512_4 (dst0 dst1 dst2 dst3: lbuffer uint8 64ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
@@ -174,7 +177,7 @@ let sha512_4 dst0 dst1 dst2 dst3 input_len input0 input1 input2 input3 =
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi4 rb;
-  hash #SHA2_512 #M256 sha512_update4 rb input_len ib;
+  hash #SHA2_512 #M256 sha512_init4 sha512_update_nblocks4 sha512_update_last4 sha512_finish4 rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_512 #M256 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);

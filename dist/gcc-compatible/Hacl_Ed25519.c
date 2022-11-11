@@ -24,6 +24,7 @@
 
 #include "internal/Hacl_Ed25519.h"
 
+#include "internal/Hacl_Streaming_SHA2.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Curve25519_51.h"
 
@@ -1737,13 +1738,7 @@ static inline void sha512_pre_msg(uint8_t *hash, uint8_t *prefix, uint32_t len, 
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384 p = s;
-  KRML_MAYBE_FOR8(i,
-    (uint32_t)0U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint64_t *os = block_state;
-    uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
-    os[i] = x;);
+  Hacl_SHA2_Scalar32_sha512_init(block_state);
   Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, input, len);
@@ -1764,13 +1759,7 @@ sha512_pre_pre2_msg(
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384 p = s;
-  KRML_MAYBE_FOR8(i,
-    (uint32_t)0U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint64_t *os = block_state;
-    uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
-    os[i] = x;);
+  Hacl_SHA2_Scalar32_sha512_init(block_state);
   Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, prefix2, (uint32_t)32U);
