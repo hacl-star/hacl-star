@@ -14,5 +14,7 @@ endif
 all:
 	cp $(KRML_HOME)/krmllib/js/loader.js .
 	cp ../../dist/wasm/*.{wasm,js,html} .
+	cp ../../dist/wasm/layouts.json .
+
 	node api_test.js
 	node test2.js

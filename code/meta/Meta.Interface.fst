@@ -263,11 +263,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
               fail (string_of_name f_name ^ "is expected to be a function!")
         in
 
-        let inv_bv: bv = pack_bv ({
-          bv_ppname = "p";
-          bv_index = 355;
-          bv_sort = `Type0;
-        }) in
+        let inv_bv: bv = fresh_bv_named "p" (`Type0) in
 
         let st, new_body, new_args, new_sigelts =
           match index_bv with
@@ -404,11 +400,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
 
       | _ ->
           if has_attr f (`Meta.Attribute.specialize) then
-            let inv_bv: bv = pack_bv ({
-              bv_ppname = "p";
-              bv_index = 355;
-              bv_sort = `Type0;
-            }) in
+            let inv_bv: bv = fresh_bv_named "p" (`Type0) in
 
             // Assuming that this is a val, but we can't inspect it. Let's work around this.
             let t = pack (Tv_FVar (pack_fv f_name)) in
@@ -517,11 +509,7 @@ and visit_body (t_i: term)
                       if needs_index then pack (Tv_App typ (must index_arg, Q_Implicit)) else typ
                     in
                     let typ = pack (Tv_App typ (inv_bv, Q_Explicit)) in
-                    let bv: bv = pack_bv ({
-                      bv_ppname = "arg_" ^ string_of_name name;
-                      bv_index = 42;
-                      bv_sort = typ
-                    }) in
+                    let bv: bv = fresh_bv_named ("arg_" ^ string_of_name name) typ in
                     (pack (Tv_Var bv), Q_Explicit), (name, bv) :: bvs
               in
 
