@@ -13,6 +13,12 @@ open Lib.IntTypes
 // integers. So, for now, the type is done using HACL* types.
 (** @type: true
 *)
+[@@ Comment "Calculate a public point from a secret/private key.
+
+This computes a scalar multiplication of the secret/private key with the curve's basepoint.
+
+@param pub Pointer to 32 bytes of memory where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from."]
 val secret_to_public:
     pub:lbuffer uint8 32ul
   -> priv:lbuffer uint8 32ul
@@ -24,6 +30,11 @@ val secret_to_public:
 
 (** @type: true
 *)
+[@@ Comment "Compute the scalar multiple of a point.
+
+@param shared Pointer to 32 bytes of memory where the resulting point is written to.
+@param my_priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param their_pub Pointer to 32 bytes of memory where the public point is read from."]
 val scalarmult:
     shared:lbuffer uint8 32ul
   -> my_priv:lbuffer uint8 32ul
@@ -37,6 +48,11 @@ val scalarmult:
 
 (** @type: true
 *)
+[@@ Comment "Execute the diffie-hellmann key exchange.
+
+@param shared Pointer to 32 bytes of memory where the resulting point is written to.
+@param my_priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
+@param their_pub Pointer to 32 bytes of memory where **their** public point is read from."]
 val ecdh:
     shared:lbuffer uint8 32ul
   -> my_priv:lbuffer uint8 32ul
