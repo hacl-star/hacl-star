@@ -61,8 +61,8 @@ git commit -m "Selected hints for failing files"
 
 Push again and verify that you pass CI. Don't use `git commit -a`!
 
-Adding the snapshot
--------------------
+Adding the generated C code
+---------------------------
 
 At this stage you should see whether you forgot to tweak some bundles, e.g.
 Mozilla only wants a subset of our algorithms and maybe you want to disable
@@ -92,4 +92,18 @@ git add dist
 git commit -m "New snapshot"
 ```
 
-Push and check that it passes CI. Open pull request.
+Push and check that it passes CI.
+
+Opening the  pull request
+-------------------------
+
+To open a PR, you will need to follow the PR template in `pull_request_template.md`.
+If your changes add a new algorithm or feature, or affect performance,
+or change any public APIs, please mention it in the PR and add an entry to `CHANGES.md`.
+You do not need to add an entry for proof fixes and improvements.
+
+Once the PR is open, the HACL* maintainers and other users will interact with you
+on the PR and the PR will be merged once it has two approving reviews (including
+one from the maintainers) and all CI checks pass.
+
+All interactions are governed by the HACL* code of conduct documented in `CODE_OF_CONDUCT.md`.
