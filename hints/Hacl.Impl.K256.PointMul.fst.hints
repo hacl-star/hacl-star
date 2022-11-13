@@ -47,7 +47,7 @@
         "typing_Hacl.K256.Scalar.qnlimb"
       ],
       0,
-      "2ffb4c332cabef6c95449c00327007eb"
+      "5971308a0b233a0c2a9cee27f86abbdb"
     ],
     [
       "Hacl.Impl.K256.PointMul.table_inv_w5",
@@ -97,7 +97,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e39a892239583bedf8a3d1500215bff9"
+      "01fd3d57b6c209e86f1cf96d2456a28d"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul",
@@ -109,7 +109,7 @@
         "refinement_interpretation_Tm_refine_116ce155fe8b86895355706e759ef189"
       ],
       0,
-      "5bdb5a590ec8abb4d519ac81244180c6"
+      "d37dd70bd426fc8f56319d0e5ff78d1a"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul",
@@ -264,7 +264,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "4468432106f7159bf8039582d9b56c4a"
+      "e7674149a4324d3233a5d5def729d95d"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g_noalloc",
@@ -276,7 +276,7 @@
         "refinement_interpretation_Tm_refine_fffa654b2db8e949b2472a41355e198a"
       ],
       0,
-      "4e10c408198c4d1be61529523252b47a"
+      "786024da34bd83df66ba107f3621a91d"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g_noalloc",
@@ -352,7 +352,8 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.ConstBuffer.live",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Spec.Exponentiation.exp_fw",
+        "equation_Prims.pos", "equation_Prims.squash",
+        "equation_Spec.Exponentiation.exp_fw",
         "equation_Spec.K256.PointOps.aff_point",
         "equation_Spec.K256.PointOps.felem", "equation_Spec.K256.PointOps.g",
         "equation_Spec.K256.PointOps.one",
@@ -424,6 +425,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5971b9fd4e06025a9ac5c931505c19d8",
         "refinement_interpretation_Tm_refine_70770d0e8837514978d14487d8435141",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_82314da64f287f73f9e6a98c7d5de811",
         "refinement_interpretation_Tm_refine_92cefa831a67b1d9b9542c432c39105f",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
@@ -442,6 +444,7 @@
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__linv_ctx",
         "token_correspondence_Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__refl",
         "token_correspondence_Hacl.Impl.K256.Point.point_inv_lseq",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl",
         "token_correspondence_Spec.K256.PointOps.to_aff_point",
         "true_interp", "typing_FStar.Monotonic.HyperHeap.rid_freeable",
@@ -461,7 +464,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e593fed1362e7433c2d44bdd61d5d2ce"
+      "a74a67167bdf48ee5f74250313256281"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g",
@@ -473,7 +476,7 @@
         "refinement_interpretation_Tm_refine_8b3fbf5f9de86728b72a7096b2614d9f"
       ],
       0,
-      "e1307fbd8a8028450b625b21b5543a23"
+      "9af62e4c38d80ebfa977a647f8794c25"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g",
@@ -650,7 +653,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "75004bcd4ec4b6accad8d01c494c29a7"
+      "eaa9c1ccc8b0efdc88d4369c87ee658a"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g_double_vartime_noalloc",
@@ -708,7 +711,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5d95613910082388deedabbe3aca329c"
+      "577f89b6d89bdb656e670418b423c3cc"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g_double_vartime_noalloc",
@@ -762,7 +765,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a75b4458f995170f630e117c9d6aac71"
+      "87f51fe7c0b29bdac67911f4d2e361c7"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g_double_vartime_noalloc",
@@ -959,7 +962,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "4c599127b76108d8e4ddca7ca56107a1"
+      "e3a8f113cabd88c44cf7919d14e42292"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g_double_vartime",
@@ -971,7 +974,7 @@
         "refinement_interpretation_Tm_refine_e4701c4bd70e852a35fe20c15cc03434"
       ],
       0,
-      "4d20075771cb07a51dff68932ff9c9e9"
+      "39f9a731914d317e62eaa9c9d9c6690d"
     ],
     [
       "Hacl.Impl.K256.PointMul.point_mul_g_double_vartime",
@@ -1200,7 +1203,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "a58d2dac97d6d1f07433317eba58b02a"
+      "f4befde637c3aeaeaf2ddd6f6d7f3818"
     ]
   ]
 ]
