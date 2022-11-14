@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_SHA2_Scalar32_H
-#define __Hacl_SHA2_Scalar32_H
+#ifndef __internal_Hacl_Streaming_SHA2_H
+#define __internal_Hacl_Streaming_SHA2_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,20 +35,14 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_SHA2_Generic.h"
-#include "Hacl_Krmllib.h"
+#include "internal/Hacl_SHA2_Types.h"
+#include "../Hacl_Streaming_SHA2.h"
 
-void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input);
-
-void Hacl_SHA2_Scalar32_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input);
-
-void Hacl_SHA2_Scalar32_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input);
-
-void Hacl_SHA2_Scalar32_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_SHA2_Scalar32_sha512_init(uint64_t *hash);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_SHA2_Scalar32_H_DEFINED
+#define __internal_Hacl_Streaming_SHA2_H_DEFINED
 #endif

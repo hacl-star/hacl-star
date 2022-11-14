@@ -24,8 +24,8 @@
 
 #include "internal/Hacl_Ed25519.h"
 
+#include "internal/Hacl_Streaming_SHA2.h"
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Curve25519_51.h"
 
 /* SNIPPET_START: fsum */
@@ -1888,7 +1888,7 @@ static inline void sha512_pre_msg(uint8_t *hash, uint8_t *prefix, uint32_t len, 
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384 p = s;
-  Hacl_Hash_Core_SHA2_init_512(block_state);
+  Hacl_SHA2_Scalar32_sha512_init(block_state);
   Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, input, len);
@@ -1913,7 +1913,7 @@ sha512_pre_pre2_msg(
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384 p = s;
-  Hacl_Hash_Core_SHA2_init_512(block_state);
+  Hacl_SHA2_Scalar32_sha512_init(block_state);
   Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, prefix2, (uint32_t)32U);

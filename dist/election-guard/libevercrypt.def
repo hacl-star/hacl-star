@@ -1,19 +1,15 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  Hacl_Hash_Core_SHA2_init_224
   Hacl_Hash_Core_SHA2_init_256
   Hacl_Hash_Core_SHA2_init_384
   Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_finish_224
   Hacl_Hash_Core_SHA2_finish_256
   Hacl_Hash_Core_SHA2_finish_384
   Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_SHA2_update_multi_224
   Hacl_Hash_SHA2_update_multi_256
   Hacl_Hash_SHA2_update_multi_384
   Hacl_Hash_SHA2_update_multi_512
-  Hacl_Hash_SHA2_update_last_224
   Hacl_Hash_SHA2_update_last_256
   Hacl_Hash_SHA2_update_last_384
   Hacl_Hash_SHA2_update_last_512
@@ -29,26 +25,46 @@ EXPORTS
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
   Hacl_HMAC_compute_sha2_512
+  Hacl_SHA2_Scalar32_sha224_init
+  Hacl_SHA2_Scalar32_sha224_update_nblocks
+  Hacl_SHA2_Scalar32_sha224_update_last
+  Hacl_SHA2_Scalar32_sha224_finish
+  Hacl_SHA2_Scalar32_sha256_init
+  Hacl_SHA2_Scalar32_sha256_update_nblocks
+  Hacl_SHA2_Scalar32_sha256_update_last
+  Hacl_SHA2_Scalar32_sha256_finish
+  Hacl_SHA2_Scalar32_sha384_init
+  Hacl_SHA2_Scalar32_sha384_update_nblocks
+  Hacl_SHA2_Scalar32_sha384_update_last
+  Hacl_SHA2_Scalar32_sha384_finish
+  Hacl_SHA2_Scalar32_sha512_init
+  Hacl_SHA2_Scalar32_sha512_update_nblocks
+  Hacl_SHA2_Scalar32_sha512_update_last
+  Hacl_SHA2_Scalar32_sha512_finish
   Hacl_Streaming_SHA2_create_in_224
   Hacl_Streaming_SHA2_init_224
   Hacl_Streaming_SHA2_update_224
   Hacl_Streaming_SHA2_finish_224
   Hacl_Streaming_SHA2_free_224
+  Hacl_Streaming_SHA2_sha224
   Hacl_Streaming_SHA2_create_in_256
   Hacl_Streaming_SHA2_init_256
   Hacl_Streaming_SHA2_update_256
   Hacl_Streaming_SHA2_finish_256
   Hacl_Streaming_SHA2_free_256
+  Hacl_Streaming_SHA2_sha256
   Hacl_Streaming_SHA2_create_in_384
   Hacl_Streaming_SHA2_init_384
   Hacl_Streaming_SHA2_update_384
   Hacl_Streaming_SHA2_finish_384
   Hacl_Streaming_SHA2_free_384
+  Hacl_Streaming_SHA2_sha384
   Hacl_Streaming_SHA2_create_in_512
   Hacl_Streaming_SHA2_init_512
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
+  Hacl_Streaming_SHA2_sha512
   Hacl_Bignum_Base_mul_wide_add2_u32
   Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Bignum_Lib_bn_get_top_index_u32

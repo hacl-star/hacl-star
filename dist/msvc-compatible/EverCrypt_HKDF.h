@@ -152,6 +152,17 @@ EverCrypt_HKDF_extract_blake2b(
   uint32_t ikmlen
 );
 
+/**
+Expand pseudorandom key to desired length.
+
+@param a Hash function to use. Usually, the same as used in `EverCrypt_HKDF_extract`.
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from.
+@param infolen Length of context and application specific information. Can be 0.
+@param len Length of output keying material.
+*/
 void
 EverCrypt_HKDF_expand(
   Spec_Hash_Definitions_hash_alg a,
@@ -163,6 +174,23 @@ EverCrypt_HKDF_expand(
   uint32_t len
 );
 
+/**
+Extract a fixed-length pseudorandom key from input keying material.
+
+@param a Hash function to use. The allowed values are:
+  * `Spec_Hash_Definitions_Blake2B` (`HashLen` = 64), 
+  * `Spec_Hash_Definitions_Blake2S` (`HashLen` = 32), 
+  * `Spec_Hash_Definitions_SHA2_256` (`HashLen` = 32), 
+  * `Spec_Hash_Definitions_SHA2_384` (`HashLen` = 48), 
+  * `Spec_Hash_Definitions_SHA2_512` (`HashLen` = 64), and
+  * `Spec_Hash_Definitions_SHA1` (`HashLen` = 20).
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+  `HashLen` depends on the used algorithm `a`. See above.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material.
+*/
 void
 EverCrypt_HKDF_extract(
   Spec_Hash_Definitions_hash_alg a,

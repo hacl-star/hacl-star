@@ -187,7 +187,7 @@
         "typing_FStar.Set.singleton", "well-founded-ordering-on-nat"
       ],
       0,
-      "e41d8054ba778c53d98b04efa9d11208"
+      "a1b5a6be6d33f7b3f46fbfed6af97bde"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.buffer_info_has_addr_opt",
@@ -227,7 +227,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "45d769e07ab97c936d4ec6b05a14eeed"
+      "f358612a3c705a3b4add20f0731c4402"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.lemma_make_owns",
@@ -243,7 +243,7 @@
         "refinement_interpretation_Tm_refine_cdecb7d3f1ae09d7afb8fc675bf462ac"
       ],
       0,
-      "823021598e3c711e5372e385e8ee9e22"
+      "8c29222adb798c3547273c6834c59d9d"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.lemma_make_owns",
@@ -381,7 +381,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "d1472a5fa86f968f544ec9d1d0c56752"
+      "0b37b53a45634f61699df186d86674b2"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.lemma_loc_mutable_buffers_rec",
@@ -390,7 +390,7 @@
       2,
       [ "@query" ],
       0,
-      "b8f5fdc210ba9d55237141c555a7c6ea"
+      "b8bd2cf604ee7334b28fefd9c5335c2a"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.lemma_loc_mutable_buffers_rec",
@@ -465,7 +465,7 @@
         "typing_Vale.PPC64LE.Memory.loc_mutable_buffers"
       ],
       0,
-      "de2e17967665d6d40fde064ff3254378"
+      "2cdbd5d0e2e4e082f63c19b7439ae550"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.lemma_loc_mutable_buffers",
@@ -625,7 +625,7 @@
         "typing_tok_Vale.Arch.HeapImpl.Mutable@tok"
       ],
       0,
-      "a071ed15a81aaa220c2c20799cbc8249"
+      "6bc9c0cec0781de395592a9398b4c1fa"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.lemma_destroy_heaplets",
@@ -1270,7 +1270,7 @@
         "typing_Vale.PPC64LE.Memory.uint_view"
       ],
       0,
-      "962b2602f4d216d13e4b6dfd9135ed16"
+      "1cc4b1e5d05a856b27071e7ed7947d67"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.store_buffer_down64_mem",
@@ -1333,7 +1333,7 @@
         "unit_typing"
       ],
       0,
-      "90d858be4740b384591ccbf9a6585d08"
+      "0ca23f50e21f0c06040d92ba9ad9c534"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.store_buffer_aux_down64_mem",
@@ -1985,10 +1985,8 @@
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt64",
         "data_typing_intro_Vale.Interop.Heap_s.InteropHeap@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
-        "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt.fits",
-        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size",
-        "equation_LowStar.BufferView.Down.as_buffer_t",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_LowStar.BufferView.Down.buffer", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Vale.Arch.HeapImpl._ih",
         "equation_Vale.Arch.HeapImpl.buffer",
@@ -2004,8 +2002,6 @@
         "equation_Vale.PPC64LE.Memory.buffer_readable",
         "equation_Vale.PPC64LE.Memory.buffer_write",
         "equation_Vale.PPC64LE.Memory.buffer_writeable",
-        "equation_Vale.PPC64LE.Memory.loc",
-        "equation_Vale.PPC64LE.Memory.loc_buffer",
         "equation_Vale.PPC64LE.Memory.scale_by",
         "equation_Vale.PPC64LE.Memory.uint64_view",
         "equation_Vale.PPC64LE.Memory.uint_view",
@@ -2048,17 +2044,14 @@
         "refinement_interpretation_Tm_refine_76e59c7a065e37ed8356ffe7fa5f9837",
         "refinement_interpretation_Tm_refine_87f65bf36fef1b919603d458579dd2c0",
         "refinement_interpretation_Tm_refine_932bf84174fc6535a71d6630627e5c17",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Tm_refine_b0e983e2a97bd15fdd0ab53f8b017a6f",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c8d14e43ad9ba7ceb64e36ef13e09448",
         "refinement_interpretation_Tm_refine_efd4ef517629f7c86a95b395d9e0faca",
         "refinement_interpretation_Tm_refine_f3af5f28517536d6dbf79ec5d669f74d",
-        "typing_FStar.UInt8.t", "typing_LowStar.BufferView.Down.as_buffer",
-        "typing_LowStar.BufferView.Down.length",
-        "typing_LowStar.BufferView.Up.as_down_buffer",
-        "typing_LowStar.BufferView.Up.buffer_src",
+        "typing_FStar.UInt8.t", "typing_LowStar.BufferView.Down.length",
         "typing_LowStar.BufferView.Up.mk_buffer",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_Vale.Arch.HeapImpl._ih",
         "typing_Vale.Interop.Heap_s.__proj__InteropHeap__item__addrs",
         "typing_Vale.Interop.Heap_s.__proj__InteropHeap__item__hs",
@@ -2070,12 +2063,11 @@
         "typing_Vale.Interop.Types.base_typ_as_type",
         "typing_Vale.Interop.Types.down_view",
         "typing_Vale.Interop.Types.get_downview",
-        "typing_Vale.PPC64LE.Memory.loc_buffer",
         "typing_Vale.PPC64LE.Memory.uint_view",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "e6e3bf23c4902589ab08181332e36761"
+      "16e0d03d27c508c655a65384d6de2bc5"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.valid_state_store_mem64_aux",
@@ -2336,7 +2328,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "278339320d73fdb9ade1e2a3907eeffa"
+      "eadb2085bd060281d5cb0611ed24aa02"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.lemma_is_full_update",
@@ -2738,8 +2730,6 @@
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
         "data_typing_intro_Vale.Interop.Heap_s.InteropHeap@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
-        "equation_FStar.Seq.Properties.lseq",
-        "equation_LowStar.BufferView.Down.as_buffer_t",
         "equation_LowStar.BufferView.Down.buffer", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Vale.Arch.HeapImpl._ih",
         "equation_Vale.Arch.HeapImpl.buffer",
@@ -2757,8 +2747,6 @@
         "equation_Vale.PPC64LE.Memory.buffer_readable",
         "equation_Vale.PPC64LE.Memory.buffer_write",
         "equation_Vale.PPC64LE.Memory.buffer_writeable",
-        "equation_Vale.PPC64LE.Memory.loc",
-        "equation_Vale.PPC64LE.Memory.loc_buffer",
         "equation_Vale.PPC64LE.Memory.scale_by",
         "equation_Vale.PPC64LE.Memory.uint128_view",
         "equation_Vale.PPC64LE.Memory.uint_view",
@@ -2798,18 +2786,15 @@
         "refinement_interpretation_Tm_refine_6d5ab57ac719f3d34aaa0ac8c62a3164",
         "refinement_interpretation_Tm_refine_76e59c7a065e37ed8356ffe7fa5f9837",
         "refinement_interpretation_Tm_refine_87f65bf36fef1b919603d458579dd2c0",
-        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Tm_refine_a44f62e48d23c8e68b0685b4e47c9ab4",
         "refinement_interpretation_Tm_refine_b01fadcc2016334c8e156744208a5c7b",
         "refinement_interpretation_Tm_refine_b0e983e2a97bd15fdd0ab53f8b017a6f",
         "refinement_interpretation_Tm_refine_c8d14e43ad9ba7ceb64e36ef13e09448",
         "refinement_interpretation_Tm_refine_efd4ef517629f7c86a95b395d9e0faca",
         "refinement_interpretation_Tm_refine_f3af5f28517536d6dbf79ec5d669f74d",
-        "typing_FStar.UInt8.t", "typing_LowStar.BufferView.Down.as_buffer",
-        "typing_LowStar.BufferView.Down.length",
-        "typing_LowStar.BufferView.Up.as_down_buffer",
-        "typing_LowStar.BufferView.Up.buffer_src",
+        "typing_FStar.UInt8.t", "typing_LowStar.BufferView.Down.length",
         "typing_LowStar.BufferView.Up.mk_buffer",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_Vale.Arch.HeapImpl._ih",
         "typing_Vale.Interop.Heap_s.__proj__InteropHeap__item__addrs",
         "typing_Vale.Interop.Heap_s.__proj__InteropHeap__item__hs",
@@ -2822,12 +2807,11 @@
         "typing_Vale.Interop.Types.down_view",
         "typing_Vale.Interop.Types.get_downview",
         "typing_Vale.PPC64LE.Memory.base_typ_as_vale_type",
-        "typing_Vale.PPC64LE.Memory.loc_buffer",
         "typing_Vale.PPC64LE.Memory.uint_view",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "d6f4174b549ea6365d60beabd6d91366"
+      "63ace5507f29713c1da1fb8561d672fb"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.written_buffer_down128_aux1",
@@ -3499,7 +3483,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "f8843600b9173373df742d57399142e3"
+      "972435c3e142a2870320fcb1bd47ec11"
     ],
     [
       "Vale.PPC64LE.Memory_Sems.low_lemma_store_mem128_full",

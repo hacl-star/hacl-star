@@ -80,7 +80,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "af6cda3b686da7ae348b8c1a6c34c864"
+      "4e301de57a407784abfa5cb79ffd32ca"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step12",
@@ -307,7 +307,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b670484cc79ace3b004a60a060af88ab"
+      "f1f19be39ca0449dcbec3af41e4b2ddb"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step45",
@@ -351,7 +351,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "37529be73a5190a1ef49d11a3f136ab7"
+      "f3f73fbd63ad0a5fb8134f0dfb9b6ea1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step45",
@@ -371,7 +371,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ad6b808144a6e657be2136739e214c6a"
+      "dc37b9b555fee0592542768749116ec1"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step45",
@@ -555,7 +555,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "4c2998aa42b31f2c6fd8ea17e28b5fca"
+      "ede37d38d275e61b78383a7d8b08cb7e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.lemma_power_step6",
@@ -569,7 +569,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d081b0d378560e4e3e93ae959c6ffaca"
+      "0e7c0c8a8e5ed5672aa2aa92222d5494"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.lemma_power_step6",
@@ -600,7 +600,7 @@
         "typing_Spec.P256.Lemmas.exp"
       ],
       0,
-      "3c383af7142144ebea2603669c061e0c"
+      "b1182583aef45a913d68fc55d4a800aa"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -626,7 +626,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a2ce8af1aa8269d0c5f27bf729471224"
+      "27a8dd3d6aa6b4a5890bc923d59299a3"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
@@ -641,6 +641,7 @@
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
@@ -746,1213 +747,10 @@
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
-        "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
-        "refinement_interpretation_Tm_refine_23901fd1a00bbbb7a1fde69f8ee925b2",
-        "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
-        "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_56c3919dda5153be7f87d90b0a6641c4",
-        "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
-        "refinement_interpretation_Tm_refine_74bb33e41f007dbc44c496ebc7422911",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_b8f648662b56a3f6e9d7c49424e1bf86",
-        "refinement_interpretation_Tm_refine_c007638b1d4ef7e66e6c5a80ab3319ff",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "refinement_interpretation_Tm_refine_eed1d421faaa74a5f4114a511f0aa2eb",
-        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "refinement_interpretation_Tm_refine_f59cf85ff3b52d40c97f5b32cfca2788",
-        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "true_interp", "typing_FStar.Map.contains",
-        "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
-        "typing_FStar.Monotonic.Heap.emp",
-        "typing_FStar.Monotonic.HyperHeap.mod_set",
-        "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperHeap.root",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_rid_ctr",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.Monotonic.HyperStack.is_stack_region",
-        "typing_FStar.Monotonic.HyperStack.remove_elt",
-        "typing_FStar.Set.complement", "typing_FStar.Set.mem",
-        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
-        "typing_FStar.UInt32.v", "typing_Hacl.Spec.P256.Felem.as_nat",
-        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.unsigned",
-        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.index",
-        "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
-        "typing_LowStar.Monotonic.Buffer.as_addr",
-        "typing_LowStar.Monotonic.Buffer.as_seq",
-        "typing_LowStar.Monotonic.Buffer.frameOf",
-        "typing_LowStar.Monotonic.Buffer.len",
-        "typing_LowStar.Monotonic.Buffer.loc_addresses",
-        "typing_LowStar.Monotonic.Buffer.loc_buffer",
-        "typing_LowStar.Monotonic.Buffer.loc_none",
-        "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
-        "typing_LowStar.Monotonic.Buffer.loc_regions",
-        "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Spec.AES.gf8",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
-        "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
-      ],
-      0,
-      "c43155ab5d7093e93d67e4d6228e1049"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      3,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "c05265d291331a0a74a0b3855c2dcf89"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      4,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "f3870b5e5ba619087b17b165c2b61d01"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      5,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "564764fd8cd811e19ab3f2373b583ec5"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      6,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "5a809cca067ab1fff38f0f28b6515b86"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      7,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "41f5bfbb5d25186574dd7d98785bee33"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      8,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "af319ef2d410a48f9d5812ead3190a7a"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      9,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "f32e02f5969b728b3a5c69eca1961b62"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      10,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "fb1c199636ead66eb414df15ab226adb"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      11,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "d68abff181c58817f8e53f569579adf3"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      12,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "0a169a05dbfc230ccb9aaf685d0a5bdb"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      13,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "1a895d5101ccd5730fddbc2892e170fe"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      14,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "d0f292bee8ae073f0f9ce65ccdd5224e"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      15,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "656339b0e1aa9b4ed0dffdf80de831d7"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      16,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "76a442cb53a3fde83f3385d04fca6e1d"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      17,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "f7e84c7f0cca770eb2002f2d47de0cf7"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      18,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "ae402ef31a67fefc100817ab685c337c"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      19,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "4042e47c92d3faa682f17622a5207f2f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      20,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "81b25424d6a4ff03aadd80a2a9c7a16c"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      21,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "bad8d7b6a3e16d099e7836768642729c"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      22,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "0c9701d9a70e922c3873831875f85adc"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      23,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "f5287ad2b58a41e58c21daff3caea018"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      24,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "41695f5f5f989e179f2763494c137733"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      25,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "5416b5f5203f3bd1167b8282a95e27d4"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      26,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "f715ab03ddd3260bf2ed43fffc982b4d"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      27,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "f575bb4a6b782b1975e74fcd5658a1fa"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      28,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "9f6c544797141a6a413dcd82c0374f6f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      29,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "d834cb40eab065026ed5333968497d64"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      30,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "76da7bf7b0c0d197a4cc5786fe77b409"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      31,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "78c499af64124085f4e8713bc23b8800"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      32,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "fce6ffc869d841041ced321987597a83"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      33,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "bfc13d566d2250a8c6cbfcae58bae6f2"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      34,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "650f4bee40a185c6dd7a3eee00f561f2"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      35,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "0b03e8ac2b7accd703512f7646454f0f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      36,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "a99ef3f43ca75bc3bedf3f18a81f2c3c"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      37,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "2a4e7cec6639f2998cb27901a9109bee"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      38,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "2df402a348af500870d203b1a411efc5"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      39,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "b3ad82219cf66ec2521b4d94b0516016"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      40,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "a42d57dbc4f487338ec75c3b3caacdfd"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      41,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "284ffa91583e8bdf86994472750fb501"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      42,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "64a1837e91ee3ea90c15b5bb7036b499"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      43,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "664dfaa8dbf3b4915e99c2aaf8bdc26f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      44,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "0451c39e421cf07396592e55f1d9069f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      45,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "a59c061dfae3c66db7a735817032e8d7"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      46,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "5c6f4a7d3f28a987bcf39f0ebd435d27"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      47,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "7fc899d8d471b3cac5427d527a711a71"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      48,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "052776aa09bc3571233a35a0478ee63d"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      49,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "c5b9271b472526396bdf3be520d5aadf"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      50,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "638b4c69ecb196456a6459c022b39774"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      51,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "8a1d947498e4a513f9f44ca675b5f306"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      52,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "de9fa2e1aec386108ddc77ea18593d12"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      53,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "4a1a311be9ff8e473ec5bbda90a1a7d1"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      54,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "31864e15617c648ce4761d88b26437e1"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      55,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "5b58bd27cb5f43979a52a50aa98f9a7b"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      56,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "1dfaea467933b8bdc4fc03914835f469"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      57,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "c57fe8044da4ac62a98d8a1965eaab0f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      58,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "b21403699125f451f4e28fb5322c5171"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      59,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "64ca0ef60a38b11bf7137ce21bda787a"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      60,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "13dd2ad245a8bd4b8577cf94fb8d4c81"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      61,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "08d6cd173e1cde27131e216dfb0e72e1"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      62,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "e3a71cb06702977f393519a76f618d7f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      63,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "693bc5fc011d948e1f8a28427698f64f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      64,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "4c1124a5c7c044d48dd839734e6e3e80"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      65,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "20f07a2f84fac9ce86f558888386eac1"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      66,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "0dcb7d957333baaf6ddc13db3b09bf97"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      67,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "c5ec1929aa00e5fad97b93dd1e9bae3d"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      68,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "8bcd67db373a4c33ecfd734b4df76890"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      69,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "d02810101670223bd44748d38eb937d9"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      70,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "ace05e79c86e2cd2dc39ab54e45a6b9f"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      71,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "01f00abfff82920fb8a52c35e9c762a8"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      72,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "70649ff47a5bc0fa5e522a44727c88eb"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      73,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "b70d7ea98a39cfc51c8bbbd00f102c53"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      74,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "1b841f1c40e024c2a0d1922a77b0b241"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      75,
-      0,
-      0,
-      [
-        "@query", "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "f3ea6c85c9f1b9acead73f6540bc91ba"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      76,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "a3773bfc63b1f1f621327a0f89116464"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      77,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "3700c557becf9ecb521f5a04fe9d1402"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      78,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.P256.Felem.as_nat", "equation_Prims.nat",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_cc725142ef7f7b35feb239d67ee268a0",
-        "typing_Hacl.Spec.P256.Felem.as_nat"
-      ],
-      0,
-      "f94562fae2c93e3baf0324bbbdae387c"
-    ],
-    [
-      "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_step6",
-      79,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
-        "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.MUT",
-        "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U64@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
-        "equation_FStar.HyperStack.ST.equal_domains",
-        "equation_FStar.HyperStack.ST.inline_stack_inv",
-        "equation_FStar.Monotonic.Heap.equal_dom",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.fresh_frame",
-        "equation_FStar.Monotonic.HyperStack.is_stack_region",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_FStar.Monotonic.HyperStack.pop",
-        "equation_FStar.Monotonic.HyperStack.poppable",
-        "equation_FStar.Monotonic.HyperStack.popped",
-        "equation_FStar.Monotonic.HyperStack.remove_elt",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_Hacl.Impl.ECDSA.MM.Exponent.prime",
-        "equation_Hacl.Spec.P256.Felem.as_nat",
-        "equation_Hacl.Spec.P256.Felem.felem", "equation_Lib.Buffer.as_seq",
-        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
-        "equation_Lib.Buffer.eq_or_disjoint",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
-        "equation_Lib.Buffer.stack_allocated", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred",
-        "equation_Spec.ECDSAP256.Definition.prime_p256_order",
-        "equation_Spec.GaloisField.gf",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Lib.IntTypes.uint64",
-        "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
-        "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
-        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
-        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_intro",
-        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
-        "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.Map.lemma_InDomRestrict",
-        "lemma_FStar.Map.lemma_InDomUpd2",
-        "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
-        "lemma_FStar.Map.lemma_UpdDomain",
-        "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
-        "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
-        "lemma_FStar.Set.lemma_equal_elim",
-        "lemma_FStar.Set.lemma_equal_intro",
-        "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
-        "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
-        "lemma_FStar.Set.mem_union", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.uv_inv", "lemma_Lib.IntTypes.v_mk_int",
-        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
-        "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
-        "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
-        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "lemma_LowStar.Monotonic.Buffer.length_null_1",
-        "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
-        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
-        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
-        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
-        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
-        "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
-        "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
-        "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
@@ -2010,7 +808,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7b2b7a45b756185591a8eb12d4d33407"
+      "1e740d3d2121f425b38edd3065eba2f5"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_core",
@@ -2095,7 +893,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8be7d4aab044d689da171cbe4de28457"
+      "f3c4ac5f8940c6479bd6a5020d791496"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_core",
@@ -2121,7 +919,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "927bc36c29b5930733f75b1c6582bd29"
+      "5c6703ada651457374ea159adcb86abe"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_core",
@@ -2301,7 +1099,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "3fa8e9c84fd66731dc79c3b1e66bc743"
+      "20552e85387c76307bcd1d9bf6b5a48e"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature",
@@ -2349,7 +1147,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dd3cc53f1bb768a1b3f6707393650461"
+      "a75a8b984a2e18b34bc145e4499226ad"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature",
@@ -2377,7 +1175,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "677ebbb7c88a97308644d5a7bc46a37d"
+      "f104df017d070b99e7e93e2f1b57122f"
     ],
     [
       "Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature",
@@ -2583,7 +1381,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "901401c87ed2a24801a3b6b7119523fa"
+      "847ff3b15cbc85bf34a7f00cc4d660f4"
     ]
   ]
 ]
