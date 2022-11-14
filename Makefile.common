@@ -108,7 +108,8 @@ CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
 # First, match the Blake2 stuff
 BLAKE2_BUNDLE_BASE= \
   -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants \
-  -bundle 'Hacl.Blake2b_32+Hacl.Blake2s_32=Hacl.Hash.Blake2,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2]'
+  -bundle 'Hacl.Blake2b_32=Hacl.Hash.Blake2,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2b_32]' \
+  -bundle 'Hacl.Blake2s_32=Hacl.Hash.Blake2,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2s_32]'
 BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
   -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
