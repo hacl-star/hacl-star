@@ -1,46 +1,50 @@
 How to submit a pull request with minimal amounts of noise
 ==========================================================
 
-Make sure you have the latest F\* and karamel.
+This guide will show you how to:
+- make sure you have no diff in dist/ or hints/, and therefore can safely merge
+  origin/main
+- add only the hints that you need to get a green
+- add only the dist/ diff that is relevant for your PR.
+
+Basics
+------
+
+Make sure you have the latest F\* and karamel, and the code works locally.
 
 Discarding your local changes to dist/ and hints/
 -------------------------------------------------
 
+This first step allows merging upstream without conflicts.
+
 ```
 git fetch
 # You now have in your local git tree all the most recent refs for remote origin
-git reset origin/master hints dist
-# Both directories are now, in the staging area, the same as origin/master, but
+git reset origin/main hints dist/*/*
+# Both directories are now, in the staging area, the same as origin/main, but
 # they have not changed in your working tree
-git checkout hints dist
+git checkout hints dist/*/*
 # The local modifications vis à vis the staging area have now been discarded:
-# both your working tree and the staging area are the same as origin/master
-```
-
-Note: if you had changes to files in dist *OTHER* than the generated C files,
-e.g. Makefile.tmpl, do the opposite operation, for instance:
-
-```
-git reset HEAD dist/Makefile.tmpl
-git checkout dist/Makefile.tmpl
+# both your working tree and the staging area are the same as origin/main
 ```
 
 At this stage, commit:
 
 ```
-git commit -am "Reset hints and dist to be the same as master"
+git commit -am "Reset hints and dist to be the same as main"
 ```
 
-You can now merge master without fear of conflicts:
+You can now merge main without fear of conflicts:
 
 ```
-git merge origin/master
+git merge origin/main
 ```
 
 Fixing up the build
 -------------------
 
-At this stage, discard ancient files and new hints:
+Your working directory is now up-to-date with origin/main. To be 100% sure your
+PR is going to get a green, restart from a clean build.
 
 ```
 git clean -fdx dist hints
@@ -64,10 +68,9 @@ Push again and verify that you pass CI. Don't use `git commit -a`!
 Adding the generated C code
 ---------------------------
 
-At this stage you should see whether you forgot to tweak some bundles, e.g.
-Mozilla only wants a subset of our algorithms and maybe you want to disable
-yours for the time being so that it doesn't appear in the dist/mozilla
-directory. Use `git status` to see what's up. Iterate as follows:
+By now all of your files should verify successfully. It is time to see if you
+forgot to tweak some bundles. Use `git status` to see what's up. Iterate as
+follows:
 
 ```
 rm -rf dist/*/Makefile.basic && git clean -fdx dist && NODEPEND=1 make -j
@@ -75,35 +78,38 @@ rm -rf dist/*/Makefile.basic && git clean -fdx dist && NODEPEND=1 make -j
 
 This will force just the regeneration of the snapshots.
 
+NOTE: if the problem is with Mozilla, you need to edit dist/package-mozilla.sh
+and run `NODEPEND=1 make -j package-compile-mozilla` instead.
+
 Once you have a successful local build, review the diff in `dist`:
 
 ```
 git diff dist
 ```
 
-if you see anything other than small changes, you most likely need to update F\*
-and karamel. Start everything over again. Do not submit a pull request if
-there's too much noise in those files.
+If you see a million small-ish changes, maybe F\*/KaRaMeL are out of date.
 
-If you are happy with the small amount of diff:
+At this stage, assess the situation, but in almost all cases, you can get away
+with submitting JUST the diff for dist/gcc-compatible (unless you're
+specifically working on MSVC-related stuff).
 
 ```
-git add dist
-git commit -m "New snapshot"
+git add dist/gcc-compatible
+git commit -m "Add changes to the C files as part of this PR"
 ```
 
 Push and check that it passes CI.
 
-Opening the  pull request
--------------------------
+Opening the pull request
+------------------------
 
 To open a PR, you will need to follow the PR template in `pull_request_template.md`.
 If your changes add a new algorithm or feature, or affect performance,
 or change any public APIs, please mention it in the PR and add an entry to `CHANGES.md`.
 You do not need to add an entry for proof fixes and improvements.
 
-Once the PR is open, the HACL* maintainers and other users will interact with you
+Once the PR is open, the HACL\* maintainers and other users will interact with you
 on the PR and the PR will be merged once it has two approving reviews (including
 one from the maintainers) and all CI checks pass.
 
-All interactions are governed by the HACL* code of conduct documented in `CODE_OF_CONDUCT.md`.
+All interactions are governed by the HACL\* code of conduct documented in `CODE_OF_CONDUCT.md`.
