@@ -9,7 +9,8 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "Hacl_Hash_Blake2.h"
+#include "Hacl_Hash_Blake2b_32.h"
+#include "Hacl_Hash_Blake2s_32.h"
 
 #if defined(HACL_CAN_COMPILE_VEC128)
 #include "Hacl_Hash_Blake2s_128.h"
