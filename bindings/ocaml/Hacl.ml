@@ -18,9 +18,8 @@ module Hacl_HMAC = Hacl_HMAC_bindings.Bindings(Hacl_HMAC_stubs)
 module Hacl_Poly1305_32 = Hacl_Poly1305_32_bindings.Bindings(Hacl_Poly1305_32_stubs)
 module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
-module Hacl_Hash_Blake2 = Hacl_Hash_Blake2_bindings.Bindings(Hacl_Hash_Blake2_stubs)
-module Hacl_Blake2b_32 = Hacl_Hash_Blake2
-module Hacl_Blake2s_32 = Hacl_Hash_Blake2
+module Hacl_Blake2b_32 = Hacl_Hash_Blake2b_32_bindings.Bindings(Hacl_Hash_Blake2b_32_stubs)
+module Hacl_Blake2s_32 = Hacl_Hash_Blake2s_32_bindings.Bindings(Hacl_Hash_Blake2s_32_stubs)
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
 #ifdef HACL_CAN_COMPILE_VEC128
