@@ -76,8 +76,8 @@ let modifies_multi #lanes #len (b:multibuf lanes len) (h0:mem) (h1:mem) =
 let stack_allocated_multi #lanes #len (b:multibuf lanes len) (h0:mem) (h1:mem) (s:lseq uint8 (v len)) =
   forall i. i < lanes ==> stack_allocated b.(|i|) h0 h1 s
 
-let multiseq (lanes:flen) (len:size_nat) =
-  ntuple (lseq uint8 len) lanes
+let multiseq (lanes:flen) (len:nat) =
+  ntuple (Seq.lseq uint8 len) lanes
 
 let as_seq_multi #lanes #len (h:mem) (b:multibuf lanes len) : GTot (multiseq lanes (v len)) =
   gmap (as_seq h) b
