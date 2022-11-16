@@ -11,7 +11,6 @@ module F = Hacl.Streaming.Functor
 module I = Hacl.Streaming.Interface
 module ST = FStar.HyperStack.ST
 
-open LowStar.BufferOps
 open FStar.Mul
 
 module Loops = Lib.LoopCombinators
@@ -26,7 +25,6 @@ inline_for_extraction noextract
 let uint32 = Lib.IntTypes.uint32
 
 module Spec = Spec.Blake2
-open Hacl.Impl.Blake2.Core
 module Core = Hacl.Impl.Blake2.Core
 open Hacl.Impl.Blake2.Generic
 module Blake2s32 = Hacl.Blake2s_32
@@ -48,7 +46,7 @@ let m_spec = Core.m_spec
 
 /// The stateful state: (wv, hash)
 inline_for_extraction noextract
-let s (a : alg) (m : m_spec) = state_p a m & state_p a m
+let s (a : alg) (m : m_spec) = Core.(state_p a m & state_p a m)
 
 inline_for_extraction noextract
 let t (a : alg) = Spec.state a
@@ -57,11 +55,11 @@ let t (a : alg) = Spec.state a
 temporary scratch space that the Blake2 implementation expects to receive. (Why
 is the implementation not performing its own stack allocations? Don't know!) *)
 inline_for_extraction noextract
-let get_wv (#a : alg) (#m : m_spec) (s : s a m) : Tot (state_p a m) =
+let get_wv (#a : alg) (#m : m_spec) (s : s a m) : Tot (Core.state_p a m) =
   match s with wv, _ -> wv
 
 inline_for_extraction noextract
-let get_state_p (#a : alg) (#m : m_spec) (s : s a m) : Tot (state_p a m) =
+let get_state_p (#a : alg) (#m : m_spec) (s : s a m) : Tot (Core.state_p a m) =
   match s with _, p -> p
 
 (* But the working vector is not reflected in the state at all -- it doesn't
@@ -77,8 +75,8 @@ let s_v (#a : alg) (#m : m_spec) (h : HS.mem) (s : s a m) : GTot (t a) =
 /// Small helper which facilitates inferencing implicit arguments for buffer
 /// operations
 inline_for_extraction noextract
-let state_to_lbuffer (#a : alg) (#m : m_spec) (s : state_p a m) :
-  B.lbuffer (element_t a m) (4 * U32.v (row_len a m)) =
+let state_to_lbuffer (#a : alg) (#m : m_spec) (s : Core.state_p a m) :
+  B.lbuffer (Core.element_t a m) (4 * U32.v (Core.row_len a m)) =
   s
 
 inline_for_extraction noextract
@@ -109,13 +107,13 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful unit =
     (fun #_ _ _ _ _ -> ()) (* frame_freeable *)
     (* alloca *)
     (fun () ->
-      let wv = alloc_state a m in
-      let b = alloc_state a m in
+      let wv = Core.alloc_state a m in
+      let b = Core.alloc_state a m in
       wv, b)
     (* create_in *)
     (fun () r ->
-      let wv = B.malloc r (zero_element a m) U32.(4ul *^ row_len a m) in
-      let b = B.malloc r (zero_element a m) U32.(4ul *^ row_len a m) in
+      let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
+      let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
       wv, b)
     (* free *)
     (fun _ acc ->
@@ -127,7 +125,7 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful unit =
       match src with src_wv, src_b ->
       match dst with src_wv, dst_b ->
       B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
-             U32.(4ul *^ row_len a m))
+             U32.(4ul *^ Core.row_len a m))
 
 /// Stateful key
 /// ============
@@ -390,17 +388,6 @@ let spec_is_incremental a input =
 /// Runtime
 /// -------
 
-let blocks_state_len (a : alg) (m : valid_m_spec a) :
-  Tot (x:U32.t{
-    U32.v x > 0 /\
-    U32.v x % U32.v (block_len a) = 0
-  }) = 
-  match m with
-  | M32 -> block_len a
-  // The vectorized implementations actually only process one block at a time
-  | M128 -> block_len a
-  | M256 -> block_len a
-
 #push-options "--ifuel 1"// --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
 let blake2 (a : alg) (m : valid_m_spec a)
@@ -418,7 +405,7 @@ let blake2 (a : alg) (m : valid_m_spec a)
     (fun () -> max_input_len a ) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
-    (fun () -> blocks_state_len a m) (* blocks_state_len *)
+    (fun () -> block_len a) (* blocks_state_len *)
 
     (fun () _k -> init_s a) (* init_s *)
     (fun () acc prevlen input -> update_multi_s acc prevlen input) (* update_multi_s *)
@@ -443,13 +430,13 @@ let blake2 (a : alg) (m : valid_m_spec a)
     (* update_multi *)
     (fun _ acc prevlen blocks len ->
       let wv, hash = acc in
-      let nb = len `U32.div` size_block a in
-      blake2_update_multi #a #m blake2_update_block #len wv hash (blake2_prevlen a prevlen) blocks nb)
+      let nb = len `U32.div` Core.size_block a in
+      update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb)
 
     (* update_last *)
     (fun _ acc prevlen last last_len ->
       let wv, hash = acc in
-      blake2_update_last #a #m blake2_update_block #last_len wv hash (blake2_prevlen a prevlen) last_len last)
+      update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last)
 
     (* finish *)
     (fun _ k acc dst ->
