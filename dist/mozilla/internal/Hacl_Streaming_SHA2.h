@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Ed25519_H
-#define __internal_Hacl_Ed25519_H
+#ifndef __internal_Hacl_Streaming_SHA2_H
+#define __internal_Hacl_Streaming_SHA2_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,38 +35,14 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "internal/Hacl_Streaming_SHA2.h"
-#include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Curve25519_51.h"
-#include "../Hacl_Ed25519.h"
+#include "internal/Hacl_SHA2_Types.h"
+#include "../Hacl_Streaming_SHA2.h"
 
-void Hacl_Bignum25519_reduce_513(uint64_t *a);
-
-void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a);
-
-void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input);
-
-void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input);
-
-void Hacl_Impl_Ed25519_PointDouble_point_double(uint64_t *out, uint64_t *p);
-
-void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
-
-void Hacl_Impl_Ed25519_PointConstants_make_point_inf(uint64_t *b);
-
-bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s);
-
-void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p);
-
-bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
-
-void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out);
-
-void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t *q);
+void Hacl_SHA2_Scalar32_sha512_init(uint64_t *hash);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Ed25519_H_DEFINED
+#define __internal_Hacl_Streaming_SHA2_H_DEFINED
 #endif
