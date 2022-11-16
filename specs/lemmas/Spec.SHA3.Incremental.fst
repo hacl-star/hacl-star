@@ -140,22 +140,6 @@ let rec sha3_ignores_extra_state (a: sha3_alg) (acc: words_state' a) (bs: bytes)
     sha3_ignores_extra_state a acc rem
 #pop-options
 
-#push-options "--print_implicits"
-let sha3_state_is_hash_state: squash (words_state' SHA3_256 == Spec.SHA3.state) =
-  let open Lib.Sequence in
-  calc (==) {
-    words_state' SHA3_256;
-  (==) { _ by (FStar.Tactics.trefl ()) }
-    m:Seq.seq (word SHA3_256) {Seq.length m = state_word_length SHA3_256};
-  (==) { }
-    m:Seq.seq (word SHA3_256) {(Seq.length m <: nat) == (state_word_length SHA3_256 <: nat)};
-  (==) { _ by (FStar.Tactics.norm [ delta_only [ `%lseq; `%seq ] ]; FStar.Tactics.trefl ())  }
-    lseq (word SHA3_256) (state_word_length SHA3_256);
-  (==) { }
-    Spec.SHA3.state;
-  }
-#pop-options
-
 let sha3_is_incremental2
   (a: sha3_alg)
   (input: bytes): Lemma (hash a input `S.equal` (

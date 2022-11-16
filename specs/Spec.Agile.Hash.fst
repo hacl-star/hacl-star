@@ -25,7 +25,9 @@ let update_sha3_256 (s: words_state SHA3_256) (b: bytes { Seq.length b = block_l
   let rateInBytes = 1088 / 8 in
   Spec.SHA3.absorb_inner rateInBytes b s, ()
 
-let update a =
+// Intentionally restricting this one to MD hashes... we want clients to AVOID
+// juggling between mk_update_multi update vs. repeati for non-MD hashes.
+let update (a: md_alg) =
   match a with
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Spec.SHA2.update a
@@ -33,28 +35,47 @@ let update a =
       Spec.MD5.update
   | SHA1 ->
       Spec.SHA1.update
-  | Blake2S -> fun h l ->
-      let blake_state, totlen = h in
-      // We should never have overflows given the restriction on buffer lengths, so
-      // this should be equivalent to a nat addition
-      let totlen = extra_state_add_nat totlen (size_block a) in
-      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S false (extra_state_v totlen) l blake_state,
-       totlen)
-  | Blake2B -> fun h l ->
-      let blake_state, totlen = h in
-      // We should never have overflows given the restriction on buffer lengths, so
-      // this should be equivalent to a nat addition
-      let totlen = extra_state_add_nat totlen (size_block a) in
-      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2B false (extra_state_v totlen) l blake_state,
-       totlen)
-  | SHA3_256 -> update_sha3_256
+
+#push-options "--print_implicits"
+let sha3_state_is_hash_state: squash (words_state' SHA3_256 == Spec.SHA3.state) =
+  let open Lib.Sequence in
+  calc (==) {
+    words_state' SHA3_256;
+  (==) { _ by (FStar.Tactics.trefl ()) }
+    m:Seq.seq (word SHA3_256) {Seq.length m = state_word_length SHA3_256};
+  (==) { }
+    m:Seq.seq (word SHA3_256) {(Seq.length m <: nat) == (state_word_length SHA3_256 <: nat)};
+  (==) { _ by (FStar.Tactics.norm [ delta_only [ `%lseq; `%seq ] ]; FStar.Tactics.trefl ())  }
+    lseq (word SHA3_256) (state_word_length SHA3_256);
+  (==) { }
+    Spec.SHA3.state;
+  }
+#pop-options
+
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
 let update_multi
   (a:hash_alg)
   (hash:words_state a)
   (blocks:bytes_blocks a)
 =
-  Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
+      Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
+  | Blake2B | Blake2S ->
+      let open Spec.Blake2 in
+      // Exactly as in blake2_update_blocks
+      let nb, _ = Lib.UpdateMulti.split_at_last_lazy_nb_rem (block_length a) (S.length blocks) in
+      let s, prev = hash in
+      let totlen = extra_state_add_nat prev (S.length blocks) in
+      let prev: nat = extra_state_v prev in
+      let a = to_blake_alg a in
+      Lib.LoopCombinators.repeati nb (blake2_update1 a prev blocks) s, totlen
+  | SHA3_256 ->
+      let s, () = coerce hash in
+      let open Spec.SHA3 in
+      let rateInBytes = 1088 / 8 in
+      Lib.Sequence.repeat_blocks_multi rateInBytes blocks (absorb_inner rateInBytes) s, ()
 
 #push-options "--fuel 0 --ifuel 0"
 

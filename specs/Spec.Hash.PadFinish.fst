@@ -7,8 +7,19 @@ open Lib.ByteSequence
 open Spec.Hash.Lemmas0
 open Spec.Hash.Definitions
 
-(** This module contains specifications shared across all the Merkle-Damgård
-    constructions. *)
+(** This module contains two things.
+ - First, a Merkle-Damgard padding scheme for the MD hashes ONLY (md5, sha1, sha2)
+ - Second, a "finish" operation that extracts the final hash from the internal
+   state, defined for any hash.
+
+ In Spec.Agile.Hash, the one-shot hash for MD hashes is defined pad,
+ update_multi, finish.
+
+ The incremental specification (in lemmas/Spec.Hash.Incremental.Definitions)
+ introduces a notion of "update_last" and then defines the hash as update_multi,
+ update_last, finish, relying on the various definitions for finish here,
+ including those for non-MD hashes.
+*)
 
 (** Padding *)
 
