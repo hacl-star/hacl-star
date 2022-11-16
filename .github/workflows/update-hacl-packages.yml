@@ -36,8 +36,3 @@ jobs:
           git add src include
           git commit -m "[CI] update code"
           git push --force --set-upstream  origin $branch
-      - name: comment pr
-        uses: thollander/actions-comment-pull-request@v1
-        with:
-          message: "[CI] corresponding branch on hacl-packages: https://github.com/cryspen/hacl-packages/tree/hacl-star-${{ github.head_ref }}"
-          comment_includes: "[CI]"
