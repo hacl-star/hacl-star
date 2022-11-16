@@ -594,11 +594,8 @@ val split_blocks: al:Spec.alg -> len:size_t -> r:(size_t & size_t){
 let split_blocks al len =
   let nb = len /. size_block al in
   let rem = len %. size_block al in
-  if rem =. 0ul && nb >. 0ul then
-      let nb' = nb -! 1ul in
-      let rem' = size_block al in
-      (nb',rem')
-  else (nb,rem)
+  (if rem =. 0ul && nb >. 0ul then nb -! 1ul else nb),
+  (if rem =. 0ul && nb >. 0ul then size_block al else rem)
 
 inline_for_extraction noextract
 let blake2_update_multi_st (al : Spec.alg) (ms : m_spec) =
