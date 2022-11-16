@@ -666,6 +666,7 @@ let mk_update_last a m update_last i acc prevlen last last_len =
   (**)   update_last_s () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 last))
 #pop-options
 
+inline_for_extraction noextract
 let blocks_state_len (a : alg) (m : valid_m_spec a) :
   Tot (x:U32.t{
     U32.v x > 0 /\
