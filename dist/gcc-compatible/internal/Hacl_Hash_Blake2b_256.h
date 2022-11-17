@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_Blake2b_32.h"
 #include "internal/Hacl_Hash_Base.h"
 #include "../Hacl_Hash_Blake2b_256.h"
 #include "libintvector.h"

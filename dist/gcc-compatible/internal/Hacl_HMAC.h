@@ -37,9 +37,15 @@ extern "C" {
 
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_Blake2b_32.h"
 #include "internal/Hacl_Hash_Base.h"
 #include "../Hacl_HMAC.h"
+
+typedef struct K___uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+K___uint32_t_uint32_t;
 
 typedef struct K____uint32_t__uint64_t_s
 {
