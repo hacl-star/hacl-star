@@ -211,6 +211,7 @@ SHELL:=$(shell which bash)
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
+  $(RUNLIM) \
   $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
