@@ -1,11 +1,11 @@
-name: Update hacl-packages
+name: Create branch on hacl-packages
 
 on:
   pull_request:
     branches: [ main ]
 
 jobs:
-  update-hacl-packages:
+  hacl-packages-create-branch:
     runs-on: ubuntu-latest
     steps:
       - name: checkout hacl-star
