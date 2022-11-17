@@ -337,10 +337,10 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let f1 = Spec.blake2_update1 a prevlen1 input1 in
   let f2 = Spec.blake2_update1 a prevlen2 input2 in
   let aux1 (i:nat{i < nb1}) (acc:t a) : Lemma (f i acc == f1 i acc)
-    = admit ()
+    = assert (Spec.get_blocki a input i `Seq.equal` Spec.get_blocki a input1 i)
   in
   let aux2 (i:nat{i < nb2}) (acc:t a) : Lemma (f2 i acc == f (i + nb1) acc)
-    = admit ()
+    = assert (Spec.get_blocki a input2 i `Seq.equal` Spec.get_blocki a input (i + nb1))
   in
   let open Lib.LoopCombinators in
   let open Lib.Sequence.Lemmas in
