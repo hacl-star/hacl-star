@@ -158,6 +158,16 @@ BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
   -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
 
+# NOTE: code/hash re-exports internal Blake2 operations with the hash signature,
+# but really, these should be thin wrappers that defer to the actual
+# repeati-based implementation in code/blake2, as opposed to re-generating a
+# copy of the code for the sole purpose of HMAC.
+# TODO: make Hacl.Hash.Blake2* just inline_for_extraction wrappers that call the
+# underlying implementation in code/blake2
+HMAC_BUNDLE=-bundle Hacl.HMAC= \
+  -bundle Hacl.HMAC.Blake2s_128= \
+  -bundle Hacl.HMAC.Blake2b_256=
+
 # Note: Hacl_Hash_SHA2 is legacy SHA2 here, will eventually go away, there's a proper
 # bundle in STREAMING_BUNDLE, below
 HASH_BUNDLE= \
