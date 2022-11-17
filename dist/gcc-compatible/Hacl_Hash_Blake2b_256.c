@@ -25,7 +25,8 @@
 #include "internal/Hacl_Hash_Blake2b_256.h"
 
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_Blake2.h"
+#include "internal/Hacl_Hash_Blake2b_32.h"
+#include "internal/Hacl_Hash_Base.h"
 
 FStar_UInt128_uint128
 Hacl_Hash_Blake2b_256_init_blake2b_256(Lib_IntVector_Intrinsics_vec256 *s)

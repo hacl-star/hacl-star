@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Hash_Base_H
-#define __Hacl_Hash_Base_H
+#ifndef __Hacl_Blake2_Common_H
+#define __Hacl_Blake2_Common_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,26 +35,17 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Lib_Memzero0.h"
-#include "Hacl_Spec.h"
-#include "Hacl_Krmllib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash_Blake2s_32.h"
-#include "Hacl_Hash_Blake2b_32.h"
 
-uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 
-uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
+#define Hacl_Impl_Blake2_Core_M32 0
+#define Hacl_Impl_Blake2_Core_M128 1
+#define Hacl_Impl_Blake2_Core_M256 2
 
-uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
-
-uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
-
-typedef uint8_t *Hacl_Hash_Definitions_hash_t;
+typedef uint8_t Hacl_Impl_Blake2_Core_m_spec;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Hash_Base_H_DEFINED
+#define __Hacl_Blake2_Common_H_DEFINED
 #endif

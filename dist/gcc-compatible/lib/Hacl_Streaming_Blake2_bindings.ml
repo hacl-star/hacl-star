@@ -4,9 +4,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     open F
     module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
     open Hacl_Spec_applied
-    module Hacl_Hash_Blake2_applied =
-      (Hacl_Hash_Blake2_bindings.Bindings)(Hacl_Hash_Blake2_stubs)
-    open Hacl_Hash_Blake2_applied
+    module Hacl_Blake2_Common_applied =
+      (Hacl_Blake2_Common_bindings.Bindings)(Hacl_Blake2_Common_stubs)
+    open Hacl_Blake2_Common_applied
     let hacl_Streaming_Blake2_blocks_state_len =
       foreign "Hacl_Streaming_Blake2_blocks_state_len"
         (spec_Blake2_alg @->

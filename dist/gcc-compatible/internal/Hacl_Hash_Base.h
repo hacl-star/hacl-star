@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_Blake2_H
-#define __internal_Hacl_Hash_Blake2_H
+#ifndef __internal_Hacl_Hash_Base_H
+#define __internal_Hacl_Hash_Base_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "internal/Hacl_Krmllib.h"
-#include "../Hacl_Hash_Blake2.h"
+#include "../Hacl_Hash_Base.h"
 
 uint64_t Hacl_Hash_Core_Blake2_init_blake2s_32(uint32_t *s);
 
@@ -112,16 +112,9 @@ void Hacl_Hash_Blake2_hash_blake2s_32(uint8_t *input, uint32_t input_len, uint8_
 
 void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
-typedef struct K___uint32_t_uint32_t_s
-{
-  uint32_t fst;
-  uint32_t snd;
-}
-K___uint32_t_uint32_t;
-
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Hash_Blake2_H_DEFINED
+#define __internal_Hacl_Hash_Base_H_DEFINED
 #endif

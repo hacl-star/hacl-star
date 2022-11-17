@@ -26,7 +26,8 @@
 
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_Blake2.h"
+#include "internal/Hacl_Hash_Blake2b_32.h"
+#include "internal/Hacl_Hash_Base.h"
 #include "internal/Hacl_HMAC.h"
 
 void
