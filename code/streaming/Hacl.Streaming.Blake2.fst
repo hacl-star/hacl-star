@@ -331,22 +331,43 @@ val update_multi_associative:
 let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let input = S.append input1 input2 in
   let nb = S.length input / U32.v (block_len a) in
+  let nb1 = S.length input1 / U32.v (block_len a) in
+  let nb2 = S.length input2 / U32.v (block_len a) in
   let f = Spec.blake2_update1 a prevlen1 input in
-  (* calc (==) {
-    update_multi_s () acc prevlen1 input;
-  (==) { }
-    Lib.LoopCombinators.repeati nb (Spec.blake2_update1 a prevlen1 input) acc;
-  (==) { }
-    Lib.LoopCombinators.repeati nb f acc;
-  (==) { Lib.Sequence.Lemmas.repeati_extensionality }
-    Lib.LoopCombinators.repeati nb (Lib.Sequence.repeat_blocks_f (U32.v (block_len a)) input f nb) acc;
-  (==) { Lib.Sequence.lemma_repeat_blocks_multi ... }
-    Lib.LoopCombinators.repeat_blocks_multi ...
-  (==) { Lib.Sequence.Lemmas.repeat_blocks_multi_split ... }
-    Lib.LoopCombinators.(repeat_blocks_multi ... (repeat_blocks_multi ...))
-  ... inverse direction ...
-  }; *)
-  admit ()
+  let f1 = Spec.blake2_update1 a prevlen1 input1 in
+  let f2 = Spec.blake2_update1 a prevlen2 input2 in
+  let aux1 (i:nat{i < nb1}) (acc:t a) : Lemma (f i acc == f1 i acc)
+    = admit ()
+  in
+  let aux2 (i:nat{i < nb2}) (acc:t a) : Lemma (f2 i acc == f (i + nb1) acc)
+    = admit ()
+  in
+  let open Lib.LoopCombinators in
+  let open Lib.Sequence.Lemmas in
+  calc (==) {
+    update_multi_s (update_multi_s acc prevlen1 input1) prevlen2 input2;
+    (==) { }
+    repeati nb2 f2 (repeati nb1 f1 acc);
+    (==) {
+      Classical.forall_intro_2 aux1;
+      repeati_extensionality nb1 f1 f acc
+    }
+    repeati nb2 f2 (repeati nb1 f acc);
+    (==) {
+      repeati_def nb1 f acc;
+      repeati_def nb2 f2 (repeat_right 0 nb1 (fixed_a (t a)) f acc)
+    }
+    repeat_right 0 nb2 (fixed_a (t a)) f2 (repeat_right 0 nb1 (fixed_a (t a)) f acc);
+    (==) {
+      Classical.forall_intro_2 aux2;
+      repeat_gen_right_extensionality nb2 nb1 (fixed_a (t a)) (fixed_a (t a)) f2 f (repeat_right 0 nb1 (fixed_a (t a)) f acc)
+    }
+    repeat_right nb1 (nb1 + nb2) (fixed_a (t a)) f (repeat_right 0 nb1 (fixed_a (t a)) f acc);
+    (==) { repeat_right_plus 0 nb1 nb (fixed_a (t a)) f acc; repeati_def nb f acc }
+    repeati nb f acc;
+    (==) { }
+    update_multi_s acc prevlen1 input;
+  }
 
 /// A helper function: the hash incremental function defined with the functions
 /// locally defined (with a signature adapted to the functor).
