@@ -1,7 +1,5 @@
 module Hacl.Hash.Lemmas
 
-module Endianness = FStar.Krml.Endianness
-
 module S = FStar.Seq
 module U8 = FStar.UInt8
 module U32 = FStar.UInt32
