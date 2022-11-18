@@ -92,10 +92,10 @@ endif
 
 all: all-staged
 
-all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
+all-unstaged: compile-gcc-compatible compile-msvc-compatible \
   compile-portable-gcc-compatible \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic \
-  obj/libhaclml.cmxa compile-election-guard
+  obj/libhaclml.cmxa
 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
@@ -863,36 +863,6 @@ doc-ocaml: test-bindings-ocaml
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
-dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
-
-
-# Election Guard distribution
-# ---------------------------
-#
-# Trying something new, i.e. only listing the things we care about (since
-# there's so few of them)
-dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
-  -bundle Hacl.Hash.* \
-  -bundle Hacl.HMAC \
-  -bundle Hacl.Streaming.SHA2= \
-  -bundle Hacl.Bignum256= \
-  -bundle Hacl.Bignum4096= \
-  -bundle Hacl.Bignum256_32= \
-  -bundle Hacl.Bignum4096_32= \
-  -bundle Hacl.GenericField32= \
-  -bundle Hacl.GenericField64= \
-  -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
-  -bundle Hacl.HMAC_DRBG= \
-  $(INTTYPES_BUNDLE)
-dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
-dist/election-guard/Makefile.basic: VALE_ASMS =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
-dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
-dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
-  -bundle '\*[rename=Should_not_be_here]' \
-  -falloca -ftail-calls -fc89 -add-early-include '"krml/internal/builtin.h"'
-
 # Portable distribution
 # ---------------------
 #
@@ -1026,7 +996,7 @@ test-c-%: dist/test/c/%.test
 # C tests (from C files) #
 ##########################
 
-test-handwritten: compile-gcc64-only compile-gcc-compatible
+test-handwritten: compile-gcc-compatible
 	$(LD_EXTRA) KRML_HOME="$(KRML_HOME)" \
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
