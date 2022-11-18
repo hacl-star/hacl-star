@@ -53,23 +53,19 @@ Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const 
 static void
 test_cshake128(
   uint32_t msg_len,
-  const uint8_t *msg,
+  uint8_t *msg,
   uint16_t ctr,
   uint32_t out_len,
-  const uint8_t *expected
+  uint8_t *expected
 )
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), out_len);
   uint8_t test[out_len];
   memset(test, 0U, out_len * sizeof (uint8_t));
-  KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
-  uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (uint8_t));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   uint64_t s[25U] = { 0U };
   s[0U] = (uint64_t)0x10010001a801U | (uint64_t)ctr << (uint32_t)48U;
   Hacl_Impl_SHA3_state_permute(s);
-  Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, msg_len, msg_, (uint8_t)0x04U);
+  Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, msg_len, msg, (uint8_t)0x04U);
   Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, out_len, test);
   if (!Lib_PrintBuffer_result_compare_display(out_len, test, expected))
   {
@@ -77,8 +73,7 @@ test_cshake128(
   }
 }
 
-static const
-uint8_t
+static uint8_t
 test1_plaintext[16U] =
   {
     (uint8_t)0x61U, (uint8_t)0x62U, (uint8_t)0x63U, (uint8_t)0x64U, (uint8_t)0x65U, (uint8_t)0x66U,
@@ -86,8 +81,7 @@ test1_plaintext[16U] =
     (uint8_t)0x66U, (uint8_t)0x67U, (uint8_t)0x68U, (uint8_t)0x69U
   };
 
-static const
-uint8_t
+static uint8_t
 test1_expected[64U] =
   {
     (uint8_t)0x89U, (uint8_t)0x2eU, (uint8_t)0xd8U, (uint8_t)0xb5U, (uint8_t)0x1aU, (uint8_t)0xecU,

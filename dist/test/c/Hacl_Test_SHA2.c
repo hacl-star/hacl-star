@@ -833,41 +833,48 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 
 extern void C_String_print(C_String_t uu___);
 
-extern void
-Lib_PrintBuffer_print_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
+extern bool
+Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
 
 static void
 test_sha2(
   uint32_t msg_len,
-  const uint8_t *msg,
-  const uint8_t *expected224,
-  const uint8_t *expected256,
-  const uint8_t *expected384,
-  const uint8_t *expected512
+  uint8_t *msg,
+  uint8_t *expected224,
+  uint8_t *expected256,
+  uint8_t *expected384,
+  uint8_t *expected512
 )
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
-  uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (uint8_t));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   uint8_t test224[28U] = { 0U };
   uint8_t test256[32U] = { 0U };
   uint8_t test384[48U] = { 0U };
   uint8_t test512[64U] = { 0U };
-  hash_224(msg_, msg_len, test224);
-  hash_256(msg_, msg_len, test256);
-  hash_384(msg_, msg_len, test384);
-  hash_512(msg_, msg_len, test512);
-  Lib_PrintBuffer_print_compare_display((uint32_t)28U, test224, expected224);
-  Lib_PrintBuffer_print_compare_display((uint32_t)32U, test256, expected256);
-  Lib_PrintBuffer_print_compare_display((uint32_t)48U, test384, expected384);
-  Lib_PrintBuffer_print_compare_display((uint32_t)64U, test512, expected512);
+  hash_224(msg, msg_len, test224);
+  hash_256(msg, msg_len, test256);
+  hash_384(msg, msg_len, test384);
+  hash_512(msg, msg_len, test512);
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)28U, test224, expected224))
+  {
+    exit((int32_t)255);
+  }
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)32U, test256, expected256))
+  {
+    exit((int32_t)255);
+  }
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)48U, test384, expected384))
+  {
+    exit((int32_t)255);
+  }
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)64U, test512, expected512))
+  {
+    exit((int32_t)255);
+  }
 }
 
-static const uint8_t test1_plaintext[3U] = { (uint8_t)0x61U, (uint8_t)0x62U, (uint8_t)0x63U };
+static uint8_t test1_plaintext[3U] = { (uint8_t)0x61U, (uint8_t)0x62U, (uint8_t)0x63U };
 
-static const
-uint8_t
+static uint8_t
 test1_expected_sha2_224[28U] =
   {
     (uint8_t)0x23U, (uint8_t)0x09U, (uint8_t)0x7dU, (uint8_t)0x22U, (uint8_t)0x34U, (uint8_t)0x05U,
@@ -877,8 +884,7 @@ test1_expected_sha2_224[28U] =
     (uint8_t)0xe3U, (uint8_t)0x6cU, (uint8_t)0x9dU, (uint8_t)0xa7U
   };
 
-static const
-uint8_t
+static uint8_t
 test1_expected_sha2_256[32U] =
   {
     (uint8_t)0xbaU, (uint8_t)0x78U, (uint8_t)0x16U, (uint8_t)0xbfU, (uint8_t)0x8fU, (uint8_t)0x01U,
@@ -889,8 +895,7 @@ test1_expected_sha2_256[32U] =
     (uint8_t)0x15U, (uint8_t)0xadU
   };
 
-static const
-uint8_t
+static uint8_t
 test1_expected_sha2_384[48U] =
   {
     (uint8_t)0xcbU, (uint8_t)0x00U, (uint8_t)0x75U, (uint8_t)0x3fU, (uint8_t)0x45U, (uint8_t)0xa3U,
@@ -903,8 +908,7 @@ test1_expected_sha2_384[48U] =
     (uint8_t)0xecU, (uint8_t)0xa1U, (uint8_t)0x34U, (uint8_t)0xc8U, (uint8_t)0x25U, (uint8_t)0xa7U
   };
 
-static const
-uint8_t
+static uint8_t
 test1_expected_sha2_512[64U] =
   {
     (uint8_t)0xddU, (uint8_t)0xafU, (uint8_t)0x35U, (uint8_t)0xa1U, (uint8_t)0x93U, (uint8_t)0x61U,
@@ -920,10 +924,9 @@ test1_expected_sha2_512[64U] =
     (uint8_t)0xa5U, (uint8_t)0x4cU, (uint8_t)0xa4U, (uint8_t)0x9fU
   };
 
-static const uint8_t test2_plaintext[0U] = {  };
+static uint8_t test2_plaintext[0U] = {  };
 
-static const
-uint8_t
+static uint8_t
 test2_expected_sha2_224[28U] =
   {
     (uint8_t)0xd1U, (uint8_t)0x4aU, (uint8_t)0x02U, (uint8_t)0x8cU, (uint8_t)0x2aU, (uint8_t)0x3aU,
@@ -933,8 +936,7 @@ test2_expected_sha2_224[28U] =
     (uint8_t)0xc5U, (uint8_t)0xb3U, (uint8_t)0xe4U, (uint8_t)0x2fU
   };
 
-static const
-uint8_t
+static uint8_t
 test2_expected_sha2_256[32U] =
   {
     (uint8_t)0xe3U, (uint8_t)0xb0U, (uint8_t)0xc4U, (uint8_t)0x42U, (uint8_t)0x98U, (uint8_t)0xfcU,
@@ -945,8 +947,7 @@ test2_expected_sha2_256[32U] =
     (uint8_t)0xb8U, (uint8_t)0x55U
   };
 
-static const
-uint8_t
+static uint8_t
 test2_expected_sha2_384[48U] =
   {
     (uint8_t)0x38U, (uint8_t)0xb0U, (uint8_t)0x60U, (uint8_t)0xa7U, (uint8_t)0x51U, (uint8_t)0xacU,
@@ -959,8 +960,7 @@ test2_expected_sha2_384[48U] =
     (uint8_t)0xd2U, (uint8_t)0xf1U, (uint8_t)0x48U, (uint8_t)0x98U, (uint8_t)0xb9U, (uint8_t)0x5bU
   };
 
-static const
-uint8_t
+static uint8_t
 test2_expected_sha2_512[64U] =
   {
     (uint8_t)0xcfU, (uint8_t)0x83U, (uint8_t)0xe1U, (uint8_t)0x35U, (uint8_t)0x7eU, (uint8_t)0xefU,
@@ -976,8 +976,7 @@ test2_expected_sha2_512[64U] =
     (uint8_t)0xf9U, (uint8_t)0x27U, (uint8_t)0xdaU, (uint8_t)0x3eU
   };
 
-static const
-uint8_t
+static uint8_t
 test3_plaintext[56U] =
   {
     (uint8_t)0x61U, (uint8_t)0x62U, (uint8_t)0x63U, (uint8_t)0x64U, (uint8_t)0x62U, (uint8_t)0x63U,
@@ -992,8 +991,7 @@ test3_plaintext[56U] =
     (uint8_t)0x70U, (uint8_t)0x71U
   };
 
-static const
-uint8_t
+static uint8_t
 test3_expected_sha2_224[28U] =
   {
     (uint8_t)0x75U, (uint8_t)0x38U, (uint8_t)0x8bU, (uint8_t)0x16U, (uint8_t)0x51U, (uint8_t)0x27U,
@@ -1003,8 +1001,7 @@ test3_expected_sha2_224[28U] =
     (uint8_t)0x52U, (uint8_t)0x52U, (uint8_t)0x25U, (uint8_t)0x25U
   };
 
-static const
-uint8_t
+static uint8_t
 test3_expected_sha2_256[32U] =
   {
     (uint8_t)0x24U, (uint8_t)0x8dU, (uint8_t)0x6aU, (uint8_t)0x61U, (uint8_t)0xd2U, (uint8_t)0x06U,
@@ -1015,8 +1012,7 @@ test3_expected_sha2_256[32U] =
     (uint8_t)0x06U, (uint8_t)0xc1U
   };
 
-static const
-uint8_t
+static uint8_t
 test3_expected_sha2_384[48U] =
   {
     (uint8_t)0x33U, (uint8_t)0x91U, (uint8_t)0xfdU, (uint8_t)0xddU, (uint8_t)0xfcU, (uint8_t)0x8dU,
@@ -1029,8 +1025,7 @@ test3_expected_sha2_384[48U] =
     (uint8_t)0x5bU, (uint8_t)0x1fU, (uint8_t)0xe3U, (uint8_t)0xc8U, (uint8_t)0x45U, (uint8_t)0x2bU
   };
 
-static const
-uint8_t
+static uint8_t
 test3_expected_sha2_512[64U] =
   {
     (uint8_t)0x20U, (uint8_t)0x4aU, (uint8_t)0x8fU, (uint8_t)0xc6U, (uint8_t)0xddU, (uint8_t)0xa8U,
@@ -1046,8 +1041,7 @@ test3_expected_sha2_512[64U] =
     (uint8_t)0x38U, (uint8_t)0xcaU, (uint8_t)0x34U, (uint8_t)0x45U
   };
 
-static const
-uint8_t
+static uint8_t
 test4_plaintext[112U] =
   {
     (uint8_t)0x61U, (uint8_t)0x62U, (uint8_t)0x63U, (uint8_t)0x64U, (uint8_t)0x65U, (uint8_t)0x66U,
@@ -1071,8 +1065,7 @@ test4_plaintext[112U] =
     (uint8_t)0x72U, (uint8_t)0x73U, (uint8_t)0x74U, (uint8_t)0x75U
   };
 
-static const
-uint8_t
+static uint8_t
 test4_expected_sha2_224[28U] =
   {
     (uint8_t)0xc9U, (uint8_t)0x7cU, (uint8_t)0xa9U, (uint8_t)0xa5U, (uint8_t)0x59U, (uint8_t)0x85U,
@@ -1082,8 +1075,7 @@ test4_expected_sha2_224[28U] =
     (uint8_t)0x26U, (uint8_t)0x5fU, (uint8_t)0xc0U, (uint8_t)0xb3U
   };
 
-static const
-uint8_t
+static uint8_t
 test4_expected_sha2_256[32U] =
   {
     (uint8_t)0xcfU, (uint8_t)0x5bU, (uint8_t)0x16U, (uint8_t)0xa7U, (uint8_t)0x78U, (uint8_t)0xafU,
@@ -1094,8 +1086,7 @@ test4_expected_sha2_256[32U] =
     (uint8_t)0xe9U, (uint8_t)0xd1U
   };
 
-static const
-uint8_t
+static uint8_t
 test4_expected_sha2_384[48U] =
   {
     (uint8_t)0x09U, (uint8_t)0x33U, (uint8_t)0x0cU, (uint8_t)0x33U, (uint8_t)0xf7U, (uint8_t)0x11U,
@@ -1108,8 +1099,7 @@ test4_expected_sha2_384[48U] =
     (uint8_t)0xe9U, (uint8_t)0xfaU, (uint8_t)0x91U, (uint8_t)0x74U, (uint8_t)0x60U, (uint8_t)0x39U
   };
 
-static const
-uint8_t
+static uint8_t
 test4_expected_sha2_512[64U] =
   {
     (uint8_t)0x8eU, (uint8_t)0x95U, (uint8_t)0x9bU, (uint8_t)0x75U, (uint8_t)0xdaU, (uint8_t)0xe3U,
