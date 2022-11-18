@@ -25,7 +25,8 @@ let update_sha3_256 (s: words_state SHA3_256) (b: bytes { Seq.length b = block_l
   let rateInBytes = 1088 / 8 in
   Spec.SHA3.absorb_inner rateInBytes b s, ()
 
-let update a =
+val update': a:hash_alg -> update_t a
+let update' a =
   match a with
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Spec.SHA2.update a
@@ -49,12 +50,15 @@ let update a =
        totlen)
   | SHA3_256 -> update_sha3_256
 
+// Constraining type signature for migration.
+let update = update'
+
 let update_multi
   (a:hash_alg)
   (hash:words_state a)
   (blocks:bytes_blocks a)
 =
-  Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
+  Lib.UpdateMulti.mk_update_multi (block_length a) (update' a) hash blocks
 
 #push-options "--fuel 0 --ifuel 0"
 

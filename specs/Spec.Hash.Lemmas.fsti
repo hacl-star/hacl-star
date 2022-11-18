@@ -40,7 +40,7 @@ val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
   (ensures ((update_multi a h S.empty) == h))
   [ SMTPat (update_multi a h S.empty) ]
 
-val update_multi_update (a: hash_alg) (h: words_state a) (input: bytes_block a): Lemma
+val update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): Lemma
   (ensures ((update_multi a h input) == (update a h input)))
   [ SMTPat (update a h input) ]
 
