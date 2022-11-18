@@ -17,7 +17,9 @@ module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
 module PT = Hacl.Impl.PrecompTable
+module SPT256 = Hacl.Spec.PrecompBaseTable256
 module BD = Hacl.Bignum.Definitions
+module SD = Hacl.Spec.Bignum.Definitions
 
 module S = Spec.Ed25519
 
@@ -95,56 +97,136 @@ let point_mul out scalar q =
 
 
 inline_for_extraction noextract
-val point_mul_g_noalloc:
-    out:point
-  -> bscalar:lbuffer uint64 4ul
-  -> g:point -> Stack unit
+val point_mul_g_noalloc: out:point -> bscalar:lbuffer uint64 4ul
+  -> q1:point -> q2:point
+  -> q3:point -> q4:point ->
+  Stack unit
   (requires fun h ->
-    live h out /\ live h g /\ live h bscalar /\
-    disjoint out g /\ disjoint bscalar out /\ disjoint bscalar g /\
-    F51.point_inv_t h g /\ F51.inv_ext_point (as_seq h g) /\
-    F51.point_eval h g == g_c /\ BD.bn_v h bscalar < pow2 256)
+    live h bscalar /\ live h out /\ live h q1 /\
+    live h q2 /\ live h q3 /\ live h q4 /\
+    disjoint out bscalar /\ disjoint out q1 /\ disjoint out q2 /\
+    disjoint out q3 /\ disjoint out q4 /\
+    disjoint q1 q2 /\ disjoint q1 q3 /\ disjoint q1 q4 /\
+    disjoint q2 q3 /\ disjoint q2 q4 /\ disjoint q3 q4 /\
+    BD.bn_v h bscalar < pow2 256 /\
+    F51.linv (as_seq h q1) /\ refl (as_seq h q1) == g_aff /\
+    F51.linv (as_seq h q2) /\ refl (as_seq h q2) == g_pow2_64 /\
+    F51.linv (as_seq h q3) /\ refl (as_seq h q3) == g_pow2_128 /\
+    F51.linv (as_seq h q4) /\ refl (as_seq h q4) == g_pow2_192)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
+    F51.linv (as_seq h1 out) /\
+   (let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v h0 bscalar) in
     S.to_aff_point (F51.point_eval h1 out) ==
-    LE.exp_fw S.mk_ed25519_comm_monoid
-      (S.to_aff_point (F51.point_eval h0 g)) 256 (BD.bn_v h0 bscalar) 4)
+    LE.exp_four_fw S.mk_ed25519_comm_monoid
+      g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
-let point_mul_g_noalloc out bscalar g =
+let point_mul_g_noalloc out bscalar q1 q2 q3 q4 =
   [@inline_let] let len = 20ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_ed25519_concrete_ops in
   [@inline_let] let l = 4ul in
   [@inline_let] let table_len = 16ul in
-  [@inline_let] let bLen = 4ul in
-  [@inline_let] let bBits = 256ul in
+  [@inline_let] let bLen = 1ul in
+  [@inline_let] let bBits = 64ul in
 
   let h0 = ST.get () in
   recall_contents precomp_basepoint_table_w4 precomp_basepoint_table_lseq_w4;
   let h1 = ST.get () in
   precomp_basepoint_table_lemma_w4 ();
-  assert (table_inv_w4 (as_seq h1 g) (as_seq h1 precomp_basepoint_table_w4));
-  assert (F51.point_eval h1 g == g_c);
+  assert (table_inv_w4 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w4));
 
-  BE.mk_lexp_fw_table len ctx_len k l table_len
-    table_inv_w4
+  recall_contents precomp_g_pow2_64_table_w4 precomp_g_pow2_64_table_lseq_w4;
+  let h1 = ST.get () in
+  precomp_g_pow2_64_table_lemma_w4 ();
+  assert (table_inv_w4 (as_seq h1 q2) (as_seq h1 precomp_g_pow2_64_table_w4));
+
+  recall_contents precomp_g_pow2_128_table_w4 precomp_g_pow2_128_table_lseq_w4;
+  let h1 = ST.get () in
+  precomp_g_pow2_128_table_lemma_w4 ();
+  assert (table_inv_w4 (as_seq h1 q3) (as_seq h1 precomp_g_pow2_128_table_w4));
+
+  recall_contents precomp_g_pow2_192_table_w4 precomp_g_pow2_192_table_lseq_w4;
+  let h1 = ST.get () in
+  precomp_g_pow2_192_table_lemma_w4 ();
+  assert (table_inv_w4 (as_seq h1 q4) (as_seq h1 precomp_g_pow2_192_table_w4));
+
+  let r1 = sub bscalar 0ul 1ul in
+  let r2 = sub bscalar 1ul 1ul in
+  let r3 = sub bscalar 2ul 1ul in
+  let r4 = sub bscalar 3ul 1ul in
+  SPT256.lemma_decompose_nat256_as_four_u64_lbignum (as_seq h0 bscalar);
+
+  ME.mk_lexp_four_fw_tables len ctx_len k l table_len
+    table_inv_w4 table_inv_w4 table_inv_w4 table_inv_w4
     (BE.lprecomp_get_consttime len ctx_len k l table_len)
-    (null uint64) g bLen bBits bscalar (to_const precomp_basepoint_table_w4) out
+    (BE.lprecomp_get_consttime len ctx_len k l table_len)
+    (BE.lprecomp_get_consttime len ctx_len k l table_len)
+    (BE.lprecomp_get_consttime len ctx_len k l table_len)
+    (null uint64) q1 bLen bBits r1 q2 r2 q3 r3 q4 r4
+    (to_const precomp_basepoint_table_w4)
+    (to_const precomp_g_pow2_64_table_w4)
+    (to_const precomp_g_pow2_128_table_w4)
+    (to_const precomp_g_pow2_192_table_w4)
+    out
+
+
+inline_for_extraction noextract
+val point_mul_g_mk_q1234: out:point -> bscalar:lbuffer uint64 4ul -> q1:point ->
+  Stack unit
+  (requires fun h ->
+    live h bscalar /\ live h out /\ live h q1 /\
+    disjoint out bscalar /\ disjoint out q1 /\
+    BD.bn_v h bscalar < pow2 256 /\
+    F51.linv (as_seq h q1) /\ refl (as_seq h q1) == g_aff)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.linv (as_seq h1 out) /\
+   (let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v h0 bscalar) in
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_four_fw S.mk_ed25519_comm_monoid
+      g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
+
+let point_mul_g_mk_q1234 out bscalar q1 =
+  push_frame ();
+  let q2 = mk_ext_g_pow2_64 () in
+  let q3 = mk_ext_g_pow2_128 () in
+  let q4 = mk_ext_g_pow2_192 () in
+  ext_g_pow2_64_lseq_lemma ();
+  ext_g_pow2_128_lseq_lemma ();
+  ext_g_pow2_192_lseq_lemma ();
+  point_mul_g_noalloc out bscalar q1 q2 q3 q4;
+  pop_frame ()
+
+
+val lemma_exp_four_fw_local: b:BSeq.lbytes 32 ->
+  Lemma (let bn = BSeq.nat_from_bytes_le b in
+    let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 bn in
+    let cm = S.mk_ed25519_comm_monoid in
+    LE.exp_four_fw cm g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 ==
+    S.to_aff_point (S.point_mul_g b))
+
+let lemma_exp_four_fw_local b =
+  let bn = BSeq.nat_from_bytes_le b in
+  let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 bn in
+  let cm = S.mk_ed25519_comm_monoid in
+  let res = LE.exp_four_fw cm g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 in
+  assert (res == SPT256.exp_as_exp_four_nat256_precomp cm g_aff bn);
+  SPT256.lemma_point_mul_base_precomp4 cm g_aff bn;
+  assert (res == LE.pow cm g_aff bn);
+  SE.exp_fw_lemma S.mk_ed25519_concrete_ops g_c 256 bn 4;
+  LE.exp_fw_lemma cm g_aff 256 bn 4;
+  assert (S.to_aff_point (S.point_mul_g b) == LE.pow cm g_aff bn)
 
 
 [@CInline]
 let point_mul_g out scalar =
-  let h0 = ST.get () in
-  SE.exp_fw_lemma S.mk_ed25519_concrete_ops
-    g_c 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar)) 4;
-
   push_frame ();
-  let g = create 20ul (u64 0) in
-  make_g g;
-
+  let h0 = ST.get () in
   let bscalar = create 4ul (u64 0) in
   convert_scalar scalar bscalar;
-  point_mul_g_noalloc out bscalar g;
+  let q1 = create 20ul (u64 0) in
+  make_g q1;
+  point_mul_g_mk_q1234 out bscalar q1;
+  lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
 
 
