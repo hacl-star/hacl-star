@@ -49,9 +49,6 @@ let sha3_state_is_hash_state: squash (words_state' SHA3_256 == Spec.SHA3.state) 
 
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
-// Constraining type signature for migration.
-let update = update'
-
 let update_multi
   (a:hash_alg)
   (hash:words_state a)
