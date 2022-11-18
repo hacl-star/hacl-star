@@ -35,8 +35,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "Hacl_SHA2_Generic.h"
 #include "Hacl_Krmllib.h"
-#include "Hacl_Hash_SHA2.h"
 
 typedef struct Hacl_Streaming_SHA2_state_sha2_224_s
 {
@@ -76,6 +76,8 @@ void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8
 
 void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
+void Hacl_Streaming_SHA2_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input);
+
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256();
 
 void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
@@ -93,6 +95,8 @@ Hacl_Streaming_SHA2_update_256(
 void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
 void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
+
+void Hacl_Streaming_SHA2_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input);
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384();
 
@@ -112,6 +116,8 @@ void Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8
 
 void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
+void Hacl_Streaming_SHA2_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input);
+
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512();
 
 void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
@@ -129,6 +135,8 @@ Hacl_Streaming_SHA2_update_512(
 void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
 
 void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
+
+void Hacl_Streaming_SHA2_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input);
 
 #if defined(__cplusplus)
 }
