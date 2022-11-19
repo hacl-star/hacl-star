@@ -94,7 +94,7 @@ BASE_FLAGS = \
   -funroll-loops 16
 
 CURVE_BUNDLE_SLOW= \
-  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
+  -bundle Hacl.Curve25519_64_Slow
 CURVE_BUNDLE_BASE= \
   $(CURVE_BUNDLE_SLOW) \
   -bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Bignum25519_51] -static-header Hacl.Impl.Curve25519.Field51 \
