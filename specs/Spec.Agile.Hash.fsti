@@ -55,8 +55,23 @@ should reason in terms of update_multi to be fully agile. None of the hash laws
 refer to update. *)
 val update (a:md_alg): update_t a
 
-val update_multi (a:hash_alg) (hash:words_state a) (blocks:bytes_blocks a):
-  Tot (words_state a) (decreases (S.length blocks))
+(* Because of blake2, we unfortunately have this precondition creeping up. *)
+let update_multi_pre
+  (a:hash_alg)
+  (hash:words_state a)
+  (blocks:bytes_blocks a)
+=
+  match a with
+  | Blake2B | Blake2S -> (S.length blocks + snd hash) `less_than_max_input_length` a
+  | _ -> true
+
+val update_multi
+  (a:hash_alg)
+  (hash:words_state a)
+  (blocks:bytes_blocks a):
+  Pure (words_state a)
+    (requires update_multi_pre a hash blocks)
+    (ensures fun _ -> True)
 
 val hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a}):
   Tot (Lib.ByteSequence.lbytes (hash_length a))
