@@ -11,6 +11,17 @@ open Spec.Hash.PadFinish
 open Spec.Hash.Lemmas
 open FStar.Mul
 
+val nb_blocks_props (a:hash_alg{is_blake a}) (nb prev data_length : nat) :
+  Lemma
+  (requires (
+    nb * block_length a <= data_length /\
+    prev + data_length <= Blake2.max_limb (to_blake_alg a) /\
+    prev + nb * block_length a <= max_extra_state a))
+  (ensures (
+    nb * block_length a >= 0 /\
+    nb <= data_length / Blake2.size_block (to_blake_alg a) /\
+    nb * block_length a % block_length a = 0))
+
 val repeati_blake2_update1_is_update_multi
   (a:hash_alg{is_blake a}) (nb prev : nat)
   (d : bytes)
