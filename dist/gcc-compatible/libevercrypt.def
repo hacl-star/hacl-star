@@ -188,7 +188,6 @@ EXPORTS
   Hacl_Salsa20_hsalsa20
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64
   Hacl_Bignum_Convert_bn_to_bytes_be_uint64
-  Hacl_Bignum_Base_mul_wide_add_u64
   Hacl_Bignum_Base_mul_wide_add2_u32
   Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Bignum_Lib_bn_get_top_index_u32
@@ -235,9 +234,6 @@ EXPORTS
   Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64
   Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u64
   Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64
-  Hacl_Curve25519_64_Slow_scalarmult
-  Hacl_Curve25519_64_Slow_secret_to_public
-  Hacl_Curve25519_64_Slow_ecdh
   Hacl_Curve25519_64_scalarmult
   Hacl_Curve25519_64_secret_to_public
   Hacl_Curve25519_64_ecdh

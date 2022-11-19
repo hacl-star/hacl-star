@@ -24,7 +24,7 @@
 
 #include "Hacl_Streaming_SHA3.h"
 
-
+#include "internal/Hacl_Streaming_SHA2.h"
 
 /* SNIPPET_START: Hacl_Streaming_SHA3_create_in_256 */
 

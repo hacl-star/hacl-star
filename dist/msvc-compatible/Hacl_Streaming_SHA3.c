@@ -24,7 +24,7 @@
 
 #include "Hacl_Streaming_SHA3.h"
 
-
+#include "internal/Hacl_Streaming_SHA2.h"
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256()
 {
