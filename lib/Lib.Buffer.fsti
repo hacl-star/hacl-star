@@ -401,6 +401,16 @@ val createL_global:
                           recallable b /\
                           witnessed b (Seq.of_list init))
 
+(** Allocate a global fixed-length mutable buffer initialized to value [init] *)
+inline_for_extraction
+val createL_mglobal: #a:Type0 -> init:list a ->
+  ST (buffer a)
+    (requires fun h0 -> normalize (FStar.List.Tot.length init <= max_size_t))
+    (ensures  fun h0 b h1 ->
+      B.frameOf b == HyperStack.root /\ B.recallable b /\
+      B.alloc_post_mem_common (b <: buffer a) h0 h1 (FStar.Seq.seq_of_list init) /\
+      length b == normalize_term (FStar.List.Tot.length init))
+
 #set-options "--max_fuel 0"
 
 (** Recall the liveness and contents of a global immutable buffer *)
@@ -1096,7 +1106,7 @@ val mapT:
 inline_for_extraction
 val map2T:
     #t1:buftype
-  -> #t2:buftype  
+  -> #t2:buftype
   -> #a1:Type
   -> #a2:Type
   -> #b:Type
