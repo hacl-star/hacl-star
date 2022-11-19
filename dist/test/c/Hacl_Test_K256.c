@@ -28,8 +28,8 @@
 
 extern void C_String_print(C_String_t uu___);
 
-extern void
-Lib_PrintBuffer_print_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
+extern bool
+Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
 
 /*******************************************************************************
   Verified C library for ECDSA signing and verification on the secp256k1 curve.
@@ -161,8 +161,7 @@ Convert a public key from raw to its compressed form.
 */
 extern void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
 
-static const
-uint8_t
+static uint8_t
 pk1[64U] =
   {
     (uint8_t)0xb8U, (uint8_t)0x38U, (uint8_t)0xffU, (uint8_t)0x44U, (uint8_t)0xe5U, (uint8_t)0xbcU,
@@ -178,15 +177,13 @@ pk1[64U] =
     (uint8_t)0xb2U, (uint8_t)0x18U, (uint8_t)0x32U, (uint8_t)0xe9U
   };
 
-static const
-uint8_t
+static uint8_t
 msg1[6U] =
   {
     (uint8_t)0x31U, (uint8_t)0x32U, (uint8_t)0x33U, (uint8_t)0x34U, (uint8_t)0x30U, (uint8_t)0x30U
   };
 
-static const
-uint8_t
+static uint8_t
 sgnt1[64U] =
   {
     (uint8_t)0x81U, (uint8_t)0x3eU, (uint8_t)0xf7U, (uint8_t)0x9cU, (uint8_t)0xceU, (uint8_t)0xfaU,
@@ -202,8 +199,7 @@ sgnt1[64U] =
     (uint8_t)0x56U, (uint8_t)0xebU, (uint8_t)0x31U, (uint8_t)0xbaU
   };
 
-static const
-uint8_t
+static uint8_t
 sk2[32U] =
   {
     (uint8_t)0xebU, (uint8_t)0xb2U, (uint8_t)0xc0U, (uint8_t)0x82U, (uint8_t)0xfdU, (uint8_t)0x77U,
@@ -214,8 +210,7 @@ sk2[32U] =
     (uint8_t)0x3eU, (uint8_t)0x0fU
   };
 
-static const
-uint8_t
+static uint8_t
 pk2[64U] =
   {
     (uint8_t)0x77U, (uint8_t)0x9dU, (uint8_t)0xd1U, (uint8_t)0x97U, (uint8_t)0xa5U, (uint8_t)0xdfU,
@@ -231,8 +226,7 @@ pk2[64U] =
     (uint8_t)0x91U, (uint8_t)0x7dU, (uint8_t)0x42U, (uint8_t)0x6fU
   };
 
-static const
-uint8_t
+static uint8_t
 nonce2[32U] =
   {
     (uint8_t)0x49U, (uint8_t)0xa0U, (uint8_t)0xd7U, (uint8_t)0xb7U, (uint8_t)0x86U, (uint8_t)0xecU,
@@ -243,8 +237,7 @@ nonce2[32U] =
     (uint8_t)0xddU, (uint8_t)0x9aU
   };
 
-static const
-uint8_t
+static uint8_t
 msgHash2[32U] =
   {
     (uint8_t)0x4bU, (uint8_t)0x68U, (uint8_t)0x8dU, (uint8_t)0xf4U, (uint8_t)0x0bU, (uint8_t)0xceU,
@@ -255,8 +248,7 @@ msgHash2[32U] =
     (uint8_t)0x1dU, (uint8_t)0x1aU
   };
 
-static const
-uint8_t
+static uint8_t
 sgnt2[64U] =
   {
     (uint8_t)0x24U, (uint8_t)0x10U, (uint8_t)0x97U, (uint8_t)0xefU, (uint8_t)0xbfU, (uint8_t)0x8bU,
@@ -272,98 +264,113 @@ sgnt2[64U] =
     (uint8_t)0x01U, (uint8_t)0xf3U, (uint8_t)0xcaU, (uint8_t)0x0eU
   };
 
-static uint8_t *const_to_buffer__uint8_t(const uint8_t *b)
+static void test_verify_sha256(uint32_t msg_len, uint8_t *msg, uint8_t *pk, uint8_t *sgnt)
 {
-  return (uint8_t *)b;
-}
-
-static void test_verify()
-{
-  bool
-  b =
-    Hacl_K256_ECDSA_ecdsa_verify_sha256((uint32_t)6U,
-      const_to_buffer__uint8_t(msg1),
-      const_to_buffer__uint8_t(pk1),
-      const_to_buffer__uint8_t(sgnt1));
+  bool b = Hacl_K256_ECDSA_ecdsa_verify_sha256(msg_len, msg, pk, sgnt);
+  C_String_print("\n Test K256 ecdsa verification: ");
   if (b)
   {
-    C_String_print("Test K256 ecdsa verification: Success!\n");
+    C_String_print("Success!\n");
   }
   else
   {
-    C_String_print("Test K256 ecdsa verification: Failure :(\n");
+    C_String_print("Failure :(\n");
+    exit((int32_t)255);
   }
 }
 
-static void test_sign_and_verify()
+static void test_verify_hashed(uint8_t *msgHash, uint8_t *pk, uint8_t *sgnt)
+{
+  bool b = Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(msgHash, pk, sgnt);
+  C_String_print("\n Test K256 ecdsa verification: ");
+  if (b)
+  {
+    C_String_print("Success!\n");
+  }
+  else
+  {
+    C_String_print("Failure :(\n");
+    exit((int32_t)255);
+  }
+}
+
+static void
+test_sign_hashed(uint8_t *msgHash, uint8_t *sk, uint8_t *nonce, uint8_t *expected_sgnt)
 {
   uint8_t sgnt[64U] = { 0U };
-  bool
-  uu____0 =
-    Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(sgnt,
-      const_to_buffer__uint8_t(msgHash2),
-      const_to_buffer__uint8_t(sk2),
-      const_to_buffer__uint8_t(nonce2));
-  Lib_PrintBuffer_print_compare_display((uint32_t)64U, sgnt, sgnt2);
-  bool
-  b =
-    Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(const_to_buffer__uint8_t(msgHash2),
-      const_to_buffer__uint8_t(pk2),
-      const_to_buffer__uint8_t(sgnt2));
-  if (b)
+  bool uu____0 = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(sgnt, msgHash, sk, nonce);
+  C_String_print("\n Test K256 ecdsa signing:\n");
+  if (!Lib_PrintBuffer_result_compare_display((uint32_t)64U, sgnt, expected_sgnt))
   {
-    C_String_print("Test K256 ecdsa verification: Success!\n");
-  }
-  else
-  {
-    C_String_print("Test K256 ecdsa verification: Failure :(\n");
+    exit((int32_t)255);
   }
 }
 
-static void test_public_key_compressed()
+static void
+test_sign_and_verify_hashed(
+  uint8_t *msgHash,
+  uint8_t *sk,
+  uint8_t *nonce,
+  uint8_t *pk,
+  uint8_t *expected_sgnt
+)
+{
+  test_verify_hashed(msgHash, pk, expected_sgnt);
+  test_sign_hashed(msgHash, sk, nonce, expected_sgnt);
+}
+
+static void test_public_key_compressed(uint8_t *pk)
 {
   uint8_t pk_c[33U] = { 0U };
   uint8_t pk_raw_c[64U] = { 0U };
-  Hacl_K256_ECDSA_public_key_compressed_from_raw(pk_c, const_to_buffer__uint8_t(pk1));
+  Hacl_K256_ECDSA_public_key_compressed_from_raw(pk_c, pk);
   bool b = Hacl_K256_ECDSA_public_key_compressed_to_raw(pk_raw_c, pk_c);
+  C_String_print("\n Test K256 pk_compressed:\n");
   if (b)
   {
-    C_String_print("Test K256 pk_compressed (Some): \n");
-    Lib_PrintBuffer_print_compare_display((uint32_t)64U, pk1, pk_raw_c);
+    if (!Lib_PrintBuffer_result_compare_display((uint32_t)64U, pk, pk_raw_c))
+    {
+      exit((int32_t)255);
+    }
   }
   else
   {
-    C_String_print("Test K256 pk_compressed (None): Failure :(\n");
+    C_String_print("Failure :(\n");
+    exit((int32_t)255);
   }
 }
 
-static void test_public_key_uncompressed()
+static void test_public_key_uncompressed(uint8_t *pk)
 {
   uint8_t pk_u[65U] = { 0U };
   uint8_t pk_raw_u[64U] = { 0U };
-  Hacl_K256_ECDSA_public_key_uncompressed_from_raw(pk_u, const_to_buffer__uint8_t(pk1));
+  Hacl_K256_ECDSA_public_key_uncompressed_from_raw(pk_u, pk);
   bool b = Hacl_K256_ECDSA_public_key_uncompressed_to_raw(pk_raw_u, pk_u);
+  C_String_print("\n Test K256 pk_uncompressed:\n");
   if (b)
   {
-    C_String_print("Test K256 pk_uncompressed (Some): \n");
-    Lib_PrintBuffer_print_compare_display((uint32_t)64U, pk1, pk_raw_u);
+    if (!Lib_PrintBuffer_result_compare_display((uint32_t)64U, pk, pk_raw_u))
+    {
+      exit((int32_t)255);
+    }
   }
   else
   {
-    C_String_print("Test K256 pk_uncompressed (None): Failure :(\n");
+    C_String_print("Failure :(\n");
+    exit((int32_t)255);
   }
 }
 
 exit_code main()
 {
   C_String_print("\nTEST 1. K256\n");
-  test_verify();
+  test_verify_sha256((uint32_t)6U, msg1, pk1, sgnt1);
   C_String_print("\nTEST 2. K256\n");
-  test_sign_and_verify();
+  test_sign_and_verify_hashed(msgHash2, sk2, nonce2, pk2, sgnt2);
   C_String_print("\nTEST 3. K256\n");
-  test_public_key_compressed();
+  test_public_key_compressed(pk1);
   C_String_print("\nTEST 4. K256\n");
-  test_public_key_uncompressed();
+  test_public_key_uncompressed(pk1);
   return EXIT_SUCCESS;
 }
 
