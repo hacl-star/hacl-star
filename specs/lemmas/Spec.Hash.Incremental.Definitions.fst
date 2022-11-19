@@ -97,3 +97,18 @@ let hash_incremental (a:hash_alg) (input:bytes{S.length input `less_than_max_inp
   finish a s
 
 let hash = Spec.Agile.Hash.hash
+
+/// Auxiliary lemma to help type postconditions
+val nb_blocks_props :
+  a:hash_alg{is_blake a} -> nb : nat -> prev : nat -> data_length : nat ->
+  Lemma
+  (requires (
+    nb * block_length a <= data_length /\
+    prev + data_length <= Blake2.max_limb (to_blake_alg a) /\
+    prev + nb * block_length a <= max_extra_state a))
+  (ensures (
+    nb * block_length a >= 0 /\
+    nb <= data_length / Spec.Blake2.size_block (to_blake_alg a) /\
+    nb * block_length a % block_length a = 0))
+
+val sha3_state_is_hash_state: squash (words_state' SHA3_256 == Spec.SHA3.state)
