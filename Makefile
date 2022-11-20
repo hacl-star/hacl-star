@@ -942,7 +942,7 @@ dist/test/c/Hacl_Test_K256.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-incl
 
 copy-krmllib:
 	mkdir -p dist/karamel
-	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal include) | (cd dist/karamel && tar xf -)
+	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal $$(find include -not -name 'steel_types.h')) | (cd dist/karamel && tar xf -)
 
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 
