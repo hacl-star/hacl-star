@@ -211,8 +211,7 @@ let shuffle = shuffle_pre
 
 let init a = h0 a, ()
 
-let update_pre (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
-  let hash, _ = hash in
+let update_pre (a:sha2_alg) (hash:words_state' a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
   let block_w = words_of_bytes a #(block_word_length a) block in
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1, ()

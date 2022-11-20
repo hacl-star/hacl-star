@@ -7,30 +7,9 @@ open Spec.Hash.PadFinish
 open FStar.Mul
 open Lib.IntTypes
 
-let init a =
-  match a with
-  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
-      Spec.SHA2.init a
-  | MD5 ->
-      Spec.MD5.init
-  | SHA1 ->
-      Spec.SHA1.init
-  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32, u64 0
-  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64, u128 0
-  | SHA3_256 -> Lib.Sequence.create 25 (u64 0), ()
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
-
-// Intentionally restricting this one to MD hashes... we want clients to AVOID
-// juggling between mk_update_multi update vs. repeati for non-MD hashes.
-let update (a: md_alg) =
-  match a with
-  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
-      Spec.SHA2.update a
-  | MD5 ->
-      Spec.MD5.update
-  | SHA1 ->
-      Spec.SHA1.update
-
+// TODO: remove this copy
 #push-options "--print_implicits"
 let sha3_state_is_hash_state: squash (words_state' SHA3_256 == Spec.SHA3.state) =
   let open Lib.Sequence in
@@ -47,30 +26,46 @@ let sha3_state_is_hash_state: squash (words_state' SHA3_256 == Spec.SHA3.state) 
   }
 #pop-options
 
-unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
+let init a =
+  match a with
+  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
+      Spec.SHA2.init a
+  | MD5 ->
+      Spec.MD5.init
+  | SHA1 ->
+      Spec.SHA1.init
+  | Blake2S -> coerce #(words_state a) #(words_state' a & nat) (Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32, 0)
+  | Blake2B -> coerce #(words_state a) #(words_state' a & nat) (Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64, 0)
+  | SHA3_256 -> coerce #(words_state a) #(Lib.Sequence.lseq uint64 25) (Lib.Sequence.create 25 (u64 0))
 
-let update_multi
-  (a:hash_alg)
-  (hash:words_state a)
-  (blocks:bytes_blocks a)
-=
+
+// Intentionally restricting this one to MD hashes... we want clients to AVOID
+// juggling between mk_update_multi update vs. repeati for non-MD hashes.
+let update (a: md_alg) =
+  match a with
+  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
+      Spec.SHA2.update a
+  | MD5 ->
+      Spec.MD5.update
+  | SHA1 ->
+      Spec.SHA1.update
+
+let update_multi a hash blocks =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
   | Blake2B | Blake2S ->
-      let open Spec.Blake2 in
       // Exactly as in blake2_update_blocks
       let nb, _ = Lib.UpdateMulti.split_at_last_lazy_nb_rem (block_length a) (S.length blocks) in
-      let s, prev = hash in
-      let totlen = extra_state_add_nat prev (S.length blocks) in
-      let prev: nat = extra_state_v prev in
-      let a = to_blake_alg a in
-      Lib.LoopCombinators.repeati nb (blake2_update1 a prev blocks) s, totlen
+      let s, prev = hash <: (words_state' a & nat) in
+      let totlen = prev + S.length blocks in
+      let a' = to_blake_alg a in
+      let hash = Lib.LoopCombinators.repeati nb (Spec.Blake2.blake2_update1 a' prev blocks) s, totlen in
+      coerce #(words_state a) #(words_state' a & nat) hash
   | SHA3_256 ->
-      let s, () = coerce hash in
       let open Spec.SHA3 in
       let rateInBytes = 1088 / 8 in
-      Lib.Sequence.repeat_blocks_multi rateInBytes blocks (absorb_inner rateInBytes) s, ()
+      Lib.Sequence.repeat_blocks_multi rateInBytes blocks (absorb_inner rateInBytes) hash
 
 #push-options "--fuel 0 --ifuel 0"
 
