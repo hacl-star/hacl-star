@@ -3,72 +3,63 @@ module Hacl.Test.SHA2
 open FStar.HyperStack.All
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.PrintBuffer
 open Hacl.Hash.SHA2
 
-#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val test_sha2:
     msg_len:size_t
-  -> msg:glbuffer uint8 msg_len
-  -> expected224:glbuffer uint8 28ul
-  -> expected256:glbuffer uint8 32ul
-  -> expected384:glbuffer uint8 48ul
-  -> expected512:glbuffer uint8 64ul
+  -> msg:lbuffer uint8 msg_len
+  -> expected224:lbuffer uint8 28ul
+  -> expected256:lbuffer uint8 32ul
+  -> expected384:lbuffer uint8 48ul
+  -> expected512:lbuffer uint8 64ul
   -> Stack unit
     (requires fun h ->
       live h msg /\ live h expected224 /\ live h expected256 /\
       live h expected384 /\ live h expected512)
     (ensures  fun h0 r h1 -> True)
-let test_sha2 msg_len msg expected224 expected256 expected384 expected512 =
-  assert_norm (v msg_len < pow2 32);
-  assert_norm (v msg_len < pow2 61);
-  assert_norm (v msg_len < pow2 125);
-  push_frame();
-  assume (v msg_len > 0);
-  let msg' = create msg_len (u8 0) in
-  copy msg' msg;
 
+let test_sha2 msg_len msg expected224 expected256 expected384 expected512 =
+  Math.Lemmas.pow2_lt_compat 61 32;
+  Math.Lemmas.pow2_lt_compat 125 32;
+  push_frame();
   let test224 = create 28ul (u8 0) in
   let test256 = create 32ul (u8 0) in
   let test384 = create 48ul (u8 0) in
   let test512 = create 64ul (u8 0) in
-  assert(length test224 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_224);
-  hash_224 msg' msg_len test224;
-  assert(length test256 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_256);
-  hash_256 msg' msg_len (test256 <: buffer_t MUT uint8);
-  assert(length test384 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_384);
-  hash_384 msg' msg_len (test384 <: buffer_t MUT uint8);
-  assert(length test512 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_512);
-  hash_512 msg' msg_len (test512 <: buffer_t MUT uint8);
+  hash_224 msg msg_len (test224 <: lbuffer uint8 28ul);
+  hash_256 msg msg_len (test256 <: lbuffer uint8 32ul);
+  hash_384 msg msg_len (test384 <: lbuffer uint8 48ul);
+  hash_512 msg msg_len (test512 <: lbuffer uint8 64ul);
 
-  print_compare_display 28ul (to_const #uint8 #MUT test224) expected224;
-  print_compare_display 32ul (to_const test256) expected256;
-  print_compare_display 48ul (to_const test384) expected384;
-  print_compare_display 64ul (to_const test512) expected512;
+  if not (result_compare_display 28ul (to_const test224) (to_const expected224)) then C.exit 255l;
+  if not (result_compare_display 32ul (to_const test256) (to_const expected256)) then C.exit 255l;
+  if not (result_compare_display 48ul (to_const test384) (to_const expected384)) then C.exit 255l;
+  if not (result_compare_display 64ul (to_const test512) (to_const expected512)) then C.exit 255l;
   pop_frame()
 
 
+inline_for_extraction noextract
 val u8: n:nat{n < 0x100} -> uint8
 let u8 n = u8 n
 
 //
 // Test1_SHA2
 //
-let test1_plaintext: b:glbuffer uint8 3ul{ recallable b } =
+let test1_plaintext: b:lbuffer uint8 3ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
       [0x61; 0x62; 0x63]) in
   assert_norm (List.Tot.length l == 3);
-  createL_global l
+  createL_mglobal l
 
-let test1_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
+let test1_expected_sha2_224: b:lbuffer uint8 28ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -76,9 +67,9 @@ let test1_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
      0x2a; 0xad; 0xbc; 0xe4; 0xbd; 0xa0; 0xb3; 0xf7; 0xe3; 0x6c; 0x9d; 0xa7])
   in
   assert_norm (List.Tot.length l == 28);
-  createL_global l
+  createL_mglobal l
 
-let test1_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
+let test1_expected_sha2_256: b:lbuffer uint8 32ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -86,9 +77,9 @@ let test1_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
      0xb0; 0x03; 0x61; 0xa3; 0x96; 0x17; 0x7a; 0x9c; 0xb4; 0x10; 0xff; 0x61; 0xf2; 0x00; 0x15; 0xad])
   in
   assert_norm (List.Tot.length l == 32);
-  createL_global l
+  createL_mglobal l
 
-let test1_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
+let test1_expected_sha2_384: b:lbuffer uint8 48ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -97,9 +88,9 @@ let test1_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
      0x80; 0x86; 0x07; 0x2b; 0xa1; 0xe7; 0xcc; 0x23; 0x58; 0xba; 0xec; 0xa1; 0x34; 0xc8; 0x25; 0xa7])
   in
   assert_norm (List.Tot.length l == 48);
-  createL_global l
+  createL_mglobal l
 
-let test1_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
+let test1_expected_sha2_512: b:lbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -109,20 +100,20 @@ let test1_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
      0x45; 0x4d; 0x44; 0x23; 0x64; 0x3c; 0xe8; 0x0e; 0x2a; 0x9a; 0xc9; 0x4f; 0xa5; 0x4c; 0xa4; 0x9f])
   in
   assert_norm (List.Tot.length l == 64);
-  createL_global l
+  createL_mglobal l
 
 //
 // Test2_SHA2
 //
-let test2_plaintext: b:glbuffer uint8 0ul{ recallable b } =
+let test2_plaintext: b:lbuffer uint8 0ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [])
   in
   assert_norm (List.Tot.length l == 0);
-  createL_global l
+  createL_mglobal l
 
-let test2_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
+let test2_expected_sha2_224: b:lbuffer uint8 28ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -130,9 +121,9 @@ let test2_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
      0x15; 0xa2; 0xb0; 0x1f; 0x82; 0x8e; 0xa6; 0x2a; 0xc5; 0xb3; 0xe4; 0x2f])
   in
   assert_norm (List.Tot.length l == 28);
-  createL_global l
+  createL_mglobal l
 
-let test2_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
+let test2_expected_sha2_256: b:lbuffer uint8 32ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -140,9 +131,9 @@ let test2_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
      0x27; 0xae; 0x41; 0xe4; 0x64; 0x9b; 0x93; 0x4c; 0xa4; 0x95; 0x99; 0x1b; 0x78; 0x52; 0xb8; 0x55])
   in
   assert_norm (List.Tot.length l == 32);
-  createL_global l
+  createL_mglobal l
 
-let test2_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
+let test2_expected_sha2_384: b:lbuffer uint8 48ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -151,9 +142,9 @@ let test2_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
      0x27; 0x4e; 0xde; 0xbf; 0xe7; 0x6f; 0x65; 0xfb; 0xd5; 0x1a; 0xd2; 0xf1; 0x48; 0x98; 0xb9; 0x5b])
   in
   assert_norm (List.Tot.length l == 48);
-  createL_global l
+  createL_mglobal l
 
-let test2_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
+let test2_expected_sha2_512: b:lbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -163,12 +154,12 @@ let test2_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
      0x63; 0xb9; 0x31; 0xbd; 0x47; 0x41; 0x7a; 0x81; 0xa5; 0x38; 0x32; 0x7a; 0xf9; 0x27; 0xda; 0x3e])
   in
   assert_norm (List.Tot.length l == 64);
-  createL_global l
+  createL_mglobal l
 
 //
 // Test3_SHA2
 //
-let test3_plaintext: b:glbuffer uint8 56ul{ recallable b } =
+let test3_plaintext: b:lbuffer uint8 56ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -178,9 +169,9 @@ let test3_plaintext: b:glbuffer uint8 56ul{ recallable b } =
      0x6d; 0x6e; 0x6f; 0x70; 0x6e; 0x6f; 0x70; 0x71])
   in
   assert_norm (List.Tot.length l == 56);
-  createL_global l
+  createL_mglobal l
 
-let test3_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
+let test3_expected_sha2_224: b:lbuffer uint8 28ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -188,9 +179,9 @@ let test3_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
      0xb0; 0xc6; 0x45; 0x5c; 0xb4; 0xf5; 0x8b; 0x19; 0x52; 0x52; 0x25; 0x25])
   in
   assert_norm (List.Tot.length l == 28);
-  createL_global l
+  createL_mglobal l
 
-let test3_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
+let test3_expected_sha2_256: b:lbuffer uint8 32ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -198,9 +189,9 @@ let test3_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
      0xa3; 0x3c; 0xe4; 0x59; 0x64; 0xff; 0x21; 0x67; 0xf6; 0xec; 0xed; 0xd4; 0x19; 0xdb; 0x06; 0xc1])
   in
   assert_norm (List.Tot.length l == 32);
-  createL_global l
+  createL_mglobal l
 
-let test3_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
+let test3_expected_sha2_384: b:lbuffer uint8 48ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -209,9 +200,9 @@ let test3_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
      0xb0; 0x45; 0x5a; 0x85; 0x20; 0xbc; 0x4e; 0x6f; 0x5f; 0xe9; 0x5b; 0x1f; 0xe3; 0xc8; 0x45; 0x2b])
   in
   assert_norm (List.Tot.length l == 48);
-  createL_global l
+  createL_mglobal l
 
-let test3_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
+let test3_expected_sha2_512: b:lbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -221,12 +212,12 @@ let test3_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
      0x31; 0xad; 0x85; 0xc7; 0xa7; 0x1d; 0xd7; 0x03; 0x54; 0xec; 0x63; 0x12; 0x38; 0xca; 0x34; 0x45])
   in
   assert_norm (List.Tot.length l == 64);
-  createL_global l
+  createL_mglobal l
 
 //
 // Test4_SHA2
 //
-let test4_plaintext: b:glbuffer uint8 112ul{ recallable b } =
+let test4_plaintext: b:lbuffer uint8 112ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -239,9 +230,9 @@ let test4_plaintext: b:glbuffer uint8 112ul{ recallable b } =
      0x6d; 0x6e; 0x6f; 0x70; 0x71; 0x72; 0x73; 0x74; 0x6e; 0x6f; 0x70; 0x71; 0x72; 0x73; 0x74; 0x75])
   in
   assert_norm (List.Tot.length l == 112);
-  createL_global l
+  createL_mglobal l
 
-let test4_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
+let test4_expected_sha2_224: b:lbuffer uint8 28ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -249,9 +240,9 @@ let test4_expected_sha2_224: b:glbuffer uint8 28ul{ recallable b } =
      0xe0; 0xe0; 0xe2; 0xab; 0x14; 0xe6; 0xb8; 0xdf; 0x26; 0x5f; 0xc0; 0xb3])
   in
   assert_norm (List.Tot.length l == 28);
-  createL_global l
+  createL_mglobal l
 
-let test4_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
+let test4_expected_sha2_256: b:lbuffer uint8 32ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -259,9 +250,9 @@ let test4_expected_sha2_256: b:glbuffer uint8 32ul{ recallable b } =
      0x0b; 0x24; 0x9b; 0x11; 0xe8; 0xf0; 0x7a; 0x51; 0xaf; 0xac; 0x45; 0x03; 0x7a; 0xfe; 0xe9; 0xd1])
   in
   assert_norm (List.Tot.length l == 32);
-  createL_global l
+  createL_mglobal l
 
-let test4_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
+let test4_expected_sha2_384: b:lbuffer uint8 48ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -270,9 +261,9 @@ let test4_expected_sha2_384: b:glbuffer uint8 48ul{ recallable b } =
      0xfc; 0xc7; 0xc7; 0x1a; 0x55; 0x7e; 0x2d; 0xb9; 0x66; 0xc3; 0xe9; 0xfa; 0x91; 0x74; 0x60; 0x39])
   in
   assert_norm (List.Tot.length l == 48);
-  createL_global l
+  createL_mglobal l
 
-let test4_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
+let test4_expected_sha2_512: b:lbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -282,7 +273,7 @@ let test4_expected_sha2_512: b:glbuffer uint8 64ul{ recallable b } =
      0xc7; 0xd3; 0x29; 0xee; 0xb6; 0xdd; 0x26; 0x54; 0x5e; 0x96; 0xe5; 0x5b; 0x87; 0x4b; 0xe9; 0x09])
   in
   assert_norm (List.Tot.length l == 64);
-  createL_global l
+  createL_mglobal l
 
 val main: unit -> St C.exit_code
 let main () =
@@ -292,7 +283,12 @@ let main () =
   recall test1_expected_sha2_384;
   recall test1_expected_sha2_512;
   recall test1_plaintext;
-  test_sha2 3ul test1_plaintext test1_expected_sha2_224 test1_expected_sha2_256 test1_expected_sha2_384 test1_expected_sha2_512;
+  test_sha2 3ul
+    test1_plaintext
+    test1_expected_sha2_224
+    test1_expected_sha2_256
+    test1_expected_sha2_384
+    test1_expected_sha2_512;
 
   C.String.print (C.String.of_literal "\nTEST 2. SHA2\n");
   recall test2_expected_sha2_224;
@@ -300,7 +296,12 @@ let main () =
   recall test2_expected_sha2_384;
   recall test2_expected_sha2_512;
   recall test2_plaintext;
-  test_sha2 0ul test2_plaintext test2_expected_sha2_224 test2_expected_sha2_256 test2_expected_sha2_384 test2_expected_sha2_512;
+  test_sha2 0ul
+    test2_plaintext
+    test2_expected_sha2_224
+    test2_expected_sha2_256
+    test2_expected_sha2_384
+    test2_expected_sha2_512;
 
   C.String.print (C.String.of_literal "\nTEST 3. SHA2\n");
   recall test3_expected_sha2_224;
@@ -308,7 +309,12 @@ let main () =
   recall test3_expected_sha2_384;
   recall test3_expected_sha2_512;
   recall test3_plaintext;
-  test_sha2 56ul test3_plaintext test3_expected_sha2_224 test3_expected_sha2_256 test3_expected_sha2_384 test3_expected_sha2_512;
+  test_sha2 56ul
+    test3_plaintext
+    test3_expected_sha2_224
+    test3_expected_sha2_256
+    test3_expected_sha2_384
+    test3_expected_sha2_512;
 
   C.String.print (C.String.of_literal "\nTEST 4. SHA2\n");
   recall test4_expected_sha2_224;
@@ -316,6 +322,11 @@ let main () =
   recall test4_expected_sha2_384;
   recall test4_expected_sha2_512;
   recall test4_plaintext;
-  test_sha2 112ul test4_plaintext test4_expected_sha2_224 test4_expected_sha2_256 test4_expected_sha2_384 test4_expected_sha2_512;
+  test_sha2 112ul
+    test4_plaintext
+    test4_expected_sha2_224
+    test4_expected_sha2_256
+    test4_expected_sha2_384
+    test4_expected_sha2_512;
 
   C.EXIT_SUCCESS
