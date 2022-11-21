@@ -71,6 +71,7 @@ let mk_nat_mod_comm_monoid (m:pos) : LE.comm_monoid (nat_mod m) = {
   LE.lemma_mul_comm = lemma_mul_mod_comm;
   }
 
+inline_for_extraction
 let rec pow_mod_ (#m:pos{1 < m}) (a:nat_mod m) (b:nat) : Tot (nat_mod m) (decreases b) =
   if b = 0 then 1
   else

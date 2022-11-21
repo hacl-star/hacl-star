@@ -33,6 +33,7 @@ let lemma_refl x =
 
 //-----------------
 
+inline_for_extraction noextract
 let proj_g_pow2_64 : S.proj_point =
   [@inline_let]
   let rX : S.felem = 0x46ec0aa60b0b98c37b29371784676ad967b7beb1a941ddb6fbbff95b44cb788b in
@@ -55,6 +56,7 @@ let lemma_proj_g_pow2_64_eval () =
   assert_norm (qX == rX /\ qY == rY /\ qZ == rZ)
 
 
+inline_for_extraction noextract
 let proj_g_pow2_128 : S.proj_point =
   [@inline_let]
   let rX : S.felem = 0x98299efbc8e459915404ae015b48cac3b929e0158665f3c7fa5489fbd25c4297 in
@@ -77,6 +79,7 @@ let lemma_proj_g_pow2_128_eval () =
   assert_norm (qX == rX /\ qY == rY /\ qZ == rZ)
 
 
+inline_for_extraction noextract
 let proj_g_pow2_192 : S.proj_point =
   [@inline_let]
   let rX : S.felem = 0xbd382b67d20492b1480ca58a6d7d617ba413a9bc7c2f1cff51301ef960fb245c in
@@ -193,6 +196,7 @@ let mk_proj_g_pow2_192 () =
 
 ///  window size = 4; precomputed table = [[0]G, [1]G, ..., [15]G]
 
+inline_for_extraction noextract
 let precomp_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240} =
   normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 15)
 
@@ -211,6 +215,7 @@ let precomp_basepoint_table_w4:
 
 ///  window size = 4; precomputed table = [[0]([pow2 64]G), [1]([pow2 64]G), ..., [15]([pow2 64]G)]
 
+inline_for_extraction noextract
 let precomp_g_pow2_64_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240} =
   normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table proj_g_pow2_64 15)
 
@@ -231,6 +236,7 @@ let precomp_g_pow2_64_table_w4:
 
 ///  window size = 4; precomputed table = [[0]([pow2 128]G), [1]([pow2 128]G),...,[15]([pow2 128]G)]
 
+inline_for_extraction noextract
 let precomp_g_pow2_128_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240} =
   normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table proj_g_pow2_128 15)
 
@@ -251,6 +257,7 @@ let precomp_g_pow2_128_table_w4:
 
 ///  window size = 4; precomputed table = [[0]([pow2 192]G), [1]([pow2 192]G),...,[15]([pow2 192]G)]
 
+inline_for_extraction noextract
 let precomp_g_pow2_192_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240} =
   normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table proj_g_pow2_192 15)
 
@@ -271,6 +278,7 @@ let precomp_g_pow2_192_table_w4:
 
 ///  window size = 5; precomputed table = [[0]G, [1]G, ..., [31]G]
 
+inline_for_extraction noextract
 let precomp_basepoint_table_list_w5: x:list uint64{FStar.List.Tot.length x = 480} =
   normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table S.g 31)
 

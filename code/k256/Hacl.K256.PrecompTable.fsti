@@ -114,9 +114,6 @@ let precomp_table_acc_inv
 ///  window size = 4; precomputed table = [[0]G, [1]G, ..., [15]G]
 
 inline_for_extraction noextract
-val precomp_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240}
-
-inline_for_extraction noextract
 val precomp_basepoint_table_lseq_w4 : LSeq.lseq uint64 240
 
 val precomp_basepoint_table_lemma_w4: unit ->
@@ -127,9 +124,6 @@ val precomp_basepoint_table_w4:
 
 
 ///  window size = 4; precomputed table = [[0]([pow2 64]G), [1]([pow2 64]G), ..., [15]([pow2 64]G)]
-
-inline_for_extraction noextract
-val precomp_g_pow2_64_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240}
 
 inline_for_extraction noextract
 val precomp_g_pow2_64_table_lseq_w4 : LSeq.lseq uint64 240
@@ -144,9 +138,6 @@ val precomp_g_pow2_64_table_w4:
 ///  window size = 4; precomputed table = [[0]([pow2 128]G), [1]([pow2 128]G), ..., [15]([pow2 128]G)]
 
 inline_for_extraction noextract
-val precomp_g_pow2_128_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240}
-
-inline_for_extraction noextract
 val precomp_g_pow2_128_table_lseq_w4 : LSeq.lseq uint64 240
 
 val precomp_g_pow2_128_table_lemma_w4: unit ->
@@ -158,9 +149,6 @@ val precomp_g_pow2_128_table_w4:
 ///  window size = 4; precomputed table = [[0]([pow2 192]G), [1]([pow2 192]G), ..., [15]([pow2 192]G)]
 
 inline_for_extraction noextract
-val precomp_g_pow2_192_table_list_w4: x:list uint64{FStar.List.Tot.length x = 240}
-
-inline_for_extraction noextract
 val precomp_g_pow2_192_table_lseq_w4 : LSeq.lseq uint64 240
 
 val precomp_g_pow2_192_table_lemma_w4: unit ->
@@ -170,9 +158,6 @@ val precomp_g_pow2_192_table_w4:
   x:glbuffer uint64 240ul{witnessed x precomp_g_pow2_192_table_lseq_w4 /\ recallable x}
 
 ///  window size = 5
-
-inline_for_extraction noextract
-val precomp_basepoint_table_list_w5: x:list uint64{FStar.List.Tot.length x = 480}
 
 inline_for_extraction noextract
 val precomp_basepoint_table_lseq_w5 : LSeq.lseq uint64 480

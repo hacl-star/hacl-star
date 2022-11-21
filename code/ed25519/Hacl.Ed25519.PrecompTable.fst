@@ -8,11 +8,9 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Bignum25519
-module F51 = Hacl.Impl.Ed25519.Field51
 
 module LSeq = Lib.Sequence
 module LM = Lib.NatMod
-module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module SPT = Hacl.Spec.PrecompBaseTable
 module SPT256 = Hacl.Spec.PrecompBaseTable256
@@ -66,6 +64,7 @@ let lemma_is_on_curve x y =
 
 //--------------
 
+inline_for_extraction noextract
 let ext_g_pow2_64 : S.ext_point =
   [@inline_let]
   let rX : SC.elem = 0x5a8a5a58bef144743ef0a14ef1bad8b169be613a4f82d2c418c00c5507edf10d in
@@ -131,11 +130,13 @@ let lemma_ext_g_pow2_64_point_inv () =
   assert (S.is_ext ext_g_pow2_64)
 
 
+inline_for_extraction noextract
 let ext_g_pow2_64_c : S.ext_point_c =
   lemma_ext_g_pow2_64_point_inv ();
   ext_g_pow2_64
 
 
+inline_for_extraction noextract
 let ext_g_pow2_128 : S.ext_point =
   [@inline_let]
   let rX : SC.elem = 0x38569441a1f5cd408a120bf398c05f4d98921fc59796c50c2af9fb1690e8727e in
@@ -201,11 +202,13 @@ let lemma_ext_g_pow2_128_point_inv () =
   assert (S.is_ext ext_g_pow2_128)
 
 
+inline_for_extraction noextract
 let ext_g_pow2_128_c : S.ext_point_c =
   lemma_ext_g_pow2_128_point_inv ();
   ext_g_pow2_128
 
 
+inline_for_extraction noextract
 let ext_g_pow2_192 : S.ext_point =
   [@inline_let]
   let rX : SC.elem = 0x59a2726d1a927e56005542ff7c0dded153e9146340a7ba261e0403afbd77ba7d in
@@ -271,6 +274,7 @@ let lemma_ext_g_pow2_192_point_inv () =
   assert (S.is_ext ext_g_pow2_192)
 
 
+inline_for_extraction noextract
 let ext_g_pow2_192_c : S.ext_point_c =
   lemma_ext_g_pow2_192_point_inv ();
   ext_g_pow2_192
@@ -359,6 +363,7 @@ let mk_ext_g_pow2_192 () =
 
 ///  window size = 4; precomputed table = [[0]G, [1]G, ..., [15]G]
 
+inline_for_extraction noextract
 let precomp_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 320} =
   normalize_term (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 15)
 
@@ -381,6 +386,7 @@ let precomp_basepoint_table_w4:
 
 ///  window size = 4; precomputed table = [[0]([pow2 64]G), [1]([pow2 64]G), ..., [15]([pow2 64]G)]
 
+inline_for_extraction noextract
 let precomp_g_pow2_64_table_list_w4: x:list uint64{FStar.List.Tot.length x = 320} =
   normalize_term (SPT.precomp_base_table_list mk_ed25519_precomp_base_table ext_g_pow2_64_c 15)
 
@@ -401,6 +407,7 @@ let precomp_g_pow2_64_table_w4:
 
 ///  window size = 4; precomputed table = [[0]([pow2 128]G), [1]([pow2 128]G),...,[15]([pow2 128]G)]
 
+inline_for_extraction noextract
 let precomp_g_pow2_128_table_list_w4: x:list uint64{FStar.List.Tot.length x = 320} =
   normalize_term (SPT.precomp_base_table_list mk_ed25519_precomp_base_table ext_g_pow2_128_c 15)
 
@@ -420,6 +427,7 @@ let precomp_g_pow2_128_table_w4:
 
 ///  window size = 4; precomputed table = [[0]([pow2 192]G), [1]([pow2 192]G),...,[15]([pow2 192]G)]
 
+inline_for_extraction noextract
 let precomp_g_pow2_192_table_list_w4: x:list uint64{FStar.List.Tot.length x = 320} =
   normalize_term (SPT.precomp_base_table_list mk_ed25519_precomp_base_table ext_g_pow2_192_c 15)
 
@@ -439,6 +447,7 @@ let precomp_g_pow2_192_table_w4:
 
 ///  window size = 5
 
+inline_for_extraction noextract
 let precomp_basepoint_table_list_w5: x:list uint64{FStar.List.Tot.length x = 640} =
   normalize_term (SPT.precomp_base_table_list mk_ed25519_precomp_base_table g_c 31)
 
