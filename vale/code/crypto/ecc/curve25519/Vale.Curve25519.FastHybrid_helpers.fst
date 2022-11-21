@@ -119,12 +119,16 @@ let lemma_carry_wide (a0 a1 a2 a3 a4 a5 a6 a7
 
 let pow2int_four (c0 c1 c2 c3:int) : int = c0 + c1 * pow2_64 + c2 * pow2_128 + c3 * pow2_192
 
-#reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '' --smtencoding.nl_arith_repr native"
+#reset-options "--z3rlimit 10 --fuel 0 --ifuel 0"
 let lemma_mul_pow256_sub (x y:nat) :
   Lemma ((x - y * pow2_256) % prime == (x - y * 38) % prime)
   =
   assert_norm (pow2_256 % prime == 38);
-  ()
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (-y) pow2_256 prime;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r (-y) 38 prime;
+  assert ((-y * pow2_256) % prime == (- y * 38) % prime);
+
+  FStar.Math.Lemmas.modulo_add prime x (- (y * pow2_256)) (- (y * 38))
 
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 let lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma

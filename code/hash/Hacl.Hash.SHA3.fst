@@ -9,7 +9,7 @@ module ST = FStar.HyperStack.ST
 
 friend Spec.Agile.Hash
 
-let crucial_fact = Spec.Hash.Incremental.sha3_state_is_hash_state
+let crucial_fact = Spec.SHA3.Incremental.sha3_state_is_hash_state
 
 let init_256 s =
   LowStar.Buffer.fill s (Lib.IntTypes.u64 0) 25ul
