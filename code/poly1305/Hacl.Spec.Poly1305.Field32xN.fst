@@ -600,15 +600,3 @@ let set_bit5 #w f i =
   let fi = f.[i / 26] in
   let res = f.[i / 26] <- vec_or fi mask in
   res
-
-inline_for_extraction noextract
-val mod_add128:
-    a:(uint64 & uint64)
-  -> b:(uint64 & uint64)
-  -> uint64 & uint64
-let mod_add128 (a0, a1) (b0, b1) =
-  let r0 = a0 +. b0 in
-  let r1 = a1 +. b1 in
-  let c = r0 ^. ((r0 ^. b0) |. ((r0 -. b0) ^. b0)) >>. 63ul in
-  let r1 = r1 +. c in
-  (r0, r1)
