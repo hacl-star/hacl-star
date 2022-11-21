@@ -9,6 +9,7 @@ open Lib.Buffer
 open Lib.ByteBuffer
 
 open Hacl.Impl.Poly1305.Fields
+open Hacl.Impl.Poly1305.Bignum128
 
 module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
