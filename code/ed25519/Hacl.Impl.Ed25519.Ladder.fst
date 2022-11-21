@@ -96,6 +96,19 @@ let point_mul out scalar q =
   pop_frame ()
 
 
+val precomp_get_consttime: BE.pow_a_to_small_b_st U64 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul
+    (BE.table_inv_precomp 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul)
+[@CInline]
+let precomp_get_consttime ctx a table bits_l tmp =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+
+  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
+
+
 inline_for_extraction noextract
 val point_mul_g_noalloc: out:point -> bscalar:lbuffer uint64 4ul
   -> q1:point -> q2:point
@@ -158,10 +171,10 @@ let point_mul_g_noalloc out bscalar q1 q2 q3 q4 =
 
   ME.mk_lexp_four_fw_tables len ctx_len k l table_len
     table_inv_w4 table_inv_w4 table_inv_w4 table_inv_w4
-    (BE.lprecomp_get_consttime len ctx_len k l table_len)
-    (BE.lprecomp_get_consttime len ctx_len k l table_len)
-    (BE.lprecomp_get_consttime len ctx_len k l table_len)
-    (BE.lprecomp_get_consttime len ctx_len k l table_len)
+    precomp_get_consttime
+    precomp_get_consttime
+    precomp_get_consttime
+    precomp_get_consttime
     (null uint64) q1 bLen bBits r1 q2 r2 q3 r3 q4 r4
     (to_const precomp_basepoint_table_w4)
     (to_const precomp_g_pow2_64_table_w4)
