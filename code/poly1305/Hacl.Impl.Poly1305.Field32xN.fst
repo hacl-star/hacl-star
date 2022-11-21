@@ -697,19 +697,6 @@ let load_felem_le #w f b =
   uint_from_bytes_le_lemma (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (LSeq.create w (BSeq.nat_from_bytes_le (as_seq h0 b)))
 
-inline_for_extraction noextract
-val uints64_from_bytes_le:
-    b:lbuffer uint8 16ul
-  -> Stack (uint64 & uint64)
-    (requires fun h -> live h b)
-    (ensures  fun h0 (lo, hi) h1 -> h0 == h1 /\
-      v hi * pow2 64 + v lo == BSeq.nat_from_bytes_le (as_seq h0 b))
-let uints64_from_bytes_le b =
-  let h0 = ST.get () in
-  let lo = uint_from_bytes_le #U64 (sub b 0ul 8ul) in
-  let hi = uint_from_bytes_le #U64 (sub b 8ul 8ul) in
-  uint_from_bytes_le_lemma (as_seq h0 b);
-  lo, hi
 
 inline_for_extraction noextract
 val uints64_from_felem_le:
@@ -723,42 +710,3 @@ val uints64_from_felem_le:
 let uints64_from_felem_le #w f =
   let (f0, f1, f2, f3, f4) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)) in
   store_felem5 #w (f0, f1, f2, f3, f4)
-
-inline_for_extraction noextract
-val uints64_to_bytes_le:
-    b:lbuffer uint8 16ul
-  -> lo:uint64
-  -> hi:uint64
-  -> Stack unit
-    (requires fun h -> live h b)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v hi * pow2 64 + v lo))
-let uints64_to_bytes_le b r0 r1 =
-  let h0 = ST.get () in
-  update_sub_f h0 b 0ul 8ul
-    (fun h -> BSeq.uint_to_bytes_le #U64 r0)
-    (fun _ -> uint_to_bytes_le (sub b 0ul 8ul) r0);
-  let h1 = ST.get () in
-  update_sub_f h1 b 8ul 8ul
-    (fun h -> BSeq.uint_to_bytes_le #U64 r1)
-    (fun _ -> uint_to_bytes_le (sub b 8ul 8ul) r1);
-  //uint_to_bytes_le (sub b 0ul 8ul) r0;
-  //uint_to_bytes_le (sub b 8ul 8ul) r1;
-  let h2 = ST.get () in
-  uints64_to_bytes_le_lemma r0 r1;
-  LSeq.eq_intro (LSeq.sub (as_seq h2 b) 0 8) (BSeq.uint_to_bytes_le #U64 r0);
-  LSeq.lemma_concat2 8 (BSeq.uint_to_bytes_le #U64 r0) 8 (BSeq.uint_to_bytes_le #U64 r1) (as_seq h2 b)
-
-inline_for_extraction noextract
-val mod_add128:
-    a:(uint64 & uint64)
-  -> b:(uint64 & uint64)
-  -> Pure (uint64 & uint64)
-    (requires True)
-    (ensures (fun (r0, r1) ->
-      let (a0, a1) = a in let (b0, b1) = b in
-      v r1 * pow2 64 + v r0 == ((v a1 + v b1) * pow2 64 + v a0 + v b0) % pow2 128))
-let mod_add128 (a0, a1) (b0, b1) =
-  mod_add128_lemma (a0, a1) (b0, b1);
-  mod_add128 (a0, a1) (b0, b1)
