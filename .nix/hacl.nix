@@ -1,13 +1,43 @@
-{ dotnet-runtime, dune_3, enableParallelBuilding ? true, fstar, git, karamel
-, nodePackages, nodejs, ocamlPackages, openssl, python3, stdenv, time, vale
-, which, writeTextFile, z3, }:
+{ lib, dotnet-runtime, dune_3, fstar, git, karamel, nodePackages, nodejs
+, ocamlPackages, openssl, python3, stdenv, time, vale, which, writeTextFile, z3
+}:
 
 let
 
   hacl = stdenv.mkDerivation {
     name = "hacl-star";
 
-    src = ./.;
+    src = lib.cleanSourceWith {
+      src = ./..;
+      filter = path: type:
+        let relPath = lib.removePrefix (toString ./.. + "/") (toString path);
+        in type == "directory" || lib.elem relPath [
+          ".gitignore"
+          "Makefile"
+          "Makefile.common"
+          "Makefile.include"
+          "Makefile.openssl"
+          "dist/LICENSE.txt"
+          "dist/META"
+          "dist/Makefile.test"
+          "dist/Makefile.tmpl"
+          "dist/configure"
+          "dist/hacl-star-raw.opam"
+          "dist/package-mozilla.sh"
+        ] || lib.any (lib.flip lib.hasPrefix relPath) [
+          "bindings"
+          "code"
+          "doc"
+          "hints"
+          "lib"
+          "providers"
+          "secure_api"
+          "specs"
+          "tests"
+          "tools"
+          "vale"
+        ];
+    };
 
     postPatch = ''
       patchShebangs tools
@@ -60,10 +90,9 @@ let
       export LD_LIBRARY_PATH=$HACL_HOME/dist/hacl-star-raw
     '';
 
-    inherit enableParallelBuilding;
+    enableParallelBuilding = true;
 
     buildPhase = ''
-      rm -rf dist/*/*
       make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
     '';
 
@@ -90,10 +119,10 @@ let
         buildPhase = ''
           for file in ./*/*.c ./*/*.h
           do
-            if ! diff $file ${hacl.src}/dist/$file 2>&1 > /dev/null
+            if ! diff $file ${../dist}/$file 2>&1 > /dev/null
             then
               echo "*** $file"
-              diff -y --suppress-common-lines $file ${hacl.src}/dist/$file || true
+              diff -y --suppress-common-lines $file ${../dist}/$file || true
             fi
           done
         '';
@@ -106,7 +135,7 @@ let
         src = "${hacl.build-products}/dist.tar";
         phases = [ "unpackPhase" "buildPhase" "installPhase" ];
         buildPhase = ''
-          diff -rq . ${hacl.src}/dist 2>&1 \
+          diff -rq . ${../dist} 2>&1 \
             | sed 's/\/nix\/store\/[a-z0-9]\{32\}-//g' \
             | sed 's/^Files \([^ ]*\).*/\1/' \
             | sed 's/^Only in source\/dist\([^\:]*\)\: \(.*\)/\.\1\/\2/' \
