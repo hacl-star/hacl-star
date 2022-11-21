@@ -71,7 +71,15 @@ let mk_nat_mod_comm_monoid (m:pos) : LE.comm_monoid (nat_mod m) = {
   LE.lemma_mul_comm = lemma_mul_mod_comm;
   }
 
+let rec pow_mod_ (#m:pos{1 < m}) (a:nat_mod m) (b:nat) : Tot (nat_mod m) (decreases b) =
+  if b = 0 then 1
+  else
+    if b % 2 = 0 then pow_mod_ (mul_mod a a) (b / 2)
+    else mul_mod a (pow_mod_ (mul_mod a a) (b / 2))
+
 val pow_mod: #m:pos{1 < m} -> a:nat_mod m -> b:nat -> nat_mod m
+
+val pow_mod_def: #m:pos{1 < m} -> a:nat_mod m -> b:nat -> Lemma (pow_mod a b == pow_mod_ a b)
 
 val lemma_pow_mod: #m:pos{1 < m} -> a:nat_mod m -> b:nat -> Lemma (pow a b % m == pow_mod #m a b)
 
