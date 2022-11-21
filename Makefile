@@ -92,10 +92,10 @@ endif
 
 all: all-staged
 
-all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
+all-unstaged: compile-gcc-compatible compile-msvc-compatible \
   compile-portable-gcc-compatible \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic \
-  obj/libhaclml.cmxa compile-election-guard
+  obj/libhaclml.cmxa
 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
@@ -272,7 +272,7 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:*' \
-	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
+	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -794,9 +794,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
-dist/wasm/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
-
-dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
@@ -865,36 +862,6 @@ doc-ocaml: test-bindings-ocaml
 	cd bindings/ocaml && $(LD_EXTRA) dune build @doc
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
-
-dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
-
-
-# Election Guard distribution
-# ---------------------------
-#
-# Trying something new, i.e. only listing the things we care about (since
-# there's so few of them)
-dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
-  -bundle Hacl.Hash.* \
-  -bundle Hacl.HMAC \
-  -bundle Hacl.Streaming.SHA2= \
-  -bundle Hacl.Bignum256= \
-  -bundle Hacl.Bignum4096= \
-  -bundle Hacl.Bignum256_32= \
-  -bundle Hacl.Bignum4096_32= \
-  -bundle Hacl.GenericField32= \
-  -bundle Hacl.GenericField64= \
-  -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
-  -bundle Hacl.HMAC_DRBG= \
-  $(INTTYPES_BUNDLE)
-dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
-dist/election-guard/Makefile.basic: VALE_ASMS =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
-dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
-dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
-  -bundle '\*[rename=Should_not_be_here]' \
-  -falloca -ftail-calls -fc89 -add-early-include '"krml/internal/builtin.h"'
 
 # Portable distribution
 # ---------------------
@@ -975,7 +942,7 @@ dist/test/c/Hacl_Test_K256.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-incl
 
 copy-krmllib:
 	mkdir -p dist/karamel
-	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal include) | (cd dist/karamel && tar xf -)
+	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal $$(find include -not -name 'steel_types.h')) | (cd dist/karamel && tar xf -)
 
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 
@@ -1029,7 +996,7 @@ test-c-%: dist/test/c/%.test
 # C tests (from C files) #
 ##########################
 
-test-handwritten: compile-gcc64-only compile-gcc-compatible
+test-handwritten: compile-gcc-compatible
 	$(LD_EXTRA) KRML_HOME="$(KRML_HOME)" \
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test

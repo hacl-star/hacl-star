@@ -24,8 +24,8 @@
 
 #include "internal/Hacl_Ed25519.h"
 
+#include "internal/Hacl_Streaming_SHA2.h"
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Curve25519_51.h"
 
 static inline void fsum(uint64_t *out, uint64_t *a, uint64_t *b)
@@ -1333,6 +1333,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
       tmp,
       (uint32_t)20U * sizeof (uint64_t)););
   Hacl_Impl_Ed25519_PointConstants_make_point_inf(out);
+  uint64_t tmp0[20U] = { 0U };
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -1355,8 +1356,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
       ite = p1;
     }
     uint64_t bits_l = ite & mask_l;
-    uint64_t a_bits_l[20U] = { 0U };
-    memcpy(a_bits_l, (uint64_t *)table, (uint32_t)20U * sizeof (uint64_t));
+    memcpy(tmp0, (uint64_t *)table, (uint32_t)20U * sizeof (uint64_t));
     KRML_MAYBE_FOR15(i2,
       (uint32_t)0U,
       (uint32_t)15U,
@@ -1365,11 +1365,11 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
       const uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)20U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)20U; i++)
       {
-        uint64_t *os = a_bits_l;
-        uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
+        uint64_t *os = tmp0;
+        uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
         os[i] = x;
       });
-    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, a_bits_l);
+    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp0);
   }
 }
 
@@ -1412,6 +1412,7 @@ static inline void point_mul_g(uint64_t *out, uint8_t *scalar)
     uint64_t x = r;
     os[i] = x;);
   Hacl_Impl_Ed25519_PointConstants_make_point_inf(out);
+  uint64_t tmp[20U] = { 0U };
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -1434,8 +1435,7 @@ static inline void point_mul_g(uint64_t *out, uint8_t *scalar)
       ite = p1;
     }
     uint64_t bits_l = ite & mask_l;
-    uint64_t a_bits_l[20U] = { 0U };
-    memcpy(a_bits_l,
+    memcpy(tmp,
       (uint64_t *)Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w4,
       (uint32_t)20U * sizeof (uint64_t));
     KRML_MAYBE_FOR15(i2,
@@ -1450,11 +1450,11 @@ static inline void point_mul_g(uint64_t *out, uint8_t *scalar)
         + (i2 + (uint32_t)1U) * (uint32_t)20U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)20U; i++)
       {
-        uint64_t *os = a_bits_l;
-        uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
+        uint64_t *os = tmp;
+        uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
         os[i] = x;
       });
-    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, a_bits_l);
+    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp);
   }
 }
 
@@ -1544,30 +1544,31 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
     ite0 = p10;
   }
   uint64_t bits_c = ite0 & mask_l0;
-  uint32_t bits_l320 = (uint32_t)bits_c;
+  uint32_t bits_l32 = (uint32_t)bits_c;
   const
   uint64_t
-  *a_bits_l0 = Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w5 + bits_l320 * (uint32_t)20U;
-  memcpy(out, (uint64_t *)a_bits_l0, (uint32_t)20U * sizeof (uint64_t));
+  *a_bits_l = Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w5 + bits_l32 * (uint32_t)20U;
+  memcpy(out, (uint64_t *)a_bits_l, (uint32_t)20U * sizeof (uint64_t));
   uint64_t mask_l1 = (uint64_t)31U;
-  uint32_t i = (uint32_t)3U;
+  uint32_t i2 = (uint32_t)3U;
   uint32_t j1 = (uint32_t)63U;
-  uint64_t p11 = bscalar2[i] >> j1;
+  uint64_t p11 = bscalar2[i2] >> j1;
   uint64_t ite1;
-  if (i + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j1)
+  if (i2 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j1)
   {
-    ite1 = p11 | bscalar2[i + (uint32_t)1U] << ((uint32_t)64U - j1);
+    ite1 = p11 | bscalar2[i2 + (uint32_t)1U] << ((uint32_t)64U - j1);
   }
   else
   {
     ite1 = p11;
   }
   uint64_t bits_c0 = ite1 & mask_l1;
-  uint32_t bits_l321 = (uint32_t)bits_c0;
-  const uint64_t *a_bits_l1 = table2 + bits_l321 * (uint32_t)20U;
-  memcpy(tmp10, (uint64_t *)a_bits_l1, (uint32_t)20U * sizeof (uint64_t));
+  uint32_t bits_l320 = (uint32_t)bits_c0;
+  const uint64_t *a_bits_l0 = table2 + bits_l320 * (uint32_t)20U;
+  memcpy(tmp10, (uint64_t *)a_bits_l0, (uint32_t)20U * sizeof (uint64_t));
   Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp10);
-  for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)51U; i2++)
+  uint64_t tmp11[20U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
   {
     KRML_MAYBE_FOR5(i1,
       (uint32_t)0U,
@@ -1576,8 +1577,8 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
       Hacl_Impl_Ed25519_PointDouble_point_double(out, out););
     uint32_t bk = (uint32_t)255U;
     uint64_t mask_l2 = (uint64_t)31U;
-    uint32_t i10 = (bk - (uint32_t)5U * i2 - (uint32_t)5U) / (uint32_t)64U;
-    uint32_t j2 = (bk - (uint32_t)5U * i2 - (uint32_t)5U) % (uint32_t)64U;
+    uint32_t i10 = (bk - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
+    uint32_t j2 = (bk - (uint32_t)5U * i - (uint32_t)5U) % (uint32_t)64U;
     uint64_t p12 = bscalar2[i10] >> j2;
     uint64_t ite2;
     if (i10 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j2)
@@ -1589,15 +1590,14 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
       ite2 = p12;
     }
     uint64_t bits_l = ite2 & mask_l2;
-    uint64_t a_bits_l2[20U] = { 0U };
-    uint32_t bits_l322 = (uint32_t)bits_l;
-    const uint64_t *a_bits_l10 = table2 + bits_l322 * (uint32_t)20U;
-    memcpy(a_bits_l2, (uint64_t *)a_bits_l10, (uint32_t)20U * sizeof (uint64_t));
-    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, a_bits_l2);
+    uint32_t bits_l321 = (uint32_t)bits_l;
+    const uint64_t *a_bits_l1 = table2 + bits_l321 * (uint32_t)20U;
+    memcpy(tmp11, (uint64_t *)a_bits_l1, (uint32_t)20U * sizeof (uint64_t));
+    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp11);
     uint32_t bk0 = (uint32_t)255U;
     uint64_t mask_l = (uint64_t)31U;
-    uint32_t i1 = (bk0 - (uint32_t)5U * i2 - (uint32_t)5U) / (uint32_t)64U;
-    uint32_t j = (bk0 - (uint32_t)5U * i2 - (uint32_t)5U) % (uint32_t)64U;
+    uint32_t i1 = (bk0 - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
+    uint32_t j = (bk0 - (uint32_t)5U * i - (uint32_t)5U) % (uint32_t)64U;
     uint64_t p1 = bscalar1[i1] >> j;
     uint64_t ite;
     if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
@@ -1609,13 +1609,12 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
       ite = p1;
     }
     uint64_t bits_l0 = ite & mask_l;
-    uint64_t a_bits_l[20U] = { 0U };
-    uint32_t bits_l32 = (uint32_t)bits_l0;
+    uint32_t bits_l322 = (uint32_t)bits_l0;
     const
     uint64_t
-    *a_bits_l11 = Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w5 + bits_l32 * (uint32_t)20U;
-    memcpy(a_bits_l, (uint64_t *)a_bits_l11, (uint32_t)20U * sizeof (uint64_t));
-    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, a_bits_l);
+    *a_bits_l2 = Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w5 + bits_l322 * (uint32_t)20U;
+    memcpy(tmp11, (uint64_t *)a_bits_l2, (uint32_t)20U * sizeof (uint64_t));
+    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp11);
   }
 }
 
@@ -1738,7 +1737,7 @@ static inline void sha512_pre_msg(uint8_t *hash, uint8_t *prefix, uint32_t len, 
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384 p = s;
-  Hacl_Hash_Core_SHA2_init_512(block_state);
+  Hacl_SHA2_Scalar32_sha512_init(block_state);
   Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, input, len);
@@ -1759,7 +1758,7 @@ sha512_pre_pre2_msg(
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384 p = s;
-  Hacl_Hash_Core_SHA2_init_512(block_state);
+  Hacl_SHA2_Scalar32_sha512_init(block_state);
   Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, prefix2, (uint32_t)32U);

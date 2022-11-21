@@ -50,12 +50,13 @@ endif
 #   to not enforce trivial preconditions
 #   for top-level unannotated effectful functions
 
+# 240: admitting declaration without definition
 # 241: corrupt cache file AND stale cache file (argh!) we wish to make the
 #      former fatal, and the latter non-fatal if it's the file we're about to
 #      verify... see https://github.com/FStarLang/FStar/issues/1652
+# 247: checked file not written because some of its dependencies...
 # 272: top-level bindings must be total
 # 274: shadowing
-# 247: checked file not written because some of its dependencies...
 # 319: effectful argument, consider let binding it
 # 328: definition is recursive but not used in its body
 # 331: name is being ignored
@@ -64,7 +65,7 @@ endif
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
-  --warn_error '+241@247-272-274@319@328@331@332@337' \
+  --warn_error '@240+241@247-272-274@319@328@331@332@337' \
   --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
@@ -94,7 +95,7 @@ BASE_FLAGS = \
   -funroll-loops 16
 
 CURVE_BUNDLE_SLOW= \
-  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
+  -bundle Hacl.Curve25519_64_Slow
 CURVE_BUNDLE_BASE= \
   $(CURVE_BUNDLE_SLOW) \
   -bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Bignum25519_51] -static-header Hacl.Impl.Curve25519.Field51 \
