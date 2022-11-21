@@ -37,10 +37,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let spec_FFDHE_ffdhe_alg_Spec_FFDHE_FFDHE4096 = Unsigned.UInt8.of_int 2
     let spec_FFDHE_ffdhe_alg_Spec_FFDHE_FFDHE6144 = Unsigned.UInt8.of_int 3
     let spec_FFDHE_ffdhe_alg_Spec_FFDHE_FFDHE8192 = Unsigned.UInt8.of_int 4
-    type spec_Blake2_alg = Unsigned.UInt8.t
-    let spec_Blake2_alg = typedef uint8_t "Spec_Blake2_alg"
-    let spec_Blake2_alg_Spec_Blake2_Blake2S = Unsigned.UInt8.of_int 0
-    let spec_Blake2_alg_Spec_Blake2_Blake2B = Unsigned.UInt8.of_int 1
     type spec_Cipher_Expansion_impl = Unsigned.UInt8.t
     let spec_Cipher_Expansion_impl =
       typedef uint8_t "Spec_Cipher_Expansion_impl"
