@@ -313,13 +313,6 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
 let repeati_blake2_update1_is_update_multi a nb prev d hash =
   repeati_blake2_update1_is_update_multi_aux a nb prev d hash
 
-/// TODO: duplicate with Hacl.Streaming.Blake2.fst - MOVE
-/// Equality between the state types defined by blake2s and the generic hash.
-/// The below equality is not trivial because of the way types are encoded for Z3.
-val blake2_state_types_equalities (a : hash_alg{is_blake a}) :
-  Lemma(Blake2.state (to_blake_alg a) == words_state' a)
-
-let blake2_state_types_equalities a = ()
 let extra_state_v_nat_to_extra_state_is_id (a : hash_alg{is_blake a})
                                            (n : nat{n <= max_extra_state a}) :
   Lemma(extra_state_v (nat_to_extra_state a n) = n) = ()
@@ -425,8 +418,6 @@ let blake2_is_hash_incremental_aux2 a input s1 =
     (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev0 input) s1,
      nat_to_extra_state a (prev0 + nb * block_length a)) ==
        update_multi a (s1, nat_to_extra_state a prev0) bs);
-  blake2_state_types_equalities a;
-  assert(words_state' a == Blake2.state (to_blake_alg a));
   assert(is2 == ((s2 <: words_state' a), nat_to_extra_state a (prev0 + nb * block_length a)))
 #pop-options
 
