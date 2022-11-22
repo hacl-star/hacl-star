@@ -55,12 +55,11 @@ let update_multi a hash blocks =
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
   | Blake2B | Blake2S ->
-      // Exactly as in blake2_update_blocks
-      let nb, _ = Lib.UpdateMulti.split_at_last_lazy_nb_rem (block_length a) (S.length blocks) in
-      let s, prev = hash <: (words_state' a & nat) in
+      let nb = S.length blocks / block_length a in
+      let s, prev = hash  <: (words_state' a & nat) in
       let totlen = prev + S.length blocks in
       let a' = to_blake_alg a in
-      let hash = Lib.LoopCombinators.repeati nb (Spec.Blake2.blake2_update1 a' prev blocks) s, totlen in
+      let hash = Lib.LoopCombinators.repeati #(words_state' a) nb (Spec.Blake2.blake2_update1 a' prev blocks) s, totlen in
       coerce #(words_state a) #(words_state' a & nat) hash
   | SHA3_256 ->
       let open Spec.SHA3 in
