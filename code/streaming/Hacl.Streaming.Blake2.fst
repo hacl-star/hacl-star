@@ -328,6 +328,7 @@ val update_multi_associative:
     update_multi_s (update_multi_s acc prevlen1 input1) prevlen2 input2 ==
       update_multi_s acc prevlen1 input))
 
+#push-options "--z3rlimit 300"
 let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let input = S.append input1 input2 in
   let nb = S.length input / U32.v (block_len a) in
@@ -368,6 +369,7 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
     (==) { }
     update_multi_s acc prevlen1 input;
   }
+#pop-options
 
 /// A helper function: the hash incremental function defined with the functions
 /// locally defined (with a signature adapted to the functor).
