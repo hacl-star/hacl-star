@@ -225,13 +225,12 @@ let shuffle (a:sha2_alg) (ws:k_w a) (hash:words_state' a) : Tot (words_state' a)
   st
 
 
-let init (a:sha2_alg) = h0 a, ()
+let init (a:sha2_alg) : words_state a = h0 a
 
 let update (a:sha2_alg) (block:block_t a) (hash:words_state a): Tot (words_state a) =
-  let hash, _ = hash in
   let block_w = Lib.ByteSequence.uints_from_bytes_be #(word_t a) #SEC #(block_word_length a) block in
   let hash_1 = shuffle a block_w hash in
-  map2 #_ #_ #_ #8 ( +. ) hash_1 hash, ()
+  map2 #_ #_ #_ #8 ( +. ) hash_1 hash
 
 
 let padded_blocks (a:sha2_alg) (len:nat{len < block_length a}) : n:nat{n <= 2} =
@@ -265,7 +264,6 @@ let update_last (a:sha2_alg) (totlen:len_t a)
 
 
 let store_state (a:sha2_alg) (hashw:words_state a) : Tot (lseq uint8 (8 * word_length a)) =
-  let hashw, _ = hashw in
   Lib.ByteSequence.uints_to_bytes_be #(word_t a) #SEC #8 hashw
 
 
