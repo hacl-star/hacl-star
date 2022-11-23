@@ -7,9 +7,6 @@ all: dist/Makefile.basic
 test: all dist/blake2-test.exe
 	dist/blake2-test.exe
 
-test32: all dist/blake2-test32.exe
-	dist/blake2-test32.exe
-
 # Defines rules for producing .checked, .krml, .depend, etc.
 include $(HACL_HOME)/Makefile.local
 
@@ -28,19 +25,9 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -fbuiltin-uint128 \
 	  -tmpdir dist \
 	  -skip-compilation \
-	  -ccopts -std=gnu11,-g,-O3 \
-	  -I "../../../karamel/include" \
-	  -I "../../lib/c" \
-	  -add-include '"kremlin/internal/target.h"' \
-	  -add-include '<stdbool.h>' \
-	  -add-include '"libintvector.h"' \
-	  -skip-compilation
 
-dist/blake2-test.exe: dist/Makefile.basic blake2-test.c
-	$(CC) -O3 -march=native -mtune=native -DVEC128 -DVEC256 -I ../../dist/gcc64-only -I dist -I ../../lib/c -I ../../dist/karamel/include -I ../../dist/karamel/krmllib/c -I ../../dist/karamel/krmllib/dist/minimal -I ../../tests ../../dist/gcc64-only/Lib_Memzero0.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c blake2-test.c -o dist/blake2-test.exe
-
-dist/blake2-test32.exe: dist/Makefile.basic blake2-test.c
-	$(CC) -O3 -march=native -mtune=native -UVEC128 -UVEC256 -I ../../dist/gcc64-only -I dist -I ../../lib/c -I ../../dist/karamel/include -I ../../dist/karamel/krmllib/c -I ../../dist/karamel/krmllib/dist/minimal -I ../../tests ../../dist/gcc64-only/Lib_Memzero0.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_32.c blake2-test.c -o dist/blake2-test32.exe
+dist/blake2-32-test.exe: dist/Makefile.basic $(HACL_HOME)/tests/blake2-32-test.c
+	$(CC) -O3 -march=native -mtune=native -I $(HACL_HOME)/dist/gcc64-only -I dist -I $(HACL_HOME)/lib/c -I $(HACL_HOME)/dist/karamel/include -I $(HACL_HOME)/dist/karamel/krmllib/c -I $(HACL_HOME)/dist/karamel/krmllib/dist/minimal -I $(HACL_HOME)/tests $(HACL_HOME)/dist/gcc64-only/Lib_Memzero0.c $(HACL_HOME)/dist/gcc64-only/EverCrypt_AutoConfig2.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_32.c $(HACL_HOME)/tests/blake2-32-test.c -o dist/blake2-32-test.exe
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
