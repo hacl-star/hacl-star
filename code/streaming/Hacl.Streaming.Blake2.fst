@@ -24,6 +24,15 @@ let uint8 = Lib.IntTypes.uint8
 inline_for_extraction noextract
 let uint32 = Lib.IntTypes.uint32
 
+unfold noextract
+let size_nat = Lib.IntTypes.size_nat
+
+unfold noextract
+let max_key = Spec.Blake2.max_key
+
+unfold noextract
+let lbytes = Lib.ByteSequence.lbytes
+
 module Spec = Spec.Blake2
 module Core = Hacl.Impl.Blake2.Core
 open Hacl.Impl.Blake2.Generic
@@ -33,7 +42,7 @@ module Blake2b32 = Hacl.Blake2b_32
 /// An instance of the stateful type class for blake2
 /// =================================================
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 inline_for_extraction noextract
 let index = unit
@@ -224,7 +233,7 @@ let k = stateful_key
 /// -------------
 
 noextract
-let max_input_length (a : alg) : n:nat { n <= Spec.max_limb a } =
+let max_input_length (a : alg) : n:nat { n <= Spec.max_limb a /\ n > Spec.size_block a } =
   assert_norm (pow2 64 < pow2 128);
   pow2 64 - 1
 
@@ -261,9 +270,9 @@ let blake2_prevlen (a : alg)
 /// -----
 
 noextract
-let init_s (a : alg) :
+let init_s (a : alg) (kk : size_nat{kk <= max_key a}) :
   Tot (t a) =
-  Spec.blake2_init_hash a 0 (output_size a)
+  Spec.blake2_init_hash a kk (output_size a)
 
 noextract
 let update_multi_s (#a : alg) (acc : t a)
@@ -289,9 +298,11 @@ let finish_s (#a : alg) (acc : t a) :
   Spec.blake2_finish a acc (U32.v (output_len a))
 
 noextract
-let spec_s (a : alg) (_key : unit)
-           (input : S.seq uint8{S.length input <= max_input_length a}) =
-  Spec.blake2 a input 0 Seq.empty (output_size a)
+let spec_s (a : alg)
+  (kk : size_nat{kk <= max_key a})
+  (key : lbytes kk)
+  (input : S.seq uint8{if kk = 0 then S.length input <= max_input_length a else S.length input + Spec.size_block a <= max_input_length a}) =
+  Spec.blake2 a input kk key (output_size a)
 
 /// Interlude for spec proofs
 /// -------------------------
@@ -328,6 +339,7 @@ val update_multi_associative:
     update_multi_s (update_multi_s acc prevlen1 input1) prevlen2 input2 ==
       update_multi_s acc prevlen1 input))
 
+#push-options "--z3rlimit 200 --split_queries"
 let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let input = S.append input1 input2 in
   let nb = S.length input / U32.v (block_len a) in
@@ -368,84 +380,166 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
     (==) { }
     update_multi_s acc prevlen1 input;
   }
+#pop-options
 
 /// A helper function: the hash incremental function defined with the functions
 /// locally defined (with a signature adapted to the functor).
 noextract
 val blake2_hash_incremental_s :
   a : alg ->
-  input:S.seq uint8 { S.length input <= max_input_length a} ->
+  kk: size_nat{kk <= max_key a} ->
+  k: lbytes kk ->
+  input:S.seq uint8 { if kk = 0 then S.length input <= max_input_length a else S.length input + (Spec.size_block a) <= max_input_length a } ->
   output:S.seq uint8 { S.length output = output_size a }
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_hash_incremental_s a input =
+let blake2_hash_incremental_s a kk k input0 =
+  let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
+  let key_block_len = S.length key_block in
+  let input = Seq.append key_block input0 in
+  assert (key_block_len = (if kk = 0 then 0 else Spec.size_block a));
   (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
   let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-  let acc1 = init_s a in
+  let acc1 = init_s a kk in
   let acc2 = update_multi_s #a acc1 0 bs in
   let acc3 = update_last_s #a acc2 (S.length bs) l in
   let acc4 = finish_s #a acc3 in
   acc4
 #pop-options
 
-val spec_is_incremental :
+#push-options "--z3cliopt smt.arith.nl=false"
+val repeati_split_at_eq :
   a : alg ->
+  s : t a ->
   input:S.seq uint8 { S.length input <= max_input_length a } ->
   Lemma(
-    blake2_hash_incremental_s a input ==
-      Spec.blake2 a input 0 S.empty (output_size a))
+    let n_blocks, l_last = Spec.split a (S.length input) in
+    let blocks, last = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+    n_blocks = Lib.Sequence.length blocks / Spec.size_block a /\ // This is necessary for type-checking
+    Lib.LoopCombinators.repeati n_blocks (Spec.blake2_update1 a 0 input) s ==
+        Lib.LoopCombinators.repeati n_blocks (Spec.blake2_update1 a 0 blocks) s)
+#pop-options
 
-let spec_is_incremental a input =
+#push-options "--z3cliopt smt.arith.nl=false"
+let repeati_split_at_eq a s input =
   let n_blocks, l_last = Spec.split a (S.length input) in
   let blocks, last = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-  let s = init_s a in
-  let s1 = Lib.LoopCombinators.repeati n_blocks (Spec.blake2_update1 a 0 input) s in
-  let s2 = Lib.LoopCombinators.repeati n_blocks (Spec.blake2_update1 a 0 blocks) s in
-  Lib.Sequence.Lemmas.repeati_extensionality n_blocks (Spec.blake2_update1 a 0 input)
-    (Spec.blake2_update1 a 0 blocks) s;
+  let f = Spec.blake2_update1 a 0 input in
+  let g = Spec.blake2_update1 a 0 blocks in
+  let s1 = Lib.LoopCombinators.repeati n_blocks f s in
+  assert (Lib.Sequence.length blocks = n_blocks * Spec.size_block a);
+  Math.Lemmas.cancel_mul_div n_blocks (Spec.size_block a);
+  assert (n_blocks = Lib.Sequence.length blocks / Spec.size_block a);
+  assert (Lib.Sequence.length blocks <= max_input_length a);
+  let s2 = Lib.LoopCombinators.repeati n_blocks g s in
+  assert (input `Seq.equal` Seq.append blocks last);
+  assert (S.length input = S.length blocks + S.length last);
+  introduce forall (i:nat{i < n_blocks}). (Spec.get_blocki a input i) `S.equal` (Spec.get_blocki a blocks i)
+  with
+    begin
+    let b0 = Spec.get_blocki a input i in
+    let b1 = Spec.get_blocki a blocks i in
+    assert (S.length blocks = n_blocks * Spec.size_block a);
+    Math.Lemmas.lemma_mult_le_right (Spec.size_block a) (i + 1) n_blocks;
+    assert ((i + 1) * Spec.size_block a <= S.length blocks);
+    Math.Lemmas.lemma_mult_le_right (Spec.size_block a) i n_blocks;
+    assert (i * Spec.size_block a <= S.length blocks);
+    Math.Lemmas.distributivity_add_left i 1 (Spec.size_block a);
+    assert ((i + 1) * Spec.size_block a = i * Spec.size_block a + Spec.size_block a);
+    introduce forall (j:  nat{j < Spec.size_block a}). S.index b0 j == S.index b1 j
+    with
+      begin
+      assert (i * Spec.size_block a + j < i * Spec.size_block a + Spec.size_block a);
+      Math.Lemmas.nat_times_nat_is_nat i (Spec.size_block a);
+      S.lemma_index_slice input (i * Spec.size_block a) ((i + 1) * Spec.size_block a) j;
+      assert (S.index b0 j == S.index input (j + (i * Spec.size_block a)))
+      end
+    end;
+  assert (forall (i:nat{i < n_blocks}) acc. f i acc == g i acc);
+  Lib.Sequence.Lemmas.repeati_extensionality n_blocks f g s
+#pop-options
+
+val spec_is_incremental :
+  a : alg ->
+  kk: size_nat{kk <= max_key a} ->
+  k: lbytes kk ->
+  input:S.seq uint8 { if kk = 0 then S.length input <= max_input_length a else  S.length input + (Spec.size_block a) <= max_input_length a } ->
+  Lemma(
+    blake2_hash_incremental_s a kk k input ==
+      Spec.blake2 a input kk k (output_size a))
+
+#restart-solver
+#push-options "--z3cliopt smt.arith.nl=false"
+let spec_is_incremental a kk k input0 =
+  let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
+  let key_block_len = S.length key_block in
+  let input = Seq.append key_block input0 in
+  let n_blocks, l_last = Spec.split a (S.length input) in
+  let blocks, last = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+  let s = init_s a kk in
+  repeati_split_at_eq a s input;
+  let f = Spec.blake2_update1 a 0 input in
+  let g = Spec.blake2_update1 a 0 blocks in
+  let s1 = Lib.LoopCombinators.repeati n_blocks f s in
+  let s2 = Lib.LoopCombinators.repeati n_blocks g s in
+  assert (s1 == s2);
   S.lemma_eq_intro (S.slice input (S.length input - l_last) (S.length input)) last;
-  S.lemma_eq_intro (S.slice last (S.length last - l_last) (S.length last)) last
+  S.lemma_eq_intro (S.slice last (S.length last - l_last) (S.length last)) last;
+  Spec.Blake2.Alternative.lemma_spec_equivalence_update a kk k input0 s;
+  assert (U32.v (output_len a) = output_size a)
+#pop-options
 
 /// Runtime
 /// -------
 
+inline_for_extraction noextract
+let max_input_len_remove_key (a : alg) (kk : nat{kk <= max_key a}) : x:U64.t { U64.v x > 0 } =
+  if kk > 0 then U64.(max_input_len a -^ U64.uint_to_t (Spec.size_block a)) else max_input_len a
+
 #push-options "--ifuel 1"// --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
-let blake2 (a : alg) (m : valid_m_spec a)
+let blake2 (a : alg) (no_key : bool) (m : valid_m_spec a)
+           (key_size : key_size_t a no_key)
            (init : blake2_init_st a m)
            (update_multi : blake2_update_multi_st a m)
            (update_last : blake2_update_last_st a m)
-           (finish : blake2_finish_st a m) :
-  I.block unit =
+           (finish : blake2_finish_st a m)
+  (*I.block unit = *)
+  =
   I.Block
     I.Erased (* key management *)
 
     (stateful_blake2 a m)     (* state *)
-    (I.stateful_unused unit)  (* key *)
+    (stateful_key a false key_size)  (* key *)
 
-    (fun () -> max_input_len a ) (* max_input_length *)
+    (fun () -> max_input_len_remove_key a (U32.v key_size)) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
     (fun () -> block_len a) (* blocks_state_len *)
 
-    (fun () _k -> init_s a) (* init_s *)
+    (fun () _k -> init_s a (U32.v key_size)) (* init_s *)
+
     (fun () acc prevlen input -> update_multi_s acc prevlen input) (* update_multi_s *)
     (fun () acc prevlen input -> update_last_s acc prevlen input) (* update_last_s *)
     (fun () _k acc -> finish_s #a acc) (* finish_s *)
-    (fun () -> spec_s a) (* spec_s *)
+    (fun () -> spec_s a (U32.v key_size)) (* spec_s *)
 
     (* update_multi_zero *)
-    (fun () prevlen acc -> update_multi_zero prevlen acc)
+    (fun () acc prevlen -> update_multi_zero #a acc prevlen)
+
     (* update_multi_associative *)
     (fun () acc prevlen1 prevlen2 input1 input2 ->
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
-    (fun () _k input -> spec_is_incremental a input) (* spec_is_incremental *)
+    (fun () k input ->
+     admit();
+     spec_is_incremental a (U32.v key_size) k input) (* spec_is_incremental *)
     (fun _ acc -> ()) (* index_of_state *)
 
     (* init *)
     (fun _ key acc ->
       [@inline_let] let wv = get_wv acc in
       [@inline_let] let h = get_state_p acc in
+      admit();
       init h (Lib.IntTypes.size 0) (output_len a))
 
     (* update_multi *)
