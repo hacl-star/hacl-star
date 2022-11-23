@@ -63,7 +63,39 @@ let mk_words_state (#a : hash_alg) (s : words_state' a)
 let hash_len a = Hacl.Hash.Definitions.hash_len a
 let block_len a = Hacl.Hash.Definitions.block_len a
 
-#push-options "--ifuel 1 --retry 5"
+val hash_is_hash_incremental (a: hash_alg)
+  (input: S.seq uint8 { S.length input <= U64.v (Hacl.Streaming.MD.max_input_len64 a) }):
+  Lemma (
+      assert_norm (pow2 64 < pow2 125);
+      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+      (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
+      (* TODO: use update_full ? *)
+      let hash0 = fst (Spec.Agile.Hash.init a) in
+      let hash1 = fst (Spec.Agile.Hash.update_multi a (mk_words_state hash0 0) bs) in
+      let prevlen = S.length bs in
+      let hash2 = fst (Spec.Hash.Incremental.update_last a (mk_words_state hash1 prevlen) prevlen l) in
+      let hash3 = Spec.Hash.PadFinish.finish a (mk_words_state hash2 0) in
+      hash3 `S.equal` Spec.Agile.Hash.hash a input)
+
+#push-options "--ifuel 1"
+let hash_is_hash_incremental a input =
+  assert_norm (pow2 64 < pow2 125);
+  if is_blake a then begin
+    assert_norm (pow2 64 < pow2 125);
+    let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+    (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
+    (* TODO: use update_full ? *)
+    let hash0 = Spec.Agile.Hash.init a in
+    let hash1 = Spec.Agile.Hash.update_multi a (mk_words_state (fst hash0) 0) bs in
+    Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a (mk_words_state (fst hash0) 0) bs;
+    assert (extra_state_v (snd hash1) == S.length bs);
+    Hacl.Hash.Blake2.Lemmas.blake2_init_no_key_is_agile a;
+    Hacl.Hash.Blake2.Lemmas.lemma_blake2_hash_equivalence a input;
+    Spec.Hash.Incremental.hash_is_hash_incremental a input
+  end else
+    Spec.Hash.Incremental.hash_is_hash_incremental a input
+
+#restart-solver
 inline_for_extraction noextract
 let evercrypt_hash : block hash_alg =
   Block
@@ -97,14 +129,7 @@ let evercrypt_hash : block hash_alg =
        else ())
     (* spec_is_incremental *)
     (fun a _ input ->
-       if is_blake a then
-         begin
-         Hacl.Hash.Blake2.Lemmas.blake2_init_no_key_is_agile a;
-         Hacl.Hash.Blake2.Lemmas.lemma_blake2_hash_equivalence a input;
-         Hacl.Streaming.Blake2.spec_is_incremental (to_blake_alg a) () input
-         end
-       else
-         Spec.Hash.Incremental.hash_is_hash_incremental a input)
+        hash_is_hash_incremental a input)
 
     EverCrypt.Hash.alg_of_state
     (fun i _ -> EverCrypt.Hash.init #i)
