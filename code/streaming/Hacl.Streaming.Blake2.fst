@@ -222,7 +222,7 @@ let stateful_key_to_buffer (#a : alg) (#no_key : bool) (#key_size : key_size_t a
   b:B.buffer uint8 { B.length b = U32.v key_size } =
   if no_key then B.null #uint8 else key
 
-inline_for_extraction noextract  
+inline_for_extraction noextract
 let k = stateful_key
 
 /// The functor currently limits the size of the data, so we can't go as far as blake2b can go
@@ -300,7 +300,7 @@ let finish_s (#a : alg) () (acc : t a) :
 
 noextract
 let spec_s (a : alg) () (_key : unit)
-           (input : S.seq uint8{S.length input <= max_input_length a}) = 
+           (input : S.seq uint8{S.length input <= max_input_length a}) =
   Spec.blake2 a input 0 Seq.empty (output_size a)
 
 /// Interlude for spec proofs
@@ -349,7 +349,7 @@ let update_multi_associative #a () acc prevlen1 prevlen2 input1 input2 =
   Spec.Hash.Lemmas.update_multi_associative (to_hash_alg a) s input1 input2;
   Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq (to_hash_alg a) s input1;
   Spec.Hash.Lemmas.extra_state_add_nat_bound_lem2 #(to_hash_alg a) es (S.length input1)
- 
+
 /// A helper function: the hash incremental function defined with the functions
 /// locally defined (with a signature adapted to the functor).
 noextract
@@ -527,35 +527,6 @@ let update_last_eq #a prevlen last acc =
   assert(Hash.extra_state_v (Hash.extra_state_add_nat es (S.length last)) ==
          Hash.extra_state_v es + S.length last)
 
-/// TODO: duplicate with Spec.Hash.Incremental.fst - MOVE
-/// Equality between the state types defined by blake2s and the generic hash.
-/// The equality is not trivial because of subtleties linked to the way types are
-/// encoded for Z3.
-noextract
-val state_types_equalities : (a : alg) ->
-  Lemma(Spec.Blake2.state a == Hash.words_state' (to_hash_alg a))
-
-let state_types_equalities a =
-  let open Lib.Sequence in
-  let open Lib.IntTypes in
-  (* Because of the necessity to be able to normalize, we basically do
-   * the same proof twice. TODO: find a better way *)
-  match a with
-  | Spec.Blake2S ->
-    let a = Spec.Blake2S in (* small trick to get a proper normalization *)
-    let row = Spec.row a in
-    assert(Spec.state a == lseq row 4);
-    assert_norm(Hash.words_state' (to_hash_alg a) == m:Seq.seq row {Seq.length m = 4});
-    assert_norm(lseq row 4 == m:Seq.seq row {Seq.length m == 4});
-    assert(lseq row 4 == m:Seq.seq row {Seq.length m = 4})
-  | Spec.Blake2B ->
-    let a = Spec.Blake2B in
-    let row = Spec.row a in
-    assert(Spec.state a == lseq row 4);
-    assert_norm(Hash.words_state' (to_hash_alg a) == m:Seq.seq row {Seq.length m = 4});
-    assert_norm(lseq row 4 == m:Seq.seq row {Seq.length m == 4});
-    assert(lseq row 4 == m:Seq.seq row {Seq.length m = 4})
-
 (* TODO: find a way not to duplicate the block spec *)
 inline_for_extraction noextract
 val mk_update_multi:
@@ -602,8 +573,6 @@ let mk_update_multi a m update_multi i acc prevlen blocks len =
   (**)                  (Spec.blake2_update1 a (Lib.IntTypes.uint_v prevlen')
   (**)                                       (B.as_seq h0 blocks))
   (**)                  (s_v h0 acc));
-  (**) state_types_equalities a;
-  (**) assert(Spec.Blake2.state a == Hash.words_state' (to_hash_alg a));
   (**) update_multi_eq (U32.v nb) (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 blocks);
   (**) assert(Lib.IntTypes.uint_v prevlen' = U64.v prevlen);
   (**) assert(s_v h3 acc == update_multi_s () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 blocks));
@@ -670,7 +639,7 @@ let blocks_state_len (a : alg) (m : valid_m_spec a) :
   Tot (x:U32.t{
     U32.v x > 0 /\
     U32.v x % U32.v (block_len a) = 0
-  }) = 
+  }) =
   match m with
   | M32 -> block_len a
   // The vectorized implementations actually only process one block at a time
@@ -687,15 +656,15 @@ let blake2 (a : alg) (m : valid_m_spec a)
   I.block unit =
   I.Block
     I.Erased (* key management *)
-    
+
     (stateful_blake2 a m)     (* state *)
     (I.stateful_unused unit)  (* key *)
-    
+
     (fun () -> max_input_len a ) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
     (fun () -> blocks_state_len a m) (* blocks_state_len *)
-    
+
     (fun () _k -> init_s a ()) (* init_s *)
     (fun () acc prevlen input -> update_multi_s () acc prevlen input) (* update_multi_s *)
     (fun () acc prevlen input -> update_last_s () acc prevlen input) (* update_last_s *)
