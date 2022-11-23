@@ -142,7 +142,7 @@ inline_for_extraction
 val _sigma1: a:sha2_alg -> x:(word a) -> Tot (word a)
 let _sigma1 a x = (x >>>. (op0 a).e3) ^. (x >>>. (op0 a).e4) ^. (x >>. (op0 a).e5)
 
-let h0: a:sha2_alg -> Tot (words_state' a) = function
+let h0: a:sha2_alg -> Tot (words_state a) = function
   | SHA2_224 -> C.h224
   | SHA2_256 -> C.h256
   | SHA2_384 -> C.h384
@@ -159,7 +159,7 @@ let (.[]) = S.index
 
 (* Core shuffling function *)
 
-let shuffle_core_pre (a:sha2_alg) (k_t: word a) (ws_t: word a) (hash:words_state' a) : Tot (words_state' a) =
+let shuffle_core_pre (a:sha2_alg) (k_t: word a) (ws_t: word a) (hash:words_state a) : Tot (words_state a) =
   (**) assert(7 <= S.length hash);
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -198,8 +198,8 @@ val shuffle_inner:
   -> ws:k_w a
   -> i:nat{i < num_rounds16 a}
   -> j:nat{j < 16}
-  -> hash:words_state' a ->
-  words_state' a
+  -> hash:words_state a ->
+  words_state a
 
 let shuffle_inner a ws i j hash =
   let k_t = Seq.index (k0 a) (16 * i + j) in
@@ -210,8 +210,8 @@ let shuffle_inner a ws i j hash =
 val shuffle_inner_loop:
     a:sha2_alg
   -> i:nat{i < num_rounds16 a}
-  -> ws_st:tuple2 (k_w a) (words_state' a) ->
-  k_w a & words_state' a
+  -> ws_st:tuple2 (k_w a) (words_state a) ->
+  k_w a & words_state a
 
 let shuffle_inner_loop a i (ws, st) =
   let st' = Lib.LoopCombinators.repeati 16 (shuffle_inner a ws i) st in
@@ -220,19 +220,17 @@ let shuffle_inner_loop a i (ws, st) =
 
 (* Full shuffling function *)
 
-let shuffle (a:sha2_alg) (ws:k_w a) (hash:words_state' a) : Tot (words_state' a) =
+let shuffle (a:sha2_alg) (ws:k_w a) (hash:words_state a) : Tot (words_state a) =
   let (ws, st) = Lib.LoopCombinators.repeati (num_rounds16 a) (shuffle_inner_loop a) (ws, hash) in
   st
 
 
-let init (a:sha2_alg) = h0 a, ()
+let init (a:sha2_alg) = h0 a
 
 let update (a:sha2_alg) (block:block_t a) (hash:words_state a): Tot (words_state a) =
-  let hash, _ = hash in
   let block_w = Lib.ByteSequence.uints_from_bytes_be #(word_t a) #SEC #(block_word_length a) block in
   let hash_1 = shuffle a block_w hash in
-  map2 #_ #_ #_ #8 ( +. ) hash_1 hash, ()
-
+  map2 #_ #_ #_ #8 ( +. ) hash_1 hash
 
 let padded_blocks (a:sha2_alg) (len:nat{len < block_length a}) : n:nat{n <= 2} =
   if (len + len_length a + 1 <= block_length a) then 1 else 2
@@ -265,7 +263,6 @@ let update_last (a:sha2_alg) (totlen:len_t a)
 
 
 let store_state (a:sha2_alg) (hashw:words_state a) : Tot (lseq uint8 (8 * word_length a)) =
-  let hashw, _ = hashw in
   Lib.ByteSequence.uints_to_bytes_be #(word_t a) #SEC #8 hashw
 
 

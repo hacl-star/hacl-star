@@ -15,9 +15,7 @@ let init_as_list : list uint32 = [
   u32 0x10325476;
 ]
 
-let h0 : words_state MD5 = Seq.seq_of_list init_as_list
-
-let init = h0
+let init : words_state MD5 = Seq.seq_of_list init_as_list
 
 (* Section 3.4 *)
 
