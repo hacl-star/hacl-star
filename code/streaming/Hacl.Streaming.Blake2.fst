@@ -307,6 +307,7 @@ val update_multi_zero:
 let update_multi_zero #a acc prevlen =
   Lib.LoopCombinators.eq_repeati0 (0 / U32.v (block_len a)) (Spec.blake2_update1 a prevlen S.empty) acc
 
+#push-options "--z3cliopt smt.arith.nl=false"
 val update_multi_associative:
   #a : alg ->
   acc: t a ->
@@ -316,6 +317,7 @@ val update_multi_associative:
   input2:S.seq uint8 ->
   Lemma
   (requires (
+    (**) Math.Lemmas.pos_times_pos_is_pos Spec.size_block_w (Spec.size_word a);
     prevlen1 % Spec.size_block a = 0 /\
     S.length input1 % Spec.size_block a = 0 /\
     S.length input2 % Spec.size_block a = 0 /\
@@ -327,7 +329,9 @@ val update_multi_associative:
     prevlen2 % Spec.size_block a = 0 /\
     update_multi_s (update_multi_s acc prevlen1 input1) prevlen2 input2 ==
       update_multi_s acc prevlen1 input))
+#pop-options
 
+#push-options "--z3rlimit 300"
 let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let input = S.append input1 input2 in
   let nb = S.length input / U32.v (block_len a) in
@@ -368,6 +372,7 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
     (==) { }
     update_multi_s acc prevlen1 input;
   }
+#pop-options
 
 /// A helper function: the hash incremental function defined with the functions
 /// locally defined (with a signature adapted to the functor).

@@ -205,7 +205,7 @@ let extra_state a = match a with
 
 (* The working state *)
 inline_for_extraction
-let words_state' a = m:Seq.seq (word a) {Seq.length m = state_word_length a}
+let words_state' a = lseq (word a) (state_word_length a)
 
 inline_for_extraction
 let words_state a = if is_blake a then words_state' a & nat else words_state' a
