@@ -61,4 +61,4 @@ let hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a
   else
     (* As defined in the NIST standard; pad, then update, then finish. *)
     let padding = pad a (S.length input) in
-    finish a (update_multi a (init a) 0 S.(input @| padding))
+    finish a (update_multi a (init a) () S.(input @| padding))

@@ -59,7 +59,7 @@ val update (a:md_alg): update_t a
 let update_multi_pre
   (a:hash_alg)
   (hash:words_state a)
-  (prev:nat)
+  (prev:extra_state a)
   (blocks:bytes)
 =
   match a with
@@ -71,7 +71,7 @@ let update_multi_pre
 val update_multi
   (a:hash_alg)
   (hash:words_state a)
-  (prev:nat)
+  (prev:extra_state a)
   (blocks:bytes_blocks a):
   Pure (words_state a)
     (requires update_multi_pre a hash prev blocks)

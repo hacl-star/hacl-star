@@ -1,3 +1,4 @@
+
 module Spec.Hash.Definitions
 
 open Lib.IntTypes
@@ -199,9 +200,6 @@ inline_for_extraction
 let extra_state a = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
   | Blake2S | Blake2B -> nat
-
-// Do not use this in Low* code: it is not possible to directly convert a
-// constant nat to a uint128.
 
 (* The working state *)
 inline_for_extraction
