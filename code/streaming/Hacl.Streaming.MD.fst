@@ -810,25 +810,33 @@ let hacl_md (a:alg)// : block unit =
   assert_norm (word SHA3_256 == Lib.IntTypes.uint64);
   Block
     Erased
-    (state_t a)
-    (stateful_unused unit)
+    (state_t a) (* state *)
+    (stateful_unused unit) (* key *)
 
-    (fun () -> max_input_len64 a)
-    (fun () -> Hacl.Hash.Definitions.hash_len a)
-    (fun () -> Hacl.Hash.Definitions.block_len a)
-    (fun () -> Hacl.Hash.Definitions.block_len a)
+    (fun () -> max_input_len64 a) (* max_input_len *)
+    (fun () -> Hacl.Hash.Definitions.hash_len a) (* output_len *)
+    (fun () -> Hacl.Hash.Definitions.block_len a) (* block_len *)
+    (fun () -> Hacl.Hash.Definitions.block_len a) (* blocks_state_len *)
+    (fun () -> 0ul) (* init_input_len *)
 
+    (fun () _k -> S.empty) (* init_input_s *)
+
+    (* init_s *)
     (fun () _ ->
       if is_sha2 a then
         Hacl.Spec.SHA2.Vec.(init a M32)
       else
         fst (Spec.Agile.Hash.init a))
+
+    (* update_multi_s *)
     (fun () acc prevlen blocks ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
         update_nblocks #a #M32 (S.length blocks) (blocks <: multiseq 1 (S.length blocks)) acc
       else
         update_multi_s a () acc prevlen blocks)
+
+    (* update_last_s *)
     (fun () acc prevlen input ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2 in
@@ -836,41 +844,55 @@ let hacl_md (a:alg)// : block unit =
         Hacl.Spec.SHA2.Vec.(update_last #a #M32 totlen (S.length input) (input <: multiseq 1 (S.length input)) acc)
       else
         fst Spec.Hash.Incremental.(update_last a (acc, ()) prevlen input))
+
+    (* finish_s *)
     (fun () _ acc ->
       if is_sha2 a then
         let _ = multiseq_hash_is_hash a in
         agile_of_lib Hacl.Spec.SHA2.Vec.(finish #a #M32 acc)
       else
         Spec.Hash.PadFinish.(finish a (acc, ())))
+
+    (* spec_s *)
     (fun () _ s -> Spec.Agile.Hash.(hash a s))
 
+    (* update_multi_zero *)
     (fun i h prevlen ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
         Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (update_block #a #M32 0 (multiseq_empty a)) h
       else
-        update_multi_zero a i h prevlen) (* update_multi_zero *)
+        update_multi_zero a i h prevlen)
+
+    (* update_multi_associative *)
     (fun i acc prevlen1 prevlen2 input1 input2 ->
       if is_sha2 a then
         repeati_associative a acc input1 input2
       else
-        update_multi_associative a i acc prevlen1 prevlen2 input1 input2) (* update_multi_associative *)
-    (fun _ _ input ->
+        update_multi_associative a i acc prevlen1 prevlen2 input1 input2)
+
+    (* spec_is_incremental *)
+    (fun _ key input ->
+      let input1 = S.append S.empty input in
+      assert (S.equal input1 input);
       if is_sha2 a then
         let open Hacl.Spec.SHA2 in
         sha2_mb_is_incremental a input
       else
         Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
+    (* index_of_state *)
     (fun _ _ -> ())
 
-    (fun _ _ s ->
+    (* init *)
+    (fun _ _ _ s ->
       match a with
       | MD5 -> Hacl.Hash.MD5.legacy_init s
       | SHA1 -> Hacl.Hash.SHA1.legacy_init s
       | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> Hacl.SHA2.Scalar32.init #a s
       | SHA3_256 -> Hacl.Hash.SHA3.init_256 s)
 
+    (* update_multi *)
     (fun _ s prevlen blocks len ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
@@ -896,6 +918,7 @@ let hacl_md (a:alg)// : block unit =
         in
         update_multi s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
 
+    (* update_last *)
     (fun _ s prevlen last last_len ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
@@ -927,6 +950,7 @@ let hacl_md (a:alg)// : block unit =
         in
         update_last s () prevlen last last_len)
 
+    (* finish *)
     (fun _ _ s dst ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
