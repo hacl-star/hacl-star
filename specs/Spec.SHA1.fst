@@ -18,9 +18,7 @@ let init_as_list : list uint32 = [
   u32 0xc3d2e1f0;
 ]
 
-let h0 : words_state' SHA1 = Seq.seq_of_list init_as_list
-
-let init = ( h0, () )
+let init : words_state SHA1 = Seq.seq_of_list init_as_list
 
 (* Section 6.1.2 Step 1: message schedule *)
 
@@ -238,9 +236,8 @@ let words_of_bytes_block
 (* Section 6.1.2: outer loop body *)
 
 let update_aux (h:words_state SHA1) l : (words_state SHA1) =
-  let h, _ = h in
   let mi = words_of_bytes_block l in
-  step4 mi h, ()
+  step4 mi h
 
 let update = update_aux
 
