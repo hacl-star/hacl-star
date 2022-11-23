@@ -205,10 +205,7 @@ let extra_state a = match a with
 
 (* The working state *)
 inline_for_extraction
-let words_state' a = lseq (word a) (state_word_length a)
-
-inline_for_extraction
-let words_state a = if is_blake a then words_state' a & nat else words_state' a
+let words_state a = lseq (word a) (state_word_length a)
 
 (* Number of words for final hash *)
 inline_for_extraction
@@ -271,8 +268,7 @@ let bytes_hash a =
 
 (** The types for the core functions *)
 
-let init_t (a: hash_alg) =
-  w:words_state a { is_blake a ==> snd (w <: words_state' a & nat) == 0 }
+let init_t (a: hash_alg) = words_state a
 
 let update_t (a: md_alg) =
   h:words_state a ->

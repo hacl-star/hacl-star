@@ -59,11 +59,11 @@ val update (a:md_alg): update_t a
 let update_multi_pre
   (a:hash_alg)
   (hash:words_state a)
+  (prev:nat)
   (blocks:bytes)
 =
   match a with
   | Blake2B | Blake2S ->
-      let _, prev = hash <: (words_state' a & nat) in
       (S.length blocks + prev) `less_than_max_input_length` a
   | _ -> true
 
@@ -71,15 +71,11 @@ let update_multi_pre
 val update_multi
   (a:hash_alg)
   (hash:words_state a)
+  (prev:nat)
   (blocks:bytes_blocks a):
   Pure (words_state a)
-    (requires update_multi_pre a hash blocks)
-    (ensures fun hash' ->
-      if is_blake a then
-        snd (hash' <: words_state' a & nat) ==
-        snd (hash <: words_state' a & nat) + S.length blocks
-      else
-        True)
+    (requires update_multi_pre a hash prev blocks)
+    (ensures fun _ -> True)
 
 val hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a}):
   Tot (Lib.ByteSequence.lbytes (hash_length a))

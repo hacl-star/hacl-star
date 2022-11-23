@@ -17,9 +17,9 @@ let init a =
       Spec.MD5.init
   | SHA1 ->
       Spec.SHA1.init
-  | Blake2S -> coerce #(words_state a) #(words_state' a & nat) (Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32, 0)
-  | Blake2B -> coerce #(words_state a) #(words_state' a & nat) (Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64, 0)
-  | SHA3_256 -> coerce #(words_state a) #(Lib.Sequence.lseq uint64 25) (Lib.Sequence.create 25 (u64 0))
+  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32
+  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64
+  | SHA3_256 -> Lib.Sequence.create 25 (u64 0)
 
 
 // Intentionally restricting this one to MD hashes... we want clients to AVOID
@@ -33,17 +33,14 @@ let update (a: md_alg) =
   | SHA1 ->
       Spec.SHA1.update
 
-let update_multi a hash blocks =
+let update_multi a hash prev blocks =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
   | Blake2B | Blake2S ->
       let nb = S.length blocks / block_length a in
-      let s, prev = hash  <: (words_state' a & nat) in
-      let totlen = prev + S.length blocks in
       let a' = to_blake_alg a in
-      let hash = Lib.LoopCombinators.repeati #(words_state' a) nb (Spec.Blake2.blake2_update1 a' prev blocks) s, totlen in
-      coerce #(words_state a) #(words_state' a & nat) hash
+      Lib.LoopCombinators.repeati nb (Spec.Blake2.blake2_update1 a' prev blocks) hash
   | SHA3_256 ->
       let open Spec.SHA3 in
       let rateInBytes = 1088 / 8 in
@@ -64,4 +61,4 @@ let hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a
   else
     (* As defined in the NIST standard; pad, then update, then finish. *)
     let padding = pad a (S.length input) in
-    finish a (update_multi a (init a) S.(input @| padding))
+    finish a (update_multi a (init a) 0 S.(input @| padding))
