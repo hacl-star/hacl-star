@@ -90,13 +90,13 @@ let table_inv_w5 : BE.table_inv_t U64 20ul 32ul =
   BE.table_inv_precomp len ctx_len k l table_len
 
 
-inline_for_extraction noextract
 val convert_scalar: scalar:lbuffer uint8 32ul -> bscalar:lbuffer uint64 4ul ->
   Stack unit
   (requires fun h -> live h scalar /\ live h bscalar /\ disjoint scalar bscalar)
   (ensures fun h0 _ h1 -> modifies (loc bscalar) h0 h1 /\
     BD.bn_v h1 bscalar == BSeq.nat_from_bytes_le (as_seq h0 scalar))
 
+[@CInline]
 let convert_scalar scalar bscalar =
   let h0 = ST.get () in
   Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
