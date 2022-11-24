@@ -63,6 +63,9 @@ let createL #a init =
 let createL_global #a init =
   CB.of_ibuffer (IB.igcmalloc_of_list #a root init)
 
+let createL_mglobal #a init =
+  B.mgcmalloc_of_list #a FStar.Monotonic.HyperHeap.root init
+
 let recall_contents #a #len b s =
   B.recall_p (CB.to_ibuffer b) (cpred s)
 

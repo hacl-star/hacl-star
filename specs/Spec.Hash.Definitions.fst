@@ -196,7 +196,7 @@ let block_length a =
 let size_block = block_length
 
 (* Number of words for intermediate hash, i.e. the working state. *)
-inline_for_extraction 
+inline_for_extraction
 let state_word_length a =
   match a with
   | MD5 -> 4
@@ -205,7 +205,7 @@ let state_word_length a =
   | SHA3_256 -> 25
   | _ -> 8
 
-inline_for_extraction 
+inline_for_extraction
 let extra_state a = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
   // Directly storing the length instead of the number of blocks to avoid
@@ -215,19 +215,19 @@ let extra_state a = match a with
   | Blake2S -> uint_t U64 SEC
   | Blake2B -> uint_t U128 SEC
 
-inline_for_extraction 
+inline_for_extraction
 let extra_state_v (#a:hash_alg) (s:extra_state a) : nat =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> 0
   | Blake2S -> v #U64 #SEC s
   | Blake2B -> v #U128 #SEC s
 
-inline_for_extraction 
+inline_for_extraction
 let extra_state_int_type : a:hash_alg{is_blake a} -> inttype = function
   | Blake2S -> U64
   | Blake2B -> U128
 
-inline_for_extraction 
+inline_for_extraction
 let extra_state_int_t (a:hash_alg{is_blake a}) : Type0 =
   int_t (extra_state_int_type a) SEC
 
@@ -244,20 +244,20 @@ let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= max_extra_state a}) 
   | Blake2S -> mk_int #U64 #SEC n
   | Blake2B -> mk_int #U128 #SEC n
 
-inline_for_extraction 
+inline_for_extraction
 let extra_state_add_nat (#a:hash_alg{is_blake a}) (s : extra_state a)
                         (n:nat{n <= maxint (extra_state_int_type a)}) :
   extra_state a =
   (s <: extra_state_int_t a) +. nat_to_extra_state a n
 
-inline_for_extraction 
+inline_for_extraction
 let extra_state_add_size_t (#a:hash_alg{is_blake a}) (s : extra_state a) (n : size_t) :
   s':extra_state a{s' == extra_state_add_nat s (size_v n)} =
   (s <: extra_state_int_t a) +. (cast (extra_state_int_type a) SEC n)
 
 (* The working state *)
-inline_for_extraction 
-let words_state' a = m:Seq.seq (word a) {Seq.length m = state_word_length a}
+inline_for_extraction
+let words_state' a = lseq (word a) (state_word_length a)
 
 let words_state a = words_state' a & extra_state a
 

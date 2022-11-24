@@ -118,6 +118,7 @@ let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
   if n = 0 then memTaint
   else update_n (addr + 1) (n - 1) (memTaint.[addr] <- t) t
 
+
 let lemma_is_machine_heap_update64 (ptr:int) (v:nat64) (mh:machine_heap) : Lemma
   (requires valid_addr64 ptr mh)
   (ensures is_machine_heap_update mh (update_heap64 ptr v mh))
@@ -150,10 +151,25 @@ let lemma_is_machine_heap_update128 (ptr:int) (v:quad32) (mh:machine_heap) : Lem
   (ensures is_machine_heap_update mh (update_heap128 ptr v mh))
   [SMTPat (is_machine_heap_update mh (update_heap128 ptr v mh))]
   =
+    let lemma_is_machine_heap_update32 (ptr:int) (v:nat32) (mh:machine_heap) : Lemma
+      (requires
+        valid_addr ptr mh /\
+        valid_addr (ptr + 1) mh /\
+        valid_addr (ptr + 2) mh /\
+        valid_addr (ptr + 3) mh
+      )
+      (ensures is_machine_heap_update mh (update_heap32 ptr v mh))
+    = update_heap32_reveal ()
+  in
+  let mem1 = update_heap32 ptr v.lo0 mh in
+  let mem2 = update_heap32 (ptr + 4) v.lo1 mem1 in
+  let mem3 = update_heap32 (ptr + 8) v.hi2 mem2 in
   reveal_opaque (`%valid_addr128) valid_addr128;
-  update_heap32_reveal ();
   update_heap128_reveal ();
-  ()
+  lemma_is_machine_heap_update32 ptr v.lo0 mh;
+  lemma_is_machine_heap_update32 (ptr + 4) v.lo1 mem1;
+  lemma_is_machine_heap_update32 (ptr + 8) v.hi2 mem2;
+  lemma_is_machine_heap_update32 (ptr + 12) v.hi3 mem3
 
 let update_mem128 (ptr:int) (v:quad32) (s:state) : state =
   if valid_addr128 ptr (heap_get s.ms_heap) then

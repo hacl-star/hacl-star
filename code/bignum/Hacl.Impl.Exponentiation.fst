@@ -268,17 +268,20 @@ let lmul_acc_pow_a_bits_l_st
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> i:size_t{v i < v bBits / v l}
-  -> acc:lbuffer (uint_t a_t SEC) len ->
+  -> acc:lbuffer (uint_t a_t SEC) len
+  -> tmp:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
+    live h tmp /\ disjoint tmp a /\ disjoint tmp b /\
+    disjoint tmp acc /\ disjoint tmp ctx /\ disjoint tmp table /\
     disjoint a acc /\ disjoint a ctx /\ disjoint b acc /\
     disjoint acc ctx /\ disjoint acc table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
     table_inv (as_seq h a) (as_seq h table))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
+  (ensures  fun h0 _ h1 -> modifies (loc acc |+| loc tmp) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
     S.mul_acc_pow_a_bits_l #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a))
@@ -298,15 +301,14 @@ val lmul_acc_pow_a_bits_l:
   -> pow_a_to_small_b:pow_a_to_small_b_st a_t len ctx_len k l table_len table_inv ->
   lmul_acc_pow_a_bits_l_st a_t len ctx_len k l table_len table_inv
 
-let lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc =
+let lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc tmp =
   let h0 = ST.get () in
   push_frame ();
   let bits_l = bn_get_bits_l bLen bBits b l i in
   assert (v bits_l < pow2 (v l));
 
-  let a_bits_l = create len (uint #a_t #SEC 0) in
-  pow_a_to_small_b ctx (as_seq h0 a) table bits_l a_bits_l;
-  k.lmul ctx acc a_bits_l acc;
+  pow_a_to_small_b ctx (as_seq h0 a) table bits_l tmp;
+  k.lmul ctx acc tmp acc;
   pop_frame ()
 
 
@@ -326,17 +328,20 @@ let lexp_fw_f_st
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> table:clbuffer (uint_t a_t SEC) (table_len *! len)
   -> i:size_t{v i < v bBits / v l}
-  -> acc:lbuffer (uint_t a_t SEC) len ->
+  -> acc:lbuffer (uint_t a_t SEC) len
+  -> tmp:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
+    live h tmp /\ disjoint tmp a /\ disjoint tmp b /\
+    disjoint tmp acc /\ disjoint tmp ctx /\ disjoint tmp table /\
     disjoint a acc /\ disjoint a ctx /\ disjoint b acc /\
     disjoint acc ctx /\ disjoint acc table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
     table_inv (as_seq h a) (as_seq h table))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
+  (ensures  fun h0 _ h1 -> modifies (loc acc |+| loc tmp) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
     S.exp_fw_f #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a))
@@ -356,9 +361,9 @@ val lexp_fw_f:
   -> pow_a_to_small_b:pow_a_to_small_b_st a_t len ctx_len k l table_len table_inv ->
   lexp_fw_f_st a_t len ctx_len k l table_len table_inv
 
-let lexp_fw_f #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc =
+let lexp_fw_f #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc tmp =
   lexp_pow2_in_place len ctx_len k ctx acc l;
-  lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc
+  lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc tmp
 
 
 inline_for_extraction noextract
@@ -405,6 +410,8 @@ val lexp_fw_loop:
   lexp_fw_loop_st a_t len ctx_len k l table_len table_inv
 
 let lexp_fw_loop #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table acc =
+  push_frame ();
+  let tmp = create len (uint #a_t #SEC 0) in
   let h0 = ST.get () in
 
   [@ inline_let]
@@ -415,7 +422,7 @@ let lexp_fw_loop #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a
 
   [@inline_let]
   let inv h (i:nat{i <= v bBits / v l}) =
-    modifies (loc acc) h0 h /\
+    modifies (loc acc |+| loc tmp) h0 h /\
     k.to.linv (as_seq h acc) /\
     k.to.refl (as_seq h acc) == Loops.repeati i (spec h0) (refl1 0) /\
     table_inv (as_seq h a) (as_seq h table) in
@@ -424,8 +431,10 @@ let lexp_fw_loop #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a
   Lib.Loops.for 0ul (bBits /. l) inv
   (fun i ->
     Loops.unfold_repeati (v bBits / v l) (spec h0) (refl1 0) (v i);
-    lexp_fw_f len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc
-  )
+    lexp_fw_f len ctx_len k l table_len table_inv pow_a_to_small_b
+      ctx a bLen bBits b table i acc tmp
+  );
+  pop_frame ()
 
 
 inline_for_extraction noextract

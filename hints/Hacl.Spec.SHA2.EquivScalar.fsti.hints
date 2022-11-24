@@ -1,6 +1,88 @@
 [
-  "p\u0003rÒßt9Å¶»º\u000f\u001f∑2√",
+  "Pì◊“•«.\u0015Ú¥õO\u000f™Ü‚",
   [
+    [
+      "Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.is_sha2",
+        "equation_Spec.Hash.Definitions.sha2_alg",
+        "equation_Spec.Hash.Definitions.word_length",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_460ce49837473aafb58331137146734e",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5586545be0eec16cc66a215f21bed3b7",
+        "typing_Spec.Hash.Definitions.word_length"
+      ],
+      0,
+      "753036402d8498017dab8db14183afb5"
+    ],
+    [
+      "Hacl.Spec.SHA2.EquivScalar.hash_is_repeat_blocks",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equation_Hacl.Spec.SHA2.len_lt_max_a_t",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.seq", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.is_sha2",
+        "equation_Spec.Hash.Definitions.len_length",
+        "equation_Spec.Hash.Definitions.sha2_alg",
+        "equation_Spec.Hash.Definitions.word_length",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_460ce49837473aafb58331137146734e",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_def2e040c30808fdfb69d60ec25eb78f",
+        "typing_Spec.Hash.Definitions.block_length",
+        "typing_Spec.Hash.Definitions.is_sha2",
+        "typing_Spec.Hash.Definitions.word_length"
+      ],
+      0,
+      "2d8196a1ba6f2f73dfedd2dc05cd3704"
+    ],
     [
       "Hacl.Spec.SHA2.EquivScalar.hash_agile_lemma",
       1,
@@ -37,7 +119,7 @@
         "typing_Spec.Hash.Definitions.hash_word_length"
       ],
       0,
-      "b6e9065b91642d1358b72991b3acd8c3"
+      "6a55f23d063f709cc235b6b4be5f5683"
     ]
   ]
 ]
