@@ -844,8 +844,75 @@ let modifies_footprint' c i p data len h0 h1 =
   if c.km = Runtime then
     c.key.frame_invariant #i (B.loc_addr_of_buffer p) k0 h0 h1
 
+/// Small helper which we use to factor out functional correctness proof obligations.
+/// It states that a state was correctly updated to process some data between two
+/// memory snapshots (the key is the same, the seen data was updated, etc.).
+///
+/// Note that we don't specify anything about the buffer and the block_state: they
+/// might have been updated differently depending on the case.
+unfold val state_is_updated :
+  #index:Type0 ->
+  (c: block index) ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
+  data: B.buffer uint8 ->
+  len: UInt32.t ->
+  h0: HS.mem ->
+  h1: HS.mem ->
+  Type0)
+
+#push-options "--z3cliopt smt.arith.nl=false"
+let state_is_updated #index c i t t' p data len h0 h1 =
+  // Functional conditions about the memory updates
+  let s0 = B.get h0 p 0 in
+  let s1 = B.get h1 p 0 in
+  let State block_state0 buf0 total_len0 seen0 key0 = s0 in
+  let State block_state1 buf1 total_len1 seen1 key1 = s1 in
+
+  block_state1 == block_state0 /\
+  buf1 == buf0 /\
+  U64.v total_len1 == U64.v total_len0 + U32.v len /\
+  key1 == key0 /\
+
+  seen1 `S.equal` (seen0 `S.append` (B.as_seq h0 data)) /\
+
+  optional_reveal #index #i #c.km #c.key h1 key1 == optional_reveal #index #i #c.km #c.key h0 key0
+#pop-options
+
+/// The functional part of the invariant
+unfold val invariant_s_funct :
+  #index:Type0 ->
+  (c: block index) ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
+  data: B.buffer uint8 ->
+  len: UInt32.t ->
+  h0: HS.mem ->
+  h1: HS.mem ->
+  Pure Type0 (requires
+    update_pre c i s data len h0 /\
+    U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
+    state_is_updated c i t t' s data len h0 h1)
+  (ensures (fun _ -> True)))
+
+let invariant_s_funct #index c i t t' p data len h0 h1 =
+  let blocks, rest = split_at_last_all_seen c i h1 p in
+  let s = B.get h1 p 0 in
+  let State block_state buf_ total_len seen key = s in
+  let init_s = c.init_s i (optional_reveal #index #i #c.km #c.key h0 key) in
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
+  c.state.v i h1 block_state == c.update_multi_s i init_s 0 blocks /\
+  S.equal (S.slice (B.as_seq h1 buf_) 0 (Seq.length rest)) rest
+
+
 /// We isolate the functional correctness proof obligations for [update_small]
-val update_small_funct_correct :
+val update_small_functional_correctness :
   #index:Type0 ->
   (c: block index) ->
   i:G.erased index -> (
@@ -864,6 +931,9 @@ val update_small_funct_correct :
       U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
       U32.v len <= U32.v (c.blocks_state_len i) - U32.v (rest c i (total_len_h c i h0 s)) /\
 
+      // Generic conditions
+      state_is_updated c i t t' s data len h0 h1 /\
+
       // Functional conditions about the memory updates
       begin
       let s0 = B.get h0 s 0 in
@@ -877,47 +947,14 @@ val update_small_funct_correct :
       let buf_beg_v0 = S.slice (B.as_seq h0 buf) 0 (U32.v sz) in
       let buf_part_v1 = S.slice (B.as_seq h1 buf) 0 (U32.v sz + U32.v len) in
 
-      block_state1 == block_state0 /\
-      buf1 == buf0 /\
-      U64.v total_len1 == U64.v total_len0 + U32.v len /\
-      key1 == key0 /\
-
-      seen1 `S.equal` (seen0 `S.append` (B.as_seq h0 data)) /\
-
       buf_part_v1 == S.append buf_beg_v0 data_v0 /\
-      c.state.v i h1 block_state1 == c.state.v i h0 block_state0 /\
-      optional_reveal #index #i #c.km #c.key h1 key1 == optional_reveal #index #i #c.km #c.key h0 key0
-      end /\
-
-      // The part of the invariant related to memory reasoning
-      begin
-      let h = h1 in
-      let s = B.get h s 0 in
-      let State block_state buf_ total_len seen key = s in
-      let seen = G.reveal seen in
-      let key_v = optional_reveal #index #i #c.km #c.key h key in
-      let all_seen = S.append (c.init_input_s i key_v) seen in
-      let blocks, rest = split_at_last c i all_seen in
-      (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
-      (**) assert(0 % U32.v (Block?.block_len c i) = 0);
-      (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.blocks_state_len c i));
-      (**) assert(0 % U32.v (Block?.blocks_state_len c i) = 0);
-
-      // Liveness and disjointness (administrative)
-      B.live h buf_ /\ c.state.invariant #i h block_state /\ optional_invariant #index #i #c.km #c.key h key /\
-      B.(loc_disjoint (loc_buffer buf_) (c.state.footprint #i h block_state)) /\
-      B.loc_disjoint (B.loc_buffer buf_) (optional_footprint #index #i #c.km #c.key h key) /\
-      B.loc_disjoint (optional_footprint #index #i #c.km #c.key h key) (c.state.footprint #i h block_state)
+      c.state.v i h1 block_state1 == c.state.v i h0 block_state0
       end
   ))
-  (ensures (
-     let s = B.get h1 s 0 in
-     invariant_s c i h1 s
-  )))
+  (ensures (invariant_s_funct c i t t' s data len h0 h1)))
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let update_small_funct_correct #index c i t t' p data len h0 h1 =
-//  let h = h2 in
+let update_small_functional_correctness #index c i t t' p data len h0 h1 =
   let s0 = B.get h0 p 0 in
   let s1 = B.get h1 p 0 in
 
@@ -953,10 +990,7 @@ let update_small_funct_correct #index c i t t' p data len h0 h1 =
   assert(c.state.v i h1 block_state == c.update_multi_s i (c.init_s i key_v1) 0 blocks1);
 
   // The second problematic condition
-  assert(S.equal (S.slice (B.as_seq h1 buf) 0 (Seq.length rest1)) rest1);
-
-  // The final invariant
-  assert(invariant_s c i h1 s1)
+  assert(S.equal (S.slice (B.as_seq h1 buf) 0 (Seq.length rest1)) rest1)
 #pop-options
 
 // The absence of loc_disjoint_includes makes reasoning a little more difficult.
@@ -1033,7 +1067,7 @@ let update_small #index c i t t' p data len =
   ST.lemma_equal_domains_trans h0 h1 h2;
 
   // Prove the invariant
-  update_small_funct_correct c i t t' p data len h0 h2
+  update_small_functional_correctness c i t t' p data len h0 h2
 
 #pop-options
 
@@ -1046,8 +1080,17 @@ noextract let all_seen_h = all_seen
 /// there is no buffered data. Of course, the data we append has to be non-empty,
 /// otherwise we might end-up with an empty internal buffer.
 
+val split_at_last_num_blocks_lem (#index : Type0) (c: block index) (i: index) (b: nat):
+  Lemma (
+    let n_blocks = split_at_last_num_blocks c i b in
+    let blocks = n_blocks * U32.v (c.blocks_state_len i) in
+    0 <= blocks /\ blocks <= b)
+
+let split_at_last_num_blocks_lem #index c i b = ()
+
 /// Auxiliary lemma which groups the functional correctness proof obligations
 /// for [update_empty_or_full].
+#push-options "--z3cliopt smt.arith.nl=false"
 val update_empty_or_full_functional_correctness :
   #index:Type0 ->
   c:block index ->
@@ -1069,6 +1112,9 @@ val update_empty_or_full_functional_correctness :
      rest c i (total_len_h c i h0 s) = c.blocks_state_len i) /\
     U32.v len > 0 /\
 
+    // Generic additional preconditions
+    state_is_updated c i t t' s data len h0 h1 /\
+
     // Additional preconditions
     begin
     let s0 = B.get h0 s 0 in
@@ -1082,6 +1128,9 @@ val update_empty_or_full_functional_correctness :
     let buf = buf0 in
 
     let n_blocks = nblocks c i len in
+    (**) split_at_last_num_blocks_lem c i (U32.v len);
+    (**) assert(U32.v n_blocks * U32.v (c.blocks_state_len i) <= U32.v len); 
+    (**) assert(U32.(FStar.UInt.size (v n_blocks * v (c.blocks_state_len i)) n));
     let data1_len = n_blocks `U32.mul` c.blocks_state_len i in
     let data2_len = len `U32.sub` data1_len in
     let data1 = B.gsub data 0ul data1_len in
@@ -1102,29 +1151,16 @@ val update_empty_or_full_functional_correctness :
     S.length all_seen0 % U32.v (c.block_len i) = 0 /\ // TODO: should be proved automatically
     S.length all_seen_data1 % U32.v (c.block_len i) = 0 /\ // TODO: should be proved automatically
 
-    block_state1 == block_state0 /\
-    buf1 == buf0 /\
-    U64.v total_len1 == U64.v total_len0 + U32.v len /\
-    key1 == key0 /\
-    optional_reveal #index #i #c.km #c.key h1 key1 == optional_reveal #index #i #c.km #c.key h0 key0 /\
-    seen1 `S.equal` S.append seen0 (B.as_seq h0 data) /\
     c.state.v i h1 block_state == c.update_multi_s i init_s 0 all_seen_data1 /\
     S.slice (B.as_seq h1 buf) 0 (Seq.length data2_v) `S.equal` data2_v /\
     True
     end /\
     True
       ))
-  (ensures (
-    let blocks, rest = split_at_last_all_seen c i h1 s in
-    let s = B.get h1 s 0 in
-    let State block_state buf_ total_len seen key = s in
-    let init_s = c.init_s i (optional_reveal #index #i #c.km #c.key h0 key) in
-    (**) Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
-    c.state.v i h1 block_state == c.update_multi_s i init_s 0 blocks /\
-    S.equal (S.slice (B.as_seq h1 buf_) 0 (Seq.length rest)) rest
-    )))
+  (ensures (invariant_s_funct c i t t' s data len h0 h1)))
+#pop-options
 
-#push-options "--z3cliopt smt.arith.nl=false --split_queries"
+#push-options "--z3cliopt smt.arith.nl=false"
 let update_empty_or_full_functional_correctness #index c i t t' p data len h0 h1 =
   let s = B.get h0 p 0 in
   let State block_state buf_ total_len seen0 key = s in
@@ -1132,7 +1168,8 @@ let update_empty_or_full_functional_correctness #index c i t t' p data len h0 h1
   Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
 
   let n_blocks = nblocks c i len in
-  assume(U32.(FStar.UInt.size (v n_blocks * v (c.blocks_state_len i)) n));
+  (**) split_at_last_num_blocks_lem c i (U32.v len);
+  (**) assert(U32.(FStar.UInt.size (v n_blocks * v (c.blocks_state_len i)) n));
   let data1_len = n_blocks `U32.mul` c.blocks_state_len i in
   let data2_len = len `U32.sub` data1_len in
   let data1 = B.gsub data 0ul data1_len in
@@ -1148,12 +1185,6 @@ let update_empty_or_full_functional_correctness #index c i t t' p data len h0 h1
   let blocks1, rest1 = split_at_last_all_seen c i h1 p in
   let data_blocks, data_rest = split_at_last c i data_v in
 
-//  S.append_assoc (all_seen c i h0 p) (B.as_seq h0 data1) (B.as_seq h0 data2);
-//  S.append_assoc (seen_h c i h0 p) (B.as_seq h0 data1) (B.as_seq h0 data2);
-
-//  let sz = rest c i total_len in
-//  assert(Seq.length rest0 = U32.v sz);
-
   split_at_last_blocks c i all_seen0 data_v;
   assert(Seq.equal all_seen1 (S.append all_seen0 data_v));
 
@@ -1161,12 +1192,6 @@ let update_empty_or_full_functional_correctness #index c i t t' p data len h0 h1
   assert(S.equal data_rest rest1)
 #pop-options
 
-(*  assert(blocks1 `S.equal` (all_seen_h c i h0 p `S.append` B.as_seq h0 data1));
-  assert(rest1 `S.equal` B.as_seq h0 data2);
-  assert(S.equal (S.slice (B.as_seq h1 buf_) 0 (Seq.length rest1)) rest1) *)
-
-
-#push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val update_empty_or_full_buf:
   #index:Type0 ->
@@ -1188,7 +1213,7 @@ val update_empty_or_full_buf:
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
-//#push-options "--split_queries"
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
 let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -1254,6 +1279,8 @@ let update_empty_or_full_buf #index c i t t' p data len =
   split_at_last_blocks c i (all_seen c i h0 p) (B.as_seq h0 data); // TODO: remove?
 
   let n_blocks = nblocks c i len in
+  (**) split_at_last_num_blocks_lem c i (U32.v len);
+  (**) assert(U32.(FStar.UInt.size (v n_blocks * v (c.blocks_state_len i)) n));
   let data1_len = n_blocks `U32.mul` c.blocks_state_len i in
   let data2_len = len `U32.sub` data1_len in
   let data1 = B.sub data 0ul data1_len in
@@ -1262,14 +1289,6 @@ let update_empty_or_full_buf #index c i t t' p data len =
   let h01 = ST.get () in
   optional_frame #_ #i #c.km #c.key (c.state.footprint h0 block_state) k' h0 h01;
   assert(preserves_freeable c i p h0 h01);
-
-(*  begin
-  let all_seen = all_seen c i h0 p in
-  let all_seen' = all_seen `S.append` B.as_seq h0 data in
-  let blocks, rest = split_at_last c i all_seen' in
-  assert(blocks `S.equal` (all_seen `S.append` B.as_seq h0 data1));
-  assert(rest `S.equal` B.as_seq h0 data2)
-  end; *)
   
   begin
     let all_seen = all_seen c i h0 p in
@@ -1288,19 +1307,6 @@ let update_empty_or_full_buf #index c i t t' p data len =
                                     (B.loc_buffer dst)
                                     (State?.block_state s) h1 h2;
   assert(preserves_freeable c i p h01 h2);
-
-(*  // TODO: remove?
-  S.append_assoc (all_seen c i h0 p) (B.as_seq h0 data1) (B.as_seq h0 data2);
-  assert (S.equal
-    (S.append (S.append (all_seen c i h0 p) (B.as_seq h0 data1)) (B.as_seq h0 data2))
-    (S.append (all_seen c i h0 p) (S.append (B.as_seq h0 data1) (B.as_seq h0 data2))));
-
-  // TODO: remove?
-  S.append_assoc (seen_h c i h0 p) (B.as_seq h0 data1) (B.as_seq h0 data2);
-  assert (S.equal
-    (S.append (S.append (seen_h c i h0 p) (B.as_seq h0 data1)) (B.as_seq h0 data2))
-    (S.append (seen_h c i h0 p) (S.append (B.as_seq h0 data1) (B.as_seq h0 data2))));
- *)
 
   [@inline_let]
   let total_len' = add_len c i total_len len in
@@ -1356,7 +1362,7 @@ val update_round:
       S.length rest' = U32.v (c.blocks_state_len i)
       end))
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false"
 let update_round #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
@@ -1366,7 +1372,12 @@ let update_round #index c i t t' p data len =
   (**) let h0 = ST.get() in
   update_small #index c i t t' p data len;
   (**) let h1 = ST.get() in
-  (**) split_at_last_small c i (all_seen c i h0 p) (B.as_seq h0 data)
+  (**) split_at_last_small c i (all_seen c i h0 p) (B.as_seq h0 data);
+  (**) begin // For some reason, the proof fails if we don't call those
+  (**) let blocks, rest = split_at_last_all_seen c i h0 p in
+  (**) let blocks', rest' = split_at_last_all_seen c i h1 p in
+  (**) ()
+  (**) end
 #pop-options  
 
 
@@ -1414,7 +1425,7 @@ let update #index c i t t' p data len =
 #pop-options
 
 #restart-solver
-#push-options "--z3rlimit 200"
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
 let mk_finish #index c i t t' p dst =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -1435,7 +1446,6 @@ let mk_finish #index c i t t' p dst =
 
   let buf_ = B.sub buf_ 0ul r in
   assert ((U64.v total_len - U32.v r) % U32.v (c.blocks_state_len i) = 0);
-  assert(U64.v total_len >= U32.v r);
   mod_trans_lem (U64.v total_len - U32.v r) (U32.v (c.blocks_state_len i)) (U32.v (c.block_len i));
   assert ((U64.v total_len - U32.v r) % U32.v (c.block_len i) = 0);
 
