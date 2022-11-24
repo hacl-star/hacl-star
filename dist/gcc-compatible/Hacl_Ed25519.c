@@ -1363,30 +1363,12 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
   uint64_t bscalar[4U] = { 0U };
   convert_scalar(scalar, bscalar);
   uint64_t table[320U] = { 0U };
-  uint64_t tmp[20U] = { 0U };
-  uint64_t *t0 = table;
-  uint64_t *t1 = table + (uint32_t)20U;
-  Hacl_Impl_Ed25519_PointConstants_make_point_inf(t0);
-  memcpy(t1, q, (uint32_t)20U * sizeof (uint64_t));
-  KRML_MAYBE_FOR7(i,
-    (uint32_t)0U,
-    (uint32_t)7U,
-    (uint32_t)1U,
-    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)20U;
-    Hacl_Impl_Ed25519_PointDouble_point_double(tmp, t11);
-    memcpy(table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U,
-      tmp,
-      (uint32_t)20U * sizeof (uint64_t));
-    uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)20U;
-    Hacl_Impl_Ed25519_PointAdd_point_add(tmp, q, t2);
-    memcpy(table + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)20U,
-      tmp,
-      (uint32_t)20U * sizeof (uint64_t)););
+  precomp_table(q, (uint32_t)16U, table);
   Hacl_Impl_Ed25519_PointConstants_make_point_inf(out);
-  uint64_t tmp0[20U] = { 0U };
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
+  uint64_t tmp[20U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    KRML_MAYBE_FOR4(i,
+    KRML_MAYBE_FOR4(i0,
       (uint32_t)0U,
       (uint32_t)4U,
       (uint32_t)1U,
@@ -1397,21 +1379,9 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
         (uint32_t)256U,
         bscalar,
         (uint32_t)4U,
-        i0);
-    memcpy(tmp0, (uint64_t *)table, (uint32_t)20U * sizeof (uint64_t));
-    KRML_MAYBE_FOR15(i1,
-      (uint32_t)0U,
-      (uint32_t)15U,
-      (uint32_t)1U,
-      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i1 + (uint32_t)1U));
-      const uint64_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)20U;
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)20U; i++)
-      {
-        uint64_t *os = tmp0;
-        uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
-        os[i] = x;
-      });
-    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp0);
+        i);
+    precomp_get_consttime(table, bits_l, tmp);
+    Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp);
   }
 }
 
