@@ -107,22 +107,26 @@ inline_for_extraction noextract
 val point_mul_noalloc:
     out:point
   -> bscalar:lbuffer uint64 4ul
-  -> q:point ->
+  -> q:point
+  -> table: lbuffer uint64 320ul ->
   Stack unit
   (requires fun h ->
-    live h bscalar /\ live h q /\ live h out /\
+    live h bscalar /\ live h q /\ live h out /\ live h table /\
     disjoint q out /\ disjoint q bscalar /\ disjoint out bscalar /\
+    disjoint out table /\
     F51.point_inv_t h q /\ F51.inv_ext_point (as_seq h q) /\
-    BD.bn_v h bscalar < pow2 256)
+    BD.bn_v h bscalar < pow2 256 /\
+    table_inv_w4 (as_seq h q) (as_seq h table))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
     S.to_aff_point (F51.point_eval h1 out) ==
     LE.exp_fw S.mk_ed25519_comm_monoid
       (S.to_aff_point (F51.point_eval h0 q)) 256 (BD.bn_v h0 bscalar) 4)
 
-let point_mul_noalloc out bscalar q =
-  BE.lexp_fw_consttime 20ul 0ul mk_ed25519_concrete_ops
-    4ul (null uint64) q 4ul 256ul bscalar out
+let point_mul_noalloc out bscalar q table =
+  BE.mk_lexp_fw_table 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul
+    table_inv_w4 precomp_get_consttime
+    (null uint64) q 4ul 256ul bscalar (to_const table) out
 
 
 let point_mul out scalar q =
@@ -132,7 +136,9 @@ let point_mul out scalar q =
   push_frame ();
   let bscalar = create 4ul (u64 0) in
   convert_scalar scalar bscalar;
-  point_mul_noalloc out bscalar q;
+  let table = create 320ul (u64 0) in
+  precomp_table (null uint64) q 16ul table;
+  point_mul_noalloc out bscalar q table;
   pop_frame ()
 
 
