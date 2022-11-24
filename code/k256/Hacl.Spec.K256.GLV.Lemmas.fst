@@ -9,6 +9,7 @@ module SE = Spec.Exponentiation
 module S = Spec.K256
 module LS = Spec.K256.Lemmas
 module SM = Hacl.Spec.K256.ECSM.Lemmas
+module SPT256 = Hacl.Spec.PrecompBaseTable256
 
 open Hacl.Spec.K256.GLV
 
@@ -172,16 +173,18 @@ let lemma_ecmult_endo_split_to_aff k p =
   Fast computation of [k1]P1 + [k2]P2 in projective coordinates
 *)
 
-// [k1]P1 + [k2]P2 = [r11 + r12 * lambda]P1 + [r21 + r22 * lambda]P2
-// = [r11]P1 + [r12]([lambda]P1) + [r21]P2 + [r22]([lambda]P2)
-// = [r11](p1_x, p1_y) + [r12](beta * p1_x, p1_y) + [r21](p2_x, p2_y) + [r22](beta * p2_x, p2_y)
+// [k1]P1 + [k2]P2 = [r11 + r12 * pow2 128]P1 + [r21 + r22 * lambda]P2
+// = [r11]P1 + [r12]([pow2 128]P1) + [r21]P2 + [r22]([lambda]P2)
+// = [r11]P1 + [r12]([pow2 128]P1) + [r21](p2_x, p2_y) + [r22](beta * p2_x, p2_y)
 let aff_proj_point_mul_double_split_lambda
   (k1:S.qelem) (p1:S.proj_point) (k2:S.qelem) (p2:S.proj_point) : S.aff_point =
-  let r11, p11, r12, p12 = ecmult_endo_split k1 p1 in
   let r21, p21, r22, p22 = ecmult_endo_split k2 p2 in
-  if r11 < pow2 128 && r12 < pow2 128 && r21 < pow2 128 && r22 < pow2 128 then
+  if r21 < pow2 128 && r22 < pow2 128 then
+    let r11, r12 = SPT256.decompose_nat256_as_two_nat128 k1 in
+    let p1_aff = S.to_aff_point p1 in
+    let p1_pow2_128_aff = LE.pow S.mk_k256_comm_monoid p1_aff (pow2 128) in
     LE.exp_four_fw S.mk_k256_comm_monoid
-      (S.to_aff_point p11) 128 r11 (S.to_aff_point p12) r12
+      p1_aff 128 r11 p1_pow2_128_aff r12
       (S.to_aff_point p21) r21 (S.to_aff_point p22) r22 5
   else
     S.to_aff_point (S.point_mul_double k1 p1 k2 p2)
@@ -193,14 +196,13 @@ val lemma_aff_proj_point_mul_double_split_lambda:
     S.aff_point_add (aff_point_mul k1 (S.to_aff_point p1)) (aff_point_mul k2 (S.to_aff_point p2)))
 
 let lemma_aff_proj_point_mul_double_split_lambda k1 p1 k2 p2 =
-  let r11, p11, r12, p12 = ecmult_endo_split k1 p1 in
   let r21, p21, r22, p22 = ecmult_endo_split k2 p2 in
 
-  if r11 < pow2 128 && r12 < pow2 128 && r21 < pow2 128 && r22 < pow2 128 then begin
-    let p1_aff  = S.to_aff_point p1 in
+  if r21 < pow2 128 && r22 < pow2 128 then begin
+    let r11, r12 = SPT256.decompose_nat256_as_two_nat128 k1 in
+    let p1_aff = S.to_aff_point p1 in
+    let p1_pow2_128_aff = LE.pow S.mk_k256_comm_monoid p1_aff (pow2 128) in
     let p2_aff  = S.to_aff_point p2 in
-    let p11_aff = S.to_aff_point p11 in
-    let p12_aff = S.to_aff_point p12 in
     let p21_aff = S.to_aff_point p21 in
     let p22_aff = S.to_aff_point p22 in
 
@@ -208,17 +210,17 @@ let lemma_aff_proj_point_mul_double_split_lambda k1 p1 k2 p2 =
       aff_proj_point_mul_double_split_lambda k1 p1 k2 p2;
     (==) {
       LE.exp_four_fw_lemma S.mk_k256_comm_monoid
-        p11_aff 128 r11 p12_aff r12 p21_aff r21 p22_aff r22 5 }
+        p1_aff 128 r11 p1_pow2_128_aff r12 p21_aff r21 p22_aff r22 5 }
       S.aff_point_add
         (S.aff_point_add
-          (S.aff_point_add (aff_point_mul r11 p11_aff) (aff_point_mul r12 p12_aff))
+          (S.aff_point_add (aff_point_mul r11 p1_aff) (aff_point_mul r12 p1_pow2_128_aff))
           (aff_point_mul r21 p21_aff))
         (aff_point_mul r22 p22_aff);
-      (==) { lemma_aff_point_mul_endo_split k1 p1_aff; lemma_ecmult_endo_split_to_aff k1 p1 }
+    (==) { SPT256.lemma_point_mul_base_precomp2 S.mk_k256_comm_monoid p1_aff k1 }
       S.aff_point_add
-        (S.aff_point_add (aff_point_mul k1 p1_aff) (aff_point_mul r21 p21_aff))
-        (aff_point_mul r22 p22_aff);
-      (==) { LS.aff_point_add_assoc_lemma
+        (S.aff_point_add (aff_point_mul k1 p1_aff)
+        (aff_point_mul r21 p21_aff)) (aff_point_mul r22 p22_aff);
+    (==) { LS.aff_point_add_assoc_lemma
         (aff_point_mul k1 p1_aff) (aff_point_mul r21 p21_aff) (aff_point_mul r22 p22_aff) }
       S.aff_point_add (aff_point_mul k1 p1_aff)
         (S.aff_point_add (aff_point_mul r21 p21_aff) (aff_point_mul r22 p22_aff));

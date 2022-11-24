@@ -293,3 +293,24 @@ let precomp_basepoint_table_lemma_w5 () =
 let precomp_basepoint_table_w5:
   x:glbuffer uint64 480ul{witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x} =
   createL_global precomp_basepoint_table_list_w5
+
+
+///  window size = 5; precomputed table = [[0]([pow2 128]G), [1]([pow2 128]G), ..., [31]([pow2 128]G)]
+
+inline_for_extraction noextract
+let precomp_g_pow2_128_table_list_w5: x:list uint64{FStar.List.Tot.length x = 480} =
+  normalize_term (SPT.precomp_base_table_list mk_k256_precomp_base_table proj_g_pow2_128 31)
+
+let precomp_g_pow2_128_table_lseq_w5 : LSeq.lseq uint64 480 =
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table proj_g_pow2_128 31);
+  Seq.seq_of_list precomp_g_pow2_128_table_list_w5
+
+let precomp_g_pow2_128_table_lemma_w5 () =
+  normalize_term_spec (SPT.precomp_base_table_list mk_k256_precomp_base_table proj_g_pow2_128 31);
+  SPT.precomp_base_table_lemma mk_k256_precomp_base_table
+    proj_g_pow2_128 32 precomp_g_pow2_128_table_lseq_w5;
+  proj_g_pow2_128_lemma ()
+
+let precomp_g_pow2_128_table_w5:
+  x:glbuffer uint64 480ul{witnessed x precomp_g_pow2_128_table_lseq_w5 /\ recallable x} =
+  createL_global precomp_g_pow2_128_table_list_w5

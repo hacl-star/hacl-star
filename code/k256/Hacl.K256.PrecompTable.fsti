@@ -157,7 +157,8 @@ val precomp_g_pow2_192_table_lemma_w4: unit ->
 val precomp_g_pow2_192_table_w4:
   x:glbuffer uint64 240ul{witnessed x precomp_g_pow2_192_table_lseq_w4 /\ recallable x}
 
-///  window size = 5
+
+///  window size = 5; precomputed table = [[0]G, [1]G, ..., [31]G]
 
 inline_for_extraction noextract
 val precomp_basepoint_table_lseq_w5 : LSeq.lseq uint64 480
@@ -167,3 +168,15 @@ val precomp_basepoint_table_lemma_w5: unit ->
 
 val precomp_basepoint_table_w5:
   x:glbuffer uint64 480ul{witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x}
+
+
+///  window size = 5; precomputed table = [[0]([pow2 128]G), [1]([pow2 128]G), ..., [31]([pow2 128]G)]
+
+inline_for_extraction noextract
+val precomp_g_pow2_128_table_lseq_w5 : LSeq.lseq uint64 480
+
+val precomp_g_pow2_128_table_lemma_w5: unit ->
+  Lemma (forall (i:nat{i < 32}). precomp_table_acc_inv g_pow2_128 32 precomp_g_pow2_128_table_lseq_w5 i)
+
+val precomp_g_pow2_128_table_w5:
+  x:glbuffer uint64 480ul{witnessed x precomp_g_pow2_128_table_lseq_w5 /\ recallable x}
