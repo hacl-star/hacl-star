@@ -1067,6 +1067,53 @@ ecmult_endo_split(
   return ((__bool_bool){ .fst = is_high1, .snd = is_high2 });
 }
 
+static inline void precomp_table(uint64_t *a, uint32_t table_len, uint64_t *table)
+{
+  uint64_t tmp[15U] = { 0U };
+  uint64_t *t0 = table;
+  uint64_t *t1 = table + (uint32_t)15U;
+  Hacl_Impl_K256_Point_make_point_at_inf(t0);
+  memcpy(t1, a, (uint32_t)15U * sizeof (uint64_t));
+  for (uint32_t i = (uint32_t)0U; i < (table_len - (uint32_t)2U) / (uint32_t)2U; i++)
+  {
+    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointDouble_point_double(tmp, t11);
+    memcpy(table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U,
+      tmp,
+      (uint32_t)15U * sizeof (uint64_t));
+    uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(tmp, a, t2);
+    memcpy(table + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U,
+      tmp,
+      (uint32_t)15U * sizeof (uint64_t));
+  }
+}
+
+static inline void precomp_get_consttime(const uint64_t *table, uint64_t bits_l, uint64_t *tmp)
+{
+  memcpy(tmp, (uint64_t *)table, (uint32_t)15U * sizeof (uint64_t));
+  KRML_MAYBE_FOR15(i0,
+    (uint32_t)0U,
+    (uint32_t)15U,
+    (uint32_t)1U,
+    uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i0 + (uint32_t)1U));
+    const uint64_t *res_j = table + (i0 + (uint32_t)1U) * (uint32_t)15U;
+    KRML_MAYBE_FOR15(i,
+      (uint32_t)0U,
+      (uint32_t)15U,
+      (uint32_t)1U,
+      uint64_t *os = tmp;
+      uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
+      os[i] = x;););
+}
+
+static inline void precomp_get_vartime(const uint64_t *table, uint64_t bits_l, uint64_t *tmp)
+{
+  uint32_t bits_l32 = (uint32_t)bits_l;
+  const uint64_t *a_bits_l = table + bits_l32 * (uint32_t)15U;
+  memcpy(tmp, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
+}
+
 void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t *q)
 {
   uint64_t table[240U] = { 0U };
@@ -1129,24 +1176,6 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
         os[i] = x;););
     Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
   }
-}
-
-static inline void precomp_get_consttime(const uint64_t *table, uint64_t bits_l, uint64_t *tmp)
-{
-  memcpy(tmp, (uint64_t *)table, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i0,
-    (uint32_t)0U,
-    (uint32_t)15U,
-    (uint32_t)1U,
-    uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i0 + (uint32_t)1U));
-    const uint64_t *res_j = table + (i0 + (uint32_t)1U) * (uint32_t)15U;
-    KRML_MAYBE_FOR15(i,
-      (uint32_t)0U,
-      (uint32_t)15U,
-      (uint32_t)1U,
-      uint64_t *os = tmp;
-      uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
-      os[i] = x;););
 }
 
 static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
@@ -1299,26 +1328,8 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
   memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
   gz[0U] = (uint64_t)1U;
   uint64_t table2[480U] = { 0U };
+  precomp_table(q2, (uint32_t)32U, table2);
   uint64_t tmp[15U] = { 0U };
-  uint64_t *t0 = table2;
-  uint64_t *t1 = table2 + (uint32_t)15U;
-  Hacl_Impl_K256_Point_make_point_at_inf(t0);
-  memcpy(t1, q2, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
-    (uint32_t)0U,
-    (uint32_t)15U,
-    (uint32_t)1U,
-    uint64_t *t11 = table2 + (i + (uint32_t)1U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointDouble_point_double(tmp, t11);
-    memcpy(table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U,
-      tmp,
-      (uint32_t)15U * sizeof (uint64_t));
-    uint64_t *t2 = table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(tmp, q2, t2);
-    memcpy(table2 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U,
-      tmp,
-      (uint32_t)15U * sizeof (uint64_t)););
-  uint64_t tmp0[15U] = { 0U };
   uint64_t mask_l0 = (uint64_t)31U;
   uint32_t i0 = (uint32_t)3U;
   uint32_t j0 = (uint32_t)63U;
@@ -1333,11 +1344,7 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
     ite0 = p10;
   }
   uint64_t bits_c = ite0 & mask_l0;
-  uint32_t bits_l32 = (uint32_t)bits_c;
-  const
-  uint64_t
-  *a_bits_l = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l32 * (uint32_t)15U;
-  memcpy(out, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
+  precomp_get_vartime(Hacl_K256_PrecompTable_precomp_basepoint_table_w5, bits_c, out);
   uint64_t mask_l1 = (uint64_t)31U;
   uint32_t i2 = (uint32_t)3U;
   uint32_t j1 = (uint32_t)63U;
@@ -1352,11 +1359,9 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
     ite1 = p11;
   }
   uint64_t bits_c0 = ite1 & mask_l1;
-  uint32_t bits_l320 = (uint32_t)bits_c0;
-  const uint64_t *a_bits_l0 = table2 + bits_l320 * (uint32_t)15U;
-  memcpy(tmp0, (uint64_t *)a_bits_l0, (uint32_t)15U * sizeof (uint64_t));
-  Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
-  uint64_t tmp1[15U] = { 0U };
+  precomp_get_vartime(table2, bits_c0, tmp);
+  Hacl_Impl_K256_PointAdd_point_add(out, out, tmp);
+  uint64_t tmp0[15U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
   {
     KRML_MAYBE_FOR5(i1,
@@ -1379,10 +1384,8 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
       ite2 = p12;
     }
     uint64_t bits_l = ite2 & mask_l2;
-    uint32_t bits_l321 = (uint32_t)bits_l;
-    const uint64_t *a_bits_l1 = table2 + bits_l321 * (uint32_t)15U;
-    memcpy(tmp1, (uint64_t *)a_bits_l1, (uint32_t)15U * sizeof (uint64_t));
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp1);
+    precomp_get_vartime(table2, bits_l, tmp0);
+    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
     uint32_t bk0 = (uint32_t)255U;
     uint64_t mask_l = (uint64_t)31U;
     uint32_t i1 = (bk0 - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
@@ -1398,13 +1401,38 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
       ite = p1;
     }
     uint64_t bits_l0 = ite & mask_l;
-    uint32_t bits_l322 = (uint32_t)bits_l0;
-    const
-    uint64_t
-    *a_bits_l2 = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l322 * (uint32_t)15U;
-    memcpy(tmp1, (uint64_t *)a_bits_l2, (uint32_t)15U * sizeof (uint64_t));
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp1);
+    precomp_get_vartime(Hacl_K256_PrecompTable_precomp_basepoint_table_w5, bits_l0, tmp0);
+    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
   }
+}
+
+static inline void
+lprecomp_get_vartime_neg(
+  bool is_negate,
+  const uint64_t *table,
+  uint64_t r_small,
+  uint64_t *res
+)
+{
+  uint32_t bits_l32 = (uint32_t)r_small;
+  const uint64_t *a_bits_l = table + bits_l32 * (uint32_t)15U;
+  memcpy(res, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
+  point_negate_conditional_vartime(res, is_negate);
+}
+
+static inline void
+lprecomp_get_vartime_lambda_neg(
+  bool is_negate,
+  const uint64_t *table,
+  uint64_t r_small,
+  uint64_t *res
+)
+{
+  uint32_t bits_l32 = (uint32_t)r_small;
+  const uint64_t *a_bits_l = table + bits_l32 * (uint32_t)15U;
+  memcpy(res, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
+  point_negate_conditional_vartime(res, is_negate);
+  point_mul_lambda_inplace(res);
 }
 
 static inline void
@@ -1422,26 +1450,8 @@ point_mul_g_double_split_lambda_table(
 )
 {
   uint64_t table2[480U] = { 0U };
+  precomp_table(p2, (uint32_t)32U, table2);
   uint64_t tmp[15U] = { 0U };
-  uint64_t *t0 = table2;
-  uint64_t *t1 = table2 + (uint32_t)15U;
-  Hacl_Impl_K256_Point_make_point_at_inf(t0);
-  memcpy(t1, p2, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR15(i,
-    (uint32_t)0U,
-    (uint32_t)15U,
-    (uint32_t)1U,
-    uint64_t *t11 = table2 + (i + (uint32_t)1U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointDouble_point_double(tmp, t11);
-    memcpy(table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U,
-      tmp,
-      (uint32_t)15U * sizeof (uint64_t));
-    uint64_t *t2 = table2 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(tmp, p2, t2);
-    memcpy(table2 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U,
-      tmp,
-      (uint32_t)15U * sizeof (uint64_t)););
-  uint64_t tmp0[15U] = { 0U };
   uint64_t tmp1[15U] = { 0U };
   uint64_t mask_l0 = (uint64_t)31U;
   uint32_t i0 = (uint32_t)1U;
@@ -1457,12 +1467,10 @@ point_mul_g_double_split_lambda_table(
     ite0 = p110;
   }
   uint64_t bits_c = ite0 & mask_l0;
-  uint32_t bits_l32 = (uint32_t)bits_c;
-  const
-  uint64_t
-  *a_bits_l = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l32 * (uint32_t)15U;
-  memcpy(out, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
-  point_negate_conditional_vartime(out, is_negate1);
+  lprecomp_get_vartime_neg(is_negate1,
+    Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
+    bits_c,
+    out);
   uint64_t mask_l1 = (uint64_t)31U;
   uint32_t i2 = (uint32_t)1U;
   uint32_t j1 = (uint32_t)61U;
@@ -1477,13 +1485,10 @@ point_mul_g_double_split_lambda_table(
     ite1 = p111;
   }
   uint64_t bits_c0 = ite1 & mask_l1;
-  uint32_t bits_l320 = (uint32_t)bits_c0;
-  const
-  uint64_t
-  *a_bits_l0 = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l320 * (uint32_t)15U;
-  memcpy(tmp1, (uint64_t *)a_bits_l0, (uint32_t)15U * sizeof (uint64_t));
-  point_negate_conditional_vartime(tmp1, is_negate2);
-  point_mul_lambda_inplace(tmp1);
+  lprecomp_get_vartime_lambda_neg(is_negate2,
+    Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
+    bits_c0,
+    tmp1);
   Hacl_Impl_K256_PointAdd_point_add(out, out, tmp1);
   uint64_t tmp10[15U] = { 0U };
   uint64_t mask_l2 = (uint64_t)31U;
@@ -1500,10 +1505,7 @@ point_mul_g_double_split_lambda_table(
     ite2 = p112;
   }
   uint64_t bits_c1 = ite2 & mask_l2;
-  uint32_t bits_l321 = (uint32_t)bits_c1;
-  const uint64_t *a_bits_l1 = table2 + bits_l321 * (uint32_t)15U;
-  memcpy(tmp0, (uint64_t *)a_bits_l1, (uint32_t)15U * sizeof (uint64_t));
-  point_negate_conditional_vartime(tmp0, is_negate3);
+  lprecomp_get_vartime_neg(is_negate3, table2, bits_c1, tmp);
   uint64_t mask_l3 = (uint64_t)31U;
   uint32_t i4 = (uint32_t)1U;
   uint32_t j3 = (uint32_t)61U;
@@ -1518,14 +1520,10 @@ point_mul_g_double_split_lambda_table(
     ite3 = p113;
   }
   uint64_t bits_c2 = ite3 & mask_l3;
-  uint32_t bits_l322 = (uint32_t)bits_c2;
-  const uint64_t *a_bits_l2 = table2 + bits_l322 * (uint32_t)15U;
-  memcpy(tmp10, (uint64_t *)a_bits_l2, (uint32_t)15U * sizeof (uint64_t));
-  point_negate_conditional_vartime(tmp10, is_negate4);
-  point_mul_lambda_inplace(tmp10);
-  Hacl_Impl_K256_PointAdd_point_add(tmp0, tmp0, tmp10);
-  Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
-  uint64_t tmp2[15U] = { 0U };
+  lprecomp_get_vartime_lambda_neg(is_negate4, table2, bits_c2, tmp10);
+  Hacl_Impl_K256_PointAdd_point_add(tmp, tmp, tmp10);
+  Hacl_Impl_K256_PointAdd_point_add(out, out, tmp);
+  uint64_t tmp0[15U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i++)
   {
     KRML_MAYBE_FOR5(i1,
@@ -1548,12 +1546,8 @@ point_mul_g_double_split_lambda_table(
       ite4 = p114;
     }
     uint64_t bits_l = ite4 & mask_l4;
-    uint32_t bits_l323 = (uint32_t)bits_l;
-    const uint64_t *a_bits_l3 = table2 + bits_l323 * (uint32_t)15U;
-    memcpy(tmp2, (uint64_t *)a_bits_l3, (uint32_t)15U * sizeof (uint64_t));
-    point_negate_conditional_vartime(tmp2, is_negate4);
-    point_mul_lambda_inplace(tmp2);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    lprecomp_get_vartime_lambda_neg(is_negate4, table2, bits_l, tmp0);
+    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
     uint32_t bk0 = (uint32_t)125U;
     uint64_t mask_l5 = (uint64_t)31U;
     uint32_t i11 = (bk0 - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
@@ -1569,11 +1563,8 @@ point_mul_g_double_split_lambda_table(
       ite5 = p115;
     }
     uint64_t bits_l0 = ite5 & mask_l5;
-    uint32_t bits_l324 = (uint32_t)bits_l0;
-    const uint64_t *a_bits_l4 = table2 + bits_l324 * (uint32_t)15U;
-    memcpy(tmp2, (uint64_t *)a_bits_l4, (uint32_t)15U * sizeof (uint64_t));
-    point_negate_conditional_vartime(tmp2, is_negate3);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    lprecomp_get_vartime_neg(is_negate3, table2, bits_l0, tmp0);
+    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
     uint32_t bk1 = (uint32_t)125U;
     uint64_t mask_l6 = (uint64_t)31U;
     uint32_t i12 = (bk1 - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
@@ -1589,14 +1580,11 @@ point_mul_g_double_split_lambda_table(
       ite6 = p116;
     }
     uint64_t bits_l1 = ite6 & mask_l6;
-    uint32_t bits_l325 = (uint32_t)bits_l1;
-    const
-    uint64_t
-    *a_bits_l5 = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l325 * (uint32_t)15U;
-    memcpy(tmp2, (uint64_t *)a_bits_l5, (uint32_t)15U * sizeof (uint64_t));
-    point_negate_conditional_vartime(tmp2, is_negate2);
-    point_mul_lambda_inplace(tmp2);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    lprecomp_get_vartime_lambda_neg(is_negate2,
+      Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
+      bits_l1,
+      tmp0);
+    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
     uint32_t bk2 = (uint32_t)125U;
     uint64_t mask_l = (uint64_t)31U;
     uint32_t i1 = (bk2 - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
@@ -1612,13 +1600,11 @@ point_mul_g_double_split_lambda_table(
       ite = p11;
     }
     uint64_t bits_l2 = ite & mask_l;
-    uint32_t bits_l326 = (uint32_t)bits_l2;
-    const
-    uint64_t
-    *a_bits_l6 = Hacl_K256_PrecompTable_precomp_basepoint_table_w5 + bits_l326 * (uint32_t)15U;
-    memcpy(tmp2, (uint64_t *)a_bits_l6, (uint32_t)15U * sizeof (uint64_t));
-    point_negate_conditional_vartime(tmp2, is_negate1);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp2);
+    lprecomp_get_vartime_neg(is_negate1,
+      Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
+      bits_l2,
+      tmp0);
+    Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
   }
 }
 
