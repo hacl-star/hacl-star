@@ -24,6 +24,17 @@ val lemma_decompose_nat256_as_four_u64: x:nat{x < pow2 256} ->
   Lemma (let (x0, x1, x2, x3) = decompose_nat256_as_four_u64 x in
     x0 + x1 * pow2 64 + x2 * pow2 128 + x3 * pow2 192 == x)
 
+
+let decompose_nat256_as_two_nat128 (x:nat{x < pow2 256}) =
+  let x0 = x % pow2 128 in
+  let x1 = x / pow2 128 % pow2 128 in
+  (x0, x1)
+
+val lemma_decompose_nat256_as_two_nat128: x:nat{x < pow2 256} ->
+  Lemma (let (x0, x1) = decompose_nat256_as_two_nat128 x in
+    x0 + x1 * pow2 128 == x)
+
+
 // TODO?: define this function for any b
 let exp_as_exp_four_nat256_precomp (#t:Type) (k:LE.comm_monoid t) (a:t) (b:nat{b < pow2 256}) =
   let (b0, b1, b2, b3) = decompose_nat256_as_four_u64 b in
@@ -34,6 +45,15 @@ let exp_as_exp_four_nat256_precomp (#t:Type) (k:LE.comm_monoid t) (a:t) (b:nat{b
 
 val lemma_point_mul_base_precomp4: #t:Type -> k:LE.comm_monoid t -> a:t -> b:nat{b < pow2 256} ->
   Lemma (exp_as_exp_four_nat256_precomp k a b == LE.pow k a b)
+
+
+let exp_as_exp_two_nat256_precomp (#t:Type) (k:LE.comm_monoid t) (a:t) (b:nat{b < pow2 256}) =
+  let (b0, b1) = decompose_nat256_as_two_nat128 b in
+  let a_pow2_128 = LE.pow k a (pow2 128) in
+  k.LE.mul (LE.pow k a b0) (LE.pow k a_pow2_128 b1)
+
+val lemma_point_mul_base_precomp2: #t:Type -> k:LE.comm_monoid t -> a:t -> b:nat{b < pow2 256} ->
+  Lemma (exp_as_exp_two_nat256_precomp k a b == LE.pow k a b)
 
 //---------------------------------------
 
@@ -67,9 +87,18 @@ val a_pow2_192_lemma: #t:Type -> k:SE.concrete_ops t -> a:t ->
   Lemma (k.SE.to.SE.refl (a_pow2_192 k a) ==
     LE.pow k.SE.to.SE.comm_monoid (k.SE.to.SE.refl a) (pow2 192))
 
+//---------------------------------------
+
 val lemma_decompose_nat256_as_four_u64_lbignum: x:BD.lbignum U64 4{BD.bn_v x < pow2 256} ->
   Lemma (let (x0, x1, x2, x3) = decompose_nat256_as_four_u64 (BD.bn_v x) in
     BD.bn_v (LSeq.sub x 0 1) == x0 /\
     BD.bn_v (LSeq.sub x 1 1) == x1 /\
     BD.bn_v (LSeq.sub x 2 1) == x2 /\
     BD.bn_v (LSeq.sub x 3 1) == x3)
+
+val lemma_decompose_nat256_as_two_nat128_lbignum: x:BD.lbignum U64 4{BD.bn_v x < pow2 256} ->
+  Lemma (let (x0, x1) = decompose_nat256_as_two_nat128 (BD.bn_v x) in
+    BD.bn_v (LSeq.sub x 0 2) == x0 /\ BD.bn_v (LSeq.sub x 2 2) == x1)
+
+val lemma_nat_lt_pow2_128_lbignum: x:BD.lbignum U64 4{BD.bn_v x < pow2 128} ->
+  Lemma (BD.bn_v (LSeq.sub x 0 2) == BD.bn_v x)

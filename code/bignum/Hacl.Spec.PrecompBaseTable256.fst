@@ -45,6 +45,16 @@ let lemma_decompose_nat256_as_four_u64 x =
   }
 
 
+let lemma_decompose_nat256_as_two_nat128 x =
+  let x0 = x % pow2 128 in
+  let x1' = x / pow2 128 % pow2 128 in
+  Math.Lemmas.lemma_div_lt x 256 128;
+  Math.Lemmas.small_mod (x / pow2 128) (pow2 128);
+  let x1 = x / pow2 128 in
+  assert (x1 == x1');
+  Math.Lemmas.euclidean_division_definition x (pow2 128)
+
+
 let lemma_point_mul_base_precomp4 #t k a b =
   let (b0, b1, b2, b3) = decompose_nat256_as_four_u64 b in
   let a_pow2_64 = LE.pow k a (pow2 64) in
@@ -87,6 +97,20 @@ let lemma_point_mul_base_precomp4 #t k a b =
     (==) { LE.lemma_pow_add k a (b0 + b1 * pow2 64 + b2 * pow2 128) (b3 * pow2 192) }
     LE.pow k a (b0 + b1 * pow2 64 + b2 * pow2 128 + b3 * pow2 192);
     (==) { lemma_decompose_nat256_as_four_u64 b }
+    LE.pow k a b;
+  }
+
+
+let lemma_point_mul_base_precomp2 #t k a b =
+  let (b0, b1) = decompose_nat256_as_two_nat128 b in
+  let a_pow2_128 = LE.pow k a (pow2 128) in
+  calc (==) {
+    k.LE.mul (LE.pow k a b0) (LE.pow k a_pow2_128 b1);
+    (==) { LE.lemma_pow_mul k a (pow2 128) b1 }
+    k.LE.mul (LE.pow k a b0) (LE.pow k a (b1 * pow2 128));
+    (==) { LE.lemma_pow_add k a b0 (b1 * pow2 128) }
+    LE.pow k a (b0 + b1 * pow2 128);
+    (==) { lemma_decompose_nat256_as_two_nat128 b }
     LE.pow k a b;
   }
 
@@ -161,3 +185,78 @@ let lemma_decompose_nat256_as_four_u64_lbignum x =
 
   BD.bn_eval1 bn_x3;
   BD.bn_eval_index x 3
+
+
+val bn_eval2: b:BD.lbignum U64 2 ->
+  Lemma (BD.bn_v b == v (LSeq.index b 0) + v (LSeq.index b 1) * pow2 64)
+let bn_eval2 b =
+  BD.bn_eval_unfold_i b 2;
+  BD.bn_eval_unfold_i b 1;
+  BD.bn_eval0 b
+
+
+val bn_x0_eval: x:BD.lbignum U64 4 -> Lemma (BD.bn_v (LSeq.sub x 0 2) == BD.bn_v x % pow2 128)
+let bn_x0_eval x =
+  let open Lib.Sequence in
+  let bn_x0 = LSeq.sub x 0 2 in
+  assert (v x.[0] == v bn_x0.[0]);
+  assert (v x.[1] == v bn_x0.[1]);
+
+  calc (==) {
+    BD.bn_v bn_x0;
+    (==) { bn_eval2 bn_x0 }
+    v bn_x0.[0] + v bn_x0.[1] * pow2 64;
+    (==) { BD.bn_eval_index x 0; assert_norm (pow2 0 = 1) }
+    BD.bn_v x % pow2 64 + v bn_x0.[1] * pow2 64;
+    (==) { BD.bn_eval_index x 1 }
+    BD.bn_v x % pow2 64 + (BD.bn_v x / pow2 64 % pow2 64) * pow2 64;
+    (==) { lemma_mod_pow2_sub (BD.bn_v x) 64 64 }
+    BD.bn_v x % pow2 128;
+  }
+
+
+val bn_x1_eval: x:BD.lbignum U64 4 ->
+  Lemma (BD.bn_v (LSeq.sub x 2 2) == BD.bn_v x / pow2 128 % pow2 128)
+let bn_x1_eval x =
+  let open Lib.Sequence in
+  let bn_x1 = LSeq.sub x 2 2 in
+  assert (v x.[2] == v bn_x1.[0]);
+  assert (v x.[3] == v bn_x1.[1]);
+
+  BD.bn_eval_index x 2;
+  BD.bn_eval_index x 3;
+  assert (v x.[2] == BD.bn_v x / pow2 128 % pow2 64);
+  assert (v x.[3] == BD.bn_v x / pow2 192 % pow2 64);
+
+  bn_eval2 bn_x1;
+  let x_div_pow128 = BD.bn_v x / pow2 128 in
+  calc (==) { // BD.bn_v bn_x1 ==
+    x_div_pow128 % pow2 64 + (BD.bn_v x / pow2 192 % pow2 64) * pow2 64;
+    (==) { Math.Lemmas.pow2_plus 128 64;
+      Math.Lemmas.division_multiplication_lemma (BD.bn_v x) (pow2 128) (pow2 64) }
+    x_div_pow128 % pow2 64 + (x_div_pow128 / pow2 64 % pow2 64) * pow2 64;
+    (==) { lemma_mod_pow2_sub x_div_pow128 64 64 }
+    x_div_pow128 % pow2 128;
+  }
+
+
+// TODO: make bn_xi_eval generic
+let lemma_decompose_nat256_as_two_nat128_lbignum x =
+  let open Lib.Sequence in
+  let bn_x0 = LSeq.sub x 0 2 in
+  let bn_x1 = LSeq.sub x 2 2 in
+  BD.bn_eval_split_i x 2;
+  assert (BD.bn_v x == BD.bn_v bn_x0 + BD.bn_v bn_x1 * pow2 128);
+  bn_x0_eval x;
+  bn_x1_eval x;
+  Math.Lemmas.euclidean_division_definition (BD.bn_v x) (pow2 128)
+
+
+let lemma_nat_lt_pow2_128_lbignum x =
+  let open Lib.Sequence in
+  let bn_x0 = LSeq.sub x 0 2 in
+  let bn_x1 = LSeq.sub x 2 2 in
+  BD.bn_eval_split_i x 2;
+  assert (BD.bn_v x == BD.bn_v bn_x0 + BD.bn_v bn_x1 * pow2 128);
+  BD.bn_eval_bound bn_x0 2;
+  assert (BD.bn_v x == BD.bn_v bn_x0)
