@@ -1279,6 +1279,13 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
   }
 }
 
+static inline void precomp_get_vartime0(const uint64_t *table, uint64_t bits_l, uint64_t *tmp)
+{
+  uint32_t bits_l32 = (uint32_t)bits_l;
+  const uint64_t *a_bits_l = table + bits_l32 * (uint32_t)15U;
+  memcpy(tmp, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
+}
+
 static inline void
 lprecomp_get_vartime_neg(
   bool is_negate,
@@ -1287,9 +1294,7 @@ lprecomp_get_vartime_neg(
   uint64_t *res
 )
 {
-  uint32_t bits_l32 = (uint32_t)r_small;
-  const uint64_t *a_bits_l = table + bits_l32 * (uint32_t)15U;
-  memcpy(res, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
+  precomp_get_vartime0(table, r_small, res);
   point_negate_conditional_vartime(res, is_negate);
 }
 
@@ -1301,9 +1306,7 @@ lprecomp_get_vartime_lambda_neg(
   uint64_t *res
 )
 {
-  uint32_t bits_l32 = (uint32_t)r_small;
-  const uint64_t *a_bits_l = table + bits_l32 * (uint32_t)15U;
-  memcpy(res, (uint64_t *)a_bits_l, (uint32_t)15U * sizeof (uint64_t));
+  precomp_get_vartime0(table, r_small, res);
   point_negate_conditional_vartime(res, is_negate);
   point_mul_lambda_inplace(res);
 }
@@ -1312,39 +1315,34 @@ static inline void
 point_mul_g_double_split_lambda_table(
   uint64_t *out,
   uint64_t *r1,
-  uint64_t *r2,
   uint64_t *r3,
   uint64_t *r4,
   uint64_t *p2,
-  bool is_negate1,
-  bool is_negate2,
   bool is_negate3,
   bool is_negate4
 )
 {
   uint64_t table2[480U] = { 0U };
   precomp_table(p2, (uint32_t)32U, table2);
+  uint64_t *r11 = r1;
+  uint64_t *r12 = r1 + (uint32_t)2U;
+  uint64_t *r32 = r3;
+  uint64_t *r42 = r4;
   uint64_t tmp[15U] = { 0U };
   uint64_t tmp1[15U] = { 0U };
   uint64_t
-  bits_c0 = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)4U, (uint32_t)128U, r1, (uint32_t)5U);
-  lprecomp_get_vartime_neg(is_negate1,
-    Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
-    bits_c0,
-    out);
+  bits_c0 = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)2U, (uint32_t)128U, r11, (uint32_t)5U);
+  precomp_get_vartime0(Hacl_K256_PrecompTable_precomp_basepoint_table_w5, bits_c0, out);
   uint64_t
-  bits_c1 = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)4U, (uint32_t)128U, r2, (uint32_t)5U);
-  lprecomp_get_vartime_lambda_neg(is_negate2,
-    Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
-    bits_c1,
-    tmp1);
+  bits_c1 = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)2U, (uint32_t)128U, r12, (uint32_t)5U);
+  precomp_get_vartime0(Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w5, bits_c1, tmp1);
   Hacl_Impl_K256_PointAdd_point_add(out, out, tmp1);
   uint64_t tmp10[15U] = { 0U };
   uint64_t
-  bits_c = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)4U, (uint32_t)128U, r3, (uint32_t)5U);
+  bits_c = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)2U, (uint32_t)128U, r32, (uint32_t)5U);
   lprecomp_get_vartime_neg(is_negate3, table2, bits_c, tmp);
   uint64_t
-  bits_c2 = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)4U, (uint32_t)128U, r4, (uint32_t)5U);
+  bits_c2 = Hacl_Bignum_Lib_bn_get_bits_c_u64((uint32_t)2U, (uint32_t)128U, r42, (uint32_t)5U);
   lprecomp_get_vartime_lambda_neg(is_negate4, table2, bits_c2, tmp10);
   Hacl_Impl_K256_PointAdd_point_add(tmp, tmp, tmp10);
   Hacl_Impl_K256_PointAdd_point_add(out, out, tmp);
@@ -1357,56 +1355,34 @@ point_mul_g_double_split_lambda_table(
       (uint32_t)1U,
       Hacl_Impl_K256_PointDouble_point_double(out, out););
     uint64_t
-    bits_l = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)4U, (uint32_t)128U, r4, (uint32_t)5U, i);
+    bits_l = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)2U, (uint32_t)128U, r42, (uint32_t)5U, i);
     lprecomp_get_vartime_lambda_neg(is_negate4, table2, bits_l, tmp0);
     Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
     uint64_t
-    bits_l0 = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)4U, (uint32_t)128U, r3, (uint32_t)5U, i);
+    bits_l0 = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)2U, (uint32_t)128U, r32, (uint32_t)5U, i);
     lprecomp_get_vartime_neg(is_negate3, table2, bits_l0, tmp0);
     Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
     uint64_t
-    bits_l1 = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)4U, (uint32_t)128U, r2, (uint32_t)5U, i);
-    lprecomp_get_vartime_lambda_neg(is_negate2,
-      Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
-      bits_l1,
-      tmp0);
+    bits_l1 = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)2U, (uint32_t)128U, r12, (uint32_t)5U, i);
+    precomp_get_vartime0(Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w5, bits_l1, tmp0);
     Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
     uint64_t
-    bits_l2 = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)4U, (uint32_t)128U, r1, (uint32_t)5U, i);
-    lprecomp_get_vartime_neg(is_negate1,
-      Hacl_K256_PrecompTable_precomp_basepoint_table_w5,
-      bits_l2,
-      tmp0);
+    bits_l2 = Hacl_Bignum_Lib_bn_get_bits_l_u64((uint32_t)2U, (uint32_t)128U, r11, (uint32_t)5U, i);
+    precomp_get_vartime0(Hacl_K256_PrecompTable_precomp_basepoint_table_w5, bits_l2, tmp0);
     Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
   }
 }
 
-static inline bool
-check_ecmult_endo_split(uint64_t *r1, uint64_t *r2, uint64_t *r3, uint64_t *r4)
+static inline bool check_ecmult_endo_split(uint64_t *r3, uint64_t *r4)
 {
-  uint64_t f20 = r1[2U];
-  uint64_t f30 = r1[3U];
-  bool b1 = f20 == (uint64_t)0U && f30 == (uint64_t)0U;
-  uint64_t f21 = r2[2U];
-  uint64_t f31 = r2[3U];
-  bool b2 = f21 == (uint64_t)0U && f31 == (uint64_t)0U;
-  uint64_t f22 = r3[2U];
-  uint64_t f32 = r3[3U];
-  bool b3 = f22 == (uint64_t)0U && f32 == (uint64_t)0U;
+  uint64_t f20 = r3[2U];
+  uint64_t f30 = r3[3U];
+  bool b3 = f20 == (uint64_t)0U && f30 == (uint64_t)0U;
   uint64_t f2 = r4[2U];
   uint64_t f3 = r4[3U];
   bool b4 = f2 == (uint64_t)0U && f3 == (uint64_t)0U;
-  return b1 && b2 && b3 && b4;
+  return b3 && b4;
 }
-
-typedef struct __bool_bool_bool_bool_s
-{
-  bool fst;
-  bool snd;
-  bool thd;
-  bool f3;
-}
-__bool_bool_bool_bool;
 
 static inline void
 point_mul_g_double_split_lambda_vartime(
@@ -1416,10 +1392,10 @@ point_mul_g_double_split_lambda_vartime(
   uint64_t *p2
 )
 {
-  uint64_t g[15U] = { 0U };
-  uint64_t *gx = g;
-  uint64_t *gy = g + (uint32_t)5U;
-  uint64_t *gz = g + (uint32_t)10U;
+  uint64_t q1[15U] = { 0U };
+  uint64_t *gx = q1;
+  uint64_t *gy = q1 + (uint32_t)5U;
+  uint64_t *gz = q1 + (uint32_t)10U;
   gx[0U] = (uint64_t)0x2815b16f81798U;
   gx[1U] = (uint64_t)0xdb2dce28d959fU;
   gx[2U] = (uint64_t)0xe870b07029bfcU;
@@ -1432,41 +1408,28 @@ point_mul_g_double_split_lambda_vartime(
   gy[4U] = (uint64_t)0x483ada7726a3U;
   memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
   gz[0U] = (uint64_t)1U;
-  uint64_t r1234[16U] = { 0U };
-  uint64_t q1234[60U] = { 0U };
-  uint64_t *r1 = r1234;
-  uint64_t *r2 = r1234 + (uint32_t)4U;
-  uint64_t *r3 = r1234 + (uint32_t)8U;
-  uint64_t *r4 = r1234 + (uint32_t)12U;
-  uint64_t *q1 = q1234;
-  uint64_t *q2 = q1234 + (uint32_t)15U;
-  uint64_t *q3 = q1234 + (uint32_t)30U;
-  uint64_t *q4 = q1234 + (uint32_t)45U;
-  __bool_bool scrut0 = ecmult_endo_split(r1, r2, q1, q2, scalar1, g);
-  bool is_high10 = scrut0.fst;
-  bool is_high20 = scrut0.snd;
+  uint64_t
+  q2[15U] =
+    {
+      (uint64_t)1277614565900951U, (uint64_t)378671684419493U, (uint64_t)3176260448102880U,
+      (uint64_t)1575691435565077U, (uint64_t)167304528382180U, (uint64_t)2600787765776588U,
+      (uint64_t)7497946149293U, (uint64_t)2184272641272202U, (uint64_t)2200235265236628U,
+      (uint64_t)265969268774814U, (uint64_t)1913228635640715U, (uint64_t)2831959046949342U,
+      (uint64_t)888030405442963U, (uint64_t)1817092932985033U, (uint64_t)101515844997121U
+    };
+  uint64_t r34[8U] = { 0U };
+  uint64_t q34[30U] = { 0U };
+  uint64_t *r3 = r34;
+  uint64_t *r4 = r34 + (uint32_t)4U;
+  uint64_t *q3 = q34;
+  uint64_t *q4 = q34 + (uint32_t)15U;
   __bool_bool scrut = ecmult_endo_split(r3, r4, q3, q4, scalar2, p2);
-  bool is_high30 = scrut.fst;
-  bool is_high40 = scrut.snd;
-  __bool_bool_bool_bool
-  scrut1 = { .fst = is_high10, .snd = is_high20, .thd = is_high30, .f3 = is_high40 };
-  bool is_high1 = scrut1.fst;
-  bool is_high2 = scrut1.snd;
-  bool is_high3 = scrut1.thd;
-  bool is_high4 = scrut1.f3;
-  bool is_r1234_valid = check_ecmult_endo_split(r1, r2, r3, r4);
-  if (is_r1234_valid)
+  bool is_high3 = scrut.fst;
+  bool is_high4 = scrut.snd;
+  bool is_r34_valid = check_ecmult_endo_split(r3, r4);
+  if (is_r34_valid)
   {
-    point_mul_g_double_split_lambda_table(out,
-      r1,
-      r2,
-      r3,
-      r4,
-      p2,
-      is_high1,
-      is_high2,
-      is_high3,
-      is_high4);
+    point_mul_g_double_split_lambda_table(out, scalar1, r3, r4, p2, is_high3, is_high4);
   }
   else
   {
