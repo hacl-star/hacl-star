@@ -14,6 +14,7 @@ module Loops = Lib.LoopCombinators
 module S = Lib.Exponentiation
 
 module BD = Hacl.Bignum.Definitions
+module BL = Hacl.Bignum.Lib
 module BN = Hacl.Bignum
 module SN = Hacl.Spec.Bignum
 module BB = Hacl.Bignum.Base
@@ -190,69 +191,6 @@ let lexp_pow2_in_place #a_t len ctx_len k ctx acc b =
 #set-options "--z3rlimit 100"
 
 inline_for_extraction noextract
-val bn_get_bits_l:
-    #b_t:inttype_a
-  -> bLen:size_t
-  -> bBits:size_t{(v bBits - 1) / bits b_t < v bLen}
-  -> b:lbuffer (uint_t b_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits b_t}
-  -> i:size_t{v i < v bBits / v l} ->
-  Stack (uint_t b_t SEC)
-  (requires fun h -> live h b /\
-    BD.bn_v h b < pow2 (v bBits))
-  (ensures  fun h0 r h1 -> h0 == h1 /\
-    v r == S.get_bits_l (v bBits) (BD.bn_v h0 b) (v l) (v i))
-
-#push-options "--z3rlimit 200"
-let bn_get_bits_l #b_t bLen bBits b l i =
-  assert (v (bBits -! bBits %. l) = v bBits - v bBits % v l);
-  let bk = bBits -! bBits %. l in
-  assert (v bk == v bBits - v bBits % v l);
-
-  Math.Lemmas.lemma_mult_le_left (v l) (v i + 1) (v bBits / v l);
-  assert (v l * (v i + 1) <= v bk);
-  Math.Lemmas.distributivity_add_right (v l) (v i) 1;
-  assert (v (bk -! l *! i -! l) == v bk - v l * v i - v l);
-
-  [@ inline_let]
-  let k = bk -! l *! i -! l in
-  assert (v k == v bk - v l * v i - v l);
-  Math.Lemmas.lemma_div_le (v k) (v bBits - 1) (bits b_t);
-  assert (v k / bits b_t < v bLen);
-
-  let h0 = ST.get () in
-  SN.bn_get_bits_lemma (as_seq h0 b) (v k) (v l);
-  BN.bn_get_bits bLen b k l
-#pop-options
-
-inline_for_extraction noextract
-val bn_get_bits_c:
-    #b_t:inttype_a
-  -> bLen:size_t
-  -> bBits:size_t{(v bBits - 1) / bits b_t < v bLen}
-  -> b:lbuffer (uint_t b_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits b_t /\ 0 < v bBits % v l} ->
-  Stack (uint_t b_t SEC)
-  (requires fun h -> live h b /\
-    BD.bn_v h b < pow2 (v bBits))
-  (ensures  fun h0 r h1 -> h0 == h1 /\
-    v r == (BD.bn_v h0 b / pow2 (v bBits / v l * v l)) % pow2 (v l))
-
-let bn_get_bits_c #b_t bLen bBits b l =
-  let h0 = ST.get () in
-  assert (v (bBits /. l *! l) == v bBits / v l * v l);
-  [@ inline_let]
-  let i = bBits /. l *! l in
-  assert (v i == v bBits / v l * v l);
-  assert (v i <= v bBits - 1);
-  Math.Lemmas.lemma_div_le (v i) (v bBits - 1) (bits b_t);
-  assert (v i / bits b_t < v bLen);
-  SN.bn_get_bits_lemma (as_seq h0 b) (v i) (v l);
-  BN.bn_get_bits bLen b i l
-
-//---------------------------------------------------
-
-inline_for_extraction noextract
 let lmul_acc_pow_a_bits_l_st
   (a_t:inttype_a)
   (len:size_t{v len > 0})
@@ -304,7 +242,7 @@ val lmul_acc_pow_a_bits_l:
 let lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc tmp =
   let h0 = ST.get () in
   push_frame ();
-  let bits_l = bn_get_bits_l bLen bBits b l i in
+  let bits_l = BL.bn_get_bits_l bLen bBits b l i in
   assert (v bits_l < pow2 (v l));
 
   pow_a_to_small_b ctx (as_seq h0 a) table bits_l tmp;
@@ -482,7 +420,7 @@ val lexp_fw_acc0:
 let lexp_fw_acc0 #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table acc =
   let h0 = ST.get () in
   assert (v (bBits %. l) == v bBits % v l);
-  let bits_c = bn_get_bits_c bLen bBits b l in
+  let bits_c = BL.bn_get_bits_c bLen bBits b l in
   pow_a_to_small_b ctx (as_seq h0 a) table bits_c acc
 
 
