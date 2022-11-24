@@ -27,6 +27,44 @@ include Hacl.K256.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let _: squash(pow2 5 = 32) =
+  assert_norm (pow2 5 = 32)
+
+[@CInline]
+let precomp_table ctx a table_len table =
+  [@inline_let] let len = 15ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_k256_concrete_ops in
+
+  PT.lprecomp_table len ctx_len k ctx a table_len table
+
+
+val precomp_get_consttime: BE.pow_a_to_small_b_st U64 15ul 0ul mk_k256_concrete_ops 4ul 16ul
+    (BE.table_inv_precomp 15ul 0ul mk_k256_concrete_ops 4ul 16ul)
+[@CInline]
+let precomp_get_consttime ctx a table bits_l tmp =
+  [@inline_let] let len = 15ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_k256_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+
+  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
+
+
+val precomp_get_vartime: BE.pow_a_to_small_b_st U64 15ul 0ul mk_k256_concrete_ops 5ul 32ul
+    (BE.table_inv_precomp 15ul 0ul mk_k256_concrete_ops 5ul 32ul)
+[@CInline]
+let precomp_get_vartime ctx a table bits_l tmp =
+  [@inline_let] let len = 15ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_k256_concrete_ops in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
+  BE.lprecomp_get_vartime len ctx_len k l table_len ctx a table bits_l tmp
+
+//--------------------------------
+
 inline_for_extraction noextract
 let table_inv_w4 : BE.table_inv_t U64 15ul 16ul =
   [@inline_let] let len = 15ul in
@@ -52,19 +90,6 @@ let point_mul out scalar q =
   let h0 = ST.get () in
   SE.exp_fw_lemma S.mk_k256_concrete_ops (point_eval h0 q) 256 (qas_nat h0 scalar) 4;
   BE.lexp_fw_consttime 15ul 0ul mk_k256_concrete_ops 4ul (null uint64) q 4ul 256ul scalar out
-
-
-val precomp_get_consttime: BE.pow_a_to_small_b_st U64 15ul 0ul mk_k256_concrete_ops 4ul 16ul
-    (BE.table_inv_precomp 15ul 0ul mk_k256_concrete_ops 4ul 16ul)
-[@CInline]
-let precomp_get_consttime ctx a table bits_l tmp =
-  [@inline_let] let len = 15ul in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = mk_k256_concrete_ops in
-  [@inline_let] let l = 4ul in
-  [@inline_let] let table_len = 16ul in
-
-  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
 
 
 inline_for_extraction noextract
@@ -175,7 +200,6 @@ let point_mul_g out scalar =
   lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
 
-
 //-------------------------
 
 inline_for_extraction noextract
@@ -209,7 +233,6 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let table_len = 32ul in
   [@inline_let] let bLen = 4ul in
   [@inline_let] let bBits = 256ul in
-  assert_norm (pow2 (v l) == v table_len);
 
   let h0 = ST.get () in
   recall_contents precomp_basepoint_table_w5 precomp_basepoint_table_lseq_w5;
@@ -220,8 +243,7 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
 
   ME.mk_lexp_double_fw_tables len ctx_len k l table_len
     table_inv_w5 table_inv_w5
-    (BE.lprecomp_get_vartime len ctx_len k l table_len)
-    (BE.lprecomp_get_vartime len ctx_len k l table_len)
+    precomp_get_vartime precomp_get_vartime
     (null uint64) q1 bLen bBits scalar1 q2 scalar2
     (to_const precomp_basepoint_table_w5) (to_const table2) out;
 
@@ -234,16 +256,13 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
 let point_mul_g_double_vartime out scalar1 scalar2 q2 =
   push_frame ();
   [@inline_let] let len = 15ul in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = mk_k256_concrete_ops in
   [@inline_let] let table_len = 32ul in
-  assert_norm (pow2 5 == v table_len);
 
   let q1 = create 15ul (u64 0) in
   make_g q1;
 
   let table2 = create (table_len *! len) (u64 0) in
-  PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
+  precomp_table (null uint64) q2 table_len table2;
   let h = ST.get () in
   assert (table_inv_w5 (as_seq h q2) (as_seq h table2));
   point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2;

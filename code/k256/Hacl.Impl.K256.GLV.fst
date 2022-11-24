@@ -61,12 +61,12 @@ let table_neg_inv_precomp
 
 // This function returns [r_small]Q or [r_small](-Q)
 // using a precomputed table [0; Q; 2Q; ...; 15Q]
-inline_for_extraction noextract
 val lprecomp_get_vartime_neg:
     q:Ghost.erased (LSeq.lseq uint64 15){point_inv_lseq q} -> is_negate:bool ->
   BE.pow_a_to_small_b_st U64 15ul 0ul mk_k256_concrete_ops 5ul 32ul
     (table_neg_inv_precomp q is_negate)
 
+[@CInline]
 let lprecomp_get_vartime_neg q is_negate ctx lambda_q table r_small res =
   let h0 = ST.get () in
   assert (table_neg_inv_precomp q is_negate lambda_q (as_seq h0 table));
@@ -103,12 +103,12 @@ let table_lambda_neg_inv_precomp
 
 // This function returns [r_small]([lambda]Q) or [r_small](-[lambda]Q)
 // using a precomputed table [0; Q; 2Q; ...; 15Q]
-inline_for_extraction noextract
 val lprecomp_get_vartime_lambda_neg:
     q:Ghost.erased (LSeq.lseq uint64 15){point_inv_lseq q} -> is_negate:bool ->
   BE.pow_a_to_small_b_st U64 15ul 0ul mk_k256_concrete_ops 5ul 32ul
     (table_lambda_neg_inv_precomp q is_negate)
 
+[@CInline]
 let lprecomp_get_vartime_lambda_neg q is_negate ctx lambda_q table r_small res =
   let h0 = ST.get () in
   assert (table_lambda_neg_inv_precomp q is_negate lambda_q (as_seq h0 table));
@@ -293,14 +293,12 @@ val point_mul_g_double_split_lambda_table:
 let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   p1 p2 is_negate1 is_negate2 is_negate3 is_negate4 =
   [@inline_let] let len = 15ul in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = mk_k256_concrete_ops in
   [@inline_let] let table_len = 32ul in
 
   let h0 = ST.get () in
   push_frame ();
   let table2 = create (table_len *! len) (u64 0) in
-  PT.lprecomp_table len ctx_len k (null uint64) p2 table_len table2;
+  PM.precomp_table (null uint64) p2 table_len table2;
   point_mul_g_double_split_lambda_table_noalloc out table2 r1 q1 r2 q2 r3 q3 r4 q4
     p1 p2 is_negate1 is_negate2 is_negate3 is_negate4;
   let h1 = ST.get () in

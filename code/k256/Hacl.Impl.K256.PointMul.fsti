@@ -14,6 +14,9 @@ open Hacl.Impl.K256.Point
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val precomp_table: Hacl.Impl.PrecompTable.lprecomp_table_st U64 15ul 0ul
+  Hacl.Impl.K256.Group.mk_k256_concrete_ops
+
 val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar /\ live h q /\

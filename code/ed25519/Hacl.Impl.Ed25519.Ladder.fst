@@ -29,6 +29,46 @@ include Hacl.Ed25519.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let _: squash(pow2 5 = 32) =
+  assert_norm (pow2 5 = 32)
+
+
+val precomp_table: PT.lprecomp_table_st U64 20ul 0ul mk_ed25519_concrete_ops
+[@CInline]
+let precomp_table ctx a table_len table =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+
+  PT.lprecomp_table len ctx_len k ctx a table_len table
+
+
+val precomp_get_consttime: BE.pow_a_to_small_b_st U64 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul
+    (BE.table_inv_precomp 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul)
+[@CInline]
+let precomp_get_consttime ctx a table bits_l tmp =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+
+  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
+
+
+val precomp_get_vartime: BE.pow_a_to_small_b_st U64 20ul 0ul mk_ed25519_concrete_ops 5ul 32ul
+    (BE.table_inv_precomp 20ul 0ul mk_ed25519_concrete_ops 5ul 32ul)
+[@CInline]
+let precomp_get_vartime ctx a table bits_l tmp =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
+  BE.lprecomp_get_vartime len ctx_len k l table_len ctx a table bits_l tmp
+
+//--------------------------------
+
 inline_for_extraction noextract
 let table_inv_w4 : BE.table_inv_t U64 20ul 16ul =
   [@inline_let] let len = 20ul in
@@ -94,19 +134,6 @@ let point_mul out scalar q =
   convert_scalar scalar bscalar;
   point_mul_noalloc out bscalar q;
   pop_frame ()
-
-
-val precomp_get_consttime: BE.pow_a_to_small_b_st U64 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul
-    (BE.table_inv_precomp 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul)
-[@CInline]
-let precomp_get_consttime ctx a table bits_l tmp =
-  [@inline_let] let len = 20ul in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = mk_ed25519_concrete_ops in
-  [@inline_let] let l = 4ul in
-  [@inline_let] let table_len = 16ul in
-
-  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
 
 
 inline_for_extraction noextract
@@ -286,8 +313,7 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
 
   ME.mk_lexp_double_fw_tables len ctx_len k l table_len
     table_inv_w5 table_inv_w5
-    (BE.lprecomp_get_vartime len ctx_len k l table_len)
-    (BE.lprecomp_get_vartime len ctx_len k l table_len)
+    precomp_get_vartime precomp_get_vartime
     (null uint64) q1 bLen bBits scalar1 q2 scalar2
     (to_const precomp_basepoint_table_w5) (to_const table2) out
 
@@ -317,15 +343,11 @@ val point_mul_g_double_vartime_table:
 
 let point_mul_g_double_vartime_table out scalar1 q1 scalar2 q2 =
   [@inline_let] let len = 20ul in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = mk_ed25519_concrete_ops in
   [@inline_let] let table_len = 32ul in
-  assert_norm (pow2 5 == v table_len);
 
   push_frame ();
   let table2 = create (table_len *! len) (u64 0) in
-  PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
-
+  precomp_table (null uint64) q2 table_len table2;
   point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2;
   pop_frame ()
 

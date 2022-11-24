@@ -68,14 +68,13 @@ let precomp_table_inv
   k.to.refl bj == S.pow k.to.comm_monoid (k.to.refl a) j
 
 
-// This function computes [a^0 = one; a^1; a^2; ..; a^(table_len - 1)]
 inline_for_extraction noextract
-val lprecomp_table:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len
-  -> ctx:lbuffer (uint_t a_t SEC) ctx_len
+let lprecomp_table_st
+  (a_t:inttype_a)
+  (len:size_t{v len > 0})
+  (ctx_len:size_t)
+  (k:concrete_ops a_t len ctx_len) =
+    ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len % 2 = 0}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len) ->
@@ -87,6 +86,16 @@ val lprecomp_table:
   (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
     (forall (j:nat{j < v table_len}).{:pattern precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j}
       precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j))
+
+
+// This function computes [a^0 = one; a^1; a^2; ..; a^(table_len - 1)]
+inline_for_extraction noextract
+val lprecomp_table:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len ->
+  lprecomp_table_st a_t len ctx_len k
 
 
 inline_for_extraction noextract
