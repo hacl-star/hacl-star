@@ -1344,9 +1344,8 @@ static inline void precomp_get_vartime(const uint64_t *table, uint64_t bits_l, u
   memcpy(tmp, (uint64_t *)a_bits_l, (uint32_t)20U * sizeof (uint64_t));
 }
 
-void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t *q)
+static inline void convert_scalar(uint8_t *scalar, uint64_t *bscalar)
 {
-  uint64_t bscalar[4U] = { 0U };
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
@@ -1357,6 +1356,12 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
     uint64_t r = u;
     uint64_t x = r;
     os[i] = x;);
+}
+
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t *q)
+{
+  uint64_t bscalar[4U] = { 0U };
+  convert_scalar(scalar, bscalar);
   uint64_t table[320U] = { 0U };
   uint64_t tmp[20U] = { 0U };
   uint64_t *t0 = table;
@@ -1413,16 +1418,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
 static inline void point_mul_g(uint64_t *out, uint8_t *scalar)
 {
   uint64_t bscalar[4U] = { 0U };
-  KRML_MAYBE_FOR4(i,
-    (uint32_t)0U,
-    (uint32_t)4U,
-    (uint32_t)1U,
-    uint64_t *os = bscalar;
-    uint8_t *bj = scalar + i * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i] = x;);
+  convert_scalar(scalar, bscalar);
   uint64_t q1[20U] = { 0U };
   uint64_t *gx = q1;
   uint64_t *gy = q1 + (uint32_t)5U;
@@ -1545,26 +1541,8 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
   gt[2U] = (uint64_t)0x0002af8df483c27eU;
   gt[3U] = (uint64_t)0x000332b375274732U;
   gt[4U] = (uint64_t)0x00067875f0fd78b7U;
-  KRML_MAYBE_FOR4(i,
-    (uint32_t)0U,
-    (uint32_t)4U,
-    (uint32_t)1U,
-    uint64_t *os = bscalar1;
-    uint8_t *bj = scalar1 + i * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i] = x;);
-  KRML_MAYBE_FOR4(i,
-    (uint32_t)0U,
-    (uint32_t)4U,
-    (uint32_t)1U,
-    uint64_t *os = bscalar2;
-    uint8_t *bj = scalar2 + i * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i] = x;);
+  convert_scalar(scalar1, bscalar1);
+  convert_scalar(scalar2, bscalar2);
   uint64_t table2[640U] = { 0U };
   precomp_table(q2, (uint32_t)32U, table2);
   uint64_t tmp1[20U] = { 0U };
