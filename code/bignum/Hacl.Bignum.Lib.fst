@@ -14,7 +14,7 @@ module S = Hacl.Spec.Bignum.Lib
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators
 module LSeq = Lib.Sequence
-
+module LE = Lib.Exponentiation
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -183,5 +183,96 @@ val bn_get_bits:
     r == S.bn_get_bits (as_seq h0 b) (v i) (v l))
 
 let bn_get_bits #t len b i l =
-  let mask_l = (uint #t #SEC 1 <<. l) -. uint #t 1 in
+  [@inline_let] let mask_l = (uint #t #SEC 1 <<. l) -. uint #t 1 in
   bn_get_bits_limb len b i &. mask_l
+
+
+inline_for_extraction noextract
+let bn_get_bits_l_st (b_t:limb_t) =
+    bLen:size_t
+  -> bBits:size_t{(v bBits - 1) / bits b_t < v bLen}
+  -> b:lbuffer (uint_t b_t SEC) bLen
+  -> l:size_t{0 < v l /\ v l < bits b_t}
+  -> i:size_t{v i < v bBits / v l} ->
+  Stack (uint_t b_t SEC)
+  (requires fun h -> live h b /\
+    bn_v h b < pow2 (v bBits))
+  (ensures  fun h0 r h1 -> h0 == h1 /\
+    v r == LE.get_bits_l (v bBits) (bn_v h0 b) (v l) (v i))
+
+#push-options "--z3rlimit 200"
+inline_for_extraction noextract
+val mk_bn_get_bits_l: #b_t:limb_t -> bn_get_bits_l_st b_t
+let mk_bn_get_bits_l #b_t bLen bBits b l i =
+  assert (v (bBits -! bBits %. l) = v bBits - v bBits % v l);
+  [@ inline_let]
+  let bk = bBits -! bBits %. l in
+  assert (v bk == v bBits - v bBits % v l);
+
+  Math.Lemmas.lemma_mult_le_left (v l) (v i + 1) (v bBits / v l);
+  assert (v l * (v i + 1) <= v bk);
+  Math.Lemmas.distributivity_add_right (v l) (v i) 1;
+  assert (v (bk -! l *! i -! l) == v bk - v l * v i - v l);
+
+  [@ inline_let]
+  let k = bk -! l *! i -! l in
+  assert (v k == v bk - v l * v i - v l);
+  Math.Lemmas.lemma_div_le (v k) (v bBits - 1) (bits b_t);
+  assert (v k / bits b_t < v bLen);
+
+  let h0 = ST.get () in
+  S.bn_get_bits_lemma (as_seq h0 b) (v k) (v l);
+  bn_get_bits bLen b k l
+#pop-options
+
+[@CInline]
+let bn_get_bits_l_u32: bn_get_bits_l_st U32 = mk_bn_get_bits_l
+[@CInline]
+let bn_get_bits_l_u64: bn_get_bits_l_st U64 = mk_bn_get_bits_l
+
+inline_for_extraction noextract
+val bn_get_bits_l: #t:_ -> bn_get_bits_l_st t
+let bn_get_bits_l #t =
+  match t with
+  | U32 -> bn_get_bits_l_u32
+  | U64 -> bn_get_bits_l_u64
+
+
+inline_for_extraction noextract
+let bn_get_bits_c_st (b_t:limb_t) =
+    bLen:size_t
+  -> bBits:size_t{(v bBits - 1) / bits b_t < v bLen}
+  -> b:lbuffer (uint_t b_t SEC) bLen
+  -> l:size_t{0 < v l /\ v l < bits b_t /\ 0 < v bBits % v l} ->
+  Stack (uint_t b_t SEC)
+  (requires fun h -> live h b /\
+    bn_v h b < pow2 (v bBits))
+  (ensures  fun h0 r h1 -> h0 == h1 /\
+    v r == (bn_v h0 b / pow2 (v bBits / v l * v l)) % pow2 (v l))
+
+
+inline_for_extraction noextract
+val mk_bn_get_bits_c: #b_t:limb_t -> bn_get_bits_c_st b_t
+let mk_bn_get_bits_c #b_t bLen bBits b l =
+  let h0 = ST.get () in
+  assert (v (bBits /. l *! l) == v bBits / v l * v l);
+  [@ inline_let]
+  let i = bBits /. l *! l in
+  assert (v i == v bBits / v l * v l);
+  assert (v i <= v bBits - 1);
+  Math.Lemmas.lemma_div_le (v i) (v bBits - 1) (bits b_t);
+  assert (v i / bits b_t < v bLen);
+  S.bn_get_bits_lemma (as_seq h0 b) (v i) (v l);
+  bn_get_bits bLen b i l
+
+[@CInline]
+let bn_get_bits_c_u32: bn_get_bits_c_st U32 = mk_bn_get_bits_c
+[@CInline]
+let bn_get_bits_c_u64: bn_get_bits_c_st U64 = mk_bn_get_bits_c
+
+inline_for_extraction noextract
+val bn_get_bits_c: #t:_ -> bn_get_bits_c_st t
+let bn_get_bits_c #t =
+  match t with
+  | U32 -> bn_get_bits_c_u32
+  | U64 -> bn_get_bits_c_u64
