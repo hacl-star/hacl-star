@@ -85,11 +85,41 @@ let table_inv_w5 : BE.table_inv_t U64 15ul 32ul =
   assert_norm (pow2 (v l) == v table_len);
   BE.table_inv_precomp len ctx_len k l table_len
 
+//-------------------------------
+
+inline_for_extraction noextract
+val point_mul_noalloc:
+    out:point
+  -> scalar:qelem
+  -> q:point
+  -> table: lbuffer uint64 240ul ->
+  Stack unit
+  (requires fun h ->
+    live h scalar /\ live h q /\ live h out /\ live h table /\
+    disjoint q out /\ disjoint q scalar /\ disjoint out scalar /\
+    disjoint out table /\
+    qas_nat h scalar < S.q /\ point_inv h q /\
+    table_inv_w4 (as_seq h q) (as_seq h table))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    point_inv h1 out /\
+    S.to_aff_point (point_eval h1 out) ==
+    LE.exp_fw S.mk_k256_comm_monoid
+      (S.to_aff_point (point_eval h0 q)) 256 (qas_nat h0 scalar) 4)
+
+let point_mul_noalloc out scalar q table =
+  BE.mk_lexp_fw_table 15ul 0ul mk_k256_concrete_ops 4ul 16ul
+    table_inv_w4 precomp_get_consttime
+    (null uint64) q 4ul 256ul scalar (to_const table) out
+
 
 let point_mul out scalar q =
+  push_frame ();
   let h0 = ST.get () in
   SE.exp_fw_lemma S.mk_k256_concrete_ops (point_eval h0 q) 256 (qas_nat h0 scalar) 4;
-  BE.lexp_fw_consttime 15ul 0ul mk_k256_concrete_ops 4ul (null uint64) q 4ul 256ul scalar out
+  let table = create 240ul (u64 0) in
+  precomp_table (null uint64) q 16ul table;
+  point_mul_noalloc out scalar q table;
+  pop_frame ()
 
 
 inline_for_extraction noextract
