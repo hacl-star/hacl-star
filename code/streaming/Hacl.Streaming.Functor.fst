@@ -534,6 +534,14 @@ let init #index c i t t' k s =
 /// Some helpers to minimize modulo-reasoning
 /// =========================================
 
+val split_at_last_num_blocks_lem (#index : Type0) (c: block index) (i: index) (b: nat):
+  Lemma (
+    let n_blocks = split_at_last_num_blocks c i b in
+    let blocks = n_blocks * U32.v (c.blocks_state_len i) in
+    0 <= blocks /\ blocks <= b)
+
+let split_at_last_num_blocks_lem #index c i b = ()
+
 /// The ``rest`` function below allows computing, based ``total_len`` stored in
 /// the state, the length of useful data currently stored in ``buf``.
 /// Unsurprisingly, there's a fair amount of modulo reasoning here because of
@@ -544,6 +552,7 @@ let rest #index (c: block index) (i: index)
   (total_len: UInt64.t): (x:UInt32.t {
     let n = split_at_last_num_blocks c i (U64.v total_len) in
     let l = U32.v (c.blocks_state_len i) in
+    0 <= n * l /\ n * l <= U64.v total_len /\
     U32.v x = U64.v total_len - (n * l)})
 =
   let open FStar.Int.Cast in
@@ -558,26 +567,29 @@ let rest #index (c: block index) (i: index)
   (**) assert(r_v < l_v);
   
   if U64.(r =^ uint_to_t 0) && U64.(total_len >^ uint_to_t 0) then
+    begin
+    (**) split_at_last_num_blocks_lem c i (U64.v total_len);
     c.blocks_state_len i
+    end
   else
     begin    
     [@inline_let] let r' = FStar.Int.Cast.uint64_to_uint32 r in
-    FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32);
-    calc (==) {
-      U32.v r';
-    (==) { }
-      U64.v r % pow2 32;
-    (==) { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32) }
-      U64.v r;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.blocks_state_len i))) }
-      U64.v total_len % U64.v (uint32_to_uint64 (c.blocks_state_len i) );
-    (==) { }
-      U64.v total_len % U32.v (c.blocks_state_len i);
-    };
-    assert(
-        let n = split_at_last_num_blocks c i (U64.v total_len) in
-        let l = U32.v (c.blocks_state_len i) in
-        U32.v r' = U64.v total_len - (n * l));
+    (**) FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32);
+    (**) calc (==) {
+    (**)   U32.v r';
+    (**) (==) { }
+    (**)   U64.v r % pow2 32;
+    (**) (==) { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32) }
+    (**)   U64.v r;
+    (**) (==) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.blocks_state_len i))) }
+    (**)   U64.v total_len % U64.v (uint32_to_uint64 (c.blocks_state_len i) );
+    (**) (==) { }
+    (**)   U64.v total_len % U32.v (c.blocks_state_len i);
+    (**) };
+    (**) assert(
+    (**)   let n = split_at_last_num_blocks c i (U64.v total_len) in
+    (**)   let l = U32.v (c.blocks_state_len i) in
+    (**)    U32.v r' = U64.v total_len - (n * l));
     r'
     end
 #pop-options
@@ -589,6 +601,8 @@ let rest #index (c: block index) (i: index)
 inline_for_extraction noextract
 let nblocks #index (c: block index) (i: index)
   (len: UInt32.t): (x:UInt32.t {
+    let l = U32.v (c.blocks_state_len i) in
+    U32.v x * l <= U32.v len /\
     U32.v x = split_at_last_num_blocks c i (U32.v len) })
 =
   let open FStar.Int.Cast in
@@ -619,12 +633,21 @@ let rest_finish #index (c: block index) (i: index)
   (len: UInt32.t): (x:UInt32.t {
     let l = U32.v (c.block_len i) in
     let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem l (U32.v len)) in
+    0 <= n * l /\ n * l <= U32.v len /\
     U32.v x = U32.v len - (n * l)})
 =
   [@inline_let] let l = c.block_len i in
   [@inline_let] let r = len `U32.rem` l in
+  (**) split_at_last_num_blocks_lem c i (U32.v len);
   if U32.(r =^ uint_to_t 0) && U32.(len >^ uint_to_t 0) then
+    begin
+    (**) begin
+    (**) let l = U32.v (c.block_len i) in
+    (**) let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem l (U32.v len)) in
+    (**) Math.Lemmas.nat_times_nat_is_nat n l
+    (**) end;
     c.block_len i
+    end
   else
     r
 #pop-options
@@ -1080,14 +1103,6 @@ noextract let all_seen_h = all_seen
 /// there is no buffered data. Of course, the data we append has to be non-empty,
 /// otherwise we might end-up with an empty internal buffer.
 
-val split_at_last_num_blocks_lem (#index : Type0) (c: block index) (i: index) (b: nat):
-  Lemma (
-    let n_blocks = split_at_last_num_blocks c i b in
-    let blocks = n_blocks * U32.v (c.blocks_state_len i) in
-    0 <= blocks /\ blocks <= b)
-
-let split_at_last_num_blocks_lem #index c i b = ()
-
 /// Auxiliary lemma which groups the functional correctness proof obligations
 /// for [update_empty_or_full].
 #push-options "--z3cliopt smt.arith.nl=false"
@@ -1424,6 +1439,126 @@ let update #index c i t t' p data len =
     0ul
 #pop-options
 
+#push-options "--z3cliopt smt.arith.nl=false"
+val mk_finish_process_begin_functional_correctness :
+  #index:Type0 ->
+  (c: block index) ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
+  dst:B.buffer uint8 { B.len dst == c.output_len i } ->
+  h0: HS.mem ->
+  h1: HS.mem ->
+  tmp_block_state: t ->
+  Lemma
+  (requires (
+    // The precondition of [mk_finish]
+    invariant c i h0 s /\
+    c.state.invariant #i h1 tmp_block_state /\
+
+    begin
+    let s = B.get h0 s 0 in
+    let State block_state buf_ total_len seen key = s in
+
+    let r = rest c i total_len in
+    (**) assert(U32.v r <= U64.v total_len);
+    let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r) in
+    let r_last = rest_finish c i r in
+    (**) assert(U32.v r_last <= U32.v r);
+    let r_multi = U32.(r -^ r_last) in
+    let buf_multi = B.gsub buf_ 0ul r_multi in
+    let prev_length = U64.v prev_len in
+
+    c.state.v i h1 tmp_block_state == c.update_multi_s i (c.state.v i h0 block_state) prev_length (B.as_seq h0 buf_multi)
+    end))
+  (ensures (
+    let all_seen = all_seen c i h0 s in
+    let s = B.get h0 s 0 in
+    let State block_state buf_ total_len seen key = s in
+
+    let block_length = U32.v (c.block_len i) in
+    let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem block_length (S.length all_seen)) in
+    let k = optional_reveal #_ #i #c.km #c.key h0 key in
+    let init_state = c.init_s i k in
+
+    (**) Math.Lemmas.modulo_lemma 0 block_length;
+    (**) Math.Lemmas.cancel_mul_mod n block_length;
+    (**) Math.Lemmas.nat_times_nat_is_nat n block_length;
+    (**) split_at_last_num_blocks_lem c i (S.length all_seen);
+
+    0 % block_length = 0 /\
+    0 <= n * block_length /\ (n * block_length) % block_length = 0 /\
+    c.state.v i h1 tmp_block_state ==
+      c.update_multi_s i init_state 0 (S.slice all_seen 0 (n * block_length)))
+  ))
+#pop-options
+
+#push-options "--z3cliopt smt.arith.nl=false"
+let mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h1 tmp_block_state =
+  let h3 = h0 in
+  let h4 = h1 in
+  let s = B.get h0 p 0 in
+  let State block_state buf_ total_len seen k' = s in
+
+  let r = rest c i total_len in
+  let buf_ = B.gsub buf_ 0ul r in
+
+  let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r) in
+  let r_last = rest_finish c i r in
+  let r_multi = U32.(r -^ r_last) in
+
+  let i = G.reveal i in
+  let all_seen = all_seen c i h0 p in
+  let block_length = U32.v (c.block_len i) in
+  let blocks_state_length = U32.v (c.blocks_state_len i) in
+  let k = optional_reveal #_ #i #c.km #c.key h0 k' in
+  let prev_length = U64.v prev_len in
+  let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem block_length (S.length all_seen)) in
+  let init_state = c.init_s i k in
+  Math.Lemmas.modulo_lemma 0 block_length;
+  Math.Lemmas.cancel_mul_mod n block_length;
+  assert(prev_length + U32.v r = U64.v total_len);
+  assert(U32.v r_multi <= U32.v r);
+  assert(prev_length + U32.v r_multi <= U64.v total_len);
+  assert(n * block_length <= U64.v total_len);
+  let buf_multi = B.gsub buf_ 0ul r_multi in
+  assert(
+    c.state.v i h4 tmp_block_state ==
+      c.update_multi_s i
+        (c.state.v i h0 block_state)
+        prev_length (B.as_seq h3 buf_multi));
+  assert(
+    B.as_seq h3 buf_multi ==
+    S.slice all_seen prev_length (prev_length + U32.v r_multi));
+  assert(
+    c.state.v i h4 tmp_block_state ==
+      c.update_multi_s i
+        (c.update_multi_s i init_state 0 (S.slice all_seen 0 prev_length))
+        prev_length (S.slice all_seen prev_length (prev_length + U32.v r_multi)));
+  assert(0 % block_length = 0);
+  assert(S.length (S.slice all_seen 0 prev_length) % block_length = 0);
+  assert(prev_length + U32.v r_multi <= S.length all_seen);
+  c.update_multi_associative i init_state 0 prev_length
+                             (S.slice all_seen 0 prev_length)
+                             (S.slice all_seen prev_length (prev_length + U32.v r_multi));
+  assert(
+    S.equal (S.append (S.slice all_seen 0 prev_length)
+                      (S.slice all_seen prev_length (prev_length + U32.v r_multi)))
+            (S.slice all_seen 0 (prev_length + U32.v r_multi)));
+  assert(
+    c.state.v i h4 tmp_block_state ==
+    c.update_multi_s i init_state 0 (S.slice all_seen 0 (prev_length + U32.v r_multi)));
+  split_at_last_finish c i all_seen;
+  Math.Lemmas.nat_times_nat_is_nat n block_length;
+  assert(0 <= n * block_length);
+  assert(n * block_length <= S.length all_seen);
+  assert(
+    c.state.v i h4 tmp_block_state ==
+    c.update_multi_s i init_state 0 (S.slice all_seen 0 (n * block_length)))
+#pop-options
+
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
 let mk_finish #index c i t t' p dst =
@@ -1445,9 +1580,6 @@ let mk_finish #index c i t t' p dst =
   let r = rest c i total_len in
 
   let buf_ = B.sub buf_ 0ul r in
-  assert ((U64.v total_len - U32.v r) % U32.v (c.blocks_state_len i) = 0);
-  mod_trans_lem (U64.v total_len - U32.v r) (U32.v (c.blocks_state_len i)) (U32.v (c.block_len i));
-  assert ((U64.v total_len - U32.v r) % U32.v (c.block_len i) = 0);
 
   let tmp_block_state = c.state.alloca i in
 
@@ -1491,57 +1623,9 @@ let mk_finish #index c i t t' p dst =
 
   let h4 = get () in
 
-  begin
-  let all_seen = all_seen c i h0 p in
-  let block_length = U32.v (c.block_len i) in
-  let blocks_state_length = U32.v (c.blocks_state_len i) in
-  let k = optional_reveal #_ #i #c.km #c.key h0 k' in
-  let prev_length = U64.v prev_len in
-  let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem block_length (S.length all_seen)) in
-  let init_state = c.init_s i k in
-  Math.Lemmas.modulo_lemma 0 block_length;
-  assert(0 % block_length = 0);
-  Math.Lemmas.cancel_mul_mod n block_length;
-  assert((n * block_length) % block_length = 0);
-  assert(prev_length + U32.v r = U64.v total_len);
-  assert(U32.v r_multi <= U32.v r);
-  assert(prev_length + U32.v r_multi <= U64.v total_len);
-  assert(n * block_length <= U64.v total_len);
-  let buf_multi = B.gsub buf_ 0ul r_multi in
-  assert(
-    c.state.v i h4 tmp_block_state ==
-      c.update_multi_s i
-        (c.state.v i h3 tmp_block_state)
-        prev_length (B.as_seq h3 buf_multi));
-  assert(
-    c.state.v i h3 tmp_block_state ==
-    c.update_multi_s i init_state 0 (S.slice all_seen 0 prev_length));
-  assert(
-    B.as_seq h3 buf_multi ==
-    S.slice all_seen prev_length (prev_length + U32.v r_multi));
-  assert(
-    c.state.v i h4 tmp_block_state ==
-      c.update_multi_s i
-        (c.update_multi_s i init_state 0 (S.slice all_seen 0 prev_length))
-        prev_length (S.slice all_seen prev_length (prev_length + U32.v r_multi)));
-  assert(0 % block_length = 0);
-  assert(S.length (S.slice all_seen 0 prev_length) % block_length = 0);
-  assert(prev_length + U32.v r_multi <= S.length all_seen);
-  c.update_multi_associative i init_state 0 prev_length
-                             (S.slice all_seen 0 prev_length)
-                             (S.slice all_seen prev_length (prev_length + U32.v r_multi));
-  assert(
-    S.equal (S.append (S.slice all_seen 0 prev_length)
-                      (S.slice all_seen prev_length (prev_length + U32.v r_multi)))
-            (S.slice all_seen 0 (prev_length + U32.v r_multi)));
-  assert(
-    c.state.v i h4 tmp_block_state ==
-    c.update_multi_s i init_state 0 (S.slice all_seen 0 (prev_length + U32.v r_multi)));
-  split_at_last_finish c i all_seen;
-  assert(
-    c.state.v i h4 tmp_block_state ==
-    c.update_multi_s i init_state 0 (S.slice all_seen 0 (n * block_length)))
-  end;
+  // Functional correctness
+  mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h4 tmp_block_state;
+  split_at_last_finish c i (all_seen c i h0 p);
   
   // Process the remaining data
   assert(UInt32.v r_last <= UInt32.v (Block?.block_len c (Ghost.reveal (Ghost.hide i))));
