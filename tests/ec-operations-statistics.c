@@ -93,6 +93,18 @@ typedef struct {
   double total_appr_ff;
 } total_number_of_ops;
 
+// TODO: rename [main] with [fw] or [double_fw]
+// TODO: add a signed representation
+typedef struct {
+  bool is_print;
+  bool is_print_precomp_g_large; // a large static precomputed table for a base
+                                 // point G: [default], [large_precomp_g]
+  bool is_ec_ops;                // print a total number of EC or FF operations
+  bool is_glv;  // [fw] for 1 ECSM, [double_fw] for 2 ECSM, [glv] for 4 ECSM
+  bool is_wnaf; // unsigned or wNAF representation: [default], [wnaf]
+  // a static precomputed table for a base point G: [default], [precomp_g]
+} print_total_number_of_ops;
+
 static inline total_number_of_ops
 print_number_of_point_ops(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                           table_precomp_params tp, number_of_ec_ops ks) {
@@ -289,7 +301,7 @@ count_number_of_ops_2_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
   return print_number_of_point_ops(is_print, is_ec_ops, cs, tp, res);
 }
 
-// 4ECSM: [glv], [glv_precomp_g], [glv_precomp_g_large] + [wnaf]
+// 4 ECSM: [glv], [glv_precomp_g], [glv_precomp_g_large] + [wnaf]
 static inline total_number_of_ops
 count_number_of_ops_4_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits_glv) {
@@ -307,20 +319,20 @@ count_number_of_ops_4_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
 }
 
 static inline total_number_of_ops
-count_number_of_ops_n_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
+count_number_of_ops_n_ecsm(print_total_number_of_ops po, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits,
                            uint32_t n_ecsm) {
 
   if (n_ecsm == 1U) {
-    return count_number_of_ops_1_ecsm(is_print, is_ec_ops, cs, tp, bBits);
+    return count_number_of_ops_1_ecsm(po.is_print, po.is_ec_ops, cs, tp, bBits);
   }
 
   if (n_ecsm == 2U) {
-    return count_number_of_ops_2_ecsm(is_print, is_ec_ops, cs, tp, bBits);
+    return count_number_of_ops_2_ecsm(po.is_print, po.is_ec_ops, cs, tp, bBits);
   }
 
   if (n_ecsm == 4U) {
-    return count_number_of_ops_4_ecsm(is_print, is_ec_ops, cs, tp, bBits);
+    return count_number_of_ops_4_ecsm(po.is_print, po.is_ec_ops, cs, tp, bBits);
   }
 
   printf("\n\n Invalid n_ecsm = %d!. Possible values are 1, 2, and 4. \n",
@@ -400,16 +412,17 @@ void print_minimum_ec_or_ff(bool is_ec_ops, bool is_diff_window_g,
 
 // total_number_of_ops res[N_LEN_G]; if is_diff_window_g
 // total_number_of_ops res[N_LEN]; otherwise
-static inline void print_count_number_of_ops_n_ecsm(
-    bool is_print, bool is_ec_ops, cost_of_ec_ops cs, uint32_t bBits,
-    bool is_wnaf, bool is_precomp_g_const, bool is_diff_window_g,
-    uint32_t n_ecsm, total_number_of_ops *res) {
+static inline void
+print_count_number_of_ops_n_ecsm(print_total_number_of_ops po,
+                                 cost_of_ec_ops cs, uint32_t bBits,
+                                 bool is_precomp_g_const, bool is_diff_window_g,
+                                 uint32_t n_ecsm, total_number_of_ops *res) {
 
   table_precomp_params tp;
   tp.is_precomp_g_const = is_precomp_g_const;
-  tp.is_wnaf = is_wnaf;
+  tp.is_wnaf = po.is_wnaf;
 
-  print_header_for_number_of_ops(is_print, is_ec_ops);
+  print_header_for_number_of_ops(po.is_print, po.is_ec_ops);
 
   if (is_diff_window_g) {
     uint32_t len = N_MAX_G - N_MIN;
@@ -417,67 +430,62 @@ static inline void print_count_number_of_ops_n_ecsm(
       for (int j = i; j < N_MAX_G; j++) {
         tp.l = i;
         tp.l_g = j;
-        res[len * (i - N_MIN) + (j - N_MIN)] = count_number_of_ops_n_ecsm(
-            is_print, is_ec_ops, cs, tp, bBits, n_ecsm);
+        res[len * (i - N_MIN) + (j - N_MIN)] =
+            count_number_of_ops_n_ecsm(po, cs, tp, bBits, n_ecsm);
       }
-      print_end_line(is_print);
+      print_end_line(po.is_print);
     }
   } else {
     for (int i = N_MIN; i < N_MAX; i++) {
       tp.l = i;
       tp.l_g = i;
-      res[i - N_MIN] = count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, tp,
-                                                  bBits, n_ecsm);
+      res[i - N_MIN] = count_number_of_ops_n_ecsm(po, cs, tp, bBits, n_ecsm);
     }
   }
-  print_end_line(is_print);
-  print_minimum_ec_or_ff(is_ec_ops, is_diff_window_g, res);
-  print_end_line(is_print);
+  print_end_line(po.is_print);
+  print_minimum_ec_or_ff(po.is_ec_ops, is_diff_window_g, res);
+  print_end_line(po.is_print);
 }
 
 void print_statistics_glv(
-    bool is_print, bool is_print_precomp_g_large, bool is_ec_ops,
-    cost_of_ec_ops cs, uint32_t bBits_glv, bool is_wnaf,
+    print_total_number_of_ops po, cost_of_ec_ops cs, uint32_t bBits_glv,
     total_number_of_ops res_glv[N_LEN],
     total_number_of_ops res_glv_precomp_g[N_LEN],
     total_number_of_ops res_glv_precomp_g_large[N_LEN_G]) {
 
-  char *wnaf_str = is_wnaf ? "+ [wNAF]" : "";
+  char *wnaf_str = po.is_wnaf ? "+ [wNAF]" : "";
   bool is_precomp_g_const;
   bool is_diff_window_g;
 
   printf("\n[glv] %s precomp_table_g is computed in 4 ECSM \n", wnaf_str);
   is_precomp_g_const = false;
   is_diff_window_g = false; // ==> N_LEN
-  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, bBits_glv, is_wnaf,
-                                   is_precomp_g_const, is_diff_window_g, 4,
-                                   res_glv);
+  print_count_number_of_ops_n_ecsm(po, cs, bBits_glv, is_precomp_g_const,
+                                   is_diff_window_g, 4, res_glv);
 
   printf("\n[glv_precomp_g] %s precomp_table_g as constant in 4 ECSM \n",
          wnaf_str);
   is_precomp_g_const = true;
   is_diff_window_g = false; // ==> N_LEN
-  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, bBits_glv, is_wnaf,
-                                   is_precomp_g_const, is_diff_window_g, 4,
-                                   res_glv_precomp_g);
+  print_count_number_of_ops_n_ecsm(po, cs, bBits_glv, is_precomp_g_const,
+                                   is_diff_window_g, 4, res_glv_precomp_g);
 
-  if (is_print_precomp_g_large) {
+  if (po.is_print_precomp_g_large) {
     printf(
         "\n[glv_precomp_g_large] %s precomp_table_g as constant in 4 ECSM \n",
         wnaf_str);
     is_precomp_g_const = true;
     is_diff_window_g = true; // ==> N_LEN_G
-    print_count_number_of_ops_n_ecsm(
-        is_print, is_ec_ops, cs, bBits_glv, is_wnaf, is_precomp_g_const,
-        is_diff_window_g, 4, res_glv_precomp_g_large);
+    print_count_number_of_ops_n_ecsm(po, cs, bBits_glv, is_precomp_g_const,
+                                     is_diff_window_g, 4,
+                                     res_glv_precomp_g_large);
   }
 }
 
-void print_statistics(bool is_print, bool is_print_precomp_g_large,
-                      bool is_ec_ops, cost_of_ec_ops cs, uint32_t bBits,
-                      bool is_glv, uint32_t bBits_glv, bool is_wnaf) {
+void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
+                      uint32_t bBits, uint32_t bBits_glv) {
 
-  char *wnaf_str = is_wnaf ? "+ [wNAF]" : "";
+  char *wnaf_str = po.is_wnaf ? "+ [wNAF]" : "";
   bool is_precomp_g_const;
   bool is_diff_window_g;
 
@@ -488,50 +496,46 @@ void print_statistics(bool is_print, bool is_print_precomp_g_large,
   printf("\n[main] %s precomp_table_g is computed in 2 ECSM \n", wnaf_str);
   is_precomp_g_const = false;
   is_diff_window_g = false; // ==> N_LEN
-  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, bBits, is_wnaf,
-                                   is_precomp_g_const, is_diff_window_g, 2,
-                                   res_main);
+  print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
+                                   is_diff_window_g, 2, res_main);
 
   printf("\n[precomp_g] %s precomp_table_g as constant in 2 ECSM\n", wnaf_str);
   is_precomp_g_const = true;
   is_diff_window_g = false; // ==> N_LEN
-  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, bBits, is_wnaf,
-                                   is_precomp_g_const, is_diff_window_g, 2,
-                                   res_precomp_g);
+  print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
+                                   is_diff_window_g, 2, res_precomp_g);
 
-  if (is_print_precomp_g_large) {
+  if (po.is_print_precomp_g_large) {
     printf("\n[precomp_g_large] %s precomp_table_g as constant in 2 ECSM\n",
            wnaf_str);
     is_precomp_g_const = true;
     is_diff_window_g = true; // ==> N_LEN_G
-    print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, bBits, is_wnaf,
-                                     is_precomp_g_const, is_diff_window_g, 2,
-                                     res_precomp_g_large);
+    print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
+                                     is_diff_window_g, 2, res_precomp_g_large);
   }
 
   double appr_main[N_LEN] = {0};
   double appr_precomp_g[N_LEN] = {0};
-  get_field_total_number_of_ops(is_ec_ops, false, res_main, appr_main);
-  get_field_total_number_of_ops(is_ec_ops, false, res_precomp_g,
+  get_field_total_number_of_ops(po.is_ec_ops, false, res_main, appr_main);
+  get_field_total_number_of_ops(po.is_ec_ops, false, res_precomp_g,
                                 appr_precomp_g);
 
-  if (is_glv) {
+  if (po.is_glv) {
     total_number_of_ops res_glv[N_LEN];
     total_number_of_ops res_glv_precomp_g[N_LEN];
     total_number_of_ops res_glv_precomp_g_large[N_LEN_G];
 
-    print_statistics_glv(is_print, is_print_precomp_g_large, is_ec_ops, cs,
-                         bBits_glv, is_wnaf, res_glv, res_glv_precomp_g,
+    print_statistics_glv(po, cs, bBits_glv, res_glv, res_glv_precomp_g,
                          res_glv_precomp_g_large);
 
     double appr_glv[N_LEN] = {0};
     double appr_glv_precomp_g[N_LEN] = {0};
-    get_field_total_number_of_ops(is_ec_ops, false, res_glv, appr_glv);
-    get_field_total_number_of_ops(is_ec_ops, false, res_glv_precomp_g,
+    get_field_total_number_of_ops(po.is_ec_ops, false, res_glv, appr_glv);
+    get_field_total_number_of_ops(po.is_ec_ops, false, res_glv_precomp_g,
                                   appr_glv_precomp_g);
 
-    print_header_for_aggregated_table(is_ec_ops, cs.ratio_ec, cs.ratio_ff,
-                                      is_wnaf);
+    print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
+                                      po.is_wnaf);
     printf("%-5s %-10s %-10s %-10s %-10s \n", "w", "main", "precomp_g", "glv",
            "glv_precomp_g");
     print_end_line(true);
@@ -542,8 +546,8 @@ void print_statistics(bool is_print, bool is_print_precomp_g_large,
     }
     print_end_line(true);
   } else {
-    print_header_for_aggregated_table(is_ec_ops, cs.ratio_ec, cs.ratio_ff,
-                                      is_wnaf);
+    print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
+                                      po.is_wnaf);
     printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
     print_end_line(true);
     for (int i = N_MIN; i < N_MAX; i++) {
@@ -555,10 +559,10 @@ void print_statistics(bool is_print, bool is_print_precomp_g_large,
 }
 
 // for 1 ECSM
-void print_statistics_1(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
-                        uint32_t bBits, bool is_wnaf) {
+void print_statistics_1(print_total_number_of_ops po, cost_of_ec_ops cs,
+                        uint32_t bBits) {
 
-  char *wnaf_str = is_wnaf ? "+ [wNAF]" : "";
+  char *wnaf_str = po.is_wnaf ? "+ [wNAF]" : "";
   bool is_precomp_g_const;
   bool is_diff_window_g = false; // 1 ECSM
 
@@ -567,24 +571,22 @@ void print_statistics_1(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
 
   printf("\n[main] %s precomp_table_g is computed in 1 ECSM \n", wnaf_str);
   is_precomp_g_const = false;
-  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, bBits, is_wnaf,
-                                   is_precomp_g_const, is_diff_window_g, 1,
-                                   res_main);
+  print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
+                                   is_diff_window_g, 1, res_main);
 
   printf("\n[precomp_g] %s precomp_table_g as constant in 1 ECSM\n", wnaf_str);
   is_precomp_g_const = true;
-  print_count_number_of_ops_n_ecsm(is_print, is_ec_ops, cs, bBits, is_wnaf,
-                                   is_precomp_g_const, is_diff_window_g, 1,
-                                   res_precomp_g);
+  print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
+                                   is_diff_window_g, 1, res_precomp_g);
 
   double appr_main[N_LEN] = {0};
   double appr_precomp_g[N_LEN] = {0};
-  get_field_total_number_of_ops(is_ec_ops, false, res_main, appr_main);
-  get_field_total_number_of_ops(is_ec_ops, false, res_precomp_g,
+  get_field_total_number_of_ops(po.is_ec_ops, false, res_main, appr_main);
+  get_field_total_number_of_ops(po.is_ec_ops, false, res_precomp_g,
                                 appr_precomp_g);
 
-  print_header_for_aggregated_table(is_ec_ops, cs.ratio_ec, cs.ratio_ff,
-                                    is_wnaf);
+  print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
+                                    po.is_wnaf);
   printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
   print_end_line(true);
   for (int i = N_MIN; i < N_MAX; i++) {
@@ -610,13 +612,15 @@ secp256k1_point_add: 859 cycles
  point_double = 0.83 * point_add
 */
 int main() {
-  bool is_print_secp256k1 = false;
-  bool is_print_precomp_g_large_secp256k1 = true;
-  bool is_ec_ops_secp256k1 = false;
   uint32_t bBits_secp256k1 = 256U;
-  bool is_glv_secp256k1 = true;
   uint32_t bBits_glv_secp256k1 = 128U; // w/o wNAF
-  bool is_wnaf_secp256k1 = false;
+
+  print_total_number_of_ops print_secp256k1;
+  print_secp256k1.is_print = false;
+  print_secp256k1.is_print_precomp_g_large = true;
+  print_secp256k1.is_ec_ops = false;
+  print_secp256k1.is_glv = true;
+  print_secp256k1.is_wnaf = false;
 
   cost_of_ec_ops cs_secp256k1;
   cs_secp256k1.padd_fmul = 12U;
@@ -629,50 +633,51 @@ int main() {
   printf("\n\n[projective] secp256k1-ecdsa-verify:\n");
   // [main], [precomp_g], [glv], [glv_precomp_g], [precomp_g_large],
   // [glv_precomp_g_large]
-  print_statistics(is_print_secp256k1, is_print_precomp_g_large_secp256k1,
-                   is_ec_ops_secp256k1, cs_secp256k1, bBits_secp256k1,
-                   is_glv_secp256k1, bBits_glv_secp256k1, is_wnaf_secp256k1);
+  print_statistics(print_secp256k1, cs_secp256k1, bBits_secp256k1,
+                   bBits_glv_secp256k1);
 
   printf("\n\n[projective] secp256k1-ecdsa-sign:\n");
   // [main], [precomp_g]
-  print_statistics_1(is_print_secp256k1, is_ec_ops_secp256k1, cs_secp256k1,
-                     bBits_secp256k1, is_wnaf_secp256k1);
+  print_statistics_1(print_secp256k1, cs_secp256k1, bBits_secp256k1);
 
   printf("\n\n");
   print_end_line(true);
   print_end_line(true);
 
-  cost_of_ec_ops cs_secp256k1_jac;
-  cs_secp256k1.ratio_ff = 0.85;
-
   printf("\n\n [jacobian-mixed] secp256k1-ecdsa-verify:\n");
+  cost_of_ec_ops cs_secp256k1_jac;
+  cs_secp256k1_jac.ratio_ff = 0.85;
   cs_secp256k1_jac.ratio_ec = 0.6; // for mixed
   cs_secp256k1_jac.padd_fmul = 8U; // for mixed
   cs_secp256k1_jac.padd_fsqr = 3U; // for mixed
-
-  // printf("\n\n [jacobian] secp256k1-ecdsa-verify:\n");
-  // cs_secp256k1_jac.ratio_ec = 0.8;
-  // cs_secp256k1_jac.padd_fmul = 12U;
-  // cs_secp256k1_jac.padd_fsqr = 4U;
-
   cs_secp256k1_jac.pdouble_fmul = 3U;
   cs_secp256k1_jac.pdouble_fsqr = 4U;
 
+  // printf("\n\n [jacobian] secp256k1-ecdsa-verify:\n");
+  // cost_of_ec_ops cs_secp256k1_jac;
+  // cs_secp256k1_jac.ratio_ff = 0.85;
+  // cs_secp256k1_jac.ratio_ec = 0.8;
+  // cs_secp256k1_jac.padd_fmul = 12U;
+  // cs_secp256k1_jac.padd_fsqr = 4U;
+  // cs_secp256k1_jac.pdouble_fmul = 3U;
+  // cs_secp256k1_jac.pdouble_fsqr = 4U;
+
   // [main], [precomp_g], [glv], [glv_precomp_g], [precomp_g_large],
   // [glv_precomp_g_large]
-  print_statistics(is_print_secp256k1, is_print_precomp_g_large_secp256k1,
-                   is_ec_ops_secp256k1, cs_secp256k1_jac, bBits_secp256k1,
-                   is_glv_secp256k1, bBits_glv_secp256k1, is_wnaf_secp256k1);
+  print_statistics(print_secp256k1, cs_secp256k1_jac, bBits_secp256k1,
+                   bBits_glv_secp256k1);
 
-  // For ed25519, it's better to set `is_ec_ops_secp256k1 = false`,
+  // For ed25519, it's better to set `is_ec_ops_secp256k1 = true`,
   // as we don't compare different point addition and doubling formulas
-  bool is_print_ed25519 = false;
-  bool is_print_precomp_g_large_ed25519 = true;
-  bool is_ec_ops_ed25519 = true;
+  print_total_number_of_ops print_ed25519;
+  print_ed25519.is_print = false;
+  print_ed25519.is_print_precomp_g_large = true;
+  print_ed25519.is_ec_ops = true;
+  print_ed25519.is_glv = false;
+  print_ed25519.is_wnaf = false;
+
   uint32_t bBits_ed25519 = 256U;
-  bool is_glv_ed25519 = false;
   uint32_t bBits_glv_ed25519 = 0U;
-  bool is_wnaf_ed25519 = false;
 
   cost_of_ec_ops cs_ed25519;
   cs_ed25519.padd_fmul = 9U; // 8M + 1D
@@ -684,14 +689,11 @@ int main() {
 
   printf("\n\nHACL ed25519-verify:\n");
   // [main], [precomp_g], [precomp_g_large]
-  print_statistics(is_print_ed25519, is_print_precomp_g_large_ed25519,
-                   is_ec_ops_ed25519, cs_ed25519, bBits_ed25519, is_glv_ed25519,
-                   bBits_glv_ed25519, is_wnaf_ed25519);
+  print_statistics(print_ed25519, cs_ed25519, bBits_ed25519, bBits_glv_ed25519);
 
   printf("\n\nHACL ed25519-sign:\n");
   // [main], [precomp_g]
-  print_statistics_1(is_print_ed25519, is_ec_ops_ed25519, cs_ed25519,
-                     bBits_ed25519, is_wnaf_ed25519);
+  print_statistics_1(print_ed25519, cs_ed25519, bBits_ed25519);
 
   return EXIT_SUCCESS;
 }
