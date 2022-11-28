@@ -21,7 +21,6 @@ let init a =
   | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64
   | SHA3_256 -> Lib.Sequence.create 25 (u64 0)
 
-
 // Intentionally restricting this one to MD hashes... we want clients to AVOID
 // juggling between mk_update_multi update vs. repeati for non-MD hashes.
 let update (a: md_alg) =

@@ -50,6 +50,10 @@ the two properties of update_multi, but this is not true in the general case.)
 
 val init (a:hash_alg): init_t a
 
+let init_extra_state (a:hash_alg) : extra_state a = match a with
+  | Blake2B | Blake2S -> 0
+  | _ -> ()
+
 (* The individual update function. This is an implementation detail, and clients
 should reason in terms of update_multi to be fully agile. None of the hash laws
 refer to update. *)

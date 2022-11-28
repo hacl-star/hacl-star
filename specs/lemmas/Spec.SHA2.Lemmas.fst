@@ -243,9 +243,9 @@ let update_224_256 hash block =
 
 #pop-options
 
-let update_multi_224_256 hash prev blocks =
-  admit ()
-  (*
+let update_multi_224_256 hash blocks =
+  admit()
+  (* TODO
   let a = SHA2_256 in
   let a' = SHA2_224 in
   assert_norm (words_state a == words_state a');
@@ -262,10 +262,10 @@ let update_multi_224_256 hash prev blocks =
     assert(S.length block1 = block_length a);
     assert(S.length blocks_end % block_length a = 0);
     assert(S.append block1 blocks_end `S.equal` blocks);
-    update_multi_associative a hash block1 prev blocks_end;
-    update_multi_associative a' hash block1 prev blocks_end;
-    update_multi_update a hash prev block1;
-    update_multi_update a' hash prev block1;
+    update_multi_associative a hash block1 blocks_end;
+    update_multi_associative a' hash block1 blocks_end;
+    update_multi_update a hash block1;
+    update_multi_update a' hash block1;
     let hash1 = Spec.Agile.Hash.update a hash block1 in
     let hash2 = Spec.Agile.Hash.update a' hash block1 in
     update_224_256 hash block1;

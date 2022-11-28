@@ -45,7 +45,7 @@ let update_last (a:hash_alg)
     let padding = pad a total_len in
     (**) Math.Lemmas.lemma_mod_add_distr (S.length input + S.length padding) prevlen (block_length a);
     (**) assert(S.length S.(input @| padding) % block_length a = 0);
-    update_multi a hash prevlen S.(input @| padding)
+    update_multi a hash () S.(input @| padding)
 
 let split_blocks (a:hash_alg) (input:bytes)
   : Pure (bytes & bytes)
@@ -61,6 +61,6 @@ let hash_incremental (a:hash_alg) (input:bytes{S.length input `less_than_max_inp
 =
   let s = init a in
   let bs, l = split_blocks a input in
-  let s = update_multi a s 0 bs in
+  let s = update_multi a s (init_extra_state a) bs in
   let s = update_last a s (S.length bs) l in
   finish a s

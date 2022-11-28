@@ -13,12 +13,26 @@ include Spec.Hash.Lemmas0
 
 /// First hash law.
 val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
-  (requires update_multi_pre a h 0 S.empty)
-  (ensures ((update_multi a h 0 S.empty) == h))
-  [ SMTPat (update_multi a h 0 S.empty) ]
+  (requires update_multi_pre a h (init_extra_state a) S.empty)
+  (ensures ((update_multi a h (init_extra_state a) S.empty) == h))
+  [ SMTPat (update_multi a h (init_extra_state a) S.empty) ]
 
 /// Second hash law. MD hashes defer to Lib.UpdateMulti while Blake2 and SHA3 defer to Lib.SequenceLemmas.
-val update_multi_associative (a: hash_alg)
+val update_multi_associative (a: hash_alg{not (is_blake a)})
+  (h: words_state a)
+  (input1: bytes)
+  (input2: bytes):
+  Lemma
+  (requires
+    S.length input1 % block_length a == 0 /\
+    S.length input2 % block_length a == 0)
+  (ensures (
+    let input = S.append input1 input2 in
+    S.length input % block_length a == 0 /\
+    update_multi a (update_multi a h () input1) () input2 == update_multi a h () input))
+  [ SMTPat (update_multi a (update_multi a h () input1) () input2) ]
+
+val update_multi_associative_blake (a: blake_alg)
   (h: words_state a)
   (prevlen1: nat)
   (prevlen2: nat)
