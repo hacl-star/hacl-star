@@ -11,23 +11,21 @@ friend Spec.Agile.Hash
 
 (** Lemmas about the behavior of update_multi / update_last *)
 
-#push-options "--fuel 0 --ifuel 1 --z3rlimit 20"
+#push-options "--fuel 0 --ifuel 1 --z3rlimit 50"
 
 let update_multi_zero (a: hash_alg) h =
-  admit ()
-  (*
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
     Lib.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a) h
   | Blake2B | Blake2S ->
-    Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (Spec.Blake2.blake2_update1 (to_blake_alg a) 0 S.empty) h
-  | SHA3_256 ->
+    Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (Spec.Blake2.blake2_update1 (to_blake_alg a) (init_extra_state a) S.empty) h
+  | SHA3_256 -> admit();
     let rateInBytes = 1088/8 in
     let f = Spec.SHA3.absorb_inner rateInBytes in
     Lib.Sequence.lemma_repeat_blocks_multi rateInBytes S.empty f h;
     let nb = 0 / rateInBytes in
     Lib.LoopCombinators.eq_repeati0 nb (Lib.Sequence.repeat_blocks_f rateInBytes S.empty f nb) h
-*)
+
 #pop-options
 (*
 let update_multi_associative_blake2 (a: blake_alg)

@@ -39,7 +39,7 @@ let update_multi a hash prev blocks =
   | Blake2B | Blake2S ->
       let nb = S.length blocks / block_length a in
       let a' = to_blake_alg a in
-      Lib.LoopCombinators.repeati nb (Spec.Blake2.blake2_update1 a' prev blocks) hash
+      Lib.LoopCombinators.repeati #(words_state a) nb (Spec.Blake2.blake2_update1 a' prev blocks) hash
   | SHA3_256 ->
       let open Spec.SHA3 in
       let rateInBytes = 1088 / 8 in
