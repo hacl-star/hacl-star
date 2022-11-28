@@ -21,11 +21,11 @@ module UpdateMulti = Lib.UpdateMulti
    client to perform the padding at the last minute upon hitting the last chunk of
    data. *)
 let update_last (a:hash_alg)
-  (hash:words_state' a)
+  (hash:words_state a)
   (prevlen:nat{prevlen % block_length a = 0})
   (input:bytes{(S.length input + prevlen) `less_than_max_input_length` a /\
     S.length input <= block_length a }):
-  Tot (words_state' a)
+  Tot (words_state a)
 =
   if is_blake a then
     Spec.Blake2.blake2_update_last (to_blake_alg a) prevlen (S.length input) input hash
@@ -45,7 +45,7 @@ let update_last (a:hash_alg)
     let padding = pad a total_len in
     (**) Math.Lemmas.lemma_mod_add_distr (S.length input + S.length padding) prevlen (block_length a);
     (**) assert(S.length S.(input @| padding) % block_length a = 0);
-    update_multi a hash S.(input @| padding)
+    update_multi a hash prevlen S.(input @| padding)
 
 let split_blocks (a:hash_alg) (input:bytes)
   : Pure (bytes & bytes)
@@ -61,14 +61,6 @@ let hash_incremental (a:hash_alg) (input:bytes{S.length input `less_than_max_inp
 =
   let s = init a in
   let bs, l = split_blocks a input in
-  let s = update_multi a s bs in
-  let s: words_state' a =
-    if is_blake a then begin
-      let s: words_state' a & nat = s in
-      assert (snd s == S.length bs);
-      fst s
-    end else
-      s
-  in
+  let s = update_multi a s 0 bs in
   let s = update_last a s (S.length bs) l in
   finish a s

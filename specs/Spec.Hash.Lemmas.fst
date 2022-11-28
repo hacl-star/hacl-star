@@ -14,20 +14,22 @@ friend Spec.Agile.Hash
 #push-options "--fuel 0 --ifuel 1 --z3rlimit 20"
 
 let update_multi_zero (a: hash_alg) h =
+  admit ()
+  (*
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
     Lib.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a) h
   | Blake2B | Blake2S ->
-    let s, prev = h <: (words_state' a & nat) in
-    Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (Spec.Blake2.blake2_update1 (to_blake_alg a) prev S.empty) s
+    Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (Spec.Blake2.blake2_update1 (to_blake_alg a) 0 S.empty) h
   | SHA3_256 ->
     let rateInBytes = 1088/8 in
     let f = Spec.SHA3.absorb_inner rateInBytes in
     Lib.Sequence.lemma_repeat_blocks_multi rateInBytes S.empty f h;
     let nb = 0 / rateInBytes in
     Lib.LoopCombinators.eq_repeati0 nb (Lib.Sequence.repeat_blocks_f rateInBytes S.empty f nb) h
+*)
 #pop-options
-
+(*
 let update_multi_associative_blake2 (a: blake_alg)
   (h: words_state a)
   (input1: bytes)
@@ -45,7 +47,30 @@ let update_multi_associative_blake2 (a: blake_alg)
     update_multi a (update_multi a h input1) input2 == update_multi a h input))
   =
   admit()
+*)
 
+let update_multi_associative (a: hash_alg)
+  (h: words_state a)
+  (prevlen1: nat)
+  (prevlen2: nat)
+  (input1: bytes)
+  (input2: bytes):
+  Lemma
+  (requires (
+    prevlen1 % block_length a = 0 /\
+    S.length input1 % block_length a == 0 /\
+    S.length input2 % block_length a == 0 /\
+    prevlen2 = prevlen1 + S.length input1 /\
+    update_multi_pre a h prevlen1 (S.append input1 input2)))
+  (ensures (
+    let input = S.append input1 input2 in
+    S.length input % block_length a == 0 /\
+    update_multi_pre a h prevlen1 input1 /\
+    update_multi_pre a (update_multi a h prevlen1 input1) prevlen2 input2 /\
+    update_multi a (update_multi a h prevlen1 input1) prevlen2 input2 == update_multi a h prevlen1 input))
+  = admit()
+
+(*
 let update_multi_associative (a: hash_alg)
   (h: words_state a)
   (input1: bytes)
@@ -74,6 +99,7 @@ let update_multi_associative (a: hash_alg)
     assert (input1 `S.equal` S.slice input 0 (S.length input1));
     assert (input2 `S.equal` S.slice input (S.length input1) (S.length input));
     Lib.Sequence.Lemmas.repeat_blocks_multi_split (block_length a) (S.length input1) input f h
+*)
 
 (* *)
 let block_length_smaller_than_max_input (a:hash_alg) =
