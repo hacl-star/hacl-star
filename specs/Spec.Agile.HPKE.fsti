@@ -41,13 +41,13 @@ let is_valid_hash = function
   | Hash.SHA2_512 -> true
   | _ -> false
 
-let hash_algorithm = a:Hash.algorithm{is_valid_hash a}
+let hash_algorithm = a:Hash.hash_alg{is_valid_hash a}
 
-let is_valid_ciphersuite (cs:DH.algorithm & hash_algorithm & aead & Hash.algorithm) : bool =
+let is_valid_ciphersuite (cs:DH.algorithm & hash_algorithm & aead & Hash.hash_alg) : bool =
   let kem_dh, kem_hash, aead, hash = cs in
   (is_valid_kem (kem_dh, kem_hash)) && (is_valid_aead aead) && (is_valid_hash hash)
 
-let ciphersuite = cs:(DH.algorithm & hash_algorithm & aead & Hash.algorithm){is_valid_ciphersuite cs}
+let ciphersuite = cs:(DH.algorithm & hash_algorithm & aead & Hash.hash_alg){is_valid_ciphersuite cs}
 
 inline_for_extraction
 let kem_dh_of_cs (cs:ciphersuite) : DH.algorithm =
@@ -289,13 +289,13 @@ let size_dh_serialized (cs:ciphersuite): size_nat = match kem_dh_of_cs cs with
   | DH.DH_P256 -> DH.size_public DH.DH_P256
 
 inline_for_extraction
-let size_kem_kdf (cs:ciphersuite): size_nat = Hash.size_hash (kem_hash_of_cs cs)
+let size_kem_kdf (cs:ciphersuite): size_nat = Hash.hash_length (kem_hash_of_cs cs)
 
 inline_for_extraction
-let size_kem_key (cs:ciphersuite): size_nat = Hash.size_hash (kem_hash_of_cs cs)
+let size_kem_key (cs:ciphersuite): size_nat = Hash.hash_length (kem_hash_of_cs cs)
 
 inline_for_extraction
-let size_kdf (cs:ciphersuite): size_nat = Hash.size_hash (hash_of_cs cs)
+let size_kdf (cs:ciphersuite): size_nat = Hash.hash_length (hash_of_cs cs)
 
 let max_seq (cs:ciphersuite): nat =
   match aead_of_cs cs with
