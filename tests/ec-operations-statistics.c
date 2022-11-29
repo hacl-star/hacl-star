@@ -12,6 +12,42 @@
    All the computations are done for the fixed-window method.
 */
 
+#define scalar_unsigned 0
+#define scalar_signed 1
+#define scalar_wnaf 2
+
+typedef uint8_t scalar_representation;
+
+static inline bool is_unsigned(scalar_representation sr) {
+  switch (sr) {
+  case scalar_unsigned: {
+    return true;
+  }
+  case scalar_signed: {
+    return false;
+  }
+  case scalar_wnaf: {
+    return false;
+  }
+  }
+}
+
+static inline char *str_scalar_repr(scalar_representation sr) {
+  switch (sr) {
+  case scalar_unsigned: {
+    return "[unsigned]";
+  }
+  case scalar_signed: {
+    return "[signed]";
+  }
+  case scalar_wnaf: {
+    return "[wNAF]";
+  }
+  }
+}
+
+//-------------------------------------------
+
 static inline void print_end_line(bool is_print) {
   if (is_print) {
     printf("-----------------------------------------------------------\n");
@@ -35,14 +71,14 @@ static inline void print_header_for_number_of_ops(bool is_print,
 static inline void print_header_for_aggregated_table(bool is_ec_ops,
                                                      double ratio_ec,
                                                      double ratio_ff,
-                                                     bool is_wnaf) {
+                                                     scalar_representation sr) {
   printf("\n\n");
   char *mul_str = is_ec_ops ? "point_add" : "fmul";
   char *sqr_str = is_ec_ops ? "point_double" : "fsqr";
   double ratio = is_ec_ops ? ratio_ec : ratio_ff;
-  char *wnaf_str = is_wnaf ? "[wNAF]" : "";
+  char *repr_str = str_scalar_repr(sr);
 
-  printf("%s Aggregated table with ~#%s, where %s = %5.2f * %s \n", wnaf_str,
+  printf("%s Aggregated table with ~#%s, where %s = %5.2f * %s \n", repr_str,
          mul_str, sqr_str, ratio, mul_str);
   print_end_line(true);
 }
@@ -62,7 +98,7 @@ typedef struct {
   uint32_t l;
   uint32_t l_g;
   bool is_precomp_g_const;
-  bool is_wnaf;
+  scalar_representation scalar_repr;
 } table_precomp_params;
 
 typedef struct {
@@ -94,14 +130,14 @@ typedef struct {
 } total_number_of_ops;
 
 // TODO: rename [main] with [fw] or [double_fw]
-// TODO: add a signed representation
 typedef struct {
   bool is_print;
-  bool is_print_precomp_g_large; // a large static precomputed table for a base
-                                 // point G: [default], [large_precomp_g]
+  bool is_print_precomp_g_large; // a large static precomputed table for a
+                                 // base point G: [default] (w = w_g),
+                                 // [large_precomp_g] (w <> w_g)
   bool is_ec_ops;                // print a total number of EC or FF operations
-  bool is_glv;  // [fw] for 1 ECSM, [double_fw] for 2 ECSM, [glv] for 4 ECSM
-  bool is_wnaf; // unsigned or wNAF representation: [default], [wnaf]
+  bool is_glv; // [fw] for 1 ECSM, [double_fw] for 2 ECSM, [glv] for 4 ECSM
+  scalar_representation scalar_repr; // [unsigned], [signed], [wnaf]
   // a static precomputed table for a base point G: [default], [precomp_g]
 } print_total_number_of_ops;
 
@@ -139,7 +175,19 @@ print_number_of_point_ops(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
   return res;
 }
 
-/* a precomputed table for wNAF: [1P; 3P; 5P; 7P; ..]
+/* a precomputed table for a signed representation: [0P; 1P; 2P; 3P; ..;
+2^(w-1)] uint32_t table_len = (1ul << (w - 1ul)) + 1ul; table[0] =
+point_at_infinity; table[1] = P; for (uint32_t i = 1; i < table_len / 2; i++) {
+    table[2 * i] = table[i] + table[i];
+    table[2 * i + 1] = table[2 * i] + P;
+    }
+  table[table_len - 1] = table[(table_len - 1) / 2] + table[(table_len - 1) / 2]
+
+point_add_signed = point_add_unsigned / 2
+point_double_signed = point_double_unsigned +/ 2 1
+*/
+
+/* a precomputed table for wNAF: [1P; 3P; 5P; 7P; ..; 2^(w-1)-1]
   uint32_t table_len = 1ul << (w - 2ul);
   tmp = 2P // 1 precomp_double
   table[0] = P
@@ -154,14 +202,25 @@ count_number_of_ops_1_ecsm_precomp(table_precomp_params tp) {
     res.precomp_double = 0U;
     res.precomp_add = 0U;
   } else {
-    if (tp.is_wnaf) {
-      uint32_t table_len = 1U << (tp.l - 2U);
-      res.precomp_double = 1U;
-      res.precomp_add = table_len - 1U;
-    } else {
+    switch (tp.scalar_repr) {
+    case scalar_unsigned: {
       uint32_t table_len = (1U << tp.l) - 2U;
       res.precomp_double = table_len / 2U;
       res.precomp_add = table_len / 2U;
+      break;
+    }
+    case scalar_signed: {
+      uint32_t table_len = (1U << (tp.l - 1U)) - 2U;
+      res.precomp_double = table_len / 2U + 1U;
+      res.precomp_add = table_len / 2U;
+      break;
+    }
+    case scalar_wnaf: {
+      uint32_t table_len = 1U << (tp.l - 2U);
+      res.precomp_double = 1U;
+      res.precomp_add = table_len - 1U;
+      break;
+    }
     }
   }
   return res;
@@ -170,17 +229,8 @@ count_number_of_ops_1_ecsm_precomp(table_precomp_params tp) {
 static inline number_of_ec_ops_table
 count_number_of_ops_2_ecsm_precomp(table_precomp_params tp) {
   number_of_ec_ops_table res;
-  if (tp.is_wnaf) {
-    uint32_t table_len = 1U << (tp.l - 2U);
-    uint32_t table_len_g = 1U << (tp.l_g - 2U);
-    if (tp.is_precomp_g_const) {
-      res.precomp_double = 1U;
-      res.precomp_add = table_len - 1U;
-    } else {
-      res.precomp_double = 2U;
-      res.precomp_add = table_len + table_len_g - 2U;
-    }
-  } else {
+  switch (tp.scalar_repr) {
+  case scalar_unsigned: {
     uint32_t table_len = (1U << tp.l) - 2U;
     uint32_t table_len_g = (1U << tp.l_g) - 2U;
     if (tp.is_precomp_g_const) {
@@ -190,6 +240,32 @@ count_number_of_ops_2_ecsm_precomp(table_precomp_params tp) {
       res.precomp_double = table_len / 2U + table_len_g / 2U;
       res.precomp_add = table_len / 2U + table_len_g / 2U;
     }
+    break;
+  }
+  case scalar_signed: {
+    uint32_t table_len = (1U << (tp.l - 1U)) - 2U;
+    uint32_t table_len_g = (1U << (tp.l_g - 1U)) - 2U;
+    if (tp.is_precomp_g_const) {
+      res.precomp_double = table_len / 2U + 1U;
+      res.precomp_add = table_len / 2U;
+    } else {
+      res.precomp_double = table_len / 2U + table_len_g / 2U + 2U;
+      res.precomp_add = table_len / 2U + table_len_g / 2U;
+    }
+    break;
+  }
+  case scalar_wnaf: {
+    uint32_t table_len = 1U << (tp.l - 2U);
+    uint32_t table_len_g = 1U << (tp.l_g - 2U);
+    if (tp.is_precomp_g_const) {
+      res.precomp_double = 1U;
+      res.precomp_add = table_len - 1U;
+    } else {
+      res.precomp_double = 2U;
+      res.precomp_add = table_len + table_len_g - 2U;
+    }
+    break;
+  }
   }
   return res;
 }
@@ -247,8 +323,8 @@ count_number_of_ops_4_ecsm_loop_l_eq(table_precomp_params tp, uint32_t bBits) {
   res.main_double = n * tp.l;
   res.main_add = n + n + n + n;
 
-  uint32_t extra_fmul = (bBits % tp.l == 0U) ? 0U : 2U;
-  res.extra_fmul = n + n + extra_fmul; // account for mul by beta = (n + n) M
+  uint32_t extra_fmul = (bBits % tp.l == 0U) ? 0U : 1U;
+  res.extra_fmul = n + extra_fmul; // account for mul by beta
 
   return res;
 }
@@ -267,7 +343,7 @@ count_number_of_ops_4_ecsm_loop_l_diff(table_precomp_params tp,
   res.main_double = bBits;
   res.main_add = n_l + n_l + n_l_g + n_l_g;
 
-  res.extra_fmul = n_l + n_l_g; // account for mul by beta = (n + n) M
+  res.extra_fmul = n_l; // account for mul by beta
 
   return res;
 }
@@ -277,7 +353,7 @@ static inline total_number_of_ops
 count_number_of_ops_1_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits) {
 
-  bBits = tp.is_wnaf ? (bBits + 1) : bBits;
+  bBits = is_unsigned(tp.scalar_repr) ? bBits : (bBits + 1);
   number_of_ec_ops res;
   res.precomp = count_number_of_ops_1_ecsm_precomp(tp);
   res.loop = count_number_of_ops_1_ecsm_loop(tp, bBits);
@@ -289,7 +365,7 @@ static inline total_number_of_ops
 count_number_of_ops_2_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits) {
 
-  bBits = tp.is_wnaf ? (bBits + 1) : bBits;
+  bBits = is_unsigned(tp.scalar_repr) ? bBits : (bBits + 1);
   number_of_ec_ops res;
   res.precomp = count_number_of_ops_2_ecsm_precomp(tp);
   if (tp.l == tp.l_g) {
@@ -306,7 +382,7 @@ static inline total_number_of_ops
 count_number_of_ops_4_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits_glv) {
 
-  bBits_glv = tp.is_wnaf ? (bBits_glv + 1) : bBits_glv;
+  bBits_glv = is_unsigned(tp.scalar_repr) ? bBits_glv : (bBits_glv + 1);
   number_of_ec_ops res;
   res.precomp = count_number_of_ops_2_ecsm_precomp(tp);
   if (tp.l == tp.l_g) {
@@ -420,7 +496,7 @@ print_count_number_of_ops_n_ecsm(print_total_number_of_ops po,
 
   table_precomp_params tp;
   tp.is_precomp_g_const = is_precomp_g_const;
-  tp.is_wnaf = po.is_wnaf;
+  tp.scalar_repr = po.scalar_repr;
 
   print_header_for_number_of_ops(po.is_print, po.is_ec_ops);
 
@@ -453,18 +529,18 @@ void print_statistics_glv(
     total_number_of_ops res_glv_precomp_g[N_LEN],
     total_number_of_ops res_glv_precomp_g_large[N_LEN_G]) {
 
-  char *wnaf_str = po.is_wnaf ? "+ [wNAF]" : "";
+  char *repr_str = str_scalar_repr(po.scalar_repr);
   bool is_precomp_g_const;
   bool is_diff_window_g;
 
-  printf("\n[glv] %s precomp_table_g is computed in 4 ECSM \n", wnaf_str);
+  printf("\n[glv] %s precomp_table_g is computed in 4 ECSM \n", repr_str);
   is_precomp_g_const = false;
   is_diff_window_g = false; // ==> N_LEN
   print_count_number_of_ops_n_ecsm(po, cs, bBits_glv, is_precomp_g_const,
                                    is_diff_window_g, 4, res_glv);
 
   printf("\n[glv_precomp_g] %s precomp_table_g as constant in 4 ECSM \n",
-         wnaf_str);
+         repr_str);
   is_precomp_g_const = true;
   is_diff_window_g = false; // ==> N_LEN
   print_count_number_of_ops_n_ecsm(po, cs, bBits_glv, is_precomp_g_const,
@@ -473,7 +549,7 @@ void print_statistics_glv(
   if (po.is_print_precomp_g_large) {
     printf(
         "\n[glv_precomp_g_large] %s precomp_table_g as constant in 4 ECSM \n",
-        wnaf_str);
+        repr_str);
     is_precomp_g_const = true;
     is_diff_window_g = true; // ==> N_LEN_G
     print_count_number_of_ops_n_ecsm(po, cs, bBits_glv, is_precomp_g_const,
@@ -485,7 +561,7 @@ void print_statistics_glv(
 void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
                       uint32_t bBits, uint32_t bBits_glv) {
 
-  char *wnaf_str = po.is_wnaf ? "+ [wNAF]" : "";
+  char *repr_str = str_scalar_repr(po.scalar_repr);
   bool is_precomp_g_const;
   bool is_diff_window_g;
 
@@ -493,13 +569,13 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
   total_number_of_ops res_precomp_g[N_LEN];
   total_number_of_ops res_precomp_g_large[N_LEN_G];
 
-  printf("\n[main] %s precomp_table_g is computed in 2 ECSM \n", wnaf_str);
+  printf("\n[main] %s precomp_table_g is computed in 2 ECSM \n", repr_str);
   is_precomp_g_const = false;
   is_diff_window_g = false; // ==> N_LEN
   print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
                                    is_diff_window_g, 2, res_main);
 
-  printf("\n[precomp_g] %s precomp_table_g as constant in 2 ECSM\n", wnaf_str);
+  printf("\n[precomp_g] %s precomp_table_g as constant in 2 ECSM\n", repr_str);
   is_precomp_g_const = true;
   is_diff_window_g = false; // ==> N_LEN
   print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
@@ -507,7 +583,7 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
 
   if (po.is_print_precomp_g_large) {
     printf("\n[precomp_g_large] %s precomp_table_g as constant in 2 ECSM\n",
-           wnaf_str);
+           repr_str);
     is_precomp_g_const = true;
     is_diff_window_g = true; // ==> N_LEN_G
     print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
@@ -535,7 +611,7 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
                                   appr_glv_precomp_g);
 
     print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
-                                      po.is_wnaf);
+                                      po.scalar_repr);
     printf("%-5s %-10s %-10s %-10s %-10s \n", "w", "main", "precomp_g", "glv",
            "glv_precomp_g");
     print_end_line(true);
@@ -547,7 +623,7 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
     print_end_line(true);
   } else {
     print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
-                                      po.is_wnaf);
+                                      po.scalar_repr);
     printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
     print_end_line(true);
     for (int i = N_MIN; i < N_MAX; i++) {
@@ -562,19 +638,19 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
 void print_statistics_1(print_total_number_of_ops po, cost_of_ec_ops cs,
                         uint32_t bBits) {
 
-  char *wnaf_str = po.is_wnaf ? "+ [wNAF]" : "";
+  char *repr_str = str_scalar_repr(po.scalar_repr);
   bool is_precomp_g_const;
   bool is_diff_window_g = false; // 1 ECSM
 
   total_number_of_ops res_main[N_LEN];
   total_number_of_ops res_precomp_g[N_LEN];
 
-  printf("\n[main] %s precomp_table_g is computed in 1 ECSM \n", wnaf_str);
+  printf("\n[main] %s precomp_table_g is computed in 1 ECSM \n", repr_str);
   is_precomp_g_const = false;
   print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
                                    is_diff_window_g, 1, res_main);
 
-  printf("\n[precomp_g] %s precomp_table_g as constant in 1 ECSM\n", wnaf_str);
+  printf("\n[precomp_g] %s precomp_table_g as constant in 1 ECSM\n", repr_str);
   is_precomp_g_const = true;
   print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
                                    is_diff_window_g, 1, res_precomp_g);
@@ -586,7 +662,7 @@ void print_statistics_1(print_total_number_of_ops po, cost_of_ec_ops cs,
                                 appr_precomp_g);
 
   print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
-                                    po.is_wnaf);
+                                    po.scalar_repr);
   printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
   print_end_line(true);
   for (int i = N_MIN; i < N_MAX; i++) {
@@ -597,14 +673,14 @@ void print_statistics_1(print_total_number_of_ops po, cost_of_ec_ops cs,
 }
 
 /*
-secp256k1_point_add: 859 cycles
- secp256k1_point_double: 567 cycles
- secp256k1_fmul: 70 cycles
- secp256k1_fsqr: 60 cycles
+secp256k1_point_add: 947 cycles
+ secp256k1_point_double: 512 cycles
+ secp256k1_fmul: 67 cycles
+ secp256k1_fsqr: 58 cycles
  fsqr = 0.85 * fmul
- point_double = 0.66 * point_add
+ point_double = 0.54 * point_add
 
- ed25519_point_add:462 cycles
+ ed25519_point_add: 462 cycles
  ed25519_point_double: 388 cycles
  ed25519_fmul: 59 cycles
  ed25519_fsqr: 49 cycles
@@ -620,7 +696,7 @@ int main() {
   print_secp256k1.is_print_precomp_g_large = true;
   print_secp256k1.is_ec_ops = false;
   print_secp256k1.is_glv = true;
-  print_secp256k1.is_wnaf = false;
+  print_secp256k1.scalar_repr = scalar_unsigned;
 
   cost_of_ec_ops cs_secp256k1;
   cs_secp256k1.padd_fmul = 12U;
@@ -656,7 +732,7 @@ int main() {
   // printf("\n\n [jacobian] secp256k1-ecdsa-verify:\n");
   // cost_of_ec_ops cs_secp256k1_jac;
   // cs_secp256k1_jac.ratio_ff = 0.85;
-  // cs_secp256k1_jac.ratio_ec = 0.8;
+  // cs_secp256k1_jac.ratio_ec = 0.42;
   // cs_secp256k1_jac.padd_fmul = 12U;
   // cs_secp256k1_jac.padd_fsqr = 4U;
   // cs_secp256k1_jac.pdouble_fmul = 3U;
@@ -674,7 +750,7 @@ int main() {
   print_ed25519.is_print_precomp_g_large = true;
   print_ed25519.is_ec_ops = true;
   print_ed25519.is_glv = false;
-  print_ed25519.is_wnaf = false;
+  print_ed25519.scalar_repr = scalar_unsigned;
 
   uint32_t bBits_ed25519 = 256U;
   uint32_t bBits_glv_ed25519 = 0U;
