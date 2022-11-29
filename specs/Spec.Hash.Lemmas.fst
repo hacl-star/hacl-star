@@ -58,6 +58,8 @@ let lemma_blocki_aux1 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s1 / block
   : Lemma (Spec.Blake2.get_blocki (to_blake_alg a) s1 i == Spec.Blake2.get_blocki (to_blake_alg a) (S.append s1 s2) i)
   = assert (Spec.Blake2.get_blocki (to_blake_alg a) s1 i `S.equal` Spec.Blake2.get_blocki (to_blake_alg a) (S.append s1 s2) i)
 
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+
 let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s2 / block_length a})
   : Lemma
     (requires S.length s1 % block_length a == 0)
@@ -83,8 +85,6 @@ let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s2 / block
           (==) { }
           Spec.Blake2.get_blocki a' s2 i;
         }
-
-#push-options "--fuel 0 --ifuel 0 --z3rlimit 500"
 
 let update_multi_associative_blake (a: blake_alg)
   (h: words_state a)
@@ -119,9 +119,15 @@ let update_multi_associative_blake (a: blake_alg)
     let open FStar.Mul in
     let aux2 (i:nat{i < nb2}) (acc:words_state a) : Lemma (f (i + nb1) acc == f2 i acc)
       = lemma_blocki_aux2 a input1 input2 i;
-        Math.Lemmas.distributivity_add_left i nb1 (block_length a);
-        assert (nb1 * block_length a == S.length input1);
-        assert (prevlen2 + i * block_length a == prevlen1 + (i + nb1) * block_length a)
+        calc (==) {
+          prevlen2 + i * block_length a;
+          (==) { }
+          prevlen1 + S.length input1 + i * block_length a;
+          (==) { Math.Lemmas.lemma_div_exact (S.length input1) (block_length a) }
+          prevlen1 + nb1 * block_length a + i * block_length a;
+          (==) { Math.Lemmas.distributivity_add_left i nb1 (block_length a) }
+          prevlen1 + (i + nb1) * block_length a;
+        }
     in
     let open Lib.LoopCombinators in
     let open Lib.Sequence.Lemmas in
