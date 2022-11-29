@@ -2,8 +2,6 @@
 #
 # From a high-level perspective, the coarse-grained dependency graph is:
 #
-#            merkle_tree
-#                |
 #             evercrypt
 #               /  \
 #           code   vale
@@ -94,8 +92,7 @@ all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible \
   compile-portable-gcc-compatible \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic \
-  obj/libhaclml.cmxa
+  dist/wasm/package.json obj/libhaclml.cmxa
 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
@@ -587,7 +584,7 @@ HAND_WRITTEN_ML_GEN =
 
 # Flags that we always include. These are not meant to be overridden and
 # provide: -library (for vale interop); -no-prefix (for correct vale interop
-# names; for correct Merkle Tree function names used by C tests); -bundle (to
+# names; for correct function names used by C tests); -bundle (to
 # eliminate spec files where definitions are not marked noextract); -drop (for
 # intrinsics, see note below); -add-include (for curve's inline header); -fX for
 # codegen customiations; -static-header (so that instead of extern declarations
@@ -606,7 +603,6 @@ REQUIRED_BUNDLES = \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
-  -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   $(VALE_BUNDLES) \
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle 'EverCrypt.Spec.*' \
@@ -631,8 +627,6 @@ REQUIRED_FLAGS	= \
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -add-include 'Hacl_Curve25519_64.c:"curve25519-inline.h"' \
-  -no-prefix 'MerkleTree' \
-  -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig \
   -static-header 'EverCrypt.TargetConfig' \
   -no-prefix 'EverCrypt.TargetConfig' \
@@ -694,7 +688,6 @@ TARGETCONFIG_FLAGS = \
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
-MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
@@ -713,7 +706,6 @@ BUNDLE_FLAGS	=\
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
-  $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
   $(P256_BUNDLE) \
@@ -795,8 +787,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 
-# And Merkle trees
-dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
@@ -871,21 +861,6 @@ dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 # we don't have bundle errors where, say, an sse2-required function ends up in a
 # file that is *NOT* known to require sse2.
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
-
-# Merkle Tree standalone distribution
-# -----------------------------------
-#
-# Without even cryptography.
-dist/merkle-tree/Makefile.basic: \
-	BUNDLE_FLAGS=-bundle MerkleTree.EverCrypt \
-    -bundle 'MerkleTree+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=*[rename=MerkleTree]'
-dist/merkle-tree/Makefile.basic: VALE_ASMS =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_H_FILES =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_FILES =
-dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
-dist/merkle-tree/Makefile.basic: INTRINSIC_FLAGS =
 
 # Actual KaRaMeL invocations
 # --------------------------
