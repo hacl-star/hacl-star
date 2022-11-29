@@ -242,3 +242,13 @@ val mk_generate: #a:supported_alg -> HMAC.compute_st a -> generate_st a
 @param additional_input_input_len Length of additional input.
 @param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from."]
 val generate: a:supported_alg -> generate_st a
+
+let free_st (a: supported_alg) =
+  s:state a -> ST unit
+  (requires fun h0 ->
+    freeable s /\
+    invariant s h0)
+  (ensures fun h0 _ h1 ->
+    B.(modifies (footprint s) h0 h1))
+
+val free: #a:supported_alg -> free_st a

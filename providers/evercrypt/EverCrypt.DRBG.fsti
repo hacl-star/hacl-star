@@ -171,7 +171,6 @@ val alloca: a:supported_alg -> StackInline (state a)
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint st h1)) /\
     invariant st h1)
 
-inline_for_extraction noextract
 val create_in: a:supported_alg -> r:HS.rid -> ST (state a)
   (requires fun _ -> is_eternal_region r)
   (ensures  fun h0 st h1 ->
@@ -192,7 +191,6 @@ val create_in: a:supported_alg -> r:HS.rid -> ST (state a)
   * `Spec_Hash_Definitions_SHA1`.
 
 @return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`."]
-inline_for_extraction
 val create: a:supported_alg -> ST (state a)
   (requires fun _ -> True)
   (ensures  fun h0 st h1 ->
