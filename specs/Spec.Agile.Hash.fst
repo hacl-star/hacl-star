@@ -43,7 +43,7 @@ let update_multi a hash prev blocks =
   | SHA3_256 ->
       let open Spec.SHA3 in
       let rateInBytes = 1088 / 8 in
-      Lib.Sequence.repeat_blocks_multi rateInBytes blocks (absorb_inner rateInBytes) hash
+      Lib.Sequence.repeat_blocks_multi #_ #(words_state a) rateInBytes blocks (absorb_inner rateInBytes) hash
 
 #push-options "--fuel 0 --ifuel 0"
 

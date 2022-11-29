@@ -19,14 +19,14 @@ let update_multi_zero (a: hash_alg) h =
     Lib.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a) h
   | Blake2B | Blake2S ->
     Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (Spec.Blake2.blake2_update1 (to_blake_alg a) (init_extra_state a) S.empty) h
-  | SHA3_256 -> admit();
+  | SHA3_256 ->
     let rateInBytes = 1088/8 in
     let f = Spec.SHA3.absorb_inner rateInBytes in
     Lib.Sequence.lemma_repeat_blocks_multi rateInBytes S.empty f h;
+
     let nb = 0 / rateInBytes in
     Lib.LoopCombinators.eq_repeati0 nb (Lib.Sequence.repeat_blocks_f rateInBytes S.empty f nb) h
 
-#pop-options
 (*
 let update_multi_associative_blake2 (a: blake_alg)
   (h: words_state a)
