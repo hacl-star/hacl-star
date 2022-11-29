@@ -118,7 +118,10 @@ let update_multi_associative_blake (a: blake_alg)
     in
     let open FStar.Mul in
     let aux2 (i:nat{i < nb2}) (acc:words_state a) : Lemma (f (i + nb1) acc == f2 i acc)
-      = lemma_blocki_aux2 a input1 input2 i
+      = lemma_blocki_aux2 a input1 input2 i;
+        Math.Lemmas.distributivity_add_left i nb1 (block_length a);
+        assert (nb1 * block_length a == S.length input1);
+        assert (prevlen2 + i * block_length a == prevlen1 + (i + nb1) * block_length a)
     in
     let open Lib.LoopCombinators in
     let open Lib.Sequence.Lemmas in
