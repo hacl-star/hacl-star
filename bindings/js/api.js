@@ -28,7 +28,7 @@ function getModulesPromise(modules=shell.my_modules) {
 }
 
 // Comment out for debug
-// loader.setMyPrint((x) => {});
+loader.setMyPrint((x) => {});
 
 // HELPERS FOR SIZE FIELDS
 // -----------------------
@@ -104,9 +104,9 @@ var evalSize = function(parsedSize, args_int32s, api) {
         throw new Error("For size "+parsedSize+", module "+m+" is unknown");
       if (!(f in api[m]))
         throw new Error("For size "+parsedSize+", function "+m+"."+f+" is unknown");
-      console.log("RECURSIVE EVAL SIZE ENTER: ", x);
+      // console.log("RECURSIVE EVAL SIZE ENTER: ", x);
       x = evalSize(x, args_int32s, api);
-      console.log("RECURSIVE EVAL SIZE END: ", x);
+      // console.log("RECURSIVE EVAL SIZE END: ", x);
       return api[m][f](x)[0];
     }
   }
@@ -428,7 +428,7 @@ var HaclWasm = (function() {
   // Eventually will be mutually recursive once Layout is implemented (flat
   // packed structs).
   var heapReadType = (runtime_type, ptr) => {
-    console.log("headReadType", runtime_type, loader.p32(ptr));
+    // console.log("headReadType", runtime_type, loader.p32(ptr));
     let [ type, data ] = runtime_type;
     switch (type) {
       case "Int":
@@ -445,7 +445,7 @@ var HaclWasm = (function() {
   };
 
   var heapWriteType = (runtime_type, ptr, v) => {
-    console.log("heapWriteType", runtime_type, loader.p32(ptr), v);
+    // console.log("heapWriteType", runtime_type, loader.p32(ptr), v);
     let [ type, data ] = runtime_type;
     switch (type) {
       case "Int":
@@ -491,7 +491,7 @@ var HaclWasm = (function() {
   };
 
   var heapReadLayout = (layout, ptr) => {
-    console.log("heapReadLayout", layout, loader.p32(ptr));
+    // console.log("heapReadLayout", layout, loader.p32(ptr));
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
@@ -534,7 +534,7 @@ var HaclWasm = (function() {
   };
 
   var stackWriteLayout = (layout, v) => {
-    console.log("stackWriteLayout", layout, v);
+    // console.log("stackWriteLayout", layout, v);
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
@@ -631,8 +631,6 @@ var HaclWasm = (function() {
         } else if (arg.kind === "output") {
           arg_byte_buffer = new (array_type(arg.type))(size);
         }
-        console.log(args);
-        console.log(arg.type, arg_byte_buffer, size, arg.name);
         check_array_type(arg.type, arg_byte_buffer, size, arg.name);
         // TODO: this copy is un-necessary in the case of output buffers.
         return debug("array", copy_array_to_stack(arg.type, arg_byte_buffer, i));
@@ -675,8 +673,8 @@ var HaclWasm = (function() {
     }
     var call_return = Module[proto.module][func_name](...args);
 
-    console.log("After function call");
-    loader.dump(Module.Karamel.mem, 256, args[0] - (args[0] % 0x20));
+    // console.log("After function call");
+    // loader.dump(Module.Karamel.mem, 256, args[0] - (args[0] % 0x20));
     //loader.dump(Module.Karamel.mem, 256, call_return - (call_return % 0x20));
 
     // Populating the JS buffers returned with their values read from Wasm memory
@@ -728,7 +726,7 @@ var HaclWasm = (function() {
     }
     if (proto.return.type === "uint64") {
       // krml convention: uint64s are sent over as two uint32s
-      console.log(call_return);
+      // console.log(call_return);
       return [BigInt(call_return[0]>>>0) + (BigInt(call_return[1]>>>0) << 32n), return_buffers].flat();
     }
     if (proto.return.type === "void") {
