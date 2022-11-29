@@ -263,7 +263,8 @@ var HaclWasm = (function() {
           'buffer(uint64)', or the name of a struct starting with an uppercase;
           for the latter case, this is understood to be a pointer (the WASM API
           does not take structs by value), and we assume the type is described
-          in layouts.json
+          in layouts.json -- in that case, kind is implicitly assumed to be
+          input, and kind == "output" is understood to mean input-output
         - 'size', see grammar of size fields above
         - 'interface_index', for all `input` that should appear in JS, position
           inside the argument list of the JS function
@@ -436,6 +437,7 @@ var HaclWasm = (function() {
   };
 
   var heapWriteType = (runtime_type, ptr, v) => {
+    console.log("heapWriteType", runtime_type, loader.p32(ptr), v);
     let [ type, data ] = runtime_type;
     switch (type) {
       case "Int":
@@ -449,11 +451,34 @@ var HaclWasm = (function() {
           heapWriteInt("A32", ptr, dst);
           heapWriteBlockFast(data[1][0], dst, v);
           break;
+        } else if (data[0] == "Layout") {
+          let dst = stackWriteLayout(data[1], v);
+          heapWriteInt("A32", ptr, dst);
+          break;
         }
         // pass-through
       default:
-        throw new Error("Not implemented: "+tag);
+        throw new Error("Not implemented: "+type);
     }
+  };
+
+  var lFlatIsTaggedUnion = data => {
+    if (data.fields.length == 2 && data.fields[0][0] == "tag" && data.fields[1][0] == "val") {
+      let [ tag_name, [ tag_ofs, [ tag_type, [ tag_width ]]]] = data.fields[0];
+      if (!(tag_name == "tag" && tag_ofs == "0" && tag_type == "Int" && tag_width == "A32"))
+        throw new Error("Inconsistent tag");
+      let [ val_name, [ val_ofs, [ val_type, val_cases]]] = data.fields[1];
+      if (!(val_name == "val" && val_ofs == "8" && val_type == "Union"))
+        throw new Error("Inconsistent val");
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  var taggedUnionGetCase = (data, tag) => {
+    let [ val_name, [ val_ofs, [ val_type, val_cases]]] = data.fields[1];
+    return val_cases[tag];
   };
 
   var heapReadLayout = (layout, ptr) => {
@@ -461,21 +486,11 @@ var HaclWasm = (function() {
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
-        if (data.fields[0][0] == "tag" && data.fields[1][0] == "val") {
-          // Tagged union detected.
-          console.log("tagged union detected");
-          let [ tag_name, [ tag_ofs, [ tag_type, [ tag_width ]]]] = data.fields[0];
-          if (!(tag_name == "tag" && tag_ofs == "0" && tag_type == "Int" && tag_width == "A32"))
-            throw new Error("Inconsistent tag");
-          let [ val_name, [ val_ofs, [ val_type, val_cases]]] = data.fields[1];
-          if (!(val_name == "val" && val_ofs == "8" && val_type == "Union"))
-            throw new Error("Inconsistent val");
-
+        if (lFlatIsTaggedUnion(data)) {
           let tag = heapReadInt("A32", ptr);
-          console.log("tag", tag, "type of case", val_cases[tag]);
           return ({
             tag,
-            val: heapReadType(val_cases[tag], ptr + 8)
+            val: heapReadType(taggedUnionGetCase(data, tag), ptr + 8)
           });
         } else {
           let o = {};
@@ -494,10 +509,15 @@ var HaclWasm = (function() {
     // console.log(v);
     switch (tag) {
       case "LFlat":
-        data.fields.forEach(([field, [ ofs, typ ]]) => {
-          // console.log("Writing", v[field]);
-          heapWriteType(typ, ptr + ofs, v[field]);
-        });
+        if (lFlatIsTaggedUnion(data)) {
+          heapWriteInt("A32", ptr, v.tag);
+          heapWriteType(taggedUnionGetCase(data, v.tag), ptr + 8, v.val);
+        } else {
+          data.fields.forEach(([field, [ ofs, typ ]]) => {
+            // console.log("Writing", v[field]);
+            heapWriteType(typ, ptr + ofs, v[field]);
+          });
+        }
         break;
       default:
         throw new Error("Not implemented: "+tag);
@@ -505,6 +525,7 @@ var HaclWasm = (function() {
   };
 
   var stackWriteLayout = (layout, v) => {
+    console.log("stackWriteLayout", layout, v);
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
@@ -517,7 +538,7 @@ var HaclWasm = (function() {
   };
 
   // END HELPERS FOR HEAP LAYOUT
-  
+
   // The object being filled:
   // - first level of keys = modules,
   // - second level of keys = functions within a module
@@ -599,6 +620,8 @@ var HaclWasm = (function() {
         } else if (arg.kind === "output") {
           arg_byte_buffer = new (array_type(arg.type))(size);
         }
+        console.log(args);
+        console.log(arg.type, arg_byte_buffer, size, arg.name);
         check_array_type(arg.type, arg_byte_buffer, size, arg.name);
         // TODO: this copy is un-necessary in the case of output buffers.
         return debug("array", copy_array_to_stack(arg.type, arg_byte_buffer, i));
@@ -614,7 +637,8 @@ var HaclWasm = (function() {
         }
       }
 
-      // Layout
+      // Layout... TODO: the "kind" field is unused because we do not have the
+      // case where the caller allocates empty space for a layout.
       if (arg.type[0].toUpperCase() == arg.type[0]) {
         let func_arg = args[arg.interface_index];
         return debug("layout", stackWriteLayout(arg.type, func_arg));
@@ -641,21 +665,26 @@ var HaclWasm = (function() {
     var call_return = Module[proto.module][func_name](...args);
 
     console.log("After function call");
-    //loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
-    loader.dump(Module.Karamel.mem, 256, call_return - (call_return % 0x20));
+    loader.dump(Module.Karamel.mem, 256, args[0] - (args[0] % 0x20));
+    //loader.dump(Module.Karamel.mem, 256, call_return - (call_return % 0x20));
 
     // Populating the JS buffers returned with their values read from Wasm memory
     var return_buffers = args.map(function(pointer, i) {
-      if (proto.args[i].kind === "output") {
-        var protoRet = proto.args[i];
+      let arg = proto.args[i];
+      if (arg.type[0].toUpperCase() == arg.type[0]) {
+        // Layout
+        throw new Error("TODO: implement a readback function or something");
+      } else if (arg.kind === "output") {
+        // Output buffer, allocated by us above, now need to read its contents
+        // out.
         var size;
-        if (typeof protoRet.size === "string") {
-          size = evalSize(protoRet.parsedSize, args_int32s, api_obj);
+        if (typeof arg.size === "string") {
+          size = evalSize(arg.parsedSize, args_int32s, api_obj);
         } else {
-          size = protoRet.size;
+          size = arg.size;
         }
         // console.log("About to read", protoRet.type, loader.p32(pointer), size);
-        let r = read_memory(protoRet.type, pointer, size);
+        let r = read_memory(arg.type, pointer, size);
         // console.log(r);
         return r;
       } else {

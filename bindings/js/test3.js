@@ -24,14 +24,24 @@ function assert(b, msg) {
     throw new Error(msg);
 }
 
+// Assumes ASCII!!
+function stringToUint8Array(s) {
+  let b = new Uint8Array(s.length);
+  (new TextEncoder).encodeInto(s, b);
+  return b;
+}
+
 // Functional test
 // ---------------
 
 const SHA2_256 = 1;
 
 function testEverCryptHash(Hacl) {
-  let s = Hacl.EverCrypt_Hash.create(SHA2_256);
+  let err, s;
+  s = Hacl.EverCrypt_Hash.create(SHA2_256);
   console.log(s);
+  [ err, s ] = Hacl.EverCrypt_Hash.update(s, stringToUint8Array("hello world"));
+  console.log(err, s);
 }
 
 // Initialization

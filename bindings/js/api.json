@@ -3300,6 +3300,38 @@
         "tests": [
         ]
       }
+    },
+    "update": {
+      "module": "EverCrypt_Hash",
+      "custom_module_name": true,
+      "name": "EverCrypt_Hash_Incremental_update",
+
+      "args": [{
+          "name": "state",
+          "kind": "input",
+          "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },{
+          "name": "data",
+          "kind": "input",
+          "type": "buffer",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32"
+        }
+      ],
+      "return": {
+        "type": "uint32",
+        "tests": [
+        ]
+      }
     }
   }
 }
