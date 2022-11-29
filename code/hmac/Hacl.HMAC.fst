@@ -15,7 +15,6 @@ open Spec.Agile.HMAC
 open Spec.Agile.Hash
 open Spec.Hash.Incremental
 open Spec.Hash.Incremental.Definitions
-open Spec.Hash.Incremental.Lemmas
 open Spec.Hash.PadFinish
 open Spec.Hash.Lemmas
 friend Spec.Agile.HMAC

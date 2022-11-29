@@ -23,7 +23,6 @@ include Spec.Hash.Definitions
 include Hacl.Hash.Definitions
 
 open Spec.Hash.Lemmas
-open Spec.Hash.Incremental.Lemmas
 
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 

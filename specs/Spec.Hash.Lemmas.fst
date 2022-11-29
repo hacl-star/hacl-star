@@ -84,7 +84,7 @@ let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s2 / block
           Spec.Blake2.get_blocki a' s2 i;
         }
 
-#push-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 500"
 
 let update_multi_associative_blake (a: blake_alg)
   (h: words_state a)
