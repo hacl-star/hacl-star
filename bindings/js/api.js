@@ -27,8 +27,8 @@ function getModulesPromise(modules=shell.my_modules) {
   ));
 }
 
-// Uncomment for debug
-loader.setMyPrint((x) => {});
+// Comment out for debug
+// loader.setMyPrint((x) => {});
 
 // HELPERS FOR SIZE FIELDS
 // -----------------------
@@ -419,6 +419,7 @@ var HaclWasm = (function() {
   // Eventually will be mutually recursive once Layout is implemented (flat
   // packed structs).
   var heapReadType = (runtime_type, ptr) => {
+    console.log("headReadType", runtime_type, loader.p32(ptr));
     let [ type, data ] = runtime_type;
     switch (type) {
       case "Int":
@@ -426,9 +427,11 @@ var HaclWasm = (function() {
       case "Pointer":
         if (data[0] == "Int")
           return heapReadBlockFast(data[1][0], heapReadInt("A32", ptr));
+        else if (data[0] == "Layout")
+          return heapReadLayout(data[1], heapReadInt("A32", ptr));
         // pass-through
       default:
-        throw new Error("Not implemented: "+tag);
+        throw new Error("Not implemented: "+type+","+data);
     }
   };
 
@@ -454,16 +457,33 @@ var HaclWasm = (function() {
   };
 
   var heapReadLayout = (layout, ptr) => {
-    // console.log(layout);
+    console.log("heapReadLayout", layout, loader.p32(ptr));
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
-        let o = {};
-        // console.log(data);
-        data.fields.forEach(([field, [ ofs, typ ]]) =>
-          o[field] = heapReadType(typ, ptr + ofs)
-        );
-        return o;
+        if (data.fields[0][0] == "tag" && data.fields[1][0] == "val") {
+          // Tagged union detected.
+          console.log("tagged union detected");
+          let [ tag_name, [ tag_ofs, [ tag_type, [ tag_width ]]]] = data.fields[0];
+          if (!(tag_name == "tag" && tag_ofs == "0" && tag_type == "Int" && tag_width == "A32"))
+            throw new Error("Inconsistent tag");
+          let [ val_name, [ val_ofs, [ val_type, val_cases]]] = data.fields[1];
+          if (!(val_name == "val" && val_ofs == "8" && val_type == "Union"))
+            throw new Error("Inconsistent val");
+
+          let tag = heapReadInt("A32", ptr);
+          console.log("tag", tag, "type of case", val_cases[tag]);
+          return ({
+            tag,
+            val: heapReadType(val_cases[tag], ptr + 8)
+          });
+        } else {
+          let o = {};
+          data.fields.forEach(([field, [ ofs, typ ]]) =>
+            o[field] = heapReadType(typ, ptr + ofs)
+          );
+          return o;
+        }
       default:
         throw new Error("Not implemented: "+tag);
     }
@@ -620,8 +640,9 @@ var HaclWasm = (function() {
     }
     var call_return = Module[proto.module][func_name](...args);
 
-    // console.log("After function call");
-    // loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
+    console.log("After function call");
+    //loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
+    loader.dump(Module.Karamel.mem, 256, call_return - (call_return % 0x20));
 
     // Populating the JS buffers returned with their values read from Wasm memory
     var return_buffers = args.map(function(pointer, i) {

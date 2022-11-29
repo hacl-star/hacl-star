@@ -3279,6 +3279,27 @@
       "return": {
         "type": "void"
       }
+    },
+    "create": {
+      "module": "EverCrypt_Hash",
+      "custom_module_name": true,
+      "name": "EverCrypt_Hash_Incremental_create_in",
+
+      "args": [{
+          "name": "hash_alg",
+          "kind": "input",
+          "type": "uint32",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "kind": "layout",
+        "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+        "tests": [
+        ]
+      }
     }
   }
 }
