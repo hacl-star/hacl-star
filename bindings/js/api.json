@@ -3280,6 +3280,26 @@
         "type": "void"
       }
     },
+    "alg_of_state": {
+      "module": "EverCrypt_Hash",
+      "custom_module_name": true,
+      "name": "EverCrypt_Hash_Incremental_alg_of_state",
+
+      "args": [{
+          "name": "state",
+          "kind": "input",
+          "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "uint32",
+        "tests": [
+        ]
+      }
+    },
     "create": {
       "module": "EverCrypt_Hash",
       "custom_module_name": true,
@@ -3308,7 +3328,7 @@
 
       "args": [{
           "name": "state",
-          "kind": "input",
+          "kind": "output",
           "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
           "interface_index": 0,
           "tests": [
@@ -3329,6 +3349,33 @@
       ],
       "return": {
         "type": "uint32",
+        "tests": [
+        ]
+      }
+    },
+    "finish": {
+      "module": "EverCrypt_Hash",
+      "custom_module_name": true,
+      "name": "EverCrypt_Hash_Incremental_finish",
+
+      "args": [{
+          "name": "state",
+          "kind": "input",
+          "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },{
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": "EverCrypt_Hash.hash_len(EverCrypt_Hash.alg_of_state(state))",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
         "tests": [
         ]
       }

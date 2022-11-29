@@ -55,7 +55,7 @@ var parseApp = (arg) => {
   let i = arg.indexOf("(");
   let [ m, f ] = arg.substr(0, i).split(".");
   let x = arg.substr(i+1, arg.length - 1 - i - 1);
-  return [ "App", m, f, x ];
+  return [ "App", m, f, parseSize(x) ];
 }
 
 var parseSize = (arg) => {
@@ -104,9 +104,10 @@ var evalSize = function(parsedSize, args_int32s, api) {
         throw new Error("For size "+parsedSize+", module "+m+" is unknown");
       if (!(f in api[m]))
         throw new Error("For size "+parsedSize+", function "+m+"."+f+" is unknown");
-      if (!(x in args_int32s))
-        throw new Error("For size "+parsedSize+", module "+x+" is unknown");
-      return api[m][f](args_int32s[x])[0];
+      console.log("RECURSIVE EVAL SIZE ENTER: ", x);
+      x = evalSize(x, args_int32s, api);
+      console.log("RECURSIVE EVAL SIZE END: ", x);
+      return api[m][f](x)[0];
     }
   }
 };
@@ -333,6 +334,13 @@ var HaclWasm = (function() {
     return m32[ptr/4-2]-8;
   };
 
+  // We adopt a uniform layout and length-tag buffers upon copying them onto the
+  // stack. This allows reading back layouts safely after they're modified.
+  var heapWriteBlockSize = (ptr, sz) => {
+    var m32 = new Uint32Array(Module.Karamel.mem.buffer)
+    return m32[ptr/4-2] = sz + 8;
+  };
+
   var heapReadBuffer = (type, ptr) => {
     // Pointer points to the actual data, header is 8 bytes before, length in
     // header includes header. Heap base pointers are always aligned on 8 byte
@@ -447,9 +455,10 @@ var HaclWasm = (function() {
         if (data[0] == "Int") {
           let sz = v.buffer.byteLength;
           // NB: could be more precise with alignment, I guess
-          let dst = loader.reserve(Module.Karamel.mem, sz, 8);
+          let dst = loader.reserve(Module.Karamel.mem, sz + 8, 8) + 8;
           heapWriteInt("A32", ptr, dst);
           heapWriteBlockFast(data[1][0], dst, v);
+          heapWriteBlockSize(dst, sz);
           break;
         } else if (data[0] == "Layout") {
           let dst = stackWriteLayout(data[1], v);
@@ -579,12 +588,14 @@ var HaclWasm = (function() {
         if (var_ in args_int32s && var_value != args_int32s[var_])
           throw new Error("Inconsistency in sizes; previously, "+var_+"="+args_int32s[var_]+"; now "+var_value);
         args_int32s[var_] = var_value;
-      } else if (arg.type === "uint32" && arg.interface_index !== undefined) {
+      } else if (arg.interface_index !== undefined) {
         // API contains e.g.:
         //   { "name": "len", "interface_index": 3 },
         //   { "name": "buf", "type": "buffer", "size": "len", "kind": "output" }
         // We know we will need `len` below when trying to allocate an array for
         // `output` -- insert it into the table.
+        // Note: we are quite lax and don't require that a length be a uint32,
+        // it's sometimes useful to allow it to be anything, like an address.
         args_int32s[arg.name] = args[arg.interface_index];
       }
     });
@@ -671,9 +682,9 @@ var HaclWasm = (function() {
     // Populating the JS buffers returned with their values read from Wasm memory
     var return_buffers = args.map(function(pointer, i) {
       let arg = proto.args[i];
-      if (arg.type[0].toUpperCase() == arg.type[0]) {
+      if (arg.type[0].toUpperCase() == arg.type[0] && arg.kind == "output") {
         // Layout
-        throw new Error("TODO: implement a readback function or something");
+        return heapReadLayout(arg.type, pointer);
       } else if (arg.kind === "output") {
         // Output buffer, allocated by us above, now need to read its contents
         // out.
