@@ -243,9 +243,28 @@ let update_224_256 hash block =
 
 #pop-options
 
-let update_multi_224_256 hash blocks =
-  admit()
-  (* TODO
+#push-options "--fuel 1"
+let update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): Lemma
+  (ensures (Spec.Agile.Hash.update_multi a h () input) == (Spec.Agile.Hash.update a h input))
+=
+  let h1 = Spec.Agile.Hash.update_multi a h () input in
+  assert(h1 == Lib.UpdateMulti.mk_update_multi (block_length a) (Spec.Agile.Hash.update a) h input);
+  if S.length input = 0 then
+    begin
+    assert(h1 == h)
+    end
+  else
+    begin
+    let block, rem = Lib.UpdateMulti.split_block (block_length a) input 1 in
+    let h2 = Spec.Agile.Hash.update a h block in
+    assert(rem `Seq.equal` Seq.empty);
+    assert(block `Seq.equal` input);
+    let h3 = Lib.UpdateMulti.mk_update_multi (block_length a) (Spec.Agile.Hash.update a) h2 rem in
+    assert(h1 == h3)
+    end
+#pop-options
+
+let rec update_multi_224_256 hash blocks =
   let a = SHA2_256 in
   let a' = SHA2_224 in
   assert_norm (words_state a == words_state a');
@@ -272,4 +291,3 @@ let update_multi_224_256 hash blocks =
     assert(hash1 == hash2);
     update_multi_224_256 hash1 blocks_end
     end
-*)
