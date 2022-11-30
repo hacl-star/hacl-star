@@ -27,7 +27,7 @@ function getModulesPromise(modules=shell.my_modules) {
   ));
 }
 
-// Uncomment for debug
+// Comment out for debug
 loader.setMyPrint((x) => {});
 
 // HELPERS FOR SIZE FIELDS
@@ -55,7 +55,7 @@ var parseApp = (arg) => {
   let i = arg.indexOf("(");
   let [ m, f ] = arg.substr(0, i).split(".");
   let x = arg.substr(i+1, arg.length - 1 - i - 1);
-  return [ "App", m, f, x ];
+  return [ "App", m, f, parseSize(x) ];
 }
 
 var parseSize = (arg) => {
@@ -104,9 +104,10 @@ var evalSize = function(parsedSize, args_int32s, api) {
         throw new Error("For size "+parsedSize+", module "+m+" is unknown");
       if (!(f in api[m]))
         throw new Error("For size "+parsedSize+", function "+m+"."+f+" is unknown");
-      if (!(x in args_int32s))
-        throw new Error("For size "+parsedSize+", module "+x+" is unknown");
-      return api[m][f](args_int32s[x])[0];
+      // console.log("RECURSIVE EVAL SIZE ENTER: ", x);
+      x = evalSize(x, args_int32s, api);
+      // console.log("RECURSIVE EVAL SIZE END: ", x);
+      return api[m][f](x)[0];
     }
   }
 };
@@ -263,7 +264,8 @@ var HaclWasm = (function() {
           'buffer(uint64)', or the name of a struct starting with an uppercase;
           for the latter case, this is understood to be a pointer (the WASM API
           does not take structs by value), and we assume the type is described
-          in layouts.json
+          in layouts.json -- in that case, kind is implicitly assumed to be
+          input, and kind == "output" is understood to mean input-output
         - 'size', see grammar of size fields above
         - 'interface_index', for all `input` that should appear in JS, position
           inside the argument list of the JS function
@@ -330,6 +332,13 @@ var HaclWasm = (function() {
   var heapReadBlockSize = (ptr) => {
     var m32 = new Uint32Array(Module.Karamel.mem.buffer)
     return m32[ptr/4-2]-8;
+  };
+
+  // We adopt a uniform layout and length-tag buffers upon copying them onto the
+  // stack. This allows reading back layouts safely after they're modified.
+  var heapWriteBlockSize = (ptr, sz) => {
+    var m32 = new Uint32Array(Module.Karamel.mem.buffer)
+    return m32[ptr/4-2] = sz + 8;
   };
 
   var heapReadBuffer = (type, ptr) => {
@@ -419,6 +428,7 @@ var HaclWasm = (function() {
   // Eventually will be mutually recursive once Layout is implemented (flat
   // packed structs).
   var heapReadType = (runtime_type, ptr) => {
+    // console.log("headReadType", runtime_type, loader.p32(ptr));
     let [ type, data ] = runtime_type;
     switch (type) {
       case "Int":
@@ -426,13 +436,16 @@ var HaclWasm = (function() {
       case "Pointer":
         if (data[0] == "Int")
           return heapReadBlockFast(data[1][0], heapReadInt("A32", ptr));
+        else if (data[0] == "Layout")
+          return heapReadLayout(data[1], heapReadInt("A32", ptr));
         // pass-through
       default:
-        throw new Error("Not implemented: "+tag);
+        throw new Error("Not implemented: "+type+","+data);
     }
   };
 
   var heapWriteType = (runtime_type, ptr, v) => {
+    // console.log("heapWriteType", runtime_type, loader.p32(ptr), v);
     let [ type, data ] = runtime_type;
     switch (type) {
       case "Int":
@@ -442,28 +455,59 @@ var HaclWasm = (function() {
         if (data[0] == "Int") {
           let sz = v.buffer.byteLength;
           // NB: could be more precise with alignment, I guess
-          let dst = loader.reserve(Module.Karamel.mem, sz, 8);
+          let dst = loader.reserve(Module.Karamel.mem, sz + 8, 8) + 8;
           heapWriteInt("A32", ptr, dst);
           heapWriteBlockFast(data[1][0], dst, v);
+          heapWriteBlockSize(dst, sz);
+          break;
+        } else if (data[0] == "Layout") {
+          let dst = stackWriteLayout(data[1], v);
+          heapWriteInt("A32", ptr, dst);
           break;
         }
         // pass-through
       default:
-        throw new Error("Not implemented: "+tag);
+        throw new Error("Not implemented: "+type);
     }
   };
 
+  var lFlatIsTaggedUnion = data => {
+    if (data.fields.length == 2 && data.fields[0][0] == "tag" && data.fields[1][0] == "val") {
+      let [ tag_name, [ tag_ofs, [ tag_type, [ tag_width ]]]] = data.fields[0];
+      if (!(tag_name == "tag" && tag_ofs == "0" && tag_type == "Int" && tag_width == "A32"))
+        throw new Error("Inconsistent tag");
+      let [ val_name, [ val_ofs, [ val_type, val_cases]]] = data.fields[1];
+      if (!(val_name == "val" && val_ofs == "8" && val_type == "Union"))
+        throw new Error("Inconsistent val");
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  var taggedUnionGetCase = (data, tag) => {
+    let [ val_name, [ val_ofs, [ val_type, val_cases]]] = data.fields[1];
+    return val_cases[tag];
+  };
+
   var heapReadLayout = (layout, ptr) => {
-    // console.log(layout);
+    // console.log("heapReadLayout", layout, loader.p32(ptr));
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
-        let o = {};
-        // console.log(data);
-        data.fields.forEach(([field, [ ofs, typ ]]) =>
-          o[field] = heapReadType(typ, ptr + ofs)
-        );
-        return o;
+        if (lFlatIsTaggedUnion(data)) {
+          let tag = heapReadInt("A32", ptr);
+          return ({
+            tag,
+            val: heapReadType(taggedUnionGetCase(data, tag), ptr + 8)
+          });
+        } else {
+          let o = {};
+          data.fields.forEach(([field, [ ofs, typ ]]) =>
+            o[field] = heapReadType(typ, ptr + ofs)
+          );
+          return o;
+        }
       default:
         throw new Error("Not implemented: "+tag);
     }
@@ -474,10 +518,15 @@ var HaclWasm = (function() {
     // console.log(v);
     switch (tag) {
       case "LFlat":
-        data.fields.forEach(([field, [ ofs, typ ]]) => {
-          // console.log("Writing", v[field]);
-          heapWriteType(typ, ptr + ofs, v[field]);
-        });
+        if (lFlatIsTaggedUnion(data)) {
+          heapWriteInt("A32", ptr, v.tag);
+          heapWriteType(taggedUnionGetCase(data, v.tag), ptr + 8, v.val);
+        } else {
+          data.fields.forEach(([field, [ ofs, typ ]]) => {
+            // console.log("Writing", v[field]);
+            heapWriteType(typ, ptr + ofs, v[field]);
+          });
+        }
         break;
       default:
         throw new Error("Not implemented: "+tag);
@@ -485,6 +534,7 @@ var HaclWasm = (function() {
   };
 
   var stackWriteLayout = (layout, v) => {
+    // console.log("stackWriteLayout", layout, v);
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
@@ -497,7 +547,7 @@ var HaclWasm = (function() {
   };
 
   // END HELPERS FOR HEAP LAYOUT
-  
+
   // The object being filled:
   // - first level of keys = modules,
   // - second level of keys = functions within a module
@@ -538,12 +588,14 @@ var HaclWasm = (function() {
         if (var_ in args_int32s && var_value != args_int32s[var_])
           throw new Error("Inconsistency in sizes; previously, "+var_+"="+args_int32s[var_]+"; now "+var_value);
         args_int32s[var_] = var_value;
-      } else if (arg.type === "uint32" && arg.interface_index !== undefined) {
+      } else if (arg.interface_index !== undefined) {
         // API contains e.g.:
         //   { "name": "len", "interface_index": 3 },
         //   { "name": "buf", "type": "buffer", "size": "len", "kind": "output" }
         // We know we will need `len` below when trying to allocate an array for
         // `output` -- insert it into the table.
+        // Note: we are quite lax and don't require that a length be a uint32,
+        // it's sometimes useful to allow it to be anything, like an address.
         args_int32s[arg.name] = args[arg.interface_index];
       }
     });
@@ -594,7 +646,8 @@ var HaclWasm = (function() {
         }
       }
 
-      // Layout
+      // Layout... TODO: the "kind" field is unused because we do not have the
+      // case where the caller allocates empty space for a layout.
       if (arg.type[0].toUpperCase() == arg.type[0]) {
         let func_arg = args[arg.interface_index];
         return debug("layout", stackWriteLayout(arg.type, func_arg));
@@ -621,20 +674,26 @@ var HaclWasm = (function() {
     var call_return = Module[proto.module][func_name](...args);
 
     // console.log("After function call");
-    // loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
+    // loader.dump(Module.Karamel.mem, 256, args[0] - (args[0] % 0x20));
+    //loader.dump(Module.Karamel.mem, 256, call_return - (call_return % 0x20));
 
     // Populating the JS buffers returned with their values read from Wasm memory
     var return_buffers = args.map(function(pointer, i) {
-      if (proto.args[i].kind === "output") {
-        var protoRet = proto.args[i];
+      let arg = proto.args[i];
+      if (arg.type[0].toUpperCase() == arg.type[0] && arg.kind == "output") {
+        // Layout
+        return heapReadLayout(arg.type, pointer);
+      } else if (arg.kind === "output") {
+        // Output buffer, allocated by us above, now need to read its contents
+        // out.
         var size;
-        if (typeof protoRet.size === "string") {
-          size = evalSize(protoRet.parsedSize, args_int32s, api_obj);
+        if (typeof arg.size === "string") {
+          size = evalSize(arg.parsedSize, args_int32s, api_obj);
         } else {
-          size = protoRet.size;
+          size = arg.size;
         }
         // console.log("About to read", protoRet.type, loader.p32(pointer), size);
-        let r = read_memory(protoRet.type, pointer, size);
+        let r = read_memory(arg.type, pointer, size);
         // console.log(r);
         return r;
       } else {
@@ -667,7 +726,7 @@ var HaclWasm = (function() {
     }
     if (proto.return.type === "uint64") {
       // krml convention: uint64s are sent over as two uint32s
-      console.log(call_return);
+      // console.log(call_return);
       return [BigInt(call_return[0]>>>0) + (BigInt(call_return[1]>>>0) << 32n), return_buffers].flat();
     }
     if (proto.return.type === "void") {
