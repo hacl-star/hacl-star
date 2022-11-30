@@ -318,7 +318,7 @@ let generate a output st n additional_input_len additional_input =
     mk_generate Hacl.HMAC.compute_sha2_512 output st n
       additional_input_len additional_input
 
-let free s =
+let free #_ s =
   let State k v ctr = s in
   B.free (k <: B.buffer uint8);
   B.free (v <: B.buffer uint8);

@@ -243,6 +243,7 @@ val mk_generate: #a:supported_alg -> HMAC.compute_st a -> generate_st a
 @param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from."]
 val generate: a:supported_alg -> generate_st a
 
+inline_for_extraction noextract
 let free_st (a: supported_alg) =
   s:state a -> ST unit
   (requires fun h0 ->
