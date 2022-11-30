@@ -129,7 +129,6 @@ typedef struct {
   double total_appr_ff;
 } total_number_of_ops;
 
-// TODO: rename [main] with [fw] or [double_fw]
 typedef struct {
   bool is_print;
   bool is_print_precomp_g_large; // a large static precomputed table for a
@@ -348,7 +347,7 @@ count_number_of_ops_4_ecsm_loop_l_diff(table_precomp_params tp,
   return res;
 }
 
-// 1 ECSM: [main], [precomp_g] + [wnaf]
+// 1 ECSM: [fw], [fw_precomp_g] + [wnaf]/[signed]/[unsigned]
 static inline total_number_of_ops
 count_number_of_ops_1_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits) {
@@ -360,7 +359,8 @@ count_number_of_ops_1_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
   return print_number_of_point_ops(is_print, is_ec_ops, cs, tp, res);
 }
 
-// 2 ECSM: [main], [precomp_g], [precomp_g_large] + [wnaf]
+// 2 ECSM: [double_fw], [double_fw_precomp_g], [double_fw_precomp_g_large] +
+// [wnaf]/[signed]/[unsigned]
 static inline total_number_of_ops
 count_number_of_ops_2_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits) {
@@ -377,7 +377,8 @@ count_number_of_ops_2_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
   return print_number_of_point_ops(is_print, is_ec_ops, cs, tp, res);
 }
 
-// 4 ECSM: [glv], [glv_precomp_g], [glv_precomp_g_large] + [wnaf]
+// 4 ECSM: [glv], [glv_precomp_g], [glv_precomp_g_large] +
+// [wnaf]/[signed]/[unsigned]
 static inline total_number_of_ops
 count_number_of_ops_4_ecsm(bool is_print, bool is_ec_ops, cost_of_ec_ops cs,
                            table_precomp_params tp, uint32_t bBits_glv) {
@@ -569,7 +570,7 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
   total_number_of_ops res_precomp_g[N_LEN];
   total_number_of_ops res_precomp_g_large[N_LEN_G];
 
-  printf("\n[main] %s precomp_table_g is computed in 2 ECSM \n", repr_str);
+  printf("\n[double_fw] %s precomp_table_g is computed in 2 ECSM \n", repr_str);
   is_precomp_g_const = false;
   is_diff_window_g = false; // ==> N_LEN
   print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
@@ -612,8 +613,8 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
 
     print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
                                       po.scalar_repr);
-    printf("%-5s %-10s %-10s %-10s %-10s \n", "w", "main", "precomp_g", "glv",
-           "glv_precomp_g");
+    printf("%-5s %-10s %-10s %-10s %-10s \n", "w", "double_fw", "precomp_g",
+           "glv", "glv_precomp_g");
     print_end_line(true);
     for (int i = N_MIN; i < N_MAX; i++) {
       printf("%-5d %-10.2f %-10.2f %-10.2f %-10.2f\n", i, appr_main[i - N_MIN],
@@ -624,7 +625,7 @@ void print_statistics(print_total_number_of_ops po, cost_of_ec_ops cs,
   } else {
     print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
                                       po.scalar_repr);
-    printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
+    printf("%-5s %-10s %-15s \n", "w", "double_fw", "precomp_g");
     print_end_line(true);
     for (int i = N_MIN; i < N_MAX; i++) {
       printf("%-5d %-15.2f %-15.2f \n", i, appr_main[i - N_MIN],
@@ -645,7 +646,7 @@ void print_statistics_1(print_total_number_of_ops po, cost_of_ec_ops cs,
   total_number_of_ops res_main[N_LEN];
   total_number_of_ops res_precomp_g[N_LEN];
 
-  printf("\n[main] %s precomp_table_g is computed in 1 ECSM \n", repr_str);
+  printf("\n[fw] %s precomp_table_g is computed in 1 ECSM \n", repr_str);
   is_precomp_g_const = false;
   print_count_number_of_ops_n_ecsm(po, cs, bBits, is_precomp_g_const,
                                    is_diff_window_g, 1, res_main);
@@ -663,7 +664,7 @@ void print_statistics_1(print_total_number_of_ops po, cost_of_ec_ops cs,
 
   print_header_for_aggregated_table(po.is_ec_ops, cs.ratio_ec, cs.ratio_ff,
                                     po.scalar_repr);
-  printf("%-5s %-10s %-15s \n", "w", "main", "precomp_g");
+  printf("%-5s %-10s %-15s \n", "w", "fw", "precomp_g");
   print_end_line(true);
   for (int i = N_MIN; i < N_MAX; i++) {
     printf("%-5d %-15.2f %-15.2f \n", i, appr_main[i - N_MIN],
@@ -707,41 +708,55 @@ int main() {
   cs_secp256k1.ratio_ff = 0.85;
 
   printf("\n\n[projective] secp256k1-ecdsa-verify:\n");
-  // [main], [precomp_g], [glv], [glv_precomp_g], [precomp_g_large],
-  // [glv_precomp_g_large]
+  // [double_fw], [double_fw_precomp_g], [double_fw_precomp_g_large]
+  // [glv], [glv_precomp_g], [glv_precomp_g_large]
   print_statistics(print_secp256k1, cs_secp256k1, bBits_secp256k1,
                    bBits_glv_secp256k1);
 
-  printf("\n\n[projective] secp256k1-ecdsa-sign:\n");
-  // [main], [precomp_g]
-  print_statistics_1(print_secp256k1, cs_secp256k1, bBits_secp256k1);
+  // we're using four_fw with four precomputed tables now
+  // printf("\n\n[projective] secp256k1-ecdsa-sign:\n");
+  // [fw], [fw_precomp_g]
+  // print_statistics_1(print_secp256k1, cs_secp256k1, bBits_secp256k1);
 
   printf("\n\n");
   print_end_line(true);
   print_end_line(true);
 
-  printf("\n\n [jacobian-mixed] secp256k1-ecdsa-verify:\n");
+  // TODO: account for making a precomputed table with Z = 1
+  /* printf("\n\n [jacobian-mixed] secp256k1-ecdsa-verify:\n"); */
+  /* cost_of_ec_ops cs_secp256k1_jac_mixed; */
+  /* cs_secp256k1_jac_mixed.ratio_ff = 0.85; */
+  /* cs_secp256k1_jac_mixed.ratio_ec = 0.6; // for mixed */
+  /* cs_secp256k1_jac_mixed.padd_fmul = 8U; // for mixed */
+  /* cs_secp256k1_jac_mixed.padd_fsqr = 3U; // for mixed */
+  /* cs_secp256k1_jac_mixed.pdouble_fmul = 3U; */
+  /* cs_secp256k1_jac_mixed.pdouble_fsqr = 4U; */
+
+  /* // [double_fw], [double_fw_precomp_g], [double_fw_precomp_g_large] */
+  /* // [glv], [glv_precomp_g], [glv_precomp_g_large] */
+  /* print_statistics(print_secp256k1, cs_secp256k1_jac_mixed, bBits_secp256k1,
+   */
+  /*                  bBits_glv_secp256k1); */
+
+  /* printf("\n\n"); */
+  /* print_end_line(true); */
+  /* print_end_line(true); */
+
+  /*
+  printf("\n\n [jacobian] secp256k1-ecdsa-verify:\n");
   cost_of_ec_ops cs_secp256k1_jac;
   cs_secp256k1_jac.ratio_ff = 0.85;
-  cs_secp256k1_jac.ratio_ec = 0.6; // for mixed
-  cs_secp256k1_jac.padd_fmul = 8U; // for mixed
-  cs_secp256k1_jac.padd_fsqr = 3U; // for mixed
+  cs_secp256k1_jac.ratio_ec = 0.42;
+  cs_secp256k1_jac.padd_fmul = 12U;
+  cs_secp256k1_jac.padd_fsqr = 4U;
   cs_secp256k1_jac.pdouble_fmul = 3U;
   cs_secp256k1_jac.pdouble_fsqr = 4U;
 
-  // printf("\n\n [jacobian] secp256k1-ecdsa-verify:\n");
-  // cost_of_ec_ops cs_secp256k1_jac;
-  // cs_secp256k1_jac.ratio_ff = 0.85;
-  // cs_secp256k1_jac.ratio_ec = 0.42;
-  // cs_secp256k1_jac.padd_fmul = 12U;
-  // cs_secp256k1_jac.padd_fsqr = 4U;
-  // cs_secp256k1_jac.pdouble_fmul = 3U;
-  // cs_secp256k1_jac.pdouble_fsqr = 4U;
-
-  // [main], [precomp_g], [glv], [glv_precomp_g], [precomp_g_large],
-  // [glv_precomp_g_large]
+  // [double_fw], [double_fw_precomp_g], [double_fw_precomp_g_large]
+  // [glv], [glv_precomp_g], [glv_precomp_g_large]
   print_statistics(print_secp256k1, cs_secp256k1_jac, bBits_secp256k1,
                    bBits_glv_secp256k1);
+  */
 
   // For ed25519, it's better to set `is_ec_ops_secp256k1 = true`,
   // as we don't compare different point addition and doubling formulas
@@ -764,12 +779,13 @@ int main() {
   cs_ed25519.ratio_ec = 0.83;
 
   printf("\n\nHACL ed25519-verify:\n");
-  // [main], [precomp_g], [precomp_g_large]
+  // [double_fw], [double_fw_precomp_g], [double_fw_precomp_g_large]
   print_statistics(print_ed25519, cs_ed25519, bBits_ed25519, bBits_glv_ed25519);
 
-  printf("\n\nHACL ed25519-sign:\n");
-  // [main], [precomp_g]
-  print_statistics_1(print_ed25519, cs_ed25519, bBits_ed25519);
+  // we're using four_fw with four precomputed tables now
+  // printf("\n\nHACL ed25519-sign:\n");
+  // [fw], [fw_precomp_g]
+  // print_statistics_1(print_ed25519, cs_ed25519, bBits_ed25519);
 
   return EXIT_SUCCESS;
 }
