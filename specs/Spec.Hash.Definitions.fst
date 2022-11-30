@@ -199,7 +199,7 @@ let state_word_length a =
 inline_for_extraction
 let extra_state a = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
-  | Blake2S | Blake2B -> nat
+  | Blake2S | Blake2B -> n:nat { n % block_length a = 0 }
 
 (* The working state *)
 inline_for_extraction

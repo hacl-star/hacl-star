@@ -27,8 +27,8 @@ inline_for_extraction noextract
 let extra_state (a:hash_alg) : Type0 =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
-  | Blake2S -> uint_t U64 SEC
-  | Blake2B -> uint_t U128 SEC
+  | Blake2S -> s:uint_t U64 SEC { v s % block_length a = 0 }
+  | Blake2B -> s:uint_t U128 SEC { v s % block_length a = 0 }
 
 inline_for_extraction noextract
 let ev_v (#a:hash_alg) (ev:extra_state a) : Spec.Hash.Definitions.extra_state a =
@@ -141,19 +141,6 @@ let blocks_t (a: hash_alg) =
 
 let hash_t (a: hash_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 
-// The proper way to generate an extra state from a constant nat.
-noextract inline_for_extraction
-let const_nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= maxint U64}) :
-  extra_state a =
-  match a with
-  | Blake2S -> mk_int #U64 #SEC n
-  | Blake2B -> cast U128 SEC (mk_int #U64 #SEC n)
-
-noextract inline_for_extraction
-let initial_extra_state (a:hash_alg) : extra_state a =
-  if is_blake a then const_nat_to_extra_state a 0
-  else ()
-
 (** The types of all stateful operations for a hash algorithm. *)
 
 noextract inline_for_extraction
@@ -227,32 +214,53 @@ let update_multi_st (i:impl) =
       as_seq h1 s ==
         Spec.Agile.Hash.update_multi (get_alg i) (as_seq h0 s) (ev_v ev) (B.as_seq h0 blocks)))
 
+let prev_len_t (a: hash_alg) =
+  if is_sha3 a then
+    unit
+  else
+    prev_len:len_t a { len_v a prev_len % block_length a = 0 }
+
+let prev_len_v #a (prev_len: prev_len_t a): Spec.Hash.Incremental.Definitions.prev_length_t a
+=
+  if is_sha3 a then
+    ()
+  else
+    len_v a prev_len
+
+let extra_state_of_prev_length #a (x: Spec.Hash.Incremental.Definitions.prev_length_t a): Spec.Agile.Hash.extra_state a =
+  match a with
+  | Blake2B | Blake2S -> x
+  | _ -> ()
+
 noextract inline_for_extraction
 let update_last_st (i:impl) =
+  let a = get_alg i in
   s:state i ->
-  ev:extra_state (get_alg i) ->
-  prev_len:len_t (get_alg i) { len_v (get_alg i) prev_len % block_length (get_alg i) = 0 } ->
-  input:B.buffer uint8 { (B.length input + len_v (get_alg i) prev_len) `less_than_max_input_length` (get_alg i) /\ B.length input <= block_length (get_alg i) } ->
+  prev_len:prev_len_t a ->
+  input:B.buffer uint8 {
+    (if is_sha3 a then True else (B.length input + len_v a prev_len) `less_than_max_input_length` a) /\
+    B.length input <= block_length a
+  } ->
   input_len:size_t { B.length input = v input_len } ->
-  ST.Stack (extra_state (get_alg i))
+  ST.Stack (extra_state a)
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input /\
-      Spec.Agile.Hash.update_multi_pre (get_alg i) (as_seq h s) (ev_v ev) (B.as_seq h input)))
+      Spec.Agile.Hash.update_multi_pre a (as_seq h s) (extra_state_of_prev_length (prev_len_v prev_len)) (B.as_seq h input)))
     (ensures (fun h0 ev' h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       as_seq h1 s ==
-        Spec.Hash.Incremental.update_last (get_alg i) (as_seq h0 s)
-                                          (len_v (get_alg i) prev_len)
+        Spec.Hash.Incremental.update_last a (as_seq h0 s)
+                                          (prev_len_v prev_len)
                                           (B.as_seq h0 input)))
 
 noextract inline_for_extraction
 let finish_st (i:impl) =
-  s:state i -> ev:extra_state (get_alg i) -> dst:hash_t (get_alg i) -> ST.Stack unit
+  s:state i -> dst:hash_t (get_alg i) -> ST.Stack unit
   (requires (fun h ->
     B.live h s /\ B.live h dst /\ B.disjoint s dst))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst `loc_union` loc_buffer s) h0 h1) /\
-    Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish (get_alg i) (as_seq h0 s, ev))))
+    Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish (get_alg i) (as_seq h0 s))))
 
 noextract inline_for_extraction
 let hash_st (a: hash_alg) =
