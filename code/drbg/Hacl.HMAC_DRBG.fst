@@ -110,7 +110,16 @@ let footprint #a st =
   B.loc_addr_of_buffer k |+| B.loc_addr_of_buffer v |+| B.loc_addr_of_buffer ctr
 
 let invariant #a st h =
-  live h st.k /\ live h st.v /\ live h st.reseed_counter
+  live h st.k /\ live h st.v /\ live h st.reseed_counter /\ (
+  // JP: the disjoint predicate from lib hardcodes loc_buffer instead of
+  // loc_addr_of_buffer, which prevents us from writing a proper free function
+  // (probably why it wasn't written here in the first place)... we add on top
+  // of the lib-style predicate a non-lib-style predicate which allows writing
+  // an actual free function
+  let k = st.k <: B.buffer uint8 in
+  let v = st.v <: B.buffer uint8 in
+  let ctr = st.reseed_counter <: B.buffer size_t in
+  B.(all_disjoint [ loc_addr_of_buffer k; loc_addr_of_buffer v; loc_addr_of_buffer ctr ]))
 
 let repr #a st h =
   S.State (as_seq h st.k) (as_seq h st.v) (v (bget h st.reseed_counter 0))
@@ -308,3 +317,9 @@ let generate a output st n additional_input_len additional_input =
   | SHA2_512 ->
     mk_generate Hacl.HMAC.compute_sha2_512 output st n
       additional_input_len additional_input
+
+let free #_ s =
+  let State k v ctr = s in
+  B.free (k <: B.buffer uint8);
+  B.free (v <: B.buffer uint8);
+  B.free (ctr <: B.buffer size_t)

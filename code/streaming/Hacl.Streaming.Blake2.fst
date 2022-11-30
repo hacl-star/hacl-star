@@ -331,7 +331,7 @@ val update_multi_associative:
       update_multi_s acc prevlen1 input))
 #pop-options
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 400"
 let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let input = S.append input1 input2 in
   let nb = S.length input / U32.v (block_len a) in
@@ -406,6 +406,11 @@ let spec_is_incremental a input =
   let s = init_s a in
   let s1 = Lib.LoopCombinators.repeati n_blocks (Spec.blake2_update1 a 0 input) s in
   let s2 = Lib.LoopCombinators.repeati n_blocks (Spec.blake2_update1 a 0 blocks) s in
+  let aux (i:nat{i < n_blocks}) (acc : t a) : Lemma
+    (Spec.blake2_update1 a 0 input i acc == Spec.blake2_update1 a 0 blocks i acc)
+    = assert (Spec.get_blocki a input i `S.equal` Spec.get_blocki a blocks i)
+  in
+  Classical.forall_intro_2 aux;
   Lib.Sequence.Lemmas.repeati_extensionality n_blocks (Spec.blake2_update1 a 0 input)
     (Spec.blake2_update1 a 0 blocks) s;
   S.lemma_eq_intro (S.slice input (S.length input - l_last) (S.length input)) last;

@@ -130,7 +130,7 @@ let
             sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/$target/configure
           done
 
-          for target in gcc-compatible merkle-tree mozilla msvc-compatible portable-gcc-compatible wasm
+          for target in gcc-compatible mozilla msvc-compatible portable-gcc-compatible wasm
           do
             cp ${info} dist/$target/INFO.txt
           done

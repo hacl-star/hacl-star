@@ -12,7 +12,6 @@ SPECS_DIR 	= $(HACL_HOME)/specs $(addprefix $(HACL_HOME)/specs/,lemmas tests drb
 CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac hkdf drbg hpke sha3 sha2-mb ecdsap256 poly1305 streaming \
   blake2 chacha20 chacha20poly1305 curve25519 tests ed25519 salsa20 nacl-box meta frodo fallback bignum rsapss ffdhe k256)
 EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test test/vectors)
-MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
 # Vale dirs also include directories that only contain .vaf files
 # (for a in $(find vale -iname '*.fst' -or -iname '*.fsti' -or -iname '*.vaf'); do dirname $a; done) | sort | uniq
 VALE_DIRS	= \
@@ -48,7 +47,7 @@ VALE_DIRS	= \
 
 ALL_HACL_SOURCE_DIRS = \
   $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \
-  $(EVERCRYPT_DIRS) $(MERKLE_DIRS) \
+  $(EVERCRYPT_DIRS) \
   $(KRML_HOME)/runtime
 
 ALL_HACL_DIRS	?= $(ALL_HACL_SOURCE_DIRS) $(HACL_HOME)/obj
