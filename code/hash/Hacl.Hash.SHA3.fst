@@ -9,18 +9,15 @@ module ST = FStar.HyperStack.ST
 
 friend Spec.Agile.Hash
 
-let crucial_fact = Spec.SHA3.Incremental.sha3_state_is_hash_state
-
 let init_256 s =
   LowStar.Buffer.fill s (Lib.IntTypes.u64 0) 25ul
 
-inline_for_extraction noextract
-let update_256: update_st (| SHA3_256, () |) = fun s () b ->
-  Hacl.Impl.SHA3.absorb_inner 136ul b s
+let update_multi_256: update_multi_st (| SHA3_256, () |) = fun s () blocks n_blocks ->
+  // Lib.Buffer.loop_blocks (block_len SHA3_256) (n_blocks `FStar.UInt32.mul` block_len SHA3_256) blocks ...
+  // Loops.repeati absorb_inner + proof that 
+  admit ()
 
-let update_multi_256: update_multi_st (| SHA3_256, () |) = Hacl.Hash.MD.mk_update_multi SHA3_256 update_256
-
-let update_last_256: update_last_st (| SHA3_256, () |) = fun s () () input input_len ->
+let update_last_256: update_last_st (| SHA3_256, () |) = fun s () input input_len ->
   let open Lib.IntTypes in
   if input_len = 136ul then begin
     Hacl.Impl.SHA3.absorb_inner 136ul input s;
