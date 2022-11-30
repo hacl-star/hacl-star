@@ -25,7 +25,6 @@
 #include "internal/Hacl_Ed25519.h"
 
 #include "internal/Hacl_Streaming_SHA2.h"
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Curve25519_51.h"
 
 static inline void fsum(uint64_t *out, uint64_t *a, uint64_t *b)

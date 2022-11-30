@@ -45,7 +45,7 @@ let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
     Seq.length l = rem /\
     rem <= block_length a /\
     Seq.length input = Seq.length bs + rem /\
-    rem = Seq.length input - Seq.length bs /\ 
+    rem = Seq.length input - Seq.length bs /\
     l `S.equal` S.slice input (S.length input - rem) (S.length input) /\
     (Seq.length input <= block_length a ==>
      (nb = 0 /\ rem = Seq.length input))))
@@ -89,7 +89,7 @@ let last_split_blake_get_last_padded_block_eq (a:hash_alg{is_blake a}) (input : 
 let blake2_update_multi_one_block_eq
   (a:hash_alg{is_blake a})
   (block : bytes_block a)
-  (hash : words_state' a) 
+  (hash : words_state' a)
   (totlen : nat{(totlen + block_length a) <= max_extra_state a}) :
   Lemma
   (ensures (
@@ -313,33 +313,6 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
 let repeati_blake2_update1_is_update_multi a nb prev d hash =
   repeati_blake2_update1_is_update_multi_aux a nb prev d hash
 
-/// TODO: duplicate with Hacl.Streaming.Blake2.fst - MOVE
-/// Equality between the state types defined by blake2s and the generic hash.
-/// The below equality is not trivial because of the way types are encoded for Z3.
-val blake2_state_types_equalities (a : hash_alg{is_blake a}) :
-  Lemma(Blake2.state (to_blake_alg a) == words_state' a)
-
-let blake2_state_types_equalities a =
-  let open Lib.Sequence in
-  let open Lib.IntTypes in
-  (* Because of the necessity to be able to normalize, we basically do
-   * the same proof twice. TODO: find a better way *)
-  match a with
-  | Blake2S ->
-    let a = Blake2S in (* small trick to get a proper normalization *)
-    let row = Blake2.row (to_blake_alg a) in
-    assert(Blake2.state (to_blake_alg a) == lseq row 4);
-    assert_norm(words_state' a == m:Seq.seq row {Seq.length m = 4});
-    assert_norm(lseq row 4 == m:Seq.seq row {Seq.length m == 4});
-    assert(lseq row 4 == m:Seq.seq row {Seq.length m = 4})
-  | Blake2B ->
-    let a = Blake2B in
-    let row = Blake2.row (to_blake_alg a) in
-    assert(Blake2.state (to_blake_alg a) == lseq row 4);
-    assert_norm(words_state' a == m:Seq.seq row {Seq.length m = 4});
-    assert_norm(lseq row 4 == m:Seq.seq row {Seq.length m == 4});
-    assert(lseq row 4 == m:Seq.seq row {Seq.length m = 4})
-
 let extra_state_v_nat_to_extra_state_is_id (a : hash_alg{is_blake a})
                                            (n : nat{n <= max_extra_state a}) :
   Lemma(extra_state_v (nat_to_extra_state a n) = n) = ()
@@ -445,8 +418,6 @@ let blake2_is_hash_incremental_aux2 a input s1 =
     (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev0 input) s1,
      nat_to_extra_state a (prev0 + nb * block_length a)) ==
        update_multi a (s1, nat_to_extra_state a prev0) bs);
-  blake2_state_types_equalities a;
-  assert(words_state' a == Blake2.state (to_blake_alg a));
   assert(is2 == ((s2 <: words_state' a), nat_to_extra_state a (prev0 + nb * block_length a)))
 #pop-options
 
@@ -535,7 +506,7 @@ let blake2_is_hash_incremental_aux3 a input s2 =
                                      last_block (fst h'),
      nat_to_extra_state a 0));
   (* Prove the final equality *)
-  assert(s3 == fst is3)  
+  assert(s3 == fst is3)
 #pop-options
 
 val blake2_is_hash_incremental_aux4

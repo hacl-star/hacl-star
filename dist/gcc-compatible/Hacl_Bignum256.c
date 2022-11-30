@@ -24,7 +24,6 @@
 
 #include "Hacl_Bignum256.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /*******************************************************************************

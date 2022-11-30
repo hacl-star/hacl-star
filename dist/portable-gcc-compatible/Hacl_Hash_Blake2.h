@@ -39,16 +39,6 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
-/* SNIPPET_START: Hacl_Impl_Blake2_Core_m_spec */
-
-#define Hacl_Impl_Blake2_Core_M32 0
-#define Hacl_Impl_Blake2_Core_M128 1
-#define Hacl_Impl_Blake2_Core_M256 2
-
-/* SNIPPET_END: Hacl_Impl_Blake2_Core_m_spec */
-
-typedef uint8_t Hacl_Impl_Blake2_Core_m_spec;
-
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b_init */
 
 void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);

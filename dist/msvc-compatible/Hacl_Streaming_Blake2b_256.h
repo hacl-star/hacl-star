@@ -35,11 +35,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Streaming_Blake2.h"
-#include "Hacl_Spec.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2b_256.h"
-#include "Hacl_Hash_Blake2.h"
 
 typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_block_state_s
 {

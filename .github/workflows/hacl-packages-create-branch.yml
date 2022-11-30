@@ -18,13 +18,13 @@ jobs:
           repository: cryspen/hacl-packages
           path: hacl-packages
           token: ${{ secrets.HACL_BOT }}
+      - name: install dependencies
+        run: |
+          sudo apt-get install -y ninja-build
       - name: update hacl-packages
         working-directory: hacl-packages
         run: |
-          rm -r src/* include/*
-          cp ../hacl-star/dist/gcc-compatible/*.c src/
-          cp ../hacl-star/dist/gcc-compatible/*.h include/
-          cp -r ../hacl-star/dist/gcc-compatible/internal include/
+          ./mach update -s ../hacl-star
       - name: push to hacl-packages
         working-directory: hacl-packages
         run: |
