@@ -150,10 +150,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
+      Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
+      Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
       uint32_t nb = (uint32_t)1U;
       Hacl_Blake2b_256_blake2b_update_multi((uint32_t)128U,
-        block_state1.fst,
-        block_state1.snd,
+        wv,
+        hash,
         FStar_UInt128_uint64_to_uint128(prevlen),
         buf,
         nb);
@@ -172,10 +174,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
     uint8_t *data2 = data + data1_len;
+    Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
+    Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)128U;
     Hacl_Blake2b_256_blake2b_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
+      wv,
+      hash,
       FStar_UInt128_uint64_to_uint128(total_len1),
       data1,
       nb);
@@ -237,10 +241,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
+      Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
+      Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
       uint32_t nb = (uint32_t)1U;
       Hacl_Blake2b_256_blake2b_update_multi((uint32_t)128U,
-        block_state1.fst,
-        block_state1.snd,
+        wv,
+        hash,
         FStar_UInt128_uint64_to_uint128(prevlen),
         buf,
         nb);
@@ -265,10 +271,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
     uint32_t data2_len = len - diff - data1_len;
     uint8_t *data11 = data2;
     uint8_t *data21 = data2 + data1_len;
+    Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
+    Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)128U;
     Hacl_Blake2b_256_blake2b_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
+      wv,
+      hash,
       FStar_UInt128_uint64_to_uint128(total_len1),
       data11,
       nb);
@@ -310,9 +318,9 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
     r = (uint32_t)(total_len % (uint64_t)(uint32_t)128U);
   }
   uint8_t *buf_1 = buf_;
-  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv0[4U] KRML_POST_ALIGN(32) = { 0U };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
-  Hacl_Streaming_Blake2b_256_blake2b_256_block_state tmp_block_state = { .fst = wv, .snd = b };
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state tmp_block_state = { .fst = wv0, .snd = b };
   Lib_IntVector_Intrinsics_vec256 *src_b = block_state.snd;
   Lib_IntVector_Intrinsics_vec256 *dst_b = tmp_block_state.snd;
   memcpy(dst_b, src_b, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
@@ -328,17 +336,21 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
+  Lib_IntVector_Intrinsics_vec256 *wv1 = tmp_block_state.fst;
+  Lib_IntVector_Intrinsics_vec256 *hash0 = tmp_block_state.snd;
   uint32_t nb = (uint32_t)0U;
   Hacl_Blake2b_256_blake2b_update_multi((uint32_t)0U,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
+    wv1,
+    hash0,
     FStar_UInt128_uint64_to_uint128(prev_len),
     buf_multi,
     nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
+  Lib_IntVector_Intrinsics_vec256 *wv = tmp_block_state.fst;
+  Lib_IntVector_Intrinsics_vec256 *hash = tmp_block_state.snd;
   Hacl_Blake2b_256_blake2b_update_last(r,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
+    wv,
+    hash,
     FStar_UInt128_uint64_to_uint128(prev_len_last),
     r,
     buf_last);

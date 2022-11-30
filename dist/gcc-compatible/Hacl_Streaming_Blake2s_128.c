@@ -150,13 +150,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
+      Lib_IntVector_Intrinsics_vec128 *wv = block_state1.fst;
+      Lib_IntVector_Intrinsics_vec128 *hash = block_state1.snd;
       uint32_t nb = (uint32_t)1U;
-      Hacl_Blake2s_128_blake2s_update_multi((uint32_t)64U,
-        block_state1.fst,
-        block_state1.snd,
-        prevlen,
-        buf,
-        nb);
+      Hacl_Blake2s_128_blake2s_update_multi((uint32_t)64U, wv, hash, prevlen, buf, nb);
     }
     uint32_t ite;
     if ((uint64_t)len % (uint64_t)(uint32_t)64U == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
@@ -172,13 +169,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
     uint8_t *data2 = data + data1_len;
+    Lib_IntVector_Intrinsics_vec128 *wv = block_state1.fst;
+    Lib_IntVector_Intrinsics_vec128 *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)64U;
-    Hacl_Blake2s_128_blake2s_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
-      total_len1,
-      data1,
-      nb);
+    Hacl_Blake2s_128_blake2s_update_multi(data1_len, wv, hash, total_len1, data1, nb);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
     *p
@@ -237,13 +231,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
+      Lib_IntVector_Intrinsics_vec128 *wv = block_state1.fst;
+      Lib_IntVector_Intrinsics_vec128 *hash = block_state1.snd;
       uint32_t nb = (uint32_t)1U;
-      Hacl_Blake2s_128_blake2s_update_multi((uint32_t)64U,
-        block_state1.fst,
-        block_state1.snd,
-        prevlen,
-        buf,
-        nb);
+      Hacl_Blake2s_128_blake2s_update_multi((uint32_t)64U, wv, hash, prevlen, buf, nb);
     }
     uint32_t ite;
     if
@@ -265,13 +256,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
     uint32_t data2_len = len - diff - data1_len;
     uint8_t *data11 = data2;
     uint8_t *data21 = data2 + data1_len;
+    Lib_IntVector_Intrinsics_vec128 *wv = block_state1.fst;
+    Lib_IntVector_Intrinsics_vec128 *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)64U;
-    Hacl_Blake2s_128_blake2s_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
-      total_len1,
-      data11,
-      nb);
+    Hacl_Blake2s_128_blake2s_update_multi(data1_len, wv, hash, total_len1, data11, nb);
     uint8_t *dst = buf;
     memcpy(dst, data21, data2_len * sizeof (uint8_t));
     *p
@@ -310,9 +298,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
     r = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
   }
   uint8_t *buf_1 = buf_;
-  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
+  KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv0[4U] KRML_POST_ALIGN(16) = { 0U };
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 b[4U] KRML_POST_ALIGN(16) = { 0U };
-  Hacl_Streaming_Blake2s_128_blake2s_128_block_state tmp_block_state = { .fst = wv, .snd = b };
+  Hacl_Streaming_Blake2s_128_blake2s_128_block_state tmp_block_state = { .fst = wv0, .snd = b };
   Lib_IntVector_Intrinsics_vec128 *src_b = block_state.snd;
   Lib_IntVector_Intrinsics_vec128 *dst_b = tmp_block_state.snd;
   memcpy(dst_b, src_b, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
@@ -328,20 +316,14 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
+  Lib_IntVector_Intrinsics_vec128 *wv1 = tmp_block_state.fst;
+  Lib_IntVector_Intrinsics_vec128 *hash0 = tmp_block_state.snd;
   uint32_t nb = (uint32_t)0U;
-  Hacl_Blake2s_128_blake2s_update_multi((uint32_t)0U,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
-    prev_len,
-    buf_multi,
-    nb);
+  Hacl_Blake2s_128_blake2s_update_multi((uint32_t)0U, wv1, hash0, prev_len, buf_multi, nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  Hacl_Blake2s_128_blake2s_update_last(r,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
-    prev_len_last,
-    r,
-    buf_last);
+  Lib_IntVector_Intrinsics_vec128 *wv = tmp_block_state.fst;
+  Lib_IntVector_Intrinsics_vec128 *hash = tmp_block_state.snd;
+  Hacl_Blake2s_128_blake2s_update_last(r, wv, hash, prev_len_last, r, buf_last);
   Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
 }
 

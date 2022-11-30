@@ -185,6 +185,10 @@ static bool is_supported_alg(alg a)
 
 typedef uint8_t error_code;
 
+/**
+Both encryption and decryption require a state that holds the key.
+The state may be reused as many times as desired.
+*/
 typedef struct state_s0_s
 {
   impl impl;
@@ -192,8 +196,43 @@ typedef struct state_s0_s
 }
 state_s0;
 
+/**
+Create the required AEAD state for the algorithm.
+
+Note: The caller must free the AEAD state by calling `EverCrypt_AEAD_free`.
+
+@param a The argument `a` must be either of:
+  * `Spec_Agile_AEAD_AES128_GCM` (KEY_LEN=16),
+  * `Spec_Agile_AEAD_AES256_GCM` (KEY_LEN=32), or
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (KEY_LEN=32).
+@param dst Pointer to a pointer where the address of the allocated AEAD state will be written to.
+@param k Pointer to `KEY_LEN` bytes of memory where the key is read from. The size depends on the used algorithm, see above.
+
+@return The function returns `EverCrypt_Error_Success` on success or
+  `EverCrypt_Error_UnsupportedAlgorithm` in case of a bad algorithm identifier.
+  (See `EverCrypt_Error.h`.)
+*/
 extern error_code EverCrypt_AEAD_create_in(alg a, state_s0 **dst, uint8_t *k);
 
+/**
+Encrypt and authenticate a message (`plain`) with associated data (`ad`).
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param plain Pointer to `plain_len` bytes of memory where the to-be-encrypted plaintext is read from.
+@param plain_len Length of the to-be-encrypted plaintext.
+@param cipher Pointer to `plain_len` bytes of memory where the ciphertext is written to.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is written to.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+
+@return `EverCrypt_AEAD_encrypt` may return either `EverCrypt_Error_Success` or `EverCrypt_Error_InvalidKey` (`EverCrypt_error.h`). The latter is returned if and only if the `s` parameter is `NULL`.
+*/
 extern error_code
 EverCrypt_AEAD_encrypt(
   state_s0 *s,
@@ -207,6 +246,37 @@ EverCrypt_AEAD_encrypt(
   uint8_t *tag
 );
 
+/**
+Verify the authenticity of `ad` || `cipher` and decrypt `cipher` into `dst`.
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param cipher Pointer to `cipher_len` bytes of memory where the ciphertext is read from.
+@param cipher_len Length of the ciphertext.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is read from.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+@param dst Pointer to `cipher_len` bytes of memory where the decrypted plaintext will be written to.
+
+@return `EverCrypt_AEAD_decrypt` returns ...
+
+  * `EverCrypt_Error_Success`
+
+  ... on success and either of ...
+
+  * `EverCrypt_Error_InvalidKey` (returned if and only if the `s` parameter is `NULL`),
+  * `EverCrypt_Error_InvalidIVLength` (see note about requirements on IV size above), or
+  * `EverCrypt_Error_AuthenticationFailure` (in case the ciphertext could not be authenticated, e.g., due to modifications)
+
+  ... on failure (`EverCrypt_error.h`).
+
+  Upon success, the plaintext will be written into `dst`.
+*/
 extern error_code
 EverCrypt_AEAD_decrypt(
   state_s0 *s,
@@ -234,6 +304,17 @@ EverCrypt_HMAC_compute(
   uint32_t datalen
 );
 
+/**
+Expand pseudorandom key to desired length.
+
+@param a Hash function to use. Usually, the same as used in `EverCrypt_HKDF_extract`.
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from.
+@param infolen Length of context and application specific information. Can be 0.
+@param len Length of output keying material.
+*/
 extern void
 EverCrypt_HKDF_expand(
   hash_alg a,
@@ -245,6 +326,23 @@ EverCrypt_HKDF_expand(
   uint32_t len
 );
 
+/**
+Extract a fixed-length pseudorandom key from input keying material.
+
+@param a Hash function to use. The allowed values are:
+  * `Spec_Hash_Definitions_Blake2B` (`HashLen` = 64), 
+  * `Spec_Hash_Definitions_Blake2S` (`HashLen` = 32), 
+  * `Spec_Hash_Definitions_SHA2_256` (`HashLen` = 32), 
+  * `Spec_Hash_Definitions_SHA2_384` (`HashLen` = 48), 
+  * `Spec_Hash_Definitions_SHA2_512` (`HashLen` = 64), and
+  * `Spec_Hash_Definitions_SHA1` (`HashLen` = 20).
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+  `HashLen` depends on the used algorithm `a`. See above.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material.
+*/
 extern void
 EverCrypt_HKDF_extract(
   hash_alg a,
@@ -9936,6 +10034,13 @@ lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstariz
 static lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 aead_vectors_low = { .len = (uint32_t)21U, .b = aead_vectors_low109 };
 
+/**
+Compute the scalar multiple of a point.
+
+@param shared Pointer to 32 bytes of memory where the resulting point is written to.
+@param my_priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param their_pub Pointer to 32 bytes of memory where the public point is read from.
+*/
 extern void
 EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
@@ -9967,6 +10072,15 @@ typedef struct state_s1_s
 }
 state_s1;
 
+/**
+Instantiate the DRBG.
+
+@param st Pointer to DRBG state.
+@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
+@param personalization_string_len Length of personalization string.
+
+@return True if and only if instantiation was successful.
+*/
 extern bool
 EverCrypt_DRBG_instantiate(
   state_s1 *st,
@@ -9974,9 +10088,29 @@ EverCrypt_DRBG_instantiate(
   uint32_t personalization_string_len
 );
 
+/**
+Reseed the DRBG.
+
+@param st Pointer to DRBG state.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if reseed was successful.
+*/
 extern bool
 EverCrypt_DRBG_reseed(state_s1 *st, uint8_t *additional_input, uint32_t additional_input_len);
 
+/**
+Generate output.
+
+@param output Pointer to `n` bytes of memory where random output is written to.
+@param st Pointer to DRBG state.
+@param n Length of desired output.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if generate was successful.
+*/
 extern bool
 EverCrypt_DRBG_generate(
   uint8_t *output,
