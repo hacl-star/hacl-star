@@ -86,13 +86,16 @@ let correct_update_get128 ptr v mem =
 #reset-options "--z3rlimit 10 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 
 let same_domain_update128 ptr v mem =
+  let mem1 = update_heap32 ptr v.lo0 mem in
+  let mem2 = update_heap32 (ptr + 4) v.lo1 mem1 in
+  let mem3 = update_heap32 (ptr + 8) v.hi2 mem2 in
   reveal_opaque (`%valid_addr128) valid_addr128;
   update_heap128_reveal ();
+  same_domain_update32 ptr v.lo0 mem;
+  same_domain_update32 (ptr+4) v.lo1 mem1;
+  same_domain_update32 (ptr+8) v.hi2 mem2;
+  same_domain_update32 (ptr+12) v.hi3 mem3;
   let memf = update_heap128 ptr v mem in
-  update_heap32_reveal ();
-  // These two lines are apparently needed
-  let mem1 = update_heap32 ptr v.lo0 mem in
-  assert (Set.equal (Map.domain mem) (Map.domain mem1));
   assert (Set.equal (Map.domain mem) (Map.domain memf))
 
 let same_mem_get_heap_val128 ptr mem1 mem2 =
@@ -101,4 +104,3 @@ let same_mem_get_heap_val128 ptr mem1 mem2 =
   same_mem_get_heap_val32 (ptr+4) mem1 mem2;
   same_mem_get_heap_val32 (ptr+8) mem1 mem2;
   same_mem_get_heap_val32 (ptr+12) mem1 mem2
-

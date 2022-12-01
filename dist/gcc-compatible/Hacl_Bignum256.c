@@ -24,7 +24,6 @@
 
 #include "Hacl_Bignum256.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /*******************************************************************************
@@ -796,6 +795,7 @@ exp_vartime_precomp(
     uint64_t *ctx_r2 = ctx + (uint32_t)4U;
     from(ctx_n, mu, ctx_r2, resM);
   }
+  uint64_t tmp0[4U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
   {
     KRML_MAYBE_FOR4(i0,
@@ -819,16 +819,15 @@ exp_vartime_precomp(
       ite = p1;
     }
     uint64_t bits_l = ite & mask_l;
-    uint64_t a_bits_l[4U] = { 0U };
     uint32_t bits_l32 = (uint32_t)bits_l;
-    const uint64_t *a_bits_l1 = table + bits_l32 * (uint32_t)4U;
-    memcpy(a_bits_l, (uint64_t *)a_bits_l1, (uint32_t)4U * sizeof (uint64_t));
+    const uint64_t *a_bits_l = table + bits_l32 * (uint32_t)4U;
+    memcpy(tmp0, (uint64_t *)a_bits_l, (uint32_t)4U * sizeof (uint64_t));
     uint64_t *ctx_n = ctx;
-    amont_mul(ctx_n, mu, resM, a_bits_l, resM);
+    amont_mul(ctx_n, mu, resM, tmp0, resM);
   }
-  uint64_t tmp0[8U] = { 0U };
-  memcpy(tmp0, resM, (uint32_t)4U * sizeof (uint64_t));
-  reduction(n, mu, tmp0, res);
+  uint64_t tmp1[8U] = { 0U };
+  memcpy(tmp1, resM, (uint32_t)4U * sizeof (uint64_t));
+  reduction(n, mu, tmp1, res);
 }
 
 static inline void
@@ -967,6 +966,7 @@ exp_consttime_precomp(
     uint64_t *ctx_r2 = ctx + (uint32_t)4U;
     from(ctx_n, mu, ctx_r2, resM);
   }
+  uint64_t tmp0[4U] = { 0U };
   for (uint32_t i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -990,8 +990,7 @@ exp_consttime_precomp(
       ite = p1;
     }
     uint64_t bits_l = ite & mask_l;
-    uint64_t a_bits_l[4U] = { 0U };
-    memcpy(a_bits_l, (uint64_t *)table, (uint32_t)4U * sizeof (uint64_t));
+    memcpy(tmp0, (uint64_t *)table, (uint32_t)4U * sizeof (uint64_t));
     KRML_MAYBE_FOR15(i2,
       (uint32_t)0U,
       (uint32_t)15U,
@@ -1002,15 +1001,15 @@ exp_consttime_precomp(
         (uint32_t)0U,
         (uint32_t)4U,
         (uint32_t)1U,
-        uint64_t *os = a_bits_l;
-        uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
+        uint64_t *os = tmp0;
+        uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
         os[i] = x;););
     uint64_t *ctx_n = ctx;
-    amont_mul(ctx_n, mu, resM, a_bits_l, resM);
+    amont_mul(ctx_n, mu, resM, tmp0, resM);
   }
-  uint64_t tmp0[8U] = { 0U };
-  memcpy(tmp0, resM, (uint32_t)4U * sizeof (uint64_t));
-  reduction(n, mu, tmp0, res);
+  uint64_t tmp1[8U] = { 0U };
+  memcpy(tmp1, resM, (uint32_t)4U * sizeof (uint64_t));
+  reduction(n, mu, tmp1, res);
 }
 
 static inline void

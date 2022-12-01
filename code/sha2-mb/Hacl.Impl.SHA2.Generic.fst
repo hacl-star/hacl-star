@@ -233,10 +233,9 @@ let update #a #m b hash =
 
 
 inline_for_extraction noextract
-let update_last_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
-    upd:update_vec_t a m
-  -> totlen:len_t a
-  -> len:size_t{v len < block_length a}
+let update_last_vec_t' (a:sha2_alg) (m:m_spec{is_supported a m}) =
+    totlen:len_t a
+  -> len:size_t{v len <= block_length a}
   -> b:multibuf (lanes a m) len
   -> hash:state_t a m ->
   Stack unit
@@ -244,6 +243,9 @@ let update_last_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
   (ensures  fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
     as_seq h1 hash == SpecVec.update_last totlen (v len) (as_seq_multi h0 b) (as_seq h0 hash))
 
+inline_for_extraction noextract
+let update_last_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
+    upd:update_vec_t a m -> update_last_vec_t' a m
 
 #push-options "--z3rlimit 350"
 inline_for_extraction noextract
@@ -290,23 +292,33 @@ let update_last #a #m upd totlen len b hash =
     pop_frame())
 #pop-options
 
-
+// The type of update_nblocks_vec_t applied to a specific update function
 inline_for_extraction noextract
-let update_nblocks_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
-    upd:update_vec_t a m
-  -> len:size_t
+let update_nblocks_vec_t' (a:sha2_alg) (m:Hacl.Spec.SHA2.Vec.(m:m_spec{is_supported a m})) =
+  let open Lib.IntTypes in
+  let open Lib.MultiBuffer in
+  let open Lib.Buffer in
+  let open Hacl.Spec.SHA2.Vec in
+  let open Hacl.Impl.SHA2.Core in
+    len:size_t
   -> b:multibuf (lanes a m) len
   -> st:state_t a m ->
   Stack unit
   (requires fun h0 -> live_multi h0 b /\ live h0 st /\ disjoint_multi b st)
   (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-    as_seq h1 st == SpecVec.update_nblocks #a #m (v len) (as_seq_multi h0 b) (as_seq h0 st))
+   (lemma_len_lt_max_a_fits_size_t a len;
+    as_seq h1 st == update_nblocks #a #m (v len) (as_seq_multi h0 b) (as_seq h0 st)))
 
+
+inline_for_extraction noextract
+let update_nblocks_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
+    upd:update_vec_t a m -> update_nblocks_vec_t' a m
 
 #push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val update_nblocks: #a:sha2_alg -> #m:m_spec{is_supported a m} -> update_nblocks_vec_t a m
 let update_nblocks #a #m upd len b st =
+  lemma_len_lt_max_a_fits_size_t a len;
   let blocks = len /. HD.block_len a in
   let h0 = ST.get() in
   loop1 h0 blocks st
@@ -356,34 +368,53 @@ let finish #a #m st h =
 
 
 inline_for_extraction noextract
+let mk_len_t_from_size_t (a:sha2_alg) (len:size_t) :
+  Pure (len_t a)
+  (requires True)
+  (ensures fun x ->
+   (lemma_len_lt_max_a_fits_size_t a len;
+    len_v a x = len_v a (Hacl.Spec.SHA2.mk_len_t a (v len)))) =
+
+  match a with
+  | SHA2_224 | SHA2_256 ->
+    (Math.Lemmas.pow2_lt_compat 64 32; Lib.IntTypes.cast #U32 #PUB U64 PUB len)
+  | SHA2_384 | SHA2_512 ->
+    (Math.Lemmas.pow2_lt_compat 128 32; Lib.IntTypes.cast #U32 #PUB U128 PUB len)
+
+inline_for_extraction noextract
 let hash_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
-    upd:update_vec_t a m
+    init:init_vec_t a m
+  -> update_nblocks:update_nblocks_vec_t' a m
+  -> update_last:update_last_vec_t' a m
+  -> finish:finish_vec_t a m
   -> h:multibuf (lanes a m) (HD.hash_len a)
   -> len:size_t
   -> b:multibuf (lanes a m) len ->
   Stack unit
   (requires fun h0 -> live_multi h0 b /\ live_multi h0 h /\ internally_disjoint h)
   (ensures  fun h0 _ h1 -> modifies_multi h h0 h1 /\
-    as_seq_multi h1 h == SpecVec.hash #a #m (v len) (as_seq_multi h0 b))
+   (lemma_len_lt_max_a_fits_size_t a len;
+    as_seq_multi h1 h == SpecVec.hash #a #m (v len) (as_seq_multi h0 b)))
 
 
 #push-options "--z3rlimit 500"
 inline_for_extraction noextract
 val hash: #a:sha2_alg -> #m:m_spec{is_supported a m} -> hash_vec_t a m
-let hash #a #m upd h len b =
+let hash #a #m init update_nblocks update_last finish h len b =
+  lemma_len_lt_max_a_fits_size_t a len;
   let init_h0 = ST.get() in
   push_frame();
   let h0 = ST.get() in
   NTup.eq_intro (as_seq_multi h0 b) (as_seq_multi init_h0 b);
   let st = alloc a m in
-  init #a #m st;
+  init st;
   let h1 = ST.get() in
   assert (modifies (loc st) h0 h1);
   assert (as_seq h1 st == SpecVec.init a m);
   NTup.eq_intro (as_seq_multi h1 b) (as_seq_multi h0 b);
   let rem = len %. HD.block_len a in
-  let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB len in
-  update_nblocks #a #m upd len b st;
+  let len' : len_t a = mk_len_t_from_size_t a len in
+  update_nblocks len b st;
   let h2 = ST.get() in
   assert (modifies (loc st) h0 h2);
   assert (as_seq h2 st == SpecVec.update_nblocks (v len) (as_seq_multi h0 b) (as_seq h1 st));
@@ -394,11 +425,11 @@ let hash #a #m upd h len b =
   assert (as_seq_multi h3 lb == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h2 b));
   assert (preserves_disjoint_multi b lb);
   assert (disjoint_multi lb st);
-  update_last #a #m upd len' rem lb st;
+  update_last len' rem lb st;
   let h4 = ST.get() in
   assert (modifies (loc st) h0 h4);
   assert (as_seq h4 st == SpecVec.update_last len' (v rem) (as_seq_multi h3 lb) (as_seq h3 st));
-  finish #a #m st h;
+  finish st h;
   let h5 = ST.get() in
   assert (modifies (loc_multi h |+| loc st) h0 h5);
   assert (as_seq_multi h5 h == SpecVec.finish #a #m (as_seq h4 st));

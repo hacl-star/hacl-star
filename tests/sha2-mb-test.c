@@ -11,7 +11,7 @@
 
 #include "test_helpers.h"
 
-#include "Hacl_SHA2_Scalar32.h"
+#include "Hacl_Streaming_SHA2.h"
 
 #if defined(HACL_CAN_COMPILE_VEC128)
 #include "Hacl_SHA2_Vec128.h"
@@ -39,11 +39,11 @@ bool print_test1(uint8_t* in, int in_len, uint8_t* exp256, uint8_t* exp512){
   uint8_t comp256[32] = {0};
   uint8_t comp512[64] = {0};
 
-  Hacl_SHA2_Scalar32_sha256(comp256,in_len,in);
+  Hacl_Streaming_SHA2_sha256(comp256,in_len,in);
   printf("NEW SHA2-256 (32-bit) Result:\n");
   bool ok = print_result(comp256,exp256,32);
 
-  Hacl_SHA2_Scalar32_sha512(comp512,in_len,in);
+  Hacl_Streaming_SHA2_sha512(comp512,in_len,in);
   printf("NEW SHA2-512 (32-bit) Result:\n");
   ok = print_result(comp512,exp512,64) && ok;
 
@@ -147,13 +147,13 @@ int main()
   memset(plain,'P',SIZE);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Scalar32_sha256(plain,SIZE,plain);
+    Hacl_Streaming_SHA2_sha256(plain,SIZE,plain);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Scalar32_sha256(plain,SIZE,plain);
+    Hacl_Streaming_SHA2_sha256(plain,SIZE,plain);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -196,13 +196,13 @@ int main()
 #endif
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Scalar32_sha512(plain,SIZE,plain);
+    Hacl_Streaming_SHA2_sha512(plain,SIZE,plain);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Scalar32_sha512(plain,SIZE,plain);
+    Hacl_Streaming_SHA2_sha512(plain,SIZE,plain);
   }
   b = cpucycles_end();
   t2 = clock();

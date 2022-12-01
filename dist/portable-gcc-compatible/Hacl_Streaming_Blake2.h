@@ -35,16 +35,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Spec.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2.h"
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blocks_state_len */
-
-uint32_t
-Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_alg a, Hacl_Impl_Blake2_Core_m_spec m);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blocks_state_len */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_block_state */
 

@@ -26,6 +26,7 @@ FILES=" \
   Hacl_Poly1305_256 \
   Hacl_Poly1305_32 \
   Hacl_RSAPSS \
+  Hacl_SHA2_Types \
   Hacl_SHA3 \
   Hacl_Spec \
   Hacl_Streaming_SHA1 \
@@ -48,9 +49,10 @@ mkdir -p mozilla/internal
 
 # For these, we want just the header
 cp gcc-compatible/Hacl_Krmllib.h mozilla/
-cp gcc-compatible/internal/Hacl_Krmllib.h mozilla/internal/
+cp gcc-compatible/internal/Hacl_Streaming_SHA2.h mozilla/internal/
 cp gcc-compatible/Hacl_Streaming_SHA2.h mozilla/
 cp gcc-compatible/Hacl_Hash_SHA2.h mozilla/
+cp gcc-compatible/Hacl_SHA2_Generic.h mozilla/
 
 for f in $FILES; do
   for ext in h c asm S; do
