@@ -65,6 +65,29 @@ int main() {
 
   //---------------------------------
 
+  uint64_t secp256k1_sm_proj[15U] = { 0U };
+  uint64_t scalar1[4U] = { 197876, 241305, 245979, 490424 };
+  uint64_t scalar2[4U] = { 197337, 246730, 685978, 440564 };
+  // Benchmarking for Hacl_EC_K256_point_mul_g_double_vartime
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_EC_K256_point_mul_g_double_vartime(secp256k1_sm_proj, scalar1, scalar2, secp256k1_add_proj);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_EC_K256_point_mul_g_double_vartime(secp256k1_sm_proj, scalar1, scalar2, secp256k1_add_proj);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diffsm = t2 - t1;
+  uint64_t cycsm = b - a;
+
+  printf("\n secp256k1_point_mul_g_double:\n");
+  print_time(count,diffsm,cycsm);
+
+  //---------------------------------
+
   uint64_t ed25519_bp_proj[20U] = { 0U };
   Hacl_EC_Ed25519_mk_base_point(ed25519_bp_proj);
   uint64_t ed25519_add_proj[20U] = { 0U };

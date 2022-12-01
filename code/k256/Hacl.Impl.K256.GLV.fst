@@ -541,7 +541,7 @@ let point_mul_g_double_split_lambda_vartime_alloc out scalar1 p1 scalar2 p2 =
   pop_frame ()
 
 
-[@CInline]
+//[@CInline]
 let point_mul_g_double_split_lambda_vartime out scalar1 scalar2 p2 =
   let h0 = ST.get () in
   SE.exp_double_fw_lemma S.mk_k256_concrete_ops S.g 256

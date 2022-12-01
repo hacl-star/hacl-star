@@ -66,19 +66,21 @@ let mk_k256_scalar_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
 }
 
 
+inline_for_extraction noextract
 val qsquare_times_in_place (out:qelem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ qe_lt_q h out)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ qe_lt_q h1 out /\
     qas_nat h1 out == SI.qsquare_times (qas_nat h0 out) (v b))
 
-[@CInline]
+//[@CInline]
 let qsquare_times_in_place out b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qas_nat h0 out) (v b);
   BE.lexp_pow2_in_place 4ul 0ul mk_k256_scalar_concrete_ops (null uint64) out b
 
 
+inline_for_extraction noextract
 val qsquare_times (out a:qelem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ live h a /\ disjoint out a /\
@@ -86,7 +88,7 @@ val qsquare_times (out a:qelem) (b:size_t) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ qe_lt_q h1 a /\
     qas_nat h1 out == SI.qsquare_times (qas_nat h0 a) (v b))
 
-[@CInline]
+//[@CInline]
 let qsquare_times out a b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qas_nat h0 a) (v b);
@@ -498,7 +500,7 @@ val qinv (out f: qelem) : Stack unit
     qas_nat h1 out == S.qinv (qas_nat h0 f)  /\
     qe_lt_q h1 out)
 
-[@CInline]
+//[@CInline]
 let qinv out f =
   let h0 = ST.get () in
   SI.qinv_is_qinv_lemma (qas_nat h0 f);

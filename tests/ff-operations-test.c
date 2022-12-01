@@ -9,12 +9,13 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "Hacl_EC_K256.h"
 #include "Hacl_Bignum_K256.h"
 #include "Hacl_Bignum25519_51.h"
 
 #include "test_helpers.h"
 
-#define ROUNDS 209715200
+#define ROUNDS 2097152
 
 int main() {
   cycles a,b;
@@ -58,6 +59,29 @@ int main() {
   print_time(count,diff1,cyc1);
   printf("\n secp256k1_fsqr:\n");
   print_time(count,diff2,cyc2);
+
+  //  ---------------------------------------------------
+
+  uint64_t bignumq_a[4U] = { 197876, 241305, 245979, 490424 };
+  uint64_t bignumq_out[4U] = { 0 };
+
+  // Benchmarking for Hacl_EC_K256_qinv
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_EC_K256_qinv(bignumq_out, bignumq_a);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_EC_K256_qinv(bignumq_out, bignumq_a);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diffq = t2 - t1;
+  uint64_t cycq = b - a;
+
+  printf("\n secp256k1_qinv:\n");
+  print_time(count,diffq,cycq);
 
   //  ---------------------------------------------------
 

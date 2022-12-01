@@ -333,6 +333,36 @@ let point_mul scalar p out =
   pop_frame ()
 
 
+val point_mul_g_double_vartime:
+  out:P.point -> scalar1:lbuffer uint64 4ul -> scalar2:lbuffer uint64 4ul -> p2:P.point ->
+  Stack unit
+  (requires fun h ->
+    live h out /\ live h scalar1 /\ live h scalar2 /\ live h p2 /\
+    disjoint p2 out /\ disjoint out scalar1 /\ disjoint out scalar2 /\
+    P.point_inv h p2 /\
+    Q.qas_nat h scalar1 < S.q /\
+    Q.qas_nat h scalar2 < S.q)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    P.point_inv h1 out /\
+    S.to_aff_point (P.point_eval h1 out) ==
+    S.to_aff_point (S.point_mul_double_g
+      (Q.qas_nat h0 scalar1) (Q.qas_nat h0 scalar2) (P.point_eval h0 p2)))
+
+let point_mul_g_double_vartime out scalar1 scalar2 p2 =
+  Hacl.Impl.K256.GLV.point_mul_g_double_split_lambda_vartime out scalar1 scalar2 p2
+
+
+val qinv (out scalar:lbuffer uint64 4ul) : Stack unit
+  (requires fun h ->
+    live h out /\ live h scalar /\ disjoint out scalar /\
+    Q.qas_nat h scalar < S.q)
+  (ensures fun h0 _ h1 ->
+    (Q.qas_nat h1 out) == S.qinv (Q.qas_nat h0 scalar))
+
+let qinv out scalar =
+  Hacl.Impl.K256.Qinv.qinv out scalar
+
+
 [@@ Comment "Checks whether `p` is equal to `q` (point equality).
 
   The function returns `true` if `p` is equal to `q` and `false` otherwise.
