@@ -921,7 +921,7 @@ val loop_blocks:
   -> spec_f:(Seq.lseq a (v blocksize)
               -> Seq.lseq b (v blen)
               -> Seq.lseq b (v blen))
-  -> spec_l:(len:size_nat{len == v inpLen % v blocksize}
+  -> spec_l:(len:size_nat{len < v blocksize}
               -> s:Seq.lseq a len
               -> Seq.lseq b (v blen)
               -> Seq.lseq b (v blen))
@@ -932,7 +932,7 @@ val loop_blocks:
           (ensures  fun h0 _ h1 ->
             modifies1 w h0 h1 /\
             as_seq h1 w == spec_f (as_seq h0 inp) (as_seq h0 w)))
-  -> l:(len:size_t{v len == v inpLen % v blocksize}
+  -> l:(len:size_t{v len < v blocksize}
        -> inp:lbuffer a len
        -> w:lbuffer b blen -> Stack unit
           (requires fun h ->
