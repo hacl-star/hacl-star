@@ -1,7 +1,6 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  LowStar_Vector_new_capacity
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
@@ -329,71 +328,6 @@ EXPORTS
   Hacl_NaCl_crypto_box_easy
   Hacl_NaCl_crypto_box_open_easy_afternm
   Hacl_NaCl_crypto_box_open_easy
-  mt_init_hash
-  mt_free_hash
-  mt_init_path
-  mt_free_path
-  mt_get_path_length
-  mt_path_insert
-  mt_get_path_step
-  mt_get_path_step_pre
-  mt_create_custom
-  mt_free
-  mt_insert
-  mt_insert_pre
-  mt_get_root
-  mt_get_root_pre
-  mt_get_path
-  mt_get_path_pre
-  mt_flush
-  mt_flush_pre
-  mt_flush_to
-  mt_flush_to_pre
-  mt_retract_to
-  mt_retract_to_pre
-  mt_verify
-  mt_verify_pre
-  mt_serialize_size
-  mt_serialize
-  mt_deserialize
-  mt_serialize_path
-  mt_deserialize_path
-  mt_sha256_compress
-  mt_create
-  MerkleTree_Low_uu___is_MT
-  MerkleTree_Low_merkle_tree_conditions
-  MerkleTree_Low_offset_of
-  MerkleTree_Low_mt_free
-  MerkleTree_Low_mt_insert_pre
-  MerkleTree_Low_mt_insert
-  MerkleTree_Low_mt_create_custom
-  MerkleTree_Low_uu___is_Path
-  MerkleTree_Low_init_path
-  MerkleTree_Low_clear_path
-  MerkleTree_Low_free_path
-  MerkleTree_Low_mt_get_root_pre
-  MerkleTree_Low_mt_get_root
-  MerkleTree_Low_mt_path_insert
-  MerkleTree_Low_mt_get_path_length
-  MerkleTree_Low_mt_get_path_step_pre
-  MerkleTree_Low_mt_get_path_step
-  MerkleTree_Low_mt_get_path_pre
-  MerkleTree_Low_mt_get_path
-  MerkleTree_Low_mt_flush_to_pre
-  MerkleTree_Low_mt_flush_to
-  MerkleTree_Low_mt_flush_pre
-  MerkleTree_Low_mt_flush
-  MerkleTree_Low_mt_retract_to_pre
-  MerkleTree_Low_mt_retract_to
-  MerkleTree_Low_mt_verify_pre
-  MerkleTree_Low_mt_verify
-  MerkleTree_Low_Serialization_mt_serialize_size
-  MerkleTree_Low_Serialization_mt_serialize
-  MerkleTree_Low_Serialization_mt_deserialize
-  MerkleTree_Low_Serialization_mt_serialize_path
-  MerkleTree_Low_Serialization_mt_deserialize_path
-  MerkleTree_Low_Hashfunctions_init_hash
-  MerkleTree_Low_Hashfunctions_free_hash
   Hacl_Impl_P256_LowLevel_toUint8
   Hacl_Impl_P256_LowLevel_changeEndian
   Hacl_Impl_P256_LowLevel_toUint64ChangeEndian
@@ -619,13 +553,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod
@@ -662,11 +596,13 @@ EXPORTS
   Hacl_HMAC_DRBG_instantiate
   Hacl_HMAC_DRBG_reseed
   Hacl_HMAC_DRBG_generate
+  Hacl_HMAC_DRBG_free
   EverCrypt_DRBG_min_length
   EverCrypt_DRBG_uu___is_SHA1_s
   EverCrypt_DRBG_uu___is_SHA2_256_s
   EverCrypt_DRBG_uu___is_SHA2_384_s
   EverCrypt_DRBG_uu___is_SHA2_512_s
+  EverCrypt_DRBG_create_in
   EverCrypt_DRBG_create
   EverCrypt_DRBG_instantiate_sha1
   EverCrypt_DRBG_instantiate_sha2_256
@@ -804,11 +740,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
+  EverCrypt_Poly1305_poly1305
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
-  EverCrypt_Poly1305_poly1305
   Hacl_Streaming_Poly1305_32_create_in
   Hacl_Streaming_Poly1305_32_init
   Hacl_Streaming_Poly1305_32_update
