@@ -148,7 +148,7 @@ let rsapss_skey_pre #t modBits eBits dBits skey =
 
 
 val rsapss_sign_pre:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat{1 < modBits}
   -> sLen:size_nat
   -> salt:lseq uint8 sLen
@@ -167,7 +167,7 @@ let rsapss_sign_pre a modBits sLen salt msgLen msg =
 
 val rsapss_sign_post:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
@@ -198,7 +198,7 @@ let rsapss_sign_post #t a modBits eBits dBits skey sLen salt msgLen msg eq_m sgn
 
 val rsapss_sign_post1:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
@@ -227,7 +227,7 @@ let rsapss_sign_post1 #t a modBits eBits dBits skey sLen salt msgLen msg eq_m sg
 
 
 val rsapss_verify_pre:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> sLen:size_nat //saltLen
   -> msgLen:nat
   -> msg:seq uint8{length msg == msgLen} -> Type0
@@ -240,7 +240,7 @@ let rsapss_verify_pre a sLen msgLen msg =
 
 val rsapss_verify_post:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
@@ -265,7 +265,7 @@ let rsapss_verify_post #t a modBits eBits pkey sLen sgnt msgLen msg verify =
 
 val rsapss_verify_post1:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
@@ -326,7 +326,7 @@ let rsapss_sign_bn #t modBits eBits dBits skey m =
 
 val rsapss_sign_msg_to_bn:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat{1 < modBits}
   -> sLen:size_nat
   -> salt:lseq uint8 sLen
@@ -391,7 +391,7 @@ let rsapss_sign_compute_sgnt #t modBits eBits dBits skey m =
 
 val rsapss_sign_:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
@@ -414,7 +414,7 @@ let rsapss_sign_ #t a modBits eBits dBits skey sLen salt msgLen msg =
 
 val rsapss_sign_lemma:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
@@ -484,7 +484,7 @@ let rsapss_sign_lemma #t a modBits eBits dBits skey sLen salt msgLen msg =
 
 val rsapss_sign:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
@@ -552,7 +552,7 @@ let rsapss_verify_bn #t modBits eBits pkey m_def s =
 
 val rsapss_verify_bn_to_msg:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat{1 < modBits}
   -> sLen:size_nat //saltLen
   -> msgLen:nat
@@ -608,7 +608,7 @@ let rsapss_verify_compute_msg #t modBits eBits pkey sgnt =
 
 val rsapss_verify_:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
@@ -632,7 +632,7 @@ let rsapss_verify_ #t a modBits eBits pkey sLen sgnt msgLen msg =
 
 val rsapss_verify_lemma:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
@@ -699,7 +699,7 @@ let rsapss_verify_lemma #t a modBits eBits pkey sLen sgnt msgLen msg =
 
 val rsapss_verify:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
@@ -947,7 +947,7 @@ let rsapss_load_skey_lemma #t modBits eBits dBits nb eb db =
 
 val rsapss_skey_sign:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
@@ -977,7 +977,7 @@ let rsapss_skey_sign #t a modBits eBits dBits nb eb db sLen salt msgLen msg sgnt
 
 val rsapss_pkey_verify:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> nb:lseq uint8 (blocks modBits 8)
