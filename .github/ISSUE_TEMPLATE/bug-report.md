@@ -11,16 +11,15 @@ assignees: ''
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-1. Version of F*
-2. Version of KaraMeL
+1. Repository version (commit)
+2. Version of F* (if relevant: `fstar.exe --version`)
+3. Version of KaraMeL (if relevant: `krml -version`)
 3. Run steps
 4. See error
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
 
 **Platform (please complete the following information):**
  - OS: [e.g. linux]
