@@ -16,13 +16,6 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 
 ## 2022-12-01
 
-### Changed
+### Added
 
-- Added a template to CHANGES.md
-
-
-## 2022-02-28
-
-### Added 
-
-- Added CHANGES.md file
+- Initialized CHANGES.md file with changelog template
