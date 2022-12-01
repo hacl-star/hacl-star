@@ -100,13 +100,17 @@ git commit -m "Add changes to the C files as part of this PR"
 
 Push and check that it passes CI.
 
+Document the changes
+--------------------
+
+If your changes add a new algorithm or feature, or affect performance,
+or change any public APIs, please add an entry to `CHANGES.md`.
+You do not need to add an entry for proof fixes and improvements.
+
 Opening the pull request
 ------------------------
 
 To open a PR, you will need to follow the PR template in `pull_request_template.md`.
-If your changes add a new algorithm or feature, or affect performance,
-or change any public APIs, please mention it in the PR and add an entry to `CHANGES.md`.
-You do not need to add an entry for proof fixes and improvements.
 
 Once the PR is open, the HACL\* maintainers and other users will interact with you
 on the PR and the PR will be merged once it has two approving reviews (including
