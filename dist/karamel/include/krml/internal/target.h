@@ -64,16 +64,29 @@
 #  endif
 #endif
 
+/* MinGW-W64 does not support C11 aligned_alloc, but it supports
+ * MSVC's _aligned_malloc.
+ */
 #ifndef KRML_ALIGNED_MALLOC
-#  ifdef _MSC_VER
+#  ifdef __MINGW32__
+#    include <_mingw.h>
+#  endif
+#  if (defined(_MSC_VER) || (defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR)))
 #    define KRML_ALIGNED_MALLOC(X, Y) _aligned_malloc(Y, X)
 #  else
 #    define KRML_ALIGNED_MALLOC(X, Y) aligned_alloc(X, Y)
 #  endif
 #endif
 
+/* Since aligned allocations with MinGW-W64 are done with
+ * _aligned_malloc (see above), such pointers must be freed with
+ * _aligned_free.
+ */
 #ifndef KRML_ALIGNED_FREE
-#  ifdef _MSC_VER
+#  ifdef __MINGW32__
+#    include <_mingw.h>
+#  endif
+#  if (defined(_MSC_VER) || (defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR)))
 #    define KRML_ALIGNED_FREE(X) _aligned_free(X)
 #  else
 #    define KRML_ALIGNED_FREE(X) free(X)
