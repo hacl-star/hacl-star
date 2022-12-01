@@ -27,22 +27,20 @@ let point_negate p out =
   push_frame ();
   let zero = create 5ul (u64 0) in
   make_zero zero;
-  let x = sub p 0ul 5ul in
-  let y = sub p 5ul 5ul in
-  let z = sub p 10ul 5ul in
-  let t = sub p 15ul 5ul in
+  let x = getx p in
+  let y = gety p in
+  let z = getz p in
+  let t = gett p in
 
-  let x1 = sub out 0ul 5ul in
-  let y1 = sub out 5ul 5ul in
-  let z1 = sub out 10ul 5ul in
-  let t1 = sub out 15ul 5ul in
+  let x1 = getx out in
+  let y1 = gety out in
+  let z1 = getz out in
+  let t1 = gett out in
 
-  copy x1 x;
-  fdifference x1 zero;
+  fdifference x1 zero x;
   reduce_513 x1;
   copy y1 y;
   copy z1 z;
-  copy t1 t;
-  fdifference t1 zero;
+  fdifference t1 zero t;
   reduce_513 t1;
   pop_frame ()

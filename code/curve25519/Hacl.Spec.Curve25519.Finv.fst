@@ -1,117 +1,51 @@
 module Hacl.Spec.Curve25519.Finv
 
 open FStar.Mul
-open Lib.IntTypes
 open Spec.Curve25519
+module M = Lib.NatMod
+module LE = Lib.Exponentiation
 
-#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let fsqr x = fmul x x
+let pow = fpow
+let cm_prime = M.mk_nat_mod_comm_monoid prime
 
-let one:elem =
-  assert_norm (1 < prime);
-  1
+val lemma_pow_mod_is_pow_cm : x:elem -> b:nat -> Lemma (pow x b = LE.pow cm_prime x b)
+let lemma_pow_mod_is_pow_cm x b =
+  M.lemma_pow_nat_mod_is_pow #prime x b;
+  M.lemma_pow_mod #prime x b
 
-val pow: a:elem -> b:nat -> elem
-let rec pow a b =
-  if b = 0 then 1
-  else fmul a (pow a (b - 1))
-
-val lemma_pow_one: x:elem
-  -> Lemma
-    (requires True)
-    (ensures  x == pow x 1)
+val lemma_pow_one: x:elem -> Lemma (x == pow x 1)
 let lemma_pow_one x =
-  assert (pow x 1 == fmul x 1);
-  FStar.Math.Lemmas.modulo_lemma x prime
+  lemma_pow_mod_is_pow_cm x 1;
+  LE.lemma_pow1 cm_prime x
 
-val lemma_fmul_assoc: a:elem -> b:elem -> c:elem
-  -> Lemma
-    (fmul (fmul a b) c == fmul a (fmul b c))
-let lemma_fmul_assoc a b c =
-  let r = fmul (fmul a b) c in
-  FStar.Math.Lemmas.lemma_mod_mul_distr_l (a * b) c prime;
-  FStar.Math.Lemmas.paren_mul_right a b c;
-  FStar.Math.Lemmas.lemma_mod_mul_distr_r a (b * c) prime
+val lemma_pow_add: x:elem -> n:nat -> m:nat ->
+  Lemma (fmul (pow x n) (pow x m) == pow x (n + m))
+let lemma_pow_add x n m =
+  lemma_pow_mod_is_pow_cm x n;
+  lemma_pow_mod_is_pow_cm x m;
+  LE.lemma_pow_add cm_prime x n m;
+  lemma_pow_mod_is_pow_cm x (n + m)
 
-val lemma_pow_add: x:elem -> n:nat -> m:nat
-  -> Lemma
-    (requires True)
-    (ensures  fmul (pow x n) (pow x m) == pow x (n + m))
-let rec lemma_pow_add x n m =
-  if n = 0 then FStar.Math.Lemmas.modulo_lemma (pow x m) prime
-  else begin
-    lemma_pow_add x (n - 1) m;
-    lemma_fmul_assoc x (pow x (n - 1)) (pow x m)
-  end
-
-val lemma_pow_mul: x:elem -> n:nat -> m:nat
-  -> Lemma
-    (requires True)
-    (ensures  pow (pow x n) m == pow x (n * m))
-let rec lemma_pow_mul x n m =
-  assert (n + n * (m - 1) = n * m);
-  if m = 0 then ()
-  else begin
-    assert (pow (pow x n) m == fmul (pow x n) (pow (pow x n) (m - 1)));
-    lemma_pow_mul x n (m - 1);
-    assert (pow (pow x n) (m - 1) == pow x (n * (m - 1)));
-    lemma_pow_add x n (n * (m - 1));
-    assert (pow (pow x n) m == fmul (pow x n) (pow x (n * (m - 1))));
-    assert (pow (pow x n) m == pow x (n + n * (m - 1)))
-  end
+val lemma_pow_mul: x:elem -> n:nat -> m:nat ->
+  Lemma (pow (pow x n) m == pow x (n * m))
+let lemma_pow_mul x n m =
+  lemma_pow_mod_is_pow_cm x n;
+  lemma_pow_mod_is_pow_cm (pow x n) m;
+  LE.lemma_pow_mul cm_prime x n m;
+  lemma_pow_mod_is_pow_cm x (n * m)
 
 val lemma_pow_double: a:elem -> b:nat ->
-  Lemma
-    (requires True)
-    (ensures (pow (a *% a) b == pow a (b + b)))
-  (decreases b)
-let rec lemma_pow_double a b =
-  if b = 0 then ()
-  else begin
-    lemma_pow_double a (b - 1);
-    assert (pow (a *% a) b == fmul (a *% a) (pow (a *% a) (b - 1)));
-    assert (pow (a *% a) b == fmul (a *% a) (pow a (b + b - 2)));
-    lemma_pow_one a;
-    lemma_pow_one a;
-    //assert (pow (a *% a) b == fmul (fmul (pow a 1) (pow a 1)) (pow a (b + b - 2)));
-    lemma_pow_add a 1 1;
-    //assert (pow (a *% a) b == fmul (pow a 2) (pow a (b + b - 2)));
-    lemma_pow_add a 2 (b + b - 2)
-    //assert (pow (a *% a) b == pow a (b + b))
-  end
+  Lemma (pow (a *% a) b == pow a (b + b))
+let lemma_pow_double a b =
+  lemma_pow_mod_is_pow_cm (a *% a) b;
+  LE.lemma_pow_double cm_prime a b;
+  lemma_pow_mod_is_pow_cm a (b + b)
 
-val lemma_fpow_is_pow:a:elem -> b:pos ->
-  Lemma
-    (requires True)
-    (ensures (fpow a b == pow a b))
-  (decreases b)
-let rec lemma_fpow_is_pow a b =
-  if b = 1 then ()
-  else begin
-    if b % 2 = 0 then begin
-      assert (fpow a b == fpow (a *% a) (b / 2));
-      lemma_fpow_is_pow (a *% a) (b / 2);
-      assert (fpow a b == pow (a *% a) (b / 2));
-      lemma_pow_double a (b / 2) end
-    else begin
-      FStar.Math.Lemmas.euclidean_division_definition b 2;
-      //assert (b == b / 2 * 2 + b % 2);
-      assert (b > 1 /\ b % 2 = 1);
-      assert (fpow a b == fmul a (fpow (a *% a) (b / 2)));
-      lemma_fpow_is_pow (a *% a) (b / 2);
-      //assert (fpow (a *% a) (b / 2) == pow (a *% a) (b / 2));
-      assert (fpow a b == fmul a (pow (a *% a) (b / 2)));
-      lemma_pow_double a (b / 2);
-      //assert (fpow a b == fmul a (pow a (b / 2 * 2)));
-      lemma_pow_one a;
-      lemma_pow_add a 1 (b / 2 * 2) end
-    end
 
-val fsquare_times:
-    inp:elem
-  -> n:size_nat{0 < n}
-  -> out:elem{out == pow inp (pow2 n)}
+val fsquare_times: inp:elem -> n:pos -> out:elem{out == pow inp (pow2 n)}
 let fsquare_times inp n =
   let out = fsqr inp in
   lemma_pow_one inp;
@@ -124,24 +58,20 @@ let fsquare_times inp n =
     (fun i out ->
       assert (out == pow inp (pow2 (i + 1)));
       let res = fsqr out in
-      lemma_pow_one out;
-      lemma_pow_add out 1 1;
-      lemma_pow_mul inp (pow2 (i + 1)) (pow2 1);
-      assert_norm (pow2 (i + 1) * pow2 1 = pow2 (i + 2));
-      assert (res == pow inp (pow2 (i + 2)));
+      calc (==) {
+        fmul out out;
+        (==) { lemma_pow_add inp (pow2 (i + 1)) (pow2 (i + 1)) }
+        pow inp (pow2 (i + 1) + pow2 (i + 1));
+        (==) { Math.Lemmas.pow2_double_sum (i + 1) }
+        pow inp (pow2 (i + 2));
+      };
       res) out in
   assert (out == pow inp (pow2 n));
   out
 
-let pow_inv:nat =
-  assert_norm (pow2 255 - 21 > 0);
-  pow2 255 - 21
-
 let pow_t0:nat =
   assert_norm (pow2 255 - pow2 5 > 0);
   pow2 255 - pow2 5
-
-#set-options "--max_fuel 0 --max_ifuel 0"
 
 val finv0: inp:elem ->
   Pure (tuple2 elem elem)
@@ -238,5 +168,4 @@ let finv i =
   lemma_pow_add i (pow2 255 - pow2 5) 11;
   assert_norm (pow2 255 - pow2 5 + 11 = pow2 255 - 21);
   assert (o == pow i (pow2 255 - 21));
-  lemma_fpow_is_pow i (pow2 255 - 21);
   o

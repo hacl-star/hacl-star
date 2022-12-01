@@ -259,7 +259,7 @@ let rsapss_sign #t ke a modBits eBits dBits skey saltLen salt msgLen msg sgnt =
   let hLen = RM.hash_len a in
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32;
-  assert (max_size_t < Hash.max_input_length a);
+  //assert (max_size_t < Hash.max_input_length a);
 
   let b =
     saltLen <=. 0xfffffffful -! hLen -! 8ul &&
@@ -500,7 +500,7 @@ let rsapss_verify #t ke a modBits eBits pkey saltLen sgntLen sgnt msgLen msg =
   let hLen = RM.hash_len a in
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32;
-  assert (max_size_t < Hash.max_input_length a);
+  //assert (max_size_t < Hash.max_input_length a);
   assert (v msgLen <= max_size_t);
   assert (v hLen + 8 < max_size_t);
 

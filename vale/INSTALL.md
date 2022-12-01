@@ -12,11 +12,11 @@ Our code relies on the following tools, which must be installed before building:
   * Download the latest [Vale binary release](https://github.com/project-everest/vale/releases) zip file
   * Set the `VALE_HOME` environment variable to the unzipped binaries directory (e.g., `VALE_HOME = vale-release-x.y.z`)
 * [F*](https://github.com/FStarLang/FStar) (`master` branch),
-  [KreMLin](https://github.com/FStarLang/kremlin) (`master` branch),
+  [KaRaMeL](https://github.com/FStarLang/karamel) (`master` branch),
   and Z3 (version [4.5.1](https://github.com/FStarLang/binaries/tree/master/z3-tested))
   * Set the `FSTAR_HOME` environment variable to the F* directory (e.g., `FSTAR_HOME = FStar`)
-  * Set the `KREMLIN_HOME` environment variable to the KreMLin directory (e.g., `KREMLIN_HOME = kremlin`)
-  * (See the [HACL* installation guide](../INSTALL.md) for directions on installing F*, KreMLin, and Z3 and setting environment variables)
+  * Set the `KRML_HOME` environment variable to the KaRaMeL directory (e.g., `KRML_HOME = karamel`)
+  * (See the [HACL* installation guide](../INSTALL.md) for directions on installing F*, KaRaMeL, and Z3 and setting environment variables)
 * An installed C/C++ compiler, used by SCons to compile C/C++ files
 
 Once these tools are installed, running SCons in the `vale` directory will
@@ -30,5 +30,5 @@ build and verify the Vale cryptographic library:
 * To build in parallel, add the `-j` option (e.g., `-j 4` for 4-way parallelism).
   Any warnings about needing `pywin32` can be ignored.
 * To see additional generic and Vale-specific options,
-  including options to configure where to find Vale, KreMLin, F*, and Z3:
+  including options to configure where to find Vale, KaRaMeL, F*, and Z3:
   * ```python.exe scons.py -h```

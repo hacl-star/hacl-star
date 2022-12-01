@@ -1,0 +1,787 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsMem.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsStack.vaf"
+
+include{:fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Properties"
+
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Def.Words.Seq_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Spec.SHA2"
+include{:fstar}{:open} "Vale.SHA.PPC64LE.SHA_helpers"
+include{:fstar}{:open} "Spec.Agile.Hash"
+include{:fstar}{:open} "Spec.Hash.PadFinish"
+include{:fstar}{:open} "Spec.Hash.Definitions"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Spec.Loops"
+include{:fstar}{:open} "Vale.SHA2.Wrapper"
+
+module Vale.SHA.PPC64LE.Rounds.Core
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Opaque_s
+open Vale.Def.Types_s
+open Vale.Def.Words_s
+open Vale.Def.Words.Seq_s
+open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.Stack_i
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsStack
+open Vale.PPC64LE.InsVector
+open Vale.SHA.PPC64LE.SHA_helpers
+open Spec.SHA2
+open Spec.Agile.Hash
+open Spec.Hash.PadFinish
+open Spec.Hash.Definitions
+open Spec.Loops
+open Vale.SHA2.Wrapper
+#reset-options "--z3rlimit 2000"
+#endverbatim
+
+
+procedure Loop_rounds_3_7_11_body(
+        inline i:nat,
+        out msg:vec_opr,
+        ghost in_b:buffer128,
+        ghost offset:nat)
+    {:quick}
+    {:public}
+    lets
+        inp @= r4;
+    reads
+        heap0; memLayout;
+    modifies
+        inp;
+    requires        
+        0 <= i /\ i < 15 /\ (i % 4) == 3;
+
+        @msg == i + 1;
+
+        validSrcAddrsOffset128(heap0, inp, in_b, offset, 1, memLayout, Secret);
+        inp + 16 < pow2_64;
+    ensures
+        msg == reverse_bytes_quad32(buffer128_read(in_b, offset, heap0));
+        inp == old(inp) + 16;
+{
+    Load128_byte16_buffer(heap0, msg, inp, Secret, in_b, offset);
+    AddImm(inp, inp, 16);
+}
+
+procedure Loop_rounds_1_15_shift_body(
+        inline i:nat,
+        out msg0:vec_opr,
+        in msg1:vec_opr,
+        ghost block:block_w)
+    {:quick}
+    requires        
+        0 <= i /\ i < 16 /\ (i % 4) != 0;
+
+        @msg0 == i; @msg1 == i - (i % 4);
+
+        i % 4 == 1 ==> msg1.hi2 == ws_opaque(block, i);
+        i % 4 == 2 ==> msg1.lo1 == ws_opaque(block, i);
+        i % 4 == 3 ==> msg1.lo0 == ws_opaque(block, i);
+    ensures
+        msg0.hi3 == ws_opaque(block, i);
+{
+    inline if (i % 4 = 1)
+    {
+        Vsldoi(msg0, msg1, msg1, 4);
+    }
+    else if (i % 4 = 2)
+    {
+        Vsldoi(msg0, msg1, msg1, 8);
+    }
+    else if (i % 4 = 3)
+    {
+        Vsldoi(msg0, msg1, msg1, 12);
+    }
+}
+
+procedure Loop_rounds_16_63_body(
+        inline i:nat,
+        inout msg0:vec_opr,
+        in msg1:vec_opr,
+        in msg2:vec_opr,
+        in msg3:vec_opr,
+        ghost block:block_w)
+    {:quick}
+    {:public}
+    {:typecheck false}
+    lets
+        tmp_vec @= v25; tmp_vec2 @= v26;
+    modifies
+        tmp_vec; tmp_vec2;
+    requires        
+        16 <= i /\ i < 64;
+
+        let j := i % 16;
+
+        @msg0 == j; @msg1 == (j + 1) % 16; @msg2 == (j + 9) % 16; @msg3 == (j + 14) % 16;
+
+        msg0.hi3 == ws_opaque(block, i-16);
+        msg1.hi3 == ws_opaque(block, i-15);
+        msg2.hi3 == ws_opaque(block, i-7);
+        msg3.hi3 == ws_opaque(block, i-2);
+    ensures
+        let sigma0 := sigma256_0_0(ws_opaque(block, i-15));
+        let sigma1 := sigma256_0_1(ws_opaque(block, i-2));
+        msg0.hi3 == add_wrap32(add_wrap32(add_wrap32(ws_opaque(block, i-16), sigma0), sigma1), ws_opaque(block, i-7));
+        msg0.hi3 == ws_opaque(block, i);
+{
+    SHA256_sigma0(tmp_vec, msg1, i, block);
+    lemma_sigma_0_0_partial(i, block);
+    Vadduwm(msg0, msg0, tmp_vec);
+    SHA256_sigma1(tmp_vec2, msg3, i, block);
+    lemma_sigma_0_1_partial(i, block);
+    Vadduwm(msg0, msg0, tmp_vec2);
+    Vadduwm(msg0, msg0, msg2);
+    lemma_ws_opaque(block, i);
+}
+
+procedure Loop_rounds_0_63_body(
+        inline i:nat,
+        in msg:vec_opr,
+        in a_vec:vec_opr,
+        in b_vec:vec_opr,
+        in c_vec:vec_opr,
+        inout d_vec:vec_opr,
+        in e_vec:vec_opr,
+        in f_vec:vec_opr,
+        inout g_vec:vec_opr,
+        inout h_vec:vec_opr,
+        ghost k_b:buffer128,
+        ghost block:block_w,
+        ghost hash_orig:hash256)
+    {:quick}
+    lets
+        Wi @= v24; tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        heap0; Wi;
+    modifies
+        tmp_vec; tmp_vec2;
+    requires
+        0 <= i /\ i < 64;
+
+        @msg == i % 16;
+        i % 8 == 0 ==> @a_vec == 16 && @b_vec == 17 && @c_vec == 18 && @d_vec == 19 && @e_vec == 20 && @f_vec == 21 && @g_vec == 22 && @h_vec == 23;
+        i % 8 == 1 ==> @a_vec == 23 && @b_vec == 16 && @c_vec == 17 && @d_vec == 18 && @e_vec == 19 && @f_vec == 20 && @g_vec == 21 && @h_vec == 22;
+        i % 8 == 2 ==> @a_vec == 22 && @b_vec == 23 && @c_vec == 16 && @d_vec == 17 && @e_vec == 18 && @f_vec == 19 && @g_vec == 20 && @h_vec == 21;
+        i % 8 == 3 ==> @a_vec == 21 && @b_vec == 22 && @c_vec == 23 && @d_vec == 16 && @e_vec == 17 && @f_vec == 18 && @g_vec == 19 && @h_vec == 20;
+        i % 8 == 4 ==> @a_vec == 20 && @b_vec == 21 && @c_vec == 22 && @d_vec == 23 && @e_vec == 16 && @f_vec == 17 && @g_vec == 18 && @h_vec == 19;
+        i % 8 == 5 ==> @a_vec == 19 && @b_vec == 20 && @c_vec == 21 && @d_vec == 22 && @e_vec == 23 && @f_vec == 16 && @g_vec == 17 && @h_vec == 18;
+        i % 8 == 6 ==> @a_vec == 18 && @b_vec == 19 && @c_vec == 20 && @d_vec == 21 && @e_vec == 22 && @f_vec == 23 && @g_vec == 16 && @h_vec == 17;
+        i % 8 == 7 ==> @a_vec == 17 && @b_vec == 18 && @c_vec == 19 && @d_vec == 20 && @e_vec == 21 && @f_vec == 22 && @g_vec == 23 && @h_vec == 16;
+
+        let ks := buffer128_as_seq(heap0, k_b);
+
+        k_reqs(ks);
+        
+        let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i, block, hash_orig));
+        a_vec.hi3 == word_to_nat32(index(hash, 0));
+        b_vec.hi3 == word_to_nat32(index(hash, 1));
+        c_vec.hi3 == word_to_nat32(index(hash, 2));
+        d_vec.hi3 == word_to_nat32(index(hash, 3));
+        e_vec.hi3 == word_to_nat32(index(hash, 4));
+        f_vec.hi3 == word_to_nat32(index(hash, 5));
+        g_vec.hi3 == word_to_nat32(index(hash, 6));
+        h_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 7)), k_index(ks, i));
+        msg.hi3 == ws_opaque(block, i);
+        i != 63 ==> Wi.hi3 == k_index(ks, i+1);
+    ensures
+        let ks := buffer128_as_seq(heap0, k_b);
+        let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i, block, hash_orig));
+        let h_k := add_wrap32(word_to_nat32(index(hash, 7)), k_index(ks, i));
+        let ch := ch_256(word_to_nat32(index(hash, 4)), word_to_nat32(index(hash, 5)), word_to_nat32(index(hash, 6)));
+        let sigma1 := sigma256_1_1(word_to_nat32(index(hash, 4)));
+        let sigma0 := sigma256_1_0(word_to_nat32(index(hash, 0)));
+        let maj := maj_256(word_to_nat32(index(hash, 0)), word_to_nat32(index(hash, 1)), word_to_nat32(index(hash, 2)));
+        let sigma0_maj := add_wrap32(sigma0, maj);
+        d_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 3)), add_wrap32(add_wrap32(add_wrap32(h_k, ws_opaque(block, i)), ch), sigma1));
+        h_vec.hi3 == add_wrap32(add_wrap32(add_wrap32(add_wrap32(h_k, ws_opaque(block, i)), ch), sigma1), sigma0_maj);
+        i != 63 ==> g_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 6)), k_index(ks, i+1));
+        i != 63 ==> (let next_hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i+1, block, hash_orig)) in
+            a_vec.hi3 == word_to_nat32(index(next_hash, 1)) /\
+            b_vec.hi3 == word_to_nat32(index(next_hash, 2)) /\
+            c_vec.hi3 == word_to_nat32(index(next_hash, 3)) /\
+            d_vec.hi3 == word_to_nat32(index(next_hash, 4)) /\
+            e_vec.hi3 == word_to_nat32(index(next_hash, 5)) /\
+            f_vec.hi3 == word_to_nat32(index(next_hash, 6)) /\
+            g_vec.hi3 == add_wrap32(word_to_nat32(index(next_hash, 7)), k_index(ks, i+1)) /\
+            h_vec.hi3 == word_to_nat32(index(next_hash, 0)));
+        i == 63 ==> make_seperated_hash_quad32(h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec) == repeat_range_vale_64(block, hash_orig);
+{
+    Vadduwm(h_vec, h_vec, msg);
+    Vsel(tmp_vec, g_vec, f_vec, e_vec);
+    lemma_vsel32(old(f_vec.hi3), old(g_vec.hi3), old(e_vec.hi3));
+    inline if (i <> 63)
+    {
+        Vadduwm(g_vec, g_vec, Wi);
+    } 
+    Vadduwm(h_vec, h_vec, tmp_vec);
+    SHA256_Sigma1(tmp_vec2, e_vec, i, block, hash_orig);
+    lemma_sigma_1_1_partial(i, block, hash_orig);
+    Vadduwm(h_vec, h_vec, tmp_vec2);
+    Vxor(tmp_vec, a_vec, b_vec);
+    Vsel(tmp_vec, b_vec, c_vec, tmp_vec);
+    quad32_xor_reveal();
+    lemma_eq_maj_xvsel32(old(a_vec.hi3), old(b_vec.hi3), old(c_vec.hi3));
+    Vadduwm(d_vec, d_vec, h_vec);
+    SHA256_Sigma0(tmp_vec2, a_vec, i, block, hash_orig);
+    lemma_sigma_1_0_partial(i, block, hash_orig);
+    Vadduwm(tmp_vec2, tmp_vec2, tmp_vec);
+    Vadduwm(h_vec, h_vec, tmp_vec2);
+    lemma_shuffle_core_properties(i, block, hash_orig);
+    inline if (i = 63)
+    {
+        lemma_make_seperated_hash(repeat_range_vale_64(block, hash_orig), h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec);
+    } 
+}
+
+procedure Loop_round_0_61_body(inline i:nat, ghost k_b:buffer128)
+    {:quick}
+    lets
+        tbl @= r6; Wi @= v24;
+    reads
+        heap0; memLayout;
+    modifies
+        tbl; Wi;
+    requires
+        0 <= i /\ i < 62;
+        let ks := buffer128_read(k_b, (i+2)/4, heap0);
+        i%4 == 0 ==> Wi.hi3 == ks.lo1 && Wi.hi2 == ks.hi2 && Wi.lo1 == ks.hi3;
+        i%4 == 1 ==> Wi.hi3 == ks.hi2 && Wi.hi2 == ks.hi3;
+        i%4 == 2 ==> validSrcAddrsOffset128(heap0, tbl, k_b, (i+2)/4, 1, memLayout, Secret) && tbl + 16 < pow2_64;
+        i%4 == 3 ==> Wi.hi3 == ks.lo0 && Wi.hi2 == ks.lo1 && Wi.lo1 == ks.hi2 && Wi.lo0 == ks.hi3;
+    ensures
+        let ks := buffer128_read(k_b, (i+2)/4, heap0);
+        i%4 == 0 ==> Wi.hi3 == ks.hi2 && Wi.hi2 == ks.hi3 && tbl == old(tbl);
+        i%4 == 1 ==> Wi.hi3 == ks.hi3 && tbl == old(tbl);
+        i%4 == 2 ==> Wi.hi3 == ks.lo0 && Wi.hi2 == ks.lo1 && Wi.lo1 == ks.hi2 && Wi.lo0 == ks.hi3 && tbl == old(tbl) + 16;
+        i%4 == 3 ==> Wi.hi3 == ks.lo1 && Wi.hi2 == ks.hi2 && Wi.lo1 == ks.hi3 && tbl == old(tbl);
+{
+    inline if (i % 4 = 2)
+    {
+        Load128_word4_buffer(heap0, Wi, tbl, Secret, k_b, (i+2)/4);
+        AddImm(tbl, tbl, 16);
+    }
+    else
+    {
+        Vsldoi(Wi, Wi, Wi, 4);
+    }
+}
+
+procedure Loop_rounds_0_59_a(
+        inline i:nat,
+        ghost k_b:buffer128,
+        ghost block:block_w,
+        ghost hash_orig:hash256)
+    {:quick}
+    {:public}
+    lets
+        tbl @= r6;
+        a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
+        e_vec @= v20; f_vec @= v21; g_vec @= v22; h_vec @= v23;
+        Wi @= v24; tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        heap0; memLayout;
+        v0; v1; v2; v3;
+    modifies
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+    requires
+        i == 0 \/ i == 16 \/ i == 32 \/ i == 48;
+        tbl + 16 < pow2_64;
+        validSrcAddrsOffset128(heap0, tbl, k_b, i/4+1, 1, memLayout, Secret);
+        let ks := buffer128_as_seq(heap0, k_b);
+        k_reqs(ks);
+        let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i, block, hash_orig)) in 
+        a_vec.hi3 == word_to_nat32(index(hash, 0)) /\
+        b_vec.hi3 == word_to_nat32(index(hash, 1)) /\
+        c_vec.hi3 == word_to_nat32(index(hash, 2)) /\
+        d_vec.hi3 == word_to_nat32(index(hash, 3)) /\
+        e_vec.hi3 == word_to_nat32(index(hash, 4)) /\
+        f_vec.hi3 == word_to_nat32(index(hash, 5)) /\
+        g_vec.hi3 == word_to_nat32(index(hash, 6)) /\
+        h_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 7)), k_index(ks, i));
+        v0.hi3 == ws_opaque(block, i) /\ v1.hi3 == ws_opaque(block, i+1) /\ v2.hi3 == ws_opaque(block, i+2) /\
+        v3.hi3 == ws_opaque(block, i+3);
+        Wi.hi3 == k_index(ks, i+1) /\ Wi.hi2 == k_index(ks, i+2) /\ Wi.lo1 == k_index(ks, i+3);
+    ensures
+        tbl == old(tbl) + 16;
+        let ks := buffer128_as_seq(heap0, k_b);
+        let next_hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i+4, block, hash_orig)) in 
+        e_vec.hi3 == word_to_nat32(index(next_hash, 0)) /\
+        f_vec.hi3 == word_to_nat32(index(next_hash, 1)) /\
+        g_vec.hi3 == word_to_nat32(index(next_hash, 2)) /\
+        h_vec.hi3 == word_to_nat32(index(next_hash, 3)) /\
+        a_vec.hi3 == word_to_nat32(index(next_hash, 4)) /\
+        b_vec.hi3 == word_to_nat32(index(next_hash, 5)) /\
+        c_vec.hi3 == word_to_nat32(index(next_hash, 6)) /\
+        d_vec.hi3 == add_wrap32(word_to_nat32(index(next_hash, 7)), k_index(ks, i+4));
+        Wi.hi3 == k_index(ks, i+5) /\ Wi.hi2 == k_index(ks, i+6) /\ Wi.lo1 == k_index(ks, i+7);
+{
+    Loop_rounds_0_63_body(i, v0, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i, k_b);
+    Loop_rounds_0_63_body(i+1, v1, h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+1, k_b);
+    Loop_rounds_0_63_body(i+2, v2, g_vec, h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+2, k_b);
+    Loop_rounds_0_63_body(i+3, v3, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+3, k_b);
+}
+
+procedure Loop_rounds_0_59_b(
+        inline i:nat,
+        ghost k_b:buffer128,
+        ghost block:block_w,
+        ghost hash_orig:hash256)
+    {:quick}
+    {:public}
+    lets
+        tbl @= r6;
+        a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
+        e_vec @= v20; f_vec @= v21; g_vec @= v22; h_vec @= v23;
+        Wi @= v24; tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        heap0; memLayout;
+        v4; v5; v6; v7;
+    modifies
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+    requires
+        i == 4 \/ i == 20 \/ i == 36 \/ i == 52;
+        tbl + 16 < pow2_64;
+        validSrcAddrsOffset128(heap0, tbl, k_b, i/4+1, 1, memLayout, Secret);
+        let ks := buffer128_as_seq(heap0, k_b);
+        k_reqs(ks);
+        let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i, block, hash_orig)) in 
+        e_vec.hi3 == word_to_nat32(index(hash, 0)) /\
+        f_vec.hi3 == word_to_nat32(index(hash, 1)) /\
+        g_vec.hi3 == word_to_nat32(index(hash, 2)) /\
+        h_vec.hi3 == word_to_nat32(index(hash, 3)) /\
+        a_vec.hi3 == word_to_nat32(index(hash, 4)) /\
+        b_vec.hi3 == word_to_nat32(index(hash, 5)) /\
+        c_vec.hi3 == word_to_nat32(index(hash, 6)) /\
+        d_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 7)), k_index(ks, i));
+        v4.hi3 == ws_opaque(block, i) /\ v5.hi3 == ws_opaque(block, i+1) /\
+        v6.hi3 == ws_opaque(block, i+2) /\ v7.hi3 == ws_opaque(block, i+3);
+        Wi.hi3 == k_index(ks, i+1) /\ Wi.hi2 == k_index(ks, i+2) /\ Wi.lo1 == k_index(ks, i+3);
+    ensures
+        tbl == old(tbl) + 16;
+        let ks := buffer128_as_seq(heap0, k_b);
+        let next_hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i+4, block, hash_orig)) in 
+        a_vec.hi3 == word_to_nat32(index(next_hash, 0)) /\
+        b_vec.hi3 == word_to_nat32(index(next_hash, 1)) /\
+        c_vec.hi3 == word_to_nat32(index(next_hash, 2)) /\
+        d_vec.hi3 == word_to_nat32(index(next_hash, 3)) /\
+        e_vec.hi3 == word_to_nat32(index(next_hash, 4)) /\
+        f_vec.hi3 == word_to_nat32(index(next_hash, 5)) /\
+        g_vec.hi3 == word_to_nat32(index(next_hash, 6)) /\
+        h_vec.hi3 == add_wrap32(word_to_nat32(index(next_hash, 7)), k_index(ks, i+4));
+        Wi.hi3 == k_index(ks, i+5) /\ Wi.hi2 == k_index(ks, i+6) /\ Wi.lo1 == k_index(ks, i+7);
+{
+    Loop_rounds_0_63_body(i, v4, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, d_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i, k_b);
+    Loop_rounds_0_63_body(i+1, v5, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+1, k_b);
+    Loop_rounds_0_63_body(i+2, v6, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+2, k_b);
+    Loop_rounds_0_63_body(i+3, v7, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+3, k_b);
+}
+
+procedure Loop_rounds_0_59_c(
+        inline i:nat,
+        ghost k_b:buffer128,
+        ghost block:block_w,
+        ghost hash_orig:hash256)
+    {:quick}
+    {:public}
+    lets
+        tbl @= r6;
+        a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
+        e_vec @= v20; f_vec @= v21; g_vec @= v22; h_vec @= v23;
+        Wi @= v24; tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        heap0; memLayout;
+        v8; v9; v10; v11;
+    modifies
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+    requires
+        i == 8 \/ i == 24 \/ i == 40 \/ i == 56;
+        tbl + 16 < pow2_64;
+        validSrcAddrsOffset128(heap0, tbl, k_b, i/4+1, 1, memLayout, Secret);
+        let ks := buffer128_as_seq(heap0, k_b);
+        k_reqs(ks);
+        let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i, block, hash_orig)) in 
+        a_vec.hi3 == word_to_nat32(index(hash, 0)) /\
+        b_vec.hi3 == word_to_nat32(index(hash, 1)) /\
+        c_vec.hi3 == word_to_nat32(index(hash, 2)) /\
+        d_vec.hi3 == word_to_nat32(index(hash, 3)) /\
+        e_vec.hi3 == word_to_nat32(index(hash, 4)) /\
+        f_vec.hi3 == word_to_nat32(index(hash, 5)) /\
+        g_vec.hi3 == word_to_nat32(index(hash, 6)) /\
+        h_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 7)), k_index(ks, i));
+        v8.hi3 == ws_opaque(block, i) /\ v9.hi3 == ws_opaque(block, i+1) /\ v10.hi3 == ws_opaque(block, i+2) /\
+        v11.hi3 == ws_opaque(block, i+3);
+        Wi.hi3 == k_index(ks, i+1) /\ Wi.hi2 == k_index(ks, i+2) /\ Wi.lo1 == k_index(ks, i+3);
+    ensures
+        tbl == old(tbl) + 16;
+        let ks := buffer128_as_seq(heap0, k_b);
+        let next_hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i+4, block, hash_orig)) in 
+        e_vec.hi3 == word_to_nat32(index(next_hash, 0)) /\
+        f_vec.hi3 == word_to_nat32(index(next_hash, 1)) /\
+        g_vec.hi3 == word_to_nat32(index(next_hash, 2)) /\
+        h_vec.hi3 == word_to_nat32(index(next_hash, 3)) /\
+        a_vec.hi3 == word_to_nat32(index(next_hash, 4)) /\
+        b_vec.hi3 == word_to_nat32(index(next_hash, 5)) /\
+        c_vec.hi3 == word_to_nat32(index(next_hash, 6)) /\
+        d_vec.hi3 == add_wrap32(word_to_nat32(index(next_hash, 7)), k_index(ks, i+4));
+        Wi.hi3 == k_index(ks, i+5) /\ Wi.hi2 == k_index(ks, i+6) /\ Wi.lo1 == k_index(ks, i+7);
+{
+    Loop_rounds_0_63_body(i, v8, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i, k_b);
+    Loop_rounds_0_63_body(i+1, v9, h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+1, k_b);
+    Loop_rounds_0_63_body(i+2, v10, g_vec, h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+2, k_b);
+    Loop_rounds_0_63_body(i+3, v11, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, d_vec, e_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+3, k_b);
+}
+
+procedure Loop_rounds_0_59_d(
+        inline i:nat,
+        ghost k_b:buffer128,
+        ghost block:block_w,
+        ghost hash_orig:hash256)
+    {:quick}
+    {:public}
+    lets
+        tbl @= r6;
+        a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
+        e_vec @= v20; f_vec @= v21; g_vec @= v22; h_vec @= v23;
+        Wi @= v24; tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        heap0; memLayout;
+        v12; v13; v14; v15;
+    modifies
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+    requires
+        i == 12 \/ i == 28 \/ i == 44;
+        tbl + 16 < pow2_64;
+        validSrcAddrsOffset128(heap0, tbl, k_b, i/4+1, 1, memLayout, Secret);
+        let ks := buffer128_as_seq(heap0, k_b);
+        k_reqs(ks);
+        let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i, block, hash_orig)) in 
+        e_vec.hi3 == word_to_nat32(index(hash, 0)) /\
+        f_vec.hi3 == word_to_nat32(index(hash, 1)) /\
+        g_vec.hi3 == word_to_nat32(index(hash, 2)) /\
+        h_vec.hi3 == word_to_nat32(index(hash, 3)) /\
+        a_vec.hi3 == word_to_nat32(index(hash, 4)) /\
+        b_vec.hi3 == word_to_nat32(index(hash, 5)) /\
+        c_vec.hi3 == word_to_nat32(index(hash, 6)) /\
+        d_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 7)), k_index(ks, i));
+        v12.hi3 == ws_opaque(block, i) /\ v13.hi3 == ws_opaque(block, i+1) /\
+        v14.hi3 == ws_opaque(block, i+2) /\ v15.hi3 == ws_opaque(block, i+3);
+        Wi.hi3 == k_index(ks, i+1) /\ Wi.hi2 == k_index(ks, i+2) /\ Wi.lo1 == k_index(ks, i+3);
+    ensures
+        tbl == old(tbl) + 16;
+        let ks := buffer128_as_seq(heap0, k_b);
+        let next_hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(i+4, block, hash_orig)) in 
+        a_vec.hi3 == word_to_nat32(index(next_hash, 0)) /\
+        b_vec.hi3 == word_to_nat32(index(next_hash, 1)) /\
+        c_vec.hi3 == word_to_nat32(index(next_hash, 2)) /\
+        d_vec.hi3 == word_to_nat32(index(next_hash, 3)) /\
+        e_vec.hi3 == word_to_nat32(index(next_hash, 4)) /\
+        f_vec.hi3 == word_to_nat32(index(next_hash, 5)) /\
+        g_vec.hi3 == word_to_nat32(index(next_hash, 6)) /\
+        h_vec.hi3 == add_wrap32(word_to_nat32(index(next_hash, 7)), k_index(ks, i+4));
+        Wi.hi3 == k_index(ks, i+5) /\ Wi.hi2 == k_index(ks, i+6) /\ Wi.lo1 == k_index(ks, i+7);
+{
+    Loop_rounds_0_63_body(i, v12, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, d_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i, k_b);
+    Loop_rounds_0_63_body(i+1, v13, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+1, k_b);
+    Loop_rounds_0_63_body(i+2, v14, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+2, k_b);
+    Loop_rounds_0_63_body(i+3, v15, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(i+3, k_b);
+}
+
+procedure Loop_rounds_60_63_b(
+        ghost k_b:buffer128,
+        ghost block:block_w,
+        ghost hash_orig:hash256)
+    {:quick}
+    {:public}
+    lets
+        tbl @= r6;
+        a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
+        e_vec @= v20; f_vec @= v21; g_vec @= v22; h_vec @= v23;
+        Wi @= v24; tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        heap0; memLayout;
+        v12; v13; v14; v15;
+    modifies
+        tbl; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec; Wi; tmp_vec; tmp_vec2;
+    requires
+        validSrcAddrs128(heap0, tbl, k_b, 16, memLayout, Secret);
+        let ks := buffer128_as_seq(heap0, k_b);
+        k_reqs(ks);
+        let hash := #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(repeat_range_vale(60, block, hash_orig)) in 
+        e_vec.hi3 == word_to_nat32(index(hash, 0)) /\
+        f_vec.hi3 == word_to_nat32(index(hash, 1)) /\
+        g_vec.hi3 == word_to_nat32(index(hash, 2)) /\
+        h_vec.hi3 == word_to_nat32(index(hash, 3)) /\
+        a_vec.hi3 == word_to_nat32(index(hash, 4)) /\
+        b_vec.hi3 == word_to_nat32(index(hash, 5)) /\
+        c_vec.hi3 == word_to_nat32(index(hash, 6)) /\
+        d_vec.hi3 == add_wrap32(word_to_nat32(index(hash, 7)), k_index(ks, 60));
+        v12.hi3 == ws_opaque(block, 60) /\ v13.hi3 == ws_opaque(block, 61) /\
+        v14.hi3 == ws_opaque(block, 62) /\ v15.hi3 == ws_opaque(block, 63);
+        Wi.hi3 == k_index(ks, 61) /\ Wi.hi2 == k_index(ks, 62) /\ Wi.lo1 == k_index(ks, 63);
+    ensures
+        make_seperated_hash_quad32(a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec) == repeat_range_vale_64(block, hash_orig);
+{
+    Loop_rounds_0_63_body(60, v12, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, d_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(60, k_b);
+    Loop_rounds_0_63_body(61, v13, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, c_vec, k_b, block, hash_orig);
+    Loop_round_0_61_body(61, k_b);
+    Loop_rounds_0_63_body(62, v14, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, b_vec, k_b, block, hash_orig);
+    Loop_rounds_0_63_body(63, v15, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec, a_vec, k_b, block, hash_orig);
+}
+
+procedure Loop_rounds_1_3(ghost block:block_w)
+    {:quick}
+    {:public}
+    reads
+        v0;
+    modifies
+        v1; v2; v3;
+    requires
+        v0.hi2 == ws_opaque(block, 1) /\ v0.lo1 == ws_opaque(block, 2) /\ v0.lo0 == ws_opaque(block, 3);
+    ensures
+        v1.hi3 == ws_opaque(block, 1) /\
+        v2.hi3 == ws_opaque(block, 2) /\
+        v3.hi3 == ws_opaque(block, 3);
+{
+    Loop_rounds_1_15_shift_body(1, v1, v0, block);
+    Loop_rounds_1_15_shift_body(2, v2, v0, block);
+    Loop_rounds_1_15_shift_body(3, v3, v0, block);
+}
+
+procedure Loop_rounds_5_7(ghost block:block_w)
+    {:quick}
+    {:public}
+    reads
+        v4;
+    modifies
+        v5; v6; v7;
+    requires
+        v4.hi2 == ws_opaque(block, 5) /\ v4.lo1 == ws_opaque(block, 6) /\ v4.lo0 == ws_opaque(block, 7);
+    ensures
+        v5.hi3 == ws_opaque(block, 5) /\
+        v6.hi3 == ws_opaque(block, 6) /\
+        v7.hi3 == ws_opaque(block, 7);
+{
+    Loop_rounds_1_15_shift_body(5, v5, v4, block);
+    Loop_rounds_1_15_shift_body(6, v6, v4, block);
+    Loop_rounds_1_15_shift_body(7, v7, v4, block);
+}
+
+procedure Loop_rounds_9_11(ghost block:block_w)
+    {:quick}
+    {:public}
+    reads
+        v8;
+    modifies
+        v9; v10; v11;
+    requires
+        v8.hi2 == ws_opaque(block, 9) /\ v8.lo1 == ws_opaque(block, 10) /\ v8.lo0 == ws_opaque(block, 11);
+    ensures
+        v9.hi3 == ws_opaque(block, 9) /\
+        v10.hi3 == ws_opaque(block, 10) /\
+        v11.hi3 == ws_opaque(block, 11);
+{
+    Loop_rounds_1_15_shift_body(9, v9, v8, block);
+    Loop_rounds_1_15_shift_body(10, v10, v8, block);
+    Loop_rounds_1_15_shift_body(11, v11, v8, block);
+}
+
+procedure Loop_rounds_13_15(ghost block:block_w)
+    {:quick}
+    {:public}
+    reads
+        v12;
+    modifies
+        v13; v14; v15;
+    requires
+        v12.hi2 == ws_opaque(block, 13) /\ v12.lo1 == ws_opaque(block, 14) /\
+        v12.lo0 == ws_opaque(block, 15);
+    ensures
+        v13.hi3 == ws_opaque(block, 13) /\
+        v14.hi3 == ws_opaque(block, 14) /\
+        v15.hi3 == ws_opaque(block, 15);
+{
+    Loop_rounds_1_15_shift_body(13, v13, v12, block);
+    Loop_rounds_1_15_shift_body(14, v14, v12, block);
+    Loop_rounds_1_15_shift_body(15, v15, v12, block);
+}
+
+procedure Loop_rounds_16_59_a(
+        inline i:nat,
+        ghost block:block_w)
+    {:quick}
+    {:public}
+    {:typecheck false}
+    lets
+        tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        v0; v5; v10; v11; v12; v13; v15;
+    modifies
+        v1; v2; v3; v4; tmp_vec; tmp_vec2;
+    requires
+        i == 16 \/ i == 32 \/ i == 48;
+        v0.hi3 == ws_opaque(block, i) /\ v1.hi3 == ws_opaque(block, i-15) /\
+        v2.hi3 == ws_opaque(block, i-14) /\ v3.hi3 == ws_opaque(block, i-13) /\
+        v4.hi3 == ws_opaque(block, i-12) /\ v5.hi3 == ws_opaque(block, i-11) /\
+        v10.hi3 == ws_opaque(block, i-6) /\ v11.hi3 == ws_opaque(block, i-5) /\
+        v12.hi3 == ws_opaque(block, i-4) /\ v13.hi3 == ws_opaque(block, i-3) /\
+        v15.hi3 == ws_opaque(block, i-1);
+    ensures
+        v1.hi3 == ws_opaque(block, i+1) /\ v2.hi3 == ws_opaque(block, i+2) /\
+        v3.hi3 == ws_opaque(block, i+3) /\ v4.hi3 == ws_opaque(block, i+4);
+{
+    Loop_rounds_16_63_body(i+1, v1, v2, v10, v15, block);
+    Loop_rounds_16_63_body(i+2, v2, v3, v11, v0, block);
+    Loop_rounds_16_63_body(i+3, v3, v4, v12, v1, block);
+    Loop_rounds_16_63_body(i+4, v4, v5, v13, v2, block);
+}
+
+procedure Loop_rounds_16_59_b(
+        inline i:nat,
+        ghost block:block_w)
+    {:quick}
+    {:public}
+    {:typecheck false}
+    lets
+        tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        v0; v1; v3; v4; v9; v14; v15;
+    modifies
+        v5; v6; v7; v8; tmp_vec; tmp_vec2;
+    requires
+        i == 20 \/ i == 36 \/ i == 52;
+        v0.hi3 == ws_opaque(block, i-4) /\ v1.hi3 == ws_opaque(block, i-3) /\
+        v3.hi3 == ws_opaque(block, i-1) /\ v4.hi3 == ws_opaque(block, i) /\
+        v5.hi3 == ws_opaque(block, i-15) /\ v6.hi3 == ws_opaque(block, i-14) /\
+        v7.hi3 == ws_opaque(block, i-13) /\ v8.hi3 == ws_opaque(block, i-12) /\
+        v9.hi3 == ws_opaque(block, i-11) /\ v14.hi3 == ws_opaque(block, i-6) /\
+        v15.hi3 == ws_opaque(block, i-5);
+    ensures
+        v5.hi3 == ws_opaque(block, i+1) /\ v6.hi3 == ws_opaque(block, i+2) /\
+        v7.hi3 == ws_opaque(block, i+3) /\ v8.hi3 == ws_opaque(block, i+4);
+{
+    Loop_rounds_16_63_body(i+1, v5, v6, v14, v3, block);
+    Loop_rounds_16_63_body(i+2, v6, v7, v15, v4, block);
+    Loop_rounds_16_63_body(i+3, v7, v8, v0, v5, block);
+    Loop_rounds_16_63_body(i+4, v8, v9, v1, v6, block);
+}
+
+procedure Loop_rounds_16_59_c(
+        inline i:nat,
+        ghost block:block_w)
+    {:quick}
+    {:public}
+    {:typecheck false}
+    lets
+        tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        v2; v3; v4; v5; v7; v8; v13;
+    modifies
+        v9; v10; v11; v12; tmp_vec; tmp_vec2;
+    requires
+        i == 24 \/ i == 40 \/ i == 56;
+        v2.hi3 == ws_opaque(block, i-6) /\ v3.hi3 == ws_opaque(block, i-5) /\
+        v4.hi3 == ws_opaque(block, i-4) /\ v5.hi3 == ws_opaque(block, i-3) /\
+        v7.hi3 == ws_opaque(block, i-1) /\ v8.hi3 == ws_opaque(block, i) /\
+        v9.hi3 == ws_opaque(block, i-15) /\ v10.hi3 == ws_opaque(block, i-14) /\
+        v11.hi3 == ws_opaque(block, i-13) /\ v12.hi3 == ws_opaque(block, i-12) /\
+        v13.hi3 == ws_opaque(block, i-11);
+    ensures
+        v9.hi3 == ws_opaque(block, i+1) /\ v10.hi3 == ws_opaque(block, i+2) /\
+        v11.hi3 == ws_opaque(block, i+3) /\ v12.hi3 == ws_opaque(block, i+4);
+{
+    Loop_rounds_16_63_body(i+1, v9, v10, v2, v7, block);
+    Loop_rounds_16_63_body(i+2, v10, v11, v3, v8, block);
+    Loop_rounds_16_63_body(i+3, v11, v12, v4, v9, block);
+    Loop_rounds_16_63_body(i+4, v12, v13, v5, v10, block);
+}
+
+procedure Loop_rounds_16_59_d(
+        inline i:nat,
+        ghost block:block_w)
+    {:quick}
+    {:public}
+    {:typecheck false}
+    lets
+        tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        v1; v6; v7; v8; v9; v11; v12;
+    modifies
+        v0; v13; v14; v15; tmp_vec; tmp_vec2;
+    requires
+        i == 28 \/ i == 44;
+        v0.hi3 == ws_opaque(block, i-12) /\ v1.hi3 == ws_opaque(block, i-11) /\
+        v6.hi3 == ws_opaque(block, i-6) /\ v7.hi3 == ws_opaque(block, i-5) /\
+        v8.hi3 == ws_opaque(block, i-4) /\ v9.hi3 == ws_opaque(block, i-3) /\
+        v11.hi3 == ws_opaque(block, i-1) /\ v12.hi3 == ws_opaque(block, i) /\
+        v13.hi3 == ws_opaque(block, i-15) /\ v14.hi3 == ws_opaque(block, i-14) /\
+        v15.hi3 == ws_opaque(block, i-13);
+    ensures
+        v0.hi3 == ws_opaque(block, i+4) /\ v13.hi3 == ws_opaque(block, i+1) /\
+        v14.hi3 == ws_opaque(block, i+2) /\ v15.hi3 == ws_opaque(block, i+3);
+{
+    Loop_rounds_16_63_body(i+1, v13, v14, v6, v11, block);
+    Loop_rounds_16_63_body(i+2, v14, v15, v7, v12, block);
+    Loop_rounds_16_63_body(i+3, v15, v0, v8, v13, block);
+    Loop_rounds_16_63_body(i+4, v0, v1, v9, v14, block);
+}
+
+procedure Loop_rounds_60_63_a(ghost block:block_w)
+    {:quick}
+    {:public}
+    lets
+        tmp_vec @= v25; tmp_vec2 @= v26;
+    reads
+        v0; v6; v7; v8; v11; v12;
+    modifies
+        v13; v14; v15; tmp_vec; tmp_vec2;
+    requires
+        v0.hi3 == ws_opaque(block, 48) /\ v6.hi3 == ws_opaque(block, 54) /\
+        v7.hi3 == ws_opaque(block, 55) /\ v8.hi3 == ws_opaque(block, 56) /\
+        v11.hi3 == ws_opaque(block, 59) /\ v12.hi3 == ws_opaque(block, 60) /\
+        v13.hi3 == ws_opaque(block, 45) /\ v14.hi3 == ws_opaque(block, 46) /\
+        v15.hi3 == ws_opaque(block, 47);
+    ensures
+        v13.hi3 == ws_opaque(block, 61) /\ v14.hi3 == ws_opaque(block, 62) /\
+        v15.hi3 == ws_opaque(block, 63);
+{
+    Loop_rounds_16_63_body(61, v13, v14, v6, v11, block);
+    Loop_rounds_16_63_body(62, v14, v15, v7, v12, block);
+    Loop_rounds_16_63_body(63, v15, v0, v8, v13, block);
+}

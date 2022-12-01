@@ -14,7 +14,7 @@ module SeqLemmas = Lib.Sequence.Lemmas
 open Hacl.Spec.Chacha20.Vec
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let blocksize = size_block
 

@@ -17,4 +17,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 4
     let everCrypt_Error_error_code_EverCrypt_Error_DecodeError =
       Unsigned.UInt8.of_int 5
+    let everCrypt_Error_error_code_EverCrypt_Error_MaximumLengthExceeded =
+      Unsigned.UInt8.of_int 6
   end

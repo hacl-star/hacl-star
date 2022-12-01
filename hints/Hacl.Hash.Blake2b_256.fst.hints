@@ -1,5 +1,5 @@
 [
-  "¨-yøâ\u0011j2“4,*ÌbFA",
+  "‰ä\u0013Ðü®Tý)n¿¥Ôy†3",
   [
     [
       "Hacl.Hash.Blake2b_256.init_blake2b_256",
@@ -22,7 +22,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "28ca8bdb715a1c4f62367a908bbe925f"
+      "8f59ad1fc6db7ff43efe48434d4ff71e"
     ],
     [
       "Hacl.Hash.Blake2b_256.alloca_blake2b_256",
@@ -47,7 +47,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b804dedaebaeb206cad2c92063bb46ab"
+      "3abd047df63a629f75bac70a9884d4ff"
     ],
     [
       "Hacl.Hash.Blake2b_256.update_blake2b_256",
@@ -70,7 +70,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3af84b4b2399b98cf2ebe249010cbebc"
+      "75d0d340d143ba3346b2e93a5e746f68"
     ],
     [
       "Hacl.Hash.Blake2b_256.finish_blake2b_256",
@@ -93,7 +93,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "49b9fabc21568a6c26bcda37785669f0"
+      "0b25e33b04e689d37041ade774a7a356"
     ],
     [
       "Hacl.Hash.Blake2b_256.update_multi_blake2b_256",
@@ -130,7 +130,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "efb704101a71ffbe631f928fef19dab2"
+      "10bca4e8725ebe9c4b93ed7666ac5273"
     ],
     [
       "Hacl.Hash.Blake2b_256.update_last_blake2b_256",
@@ -167,7 +167,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "7aa34473296b6181e616eb720ad52109"
+      "869b32482bb363cfc33806d601b46484"
     ],
     [
       "Hacl.Hash.Blake2b_256.hash_blake2b_256",
@@ -204,7 +204,44 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "fa647bf65b0dbc5c4fc6b85528cbcfef"
+      "b6fe5d7010c2bb120d87674eab5dc383"
+    ],
+    [
+      "Hacl.Hash.Blake2b_256.malloc_blake2b_256",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Hacl.Impl.Blake2.Core_pretyping_738bced230d07a53885c00814ce7f1ee",
+        "Spec.Blake2_pretyping_db784d5da91640e63403e359daacba94",
+        "constructor_distinct_Hacl.Impl.Blake2.Core.M256",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Hash.Definitions.Blake2B",
+        "data_typing_intro_Hacl.Impl.Blake2.Core.M128@tok",
+        "data_typing_intro_Spec.Blake2.Blake2B@tok",
+        "equality_tok_Hacl.Impl.Blake2.Core.M256@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.Blake2.Blake2B@tok",
+        "equality_tok_Spec.Hash.Definitions.Blake2B@tok",
+        "equation_Hacl.Impl.Blake2.Generic.is_valid_blake2_config",
+        "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.is_blake",
+        "equation_Spec.Hash.Definitions.to_blake_alg",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+      ],
+      0,
+      "fb2f69f1b6d84ce6772d6be6ca6f96e7"
     ]
   ]
 ]

@@ -30,15 +30,14 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Lib_Memzero0.h"
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 void
 Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
@@ -79,6 +78,16 @@ Hacl_Blake2b_256_blake2b_finish(
   Lib_IntVector_Intrinsics_vec256 *hash
 );
 
+/**
+Write the BLAKE2b digest of message `d` using key `k` into `output`.
+
+@param nn Length of the to-be-generated digest with 1 <= `nn` <= 64.
+@param output Pointer to `nn` bytes of memory where the digest is written to.
+@param ll Length of the input message.
+@param d Pointer to `ll` bytes of memory where the input message is read from.
+@param kk Length of the key. Can be 0.
+@param k Pointer to `kk` bytes of memory where the key is read from.
+*/
 void
 Hacl_Blake2b_256_blake2b(
   uint32_t nn,
@@ -87,6 +96,18 @@ Hacl_Blake2b_256_blake2b(
   uint8_t *d,
   uint32_t kk,
   uint8_t *k
+);
+
+void
+Hacl_Blake2b_256_load_state256b_from_state32(
+  Lib_IntVector_Intrinsics_vec256 *st,
+  uint64_t *st32
+);
+
+void
+Hacl_Blake2b_256_store_state256b_to_state32(
+  uint64_t *st32,
+  Lib_IntVector_Intrinsics_vec256 *st
 );
 
 #if defined(__cplusplus)

@@ -14,8 +14,8 @@ open Spec.Hash.Definitions
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
-let pad_md (a:hash_alg{is_md a})
-  (total_len:nat{total_len <= max_input_length a}):
+let pad_md (a:md_alg)
+  (total_len:nat{total_len `less_than_max_input_length` a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
   = let open FStar.Mul in
     let firstbyte = S.create 1 (u8 0x80) in
@@ -30,33 +30,38 @@ let pad_md (a:hash_alg{is_md a})
     in
     S.(firstbyte @| zeros @| encodedlen)
 
-let pad_blake (a:hash_alg {is_blake a})
-  (total_len:nat{total_len <= max_input_length a}):
+let pad (a:md_alg)
+  (total_len:nat{total_len `less_than_max_input_length` a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
-  = let len = (block_length a - total_len) % block_length a in
-    S.create len (u8 0)
-
-let pad (a:hash_alg)
-  (total_len:nat{total_len <= max_input_length a}):
-  Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
-= if is_blake a then pad_blake a total_len
-  else pad_md a total_len
+= pad_md a total_len
 
 (** Extracting the hash, which we call "finish" *)
 
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish_md (a:hash_alg{is_md a}) (hashw:words_state a): Tot (lbytes (hash_length a)) =
+let finish_md (a:md_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
   let hashw, extra = hashw in
   let hash_final_w = S.slice hashw 0 (hash_word_length a) in
   bytes_of_words a #(hash_word_length a) hash_final_w
 
-let finish_blake (a:hash_alg{is_blake a}) (hashw:words_state a): Tot (lbytes (hash_length a)) =
+let finish_blake (a:blake_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
   let alg = to_blake_alg a in
   Spec.Blake2.blake2_finish alg (fst hashw) (Spec.Blake2.max_output alg)
+
+let finish_sha3 (a: sha3_alg) (s: words_state a): Tot (lbytes (hash_length a)) =
+  match a with
+  | SHA3_256 ->
+      let rateInBytes = 1088 / 8 in
+      let outputByteLen = 32 in
+      let s, _ = s in
+      Spec.SHA3.squeeze s rateInBytes outputByteLen
 
 (* Note that the ``extra_state`` in the ``words_state`` parameter is useless -
  * we use this fact pervasively in the proofs and some definitions by providing
  * dummy extra-states when we don't manipulate "full" words states *)
 let finish (a:hash_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
-  if is_blake a then finish_blake a hashw
-  else finish_md a hashw
+  if is_blake a then
+    finish_blake a hashw
+  else if is_sha3 a then
+    finish_sha3 a hashw
+  else
+    finish_md a hashw

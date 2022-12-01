@@ -2,6 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    module Hacl_Bignum_applied =
+      (Hacl_Bignum_bindings.Bindings)(Hacl_Bignum_stubs)
+    open Hacl_Bignum_applied
     let hacl_Bignum256_add =
       foreign "Hacl_Bignum256_add"
         ((ptr uint64_t) @->
@@ -47,20 +50,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Bignum256_mod_inv_prime_vartime"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
-    type hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 =
-      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 ] structure
-    let (hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 :
-      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 ] structure typ) =
-      structure "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s"
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_len =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 "len" uint32_t
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_n =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 "n" (ptr uint64_t)
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_mu =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 "mu" uint64_t
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_r2 =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 "r2" (ptr uint64_t)
-    let _ = seal hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
     let hacl_Bignum256_mont_ctx_init =
       foreign "Hacl_Bignum256_mont_ctx_init"
         ((ptr uint64_t) @->

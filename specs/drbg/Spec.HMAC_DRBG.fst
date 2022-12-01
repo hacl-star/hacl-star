@@ -20,23 +20,23 @@ type state (a:supported_alg) =
 let hmac_input_bound = function
   | SHA1     ->
     let a = SHA1 in
-    assert_norm (hash_length a + pow2 32 + pow2 32 +1 + block_length a + block_length a <= max_input_length a)
+    assert_norm ((hash_length a + pow2 32 + pow2 32 +1 + block_length a + block_length a) `less_than_max_input_length` a)
   | SHA2_256 ->
     let a = SHA2_256 in
-    assert_norm (hash_length a + pow2 32 + pow2 32 + 1 + block_length a + block_length a <= max_input_length a)
+    assert_norm ((hash_length a + pow2 32 + pow2 32 + 1 + block_length a + block_length a) `less_than_max_input_length` a)
   | SHA2_384 ->
     let a = SHA2_384 in
-    assert_norm (hash_length a + pow2 32 + pow2 32 + 1 + block_length a + block_length a <= max_input_length a)
+    assert_norm ((hash_length a + pow2 32 + pow2 32 + 1 + block_length a + block_length a) `less_than_max_input_length` a)
   | SHA2_512 ->
     let a = SHA2_512 in
-    assert_norm (hash_length a + pow2 32 + pow2 32 + 1 + block_length a + block_length a <= max_input_length a)
+    assert_norm ((hash_length a + pow2 32 + pow2 32 + 1 + block_length a + block_length a) `less_than_max_input_length` a)
 
 val update: #a:supported_alg
   -> data:bytes
   -> k:lbytes (hash_length a)
   -> v:lbytes (hash_length a)
   -> Pure (lbytes (hash_length a) & lbytes (hash_length a))
-  (requires hash_length a + Seq.length data + 1 + block_length a <= max_input_length a)
+  (requires (hash_length a + Seq.length data + 1 + block_length a) `less_than_max_input_length` a)
   (ensures  fun _ -> True)
 
 let update #a data k v =
@@ -111,8 +111,8 @@ val generate': #a:supported_alg
   -> Pure (option (lbytes n & state a))
   (requires
     n <= max_output_length /\
-    hash_length a + Seq.length additional_input
-      + 1 + block_length a <= max_input_length a)
+    (hash_length a + Seq.length additional_input
+      + 1 + block_length a) `less_than_max_input_length` a)
   (ensures fun _ -> True)
 let generate' #a st n additional_input =
   hmac_input_bound a;

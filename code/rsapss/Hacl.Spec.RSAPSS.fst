@@ -155,11 +155,14 @@ val rsapss_sign_pre:
   -> msgLen:nat
   -> msg:seq uint8{length msg == msgLen} -> Type0
 
+inline_for_extraction noextract
+let less_than_max_input_length = Spec.Hash.Definitions.less_than_max_input_length
+
 let rsapss_sign_pre a modBits sLen salt msgLen msg =
   sLen + Hash.hash_length a + 8 <= max_size_t /\
-  sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
+  (sLen + Hash.hash_length a + 8) `less_than_max_input_length` a /\
   sLen + Hash.hash_length a + 2 <= blocks (modBits - 1) 8 /\
-  msgLen <= Hash.max_input_length a
+  msgLen `less_than_max_input_length` a
 
 
 val rsapss_sign_post:
@@ -231,8 +234,8 @@ val rsapss_verify_pre:
 
 let rsapss_verify_pre a sLen msgLen msg =
   sLen + Hash.hash_length a + 8 <= max_size_t /\
-  sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
-  msgLen <= Hash.max_input_length a
+  (sLen + Hash.hash_length a + 8) `less_than_max_input_length` a /\
+  msgLen `less_than_max_input_length` a
 
 
 val rsapss_verify_post:
@@ -500,11 +503,10 @@ let rsapss_sign #t a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   let hLen = Hash.hash_length a in
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32;
-  assert (max_size_t < Hash.max_input_length a);
 
   let b =
     sLen <= v (0xfffffffful) - hLen - 8 &&
-    msgLen <= Hash.max_input_length a &&
+    msgLen `less_than_max_input_length` a &&
     sLen + hLen + 2 <= blocks (modBits - 1) 8 in
 
   if b then begin
@@ -714,12 +716,12 @@ let rsapss_verify #t a modBits eBits pkey sLen k sgnt msgLen msg =
   let hLen = Hash.hash_length a in
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32;
-  assert (max_size_t < Hash.max_input_length a);
+  //assert (max_size_t < Hash.max_input_length a);
   assert (hLen + 8 < max_size_t);
 
   let b =
     sLen <= v (0xfffffffful) - hLen - 8 &&
-    msgLen <= Hash.max_input_length a &&
+    msgLen `less_than_max_input_length` a &&
     k = blocks modBits 8 in
 
   if b then begin

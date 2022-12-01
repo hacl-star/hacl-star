@@ -30,15 +30,19 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "internal/Hacl_Kremlib.h"
 #include "../Hacl_Hash_Blake2.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
+/* SNIPPET_START: Hacl_Hash_Core_Blake2_init_blake2s_32 */
+
+uint64_t Hacl_Hash_Core_Blake2_init_blake2s_32(uint32_t *s);
+
+/* SNIPPET_END: Hacl_Hash_Core_Blake2_init_blake2s_32 */
+
 /* SNIPPET_START: Hacl_Hash_Core_Blake2_update_blake2s_32 */
 
 uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block);
@@ -50,6 +54,12 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
 void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Hash_Core_Blake2_finish_blake2s_32 */
+
+/* SNIPPET_START: Hacl_Hash_Core_Blake2_init_blake2b_32 */
+
+FStar_UInt128_uint128 Hacl_Hash_Core_Blake2_init_blake2b_32(uint64_t *s);
+
+/* SNIPPET_END: Hacl_Hash_Core_Blake2_init_blake2b_32 */
 
 /* SNIPPET_START: Hacl_Hash_Core_Blake2_update_blake2b_32 */
 

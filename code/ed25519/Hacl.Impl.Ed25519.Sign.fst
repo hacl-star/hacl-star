@@ -1,31 +1,94 @@
 module Hacl.Impl.Ed25519.Sign
 
-module ST = FStar.HyperStack.ST
-open FStar.HyperStack.All
+open FStar.HyperStack
+open FStar.HyperStack.ST
 open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Ed25519.Sign.Expanded
+module ST = FStar.HyperStack.ST
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
+
+module F51 = Hacl.Impl.Ed25519.Field51
+module F56 = Hacl.Impl.BignumQ.Mul
+module S56 = Hacl.Spec.BignumQ.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-inline_for_extraction noextract
-val sign:
-    signature:lbuffer uint8 64ul
-  -> secret:lbuffer uint8 32ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len ->
-  Stack unit
-    (requires fun h -> live h signature /\ live h msg /\ live h secret)
-    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
-      as_seq h1 signature == Spec.Ed25519.sign (as_seq h0 secret) (as_seq h0 msg)
-    )
+val point_mul_g_compress (out s:lbuffer uint8 32ul) : Stack unit
+  (requires fun h ->
+    live h out /\ live h s /\ disjoint s out)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_seq h1 out == Spec.Ed25519.point_compress (Spec.Ed25519.point_mul_g (as_seq h0 s)))
 
-let sign signature secret len msg =
-  push_frame();
-  let ks = create 96ul (u8 0) in
-  expand_keys ks secret;
-  sign_expanded signature ks len msg;
-  pop_frame()
+[@CInline]
+let point_mul_g_compress out s =
+  push_frame ();
+  let tmp = create 20ul (u64 0) in
+  Hacl.Impl.Ed25519.Ladder.point_mul_g tmp s;
+  Hacl.Impl.Ed25519.PointCompress.point_compress out tmp;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val sign_compute_s (r hs:lbuffer uint64 5ul) (a s:lbuffer uint8 32ul) : Stack unit
+  (requires fun h ->
+    live h r /\ live h hs /\ live h a /\ live h s /\
+    disjoint s r /\ disjoint s hs /\ disjoint s a /\
+    F56.scalar_inv_full_t h r /\ F56.scalar_inv_full_t h hs)
+  (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
+    as_seq h1 s == BSeq.nat_to_bytes_le 32 ((F56.as_nat h0 r +
+      (F56.as_nat h0 hs * BSeq.nat_from_bytes_le (as_seq h0 a)) % Spec.Ed25519.q) % Spec.Ed25519.q))
+
+let sign_compute_s r hs a s =
+  push_frame ();
+  let aq = create 5ul (u64 0) in
+  Hacl.Impl.Load56.load_32_bytes aq a;
+  Hacl.Impl.BignumQ.Mul.mul_modq aq hs aq;
+  Hacl.Impl.BignumQ.Mul.add_modq aq r aq;
+  assert_norm (0x100000000000000 == pow2 56);
+  Hacl.Impl.Store56.store_56 s aq;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val sign_expanded:
+    signature:lbuffer uint8 64ul
+  -> expanded_keys:lbuffer uint8 96ul
+  -> msg_len:size_t
+  -> msg:lbuffer uint8 msg_len ->
+  Stack unit
+    (requires fun h ->
+      live h signature /\ live h msg /\ live h expanded_keys /\
+      disjoint signature msg /\ disjoint signature expanded_keys)
+    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
+      as_seq h1 signature == Spec.Ed25519.sign_expanded
+        (as_seq h0 (gsub expanded_keys 0ul 32ul))
+        (as_seq h0 (gsub expanded_keys 32ul 32ul))
+        (as_seq h0 (gsub expanded_keys 64ul 32ul))
+        (as_seq h0 msg))
+
+let sign_expanded signature expanded_keys msg_len msg =
+  push_frame ();
+  let rs = sub signature 0ul 32ul in
+  let ss = sub signature 32ul 32ul in
+
+  let rq = create 5ul (u64 0) in
+  let hq = create 5ul (u64 0) in
+  let rb = create 32ul (u8 0) in
+
+  // expanded_keys = [ public_key; s; prefix ]
+  let public_key = sub expanded_keys  0ul 32ul in
+  let s          = sub expanded_keys 32ul 32ul in
+  let prefix     = sub expanded_keys 64ul 32ul in
+
+  Hacl.Impl.SHA512.ModQ.store_sha512_modq_pre rb rq prefix msg_len msg;
+  point_mul_g_compress rs rb;
+  Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 hq rs public_key msg_len msg;
+  sign_compute_s rq hq s ss;
+  let h1 = ST.get () in
+  LSeq.eq_intro (as_seq h1 signature)
+    (Spec.Ed25519.sign_expanded (as_seq h1 public_key) (as_seq h1 s) (as_seq h1 prefix) (as_seq h1 msg));
+  pop_frame ()

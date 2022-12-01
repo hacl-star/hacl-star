@@ -84,10 +84,10 @@ let new_bn_from_bytes_le r len b =
   BS.new_bn_from_bytes_le r len b
 
 let bn_to_bytes_be len b res =
-  Hacl.Bignum.Convert.mk_bn_to_bytes_be len b res
+  Hacl.Bignum.Convert.mk_bn_to_bytes_be false len b res
 
 let bn_to_bytes_le len b res =
-  Hacl.Bignum.Convert.mk_bn_to_bytes_le len b res
+  Hacl.Bignum.Convert.mk_bn_to_bytes_le false len b res
 
 let lt_mask len a b =
   BN.bn_lt_mask len a b

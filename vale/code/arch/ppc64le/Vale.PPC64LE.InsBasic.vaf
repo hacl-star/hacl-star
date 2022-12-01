@@ -1,0 +1,327 @@
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+
+module Vale.PPC64LE.InsBasic
+
+#verbatim{:interface}
+open FStar.Mul
+open Vale.Arch.Types
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.QuickCode
+unfold let vale_heap = Vale.PPC64LE.Memory.vale_heap
+unfold let vale_stack = Vale.PPC64LE.Stack_i.vale_stack
+#endverbatim
+
+#verbatim
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.Stack_i
+friend Vale.PPC64LE.Decls
+module S = Vale.PPC64LE.Semantics_s
+#endverbatim
+
+type vale_heap:Type(1) := Vale.PPC64LE.Memory.vale_heap;
+type vale_stack:Type(1) := Vale.PPC64LE.Stack_i.vale_stack;
+
+var ok:bool {:state ok()};
+var r0:nat64 {:state reg(0)};
+var r1:nat64 {:state reg(1)};
+var r2:nat64 {:state reg(2)};
+var r3:nat64 {:state reg(3)};
+var r4:nat64 {:state reg(4)};
+var r5:nat64 {:state reg(5)};
+var r6:nat64 {:state reg(6)};
+var r7:nat64 {:state reg(7)};
+var r8:nat64 {:state reg(8)};
+var r9:nat64 {:state reg(9)};
+var r10:nat64 {:state reg(10)};
+var r11:nat64 {:state reg(11)};
+var r12:nat64 {:state reg(12)};
+var r13:nat64 {:state reg(13)};
+var r14:nat64 {:state reg(14)};
+var r15:nat64 {:state reg(15)};
+var r16:nat64 {:state reg(16)};
+var r17:nat64 {:state reg(17)};
+var r18:nat64 {:state reg(18)};
+var r19:nat64 {:state reg(19)};
+var r20:nat64 {:state reg(20)};
+var r21:nat64 {:state reg(21)};
+var r22:nat64 {:state reg(22)};
+var r23:nat64 {:state reg(23)};
+var r24:nat64 {:state reg(24)};
+var r25:nat64 {:state reg(25)};
+var r26:nat64 {:state reg(26)};
+var r27:nat64 {:state reg(27)};
+var r28:nat64 {:state reg(28)};
+var r29:nat64 {:state reg(29)};
+var r30:nat64 {:state reg(30)};
+var r31:nat64 {:state reg(31)};
+var cr0:cr0_t {:state cr0()};
+var xer:xer_t {:state xer()};
+var mem_config:int {:state mem_config()};
+var mem:vale_heap {:state mem()};
+var heap0 :vale_heap {:state mem_heaplet(0 )}{:updates mem};
+var heap1 :vale_heap {:state mem_heaplet(1 )}{:updates mem};
+var heap2 :vale_heap {:state mem_heaplet(2 )}{:updates mem};
+var heap3 :vale_heap {:state mem_heaplet(3 )}{:updates mem};
+var heap4 :vale_heap {:state mem_heaplet(4 )}{:updates mem};
+var heap5 :vale_heap {:state mem_heaplet(5 )}{:updates mem};
+var heap6 :vale_heap {:state mem_heaplet(6 )}{:updates mem};
+var heap7 :vale_heap {:state mem_heaplet(7 )}{:updates mem};
+var heap8 :vale_heap {:state mem_heaplet(8 )}{:updates mem};
+var heap9 :vale_heap {:state mem_heaplet(9 )}{:updates mem};
+var heap10:vale_heap {:state mem_heaplet(10)}{:updates mem};
+var heap11:vale_heap {:state mem_heaplet(11)}{:updates mem};
+var heap12:vale_heap {:state mem_heaplet(12)}{:updates mem};
+var heap13:vale_heap {:state mem_heaplet(13)}{:updates mem};
+var heap14:vale_heap {:state mem_heaplet(14)}{:updates mem};
+var heap15:vale_heap {:state mem_heaplet(15)}{:updates mem};
+var stack:vale_stack {:state stack()};
+var memLayout:vale_heap_layout {:state mem_layout()};
+var stackTaint:memtaint {:state stackTaint()};
+
+// Operands of general-purpose registers
+operand_type reg_opr:nat64 @ reg :=
+| inout r0 | inout r1 | inout r2 | inout r3
+| inout r4 | inout r5 | inout r6 | inout r7
+| inout r8 | inout r9 | inout r10 | inout r11
+| inout r12 | inout r13 | inout r14 | inout r15
+| inout r16 | inout r17 | inout r18 | inout r19
+| inout r20 | inout r21 | inout r22 | inout r23
+| inout r24 | inout r25 | inout r26 | inout r27
+| inout r28 | inout r29 | inout r30 | inout r31
+;
+
+operand_type heaplet:vale_heap @ heaplet_id :=
+| inout heap0 | inout heap1 | inout heap2 | inout heap3
+| inout heap4 | inout heap5 | inout heap6 | inout heap7
+| inout heap8 | inout heap9 | inout heap10 | inout heap11
+| inout heap12 | inout heap13 | inout heap14 | inout heap15
+;
+
+type simm16:Type(0) := int_range((-32768), 32767);
+type nsimm16:Type(0) := int_range((-32767), 32768);
+
+procedure Move(out dst:reg_opr, in src:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Move(dst, src))}
+    ensures
+        dst == old(src);
+{
+}
+
+// Load Immediate to general-purpose register
+procedure LoadImm64(out dst:reg_opr, inline src:simm16)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.LoadImm64(dst, src))}
+    ensures
+        dst == old(int_to_nat64(src));
+{
+}
+
+// Load address
+procedure AddLa(out dst:reg_opr, in src1:reg_opr, inline src2:simm16)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.AddLa(dst, src1, src2))}
+    requires
+        0 <= src1 + src2 < pow2_64;
+    ensures
+        dst == old(src1) + old(src2);
+{
+}
+
+// Add two general-purpose registers. Assuming the result has no carry
+procedure Add(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Add(dst, src1, src2))}
+    requires
+        src1 + src2 < pow2_64;
+    ensures
+        dst == old(src1 + src2);
+{
+}
+
+// Add two general-purpose registers with wrapping
+procedure AddWrap(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Add(dst, src1, src2))}
+    ensures
+        dst == old(add_wrap64(src1, src2));
+{
+}
+
+// Add general-purpose register amd immediate. Assuming the result has no carry
+procedure AddImm(out dst:reg_opr, in src1:reg_opr, inline src2:simm16)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.AddImm(dst, src1, src2))}
+    requires
+        src1 + int_to_nat64(src2) < pow2_64;
+    ensures
+        dst == old(src1 + int_to_nat64(src2));
+{
+}
+
+// Add general-purpose register amd immediate with wrapping
+procedure AddImmWrap(out dst:reg_opr, in src1:reg_opr, inline src2:simm16)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.AddImm(dst, src1, src2))}
+    ensures
+        dst == old(add_wrap64(src1, int_to_nat64(src2)));
+{
+}
+
+// Add two general-purpose registers  plus carry with wrapping and store status of carry occurrence in XER register
+procedure AddExtended(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.AddExtended(dst, src1, src2))}
+    modifies
+        xer;
+    ensures
+        dst == old(add_wrap64(add_wrap64(src1, src2), (if xer_ca(xer) then 1 else 0)));
+        xer_ca(xer) == old(src1 + src2 + (if xer_ca(xer) then 1 else 0)) >= pow2_64;
+{
+}
+
+// Add two general-purpose registers plus overflow with wrapping and store status of overflow occurrence in XER register
+procedure AddExtendedOV(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.AddExtendedOV(dst, src1, src2))}
+    modifies
+        xer;
+    ensures
+        dst == old(add_wrap64(add_wrap64(src1, src2), (if xer_ov(xer) then 1 else 0)));
+        xer_ov(xer) == old(src1 + src2 + (if xer_ov(xer) then 1 else 0)) >= pow2_64;
+{
+}
+
+// Subtract two general-purpose registers. Assuming the result has no borrow
+procedure Sub(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Sub(dst, src1, src2))}
+    requires
+        src1 - src2 >= 0;
+    ensures
+        dst == old(src1 - src2);
+{
+}
+
+// Subtract two general-purpose registers with wrapping
+procedure SubWrap(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Sub(dst, src1, src2))}
+    ensures
+        dst == old(src1 - src2) % pow2_64;
+{
+}
+
+// Subtract general-purpose register amd immediate. Assuming the result has no borrow
+procedure SubImm(out dst:reg_opr, in src1:reg_opr, inline src2:nsimm16)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.SubImm(dst, src1, src2))}
+    requires
+        src1 - int_to_nat64(src2) >= 0;
+    ensures
+        dst == old(src1 - int_to_nat64(src2));
+{
+}
+
+// Subtract general-purpose register amd immediate with wrapping
+procedure SubImmWrap(out dst:reg_opr, in src1:reg_opr, inline src2:nsimm16)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.SubImm(dst, src1, src2))}
+    ensures
+        dst == old(src1 - int_to_nat64(src2)) % pow2_64;
+{
+}
+
+// Mutiply two general-purpose registers. Assuming the product fits in 64-bit
+procedure MulLow64(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.MulLow64(dst, src1, src2))}
+    requires
+        0 <= src1 * src2 < pow2_64;
+    ensures
+        dst == old(src1 * src2);
+{
+}
+
+// Mutiply two general-purpose registers ans store the low 64-bit of product in the destination register
+procedure MulLow64Wrap(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.MulLow64(dst, src1, src2))}
+    ensures
+        dst == old(src1 * src2) % pow2_64;
+{
+}
+
+// Mutiply two general-purpose registers ans store the high 64-bit of product in the destination register
+procedure MulHigh64U(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.MulHigh64U(dst, src1, src2))}
+    ensures
+        dst == old(src1 * src2) / pow2_64;
+{
+}
+
+// XOR operation of two general-purpose registers
+procedure Xor(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Xor(dst, src1, src2))}
+    ensures
+        dst == old(ixor64(src1, src2));
+{
+}
+
+// AND operation of two general-purpose registers
+procedure And(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.And(dst, src1, src2))}
+    ensures
+        dst == old(iand64(src1, src2));
+{
+}
+
+// Shift right general-purpose register with immediate bit value
+procedure Sr64Imm(out dst:reg_opr, in src1:reg_opr, inline src2:bits64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Sr64Imm(dst, src1, src2))}
+    ensures
+        dst == old(ishr64(src1, src2));
+{
+}
+
+// Shift left general-purpose register with immediate bit value
+procedure Sl64Imm(out dst:reg_opr, in src1:reg_opr, inline src2:bits64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Sl64Imm(dst, src1, src2))}
+    ensures
+        dst == old(ishl64(src1, src2));
+{
+}

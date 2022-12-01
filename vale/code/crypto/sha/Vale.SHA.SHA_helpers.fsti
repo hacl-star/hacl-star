@@ -206,7 +206,6 @@ val lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_qua
         (ensures
            length blocks % size_k_w_256 == 0 /\
            hash' == update_multi_opaque_vale hash blocks)
-        (decreases (length quads))
 
 val lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
     (requires bound + 4 <= length s)

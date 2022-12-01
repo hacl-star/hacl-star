@@ -7,6 +7,8 @@ open Lib.ByteSequence
 
 open Spec.Curve25519.Lemmas
 
+#set-options "--z3rlimit 30 --ifuel 0 --fuel 0"
+
 (* Field types and parameters *)
 let prime : pos = pow2 255 - 19
 
@@ -22,14 +24,11 @@ let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
 
-val fpow: a:elem -> b:pos -> Tot elem (decreases b)
-let rec fpow a b =
-  if b = 1 then a
-  else
-    if b % 2 = 0 then fpow (a *% a) (b / 2)
-    else a *% (fpow (a *% a) (b / 2))
-
+let fpow (x:elem) (b:nat) : elem = Lib.NatMod.pow_mod #prime x b
 let ( **% ) = fpow
+  
+let finv (x:elem) : elem = x **% (prime - 2)
+let ( /% ) (x:elem) (y:elem) = x *% finv y
 
 (* Type aliases *)
 type scalar = lbytes 32
@@ -50,7 +49,7 @@ let decodePoint (u:serialized_point) =
 
 let encodePoint (p:proj_point) : Tot serialized_point =
   let x, z = p in
-  let p = x *% (z **% (prime - 2)) in
+  let p = x /% z in
   nat_to_bytes_le 32 p
 
 let add_and_double q nq nqp1 =

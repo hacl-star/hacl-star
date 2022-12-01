@@ -1,3 +1,5 @@
+HACL_HOME=$(realpath ../..)
+
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
 all: dist/curve64-ours.exe
@@ -8,7 +10,7 @@ test: all
 FSTAR_ROOTS = Hacl.Curve25519_64_Local.fst Hacl.Curve25519_64_Slow.fst Hacl.Curve25519_51.fst
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
 # CUSTOMIZE HERE: how to produce binary objects
 dist:

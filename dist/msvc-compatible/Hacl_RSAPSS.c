@@ -24,7 +24,6 @@
 
 #include "Hacl_RSAPSS.h"
 
-#include "internal/Hacl_Kremlib.h"
 #include "internal/Hacl_Bignum.h"
 
 static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
@@ -55,6 +54,10 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)64U;
       }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)32U;
@@ -65,7 +68,7 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -93,7 +96,7 @@ hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t 
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -109,14 +112,14 @@ mgf_hash(
 )
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)4U);
-  uint8_t *mgfseed_counter = alloca((len + (uint32_t)4U) * sizeof (uint8_t));
+  uint8_t *mgfseed_counter = (uint8_t *)alloca((len + (uint32_t)4U) * sizeof (uint8_t));
   memset(mgfseed_counter, 0U, (len + (uint32_t)4U) * sizeof (uint8_t));
   memcpy(mgfseed_counter, mgfseed, len * sizeof (uint8_t));
   uint32_t hLen = hash_len(a);
   uint32_t n = (maskLen - (uint32_t)1U) / hLen + (uint32_t)1U;
   uint32_t accLen = n * hLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), accLen);
-  uint8_t *acc = alloca(accLen * sizeof (uint8_t));
+  uint8_t *acc = (uint8_t *)alloca(accLen * sizeof (uint8_t));
   memset(acc, 0U, accLen * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
@@ -139,7 +142,7 @@ static inline uint64_t check_num_bits_u64(uint32_t bs, uint64_t *b)
     return (uint64_t)0xFFFFFFFFFFFFFFFFU;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), bLen);
-  uint64_t *b2 = alloca(bLen * sizeof (uint64_t));
+  uint64_t *b2 = (uint64_t *)alloca(bLen * sizeof (uint64_t));
   memset(b2, 0U, bLen * sizeof (uint64_t));
   uint32_t i0 = bs / (uint32_t)64U;
   uint32_t j = bs % (uint32_t)64U;
@@ -161,7 +164,7 @@ static inline uint64_t check_modulus_u64(uint32_t modBits, uint64_t *n)
   uint64_t bits0 = n[0U] & (uint64_t)1U;
   uint64_t m0 = (uint64_t)0U - bits0;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *b2 = alloca(nLen * sizeof (uint64_t));
+  uint64_t *b2 = (uint64_t *)alloca(nLen * sizeof (uint64_t));
   memset(b2, 0U, nLen * sizeof (uint64_t));
   uint32_t i0 = (modBits - (uint32_t)1U) / (uint32_t)64U;
   uint32_t j = (modBits - (uint32_t)1U) % (uint32_t)64U;
@@ -183,7 +186,7 @@ static inline uint64_t check_exponent_u64(uint32_t eBits, uint64_t *e)
 {
   uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), eLen);
-  uint64_t *bn_zero = alloca(eLen * sizeof (uint64_t));
+  uint64_t *bn_zero = (uint64_t *)alloca(eLen * sizeof (uint64_t));
   memset(bn_zero, 0U, eLen * sizeof (uint64_t));
   uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
   for (uint32_t i = (uint32_t)0U; i < eLen; i++)
@@ -211,11 +214,11 @@ pss_encode(
 {
   uint32_t hLen = hash_len(a);
   KRML_CHECK_SIZE(sizeof (uint8_t), hLen);
-  uint8_t *m1Hash = alloca(hLen * sizeof (uint8_t));
+  uint8_t *m1Hash = (uint8_t *)alloca(hLen * sizeof (uint8_t));
   memset(m1Hash, 0U, hLen * sizeof (uint8_t));
   uint32_t m1Len = (uint32_t)8U + hLen + saltLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
-  uint8_t *m1 = alloca(m1Len * sizeof (uint8_t));
+  uint8_t *m1 = (uint8_t *)alloca(m1Len * sizeof (uint8_t));
   memset(m1, 0U, m1Len * sizeof (uint8_t));
   hash(a, m1 + (uint32_t)8U, msgLen, msg);
   memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
@@ -223,13 +226,13 @@ pss_encode(
   uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t dbLen = emLen - hLen - (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
-  uint8_t *db = alloca(dbLen * sizeof (uint8_t));
+  uint8_t *db = (uint8_t *)alloca(dbLen * sizeof (uint8_t));
   memset(db, 0U, dbLen * sizeof (uint8_t));
   uint32_t last_before_salt = dbLen - saltLen - (uint32_t)1U;
   db[last_before_salt] = (uint8_t)1U;
   memcpy(db + last_before_salt + (uint32_t)1U, salt, saltLen * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
-  uint8_t *dbMask = alloca(dbLen * sizeof (uint8_t));
+  uint8_t *dbMask = (uint8_t *)alloca(dbLen * sizeof (uint8_t));
   memset(dbMask, 0U, dbLen * sizeof (uint8_t));
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
   for (uint32_t i = (uint32_t)0U; i < dbLen; i++)
@@ -281,13 +284,13 @@ pss_verify(
   uint32_t emLen1 = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t hLen = hash_len(a);
   KRML_CHECK_SIZE(sizeof (uint8_t), hLen);
-  uint8_t *m1Hash0 = alloca(hLen * sizeof (uint8_t));
+  uint8_t *m1Hash0 = (uint8_t *)alloca(hLen * sizeof (uint8_t));
   memset(m1Hash0, 0U, hLen * sizeof (uint8_t));
   uint32_t dbLen = emLen1 - hLen - (uint32_t)1U;
   uint8_t *maskedDB = em;
   uint8_t *m1Hash = em + dbLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
-  uint8_t *dbMask = alloca(dbLen * sizeof (uint8_t));
+  uint8_t *dbMask = (uint8_t *)alloca(dbLen * sizeof (uint8_t));
   memset(dbMask, 0U, dbLen * sizeof (uint8_t));
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
   for (uint32_t i = (uint32_t)0U; i < dbLen; i++)
@@ -303,7 +306,7 @@ pss_verify(
   }
   uint32_t padLen = emLen1 - saltLen - hLen - (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), padLen);
-  uint8_t *pad2 = alloca(padLen * sizeof (uint8_t));
+  uint8_t *pad2 = (uint8_t *)alloca(padLen * sizeof (uint8_t));
   memset(pad2, 0U, padLen * sizeof (uint8_t));
   pad2[padLen - (uint32_t)1U] = (uint8_t)0x01U;
   uint8_t *pad = dbMask;
@@ -321,7 +324,7 @@ pss_verify(
   }
   uint32_t m1Len = (uint32_t)8U + hLen + saltLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
-  uint8_t *m1 = alloca(m1Len * sizeof (uint8_t));
+  uint8_t *m1 = (uint8_t *)alloca(m1Len * sizeof (uint8_t));
   memset(m1, 0U, m1Len * sizeof (uint8_t));
   hash(a, m1 + (uint32_t)8U, msgLen, msg);
   memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
@@ -382,6 +385,25 @@ load_skey(
   return b && m1 == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
+/**
+Sign a message `msg` and write the signature to `sgnt`.
+
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  * Spec_Hash_Definitions_SHA2_256,
+  * Spec_Hash_Definitions_SHA2_384, and
+  * Spec_Hash_Definitions_SHA2_512.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param skey Pointer to secret key created by `Hacl_RSAPSS_new_rsapss_load_skey`.
+@param saltLen Length of salt.
+@param salt Pointer to `saltLen` bytes where the salt is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+@param sgnt Pointer to `ceil(modBits / 8)` bytes where the signature is written to.
+
+@return Returns true if and only if signing was successful.
+*/
 bool
 Hacl_RSAPSS_rsapss_sign(
   Spec_Hash_Definitions_hash_alg a,
@@ -410,22 +432,22 @@ Hacl_RSAPSS_rsapss_sign(
   {
     uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-    uint64_t *m = alloca(nLen * sizeof (uint64_t));
+    uint64_t *m = (uint64_t *)alloca(nLen * sizeof (uint64_t));
     memset(m, 0U, nLen * sizeof (uint64_t));
     uint32_t emBits = modBits - (uint32_t)1U;
     uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
     KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
-    uint8_t *em = alloca(emLen * sizeof (uint8_t));
+    uint8_t *em = (uint8_t *)alloca(emLen * sizeof (uint8_t));
     memset(em, 0U, emLen * sizeof (uint8_t));
     pss_encode(a, saltLen, salt, msgLen, msg, emBits, em);
     Hacl_Bignum_Convert_bn_from_bytes_be_uint64(emLen, em, m);
     uint32_t nLen1 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     uint32_t k = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
     KRML_CHECK_SIZE(sizeof (uint64_t), nLen1);
-    uint64_t *s = alloca(nLen1 * sizeof (uint64_t));
+    uint64_t *s = (uint64_t *)alloca(nLen1 * sizeof (uint64_t));
     memset(s, 0U, nLen1 * sizeof (uint64_t));
     KRML_CHECK_SIZE(sizeof (uint64_t), nLen1);
-    uint64_t *m_ = alloca(nLen1 * sizeof (uint64_t));
+    uint64_t *m_ = (uint64_t *)alloca(nLen1 * sizeof (uint64_t));
     memset(m_, 0U, nLen1 * sizeof (uint64_t));
     uint32_t nLen2 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
@@ -478,6 +500,21 @@ Hacl_RSAPSS_rsapss_sign(
   return false;
 }
 
+/**
+Verify the signature `sgnt` of a message `msg`.
+
+@param a Hash algorithm to use.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param pkey Pointer to public key created by `Hacl_RSAPSS_new_rsapss_load_pkey`.
+@param saltLen Length of salt.
+@param sgntLen Length of signature.
+@param sgnt Pointer to `sgntLen` bytes where the signature is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+
+@return Returns true if and only if the signature is valid.
+*/
 bool
 Hacl_RSAPSS_rsapss_verify(
   Spec_Hash_Definitions_hash_alg a,
@@ -501,12 +538,12 @@ Hacl_RSAPSS_rsapss_verify(
   {
     uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-    uint64_t *m = alloca(nLen * sizeof (uint64_t));
+    uint64_t *m = (uint64_t *)alloca(nLen * sizeof (uint64_t));
     memset(m, 0U, nLen * sizeof (uint64_t));
     uint32_t nLen1 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     uint32_t k = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
     KRML_CHECK_SIZE(sizeof (uint64_t), nLen1);
-    uint64_t *s = alloca(nLen1 * sizeof (uint64_t));
+    uint64_t *s = (uint64_t *)alloca(nLen1 * sizeof (uint64_t));
     memset(s, 0U, nLen1 * sizeof (uint64_t));
     Hacl_Bignum_Convert_bn_from_bytes_be_uint64(k, sgnt, s);
     uint32_t nLen2 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
@@ -568,7 +605,7 @@ Hacl_RSAPSS_rsapss_verify(
       uint32_t emBits = modBits - (uint32_t)1U;
       uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
       KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
-      uint8_t *em = alloca(emLen * sizeof (uint8_t));
+      uint8_t *em = (uint8_t *)alloca(emLen * sizeof (uint8_t));
       memset(em, 0U, emLen * sizeof (uint8_t));
       uint64_t *m1 = m;
       Hacl_Bignum_Convert_bn_to_bytes_be_uint64(emLen, m1, em);
@@ -580,6 +617,16 @@ Hacl_RSAPSS_rsapss_verify(
   return false;
 }
 
+/**
+Load a public key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+
+@return Returns an allocated public key. Note: caller must take care to `free()` the created key.
+*/
 uint64_t
 *Hacl_RSAPSS_new_rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb)
 {
@@ -606,7 +653,7 @@ uint64_t
   uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t pkeyLen = nLen + nLen + eLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), pkeyLen);
-  uint64_t *pkey = KRML_HOST_CALLOC(pkeyLen, sizeof (uint64_t));
+  uint64_t *pkey = (uint64_t *)KRML_HOST_CALLOC(pkeyLen, sizeof (uint64_t));
   if (pkey == NULL)
   {
     return pkey;
@@ -635,9 +682,22 @@ uint64_t
   {
     return pkey2;
   }
+  KRML_HOST_FREE(pkey2);
   return NULL;
 }
 
+/**
+Load a secret key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value is read from.
+
+@return Returns an allocated secret key. Note: caller must take care to `free()` the created key.
+*/
 uint64_t
 *Hacl_RSAPSS_new_rsapss_load_skey(
   uint32_t modBits,
@@ -684,7 +744,7 @@ uint64_t
   uint32_t dLen = (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t skeyLen = nLen + nLen + eLen + dLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), skeyLen);
-  uint64_t *skey = KRML_HOST_CALLOC(skeyLen, sizeof (uint64_t));
+  uint64_t *skey = (uint64_t *)KRML_HOST_CALLOC(skeyLen, sizeof (uint64_t));
   if (skey == NULL)
   {
     return skey;
@@ -722,9 +782,28 @@ uint64_t
   {
     return skey2;
   }
+  KRML_HOST_FREE(skey2);
   return NULL;
 }
 
+/**
+Sign a message `msg` and write the signature to `sgnt`.
+
+@param a Hash algorithm to use.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value is read from.
+@param saltLen Length of salt.
+@param salt Pointer to `saltLen` bytes where the salt is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+@param sgnt Pointer to `ceil(modBits / 8)` bytes where the signature is written to.
+
+@return Returns true if and only if signing was successful.
+*/
 bool
 Hacl_RSAPSS_rsapss_skey_sign(
   Spec_Hash_Definitions_hash_alg a,
@@ -748,7 +827,7 @@ Hacl_RSAPSS_rsapss_skey_sign(
     + (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U);
   uint64_t
   *skey =
-    alloca(((uint32_t)2U
+    (uint64_t *)alloca(((uint32_t)2U
       * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
       + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U
       + (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
@@ -778,6 +857,22 @@ Hacl_RSAPSS_rsapss_skey_sign(
   return false;
 }
 
+/**
+Verify the signature `sgnt` of a message `msg`.
+
+@param a Hash algorithm to use.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param saltLen Length of salt.
+@param sgntLen Length of signature.
+@param sgnt Pointer to `sgntLen` bytes where the signature is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+
+@return Returns true if and only if the signature is valid.
+*/
 bool
 Hacl_RSAPSS_rsapss_pkey_verify(
   Spec_Hash_Definitions_hash_alg a,
@@ -798,7 +893,7 @@ Hacl_RSAPSS_rsapss_pkey_verify(
     + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U);
   uint64_t
   *pkey =
-    alloca(((uint32_t)2U
+    (uint64_t *)alloca(((uint32_t)2U
       * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
       + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
       * sizeof (uint64_t));
@@ -814,5 +909,21 @@ Hacl_RSAPSS_rsapss_pkey_verify(
     return Hacl_RSAPSS_rsapss_verify(a, modBits, eBits, pkey, saltLen, sgntLen, sgnt, msgLen, msg);
   }
   return false;
+}
+
+/**
+  The mask generation function defined in the Public Key Cryptography Standard #1 
+  (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) 
+*/
+void
+Hacl_RSAPSS_mgf_hash(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t len,
+  uint8_t *mgfseed,
+  uint32_t maskLen,
+  uint8_t *res
+)
+{
+  mgf_hash(a, len, mgfseed, maskLen, res);
 }
 

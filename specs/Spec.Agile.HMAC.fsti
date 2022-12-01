@@ -8,7 +8,7 @@ open Lib.IntTypes
 let lbytes (l:nat) = b:bytes {Seq.length b = l}
 
 let keysized (a:hash_alg) (l:nat) =
-  l <= max_input_length a /\
+  l `less_than_max_input_length` a /\
   l + block_length a < pow2 32
 
 val hmac:
@@ -17,5 +17,5 @@ val hmac:
   data: bytes ->
   Pure (lbytes (hash_length a))
     (requires keysized a (Seq.length key) /\
-      Seq.length data + block_length a <= max_input_length a)
+      (Seq.length data + block_length a) `less_than_max_input_length` a)
     (ensures fun _ -> True)

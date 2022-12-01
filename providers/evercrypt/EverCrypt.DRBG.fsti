@@ -85,17 +85,21 @@ let min_length (a:supported_alg) : n:size_t{v n == S.min_length a} =
   | SHA2_256 | SHA2_384 | SHA2_512 -> normalize_term (mk_int (S.min_length SHA2_256))
 
 /// This has a @CAbstractStruct attribute in the implementation.
-/// See https://github.com/FStarLang/kremlin/issues/153
+/// See https://github.com/FStarLang/karamel/issues/153
 /// 
-/// It instructs KreMLin to include only a forward-declarartion
+/// It instructs KaRaMeL to include only a forward-declarartion
 /// in the header file, forcing code to always use `state_s` abstractly
 /// through a pointer.
+inline_for_extraction noextract
 val state_s: supported_alg -> Type0
 
+inline_for_extraction noextract
 let state a = B.pointer (state_s a)
 
+inline_for_extraction noextract
 val freeable_s: #a:supported_alg -> st:state_s a -> Type0
 
+inline_for_extraction noextract
 let freeable (#a:supported_alg) (st:state a) (h:HS.mem) =
   B.freeable st /\ freeable_s (B.deref h st)
 
@@ -104,13 +108,16 @@ val footprint_s: #a:supported_alg -> state_s a -> GTot B.loc
 let footprint (#a:supported_alg) (st:state a) (h:HS.mem) =
   B.loc_union (B.loc_addr_of_buffer st) (footprint_s (B.deref h st))
 
+inline_for_extraction noextract
 val invariant_s: #a:supported_alg -> state_s a -> HS.mem -> Type0
 
+inline_for_extraction noextract
 let invariant (#a:supported_alg) (st:state a) (h:HS.mem) =
   B.live h st /\
   B.loc_disjoint (B.loc_addr_of_buffer st) (footprint_s (B.deref h st)) /\
   invariant_s (B.deref h st) h
 
+inline_for_extraction noextract
 let disjoint_st (#t:Type) (#a:supported_alg) 
   (st:state a) (b:B.buffer t) (h:HS.mem) 
 =
@@ -151,6 +158,7 @@ val frame_invariant: #a:supported_alg -> l:B.loc -> st:state a -> h0:HS.mem -> h
     invariant st h1 /\
     repr st h0 == repr st h1)
 
+inline_for_extraction noextract
 let preserves_freeable #a (st:state a) (h0 h1:HS.mem)  =
   freeable st h0 ==> freeable st h1
 
@@ -163,7 +171,6 @@ val alloca: a:supported_alg -> StackInline (state a)
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint st h1)) /\
     invariant st h1)
 
-inline_for_extraction noextract
 val create_in: a:supported_alg -> r:HS.rid -> ST (state a)
   (requires fun _ -> is_eternal_region r)
   (ensures  fun h0 st h1 ->
@@ -175,7 +182,15 @@ val create_in: a:supported_alg -> r:HS.rid -> ST (state a)
 
 (** @type: true
 *)
-inline_for_extraction
+[@@ Comment "Create a DRBG state.
+
+@param a Hash algorithm to use. The possible instantiations are ...
+  * `Spec_Hash_Definitions_SHA2_256`,
+  * `Spec_Hash_Definitions_SHA2_384`,
+  * `Spec_Hash_Definitions_SHA2_512`, and
+  * `Spec_Hash_Definitions_SHA1`.
+
+@return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`."]
 val create: a:supported_alg -> ST (state a)
   (requires fun _ -> True)
   (ensures  fun h0 st h1 ->
@@ -185,7 +200,7 @@ val create: a:supported_alg -> ST (state a)
     freeable st h1)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 let instantiate_st (a:supported_alg) =
     st:state a
   -> personalization_string:B.buffer uint8
@@ -231,7 +246,7 @@ val instantiate_sha2_384: instantiate_st SHA2_384
 val instantiate_sha2_512: instantiate_st SHA2_512
 
 
-inline_for_extraction
+inline_for_extraction noextract
 let reseed_st (a:supported_alg) =
     st:state a
   -> additional_input:B.buffer uint8
@@ -275,7 +290,7 @@ val reseed_sha2_384: reseed_st SHA2_384
 val reseed_sha2_512: reseed_st SHA2_512
 
 
-inline_for_extraction
+inline_for_extraction noextract
 let generate_st (a:supported_alg) =
     output:B.buffer uint8
   -> st:state a
@@ -328,7 +343,7 @@ val generate_sha2_384: generate_st SHA2_384
 val generate_sha2_512: generate_st SHA2_512
 
 
-inline_for_extraction
+inline_for_extraction noextract
 let uninstantiate_st (a:supported_alg) =
     st:state a
   -> ST unit
@@ -357,16 +372,42 @@ val uninstantiate_sha2_512: uninstantiate_st SHA2_512
 
 (** @type: true 
 *)
+[@@ Comment "Instantiate the DRBG.
+
+@param st Pointer to DRBG state.
+@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
+@param personalization_string_len Length of personalization string.
+
+@return True if and only if instantiation was successful."]
 val instantiate: a:(Ghost.erased supported_alg) -> instantiate_st (Ghost.reveal a)
 
 (** @type: true 
 *)
+[@@ Comment "Reseed the DRBG.
+
+@param st Pointer to DRBG state.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if reseed was successful."]
 val reseed: a:(Ghost.erased supported_alg) -> reseed_st (Ghost.reveal a)
 
 (** @type: true 
 *)
+[@@ Comment "Generate output.
+
+@param output Pointer to `n` bytes of memory where random output is written to.
+@param st Pointer to DRBG state.
+@param n Length of desired output.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if generate was successful."]
 val generate:  a:(Ghost.erased supported_alg) -> generate_st (Ghost.reveal a)
 
 (** @type: true
 *)
+[@@ Comment "Uninstantiate and free the DRBG.
+
+@param st Pointer to DRBG state."]
 val uninstantiate: a:(Ghost.erased supported_alg) -> uninstantiate_st (Ghost.reveal a)

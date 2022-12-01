@@ -20,12 +20,15 @@ module BD = Hacl.Bignum.Definitions
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
+let less_than_max_input_length = Spec.Hash.Definitions.less_than_max_input_length
+
+inline_for_extraction noextract
 let salt_len_t (a:Hash.algorithm) =
-  saltLen:size_t{8 + Hash.hash_length a + v saltLen <= max_size_t /\ 8 + Hash.hash_length a + v saltLen <= Hash.max_input_length a}
+  saltLen:size_t{8 + Hash.hash_length a + v saltLen <= max_size_t /\ (8 + Hash.hash_length a + v saltLen) `less_than_max_input_length` a}
 
 inline_for_extraction noextract
 let msg_len_t (a:Hash.algorithm) =
-  msgLen:size_t{v msgLen <= Hash.max_input_length a}
+  msgLen:size_t{v msgLen `less_than_max_input_length` a}
 
 inline_for_extraction noextract
 let em_len_t (a:Hash.algorithm) (saltLen:salt_len_t a) =
@@ -133,7 +136,7 @@ let get_maskedDB a saltLen salt hLen m1Hash emBits dbLen db =
   update_sub db (last_before_salt +! 1ul) saltLen salt;
 
   let dbMask = create dbLen (u8 0) in
-  assert_norm (Hash.hash_length a + 4 <= max_size_t /\ Hash.hash_length a + 4 <= Hash.max_input_length a);
+  assert_norm (Hash.hash_length a + 4 <= max_size_t /\ (Hash.hash_length a + 4) `less_than_max_input_length` a);
   mgf_hash a hLen m1Hash dbLen dbMask;
   xor_bytes dbLen db dbMask;
   db_zero dbLen db emBits;

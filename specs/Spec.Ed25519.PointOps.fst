@@ -11,11 +11,8 @@ module BSeq = Lib.ByteSequence
 type aff_point = elem & elem               // Affine point
 type ext_point = elem & elem & elem & elem // Homogeneous extended coordinates
 
-let modp_sqrt_m1 : elem = 2 **% ((prime - 1) / 4)
-
-let fexp (x:elem) (b:pos) : elem = Lib.NatMod.pow_mod #prime x b
-let finv (x:elem) : elem = fexp x (prime - 2)
-let ( /% ) (x:elem) (y:elem) = x *% finv y
+(* 2 **% ((prime - 1) / 4) *)
+let modp_sqrt_m1 : elem = 0x2b8324804fc1df0b2b4d00993dfbd7a72f431806ad2fe478c4ee1b274a0ea0b0
 
 let d : elem =
   let x = 37095705934669439343138083508754565189542113879843219016388785533085940283555 in

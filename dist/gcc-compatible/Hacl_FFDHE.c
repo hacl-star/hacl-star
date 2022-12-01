@@ -24,7 +24,6 @@
 
 #include "Hacl_FFDHE.h"
 
-#include "internal/Hacl_Kremlib.h"
 #include "internal/Hacl_Bignum.h"
 
 static inline uint32_t ffdhe_len(Spec_FFDHE_ffdhe_alg a)
@@ -53,7 +52,7 @@ static inline uint32_t ffdhe_len(Spec_FFDHE_ffdhe_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -97,7 +96,7 @@ static inline void ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a, uint64_t *p_r2_n)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -128,11 +127,10 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
   uint64_t c1;
   if ((uint32_t)1U < nLen)
   {
-    uint32_t rLen = nLen - (uint32_t)1U;
     uint64_t *a1 = p_n + (uint32_t)1U;
     uint64_t *res1 = p_n1 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (nLen - (uint32_t)1U) / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -147,7 +145,12 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for
+    (uint32_t
+      i = (nLen - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+      i
+      < nLen - (uint32_t)1U;
+      i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;
@@ -224,7 +227,7 @@ uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a)
 {
   uint32_t nLen = (ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
-  uint64_t *res = KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
+  uint64_t *res = (uint64_t *)KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
   if (res == NULL)
   {
     return res;
@@ -249,11 +252,10 @@ Hacl_FFDHE_ffdhe_secret_to_public_precomp(
   uint64_t g_n[nLen];
   memset(g_n, 0U, nLen * sizeof (uint64_t));
   uint8_t g = (uint8_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
     uint8_t *os = &g;
-    uint8_t x = Hacl_Impl_FFDHE_Constants_ffdhe_g2[i];
-    os[i] = x;
+    uint8_t x = Hacl_Impl_FFDHE_Constants_ffdhe_g2[0U];
+    os[0U] = x;
   }
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)1U, &g, g_n);
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);

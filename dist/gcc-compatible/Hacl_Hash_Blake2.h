@@ -30,21 +30,14 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Lib_Memzero0.h"
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#define Hacl_Impl_Blake2_Core_M32 0
-#define Hacl_Impl_Blake2_Core_M128 1
-#define Hacl_Impl_Blake2_Core_M256 2
-
-typedef uint8_t Hacl_Impl_Blake2_Core_m_spec;
 
 void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
 
@@ -79,6 +72,16 @@ Hacl_Blake2b_32_blake2b_update_last(
 
 void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
+/**
+Write the BLAKE2b digest of message `d` using key `k` into `output`.
+
+@param nn Length of the to-be-generated digest with 1 <= `nn` <= 64.
+@param output Pointer to `nn` bytes of memory where the digest is written to.
+@param ll Length of the input message.
+@param d Pointer to `ll` bytes of memory where the input message is read from.
+@param kk Length of the key. Can be 0.
+@param k Pointer to `kk` bytes of memory where the key is read from.
+*/
 void
 Hacl_Blake2b_32_blake2b(
   uint32_t nn,
@@ -122,6 +125,16 @@ Hacl_Blake2s_32_blake2s_update_last(
 
 void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
 
+/**
+Write the BLAKE2s digest of message `d` using key `k` into `output`.
+
+@param nn Length of to-be-generated digest with 1 <= `nn` <= 32.
+@param output Pointer to `nn` bytes of memory where the digest is written to.
+@param ll Length of the input message.
+@param d Pointer to `ll` bytes of memory where the input message is read from.
+@param kk Length of the key. Can be 0.
+@param k Pointer to `kk` bytes of memory where the key is read from.
+*/
 void
 Hacl_Blake2s_32_blake2s(
   uint32_t nn,

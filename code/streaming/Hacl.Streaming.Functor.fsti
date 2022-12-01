@@ -35,7 +35,7 @@ let uint32 = Lib.IntTypes.uint32
 /// ===============
 
 // TODO: when state_s is declared as CAbstractStruct, it prevents Hacl_Streaming_MD5.c
-// and Hacl_Streaming_SHA1.c from compiling, because Kremlin tries to share the state_s
+// and Hacl_Streaming_SHA1.c from compiling, because KaRaMeL tries to share the state_s
 // type definition with Hacl_Streaming_SHA2.c, which is hidden.
 //[@CAbstractStruct]
 val state_s (#index: Type0) (c: block index) (i: index)
@@ -47,7 +47,7 @@ inline_for_extraction noextract
 let state_s' c i = state_s c i (c.state.s i) (optional_key i c.km c.key)
 
 /// State is equipped with a superfluous type-level parameter to ensure ML-like
-/// prenex polymorphism and hence low-level monomorphization via KreMLin.
+/// prenex polymorphism and hence low-level monomorphization via KaRaMeL.
 ///
 /// Run-time functions MUST take t as a parameter. Proof-level functions are
 /// welcome to instantiate it directly with ``c.state i``.
@@ -85,13 +85,17 @@ let loc_includes_union_l_footprint_s
   [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s c i m s))]
 = B.loc_includes_union_l l1 l2 (footprint_s c i m s)
 
+inline_for_extraction noextract
 val invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0
 
+inline_for_extraction noextract
 val freeable (#index : Type0) (c: block index) (i: index) (h: HS.mem) (s: state' c i) : Type0
 
+inline_for_extraction noextract
 let preserves_freeable (#index : Type0) (c: block index) (i: index) (s: state' c i) (h0 h1 : HS.mem): Type0 =
   freeable c i h0 s ==> freeable c i h1 s
 
+inline_for_extraction noextract
 let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
   invariant_s c i m (B.get m s 0) /\
   B.live m s /\
@@ -158,7 +162,7 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
   (requires (
     invariant c i h s))
   (ensures (
-    S.length (seen c i h s) <= c.max_input_length i))
+    S.length (seen c i h s) <= U64.v (c.max_input_len i)))
 
 /// A fine design point here... There are two styles that have been used in
 /// EverCrypt and throughout for key management.
@@ -227,6 +231,21 @@ val index_of_state:
   Stack index
   (fun h0 -> invariant c i h0 s)
   (fun h0 i' h1 -> h0 == h1 /\ i' == i))
+
+// The number of bytes fed so far into the hash, so that the client doesn't have
+// to track it themselves, since this module does it anyhow.
+inline_for_extraction noextract
+val seen_length:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
+  Stack U64.t
+  (fun h0 -> invariant c i h0 s)
+  (fun h0 l h1 -> h0 == h1 /\ U64.v l == S.length (seen c i h0 s)))
 
 inline_for_extraction noextract
 let create_in_st
@@ -333,7 +352,6 @@ let update_pre
   invariant c i h0 s /\
   B.live h0 data /\
   U32.v len = B.length data /\
-  S.length (seen c i h0 s) + U32.v len <= c.max_input_length i /\
   B.(loc_disjoint (loc_buffer data) (footprint c i h0 s))
 
 unfold noextract
@@ -363,9 +381,18 @@ let update_st
   s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
-  Stack unit
+  Stack UInt32.t
     (requires fun h0 -> update_pre c i s data len h0)
-    (ensures fun h0 s' h1 -> update_post c i s data len h0 h1)
+    (ensures fun h0 s' h1 ->
+      match s' with
+      | 0ul ->
+          S.length (seen c i h0 s) + UInt32.v len <= U64.v (c.max_input_len i) /\
+          update_post c i s data len h0 h1
+      | 1ul ->
+          S.length (seen c i h0 s) + UInt32.v len > U64.v (c.max_input_len i) /\
+          h0 == h1
+      | _ ->
+          False)
 
 inline_for_extraction noextract
 val update:

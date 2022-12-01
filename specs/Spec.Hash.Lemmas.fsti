@@ -59,18 +59,10 @@ val update_multi_associative (a: hash_alg)
   [ SMTPat (update_multi a (update_multi a h input1) input2) ]
 
 val block_length_smaller_than_max_input (a:hash_alg) :
-  Lemma(block_length a <= max_input_length a)
+  Lemma(block_length a `less_than_max_input_length` a)
 
-val pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
-  (requires blocks % block_length a = 0)
-  (ensures (pad_length a rest = pad_length a (blocks + rest)))
-  [ SMTPat (pad_length a (blocks + rest)) ]
+val reveal_init_blake2 (a : Spec.Blake2.alg): Lemma (
+  let _ = allow_inversion Spec.Blake2.alg in
+  let ws: words_state' (to_hash_alg a) = Spec.Blake2.blake2_init_hash a 0 (Spec.Blake2.max_output a) in
+  Spec.Agile.Hash.init (to_hash_alg a) == (ws, nat_to_extra_state (to_hash_alg a) 0))
 
-(* A useful lemma for all the operations that involve going from bytes to bits. *)
-val max_input_size_len (a: hash_alg{is_md a}):
-  Lemma (FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
-
-(* *)
-let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % block_length a = 0 }) =
-  if is_blake a then (block_length a - len) % block_length a
-  else pad0_length a len + 1 + len_length a

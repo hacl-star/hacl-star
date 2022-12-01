@@ -29,11 +29,11 @@ our code is extracted to a mixture of C and ASM.
 
 Our code is callable from C clients, and from OCaml, via ctypes bindings. A
 subset of our code (the HACL API) compiles to WebAssembly via a dedicated,
-formalized codepath of the KreMLin_ compiler and can be used for any Web context
+formalized codepath of the KaRaMeL_ compiler and can be used for any Web context
 (e.g. Electron, website) where modern, trustworthy cryptography is in order.
 
 In addition to unverified clients, verified clients can be built atop the
 EverCrypt API. These include a library of Merkle Trees, distributed in the
 present repository, but also an implementation of the Signal protocol in F*.
 
-.. _KreMLin: https://github.com/FStarLang/kremlin/
+.. _KaRaMeL: https://github.com/FStarLang/karamel/

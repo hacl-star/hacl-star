@@ -10,8 +10,6 @@ open Hacl.Impl.Poly1305.Fields
 open Hacl.Impl.Poly1305
 
 
-let blocklen = 16ul
-
 type poly1305_ctx = lbuffer (Lib.IntVector.vec_t U64 2) 25ul
 
 val poly1305_init: poly1305_init_st M128

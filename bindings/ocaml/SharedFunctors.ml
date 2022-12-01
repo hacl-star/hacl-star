@@ -115,12 +115,11 @@ module Make_EdDSA_generic (C: Buffer)
   end)
 = struct
   type bytes = C.t
-  let max_size_t = pow2 32
   let verify ~pk ~msg ~signature =
     (* Hacl.Ed25519.verify *)
     assert (C.size pk = 32);
     assert (C.size signature = 64);
-    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+    assert Z.(of_int (C.size msg) <= max_uint32);
     Impl.verify (C.ctypes_buf pk) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
   module Noalloc = struct
     let secret_to_public ~sk ~pk =
@@ -133,7 +132,7 @@ module Make_EdDSA_generic (C: Buffer)
       (* Hacl.Ed25519.sign *)
       assert (C.size sk = 32);
       assert (C.size signature = 64);
-      assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+      assert Z.(of_int (C.size msg) <= max_uint32);
       Impl.sign (C.ctypes_buf signature) (C.ctypes_buf sk) (C.size_uint32 msg) (C.ctypes_buf msg)
     let expand_keys ~sk ~ks =
       (* Hacl.Ed25519.expand_keys *)
@@ -145,7 +144,7 @@ module Make_EdDSA_generic (C: Buffer)
       (* Hacl.Ed25519.sign_expanded *)
       assert (C.size ks = 96);
       assert (C.size signature = 64);
-      assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+      assert Z.(of_int (C.size msg) <= max_uint32);
       Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
   end
   let secret_to_public ~sk =
@@ -189,13 +188,9 @@ module Make_HashFunction_generic (C: Buffer)
     | SHA3_384 -> 48
     | SHA3_512 -> 64
     | Agile alg -> HashDefs.digest_len alg
-  let check_max_input_len alg len =
-    match alg with
-    | Agile alg -> HashDefs.check_max_input_len alg len
-    | _ -> ()
   module Noalloc = struct
     let hash ~msg ~digest =
-      check_max_input_len Impl.hash_alg (C.size msg);
+      check_max_buffer_len (C.size msg);
       assert (C.size digest = digest_len Impl.hash_alg);
       assert (C.disjoint msg digest);
       Impl.hash (C.ctypes_buf msg) (C.size_uint32 msg) (C.ctypes_buf digest)
@@ -241,8 +236,8 @@ module Make_HMAC_generic (C: Buffer)
       (* Hacl.HMAC.compute_st *)
       assert (HashDefs.digest_len Impl.hash_alg = C.size tag);
       assert (C.disjoint tag key);
-      HashDefs.check_key_len Impl.hash_alg (C.size key);
-      HashDefs.check_key_len Impl.hash_alg (C.size msg);
+      check_max_buffer_len (C.size key);
+      check_max_buffer_len (C.size msg);
       Impl.mac (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
   end
   let mac ~key ~msg =
@@ -265,16 +260,16 @@ module Make_HKDF_generic (C: Buffer)
       assert (C.size prk = HashDefs.digest_len Impl.hash_alg);
       assert (C.disjoint salt prk);
       assert (C.disjoint ikm prk);
-      HashDefs.check_key_len Impl.hash_alg (C.size salt);
-      HashDefs.check_key_len Impl.hash_alg (C.size ikm);
+      check_max_buffer_len (C.size salt);
+      check_max_buffer_len (C.size ikm);
       Impl.extract (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
     let expand ~prk ~info ~okm =
       (* Hacl.HKDF.expand_st *)
       assert (C.size okm <= 255 * HashDefs.digest_len Impl.hash_alg);
       assert (C.disjoint okm prk);
       assert (HashDefs.digest_len Impl.hash_alg <= C.size prk);
-      HashDefs.(check_max_input_len Impl.hash_alg (digest_len Impl.hash_alg + block_len Impl.hash_alg + C.size info + 1));
-      HashDefs.check_key_len Impl.hash_alg (C.size prk);
+      check_max_buffer_len (C.size info);
+      check_max_buffer_len (C.size prk);
       Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
   end
   let extract ~salt ~ikm =
@@ -343,12 +338,9 @@ module Make_Blake2b_generic (C: Buffer)
     let hash ~key ~msg ~digest =
       check_reqs Impl.reqs;
       (* specs/Spec.Blake2.blake2b *)
+      check_max_buffer_len (C.size msg);
       assert (C.size digest > 0 && C.size digest <= 64);
       assert (C.size key <= 64);
-      if C.size key = 0 then
-        assert Z.(of_int (C.size msg) < pow2 128)
-      else
-        assert Z.(of_int (C.size msg) + ~$128 < pow2 128);
       assert (C.disjoint key msg);
       assert (C.disjoint key digest);
       assert (C.disjoint msg digest);
@@ -372,12 +364,9 @@ module Make_Blake2s_generic (C: Buffer)
     let hash ~key ~msg ~digest =
       check_reqs Impl.reqs;
       (* specs/Spec.Blake2.blake2s *)
+      check_max_buffer_len (C.size msg);
       assert (C.size digest > 0 && C.size digest <= 32);
       assert (C.size key <= 32);
-      if C.size key = 0 then
-        assert Z.(of_int (C.size msg) < pow2 64)
-      else
-        assert Z.(of_int (C.size msg) + ~$64 < pow2 64);
       assert (C.disjoint key msg);
       assert (C.disjoint key digest);
       assert (C.disjoint msg digest);

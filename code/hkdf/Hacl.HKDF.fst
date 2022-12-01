@@ -30,26 +30,27 @@ let mk_extract a hmac prk salt saltlen ikm ikmlen =
   hmac prk salt saltlen ikm ikmlen
 
 val hmac_input_fits: a:hash_alg -> Lemma
-  (pow2 32 + block_length a <= max_input_length a)
+  ((pow2 32 + block_length a) `less_than_max_input_length` a)
 let hmac_input_fits a =
   allow_inversion hash_alg;
   match a with
   | MD5 ->
-    assert_norm (pow2 32 + block_length MD5 <= max_input_length MD5)
+    assert_norm (pow2 32 + block_length MD5 <= Some?.v (max_input_length MD5))
   | SHA1 ->
-    assert_norm (pow2 32 + block_length SHA1 <= max_input_length SHA1)
+    assert_norm (pow2 32 + block_length SHA1 <= Some?.v (max_input_length SHA1))
   | SHA2_224 ->
-    assert_norm (pow2 32 + block_length SHA2_224 <= max_input_length SHA2_224)
+    assert_norm (pow2 32 + block_length SHA2_224 <= Some?.v (max_input_length SHA2_224))
   | SHA2_256 ->
-    assert_norm (pow2 32 + block_length SHA2_256 <= max_input_length SHA2_256)
+    assert_norm (pow2 32 + block_length SHA2_256 <= Some?.v (max_input_length SHA2_256))
   | SHA2_384 ->
-    assert_norm (pow2 32 + block_length SHA2_384 <= max_input_length SHA2_384)
+    assert_norm (pow2 32 + block_length SHA2_384 <= Some?.v (max_input_length SHA2_384))
   | SHA2_512 ->
-    assert_norm (pow2 32 + block_length SHA2_512 <= max_input_length SHA2_512)
+    assert_norm (pow2 32 + block_length SHA2_512 <= Some?.v (max_input_length SHA2_512))
   | Blake2S ->
-    assert_norm (pow2 32 + block_length Blake2S <= max_input_length Blake2S)
+    assert_norm (pow2 32 + block_length Blake2S <= Some?.v (max_input_length Blake2S))
   | Blake2B ->
-    assert_norm (pow2 32 + block_length Blake2B <= max_input_length Blake2B)
+    assert_norm (pow2 32 + block_length Blake2B <= Some?.v (max_input_length Blake2B))
+  | SHA3_256 -> ()
 
 #push-options "--z3rlimit 300"
 

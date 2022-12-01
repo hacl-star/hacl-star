@@ -148,3 +148,4 @@ let print_proc = P.print_proc
 let print_footer = P.print_footer
 let masm = P.masm
 let gcc = P.gcc
+let gcc_linux = P.gcc_linux

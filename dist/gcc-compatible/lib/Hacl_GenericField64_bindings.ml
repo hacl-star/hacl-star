@@ -2,9 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Bignum256_applied =
-      (Hacl_Bignum256_bindings.Bindings)(Hacl_Bignum256_stubs)
-    open Hacl_Bignum256_applied
+    module Hacl_Bignum_applied =
+      (Hacl_Bignum_bindings.Bindings)(Hacl_Bignum_stubs)
+    open Hacl_Bignum_applied
     let hacl_GenericField64_field_modulus_check =
       foreign "Hacl_GenericField64_field_modulus_check"
         (uint32_t @-> ((ptr uint64_t) @-> (returning bool)))

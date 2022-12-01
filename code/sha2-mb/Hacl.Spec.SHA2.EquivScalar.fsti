@@ -9,5 +9,27 @@ open Hacl.Spec.SHA2
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-val hash_agile_lemma: #a:sha2_alg -> len:size_nat{len <= max_input_length a} -> b:lseq uint8 len ->
+val update_nblocks_is_repeat_blocks_multi:
+     a:sha2_alg
+  -> len:len_lt_max_a_t a{len % block_length a = 0}
+  -> b:seq uint8{length b = len}
+  -> st0:words_state a ->
+  Lemma (update_nblocks a len b st0 ==
+    Lib.Sequence.repeat_blocks_multi (block_length a) b (update a) st0)
+
+
+val hash_is_repeat_blocks:
+     a:sha2_alg
+  -> len:len_lt_max_a_t a
+  -> b:seq uint8{length b = len}
+  -> st0:words_state a ->
+  Lemma
+   (let len' : len_t a = mk_len_t a len in
+    let st = update_nblocks a len b st0 in
+    let rem = len % block_length a in
+    let mb = Seq.slice b (len - rem) len in
+    update_last a len' rem mb st ==
+    Lib.Sequence.repeat_blocks (block_length a) b (update a) (update_last a len') st0)
+
+val hash_agile_lemma: #a:sha2_alg -> len:len_lt_max_a_t a -> b:seq uint8{length b = len} ->
   Lemma (hash #a len b == Spec.Agile.Hash.hash a b)

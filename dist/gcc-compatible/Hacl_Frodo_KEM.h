@@ -30,17 +30,16 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
-#include "Hacl_Kremlib.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include "Hacl_Krmllib.h"
+
 static inline void
 Hacl_Keccak_shake128_4x(
   uint32_t input_len,
@@ -260,7 +259,7 @@ Hacl_Impl_Frodo_Params_frodo_gen_matrix(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -541,11 +540,12 @@ Hacl_Impl_Frodo_Encode_frodo_key_encode(
     uint64_t u = load64_le(v8);
     uint64_t x = u;
     uint64_t x0 = x;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
+    KRML_MAYBE_FOR8(i,
+      (uint32_t)0U,
+      (uint32_t)8U,
+      (uint32_t)1U,
       uint64_t rk = x0 >> b * i & (((uint64_t)1U << b) - (uint64_t)1U);
-      res[i0 * n + i] = (uint16_t)rk << (logq - b);
-    }
+      res[i0 * n + i] = (uint16_t)rk << (logq - b););
   }
 }
 
@@ -561,12 +561,13 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(
   for (uint32_t i0 = (uint32_t)0U; i0 < n; i0++)
   {
     uint64_t templong = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-    {
+    KRML_MAYBE_FOR8(i,
+      (uint32_t)0U,
+      (uint32_t)8U,
+      (uint32_t)1U,
       uint16_t aik = a[i0 * n + i];
       uint16_t res1 = (aik + ((uint16_t)1U << (logq - b - (uint32_t)1U))) >> (logq - b);
-      templong = templong | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i;
-    }
+      templong = templong | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i;);
     uint64_t templong0 = templong;
     uint8_t v8[8U] = { 0U };
     store64_le(v8, templong0);

@@ -39,16 +39,21 @@ open EverCrypt.Error
 /// of arguments to be in line with ``B.as_seq``, etc. which take the memory
 /// first.
 
-[@CAbstractStruct]
+[@@ CAbstractStruct; Comment "Both encryption and decryption require a state that holds the key.
+The state may be reused as many times as desired."]
 val state_s: alg -> Type0
 
+inline_for_extraction noextract
 let state alg = B.pointer (state_s alg)
 
+inline_for_extraction noextract
 val freeable_s: #(a: alg) -> state_s a -> Type0
 
+inline_for_extraction noextract
 let freeable (#a: alg) (h: HS.mem) (p: state a) =
   B.freeable p /\ freeable_s (B.deref h p)
 
+inline_for_extraction noextract
 let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
   freeable h0 s ==> freeable h1 s
 
@@ -77,6 +82,7 @@ let loc_includes_union_l_footprint_s
 = B.loc_includes_union_l l1 l2 (footprint_s s)
 
 /// The configuration preconditions
+inline_for_extraction noextract
 let config_pre a =
   match a with
   | AES128_GCM
@@ -87,7 +93,10 @@ let config_pre a =
   | CHACHA20_POLY1305 -> True
   | _ -> True
 
+inline_for_extraction noextract
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
+
+inline_for_extraction noextract
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
   B.live m s /\
   B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
@@ -119,6 +128,11 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
 noextract
 let bytes = Seq.seq uint8
 
+[@@ Comment "Return the algorithm used in the AEAD state.
+
+@param s State of the AEAD algorithm.
+
+@return Algorithm used in the AEAD state."]
 val alg_of_state (a: G.erased alg) (s: state (G.reveal a)): Stack alg
   (requires (fun h0 -> invariant #(G.reveal a) h0 s))
   (ensures (fun h0 a' h1 ->
@@ -191,6 +205,20 @@ let alloca_st (a: alg) =
 /// required for encrypt.
 (** @type: true
 *)
+[@@ Comment "Create the required AEAD state for the algorithm.
+
+Note: The caller must free the AEAD state by calling `EverCrypt_AEAD_free`.
+
+@param a The argument `a` must be either of:
+  * `Spec_Agile_AEAD_AES128_GCM` (KEY_LEN=16),
+  * `Spec_Agile_AEAD_AES256_GCM` (KEY_LEN=32), or
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (KEY_LEN=32).
+@param dst Pointer to a pointer where the address of the allocated AEAD state will be written to.
+@param k Pointer to `KEY_LEN` bytes of memory where the key is read from. The size depends on the used algorithm, see above.
+
+@return The function returns `EverCrypt_Error_Success` on success or
+  `EverCrypt_Error_UnsupportedAlgorithm` in case of a bad algorithm identifier.
+  (See `EverCrypt_Error.h`.)"]
 val create_in: #a:alg -> create_in_st a
 
 inline_for_extraction noextract
@@ -199,12 +227,20 @@ val alloca: #a:alg -> alloca_st a
 /// Encryption (pre-allocated state)
 /// --------------------------------
 
+inline_for_extraction noextract
 let iv_p a = iv:B.buffer uint8 { iv_length a (B.length iv)}
+
+inline_for_extraction noextract
 let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
+
+inline_for_extraction noextract
 let plain_p a = p:B.buffer uint8 { B.length p <= max_length a }
+
+inline_for_extraction noextract
 let cipher_p a = p:B.buffer uint8 { B.length p + tag_length a <= max_length a }
 
 // SNIPPET_START: encrypt_pre
+inline_for_extraction noextract
 let encrypt_gen_pre (a: supported_alg)
   (iv:iv_p a)
   (iv_len: UInt32.t)
@@ -222,6 +258,7 @@ let encrypt_gen_pre (a: supported_alg)
   B.length cipher = B.length plain /\
   B.length tag = tag_length a
 
+inline_for_extraction noextract
 let encrypt_live_disjoint_pre (a: supported_alg)
   (iv:iv_p a)
   (iv_len: UInt32.t)
@@ -241,6 +278,7 @@ let encrypt_live_disjoint_pre (a: supported_alg)
   B.disjoint plain ad /\
   B.disjoint ad cipher /\ B.disjoint ad tag
 
+inline_for_extraction noextract
 let encrypt_pre (a: supported_alg)
   (s:B.pointer_or_null (state_s a))
   (iv:iv_p a)
@@ -301,6 +339,23 @@ let encrypt_st (a: supported_alg) =
 /// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
 (** @type: true
 *)
+[@@ Comment "Encrypt and authenticate a message (`plain`) with associated data (`ad`).
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param plain Pointer to `plain_len` bytes of memory where the to-be-encrypted plaintext is read from.
+@param plain_len Length of the to-be-encrypted plaintext.
+@param cipher Pointer to `plain_len` bytes of memory where the ciphertext is written to.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is written to.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+
+@return `EverCrypt_AEAD_encrypt` may return either `EverCrypt_Error_Success` or `EverCrypt_Error_InvalidKey` (`EverCrypt_error.h`). The latter is returned if and only if the `s` parameter is `NULL`."]
 val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
 
 /// Encryption (no pre-allocated state)
@@ -309,6 +364,7 @@ val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
 /// All-in-one API that does not require performing key expansion separately.
 /// Use if you must be in the Stack effect, or if you know you do not intend to
 /// reuse the key with a different nonce later.
+inline_for_extraction noextract
 let encrypt_expand_pre (a: supported_alg)
   (k:B.buffer uint8 { B.length k = key_length a })
   (iv:iv_p a)
@@ -454,6 +510,35 @@ let decrypt_st (a: supported_alg) =
 /// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
 (** @type: true
 *)
+[@@ Comment "Verify the authenticity of `ad` || `cipher` and decrypt `cipher` into `dst`.
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param cipher Pointer to `cipher_len` bytes of memory where the ciphertext is read from.
+@param cipher_len Length of the ciphertext.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is read from.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+@param dst Pointer to `cipher_len` bytes of memory where the decrypted plaintext will be written to.
+
+@return `EverCrypt_AEAD_decrypt` returns ...
+
+  * `EverCrypt_Error_Success`
+
+  ... on success and either of ...
+
+  * `EverCrypt_Error_InvalidKey` (returned if and only if the `s` parameter is `NULL`),
+  * `EverCrypt_Error_InvalidIVLength` (see note about requirements on IV size above), or
+  * `EverCrypt_Error_AuthenticationFailure` (in case the ciphertext could not be authenticated, e.g., due to modifications)
+
+  ... on failure (`EverCrypt_error.h`).
+
+  Upon success, the plaintext will be written into `dst`."]
 val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)
 
 /// Decryption (no pre-allocated state)
@@ -532,6 +617,9 @@ val decrypt_expand: #a:supported_alg -> decrypt_expand_st true (G.reveal a)
 
 (** @type: true
 *)
+[@@ Comment "Cleanup and free the AEAD state.
+
+@param s State of the AEAD algorithm."]
 val free:
   #a:G.erased supported_alg -> (
   let a = Ghost.reveal a in

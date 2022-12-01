@@ -660,7 +660,7 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
   lemma_eval_instr_unchanged_at' it oprs ann s1 s2
 
 #push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine_state) :
+let lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine_state) :
   Lemma
     (ensures (constant_on_execution (rw_set_of_ins i).loc_constant_writes (machine_eval_ins_st i) s)) =
   if s.ms_ok then (
@@ -806,7 +806,7 @@ let lemma_machine_eval_code_Ins_bounded_effects_aux4 (i:ins) (fuel:nat) s1 s2 :
         let rw = rw_set_of_ins i in
         (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
   let filt s = { s with ms_trace = [] } in
-  let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) @ s_orig.ms_trace } in
+  let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) `L.append` s_orig.ms_trace } in
   let f : st unit = machine_eval_code_Ins i fuel in
   let rw = rw_set_of_ins i in
   lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
@@ -952,7 +952,7 @@ let rec lemma_unchanged_at_difference_elim (l1 l2:locations) (s1 s2:machine_stat
       lemma_unchanged_at_difference_elim xs l2 s1 s2
     )
 
-let rec lemma_unchanged_at_sym_diff_implies_difference (l1 l2:locations) (s1 s2:machine_state) :
+let lemma_unchanged_at_sym_diff_implies_difference (l1 l2:locations) (s1 s2:machine_state) :
   Lemma
     (requires (unchanged_at (sym_difference l1 l2) s1 s2))
     (ensures (unchanged_at (l1 `difference` l2) s1 s2 /\ unchanged_at (l2 `difference` l1) s1 s2)) =
@@ -1186,16 +1186,16 @@ let lemma_bounded_effects_series_aux1 rw1 rw2 f1 f2 s a :
         (bounded_effects rw1 f1) /\
         (bounded_effects rw2 f2) /\
         !!(disjoint_location_from_locations a rw.loc_writes) /\
-        (run (f1 ;; f2) s).ms_ok))
+        (run (f1 ;* f2) s).ms_ok))
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
-        eval_location a s == eval_location a (run (f1;;f2) s))) =
+        eval_location a s == eval_location a (run (f1;*f2) s))) =
   let open Vale.X64.Machine_Semantics_s in
   lemma_disjoint_location_from_locations_append a rw1.loc_writes rw2.loc_writes;
   assert (unchanged_except rw1.loc_writes s (run f1 s));
   assert (eval_location a s == eval_location a (run f1 s));
   assert (unchanged_except rw2.loc_writes (run f1 s) (run f2 (run f1 s)));
-  assert (eval_location a s == eval_location a (run (f1;;f2) s))
+  assert (eval_location a s == eval_location a (run (f1;*f2) s))
 
 #push-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_bounded_effects_series_aux2 c1 c2 f1 f2 s :
@@ -1205,9 +1205,9 @@ let rec lemma_bounded_effects_series_aux2 c1 c2 f1 f2 s :
         (forall s. {:pattern (constant_on_execution c2 f2 s)} (constant_on_execution c2 f2 s))))
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
-        (constant_on_execution (c1 `intersect` c2) (f1;;f2) s))) =
+        (constant_on_execution (c1 `intersect` c2) (f1;*f2) s))) =
   let open Vale.X64.Machine_Semantics_s in
-  let f = f1;;f2 in
+  let f = f1;*f2 in
   if (run f s).ms_ok then (
     match c1 with
     | [] -> ()
@@ -1245,11 +1245,11 @@ let lemma_bounded_effects_series_aux3 rw1 rw2 f1 f2 s1 s2 :
         (unchanged_at rw.loc_reads s1 s2)))
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
-        let f = f1;;f2 in
+        let f = f1;*f2 in
         (run f s1).ms_ok = (run f s2).ms_ok)) =
   let open Vale.X64.Machine_Semantics_s in
   let rw = rw_set_in_series rw1 rw2 in
-  let f = (f1;;f2) in
+  let f = (f1;*f2) in
   let s1_1, s2_1 = run f1 s1, run f1 s2 in
   let s1_1_2, s2_1_2 = run f2 s1_1, run f2 s2_1 in
   lemma_unchanged_at_append rw1.loc_reads (rw2.loc_reads `difference` rw1.loc_writes) s1 s2;
@@ -1291,17 +1291,17 @@ let lemma_bounded_effects_series_aux4 rw1 rw2 f1 f2 s1 s2 :
         (bounded_effects rw1 f1) /\
         (bounded_effects rw2 f2) /\
         (s1.ms_ok = s2.ms_ok) /\
-        (run (f1;;f2) s1).ms_ok /\
-        (run (f1;;f2) s2).ms_ok /\
+        (run (f1;*f2) s1).ms_ok /\
+        (run (f1;*f2) s2).ms_ok /\
         (unchanged_at rw.loc_reads s1 s2)))
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
-        let f = f1;;f2 in
+        let f = f1;*f2 in
         let rw = rw_set_in_series rw1 rw2 in
         (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
   let open Vale.X64.Machine_Semantics_s in
   let rw = rw_set_in_series rw1 rw2 in
-  let f = (f1;;f2) in
+  let f = (f1;*f2) in
   let s1_1, s2_1 = run f1 s1, run f1 s2 in
   let s1_1_2, s2_1_2 = run f2 s1_1, run f2 s2_1 in
   lemma_unchanged_at_append rw1.loc_reads (rw2.loc_reads `difference` rw1.loc_writes) s1 s2;

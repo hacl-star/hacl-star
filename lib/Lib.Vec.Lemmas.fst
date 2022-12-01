@@ -2,7 +2,7 @@ module Lib.Vec.Lemmas
 
 #set-options ""
 #push-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 \
-  --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq \
+  --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq -FStar.Seq.Properties.slice_slice \
     +Lib.IntTypes +Lib.Sequence +Lib.Sequence.Lemmas +Lib.LoopCombinators +Lib.Vec.Lemmas'"
 
 
@@ -115,11 +115,16 @@ let repeat_gen_blocks_slice_k #inp_t w blocksize n hi_f inp a f i k acc =
     (==) { Math.Lemmas.paren_mul_right i w blocksize }
     i * w * blocksize + (k - w * i) * blocksize;
     (==) { Math.Lemmas.distributivity_add_left (i * w) (k - w * i) blocksize }
+    (i * w + (k - w * i)) * blocksize;
+    (==) { }
+    (i * w + (k + (- w * i))) * blocksize;
+    (==) { Math.Lemmas.paren_add_right (i * w) k (- w * i) }
+    (i * w + k + (- w * i)) * blocksize;
+    (==) { Math.Lemmas.swap_mul i w } // JP: this was the important one that made the proof brittle
     k * blocksize;
     };
 
   Seq.Properties.slice_slice inp (i * blocksize_v) ((i + 1) * blocksize_v) (i_b * blocksize) (i_b * blocksize + blocksize)
-
 
 val repeat_gen_blocks_slice:
     #inp_t:Type0
@@ -197,7 +202,7 @@ let repeat_gen_blocks_multi_vec_step #inp_t w blocksize n hi_f inp a a_vec f f_v
 
   assert (repeat_gen_blocks_multi_vec_equiv_pre w blocksize n hi_f a a_vec f f_v normalize_v i b_v acc_v)
 
-
+#push-options "--z3rlimit_factor 2"
 let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v acc_v0 =
   let len = length inp in
   let blocksize_v = w * blocksize in
@@ -221,6 +226,7 @@ let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_
     (==) { repeat_gen_blocks_multi_extensionality_zero blocksize 0 (w * n) hi_f (w * n) inp a a f f acc0 }
     repeat_gen_blocks_multi blocksize 0 hi_f (w * n) inp a f acc0;
   }
+#pop-options
 
 ////////////////////////
 // End of proof of lemma_repeat_gen_blocks_multi_vec

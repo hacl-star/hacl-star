@@ -1,6 +1,6 @@
 module Lib.NatMod
 
-module LE = Lib.Exponentiation
+module LE = Lib.Exponentiation.Definition
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
@@ -36,6 +36,10 @@ let rec lemma_pow_nat_is_pow a b =
     lemma_pow_nat_is_pow a (b - 1);
     LE.lemma_pow_unfold k a b;
     () end
+
+
+let lemma_pow_zero b =
+  lemma_pow_unfold 0 b
 
 
 let lemma_pow_one b =
@@ -115,15 +119,9 @@ let lemma_mul_mod_assoc #m a b c =
 
 let lemma_mul_mod_comm #m a b = ()
 
-
-val pow_mod_ (#m:pos{1 < m}) (a:nat_mod m) (b:nat) : Tot (nat_mod m) (decreases b)
-let rec pow_mod_ #m a b =
-  if b = 0 then 1
-  else
-    if b % 2 = 0 then pow_mod_ (mul_mod a a) (b / 2)
-    else mul_mod a (pow_mod_ (mul_mod a a) (b / 2))
-
 let pow_mod #m a b = pow_mod_ #m a b
+
+let pow_mod_def #m a b = ()
 
 
 #push-options "--fuel 2"
@@ -356,3 +354,46 @@ let lemma_div_mod_prime_to_one_denominator #m a b c d =
       lemma_mul_mod_assoc #m a b (inv_mod (mul_mod c d)) }
     mul_mod (mul_mod a b) (inv_mod (mul_mod c d));
     }
+
+
+val lemma_div_mod_eq_mul_mod1: #m:prime -> a:nat_mod m -> b:nat_mod m{b <> 0} -> c:nat_mod m ->
+  Lemma (div_mod a b = c ==> a = mul_mod c b)
+
+let lemma_div_mod_eq_mul_mod1 #m a b c =
+  if div_mod a b = c then begin
+    assert (mul_mod (div_mod a b) b = mul_mod c b);
+    calc (==) {
+      mul_mod (div_mod a b) b;
+      (==) { lemma_div_mod_prime_one b }
+      mul_mod (div_mod a b) (div_mod b 1);
+      (==) { lemma_div_mod_prime_to_one_denominator a b b 1 }
+      div_mod (mul_mod a b) (mul_mod b 1);
+      (==) { lemma_div_mod_prime_cancel a 1 b }
+      div_mod a 1;
+      (==) { lemma_div_mod_prime_one a }
+      a;
+      } end
+  else ()
+
+
+val lemma_div_mod_eq_mul_mod2: #m:prime -> a:nat_mod m -> b:nat_mod m{b <> 0} -> c:nat_mod m ->
+  Lemma (a = mul_mod c b ==> div_mod a b = c)
+
+let lemma_div_mod_eq_mul_mod2 #m a b c =
+  if a = mul_mod c b then begin
+    assert (div_mod a b == div_mod (mul_mod c b) b);
+    calc (==) {
+      div_mod (mul_mod c b) b;
+      (==) { Math.Lemmas.small_mod b m }
+      div_mod (mul_mod c b) (mul_mod b 1);
+      (==) { lemma_div_mod_prime_cancel c 1 b }
+      div_mod c 1;
+      (==) { lemma_div_mod_prime_one c }
+      c;
+    } end
+  else ()
+
+
+let lemma_div_mod_eq_mul_mod #m a b c =
+  lemma_div_mod_eq_mul_mod1 a b c;
+  lemma_div_mod_eq_mul_mod2 a b c

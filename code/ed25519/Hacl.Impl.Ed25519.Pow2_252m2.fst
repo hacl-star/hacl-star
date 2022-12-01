@@ -132,9 +132,7 @@ val pow2_252m2:
 let pow2_252m2 out z =
   push_frame();
   let buf = create 20ul (u64 0) in
-  let h0 = ST.get() in
   crecip_1 out buf z;
   crecip_2 out buf z;
-  CI.lemma_fpow_is_pow (F51.fevalh h0 z) 7237005577332262213973186563042994240829374041602535252466099000494570602494;
   assert_norm (7237005577332262213973186563042994240829374041602535252466099000494570602494 == (SC.prime + 3) / 8);
   pop_frame()

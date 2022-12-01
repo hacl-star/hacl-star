@@ -1,1 +1,1 @@
-This code was authored by Jonathan Protzenko.
+This code was authored by Jonathan Protzenko (MSR).

@@ -10,272 +10,405 @@ open Lib.Buffer
 open Hacl.Bignum25519
 module F51 = Hacl.Impl.Ed25519.Field51
 
-module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
+
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
-
+module PT = Hacl.Impl.PrecompTable
+module SPT256 = Hacl.Spec.PrecompBaseTable256
 module BD = Hacl.Bignum.Definitions
-module BC = Hacl.Bignum.Convert
-module SC = Hacl.Spec.Bignum.Convert
+module SD = Hacl.Spec.Bignum.Definitions
+
+module S = Spec.Ed25519
+
+open Hacl.Impl.Ed25519.PointConstants
+include Hacl.Impl.Ed25519.Group
+include Hacl.Ed25519.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-////////////////////////////////////////////////////
-unfold
-let a_spec = Spec.Ed25519.aff_point_c
-
-unfold
-let lseq_as_felem (a:LSeq.lseq uint64 5) : GTot Hacl.Spec.Curve25519.Field51.Definition.felem5 =
-  let s0 = LSeq.index a 0 in
-  let s1 = LSeq.index a 1 in
-  let s2 = LSeq.index a 2 in
-  let s3 = LSeq.index a 3 in
-  let s4 = LSeq.index a 4 in
-  (s0, s1, s2, s3, s4)
-
-unfold
-let refl_ext_point (a:LSeq.lseq uint64 20) : GTot Spec.Ed25519.ext_point =
-  let open Hacl.Spec.Curve25519.Field51.Definition in
-  let x = feval (lseq_as_felem (LSeq.sub a 0 5)) in
-  let y = feval (lseq_as_felem (LSeq.sub a 5 5)) in
-  let z = feval (lseq_as_felem (LSeq.sub a 10 5)) in
-  let t = feval (lseq_as_felem (LSeq.sub a 15 5)) in
-  (x, y, z, t)
-
-unfold
-let inv_ext_point (a:LSeq.lseq uint64 20) : Type0 =
-  Spec.Ed25519.point_inv (refl_ext_point a)
-
-
-unfold
-let linv (a:LSeq.lseq uint64 20) : Type0 =
-  let open Hacl.Spec.Curve25519.Field51 in
-  mul_inv_t (lseq_as_felem (LSeq.sub a 0 5)) /\
-  mul_inv_t (lseq_as_felem (LSeq.sub a 5 5)) /\
-  mul_inv_t (lseq_as_felem (LSeq.sub a 10 5)) /\
-  mul_inv_t (lseq_as_felem (LSeq.sub a 15 5)) /\
-  inv_ext_point a
-
-
-unfold
-let refl (a:LSeq.lseq uint64 20{linv a}) : GTot a_spec =
-  Spec.Ed25519.to_aff_point (refl_ext_point a)
-
-unfold
-let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
+inline_for_extraction noextract
+let table_inv_w4 : BE.table_inv_t U64 20ul 16ul =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+  BE.table_inv_precomp len ctx_len k l table_len
 
 
 inline_for_extraction noextract
-let mk_to_ed25519_comm_monoid : BE.to_comm_monoid U64 20ul 0ul = {
-  BE.a_spec = a_spec;
-  BE.comm_monoid = Spec.Ed25519.mk_ed25519_comm_monoid;
-  BE.linv_ctx = linv_ctx;
-  BE.linv = linv;
-  BE.refl = refl;
-  }
+let table_inv_w5 : BE.table_inv_t U64 20ul 32ul =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
+  assert_norm (pow2 (v l) = v table_len);
+  BE.table_inv_precomp len ctx_len k l table_len
 
 
 inline_for_extraction noextract
-val point_add : BE.lmul_st U64 20ul 0ul mk_to_ed25519_comm_monoid
-let point_add ctx x y xy =
-  let h0 = ST.get () in
-  Spec.Ed25519.Lemmas.to_aff_point_add_lemma (refl_ext_point (as_seq h0 x)) (refl_ext_point (as_seq h0 y));
-  Hacl.Impl.Ed25519.PointAdd.point_add xy x y
-
-
-inline_for_extraction noextract
-val point_double : BE.lsqr_st U64 20ul 0ul mk_to_ed25519_comm_monoid
-let point_double ctx x xx =
-  let h0 = ST.get () in
-  Spec.Ed25519.Lemmas.to_aff_point_double_lemma (refl_ext_point (as_seq h0 x));
-  Hacl.Impl.Ed25519.PointDouble.point_double xx x
-
-
-inline_for_extraction noextract
-let mk_ed25519_concrete_ops : BE.concrete_ops U64 20ul 0ul = {
-  BE.to = mk_to_ed25519_comm_monoid;
-  BE.lmul = point_add;
-  BE.lsqr = point_double;
-}
-
-//////////////////////////////////////////////
-
-inline_for_extraction noextract
-val make_point_inf:
-  b:lbuffer uint64 20ul ->
+val convert_scalar: scalar:lbuffer uint8 32ul -> bscalar:lbuffer uint64 4ul ->
   Stack unit
-  (requires fun h -> live h b)
-  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-    F51.point_inv_t h1 b /\ inv_ext_point (as_seq h1 b) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 b) ==
-    Spec.Ed25519.aff_point_at_infinity)
+  (requires fun h -> live h scalar /\ live h bscalar /\ disjoint scalar bscalar)
+  (ensures fun h0 _ h1 -> modifies (loc bscalar) h0 h1 /\
+    BD.bn_v h1 bscalar == BSeq.nat_from_bytes_le (as_seq h0 scalar))
 
-let make_point_inf b =
-  let x = getx b in
-  let y = gety b in
-  let z = getz b in
-  let t = gett b in
-  make_zero x;
-  make_one y;
-  make_one z;
-  make_zero t;
-  let h1 = ST.get () in
-  assert (F51.point_eval h1 b == Spec.Ed25519.point_at_infinity);
-  Spec.Ed25519.Lemmas.to_aff_point_at_infinity_lemma ()
+let convert_scalar scalar bscalar =
+  let h0 = ST.get () in
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
+  Hacl.Bignum.Convert.mk_bn_from_bytes_le true 32ul scalar bscalar
 
 
 inline_for_extraction noextract
-val make_g:
-  g:point ->
-  Stack unit
-  (requires fun h -> live h g)
-  (ensures fun h0 _ h1 -> modifies (loc g) h0 h1 /\
-    F51.point_inv_t h1 g /\
-    F51.point_eval h1 g == Spec.Ed25519.g)
-
-let make_g g =
-  let gx = getx g in
-  let gy = gety g in
-  let gz = getz g in
-  let gt = gett g in
-  make_u64_5 gx (u64 0x00062d608f25d51a) (u64 0x000412a4b4f6592a) (u64 0x00075b7171a4b31d) (u64 0x0001ff60527118fe) (u64 0x000216936d3cd6e5);
-  make_u64_5 gy (u64 0x0006666666666658) (u64 0x0004cccccccccccc) (u64 0x0001999999999999) (u64 0x0003333333333333) (u64 0x0006666666666666);
-  make_one gz;
-  make_u64_5 gt (u64 0x00068ab3a5b7dda3) (u64 0x00000eea2a5eadbb) (u64 0x0002af8df483c27e) (u64 0x000332b375274732) (u64 0x00067875f0fd78b7);
-
-  (**) assert_norm (Spec.Ed25519.g_x ==
-    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x00062d608f25d51a, u64 0x000412a4b4f6592a, u64 0x00075b7171a4b31d, u64 0x0001ff60527118fe, u64 0x000216936d3cd6e5) % Spec.Curve25519.prime);
-  (**) assert_norm (Spec.Ed25519.g_y ==
-    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x0006666666666658, u64 0x0004cccccccccccc, u64 0x0001999999999999, u64 0x0003333333333333, u64 0x0006666666666666) %
-      Spec.Curve25519.prime);
-  (**) assert_norm (Mktuple4?._4 Spec.Ed25519.g ==
-    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x00068ab3a5b7dda3, u64 0x00000eea2a5eadbb, u64 0x0002af8df483c27e, u64 0x000332b375274732, u64 0x00067875f0fd78b7) % Spec.Curve25519.prime);
-  let h1 = ST.get () in
-  assert (F51.point_inv_t h1 g);
-  assert (F51.point_eval h1 g == Spec.Ed25519.g)
-
-
-val point_mul:
-    result:point
-  -> scalar:lbuffer uint8 32ul
+val point_mul_noalloc:
+    out:point
+  -> bscalar:lbuffer uint64 4ul
   -> q:point ->
   Stack unit
   (requires fun h ->
-    live h scalar /\ live h q /\ live h result /\
-    disjoint q result /\ disjoint q scalar /\
-    F51.point_inv_t h q /\ inv_ext_point (as_seq h q))
-  (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 result) ==
-    Spec.Ed25519.to_aff_point (Spec.Ed25519.point_mul (as_seq h0 scalar) (F51.point_eval h0 q)))
+    live h bscalar /\ live h q /\ live h out /\
+    disjoint q out /\ disjoint q bscalar /\ disjoint out bscalar /\
+    F51.point_inv_t h q /\ F51.inv_ext_point (as_seq h q) /\
+    BD.bn_v h bscalar < pow2 256)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.point_inv_t h1 out /\ F51.inv_ext_point (as_seq h1 out) /\
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_fw S.mk_ed25519_comm_monoid
+      (S.to_aff_point (F51.point_eval h0 q)) 256 (BD.bn_v h0 bscalar) 4)
 
-let point_mul result scalar q =
+let point_mul_noalloc out bscalar q =
+  BE.lexp_fw_consttime 20ul 0ul mk_ed25519_concrete_ops
+    4ul (null uint64) q 4ul 256ul bscalar out
+
+
+let point_mul out scalar q =
   let h0 = ST.get () in
+  SE.exp_fw_lemma S.mk_ed25519_concrete_ops
+    (F51.point_eval h0 q) 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar)) 4;
   push_frame ();
   let bscalar = create 4ul (u64 0) in
-  Lib.ByteBuffer.uints_from_bytes_le bscalar scalar;
-  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar);
-  let h1 = ST.get () in
-  assert (as_seq h1 bscalar == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar));
-  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
-
-  make_point_inf result;
-  BE.lexp_fw_consttime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q 4ul 256ul bscalar result 4ul;
+  convert_scalar scalar bscalar;
+  point_mul_noalloc out bscalar q;
   pop_frame ()
 
 
-val point_mul_g:
-    result:point
-  -> scalar:lbuffer uint8 32ul ->
+val precomp_get_consttime: BE.pow_a_to_small_b_st U64 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul
+    (BE.table_inv_precomp 20ul 0ul mk_ed25519_concrete_ops 4ul 16ul)
+[@CInline]
+let precomp_get_consttime ctx a table bits_l tmp =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+
+  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
+
+
+inline_for_extraction noextract
+val point_mul_g_noalloc: out:point -> bscalar:lbuffer uint64 4ul
+  -> q1:point -> q2:point
+  -> q3:point -> q4:point ->
   Stack unit
   (requires fun h ->
-    live h scalar /\ live h result /\ disjoint result scalar)
-  (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 result) ==
-    Spec.Ed25519.to_aff_point (Spec.Ed25519.point_mul_g (as_seq h0 scalar)))
+    live h bscalar /\ live h out /\ live h q1 /\
+    live h q2 /\ live h q3 /\ live h q4 /\
+    disjoint out bscalar /\ disjoint out q1 /\ disjoint out q2 /\
+    disjoint out q3 /\ disjoint out q4 /\
+    disjoint q1 q2 /\ disjoint q1 q3 /\ disjoint q1 q4 /\
+    disjoint q2 q3 /\ disjoint q2 q4 /\ disjoint q3 q4 /\
+    BD.bn_v h bscalar < pow2 256 /\
+    F51.linv (as_seq h q1) /\ refl (as_seq h q1) == g_aff /\
+    F51.linv (as_seq h q2) /\ refl (as_seq h q2) == g_pow2_64 /\
+    F51.linv (as_seq h q3) /\ refl (as_seq h q3) == g_pow2_128 /\
+    F51.linv (as_seq h q4) /\ refl (as_seq h q4) == g_pow2_192)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.linv (as_seq h1 out) /\
+   (let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v h0 bscalar) in
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_four_fw S.mk_ed25519_comm_monoid
+      g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
-[@CInline]
-let point_mul_g result scalar =
-  push_frame ();
-  let g = create 20ul (u64 0) in
-  make_g g;
-  Spec.Ed25519.Lemmas.g_is_on_curve ();
-  point_mul result scalar g;
-  pop_frame ()
+let point_mul_g_noalloc out bscalar q1 q2 q3 q4 =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+  [@inline_let] let bLen = 1ul in
+  [@inline_let] let bBits = 64ul in
 
-
-#push-options "--z3rlimit 150"
-val point_mul_double_vartime:
-    result:point
-  -> scalar1:lbuffer uint8 32ul
-  -> q1:point
-  -> scalar2:lbuffer uint8 32ul
-  -> q2:point ->
-  Stack unit
-  (requires fun h ->
-    live h result /\ live h scalar1 /\ live h q1 /\
-    live h scalar2 /\ live h q2 /\
-    disjoint q1 result /\ disjoint q2 result /\
-    disjoint q1 q2 /\
-    F51.point_inv_t h q1 /\ inv_ext_point (as_seq h q1) /\
-    F51.point_inv_t h q2 /\ inv_ext_point (as_seq h q2))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 result) ==
-    Spec.Ed25519.to_aff_point (Spec.Ed25519.point_mul_double
-      (as_seq h0 scalar1) (F51.point_eval h0 q1)
-      (as_seq h0 scalar2) (F51.point_eval h0 q2)))
-
-[@CInline]
-let point_mul_double_vartime result scalar1 q1 scalar2 q2 =
   let h0 = ST.get () in
-  push_frame ();
-  let bscalar1 = create 4ul (u64 0) in
-  Lib.ByteBuffer.uints_from_bytes_le bscalar1 scalar1;
-  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar1);
-  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar1);
-
-  let bscalar2 = create 4ul (u64 0) in
-  Lib.ByteBuffer.uints_from_bytes_le bscalar2 scalar2;
-  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar2);
-  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar2);
-
+  recall_contents precomp_basepoint_table_w4 precomp_basepoint_table_lseq_w4;
   let h1 = ST.get () in
-  assert (as_seq h1 bscalar1 == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar1));
-  assert (as_seq h1 bscalar2 == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar2));
+  precomp_basepoint_table_lemma_w4 ();
+  assert (table_inv_w4 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w4));
 
-  make_point_inf result;
-  ME.lexp_double_fw_vartime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q1 4ul 256ul bscalar1 q2 bscalar2 result 4ul;
+  recall_contents precomp_g_pow2_64_table_w4 precomp_g_pow2_64_table_lseq_w4;
+  let h1 = ST.get () in
+  precomp_g_pow2_64_table_lemma_w4 ();
+  assert (table_inv_w4 (as_seq h1 q2) (as_seq h1 precomp_g_pow2_64_table_w4));
+
+  recall_contents precomp_g_pow2_128_table_w4 precomp_g_pow2_128_table_lseq_w4;
+  let h1 = ST.get () in
+  precomp_g_pow2_128_table_lemma_w4 ();
+  assert (table_inv_w4 (as_seq h1 q3) (as_seq h1 precomp_g_pow2_128_table_w4));
+
+  recall_contents precomp_g_pow2_192_table_w4 precomp_g_pow2_192_table_lseq_w4;
+  let h1 = ST.get () in
+  precomp_g_pow2_192_table_lemma_w4 ();
+  assert (table_inv_w4 (as_seq h1 q4) (as_seq h1 precomp_g_pow2_192_table_w4));
+
+  let r1 = sub bscalar 0ul 1ul in
+  let r2 = sub bscalar 1ul 1ul in
+  let r3 = sub bscalar 2ul 1ul in
+  let r4 = sub bscalar 3ul 1ul in
+  SPT256.lemma_decompose_nat256_as_four_u64_lbignum (as_seq h0 bscalar);
+
+  ME.mk_lexp_four_fw_tables len ctx_len k l table_len
+    table_inv_w4 table_inv_w4 table_inv_w4 table_inv_w4
+    precomp_get_consttime
+    precomp_get_consttime
+    precomp_get_consttime
+    precomp_get_consttime
+    (null uint64) q1 bLen bBits r1 q2 r2 q3 r3 q4 r4
+    (to_const precomp_basepoint_table_w4)
+    (to_const precomp_g_pow2_64_table_w4)
+    (to_const precomp_g_pow2_128_table_w4)
+    (to_const precomp_g_pow2_192_table_w4)
+    out
+
+
+inline_for_extraction noextract
+val point_mul_g_mk_q1234: out:point -> bscalar:lbuffer uint64 4ul -> q1:point ->
+  Stack unit
+  (requires fun h ->
+    live h bscalar /\ live h out /\ live h q1 /\
+    disjoint out bscalar /\ disjoint out q1 /\
+    BD.bn_v h bscalar < pow2 256 /\
+    F51.linv (as_seq h q1) /\ refl (as_seq h q1) == g_aff)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.linv (as_seq h1 out) /\
+   (let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v h0 bscalar) in
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_four_fw S.mk_ed25519_comm_monoid
+      g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
+
+let point_mul_g_mk_q1234 out bscalar q1 =
+  push_frame ();
+  let q2 = mk_ext_g_pow2_64 () in
+  let q3 = mk_ext_g_pow2_128 () in
+  let q4 = mk_ext_g_pow2_192 () in
+  ext_g_pow2_64_lseq_lemma ();
+  ext_g_pow2_128_lseq_lemma ();
+  ext_g_pow2_192_lseq_lemma ();
+  point_mul_g_noalloc out bscalar q1 q2 q3 q4;
   pop_frame ()
-#pop-options
+
+
+val lemma_exp_four_fw_local: b:BSeq.lbytes 32 ->
+  Lemma (let bn = BSeq.nat_from_bytes_le b in
+    let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 bn in
+    let cm = S.mk_ed25519_comm_monoid in
+    LE.exp_four_fw cm g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 ==
+    S.to_aff_point (S.point_mul_g b))
+
+let lemma_exp_four_fw_local b =
+  let bn = BSeq.nat_from_bytes_le b in
+  let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 bn in
+  let cm = S.mk_ed25519_comm_monoid in
+  let res = LE.exp_four_fw cm g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 in
+  assert (res == SPT256.exp_as_exp_four_nat256_precomp cm g_aff bn);
+  SPT256.lemma_point_mul_base_precomp4 cm g_aff bn;
+  assert (res == LE.pow cm g_aff bn);
+  SE.exp_fw_lemma S.mk_ed25519_concrete_ops g_c 256 bn 4;
+  LE.exp_fw_lemma cm g_aff 256 bn 4;
+  assert (S.to_aff_point (S.point_mul_g b) == LE.pow cm g_aff bn)
+
+
+[@CInline]
+let point_mul_g out scalar =
+  push_frame ();
+  let h0 = ST.get () in
+  let bscalar = create 4ul (u64 0) in
+  convert_scalar scalar bscalar;
+  let q1 = create 20ul (u64 0) in
+  make_g q1;
+  point_mul_g_mk_q1234 out bscalar q1;
+  lemma_exp_four_fw_local (as_seq h0 scalar);
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val point_mul_g_double_vartime_noalloc:
+    out:point
+  -> scalar1:lbuffer uint64 4ul -> q1:point
+  -> scalar2:lbuffer uint64 4ul -> q2:point
+  -> table2: lbuffer uint64 640ul ->
+  Stack unit
+  (requires fun h ->
+    live h out /\ live h scalar1 /\ live h q1 /\
+    live h scalar2 /\ live h q2 /\ live h table2 /\
+
+    eq_or_disjoint q1 q2 /\ disjoint out q1 /\ disjoint out q2 /\
+    disjoint out scalar1 /\ disjoint out scalar2 /\ disjoint out table2 /\
+
+    BD.bn_v h scalar1 < pow2 256 /\ BD.bn_v h scalar2 < pow2 256 /\
+    F51.linv (as_seq h q1) /\ F51.linv (as_seq h q2) /\
+    F51.point_eval h q1 == g_c /\
+    table_inv_w5 (as_seq h q2) (as_seq h table2))
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.linv (as_seq h1 out) /\
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
+      (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h0 scalar1)
+      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h0 scalar2) 5)
+
+let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
+  [@inline_let] let bLen = 4ul in
+  [@inline_let] let bBits = 256ul in
+  assert_norm (pow2 (v l) == v table_len);
+  let h0 = ST.get () in
+  recall_contents precomp_basepoint_table_w5 precomp_basepoint_table_lseq_w5;
+  let h1 = ST.get () in
+  precomp_basepoint_table_lemma_w5 ();
+  assert (table_inv_w5 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w5));
+  assert (table_inv_w5 (as_seq h1 q2) (as_seq h1 table2));
+
+  ME.mk_lexp_double_fw_tables len ctx_len k l table_len
+    table_inv_w5 table_inv_w5
+    (BE.lprecomp_get_vartime len ctx_len k l table_len)
+    (BE.lprecomp_get_vartime len ctx_len k l table_len)
+    (null uint64) q1 bLen bBits scalar1 q2 scalar2
+    (to_const precomp_basepoint_table_w5) (to_const table2) out
+
+
+inline_for_extraction noextract
+val point_mul_g_double_vartime_table:
+    out:point
+  -> scalar1:lbuffer uint64 4ul -> q1:point
+  -> scalar2:lbuffer uint64 4ul -> q2:point ->
+  Stack unit
+  (requires fun h ->
+    live h out /\ live h scalar1 /\ live h q1 /\
+    live h scalar2 /\ live h q2 /\
+
+    eq_or_disjoint q1 q2 /\ disjoint out q1 /\ disjoint out q2 /\
+    disjoint out scalar1 /\ disjoint out scalar2 /\
+
+    BD.bn_v h scalar1 < pow2 256 /\ BD.bn_v h scalar2 < pow2 256 /\
+    F51.linv (as_seq h q1) /\ F51.linv (as_seq h q2) /\
+    F51.point_eval h q1 == g_c)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.linv (as_seq h1 out) /\
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
+      (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h0 scalar1)
+      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h0 scalar2) 5)
+
+let point_mul_g_double_vartime_table out scalar1 q1 scalar2 q2 =
+  [@inline_let] let len = 20ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_ed25519_concrete_ops in
+  [@inline_let] let table_len = 32ul in
+  assert_norm (pow2 5 == v table_len);
+
+  push_frame ();
+  let table2 = create (table_len *! len) (u64 0) in
+  PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
+
+  point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val point_mul_g_double_vartime_aux:
+    out:point
+  -> scalar1:lbuffer uint8 32ul -> q1:point
+  -> scalar2:lbuffer uint8 32ul -> q2:point
+  -> bscalar1:lbuffer uint64 4ul
+  -> bscalar2:lbuffer uint64 4ul ->
+  Stack unit
+  (requires fun h ->
+    live h out /\ live h scalar1 /\ live h q1 /\
+    live h scalar2 /\ live h q2 /\ live h bscalar1 /\ live h bscalar2 /\
+
+    disjoint scalar1 bscalar1 /\ disjoint scalar2 bscalar2 /\ disjoint scalar2 bscalar1 /\
+    disjoint scalar1 bscalar2 /\ disjoint bscalar1 bscalar2 /\ disjoint bscalar1 out /\
+    disjoint bscalar1 q1 /\ disjoint bscalar1 q2 /\ disjoint bscalar2 out /\
+    disjoint bscalar2 q1 /\ disjoint bscalar2 q2 /\ eq_or_disjoint q1 q2 /\
+    disjoint q1 out /\ disjoint q2 out /\ disjoint scalar1 out /\ disjoint scalar2 out /\
+
+    F51.linv (as_seq h q1) /\ F51.linv (as_seq h q2) /\
+    F51.point_eval h q1 == g_c)
+  (ensures fun h0 _ h1 -> modifies (loc out |+| loc bscalar1 |+| loc bscalar2) h0 h1 /\
+    F51.linv (as_seq h1 out) /\
+    BD.bn_v h1 bscalar1 == BSeq.nat_from_bytes_le (as_seq h0 scalar1) /\
+    BD.bn_v h1 bscalar2 == BSeq.nat_from_bytes_le (as_seq h0 scalar2) /\
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
+      (S.to_aff_point (F51.point_eval h0 q1)) 256 (BD.bn_v h1 bscalar1)
+      (S.to_aff_point (F51.point_eval h0 q2)) (BD.bn_v h1 bscalar2) 5)
+
+let point_mul_g_double_vartime_aux out scalar1 q1 scalar2 q2 bscalar1 bscalar2 =
+  let h0 = ST.get () in
+  convert_scalar scalar1 bscalar1;
+  convert_scalar scalar2 bscalar2;
+  let h1 = ST.get () in
+  assert (BD.bn_v h1 bscalar1 == BSeq.nat_from_bytes_le (as_seq h0 scalar1));
+  assert (BD.bn_v h1 bscalar2 == BSeq.nat_from_bytes_le (as_seq h0 scalar2));
+  point_mul_g_double_vartime_table out bscalar1 q1 bscalar2 q2
 
 
 val point_mul_g_double_vartime:
-    result:point
+    out:point
   -> scalar1:lbuffer uint8 32ul
   -> scalar2:lbuffer uint8 32ul
   -> q2:point ->
   Stack unit
   (requires fun h ->
-    live h result /\ live h scalar1 /\
+    live h out /\ live h scalar1 /\
     live h scalar2 /\ live h q2 /\
-    disjoint q2 result /\
-    F51.point_inv_t h q2 /\ inv_ext_point (as_seq h q2))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 result) ==
-    Spec.Ed25519.to_aff_point (Spec.Ed25519.point_mul_double_g
-      (as_seq h0 scalar1) (as_seq h0 scalar2) (F51.point_eval h0 q2)))
+    disjoint q2 out /\ disjoint scalar1 out /\ disjoint scalar2 out /\
+    F51.linv (as_seq h q2))
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.linv (as_seq h1 out) /\
+    S.to_aff_point (F51.point_eval h1 out) ==
+    LE.exp_double_fw #S.aff_point_c S.mk_ed25519_comm_monoid
+      (S.to_aff_point g_c) 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar1))
+      (S.to_aff_point (F51.point_eval h0 q2)) (BSeq.nat_from_bytes_le (as_seq h0 scalar2)) 5)
 
 [@CInline]
-let point_mul_g_double_vartime result scalar1 scalar2 q2 =
+let point_mul_g_double_vartime out scalar1 scalar2 q2 =
   push_frame ();
-  let g = create 20ul (u64 0) in
+  let tmp = create 28ul (u64 0) in
+  let g = sub tmp 0ul 20ul in
+  let bscalar1 = sub tmp 20ul 4ul in
+  let bscalar2 = sub tmp 24ul 4ul in
   make_g g;
-  Spec.Ed25519.Lemmas.g_is_on_curve ();
-  point_mul_double_vartime result scalar1 g scalar2 q2;
+  point_mul_g_double_vartime_aux out scalar1 g scalar2 q2 bscalar1 bscalar2;
+  pop_frame ()
+
+
+[@CInline]
+let point_negate_mul_double_g_vartime out scalar1 scalar2 q2 =
+  push_frame ();
+  let q2_neg = create 20ul (u64 0) in
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.to_aff_point_negate (F51.refl_ext_point (as_seq h0 q2));
+  Hacl.Impl.Ed25519.PointNegate.point_negate q2 q2_neg;
+  let h1 = ST.get () in
+  point_mul_g_double_vartime out scalar1 scalar2 q2_neg;
+  SE.exp_double_fw_lemma S.mk_ed25519_concrete_ops
+    g_c 256 (BSeq.nat_from_bytes_le (as_seq h1 scalar1))
+    (F51.point_eval h1 q2_neg) (BSeq.nat_from_bytes_le (as_seq h1 scalar2)) 5;
   pop_frame ()

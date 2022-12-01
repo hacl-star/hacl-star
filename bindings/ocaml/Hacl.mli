@@ -56,7 +56,7 @@ module P256 : sig
   (** {1:points Point representation and conversions}
       Elliptic curve points have 2 32-byte coordinates {i (x, y)} and can be represented in 3 ways:
       - "raw" form (64 bytes): the concatenation of the 2 coordinates
-      - "compressed" form (33 bytes): the first byte is equal to {0x2 + (y % 2)}, followed
+      - "compressed" form (33 bytes): the first byte is equal to [0x2 + (y % 2)], followed
       by {i x}
       - "uncompressed" form (65 bytes): the first byte is always [\04], followed by the "raw" form
 
@@ -405,13 +405,13 @@ module NaCl : sig
       (** {1 Box}
           {2 One-shot interface} *)
 
-      val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> bool
+      val box : pt:bytes -> ?pt_offset:int -> ?pt_len:int -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> ?ct_offset:int -> unit -> bool
       (** [box pt n pk sk ct] authenticates and encrypts plaintext [pt] using public key [pk],
           secret key [sk], and nonce [n] and writes both the message authentication tag
           and the ciphertext in [ct].
           Returns true if successful. *)
 
-      val box_open : ct:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
+      val box_open : ct:bytes -> ?ct_offset:int -> ?ct_len:int -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> ?pt_offset:int -> unit -> bool
       (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using public key [pk],
           secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
           and returns true. *)
@@ -419,90 +419,120 @@ module NaCl : sig
       (** {2 Precomputation interface }
           The shared key [ck] is obtained using {!NaCl.box_beforenm} or {!NaCl.Noalloc.box_beforenm}. *)
 
-      val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> bool
+      val box_afternm : pt:bytes -> ?pt_offset:int -> ?pt_len:int -> n:bytes -> ck:bytes -> ct:bytes -> ?ct_offset:int -> unit -> bool
       (** [box_afternm pt n ck ct] authenticates and encrypts [pt] using shared key [ck] and
           nonce [n] and writes both the message authentication tag and the ciphertext in [ct].
           Returns true if successful. *)
 
-      val box_open_afternm : ct:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
+      val box_open_afternm : ct:bytes -> ?ct_offset:int -> ?ct_len:int -> n:bytes -> ck:bytes -> pt:bytes -> ?pt_offset:int -> unit -> bool
       (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using
           shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
           and returns true. *)
 
       (** {1 Secretbox} *)
 
-      val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> bool
+      val secretbox : pt:bytes -> ?pt_offset:int -> ?pt_len:int -> n:bytes -> key:bytes -> ct:bytes -> ?ct_offset:int -> unit -> bool
       (** [secretbox pt n key ct] authenticates and encrypts plaintext [pt] using
           secret key [key] and nonce [n] and writes both the message authentication tag
           and the ciphertext in [ct].
           Returns true if successful. *)
 
-      val secretbox_open : ct:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
+      val secretbox_open : ct:bytes -> ?ct_offset:int -> ?ct_len:int -> n:bytes -> key:bytes -> pt:bytes -> ?pt_offset:int -> unit -> bool
       (** [secretbox_open ct n key pt] attempts to verify and decrypt ciphertext [ct] using
           secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
           and returns true. *)
     end
-    (** The {i easy} interface concatenates the ciphertext and the 16-byte long message
-        authentication tag into a single buffer.
+    (** The {i easy} interface concatenates the ciphertext and the 16-byte long
+        message authentication tag into a single buffer.
+
+        By default, these functions use the whole of [pt] and [ct], but users
+        can choose to only pass portions of these buffers, by passing some of
+        these optional arguments:
+        - [pt_offset], [ct_offset]: start at the specified position in [pt] or
+          [ct] (0 by default)
+        - [pt_len] or [ct_len]: specify the number of bytes to take in [pt] or
+          [ct] (by default, the entire buffer)
+
+        {i Note 1:} Since it must always be the case that [ct] be 16 bytes
+        longer than [pt], functions accept only one of these arguments
+        ([pt_len] for encryption functions, [ct_len] for decryption functions)
+
+        {i Note 2:} As opposed to not passing [pt_len] at all, passing
+        [pt_len=0] will result in using an empty buffer.
 
         Buffers have the following size requirements:
         - [ct]: at least 16 bytes
         - [pk], [sk], [ck]: 32 bytes
         - [n]: 24 bytes
+        - [pt_offset], [ct_offset]: positive, <= size of buffer
+        - [pt_len]: positive, <= size of [pt] - [pt_offset]
+        - [ct_len]: >= 16, <= size of [ct] - [ct_offset]
     *)
 
     module Detached : sig
       (** {1 Box}
           {2 One-shot interface} *)
 
-      val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> tag:bytes -> bool
-      (** [box pt n pk sk ct tag] authenticates and encrypts plaintext [pt] using public key [pk],
-          secret key [sk], and nonce [n] and writes the ciphertext in [ct] and
-          the message authentication tag in [tag].
+      val box : buf:bytes -> tag:bytes -> ?offset:int -> ?len:int -> n:bytes -> pk:bytes -> sk:bytes -> unit -> bool
+      (** [box buf tag n pk sk] authenticates and encrypts in-place the plaintext
+          in [buf] using public key [pk], secret key [sk], and nonce [n] and
+          writes the message authentication tag in [tag].
           Returns true if successful. *)
 
-      val box_open : ct:bytes -> tag:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
-      (** [box_open ct tag n pk sk pt] attempts to verify and decrypt ciphertext [ct] and
-          message authentication tag [tag] using public key [pk],
-          secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
-          and returns true. *)
+      val box_open : buf:bytes -> tag:bytes -> ?offset:int -> ?len:int -> n:bytes -> pk:bytes -> sk:bytes -> unit -> bool
+      (** [box_open buf tag n pk sk] attempts to verify and decrypt in-place the
+          ciphertext in [ct] and message authentication tag [tag] using public
+          key [pk], secret key [sk], and nonce [n].
+          Returns true if successful.  *)
 
       (** {2 Precomputation interface }
-          The shared key [ck] is obtained using {!NaCl.box_beforenm} or {!NaCl.Noalloc.box_beforenm}. *)
+          The shared key [ck] is obtained using {!NaCl.box_beforenm} or
+          {!NaCl.Noalloc.box_beforenm}. *)
 
-      val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> tag:bytes -> bool
-      (** [box_afternm pt n ck ct tag] authenticates and encrypts [pt] using shared key [ck] and
-          nonce [n] and writes the ciphertext in [ct] and the message authentication tag in [tag].
+      val box_afternm : buf:bytes -> tag:bytes -> ?offset:int -> ?len:int -> n:bytes -> ck:bytes -> unit -> bool
+      (** [box buf tag n pk sk] authenticates and encrypts in-place the plaintext
+          in [buf] using shared key [ck] and nonce [n] and writes the message
+          authentication tag in [tag].
           Returns true if successful. *)
 
-      val box_open_afternm : ct:bytes -> tag:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
-      (** [box_open_afternm ct tag n ck pt] attempts to verify and decrypt ciphertext [ct] and
-          message authentication tag [tag] using
-          shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
-          and returns true. *)
+      val box_open_afternm : buf:bytes -> tag:bytes -> ?offset:int -> ?len:int -> n:bytes -> ck:bytes -> unit -> bool
+      (** [box_open buf tag n pk sk] attempts to verify and decrypt in-place the
+          ciphertext in [ct] and message authentication tag [tag] using shared
+          key [ck] and nonce [n].
+          Returns true if successful.  *)
 
       (** {1 Secretbox} *)
 
-      val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> tag:bytes -> bool
-      (** [secretbox pt n key ct tag] authenticates and encrypts plaintext [pt] using
-          secret key [key] and nonce [n] and writes the ciphertext in [ct]
-          and the message authentication tag in [tag].
+      val secretbox : buf:bytes -> tag:bytes -> ?offset:int -> ?len:int -> n:bytes -> key:bytes -> unit -> bool
+      (** [secretbox buf tag n key] authenticates and encrypts in-place the
+          plaintext in [buf] using secret key [key] and nonce [n] and writes
+          the message authentication tag in [tag].
           Returns true if successful. *)
 
-      val secretbox_open : ct:bytes -> tag:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
-      (** [secretbox_open ct tag n key pt] attempts to verify and decrypt ciphertext [ct] and
-          message authentication tag [tag] using
-          secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
-          and returns true. *)
+      val secretbox_open : buf:bytes -> tag:bytes -> ?offset:int -> ?len:int -> n:bytes -> key:bytes -> unit -> bool
+      (** [secretbox_open buf tag n key] attempts to verify and decrypt in-place
+          the ciphertext in [buf] and message authentication tag [tag] using
+          secret key [key] and nonce [n].
+          Returns true if successful. *)
     end
-    (** The {i detached} interface uses 2 separate buffers for the ciphertext and
-        the message authentication tag. This allows users to encrypt and decrypt data in-place,
-        by passing the same buffer for both plaintext and ciphertext.
+    (** The {i detached} interface uses 2 separate buffers for the ciphertext
+        and the message authentication tag. This allows users to encrypt and
+        decrypt data in-place, in buffer [buf].
+
+        By default, these functions use the whole [buf], but users can choose
+        to only pass a portion of [buf], by passing one or both of these
+        optional arguments:
+        - [offset]: start at position [offset] in [buf] (0 by default)
+        - [len]: take only the first [len] bytes in [buf], starting at
+        [offset] ({i Note:} As opposed to not passing [len] at all, passing
+        [len=0] will result in using an empty buffer.)
 
         Buffers have the following size requirements:
         - [tag]: 16 bytes
         - [pk], [sk], [ck]: 32 bytes
         - [n]: 24 bytes
+        - [offset]: positive, <= size of [buf]
+        - [len]: positive, <= size of [buf] - [offset]
     *)
   end
 end

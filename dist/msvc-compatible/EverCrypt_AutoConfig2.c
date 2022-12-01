@@ -25,7 +25,7 @@
 #include "EverCrypt_AutoConfig2.h"
 
 #include "internal/Vale.h"
-
+#include "evercrypt_targetconfig.h"
 static bool cpu_has_shaext[1U] = { false };
 
 static bool cpu_has_aesni[1U] = { false };
@@ -47,14 +47,6 @@ static bool cpu_has_movbe[1U] = { false };
 static bool cpu_has_rdrand[1U] = { false };
 
 static bool cpu_has_avx512[1U] = { false };
-
-static bool user_wants_hacl[1U] = { true };
-
-static bool user_wants_vale[1U] = { true };
-
-static bool user_wants_openssl[1U] = { true };
-
-static bool user_wants_bcrypt[1U] = { false };
 
 bool EverCrypt_AutoConfig2_has_shaext()
 {
@@ -109,28 +101,6 @@ bool EverCrypt_AutoConfig2_has_rdrand()
 bool EverCrypt_AutoConfig2_has_avx512()
 {
   return cpu_has_avx512[0U];
-}
-
-KRML_DEPRECATED("")
-
-bool EverCrypt_AutoConfig2_wants_vale()
-{
-  return user_wants_vale[0U];
-}
-
-bool EverCrypt_AutoConfig2_wants_hacl()
-{
-  return user_wants_hacl[0U];
-}
-
-bool EverCrypt_AutoConfig2_wants_openssl()
-{
-  return user_wants_openssl[0U];
-}
-
-bool EverCrypt_AutoConfig2_wants_bcrypt()
-{
-  return user_wants_bcrypt[0U];
 }
 
 void EverCrypt_AutoConfig2_recall()
@@ -212,15 +182,15 @@ void EverCrypt_AutoConfig2_init()
         if (scrut10 != (uint64_t)0U)
         {
           cpu_has_avx512[0U] = true;
+          return;
         }
+        return;
       }
+      return;
     }
+    return;
   }
   #endif
-  user_wants_hacl[0U] = true;
-  user_wants_vale[0U] = true;
-  user_wants_bcrypt[0U] = false;
-  user_wants_openssl[0U] = true;
 }
 
 void EverCrypt_AutoConfig2_disable_avx2()
@@ -276,26 +246,6 @@ void EverCrypt_AutoConfig2_disable_rdrand()
 void EverCrypt_AutoConfig2_disable_avx512()
 {
   cpu_has_avx512[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_vale()
-{
-  user_wants_vale[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_hacl()
-{
-  user_wants_hacl[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_openssl()
-{
-  user_wants_openssl[0U] = false;
-}
-
-void EverCrypt_AutoConfig2_disable_bcrypt()
-{
-  user_wants_bcrypt[0U] = false;
 }
 
 bool EverCrypt_AutoConfig2_has_vec128()

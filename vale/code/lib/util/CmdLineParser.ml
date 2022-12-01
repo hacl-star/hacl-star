@@ -51,9 +51,10 @@ let parse_cmdline :
                  "Please choose a correct assembler option: GCC or MASM\n")
     in
     let printer =
-      match asm_choice with
-      | GCC -> Vale_X64_Decls.gcc
-      | MASM -> Vale_X64_Decls.masm
+      match asm_choice, platform_choice with
+      | GCC, Linux -> Vale_X64_Decls.gcc_linux
+      | GCC, _ -> Vale_X64_Decls.gcc
+      | MASM, _ -> Vale_X64_Decls.masm
     in
     let windows = platform_choice = Win in
 

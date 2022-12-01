@@ -74,7 +74,7 @@ let w_loop_inv (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (h: HS.mem) (i: n
   B.live h m /\
   B.live h b /\
   B.modifies (B.loc_buffer b) h0 h /\ (
-    let mi = Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h m) in
+    let mi = Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq h m) in
     w_inv' i mi b h
   )
 
@@ -85,7 +85,7 @@ let w_inv_elim (h: HS.mem) (m: Spec.word_block) (b: w_t) (i: nat) (j: nat) : Lem
 
 let w_loop_inv_elim (h0: Ghost.erased HS.mem) (h: HS.mem) (m: block_t) (b: w_t) (i: nat) (j: nat) : Lemma
   (requires (w_loop_inv h0 m b h i /\ j < i))
-  (ensures (Seq.index (B.as_seq h b) j == Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h m)) (U32.uint_to_t j)))
+  (ensures (Seq.index (B.as_seq h b) j == Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq h m)) (U32.uint_to_t j)))
 = ()
 
 inline_for_extraction
@@ -104,10 +104,10 @@ inline_for_extraction
 let w_body_value (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t) : HST.Stack uint32
   (requires (fun h -> w_loop_inv h0 m b h (U32.v i) /\ U32.v i < 80))
   (ensures (fun h v h' -> B.modifies B.loc_none h h' /\ v ==
-		       Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq (Ghost.reveal h0) m)) i))
+		       Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq (Ghost.reveal h0) m)) i))
 =
   if U32.lt i 16ul then
-    index_32_be' (size block_word_length) m i
+    index_32_be' (size (block_word_length SHA1)) m i
   else
     let wmit3 = B.index b (i `U32.sub` 3ul) in
     let wmit8 = B.index b (i `U32.sub` 8ul) in
@@ -133,7 +133,7 @@ let w_body (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t { U32.v i <
     (requires (j < U32.v i + 1))
     (ensures (j < U32.v i + 1 /\
 	      Seq.index (B.as_seq h' b) j ==
-	      Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq (Ghost.reveal h0) m)) (U32.uint_to_t j)))
+	      Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq (Ghost.reveal h0) m)) (U32.uint_to_t j)))
   = lt_S_r j (U32.v i);
     if j = U32.v i
     then ()
@@ -145,8 +145,8 @@ inline_for_extraction
 let w (m: block_t) (b: w_t) : HST.Stack unit
   (requires (fun h -> B.live h m /\ B.live h b /\ B.disjoint m b))
   (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ w_inv
-		       (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h m)) b h'))
-= let h = Ghost.hide (HST.get ()) in
+		       (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq h m)) b h'))
+= let h = HST.get () in
   C.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
 
 inline_for_extraction
@@ -241,14 +241,14 @@ let step3
     B.modifies (B.loc_buffer h) h0 h1 /\
     B.live h1 h /\
     B.as_seq h1 h == Spec.step3
-	     (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h0 m)) (B.as_seq h0 h)
+	     (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq h0 m)) (B.as_seq h0 h)
   ))
 = let h0 = HST.get () in
   HST.push_frame ();
   let _w = B.alloca (u32 0) 80ul in
   w m _w;
   let mi = Ghost.hide (
-      Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h0 m)) in
+      Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq h0 m)) in
   let h1 = HST.get () in
   let cwt = Ghost.hide (Spec.compute_w (Ghost.reveal mi) 0 Seq.empty) in
   let gw: Ghost.erased (Spec.step3_body_w_t (Ghost.reveal mi)) =
@@ -281,7 +281,7 @@ let step4
     B.modifies (B.loc_buffer h) h0 h1 /\
     B.live h1 h /\
       B.as_seq h1 h == Spec.step4
-	       (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h0 m))
+	       (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(block_word_length SHA1) (B.as_seq h0 m))
 	       (B.as_seq h0 h)
   ))
 = let ha = B.index h 0ul in

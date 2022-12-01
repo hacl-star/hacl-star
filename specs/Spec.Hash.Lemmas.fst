@@ -90,74 +90,10 @@ let update_multi_associative (a: hash_alg)
   Lib.UpdateMulti.update_multi_associative (block_length a) (Spec.Agile.Hash.update a) h input1 input2
 
 (* *)
-let block_length_smaller_than_max_input (a:hash_alg) :
-  Lemma(block_length a <= max_input_length a) =
+let block_length_smaller_than_max_input (a:hash_alg) =
   normalize_term_spec(pow2 61 - 1);
   normalize_term_spec(pow2 125 - 1);
   normalize_term_spec(pow2 64 - 1)
-  
-#reset-options "--using_facts_from 'Prims Spec.Hash.Definitions'"
-#push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=false"
-let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
-  (requires blocks % block_length a = 0)
-  (ensures (pad_length a rest = pad_length a (blocks + rest)))
-= 
-  match a with
-  | Blake2S | Blake2B ->
-    calc (==) {
-      (pad_length a (blocks + rest) <: int);
-    (==) {}
-      (block_length a - blocks - rest) % block_length a;
-    (==) {}
-      ((block_length a - rest) - blocks) % block_length a;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (block_length a - rest) blocks (block_length a) }
-      (block_length a - rest) % block_length a;
-    (==) {}
-      pad_length a rest;
-    }
-  | _ ->
-  //to prove: pad_length a rest == pad_length a (blocks + rest)
-  //expanding pad_length:
-  //          pad0_length a rest + 1 + len_length a == pad0_length a (blocks + rest) + 1 + len_length a
-  //subtracting 1 + len_length a from both sides:
-  //          pad0_length a rest == pad0_length a (blocks + rest)
-  //expanding pad0_length:
-  //          (block_length a - (rest + len_length a + 1)) % block_length a ==
-  //          (block_length a - (blocks + rest + len_length a + 1)) % block_length a
-  //
-  //
-  //say x = block_length a, and y = rest + len_length a + 1, then we have to prove:
-  //
-  //(x - y) % x == (x - (blocks + y)) % x -- G
-  let x = block_length a in
-  let y = rest + len_length a + 1 in
 
-  Math.Lemmas.lemma_mod_sub_distr x y x;
-  //gives us: (x - y) % x == (x - y%x) % x -- 1
-
-  Math.Lemmas.lemma_mod_sub_distr x (blocks + y) x;
-  //gives us: (x - (blocks + y)) % x == (x - (blocks + y)%x) % x -- 2
-
-  Math.Lemmas.lemma_mod_add_distr y blocks x;
-  //gives us: (y + blocks) % x == (y + blocks%x) % x
-  //and since blocks%x == 0,
-  //          (y + blocks) % x == y % x
-
-  //which makes R.H.S. of (1) and (2) same, and hence the goal G
-
+let reveal_init_blake2 a =
   ()
-#pop-options
-
-(* A useful lemma for all the operations that involve going from bytes to bits. *)
-let max_input_size_len (a: hash_alg{is_md a}):
-  Lemma (FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
-=
-  let open FStar.Mul in
-  (* Small trick to ensure proper normalization: depending on the algorithm
-   * there are two possible values for the max input length. However, we need
-   * to normalize the quantities on specific algorithm values, otherwise the
-   * prover fails. *)
-  let f a = Spec.Hash.Definitions.max_input_length a * 8 + 8 = pow2 (Spec.Hash.Definitions.len_length a * 8) in
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> assert_norm(f MD5)
-  | SHA2_384 | SHA2_512 -> assert_norm(f SHA2_384)

@@ -9,7 +9,6 @@ open EverCrypt.Helpers
 open EverCrypt.Error
 
 module AC = EverCrypt.AutoConfig2
-module SC = EverCrypt.StaticConfig
 module H = EverCrypt.Hash
 
 open Test.Vectors
@@ -149,22 +148,22 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     Spec.Agile.AEAD.is_supported_alg alg
   )
   then
-    C.Failure.failwith !$"Error: skipping a test_aead_st instance because algo unsupported etc.\n"
+    LowStar.Failure.failwith "Error: skipping a test_aead_st instance because algo unsupported etc.\n"
   else
   if not (key_len = aead_key_length32 alg)
-  then C.Failure.failwith !$"test_aead_st: not (key_len = aead_key_length32 alg)"
+  then LowStar.Failure.failwith "test_aead_st: not (key_len = aead_key_length32 alg)"
   else if not (tag_len = aead_tag_length32 alg)
-  then C.Failure.failwith !$"test_aead_st: not (tag_len = aead_tag_length32 alg)"
+  then LowStar.Failure.failwith "test_aead_st: not (tag_len = aead_tag_length32 alg)"
   else if not (ciphertext_len = plaintext_len)
-  then C.Failure.failwith !$"test_aead_st: not (ciphertext_len = plaintext_len)"
+  then LowStar.Failure.failwith "test_aead_st: not (ciphertext_len = plaintext_len)"
   else if not (aead_iv_length32 alg iv_len)
-  then C.Failure.failwith !$"test_aead_st: not (iv_len = aead_iv_length32 alg)"
+  then LowStar.Failure.failwith "test_aead_st: not (iv_len = aead_iv_length32 alg)"
   else if not (aad_len `U32.lte` max_len)
-  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` max_len)"
+  then LowStar.Failure.failwith "test_aead_st: not (aad_len `U32.lte` max_len)"
   else if not (aad_len `U32.lte` 2147483648ul)
-  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` 2147483648ul)"
+  then LowStar.Failure.failwith "test_aead_st: not (aad_len `U32.lte` 2147483648ul)"
   else if not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)
-  then C.Failure.failwith !$"test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)"
+  then LowStar.Failure.failwith "test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)"
   else begin
     push_frame();
     B.recall key;
@@ -174,7 +173,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     let st = B.alloca B.null 1ul in
     let e = EverCrypt.AEAD.create_in #alg HyperStack.root st key in
     begin match e with
-    | UnsupportedAlgorithm -> () // Non-fatal since, say, some CI machines may not have AESNI. Was: C.Failure.failwith !$"Failure: AEAD create_in UnsupportedAlgorithm"
+    | UnsupportedAlgorithm -> () // Non-fatal since, say, some CI machines may not have AESNI. Was: LowStar.Failure.failwith "Failure: AEAD create_in UnsupportedAlgorithm"
     | Success ->
       let h1 = HST.get () in
       let st = B.index st 0ul in
@@ -193,7 +192,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       EverCrypt.AEAD.frame_invariant B.loc_none st h1 h2;
 
       if EverCrypt.AEAD.(encrypt #(G.hide alg) st iv iv_len aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
-        C.Failure.failwith !$"Failure AEAD encrypt\n";
+        LowStar.Failure.failwith "Failure AEAD encrypt\n";
       let h3 = HST.get () in
       (match EverCrypt.AEAD.decrypt #(G.hide alg) st iv iv_len aad aad_len ciphertext' ciphertext_len tag' plaintext' with
       | Success ->
@@ -202,8 +201,8 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
         TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
         B.recall tag;
         TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
-      | _ -> 
-        C.Failure.failwith !$"Failure AEAD decrypt\n");
+      | _ ->
+        LowStar.Failure.failwith "Failure AEAD decrypt\n");
       pop_frame ()
     end;
     //EverCrypt.aead_free st;
@@ -279,6 +278,7 @@ let key_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.key_length a }) 
   | Spec.Agile.Cipher.AES128 -> 16ul
   | Spec.Agile.Cipher.AES256 -> 32ul
 
+(*
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   (counter: B.buffer UInt8.t)
@@ -310,15 +310,15 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   let open EverCrypt.CTR in
 
   if not (k_len = key_len a) then
-    C.Failure.failwith !$"test_ctr_st: not (key_len = key_len a)"
+    LowStar.Failure.failwith "test_ctr_st: not (key_len = key_len a)"
   else if not (counter_len = 4ul) then
-    C.Failure.failwith !$"test_ctr_st: not (counter_len = 4)"
+    LowStar.Failure.failwith "test_ctr_st: not (counter_len = 4)"
   else if not (nonce_bound a nonce_len) then
-    C.Failure.failwith !$"test_ctr_st: not (nonce_bound a nonce_len)"
+    LowStar.Failure.failwith "test_ctr_st: not (nonce_bound a nonce_len)"
   else if not (input_len = output_len) then
-    C.Failure.failwith !$"test_ctr_st: not (input_len = output_len)"
+    LowStar.Failure.failwith "test_ctr_st: not (input_len = output_len)"
   else if not (input_len `U32.gte` block_len a) then
-    C.Failure.failwith !$"test_ctr_st: not (input_len >= block_len a)"
+    LowStar.Failure.failwith "test_ctr_st: not (input_len >= block_len a)"
 
   else begin
     B.recall k;
@@ -329,7 +329,7 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
     // Might only be correct for AES
     let ctr = LowStar.Endianness.load32_be counter in
     if ctr = 0xfffffffful then
-      C.Failure.failwith !$"test_ctr_st: ctr = max_uint32"
+      LowStar.Failure.failwith "test_ctr_st: ctr = max_uint32"
     else begin
       push_frame ();
       let output' = B.alloca 0uy (block_len a) in
@@ -337,7 +337,7 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
       let s = B.alloca B.null 1ul in
       let r = EverCrypt.CTR.create_in a HyperStack.root s k nonce nonce_len ctr in
       if r <> Success then
-        C.Failure.failwith !$"test_ctr_st: create_in <> Success"
+        LowStar.Failure.failwith "test_ctr_st: create_in <> Success"
       else begin
         let s = B.index s 0ul in
         let input_block = B.sub input 0ul (block_len a) in
@@ -359,7 +359,6 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
     end
   end
 
-
 let rec test_chacha20_ctr_loop (vs: lbuffer chacha20_vector): St unit =
   let LB len vs = vs in
   if len <> 0ul then begin
@@ -373,7 +372,7 @@ let rec test_chacha20_ctr_loop (vs: lbuffer chacha20_vector): St unit =
     B.recall key;
     B.recall iv;
     if cipher_len <> plain_len then
-      failwith !$"chacha-ctr: cipher len and plain len don't match"
+      LowStar.Failure.failwith "chacha-ctr: cipher len and plain len don't match"
     else begin
       let plain = B.sub plain 0ul round_len in
       let cipher = B.sub cipher 0ul round_len in
@@ -413,8 +412,9 @@ let rec test_aes128_ctr_loop (i: U32.t): St unit =
 
 let test_aes128_ctr () : St unit =
   test_aes128_ctr_loop 0ul
+*)
 
-let rec test_rng (ctr:UInt32.t) : St unit = ()
+let test_rng (ctr:UInt32.t) : St unit = ()
   // AR: 09/07: B.alloca won't work, we don't know is_stack_region (get_tip h0)
   // let open FStar.Integers in
   // if ctr = 0ul then ()
@@ -544,15 +544,12 @@ let f_shaext : features = // [@inline_let] ({ f_none with features_shaext = true
 }
 
 inline_for_extraction
-type impl = | Hacl | Vale | OpenSSL | BCrypt
-
-inline_for_extraction
-let config = (impl & features)
+let config = features
 
 inline_for_extraction
 let check_static_config (c: config) : Stack bool (fun _ -> True) (fun _ _ _ -> True) =
   match c with
-  | (i, f) ->
+  | f ->
     AC.init ();
     let no_avx = not (AC.has_avx ()) in
     let no_avx2 = not (AC.has_avx2 ()) in
@@ -570,22 +567,14 @@ let check_static_config (c: config) : Stack bool (fun _ -> True) (fun _ _ _ -> T
     then
       false
     else
-      match i with
-      | Hacl -> SC.hacl
-      | Vale -> SC.vale
-      | OpenSSL -> SC.openssl
-      | BCrypt -> SC.bcrypt
+      true
 
 #push-options "--z3rlimit 16"
 
 inline_for_extraction
 let set_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   match c with
-  | (i, f) ->
-    (if i <> Hacl then AC.disable_hacl ());
-    (if i <> Vale then AC.disable_vale ());
-    (if i <> OpenSSL then AC.disable_openssl ());
-    (if i <> BCrypt then AC.disable_bcrypt ());
+  | f ->
     (if not f.features_avx then AC.disable_avx ());
     (if not f.features_avx2 then AC.disable_avx2 ());
     (if not f.features_bmi2 then AC.disable_bmi2 ());
@@ -598,13 +587,7 @@ let set_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
 inline_for_extraction
 let print_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   match c with
-  | (i, f) ->
-    begin match i with
-    | Hacl -> C.String.print !$"HACL"
-    | Vale -> C.String.print !$"Vale"
-    | OpenSSL -> C.String.print !$"OpenSSL"
-    | BCrypt -> C.String.print !$"BCrypt"
-    end;
+  | f ->
     (if f.features_avx then C.String.print !$" avx");
     (if f.features_avx2 then C.String.print !$" avx2");
     (if f.features_bmi2 then C.String.print !$" bmi2");
@@ -653,56 +636,56 @@ let ts_cons (c: config) (ts: test_set) : Tot test_set =
 inline_for_extraction
 noextract
 let poly1305_test_set =
-  (Hacl, f_avx2) `ts_cons` (
-  (Hacl, f_avx) `ts_cons` (
-  (Hacl, f_none) `ts_cons` (
-  (Vale, f_none) `ts_cons` (
+  f_avx2 `ts_cons` (
+  f_avx `ts_cons` (
+  f_none `ts_cons` (
+  f_none `ts_cons` (
   ts_nil))))
 
 inline_for_extraction
 noextract
 let curve25519_test_set =
-  (Hacl, f_bmi2 `f_concat` f_adx) `ts_cons` (
-  (Hacl, f_none) `ts_cons`
+  (f_bmi2 `f_concat` f_adx) `ts_cons` (
+  f_none `ts_cons`
   ts_nil)
 
 inline_for_extraction
 noextract
 let aes_gcm_test_set =
-  (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
+  (f_aesni `f_concat` f_avx) `ts_cons` (
   ts_nil)
 
 inline_for_extraction
 noextract
 let chacha20poly1305_test_set =
-  (Hacl, f_none) `ts_cons`
+  (f_none) `ts_cons`
   ts_nil
 
 inline_for_extraction
 noextract
 let hash_test_set =
-  (Vale, f_none) `ts_cons` (
-  (Vale, f_shaext) `ts_cons` (
-  (Hacl, f_none) `ts_cons` (
+  (f_none) `ts_cons` (
+  (f_shaext) `ts_cons` (
+  (f_none) `ts_cons` (
   ts_nil)))
 
 inline_for_extraction
 noextract
 let chacha20_test_set =
-  (Hacl, f_none) `ts_cons`
+  (f_none) `ts_cons`
   ts_nil
 
 inline_for_extraction
 noextract
 let aes128_ecb_test_set =
-  (Vale, f_aesni) `ts_cons` (
-  (Hacl, f_none) `ts_cons` (
+  (f_aesni) `ts_cons` (
+  (f_none) `ts_cons` (
   ts_nil))
 
 inline_for_extraction
 noextract
 let aes256_ecb_test_set =
-  (Hacl, f_none) `ts_cons` (
+  (f_none) `ts_cons` (
   ts_nil)
 
 (* Test bodies *)
@@ -729,6 +712,7 @@ let test_aes_gcm_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
     test_aes128_gcm ()
 
+(*
 inline_for_extraction
 noextract
 let test_aes_ctr_body (print: C.String.t -> St unit) : St unit =
@@ -740,6 +724,7 @@ noextract
 let test_chacha20_ctr_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> CTR (CHACHA20 vectors)\n";
     test_chacha20_ctr ()
+*)
 
 inline_for_extraction
 let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
@@ -757,8 +742,6 @@ let test_hash_body (print: C.String.t -> St unit) : St unit =
     test_hash hash_vectors_low;
     print !$"  >>>>>>>>> HMAC (Test.NoHeap)\n";
     test_hmac hmac_vectors_low;
-    print !$"  >>>>>>>>> HMAC_DRBG (Test.NoHeap)\n";
-    test_hmac_drbg hmac_drbg_vectors_low;
     print !$"  >>>>>>>>> HKDF (Test.NoHeap)\n";
     test_hkdf hkdf_vectors_low
 
@@ -781,6 +764,93 @@ let test_aes256_ecb_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AES256_ECB\n";
     test_aes_ecb AES256
 *)
+/// HMAC-DRBG
+/// ----
+
+#push-options "--z3rlimit 500"
+val test_one_hmac_drbg: hmac_drbg_vector -> ST unit (fun _ -> True) (fun _ _ _ -> True)
+let test_one_hmac_drbg vec =
+  let open Hacl.HMAC_DRBG in
+  let open EverCrypt.DRBG in
+  let open Lib.IntTypes in
+  let a,
+      LB entropy_input_len entropy_input,
+      LB nonce_len nonce,
+      LB personalization_string_len personalization_string,
+      LB entropy_input_reseed_len entropy_input_reseed,
+      LB additional_input_reseed_len additional_input_reseed,
+      (LB additional_input_1_len additional_input_1,
+       LB additional_input_2_len additional_input_2),
+      LB returned_bits_len returned_bits = vec
+  in
+  // EverCrypt.DRBG sources entropy internally.
+  // We don't use entropy_input, entropy_input_reseed, nonce, and returned_bits
+  // from the test vector, but we test safety of the API.
+  B.recall personalization_string;
+  B.recall additional_input_reseed;
+  B.recall additional_input_1;
+  B.recall additional_input_2;
+  if not (Spec.HMAC_DRBG.is_supported_alg a &&
+          0ul <. returned_bits_len &&
+          returned_bits_len <. 0xFFFFFFFFul)
+  then C.exit (-1l)
+  else
+    begin
+    push_frame();
+    let output = B.alloca (u8 0) returned_bits_len in
+    let st = EverCrypt.DRBG.create_in a HyperStack.root in
+    [@inline_let]
+    let a = Ghost.hide a in
+    let ok = instantiate a st personalization_string personalization_string_len in
+    if ok then
+      // We always provide prediction_resistance, so technically we don't need to reseed
+      let ok = reseed a st additional_input_reseed additional_input_reseed_len in
+      if ok then
+        let ok = generate a output st returned_bits_len
+                   additional_input_1 additional_input_1_len
+        in
+        if ok then
+          let ok = generate a output st returned_bits_len
+                     additional_input_2 additional_input_2_len
+          in
+          if ok then begin
+            uninstantiate a st;
+            TestLib.compare_and_print !$"HMAC-DRBG" output output returned_bits_len
+          end
+          else C.exit 1l
+        else C.exit 1l
+      else C.exit 1l
+    else C.exit 1l;
+    pop_frame()
+    end
+
+// Has to be recursive with a function pointer because C.Loops does not support ST. SIGH!!!
+let rec test_many_st_loop #a (i: UInt32.t)
+  (f: a -> ST unit (fun _ -> True) (fun _ _ _ -> True)) (vec: Test.Lowstarize.lbuffer a):
+  ST unit (fun _ -> True) (fun _ _ _ -> True)
+=
+  let Test.Lowstarize.LB len vs = vec in
+  if FStar.UInt32.gte i len then
+    ()
+  else begin
+    let open LowStar.BufferOps in
+    B.recall vs;
+    f vs.(i);
+    let i = i `FStar.UInt32.add` 1ul in
+    test_many_st_loop i f vec
+  end
+
+inline_for_extraction noextract
+let test_many_st #a (label: C.String.t)
+  (f: a -> ST unit (fun _ -> True) (fun _ _ _ -> True)) (vec: Test.Lowstarize.lbuffer a):
+  ST unit (fun _ -> True) (fun _ _ _ -> True)
+=
+  C.String.print label;
+  C.String.(print !$"\n");
+  test_many_st_loop 0ul f vec
+
+#pop-options
+let test_hmac_drbg = test_many_st !$"HMAC-DRBG" test_one_hmac_drbg
 
 (* Summary *)
 
@@ -795,13 +865,17 @@ let test_all () : St unit =
   print_sep ();
   aes_gcm_test_set          test_aes_gcm_body;
   print_sep ();
+  (*
   aes_gcm_test_set          test_aes_ctr_body;
   print_sep ();
   chacha20_test_set         test_chacha20_ctr_body;
   print_sep ();
+  *)
   chacha20poly1305_test_set test_chacha20poly1305_body;
   print_sep ();
   hash_test_set             test_hash_body;
+  print_sep ();
+  test_hmac_drbg            hmac_drbg_vectors_low;
   print_sep ();
   chacha20_test_set         test_chacha20_body(*;
   print_sep ();

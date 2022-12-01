@@ -22,6 +22,7 @@ let print_error = function
   | AuthenticationFailure -> "Authentication failure"
   | InvalidIVLength -> "Invalid IV length"
   | DecodeError -> "Decode error"
+  | MaximumLengthExceeded -> "Maximum length exceeded"
 
 let init_bytes len =
   let buf = Bytes.create len in

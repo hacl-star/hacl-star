@@ -254,4 +254,4 @@ L1:
   pop %r15
   ret
 
-
+.section .note.GNU-stack,"",%progbits

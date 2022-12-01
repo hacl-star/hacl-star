@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Poly1305_256.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 /* SNIPPET_START: Hacl_Streaming_Poly1305_256_poly1305_256_state */
 
 typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s
@@ -67,7 +66,10 @@ Hacl_Streaming_Poly1305_256_init(uint8_t *k, Hacl_Streaming_Poly1305_256_poly130
 
 /* SNIPPET_START: Hacl_Streaming_Poly1305_256_update */
 
-void
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
 Hacl_Streaming_Poly1305_256_update(
   Hacl_Streaming_Poly1305_256_poly1305_256_state *p,
   uint8_t *data,

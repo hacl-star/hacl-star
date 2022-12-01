@@ -24,7 +24,6 @@
 
 #include "Hacl_Bignum32.h"
 
-#include "internal/Hacl_Kremlib.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: Hacl_Bignum32_add */
@@ -43,7 +42,7 @@ of `len` unsigned 32-bit integers, i.e. uint32_t[len].
 /************************/
 
 
-/*
+/**
 Write `a + b mod 2 ^ (32 * len)` in `res`.
 
   This functions returns the carry.
@@ -59,7 +58,7 @@ uint32_t Hacl_Bignum32_add(uint32_t len, uint32_t *a, uint32_t *b, uint32_t *res
 
 /* SNIPPET_START: Hacl_Bignum32_sub */
 
-/*
+/**
 Write `a - b mod 2 ^ (32 * len)` in `res`.
 
   This functions returns the carry.
@@ -75,7 +74,7 @@ uint32_t Hacl_Bignum32_sub(uint32_t len, uint32_t *a, uint32_t *b, uint32_t *res
 
 /* SNIPPET_START: Hacl_Bignum32_add_mod */
 
-/*
+/**
 Write `(a + b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -94,7 +93,7 @@ void Hacl_Bignum32_add_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *b, 
 
 /* SNIPPET_START: Hacl_Bignum32_sub_mod */
 
-/*
+/**
 Write `(a - b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -113,7 +112,7 @@ void Hacl_Bignum32_sub_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *b, 
 
 /* SNIPPET_START: Hacl_Bignum32_mul */
 
-/*
+/**
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -131,7 +130,7 @@ void Hacl_Bignum32_mul(uint32_t len, uint32_t *a, uint32_t *b, uint32_t *res)
 
 /* SNIPPET_START: Hacl_Bignum32_sqr */
 
-/*
+/**
 Write `a * a` in `res`.
 
   The argument a is meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -226,7 +225,7 @@ bn_slow_precomp(
 
 /* SNIPPET_START: Hacl_Bignum32_mod */
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
@@ -276,7 +275,7 @@ bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
 
 /* SNIPPET_START: Hacl_Bignum32_mod_exp_vartime */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -323,7 +322,7 @@ Hacl_Bignum32_mod_exp_vartime(
 
 /* SNIPPET_START: Hacl_Bignum32_mod_exp_consttime */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -370,7 +369,7 @@ Hacl_Bignum32_mod_exp_consttime(
 
 /* SNIPPET_START: Hacl_Bignum32_mod_inv_prime_vartime */
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -435,11 +434,10 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
     uint32_t c1;
     if ((uint32_t)1U < len)
     {
-      uint32_t rLen = len - (uint32_t)1U;
       uint32_t *a1 = n + (uint32_t)1U;
       uint32_t *res1 = n2 + (uint32_t)1U;
       uint32_t c = c0;
-      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < (len - (uint32_t)1U) / (uint32_t)4U; i++)
       {
         uint32_t t1 = a1[(uint32_t)4U * i];
         uint32_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -454,7 +452,12 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
         uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
       }
-      for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+      for
+      (uint32_t
+        i = (len - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+        i
+        < len - (uint32_t)1U;
+        i++)
       {
         uint32_t t1 = a1[i];
         uint32_t *res_i = res1 + i;
@@ -492,7 +495,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
 /**********************************************/
 
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -509,9 +512,9 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
 *Hacl_Bignum32_mont_ctx_init(uint32_t len, uint32_t *n)
 {
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
-  uint32_t *r2 = KRML_HOST_CALLOC(len, sizeof (uint32_t));
+  uint32_t *r2 = (uint32_t *)KRML_HOST_CALLOC(len, sizeof (uint32_t));
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
-  uint32_t *n1 = KRML_HOST_CALLOC(len, sizeof (uint32_t));
+  uint32_t *n1 = (uint32_t *)KRML_HOST_CALLOC(len, sizeof (uint32_t));
   uint32_t *r21 = r2;
   uint32_t *n11 = n1;
   memcpy(n11, n, len * sizeof (uint32_t));
@@ -521,7 +524,10 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 res = { .len = len, .n = n11, .mu = mu, .r2 = r21 };
   KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
-  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32));
+  *buf =
+    (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
+      ));
   buf[0U] = res;
   return buf;
 }
@@ -530,7 +536,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
 
 /* SNIPPET_START: Hacl_Bignum32_mont_ctx_free */
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_Bignum32_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
@@ -549,7 +555,7 @@ void Hacl_Bignum32_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k)
 
 /* SNIPPET_START: Hacl_Bignum32_mod_precomp */
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
@@ -573,7 +579,7 @@ Hacl_Bignum32_mod_precomp(
 
 /* SNIPPET_START: Hacl_Bignum32_mod_exp_vartime_precomp */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -618,7 +624,7 @@ Hacl_Bignum32_mod_exp_vartime_precomp(
 
 /* SNIPPET_START: Hacl_Bignum32_mod_exp_consttime_precomp */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -663,7 +669,7 @@ Hacl_Bignum32_mod_exp_consttime_precomp(
 
 /* SNIPPET_START: Hacl_Bignum32_mod_inv_prime_vartime_precomp */
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -692,11 +698,10 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
   uint32_t c1;
   if ((uint32_t)1U < len1)
   {
-    uint32_t rLen = len1 - (uint32_t)1U;
     uint32_t *a1 = k1.n + (uint32_t)1U;
     uint32_t *res1 = n2 + (uint32_t)1U;
     uint32_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (len1 - (uint32_t)1U) / (uint32_t)4U; i++)
     {
       uint32_t t1 = a1[(uint32_t)4U * i];
       uint32_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -711,7 +716,12 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
       uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for
+    (uint32_t
+      i = (len1 - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
+      i
+      < len1 - (uint32_t)1U;
+      i++)
     {
       uint32_t t1 = a1[i];
       uint32_t *res_i = res1 + i;
@@ -744,7 +754,7 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
 /********************/
 
 
-/*
+/**
 Load a bid-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -768,7 +778,9 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), (len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U);
   uint32_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U, sizeof (uint32_t));
+  *res =
+    (uint32_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U,
+      sizeof (uint32_t));
   if (res == NULL)
   {
     return res;
@@ -795,7 +807,7 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
 
 /* SNIPPET_START: Hacl_Bignum32_new_bn_from_bytes_le */
 
-/*
+/**
 Load a little-endian bignum from memory.
 
   The argument b points to `len` bytes of valid memory.
@@ -819,7 +831,9 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), (len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U);
   uint32_t
-  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U, sizeof (uint32_t));
+  *res =
+    (uint32_t *)KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)4U + (uint32_t)1U,
+      sizeof (uint32_t));
   if (res == NULL)
   {
     return res;
@@ -848,7 +862,7 @@ uint32_t *Hacl_Bignum32_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
 
 /* SNIPPET_START: Hacl_Bignum32_bn_to_bytes_be */
 
-/*
+/**
 Serialize a bignum into big-endian memory.
 
   The argument b points to a bignum of ⌈len / 4⌉ size.
@@ -861,10 +875,9 @@ void Hacl_Bignum32_bn_to_bytes_be(uint32_t len, uint32_t *b, uint8_t *res)
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
-  uint32_t numb = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
-    store32_be(tmp + i * numb, b[bnLen - i - (uint32_t)1U]);
+    store32_be(tmp + i * (uint32_t)4U, b[bnLen - i - (uint32_t)1U]);
   }
   memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
 }
@@ -873,7 +886,7 @@ void Hacl_Bignum32_bn_to_bytes_be(uint32_t len, uint32_t *b, uint8_t *res)
 
 /* SNIPPET_START: Hacl_Bignum32_bn_to_bytes_le */
 
-/*
+/**
 Serialize a bignum into little-endian memory.
 
   The argument b points to a bignum of ⌈len / 4⌉ size.
@@ -903,7 +916,7 @@ void Hacl_Bignum32_bn_to_bytes_le(uint32_t len, uint32_t *b, uint8_t *res)
 /***************/
 
 
-/*
+/**
 Returns 2^32 - 1 if a < b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -924,7 +937,7 @@ uint32_t Hacl_Bignum32_lt_mask(uint32_t len, uint32_t *a, uint32_t *b)
 
 /* SNIPPET_START: Hacl_Bignum32_eq_mask */
 
-/*
+/**
 Returns 2^32 - 1 if a = b, otherwise returns 0.
 
  The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].

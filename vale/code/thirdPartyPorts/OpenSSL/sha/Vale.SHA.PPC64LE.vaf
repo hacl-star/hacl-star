@@ -1,0 +1,323 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsMem.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsStack.vaf"
+include "Vale.SHA.PPC64LE.Loop.vaf"
+
+include{:fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Properties"
+
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Def.Words.Seq_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Spec.SHA2"
+include{:fstar}{:open} "Vale.SHA.PPC64LE.SHA_helpers"
+include{:fstar}{:open} "Spec.Agile.Hash"
+include{:fstar}{:open} "Spec.Hash.PadFinish"
+include{:fstar}{:open} "Spec.Hash.Definitions"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Spec.Loops"
+include{:fstar}{:open} "Vale.SHA2.Wrapper"
+
+module Vale.SHA.PPC64LE
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Opaque_s
+open Vale.Def.Types_s
+open Vale.Def.Words_s
+open Vale.Def.Words.Seq_s
+open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.Stack_i
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsStack
+open Vale.PPC64LE.InsVector
+open Vale.SHA.PPC64LE.SHA_helpers
+open Spec.SHA2
+open Spec.Agile.Hash
+open Spec.Hash.PadFinish
+open Spec.Hash.Definitions
+open Spec.Loops
+open Vale.SHA.PPC64LE.Loop
+open Vale.SHA2.Wrapper
+#reset-options "--z3rlimit 2000"
+#endverbatim
+
+procedure Preamble(ghost ctx_b:buffer128)
+    {:quick}
+    lets
+        ctx @= r3;
+        a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
+        e_vec @= v20; f_vec @= v21; g_vec @= v22; h_vec @= v23;
+    reads
+        ctx; memLayout; heap0;
+    modifies
+        r10; a_vec; b_vec; c_vec; d_vec; e_vec; f_vec; g_vec; h_vec;
+    requires
+        validSrcAddrs128(heap0, ctx,  ctx_b,  2, memLayout, Secret);
+    ensures
+        let dcba := buffer128_read(ctx_b, 0, heap0) in
+        let hgfe := buffer128_read(ctx_b, 1, heap0) in
+        a_vec.hi3 == dcba.lo0 /\
+        b_vec.hi3 == dcba.lo1 /\
+        c_vec.hi3 == dcba.hi2 /\
+        d_vec.hi3 == dcba.hi3 /\
+        e_vec.hi3 == hgfe.lo0 /\
+        f_vec.hi3 == hgfe.lo1 /\
+        g_vec.hi3 == hgfe.hi2 /\
+        h_vec.hi3 == hgfe.hi3 /\
+        make_seperated_hash_quad32(a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec) == make_ordered_hash(dcba, hgfe);
+{
+    let dcba := buffer128_read(ctx_b, 0, heap0);
+    let hgfe := buffer128_read(ctx_b, 1, heap0);
+    let a := dcba.lo0;
+    let b := dcba.lo1;
+    let c := dcba.hi2;
+    let d := dcba.hi3;
+    let e := hgfe.lo0;
+    let f := hgfe.lo1;
+    let g := hgfe.hi2;
+    let h := hgfe.hi3;
+    LoadImm64(r10, 16);
+    Load128_word4_buffer(heap0, a_vec, ctx, Secret, ctx_b, 0);
+    Load128_word4_buffer_index(heap0, e_vec, ctx, r10, Secret, ctx_b, 1);
+
+    Vsldoi(b_vec, a_vec, a_vec, 4);
+    Vsldoi(c_vec, a_vec, a_vec, 8);
+    Vsldoi(d_vec, a_vec, a_vec, 12);
+    Vsldoi(f_vec, e_vec, e_vec, 4);
+    Vsldoi(g_vec, e_vec, e_vec, 8);
+    Vsldoi(h_vec, e_vec, e_vec, 12);
+
+    assert equal(#(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(make_seperated_hash(a, b, c, d, e, f, g, h)), #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(make_ordered_hash(dcba, hgfe)));
+    assert equal(#(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(make_seperated_hash(a, b, c, d, e, f, g, h)), #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(make_seperated_hash_quad32(a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec)));
+}
+
+procedure Epilogue(ghost ctx_b:buffer128)
+    {:quick}
+    lets
+        ctx @= r3;
+        a_vec @= v16; b_vec @= v17; c_vec @= v18; d_vec @= v19;
+        e_vec @= v20; f_vec @= v21; g_vec @= v22; h_vec @= v23;
+    reads
+        ctx; b_vec; d_vec; f_vec; h_vec; memLayout;
+    modifies
+        r10; a_vec; c_vec; e_vec; g_vec; heap0;
+    requires
+        validDstAddrs128(heap0, ctx,  ctx_b,  2, memLayout, Secret);
+    ensures
+        let dcba := old(Mkfour(a_vec.hi3, b_vec.hi3, c_vec.hi3, d_vec.hi3)) in
+        let hgfe := old(Mkfour(e_vec.hi3, f_vec.hi3, g_vec.hi3, h_vec.hi3)) in
+        dcba == buffer128_read(ctx_b, 0, heap0) /\
+        hgfe == buffer128_read(ctx_b, 1, heap0) /\
+        old(make_seperated_hash_quad32(a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec)) == make_ordered_hash(dcba, hgfe);
+
+        modifies_buffer128(ctx_b, old(heap0), heap0);
+{
+    Vmrghw(a_vec, a_vec, b_vec);
+    Vmrghw(c_vec, c_vec, d_vec);
+    Xxmrghd(a_vec, a_vec, c_vec);
+
+    Vmrghw(e_vec, e_vec, f_vec);
+    Vmrghw(g_vec, g_vec, h_vec);
+    Xxmrghd(e_vec, e_vec, g_vec);
+
+    LoadImm64(r10, 16);
+    Store128_word4_buffer(heap0, a_vec, ctx, Secret, ctx_b, 0);
+    Store128_word4_buffer_index(heap0, e_vec, ctx, r10, Secret, ctx_b, 1);
+    let dcba := buffer128_read(ctx_b, 0, heap0);
+    let hgfe := buffer128_read(ctx_b, 1, heap0);
+    assert equal(#(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(old(make_seperated_hash_quad32(a_vec, b_vec, c_vec, d_vec, e_vec, f_vec, g_vec, h_vec))), #(seq(Vale.SHA.PPC64LE.SHA_helpers.word))(make_ordered_hash(dcba, hgfe)));
+}
+
+procedure Sha_update(
+        ghost ctx_b:buffer128,
+        ghost in_b:buffer128,
+        ghost k_b:buffer128)
+    {:quick}
+    lets
+        ctx @= r3; inp @= r4; num @= r5; tbl @= r6;
+    reads
+        ctx;
+    modifies
+        inp; num; tbl; r10; cr0;
+        v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; v16; v17; v18; v19; v20; v21; v22; v23; v24; v25; v26; v28; v29; v30; v31;
+        heap0; memLayout;
+    requires
+        validDstAddrs128(heap0, ctx,  ctx_b,  2, memLayout, Secret);
+        validSrcAddrs128(heap0, inp,   in_b,  4*num, memLayout, Secret);
+        validSrcAddrs128(heap0, tbl,    k_b, 16, memLayout, Secret);
+        validSrcAddrsOffset128(heap0, tbl, k_b, 13, 3, memLayout, Secret);
+        inp + 0x40*num < pow2_64;
+        tbl + 256 < pow2_64;
+        buffers_disjoint128(ctx_b, in_b);
+
+        k_reqs(buffer128_as_seq(heap0, k_b));
+    ensures
+        inp == old(inp) + 0x40*old(num);
+        let dcba  := old(buffer128_read(ctx_b, 0, heap0)) in
+        let hgfe  := old(buffer128_read(ctx_b, 1, heap0)) in
+        let dcba' :=     buffer128_read(ctx_b, 0, heap0)  in
+        let hgfe' :=     buffer128_read(ctx_b, 1, heap0)  in
+
+        let input_LE := slice(buffer128_as_seq(heap0, in_b), 0, 4*old(num)) in
+        let input_BE := reverse_bytes_quad32_seq(input_LE) in
+        make_ordered_hash(dcba', hgfe') == update_multi_quads(input_BE, make_ordered_hash(dcba, hgfe));
+        
+        modifies_buffer128(ctx_b, old(heap0), heap0);
+{
+    Preamble(ctx_b);
+    Loop(in_b, k_b);
+    Epilogue(ctx_b);
+}
+
+procedure Sha_update_bytes(
+        ghost ctx_b:buffer128,
+        ghost in_b:buffer128,
+        ghost k_b:buffer128)
+    {:quick}
+    lets
+        ctx @= r3; inp @= r4; num @= r5; tbl @= r6;
+    reads
+        ctx;
+    modifies
+        inp; num; tbl; r10; cr0;
+        v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; v16; v17; v18; v19; v20; v21; v22; v23; v24; v25; v26; v28; v29; v30; v31;
+        heap0; memLayout;
+    requires
+        validSrcAddrs128(heap0, inp,   in_b,  4*num, memLayout, Secret);
+        validDstAddrs128(heap0, ctx,  ctx_b,  2, memLayout, Secret);
+        validSrcAddrs128(heap0, tbl,    k_b, 16, memLayout, Secret);
+        validSrcAddrsOffset128(heap0, tbl, k_b, 13, 3, memLayout, Secret);
+        inp + 0x40*num < pow2_64;
+        tbl + 256 < pow2_64;
+        buffers_disjoint128(ctx_b, in_b);
+        buffer_length(ctx_b) == 2;
+        buffer_length(in_b) == 4*num;
+
+        k_reqs(buffer128_as_seq(heap0, k_b));
+    ensures
+        inp == old(inp) + 0x40*old(num);
+
+        let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, ctx_b))));
+        let hash_out :=     le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, ctx_b)));
+
+        let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b))) in
+        length(input_LE) % 64 == 0 /\
+        hash_out == update_multi_opaque_vale(hash_in, input_LE);
+
+        // Framing
+        modifies_buffer128(ctx_b, old(heap0), heap0);
+{
+    Sha_update(ctx_b, in_b, k_b);
+    let old_ctx:seq(four(nat32)) := old(buffer128_as_seq(heap0, ctx_b));
+    let new_ctx:seq(four(nat32)) :=     buffer128_as_seq(heap0, ctx_b);
+    lemma_hash_to_bytes(old_ctx);
+    lemma_hash_to_bytes(new_ctx);
+    let hash_in  := le_bytes_to_hash(le_seq_quad32_to_bytes(old_ctx));
+    let hash_out := le_bytes_to_hash(le_seq_quad32_to_bytes(new_ctx));
+
+    let input_LE := slice(buffer128_as_seq(heap0, in_b), 0, 4*old(num));
+    let input_BE := reverse_bytes_quad32_seq(input_LE);
+    assert hash_out == update_multi_quads(input_BE, hash_in);
+    lemma_update_multi_equiv_vale(hash_in, hash_out, input_LE, input_BE, le_seq_quad32_to_bytes(input_LE),
+                                  seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(input_LE)));
+}
+
+procedure Sha_update_bytes_main(
+        ghost ctx_b:buffer128,
+        ghost in_b:buffer128,
+        ghost num_val:nat64,
+        ghost k_b:buffer128)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    lets
+        ctx @= r3; inp @= r4; num @= r5; tbl @= r6;
+    reads
+        ctx;
+    modifies
+        r1; inp; num; tbl; r10; cr0;
+        v0; v1; v2; v3; v4; v5; v6; v7; v8; v9; v10; v11; v12; v13; v14; v15; v16; v17; v18; v19; v20; v21; v22; v23; v24; v25; v26; v28; v29; v30; v31;
+        heap0; memLayout; stack; stackTaint;
+    requires
+        r1 == init_r1(stack);
+        is_initial_heap(memLayout, mem);
+        locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(in_b))) \/ ctx_b == in_b;
+        locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(k_b))) \/ ctx_b == k_b;
+        locs_disjoint(list(loc_buffer(in_b), loc_buffer(k_b))) \/ in_b == k_b;
+        validDstAddrs128(mem, ctx,  ctx_b,  2, memLayout, Secret);
+        validSrcAddrs128(mem, inp,   in_b,  4*num, memLayout, Secret);
+        validSrcAddrs128(mem, tbl,    k_b, 16, memLayout, Secret);
+        validSrcAddrsOffset128(mem, tbl, k_b, 13, 3, memLayout, Secret);
+        num_val == num;
+        inp + 0x40*num < pow2_64;
+        tbl + 256 < pow2_64;
+        buffers_disjoint128(ctx_b, in_b);
+        buffer_length(ctx_b) == 2;
+        buffer_length(in_b) == 4 * num;
+        k_reqs(buffer128_as_seq(mem, k_b));
+    ensures
+        let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
+        let hash_out :=     le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b)));
+
+        let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b))) in
+        length(input_LE) % 64 == 0 /\
+        hash_out == update_multi_transparent(hash_in, #(Vale.SHA.PPC64LE.SHA_helpers.bytes_blocks)(input_LE));
+        
+        modifies_mem(loc_buffer(ctx_b), old(mem), mem);
+        r1 == old(r1);
+        v20 == old(v20) /\ v21 == old(v21) /\ v22 == old(v22) /\
+        v23 == old(v23) /\ v24 == old(v24) /\ v25 == old(v25) /\
+        v26 == old(v26) /\ v28 == old(v28) /\ v29 == old(v29) /\
+        v30 == old(v30) /\ v31 == old(v31);
+{
+    CreateHeaplets(list(
+        declare_buffer128(in_b, 0, Secret, Immutable),
+        declare_buffer128(k_b, 0, Secret, Immutable),
+        declare_buffer128(ctx_b, 0, Secret, Mutable)));
+
+    Alloc_stack(16*11);
+    Store_stack128(v20, 16*0);
+    Store_stack128(v21, 16*1);
+    Store_stack128(v22, 16*2);
+    Store_stack128(v23, 16*3);
+    Store_stack128(v24, 16*4);
+    Store_stack128(v25, 16*5);
+    Store_stack128(v26, 16*6);
+    Store_stack128(v28, 16*7);
+    Store_stack128(v29, 16*8);
+    Store_stack128(v30, 16*9);
+    Store_stack128(v31, 16*10);
+    Sha_update_bytes(ctx_b, in_b, k_b);
+    Load_stack128(v20, 16*0);
+    Load_stack128(v21, 16*1);
+    Load_stack128(v22, 16*2);
+    Load_stack128(v23, 16*3);
+    Load_stack128(v24, 16*4);
+    Load_stack128(v25, 16*5);
+    Load_stack128(v26, 16*6);
+    Load_stack128(v28, 16*7);
+    Load_stack128(v29, 16*8);
+    Load_stack128(v30, 16*9);
+    Load_stack128(v31, 16*10);
+    Dealloc_stack(16*11);
+
+    let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, ctx_b))));
+    let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b)));
+    lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);
+
+    DestroyHeaplets();
+}

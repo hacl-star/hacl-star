@@ -23,11 +23,16 @@ val hash_len: a:Hash.algorithm{S.hash_is_supported a} -> Tot (res:size_t{v res =
 let hash_len a =
   Hacl.Hash.Definitions.hash_len a
 
+inline_for_extraction noextract
+let max_input_length = Hash.max_input_length
+
+inline_for_extraction noextract
+let less_than_max_input_length = Spec.Hash.Definitions.less_than_max_input_length
 
 val hash:
     a:Hash.algorithm{S.hash_is_supported a}
   -> mHash:lbuffer uint8 (hash_len a)
-  -> msgLen:size_t{v msgLen <= Hash.max_input_length a}
+  -> msgLen:size_t{v msgLen `less_than_max_input_length` a}
   -> msg:lbuffer uint8 msgLen ->
   Stack unit
   (requires fun h -> live h mHash /\ live h msg /\ disjoint msg mHash)
@@ -69,7 +74,7 @@ let counter_to_bytes i c =
 inline_for_extraction noextract
 val mgf_hash_f:
     a:Hash.algorithm{S.hash_is_supported a}
-  -> len:size_t{v len + 4 <= max_size_t /\ v len + 4 <= Hash.max_input_length a}
+  -> len:size_t{v len + 4 <= max_size_t /\ (v len + 4) `less_than_max_input_length` a}
   -> i:size_t
   -> mgfseed_counter:lbuffer uint8 (len +! 4ul)
   -> block:lbuffer uint8 (hash_len a) ->
@@ -90,7 +95,7 @@ let mgf_hash_f a len i mgfseed_counter block =
 
 inline_for_extraction noextract
 let mgf_hash_st (a:Hash.algorithm{S.hash_is_supported a}) =
-  len:size_t{v len + 4 <= max_size_t /\ v len + 4 <= Hash.max_input_length a}
+  len:size_t{v len + 4 <= max_size_t /\ (v len + 4) `less_than_max_input_length` a}
   -> mgfseed:lbuffer uint8 len
   -> maskLen:size_t{0 < v maskLen /\ S.blocks (v maskLen) (Hash.hash_length a) * Hash.hash_length a < pow2 32}
   -> res:lbuffer uint8 maskLen ->
@@ -99,6 +104,7 @@ let mgf_hash_st (a:Hash.algorithm{S.hash_is_supported a}) =
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.mgf_hash a (v len) (as_seq h0 mgfseed) (v maskLen))
 
+#push-options "--z3rlimit 100"
 val mgf_hash: a:Hash.algorithm{S.hash_is_supported a} -> mgf_hash_st a
 [@CInline]
 let mgf_hash a len mgfseed maskLen res =
@@ -122,3 +128,4 @@ let mgf_hash a len mgfseed maskLen res =
       mgf_hash_f a len i mgfseed_counter acc_i);
   copy res (sub acc 0ul maskLen);
   pop_frame ()
+#pop-options

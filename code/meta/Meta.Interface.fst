@@ -1,5 +1,6 @@
 module Meta.Interface
 
+open FStar.List.Tot
 open FStar.Reflection
 open FStar.Tactics
 
@@ -120,8 +121,8 @@ let rec push_pre (inv_bv: bv) (t: term): Tac term =
               C_Eff us e a args
             else
               fail ("rewritten function has an unknown effect: " ^ string_of_name e)
-        | C_Total t decr ->
-            C_Total (push_pre inv_bv t) decr
+        | C_Total t u decr ->
+            C_Total (push_pre inv_bv t) u decr
         | _ ->
             fail ("rewritten type is neither a Tot or a stateful arrow: " ^ term_to_string t)
       in
@@ -132,11 +133,12 @@ let rec push_pre (inv_bv: bv) (t: term): Tac term =
 
 let rec to_reduce t: Tac _ =
   match fst (collect_app t) with
+  | Tv_UInst fv _
   | Tv_FVar fv ->
       [ fv_to_string fv ]
   | Tv_Arrow bv c ->
       begin match inspect_comp c with
-      | C_Total t _ ->
+      | C_Total t _ _ ->
           to_reduce t
       | _ ->
           []
@@ -169,7 +171,7 @@ let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv
       print (st.indent ^ "  Found index of type " ^ term_to_string t);
       let f_typ =
         match inspect_comp c with
-        | C_Total t _ ->
+        | C_Total t _ _ ->
             // ... -> ... (requires p) ...
             let t = push_pre inv_bv t in
             // fun p:Type. ... -> ... (requires p) ...
@@ -261,11 +263,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
               fail (string_of_name f_name ^ "is expected to be a function!")
         in
 
-        let inv_bv: bv = pack_bv ({
-          bv_ppname = "p";
-          bv_index = 355;
-          bv_sort = `Type0;
-        }) in
+        let inv_bv: bv = fresh_bv_named "p" (`Type0) in
 
         let st, new_body, new_args, new_sigelts =
           match index_bv with
@@ -402,11 +400,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
 
       | _ ->
           if has_attr f (`Meta.Attribute.specialize) then
-            let inv_bv: bv = pack_bv ({
-              bv_ppname = "p";
-              bv_index = 355;
-              bv_sort = `Type0;
-            }) in
+            let inv_bv: bv = fresh_bv_named "p" (`Type0) in
 
             // Assuming that this is a val, but we can't inspect it. Let's work around this.
             let t = pack (Tv_FVar (pack_fv f_name)) in
@@ -466,6 +460,7 @@ and visit_body (t_i: term)
 
       // If this is an application ...
       begin match inspect e with
+      | Tv_UInst fv _
       | Tv_FVar fv ->
           // ... of a top-level name ...
           let fv = inspect_fv fv in
@@ -514,11 +509,7 @@ and visit_body (t_i: term)
                       if needs_index then pack (Tv_App typ (must index_arg, Q_Implicit)) else typ
                     in
                     let typ = pack (Tv_App typ (inv_bv, Q_Explicit)) in
-                    let bv: bv = pack_bv ({
-                      bv_ppname = "arg_" ^ string_of_name name;
-                      bv_index = 42;
-                      bv_sort = typ
-                    }) in
+                    let bv: bv = fresh_bv_named ("arg_" ^ string_of_name name) typ in
                     (pack (Tv_Var bv), Q_Explicit), (name, bv) :: bvs
               in
 
@@ -557,7 +548,7 @@ and visit_body (t_i: term)
           st, e, bvs, ses
       end
 
-  | Tv_Var _ | Tv_BVar _ | Tv_FVar _
+  | Tv_Var _ | Tv_BVar _ | Tv_FVar _ | Tv_UInst _ _
   | Tv_Const _ ->
       st, e, bvs, []
 
@@ -579,14 +570,14 @@ and visit_body (t_i: term)
       let e = pack (Tv_Let r attrs bv e1 e2) in
       st, e, bvs, ses @ ses'
 
-  | Tv_AscribedT e t tac ->
+  | Tv_AscribedT e t tac use_eq ->
       let st, e, bvs, ses = visit_body t_i index_bv inv_bv st bvs e in
-      let e = pack (Tv_AscribedT e t tac) in
+      let e = pack (Tv_AscribedT e t tac use_eq) in
       st, e, bvs, ses
 
-  | Tv_AscribedC e c tac ->
+  | Tv_AscribedC e c tac use_eq ->
       let st, e, bvs, ses = visit_body t_i index_bv inv_bv st bvs e in
-      let e = pack (Tv_AscribedC e c tac) in
+      let e = pack (Tv_AscribedC e c tac use_eq) in
       st, e, bvs, ses
 
   | Tv_Arrow _ _
@@ -601,6 +592,7 @@ and visit_body (t_i: term)
 let specialize (t_i: term) (names: list term): Tac decls =
   let names = map (fun name ->
     match inspect name with
+    | Tv_UInst fv _
     | Tv_FVar fv -> inspect_fv fv
     | _ -> fail "error: argument to specialize is not a top-level name"
   ) names in

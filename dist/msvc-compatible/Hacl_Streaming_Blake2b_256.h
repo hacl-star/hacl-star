@@ -30,18 +30,14 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Streaming_Blake2.h"
-#include "Hacl_Spec.h"
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2b_256.h"
-#include "Hacl_Hash_Blake2.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_block_state_s
 {
   Lib_IntVector_Intrinsics_vec256 *fst;
@@ -57,13 +53,13 @@ typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s
 }
 Hacl_Streaming_Blake2b_256_blake2b_256_state;
 
-/*
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in();
 
-/*
+/**
   (Re-)initialization function when there is no key
 */
 void
@@ -71,17 +67,17 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
   Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 );
 
-/*
-  Update function when there is no key
+/**
+  Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-void
+uint32_t
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
   Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *data,
   uint32_t len
 );
 
-/*
+/**
   Finish function when there is no key
 */
 void
@@ -90,7 +86,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
   uint8_t *dst
 );
 
-/*
+/**
   Free state function when there is no key
 */
 void

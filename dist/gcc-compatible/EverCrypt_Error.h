@@ -30,34 +30,22 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 #define EverCrypt_Error_Success 0
 #define EverCrypt_Error_UnsupportedAlgorithm 1
 #define EverCrypt_Error_InvalidKey 2
 #define EverCrypt_Error_AuthenticationFailure 3
 #define EverCrypt_Error_InvalidIVLength 4
 #define EverCrypt_Error_DecodeError 5
+#define EverCrypt_Error_MaximumLengthExceeded 6
 
 typedef uint8_t EverCrypt_Error_error_code;
-
-bool EverCrypt_Error_uu___is_Success(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_UnsupportedAlgorithm(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_InvalidKey(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_AuthenticationFailure(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_InvalidIVLength(EverCrypt_Error_error_code projectee);
-
-bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee);
 
 #if defined(__cplusplus)
 }

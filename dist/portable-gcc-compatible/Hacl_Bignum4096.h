@@ -30,16 +30,15 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Bignum_Base.h"
-#include "Hacl_Bignum256.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include "Hacl_Bignum.h"
+
 /* SNIPPET_START: Hacl_Bignum4096_add */
 
 /*******************************************************************************
@@ -68,7 +67,7 @@ have the ability to switch easily to a 32-bit optimized version in the future.
 /************************/
 
 
-/*
+/**
 Write `a + b mod 2^4096` in `res`.
 
   This functions returns the carry.
@@ -81,7 +80,7 @@ uint64_t Hacl_Bignum4096_add(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /* SNIPPET_START: Hacl_Bignum4096_sub */
 
-/*
+/**
 Write `a - b mod 2^4096` in `res`.
 
   This functions returns the carry.
@@ -94,7 +93,7 @@ uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /* SNIPPET_START: Hacl_Bignum4096_add_mod */
 
-/*
+/**
 Write `(a + b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -110,7 +109,7 @@ void Hacl_Bignum4096_add_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *re
 
 /* SNIPPET_START: Hacl_Bignum4096_sub_mod */
 
-/*
+/**
 Write `(a - b) mod n` in `res`.
 
   The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -126,7 +125,7 @@ void Hacl_Bignum4096_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *re
 
 /* SNIPPET_START: Hacl_Bignum4096_mul */
 
-/*
+/**
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -138,7 +137,7 @@ void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /* SNIPPET_START: Hacl_Bignum4096_sqr */
 
-/*
+/**
 Write `a * a` in `res`.
 
   The argument a is meant to be a 4096-bit bignum, i.e. uint64_t[64].
@@ -150,7 +149,7 @@ void Hacl_Bignum4096_sqr(uint64_t *a, uint64_t *res);
 
 /* SNIPPET_START: Hacl_Bignum4096_mod */
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 8192-bit bignum, i.e. uint64_t[128].
@@ -167,7 +166,7 @@ bool Hacl_Bignum4096_mod(uint64_t *n, uint64_t *a, uint64_t *res);
 
 /* SNIPPET_START: Hacl_Bignum4096_mod_exp_vartime */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -200,7 +199,7 @@ Hacl_Bignum4096_mod_exp_vartime(
 
 /* SNIPPET_START: Hacl_Bignum4096_mod_exp_consttime */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -233,7 +232,7 @@ Hacl_Bignum4096_mod_exp_consttime(
 
 /* SNIPPET_START: Hacl_Bignum4096_mod_inv_prime_vartime */
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -260,7 +259,7 @@ bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *r
 /**********************************************/
 
 
-/*
+/**
 Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be a 4096-bit bignum, i.e. uint64_t[64].
@@ -279,7 +278,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum4096_mont_ctx_init(uint64
 
 /* SNIPPET_START: Hacl_Bignum4096_mont_ctx_free */
 
-/*
+/**
 Deallocate the memory previously allocated by Hacl_Bignum4096_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
@@ -290,7 +289,7 @@ void Hacl_Bignum4096_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k
 
 /* SNIPPET_START: Hacl_Bignum4096_mod_precomp */
 
-/*
+/**
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 8192-bit bignum, i.e. uint64_t[128].
@@ -308,7 +307,7 @@ Hacl_Bignum4096_mod_precomp(
 
 /* SNIPPET_START: Hacl_Bignum4096_mod_exp_vartime_precomp */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -340,7 +339,7 @@ Hacl_Bignum4096_mod_exp_vartime_precomp(
 
 /* SNIPPET_START: Hacl_Bignum4096_mod_exp_consttime_precomp */
 
-/*
+/**
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -372,7 +371,7 @@ Hacl_Bignum4096_mod_exp_consttime_precomp(
 
 /* SNIPPET_START: Hacl_Bignum4096_mod_inv_prime_vartime_precomp */
 
-/*
+/**
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -401,7 +400,7 @@ Hacl_Bignum4096_mod_inv_prime_vartime_precomp(
 /********************/
 
 
-/*
+/**
 Load a bid-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
@@ -418,7 +417,7 @@ uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b);
 
 /* SNIPPET_START: Hacl_Bignum4096_new_bn_from_bytes_le */
 
-/*
+/**
 Load a little-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
@@ -435,7 +434,7 @@ uint64_t *Hacl_Bignum4096_new_bn_from_bytes_le(uint32_t len, uint8_t *b);
 
 /* SNIPPET_START: Hacl_Bignum4096_bn_to_bytes_be */
 
-/*
+/**
 Serialize a bignum into big-endian memory.
 
   The argument b points to a 4096-bit bignum.
@@ -447,7 +446,7 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 
 /* SNIPPET_START: Hacl_Bignum4096_bn_to_bytes_le */
 
-/*
+/**
 Serialize a bignum into little-endian memory.
 
   The argument b points to a 4096-bit bignum.
@@ -465,7 +464,7 @@ void Hacl_Bignum4096_bn_to_bytes_le(uint64_t *b, uint8_t *res);
 /***************/
 
 
-/*
+/**
 Returns 2^64 - 1 if a < b, otherwise returns 0.
 
  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -476,7 +475,7 @@ uint64_t Hacl_Bignum4096_lt_mask(uint64_t *a, uint64_t *b);
 
 /* SNIPPET_START: Hacl_Bignum4096_eq_mask */
 
-/*
+/**
 Returns 2^64 - 1 if a = b, otherwise returns 0.
 
  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].

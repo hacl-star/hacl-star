@@ -25,14 +25,14 @@
 #include "Hacl_Curve25519_64.h"
 
 #include "internal/Vale.h"
+#include "config.h"
 #include "curve25519-inline.h"
-static inline uint64_t add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
+static inline void add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
   #if HACL_CAN_COMPILE_INLINE_ASM
-  return add_scalar(out, f1, f2);
+  add_scalar(out, f1, f2);
   #else
-  uint64_t scrut = add_scalar_e(out, f1, f2);
-  return scrut;
+  uint64_t uu____0 = add_scalar_e(out, f1, f2);
   #endif
 }
 
@@ -285,11 +285,11 @@ static void store_felem(uint64_t *b, uint64_t *f)
   uint64_t f30 = f[3U];
   uint64_t top_bit0 = f30 >> (uint32_t)63U;
   f[3U] = f30 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t carry = add_scalar0(f, f, (uint64_t)19U * top_bit0);
+  add_scalar0(f, f, (uint64_t)19U * top_bit0);
   uint64_t f31 = f[3U];
   uint64_t top_bit = f31 >> (uint32_t)63U;
   f[3U] = f31 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t carry0 = add_scalar0(f, f, (uint64_t)19U * top_bit);
+  add_scalar0(f, f, (uint64_t)19U * top_bit);
   uint64_t f0 = f[0U];
   uint64_t f1 = f[1U];
   uint64_t f2 = f[2U];
@@ -323,25 +323,34 @@ static void encode_point(uint8_t *o, uint64_t *i)
   finv(tmp, z, tmp_w);
   fmul0(tmp, tmp, x, tmp_w);
   store_felem(u64s, tmp);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
-    store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store64_le(o + i0 * (uint32_t)8U, u64s[i0]););
 }
 
+/**
+Compute the scalar multiple of a point.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where the public point is read from.
+*/
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init[8U] = { 0U };
   uint64_t tmp[4U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t *os = tmp;
     uint8_t *bj = pub + i * (uint32_t)8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i] = x;
-  }
+    os[i] = x;);
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (uint64_t)0x7fffffffffffffffU;
   uint64_t *x = init;
@@ -358,6 +367,14 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
   encode_point(out, init);
 }
 
+/**
+Calculate a public point from a secret/private key.
+
+This computes a scalar multiplication of the secret/private key with the curve's basepoint.
+
+@param pub Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+*/
 void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   uint8_t basepoint[32U] = { 0U };
@@ -370,6 +387,13 @@ void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv)
   Hacl_Curve25519_64_scalarmult(pub, priv, basepoint);
 }
 
+/**
+Execute the diffie-hellmann key exchange.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where **their** public point is read from.
+*/
 bool Hacl_Curve25519_64_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint8_t zeros[32U] = { 0U };

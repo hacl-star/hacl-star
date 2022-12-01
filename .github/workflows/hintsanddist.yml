@@ -1,0 +1,64 @@
+name: regenerate hints and dist
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  regenerate-hints-and-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: delete old files
+        run: git rm -r hints dist/*/*
+
+      - name: download new files
+        run: |
+          STATUS_SUCCEEDED=0 # from https://github.com/NixOS/hydra/blob/cf9f38e43fd81f9298e3f2ff50c8a6ee0acc3af0/hydra-api.yaml#L927-L941
+          baseUrl="https://everest-ci.paris.inria.fr"
+          latestFinishedEval=$(curl -sLH 'Content-Type: application/json' "$baseUrl/jobset/hacl-star/branch-main/latest-eval")
+
+          rev=$(echo "$latestFinishedEval" | jq -r '.flake | split("/") | last')
+          id=$(echo "$latestFinishedEval" | jq -r '.id')
+
+          [[ "$rev" == "$(git rev-parse HEAD)" ]] || {
+              echo "The latest evaluation on the CI doesn't correspond to the latest commit."
+              exit 1
+          }
+
+          buildUrl="$baseUrl/eval/$id/job/hacl-build-products.x86_64-linux"
+          buildInfo=$(curl -sLH 'Content-Type: application/json' "$buildUrl")
+
+          # Check wether the build was successful
+          [[ "$(echo "$buildInfo" | jq -r '.buildstatus')" == "$STATUS_SUCCEEDED" ]] || {
+              echo "The latest evaluation wasn't successful. Aborting."
+              exit 2
+          }
+
+          installTar () {
+              curl -sL "$buildUrl/download-by-type/file/$1" | tar -xv
+          }
+
+          installTar "hints"
+          installTar "dist"
+
+      - name: commit changes
+        run: |
+          git config --local user.name "Hacl Bot"
+          git config --local user.email "hacl-star@mailo.com"
+          git add hints dist
+          git commit -m "[CI] regenerate hints and dist"
+
+      - name: avoid trivial changes
+        run: |
+          [[ 1 -lt $(git diff --compact-summary HEAD~.. | grep -v INFO.txt | wc -l) ]]
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.HACL_BOT }}
+          branch: "hints-and-dist-main"
+          title: "[CI] regenerate hints and dist"

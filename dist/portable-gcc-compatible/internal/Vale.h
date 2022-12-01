@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 /* SNIPPET_START: add_scalar_e */
 
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
@@ -133,48 +132,6 @@ extern uint64_t check_avx_xcr0();
 extern uint64_t check_avx512_xcr0();
 
 /* SNIPPET_END: check_avx512_xcr0 */
-
-/* SNIPPET_START: cswap2_e */
-
-extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);
-
-/* SNIPPET_END: cswap2_e */
-
-/* SNIPPET_START: fsqr_e */
-
-extern uint64_t fsqr_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
-/* SNIPPET_END: fsqr_e */
-
-/* SNIPPET_START: fsqr2_e */
-
-extern uint64_t fsqr2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
-/* SNIPPET_END: fsqr2_e */
-
-/* SNIPPET_START: fmul_e */
-
-extern uint64_t fmul_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
-
-/* SNIPPET_END: fmul_e */
-
-/* SNIPPET_START: fmul2_e */
-
-extern uint64_t fmul2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
-
-/* SNIPPET_END: fmul2_e */
-
-/* SNIPPET_START: fmul_scalar_e */
-
-extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
-
-/* SNIPPET_END: fmul_scalar_e */
-
-/* SNIPPET_START: fsub_e */
-
-extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
-/* SNIPPET_END: fsub_e */
 
 /* SNIPPET_START: gcm128_decrypt_opt */
 
@@ -314,35 +271,47 @@ extern uint64_t aes256_keyhash_init(uint8_t *x0, uint8_t *x1);
 
 /* SNIPPET_END: aes256_keyhash_init */
 
-/* SNIPPET_START: gctr128_bytes */
+/* SNIPPET_START: cswap2_e */
 
-extern uint64_t
-gctr128_bytes(
-  uint8_t *x0,
-  uint64_t x1,
-  uint8_t *x2,
-  uint8_t *x3,
-  uint8_t *x4,
-  uint8_t *x5,
-  uint64_t x6
-);
+extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);
 
-/* SNIPPET_END: gctr128_bytes */
+/* SNIPPET_END: cswap2_e */
 
-/* SNIPPET_START: gctr256_bytes */
+/* SNIPPET_START: fsqr_e */
 
-extern uint64_t
-gctr256_bytes(
-  uint8_t *x0,
-  uint64_t x1,
-  uint8_t *x2,
-  uint8_t *x3,
-  uint8_t *x4,
-  uint8_t *x5,
-  uint64_t x6
-);
+extern uint64_t fsqr_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
-/* SNIPPET_END: gctr256_bytes */
+/* SNIPPET_END: fsqr_e */
+
+/* SNIPPET_START: fsqr2_e */
+
+extern uint64_t fsqr2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+/* SNIPPET_END: fsqr2_e */
+
+/* SNIPPET_START: fmul_e */
+
+extern uint64_t fmul_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
+
+/* SNIPPET_END: fmul_e */
+
+/* SNIPPET_START: fmul2_e */
+
+extern uint64_t fmul2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
+
+/* SNIPPET_END: fmul2_e */
+
+/* SNIPPET_START: fmul_scalar_e */
+
+extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
+
+/* SNIPPET_END: fmul_scalar_e */
+
+/* SNIPPET_START: fsub_e */
+
+extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+/* SNIPPET_END: fsub_e */
 
 #if defined(__cplusplus)
 }

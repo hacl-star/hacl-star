@@ -63,6 +63,9 @@ let createL #a init =
 let createL_global #a init =
   CB.of_ibuffer (IB.igcmalloc_of_list #a root init)
 
+let createL_mglobal #a init =
+  B.mgcmalloc_of_list #a FStar.Monotonic.HyperHeap.root init
+
 let recall_contents #a #len b s =
   B.recall_p (CB.to_ibuffer b) (cpred s)
 
@@ -516,15 +519,15 @@ let mapT #t #a #b clen out f inp =
      f x)
 
 inline_for_extraction
-let map2T #t #a1 #a2 #b clen out f inp1 inp2 =
+let map2T #t1 #t2 #a1 #a2 #b clen out f inp1 inp2 =
   let h0 = ST.get () in
   [@inline_let]
   let spec (h:mem) = Seq.map2_inner #a1 #a2 #b #(v clen) f (as_seq h inp1) (as_seq h inp2) in
   fill h0 clen out spec
     (fun i ->
       let h1 = ST.get () in
-      lemma_eq_disjoint #t clen clen out inp1 i h0 h1;
-      lemma_eq_disjoint #t clen clen out inp2 i h0 h1;
+      lemma_eq_disjoint #t1 clen clen out inp1 i h0 h1;
+      lemma_eq_disjoint #t2 clen clen out inp2 i h0 h1;
       f inp1.(i) inp2.(i))
 
 let mapiT #t #a #b clen out f inp =
@@ -575,19 +578,24 @@ val div_mul_le: b:pos -> a:nat -> Lemma
   ((a / b) * b <= a)
 let div_mul_le b a = ()
 
-#reset-options "--z3rlimit 2000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --fuel 0 --ifuel 0"
+
+let size_gt_0_neq_0 (x: size_t): Lemma (requires v x > 0) (ensures v x <> 0) = ()
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   div_mul_le (v blocksize) (v len);
+  size_gt_0_neq_0 blocksize;
   let nb = len /. blocksize in
   let rem = len %. blocksize in
   let blen = nb *! blocksize in
+  Math.Lemmas.lemma_div_mod (v len) (v blocksize);
+  Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
+  Math.Lemmas.swap_mul (v len / v blocksize) (v blocksize);
+  Math.Lemmas.multiply_fractions (v len) (v blocksize);
   let ib = sub inp 0ul blen in
   let ob = sub output 0ul blen in
   let il = sub inp blen rem in
   let ol = sub inp blen rem in
-  Math.Lemmas.lemma_div_mod (v len) (v blocksize);
-  Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
   map_blocks_multi #t #a h0 blocksize nb ib ob spec_f impl_f;
   if rem >. 0ul then
      (impl_l nb;

@@ -24,7 +24,7 @@
 
 #include "Hacl_NaCl.h"
 
-#include "internal/Hacl_Kremlib.h"
+
 
 static void secretbox_init(uint8_t *xkeys, uint8_t *k, uint8_t *n)
 {
@@ -88,11 +88,12 @@ secretbox_open_detached(
   uint8_t tag_[16U] = { 0U };
   Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-  {
+  KRML_MAYBE_FOR16(i,
+    (uint32_t)0U,
+    (uint32_t)16U,
+    (uint32_t)1U,
     uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
-    res = uu____0 & res;
-  }
+    res = uu____0 & res;);
   uint8_t z = res;
   if (z == (uint8_t)255U)
   {
@@ -256,6 +257,18 @@ box_open_easy(uint32_t mlen, uint8_t *m, uint8_t *pk, uint8_t *sk, uint8_t *n, u
   return box_open_detached(mlen, m, pk, sk, n, cip, tag);
 }
 
+/**
+Encrypt a message with a key and nonce.
+
+Note: `c` and `m` can point to the same memory for in-place encryption.
+
+@param c Pointer to `mlen` bytes where the ciphertext is written to.
+@param tag Pointer to 16 (tag length) bytes where the authentication tag is written to.
+@param m Pointer to `mlen` bytes where the message is read from.
+@param mlen Length of message.
+@param n Pointer to 24 (`crypto_secretbox_NONCEBYTES`) bytes where the nonce is read from.
+@param k Pointer to 32 (`crypto_secretbox_KEYBYTES`) bytes where the key is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_secretbox_detached(
   uint8_t *c,
@@ -270,6 +283,18 @@ Hacl_NaCl_crypto_secretbox_detached(
   return (uint32_t)0U;
 }
 
+/**
+Verify and decrypt a ciphertext produced with `Hacl_NaCl_crypto_secretbox_detached`.
+
+Note: `m` and `c` can point to the same memory for in-place decryption.
+
+@param m Pointer to `mlen` bytes where the message is written to.
+@param c Pointer to `mlen` bytes where the ciphertext is read from.
+@param tag Pointer to 16 (tag length) bytes where the authentication tag is read from.
+@param mlen Length of message (and ciphertext).
+@param n Pointer to 24 (`crypto_secretbox_NONCEBYTES`) bytes where the nonce is read from.
+@param k Pointer to 32 (`crypto_secretbox_KEYBYTES`) bytes where the key is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_secretbox_open_detached(
   uint8_t *m,
@@ -283,6 +308,15 @@ Hacl_NaCl_crypto_secretbox_open_detached(
   return secretbox_open_detached(mlen, m, k, n, c, tag);
 }
 
+/**
+Encrypt a message with a key and nonce.
+
+@param c Pointer to 16 (tag length) + `mlen` bytes where the ciphertext is written to.
+@param m Pointer to `mlen` bytes where the message is read from.
+@param mlen Length of message.
+@param n Pointer to 24 (`crypto_secretbox_NONCEBYTES`) bytes where the nonce is read from.
+@param k Pointer to 32 (`crypto_secretbox_KEYBYTES`) bytes where the key is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_secretbox_easy(uint8_t *c, uint8_t *m, uint32_t mlen, uint8_t *n, uint8_t *k)
 {
@@ -290,6 +324,15 @@ Hacl_NaCl_crypto_secretbox_easy(uint8_t *c, uint8_t *m, uint32_t mlen, uint8_t *
   return (uint32_t)0U;
 }
 
+/**
+Verify and decrypt a ciphertext produced with `crypto_secretbox_easy`.
+
+@param m Pointer to `mlen` bytes where the message is written to.
+@param c Pointer to `clen` bytes where the ciphertext is read from. The authentication tag must be included.
+@param clen Length of ciphertext.
+@param n Pointer to 24 (`crypto_secretbox_NONCEBYTES`) bytes where the nonce is read from.
+@param k Pointer to 32 (`crypto_secretbox_KEYBYTES`) bytes where the key is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_secretbox_open_easy(
   uint8_t *m,
@@ -302,11 +345,21 @@ Hacl_NaCl_crypto_secretbox_open_easy(
   return secretbox_open_easy(clen - (uint32_t)16U, m, k, n, c);
 }
 
+/**
+Compute a shared secret key given a public key and secret key.
+
+@param k Pointer to 32 (`crypto_box_BEFORENMBYTES`) bytes of memory where the shared secret is written to.
+@param pk Pointer to 32 bytes of memory where **their** public key is read from.
+@param sk Pointer to 32 bytes of memory where **my** secret key is read from.
+*/
 uint32_t Hacl_NaCl_crypto_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
 {
   return box_beforenm(k, pk, sk);
 }
 
+/**
+See `crypto_box_detached`.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_detached_afternm(
   uint8_t *c,
@@ -320,6 +373,17 @@ Hacl_NaCl_crypto_box_detached_afternm(
   return box_detached_afternm(mlen, c, tag, k, n, m);
 }
 
+/**
+Encrypt a message using the recipient's public key, the sender's secret key, and a nonce.
+
+@param c Pointer to `mlen` bytes of memory where the ciphertext is written to.
+@param tag Pointer to 16 (tag length) bytes of memory where the authentication tag is written to.
+@param m Pointer to `mlen` bytes of memory where the message is read from.
+@param mlen Length of the message.
+@param n Pointer to 24 (`crypto_box_NONCEBYTES`) bytes of memory where the nonce is read from.
+@param pk Pointer to 32 bytes of memory where **their** public key is read from.
+@param sk Pointer to 32 bytes of memory where **my** secret key is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_detached(
   uint8_t *c,
@@ -334,6 +398,9 @@ Hacl_NaCl_crypto_box_detached(
   return box_detached(mlen, c, tag, sk, pk, n, m);
 }
 
+/**
+See `crypto_box_open_detached`.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_open_detached_afternm(
   uint8_t *m,
@@ -347,6 +414,17 @@ Hacl_NaCl_crypto_box_open_detached_afternm(
   return box_open_detached_afternm(mlen, m, k, n, c, tag);
 }
 
+/**
+Verify and decrypt a ciphertext produced by `crypto_box_detached`.
+
+@param m Pointer to `mlen` bytes of memory where the decrypted message is written to.
+@param c Pointer to `mlen` bytes of memory where the ciphertext is read from. Note: the ciphertext must include the tag.
+@param tag Pointer to 16 (tag length) bytes of memory where the authentication tag is read from.
+@param mlen Length of the message (and ciphertext).
+@param n Pointer to 24 (`crypto_box_NONCEBYTES`) bytes of memory where the nonce is read from.
+@param pk Pointer to 32 bytes of memory where the public key of the sender is read from.
+@param sk Pointer to 32 bytes of memory where the secret key of the recipient is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_open_detached(
   uint8_t *m,
@@ -361,6 +439,9 @@ Hacl_NaCl_crypto_box_open_detached(
   return box_open_detached(mlen, m, pk, sk, n, c, tag);
 }
 
+/**
+See `crypto_box_easy`.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_easy_afternm(
   uint8_t *c,
@@ -373,6 +454,16 @@ Hacl_NaCl_crypto_box_easy_afternm(
   return box_easy_afternm(mlen, c, k, n, m);
 }
 
+/**
+Encrypt a message using the recipient's public key, the sender's secret key, and a nonce.
+
+@param c Pointer to 16 (tag length) + `mlen` bytes of memory where the authentication tag and ciphertext is written to.
+@param m Pointer to `mlen` bytes of memory where the message is read from.
+@param mlen Length of the message.
+@param n Pointer to 24 (`crypto_box_NONCEBYTES`) bytes of memory where the nonce is read from.
+@param pk Pointer to 32 bytes of memory where the public key of the recipient is read from.
+@param sk Pointer to 32 bytes of memory where the secret key of the sender is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_easy(
   uint8_t *c,
@@ -386,6 +477,9 @@ Hacl_NaCl_crypto_box_easy(
   return box_easy(mlen, c, sk, pk, n, m);
 }
 
+/**
+See `crypto_box_open_easy`.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_open_easy_afternm(
   uint8_t *m,
@@ -398,6 +492,16 @@ Hacl_NaCl_crypto_box_open_easy_afternm(
   return box_open_easy_afternm(clen - (uint32_t)16U, m, k, n, c);
 }
 
+/**
+Verify and decrypt a ciphertext produced by `crypto_box_easy`.
+
+@param m Pointer to `clen` - 16 (tag length) bytes of memory where the decrypted message is written to.
+@param c Pointer to `clen` bytes of memory where the ciphertext is read from. Note: the ciphertext must include the tag.
+@param clen Length of the ciphertext.
+@param n Pointer to 24 (`crypto_box_NONCEBYTES`) bytes of memory where the nonce is read from.
+@param pk Pointer to 32 bytes of memory where the public key of the sender is read from.
+@param sk Pointer to 32 bytes of memory where the secret key of the recipient is read from.
+*/
 uint32_t
 Hacl_NaCl_crypto_box_open_easy(
   uint8_t *m,

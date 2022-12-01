@@ -59,7 +59,7 @@ let of_nat32 n =
   lemma_of_nat_of_uint 32 n;
   of_uint 32 n
 
-let rec lemma_of_nat_of_uint32 (x:nat32) : Lemma
+let lemma_of_nat_of_uint32 (x:nat32) : Lemma
   (ensures of_nat32 x == of_nat x)
   =
   lemma_of_nat_of_uint 32 x

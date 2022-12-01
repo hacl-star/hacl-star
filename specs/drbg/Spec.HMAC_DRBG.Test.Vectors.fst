@@ -10,8 +10,14 @@ open Spec.Hash.Definitions
 /// https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/random-number-generators#DRBG
 ///
 
+let is_supported_alg = function
+  | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+  | _ -> false
+
+let supported_alg = a:hash_alg{ is_supported_alg a }
+
 type vec = {
-  a: hash_alg;
+  a: supported_alg;
   entropy_input: hex_string;
   nonce: hex_string;
   personalization_string: hex_string;

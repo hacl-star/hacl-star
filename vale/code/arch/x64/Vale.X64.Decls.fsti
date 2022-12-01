@@ -647,6 +647,7 @@ val print_proc : (name:string) -> (code:va_code) -> (label:int) -> (p:printer) -
 val print_footer : printer -> FStar.All.ML unit
 val masm : printer
 val gcc : printer
+val gcc_linux : printer
 
 unfold let memTaint_type = Map.t int taint
 
@@ -655,4 +656,3 @@ let max_one_mem (o1 o2:operand64) : prop0 =
   match (o1, o2) with
   | (OMem _, OMem _) | (OMem _, OStack _) | (OStack _, OMem _) | (OStack _, OStack _) -> False
   | _ -> True
-

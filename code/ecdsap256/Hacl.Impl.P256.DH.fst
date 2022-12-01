@@ -87,7 +87,7 @@ let _ecp256dh_r result pubKey scalar =
   let tempBuffer = create (size 100) (u64 0) in
   let publicKeyBuffer = create (size 12) (u64 0) in
   bufferToJac pubKey publicKeyBuffer;
-  let publicKeyCorrect = verifyQValidCurvePoint publicKeyBuffer tempBuffer in
+  let publicKeyCorrect = verifyQValidCurvePoint publicKeyBuffer in
   if publicKeyCorrect then
     begin
     scalarMultiplication publicKeyBuffer result scalar tempBuffer;

@@ -25,10 +25,14 @@
 #include "EverCrypt_AEAD.h"
 
 #include "internal/Vale.h"
-#include "internal/Hacl_Kremlib.h"
-
+#include "internal/Hacl_Spec.h"
+#include "config.h"
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
+/**
+Both encryption and decryption require a state that holds the key.
+The state may be reused as many times as desired.
+*/
 typedef struct EverCrypt_AEAD_state_s_s
 {
   Spec_Cipher_Expansion_impl impl;
@@ -49,6 +53,13 @@ bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s pro
 
 /* SNIPPET_START: EverCrypt_AEAD_alg_of_state */
 
+/**
+Return the algorithm used in the AEAD state.
+
+@param s State of the AEAD algorithm.
+
+@return Algorithm used in the AEAD state.
+*/
 Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
 {
   EverCrypt_AEAD_state_s scrut = *s;
@@ -69,7 +80,7 @@ Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -82,9 +93,10 @@ Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
 static EverCrypt_Error_error_code
 create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
-  uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+  uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-  EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+  EverCrypt_AEAD_state_s
+  *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
   p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek });
   memcpy(ek, k, (uint32_t)32U * sizeof (uint8_t));
   dst[0U] = p;
@@ -106,13 +118,14 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t *ek = KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
+    uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)176U;
     uint64_t scrut = aes128_key_expansion(k, keys_b);
     uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-    EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+    EverCrypt_AEAD_state_s
+    *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek });
     *dst = p;
     return EverCrypt_Error_Success;
@@ -136,13 +149,14 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t *ek = KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
+    uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)240U;
     uint64_t scrut = aes256_key_expansion(k, keys_b);
     uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-    EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+    EverCrypt_AEAD_state_s
+    *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek });
     *dst = p;
     return EverCrypt_Error_Success;
@@ -155,6 +169,22 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 
 /* SNIPPET_START: EverCrypt_AEAD_create_in */
 
+/**
+Create the required AEAD state for the algorithm.
+
+Note: The caller must free the AEAD state by calling `EverCrypt_AEAD_free`.
+
+@param a The argument `a` must be either of:
+  * `Spec_Agile_AEAD_AES128_GCM` (KEY_LEN=16),
+  * `Spec_Agile_AEAD_AES256_GCM` (KEY_LEN=32), or
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (KEY_LEN=32).
+@param dst Pointer to a pointer where the address of the allocated AEAD state will be written to.
+@param k Pointer to `KEY_LEN` bytes of memory where the key is read from. The size depends on the used algorithm, see above.
+
+@return The function returns `EverCrypt_Error_Success` on success or
+  `EverCrypt_Error_UnsupportedAlgorithm` in case of a bad algorithm identifier.
+  (See `EverCrypt_Error.h`.)
+*/
 EverCrypt_Error_error_code
 EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
@@ -299,7 +329,7 @@ encrypt_aes128_gcm(
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -427,7 +457,7 @@ encrypt_aes256_gcm(
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -439,6 +469,25 @@ encrypt_aes256_gcm(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt */
 
+/**
+Encrypt and authenticate a message (`plain`) with associated data (`ad`).
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param plain Pointer to `plain_len` bytes of memory where the to-be-encrypted plaintext is read from.
+@param plain_len Length of the to-be-encrypted plaintext.
+@param cipher Pointer to `plain_len` bytes of memory where the ciphertext is written to.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is written to.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+
+@return `EverCrypt_AEAD_encrypt` may return either `EverCrypt_Error_Success` or `EverCrypt_Error_InvalidKey` (`EverCrypt_error.h`). The latter is returned if and only if the `s` parameter is `NULL`.
+*/
 EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt(
   EverCrypt_AEAD_state_s *s,
@@ -480,7 +529,7 @@ EverCrypt_AEAD_encrypt(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -490,7 +539,7 @@ EverCrypt_AEAD_encrypt(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -626,7 +675,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   }
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -638,7 +687,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -774,7 +823,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
   }
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -1156,7 +1205,7 @@ EverCrypt_AEAD_encrypt_expand(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1292,7 +1341,7 @@ decrypt_aes128_gcm(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -1430,7 +1479,7 @@ decrypt_aes256_gcm(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -1478,6 +1527,37 @@ decrypt_chacha20_poly1305(
 
 /* SNIPPET_START: EverCrypt_AEAD_decrypt */
 
+/**
+Verify the authenticity of `ad` || `cipher` and decrypt `cipher` into `dst`.
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param cipher Pointer to `cipher_len` bytes of memory where the ciphertext is read from.
+@param cipher_len Length of the ciphertext.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is read from.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+@param dst Pointer to `cipher_len` bytes of memory where the decrypted plaintext will be written to.
+
+@return `EverCrypt_AEAD_decrypt` returns ...
+
+  * `EverCrypt_Error_Success`
+
+  ... on success and either of ...
+
+  * `EverCrypt_Error_InvalidKey` (returned if and only if the `s` parameter is `NULL`),
+  * `EverCrypt_Error_InvalidIVLength` (see note about requirements on IV size above), or
+  * `EverCrypt_Error_AuthenticationFailure` (in case the ciphertext could not be authenticated, e.g., due to modifications)
+
+  ... on failure (`EverCrypt_error.h`).
+
+  Upon success, the plaintext will be written into `dst`.
+*/
 EverCrypt_Error_error_code
 EverCrypt_AEAD_decrypt(
   EverCrypt_AEAD_state_s *s,
@@ -1513,7 +1593,7 @@ EverCrypt_AEAD_decrypt(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1523,7 +1603,7 @@ EverCrypt_AEAD_decrypt(
 
 /* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -1664,7 +1744,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -1676,7 +1756,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
 
 /* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check */
 
-/*
+/**
 WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
@@ -1817,7 +1897,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -2220,7 +2300,7 @@ EverCrypt_AEAD_decrypt_expand(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -2230,6 +2310,11 @@ EverCrypt_AEAD_decrypt_expand(
 
 /* SNIPPET_START: EverCrypt_AEAD_free */
 
+/**
+Cleanup and free the AEAD state.
+
+@param s State of the AEAD algorithm.
+*/
 void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s)
 {
   EverCrypt_AEAD_state_s scrut = *s;

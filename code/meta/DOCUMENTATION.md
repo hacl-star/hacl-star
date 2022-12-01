@@ -352,7 +352,7 @@ The main drawback with this style is that we have lost the ability to split the
 `_32` functions in their own file; furthermore, we also still cannot provide,
 say, a microcoded version of `double_round256`.
 
-The former issue could be remediated with some tricks in KreMLin; the latter,
+The former issue could be remediated with some tricks in KaRaMeL; the latter,
 however, is more serious.
 
 Third and final attempt, using higher-order

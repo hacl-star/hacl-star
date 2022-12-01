@@ -31,6 +31,8 @@ open FStar.Math.Lemmas
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+
 val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in 
   pNew == q /\ qNew == p})
 
@@ -276,6 +278,8 @@ let norm p resultPoint tempBuffer =
     let h3 = ST.get() in 
     lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf)); 
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
+    Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
 
     lemma_norm_as_specification (fromDomain_ (point_x_as_nat h0 p)) (fromDomain_ (point_y_as_nat h0 p)) (fromDomain_ (point_z_as_nat h0 p)) (point_x_as_nat h3 resultPoint) (point_y_as_nat h3 resultPoint) (point_z_as_nat h3 resultPoint);

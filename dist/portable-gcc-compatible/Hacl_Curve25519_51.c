@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Curve25519_51.h"
 
-#include "internal/Hacl_Kremlib.h"
+
 
 /* SNIPPET_START: g25519 */
 
@@ -248,29 +248,38 @@ static void encode_point(uint8_t *o, uint64_t *i)
   Hacl_Curve25519_51_finv(tmp, z, tmp_w);
   Hacl_Impl_Curve25519_Field51_fmul(tmp, tmp, x, tmp_w);
   Hacl_Impl_Curve25519_Field51_store_felem(u64s, tmp);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
-    store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
-  }
+  KRML_MAYBE_FOR4(i0,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store64_le(o + i0 * (uint32_t)8U, u64s[i0]););
 }
 
 /* SNIPPET_END: encode_point */
 
 /* SNIPPET_START: Hacl_Curve25519_51_scalarmult */
 
+/**
+Compute the scalar multiple of a point.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where the public point is read from.
+*/
 void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init[10U] = { 0U };
   uint64_t tmp[4U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
     uint64_t *os = tmp;
     uint8_t *bj = pub + i * (uint32_t)8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i] = x;
-  }
+    os[i] = x;);
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (uint64_t)0x7fffffffffffffffU;
   uint64_t *x = init;
@@ -301,6 +310,14 @@ void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 
 /* SNIPPET_START: Hacl_Curve25519_51_secret_to_public */
 
+/**
+Calculate a public point from a secret/private key.
+
+This computes a scalar multiplication of the secret/private key with the curve's basepoint.
+
+@param pub Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+*/
 void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   uint8_t basepoint[32U] = { 0U };
@@ -317,6 +334,13 @@ void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv)
 
 /* SNIPPET_START: Hacl_Curve25519_51_ecdh */
 
+/**
+Execute the diffie-hellmann key exchange.
+
+@param out Pointer to 32 bytes of memory, allocated by the caller, where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
+@param pub Pointer to 32 bytes of memory where **their** public point is read from.
+*/
 bool Hacl_Curve25519_51_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint8_t zeros[32U] = { 0U };

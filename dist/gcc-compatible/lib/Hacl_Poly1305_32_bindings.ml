@@ -2,8 +2,6 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_Poly1305_32_blocklen =
-      foreign_value "Hacl_Poly1305_32_blocklen" uint32_t
     let hacl_Poly1305_32_poly1305_init =
       foreign "Hacl_Poly1305_32_poly1305_init"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))

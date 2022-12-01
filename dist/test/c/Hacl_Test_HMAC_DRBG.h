@@ -28,7 +28,8 @@
 
 
 
-#include "kremlib.h"
+#include "krmllib.h"
+#include "libintvector.h"
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
 static inline FStar_UInt128_uint128

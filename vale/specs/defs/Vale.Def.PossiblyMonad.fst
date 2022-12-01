@@ -11,7 +11,7 @@ type possibly 'a =
 unfold let return (#a:Type) (x:a) : possibly a =
   Ok x
 
-unfold let bind (#a #b:Type) (x:possibly a) (f:a -> possibly b) : possibly b =
+unfold let (let+) (#a #b:Type) (x:possibly a) (f:a -> possibly b) : possibly b =
   match x with
   | Err s -> Err s
   | Ok x' -> f x'

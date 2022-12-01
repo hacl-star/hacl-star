@@ -19,7 +19,7 @@ open FStar.Tactics.Canon
 open FStar.Mul
 open Lib.IntTypes.Intrinsics
 
-#reset-options "--z3rlimit 200"
+#reset-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit

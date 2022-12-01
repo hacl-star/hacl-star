@@ -92,7 +92,6 @@ val chacha20_init:
   (ensures  fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
     as_seq h1 ctx == Spec.chacha20_init (as_seq h0 k) (as_seq h0 n) (v ctr0))
 
-[@ CInline]
 let chacha20_init ctx k n ctr =
   let h0 = ST.get() in
   recall_contents chacha20_constants Spec.chacha20_constants;
@@ -126,7 +125,6 @@ val chacha20_encrypt_block:
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_seq h1 out == Spec.chacha20_encrypt_block (as_seq h0 ctx) (v incr) (as_seq h0 text))
 
-[@CInline]
 let chacha20_encrypt_block ctx out incr text =
   push_frame();
   let k = create 16ul (u32 0) in
@@ -170,7 +168,6 @@ val chacha20_update:
   (ensures  fun h0 _ h1 -> modifies (loc ctx |+| loc out) h0 h1 /\
     as_seq h1 out == Spec.chacha20_update (as_seq h0 ctx) (as_seq h0 text))
 
-[@ CInline ]
 let chacha20_update ctx len out text =
   push_frame();
   let blocks = len /. size 64 in

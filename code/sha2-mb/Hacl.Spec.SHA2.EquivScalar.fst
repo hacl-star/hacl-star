@@ -573,8 +573,8 @@ val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
 let update_lemma a block hash' =
   let hash, _ = hash' in
   reveal_opaque (`%Spec.update) Spec.update;
-  let block_w = BSeq.uints_from_bytes_be #(word_t a) #SEC #block_word_length block in
-  assert (block_w == words_of_bytes a #block_word_length block);
+  let block_w = BSeq.uints_from_bytes_be #(word_t a) #SEC #(block_word_length a) block in
+  assert (block_w == words_of_bytes a #(block_word_length a) block);
   let hash_1 = shuffle a block_w hash in
   shuffle_lemma a block_w hash;
   assert (hash_1 == Spec.shuffle a hash block_w);
@@ -642,8 +642,8 @@ let repeat_blocks_multi_extensionality #a #b blocksize inp f g init =
 
 val update_multi_is_repeat_blocks_multi:
      a:sha2_alg
-  -> len:size_nat
-  -> b:lseq uint8 len
+  -> len:len_lt_max_a_t a
+  -> b:seq uint8{length b = len}
   -> st0:words_state a
   -> pad_s:lseq uint8 (pad_length a len) ->
   Lemma
@@ -674,18 +674,19 @@ let update_multi_is_repeat_blocks_multi a len b st0 pad_s =
   repeat_blocks_multi_extensionality (block_length a) blocks repeat_f (update a) st0
 
 
-val hash_is_repeat_blocks:
-     a:sha2_alg
-  -> len:size_nat
-  -> b:lseq uint8 len
-  -> st0:words_state a ->
-  Lemma
-   (let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
-    let st = update_nblocks a len b st0 in
-    let rem = len % block_length a in
-    let mb = sub b (len - rem) rem in
-    update_last a len' rem mb st ==
-    LSeq.repeat_blocks (block_length a) b (update a) (update_last a len') st0)
+let update_nblocks_is_repeat_blocks_multi a len b st0 =
+  let bs = block_length a in
+  let nb = len / bs in
+  let acc = Loops.repeati nb (repeat_blocks_f bs b (update a) nb) st0 in
+
+  let aux (i:nat{i < nb}) (acc:words_state a) :
+    Lemma (repeat_blocks_f bs b (update a) nb i acc == update_block a len b i acc) = () in
+  Classical.forall_intro_2 aux;
+  LSeqLemmas.repeati_extensionality nb (repeat_blocks_f bs b (update a) nb) (update_block a len b) st0;
+  assert (acc == update_nblocks a len b st0);
+
+  LSeq.lemma_repeat_blocks_multi bs b (update a) st0
+
 
 let hash_is_repeat_blocks a len b st0 =
   let bs = block_length a in
@@ -699,13 +700,13 @@ let hash_is_repeat_blocks a len b st0 =
   LSeqLemmas.repeati_extensionality nb (repeat_blocks_f bs b (update a) nb) (update_block a len b) st0;
   assert (acc == update_nblocks a len b st0);
 
-  let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let len' : len_t a = mk_len_t a len in
   LSeq.lemma_repeat_blocks bs b (update a) (update_last a len') st0;
   let last = Seq.slice b (nb * bs) len in
   assert (LSeq.repeat_blocks bs b (update a) (update_last a len') st0 == update_last a len' rem last acc)
 
 
-val append_pad_last_length_lemma: a:sha2_alg -> len:size_nat ->
+val append_pad_last_length_lemma: a:sha2_alg -> len:len_lt_max_a_t a ->
   Lemma
    (let blocksize = block_length a in
     let b_len = (blocksize - (len + len_length a + 1)) % blocksize + 1 + len_length a + len % blocksize in
@@ -719,10 +720,9 @@ let append_pad_last_length_lemma a len =
   assert (b_len == (blocksize - x) % blocksize + x)
   //if x < blocksize then b_len = blocksize else b_len = 2 * blocksize
 
-
 val load_last_lemma:
      a:sha2_alg
-  -> totlen:size_nat{totlen <= max_input_length a}
+  -> totlen:len_lt_max_a_t a
   -> totlen_seq:lseq uint8 (len_length a)
   -> b:bytes{length b = totlen % block_length a} ->
   Lemma
@@ -776,14 +776,25 @@ let load_last_lemma a totlen totlen_seq b =
   Seq.lemma_eq_intro (Seq.slice last3 0 fin) (Seq.append b pad)
 
 
+val lemma_len_lt_max_a_mul_by_8: a:sha2_alg -> len:len_lt_max_a_t a ->
+  Lemma (let len' : len_t a = mk_len_t a len in
+    let total_len_bits = secret (shift_left #(len_int_type a) len' 3ul) in
+    v total_len_bits == len * 8)
+
+let lemma_len_lt_max_a_mul_by_8 a len =
+  match a with
+  | SHA2_224 | SHA2_256 -> Math.Lemmas.pow2_plus 61 3
+  | SHA2_384 | SHA2_512 -> Math.Lemmas.pow2_plus 125 3
+
+
 val load_last_pad_lemma:
      a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
-  -> fin:size_nat{fin == block_length a \/ fin == 2 * block_length a}
-  -> rem:size_nat{rem < block_length a}
+  -> len:len_lt_max_a_t a
+  -> fin:nat{fin == block_length a \/ fin == 2 * block_length a}
+  -> rem:nat{rem < block_length a}
   -> b:bytes{length b = rem} ->
   Lemma
-   (let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+   (let len' : len_t a = mk_len_t a len in
     let total_len_bits = secret (shift_left #(len_int_type a) len' 3ul) in
     let totlen_seq = BSeq.uint_to_bytes_be #(len_int_type a) total_len_bits in
 
@@ -793,8 +804,9 @@ val load_last_pad_lemma:
     PadFinish.pad a len == pad)
 
 let load_last_pad_lemma a len fin rem b =
-  let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let len' : len_t a = mk_len_t a len in
   let total_len_bits = secret (shift_left #(len_int_type a) len' 3ul) in
+  lemma_len_lt_max_a_mul_by_8 a len;
   assert (v total_len_bits == len * 8);
 
   let totlen_seq = BSeq.uint_to_bytes_be #(len_int_type a) total_len_bits in
@@ -806,10 +818,10 @@ let load_last_pad_lemma a len fin rem b =
 
 val update_last_lemma:
      a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
+  -> len:len_lt_max_a_t a
   -> b:lseq uint8 (len % block_length a) ->
   Lemma
-  (let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  (let len' : len_t a = mk_len_t a len in
    let total_len_bits = secret (shift_left #(len_int_type a) len' 3ul) in
    let totlen_seq = BSeq.uint_to_bytes_be #(len_int_type a) total_len_bits in
    let blocksize = block_length a in
@@ -824,7 +836,7 @@ val update_last_lemma:
    Seq.equal (Seq.slice last 0 fin) (Seq.append b (PadFinish.pad a len)))
 
 let update_last_lemma a len b =
-  let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let len' : len_t a = mk_len_t a len in
   let total_len_bits = secret (shift_left #(len_int_type a) len' 3ul) in
   let totlen_seq = BSeq.uint_to_bytes_be #(len_int_type a) total_len_bits in
   let blocksize = block_length a in
@@ -838,7 +850,7 @@ let update_last_lemma a len b =
 
 val update_last_is_repeat_blocks_multi:
      a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
+  -> len:len_lt_max_a_t a
   -> last:lseq uint8 (len % block_length a)
   -> st1:words_state a ->
   Lemma
@@ -846,7 +858,7 @@ val update_last_is_repeat_blocks_multi:
    (let blocksize = block_length a in
     (pad_length a len + len % blocksize) % blocksize = 0))
   (ensures
-   (let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+   (let len' : len_t a = mk_len_t a len in
     let pad_s = PadFinish.pad a len in
     let blocksize = block_length a in
     let rem = len % blocksize in
@@ -859,8 +871,11 @@ let update_last_is_repeat_blocks_multi a len last st1 =
   let blocksize = block_length a in
   let rem = len % blocksize in
   let blocks1 = Seq.append last pad_s in
+  let blocks = padded_blocks a rem in
+  let fin = blocks * block_length a in
   append_pad_last_length_lemma a len;
-  //assert (length blocks1 = blocksize \/ length blocks1 = 2 * blocksize);
+  load_last_pad_lemma a len fin rem last;
+  assert (length blocks1 = blocksize \/ length blocks1 = 2 * blocksize);
   assert (length blocks1 == padded_blocks a rem * blocksize);
   let nb = padded_blocks a rem in
   Math.Lemmas.cancel_mul_mod nb blocksize;
@@ -868,11 +883,9 @@ let update_last_is_repeat_blocks_multi a len last st1 =
   LSeq.lemma_repeat_blocks_multi blocksize blocks1 (update a) st1;
   assert (res == Loops.repeati nb (repeat_blocks_f blocksize blocks1 (update a) nb) st1);
 
-  let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let len' : len_t a = mk_len_t a len in
   let total_len_bits = secret (shift_left #(len_int_type a) len' 3ul) in
   let totlen_seq = BSeq.uint_to_bytes_be #(len_int_type a) total_len_bits in
-  let blocks = padded_blocks a rem in
-  let fin = blocks * block_length a in
   let (b0, b1) = load_last a totlen_seq fin rem last in
   let st2 = update a b0 st1 in
   Loops.unfold_repeati nb (repeat_blocks_f blocksize blocks1 (update a) nb) st1 0;
@@ -889,11 +902,11 @@ let update_last_is_repeat_blocks_multi a len last st1 =
 #push-options "--z3rlimit 150"
 val hash_is_repeat_blocks_multi:
     a:sha2_alg
-  -> len:size_nat{len <= max_input_length a}
-  -> b:lseq uint8 len
+  -> len:len_lt_max_a_t a
+  -> b:seq uint8{length b = len}
   -> st0:words_state a ->
   Lemma
-  (let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  (let len' : len_t a = mk_len_t a len in
    let pad_s = PadFinish.pad a len in
    repeat_blocks (block_length a) b (update a) (update_last a len') st0 ==
    repeat_blocks_multi (block_length a) (Seq.append b pad_s) (update a) st0)
@@ -915,7 +928,7 @@ let hash_is_repeat_blocks_multi a len b st0 =
   LSeqLemmas.repeat_blocks_multi_split blocksize len0 blocks (update a) st0;
   //assert (res == repeat_blocks_multi blocksize blocks1 (update a) st1);
 
-  let len':len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let len' : len_t a = mk_len_t a len in
   LSeqLemmas.lemma_repeat_blocks_via_multi blocksize b (update a) (update_last a len') st0;
   Seq.lemma_eq_intro (Seq.slice b 0 len0) blocks0;
   let last = Seq.slice b len0 len in
@@ -929,6 +942,15 @@ let hash_agile_lemma #a len b =
   let st0 = Spec.Agile.Hash.init a in
   let pad_s = PadFinish.pad a len in
   let st_s = Spec.Agile.Hash.update_multi a st0 (Seq.append b pad_s) in
+
+  let blocksize = block_length a in
+  let rem = len % blocksize in
+  let blocks = padded_blocks a rem in
+  let fin = blocks * block_length a in
+  let last = Seq.slice b (len - rem) len in
+  append_pad_last_length_lemma a len;
+  load_last_pad_lemma a len fin rem last;
+
   hash_is_repeat_blocks a len b st0;
   update_multi_is_repeat_blocks_multi a len b st0 pad_s;
   hash_is_repeat_blocks_multi a len b st0;

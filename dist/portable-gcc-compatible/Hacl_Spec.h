@@ -30,22 +30,12 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-/* SNIPPET_START: Spec_Blake2_alg */
-
-#define Spec_Blake2_Blake2S 0
-#define Spec_Blake2_Blake2B 1
-
-/* SNIPPET_END: Spec_Blake2_alg */
-
-typedef uint8_t Spec_Blake2_alg;
 
 /* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
 
@@ -57,6 +47,7 @@ typedef uint8_t Spec_Blake2_alg;
 #define Spec_Hash_Definitions_MD5 5
 #define Spec_Hash_Definitions_Blake2S 6
 #define Spec_Hash_Definitions_Blake2B 7
+#define Spec_Hash_Definitions_SHA3_256 8
 
 /* SNIPPET_END: Spec_Hash_Definitions_hash_alg */
 
@@ -73,26 +64,6 @@ typedef uint8_t Spec_Hash_Definitions_hash_alg;
 /* SNIPPET_END: Spec_FFDHE_ffdhe_alg */
 
 typedef uint8_t Spec_FFDHE_ffdhe_alg;
-
-/* SNIPPET_START: Spec_Agile_Cipher_cipher_alg */
-
-#define Spec_Agile_Cipher_AES128 0
-#define Spec_Agile_Cipher_AES256 1
-#define Spec_Agile_Cipher_CHACHA20 2
-
-/* SNIPPET_END: Spec_Agile_Cipher_cipher_alg */
-
-typedef uint8_t Spec_Agile_Cipher_cipher_alg;
-
-/* SNIPPET_START: Spec_Cipher_Expansion_impl */
-
-#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
-#define Spec_Cipher_Expansion_Vale_AES128 1
-#define Spec_Cipher_Expansion_Vale_AES256 2
-
-/* SNIPPET_END: Spec_Cipher_Expansion_impl */
-
-typedef uint8_t Spec_Cipher_Expansion_impl;
 
 /* SNIPPET_START: Spec_Agile_AEAD_alg */
 

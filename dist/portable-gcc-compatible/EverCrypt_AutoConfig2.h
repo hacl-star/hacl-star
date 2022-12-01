@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_shaext */
 
 bool EverCrypt_AutoConfig2_has_shaext();
@@ -103,32 +102,6 @@ bool EverCrypt_AutoConfig2_has_rdrand();
 bool EverCrypt_AutoConfig2_has_avx512();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_avx512 */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_vale */
-
-KRML_DEPRECATED("")
-
-bool EverCrypt_AutoConfig2_wants_vale();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_vale */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_hacl */
-
-bool EverCrypt_AutoConfig2_wants_hacl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_hacl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_openssl */
-
-bool EverCrypt_AutoConfig2_wants_openssl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_openssl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_bcrypt */
-
-bool EverCrypt_AutoConfig2_wants_bcrypt();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_bcrypt */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_recall */
 
@@ -213,30 +186,6 @@ void EverCrypt_AutoConfig2_disable_rdrand();
 void EverCrypt_AutoConfig2_disable_avx512();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx512 */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_vale */
-
-void EverCrypt_AutoConfig2_disable_vale();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_vale */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_hacl */
-
-void EverCrypt_AutoConfig2_disable_hacl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_hacl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_openssl */
-
-void EverCrypt_AutoConfig2_disable_openssl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_openssl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_bcrypt */
-
-void EverCrypt_AutoConfig2_disable_bcrypt();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_bcrypt */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_vec128 */
 

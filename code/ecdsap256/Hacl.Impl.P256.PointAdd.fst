@@ -29,7 +29,7 @@ open FStar.Math.Lemmas
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
-#reset-options "--z3rlimit 300" 
+#reset-options "--z3rlimit 300 --fuel 0 --ifuel 0" 
 
 
 val copy_point_conditional: x3_out: felem -> y3_out: felem -> z3_out: felem -> p: point -> maskPoint: point -> Stack unit

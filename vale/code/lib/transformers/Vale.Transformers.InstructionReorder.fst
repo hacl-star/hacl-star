@@ -116,7 +116,7 @@ let rec lemma_write_same_constants_symmetric (c1 c2:locations_with_values) :
     lemma_write_same_constants_symmetric xs c2;
     lemma_write_same_constants_symmetric xs ys
 
-let rec lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
+let lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
   Lemma
     (ensures (!!(write_exchange_allowed w1 w2 c1 c2) = !!(write_exchange_allowed w2 w1 c2 c1))) =
   lemma_write_same_constants_symmetric c1 c2
@@ -555,7 +555,7 @@ and lemma_eval_while_equiv_states (cond:ocmp) (body:code) (fuel:nat) (s1 s2:mach
 unfold
 let run2 (f1 f2:st unit) (s:machine_state) : machine_state =
   let open Vale.X64.Machine_Semantics_s in
-  run (f1;; f2;; return ()) s
+  run (f1;* f2;* return ()) s
 
 let commutes (s:machine_state) (f1 f2:st unit) : GTot Type0 =
   equiv_states_or_both_not_ok
@@ -1026,7 +1026,7 @@ let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
 
 let wrap_ss (f:machine_state -> machine_state) : st unit =
   let open Vale.X64.Machine_Semantics_s in
-  s <-- get;
+  let* s = get in
   set (f s)
 
 let wrap_sos (f:machine_state -> option machine_state) : st unit =
@@ -1250,7 +1250,7 @@ let lemma_equiv_code_codes (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
         let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
         equiv_states_or_both_not_ok
-          (run (f1;;f2) s)
+          (run (f1;* f2) s)
           (run f12 s))) =
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
@@ -1258,7 +1258,7 @@ let lemma_equiv_code_codes (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
   let s_1 = run f1 s in
   let s_1_2 = run f2 s_1 in
-  let s_12 = run (f1;;f2) s in
+  let s_12 = run (f1;* f2) s in
   let s12 = run f12 s in
   assert (s_12 == {s_1_2 with ms_ok = s.ms_ok && s_1.ms_ok && s_1_2.ms_ok});
   if s.ms_ok then (
@@ -1278,7 +1278,7 @@ let lemma_bounded_effects_code_codes_aux1 (c:code) (cs:codes) (rw:rw_set) (fuel:
         let f1 = wrap_sos (machine_eval_code c fuel) in
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
         let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
-        (bounded_effects rw (f1 ;; f2)) /\
+        (bounded_effects rw (f1 ;* f2)) /\
         !!(disjoint_location_from_locations a rw.loc_writes) /\
         (run f12 s).ms_ok))
     (ensures (
@@ -1287,9 +1287,9 @@ let lemma_bounded_effects_code_codes_aux1 (c:code) (cs:codes) (rw:rw_set) (fuel:
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
   let f2 = wrap_sos (machine_eval_codes cs fuel) in
-  let f = (f1;;f2) in
+  let f = (f1;*f2) in
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
-  let s_12 = run (f1;;f2) s in
+  let s_12 = run (f1;*f2) s in
   let s12 = run f12 s in
   lemma_equiv_code_codes c cs fuel s;
   assert (equiv_states_or_both_not_ok s_12 s12);
@@ -1301,14 +1301,14 @@ let rec lemma_bounded_effects_code_codes_aux2 (c:code) (cs:codes) (fuel:nat) cw 
         let open Vale.X64.Machine_Semantics_s in
         let f1 = wrap_sos (machine_eval_code c fuel) in
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
-        (constant_on_execution cw (f1;;f2) s)))
+        (constant_on_execution cw (f1;*f2) s)))
     (ensures (
         let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
         (constant_on_execution cw f12 s))) =
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
   let f2 = wrap_sos (machine_eval_codes cs fuel) in
-  let f = (f1;;f2) in
+  let f = (f1;*f2) in
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
   lemma_equiv_code_codes c cs fuel s;
   if (run f s).ms_ok then (
@@ -1333,7 +1333,7 @@ let lemma_bounded_effects_code_codes_aux3 (c:code) (cs:codes) (rw:rw_set) (fuel:
         let open Vale.X64.Machine_Semantics_s in
         let f1 = wrap_sos (machine_eval_code c fuel) in
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
-        (bounded_effects rw (f1 ;; f2)) /\
+        (bounded_effects rw (f1 ;* f2)) /\
         s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2))
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
@@ -1341,11 +1341,11 @@ let lemma_bounded_effects_code_codes_aux3 (c:code) (cs:codes) (rw:rw_set) (fuel:
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
         let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
         (run f12 s1).ms_ok = (run f12 s2).ms_ok /\
-        (run (f1 ;; f2) s1).ms_ok = (run f12 s1).ms_ok)) =
+        (run (f1 ;* f2) s1).ms_ok = (run f12 s1).ms_ok)) =
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
   let f2 = wrap_sos (machine_eval_codes cs fuel) in
-  let f = (f1;;f2) in
+  let f = (f1;*f2) in
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
   let pre = bounded_effects rw f in
   lemma_equiv_code_codes c cs fuel s1;
@@ -1360,15 +1360,15 @@ let lemma_bounded_effects_code_codes_aux4 (c:code) (cs:codes) (rw:rw_set) (fuel:
         let open Vale.X64.Machine_Semantics_s in
         let f1 = wrap_sos (machine_eval_code c fuel) in
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
-        (bounded_effects rw (f1 ;; f2)) /\
-        s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2 /\ (run (f1 ;; f2) s1).ms_ok))
+        (bounded_effects rw (f1 ;* f2)) /\
+        s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2 /\ (run (f1 ;* f2) s1).ms_ok))
     (ensures (
         let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
         unchanged_at rw.loc_writes (run f12 s1) (run f12 s2))) =
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
   let f2 = wrap_sos (machine_eval_codes cs fuel) in
-  let f = (f1;;f2) in
+  let f = (f1;*f2) in
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
   let pre = bounded_effects rw f in
   lemma_equiv_code_codes c cs fuel s1;
@@ -1386,14 +1386,14 @@ let lemma_bounded_effects_code_codes (c:code) (cs:codes) (rw:rw_set) (fuel:nat) 
         let open Vale.X64.Machine_Semantics_s in
         let f1 = wrap_sos (machine_eval_code c fuel) in
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
-        (bounded_effects rw (f1 ;; f2))))
+        (bounded_effects rw (f1 ;* f2))))
     (ensures (
         let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
         bounded_effects rw f12)) =
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
   let f2 = wrap_sos (machine_eval_codes cs fuel) in
-  let f = f1;;f2 in
+  let f = f1;*f2 in
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
   let pre = bounded_effects rw f in
   let aux s = FStar.Classical.move_requires (lemma_bounded_effects_code_codes_aux1 c cs rw fuel s) in
@@ -1591,7 +1591,7 @@ let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibl
       match t with
       | MoveUpFrom i -> (
           if i < L.length c then (
-            c' <-- bubble_to_top c i;
+            let+ c'= bubble_to_top c i in
             return (L.index c i :: c')
           ) else (
             Err ("invalid hint : " ^ string_of_transformation_hint t)
@@ -1603,12 +1603,12 @@ let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibl
           let left, mid, right = split3 c i in
           match mid with
           | Block l ->
-            l' <-- perform_reordering_with_hint t' l; (
+            let+ l' = perform_reordering_with_hint t' l in (
               match l' with
               | [] -> Err "impossible"
               | y :: ys ->
                 L.append_length left [y];
-                left' <-- bubble_to_top (left `L.append` [y]) i;
+                let+ left' = bubble_to_top (left `L.append` [y]) i in
                 return (y :: (left' `L.append` (Block ys :: right)))
             )
           | _ ->
@@ -1619,8 +1619,8 @@ let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibl
       | InPlaceIfElse tht thf -> (
           match x with
           | IfElse c (Block t) (Block f) ->
-            tt <-- perform_reordering_with_hints tht t;
-            ff <-- perform_reordering_with_hints thf f;
+            let+ tt = perform_reordering_with_hints tht t in
+            let+ ff = perform_reordering_with_hints thf f in
             return (IfElse c (Block tt) (Block ff) :: xs)
           | _ ->
             Err ("Invalid hint : " ^ string_of_transformation_hint t ^ " for codes " ^ fst (print_code (Block c) 0 gcc))
@@ -1628,7 +1628,7 @@ let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibl
       | InPlaceWhile thb -> (
           match x with
           | While c (Block b) ->
-            bb <-- perform_reordering_with_hints thb b;
+            let+ bb = perform_reordering_with_hints thb b in
             return (While c (Block bb) :: xs)
           | _ ->
             Err ("Invalid hint : " ^ string_of_transformation_hint t ^ " for codes " ^ fst (print_code (Block c) 0 gcc))
@@ -1659,7 +1659,7 @@ and perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly
       )
     )
   | t :: ts' ->
-    c' <-- perform_reordering_with_hint t c;
+    let+ c' = perform_reordering_with_hint t c in
     match c' with
     | [] -> Err "impossible"
     | x :: xs ->
@@ -1672,7 +1672,7 @@ and perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly
             fst (print_code x 0 gcc) ^
             "\n") in
         *)
-        xs' <-- perform_reordering_with_hints ts' xs;
+        let+ xs' = perform_reordering_with_hints ts' xs in
         return (x :: xs')
       )
 
@@ -1756,11 +1756,11 @@ let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_h
             | Ok t ->
               return (DiveInAt 0 t)
             | Err reason ->
-              th <-- find_deep_code_transform c xs;
+              let+ th = find_deep_code_transform c xs in
               return (increment_hint th)
           )
         | _ ->
-          th <-- find_deep_code_transform c xs;
+          let+ th = find_deep_code_transform c xs in
           return (increment_hint th)
       )
     )
@@ -1816,7 +1816,7 @@ let rec find_transformation_hints (c1 c2:codes) :
       | Ok th -> (
           match perform_reordering_with_hint th c1 with
           | Ok (h1 :: t1) ->
-            t_hints2 <-- find_transformation_hints t1 t2;
+            let+ t_hints2 = find_transformation_hints t1 t2 in
             return (th :: t_hints2)
           | Ok [] -> Err "Impossible"
           | Err reason ->
@@ -1827,8 +1827,8 @@ let rec find_transformation_hints (c1 c2:codes) :
           match h1, h2 with
           | Block l1, Block l2 -> (
               match (
-                t_hints1 <-- find_transformation_hints l1 l2;
-                t_hints2 <-- find_transformation_hints t1 t2;
+                let+ t_hints1 = find_transformation_hints l1 l2 in
+                let+ t_hints2 = find_transformation_hints t1 t2 in
                 return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
               ) with
               | Ok ths -> return ths
@@ -1837,25 +1837,25 @@ let rec find_transformation_hints (c1 c2:codes) :
             )
           | IfElse co1 (Block tr1) (Block fa1), IfElse co2 (Block tr2) (Block fa2) ->
             (co1 = co2) /- ("Non-same conditions for IfElse: (" ^
-                            print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");;
+                            print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");+
             assert (metric_for_code h2 > metric_for_code (Block tr2)); (* OBSERVE *)
             assert (metric_for_code h2 > metric_for_code (Block fa2)); (* OBSERVE *)
-            tr_hints <-- find_transformation_hints tr1 tr2;
-            fa_hints <-- find_transformation_hints fa1 fa2;
-            t_hints2 <-- find_transformation_hints t1 t2;
+            let+ tr_hints = find_transformation_hints tr1 tr2 in
+            let+ fa_hints = find_transformation_hints fa1 fa2 in
+            let+ t_hints2 = find_transformation_hints t1 t2 in
             return (InPlaceIfElse tr_hints fa_hints :: t_hints2)
           | While co1 (Block bo1), While co2 (Block bo2) ->
             (co1 = co2) /- ("Non-same conditions for While: (" ^
-                            print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");;
+                            print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");+
             assert (metric_for_code h2 > metric_for_code (Block bo2)); (* OBSERVE *)
-            bo_hints <-- find_transformation_hints bo1 bo2;
-            t_hints2 <-- find_transformation_hints t1 t2;
+            let+ bo_hints = find_transformation_hints bo1 bo2 in
+            let+ t_hints2 = find_transformation_hints t1 t2 in
             return (InPlaceWhile bo_hints :: t_hints2)
           | Block l1, IfElse _ _ _
           | Block l1, While _ _ ->
             assert (metric_for_codes (l1 `L.append` t1) == metric_for_codes l1 + metric_for_codes t1); (* OBSERVE *)
             assert_norm (metric_for_codes c1 == 2 + metric_for_codes l1 + metric_for_codes t1); (* OBSERVE *)
-            t_hints1 <-- find_transformation_hints (l1 `L.append` t1) c2;
+            let+ t_hints1 = find_transformation_hints (l1 `L.append` t1) c2 in
             (
               match t_hints1 with
               | [] -> Err "Impossible"
@@ -1863,7 +1863,7 @@ let rec find_transformation_hints (c1 c2:codes) :
                 let th = DiveInAt 0 th in
                 match perform_reordering_with_hint th c1 with
                 | Ok (h1 :: t1) ->
-                  t_hints2 <-- find_transformation_hints t1 t2;
+                  let+ t_hints2 = find_transformation_hints t1 t2 in
                   return (th :: t_hints2)
                 | Ok [] -> Err "Impossible"
                 | Err reason ->

@@ -57,13 +57,45 @@ let mk_words_state (#a : hash_alg) (s : words_state' a)
  if is_blake a then
    (s, nat_to_extra_state a counter)
  else (s, ())
-#pop-options    
+#pop-options
 
 (* Adding some non-inlined definitions to factorize code *)
 let hash_len a = Hacl.Hash.Definitions.hash_len a
 let block_len a = Hacl.Hash.Definitions.block_len a
 
-#push-options "--ifuel 1 --retry 5"
+val hash_is_hash_incremental (a: hash_alg)
+  (input: S.seq uint8 { S.length input <= U64.v (Hacl.Streaming.MD.max_input_len64 a) }):
+  Lemma (
+      assert_norm (pow2 64 < pow2 125);
+      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+      (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
+      (* TODO: use update_full ? *)
+      let hash0 = fst (Spec.Agile.Hash.init a) in
+      let hash1 = fst (Spec.Agile.Hash.update_multi a (mk_words_state hash0 0) bs) in
+      let prevlen = S.length bs in
+      let hash2 = fst (Spec.Hash.Incremental.update_last a (mk_words_state hash1 prevlen) prevlen l) in
+      let hash3 = Spec.Hash.PadFinish.finish a (mk_words_state hash2 0) in
+      hash3 `S.equal` Spec.Agile.Hash.hash a input)
+
+#push-options "--ifuel 1"
+let hash_is_hash_incremental a input =
+  assert_norm (pow2 64 < pow2 125);
+  if is_blake a then begin
+    assert_norm (pow2 64 < pow2 125);
+    let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
+    (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
+    (* TODO: use update_full ? *)
+    let hash0 = Spec.Agile.Hash.init a in
+    let hash1 = Spec.Agile.Hash.update_multi a (mk_words_state (fst hash0) 0) bs in
+    Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a (mk_words_state (fst hash0) 0) bs;
+    assert (extra_state_v (snd hash1) == S.length bs);
+    Hacl.Hash.Blake2.Lemmas.blake2_init_no_key_is_agile a;
+    Hacl.Hash.Blake2.Lemmas.lemma_blake2_hash_equivalence a input;
+    Spec.Hash.Incremental.hash_is_hash_incremental a input
+  end else
+    Spec.Hash.Incremental.hash_is_hash_incremental a input
+
+#restart-solver
 inline_for_extraction noextract
 let evercrypt_hash : block hash_alg =
   Block
@@ -72,7 +104,7 @@ let evercrypt_hash : block hash_alg =
     (stateful_unused hash_alg)
 
     (* TODO: this general max length definition shouldn't be in the MD file! *)
-    Hacl.Streaming.MD.max_input_length64
+    Hacl.Streaming.MD.max_input_len64
     hash_len
     block_len
     block_len // No vectorization
@@ -97,24 +129,17 @@ let evercrypt_hash : block hash_alg =
        else ())
     (* spec_is_incremental *)
     (fun a _ input ->
-       if is_blake a then
-         begin
-         Hacl.Hash.Blake2.Lemmas.blake2_init_no_key_is_agile a;
-         Hacl.Hash.Blake2.Lemmas.lemma_blake2_hash_equivalence a input;
-         Hacl.Streaming.Blake2.spec_is_incremental (to_blake_alg a) () input
-         end
-       else
-         Spec.Hash.Incremental.hash_is_hash_incremental a input)
+        hash_is_hash_incremental a input)
 
     EverCrypt.Hash.alg_of_state
     (fun i _ -> EverCrypt.Hash.init #i)
-    (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi2 #i s prevlen blocks len)
+    (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->
        (**) if is_blake i then
        (**)   assert(
        (**)    Lib.IntTypes.cast (extra_state_int_type i) Lib.IntTypes.SEC prevlen ==
        (**)    nat_to_extra_state i (U64.v prevlen));
-       EverCrypt.Hash.update_last2 #i s prevlen last last_len)
+       EverCrypt.Hash.update_last #i s prevlen last last_len)
     (fun i _ -> EverCrypt.Hash.finish #i)
 #pop-options
 
@@ -122,11 +147,25 @@ let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erase
 
 let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
-let update (i: G.erased hash_alg) =
-  let _ = allow_inversion Spec.Agile.Hash.hash_alg in
-  assert_norm (pow2 61 - 1 < pow2 64);
-  assert_norm (pow2 64 < pow2 125 - 1);
-  F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit)
+let update (i: G.erased hash_alg)
+  (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
+  (data: B.buffer uint8)
+  (len: UInt32.t):
+  Stack EverCrypt.Error.error_code
+    (requires fun h0 -> F.update_pre evercrypt_hash i s data len h0)
+    (ensures fun h0 e h1 ->
+      match e with
+      | EverCrypt.Error.Success ->
+          S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i) /\
+          F.update_post evercrypt_hash i s data len h0 h1
+      | EverCrypt.Error.MaximumLengthExceeded ->
+          h0 == h1 /\
+          not (S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i))
+      | _ -> False)
+=
+  match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s data len with
+  | 0ul -> EverCrypt.Error.Success
+  | 1ul -> EverCrypt.Error.MaximumLengthExceeded
 
 inline_for_extraction noextract
 let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
@@ -137,6 +176,7 @@ let finish_md5: finish_st MD5 = F.mk_finish evercrypt_hash MD5 (EverCrypt.Hash.s
 let finish_sha1: finish_st SHA1 = F.mk_finish evercrypt_hash SHA1 (EverCrypt.Hash.state SHA1) (G.erased unit)
 let finish_sha224: finish_st SHA2_224 = F.mk_finish evercrypt_hash SHA2_224 (EverCrypt.Hash.state SHA2_224) (G.erased unit)
 let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
+let finish_sha3_256: finish_st SHA3_256 = F.mk_finish evercrypt_hash SHA3_256 (EverCrypt.Hash.state SHA3_256) (G.erased unit)
 let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
 let finish_sha512: finish_st SHA2_512 = F.mk_finish evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512) (G.erased unit)
 let finish_blake2s: finish_st Blake2S = F.mk_finish evercrypt_hash Blake2S (EverCrypt.Hash.state Blake2S) (G.erased unit)
@@ -154,6 +194,7 @@ let finish a s dst =
   | SHA2_256 -> finish_sha256 s dst
   | SHA2_384 -> finish_sha384 s dst
   | SHA2_512 -> finish_sha512 s dst
+  | SHA3_256 -> finish_sha3_256 s dst
   | Blake2S -> finish_blake2s s dst
   | Blake2B -> finish_blake2b s dst
 

@@ -602,6 +602,8 @@ val some_arithmetic: t:inttype{~(U1? t)} -> n:nat -> i:nat -> Lemma
   (let m = numbytes t in
    n / pow2 (bits t * (i / m)) % pow2 (bits t) / pow2 (8 * (i % m)) % pow2 8 ==
    n / pow2 (8 * i) % pow2 8)
+
+#push-options "--z3rlimit 150 --fuel 0 --ifuel 0"
 let some_arithmetic t n i =
   let m = numbytes t in
   calc (==) {
@@ -621,7 +623,7 @@ let some_arithmetic t n i =
     == { Math.Lemmas.pow2_plus (8 * i - 8 * (i % m)) (8 * (i % m)) }
     (n / pow2 (8 * i)) % pow2 8;
   }
-
+#pop-options
 
 val index_nat_to_intseq_to_bytes_le:
     #t:inttype{unsigned t /\ ~(U1? t)}
@@ -832,3 +834,27 @@ let rec nat_from_intseq_le_public_to_secret #t len b =
     nat_from_intseq_le_lemma0 (slice b_secret 0 1);
     eq_intro (slice (map secret b) 1 len) (map secret (slice b 1 len));
     () end
+
+let lemma_uints_to_bytes_le_sub #t #l #len s i =
+  let lemma_uints_to_bytes_le_i_j (j : size_nat {j < numbytes t}):
+      Lemma(index (uints_to_bytes_le #t #l s) (i * numbytes t + j) == index (uint_to_bytes_le (index s i)) j) =
+        index_uints_to_bytes_le #t #l #len s (i*numbytes t + j);
+        assert (index (uints_to_bytes_le #t #l s) (i*numbytes t + j) ==
+                index (uint_to_bytes_le (index s i)) j) in
+
+  Classical.forall_intro lemma_uints_to_bytes_le_i_j;
+  eq_intro (sub (uints_to_bytes_le #t #l s) (i * numbytes t) (numbytes t)) (uint_to_bytes_le (index s i))
+
+let lemma_uints_to_from_bytes_le_preserves_value #t #l #len s =
+  let lemma_uints_to_from_bytes_le_preserves_value_i (i : size_nat {i < len}) :
+      Lemma(index (uints_from_bytes_le #t #l (uints_to_bytes_le #t #l s)) i == index s i) =
+        let b8 = uints_to_bytes_le #t #l s in
+        index_uints_from_bytes_le #t #l #len b8 i;
+        assert (index (uints_from_bytes_le b8) i ==
+                uint_from_bytes_le (sub b8 (i * numbytes t) (numbytes t)));
+        lemma_uints_to_bytes_le_sub s i;
+        assert (sub b8 (i * numbytes t) (numbytes t) == uint_to_bytes_le (index s i));
+        lemma_uint_to_from_bytes_le_preserves_value (index s i) in
+
+  Classical.forall_intro lemma_uints_to_from_bytes_le_preserves_value_i;
+  eq_intro (uints_from_bytes_le #t #l (uints_to_bytes_le #t #l s)) s

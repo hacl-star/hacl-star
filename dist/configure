@@ -114,8 +114,8 @@ int main() {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DHACL_CAN_COMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
+  $CC $CROSS_CFLAGS -I. -I../karamel/include -I../karamel/krmllib/dist/minimal -DHACL_CAN_COMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../karamel/include -I../karamel/krmllib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
   else
     echo "... WARNING: lib_intrinsics.h is missing: we can't test whether bug 81300 is present or not and assume it is not."
@@ -335,7 +335,7 @@ if [ ! -z "$build_target" ]; then
     target_arch="aarch64"
     target_sys="apple"
     target_abi="ios"
-    CROSS_TARGET="-target arm64-apple-ios"
+    CROSS_TARGET="-target arm64-apple-ios13.0"
     CROSS_SYSROOT="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch arm64"
     # CROSS_INCLUDES="-I$SYSROOT/usr/include/"
   elif [[ "$build_target" == "x86_64-apple-ios-simulator" ]]; then
@@ -344,7 +344,7 @@ if [ ! -z "$build_target" ]; then
     target_arch="x86_64"
     target_sys="apple"
     target_abi="ios-simulator"
-    CROSS_TARGET="-target x86_64-apple-ios-simulator"
+    CROSS_TARGET="-target x86_64-apple-ios-simulator -mios-simulator-version-min=13.0"
     CROSS_SYSROOT="-isysroot $(xcrun --sdk iphonesimulator --show-sdk-path)"
   else
     show_help

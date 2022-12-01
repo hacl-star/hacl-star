@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "6fbd689a1c7f6c05d23fb9f22a1c3400"
+      "ba53ab69b464eff0ee49f65bea2c4c7f"
     ],
     [
       "Vale.Transformers.PeepHole.peephole_correct",
@@ -34,7 +34,7 @@
         "typing_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph"
       ],
       0,
-      "d8e1617819227ce919114faf82cd2c93"
+      "0c42a5a9aaaa1a78784340ce85fa5b6c"
     ],
     [
       "Vale.Transformers.PeepHole.coerce_to_normal",
@@ -43,7 +43,7 @@
       0,
       [ "@query" ],
       0,
-      "2dc82744c1a38b7d6ffad950c3462789"
+      "54d858f7a8ff2070057cd87c972a20b0"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_update_to_valid_destination_keeps_it_as_valid_src",
@@ -196,7 +196,7 @@
         "typing_Vale.X64.Machine_Semantics_s.valid_src_operand64_and_taint"
       ],
       0,
-      "6afcf6dfc5c5289d5d4fe418a3234b19"
+      "c20fa0279a67682e33a7f4d8855ad98c"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_double_update_reg",
@@ -271,39 +271,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "3e2de87669df99dff2ce77a5d79d28a3"
-    ],
-    [
-      "Vale.Transformers.PeepHole.lemma_double_update_reg",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN", "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "834851fa1d7c44d9db7b9927a052ceac"
-    ],
-    [
-      "Vale.Transformers.PeepHole.lemma_double_update_reg",
-      3,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
-        "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "28110045c1af2ba5d8cc3872406a1dea"
+      "a17ade737187b5115567d6f50ca2c2b3"
     ]
   ]
 ]

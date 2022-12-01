@@ -112,7 +112,7 @@ let rec gctr_encrypt_recursive_length (icb:quad32) (plain:gctr_plain_internal_LE
   else gctr_encrypt_recursive_length icb (tail plain) alg key (i + 1)
 
 #reset-options "--z3rlimit 40"
-let rec gctr_encrypt_length (icb_BE:quad32) (plain:gctr_plain_LE)
+let gctr_encrypt_length (icb_BE:quad32) (plain:gctr_plain_LE)
                              (alg:algorithm) (key:aes_key_LE alg) :
   Lemma(length (gctr_encrypt_LE icb_BE plain alg key) == length plain)
   [SMTPat (length (gctr_encrypt_LE icb_BE plain alg key))]
@@ -172,7 +172,7 @@ let rec gctr_indexed_helper (icb:quad32) (plain:gctr_plain_internal_LE)
       in
       FStar.Classical.forall_intro helper
 
-let rec gctr_indexed (icb:quad32) (plain:gctr_plain_internal_LE)
+let gctr_indexed (icb:quad32) (plain:gctr_plain_internal_LE)
                      (alg:algorithm) (key:aes_key_LE alg) (cipher:seq quad32) : Lemma
   (requires  length cipher == length plain /\
              (forall i . {:pattern index cipher i} 0 <= i /\ i < length cipher ==>
@@ -792,4 +792,3 @@ let gctr_bytes_helper alg key p128 p_bytes c128 c_bytes p_num_bytes iv_BE =
   lemma_length_simplifier p128 p_bytes (if p_num_bytes > length p128 * 16 then append p128 p_bytes else p128) p_num_bytes;
   lemma_length_simplifier c128 c_bytes (if p_num_bytes > length c128 * 16 then append c128 c_bytes else c128) p_num_bytes;
   ()
-

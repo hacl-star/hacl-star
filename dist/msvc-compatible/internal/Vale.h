@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
 extern uint64_t fadd_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
@@ -69,20 +68,6 @@ extern uint64_t check_osxsave();
 extern uint64_t check_avx_xcr0();
 
 extern uint64_t check_avx512_xcr0();
-
-extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);
-
-extern uint64_t fsqr_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
-extern uint64_t fsqr2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
-
-extern uint64_t fmul_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
-
-extern uint64_t fmul2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
-
-extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
-
-extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
 extern uint64_t
 gcm128_decrypt_opt(
@@ -186,27 +171,19 @@ extern uint64_t aes128_keyhash_init(uint8_t *x0, uint8_t *x1);
 
 extern uint64_t aes256_keyhash_init(uint8_t *x0, uint8_t *x1);
 
-extern uint64_t
-gctr128_bytes(
-  uint8_t *x0,
-  uint64_t x1,
-  uint8_t *x2,
-  uint8_t *x3,
-  uint8_t *x4,
-  uint8_t *x5,
-  uint64_t x6
-);
+extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);
 
-extern uint64_t
-gctr256_bytes(
-  uint8_t *x0,
-  uint64_t x1,
-  uint8_t *x2,
-  uint8_t *x3,
-  uint8_t *x4,
-  uint8_t *x5,
-  uint64_t x6
-);
+extern uint64_t fsqr_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+extern uint64_t fsqr2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+extern uint64_t fmul_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
+
+extern uint64_t fmul2_e(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
+
+extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
+
+extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
 #if defined(__cplusplus)
 }

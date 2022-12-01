@@ -10,6 +10,15 @@ open Spec.Hash.Definitions
 
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
+let len_lt_max_a_t (a:sha2_alg) = len:nat{len `less_than_max_input_length` a}
+
+let mk_len_t (a:sha2_alg) (len:len_lt_max_a_t a) : len_t a =
+  match a with
+  | SHA2_224 | SHA2_256 ->
+    (Math.Lemmas.pow2_lt_compat 64 61; uint #U64 #PUB len)
+  | SHA2_384 | SHA2_512 ->
+    (Math.Lemmas.pow2_lt_compat 128 125; uint #U128 #PUB len)
+
 (* The core compression, padding and extraction functions for all SHA2
  * algorithms. *)
 
@@ -30,19 +39,14 @@ let to_word (a:sha2_alg) (n:nat{n < pow2 (word_n a)}) : word a =
   | SHA2_224 | SHA2_256 -> u32 n
   | SHA2_384 | SHA2_512 -> u64 n
 
-let v' (#a: sha2_alg) (x:word a) = match a with
-  | SHA2_224 | SHA2_256 -> uint_v #U32 #SEC x
-  | SHA2_384 | SHA2_512 -> uint_v #U64 #SEC x
-
 inline_for_extraction
 let num_rounds16 (a:sha2_alg) : n:pos{16 * n == size_k_w a} =
   match a with
   | SHA2_224 | SHA2_256 -> 4
   | SHA2_384 | SHA2_512 -> 5
 
-let k_w   (a: sha2_alg) = lseq (word a) block_word_length
+let k_w   (a: sha2_alg) = lseq (word a) (block_word_length a)
 let block_t (a: sha2_alg) = lseq uint8 (block_length a)
-let counter = nat
 
 inline_for_extraction noextract
 type ops = {
@@ -225,18 +229,18 @@ let init (a:sha2_alg) = h0 a, ()
 
 let update (a:sha2_alg) (block:block_t a) (hash:words_state a): Tot (words_state a) =
   let hash, _ = hash in
-  let block_w = Lib.ByteSequence.uints_from_bytes_be #(word_t a) #SEC #block_word_length block in
+  let block_w = Lib.ByteSequence.uints_from_bytes_be #(word_t a) #SEC #(block_word_length a) block in
   let hash_1 = shuffle a block_w hash in
   map2 #_ #_ #_ #8 ( +. ) hash_1 hash, ()
 
 
-let padded_blocks (a:sha2_alg) (len:size_nat{len < block_length a}) : n:nat{n <= 2} =
+let padded_blocks (a:sha2_alg) (len:nat{len < block_length a}) : n:nat{n <= 2} =
   if (len + len_length a + 1 <= block_length a) then 1 else 2
 
 
 let load_last (a:sha2_alg) (totlen_seq:lseq uint8 (len_length a))
-   (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
-   (len:size_nat{len < block_length a}) (b:bytes{S.length b = len}) :
+   (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
+   (len:nat{len < block_length a}) (b:bytes{S.length b = len}) :
    (block_t a & block_t a)
  =
   let last = create (2 * block_length a) (u8 0) in
@@ -249,7 +253,7 @@ let load_last (a:sha2_alg) (totlen_seq:lseq uint8 (len_length a))
 
 
 let update_last (a:sha2_alg) (totlen:len_t a)
-  (len:size_nat{len < block_length a})
+  (len:nat{len < block_length a})
   (b:bytes{S.length b = len}) (hash:words_state a) : Tot (words_state a) =
   let blocks = padded_blocks a len in
   let fin = blocks * block_length a in
@@ -274,35 +278,35 @@ let finish (a:sha2_alg) (st:words_state a) : Tot (lseq uint8 (hash_length a)) =
   emit a hseq
 
 
-let update_block (a:sha2_alg) (len:size_nat) (b:lseq uint8 len)
+let update_block (a:sha2_alg) (len:len_lt_max_a_t a) (b:seq uint8{length b = len})
   (i:nat{i < len / block_length a}) (st:words_state a) : words_state a
  =
-  let mb = sub b (i * block_length a) (block_length a) in
+  let mb = Seq.slice b (i * block_length a) (i * block_length a + block_length a) in
   update a mb st
 
 
-let update_nblocks (a:sha2_alg) (len:size_nat) (b:lseq uint8 len) (st:words_state a) : words_state a =
+let update_nblocks (a:sha2_alg) (len:len_lt_max_a_t a) (b:seq uint8{length b = len}) (st:words_state a) : words_state a =
   let blocks = len / block_length a in
   Lib.LoopCombinators.repeati blocks (update_block a len b) st
 
 
-let hash (#a:sha2_alg) (len:size_nat) (b:lseq uint8 len) =
-  let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+let hash (#a:sha2_alg) (len:len_lt_max_a_t a) (b:seq uint8{length b = len}) =
+  let len' : len_t a = mk_len_t a len in
   let st = init a in
   let st = update_nblocks a len b st in
   let rem = len % block_length a in
-  let mb = sub b (len - rem) rem in
+  let mb = Seq.slice b (len - rem) len in
   let st = update_last a len' rem mb st in
   finish a st
 
-let sha224 (len:size_nat) (b:lseq uint8 len) =
+let sha224 (len:len_lt_max_a_t SHA2_224) (b:seq uint8{length b = len}) =
   hash #SHA2_224 len b
 
-let sha256 (len:size_nat) (b:lseq uint8 len) =
+let sha256 (len:len_lt_max_a_t SHA2_256) (b:seq uint8{length b = len}) =
   hash #SHA2_256 len b
 
-let sha384 (len:size_nat) (b:lseq uint8 len) =
+let sha384 (len:len_lt_max_a_t SHA2_384) (b:seq uint8{length b = len}) =
   hash #SHA2_384 len b
 
-let sha512 (len:size_nat) (b:lseq uint8 len) =
+let sha512 (len:len_lt_max_a_t SHA2_512) (b:seq uint8{length b = len}) =
   hash #SHA2_512 len b

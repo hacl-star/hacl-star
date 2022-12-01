@@ -153,6 +153,7 @@ val ecdsa_signature_step6: result: felem
   -> Stack unit
     (requires fun h -> 
       live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
+      eq_or_disjoint r da /\
       as_nat h kFelem < prime_p256_order /\ 
       as_nat h z < prime_p256_order /\ 
       as_nat h r < prime_p256_order /\ 

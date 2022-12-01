@@ -1,0 +1,9 @@
+# Exporting proper linking flags -- used by Makefile and tests/Makefile
+
+ifeq ($(shell uname),Darwin)
+OPENSSL_ROOT=$(shell which brew >/dev/null && brew info --quiet openssl | egrep '^/' | cut -f 1 -d ' ')
+ifneq (,$(OPENSSL_ROOT))
+CFLAGS := -I$(OPENSSL_ROOT)/include/ $(CFLAGS)
+LDFLAGS:= -L$(OPENSSL_ROOT)/lib $(LDFLAGS)
+endif
+endif

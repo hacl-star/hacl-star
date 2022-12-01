@@ -31,7 +31,7 @@ let v' (#a: sha2_alg) (x:word a) = match a with
   | SHA2_384 | SHA2_512 -> uint_v #U64 #SEC x
 
 let k_w      (a: sha2_alg) = m:S.seq (word a) {S.length m = size_k_w a}
-let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = block_word_length}
+let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = block_word_length a}
 let counter = nat
 
 inline_for_extraction 
@@ -176,10 +176,10 @@ let shuffle_core_pre = shuffle_core_pre_
 (* Scheduling function *)
 
 (* Incremental Version *)
-let ws0_pre_inner (a:sha2_alg) (block:block_w a) (i:nat{i < block_word_length}) (ws:k_w a) : k_w a =
+let ws0_pre_inner (a:sha2_alg) (block:block_w a) (i:nat{i < block_word_length a}) (ws:k_w a) : k_w a =
       Seq.upd ws i (Seq.index block i)
 
-let wsi_pre_inner (a:sha2_alg) (i:nat{i >= block_word_length /\ i < size_k_w a}) (ws:k_w a) : k_w a =
+let wsi_pre_inner (a:sha2_alg) (i:nat{i >= block_word_length a /\ i < size_k_w a}) (ws:k_w a) : k_w a =
       let t16 = ws.[i - 16] in
       let t15 = ws.[i - 15] in
       let t7  = ws.[i - 7] in
@@ -189,7 +189,7 @@ let wsi_pre_inner (a:sha2_alg) (i:nat{i >= block_word_length /\ i < size_k_w a})
       Seq.upd ws i (s1 +. t7 +. s0 +. t16)
 
 let ws_pre_inner (a:sha2_alg) (block:block_w a) (i:nat{i < size_k_w a}) (ws:k_w a) : k_w a =
-    if i < block_word_length then
+    if i < block_word_length a then
       ws0_pre_inner a block i ws
     else
       wsi_pre_inner a i ws
@@ -213,7 +213,7 @@ let init a = h0 a, ()
 
 let update_pre (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
   let hash, _ = hash in
-  let block_w = words_of_bytes a #block_word_length block in
+  let block_w = words_of_bytes a #(block_word_length a) block in
   let hash_1 = shuffle a hash block_w in
   Spec.Loops.seq_map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1, ()
 

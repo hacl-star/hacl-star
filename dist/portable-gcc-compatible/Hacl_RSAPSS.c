@@ -24,7 +24,6 @@
 
 #include "Hacl_RSAPSS.h"
 
-#include "internal/Hacl_Kremlib.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: hash_len */
@@ -57,6 +56,10 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)64U;
       }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)32U;
@@ -67,7 +70,7 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -99,7 +102,7 @@ hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t 
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -424,6 +427,25 @@ load_skey(
 
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
 
+/**
+Sign a message `msg` and write the signature to `sgnt`.
+
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  * Spec_Hash_Definitions_SHA2_256,
+  * Spec_Hash_Definitions_SHA2_384, and
+  * Spec_Hash_Definitions_SHA2_512.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param skey Pointer to secret key created by `Hacl_RSAPSS_new_rsapss_load_skey`.
+@param saltLen Length of salt.
+@param salt Pointer to `saltLen` bytes where the salt is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+@param sgnt Pointer to `ceil(modBits / 8)` bytes where the signature is written to.
+
+@return Returns true if and only if signing was successful.
+*/
 bool
 Hacl_RSAPSS_rsapss_sign(
   Spec_Hash_Definitions_hash_alg a,
@@ -524,6 +546,21 @@ Hacl_RSAPSS_rsapss_sign(
 
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_verify */
 
+/**
+Verify the signature `sgnt` of a message `msg`.
+
+@param a Hash algorithm to use.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param pkey Pointer to public key created by `Hacl_RSAPSS_new_rsapss_load_pkey`.
+@param saltLen Length of salt.
+@param sgntLen Length of signature.
+@param sgnt Pointer to `sgntLen` bytes where the signature is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+
+@return Returns true if and only if the signature is valid.
+*/
 bool
 Hacl_RSAPSS_rsapss_verify(
   Spec_Hash_Definitions_hash_alg a,
@@ -630,6 +667,16 @@ Hacl_RSAPSS_rsapss_verify(
 
 /* SNIPPET_START: Hacl_RSAPSS_new_rsapss_load_pkey */
 
+/**
+Load a public key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+
+@return Returns an allocated public key. Note: caller must take care to `free()` the created key.
+*/
 uint64_t
 *Hacl_RSAPSS_new_rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb)
 {
@@ -656,7 +703,7 @@ uint64_t
   uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t pkeyLen = nLen + nLen + eLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), pkeyLen);
-  uint64_t *pkey = KRML_HOST_CALLOC(pkeyLen, sizeof (uint64_t));
+  uint64_t *pkey = (uint64_t *)KRML_HOST_CALLOC(pkeyLen, sizeof (uint64_t));
   if (pkey == NULL)
   {
     return pkey;
@@ -685,6 +732,7 @@ uint64_t
   {
     return pkey2;
   }
+  KRML_HOST_FREE(pkey2);
   return NULL;
 }
 
@@ -692,6 +740,18 @@ uint64_t
 
 /* SNIPPET_START: Hacl_RSAPSS_new_rsapss_load_skey */
 
+/**
+Load a secret key from key parts.
+
+@param modBits Count of bits in modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value is read from.
+
+@return Returns an allocated secret key. Note: caller must take care to `free()` the created key.
+*/
 uint64_t
 *Hacl_RSAPSS_new_rsapss_load_skey(
   uint32_t modBits,
@@ -738,7 +798,7 @@ uint64_t
   uint32_t dLen = (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t skeyLen = nLen + nLen + eLen + dLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), skeyLen);
-  uint64_t *skey = KRML_HOST_CALLOC(skeyLen, sizeof (uint64_t));
+  uint64_t *skey = (uint64_t *)KRML_HOST_CALLOC(skeyLen, sizeof (uint64_t));
   if (skey == NULL)
   {
     return skey;
@@ -776,6 +836,7 @@ uint64_t
   {
     return skey2;
   }
+  KRML_HOST_FREE(skey2);
   return NULL;
 }
 
@@ -783,6 +844,24 @@ uint64_t
 
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_skey_sign */
 
+/**
+Sign a message `msg` and write the signature to `sgnt`.
+
+@param a Hash algorithm to use.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param dBits Count of bits in `d` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value is read from.
+@param saltLen Length of salt.
+@param salt Pointer to `saltLen` bytes where the salt is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+@param sgnt Pointer to `ceil(modBits / 8)` bytes where the signature is written to.
+
+@return Returns true if and only if signing was successful.
+*/
 bool
 Hacl_RSAPSS_rsapss_skey_sign(
   Spec_Hash_Definitions_hash_alg a,
@@ -838,6 +917,22 @@ Hacl_RSAPSS_rsapss_skey_sign(
 
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_pkey_verify */
 
+/**
+Verify the signature `sgnt` of a message `msg`.
+
+@param a Hash algorithm to use.
+@param modBits Count of bits in the modulus (`n`).
+@param eBits Count of bits in `e` value.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param saltLen Length of salt.
+@param sgntLen Length of signature.
+@param sgnt Pointer to `sgntLen` bytes where the signature is read from.
+@param msgLen Length of message.
+@param msg Pointer to `msgLen` bytes where the message is read from.
+
+@return Returns true if and only if the signature is valid.
+*/
 bool
 Hacl_RSAPSS_rsapss_pkey_verify(
   Spec_Hash_Definitions_hash_alg a,
@@ -875,4 +970,24 @@ Hacl_RSAPSS_rsapss_pkey_verify(
 }
 
 /* SNIPPET_END: Hacl_RSAPSS_rsapss_pkey_verify */
+
+/* SNIPPET_START: Hacl_RSAPSS_mgf_hash */
+
+/**
+  The mask generation function defined in the Public Key Cryptography Standard #1 
+  (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) 
+*/
+void
+Hacl_RSAPSS_mgf_hash(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t len,
+  uint8_t *mgfseed,
+  uint32_t maskLen,
+  uint8_t *res
+)
+{
+  mgf_hash(a, len, mgfseed, maskLen, res);
+}
+
+/* SNIPPET_END: Hacl_RSAPSS_mgf_hash */
 

@@ -7,7 +7,7 @@ open Lib.Buffer
 
 (* Versions of add_carry_u64 and sub_borrow_u64 that rely on uint128 *)
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 val add_carry_u64: add_carry_st U64
 let add_carry_u64 cin x y r =

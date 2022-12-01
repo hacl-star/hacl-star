@@ -22,7 +22,6 @@ val seq_map_i_indexed (#a:Type) (#b:Type) (f:int->a->b) (s:seq a) (i:int) :
   Tot (s':seq b { length s' == length s /\
                   (forall j . {:pattern index s' j} 0 <= j /\ j < length s ==> index s' j == f (i + j) (index s j))
                 })
-      (decreases %[(length s)])
 
 val seq_map_i (#a:Type) (#b:Type) (f:int->a->b) (s:seq a) :
   Tot (s':seq b { length s' == length s /\

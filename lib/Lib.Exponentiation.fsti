@@ -3,49 +3,9 @@ module Lib.Exponentiation
 open FStar.Mul
 
 module Loops = Lib.LoopCombinators
+include Lib.Exponentiation.Definition
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
-
-//we don't require to have an inverse element to be an abelian group
-//so this is just commutative monoid
-inline_for_extraction
-class comm_monoid (t:Type) = {
-  one: t;
-  mul: t -> t -> t;
-  lemma_one: a:t -> Lemma (mul a one == a);
-  lemma_mul_assoc: a:t -> b:t -> c:t -> Lemma (mul (mul a b) c == mul a (mul b c));
-  lemma_mul_comm: a:t -> b:t -> Lemma (mul a b == mul b a)
-  }
-
-let sqr (#t:Type) (k:comm_monoid t) (a:t) : t = mul a a
-
-let rec pow (#t:Type) (k:comm_monoid t) (x:t) (n:nat) : t =
-  if n = 0 then one
-  else mul x (pow k x (n - 1))
-
-
-val lemma_pow0: #t:Type -> k:comm_monoid t -> x:t -> Lemma (pow k x 0 == one)
-
-val lemma_pow1: #t:Type -> k:comm_monoid t -> x:t -> Lemma (pow k x 1 == x)
-
-val lemma_pow_unfold: #t:Type -> k:comm_monoid t -> x:t -> n:pos ->
-  Lemma (mul x (pow k x (n - 1)) == pow k x n)
-
-
-val lemma_pow_one: #t:Type -> k:comm_monoid t -> n:nat -> Lemma (pow k one n == one)
-
-val lemma_pow_add: #t:Type -> k:comm_monoid t -> x:t -> n:nat -> m:nat ->
-  Lemma (mul (pow k x n) (pow k x m) == pow k x (n + m))
-
-val lemma_pow_mul: #t:Type -> k:comm_monoid t -> x:t -> n:nat -> m:nat ->
-  Lemma (pow k (pow k x n) m == pow k x (n * m))
-
-val lemma_pow_mul_base: #t:Type -> k:comm_monoid t -> a:t -> b:t -> n:nat ->
-  Lemma (mul (pow k a n) (pow k b n) == pow k (mul a b) n)
-
-val lemma_pow_double: #t:Type -> k:comm_monoid t -> x:t -> b:nat ->
-  Lemma (pow k (mul x x) b == pow k x (b + b))
-
 
 let get_ith_bit (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i < bBits}) =
   b / pow2 i % 2
@@ -167,27 +127,81 @@ val exp_fw_lemma: #t:Type -> k:comm_monoid t -> a:t -> bBits:nat -> b:nat{b < po
   Lemma (exp_fw k a bBits b l == pow k a b)
 
 
-// double exponentiation
+///  Multi-Exponentiation
+
+// Double exponentiation [a1^b1 `mul` a2^b2]
+//-------------------------------------------
+
 let exp_double_fw_f (#t:Type) (k:comm_monoid t)
   (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
   (a2:t) (b2:nat{b2 < pow2 bBits})
   (l:pos) (i:nat{i < bBits / l}) (acc:t) : t
  =
-  let acc1 = exp_fw_f k a1 bBits b1 l i acc in
-  mul_acc_pow_a_bits_l k a2 bBits b2 l i acc1
+  let acc1 = exp_fw_f k a2 bBits b2 l i acc in
+  mul_acc_pow_a_bits_l k a1 bBits b1 l i acc1
 
 let exp_double_fw_acc0 (#t:Type) (k:comm_monoid t)
-  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits}) (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{bBits % l <> 0}) : t =
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{bBits % l <> 0}) : t =
   let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
   let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
   mul acc_a1 acc_a2
 
-let exp_double_fw (#t:Type) (k:comm_monoid t) (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits}) (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t =
+let exp_double_fw (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t =
   let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
-  let res = Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
-  res
+  Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0
 
 val exp_double_fw_lemma: #t:Type -> k:comm_monoid t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
   -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos ->
   Lemma (exp_double_fw k a1 bBits b1 a2 b2 l == mul (pow k a1 b1) (pow k a2 b2))
+
+
+// [a1^b1 `mul` a2^b2 `mul` a3^b3 `mul` a4^b4]
+//----------------------------------------------
+
+let exp_four_fw_f (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits})
+  (a3:t) (b3:nat{b3 < pow2 bBits})
+  (a4:t) (b4:nat{b4 < pow2 bBits})
+  (l:pos) (i:nat{i < bBits / l}) (acc:t) : t
+ =
+  let acc = exp_fw_f k a4 bBits b4 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a3 bBits b3 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a2 bBits b2 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a1 bBits b1 l i acc in
+  acc
+
+let exp_four_fw_acc0 (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits})
+  (a3:t) (b3:nat{b3 < pow2 bBits})
+  (a4:t) (b4:nat{b4 < pow2 bBits})
+  (l:pos{bBits % l <> 0}) : t =
+  let acc_a12 = exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
+  let acc_a34 = exp_double_fw_acc0 k a3 bBits b3 a4 b4 l in
+  mul acc_a12 acc_a34
+
+let exp_four_fw (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
+  (a2:t) (b2:nat{b2 < pow2 bBits})
+  (a3:t) (b3:nat{b3 < pow2 bBits})
+  (a4:t) (b4:nat{b4 < pow2 bBits})
+  (l:pos) : t =
+  let acc0 =
+    if bBits % l = 0 then one
+    else exp_four_fw_acc0 k a1 bBits b1 a2 b2 a3 b3 a4 b4 l in
+  Loops.repeati (bBits / l)
+    (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0
+
+val exp_four_fw_lemma: #t:Type -> k:comm_monoid t
+  -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits}
+  -> a3:t -> b3:nat{b3 < pow2 bBits}
+  -> a4:t -> b4:nat{b4 < pow2 bBits}
+  -> l:pos ->
+  Lemma (exp_four_fw k a1 bBits b1 a2 b2 a3 b3 a4 b4 l ==
+    mul (mul (mul (pow k a1 b1) (pow k a2 b2)) (pow k a3 b3)) (pow k a4 b4))

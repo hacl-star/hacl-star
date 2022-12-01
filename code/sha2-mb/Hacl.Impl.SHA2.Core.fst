@@ -21,6 +21,10 @@ module VecTranspose = Lib.IntVector.Transpose
 module LSeq = Lib.Sequence
 module HD = Hacl.Hash.Definitions
 
+(* Force ordering in dependency analysis so that monomorphizations are inserted
+   into the Types module first. *)
+let _ = Hacl.Impl.SHA2.Types.uint8_8p
+
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 unfold
@@ -347,7 +351,7 @@ let load_ws #a #m b ws =
 
 
 inline_for_extraction noextract
-let padded_blocks (a:sha2_alg) (len:size_t{v len < block_length a}) :
+let padded_blocks (a:sha2_alg) (len:size_t{v len <= block_length a}) :
   n:size_t{v n == SpecVec.padded_blocks a (v len)}
  =
   if (len +! len_len a +! 1ul <=. HD.block_len a) then 1ul else 2ul
@@ -356,7 +360,7 @@ let padded_blocks (a:sha2_alg) (len:size_t{v len < block_length a}) :
 inline_for_extraction noextract
 val load_last_blocks: #a:sha2_alg
   -> totlen_buf:lbuffer uint8 (len_len a)
-  -> len:size_t{v len < block_length a}
+  -> len:size_t{v len <= block_length a}
   -> b:lbuffer uint8 len
   -> fin:size_t{v fin == block_length a \/ v fin == 2 * block_length a}
   -> last:lbuffer uint8 (2ul *! HD.block_len a)  ->
@@ -391,7 +395,7 @@ let preserves_sub_disjoint_multi #lanes #len #len' (b:lbuffer uint8 len) (r:mult
 inline_for_extraction noextract
 let load_last_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     totlen_buf:lbuffer uint8 (len_len a)
-  -> len:size_t{v len < block_length a}
+  -> len:size_t{v len <= block_length a}
   -> b:multibuf (lanes a m) len
   -> fin:size_t{v fin == block_length a \/ v fin == 2 * block_length a}
   -> last:lbuffer uint8 (size (lanes a m) *! 2ul *! HD.block_len a) ->
@@ -776,6 +780,14 @@ noextract
 let preserves_disjoint_multi #lanes #len #len' (b:multibuf lanes len) (r:multibuf lanes len') =
     (forall a l (x:lbuffer a l). disjoint_multi b x ==> disjoint_multi r x)
 
+val lemma_len_lt_max_a_fits_size_t: a:sha2_alg -> len:size_t ->
+  Lemma (v len `less_than_max_input_length` a)
+
+let lemma_len_lt_max_a_fits_size_t a len =
+  match a with
+  | SHA2_224 | SHA2_256 -> Math.Lemmas.pow2_lt_compat 61 32
+  | SHA2_384 | SHA2_512 -> Math.Lemmas.pow2_lt_compat 125 32
+
 
 inline_for_extraction noextract
 let get_multiblock_t (a:sha2_alg) (m:m_spec) =
@@ -785,12 +797,14 @@ let get_multiblock_t (a:sha2_alg) (m:m_spec) =
   Stack (multibuf (lanes a m) (HD.block_len a))
   (requires fun h -> live_multi h b)
   (ensures  fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\ preserves_disjoint_multi b r /\
-    as_seq_multi h1 r == SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i))
+   (lemma_len_lt_max_a_fits_size_t a len;
+    as_seq_multi h1 r == SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i)))
 
 
 inline_for_extraction noextract
 val get_multiblock: #a:sha2_alg -> #m:m_spec{is_supported a m} -> get_multiblock_t a m
 let get_multiblock #a #m len b i =
+  lemma_len_lt_max_a_fits_size_t a len;
   let h0 = ST.get() in
   match lanes a m with
   | 1 ->
@@ -833,12 +847,14 @@ let get_multilast_t (a:sha2_alg) (m:m_spec) =
   Stack (multibuf (lanes a m) (len %. HD.block_len a))
   (requires fun h -> live_multi h b)
   (ensures  fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\ preserves_disjoint_multi b r /\
-    as_seq_multi h1 r == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b))
+    (lemma_len_lt_max_a_fits_size_t a len;
+    as_seq_multi h1 r == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)))
 
 inline_for_extraction noextract
 val get_multilast: #a:sha2_alg -> #m:m_spec{is_supported a m} -> get_multilast_t a m
 #push-options "--z3rlimit 300"
 let get_multilast #a #m len b =
+  lemma_len_lt_max_a_fits_size_t a len;
   let h0 = ST.get() in
   let rem = len %. HD.block_len a in
   assert (v (len -! rem) == v len - v rem);

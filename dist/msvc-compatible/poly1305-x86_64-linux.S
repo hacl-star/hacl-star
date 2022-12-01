@@ -200,4 +200,4 @@ L3:
   mov %rax, %rdi
   ret
 
-
+.section .note.GNU-stack,"",%progbits

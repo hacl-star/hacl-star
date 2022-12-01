@@ -1,17 +1,18 @@
 module Hacl.HPKE.Curve64_CP256_SHA512
 
 open Hacl.Impl.HPKE
+module S = Spec.Agile.HPKE
 module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD
 module Hash = Spec.Agile.Hash
 
 noextract unfold
-let cs = (DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_512)
+let cs:S.ciphersuite = (DH.DH_Curve25519, Hash.SHA2_256, S.Seal AEAD.CHACHA20_POLY1305, Hash.SHA2_512)
 
 noextract unfold
 let vale_p = Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
-val setupBaseI: setupBaseI_st cs vale_p
+val setupBaseS: setupBaseS_st cs vale_p
 
 val setupBaseR: setupBaseR_st cs vale_p
 

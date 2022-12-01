@@ -30,17 +30,14 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "internal/Hacl_Spec.h"
-#include "internal/Hacl_Kremlib.h"
 #include "../Hacl_P256.h"
-#include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Impl_P256_LowLevel_toUint8 */
 
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
@@ -74,7 +71,7 @@ Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *
 
 /* SNIPPET_START: Hacl_Impl_P256_DH__ecp256dh_r */
 
-/*
+/**
   The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
 */

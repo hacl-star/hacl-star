@@ -30,9 +30,9 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Lib_RandomBuffer_System.h"
@@ -40,8 +40,7 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
 #include "EverCrypt_HMAC.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 /* SNIPPET_START: EverCrypt_DRBG_supported_alg */
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
@@ -83,17 +82,6 @@ extern uint32_t EverCrypt_DRBG_max_additional_input_length;
 uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: EverCrypt_DRBG_min_length */
-
-/* SNIPPET_START: EverCrypt_DRBG_state_s_tags */
-
-#define EverCrypt_DRBG_SHA1_s 0
-#define EverCrypt_DRBG_SHA2_256_s 1
-#define EverCrypt_DRBG_SHA2_384_s 2
-#define EverCrypt_DRBG_SHA2_512_s 3
-
-/* SNIPPET_END: EverCrypt_DRBG_state_s_tags */
-
-typedef uint8_t EverCrypt_DRBG_state_s_tags;
 
 /* SNIPPET_START: EverCrypt_DRBG_state_s */
 
@@ -141,8 +129,25 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_512_s */
 
+/* SNIPPET_START: EverCrypt_DRBG_create_in */
+
+EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: EverCrypt_DRBG_create_in */
+
 /* SNIPPET_START: EverCrypt_DRBG_create */
 
+/**
+Create a DRBG state.
+
+@param a Hash algorithm to use. The possible instantiations are ...
+  * `Spec_Hash_Definitions_SHA2_256`,
+  * `Spec_Hash_Definitions_SHA2_384`,
+  * `Spec_Hash_Definitions_SHA2_512`, and
+  * `Spec_Hash_Definitions_SHA1`.
+
+@return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`.
+*/
 EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: EverCrypt_DRBG_create */
@@ -313,6 +318,15 @@ void EverCrypt_DRBG_uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st);
 
 /* SNIPPET_START: EverCrypt_DRBG_instantiate */
 
+/**
+Instantiate the DRBG.
+
+@param st Pointer to DRBG state.
+@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
+@param personalization_string_len Length of personalization string.
+
+@return True if and only if instantiation was successful.
+*/
 bool
 EverCrypt_DRBG_instantiate(
   EverCrypt_DRBG_state_s *st,
@@ -324,6 +338,15 @@ EverCrypt_DRBG_instantiate(
 
 /* SNIPPET_START: EverCrypt_DRBG_reseed */
 
+/**
+Reseed the DRBG.
+
+@param st Pointer to DRBG state.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if reseed was successful.
+*/
 bool
 EverCrypt_DRBG_reseed(
   EverCrypt_DRBG_state_s *st,
@@ -335,6 +358,17 @@ EverCrypt_DRBG_reseed(
 
 /* SNIPPET_START: EverCrypt_DRBG_generate */
 
+/**
+Generate output.
+
+@param output Pointer to `n` bytes of memory where random output is written to.
+@param st Pointer to DRBG state.
+@param n Length of desired output.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if generate was successful.
+*/
 bool
 EverCrypt_DRBG_generate(
   uint8_t *output,
@@ -348,6 +382,11 @@ EverCrypt_DRBG_generate(
 
 /* SNIPPET_START: EverCrypt_DRBG_uninstantiate */
 
+/**
+Uninstantiate and free the DRBG.
+
+@param st Pointer to DRBG state.
+*/
 void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st);
 
 /* SNIPPET_END: EverCrypt_DRBG_uninstantiate */

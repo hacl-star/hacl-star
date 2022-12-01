@@ -161,6 +161,8 @@ let y3_lemma_0 x y z t0 =
 val y3_lemma_1: x: int ->  y: int -> z: int ->  
   Lemma (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime == 3 * (x + z * z) * (x - z * z)  % prime)
 
+let sym_decidable (#a:eqtype) (x y:a) : Lemma (requires y = x) (ensures x == y) = ()
+
 let y3_lemma_1 x y z = 
   let open FStar.Tactics.Canon in 
   calc (==)
@@ -178,10 +180,8 @@ let y3_lemma_1 x y z =
       3 * (x + z * z) * ((x - (z * z % prime))  % prime)  % prime;
     (==) {lemma_mod_sub_distr x (z * z) prime}
       3 * (x + z * z) * ((x - z * z) % prime)  % prime;
-    (==) {lemma_mod_mul_distr_r (3 * (x + z * z)) (x - z * z) prime}
-      3 * (x - z * z) * (x + z * z)  % prime;
-    (==) {assert_by_tactic (3 * (x + z * z) * (x - z * z) == 3 * (x - z * z) * (x + z * z)) canon}
-      3 * (x + z * z) * (x - z * z)  % prime; 
+    (==) { _ by FStar.Tactics.(mapply (`sym_decidable); mapply (`lemma_mod_mul_distr_r)) }
+      3 * (x + z * z) * (x - z * z)  % prime;
     }
 
 

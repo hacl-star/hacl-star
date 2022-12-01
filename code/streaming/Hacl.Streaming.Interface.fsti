@@ -212,7 +212,7 @@ let optional_t #index
 ///
 /// Some remarks.
 /// - For algorithms that don't need a key at all (e.g. hash) it suffices to
-///   pass stateful_unused for the key. (Kremlin unit argument elimination will
+///   pass stateful_unused for the key. (KaRaMeL unit argument elimination will
 ///   do the rest).
 /// - The Runtime API is more general, and we could just dismiss `km` and always
 ///   choose to keep the key at run-time in the streaming state, except this is
@@ -248,7 +248,7 @@ type block (index: Type0) =
   key: stateful index ->
 
   // Introducing a notion of blocks and final result.
-  max_input_length: (index -> x:nat { 0 < x /\ x < pow2 64 }) ->
+  max_input_len: (index -> x:U64.t { U64.v x > 0 }) ->
   output_len: (index -> x:U32.t { U32.v x > 0 }) ->
   block_len: (index -> x:U32.t { U32.v x > 0 }) ->
   // The size of data to process at a time. Must be a multiple of block_len.
@@ -262,24 +262,24 @@ type block (index: Type0) =
   update_multi_s: (i:index ->
     state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
-    s:S.seq uint8 { prevlen + S.length s <= max_input_length i /\ S.length s % U32.v (block_len i) = 0 } ->
+    s:S.seq uint8 { prevlen + S.length s <= U64.v (max_input_len i) /\ S.length s % U32.v (block_len i) = 0 } ->
     state.t i) ->
   update_last_s: (i:index ->
     state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
-    s:S.seq uint8 { S.length s + prevlen <= max_input_length i /\ S.length s <= U32.v (block_len i) } ->
+    s:S.seq uint8 { S.length s + prevlen <= U64.v (max_input_len i) /\ S.length s <= U32.v (block_len i) } ->
     state.t i) ->
   finish_s: (i:index -> key.t i -> state.t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
 
   /// The specification in one shot.
-  spec_s: (i:index -> key.t i -> input:S.seq uint8 { S.length input <= max_input_length i } ->
+  spec_s: (i:index -> key.t i -> input:S.seq uint8 { S.length input <= U64.v (max_input_len i) } ->
     output:S.seq uint8 { S.length output == U32.v (output_len i) }) ->
 
   // Required lemmas... clients can enjoy them in their local contexts with the SMT pattern via a let-binding.
 
   update_multi_zero: (i:index ->
     h:state.t i ->
-    prevlen:nat { prevlen % U32.v (block_len i) = 0 /\ prevlen <= max_input_length i } ->
+    prevlen:nat { prevlen % U32.v (block_len i) = 0 /\ prevlen <= U64.v (max_input_len i) } ->
     Lemma
     (ensures (
       Math.Lemmas.modulo_lemma 0 (UInt32.v (block_len i));
@@ -296,7 +296,7 @@ type block (index: Type0) =
       prevlen1 % U32.v (block_len i) = 0 /\
       S.length input1 % U32.v (block_len i) = 0 /\
       S.length input2 % U32.v (block_len i) = 0 /\
-      prevlen1 + S.length input1 + S.length input2 <= max_input_length i /\
+      prevlen1 + S.length input1 + S.length input2 <= U64.v (max_input_len i) /\
       prevlen2 = prevlen1 + S.length input1))
     (ensures (
       let input = S.append input1 input2 in
@@ -310,7 +310,7 @@ type block (index: Type0) =
    * and Spec.Hash.Incremental *)
   spec_is_incremental: (i:index ->
     key: key.t i ->
-    input:S.seq uint8 { S.length input <= max_input_length i } ->
+    input:S.seq uint8 { S.length input <= U64.v (max_input_len i) } ->
     Lemma (
       let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input in
       (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len i));
@@ -353,7 +353,7 @@ type block (index: Type0) =
     prevlen:U64.t { U64.v prevlen % U32.v (block_len i) = 0 } ->
     blocks:B.buffer uint8 { B.length blocks % U32.v (block_len i) = 0 } ->
     len: U32.t { U32.v len = B.length blocks /\
-                 U64.v prevlen + U32.v len <= max_input_length i } ->
+                 U64.v prevlen + U32.v len <= U64.v (max_input_len i) } ->
     Stack unit
     (requires fun h0 ->
       state.invariant #i h0 s /\
@@ -375,7 +375,7 @@ type block (index: Type0) =
     last_len:U32.t{
       last_len = B.len last /\
       U32.v last_len <= U32.v (block_len i) /\
-      U64.v prevlen + U32.v last_len <= max_input_length i} ->
+      U64.v prevlen + U32.v last_len <= U64.v (max_input_len i)} ->
     Stack unit
     (requires fun h0 ->
       state.invariant #i h0 s /\
@@ -408,7 +408,7 @@ type block (index: Type0) =
           B.(loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s))))
     (ensures fun h0 _ h1 ->
       state.invariant #i h1 s /\
-      B.(modifies (loc_buffer dst) h0 h1) /\
+      B.(modifies (loc_buffer dst `loc_union` (state.footprint #i h0 s)) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->

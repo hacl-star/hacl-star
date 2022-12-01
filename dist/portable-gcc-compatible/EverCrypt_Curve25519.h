@@ -30,30 +30,51 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Curve25519_64.h"
 #include "Hacl_Curve25519_51.h"
 #include "EverCrypt_AutoConfig2.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+
 /* SNIPPET_START: EverCrypt_Curve25519_secret_to_public */
 
+/**
+Calculate a public point from a secret/private key.
+
+This computes a scalar multiplication of the secret/private key with the curve's basepoint.
+
+@param pub Pointer to 32 bytes of memory where the resulting point is written to.
+@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
+*/
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv);
 
 /* SNIPPET_END: EverCrypt_Curve25519_secret_to_public */
 
 /* SNIPPET_START: EverCrypt_Curve25519_scalarmult */
 
+/**
+Compute the scalar multiple of a point.
+
+@param shared Pointer to 32 bytes of memory where the resulting point is written to.
+@param my_priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param their_pub Pointer to 32 bytes of memory where the public point is read from.
+*/
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
 /* SNIPPET_END: EverCrypt_Curve25519_scalarmult */
 
 /* SNIPPET_START: EverCrypt_Curve25519_ecdh */
 
+/**
+Execute the diffie-hellmann key exchange.
+
+@param shared Pointer to 32 bytes of memory where the resulting point is written to.
+@param my_priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
+@param their_pub Pointer to 32 bytes of memory where **their** public point is read from.
+*/
 bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
 /* SNIPPET_END: EverCrypt_Curve25519_ecdh */

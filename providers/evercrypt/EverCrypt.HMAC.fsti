@@ -14,7 +14,7 @@ open Lib.IntTypes
 /// Auxiliary lemma
 
 let key_and_data_fits (a: hash_alg): Lemma
-  (ensures (block_length a + pow2 32 <= max_input_length a))
+  (ensures ((block_length a + pow2 32) `less_than_max_input_length` a))
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
@@ -23,7 +23,7 @@ let key_and_data_fits (a: hash_alg): Lemma
 /// Type for compute
 /// Duplicated from Hacl.HMAC because we don't want clients to depend on Hacl.HMAC
 
-inline_for_extraction
+inline_for_extraction noextract
 let compute_st (a: hash_alg) =
   tag: B.buffer uint8 {B.length tag == hash_length a} ->
   key: B.buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->

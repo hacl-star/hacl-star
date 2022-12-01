@@ -157,7 +157,7 @@ val index_map2_lemma (#a:Type) (#b:Type) (#c:Type) (#len:flen) (f:a -> b -> c) (
 unfold let op_Lens_Access #a #len = index #a #len
 unfold let op_Lens_Assignment #a #len = upd #a #len
 
-(* The following conversions are tedious, but are needed to aid KreMLin in extracting ntuples correctly *)
+(* The following conversions are tedious, but are needed to aid KaRaMeL in extracting ntuples correctly *)
 inline_for_extraction
 let ntup1 #a (#l:flen{l = 1}) (t:a) : ntuple a l =
   assert (ntuple a l == ntuple a 1);

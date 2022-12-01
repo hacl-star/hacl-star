@@ -163,4 +163,4 @@ check_avx512_xcr0:
   and %rcx, %rax
   ret
 
-
+.section .note.GNU-stack,"",%progbits
