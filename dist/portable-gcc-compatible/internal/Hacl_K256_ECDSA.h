@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_K256_ECDSA.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: Hacl_Impl_K256_Point_make_point_at_inf */

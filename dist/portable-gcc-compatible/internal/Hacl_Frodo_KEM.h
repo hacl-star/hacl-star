@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Frodo_KEM.h"
 
 /* SNIPPET_START: randombytes_ */

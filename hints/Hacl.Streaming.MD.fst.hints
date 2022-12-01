@@ -1196,7 +1196,7 @@
         "unit_typing"
       ],
       0,
-      "e8cda4221c96c19198941fc90900fca5"
+      "5e3d342058a3a5d784b9bba455dfa835"
     ],
     [
       "Hacl.Streaming.MD.state_spec_v_extensionality",
@@ -1639,7 +1639,7 @@
         "unit_typing"
       ],
       0,
-      "327a26aaf5577f96bda22aceb5eb6a68"
+      "21674a31659a4e561b5276fc850d1775"
     ],
     [
       "Hacl.Streaming.MD.update_nblocks_with_last_sliced",
@@ -2702,8 +2702,7 @@
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.Pervasives.Native.fst",
-        "equation_FStar.Seq.Properties.lseq",
-        "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
+        "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Hacl.Hash.Definitions.as_seq",
@@ -2712,7 +2711,6 @@
         "equation_Hacl.Hash.Definitions.hash_len",
         "equation_Hacl.Hash.Definitions.impl",
         "equation_Hacl.Hash.Definitions.impl_state_len",
-        "equation_Hacl.Hash.Definitions.impl_state_length",
         "equation_Hacl.Hash.Definitions.impl_word",
         "equation_Hacl.Hash.Definitions.m_spec",
         "equation_Hacl.Hash.Definitions.state",
@@ -2745,10 +2743,11 @@
         "equation_Lib.Buffer.modifies1",
         "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.uint64",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.MultiBuffer.disjoint_multi",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.MultiBuffer.disjoint_multi",
         "equation_Lib.MultiBuffer.internally_disjoint",
         "equation_Lib.MultiBuffer.live_multi",
         "equation_Lib.MultiBuffer.multibuf",
@@ -2778,7 +2777,9 @@
         "equation_Spec.Hash.Definitions.len_v",
         "equation_Spec.Hash.Definitions.less_than_max_input_length",
         "equation_Spec.Hash.Definitions.max_input_length",
+        "equation_Spec.Hash.Definitions.sha2_alg",
         "equation_Spec.Hash.Definitions.state_word_length",
+        "equation_Spec.Hash.Definitions.word",
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.Hash.Definitions.words_state",
@@ -2794,6 +2795,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
         "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Hacl.Streaming.Interface.__proj__Stateful__item__freeable",
         "function_token_typing_Hacl.Streaming.Interface.__proj__Stateful__item__t",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Lib.IntTypes.uint8",
@@ -2873,6 +2875,7 @@
         "refinement_interpretation_Tm_refine_1821bb125f421b67809195ad37eb533a",
         "refinement_interpretation_Tm_refine_1dedfade9bd5b2e99e5e8929e9bb5499",
         "refinement_interpretation_Tm_refine_2065983b7394855e8cae0a101ff57c0d",
+        "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
         "refinement_interpretation_Tm_refine_30e6144473b54dee89b03bc9e962cecc",
         "refinement_interpretation_Tm_refine_33dd6c2120be7574a0eed20d42b46e05",
         "refinement_interpretation_Tm_refine_36405dc5122bcdebe15723f1ee36a7b7",
@@ -2938,21 +2941,22 @@
         "typing_FStar.Int.Cast.Full.uint64_to_uint128",
         "typing_FStar.Map.domain", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Pervasives.Native.fst", "typing_FStar.Seq.Base.append",
-        "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
-        "typing_FStar.Seq.Properties.lseq", "typing_FStar.Set.singleton",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt.max_int",
-        "typing_FStar.UInt32.v", "typing_FStar.UInt64.v",
-        "typing_Hacl.Hash.Definitions.as_seq",
+        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.empty",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Properties.lseq",
+        "typing_FStar.Set.singleton", "typing_FStar.UInt.fits",
+        "typing_FStar.UInt.max_int", "typing_FStar.UInt32.v",
+        "typing_FStar.UInt64.v", "typing_Hacl.Hash.Definitions.as_seq",
         "typing_Hacl.Hash.Definitions.block_len",
         "typing_Hacl.Hash.Definitions.hash_len",
         "typing_Hacl.Hash.Definitions.impl_state_len",
         "typing_Hacl.Hash.Definitions.impl_word",
+        "typing_Hacl.Spec.SHA2.Vec.element_t",
         "typing_Hacl.Streaming.MD.max_input_len64",
         "typing_Hacl.Streaming.MD.state_t", "typing_Hacl.Streaming.MD.word",
         "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.MultiBuffer.loc_multi",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.maxint",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.MultiBuffer.loc_multi",
         "typing_Lib.MultiBuffer.multibuf", "typing_Lib.NTuple.createi",
         "typing_Lib.NTuple.index",
         "typing_Lib.UpdateMulti.split_at_last_lazy",
@@ -2969,7 +2973,6 @@
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.block_length",
         "typing_Spec.Hash.Definitions.block_word_length",
-        "typing_Spec.Hash.Definitions.extra_state",
         "typing_Spec.Hash.Definitions.hash_length",
         "typing_Spec.Hash.Definitions.is_blake",
         "typing_Spec.Hash.Definitions.is_sha3",
@@ -2987,6 +2990,7 @@
         "typing_Tm_abs_52a0ed64348f472cf681bfc70625daa4",
         "typing_Tm_abs_ace6b227d2c50150f9d1aa9702bf202c",
         "typing_Tm_abs_bca86c378e629c7384680d9f5e5b4192",
+        "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U128@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok",
@@ -2996,7 +3000,7 @@
         "unit_typing"
       ],
       0,
-      "256399e734ee1fd2919d6884c2c6d998"
+      "85f8d7161d03583c84df2fc705309754"
     ]
   ]
 ]

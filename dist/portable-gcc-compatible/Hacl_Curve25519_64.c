@@ -25,7 +25,6 @@
 #include "Hacl_Curve25519_64.h"
 
 #include "internal/Vale.h"
-#include "internal/Hacl_Krmllib.h"
 #include "config.h"
 #include "curve25519-inline.h"
 /* SNIPPET_START: add_scalar0 */
