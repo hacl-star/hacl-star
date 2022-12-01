@@ -21,7 +21,7 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Added a template to CHANGES.md
 
 
-## 28.02.2022
+## 2022-02-28
 
 ### Added 
 
