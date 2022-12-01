@@ -30,6 +30,10 @@ module Bindings(F:Cstubs.FOREIGN) =
     type everCrypt_DRBG_state_s = [ `everCrypt_DRBG_state_s ] structure
     let (everCrypt_DRBG_state_s : [ `everCrypt_DRBG_state_s ] structure typ)
       = structure "EverCrypt_DRBG_state_s_s"
+    let everCrypt_DRBG_create_in =
+      foreign "EverCrypt_DRBG_create_in"
+        (spec_Hash_Definitions_hash_alg @->
+           (returning (ptr everCrypt_DRBG_state_s)))
     let everCrypt_DRBG_create =
       foreign "EverCrypt_DRBG_create"
         (spec_Hash_Definitions_hash_alg @->

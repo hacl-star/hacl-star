@@ -143,6 +143,8 @@ Hacl_HMAC_DRBG_generate(
   uint8_t *additional_input
 );
 
+void Hacl_HMAC_DRBG_free(Spec_Hash_Definitions_hash_alg uu___, Hacl_HMAC_DRBG_state s);
+
 #if defined(__cplusplus)
 }
 #endif

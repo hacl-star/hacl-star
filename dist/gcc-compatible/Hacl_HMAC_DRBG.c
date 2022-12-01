@@ -1087,3 +1087,13 @@ Hacl_HMAC_DRBG_generate(
   }
 }
 
+void Hacl_HMAC_DRBG_free(Spec_Hash_Definitions_hash_alg uu___, Hacl_HMAC_DRBG_state s)
+{
+  uint8_t *k = s.k;
+  uint8_t *v = s.v;
+  uint32_t *ctr = s.reseed_counter;
+  KRML_HOST_FREE(k);
+  KRML_HOST_FREE(v);
+  KRML_HOST_FREE(ctr);
+}
+
