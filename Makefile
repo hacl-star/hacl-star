@@ -2,8 +2,6 @@
 #
 # From a high-level perspective, the coarse-grained dependency graph is:
 #
-#            merkle_tree
-#                |
 #             evercrypt
 #               /  \
 #           code   vale
@@ -92,10 +90,9 @@ endif
 
 all: all-staged
 
-all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
+all-unstaged: compile-gcc-compatible compile-msvc-compatible \
   compile-portable-gcc-compatible \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic \
-  obj/libhaclml.cmxa compile-election-guard
+  dist/wasm/package.json obj/libhaclml.cmxa
 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
@@ -272,8 +269,8 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:*' \
-	    --extract 'OCaml:-* +FStar.Krml.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
-	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
+	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@.tmp && \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@.tmp && mv $@.tmp $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -587,7 +584,7 @@ HAND_WRITTEN_ML_GEN =
 
 # Flags that we always include. These are not meant to be overridden and
 # provide: -library (for vale interop); -no-prefix (for correct vale interop
-# names; for correct Merkle Tree function names used by C tests); -bundle (to
+# names; for correct function names used by C tests); -bundle (to
 # eliminate spec files where definitions are not marked noextract); -drop (for
 # intrinsics, see note below); -add-include (for curve's inline header); -fX for
 # codegen customiations; -static-header (so that instead of extern declarations
@@ -606,7 +603,6 @@ REQUIRED_BUNDLES = \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
-  -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   $(VALE_BUNDLES) \
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle 'EverCrypt.Spec.*' \
@@ -631,8 +627,6 @@ REQUIRED_FLAGS	= \
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -add-include 'Hacl_Curve25519_64.c:"curve25519-inline.h"' \
-  -no-prefix 'MerkleTree' \
-  -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig \
   -static-header 'EverCrypt.TargetConfig' \
   -no-prefix 'EverCrypt.TargetConfig' \
@@ -694,7 +688,6 @@ TARGETCONFIG_FLAGS = \
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
-MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
@@ -713,7 +706,6 @@ BUNDLE_FLAGS	=\
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
-  $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
   $(P256_BUNDLE) \
@@ -794,12 +786,7 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
-dist/wasm/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
 
-dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
-
-# And Merkle trees
-dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
@@ -834,7 +821,8 @@ publish-test-wasm: dist/wasm/package.json
 test-wasm: dist/wasm/package.json
 	cd dist/wasm && \
 	  node api_test.js && \
-	  node test2.js
+	  node test2.js && \
+	  node test3.js
 
 # Compact distributions
 # ---------------------
@@ -866,36 +854,6 @@ doc-ocaml: test-bindings-ocaml
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
-dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
-
-
-# Election Guard distribution
-# ---------------------------
-#
-# Trying something new, i.e. only listing the things we care about (since
-# there's so few of them)
-dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
-  -bundle Hacl.Hash.* \
-  -bundle Hacl.HMAC \
-  -bundle Hacl.Streaming.SHA2= \
-  -bundle Hacl.Bignum256= \
-  -bundle Hacl.Bignum4096= \
-  -bundle Hacl.Bignum256_32= \
-  -bundle Hacl.Bignum4096_32= \
-  -bundle Hacl.GenericField32= \
-  -bundle Hacl.GenericField64= \
-  -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
-  -bundle Hacl.HMAC_DRBG= \
-  $(INTTYPES_BUNDLE)
-dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
-dist/election-guard/Makefile.basic: VALE_ASMS =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
-dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
-dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
-  -bundle '\*[rename=Should_not_be_here]' \
-  -falloca -ftail-calls -fc89 -add-early-include '"krml/internal/builtin.h"'
-
 # Portable distribution
 # ---------------------
 #
@@ -905,24 +863,10 @@ dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
 # file that is *NOT* known to require sse2.
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
-# Merkle Tree standalone distribution
-# -----------------------------------
-#
-# Without even cryptography.
-dist/merkle-tree/Makefile.basic: \
-	BUNDLE_FLAGS=-bundle MerkleTree.EverCrypt \
-    -bundle 'MerkleTree+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=*[rename=MerkleTree]'
-dist/merkle-tree/Makefile.basic: VALE_ASMS =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_H_FILES =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_FILES =
-dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
-dist/merkle-tree/Makefile.basic: INTRINSIC_FLAGS =
-
 # Actual KaRaMeL invocations
 # --------------------------
 
+.PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS)
 	mkdir -p $(dir $@)
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
@@ -975,7 +919,7 @@ dist/test/c/Hacl_Test_K256.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-incl
 
 copy-krmllib:
 	mkdir -p dist/karamel
-	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal include) | (cd dist/karamel && tar xf -)
+	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal $$(find include -not -name 'steel_types.h')) | (cd dist/karamel && tar xf -)
 
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 
@@ -1029,7 +973,7 @@ test-c-%: dist/test/c/%.test
 # C tests (from C files) #
 ##########################
 
-test-handwritten: compile-gcc64-only compile-gcc-compatible
+test-handwritten: compile-gcc-compatible
 	$(LD_EXTRA) KRML_HOME="$(KRML_HOME)" \
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test

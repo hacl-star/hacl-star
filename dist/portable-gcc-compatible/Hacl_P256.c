@@ -25,7 +25,6 @@
 #include "internal/Hacl_P256.h"
 
 #include "internal/Hacl_Spec.h"
-#include "internal/Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: isZero_uint64_CT */
 

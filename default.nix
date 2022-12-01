@@ -125,12 +125,12 @@ let
 
           sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/configure
           sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/package-mozilla.sh
-          for target in election-guard gcc-compatible gcc64-only msvc-compatible portable-gcc-compatible
+          for target in gcc-compatible msvc-compatible portable-gcc-compatible
           do
             sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/$target/configure
           done
 
-          for target in election-guard gcc-compatible gcc64-only merkle-tree mozilla msvc-compatible portable-gcc-compatible wasm
+          for target in gcc-compatible mozilla msvc-compatible portable-gcc-compatible wasm
           do
             cp ${info} dist/$target/INFO.txt
           done

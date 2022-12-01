@@ -246,7 +246,7 @@ let finish_sha3: finish_st (| SHA3_256, () |) = fun s _ dst ->
   let h0 = ST.get () in
   Hacl.Impl.SHA3.squeeze s 136ul 32ul dst;
   let h1 = ST.get () in
-  let _ = Spec.Hash.Incremental.sha3_state_is_hash_state in
+  let _ = Spec.SHA3.Incremental.sha3_state_is_hash_state in
   assert (B.as_seq h1 dst `S.equal` Spec.SHA3.squeeze (B.as_seq h0 s) 136 32)
 
 
