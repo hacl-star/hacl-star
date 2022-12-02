@@ -323,8 +323,11 @@ count_number_of_ops_4_ecsm_loop_l_eq(table_precomp_params tp, uint32_t bBits) {
   res.main_add = n + n + n + n;
 
   uint32_t extra_fmul = (bBits % tp.l == 0U) ? 0U : 1U;
-  res.extra_fmul = n + extra_fmul; // account for mul by beta
-
+  if (tp.is_precomp_g_const) {
+    res.extra_fmul = n + extra_fmul; // account for mul by beta
+  } else {
+    res.extra_fmul = n + extra_fmul + n + extra_fmul; // account for mul by beta
+  }
   return res;
 }
 
@@ -342,7 +345,11 @@ count_number_of_ops_4_ecsm_loop_l_diff(table_precomp_params tp,
   res.main_double = bBits;
   res.main_add = n_l + n_l + n_l_g + n_l_g;
 
-  res.extra_fmul = n_l; // account for mul by beta
+  if (tp.is_precomp_g_const) {
+    res.extra_fmul = n_l; // account for mul by beta
+  } else {
+    res.extra_fmul = n_l + n_l_g; // account for mul by beta
+  }
 
   return res;
 }
@@ -674,12 +681,12 @@ void print_statistics_1(print_total_number_of_ops po, cost_of_ec_ops cs,
 }
 
 /*
-secp256k1_point_add: 947 cycles
- secp256k1_point_double: 512 cycles
+secp256k1_point_add: 825 cycles
+ secp256k1_point_double: 516 cycles
  secp256k1_fmul: 67 cycles
  secp256k1_fsqr: 58 cycles
  fsqr = 0.85 * fmul
- point_double = 0.54 * point_add
+ point_double = 0.62 * point_add
 
  ed25519_point_add: 462 cycles
  ed25519_point_double: 388 cycles
