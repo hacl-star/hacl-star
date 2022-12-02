@@ -102,6 +102,15 @@ the hash via `update_256`."]
 let finish_256 = F.mk_finish hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
 
 [@@ Comment
+"Free a state allocated with `create_in_256`.
+
+This function is identical to the free function for SHA2_224.";
+
+CPrologue
+"#define Hacl_Streaming_SHA2_free_224 Hacl_Streaming_SHA2_free_256" ]
+let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+
+[@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes."]
 val sha256: hash_t SHA2_256
 let sha256 dst input_len input =
@@ -113,15 +122,6 @@ let sha256 dst input_len input =
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_256 #M32 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
-
-[@@ Comment
-"Free a state allocated with `create_in_256`.
-
-This function is identical to the free function for SHA2_224.";
-
-CPrologue
-"#define Hacl_Streaming_SHA2_free_224 Hacl_Streaming_SHA2_free_256" ]
-let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 
 // SHA2-224
 // --------
