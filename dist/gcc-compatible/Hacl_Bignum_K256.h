@@ -683,6 +683,103 @@ static inline void Hacl_Impl_K256_Finv_fsqrt(uint64_t *out, uint64_t *f)
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, (uint32_t)2U);
 }
 
+static inline void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p)
+{
+  uint64_t tmp[25U] = { 0U };
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + (uint32_t)5U;
+  uint64_t *z1 = p + (uint32_t)10U;
+  uint64_t *x3 = out;
+  uint64_t *y3 = out + (uint32_t)5U;
+  uint64_t *z3 = out + (uint32_t)10U;
+  uint64_t *yy = tmp;
+  uint64_t *zz = tmp + (uint32_t)5U;
+  uint64_t *bzz3 = tmp + (uint32_t)10U;
+  uint64_t *bzz9 = tmp + (uint32_t)15U;
+  uint64_t *tmp1 = tmp + (uint32_t)20U;
+  Hacl_K256_Field_fsqr(yy, y1);
+  Hacl_K256_Field_fsqr(zz, z1);
+  Hacl_K256_Field_fmul_small_num(x3, x1, (uint64_t)2U);
+  Hacl_K256_Field_fmul(x3, x3, y1);
+  Hacl_K256_Field_fmul(tmp1, yy, y1);
+  Hacl_K256_Field_fmul(z3, tmp1, z1);
+  Hacl_K256_Field_fmul_small_num(z3, z3, (uint64_t)8U);
+  Hacl_K256_Field_fnormalize_weak(z3, z3);
+  Hacl_K256_Field_fmul_small_num(bzz3, zz, (uint64_t)21U);
+  Hacl_K256_Field_fnormalize_weak(bzz3, bzz3);
+  Hacl_K256_Field_fmul_small_num(bzz9, bzz3, (uint64_t)3U);
+  Hacl_K256_Field_fsub(bzz9, yy, bzz9, (uint64_t)6U);
+  Hacl_K256_Field_fadd(tmp1, yy, bzz3);
+  Hacl_K256_Field_fmul(tmp1, bzz9, tmp1);
+  Hacl_K256_Field_fmul(y3, yy, zz);
+  Hacl_K256_Field_fmul(x3, x3, bzz9);
+  Hacl_K256_Field_fmul_small_num(y3, y3, (uint64_t)168U);
+  Hacl_K256_Field_fadd(y3, tmp1, y3);
+  Hacl_K256_Field_fnormalize_weak(y3, y3);
+}
+
+static inline void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
+{
+  uint64_t tmp[45U] = { 0U };
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + (uint32_t)5U;
+  uint64_t *z1 = p + (uint32_t)10U;
+  uint64_t *x2 = q;
+  uint64_t *y2 = q + (uint32_t)5U;
+  uint64_t *z2 = q + (uint32_t)10U;
+  uint64_t *x3 = out;
+  uint64_t *y3 = out + (uint32_t)5U;
+  uint64_t *z3 = out + (uint32_t)10U;
+  uint64_t *xx = tmp;
+  uint64_t *yy = tmp + (uint32_t)5U;
+  uint64_t *zz = tmp + (uint32_t)10U;
+  uint64_t *xy_pairs = tmp + (uint32_t)15U;
+  uint64_t *yz_pairs = tmp + (uint32_t)20U;
+  uint64_t *xz_pairs = tmp + (uint32_t)25U;
+  uint64_t *yy_m_bzz3 = tmp + (uint32_t)30U;
+  uint64_t *yy_p_bzz3 = tmp + (uint32_t)35U;
+  uint64_t *tmp1 = tmp + (uint32_t)40U;
+  Hacl_K256_Field_fmul(xx, x1, x2);
+  Hacl_K256_Field_fmul(yy, y1, y2);
+  Hacl_K256_Field_fmul(zz, z1, z2);
+  Hacl_K256_Field_fadd(xy_pairs, x1, y1);
+  Hacl_K256_Field_fadd(tmp1, x2, y2);
+  Hacl_K256_Field_fmul(xy_pairs, xy_pairs, tmp1);
+  Hacl_K256_Field_fadd(tmp1, xx, yy);
+  Hacl_K256_Field_fsub(xy_pairs, xy_pairs, tmp1, (uint64_t)4U);
+  Hacl_K256_Field_fadd(yz_pairs, y1, z1);
+  Hacl_K256_Field_fadd(tmp1, y2, z2);
+  Hacl_K256_Field_fmul(yz_pairs, yz_pairs, tmp1);
+  Hacl_K256_Field_fadd(tmp1, yy, zz);
+  Hacl_K256_Field_fsub(yz_pairs, yz_pairs, tmp1, (uint64_t)4U);
+  Hacl_K256_Field_fadd(xz_pairs, x1, z1);
+  Hacl_K256_Field_fadd(tmp1, x2, z2);
+  Hacl_K256_Field_fmul(xz_pairs, xz_pairs, tmp1);
+  Hacl_K256_Field_fadd(tmp1, xx, zz);
+  Hacl_K256_Field_fsub(xz_pairs, xz_pairs, tmp1, (uint64_t)4U);
+  Hacl_K256_Field_fmul_small_num(tmp1, zz, (uint64_t)21U);
+  Hacl_K256_Field_fnormalize_weak(tmp1, tmp1);
+  Hacl_K256_Field_fsub(yy_m_bzz3, yy, tmp1, (uint64_t)2U);
+  Hacl_K256_Field_fadd(yy_p_bzz3, yy, tmp1);
+  Hacl_K256_Field_fmul_small_num(x3, yz_pairs, (uint64_t)21U);
+  Hacl_K256_Field_fnormalize_weak(x3, x3);
+  Hacl_K256_Field_fmul_small_num(z3, xx, (uint64_t)3U);
+  Hacl_K256_Field_fmul_small_num(y3, z3, (uint64_t)21U);
+  Hacl_K256_Field_fnormalize_weak(y3, y3);
+  Hacl_K256_Field_fmul(tmp1, xy_pairs, yy_m_bzz3);
+  Hacl_K256_Field_fmul(x3, x3, xz_pairs);
+  Hacl_K256_Field_fsub(x3, tmp1, x3, (uint64_t)2U);
+  Hacl_K256_Field_fnormalize_weak(x3, x3);
+  Hacl_K256_Field_fmul(tmp1, yy_p_bzz3, yy_m_bzz3);
+  Hacl_K256_Field_fmul(y3, y3, xz_pairs);
+  Hacl_K256_Field_fadd(y3, tmp1, y3);
+  Hacl_K256_Field_fnormalize_weak(y3, y3);
+  Hacl_K256_Field_fmul(tmp1, yz_pairs, yy_p_bzz3);
+  Hacl_K256_Field_fmul(z3, z3, xy_pairs);
+  Hacl_K256_Field_fadd(z3, tmp1, z3);
+  Hacl_K256_Field_fnormalize_weak(z3, z3);
+}
+
 #if defined(__cplusplus)
 }
 #endif

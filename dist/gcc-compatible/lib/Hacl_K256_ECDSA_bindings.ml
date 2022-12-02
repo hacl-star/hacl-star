@@ -2,6 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    let hacl_Impl_K256_Qinv_qinv =
+      foreign "Hacl_Impl_K256_Qinv_qinv"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_Impl_K256_Point_make_point_at_inf =
       foreign "Hacl_Impl_K256_Point_make_point_at_inf"
         ((ptr uint64_t) @-> (returning void))
@@ -19,17 +22,15 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Impl_K256_Point_aff_point_compress_vartime"
         (ocaml_bytes @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Impl_K256_PointDouble_point_double =
-      foreign "Hacl_Impl_K256_PointDouble_point_double"
-        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
-    let hacl_Impl_K256_PointAdd_point_add =
-      foreign "Hacl_Impl_K256_PointAdd_point_add"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
     let hacl_Impl_K256_PointMul_point_mul =
       foreign "Hacl_Impl_K256_PointMul_point_mul"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_Impl_K256_GLV_point_mul_g_double_split_lambda_vartime =
+      foreign "Hacl_Impl_K256_GLV_point_mul_g_double_split_lambda_vartime"
+        ((ptr uint64_t) @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
     let hacl_K256_ECDSA_ecdsa_sign_hashed_msg =
       foreign "Hacl_K256_ECDSA_ecdsa_sign_hashed_msg"
         (ocaml_bytes @->

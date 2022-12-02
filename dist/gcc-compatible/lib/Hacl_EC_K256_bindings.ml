@@ -52,6 +52,14 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_EC_K256_point_mul"
         (ocaml_bytes @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_EC_K256_point_mul_g_double_vartime =
+      foreign "Hacl_EC_K256_point_mul_g_double_vartime"
+        ((ptr uint64_t) @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
+    let hacl_EC_K256_qinv =
+      foreign "Hacl_EC_K256_qinv"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_EC_K256_point_eq =
       foreign "Hacl_EC_K256_point_eq"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool)))

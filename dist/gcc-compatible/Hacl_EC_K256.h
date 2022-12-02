@@ -211,6 +211,16 @@ Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 */
 void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out);
 
+void
+Hacl_EC_K256_point_mul_g_double_vartime(
+  uint64_t *out,
+  uint64_t *scalar1,
+  uint64_t *scalar2,
+  uint64_t *p2
+);
+
+void Hacl_EC_K256_qinv(uint64_t *out, uint64_t *scalar);
+
 /**
 Checks whether `p` is equal to `q` (point equality).
 

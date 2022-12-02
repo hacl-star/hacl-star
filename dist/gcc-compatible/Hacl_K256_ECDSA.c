@@ -616,24 +616,7 @@ static inline void qmul_shift_384(uint64_t *res, uint64_t *a, uint64_t *b)
     os[i] = x;);
 }
 
-static inline void qsquare_times_in_place(uint64_t *out, uint32_t b)
-{
-  for (uint32_t i = (uint32_t)0U; i < b; i++)
-  {
-    qsqr(out, out);
-  }
-}
-
-static inline void qsquare_times(uint64_t *out, uint64_t *a, uint32_t b)
-{
-  memcpy(out, a, (uint32_t)4U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < b; i++)
-  {
-    qsqr(out, out);
-  }
-}
-
-static inline void qinv(uint64_t *out, uint64_t *f)
+void Hacl_Impl_K256_Qinv_qinv(uint64_t *out, uint64_t *f)
 {
   uint64_t x_10[4U] = { 0U };
   uint64_t x_11[4U] = { 0U };
@@ -642,7 +625,10 @@ static inline void qinv(uint64_t *out, uint64_t *f)
   uint64_t x_1001[4U] = { 0U };
   uint64_t x_1011[4U] = { 0U };
   uint64_t x_1101[4U] = { 0U };
-  qsquare_times(x_10, f, (uint32_t)1U);
+  memcpy(x_10, f, (uint32_t)4U * sizeof (uint64_t));
+  {
+    qsqr(x_10, x_10);
+  }
   qmul(x_11, x_10, f);
   qmul(x_101, x_10, x_11);
   qmul(x_111, x_10, x_101);
@@ -652,68 +638,80 @@ static inline void qinv(uint64_t *out, uint64_t *f)
   uint64_t x6[4U] = { 0U };
   uint64_t x8[4U] = { 0U };
   uint64_t x14[4U] = { 0U };
-  qsquare_times(x6, x_1101, (uint32_t)2U);
+  memcpy(x6, x_1101, (uint32_t)4U * sizeof (uint64_t));
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, qsqr(x6, x6););
   qmul(x6, x6, x_1011);
-  qsquare_times(x8, x6, (uint32_t)2U);
+  memcpy(x8, x6, (uint32_t)4U * sizeof (uint64_t));
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, qsqr(x8, x8););
   qmul(x8, x8, x_11);
-  qsquare_times(x14, x8, (uint32_t)6U);
+  memcpy(x14, x8, (uint32_t)4U * sizeof (uint64_t));
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(x14, x14););
   qmul(x14, x14, x6);
   uint64_t x56[4U] = { 0U };
-  qsquare_times(out, x14, (uint32_t)14U);
+  memcpy(out, x14, (uint32_t)4U * sizeof (uint64_t));
+  KRML_MAYBE_FOR14(i, (uint32_t)0U, (uint32_t)14U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x14);
-  qsquare_times(x56, out, (uint32_t)28U);
+  memcpy(x56, out, (uint32_t)4U * sizeof (uint64_t));
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)28U; i++)
+  {
+    qsqr(x56, x56);
+  }
   qmul(x56, x56, out);
-  qsquare_times(out, x56, (uint32_t)56U);
+  memcpy(out, x56, (uint32_t)4U * sizeof (uint64_t));
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)56U; i++)
+  {
+    qsqr(out, out);
+  }
   qmul(out, out, x56);
-  qsquare_times_in_place(out, (uint32_t)14U);
+  KRML_MAYBE_FOR14(i, (uint32_t)0U, (uint32_t)14U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x14);
-  qsquare_times_in_place(out, (uint32_t)3U);
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_101);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_111);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_101);
-  qsquare_times_in_place(out, (uint32_t)5U);
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1011);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1011);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_111);
-  qsquare_times_in_place(out, (uint32_t)5U);
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_111);
-  qsquare_times_in_place(out, (uint32_t)6U);
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1101);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_101);
-  qsquare_times_in_place(out, (uint32_t)3U);
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_111);
-  qsquare_times_in_place(out, (uint32_t)5U);
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1001);
-  qsquare_times_in_place(out, (uint32_t)6U);
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_101);
-  qsquare_times_in_place(out, (uint32_t)10U);
+  KRML_MAYBE_FOR10(i, (uint32_t)0U, (uint32_t)10U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_111);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_111);
-  qsquare_times_in_place(out, (uint32_t)9U);
+  KRML_MAYBE_FOR9(i, (uint32_t)0U, (uint32_t)9U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x8);
-  qsquare_times_in_place(out, (uint32_t)5U);
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1001);
-  qsquare_times_in_place(out, (uint32_t)6U);
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1011);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1101);
-  qsquare_times_in_place(out, (uint32_t)5U);
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_11);
-  qsquare_times_in_place(out, (uint32_t)6U);
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1101);
-  qsquare_times_in_place(out, (uint32_t)10U);
+  KRML_MAYBE_FOR10(i, (uint32_t)0U, (uint32_t)10U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1101);
-  qsquare_times_in_place(out, (uint32_t)4U);
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x_1001);
-  qsquare_times_in_place(out, (uint32_t)6U);
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, f);
-  qsquare_times_in_place(out, (uint32_t)8U);
+  KRML_MAYBE_FOR8(i, (uint32_t)0U, (uint32_t)8U, (uint32_t)1U, qsqr(out, out););
   qmul(out, out, x6);
 }
 
@@ -865,103 +863,6 @@ void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, ui
   }
   s[0U] = ite;
   Hacl_K256_Field_store_felem(s + (uint32_t)1U, x);
-}
-
-void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p)
-{
-  uint64_t tmp[25U] = { 0U };
-  uint64_t *x1 = p;
-  uint64_t *y1 = p + (uint32_t)5U;
-  uint64_t *z1 = p + (uint32_t)10U;
-  uint64_t *x3 = out;
-  uint64_t *y3 = out + (uint32_t)5U;
-  uint64_t *z3 = out + (uint32_t)10U;
-  uint64_t *yy = tmp;
-  uint64_t *zz = tmp + (uint32_t)5U;
-  uint64_t *bzz3 = tmp + (uint32_t)10U;
-  uint64_t *bzz9 = tmp + (uint32_t)15U;
-  uint64_t *tmp1 = tmp + (uint32_t)20U;
-  Hacl_K256_Field_fsqr(yy, y1);
-  Hacl_K256_Field_fsqr(zz, z1);
-  Hacl_K256_Field_fmul_small_num(x3, x1, (uint64_t)2U);
-  Hacl_K256_Field_fmul(x3, x3, y1);
-  Hacl_K256_Field_fmul(tmp1, yy, y1);
-  Hacl_K256_Field_fmul(z3, tmp1, z1);
-  Hacl_K256_Field_fmul_small_num(z3, z3, (uint64_t)8U);
-  Hacl_K256_Field_fnormalize_weak(z3, z3);
-  Hacl_K256_Field_fmul_small_num(bzz3, zz, (uint64_t)21U);
-  Hacl_K256_Field_fnormalize_weak(bzz3, bzz3);
-  Hacl_K256_Field_fmul_small_num(bzz9, bzz3, (uint64_t)3U);
-  Hacl_K256_Field_fsub(bzz9, yy, bzz9, (uint64_t)6U);
-  Hacl_K256_Field_fadd(tmp1, yy, bzz3);
-  Hacl_K256_Field_fmul(tmp1, bzz9, tmp1);
-  Hacl_K256_Field_fmul(y3, yy, zz);
-  Hacl_K256_Field_fmul(x3, x3, bzz9);
-  Hacl_K256_Field_fmul_small_num(y3, y3, (uint64_t)168U);
-  Hacl_K256_Field_fadd(y3, tmp1, y3);
-  Hacl_K256_Field_fnormalize_weak(y3, y3);
-}
-
-void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
-{
-  uint64_t tmp[45U] = { 0U };
-  uint64_t *x1 = p;
-  uint64_t *y1 = p + (uint32_t)5U;
-  uint64_t *z1 = p + (uint32_t)10U;
-  uint64_t *x2 = q;
-  uint64_t *y2 = q + (uint32_t)5U;
-  uint64_t *z2 = q + (uint32_t)10U;
-  uint64_t *x3 = out;
-  uint64_t *y3 = out + (uint32_t)5U;
-  uint64_t *z3 = out + (uint32_t)10U;
-  uint64_t *xx = tmp;
-  uint64_t *yy = tmp + (uint32_t)5U;
-  uint64_t *zz = tmp + (uint32_t)10U;
-  uint64_t *xy_pairs = tmp + (uint32_t)15U;
-  uint64_t *yz_pairs = tmp + (uint32_t)20U;
-  uint64_t *xz_pairs = tmp + (uint32_t)25U;
-  uint64_t *yy_m_bzz3 = tmp + (uint32_t)30U;
-  uint64_t *yy_p_bzz3 = tmp + (uint32_t)35U;
-  uint64_t *tmp1 = tmp + (uint32_t)40U;
-  Hacl_K256_Field_fmul(xx, x1, x2);
-  Hacl_K256_Field_fmul(yy, y1, y2);
-  Hacl_K256_Field_fmul(zz, z1, z2);
-  Hacl_K256_Field_fadd(xy_pairs, x1, y1);
-  Hacl_K256_Field_fadd(tmp1, x2, y2);
-  Hacl_K256_Field_fmul(xy_pairs, xy_pairs, tmp1);
-  Hacl_K256_Field_fadd(tmp1, xx, yy);
-  Hacl_K256_Field_fsub(xy_pairs, xy_pairs, tmp1, (uint64_t)4U);
-  Hacl_K256_Field_fadd(yz_pairs, y1, z1);
-  Hacl_K256_Field_fadd(tmp1, y2, z2);
-  Hacl_K256_Field_fmul(yz_pairs, yz_pairs, tmp1);
-  Hacl_K256_Field_fadd(tmp1, yy, zz);
-  Hacl_K256_Field_fsub(yz_pairs, yz_pairs, tmp1, (uint64_t)4U);
-  Hacl_K256_Field_fadd(xz_pairs, x1, z1);
-  Hacl_K256_Field_fadd(tmp1, x2, z2);
-  Hacl_K256_Field_fmul(xz_pairs, xz_pairs, tmp1);
-  Hacl_K256_Field_fadd(tmp1, xx, zz);
-  Hacl_K256_Field_fsub(xz_pairs, xz_pairs, tmp1, (uint64_t)4U);
-  Hacl_K256_Field_fmul_small_num(tmp1, zz, (uint64_t)21U);
-  Hacl_K256_Field_fnormalize_weak(tmp1, tmp1);
-  Hacl_K256_Field_fsub(yy_m_bzz3, yy, tmp1, (uint64_t)2U);
-  Hacl_K256_Field_fadd(yy_p_bzz3, yy, tmp1);
-  Hacl_K256_Field_fmul_small_num(x3, yz_pairs, (uint64_t)21U);
-  Hacl_K256_Field_fnormalize_weak(x3, x3);
-  Hacl_K256_Field_fmul_small_num(z3, xx, (uint64_t)3U);
-  Hacl_K256_Field_fmul_small_num(y3, z3, (uint64_t)21U);
-  Hacl_K256_Field_fnormalize_weak(y3, y3);
-  Hacl_K256_Field_fmul(tmp1, xy_pairs, yy_m_bzz3);
-  Hacl_K256_Field_fmul(x3, x3, xz_pairs);
-  Hacl_K256_Field_fsub(x3, tmp1, x3, (uint64_t)2U);
-  Hacl_K256_Field_fnormalize_weak(x3, x3);
-  Hacl_K256_Field_fmul(tmp1, yy_p_bzz3, yy_m_bzz3);
-  Hacl_K256_Field_fmul(y3, y3, xz_pairs);
-  Hacl_K256_Field_fadd(y3, tmp1, y3);
-  Hacl_K256_Field_fnormalize_weak(y3, y3);
-  Hacl_K256_Field_fmul(tmp1, yz_pairs, yy_p_bzz3);
-  Hacl_K256_Field_fmul(z3, z3, xy_pairs);
-  Hacl_K256_Field_fadd(z3, tmp1, z3);
-  Hacl_K256_Field_fnormalize_weak(z3, z3);
 }
 
 static inline void scalar_split_lambda(uint64_t *r1, uint64_t *r2, uint64_t *k)
@@ -1649,8 +1550,8 @@ typedef struct __bool_bool_bool_bool_s
 }
 __bool_bool_bool_bool;
 
-static inline void
-point_mul_g_double_split_lambda_vartime(
+void
+Hacl_Impl_K256_GLV_point_mul_g_double_split_lambda_vartime(
   uint64_t *out,
   uint64_t *scalar1,
   uint64_t *scalar2,
@@ -1813,7 +1714,7 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint64_t z0[4U] = { 0U };
   uint64_t kinv[4U] = { 0U };
   load_qelem_modq(z0, msgHash);
-  qinv(kinv, k_q);
+  Hacl_Impl_K256_Qinv_qinv(kinv, k_q);
   qmul(s_q, r_q, d_a);
   qadd(s_q, z0, s_q);
   qmul(s_q, kinv, s_q);
@@ -1899,10 +1800,10 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
   uint64_t sinv1[4U] = { 0U };
   uint64_t u11[4U] = { 0U };
   uint64_t u21[4U] = { 0U };
-  qinv(sinv1, s_q);
+  Hacl_Impl_K256_Qinv_qinv(sinv1, s_q);
   qmul(u11, z, sinv1);
   qmul(u21, r_q, sinv1);
-  point_mul_g_double_split_lambda_vartime(res, u11, u21, p);
+  Hacl_Impl_K256_GLV_point_mul_g_double_split_lambda_vartime(res, u11, u21, p);
   uint64_t tmp[5U] = { 0U };
   uint64_t *pz = res + (uint32_t)10U;
   Hacl_K256_Field_fnormalize(tmp, pz);

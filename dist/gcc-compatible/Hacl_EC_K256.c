@@ -272,6 +272,22 @@ void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out)
   Hacl_Impl_K256_PointMul_point_mul(out, scalar_q, p);
 }
 
+void
+Hacl_EC_K256_point_mul_g_double_vartime(
+  uint64_t *out,
+  uint64_t *scalar1,
+  uint64_t *scalar2,
+  uint64_t *p2
+)
+{
+  Hacl_Impl_K256_GLV_point_mul_g_double_split_lambda_vartime(out, scalar1, scalar2, p2);
+}
+
+void Hacl_EC_K256_qinv(uint64_t *out, uint64_t *scalar)
+{
+  Hacl_Impl_K256_Qinv_qinv(out, scalar);
+}
+
 /**
 Checks whether `p` is equal to `q` (point equality).
 
