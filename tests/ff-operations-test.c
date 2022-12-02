@@ -61,6 +61,27 @@ int main() {
   print_time(count,diff2,cyc2);
 
   //  ---------------------------------------------------
+  uint64_t bignumfi_out[5U] = { 0 };
+
+  // Benchmarking for Hacl_Impl_K256_Finv_finv
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_K256_Finv_finv(bignumfi_out, bignum_b);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_K256_Finv_finv(bignumfi_out, bignum_b);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double difffi = t2 - t1;
+  uint64_t cycfi = b - a;
+
+  printf("\n secp256k1_finv:\n");
+  print_time(count,difffi,cycfi);
+
+  //  ---------------------------------------------------
 
   uint64_t bignumq_a[4U] = { 197876, 241305, 245979, 490424 };
   uint64_t bignumq_out[4U] = { 0 };
