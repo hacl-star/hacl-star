@@ -207,7 +207,6 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg 
         KRML_HOST_EXIT(253U);
       }
   }
-  KRML_CHECK_SIZE(sizeof (EverCrypt_DRBG_state_s), (uint32_t)1U);
   EverCrypt_DRBG_state_s
   *buf = (EverCrypt_DRBG_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_DRBG_state_s));
   buf[0U] = st;
