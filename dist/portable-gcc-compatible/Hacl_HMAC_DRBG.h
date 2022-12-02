@@ -195,6 +195,12 @@ Hacl_HMAC_DRBG_generate(
 
 /* SNIPPET_END: Hacl_HMAC_DRBG_generate */
 
+/* SNIPPET_START: Hacl_HMAC_DRBG_free */
+
+void Hacl_HMAC_DRBG_free(Spec_Hash_Definitions_hash_alg uu___, Hacl_HMAC_DRBG_state s);
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_free */
+
 #if defined(__cplusplus)
 }
 #endif

@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "internal/Hacl_Spec.h"
-#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_P256.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: Hacl_Impl_P256_LowLevel_toUint8 */

@@ -742,8 +742,6 @@ let test_hash_body (print: C.String.t -> St unit) : St unit =
     test_hash hash_vectors_low;
     print !$"  >>>>>>>>> HMAC (Test.NoHeap)\n";
     test_hmac hmac_vectors_low;
-    print !$"  >>>>>>>>> HMAC_DRBG (Test.NoHeap)\n";
-    test_hmac_drbg hmac_drbg_vectors_low;
     print !$"  >>>>>>>>> HKDF (Test.NoHeap)\n";
     test_hkdf hkdf_vectors_low
 
@@ -766,6 +764,93 @@ let test_aes256_ecb_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AES256_ECB\n";
     test_aes_ecb AES256
 *)
+/// HMAC-DRBG
+/// ----
+
+#push-options "--z3rlimit 500"
+val test_one_hmac_drbg: hmac_drbg_vector -> ST unit (fun _ -> True) (fun _ _ _ -> True)
+let test_one_hmac_drbg vec =
+  let open Hacl.HMAC_DRBG in
+  let open EverCrypt.DRBG in
+  let open Lib.IntTypes in
+  let a,
+      LB entropy_input_len entropy_input,
+      LB nonce_len nonce,
+      LB personalization_string_len personalization_string,
+      LB entropy_input_reseed_len entropy_input_reseed,
+      LB additional_input_reseed_len additional_input_reseed,
+      (LB additional_input_1_len additional_input_1,
+       LB additional_input_2_len additional_input_2),
+      LB returned_bits_len returned_bits = vec
+  in
+  // EverCrypt.DRBG sources entropy internally.
+  // We don't use entropy_input, entropy_input_reseed, nonce, and returned_bits
+  // from the test vector, but we test safety of the API.
+  B.recall personalization_string;
+  B.recall additional_input_reseed;
+  B.recall additional_input_1;
+  B.recall additional_input_2;
+  if not (Spec.HMAC_DRBG.is_supported_alg a &&
+          0ul <. returned_bits_len &&
+          returned_bits_len <. 0xFFFFFFFFul)
+  then C.exit (-1l)
+  else
+    begin
+    push_frame();
+    let output = B.alloca (u8 0) returned_bits_len in
+    let st = EverCrypt.DRBG.create_in a HyperStack.root in
+    [@inline_let]
+    let a = Ghost.hide a in
+    let ok = instantiate a st personalization_string personalization_string_len in
+    if ok then
+      // We always provide prediction_resistance, so technically we don't need to reseed
+      let ok = reseed a st additional_input_reseed additional_input_reseed_len in
+      if ok then
+        let ok = generate a output st returned_bits_len
+                   additional_input_1 additional_input_1_len
+        in
+        if ok then
+          let ok = generate a output st returned_bits_len
+                     additional_input_2 additional_input_2_len
+          in
+          if ok then begin
+            uninstantiate a st;
+            TestLib.compare_and_print !$"HMAC-DRBG" output output returned_bits_len
+          end
+          else C.exit 1l
+        else C.exit 1l
+      else C.exit 1l
+    else C.exit 1l;
+    pop_frame()
+    end
+
+// Has to be recursive with a function pointer because C.Loops does not support ST. SIGH!!!
+let rec test_many_st_loop #a (i: UInt32.t)
+  (f: a -> ST unit (fun _ -> True) (fun _ _ _ -> True)) (vec: Test.Lowstarize.lbuffer a):
+  ST unit (fun _ -> True) (fun _ _ _ -> True)
+=
+  let Test.Lowstarize.LB len vs = vec in
+  if FStar.UInt32.gte i len then
+    ()
+  else begin
+    let open LowStar.BufferOps in
+    B.recall vs;
+    f vs.(i);
+    let i = i `FStar.UInt32.add` 1ul in
+    test_many_st_loop i f vec
+  end
+
+inline_for_extraction noextract
+let test_many_st #a (label: C.String.t)
+  (f: a -> ST unit (fun _ -> True) (fun _ _ _ -> True)) (vec: Test.Lowstarize.lbuffer a):
+  ST unit (fun _ -> True) (fun _ _ _ -> True)
+=
+  C.String.print label;
+  C.String.(print !$"\n");
+  test_many_st_loop 0ul f vec
+
+#pop-options
+let test_hmac_drbg = test_many_st !$"HMAC-DRBG" test_one_hmac_drbg
 
 (* Summary *)
 
@@ -789,6 +874,8 @@ let test_all () : St unit =
   chacha20poly1305_test_set test_chacha20poly1305_body;
   print_sep ();
   hash_test_set             test_hash_body;
+  print_sep ();
+  test_hmac_drbg            hmac_drbg_vectors_low;
   print_sep ();
   chacha20_test_set         test_chacha20_body(*;
   print_sep ();

@@ -24,7 +24,6 @@
 
 #include "internal/Hacl_Hash_Blake2s_128.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_Blake2.h"
 
 /* SNIPPET_START: Hacl_Hash_Blake2s_128_init_blake2s_128 */

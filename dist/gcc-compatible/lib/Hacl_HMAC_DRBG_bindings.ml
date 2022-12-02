@@ -55,4 +55,8 @@ module Bindings(F:Cstubs.FOREIGN) =
               (hacl_HMAC_DRBG_state @->
                  (uint32_t @->
                     (uint32_t @-> (ocaml_bytes @-> (returning bool)))))))
+    let hacl_HMAC_DRBG_free =
+      foreign "Hacl_HMAC_DRBG_free"
+        (spec_Hash_Definitions_hash_alg @->
+           (hacl_HMAC_DRBG_state @-> (returning void)))
   end

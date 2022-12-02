@@ -26,7 +26,6 @@
 
 #include "internal/Vale.h"
 #include "internal/Hacl_Spec.h"
-#include "internal/Hacl_Krmllib.h"
 #include "config.h"
 /**
 Both encryption and decryption require a state that holds the key.

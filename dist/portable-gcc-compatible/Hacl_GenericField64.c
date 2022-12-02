@@ -24,7 +24,6 @@
 
 #include "Hacl_GenericField64.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: Hacl_GenericField64_field_modulus_check */
