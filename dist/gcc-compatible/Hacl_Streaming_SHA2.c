@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Streaming_SHA2.h"
 
-#include "internal/Hacl_SHA2_Types.h"
+
 
 static inline void sha224_init(uint32_t *hash)
 {
@@ -191,14 +191,12 @@ sha224_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
   memcpy(last + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + (uint32_t)64U;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut = { .fst = last00, .snd = last10 };
-  uint8_t *l0 = scrut.fst;
-  uint8_t *l1 = scrut.snd;
+  uint8_t *l0 = last00;
+  uint8_t *l1 = last10;
   uint8_t *lb0 = l0;
   uint8_t *lb1 = l1;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut0 = { .fst = lb0, .snd = lb1 };
-  uint8_t *last0 = scrut0.fst;
-  uint8_t *last1 = scrut0.snd;
+  uint8_t *last0 = lb0;
+  uint8_t *last1 = lb1;
   sha224_update(last0, hash);
   if (blocks > (uint32_t)1U)
   {
@@ -383,14 +381,12 @@ sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
   memcpy(last + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + (uint32_t)64U;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut = { .fst = last00, .snd = last10 };
-  uint8_t *l0 = scrut.fst;
-  uint8_t *l1 = scrut.snd;
+  uint8_t *l0 = last00;
+  uint8_t *l1 = last10;
   uint8_t *lb0 = l0;
   uint8_t *lb1 = l1;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut0 = { .fst = lb0, .snd = lb1 };
-  uint8_t *last0 = scrut0.fst;
-  uint8_t *last1 = scrut0.snd;
+  uint8_t *last0 = lb0;
+  uint8_t *last1 = lb1;
   sha256_update0(last0, hash);
   if (blocks > (uint32_t)1U)
   {
@@ -575,14 +571,12 @@ sha384_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint6
   memcpy(last + fin - (uint32_t)16U, totlen_buf, (uint32_t)16U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + (uint32_t)128U;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut = { .fst = last00, .snd = last10 };
-  uint8_t *l0 = scrut.fst;
-  uint8_t *l1 = scrut.snd;
+  uint8_t *l0 = last00;
+  uint8_t *l1 = last10;
   uint8_t *lb0 = l0;
   uint8_t *lb1 = l1;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut0 = { .fst = lb0, .snd = lb1 };
-  uint8_t *last0 = scrut0.fst;
-  uint8_t *last1 = scrut0.snd;
+  uint8_t *last0 = lb0;
+  uint8_t *last1 = lb1;
   sha384_update(last0, hash);
   if (blocks > (uint32_t)1U)
   {
@@ -767,14 +761,12 @@ sha512_update_last(FStar_UInt128_uint128 totlen, uint32_t len, uint8_t *b, uint6
   memcpy(last + fin - (uint32_t)16U, totlen_buf, (uint32_t)16U * sizeof (uint8_t));
   uint8_t *last00 = last;
   uint8_t *last10 = last + (uint32_t)128U;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut = { .fst = last00, .snd = last10 };
-  uint8_t *l0 = scrut.fst;
-  uint8_t *l1 = scrut.snd;
+  uint8_t *l0 = last00;
+  uint8_t *l1 = last10;
   uint8_t *lb0 = l0;
   uint8_t *lb1 = l1;
-  Hacl_Impl_SHA2_Types_uint8_2p scrut0 = { .fst = lb0, .snd = lb1 };
-  uint8_t *last0 = scrut0.fst;
-  uint8_t *last1 = scrut0.snd;
+  uint8_t *last0 = lb0;
+  uint8_t *last1 = lb1;
   sha512_update(last0, hash);
   if (blocks > (uint32_t)1U)
   {
