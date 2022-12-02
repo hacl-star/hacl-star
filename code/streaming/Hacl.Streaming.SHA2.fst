@@ -62,15 +62,6 @@ let hash_t (a: sha2_alg) =
     (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
       as_seq h1 dst == Spec.Agile.Hash.hash a (as_seq h0 input))
 
-inline_for_extraction noextract
-let alloca_224 = F.alloca hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let create_in_224 = F.create_in hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let init_224 = F.init hacl_sha2_224 (G.hide ()) (state_t_224.s ()) (G.erased unit)
-[@@ Comment "0 = success, 1 = max length exceeded" ]
-let update_224 = F.update hacl_sha2_224 (G.hide ()) (state_t_224.s ()) (G.erased unit)
-let finish_224 = F.mk_finish hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let free_224 = F.free hacl_sha2_224 (G.hide ()) (state_t_224.s ()) (G.erased unit)
-
 open Lib.NTuple
 open Lib.MultiBuffer
 open Hacl.Spec.SHA2.Vec
@@ -78,26 +69,40 @@ open Hacl.SHA2.Scalar32
 open Hacl.Impl.SHA2.Generic
 module ST = FStar.HyperStack.ST
 
-val sha224: hash_t SHA2_224
-let sha224 dst input_len input =
-  let ib = ntup1 input in
-  let rb = ntup1 dst in
-  let h0 = ST.get() in
-  loc_multi1 rb;
-  hash #SHA2_224 #M32 sha224_init sha224_update_nblocks sha224_update_last sha224_finish rb input_len ib;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+// SHA2-256
+// --------
 
 inline_for_extraction noextract
 let alloca_256 = F.alloca hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
-let create_in_256 = F.create_in hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
-let init_256 = F.init hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
-[@@ Comment "0 = success, 1 = max length exceeded" ]
-let update_256 = F.update hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
-let finish_256 = F.mk_finish hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
-let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 
+[@@ Comment
+"Allocate initial state for the SHA2_256 hash. The state is to be freed by
+calling `free_256`."]
+let create_in_256 = F.create_in hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
+
+[@@ Comment
+"Reset an existing state to the initial hash state with empty data."]
+let init_256 = F.init hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+
+[@@ Comment
+"Feed an arbitrary amount of data into the hash. This function returns 0 for
+success, or 1 if the combined length of all of the data passed to `update_256`
+(since the last call to `init_256`) exceeds 2^63-1 bytes.
+
+This function is identical to the update function for SHA2_224.";
+
+CPrologue
+"#define Hacl_Streaming_SHA2_update_224 Hacl_Streaming_SHA2_update_256" ]
+let update_256 = F.update hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+
+[@@ Comment
+"Write the resulting hash into `dst`, an array of 32 bytes. The state remains
+valid after a call to `finish_256`, meaning the user may feed more data into
+the hash via `update_256`."]
+let finish_256 = F.mk_finish hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
+
+[@@ Comment
+"Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes."]
 val sha256: hash_t SHA2_256
 let sha256 dst input_len input =
   let ib = ntup1 input in
@@ -109,35 +114,77 @@ let sha256 dst input_len input =
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_256 #M32 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
 
-inline_for_extraction noextract
-let alloca_384 = F.alloca hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let create_in_384 = F.create_in hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let init_384 = F.init hacl_sha2_384 (G.hide ()) (state_t_384.s ()) (G.erased unit)
-[@@ Comment "0 = success, 1 = max length exceeded" ]
-let update_384 = F.update hacl_sha2_384 (G.hide ()) (state_t_384.s ()) (G.erased unit)
-let finish_384 = F.mk_finish hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let free_384 = F.free hacl_sha2_384 (G.hide ()) (state_t_384.s ()) (G.erased unit)
+[@@ Comment
+"Free a state allocated with `create_in_256`.
 
-val sha384: hash_t SHA2_384
-let sha384 dst input_len input =
+This function is identical to the free function for SHA2_224.";
+
+CPrologue
+"#define Hacl_Streaming_SHA2_free_224 Hacl_Streaming_SHA2_free_256" ]
+let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+
+// SHA2-224
+// --------
+
+inline_for_extraction noextract
+let alloca_224 = F.alloca hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
+let create_in_224 = F.create_in hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
+let init_224 = F.init hacl_sha2_224 (G.hide ()) (state_t_224.s ()) (G.erased unit)
+
+[@@ Comment
+"Write the resulting hash into `dst`, an array of 28 bytes. The state remains
+valid after a call to `finish_224`, meaning the user may feed more data into
+the hash via `update_224`."]
+let finish_224 = F.mk_finish hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
+
+[@@ Comment
+"Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes."]
+val sha224: hash_t SHA2_224
+let sha224 dst input_len input =
   let ib = ntup1 input in
   let rb = ntup1 dst in
   let h0 = ST.get() in
   loc_multi1 rb;
-  hash #SHA2_384 #M32 sha384_init sha384_update_nblocks sha384_update_last sha384_finish rb input_len ib;
+  hash #SHA2_224 #M32 sha224_init sha224_update_nblocks sha224_update_last sha224_finish rb input_len ib;
   let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M32 (v input_len) (as_seq_multi h0 ib);
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M32 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+
+// SHA2-512
+// --------
 
 inline_for_extraction noextract
 let alloca_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let create_in_512 = F.create_in hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let init_512 = F.init hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
-[@@ Comment "0 = success, 1 = max length exceeded" ]
+[@@ Comment
+"Feed an arbitrary amount of data into the hash. This function returns 0 for
+success, or 1 if the combined length of all of the data passed to `update_512`
+(since the last call to `init_512`) exceeds 2^125-1 bytes.
+
+This function is identical to the update function for SHA2_384.";
+
+CPrologue
+"#define Hacl_Streaming_SHA2_update_384 Hacl_Streaming_SHA2_update_512" ]
 let update_512 = F.update hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
+
+[@@ Comment
+"Write the resulting hash into `dst`, an array of 64 bytes. The state remains
+valid after a call to `finish_512`, meaning the user may feed more data into
+the hash via `update_512`."]
 let finish_512 = F.mk_finish hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+
+[@@ Comment
+"Free a state allocated with `create_in_512`.
+
+This function is identical to the free function for SHA2_384.";
+
+CPrologue
+"#define Hacl_Streaming_SHA2_free_384 Hacl_Streaming_SHA2_free_512" ]
 let free_512 = F.free hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 
+[@@ Comment
+"Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes."]
 val sha512: hash_t SHA2_512
 let sha512 dst input_len input =
   let ib = ntup1 input in
@@ -147,4 +194,31 @@ let sha512 dst input_len input =
   hash #SHA2_512 #M32 sha512_init sha512_update_nblocks sha512_update_last sha512_finish rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_512 #M32 (v input_len) (as_seq_multi h0 ib);
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+
+// SHA2-384
+// --------
+
+inline_for_extraction noextract
+let alloca_384 = F.alloca hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
+let create_in_384 = F.create_in hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
+let init_384 = F.init hacl_sha2_384 (G.hide ()) (state_t_384.s ()) (G.erased unit)
+
+[@@ Comment
+"Write the resulting hash into `dst`, an array of 48 bytes. The state remains
+valid after a call to `finish_384`, meaning the user may feed more data into
+the hash via `update_384`."]
+let finish_384 = F.mk_finish hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
+
+[@@ Comment
+"Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes."]
+val sha384: hash_t SHA2_384
+let sha384 dst input_len input =
+  let ib = ntup1 input in
+  let rb = ntup1 dst in
+  let h0 = ST.get() in
+  loc_multi1 rb;
+  hash #SHA2_384 #M32 sha384_init sha384_update_nblocks sha384_update_last sha384_finish rb input_len ib;
+  let h1 = ST.get() in
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M32 (v input_len) (as_seq_multi h0 ib);
   assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
