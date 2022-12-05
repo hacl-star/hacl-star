@@ -290,7 +290,6 @@ static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f
   uint64_t b2 = f2[2U];
   uint64_t b3 = f2[3U];
   uint64_t b4 = f2[4U];
-  uint64_t r = (uint64_t)0x1000003D10U;
   FStar_UInt128_uint128
   d0 =
     FStar_UInt128_add_mod(FStar_UInt128_add_mod(FStar_UInt128_add_mod(FStar_UInt128_mul_wide(a0,
@@ -300,7 +299,9 @@ static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f
       FStar_UInt128_mul_wide(a3, b0));
   FStar_UInt128_uint128 c0 = FStar_UInt128_mul_wide(a4, b4);
   FStar_UInt128_uint128
-  d1 = FStar_UInt128_add_mod(d0, FStar_UInt128_mul_wide(r, FStar_UInt128_uint128_to_uint64(c0)));
+  d1 =
+    FStar_UInt128_add_mod(d0,
+      FStar_UInt128_mul_wide((uint64_t)0x1000003D10U, FStar_UInt128_uint128_to_uint64(c0)));
   uint64_t c1 = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(c0, (uint32_t)64U));
   uint64_t t3 = FStar_UInt128_uint128_to_uint64(d1) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 d2 = FStar_UInt128_shift_right(d1, (uint32_t)52U);
@@ -313,7 +314,7 @@ static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f
         FStar_UInt128_mul_wide(a3, b1)),
       FStar_UInt128_mul_wide(a4, b0));
   FStar_UInt128_uint128
-  d4 = FStar_UInt128_add_mod(d3, FStar_UInt128_mul_wide(r << (uint32_t)12U, c1));
+  d4 = FStar_UInt128_add_mod(d3, FStar_UInt128_mul_wide((uint64_t)281475040739328U, c1));
   uint64_t t4 = FStar_UInt128_uint128_to_uint64(d4) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 d5 = FStar_UInt128_shift_right(d4, (uint32_t)52U);
   uint64_t tx = t4 >> (uint32_t)48U;
@@ -330,7 +331,7 @@ static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f
   FStar_UInt128_uint128 d7 = FStar_UInt128_shift_right(d6, (uint32_t)52U);
   uint64_t u0_ = tx | u0 << (uint32_t)4U;
   FStar_UInt128_uint128
-  c3 = FStar_UInt128_add_mod(c2, FStar_UInt128_mul_wide(u0_, r >> (uint32_t)4U));
+  c3 = FStar_UInt128_add_mod(c2, FStar_UInt128_mul_wide(u0_, (uint64_t)4294968273U));
   uint64_t r0 = FStar_UInt128_uint128_to_uint64(c3) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 c4 = FStar_UInt128_shift_right(c3, (uint32_t)52U);
   FStar_UInt128_uint128
@@ -346,7 +347,8 @@ static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f
   FStar_UInt128_uint128
   c6 =
     FStar_UInt128_add_mod(c5,
-      FStar_UInt128_mul_wide(FStar_UInt128_uint128_to_uint64(d8) & (uint64_t)0xfffffffffffffU, r));
+      FStar_UInt128_mul_wide(FStar_UInt128_uint128_to_uint64(d8) & (uint64_t)0xfffffffffffffU,
+        (uint64_t)0x1000003D10U));
   FStar_UInt128_uint128 d9 = FStar_UInt128_shift_right(d8, (uint32_t)52U);
   uint64_t r1 = FStar_UInt128_uint128_to_uint64(c6) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 c7 = FStar_UInt128_shift_right(c6, (uint32_t)52U);
@@ -361,14 +363,16 @@ static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f
     FStar_UInt128_add_mod(FStar_UInt128_add_mod(d9, FStar_UInt128_mul_wide(a3, b4)),
       FStar_UInt128_mul_wide(a4, b3));
   FStar_UInt128_uint128
-  c9 = FStar_UInt128_add_mod(c8, FStar_UInt128_mul_wide(r, FStar_UInt128_uint128_to_uint64(d10)));
+  c9 =
+    FStar_UInt128_add_mod(c8,
+      FStar_UInt128_mul_wide((uint64_t)0x1000003D10U, FStar_UInt128_uint128_to_uint64(d10)));
   uint64_t d11 = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(d10, (uint32_t)64U));
   uint64_t r2 = FStar_UInt128_uint128_to_uint64(c9) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 c10 = FStar_UInt128_shift_right(c9, (uint32_t)52U);
   FStar_UInt128_uint128
   c11 =
     FStar_UInt128_add_mod(FStar_UInt128_add_mod(c10,
-        FStar_UInt128_mul_wide(r << (uint32_t)12U, d11)),
+        FStar_UInt128_mul_wide((uint64_t)281475040739328U, d11)),
       FStar_UInt128_uint64_to_uint128(t3));
   uint64_t r3 = FStar_UInt128_uint128_to_uint64(c11) & (uint64_t)0xfffffffffffffU;
   uint64_t c12 = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(c11, (uint32_t)52U));
@@ -392,26 +396,28 @@ static inline void Hacl_K256_Field_fsqr(uint64_t *out, uint64_t *f)
   uint64_t a2 = f[2U];
   uint64_t a3 = f[3U];
   uint64_t a4 = f[4U];
-  uint64_t r = (uint64_t)0x1000003D10U;
+  uint64_t a02 = a0 * (uint64_t)2U;
+  uint64_t a12 = a1 * (uint64_t)2U;
+  uint64_t a22 = a2 * (uint64_t)2U;
+  uint64_t a42 = a4 * (uint64_t)2U;
   FStar_UInt128_uint128
-  d0 =
-    FStar_UInt128_add_mod(FStar_UInt128_mul_wide(a0 * (uint64_t)2U, a3),
-      FStar_UInt128_mul_wide(a1 * (uint64_t)2U, a2));
+  d0 = FStar_UInt128_add_mod(FStar_UInt128_mul_wide(a02, a3), FStar_UInt128_mul_wide(a12, a2));
   FStar_UInt128_uint128 c0 = FStar_UInt128_mul_wide(a4, a4);
   FStar_UInt128_uint128
-  d1 = FStar_UInt128_add_mod(d0, FStar_UInt128_mul_wide(r, FStar_UInt128_uint128_to_uint64(c0)));
+  d1 =
+    FStar_UInt128_add_mod(d0,
+      FStar_UInt128_mul_wide((uint64_t)0x1000003D10U, FStar_UInt128_uint128_to_uint64(c0)));
   uint64_t c1 = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(c0, (uint32_t)64U));
   uint64_t t3 = FStar_UInt128_uint128_to_uint64(d1) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 d2 = FStar_UInt128_shift_right(d1, (uint32_t)52U);
-  uint64_t a41 = a4 * (uint64_t)2U;
   FStar_UInt128_uint128
   d3 =
     FStar_UInt128_add_mod(FStar_UInt128_add_mod(FStar_UInt128_add_mod(d2,
-          FStar_UInt128_mul_wide(a0, a41)),
-        FStar_UInt128_mul_wide(a1 * (uint64_t)2U, a3)),
+          FStar_UInt128_mul_wide(a0, a42)),
+        FStar_UInt128_mul_wide(a12, a3)),
       FStar_UInt128_mul_wide(a2, a2));
   FStar_UInt128_uint128
-  d4 = FStar_UInt128_add_mod(d3, FStar_UInt128_mul_wide(r << (uint32_t)12U, c1));
+  d4 = FStar_UInt128_add_mod(d3, FStar_UInt128_mul_wide((uint64_t)281475040739328U, c1));
   uint64_t t4 = FStar_UInt128_uint128_to_uint64(d4) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 d5 = FStar_UInt128_shift_right(d4, (uint32_t)52U);
   uint64_t tx = t4 >> (uint32_t)48U;
@@ -419,42 +425,44 @@ static inline void Hacl_K256_Field_fsqr(uint64_t *out, uint64_t *f)
   FStar_UInt128_uint128 c2 = FStar_UInt128_mul_wide(a0, a0);
   FStar_UInt128_uint128
   d6 =
-    FStar_UInt128_add_mod(FStar_UInt128_add_mod(d5, FStar_UInt128_mul_wide(a1, a41)),
-      FStar_UInt128_mul_wide(a2 * (uint64_t)2U, a3));
+    FStar_UInt128_add_mod(FStar_UInt128_add_mod(d5, FStar_UInt128_mul_wide(a1, a42)),
+      FStar_UInt128_mul_wide(a22, a3));
   uint64_t u0 = FStar_UInt128_uint128_to_uint64(d6) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 d7 = FStar_UInt128_shift_right(d6, (uint32_t)52U);
   uint64_t u0_ = tx | u0 << (uint32_t)4U;
   FStar_UInt128_uint128
-  c3 = FStar_UInt128_add_mod(c2, FStar_UInt128_mul_wide(u0_, r >> (uint32_t)4U));
+  c3 = FStar_UInt128_add_mod(c2, FStar_UInt128_mul_wide(u0_, (uint64_t)4294968273U));
   uint64_t r0 = FStar_UInt128_uint128_to_uint64(c3) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 c4 = FStar_UInt128_shift_right(c3, (uint32_t)52U);
-  uint64_t a01 = a0 * (uint64_t)2U;
-  FStar_UInt128_uint128 c5 = FStar_UInt128_add_mod(c4, FStar_UInt128_mul_wide(a01, a1));
+  FStar_UInt128_uint128 c5 = FStar_UInt128_add_mod(c4, FStar_UInt128_mul_wide(a02, a1));
   FStar_UInt128_uint128
   d8 =
-    FStar_UInt128_add_mod(FStar_UInt128_add_mod(d7, FStar_UInt128_mul_wide(a2, a41)),
+    FStar_UInt128_add_mod(FStar_UInt128_add_mod(d7, FStar_UInt128_mul_wide(a2, a42)),
       FStar_UInt128_mul_wide(a3, a3));
   FStar_UInt128_uint128
   c6 =
     FStar_UInt128_add_mod(c5,
-      FStar_UInt128_mul_wide(FStar_UInt128_uint128_to_uint64(d8) & (uint64_t)0xfffffffffffffU, r));
+      FStar_UInt128_mul_wide(FStar_UInt128_uint128_to_uint64(d8) & (uint64_t)0xfffffffffffffU,
+        (uint64_t)0x1000003D10U));
   FStar_UInt128_uint128 d9 = FStar_UInt128_shift_right(d8, (uint32_t)52U);
   uint64_t r1 = FStar_UInt128_uint128_to_uint64(c6) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 c7 = FStar_UInt128_shift_right(c6, (uint32_t)52U);
   FStar_UInt128_uint128
   c8 =
-    FStar_UInt128_add_mod(FStar_UInt128_add_mod(c7, FStar_UInt128_mul_wide(a01, a2)),
+    FStar_UInt128_add_mod(FStar_UInt128_add_mod(c7, FStar_UInt128_mul_wide(a02, a2)),
       FStar_UInt128_mul_wide(a1, a1));
-  FStar_UInt128_uint128 d10 = FStar_UInt128_add_mod(d9, FStar_UInt128_mul_wide(a3, a41));
+  FStar_UInt128_uint128 d10 = FStar_UInt128_add_mod(d9, FStar_UInt128_mul_wide(a3, a42));
   FStar_UInt128_uint128
-  c9 = FStar_UInt128_add_mod(c8, FStar_UInt128_mul_wide(r, FStar_UInt128_uint128_to_uint64(d10)));
+  c9 =
+    FStar_UInt128_add_mod(c8,
+      FStar_UInt128_mul_wide((uint64_t)0x1000003D10U, FStar_UInt128_uint128_to_uint64(d10)));
   uint64_t d11 = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(d10, (uint32_t)64U));
   uint64_t r2 = FStar_UInt128_uint128_to_uint64(c9) & (uint64_t)0xfffffffffffffU;
   FStar_UInt128_uint128 c10 = FStar_UInt128_shift_right(c9, (uint32_t)52U);
   FStar_UInt128_uint128
   c11 =
     FStar_UInt128_add_mod(FStar_UInt128_add_mod(c10,
-        FStar_UInt128_mul_wide(r << (uint32_t)12U, d11)),
+        FStar_UInt128_mul_wide((uint64_t)281475040739328U, d11)),
       FStar_UInt128_uint64_to_uint128(t3));
   uint64_t r3 = FStar_UInt128_uint128_to_uint64(c11) & (uint64_t)0xfffffffffffffU;
   uint64_t c12 = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(c11, (uint32_t)52U));
