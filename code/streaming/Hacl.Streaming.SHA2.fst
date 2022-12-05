@@ -84,30 +84,30 @@ let create_in_256 = F.create_in hacl_sha2_256 () (state_t_256.s ()) (G.erased un
 "Reset an existing state to the initial hash state with empty data."]
 let init_256 = F.init hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 
+[@@ CInline ]
+private
+let update_224_256 = F.update hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns 0 for
 success, or 1 if the combined length of all of the data passed to `update_256`
-(since the last call to `init_256`) exceeds 2^63-1 bytes.
+(since the last call to `init_256`) exceeds 2^61-1 bytes.
 
 This function is identical to the update function for SHA2_224.";
-
-CPrologue
-"#define Hacl_Streaming_SHA2_update_224 Hacl_Streaming_SHA2_update_256" ]
-let update_256 = F.update hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+]
+let update_256: F.update_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit) = fun p input input_len -> update_224_256 p input input_len
 
 [@@ Comment
 "Write the resulting hash into `dst`, an array of 32 bytes. The state remains
 valid after a call to `finish_256`, meaning the user may feed more data into
-the hash via `update_256`."]
+the hash via `update_256`. (The finish_256 function operates on an internal copy of
+the state and therefore does not invalidate the client-held state `p`.)"]
 let finish_256 = F.mk_finish hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
 
 [@@ Comment
 "Free a state allocated with `create_in_256`.
 
-This function is identical to the free function for SHA2_224.";
-
-CPrologue
-"#define Hacl_Streaming_SHA2_free_224 Hacl_Streaming_SHA2_free_256" ]
+This function is identical to the free function for SHA2_224."]
 let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 
 [@@ Comment
@@ -130,12 +130,15 @@ inline_for_extraction noextract
 let alloca_224 = F.alloca hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
 let create_in_224 = F.create_in hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
 let init_224 = F.init hacl_sha2_224 (G.hide ()) (state_t_224.s ()) (G.erased unit)
+// We assume verified clients will rely on Spec.SHA2.Lemmas to prove that update_224 has the same effect as update_256.
+let update_224: F.update_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit) = fun p input input_len -> update_224_256 p input input_len
 
 [@@ Comment
 "Write the resulting hash into `dst`, an array of 28 bytes. The state remains
 valid after a call to `finish_224`, meaning the user may feed more data into
 the hash via `update_224`."]
 let finish_224 = F.mk_finish hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
+let free_224: F.free_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit) = fun p -> free_256 p
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes."]
@@ -157,30 +160,31 @@ inline_for_extraction noextract
 let alloca_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let create_in_512 = F.create_in hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let init_512 = F.init hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
+
+[@@ CInline ]
+private
+let update_384_512 = F.update hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns 0 for
 success, or 1 if the combined length of all of the data passed to `update_512`
 (since the last call to `init_512`) exceeds 2^125-1 bytes.
 
 This function is identical to the update function for SHA2_384.";
-
-CPrologue
-"#define Hacl_Streaming_SHA2_update_384 Hacl_Streaming_SHA2_update_512" ]
-let update_512 = F.update hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
+]
+let update_512: F.update_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit) = fun p input input_len -> update_384_512 p input input_len
 
 [@@ Comment
 "Write the resulting hash into `dst`, an array of 64 bytes. The state remains
 valid after a call to `finish_512`, meaning the user may feed more data into
-the hash via `update_512`."]
+the hash via `update_512`. (The finish_512 function operates on an internal copy of
+the state and therefore does not invalidate the client-held state `p`.)"]
 let finish_512 = F.mk_finish hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 
 [@@ Comment
 "Free a state allocated with `create_in_512`.
 
 This function is identical to the free function for SHA2_384.";
-
-CPrologue
-"#define Hacl_Streaming_SHA2_free_384 Hacl_Streaming_SHA2_free_512" ]
+]
 let free_512 = F.free hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 
 [@@ Comment
@@ -203,12 +207,15 @@ inline_for_extraction noextract
 let alloca_384 = F.alloca hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
 let create_in_384 = F.create_in hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
 let init_384 = F.init hacl_sha2_384 (G.hide ()) (state_t_384.s ()) (G.erased unit)
+let update_384: F.update_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit) = fun p input input_len -> update_384_512 p input input_len
 
 [@@ Comment
 "Write the resulting hash into `dst`, an array of 48 bytes. The state remains
 valid after a call to `finish_384`, meaning the user may feed more data into
 the hash via `update_384`."]
 let finish_384 = F.mk_finish hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
+
+let free_384: F.free_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit) = fun p -> free_512 p
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes."]

@@ -53,22 +53,29 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Streaming_SHA2_finish_256"
         ((ptr hacl_Streaming_SHA2_state_sha2_224) @->
            (ocaml_bytes @-> (returning void)))
-    let hacl_Streaming_SHA2_sha256 =
-      foreign "Hacl_Streaming_SHA2_sha256"
-        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
     let hacl_Streaming_SHA2_free_256 =
       foreign "Hacl_Streaming_SHA2_free_256"
         ((ptr hacl_Streaming_SHA2_state_sha2_224) @-> (returning void))
+    let hacl_Streaming_SHA2_sha256 =
+      foreign "Hacl_Streaming_SHA2_sha256"
+        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
     let hacl_Streaming_SHA2_create_in_224 =
       foreign "Hacl_Streaming_SHA2_create_in_224"
         (void @-> (returning (ptr hacl_Streaming_SHA2_state_sha2_224)))
     let hacl_Streaming_SHA2_init_224 =
       foreign "Hacl_Streaming_SHA2_init_224"
         ((ptr hacl_Streaming_SHA2_state_sha2_224) @-> (returning void))
+    let hacl_Streaming_SHA2_update_224 =
+      foreign "Hacl_Streaming_SHA2_update_224"
+        ((ptr hacl_Streaming_SHA2_state_sha2_224) @->
+           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
     let hacl_Streaming_SHA2_finish_224 =
       foreign "Hacl_Streaming_SHA2_finish_224"
         ((ptr hacl_Streaming_SHA2_state_sha2_224) @->
            (ocaml_bytes @-> (returning void)))
+    let hacl_Streaming_SHA2_free_224 =
+      foreign "Hacl_Streaming_SHA2_free_224"
+        ((ptr hacl_Streaming_SHA2_state_sha2_224) @-> (returning void))
     let hacl_Streaming_SHA2_sha224 =
       foreign "Hacl_Streaming_SHA2_sha224"
         (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
@@ -98,10 +105,17 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA2_init_384 =
       foreign "Hacl_Streaming_SHA2_init_384"
         ((ptr hacl_Streaming_SHA2_state_sha2_384) @-> (returning void))
+    let hacl_Streaming_SHA2_update_384 =
+      foreign "Hacl_Streaming_SHA2_update_384"
+        ((ptr hacl_Streaming_SHA2_state_sha2_384) @->
+           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
     let hacl_Streaming_SHA2_finish_384 =
       foreign "Hacl_Streaming_SHA2_finish_384"
         ((ptr hacl_Streaming_SHA2_state_sha2_384) @->
            (ocaml_bytes @-> (returning void)))
+    let hacl_Streaming_SHA2_free_384 =
+      foreign "Hacl_Streaming_SHA2_free_384"
+        ((ptr hacl_Streaming_SHA2_state_sha2_384) @-> (returning void))
     let hacl_Streaming_SHA2_sha384 =
       foreign "Hacl_Streaming_SHA2_sha384"
         (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
