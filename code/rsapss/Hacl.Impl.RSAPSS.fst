@@ -87,7 +87,7 @@ let rsapss_sign_bn #t ke modBits eBits dBits skey m m' s =
 
 
 inline_for_extraction noextract
-let rsapss_sign_msg_to_bn_st (t:limb_t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:modBits_t t) =
+let rsapss_sign_msg_to_bn_st (t:limb_t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:modBits_t t) =
   let len = blocks modBits (size (bits t)) in
     saltLen:size_t
   -> salt:lbuffer uint8 saltLen
@@ -107,7 +107,7 @@ let rsapss_sign_msg_to_bn_st (t:limb_t) (a:Hash.algorithm{S.hash_is_supported a}
 inline_for_extraction noextract
 val rsapss_sign_msg_to_bn:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t ->
   rsapss_sign_msg_to_bn_st t a modBits
 
@@ -182,7 +182,7 @@ let rsapss_sign_compute_sgnt #t ke modBits eBits dBits skey m sgnt =
 
 
 inline_for_extraction noextract
-let rsapss_sign_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:modBits_t t) =
+let rsapss_sign_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:modBits_t t) =
   let len = blocks modBits (size (bits t)) in
     eBits:size_t
   -> dBits:size_t{LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
@@ -209,7 +209,7 @@ inline_for_extraction noextract
 val rsapss_sign_:
     #t:limb_t
   -> ke:BE.exp t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t ->
   rsapss_sign_st1 t ke a modBits
 
@@ -225,7 +225,7 @@ let rsapss_sign_ #t ke a modBits eBits dBits skey saltLen salt msgLen msg sgnt =
 
 
 inline_for_extraction noextract
-let rsapss_sign_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:modBits_t t) =
+let rsapss_sign_st (t:limb_t) (ke:BE.exp t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:modBits_t t) =
     let len = blocks modBits (size (bits t)) in
      eBits:size_t
   -> dBits:size_t{LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
@@ -251,7 +251,7 @@ inline_for_extraction noextract
 val rsapss_sign:
     #t:limb_t
   -> ke:BE.exp t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t ->
   rsapss_sign_st t ke a modBits
 
@@ -339,7 +339,7 @@ let rsapss_verify_bn #t ke modBits eBits pkey m_def s =
 
 
 inline_for_extraction noextract
-let rsapss_verify_bn_to_msg_st (t:limb_t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:modBits_t t) =
+let rsapss_verify_bn_to_msg_st (t:limb_t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:modBits_t t) =
     saltLen:size_t
   -> msgLen:size_t
   -> msg:lbuffer uint8 msgLen
@@ -356,7 +356,7 @@ let rsapss_verify_bn_to_msg_st (t:limb_t) (a:Hash.algorithm{S.hash_is_supported 
 inline_for_extraction noextract
 val rsapss_verify_bn_to_msg:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t ->
   rsapss_verify_bn_to_msg_st t a modBits
 
@@ -428,7 +428,7 @@ let rsapss_verify_compute_msg #t ke modBits eBits pkey sgnt m =
 
 
 inline_for_extraction noextract
-let rsapss_verify_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:modBits_t t) =
+let rsapss_verify_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:modBits_t t) =
    let len = blocks modBits (size (bits t)) in
     eBits:size_t{LS.pkey_len_pre t (v modBits) (v eBits)}
   -> pkey:lbignum t (2ul *! len +! blocks eBits (size (bits t)))
@@ -452,7 +452,7 @@ inline_for_extraction noextract
 val rsapss_verify_:
     #t:limb_t
   -> ke:BE.exp t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t ->
   rsapss_verify_st1 t ke a modBits
 
@@ -468,7 +468,7 @@ let rsapss_verify_ #t ke a modBits eBits pkey saltLen sgnt msgLen msg =
 
 
 inline_for_extraction noextract
-let rsapss_verify_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:modBits_t t) =
+let rsapss_verify_st (t:limb_t) (ke:BE.exp t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:modBits_t t) =
    let len = blocks modBits (size (bits t)) in
     eBits:size_t{LS.pkey_len_pre t (v modBits) (v eBits)}
   -> pkey:lbignum t (2ul *! len +! blocks eBits (size (bits t)))
@@ -492,7 +492,7 @@ inline_for_extraction noextract
 val rsapss_verify:
     #t:limb_t
   -> ke:BE.exp t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t ->
   rsapss_verify_st t ke a modBits
 
@@ -515,7 +515,7 @@ let rsapss_verify #t ke a modBits eBits pkey saltLen sgntLen sgnt msgLen msg =
 
 
 inline_for_extraction noextract
-let rsapss_skey_sign_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:size_t) =
+let rsapss_skey_sign_st (t:limb_t) (ke:BE.exp t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:size_t) =
     eBits:size_t
   -> dBits:size_t{LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
   -> nb:lbuffer uint8 (blocks modBits 8ul)
@@ -544,7 +544,7 @@ inline_for_extraction noextract
 val rsapss_skey_sign:
     #t:limb_t
   -> ke:BE.exp t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t
   -> rsapss_load_skey:RK.rsapss_load_skey_st t ke modBits
   -> rsapss_sign:rsapss_sign_st t ke a modBits ->
@@ -572,7 +572,7 @@ let rsapss_skey_sign #t ke a modBits rsapss_load_skey rsapss_sign eBits dBits nb
 
 
 inline_for_extraction noextract
-let rsapss_pkey_verify_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_supported a}) (modBits:size_t) =
+let rsapss_pkey_verify_st (t:limb_t) (ke:BE.exp t) (a:Hash.hash_alg{S.hash_is_supported a}) (modBits:size_t) =
     eBits:size_t{LS.pkey_len_pre t (v modBits) (v eBits)}
   -> nb:lbuffer uint8 (blocks modBits 8ul)
   -> eb:lbuffer uint8 (blocks eBits 8ul)
@@ -596,7 +596,7 @@ inline_for_extraction noextract
 val rsapss_pkey_verify:
     #t:limb_t
   -> ke:BE.exp t
-  -> a:Hash.algorithm{S.hash_is_supported a}
+  -> a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t t
   -> rsapss_load_pkey:RK.rsapss_load_pkey_st t ke modBits
   -> rsapss_verify:rsapss_verify_st t ke a modBits ->

@@ -23,15 +23,15 @@ inline_for_extraction noextract
 let less_than_max_input_length = Spec.Hash.Definitions.less_than_max_input_length
 
 inline_for_extraction noextract
-let salt_len_t (a:Hash.algorithm) =
+let salt_len_t (a:Hash.hash_alg) =
   saltLen:size_t{8 + Hash.hash_length a + v saltLen <= max_size_t /\ (8 + Hash.hash_length a + v saltLen) `less_than_max_input_length` a}
 
 inline_for_extraction noextract
-let msg_len_t (a:Hash.algorithm) =
+let msg_len_t (a:Hash.hash_alg) =
   msgLen:size_t{v msgLen `less_than_max_input_length` a}
 
 inline_for_extraction noextract
-let em_len_t (a:Hash.algorithm) (saltLen:salt_len_t a) =
+let em_len_t (a:Hash.hash_alg) (saltLen:salt_len_t a) =
   emBits:size_t{0 < v emBits /\ Hash.hash_length a + v saltLen + 2 <= S.blocks (v emBits) 8}
 
 
@@ -67,7 +67,7 @@ let db_zero len db emBits =
 
 inline_for_extraction noextract
 val get_m1Hash:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> saltLen:salt_len_t a
   -> salt:lbuffer uint8 saltLen
   -> msgLen:msg_len_t a
@@ -102,7 +102,7 @@ let get_m1Hash a saltLen salt msgLen msg hLen m1Hash =
 
 inline_for_extraction noextract
 val get_maskedDB:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> saltLen:salt_len_t a
   -> salt:lbuffer uint8 saltLen
   -> hLen:size_t{v hLen == Hash.hash_length a}
@@ -144,7 +144,7 @@ let get_maskedDB a saltLen salt hLen m1Hash emBits dbLen db =
 
 
 val pss_encode:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> saltLen:salt_len_t a
   -> salt:lbuffer uint8 saltLen
   -> msgLen:msg_len_t a
@@ -179,7 +179,7 @@ let pss_encode a saltLen salt msgLen msg emBits em =
 
 inline_for_extraction noextract
 val pss_verify_:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> saltLen:salt_len_t a
   -> msgLen:msg_len_t a
   -> msg:lbuffer uint8 msgLen
@@ -224,7 +224,7 @@ let pss_verify_ a saltLen msgLen msg emBits em =
 #set-options "--z3rlimit 300"
 
 val pss_verify:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> saltLen:salt_len_t a
   -> msgLen:msg_len_t a
   -> msg:lbuffer uint8 msgLen
