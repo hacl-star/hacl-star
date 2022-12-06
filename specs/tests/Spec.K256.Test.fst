@@ -88,6 +88,25 @@ let test2_sgnt = List.Tot.map u8_from_UInt8 [
 ]
 
 
+let test_secret_to_public () : FStar.All.ML bool =
+  assert_norm (List.Tot.length test2_sk = 32);
+  assert_norm (List.Tot.length test2_pk = 64);
+
+  let sk : lbytes 32 = of_list test2_sk in
+  let pk_expected : lbytes 64 = of_list test2_pk in
+
+  let pk = secret_to_public sk in
+
+  let is_pk_valid =
+    match pk with
+    | Some pk -> for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) pk_expected pk
+    | None -> false in
+
+  if is_pk_valid then IO.print_string "Test K256 secret_to_public: Success!\n"
+  else IO.print_string "Test K256 secret_to_public: Failure :(\n";
+  is_pk_valid
+
+
 let test_verify () : FStar.All.ML bool =
   assert_norm (List.Tot.length test1_pk = 64);
   assert_norm (List.Tot.length test1_msg = 6);
@@ -166,11 +185,12 @@ let test_public_key_uncompressed () : FStar.All.ML bool =
 
 
 let test () : FStar.All.ML bool  =
+  let t0 : bool = test_secret_to_public () in
   let t1 : bool = test_verify () in
   let t2 : bool = test_sign_and_verify () in
   let t3 : bool = test_public_key_compressed () in
   let t4 : bool = test_public_key_uncompressed () in
 
-  if t1 && t2 && t3 && t4
+  if t0 && t1 && t2 && t3 && t4
   then begin IO.print_string "Test K256 ecdsa: Success!\n"; true end
   else begin IO.print_string "Test K256 ecdsa: Failure :(\n"; false end
