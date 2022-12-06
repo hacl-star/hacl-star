@@ -132,14 +132,13 @@ let mk_update_multi a update s () blocks n_blocks =
 
 #pop-options
 
-#push-options "--fuel 0 --ifuel 1 --z3rlimit 400 --z3cliopt smt.arith.nl=false"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 400"
 
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction
 let mk_update_last a update_multi =
   assert_norm(block_length a > 0);
-  fun pad s ev prev_len input input_len ->
-  assert (extra_state a == unit);
+  fun pad s prev_len input input_len ->
   ST.push_frame ();
   let h0 = ST.get () in
 
@@ -163,7 +162,7 @@ let mk_update_last a update_multi =
 
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h0 input) (S.append (B.as_seq h1 blocks) (B.as_seq h1 rest)));
-  assert (S.equal (B.as_seq h1 s) (fst (Spec.Agile.Hash.update_multi a (B.as_seq h0 s, ()) (B.as_seq h0 blocks))));
+  assert (S.equal (as_seq h1 s) (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) () (B.as_seq h0 blocks)));
 
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in
@@ -205,8 +204,8 @@ let mk_update_last a update_multi =
 
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
-    (fst (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.update_multi a (B.as_seq h0 s, ()) (B.as_seq h1 blocks))
-      (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len))))));
+    (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) () (B.as_seq h1 blocks)) ()
+      (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)))));
   assert (
     let s1 = B.as_seq h1 blocks in
     let s2 = B.as_seq h2 rest in
