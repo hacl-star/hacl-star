@@ -160,7 +160,7 @@ let index_be (a: sha2_alg) (b: block_b a) (i: U32.t):
   | SHA2_224 | SHA2_256 -> Lib.ByteBuffer.uint_at_index_be #U32 #SEC #(size (block_word_length a)) b i
   | SHA2_384 | SHA2_512 -> Lib.ByteBuffer.uint_at_index_be #U64 #SEC #(size (block_word_length a)) b i
 
-#set-options "--max_fuel 1 --z3rlimit 20"
+#set-options "--fuel 1 --z3rlimit 50"
 
 inline_for_extraction
 let ws a b ws =
@@ -347,7 +347,7 @@ let zero (a: sha2_alg): word a =
   | SHA2_224 | SHA2_256 -> u32 0
   | SHA2_384 | SHA2_512 -> u64 0
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st (|a, ()|)
@@ -368,7 +368,7 @@ let update a hash ev block =
 	       S.equal (B.as_seq h2 hash1) (Spec.shuffle a (B.as_seq h1 hash1) block_w));
   C.Loops.in_place_map2 hash hash1 8ul ( (+. ) #(word_t a) #SEC );
   (**) let h3 = ST.get () in
-  (**) assert (S.equal (B.as_seq h3 hash) (fst (Spec.update_pre a (B.as_seq h1 hash1, ()) (B.as_seq h1 block))));
+  (**) assert (S.equal (B.as_seq h3 hash) (Spec.update_pre a (B.as_seq h1 hash1) (B.as_seq h1 block)));
   ST.pop_frame();
   (**) reveal_opaque (`%Spec.update) Spec.update
 
