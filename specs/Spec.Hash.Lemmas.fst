@@ -29,6 +29,26 @@ let update_multi_zero (a: hash_alg) h =
 
 #pop-options
 
+#push-options "--fuel 1"
+let update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): Lemma
+  (ensures (update_multi a h () input) == (update a h input))
+=
+  let h1 = update_multi a h () input in
+  assert(h1 == Lib.UpdateMulti.mk_update_multi (block_length a) (update a) h input);
+  if S.length input = 0 then
+    begin
+    assert(h1 == h)
+    end
+  else
+    begin
+    let block, rem = Lib.UpdateMulti.split_block (block_length a) input 1 in
+    let h2 = update a h block in
+    assert(rem `Seq.equal` Seq.empty);
+    assert(block `Seq.equal` input);
+    let h3 = Lib.UpdateMulti.mk_update_multi (block_length a) (update a) h2 rem in
+    assert(h1 == h3)
+    end
+#pop-options
 
 let update_multi_associative (a: hash_alg{not (is_blake a)})
   (h: words_state a)

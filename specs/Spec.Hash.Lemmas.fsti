@@ -17,6 +17,10 @@ val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
   (ensures ((update_multi a h (init_extra_state a) S.empty) == h))
   [ SMTPat (update_multi a h (init_extra_state a) S.empty) ]
 
+/// Single update corresponds to update_multi for the MD algorithms
+val update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): Lemma
+  (ensures (update_multi a h () input == update a h input))
+
 /// Second hash law. MD hashes defer to Lib.UpdateMulti while Blake2 and SHA3 defer to Lib.SequenceLemmas.
 val update_multi_associative (a: hash_alg{not (is_blake a)})
   (h: words_state a)
