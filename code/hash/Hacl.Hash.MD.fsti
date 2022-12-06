@@ -12,13 +12,13 @@ val len_add32 (a: hash_alg{not (is_sha3 a)})
   x:len_t a { len_v a x = len_v a prev_len + U32.v input_len }
 
 noextract inline_for_extraction
-val mk_update_multi: a:hash_alg{not (is_blake a)} -> update:update_st (|a, ()|) -> update_multi_st (|a, ()|)
+val mk_update_multi: a:md_alg -> update:update_st (|a, ()|) -> update_multi_st (|a, ()|)
 
 noextract inline_for_extraction
-val mk_update_last: a:hash_alg{is_md a} -> update_multi_st (|a, ()|) -> pad_st a -> update_last_st (|a, ()|)
+val mk_update_last: a:md_alg -> update_multi_st (|a, ()|) -> pad_st a -> update_last_st (|a, ()|)
 
 noextract inline_for_extraction
-val mk_hash: a:hash_alg{is_md a} ->
+val mk_hash: a:md_alg ->
   alloca:alloca_st (|a, ()|) ->
   update_multi:update_multi_st (|a, ()|) ->
   update_last:update_last_st (|a, ()|) ->

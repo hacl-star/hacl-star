@@ -83,19 +83,19 @@ let len_add32 a prev_len input_len =
       assert_norm (pow2 125 < pow2 128);
       U128.(prev_len +^ uint64_to_uint128 (uint32_to_uint64 input_len))
 
-#push-options "--max_fuel 1 --ifuel 1 --z3rlimit 128"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
 (** Iterated compression function. *)
 noextract inline_for_extraction
-let mk_update_multi a update s ev blocks n_blocks =
+let mk_update_multi a update s () blocks n_blocks =
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
     let i_block = block_length a * i in
     i <= U32.v n_blocks /\
     B.live h s /\ B.live h blocks /\
     B.(modifies (loc_buffer s) h0 h) /\
-    (as_seq h s, ev) ==
-      (Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (S.slice (B.as_seq h0 blocks) 0 i_block))
+    as_seq h s ==
+      Spec.Agile.Hash.update_multi a (as_seq h0 s) () (S.slice (B.as_seq h0 blocks) 0 i_block)
   in
   let f (i:U32.t { U32.(0 <= v i /\ v i < v n_blocks)}): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))
@@ -105,12 +105,12 @@ let mk_update_multi a update s ev blocks n_blocks =
     let sz = block_len a in
     let blocks0 = B.sub blocks 0ul U32.(sz *^ i) in
     let block = B.sub blocks U32.(sz *^ i) sz in
-    update s ev block;
-    (**) Spec.Hash.Lemmas.update_multi_update a (as_seq h1 s, ev) (B.as_seq h0 block);
+    update s () block;
+    (**) Spec.Hash.Lemmas.update_multi_update a (as_seq h1 s) (B.as_seq h0 block);
     (**) let h2 = ST.get () in
     (**) let blocks_v : Ghost.erased _ = B.as_seq h0 blocks in
     (**) let block_v : Ghost.erased _ = B.as_seq h0 block in
-    (**) let blocks0_v : Ghost.erased _ = B.as_seq h0 blocks0 in 
+    (**) let blocks0_v : Ghost.erased _ = B.as_seq h0 blocks0 in
     assert (
       let s1 = B.as_seq h1 s in
       let s2 = B.as_seq h2 s in
@@ -119,16 +119,16 @@ let mk_update_multi a update s ev blocks n_blocks =
       block_length a * (i + 1) <= S.length blocks_v /\
       (block_length a * (i + 1) - block_length a * i) % block_length a = 0 /\
       S.equal block_v (S.slice blocks_v (block_length a * i) (block_length a * (i + 1))) /\
-      S.equal s2 (fst (Spec.Agile.Hash.update_multi a (s1, ()) block_v))
+      S.equal s2 (Spec.Agile.Hash.update_multi a s1 () block_v)
       );
     (**) let i_block : Ghost.erased _ = block_length a * (U32.v i) in
-    (**) Spec.Hash.Lemmas.update_multi_associative a (as_seq h0 s, ev)
+    (**) Spec.Hash.Lemmas.update_multi_associative a (as_seq h0 s)
                                                    (S.slice blocks_v 0 i_block)
                                                    block_v
   in
   assert (B.length blocks = U32.v n_blocks * block_length a);
-  C.Loops.for 0ul n_blocks inv f;
-  ev
+  Spec.Hash.Lemmas.update_multi_zero a (as_seq h0 s);
+  C.Loops.for 0ul n_blocks inv f
 
 #pop-options
 
