@@ -17,8 +17,8 @@ let squash_and_elim (t : term) : Tac unit =
     let ae = `__squash_and_elim in
     apply_lemma (mk_e_app ae [t])
 
-let tf (t : term) =
-  match unsquash t with
+let tf (t : term) : Tot (term -> Tac unit) =
+  match unsquash_term t with
   | None -> and_elim
   | _ -> squash_and_elim
 
