@@ -184,20 +184,9 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_512_s */
 
-/* SNIPPET_START: EverCrypt_DRBG_create */
+/* SNIPPET_START: EverCrypt_DRBG_create_in */
 
-/**
-Create a DRBG state.
-
-@param a Hash algorithm to use. The possible instantiations are ...
-  * `Spec_Hash_Definitions_SHA2_256`,
-  * `Spec_Hash_Definitions_SHA2_384`,
-  * `Spec_Hash_Definitions_SHA2_512`, and
-  * `Spec_Hash_Definitions_SHA1`.
-
-@return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`.
-*/
-EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
+EverCrypt_DRBG_state_s *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
 {
   EverCrypt_DRBG_state_s st;
   switch (a)
@@ -273,6 +262,26 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
   *buf = (EverCrypt_DRBG_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_DRBG_state_s));
   buf[0U] = st;
   return buf;
+}
+
+/* SNIPPET_END: EverCrypt_DRBG_create_in */
+
+/* SNIPPET_START: EverCrypt_DRBG_create */
+
+/**
+Create a DRBG state.
+
+@param a Hash algorithm to use. The possible instantiations are ...
+  * `Spec_Hash_Definitions_SHA2_256`,
+  * `Spec_Hash_Definitions_SHA2_384`,
+  * `Spec_Hash_Definitions_SHA2_512`, and
+  * `Spec_Hash_Definitions_SHA1`.
+
+@return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`.
+*/
+EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
+{
+  return EverCrypt_DRBG_create_in(a);
 }
 
 /* SNIPPET_END: EverCrypt_DRBG_create */

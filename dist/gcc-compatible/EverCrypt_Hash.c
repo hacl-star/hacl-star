@@ -414,7 +414,6 @@ EverCrypt_Hash_state_s *EverCrypt_Hash_create_in(Spec_Hash_Definitions_hash_alg 
         KRML_HOST_EXIT(253U);
       }
   }
-  KRML_CHECK_SIZE(sizeof (EverCrypt_Hash_state_s), (uint32_t)1U);
   EverCrypt_Hash_state_s
   *buf = (EverCrypt_Hash_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_Hash_state_s));
   buf[0U] = s;
@@ -1550,8 +1549,6 @@ Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
   EverCrypt_Hash_state_s *block_state = EverCrypt_Hash_create_in(a);
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____),
-    (uint32_t)1U);
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
   *p =
     (Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *)KRML_HOST_MALLOC(sizeof (
