@@ -754,9 +754,7 @@ let lemma_update_multi_quads_short (s:seq quad32) (hash_orig:hash256) : Lemma
 
 let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Lemma
   (ensures (update_multi SHA2_256 h () b == update SHA2_256 h b)) =
-  let block, rem = Seq.split b (block_length) in
-  assert (Seq.length rem == 0);
-  update_multi_zero SHA2_256 (update SHA2_256 h b)
+  update_multi_update SHA2_256 h b
 
 #pop-options
 
