@@ -14,6 +14,8 @@
 # - SKIPDEPEND=1 disables even *including* .depend files (not meant for end users)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
+# - RESOURCEMONITOR=1 will create .runlim files with runtime and memory usage
+#   information. The results can then be tallied with the res_summary.sh script.
 #
 # This is a staged Makefile, because we first need to generate .fst files out of
 # .vaf files in order to get a full dependency graph for the .fst files. So,
@@ -198,6 +200,13 @@ endif
 
 SHELL:=$(shell which bash)
 
+# Passing RESOURCEMONITOR=1 to this Makefile will create .runlim files
+# throughout the tree with resource information. The $(RUNLIM) variable
+# can also be defined directly if so desired.
+ifneq ($(RESOURCEMONITOR),)
+  RUNLIM = runlim -p -o $@.runlim
+endif
+
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM)
 #
@@ -208,6 +217,7 @@ SHELL:=$(shell which bash)
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
+  $(RUNLIM) \
   $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
@@ -223,7 +233,7 @@ run-with-log = \
     false; \
   fi
 else
-run-with-log = $1
+run-with-log = $(RUNLIM) $1
 endif
 
 
