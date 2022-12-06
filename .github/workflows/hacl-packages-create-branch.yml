@@ -1,7 +1,7 @@
 name: Create branch on hacl-packages
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [ main ]
 
 jobs:
@@ -36,3 +36,11 @@ jobs:
           git add src include
           git commit -m "[CI] update code"
           git push --force --set-upstream  origin $branch
+      - name: comment pr
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: |
+            [CI] Extensive testing of the generated code on hacl-packages:
+            - [build](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abuild_pull_request)
+            - [ocaml](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Aocaml)
+          comment_includes: "[CI]"
