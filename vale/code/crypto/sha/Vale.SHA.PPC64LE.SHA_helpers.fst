@@ -143,15 +143,9 @@ let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_le
   assert (equal (update_block hash (words_of_bytes SHA2_256 #(block_word_length SHA2_256) block)) (update SHA2_256 hash block));
   ()
 
-#push-options "--fuel 1"
-
 let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Lemma
   (ensures (update_multi SHA2_256 h () b == update SHA2_256 h b)) =
-  let block, rem = Seq.split b (block_length) in
-  assert (Seq.length rem == 0);
-  update_multi_zero SHA2_256 (update SHA2_256 h b)
-
-#pop-options
+  update_multi_update SHA2_256 h b
 
 friend Lib.ByteSequence
 
