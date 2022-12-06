@@ -41,6 +41,6 @@ jobs:
         with:
           message: |
             [CI] Extensive testing of the generated code on hacl-packages:
-            - https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abuild_pull_request
-            - https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Aocaml
+            - [build](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abuild_pull_request)
+            - [ocaml](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Aocaml)
           comment_includes: "[CI]"
