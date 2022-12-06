@@ -226,7 +226,7 @@ let fmul_fmul_eq_vartime a bz c dz =
   z
 
 
-let point_eq p q =
+let point_eq_vartime p q =
   let px, py, pz = getx p, gety p, getz p in
   let qx, qy, qz = getx q, gety q, getz q in
 
