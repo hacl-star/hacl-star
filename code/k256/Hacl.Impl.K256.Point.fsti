@@ -205,3 +205,31 @@ val point_compress_vartime (s:lbuffer uint8 33ul) (p:point) : Stack unit
     point_inv h p)
   (ensures fun h0 b h1 -> modifies (loc s) h0 h1 /\
     as_seq h1 s == S.point_compress (point_eval h0 p))
+
+
+inline_for_extraction noextract
+val store_point: out:lbuffer uint8 64ul -> p:point -> Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ disjoint out p /\
+    point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_seq h1 out == S.store_point (point_eval h0 p))
+
+
+inline_for_extraction noextract
+val load_point_nocheck: out:point -> b:lbuffer uint8 64ul -> Stack unit
+  (requires fun h ->
+    live h out /\ live h b /\ disjoint out b /\
+    S.point_inv_bytes (as_seq h b))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    point_inv h1 out /\
+    point_eval h1 out == S.load_point_nocheck (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val load_point_vartime: out:point -> b:lbuffer uint8 64ul -> Stack bool
+  (requires fun h ->
+    live h out /\ live h b /\ disjoint out b)
+  (ensures  fun h0 res h1 -> modifies (loc out) h0 h1 /\
+    (let ps = S.load_point (as_seq h0 b) in
+    (res <==> Some? ps) /\ (res ==> (point_inv h1 out /\ point_eval h1 out == Some?.v ps))))

@@ -310,3 +310,96 @@ let point_compress_vartime s p =
   to_aff_point xa ya p;
   aff_point_compress_vartime s xa ya;
   pop_frame ()
+
+
+let store_point out p =
+  push_frame ();
+  let px = create_felem () in
+  let py = create_felem () in
+  to_aff_point px py p;
+
+  let h0 = ST.get () in
+  fnormalize px px;
+  fnormalize py py;
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h0 px);
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h0 py);
+
+  let h0 = ST.get () in
+  update_sub_f h0 out 0ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 px))
+    (fun _ -> store_felem (sub out 0ul 32ul) px);
+
+  let h1 = ST.get () in
+  update_sub_f h1 out 32ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 py))
+    (fun _ -> store_felem (sub out 32ul 32ul) py);
+
+  let h2 = ST.get () in
+  let px = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 px)) in
+  let py = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 py)) in
+  LSeq.eq_intro (as_seq h2 out) (LSeq.concat #_ #32 #32 px py);
+  pop_frame ()
+
+
+let load_point_nocheck out b =
+  push_frame ();
+  let px = create_felem () in
+  let py = create_felem () in
+  let pxb = sub b 0ul 32ul in
+  let pyb = sub b 32ul 32ul in
+  load_felem px pxb;
+  load_felem py pyb;
+  let h = ST.get () in
+  assert (inv_lazy_reduced2 h px);
+  assert (inv_lazy_reduced2 h py);
+  to_proj_point out px py;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val load_point_vartime_noalloc:
+   out:point
+  -> px:felem
+  -> py:felem
+  -> b:lbuffer uint8 64ul -> Stack bool
+  (requires fun h ->
+    live h out /\ live h b /\ live h px /\ live h py /\
+    disjoint out px /\ disjoint out py /\ disjoint out b /\
+    disjoint px py /\ disjoint px b /\ disjoint py b)
+  (ensures  fun h0 res h1 -> modifies (loc out |+| loc px |+| loc py) h0 h1 /\
+    (let ps = S.load_point (as_seq h0 b) in
+    (res <==> Some? ps) /\ (res ==> (point_inv h1 out /\ point_eval h1 out == Some?.v ps))))
+
+let load_point_vartime_noalloc out px py b =
+  let pxb = sub b 0ul 32ul in
+  let pyb = sub b 32ul 32ul in
+  let h0 = ST.get () in
+  let is_x_valid = load_felem_lt_prime_vartime px pxb in
+  let is_y_valid = load_felem_lt_prime_vartime py pyb in
+  let h1 = ST.get () in
+  assert (as_nat h1 px == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 0ul 32ul)));
+  assert (as_nat h1 py == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 32ul 32ul)));
+  assert (inv_lazy_reduced1 h1 px);
+  assert (inv_lazy_reduced1 h1 py);
+
+  let res =
+    if is_x_valid && is_y_valid then begin
+      assert (inv_fully_reduced h1 px);
+      assert (inv_fully_reduced h1 py);
+      is_on_curve_vartime px py end
+    else false in
+
+  if res then begin
+    assert (inv_lazy_reduced2 h1 px);
+    assert (inv_lazy_reduced2 h1 py);
+    to_proj_point out px py end;
+  res
+
+
+let load_point_vartime out b =
+  push_frame ();
+  let px = create_felem () in
+  let py = create_felem () in
+  let res = load_point_vartime_noalloc out px py b in
+  pop_frame ();
+  res
