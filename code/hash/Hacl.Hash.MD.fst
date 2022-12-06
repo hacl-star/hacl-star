@@ -90,7 +90,7 @@ noextract inline_for_extraction
 let mk_update_multi a update s () blocks n_blocks =
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
-    let i_block = block_length a * i in
+    let i_block = i * block_length a in
     i <= U32.v n_blocks /\
     B.live h s /\ B.live h blocks /\
     B.(modifies (loc_buffer s) h0 h) /\
