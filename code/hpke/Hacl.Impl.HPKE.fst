@@ -514,7 +514,7 @@ val labeled_expand_hash_pre:
       )
   )
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_hash_pre #cs suite_id_len suite_id labellen label infolen info l tmplen tmp =
