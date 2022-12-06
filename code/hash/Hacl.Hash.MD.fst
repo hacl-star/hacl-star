@@ -258,34 +258,55 @@ let split_blocks a input input_len =
 
 (** Complete hash. *)
 
+/// We need to friend Spec.Agile.Hash to expose the definition of hash
+friend Spec.Agile.Hash
+
+#push-options "--ifuel 0 --fuel 0 --z3rlimit 200"
 noextract inline_for_extraction
 let mk_hash a alloca update_multi update_last finish input input_len dst =
-  (**) assert (extra_state a == unit);
   (**) let h0 = ST.get () in
   ST.push_frame ();
   let s, _ = alloca () in
   let (blocks_n, blocks_len, blocks, rest_len, rest) = split_blocks a input input_len in
+
   (**) let blocks_v0 : Ghost.erased _ = B.as_seq h0 blocks in
   (**) let rest_v0 : Ghost.erased _ = B.as_seq h0 rest in
   (**) let input_v0 : Ghost.erased _ = B.as_seq h0 input in
   (**) assert(input_v0 `S.equal` S.append blocks_v0 rest_v0);
   update_multi s () blocks blocks_n;
-  let h01 = ST.get () in
-  assert ((as_seq h01 s, ()) == Spec.Agile.Hash.(update_multi a (init a) blocks_v0));
-  update_last s () (u32_to_len a blocks_len) rest rest_len;
-  let h02 = ST.get () in
-  (**) assert((as_seq h02 s, ()) ==
-         Spec.Hash.Incremental.update_last a
-           (Spec.Agile.Hash.(update_multi a (init a) blocks_v0)) (U32.v blocks_len) rest_v0);
-  (**) assert((as_seq h02 s, ()) ==
-         Spec.Hash.Incremental.hash_incremental_body a input_v0 (Spec.Agile.Hash.init a));
-  finish s () dst;
-  assert B.(disjoint s dst);
-  (**) let h1 = ST.get () in
-  (**) assert(
-         B.as_seq h1 dst `S.equal`
-         Spec.Hash.PadFinish.finish a (
-           Spec.Hash.Incremental.hash_incremental_body a input_v0 (Spec.Agile.Hash.init a)));
-  (**) assert(B.as_seq h1 dst `S.equal` Spec.Hash.Incremental.hash_incremental a input_v0);
-  (**) Spec.Hash.Incremental.hash_is_hash_incremental a input_v0;
+
+  // AF: Most of these assertions are not needed, but they are good to document
+  // the current state of the proof
+  (**) let h01 = ST.get () in
+  (**) assert (as_seq h01 s == Spec.Agile.Hash.(update_multi a (init a) () blocks_v0));
+
+  update_last s (u32_to_len a blocks_len) rest rest_len;
+  (**) let h02 = ST.get () in
+  (**) assert (as_seq h02 s == Spec.Agile.Hash.(Spec.Hash.Incremental.update_last a (update_multi a (init a) () blocks_v0) (S.length blocks_v0) rest_v0));
+
+  (**) let padding: Ghost.erased _ = Spec.Hash.PadFinish.pad a (S.length input_v0) in
+  // We need to prove that rest_v0 @| padding is a block. We do this using the calc below
+  calc (==) {
+    S.(length (rest_v0 @| padding)) % block_length a;
+    (==) { }
+    S.(length rest_v0 + S.length padding) % block_length a;
+    (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length rest_v0) (block_length a) }
+    S.(length rest_v0 % block_length a + S.length padding) % block_length a;
+    (==) { }
+    S.(length input_v0 % block_length a + S.length padding) % block_length a;
+    (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length input_v0) (block_length a) }
+    S.(length input_v0 + S.length padding) % block_length a;
+    (==) { }
+    0;
+  };
+  (**) assert (as_seq h02 s == Spec.Agile.Hash.(update_multi a
+    (update_multi a (init a) () blocks_v0) () (rest_v0 `S.append` padding)));
+  (**) assert ((blocks_v0 `S.append` (rest_v0 `S.append` padding)) `S.equal` (input_v0 `S.append` padding));
+  (**) Spec.Hash.Lemmas.update_multi_associative a (Spec.Agile.Hash.init a) (blocks_v0) (rest_v0 `S.append` padding);
+  (**) assert (as_seq h02 s == Spec.Agile.Hash.(update_multi a (init a) () (input_v0 `S.append` padding)));
+
+finish s dst;
+  (**) let h03 = ST.get () in
+  (**) assert (B.as_seq h03 dst == Spec.Agile.Hash.hash a input_v0);
+
   ST.pop_frame ()
