@@ -57,14 +57,14 @@ let sha3_is_incremental1
        (let s = init a in
         let bs, l = split_blocks a input in
         let s = update_multi a s () bs in
-        let s = update_last a s (S.length bs) l in
+        let s = update_last a s () l in
         finish a s);
        (==) { }
        (let s = Lib.Sequence.create 25 (u64 0) in
         let rateInBytes = 1088/8 in
         let bs, l = UpdateMulti.split_at_last_lazy rateInBytes input in
         let s = update_multi a s () bs in
-        let s = update_last a s (S.length bs) l in
+        let s = update_last a s () l in
         finish a s);
        (==) { } (
        let s = Lib.Sequence.create 25 (u64 0) in
