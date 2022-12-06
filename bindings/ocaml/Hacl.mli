@@ -45,43 +45,51 @@ module Ed25519 : EdDSA
 (** {2 P-256} *)
 
 module P256 : sig
-
   (** Buffers have the following size constraints:
-      - [pk]: 64 bytes, corresponding to the "raw" representation of an elliptic curve point (see {!section:points})
+      - [pk]: 64 bytes, corresponding to the "raw" representation of
+        an elliptic curve point (see {!section:points})
       - [sk], [k]: 32 bytes
       - [signature]: 64 bytes
-      - [msg]: depends on which hash function is being used (see {!section:ecdsa})
+      - [msg]: depends on which hash function is being used (see {!label-ecdsa})
   *)
 
   (** {1:points Point representation and conversions}
-      Elliptic curve points have 2 32-byte coordinates {i (x, y)} and can be represented in 3 ways:
-      - "raw" form (64 bytes): the concatenation of the 2 coordinates
-      - "compressed" form (33 bytes): the first byte is equal to [0x2 + (y % 2)], followed
-      by {i x}
-      - "uncompressed" form (65 bytes): the first byte is always [\04], followed by the "raw" form
+      Elliptic curve points have two 32-byte coordinates {i (x, y)} and can be
+      represented in 3 ways:
+      - "raw" form (64 bytes): the concatenation of the 2 coordinates [x || y]
+      - "compressed" form (33 bytes): the first byte is equal to
+        [0x02 + (y % 2)], followed by [x]
+      - "uncompressed" form (65 bytes): the first byte is [0x04],
+        followed by the "raw" form
 
       These functions convert points between these representations:
-*)
+  *)
 
   val raw_to_compressed : bytes -> bytes
-    (** [raw_to_compressed p] converts a "raw" point [p] (64 bytes) to a "compressed" point (33 bytes) *)
+  (** [raw_to_compressed p] converts a "raw" point [p] (64 bytes) to
+      a "compressed" point (33 bytes). *)
 
   val raw_to_uncompressed : bytes -> bytes
-    (** [raw_to_uncompressed p] converts a "raw" point [p] (64 bytes) to an "uncompressed" point (65 bytes) *)
+  (** [raw_to_uncompressed p] converts a "raw" point [p] (64 bytes) to
+      an "uncompressed" point (65 bytes). *)
 
   val compressed_to_raw : bytes -> bytes option
-    (** [compressed_to_raw p] attempts to convert a "compressed" point [p] (33 bytes) to a "raw" point (64 bytes)
-        and returns it if successful. *)
+  (** [compressed_to_raw p] attempts to convert a "compressed"
+      point [p] (33 bytes) to a "raw" point (64 bytes) and returns it
+      if successful. *)
 
   val uncompressed_to_raw : bytes -> bytes option
-    (** [uncompressed_to_raw p] attempts to convert an "uncompressed" point [p] (65 bytes) to a "raw" point (64 bytes)
-        and returns it if successful. *)
+  (** [uncompressed_to_raw p] attempts to convert an "uncompressed"
+      point [p] (65 bytes) to a "raw" point (64 bytes) and returns it
+      if successful. *)
 
   (** {1 Point validation} *)
 
   val valid_sk : sk:bytes -> bool
-    (** [valid_sk sk] checks if the contents of [sk] can be used as a secret key or as a signing secret.
-    This is the case if 0 < [sk] < the order of the curve. *)
+  (** [valid_sk sk] checks if the contents of [sk] can be used as a secret key
+      or as a signing secret. This is the case if:
+      - [sk] is 32 bytes long
+      - 0 < [sk] < the order of the curve. *)
 
   val valid_pk : pk:bytes -> bool
   (** [valid_pk pk] checks if the contents of [pk] is a valid public key, as specified in {{: https://csrc.nist.gov/publications/detail/sp/800-56a/rev-3/final}NIST SP 800-56A}. *)
@@ -128,18 +136,22 @@ module P256 : sig
     (** {1 Point representation and conversions} *)
 
     val raw_to_compressed : p:bytes -> result:bytes -> unit
-    (** [raw_to_compressed p result] converts a "raw" point [p] (64 bytes) to a "compressed" point [result] (33 bytes) *)
+    (** [raw_to_compressed p result] converts a "raw" point [p] (64 bytes)
+        to a "compressed" point [result] (33 bytes). *)
 
     val raw_to_uncompressed : p:bytes -> result:bytes -> unit
-    (** [raw_to_uncompressed p result] converts a "raw" point [p] (64 bytes) to an "uncompressed" point [result] (65 bytes) *)
+    (** [raw_to_uncompressed p result] converts a "raw" point [p] (64 bytes)
+        to an "uncompressed" point [result] (65 bytes). *)
 
     val compressed_to_raw : p:bytes -> result:bytes -> bool
-    (** [compressed_to_raw p result] converts a "compressed" point [p] (33 bytes) to a "raw" point [result] (64 bytes).
-        Returns true if successful. *)
+    (** [compressed_to_raw p result] converts a "compressed" point
+        [p] (33 bytes) to a "raw" point [result] (64 bytes). Returns true
+        if successful. *)
 
     val uncompressed_to_raw : p:bytes -> result:bytes -> bool
-    (** [uncompressed_to_raw p result] converts an "uncompressed" point [p] (65 bytes) to a "raw" point [result] (64 bytes).
-        Returns true if successful. *)
+    (** [uncompressed_to_raw p result] converts an "uncompressed" point
+        [p] (65 bytes) to a "raw" point [result] (64 bytes). Returns true
+        if successful. *)
 
     (** {1 ECDH}
         ECDH key agreement protocol
