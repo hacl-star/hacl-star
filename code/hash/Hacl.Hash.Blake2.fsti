@@ -17,16 +17,19 @@ open Hacl.Impl.Blake2.Core
 // Blake2B_32
 
 inline_for_extraction noextract
-val init_256: init_st (|Blake2B, M32|)
+val alloca_blake2b_32: alloca_st (|Blake2B, M32|)
 
 inline_for_extraction noextract
-val update_multi_256: update_multi_st (|Blake2B, M32|)
+val init_blake2b_32: init_st (|Blake2B, M32|)
 
 inline_for_extraction noextract
-val update_last_256: update_last_st (|Blake2B, M32|)
+val update_multi_blake2b_32: update_multi_st (|Blake2B, M32|)
 
 inline_for_extraction noextract
-val finish_256: finish_st (|Blake2B, M32|)
+val update_last_blake2b_32: update_last_st (|Blake2B, M32|)
+
+inline_for_extraction noextract
+val finish_blake2b_32: finish_st (|Blake2B, M32|)
 
 // Blake2S_32 (TODO)
 
