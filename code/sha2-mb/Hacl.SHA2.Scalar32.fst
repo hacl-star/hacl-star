@@ -36,7 +36,7 @@ open Hacl.Impl.SHA2.Generic
 [@CInline] let sha384_update_last = update_last #SHA2_384 #M32 sha384_update
 [@CInline] let sha384_finish = finish #SHA2_384 #M32
 
-[@CInline] let sha512_init = init #SHA2_512 #M32
+let sha512_init = init #SHA2_512 #M32
 [@CInline] let sha512_update = update #SHA2_512 #M32
 [@CInline] let sha512_update_nblocks = update_nblocks #SHA2_512 #M32 sha512_update
 [@CInline] let sha512_update_last = update_last #SHA2_512 #M32 sha512_update
