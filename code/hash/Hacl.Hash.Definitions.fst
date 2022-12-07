@@ -144,10 +144,10 @@ let hash_t (a: hash_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 (** The types of all stateful operations for a hash algorithm. *)
 
 noextract inline_for_extraction
-let alloca_st (i:impl) = unit -> ST.StackInline (state i & extra_state (get_alg i))
+let alloca_st (i:impl) = unit -> ST.StackInline (state i)
   (requires (fun h ->
     HS.is_stack_region (HS.get_tip h)))
-  (ensures (fun h0 (s, v) h1 ->
+  (ensures (fun h0 s h1 ->
     M.(modifies M.loc_none h0 h1) /\
     B.frameOf s == HS.get_tip h0 /\
     as_seq h1 s == Spec.Agile.Hash.init (get_alg i) /\

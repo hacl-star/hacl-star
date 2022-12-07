@@ -266,7 +266,7 @@ noextract inline_for_extraction
 let mk_hash a alloca update_multi update_last finish input input_len dst =
   (**) let h0 = ST.get () in
   ST.push_frame ();
-  let s, _ = alloca () in
+  let s = alloca () in
   let (blocks_n, blocks_len, blocks, rest_len, rest) = split_blocks a input input_len in
 
   (**) let blocks_v0 : Ghost.erased _ = B.as_seq h0 blocks in
