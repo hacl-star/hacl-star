@@ -69,3 +69,20 @@ val update_last_blake2s_128: update_last_st (|Blake2S, M128|)
 
 inline_for_extraction noextract
 val finish_blake2s_128: finish_st (|Blake2S, M128|)
+
+// Blake2B_256
+
+inline_for_extraction noextract
+val alloca_blake2b_256: alloca_st (|Blake2B, M256|)
+
+inline_for_extraction noextract
+val init_blake2b_256: init_st (|Blake2B, M256|)
+
+inline_for_extraction noextract
+val update_multi_blake2b_256: update_multi_st (|Blake2B, M256|)
+
+inline_for_extraction noextract
+val update_last_blake2b_256: update_last_st (|Blake2B, M256|)
+
+inline_for_extraction noextract
+val finish_blake2b_256: finish_st (|Blake2B, M256|)
