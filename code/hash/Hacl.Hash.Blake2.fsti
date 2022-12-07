@@ -31,6 +31,9 @@ val update_last_blake2b_32: update_last_st (|Blake2B, M32|)
 inline_for_extraction noextract
 val finish_blake2b_32: finish_st (|Blake2B, M32|)
 
+inline_for_extraction noextract
+val hash_blake2b_32: hash_st Blake2B
+
 // Blake2S_32
 
 inline_for_extraction noextract
@@ -47,6 +50,9 @@ val update_last_blake2s_32: update_last_st (|Blake2S, M32|)
 
 inline_for_extraction noextract
 val finish_blake2s_32: finish_st (|Blake2S, M32|)
+
+inline_for_extraction noextract
+val hash_blake2s_32: hash_st Blake2S
 
 // As mentioned above, this module generates no code at run-time, so we can
 // safely put vectorized versions in a file that does not contain a _128 or _256
@@ -70,6 +76,9 @@ val update_last_blake2s_128: update_last_st (|Blake2S, M128|)
 inline_for_extraction noextract
 val finish_blake2s_128: finish_st (|Blake2S, M128|)
 
+inline_for_extraction noextract
+val hash_blake2s_128: hash_st Blake2S
+
 // Blake2B_256
 
 inline_for_extraction noextract
@@ -86,3 +95,6 @@ val update_last_blake2b_256: update_last_st (|Blake2B, M256|)
 
 inline_for_extraction noextract
 val finish_blake2b_256: finish_st (|Blake2B, M256|)
+
+inline_for_extraction noextract
+val hash_blake2b_256: hash_st Blake2B
