@@ -11,10 +11,15 @@ include Spec.Hash.Lemmas0
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
+#push-options "--ifuel 1"
 /// First hash law.
-val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
-  (requires update_multi_pre a h (init_extra_state a) S.empty)
-  (ensures ((update_multi a h (init_extra_state a) S.empty) == h))
+val update_multi_zero (a: hash_alg { not (is_blake a)} ) (h: words_state a): Lemma
+  (ensures (update_multi a h () S.empty == h))
+
+val update_multi_zero_blake (a: hash_alg { is_blake a } ) (prevlen: extra_state a) (h: words_state a): Lemma
+  (requires (update_multi_pre a h prevlen S.empty))
+  (ensures (update_multi a h prevlen S.empty == h))
+#pop-options
 
 /// Single update corresponds to update_multi for the MD algorithms
 val update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): Lemma

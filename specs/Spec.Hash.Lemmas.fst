@@ -13,12 +13,10 @@ friend Spec.Agile.Hash
 
 #push-options "--fuel 0 --ifuel 1 --z3rlimit 50"
 
-let update_multi_zero (a: hash_alg) h =
+let update_multi_zero a h =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
     Lib.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a) h
-  | Blake2B | Blake2S ->
-    Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (Spec.Blake2.blake2_update1 (to_blake_alg a) (init_extra_state a) S.empty) h
   | SHA3_256 ->
     let rateInBytes = 1088/8 in
     let f = Spec.SHA3.absorb_inner rateInBytes in
@@ -27,6 +25,8 @@ let update_multi_zero (a: hash_alg) h =
     let nb = 0 / rateInBytes in
     Lib.LoopCombinators.eq_repeati0 nb (Lib.Sequence.repeat_blocks_f rateInBytes S.empty f nb) h
 
+let update_multi_zero_blake a prevlen h =
+  Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (Spec.Blake2.blake2_update1 (to_blake_alg a) prevlen S.empty) h
 #pop-options
 
 #push-options "--fuel 1"

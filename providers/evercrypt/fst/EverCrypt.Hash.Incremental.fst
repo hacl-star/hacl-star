@@ -96,7 +96,7 @@ let evercrypt_hash : block hash_alg =
 
     (fun a s prevlen ->
       if is_blake a then
-        admit ()
+        Spec.Hash.Lemmas.update_multi_zero_blake a prevlen s
       else
         Spec.Hash.Lemmas.update_multi_zero a s)
     (* update_multi_associative *)

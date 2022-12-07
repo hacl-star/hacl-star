@@ -184,7 +184,10 @@ let part2_update_empty a m init update_multi update_last s key data len =
     (**) key_and_data_fits a;
     update_last s (zero_to_len a) key (D.block_len a);
     (**) assert(key_data_v0 `S.equal` key_v0);
-    (**) Spec.Hash.Lemmas.update_multi_zero a (D.as_seq h0 s);
+    (if not (is_blake a) then
+    (**) Spec.Hash.Lemmas.update_multi_zero a (D.as_seq h0 s)
+    else
+    (**) Spec.Hash.Lemmas.update_multi_zero_blake a 0 (D.as_seq h0 s));
     (**) lemma_split_one_block a key_v0
 
 inline_for_extraction noextract
