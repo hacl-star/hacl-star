@@ -31,12 +31,41 @@ val update_last_blake2b_32: update_last_st (|Blake2B, M32|)
 inline_for_extraction noextract
 val finish_blake2b_32: finish_st (|Blake2B, M32|)
 
-// Blake2S_32 (TODO)
+// Blake2S_32
+
+inline_for_extraction noextract
+val alloca_blake2s_32: alloca_st (|Blake2S, M32|)
+
+inline_for_extraction noextract
+val init_blake2s_32: init_st (|Blake2S, M32|)
+
+inline_for_extraction noextract
+val update_multi_blake2s_32: update_multi_st (|Blake2S, M32|)
+
+inline_for_extraction noextract
+val update_last_blake2s_32: update_last_st (|Blake2S, M32|)
+
+inline_for_extraction noextract
+val finish_blake2s_32: finish_st (|Blake2S, M32|)
 
 // As mentioned above, this module generates no code at run-time, so we can
 // safely put vectorized versions in a file that does not contain a _128 or _256
 // suffix: these combinators will be inlined in their respective files, e.g.
 // Hacl_HMAC_Blake2s_128.c
 
-// Blake2S_128 (TODO)
-// Blake2B_256 (TODO)
+// Blake2S_128
+
+inline_for_extraction noextract
+val alloca_blake2s_128: alloca_st (|Blake2S, M128|)
+
+inline_for_extraction noextract
+val init_blake2s_128: init_st (|Blake2S, M128|)
+
+inline_for_extraction noextract
+val update_multi_blake2s_128: update_multi_st (|Blake2S, M128|)
+
+inline_for_extraction noextract
+val update_last_blake2s_128: update_last_st (|Blake2S, M128|)
+
+inline_for_extraction noextract
+val finish_blake2s_128: finish_st (|Blake2S, M128|)
