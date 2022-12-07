@@ -13,6 +13,9 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## 2022-12-19
+- Added JS bindings for secp256k1
+
 ## 2022-12-14
 
 - Align the APIs in Hacl_Hash_SHA2 and Hacl_Streaming_SHA2 for full hashes. The

@@ -1206,7 +1206,6 @@
         ]
       }
     },
-
     "box_beforenm": {
       "module": "Hacl_NaCl",
       "name": "crypto_box_beforenm",
@@ -1514,6 +1513,407 @@
         "tests": [
             0,
             0
+        ]
+      }
+    }
+  },
+  "K256": {
+    "ecdsa_sign_hashed_msg": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "ecdsa_sign_hashed_msg",
+      "args": [{
+          "name": "signature",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+              "241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e"
+          ]
+        },
+        {
+          "name": "msgHash",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [
+              "4b688df40bcedbe641ddb16ff0a1842d9c67ea1c3bf63f3e0471baa664531d1a"
+          ]
+        },
+        {
+          "name": "private_key",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 1,
+          "tests": [
+              "ebb2c082fd7727890a28ac82f6bdf97bad8de9f5d7c9028692de1a255cad3e0f"
+          ]
+        },
+        {
+          "name": "nonce",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 2,
+          "tests": [
+              "49a0d7b786ec9cde0d0721d72804befd06571c974b191efb42ecf322ba9ddd9a"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true"
+        ]
+      }
+    },
+    "ecdsa_verify_hashed_msg": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "ecdsa_verify_hashed_msg",
+      "args": [{
+          "name": "m",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [
+              "4b688df40bcedbe641ddb16ff0a1842d9c67ea1c3bf63f3e0471baa664531d1a",
+              "4b688df40bcedbe641ddb16ff0a1842d9c67ea1c3bf63f3e0471baa664531d1a"
+          ]
+        },
+        {
+          "name": "public_key",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 1,
+          "tests": [
+              "779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f","779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f",
+              "779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f","779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f"
+          ]
+        },
+        {
+          "name": "signature",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 2,
+          "tests": [
+              "241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e","241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e",
+              "240097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e","241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true",
+            "true"
+        ]
+      }
+    },
+    "secp256k1_ecdsa_sign_hashed_msg": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "secp256k1_ecdsa_sign_hashed_msg",
+      "args": [{
+          "name": "signature",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+              "241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e"
+          ]
+        },
+        {
+          "name": "msgHash",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [
+              "4b688df40bcedbe641ddb16ff0a1842d9c67ea1c3bf63f3e0471baa664531d1a"
+          ]
+        },
+        {
+          "name": "private_key",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 1,
+          "tests": [
+              "ebb2c082fd7727890a28ac82f6bdf97bad8de9f5d7c9028692de1a255cad3e0f"
+          ]
+        },
+        {
+          "name": "nonce",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 2,
+          "tests": [
+              "49a0d7b786ec9cde0d0721d72804befd06571c974b191efb42ecf322ba9ddd9a"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true"
+        ]
+      }
+    },
+    "secp256k1_ecdsa_verify_hashed_msg": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "secp256k1_ecdsa_verify_hashed_msg",
+      "args": [{
+          "name": "m",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [
+              "4b688df40bcedbe641ddb16ff0a1842d9c67ea1c3bf63f3e0471baa664531d1a",
+              "4b688df40bcedbe641ddb16ff0a1842d9c67ea1c3bf63f3e0471baa664531d1a"
+          ]
+        },
+        {
+          "name": "public_key",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 1,
+          "tests": [
+              "779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f","779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f",
+              "779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f","779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f"
+          ]
+        },
+        {
+          "name": "signature",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 2,
+          "tests": [
+              "241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e","241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e",
+              "240097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e","241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true",
+            "true"
+        ]
+      }
+    },
+    "secp256k1_ecdsa_signature_normalize": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "secp256k1_ecdsa_signature_normalize",
+      "args": [{
+          "name": "signature",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 0,
+          "tests": [
+              "241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true"
+        ]
+      }
+    },
+    "secp256k1_ecdsa_is_signature_normalized": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "secp256k1_ecdsa_is_signature_normalized",
+      "args": [{
+          "name": "signature",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 0,
+          "tests": [
+              "241097efbf8b63bf145c8961dbdf10c310efbb3b2676bbc0f8b08505c9e2f795021006b7838609339e8b415a7f9acb1b661828131aef1ecbc7955dfb01f3ca0e"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true"
+        ]
+      }
+    },
+    "uncompressed_to_raw": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "public_key_uncompressed_to_raw",
+      "args": [{
+          "name": "pk_raw",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+              "0a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae595dc53f8b0efe61e703075bd9b143bac75ec0e19f82a2208caeb32be53414c40"
+          ]
+        },
+        {
+          "name": "pk",
+          "kind": "input",
+          "type": "buffer",
+          "size": 65,
+          "interface_index": 0,
+          "tests": [
+              "040a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae595dc53f8b0efe61e703075bd9b143bac75ec0e19f82a2208caeb32be53414c40"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true"
+        ]
+      }
+    },
+    "uncompressed_from_raw": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "public_key_uncompressed_from_raw",
+      "args": [{
+          "name": "pk",
+          "kind": "output",
+          "type": "buffer",
+          "size": 65,
+          "tests": [
+              "040a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae595dc53f8b0efe61e703075bd9b143bac75ec0e19f82a2208caeb32be53414c40"
+          ]
+        },
+        {
+          "name": "pk_raw",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 0,
+          "tests": [
+              "0a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae595dc53f8b0efe61e703075bd9b143bac75ec0e19f82a2208caeb32be53414c40"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "compressed_to_raw": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "public_key_compressed_to_raw",
+      "args": [{
+          "name": "pk_raw",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+              "0a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae595dc53f8b0efe61e703075bd9b143bac75ec0e19f82a2208caeb32be53414c40"
+          ]
+        },
+        {
+          "name": "pk",
+          "kind": "input",
+          "type": "buffer",
+          "size": 33,
+          "interface_index": 0,
+          "tests": [
+              "020a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae5"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true"
+        ]
+      }
+    },
+    "compressed_from_raw": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "public_key_compressed_from_raw",
+      "args": [{
+          "name": "pk",
+          "kind": "output",
+          "type": "buffer",
+          "size": 33,
+          "tests": [
+              "020a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae5"
+          ]
+        },
+        {
+          "name": "pk_raw",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 0,
+          "tests": [
+              "0a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae595dc53f8b0efe61e703075bd9b143bac75ec0e19f82a2208caeb32be53414c40"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "is_public_key_valid": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "is_public_key_valid",
+      "args": [{
+          "name": "pk",
+          "kind": "input",
+          "type": "buffer",
+          "size": 64,
+          "interface_index": 0,
+          "tests": [
+              "0a629506e1b65cd9d2e0ba9c75df9c4fed0db16dc9625ed14397f0afc836fae595dc53f8b0efe61e703075bd9b143bac75ec0e19f82a2208caeb32be53414c40",
+              "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2cfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd036413e"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true",
+            "false"
+        ]
+      }
+    },
+    "secret_to_public": {
+      "module": "Hacl_K256_ECDSA",
+      "name": "secret_to_public",
+      "args": [{
+          "name": "public_key",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+              "779dd197a5df977ed2cf6cb31d82d43328b790dc6b3b7d4437a427bd5847dfcde94b724a555b6d017bb7607c3e3281daf5b1699d6ef4124975c9237b917d426f"
+          ]
+        },
+        {
+          "name": "private_key",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [
+              "ebb2c082fd7727890a28ac82f6bdf97bad8de9f5d7c9028692de1a255cad3e0f"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+            "true"
         ]
       }
     }
@@ -3221,7 +3621,6 @@
       "module": "EverCrypt_Hash",
       "custom_module_name": true,
       "name": "EverCrypt_Hash_Incremental_hash_len",
-
       "args": [{
           "name": "hash_alg",
           "kind": "input",
@@ -3284,7 +3683,6 @@
       "module": "EverCrypt_Hash",
       "custom_module_name": true,
       "name": "EverCrypt_Hash_Incremental_alg_of_state",
-
       "args": [{
           "name": "state",
           "kind": "input",
@@ -3304,7 +3702,6 @@
       "module": "EverCrypt_Hash",
       "custom_module_name": true,
       "name": "EverCrypt_Hash_Incremental_create_in",
-
       "args": [{
           "name": "hash_alg",
           "kind": "input",
@@ -3325,7 +3722,6 @@
       "module": "EverCrypt_Hash",
       "custom_module_name": true,
       "name": "EverCrypt_Hash_Incremental_update",
-
       "args": [{
           "name": "state",
           "kind": "output",
@@ -3357,7 +3753,6 @@
       "module": "EverCrypt_Hash",
       "custom_module_name": true,
       "name": "EverCrypt_Hash_Incremental_finish",
-
       "args": [{
           "name": "state",
           "kind": "input",
