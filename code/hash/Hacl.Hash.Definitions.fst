@@ -176,7 +176,6 @@ let init_st (i:impl) = s:state i -> ST.Stack unit
 noextract inline_for_extraction
 let update_st (i:impl{is_md (get_alg i)}) =
   s:state i ->
-  v:extra_state (get_alg i) ->
   block:B.buffer uint8 { B.length block = block_length (get_alg i) } ->
   ST.Stack unit
     (requires (fun h ->

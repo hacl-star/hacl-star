@@ -105,7 +105,7 @@ let mk_update_multi a update s () blocks n_blocks =
     let sz = block_len a in
     let blocks0 = B.sub blocks 0ul U32.(sz *^ i) in
     let block = B.sub blocks U32.(sz *^ i) sz in
-    update s () block;
+    update s block;
     (**) Spec.Hash.Lemmas.update_multi_update a (as_seq h1 s) (B.as_seq h0 block);
     (**) let h2 = ST.get () in
     (**) let blocks_v : Ghost.erased _ = B.as_seq h0 blocks in

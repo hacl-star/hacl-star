@@ -354,7 +354,7 @@ let zero (a: sha2_alg): word a =
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st (|a, ()|)
 noextract inline_for_extraction
-let update a hash ev block =
+let update a hash block =
   (**) ST.push_frame ();
   (**) let h0 = ST.get () in
   let hash1: words_state a = B.alloca (zero a) 8ul in
