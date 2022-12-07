@@ -65,7 +65,7 @@ let helper_smtpat (a: hash_alg) (len: uint32_t{ v len `less_than_max_input_lengt
 #set-options "--z3rlimit 40"
 
 inline_for_extraction noextract
-let mk_wrap_key (a: hash_alg) (hash: Hacl.Hash.Definitions.hash_st a): wrap_key_st a =
+let mk_wrap_key (a: hash_alg) (hash: D.hash_st a): wrap_key_st a =
 fun output key len ->
   //[@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = helper_smtpat a len in
@@ -171,6 +171,11 @@ val part2_update_empty:
           (Spec.Agile.Hash.update_multi a (D.as_seq h0 s) (init_extra_state a) bs)
           (if is_sha3 a then () else S.length bs) l))
 
+let lemma_split_one_block (a:hash_alg) (s:bytes) : Lemma
+  (requires S.length s == block_length a)
+  (ensures (key_and_data_fits a; split_blocks a s == (S.empty, s)))
+  = ()
+
 let part2_update_empty a m init update_multi update_last s key data len =
     (**) let h0 = ST.get () in
     (**) let key_v0 : Ghost.erased _ = B.as_seq h0 key in
@@ -179,12 +184,13 @@ let part2_update_empty a m init update_multi update_last s key data len =
     (**) key_and_data_fits a;
     update_last s (zero_to_len a) key (D.block_len a);
     (**) assert(key_data_v0 `S.equal` key_v0);
-    (**) Spec.Hash.Lemmas.update_multi_zero a (D.as_seq h0 s)
+    (**) Spec.Hash.Lemmas.update_multi_zero a (D.as_seq h0 s);
+    (**) lemma_split_one_block a key_v0
 
 inline_for_extraction noextract
 let uint32_to_ev (a:hash_alg) (n:UInt32.t{v n % block_length a == 0}) :
-  ev:Hacl.Hash.Definitions.extra_state a
-    {if is_blake a then Hacl.Hash.Definitions.ev_v #a ev == v n else True}
+  ev:D.extra_state a
+    {if is_blake a then D.ev_v #a ev == v n else True}
   = match a with
   | MD5 | SHA1
   | SHA2_224 | SHA2_256
@@ -247,7 +253,7 @@ val split_nb_rem_extend_one_block (l:pos) (d:pos)
 let split_nb_rem_extend_one_block l d =
   FStar.Math.Lemmas.add_div_mod_1 d l
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 400 --using_facts_from '* -Spec.Hash.Lemmas.update_multi_associative'"
 
 let part2_update_nonempty a m init update_multi update_last s key data len =
     (**) let h0 = ST.get () in
@@ -270,7 +276,7 @@ let part2_update_nonempty a m init update_multi update_last s key data len =
 
     [@inline_let]
     let ev = if is_blake a then zero_to_len a else () in
-    (**) assert (Hacl.Hash.Definitions.ev_v ev == init_extra_state a);
+    (**) assert (D.ev_v ev == init_extra_state a);
     (**) assert (B.length key == block_length a * 1);
     update_multi s ev key 1ul;
     (**) let h1 = ST.get () in
@@ -283,29 +289,24 @@ let part2_update_nonempty a m init update_multi update_last s key data len =
 
     (**) let h2 = ST.get () in
 
+    (**) let aux () : Lemma (D.as_seq h2 s == Spec.Agile.Hash.(update_multi a (D.as_seq h0 s) (init_extra_state a) (S.append key_v0 (B.as_seq h0 full_blocks))))
+    (**) = if is_blake a then
+    (**)    update_multi_associative_blake a (D.as_seq h0 s) (init_extra_state a) (v block_len) key_v0 (B.as_seq h0 full_blocks)
+    (**) else
+    (**)   update_multi_associative a (D.as_seq h0 s) key_v0 (B.as_seq h0 full_blocks)
+    (**) in
+    (**) aux ();
+
     [@inline_let]
-    let prev_len: prev_len:len_t a
+    let prev_len: prev_len:D.prev_len_t a
       { if is_sha3 a then True else len_v a prev_len % block_length a = 0 }
     =
       if is_sha3 a then () else
         len_add32 a (block_len_as_len a) full_blocks_len
     in
-    update_last s prev_len rem rem_len;
-
-    (**) let aux () : Lemma (D.as_seq h2 s == Spec.Agile.Hash.(update_multi a (D.as_seq h0 s) (init_extra_state a) (S.append key_v0 (B.as_seq h1 full_blocks))))
-    (**) = if is_blake a then
-    (**)    update_multi_associative_blake a (D.as_seq h0 s) (init_extra_state a) (v block_len) key_v0 (B.as_seq h1 full_blocks)
-    (**) else
-    (**)   update_multi_associative a (D.as_seq h0 s) key_v0 (B.as_seq h1 full_blocks)
-    (**) in
-    (**) aux ()
+    update_last s prev_len rem rem_len
 
 #pop-options
-
-// Keeping this annotation in case this proof regresses in the future.
-// Removing the pattern for update_multi_associative was previously required
-// #push-options "--z3rlimit 400 --z3seed 1 --using_facts_from '* -Spec.Hash.Lemmas.update_multi_associative'"
-#push-options "--z3rlimit 100"
 
 inline_for_extraction noextract
 let part2 a m init update_multi update_last finish s dst key data len =
@@ -334,7 +335,6 @@ let part2 a m init update_multi update_last finish s dst key data len =
       (loc_union (loc_buffer s) (loc_buffer dst)) h0 h3 (loc_union (loc_buffer s) (loc_buffer dst)) h4);
   (**) assert (B.as_seq h4 dst == hash_incremental a key_data_v0);
   (**) hash_is_hash_incremental a key_data_v0
-#pop-options
 
 /// This implementation is optimized. First, it reuses an existing hash state
 /// ``s`` rather than allocating a new one. Second, it writes out the result of
