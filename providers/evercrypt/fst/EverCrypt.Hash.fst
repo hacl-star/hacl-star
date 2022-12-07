@@ -241,7 +241,7 @@ let create_in a r =
           // Slightly frustrating duplication of the else-branch because we
           // can't compile this using the if-and return optimization of krml.
           if vec128 then
-            Blake2S_128_s () (Hacl.Hash.Blake2s_128.malloc_blake2s_128 r)
+            Blake2S_128_s () (Hacl.Blake2s_128.blake2s_malloc r)
           else
             Blake2S_s (B.malloc r 0ul 16ul)
         else
@@ -250,7 +250,7 @@ let create_in a r =
         let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
         if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
           if vec256 then
-            Blake2B_256_s () (Hacl.Hash.Blake2b_256.malloc_blake2b_256 r)
+            Blake2B_256_s () (Hacl.Blake2b_256.blake2b_malloc r)
           else
             Blake2B_s (B.malloc r 0uL 16ul)
         else
@@ -278,11 +278,11 @@ let init #a s =
   | Blake2S_s p -> let _ = Hacl.Hash.Blake2.init_blake2s_32 p in ()
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        let _ = Hacl.Hash.Blake2s_128.init_blake2s_128 p in ()
+        let _ = Hacl.Hash.Blake2.init_blake2s_128 p in ()
   | Blake2B_s p -> let _ = Hacl.Hash.Blake2.init_blake2b_32 p in ()
   | Blake2B_256_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        let _ = Hacl.Hash.Blake2b_256.init_blake2b_256 p in ()
+        let _ = Hacl.Hash.Blake2.init_blake2b_256 p in ()
 #pop-options
 
 friend Vale.SHA.SHA_helpers
@@ -322,7 +322,7 @@ inline_for_extraction noextract
 let update_multi_224 s ev blocks n =
   assert_norm (words_state SHA2_224 == words_state SHA2_256);
   let h0 = ST.get () in
-  Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s, ()) (B.as_seq h0 blocks);
+  Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s) (B.as_seq h0 blocks);
   update_multi_256 s ev blocks n
 
 
@@ -358,7 +358,7 @@ let update_multi #a s prevlen blocks len =
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
         let n = len / block_len Blake2S in
-        let _ = Hacl.Hash.Blake2s_128.update_multi_blake2s_128 p prevlen blocks n in
+        let _ = Hacl.Hash.Blake2.update_multi_blake2s_128 p prevlen blocks n in
         ()
   | Blake2B_s p ->
       [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
@@ -369,7 +369,7 @@ let update_multi #a s prevlen blocks len =
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
         [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
         let n = len / block_len Blake2B in
-        let _ = Hacl.Hash.Blake2b_256.update_multi_blake2b_256 p prevlen blocks n in
+        let _ = Hacl.Hash.Blake2.update_multi_blake2b_256 p prevlen blocks n in
         ()
 
 #pop-options
@@ -382,12 +382,12 @@ let update_last_256 s prev_len input input_len =
 let update_last_224 s prev_len input input_len =
   assert_norm (words_state SHA2_224 == words_state SHA2_256);
   [@inline_let]
-  let l x y:
+  let l (hash:words_state SHA2_256) (blocks:bytes_blocks SHA2_256):
     Lemma
-      (ensures (Spec.Agile.Hash.update_multi SHA2_224 x y == Spec.Agile.Hash.update_multi SHA2_256 x y))
-    [ SMTPat (Spec.Agile.Hash.update_multi SHA2_224 x y); SMTPat (Spec.Agile.Hash.update_multi SHA2_256 x y) ]
+      (ensures (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks == Spec.Agile.Hash.update_multi SHA2_256 hash () blocks))
+    [ SMTPat (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks); SMTPat (Spec.Agile.Hash.update_multi SHA2_256 hash () blocks) ]
   =
-    Spec.SHA2.Lemmas.update_multi_224_256 x y
+    Spec.SHA2.Lemmas.update_multi_224_256 hash blocks
   in
   update_last_256 s prev_len input input_len
 

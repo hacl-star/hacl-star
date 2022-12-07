@@ -807,3 +807,17 @@ let blake2 #al #ms blake2_init blake2_update blake2_finish nn output ll d kk k =
       blake2_update wv h kk k ll d;
       blake2_finish nn output h))
 #pop-options
+
+// A little wrapper needed by EverCrypt.Hash
+// TODO: should be duplicate the type and/or add extra levels of indirection to
+// avoid a dependency from code/blake2 to code/hash?
+
+noextract inline_for_extraction
+val mk_malloc:
+    a:Spec.alg
+  -> m:m_spec{is_valid_blake2_config a m}
+  ->
+  Hacl.Hash.Definitions.malloc_st (| (Spec.Hash.Definitions.to_hash_alg a), m |)
+
+let mk_malloc a m r =
+  LowStar.Buffer.malloc r (Hacl.Impl.Blake2.Core.zero_element a m) (Hacl.Hash.Definitions.impl_state_len (|(Spec.Hash.Definitions.to_hash_alg a),m|))
