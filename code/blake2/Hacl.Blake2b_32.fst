@@ -45,3 +45,6 @@ let blake2b_finish : Impl.blake2_finish_st Spec.Blake2B Core.M32 =
 @param k Pointer to `kk` bytes of memory where the key is read from."]
 let blake2b : Impl.blake2_st Spec.Blake2B Core.M32 =
   Impl.blake2 #Spec.Blake2B #Core.M32 blake2b_init blake2b_update blake2b_finish
+
+let blake2b_malloc : Impl.blake2_malloc_st Spec.Blake2B Core.M32 =
+  Impl.blake2_malloc Spec.Blake2B Core.M32
