@@ -1788,17 +1788,31 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint8_t *nonce
 )
 {
-  uint64_t r_q[4U] = { 0U };
-  uint64_t s_q[4U] = { 0U };
-  uint64_t d_a[4U] = { 0U };
-  uint64_t k_q[4U] = { 0U };
+  uint64_t oneq[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
+  uint64_t rsdk_q[16U] = { 0U };
+  uint64_t *r_q = rsdk_q;
+  uint64_t *s_q = rsdk_q + (uint32_t)4U;
+  uint64_t *d_a = rsdk_q + (uint32_t)8U;
+  uint64_t *k_q = rsdk_q + (uint32_t)12U;
   uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
   uint64_t is_nonce_valid = load_qelem_check(k_q, nonce);
   uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;
-  if (are_sk_nonce_valid == (uint64_t)0U)
-  {
-    return false;
-  }
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = d_a;
+    uint64_t uu____0 = oneq[i];
+    uint64_t x = uu____0 ^ (are_sk_nonce_valid & (d_a[i] ^ uu____0));
+    os[i] = x;);
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = k_q;
+    uint64_t uu____1 = oneq[i];
+    uint64_t x = uu____1 ^ (are_sk_nonce_valid & (k_q[i] ^ uu____1));
+    os[i] = x;);
   uint64_t tmp[5U] = { 0U };
   uint8_t x_bytes[32U] = { 0U };
   uint64_t p[15U] = { 0U };
@@ -1821,11 +1835,9 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   store_qelem(signature + (uint32_t)32U, s_q);
   uint64_t is_r_zero = is_qelem_zero(r_q);
   uint64_t is_s_zero = is_qelem_zero(s_q);
-  if (is_r_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU || is_s_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU)
-  {
-    return false;
-  }
-  return true;
+  uint64_t m = are_sk_nonce_valid & (~is_r_zero & ~is_s_zero);
+  bool res = m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  return res;
 }
 
 /**
@@ -2253,10 +2265,15 @@ bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key)
   uint64_t d_a[4U] = { 0U };
   uint64_t p[15U] = { 0U };
   uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
-  if (is_sk_valid == (uint64_t)0U)
-  {
-    return false;
-  }
+  uint64_t oneq[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = d_a;
+    uint64_t uu____0 = oneq[i];
+    uint64_t x = uu____0 ^ (is_sk_valid & (d_a[i] ^ uu____0));
+    os[i] = x;);
   point_mul_g(p, d_a);
   uint64_t px[5U] = { 0U };
   uint64_t py[5U] = { 0U };
@@ -2271,6 +2288,6 @@ bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key)
   Hacl_K256_Field_fnormalize(py, py);
   Hacl_K256_Field_store_felem(public_key, px);
   Hacl_K256_Field_store_felem(public_key + (uint32_t)32U, py);
-  return true;
+  return is_sk_valid == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
