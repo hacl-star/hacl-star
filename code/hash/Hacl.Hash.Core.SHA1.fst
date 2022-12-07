@@ -304,7 +304,7 @@ let step4
     (ste +. he);
   reveal_opaque (`%Spec.step4) Spec.step4
 
-let legacy_update h ev l =
+let legacy_update h l =
   step4 l h
 
 let legacy_pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1

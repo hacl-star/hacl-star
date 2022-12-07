@@ -401,7 +401,7 @@ let update'
   assert (Seq.equal (B.as_seq h1 abcd) (Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
 
 #push-options "--ifuel 1"
-let legacy_update abcd ev x = update' abcd x
+let legacy_update abcd x = update' abcd x
 #pop-options
 
 let legacy_pad: pad_st MD5 = Hacl.Hash.PadFinish.pad MD5
