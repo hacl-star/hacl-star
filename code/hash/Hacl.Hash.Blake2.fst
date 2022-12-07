@@ -29,7 +29,7 @@ let init_blake2b_32 s = BlB32.blake2b_init s 0ul 64ul
 let update_multi_blake2b_32 s ev blocks n =
   ST.push_frame ();
   let wv = Hacl.Impl.Blake2.Core.alloc_state Spec.Blake2.Blake2B M32 in
-  BlB32.blake2b_update_multi #(n `FStar.UInt32.mul` block_len Blake2B) wv s ev blocks n;
+  BlB32.blake2b_update_multi #(n `FStar.UInt32.mul` block_len Blake2B) wv s (secret ev) blocks n;
   ST.pop_frame ()
 
 let update_last_blake2b_32 s prev input input_len =
@@ -58,7 +58,7 @@ let init_blake2s_32 s = BlS32.blake2s_init s 0ul 32ul
 let update_multi_blake2s_32 s ev blocks n =
   ST.push_frame ();
   let wv = Hacl.Impl.Blake2.Core.alloc_state Spec.Blake2.Blake2S M32 in
-  BlS32.blake2s_update_multi #(n `FStar.UInt32.mul` block_len Blake2S) wv s ev blocks n;
+  BlS32.blake2s_update_multi #(n `FStar.UInt32.mul` block_len Blake2S) wv s (secret ev) blocks n;
   ST.pop_frame ()
 
 let update_last_blake2s_32 s prev input input_len =
@@ -87,7 +87,7 @@ let init_blake2s_128 s = BlS128.blake2s_init s 0ul 32ul
 let update_multi_blake2s_128 s ev blocks n =
   ST.push_frame ();
   let wv = Hacl.Impl.Blake2.Core.alloc_state Spec.Blake2.Blake2S M128 in
-  BlS128.blake2s_update_multi #(n `FStar.UInt32.mul` block_len Blake2S) wv s ev blocks n;
+  BlS128.blake2s_update_multi #(n `FStar.UInt32.mul` block_len Blake2S) wv s (secret ev) blocks n;
   ST.pop_frame ()
 
 let update_last_blake2s_128 s prev input input_len =
@@ -116,7 +116,7 @@ let init_blake2b_256 s = BlB256.blake2b_init s 0ul 64ul
 let update_multi_blake2b_256 s ev blocks n =
   ST.push_frame ();
   let wv = Hacl.Impl.Blake2.Core.alloc_state Spec.Blake2.Blake2B M256 in
-  BlB256.blake2b_update_multi #(n `FStar.UInt32.mul` block_len Blake2B) wv s ev blocks n;
+  BlB256.blake2b_update_multi #(n `FStar.UInt32.mul` block_len Blake2B) wv s (secret ev) blocks n;
   ST.pop_frame ()
 
 let update_last_blake2b_256 s prev input input_len =
