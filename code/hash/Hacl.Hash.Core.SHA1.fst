@@ -22,7 +22,7 @@ let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 
 noextract inline_for_extraction
 let legacy_alloca () =
-  B.alloca_of_list Spec.init_as_list, ()
+  B.alloca_of_list Spec.init_as_list
 
 (* We read values from constant buffers through accessors to isolate
    all recall/liveness issues away. Thus, clients will not need to

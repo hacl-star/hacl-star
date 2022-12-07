@@ -76,7 +76,7 @@ let alloca a () =
     | SHA2_256 -> Constants.h256_l
     | SHA2_384 -> Constants.h384_l
     | SHA2_512 -> Constants.h512_l) in
-  B.alloca_of_list l, ()
+  B.alloca_of_list l
 
 #set-options "--max_fuel 0"
 
@@ -210,7 +210,9 @@ let ws a b ws =
       (**) let h2 = ST.get () in
       (**) init_next (B.as_seq h2 ws) (SpecLemmas.ws a (block_words_be a h0 b)) (U32.v i)
   in
-  C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
+  C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f;
+  let h1 = ST.get () in
+  assert (S.equal (S.slice (B.as_seq h1 ws) 0 (Spec.size_k_w a)) (B.as_seq h1 ws))
 
 #set-options "--max_fuel 0"
 

@@ -178,10 +178,10 @@ let update_st (i:impl{is_md (get_alg i)}) =
   s:state i ->
   v:extra_state (get_alg i) ->
   block:B.buffer uint8 { B.length block = block_length (get_alg i) } ->
-  ST.Stack (extra_state (get_alg i))
+  ST.Stack unit
     (requires (fun h ->
       B.live h s /\ B.live h block /\ B.disjoint s block))
-    (ensures (fun h0 v' h1 ->
+    (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer s) h0 h1) /\
       as_seq h1 s ==
         Spec.Agile.Hash.update (get_alg i) (as_seq h0 s) (B.as_seq h0 block)))
@@ -205,11 +205,11 @@ let update_multi_st (i:impl) =
   ev:extra_state (get_alg i) ->
   blocks:blocks_t (get_alg i) ->
   n:size_t { B.length blocks = block_length (get_alg i) * v n } ->
-  ST.Stack (extra_state (get_alg i))
+  ST.Stack unit
     (requires (fun h ->
       Spec.Agile.Hash.update_multi_pre (get_alg i) (as_seq h s) (ev_v ev) (B.as_seq h blocks) /\
       B.live h s /\ B.live h blocks /\ B.disjoint s blocks))
-    (ensures (fun h0 ev' h1 ->
+    (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       as_seq h1 s ==
         Spec.Agile.Hash.update_multi (get_alg i) (as_seq h0 s) (ev_v ev) (B.as_seq h0 blocks)))
@@ -242,11 +242,11 @@ let update_last_st (i:impl) =
     B.length input <= block_length a
   } ->
   input_len:size_t { B.length input = v input_len } ->
-  ST.Stack (extra_state a)
+  ST.Stack unit
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input /\
       Spec.Agile.Hash.update_multi_pre a (as_seq h s) (extra_state_of_prev_length (prev_len_v prev_len)) (B.as_seq h input)))
-    (ensures (fun h0 ev' h1 ->
+    (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       as_seq h1 s ==
         Spec.Hash.Incremental.update_last a (as_seq h0 s)
