@@ -790,7 +790,7 @@ static inline bool fmul_fmul_eq_vartime(uint64_t *a, uint64_t *bz, uint64_t *c, 
   return z;
 }
 
-bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q)
+bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q)
 {
   uint64_t *px = p;
   uint64_t *py = p + (uint32_t)5U;
@@ -2215,5 +2215,62 @@ void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw
   }
   pk[0U] = ite;
   memcpy(pk + (uint32_t)1U, pk_x, (uint32_t)32U * sizeof (uint8_t));
+}
+
+/**
+Public key validation.
+
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve. 
+*/
+bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *pk)
+{
+  uint64_t fpk_x[5U] = { 0U };
+  uint64_t fpk_y[5U] = { 0U };
+  bool is_pk_valid = load_public_key(pk, fpk_x, fpk_y);
+  return is_pk_valid;
+}
+
+/**
+Compute the public key from the private key.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` and `private_key` < the order of the curve.
+*/
+bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key)
+{
+  uint64_t d_a[4U] = { 0U };
+  uint64_t p[15U] = { 0U };
+  uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
+  if (is_sk_valid == (uint64_t)0U)
+  {
+    return false;
+  }
+  point_mul_g(p, d_a);
+  uint64_t px[5U] = { 0U };
+  uint64_t py[5U] = { 0U };
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + (uint32_t)5U;
+  uint64_t *z1 = p + (uint32_t)10U;
+  uint64_t zinv[5U] = { 0U };
+  Hacl_Impl_K256_Finv_finv(zinv, z1);
+  Hacl_K256_Field_fmul(px, x1, zinv);
+  Hacl_K256_Field_fmul(py, y1, zinv);
+  Hacl_K256_Field_fnormalize(px, px);
+  Hacl_K256_Field_fnormalize(py, py);
+  Hacl_K256_Field_store_felem(public_key, px);
+  Hacl_K256_Field_store_felem(public_key + (uint32_t)32U, py);
+  return true;
 }
 
