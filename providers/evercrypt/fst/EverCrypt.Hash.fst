@@ -177,7 +177,7 @@ let alg_of_state a s =
   | Blake2B_s _ -> Blake2B
   | Blake2B_256_s _ _ -> Blake2B
 
-let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state' a) =
+let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state a) =
   Seq.equal r1 r2
 
 let fresh_is_disjoint l1 l2 h0 h1 = ()
@@ -325,34 +325,6 @@ let update_multi_224 s ev blocks n =
   Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s, ()) (B.as_seq h0 blocks);
   update_multi_256 s ev blocks n
 
-// Need to unroll the definition of update_multi once to prove that it's update
-#push-options "--fuel 1 --ifuel 1"
-let update #a s prevlen block =
-  match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.legacy_update p () block
-  | SHA1_s p -> Hacl.Hash.SHA1.legacy_update p () block
-  | SHA2_224_s p -> update_multi_224 p () block 1ul
-  | SHA2_256_s p -> update_multi_256 p () block 1ul
-  | SHA2_384_s p -> Hacl.Hash.SHA2.update_384 p () block
-  | SHA2_512_s p -> Hacl.Hash.SHA2.update_512 p () block
-  | SHA3_256_s p -> Hacl.Hash.SHA3.update_256 p () block
-  | Blake2S_s p ->
-      let _ = Hacl.Hash.Blake2.update_blake2s_32 p prevlen block in
-      ()
-  | Blake2S_128_s _ p ->
-      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        let _ = Hacl.Hash.Blake2s_128.update_blake2s_128 p prevlen block in
-        ()
-  | Blake2B_s p ->
-      [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
-      let _ = Hacl.Hash.Blake2.update_blake2b_32 p prevlen block in
-      ()
-  | Blake2B_256_s _ p ->
-      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
-        let _ = Hacl.Hash.Blake2b_256.update_blake2b_256 p prevlen block in
-        ()
-#pop-options
 
 #push-options "--ifuel 1"
 
