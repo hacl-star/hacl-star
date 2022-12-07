@@ -195,11 +195,12 @@ let secret_to_public public_key private_key =
   let d_a = create_qelem () in
   let p = P.create_point () in
   let is_sk_valid = load_qelem_check d_a private_key in
-  let b =
-    if BB.unsafe_bool_of_limb0 is_sk_valid then false
-    else begin
-      PM.point_mul_g p d_a; // p = [d_a]G
-      P.store_point public_key p;
-      true end in
+  let oneq = create_one () in
+  let h0 = ST.get () in
+  Lib.ByteBuffer.buf_mask_select d_a oneq is_sk_valid d_a;
+  let h1 = ST.get () in
+  assert (as_seq h1 d_a == (if (v is_sk_valid = 0) then as_seq h0 oneq else as_seq h0 d_a));
+  PM.point_mul_g p d_a; // p = [d_a]G
+  P.store_point public_key p;
   pop_frame ();
-  b
+  BB.unsafe_bool_of_limb is_sk_valid
