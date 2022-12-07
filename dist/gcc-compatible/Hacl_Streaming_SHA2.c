@@ -596,7 +596,7 @@ static inline void sha384_finish(uint64_t *st, uint8_t *h)
   memcpy(h, hbuf, (uint32_t)48U * sizeof (uint8_t));
 }
 
-inline void Hacl_SHA2_Scalar32_sha512_init(uint64_t *hash)
+void Hacl_SHA2_Scalar32_sha512_init(uint64_t *hash)
 {
   KRML_MAYBE_FOR8(i,
     (uint32_t)0U,
