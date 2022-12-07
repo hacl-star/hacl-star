@@ -15,7 +15,6 @@ include Spec.Hash.Lemmas0
 val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
   (requires update_multi_pre a h (init_extra_state a) S.empty)
   (ensures ((update_multi a h (init_extra_state a) S.empty) == h))
-  [ SMTPat (update_multi a h (init_extra_state a) S.empty) ]
 
 /// Single update corresponds to update_multi for the MD algorithms
 val update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): Lemma
@@ -34,7 +33,6 @@ val update_multi_associative (a: hash_alg{not (is_blake a)})
     let input = S.append input1 input2 in
     S.length input % block_length a == 0 /\
     update_multi a (update_multi a h () input1) () input2 == update_multi a h () input))
-  [ SMTPat (update_multi a (update_multi a h () input1) () input2) ]
 
 val update_multi_associative_blake (a: blake_alg)
   (h: words_state a)
@@ -55,7 +53,6 @@ val update_multi_associative_blake (a: blake_alg)
     update_multi_pre a h prevlen1 input1 /\
     update_multi_pre a (update_multi a h prevlen1 input1) prevlen2 input2 /\
     update_multi a (update_multi a h prevlen1 input1) prevlen2 input2 == update_multi a h prevlen1 input))
-  [ SMTPat (update_multi a (update_multi a h prevlen1 input1) prevlen2 input2) ]
 
 val block_length_smaller_than_max_input (a:hash_alg) :
   Lemma (block_length a `less_than_max_input_length` a)

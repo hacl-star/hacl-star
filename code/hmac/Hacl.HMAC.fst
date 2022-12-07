@@ -253,7 +253,7 @@ val split_nb_rem_extend_one_block (l:pos) (d:pos)
 let split_nb_rem_extend_one_block l d =
   FStar.Math.Lemmas.add_div_mod_1 d l
 
-#push-options "--z3rlimit 400 --using_facts_from '* -Spec.Hash.Lemmas.update_multi_associative'"
+#push-options "--z3rlimit 400"
 
 let part2_update_nonempty a m init update_multi update_last s key data len =
     (**) let h0 = ST.get () in

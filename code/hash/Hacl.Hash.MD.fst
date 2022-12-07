@@ -212,6 +212,11 @@ let mk_update_last a update_multi =
     let s3 = Spec.Hash.PadFinish.pad a (len_v a total_input_len) in
     S.equal (S.append s1 (S.append s2 s3)) (S.append (S.append s1 s2) s3));
 
+  Spec.Hash.Lemmas.update_multi_associative a
+    (B.as_seq h0 s)
+    (B.as_seq h1 blocks)
+    (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)));
+
   ST.pop_frame ()
 
 #pop-options
