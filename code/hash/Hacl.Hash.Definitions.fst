@@ -27,15 +27,15 @@ inline_for_extraction noextract
 let extra_state (a:hash_alg) : Type0 =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
-  | Blake2S -> s:uint64{ v s % block_length a = 0 }
-  | Blake2B -> s:uint128{ v s % block_length a = 0 }
+  | Blake2S -> s:uint_t U64 PUB{ v s % block_length a = 0 }
+  | Blake2B -> s:uint_t U128 PUB{ v s % block_length a = 0 }
 
 inline_for_extraction noextract
 let ev_v (#a:hash_alg) (ev:extra_state a) : Spec.Hash.Definitions.extra_state a =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> ()
-  | Blake2S -> v #U64 #SEC ev
-  | Blake2B -> v #U128 #SEC ev
+  | Blake2S -> v #U64 #PUB ev
+  | Blake2B -> v #U128 #PUB ev
 
 inline_for_extraction
 type impl = a:hash_alg & m_spec a
