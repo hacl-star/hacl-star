@@ -17,6 +17,9 @@ open Hacl.Impl.Blake2.Core
 // Blake2B_32
 
 inline_for_extraction noextract
+val malloc_blake2b_32: malloc_st (|Blake2B, M32|)
+
+inline_for_extraction noextract
 val alloca_blake2b_32: alloca_st (|Blake2B, M32|)
 
 inline_for_extraction noextract
@@ -35,6 +38,9 @@ inline_for_extraction noextract
 val hash_blake2b_32: hash_st Blake2B
 
 // Blake2S_32
+
+inline_for_extraction noextract
+val malloc_blake2s_32: malloc_st (|Blake2S, M32|)
 
 inline_for_extraction noextract
 val alloca_blake2s_32: alloca_st (|Blake2S, M32|)
@@ -62,6 +68,9 @@ val hash_blake2s_32: hash_st Blake2S
 // Blake2S_128
 
 inline_for_extraction noextract
+val malloc_blake2s_128: malloc_st (|Blake2S, M128|)
+
+inline_for_extraction noextract
 val alloca_blake2s_128: alloca_st (|Blake2S, M128|)
 
 inline_for_extraction noextract
@@ -80,6 +89,9 @@ inline_for_extraction noextract
 val hash_blake2s_128: hash_st Blake2S
 
 // Blake2B_256
+
+inline_for_extraction noextract
+val malloc_blake2b_256: malloc_st (|Blake2B, M256|)
 
 inline_for_extraction noextract
 val alloca_blake2b_256: alloca_st (|Blake2B, M256|)

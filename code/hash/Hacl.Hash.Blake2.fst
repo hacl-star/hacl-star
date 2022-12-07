@@ -15,6 +15,8 @@ friend Spec.Agile.Hash
 
 // Blake2b_32
 
+let malloc_blake2b_32 = BlB32.blake2b_malloc
+
 let alloca_blake2b_32 () =
   let h0 = ST.get() in
   let s = Hacl.Impl.Blake2.Core.alloc_state Spec.Blake2.Blake2B M32 in
@@ -43,6 +45,8 @@ let finish_blake2b_32 s dst = BlB32.blake2b_finish (hash_len Blake2B) dst s
 let hash_blake2b_32 input input_len dst = BlB32.blake2b 64ul dst input_len input 0ul (null #MUT uint8)
 
 // Blake2s_32
+
+let malloc_blake2s_32 = BlS32.blake2s_malloc
 
 let alloca_blake2s_32 () =
   let h0 = ST.get() in
@@ -73,6 +77,8 @@ let hash_blake2s_32 input input_len dst = BlS32.blake2s 32ul dst input_len input
 
 // Blake2s_128
 
+let malloc_blake2s_128 = BlS128.blake2s_malloc
+
 let alloca_blake2s_128 () =
   let h0 = ST.get() in
   let s = Hacl.Impl.Blake2.Core.alloc_state Spec.Blake2.Blake2S M128 in
@@ -101,6 +107,8 @@ let finish_blake2s_128 s dst = BlS128.blake2s_finish (hash_len Blake2S) dst s
 let hash_blake2s_128 input input_len dst = BlS128.blake2s 32ul dst input_len input 0ul (null #MUT uint8)
 
 // Blake2b_256
+
+let malloc_blake2b_256 = BlB256.blake2b_malloc
 
 let alloca_blake2b_256 () =
   let h0 = ST.get() in
