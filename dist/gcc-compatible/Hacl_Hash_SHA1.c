@@ -38,7 +38,7 @@ void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
   KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, s[i] = _h0[i];);
 }
 
-void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l)
+static void legacy_update(uint32_t *h, uint8_t *l)
 {
   uint32_t ha = h[0U];
   uint32_t hb = h[1U];
@@ -169,7 +169,7 @@ void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA1_legacy_update(s, block);
+    legacy_update(s, block);
   }
 }
 

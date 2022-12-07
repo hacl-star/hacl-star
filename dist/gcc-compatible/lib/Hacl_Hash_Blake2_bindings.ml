@@ -5,10 +5,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Core_Blake2_init_blake2s_32 =
       foreign "Hacl_Hash_Core_Blake2_init_blake2s_32"
         ((ptr uint32_t) @-> (returning uint64_t))
-    let hacl_Hash_Core_Blake2_update_blake2s_32 =
-      foreign "Hacl_Hash_Core_Blake2_update_blake2s_32"
-        ((ptr uint32_t) @->
-           (uint64_t @-> (ocaml_bytes @-> (returning uint64_t))))
     let hacl_Hash_Core_Blake2_finish_blake2s_32 =
       foreign "Hacl_Hash_Core_Blake2_finish_blake2s_32"
         ((ptr uint32_t) @-> (uint64_t @-> (ocaml_bytes @-> (returning void))))

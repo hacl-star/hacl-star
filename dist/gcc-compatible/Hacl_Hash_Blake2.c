@@ -61,7 +61,7 @@ uint64_t Hacl_Hash_Core_Blake2_init_blake2s_32(uint32_t *s)
   return (uint64_t)0U;
 }
 
-uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block)
+static uint64_t update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block)
 {
   uint32_t wv[16U] = { 0U };
   uint64_t totlen1 = totlen + (uint64_t)(uint32_t)64U;
@@ -559,12 +559,8 @@ FStar_UInt128_uint128 Hacl_Hash_Core_Blake2_init_blake2b_32(uint64_t *s)
   return FStar_UInt128_uint64_to_uint128((uint64_t)0U);
 }
 
-FStar_UInt128_uint128
-Hacl_Hash_Core_Blake2_update_blake2b_32(
-  uint64_t *s,
-  FStar_UInt128_uint128 totlen,
-  uint8_t *block
-)
+static FStar_UInt128_uint128
+update_blake2b_32(uint64_t *s, FStar_UInt128_uint128 totlen, uint8_t *block)
 {
   uint64_t wv[16U] = { 0U };
   FStar_UInt128_uint128
@@ -1043,11 +1039,7 @@ Hacl_Hash_Blake2_update_multi_blake2s_32(
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    uint64_t
-    v_ =
-      Hacl_Hash_Core_Blake2_update_blake2s_32(s,
-        ev + (uint64_t)i * (uint64_t)(uint32_t)64U,
-        block);
+    uint64_t v_ = update_blake2s_32(s, ev + (uint64_t)i * (uint64_t)(uint32_t)64U, block);
   }
   return ev + (uint64_t)n_blocks * (uint64_t)(uint32_t)64U;
 }
@@ -1066,7 +1058,7 @@ Hacl_Hash_Blake2_update_multi_blake2b_32(
     uint8_t *block = blocks + sz * i;
     FStar_UInt128_uint128
     v_ =
-      Hacl_Hash_Core_Blake2_update_blake2b_32(s,
+      update_blake2b_32(s,
         FStar_UInt128_add_mod(ev,
           FStar_UInt128_uint64_to_uint128((uint64_t)i * (uint64_t)(uint32_t)128U)),
         block);

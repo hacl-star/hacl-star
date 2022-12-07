@@ -13,7 +13,7 @@ let compute_sha1 =
    the static configuration and CPUID *)
 let compute_sha2_256 =
   let open Hacl.Hash.SHA2 in
-  mk_compute (|SHA2_256, ()|) EverCrypt.Hash.hash_256 alloca_256 init_256
+  mk_compute (|SHA2_256, ()|) EverCrypt.Hash.Incremental.hash_256 alloca_256 init_256
              EverCrypt.Hash.update_multi_256
              EverCrypt.Hash.update_last_256 finish_256
 

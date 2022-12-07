@@ -60,7 +60,7 @@ let test_one_hash vec =
     EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
     assert (v total_input_len `Spec.Hash.Definitions.less_than_max_input_length` a);
 
-    EverCrypt.Hash.hash a computed total_input total_input_len;
+    EverCrypt.Hash.Incremental.hash a computed total_input total_input_len;
 
     B.recall expected;
     let str = H.string_of_alg a in

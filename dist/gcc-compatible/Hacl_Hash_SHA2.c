@@ -277,7 +277,7 @@ static void update_256(uint32_t *hash, uint8_t *block)
     hash[i] = xi + yi;);
 }
 
-void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
+static void update_384(uint64_t *hash, uint8_t *block)
 {
   uint64_t hash1[8U] = { 0U };
   uint64_t computed_ws[80U] = { 0U };
@@ -353,7 +353,7 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
     hash[i] = xi + yi;);
 }
 
-void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block)
+static void update_512(uint64_t *hash, uint8_t *block)
 {
   uint64_t hash1[8U] = { 0U };
   uint64_t computed_ws[80U] = { 0U };
@@ -609,7 +609,7 @@ void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_bl
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_384(s, block);
+    update_384(s, block);
   }
 }
 
@@ -619,7 +619,7 @@ void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_bl
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_512(s, block);
+    update_512(s, block);
   }
 }
 

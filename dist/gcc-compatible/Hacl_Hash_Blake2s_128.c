@@ -49,12 +49,8 @@ uint64_t Hacl_Hash_Blake2s_128_init_blake2s_128(Lib_IntVector_Intrinsics_vec128 
   return (uint64_t)0U;
 }
 
-uint64_t
-Hacl_Hash_Blake2s_128_update_blake2s_128(
-  Lib_IntVector_Intrinsics_vec128 *s,
-  uint64_t totlen,
-  uint8_t *block
-)
+static uint64_t
+update_blake2s_128(Lib_IntVector_Intrinsics_vec128 *s, uint64_t totlen, uint8_t *block)
 {
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
   uint64_t totlen1 = totlen + (uint64_t)(uint32_t)64U;
@@ -259,11 +255,7 @@ Hacl_Hash_Blake2s_128_update_multi_blake2s_128(
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    uint64_t
-    v_ =
-      Hacl_Hash_Blake2s_128_update_blake2s_128(s,
-        ev + (uint64_t)i * (uint64_t)(uint32_t)64U,
-        block);
+    uint64_t v_ = update_blake2s_128(s, ev + (uint64_t)i * (uint64_t)(uint32_t)64U, block);
   }
   return ev + (uint64_t)n_blocks * (uint64_t)(uint32_t)64U;
 }

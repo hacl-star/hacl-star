@@ -28,6 +28,7 @@
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_Blake2.h"
 #include "internal/Hacl_HMAC.h"
+#include "internal/EverCrypt_Hash.h"
 
 void
 EverCrypt_HMAC_compute_sha1(
@@ -178,7 +179,7 @@ EverCrypt_HMAC_compute_sha2_256(
   }
   else
   {
-    EverCrypt_Hash_hash_256(key, key_len, nkey);
+    EverCrypt_Hash_Incremental_hash_256(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];

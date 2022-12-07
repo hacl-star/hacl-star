@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_MD5_H
-#define __internal_Hacl_Hash_MD5_H
+#ifndef __internal_EverCrypt_Hash_H
+#define __internal_EverCrypt_Hash_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,15 +35,28 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "../Hacl_Hash_MD5.h"
+#include "internal/Vale.h"
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_MD5.h"
+#include "internal/Hacl_Hash_Blake2s_128.h"
+#include "internal/Hacl_Hash_Blake2b_256.h"
+#include "internal/Hacl_Hash_Blake2.h"
+#include "../EverCrypt_Hash.h"
 
-void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s);
+void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
-void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst);
+void
+EverCrypt_Hash_update_last_256(
+  uint32_t *s,
+  uint64_t input,
+  uint8_t *input_len,
+  uint32_t input_len1
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Hash_MD5_H_DEFINED
+#define __internal_EverCrypt_Hash_H_DEFINED
 #endif

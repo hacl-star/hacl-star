@@ -50,8 +50,8 @@ Hacl_Hash_Blake2b_256_init_blake2b_256(Lib_IntVector_Intrinsics_vec256 *s)
   return FStar_UInt128_uint64_to_uint128((uint64_t)0U);
 }
 
-FStar_UInt128_uint128
-Hacl_Hash_Blake2b_256_update_blake2b_256(
+static FStar_UInt128_uint128
+update_blake2b_256(
   Lib_IntVector_Intrinsics_vec256 *s,
   FStar_UInt128_uint128 totlen,
   uint8_t *block
@@ -265,7 +265,7 @@ Hacl_Hash_Blake2b_256_update_multi_blake2b_256(
     uint8_t *block = blocks + sz * i;
     FStar_UInt128_uint128
     v_ =
-      Hacl_Hash_Blake2b_256_update_blake2b_256(s,
+      update_blake2b_256(s,
         FStar_UInt128_add_mod(ev,
           FStar_UInt128_uint64_to_uint128((uint64_t)i * (uint64_t)(uint32_t)128U)),
         block);

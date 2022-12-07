@@ -13,6 +13,10 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## 2022-12-06
+
+- Tighten the `EverCrypt_Hash` header file to only expose the one-shot and
+  "streaming" APIs.
 
 ## 2022-12-01
 

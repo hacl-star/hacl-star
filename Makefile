@@ -697,7 +697,7 @@ TARGETCONFIG_FLAGS = \
 # All of these bundles that have something on the left-hand side. They demand
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
-E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
+E_HASH_BUNDLE=-bundle EverCrypt.Hash.Incremental=EverCrypt.Hash[rename=EverCrypt_Hash]
 CTR_BUNDLE=-bundle EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
