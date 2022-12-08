@@ -5,7 +5,6 @@ module ST = FStar.HyperStack.ST
 
 module M = LowStar.Modifies
 module B = LowStar.Buffer
-module Spec = Spec.Hash.PadFinish
 module Blake2 = Hacl.Impl.Blake2.Core
 
 open Lib.IntTypes
@@ -194,7 +193,7 @@ let pad_st (a: md_alg) = len:len_t a -> dst:B.buffer uint8 ->
       B.length dst = pad_length a (len_v a len)))
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer dst) h0 h1) /\
-      Seq.equal (B.as_seq h1 dst) (Spec.pad a (len_v a len))))
+      Seq.equal (B.as_seq h1 dst) (Spec.Hash.MD.pad a (len_v a len))))
 
 // Note: we cannot take more than 4GB of data because we are currently
 // constrained by the size of buffers...
@@ -262,7 +261,7 @@ let finish_st (i:impl) =
     B.live h s /\ B.live h dst /\ B.disjoint s dst))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst `loc_union` loc_buffer s) h0 h1) /\
-    Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish (get_alg i) (as_seq h0 s))))
+    Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.finish (get_alg i) (as_seq h0 s))))
 
 noextract inline_for_extraction
 let hash_st (a: hash_alg) =
