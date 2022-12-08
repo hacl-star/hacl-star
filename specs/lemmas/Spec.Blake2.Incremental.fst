@@ -5,7 +5,6 @@ module S = FStar.Seq
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.Incremental.Definitions
-open Spec.Hash.PadFinish
 open Spec.Hash.Lemmas
 open FStar.Mul
 

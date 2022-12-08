@@ -45,6 +45,10 @@ correctness.
 
 (In the case of MD hashes, the proof of incrementality specifically relies on
 the two properties of update_multi, but this is not true in the general case.)
+
+The incremental specification (in lemmas/Spec.Hash.Incremental.Definitions)
+introduces a notion of "update_last" and then defines the hash as update_multi,
+update_last, finish.
 *)
 
 val init (a:hash_alg): init_t a
@@ -79,6 +83,8 @@ val update_multi
   Pure (words_state a)
     (requires update_multi_pre a hash prev blocks)
     (ensures fun _ -> True)
+
+val finish (a:hash_alg) (hashw:words_state a): Tot (bytes_hash a)
 
 val hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a}):
   Tot (Lib.ByteSequence.lbytes (hash_length a))

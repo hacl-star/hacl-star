@@ -4,7 +4,7 @@ module S = FStar.Seq
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
-open Spec.Hash.PadFinish
+open Spec.Hash.MD
 open Spec.Hash.Lemmas
 
 friend Spec.Agile.Hash

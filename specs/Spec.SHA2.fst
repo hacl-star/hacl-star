@@ -218,7 +218,3 @@ let update_pre (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = b
 
 [@"opaque_to_smt"]
 let update = update_pre
-
-let pad = Spec.Hash.PadFinish.pad
-
-let finish a = Spec.Hash.PadFinish.finish a

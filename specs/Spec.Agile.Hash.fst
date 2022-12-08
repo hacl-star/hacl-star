@@ -3,7 +3,7 @@ module Spec.Agile.Hash
 module S = FStar.Seq
 
 open Spec.Hash.Definitions
-open Spec.Hash.PadFinish
+open Spec.Hash.MD
 open FStar.Mul
 open Lib.IntTypes
 
@@ -44,6 +44,32 @@ let update_multi a hash prev blocks =
       let open Spec.SHA3 in
       let rateInBytes = 1088 / 8 in
       Lib.Sequence.repeat_blocks_multi #_ #(words_state a) rateInBytes blocks (absorb_inner rateInBytes) hash
+
+(** Extracting the hash, which we call "finish" *)
+
+(* Unflatten the hash from the sequence of words to bytes up to the correct size *)
+let finish_md (a:md_alg) (hashw:words_state a): Tot (bytes_hash a) =
+  let hash_final_w = S.slice hashw 0 (hash_word_length a) in
+  bytes_of_words a #(hash_word_length a) hash_final_w
+
+let finish_blake (a:blake_alg) (hash:words_state a): Tot (bytes_hash a) =
+  let alg = to_blake_alg a in
+  Spec.Blake2.blake2_finish alg hash (Spec.Blake2.max_output alg)
+
+let finish_sha3 (a: sha3_alg) (s: words_state a): Tot (bytes_hash a) =
+  match a with
+  | SHA3_256 ->
+      let rateInBytes = 1088 / 8 in
+      let outputByteLen = 32 in
+      Spec.SHA3.squeeze s rateInBytes outputByteLen
+
+let finish (a:hash_alg) (hashw:words_state a): Tot (bytes_hash a) =
+  if is_blake a then
+    finish_blake a hashw
+  else if is_sha3 a then
+    finish_sha3 a hashw
+  else
+    finish_md a hashw
 
 #push-options "--fuel 0 --ifuel 0"
 

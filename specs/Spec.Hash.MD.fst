@@ -1,4 +1,4 @@
-module Spec.Hash.PadFinish
+module Spec.Hash.MD
 
 module S = FStar.Seq
 open Lib.IntTypes
@@ -6,18 +6,11 @@ open Lib.ByteSequence
 
 open Spec.Hash.Definitions
 
-(** This module contains two things.
- - First, a Merkle-Damgard padding scheme for the MD hashes ONLY (md5, sha1, sha2)
- - Second, a "finish" operation that extracts the final hash from the internal
-   state, defined for any hash.
+(** This module contains a Merkle-Damgard padding scheme for the
+    MD hashes ONLY (md5, sha1, sha2)
 
  In Spec.Agile.Hash, the one-shot hash for MD hashes is defined pad,
  update_multi, finish.
-
- The incremental specification (in lemmas/Spec.Hash.Incremental.Definitions)
- introduces a notion of "update_last" and then defines the hash as update_multi,
- update_last, finish, relying on the various definitions for finish here,
- including those for non-MD hashes.
 *)
 
 #push-options "--fuel 2 --ifuel 0"
@@ -53,29 +46,3 @@ let pad (a:md_alg)
   (total_len:nat{total_len `less_than_max_input_length` a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
 = pad_md a total_len
-
-(** Extracting the hash, which we call "finish" *)
-
-(* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish_md (a:md_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
-  let hash_final_w = S.slice hashw 0 (hash_word_length a) in
-  bytes_of_words a #(hash_word_length a) hash_final_w
-
-let finish_blake (a:blake_alg) (hash:words_state a): Tot (lbytes (hash_length a)) =
-  let alg = to_blake_alg a in
-  Spec.Blake2.blake2_finish alg hash (Spec.Blake2.max_output alg)
-
-let finish_sha3 (a: sha3_alg) (s: words_state a): Tot (lbytes (hash_length a)) =
-  match a with
-  | SHA3_256 ->
-      let rateInBytes = 1088 / 8 in
-      let outputByteLen = 32 in
-      Spec.SHA3.squeeze s rateInBytes outputByteLen
-
-let finish (a:hash_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
-  if is_blake a then
-    finish_blake a hashw
-  else if is_sha3 a then
-    finish_sha3 a hashw
-  else
-    finish_md a hashw

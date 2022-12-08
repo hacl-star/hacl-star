@@ -5,7 +5,6 @@ module Blake2 = Spec.Blake2
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
-open Spec.Hash.PadFinish
 
 open FStar.Mul
 open Lib.Sequence
