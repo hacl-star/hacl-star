@@ -53,10 +53,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_Hash_update_multi_256 =
       foreign "EverCrypt_Hash_update_multi_256"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
-    let everCrypt_Hash_update =
-      foreign "EverCrypt_Hash_update"
-        ((ptr everCrypt_Hash_state_s) @->
-           (uint64_t @-> (ocaml_bytes @-> (returning void))))
     let everCrypt_Hash_update_multi =
       foreign "EverCrypt_Hash_update_multi"
         ((ptr everCrypt_Hash_state_s) @->

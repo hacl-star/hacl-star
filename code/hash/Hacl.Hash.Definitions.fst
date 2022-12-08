@@ -213,12 +213,14 @@ let update_multi_st (i:impl) =
       as_seq h1 s ==
         Spec.Agile.Hash.update_multi (get_alg i) (as_seq h0 s) (ev_v ev) (B.as_seq h0 blocks)))
 
+noextract inline_for_extraction
 let prev_len_t (a: hash_alg) =
   if is_sha3 a then
     unit
   else
     prev_len:len_t a { len_v a prev_len % block_length a = 0 }
 
+noextract inline_for_extraction
 let prev_len_v #a (prev_len: prev_len_t a): Spec.Hash.Incremental.Definitions.prev_length_t a
 =
   if is_sha3 a then
@@ -226,6 +228,7 @@ let prev_len_v #a (prev_len: prev_len_t a): Spec.Hash.Incremental.Definitions.pr
   else
     len_v a prev_len
 
+noextract inline_for_extraction
 let extra_state_of_prev_length #a (x: Spec.Hash.Incremental.Definitions.prev_length_t a): Spec.Agile.Hash.extra_state a =
   match a with
   | Blake2B | Blake2S -> x
