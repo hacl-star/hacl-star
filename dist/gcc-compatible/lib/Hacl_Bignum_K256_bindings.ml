@@ -14,6 +14,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_K256_Field_load_felem =
       foreign "Hacl_K256_Field_load_felem"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
+    let hacl_K256_Field_load_felem_lt_prime_vartime =
+      foreign "Hacl_K256_Field_load_felem_lt_prime_vartime"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning bool)))
     let hacl_K256_Field_load_felem_vartime =
       foreign "Hacl_K256_Field_load_felem_vartime"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning bool)))

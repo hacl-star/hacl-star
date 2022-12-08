@@ -87,7 +87,13 @@ let point_mul_double_g (a1:qelem) (a2:qelem) (p:proj_point) : proj_point =
 
 ///  ECDSA with a prehashed message
 
-// TODO: add `secret_to_public`?
+let secret_to_public (private_key:lbytes 32) : option (lbytes 64) =
+  let d_a = nat_from_bytes_be private_key in
+  let is_privkey_valid = 0 < d_a && d_a < q in
+
+  if not is_privkey_valid then None
+  else Some (store_point (point_mul_g d_a))
+
 
 let ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes 64) =
   let k_q = nat_from_bytes_be nonce in
@@ -120,6 +126,11 @@ let load_public_key (pk:lbytes 64) : tuple3 nat nat bool =
   let is_xy_on_curve =
     if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
   pk_x, pk_y, is_xy_on_curve
+
+
+let is_public_key_valid (pk:lbytes 64) : bool =
+  let _, _, is_pk_valid = load_public_key pk in
+  is_pk_valid
 
 
 let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =

@@ -142,6 +142,37 @@ let ecdsa_sign_store signature r_q s_q =
 
 
 inline_for_extraction noextract
+val check_signature: are_sk_nonce_valid:uint64 -> r_q:qelem -> s_q:qelem -> Stack bool
+  (requires fun h ->
+    live h r_q /\ live h s_q /\ disjoint r_q s_q /\
+    (v are_sk_nonce_valid = ones_v U64 \/ v are_sk_nonce_valid = 0))
+  (ensures fun h0 res h1 -> modifies0 h0 h1 /\
+    res == ((v are_sk_nonce_valid = ones_v U64) && (0 < qas_nat h0 r_q) && (0 < qas_nat h0 s_q)))
+
+let check_signature are_sk_nonce_valid r_q s_q =
+  let h0 = ST.get () in
+  let is_r_zero = is_qelem_zero r_q in
+  let is_s_zero = is_qelem_zero s_q in
+  assert (v is_r_zero == (if qas_nat h0 r_q = 0 then ones_v U64 else 0));
+  assert (v is_s_zero == (if qas_nat h0 s_q = 0 then ones_v U64 else 0));
+  [@inline_let] let m0 = lognot is_r_zero in
+  [@inline_let] let m1 = lognot is_s_zero in
+  [@inline_let] let m2 = m0 &. m1 in
+  lognot_lemma is_r_zero;
+  lognot_lemma is_s_zero;
+  assert (v m0 == (if qas_nat h0 r_q = 0 then 0 else ones_v U64));
+  assert (v m1 == (if qas_nat h0 s_q = 0 then 0 else ones_v U64));
+  logand_lemma m0 m1;
+  assert (v m2 = (if v m0 = 0 then 0 else v m1));
+  assert ((v m2 = 0) <==> (qas_nat h0 r_q = 0 || qas_nat h0 s_q = 0));
+  let m = are_sk_nonce_valid &. m2 in
+  logand_lemma are_sk_nonce_valid m2;
+  assert ((v m = ones_v U64) <==>
+    ((v are_sk_nonce_valid = ones_v U64) && (0 < qas_nat h0 r_q) && (0 < qas_nat h0 s_q)));
+  BB.unsafe_bool_of_limb m
+
+
+inline_for_extraction noextract
 val ecdsa_sign_hashed_msg (signature:lbytes 64ul) (msgHash private_key nonce:lbytes 32ul) : Stack bool
   (requires fun h ->
     live h msgHash /\ live h private_key /\ live h nonce /\ live h signature /\
@@ -152,23 +183,23 @@ val ecdsa_sign_hashed_msg (signature:lbytes 64ul) (msgHash private_key nonce:lby
 
 let ecdsa_sign_hashed_msg signature msgHash private_key nonce =
   push_frame ();
-  let r_q = create_qelem () in
-  let s_q = create_qelem () in
-  let d_a = create_qelem () in
-  let k_q = create_qelem () in
+  let oneq = create_one () in
+  let rsdk_q = create 16ul (u64 0) in
+  let r_q = sub rsdk_q 0ul 4ul in
+  let s_q = sub rsdk_q 4ul 4ul in
+  let d_a = sub rsdk_q 8ul 4ul in
+  let k_q = sub rsdk_q 12ul 4ul in
 
   let are_sk_nonce_valid = ecdsa_sign_load d_a k_q private_key nonce in
-
-  let b =
-    if BB.unsafe_bool_of_limb0 are_sk_nonce_valid then false
-    else begin
-      ecdsa_sign_r r_q k_q;
-      ecdsa_sign_s s_q k_q r_q d_a msgHash;
-      ecdsa_sign_store signature r_q s_q;
-
-      let is_r_zero = is_qelem_zero r_q in
-      let is_s_zero = is_qelem_zero s_q in
-      if BB.unsafe_bool_of_limb is_r_zero || BB.unsafe_bool_of_limb is_s_zero
-      then false else true end in
+  let h0 = ST.get () in
+  Lib.ByteBuffer.buf_mask_select d_a oneq are_sk_nonce_valid d_a;
+  Lib.ByteBuffer.buf_mask_select k_q oneq are_sk_nonce_valid k_q;
+  let h1 = ST.get () in
+  assert (as_seq h1 d_a == (if (v are_sk_nonce_valid = 0) then as_seq h0 oneq else as_seq h0 d_a));
+  assert (as_seq h1 k_q == (if (v are_sk_nonce_valid = 0) then as_seq h0 oneq else as_seq h0 k_q));
+  ecdsa_sign_r r_q k_q;
+  ecdsa_sign_s s_q k_q r_q d_a msgHash;
+  ecdsa_sign_store signature r_q s_q;
+  let res = check_signature are_sk_nonce_valid r_q s_q in
   pop_frame ();
-  b
+  res

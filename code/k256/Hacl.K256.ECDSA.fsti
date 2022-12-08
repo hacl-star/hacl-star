@@ -279,3 +279,37 @@ val public_key_compressed_from_raw: pk:lbytes 33ul -> pk_raw:lbytes 64ul -> Stac
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
     as_seq h1 pk == S.pk_compressed_from_raw (as_seq h0 pk_raw))
+
+
+[@@ Comment "Public key validation.
+
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve. "]
+val is_public_key_valid: pk:lbytes 64ul -> Stack bool
+  (requires fun h -> live h pk)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    b <==> S.is_public_key_valid (as_seq h0 pk))
+
+
+[@@ Comment "Compute the public key from the private key.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` and `private_key` < the order of the curve."]
+val secret_to_public: public_key:lbytes 64ul -> private_key:lbytes 32ul -> Stack bool
+  (requires fun h ->
+    live h public_key /\ live h private_key /\
+    disjoint public_key private_key)
+  (ensures fun h0 b h1 -> modifies (loc public_key) h0 h1 /\
+    (let public_key_s = S.secret_to_public (as_seq h0 private_key) in
+    (b <==> Some? public_key_s) /\ (b ==> (as_seq h1 public_key == Some?.v public_key_s))))

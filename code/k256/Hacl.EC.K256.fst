@@ -341,7 +341,9 @@ let point_mul scalar p out =
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `p` and `q` are either disjoint or equal"]
+  • `p` and `q` are either disjoint or equal.
+
+  This function is NOT constant-time."]
 val point_eq (p q:P.point) : Stack bool
   (requires fun h ->
     live h p /\ live h q /\ eq_or_disjoint p q /\
@@ -350,7 +352,87 @@ val point_eq (p q:P.point) : Stack bool
     (z <==> S.point_equal (P.point_eval h0 p) (P.point_eval h0 q)))
 
 let point_eq p q =
-  P.point_eq p q
+  P.point_eq_vartime p q
+
+
+[@@ Comment "Convert a point from projective coordinates to its raw form.
+
+  The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
+  The outparam `out` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first converts a given point `p` from projective to affine coordinates
+  and then writes [ `x`; `y` ] in `out`.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are disjoint."]
+val point_store: p:P.point -> out:lbuffer uint8 64ul -> Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ disjoint p out /\
+    P.point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_seq h1 out == S.store_point (P.point_eval h0 p))
+
+let point_store p out =
+  P.store_point out p
+
+
+[@@ Comment "Convert a point to projective coordinates from its raw form.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The outparam `out` points to a point of 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` is valid point, i.e., x < prime and y < prime and (x, y) is on the curve
+  • `b` and `out` are disjoint."]
+val point_load: b:lbuffer uint8 64ul -> out:P.point -> Stack unit
+  (requires fun h ->
+    live h out /\ live h b /\ disjoint b out /\
+    S.point_inv_bytes (as_seq h b))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    P.point_inv h1 out /\
+    P.point_eval h1 out == S.load_point_nocheck (as_seq h0 b))
+
+let point_load b out =
+  P.load_point_nocheck out b
+
+
+[@@ Comment "Check whether a point is valid.
+
+  The function returns `true` if a point is valid and `false` otherwise.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The point (x || y) is valid:
+    • x < prime
+    • y < prime
+    • (x, y) is on the curve.
+
+  This function is NOT constant-time."]
+val is_point_valid: b:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h b)
+  (ensures  fun h0 res h1 -> modifies0 h0 h1 /\
+    res <==> (S.point_inv_bytes (as_seq h0 b)))
+
+let is_point_valid b =
+  push_frame ();
+  let px = F.create_felem () in
+  let py = F.create_felem () in
+  let pxb = sub b 0ul 32ul in
+  let pyb = sub b 32ul 32ul in
+  let is_x_valid = F.load_felem_lt_prime_vartime px pxb in
+  let is_y_valid = F.load_felem_lt_prime_vartime py pyb in
+  let h1 = ST.get () in
+
+  let res =
+    if is_x_valid && is_y_valid then begin
+      assert (F.inv_fully_reduced h1 px);
+      assert (F.inv_fully_reduced h1 py);
+      P.is_on_curve_vartime px py end
+    else false in
+  pop_frame ();
+  res
 
 
 [@@ Comment "Compress a point in projective coordinates to its compressed form.
@@ -363,7 +445,9 @@ let point_eq p q =
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `p` and `out` are disjoint"]
+  • `p` and `out` are disjoint.
+
+  This function is NOT constant-time."]
 val point_compress: p:P.point -> out:lbuffer uint8 33ul -> Stack unit
   (requires fun h ->
     live h out /\ live h p /\ disjoint p out /\
@@ -385,7 +469,9 @@ let point_compress p out =
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `s` and `out` are disjoint"]
+  • `s` and `out` are disjoint.
+
+  This function is NOT constant-time."]
 val point_decompress: s:lbuffer uint8 33ul -> out:P.point -> Stack bool
   (requires fun h ->
     live h out /\ live h s /\ disjoint out s)
