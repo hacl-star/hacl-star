@@ -56,7 +56,7 @@ let load_skey (modBits:modBits_t) : RK.rsapss_load_skey_st t_limbs (ke modBits) 
 
 @return Returns true if and only if signing was successful."]
 val rsapss_sign:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t ->
   RI.rsapss_sign_st t_limbs (ke modBits) a modBits
 
@@ -78,7 +78,7 @@ let rsapss_sign a modBits eBits dBits skey saltLen salt msgLen msg sgnt =
 
 @return Returns true if and only if the signature is valid."]
 val rsapss_verify:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t ->
   RI.rsapss_verify_st t_limbs (ke modBits) a modBits
 
@@ -131,7 +131,7 @@ let new_rsapss_load_skey modBits r eBits dBits nb eb db =
 
 @return Returns true if and only if signing was successful."]
 val rsapss_skey_sign:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t ->
   RI.rsapss_skey_sign_st t_limbs (ke modBits) a modBits
 
@@ -155,7 +155,7 @@ let rsapss_skey_sign a modBits eBits dBits nb eb db saltLen salt msgLen msg sgnt
 
 @return Returns true if and only if the signature is valid."]
 val rsapss_pkey_verify:
-    a:Hash.algorithm{S.hash_is_supported a}
+    a:Hash.hash_alg{S.hash_is_supported a}
   -> modBits:modBits_t ->
   RI.rsapss_pkey_verify_st t_limbs (ke modBits) a modBits
 
@@ -164,8 +164,8 @@ let rsapss_pkey_verify a modBits eBits nb eb saltLen sgntLen sgnt msgLen msg =
     (load_pkey modBits) (rsapss_verify a modBits) eBits nb eb saltLen sgntLen sgnt msgLen msg
 
 
-[@@ Comment "  The mask generation function defined in the Public Key Cryptography Standard #1 
+[@@ Comment "  The mask generation function defined in the Public Key Cryptography Standard #1
   (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) "]
-val mgf_hash: a:Hash.algorithm{S.hash_is_supported a} -> Hacl.Impl.RSAPSS.MGF.mgf_hash_st a
+val mgf_hash: a:Hash.hash_alg{S.hash_is_supported a} -> Hacl.Impl.RSAPSS.MGF.mgf_hash_st a
 
 let mgf_hash a len mgfseed maskLen res = Hacl.Impl.RSAPSS.MGF.mgf_hash a len mgfseed maskLen res

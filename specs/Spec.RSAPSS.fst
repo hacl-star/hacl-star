@@ -28,7 +28,7 @@ let blocks x m = (x - 1) / m + 1
 val xor_bytes: #len:size_pos -> b1:lbytes len -> b2:lbytes len -> Tot (lbytes len)
 let xor_bytes #len b1 b2 = map2 (fun x y -> x ^. y) b1 b2
 
-let hash_is_supported (a:Hash.algorithm) : Tot bool =
+let hash_is_supported (a:Hash.hash_alg) : Tot bool =
   match a with
   | Hash.SHA2_256 -> true
   | Hash.SHA2_384 -> true
@@ -37,7 +37,7 @@ let hash_is_supported (a:Hash.algorithm) : Tot bool =
 
 (* Mask Generation Function *)
 val mgf_hash_f:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> len:size_nat{len + 4 <= max_size_t /\ (len + 4) `Hash.less_than_max_input_length` a}
   -> i:size_nat
   -> mgfseed_counter:lbytes (len + 4) ->
@@ -52,7 +52,7 @@ let mgf_hash_f a len i mgfseed_counter =
 let mgf_hash_a (len:size_nat{len + 4 <= max_size_t}) (n:pos) (i:nat{i <= n}) = lbytes (len + 4)
 
 val mgf_hash:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> len:size_nat{len + 4 <= max_size_t /\ (len + 4) `Hash.less_than_max_input_length` a}
   -> mgfseed:lbytes len
   -> maskLen:size_pos{(blocks maskLen (Hash.hash_length a)) * Hash.hash_length a < pow2 32} ->
@@ -105,7 +105,7 @@ let db_zero #len db emBits =
 
 
 val pss_encode:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\
     (sLen + Hash.hash_length a + 8) `Hash.less_than_max_input_length` a}
   -> salt:lbytes sLen
@@ -148,7 +148,7 @@ let pss_encode a sLen salt msgLen msg emBits =
 
 
 val pss_verify_:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\
     (sLen + Hash.hash_length a + 8) `Hash.less_than_max_input_length` a}
   -> msgLen:nat{msgLen `Hash.less_than_max_input_length` a}
@@ -188,7 +188,7 @@ let pss_verify_ a sLen msgLen msg emBits em =
 
 
 val pss_verify:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\
     (sLen + Hash.hash_length a + 8) `Hash.less_than_max_input_length` a}
   -> msgLen:nat{msgLen `Hash.less_than_max_input_length` a}
@@ -246,7 +246,7 @@ let os2ip_lemma emBits em =
 
 
 val rsapss_sign_:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
   -> skey:rsapss_skey modBits
   -> sLen:size_nat{
@@ -281,7 +281,7 @@ let rsapss_sign_ a modBits skey sLen salt msgLen msg =
 
 
 val rsapss_sign:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
   -> skey:rsapss_skey modBits
   -> sLen:size_nat
@@ -305,7 +305,7 @@ let rsapss_sign a modBits skey sLen salt msgLen msg =
 
 
 val rsapss_verify_:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
   -> pkey:rsapss_pkey modBits
   -> sLen:size_nat{
@@ -336,7 +336,7 @@ let rsapss_verify_ a modBits pkey sLen sgnt msgLen msg =
 
 
 val rsapss_verify:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
   -> pkey:rsapss_pkey modBits
   -> sLen:size_nat
@@ -398,7 +398,7 @@ let rsapss_load_skey modBits eBits dBits nb eb db =
 
 
 val rsapss_skey_sign:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
   -> eBits:size_pos
   -> dBits:size_pos
@@ -419,7 +419,7 @@ let rsapss_skey_sign a modBits eBits dBits nb eb db sLen salt msgLen msg =
 
 
 val rsapss_pkey_verify:
-    a:Hash.algorithm{hash_is_supported a}
+    a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
   -> eBits:size_pos
   -> nb:lseq uint8 (blocks modBits 8)

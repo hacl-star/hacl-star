@@ -16,5 +16,5 @@ val md_is_hash_incremental
   (s:words_state a)
   : Lemma (
       let blocks, rest = split_blocks a input in
-      update_multi a s (input `S.append` (pad a (S.length input))) ==
-      update_last a (update_multi a s blocks) (S.length blocks) rest)
+      update_multi a s () (input `S.append` (pad a (S.length input))) ==
+      update_last a (update_multi a s () blocks) (S.length blocks) rest)
