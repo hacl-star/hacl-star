@@ -6,10 +6,10 @@ open Lib.IntTypes
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
-open Spec.Hash.PadFinish
-include Spec.Hash.Lemmas0
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
+let _ = allow_inversion Spec.Hash.Definitions.hash_alg
 
 #push-options "--ifuel 1"
 /// First hash law.

@@ -162,7 +162,7 @@ let pad_3 (a: hash_alg{is_md a}) (len: len_t a) (dst: B.buffer uint8):
       len_v a len `less_than_max_input_length` a /\
       B.live h dst /\ B.length dst = len_length a))
     (ensures (fun h0 _ h1 ->
-      max_input_size_len a;
+      Spec.Hash.PadFinish.max_input_size_len a;
       B.(modifies (loc_buffer dst) h0 h1) /\
       S.equal (B.as_seq h1 dst)
         (match a with
@@ -210,7 +210,7 @@ let pad a len dst =
   (**) let h2 = ST.get () in
   (**) assert (
   (**)   let pad0_length = pad0_length a (len_v a len) in
-  (**)   max_input_size_len a;
+  (**)   Spec.Hash.PadFinish.max_input_size_len a;
   (**)   let s = B.as_seq h2 dst in
   (**)   let s1 = S.slice s 0 1 in
   (**)   let s2 = S.slice s 1 (1 + pad0_length) in

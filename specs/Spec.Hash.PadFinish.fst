@@ -4,7 +4,6 @@ module S = FStar.Seq
 open Lib.IntTypes
 open Lib.ByteSequence
 
-open Spec.Hash.Lemmas0
 open Spec.Hash.Definitions
 
 (** This module contains two things.
@@ -21,9 +20,18 @@ open Spec.Hash.Definitions
  including those for non-MD hashes.
 *)
 
+#push-options "--fuel 2 --ifuel 0"
+(* A useful lemma for all the operations that involve going from bytes to bits. *)
+let max_input_size_len (a: hash_alg{is_md a}): Lemma
+  (ensures FStar.Mul.(Some ?.v (max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
+=
+  let open FStar.Mul in
+  assert_norm (Some?.v (max_input_length a) * 8 + 8 = pow2 (len_length a * 8))
+#pop-options
+
 (** Padding *)
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 10"
 
 let pad_md (a:md_alg)
   (total_len:nat{total_len `less_than_max_input_length` a}):

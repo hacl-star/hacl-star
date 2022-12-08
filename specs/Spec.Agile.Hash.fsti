@@ -3,7 +3,6 @@ module Spec.Agile.Hash
 module S = FStar.Seq
 
 include Spec.Hash.Definitions
-open Spec.Hash.PadFinish
 open FStar.Mul
 
 (** Hashes, agility, incrementality, streaming, and hash laws.

@@ -5,7 +5,6 @@ open Lib.IntTypes
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
-open Spec.Hash.PadFinish
 
 friend Spec.Agile.Hash
 
