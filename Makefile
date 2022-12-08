@@ -1033,6 +1033,3 @@ obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_F
 %/Makefile:
 	echo "HACL_HOME=$(shell realpath . --relative-to $(dir $@))" > $@
 	echo "include \$$(HACL_HOME)/Makefile.common" >> $@
-
-foo:
-	echo blah
