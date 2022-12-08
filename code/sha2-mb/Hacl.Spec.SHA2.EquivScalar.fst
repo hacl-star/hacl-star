@@ -898,7 +898,7 @@ let update_last_is_repeat_blocks_multi a len last st1 =
     assert (st3 == repeat_blocks_f blocksize blocks1 (update a) nb 1 st2) end
 
 
-#push-options "--z3rlimit 250"
+#push-options "--z3rlimit 350"
 val hash_is_repeat_blocks_multi:
     a:sha2_alg
   -> len:len_lt_max_a_t a

@@ -167,7 +167,7 @@ let mk_update_last a update_multi =
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in
   (* Blit the remaining data and the padding together *)
-  let pad_len = Hacl.Hash.MD.pad_len a total_input_len in
+  let pad_len = Hacl.Hash.PadFinish.pad_len a total_input_len in
   let tmp_len = U32.( rest_len +^ pad_len ) in
   assert (len_v a total_input_len = len_v a prev_len + U32.v blocks_len + U32.v rest_len);
   Lemmas.modulo_distributivity (len_v a prev_len) (U32.v blocks_len) (block_length a);

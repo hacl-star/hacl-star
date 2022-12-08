@@ -323,7 +323,7 @@ val finish:
     M.(modifies (loc_buffer dst `loc_union` footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     (* The 0UL value is dummy: it is actually useless *)
-    B.as_seq h1 dst == Spec.Hash.PadFinish.finish a (repr s h0) /\
+    B.as_seq h1 dst == Spec.Agile.Hash.finish a (repr s h0) /\
     preserves_freeable s h0 h1))
 
 (** @type: true
