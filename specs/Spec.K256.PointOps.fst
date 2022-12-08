@@ -170,6 +170,33 @@ let point_negate (p:proj_point) : proj_point =
   let x, y, z = p in
   x, (-y) % prime, z
 
+///  Point conversion between affine, projective and bytes representation
+
+let store_point (p:proj_point) : BSeq.lbytes 64 =
+  let px, py = to_aff_point p in
+  let pxb = BSeq.nat_to_bytes_be 32 px in
+  let pxy = BSeq.nat_to_bytes_be 32 py in
+  concat #uint8 #32 #32 pxb pxy
+
+let point_inv_bytes (b:BSeq.lbytes 64) =
+  let px = BSeq.nat_from_bytes_be (sub b 0 32) in
+  let py = BSeq.nat_from_bytes_be (sub b 32 32) in
+  px < prime && py < prime && is_on_curve (px, py)
+
+let load_point_nocheck (b:BSeq.lbytes 64{point_inv_bytes b}) : proj_point =
+  let px = BSeq.nat_from_bytes_be (sub b 0 32) in
+  let py = BSeq.nat_from_bytes_be (sub b 32 32) in
+  to_proj_point (px, py)
+
+let load_point (b:BSeq.lbytes 64) : option proj_point =
+  let pk_x = BSeq.nat_from_bytes_be (sub b 0 32) in
+  let pk_y = BSeq.nat_from_bytes_be (sub b 32 32) in
+  let is_x_valid = pk_x < prime in
+  let is_y_valid = pk_y < prime in
+  let is_xy_on_curve =
+    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
+  if is_xy_on_curve then Some (to_proj_point (pk_x, pk_y)) else None
+
 
 let recover_y (x:felem{0 < x}) (is_odd:bool) : option felem =
   let y2 = x *% x *% x +% b in

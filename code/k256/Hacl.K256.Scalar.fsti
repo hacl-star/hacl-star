@@ -66,6 +66,14 @@ val create_qelem: unit -> StackInline qelem
     qas_nat h1 f == 0)
 
 
+inline_for_extraction noextract
+val create_one: unit -> StackInline qelem
+  (requires fun h -> True)
+  (ensures  fun h0 f h1 ->
+    stack_allocated f h0 h1 (LSeq.create4 (u64 1) (u64 0) (u64 0) (u64 0)) /\
+    qas_nat h1 f = 1)
+
+
 val is_qelem_zero (f:qelem) : Stack uint64
   (requires fun h -> live h f)
   (ensures  fun h0 m h1 -> modifies0 h0 h1 /\

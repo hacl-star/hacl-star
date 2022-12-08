@@ -13,6 +13,8 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## 2022-12-07
+- Added secret_to_public for secp256k1
 
 ## 2022-12-01
 

@@ -90,6 +90,16 @@ let create_qelem () =
   create qnlimb (u64 0)
 
 
+let create_one () =
+  [@inline_let]
+  let l = [u64 0x1; u64 0x0; u64 0x0; u64 0x0] in
+  assert_norm (FStar.List.Tot.length l = 4);
+  Seq.elim_of_list l;
+  LSeq.eq_intro (LSeq.create4 (u64 0x1) (u64 0x0) (u64 0x0) (u64 0x0)) (Seq.seq_of_list l);
+  KL.qas_nat4_is_qas_nat (LSeq.create4 (u64 0x1) (u64 0x0) (u64 0x0) (u64 0x0));
+  createL l
+
+
 [@CInline]
 let is_qelem_zero f =
   let h0 = ST.get () in

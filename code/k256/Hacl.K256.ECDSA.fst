@@ -176,3 +176,31 @@ let public_key_compressed_from_raw pk pk_raw =
   update_sub pk 1ul 32ul pk_x;
   let h1 = ST.get () in
   LSeq.eq_intro (as_seq h1 pk) (S.pk_compressed_from_raw (as_seq h0 pk_raw))
+
+
+let is_public_key_valid pk =
+  push_frame ();
+  let fpk_x = create_felem () in
+  let fpk_y = create_felem () in
+  let is_pk_valid = Hacl.Impl.K256.Verify.load_public_key pk fpk_x fpk_y in
+  pop_frame ();
+  is_pk_valid
+
+
+module BB = Hacl.Bignum.Base
+module PM = Hacl.Impl.K256.PointMul
+
+let secret_to_public public_key private_key =
+  push_frame ();
+  let d_a = create_qelem () in
+  let p = P.create_point () in
+  let is_sk_valid = load_qelem_check d_a private_key in
+  let oneq = create_one () in
+  let h0 = ST.get () in
+  Lib.ByteBuffer.buf_mask_select d_a oneq is_sk_valid d_a;
+  let h1 = ST.get () in
+  assert (as_seq h1 d_a == (if (v is_sk_valid = 0) then as_seq h0 oneq else as_seq h0 d_a));
+  PM.point_mul_g p d_a; // p = [d_a]G
+  P.store_point public_key p;
+  pop_frame ();
+  BB.unsafe_bool_of_limb is_sk_valid
