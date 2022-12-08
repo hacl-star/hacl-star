@@ -23,7 +23,6 @@ include Spec.Hash.Definitions
 include Hacl.Hash.Definitions
 
 open Spec.Hash.Lemmas
-open Spec.Hash.Incremental.Lemmas
 
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
@@ -36,7 +35,7 @@ let agile_state: stateful hash_alg =
     EverCrypt.Hash.freeable
     (fun #i h s -> EverCrypt.Hash.invariant s h)
 
-    Spec.Hash.Definitions.words_state'
+    Spec.Hash.Definitions.words_state
     (fun i h s -> EverCrypt.Hash.repr s h)
 
     (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
@@ -49,53 +48,28 @@ let agile_state: stateful hash_alg =
     (fun i -> EverCrypt.Hash.free #i)
     (fun i -> EverCrypt.Hash.copy #i)
 
-#push-options "--ifuel 1"
-inline_for_extraction noextract
-let mk_words_state (#a : hash_alg) (s : words_state' a)
-                   (counter : nat{is_blake a ==> counter <= max_extra_state a}) :
- Tot (words_state a) =
- if is_blake a then
-   (s, nat_to_extra_state a counter)
- else (s, ())
-#pop-options
-
 (* Adding some non-inlined definitions to factorize code *)
 let hash_len a = Hacl.Hash.Definitions.hash_len a
 let block_len a = Hacl.Hash.Definitions.block_len a
 
-val hash_is_hash_incremental (a: hash_alg)
-  (input: S.seq uint8 { S.length input <= U64.v (Hacl.Streaming.MD.max_input_len64 a) }):
-  Lemma (
-      assert_norm (pow2 64 < pow2 125);
-      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-      (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
-      (* TODO: use update_full ? *)
-      let hash0 = fst (Spec.Agile.Hash.init a) in
-      let hash1 = fst (Spec.Agile.Hash.update_multi a (mk_words_state hash0 0) bs) in
-      let prevlen = S.length bs in
-      let hash2 = fst (Spec.Hash.Incremental.update_last a (mk_words_state hash1 prevlen) prevlen l) in
-      let hash3 = Spec.Hash.PadFinish.finish a (mk_words_state hash2 0) in
-      hash3 `S.equal` Spec.Agile.Hash.hash a input)
+inline_for_extraction noextract
+let extra_state_of_nat (a: hash_alg) (i: nat { i % U32.v (block_len a) = 0 }):
+  Spec.Hash.Definitions.extra_state a
+=
+  if is_blake a then
+    i
+  else
+    ()
 
-#push-options "--ifuel 1"
-let hash_is_hash_incremental a input =
-  assert_norm (pow2 64 < pow2 125);
-  if is_blake a then begin
-    assert_norm (pow2 64 < pow2 125);
-    let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-    (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
-    (* TODO: use update_full ? *)
-    let hash0 = Spec.Agile.Hash.init a in
-    let hash1 = Spec.Agile.Hash.update_multi a (mk_words_state (fst hash0) 0) bs in
-    Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a (mk_words_state (fst hash0) 0) bs;
-    assert (extra_state_v (snd hash1) == S.length bs);
-    Hacl.Hash.Blake2.Lemmas.blake2_init_no_key_is_agile a;
-    Hacl.Hash.Blake2.Lemmas.lemma_blake2_hash_equivalence a input;
-    Spec.Hash.Incremental.hash_is_hash_incremental a input
-  end else
-    Spec.Hash.Incremental.hash_is_hash_incremental a input
+inline_for_extraction noextract
+let prev_length_of_nat (a: hash_alg) (i: nat { i % U32.v (block_len a) = 0 }):
+  Spec.Hash.Incremental.prev_length_t a
+=
+  if is_sha3 a then
+    ()
+  else
+    i
 
-#restart-solver
 inline_for_extraction noextract
 let evercrypt_hash : block hash_alg =
   Block
@@ -109,39 +83,38 @@ let evercrypt_hash : block hash_alg =
     block_len
     block_len // No vectorization
 
-    (fun a _ -> fst (Spec.Agile.Hash.init a))
-    (fun a s prevlen input -> fst (Spec.Agile.Hash.update_multi a (mk_words_state s prevlen) input))
-    (fun a s prevlen input -> fst (Spec.Hash.Incremental.update_last a (mk_words_state s prevlen) prevlen input))
-    (fun a _ s -> Spec.Hash.PadFinish.finish a (mk_words_state s 0))
+    (fun a _ -> Spec.Agile.Hash.init a)
+    (fun a s prevlen input ->
+      let prevlen = extra_state_of_nat a prevlen in
+      Spec.Agile.Hash.update_multi a s prevlen input)
+    (fun a s prevlen input ->
+      let prevlen = prev_length_of_nat a prevlen in
+      Spec.Hash.Incremental.update_last a s prevlen input)
+    (fun a _ s -> Spec.Hash.PadFinish.finish a s)
 
     (fun a _ -> Spec.Agile.Hash.hash a)
 
-    (fun a s prevlen -> Spec.Hash.Lemmas.update_multi_zero a (mk_words_state s prevlen))
-    (* udpate_multi_associative *)
+    (fun a s prevlen ->
+      if is_blake a then
+        Spec.Hash.Lemmas.update_multi_zero_blake a prevlen s
+      else
+        Spec.Hash.Lemmas.update_multi_zero a s)
+    (* update_multi_associative *)
     (fun a s prevlen1 prevlen2 input1 input2 ->
-       let s = mk_words_state s prevlen1 in
-       Spec.Hash.Lemmas.update_multi_associative a s input1 input2;
        if is_blake a then
-         begin
-         Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a s input1;
-         Spec.Hash.Lemmas.extra_state_add_nat_bound_lem2 #a (snd s) (S.length input1)
-         end
-       else ())
+         Spec.Hash.Lemmas.update_multi_associative_blake a s prevlen1 prevlen2 input1 input2
+       else
+         Spec.Hash.Lemmas.update_multi_associative a s input1 input2)
     (* spec_is_incremental *)
     (fun a _ input ->
-        hash_is_hash_incremental a input)
+        Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
     EverCrypt.Hash.alg_of_state
     (fun i _ -> EverCrypt.Hash.init #i)
     (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->
-       (**) if is_blake i then
-       (**)   assert(
-       (**)    Lib.IntTypes.cast (extra_state_int_type i) Lib.IntTypes.SEC prevlen ==
-       (**)    nat_to_extra_state i (U64.v prevlen));
        EverCrypt.Hash.update_last #i s prevlen last last_len)
     (fun i _ -> EverCrypt.Hash.finish #i)
-#pop-options
 
 let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 

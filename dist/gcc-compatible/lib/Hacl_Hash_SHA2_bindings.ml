@@ -14,12 +14,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Core_SHA2_init_512 =
       foreign "Hacl_Hash_Core_SHA2_init_512"
         ((ptr uint64_t) @-> (returning void))
-    let hacl_Hash_Core_SHA2_update_384 =
-      foreign "Hacl_Hash_Core_SHA2_update_384"
-        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
-    let hacl_Hash_Core_SHA2_update_512 =
-      foreign "Hacl_Hash_Core_SHA2_update_512"
-        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
     let hacl_Hash_Core_SHA2_pad_256 =
       foreign "Hacl_Hash_Core_SHA2_pad_256"
         (uint64_t @-> (ocaml_bytes @-> (returning void)))

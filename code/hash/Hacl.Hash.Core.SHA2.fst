@@ -76,7 +76,7 @@ let alloca a () =
     | SHA2_256 -> Constants.h256_l
     | SHA2_384 -> Constants.h384_l
     | SHA2_512 -> Constants.h512_l) in
-  B.alloca_of_list l, ()
+  B.alloca_of_list l
 
 #set-options "--max_fuel 0"
 
@@ -160,7 +160,7 @@ let index_be (a: sha2_alg) (b: block_b a) (i: U32.t):
   | SHA2_224 | SHA2_256 -> Lib.ByteBuffer.uint_at_index_be #U32 #SEC #(size (block_word_length a)) b i
   | SHA2_384 | SHA2_512 -> Lib.ByteBuffer.uint_at_index_be #U64 #SEC #(size (block_word_length a)) b i
 
-#set-options "--max_fuel 1 --z3rlimit 20"
+#set-options "--fuel 1 --z3rlimit 50"
 
 inline_for_extraction
 let ws a b ws =
@@ -210,7 +210,9 @@ let ws a b ws =
       (**) let h2 = ST.get () in
       (**) init_next (B.as_seq h2 ws) (SpecLemmas.ws a (block_words_be a h0 b)) (U32.v i)
   in
-  C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
+  C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f;
+  let h1 = ST.get () in
+  assert (S.equal (S.slice (B.as_seq h1 ws) 0 (Spec.size_k_w a)) (B.as_seq h1 ws))
 
 #set-options "--max_fuel 0"
 
@@ -347,12 +349,12 @@ let zero (a: sha2_alg): word a =
   | SHA2_224 | SHA2_256 -> u32 0
   | SHA2_384 | SHA2_512 -> u64 0
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st (|a, ()|)
 noextract inline_for_extraction
-let update a hash ev block =
+let update a hash block =
   (**) ST.push_frame ();
   (**) let h0 = ST.get () in
   let hash1: words_state a = B.alloca (zero a) 8ul in
@@ -368,7 +370,7 @@ let update a hash ev block =
 	       S.equal (B.as_seq h2 hash1) (Spec.shuffle a (B.as_seq h1 hash1) block_w));
   C.Loops.in_place_map2 hash hash1 8ul ( (+. ) #(word_t a) #SEC );
   (**) let h3 = ST.get () in
-  (**) assert (S.equal (B.as_seq h3 hash) (fst (Spec.update_pre a (B.as_seq h1 hash1, ()) (B.as_seq h1 block))));
+  (**) assert (S.equal (B.as_seq h3 hash) (Spec.update_pre a (B.as_seq h1 hash1) (B.as_seq h1 block)));
   ST.pop_frame();
   (**) reveal_opaque (`%Spec.update) Spec.update
 
