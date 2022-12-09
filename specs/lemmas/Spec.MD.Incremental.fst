@@ -11,7 +11,7 @@ friend Spec.Agile.Hash
 
 open FStar.Mul
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 #push-options "--z3rlimit 150"
 let md_is_hash_incremental
