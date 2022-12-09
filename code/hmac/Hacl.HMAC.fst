@@ -124,7 +124,9 @@ val part2:
       B.disjoint s key /\
       B.disjoint s data /\
       B.disjoint s dst /\
-      MB.(all_live h0 [ buf s; buf dst; buf key; buf data ]))
+      MB.(all_live h0 [ buf s; buf dst; buf key; buf data ]) /\
+      D.as_seq h0 s == Spec.Agile.Hash.init a
+    )
     (ensures fun h0 _ h1 ->
       key_and_data_fits a;
       B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h0 h1) /\
@@ -317,7 +319,6 @@ let part2 a m init update_multi update_last finish s dst key data len =
   (**) let key_v0 : Ghost.erased _ = B.as_seq h0 key in
   (**) let data_v0 : Ghost.erased _ = B.as_seq h0 data in
   (**) let key_data_v0 : Ghost.erased _ = Seq.append key_v0 data_v0 in
-  init s;
   (**) let h1 = ST.get () in
   (**) assert(B.(modifies (loc_buffer s) h0 h1));
   (**) let init_v : Ghost.erased (init_t a) = Spec.Agile.Hash.init a in
@@ -358,7 +359,9 @@ val part1:
     (requires fun h0 ->
       B.disjoint s key /\
       B.disjoint s data /\
-      MB.(all_live h0 [ buf s; buf key; buf data ]))
+      MB.(all_live h0 [ buf s; buf key; buf data ]) /\
+      D.as_seq h0 s == Spec.Agile.Hash.init a
+    )
     (ensures fun h0 _ h1 ->
       key_and_data_fits a;
       B.(modifies (loc_union (loc_buffer s) (loc_buffer key)) h0 h1) /\
@@ -372,7 +375,7 @@ let part1 a m init update_multi update_last finish s key data len =
 let block_len_positive (a: hash_alg): Lemma (D.block_len a `FStar.UInt32.gt` 0ul) = ()
 let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 let mk_compute i hash alloca init update_multi update_last finish dst key key_len data data_len =
   [@inline_let] let a = D.get_alg i in
   [@inline_let] let m = D.get_spec i in
@@ -406,6 +409,7 @@ let mk_compute i hash alloca init update_multi update_last finish dst key key_le
   (**)    (Spec.Agile.Hash.hash a S.(append (xor (u8 0x36) (wrap a (B.as_seq h0 key)))
   (**)                          (B.as_seq h0 data)));
   let hash1 = B.sub ipad 0ul (D.hash_len a) in
+  init s;
   part2 a m init update_multi update_last finish s dst opad hash1 (D.hash_len a);
   (**) let h6 = ST.get () in
   (**) assert (B.as_seq h6 dst `S.equal` hmac a (B.as_seq h0 key) (B.as_seq h0 data));
