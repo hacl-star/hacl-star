@@ -51,17 +51,6 @@ let state_sha2_512 = F.state_s hacl_sha2_512 () (state_t_512.s ()) (G.erased uni
 
 open Lib.Buffer
 open Lib.IntTypes
-
-// Slightly rewritten spec to remove any mention of multibuffer-isms
-inline_for_extraction noextract
-let hash_t (a: sha2_alg) =
-  dst:lbuffer uint8 (Hacl.Hash.Definitions.hash_len a) -> input_len:size_t -> input:lbuffer uint8 input_len ->
-    Stack unit
-    (requires fun h0 -> v input_len `less_than_max_input_length` a /\
-      live h0 input /\ live h0 dst /\ disjoint dst input)
-    (ensures  fun h0 _ h1 -> modifies (loc dst) h0 h1 /\
-      as_seq h1 dst == Spec.Agile.Hash.hash a (as_seq h0 input))
-
 open Lib.NTuple
 open Lib.MultiBuffer
 open Hacl.Spec.SHA2.Vec
@@ -112,8 +101,9 @@ let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased uni
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes."]
-val sha256: hash_t SHA2_256
-let sha256 dst input_len input =
+val sha256: Hacl.Hash.Definitions.hash_st SHA2_256
+let sha256 input input_len dst =
+  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_256) = dst in
   let ib = ntup1 input in
   let rb = ntup1 dst in
   let h0 = ST.get() in
@@ -142,8 +132,9 @@ let free_224: F.free_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased u
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes."]
-val sha224: hash_t SHA2_224
-let sha224 dst input_len input =
+val sha224: Hacl.Hash.Definitions.hash_st SHA2_224
+let sha224 input input_len dst =
+  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_224) = dst in
   let ib = ntup1 input in
   let rb = ntup1 dst in
   let h0 = ST.get() in
@@ -189,8 +180,9 @@ let free_512 = F.free hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased uni
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes."]
-val sha512: hash_t SHA2_512
-let sha512 dst input_len input =
+val sha512: Hacl.Hash.Definitions.hash_st SHA2_512
+let sha512 input input_len dst =
+  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_512) = dst in
   let ib = ntup1 input in
   let rb = ntup1 dst in
   let h0 = ST.get() in
@@ -219,8 +211,9 @@ let free_384: F.free_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased u
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes."]
-val sha384: hash_t SHA2_384
-let sha384 dst input_len input =
+val sha384: Hacl.Hash.Definitions.hash_st SHA2_384
+let sha384 input input_len dst =
+  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_384) = dst in
   let ib = ntup1 input in
   let rb = ntup1 dst in
   let h0 = ST.get() in

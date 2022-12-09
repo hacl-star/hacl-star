@@ -7,6 +7,9 @@ include Hacl.Hash.Core.SHA2
 
 friend Hacl.Hash.MD
 
+module Streaming = Hacl.Streaming.MD
+module ST = FStar.HyperStack.ST
+
 let update_multi_224 =
   Hacl.Hash.MD.mk_update_multi SHA2_224 update_224
 let update_multi_256 =
@@ -25,14 +28,10 @@ let update_last_384 =
 let update_last_512 =
   Hacl.Hash.MD.mk_update_last SHA2_512 update_multi_512 pad_512
 
-let hash_224: hash_st SHA2_224 =
-  Hacl.Hash.MD.mk_hash SHA2_224 alloca_224 update_multi_224 update_last_224 finish_224
-let hash_256: hash_st SHA2_256 =
-  Hacl.Hash.MD.mk_hash SHA2_256 alloca_256 update_multi_256 update_last_256 finish_256
-let hash_384: hash_st SHA2_384 =
-  Hacl.Hash.MD.mk_hash SHA2_384 alloca_384 update_multi_384 update_last_384 finish_384
-let hash_512: hash_st SHA2_512 =
-  Hacl.Hash.MD.mk_hash SHA2_512 alloca_512 update_multi_512 update_last_512 finish_512
+let hash_224 = Hacl.Streaming.SHA2.sha224
+let hash_256 = Hacl.Streaming.SHA2.sha256
+let hash_384 = Hacl.Streaming.SHA2.sha384
+let hash_512 = Hacl.Streaming.SHA2.sha512
 
 // Friend-ing for compatibility with HACL* libs until we unify the secret integers
 
