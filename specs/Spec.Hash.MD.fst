@@ -26,7 +26,7 @@ let max_input_size_len (a: hash_alg{is_md a}): Lemma
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 10"
 
-let pad_md (a:md_alg)
+let pad (a:md_alg)
   (total_len:nat{total_len `less_than_max_input_length` a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
   = let open FStar.Mul in
@@ -41,8 +41,3 @@ let pad_md (a:md_alg)
       | _ -> Lib.ByteSequence.uint_to_bytes_be (secret (nat_to_len a (total_len * 8)))
     in
     S.(firstbyte @| zeros @| encodedlen)
-
-let pad (a:md_alg)
-  (total_len:nat{total_len `less_than_max_input_length` a}):
-  Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
-= pad_md a total_len
