@@ -213,3 +213,69 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
       Lib.Sequence.repeat_blocks #uint8 block_length input repeat_f repeat_l acc;
     }
   end
+
+#push-options "--fuel 2"
+let update_multi_one #a (block_length: pos)
+  (update: update_t a block_length)
+  (acc0: a)
+  (input: S.seq uint8 { S.length input == block_length }): Lemma
+  (ensures 
+    update acc0 input ==
+    Lib.UpdateMulti.mk_update_multi block_length update acc0 input)
+=
+  ()
+#pop-options
+
+let rec update_multi_is_repeat_blocks_multi #a block_length update acc input =
+  // Lib.UpdateMulti side
+  let n_blocks = S.length input / block_length in
+  let blocks, rest = S.split input (n_blocks * block_length) in
+
+  // Lib.Sequence side
+  let repeat_f = repeat_f block_length update in
+  let repeat_blocks_f = Lib.Sequence.repeat_blocks_f in
+
+  if S.length input = 0 then begin
+    Lib.Sequence.lemma_repeat_blocks_multi block_length input repeat_f acc;
+    Lib.LoopCombinators.eq_repeati0 n_blocks (Lib.Sequence.repeat_blocks_f block_length input repeat_f n_blocks) acc;
+    Lib.UpdateMulti.update_multi_zero block_length update acc
+  end else
+    let split_index = S.length input - block_length in
+    FStar.Math.Lemmas.modulo_lemma 0 block_length;
+    FStar.Math.Lemmas.lemma_mod_plus (S.length input) (-1) block_length;
+    Lib.Sequence.Lemmas.repeat_blocks_multi_split block_length split_index input repeat_f acc;
+    let acc0 = Lib.UpdateMulti.mk_update_multi block_length update acc (S.slice input 0 split_index) in
+    let f = repeat_blocks_f block_length (S.slice input split_index (S.length input)) repeat_f 1 in
+    calc (==) {
+      Lib.Sequence.repeat_blocks_multi #uint8 block_length input repeat_f acc;
+    (==) { Lib.Sequence.Lemmas.repeat_blocks_multi_split block_length split_index input repeat_f acc }
+      Lib.Sequence.repeat_blocks_multi #uint8 block_length (S.slice input split_index (S.length input)) repeat_f
+        (Lib.Sequence.repeat_blocks_multi #uint8 block_length (S.slice input 0 split_index) repeat_f acc);
+    (==) { update_multi_is_repeat_blocks_multi block_length update acc (S.slice input 0 split_index) }
+      Lib.Sequence.repeat_blocks_multi #uint8 block_length (S.slice input split_index (S.length input)) repeat_f
+        acc0;
+    (==) { Lib.Sequence.lemma_repeat_blocks_multi block_length (S.slice input split_index (S.length input)) repeat_f
+        acc0
+    }
+      Lib.LoopCombinators.repeati 1 (repeat_blocks_f block_length (S.slice input split_index (S.length input)) repeat_f 1) acc0;
+    (==) { Lib.LoopCombinators.unfold_repeati 1
+      (repeat_blocks_f block_length (S.slice input split_index (S.length input)) repeat_f 1)
+      acc0
+      0
+    }
+      f 0 (Lib.LoopCombinators.repeati 0 f acc0);
+    (==) { Lib.LoopCombinators.eq_repeati0 0 f acc0 }
+      f 0 acc0;
+    (==) { }
+      update acc0 (S.slice input split_index (S.length input));
+    (==) { update_multi_one block_length update acc0 (S.slice input split_index (S.length input)) }
+      Lib.UpdateMulti.mk_update_multi block_length update acc0 (S.slice input split_index (S.length input));
+    (==) { Lib.UpdateMulti.update_multi_associative block_length update acc
+      (S.slice input 0 split_index) (S.slice input split_index (S.length input)) }
+      Lib.UpdateMulti.mk_update_multi block_length update acc (S.append
+        (S.slice input 0 split_index) (S.slice input split_index (S.length input)));
+    (==) { assert (
+        (S.append (S.slice input 0 split_index) (S.slice input split_index (S.length input))) `S.equal`
+        input) }
+      Lib.UpdateMulti.mk_update_multi block_length update acc input;
+    }
