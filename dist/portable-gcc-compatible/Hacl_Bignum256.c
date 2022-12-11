@@ -1332,7 +1332,6 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_
   uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
   res = { .len = (uint32_t)4U, .n = n11, .mu = mu, .r2 = r21 };
-  KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
   *buf =
     (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *)KRML_HOST_MALLOC(sizeof (

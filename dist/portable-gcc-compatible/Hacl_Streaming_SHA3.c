@@ -34,7 +34,6 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256()
   uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_384), (uint32_t)1U);
   Hacl_Streaming_SHA2_state_sha2_384
   *p =
     (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
@@ -139,9 +138,10 @@ Hacl_Streaming_SHA3_update_256(
     }
     if (!(sz1 == (uint32_t)0U))
     {
+      uint32_t nb = (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < nb; i++)
       {
-        uint32_t sz2 = (uint32_t)136U;
-        uint8_t *block = buf + sz2 * (uint32_t)0U;
+        uint8_t *block = buf + i * (uint32_t)136U;
         Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
         Hacl_Impl_SHA3_state_permute(block_state1);
       }
@@ -160,10 +160,10 @@ Hacl_Streaming_SHA3_update_256(
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
     uint8_t *data2 = data + data1_len;
-    for (uint32_t i = (uint32_t)0U; i < data1_len / (uint32_t)136U; i++)
+    uint32_t nb = data1_len / (uint32_t)136U * (uint32_t)136U / (uint32_t)136U;
+    for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
-      uint32_t sz2 = (uint32_t)136U;
-      uint8_t *block = data1 + sz2 * i;
+      uint8_t *block = data1 + i * (uint32_t)136U;
       Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
       Hacl_Impl_SHA3_state_permute(block_state1);
     }
@@ -224,9 +224,10 @@ Hacl_Streaming_SHA3_update_256(
     }
     if (!(sz1 == (uint32_t)0U))
     {
+      uint32_t nb = (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < nb; i++)
       {
-        uint32_t sz2 = (uint32_t)136U;
-        uint8_t *block = buf + sz2 * (uint32_t)0U;
+        uint8_t *block = buf + i * (uint32_t)136U;
         Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
         Hacl_Impl_SHA3_state_permute(block_state1);
       }
@@ -251,10 +252,10 @@ Hacl_Streaming_SHA3_update_256(
     uint32_t data2_len = len - diff - data1_len;
     uint8_t *data11 = data2;
     uint8_t *data21 = data2 + data1_len;
-    for (uint32_t i = (uint32_t)0U; i < data1_len / (uint32_t)136U; i++)
+    uint32_t nb = data1_len / (uint32_t)136U * (uint32_t)136U / (uint32_t)136U;
+    for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
-      uint32_t sz2 = (uint32_t)136U;
-      uint8_t *block = data11 + sz2 * i;
+      uint8_t *block = data11 + i * (uint32_t)136U;
       Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
       Hacl_Impl_SHA3_state_permute(block_state1);
     }
@@ -306,6 +307,13 @@ void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
+  uint32_t nb = (uint32_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < nb; i++)
+  {
+    uint8_t *block = buf_multi + i * (uint32_t)136U;
+    Hacl_Impl_SHA3_loadState((uint32_t)136U, block, tmp_block_state);
+    Hacl_Impl_SHA3_state_permute(tmp_block_state);
+  }
   if (r == (uint32_t)136U)
   {
     Hacl_Impl_SHA3_loadState((uint32_t)136U, buf_last, tmp_block_state);
