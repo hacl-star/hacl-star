@@ -458,7 +458,9 @@ val absorb:
       S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen)
         (as_seq h0 input) delimitedSuffix)
 let absorb s rateInBytes inputByteLen input delimitedSuffix =
-  loop_blocks rateInBytes inputByteLen input
+  let n_blocks = inputByteLen /. rateInBytes in
+  let rem = inputByteLen %. rateInBytes in
+  loop_blocks rateInBytes n_blocks rem input
   (S.absorb_inner (v rateInBytes))
   (S.absorb_last delimitedSuffix (v rateInBytes))
   (absorb_inner rateInBytes)

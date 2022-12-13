@@ -679,8 +679,7 @@ EverCrypt_Hash_update_multi(
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
     uint32_t n = len / (uint32_t)136U;
-    uint32_t nb = n * (uint32_t)136U / (uint32_t)136U;
-    for (uint32_t i = (uint32_t)0U; i < nb; i++)
+    for (uint32_t i = (uint32_t)0U; i < n; i++)
     {
       uint8_t *block = blocks + i * (uint32_t)136U;
       Hacl_Impl_SHA3_loadState((uint32_t)136U, block, p1);

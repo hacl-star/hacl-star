@@ -23,11 +23,9 @@ let spec_l (len:size_nat{len < block_length SHA3_256}) (inp:Lib.Sequence.lseq ui
 
 let update_multi_256: update_multi_st (| SHA3_256, () |) = fun s () blocks n_blocks ->
   [@inline_let]
-  let blocks_len:size_t = n_blocks `FStar.UInt32.mul` block_len SHA3_256 in
-  [@inline_let]
   let spec_f = Spec.SHA3.absorb_inner (1088/8) in
   let h0 = ST.get () in
-  Lib.Buffer.loop_blocks (block_len SHA3_256) blocks_len blocks spec_f spec_l (Hacl.Impl.SHA3.absorb_inner 136ul) (fun _ _ _ -> ()) s;
+  Lib.Buffer.loop_blocks (block_len SHA3_256) n_blocks 0ul blocks spec_f spec_l (Hacl.Impl.SHA3.absorb_inner 136ul) (fun _ _ _ -> ()) s;
   let open Lib.Sequence in
   calc (==) {
     repeat_blocks (block_length SHA3_256) (B.as_seq h0 blocks) spec_f spec_l (as_seq h0 s);
