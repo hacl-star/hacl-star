@@ -9,6 +9,9 @@ open Hacl.Spec.SHA2
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
+  Lemma (update a block hash == Spec.Agile.Hash.update a hash block)
+
 val update_nblocks_is_repeat_blocks_multi:
      a:sha2_alg
   -> len:len_lt_max_a_t a{len % block_length a = 0}

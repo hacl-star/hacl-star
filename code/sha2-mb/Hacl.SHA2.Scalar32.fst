@@ -12,6 +12,7 @@ open Lib.MultiBuffer
 open Spec.Hash.Definitions
 open Spec.Agile.Hash
 open Hacl.Spec.SHA2.Vec
+module SpecVec = Hacl.Spec.SHA2.Vec
 open Hacl.Impl.SHA2.Generic
 
 // This module only contains internal helpers that are in support of either the
@@ -26,35 +27,72 @@ open Hacl.Impl.SHA2.Generic
 [@CInline] let sha256_finish = finish #SHA2_256 #M32
 
 [@CInline] let sha224_init = init #SHA2_224 #M32
-[@CInline] let sha224_update = update #SHA2_224 #M32
 
-#push-options "--fuel 0 --ifuel 0 --z3rlimit 100"
-[@CInline]
-val sha224_update_nblocks: update_nblocks_vec_t' SHA2_224 M32
+let state_spec_v_extensionality (a : hash_alg { is_sha2 a })
+  (acc1: Hacl.Spec.SHA2.Vec.(state_spec a M32))
+  (acc2: Hacl.Spec.SHA2.Vec.(state_spec a M32)) :
+  Lemma
+  (requires (let open Hacl.Spec.SHA2.Vec in
+     Lib.Sequence.index (state_spec_v acc1) 0 ==
+     Lib.Sequence.index (state_spec_v acc2) 0))
+  (ensures acc1 == acc2) =
 
-let sha224_update_nblocks len b st =
+  let open Lib.Sequence in
+  let open Lib.IntVector in
+  let open Hacl.Spec.SHA2.Vec in
+  allow_inversion hash_alg;
+  let acc1_s = (state_spec_v acc1).[0] <: lseq (word a) 8 in
+  let acc2_s = (state_spec_v acc2).[0] <: lseq (word a) 8 in
+
+  let aux (i:nat{i < 8}) : Lemma (acc1.[i] == acc2.[i]) =
+    assert (index (vec_v acc1.[i]) 0 == index #(word a) #8 acc1_s i);
+    assert (index (vec_v acc2.[i]) 0 == index #(word a) #8 acc2_s i);
+    assert (index (vec_v acc1.[i]) 0 == index (vec_v acc2.[i]) 0);
+    eq_intro (vec_v acc1.[i]) (vec_v acc2.[i]);
+    vecv_extensionality acc1.[i] acc2.[i] in
+
+  Classical.forall_intro aux;
+  eq_intro acc1 acc2
+
+inline_for_extraction noextract
+val sha224_update: update_vec_t SHA2_224 M32
+
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+let sha224_update b st =
   let open Lib.Sequence in
   let h0 = ST.get () in
-  sha256_update_nblocks len b st;
+  sha256_update b st;
   let h1 = ST.get () in
   begin
-    Hacl.Impl.SHA2.Core.lemma_len_lt_max_a_fits_size_t SHA2_256 len;
     let st0: lseq (element_t SHA2_256 M32) 8 = as_seq h0 st in
-    let st0': words_state SHA2_256 = st0 in
-    admit () end
+    let st0_m32 = (state_spec_v st0).[0] <: words_state SHA2_256 in
+    let b0: multiblock_spec SHA2_256 M32 = as_seq_multi h0 b in
     let st1: lseq (element_t SHA2_256 M32) 8 = as_seq h1 st in
-    let b: multiseq 1 (v len) = as_seq_multi h0 b in
-    let b': s:Seq.seq uint8 { Seq.length s = v len } = b in
-    assume (v len % block_length SHA2_256 = 0);
+    let st1_m32 = (state_spec_v st1).[0] <: words_state SHA2_256 in
     calc (==) {
-      st1;
+      st1_m32;
     (==) {}
-      Hacl.Spec.SHA2.Vec.update_nblocks #SHA2_256 #M32 (v len) b st0;
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_256 (v len) b' st0 }
-      repeat_blocks_multi (block_length SHA2_256) b' (Hacl.Spec.SHA2.update SHA2_256) st0;
+      (state_spec_v (SpecVec.update #SHA2_256 b0 st0)).[0];
+    (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_256 #M32 b0 st0 0 }
+      Hacl.Spec.SHA2.update SHA2_256 b0.(|0|) st0_m32;
+    (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_256 b0.(|0|) st0_m32 }
+      Spec.Agile.Hash.update SHA2_256 st0_m32 b0.(|0|);
+    (==) { Spec.SHA2.Lemmas.update_224_256' st0_m32 b0.(|0|) }
+      Spec.Agile.Hash.update SHA2_224 st0_m32 b0.(|0|);
+    (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_224 b0.(|0|) st0_m32 }
+      Hacl.Spec.SHA2.update SHA2_224 b0.(|0|) st0_m32;
+    (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_224 #M32 b0 st0 0 }
+      (state_spec_v #SHA2_224 #M32 (SpecVec.update #SHA2_224 b0 st0)).[0];
     };
-    admit ()
+    state_spec_v_extensionality SHA2_256
+      (SpecVec.update #SHA2_256 b0 st0)
+      (SpecVec.update #SHA2_224 #M32 b0 st0)
   end
+#pop-options
+
+[@CInline]
+val sha224_update_nblocks: update_nblocks_vec_t' SHA2_224 M32
+let sha224_update_nblocks = update_nblocks #SHA2_224 #M32 sha224_update
 
 [@CInline] let sha224_update_last = update_last #SHA2_224 #M32 sha224_update
 [@CInline] let sha224_finish = finish #SHA2_224 #M32

@@ -15,13 +15,9 @@ val update_last_256: update_last_st (|SHA2_256, ()|)
 val update_last_384: update_last_st (|SHA2_384, ()|)
 val update_last_512: update_last_st (|SHA2_512, ()|)
 
-noextract inline_for_extraction
 val hash_224: hash_st SHA2_224
-noextract inline_for_extraction
 val hash_256: hash_st SHA2_256
-noextract inline_for_extraction
 val hash_384: hash_st SHA2_384
-noextract inline_for_extraction
 val hash_512: hash_st SHA2_512
 
 // Interface that exposes a sha2-512 signature suitable for calling from HACL-lib code.

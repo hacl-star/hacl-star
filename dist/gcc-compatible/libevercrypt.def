@@ -77,10 +77,35 @@ EXPORTS
   Hacl_Hash_SHA2_update_last_256
   Hacl_Hash_SHA2_update_last_384
   Hacl_Hash_SHA2_update_last_512
-  Hacl_Hash_SHA2_hash_224
-  Hacl_Hash_SHA2_hash_256
-  Hacl_Hash_SHA2_hash_384
-  Hacl_Hash_SHA2_hash_512
+  Hacl_SHA2_Scalar32_sha512_init
+  Hacl_Streaming_SHA2_create_in_256
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_SHA2_init_256
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_SHA2_update_256
+  Hacl_Streaming_SHA2_finish_256
+  Hacl_Streaming_SHA2_free_256
+  Hacl_Streaming_SHA2_sha256
+  Hacl_Streaming_SHA2_create_in_224
+  Hacl_Streaming_SHA2_init_224
+  Hacl_Streaming_SHA2_update_224
+  Hacl_Streaming_SHA2_finish_224
+  Hacl_Streaming_SHA2_free_224
+  Hacl_Streaming_SHA2_sha224
+  Hacl_Streaming_SHA2_create_in_512
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
+  Hacl_Streaming_SHA2_init_512
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
+  Hacl_Streaming_SHA2_update_512
+  Hacl_Streaming_SHA2_finish_512
+  Hacl_Streaming_SHA2_free_512
+  Hacl_Streaming_SHA2_sha512
+  Hacl_Streaming_SHA2_create_in_384
+  Hacl_Streaming_SHA2_init_384
+  Hacl_Streaming_SHA2_update_384
+  Hacl_Streaming_SHA2_finish_384
+  Hacl_Streaming_SHA2_free_384
+  Hacl_Streaming_SHA2_sha384
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -223,35 +248,6 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_SHA2_Scalar32_sha512_init
-  Hacl_Streaming_SHA2_create_in_256
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
-  Hacl_Streaming_SHA2_init_256
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
-  Hacl_Streaming_SHA2_update_256
-  Hacl_Streaming_SHA2_finish_256
-  Hacl_Streaming_SHA2_free_256
-  Hacl_Streaming_SHA2_sha256
-  Hacl_Streaming_SHA2_create_in_224
-  Hacl_Streaming_SHA2_init_224
-  Hacl_Streaming_SHA2_update_224
-  Hacl_Streaming_SHA2_finish_224
-  Hacl_Streaming_SHA2_free_224
-  Hacl_Streaming_SHA2_sha224
-  Hacl_Streaming_SHA2_create_in_512
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
-  Hacl_Streaming_SHA2_init_512
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
-  Hacl_Streaming_SHA2_update_512
-  Hacl_Streaming_SHA2_finish_512
-  Hacl_Streaming_SHA2_free_512
-  Hacl_Streaming_SHA2_sha512
-  Hacl_Streaming_SHA2_create_in_384
-  Hacl_Streaming_SHA2_init_384
-  Hacl_Streaming_SHA2_update_384
-  Hacl_Streaming_SHA2_finish_384
-  Hacl_Streaming_SHA2_free_384
-  Hacl_Streaming_SHA2_sha384
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -532,13 +528,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod
@@ -719,11 +715,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
+  EverCrypt_Poly1305_poly1305
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
-  EverCrypt_Poly1305_poly1305
   Hacl_Streaming_Poly1305_32_create_in
   Hacl_Streaming_Poly1305_32_init
   Hacl_Streaming_Poly1305_32_update
