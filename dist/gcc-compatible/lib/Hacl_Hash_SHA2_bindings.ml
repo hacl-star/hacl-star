@@ -49,4 +49,16 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_SHA2_update_last_256"
         ((ptr uint32_t) @->
            (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+    let hacl_Hash_SHA2_hash_224 =
+      foreign "Hacl_Hash_SHA2_hash_224"
+        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
+    let hacl_Hash_SHA2_hash_256 =
+      foreign "Hacl_Hash_SHA2_hash_256"
+        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
+    let hacl_Hash_SHA2_hash_384 =
+      foreign "Hacl_Hash_SHA2_hash_384"
+        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
+    let hacl_Hash_SHA2_hash_512 =
+      foreign "Hacl_Hash_SHA2_hash_512"
+        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
   end

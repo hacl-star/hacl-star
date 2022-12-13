@@ -1300,12 +1300,12 @@ EverCrypt_Hash_hash(
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        Hacl_Streaming_SHA2_sha384(input, len, dst);
+        Hacl_Hash_SHA2_hash_384(input, len, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        Hacl_Streaming_SHA2_sha512(input, len, dst);
+        Hacl_Hash_SHA2_hash_512(input, len, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA3_256:

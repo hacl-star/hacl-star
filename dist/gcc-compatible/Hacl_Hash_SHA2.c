@@ -763,3 +763,15 @@ Hacl_Hash_SHA2_update_last_512(
   Hacl_Hash_SHA2_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
+void
+(*Hacl_Hash_SHA2_hash_224)(uint8_t *x0, uint32_t x1, uint8_t *x2) = Hacl_Streaming_SHA2_sha224;
+
+void
+(*Hacl_Hash_SHA2_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2) = Hacl_Streaming_SHA2_sha256;
+
+void
+(*Hacl_Hash_SHA2_hash_384)(uint8_t *x0, uint32_t x1, uint8_t *x2) = Hacl_Streaming_SHA2_sha384;
+
+void
+(*Hacl_Hash_SHA2_hash_512)(uint8_t *x0, uint32_t x1, uint8_t *x2) = Hacl_Streaming_SHA2_sha512;
+
