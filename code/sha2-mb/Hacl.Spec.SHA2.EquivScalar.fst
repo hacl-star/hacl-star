@@ -568,8 +568,6 @@ let shuffle_lemma a block st0 =
   shuffle_lemma_i a block st0 (num_rounds16 a)
 
 
-val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
-  Lemma (update a block hash == Spec.update a hash block)
 let update_lemma a block hash' =
   let hash = hash' in
   reveal_opaque (`%Spec.update) Spec.update;

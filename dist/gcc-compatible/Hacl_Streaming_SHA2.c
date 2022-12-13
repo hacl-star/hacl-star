@@ -229,13 +229,7 @@ static inline void sha224_init(uint32_t *hash)
 
 static inline void sha224_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st)
 {
-  uint32_t blocks = len / (uint32_t)64U;
-  for (uint32_t i = (uint32_t)0U; i < blocks; i++)
-  {
-    uint8_t *b0 = b;
-    uint8_t *mb = b0 + i * (uint32_t)64U;
-    sha256_update(mb, st);
-  }
+  sha256_update_nblocks(len, b, st);
 }
 
 static inline void

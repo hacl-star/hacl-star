@@ -294,3 +294,15 @@ let rec update_multi_224_256 hash blocks =
     assert(hash1 == hash2);
     update_multi_224_256 hash1 blocks_end
     end
+
+let update_last_224_256 hash prevlen input =
+  let update_multi_224_256 (hash:words_state SHA2_256) (blocks:bytes_blocks SHA2_256):
+    Lemma
+      (ensures (Spec.Agile.Hash.update_multi SHA2_256 hash () blocks ==
+        Spec.Agile.Hash.update_multi SHA2_224 hash () blocks))
+      (decreases (Seq.length blocks))
+      [ SMTPat (Spec.Agile.Hash.update_multi SHA2_256 hash () blocks) ]
+   =
+     update_multi_224_256 hash blocks
+  in
+  ()
