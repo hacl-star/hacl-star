@@ -20,20 +20,20 @@ let md_is_hash_incremental
   (s:words_state a)
   : Lemma (
       let blocks, rest = split_blocks a input in
-      update_multi a s (input `S.append` (pad a (S.length input))) ==
-      update_last a (update_multi a s blocks) (S.length blocks) rest)
+      update_multi a s () (input `S.append` (pad a (S.length input))) ==
+      update_last a (update_multi a s () blocks) (S.length blocks) rest)
    = let blocks, rest = split_blocks a input in
      assert (S.length input == S.length blocks + S.length rest);
      let padding = pad a (S.length input) in
      calc (==) {
-       update_last a (update_multi a s blocks) (S.length blocks) rest;
+       update_last a (update_multi a s () blocks) (S.length blocks) rest;
        (==) { }
-       update_multi a (update_multi a s blocks) S.(rest @| padding);
+       update_multi a (update_multi a s () blocks) () S.(rest @| padding);
        (==) { update_multi_associative a s blocks S.(rest @| padding) }
-       update_multi a s S.(blocks @| (rest @| padding));
+       update_multi a s () S.(blocks @| (rest @| padding));
        (==) { S.append_assoc blocks rest padding }
-       update_multi a s S.((blocks @| rest) @| padding);
+       update_multi a s () S.((blocks @| rest) @| padding);
        (==) { }
-       update_multi a s S.(input @| padding);
+       update_multi a s () S.(input @| padding);
      }
 #pop-options

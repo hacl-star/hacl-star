@@ -105,6 +105,25 @@ let sgnt2: b:lbuffer uint8 64ul{ recallable b } =
   createL_mglobal l
 
 
+val test_secret_to_public:
+    sk:lbuffer uint8 32ul
+  -> pk:lbuffer uint8 64ul
+  -> Stack unit
+  (requires fun h -> live h sk /\ live h pk)
+  (ensures  fun h0 _ h1 -> modifies0 h0 h1)
+
+let test_secret_to_public sk pk =
+  push_frame ();
+  let pk_comp = create 64ul (u8 0) in
+  let b = K256.secret_to_public pk_comp sk in
+
+  C.String.print (C.String.of_literal "\n Test K256 secret_to_public: ");
+  let is_eq = result_compare_display 64ul (to_const pk) (to_const pk_comp) in
+  if (is_eq && b) then C.String.print (C.String.of_literal "Success!\n")
+  else (C.String.print (C.String.of_literal "Failure :(\n"); C.exit 255l);
+  pop_frame ()
+
+
 val test_verify_sha256:
     msg_len:size_t
   -> msg:lbuffer uint8 msg_len
@@ -234,4 +253,8 @@ let main () =
 
   C.String.print (C.String.of_literal "\nTEST 4. K256\n");
   test_public_key_uncompressed pk1;
+
+  C.String.print (C.String.of_literal "\nTEST 5. K256\n");
+  test_secret_to_public sk2 pk2;
+
   C.EXIT_SUCCESS
