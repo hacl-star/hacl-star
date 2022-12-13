@@ -568,6 +568,8 @@ let shuffle_lemma a block st0 =
   shuffle_lemma_i a block st0 (num_rounds16 a)
 
 
+val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
+  Lemma (update a block hash == Spec.update a hash block)
 let update_lemma a block hash' =
   let hash = hash' in
   reveal_opaque (`%Spec.update) Spec.update;
@@ -606,20 +608,6 @@ let finish_lemma a st' =
   eq_intro #uint8 #(hash_length a) (finish a st') (PadFinish.finish a st')
 
 //TODO: move to Lib.Sequence.Lemmas
-val repeat_blocks_multi_extensionality:
-    #a:Type0
-  -> #b:Type0
-  -> blocksize:size_pos
-  -> inp:seq a{length inp % blocksize = 0}
-  -> f:(lseq a blocksize -> b -> b)
-  -> g:(lseq a blocksize -> b -> b)
-  -> init:b ->
-  Lemma
-  (requires
-    (forall (block:lseq a blocksize) (acc:b). f block acc == g block acc))
-  (ensures
-    repeat_blocks_multi blocksize inp f init ==
-    repeat_blocks_multi blocksize inp g init)
 
 let repeat_blocks_multi_extensionality #a #b blocksize inp f g init =
   let len = length inp in
@@ -684,6 +672,20 @@ let update_nblocks_is_repeat_blocks_multi a len b st0 =
   assert (acc == update_nblocks a len b st0);
 
   LSeq.lemma_repeat_blocks_multi bs b (update a) st0
+
+let update_nblocks_is_repeat_blocks_multi' a len b st0 =
+  let bs = block_length a in
+  let nb = len / bs in
+  let b' = Seq.slice b 0 (Seq.length b - Seq.length b % block_length a) in
+  let acc = Loops.repeati nb (repeat_blocks_f bs b' (update a) nb) st0 in
+
+  let aux (i:nat{i < nb}) (acc:words_state a) :
+    Lemma (repeat_blocks_f bs b' (update a) nb i acc == update_block a len b i acc) = () in
+  Classical.forall_intro_2 aux;
+  LSeqLemmas.repeati_extensionality nb (repeat_blocks_f bs b' (update a) nb) (update_block a len b) st0;
+  assert (acc == update_nblocks a len b st0);
+
+  LSeq.lemma_repeat_blocks_multi bs b' (update a) st0
 
 
 let hash_is_repeat_blocks a len b st0 =

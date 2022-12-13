@@ -54,10 +54,24 @@ let state_spec_v_extensionality (a : hash_alg { is_sha2 a })
   Classical.forall_intro aux;
   eq_intro acc1 acc2
 
+let hacl_spec_update_224_256 b st: Lemma (ensures
+  Hacl.Spec.SHA2.update SHA2_256 b st ==
+  Hacl.Spec.SHA2.update SHA2_224 b st)
+=
+  calc (==) {
+    Hacl.Spec.SHA2.update SHA2_256 b st;
+  (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_256 b st }
+    Spec.Agile.Hash.update SHA2_256 st b;
+  (==) { Spec.SHA2.Lemmas.update_224_256' st b }
+    Spec.Agile.Hash.update SHA2_224 st b;
+  (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_224 b st }
+    Hacl.Spec.SHA2.update SHA2_224 b st;
+  }
+
 inline_for_extraction noextract
 val sha224_update: update_vec_t SHA2_224 M32
 
-#push-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 let sha224_update b st =
   let open Lib.Sequence in
   let h0 = ST.get () in
@@ -75,11 +89,7 @@ let sha224_update b st =
       (state_spec_v (SpecVec.update #SHA2_256 b0 st0)).[0];
     (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_256 #M32 b0 st0 0 }
       Hacl.Spec.SHA2.update SHA2_256 b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_256 b0.(|0|) st0_m32 }
-      Spec.Agile.Hash.update SHA2_256 st0_m32 b0.(|0|);
-    (==) { Spec.SHA2.Lemmas.update_224_256' st0_m32 b0.(|0|) }
-      Spec.Agile.Hash.update SHA2_224 st0_m32 b0.(|0|);
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_224 b0.(|0|) st0_m32 }
+    (==) { hacl_spec_update_224_256 b0.(|0|) st0_m32 }
       Hacl.Spec.SHA2.update SHA2_224 b0.(|0|) st0_m32;
     (==) { Hacl.Spec.SHA2.Equiv.update_lemma_l #SHA2_224 #M32 b0 st0 0 }
       (state_spec_v #SHA2_224 #M32 (SpecVec.update #SHA2_224 b0 st0)).[0];
@@ -88,11 +98,51 @@ let sha224_update b st =
       (SpecVec.update #SHA2_256 b0 st0)
       (SpecVec.update #SHA2_224 #M32 b0 st0)
   end
-#pop-options
 
 [@CInline]
 val sha224_update_nblocks: update_nblocks_vec_t' SHA2_224 M32
-let sha224_update_nblocks = update_nblocks #SHA2_224 #M32 sha224_update
+let sha224_update_nblocks len b st =
+  let open Lib.Sequence in
+  let h0 = ST.get () in
+  sha256_update_nblocks len b st;
+  let h1 = ST.get () in
+  begin
+    let st0: lseq (element_t SHA2_256 M32) 8 = as_seq h0 st in
+    let st0_m32 = (state_spec_v st0).[0] <: words_state SHA2_256 in
+    let b0: multiseq (lanes SHA2_256 M32) (v len) = as_seq_multi h0 b in
+    let b0_m32' = Seq.slice b0.(|0|) 0 (Seq.length b0.(|0|) - Seq.length b0.(|0|) % block_length SHA2_256) in
+    let st1: lseq (element_t SHA2_256 M32) 8 = as_seq h1 st in
+    let st1_m32 = (state_spec_v st1).[0] <: words_state SHA2_256 in
+    Hacl.Impl.SHA2.Core.lemma_len_lt_max_a_fits_size_t SHA2_256 len;
+    calc (==) {
+      st1_m32;
+    (==) {}
+      (state_spec_v (SpecVec.update_nblocks #SHA2_256 (v len) b0 st0)).[0];
+    (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_256 #M32 (v len) b0 st0 0 }
+      Hacl.Spec.SHA2.update_nblocks SHA2_256 (v len) b0.(|0|) st0_m32;
+    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi' SHA2_256 (v len) b0.(|0|) st0_m32 }
+      Lib.Sequence.repeat_blocks_multi (block_length SHA2_256) b0_m32' (Hacl.Spec.SHA2.update SHA2_256) st0_m32;
+    (==) {
+      FStar.Classical.forall_intro_2 hacl_spec_update_224_256;
+      Hacl.Spec.SHA2.EquivScalar.repeat_blocks_multi_extensionality #uint8 #(words_state SHA2_256) (block_length SHA2_256) b0_m32'
+        (Hacl.Spec.SHA2.update SHA2_256)
+        (Hacl.Spec.SHA2.update SHA2_224)
+        st0_m32
+    }
+      Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_256) (block_length SHA2_256) b0_m32' (Hacl.Spec.SHA2.update SHA2_224) st0_m32;
+    (==) { }
+      Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_224) (block_length SHA2_224) b0_m32' (Hacl.Spec.SHA2.update SHA2_224) (st0_m32 <: words_state SHA2_224);
+    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi' SHA2_224 (v len) b0.(|0|) st0_m32 }
+      Hacl.Spec.SHA2.update_nblocks SHA2_224 (v len) b0.(|0|) st0_m32;
+    (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_224 #M32 (v len) b0 st0 0 }
+      (state_spec_v #SHA2_224 #M32 (SpecVec.update_nblocks #SHA2_224 (v len) b0 st0)).[0];
+    };
+    state_spec_v_extensionality SHA2_256
+      (SpecVec.update_nblocks #SHA2_256 (v len) b0 st0)
+      (SpecVec.update_nblocks #SHA2_224 #M32 (v len) b0 st0)
+  end
+
+#pop-options
 
 [@CInline] let sha224_update_last = update_last #SHA2_224 #M32 sha224_update
 [@CInline] let sha224_finish = finish #SHA2_224 #M32
