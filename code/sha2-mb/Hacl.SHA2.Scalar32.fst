@@ -18,17 +18,46 @@ open Hacl.Impl.SHA2.Generic
 // full hash function, or the streaming functor. The top-level API is now
 // exposed in Hacl.Streaming.SHA2.fst
 
-[@CInline] let sha224_init = init #SHA2_224 #M32
-[@CInline] let sha224_update = update #SHA2_224 #M32
-[@CInline] let sha224_update_nblocks = update_nblocks #SHA2_224 #M32 sha224_update
-[@CInline] let sha224_update_last = update_last #SHA2_224 #M32 sha224_update
-[@CInline] let sha224_finish = finish #SHA2_224 #M32
-
 [@CInline] let sha256_init = init #SHA2_256 #M32
 [@CInline] let sha256_update = update #SHA2_256 #M32
-[@CInline] let sha256_update_nblocks = update_nblocks #SHA2_256 #M32 sha256_update
+[@CInline] let sha256_update_nblocks: update_nblocks_vec_t' SHA2_256 M32 =
+  update_nblocks #SHA2_256 #M32 sha256_update
 [@CInline] let sha256_update_last = update_last #SHA2_256 #M32 sha256_update
 [@CInline] let sha256_finish = finish #SHA2_256 #M32
+
+[@CInline] let sha224_init = init #SHA2_224 #M32
+[@CInline] let sha224_update = update #SHA2_224 #M32
+
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+[@CInline]
+val sha224_update_nblocks: update_nblocks_vec_t' SHA2_224 M32
+
+let sha224_update_nblocks len b st =
+  let open Lib.Sequence in
+  let h0 = ST.get () in
+  sha256_update_nblocks len b st;
+  let h1 = ST.get () in
+  begin
+    Hacl.Impl.SHA2.Core.lemma_len_lt_max_a_fits_size_t SHA2_256 len;
+    let st0: lseq (element_t SHA2_256 M32) 8 = as_seq h0 st in
+    let st0': words_state SHA2_256 = st0 in
+    admit () end
+    let st1: lseq (element_t SHA2_256 M32) 8 = as_seq h1 st in
+    let b: multiseq 1 (v len) = as_seq_multi h0 b in
+    let b': s:Seq.seq uint8 { Seq.length s = v len } = b in
+    assume (v len % block_length SHA2_256 = 0);
+    calc (==) {
+      st1;
+    (==) {}
+      Hacl.Spec.SHA2.Vec.update_nblocks #SHA2_256 #M32 (v len) b st0;
+    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_256 (v len) b' st0 }
+      repeat_blocks_multi (block_length SHA2_256) b' (Hacl.Spec.SHA2.update SHA2_256) st0;
+    };
+    admit ()
+  end
+
+[@CInline] let sha224_update_last = update_last #SHA2_224 #M32 sha224_update
+[@CInline] let sha224_finish = finish #SHA2_224 #M32
 
 [@CInline] let sha384_init = init #SHA2_384 #M32
 [@CInline] let sha384_update = update #SHA2_384 #M32

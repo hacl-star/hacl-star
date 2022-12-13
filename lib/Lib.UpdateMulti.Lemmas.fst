@@ -127,6 +127,8 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 =
   ()
 
+// NOTE: this proof is fragile but could be greatly simplified by using the
+// (more robust) proof immediately below.
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
   // Lib.UpdateMulti side
@@ -229,7 +231,9 @@ let update_multi_one #a (block_length: pos)
 let rec update_multi_is_repeat_blocks_multi #a block_length update acc input =
   // Lib.UpdateMulti side
   let n_blocks = S.length input / block_length in
+  // triggers!
   let blocks, rest = S.split input (n_blocks * block_length) in
+  FStar.Math.Lemmas.nat_over_pos_is_nat (S.length input) block_length;
 
   // Lib.Sequence side
   let repeat_f = repeat_f block_length update in
