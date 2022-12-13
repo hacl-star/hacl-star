@@ -4,12 +4,7 @@ open Spec.Hash.Definitions
 
 #push-options "--z3rlimit 25 --fuel 0 --ifuel 0"
 
-val update_224_256: hash:words_state SHA2_256 ->
-  block:bytes{Seq.length block = block_length SHA2_256} ->
-  Lemma
-    (ensures (Spec.SHA2.(update SHA2_256 hash block == update SHA2_224 hash block)))
-
-val update_224_256': st:words_state SHA2_256 ->
+val update_224_256: st:words_state SHA2_256 ->
   block:bytes{Seq.length block = block_length SHA2_256} ->
   Lemma
     (ensures (Spec.Agile.Hash.(update SHA2_256 st block == update SHA2_224 st block)))

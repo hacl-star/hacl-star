@@ -62,7 +62,7 @@ let hacl_spec_update_224_256 b st: Lemma (ensures
     Hacl.Spec.SHA2.update SHA2_256 b st;
   (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_256 b st }
     Spec.Agile.Hash.update SHA2_256 st b;
-  (==) { Spec.SHA2.Lemmas.update_224_256' st b }
+  (==) { Spec.SHA2.Lemmas.update_224_256 st b }
     Spec.Agile.Hash.update SHA2_224 st b;
   (==) { Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_224 b st }
     Hacl.Spec.SHA2.update SHA2_224 b st;

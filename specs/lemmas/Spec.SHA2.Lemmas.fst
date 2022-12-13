@@ -243,9 +243,6 @@ let update_224_256 hash block =
 
 #pop-options
 
-let update_224_256' hash block =
-  update_224_256 hash block
-
 #push-options "--fuel 1"
 let update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): Lemma
   (ensures (Spec.Agile.Hash.update_multi a h () input) == (Spec.Agile.Hash.update a h input))
