@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Krmllib.h"
 
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
@@ -78,13 +77,13 @@ Hacl_Hash_SHA2_update_last_512(
   uint32_t input_len
 );
 
-extern void (*Hacl_Hash_SHA2_hash_224)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
-extern void (*Hacl_Hash_SHA2_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
-extern void (*Hacl_Hash_SHA2_hash_384)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
-extern void (*Hacl_Hash_SHA2_hash_512)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }

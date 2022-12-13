@@ -37,7 +37,7 @@ static inline void sha256_init(uint32_t *hash)
     os[i] = x;);
 }
 
-static inline void sha256_update(uint8_t *b, uint32_t *hash)
+static inline void sha256_update0(uint8_t *b, uint32_t *hash)
 {
   uint32_t hash_old[8U] = { 0U };
   uint32_t ws[16U] = { 0U };
@@ -164,7 +164,7 @@ static inline void sha256_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st)
   {
     uint8_t *b0 = b;
     uint8_t *mb = b0 + i * (uint32_t)64U;
-    sha256_update(mb, st);
+    sha256_update0(mb, st);
   }
 }
 
@@ -197,10 +197,10 @@ sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
   uint8_t *lb1 = l1;
   uint8_t *last0 = lb0;
   uint8_t *last1 = lb1;
-  sha256_update(last0, hash);
+  sha256_update0(last0, hash);
   if (blocks > (uint32_t)1U)
   {
-    sha256_update(last1, hash);
+    sha256_update0(last1, hash);
     return;
   }
 }
@@ -232,41 +232,9 @@ static inline void sha224_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st)
   sha256_update_nblocks(len, b, st);
 }
 
-static inline void
-sha224_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash)
+static void sha224_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *st)
 {
-  uint32_t blocks;
-  if (len + (uint32_t)8U + (uint32_t)1U <= (uint32_t)64U)
-  {
-    blocks = (uint32_t)1U;
-  }
-  else
-  {
-    blocks = (uint32_t)2U;
-  }
-  uint32_t fin = blocks * (uint32_t)64U;
-  uint8_t last[128U] = { 0U };
-  uint8_t totlen_buf[8U] = { 0U };
-  uint64_t total_len_bits = totlen << (uint32_t)3U;
-  store64_be(totlen_buf, total_len_bits);
-  uint8_t *b0 = b;
-  memcpy(last, b0, len * sizeof (uint8_t));
-  last[len] = (uint8_t)0x80U;
-  memcpy(last + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
-  uint8_t *last00 = last;
-  uint8_t *last10 = last + (uint32_t)64U;
-  uint8_t *l0 = last00;
-  uint8_t *l1 = last10;
-  uint8_t *lb0 = l0;
-  uint8_t *lb1 = l1;
-  uint8_t *last0 = lb0;
-  uint8_t *last1 = lb1;
-  sha256_update(last0, hash);
-  if (blocks > (uint32_t)1U)
-  {
-    sha256_update(last1, hash);
-    return;
-  }
+  sha256_update_last(totlen, len, b, st);
 }
 
 static inline void sha224_finish(uint32_t *st, uint8_t *h)

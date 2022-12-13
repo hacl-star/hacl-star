@@ -142,9 +142,46 @@ let sha224_update_nblocks len b st =
       (SpecVec.update_nblocks #SHA2_224 #M32 (v len) b0 st0)
   end
 
+
+val sha224_update_last: update_last_vec_t' SHA2_224 M32
+
+let sha224_update_last totlen len b st =
+  let open Lib.Sequence in
+  let h0 = ST.get () in
+  sha256_update_last totlen len b st;
+  let h1 = ST.get () in
+  begin
+    let st0: lseq (element_t SHA2_256 M32) 8 = as_seq h0 st in
+    let st0_m32 = (state_spec_v st0).[0] <: words_state SHA2_256 in
+    let b0: multiseq (lanes SHA2_256 M32) (v len) = as_seq_multi h0 b in
+    let st1: lseq (element_t SHA2_256 M32) 8 = as_seq h1 st in
+    let st1_m32 = (state_spec_v st1).[0] <: words_state SHA2_256 in
+    Hacl.Impl.SHA2.Core.lemma_len_lt_max_a_fits_size_t SHA2_256 len;
+    let hacl_spec_update_224_256 b st: Lemma (ensures
+      Hacl.Spec.SHA2.update SHA2_256 b st ==
+      Hacl.Spec.SHA2.update SHA2_224 b st)
+      [ SMTPat (Hacl.Spec.SHA2.update SHA2_256 b st) ]
+    =
+      hacl_spec_update_224_256 b st
+    in
+    calc (==) {
+      st1_m32;
+    (==) {}
+      (state_spec_v (SpecVec.update_last #SHA2_256 totlen (v len) b0 st0)).[0];
+    (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_256 #M32 totlen (v len) b0 st0 0 }
+      Hacl.Spec.SHA2.update_last SHA2_256 totlen (v len) b0.(|0|) st0_m32;
+    (==) { }
+      Hacl.Spec.SHA2.update_last SHA2_224 totlen (v len) b0.(|0|) st0_m32;
+    (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_224 #M32 totlen (v len) b0 st0 0 }
+      (state_spec_v (SpecVec.update_last #SHA2_224 #M32 totlen (v len) b0 st0)).[0];
+    };
+    state_spec_v_extensionality SHA2_256
+      (SpecVec.update_last #SHA2_224 #M32 totlen (v len) b0 st0)
+      (SpecVec.update_last #SHA2_256 #M32 totlen (v len) b0 st0)
+  end
+
 #pop-options
 
-[@CInline] let sha224_update_last = update_last #SHA2_224 #M32 sha224_update
 [@CInline] let sha224_finish = finish #SHA2_224 #M32
 
 [@CInline] let sha384_init = init #SHA2_384 #M32
