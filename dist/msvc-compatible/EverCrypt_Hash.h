@@ -44,6 +44,7 @@ extern "C" {
 #include "Hacl_Hash_MD5.h"
 #include "Hacl_Hash_Blake2s_128.h"
 #include "Hacl_Hash_Blake2b_256.h"
+#include "Hacl_Hash_Blake2.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 
@@ -137,8 +138,6 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s);
 
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
-void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
-
 void
 EverCrypt_Hash_update_multi(
   EverCrypt_Hash_state_s *s,
@@ -150,9 +149,9 @@ EverCrypt_Hash_update_multi(
 void
 EverCrypt_Hash_update_last_256(
   uint32_t *s,
-  uint64_t input,
-  uint8_t *input_len,
-  uint32_t input_len1
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
 );
 
 void

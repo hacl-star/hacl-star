@@ -85,7 +85,6 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   Hacl_Blake2b_256_blake2b_init(s, (uint32_t)0U, (uint32_t)64U);
   Lib_IntVector_Intrinsics_vec256 *s0 = s;
   uint8_t *dst1 = ipad;
-  Hacl_Blake2b_256_blake2b_init(s0, (uint32_t)0U, (uint32_t)64U);
   if (data_len == (uint32_t)0U)
   {
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };

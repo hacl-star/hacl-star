@@ -36,9 +36,9 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
+#include "Hacl_Hash_Blake2.h"
 
 /**
 Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.

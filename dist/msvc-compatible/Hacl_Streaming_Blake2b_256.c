@@ -46,7 +46,6 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2b_256_blake2b_256_state
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2b_256_blake2b_256_state), (uint32_t)1U);
   Hacl_Streaming_Blake2b_256_blake2b_256_state
   *p =
     (Hacl_Streaming_Blake2b_256_blake2b_256_state *)KRML_HOST_MALLOC(sizeof (
