@@ -49,11 +49,11 @@ void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p);
 
 /* SNIPPET_END: Hacl_Impl_K256_Point_point_negate */
 
-/* SNIPPET_START: Hacl_Impl_K256_Point_point_eq */
+/* SNIPPET_START: Hacl_Impl_K256_Point_point_eq_vartime */
 
-bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q);
+bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q);
 
-/* SNIPPET_END: Hacl_Impl_K256_Point_point_eq */
+/* SNIPPET_END: Hacl_Impl_K256_Point_point_eq_vartime */
 
 /* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
 

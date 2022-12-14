@@ -41,7 +41,6 @@ Hacl_Streaming_Poly1305_256_poly1305_256_state
   uint8_t *k_0 = k_;
   Hacl_Streaming_Poly1305_256_poly1305_256_state
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Poly1305_256_poly1305_256_state), (uint32_t)1U);
   Hacl_Streaming_Poly1305_256_poly1305_256_state
   *p =
     (Hacl_Streaming_Poly1305_256_poly1305_256_state *)KRML_HOST_MALLOC(sizeof (
