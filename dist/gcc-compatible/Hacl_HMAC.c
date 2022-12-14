@@ -90,7 +90,6 @@ Hacl_HMAC_legacy_compute_sha1(
       (uint32_t)0xc3d2e1f0U
     };
   uint8_t *dst1 = ipad;
-  Hacl_Hash_Core_SHA1_legacy_init(s);
   if (data_len == (uint32_t)0U)
   {
     Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)0U, ipad, (uint32_t)64U);
@@ -215,7 +214,6 @@ Hacl_HMAC_compute_sha2_256(
       (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
     };
   uint8_t *dst1 = ipad;
-  Hacl_Hash_Core_SHA2_init_256(s);
   if (data_len == (uint32_t)0U)
   {
     Hacl_Hash_SHA2_update_last_256(s, (uint64_t)0U, ipad, (uint32_t)64U);
@@ -341,7 +339,6 @@ Hacl_HMAC_compute_sha2_384(
       (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
     };
   uint8_t *dst1 = ipad;
-  Hacl_Hash_Core_SHA2_init_384(s);
   if (data_len == (uint32_t)0U)
   {
     Hacl_Hash_SHA2_update_last_384(s,
@@ -472,7 +469,6 @@ Hacl_HMAC_compute_sha2_512(
       (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
     };
   uint8_t *dst1 = ipad;
-  Hacl_Hash_Core_SHA2_init_512(s);
   if (data_len == (uint32_t)0U)
   {
     Hacl_Hash_SHA2_update_last_512(s,
@@ -599,7 +595,6 @@ Hacl_HMAC_compute_blake2s_32(
   Hacl_Blake2s_32_blake2s_init(s, (uint32_t)0U, (uint32_t)32U);
   uint32_t *s0 = s;
   uint8_t *dst1 = ipad;
-  Hacl_Blake2s_32_blake2s_init(s0, (uint32_t)0U, (uint32_t)32U);
   if (data_len == (uint32_t)0U)
   {
     uint32_t wv[16U] = { 0U };
@@ -742,7 +737,6 @@ Hacl_HMAC_compute_blake2b_32(
   Hacl_Blake2b_32_blake2b_init(s, (uint32_t)0U, (uint32_t)64U);
   uint64_t *s0 = s;
   uint8_t *dst1 = ipad;
-  Hacl_Blake2b_32_blake2b_init(s0, (uint32_t)0U, (uint32_t)64U);
   if (data_len == (uint32_t)0U)
   {
     uint64_t wv[16U] = { 0U };

@@ -36,7 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
+#include "Hacl_Hash_Blake2b_256.h"
 
 /* SNIPPET_START: Hacl_HMAC_Blake2b_256_compute_blake2b_256 */
 

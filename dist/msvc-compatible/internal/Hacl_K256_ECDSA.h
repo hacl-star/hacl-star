@@ -41,7 +41,7 @@ void Hacl_Impl_K256_Point_make_point_at_inf(uint64_t *p);
 
 void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p);
 
-bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q);
+bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q);
 
 bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s);
 
