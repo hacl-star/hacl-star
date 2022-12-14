@@ -41,7 +41,7 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint64",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Prims.nat",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.P256.Definitions.felem_seq_as_nat",
         "equation_Spec.P256.Definitions.p256_prime_list",
         "equation_with_fuel_FStar.List.Tot.Base.index.fuel_instrumented",
@@ -66,6 +66,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_6099ed87ec020985dcad17ca98dafcdf",
         "refinement_interpretation_Tm_refine_62a2451105b37310c581c6e924f97d36",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_bf2fa1226f2c9a0f6671df3e80ddcb8e",
@@ -80,7 +81,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.maxint", "typing_Lib.IntTypes.minint",
         "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.v",
-        "typing_Spec.P256.Definitions.p256_prime_list",
+        "typing_Prims.pow2", "typing_Spec.P256.Definitions.p256_prime_list",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
@@ -126,7 +127,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "20d658253a7ed6c05ce5a45cd777189f"
+      "d51643df163baf1da7f4633e57b39996"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.reduction_prime256_2prime256_with_carry_impl",
@@ -331,7 +332,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "dff65d56b3081ef61dbbdfd7f055b788"
+      "5b9273ff08b60b03d3c9d133e9bbc9da"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.reduction_prime256_2prime256_8_with_carry_impl",
@@ -352,7 +353,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "bac9342da7a1a66f17164849dcda221f"
+      "8fd06e6419fb038f6fe844514a0b72cf"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.reduction_prime256_2prime256_8_with_carry_impl",
@@ -581,7 +582,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "80ec6c38333390783822f7c20c28cfe8"
+      "3462e0a740b830544efda233d168f6c6"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_reduction1_0",
@@ -590,7 +591,7 @@
       1,
       [ "@query" ],
       0,
-      "666b25af18a14d36d82ded2d9bc3a669"
+      "b461430575bf399a5291e57e1f143072"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_reduction1_0",
@@ -607,7 +608,7 @@
         "refinement_interpretation_Tm_refine_5ff0479b6bf26f4b6f6f5d5dc264d1cc"
       ],
       0,
-      "324a4efa208d1a776fa41b43cc6c3afd"
+      "b8397595353d408cd7bed39a022dac17"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_reduction1",
@@ -621,7 +622,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "96b991d59c438b2fe6daafabefaaf845"
+      "182d59dda5cf741a6aaa2befbb7562dc"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_reduction1",
@@ -635,7 +636,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "3633359193312ba7d1c7e47f7f924f7d"
+      "f80690690e9aeb6c73d6f44938059004"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_reduction1",
@@ -650,7 +651,7 @@
         "refinement_interpretation_Tm_refine_f51785a1a86b5a997ced8b0314d166b7"
       ],
       0,
-      "42c404cdfe89802c158ad16160930687"
+      "bf9ee1339f27941768edb69f3efcc6f8"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.reduction_prime_2prime_impl",
@@ -671,7 +672,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "51834e073339d6d3ff22840673b79346"
+      "32bf75b2a917b8424065551223a0f813"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.reduction_prime_2prime_impl",
@@ -864,7 +865,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "378b732425abb0d36ee629415b41bfff"
+      "8eaef8f4468744860fe18db1f971ce4b"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_t_computation",
@@ -902,7 +903,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "7fddfe1fcbd038af492a5e9bfdd75b9e"
+      "38d39d0cb244086de0a5971c905fcd08"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_t_computation",
@@ -951,7 +952,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b6b0d149826887a59f5c1ee430245e0f"
+      "5de187c429ae4f7c494edbab9d2c7f77"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_t_computation2",
@@ -982,7 +983,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "4a250ceb5d012ba03720a1d296decf2a"
+      "1fd1f8c126a69a3c73ec519755f5e2ad"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.lemma_t_computation2",
@@ -1033,7 +1034,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "9a3ea56ded9fe7cd30fcd6355ecf63e8"
+      "975c63610912f80d3e29b08a2d2bcea1"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_add",
@@ -1057,7 +1058,7 @@
         "typing_Spec.P256.Definitions.as_nat"
       ],
       0,
-      "f195d71eac4ad3696e36047c097c4082"
+      "5f7558f9cc8a76925875e05ff0408015"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_add",
@@ -1117,7 +1118,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c72d0909ec298661a6d5d0580aaf3c76"
+      "e7f440eee2a852af92024fdf5952f691"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_double",
@@ -1143,7 +1144,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "077c79d18ea09e0826375c094d0b6351"
+      "d2542774ffae4dcd873896198074ae0c"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_double",
@@ -1208,7 +1209,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "d33bf4efd8d54695436b141fa6ad2974"
+      "90621d023e70c0e6c97b978566273d2a"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_sub",
@@ -1232,7 +1233,7 @@
         "typing_Spec.P256.Definitions.as_nat"
       ],
       0,
-      "7c61826b56aa5986d117de527d7a9a4c"
+      "2f2cebb2371b0033f964223bd638fe4e"
     ],
     [
       "Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_sub",
@@ -1334,7 +1335,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "28f371dcef885f456cdc943f1f4798df"
+      "71308928f612ce3a073188f5f47eb5f1"
     ]
   ]
 ]

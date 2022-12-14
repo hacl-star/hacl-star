@@ -61,18 +61,6 @@ void Hacl_Hash_Core_SHA2_init_512(uint64_t *s);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_init_512 */
 
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_384 */
-
-void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_384 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_512 */
-
-void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_512 */
-
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_pad_256 */
 
 void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst);

@@ -28,6 +28,7 @@
 #include "config.h"
 static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
+  #if HACL_CAN_COMPILE_VALE
   uint8_t ctx[192U] = { 0U };
   memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
   uint32_t n_blocks = len / (uint32_t)16U;
@@ -47,6 +48,7 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
     uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
   }
   memcpy(dst, ctx, (uint32_t)16U * sizeof (uint8_t));
+  #endif
 }
 
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)

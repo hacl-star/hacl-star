@@ -610,17 +610,14 @@ update_last_512(
   update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
-typedef uint32_t *___uint32_t____;
-
 static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  scrut[8U] =
+  s[8U] =
     {
       (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
       (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
     };
-  uint32_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)64U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
@@ -645,18 +642,15 @@ static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   finish_256(s, dst);
 }
 
-typedef uint64_t *___uint64_t____;
-
 static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  scrut[8U] =
+  s[8U] =
     {
       (uint64_t)0xcbbb9d5dc1059ed8U, (uint64_t)0x629a292a367cd507U, (uint64_t)0x9159015a3070dd17U,
       (uint64_t)0x152fecd8f70e5939U, (uint64_t)0x67332667ffc00b31U, (uint64_t)0x8eb44a8768581511U,
       (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
     };
-  uint64_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)128U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
@@ -684,13 +678,12 @@ static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  scrut[8U] =
+  s[8U] =
     {
       (uint64_t)0x6a09e667f3bcc908U, (uint64_t)0xbb67ae8584caa73bU, (uint64_t)0x3c6ef372fe94f82bU,
       (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
       (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
     };
-  uint64_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)128U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
@@ -894,12 +887,11 @@ legacy_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t inpu
 static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  scrut[5U] =
+  s[5U] =
     {
       (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
       (uint32_t)0xc3d2e1f0U
     };
-  uint32_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)64U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
@@ -989,51 +981,48 @@ legacy_compute_sha1(
     opad[i] = xi ^ yi;
   }
   uint32_t
-  scrut0[5U] =
+  s[5U] =
     {
       (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
       (uint32_t)0xc3d2e1f0U
     };
-  uint32_t *s = scrut0;
   uint8_t *dst1 = ipad;
-  legacy_init(s);
   if (data_len == (uint32_t)0U)
   {
     legacy_update_last(s, (uint64_t)0U, ipad, (uint32_t)64U);
   }
   else
   {
-    legacy_update_multi(s, ipad, (uint32_t)1U);
     uint32_t block_len = (uint32_t)64U;
     uint32_t n_blocks0 = data_len / block_len;
-    uint32_t rem = data_len % block_len;
+    uint32_t rem0 = data_len % block_len;
     __uint32_t_uint32_t scrut;
-    if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+    if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
     {
       uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
       scrut = ((__uint32_t_uint32_t){ .fst = n_blocks_, .snd = data_len - n_blocks_ * block_len });
     }
     else
     {
-      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
     }
     uint32_t n_blocks = scrut.fst;
     uint32_t rem_len = scrut.snd;
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
+    uint8_t *rem = data + full_blocks_len;
+    legacy_update_multi(s, ipad, (uint32_t)1U);
     legacy_update_multi(s, full_blocks, n_blocks);
-    uint8_t *rem0 = data + full_blocks_len;
-    legacy_update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem0, rem_len);
+    legacy_update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
   legacy_finish(s, dst1);
   uint8_t *hash1 = ipad;
   legacy_init(s);
-  legacy_update_multi(s, opad, (uint32_t)1U);
   uint32_t block_len = (uint32_t)64U;
   uint32_t n_blocks0 = (uint32_t)20U / block_len;
-  uint32_t rem = (uint32_t)20U % block_len;
+  uint32_t rem0 = (uint32_t)20U % block_len;
   __uint32_t_uint32_t scrut;
-  if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+  if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
   {
     uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
     scrut =
@@ -1041,15 +1030,16 @@ legacy_compute_sha1(
   }
   else
   {
-    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
   }
   uint32_t n_blocks = scrut.fst;
   uint32_t rem_len = scrut.snd;
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
+  uint8_t *rem = hash1 + full_blocks_len;
+  legacy_update_multi(s, opad, (uint32_t)1U);
   legacy_update_multi(s, full_blocks, n_blocks);
-  uint8_t *rem0 = hash1 + full_blocks_len;
-  legacy_update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem0, rem_len);
+  legacy_update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   legacy_finish(s, dst);
 }
 
@@ -1109,51 +1099,48 @@ compute_sha2_256(
     opad[i] = xi ^ yi;
   }
   uint32_t
-  scrut0[8U] =
+  s[8U] =
     {
       (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
       (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
     };
-  uint32_t *s = scrut0;
   uint8_t *dst1 = ipad;
-  init_256(s);
   if (data_len == (uint32_t)0U)
   {
     update_last_256(s, (uint64_t)0U, ipad, (uint32_t)64U);
   }
   else
   {
-    update_multi_256(s, ipad, (uint32_t)1U);
     uint32_t block_len = (uint32_t)64U;
     uint32_t n_blocks0 = data_len / block_len;
-    uint32_t rem = data_len % block_len;
+    uint32_t rem0 = data_len % block_len;
     __uint32_t_uint32_t scrut;
-    if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+    if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
     {
       uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
       scrut = ((__uint32_t_uint32_t){ .fst = n_blocks_, .snd = data_len - n_blocks_ * block_len });
     }
     else
     {
-      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
     }
     uint32_t n_blocks = scrut.fst;
     uint32_t rem_len = scrut.snd;
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
+    uint8_t *rem = data + full_blocks_len;
+    update_multi_256(s, ipad, (uint32_t)1U);
     update_multi_256(s, full_blocks, n_blocks);
-    uint8_t *rem0 = data + full_blocks_len;
-    update_last_256(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem0, rem_len);
+    update_last_256(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
   finish_256(s, dst1);
   uint8_t *hash1 = ipad;
   init_256(s);
-  update_multi_256(s, opad, (uint32_t)1U);
   uint32_t block_len = (uint32_t)64U;
   uint32_t n_blocks0 = (uint32_t)32U / block_len;
-  uint32_t rem = (uint32_t)32U % block_len;
+  uint32_t rem0 = (uint32_t)32U % block_len;
   __uint32_t_uint32_t scrut;
-  if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+  if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
   {
     uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
     scrut =
@@ -1161,15 +1148,16 @@ compute_sha2_256(
   }
   else
   {
-    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
   }
   uint32_t n_blocks = scrut.fst;
   uint32_t rem_len = scrut.snd;
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
+  uint8_t *rem = hash1 + full_blocks_len;
+  update_multi_256(s, opad, (uint32_t)1U);
   update_multi_256(s, full_blocks, n_blocks);
-  uint8_t *rem0 = hash1 + full_blocks_len;
-  update_last_256(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem0, rem_len);
+  update_last_256(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   finish_256(s, dst);
 }
 
@@ -1229,56 +1217,53 @@ compute_sha2_384(
     opad[i] = xi ^ yi;
   }
   uint64_t
-  scrut0[8U] =
+  s[8U] =
     {
       (uint64_t)0xcbbb9d5dc1059ed8U, (uint64_t)0x629a292a367cd507U, (uint64_t)0x9159015a3070dd17U,
       (uint64_t)0x152fecd8f70e5939U, (uint64_t)0x67332667ffc00b31U, (uint64_t)0x8eb44a8768581511U,
       (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
     };
-  uint64_t *s = scrut0;
   uint8_t *dst1 = ipad;
-  init_384(s);
   if (data_len == (uint32_t)0U)
   {
     update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), ipad, (uint32_t)128U);
   }
   else
   {
-    update_multi_384(s, ipad, (uint32_t)1U);
     uint32_t block_len = (uint32_t)128U;
     uint32_t n_blocks0 = data_len / block_len;
-    uint32_t rem = data_len % block_len;
+    uint32_t rem0 = data_len % block_len;
     __uint32_t_uint32_t scrut;
-    if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+    if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
     {
       uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
       scrut = ((__uint32_t_uint32_t){ .fst = n_blocks_, .snd = data_len - n_blocks_ * block_len });
     }
     else
     {
-      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
     }
     uint32_t n_blocks = scrut.fst;
     uint32_t rem_len = scrut.snd;
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
+    uint8_t *rem = data + full_blocks_len;
+    update_multi_384(s, ipad, (uint32_t)1U);
     update_multi_384(s, full_blocks, n_blocks);
-    uint8_t *rem0 = data + full_blocks_len;
     update_last_384(s,
       FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
         FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
-      rem0,
+      rem,
       rem_len);
   }
   finish_384(s, dst1);
   uint8_t *hash1 = ipad;
   init_384(s);
-  update_multi_384(s, opad, (uint32_t)1U);
   uint32_t block_len = (uint32_t)128U;
   uint32_t n_blocks0 = (uint32_t)48U / block_len;
-  uint32_t rem = (uint32_t)48U % block_len;
+  uint32_t rem0 = (uint32_t)48U % block_len;
   __uint32_t_uint32_t scrut;
-  if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+  if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
   {
     uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
     scrut =
@@ -1286,18 +1271,19 @@ compute_sha2_384(
   }
   else
   {
-    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
   }
   uint32_t n_blocks = scrut.fst;
   uint32_t rem_len = scrut.snd;
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
+  uint8_t *rem = hash1 + full_blocks_len;
+  update_multi_384(s, opad, (uint32_t)1U);
   update_multi_384(s, full_blocks, n_blocks);
-  uint8_t *rem0 = hash1 + full_blocks_len;
   update_last_384(s,
     FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
       FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
-    rem0,
+    rem,
     rem_len);
   finish_384(s, dst);
 }
@@ -1358,56 +1344,53 @@ compute_sha2_512(
     opad[i] = xi ^ yi;
   }
   uint64_t
-  scrut0[8U] =
+  s[8U] =
     {
       (uint64_t)0x6a09e667f3bcc908U, (uint64_t)0xbb67ae8584caa73bU, (uint64_t)0x3c6ef372fe94f82bU,
       (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
       (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
     };
-  uint64_t *s = scrut0;
   uint8_t *dst1 = ipad;
-  init_512(s);
   if (data_len == (uint32_t)0U)
   {
     update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), ipad, (uint32_t)128U);
   }
   else
   {
-    update_multi_512(s, ipad, (uint32_t)1U);
     uint32_t block_len = (uint32_t)128U;
     uint32_t n_blocks0 = data_len / block_len;
-    uint32_t rem = data_len % block_len;
+    uint32_t rem0 = data_len % block_len;
     __uint32_t_uint32_t scrut;
-    if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+    if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
     {
       uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
       scrut = ((__uint32_t_uint32_t){ .fst = n_blocks_, .snd = data_len - n_blocks_ * block_len });
     }
     else
     {
-      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+      scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
     }
     uint32_t n_blocks = scrut.fst;
     uint32_t rem_len = scrut.snd;
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
+    uint8_t *rem = data + full_blocks_len;
+    update_multi_512(s, ipad, (uint32_t)1U);
     update_multi_512(s, full_blocks, n_blocks);
-    uint8_t *rem0 = data + full_blocks_len;
     update_last_512(s,
       FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
         FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
-      rem0,
+      rem,
       rem_len);
   }
   finish_512(s, dst1);
   uint8_t *hash1 = ipad;
   init_512(s);
-  update_multi_512(s, opad, (uint32_t)1U);
   uint32_t block_len = (uint32_t)128U;
   uint32_t n_blocks0 = (uint32_t)64U / block_len;
-  uint32_t rem = (uint32_t)64U % block_len;
+  uint32_t rem0 = (uint32_t)64U % block_len;
   __uint32_t_uint32_t scrut;
-  if (n_blocks0 > (uint32_t)0U && rem == (uint32_t)0U)
+  if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
   {
     uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
     scrut =
@@ -1415,18 +1398,19 @@ compute_sha2_512(
   }
   else
   {
-    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem });
+    scrut = ((__uint32_t_uint32_t){ .fst = n_blocks0, .snd = rem0 });
   }
   uint32_t n_blocks = scrut.fst;
   uint32_t rem_len = scrut.snd;
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
+  uint8_t *rem = hash1 + full_blocks_len;
+  update_multi_512(s, opad, (uint32_t)1U);
   update_multi_512(s, full_blocks, n_blocks);
-  uint8_t *rem0 = hash1 + full_blocks_len;
   update_last_512(s,
     FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
       FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
-    rem0,
+    rem,
     rem_len);
   finish_512(s, dst);
 }
