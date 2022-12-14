@@ -29,14 +29,6 @@ val repeat_blocks_multi_extensionality:
 
 val update_nblocks_is_repeat_blocks_multi:
      a:sha2_alg
-  -> len:len_lt_max_a_t a{len % block_length a = 0}
-  -> b:seq uint8{length b = len}
-  -> st0:words_state a ->
-  Lemma (update_nblocks a len b st0 ==
-    Lib.Sequence.repeat_blocks_multi (block_length a) b (update a) st0)
-
-val update_nblocks_is_repeat_blocks_multi':
-     a:sha2_alg
   -> len:len_lt_max_a_t a
   -> b:seq uint8{length b = len}
   -> st0:words_state a ->

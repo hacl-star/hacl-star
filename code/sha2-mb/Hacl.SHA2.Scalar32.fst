@@ -120,7 +120,7 @@ let sha224_update_nblocks len b st =
       (state_spec_v (SpecVec.update_nblocks #SHA2_256 (v len) b0 st0)).[0];
     (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_256 #M32 (v len) b0 st0 0 }
       Hacl.Spec.SHA2.update_nblocks SHA2_256 (v len) b0.(|0|) st0_m32;
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi' SHA2_256 (v len) b0.(|0|) st0_m32 }
+    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_256 (v len) b0.(|0|) st0_m32 }
       Lib.Sequence.repeat_blocks_multi (block_length SHA2_256) b0_m32' (Hacl.Spec.SHA2.update SHA2_256) st0_m32;
     (==) {
       FStar.Classical.forall_intro_2 hacl_spec_update_224_256;
@@ -132,7 +132,7 @@ let sha224_update_nblocks len b st =
       Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_256) (block_length SHA2_256) b0_m32' (Hacl.Spec.SHA2.update SHA2_224) st0_m32;
     (==) { }
       Lib.Sequence.repeat_blocks_multi #uint8 #(words_state SHA2_224) (block_length SHA2_224) b0_m32' (Hacl.Spec.SHA2.update SHA2_224) (st0_m32 <: words_state SHA2_224);
-    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi' SHA2_224 (v len) b0.(|0|) st0_m32 }
+    (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi SHA2_224 (v len) b0.(|0|) st0_m32 }
       Hacl.Spec.SHA2.update_nblocks SHA2_224 (v len) b0.(|0|) st0_m32;
     (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #SHA2_224 #M32 (v len) b0 st0 0 }
       (state_spec_v #SHA2_224 #M32 (SpecVec.update_nblocks #SHA2_224 (v len) b0 st0)).[0];
