@@ -920,9 +920,8 @@ Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes.
 */
 void Hacl_Streaming_SHA2_sha256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
-  uint8_t *dst1 = dst;
   uint8_t *ib = input;
-  uint8_t *rb = dst1;
+  uint8_t *rb = dst;
   uint32_t st[8U] = { 0U };
   sha256_init(st);
   uint32_t rem = input_len % (uint32_t)64U;
@@ -1027,9 +1026,8 @@ Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes.
 */
 void Hacl_Streaming_SHA2_sha224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
-  uint8_t *dst1 = dst;
   uint8_t *ib = input;
-  uint8_t *rb = dst1;
+  uint8_t *rb = dst;
   uint32_t st[8U] = { 0U };
   sha224_init(st);
   uint32_t rem = input_len % (uint32_t)64U;
@@ -1331,9 +1329,8 @@ Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes.
 */
 void Hacl_Streaming_SHA2_sha512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
-  uint8_t *dst1 = dst;
   uint8_t *ib = input;
-  uint8_t *rb = dst1;
+  uint8_t *rb = dst;
   uint64_t st[8U] = { 0U };
   Hacl_SHA2_Scalar32_sha512_init(st);
   uint32_t rem = input_len % (uint32_t)128U;
@@ -1442,9 +1439,8 @@ Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes.
 */
 void Hacl_Streaming_SHA2_sha384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
-  uint8_t *dst1 = dst;
   uint8_t *ib = input;
-  uint8_t *rb = dst1;
+  uint8_t *rb = dst;
   uint64_t st[8U] = { 0U };
   sha384_init(st);
   uint32_t rem = input_len % (uint32_t)128U;
