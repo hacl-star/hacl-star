@@ -124,7 +124,7 @@ let sha224_update_nblocks len b st =
       Lib.Sequence.repeat_blocks_multi (block_length SHA2_256) b0_m32' (Hacl.Spec.SHA2.update SHA2_256) st0_m32;
     (==) {
       FStar.Classical.forall_intro_2 hacl_spec_update_224_256;
-      Hacl.Spec.SHA2.EquivScalar.repeat_blocks_multi_extensionality #uint8 #(words_state SHA2_256) (block_length SHA2_256) b0_m32'
+      Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality #uint8 #(words_state SHA2_256) (block_length SHA2_256) b0_m32'
         (Hacl.Spec.SHA2.update SHA2_256)
         (Hacl.Spec.SHA2.update SHA2_224)
         st0_m32

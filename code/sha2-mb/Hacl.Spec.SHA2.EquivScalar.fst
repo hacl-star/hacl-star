@@ -607,22 +607,6 @@ let finish_lemma a st' =
 
 //TODO: move to Lib.Sequence.Lemmas
 
-let repeat_blocks_multi_extensionality #a #b blocksize inp f g init =
-  let len = length inp in
-  let nb = len / blocksize in
-  let f_rep = repeat_blocks_f blocksize inp f nb in
-  let g_rep = repeat_blocks_f blocksize inp g nb in
-
-  lemma_repeat_blocks_multi blocksize inp f init;
-  lemma_repeat_blocks_multi blocksize inp g init;
-
-  let aux (i:nat{i < nb}) (acc:b) : Lemma (f_rep i acc == g_rep i acc) =
-    Math.Lemmas.lemma_mult_le_right blocksize (i + 1) nb;
-    Seq.Properties.slice_slice inp 0 (nb * blocksize) (i * blocksize) (i * blocksize + blocksize) in
-
-  Classical.forall_intro_2 aux;
-  LSeqLemmas.repeati_extensionality nb f_rep g_rep init
-
 
 val update_multi_is_repeat_blocks_multi:
      a:sha2_alg
@@ -655,7 +639,7 @@ let update_multi_is_repeat_blocks_multi a len b st0 pad_s =
   //    LSeq.repeat_blocks_multi (block_length a) blocks repeat_f st0);
 
   Classical.forall_intro_2 (update_lemma a);
-  repeat_blocks_multi_extensionality (block_length a) blocks repeat_f (update a) st0
+  LSeqLemmas.repeat_blocks_multi_extensionality (block_length a) blocks repeat_f (update a) st0
 
 let update_nblocks_is_repeat_blocks_multi a len b st0 =
   let bs = block_length a in

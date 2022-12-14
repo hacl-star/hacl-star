@@ -12,21 +12,6 @@ open Hacl.Spec.SHA2
 val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
   Lemma (update a block hash == Spec.Agile.Hash.update a hash block)
 
-val repeat_blocks_multi_extensionality:
-    #a:Type0
-  -> #b:Type0
-  -> blocksize:size_pos
-  -> inp:seq a{length inp % blocksize = 0}
-  -> f:(lseq a blocksize -> b -> b)
-  -> g:(lseq a blocksize -> b -> b)
-  -> init:b ->
-  Lemma
-  (requires
-    (forall (block:lseq a blocksize) (acc:b). f block acc == g block acc))
-  (ensures
-    repeat_blocks_multi blocksize inp f init ==
-    repeat_blocks_multi blocksize inp g init)
-
 val update_nblocks_is_repeat_blocks_multi:
      a:sha2_alg
   -> len:len_lt_max_a_t a
