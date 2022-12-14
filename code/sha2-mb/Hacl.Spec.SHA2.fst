@@ -233,13 +233,13 @@ let update (a:sha2_alg) (block:block_t a) (hash:words_state a): Tot (words_state
   map2 #_ #_ #_ #8 ( +. ) hash_1 hash
 
 
-let padded_blocks (a:sha2_alg) (len:nat{len < block_length a}) : n:nat{n <= 2} =
+let padded_blocks (a:sha2_alg) (len:nat{len <= block_length a}) : n:nat{n <= 2} =
   if (len + len_length a + 1 <= block_length a) then 1 else 2
 
 
 let load_last (a:sha2_alg) (totlen_seq:lseq uint8 (len_length a))
    (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
-   (len:nat{len < block_length a}) (b:bytes{S.length b = len}) :
+   (len:nat{len <= block_length a}) (b:bytes{S.length b = len}) :
    (block_t a & block_t a)
  =
   let last = create (2 * block_length a) (u8 0) in
@@ -252,7 +252,7 @@ let load_last (a:sha2_alg) (totlen_seq:lseq uint8 (len_length a))
 
 
 let update_last (a:sha2_alg) (totlen:len_t a)
-  (len:nat{len < block_length a})
+  (len:nat{len <= block_length a})
   (b:bytes{S.length b = len}) (hash:words_state a) : Tot (words_state a) =
   let blocks = padded_blocks a len in
   let fin = blocks * block_length a in

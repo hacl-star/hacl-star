@@ -588,6 +588,23 @@ let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 =
     repeat_blocks blocksize t1 f l acc1;
     }
 
+let repeat_blocks_multi_extensionality #a #b blocksize inp f g init =
+  let len = length inp in
+  let nb = len / blocksize in
+  let f_rep = repeat_blocks_f blocksize inp f nb in
+  let g_rep = repeat_blocks_f blocksize inp g nb in
+
+  lemma_repeat_blocks_multi blocksize inp f init;
+  lemma_repeat_blocks_multi blocksize inp g init;
+
+  let aux (i:nat{i < nb}) (acc:b) : Lemma (f_rep i acc == g_rep i acc) =
+    Math.Lemmas.lemma_mult_le_right blocksize (i + 1) nb;
+    Seq.Properties.slice_slice inp 0 (nb * blocksize) (i * blocksize) (i * blocksize + blocksize) in
+
+  Classical.forall_intro_2 aux;
+  repeati_extensionality nb f_rep g_rep init
+
+
 ////////////////////////
 // End of repeat_blocks-related properties
 ////////////////////////
