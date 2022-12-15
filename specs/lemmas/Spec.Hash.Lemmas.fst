@@ -79,16 +79,17 @@ let lemma_blocki_aux1 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s1 / block
 
 #push-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
-let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s2 / block_length a})
+open FStar.Mul
+
+let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (i:nat{i < nb2})
   : Lemma
-    (requires S.length s1 % block_length a == 0)
+    (requires
+      S.length s1 == nb1 * block_length a /\
+      S.length s2 == nb2 * block_length a)
     (ensures Spec.Blake2.get_blocki (to_blake_alg a) s2 i ==
-           Spec.Blake2.get_blocki (to_blake_alg a) (S.append s1 s2) (i + S.length s1 / block_length a))
-  = let nb1 = S.length s1 / block_length a in
-    let nb2 = S.length s2 / block_length a in
-    let s = s1 `S.append` s2 in
+           Spec.Blake2.get_blocki (to_blake_alg a) (S.append s1 s2) (i + nb1))
+  = let s = s1 `S.append` s2 in
     let a' = to_blake_alg a in
-    let open FStar.Mul in
     calc (==) {
           Spec.Blake2.get_blocki a' s (i + nb1);
           (==) { }
@@ -105,8 +106,6 @@ let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s2 / block
           Spec.Blake2.get_blocki a' s2 i;
         }
 
-open FStar.Mul
-
 let lemma_update_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (prevlen1 prevlen2:nat) (i:nat{i < nb2}) (acc:words_state a)
   : Lemma
     (requires
@@ -118,17 +117,39 @@ let lemma_update_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (prevlen1 prevle
     (ensures
       Spec.Blake2.blake2_update1 (to_blake_alg a) prevlen1 (s1 `S.append` s2) (i + nb1) acc ==
       Spec.Blake2.blake2_update1 (to_blake_alg a) prevlen2 s2 i acc)
-  = lemma_blocki_aux2 a s1 s2 i;
-    calc (==) {
-      prevlen2 + i * block_length a;
-      (==) { }
-      prevlen1 + S.length s1 + i * block_length a;
-      (==) { Math.Lemmas.lemma_div_exact (S.length s1) (block_length a) }
-      prevlen1 + nb1 * block_length a + i * block_length a;
-      (==) { Math.Lemmas.distributivity_add_left i nb1 (block_length a) }
-      prevlen1 + (i + nb1) * block_length a;
-    }
+  = let s = s1 `S.append` s2 in
+    let a' = to_blake_alg a in
 
+    let open Spec.Blake2 in
+    let f1 = blake2_update1 (to_blake_alg a) prevlen1 s in
+    let f2 = blake2_update1 (to_blake_alg a) prevlen2 s2 in
+    let totlen1 = prevlen1 + (i + nb1 + 1) * size_block a' in
+    let totlen2 = prevlen2 + (i + 1) * size_block a' in
+    // Proving totlen1 == totlen2 for the last calc step below
+    calc (==) {
+      totlen2;
+      (==) { }
+      prevlen2 + (i + 1) * block_length a;
+      (==) { }
+      prevlen1 + S.length s1 + (i + 1) * block_length a;
+      (==) { }
+      prevlen1 + nb1 * block_length a + (i + 1) * block_length a;
+      (==) { Math.Lemmas.distributivity_add_left (i + 1) nb1 (block_length a) }
+      prevlen1 + (i + 1 + nb1) * block_length a;
+      (==) { }
+      totlen1;
+    };
+
+    calc (==) {
+      f1 (i + nb1) acc;
+      (==) { }
+      blake2_update_block a' false totlen1 (get_blocki a' s (i + nb1)) acc;
+      (==) { lemma_blocki_aux2 a s1 s2 nb1 nb2 i }
+      blake2_update_block a' false totlen1 (get_blocki a' s2 i) acc;
+      (==) { }
+      f2 i acc;
+
+    }
 
 let update_multi_associative_blake (a: blake_alg)
   (h: words_state a)
