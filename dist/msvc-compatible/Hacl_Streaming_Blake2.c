@@ -37,7 +37,6 @@ Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_
   Hacl_Streaming_Blake2_blake2s_32_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2_blake2s_32_state
   s1 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2_blake2s_32_state), (uint32_t)1U);
   Hacl_Streaming_Blake2_blake2s_32_state
   *p =
     (Hacl_Streaming_Blake2_blake2s_32_state *)KRML_HOST_MALLOC(sizeof (
@@ -342,7 +341,6 @@ Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_
   Hacl_Streaming_Blake2_blake2b_32_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2_blake2b_32_state
   s1 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2_blake2b_32_state), (uint32_t)1U);
   Hacl_Streaming_Blake2_blake2b_32_state
   *p =
     (Hacl_Streaming_Blake2_blake2b_32_state *)KRML_HOST_MALLOC(sizeof (

@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "internal/Hacl_SHA2_Types.h"
 #include "../Hacl_Streaming_SHA2.h"
 
 void Hacl_SHA2_Scalar32_sha512_init(uint64_t *hash);
