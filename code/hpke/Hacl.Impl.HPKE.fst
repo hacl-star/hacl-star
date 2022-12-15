@@ -762,7 +762,7 @@ val decap:
        | _ -> False)
      )
 
-#push-options "--z3rlimit 300 --z3refresh"
+#push-options "--z3rlimit 300 --z3refresh --ifuel 1"
 
 [@ Meta.Attribute.inline_ ]
 let decap #cs o_shared enc skR =
