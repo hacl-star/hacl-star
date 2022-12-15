@@ -279,7 +279,7 @@ let update_nblocks_vec_m32_is_repeat_blocks_multi a len b st0 =
   assert (b.(|0|) == b);
   assert (st1_m32_t == st1_spec_m32)
 
-let state_spec_v_extensionality = Hacl.SHA2.Scalar32.state_spec_v_extensionality
+let state_spec_v_extensionality = Hacl.SHA2.Scalar32.Lemmas.state_spec_v_extensionality
 
 let repeati_associative (a : alg { is_sha2 a })
   (acc: Hacl.Spec.SHA2.Vec.(state_spec a M32))
