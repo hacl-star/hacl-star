@@ -163,12 +163,12 @@ let update_multi_associative_blake (a: blake_alg)
     S.length input1 % block_length a == 0 /\
     S.length input2 % block_length a == 0 /\
     prevlen2 = prevlen1 + S.length input1 /\
-    update_multi_pre a h prevlen1 (S.append input1 input2)))
+    update_multi_pre a prevlen1 (S.append input1 input2)))
   (ensures (
     let input = S.append input1 input2 in
     S.length input % block_length a == 0 /\
-    update_multi_pre a h prevlen1 input1 /\
-    update_multi_pre a (update_multi a h prevlen1 input1) prevlen2 input2 /\
+    update_multi_pre a prevlen1 input1 /\
+    update_multi_pre a prevlen2 input2 /\
     update_multi a (update_multi a h prevlen1 input1) prevlen2 input2 == update_multi a h prevlen1 input))
   = let input = S.append input1 input2 in
     let nb1 = S.length input1 / block_length a in

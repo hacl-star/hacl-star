@@ -65,7 +65,6 @@ val update (a:md_alg): update_t a
 (* Because of blake2, we unfortunately have this precondition creeping up. *)
 let update_multi_pre
   (a:hash_alg)
-  (hash:words_state a)
   (prev:extra_state a)
   (blocks:bytes)
 =
@@ -81,7 +80,7 @@ val update_multi
   (prev:extra_state a)
   (blocks:bytes_blocks a):
   Pure (words_state a)
-    (requires update_multi_pre a hash prev blocks)
+    (requires update_multi_pre a prev blocks)
     (ensures fun _ -> True)
 
 val finish (a:hash_alg) (hashw:words_state a): Tot (bytes_hash a)

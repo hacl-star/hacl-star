@@ -251,7 +251,7 @@ val update_multi:
   (requires fun h0 ->
     invariant s h0 /\
     B.live h0 blocks /\
-    Spec.Agile.Hash.update_multi_pre a (repr s h0) (ev_of_uint64 a prevlen) (B.as_seq h0 blocks) /\
+    Spec.Agile.Hash.update_multi_pre a (ev_of_uint64 a prevlen) (B.as_seq h0 blocks) /\
     M.(loc_disjoint (footprint s h0) (loc_buffer blocks)))
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1) /\
@@ -295,7 +295,7 @@ val update_last:
   (requires fun h0 ->
     invariant s h0 /\
     B.live h0 last /\
-    Spec.Agile.Hash.update_multi_pre a (repr s h0) (ev_of_uint64 a prev_len) (B.as_seq h0 last) /\
+    Spec.Agile.Hash.update_multi_pre a (ev_of_uint64 a prev_len) (B.as_seq h0 last) /\
     M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
