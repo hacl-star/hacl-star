@@ -417,6 +417,7 @@ val repeat_blocks_multi_split:
    (let len = length inp in
     Math.Lemmas.lemma_div_exact len blocksize;
     split_len_lemma0 blocksize (len / blocksize) len0;
+    Math.Lemmas.swap_mul blocksize (len / blocksize);
 
     repeat_blocks_multi blocksize inp f acc0 ==
     repeat_blocks_multi blocksize (Seq.slice inp len0 len) f
