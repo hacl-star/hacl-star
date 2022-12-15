@@ -101,7 +101,7 @@ let rec push_pre (inv_bv: bv) (t: term): Tac term =
   | Tv_Arrow bv c ->
       let c =
         match inspect_comp c with
-        | C_Eff us e a args ->
+        | C_Eff us e a args decrs ->
             if string_of_name e = "FStar_HyperStack_ST_Stack" then
               let args =
                 match args with
@@ -118,11 +118,11 @@ let rec push_pre (inv_bv: bv) (t: term): Tac term =
                 | _ ->
                     fail ("impossible: effect not fully applied " ^ string_of_name e)
               in
-              C_Eff us e a args
+              C_Eff us e a args decrs
             else
               fail ("rewritten function has an unknown effect: " ^ string_of_name e)
-        | C_Total t u decr ->
-            C_Total (push_pre inv_bv t) u decr
+        | C_Total t ->
+            C_Total (push_pre inv_bv t)
         | _ ->
             fail ("rewritten type is neither a Tot or a stateful arrow: " ^ term_to_string t)
       in
@@ -138,8 +138,7 @@ let rec to_reduce t: Tac _ =
       [ fv_to_string fv ]
   | Tv_Arrow bv c ->
       begin match inspect_comp c with
-      | C_Total t _ _ ->
-          to_reduce t
+      | C_Total t -> to_reduce t
       | _ ->
           []
       end
@@ -171,7 +170,7 @@ let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv
       print (st.indent ^ "  Found index of type " ^ term_to_string t);
       let f_typ =
         match inspect_comp c with
-        | C_Total t _ _ ->
+        | C_Total t ->
             // ... -> ... (requires p) ...
             let t = push_pre inv_bv t in
             // fun p:Type. ... -> ... (requires p) ...

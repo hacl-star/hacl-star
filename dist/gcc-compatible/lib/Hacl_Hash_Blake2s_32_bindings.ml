@@ -34,4 +34,7 @@ module Bindings(F:Cstubs.FOREIGN) =
               (uint32_t @->
                  (ocaml_bytes @->
                     (uint32_t @-> (ocaml_bytes @-> (returning void)))))))
+    let hacl_Blake2s_32_blake2s_malloc =
+      foreign "Hacl_Blake2s_32_blake2s_malloc"
+        (void @-> (returning (ptr uint32_t)))
   end

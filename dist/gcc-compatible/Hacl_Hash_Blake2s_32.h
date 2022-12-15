@@ -92,6 +92,8 @@ Hacl_Blake2s_32_blake2s(
   uint8_t *k
 );
 
+uint32_t *Hacl_Blake2s_32_blake2s_malloc();
+
 #if defined(__cplusplus)
 }
 #endif

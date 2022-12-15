@@ -24,7 +24,6 @@
 
 #include "Hacl_RSAPSS.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: hash_len */
@@ -79,10 +78,10 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
 
 /* SNIPPET_END: hash_len */
 
-/* SNIPPET_START: hash0 */
+/* SNIPPET_START: hash */
 
 static inline void
-hash0(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
+hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
 {
   switch (a)
   {
@@ -109,7 +108,7 @@ hash0(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t
   }
 }
 
-/* SNIPPET_END: hash0 */
+/* SNIPPET_END: hash */
 
 /* SNIPPET_START: mgf_hash */
 
@@ -140,7 +139,7 @@ mgf_hash(
     c[1U] = (uint8_t)(i >> (uint32_t)16U);
     c[2U] = (uint8_t)(i >> (uint32_t)8U);
     c[3U] = (uint8_t)i;
-    hash0(a, acc_i, len + (uint32_t)4U, mgfseed_counter);
+    hash(a, acc_i, len + (uint32_t)4U, mgfseed_counter);
   }
   memcpy(res, acc, maskLen * sizeof (uint8_t));
 }
@@ -247,9 +246,9 @@ pss_encode(
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
   uint8_t m1[m1Len];
   memset(m1, 0U, m1Len * sizeof (uint8_t));
-  hash0(a, m1 + (uint32_t)8U, msgLen, msg);
+  hash(a, m1 + (uint32_t)8U, msgLen, msg);
   memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
-  hash0(a, m1Hash, m1Len, m1);
+  hash(a, m1Hash, m1Len, m1);
   uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t dbLen = emLen - hLen - (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
@@ -357,9 +356,9 @@ pss_verify(
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
   uint8_t m1[m1Len];
   memset(m1, 0U, m1Len * sizeof (uint8_t));
-  hash0(a, m1 + (uint32_t)8U, msgLen, msg);
+  hash(a, m1 + (uint32_t)8U, msgLen, msg);
   memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
-  hash0(a, m1Hash0, m1Len, m1);
+  hash(a, m1Hash0, m1Len, m1);
   uint8_t res0 = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < hLen; i++)
   {
@@ -975,7 +974,7 @@ Hacl_RSAPSS_rsapss_pkey_verify(
 /* SNIPPET_START: Hacl_RSAPSS_mgf_hash */
 
 /**
-  The mask generation function defined in the Public Key Cryptography Standard #1 
+  The mask generation function defined in the Public Key Cryptography Standard #1
   (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) 
 */
 void

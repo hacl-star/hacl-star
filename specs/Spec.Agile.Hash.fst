@@ -7,6 +7,8 @@ open Spec.Hash.PadFinish
 open FStar.Mul
 open Lib.IntTypes
 
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
+
 let init a =
   match a with
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
@@ -15,17 +17,13 @@ let init a =
       Spec.MD5.init
   | SHA1 ->
       Spec.SHA1.init
-  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32, u64 0
-  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64, u128 0
-  | SHA3_256 -> Lib.Sequence.create 25 (u64 0), ()
+  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32
+  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64
+  | SHA3_256 -> Lib.Sequence.create 25 (u64 0)
 
-val update_sha3_256: update_t SHA3_256
-let update_sha3_256 (s: words_state SHA3_256) (b: bytes { Seq.length b = block_length SHA3_256 }) =
-  let s, () = s in
-  let rateInBytes = 1088 / 8 in
-  Spec.SHA3.absorb_inner rateInBytes b s, ()
-
-let update a =
+// Intentionally restricting this one to MD hashes... we want clients to AVOID
+// juggling between mk_update_multi update vs. repeati for non-MD hashes.
+let update (a: md_alg) =
   match a with
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Spec.SHA2.update a
@@ -33,28 +31,19 @@ let update a =
       Spec.MD5.update
   | SHA1 ->
       Spec.SHA1.update
-  | Blake2S -> fun h l ->
-      let blake_state, totlen = h in
-      // We should never have overflows given the restriction on buffer lengths, so
-      // this should be equivalent to a nat addition
-      let totlen = extra_state_add_nat totlen (size_block a) in
-      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S false (extra_state_v totlen) l blake_state,
-       totlen)
-  | Blake2B -> fun h l ->
-      let blake_state, totlen = h in
-      // We should never have overflows given the restriction on buffer lengths, so
-      // this should be equivalent to a nat addition
-      let totlen = extra_state_add_nat totlen (size_block a) in
-      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2B false (extra_state_v totlen) l blake_state,
-       totlen)
-  | SHA3_256 -> update_sha3_256
 
-let update_multi
-  (a:hash_alg)
-  (hash:words_state a)
-  (blocks:bytes_blocks a)
-=
-  Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
+let update_multi a hash prev blocks =
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
+      Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
+  | Blake2B | Blake2S ->
+      let nb = S.length blocks / block_length a in
+      let a' = to_blake_alg a in
+      Lib.LoopCombinators.repeati #(words_state a) nb (Spec.Blake2.blake2_update1 a' prev blocks) hash
+  | SHA3_256 ->
+      let open Spec.SHA3 in
+      let rateInBytes = 1088 / 8 in
+      Lib.Sequence.repeat_blocks_multi #_ #(words_state a) rateInBytes blocks (absorb_inner rateInBytes) hash
 
 #push-options "--fuel 0 --ifuel 0"
 
@@ -71,4 +60,4 @@ let hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a
   else
     (* As defined in the NIST standard; pad, then update, then finish. *)
     let padding = pad a (S.length input) in
-    finish a (update_multi a (init a) S.(input @| padding))
+    finish a (update_multi a (init a) () S.(input @| padding))

@@ -286,7 +286,7 @@ val repeat_blocks:
   -> blocksize:size_pos
   -> inp:seq a
   -> f:(lseq a blocksize -> b -> b)
-  -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> c)
+  -> l:(len:nat{len < blocksize} -> s:lseq a len -> b -> c)
   -> init:b ->
   Tot c
 
@@ -297,7 +297,7 @@ val lemma_repeat_blocks:
   -> bs:size_pos
   -> inp:seq a
   -> f:(lseq a bs -> b -> b)
-  -> l:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> c)
+  -> l:(len:nat{len < bs} -> s:lseq a len -> b -> c)
   -> init:b ->
   Lemma (
     let len = length inp in

@@ -1,0 +1,113 @@
+[
+  "®˙Eœ6l[ÊŒâÚ Q:{ù",
+  [
+    [
+      "Hacl.Spec.PrecompBaseTable256.lemma_mod_pow2_sub",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.nonzero", "int_inversion",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "8372b204807cec081b0c804079cf115e"
+    ],
+    [
+      "Hacl.Spec.PrecompBaseTable256.decompose_nat256_as_four_u64",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nonzero",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f"
+      ],
+      0,
+      "6d411053e7b429241a79466e1cc16c17"
+    ],
+    [
+      "Hacl.Spec.PrecompBaseTable256.exp_as_exp_four_nat256_precomp",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Spec.PrecompBaseTable256.decompose_nat256_as_four_u64",
+        "equation_Prims.nat", "equation_Prims.pos", "int_typing",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "04cc526e857034dab2687601b9fc0b0d"
+    ],
+    [
+      "Hacl.Spec.PrecompBaseTable256.exp_pow2_rec",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_5", "equation_Prims.nat",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "347cc8f06a79a43daeedfec8dbeeeeb6"
+    ],
+    [
+      "Hacl.Spec.PrecompBaseTable256.a_pow2_64_lemma",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "1a2df2cf8715c132017be92100afd82d"
+    ],
+    [
+      "Hacl.Spec.PrecompBaseTable256.a_pow2_128_lemma",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "a8e2c33f9e3a7d67925713d25ac3baef"
+    ],
+    [
+      "Hacl.Spec.PrecompBaseTable256.a_pow2_192_lemma",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "b96ca0f2333000122b4e3a2ce552db78"
+    ],
+    [
+      "Hacl.Spec.PrecompBaseTable256.lemma_decompose_nat256_as_four_u64_lbignum",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_60df9990d7200e66676af097bf523539"
+      ],
+      0,
+      "f228a9ea784d022add467a75cfdbe15a"
+    ]
+  ]
+]

@@ -119,12 +119,18 @@ let load_felem f b =
 
 
 [@CInline]
-let load_felem_vartime f b =
+let load_felem_lt_prime_vartime f b =
   load_felem f b;
   let h0 = ST.get () in
   let is_ge_p = BI.is_felem_ge_prime_vartime5 (f.(0ul),f.(1ul),f.(2ul),f.(3ul),f.(4ul)) in
   BL.is_felem_ge_prime_vartime5_lemma (as_felem5 h0 f);
-  if is_ge_p then false
+  not is_ge_p
+
+
+[@CInline]
+let load_felem_vartime f b =
+  let is_lt_p = load_felem_lt_prime_vartime f b in
+  if not is_lt_p then false
   else not (is_felem_zero_vartime f)
 
 

@@ -37,7 +37,6 @@ extern "C" {
 
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_Base.h"
 #include "../Hacl_HMAC.h"
 
 typedef struct K___uint32_t_uint32_t_s
@@ -46,20 +45,6 @@ typedef struct K___uint32_t_uint32_t_s
   uint32_t snd;
 }
 K___uint32_t_uint32_t;
-
-typedef struct K____uint32_t__uint64_t_s
-{
-  uint32_t *fst;
-  uint64_t snd;
-}
-K____uint32_t__uint64_t;
-
-typedef struct K____uint64_t__FStar_UInt128_uint128_s
-{
-  uint64_t *fst;
-  FStar_UInt128_uint128 snd;
-}
-K____uint64_t__FStar_UInt128_uint128;
 
 #if defined(__cplusplus)
 }

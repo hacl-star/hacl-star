@@ -208,7 +208,7 @@ val decap:
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 let decap cs enc skR =
   let _ = allow_inversion Spec.Agile.DH.algorithm in
-  let _ = allow_inversion Spec.Agile.Hash.algorithm in
+  let _ = allow_inversion Spec.Agile.Hash.hash_alg in
   let pkE = deserialize_public_key cs enc in
   match DH.dh (kem_dh_of_cs cs) skR pkE with
   | None -> None

@@ -1,5 +1,5 @@
 [
-  "eÂÎO2fË\u0019Õo\r¡\u0006úŽå",
+  "àVï9\u0011Ô™27\tsç6Ã\u0002Y",
   [
     [
       "Hacl.K256.Field.as_felem5",
@@ -57,7 +57,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2bc51d5004c031242759848385f5fb88"
+      "d3f5bd926e9af9cec8e642404851e01a"
     ],
     [
       "Hacl.K256.Field.feval",
@@ -70,7 +70,7 @@
         "refinement_interpretation_Tm_refine_5971b9fd4e06025a9ac5c931505c19d8"
       ],
       0,
-      "12674308f70e06e39cef6a0071b3c877"
+      "2e307c2d06b8f48ca11a8e7eb97535e0"
     ],
     [
       "Hacl.K256.Field.as_felem4",
@@ -118,7 +118,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "1e0a59f4c77141ea81f7ba2bdd6b0137"
+      "0ab322b267ff20ae947b4c417897fe72"
     ],
     [
       "Hacl.K256.Field.make_prime_k256",
@@ -127,7 +127,7 @@
       0,
       [ "@query" ],
       0,
-      "96ffb3d3a282be5cfdb0ee95149afcc4"
+      "f01a44ed7d92f6584bb3b0b95b276f5b"
     ],
     [
       "Hacl.K256.Field.make_order_k256",
@@ -136,7 +136,7 @@
       0,
       [ "@query" ],
       0,
-      "45cb777c42636bae31864c9fddeda262"
+      "afbc527b3800fc0ceedc6a533f6b2018"
     ],
     [
       "Hacl.K256.Field.make_b_k256",
@@ -150,7 +150,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b723c9c3d4b4f522b386424de99f0e5a"
+      "3eb5640564d28d5d410a18fa0ab49474"
     ],
     [
       "Hacl.K256.Field.is_felem_eq_vartime",
@@ -164,7 +164,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b800ba7d5d1c97aeb884a3bd5a8a9a7a"
+      "68f483e4b69fabb6655f6c4a90a7c356"
     ],
     [
       "Hacl.K256.Field.create_felem",
@@ -208,7 +208,32 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "2c07d3c110a7690a6c87818f7cc03876"
+      "dd2ee8c4786b10d3b02033c6e2c0b991"
+    ],
+    [
+      "Hacl.K256.Field.load_felem_lt_prime_vartime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.Sequence.length", "equation_LowStar.Buffer.buffer",
+        "equation_Prims.nat", "function_token_typing_Lib.IntTypes.uint8",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "typing_Lib.Buffer.length", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "74fca7e3cca088307ba751b58474f1be"
     ],
     [
       "Hacl.K256.Field.load_felem_vartime",
@@ -233,7 +258,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "4ed0bd87da24f6efebccf7de4ed34438"
+      "59586c0e97393e1a89cf0f4436b5e935"
     ],
     [
       "Hacl.K256.Field.store_felem",
@@ -269,7 +294,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "8952092ee8ac1607cd877aedeb471515"
+      "a49254f06bf4d7e00a044e10708f4bc5"
     ],
     [
       "Hacl.K256.Field.copy_felem",
@@ -304,7 +329,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "c32b4556d6ae63bc39474fb4c16c383c"
+      "b198845b7c709b47b3235063ea5aa724"
     ],
     [
       "Hacl.K256.Field.fmul",
@@ -313,7 +338,7 @@
       0,
       [ "@query" ],
       0,
-      "4e9a122693e07e69c78415175efb2f51"
+      "a9b89d330adf37c9f378d5c106039ae9"
     ],
     [
       "Hacl.K256.Field.fsqr",
@@ -322,7 +347,7 @@
       0,
       [ "@query" ],
       0,
-      "596851c2ed5d6b8f3800a8efe8db4abe"
+      "c635532035bdcd45aa4c56242041bc8b"
     ],
     [
       "Hacl.K256.Field.fmul_3b_normalize_weak",
@@ -337,7 +362,7 @@
         "typing_Spec.K256.PointOps.prime"
       ],
       0,
-      "d4529f07ff325e4d8157d1ee52ae0d05"
+      "a78f6545115ad684bf579504691f5dbc"
     ],
     [
       "Hacl.K256.Field.fmul_8_normalize_weak",
@@ -352,7 +377,7 @@
         "typing_Spec.K256.PointOps.prime"
       ],
       0,
-      "3fcb7b1711d1584e2aed48de4ac1619a"
+      "54e534d36ff1044ac4cbc762f75648aa"
     ],
     [
       "Hacl.K256.Field.fnegate_conditional_vartime",
@@ -361,7 +386,7 @@
       0,
       [ "@query" ],
       0,
-      "6ede296eb1062177355c355a5de0880b"
+      "6e4d7c6eaae504770d6060dc24338f0c"
     ]
   ]
 ]
