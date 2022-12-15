@@ -138,12 +138,7 @@ let rec to_reduce t: Tac _ =
       [ fv_to_string fv ]
   | Tv_Arrow bv c ->
       begin match inspect_comp c with
-      | C_Total t ->
-          to_reduce t
-      | C_Eff _ nm t _ _ ->
-          if nm = ["Prims"; "Tot"]
-          then to_reduce t
-          else []
+      | C_Total t -> to_reduce t
       | _ ->
           []
       end
