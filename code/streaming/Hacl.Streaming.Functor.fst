@@ -356,7 +356,7 @@ let create_in #index c i t t' k r =
 
   p
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 300"
 let copy #index c i t t' s0 r =
   //[@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   //[@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -446,55 +446,59 @@ let copy #index c i t t' s0 r =
 
   (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
   (**) assume (B.fresh_loc (c.state.footprint #i h5 block_state) h0 h5);
-  admit()
-// +
-// +  let s = State block_state buf 0UL (G.hide S.empty) k' in
-// +  (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
-// +
-// +  (**) B.loc_unused_in_not_unused_in_disjoint h5;
-// +  let p = B.malloc r s 1ul in
-// +  (**) let h6 = ST.get () in
-// +  (**) B.(modifies_only_not_unused_in loc_none h5 h6);
-// +  (**) B.(modifies_only_not_unused_in loc_none h0 h6);
-// +  (**) c.key.frame_invariant B.loc_none k h5 h6;
-// +  (**) c.state.frame_invariant B.loc_none block_state h5 h6;
-// +  (**) optional_frame B.loc_none k' h5 h6;
-// +  (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
-// +  (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
-// +  (**) c.state.frame_freeable B.loc_none block_state h5 h6;
-// +  (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
-// +
-// +  c.init (G.hide i) k block_state;
-// +  (**) let h7 = ST.get () in
-// +  (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
-// +  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
-// +  (**) optional_frame (c.state.footprint #i h7 block_state) k' h6 h7;
-// +  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
-// +  (**) split_at_last_empty c i;
-// +  (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
-// +  (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
-// +
-// +  (**) let h8 = ST.get () in
-// +  (**) assert (
-// +    let h = h8 in
-// +    let s = (B.get h8 p 0) in
-// +    let State block_state buf_ total_len seen _ = s in
-// +    let seen = G.reveal seen in
-// +    let blocks, rest = split_at_last c i seen in
-// +    // JP: unclear why I need to assert this... but without it the proof doesn't
-// +    // go through.
-// +    U64.v total_len < U64.v (c.max_input_len i)
-// +  );
-// +  (**) assert (invariant c i h8 p);
-// +  (**) assert (seen c i h8 p == S.empty);
-// +  (**) assert B.(modifies loc_none h0 h8);
-// +  (**) assert (B.fresh_loc (footprint c i h8 p) h0 h8);
-// +  (**) assert B.(loc_includes (loc_region_only true r) (footprint c i h8 p));
-// +
-// +  (**) assert (ST.equal_stack_domains h1 h8);
-// +  (**) assert (ST.equal_stack_domains h0 h1);
-// +
-// +  p
+
+
+  let s = State block_state buf 0UL (G.hide S.empty) k' in
+  (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
+
+  (**) B.loc_unused_in_not_unused_in_disjoint h5;
+  let p = B.malloc r s 1ul in
+  (**) let h6 = ST.get () in
+  (**) B.(modifies_only_not_unused_in loc_none h5 h6);
+  (**) B.(modifies_only_not_unused_in loc_none h0 h6);
+  (**) c.key.frame_invariant #i B.loc_none k0 h0 h6;
+  (**) assume (c.state.invariant #i h5 block_state);
+  (**) c.state.frame_invariant #i B.loc_none block_state h5 h6;
+  (**) optional_frame B.loc_none k' h5 h6;
+  (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
+  (**) assume (B.fresh_loc (footprint_s c i h6 s) h0 h6);
+//  (**) c.state.frame_freeable B.loc_none block_state h5 h6;
+  (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
+
+  c.init (G.hide i) k0 block_state;
+  (**) let h7 = ST.get () in
+  (**) assume (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
+  (**) assume (B.fresh_loc (B.loc_buffer buf) h0 h7);
+  (**) assume (B.loc_disjoint (c.state.footprint #i h7 block_state) (optional_footprint h6 k'));
+  (**) optional_frame (c.state.footprint #i h7 block_state) k' h6 h7;
+  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
+  (**) split_at_last_empty c i;
+  (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
+  (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
+
+  (**) let h8 = ST.get () in
+  (**) assert (
+    let h = h8 in
+    let s = (B.get h8 p 0) in
+    let State block_state buf_ total_len seen _ = s in
+    let seen = G.reveal seen in
+    let blocks, rest = split_at_last c i seen in
+    // JP: unclear why I need to assert this... but without it the proof doesn't
+    // go through.
+    U64.v total_len < U64.v (c.max_input_len i)
+  );
+  (**) assume (invariant c i h8 p);
+  (**) assume (freeable c i h8 p);
+  (**) assume (seen c i h8 p == seen c i h0 s0);
+  (**) assume (key c i h8 p == key c i h0 s0);
+  (**) assert B.(modifies loc_none h0 h8);
+  (**) assert (B.fresh_loc (footprint c i h8 p) h0 h8);
+  (**) assume B.(loc_includes (loc_region_only true r) (footprint c i h8 p));
+
+  (**) assert (ST.equal_stack_domains h1 h8);
+  (**) assert (ST.equal_stack_domains h0 h1);
+
+  p
 
 #push-options "--z3rlimit 100"
 let alloca #index c i t t' k =
