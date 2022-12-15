@@ -660,7 +660,7 @@ let map_blocks_multi_acc_is_repeat_gen_blocks_multi #a blocksize mi hi n inp f a
 
 let map_blocks_acc_is_repeat_gen_blocks #a blocksize mi hi inp f l acc0 = ()
 
-
+#push-options "--z3rlimit 150"
 val map_blocks_multi_acc_is_map_blocks_multi_:
     #a:Type0
   -> blocksize:size_pos
@@ -682,7 +682,6 @@ val map_blocks_multi_acc_is_map_blocks_multi_:
     Loops.repeat_right mi (mi + n) a_f f_gen acc0 ==
     Seq.append acc0 (Loops.repeat_right 0 n a_g f_map (Seq.empty #a)))
 
-#push-options "--z3rlimit 150"
 let rec map_blocks_multi_acc_is_map_blocks_multi_ #a blocksize mi hi_f hi_g n inp f acc0 =
   let a_f = map_blocks_a a blocksize hi_f in
   let a_g = map_blocks_a a blocksize hi_g in
