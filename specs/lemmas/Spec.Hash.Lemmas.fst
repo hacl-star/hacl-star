@@ -105,6 +105,31 @@ let lemma_blocki_aux2 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s2 / block
           Spec.Blake2.get_blocki a' s2 i;
         }
 
+open FStar.Mul
+
+let lemma_update_aux2 (a:blake_alg) (s1 s2:bytes) (nb1 nb2:nat) (prevlen1 prevlen2:nat) (i:nat{i < nb2}) (acc:words_state a)
+  : Lemma
+    (requires
+      S.length s1 == nb1 * block_length a /\
+      S.length s2 == nb2 * block_length a /\
+      prevlen1 % block_length a == 0 /\
+      prevlen2 = prevlen1 + S.length s1 /\
+      (S.length (S.append s1 s2) + prevlen1) `less_than_max_input_length` a)
+    (ensures
+      Spec.Blake2.blake2_update1 (to_blake_alg a) prevlen1 (s1 `S.append` s2) (i + nb1) acc ==
+      Spec.Blake2.blake2_update1 (to_blake_alg a) prevlen2 s2 i acc)
+  = lemma_blocki_aux2 a s1 s2 i;
+    calc (==) {
+      prevlen2 + i * block_length a;
+      (==) { }
+      prevlen1 + S.length s1 + i * block_length a;
+      (==) { Math.Lemmas.lemma_div_exact (S.length s1) (block_length a) }
+      prevlen1 + nb1 * block_length a + i * block_length a;
+      (==) { Math.Lemmas.distributivity_add_left i nb1 (block_length a) }
+      prevlen1 + (i + nb1) * block_length a;
+    }
+
+
 let update_multi_associative_blake (a: blake_alg)
   (h: words_state a)
   (prevlen1: nat)
@@ -113,7 +138,7 @@ let update_multi_associative_blake (a: blake_alg)
   (input2: bytes):
   Lemma
   (requires (
-    prevlen1 % block_length a = 0 /\
+    prevlen1 % block_length a == 0 /\
     S.length input1 % block_length a == 0 /\
     S.length input2 % block_length a == 0 /\
     prevlen2 = prevlen1 + S.length input1 /\
@@ -137,16 +162,7 @@ let update_multi_associative_blake (a: blake_alg)
     in
     let open FStar.Mul in
     let aux2 (i:nat{i < nb2}) (acc:words_state a) : Lemma (f (i + nb1) acc == f2 i acc)
-      = lemma_blocki_aux2 a input1 input2 i;
-        calc (==) {
-          prevlen2 + i * block_length a;
-          (==) { }
-          prevlen1 + S.length input1 + i * block_length a;
-          (==) { Math.Lemmas.lemma_div_exact (S.length input1) (block_length a) }
-          prevlen1 + nb1 * block_length a + i * block_length a;
-          (==) { Math.Lemmas.distributivity_add_left i nb1 (block_length a) }
-          prevlen1 + (i + nb1) * block_length a;
-        }
+      = lemma_update_aux2 a input1 input2 nb1 nb2 prevlen1 prevlen2 i acc
     in
     let open Lib.LoopCombinators in
     let open Lib.Sequence.Lemmas in
