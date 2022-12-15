@@ -866,7 +866,7 @@ let update_last_is_repeat_blocks_multi a len last st1 =
     assert (st3 == repeat_blocks_f blocksize blocks1 (update a) nb 1 st2) end
 
 
-#push-options "--z3rlimit 350"
+#push-options "--z3rlimit 450"
 val hash_is_repeat_blocks_multi:
     a:sha2_alg
   -> len:len_lt_max_a_t a
@@ -901,6 +901,13 @@ let hash_is_repeat_blocks_multi a len b st0 =
   let last = Seq.slice b len0 len in
   //assert (repeat_blocks blocksize b (update a) (update_last a len') st0 == update_last a len' rem last st1);
   Seq.lemma_eq_intro blocks1 (Seq.append last pad_s);
+
+  // Stabilizing nl arithmetic:
+  //  By def of pad_length
+  assert ((pad_length a len + len) % blocksize == 0);
+  //  We derive the precondition of update_last_is_repeat_blocks_multi
+  Math.Lemmas.lemma_mod_add_distr (pad_length a len) len blocksize;
+  assert ((pad_length a len + len % blocksize) % blocksize = 0);
   update_last_is_repeat_blocks_multi a len last st1
 #pop-options
 
