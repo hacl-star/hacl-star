@@ -63,6 +63,9 @@ let createL #a init =
 let createL_global #a init =
   CB.of_ibuffer (IB.igcmalloc_of_list #a root init)
 
+let createL_mglobal #a init =
+  B.mgcmalloc_of_list #a FStar.Monotonic.HyperHeap.root init
+
 let recall_contents #a #len b s =
   B.recall_p (CB.to_ibuffer b) (cpred s)
 
@@ -337,16 +340,14 @@ let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
 
 #set-options "--z3rlimit 400 --max_fuel 1"
 
-let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
-  let nb = inpLen /. bs in
-  let rem = inpLen %. bs in
+let loop_blocks #a #b #blen bs nb rem inp spec_f spec_l f l w =
   [@ inline_let]
   let spec_fh h0 = Seq.repeat_blocks_f (v bs) (as_seq h0 inp) spec_f (v nb) in
   let h0 = ST.get () in
   loop1 #b #blen h0 nb w spec_fh
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
-    loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
+    loop_blocks_f #a #b #blen bs (bs *! nb +! rem) inp spec_f f nb i w);
   let last = sub inp (nb *! bs) rem in
   l rem last w
 

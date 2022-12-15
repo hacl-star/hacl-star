@@ -1,5 +1,5 @@
 [
-  "ÿ+–3“Û…”∫¿\u0002fî\u001fy\u0012",
+  "2Òãv1Ï\u001aÅ #Í\u0018Økí",
   [
     [
       "Lib.MultiBuffer.internally_disjoint",
@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "da05f50185df74938dbaffc88d032aa1"
+      "b38cd6629b060dd4c2c94a0c66ceb2df"
     ],
     [
       "Lib.MultiBuffer.loc_multi_",
@@ -34,7 +34,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "dd87fe829195bf7b2d5093568c10b387"
+      "00e80c4613d19b5c2d48c75fd974c600"
     ],
     [
       "Lib.MultiBuffer.loc_multi",
@@ -48,7 +48,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "ddc60b59dd429fa243dfd715afb3e3b2"
+      "56c3010b18eb5b12d8b647f43e08223c"
     ],
     [
       "Lib.MultiBuffer.loc_multi1",
@@ -65,7 +65,7 @@
         "refinement_interpretation_Tm_refine_bded595d5c675d20923ebf7eee58cd50"
       ],
       0,
-      "ca74ce6e49e682ae652d7477b54c469f"
+      "6d5b5d75794d1781fd42ef0181c04ce1"
     ],
     [
       "Lib.MultiBuffer.loc_multi4",
@@ -111,7 +111,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "4a231d006ba7c7f08ab5979c11ade541"
+      "af6e89217de6c77a70f18b83db602f38"
     ],
     [
       "Lib.MultiBuffer.loc_multi8",
@@ -157,7 +157,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "eefb470381c8ac272cee80aa9df254a9"
+      "b6b233664a611b82898a7dd96243aca5"
     ],
     [
       "Lib.MultiBuffer.disjoint_multi_multi",
@@ -169,7 +169,7 @@
         "refinement_interpretation_Tm_refine_c306ccae1059a87849b4e82260d2061a"
       ],
       0,
-      "af378e728e88558682fd8fbee8ec984d"
+      "e963756d70b112041eeb496c00b43ad1"
     ],
     [
       "Lib.MultiBuffer.stack_allocated_multi",
@@ -193,7 +193,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "f240513ae064706c4cd18a569e6f814a"
+      "91e3e4a8fffe0da370b1a210503ca1cd"
     ],
     [
       "Lib.MultiBuffer.as_seq_multi",
@@ -217,7 +217,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "d501892f10c9689ea0bb5034f83fb557"
+      "6bb06ed8164f3ddb0dccfb10071e8ed4"
     ],
     [
       "Lib.MultiBuffer.as_seq_multi_lemma",
@@ -225,29 +225,53 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "@MaxIFuel_assumption", "@query",
+        "Lib.Buffer_interpretation_Tm_ghost_arrow_2dc959718e214e5c75a81c011c332cb9",
+        "Prims_interpretation_Tm_ghost_arrow_0283b8a2a36bbec52abac4e3d837674a",
+        "b2t_def", "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.UInt.fits",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
+        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
         "equation_Lib.MultiBuffer.as_seq_multi", "equation_Lib.NTuple.flen",
-        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
+        "equation_Prims.pos", "function_token_typing_Lib.Buffer.as_seq",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "lemma_Lib.NTuple.index_gmap_lemma", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt32.v"
+        "token_correspondence_Lib.Buffer.as_seq",
+        "typing_FStar.Seq.Properties.lseq", "typing_FStar.UInt32.v",
+        "typing_Lib.Buffer.lbuffer_t", "typing_Lib.IntTypes.v",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.as_seq",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9532bcdd87cd355c649b03fe4ef5aeec"
+      "790cb771fc40c2438633a9fbf66c6e93"
     ]
   ]
 ]

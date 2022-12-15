@@ -24,7 +24,7 @@
 
 #include "Hacl_Streaming_SHA3.h"
 
-
+#include "internal/Hacl_Streaming_SHA2.h"
 
 /* SNIPPET_START: Hacl_Streaming_SHA3_create_in_256 */
 
@@ -34,7 +34,6 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256()
   uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   Hacl_Streaming_SHA2_state_sha2_384
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_384), (uint32_t)1U);
   Hacl_Streaming_SHA2_state_sha2_384
   *p =
     (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
@@ -140,8 +139,7 @@ Hacl_Streaming_SHA3_update_256(
     if (!(sz1 == (uint32_t)0U))
     {
       {
-        uint32_t sz2 = (uint32_t)136U;
-        uint8_t *block = buf + sz2 * (uint32_t)0U;
+        uint8_t *block = buf + (uint32_t)0U * (uint32_t)136U;
         Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
         Hacl_Impl_SHA3_state_permute(block_state1);
       }
@@ -162,8 +160,7 @@ Hacl_Streaming_SHA3_update_256(
     uint8_t *data2 = data + data1_len;
     for (uint32_t i = (uint32_t)0U; i < data1_len / (uint32_t)136U; i++)
     {
-      uint32_t sz2 = (uint32_t)136U;
-      uint8_t *block = data1 + sz2 * i;
+      uint8_t *block = data1 + i * (uint32_t)136U;
       Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
       Hacl_Impl_SHA3_state_permute(block_state1);
     }
@@ -225,8 +222,7 @@ Hacl_Streaming_SHA3_update_256(
     if (!(sz1 == (uint32_t)0U))
     {
       {
-        uint32_t sz2 = (uint32_t)136U;
-        uint8_t *block = buf + sz2 * (uint32_t)0U;
+        uint8_t *block = buf + (uint32_t)0U * (uint32_t)136U;
         Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
         Hacl_Impl_SHA3_state_permute(block_state1);
       }
@@ -253,8 +249,7 @@ Hacl_Streaming_SHA3_update_256(
     uint8_t *data21 = data2 + data1_len;
     for (uint32_t i = (uint32_t)0U; i < data1_len / (uint32_t)136U; i++)
     {
-      uint32_t sz2 = (uint32_t)136U;
-      uint8_t *block = data11 + sz2 * i;
+      uint8_t *block = data11 + i * (uint32_t)136U;
       Hacl_Impl_SHA3_loadState((uint32_t)136U, block, block_state1);
       Hacl_Impl_SHA3_state_permute(block_state1);
     }

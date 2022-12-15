@@ -49,7 +49,6 @@ mkdir -p mozilla/internal
 
 # For these, we want just the header
 cp gcc-compatible/Hacl_Krmllib.h mozilla/
-cp gcc-compatible/internal/Hacl_Krmllib.h mozilla/internal/
 cp gcc-compatible/internal/Hacl_Streaming_SHA2.h mozilla/internal/
 cp gcc-compatible/Hacl_Streaming_SHA2.h mozilla/
 cp gcc-compatible/Hacl_Hash_SHA2.h mozilla/

@@ -37,11 +37,6 @@ extern "C" {
 
 
 
-#define Spec_Blake2_Blake2S 0
-#define Spec_Blake2_Blake2B 1
-
-typedef uint8_t Spec_Blake2_alg;
-
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2

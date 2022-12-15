@@ -119,15 +119,9 @@ let lemma_mul_mod_assoc #m a b c =
 
 let lemma_mul_mod_comm #m a b = ()
 
-
-val pow_mod_ (#m:pos{1 < m}) (a:nat_mod m) (b:nat) : Tot (nat_mod m) (decreases b)
-let rec pow_mod_ #m a b =
-  if b = 0 then 1
-  else
-    if b % 2 = 0 then pow_mod_ (mul_mod a a) (b / 2)
-    else mul_mod a (pow_mod_ (mul_mod a a) (b / 2))
-
 let pow_mod #m a b = pow_mod_ #m a b
+
+let pow_mod_def #m a b = ()
 
 
 #push-options "--fuel 2"

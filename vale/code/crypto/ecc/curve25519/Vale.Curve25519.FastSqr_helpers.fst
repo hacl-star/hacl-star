@@ -103,6 +103,17 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
   lemma_dbl_pow2_six (mul_nats a0 a1) (mul_nats a0 a2) (mul_nats a0 a3 + a1*a2) (mul_nats a1 a3) (mul_nats a2 a3) 0;
   assert_by_tactic (pow2_64 * pow2_six (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2)) (2*(mul_nats a0 a3 + a1*a2)) (2*(mul_nats a1 a3)) (2*(mul_nats a2 a3)) 0 ==
                     pow2_seven 0 (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2)) (2*(mul_nats a0 a3 + a1*a2)) (2*(mul_nats a1 a3)) (2*(mul_nats a2 a3)) 0) int_canon;  // PASSES
+
+  // The following unrolling is apparently needed
+  assert_by_tactic ( (36893488147419103232 * (a0 * a1) +
+    (680564733841876926926749214863536422912 * (a0 * a2) +
+    (12554203470773361527671578846415332832204710888928069025792 * (a0 * a3) +
+    (12554203470773361527671578846415332832204710888928069025792 * (a1 * a2) +
+    (231584178474632390847141970017375815706539969331281128078915168015826259279872 * (a1 * a3) +
+    (4271974071841820164790043412339104229205409044713305539894083215644439451561281100045924173873152 *
+    (a2 * a3)
+    )))))) == pow2_64 * pow2_six (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2)) (2*(mul_nats a0 a3 + a1*a2)) (2*(mul_nats a1 a3)) (2*(mul_nats a2 a3)) 0) int_canon;
+
   assert_by_tactic (rhs == pow2_eight (mul_nats a0 a0) (2*(mul_nats a0 a1)) ((2*(mul_nats a0 a2)) + mul_nats a1 a1) (2*(mul_nats a0 a3 + a1*a2)) ((2*(mul_nats a1 a3)) + mul_nats a2 a2) (2*(mul_nats a2 a3)) (mul_nats a3 a3) 0) int_canon;  // PASSES
   let final_rhs:int = pow2_seven (mul_nats a0 a0) (2*(mul_nats a0 a1)) ((2*(mul_nats a0 a2)) + mul_nats a1 a1) (2*(mul_nats a0 a3 + a1*a2)) ((2*(mul_nats a1 a3)) + mul_nats a2 a2) (2*(mul_nats a2 a3)) (mul_nats a3 a3) in
   assert_by_tactic (pow2_eight (mul_nats a0 a0) (2*(mul_nats a0 a1)) ((2*(mul_nats a0 a2)) + mul_nats a1 a1) (2*(mul_nats a0 a3 + a1*a2)) ((2*(mul_nats a1 a3)) + mul_nats a2 a2) (2*(mul_nats a2 a3)) (mul_nats a3 a3) 0 ==

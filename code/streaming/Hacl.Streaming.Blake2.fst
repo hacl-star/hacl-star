@@ -334,7 +334,7 @@ val update_multi_associative:
       update_multi_s acc prevlen1 input))
 #pop-options
 
-#push-options "--z3rlimit 200 --split_queries"
+#push-options "--z3rlimit 400"
 let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let input = S.append input1 input2 in
   let nb = S.length input / U32.v (block_len a) in
@@ -478,6 +478,7 @@ let spec_is_incremental a kk k input0 =
   let s1 = Lib.LoopCombinators.repeati n_blocks f s in
   let s2 = Lib.LoopCombinators.repeati n_blocks g s in
   assert (s1 == s2);
+
   S.lemma_eq_intro (S.slice input (S.length input - l_last) (S.length input)) last;
   S.lemma_eq_intro (S.slice last (S.length last - l_last) (S.length last)) last;
   Spec.Blake2.Alternative.lemma_spec_equivalence_update a kk k input0 s;

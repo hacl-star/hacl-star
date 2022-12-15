@@ -2,8 +2,6 @@
 #
 # From a high-level perspective, the coarse-grained dependency graph is:
 #
-#            merkle_tree
-#                |
 #             evercrypt
 #               /  \
 #           code   vale
@@ -16,6 +14,8 @@
 # - SKIPDEPEND=1 disables even *including* .depend files (not meant for end users)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
+# - RESOURCEMONITOR=1 will create .runlim files with runtime and memory usage
+#   information. The results can then be tallied with the res_summary.sh script.
 #
 # This is a staged Makefile, because we first need to generate .fst files out of
 # .vaf files in order to get a full dependency graph for the .fst files. So,
@@ -94,8 +94,7 @@ all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible \
   compile-portable-gcc-compatible \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic \
-  obj/libhaclml.cmxa
+  dist/wasm/package.json obj/libhaclml.cmxa
 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
@@ -201,6 +200,13 @@ endif
 
 SHELL:=$(shell which bash)
 
+# Passing RESOURCEMONITOR=1 to this Makefile will create .runlim files
+# throughout the tree with resource information. The $(RUNLIM) variable
+# can also be defined directly if so desired.
+ifneq ($(RESOURCEMONITOR),)
+  RUNLIM = runlim -p -o $@.runlim
+endif
+
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM)
 #
@@ -211,6 +217,7 @@ SHELL:=$(shell which bash)
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
+  $(RUNLIM) \
   $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
@@ -226,7 +233,7 @@ run-with-log = \
     false; \
   fi
 else
-run-with-log = $1
+run-with-log = $(RUNLIM) $1
 endif
 
 
@@ -272,8 +279,8 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:*' \
-	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
-	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
+	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@.tmp && \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@.tmp && mv $@.tmp $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -587,7 +594,7 @@ HAND_WRITTEN_ML_GEN =
 
 # Flags that we always include. These are not meant to be overridden and
 # provide: -library (for vale interop); -no-prefix (for correct vale interop
-# names; for correct Merkle Tree function names used by C tests); -bundle (to
+# names; for correct function names used by C tests); -bundle (to
 # eliminate spec files where definitions are not marked noextract); -drop (for
 # intrinsics, see note below); -add-include (for curve's inline header); -fX for
 # codegen customiations; -static-header (so that instead of extern declarations
@@ -606,7 +613,6 @@ REQUIRED_BUNDLES = \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
-  -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   $(VALE_BUNDLES) \
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle 'EverCrypt.Spec.*' \
@@ -631,8 +637,6 @@ REQUIRED_FLAGS	= \
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -add-include 'Hacl_Curve25519_64.c:"curve25519-inline.h"' \
-  -no-prefix 'MerkleTree' \
-  -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig \
   -static-header 'EverCrypt.TargetConfig' \
   -no-prefix 'EverCrypt.TargetConfig' \
@@ -694,7 +698,6 @@ TARGETCONFIG_FLAGS = \
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
-MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
@@ -713,7 +716,6 @@ BUNDLE_FLAGS	=\
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
-  $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
   $(P256_BUNDLE) \
@@ -795,8 +797,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 
-# And Merkle trees
-dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
@@ -831,7 +831,8 @@ publish-test-wasm: dist/wasm/package.json
 test-wasm: dist/wasm/package.json
 	cd dist/wasm && \
 	  node api_test.js && \
-	  node test2.js
+	  node test2.js && \
+	  node test3.js
 
 # Compact distributions
 # ---------------------
@@ -872,24 +873,10 @@ dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 # file that is *NOT* known to require sse2.
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
-# Merkle Tree standalone distribution
-# -----------------------------------
-#
-# Without even cryptography.
-dist/merkle-tree/Makefile.basic: \
-	BUNDLE_FLAGS=-bundle MerkleTree.EverCrypt \
-    -bundle 'MerkleTree+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=*[rename=MerkleTree]'
-dist/merkle-tree/Makefile.basic: VALE_ASMS =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_H_FILES =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_FILES =
-dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
-dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
-dist/merkle-tree/Makefile.basic: INTRINSIC_FLAGS =
-
 # Actual KaRaMeL invocations
 # --------------------------
 
+.PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS)
 	mkdir -p $(dir $@)
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
@@ -942,7 +929,7 @@ dist/test/c/Hacl_Test_K256.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-incl
 
 copy-krmllib:
 	mkdir -p dist/karamel
-	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal include) | (cd dist/karamel && tar xf -)
+	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal $$(find include -not -name 'steel_types.h')) | (cd dist/karamel && tar xf -)
 
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 

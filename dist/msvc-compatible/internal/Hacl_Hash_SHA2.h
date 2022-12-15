@@ -45,10 +45,6 @@ void Hacl_Hash_Core_SHA2_init_384(uint64_t *s);
 
 void Hacl_Hash_Core_SHA2_init_512(uint64_t *s);
 
-void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block);
-
-void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block);
-
 void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst);
 
 void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst);

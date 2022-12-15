@@ -5,9 +5,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Core_MD5_legacy_init =
       foreign "Hacl_Hash_Core_MD5_legacy_init"
         ((ptr uint32_t) @-> (returning void))
-    let hacl_Hash_Core_MD5_legacy_update =
-      foreign "Hacl_Hash_Core_MD5_legacy_update"
-        ((ptr uint32_t) @-> (ocaml_bytes @-> (returning void)))
     let hacl_Hash_Core_MD5_legacy_finish =
       foreign "Hacl_Hash_Core_MD5_legacy_finish"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (returning void)))

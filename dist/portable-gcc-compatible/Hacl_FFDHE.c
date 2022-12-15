@@ -24,7 +24,6 @@
 
 #include "Hacl_FFDHE.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: ffdhe_len */

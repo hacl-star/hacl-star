@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Impl_Blake2_Constants.h"
+#include "Hacl_Hash_Blake2s_128.h"
 
 /**
 Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.

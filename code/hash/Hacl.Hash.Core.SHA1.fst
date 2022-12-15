@@ -22,7 +22,7 @@ let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 
 noextract inline_for_extraction
 let legacy_alloca () =
-  B.alloca_of_list Spec.init_as_list, ()
+  B.alloca_of_list Spec.init_as_list
 
 (* We read values from constant buffers through accessors to isolate
    all recall/liveness issues away. Thus, clients will not need to
@@ -34,21 +34,21 @@ let h0 (i: U32.t { U32.v i < 5 } ) : HST.Stack uint32
   (requires (fun _ -> True))
   (ensures (fun h res h' ->
     B.modifies B.loc_none h h' /\
-    res == Seq.index Spec.h0 (U32.v i)
+    res == Seq.index Spec.init (U32.v i)
   ))
-= IB.recall_contents _h0 Spec.h0;
+= IB.recall_contents _h0 Spec.init;
   B.index _h0 i
 
 let legacy_init s =
   let h = HST.get () in
   let inv (h' : HS.mem) (i: nat) : GTot Type0 =
-    B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 5 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.h0 0 i
+    B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 5 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
   in
   C.Loops.for 0ul 5ul inv (fun i ->
     B.upd s i (h0 i);
     let h' = HST.get () in
     Seq.snoc_slice_index (B.as_seq h' s) 0 (U32.v i);
-    Seq.snoc_slice_index (Spec.h0) 0 (U32.v i)
+    Seq.snoc_slice_index (Spec.init) 0 (U32.v i)
   )
 
 inline_for_extraction
@@ -213,15 +213,15 @@ let zero_out
 let spec_step3_body
   (mi: Spec.word_block)
   (gw: Ghost.erased (Spec.step3_body_w_t mi))
-  (st: Ghost.erased (words_state' SHA1))
+  (st: Ghost.erased (words_state SHA1))
   (t: nat {t < 80})
-: Tot (Ghost.erased (words_state' SHA1))
+: Tot (Ghost.erased (words_state SHA1))
 = Ghost.elift1 (fun h -> Spec.step3_body mi (Ghost.reveal gw) h t) st
 
 let spec_step3_body_spec
   (mi: Spec.word_block)
   (gw: Ghost.erased (Spec.step3_body_w_t mi))
-  (st: Ghost.erased (words_state' SHA1)) (t: nat { t < 80 } )
+  (st: Ghost.erased (words_state SHA1)) (t: nat { t < 80 } )
 : Lemma
   (Ghost.reveal (spec_step3_body mi gw st t) == Spec.step3_body mi (Ghost.reveal gw) (Ghost.reveal st) t)
   [SMTPat (Ghost.reveal (spec_step3_body mi gw st t))]
@@ -254,12 +254,12 @@ let step3
   let gw: Ghost.erased (Spec.step3_body_w_t (Ghost.reveal mi)) =
     Ghost.elift1 (Spec.index_compute_w (Ghost.reveal mi)) cwt
   in
-  let f : Ghost.erased (C.Loops.repeat_range_body_spec (words_state' SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi) (Ghost.reveal gw)) in
+  let f : Ghost.erased (C.Loops.repeat_range_body_spec (words_state SHA1) 80) = Ghost.hide (Spec.step3_body (Ghost.reveal mi) (Ghost.reveal gw)) in
   let inv (h' : HS.mem) : GTot Type0 =
     B.modifies (B.loc_buffer h) h1 h' /\
     B.live h' h
   in
-  let interp (h' : HS.mem { inv h' } ) : GTot (words_state' SHA1) =
+  let interp (h' : HS.mem { inv h' } ) : GTot (words_state SHA1) =
     B.as_seq h' h
   in
   C.Loops.repeat_range 0ul 80ul f inv interp (fun i -> step3_body mi _w gw h i);
@@ -304,7 +304,7 @@ let step4
     (ste +. he);
   reveal_opaque (`%Spec.step4) Spec.step4
 
-let legacy_update h ev l =
+let legacy_update h l =
   step4 l h
 
 let legacy_pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1

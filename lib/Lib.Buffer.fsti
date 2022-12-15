@@ -401,6 +401,16 @@ val createL_global:
                           recallable b /\
                           witnessed b (Seq.of_list init))
 
+(** Allocate a global fixed-length mutable buffer initialized to value [init] *)
+inline_for_extraction
+val createL_mglobal: #a:Type0 -> init:list a ->
+  ST (buffer a)
+    (requires fun h0 -> normalize (FStar.List.Tot.length init <= max_size_t))
+    (ensures  fun h0 b h1 ->
+      B.frameOf b == HyperStack.root /\ B.recallable b /\
+      B.alloc_post_mem_common (b <: buffer a) h0 h1 (FStar.Seq.seq_of_list init) /\
+      length b == normalize_term (FStar.List.Tot.length init))
+
 #set-options "--max_fuel 0"
 
 (** Recall the liveness and contents of a global immutable buffer *)
@@ -900,18 +910,21 @@ val loopi_blocks_nospec:
     (requires fun h -> live h inp /\ live h write /\ disjoint inp write)
     (ensures  fun h0 _ h1 -> modifies1 write h0 h1)
 
+open FStar.Mul
+
 inline_for_extraction
 val loop_blocks:
     #a:Type0
   -> #b:Type0
   -> #blen:size_t
   -> blocksize:size_t{v blocksize > 0}
-  -> inpLen:size_t
-  -> inp:lbuffer a inpLen
+  -> n_blocks:size_t
+  -> rem:size_t { v n_blocks * v blocksize + v rem < pow2 32 }
+  -> inp:lbuffer a (blocksize *! n_blocks +! rem) { v n_blocks == length inp / v blocksize }
   -> spec_f:(Seq.lseq a (v blocksize)
               -> Seq.lseq b (v blen)
               -> Seq.lseq b (v blen))
-  -> spec_l:(len:size_nat{len == v inpLen % v blocksize}
+  -> spec_l:(len:size_nat{len < v blocksize}
               -> s:Seq.lseq a len
               -> Seq.lseq b (v blen)
               -> Seq.lseq b (v blen))
@@ -922,7 +935,7 @@ val loop_blocks:
           (ensures  fun h0 _ h1 ->
             modifies1 w h0 h1 /\
             as_seq h1 w == spec_f (as_seq h0 inp) (as_seq h0 w)))
-  -> l:(len:size_t{v len == v inpLen % v blocksize}
+  -> l:(len:size_t{v len < v blocksize}
        -> inp:lbuffer a len
        -> w:lbuffer b blen -> Stack unit
           (requires fun h ->
@@ -1096,7 +1109,7 @@ val mapT:
 inline_for_extraction
 val map2T:
     #t1:buftype
-  -> #t2:buftype  
+  -> #t2:buftype
   -> #a1:Type
   -> #a2:Type
   -> #b:Type

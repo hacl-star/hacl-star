@@ -1,0 +1,46 @@
+name: Create branch on hacl-packages
+
+on:
+  pull_request_target:
+    branches: [ main ]
+
+jobs:
+  hacl-packages-create-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout hacl-star
+        uses: actions/checkout@v3
+        with:
+          path: hacl-star
+      - name: checkout hacl-packages
+        uses: actions/checkout@v3
+        with:
+          repository: cryspen/hacl-packages
+          path: hacl-packages
+          token: ${{ secrets.HACL_BOT }}
+      - name: install dependencies
+        run: |
+          sudo apt-get install -y ninja-build
+      - name: update hacl-packages
+        working-directory: hacl-packages
+        run: |
+          ./mach update -s ../hacl-star
+      - name: push to hacl-packages
+        working-directory: hacl-packages
+        run: |
+          branch=hacl-star-${{ github.head_ref }}
+          token=${{ secrets.HACL_BOT }}
+          git config --local user.name "Hacl Bot"
+          git config --local user.email "hacl-star@mailo.com"
+          git checkout -b $branch
+          git add src include
+          git commit -m "[CI] update code"
+          git push --force --set-upstream  origin $branch
+      - name: comment pr
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: |
+            [CI] Extensive testing of the generated code on hacl-packages:
+            - [build](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abuild_pull_request)
+            - [ocaml](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Aocaml)
+          comment_includes: "[CI]"

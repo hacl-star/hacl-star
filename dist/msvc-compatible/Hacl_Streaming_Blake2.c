@@ -26,97 +26,17 @@
 
 
 
-uint32_t
-Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_alg a, Hacl_Impl_Blake2_Core_m_spec m)
-{
-  switch (m)
-  {
-    case Hacl_Impl_Blake2_Core_M32:
-      {
-        switch (a)
-        {
-          case Spec_Blake2_Blake2S:
-            {
-              return (uint32_t)64U;
-            }
-          case Spec_Blake2_Blake2B:
-            {
-              return (uint32_t)128U;
-            }
-          default:
-            {
-              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        break;
-      }
-    case Hacl_Impl_Blake2_Core_M128:
-      {
-        switch (a)
-        {
-          case Spec_Blake2_Blake2S:
-            {
-              return (uint32_t)64U;
-            }
-          case Spec_Blake2_Blake2B:
-            {
-              return (uint32_t)128U;
-            }
-          default:
-            {
-              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        break;
-      }
-    case Hacl_Impl_Blake2_Core_M256:
-      {
-        switch (a)
-        {
-          case Spec_Blake2_Blake2S:
-            {
-              return (uint32_t)64U;
-            }
-          case Spec_Blake2_Blake2B:
-            {
-              return (uint32_t)128U;
-            }
-          default:
-            {
-              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
 /**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in()
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t),
-    Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32));
-  uint8_t
-  *buf =
-    (uint8_t *)KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-        Hacl_Impl_Blake2_Core_M32),
-      sizeof (uint8_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   uint32_t *wv = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
   uint32_t *b = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
   Hacl_Streaming_Blake2_blake2s_32_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2_blake2s_32_state
   s1 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2_blake2s_32_state), (uint32_t)1U);
   Hacl_Streaming_Blake2_blake2s_32_state
   *p =
     (Hacl_Streaming_Blake2_blake2s_32_state *)KRML_HOST_MALLOC(sizeof (
@@ -163,56 +83,28 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
     return (uint32_t)1U;
   }
   uint32_t sz;
-  if
-  (
-    total_len
-    %
-      (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-        Hacl_Impl_Blake2_Core_M32)
-    == (uint64_t)0U
-    && total_len > (uint64_t)0U
-  )
+  if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
   {
-    sz = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+    sz = (uint32_t)64U;
   }
   else
   {
-    sz =
-      (uint32_t)(total_len
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32));
+    sz = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
   }
-  if
-  (
-    len
-    <= Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32) - sz
-  )
+  if (len <= (uint32_t)64U - sz)
   {
     Hacl_Streaming_Blake2_blake2s_32_state s2 = *p;
     Hacl_Streaming_Blake2_blake2s_32_block_state block_state1 = s2.block_state;
     uint8_t *buf = s2.buf;
     uint64_t total_len1 = s2.total_len;
     uint32_t sz1;
-    if
-    (
-      total_len1
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len1 > (uint64_t)0U
-    )
+    if (total_len1 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len1 > (uint64_t)0U)
     {
-      sz1 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+      sz1 = (uint32_t)64U;
     }
     else
     {
-      sz1 =
-        (uint32_t)(total_len1
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-            Hacl_Impl_Blake2_Core_M32));
+      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
     }
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, data, len * sizeof (uint8_t));
@@ -234,81 +126,40 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
     uint8_t *buf = s2.buf;
     uint64_t total_len1 = s2.total_len;
     uint32_t sz1;
-    if
-    (
-      total_len1
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len1 > (uint64_t)0U
-    )
+    if (total_len1 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len1 > (uint64_t)0U)
     {
-      sz1 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+      sz1 = (uint32_t)64U;
     }
     else
     {
-      sz1 =
-        (uint32_t)(total_len1
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-            Hacl_Impl_Blake2_Core_M32));
+      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
     }
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint32_t
-      nb =
-        Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
-        / (uint32_t)64U;
-      Hacl_Blake2s_32_blake2s_update_multi(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32),
-        block_state1.fst,
-        block_state1.snd,
-        prevlen,
-        buf,
-        nb);
+      uint32_t *wv = block_state1.fst;
+      uint32_t *hash = block_state1.snd;
+      uint32_t nb = (uint32_t)1U;
+      Hacl_Blake2s_32_blake2s_update_multi((uint32_t)64U, wv, hash, prevlen, buf, nb);
     }
     uint32_t ite;
-    if
-    (
-      (uint64_t)len
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && (uint64_t)len > (uint64_t)0U
-    )
+    if ((uint64_t)len % (uint64_t)(uint32_t)64U == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
     {
-      ite = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+      ite = (uint32_t)64U;
     }
     else
     {
-      ite =
-        (uint32_t)((uint64_t)len
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-            Hacl_Impl_Blake2_Core_M32));
+      ite = (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)64U);
     }
-    uint32_t
-    n_blocks =
-      (len - ite)
-      / Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
-    uint32_t
-    data1_len =
-      n_blocks
-      * Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+    uint32_t n_blocks = (len - ite) / (uint32_t)64U;
+    uint32_t data1_len = n_blocks * (uint32_t)64U;
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
     uint8_t *data2 = data + data1_len;
+    uint32_t *wv = block_state1.fst;
+    uint32_t *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)64U;
-    Hacl_Blake2s_32_blake2s_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
-      total_len1,
-      data1,
-      nb);
+    Hacl_Blake2s_32_blake2s_update_multi(data1_len, wv, hash, total_len1, data1, nb);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
     *p
@@ -323,11 +174,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
   }
   else
   {
-    uint32_t
-    diff =
-      Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-        Hacl_Impl_Blake2_Core_M32)
-      - sz;
+    uint32_t diff = (uint32_t)64U - sz;
     uint8_t *data1 = data;
     uint8_t *data2 = data + diff;
     Hacl_Streaming_Blake2_blake2s_32_state s2 = *p;
@@ -335,25 +182,13 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
     uint8_t *buf0 = s2.buf;
     uint64_t total_len10 = s2.total_len;
     uint32_t sz10;
-    if
-    (
-      total_len10
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len10 > (uint64_t)0U
-    )
+    if (total_len10 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len10 > (uint64_t)0U)
     {
-      sz10 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+      sz10 = (uint32_t)64U;
     }
     else
     {
-      sz10 =
-        (uint32_t)(total_len10
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-            Hacl_Impl_Blake2_Core_M32));
+      sz10 = (uint32_t)(total_len10 % (uint64_t)(uint32_t)64U);
     }
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, data1, diff * sizeof (uint8_t));
@@ -372,81 +207,46 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
     uint8_t *buf = s20.buf;
     uint64_t total_len1 = s20.total_len;
     uint32_t sz1;
-    if
-    (
-      total_len1
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len1 > (uint64_t)0U
-    )
+    if (total_len1 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len1 > (uint64_t)0U)
     {
-      sz1 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+      sz1 = (uint32_t)64U;
     }
     else
     {
-      sz1 =
-        (uint32_t)(total_len1
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-            Hacl_Impl_Blake2_Core_M32));
+      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
     }
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint32_t
-      nb =
-        Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
-        / (uint32_t)64U;
-      Hacl_Blake2s_32_blake2s_update_multi(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32),
-        block_state1.fst,
-        block_state1.snd,
-        prevlen,
-        buf,
-        nb);
+      uint32_t *wv = block_state1.fst;
+      uint32_t *hash = block_state1.snd;
+      uint32_t nb = (uint32_t)1U;
+      Hacl_Blake2s_32_blake2s_update_multi((uint32_t)64U, wv, hash, prevlen, buf, nb);
     }
     uint32_t ite;
     if
     (
       (uint64_t)(len - diff)
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32)
+      % (uint64_t)(uint32_t)64U
       == (uint64_t)0U
       && (uint64_t)(len - diff) > (uint64_t)0U
     )
     {
-      ite = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+      ite = (uint32_t)64U;
     }
     else
     {
-      ite =
-        (uint32_t)((uint64_t)(len - diff)
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-            Hacl_Impl_Blake2_Core_M32));
+      ite = (uint32_t)((uint64_t)(len - diff) % (uint64_t)(uint32_t)64U);
     }
-    uint32_t
-    n_blocks =
-      (len - diff - ite)
-      / Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
-    uint32_t
-    data1_len =
-      n_blocks
-      * Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+    uint32_t n_blocks = (len - diff - ite) / (uint32_t)64U;
+    uint32_t data1_len = n_blocks * (uint32_t)64U;
     uint32_t data2_len = len - diff - data1_len;
     uint8_t *data11 = data2;
     uint8_t *data21 = data2 + data1_len;
+    uint32_t *wv = block_state1.fst;
+    uint32_t *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)64U;
-    Hacl_Blake2s_32_blake2s_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
-      total_len1,
-      data11,
-      nb);
+    Hacl_Blake2s_32_blake2s_update_multi(data1_len, wv, hash, total_len1, data11, nb);
     uint8_t *dst = buf;
     memcpy(dst, data21, data2_len * sizeof (uint8_t));
     *p
@@ -476,141 +276,24 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint32_t r;
-  if
-  (
-    total_len
-    %
-      (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-        Hacl_Impl_Blake2_Core_M32)
-    == (uint64_t)0U
-    && total_len > (uint64_t)0U
-  )
+  if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
   {
-    r = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32);
+    r = (uint32_t)64U;
   }
   else
   {
-    r =
-      (uint32_t)(total_len
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
-          Hacl_Impl_Blake2_Core_M32));
+    r = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
   }
   uint8_t *buf_1 = buf_;
-  uint32_t wv[16U] = { 0U };
+  uint32_t wv0[16U] = { 0U };
   uint32_t b[16U] = { 0U };
-  Hacl_Streaming_Blake2_blake2s_32_block_state tmp_block_state = { .fst = wv, .snd = b };
+  Hacl_Streaming_Blake2_blake2s_32_block_state tmp_block_state = { .fst = wv0, .snd = b };
   uint32_t *src_b = block_state.snd;
   uint32_t *dst_b = tmp_block_state.snd;
   memcpy(dst_b, src_b, (uint32_t)16U * sizeof (uint32_t));
   uint64_t prev_len = total_len - (uint64_t)r;
-  uint32_t ite0;
-  if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-  {
-    ite0 = (uint32_t)64U;
-  }
-  else
-  {
-    ite0 = r % (uint32_t)64U;
-  }
-  uint8_t *buf_last = buf_1 + r - ite0;
-  uint8_t *buf_multi = buf_1;
-  uint32_t ite1;
-  if
-  (
-    (uint32_t)64U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite1 = (uint32_t)0U;
-  }
-  else
-  {
-    uint32_t ite;
-    if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-    {
-      ite = (uint32_t)64U;
-    }
-    else
-    {
-      ite = r % (uint32_t)64U;
-    }
-    ite1 = r - ite;
-  }
-  uint32_t nb = ite1 / (uint32_t)64U;
-  uint32_t ite2;
-  if
-  (
-    (uint32_t)64U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite2 = (uint32_t)0U;
-  }
-  else
-  {
-    uint32_t ite;
-    if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-    {
-      ite = (uint32_t)64U;
-    }
-    else
-    {
-      ite = r % (uint32_t)64U;
-    }
-    ite2 = r - ite;
-  }
-  Hacl_Blake2s_32_blake2s_update_multi(ite2,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
-    prev_len,
-    buf_multi,
-    nb);
-  uint32_t ite3;
-  if
-  (
-    (uint32_t)64U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite3 = r;
-  }
-  else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-  {
-    ite3 = (uint32_t)64U;
-  }
-  else
-  {
-    ite3 = r % (uint32_t)64U;
-  }
-  uint64_t prev_len_last = total_len - (uint64_t)ite3;
-  uint32_t ite4;
-  if
-  (
-    (uint32_t)64U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite4 = r;
-  }
-  else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
-  {
-    ite4 = (uint32_t)64U;
-  }
-  else
-  {
-    ite4 = r % (uint32_t)64U;
-  }
   uint32_t ite;
-  if
-  (
-    (uint32_t)64U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite = r;
-  }
-  else if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+  if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
   {
     ite = (uint32_t)64U;
   }
@@ -618,12 +301,16 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
   {
     ite = r % (uint32_t)64U;
   }
-  Hacl_Blake2s_32_blake2s_update_last(ite4,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
-    prev_len_last,
-    ite,
-    buf_last);
+  uint8_t *buf_last = buf_1 + r - ite;
+  uint8_t *buf_multi = buf_1;
+  uint32_t *wv1 = tmp_block_state.fst;
+  uint32_t *hash0 = tmp_block_state.snd;
+  uint32_t nb = (uint32_t)0U;
+  Hacl_Blake2s_32_blake2s_update_multi((uint32_t)0U, wv1, hash0, prev_len, buf_multi, nb);
+  uint64_t prev_len_last = total_len - (uint64_t)r;
+  uint32_t *wv = tmp_block_state.fst;
+  uint32_t *hash = tmp_block_state.snd;
+  Hacl_Blake2s_32_blake2s_update_last(r, wv, hash, prev_len_last, r, buf_last);
   Hacl_Blake2s_32_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
 }
 
@@ -648,19 +335,12 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_
 */
 Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_create_in()
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t),
-    Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32));
-  uint8_t
-  *buf =
-    (uint8_t *)KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-        Hacl_Impl_Blake2_Core_M32),
-      sizeof (uint8_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
   uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
   Hacl_Streaming_Blake2_blake2b_32_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2_blake2b_32_state
   s1 = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2_blake2b_32_state), (uint32_t)1U);
   Hacl_Streaming_Blake2_blake2b_32_state
   *p =
     (Hacl_Streaming_Blake2_blake2b_32_state *)KRML_HOST_MALLOC(sizeof (
@@ -707,56 +387,28 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
     return (uint32_t)1U;
   }
   uint32_t sz;
-  if
-  (
-    total_len
-    %
-      (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-        Hacl_Impl_Blake2_Core_M32)
-    == (uint64_t)0U
-    && total_len > (uint64_t)0U
-  )
+  if (total_len % (uint64_t)(uint32_t)128U == (uint64_t)0U && total_len > (uint64_t)0U)
   {
-    sz = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+    sz = (uint32_t)128U;
   }
   else
   {
-    sz =
-      (uint32_t)(total_len
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32));
+    sz = (uint32_t)(total_len % (uint64_t)(uint32_t)128U);
   }
-  if
-  (
-    len
-    <= Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32) - sz
-  )
+  if (len <= (uint32_t)128U - sz)
   {
     Hacl_Streaming_Blake2_blake2b_32_state s2 = *p;
     Hacl_Streaming_Blake2_blake2b_32_block_state block_state1 = s2.block_state;
     uint8_t *buf = s2.buf;
     uint64_t total_len1 = s2.total_len;
     uint32_t sz1;
-    if
-    (
-      total_len1
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len1 > (uint64_t)0U
-    )
+    if (total_len1 % (uint64_t)(uint32_t)128U == (uint64_t)0U && total_len1 > (uint64_t)0U)
     {
-      sz1 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+      sz1 = (uint32_t)128U;
     }
     else
     {
-      sz1 =
-        (uint32_t)(total_len1
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-            Hacl_Impl_Blake2_Core_M32));
+      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)128U);
     }
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, data, len * sizeof (uint8_t));
@@ -778,78 +430,47 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
     uint8_t *buf = s2.buf;
     uint64_t total_len1 = s2.total_len;
     uint32_t sz1;
-    if
-    (
-      total_len1
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len1 > (uint64_t)0U
-    )
+    if (total_len1 % (uint64_t)(uint32_t)128U == (uint64_t)0U && total_len1 > (uint64_t)0U)
     {
-      sz1 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+      sz1 = (uint32_t)128U;
     }
     else
     {
-      sz1 =
-        (uint32_t)(total_len1
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-            Hacl_Impl_Blake2_Core_M32));
+      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)128U);
     }
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint32_t
-      nb =
-        Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
-        / (uint32_t)128U;
-      Hacl_Blake2b_32_blake2b_update_multi(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32),
-        block_state1.fst,
-        block_state1.snd,
+      uint64_t *wv = block_state1.fst;
+      uint64_t *hash = block_state1.snd;
+      uint32_t nb = (uint32_t)1U;
+      Hacl_Blake2b_32_blake2b_update_multi((uint32_t)128U,
+        wv,
+        hash,
         FStar_UInt128_uint64_to_uint128(prevlen),
         buf,
         nb);
     }
     uint32_t ite;
-    if
-    (
-      (uint64_t)len
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && (uint64_t)len > (uint64_t)0U
-    )
+    if ((uint64_t)len % (uint64_t)(uint32_t)128U == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
     {
-      ite = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+      ite = (uint32_t)128U;
     }
     else
     {
-      ite =
-        (uint32_t)((uint64_t)len
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-            Hacl_Impl_Blake2_Core_M32));
+      ite = (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U);
     }
-    uint32_t
-    n_blocks =
-      (len - ite)
-      / Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
-    uint32_t
-    data1_len =
-      n_blocks
-      * Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+    uint32_t n_blocks = (len - ite) / (uint32_t)128U;
+    uint32_t data1_len = n_blocks * (uint32_t)128U;
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
     uint8_t *data2 = data + data1_len;
+    uint64_t *wv = block_state1.fst;
+    uint64_t *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)128U;
     Hacl_Blake2b_32_blake2b_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
+      wv,
+      hash,
       FStar_UInt128_uint64_to_uint128(total_len1),
       data1,
       nb);
@@ -867,11 +488,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
   }
   else
   {
-    uint32_t
-    diff =
-      Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-        Hacl_Impl_Blake2_Core_M32)
-      - sz;
+    uint32_t diff = (uint32_t)128U - sz;
     uint8_t *data1 = data;
     uint8_t *data2 = data + diff;
     Hacl_Streaming_Blake2_blake2b_32_state s2 = *p;
@@ -879,25 +496,13 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
     uint8_t *buf0 = s2.buf;
     uint64_t total_len10 = s2.total_len;
     uint32_t sz10;
-    if
-    (
-      total_len10
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len10 > (uint64_t)0U
-    )
+    if (total_len10 % (uint64_t)(uint32_t)128U == (uint64_t)0U && total_len10 > (uint64_t)0U)
     {
-      sz10 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+      sz10 = (uint32_t)128U;
     }
     else
     {
-      sz10 =
-        (uint32_t)(total_len10
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-            Hacl_Impl_Blake2_Core_M32));
+      sz10 = (uint32_t)(total_len10 % (uint64_t)(uint32_t)128U);
     }
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, data1, diff * sizeof (uint8_t));
@@ -916,38 +521,23 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
     uint8_t *buf = s20.buf;
     uint64_t total_len1 = s20.total_len;
     uint32_t sz1;
-    if
-    (
-      total_len1
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
-      == (uint64_t)0U
-      && total_len1 > (uint64_t)0U
-    )
+    if (total_len1 % (uint64_t)(uint32_t)128U == (uint64_t)0U && total_len1 > (uint64_t)0U)
     {
-      sz1 = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+      sz1 = (uint32_t)128U;
     }
     else
     {
-      sz1 =
-        (uint32_t)(total_len1
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-            Hacl_Impl_Blake2_Core_M32));
+      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)128U);
     }
     if (!(sz1 == (uint32_t)0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint32_t
-      nb =
-        Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
-        / (uint32_t)128U;
-      Hacl_Blake2b_32_blake2b_update_multi(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32),
-        block_state1.fst,
-        block_state1.snd,
+      uint64_t *wv = block_state1.fst;
+      uint64_t *hash = block_state1.snd;
+      uint32_t nb = (uint32_t)1U;
+      Hacl_Blake2b_32_blake2b_update_multi((uint32_t)128U,
+        wv,
+        hash,
         FStar_UInt128_uint64_to_uint128(prevlen),
         buf,
         nb);
@@ -956,38 +546,28 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
     if
     (
       (uint64_t)(len - diff)
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32)
+      % (uint64_t)(uint32_t)128U
       == (uint64_t)0U
       && (uint64_t)(len - diff) > (uint64_t)0U
     )
     {
-      ite = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+      ite = (uint32_t)128U;
     }
     else
     {
-      ite =
-        (uint32_t)((uint64_t)(len - diff)
-        %
-          (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-            Hacl_Impl_Blake2_Core_M32));
+      ite = (uint32_t)((uint64_t)(len - diff) % (uint64_t)(uint32_t)128U);
     }
-    uint32_t
-    n_blocks =
-      (len - diff - ite)
-      / Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
-    uint32_t
-    data1_len =
-      n_blocks
-      * Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+    uint32_t n_blocks = (len - diff - ite) / (uint32_t)128U;
+    uint32_t data1_len = n_blocks * (uint32_t)128U;
     uint32_t data2_len = len - diff - data1_len;
     uint8_t *data11 = data2;
     uint8_t *data21 = data2 + data1_len;
+    uint64_t *wv = block_state1.fst;
+    uint64_t *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)128U;
     Hacl_Blake2b_32_blake2b_update_multi(data1_len,
-      block_state1.fst,
-      block_state1.snd,
+      wv,
+      hash,
       FStar_UInt128_uint64_to_uint128(total_len1),
       data11,
       nb);
@@ -1020,141 +600,24 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint32_t r;
-  if
-  (
-    total_len
-    %
-      (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-        Hacl_Impl_Blake2_Core_M32)
-    == (uint64_t)0U
-    && total_len > (uint64_t)0U
-  )
+  if (total_len % (uint64_t)(uint32_t)128U == (uint64_t)0U && total_len > (uint64_t)0U)
   {
-    r = Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32);
+    r = (uint32_t)128U;
   }
   else
   {
-    r =
-      (uint32_t)(total_len
-      %
-        (uint64_t)Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B,
-          Hacl_Impl_Blake2_Core_M32));
+    r = (uint32_t)(total_len % (uint64_t)(uint32_t)128U);
   }
   uint8_t *buf_1 = buf_;
-  uint64_t wv[16U] = { 0U };
+  uint64_t wv0[16U] = { 0U };
   uint64_t b[16U] = { 0U };
-  Hacl_Streaming_Blake2_blake2b_32_block_state tmp_block_state = { .fst = wv, .snd = b };
+  Hacl_Streaming_Blake2_blake2b_32_block_state tmp_block_state = { .fst = wv0, .snd = b };
   uint64_t *src_b = block_state.snd;
   uint64_t *dst_b = tmp_block_state.snd;
   memcpy(dst_b, src_b, (uint32_t)16U * sizeof (uint64_t));
   uint64_t prev_len = total_len - (uint64_t)r;
-  uint32_t ite0;
-  if (r % (uint32_t)128U == (uint32_t)0U && r > (uint32_t)0U)
-  {
-    ite0 = (uint32_t)128U;
-  }
-  else
-  {
-    ite0 = r % (uint32_t)128U;
-  }
-  uint8_t *buf_last = buf_1 + r - ite0;
-  uint8_t *buf_multi = buf_1;
-  uint32_t ite1;
-  if
-  (
-    (uint32_t)128U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite1 = (uint32_t)0U;
-  }
-  else
-  {
-    uint32_t ite;
-    if (r % (uint32_t)128U == (uint32_t)0U && r > (uint32_t)0U)
-    {
-      ite = (uint32_t)128U;
-    }
-    else
-    {
-      ite = r % (uint32_t)128U;
-    }
-    ite1 = r - ite;
-  }
-  uint32_t nb = ite1 / (uint32_t)128U;
-  uint32_t ite2;
-  if
-  (
-    (uint32_t)128U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite2 = (uint32_t)0U;
-  }
-  else
-  {
-    uint32_t ite;
-    if (r % (uint32_t)128U == (uint32_t)0U && r > (uint32_t)0U)
-    {
-      ite = (uint32_t)128U;
-    }
-    else
-    {
-      ite = r % (uint32_t)128U;
-    }
-    ite2 = r - ite;
-  }
-  Hacl_Blake2b_32_blake2b_update_multi(ite2,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
-    FStar_UInt128_uint64_to_uint128(prev_len),
-    buf_multi,
-    nb);
-  uint32_t ite3;
-  if
-  (
-    (uint32_t)128U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite3 = r;
-  }
-  else if (r % (uint32_t)128U == (uint32_t)0U && r > (uint32_t)0U)
-  {
-    ite3 = (uint32_t)128U;
-  }
-  else
-  {
-    ite3 = r % (uint32_t)128U;
-  }
-  uint64_t prev_len_last = total_len - (uint64_t)ite3;
-  uint32_t ite4;
-  if
-  (
-    (uint32_t)128U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite4 = r;
-  }
-  else if (r % (uint32_t)128U == (uint32_t)0U && r > (uint32_t)0U)
-  {
-    ite4 = (uint32_t)128U;
-  }
-  else
-  {
-    ite4 = r % (uint32_t)128U;
-  }
   uint32_t ite;
-  if
-  (
-    (uint32_t)128U
-    == Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M32)
-  )
-  {
-    ite = r;
-  }
-  else if (r % (uint32_t)128U == (uint32_t)0U && r > (uint32_t)0U)
+  if (r % (uint32_t)128U == (uint32_t)0U && r > (uint32_t)0U)
   {
     ite = (uint32_t)128U;
   }
@@ -1162,11 +625,25 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
   {
     ite = r % (uint32_t)128U;
   }
-  Hacl_Blake2b_32_blake2b_update_last(ite4,
-    tmp_block_state.fst,
-    tmp_block_state.snd,
+  uint8_t *buf_last = buf_1 + r - ite;
+  uint8_t *buf_multi = buf_1;
+  uint64_t *wv1 = tmp_block_state.fst;
+  uint64_t *hash0 = tmp_block_state.snd;
+  uint32_t nb = (uint32_t)0U;
+  Hacl_Blake2b_32_blake2b_update_multi((uint32_t)0U,
+    wv1,
+    hash0,
+    FStar_UInt128_uint64_to_uint128(prev_len),
+    buf_multi,
+    nb);
+  uint64_t prev_len_last = total_len - (uint64_t)r;
+  uint64_t *wv = tmp_block_state.fst;
+  uint64_t *hash = tmp_block_state.snd;
+  Hacl_Blake2b_32_blake2b_update_last(r,
+    wv,
+    hash,
     FStar_UInt128_uint64_to_uint128(prev_len_last),
-    ite,
+    r,
     buf_last);
   Hacl_Blake2b_32_blake2b_finish((uint32_t)64U, dst, tmp_block_state.snd);
 }

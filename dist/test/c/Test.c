@@ -72,39 +72,7 @@ extern void EverCrypt_AutoConfig2_disable_aesni();
 
 extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___);
 
-#define MD5_s 0
-#define SHA1_s 1
-#define SHA2_224_s 2
-#define SHA2_256_s 3
-#define SHA2_384_s 4
-#define SHA2_512_s 5
-#define SHA3_256_s 6
-#define Blake2S_s 7
-#define Blake2S_128_s 8
-#define Blake2B_s 9
-#define Blake2B_256_s 10
-
-typedef uint8_t state_s_tags;
-
-typedef struct state_s_s
-{
-  state_s_tags tag;
-  union {
-    uint32_t *case_MD5_s;
-    uint32_t *case_SHA1_s;
-    uint32_t *case_SHA2_224_s;
-    uint32_t *case_SHA2_256_s;
-    uint64_t *case_SHA2_384_s;
-    uint64_t *case_SHA2_512_s;
-    uint64_t *case_SHA3_256_s;
-    uint32_t *case_Blake2S_s;
-    Lib_IntVector_Intrinsics_vec128 *case_Blake2S_128_s;
-    uint64_t *case_Blake2B_s;
-    Lib_IntVector_Intrinsics_vec256 *case_Blake2B_256_s;
-  }
-  ;
-}
-state_s;
+typedef struct state_s_s state_s;
 
 extern state_s *EverCrypt_Hash_create(hash_alg a);
 
@@ -135,12 +103,6 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *cipher,
   uint8_t *tag
 );
-
-#define Hacl_CHACHA20 0
-#define Vale_AES128 1
-#define Vale_AES256 2
-
-typedef uint8_t impl;
 
 #define AES128_GCM 0
 #define AES256_GCM 1
@@ -185,15 +147,45 @@ static bool is_supported_alg(alg a)
 
 typedef uint8_t error_code;
 
-typedef struct state_s0_s
-{
-  impl impl;
-  uint8_t *ek;
-}
-state_s0;
+typedef struct state_s0_s state_s0;
 
+/**
+Create the required AEAD state for the algorithm.
+
+Note: The caller must free the AEAD state by calling `EverCrypt_AEAD_free`.
+
+@param a The argument `a` must be either of:
+  * `Spec_Agile_AEAD_AES128_GCM` (KEY_LEN=16),
+  * `Spec_Agile_AEAD_AES256_GCM` (KEY_LEN=32), or
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (KEY_LEN=32).
+@param dst Pointer to a pointer where the address of the allocated AEAD state will be written to.
+@param k Pointer to `KEY_LEN` bytes of memory where the key is read from. The size depends on the used algorithm, see above.
+
+@return The function returns `EverCrypt_Error_Success` on success or
+  `EverCrypt_Error_UnsupportedAlgorithm` in case of a bad algorithm identifier.
+  (See `EverCrypt_Error.h`.)
+*/
 extern error_code EverCrypt_AEAD_create_in(alg a, state_s0 **dst, uint8_t *k);
 
+/**
+Encrypt and authenticate a message (`plain`) with associated data (`ad`).
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param plain Pointer to `plain_len` bytes of memory where the to-be-encrypted plaintext is read from.
+@param plain_len Length of the to-be-encrypted plaintext.
+@param cipher Pointer to `plain_len` bytes of memory where the ciphertext is written to.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is written to.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+
+@return `EverCrypt_AEAD_encrypt` may return either `EverCrypt_Error_Success` or `EverCrypt_Error_InvalidKey` (`EverCrypt_error.h`). The latter is returned if and only if the `s` parameter is `NULL`.
+*/
 extern error_code
 EverCrypt_AEAD_encrypt(
   state_s0 *s,
@@ -207,6 +199,37 @@ EverCrypt_AEAD_encrypt(
   uint8_t *tag
 );
 
+/**
+Verify the authenticity of `ad` || `cipher` and decrypt `cipher` into `dst`.
+
+@param s Pointer to the The AEAD state created by `EverCrypt_AEAD_create_in`. It already contains the encryption key.
+@param iv Pointer to `iv_len` bytes of memory where the nonce is read from.
+@param iv_len Length of the nonce. Note: ChaCha20Poly1305 requires a 12 byte nonce.
+@param ad Pointer to `ad_len` bytes of memory where the associated data is read from.
+@param ad_len Length of the associated data.
+@param cipher Pointer to `cipher_len` bytes of memory where the ciphertext is read from.
+@param cipher_len Length of the ciphertext.
+@param tag Pointer to `TAG_LEN` bytes of memory where the tag is read from.
+  The length of the `tag` must be of a suitable length for the chosen algorithm:
+  * `Spec_Agile_AEAD_AES128_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_AES256_GCM` (TAG_LEN=16)
+  * `Spec_Agile_AEAD_CHACHA20_POLY1305` (TAG_LEN=16)
+@param dst Pointer to `cipher_len` bytes of memory where the decrypted plaintext will be written to.
+
+@return `EverCrypt_AEAD_decrypt` returns ...
+
+  * `EverCrypt_Error_Success`
+
+  ... on success and either of ...
+
+  * `EverCrypt_Error_InvalidKey` (returned if and only if the `s` parameter is `NULL`),
+  * `EverCrypt_Error_InvalidIVLength` (see note about requirements on IV size above), or
+  * `EverCrypt_Error_AuthenticationFailure` (in case the ciphertext could not be authenticated, e.g., due to modifications)
+
+  ... on failure (`EverCrypt_error.h`).
+
+  Upon success, the plaintext will be written into `dst`.
+*/
 extern error_code
 EverCrypt_AEAD_decrypt(
   state_s0 *s,
@@ -234,6 +257,17 @@ EverCrypt_HMAC_compute(
   uint32_t datalen
 );
 
+/**
+Expand pseudorandom key to desired length.
+
+@param a Hash function to use. Usually, the same as used in `EverCrypt_HKDF_extract`.
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from.
+@param infolen Length of context and application specific information. Can be 0.
+@param len Length of output keying material.
+*/
 extern void
 EverCrypt_HKDF_expand(
   hash_alg a,
@@ -245,6 +279,23 @@ EverCrypt_HKDF_expand(
   uint32_t len
 );
 
+/**
+Extract a fixed-length pseudorandom key from input keying material.
+
+@param a Hash function to use. The allowed values are:
+  * `Spec_Hash_Definitions_Blake2B` (`HashLen` = 64), 
+  * `Spec_Hash_Definitions_Blake2S` (`HashLen` = 32), 
+  * `Spec_Hash_Definitions_SHA2_256` (`HashLen` = 32), 
+  * `Spec_Hash_Definitions_SHA2_384` (`HashLen` = 48), 
+  * `Spec_Hash_Definitions_SHA2_512` (`HashLen` = 64), and
+  * `Spec_Hash_Definitions_SHA1` (`HashLen` = 20).
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+  `HashLen` depends on the used algorithm `a`. See above.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material.
+*/
 extern void
 EverCrypt_HKDF_extract(
   hash_alg a,
@@ -3295,14 +3346,6 @@ vectors0[7U] =
   };
 
 static uint32_t vectors_len0 = (uint32_t)7U;
-
-typedef struct state_s
-{
-  uint8_t *k;
-  uint8_t *v;
-  uint32_t *reseed_counter;
-}
-state;
 
 static uint8_t
 input00[34U] =
@@ -9936,6 +9979,13 @@ lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstariz
 static lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 aead_vectors_low = { .len = (uint32_t)21U, .b = aead_vectors_low109 };
 
+/**
+Compute the scalar multiple of a point.
+
+@param shared Pointer to 32 bytes of memory where the resulting point is written to.
+@param my_priv Pointer to 32 bytes of memory where the secret/private key is read from.
+@param their_pub Pointer to 32 bytes of memory where the public point is read from.
+*/
 extern void
 EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
@@ -9947,26 +9997,19 @@ static void Test_Hash_main()
   EverCrypt_Hash_init(s2);
 }
 
-#define SHA1_s0 0
-#define SHA2_256_s0 1
-#define SHA2_384_s0 2
-#define SHA2_512_s0 3
+typedef struct state_s1_s state_s1;
 
-typedef uint8_t state_s_tags0;
+extern state_s1 *EverCrypt_DRBG_create_in(hash_alg a);
 
-typedef struct state_s1_s
-{
-  state_s_tags0 tag;
-  union {
-    state case_SHA1_s;
-    state case_SHA2_256_s;
-    state case_SHA2_384_s;
-    state case_SHA2_512_s;
-  }
-  ;
-}
-state_s1;
+/**
+Instantiate the DRBG.
 
+@param st Pointer to DRBG state.
+@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
+@param personalization_string_len Length of personalization string.
+
+@return True if and only if instantiation was successful.
+*/
 extern bool
 EverCrypt_DRBG_instantiate(
   state_s1 *st,
@@ -9974,9 +10017,29 @@ EverCrypt_DRBG_instantiate(
   uint32_t personalization_string_len
 );
 
+/**
+Reseed the DRBG.
+
+@param st Pointer to DRBG state.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if reseed was successful.
+*/
 extern bool
 EverCrypt_DRBG_reseed(state_s1 *st, uint8_t *additional_input, uint32_t additional_input_len);
 
+/**
+Generate output.
+
+@param output Pointer to `n` bytes of memory where random output is written to.
+@param st Pointer to DRBG state.
+@param n Length of desired output.
+@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
+@param additional_input_input_len Length of additional input.
+
+@return True if and only if generate was successful.
+*/
 extern bool
 EverCrypt_DRBG_generate(
   uint8_t *output,
@@ -9985,6 +10048,13 @@ EverCrypt_DRBG_generate(
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
+
+/**
+Uninstantiate and free the DRBG.
+
+@param st Pointer to DRBG state.
+*/
+extern void EverCrypt_DRBG_uninstantiate(state_s1 *st);
 
 extern void
 EverCrypt_Cipher_chacha20(
@@ -10462,423 +10532,6 @@ test_hmac(
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hmac(vs[i]);
-  }
-}
-
-static void
-test_one_hmac_drbg(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
-{
-  uint32_t returned_bits_len = vec.f7.len;
-  uint8_t *additional_input_2 = vec.f6.snd.b;
-  uint32_t additional_input_2_len = vec.f6.snd.len;
-  uint8_t *additional_input_1 = vec.f6.fst.b;
-  uint32_t additional_input_1_len = vec.f6.fst.len;
-  uint8_t *additional_input_reseed = vec.f5.b;
-  uint32_t additional_input_reseed_len = vec.f5.len;
-  uint8_t *personalization_string = vec.f3.b;
-  uint32_t personalization_string_len = vec.f3.len;
-  hash_alg a = vec.fst;
-  if
-  (
-    !(is_supported_alg0(a)
-    && (uint32_t)0U < returned_bits_len
-    && returned_bits_len < (uint32_t)0xFFFFFFFFU)
-  )
-  {
-    exit((int32_t)-1);
-  }
-  else
-  {
-    KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
-    uint8_t output[returned_bits_len];
-    memset(output, 0U, returned_bits_len * sizeof (uint8_t));
-    state_s1 st;
-    uint32_t ctr0 = (uint32_t)1U;
-    uint8_t buf0[64U] = { 0U };
-    uint8_t buf1[48U] = { 0U };
-    uint8_t buf2[32U] = { 0U };
-    uint8_t buf3[20U] = { 0U };
-    uint8_t buf4[64U] = { 0U };
-    uint8_t buf5[48U] = { 0U };
-    uint8_t buf6[32U] = { 0U };
-    uint8_t buf7[20U] = { 0U };
-    uint32_t ctr1 = (uint32_t)1U;
-    uint8_t buf8[64U] = { 0U };
-    uint8_t buf9[48U] = { 0U };
-    uint8_t buf10[32U] = { 0U };
-    uint8_t buf11[20U] = { 0U };
-    uint8_t buf12[64U] = { 0U };
-    uint8_t buf13[48U] = { 0U };
-    uint8_t buf14[32U] = { 0U };
-    uint8_t buf15[20U] = { 0U };
-    uint32_t ctr2 = (uint32_t)1U;
-    uint8_t buf16[64U] = { 0U };
-    uint8_t buf17[48U] = { 0U };
-    uint8_t buf18[32U] = { 0U };
-    uint8_t buf19[20U] = { 0U };
-    uint8_t buf20[64U] = { 0U };
-    uint8_t buf21[48U] = { 0U };
-    uint8_t buf22[32U] = { 0U };
-    uint8_t buf23[20U] = { 0U };
-    uint32_t ctr = (uint32_t)1U;
-    uint8_t buf24[64U] = { 0U };
-    uint8_t buf25[48U] = { 0U };
-    uint8_t buf26[32U] = { 0U };
-    uint8_t buf27[20U] = { 0U };
-    uint8_t buf28[64U] = { 0U };
-    uint8_t buf29[48U] = { 0U };
-    uint8_t buf30[32U] = { 0U };
-    uint8_t buf[20U] = { 0U };
-    switch (a)
-    {
-      case SHA1:
-        {
-          uint8_t *k;
-          switch (a)
-          {
-            case SHA1:
-              {
-                k = buf7;
-                break;
-              }
-            case SHA2_256:
-              {
-                k = buf6;
-                break;
-              }
-            case SHA2_384:
-              {
-                k = buf5;
-                break;
-              }
-            case SHA2_512:
-              {
-                k = buf4;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          uint8_t *v;
-          switch (a)
-          {
-            case SHA1:
-              {
-                v = buf3;
-                break;
-              }
-            case SHA2_256:
-              {
-                v = buf2;
-                break;
-              }
-            case SHA2_384:
-              {
-                v = buf1;
-                break;
-              }
-            case SHA2_512:
-              {
-                v = buf0;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          st =
-            (
-              (state_s1){
-                .tag = SHA1_s0,
-                { .case_SHA1_s = { .k = k, .v = v, .reseed_counter = &ctr0 } }
-              }
-            );
-          break;
-        }
-      case SHA2_256:
-        {
-          uint8_t *k;
-          switch (a)
-          {
-            case SHA1:
-              {
-                k = buf15;
-                break;
-              }
-            case SHA2_256:
-              {
-                k = buf14;
-                break;
-              }
-            case SHA2_384:
-              {
-                k = buf13;
-                break;
-              }
-            case SHA2_512:
-              {
-                k = buf12;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          uint8_t *v;
-          switch (a)
-          {
-            case SHA1:
-              {
-                v = buf11;
-                break;
-              }
-            case SHA2_256:
-              {
-                v = buf10;
-                break;
-              }
-            case SHA2_384:
-              {
-                v = buf9;
-                break;
-              }
-            case SHA2_512:
-              {
-                v = buf8;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          st =
-            (
-              (state_s1){
-                .tag = SHA2_256_s0,
-                { .case_SHA2_256_s = { .k = k, .v = v, .reseed_counter = &ctr1 } }
-              }
-            );
-          break;
-        }
-      case SHA2_384:
-        {
-          uint8_t *k;
-          switch (a)
-          {
-            case SHA1:
-              {
-                k = buf23;
-                break;
-              }
-            case SHA2_256:
-              {
-                k = buf22;
-                break;
-              }
-            case SHA2_384:
-              {
-                k = buf21;
-                break;
-              }
-            case SHA2_512:
-              {
-                k = buf20;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          uint8_t *v;
-          switch (a)
-          {
-            case SHA1:
-              {
-                v = buf19;
-                break;
-              }
-            case SHA2_256:
-              {
-                v = buf18;
-                break;
-              }
-            case SHA2_384:
-              {
-                v = buf17;
-                break;
-              }
-            case SHA2_512:
-              {
-                v = buf16;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          st =
-            (
-              (state_s1){
-                .tag = SHA2_384_s0,
-                { .case_SHA2_384_s = { .k = k, .v = v, .reseed_counter = &ctr2 } }
-              }
-            );
-          break;
-        }
-      case SHA2_512:
-        {
-          uint8_t *k;
-          switch (a)
-          {
-            case SHA1:
-              {
-                k = buf;
-                break;
-              }
-            case SHA2_256:
-              {
-                k = buf30;
-                break;
-              }
-            case SHA2_384:
-              {
-                k = buf29;
-                break;
-              }
-            case SHA2_512:
-              {
-                k = buf28;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          uint8_t *v;
-          switch (a)
-          {
-            case SHA1:
-              {
-                v = buf27;
-                break;
-              }
-            case SHA2_256:
-              {
-                v = buf26;
-                break;
-              }
-            case SHA2_384:
-              {
-                v = buf25;
-                break;
-              }
-            case SHA2_512:
-              {
-                v = buf24;
-                break;
-              }
-            default:
-              {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          st =
-            (
-              (state_s1){
-                .tag = SHA2_512_s0,
-                { .case_SHA2_512_s = { .k = k, .v = v, .reseed_counter = &ctr } }
-              }
-            );
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-    state_s1 st0 = st;
-    bool ok = EverCrypt_DRBG_instantiate(&st0, personalization_string, personalization_string_len);
-    if (ok)
-    {
-      bool ok1 = EverCrypt_DRBG_reseed(&st0, additional_input_reseed, additional_input_reseed_len);
-      if (ok1)
-      {
-        bool
-        ok2 =
-          EverCrypt_DRBG_generate(output,
-            &st0,
-            returned_bits_len,
-            additional_input_1,
-            additional_input_1_len);
-        if (ok2)
-        {
-          bool
-          ok3 =
-            EverCrypt_DRBG_generate(output,
-              &st0,
-              returned_bits_len,
-              additional_input_2,
-              additional_input_2_len);
-          if (ok3)
-          {
-            TestLib_compare_and_print("HMAC-DRBG", output, output, returned_bits_len);
-          }
-          else
-          {
-            exit((int32_t)1);
-          }
-        }
-        else
-        {
-          exit((int32_t)1);
-        }
-      }
-      else
-      {
-        exit((int32_t)1);
-      }
-    }
-    else
-    {
-      exit((int32_t)1);
-    }
-  }
-}
-
-static void
-test_hmac_drbg(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
-{
-  C_String_print("HMAC-DRBG");
-  C_String_print("\n");
-  uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    test_one_hmac_drbg(vs[i]);
   }
 }
 
@@ -12301,6 +11954,124 @@ static void test_aes128_gcm()
   test_aes128_gcm_loop((uint32_t)0U);
 }
 
+static void
+test_one_hmac_drbg(
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  vec
+)
+{
+  uint32_t returned_bits_len = vec.f7.len;
+  uint8_t *additional_input_2 = vec.f6.snd.b;
+  uint32_t additional_input_2_len = vec.f6.snd.len;
+  uint8_t *additional_input_1 = vec.f6.fst.b;
+  uint32_t additional_input_1_len = vec.f6.fst.len;
+  uint8_t *additional_input_reseed = vec.f5.b;
+  uint32_t additional_input_reseed_len = vec.f5.len;
+  uint8_t *personalization_string = vec.f3.b;
+  uint32_t personalization_string_len = vec.f3.len;
+  hash_alg a = vec.fst;
+  if
+  (
+    !(is_supported_alg0(a)
+    && (uint32_t)0U < returned_bits_len
+    && returned_bits_len < (uint32_t)0xFFFFFFFFU)
+  )
+  {
+    exit((int32_t)-1);
+  }
+  else
+  {
+    KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
+    uint8_t output[returned_bits_len];
+    memset(output, 0U, returned_bits_len * sizeof (uint8_t));
+    state_s1 *st = EverCrypt_DRBG_create_in(a);
+    bool ok = EverCrypt_DRBG_instantiate(st, personalization_string, personalization_string_len);
+    if (ok)
+    {
+      bool ok1 = EverCrypt_DRBG_reseed(st, additional_input_reseed, additional_input_reseed_len);
+      if (ok1)
+      {
+        bool
+        ok2 =
+          EverCrypt_DRBG_generate(output,
+            st,
+            returned_bits_len,
+            additional_input_1,
+            additional_input_1_len);
+        if (ok2)
+        {
+          bool
+          ok3 =
+            EverCrypt_DRBG_generate(output,
+              st,
+              returned_bits_len,
+              additional_input_2,
+              additional_input_2_len);
+          if (ok3)
+          {
+            EverCrypt_DRBG_uninstantiate(st);
+            TestLib_compare_and_print("HMAC-DRBG", output, output, returned_bits_len);
+          }
+          else
+          {
+            exit((int32_t)1);
+          }
+        }
+        else
+        {
+          exit((int32_t)1);
+        }
+      }
+      else
+      {
+        exit((int32_t)1);
+      }
+    }
+    else
+    {
+      exit((int32_t)1);
+    }
+  }
+}
+
+static void
+test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t(
+  uint32_t i,
+  void
+  (*f)(
+    __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+    x0
+  ),
+  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  vec
+)
+{
+  uint32_t len = vec.len;
+  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  *vs = vec.b;
+  if (!(i >= len))
+  {
+    f(vs[i]);
+    uint32_t i1 = i + (uint32_t)1U;
+    test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t(i1,
+      f,
+      vec);
+  }
+}
+
+static void
+test_hmac_drbg(
+  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  vec
+)
+{
+  C_String_print("HMAC-DRBG");
+  C_String_print("\n");
+  test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t((uint32_t)0U,
+    test_one_hmac_drbg,
+    vec);
+}
+
 static void print_sep()
 {
   C_String_print("=====================\n");
@@ -12561,8 +12332,6 @@ static void test_all()
     test_hash(hash_vectors_low);
     C_String_print("  >>>>>>>>> HMAC (Test.NoHeap)\n");
     test_hmac(hmac_vectors_low);
-    C_String_print("  >>>>>>>>> HMAC_DRBG (Test.NoHeap)\n");
-    test_hmac_drbg(hmac_drbg_vectors_low);
     C_String_print("  >>>>>>>>> HKDF (Test.NoHeap)\n");
     test_hkdf(hkdf_vectors_low);
   }
@@ -12603,9 +12372,6 @@ static void test_all()
     C_String_print("  >>>>>>>>> HMAC (Test.NoHeap)\n");
     test_hmac(hmac_vectors_low);
     C_String_print(" shaext");
-    C_String_print("  >>>>>>>>> HMAC_DRBG (Test.NoHeap)\n");
-    test_hmac_drbg(hmac_drbg_vectors_low);
-    C_String_print(" shaext");
     C_String_print("  >>>>>>>>> HKDF (Test.NoHeap)\n");
     test_hkdf(hkdf_vectors_low);
   }
@@ -12635,8 +12401,6 @@ static void test_all()
     test_hash(hash_vectors_low);
     C_String_print("  >>>>>>>>> HMAC (Test.NoHeap)\n");
     test_hmac(hmac_vectors_low);
-    C_String_print("  >>>>>>>>> HMAC_DRBG (Test.NoHeap)\n");
-    test_hmac_drbg(hmac_drbg_vectors_low);
     C_String_print("  >>>>>>>>> HKDF (Test.NoHeap)\n");
     test_hkdf(hkdf_vectors_low);
   }
@@ -12644,6 +12408,8 @@ static void test_all()
   {
     C_String_print(" SKIP because not in static config\n");
   }
+  print_sep();
+  test_hmac_drbg(hmac_drbg_vectors_low);
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx11 = !EverCrypt_AutoConfig2_has_avx();

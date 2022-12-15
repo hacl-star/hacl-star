@@ -24,7 +24,6 @@
 
 #include "Hacl_Bignum4096_32.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: Hacl_Bignum4096_32_add */
@@ -732,6 +731,7 @@ exp_vartime_precomp(
     uint32_t *ctx_r2 = ctx + (uint32_t)128U;
     from(ctx_n, mu, ctx_r2, resM);
   }
+  uint32_t tmp0[128U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
   {
     KRML_MAYBE_FOR4(i0,
@@ -755,16 +755,15 @@ exp_vartime_precomp(
       ite = p1;
     }
     uint32_t bits_l = ite & mask_l;
-    uint32_t a_bits_l[128U] = { 0U };
     uint32_t bits_l32 = bits_l;
-    const uint32_t *a_bits_l1 = table + bits_l32 * (uint32_t)128U;
-    memcpy(a_bits_l, (uint32_t *)a_bits_l1, (uint32_t)128U * sizeof (uint32_t));
+    const uint32_t *a_bits_l = table + bits_l32 * (uint32_t)128U;
+    memcpy(tmp0, (uint32_t *)a_bits_l, (uint32_t)128U * sizeof (uint32_t));
     uint32_t *ctx_n = ctx;
-    amont_mul(ctx_n, mu, resM, a_bits_l, resM);
+    amont_mul(ctx_n, mu, resM, tmp0, resM);
   }
-  uint32_t tmp0[256U] = { 0U };
-  memcpy(tmp0, resM, (uint32_t)128U * sizeof (uint32_t));
-  reduction(n, mu, tmp0, res);
+  uint32_t tmp1[256U] = { 0U };
+  memcpy(tmp1, resM, (uint32_t)128U * sizeof (uint32_t));
+  reduction(n, mu, tmp1, res);
 }
 
 /* SNIPPET_END: exp_vartime_precomp */
@@ -904,6 +903,7 @@ exp_consttime_precomp(
     uint32_t *ctx_r2 = ctx + (uint32_t)128U;
     from(ctx_n, mu, ctx_r2, resM);
   }
+  uint32_t tmp0[128U] = { 0U };
   for (uint32_t i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -927,8 +927,7 @@ exp_consttime_precomp(
       ite = p1;
     }
     uint32_t bits_l = ite & mask_l;
-    uint32_t a_bits_l[128U] = { 0U };
-    memcpy(a_bits_l, (uint32_t *)table, (uint32_t)128U * sizeof (uint32_t));
+    memcpy(tmp0, (uint32_t *)table, (uint32_t)128U * sizeof (uint32_t));
     KRML_MAYBE_FOR15(i2,
       (uint32_t)0U,
       (uint32_t)15U,
@@ -937,16 +936,16 @@ exp_consttime_precomp(
       const uint32_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)128U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
       {
-        uint32_t *os = a_bits_l;
-        uint32_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
+        uint32_t *os = tmp0;
+        uint32_t x = (c & res_j[i]) | (~c & tmp0[i]);
         os[i] = x;
       });
     uint32_t *ctx_n = ctx;
-    amont_mul(ctx_n, mu, resM, a_bits_l, resM);
+    amont_mul(ctx_n, mu, resM, tmp0, resM);
   }
-  uint32_t tmp0[256U] = { 0U };
-  memcpy(tmp0, resM, (uint32_t)128U * sizeof (uint32_t));
-  reduction(n, mu, tmp0, res);
+  uint32_t tmp1[256U] = { 0U };
+  memcpy(tmp1, resM, (uint32_t)128U * sizeof (uint32_t));
+  reduction(n, mu, tmp1, res);
 }
 
 /* SNIPPET_END: exp_consttime_precomp */
@@ -1211,7 +1210,6 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum4096_32_mont_ctx_init(uin
   uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   res = { .len = (uint32_t)128U, .n = n11, .mu = mu, .r2 = r21 };
-  KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   *buf =
     (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *)KRML_HOST_MALLOC(sizeof (

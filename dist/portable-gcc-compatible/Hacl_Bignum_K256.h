@@ -152,9 +152,9 @@ static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
 
 /* SNIPPET_END: Hacl_K256_Field_load_felem */
 
-/* SNIPPET_START: Hacl_K256_Field_load_felem_vartime */
+/* SNIPPET_START: Hacl_K256_Field_load_felem_lt_prime_vartime */
 
-static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
+static inline bool Hacl_K256_Field_load_felem_lt_prime_vartime(uint64_t *f, uint8_t *b)
 {
   Hacl_K256_Field_load_felem(f, b);
   uint64_t f0 = f[0U];
@@ -170,7 +170,17 @@ static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
     && f2 == (uint64_t)0xfffffffffffffU
     && f3 == (uint64_t)0xfffffffffffffU
     && f4 == (uint64_t)0xffffffffffffU;
-  if (is_ge_p)
+  return !is_ge_p;
+}
+
+/* SNIPPET_END: Hacl_K256_Field_load_felem_lt_prime_vartime */
+
+/* SNIPPET_START: Hacl_K256_Field_load_felem_vartime */
+
+static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
+{
+  bool is_lt_p = Hacl_K256_Field_load_felem_lt_prime_vartime(f, b);
+  if (!is_lt_p)
   {
     return false;
   }
