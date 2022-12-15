@@ -417,6 +417,7 @@ val repeat_blocks_multi_split:
    (let len = length inp in
     Math.Lemmas.lemma_div_exact len blocksize;
     split_len_lemma0 blocksize (len / blocksize) len0;
+    Math.Lemmas.swap_mul blocksize (len / blocksize);
 
     repeat_blocks_multi blocksize inp f acc0 ==
     repeat_blocks_multi blocksize (Seq.slice inp len0 len) f
@@ -442,6 +443,21 @@ val repeat_blocks_split:
       (repeat_blocks_multi blocksize (Seq.slice inp 0 len0) f acc0))
 
 ///
+val repeat_blocks_multi_extensionality:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_pos
+  -> inp:seq a{length inp % blocksize = 0}
+  -> f:(lseq a blocksize -> b -> b)
+  -> g:(lseq a blocksize -> b -> b)
+  -> init:b ->
+  Lemma
+  (requires
+    (forall (block:lseq a blocksize) (acc:b). f block acc == g block acc))
+  (ensures
+    repeat_blocks_multi blocksize inp f init ==
+    repeat_blocks_multi blocksize inp g init)
+
 ///  Properties related to the map_blocks combinator
 ///
 

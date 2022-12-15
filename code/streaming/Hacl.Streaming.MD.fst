@@ -279,32 +279,7 @@ let update_nblocks_vec_m32_is_repeat_blocks_multi a len b st0 =
   assert (b.(|0|) == b);
   assert (st1_m32_t == st1_spec_m32)
 
-
-let state_spec_v_extensionality (a : alg { is_sha2 a })
-  (acc1: Hacl.Spec.SHA2.Vec.(state_spec a M32))
-  (acc2: Hacl.Spec.SHA2.Vec.(state_spec a M32)) :
-  Lemma
-  (requires (let open Hacl.Spec.SHA2.Vec in
-     Lib.Sequence.index (state_spec_v acc1) 0 ==
-     Lib.Sequence.index (state_spec_v acc2) 0))
-  (ensures acc1 == acc2) =
-
-  let open Lib.Sequence in
-  let open Lib.IntVector in
-  let open Hacl.Spec.SHA2.Vec in
-  allow_inversion alg;
-  let acc1_s = (state_spec_v acc1).[0] <: lseq (word a) 8 in
-  let acc2_s = (state_spec_v acc2).[0] <: lseq (word a) 8 in
-
-  let aux (i:nat{i < 8}) : Lemma (acc1.[i] == acc2.[i]) =
-    assert (index (vec_v acc1.[i]) 0 == index #(word a) #8 acc1_s i);
-    assert (index (vec_v acc2.[i]) 0 == index #(word a) #8 acc2_s i);
-    assert (index (vec_v acc1.[i]) 0 == index (vec_v acc2.[i]) 0);
-    eq_intro (vec_v acc1.[i]) (vec_v acc2.[i]);
-    vecv_extensionality acc1.[i] acc2.[i] in
-
-  Classical.forall_intro aux;
-  eq_intro acc1 acc2
+let state_spec_v_extensionality = Hacl.SHA2.Scalar32.Lemmas.state_spec_v_extensionality
 
 let repeati_associative (a : alg { is_sha2 a })
   (acc: Hacl.Spec.SHA2.Vec.(state_spec a M32))
