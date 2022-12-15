@@ -118,23 +118,13 @@ let ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes
     if r = 0 || s = 0 then None else Some (concat #_ #32 #32 rb sb) end
 
 
-let load_public_key (pk:lbytes 64) : tuple3 nat nat bool =
-  let pk_x = nat_from_bytes_be (sub pk 0 32) in
-  let pk_y = nat_from_bytes_be (sub pk 32 32) in
-  let is_x_valid = 0 < pk_x && pk_x < prime in
-  let is_y_valid = 0 < pk_y && pk_y < prime in
-  let is_xy_on_curve =
-    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
-  pk_x, pk_y, is_xy_on_curve
-
-
 let is_public_key_valid (pk:lbytes 64) : bool =
-  let _, _, is_pk_valid = load_public_key pk in
-  is_pk_valid
+  let pk = load_point pk in
+  match pk with | Some pk -> true | None -> false
 
 
 let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
-  let pk_x, pk_y, is_xy_on_curve = load_public_key public_key in
+  let pk = load_point public_key in
   let r = nat_from_bytes_be (sub signature 0 32) in
   let s = nat_from_bytes_be (sub signature 32 32) in
   let z = nat_from_bytes_be msgHash % q in
@@ -142,13 +132,13 @@ let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64)
   let is_r_valid = 0 < r && r < q in
   let is_s_valid = 0 < s && s < q in
 
-  if not (is_xy_on_curve && is_r_valid && is_s_valid) then false
+  if not (Some? pk && is_r_valid && is_s_valid) then false
   else begin
     assert_norm (q < pow2 256);
     let sinv = qinv s in
     let u1 = z *^ sinv in
     let u2 = r *^ sinv in
-    let _X, _Y, _Z = point_mul_double_g u1 u2 (to_proj_point (pk_x, pk_y)) in
+    let _X, _Y, _Z = point_mul_double_g u1 u2 (Some?.v pk) in
 
     if is_proj_point_at_inf (_X, _Y, _Z) then false
     else begin

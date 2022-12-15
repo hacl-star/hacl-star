@@ -180,9 +180,8 @@ let public_key_compressed_from_raw pk pk_raw =
 
 let is_public_key_valid pk =
   push_frame ();
-  let fpk_x = create_felem () in
-  let fpk_y = create_felem () in
-  let is_pk_valid = Hacl.Impl.K256.Verify.load_public_key pk fpk_x fpk_y in
+  let p = P.create_point () in
+  let is_pk_valid = P.load_point_vartime p pk in
   pop_frame ();
   is_pk_valid
 

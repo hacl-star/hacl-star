@@ -82,8 +82,7 @@ val ecdsa_sign_sha256 (signature:lbytes 64ul)
   The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
 
   The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve"]
 val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
@@ -187,8 +186,7 @@ val secp256k1_ecdsa_sign_sha256 (signature:lbytes 64ul)
   The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
 
   The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve"]
 val secp256k1_ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
@@ -288,8 +286,7 @@ val public_key_compressed_from_raw: pk:lbytes 33ul -> pk_raw:lbytes 64ul -> Stac
   The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
   The public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve. "]
 val is_public_key_valid: pk:lbytes 64ul -> Stack bool
   (requires fun h -> live h pk)

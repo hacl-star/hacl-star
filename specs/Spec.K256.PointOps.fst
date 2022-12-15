@@ -198,7 +198,7 @@ let load_point (b:BSeq.lbytes 64) : option proj_point =
   if is_xy_on_curve then Some (to_proj_point (pk_x, pk_y)) else None
 
 
-let recover_y (x:felem{0 < x}) (is_odd:bool) : option felem =
+let recover_y (x:felem) (is_odd:bool) : option felem =
   let y2 = x *% x *% x +% b in
   let y = fsqrt y2 in
   if y *% y <> y2 then None
@@ -212,7 +212,7 @@ let aff_point_decompress (s:BSeq.lbytes 33) : option aff_point =
   if not (s0 = 0x02uy || s0 = 0x03uy) then None
   else begin
     let x = BSeq.nat_from_bytes_be (sub s 1 32) in
-    let is_x_valid = 0 < x && x < prime in
+    let is_x_valid = x < prime in
     let is_y_odd = s0 = 0x03uy in
 
     if not is_x_valid then None

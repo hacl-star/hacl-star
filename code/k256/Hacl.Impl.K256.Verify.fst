@@ -27,26 +27,6 @@ inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
 
 
-val load_public_key (pk:lbytes 64ul) (fpk_x fpk_y:felem) : Stack bool
-  (requires fun h ->
-    live h pk /\ live h fpk_x /\ live h fpk_y /\
-    disjoint fpk_x fpk_y /\ disjoint fpk_x pk /\ disjoint fpk_y pk)
-  (ensures  fun h0 b h1 -> modifies (loc fpk_x |+| loc fpk_y) h0 h1 /\
-    (b ==> inv_fully_reduced h1 fpk_x /\ inv_fully_reduced h1 fpk_y) /\
-    (as_nat h1 fpk_x, as_nat h1 fpk_y, b) == S.load_public_key (as_seq h0 pk))
-
-[@CInline]
-let load_public_key pk fpk_x fpk_y =
-  let pk_x = sub pk 0ul 32ul in
-  let pk_y = sub pk 32ul 32ul in
-  let is_x_valid = load_felem_vartime fpk_x pk_x in
-  let is_y_valid = load_felem_vartime fpk_y pk_y in
-
-  if is_x_valid && is_y_valid then
-    is_on_curve_vartime fpk_x fpk_y
-  else false
-
-
 inline_for_extraction noextract
 val ecdsa_verify_qelem (res p:point) (z r s:QA.qelem) : Stack unit
   (requires fun h ->
@@ -62,13 +42,12 @@ val ecdsa_verify_qelem (res p:point) (z r s:QA.qelem) : Stack unit
 
 let ecdsa_verify_qelem res p z r s =
   push_frame ();
-  let sinv = QA.create_qelem () in
   let u1 = QA.create_qelem () in
   let u2 = QA.create_qelem () in
 
-  QI.qinv sinv s;
-  QA.qmul u1 z sinv;
-  QA.qmul u2 r sinv;
+  QI.qinv u2 s;
+  QA.qmul u1 z u2;
+  QA.qmul u2 r u2;
   //point_mul_g_double_vartime res u1 u2 p;
   point_mul_g_double_split_lambda_vartime res u1 u2 p;
   pop_frame ()
@@ -156,68 +135,60 @@ let ecdsa_verify_avoid_finv p r =
 
 
 inline_for_extraction noextract
-val ecdsa_verify_qelem_aff_noalloc (p res:point) (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
+val ecdsa_verify_qelem_proj_noalloc (res p:point) (z r s:QA.qelem) : Stack bool
   (requires fun h ->
-    live h pk_x /\ live h pk_y /\ live h z /\
-    live h r /\ live h s /\ live h p /\ live h res /\
-    disjoint p res /\ disjoint p pk_x /\ disjoint p pk_y /\
-    disjoint p z /\ disjoint p r /\ disjoint p s /\
-    disjoint res pk_x /\ disjoint res pk_y /\ disjoint res z /\
-    disjoint res r /\ disjoint res s /\
+    live h z /\ live h r /\ live h s /\ live h p /\ live h res /\
+    disjoint res p /\ disjoint res z /\ disjoint res r /\ disjoint res s /\
 
     QA.qas_nat h z < S.q /\ QA.qas_nat h s < S.q /\
     0 < QA.qas_nat h r /\ QA.qas_nat h r < S.q /\
-    inv_fully_reduced h pk_x /\ inv_fully_reduced h pk_y)
-  (ensures  fun h0 b h1 -> modifies (loc res |+| loc p) h0 h1 /\
+    point_inv h p)
+  (ensures  fun h0 b h1 -> modifies (loc res) h0 h1 /\
    (let sinv = S.qinv (QA.qas_nat h0 s) in
     let u1 = S.qmul (QA.qas_nat h0 z) sinv in
     let u2 = S.qmul (QA.qas_nat h0 r) sinv in
-    let p = (feval h0 pk_x, feval h0 pk_y, S.one) in
-    let _X, _Y, _Z = S.point_mul_double_g u1 u2 p in
+    let _X, _Y, _Z = S.point_mul_double_g u1 u2 (point_eval h0 p) in
     b <==> (if S.is_proj_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
 
-let ecdsa_verify_qelem_aff_noalloc p res pk_x pk_y z r s =
+let ecdsa_verify_qelem_proj_noalloc res p z r s =
   let h0 = ST.get () in
   let sinv = Ghost.hide (S.qinv (QA.qas_nat h0 s)) in
   let u1 = Ghost.hide (S.qmul (QA.qas_nat h0 z) sinv) in
   let u2 = Ghost.hide (S.qmul (QA.qas_nat h0 r) sinv) in
 
-  to_proj_point p pk_x pk_y;
-  let h1 = ST.get () in
   ecdsa_verify_qelem res p z r s;
-  let h2 = ST.get () in
-  assert (S.to_aff_point (point_eval h2 res) ==
-    S.to_aff_point (S.point_mul_double_g u1 u2 (point_eval h1 p)));
+  let h1 = ST.get () in
+  assert (S.to_aff_point (point_eval h1 res) ==
+    S.to_aff_point (S.point_mul_double_g u1 u2 (point_eval h0 p)));
 
-  KL.lemma_aff_is_point_at_inf (point_eval h2 res);
-  KL.lemma_aff_is_point_at_inf (S.point_mul_double_g u1 u2 (point_eval h1 p));
+  KL.lemma_aff_is_point_at_inf (point_eval h1 res);
+  KL.lemma_aff_is_point_at_inf (S.point_mul_double_g u1 u2 (point_eval h0 p));
 
   if is_proj_point_at_inf_vartime res then false
   else ecdsa_verify_avoid_finv res r
 
 
 inline_for_extraction noextract
-val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
+val ecdsa_verify_qelem_proj (p:point) (z r s:QA.qelem) : Stack bool
   (requires fun h ->
-    live h pk_x /\ live h pk_y /\ live h z /\ live h r /\ live h s /\
+    live h z /\ live h r /\ live h s /\ live h p /\
+
     QA.qas_nat h z < S.q /\ QA.qas_nat h s < S.q /\
     0 < QA.qas_nat h r /\ QA.qas_nat h r < S.q /\
-    inv_fully_reduced h pk_x /\ inv_fully_reduced h pk_y)
+    point_inv h p)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
    (let sinv = S.qinv (QA.qas_nat h0 s) in
     let u1 = S.qmul (QA.qas_nat h0 z) sinv in
     let u2 = S.qmul (QA.qas_nat h0 r) sinv in
-    let p = (feval h0 pk_x, feval h0 pk_y, S.one) in
-    let _X, _Y, _Z = S.point_mul_double_g u1 u2 p in
+    let _X, _Y, _Z = S.point_mul_double_g u1 u2 (point_eval h0 p) in
     b <==> (if S.is_proj_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
 
-let ecdsa_verify_qelem_aff pk_x pk_y z r s =
+let ecdsa_verify_qelem_proj p z r s =
   push_frame ();
-  let p = create_point () in
   let res = create_point () in
-  let b = ecdsa_verify_qelem_aff_noalloc p res pk_x pk_y z r s in
+  let b = ecdsa_verify_qelem_proj_noalloc res p z r s in
   pop_frame ();
   b
 
@@ -229,17 +200,14 @@ val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 6
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     b == S.ecdsa_verify_hashed_msg (as_seq h0 msgHash) (as_seq h0 public_key) (as_seq h0 signature))
 
-#push-options "--z3rlimit 150"
 let ecdsa_verify_hashed_msg msgHash public_key signature =
   push_frame ();
-  let pk_x = create_felem () in
-  let pk_y = create_felem () in
-
+  let p = create_point () in
   let r_q = QA.create_qelem () in
   let s_q = QA.create_qelem () in
   let z = QA.create_qelem () in
 
-  let is_xy_on_curve = load_public_key public_key pk_x pk_y in
+  let is_xy_on_curve = load_point_vartime p public_key in
   let is_r_valid = QA.load_qelem_vartime r_q (sub signature 0ul 32ul) in
   let is_s_valid = QA.load_qelem_vartime s_q (sub signature 32ul 32ul) in
   QA.load_qelem_modq z msgHash;
@@ -247,10 +215,6 @@ let ecdsa_verify_hashed_msg msgHash public_key signature =
   let h0 = ST.get () in
   let res =
     if not (is_xy_on_curve && is_r_valid && is_s_valid) then false
-    else begin
-      Math.Lemmas.small_mod (as_nat h0 pk_x) S.prime;
-      Math.Lemmas.small_mod (as_nat h0 pk_y) S.prime;
-      ecdsa_verify_qelem_aff pk_x pk_y z r_q s_q end in
+    else ecdsa_verify_qelem_proj p z r_q s_q in
   pop_frame ();
   res
-#pop-options

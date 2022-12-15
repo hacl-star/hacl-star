@@ -226,7 +226,6 @@ val load_point_nocheck: out:point -> b:lbuffer uint8 64ul -> Stack unit
     point_eval h1 out == S.load_point_nocheck (as_seq h0 b))
 
 
-inline_for_extraction noextract
 val load_point_vartime: out:point -> b:lbuffer uint8 64ul -> Stack bool
   (requires fun h ->
     live h out /\ live h b /\ disjoint out b)

@@ -239,7 +239,7 @@ inline_for_extraction noextract
 val recover_y_vartime (y x:felem) (is_odd:bool) : Stack bool
   (requires fun h ->
     live h x /\ live h y /\ disjoint x y /\
-    inv_fully_reduced h x /\ 0 < as_nat h x)
+    inv_fully_reduced h x)
   (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\
     (b <==> Some? (S.recover_y (as_nat h0 x) is_odd)) /\
     (b ==> (inv_fully_reduced h1 y /\
@@ -271,7 +271,7 @@ let aff_point_decompress_vartime x y s =
     Lib.RawIntTypes.u8_to_UInt8 s0 = 0x03uy) then false
   else begin
     let xb = sub s 1ul 32ul in
-    let is_x_valid = load_felem_vartime x xb in
+    let is_x_valid = load_felem_lt_prime_vartime x xb in
     let is_y_odd = Lib.RawIntTypes.u8_to_UInt8 s0 = 0x03uy in
 
     if not is_x_valid then false
