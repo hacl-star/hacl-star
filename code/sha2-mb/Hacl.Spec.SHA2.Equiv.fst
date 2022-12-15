@@ -457,7 +457,7 @@ val load_last_lemma_l:
   -> #m:m_spec{is_supported a m}
   -> totlen_seq:lseq uint8 (len_length a)
   -> fin:nat{fin == block_length a \/ fin == 2 * block_length a}
-  -> len:nat{len < block_length a}
+  -> len:nat{len <= block_length a}
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
   Lemma
@@ -475,7 +475,7 @@ val update_last_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
   -> totlen:len_t a
-  -> len:nat{len < block_length a}
+  -> len:nat{len <= block_length a}
   -> b:multiseq (lanes a m) len
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
