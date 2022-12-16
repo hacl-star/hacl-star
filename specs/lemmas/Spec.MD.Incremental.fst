@@ -4,14 +4,14 @@ module S = FStar.Seq
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
-open Spec.Hash.PadFinish
+open Spec.Hash.MD
 open Spec.Hash.Lemmas
 
 friend Spec.Agile.Hash
 
 open FStar.Mul
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 #push-options "--z3rlimit 150"
 let md_is_hash_incremental

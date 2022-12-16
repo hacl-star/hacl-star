@@ -5,7 +5,6 @@ module ST = FStar.HyperStack.ST
 
 module M = LowStar.Modifies
 module B = LowStar.Buffer
-module Spec = Spec.Hash.PadFinish
 module Blake2 = Hacl.Impl.Blake2.Core
 
 open Lib.IntTypes
@@ -194,7 +193,7 @@ let pad_st (a: md_alg) = len:len_t a -> dst:B.buffer uint8 ->
       B.length dst = pad_length a (len_v a len)))
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer dst) h0 h1) /\
-      Seq.equal (B.as_seq h1 dst) (Spec.pad a (len_v a len))))
+      Seq.equal (B.as_seq h1 dst) (Spec.Hash.MD.pad a (len_v a len))))
 
 // Note: we cannot take more than 4GB of data because we are currently
 // constrained by the size of buffers...
@@ -206,7 +205,7 @@ let update_multi_st (i:impl) =
   n:size_t { B.length blocks = block_length (get_alg i) * v n } ->
   ST.Stack unit
     (requires (fun h ->
-      Spec.Agile.Hash.update_multi_pre (get_alg i) (as_seq h s) (ev_v ev) (B.as_seq h blocks) /\
+      Spec.Agile.Hash.update_multi_pre (get_alg i) (ev_v ev) (B.as_seq h blocks) /\
       B.live h s /\ B.live h blocks /\ B.disjoint s blocks))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
@@ -247,7 +246,7 @@ let update_last_st (i:impl) =
   ST.Stack unit
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input /\
-      Spec.Agile.Hash.update_multi_pre a (as_seq h s) (extra_state_of_prev_length (prev_len_v prev_len)) (B.as_seq h input)))
+      Spec.Agile.Hash.update_multi_pre a (extra_state_of_prev_length (prev_len_v prev_len)) (B.as_seq h input)))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       as_seq h1 s ==
@@ -262,7 +261,7 @@ let finish_st (i:impl) =
     B.live h s /\ B.live h dst /\ B.disjoint s dst))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst `loc_union` loc_buffer s) h0 h1) /\
-    Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish (get_alg i) (as_seq h0 s))))
+    Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.finish (get_alg i) (as_seq h0 s))))
 
 noextract inline_for_extraction
 let hash_st (a: hash_alg) =

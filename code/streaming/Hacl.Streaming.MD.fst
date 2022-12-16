@@ -802,7 +802,7 @@ let hacl_md (a:alg)// : block unit =
         let _ = multiseq_hash_is_hash a in
         agile_of_lib Hacl.Spec.SHA2.Vec.(finish #a #M32 acc)
       else
-        Spec.Hash.PadFinish.(finish a acc))
+        Spec.Agile.Hash.(finish a acc))
     (fun () _ s -> Spec.Agile.Hash.(hash a s))
 
     (fun i h prevlen ->

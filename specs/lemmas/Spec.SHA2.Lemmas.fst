@@ -292,6 +292,7 @@ let rec update_multi_224_256 hash blocks =
     update_multi_224_256 hash1 blocks_end
     end
 
+#push-options "--z3rlimit 50"
 let update_last_224_256 hash prevlen input =
   let update_multi_224_256 (hash:words_state SHA2_256) (blocks:bytes_blocks SHA2_256):
     Lemma
