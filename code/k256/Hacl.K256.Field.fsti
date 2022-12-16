@@ -149,7 +149,7 @@ val load_felem_lt_prime_vartime: f:felem -> b:lbuffer uint8 32ul -> Stack bool
     live h f /\ live h b /\ disjoint f b)
   (ensures  fun h0 m h1 -> modifies (loc f) h0 h1 /\
    (let b_nat = BSeq.nat_from_bytes_be (as_seq h0 b) in
-    as_nat h1 f == b_nat /\ m = (b_nat < S.prime) /\
+    as_nat h1 f == b_nat /\ m == (b_nat < S.prime) /\
     inv_lazy_reduced1 h1 f))
 
 

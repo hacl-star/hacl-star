@@ -201,6 +201,8 @@ let point_mul_lambda res p =
   let px, py, pz = getx p, gety p, getz p in
   let beta = create_felem () in
   make_beta beta;
+  let h1 = ST.get () in
+  assert (as_nat h1 beta == SG.beta /\ inv_fully_reduced h1 beta);
   fmul rx beta px;
 
   copy_felem ry py;

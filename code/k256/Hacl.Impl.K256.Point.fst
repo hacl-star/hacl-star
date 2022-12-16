@@ -266,16 +266,22 @@ let recover_y_vartime y x is_odd =
 
 
 let aff_point_decompress_vartime x y s =
+  let h0 = ST.get () in
   let s0 = s.(0ul) in
-  if not (Lib.RawIntTypes.u8_to_UInt8 s0 = 0x02uy ||
-    Lib.RawIntTypes.u8_to_UInt8 s0 = 0x03uy) then false
+  [@inline_let] let s0 = Lib.RawIntTypes.u8_to_UInt8 s0 in
+  if not (s0 = 0x02uy || s0 = 0x03uy) then false
   else begin
     let xb = sub s 1ul 32ul in
     let is_x_valid = load_felem_lt_prime_vartime x xb in
-    let is_y_odd = Lib.RawIntTypes.u8_to_UInt8 s0 = 0x03uy in
+    let h1 = ST.get () in
+    assert (is_x_valid == (as_nat h1 x < S.prime));
+    let is_y_odd = s0 = 0x03uy in
 
     if not is_x_valid then false
-    else recover_y_vartime y x is_y_odd end
+    else begin
+      assert (inv_fully_reduced h1 x);
+      recover_y_vartime y x is_y_odd end
+    end
 
 
 let point_decompress_vartime p s =
@@ -377,11 +383,6 @@ let load_point_vartime_noalloc out px py b =
   let is_x_valid = load_felem_lt_prime_vartime px pxb in
   let is_y_valid = load_felem_lt_prime_vartime py pyb in
   let h1 = ST.get () in
-  assert (as_nat h1 px == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 0ul 32ul)));
-  assert (as_nat h1 py == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 32ul 32ul)));
-  assert (inv_lazy_reduced1 h1 px);
-  assert (inv_lazy_reduced1 h1 py);
-
   let res =
     if is_x_valid && is_y_valid then begin
       assert (inv_fully_reduced h1 px);
@@ -389,10 +390,7 @@ let load_point_vartime_noalloc out px py b =
       is_on_curve_vartime px py end
     else false in
 
-  if res then begin
-    assert (inv_lazy_reduced2 h1 px);
-    assert (inv_lazy_reduced2 h1 py);
-    to_proj_point out px py end;
+  if res then to_proj_point out px py;
   res
 
 
