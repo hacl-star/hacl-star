@@ -302,6 +302,37 @@ val create_in:
   create_in_st c i t t'
 
 inline_for_extraction noextract
+let copy_st
+  (#index: Type0)
+  (c:block index)
+  (i:index)
+  (t:Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
+  s0:state c i t t' ->
+  r: HS.rid ->
+  ST (state c i t t')
+  (requires (fun h0 ->
+    invariant c i h0 s0 /\
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    invariant c i h1 s /\
+    freeable c i h1 s /\
+    seen c i h1 s == seen c i h0 s0 /\
+    key c i h1 s == key c i h0 s0 /\
+    B.(modifies loc_none h0 h1) /\
+    B.fresh_loc (footprint c i h1 s) h0 h1 /\
+    B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
+
+inline_for_extraction noextract
+val copy:
+  #index: Type0 ->
+  c:block index ->
+  i:index ->
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  copy_st c i t t'
+
+inline_for_extraction noextract
 let alloca_st
   (#index: Type0)
   (c:block index)
