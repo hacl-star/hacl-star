@@ -240,11 +240,3 @@ let update_aux (h:words_state SHA1) l : (words_state SHA1) =
   step4 mi h
 
 let update = update_aux
-
-(* Section 5.1.1: padding *)
-
-let pad = Spec.Hash.PadFinish.pad SHA1
-
-(* Section 6.1.2: no truncation needed *)
-
-let finish = Spec.Hash.PadFinish.finish SHA1

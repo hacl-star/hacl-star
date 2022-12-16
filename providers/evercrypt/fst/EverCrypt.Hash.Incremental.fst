@@ -94,7 +94,7 @@ let evercrypt_hash : block hash_alg =
     (fun a s prevlen input ->
       let prevlen = prev_length_of_nat a prevlen in
       Spec.Hash.Incremental.update_last a s prevlen input)
-    (fun a _ s -> Spec.Hash.PadFinish.finish a s)
+    (fun a _ s -> Spec.Agile.Hash.finish a s)
 
     (fun a _ -> Spec.Agile.Hash.hash a)
 

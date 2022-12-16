@@ -39,11 +39,11 @@ bool print_test1(uint8_t* in, int in_len, uint8_t* exp256, uint8_t* exp512){
   uint8_t comp256[32] = {0};
   uint8_t comp512[64] = {0};
 
-  Hacl_Streaming_SHA2_sha256(comp256,in_len,in);
+  Hacl_Streaming_SHA2_sha256(in, in_len, comp256);
   printf("NEW SHA2-256 (32-bit) Result:\n");
   bool ok = print_result(comp256,exp256,32);
 
-  Hacl_Streaming_SHA2_sha512(comp512,in_len,in);
+  Hacl_Streaming_SHA2_sha512(in, in_len, comp512);
   printf("NEW SHA2-512 (32-bit) Result:\n");
   ok = print_result(comp512,exp512,64) && ok;
 
