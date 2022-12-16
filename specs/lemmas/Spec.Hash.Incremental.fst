@@ -5,8 +5,6 @@ module Blake2 = Spec.Blake2
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
-open Spec.Hash.PadFinish
-open Spec.Hash.Lemmas
 
 friend Spec.Agile.Hash
 
@@ -29,4 +27,3 @@ let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input `less_
     Spec.SHA3.Incremental.sha3_is_incremental a input
   else
     Spec.MD.Incremental.md_is_hash_incremental a input (init a)
-

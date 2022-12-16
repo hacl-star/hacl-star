@@ -291,11 +291,3 @@ let update_aux (abcd:words_state MD5) x : Tot (words_state MD5) =
 
 [@"opaque_to_smt"]
 let update = update_aux
-
-(* Sections 3.1 and 3.2 *)
-
-let pad = Spec.Hash.PadFinish.pad MD5
-
-(* Section 3.5 *)
-
-let finish = Spec.Hash.PadFinish.finish MD5

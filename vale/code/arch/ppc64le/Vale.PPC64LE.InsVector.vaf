@@ -32,7 +32,6 @@ open Vale.PPC64LE.InsBasic
 open Vale.PPC64LE.InsMem
 open Vale.PPC64LE.Memory
 open Vale.Def.Sel
-open Spec.Hash.PadFinish
 open Spec.SHA2
 open Spec.Hash.Definitions
 open Vale.SHA.PPC64LE.SHA_helpers
@@ -49,7 +48,6 @@ open Vale.Def.Types_s
 open Vale.PPC64LE.Machine_s
 open Vale.PPC64LE.State
 open Vale.PPC64LE.Decls
-open Spec.Hash.PadFinish
 open Spec.Hash.Definitions
 open Spec.SHA2
 friend Vale.PPC64LE.Decls

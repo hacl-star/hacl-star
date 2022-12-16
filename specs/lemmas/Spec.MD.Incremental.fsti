@@ -5,7 +5,7 @@ module S = FStar.Seq
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.Incremental.Definitions
-open Spec.Hash.PadFinish
+open Spec.Hash.MD
 open Spec.Hash.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"

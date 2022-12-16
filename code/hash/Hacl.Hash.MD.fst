@@ -192,7 +192,7 @@ let mk_update_last a update_multi =
   let h2 = ST.get () in
   assert (S.equal (B.as_seq h2 tmp) (S.append (B.as_seq h2 tmp_rest) (B.as_seq h2 tmp_pad)));
   assert (S.equal (B.as_seq h2 tmp_rest) (B.as_seq h1 rest));
-  assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)));
+  assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.MD.pad a (len_v a total_input_len)));
 
   (* Update multi those last few blocks *)
   Math.Lemmas.cancel_mul_mod (U32.v tmp_len) (block_length a);
@@ -205,17 +205,17 @@ let mk_update_last a update_multi =
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
     (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) () (B.as_seq h1 blocks)) ()
-      (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)))));
+      (S.append (B.as_seq h1 rest) (Spec.Hash.MD.pad a (len_v a total_input_len)))));
   assert (
     let s1 = B.as_seq h1 blocks in
     let s2 = B.as_seq h2 rest in
-    let s3 = Spec.Hash.PadFinish.pad a (len_v a total_input_len) in
+    let s3 = Spec.Hash.MD.pad a (len_v a total_input_len) in
     S.equal (S.append s1 (S.append s2 s3)) (S.append (S.append s1 s2) s3));
 
   Spec.Hash.Lemmas.update_multi_associative a
     (B.as_seq h0 s)
     (B.as_seq h1 blocks)
-    (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)));
+    (S.append (B.as_seq h1 rest) (Spec.Hash.MD.pad a (len_v a total_input_len)));
 
   ST.pop_frame ()
 
@@ -289,7 +289,7 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   (**) let h02 = ST.get () in
   (**) assert (as_seq h02 s == Spec.Agile.Hash.(Spec.Hash.Incremental.update_last a (update_multi a (init a) () blocks_v0) (S.length blocks_v0) rest_v0));
 
-  (**) let padding: Ghost.erased _ = Spec.Hash.PadFinish.pad a (S.length input_v0) in
+  (**) let padding: Ghost.erased _ = Spec.Hash.MD.pad a (S.length input_v0) in
   // We need to prove that rest_v0 @| padding is a block. We do this using the calc below
   calc (==) {
     S.(length (rest_v0 @| padding)) % block_length a;
