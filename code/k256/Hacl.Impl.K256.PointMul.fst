@@ -178,7 +178,6 @@ let point_mul_g out scalar =
 
 //-------------------------
 
-inline_for_extraction noextract
 val point_mul_g_double_vartime_noalloc:
     out:point
   -> scalar1:qelem -> q1:point
@@ -201,6 +200,7 @@ val point_mul_g_double_vartime_noalloc:
     S.to_aff_point (S.point_mul_double_g
       (qas_nat h0 scalar1) (qas_nat h0 scalar2) (point_eval h0 q2)))
 
+[@CInline]
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let len = 15ul in
   [@inline_let] let ctx_len = 0ul in
@@ -230,21 +230,34 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
     (point_eval h0 q2) (qas_nat h0 scalar2) 5
 
 
+val make_g_and_precomp_table: q1:point -> q2:point -> table2:lbuffer uint64 480ul -> Stack unit
+  (requires fun h ->
+    live h q1 /\ live h q2 /\ live h table2 /\
+    disjoint q1 q2 /\ disjoint q1 table2 /\
+    disjoint q2 table2 /\ point_inv h q2)
+  (ensures fun h0 _ h1 -> modifies (loc q1 |+| loc table2) h0 h1 /\
+    point_inv h1 q1 /\ point_eval h1 q1 == S.g /\
+    table_inv_w5 (as_seq h1 q2) (as_seq h1 table2))
+
 [@CInline]
-let point_mul_g_double_vartime out scalar1 scalar2 q2 =
-  push_frame ();
+let make_g_and_precomp_table q1 q2 table2 =
   [@inline_let] let len = 15ul in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_k256_concrete_ops in
   [@inline_let] let table_len = 32ul in
-  assert_norm (pow2 5 == v table_len);
+  assert_norm (pow2 5 = 32);
+  make_g q1;
+  PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2
+
+
+[@CInline]
+let point_mul_g_double_vartime out scalar1 scalar2 q2 =
+  push_frame ();
+  [@inline_let] let len = 15ul in
+  [@inline_let] let table_len = 32ul in
 
   let q1 = create 15ul (u64 0) in
-  make_g q1;
-
   let table2 = create (table_len *! len) (u64 0) in
-  PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
-  let h = ST.get () in
-  assert (table_inv_w5 (as_seq h q2) (as_seq h table2));
+  make_g_and_precomp_table q1 q2 table2;
   point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2;
   pop_frame ()
