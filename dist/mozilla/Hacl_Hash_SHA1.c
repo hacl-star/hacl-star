@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Hash_SHA1.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 static uint32_t
 _h0[5U] =

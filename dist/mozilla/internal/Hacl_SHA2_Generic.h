@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_SHA2_Generic_H
-#define __Hacl_SHA2_Generic_H
+#ifndef __internal_Hacl_SHA2_Generic_H
+#define __internal_Hacl_SHA2_Generic_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -130,5 +130,5 @@ Hacl_Impl_SHA2_Generic_k384_512[80U] =
 }
 #endif
 
-#define __Hacl_SHA2_Generic_H_DEFINED
+#define __internal_Hacl_SHA2_Generic_H_DEFINED
 #endif
