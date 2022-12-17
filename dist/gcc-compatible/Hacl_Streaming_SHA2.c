@@ -24,7 +24,8 @@
 
 #include "internal/Hacl_Streaming_SHA2.h"
 
-
+#include "internal/Hacl_SHA2_Generic.h"
+#include "internal/Hacl_Krmllib.h"
 
 static inline void sha256_init(uint32_t *hash)
 {

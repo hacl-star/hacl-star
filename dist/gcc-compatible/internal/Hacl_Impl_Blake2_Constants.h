@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Impl_Blake2_Constants_H
-#define __Hacl_Impl_Blake2_Constants_H
+#ifndef __internal_Hacl_Impl_Blake2_Constants_H
+#define __internal_Hacl_Impl_Blake2_Constants_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -91,5 +91,5 @@ Hacl_Impl_Blake2_Constants_ivTable_B[8U] =
 }
 #endif
 
-#define __Hacl_Impl_Blake2_Constants_H_DEFINED
+#define __internal_Hacl_Impl_Blake2_Constants_H_DEFINED
 #endif

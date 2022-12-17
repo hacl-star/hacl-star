@@ -24,6 +24,8 @@
 
 #include "Hacl_Hash_Blake2b_256.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "internal/Hacl_Hash_Blake2.h"
 
 static inline void

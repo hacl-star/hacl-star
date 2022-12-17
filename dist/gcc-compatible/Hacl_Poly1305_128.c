@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Poly1305_128.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 void
 Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b)
