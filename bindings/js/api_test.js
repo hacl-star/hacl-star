@@ -63,7 +63,11 @@ var passTest = function(func_sig, func, msg, t) {
     var expected_result = postprocessing(func_sig.return.type, func_sig.return.tests[t]);
     var result_val = postprocessing(func_sig.return.type, result[0]);
     if (result_val !== expected_result) {
-      throw "Wrong return value ! Expecting " + expected_result + ", got " + result_val;
+      throw ({
+        message: "Wrong return value ! Expecting " + expected_result + ", got " + result_val,
+        func: msg,
+        index: t,
+      });
     }
   }
   func_sig.args.filter(function(arg) {
@@ -190,5 +194,15 @@ HaclWasm.getInitializedHaclModule().then(function(Hacl) {
   }));
   for (var i = 0; i < tests.length; i++) {
     checkTestVectors.apply(null, tests[i]);
+  }
+}).catch(e => {
+  if ("func" in e) {
+    console.log("Error while running test #", e.index, "for", e.func);
+    console.log(e.message);
+    process.exit(1);
+  } else {
+    console.log("Unknown error");
+    console.log(e);
+    process.exit(1);
   }
 });
