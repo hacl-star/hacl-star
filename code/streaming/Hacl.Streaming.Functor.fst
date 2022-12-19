@@ -367,19 +367,20 @@ let create_in #index c i t t' k r =
   p
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 100"
 let copy #index c i t t' s0 r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
 
   // All source state is suffixed by 0.
-  let State block_state0 buf0 total_len0 _ k0 = !*s0 in
+  let State block_state0 buf0 total_len0 seen0 k0 = !*s0 in
 
   (**) let h0 = ST.get () in
 
   (**) B.loc_unused_in_not_unused_in_disjoint h0;
   let buf = B.malloc r (Lib.IntTypes.u8 0) (c.blocks_state_len i) in
+  B.blit buf0 0ul buf 0ul (c.blocks_state_len i);
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
@@ -398,6 +399,13 @@ let copy #index c i t t' s0 r =
   (**)   c.key.frame_invariant #i B.loc_none k0 h1 h2;
   (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
   (**) assert (invariant c i h2 s0);
+
+  c.state.copy (G.hide i) block_state0 block_state;
+  (**) let h2 = ST.get () in
+  (**) B.loc_unused_in_not_unused_in_disjoint h2;
+  (**) B.(modifies_only_not_unused_in loc_none h1 h2);
+  (**) if c.km = Runtime then
+  (**)   c.key.frame_invariant #i (c.state.footprint #i h2 block_state) k0 h1 h2;
 
   let k': optional_key i c.km c.key =
     match c.km with
@@ -429,8 +437,7 @@ let copy #index c i t t' s0 r =
   (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
   (**) assert (B.fresh_loc (c.state.footprint #i h5 block_state) h0 h5);
 
-  [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
-  let s = State block_state buf total_len (G.hide S.empty) k' in
+  let s = State block_state buf total_len0 seen0 k' in
   (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
 
   (**) B.loc_unused_in_not_unused_in_disjoint h5;
@@ -447,42 +454,7 @@ let copy #index c i t t' s0 r =
   (**) c.state.frame_freeable B.loc_none block_state h5 h6;
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
-  admit() (*
-
-
-  c.init (G.hide i) k0 buf block_state;
-  (**) let h7 = ST.get () in
-  (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
-  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
-  (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
-  (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
-  (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
-
-
-  (**) let h8 = ST.get () in
-  (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
-
-  (**) begin
-  (**) let s = B.get h8 p 0 in
-  (**) let key_v = key c i h8 p in
-  (**) let init_input = c.init_input_s i key_v in
-  (**) split_at_last_init c i init_input;
-  (**) assert(invariant_s c i h8 s)
-  (**) end;
-  (**) assert (invariant c i h8 p);
-
-  (**) assert (seen c i h8 p == S.empty);
-  (**) assert B.(modifies loc_none h0 h8);
-  (**) assert (B.fresh_loc (footprint c i h8 p) h0 h8);
-  (**) assert B.(loc_includes (loc_region_only true r) (footprint c i h8 p));
-
-  (**) assert (ST.equal_stack_domains h1 h8);
-  (**) assert (ST.equal_stack_domains h0 h1);
-
   p
-
-*)
 #pop-options
 
 #push-options "--z3rlimit 100"
