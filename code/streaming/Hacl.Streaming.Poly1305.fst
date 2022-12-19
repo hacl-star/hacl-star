@@ -405,37 +405,54 @@ let poly1305 (fs : field_spec) : I.block unit =
   I.Block
     I.Runtime
 
-    (stateful_poly1305_ctx fs)
-    k
+    (stateful_poly1305_ctx fs) (* state *)
+    k (* key *)
 
-    (fun () -> 0xffffffffUL)
-    (fun () -> 16ul)
-    (fun () -> 16ul)
+    (fun () -> 0xffffffffUL) (* max_input_len *)
+    (fun () -> 16ul) (* output_len *)
+    (fun () -> 16ul) (* block_len *)
+
+    (* blocks_state_len *)
     (fun () ->
       match fs with
       | M32 -> 16ul // block_length
       | M128 -> 32ul // 2 * block_length
       | M256 -> 64ul) // 4 * block_length
+    (fun () -> 0ul) (* init_input_len *)
 
-    (fun () -> Spec.Poly1305.poly1305_init)
-    (fun () acc prevlen data -> update_multi acc data)
-    (fun () x _ y -> update_last x y)
-    (fun () -> finish_)
+    (fun () _k -> S.empty) (* init_input_s *)
+    (fun () -> Spec.Poly1305.poly1305_init) (* init_s *)
+    (fun () acc prevlen data -> update_multi acc data) (* update_multi_s *)
+    (fun () x _ y -> update_last x y) (* update_last_s *)
+    (fun () -> finish_) (* finish_s *)
 
-    (fun () -> spec)
+    (fun () -> spec) (* spec_s *)
 
+    (* update_multi_zero *)
     (fun () acc prevlen -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_ acc)
+
+    (* update_multi_associative *)
     (fun () acc prevlen1 prevlen2 input1 input2 ->
       Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_
                                                acc input1 input2)
-    (fun () -> poly_is_incremental_lazy)
 
+    (* spec_is_incremental *)
+    (fun () key input ->
+      let input1 = S.append S.empty input in
+      assert (S.equal input1 input);
+      poly_is_incremental_lazy key input)
+
+    (* index_of_state *)
     (fun _ _ -> ())
-    (fun _ k s ->
+
+    (* init *)
+    (fun _ k _ s ->
       match fs with
       | M32 -> Hacl.Poly1305_32.poly1305_init s k
       | M128 -> Hacl.Poly1305_128.poly1305_init s k
       | M256 -> Hacl.Poly1305_256.poly1305_init s k)
+
+    (* update_multi *)
     (fun _ s prevlen blocks len ->
       let h0 = ST.get () in
       begin
@@ -446,6 +463,8 @@ let poly1305 (fs : field_spec) : I.block unit =
       | M32 -> Hacl.Poly1305_32.poly1305_update s len blocks
       | M128 -> Hacl.Poly1305_128.poly1305_update s len blocks
       | M256 -> Hacl.Poly1305_256.poly1305_update s len blocks)
+
+    (* update_last *)
     (fun _ s prev_len last last_len ->
       let h0 = ST.get () in
       begin
@@ -457,6 +476,7 @@ let poly1305 (fs : field_spec) : I.block unit =
       | M128 -> Hacl.Poly1305_128.poly1305_update s last_len last
       | M256 -> Hacl.Poly1305_256.poly1305_update s last_len last)
 
+    (* finish *)
     (fun _ k s dst ->
       let h0 = ST.get () in
       ST.push_frame ();

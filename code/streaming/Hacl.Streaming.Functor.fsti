@@ -158,11 +158,18 @@ val invariant_loc_in_footprint
 
 val seen: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot bytes
 
+/// We maintain the invariant that the length of the data hashed so far is smaller
+/// than the maximum length accepted by the hash algorithm.
+///
+/// Note that for hashes like blake2, the key is turned into a block which is then
+/// concatenated with the bytes fed into the algorithm (we copy this iniial
+/// block into the temporary buffer upon initilization). We count the length of
+/// this initial block in the total length of the hashed data.
 val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> Lemma
   (requires (
     invariant c i h s))
   (ensures (
-    S.length (seen c i h s) <= U64.v (c.max_input_len i)))
+    U32.v (c.init_input_len i) + S.length (seen c i h s) <= U64.v (c.max_input_len i)))
 
 /// A fine design point here... There are two styles that have been used in
 /// EverCrypt and throughout for key management.
@@ -245,7 +252,7 @@ val seen_length:
   s:state c i t t' ->
   Stack U64.t
   (fun h0 -> invariant c i h0 s)
-  (fun h0 l h1 -> h0 == h1 /\ U64.v l == S.length (seen c i h0 s)))
+  (fun h0 l h1 -> h0 == h1 /\ U64.v l == U32.v (c.init_input_len i) +  S.length (seen c i h0 s)))
 
 inline_for_extraction noextract
 let create_in_st
@@ -386,10 +393,10 @@ let update_st
     (ensures fun h0 s' h1 ->
       match s' with
       | 0ul ->
-          S.length (seen c i h0 s) + UInt32.v len <= U64.v (c.max_input_len i) /\
+          U32.v (c.init_input_len i) + S.length (seen c i h0 s) + UInt32.v len <= U64.v (c.max_input_len i) /\
           update_post c i s data len h0 h1
       | 1ul ->
-          S.length (seen c i h0 s) + UInt32.v len > U64.v (c.max_input_len i) /\
+          U32.v (c.init_input_len i) + S.length (seen c i h0 s) + UInt32.v len > U64.v (c.max_input_len i) /\
           h0 == h1
       | _ ->
           False)
