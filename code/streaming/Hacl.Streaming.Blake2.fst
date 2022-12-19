@@ -141,11 +141,11 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful unit =
 /// ============
 
 inline_for_extraction noextract
-let key_size (a : alg) = kk:nat{0 <= kk /\ kk <= Spec.max_key a}
+let key_size (a : alg) = kk:nat{kk <= Spec.max_key a}
 
 inline_for_extraction noextract
 let key_size_t (a : alg) =
-  key_size:U32.t{0 <= U32.v key_size /\ U32.v key_size <= Spec.max_key a}
+  key_size:U32.t{U32.v key_size <= Spec.max_key a}
 
 /// Defining stateful keys
 inline_for_extraction noextract
