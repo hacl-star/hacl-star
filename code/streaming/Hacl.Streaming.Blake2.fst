@@ -514,7 +514,7 @@ let init_key_block a kk k buf_ =
     let sub_b = B.sub buf_ (U32.uint_to_t kk) sub_b_len in
     B.fill sub_b (Lib.IntTypes.u8 0) sub_b_len;
     (**) let h1 = ST.get () in
-    (**) assert(S.slice (B.as_seq h1 buf_) kk (Spec.size_block a) == B.as_seq h1 sub_b);
+    (**) assert(S.slice (B.as_seq h1 buf_) kk (Spec.size_block a) `S.equal` B.as_seq h1 sub_b);
 
     (* Copy the key at the beginning of the buffer *)
     Lib.Buffer.update_sub #Lib.Buffer.MUT #uint8 #(U32.uint_to_t (Spec.size_block a))
@@ -526,29 +526,29 @@ let init_key_block a kk k buf_ =
     (**) let buf_v2 : LS.lseq uint8 (Spec.size_block a) = B.as_seq h2 buf_ in
 
     (* Prove that [buf_] is equal to [key @ create ... 0] *)
-    (**) assert(buf_v2 == LS.update_sub buf_v1 0 kk k);
+    (**) assert(buf_v2 `S.equal` LS.update_sub buf_v1 0 kk k);
     (**) let zeroed : LS.lseq uint8 (Spec.size_block a - kk) = S.create (Spec.size_block a - kk) (Lib.IntTypes.u8 0) in
-    (**) assert(B.as_seq h1 sub_b == zeroed);
+    (**) assert(B.as_seq h1 sub_b `S.equal` zeroed);
     (**) let key_and_zeroed : LS.lseq uint8 (Spec.size_block a) = Seq.append k zeroed in
     (**) assert(S.equal (S.slice key_and_zeroed 0 kk) k);
     (**) assert(S.equal (S.slice key_and_zeroed kk (Spec.size_block a)) zeroed);
     (**) LS.lemma_update_sub #uint8 #(Spec.size_block a) buf_v1 0 kk k key_and_zeroed;
-    (**) assert(buf_v2 == key_and_zeroed);
+    (**) assert(buf_v2 `S.equal` key_and_zeroed);
 
     (* Prove that the initial input is equal to [key @ create ... 0] *)
     (**) let input = Spec.blake2_key_block a kk k in
     (**) let key_block0: LS.lseq uint8 (Spec.size_block a) = S.create (Spec.size_block a) (Lib.IntTypes.u8 0) in
-    (**) assert(input == LS.update_sub key_block0 0 kk k);
+    (**) assert(input `S.equal` LS.update_sub key_block0 0 kk k);
     (**) assert(Seq.equal (LS.sub key_and_zeroed 0 kk) k);
     (**) assert(Seq.equal (LS.sub key_and_zeroed kk (Spec.size_block a - kk))
                           (LS.sub key_block0 kk (Spec.size_block a - kk)));
     (**) LS.lemma_update_sub #uint8 #(Spec.size_block a) key_block0 0 kk k key_and_zeroed;
-    (**) assert(input == key_and_zeroed)
+    (**) assert(input `S.equal` key_and_zeroed)
     (**) end
     end
 
 /// Runtime
-/// !-------
+/// -------
 
 #push-options "--ifuel 1"// --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
