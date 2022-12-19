@@ -254,10 +254,12 @@ type block (index: Type0) =
   // The size of data to process at a time. Must be a multiple of block_len.
   // Controls the size of the internal buffer.
   blocks_state_len: (i:index ->
-    x:U32.t { U32.v x > 0 /\ U32.v x % U32.v (block_len i) = 0 }) ->
+    x:U32.t { U32.v x > 0 /\ U32.v x >= U32.v (block_len i) /\ U32.v x % U32.v (block_len i) = 0 }) ->
+  init_input_len: (i:index -> x:U32.t { U32.v x <= U32.v (block_len i) /\ U32.v x <= U64.v (max_input_len i) }) ->
 
   /// An init/update/update_last/finish specification. The long refinements were
   /// previously defined as blocks / small / output.
+  init_input_s: (i:index -> key.t i -> s:S.seq uint8 { S.length s = U32.v (init_input_len i) }) ->
   init_s: (i:index -> key.t i -> state.t i) ->
   update_multi_s: (i:index ->
     state.t i ->
@@ -272,7 +274,7 @@ type block (index: Type0) =
   finish_s: (i:index -> key.t i -> state.t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
 
   /// The specification in one shot.
-  spec_s: (i:index -> key.t i -> input:S.seq uint8 { S.length input <= U64.v (max_input_len i) } ->
+  spec_s: (i:index -> key.t i -> input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
     output:S.seq uint8 { S.length output == U32.v (output_len i) }) ->
 
   // Required lemmas... clients can enjoy them in their local contexts with the SMT pattern via a let-binding.
@@ -310,9 +312,10 @@ type block (index: Type0) =
    * and Spec.Hash.Incremental *)
   spec_is_incremental: (i:index ->
     key: key.t i ->
-    input:S.seq uint8 { S.length input <= U64.v (max_input_len i) } ->
+    input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
     Lemma (
-      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input in
+      let input1 = S.append (init_input_s i key) input in
+      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input1 in
       (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len i));
       (* TODO: use update_full ? *)
       let hash0 = init_s i key in
@@ -332,17 +335,22 @@ type block (index: Type0) =
   init: (i:G.erased index -> (
     let i = G.reveal i in
     k: key.s i ->
+    buf_: B.buffer uint8 { B.length buf_ = U32.v (blocks_state_len i) } ->
     s: state.s i -> Stack unit
     (requires fun h0 ->
       key.invariant #i h0 k /\
+      B.live h0 buf_ /\
       state.invariant #i h0 s /\
-      B.loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s))
+      B.loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s) /\
+      B.loc_disjoint (key.footprint #i h0 k) (B.loc_buffer buf_) /\
+      B.loc_disjoint (B.loc_buffer buf_) (state.footprint #i h0 s))
     (ensures fun h0 _ h1 ->
       key.invariant #i h1 k /\
       (key.freeable #i h0 k ==> key.freeable #i h1 k) /\
       state.invariant #i h1 s /\
       state.v i h1 s == init_s i (key.v i h0 k) /\
-      B.(modifies (state.footprint #i h0 s) h0 h1) /\
+      S.equal (S.slice (B.as_seq h1 buf_) 0 (U32.v (init_input_len i))) (init_input_s i (key.v i h0 k)) /\
+      B.(modifies (loc_union (state.footprint #i h0 s) (loc_buffer buf_)) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
