@@ -139,7 +139,7 @@ void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes.
 */
-void Hacl_Streaming_SHA2_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha256 */
 
@@ -188,7 +188,7 @@ void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA2_state_sha2_224 *p);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes.
 */
-void Hacl_Streaming_SHA2_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha224(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha224 */
 
@@ -250,7 +250,7 @@ void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes.
 */
-void Hacl_Streaming_SHA2_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha512(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha512 */
 
@@ -299,7 +299,7 @@ void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_SHA2_state_sha2_384 *p);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes.
 */
-void Hacl_Streaming_SHA2_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha384(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha384 */
 
