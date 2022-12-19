@@ -1,5 +1,5 @@
 [
-  "ý2@ýŸˆ0ÿ@”\n‰i%»\u0011",
+  "¾(ÂW\u001eZ)ƒ¨\u0004ö lÉ-4",
   [
     [
       "Spec.SHA3.Incremental.update_is_update_multi",
@@ -75,7 +75,7 @@
         "unit_typing"
       ],
       0,
-      "83dbaf3a404d6278995ca91db92d1734"
+      "b46045b97c00ebc0c590034086ce3063"
     ],
     [
       "Spec.SHA3.Incremental.sha3_is_incremental1",
@@ -187,7 +187,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA3_256@tok"
       ],
       0,
-      "e73455a7a0613f803d3a5159b13a32b3"
+      "90fa060f14758082808fccf5b6a1d99e"
     ],
     [
       "Spec.SHA3.Incremental.sha3_is_incremental2",
@@ -223,7 +223,9 @@
         "equation_Lib.UpdateMulti.split_at_last_nb_rem",
         "equation_Lib.UpdateMulti.split_block",
         "equation_Lib.UpdateMulti.uint8", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.Agile.Hash.hash",
+        "equation_Prims.pos", "equation_Spec.Agile.Hash.finish",
+        "equation_Spec.Agile.Hash.finish_sha3",
+        "equation_Spec.Agile.Hash.hash",
         "equation_Spec.Agile.Hash.update_multi",
         "equation_Spec.Agile.Hash.update_multi_pre",
         "equation_Spec.Hash.Definitions.block_length",
@@ -242,8 +244,6 @@
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.Hash.Definitions.words_state",
-        "equation_Spec.Hash.PadFinish.finish",
-        "equation_Spec.Hash.PadFinish.finish_sha3",
         "equation_Spec.SHA3.absorb", "equation_Spec.SHA3.keccak",
         "equation_Spec.SHA3.sha3_256",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
@@ -286,7 +286,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA3_256@tok", "unit_typing"
       ],
       0,
-      "d2b769e917d8f804f0e3fa7d767a60db"
+      "a4d51f2b8fc539fc1a283cd732d997f1"
     ],
     [
       "Spec.SHA3.Incremental.sha3_is_incremental",
@@ -320,7 +320,7 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "de9934309bdc8d50c0a4396548658a26"
+      "ed49370da2d8b94a668771a8ea43b6fe"
     ],
     [
       "Spec.SHA3.Incremental.sha3_is_incremental",
@@ -358,6 +358,7 @@
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.bytes_hash",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.init_t",
@@ -388,6 +389,7 @@
         "refinement_interpretation_Tm_refine_80fcf399ebafecbbd82dcddbbdc1abf9",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
+        "refinement_interpretation_Tm_refine_b3e3751c3894f166dfde09b500dd73a6",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
@@ -401,7 +403,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA3_256@tok"
       ],
       0,
-      "ff7568ae45972166cd3915c4ded5070a"
+      "f63c018de557a38a5b360467fb76e18b"
     ]
   ]
 ]
