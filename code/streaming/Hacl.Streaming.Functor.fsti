@@ -188,22 +188,6 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
 /// Note: annotating the projector because of an interleaving bug.
 val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot (c.key.I.t i)
 
-(*
-/// For hashes like blake2, the key is turned into a block which is then
-/// concatenated with the bytes fed into the algorithm (we copy this iniial
-/// block into the temporary buffer upon initilization).
-/// [init_input] gives this initial block of data.
-val init_input: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot (c.key.I.t i)
-
-/// For hashes like blake2, the key is turned into a block which is then
-/// concatenated with the bytes fed into the algorithm (we copy this iniial
-/// block into the temporary buffer upon initilization). The [seen] function
-/// gives the bytes fed to the algorithm, while the [all_seen] function gives
-/// the concatenation key + bytes fed.
-let all_seen (#index:Type0) (c:block index) (i:index) (h:HS.mem) (s:state' c i) : GTot bytes =
-  S.append (c.init_input_s i (key )) (seen c i h s)
-*)
-
 /// Framing
 /// =======
 ///
