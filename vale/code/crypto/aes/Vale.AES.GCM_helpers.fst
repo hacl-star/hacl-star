@@ -25,7 +25,7 @@ let extra_bytes_helper (n:nat) : Lemma
 let bytes_to_quad_size_no_extra_bytes num_bytes = ()
 
 let no_extra_bytes_helper s num_bytes =
-  assert (slice (le_seq_quad32_to_bytes s) 0 num_bytes == le_seq_quad32_to_bytes s); // TODO: this shouldn't be necessary
+  assert (slice (le_seq_quad32_to_bytes s) 0 num_bytes `Seq.equal` le_seq_quad32_to_bytes s); // TODO: this shouldn't be necessary
   ()
 
 let le_seq_quad32_to_bytes_tail_prefix (s:seq quad32) (num_bytes:nat) =
