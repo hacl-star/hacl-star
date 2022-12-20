@@ -234,7 +234,7 @@ val bn_sqr_f_lemma:
   Lemma (let res = bn_sqr_f a j acc in
    eval_ (aLen + aLen) res (j + j + 1) ==
    eval_ (aLen + aLen) acc (j + j) + eval_ aLen a j * v a.[j] * pow2 (bits t * j) /\
-  (forall (i:nat{j + j < i /\ i < aLen + aLen}). index res i == index acc i))
+  (forall (i:nat{j + j < i /\ i < aLen + aLen}). Seq.index res i == Seq.index acc i))
 
 let bn_sqr_f_lemma #t #aLen a j acc =
   let resLen = aLen + aLen in
@@ -275,7 +275,7 @@ let bn_sqr_inductive #t #aLen a k =
     let acc1 = bn_sqr_f a i acci in
     assert (acc1 == repeati (i + 1) (bn_sqr_f a) acc0);
     bn_sqr_f_lemma a i acci;
-    assert (forall (i0:nat{i + i + 2 < i0 /\ i0 < aLen + aLen}). index acc1 i0 == index acc0 i0);
+    assert (forall (i0:nat{i + i + 2 < i0 /\ i0 < aLen + aLen}). Seq.index acc1 i0 == Seq.index acc0 i0);
     acc1)
   acc0
 
