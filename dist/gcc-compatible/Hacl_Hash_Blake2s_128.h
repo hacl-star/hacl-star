@@ -108,7 +108,7 @@ Hacl_Blake2s_128_load_state128s_from_state32(
   uint32_t *st32
 );
 
-Lib_IntVector_Intrinsics_vec128 *Hacl_Blake2s_128_blake2s_malloc();
+Lib_IntVector_Intrinsics_vec128 *Hacl_Blake2s_128_blake2s_malloc(void);
 
 #if defined(__cplusplus)
 }

@@ -488,7 +488,7 @@ Hacl_Blake2b_256_store_state256b_to_state32(
     os[i] = x;);
 }
 
-Lib_IntVector_Intrinsics_vec256 *Hacl_Blake2b_256_blake2b_malloc()
+Lib_IntVector_Intrinsics_vec256 *Hacl_Blake2b_256_blake2b_malloc(void)
 {
   Lib_IntVector_Intrinsics_vec256
   *buf =

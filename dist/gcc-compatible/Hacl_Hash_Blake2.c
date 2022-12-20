@@ -677,7 +677,7 @@ Hacl_Blake2b_32_blake2b(
   Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
 }
 
-uint64_t *Hacl_Blake2b_32_blake2b_malloc()
+uint64_t *Hacl_Blake2b_32_blake2b_malloc(void)
 {
   uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
   return buf;
@@ -1319,7 +1319,7 @@ Hacl_Blake2s_32_blake2s(
   Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
 }
 
-uint32_t *Hacl_Blake2s_32_blake2s_malloc()
+uint32_t *Hacl_Blake2s_32_blake2s_malloc(void)
 {
   uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
   return buf;
