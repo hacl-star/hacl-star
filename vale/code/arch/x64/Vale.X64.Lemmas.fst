@@ -17,7 +17,7 @@ let rec lemma_eq_instr_apply_eval_args
   : Lemma
   (requires state_eq_S true s1 s2)
   (ensures
-    BS.instr_apply_eval_args outs args f oprs s1 == 
+    BS.instr_apply_eval_args outs args f oprs s1 ==
     BS.instr_apply_eval_args outs args f oprs s2)
   =
   let open BS in
@@ -44,7 +44,7 @@ let rec lemma_eq_instr_apply_eval_inouts
   : Lemma
   (requires state_eq_S true s1 s2)
   (ensures
-    BS.instr_apply_eval_inouts outs inouts args f oprs s1 == 
+    BS.instr_apply_eval_inouts outs inouts args f oprs s1 ==
     BS.instr_apply_eval_inouts outs inouts args f oprs s2)
   =
   let open BS in
@@ -140,22 +140,54 @@ let eval_code_eq_instr (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
   eval_ins_eq_instr inst ({s1 with BS.ms_trace = []}) ({s2 with BS.ms_trace = []})
 
-#restart-solver
+let eval_code_eq_dealloc (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
+  (requires Dealloc? inst /\ state_eq_S true s1 s2)
+  (ensures state_eq_opt true (BS.machine_eval_code (Ins inst) f s1) (BS.machine_eval_code (Ins inst) f s2))
+  =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
+  use_machine_state_equal ();
+  lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
+  allow_inversion tmaddr
+
+let eval_code_eq_alloc (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
+  (requires Alloc? inst /\ state_eq_S true s1 s2)
+  (ensures state_eq_opt true (BS.machine_eval_code (Ins inst) f s1) (BS.machine_eval_code (Ins inst) f s2))
+  =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
+  use_machine_state_equal ();
+  lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
+  allow_inversion tmaddr
+
+let eval_code_eq_push (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
+  (requires Push? inst /\ state_eq_S true s1 s2)
+  (ensures state_eq_opt true (BS.machine_eval_code (Ins inst) f s1) (BS.machine_eval_code (Ins inst) f s2))
+  =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
+  use_machine_state_equal ();
+  lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
+  allow_inversion tmaddr
+
+let eval_code_eq_pop (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
+  (requires Pop? inst /\ state_eq_S true s1 s2)
+  (ensures state_eq_opt true (BS.machine_eval_code (Ins inst) f s1) (BS.machine_eval_code (Ins inst) f s2))
+  =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
+  use_machine_state_equal ();
+  lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
+  allow_inversion tmaddr
+
 let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_code (Ins i) f s1) (BS.machine_eval_code (Ins i) f s2))
   =
-  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
-  if Instr? i then eval_code_eq_instr i f s1 s2
-  else (
-    assert (Dealloc? i \/ Alloc? i \/ Push? i \/ Pop? i);
-    use_machine_state_equal ();
-    lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
-    allow_inversion tmaddr;
-    ()
-  )
+  match i with
+  | Instr _ _ _ -> eval_code_eq_instr i f s1 s2
+  | Dealloc _  -> eval_code_eq_dealloc i f s1 s2
+  | Alloc _  -> eval_code_eq_alloc i f s1 s2
+  | Push _ _  -> eval_code_eq_push i f s1 s2
+  | Pop _ _  -> eval_code_eq_pop i f s1 s2
 
-#reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
+#reset-options "--fuel 2 --z3rlimit 30"
 
 let eval_ocmp_eq_core (g:bool) (cond:ocmp) (s:machine_state) : Lemma
   (ensures (
