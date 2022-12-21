@@ -162,7 +162,7 @@ let optional_frame #index
   | Erased -> ()
   | Runtime ->
       key.frame_invariant #i l s h0 h1;
-      stateful_frame_preserves_freeable #index #key #i l s h0 h1      
+      stateful_frame_preserves_freeable #index #key #i l s h0 h1
 
 let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
   let State block_state buf_ _ _ p_key = s in
@@ -195,7 +195,7 @@ let invariant_s #index (c: block index) (i: index) h s =
   U32.v (c.init_input_len i) + S.length seen = U64.v total_len /\
   U64.v total_len <= U64.v (c.max_input_len i) /\
 
-  // Note the double equals here, we now no longer know that this is a sequence.  
+  // Note the double equals here, we now no longer know that this is a sequence.
   c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) 0 blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest
 #pop-options
@@ -363,6 +363,96 @@ let create_in #index c i t t' k r =
 
   (**) assert (ST.equal_stack_domains h1 h8);
   (**) assert (ST.equal_stack_domains h0 h1);
+
+  p
+#pop-options
+
+#push-options "--z3rlimit 100"
+let copy #index c i t t' s0 r =
+  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
+  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
+  allow_inversion key_management;
+
+  // All source state is suffixed by 0.
+  let State block_state0 buf0 total_len0 seen0 k0 = !*s0 in
+
+  (**) let h0 = ST.get () in
+
+  (**) B.loc_unused_in_not_unused_in_disjoint h0;
+  let buf = B.malloc r (Lib.IntTypes.u8 0) (c.blocks_state_len i) in
+  B.blit buf0 0ul buf 0ul (c.blocks_state_len i);
+  (**) let h1 = ST.get () in
+  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
+  (**) B.loc_unused_in_not_unused_in_disjoint h1;
+  (**) B.(modifies_only_not_unused_in loc_none h0 h1);
+  (**) if c.km = Runtime then
+  (**)   c.key.frame_invariant #i B.loc_none k0 h0 h1;
+  (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
+  (**) assert (invariant c i h1 s0);
+
+  let block_state = c.state.create_in i r in
+  (**) let h2 = ST.get () in
+  (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
+  (**) B.loc_unused_in_not_unused_in_disjoint h2;
+  (**) B.(modifies_only_not_unused_in loc_none h1 h2);
+  (**) if c.km = Runtime then
+  (**)   c.key.frame_invariant #i B.loc_none k0 h1 h2;
+  (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
+  (**) assert (invariant c i h2 s0);
+
+  c.state.copy (G.hide i) block_state0 block_state;
+  (**) let h2 = ST.get () in
+  (**) B.loc_unused_in_not_unused_in_disjoint h2;
+  (**) B.(modifies_only_not_unused_in loc_none h1 h2);
+  (**) if c.km = Runtime then
+  (**)   c.key.frame_invariant #i (c.state.footprint #i h2 block_state) k0 h1 h2;
+
+  let k': optional_key i c.km c.key =
+    match c.km with
+    | Runtime ->
+        let k' = c.key.create_in i r in
+        (**) let h3 = ST.get () in
+        (**) B.loc_unused_in_not_unused_in_disjoint h3;
+        (**) B.(modifies_only_not_unused_in loc_none h2 h3);
+        (**) c.key.frame_invariant #i B.loc_none k0 h2 h3;
+        (**) c.state.frame_invariant #i B.loc_none block_state h2 h3;
+        (**) c.state.frame_freeable #i B.loc_none block_state h2 h3;
+        (**) assert (B.fresh_loc (c.key.footprint #i h3 k') h0 h3);
+        (**) assert (c.key.invariant #i h3 k');
+        (**) assert (c.key.invariant #i h3 k0);
+        (**) assert B.(loc_disjoint (c.key.footprint #i h3 k0) (c.key.footprint #i h3 k'));
+        c.key.copy i k0 k';
+        (**) let h4 = ST.get () in
+        (**) assert (B.fresh_loc (c.key.footprint #i h4 k') h0 h4);
+        (**) B.loc_unused_in_not_unused_in_disjoint h4;
+        (**) B.(modifies_only_not_unused_in loc_none h2 h4);
+        (**) assert (c.key.invariant #i h4 k');
+        (**) c.key.frame_invariant #i (c.key.footprint #i h3 k') k0 h3 h4;
+        (**) c.state.frame_invariant #i (c.key.footprint #i h3 k') block_state h3 h4;
+        (**) c.state.frame_freeable #i (c.key.footprint #i h3 k') block_state h3 h4;
+        k'
+    | Erased -> k0
+  in
+  (**) let h5 = ST.get () in
+  (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
+  (**) assert (B.fresh_loc (c.state.footprint #i h5 block_state) h0 h5);
+
+  let s = State block_state buf total_len0 seen0 k' in
+  (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
+
+  (**) B.loc_unused_in_not_unused_in_disjoint h5;
+  let p = B.malloc r s 1ul in
+  (**) let h6 = ST.get () in
+  (**) B.(modifies_only_not_unused_in loc_none h5 h6);
+  (**) B.(modifies_only_not_unused_in loc_none h0 h6);
+  (**) if c.km = Runtime then
+  (**)   c.key.frame_invariant #i B.loc_none k0 h5 h6;
+  (**) c.state.frame_invariant #i B.loc_none block_state h5 h6;
+  (**) optional_frame B.loc_none k' h5 h6;
+  (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
+  (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
+  (**) c.state.frame_freeable B.loc_none block_state h5 h6;
+  (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
   p
 #pop-options
@@ -565,14 +655,14 @@ let rest #index (c: block index) (i: index)
   (**) Math.Lemmas.euclidean_division_definition total_len_v l_v;
   (**) assert(Ghost.reveal r_v = total_len_v % l_v);
   (**) assert(r_v < l_v);
-  
+
   if U64.(r =^ uint_to_t 0) && U64.(total_len >^ uint_to_t 0) then
     begin
     (**) split_at_last_num_blocks_lem c i (U64.v total_len);
     c.blocks_state_len i
     end
   else
-    begin    
+    begin
     [@inline_let] let r' = FStar.Int.Cast.uint64_to_uint32 r in
     (**) FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32);
     (**) calc (==) {
@@ -683,7 +773,7 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
   assert(b = n * l + r');
   split_at_last_num_blocks_spec c i b n r'
 #pop-options
-  
+
 
 /// Beginning of the three sub-cases (see Hacl.Streaming.Spec)
 /// ==========================================================
@@ -1144,7 +1234,7 @@ val update_empty_or_full_functional_correctness :
 
     let n_blocks = nblocks c i len in
     (**) split_at_last_num_blocks_lem c i (U32.v len);
-    (**) assert(U32.v n_blocks * U32.v (c.blocks_state_len i) <= U32.v len); 
+    (**) assert(U32.v n_blocks * U32.v (c.blocks_state_len i) <= U32.v len);
     (**) assert(U32.(FStar.UInt.size (v n_blocks * v (c.blocks_state_len i)) n));
     let data1_len = n_blocks `U32.mul` c.blocks_state_len i in
     let data2_len = len `U32.sub` data1_len in
@@ -1256,7 +1346,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
 
   let init_state : Ghost.erased _ =
     c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key)) in
-  
+
   (* Start by "flushing" the buffer: hash it so that all the data seen so far
    * has been processed and we can consider the buffer as empty *)
   if U32.(sz =^ 0ul) then
@@ -1283,7 +1373,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
       assert(c.state.v i h1 block_state == c.update_multi_s i init_state 0 all_seen)
       end
     end;
- 
+
   let h1 = ST.get () in
 
   assert(
@@ -1304,7 +1394,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
   let h01 = ST.get () in
   optional_frame #_ #i #c.km #c.key (c.state.footprint h0 block_state) k' h0 h01;
   assert(preserves_freeable c i p h0 h01);
-  
+
   begin
     let all_seen = all_seen c i h0 p in
     let data1_v = B.as_seq h01 data1 in
@@ -1393,7 +1483,7 @@ let update_round #index c i t t' p data len =
   (**) let blocks', rest' = split_at_last_all_seen c i h1 p in
   (**) ()
   (**) end
-#pop-options  
+#pop-options
 
 
 /// General update function, as a decomposition of the three sub-cases
@@ -1576,7 +1666,7 @@ let mk_finish #index c i t t' p dst =
   c.state.frame_invariant #i B.loc_none block_state h0 h1;
   stateful_frame_preserves_freeable #index #c.state #i B.loc_none block_state h0 h1;
   optional_frame #_ #i #c.km #c.key B.loc_none k' h0 h1;
-  
+
   let r = rest c i total_len in
 
   let buf_ = B.sub buf_ 0ul r in
@@ -1626,7 +1716,7 @@ let mk_finish #index c i t t' p dst =
   // Functional correctness
   mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h4 tmp_block_state;
   split_at_last_finish c i (all_seen c i h0 p);
-  
+
   // Process the remaining data
   assert(UInt32.v r_last <= UInt32.v (Block?.block_len c (Ghost.reveal (Ghost.hide i))));
   let prev_len_last = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r_last) in
@@ -1652,7 +1742,7 @@ let mk_finish #index c i t t' p dst =
     let all_seen = all_seen c i h0 p in
     let blocks_state_length = U32.v (c.blocks_state_len i) in
     let block_length = U32.v (c.block_len i) in
-    
+
     let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem block_length (S.length all_seen)) in
     let blocks, rest_ = Lib.UpdateMulti.split_at_last_lazy block_length all_seen in
     let k = optional_reveal #_ #i #c.km #c.key h0 k' in

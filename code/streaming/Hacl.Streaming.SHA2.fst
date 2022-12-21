@@ -70,6 +70,11 @@ calling `free_256`."]
 let create_in_256 = F.create_in hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
 
 [@@ Comment
+"Copies the state passed as argument into a newly allocated state. The state
+is to be freed by calling `free_256`"]
+let copy_256 = F.copy hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
+
+[@@ Comment
 "Reset an existing state to the initial hash state with empty data."]
 let init_256 = F.init hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 
