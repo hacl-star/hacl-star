@@ -65,6 +65,13 @@ calling `free_256`.
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256();
 
 /**
+Copies the state passed as argument into a newly allocated state. The state
+is to be freed by calling `free_256`
+*/
+Hacl_Streaming_SHA2_state_sha2_224
+*Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_SHA2_state_sha2_224 *s0);
+
+/**
 Reset an existing state to the initial hash state with empty data.
 */
 void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
