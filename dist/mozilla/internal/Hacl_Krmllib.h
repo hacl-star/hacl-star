@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_HPKE_Curve51_CP32_SHA256_H
-#define __Hacl_HPKE_Curve51_CP32_SHA256_H
+#ifndef __internal_Hacl_Krmllib_H
+#define __internal_Hacl_Krmllib_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,60 +35,34 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
-#include "Hacl_HKDF.h"
-#include "Hacl_Curve25519_51.h"
-#include "Hacl_Chacha20Poly1305_32.h"
+#include "../Hacl_Krmllib.h"
 
-uint32_t
-Hacl_HPKE_Curve51_CP32_SHA256_setupBaseS(
-  uint8_t *o_pkE,
-  Hacl_Impl_HPKE_context_s o_ctx,
-  uint8_t *skE,
-  uint8_t *pkR,
-  uint32_t infolen,
-  uint8_t *info
-);
+static inline uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
 
-uint32_t
-Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR(
-  Hacl_Impl_HPKE_context_s o_ctx,
-  uint8_t *enc,
-  uint8_t *skR,
-  uint32_t infolen,
-  uint8_t *info
-);
+static inline uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);
 
-uint32_t
-Hacl_HPKE_Curve51_CP32_SHA256_sealBase(
-  uint8_t *skE,
-  uint8_t *pkR,
-  uint32_t infolen,
-  uint8_t *info,
-  uint32_t aadlen,
-  uint8_t *aad,
-  uint32_t plainlen,
-  uint8_t *plain,
-  uint8_t *o_enc,
-  uint8_t *o_ct
-);
+static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
-uint32_t
-Hacl_HPKE_Curve51_CP32_SHA256_openBase(
-  uint8_t *pkE,
-  uint8_t *skR,
-  uint32_t infolen,
-  uint8_t *info,
-  uint32_t aadlen,
-  uint8_t *aad,
-  uint32_t ctlen,
-  uint8_t *ct,
-  uint8_t *o_pt
-);
+static inline uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b);
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_logor(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
+
+static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
+
+static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+
+static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_HPKE_Curve51_CP32_SHA256_H_DEFINED
+#define __internal_Hacl_Krmllib_H_DEFINED
 #endif

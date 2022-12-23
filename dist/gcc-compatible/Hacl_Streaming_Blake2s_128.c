@@ -30,7 +30,7 @@
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2s_128_blake2s_128_state
-*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in()
+*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec128
