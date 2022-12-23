@@ -70,8 +70,10 @@ calling `free_256`."]
 let create_in_256 = F.create_in hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
 
 [@@ Comment
-"Copies the state passed as argument into a newly allocated state. The state
-is to be freed by calling `free_256`"]
+"Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_256`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch."]
 let copy_256 = F.copy hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
 
 [@@ Comment
