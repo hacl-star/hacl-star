@@ -24,6 +24,7 @@
 
 #include "Hacl_Chacha20_Vec128.h"
 
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Chacha20.h"
 #include "libintvector.h"
 /* SNIPPET_START: double_round_128 */

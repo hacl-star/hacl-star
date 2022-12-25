@@ -24,7 +24,7 @@
 
 #include "Hacl_SHA3.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
 

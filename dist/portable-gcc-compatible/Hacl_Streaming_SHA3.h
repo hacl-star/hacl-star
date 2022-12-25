@@ -47,7 +47,7 @@ typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA3_state_sha3_256;
 
 /* SNIPPET_START: Hacl_Streaming_SHA3_create_in_256 */
 
-Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256();
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA3_create_in_256(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA3_create_in_256 */
 

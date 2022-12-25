@@ -24,7 +24,8 @@
 
 #include "internal/Hacl_Curve25519_51.h"
 
-
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum25519_51.h"
 
 static const uint8_t g25519[32U] = { (uint8_t)9U };
 

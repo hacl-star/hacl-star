@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Hash_SHA2.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: h224 */
 
