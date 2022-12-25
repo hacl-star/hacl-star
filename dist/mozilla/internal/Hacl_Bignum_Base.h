@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Bignum_Base_H
-#define __Hacl_Bignum_Base_H
+#ifndef __internal_Hacl_Bignum_Base_H
+#define __internal_Hacl_Bignum_Base_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
 #include "Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
 static inline void
@@ -430,5 +431,5 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
 }
 #endif
 
-#define __Hacl_Bignum_Base_H_DEFINED
+#define __internal_Hacl_Bignum_Base_H_DEFINED
 #endif
