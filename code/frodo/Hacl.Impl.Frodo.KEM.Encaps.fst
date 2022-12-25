@@ -19,6 +19,7 @@ open Hacl.Frodo.Random
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
+module LB = Lib.ByteSequence
 
 module FP = Spec.Frodo.Params
 module S = Spec.Frodo.KEM.Encaps
@@ -202,9 +203,10 @@ val crypto_kem_enc_ct0:
       disjoint ct seed_a /\ disjoint ct b /\ disjoint ct mu /\
       disjoint ct sp_matrix /\ disjoint ct ep_matrix /\ disjoint ct epp_matrix)
     (ensures fun h0 _ h1 -> modifies (loc ct) h0 h1 /\
-    (let c1 = S.crypto_kem_enc_ct_pack_c1 a gen_a (as_seq h0 seed_a) (as_seq h0 sp_matrix) (as_seq h0 ep_matrix) in
-      let c2 = S.crypto_kem_enc_ct_pack_c2 a (as_seq h0 mu) (as_seq h0 b) (as_seq h0 sp_matrix) (as_seq h0 epp_matrix) in
-      as_seq h1 ct == LSeq.concat c1 c2))
+      (let c1:LB.lbytes (FP.ct1bytes_len a) = S.crypto_kem_enc_ct_pack_c1 a gen_a (as_seq h0 seed_a) (as_seq h0 sp_matrix) (as_seq h0 ep_matrix) in
+      let c2:LB.lbytes (FP.ct2bytes_len a) = S.crypto_kem_enc_ct_pack_c2 a (as_seq h0 mu) (as_seq h0 b) (as_seq h0 sp_matrix) (as_seq h0 epp_matrix) in
+      v (crypto_ciphertextbytes a) == FP.ct1bytes_len a + FP.ct2bytes_len a /\
+      as_seq h1 ct `Seq.equal` LSeq.concat #_ #(FP.ct1bytes_len a) #(FP.ct2bytes_len a) c1 c2))
 
 let crypto_kem_enc_ct0 a gen_a seed_a b mu sp_matrix ep_matrix epp_matrix ct =
   let c1 = sub ct 0ul (ct1bytes_len a) in
