@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_Bignum25519_51.h"
 
 /**
 Compute the scalar multiple of a point.

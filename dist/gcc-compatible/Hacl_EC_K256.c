@@ -24,7 +24,9 @@
 
 #include "Hacl_EC_K256.h"
 
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_K256_ECDSA.h"
+#include "internal/Hacl_Bignum_K256.h"
 
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^256 - 0x1000003D1.

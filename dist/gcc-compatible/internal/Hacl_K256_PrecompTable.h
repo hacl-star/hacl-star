@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_K256_PrecompTable_H
-#define __Hacl_K256_PrecompTable_H
+#ifndef __internal_Hacl_K256_PrecompTable_H
+#define __internal_Hacl_K256_PrecompTable_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -539,5 +539,5 @@ Hacl_K256_PrecompTable_precomp_basepoint_table_w5[480U] =
 }
 #endif
 
-#define __Hacl_K256_PrecompTable_H_DEFINED
+#define __internal_Hacl_K256_PrecompTable_H_DEFINED
 #endif

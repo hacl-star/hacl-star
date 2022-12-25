@@ -71,7 +71,8 @@ Hacl_Streaming_Blake2_blake2b_32_state;
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in();
+Hacl_Streaming_Blake2_blake2s_32_state
+*Hacl_Streaming_Blake2_blake2s_32_no_key_create_in(void);
 
 /**
   (Re-)initialization function when there is no key
@@ -105,7 +106,8 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_create_in();
+Hacl_Streaming_Blake2_blake2b_32_state
+*Hacl_Streaming_Blake2_blake2b_32_no_key_create_in(void);
 
 /**
   (Re)-initialization function when there is no key

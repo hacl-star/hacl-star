@@ -24,7 +24,7 @@
 
 #include "Hacl_SHA3.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 const
 uint32_t
