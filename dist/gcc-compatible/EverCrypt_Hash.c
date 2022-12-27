@@ -1003,39 +1003,39 @@ uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a)
   {
     case Spec_Hash_Definitions_MD5:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_MD5_HASH_LEN;
+        return MD5_HASH_LEN;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_SHA1_HASH_LEN;
+        return SHA1_HASH_LEN;
       }
     case Spec_Hash_Definitions_SHA2_224:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_SHA2_224_HASH_LEN;
+        return SHA2_224_HASH_LEN;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_SHA2_256_HASH_LEN;
+        return SHA2_256_HASH_LEN;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_SHA2_384_HASH_LEN;
+        return SHA2_384_HASH_LEN;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_SHA2_512_HASH_LEN;
+        return SHA2_512_HASH_LEN;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_SHA3_256_HASH_LEN;
+        return SHA3_256_HASH_LEN;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_BLAKE2S_HASH_LEN;
+        return BLAKE2S_HASH_LEN;
       }
     case Spec_Hash_Definitions_Blake2B:
       {
-        return EVERCRYPT_HASH_INCREMENTAL_BLAKE2B_HASH_LEN;
+        return BLAKE2B_HASH_LEN;
       }
     default:
       {

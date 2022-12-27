@@ -50,24 +50,6 @@ extern "C" {
 
 typedef struct EverCrypt_Hash_state_s_s EverCrypt_Hash_state_s;
 
-#define EVERCRYPT_HASH_INCREMENTAL_MD5_HASH_LEN ((uint32_t)16U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_SHA1_HASH_LEN ((uint32_t)20U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_SHA2_224_HASH_LEN ((uint32_t)28U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_SHA2_256_HASH_LEN ((uint32_t)32U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_SHA2_384_HASH_LEN ((uint32_t)48U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_SHA2_512_HASH_LEN ((uint32_t)64U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_SHA3_256_HASH_LEN ((uint32_t)32U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_BLAKE2S_HASH_LEN ((uint32_t)32U)
-
-#define EVERCRYPT_HASH_INCREMENTAL_BLAKE2B_HASH_LEN ((uint32_t)64U)
-
 uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 typedef struct EverCrypt_Hash_Incremental_hash_state_s
@@ -104,6 +86,24 @@ EverCrypt_Hash_Incremental_hash(
   uint8_t *input,
   uint32_t len
 );
+
+#define MD5_HASH_LEN ((uint32_t)16U)
+
+#define SHA1_HASH_LEN ((uint32_t)20U)
+
+#define SHA2_224_HASH_LEN ((uint32_t)28U)
+
+#define SHA2_256_HASH_LEN ((uint32_t)32U)
+
+#define SHA2_384_HASH_LEN ((uint32_t)48U)
+
+#define SHA2_512_HASH_LEN ((uint32_t)64U)
+
+#define SHA3_256_HASH_LEN ((uint32_t)32U)
+
+#define BLAKE2S_HASH_LEN ((uint32_t)32U)
+
+#define BLAKE2B_HASH_LEN ((uint32_t)64U)
 
 #if defined(__cplusplus)
 }
