@@ -22,21 +22,9 @@
  */
 
 
-#include "Test.h"
+#include "internal/Test.h"
 
 
-
-#define SHA2_224 0
-#define SHA2_256 1
-#define SHA2_384 2
-#define SHA2_512 3
-#define SHA1 4
-#define MD5 5
-#define Blake2S 6
-#define Blake2B 7
-#define SHA3_256 8
-
-typedef uint8_t hash_alg;
 
 extern void C_String_print(C_String_t uu___);
 
@@ -44,41 +32,47 @@ extern uint32_t C_String_strlen(C_String_t uu___);
 
 extern void C_String_memcpy(uint8_t *uu___, C_String_t uu___1, uint32_t uu___2);
 
-extern bool EverCrypt_AutoConfig2_has_shaext();
+extern bool EverCrypt_AutoConfig2_has_shaext(void);
 
-extern bool EverCrypt_AutoConfig2_has_aesni();
+extern bool EverCrypt_AutoConfig2_has_aesni(void);
 
-extern bool EverCrypt_AutoConfig2_has_avx2();
+extern bool EverCrypt_AutoConfig2_has_avx2(void);
 
-extern bool EverCrypt_AutoConfig2_has_avx();
+extern bool EverCrypt_AutoConfig2_has_avx(void);
 
-extern bool EverCrypt_AutoConfig2_has_bmi2();
+extern bool EverCrypt_AutoConfig2_has_bmi2(void);
 
-extern bool EverCrypt_AutoConfig2_has_adx();
+extern bool EverCrypt_AutoConfig2_has_adx(void);
 
-extern void EverCrypt_AutoConfig2_init();
+extern void EverCrypt_AutoConfig2_init(void);
 
-extern void EverCrypt_AutoConfig2_disable_avx2();
+extern void EverCrypt_AutoConfig2_disable_avx2(void);
 
-extern void EverCrypt_AutoConfig2_disable_avx();
+extern void EverCrypt_AutoConfig2_disable_avx(void);
 
-extern void EverCrypt_AutoConfig2_disable_bmi2();
+extern void EverCrypt_AutoConfig2_disable_bmi2(void);
 
-extern void EverCrypt_AutoConfig2_disable_adx();
+extern void EverCrypt_AutoConfig2_disable_adx(void);
 
-extern void EverCrypt_AutoConfig2_disable_shaext();
+extern void EverCrypt_AutoConfig2_disable_shaext(void);
 
-extern void EverCrypt_AutoConfig2_disable_aesni();
+extern void EverCrypt_AutoConfig2_disable_aesni(void);
 
-extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___);
+extern C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 typedef struct state_s_s state_s;
 
-extern state_s *EverCrypt_Hash_create(hash_alg a);
+extern state_s *EverCrypt_Hash_create(Spec_Hash_Definitions_hash_alg a);
 
 extern void EverCrypt_Hash_init(state_s *s);
 
-extern void EverCrypt_Hash_hash(hash_alg a, uint8_t *dst, uint8_t *input, uint32_t len);
+extern void
+EverCrypt_Hash_hash(
+  Spec_Hash_Definitions_hash_alg a,
+  uint8_t *dst,
+  uint8_t *input,
+  uint32_t len
+);
 
 extern void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
@@ -245,11 +239,11 @@ EverCrypt_AEAD_decrypt(
 
 extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
-extern bool EverCrypt_HMAC_is_supported_alg(hash_alg uu___);
+extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 extern void
 EverCrypt_HMAC_compute(
-  hash_alg a,
+  Spec_Hash_Definitions_hash_alg a,
   uint8_t *mac,
   uint8_t *key,
   uint32_t keylen,
@@ -270,7 +264,7 @@ Expand pseudorandom key to desired length.
 */
 extern void
 EverCrypt_HKDF_expand(
-  hash_alg a,
+  Spec_Hash_Definitions_hash_alg a,
   uint8_t *okm,
   uint8_t *prk,
   uint32_t prklen,
@@ -298,7 +292,7 @@ Extract a fixed-length pseudorandom key from input keying material.
 */
 extern void
 EverCrypt_HKDF_extract(
-  hash_alg a,
+  Spec_Hash_Definitions_hash_alg a,
   uint8_t *prk,
   uint8_t *salt,
   uint32_t saltlen,
@@ -3042,23 +3036,23 @@ vectors[12U] =
 
 static uint32_t vectors_len = (uint32_t)12U;
 
-static bool is_supported_alg0(hash_alg uu___)
+static bool is_supported_alg0(Spec_Hash_Definitions_hash_alg uu___)
 {
   switch (uu___)
   {
-    case SHA1:
+    case Spec_Hash_Definitions_SHA1:
       {
         return true;
       }
-    case SHA2_256:
+    case Spec_Hash_Definitions_SHA2_256:
       {
         return true;
       }
-    case SHA2_384:
+    case Spec_Hash_Definitions_SHA2_384:
       {
         return true;
       }
-    case SHA2_512:
+    case Spec_Hash_Definitions_SHA2_512:
       {
         return true;
       }
@@ -5295,19 +5289,12 @@ hash_vectors_low23[64U] =
     (uint8_t)63U, (uint8_t)183U, (uint8_t)186U, (uint8_t)233U
   };
 
-typedef struct lbuffer__uint8_t_s
-{
-  uint32_t len;
-  uint8_t *b;
-}
-lbuffer__uint8_t;
-
 typedef struct
 __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t_s
 {
-  hash_alg fst;
+  Spec_Hash_Definitions_hash_alg fst;
   C_String_t snd;
-  lbuffer__uint8_t thd;
+  Test_Lowstarize_lbuffer__uint8_t thd;
   uint32_t f3;
 }
 __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t;
@@ -5316,145 +5303,145 @@ static __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8
 hash_vectors_low24[24U] =
   {
     {
-      .fst = MD5,
+      .fst = Spec_Hash_Definitions_MD5,
       .snd = "",
       .thd = { .len = (uint32_t)16U, .b = hash_vectors_low0 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = MD5,
+      .fst = Spec_Hash_Definitions_MD5,
       .snd = "a",
       .thd = { .len = (uint32_t)16U, .b = hash_vectors_low1 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = MD5,
+      .fst = Spec_Hash_Definitions_MD5,
       .snd = "abc",
       .thd = { .len = (uint32_t)16U, .b = hash_vectors_low2 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = MD5,
+      .fst = Spec_Hash_Definitions_MD5,
       .snd = "message digest",
       .thd = { .len = (uint32_t)16U, .b = hash_vectors_low3 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = MD5,
+      .fst = Spec_Hash_Definitions_MD5,
       .snd = "abcdefghijklmnopqrstuvwxyz",
       .thd = { .len = (uint32_t)16U, .b = hash_vectors_low4 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = MD5,
+      .fst = Spec_Hash_Definitions_MD5,
       .snd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
       .thd = { .len = (uint32_t)16U, .b = hash_vectors_low5 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = MD5,
+      .fst = Spec_Hash_Definitions_MD5,
       .snd = "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
       .thd = { .len = (uint32_t)16U, .b = hash_vectors_low6 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA1,
+      .fst = Spec_Hash_Definitions_SHA1,
       .snd = "abc",
       .thd = { .len = (uint32_t)20U, .b = hash_vectors_low7 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA1,
+      .fst = Spec_Hash_Definitions_SHA1,
       .snd = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
       .thd = { .len = (uint32_t)20U, .b = hash_vectors_low8 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA1,
+      .fst = Spec_Hash_Definitions_SHA1,
       .snd = "a",
       .thd = { .len = (uint32_t)20U, .b = hash_vectors_low9 },
       .f3 = (uint32_t)1000000U
     },
     {
-      .fst = SHA1,
+      .fst = Spec_Hash_Definitions_SHA1,
       .snd = "0123456701234567012345670123456701234567012345670123456701234567",
       .thd = { .len = (uint32_t)20U, .b = hash_vectors_low10 },
       .f3 = (uint32_t)10U
     },
     {
-      .fst = SHA2_256,
+      .fst = Spec_Hash_Definitions_SHA2_256,
       .snd = "abc",
       .thd = { .len = (uint32_t)32U, .b = hash_vectors_low11 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA2_256,
+      .fst = Spec_Hash_Definitions_SHA2_256,
       .snd = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
       .thd = { .len = (uint32_t)32U, .b = hash_vectors_low12 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA2_256,
+      .fst = Spec_Hash_Definitions_SHA2_256,
       .snd = "a",
       .thd = { .len = (uint32_t)32U, .b = hash_vectors_low13 },
       .f3 = (uint32_t)1000000U
     },
     {
-      .fst = SHA2_256,
+      .fst = Spec_Hash_Definitions_SHA2_256,
       .snd = "0123456701234567012345670123456701234567012345670123456701234567",
       .thd = { .len = (uint32_t)32U, .b = hash_vectors_low14 },
       .f3 = (uint32_t)10U
     },
     {
-      .fst = SHA2_256,
+      .fst = Spec_Hash_Definitions_SHA2_256,
       .snd = "\x19",
       .thd = { .len = (uint32_t)32U, .b = hash_vectors_low15 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA2_384,
+      .fst = Spec_Hash_Definitions_SHA2_384,
       .snd = "abc",
       .thd = { .len = (uint32_t)48U, .b = hash_vectors_low16 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA2_384,
+      .fst = Spec_Hash_Definitions_SHA2_384,
       .snd = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
       .thd = { .len = (uint32_t)48U, .b = hash_vectors_low17 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA2_384,
+      .fst = Spec_Hash_Definitions_SHA2_384,
       .snd = "a",
       .thd = { .len = (uint32_t)48U, .b = hash_vectors_low18 },
       .f3 = (uint32_t)1000000U
     },
     {
-      .fst = SHA2_384,
+      .fst = Spec_Hash_Definitions_SHA2_384,
       .snd = "0123456701234567012345670123456701234567012345670123456701234567",
       .thd = { .len = (uint32_t)48U, .b = hash_vectors_low19 },
       .f3 = (uint32_t)10U
     },
     {
-      .fst = SHA2_512,
+      .fst = Spec_Hash_Definitions_SHA2_512,
       .snd = "abc",
       .thd = { .len = (uint32_t)64U, .b = hash_vectors_low20 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA2_512,
+      .fst = Spec_Hash_Definitions_SHA2_512,
       .snd = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
       .thd = { .len = (uint32_t)64U, .b = hash_vectors_low21 },
       .f3 = (uint32_t)1U
     },
     {
-      .fst = SHA2_512,
+      .fst = Spec_Hash_Definitions_SHA2_512,
       .snd = "a",
       .thd = { .len = (uint32_t)64U, .b = hash_vectors_low22 },
       .f3 = (uint32_t)1000000U
     },
     {
-      .fst = SHA2_512,
+      .fst = Spec_Hash_Definitions_SHA2_512,
       .snd = "0123456701234567012345670123456701234567012345670123456701234567",
       .thd = { .len = (uint32_t)64U, .b = hash_vectors_low23 },
       .f3 = (uint32_t)10U
@@ -5531,10 +5518,10 @@ hmac_vectors_low5[48U] =
 typedef struct
 __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
-  hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
+  Spec_Hash_Definitions_hash_alg fst;
+  Test_Lowstarize_lbuffer__uint8_t snd;
+  Test_Lowstarize_lbuffer__uint8_t thd;
+  Test_Lowstarize_lbuffer__uint8_t f3;
 }
 __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
@@ -5542,13 +5529,13 @@ static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lo
 hmac_vectors_low6[2U] =
   {
     {
-      .fst = SHA2_256,
+      .fst = Spec_Hash_Definitions_SHA2_256,
       .snd = { .len = (uint32_t)20U, .b = hmac_vectors_low0 },
       .thd = { .len = (uint32_t)8U, .b = hmac_vectors_low1 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_vectors_low2 }
     },
     {
-      .fst = SHA2_384,
+      .fst = Spec_Hash_Definitions_SHA2_384,
       .snd = { .len = (uint32_t)20U, .b = hmac_vectors_low3 },
       .thd = { .len = (uint32_t)8U, .b = hmac_vectors_low4 },
       .f3 = { .len = (uint32_t)48U, .b = hmac_vectors_low5 }
@@ -7983,32 +7970,12 @@ hmac_drbg_vectors_low176[255U] =
     (uint8_t)251U, (uint8_t)239U, (uint8_t)172U
   };
 
-typedef struct __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
-{
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
-}
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
-
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
-{
-  hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t f6;
-  lbuffer__uint8_t f7;
-}
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
-
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 hmac_drbg_vectors_low177[28U] =
   {
     {
-      .fst = SHA1, .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low0 },
+      .fst = Spec_Hash_Definitions_SHA1,
+      .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low0 },
       .thd = { .len = (uint32_t)8U, .b = hmac_drbg_vectors_low1 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low2 },
@@ -8019,7 +7986,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)80U, .b = hmac_drbg_vectors_low6 }
     },
     {
-      .fst = SHA1, .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low7 },
+      .fst = Spec_Hash_Definitions_SHA1,
+      .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low7 },
       .thd = { .len = (uint32_t)8U, .b = hmac_drbg_vectors_low8 },
       .f3 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low9 },
       .f4 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low10 },
@@ -8030,7 +7998,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)80U, .b = hmac_drbg_vectors_low14 }
     },
     {
-      .fst = SHA1, .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low15 },
+      .fst = Spec_Hash_Definitions_SHA1,
+      .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low15 },
       .thd = { .len = (uint32_t)8U, .b = hmac_drbg_vectors_low16 },
       .f3 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low17 },
       .f4 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low18 },
@@ -8039,7 +8008,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)80U, .b = hmac_drbg_vectors_low19 }
     },
     {
-      .fst = SHA1, .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low20 },
+      .fst = Spec_Hash_Definitions_SHA1,
+      .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low20 },
       .thd = { .len = (uint32_t)8U, .b = hmac_drbg_vectors_low21 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low22 },
@@ -8048,7 +8018,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)80U, .b = hmac_drbg_vectors_low23 }
     },
     {
-      .fst = SHA1, .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low24 },
+      .fst = Spec_Hash_Definitions_SHA1,
+      .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low24 },
       .thd = { .len = (uint32_t)8U, .b = hmac_drbg_vectors_low25 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low26 },
@@ -8059,7 +8030,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)80U, .b = hmac_drbg_vectors_low30 }
     },
     {
-      .fst = SHA1, .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low31 },
+      .fst = Spec_Hash_Definitions_SHA1,
+      .snd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low31 },
       .thd = { .len = (uint32_t)8U, .b = hmac_drbg_vectors_low32 },
       .f3 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low33 },
       .f4 = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low34 },
@@ -8070,7 +8042,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)80U, .b = hmac_drbg_vectors_low38 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low39 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low39 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low40 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low41 },
@@ -8081,7 +8054,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low45 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low46 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low46 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low47 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low48 },
@@ -8092,7 +8066,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low52 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low53 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low53 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low54 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low55 },
@@ -8103,7 +8078,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low59 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low60 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low60 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low61 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low62 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low63 },
@@ -8114,7 +8090,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low67 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low68 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low68 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low69 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low70 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low71 },
@@ -8123,7 +8100,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low72 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low73 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low73 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low74 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low75 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low76 },
@@ -8134,7 +8112,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low80 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low81 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low81 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low82 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low83 },
@@ -8145,7 +8124,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low87 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low88 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low88 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low89 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low90 },
@@ -8154,7 +8134,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low91 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low92 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low92 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low93 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low94 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low95 },
@@ -8163,7 +8144,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)128U, .b = hmac_drbg_vectors_low96 }
     },
     {
-      .fst = SHA2_384, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low97 },
+      .fst = Spec_Hash_Definitions_SHA2_384,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low97 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low98 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low99 },
@@ -8174,7 +8156,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)192U, .b = hmac_drbg_vectors_low103 }
     },
     {
-      .fst = SHA2_384, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low104 },
+      .fst = Spec_Hash_Definitions_SHA2_384,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low104 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low105 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low106 },
@@ -8183,7 +8166,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)192U, .b = hmac_drbg_vectors_low107 }
     },
     {
-      .fst = SHA2_384, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low108 },
+      .fst = Spec_Hash_Definitions_SHA2_384,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low108 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low109 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low110 },
@@ -8194,7 +8178,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)192U, .b = hmac_drbg_vectors_low114 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low115 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low115 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low116 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low117 },
@@ -8203,7 +8188,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low118 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low119 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low119 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low120 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low121 },
@@ -8212,7 +8198,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low122 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low123 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low123 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low124 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low125 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low126 },
@@ -8221,7 +8208,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low127 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low128 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low128 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low129 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low130 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low131 },
@@ -8232,7 +8220,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low135 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low136 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low136 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low137 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low138 },
@@ -8241,7 +8230,8 @@ hmac_drbg_vectors_low177[28U] =
       .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low139 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low140 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low140 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low141 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low142 },
@@ -8252,7 +8242,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low146 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low147 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low147 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low148 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low149 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low150 },
@@ -8263,7 +8254,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low154 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low155 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low155 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low156 },
       .f3 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low157 },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low158 },
@@ -8274,7 +8266,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low162 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low163 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low163 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low164 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low165 },
@@ -8285,7 +8278,8 @@ hmac_drbg_vectors_low177[28U] =
       }, .f7 = { .len = (uint32_t)256U, .b = hmac_drbg_vectors_low169 }
     },
     {
-      .fst = SHA2_512, .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low170 },
+      .fst = Spec_Hash_Definitions_SHA2_512,
+      .snd = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low170 },
       .thd = { .len = (uint32_t)16U, .b = hmac_drbg_vectors_low171 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hmac_drbg_vectors_low172 },
@@ -8297,16 +8291,7 @@ hmac_drbg_vectors_low177[28U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
-{
-  uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
-}
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
-
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 hmac_drbg_vectors_low = { .len = (uint32_t)28U, .b = hmac_drbg_vectors_low177 };
 
 static uint8_t
@@ -8476,12 +8461,12 @@ hkdf_vectors_low12[42U] =
 typedef struct
 __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
-  hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
+  Spec_Hash_Definitions_hash_alg fst;
+  Test_Lowstarize_lbuffer__uint8_t snd;
+  Test_Lowstarize_lbuffer__uint8_t thd;
+  Test_Lowstarize_lbuffer__uint8_t f3;
+  Test_Lowstarize_lbuffer__uint8_t f4;
+  Test_Lowstarize_lbuffer__uint8_t f5;
 }
 __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
@@ -8489,21 +8474,22 @@ static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lo
 hkdf_vectors_low13[3U] =
   {
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)22U, .b = hkdf_vectors_low0 },
+      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = (uint32_t)22U, .b = hkdf_vectors_low0 },
       .thd = { .len = (uint32_t)13U, .b = hkdf_vectors_low1 },
       .f3 = { .len = (uint32_t)10U, .b = hkdf_vectors_low2 },
       .f4 = { .len = (uint32_t)32U, .b = hkdf_vectors_low3 },
       .f5 = { .len = (uint32_t)42U, .b = hkdf_vectors_low4 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)80U, .b = hkdf_vectors_low5 },
+      .fst = Spec_Hash_Definitions_SHA2_256, .snd = { .len = (uint32_t)80U, .b = hkdf_vectors_low5 },
       .thd = { .len = (uint32_t)80U, .b = hkdf_vectors_low6 },
       .f3 = { .len = (uint32_t)80U, .b = hkdf_vectors_low7 },
       .f4 = { .len = (uint32_t)32U, .b = hkdf_vectors_low8 },
       .f5 = { .len = (uint32_t)82U, .b = hkdf_vectors_low9 }
     },
     {
-      .fst = SHA2_256, .snd = { .len = (uint32_t)22U, .b = hkdf_vectors_low10 },
+      .fst = Spec_Hash_Definitions_SHA2_256,
+      .snd = { .len = (uint32_t)22U, .b = hkdf_vectors_low10 },
       .thd = { .len = (uint32_t)0U, .b = NULL }, .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)32U, .b = hkdf_vectors_low11 },
       .f5 = { .len = (uint32_t)42U, .b = hkdf_vectors_low12 }
@@ -8590,11 +8576,11 @@ chacha20_vectors_low3[114U] =
 typedef struct
 __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
+  Test_Lowstarize_lbuffer__uint8_t fst;
+  Test_Lowstarize_lbuffer__uint8_t snd;
   uint32_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
+  Test_Lowstarize_lbuffer__uint8_t f3;
+  Test_Lowstarize_lbuffer__uint8_t f4;
 }
 __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
 
@@ -8620,12 +8606,6 @@ lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_u
 
 static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 chacha20_vectors_low = { .len = (uint32_t)1U, .b = chacha20_vectors_low4 };
-
-#define AES_128_GCM 0
-#define AES_256_GCM 1
-#define CHACHA20_POLY13050 2
-
-typedef uint8_t cipher;
 
 static uint8_t
 aead_vectors_low0[32U] =
@@ -9784,24 +9764,11 @@ aead_vectors_low108[80U] =
     (uint8_t)76U, (uint8_t)197U
   };
 
-typedef struct
-__Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
-{
-  cipher fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  lbuffer__uint8_t f6;
-}
-__Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
-
-static __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 aead_vectors_low109[21U] =
   {
     {
-      .fst = CHACHA20_POLY13050, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low0 },
+      .fst = Test_Vectors_CHACHA20_POLY1305, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low0 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low1 },
       .f3 = { .len = (uint32_t)12U, .b = aead_vectors_low2 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low3 },
@@ -9809,7 +9776,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)114U, .b = aead_vectors_low5 }
     },
     {
-      .fst = CHACHA20_POLY13050, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low6 },
+      .fst = Test_Vectors_CHACHA20_POLY1305, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low6 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low7 },
       .f3 = { .len = (uint32_t)12U, .b = aead_vectors_low8 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low9 },
@@ -9817,14 +9784,14 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)265U, .b = aead_vectors_low11 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low12 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low12 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low13 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low14 },
       .f5 = { .len = (uint32_t)0U, .b = NULL }, .f6 = { .len = (uint32_t)0U, .b = NULL }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low15 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low15 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low16 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low17 },
@@ -9832,7 +9799,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)16U, .b = aead_vectors_low19 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low20 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low20 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low21 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low22 },
@@ -9840,7 +9807,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)64U, .b = aead_vectors_low24 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low25 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low25 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low26 },
       .f3 = { .len = (uint32_t)20U, .b = aead_vectors_low27 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low28 },
@@ -9848,7 +9815,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)60U, .b = aead_vectors_low30 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low31 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low31 },
       .thd = { .len = (uint32_t)8U, .b = aead_vectors_low32 },
       .f3 = { .len = (uint32_t)20U, .b = aead_vectors_low33 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low34 },
@@ -9856,7 +9823,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)60U, .b = aead_vectors_low36 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low37 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low37 },
       .thd = { .len = (uint32_t)60U, .b = aead_vectors_low38 },
       .f3 = { .len = (uint32_t)20U, .b = aead_vectors_low39 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low40 },
@@ -9864,14 +9831,14 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)60U, .b = aead_vectors_low42 }
     },
     {
-      .fst = AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low43 },
+      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low43 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low44 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low45 },
       .f5 = { .len = (uint32_t)0U, .b = NULL }, .f6 = { .len = (uint32_t)0U, .b = NULL }
     },
     {
-      .fst = AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low46 },
+      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low46 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low47 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low48 },
@@ -9879,7 +9846,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)64U, .b = aead_vectors_low50 }
     },
     {
-      .fst = AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low51 },
+      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low51 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low52 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low53 },
@@ -9887,7 +9854,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)64U, .b = aead_vectors_low55 }
     },
     {
-      .fst = AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low56 },
+      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low56 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low57 },
       .f3 = { .len = (uint32_t)20U, .b = aead_vectors_low58 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low59 },
@@ -9895,7 +9862,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)60U, .b = aead_vectors_low61 }
     },
     {
-      .fst = AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low62 },
+      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low62 },
       .thd = { .len = (uint32_t)8U, .b = aead_vectors_low63 },
       .f3 = { .len = (uint32_t)20U, .b = aead_vectors_low64 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low65 },
@@ -9903,7 +9870,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)60U, .b = aead_vectors_low67 }
     },
     {
-      .fst = AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low68 },
+      .fst = Test_Vectors_AES_256_GCM, .snd = { .len = (uint32_t)32U, .b = aead_vectors_low68 },
       .thd = { .len = (uint32_t)60U, .b = aead_vectors_low69 },
       .f3 = { .len = (uint32_t)20U, .b = aead_vectors_low70 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low71 },
@@ -9911,14 +9878,14 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)60U, .b = aead_vectors_low73 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low74 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low74 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low75 },
       .f3 = { .len = (uint32_t)128U, .b = aead_vectors_low76 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low77 },
       .f5 = { .len = (uint32_t)0U, .b = NULL }, .f6 = { .len = (uint32_t)0U, .b = NULL }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low78 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low78 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low79 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low80 },
@@ -9926,7 +9893,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)48U, .b = aead_vectors_low82 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low83 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low83 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low84 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low85 },
@@ -9934,7 +9901,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)80U, .b = aead_vectors_low87 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low88 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low88 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low89 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low90 },
@@ -9942,7 +9909,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)128U, .b = aead_vectors_low92 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low93 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low93 },
       .thd = { .len = (uint32_t)64U, .b = aead_vectors_low94 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low95 },
@@ -9950,7 +9917,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)192U, .b = aead_vectors_low97 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low98 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low98 },
       .thd = { .len = (uint32_t)64U, .b = aead_vectors_low99 },
       .f3 = { .len = (uint32_t)0U, .b = NULL },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low100 },
@@ -9958,7 +9925,7 @@ aead_vectors_low109[21U] =
       .f6 = { .len = (uint32_t)288U, .b = aead_vectors_low102 }
     },
     {
-      .fst = AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low103 },
+      .fst = Test_Vectors_AES_128_GCM, .snd = { .len = (uint32_t)16U, .b = aead_vectors_low103 },
       .thd = { .len = (uint32_t)12U, .b = aead_vectors_low104 },
       .f3 = { .len = (uint32_t)32U, .b = aead_vectors_low105 },
       .f4 = { .len = (uint32_t)16U, .b = aead_vectors_low106 },
@@ -9967,16 +9934,7 @@ aead_vectors_low109[21U] =
     }
   };
 
-typedef struct
-lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
-{
-  uint32_t len;
-  __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
-}
-lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
-
-static lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static Test_Lowstarize_lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
 aead_vectors_low = { .len = (uint32_t)21U, .b = aead_vectors_low109 };
 
 /**
@@ -9989,17 +9947,17 @@ Compute the scalar multiple of a point.
 extern void
 EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
-static void Test_Hash_main()
+static void Test_Hash_main(void)
 {
-  state_s *s1 = EverCrypt_Hash_create(SHA2_256);
-  state_s *s2 = EverCrypt_Hash_create(SHA2_384);
+  state_s *s1 = EverCrypt_Hash_create(Spec_Hash_Definitions_SHA2_256);
+  state_s *s2 = EverCrypt_Hash_create(Spec_Hash_Definitions_SHA2_384);
   EverCrypt_Hash_init(s1);
   EverCrypt_Hash_init(s2);
 }
 
 typedef struct state_s1_s state_s1;
 
-extern state_s1 *EverCrypt_DRBG_create_in(hash_alg a);
+extern state_s1 *EverCrypt_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
 
 /**
 Instantiate the DRBG.
@@ -10075,52 +10033,52 @@ test_one_hash(
   uint8_t *expected = vec.thd.b;
   uint32_t expected_len = vec.thd.len;
   C_String_t input = vec.snd;
-  hash_alg a = vec.fst;
+  Spec_Hash_Definitions_hash_alg a = vec.fst;
   uint32_t input_len = C_String_strlen(input);
   uint32_t tlen;
   switch (a)
   {
-    case MD5:
+    case Spec_Hash_Definitions_MD5:
       {
         tlen = (uint32_t)16U;
         break;
       }
-    case SHA1:
+    case Spec_Hash_Definitions_SHA1:
       {
         tlen = (uint32_t)20U;
         break;
       }
-    case SHA2_224:
+    case Spec_Hash_Definitions_SHA2_224:
       {
         tlen = (uint32_t)28U;
         break;
       }
-    case SHA2_256:
+    case Spec_Hash_Definitions_SHA2_256:
       {
         tlen = (uint32_t)32U;
         break;
       }
-    case SHA2_384:
+    case Spec_Hash_Definitions_SHA2_384:
       {
         tlen = (uint32_t)48U;
         break;
       }
-    case SHA2_512:
+    case Spec_Hash_Definitions_SHA2_512:
       {
         tlen = (uint32_t)64U;
         break;
       }
-    case SHA3_256:
+    case Spec_Hash_Definitions_SHA3_256:
       {
         tlen = (uint32_t)32U;
         break;
       }
-    case Blake2S:
+    case Spec_Hash_Definitions_Blake2S:
       {
         tlen = (uint32_t)32U;
         break;
       }
-    case Blake2B:
+    case Spec_Hash_Definitions_Blake2B:
       {
         tlen = (uint32_t)64U;
         break;
@@ -10192,52 +10150,52 @@ test_hash(
   }
 }
 
-static bool keysized(hash_alg a, uint32_t l)
+static bool keysized(Spec_Hash_Definitions_hash_alg a, uint32_t l)
 {
   uint32_t sw;
   switch (a)
   {
-    case MD5:
+    case Spec_Hash_Definitions_MD5:
       {
         sw = (uint32_t)64U;
         break;
       }
-    case SHA1:
+    case Spec_Hash_Definitions_SHA1:
       {
         sw = (uint32_t)64U;
         break;
       }
-    case SHA2_224:
+    case Spec_Hash_Definitions_SHA2_224:
       {
         sw = (uint32_t)64U;
         break;
       }
-    case SHA2_256:
+    case Spec_Hash_Definitions_SHA2_256:
       {
         sw = (uint32_t)64U;
         break;
       }
-    case SHA2_384:
+    case Spec_Hash_Definitions_SHA2_384:
       {
         sw = (uint32_t)128U;
         break;
       }
-    case SHA2_512:
+    case Spec_Hash_Definitions_SHA2_512:
       {
         sw = (uint32_t)128U;
         break;
       }
-    case SHA3_256:
+    case Spec_Hash_Definitions_SHA3_256:
       {
         sw = (uint32_t)136U;
         break;
       }
-    case Blake2S:
+    case Spec_Hash_Definitions_Blake2S:
       {
         sw = (uint32_t)64U;
         break;
       }
-    case Blake2B:
+    case Spec_Hash_Definitions_Blake2B:
       {
         sw = (uint32_t)128U;
         break;
@@ -10263,51 +10221,51 @@ test_one_hmac(
   uint32_t datalen = vec.thd.len;
   uint8_t *key = vec.snd.b;
   uint32_t keylen = vec.snd.len;
-  hash_alg ha = vec.fst;
+  Spec_Hash_Definitions_hash_alg ha = vec.fst;
   uint32_t sw0;
   switch (ha)
   {
-    case MD5:
+    case Spec_Hash_Definitions_MD5:
       {
         sw0 = (uint32_t)16U;
         break;
       }
-    case SHA1:
+    case Spec_Hash_Definitions_SHA1:
       {
         sw0 = (uint32_t)20U;
         break;
       }
-    case SHA2_224:
+    case Spec_Hash_Definitions_SHA2_224:
       {
         sw0 = (uint32_t)28U;
         break;
       }
-    case SHA2_256:
+    case Spec_Hash_Definitions_SHA2_256:
       {
         sw0 = (uint32_t)32U;
         break;
       }
-    case SHA2_384:
+    case Spec_Hash_Definitions_SHA2_384:
       {
         sw0 = (uint32_t)48U;
         break;
       }
-    case SHA2_512:
+    case Spec_Hash_Definitions_SHA2_512:
       {
         sw0 = (uint32_t)64U;
         break;
       }
-    case SHA3_256:
+    case Spec_Hash_Definitions_SHA3_256:
       {
         sw0 = (uint32_t)32U;
         break;
       }
-    case Blake2S:
+    case Spec_Hash_Definitions_Blake2S:
       {
         sw0 = (uint32_t)32U;
         break;
       }
-    case Blake2B:
+    case Spec_Hash_Definitions_Blake2B:
       {
         sw0 = (uint32_t)64U;
         break;
@@ -10339,47 +10297,47 @@ test_one_hmac(
     uint32_t sw1;
     switch (ha)
     {
-      case MD5:
+      case Spec_Hash_Definitions_MD5:
         {
           sw1 = (uint32_t)64U;
           break;
         }
-      case SHA1:
+      case Spec_Hash_Definitions_SHA1:
         {
           sw1 = (uint32_t)64U;
           break;
         }
-      case SHA2_224:
+      case Spec_Hash_Definitions_SHA2_224:
         {
           sw1 = (uint32_t)64U;
           break;
         }
-      case SHA2_256:
+      case Spec_Hash_Definitions_SHA2_256:
         {
           sw1 = (uint32_t)64U;
           break;
         }
-      case SHA2_384:
+      case Spec_Hash_Definitions_SHA2_384:
         {
           sw1 = (uint32_t)128U;
           break;
         }
-      case SHA2_512:
+      case Spec_Hash_Definitions_SHA2_512:
         {
           sw1 = (uint32_t)128U;
           break;
         }
-      case SHA3_256:
+      case Spec_Hash_Definitions_SHA3_256:
         {
           sw1 = (uint32_t)136U;
           break;
         }
-      case Blake2S:
+      case Spec_Hash_Definitions_Blake2S:
         {
           sw1 = (uint32_t)64U;
           break;
         }
-      case Blake2B:
+      case Spec_Hash_Definitions_Blake2B:
         {
           sw1 = (uint32_t)128U;
           break;
@@ -10403,47 +10361,47 @@ test_one_hmac(
       uint32_t sw2;
       switch (ha)
       {
-        case MD5:
+        case Spec_Hash_Definitions_MD5:
           {
             sw2 = (uint32_t)16U;
             break;
           }
-        case SHA1:
+        case Spec_Hash_Definitions_SHA1:
           {
             sw2 = (uint32_t)20U;
             break;
           }
-        case SHA2_224:
+        case Spec_Hash_Definitions_SHA2_224:
           {
             sw2 = (uint32_t)28U;
             break;
           }
-        case SHA2_256:
+        case Spec_Hash_Definitions_SHA2_256:
           {
             sw2 = (uint32_t)32U;
             break;
           }
-        case SHA2_384:
+        case Spec_Hash_Definitions_SHA2_384:
           {
             sw2 = (uint32_t)48U;
             break;
           }
-        case SHA2_512:
+        case Spec_Hash_Definitions_SHA2_512:
           {
             sw2 = (uint32_t)64U;
             break;
           }
-        case SHA3_256:
+        case Spec_Hash_Definitions_SHA3_256:
           {
             sw2 = (uint32_t)32U;
             break;
           }
-        case Blake2S:
+        case Spec_Hash_Definitions_Blake2S:
           {
             sw2 = (uint32_t)32U;
             break;
           }
-        case Blake2B:
+        case Spec_Hash_Definitions_Blake2B:
           {
             sw2 = (uint32_t)64U;
             break;
@@ -10462,47 +10420,47 @@ test_one_hmac(
       uint32_t sw;
       switch (ha)
       {
-        case MD5:
+        case Spec_Hash_Definitions_MD5:
           {
             sw = (uint32_t)16U;
             break;
           }
-        case SHA1:
+        case Spec_Hash_Definitions_SHA1:
           {
             sw = (uint32_t)20U;
             break;
           }
-        case SHA2_224:
+        case Spec_Hash_Definitions_SHA2_224:
           {
             sw = (uint32_t)28U;
             break;
           }
-        case SHA2_256:
+        case Spec_Hash_Definitions_SHA2_256:
           {
             sw = (uint32_t)32U;
             break;
           }
-        case SHA2_384:
+        case Spec_Hash_Definitions_SHA2_384:
           {
             sw = (uint32_t)48U;
             break;
           }
-        case SHA2_512:
+        case Spec_Hash_Definitions_SHA2_512:
           {
             sw = (uint32_t)64U;
             break;
           }
-        case SHA3_256:
+        case Spec_Hash_Definitions_SHA3_256:
           {
             sw = (uint32_t)32U;
             break;
           }
-        case Blake2S:
+        case Spec_Hash_Definitions_Blake2S:
           {
             sw = (uint32_t)32U;
             break;
           }
-        case Blake2B:
+        case Spec_Hash_Definitions_Blake2B:
           {
             sw = (uint32_t)64U;
             break;
@@ -10551,51 +10509,51 @@ test_one_hkdf(
   uint32_t saltlen = vec.thd.len;
   uint8_t *ikm = vec.snd.b;
   uint32_t ikmlen = vec.snd.len;
-  hash_alg ha = vec.fst;
+  Spec_Hash_Definitions_hash_alg ha = vec.fst;
   uint32_t sw0;
   switch (ha)
   {
-    case MD5:
+    case Spec_Hash_Definitions_MD5:
       {
         sw0 = (uint32_t)16U;
         break;
       }
-    case SHA1:
+    case Spec_Hash_Definitions_SHA1:
       {
         sw0 = (uint32_t)20U;
         break;
       }
-    case SHA2_224:
+    case Spec_Hash_Definitions_SHA2_224:
       {
         sw0 = (uint32_t)28U;
         break;
       }
-    case SHA2_256:
+    case Spec_Hash_Definitions_SHA2_256:
       {
         sw0 = (uint32_t)32U;
         break;
       }
-    case SHA2_384:
+    case Spec_Hash_Definitions_SHA2_384:
       {
         sw0 = (uint32_t)48U;
         break;
       }
-    case SHA2_512:
+    case Spec_Hash_Definitions_SHA2_512:
       {
         sw0 = (uint32_t)64U;
         break;
       }
-    case SHA3_256:
+    case Spec_Hash_Definitions_SHA3_256:
       {
         sw0 = (uint32_t)32U;
         break;
       }
-    case Blake2S:
+    case Spec_Hash_Definitions_Blake2S:
       {
         sw0 = (uint32_t)32U;
         break;
       }
-    case Blake2B:
+    case Spec_Hash_Definitions_Blake2B:
       {
         sw0 = (uint32_t)64U;
         break;
@@ -10619,47 +10577,47 @@ test_one_hkdf(
     uint32_t sw1;
     switch (ha)
     {
-      case MD5:
+      case Spec_Hash_Definitions_MD5:
         {
           sw1 = (uint32_t)16U;
           break;
         }
-      case SHA1:
+      case Spec_Hash_Definitions_SHA1:
         {
           sw1 = (uint32_t)20U;
           break;
         }
-      case SHA2_224:
+      case Spec_Hash_Definitions_SHA2_224:
         {
           sw1 = (uint32_t)28U;
           break;
         }
-      case SHA2_256:
+      case Spec_Hash_Definitions_SHA2_256:
         {
           sw1 = (uint32_t)32U;
           break;
         }
-      case SHA2_384:
+      case Spec_Hash_Definitions_SHA2_384:
         {
           sw1 = (uint32_t)48U;
           break;
         }
-      case SHA2_512:
+      case Spec_Hash_Definitions_SHA2_512:
         {
           sw1 = (uint32_t)64U;
           break;
         }
-      case SHA3_256:
+      case Spec_Hash_Definitions_SHA3_256:
         {
           sw1 = (uint32_t)32U;
           break;
         }
-      case Blake2S:
+      case Spec_Hash_Definitions_Blake2S:
         {
           sw1 = (uint32_t)32U;
           break;
         }
-      case Blake2B:
+      case Spec_Hash_Definitions_Blake2B:
         {
           sw1 = (uint32_t)64U;
           break;
@@ -10699,47 +10657,47 @@ test_one_hkdf(
       uint32_t sw2;
       switch (ha)
       {
-        case MD5:
+        case Spec_Hash_Definitions_MD5:
           {
             sw2 = (uint32_t)64U;
             break;
           }
-        case SHA1:
+        case Spec_Hash_Definitions_SHA1:
           {
             sw2 = (uint32_t)64U;
             break;
           }
-        case SHA2_224:
+        case Spec_Hash_Definitions_SHA2_224:
           {
             sw2 = (uint32_t)64U;
             break;
           }
-        case SHA2_256:
+        case Spec_Hash_Definitions_SHA2_256:
           {
             sw2 = (uint32_t)64U;
             break;
           }
-        case SHA2_384:
+        case Spec_Hash_Definitions_SHA2_384:
           {
             sw2 = (uint32_t)128U;
             break;
           }
-        case SHA2_512:
+        case Spec_Hash_Definitions_SHA2_512:
           {
             sw2 = (uint32_t)128U;
             break;
           }
-        case SHA3_256:
+        case Spec_Hash_Definitions_SHA3_256:
           {
             sw2 = (uint32_t)136U;
             break;
           }
-        case Blake2S:
+        case Spec_Hash_Definitions_Blake2S:
           {
             sw2 = (uint32_t)64U;
             break;
           }
-        case Blake2B:
+        case Spec_Hash_Definitions_Blake2B:
           {
             sw2 = (uint32_t)128U;
             break;
@@ -10763,47 +10721,47 @@ test_one_hkdf(
         uint32_t sw3;
         switch (ha)
         {
-          case MD5:
+          case Spec_Hash_Definitions_MD5:
             {
               sw3 = (uint32_t)64U;
               break;
             }
-          case SHA1:
+          case Spec_Hash_Definitions_SHA1:
             {
               sw3 = (uint32_t)64U;
               break;
             }
-          case SHA2_224:
+          case Spec_Hash_Definitions_SHA2_224:
             {
               sw3 = (uint32_t)64U;
               break;
             }
-          case SHA2_256:
+          case Spec_Hash_Definitions_SHA2_256:
             {
               sw3 = (uint32_t)64U;
               break;
             }
-          case SHA2_384:
+          case Spec_Hash_Definitions_SHA2_384:
             {
               sw3 = (uint32_t)128U;
               break;
             }
-          case SHA2_512:
+          case Spec_Hash_Definitions_SHA2_512:
             {
               sw3 = (uint32_t)128U;
               break;
             }
-          case SHA3_256:
+          case Spec_Hash_Definitions_SHA3_256:
             {
               sw3 = (uint32_t)136U;
               break;
             }
-          case Blake2S:
+          case Spec_Hash_Definitions_Blake2S:
             {
               sw3 = (uint32_t)64U;
               break;
             }
-          case Blake2B:
+          case Spec_Hash_Definitions_Blake2B:
             {
               sw3 = (uint32_t)128U;
               break;
@@ -10817,47 +10775,47 @@ test_one_hkdf(
         uint32_t sw4;
         switch (ha)
         {
-          case MD5:
+          case Spec_Hash_Definitions_MD5:
             {
               sw4 = (uint32_t)16U;
               break;
             }
-          case SHA1:
+          case Spec_Hash_Definitions_SHA1:
             {
               sw4 = (uint32_t)20U;
               break;
             }
-          case SHA2_224:
+          case Spec_Hash_Definitions_SHA2_224:
             {
               sw4 = (uint32_t)28U;
               break;
             }
-          case SHA2_256:
+          case Spec_Hash_Definitions_SHA2_256:
             {
               sw4 = (uint32_t)32U;
               break;
             }
-          case SHA2_384:
+          case Spec_Hash_Definitions_SHA2_384:
             {
               sw4 = (uint32_t)48U;
               break;
             }
-          case SHA2_512:
+          case Spec_Hash_Definitions_SHA2_512:
             {
               sw4 = (uint32_t)64U;
               break;
             }
-          case SHA3_256:
+          case Spec_Hash_Definitions_SHA3_256:
             {
               sw4 = (uint32_t)32U;
               break;
             }
-          case Blake2S:
+          case Spec_Hash_Definitions_Blake2S:
             {
               sw4 = (uint32_t)32U;
               break;
             }
-          case Blake2B:
+          case Spec_Hash_Definitions_Blake2B:
             {
               sw4 = (uint32_t)64U;
               break;
@@ -10882,47 +10840,47 @@ test_one_hkdf(
           uint32_t sw5;
           switch (ha)
           {
-            case MD5:
+            case Spec_Hash_Definitions_MD5:
               {
                 sw5 = (uint32_t)16U;
                 break;
               }
-            case SHA1:
+            case Spec_Hash_Definitions_SHA1:
               {
                 sw5 = (uint32_t)20U;
                 break;
               }
-            case SHA2_224:
+            case Spec_Hash_Definitions_SHA2_224:
               {
                 sw5 = (uint32_t)28U;
                 break;
               }
-            case SHA2_256:
+            case Spec_Hash_Definitions_SHA2_256:
               {
                 sw5 = (uint32_t)32U;
                 break;
               }
-            case SHA2_384:
+            case Spec_Hash_Definitions_SHA2_384:
               {
                 sw5 = (uint32_t)48U;
                 break;
               }
-            case SHA2_512:
+            case Spec_Hash_Definitions_SHA2_512:
               {
                 sw5 = (uint32_t)64U;
                 break;
               }
-            case SHA3_256:
+            case Spec_Hash_Definitions_SHA3_256:
               {
                 sw5 = (uint32_t)32U;
                 break;
               }
-            case Blake2S:
+            case Spec_Hash_Definitions_Blake2S:
               {
                 sw5 = (uint32_t)32U;
                 break;
               }
-            case Blake2B:
+            case Spec_Hash_Definitions_Blake2B:
               {
                 sw5 = (uint32_t)64U;
                 break;
@@ -10940,47 +10898,47 @@ test_one_hkdf(
           uint32_t sw;
           switch (ha)
           {
-            case MD5:
+            case Spec_Hash_Definitions_MD5:
               {
                 sw = (uint32_t)16U;
                 break;
               }
-            case SHA1:
+            case Spec_Hash_Definitions_SHA1:
               {
                 sw = (uint32_t)20U;
                 break;
               }
-            case SHA2_224:
+            case Spec_Hash_Definitions_SHA2_224:
               {
                 sw = (uint32_t)28U;
                 break;
               }
-            case SHA2_256:
+            case Spec_Hash_Definitions_SHA2_256:
               {
                 sw = (uint32_t)32U;
                 break;
               }
-            case SHA2_384:
+            case Spec_Hash_Definitions_SHA2_384:
               {
                 sw = (uint32_t)48U;
                 break;
               }
-            case SHA2_512:
+            case Spec_Hash_Definitions_SHA2_512:
               {
                 sw = (uint32_t)64U;
                 break;
               }
-            case SHA3_256:
+            case Spec_Hash_Definitions_SHA3_256:
               {
                 sw = (uint32_t)32U;
                 break;
               }
-            case Blake2S:
+            case Spec_Hash_Definitions_Blake2S:
               {
                 sw = (uint32_t)32U;
                 break;
               }
-            case Blake2B:
+            case Spec_Hash_Definitions_Blake2B:
               {
                 sw = (uint32_t)64U;
                 break;
@@ -11027,7 +10985,7 @@ test_one_chacha20(
   v
 )
 {
-  uint8_t *cipher0 = v.f4.b;
+  uint8_t *cipher = v.f4.b;
   uint32_t cipher_len = v.f4.len;
   uint8_t *plain = v.f3.b;
   uint32_t plain_len = v.f3.len;
@@ -11071,7 +11029,7 @@ test_one_chacha20(
     memset(cipher_, 0U, (cipher_len + (uint32_t)1U) * sizeof (uint8_t));
     uint8_t *cipher_1 = cipher_;
     EverCrypt_Cipher_chacha20(plain_len, cipher_1, plain, key, iv, ctr);
-    TestLib_compare_and_print("of ChaCha20 message", cipher0, cipher_1, cipher_len);
+    TestLib_compare_and_print("of ChaCha20 message", cipher, cipher_1, cipher_len);
   }
 }
 
@@ -11122,7 +11080,7 @@ static void test_one_poly1305(vector1 v)
   }
 }
 
-static void test_poly1305()
+static void test_poly1305(void)
 {
   C_String_print("poly1305");
   C_String_print("\n");
@@ -11154,7 +11112,7 @@ static void test_one_curve25519(vector0 v)
   }
 }
 
-static void test_curve25519()
+static void test_curve25519(void)
 {
   C_String_print("curve25519");
   C_String_print("\n");
@@ -11237,7 +11195,7 @@ static void test_one_chacha20poly1305(vector v)
       cipher_and_tag,
       tmp,
       cipher_and_tag_len);
-    uint8_t *cipher0 = cipher_and_tag;
+    uint8_t *cipher = cipher_and_tag;
     uint8_t *tag = cipher_and_tag + plain_len;
     uint32_t
     res =
@@ -11247,7 +11205,7 @@ static void test_one_chacha20poly1305(vector v)
         aad,
         plain_len,
         tmp_msg_,
-        cipher0,
+        cipher,
         tag);
     if (res == (uint32_t)0U)
     {
@@ -11264,7 +11222,7 @@ static void test_one_chacha20poly1305(vector v)
   }
 }
 
-static void test_chacha20poly1305()
+static void test_chacha20poly1305(void)
 {
   C_String_print("chacha20poly1305");
   C_String_print("\n");
@@ -11833,19 +11791,19 @@ test_aead_st(
   }
 }
 
-static alg alg_of_alg(cipher uu___)
+static alg alg_of_alg(Test_Vectors_cipher uu___)
 {
   switch (uu___)
   {
-    case CHACHA20_POLY13050:
+    case Test_Vectors_CHACHA20_POLY1305:
       {
         return CHACHA20_POLY1305;
       }
-    case AES_128_GCM:
+    case Test_Vectors_AES_128_GCM:
       {
         return AES128_GCM;
       }
-    case AES_256_GCM:
+    case Test_Vectors_AES_256_GCM:
       {
         return AES256_GCM;
       }
@@ -11857,19 +11815,19 @@ static alg alg_of_alg(cipher uu___)
   }
 }
 
-static void
+void
 test_aead_loop(
-  cipher alg0,
-  lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  Test_Vectors_cipher alg0,
+  Test_Lowstarize_lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   uu___
 )
 {
   uint32_t len = uu___.len;
-  __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   *vs = uu___.b;
   if (!(len == (uint32_t)0U))
   {
-    __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+    K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
     v = vs[0U];
     uint8_t *ciphertext = v.f6.b;
     uint32_t ciphertext_len = v.f6.len;
@@ -11883,7 +11841,7 @@ test_aead_loop(
     uint32_t iv_len = v.thd.len;
     uint8_t *key = v.snd.b;
     uint32_t key_len = v.snd.len;
-    cipher alg1 = v.fst;
+    Test_Vectors_cipher alg1 = v.fst;
     if (alg1 == alg0)
     {
       test_aead_st(alg_of_alg(alg1),
@@ -11902,7 +11860,7 @@ test_aead_loop(
     }
     test_aead_loop(alg0,
       (
-        (lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
+        (Test_Lowstarize_lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
           .len = len - (uint32_t)1U,
           .b = vs + (uint32_t)1U
         }
@@ -11910,12 +11868,12 @@ test_aead_loop(
   }
 }
 
-static void test_aead(cipher alg0)
+static void test_aead(Test_Vectors_cipher alg0)
 {
   test_aead_loop(alg0, aead_vectors_low);
 }
 
-static void test_aes128_gcm_loop(uint32_t i)
+void test_aes128_gcm_loop(uint32_t i)
 {
   if (!(i >= vectors_len2))
   {
@@ -11949,14 +11907,14 @@ static void test_aes128_gcm_loop(uint32_t i)
   }
 }
 
-static void test_aes128_gcm()
+static void test_aes128_gcm(void)
 {
   test_aes128_gcm_loop((uint32_t)0U);
 }
 
 static void
 test_one_hmac_drbg(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
@@ -11969,7 +11927,7 @@ test_one_hmac_drbg(
   uint32_t additional_input_reseed_len = vec.f5.len;
   uint8_t *personalization_string = vec.f3.b;
   uint32_t personalization_string_len = vec.f3.len;
-  hash_alg a = vec.fst;
+  Spec_Hash_Definitions_hash_alg a = vec.fst;
   if
   (
     !(is_supported_alg0(a)
@@ -12034,20 +11992,20 @@ test_one_hmac_drbg(
   }
 }
 
-static void
+void
 test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t___Test_Lowstarize_lbuffer_uint8_t(
   uint32_t i,
   void
   (*f)(
-    __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+    K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
     x0
   ),
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   *vs = vec.b;
   if (!(i >= len))
   {
@@ -12061,7 +12019,7 @@ test_many_st_loop__Spec_Hash_Definitions_hash_alg___Test_Lowstarize_lbuffer_uint
 
 static void
 test_hmac_drbg(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+  Test_Lowstarize_lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
   vec
 )
 {
@@ -12072,12 +12030,12 @@ test_hmac_drbg(
     vec);
 }
 
-static void print_sep()
+static void print_sep(void)
 {
   C_String_print("=====================\n");
 }
 
-static void test_all()
+static void test_all(void)
 {
   EverCrypt_AutoConfig2_init();
   bool no_avx = !EverCrypt_AutoConfig2_has_avx();
@@ -12269,11 +12227,11 @@ static void test_all()
     C_String_print(" avx");
     C_String_print(" aesni");
     C_String_print("  >>>>>>>>> AEAD (AES128_GCM old vectors)\n");
-    test_aead(AES_128_GCM);
+    test_aead(Test_Vectors_AES_128_GCM);
     C_String_print(" avx");
     C_String_print(" aesni");
     C_String_print("  >>>>>>>>> AEAD (AES256_GCM old vectors)\n");
-    test_aead(AES_256_GCM);
+    test_aead(Test_Vectors_AES_256_GCM);
     C_String_print(" avx");
     C_String_print(" aesni");
     C_String_print("  >>>>>>>>> AEAD (AES128_GCM vectors)\n");
@@ -12304,7 +12262,7 @@ static void test_all()
     C_String_print("  >>>>>>>>> AEAD (ChachaPoly vectors)\n");
     test_chacha20poly1305();
     C_String_print("  >>>>>>>>> AEAD (ChachaPoly old vectors)\n");
-    test_aead(CHACHA20_POLY13050);
+    test_aead(Test_Vectors_CHACHA20_POLY1305);
   }
   else
   {
@@ -12435,7 +12393,7 @@ static void test_all()
   }
 }
 
-exit_code main()
+exit_code main(void)
 {
   test_all();
   return EXIT_SUCCESS;

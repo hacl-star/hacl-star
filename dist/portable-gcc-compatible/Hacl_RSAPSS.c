@@ -24,6 +24,8 @@
 
 #include "Hacl_RSAPSS.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: hash_len */

@@ -24,6 +24,8 @@
 
 #include "Hacl_RSAPSS.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
 
 static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)

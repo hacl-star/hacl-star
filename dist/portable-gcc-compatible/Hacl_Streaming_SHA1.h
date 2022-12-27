@@ -46,7 +46,7 @@ typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_create_in_sha1 */
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_create_in_sha1 */
 

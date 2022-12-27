@@ -35,6 +35,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "../Hacl_Hash_Blake2.h"
 
 typedef struct K___uint32_t_uint32_t_s

@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Lib_Memzero0.h"
-#include "Hacl_Krmllib.h"
 
 extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
 

@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Poly1305_128.h"
-#include "Hacl_Krmllib.h"
 #include "Hacl_Chacha20_Vec128.h"
 
 /* SNIPPET_START: Hacl_Chacha20Poly1305_128_aead_encrypt */

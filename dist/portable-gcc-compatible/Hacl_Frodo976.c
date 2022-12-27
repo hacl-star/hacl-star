@@ -24,6 +24,7 @@
 
 #include "Hacl_Frodo976.h"
 
+#include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
 
 /* SNIPPET_START: Hacl_Frodo976_crypto_bytes */

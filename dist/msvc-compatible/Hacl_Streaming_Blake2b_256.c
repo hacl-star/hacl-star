@@ -30,7 +30,7 @@
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2b_256_blake2b_256_state
-*Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in()
+*Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
@@ -45,7 +45,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state
   memset(b, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = { .fst = wv, .snd = b };
   Hacl_Streaming_Blake2b_256_blake2b_256_state
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_Blake2b_256_blake2b_256_state
   *p =
     (Hacl_Streaming_Blake2b_256_blake2b_256_state *)KRML_HOST_MALLOC(sizeof (
@@ -68,14 +68,9 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   Hacl_Blake2b_256_blake2b_init(block_state.snd, (uint32_t)0U, (uint32_t)64U);
-  s[0U] =
-    (
-      (Hacl_Streaming_Blake2b_256_blake2b_256_state){
-        .block_state = block_state,
-        .buf = buf,
-        .total_len = (uint64_t)0U
-      }
-    );
+  Hacl_Streaming_Blake2b_256_blake2b_256_state
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
+  s[0U] = tmp;
 }
 
 /**

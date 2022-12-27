@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_Bignum_Base.h"
 #include "Hacl_Bignum.h"
 
 /*******************************************************************************
