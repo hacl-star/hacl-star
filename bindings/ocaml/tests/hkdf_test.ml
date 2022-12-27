@@ -82,15 +82,6 @@ let test_agile (v: Bytes.t hkdf_test) =
 let _ =
   List.iter test_agile tests;
 
-  let module Tests = MakeTests (EverCrypt.HKDF_SHA2_256) in
-  Tests.run_tests "EverCrypt.HKDF_SHA2_256" SHA2_256;
-
-  let module Tests = MakeTests (EverCrypt.HKDF_SHA2_384) in
-  Tests.run_tests "EverCrypt.HKDF_SHA2_384" SHA2_384;
-
-  let module Tests = MakeTests (EverCrypt.HKDF_SHA2_512) in
-  Tests.run_tests "EverCrypt.HKDF_SHA2_512" SHA2_512;
-
   let module Tests = MakeTests (Hacl.HKDF_SHA2_256) in
   Tests.run_tests "Hacl.HKDF_SHA2_256" SHA2_256;
 
