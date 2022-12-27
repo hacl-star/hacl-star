@@ -24,7 +24,8 @@
 
 #include "internal/Hacl_Frodo_KEM.h"
 
-
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Krmllib.h"
 
 void randombytes_(uint32_t len, uint8_t *res)
 {

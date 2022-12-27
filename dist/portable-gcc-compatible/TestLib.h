@@ -147,7 +147,7 @@ extern uint64_t *TestLib_uint64_p_null;
 
 /* SNIPPET_START: TestLib_cpucycles */
 
-extern TestLib_cycles TestLib_cpucycles();
+extern TestLib_cycles TestLib_cpucycles(void);
 
 /* SNIPPET_END: TestLib_cpucycles */
 

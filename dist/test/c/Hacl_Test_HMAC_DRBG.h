@@ -30,21 +30,7 @@
 
 #include "krmllib.h"
 #include "libintvector.h"
-static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
-
-static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
-
-exit_code main();
+exit_code main(void);
 
 
 #define __Hacl_Test_HMAC_DRBG_H_DEFINED

@@ -24,7 +24,8 @@
 
 #include "internal/Hacl_Hash_Blake2.h"
 
-
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Impl_Blake2_Constants.h"
 
 /* SNIPPET_START: blake2b_update_block */
 
@@ -714,7 +715,7 @@ Hacl_Blake2b_32_blake2b(
 
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b_malloc */
 
-uint64_t *Hacl_Blake2b_32_blake2b_malloc()
+uint64_t *Hacl_Blake2b_32_blake2b_malloc(void)
 {
   uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
   return buf;
@@ -1396,7 +1397,7 @@ Hacl_Blake2s_32_blake2s(
 
 /* SNIPPET_START: Hacl_Blake2s_32_blake2s_malloc */
 
-uint32_t *Hacl_Blake2s_32_blake2s_malloc()
+uint32_t *Hacl_Blake2s_32_blake2s_malloc(void)
 {
   uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
   return buf;

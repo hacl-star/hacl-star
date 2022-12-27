@@ -391,7 +391,7 @@ static void test_public_key_uncompressed(uint8_t *pk)
   }
 }
 
-exit_code main()
+exit_code main(void)
 {
   C_String_print("\nTEST 1. K256\n");
   test_verify_sha256((uint32_t)6U, msg1, pk1, sgnt1);

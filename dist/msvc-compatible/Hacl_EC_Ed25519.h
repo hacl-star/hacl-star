@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_Bignum25519_51.h"
 
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^255 - 19.

@@ -35,8 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Krmllib.h"
-#include "Hacl_Bignum_K256.h"
+
 
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^256 - 0x1000003D1.

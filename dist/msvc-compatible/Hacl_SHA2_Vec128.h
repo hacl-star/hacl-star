@@ -35,8 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_SHA2_Generic.h"
-#include "Hacl_Krmllib.h"
+
 
 void
 Hacl_SHA2_Vec128_sha224_4(

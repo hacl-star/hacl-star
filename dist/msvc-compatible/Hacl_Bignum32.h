@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Krmllib.h"
-#include "Hacl_Bignum_Base.h"
 #include "Hacl_Bignum.h"
 
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum32_pbn_mont_ctx_u32;

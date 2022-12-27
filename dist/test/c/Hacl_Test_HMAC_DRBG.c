@@ -5357,7 +5357,7 @@ test_one(
   }
 }
 
-exit_code main()
+exit_code main(void)
 {
   C_String_print("[HMAC_DRBG]");
   C_String_print("\n");

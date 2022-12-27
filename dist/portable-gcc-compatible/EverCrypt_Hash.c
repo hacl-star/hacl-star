@@ -1576,7 +1576,7 @@ Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
   *buf = (uint8_t *)KRML_HOST_CALLOC(EverCrypt_Hash_Incremental_block_len(a), sizeof (uint8_t));
   EverCrypt_Hash_state_s *block_state = EverCrypt_Hash_create_in(a);
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
   *p =
     (Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *)KRML_HOST_MALLOC(sizeof (
@@ -1599,14 +1599,9 @@ EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   Spec_Hash_Definitions_hash_alg i = EverCrypt_Hash_alg_of_state(block_state);
   EverCrypt_Hash_init(block_state);
-  s[0U] =
-    (
-      (Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____){
-        .block_state = block_state,
-        .buf = buf,
-        .total_len = (uint64_t)0U
-      }
-    );
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
+  s[0U] = tmp;
 }
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_init */

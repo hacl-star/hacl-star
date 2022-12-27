@@ -39,163 +39,163 @@ extern "C" {
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_shaext */
 
-bool EverCrypt_AutoConfig2_has_shaext();
+bool EverCrypt_AutoConfig2_has_shaext(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_shaext */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_aesni */
 
-bool EverCrypt_AutoConfig2_has_aesni();
+bool EverCrypt_AutoConfig2_has_aesni(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_aesni */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_pclmulqdq */
 
-bool EverCrypt_AutoConfig2_has_pclmulqdq();
+bool EverCrypt_AutoConfig2_has_pclmulqdq(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_pclmulqdq */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_avx2 */
 
-bool EverCrypt_AutoConfig2_has_avx2();
+bool EverCrypt_AutoConfig2_has_avx2(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_avx2 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_avx */
 
-bool EverCrypt_AutoConfig2_has_avx();
+bool EverCrypt_AutoConfig2_has_avx(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_avx */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_bmi2 */
 
-bool EverCrypt_AutoConfig2_has_bmi2();
+bool EverCrypt_AutoConfig2_has_bmi2(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_bmi2 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_adx */
 
-bool EverCrypt_AutoConfig2_has_adx();
+bool EverCrypt_AutoConfig2_has_adx(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_adx */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_sse */
 
-bool EverCrypt_AutoConfig2_has_sse();
+bool EverCrypt_AutoConfig2_has_sse(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_sse */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_movbe */
 
-bool EverCrypt_AutoConfig2_has_movbe();
+bool EverCrypt_AutoConfig2_has_movbe(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_movbe */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_rdrand */
 
-bool EverCrypt_AutoConfig2_has_rdrand();
+bool EverCrypt_AutoConfig2_has_rdrand(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_rdrand */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_avx512 */
 
-bool EverCrypt_AutoConfig2_has_avx512();
+bool EverCrypt_AutoConfig2_has_avx512(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_avx512 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_recall */
 
-void EverCrypt_AutoConfig2_recall();
+void EverCrypt_AutoConfig2_recall(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_recall */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_init */
 
-void EverCrypt_AutoConfig2_init();
+void EverCrypt_AutoConfig2_init(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_init */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disabler */
 
-typedef void (*EverCrypt_AutoConfig2_disabler)();
+typedef void (*EverCrypt_AutoConfig2_disabler)(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disabler */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_avx2 */
 
-void EverCrypt_AutoConfig2_disable_avx2();
+void EverCrypt_AutoConfig2_disable_avx2(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx2 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_avx */
 
-void EverCrypt_AutoConfig2_disable_avx();
+void EverCrypt_AutoConfig2_disable_avx(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_bmi2 */
 
-void EverCrypt_AutoConfig2_disable_bmi2();
+void EverCrypt_AutoConfig2_disable_bmi2(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_bmi2 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_adx */
 
-void EverCrypt_AutoConfig2_disable_adx();
+void EverCrypt_AutoConfig2_disable_adx(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_adx */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_shaext */
 
-void EverCrypt_AutoConfig2_disable_shaext();
+void EverCrypt_AutoConfig2_disable_shaext(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_shaext */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_aesni */
 
-void EverCrypt_AutoConfig2_disable_aesni();
+void EverCrypt_AutoConfig2_disable_aesni(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_aesni */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_pclmulqdq */
 
-void EverCrypt_AutoConfig2_disable_pclmulqdq();
+void EverCrypt_AutoConfig2_disable_pclmulqdq(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_pclmulqdq */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_sse */
 
-void EverCrypt_AutoConfig2_disable_sse();
+void EverCrypt_AutoConfig2_disable_sse(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_sse */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_movbe */
 
-void EverCrypt_AutoConfig2_disable_movbe();
+void EverCrypt_AutoConfig2_disable_movbe(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_movbe */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_rdrand */
 
-void EverCrypt_AutoConfig2_disable_rdrand();
+void EverCrypt_AutoConfig2_disable_rdrand(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_rdrand */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_avx512 */
 
-void EverCrypt_AutoConfig2_disable_avx512();
+void EverCrypt_AutoConfig2_disable_avx512(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx512 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_vec128 */
 
-bool EverCrypt_AutoConfig2_has_vec128();
+bool EverCrypt_AutoConfig2_has_vec128(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_vec128 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_vec256 */
 
-bool EverCrypt_AutoConfig2_has_vec256();
+bool EverCrypt_AutoConfig2_has_vec256(void);
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_vec256 */
 

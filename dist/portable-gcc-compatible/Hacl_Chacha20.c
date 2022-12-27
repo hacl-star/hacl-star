@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Chacha20.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 

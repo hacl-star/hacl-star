@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Krmllib.h"
+
 #include "libintvector.h"
 /* SNIPPET_START: Hacl_Poly1305_256_poly1305_ctx */
 

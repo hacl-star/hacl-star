@@ -24,6 +24,8 @@
 
 #include "Hacl_Hash_Blake2s_128.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "internal/Hacl_Hash_Blake2.h"
 
 static inline void
@@ -478,7 +480,7 @@ Hacl_Blake2s_128_load_state128s_from_state32(
   r3[0U] = Lib_IntVector_Intrinsics_vec128_load32s(b3[0U], b3[1U], b3[2U], b3[3U]);
 }
 
-Lib_IntVector_Intrinsics_vec128 *Hacl_Blake2s_128_blake2s_malloc()
+Lib_IntVector_Intrinsics_vec128 *Hacl_Blake2s_128_blake2s_malloc(void)
 {
   Lib_IntVector_Intrinsics_vec128
   *buf =
