@@ -16,6 +16,7 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 
 ## 2022-12-19
 
+- Added JS bindings for secp256k1
 - Added an OCaml API for secp256k1
 
 ## 2022-12-14
