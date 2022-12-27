@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Chacha20.h"
 
 extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];

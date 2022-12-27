@@ -77,7 +77,7 @@ KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
 extern uint64_t *TestLib_uint64_p_null;
 
-extern TestLib_cycles TestLib_cpucycles();
+extern TestLib_cycles TestLib_cpucycles(void);
 
 extern void
 TestLib_print_cycles_per_round(TestLib_cycles uu___, TestLib_cycles uu___1, uint32_t uu___2);

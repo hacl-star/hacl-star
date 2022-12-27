@@ -63,7 +63,11 @@ var passTest = function(func_sig, func, msg, t) {
     var expected_result = postprocessing(func_sig.return.type, func_sig.return.tests[t]);
     var result_val = postprocessing(func_sig.return.type, result[0]);
     if (result_val !== expected_result) {
-      throw "Wrong return value ! Expecting " + expected_result + ", got " + result_val;
+      throw ({
+        message: "Wrong return value ! Expecting " + expected_result + ", got " + result_val,
+        func: msg,
+        index: t,
+      });
     }
   }
   func_sig.args.filter(function(arg) {
@@ -82,21 +86,40 @@ var passTest = function(func_sig, func, msg, t) {
     }
     result_val = postprocessing(arg.type, result_val);
     if (result_val !== arg.tests[t]) {
-      throw "Wrong return value for " + result_name + " ! Expecting " + arg.tests[t] + ", got " + result_val;
+      throw ({
+        message: "Wrong return value for " + result_name + " ! Expecting " + arg.tests[t] + ", got " + result_val,
+        func: msg,
+        index: t,
+      });
     }
   });
   console.log("Test #" + (t + 1) + " passed !");
 };
 
 function checkTestVectors(func_sig, func, msg) {
-  var number_of_tests = Infinity;
+  var number_of_tests = -1;
+  var n;
   func_sig.args.map(function(arg) {
     if (arg.tests !== undefined) {
-      number_of_tests = Math.min(number_of_tests, arg.tests.length);
+      n = arg.tests.length;
+      if (number_of_tests >= 0 && n !== number_of_tests) {
+        throw ({
+          message: "Inconsistent number of test vectors for arguments",
+          func: msg,
+        });
+      } else {
+        number_of_tests = n;
+      }
     }
   });
   if (func_sig.return.tests !== undefined) {
-    number_of_tests = Math.min(number_of_tests, func_sig.return.tests.length);
+    n = func_sig.return.tests.length;
+    if (n !== number_of_tests) {
+      throw ({
+        message: "Inconsistent number of test vectors: " + n + " for return value, " + number_of_tests + " for arguments",
+        func: msg,
+      });
+    }
   }
   console.log("Starting tests for " + msg);
   if (number_of_tests === 0) {
@@ -190,5 +213,19 @@ HaclWasm.getInitializedHaclModule().then(function(Hacl) {
   }));
   for (var i = 0; i < tests.length; i++) {
     checkTestVectors.apply(null, tests[i]);
+  }
+}).catch(e => {
+  if ("func" in e && "index" in e) {
+    console.log("Error while running test #", e.index, "for", e.func);
+    console.log(e.message);
+    process.exit(1);
+  } else if ("func" in e) {
+    console.log("Error while running tests for", e.func);
+    console.log(e.message);
+    process.exit(1);
+  } else {
+    console.log("Unknown error");
+    console.log(e);
+    process.exit(1);
   }
 });

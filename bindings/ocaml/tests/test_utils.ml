@@ -1,3 +1,4 @@
+open QCheck2
 open EverCrypt.Error
 
 type result =
@@ -32,3 +33,8 @@ let init_bytes len =
 let rec supports = function
   | [] -> true
   | f::fs -> AutoConfig2.has_feature f && supports fs
+
+let make_qcheck_test ?(count=100) ?print (gen: 'a Gen.t) (f: 'a -> bool) () =
+  Test.(check_exn @@ make ~count ?print gen f)
+
+let bytes_of_hex hex = Cstruct.(to_bytes (of_hex hex))

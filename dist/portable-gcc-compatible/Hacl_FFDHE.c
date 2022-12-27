@@ -24,6 +24,8 @@
 
 #include "Hacl_FFDHE.h"
 
+#include "internal/Hacl_Impl_FFDHE_Constants.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: ffdhe_len */

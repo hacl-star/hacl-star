@@ -24,7 +24,9 @@
 
 #include "Hacl_EC_K256.h"
 
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_K256_ECDSA.h"
+#include "internal/Hacl_Bignum_K256.h"
 
 /* SNIPPET_START: Hacl_EC_K256_mk_felem_zero */
 

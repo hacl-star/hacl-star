@@ -36,8 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Spec.h"
-#include "Hacl_Impl_FFDHE_Constants.h"
-#include "Hacl_Bignum_Base.h"
+#include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_FFDHE_ffdhe_len */
 

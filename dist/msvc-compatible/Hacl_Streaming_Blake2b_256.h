@@ -57,7 +57,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state;
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2b_256_blake2b_256_state
-*Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in();
+*Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in(void);
 
 /**
   (Re-)initialization function when there is no key

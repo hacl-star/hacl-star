@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_SHA2_Generic_H
-#define __Hacl_SHA2_Generic_H
+#ifndef __internal_Hacl_SHA2_Generic_H
+#define __internal_Hacl_SHA2_Generic_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,8 +37,6 @@ extern "C" {
 
 
 
-/* SNIPPET_START: Hacl_Impl_SHA2_Generic_h224 */
-
 static const
 uint32_t
 Hacl_Impl_SHA2_Generic_h224[8U] =
@@ -47,10 +45,6 @@ Hacl_Impl_SHA2_Generic_h224[8U] =
     (uint32_t)0xffc00b31U, (uint32_t)0x68581511U, (uint32_t)0x64f98fa7U, (uint32_t)0xbefa4fa4U
   };
 
-/* SNIPPET_END: Hacl_Impl_SHA2_Generic_h224 */
-
-/* SNIPPET_START: Hacl_Impl_SHA2_Generic_h256 */
-
 static const
 uint32_t
 Hacl_Impl_SHA2_Generic_h256[8U] =
@@ -58,10 +52,6 @@ Hacl_Impl_SHA2_Generic_h256[8U] =
     (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
     (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
   };
-
-/* SNIPPET_END: Hacl_Impl_SHA2_Generic_h256 */
-
-/* SNIPPET_START: Hacl_Impl_SHA2_Generic_h384 */
 
 static const
 uint64_t
@@ -72,10 +62,6 @@ Hacl_Impl_SHA2_Generic_h384[8U] =
     (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
   };
 
-/* SNIPPET_END: Hacl_Impl_SHA2_Generic_h384 */
-
-/* SNIPPET_START: Hacl_Impl_SHA2_Generic_h512 */
-
 static const
 uint64_t
 Hacl_Impl_SHA2_Generic_h512[8U] =
@@ -84,10 +70,6 @@ Hacl_Impl_SHA2_Generic_h512[8U] =
     (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
     (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
   };
-
-/* SNIPPET_END: Hacl_Impl_SHA2_Generic_h512 */
-
-/* SNIPPET_START: Hacl_Impl_SHA2_Generic_k224_256 */
 
 static const
 uint32_t
@@ -110,10 +92,6 @@ Hacl_Impl_SHA2_Generic_k224_256[64U] =
     (uint32_t)0x748f82eeU, (uint32_t)0x78a5636fU, (uint32_t)0x84c87814U, (uint32_t)0x8cc70208U,
     (uint32_t)0x90befffaU, (uint32_t)0xa4506cebU, (uint32_t)0xbef9a3f7U, (uint32_t)0xc67178f2U
   };
-
-/* SNIPPET_END: Hacl_Impl_SHA2_Generic_k224_256 */
-
-/* SNIPPET_START: Hacl_Impl_SHA2_Generic_k384_512 */
 
 static const
 uint64_t
@@ -148,11 +126,9 @@ Hacl_Impl_SHA2_Generic_k384_512[80U] =
     (uint64_t)0x5fcb6fab3ad6faecU, (uint64_t)0x6c44198c4a475817U
   };
 
-/* SNIPPET_END: Hacl_Impl_SHA2_Generic_k384_512 */
-
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_SHA2_Generic_H_DEFINED
+#define __internal_Hacl_SHA2_Generic_H_DEFINED
 #endif

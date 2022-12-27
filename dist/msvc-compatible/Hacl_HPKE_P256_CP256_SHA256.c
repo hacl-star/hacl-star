@@ -25,6 +25,7 @@
 #include "Hacl_HPKE_P256_CP256_SHA256.h"
 
 #include "internal/Hacl_P256.h"
+#include "internal/Hacl_Krmllib.h"
 
 uint32_t
 Hacl_HPKE_P256_CP256_SHA256_setupBaseS(
