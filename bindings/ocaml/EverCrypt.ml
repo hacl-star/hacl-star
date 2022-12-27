@@ -143,12 +143,13 @@ module Hash = struct
       check_max_buffer_len (C.size msg);
       assert (C.size digest = digest_len alg);
       assert (C.disjoint digest msg);
-      everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf msg) (C.size_uint32 msg)
+      everCrypt_Hash_Incremental_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf msg) (C.size_uint32 msg)
     let finish ~st:(alg, t) ~digest =
       assert (C.size digest = digest_len alg);
       everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest)
   end
-  type t = alg * hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ptr
+  (* TODO: get rid of the `alg` here by using `alg_of_state` *)
+  type t = alg * everCrypt_Hash_Incremental_hash_state Ctypes_static.ptr
   let init ~alg =
     Lazy.force at_exit_full_major;
     let alg_spec = alg_definition alg in
@@ -172,18 +173,6 @@ module Hash = struct
     digest
 end
 
-module SHA2_224 : HashFunction =
-  Make_HashFunction (struct
-    let hash_alg = Agile HashDefs.SHA2_224
-    let hash = EverCrypt_Hash.everCrypt_Hash_hash_224
-end)
-
-module SHA2_256 : HashFunction =
-  Make_HashFunction (struct
-    let hash_alg = Agile HashDefs.SHA2_256
-    let hash = EverCrypt_Hash.everCrypt_Hash_hash_256
-end)
-
 module HMAC = struct
   open EverCrypt_HMAC
   let is_supported_alg ~alg =
@@ -202,24 +191,6 @@ module HMAC = struct
     Noalloc.mac ~alg ~key ~msg ~tag;
     tag
 end
-
-module HMAC_SHA2_256 : MAC =
-  Make_HMAC (struct
-    let hash_alg = HashDefs.SHA2_256
-    let mac = EverCrypt_HMAC.everCrypt_HMAC_compute_sha2_256
-end)
-
-module HMAC_SHA2_384 : MAC =
-  Make_HMAC (struct
-    let hash_alg = HashDefs.SHA2_384
-    let mac = EverCrypt_HMAC.everCrypt_HMAC_compute_sha2_384
-end)
-
-module HMAC_SHA2_512 : MAC =
-  Make_HMAC (struct
-    let hash_alg = HashDefs.SHA2_512
-    let mac = EverCrypt_HMAC.everCrypt_HMAC_compute_sha2_512
-end)
 
 module Poly1305 : MAC =
   Make_Poly1305 (struct
@@ -256,27 +227,6 @@ module HKDF = struct
     Noalloc.expand ~alg ~prk ~info ~okm;
     okm
 end
-
-module HKDF_SHA2_256 : HKDF =
-  Make_HKDF (struct
-    let hash_alg = HashDefs.SHA2_256
-    let expand = EverCrypt_HKDF.everCrypt_HKDF_expand_sha2_256
-    let extract = EverCrypt_HKDF.everCrypt_HKDF_extract_sha2_256
-  end)
-
-module HKDF_SHA2_384 : HKDF =
-  Make_HKDF (struct
-    let hash_alg = HashDefs.SHA2_384
-    let expand = EverCrypt_HKDF.everCrypt_HKDF_expand_sha2_384
-    let extract = EverCrypt_HKDF.everCrypt_HKDF_extract_sha2_384
-  end)
-
-module HKDF_SHA2_512 : HKDF =
-  Make_HKDF (struct
-    let hash_alg = HashDefs.SHA2_512
-    let expand = EverCrypt_HKDF.everCrypt_HKDF_expand_sha2_512
-    let extract = EverCrypt_HKDF.everCrypt_HKDF_extract_sha2_512
-  end)
 
 module DRBG = struct
   open EverCrypt_DRBG
