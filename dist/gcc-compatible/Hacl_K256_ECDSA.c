@@ -24,7 +24,10 @@
 
 #include "internal/Hacl_K256_ECDSA.h"
 
-
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_K256_PrecompTable.h"
+#include "internal/Hacl_Bignum_K256.h"
+#include "internal/Hacl_Bignum_Base.h"
 
 static inline uint64_t
 bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
@@ -790,7 +793,7 @@ static inline bool fmul_fmul_eq_vartime(uint64_t *a, uint64_t *bz, uint64_t *c, 
   return z;
 }
 
-bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q)
+bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q)
 {
   uint64_t *px = p;
   uint64_t *py = p + (uint32_t)5U;
@@ -1788,17 +1791,31 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint8_t *nonce
 )
 {
-  uint64_t r_q[4U] = { 0U };
-  uint64_t s_q[4U] = { 0U };
-  uint64_t d_a[4U] = { 0U };
-  uint64_t k_q[4U] = { 0U };
+  uint64_t oneq[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
+  uint64_t rsdk_q[16U] = { 0U };
+  uint64_t *r_q = rsdk_q;
+  uint64_t *s_q = rsdk_q + (uint32_t)4U;
+  uint64_t *d_a = rsdk_q + (uint32_t)8U;
+  uint64_t *k_q = rsdk_q + (uint32_t)12U;
   uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
   uint64_t is_nonce_valid = load_qelem_check(k_q, nonce);
   uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;
-  if (are_sk_nonce_valid == (uint64_t)0U)
-  {
-    return false;
-  }
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = d_a;
+    uint64_t uu____0 = oneq[i];
+    uint64_t x = uu____0 ^ (are_sk_nonce_valid & (d_a[i] ^ uu____0));
+    os[i] = x;);
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = k_q;
+    uint64_t uu____1 = oneq[i];
+    uint64_t x = uu____1 ^ (are_sk_nonce_valid & (k_q[i] ^ uu____1));
+    os[i] = x;);
   uint64_t tmp[5U] = { 0U };
   uint8_t x_bytes[32U] = { 0U };
   uint64_t p[15U] = { 0U };
@@ -1821,11 +1838,9 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   store_qelem(signature + (uint32_t)32U, s_q);
   uint64_t is_r_zero = is_qelem_zero(r_q);
   uint64_t is_s_zero = is_qelem_zero(s_q);
-  if (is_r_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU || is_s_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU)
-  {
-    return false;
-  }
-  return true;
+  uint64_t m = are_sk_nonce_valid & (~is_r_zero & ~is_s_zero);
+  bool res = m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  return res;
 }
 
 /**
@@ -2215,5 +2230,67 @@ void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw
   }
   pk[0U] = ite;
   memcpy(pk + (uint32_t)1U, pk_x, (uint32_t)32U * sizeof (uint8_t));
+}
+
+/**
+Public key validation.
+
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve. 
+*/
+bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *pk)
+{
+  uint64_t fpk_x[5U] = { 0U };
+  uint64_t fpk_y[5U] = { 0U };
+  bool is_pk_valid = load_public_key(pk, fpk_x, fpk_y);
+  return is_pk_valid;
+}
+
+/**
+Compute the public key from the private key.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` and `private_key` < the order of the curve.
+*/
+bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key)
+{
+  uint64_t d_a[4U] = { 0U };
+  uint64_t p[15U] = { 0U };
+  uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
+  uint64_t oneq[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = d_a;
+    uint64_t uu____0 = oneq[i];
+    uint64_t x = uu____0 ^ (is_sk_valid & (d_a[i] ^ uu____0));
+    os[i] = x;);
+  point_mul_g(p, d_a);
+  uint64_t px[5U] = { 0U };
+  uint64_t py[5U] = { 0U };
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + (uint32_t)5U;
+  uint64_t *z1 = p + (uint32_t)10U;
+  uint64_t zinv[5U] = { 0U };
+  Hacl_Impl_K256_Finv_finv(zinv, z1);
+  Hacl_K256_Field_fmul(px, x1, zinv);
+  Hacl_K256_Field_fmul(py, y1, zinv);
+  Hacl_K256_Field_fnormalize(px, px);
+  Hacl_K256_Field_fnormalize(py, py);
+  Hacl_K256_Field_store_felem(public_key, px);
+  Hacl_K256_Field_store_felem(public_key + (uint32_t)32U, py);
+  return is_sk_valid == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 

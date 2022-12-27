@@ -36,10 +36,7 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_K256_PrecompTable.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Bignum_K256.h"
-#include "Hacl_Bignum_Base.h"
 #include "lib_intrinsics.h"
 /*******************************************************************************
   Verified C library for ECDSA signing and verification on the secp256k1 curve.
@@ -296,6 +293,33 @@ Convert a public key from raw to its compressed form.
   The function DOESN'T check whether (x, y) is valid point.
 */
 void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
+
+/**
+Public key validation.
+
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve. 
+*/
+bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *pk);
+
+/**
+Compute the public key from the private key.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` and `private_key` < the order of the curve.
+*/
+bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key);
 
 #if defined(__cplusplus)
 }

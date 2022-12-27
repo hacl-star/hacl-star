@@ -35,6 +35,10 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_K256_PrecompTable.h"
+#include "internal/Hacl_Bignum_K256.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "../Hacl_K256_ECDSA.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: Hacl_Impl_K256_Point_make_point_at_inf */
@@ -49,11 +53,11 @@ void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p);
 
 /* SNIPPET_END: Hacl_Impl_K256_Point_point_negate */
 
-/* SNIPPET_START: Hacl_Impl_K256_Point_point_eq */
+/* SNIPPET_START: Hacl_Impl_K256_Point_point_eq_vartime */
 
-bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q);
+bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q);
 
-/* SNIPPET_END: Hacl_Impl_K256_Point_point_eq */
+/* SNIPPET_END: Hacl_Impl_K256_Point_point_eq_vartime */
 
 /* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
 

@@ -121,16 +121,7 @@ let invariant (#a:alg) (s: state a) (m: HS.mem) =
 
 //18-07-06 as_acc a better name? not really a representation
 val repr: #a:alg ->
-  s:state a -> h:HS.mem -> GTot (words_state' a)
-
-#push-options "--ifuel 1"
-let repr_with_counter (#a:alg) (s:state a) (h:HS.mem) (counter:uint64_t) :
-  GTot (words_state a) =
-  if is_blake a then
-    let ev : extra_state a = Lib.IntTypes.cast (extra_state_int_type a) Lib.IntTypes.SEC counter in
-    repr s h, ev
-  else (repr s h, ())
-#pop-options
+  s:state a -> h:HS.mem -> GTot (words_state a)
 
 val alg_of_state: a:e_alg -> (
   let a = G.reveal a in
@@ -231,7 +222,7 @@ val init: #a:e_alg -> (
   (requires invariant s)
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    repr s h1 == fst (Spec.Agile.Hash.init a) /\
+    repr s h1 == Spec.Agile.Hash.init a /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -241,31 +232,9 @@ val update_multi_256: Hacl.Hash.Definitions.update_multi_st (|SHA2_256, ()|)
 inline_for_extraction noextract
 val update_multi_224: Hacl.Hash.Definitions.update_multi_st (|SHA2_224, ()|)
 
-/// The ``update`` method (with support for blake2)
-// Note: this function relies implicitly on the fact that we are running with
-// code/lib/karamel and that we know that machine integers and secret integers
-// are the same. In the long run, we should standardize on a secret integer type
-// in F*'s ulib and have evercrypt use it.
-(** @type: true
-*)
-val update:
-  #a:e_alg -> (
-  let a = Ghost.reveal a in
-  s:state a ->
-  prevlen : uint64_t ->
-  block:B.buffer Lib.IntTypes.uint8 { B.length block = block_length a } ->
-  Stack unit
-  (requires fun h0 ->
-    invariant s h0 /\
-    B.live h0 block /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer block)))
-  (ensures fun h0 _ h1 ->
-    M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    invariant s h1 /\
-    repr s h1 == fst (Spec.Agile.Hash.update a (repr_with_counter s h0 prevlen)
-                                             (B.as_seq h0 block)) /\
-    preserves_freeable s h0 h1))
+inline_for_extraction noextract
+let ev_of_uint64 a (prevlen: UInt64.t { UInt64.v prevlen % block_length a = 0 }): Spec.Hash.Definitions.extra_state a =
+  (if is_blake a then UInt64.v prevlen else ())
 
 /// The ``update_multi`` method
 // Note that we pass the data length in bytes (rather than blocks).
@@ -275,26 +244,31 @@ val update_multi:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  prevlen : uint64_t ->
+  prevlen : uint64_t { UInt64.v prevlen % block_length a = 0 } ->
   blocks:B.buffer Lib.IntTypes.uint8 { B.length blocks % block_length a = 0 } ->
   len: UInt32.t { v len = B.length blocks } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
     B.live h0 blocks /\
+    Spec.Agile.Hash.update_multi_pre a (ev_of_uint64 a prevlen) (B.as_seq h0 blocks) /\
     M.(loc_disjoint (footprint s h0) (loc_buffer blocks)))
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == fst (Spec.Agile.Hash.update_multi a (repr_with_counter s h0 prevlen)
-                                                   (B.as_seq h0 blocks)) /\
+    repr s h1 == Spec.Agile.Hash.update_multi a (repr s h0)
+      (ev_of_uint64 a prevlen) (B.as_seq h0 blocks) /\
     preserves_freeable s h0 h1))
 
 val update_last_256: Hacl.Hash.Definitions.update_last_st (|SHA2_256, ()|)
 
 inline_for_extraction noextract
 val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
+
+inline_for_extraction noextract
+let prev_len_of_uint64 a (prevlen: UInt64.t { UInt64.v prevlen % block_length a = 0 }): Spec.Hash.Incremental.prev_length_t a =
+  (if is_sha3 a then () else UInt64.v prevlen)
 
 /// The ``update_last`` method with support for blake2
 // 18-03-05 note the *new* length-passing convention!
@@ -321,12 +295,13 @@ val update_last:
   (requires fun h0 ->
     invariant s h0 /\
     B.live h0 last /\
+    Spec.Agile.Hash.update_multi_pre a (ev_of_uint64 a prev_len) (B.as_seq h0 last) /\
     M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
     repr s h1 ==
-      fst (Spec.Hash.Incremental.update_last a (repr_with_counter s h0 prev_len) (v prev_len)
-                                             (B.as_seq h0 last)) /\
+      Spec.Hash.Incremental.update_last a (repr s h0) (prev_len_of_uint64 a prev_len)
+                                             (B.as_seq h0 last) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -348,7 +323,7 @@ val finish:
     M.(modifies (loc_buffer dst `loc_union` footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     (* The 0UL value is dummy: it is actually useless *)
-    B.as_seq h1 dst == Spec.Hash.PadFinish.finish a (repr_with_counter s h0 0UL) /\
+    B.as_seq h1 dst == Spec.Agile.Hash.finish a (repr s h0) /\
     preserves_freeable s h0 h1))
 
 (** @type: true

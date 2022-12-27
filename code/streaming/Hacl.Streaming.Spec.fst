@@ -175,12 +175,17 @@ let split_at_last_spec #index (c: block index) (i: index)
 /// For the initialization of the streaming state.
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let split_at_last_empty #index (c: block index) (i: index): Lemma
+let split_at_last_init #index (c: block index) (i: index) (b: bytes) : Lemma
+  (requires (
+    let l = U32.v (c.blocks_state_len i) in
+    S.length b <= l))
   (ensures (
-    let blocks, rest = split_at_last c i S.empty in
-    S.equal blocks S.empty /\ S.equal rest S.empty))
+    let blocks, rest = split_at_last c i b in
+    S.equal blocks S.empty /\ S.equal rest b))
 =
-  FStar.Math.Lemmas.multiple_division_lemma 0 (U32.v (c.blocks_state_len i))
+  let l = U32.v (c.blocks_state_len i) in
+  FStar.Math.Lemmas.multiple_modulo_lemma 0 l;
+  split_at_last_spec c i b S.empty b
 #pop-options
 
 /// "Small" case: not enough data to obtain strictly more than a complete block,

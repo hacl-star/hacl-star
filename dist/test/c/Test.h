@@ -30,7 +30,7 @@
 
 #include "krmllib.h"
 #include "libintvector.h"
-exit_code main();
+exit_code main(void);
 
 
 #define __Test_H_DEFINED

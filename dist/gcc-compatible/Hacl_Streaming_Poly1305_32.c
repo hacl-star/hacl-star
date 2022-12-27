@@ -35,7 +35,8 @@ Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_
   memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_0 = k_;
   Hacl_Streaming_Poly1305_32_poly1305_32_state
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
+  s =
+    { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U, .p_key = k_0 };
   Hacl_Streaming_Poly1305_32_poly1305_32_state
   *p =
     (Hacl_Streaming_Poly1305_32_poly1305_32_state *)KRML_HOST_MALLOC(sizeof (
@@ -56,15 +57,10 @@ Hacl_Streaming_Poly1305_32_init(uint8_t *k, Hacl_Streaming_Poly1305_32_poly1305_
   Hacl_Poly1305_32_poly1305_init(block_state, k);
   memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
-  s[0U] =
-    (
-      (Hacl_Streaming_Poly1305_32_poly1305_32_state){
-        .block_state = block_state,
-        .buf = buf,
-        .total_len = (uint64_t)0U,
-        .p_key = k_1
-      }
-    );
+  Hacl_Streaming_Poly1305_32_poly1305_32_state
+  tmp =
+    { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U, .p_key = k_1 };
+  s[0U] = tmp;
 }
 
 /**

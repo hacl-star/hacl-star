@@ -24,6 +24,8 @@
 
 #include "Hacl_RSAPSS.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: hash_len */
@@ -974,7 +976,7 @@ Hacl_RSAPSS_rsapss_pkey_verify(
 /* SNIPPET_START: Hacl_RSAPSS_mgf_hash */
 
 /**
-  The mask generation function defined in the Public Key Cryptography Standard #1 
+  The mask generation function defined in the Public Key Cryptography Standard #1
   (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) 
 */
 void

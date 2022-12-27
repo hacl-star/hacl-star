@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Lib_Memzero0.h"
 #include "Hacl_Krmllib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 
 void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
 
@@ -92,6 +91,8 @@ Hacl_Blake2b_32_blake2b(
   uint8_t *k
 );
 
+uint64_t *Hacl_Blake2b_32_blake2b_malloc(void);
+
 void Hacl_Blake2s_32_blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn);
 
 void
@@ -144,6 +145,8 @@ Hacl_Blake2s_32_blake2s(
   uint32_t kk,
   uint8_t *k
 );
+
+uint32_t *Hacl_Blake2s_32_blake2s_malloc(void);
 
 #if defined(__cplusplus)
 }

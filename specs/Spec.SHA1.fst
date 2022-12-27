@@ -18,9 +18,7 @@ let init_as_list : list uint32 = [
   u32 0xc3d2e1f0;
 ]
 
-let h0 : words_state' SHA1 = Seq.seq_of_list init_as_list
-
-let init = ( h0, () )
+let init : words_state SHA1 = Seq.seq_of_list init_as_list
 
 (* Section 6.1.2 Step 1: message schedule *)
 
@@ -144,10 +142,10 @@ let word_block = Seq.lseq (word SHA1) (block_word_length SHA1)
 
 let step3_body'_aux
   (mi: word_block)
-  (st: words_state' SHA1)
+  (st: words_state SHA1)
   (t: size_t {v t < 80})
   (wt: word SHA1 { wt == w mi t } )
-: Tot (words_state' SHA1)
+: Tot (words_state SHA1)
 = let sta = Seq.index st 0 in
   let stb = Seq.index st 1 in
   let stc = Seq.index st 2 in
@@ -183,9 +181,9 @@ let step3_body_w_t
 let step3_body
   (mi: word_block)
   (w: step3_body_w_t mi)
-  (st: words_state' SHA1)
+  (st: words_state SHA1)
   (t: nat {t < 80})
-: Tot (words_state' SHA1)
+: Tot (words_state SHA1)
 = step3_body' mi st (size t) (w t)
 
 inline_for_extraction
@@ -197,8 +195,8 @@ let index_compute_w
 
 let step3_aux
   (mi: word_block)
-  (h: words_state' SHA1)
-: Tot (words_state' SHA1)
+  (h: words_state SHA1)
+: Tot (words_state SHA1)
 = let cwt = compute_w mi 0 Seq.empty in
   Spec.Loops.repeat_range 0 80 (step3_body mi (index_compute_w mi cwt)) h
 
@@ -209,8 +207,8 @@ let step3 = step3_aux
 
 let step4_aux
   (mi: word_block)
-  (h: words_state' SHA1)
-: Tot (words_state' SHA1) =
+  (h: words_state SHA1)
+: Tot (words_state SHA1) =
   let st = step3 mi h in
   let sta = Seq.index st 0 in
   let stb = Seq.index st 1 in
@@ -238,16 +236,7 @@ let words_of_bytes_block
 (* Section 6.1.2: outer loop body *)
 
 let update_aux (h:words_state SHA1) l : (words_state SHA1) =
-  let h, _ = h in
   let mi = words_of_bytes_block l in
-  step4 mi h, ()
+  step4 mi h
 
 let update = update_aux
-
-(* Section 5.1.1: padding *)
-
-let pad = Spec.Hash.PadFinish.pad SHA1
-
-(* Section 6.1.2: no truncation needed *)
-
-let finish = Spec.Hash.PadFinish.finish SHA1

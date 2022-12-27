@@ -35,8 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Krmllib.h"
-#include "Hacl_Bignum_K256.h"
+
 
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^256 - 0x1000003D1.
@@ -220,9 +219,55 @@ Checks whether `p` is equal to `q` (point equality).
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `p` and `q` are either disjoint or equal
+  • `p` and `q` are either disjoint or equal.
+
+  This function is NOT constant-time.
 */
 bool Hacl_EC_K256_point_eq(uint64_t *p, uint64_t *q);
+
+/**
+Convert a point from projective coordinates to its raw form.
+
+  The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
+  The outparam `out` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first converts a given point `p` from projective to affine coordinates
+  and then writes [ `x`; `y` ] in `out`.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are disjoint.
+*/
+void Hacl_EC_K256_point_store(uint64_t *p, uint8_t *out);
+
+/**
+Convert a point to projective coordinates from its raw form.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The outparam `out` points to a point of 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` is valid point, i.e., x < prime and y < prime and (x, y) is on the curve
+  • `b` and `out` are disjoint.
+*/
+void Hacl_EC_K256_point_load(uint8_t *b, uint64_t *out);
+
+/**
+Check whether a point is valid.
+
+  The function returns `true` if a point is valid and `false` otherwise.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The point (x || y) is valid:
+    • x < prime
+    • y < prime
+    • (x, y) is on the curve.
+
+  This function is NOT constant-time.
+*/
+bool Hacl_EC_K256_is_point_valid(uint8_t *b);
 
 /**
 Compress a point in projective coordinates to its compressed form.
@@ -235,7 +280,9 @@ Compress a point in projective coordinates to its compressed form.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `p` and `out` are disjoint
+  • `p` and `out` are disjoint.
+
+  This function is NOT constant-time.
 */
 void Hacl_EC_K256_point_compress(uint64_t *p, uint8_t *out);
 
@@ -250,7 +297,9 @@ Decompress a point in projective coordinates from its compressed form.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `s` and `out` are disjoint
+  • `s` and `out` are disjoint.
+
+  This function is NOT constant-time.
 */
 bool Hacl_EC_K256_point_decompress(uint8_t *s, uint64_t *out);
 

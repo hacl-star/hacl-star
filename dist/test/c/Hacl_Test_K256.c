@@ -161,6 +161,19 @@ Convert a public key from raw to its compressed form.
 */
 extern void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
 
+/**
+Compute the public key from the private key.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` and `private_key` < the order of the curve.
+*/
+extern bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key);
+
 static uint8_t
 pk1[64U] =
   {
@@ -264,6 +277,23 @@ sgnt2[64U] =
     (uint8_t)0x01U, (uint8_t)0xf3U, (uint8_t)0xcaU, (uint8_t)0x0eU
   };
 
+static void test_secret_to_public(uint8_t *sk, uint8_t *pk)
+{
+  uint8_t pk_comp[64U] = { 0U };
+  bool b = Hacl_K256_ECDSA_secret_to_public(pk_comp, sk);
+  C_String_print("\n Test K256 secret_to_public: ");
+  bool is_eq = Lib_PrintBuffer_result_compare_display((uint32_t)64U, pk, pk_comp);
+  if (is_eq && b)
+  {
+    C_String_print("Success!\n");
+  }
+  else
+  {
+    C_String_print("Failure :(\n");
+    exit((int32_t)255);
+  }
+}
+
 static void test_verify_sha256(uint32_t msg_len, uint8_t *msg, uint8_t *pk, uint8_t *sgnt)
 {
   bool b = Hacl_K256_ECDSA_ecdsa_verify_sha256(msg_len, msg, pk, sgnt);
@@ -361,7 +391,7 @@ static void test_public_key_uncompressed(uint8_t *pk)
   }
 }
 
-exit_code main()
+exit_code main(void)
 {
   C_String_print("\nTEST 1. K256\n");
   test_verify_sha256((uint32_t)6U, msg1, pk1, sgnt1);
@@ -371,6 +401,8 @@ exit_code main()
   test_public_key_compressed(pk1);
   C_String_print("\nTEST 4. K256\n");
   test_public_key_uncompressed(pk1);
+  C_String_print("\nTEST 5. K256\n");
+  test_secret_to_public(sk2, pk2);
   return EXIT_SUCCESS;
 }
 

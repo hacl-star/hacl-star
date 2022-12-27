@@ -24,7 +24,9 @@
 
 #include "Hacl_EC_K256.h"
 
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_K256_ECDSA.h"
+#include "internal/Hacl_Bignum_K256.h"
 
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^256 - 0x1000003D1.
@@ -281,11 +283,116 @@ Checks whether `p` is equal to `q` (point equality).
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `p` and `q` are either disjoint or equal
+  • `p` and `q` are either disjoint or equal.
+
+  This function is NOT constant-time.
 */
 bool Hacl_EC_K256_point_eq(uint64_t *p, uint64_t *q)
 {
-  return Hacl_Impl_K256_Point_point_eq(p, q);
+  return Hacl_Impl_K256_Point_point_eq_vartime(p, q);
+}
+
+/**
+Convert a point from projective coordinates to its raw form.
+
+  The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
+  The outparam `out` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first converts a given point `p` from projective to affine coordinates
+  and then writes [ `x`; `y` ] in `out`.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are disjoint.
+*/
+void Hacl_EC_K256_point_store(uint64_t *p, uint8_t *out)
+{
+  uint64_t px[5U] = { 0U };
+  uint64_t py[5U] = { 0U };
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + (uint32_t)5U;
+  uint64_t *z1 = p + (uint32_t)10U;
+  uint64_t zinv[5U] = { 0U };
+  Hacl_Impl_K256_Finv_finv(zinv, z1);
+  Hacl_K256_Field_fmul(px, x1, zinv);
+  Hacl_K256_Field_fmul(py, y1, zinv);
+  Hacl_K256_Field_fnormalize(px, px);
+  Hacl_K256_Field_fnormalize(py, py);
+  Hacl_K256_Field_store_felem(out, px);
+  Hacl_K256_Field_store_felem(out + (uint32_t)32U, py);
+}
+
+/**
+Convert a point to projective coordinates from its raw form.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The outparam `out` points to a point of 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` is valid point, i.e., x < prime and y < prime and (x, y) is on the curve
+  • `b` and `out` are disjoint.
+*/
+void Hacl_EC_K256_point_load(uint8_t *b, uint64_t *out)
+{
+  uint64_t px[5U] = { 0U };
+  uint64_t py[5U] = { 0U };
+  uint8_t *pxb = b;
+  uint8_t *pyb = b + (uint32_t)32U;
+  Hacl_K256_Field_load_felem(px, pxb);
+  Hacl_K256_Field_load_felem(py, pyb);
+  uint64_t *x1 = out;
+  uint64_t *y1 = out + (uint32_t)5U;
+  uint64_t *z1 = out + (uint32_t)10U;
+  memcpy(x1, px, (uint32_t)5U * sizeof (uint64_t));
+  memcpy(y1, py, (uint32_t)5U * sizeof (uint64_t));
+  memset(z1, 0U, (uint32_t)5U * sizeof (uint64_t));
+  z1[0U] = (uint64_t)1U;
+}
+
+/**
+Check whether a point is valid.
+
+  The function returns `true` if a point is valid and `false` otherwise.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The point (x || y) is valid:
+    • x < prime
+    • y < prime
+    • (x, y) is on the curve.
+
+  This function is NOT constant-time.
+*/
+bool Hacl_EC_K256_is_point_valid(uint8_t *b)
+{
+  uint64_t px[5U] = { 0U };
+  uint64_t py[5U] = { 0U };
+  uint8_t *pxb = b;
+  uint8_t *pyb = b + (uint32_t)32U;
+  bool is_x_valid = Hacl_K256_Field_load_felem_lt_prime_vartime(px, pxb);
+  bool is_y_valid = Hacl_K256_Field_load_felem_lt_prime_vartime(py, pyb);
+  if (is_x_valid && is_y_valid)
+  {
+    uint64_t y2_exp[5U] = { 0U };
+    uint64_t b1[5U] = { 0U };
+    b1[0U] = (uint64_t)0x7U;
+    b1[1U] = (uint64_t)0U;
+    b1[2U] = (uint64_t)0U;
+    b1[3U] = (uint64_t)0U;
+    b1[4U] = (uint64_t)0U;
+    Hacl_K256_Field_fsqr(y2_exp, px);
+    Hacl_K256_Field_fmul(y2_exp, y2_exp, px);
+    Hacl_K256_Field_fadd(y2_exp, y2_exp, b1);
+    Hacl_K256_Field_fnormalize(y2_exp, y2_exp);
+    uint64_t y2_comp[5U] = { 0U };
+    Hacl_K256_Field_fsqr(y2_comp, py);
+    Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
+    bool res = Hacl_K256_Field_is_felem_eq_vartime(y2_exp, y2_comp);
+    bool res0 = res;
+    return res0;
+  }
+  return false;
 }
 
 /**
@@ -299,7 +406,9 @@ Compress a point in projective coordinates to its compressed form.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `p` and `out` are disjoint
+  • `p` and `out` are disjoint.
+
+  This function is NOT constant-time.
 */
 void Hacl_EC_K256_point_compress(uint64_t *p, uint8_t *out)
 {
@@ -326,7 +435,9 @@ Decompress a point in projective coordinates from its compressed form.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • `s` and `out` are disjoint
+  • `s` and `out` are disjoint.
+
+  This function is NOT constant-time.
 */
 bool Hacl_EC_K256_point_decompress(uint8_t *s, uint64_t *out)
 {

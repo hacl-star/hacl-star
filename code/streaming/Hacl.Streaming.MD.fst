@@ -214,11 +214,11 @@ let lib_of_state (a: alg { is_sha2 a }) (s: (state_t a).s ()): Lemma
 
 inline_for_extraction noextract
 let update_multi_s (a : alg) () acc (prevlen : nat) input =
-  fst Agile.(update_multi a (acc, ()) input)
+  Agile.(update_multi a acc () input)
 
 noextract
 let update_multi_zero (a : alg) () acc (prevlen : nat) :
-  Lemma(update_multi_s a () acc prevlen S.empty == acc) = ()
+  Lemma(update_multi_s a () acc prevlen S.empty == acc) = Spec.Hash.Lemmas.update_multi_zero a acc
 
 noextract
 let multiseq_empty (a: alg { is_sha2 a }): Hacl.Spec.SHA2.Vec.(multiseq (lanes a M32) 0) =
@@ -241,7 +241,7 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
       S.length input % U32.v (D.block_len a) = 0 /\
       update_multi_s a () (update_multi_s a () acc prevlen1 input1) prevlen2 input2 ==
         update_multi_s a () acc prevlen1 input)) =
-  Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
+  Spec.Hash.Lemmas.update_multi_associative a acc input1 input2
 #pop-options
 
 val update_nblocks_vec_m32_is_repeat_blocks_multi:
@@ -255,10 +255,8 @@ val update_nblocks_vec_m32_is_repeat_blocks_multi:
     let b = b <: multiseq 1 len in
     let st = update_nblocks #a #M32 len b st0 in
 
-    let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
-    let st0_m32 = (st0_m32, ()) <: words_state a in
+    let st0_m32 = (state_spec_v st0).[0] <: words_state a in
     let st_m32 = (state_spec_v st).[0] <: words_state' a in
-    let st_m32 = (st_m32, ()) <: words_state a in
     st_m32 == repeat_blocks_multi (block_length a) b (Hacl.Spec.SHA2.update a) st0_m32)
 
 let update_nblocks_vec_m32_is_repeat_blocks_multi a len b st0 =
@@ -268,10 +266,8 @@ let update_nblocks_vec_m32_is_repeat_blocks_multi a len b st0 =
   let b = b <: multiseq 1 len in
   let st1 = update_nblocks #a #M32 len b st0 in
 
-  let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
-  let st0_m32_t = (st0_m32, ()) <: words_state a in
-  let st1_m32 = (state_spec_v st1).[0] <: words_state' a in
-  let st1_m32_t = (st1_m32, ()) <: words_state a in
+  let st0_m32_t = (state_spec_v st0).[0] <: words_state a in
+  let st1_m32_t = (state_spec_v st1).[0] <: words_state a in
   let st1_spec_m32 = Hacl.Spec.SHA2.update_nblocks a len b st0_m32_t in
 
   Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi a len b st0_m32_t;
@@ -281,36 +277,9 @@ let update_nblocks_vec_m32_is_repeat_blocks_multi a len b st0 =
   Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #a #M32 len b st0 0;
   tup1_lemma b;
   assert (b.(|0|) == b);
-  assert (st1_m32 == Pervasives.fst st1_spec_m32);
-  assert (Pervasives.snd st1_spec_m32 = ());
   assert (st1_m32_t == st1_spec_m32)
 
-
-let state_spec_v_extensionality (a : alg { is_sha2 a })
-  (acc1: Hacl.Spec.SHA2.Vec.(state_spec a M32))
-  (acc2: Hacl.Spec.SHA2.Vec.(state_spec a M32)) :
-  Lemma
-  (requires (let open Hacl.Spec.SHA2.Vec in
-     Lib.Sequence.index (state_spec_v acc1) 0 ==
-     Lib.Sequence.index (state_spec_v acc2) 0))
-  (ensures acc1 == acc2) =
-
-  let open Lib.Sequence in
-  let open Lib.IntVector in
-  let open Hacl.Spec.SHA2.Vec in
-  allow_inversion alg;
-  let acc1_s = (state_spec_v acc1).[0] <: lseq (word a) 8 in
-  let acc2_s = (state_spec_v acc2).[0] <: lseq (word a) 8 in
-
-  let aux (i:nat{i < 8}) : Lemma (acc1.[i] == acc2.[i]) =
-    assert (index (vec_v acc1.[i]) 0 == index #(word a) #8 acc1_s i);
-    assert (index (vec_v acc2.[i]) 0 == index #(word a) #8 acc2_s i);
-    assert (index (vec_v acc1.[i]) 0 == index (vec_v acc2.[i]) 0);
-    eq_intro (vec_v acc1.[i]) (vec_v acc2.[i]);
-    vecv_extensionality acc1.[i] acc2.[i] in
-
-  Classical.forall_intro aux;
-  eq_intro acc1 acc2
+let state_spec_v_extensionality = Hacl.SHA2.Scalar32.Lemmas.state_spec_v_extensionality
 
 let repeati_associative (a : alg { is_sha2 a })
   (acc: Hacl.Spec.SHA2.Vec.(state_spec a M32))
@@ -339,8 +308,7 @@ let repeati_associative (a : alg { is_sha2 a })
   let input1 = input1 <: multiseq 1 len1 in
   let input2 = input2 <: multiseq 1 len2 in
 
-  let acc_m32 = (state_spec_v acc).[0] <: words_state' a in
-  let acc_m32 = (acc_m32, ()) <: words_state a in
+  let acc_m32 = (state_spec_v acc).[0] <: words_state a in
   let bl = block_length a in
   Lib.Sequence.Lemmas.repeat_blocks_multi_split bl
     len1 input (Hacl.Spec.SHA2.update a) acc_m32;
@@ -388,10 +356,8 @@ val hash_vec_m32_is_repeat_blocks:
     let mb = mb <: multiseq 1 rem in
     let st_last = update_last #a #M32 totlen rem mb st in
 
-    let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
-    let st0_m32 = (st0_m32, ()) <: words_state a in
-    let st_last_m32 = (state_spec_v st_last).[0] <: words_state' a in
-    let st_last_m32 = (st_last_m32, ()) <: words_state a in
+    let st0_m32 = (state_spec_v st0).[0] <: words_state a in
+    let st_last_m32 = (state_spec_v st_last).[0] <: words_state a in
 
     st_last_m32 == repeat_blocks (block_length a) b
       (Hacl.Spec.SHA2.update a) (Hacl.Spec.SHA2.update_last a totlen) st0_m32)
@@ -408,12 +374,9 @@ let hash_vec_m32_is_repeat_blocks a len b st0 =
   let st1 = update_nblocks #a #M32 len b st0 in
   let st2 = update_last #a #M32 totlen rem mb st1 in
 
-  let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
-  let st0_m32_t = (st0_m32, ()) <: words_state a in
-  let st1_m32 = (state_spec_v st1).[0] <: words_state' a in
-  let st1_m32_t = (st1_m32, ()) <: words_state a in
-  let st2_m32 = (state_spec_v st2).[0] <: words_state' a in
-  let st2_m32_t = (st2_m32, ()) <: words_state a in
+  let st0_m32_t = (state_spec_v st0).[0] <: words_state a in
+  let st1_m32_t = (state_spec_v st1).[0] <: words_state a in
+  let st2_m32_t = (state_spec_v st2).[0] <: words_state a in
 
   let st1_spec_m32 = Hacl.Spec.SHA2.update_nblocks a len b st0_m32_t in
   let st2_spec_m32 = Hacl.Spec.SHA2.update_last a totlen rem mb st1_spec_m32 in
@@ -429,12 +392,12 @@ let hash_vec_m32_is_repeat_blocks a len b st0 =
   //   Pervasives.fst (Hacl.Spec.SHA2.update_nblocks a len b.(|0|) st0_m32_t));
   tup1_lemma b;
   assert (b.(|0|) == b);
-  assert (st1_m32 == Pervasives.fst st1_spec_m32);
+  assert (st1_m32_t == st1_spec_m32);
 
   Hacl.Spec.SHA2.Equiv.update_last_lemma_l totlen rem mb st1 0;
   tup1_lemma mb;
   assert (mb.(|0|) == mb);
-  assert (st2_m32 == Pervasives.fst st2_spec_m32)
+  assert (st2_m32_t == st2_spec_m32)
 
 val update_nblocks_with_last_sliced:
      a:alg { is_sha2 a }
@@ -470,12 +433,10 @@ let update_nblocks_with_last_sliced a len b st0 =
   let mb = mb <: multiseq 1 rem in
   let st_last = update_last #a #M32 totlen rem mb st in
 
-  let st0_m32 = (state_spec_v st0).[0] <: words_state' a in
-  let st0_m32_t = (st0_m32, ()) <: words_state a in
+  let st0_m32_t = (state_spec_v st0).[0] <: words_state a in
   //let st_m32 = (state_spec_v st).[0] <: words_state' a in
   //let st_m32_t = (st_m32, ()) <: words_state a in
-  let st_last_m32 = (state_spec_v st_last).[0] <: words_state' a in
-  let st_last_m32_t = (st_last_m32, ()) <: words_state a in
+  let st_last_m32_t = (state_spec_v st_last).[0] <: words_state a in
 
   hash_vec_m32_is_repeat_blocks a len b st0;
   assert (st_last_m32_t == repeat_blocks (block_length a) b
@@ -493,10 +454,8 @@ let update_nblocks_with_last_sliced a len b st0 =
   let st_sliced = update_nblocks #a #M32 (len - rem) blocks st0 in
   let st_sliced_last = update_last #a #M32 totlen rem mb st_sliced in
 
-  let st_sliced_m32 = (state_spec_v st_sliced).[0] <: words_state' a in
-  let st_sliced_m32_t = (st_sliced_m32, ()) <: words_state a in
-  let st_slicedl_m32 = (state_spec_v st_sliced_last).[0] <: words_state' a in
-  let st_slicedl_m32_t = (st_slicedl_m32, ()) <: words_state a in
+  let st_sliced_m32_t = (state_spec_v st_sliced).[0] <: words_state a in
+  let st_slicedl_m32_t = (state_spec_v st_sliced_last).[0] <: words_state a in
 
   update_nblocks_vec_m32_is_repeat_blocks_multi a (len - rem) blocks st0;
   assert (st_sliced_m32_t ==
@@ -506,7 +465,7 @@ let update_nblocks_with_last_sliced a len b st0 =
   Hacl.Spec.SHA2.Equiv.update_last_lemma_l totlen rem mb st_sliced 0;
   tup1_lemma mb;
   assert (mb.(|0|) == mb);
-  assert (st_slicedl_m32 == st_last_m32);
+  assert (st_slicedl_m32_t == st_last_m32_t);
   state_spec_v_extensionality a st_last st_sliced_last
 
 let lemma_split_at_last_lazy (l:pos) (b: S.seq uint8) :
@@ -810,67 +769,91 @@ let hacl_md (a:alg)// : block unit =
   assert_norm (word SHA3_256 == Lib.IntTypes.uint64);
   Block
     Erased
-    (state_t a)
-    (stateful_unused unit)
+    (state_t a) (* state *)
+    (stateful_unused unit) (* key *)
 
-    (fun () -> max_input_len64 a)
-    (fun () -> Hacl.Hash.Definitions.hash_len a)
-    (fun () -> Hacl.Hash.Definitions.block_len a)
-    (fun () -> Hacl.Hash.Definitions.block_len a)
+    (fun () -> max_input_len64 a) (* max_input_len *)
+    (fun () -> Hacl.Hash.Definitions.hash_len a) (* output_len *)
+    (fun () -> Hacl.Hash.Definitions.block_len a) (* block_len *)
+    (fun () -> Hacl.Hash.Definitions.block_len a) (* blocks_state_len *)
+    (fun () -> 0ul) (* init_input_len *)
 
+    (fun () _k -> S.empty) (* init_input_s *)
+
+    (* init_s *)
     (fun () _ ->
       if is_sha2 a then
         Hacl.Spec.SHA2.Vec.(init a M32)
       else
-        fst (Spec.Agile.Hash.init a))
+        Spec.Agile.Hash.init a)
+
+    (* update_multi_s *)
     (fun () acc prevlen blocks ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
         update_nblocks #a #M32 (S.length blocks) (blocks <: multiseq 1 (S.length blocks)) acc
       else
         update_multi_s a () acc prevlen blocks)
+
+    (* update_last_s *)
     (fun () acc prevlen input ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2 in
         let totlen: len_t a = mk_len_t a (prevlen + S.length input) in
         Hacl.Spec.SHA2.Vec.(update_last #a #M32 totlen (S.length input) (input <: multiseq 1 (S.length input)) acc)
+      else if is_sha3 a then
+        Spec.Hash.Incremental.(update_last a acc () input)
       else
-        fst Spec.Hash.Incremental.(update_last a (acc, ()) prevlen input))
+        Spec.Hash.Incremental.(update_last a acc prevlen input))
+
+    (* finish_s *)
     (fun () _ acc ->
       if is_sha2 a then
         let _ = multiseq_hash_is_hash a in
         agile_of_lib Hacl.Spec.SHA2.Vec.(finish #a #M32 acc)
       else
-        Spec.Hash.PadFinish.(finish a (acc, ())))
+
+    (* spec_s *)
+        Spec.Agile.Hash.(finish a acc))
     (fun () _ s -> Spec.Agile.Hash.(hash a s))
 
+    (* update_multi_zero *)
     (fun i h prevlen ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
         Lib.LoopCombinators.eq_repeati0 (0 / block_length a) (update_block #a #M32 0 (multiseq_empty a)) h
       else
-        update_multi_zero a i h prevlen) (* update_multi_zero *)
+        update_multi_zero a i h prevlen)
+
+    (* update_multi_associative *)
     (fun i acc prevlen1 prevlen2 input1 input2 ->
       if is_sha2 a then
         repeati_associative a acc input1 input2
       else
-        update_multi_associative a i acc prevlen1 prevlen2 input1 input2) (* update_multi_associative *)
-    (fun _ _ input ->
+        update_multi_associative a i acc prevlen1 prevlen2 input1 input2)
+
+    (* spec_is_incremental *)
+    (fun _ key input ->
+      let input1 = S.append S.empty input in
+      assert (S.equal input1 input);
       if is_sha2 a then
         let open Hacl.Spec.SHA2 in
         sha2_mb_is_incremental a input
       else
         Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
+    (* index_of_state *)
     (fun _ _ -> ())
 
-    (fun _ _ s ->
+    (* init *)
+    (fun _ _ _ s ->
       match a with
       | MD5 -> Hacl.Hash.MD5.legacy_init s
       | SHA1 -> Hacl.Hash.SHA1.legacy_init s
       | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> Hacl.SHA2.Scalar32.init #a s
       | SHA3_256 -> Hacl.Hash.SHA3.init_256 s)
 
+    (* update_multi *)
     (fun _ s prevlen blocks len ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
@@ -896,6 +879,7 @@ let hacl_md (a:alg)// : block unit =
         in
         update_multi s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
 
+    (* update_last *)
     (fun _ s prevlen last last_len ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
@@ -925,8 +909,9 @@ let hacl_md (a:alg)// : block unit =
           | MD5 | SHA1 -> prevlen
           | SHA3_256 -> ()
         in
-        update_last s () prevlen last last_len)
+        update_last s prevlen last last_len)
 
+    (* finish *)
     (fun _ _ s dst ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
@@ -951,5 +936,5 @@ let hacl_md (a:alg)// : block unit =
           | SHA1 -> Hacl.Hash.SHA1.legacy_finish
           | SHA3_256 -> Hacl.Hash.SHA3.finish_256
         in
-        finish s () dst)
+        finish s dst)
 #pop-options

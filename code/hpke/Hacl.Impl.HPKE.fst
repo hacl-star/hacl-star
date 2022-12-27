@@ -385,7 +385,7 @@ val labeled_extract_hash:
       as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
 
 
-#push-options "--z3rlimit 300 --z3refresh"
+#push-options "--z3rlimit 500 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let labeled_extract_hash #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
@@ -486,6 +486,47 @@ let nat_to_bytes_2 l tmp =
   copy (sub tmp 0ul 2ul) (sub tmp 2ul 2ul)
 
 noextract inline_for_extraction
+val labeled_expand_hash_pre:
+    #cs:S.ciphersuite
+  -> suite_id_len:size_t
+  -> suite_id:lbuffer uint8 suite_id_len
+  -> labellen:size_t
+  -> label:lbuffer uint8 labellen
+  -> infolen:size_t
+  -> info:lbuffer uint8 infolen
+  -> l:size_t
+  -> tmplen:size_t
+  -> tmp: lbuffer uint8 tmplen ->
+  Stack unit
+    (requires fun h ->
+      live h tmp /\ live h suite_id /\ live h label /\ live h info /\
+      disjoint tmp suite_id /\ disjoint tmp label /\ disjoint tmp info /\
+
+      Spec.Agile.HKDF.expand_output_length_pred (S.hash_of_cs cs) (v l) /\
+      v tmplen == 9 + v suite_id_len + v labellen + v infolen)
+  (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
+    as_seq h1 tmp `Seq.equal` (
+    (((Lib.ByteSequence.nat_to_bytes_be 2 (v l)
+      `Seq.append` S.label_version)
+      `Seq.append` (as_seq h0 suite_id))
+      `Seq.append` (as_seq h0 label))
+      `Seq.append` (as_seq h0 info)
+      )
+  )
+
+#push-options "--z3rlimit 300"
+
+[@ Meta.Attribute.inline_]
+let labeled_expand_hash_pre #cs suite_id_len suite_id labellen label infolen info l tmplen tmp =
+  nat_to_bytes_2 l (sub tmp 0ul 4ul);
+  init_label_version (sub tmp 2ul 7ul);
+  copy (sub tmp 9ul suite_id_len) suite_id;
+  copy (sub tmp (9ul +. suite_id_len) labellen) label;
+  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info
+
+#pop-options
+
+noextract inline_for_extraction
 val labeled_expand_hash:
     #cs:S.ciphersuite
   -> suite_id_len:size_t
@@ -511,7 +552,7 @@ val labeled_expand_hash:
       as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-#push-options "--z3rlimit 400 --z3refresh"
+#push-options "--z3rlimit 200"
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
@@ -520,20 +561,7 @@ let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label info
   let len = 9ul +. suite_id_len +. labellen +. infolen in
   let tmp = create len (u8 0) in
 
-  nat_to_bytes_2 l (sub tmp 0ul 4ul);
-  init_label_version (sub tmp 2ul 7ul);
-  copy (sub tmp 9ul suite_id_len) suite_id;
-  copy (sub tmp (9ul +. suite_id_len) labellen) label;
-  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info;
-
-  let h1 = ST.get () in
-  assert (as_seq h1 tmp `Seq.equal` (
-    (((Lib.ByteSequence.nat_to_bytes_be 2 (v l)
-      `Seq.append` S.label_version)
-      `Seq.append` (as_seq h0 suite_id))
-      `Seq.append` (as_seq h0 label))
-      `Seq.append` (as_seq h0 info)
-      ));
+  labeled_expand_hash_pre #cs suite_id_len suite_id labellen label infolen info l len tmp;
 
   HKDF.hkdf_expand #cs o_hash prk prklen tmp len l;
 
@@ -734,7 +762,7 @@ val decap:
        | _ -> False)
      )
 
-#push-options "--z3rlimit 300 --z3refresh"
+#push-options "--z3rlimit 300 --z3refresh --ifuel 1"
 
 [@ Meta.Attribute.inline_ ]
 let decap #cs o_shared enc skR =

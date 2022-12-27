@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Hash_SHA2.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 static uint32_t
 h224[8U] =
@@ -277,7 +277,7 @@ static void update_256(uint32_t *hash, uint8_t *block)
     hash[i] = xi + yi;);
 }
 
-void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
+static void update_384(uint64_t *hash, uint8_t *block)
 {
   uint64_t hash1[8U] = { 0U };
   uint64_t computed_ws[80U] = { 0U };
@@ -353,7 +353,7 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
     hash[i] = xi + yi;);
 }
 
-void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block)
+static void update_512(uint64_t *hash, uint8_t *block)
 {
   uint64_t hash1[8U] = { 0U };
   uint64_t computed_ws[80U] = { 0U };
@@ -609,7 +609,7 @@ void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_bl
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_384(s, block);
+    update_384(s, block);
   }
 }
 
@@ -619,7 +619,7 @@ void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_bl
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_512(s, block);
+    update_512(s, block);
   }
 }
 
@@ -766,12 +766,11 @@ Hacl_Hash_SHA2_update_last_512(
 void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  scrut[8U] =
+  s[8U] =
     {
       (uint32_t)0xc1059ed8U, (uint32_t)0x367cd507U, (uint32_t)0x3070dd17U, (uint32_t)0xf70e5939U,
       (uint32_t)0xffc00b31U, (uint32_t)0x68581511U, (uint32_t)0x64f98fa7U, (uint32_t)0xbefa4fa4U
     };
-  uint32_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)64U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
@@ -799,12 +798,11 @@ void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  scrut[8U] =
+  s[8U] =
     {
       (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
       (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
     };
-  uint32_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)64U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
@@ -829,18 +827,15 @@ void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
 }
 
-typedef uint64_t *___uint64_t____;
-
 void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  scrut[8U] =
+  s[8U] =
     {
       (uint64_t)0xcbbb9d5dc1059ed8U, (uint64_t)0x629a292a367cd507U, (uint64_t)0x9159015a3070dd17U,
       (uint64_t)0x152fecd8f70e5939U, (uint64_t)0x67332667ffc00b31U, (uint64_t)0x8eb44a8768581511U,
       (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
     };
-  uint64_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)128U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
@@ -871,13 +866,12 @@ void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  scrut[8U] =
+  s[8U] =
     {
       (uint64_t)0x6a09e667f3bcc908U, (uint64_t)0xbb67ae8584caa73bU, (uint64_t)0x3c6ef372fe94f82bU,
       (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
       (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
     };
-  uint64_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)128U;
   uint32_t blocks_n1;
   if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)

@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Hash_SHA1.h"
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_init */
@@ -42,12 +43,6 @@ extern "C" {
 void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_init */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_update */
-
-void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_update */
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_finish */
 

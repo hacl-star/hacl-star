@@ -36,8 +36,8 @@ extern "C" {
 
 
 #include "Hacl_Spec.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Bignum_Base.h"
 
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
 
@@ -226,7 +226,7 @@ Hacl_RSAPSS_rsapss_pkey_verify(
 /* SNIPPET_START: Hacl_RSAPSS_mgf_hash */
 
 /**
-  The mask generation function defined in the Public Key Cryptography Standard #1 
+  The mask generation function defined in the Public Key Cryptography Standard #1
   (https://www.ietf.org/rfc/rfc2437.txt Section 10.2.1) 
 */
 void

@@ -22,6 +22,7 @@ module Hacl_Hash_Blake2 = Hacl_Hash_Blake2_bindings.Bindings(Hacl_Hash_Blake2_st
 module Hacl_Blake2b_32 = Hacl_Hash_Blake2
 module Hacl_Blake2s_32 = Hacl_Hash_Blake2
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
+module Hacl_K256 = Hacl_K256_ECDSA_bindings.Bindings(Hacl_K256_ECDSA_stubs)
 
 #ifdef HACL_CAN_COMPILE_VEC128
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
@@ -495,6 +496,134 @@ module P256 = struct
       let sign = Hacl_P256.hacl_P256_ecdsa_sign_p256_sha512
       let verify = Hacl_P256.hacl_P256_ecdsa_verif_p256_sha512
     end)
+end
+
+module K256 = struct
+  let k256_group_order = Z.of_string "115792089237316195423570985008687907852837564279074904382605163141518161494337"
+  let size_signature = 64
+  let size_pk = 64
+  let size_pk_uncompressed = 65
+  let size_pk_compressed = 33
+  let size_sk = 32
+  let size_hashed_msg = 32
+  let valid_sk ~sk =
+    C.size sk = size_sk && C.z_compare sk Z.zero > 0 && C.z_compare sk k256_group_order < 0
+  module Noalloc = struct
+    let raw_to_compressed ~p ~result =
+      (* Hacl.K256.ECDSA.public_key_compressed_from_raw *)
+      assert (C.size p = size_pk);
+      assert (C.size result = size_pk_compressed);
+      Hacl_K256.hacl_K256_ECDSA_public_key_compressed_from_raw (C.ctypes_buf result) (C.ctypes_buf p)
+    let raw_to_uncompressed ~p ~result =
+      (* Hacl.K256.ECDSA.public_key_uncompressed_from_raw *)
+      assert (C.size p = size_pk);
+      assert (C.size result = size_pk_uncompressed);
+      Hacl_K256.hacl_K256_ECDSA_public_key_uncompressed_from_raw (C.ctypes_buf result) (C.ctypes_buf p)
+    let compressed_to_raw ~p ~result =
+      (* Hacl.K256.ECDSA.public_key_compressed_to_raw *)
+      assert (C.size p = size_pk_compressed);
+      assert (C.size result = size_pk);
+      Hacl_K256.hacl_K256_ECDSA_public_key_compressed_to_raw (C.ctypes_buf result) (C.ctypes_buf p)
+    let uncompressed_to_raw ~p ~result =
+      (* Hacl.K256.ECDSA.public_key_uncompressed_to_raw *)
+      assert (C.size p = size_pk_uncompressed);
+      assert (C.size result = size_pk);
+      Hacl_K256.hacl_K256_ECDSA_public_key_uncompressed_to_raw (C.ctypes_buf result) (C.ctypes_buf p)
+    let secret_to_public ~sk ~pk =
+      (* Hacl.K256.ECDSA.secret_to_public *)
+      assert (C.size sk = size_sk);
+      assert (C.size pk = size_pk);
+      Hacl_K256.hacl_K256_ECDSA_secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
+    let sign ~sk ~msg ~k ~signature =
+      (* Hacl.K256.ECDSA.ecdsa_sign_hashed_msg *)
+      assert (C.size signature = size_signature);
+      assert (valid_sk ~sk);
+      assert (valid_sk ~sk:k);
+      assert (C.size msg = size_hashed_msg);
+      Hacl_K256.hacl_K256_ECDSA_ecdsa_sign_hashed_msg
+        (C.ctypes_buf signature) (C.ctypes_buf msg) (C.ctypes_buf sk) (C.ctypes_buf k)
+    module Libsecp256k1 = struct
+      let normalize_signature ~signature =
+        (* Hacl.K256.ECDSA.secp256k1_ecdsa_signature_normalize *)
+        assert (C.size signature = size_signature);
+        Hacl_K256.hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize (C.ctypes_buf signature)
+      let sign ~sk ~msg ~k ~signature =
+        (* Hacl.K256.ECDSA.secp256k1_ecdsa_sign_hashed_msg *)
+        assert (C.size signature = size_signature);
+        assert (valid_sk ~sk);
+        assert (valid_sk ~sk:k);
+        assert (C.size msg = size_hashed_msg);
+        Hacl_K256.hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg
+          (C.ctypes_buf signature) (C.ctypes_buf msg) (C.ctypes_buf sk) (C.ctypes_buf k)
+    end
+  end
+  let valid_pk ~pk =
+    (* Hacl.K256.ECDSA.is_public_key_valid *)
+    assert (C.size pk = size_pk);
+    Hacl_K256.hacl_K256_ECDSA_is_public_key_valid (C.ctypes_buf pk)
+  let secret_to_public ~sk =
+    let pk = C.make size_pk in
+    if Noalloc.secret_to_public ~sk ~pk then
+      Some pk
+    else
+      None
+  let sign ~sk ~msg ~k =
+    let signature = C.make size_signature in
+    if Noalloc.sign ~sk ~msg ~k ~signature then
+      Some signature
+    else
+      None
+  let verify ~pk ~msg ~signature =
+    (* Hacl.K256.ECDSA.ecdsa_verify_hashed_msg *)
+    assert (C.size msg = size_hashed_msg);
+    assert (C.size pk = size_pk);
+    assert (C.size signature = size_signature);
+    Hacl_K256.hacl_K256_ECDSA_ecdsa_verify_hashed_msg
+      (C.ctypes_buf msg) (C.ctypes_buf pk) (C.ctypes_buf signature)
+  module Libsecp256k1 = struct
+    let sign ~sk ~msg ~k =
+      let signature = C.make 64 in
+      if Noalloc.Libsecp256k1.sign ~sk ~msg ~k ~signature then
+        Some signature
+      else
+        None
+    let verify ~pk ~msg ~signature =
+      (* Hacl.K256.ECDSA.secp256k1_ecdsa_verify_hashed_msg *)
+      assert (C.size msg = size_hashed_msg);
+      assert (C.size pk = size_pk);
+      assert (C.size signature = size_signature);
+      Hacl_K256.hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg
+        (C.ctypes_buf msg) (C.ctypes_buf pk) (C.ctypes_buf signature)
+    let is_signature_normalized ~signature =
+      (* Hacl.K256.ECDSA.secp256k1_ecdsa_is_signature_normalized *)
+      assert (C.size signature = size_signature);
+        Hacl_K256.hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized (C.ctypes_buf signature)
+    let normalize_signature ~signature =
+      if Noalloc.Libsecp256k1.normalize_signature ~signature then
+        Some (Bytes.copy signature)
+      else
+        None
+  end
+  let raw_to_compressed p =
+    let result = C.make size_pk_compressed in
+    Noalloc.raw_to_compressed ~p ~result;
+    result
+  let raw_to_uncompressed p =
+    let result = C.make size_pk_uncompressed in
+    Noalloc.raw_to_uncompressed ~p ~result;
+    result
+  let compressed_to_raw p =
+    let result = C.make size_pk in
+    if Noalloc.compressed_to_raw ~p ~result then
+      Some result
+    else
+      None
+  let uncompressed_to_raw p =
+    let result = C.make size_pk in
+    if Noalloc.uncompressed_to_raw ~p ~result then
+      Some result
+    else
+      None
 end
 
 module Blake2b_32 : Blake2 =

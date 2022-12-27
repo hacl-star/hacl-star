@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Lib_Memzero0.h"
 #include "Hacl_Krmllib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 #include "libintvector.h"
 /* SNIPPET_START: Hacl_Blake2b_256_blake2b_init */
 
@@ -141,6 +140,12 @@ Hacl_Blake2b_256_store_state256b_to_state32(
 );
 
 /* SNIPPET_END: Hacl_Blake2b_256_store_state256b_to_state32 */
+
+/* SNIPPET_START: Hacl_Blake2b_256_blake2b_malloc */
+
+Lib_IntVector_Intrinsics_vec256 *Hacl_Blake2b_256_blake2b_malloc(void);
+
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_malloc */
 
 #if defined(__cplusplus)
 }

@@ -568,7 +568,7 @@ test12_expected_shake256[32U] =
     (uint8_t)0x35U, (uint8_t)0xc2U
   };
 
-exit_code main()
+exit_code main(void)
 {
   C_String_print("\nTEST 1. SHA3\n");
   test_sha3((uint32_t)0U,

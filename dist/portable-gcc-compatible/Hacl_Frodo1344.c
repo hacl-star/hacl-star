@@ -24,6 +24,7 @@
 
 #include "Hacl_Frodo1344.h"
 
+#include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
 
 /* SNIPPET_START: Hacl_Frodo1344_crypto_bytes */
@@ -77,6 +78,7 @@ uint32_t Hacl_Frodo1344_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
     r + (uint32_t)21504U,
     e_matrix);
   uint16_t b_matrix[10752U] = { 0U };
+  KRML_CHECK_SIZE(sizeof (uint16_t), (uint32_t)1806336U);
   uint16_t a_matrix[1806336U] = { 0U };
   Hacl_Impl_Frodo_Params_frodo_gen_matrix(Spec_Frodo_Params_SHAKE128,
     (uint32_t)1344U,
@@ -144,6 +146,7 @@ uint32_t Hacl_Frodo1344_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   uint8_t *c1 = ct;
   uint8_t *c2 = ct + (uint32_t)21504U;
   uint16_t bp_matrix[10752U] = { 0U };
+  KRML_CHECK_SIZE(sizeof (uint16_t), (uint32_t)1806336U);
   uint16_t a_matrix[1806336U] = { 0U };
   Hacl_Impl_Frodo_Params_frodo_gen_matrix(Spec_Frodo_Params_SHAKE128,
     (uint32_t)1344U,
@@ -259,6 +262,7 @@ uint32_t Hacl_Frodo1344_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t *pk = sk + (uint32_t)32U;
   uint8_t *seed_a = pk;
   uint8_t *b = pk + (uint32_t)16U;
+  KRML_CHECK_SIZE(sizeof (uint16_t), (uint32_t)1806336U);
   uint16_t a_matrix[1806336U] = { 0U };
   Hacl_Impl_Frodo_Params_frodo_gen_matrix(Spec_Frodo_Params_SHAKE128,
     (uint32_t)1344U,

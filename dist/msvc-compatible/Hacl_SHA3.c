@@ -24,7 +24,7 @@
 
 #include "Hacl_SHA3.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 const
 uint32_t
@@ -163,15 +163,15 @@ Hacl_Impl_SHA3_absorb(
   uint8_t delimitedSuffix
 )
 {
-  uint32_t nb = inputByteLen / rateInBytes;
+  uint32_t n_blocks = inputByteLen / rateInBytes;
   uint32_t rem = inputByteLen % rateInBytes;
-  for (uint32_t i = (uint32_t)0U; i < nb; i++)
+  for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint8_t *block = input + i * rateInBytes;
     Hacl_Impl_SHA3_loadState(rateInBytes, block, s);
     Hacl_Impl_SHA3_state_permute(s);
   }
-  uint8_t *last = input + nb * rateInBytes;
+  uint8_t *last = input + n_blocks * rateInBytes;
   KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
   uint8_t *b = (uint8_t *)alloca(rateInBytes * sizeof (uint8_t));
   memset(b, 0U, rateInBytes * sizeof (uint8_t));

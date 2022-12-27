@@ -24,6 +24,8 @@
 
 #include "Hacl_Bignum256_32.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
 
 /*******************************************************************************
@@ -1275,7 +1277,6 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum256_32_mont_ctx_init(uint
   uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   res = { .len = (uint32_t)8U, .n = n11, .mu = mu, .r2 = r21 };
-  KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32), (uint32_t)1U);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   *buf =
     (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *)KRML_HOST_MALLOC(sizeof (

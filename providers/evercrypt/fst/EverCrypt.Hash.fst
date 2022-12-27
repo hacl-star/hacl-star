@@ -177,7 +177,7 @@ let alg_of_state a s =
   | Blake2B_s _ -> Blake2B
   | Blake2B_256_s _ _ -> Blake2B
 
-let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state' a) =
+let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state a) =
   Seq.equal r1 r2
 
 let fresh_is_disjoint l1 l2 h0 h1 = ()
@@ -241,7 +241,7 @@ let create_in a r =
           // Slightly frustrating duplication of the else-branch because we
           // can't compile this using the if-and return optimization of krml.
           if vec128 then
-            Blake2S_128_s () (Hacl.Hash.Blake2s_128.malloc_blake2s_128 r)
+            Blake2S_128_s () (Hacl.Blake2s_128.blake2s_malloc r)
           else
             Blake2S_s (B.malloc r 0ul 16ul)
         else
@@ -250,7 +250,7 @@ let create_in a r =
         let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
         if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
           if vec256 then
-            Blake2B_256_s () (Hacl.Hash.Blake2b_256.malloc_blake2b_256 r)
+            Blake2B_256_s () (Hacl.Blake2b_256.blake2b_malloc r)
           else
             Blake2B_s (B.malloc r 0uL 16ul)
         else
@@ -278,11 +278,11 @@ let init #a s =
   | Blake2S_s p -> let _ = Hacl.Hash.Blake2.init_blake2s_32 p in ()
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        let _ = Hacl.Hash.Blake2s_128.init_blake2s_128 p in ()
+        let _ = Hacl.Hash.Blake2.init_blake2s_128 p in ()
   | Blake2B_s p -> let _ = Hacl.Hash.Blake2.init_blake2b_32 p in ()
   | Blake2B_256_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        let _ = Hacl.Hash.Blake2b_256.init_blake2b_256 p in ()
+        let _ = Hacl.Hash.Blake2.init_blake2b_256 p in ()
 #pop-options
 
 friend Vale.SHA.SHA_helpers
@@ -322,37 +322,9 @@ inline_for_extraction noextract
 let update_multi_224 s ev blocks n =
   assert_norm (words_state SHA2_224 == words_state SHA2_256);
   let h0 = ST.get () in
-  Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s, ()) (B.as_seq h0 blocks);
+  Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s) (B.as_seq h0 blocks);
   update_multi_256 s ev blocks n
 
-// Need to unroll the definition of update_multi once to prove that it's update
-#push-options "--fuel 1 --ifuel 1"
-let update #a s prevlen block =
-  match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.legacy_update p () block
-  | SHA1_s p -> Hacl.Hash.SHA1.legacy_update p () block
-  | SHA2_224_s p -> update_multi_224 p () block 1ul
-  | SHA2_256_s p -> update_multi_256 p () block 1ul
-  | SHA2_384_s p -> Hacl.Hash.SHA2.update_384 p () block
-  | SHA2_512_s p -> Hacl.Hash.SHA2.update_512 p () block
-  | SHA3_256_s p -> Hacl.Hash.SHA3.update_256 p () block
-  | Blake2S_s p ->
-      let _ = Hacl.Hash.Blake2.update_blake2s_32 p prevlen block in
-      ()
-  | Blake2S_128_s _ p ->
-      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        let _ = Hacl.Hash.Blake2s_128.update_blake2s_128 p prevlen block in
-        ()
-  | Blake2B_s p ->
-      [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
-      let _ = Hacl.Hash.Blake2.update_blake2b_32 p prevlen block in
-      ()
-  | Blake2B_256_s _ p ->
-      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
-        let _ = Hacl.Hash.Blake2b_256.update_blake2b_256 p prevlen block in
-        ()
-#pop-options
 
 #push-options "--ifuel 1"
 
@@ -386,7 +358,7 @@ let update_multi #a s prevlen blocks len =
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
         let n = len / block_len Blake2S in
-        let _ = Hacl.Hash.Blake2s_128.update_multi_blake2s_128 p prevlen blocks n in
+        let _ = Hacl.Hash.Blake2.update_multi_blake2s_128 p prevlen blocks n in
         ()
   | Blake2B_s p ->
       [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
@@ -397,7 +369,7 @@ let update_multi #a s prevlen blocks len =
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
         [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
         let n = len / block_len Blake2B in
-        let _ = Hacl.Hash.Blake2b_256.update_multi_blake2b_256 p prevlen blocks n in
+        let _ = Hacl.Hash.Blake2.update_multi_blake2b_256 p prevlen blocks n in
         ()
 
 #pop-options
@@ -410,173 +382,42 @@ let update_last_256 s prev_len input input_len =
 let update_last_224 s prev_len input input_len =
   assert_norm (words_state SHA2_224 == words_state SHA2_256);
   [@inline_let]
-  let l x y:
+  let l (hash:words_state SHA2_256) (blocks:bytes_blocks SHA2_256):
     Lemma
-      (ensures (Spec.Agile.Hash.update_multi SHA2_224 x y == Spec.Agile.Hash.update_multi SHA2_256 x y))
-    [ SMTPat (Spec.Agile.Hash.update_multi SHA2_224 x y); SMTPat (Spec.Agile.Hash.update_multi SHA2_256 x y) ]
+      (ensures (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks == Spec.Agile.Hash.update_multi SHA2_256 hash () blocks))
+    [ SMTPat (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks); SMTPat (Spec.Agile.Hash.update_multi SHA2_256 hash () blocks) ]
   =
-    Spec.SHA2.Lemmas.update_multi_224_256 x y
+    Spec.SHA2.Lemmas.update_multi_224_256 hash blocks
   in
   update_last_256 s prev_len input input_len
 
-// Splitting out these proof bits; the proof is highly unreliable when all six
-// cases are done together in a single match
-inline_for_extraction
-let update_last_st (#i:G.erased impl) =
-  let i = Ghost.reveal i in
-  let a = alg_of_impl i in
-  p:Hacl.Hash.Definitions.state i ->
-  ev:extra_state a ->
-  prev_len:uint64_t ->
-  last:uint8_p { B.length last <= block_length a } ->
-  last_len:uint32_t {
-    v last_len = B.length last /\
-    (v prev_len + v last_len) `less_than_max_input_length` a /\
-    v prev_len % block_length a = 0 /\
-    (extra_state_v ev + B.length last) `less_than_max_input_length` a
-    } ->
-  Stack (extra_state a)
-  (requires fun h0 ->
-    B.live h0 p /\
-    B.live h0 last /\
-    B.(loc_disjoint (loc_buffer p) (loc_buffer last)))
-  (ensures fun h0 ev' h1 ->
-    B.(modifies (loc_buffer p) h0 h1) /\
-    (Hacl.Hash.Definitions.as_seq h1 p, ev') ==
-      Spec.Hash.Incremental.update_last a (Hacl.Hash.Definitions.as_seq h0 p, ev)
-                                        (v prev_len) (B.as_seq h0 last))
-
-inline_for_extraction
-val update_last_64 (i: G.erased impl{ G.reveal i <> sha2_384 /\
-                                      G.reveal i <> sha2_512 /\
-                                      G.reveal i <> blake2b_32 /\
-                                      G.reveal i <> blake2b_256 /\ not (is_sha3 (dfst i)) })
-  (update_last: Hacl.Hash.Definitions.update_last_st i):
-  update_last_st #i
-
-inline_for_extraction
-let update_last_64 i update_last p ev prev_len last last_len =
-  update_last p ev prev_len last last_len
-
-inline_for_extraction
-val update_last_128 (i: G.erased impl{ G.reveal i = sha2_384 \/
-                                       G.reveal i = sha2_512 \/
-                                       G.reveal i = blake2b_32 \/
-                                       G.reveal i = blake2b_256})
-  (update_last: Hacl.Hash.Definitions.update_last_st i):
-  update_last_st #i
-
-inline_for_extraction
-let update_last_128 i update_last p ev prev_len last last_len =
-  [@inline_let] let prev_len : UInt128.t = Int.Cast.Full.uint64_to_uint128 prev_len in
-  update_last p ev prev_len last last_len
-
-let state_s_to_words_state (#i:impl) (s:Hacl.Hash.Definitions.state i)
-  (h:HS.mem) (counter:uint64_t) :
-  GTot (words_state (alg_of_impl i)) =
-  let a = alg_of_impl i in
-  if is_blake a then
-    let ev : extra_state a = Lib.IntTypes.cast (extra_state_int_type a) Lib.IntTypes.SEC counter in
-    as_seq h s, ev
-  else (as_seq h s, ())
-
-/// Before defining ``update_last`` we introduce auxiliary functions for Blake2S
-/// and Blake2B, because trying to define it completely at once leads to a proof loop.
-/// Besides, even with this the Blake functions tend to loop.
-inline_for_extraction noextract
-let update_last_with_internal_st (i : impl) =
-  let a = alg_of_impl i in (
-  p:Hacl.Hash.Definitions.state i ->
-  prev_len:uint64_t ->
-  last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
-  last_len:uint32_t {
-    v last_len = B.length last /\
-    (v prev_len + v last_len) `less_than_max_input_length` a /\
-    v prev_len % block_length a = 0
-    } ->
-  Stack unit
-  (requires fun h0 ->
-    B.live h0 p /\
-    B.live h0 last /\
-    B.(loc_disjoint (loc_addr_of_buffer p) (loc_buffer last)))
-  (ensures fun h0 _ h1 ->
-    B.live h1 p /\
-    as_seq h1 p ==
-      fst (Spec.Hash.Incremental.update_last a (state_s_to_words_state p h0 prev_len) (v prev_len)
-                                             (B.as_seq h0 last)) /\
-    B.(modifies (B.loc_addr_of_buffer p) h0 h1)))
-
-
-inline_for_extraction noextract
-val update_last_blake2s_32 : update_last_with_internal_st blake2s_32
-
-#push-options "--fuel 0 --ifuel 1"
-let update_last_blake2s_32 p prev_len last last_len =
-  [@inline_let] let ev = prev_len in
-  let x:Lib.IntTypes.uint_t Lib.IntTypes.U64 Lib.IntTypes.SEC =
-    update_last_64 blake2s_32 Hacl.Hash.Blake2.update_last_blake2s_32 p ev
-                   prev_len last last_len in
-  ()
-#pop-options
-
-inline_for_extraction noextract
-val update_last_blake2s_128 : update_last_with_internal_st blake2s_128
-
-#push-options "--fuel 0 --ifuel 1"
-let update_last_blake2s_128 p prev_len last last_len =
-  [@inline_let] let ev = prev_len in
-  let x:Lib.IntTypes.uint_t Lib.IntTypes.U64 Lib.IntTypes.SEC =
-    update_last_64 blake2s_128 Hacl.Hash.Blake2s_128.update_last_blake2s_128 p ev
-                   prev_len last last_len in
-  ()
-#pop-options
-
-inline_for_extraction noextract
-val update_last_blake2b_32 : update_last_with_internal_st blake2b_32
-
-let update_last_blake2b_32 p prev_len last last_len =
-  [@inline_let] let ev = Int.Cast.Full.uint64_to_uint128 prev_len in
-  let x:Lib.IntTypes.uint_t Lib.IntTypes.U128 Lib.IntTypes.SEC =
-    update_last_128 blake2b_32 Hacl.Hash.Blake2.update_last_blake2b_32 p ev
-                    prev_len last last_len in
-  ()
-
-inline_for_extraction noextract
-val update_last_blake2b_256 : update_last_with_internal_st blake2b_256
-
-let update_last_blake2b_256 p prev_len last last_len =
-  [@inline_let] let ev = Int.Cast.Full.uint64_to_uint128 prev_len in
-  let x:Lib.IntTypes.uint_t Lib.IntTypes.U128 Lib.IntTypes.SEC =
-    update_last_128 blake2b_256 Hacl.Hash.Blake2b_256.update_last_blake2b_256 p ev
-                    prev_len last last_len in
-  ()
-
 let update_last #a s prev_len last last_len =
+  [@inline_let] let cast = FStar.Int.Cast.Full.uint64_to_uint128 in
   match !*s with
   | MD5_s p ->
-      update_last_64 md5 Hacl.Hash.MD5.legacy_update_last p () prev_len last last_len
+      Hacl.Hash.MD5.legacy_update_last p prev_len last last_len
   | SHA1_s p ->
-      update_last_64 sha1 Hacl.Hash.SHA1.legacy_update_last p () prev_len last last_len
+      Hacl.Hash.SHA1.legacy_update_last p prev_len last last_len
   | SHA2_224_s p ->
-      update_last_64 sha2_224 update_last_224 p () prev_len last last_len
+      update_last_224 p prev_len last last_len
   | SHA2_256_s p ->
-      update_last_64 sha2_256 update_last_256 p () prev_len last last_len
+      update_last_256 p prev_len last last_len
   | SHA2_384_s p ->
-      update_last_128 sha2_384 Hacl.Hash.SHA2.update_last_384 p () prev_len last last_len
+      Hacl.Hash.SHA2.update_last_384 p (cast prev_len) last last_len
   | SHA2_512_s p ->
-      update_last_128 sha2_512 Hacl.Hash.SHA2.update_last_512 p () prev_len last last_len
+      Hacl.Hash.SHA2.update_last_512 p (cast prev_len) last last_len
   | SHA3_256_s p ->
-      Hacl.Hash.SHA3.update_last_256 p () () last last_len
+      Hacl.Hash.SHA3.update_last_256 p () last last_len
   | Blake2S_s p ->
-      update_last_blake2s_32 p prev_len last last_len
+      Hacl.Hash.Blake2.update_last_blake2s_32 p prev_len last last_len
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        update_last_blake2s_128 p prev_len last last_len
+        Hacl.Hash.Blake2.update_last_blake2s_128 p prev_len last last_len
   | Blake2B_s p ->
-      update_last_blake2b_32 p prev_len last last_len
+      Hacl.Hash.Blake2.update_last_blake2b_32 p (cast prev_len) last last_len
   | Blake2B_256_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        update_last_blake2b_256 p prev_len last last_len
+        Hacl.Hash.Blake2.update_last_blake2b_256 p (cast prev_len) last last_len
 
 // TODO: move to FStar.Math.Lemmas
 val modulo_sub_lemma (a : int) (b : nat) (c : pos) :
@@ -618,24 +459,22 @@ let modulo_sub_lemma a b c =
 
 let finish #a s dst =
   match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.legacy_finish p () dst
-  | SHA1_s p -> Hacl.Hash.SHA1.legacy_finish p () dst
-  | SHA2_224_s p -> Hacl.Hash.SHA2.finish_224 p () dst
-  | SHA2_256_s p -> Hacl.Hash.SHA2.finish_256 p () dst
-  | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p () dst
-  | SHA2_512_s p -> Hacl.Hash.SHA2.finish_512 p () dst
-  | SHA3_256_s p -> Hacl.Hash.SHA3.finish_256 p () dst
-  | Blake2S_s p -> Hacl.Hash.Blake2.finish_blake2s_32 p 0UL dst
+  | MD5_s p -> Hacl.Hash.MD5.legacy_finish p dst
+  | SHA1_s p -> Hacl.Hash.SHA1.legacy_finish p dst
+  | SHA2_224_s p -> Hacl.Hash.SHA2.finish_224 p dst
+  | SHA2_256_s p -> Hacl.Hash.SHA2.finish_256 p dst
+  | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p dst
+  | SHA2_512_s p -> Hacl.Hash.SHA2.finish_512 p dst
+  | SHA3_256_s p -> Hacl.Hash.SHA3.finish_256 p dst
+  | Blake2S_s p -> Hacl.Hash.Blake2.finish_blake2s_32 p dst
   | Blake2S_128_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
-        Hacl.Hash.Blake2s_128.finish_blake2s_128 p 0UL dst
+        Hacl.Hash.Blake2.finish_blake2s_128 p dst
   | Blake2B_s p ->
-      Hacl.Hash.Blake2.finish_blake2b_32 p
-        (Int.Cast.Full.uint64_to_uint128 (UInt64.uint_to_t 0)) dst
+      Hacl.Hash.Blake2.finish_blake2b_32 p dst
   | Blake2B_256_s _ p ->
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
-        Hacl.Hash.Blake2b_256.finish_blake2b_256 p
-          (Int.Cast.Full.uint64_to_uint128 (UInt64.uint_to_t 0)) dst
+        Hacl.Hash.Blake2.finish_blake2b_256 p dst
 
 #pop-options
 

@@ -36,7 +36,6 @@ extern "C" {
 
 
 #include "Hacl_Poly1305_32.h"
-#include "Hacl_Krmllib.h"
 #include "Hacl_Chacha20.h"
 
 /**

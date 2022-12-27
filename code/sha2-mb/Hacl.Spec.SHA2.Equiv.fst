@@ -293,11 +293,11 @@ let shuffle_lemma_l #a #m ws st l =
   shuffle_loop_lemma #a #m ws st l (Spec.num_rounds16 a)
 
 val init_lemma_l: a:sha2_alg -> m:m_spec -> l:nat{l < lanes a m} ->
-  Lemma ((state_spec_v (init a m)).[l] == Pervasives.fst (Spec.init a))
+  Lemma ((state_spec_v (init a m)).[l] == Spec.init a)
 
 let init_lemma_l a m l =
   eq_intro #(word a) #(state_word_length a)
-    (state_spec_v (init a m)).[l] (Pervasives.fst (Spec.init a))
+    (state_spec_v (init a m)).[l] (Spec.init a)
 
 
 val load_blocks_lemma_ij:
@@ -438,7 +438,7 @@ val update_lemma_l:
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma ((state_spec_v (update b st)).[l] ==
-    Pervasives.fst (Spec.update a b.(|l|) ((state_spec_v st).[l], ())))
+    Spec.update a b.(|l|) (state_spec_v st).[l])
 
 let update_lemma_l #a #m b st l =
   reveal_opaque (`%update) (update #a #m);
@@ -457,7 +457,7 @@ val load_last_lemma_l:
   -> #m:m_spec{is_supported a m}
   -> totlen_seq:lseq uint8 (len_length a)
   -> fin:nat{fin == block_length a \/ fin == 2 * block_length a}
-  -> len:nat{len < block_length a}
+  -> len:nat{len <= block_length a}
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
   Lemma
@@ -475,12 +475,12 @@ val update_last_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
   -> totlen:len_t a
-  -> len:nat{len < block_length a}
+  -> len:nat{len <= block_length a}
   -> b:multiseq (lanes a m) len
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma ((state_spec_v (update_last totlen len b st)).[l] ==
-    Pervasives.fst (Spec.update_last a totlen len b.(|l|) ((state_spec_v st).[l], ())))
+    Spec.update_last a totlen len b.(|l|) ((state_spec_v st).[l]))
 
 let update_last_lemma_l #a #m totlen len b st0 l =
   let blocks = padded_blocks a len in
@@ -552,22 +552,22 @@ val store_state_lemma_l:
   -> l:nat{l < lanes a m} ->
   Lemma
    (sub (store_state st) (l * (8 * word_length a)) (8 * word_length a) ==
-    Spec.store_state a ((state_spec_v st).[l], ()))
+    Spec.store_state a (state_spec_v st).[l])
 
 let store_state_lemma_l #a #m st l =
-  let st_l : words_state a = (state_spec_v st).[l], () in
+  let st_l : words_state a = (state_spec_v st).[l] in
   let rp = Spec.store_state a st_l in
   let lp = store_state st in
 
   let aux (i:nat{i < 8 * word_length a}) : Lemma (lp.[l * (8 * word_length a) + i] == rp.[i]) =
     //assert (rp == BSeq.uints_to_bytes_be #(word_t a) #SEC #8 st_l);
-    BSeq.index_uints_to_bytes_be #(word_t a) #SEC #8 (Pervasives.fst st_l) i;
+    BSeq.index_uints_to_bytes_be #(word_t a) #SEC #8 st_l i;
     store_state_lemma_ij #a #m st l i in
 
   Classical.forall_intro aux;
   eq_intro
     (sub (store_state st) (l * (8 * word_length a)) (8 * word_length a))
-    (Spec.store_state a ((state_spec_v st).[l], ()))
+    (Spec.store_state a (state_spec_v st).[l])
 
 
 // val emit_lemma_l:
@@ -585,7 +585,7 @@ val finish_lemma_l:
   -> #m:m_spec{is_supported a m}
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma ((finish st).(|l|) == Spec.finish a ((state_spec_v st).[l], ()))
+  Lemma ((finish st).(|l|) == Spec.finish a (state_spec_v st).[l])
 
 let finish_lemma_l #a #m st l =
   store_state_lemma_l #a #m st l
@@ -601,7 +601,7 @@ val update_block_lemma_l:
   -> l:nat{l < lanes a m} ->
   Lemma
    ((state_spec_v (update_block len b i st)).[l] ==
-    Pervasives.fst (Spec.update_block a len b.(|l|) i ((state_spec_v st).[l], ())))
+    Spec.update_block a len b.(|l|) i (state_spec_v st).[l])
 
 let update_block_lemma_l #a #m len b i st l =
   let mb = get_multiblock_spec len b i in
@@ -618,23 +618,23 @@ val update_nblocks_loop_lemma:
   -> n:nat{n <= len / block_length a } ->
   Lemma
    ((state_spec_v (repeati n (update_block #a #m len b) st)).[l] ==
-    Pervasives.fst (repeati n (Spec.update_block a len b.(|l|)) ((state_spec_v st).[l], ())))
+    repeati n (Spec.update_block a len b.(|l|)) ((state_spec_v st).[l]))
 
 let rec update_nblocks_loop_lemma #a #m len b st l n =
   let lp = repeati n (update_block #a #m len b) st in
   let f_sc = Spec.update_block a len b.(|l|) in
-  let rp = repeati n f_sc ((state_spec_v st).[l], ()) in
+  let rp = repeati n f_sc (state_spec_v st).[l] in
 
   if n = 0 then begin
     eq_repeati0 n (update_block #a #m len b) st;
-    eq_repeati0 n f_sc ((state_spec_v st).[l], ()) end
+    eq_repeati0 n f_sc (state_spec_v st).[l] end
   else begin
     let lp1 = repeati (n - 1) (update_block #a #m len b) st in
-    let rp1 = repeati (n - 1) f_sc ((state_spec_v st).[l], ()) in
+    let rp1 = repeati (n - 1) f_sc (state_spec_v st).[l] in
     update_nblocks_loop_lemma #a #m len b st l (n - 1);
-    assert ((state_spec_v lp1).[l] == Pervasives.fst rp1);
+    assert ((state_spec_v lp1).[l] == rp1);
     unfold_repeati n (update_block #a #m len b) st (n - 1);
-    unfold_repeati n f_sc ((state_spec_v st).[l], ()) (n - 1);
+    unfold_repeati n f_sc (state_spec_v st).[l] (n - 1);
     update_block_lemma_l #a #m len b (n - 1) lp1 l end
 
 
@@ -647,7 +647,7 @@ val update_nblocks_lemma_l:
   -> l:nat{l < lanes a m} ->
   Lemma
    ((state_spec_v (update_nblocks len b st)).[l] ==
-    Pervasives.fst (Spec.update_nblocks a len b.(|l|) ((state_spec_v st).[l], ())))
+    Spec.update_nblocks a len b.(|l|) (state_spec_v st).[l])
 
 let update_nblocks_lemma_l #a #m len b st l =
   let blocks = len / block_length a in

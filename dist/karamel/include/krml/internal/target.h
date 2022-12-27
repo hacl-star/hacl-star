@@ -12,7 +12,12 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "krml/internal/callconv.h"
+/* Since KaRaMeL emits the inline keyword unconditionally, we follow the
+ * guidelines at https://gcc.gnu.org/onlinedocs/gcc/Inline.html and make this
+ * __inline__ to ensure the code compiles with -std=c90 and earlier. */
+#ifdef __GNUC__
+#  define inline __inline__
+#endif
 
 /******************************************************************************/
 /* Macros that KaRaMeL will generate.                                         */
@@ -122,7 +127,6 @@ inline static int32_t krml_time() {
 /* In FStar.Buffer.fst, the size of arrays is uint32_t, but it's a number of
  * *elements*. Do an ugly, run-time check (some of which KaRaMeL can eliminate).
  */
-
 #if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ > 4))
 #  define _KRML_CHECK_SIZE_PRAGMA                                              \
     _Pragma("GCC diagnostic ignored \"-Wtype-limits\"")

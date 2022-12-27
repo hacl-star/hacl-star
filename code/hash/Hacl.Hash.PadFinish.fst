@@ -162,7 +162,7 @@ let pad_3 (a: hash_alg{is_md a}) (len: len_t a) (dst: B.buffer uint8):
       len_v a len `less_than_max_input_length` a /\
       B.live h dst /\ B.length dst = len_length a))
     (ensures (fun h0 _ h1 ->
-      max_input_size_len a;
+      Spec.Hash.MD.max_input_size_len a;
       B.(modifies (loc_buffer dst) h0 h1) /\
       S.equal (B.as_seq h1 dst)
         (match a with
@@ -210,7 +210,7 @@ let pad a len dst =
   (**) let h2 = ST.get () in
   (**) assert (
   (**)   let pad0_length = pad0_length a (len_v a len) in
-  (**)   max_input_size_len a;
+  (**)   Spec.Hash.MD.max_input_size_len a;
   (**)   let s = B.as_seq h2 dst in
   (**)   let s1 = S.slice s 0 1 in
   (**)   let s2 = S.slice s 1 (1 + pad0_length) in
@@ -238,20 +238,20 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
   | SHA3_256 -> 4ul
   | Blake2S | Blake2B -> 8ul
 
-#set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
+friend Spec.Agile.Hash
 
 noextract inline_for_extraction
-let finish_sha3: finish_st (| SHA3_256, () |) = fun s _ dst ->
+let finish_sha3: finish_st (| SHA3_256, () |) = fun s dst ->
   assert_norm (1088/8 = 136);
   let h0 = ST.get () in
   Hacl.Impl.SHA3.squeeze s 136ul 32ul dst;
   let h1 = ST.get () in
-  let _ = Spec.SHA3.Incremental.sha3_state_is_hash_state in
   assert (B.as_seq h1 dst `S.equal` Spec.SHA3.squeeze (B.as_seq h0 s) 136 32)
 
-
 noextract inline_for_extraction
-let finish i s ev dst =
+let finish i s dst =
   [@inline_let] let a = get_alg i in
   [@inline_let] let m = get_spec i in
   match a with
@@ -261,5 +261,5 @@ let finish i s ev dst =
   | Blake2B ->
     Hacl.Impl.Blake2.Generic.blake2_finish #Spec.Blake2.Blake2B #m 64ul dst s
   | SHA3_256 ->
-    finish_sha3 s ev dst
+    finish_sha3 s dst
   | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
