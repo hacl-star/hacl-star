@@ -1,6 +1,5 @@
 module Test.NoHeap
 
-module H = EverCrypt.Hash
 module B = LowStar.Buffer
 module L = Test.Lowstarize
 module U32 = FStar.UInt32
@@ -9,6 +8,20 @@ open FStar.HyperStack.ST
 open FStar.Integers
 open LowStar.BufferOps
 open Test.Lowstarize
+
+let string_of_alg: Spec.Agile.Hash.hash_alg -> C.String.t =
+  let open C.String in
+  let open Spec.Agile.Hash in
+  function
+  | MD5 -> !$"MD5"
+  | SHA1 -> !$"SHA1"
+  | SHA2_224 -> !$"SHA2_224"
+  | SHA2_256 -> !$"SHA2_256"
+  | SHA2_384 -> !$"SHA2_384"
+  | SHA2_512 -> !$"SHA2_512"
+  | SHA3_256 -> !$"SHA3_256"
+  | Blake2S -> !$"Blake2S"
+  | Blake2B -> !$"Blake2B"
 
 /// A module that contains stack-only tests, suitable for both C and Wasm. Other
 /// tests that may make arbitrary use of the heap are in Test and Test.Hash.
@@ -63,7 +76,7 @@ let test_one_hash vec =
     EverCrypt.Hash.Incremental.hash a computed total_input total_input_len;
 
     B.recall expected;
-    let str = H.string_of_alg a in
+    let str = string_of_alg a in
     TestLib.compare_and_print str expected computed tlen;
     pop_frame()
     end
@@ -97,7 +110,7 @@ let test_one_hmac vec =
     B.recall data;
     let computed = B.alloca 0uy (Hacl.Hash.Definitions.hash_len ha) in
     EverCrypt.HMAC.compute ha computed key keylen data datalen;
-    let str = EverCrypt.Hash.string_of_alg ha  in
+    let str = string_of_alg ha  in
     B.recall expected;
     TestLib.compare_and_print str expected computed (Hacl.Hash.Definitions.hash_len ha);
     pop_frame()
@@ -136,7 +149,7 @@ let test_one_hkdf vec =
     B.recall salt;
     B.recall ikm;
     B.recall info;
-    let str = EverCrypt.Hash.string_of_alg ha in
+    let str = string_of_alg ha in
     let computed_prk = B.alloca 0uy (Hacl.Hash.Definitions.hash_len ha) in
     EverCrypt.HKDF.extract ha computed_prk salt saltlen ikm ikmlen;
     B.recall expected_prk;
