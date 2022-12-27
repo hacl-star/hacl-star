@@ -636,6 +636,7 @@ REQUIRED_FLAGS	= \
   -no-prefix 'Vale.Inline.X64.Fswap_inline' \
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
+  -no-prefix 'EverCrypt.Hash.Incremental.Macros' \
   -add-include 'Hacl_Curve25519_64.c:"curve25519-inline.h"' \
   -library EverCrypt.AutoConfig \
   -static-header 'EverCrypt.TargetConfig' \
@@ -697,7 +698,7 @@ TARGETCONFIG_FLAGS = \
 # All of these bundles that have something on the left-hand side. They demand
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
-E_HASH_BUNDLE=-bundle EverCrypt.Hash.Incremental=EverCrypt.Hash[rename=EverCrypt_Hash]
+E_HASH_BUNDLE=-bundle EverCrypt.Hash.Incremental+EverCrypt.Hash.Incremental.Macros=EverCrypt.Hash[rename=EverCrypt_Hash]
 CTR_BUNDLE=-bundle EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]

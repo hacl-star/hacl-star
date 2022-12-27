@@ -51,9 +51,21 @@ let agile_state: stateful hash_alg =
     (fun i -> EverCrypt.Hash.free #i)
     (fun i -> EverCrypt.Hash.copy #i)
 
-(* Adding some non-inlined definitions to factorize code *)
-private
-let hash_len a = Hacl.Hash.Definitions.hash_len a
+include EverCrypt.Hash.Incremental.Macros
+
+(* Adding some non-inlined definitions to factorize code. This one is public
+   because it's used by the WASM API, and is generally useful to callers. *)
+let hash_len a: (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
+  match a with
+  | MD5 -> md5_hash_len
+  | SHA1 -> sha1_hash_len
+  | SHA2_224 -> sha2_224_hash_len
+  | SHA2_256 -> sha2_256_hash_len
+  | SHA2_384 -> sha2_384_hash_len
+  | SHA2_512 -> sha2_512_hash_len
+  | SHA3_256 -> sha3_256_hash_len
+  | Blake2S -> blake2s_hash_len
+  | Blake2B -> blake2b_hash_len
 
 private
 let block_len a = Hacl.Hash.Definitions.block_len a

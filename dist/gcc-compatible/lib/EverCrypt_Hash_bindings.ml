@@ -30,6 +30,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_Hash_update_last_256"
         ((ptr uint32_t) @->
            (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+    let everCrypt_Hash_Incremental_hash_len =
+      foreign "EverCrypt_Hash_Incremental_hash_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
     type everCrypt_Hash_Incremental_hash_state =
       [ `everCrypt_Hash_Incremental_hash_state ] structure
     let (everCrypt_Hash_Incremental_hash_state :

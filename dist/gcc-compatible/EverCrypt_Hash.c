@@ -997,6 +997,54 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
   KRML_HOST_EXIT(255U);
 }
 
+uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_MD5_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_SHA1_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_SHA2_224_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_SHA2_256_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_SHA2_384_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_SHA2_512_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_SHA3_256_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_BLAKE2S_HASH_LEN;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return EVERCRYPT_HASH_INCREMENTAL_BLAKE2B_HASH_LEN;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 static uint32_t block_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
