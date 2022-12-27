@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Hash_MD5.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: _h0 */
 

@@ -24,6 +24,7 @@
 
 #include "EverCrypt_HMAC.h"
 
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_Blake2.h"

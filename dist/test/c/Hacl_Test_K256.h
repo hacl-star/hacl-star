@@ -31,7 +31,7 @@
 #include "krmllib.h"
 #include "libintvector.h"
 #include "lib_intrinsics.h"
-exit_code main();
+exit_code main(void);
 
 
 #define __Hacl_Test_K256_H_DEFINED

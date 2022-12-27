@@ -97,7 +97,7 @@ test1_expected[64U] =
     (uint8_t)0xe2U, (uint8_t)0xb2U, (uint8_t)0x23U, (uint8_t)0x6fU
   };
 
-exit_code main()
+exit_code main(void)
 {
   C_String_print("\nTEST 1. SHA3\n");
   test_cshake128((uint32_t)16U, test1_plaintext, (uint16_t)2U, (uint32_t)64U, test1_expected);

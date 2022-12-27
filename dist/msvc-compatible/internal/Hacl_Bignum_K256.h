@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Bignum_K256_H
-#define __Hacl_Bignum_K256_H
+#ifndef __internal_Hacl_Bignum_K256_H
+#define __internal_Hacl_Bignum_K256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,9 +35,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
 #include "Hacl_Krmllib.h"
-
-/* SNIPPET_START: Hacl_K256_Field_is_felem_zero_vartime */
 
 static inline bool Hacl_K256_Field_is_felem_zero_vartime(uint64_t *f)
 {
@@ -55,10 +54,6 @@ static inline bool Hacl_K256_Field_is_felem_zero_vartime(uint64_t *f)
     && f4 == (uint64_t)0U;
 }
 
-/* SNIPPET_END: Hacl_K256_Field_is_felem_zero_vartime */
-
-/* SNIPPET_START: Hacl_K256_Field_is_felem_eq_vartime */
-
 static inline bool Hacl_K256_Field_is_felem_eq_vartime(uint64_t *f1, uint64_t *f2)
 {
   uint64_t a0 = f1[0U];
@@ -73,10 +68,6 @@ static inline bool Hacl_K256_Field_is_felem_eq_vartime(uint64_t *f1, uint64_t *f
   uint64_t b4 = f2[4U];
   return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4;
 }
-
-/* SNIPPET_END: Hacl_K256_Field_is_felem_eq_vartime */
-
-/* SNIPPET_START: Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime */
 
 static inline bool Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(uint64_t *f)
 {
@@ -112,10 +103,6 @@ static inline bool Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(uint64_
   return f0 < (uint64_t)0xda1722fc9baeeU;
 }
 
-/* SNIPPET_END: Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime */
-
-/* SNIPPET_START: Hacl_K256_Field_load_felem */
-
 static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
 {
   uint64_t tmp[4U] = { 0U };
@@ -150,10 +137,6 @@ static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
   f[4U] = f4;
 }
 
-/* SNIPPET_END: Hacl_K256_Field_load_felem */
-
-/* SNIPPET_START: Hacl_K256_Field_load_felem_lt_prime_vartime */
-
 static inline bool Hacl_K256_Field_load_felem_lt_prime_vartime(uint64_t *f, uint8_t *b)
 {
   Hacl_K256_Field_load_felem(f, b);
@@ -173,10 +156,6 @@ static inline bool Hacl_K256_Field_load_felem_lt_prime_vartime(uint64_t *f, uint
   return !is_ge_p;
 }
 
-/* SNIPPET_END: Hacl_K256_Field_load_felem_lt_prime_vartime */
-
-/* SNIPPET_START: Hacl_K256_Field_load_felem_vartime */
-
 static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
 {
   bool is_lt_p = Hacl_K256_Field_load_felem_lt_prime_vartime(f, b);
@@ -186,10 +165,6 @@ static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
   }
   return !Hacl_K256_Field_is_felem_zero_vartime(f);
 }
-
-/* SNIPPET_END: Hacl_K256_Field_load_felem_vartime */
-
-/* SNIPPET_START: Hacl_K256_Field_store_felem */
 
 static inline void Hacl_K256_Field_store_felem(uint8_t *b, uint64_t *f)
 {
@@ -218,10 +193,6 @@ static inline void Hacl_K256_Field_store_felem(uint8_t *b, uint64_t *f)
     store64_be(b + i * (uint32_t)8U, tmp[i]););
 }
 
-/* SNIPPET_END: Hacl_K256_Field_store_felem */
-
-/* SNIPPET_START: Hacl_K256_Field_fmul_small_num */
-
 static inline void Hacl_K256_Field_fmul_small_num(uint64_t *out, uint64_t *f, uint64_t num)
 {
   uint64_t f00 = f[0U];
@@ -245,10 +216,6 @@ static inline void Hacl_K256_Field_fmul_small_num(uint64_t *out, uint64_t *f, ui
   out[3U] = f3;
   out[4U] = f4;
 }
-
-/* SNIPPET_END: Hacl_K256_Field_fmul_small_num */
-
-/* SNIPPET_START: Hacl_K256_Field_fadd */
 
 static inline void Hacl_K256_Field_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
@@ -278,10 +245,6 @@ static inline void Hacl_K256_Field_fadd(uint64_t *out, uint64_t *f1, uint64_t *f
   out[3U] = f3;
   out[4U] = f4;
 }
-
-/* SNIPPET_END: Hacl_K256_Field_fadd */
-
-/* SNIPPET_START: Hacl_K256_Field_fsub */
 
 static inline void Hacl_K256_Field_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t x)
 {
@@ -321,10 +284,6 @@ static inline void Hacl_K256_Field_fsub(uint64_t *out, uint64_t *f1, uint64_t *f
   out[3U] = f3;
   out[4U] = f4;
 }
-
-/* SNIPPET_END: Hacl_K256_Field_fsub */
-
-/* SNIPPET_START: Hacl_K256_Field_fmul */
 
 static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
@@ -433,10 +392,6 @@ static inline void Hacl_K256_Field_fmul(uint64_t *out, uint64_t *f1, uint64_t *f
   out[4U] = f4;
 }
 
-/* SNIPPET_END: Hacl_K256_Field_fmul */
-
-/* SNIPPET_START: Hacl_K256_Field_fsqr */
-
 static inline void Hacl_K256_Field_fsqr(uint64_t *out, uint64_t *f)
 {
   uint64_t a0 = f[0U];
@@ -523,10 +478,6 @@ static inline void Hacl_K256_Field_fsqr(uint64_t *out, uint64_t *f)
   out[4U] = f4;
 }
 
-/* SNIPPET_END: Hacl_K256_Field_fsqr */
-
-/* SNIPPET_START: Hacl_K256_Field_fnormalize_weak */
-
 static inline void Hacl_K256_Field_fnormalize_weak(uint64_t *out, uint64_t *f)
 {
   uint64_t t0 = f[0U];
@@ -562,10 +513,6 @@ static inline void Hacl_K256_Field_fnormalize_weak(uint64_t *out, uint64_t *f)
   out[3U] = f3;
   out[4U] = f4;
 }
-
-/* SNIPPET_END: Hacl_K256_Field_fnormalize_weak */
-
-/* SNIPPET_START: Hacl_K256_Field_fnormalize */
 
 static inline void Hacl_K256_Field_fnormalize(uint64_t *out, uint64_t *f)
 {
@@ -644,10 +591,6 @@ static inline void Hacl_K256_Field_fnormalize(uint64_t *out, uint64_t *f)
   out[4U] = f4;
 }
 
-/* SNIPPET_END: Hacl_K256_Field_fnormalize */
-
-/* SNIPPET_START: Hacl_K256_Field_fnegate_conditional_vartime */
-
 static inline void Hacl_K256_Field_fnegate_conditional_vartime(uint64_t *f, bool is_negate)
 {
   if (is_negate)
@@ -677,10 +620,6 @@ static inline void Hacl_K256_Field_fnegate_conditional_vartime(uint64_t *f, bool
   }
 }
 
-/* SNIPPET_END: Hacl_K256_Field_fnegate_conditional_vartime */
-
-/* SNIPPET_START: Hacl_Impl_K256_Finv_fsquare_times_in_place */
-
 static inline void Hacl_Impl_K256_Finv_fsquare_times_in_place(uint64_t *out, uint32_t b)
 {
   for (uint32_t i = (uint32_t)0U; i < b; i++)
@@ -688,10 +627,6 @@ static inline void Hacl_Impl_K256_Finv_fsquare_times_in_place(uint64_t *out, uin
     Hacl_K256_Field_fsqr(out, out);
   }
 }
-
-/* SNIPPET_END: Hacl_Impl_K256_Finv_fsquare_times_in_place */
-
-/* SNIPPET_START: Hacl_Impl_K256_Finv_fsquare_times */
 
 static inline void Hacl_Impl_K256_Finv_fsquare_times(uint64_t *out, uint64_t *a, uint32_t b)
 {
@@ -701,10 +636,6 @@ static inline void Hacl_Impl_K256_Finv_fsquare_times(uint64_t *out, uint64_t *a,
     Hacl_K256_Field_fsqr(out, out);
   }
 }
-
-/* SNIPPET_END: Hacl_Impl_K256_Finv_fsquare_times */
-
-/* SNIPPET_START: Hacl_Impl_K256_Finv_fexp_223_23 */
 
 static inline void Hacl_Impl_K256_Finv_fexp_223_23(uint64_t *out, uint64_t *x2, uint64_t *f)
 {
@@ -738,10 +669,6 @@ static inline void Hacl_Impl_K256_Finv_fexp_223_23(uint64_t *out, uint64_t *x2, 
   Hacl_K256_Field_fmul(out, out, x22);
 }
 
-/* SNIPPET_END: Hacl_Impl_K256_Finv_fexp_223_23 */
-
-/* SNIPPET_START: Hacl_Impl_K256_Finv_finv */
-
 static inline void Hacl_Impl_K256_Finv_finv(uint64_t *out, uint64_t *f)
 {
   uint64_t x2[5U] = { 0U };
@@ -754,10 +681,6 @@ static inline void Hacl_Impl_K256_Finv_finv(uint64_t *out, uint64_t *f)
   Hacl_K256_Field_fmul(out, out, f);
 }
 
-/* SNIPPET_END: Hacl_Impl_K256_Finv_finv */
-
-/* SNIPPET_START: Hacl_Impl_K256_Finv_fsqrt */
-
 static inline void Hacl_Impl_K256_Finv_fsqrt(uint64_t *out, uint64_t *f)
 {
   uint64_t x2[5U] = { 0U };
@@ -767,11 +690,9 @@ static inline void Hacl_Impl_K256_Finv_fsqrt(uint64_t *out, uint64_t *f)
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, (uint32_t)2U);
 }
 
-/* SNIPPET_END: Hacl_Impl_K256_Finv_fsqrt */
-
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Bignum_K256_H_DEFINED
+#define __internal_Hacl_Bignum_K256_H_DEFINED
 #endif

@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_K256_PrecompTable_H
-#define __Hacl_K256_PrecompTable_H
+#ifndef __internal_Hacl_K256_PrecompTable_H
+#define __internal_Hacl_K256_PrecompTable_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -36,6 +36,8 @@ extern "C" {
 
 
 
+
+/* SNIPPET_START: Hacl_K256_PrecompTable_precomp_basepoint_table_w4 */
 
 static const
 uint64_t
@@ -119,6 +121,10 @@ Hacl_K256_PrecompTable_precomp_basepoint_table_w4[240U] =
     (uint64_t)78074942938713U, (uint64_t)454207263265292U, (uint64_t)972683614054061U,
     (uint64_t)808474205144361U, (uint64_t)942703935951735U, (uint64_t)134460241077887U
   };
+
+/* SNIPPET_END: Hacl_K256_PrecompTable_precomp_basepoint_table_w4 */
+
+/* SNIPPET_START: Hacl_K256_PrecompTable_precomp_g_pow2_64_table_w4 */
 
 static const
 uint64_t
@@ -204,6 +210,10 @@ Hacl_K256_PrecompTable_precomp_g_pow2_64_table_w4[240U] =
     (uint64_t)1815515638724020U, (uint64_t)104845375825434U
   };
 
+/* SNIPPET_END: Hacl_K256_PrecompTable_precomp_g_pow2_64_table_w4 */
+
+/* SNIPPET_START: Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w4 */
+
 static const
 uint64_t
 Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w4[240U] =
@@ -288,6 +298,10 @@ Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w4[240U] =
     (uint64_t)3355649228050892U, (uint64_t)99772108898412U
   };
 
+/* SNIPPET_END: Hacl_K256_PrecompTable_precomp_g_pow2_128_table_w4 */
+
+/* SNIPPET_START: Hacl_K256_PrecompTable_precomp_g_pow2_192_table_w4 */
+
 static const
 uint64_t
 Hacl_K256_PrecompTable_precomp_g_pow2_192_table_w4[240U] =
@@ -371,6 +385,10 @@ Hacl_K256_PrecompTable_precomp_g_pow2_192_table_w4[240U] =
     (uint64_t)2718831919953281U, (uint64_t)4348638387588593U, (uint64_t)3761438313263183U,
     (uint64_t)13169515318095U, (uint64_t)212893621229476U
   };
+
+/* SNIPPET_END: Hacl_K256_PrecompTable_precomp_g_pow2_192_table_w4 */
+
+/* SNIPPET_START: Hacl_K256_PrecompTable_precomp_basepoint_table_w5 */
 
 static const
 uint64_t
@@ -535,9 +553,11 @@ Hacl_K256_PrecompTable_precomp_basepoint_table_w5[480U] =
     (uint64_t)2090045379763451U, (uint64_t)968565474458988U, (uint64_t)234295114806066U
   };
 
+/* SNIPPET_END: Hacl_K256_PrecompTable_precomp_basepoint_table_w5 */
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_K256_PrecompTable_H_DEFINED
+#define __internal_Hacl_K256_PrecompTable_H_DEFINED
 #endif

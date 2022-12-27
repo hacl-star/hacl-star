@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-
+#include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_add_carry_u32 */
 

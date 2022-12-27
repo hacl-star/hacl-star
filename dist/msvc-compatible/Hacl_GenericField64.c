@@ -24,6 +24,7 @@
 
 #include "Hacl_GenericField64.h"
 
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum.h"
 
 /*******************************************************************************

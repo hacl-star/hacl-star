@@ -42,6 +42,8 @@ let
       cppo
       odoc
       alcotest
+      qcheck-core
+      secp256k1-internal
     ]);
 
     buildInputs = [ openssl.dev ];
