@@ -229,22 +229,6 @@ let instantiate_st (a:supported_alg) =
         repr st h1 ==
         S.instantiate entropy_input nonce (B.as_seq h0 personalization_string)))
 
-(** @type: true 
-*)
-val instantiate_sha1    : instantiate_st SHA1
-
-(** @type: true 
-*)
-val instantiate_sha2_256: instantiate_st SHA2_256
-
-(** @type: true 
-*)
-val instantiate_sha2_384: instantiate_st SHA2_384
-
-(** @type: true 
-*)
-val instantiate_sha2_512: instantiate_st SHA2_512
-
 
 inline_for_extraction noextract
 let reseed_st (a:supported_alg) =
@@ -272,22 +256,6 @@ let reseed_st (a:supported_alg) =
         Seq.length entropy_input <= S.max_length /\
         repr st h1 ==
         S.reseed (repr st h0) entropy_input (B.as_seq h0 additional_input)))
-
-(** @type: true 
-*)
-val reseed_sha1    : reseed_st SHA1
-
-(** @type: true 
-*)
-val reseed_sha2_256: reseed_st SHA2_256
-
-(** @type: true 
-*)
-val reseed_sha2_384: reseed_st SHA2_384
-
-(** @type: true 
-*)
-val reseed_sha2_512: reseed_st SHA2_512
 
 
 inline_for_extraction noextract
@@ -326,22 +294,6 @@ let generate_st (a:supported_alg) =
           repr st h1 == st_ /\
           B.as_seq h1 output == out)))
 
-(** @type: true 
-*)
-val generate_sha1    : generate_st SHA1
-
-(** @type: true 
-*)
-val generate_sha2_256: generate_st SHA2_256
-
-(** @type: true 
-*)
-val generate_sha2_384: generate_st SHA2_384
-
-(** @type: true 
-*)
-val generate_sha2_512: generate_st SHA2_512
-
 
 inline_for_extraction noextract
 let uninstantiate_st (a:supported_alg) =
@@ -349,22 +301,6 @@ let uninstantiate_st (a:supported_alg) =
   -> ST unit
   (requires fun h0 -> freeable st h0 /\ invariant st h0)
   (ensures  fun h0 _ h1 -> B.modifies (footprint st h0) h0 h1)
-
-(** @type: true 
-*)
-val uninstantiate_sha1    : uninstantiate_st SHA1
-
-(** @type: true 
-*)
-val uninstantiate_sha2_256: uninstantiate_st SHA2_256
-
-(** @type: true 
-*)
-val uninstantiate_sha2_384: uninstantiate_st SHA2_384
-
-(** @type: true 
-*)
-val uninstantiate_sha2_512: uninstantiate_st SHA2_512
 
 
 /// Agile variants that dispatch dynamically to the appropriate monomorphic variants above

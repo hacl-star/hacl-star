@@ -39,7 +39,6 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
-#include "EverCrypt_HMAC.h"
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 
@@ -95,106 +94,6 @@ Create a DRBG state.
 @return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`.
 */
 EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a);
-
-bool
-EverCrypt_DRBG_instantiate_sha1(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *personalization_string,
-  uint32_t personalization_string_len
-);
-
-bool
-EverCrypt_DRBG_instantiate_sha2_256(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *personalization_string,
-  uint32_t personalization_string_len
-);
-
-bool
-EverCrypt_DRBG_instantiate_sha2_384(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *personalization_string,
-  uint32_t personalization_string_len
-);
-
-bool
-EverCrypt_DRBG_instantiate_sha2_512(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *personalization_string,
-  uint32_t personalization_string_len
-);
-
-bool
-EverCrypt_DRBG_reseed_sha1(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-bool
-EverCrypt_DRBG_reseed_sha2_256(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-bool
-EverCrypt_DRBG_reseed_sha2_384(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-bool
-EverCrypt_DRBG_reseed_sha2_512(
-  EverCrypt_DRBG_state_s *st,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-bool
-EverCrypt_DRBG_generate_sha1(
-  uint8_t *output,
-  EverCrypt_DRBG_state_s *st,
-  uint32_t n,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-bool
-EverCrypt_DRBG_generate_sha2_256(
-  uint8_t *output,
-  EverCrypt_DRBG_state_s *st,
-  uint32_t n,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-bool
-EverCrypt_DRBG_generate_sha2_384(
-  uint8_t *output,
-  EverCrypt_DRBG_state_s *st,
-  uint32_t n,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-bool
-EverCrypt_DRBG_generate_sha2_512(
-  uint8_t *output,
-  EverCrypt_DRBG_state_s *st,
-  uint32_t n,
-  uint8_t *additional_input,
-  uint32_t additional_input_len
-);
-
-void EverCrypt_DRBG_uninstantiate_sha1(EverCrypt_DRBG_state_s *st);
-
-void EverCrypt_DRBG_uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st);
-
-void EverCrypt_DRBG_uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st);
-
-void EverCrypt_DRBG_uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st);
 
 /**
 Instantiate the DRBG.

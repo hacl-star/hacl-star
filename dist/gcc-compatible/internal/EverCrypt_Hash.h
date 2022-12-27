@@ -39,9 +39,6 @@ extern "C" {
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
-#include "internal/Hacl_Hash_Blake2s_128.h"
-#include "internal/Hacl_Hash_Blake2b_256.h"
-#include "internal/Hacl_Hash_Blake2.h"
 #include "../EverCrypt_Hash.h"
 
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
@@ -49,10 +46,12 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 void
 EverCrypt_Hash_update_last_256(
   uint32_t *s,
-  uint64_t input,
-  uint8_t *input_len,
-  uint32_t input_len1
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
 );
+
+void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
