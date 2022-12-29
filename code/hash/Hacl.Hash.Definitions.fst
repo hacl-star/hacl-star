@@ -54,7 +54,8 @@ inline_for_extraction noextract
 let impl_word (i:impl) =
   [@inline_let] let a = get_alg i in
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> word a
+  | MD5 | SHA1 | SHA3_256 -> word a
+  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> Hacl.Spec.SHA2.Vec.(element_t a M32)
   | Blake2S | Blake2B -> Blake2.element_t (to_blake_alg a) (get_spec i)
 
 inline_for_extraction noextract
@@ -87,8 +88,19 @@ type state (i:impl) =
 
 inline_for_extraction noextract
 let as_seq (#i:impl) (h:HS.mem) (s:state i) : GTot (words_state (get_alg i)) =
-  match get_alg i with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> B.as_seq h s
+  let a = get_alg i in
+  match a with
+  | MD5 | SHA1 | SHA3_256 -> B.as_seq h s
+  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
+      // The agile hash specification has no notion of vectorized words, so we
+      // "dereference" the single-element vector to obtain a vector of uint32s
+      // or uint64s
+      let s = B.as_seq h s in
+      let s = Seq.init 8 (fun j ->
+        let v = Seq.index s j in
+        let v = Lib.IntVector.vec_v #(Spec.Hash.Definitions.word_t a) #1 v in
+        Seq.index v 0 <: Spec.Hash.Definitions.word a) in
+      s
   | Blake2S -> Blake2.state_v #Spec.Blake2.Blake2S #(get_spec i) h s
   | Blake2B -> Blake2.state_v #Spec.Blake2.Blake2B #(get_spec i) h s
 
