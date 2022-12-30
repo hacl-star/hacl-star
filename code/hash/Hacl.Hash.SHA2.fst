@@ -9,8 +9,6 @@ open Spec.Hash.Definitions
 open Lib.MultiBuffer
 open Lib.NTuple
 
-include Hacl.Hash.Core.SHA2
-
 // To prove we are properly defining init
 friend Spec.Agile.Hash
 // To prove we are properly defining update_last
@@ -20,66 +18,28 @@ friend Spec.SHA2
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-let mb_init_is_init (#a: sha2_alg) (h: HS.mem) (st: state (| a, () |) ): Lemma
-  (requires (LowStar.Buffer.as_seq h st == Hacl.Spec.SHA2.Vec.(init a M32)))
-  (ensures (as_seq h st == Spec.Agile.Hash.init a))
-=
-  let st1 = as_seq h st in
-  let st1_raw = LowStar.Buffer.as_seq h st in
-  let spec = Spec.Agile.Hash.init a in
-  let spec_vec = Hacl.Spec.SHA2.Vec.(init a M32) in
-  assert (st1_raw `Seq.equal` spec_vec);
-  let t = Spec.Hash.Definitions.word_t a in
-  let h0 = Hacl.Spec.SHA2.h0 a in
-  let lemma_i (i: nat { i < 8 }): Lemma
-    (Seq.index st1 i == Seq.index spec i)
-  =
-    calc (== ) {
-      Seq.index st1 i;
-    (==) { }
-      Seq.index (Lib.IntVector.vec_v #t #1 (Seq.index spec_vec i)) 0;
-    (==) { (* otherwise the pattern on createi doesn't trigger *) }
-      Seq.index (Lib.IntVector.vec_v #t #1 (Lib.Sequence.index spec_vec i)) 0;
-    (==) { }
-      Seq.index (Lib.IntVector.vec_v #t #1 Hacl.Spec.SHA2.Vec.(load_element a M32
-        (Seq.index h0 i))) 0;
-    (==) { }
-      Seq.index (Lib.IntVector.vec_v #t #1 Lib.IntVector.(
-        vec_load (Seq.index h0 i) 1)) 0;
-    (==) { }
-      Seq.index h0 i;
-    };
-    ()
-  in
-  FStar.Classical.forall_intro lemma_i;
-  assert (st1 `Seq.equal` spec)
-
 let init_224 st =
   Hacl.SHA2.Scalar32.init #SHA2_224 st;
-  let h1 = ST.get () in
-  mb_init_is_init h1 st
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Hacl.Spec.SHA2.Vec.M32 0
 
 let init_256 st =
   Hacl.SHA2.Scalar32.init #SHA2_256 st;
-  let h1 = ST.get () in
-  mb_init_is_init h1 st
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_256 Hacl.Spec.SHA2.Vec.M32 0
 
 let init_384 st =
   Hacl.SHA2.Scalar32.init #SHA2_384 st;
-  let h1 = ST.get () in
-  mb_init_is_init h1 st
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_384 Hacl.Spec.SHA2.Vec.M32 0
 
 let init_512 st =
   Hacl.SHA2.Scalar32.init #SHA2_512 st;
-  let h1 = ST.get () in
-  mb_init_is_init h1 st
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_512 Hacl.Spec.SHA2.Vec.M32 0
 
 let alloca_224 () =
   let h0 = ST.get () in
   let st = Hacl.Impl.SHA2.Generic.alloc SHA2_224 Hacl.Spec.SHA2.Vec.M32 in
   Hacl.Impl.SHA2.Generic.init st;
   let h1 = ST.get () in
-  mb_init_is_init #SHA2_224 h1 st;
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Hacl.Spec.SHA2.Vec.M32 0;
   LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
   st
 
@@ -88,7 +48,7 @@ let alloca_256 () =
   let st = Hacl.Impl.SHA2.Generic.alloc SHA2_256 Hacl.Spec.SHA2.Vec.M32 in
   Hacl.Impl.SHA2.Generic.init st;
   let h1 = ST.get () in
-  mb_init_is_init #SHA2_256 h1 st;
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_256 Hacl.Spec.SHA2.Vec.M32 0;
   LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
   st
 
@@ -97,7 +57,7 @@ let alloca_384 () =
   let st = Hacl.Impl.SHA2.Generic.alloc SHA2_384 Hacl.Spec.SHA2.Vec.M32 in
   Hacl.Impl.SHA2.Generic.init st;
   let h1 = ST.get () in
-  mb_init_is_init #SHA2_384 h1 st;
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_384 Hacl.Spec.SHA2.Vec.M32 0;
   LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
   st
 
@@ -106,21 +66,82 @@ let alloca_512 () =
   let st = Hacl.Impl.SHA2.Generic.alloc SHA2_512 Hacl.Spec.SHA2.Vec.M32 in
   Hacl.Impl.SHA2.Generic.init st;
   let h1 = ST.get () in
-  mb_init_is_init #SHA2_512 h1 st;
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_512 Hacl.Spec.SHA2.Vec.M32 0;
   LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
   st
 
-let update_multi_224 st () blocks n_blocks =
-  let blocks1 = ntup1 blocks in
-  Hacl.SHA2.Scalar32.sha224_update_nblocks (n_blocks `FStar.UInt32.mul` block_len SHA2_224) blocks1 st;
-  admit ()
+#set-options "--print_implicits"
 
+inline_for_extraction noextract
+val mk_update_multi: a:sha2_alg -> update_multi_st (| a, () |)
+
+let mk_update_multi a st () blocks n_blocks =
+  [@inline_let]
+  let len_blocks = n_blocks `FStar.UInt32.mul` block_len a in
+  [@inline_let]
+  let blocks_multi = ntup1 #(Lib.Buffer.lbuffer Lib.IntTypes.uint8 len_blocks) #1 blocks in
+  let h0 = ST.get () in
+  begin match a with
+  | SHA2_224 -> Hacl.SHA2.Scalar32.sha224_update_nblocks len_blocks blocks_multi st
+  | SHA2_256 -> Hacl.SHA2.Scalar32.sha256_update_nblocks len_blocks blocks_multi st
+  | SHA2_384 -> Hacl.SHA2.Scalar32.sha384_update_nblocks len_blocks blocks_multi st
+  | SHA2_512 -> Hacl.SHA2.Scalar32.sha512_update_nblocks len_blocks blocks_multi st
+  end;
+  let h1 = ST.get () in
+
+  begin (* ghost *)
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
+  let st0 = as_seq h0 st in
+  let blocks0 = LowStar.Buffer.as_seq h0 blocks in
+  let length_blocks = UInt32.v len_blocks in
+  assert (Lib.Sequence.length blocks0 = length_blocks);
+  let blocks0_multi = as_seq_multi #1 #len_blocks h0 blocks_multi in
+  let st0_raw = LowStar.Buffer.as_seq h0 st in
+
+  calc (==) {
+    as_seq h1 st;
+  (==) { Hacl.Spec.SHA2.Equiv.update_nblocks_lemma_l #a #Hacl.Spec.SHA2.Vec.M32 length_blocks blocks0_multi st0_raw 0 }
+    Hacl.Spec.SHA2.update_nblocks a length_blocks blocks0_multi.(|0|) (as_seq h0 st);
+  (==) { }
+    Hacl.Spec.SHA2.update_nblocks a length_blocks blocks0 st0;
+  (==) { Hacl.Spec.SHA2.EquivScalar.update_nblocks_is_repeat_blocks_multi a length_blocks blocks0 st0 } (
+    let b = blocks0 in
+    let open Lib.Sequence in
+    let bl = block_length a in
+    repeat_blocks_multi #Lib.IntTypes.uint8 #(words_state a) bl
+      (Seq.slice b 0 (Seq.length b - Seq.length b % bl)) (Hacl.Spec.SHA2.update a) st0);
+  (==) { }
+    Lib.Sequence.repeat_blocks_multi #Lib.IntTypes.uint8 #(words_state a)
+      (block_length a) blocks0 (Hacl.Spec.SHA2.update a) st0;
+  (==) {
+    FStar.Classical.forall_intro_2 (Hacl.Spec.SHA2.EquivScalar.update_lemma a);
+    Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality
+      #Lib.IntTypes.uint8 #(words_state a)
+      (block_length a) blocks0 (Hacl.Spec.SHA2.update a)
+      (Lib.UpdateMulti.Lemmas.repeat_f (block_length a) (Spec.Agile.Hash.update a))
+      st0
+  }
+    Lib.Sequence.repeat_blocks_multi #Lib.IntTypes.uint8 #(words_state a)
+      (block_length a) blocks0 (Lib.UpdateMulti.Lemmas.repeat_f (block_length a) (Spec.Agile.Hash.update a)) st0;
+  (==) {
+    Lib.UpdateMulti.Lemmas.update_multi_is_repeat_blocks_multi #(words_state a)
+      (block_length a) (Spec.Agile.Hash.update a) st0 blocks0
+  }
+    Lib.UpdateMulti.mk_update_multi #(words_state a) (block_length a) (Spec.Agile.Hash.update a) st0 blocks0;
+  (==) { }
+    Spec.Agile.Hash.update_multi a st0 () blocks0;
+  }
+  end
+
+let update_multi_224 =
+  mk_update_multi SHA2_224
 let update_multi_256 =
-  Hacl.Hash.MD.mk_update_multi SHA2_256 update_256
+  mk_update_multi SHA2_256
 let update_multi_384 =
-  Hacl.Hash.MD.mk_update_multi SHA2_384 update_384
+  mk_update_multi SHA2_384
 let update_multi_512 =
-  Hacl.Hash.MD.mk_update_multi SHA2_512 update_512
+  mk_update_multi SHA2_512
 
 let update_last_224 =
   Hacl.Hash.MD.mk_update_last SHA2_224 update_multi_224 pad_224
