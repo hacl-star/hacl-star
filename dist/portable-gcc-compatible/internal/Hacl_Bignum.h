@@ -35,6 +35,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "../Hacl_Bignum.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32 */

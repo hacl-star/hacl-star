@@ -48,67 +48,67 @@ static bool cpu_has_rdrand[1U] = { false };
 
 static bool cpu_has_avx512[1U] = { false };
 
-bool EverCrypt_AutoConfig2_has_shaext()
+bool EverCrypt_AutoConfig2_has_shaext(void)
 {
   return cpu_has_shaext[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_aesni()
+bool EverCrypt_AutoConfig2_has_aesni(void)
 {
   return cpu_has_aesni[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_pclmulqdq()
+bool EverCrypt_AutoConfig2_has_pclmulqdq(void)
 {
   return cpu_has_pclmulqdq[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_avx2()
+bool EverCrypt_AutoConfig2_has_avx2(void)
 {
   return cpu_has_avx2[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_avx()
+bool EverCrypt_AutoConfig2_has_avx(void)
 {
   return cpu_has_avx[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_bmi2()
+bool EverCrypt_AutoConfig2_has_bmi2(void)
 {
   return cpu_has_bmi2[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_adx()
+bool EverCrypt_AutoConfig2_has_adx(void)
 {
   return cpu_has_adx[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_sse()
+bool EverCrypt_AutoConfig2_has_sse(void)
 {
   return cpu_has_sse[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_movbe()
+bool EverCrypt_AutoConfig2_has_movbe(void)
 {
   return cpu_has_movbe[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_rdrand()
+bool EverCrypt_AutoConfig2_has_rdrand(void)
 {
   return cpu_has_rdrand[0U];
 }
 
-bool EverCrypt_AutoConfig2_has_avx512()
+bool EverCrypt_AutoConfig2_has_avx512(void)
 {
   return cpu_has_avx512[0U];
 }
 
-void EverCrypt_AutoConfig2_recall()
+void EverCrypt_AutoConfig2_recall(void)
 {
 
 }
 
-void EverCrypt_AutoConfig2_init()
+void EverCrypt_AutoConfig2_init(void)
 {
   #if HACL_CAN_COMPILE_VALE
   uint64_t scrut = check_aesni();
@@ -193,69 +193,69 @@ void EverCrypt_AutoConfig2_init()
   #endif
 }
 
-void EverCrypt_AutoConfig2_disable_avx2()
+void EverCrypt_AutoConfig2_disable_avx2(void)
 {
   cpu_has_avx2[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_avx()
+void EverCrypt_AutoConfig2_disable_avx(void)
 {
   cpu_has_avx[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_bmi2()
+void EverCrypt_AutoConfig2_disable_bmi2(void)
 {
   cpu_has_bmi2[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_adx()
+void EverCrypt_AutoConfig2_disable_adx(void)
 {
   cpu_has_adx[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_shaext()
+void EverCrypt_AutoConfig2_disable_shaext(void)
 {
   cpu_has_shaext[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_aesni()
+void EverCrypt_AutoConfig2_disable_aesni(void)
 {
   cpu_has_aesni[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_pclmulqdq()
+void EverCrypt_AutoConfig2_disable_pclmulqdq(void)
 {
   cpu_has_pclmulqdq[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_sse()
+void EverCrypt_AutoConfig2_disable_sse(void)
 {
   cpu_has_sse[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_movbe()
+void EverCrypt_AutoConfig2_disable_movbe(void)
 {
   cpu_has_movbe[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_rdrand()
+void EverCrypt_AutoConfig2_disable_rdrand(void)
 {
   cpu_has_rdrand[0U] = false;
 }
 
-void EverCrypt_AutoConfig2_disable_avx512()
+void EverCrypt_AutoConfig2_disable_avx512(void)
 {
   cpu_has_avx512[0U] = false;
 }
 
-bool EverCrypt_AutoConfig2_has_vec128()
+bool EverCrypt_AutoConfig2_has_vec128(void)
 {
   bool avx = EverCrypt_AutoConfig2_has_avx();
   bool other = has_vec128_not_avx();
   return avx || other;
 }
 
-bool EverCrypt_AutoConfig2_has_vec256()
+bool EverCrypt_AutoConfig2_has_vec256(void)
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
   bool other = has_vec256_not_avx2();

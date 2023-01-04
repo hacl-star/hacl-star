@@ -46,7 +46,7 @@ typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_MD5_state_md5;
 
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_create_in_md5 */
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5(void);
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_create_in_md5 */
 

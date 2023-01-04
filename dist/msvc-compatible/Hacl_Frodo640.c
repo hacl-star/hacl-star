@@ -24,6 +24,7 @@
 
 #include "Hacl_Frodo640.h"
 
+#include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
 
 uint32_t Hacl_Frodo640_crypto_bytes = (uint32_t)16U;

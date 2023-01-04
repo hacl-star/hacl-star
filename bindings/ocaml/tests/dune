@@ -9,8 +9,10 @@
         hkdf_test
         nacl_test
         drbg_test
-        p256_test)
- (libraries hacl-star alcotest)
+        p256_test
+        k256_test
+        libsecp256k1_test)
+ (libraries hacl-star alcotest secp256k1-internal qcheck-core cstruct)
  (preprocessor_deps config.h)
  (preprocess (action (run %{bin:cppo} %{input-file})))
  (flags (:standard -open Hacl_star -warn-error -3)))

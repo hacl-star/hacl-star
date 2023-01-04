@@ -37,24 +37,6 @@ extern "C" {
 
 
 
-/* SNIPPET_START: FStar_UInt32_eq_mask */
-
-static inline uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
-
-/* SNIPPET_END: FStar_UInt32_eq_mask */
-
-/* SNIPPET_START: FStar_UInt32_gte_mask */
-
-static inline uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);
-
-/* SNIPPET_END: FStar_UInt32_gte_mask */
-
-/* SNIPPET_START: FStar_UInt8_eq_mask */
-
-static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
-
-/* SNIPPET_END: FStar_UInt8_eq_mask */
-
 /* SNIPPET_START: FStar_UInt64_eq_mask */
 
 static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
@@ -66,19 +48,6 @@ static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
 static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
 
 /* SNIPPET_END: FStar_UInt64_gte_mask */
-
-/* SNIPPET_START: FStar_UInt16_eq_mask */
-
-static inline uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b);
-
-/* SNIPPET_END: FStar_UInt16_eq_mask */
-
-/* SNIPPET_START: FStar_UInt128_add */
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-/* SNIPPET_END: FStar_UInt128_add */
 
 /* SNIPPET_START: FStar_UInt128_add_mod */
 
@@ -93,20 +62,6 @@ static inline FStar_UInt128_uint128
 FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 
 /* SNIPPET_END: FStar_UInt128_sub_mod */
-
-/* SNIPPET_START: FStar_UInt128_logor */
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_logor(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-/* SNIPPET_END: FStar_UInt128_logor */
-
-/* SNIPPET_START: FStar_UInt128_shift_left */
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-/* SNIPPET_END: FStar_UInt128_shift_left */
 
 /* SNIPPET_START: FStar_UInt128_shift_right */
 
@@ -126,24 +81,6 @@ static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
 static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
 
 /* SNIPPET_END: FStar_UInt128_uint128_to_uint64 */
-
-/* SNIPPET_START: FStar_UInt128_mul_wide */
-
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-/* SNIPPET_END: FStar_UInt128_mul_wide */
-
-/* SNIPPET_START: store128_be */
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
-
-/* SNIPPET_END: store128_be */
-
-/* SNIPPET_START: load128_be */
-
-static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
-
-/* SNIPPET_END: load128_be */
 
 #if defined(__cplusplus)
 }

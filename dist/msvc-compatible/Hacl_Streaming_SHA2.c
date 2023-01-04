@@ -24,7 +24,8 @@
 
 #include "internal/Hacl_Streaming_SHA2.h"
 
-
+#include "internal/Hacl_SHA2_Generic.h"
+#include "internal/Hacl_Krmllib.h"
 
 static inline void sha256_init(uint32_t *hash)
 {
@@ -632,12 +633,12 @@ static inline void sha512_finish(uint64_t *st, uint8_t *h)
 Allocate initial state for the SHA2_256 hash. The state is to be freed by
 calling `free_256`.
 */
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256()
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint32_t));
   Hacl_Streaming_SHA2_state_sha2_224
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_SHA2_state_sha2_224
   *p =
     (Hacl_Streaming_SHA2_state_sha2_224 *)KRML_HOST_MALLOC(sizeof (
@@ -645,6 +646,34 @@ Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256()
       ));
   p[0U] = s;
   sha256_init(block_state);
+  return p;
+}
+
+/**
+Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_256`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch.
+*/
+Hacl_Streaming_SHA2_state_sha2_224
+*Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_SHA2_state_sha2_224 *s0)
+{
+  Hacl_Streaming_SHA2_state_sha2_224 scrut = *s0;
+  uint32_t *block_state0 = scrut.block_state;
+  uint8_t *buf0 = scrut.buf;
+  uint64_t total_len0 = scrut.total_len;
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  memcpy(buf, buf0, (uint32_t)64U * sizeof (uint8_t));
+  uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint32_t));
+  memcpy(block_state, block_state0, (uint32_t)8U * sizeof (uint32_t));
+  Hacl_Streaming_SHA2_state_sha2_224
+  s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
+  Hacl_Streaming_SHA2_state_sha2_224
+  *p =
+    (Hacl_Streaming_SHA2_state_sha2_224 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_SHA2_state_sha2_224
+      ));
+  p[0U] = s;
   return p;
 }
 
@@ -657,14 +686,9 @@ void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s)
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
   sha256_init(block_state);
-  s[0U] =
-    (
-      (Hacl_Streaming_SHA2_state_sha2_224){
-        .block_state = block_state,
-        .buf = buf,
-        .total_len = (uint64_t)0U
-      }
-    );
+  Hacl_Streaming_SHA2_state_sha2_224
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
+  s[0U] = tmp;
 }
 
 static inline uint32_t
@@ -934,12 +958,12 @@ void Hacl_Streaming_SHA2_sha256(uint8_t *input, uint32_t input_len, uint8_t *dst
   sha256_finish(st, rb);
 }
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224()
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint32_t));
   Hacl_Streaming_SHA2_state_sha2_224
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_SHA2_state_sha2_224
   *p =
     (Hacl_Streaming_SHA2_state_sha2_224 *)KRML_HOST_MALLOC(sizeof (
@@ -956,14 +980,9 @@ void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s)
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
   sha224_init(block_state);
-  s[0U] =
-    (
-      (Hacl_Streaming_SHA2_state_sha2_224){
-        .block_state = block_state,
-        .buf = buf,
-        .total_len = (uint64_t)0U
-      }
-    );
+  Hacl_Streaming_SHA2_state_sha2_224
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
+  s[0U] = tmp;
 }
 
 uint32_t
@@ -1040,12 +1059,12 @@ void Hacl_Streaming_SHA2_sha224(uint8_t *input, uint32_t input_len, uint8_t *dst
   sha224_finish(st, rb);
 }
 
-Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512()
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
   uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint64_t));
   Hacl_Streaming_SHA2_state_sha2_384
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384
   *p =
     (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
@@ -1062,14 +1081,9 @@ void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_SHA2_state_sha2_384 *s)
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
   Hacl_SHA2_Scalar32_sha512_init(block_state);
-  s[0U] =
-    (
-      (Hacl_Streaming_SHA2_state_sha2_384){
-        .block_state = block_state,
-        .buf = buf,
-        .total_len = (uint64_t)0U
-      }
-    );
+  Hacl_Streaming_SHA2_state_sha2_384
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
+  s[0U] = tmp;
 }
 
 static inline uint32_t
@@ -1343,12 +1357,12 @@ void Hacl_Streaming_SHA2_sha512(uint8_t *input, uint32_t input_len, uint8_t *dst
   sha512_finish(st, rb);
 }
 
-Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384()
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
   uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint64_t));
   Hacl_Streaming_SHA2_state_sha2_384
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_SHA2_state_sha2_384
   *p =
     (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
@@ -1365,14 +1379,9 @@ void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_SHA2_state_sha2_384 *s)
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
   sha384_init(block_state);
-  s[0U] =
-    (
-      (Hacl_Streaming_SHA2_state_sha2_384){
-        .block_state = block_state,
-        .buf = buf,
-        .total_len = (uint64_t)0U
-      }
-    );
+  Hacl_Streaming_SHA2_state_sha2_384
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
+  s[0U] = tmp;
 }
 
 uint32_t
