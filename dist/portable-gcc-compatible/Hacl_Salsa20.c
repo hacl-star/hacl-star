@@ -24,7 +24,7 @@
 
 #include "Hacl_Salsa20.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: quarter_round */
 

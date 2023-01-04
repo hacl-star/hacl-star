@@ -799,7 +799,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 
 dist/wasm/Makefile.basic: CTR_BUNDLE =
-dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle EverCrypt.TargetConfig \
@@ -930,7 +929,7 @@ dist/test/c/Hacl_Test_K256.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-incl
 
 copy-krmllib:
 	mkdir -p dist/karamel
-	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal $$(find include -not -name 'steel_types.h')) | (cd dist/karamel && tar xf -)
+	(cd $(KRML_HOME) && tar cvf - krmllib/dist/minimal $$(find include -type f -and -not -name 'steel_types.h')) | (cd dist/karamel && tar xf -)
 
 package-compile-mozilla: dist/mozilla/libevercrypt.a
 

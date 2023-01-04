@@ -24,6 +24,7 @@
 
 #include "Hacl_Chacha20_Vec32.h"
 
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Chacha20.h"
 
 /* SNIPPET_START: double_round_32 */

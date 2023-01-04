@@ -24,6 +24,7 @@
 
 #include "Hacl_Frodo64.h"
 
+#include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
 
 /*

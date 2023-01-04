@@ -70,6 +70,8 @@ let prev_length_of_nat (a: hash_alg) (i: nat { i % U32.v (block_len a) = 0 }):
   else
     i
 
+#push-options "--z3rlimit 500"
+
 inline_for_extraction noextract
 let evercrypt_hash : block hash_alg =
   Block
@@ -82,7 +84,9 @@ let evercrypt_hash : block hash_alg =
     hash_len
     block_len
     block_len // No vectorization
+    (fun _ -> 0ul)
 
+    (fun _ _ -> S.empty)
     (fun a _ -> Spec.Agile.Hash.init a)
     (fun a s prevlen input ->
       let prevlen = extra_state_of_nat a prevlen in
@@ -90,7 +94,7 @@ let evercrypt_hash : block hash_alg =
     (fun a s prevlen input ->
       let prevlen = prev_length_of_nat a prevlen in
       Spec.Hash.Incremental.update_last a s prevlen input)
-    (fun a _ s -> Spec.Hash.PadFinish.finish a s)
+    (fun a _ s -> Spec.Agile.Hash.finish a s)
 
     (fun a _ -> Spec.Agile.Hash.hash a)
 
@@ -107,14 +111,18 @@ let evercrypt_hash : block hash_alg =
          Spec.Hash.Lemmas.update_multi_associative a s input1 input2)
     (* spec_is_incremental *)
     (fun a _ input ->
+        let input1 = S.append S.empty input in
+        assert (S.equal input1 input);
         Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
     EverCrypt.Hash.alg_of_state
-    (fun i _ -> EverCrypt.Hash.init #i)
+    (fun i _ _ -> EverCrypt.Hash.init #i)
     (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->
        EverCrypt.Hash.update_last #i s prevlen last last_len)
     (fun i _ -> EverCrypt.Hash.finish #i)
+
+#pop-options
 
 let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 

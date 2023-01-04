@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_SHA2_Generic.h"
 #include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_224 */
@@ -80,9 +79,22 @@ typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA2_state_sha2_512;
 Allocate initial state for the SHA2_256 hash. The state is to be freed by
 calling `free_256`.
 */
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA2_copy_256 */
+
+/**
+Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_256`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch.
+*/
+Hacl_Streaming_SHA2_state_sha2_224
+*Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_SHA2_state_sha2_224 *s0);
+
+/* SNIPPET_END: Hacl_Streaming_SHA2_copy_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_init_256 */
 
@@ -139,13 +151,13 @@ void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes.
 */
-void Hacl_Streaming_SHA2_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_224 */
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_224 */
 
@@ -188,13 +200,13 @@ void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA2_state_sha2_224 *p);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes.
 */
-void Hacl_Streaming_SHA2_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha224(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_512 */
 
-Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512();
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_512 */
 
@@ -250,13 +262,13 @@ void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes.
 */
-void Hacl_Streaming_SHA2_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha512(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha512 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_384 */
 
-Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384();
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_384 */
 
@@ -299,7 +311,7 @@ void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_SHA2_state_sha2_384 *p);
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes.
 */
-void Hacl_Streaming_SHA2_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input);
+void Hacl_Streaming_SHA2_sha384(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_sha384 */
 

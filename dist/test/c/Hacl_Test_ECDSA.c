@@ -8781,7 +8781,7 @@ test_siggen_512(
   }
 }
 
-exit_code main()
+exit_code main(void)
 {
   C_String_print("[ECDSA SigVer]");
   C_String_print("\n");

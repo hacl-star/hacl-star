@@ -1107,7 +1107,7 @@ test4_expected_sha2_512[64U] =
     (uint8_t)0x87U, (uint8_t)0x4bU, (uint8_t)0xe9U, (uint8_t)0x09U
   };
 
-exit_code main()
+exit_code main(void)
 {
   C_String_print("\nTEST 1. SHA2\n");
   test_sha2((uint32_t)3U,

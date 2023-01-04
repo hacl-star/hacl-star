@@ -66,7 +66,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state;
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2s_128_blake2s_128_state
-*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in();
+*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in(void);
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in */
 

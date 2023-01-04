@@ -5,7 +5,6 @@ include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Spec.SHA2"
 include{:fstar}{:open} "Vale.SHA.SHA_helpers"
-include{:fstar}{:open} "Spec.Hash.PadFinish"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
@@ -18,7 +17,6 @@ module Vale.X64.InsSha
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
-open Spec.Hash.PadFinish
 open Spec.SHA2
 open Spec.Hash.Definitions
 open Vale.SHA.SHA_helpers
@@ -44,7 +42,6 @@ open Vale.X64.InsLemmas
 open Vale.X64.Taint_Semantics
 open Vale.X64.Decls
 open Vale.X64.CryptoInstructions_s
-open Spec.Hash.PadFinish
 open Spec.Hash.Definitions
 open Spec.SHA2
 open Vale.X64.CPU_Features_s

@@ -81,3 +81,17 @@ val update_full_is_repeat_blocks:
       Lib.Sequence.repeat_blocks #uint8 block_length input repeat_f repeat_l acc ==
       Lib.UpdateMulti.update_full block_length update update_last acc input))
     (decreases (S.length input))
+
+val update_multi_is_repeat_blocks_multi:
+  #a:Type0 ->
+  block_length:pos{ block_length < pow2 32 } ->
+  update: (a -> s:S.seq uint8 { S.length s = block_length } -> a) ->
+  acc:a ->
+  input:S.seq uint8 ->
+  Lemma
+    (requires (S.length input % block_length == 0))
+    (ensures (
+      let repeat_f = repeat_f block_length update in
+      Lib.Sequence.repeat_blocks_multi #uint8 block_length input repeat_f acc ==
+      Lib.UpdateMulti.mk_update_multi block_length update acc input))
+    (decreases (S.length input))

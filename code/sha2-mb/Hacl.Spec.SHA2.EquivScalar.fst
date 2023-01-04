@@ -11,7 +11,6 @@ open Hacl.Spec.SHA2
 module Spec = Spec.SHA2
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
-module PadFinish = Spec.Hash.PadFinish
 module UpdLemmas = Lib.UpdateMulti.Lemmas
 module LSeqLemmas = Lib.Sequence.Lemmas
 module Loops = Lib.LoopCombinators
@@ -568,8 +567,6 @@ let shuffle_lemma a block st0 =
   shuffle_lemma_i a block st0 (num_rounds16 a)
 
 
-val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
-  Lemma (update a block hash == Spec.update a hash block)
 let update_lemma a block hash' =
   let hash = hash' in
   reveal_opaque (`%Spec.update) Spec.update;
@@ -592,52 +589,22 @@ let update_lemma a block hash' =
   eq_intro #_ #8 (update a block hash') (Spec.update_pre a hash' block)
 
 
-val finish_lemma: a:sha2_alg -> st:words_state a -> Lemma (finish a st == PadFinish.finish a st)
+val finish_lemma: a:sha2_alg -> st:words_state a -> Lemma (finish a st == Spec.Agile.Hash.finish a st)
 let finish_lemma a st' =
   let st = st' in
   let hash_final_w = sub #_ #8 st 0 (hash_word_length a) in
-  assert (PadFinish.finish a st' == BSeq.uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w);
+  assert (Spec.Agile.Hash.finish a st' == BSeq.uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w);
   assert (finish a st' == sub (BSeq.uints_to_bytes_be #(word_t a) #SEC #8 st) 0 (hash_length a));
   assert (hash_length a == word_length a * hash_word_length a);
 
-  let aux (i:nat{i < hash_length a}) : Lemma ((finish a st').[i] == (PadFinish.finish a st').[i]) =
+  let aux (i:nat{i < hash_length a}) : Lemma ((finish a st').[i] == (Spec.Agile.Hash.finish a st').[i]) =
     BSeq.index_uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w i;
     BSeq.index_uints_to_bytes_be #(word_t a) #SEC #8 st i in
 
   Classical.forall_intro aux;
-  eq_intro #uint8 #(hash_length a) (finish a st') (PadFinish.finish a st')
+  eq_intro #uint8 #(hash_length a) (finish a st') (Spec.Agile.Hash.finish a st')
 
 //TODO: move to Lib.Sequence.Lemmas
-val repeat_blocks_multi_extensionality:
-    #a:Type0
-  -> #b:Type0
-  -> blocksize:size_pos
-  -> inp:seq a{length inp % blocksize = 0}
-  -> f:(lseq a blocksize -> b -> b)
-  -> g:(lseq a blocksize -> b -> b)
-  -> init:b ->
-  Lemma
-  (requires
-    (forall (block:lseq a blocksize) (acc:b). f block acc == g block acc))
-  (ensures
-    repeat_blocks_multi blocksize inp f init ==
-    repeat_blocks_multi blocksize inp g init)
-
-let repeat_blocks_multi_extensionality #a #b blocksize inp f g init =
-  let len = length inp in
-  let nb = len / blocksize in
-  let f_rep = repeat_blocks_f blocksize inp f nb in
-  let g_rep = repeat_blocks_f blocksize inp g nb in
-
-  lemma_repeat_blocks_multi blocksize inp f init;
-  lemma_repeat_blocks_multi blocksize inp g init;
-
-  let aux (i:nat{i < nb}) (acc:b) : Lemma (f_rep i acc == g_rep i acc) =
-    Math.Lemmas.lemma_mult_le_right blocksize (i + 1) nb;
-    Seq.Properties.slice_slice inp 0 (nb * blocksize) (i * blocksize) (i * blocksize + blocksize) in
-
-  Classical.forall_intro_2 aux;
-  LSeqLemmas.repeati_extensionality nb f_rep g_rep init
 
 
 val update_multi_is_repeat_blocks_multi:
@@ -671,21 +638,21 @@ let update_multi_is_repeat_blocks_multi a len b st0 pad_s =
   //    LSeq.repeat_blocks_multi (block_length a) blocks repeat_f st0);
 
   Classical.forall_intro_2 (update_lemma a);
-  repeat_blocks_multi_extensionality (block_length a) blocks repeat_f (update a) st0
-
+  LSeqLemmas.repeat_blocks_multi_extensionality (block_length a) blocks repeat_f (update a) st0
 
 let update_nblocks_is_repeat_blocks_multi a len b st0 =
   let bs = block_length a in
   let nb = len / bs in
-  let acc = Loops.repeati nb (repeat_blocks_f bs b (update a) nb) st0 in
+  let b' = Seq.slice b 0 (Seq.length b - Seq.length b % block_length a) in
+  let acc = Loops.repeati nb (repeat_blocks_f bs b' (update a) nb) st0 in
 
   let aux (i:nat{i < nb}) (acc:words_state a) :
-    Lemma (repeat_blocks_f bs b (update a) nb i acc == update_block a len b i acc) = () in
+    Lemma (repeat_blocks_f bs b' (update a) nb i acc == update_block a len b i acc) = () in
   Classical.forall_intro_2 aux;
-  LSeqLemmas.repeati_extensionality nb (repeat_blocks_f bs b (update a) nb) (update_block a len b) st0;
+  LSeqLemmas.repeati_extensionality nb (repeat_blocks_f bs b' (update a) nb) (update_block a len b) st0;
   assert (acc == update_nblocks a len b st0);
 
-  LSeq.lemma_repeat_blocks_multi bs b (update a) st0
+  LSeq.lemma_repeat_blocks_multi bs b' (update a) st0
 
 
 let hash_is_repeat_blocks a len b st0 =
@@ -801,7 +768,7 @@ val load_last_pad_lemma:
     let firstbyte = create 1 (u8 0x80) in
     let zeros = create (pad0_length a len) (u8 0) in
     let pad = Seq.append (Seq.append firstbyte zeros) totlen_seq in
-    PadFinish.pad a len == pad)
+    Spec.Hash.MD.pad a len == pad)
 
 let load_last_pad_lemma a len fin rem b =
   let len' : len_t a = mk_len_t a len in
@@ -813,7 +780,7 @@ let load_last_pad_lemma a len fin rem b =
   let firstbyte = create 1 (u8 0x80) in
   let zeros = create (pad0_length a len) (u8 0) in
   let pad = Seq.append (Seq.append firstbyte zeros) totlen_seq in
-  Seq.lemma_eq_intro (PadFinish.pad a len) pad
+  Seq.lemma_eq_intro (Spec.Hash.MD.pad a len) pad
 
 
 val update_last_lemma:
@@ -833,7 +800,7 @@ val update_last_lemma:
    let last = update_sub last 0 rem b in
    let last = last.[rem] <- u8 0x80 in
    let last = update_sub last (fin - len_length a) (len_length a) totlen_seq in
-   Seq.equal (Seq.slice last 0 fin) (Seq.append b (PadFinish.pad a len)))
+   Seq.equal (Seq.slice last 0 fin) (Seq.append b (Spec.Hash.MD.pad a len)))
 
 let update_last_lemma a len b =
   let len' : len_t a = mk_len_t a len in
@@ -859,7 +826,7 @@ val update_last_is_repeat_blocks_multi:
     (pad_length a len + len % blocksize) % blocksize = 0))
   (ensures
    (let len' : len_t a = mk_len_t a len in
-    let pad_s = PadFinish.pad a len in
+    let pad_s = Spec.Hash.MD.pad a len in
     let blocksize = block_length a in
     let rem = len % blocksize in
     let blocks1 = Seq.append last pad_s in
@@ -867,7 +834,7 @@ val update_last_is_repeat_blocks_multi:
     repeat_blocks_multi blocksize blocks1 (update a) st1))
 
 let update_last_is_repeat_blocks_multi a len last st1 =
-  let pad_s = PadFinish.pad a len in
+  let pad_s = Spec.Hash.MD.pad a len in
   let blocksize = block_length a in
   let rem = len % blocksize in
   let blocks1 = Seq.append last pad_s in
@@ -899,7 +866,7 @@ let update_last_is_repeat_blocks_multi a len last st1 =
     assert (st3 == repeat_blocks_f blocksize blocks1 (update a) nb 1 st2) end
 
 
-#push-options "--z3rlimit 250"
+#push-options "--z3rlimit 450"
 val hash_is_repeat_blocks_multi:
     a:sha2_alg
   -> len:len_lt_max_a_t a
@@ -907,12 +874,12 @@ val hash_is_repeat_blocks_multi:
   -> st0:words_state a ->
   Lemma
   (let len' : len_t a = mk_len_t a len in
-   let pad_s = PadFinish.pad a len in
+   let pad_s = Spec.Hash.MD.pad a len in
    repeat_blocks (block_length a) b (update a) (update_last a len') st0 ==
    repeat_blocks_multi (block_length a) (Seq.append b pad_s) (update a) st0)
 
 let hash_is_repeat_blocks_multi a len b st0 =
-  let pad_s = PadFinish.pad a len in
+  let pad_s = Spec.Hash.MD.pad a len in
   let blocks = Seq.append b pad_s in
   let blocksize = block_length a in
   let nb = len / blocksize in
@@ -934,13 +901,20 @@ let hash_is_repeat_blocks_multi a len b st0 =
   let last = Seq.slice b len0 len in
   //assert (repeat_blocks blocksize b (update a) (update_last a len') st0 == update_last a len' rem last st1);
   Seq.lemma_eq_intro blocks1 (Seq.append last pad_s);
+
+  // Stabilizing nl arithmetic:
+  //  By def of pad_length
+  assert ((pad_length a len + len) % blocksize == 0);
+  //  We derive the precondition of update_last_is_repeat_blocks_multi
+  Math.Lemmas.lemma_mod_add_distr (pad_length a len) len blocksize;
+  assert ((pad_length a len + len % blocksize) % blocksize = 0);
   update_last_is_repeat_blocks_multi a len last st1
 #pop-options
 
 
 let hash_agile_lemma #a len b =
   let st0 = Spec.Agile.Hash.init a in
-  let pad_s = PadFinish.pad a len in
+  let pad_s = Spec.Hash.MD.pad a len in
   let st_s = Spec.Agile.Hash.update_multi a st0 () (Seq.append b pad_s) in
 
   let blocksize = block_length a in

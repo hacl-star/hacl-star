@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Hash_SHA2.h"
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_init_224 */

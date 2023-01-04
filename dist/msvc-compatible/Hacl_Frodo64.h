@@ -36,9 +36,7 @@ extern "C" {
 
 
 #include "Lib_Memzero0.h"
-#include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
-#include "Hacl_Frodo_KEM.h"
 
 /*
  this variant is used only for testing purposes!

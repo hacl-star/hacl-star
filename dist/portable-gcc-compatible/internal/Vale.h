@@ -63,73 +63,73 @@ extern uint64_t x64_poly1305(uint8_t *x0, uint8_t *x1, uint64_t x2, uint64_t x3)
 
 /* SNIPPET_START: check_aesni */
 
-extern uint64_t check_aesni();
+extern uint64_t check_aesni(void);
 
 /* SNIPPET_END: check_aesni */
 
 /* SNIPPET_START: check_sha */
 
-extern uint64_t check_sha();
+extern uint64_t check_sha(void);
 
 /* SNIPPET_END: check_sha */
 
 /* SNIPPET_START: check_adx_bmi2 */
 
-extern uint64_t check_adx_bmi2();
+extern uint64_t check_adx_bmi2(void);
 
 /* SNIPPET_END: check_adx_bmi2 */
 
 /* SNIPPET_START: check_avx */
 
-extern uint64_t check_avx();
+extern uint64_t check_avx(void);
 
 /* SNIPPET_END: check_avx */
 
 /* SNIPPET_START: check_avx2 */
 
-extern uint64_t check_avx2();
+extern uint64_t check_avx2(void);
 
 /* SNIPPET_END: check_avx2 */
 
 /* SNIPPET_START: check_movbe */
 
-extern uint64_t check_movbe();
+extern uint64_t check_movbe(void);
 
 /* SNIPPET_END: check_movbe */
 
 /* SNIPPET_START: check_sse */
 
-extern uint64_t check_sse();
+extern uint64_t check_sse(void);
 
 /* SNIPPET_END: check_sse */
 
 /* SNIPPET_START: check_rdrand */
 
-extern uint64_t check_rdrand();
+extern uint64_t check_rdrand(void);
 
 /* SNIPPET_END: check_rdrand */
 
 /* SNIPPET_START: check_avx512 */
 
-extern uint64_t check_avx512();
+extern uint64_t check_avx512(void);
 
 /* SNIPPET_END: check_avx512 */
 
 /* SNIPPET_START: check_osxsave */
 
-extern uint64_t check_osxsave();
+extern uint64_t check_osxsave(void);
 
 /* SNIPPET_END: check_osxsave */
 
 /* SNIPPET_START: check_avx_xcr0 */
 
-extern uint64_t check_avx_xcr0();
+extern uint64_t check_avx_xcr0(void);
 
 /* SNIPPET_END: check_avx_xcr0 */
 
 /* SNIPPET_START: check_avx512_xcr0 */
 
-extern uint64_t check_avx512_xcr0();
+extern uint64_t check_avx512_xcr0(void);
 
 /* SNIPPET_END: check_avx512_xcr0 */
 

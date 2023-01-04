@@ -30,7 +30,7 @@
 
 #include "krmllib.h"
 #include "libintvector.h"
-exit_code main();
+exit_code main(void);
 
 
 #define __Hacl_Test_CSHAKE_H_DEFINED

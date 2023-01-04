@@ -3,7 +3,6 @@ module Spec.Agile.Hash
 module S = FStar.Seq
 
 include Spec.Hash.Definitions
-open Spec.Hash.PadFinish
 open FStar.Mul
 
 (** Hashes, agility, incrementality, streaming, and hash laws.
@@ -46,6 +45,10 @@ correctness.
 
 (In the case of MD hashes, the proof of incrementality specifically relies on
 the two properties of update_multi, but this is not true in the general case.)
+
+The incremental specification (in lemmas/Spec.Hash.Incremental.Definitions)
+introduces a notion of "update_last" and then defines the hash as update_multi,
+update_last, finish.
 *)
 
 val init (a:hash_alg): init_t a
@@ -62,7 +65,6 @@ val update (a:md_alg): update_t a
 (* Because of blake2, we unfortunately have this precondition creeping up. *)
 let update_multi_pre
   (a:hash_alg)
-  (hash:words_state a)
   (prev:extra_state a)
   (blocks:bytes)
 =
@@ -78,8 +80,10 @@ val update_multi
   (prev:extra_state a)
   (blocks:bytes_blocks a):
   Pure (words_state a)
-    (requires update_multi_pre a hash prev blocks)
+    (requires update_multi_pre a prev blocks)
     (ensures fun _ -> True)
+
+val finish (a:hash_alg) (hashw:words_state a): Tot (bytes_hash a)
 
 val hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a}):
   Tot (Lib.ByteSequence.lbytes (hash_length a))

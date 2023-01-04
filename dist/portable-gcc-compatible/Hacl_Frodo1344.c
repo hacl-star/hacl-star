@@ -24,6 +24,7 @@
 
 #include "Hacl_Frodo1344.h"
 
+#include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
 
 /* SNIPPET_START: Hacl_Frodo1344_crypto_bytes */
