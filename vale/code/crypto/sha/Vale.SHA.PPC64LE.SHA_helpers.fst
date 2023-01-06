@@ -485,27 +485,35 @@ let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
     (((d +. c) +. b) +. a);
   }
 
-#reset-options "--max_fuel 1 --z3rlimit 40"
+#reset-options "--fuel 1 --z3rlimit 50"
 let lemma_ws_opaque (block:block_w) (t:counter) : Lemma
   (requires 16 <= t && t < size_k_w_256)
   (ensures (let sigma0 = sigma256_0_0 (ws_opaque block (t - 15)) in
             let sigma1 = sigma256_0_1 (ws_opaque block (t - 2)) in
             ws_opaque block t == add_wrap (add_wrap (add_wrap sigma1 (ws_opaque block (t - 7))) sigma0) (ws_opaque block (t - 16))))
   =
-  Pervasives.reveal_opaque (`%ws) ws;
-  let t16 = to_uint32 (ws_opaque block (t - 16)) in
-  let t15 = to_uint32 (ws_opaque block (t - 15)) in
-  let t7  = to_uint32 (ws_opaque block (t - 7)) in
-  let t2  = to_uint32 (ws_opaque block (t - 2)) in
+  let t16 = ws SHA2_256 block (t - 16) in
+  let t15 = ws SHA2_256 block (t - 15) in
+  let t7  = ws SHA2_256 block (t - 7) in
+  let t2  = ws SHA2_256 block (t - 2) in
+  let sigma0 = sigma256_0_0 (ws_opaque block (t - 15)) in
+  let sigma1 = sigma256_0_1 (ws_opaque block (t - 2)) in
   let s1 = _sigma1 SHA2_256 t2 in
   let s0 = _sigma0 SHA2_256 t15 in
-  lemma_add_mod_ws_rearrangement s1 t7 s0 t16;
-  lemma_add_wrap_is_add_mod (sigma256_0_1 (ws_opaque block (t - 2))) (ws_opaque block (t - 7));
-  lemma_add_wrap_is_add_mod (add_wrap (sigma256_0_1 (ws_opaque block (t - 2))) (ws_opaque block (t - 7))) (sigma256_0_0 (ws_opaque block (t - 15)));
-  lemma_add_wrap_is_add_mod (add_wrap (add_wrap (sigma256_0_1 (ws_opaque block (t - 2))) (ws_opaque block (t - 7))) (sigma256_0_0 (ws_opaque block (t - 15)))) (ws_opaque block (t - 16))
-#reset-options "--max_fuel 0 --max_ifuel 0"
+  calc (==) {
+    ws_opaque block t;
+    (==) { Pervasives.reveal_opaque (`%ws) ws }
+    vv ((s1 +. t7 +. s0) +. t16);
+    (==) { lemma_add_wrap_is_add_mod (vv (s1 +. t7 +. s0)) (ws_opaque block (t-16)) }
+    add_wrap (vv ((s1 +. t7) +. s0)) (ws_opaque block (t-16));
+    (==) { lemma_add_wrap_is_add_mod (vv (s1 +. t7)) sigma0 }
+    add_wrap (add_wrap (vv (s1 +. t7)) sigma0) (ws_opaque block (t-16));
+    (==) { lemma_add_wrap_is_add_mod sigma1 (ws_opaque block (t-7)) }
+    add_wrap (add_wrap (add_wrap sigma1 (ws_opaque block (t - 7))) sigma0) (ws_opaque block (t - 16));
 
-#reset-options "--z3rlimit 20"
+  }
+
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 let translate_hash_update (a b c d e f g h a' b' c' d' e' f' g' h' a_old b_old c_old d_old e_old f_old g_old h_old:quad32) : Lemma
   (requires a' == add_wrap_quad32 a a_old /\
             b' == add_wrap_quad32 b b_old /\
@@ -531,7 +539,6 @@ let translate_hash_update (a b c d e f g h a' b' c' d' e' f' g' h' a_old b_old c
   FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   assert (equal mapped h');
   ()
-#reset-options "--max_fuel 0 --max_ifuel 0"
 
 let update_lemma (a b c d e f g h a_old b_old c_old d_old e_old f_old g_old h_old a' b' c' d' e' f' g' h':quad32) (block:block_w) : Lemma
   (requires (let hash_orig = make_seperated_hash_quad32 a_old b_old c_old d_old e_old f_old g_old h_old in

@@ -19,6 +19,7 @@ open Hacl.Frodo.Random
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
+module LB = Lib.ByteSequence
 
 module FP = Spec.Frodo.Params
 module S = Spec.Frodo.KEM.Encaps
@@ -146,6 +147,7 @@ val crypto_kem_enc_ct_pack_c2:
       as_seq h1 c2 ==
       S.crypto_kem_enc_ct_pack_c2 a (as_seq h0 mu) (as_seq h0 b) (as_matrix h0 sp_matrix) (as_matrix h0 epp_matrix))
 
+#push-options "--z3rlimit 200"
 let crypto_kem_enc_ct_pack_c2 a mu b sp_matrix epp_matrix c2 =
   push_frame ();
   let v_matrix = matrix_create params_nbar params_nbar in
@@ -153,7 +155,7 @@ let crypto_kem_enc_ct_pack_c2 a mu b sp_matrix epp_matrix c2 =
   frodo_pack (params_logq a) v_matrix c2;
   clear_matrix v_matrix;
   pop_frame ()
-
+#pop-options
 
 inline_for_extraction noextract
 val get_sp_ep_epp_matrices:
@@ -202,9 +204,10 @@ val crypto_kem_enc_ct0:
       disjoint ct seed_a /\ disjoint ct b /\ disjoint ct mu /\
       disjoint ct sp_matrix /\ disjoint ct ep_matrix /\ disjoint ct epp_matrix)
     (ensures fun h0 _ h1 -> modifies (loc ct) h0 h1 /\
-    (let c1 = S.crypto_kem_enc_ct_pack_c1 a gen_a (as_seq h0 seed_a) (as_seq h0 sp_matrix) (as_seq h0 ep_matrix) in
-      let c2 = S.crypto_kem_enc_ct_pack_c2 a (as_seq h0 mu) (as_seq h0 b) (as_seq h0 sp_matrix) (as_seq h0 epp_matrix) in
-      as_seq h1 ct == LSeq.concat c1 c2))
+      (let c1:LB.lbytes (FP.ct1bytes_len a) = S.crypto_kem_enc_ct_pack_c1 a gen_a (as_seq h0 seed_a) (as_seq h0 sp_matrix) (as_seq h0 ep_matrix) in
+      let c2:LB.lbytes (FP.ct2bytes_len a) = S.crypto_kem_enc_ct_pack_c2 a (as_seq h0 mu) (as_seq h0 b) (as_seq h0 sp_matrix) (as_seq h0 epp_matrix) in
+      v (crypto_ciphertextbytes a) == FP.ct1bytes_len a + FP.ct2bytes_len a /\
+      as_seq h1 ct `Seq.equal` LSeq.concat #_ #(FP.ct1bytes_len a) #(FP.ct2bytes_len a) c1 c2))
 
 let crypto_kem_enc_ct0 a gen_a seed_a b mu sp_matrix ep_matrix epp_matrix ct =
   let c1 = sub ct 0ul (ct1bytes_len a) in
@@ -241,7 +244,6 @@ let clear_matrix3 a sp_matrix ep_matrix epp_matrix =
   clear_matrix ep_matrix;
   clear_matrix epp_matrix
 
-
 inline_for_extraction noextract
 val crypto_kem_enc_ct:
     a:FP.frodo_alg
@@ -257,8 +259,10 @@ val crypto_kem_enc_ct:
     (ensures fun h0 _ h1 -> modifies (loc ct) h0 h1 /\
       as_seq h1 ct == S.crypto_kem_enc_ct a gen_a (as_seq h0 mu) (as_seq h0 pk) (as_seq h0 seed_se))
 
+#push-options "--z3rlimit 200"
 let crypto_kem_enc_ct a gen_a mu pk seed_se ct =
   push_frame ();
+  let h0 = ST.get () in
   FP.expand_crypto_publickeybytes a;
   let seed_a = sub pk 0ul bytes_seed_a in
   let b = sub pk bytes_seed_a (publicmatrixbytes_len a) in
@@ -270,8 +274,12 @@ let crypto_kem_enc_ct a gen_a mu pk seed_se ct =
   crypto_kem_enc_ct0 a gen_a seed_a b mu sp_matrix ep_matrix epp_matrix ct;
 
   clear_matrix3 a sp_matrix ep_matrix epp_matrix;
+  let h1 = ST.get () in
+  LSeq.eq_intro
+    (as_seq h1 ct)
+    (S.crypto_kem_enc_ct a gen_a (as_seq h0 mu) (as_seq h0 pk) (as_seq h0 seed_se));
   pop_frame ()
-
+#pop-options
 
 inline_for_extraction noextract
 val crypto_kem_enc_ss:
@@ -374,10 +382,11 @@ val crypto_kem_enc0:
     (ensures  fun h0 _ h1 -> modifies (loc ct |+| loc ss |+| loc seed_se_k) h0 h1 /\
       (as_seq h1 ct, as_seq h1 ss) == S.crypto_kem_enc_ a gen_a (as_seq h0 mu) (as_seq h0 pk))
 
+#push-options "--z3rlimit 200"
 let crypto_kem_enc0 a gen_a mu ct ss pk seed_se_k =
   crypto_kem_enc_seed_se_k a mu pk seed_se_k;
   crypto_kem_enc_ct_ss a gen_a seed_se_k mu ct ss pk
-
+#pop-options
 
 inline_for_extraction noextract
 val crypto_kem_enc_:
