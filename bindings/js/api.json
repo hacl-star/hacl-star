@@ -3640,7 +3640,8 @@
     },
     "hash": {
       "module": "EverCrypt_Hash",
-      "name": "hash",
+      "custom_module_name": true,
+      "name": "EverCrypt_Hash_Incremental_hash",
       "args": [{
           "name": "hash_alg",
           "kind": "input",
@@ -3686,7 +3687,7 @@
       "args": [{
           "name": "state",
           "kind": "input",
-          "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+          "type": "EverCrypt_Hash_Incremental_hash_state",
           "interface_index": 0,
           "tests": [
           ]
@@ -3713,7 +3714,7 @@
       ],
       "return": {
         "kind": "layout",
-        "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+        "type": "EverCrypt_Hash_Incremental_hash_state",
         "tests": [
         ]
       }
@@ -3725,7 +3726,7 @@
       "args": [{
           "name": "state",
           "kind": "output",
-          "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+          "type": "EverCrypt_Hash_Incremental_hash_state",
           "interface_index": 0,
           "tests": [
           ]
@@ -3756,7 +3757,7 @@
       "args": [{
           "name": "state",
           "kind": "input",
-          "type": "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____",
+          "type": "EverCrypt_Hash_Incremental_hash_state",
           "interface_index": 0,
           "tests": [
           ]

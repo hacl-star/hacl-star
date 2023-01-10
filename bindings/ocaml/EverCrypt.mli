@@ -173,18 +173,6 @@ end
 Multiplexing interfaces for SHA-224 and SHA-256 which use {{!AutoConfig2.SHAEXT}Intel SHA extensions} when available.
 *)
 
-module SHA2_224 : HashFunction
-(** Direct hashing with SHA-224
-
-The [digest] buffer must match the digest size of SHA-224, which is 28 bytes.
-*)
-
-module SHA2_256 : HashFunction
-(** Direct hashing with SHA-256
-
-The [digest] buffer must match the digest size of SHA-256, which is 32 bytes.
-*)
-
 
 (** {1:mac MACs}
 Message authentication codes *)
@@ -224,17 +212,6 @@ The hashing algorithms currently supported are the same as for the {{!EverCrypt.
       the output buffer is 64 bytes for BLAKE2b and 32 bytes for BLAKE2s.
 *)
 
-
-(** Non-agile, multiplexing interfaces for each version of HMAC are also available. *)
-
-module HMAC_SHA2_256 : MAC
-(** Multiplexing interface for HMAC-SHA-256 *)
-
-module HMAC_SHA2_384 : MAC
-(** Multiplexing interface for HMAC-SHA-384 *)
-
-module HMAC_SHA2_512 : MAC
-(** Multiplexing interface for HMAC-SHA-512 *)
 
 (** {2 Poly1305} *)
 
@@ -279,14 +256,6 @@ end
     Supports the same hashing algorithms as {!EverCrypt.HMAC}.
 *)
 
-module HKDF_SHA2_256 : HKDF
-(** Multiplexing interface for HKDF using SHA2-256 *)
-
-module HKDF_SHA2_384 : HKDF
-(** Multiplexing interface for HKDF using SHA2-384 *)
-
-module HKDF_SHA2_512 : HKDF
-(** Multiplexing interface for HKDF using SHA2-512 *)
 
 (** {1 DRBG}
 

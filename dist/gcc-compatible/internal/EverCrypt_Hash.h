@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __EverCrypt_HMAC_H
-#define __EverCrypt_HMAC_H
+#ifndef __internal_EverCrypt_Hash_H
+#define __internal_EverCrypt_Hash_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,31 +35,27 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Spec.h"
-#include "Hacl_Krmllib.h"
-#include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_SHA1.h"
-#include "Hacl_Hash_Blake2.h"
+#include "internal/Vale.h"
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_MD5.h"
+#include "../EverCrypt_Hash.h"
 
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
-
-typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
-
-extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
 void
-EverCrypt_HMAC_compute(
-  Spec_Hash_Definitions_hash_alg a,
-  uint8_t *mac,
-  uint8_t *key,
-  uint32_t keylen,
-  uint8_t *data,
-  uint32_t datalen
+EverCrypt_Hash_update_last_256(
+  uint32_t *s,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
 );
+
+void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_HMAC_H_DEFINED
+#define __internal_EverCrypt_Hash_H_DEFINED
 #endif

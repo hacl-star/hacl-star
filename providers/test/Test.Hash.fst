@@ -1,6 +1,5 @@
 module Test.Hash
 
-module H = EverCrypt.Hash
 module HI = EverCrypt.Hash.Incremental
 module S = Hacl.Streaming.Functor
 
@@ -22,15 +21,9 @@ open FStar.HyperStack.ST
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 let main (): St unit =
-  let s1 = H.create SHA2_256 in
-  let h1 = ST.get () in
-  let s2 = H.create SHA2_384 in
-  let h2 = ST.get () in
-  H.frame_invariant M.loc_none s1 h1 h2;
-  H.init #(Ghost.hide SHA2_256) s1;
-  let h3 = ST.get () in
-  H.frame_invariant (H.footprint s1 h1) s2 h2 h3;
-  H.init #(Ghost.hide SHA2_384) s2
+  // Nothing here: EverCrypt.Hash is no longer a public API, all clients
+  // expected to go through HI
+  ()
 
 #push-options "--z3rlimit 100"
 let test_incremental_api (): St unit =

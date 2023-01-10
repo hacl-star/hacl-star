@@ -107,49 +107,17 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_avx512
   EverCrypt_AutoConfig2_has_vec128
   EverCrypt_AutoConfig2_has_vec256
-  EverCrypt_Hash_string_of_alg
-  EverCrypt_Hash_uu___is_MD5_s
-  EverCrypt_Hash_uu___is_SHA1_s
-  EverCrypt_Hash_uu___is_SHA2_224_s
-  EverCrypt_Hash_uu___is_SHA2_256_s
-  EverCrypt_Hash_uu___is_SHA2_384_s
-  EverCrypt_Hash_uu___is_SHA2_512_s
-  EverCrypt_Hash_uu___is_SHA3_256_s
-  EverCrypt_Hash_uu___is_Blake2S_s
-  EverCrypt_Hash_uu___is_Blake2S_128_s
-  EverCrypt_Hash_uu___is_Blake2B_s
-  EverCrypt_Hash_uu___is_Blake2B_256_s
-  EverCrypt_Hash_alg_of_state
-  EverCrypt_Hash_create_in
-  EverCrypt_Hash_create
-  EverCrypt_Hash_init
   EverCrypt_Hash_update_multi_256
-  EverCrypt_Hash_update_multi
   EverCrypt_Hash_update_last_256
-  EverCrypt_Hash_update_last
-  EverCrypt_Hash_finish
-  EverCrypt_Hash_free
-  EverCrypt_Hash_copy
-  EverCrypt_Hash_hash_256
-  EverCrypt_Hash_hash_224
-  EverCrypt_Hash_hash
   EverCrypt_Hash_Incremental_hash_len
-  EverCrypt_Hash_Incremental_block_len
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
   EverCrypt_Hash_Incremental_update
-  EverCrypt_Hash_Incremental_finish_md5
-  EverCrypt_Hash_Incremental_finish_sha1
-  EverCrypt_Hash_Incremental_finish_sha224
-  EverCrypt_Hash_Incremental_finish_sha256
-  EverCrypt_Hash_Incremental_finish_sha3_256
-  EverCrypt_Hash_Incremental_finish_sha384
-  EverCrypt_Hash_Incremental_finish_sha512
-  EverCrypt_Hash_Incremental_finish_blake2s
-  EverCrypt_Hash_Incremental_finish_blake2b
   EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
+  EverCrypt_Hash_Incremental_hash_256
+  EverCrypt_Hash_Incremental_hash
   Hacl_Impl_Chacha20_chacha20_init
   Hacl_Impl_Chacha20_chacha20_update
   Hacl_Chacha20_chacha20_encrypt
@@ -562,13 +530,13 @@ EXPORTS
   Hacl_Bignum4096_32_bn_to_bytes_le
   Hacl_Bignum4096_32_lt_mask
   Hacl_Bignum4096_32_eq_mask
+  EverCrypt_HMAC_is_supported_alg
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
   EverCrypt_HMAC_compute_sha2_512
   EverCrypt_HMAC_compute_blake2s
   EverCrypt_HMAC_compute_blake2b
-  EverCrypt_HMAC_is_supported_alg
   EverCrypt_HMAC_compute
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
@@ -584,22 +552,6 @@ EXPORTS
   EverCrypt_DRBG_uu___is_SHA2_512_s
   EverCrypt_DRBG_create_in
   EverCrypt_DRBG_create
-  EverCrypt_DRBG_instantiate_sha1
-  EverCrypt_DRBG_instantiate_sha2_256
-  EverCrypt_DRBG_instantiate_sha2_384
-  EverCrypt_DRBG_instantiate_sha2_512
-  EverCrypt_DRBG_reseed_sha1
-  EverCrypt_DRBG_reseed_sha2_256
-  EverCrypt_DRBG_reseed_sha2_384
-  EverCrypt_DRBG_reseed_sha2_512
-  EverCrypt_DRBG_generate_sha1
-  EverCrypt_DRBG_generate_sha2_256
-  EverCrypt_DRBG_generate_sha2_384
-  EverCrypt_DRBG_generate_sha2_512
-  EverCrypt_DRBG_uninstantiate_sha1
-  EverCrypt_DRBG_uninstantiate_sha2_256
-  EverCrypt_DRBG_uninstantiate_sha2_384
-  EverCrypt_DRBG_uninstantiate_sha2_512
   EverCrypt_DRBG_instantiate
   EverCrypt_DRBG_reseed
   EverCrypt_DRBG_generate
@@ -798,18 +750,6 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
-  EverCrypt_HKDF_expand_sha1
-  EverCrypt_HKDF_extract_sha1
-  EverCrypt_HKDF_expand_sha2_256
-  EverCrypt_HKDF_extract_sha2_256
-  EverCrypt_HKDF_expand_sha2_384
-  EverCrypt_HKDF_extract_sha2_384
-  EverCrypt_HKDF_expand_sha2_512
-  EverCrypt_HKDF_extract_sha2_512
-  EverCrypt_HKDF_expand_blake2s
-  EverCrypt_HKDF_extract_blake2s
-  EverCrypt_HKDF_expand_blake2b
-  EverCrypt_HKDF_extract_blake2b
   EverCrypt_HKDF_expand
   EverCrypt_HKDF_extract
   Hacl_EC_Ed25519_mk_felem_zero
