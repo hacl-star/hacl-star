@@ -148,10 +148,23 @@ let hash_state =
 // Public API (streaming)
 // ----------------------
 
+[@@ Comment
+"Allocate initial state for the agile hash. The argument `a` stands for the
+choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
+efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
+before. The state is to be freed by calling `free`."]
 let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
+[@@ Comment
+"Reset an existing state to the initial hash state with empty data."]
 let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
+[@@ Comment
+"Feed an arbitrary amount of data into the hash. This function returns
+EverCrypt_Error_Success for success, or EverCrypt_Error_MaximumLengthExceeded if
+the combined length of all of the data passed to `update` (since the last call
+to `init`) exceeds 2^61-1 bytes or 2^64-1 bytes, depending on the choice of
+algorithm. Both limits are unlikely to be attained in practice."]
 let update (i: G.erased hash_alg)
   (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
   (data: B.buffer uint8)
@@ -196,8 +209,17 @@ let finish_blake2s: finish_st Blake2S = F.mk_finish evercrypt_hash Blake2S (Ever
 private
 let finish_blake2b: finish_st Blake2B = F.mk_finish evercrypt_hash Blake2B (EverCrypt.Hash.state Blake2B) (G.erased unit)
 
+[@@ Comment
+"Perform a run-time test to determine which algorithm was chosen for the given piece of state."]
 let alg_of_state (a: G.erased hash_alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
+[@@ Comment
+"Write the resulting hash into `dst`, an array whose length is
+algorithm-specific. You can use the macros defined earlier in this file to
+allocate a destination buffer of the right length. The state remains valid after
+a call to `finish`, meaning the user may feed more data into the hash via
+`update`. (The finish function operates on an internal copy of the state and
+therefore does not invalidate the client-held state.)"]
 val finish: a:G.erased hash_alg -> finish_st a
 let finish a s dst =
   let a = alg_of_state a s in
@@ -212,6 +234,8 @@ let finish a s dst =
   | Blake2S -> finish_blake2s s dst
   | Blake2B -> finish_blake2b s dst
 
+[@@ Comment
+"Free a state previously allocated with `create_in`."]
 let free (i: G.erased hash_alg) = F.free evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit)
 
 // Private API (one-shot, multiplexing)
@@ -244,6 +268,13 @@ let hash_224 input input_len dst =
 // ALSO: for some reason, this function was historically exported with an order
 // of arguments different from Hacl.Hash.Definitions.hash_st a. Would be worth
 // fixing at some point.
+
+[@@ Comment
+"Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
+earlier in this file to allocate a destination buffer of the right length. This
+API will automatically pick the most efficient implementation, provided you have
+called EverCrypt_AutoConfig2_init() before. "]
 val hash:
   a:Spec.Agile.Hash.hash_alg ->
   dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
