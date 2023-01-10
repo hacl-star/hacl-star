@@ -106,8 +106,7 @@ Verify an ECDSA signature.
   The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
 
   The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve
 */
 bool
@@ -206,8 +205,7 @@ Verify an ECDSA signature.
   The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
 
   The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve
 */
 bool
@@ -302,8 +300,7 @@ Public key validation.
   The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
   The public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve. 
 */
 bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *pk);
