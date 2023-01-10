@@ -18,10 +18,10 @@ _Put an `x` in the boxes that apply_
 
 _Put an `x` in the boxes that apply. You can also fill these out after creating the PR. If you're unsure about any of them, don't hesitate to ask. We're here to help! This is simply a reminder of what we are going to look for before merging your code._
 
-- [ ] I have read the [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) doc
-- [ ] I have read and agree to submit my changes under the [LICENSE](LICENSE.md)
+- [ ] I have read the [CODE_OF_CONDUCT.md](https://github.com/hacl-star/hacl-star/blob/main/CODE_OF_CONDUCT.md) doc
+- [ ] I have read and agree to submit my changes under the [LICENSE](https://github.com/hacl-star/hacl-star/blob/main/LICENSE)
 - [ ] I have added necessary documentation (if appropriate)
-- [ ] I have edited [CHANGES.md](CHANGES.md) (if appropriate)
+- [ ] I have edited [CHANGES.md](https://github.com/hacl-star/hacl-star/blob/main/CHANGES.md) (if appropriate)
 
 ## Further comments
 
