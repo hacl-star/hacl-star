@@ -13,13 +13,13 @@ homepage: "https://hacl-star.github.io/"
 doc: "https://hacl-star.github.io/ocaml_doc"
 bug-reports: "https://github.com/project-everest/hacl-star/issues"
 depends: [
-  "ocaml" { >= "4.08.0" }
+  "ocaml" {>= "4.08.0"}
   "dune" {>= "1.2"}
   "hacl-star-raw" {= version}
   "zarith"
   "cppo" {build}
   "alcotest" {with-test & >= "1.1.0"}
-  "qcheck-core" {with-test}
+  "qcheck-core" {with-test & >= "0.20"}
   "secp256k1-internal" {with-test}
   "cstruct" {with-test}
   "odoc" {with-doc}
