@@ -37,6 +37,7 @@
           hacl-stats = hacl.passthru.stats;
           hacl-dist-compare = hacl.passthru.dist-compare;
           hacl-dist-list = hacl.passthru.dist-list;
+          hacl-resource-monitor = hacl.passthru.resource-monitor;
         };
       });
 }

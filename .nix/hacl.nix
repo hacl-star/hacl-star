@@ -1,8 +1,25 @@
 { lib, dotnet-runtime, dune_3, fstar, git, karamel, nodePackages, nodejs
 , ocamlPackages, openssl, python3, stdenv, time, vale, which, writeTextFile, z3
-}:
+, fetchFromGitHub }:
 
 let
+
+  runlim = stdenv.mkDerivation rec {
+    name = "runlim";
+    src = fetchFromGitHub {
+      owner = "arminbiere";
+      repo = "runlim";
+      rev = "master";
+      sha256 = "sha256-0aCt3Mb6cuuR/srhNLPXEs4/AooPn3ivEWb8cA76BEE=";
+    };
+    configurePhase = ''
+      CC="" ./configure.sh
+    '';
+    installPhase = ''
+      mkdir -p $out/bin
+      cp ./runlim ./runlim-remount-proc $out/bin
+    '';
+  };
 
   hacl = stdenv.mkDerivation {
     name = "hacl-star";
@@ -57,6 +74,7 @@ let
       nodejs
       nodePackages.jsdoc
       dune_3
+      runlim
     ] ++ (with ocamlPackages; [
       ocaml
       findlib
@@ -96,7 +114,7 @@ let
     enableParallelBuilding = true;
 
     buildPhase = ''
-      make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
+      RESOURCEMONITOR=1 make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
     '';
 
     installPhase = ''
@@ -195,6 +213,16 @@ let
               | grep "^\[VERIFY\]" \
               | sed 's/\[VERIFY\] \(.*\), \(.*\)/\2 \1/' \
               | sort -rg - > $out/stats.txt
+        '';
+      };
+      resource-monitor = stdenv.mkDerivation {
+        name = "hacl-resource-monitor";
+        src = hacl;
+        dontBuild = true;
+        installPhase = ''
+          mkdir -p $out/nix-support
+          bash ${fstar.src}/.scripts/res_summary.sh > $out/resources.txt
+          echo "file resources $out/resources.txt" >> $out/nix-support/hydra-build-products
         '';
       };
     };
