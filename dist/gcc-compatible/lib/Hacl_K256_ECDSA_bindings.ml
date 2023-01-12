@@ -86,10 +86,4 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_K256_ECDSA_public_key_compressed_from_raw =
       foreign "Hacl_K256_ECDSA_public_key_compressed_from_raw"
         (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
-    let hacl_K256_ECDSA_is_public_key_valid =
-      foreign "Hacl_K256_ECDSA_is_public_key_valid"
-        (ocaml_bytes @-> (returning bool))
-    let hacl_K256_ECDSA_secret_to_public =
-      foreign "Hacl_K256_ECDSA_secret_to_public"
-        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
   end

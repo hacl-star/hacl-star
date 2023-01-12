@@ -14,7 +14,7 @@
 #include "test_helpers.h"
 #include "k256-ecdsa_vectors.h"
 
-#define ROUNDS 16384
+#define ROUNDS 32768
 
 static uint8_t sk2[32U] = {
     (uint8_t)0xebU, (uint8_t)0xb2U, (uint8_t)0xc0U, (uint8_t)0x82U, (uint8_t)0xfdU, (uint8_t)0x77U,
