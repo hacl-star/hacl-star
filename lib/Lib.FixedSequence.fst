@@ -63,7 +63,7 @@ let rec createi_lemma_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < 
 inline_for_extraction noextract
 let createi_lemma (#a:Type0) (len:flen) (f:(i:nat{i < len} -> a)) (i:nat{i < len}) :
     Lemma (index (createi #a len f) i == f i)
-	  [SMTPat (index (createi #a len f) i)] =
+    [SMTPat (index (createi #a len f) i)] =
     createi_lemma_ #a 0 len f i
 
 inline_for_extraction
@@ -71,7 +71,7 @@ let to_lseq (#a:Type0) (#len:flen) (l:fseq a len) : Lib.Sequence.lseq a len =
     normalize_term (Lib.Sequence.createi len (index l))
 
 inline_for_extraction
-let from_lseq (#a:Type0) (#len:flen) (s:Lib.Sequence.lseq a len) : l:fseq a len =
+let from_lseq (#a:Type0) (#len:flen) (s:Lib.Sequence.lseq a len) : fseq a len =
     normalize_term (createi #a len (Lib.Sequence.index s))
 
 inline_for_extraction
@@ -82,45 +82,45 @@ let create (#a:Type0) (len:flen) (init:a) =
 inline_for_extraction noextract
 let create_lemma (#a:Type0) (len:flen) (init:a) (i:nat{i < len}) :
     Lemma (index (create #a len init) i == init)
-	  [SMTPat (index (create #a len init) i)] =
+    [SMTPat (index (create #a len init) i)] =
     createi_lemma_ #a 0 len (fun i -> init) i
 
 inline_for_extraction //noextract
 let rec concat_ (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_fseq_len})
-		(s0:fseq a len0) (s1:fseq a len1) : fseq_ a (len0 + len1) =
-	if len0 = 1 then s0,s1
-	else fst s0, concat_ (rest s0) s1
+    (s0:fseq a len0) (s1:fseq a len1) : fseq_ a (len0 + len1) =
+  if len0 = 1 then s0,s1
+  else fst s0, concat_ (rest s0) s1
 
 inline_for_extraction
 let concat (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_fseq_len})
-		(s0:fseq a len0) (s1:fseq a len1) : fseq a (len0 + len1) =
-	concat_ s0 s1
+    (s0:fseq a len0) (s1:fseq a len1) : fseq a (len0 + len1) =
+  concat_ s0 s1
 
 inline_for_extraction noextract
 let rec concat_lemma1 (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_fseq_len})
-		(s0:fseq a len0) (s1:fseq a len1) (i:nat{i < len0}) :
-		Lemma (index (concat s0 s1) i == index s0 i) =
-	if i = 0 then ()
-	else concat_lemma1 (rest s0) s1 (i-1)
+    (s0:fseq a len0) (s1:fseq a len1) (i:nat{i < len0}) :
+    Lemma (index (concat s0 s1) i == index s0 i) =
+  if i = 0 then ()
+  else concat_lemma1 (rest s0) s1 (i-1)
 
 inline_for_extraction noextract
 let rec concat_lemma2 (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_fseq_len})
-		(s0:fseq a len0) (s1:fseq a len1) (i:nat{i >= len0 /\ i < len0 + len1}) :
-		Lemma (index (concat s0 s1) i == index s1 (i-len0)) =
-	if i = 0 then ()
-	else
-	  if len0 = 1 then ()
-	  else concat_lemma2 (rest s0) s1 (i-1)
+    (s0:fseq a len0) (s1:fseq a len1) (i:nat{i >= len0 /\ i < len0 + len1}) :
+    Lemma (index (concat s0 s1) i == index s1 (i-len0)) =
+  if i = 0 then ()
+  else
+    if len0 = 1 then ()
+    else concat_lemma2 (rest s0) s1 (i-1)
 
 inline_for_extraction noextract
 let concat_lemma (#a:Type0) (#len0:flen) (#len1:flen)
-		 (s0:fseq a len0) (s1:fseq a len1) (i:nat):
-		Lemma (requires (len0 + len1 <= max_fseq_len /\ i < len0 + len1))
-		      (ensures ((i < len0 ==> index (concat s0 s1) i == index s0 i) /\
-			        (i >= len0 ==> index (concat s0 s1) i == index s1 (i-len0))))
-		[SMTPat (index (concat s0 s1) i)] =
-		  if i < len0 then concat_lemma1 s0 s1 i
-		  else concat_lemma2 s0 s1 i
+     (s0:fseq a len0) (s1:fseq a len1) (i:nat):
+    Lemma (requires (len0 + len1 <= max_fseq_len /\ i < len0 + len1))
+          (ensures ((i < len0 ==> index (concat s0 s1) i == index s0 i) /\
+              (i >= len0 ==> index (concat s0 s1) i == index s1 (i-len0))))
+    [SMTPat (index (concat s0 s1) i)] =
+      if i < len0 then concat_lemma1 s0 s1 i
+      else concat_lemma2 s0 s1 i
 
 //abstract
 type equal (#a:Type) (#len:flen) (s1:fseq a len) (s2:fseq a len) =
@@ -155,7 +155,7 @@ let upd (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq a len
 inline_for_extraction noextract
 let rec upd_lemma (#a:Type0) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) (j:nat{j < len}) :
     Lemma (index (upd #a #len s i x) j == (if i = j then x else index s j))
-	  [SMTPat (index (upd #a #len s i x) j)] =
+    [SMTPat (index (upd #a #len s i x) j)] =
   if j = 0 then ()
   else if i = 0 then ()
        else upd_lemma #a #(len-1) (rest s) (i-1) x (j-1)
@@ -200,20 +200,20 @@ let fseq_to_bytes_be (#t:inttype{unsigned t}) (#l:secrecy_level) (#len:flen) (s:
     admit();
     assert_norm (len * numbytes t < pow2 32);
     let _, o = normalize_term (Lib.Sequence.generate_blocks (numbytes t) len len funit
-		(fun i u -> (),Lib.ByteSequence.uint_to_bytes_be #t #l s.[i]) ()) in
+    (fun i u -> (),Lib.ByteSequence.uint_to_bytes_be #t #l s.[i]) ()) in
     o
 
 let fseq_to_bytes_le (#t:inttype{unsigned t}) (#l:secrecy_level) (#len:flen) (s:fseq (uint_t t l) len) : Lib.ByteSequence.lbytes_l l (numbytes t * len) =
     assert_norm (len * numbytes t < pow2 32);
     let _, o = normalize_term (Lib.Sequence.generate_blocks (numbytes t) len len funit
-		(fun i u -> (),Lib.ByteSequence.uint_to_bytes_le #t #l s.[i]) ()) in
+    (fun i u -> (),Lib.ByteSequence.uint_to_bytes_le #t #l s.[i]) ()) in
     o
 
-let fseq_from_bytes_be (#t:inttype{unsigned t /\ t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : (s:fseq (uint_t t l) len) =
+let fseq_from_bytes_be (#t:inttype{unsigned t /\ t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : fseq (uint_t t l) len =
     normalize_term (createi #(uint_t t l) len
       (fun i -> Lib.ByteSequence.uint_from_bytes_be (Lib.Sequence.sub b (i * numbytes t) (numbytes t))))
 
-let fseq_from_bytes_le (#t:inttype{unsigned t /\ t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : (s:fseq (uint_t t l) len) =
+let fseq_from_bytes_le (#t:inttype{unsigned t /\ t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : fseq (uint_t t l) len =
     normalize_term (createi #(uint_t t l) len
       (fun i -> Lib.ByteSequence.uint_from_bytes_le (Lib.Sequence.sub b (i * numbytes t) (numbytes t))))
 

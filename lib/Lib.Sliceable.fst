@@ -107,7 +107,7 @@ val xNxM_eq_intro (#n:IT.size_nat) (#xN:sig n) (#m:IT.size_nat) (x y:xNxM xN m) 
   Lemma
     (requires forall (i:nat{i<m}). index x i == index y i)
     (ensures x == y)
-let rec xNxM_eq_intro #n #xN #m x y =
+let xNxM_eq_intro #n #xN #m x y =
   assert (forall (i:nat{i<m}). Seq.index x i == Seq.index y i);
   Seq.eq_intro x y
 
@@ -544,12 +544,12 @@ let reduce_output_lowstar #m #m' spec xN impl m'' r =
 (*** of_uint and to_uint ***)
 
 inline_for_extraction noextract
-val to_uint (#m:IT.size_nat{m>0}) (x:u1xM m) : (p:uint_t m)
+val to_uint (#m:IT.size_nat{m>0}) (x:u1xM m) : uint_t m
 inline_for_extraction noextract
 let to_uint #m x = FStar.UInt.from_vec (FStar.Seq.init m (index x))
 
 inline_for_extraction noextract
-val of_uint (#m:IT.size_nat{m>0}) (p:uint_t m) : (x:u1xM m)
+val of_uint (#m:IT.size_nat{m>0}) (p:uint_t m) : u1xM m
 inline_for_extraction noextract
 let of_uint #m p = u1xM_mk _ (FStar.UInt.nth p)
 
