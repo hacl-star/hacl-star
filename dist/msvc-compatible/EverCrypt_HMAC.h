@@ -40,65 +40,12 @@ extern "C" {
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "Hacl_Hash_Blake2.h"
-#include "EverCrypt_Hash.h"
-
-void
-EverCrypt_HMAC_compute_sha1(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-);
-
-void
-EverCrypt_HMAC_compute_sha2_256(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-);
-
-void
-EverCrypt_HMAC_compute_sha2_384(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-);
-
-void
-EverCrypt_HMAC_compute_sha2_512(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-);
-
-void
-EverCrypt_HMAC_compute_blake2s(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-);
-
-void
-EverCrypt_HMAC_compute_blake2b(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-);
 
 bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
+
+extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2);
 
 void
 EverCrypt_HMAC_compute(
