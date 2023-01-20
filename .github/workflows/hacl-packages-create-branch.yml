@@ -34,14 +34,20 @@ jobs:
           git config --local user.email "hacl-star@mailo.com"
           git checkout -b $branch
           git add src include
-          git commit -m "[CI] update code"
+          git commit --allow-empty -m "[CI] update code"
           git push --force --set-upstream  origin $branch
       - name: comment pr
         uses: thollander/actions-comment-pull-request@v1
         with:
           message: |
-            [CI] Extensive testing of the generated code on hacl-packages:
-            - [build](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abuild_pull_request)
-            - [ocaml](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Aocaml)
-            - [benchmarks](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abenchmark_pull_request)
+            [CI] Important!
+            The code in `dist` is tested on [cryspen/hacl-packages](https://github.com/cryspen/hacl-packages).
+            `dist` is not automatically re-generated, be sure to do it manually.
+            Then check the following tests before merging this PR.
+            Always check the latest run, it corresponds to the most recent version of this branch.
+            All jobs are expected to be successful.
+            In some cases manual intervention is needed. Please ping the hacl-packages maintainers.
+            - [Build & Test](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abuild_pull_request): Build on Linux (x86, x64), Windows (x86, x64), MacOS (x64, arm64), s390x, Android (arm64) and test on Linux (x86, x64), Windows (x86, x64), MacOS (x64).
+            - [Benchmarks](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Abenchmark_pull_request): Navigate to the terminal output in “Run benchmarks”. The comparison with the main branch will be at the bottom.
+            - [OCaml bindings](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Aocaml) & [JS bindings](https://github.com/cryspen/hacl-packages/actions?query=branch%3Ahacl-star-${{ github.head_ref }}+workflow%3Ajs)
           comment_includes: "[CI]"
