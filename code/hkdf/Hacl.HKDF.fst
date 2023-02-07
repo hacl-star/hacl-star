@@ -171,6 +171,12 @@ let expand_sha2_256: expand_st SHA2_256 =
 let extract_sha2_256: extract_st SHA2_256 =
   mk_extract SHA2_256 Hacl.HMAC.compute_sha2_256
 
+let expand_sha2_384: expand_st SHA2_384 =
+  mk_expand SHA2_384 Hacl.HMAC.compute_sha2_384
+
+let extract_sha2_384: extract_st SHA2_384 =
+  mk_extract SHA2_384 Hacl.HMAC.compute_sha2_384
+
 let expand_sha2_512: expand_st SHA2_512 =
   mk_expand SHA2_512 Hacl.HMAC.compute_sha2_512
 

@@ -14,6 +14,18 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
+    let hacl_HKDF_expand_sha2_384 =
+      foreign "Hacl_HKDF_expand_sha2_384"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @-> (uint32_t @-> (returning void)))))))
+    let hacl_HKDF_extract_sha2_384 =
+      foreign "Hacl_HKDF_extract_sha2_384"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
     let hacl_HKDF_expand_sha2_512 =
       foreign "Hacl_HKDF_expand_sha2_512"
         (ocaml_bytes @->
