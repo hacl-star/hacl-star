@@ -113,6 +113,8 @@ val expand_sha2_256: expand_st SHA2_256
 @param ikmlen Length of input keying material."]
 val extract_sha2_256: extract_st SHA2_256
 
+[@@ Comment "Expand pseudorandom key to desired length.
+
 @param okm Pointer to `len` bytes of memory where output keying material is written to.
 @param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
 @param prklen Length of pseudorandom key.
