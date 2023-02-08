@@ -159,6 +159,14 @@ let sha224 input input_len dst =
 inline_for_extraction noextract
 let alloca_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let create_in_512 = F.create_in hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+
+[@@ Comment
+"Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_512`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch."]
+let copy_512 = F.copy hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+
 let init_512 = F.init hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 
 [@@ CInline ]

@@ -919,6 +919,34 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512(void)
   return p;
 }
 
+/**
+Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_512`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch.
+*/
+Hacl_Streaming_SHA2_state_sha2_384
+*Hacl_Streaming_SHA2_copy_512(Hacl_Streaming_SHA2_state_sha2_384 *s0)
+{
+  Hacl_Streaming_SHA2_state_sha2_384 scrut = *s0;
+  uint64_t *block_state0 = scrut.block_state;
+  uint8_t *buf0 = scrut.buf;
+  uint64_t total_len0 = scrut.total_len;
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
+  memcpy(buf, buf0, (uint32_t)128U * sizeof (uint8_t));
+  uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint64_t));
+  memcpy(block_state, block_state0, (uint32_t)8U * sizeof (uint64_t));
+  Hacl_Streaming_SHA2_state_sha2_384
+  s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
+  Hacl_Streaming_SHA2_state_sha2_384
+  *p =
+    (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_SHA2_state_sha2_384
+      ));
+  p[0U] = s;
+  return p;
+}
+
 void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_SHA2_state_sha2_384 *s)
 {
   Hacl_Streaming_SHA2_state_sha2_384 scrut = *s;
