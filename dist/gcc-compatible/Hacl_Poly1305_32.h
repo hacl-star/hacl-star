@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Krmllib.h"
 
 typedef uint64_t *Hacl_Poly1305_32_poly1305_ctx;

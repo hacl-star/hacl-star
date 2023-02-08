@@ -30,6 +30,7 @@
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
 #include "config.h"
+
 #define MD5_s 0
 #define SHA1_s 1
 #define SHA2_224_s 2

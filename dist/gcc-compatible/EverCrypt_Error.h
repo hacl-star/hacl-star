@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 #define EverCrypt_Error_Success 0
 #define EverCrypt_Error_UnsupportedAlgorithm 1
 #define EverCrypt_Error_InvalidKey 2

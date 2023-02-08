@@ -25,7 +25,5 @@
 
 #include "internal/Vale.h"
 
-
-
 typedef uint64_t als_ret;
 
