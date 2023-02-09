@@ -25,8 +25,6 @@
 
 #include "Hacl_HKDF_Blake2b_256.h"
 
-
-
 /**
 Expand pseudorandom key to desired length.
 
