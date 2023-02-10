@@ -257,7 +257,7 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_SOURCE_DIRS)) \
     $(addsuffix /*.fst,$(ALL_HACL_SOURCE_DIRS))) \
-  $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
+  $(FSTAR_ULIB)/LowStar.Endianness.fst \
   $(wildcard $(VALE_FSTS)) # empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
@@ -280,7 +280,7 @@ ifndef MAKE_RESTARTS
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract 'krml:*' \
 	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@.tmp && \
-	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@.tmp && mv $@.tmp $@ \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/\.\./!/!g' $@.tmp && mv $@.tmp $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -1022,8 +1022,8 @@ test-ml-%: dist/test/ml/%.exe
 
 obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_FILES))
 	# JP: doesn't work because a PPX is prepended for some reason
-	#ocamlfind mklib -o haclml -package fstarlib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
-	ocamlfind opt -a -o $@ -package fstarlib -g -I $(HACL_HOME)/obj $^
+	#ocamlfind mklib -o haclml -package fstar.lib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
+	ocamlfind opt -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^
 
 
 ########
