@@ -25,8 +25,8 @@
 
 #include "EverCrypt_Curve25519.h"
 
-
 #include "config.h"
+
 static inline bool has_adx_bmi2(void)
 {
   bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();

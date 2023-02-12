@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "../Hacl_Spec.h"
 
 /* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa_tags */

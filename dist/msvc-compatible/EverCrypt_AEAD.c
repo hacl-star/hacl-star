@@ -28,6 +28,7 @@
 #include "internal/Vale.h"
 #include "internal/Hacl_Spec.h"
 #include "config.h"
+
 /**
 Both encryption and decryption require a state that holds the key.
 The state may be reused as many times as desired.

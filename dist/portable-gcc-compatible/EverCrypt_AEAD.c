@@ -28,6 +28,7 @@
 #include "internal/Vale.h"
 #include "internal/Hacl_Spec.h"
 #include "config.h"
+
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
 /**

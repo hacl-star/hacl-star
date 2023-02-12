@@ -35,9 +35,8 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
 #include "libintvector.h"
+
 /* SNIPPET_START: Hacl_Poly1305_256_poly1305_ctx */
 
 typedef Lib_IntVector_Intrinsics_vec256 *Hacl_Poly1305_256_poly1305_ctx;

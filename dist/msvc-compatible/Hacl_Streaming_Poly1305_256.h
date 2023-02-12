@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Poly1305_256.h"
 
 typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s

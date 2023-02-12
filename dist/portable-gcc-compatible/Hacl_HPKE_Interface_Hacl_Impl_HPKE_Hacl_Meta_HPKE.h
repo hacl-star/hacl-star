@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 /* SNIPPET_START: Hacl_Impl_HPKE_context_s */
 
 typedef struct Hacl_Impl_HPKE_context_s_s

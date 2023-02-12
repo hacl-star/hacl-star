@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
 
 static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);

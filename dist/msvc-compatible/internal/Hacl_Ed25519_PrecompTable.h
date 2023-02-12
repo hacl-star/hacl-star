@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 static const
 uint64_t
 Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w4[320U] =

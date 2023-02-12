@@ -25,8 +25,6 @@
 
 #include "EverCrypt_Ed25519.h"
 
-
-
 void EverCrypt_Ed25519_secret_to_public(uint8_t *public_key, uint8_t *private_key)
 {
   Hacl_Ed25519_secret_to_public(public_key, private_key);

@@ -25,8 +25,6 @@
 
 #include "Hacl_Streaming_Blake2.h"
 
-
-
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_create_in */
 
 /**

@@ -29,6 +29,7 @@
 #include "internal/Hacl_SHA2_Generic.h"
 #include "internal/Hacl_Krmllib.h"
 #include "libintvector.h"
+
 static inline void sha224_init8(Lib_IntVector_Intrinsics_vec256 *hash)
 {
   KRML_MAYBE_FOR8(i,
