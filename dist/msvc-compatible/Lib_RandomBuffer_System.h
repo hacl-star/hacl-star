@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 KRML_DEPRECATED("random_crypto")
 
 extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf, uint32_t len);

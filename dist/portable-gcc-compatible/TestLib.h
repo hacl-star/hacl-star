@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 /* SNIPPET_START: TestLib_touch */
 
 extern void TestLib_touch(int32_t uu___);

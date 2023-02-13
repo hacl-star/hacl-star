@@ -26,12 +26,10 @@
 #ifndef __Hacl_Test_K256_H
 #define __Hacl_Test_K256_H
 
-
-
-
 #include "krmllib.h"
 #include "libintvector.h"
 #include "lib_intrinsics.h"
+
 exit_code main(void);
 
 

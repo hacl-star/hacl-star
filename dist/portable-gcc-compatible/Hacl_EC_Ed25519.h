@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_EC_Ed25519_mk_felem_zero */

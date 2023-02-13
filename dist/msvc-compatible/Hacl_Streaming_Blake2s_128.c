@@ -25,8 +25,6 @@
 
 #include "Hacl_Streaming_Blake2s_128.h"
 
-
-
 /**
   State allocation function when there is no key
 */

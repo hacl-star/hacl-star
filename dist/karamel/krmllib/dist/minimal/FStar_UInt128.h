@@ -7,15 +7,13 @@
 #ifndef __FStar_UInt128_H
 #define __FStar_UInt128_H
 
-
-
-
 #include <inttypes.h>
 #include <stdbool.h>
 #include "krml/internal/compat.h"
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/types.h"
 #include "krml/internal/target.h"
+
 static inline FStar_UInt128_uint128
 FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 

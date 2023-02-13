@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "../Hacl_Krmllib.h"
 
 static inline uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);

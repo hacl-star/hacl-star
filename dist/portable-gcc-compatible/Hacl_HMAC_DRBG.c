@@ -25,8 +25,6 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
-
-
 /* SNIPPET_START: Hacl_HMAC_DRBG_reseed_interval */
 
 uint32_t Hacl_HMAC_DRBG_reseed_interval = (uint32_t)1024U;

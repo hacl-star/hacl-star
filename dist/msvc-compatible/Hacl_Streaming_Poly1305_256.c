@@ -25,8 +25,6 @@
 
 #include "Hacl_Streaming_Poly1305_256.h"
 
-
-
 Hacl_Streaming_Poly1305_256_poly1305_256_state
 *Hacl_Streaming_Poly1305_256_create_in(uint8_t *k)
 {

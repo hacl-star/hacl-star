@@ -25,8 +25,6 @@
 
 #include "internal/Vale.h"
 
-
-
 /* SNIPPET_START: als_ret */
 
 typedef uint64_t als_ret;

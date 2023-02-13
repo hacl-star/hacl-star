@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 /* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
 
 #define Spec_Hash_Definitions_SHA2_224 0

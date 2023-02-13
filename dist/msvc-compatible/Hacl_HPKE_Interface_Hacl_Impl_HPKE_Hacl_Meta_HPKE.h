@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 typedef struct Hacl_Impl_HPKE_context_s_s
 {
   uint8_t *ctx_key;

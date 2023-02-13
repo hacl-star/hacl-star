@@ -25,8 +25,6 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
-
-
 uint32_t Hacl_HMAC_DRBG_reseed_interval = (uint32_t)1024U;
 
 uint32_t Hacl_HMAC_DRBG_max_output_length = (uint32_t)65536U;

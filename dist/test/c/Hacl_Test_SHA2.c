@@ -25,8 +25,6 @@
 
 #include "Hacl_Test_SHA2.h"
 
-
-
 static uint32_t
 k224_256[64U] =
   {

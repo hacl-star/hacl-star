@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 void
 Hacl_Chacha20_chacha20_encrypt(
   uint32_t len,

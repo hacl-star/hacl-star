@@ -25,12 +25,12 @@
 
 #ifndef __Test_H
 #define __Test_H
+
 #include "krml/internal/compat.h"
-
-
 
 #include "krmllib.h"
 #include "libintvector.h"
+
 exit_code main(void);
 
 

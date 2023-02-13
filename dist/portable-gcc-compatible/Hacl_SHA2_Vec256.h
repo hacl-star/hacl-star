@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_SHA2_Vec256_sha224_8 */

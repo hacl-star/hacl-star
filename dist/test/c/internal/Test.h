@@ -25,12 +25,13 @@
 
 #ifndef __internal_Test_H
 #define __internal_Test_H
-#include "krml/internal/compat.h"
 
+#include "krml/internal/compat.h"
 
 #include "../Test.h"
 #include "krmllib.h"
 #include "libintvector.h"
+
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
