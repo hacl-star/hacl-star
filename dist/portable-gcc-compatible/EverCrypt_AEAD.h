@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Spec.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_Chacha20Poly1305.h"

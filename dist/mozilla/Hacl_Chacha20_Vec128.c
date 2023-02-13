@@ -28,6 +28,7 @@
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Chacha20.h"
 #include "libintvector.h"
+
 static inline void double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
 {
   st[0U] = Lib_IntVector_Intrinsics_vec128_add32(st[0U], st[4U]);

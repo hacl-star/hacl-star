@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 /* SNIPPET_START: EverCrypt_Cipher_chacha20 */
 
 void

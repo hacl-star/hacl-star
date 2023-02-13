@@ -25,8 +25,6 @@
 
 #include "Hacl_Test_CSHAKE.h"
 
-
-
 extern void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
 extern void

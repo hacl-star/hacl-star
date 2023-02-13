@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 /* SNIPPET_START: Hacl_Impl_SHA2_Types_uint8_1p */
 
 typedef uint8_t *Hacl_Impl_SHA2_Types_uint8_1p;

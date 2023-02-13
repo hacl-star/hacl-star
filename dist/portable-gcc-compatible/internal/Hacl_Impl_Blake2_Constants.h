@@ -35,9 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-
-
 /* SNIPPET_START: Hacl_Impl_Blake2_Constants_sigmaTable */
 
 static const

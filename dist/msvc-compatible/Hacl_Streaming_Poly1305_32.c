@@ -25,8 +25,6 @@
 
 #include "Hacl_Streaming_Poly1305_32.h"
 
-
-
 Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_in(uint8_t *k)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));

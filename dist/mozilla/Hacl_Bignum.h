@@ -35,9 +35,9 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
+
 typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
 {
   uint32_t len;

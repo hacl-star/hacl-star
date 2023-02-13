@@ -25,8 +25,6 @@
 
 #include "internal/Test.h"
 
-
-
 extern void C_String_print(C_String_t uu___);
 
 extern uint32_t C_String_strlen(C_String_t uu___);

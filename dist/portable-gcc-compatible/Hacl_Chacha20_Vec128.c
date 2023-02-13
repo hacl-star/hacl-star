@@ -28,6 +28,7 @@
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Chacha20.h"
 #include "libintvector.h"
+
 /* SNIPPET_START: double_round_128 */
 
 static inline void double_round_128(Lib_IntVector_Intrinsics_vec128 *st)

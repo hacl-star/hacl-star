@@ -35,10 +35,10 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "internal/Hacl_Krmllib.h"
 #include "Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
+
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
 
 static inline void

@@ -30,6 +30,7 @@
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
 #include "config.h"
+
 /* SNIPPET_START: state_s_tags */
 
 #define MD5_s 0

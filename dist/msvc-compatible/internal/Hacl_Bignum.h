@@ -35,11 +35,11 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "../Hacl_Bignum.h"
 #include "lib_intrinsics.h"
+
 void
 Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(
   uint32_t aLen,

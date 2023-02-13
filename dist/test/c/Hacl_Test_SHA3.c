@@ -25,8 +25,6 @@
 
 #include "Hacl_Test_SHA3.h"
 
-
-
 extern void
 Hacl_Impl_SHA3_keccak(
   uint32_t rate,

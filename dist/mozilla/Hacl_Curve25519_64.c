@@ -29,6 +29,7 @@
 #include "internal/Hacl_Krmllib.h"
 #include "config.h"
 #include "curve25519-inline.h"
+
 static inline void add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
   #if HACL_CAN_COMPILE_INLINE_ASM

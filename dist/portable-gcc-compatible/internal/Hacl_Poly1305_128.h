@@ -35,10 +35,10 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Poly1305_128.h"
 #include "libintvector.h"
+
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
 
 void

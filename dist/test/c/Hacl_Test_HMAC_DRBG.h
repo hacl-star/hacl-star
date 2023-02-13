@@ -26,11 +26,9 @@
 #ifndef __Hacl_Test_HMAC_DRBG_H
 #define __Hacl_Test_HMAC_DRBG_H
 
-
-
-
 #include "krmllib.h"
 #include "libintvector.h"
+
 exit_code main(void);
 
 
