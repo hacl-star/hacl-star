@@ -274,6 +274,14 @@ ifndef MAKE_RESTARTS
 # need to run: Vale stuff, and HACL spec tests.
 # For KaRaMeL, we use --extract 'krml:*' to extract everything and let krml
 # decide what to keep based on reachability and bundling
+
+# The `sed` invocation is currently necessary because, even though all
+# paths are absolute (HACL_HOME, FSTAR_HOME, etc.), F* still generates
+# dependency trees containing things like bin/../ulib (or
+# bin/../lib/fstar if F* is installed from opam or from `make
+# install`) We need to remove such detours by hand, which is done by
+# that `sed` invocation below
+
 .fstar-depend-%: .FORCE
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
