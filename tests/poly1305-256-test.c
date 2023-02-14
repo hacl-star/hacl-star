@@ -1,13 +1,13 @@
+#include <fcntl.h>
 #include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdbool.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "test_helpers.h"
 
@@ -18,55 +18,61 @@
 #include "poly1305_vectors.h"
 
 #define ROUNDS 100000
-#define SIZE   16384
+#define SIZE 16384
 
-bool print_result(uint8_t* comp, uint8_t* exp) {
+bool
+print_result(uint8_t* comp, uint8_t* exp)
+{
   return compare_and_print(16, comp, exp);
 }
 
-bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
-  uint8_t comp[16] = {0};
+bool
+print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp)
+{
+  uint8_t comp[16] = { 0 };
   bool ok = true;
 
-  Hacl_Poly1305_256_poly1305_mac(comp,in_len,in,key);
+  Hacl_Poly1305_256_poly1305_mac(comp, in_len, in, key);
   printf("Poly1305 (256-bit) Result:\n");
   ok = ok && print_result(comp, exp);
 
   return ok;
 }
 
-int main() {
+int
+main()
+{
   EverCrypt_AutoConfig2_init();
   if (!EverCrypt_AutoConfig2_has_vec256()) {
-      printf("The current hardware doesn't support vec256: aborting\n");
-      return EXIT_SUCCESS;
-  }
-  else {
-      printf("The current hardware supports vec256: performing the tests\n");
+    printf("The current hardware doesn't support vec256: aborting\n");
+    return EXIT_SUCCESS;
+  } else {
+    printf("The current hardware supports vec256: performing the tests\n");
   }
 
   bool ok = true;
-  for (int i = 0; i < sizeof(vectors)/sizeof(poly1305_test_vector); ++i) {
-    ok &= print_test(vectors[i].input_len,vectors[i].input,vectors[i].key,vectors[i].tag);
+  for (int i = 0; i < sizeof(vectors) / sizeof(poly1305_test_vector); ++i) {
+    ok &= print_test(
+      vectors[i].input_len, vectors[i].input, vectors[i].key, vectors[i].tag);
   }
 
   uint8_t plain[SIZE];
   uint8_t key[32];
   uint64_t res = 0;
   uint8_t tag[16];
-  cycles a,b;
-  clock_t t1,t2;
+  cycles a, b;
+  clock_t t1, t2;
 
-  memset(plain,'P',SIZE);
-  memset(key,'K',16);
+  memset(plain, 'P', SIZE);
+  memset(key, 'K', 16);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_256_poly1305_mac(plain,SIZE,plain,key);
+    Hacl_Poly1305_256_poly1305_mac(plain, SIZE, plain, key);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_256_poly1305_mac(tag,SIZE,plain,key);
+    Hacl_Poly1305_256_poly1305_mac(tag, SIZE, plain, key);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();
@@ -75,8 +81,11 @@ int main() {
   cycles cdiff1 = b - a;
 
   uint64_t count = ROUNDS * SIZE;
-  printf("Poly1305 (256-bit) PERF:\n"); print_time(count,tdiff1,cdiff1);
+  printf("Poly1305 (256-bit) PERF:\n");
+  print_time(count, tdiff1, cdiff1);
 
-  if (ok) return EXIT_SUCCESS;
-  else return EXIT_FAILURE;
+  if (ok)
+    return EXIT_SUCCESS;
+  else
+    return EXIT_FAILURE;
 }
