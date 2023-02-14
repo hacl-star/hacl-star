@@ -32,7 +32,7 @@ ifndef FSTAR_HOME
   endif
 endif
 
-FSTAR_ULIB ?= $(shell if test -d "$(FSTAR_HOME)/ulib" ; then echo "$(FSTAR_HOME)/ulib" ; else echo "$(FSTAR_HOME)/bin/fstar" ; fi)
+FSTAR_ULIB ?= $(shell if test -d "$(FSTAR_HOME)/ulib" ; then echo "$(FSTAR_HOME)/ulib" ; else echo "$(FSTAR_HOME)/lib/fstar" ; fi)
 
 VALE_HOME	?= $(HACL_HOME)/../vale
 
