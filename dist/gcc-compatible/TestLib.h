@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,9 +34,6 @@ extern "C" {
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
-
-
-
 
 extern void TestLib_touch(int32_t uu___);
 
@@ -77,7 +75,7 @@ KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
 extern uint64_t *TestLib_uint64_p_null;
 
-extern TestLib_cycles TestLib_cpucycles();
+extern TestLib_cycles TestLib_cpucycles(void);
 
 extern void
 TestLib_print_cycles_per_round(TestLib_cycles uu___, TestLib_cycles uu___1, uint32_t uu___2);

@@ -264,6 +264,7 @@ let update_multi_update (a: md_alg) (h: words_state a) (input: bytes_block a): L
     end
 #pop-options
 
+
 let rec update_multi_224_256 hash blocks =
   let a = SHA2_256 in
   let a' = SHA2_224 in
@@ -302,5 +303,145 @@ let update_last_224_256 hash prevlen input =
       [ SMTPat (Spec.Agile.Hash.update_multi SHA2_256 hash () blocks) ]
    =
      update_multi_224_256 hash blocks
+  in
+  ()
+
+
+#push-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 200"
+let update_384_512 hash block =
+  assert_norm (words_state SHA2_384 == words_state SHA2_512);
+  let rec ws_384_512 (b: block_w SHA2_512) (t:counter{t < size_k_w SHA2_512}):
+    Lemma
+      (ensures (ws SHA2_384 b t == ws SHA2_512 b t))
+    [ SMTPat (ws SHA2_512 b t) ]
+  =
+    reveal_opaque (`%ws) ws;
+    assert_norm (block_w SHA2_512 == block_w SHA2_384);
+    assert_norm (size_k_w SHA2_512 == size_k_w SHA2_384);
+
+    (*
+     * The code earlier was doing assert_norm (_sigma0 SHA2_512 == _sigma0 SHA2_384)
+     *
+     * This is a bit suboptimal, since assert_norm is a heavy hammer,
+     *   it also ends up unfolding `==`, which means the equality is not
+     *   reduced in F*, rather the query for proving equality of two
+     *   lambda terms reaches Z3 -- once that happens we are at the mercy of
+     *   hashconsing etc. to prove the equality
+     *
+     * Instead, if we do controlled normalization, we can prove the equality
+     *   within F*
+     *)
+
+    let steps = [iota; primops; simplify; delta_only [
+      `%_sigma0; `%_sigma1; `%op0; `%word; `%word_t;
+      `%__proj__Mkops__item__e5; `%op384_512; `%__proj__Mkops__item__e3;
+      `%__proj__Mkops__item__e4;
+      `%Spec.SHA2.op_Hat_Dot; `%Spec.SHA2.op_Greater_Greater_Dot;
+      `%Spec.SHA2.op_Greater_Greater_Greater_Dot ]] in
+
+    assert (norm steps (_sigma0 SHA2_512) == norm steps (_sigma0 SHA2_384));
+    assert (norm steps (_sigma1 SHA2_512) == norm steps (_sigma1 SHA2_384));
+
+    norm_spec steps (_sigma0 SHA2_512);
+    norm_spec steps (_sigma0 SHA2_384);
+    norm_spec steps (_sigma1 SHA2_512);
+    norm_spec steps (_sigma1 SHA2_384);
+
+    // assert_norm (word_add_mod SHA2_512 == word_add_mod SHA2_384);
+    if t < block_word_length SHA2_512 then
+      ()
+    else begin
+      ws_384_512 b (t - 16);
+      ws_384_512 b (t - 15);
+      ws_384_512 b (t - 7);
+      ws_384_512 b (t - 2)
+    end
+  in
+  let shuffle_core_384_512 (block:block_w SHA2_512) (hash:words_state SHA2_512) (t:counter{t < size_k_w SHA2_512}):
+    Lemma (ensures (shuffle_core SHA2_384 block hash t == shuffle_core SHA2_512 block hash t))
+    [ SMTPat (shuffle_core SHA2_512 block hash t) ]
+  =
+    reveal_opaque (`%shuffle_core) shuffle_core
+  in
+  let rec repeat_range_f (#a:Type) (min:nat) (max:nat{min <= max}) (f g:(a -> i:nat{i < max} -> Tot a)) (x: a):
+    Lemma
+      (requires (forall x (i: nat { i < max }). {:pattern f x i \/ g x i } f x i == g x i))
+      (ensures (Spec.Loops.repeat_range min max f x == Spec.Loops.repeat_range min max g x))
+      (decreases (max - min))
+    [ SMTPat (Spec.Loops.repeat_range min max f x); SMTPat (Spec.Loops.repeat_range min max g x) ]
+  =
+    if min = max then
+      ()
+    else
+      repeat_range_f (min + 1) max f g (f x min)
+  in
+  let shuffle_384_512 (hash:words_state SHA2_512) (block:block_w SHA2_512):
+    Lemma (ensures (shuffle SHA2_384 hash block == shuffle SHA2_512 hash block))
+    [ SMTPat (shuffle SHA2_512 hash block) ]
+  =
+    shuffle_is_shuffle_pre SHA2_384 hash block;
+    shuffle_is_shuffle_pre SHA2_512 hash block;
+    reveal_opaque (`%shuffle) shuffle;
+    assert_norm (words_state SHA2_384 == words_state SHA2_512)
+  in
+  let rec seq_map2_f
+    (#a:Type) (#b:Type) (#c:Type)
+    (f g:(a -> b -> Tot c))
+    (s:S.seq a) (s':S.seq b{S.length s = S.length s'}):
+    Lemma
+      (requires (forall x y. {:pattern f x y \/ g x y} f x y == g x y))
+      (ensures (Spec.Loops.(seq_map2 f s s' == seq_map2 g s s')))
+      (decreases (S.length s))
+    [ SMTPat (Spec.Loops.seq_map2 f s s'); SMTPat (Spec.Loops.seq_map2 g s s') ]
+  =
+    if S.length s = 0 then
+      ()
+    else
+      seq_map2_f f g (S.tail s) (S.tail s')
+  in
+  assert_norm (words_of_bytes SHA2_512 #(block_word_length SHA2_512) == words_of_bytes SHA2_384 #(block_word_length SHA2_384));
+  reveal_opaque (`%shuffle) shuffle;
+  reveal_opaque (`%update) update
+#pop-options
+
+
+let rec update_multi_384_512 hash blocks =
+  let a = SHA2_512 in
+  let a' = SHA2_384 in
+  assert_norm (words_state a == words_state a');
+  if S.length blocks = 0 then
+    begin
+    assert(blocks `S.equal` S.empty);
+    Spec.Hash.Lemmas.update_multi_zero a hash;
+    Spec.Hash.Lemmas.update_multi_zero a' hash
+    end
+  else
+    begin
+    assert(block_length a = block_length a');
+    let block1, blocks_end = S.split blocks (block_length a) in
+    assert(S.length block1 = block_length a);
+    assert(S.length blocks_end % block_length a = 0);
+    assert(S.append block1 blocks_end `S.equal` blocks);
+    update_multi_associative a hash block1 blocks_end;
+    update_multi_associative a' hash block1 blocks_end;
+    update_multi_update a hash block1;
+    update_multi_update a' hash block1;
+    let hash1 = Spec.Agile.Hash.update a hash block1 in
+    let hash2 = Spec.Agile.Hash.update a' hash block1 in
+    update_384_512 hash block1;
+    assert(hash1 == hash2);
+    update_multi_384_512 hash1 blocks_end
+    end
+
+#push-options "--z3rlimit 50"
+let update_last_384_512 hash prevlen input =
+  let update_multi_384_512 (hash:words_state SHA2_512) (blocks:bytes_blocks SHA2_512):
+    Lemma
+      (ensures (Spec.Agile.Hash.update_multi SHA2_512 hash () blocks ==
+        Spec.Agile.Hash.update_multi SHA2_384 hash () blocks))
+      (decreases (Seq.length blocks))
+      [ SMTPat (Spec.Agile.Hash.update_multi SHA2_512 hash () blocks) ]
+   =
+     update_multi_384_512 hash blocks
   in
   ()

@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +26,10 @@
 #include "internal/Hacl_P256.h"
 
 #include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "lib_intrinsics.h"
+
 static uint64_t isZero_uint64_CT(uint64_t *f)
 {
   uint64_t a0 = f[0U];

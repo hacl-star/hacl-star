@@ -27,7 +27,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "7c4a6c0f4cce34d25e5cec6d5178a56e"
+      "4d8fbf6fce6e296c6560fda86c18a62f"
     ],
     [
       "Hacl.Hash.Core.MD5._t",
@@ -55,7 +55,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "c1a8bbc78cf1c0accbce2740a8451216"
+      "4189f95bd4e7174e15e8577fbbf1502e"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_alloca",
@@ -119,7 +119,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_unused_in", "unit_typing"
       ],
       0,
-      "14ed8ee7210c3b2665206f7c9f52ee42"
+      "08c5f541fab6f4ccb6f5030bcb6aa846"
     ],
     [
       "Hacl.Hash.Core.MD5.h0",
@@ -150,7 +150,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.init"
       ],
       0,
-      "5c804f4d75ca2f42a9d96776b7c41a8e"
+      "6f32fe5764d8e25a32f7ddb712cb9f31"
     ],
     [
       "Hacl.Hash.Core.MD5.t",
@@ -173,7 +173,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.t"
       ],
       0,
-      "985ad69c6f52a514539fa654dfcbf3f7"
+      "84c7745d37970261feaa1a229f249148"
     ],
     [
       "Hacl.Hash.Core.MD5.seq_index_upd",
@@ -205,7 +205,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b26b9890746e5657aeae6da56da7cff6"
+      "198642e84c81e25bfe6dea4f9658043c"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_init",
@@ -315,7 +315,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok", "unit_typing"
       ],
       0,
-      "28551ff80355b4fc39aca55526d5b5b6"
+      "0819753161c1caefbf523e23123c34ed"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -365,7 +365,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "310f81cf8bc1f11aaf15887e9d772c91"
+      "0de313e1b26f61f275719c9c3da9ab66"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -484,7 +484,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "85231c41be4572b65b32807850f35dc7"
+      "74bc6e68468c3f2029e02b1d75e5d85b"
     ],
     [
       "Hacl.Hash.Core.MD5.round1",
@@ -678,6 +678,7 @@
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Blake2.Blake2S",
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
@@ -706,12 +707,12 @@
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.felem",
-        "equation_Spec.GaloisField.gf", "equation_Spec.MD5.abcd_t",
-        "equation_Spec.MD5.ia", "equation_Spec.MD5.ib",
-        "equation_Spec.MD5.ic", "equation_Spec.MD5.id",
-        "equation_Spec.MD5.rotate_idx", "equation_Spec.MD5.round3_aux",
-        "equation_Spec.MD5.round3_op",
+        "equation_Spec.AES.irred", "equation_Spec.Blake2.wt",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "equation_Spec.MD5.abcd_t", "equation_Spec.MD5.ia",
+        "equation_Spec.MD5.ib", "equation_Spec.MD5.ic",
+        "equation_Spec.MD5.id", "equation_Spec.MD5.rotate_idx",
+        "equation_Spec.MD5.round3_aux", "equation_Spec.MD5.round3_op",
         "function_token_typing_Lib.IntTypes.uint32",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Spec.AES.elem",
@@ -989,7 +990,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "cf964096ab12d4ae79f7976d5ba8cae5"
+      "352cfe7ef92deefd6fba2681360fe281"
     ],
     [
       "Hacl.Hash.Core.MD5.update'",
@@ -1083,7 +1084,7 @@
         "projection_inverse_Prims.Mkdtuple2__1"
       ],
       0,
-      "e3440876f841267788657d32abc60fc2"
+      "5d43eeaa3c8ee6c3f9ca8aa323a5e441"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_update",
@@ -1121,7 +1122,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "faf291699e55a9df8d52f22249549bfe"
+      "5b979dcc5d6e1e0f035dc71f412ea12f"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_pad",
@@ -1135,7 +1136,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "bcd751276f7697a4076afcd36e3d9dd2"
+      "e5c2a5f6a29cd48bdd750813cfb534ed"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_pad",
@@ -1158,7 +1159,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a80ccb8bf08d8e552b3a0e186cdd575a"
+      "7ce84f695d778ef7838d71d4d4fe5b0d"
     ]
   ]
 ]

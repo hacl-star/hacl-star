@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,62 +35,59 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+bool EverCrypt_AutoConfig2_has_shaext(void);
 
+bool EverCrypt_AutoConfig2_has_aesni(void);
 
+bool EverCrypt_AutoConfig2_has_pclmulqdq(void);
 
-bool EverCrypt_AutoConfig2_has_shaext();
+bool EverCrypt_AutoConfig2_has_avx2(void);
 
-bool EverCrypt_AutoConfig2_has_aesni();
+bool EverCrypt_AutoConfig2_has_avx(void);
 
-bool EverCrypt_AutoConfig2_has_pclmulqdq();
+bool EverCrypt_AutoConfig2_has_bmi2(void);
 
-bool EverCrypt_AutoConfig2_has_avx2();
+bool EverCrypt_AutoConfig2_has_adx(void);
 
-bool EverCrypt_AutoConfig2_has_avx();
+bool EverCrypt_AutoConfig2_has_sse(void);
 
-bool EverCrypt_AutoConfig2_has_bmi2();
+bool EverCrypt_AutoConfig2_has_movbe(void);
 
-bool EverCrypt_AutoConfig2_has_adx();
+bool EverCrypt_AutoConfig2_has_rdrand(void);
 
-bool EverCrypt_AutoConfig2_has_sse();
+bool EverCrypt_AutoConfig2_has_avx512(void);
 
-bool EverCrypt_AutoConfig2_has_movbe();
+void EverCrypt_AutoConfig2_recall(void);
 
-bool EverCrypt_AutoConfig2_has_rdrand();
+void EverCrypt_AutoConfig2_init(void);
 
-bool EverCrypt_AutoConfig2_has_avx512();
+typedef void (*EverCrypt_AutoConfig2_disabler)(void);
 
-void EverCrypt_AutoConfig2_recall();
+void EverCrypt_AutoConfig2_disable_avx2(void);
 
-void EverCrypt_AutoConfig2_init();
+void EverCrypt_AutoConfig2_disable_avx(void);
 
-typedef void (*EverCrypt_AutoConfig2_disabler)();
+void EverCrypt_AutoConfig2_disable_bmi2(void);
 
-void EverCrypt_AutoConfig2_disable_avx2();
+void EverCrypt_AutoConfig2_disable_adx(void);
 
-void EverCrypt_AutoConfig2_disable_avx();
+void EverCrypt_AutoConfig2_disable_shaext(void);
 
-void EverCrypt_AutoConfig2_disable_bmi2();
+void EverCrypt_AutoConfig2_disable_aesni(void);
 
-void EverCrypt_AutoConfig2_disable_adx();
+void EverCrypt_AutoConfig2_disable_pclmulqdq(void);
 
-void EverCrypt_AutoConfig2_disable_shaext();
+void EverCrypt_AutoConfig2_disable_sse(void);
 
-void EverCrypt_AutoConfig2_disable_aesni();
+void EverCrypt_AutoConfig2_disable_movbe(void);
 
-void EverCrypt_AutoConfig2_disable_pclmulqdq();
+void EverCrypt_AutoConfig2_disable_rdrand(void);
 
-void EverCrypt_AutoConfig2_disable_sse();
+void EverCrypt_AutoConfig2_disable_avx512(void);
 
-void EverCrypt_AutoConfig2_disable_movbe();
+bool EverCrypt_AutoConfig2_has_vec128(void);
 
-void EverCrypt_AutoConfig2_disable_rdrand();
-
-void EverCrypt_AutoConfig2_disable_avx512();
-
-bool EverCrypt_AutoConfig2_has_vec128();
-
-bool EverCrypt_AutoConfig2_has_vec256();
+bool EverCrypt_AutoConfig2_has_vec256(void);
 
 #if defined(__cplusplus)
 }

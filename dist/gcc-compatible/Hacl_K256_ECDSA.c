@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +25,10 @@
 
 #include "internal/Hacl_K256_ECDSA.h"
 
-
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_K256_PrecompTable.h"
+#include "internal/Hacl_Bignum_K256.h"
+#include "internal/Hacl_Bignum_Base.h"
 
 static inline uint64_t
 bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)

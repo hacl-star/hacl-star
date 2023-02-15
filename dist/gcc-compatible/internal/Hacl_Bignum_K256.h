@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Bignum_K256_H
-#define __Hacl_Bignum_K256_H
+#ifndef __internal_Hacl_Bignum_K256_H
+#define __internal_Hacl_Bignum_K256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -34,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
+#include "internal/Hacl_Krmllib.h"
 #include "Hacl_Krmllib.h"
 
 static inline bool Hacl_K256_Field_is_felem_zero_vartime(uint64_t *f)
@@ -693,5 +694,5 @@ static inline void Hacl_Impl_K256_Finv_fsqrt(uint64_t *out, uint64_t *f)
 }
 #endif
 
-#define __Hacl_Bignum_K256_H_DEFINED
+#define __internal_Hacl_Bignum_K256_H_DEFINED
 #endif

@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +25,8 @@
 
 #include "Hacl_Hash_Blake2b_256.h"
 
-
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Impl_Blake2_Constants.h"
 
 static inline void
 blake2b_update_block(
@@ -491,7 +493,7 @@ Hacl_Blake2b_256_store_state256b_to_state32(
     os[i] = x;);
 }
 
-Lib_IntVector_Intrinsics_vec256 *Hacl_Blake2b_256_blake2b_malloc()
+Lib_IntVector_Intrinsics_vec256 *Hacl_Blake2b_256_blake2b_malloc(void)
 {
   Lib_IntVector_Intrinsics_vec256
   *buf =

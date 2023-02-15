@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "../Hacl_Spec.h"
 
 #define Spec_ECDSA_NoHash 0
@@ -54,6 +54,11 @@ Spec_ECDSA_hash_alg_ecdsa;
 #define Spec_Cipher_Expansion_Vale_AES256 2
 
 typedef uint8_t Spec_Cipher_Expansion_impl;
+
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
 
 #if defined(__cplusplus)
 }

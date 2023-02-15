@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +34,6 @@ extern "C" {
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
-
 
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2s_32.h"
@@ -72,7 +72,8 @@ Hacl_Streaming_Blake2_blake2b_32_state;
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in();
+Hacl_Streaming_Blake2_blake2s_32_state
+*Hacl_Streaming_Blake2_blake2s_32_no_key_create_in(void);
 
 /**
   (Re-)initialization function when there is no key
@@ -106,7 +107,8 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_create_in();
+Hacl_Streaming_Blake2_blake2b_32_state
+*Hacl_Streaming_Blake2_blake2b_32_no_key_create_in(void);
 
 /**
   (Re)-initialization function when there is no key

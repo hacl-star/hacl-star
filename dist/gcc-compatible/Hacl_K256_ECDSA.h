@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,13 +35,10 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Krmllib.h"
-#include "Hacl_K256_PrecompTable.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Bignum_K256.h"
-#include "Hacl_Bignum_Base.h"
 #include "lib_intrinsics.h"
+
 /*******************************************************************************
   Verified C library for ECDSA signing and verification on the secp256k1 curve.
 

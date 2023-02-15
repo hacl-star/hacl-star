@@ -324,9 +324,6 @@ let _ =
   test_nonagile "Hacl" test_sha3_384 Hacl.SHA3_384.hash Hacl.SHA3_384.Noalloc.hash;
   test_nonagile "Hacl" test_sha3_512 Hacl.SHA3_512.hash Hacl.SHA3_512.Noalloc.hash;
 
-  test_nonagile "EverCrypt" test_sha2_224 EverCrypt.SHA2_224.hash EverCrypt.SHA2_224.Noalloc.hash;
-  test_nonagile "EverCrypt" test_sha2_256 EverCrypt.SHA2_256.hash EverCrypt.SHA2_256.Noalloc.hash;
-
   test_agile test_sha1;
   test_agile test_md5;
 

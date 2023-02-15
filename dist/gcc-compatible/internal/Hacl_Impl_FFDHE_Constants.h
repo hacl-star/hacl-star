@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Impl_FFDHE_Constants_H
-#define __Hacl_Impl_FFDHE_Constants_H
+#ifndef __internal_Hacl_Impl_FFDHE_Constants_H
+#define __internal_Hacl_Impl_FFDHE_Constants_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -33,9 +34,6 @@ extern "C" {
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
-
-
-
 
 static const uint8_t Hacl_Impl_FFDHE_Constants_ffdhe_g2[1U] = { (uint8_t)0x02U };
 
@@ -565,5 +563,5 @@ Hacl_Impl_FFDHE_Constants_ffdhe_p8192[1024U] =
 }
 #endif
 
-#define __Hacl_Impl_FFDHE_Constants_H_DEFINED
+#define __internal_Hacl_Impl_FFDHE_Constants_H_DEFINED
 #endif

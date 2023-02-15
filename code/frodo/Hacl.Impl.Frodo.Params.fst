@@ -55,7 +55,7 @@ let bytes_pkhash (a:S.frodo_alg) =
   crypto_bytes a
 
 inline_for_extraction noextract
-let bytes_mu (a:S.frodo_alg) =
+let bytes_mu (a:S.frodo_alg) : x:size_t{v x == S.bytes_mu a} =
   params_extracted_bits a *! params_nbar *! params_nbar /. 8ul
 
 inline_for_extraction noextract

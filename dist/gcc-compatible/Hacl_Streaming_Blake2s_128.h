@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "Hacl_Hash_Blake2s_128.h"
 
 typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_block_state_s
@@ -56,7 +56,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state;
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2s_128_blake2s_128_state
-*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in();
+*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in(void);
 
 /**
   (Re-)initialization function when there is no key
