@@ -1,5 +1,6 @@
 module Hacl.Spec.P256.Felem
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -7,7 +8,10 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.Sequence
-open Lib.ByteSequence
+
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
+module BD = Hacl.Spec.Bignum.Definitions
 
 open Spec.P256.Definitions
 
@@ -38,18 +42,84 @@ let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   wide_as_nat4 (s.[0], s.[1], s.[2], s.[3], s.[4], s.[5], s.[6], s.[7])
 
 
-val lemma_core_0: a:lbuffer uint64 (size 4) -> h:mem
-  -> Lemma (nat_from_intseq_le (as_seq h a) == as_nat h a)
+val lemma_core_0: a:lbuffer uint64 (size 4) -> h:mem ->
+  Lemma (BSeq.nat_from_intseq_le (as_seq h a) == as_nat h a)
 
 let lemma_core_0 a h =
   let k = as_seq h a in
-  let z = nat_from_intseq_le k in
-    nat_from_intseq_le_slice_lemma k 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k 0 1);
+  let z = BSeq.nat_from_intseq_le k in
+    BSeq.nat_from_intseq_le_slice_lemma k 1;
+    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k 0 1);
   let k1 = Seq.slice k 1 4 in
-    nat_from_intseq_le_slice_lemma #_ #_ #3 k1 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k1 0 1);
+    BSeq.nat_from_intseq_le_slice_lemma #_ #_ #3 k1 1;
+    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k1 0 1);
   let k2 = Seq.slice k1 1 3 in
-    nat_from_intseq_le_slice_lemma #_ #_ #2 k2 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k2 0 1);
-    nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
+    BSeq.nat_from_intseq_le_slice_lemma #_ #_ #2 k2 1;
+    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k2 0 1);
+    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
+
+
+val bignum_bn_v_is_as_nat: h: mem -> a: felem ->
+  Lemma (BD.bn_v (as_seq h a) == as_nat h a)
+
+let bignum_bn_v_is_as_nat h a =
+  let a = as_seq h a in
+  let open Hacl.Spec.Bignum.Definitions in
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+
+  calc (==) {
+    bn_v a;
+  (==) {bn_eval1 (LSeq.slice a 0 1); bn_eval_split_i #U64 a 1}
+     v (LSeq.index a 0) + pow2 64 * bn_v (LSeq.slice a 1 4);
+  (==) {bn_eval_split_i #U64 (LSeq.slice a 1 4) 1; bn_eval1 (LSeq.slice a 1 2)}
+    v (LSeq.index a 0)
+    + pow2 64 * v (LSeq.index a 1)
+    + pow2 64 * pow2 64 * bn_v (LSeq.slice a 2 4);
+  (==) {bn_eval_split_i #U64 (LSeq.slice a 2 4) 1; bn_eval1 (LSeq.slice a 2 3)}
+      v (LSeq.index a 0)
+    + pow2 64 * v (LSeq.index a 1)
+    + pow2 64 * pow2 64 * v (LSeq.index a 2)
+    + pow2 64 * pow2 64 * pow2 64 * bn_v (LSeq.slice a 3 4);
+  (==) {bn_eval1 (LSeq.slice a 3 4)}
+       v (LSeq.index a 0)
+    + pow2 64 * v (LSeq.index a 1)
+    + pow2 64 * pow2 64 * v (LSeq.index a 2)
+    + pow2 64 * pow2 64 * pow2 64 * v (LSeq.index a 3);
+  }
+
+
+// local function
+val lemma_powers: unit -> Lemma (
+  pow2 64 * pow2 64 * pow2 64 = pow2 (3 * 64) /\
+  pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 (4 * 64) /\
+  pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 = pow2 (5 * 64) /\
+  pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 = pow2 (6 * 64) /\
+  pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 = pow2 (7 * 64) /\
+  pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
+
+let lemma_powers () =
+   assert_norm(pow2 64 * pow2 64 * pow2 64 = pow2 (3 * 64));
+   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 (4 * 64));
+   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 = pow2 (5 * 64));
+   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 = pow2 (6 * 64));
+   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 = pow2 (7 * 64));
+   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
+
+
+// local function
+val wide_as_nat_is_as_nat: h: mem -> a: widefelem
+  -> Lemma (wide_as_nat h a == as_nat h (gsub a (size 0) (size 4)) + pow2 (64 * 4) * as_nat h (gsub a (size 4) (size 4)))
+
+let wide_as_nat_is_as_nat h a =
+  lemma_powers()
+
+
+val bignum_bn_v_is_wide_as_nat: h:mem -> a:widefelem ->
+  Lemma (BD.bn_v (as_seq h a) == wide_as_nat h a)
+
+let bignum_bn_v_is_wide_as_nat h a =
+  wide_as_nat_is_as_nat h a;
+  bignum_bn_v_is_as_nat h (gsub a (size 0) (size 4));
+  bignum_bn_v_is_as_nat h (gsub a (size 4) (size 4));
+  BD.bn_eval_split_i (as_seq h a) 4
