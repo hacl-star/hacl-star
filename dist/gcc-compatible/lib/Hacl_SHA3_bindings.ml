@@ -2,9 +2,6 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_Impl_SHA3_rotl =
-      foreign "Hacl_Impl_SHA3_rotl"
-        (uint64_t @-> (uint32_t @-> (returning uint64_t)))
     let hacl_Impl_SHA3_state_permute =
       foreign "Hacl_Impl_SHA3_state_permute"
         ((ptr uint64_t) @-> (returning void))

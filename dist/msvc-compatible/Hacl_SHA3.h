@@ -35,14 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
-
-extern const uint32_t Hacl_Impl_SHA3_keccak_piln[24U];
-
-extern const uint64_t Hacl_Impl_SHA3_keccak_rndc[24U];
-
-uint64_t Hacl_Impl_SHA3_rotl(uint64_t a, uint32_t b);
-
 void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
 void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
