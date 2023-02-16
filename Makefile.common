@@ -45,18 +45,20 @@ endif
 # each file name, especially when generating dependency trees. On
 # Cygwin, we additionally need to use Windows paths instead of Cygwin
 # paths.
-HACL_HOME  := $(realpath $(HACL_HOME))
-KRML_HOME  := $(realpath $(KRML_HOME))
-FSTAR_HOME := $(realpath $(FSTAR_HOME))
-FSTAR_ULIB := $(realpath $(FSTAR_ULIB))
-VALE_HOME  := $(realpath $(VALE_HOME))
+
 ifeq ($(OS),Windows_NT)
-  HACL_HOME  := $(shell cygpath -m $(HACL_HOME))
-  KRML_HOME  := $(shell cygpath -m $(KRML_HOME))
-  FSTAR_HOME := $(shell cygpath -m $(FSTAR_HOME))
-  FSTAR_ULIB := $(shell cygpath -m $(FSTAR_ULIB))
-  VALE_HOME  := $(shell cygpath -m $(VALE_HOME))
+  maybe_cygpath=$(shell cygpath -m $(1))
+else
+  maybe_cygpath=$(1)
 endif
+
+sanitize_path=$(call maybe_cygpath,$(realpath $(1)))
+
+HACL_HOME := $(call sanitize_path,$(HACL_HOME))
+KRML_HOME := $(call sanitize_path,$(KRML_HOME))
+FSTAR_HOME := $(call sanitize_path,$(FSTAR_HOME))
+FSTAR_ULIB := $(call sanitize_path,$(FSTAR_ULIB))
+VALE_HOME := $(call sanitize_path,$(VALE_HOME))
 
 include $(HACL_HOME)/Makefile.include
 
