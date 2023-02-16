@@ -33,9 +33,6 @@ EXPORTS
   Hacl_Blake2s_128_store_state128s_to_state32
   Hacl_Blake2s_128_load_state128s_from_state32
   Hacl_Blake2s_128_blake2s_malloc
-  Hacl_Impl_SHA3_state_permute
-  Hacl_Impl_SHA3_loadState
-  Hacl_Impl_SHA3_squeeze
   Hacl_Streaming_SHA3_create_in_256
   LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
   Hacl_Streaming_SHA3_init_256
@@ -50,6 +47,13 @@ EXPORTS
   Hacl_SHA3_sha3_256
   Hacl_SHA3_sha3_384
   Hacl_SHA3_sha3_512
+  Hacl_Impl_SHA3_rotl
+  Hacl_Impl_SHA3_state_permute
+  Hacl_Impl_SHA3_loadState
+  Hacl_Impl_SHA3_storeState
+  Hacl_Impl_SHA3_absorb
+  Hacl_Impl_SHA3_squeeze
+  Hacl_Impl_SHA3_keccak
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
