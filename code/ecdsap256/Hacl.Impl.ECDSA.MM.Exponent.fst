@@ -220,45 +220,6 @@ let lemma_fromDomain2 a =
   power_distributivity (inv_pow256_order * pow2 256) (prime_p256_order - 2) prime_p256_order;
   power_one (prime_p256_order -2)
 
-#push-options "--fuel 1"
-let multPower a b result =
-  push_frame();
-    let tempB1 = create (size 4) (u64 0) in
-    let buffFromDB = create (size 4) (u64 0) in
-	let h0 = ST.get() in
-      fromDomainImpl a tempB1;
-      fromDomainImpl b buffFromDB;
-      fromDomainImpl buffFromDB buffFromDB;
-      montgomery_ladder_exponent tempB1;
-      montgomery_multiplication_ecdsa_module tempB1 buffFromDB result;
-    pop_frame();
-
-      let p = pow (fromDomain_ (fromDomain_ (as_nat h0 a))) (prime_p256_order - 2) % prime_p256_order in
-      let q = fromDomain_ (fromDomain_ (fromDomain_ (as_nat h0 b))) in
-      let r = modp_inv2_prime (pow2 256) prime_p256_order in
-      lemma_fromDomain1 (as_nat h0 b);
-      lemma_fromDomain2 (as_nat h0 a);
-
-      lemma_mod_mul_distr_l (pow (as_nat h0 a) (prime_p256_order - 2) * pow r (prime_p256_order - 2) * pow r (prime_p256_order - 2)) (((as_nat h0 b) * r * r * r) % prime_p256_order) prime_p256_order;
-      lemma_mod_mul_distr_r (pow (as_nat h0 a) (prime_p256_order - 2) * pow r (prime_p256_order - 2) * pow r (prime_p256_order - 2)) ((as_nat h0 b) * r * r * r) prime_p256_order;
-
-      assert_by_tactic (pow (as_nat h0 a) (prime_p256_order - 2) * pow r (prime_p256_order - 2) * pow r (prime_p256_order - 2) * ((as_nat h0 b) * r * r * r) == pow (as_nat h0 a) (prime_p256_order - 2) * (pow r (prime_p256_order - 2) * r) * (pow r (prime_p256_order - 2) * r) * (as_nat h0 b) * r) canon;
-
-      pow_plus r (prime_p256_order - 2) 1;
-      power_one r;
-      lemma_mod_mul_distr_l (pow (as_nat h0 a) (prime_p256_order - 2) * (pow r (prime_p256_order - 1)) * (pow r (prime_p256_order - 1)) * (as_nat h0 b) * r) (pow2 256) prime_p256_order;
-
-      assert_by_tactic (pow (as_nat h0 a) (prime_p256_order - 2) * (pow r (prime_p256_order - 1)) * (pow r (prime_p256_order - 1)) * (as_nat h0 b) * r * pow2 256 == pow (as_nat h0 a) (prime_p256_order - 2) * (pow r (prime_p256_order - 1)) * (pow r (prime_p256_order - 1)) * (as_nat h0 b) * (r * pow2 256)) canon;
-      lemma_mod_mul_distr_r (pow (as_nat h0 a) (prime_p256_order - 2) * (pow r (prime_p256_order - 1)) * (pow r (prime_p256_order - 1)) * (as_nat h0 b)) (r * pow2 256) prime_p256_order;
-
-      assert_norm ((pow2 256 * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order == 1);
-      assert_by_tactic (pow (as_nat h0 a) (prime_p256_order - 2) * (pow r (prime_p256_order - 1)) * (pow r (prime_p256_order - 1)) * (as_nat h0 b) == pow (as_nat h0 a) (prime_p256_order - 2) * (as_nat h0 b)  * (pow r (prime_p256_order - 1)) * (pow r (prime_p256_order - 1))) canon;
-
-      lemma_mod_mul_distr_r (pow (as_nat h0 a) (prime_p256_order - 2) * (as_nat h0 b)  * (pow r (prime_p256_order - 1))) (pow r (prime_p256_order - 1)) prime_p256_order;
-
-      lemma_l_ferm ();
-      lemma_mod_mul_distr_r (pow (as_nat h0 a) (prime_p256_order - 2) * (as_nat h0 b)) (pow r (prime_p256_order - 1)) prime_p256_order
-#pop-options
 
 #push-options "--fuel 2"
 let multPowerPartial s a b result =

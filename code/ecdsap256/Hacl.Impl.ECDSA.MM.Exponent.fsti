@@ -44,11 +44,6 @@ val fromDomainImpl: a: felem -> result: felem -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
      as_nat h1 result < prime /\ as_nat h1 result == fromDomain_ (as_nat h0 a))
 
-val multPower: a: felem -> b: felem ->  result: felem -> Stack unit
-  (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat h a < prime /\ as_nat h b < prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result = (pow (as_nat h0 a) (prime_p256_order - 2)  * (as_nat h0 b)) % prime_p256_order)
-
 
 val multPowerPartial: s: felem -> a: felem -> b: felem -> result: felem -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat h a < prime /\ as_nat h b < prime /\
