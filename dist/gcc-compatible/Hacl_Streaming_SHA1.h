@@ -59,6 +59,9 @@ Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, ui
 
 void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
+Hacl_Streaming_SHA2_state_sha2_224
+*Hacl_Streaming_SHA1_legacy_copy_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s0);
+
 #if defined(__cplusplus)
 }
 #endif
