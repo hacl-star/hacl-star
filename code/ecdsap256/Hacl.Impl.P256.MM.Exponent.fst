@@ -1,5 +1,6 @@
 module Hacl.Impl.P256.MM.Exponent
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -8,25 +9,10 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
-
 open Hacl.Impl.P256.LowLevel
-
-open FStar.Mul
-
-open Lib.Loops
-
 open Hacl.Impl.P256.MontgomeryMultiplication
+
 open Spec.P256.MontgomeryMultiplication
-
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
-open Hacl.Impl.P256.Core
-
-open Spec.P256.Definitions
-open Spec.P256.Lemmas
-open Spec.P256
-open Spec.P256.MontgomeryMultiplication
-
 friend Spec.P256.MontgomeryMultiplication
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 200"
@@ -158,7 +144,7 @@ let _montgomery_ladder_power a b scalar =
   let inv h (i: nat {i <= 256}) =
     live h a /\ live h b /\ live h scalar /\ modifies (loc a |+| loc b) h0 h /\ as_nat h a < prime /\ as_nat h b < prime /\
     acc h == Lib.LoopCombinators.repeati i (spec_exp h0) (acc h0) in
-  for 0ul 256ul inv (
+  Lib.Loops.for 0ul 256ul inv (
     fun i ->
 	  montgomery_ladder_power_step a b scalar i;
 	  Lib.LoopCombinators.unfold_repeati 256 (spec_exp h0) (acc h0) (uint_v i))

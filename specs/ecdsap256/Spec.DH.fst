@@ -7,7 +7,7 @@ open Lib.Sequence
 open Spec.P256
 open Spec.ECDSA
 
-#set-options "--fuel 0 --ifuel 0"
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 (* Initiator *)
 val ecp256_dh_i: s:lbytes 32 -> tuple3 (lbytes 32) (lbytes 32) bool

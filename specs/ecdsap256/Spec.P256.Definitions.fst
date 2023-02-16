@@ -1,15 +1,13 @@
 module Spec.P256.Definitions
 
-open Lib.IntTypes
+open FStar.Mul
 open FStar.Math.Lemmas
 open FStar.Math.Lib
 
-open FStar.HyperStack
-open FStar.HyperStack.All
+open Lib.IntTypes
 open Lib.Sequence
-open FStar.Mul
 
-
+#set-options "--z3rlimit 30"
 
 let prime256: (a: pos {a > 3 && a < pow2 256}) =
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
@@ -17,30 +15,30 @@ let prime256: (a: pos {a > 3 && a < pow2 256}) =
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 
 
-inline_for_extraction 
-let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ 
+inline_for_extraction
+let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\
   (
-    let open FStar.Mul in 
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
+    let open FStar.Mul in
+    let l0 = uint_v (List.Tot.index x 0) in
+    let l1 = uint_v (List.Tot.index x 1) in
+    let l2 = uint_v (List.Tot.index x 2) in
+    let l3 = uint_v (List.Tot.index x 3) in
     l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256)
   } =
-  let open FStar.Mul in 
+  let open FStar.Mul in
   [@inline_let]
   let x =
     [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
     assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
   x
 
-inline_for_extraction 
+inline_for_extraction
 let felem4 = tuple4 uint64 uint64 uint64 uint64
-inline_for_extraction 
+inline_for_extraction
 let felem8 = tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
-inline_for_extraction 
+inline_for_extraction
 let felem8_32 = tuple8 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32
-inline_for_extraction 
+inline_for_extraction
 let felem9 = tuple9 uint64 uint64 uint64  uint64 uint64 uint64 uint64 uint64 uint64
 
 
@@ -73,7 +71,7 @@ let point_nat_prime = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < pr
 
 
 
-let point_seq = Lib.Sequence.lseq uint64 12 
+let point_seq = Lib.Sequence.lseq uint64 12
 
 
 let felem_seq = lseq uint64 4
@@ -81,44 +79,40 @@ let felem_seq = lseq uint64 4
 
 
 
-let felem_seq_as_nat (a: felem_seq) : Tot nat  = 
-  let open FStar.Mul in 
-  let a0 = Lib.Sequence.index a 0 in 
-  let a1 =  Lib.Sequence.index a 1 in 
-  let a2 =  Lib.Sequence.index  a 2 in 
-  let a3 =  Lib.Sequence.index a 3 in 
+let felem_seq_as_nat (a: felem_seq) : Tot nat  =
+  let open FStar.Mul in
+  let a0 = Lib.Sequence.index a 0 in
+  let a1 =  Lib.Sequence.index a 1 in
+  let a2 =  Lib.Sequence.index  a 2 in
+  let a3 =  Lib.Sequence.index a 3 in
   uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64
 
 
 
-let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat = 
-  let open FStar.Mul in 
-  let a0 = Lib.Sequence.index a 0 in 
-  let a1 = Lib.Sequence.index a 1 in 
-  let a2 = Lib.Sequence.index a 2 in 
-  let a3 = Lib.Sequence.index a 3 in 
-  let a4 = Lib.Sequence.index a 4 in 
-  let a5 = Lib.Sequence.index a 5 in 
-  let a6 = Lib.Sequence.index a 6 in 
+let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat =
+  let open FStar.Mul in
+  let a0 = Lib.Sequence.index a 0 in
+  let a1 = Lib.Sequence.index a 1 in
+  let a2 = Lib.Sequence.index a 2 in
+  let a3 = Lib.Sequence.index a 3 in
+  let a4 = Lib.Sequence.index a 4 in
+  let a5 = Lib.Sequence.index a 5 in
+  let a6 = Lib.Sequence.index a 6 in
   let a7 = Lib.Sequence.index a 7 in
-  uint_v a0 + 
-  uint_v a1 * pow2 64 + 
-  uint_v a2 * pow2 64 * pow2 64 + 
-  uint_v a3 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+  uint_v a0 +
+  uint_v a1 * pow2 64 +
+  uint_v a2 * pow2 64 * pow2 64 +
+  uint_v a3 * pow2 64 * pow2 64 * pow2 64 +
+  uint_v a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
   uint_v a7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
-
-
-
-open FStar.Mul
 
 
 let felem_seq_prime = a: felem_seq {felem_seq_as_nat a < prime256}
 
-let point_prime =  p: point_seq{let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
-  felem_seq_as_nat x < prime256 /\ felem_seq_as_nat y < prime256 /\ felem_seq_as_nat z < prime256} 
+let point_prime =  p: point_seq{let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in
+  felem_seq_as_nat x < prime256 /\ felem_seq_as_nat y < prime256 /\ felem_seq_as_nat z < prime256}
 
 
 let nat_prime = n:nat{n < prime256}

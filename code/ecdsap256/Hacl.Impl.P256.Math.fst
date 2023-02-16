@@ -38,12 +38,12 @@ let euclid n a b r s =
     b % n;
     == { FStar.Math.Lemmas.distributivity_add_left (r * n) (s * a) b }
     (r * n * b + s * a * b) % n;
-    == { FStar.Math.Lemmas.paren_mul_right s a b }    
+    == { FStar.Math.Lemmas.paren_mul_right s a b }
     (r * n * b + s * (a * b)) % n;
     == { FStar.Math.Lemmas.modulo_distributivity (r * n * b) (s * (a * b)) n }
     ((r * n * b) % n + s * (a * b) % n) % n;
     == { FStar.Math.Lemmas.lemma_mod_mul_distr_r s (a * b) n }
-    ((r * n * b) % n + s * ((a * b) % n) % n) % n;  
+    ((r * n * b) % n + s * ((a * b) % n) % n) % n;
     == { assert (a * b % n = 0) }
     ((r * n * b) % n + s * 0 % n) % n;
     == { assert (s * 0 == 0) }
@@ -153,7 +153,7 @@ let lemma_l_ferm () =
   let r = modp_inv2_prime (pow2 256) prime_p256_order in
   assert_norm (exp (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 1)  == 1);
   lemma_pow_mod_n_is_fpow prime_p256_order r (prime_p256_order - 1)
-  
+
 
 val lemma_multiplication_not_mod_prime_left: a:nat{a < prime256} -> Lemma
   (requires a * (modp_inv2 (pow2 256)) % prime256 == 0)

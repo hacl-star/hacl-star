@@ -1,5 +1,6 @@
 module Hacl.Impl.P256.MM.Exponent
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -7,32 +8,18 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
-open Hacl.Impl.P256.Math 
 
-open Hacl.Impl.P256.LowLevel 
-open FStar.Tactics
-open FStar.Tactics.Canon 
-
-open FStar.Mul
-
-open Lib.Loops
-
-open Hacl.Impl.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication
-
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
-open Hacl.Impl.P256.Core
-open Hacl.Impl.P256.Arithmetics
-
-open Spec.P256.Definitions
-open Hacl.Spec.P256.Felem
-open Spec.P256.Lemmas
 open Spec.P256
+open Spec.P256.Definitions
+open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
+
+open Hacl.Spec.P256.Felem
+
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val square_root: a: felem -> result: felem ->  Stack unit 
+val square_root: a: felem -> result: felem ->  Stack unit
   (requires fun h -> live h a /\ live h result /\ as_nat h a < prime)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
     as_nat h1 result < prime /\

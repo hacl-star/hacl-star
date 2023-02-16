@@ -4,22 +4,20 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open Hacl.Impl.P256.Math
+open FStar.Mul
+open FStar.Math.Lemmas
 
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
-open FStar.Mul
-
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
+open Spec.P256.MontgomeryMultiplication
+
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
-
-open Lib.Loops
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Impl.P256.Math
 
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
@@ -266,7 +264,7 @@ let fsquarePowN n a =
     as_nat h1 a = toDomain_ (pow k (pow2 i)) /\
     as_nat h1 a < prime256 /\ live h1 a /\ modifies1 a h0 h1  in
   power_one (fromDomain_ (as_nat h0 a));
-  for (size 0) n (inv h0) (fun x ->
+  Lib.Loops.for (size 0) n (inv h0) (fun x ->
     let h0_ = ST.get() in
      montgomery_square_buffer a a;
      let k = fromDomain_ (as_nat h0 a) in
@@ -309,7 +307,7 @@ let fsquarePowNminusOne n a b =
     let k = fromDomain_(as_nat h0 a) in
     as_nat h1 b = toDomain_ (pow k (pow2 i - 1)) /\ as_nat h1 a < prime256 /\ live h1 a /\
     as_nat h1 a = toDomain_ (pow k (pow2 i)) /\ as_nat h1 b < prime256 /\ live h1 b /\ modifies (loc a |+| loc b) h0 h1 in
-  for (size 0) n (inv h0) (fun x ->
+  Lib.Loops.for (size 0) n (inv h0) (fun x ->
     let h0_ = ST.get() in
     montgomery_multiplication_buffer b a b;
     montgomery_square_buffer a a;

@@ -1,14 +1,15 @@
 module Hacl.SolinasReduction.Lemmas
 
-open Lib.IntTypes
+open FStar.Mul
 open FStar.Math.Lemmas
 open FStar.Math.Lib
-open Spec.P256.Definitions
-open FStar.Mul
-open Lib.Sequence
-
 open FStar.Tactics
 open FStar.Tactics.Canon
+
+open Lib.IntTypes
+open Lib.Sequence
+
+open Spec.P256.Definitions
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
@@ -76,8 +77,8 @@ noextract
 val c11_reduction: c11: _uint32 -> Lemma
   (c11 * pow2 (11 * 32) % prime ==
   (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime)
-  
-let c11_reduction c11  =  
+
+let c11_reduction c11  =
   let open FStar.Tactics in
   let open FStar.Tactics.Canon in
   calc (==) {

@@ -1,23 +1,19 @@
 module Spec.ECDSA
 
 open FStar.Mul
-open Spec.ECDSAP256.Definition
-open Spec.P256.Lemmas
+open FStar.Math.Lemmas
+open FStar.Math.Lib
 
 open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
-open Spec.Hash
 open Spec.P256
+open Spec.P256.Lemmas
+open Spec.ECDSAP256.Definition
 
-module Def = Spec.Hash.Definitions
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-open FStar.Math.Lemmas
-open FStar.Math.Lib
-
-
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 let prime = prime_p256_order
 
@@ -395,7 +391,7 @@ let checkCoordinates r s =
 open Spec.Hash.Definitions
 
 
-type hash_alg_ecdsa = 
+type hash_alg_ecdsa =
   |NoHash
   |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
 
@@ -418,30 +414,30 @@ let min_input_length a =
 (*
 
 let hash_length (a : hash_alg_ecdsa) =
-  match a with 
+  match a with
     |NoHash -> 32
     |Hash a -> hash_length a
 *)
 
-val hashSpec: a: hash_alg_ecdsa 
+val hashSpec: a: hash_alg_ecdsa
   -> mLen: size_nat{mLen >= min_input_length a}
   -> m: lseq uint8 mLen ->
-  Tot (r:Lib.ByteSequence.lbytes 
+  Tot (r:Lib.ByteSequence.lbytes
     (if Hash? a then hash_length (match a with Hash a -> a) else mLen) {length r >= 32})
 
-let hashSpec a mLen m = 
+let hashSpec a mLen m =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   allow_inversion hash_alg_ecdsa;
-  match a with 
+  match a with
   |NoHash ->  m
   |Hash a -> Spec.Agile.Hash.hash a m
 
-open Lib.ByteSequence 
+open Lib.ByteSequence
 
-(** 
+(**
   Important changed was done comparing to the previous version:
-  The point addition routine used in the code doesnot work correctly in case the points are equal to each other. In this case the produced result is equal to 0. To solve it, before the execution we check that points are equal and then call either point double, if the points are identical, or point add. 
+  The point addition routine used in the code doesnot work correctly in case the points are equal to each other. In this case the produced result is equal to 0. To solve it, before the execution we check that points are equal and then call either point double, if the points are identical, or point add.
 
   Sage script:
 
@@ -463,15 +459,15 @@ open Lib.ByteSequence
     y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime
     z3 = (h * z1 * z2) % prime
     return x3, y3, z3
-    
+
     pointAdd(94616602910890750895476491097843493117917747793373442062816991926475923005642,
-    36020885031736900871498807428940761284168967909318796815085487081314546588335, 1, 
-    94616602910890750895476491097843493117917747793373442062816991926475923005642, 
+    36020885031736900871498807428940761284168967909318796815085487081314546588335, 1,
+    94616602910890750895476491097843493117917747793373442062816991926475923005642,
     36020885031736900871498807428940761284168967909318796815085487081314546588335, 1)
 
     The result is (0, 0, 0)
 
-    The correct result: 
+    The correct result:
 
     prime = 2** 256 - 2**224 + 2**192 + 2**96 -1
     p = Zmod(prime)
@@ -482,18 +478,18 @@ open Lib.ByteSequence
 
     point = c(94616602910890750895476491097843493117917747793373442062816991926475923005642, 36020885031736900871498807428940761284168967909318796815085487081314546588335)
     doublePoint = point + point
-    
+
     (50269061329272915414642095420870671498020143477290467295126614723791645001065, 13163180605447792593340701861458269296763094398473012191314473475747756843689)
-    
+
 **)
 
 
 val ecdsa_verification_agile:
   alg: hash_alg_ecdsa
-  -> publicKey:tuple2 nat nat 
-  -> r: nat 
+  -> publicKey:tuple2 nat nat
+  -> r: nat
   -> s: nat
-  -> mLen:size_nat {mLen >= min_input_length alg} 
+  -> mLen:size_nat {mLen >= min_input_length alg}
   -> m:lseq uint8 mLen
   -> bool
 
@@ -507,9 +503,9 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     else
       begin
 
-      let hashM = hashSpec alg mLen m in 
-     
-      let cutHashM = sub hashM 0 32 in 
+      let hashM = hashSpec alg mLen m in
+
+      let cutHashM = sub hashM 0 32 in
       let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
 
       let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
@@ -521,19 +517,19 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
 
       let sumD = if  _norm u1D =  _norm u2D then
        _point_double u1D
-      else 
-        _point_add u1D u2D in 
+      else
+        _point_add u1D u2D in
       let pointNorm = _norm sumD in
-      
+
       let x, y, z = pointNorm in
-      let x = x % prime_p256_order in 
+      let x = x % prime_p256_order in
       if Spec.P256.isPointAtInfinity pointNorm then false else x = r
     end
   end
 
 val ecdsa_signature_agile:
   alg: hash_alg_ecdsa
-  -> mLen:size_nat{mLen >= min_input_length alg} 
+  -> mLen:size_nat{mLen >= min_input_length alg}
   -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
@@ -544,8 +540,8 @@ let ecdsa_signature_agile alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 125);
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
-  let hashM = hashSpec alg mLen m in 
-  let cutHashM = sub hashM 0 32 in 
+  let hashM = hashSpec alg mLen m in
+  let cutHashM = sub hashM 0 32 in
   let z = nat_from_bytes_be cutHashM % prime_p256_order in
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in

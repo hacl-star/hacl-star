@@ -1,14 +1,14 @@
 module Hacl.Impl.P256.LowLevel.RawCmp
 
-
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-
 open Lib.RawIntTypes
+
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val eq_u8_nCT: a:uint8 -> b:uint8 -> (r:bool{r == (uint_v a = uint_v b)})
@@ -37,5 +37,5 @@ inline_for_extraction noextract
 val unsafe_bool_of_u64 (x: uint64 { v x == 0 \/ v x == pow2 64 - 1 }):
   (b:bool { b <==> v x == 0 })
 
-let unsafe_bool_of_u64 x = 
+let unsafe_bool_of_u64 x =
   FStar.UInt64.(u64_to_UInt64 x =^ 0uL)

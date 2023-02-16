@@ -4,20 +4,17 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open Lib.IntTypes
+open FStar.Mul
 open FStar.Math.Lemmas
 open FStar.Math.Lib
-open Lib.Buffer
-
-open Hacl.SolinasReduction.Lemmas
-open Hacl.Impl.P256.LowLevel
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
-
-open Spec.P256.Definitions
-open FStar.Mul
-
 module BV = FStar.BitVector
 module Seq = FStar.Seq
+
+open Lib.IntTypes
+open Lib.Buffer
+
+open Spec.P256.Definitions
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
@@ -266,7 +263,7 @@ let upl_fif_buffer c8 c10 c11 c12 c13 o =
     reduction_prime_2prime_impl o o
 
 inline_for_extraction noextract
-val upl_six_buffer: c9: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32-> 
+val upl_six_buffer: c9: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32->
   o: lbuffer uint64 (size 4) ->
   Stack unit
     (requires fun h -> live h o)

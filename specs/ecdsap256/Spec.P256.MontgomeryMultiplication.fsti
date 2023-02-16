@@ -4,11 +4,11 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open FStar.Mul
 
-open Spec.P256.Lemmas
-open Spec.P256.Definitions
-
 open Lib.IntTypes
 open Lib.Sequence
+
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 
 #set-options "--z3rlimit 40 --fuel 0 --ifuel 0"
 
@@ -16,10 +16,10 @@ open Lib.Sequence
 val fromDomain_: a: int -> Tot (a: nat {a < prime256})
 
 
-val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat 
+val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat
   {
     let x, y, z = a in
-    let x3, y3, z3 = r in 
+    let x3, y3, z3 = r in
     x3 == fromDomain_ x /\ y3 == fromDomain_ y /\ z3 == fromDomain_ z /\
     x3 < prime256 /\ y3 < prime256 /\ z3 < prime256
   }
@@ -42,17 +42,17 @@ val lemmaFromDomainToDomainModuloPrime: a: int -> Lemma (a % prime256 == fromDom
 val inDomain_mod_is_not_mod: a: int -> Lemma (toDomain_ a == toDomain_ (a % prime256))
 
 val multiplicationInDomainNat: #k: nat -> #l: nat ->
-  a: nat {a == toDomain_ k /\ a < prime256} -> 
+  a: nat {a == toDomain_ k /\ a < prime256} ->
   b: nat {b == toDomain_ l /\ b < prime256} ->
   Lemma (
     assert_norm (prime256 > 3);
-    let multResult = a * b * modp_inv2_prime (pow2 256) prime256 % prime256 in 
+    let multResult = a * b * modp_inv2_prime (pow2 256) prime256 % prime256 in
     multResult == toDomain_ (k * l))
 
-val additionInDomain: a: nat {a < prime256} -> b: nat {b < prime256} -> Lemma 
+val additionInDomain: a: nat {a < prime256} -> b: nat {b < prime256} -> Lemma
   ((a + b) % prime256 == toDomain_ (fromDomain_ a + fromDomain_ b))
-  
-val substractionInDomain: a: nat {a < prime256} -> b: nat { b < prime256} -> Lemma 
+
+val substractionInDomain: a: nat {a < prime256} -> b: nat { b < prime256} -> Lemma
   ((a - b) % prime256 == toDomain_ (fromDomain_ a - fromDomain_ b))
 
 

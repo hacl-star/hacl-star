@@ -9,14 +9,12 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.P256
-open Spec.ECDSA
 open Spec.P256.Definitions
-open Hacl.Spec.P256.Felem
+open Spec.ECDSA
 open Spec.DH
-open Spec.ECDSAP256.Definition
-open Spec.P256.Lemmas
 
-open Hacl.Impl.P256.LowLevel 
+open Hacl.Spec.P256.Felem
+open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Signature.Common
 
@@ -47,26 +45,26 @@ let ecp256dh_i result scalar =
 
   lemma_core_0 resultBufferY h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  changeEndian_le_be (as_nat h0 resultBufferY); 
+  changeEndian_le_be (as_nat h0 resultBufferY);
   pop_frame();
 
-  let open Hacl.Impl.P256.LowLevel.RawCmp in 
+  let open Hacl.Impl.P256.LowLevel.RawCmp in
   unsafe_bool_of_u64  flag
 
 
-[@ (Comment "  The pub(lic)_key input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over this variable.")] 
+[@ (Comment "  The pub(lic)_key input of the function is considered to be public,
+  thus this code is not secret independent with respect to the operations done over this variable.")]
 val _ecp256dh_r:
-    result:lbuffer uint64 (size 12) 
-  -> pubKey:lbuffer uint64 (size 8) 
-  -> scalar: lbuffer uint8 (size 32) 
+    result:lbuffer uint64 (size 12)
+  -> pubKey:lbuffer uint64 (size 8)
+  -> scalar: lbuffer uint8 (size 32)
   -> Stack uint64
-    (requires fun h -> 
+    (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar /\
       as_nat h (gsub result (size 0) (size 4)) == 0 /\
       as_nat h (gsub result (size 4) (size 4)) == 0)
-    (ensures fun h0 r h1 -> 
+    (ensures fun h0 r h1 ->
       modifies (loc result) h0 h1 /\
       (let x, y = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)) in
        let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
@@ -132,7 +130,7 @@ let ecp256dh_r result pubKey scalar =
   let flag = _ecp256dh_r resultBufferFelem publicKeyAsFelem scalar in
 
   let h2 = ST.get() in
-  
+
   changeEndian resultBufferFelemX;
   changeEndian resultBufferFelemY;
   toUint8 resultBufferFelemX resultX;
@@ -147,7 +145,6 @@ let ecp256dh_r result pubKey scalar =
   changeEndian_le_be (as_nat h2 resultBufferFelemY);
 
   pop_frame();
-  
-  let open Hacl.Impl.P256.LowLevel.RawCmp in 
-  unsafe_bool_of_u64  flag
 
+  let open Hacl.Impl.P256.LowLevel.RawCmp in
+  unsafe_bool_of_u64  flag

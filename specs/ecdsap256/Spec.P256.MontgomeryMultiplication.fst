@@ -4,12 +4,12 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open FStar.Mul
 
+open Lib.IntTypes
+open Lib.ByteSequence
+
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
 open Spec.P256
-
-
-open Lib.IntTypes
 
 #set-options "--z3rlimit 40 --fuel 0 --ifuel 0"
 
@@ -115,8 +115,6 @@ let substractionInDomain a b =
 let ( *% ) a b = (a * b) % prime
 
 
-open Lib.ByteSequence
-
 val ith_bit_power: k:lbytes 32 -> i:nat{i < 256}
   -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
 
@@ -154,7 +152,6 @@ let conditional_swap_pow i p q =
 
 let lemma_swaped_steps p q = ()
 
-open Lib.ByteSequence
 
 let _pow_step k i (p, q) =
   let bit = 255 - i in
@@ -312,10 +309,10 @@ let rec lemma_exponen_spec k start index =
 
 let pow_spec k p =
   assert_norm (1 < prime256);
-  let a, b = Lib.LoopCombinators.repeati 256 (_pow_step k) (1, p) in 
+  let a, b = Lib.LoopCombinators.repeati 256 (_pow_step k) (1, p) in
   lemma_exponen_spec k (1, p) 256;
   a
 
 
-let sq_root_spec a = 
+let sq_root_spec a =
   pow a ((prime256 + 1) / 4) % prime256

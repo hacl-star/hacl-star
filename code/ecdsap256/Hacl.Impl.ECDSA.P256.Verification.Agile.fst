@@ -1,45 +1,33 @@
 module Hacl.Impl.ECDSA.P256.Verification.Agile
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.ByteSequence
 
+open Spec.P256
 open Spec.P256.Lemmas
-
 open Spec.P256.Definitions
-open Hacl.Spec.P256.Felem
-open Hacl.Impl.P256.LowLevel 
-open Hacl.Impl.P256.Core
 open Spec.P256.MontgomeryMultiplication
+open Spec.ECDSA
+open Spec.ECDSAP256.Definition
+
+open Hacl.Spec.P256.Felem
+open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Core
+open Hacl.Impl.P256.PointAdd
+open Hacl.Impl.P256.PointDouble
+open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.P256.Signature.Common
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MM.Exponent
 
-open Spec.ECDSAP256.Definition
-open Spec.ECDSA
-open Spec.P256
-open Spec.P256.Lemmas
-
-open Hacl.Impl.P256.PointAdd
-open Hacl.Impl.P256.PointDouble
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
-open Hacl.Impl.P256.LowLevel.RawCmp
-
 open Hacl.Hash.SHA2
-
-open Hacl.Impl.P256.Signature.Common
-open Lib.ByteSequence
-open Lib.IntVector.Intrinsics
-
-
 open Spec.Hash.Definitions
-
-open FStar.Mul
-
-module H = Spec.Agile.Hash
-module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
@@ -64,7 +52,7 @@ let isZero_uint64_nCT f =
 
 
 [@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")] 
+thus this code is not secret independent with respect to the operations done over the input.")]
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
@@ -98,7 +86,7 @@ let ecdsa_verification_step1 r s =
 inline_for_extraction
 val ecdsa_verification_step23: alg:hash_alg_ecdsa
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
-  -> m: lbuffer uint8 mLen 
+  -> m: lbuffer uint8 mLen
   -> result: felem
   -> Stack unit
     (requires fun h -> live h m /\ live h result )
@@ -106,32 +94,32 @@ val ecdsa_verification_step23: alg:hash_alg_ecdsa
       (
 	assert_norm (pow2 32 < pow2 61);
 	assert_norm (pow2 32 < pow2 125);
-	let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
-	let cutHashM = Lib.Sequence.sub hashM 0 32 in 
+	let hashM = hashSpec alg (v mLen) (as_seq h0 m) in
+	let cutHashM = Lib.Sequence.sub hashM 0 32 in
 	as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
       )
     )
 
 
-let ecdsa_verification_step23 alg mLen m result = 
+let ecdsa_verification_step23 alg mLen m result =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  push_frame(); 
+  push_frame();
   let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a -> Hacl.Hash.Definitions.hash_len a in
-  let mHash = create sz (u8 0) in    
-  
+  let mHash = create sz (u8 0) in
+
   begin
-  match alg with 
-    |NoHash -> copy mHash m 
-    |Hash a -> match a with 
+  match alg with
+    |NoHash -> copy mHash m
+    |Hash a -> match a with
       |SHA2_256 -> hash_256 m mLen mHash
       |SHA2_384 -> hash_384 m mLen mHash
-      |SHA2_512 -> hash_512 m mLen mHash 
+      |SHA2_512 -> hash_512 m mLen mHash
   end;
-  
-  let cutHash = sub mHash (size 0) (size 32) in 
+
+  let cutHash = sub mHash (size 0) (size 32) in
   toUint64ChangeEndian cutHash result;
-  let h1 = ST.get() in 
+  let h1 = ST.get() in
   reduction_prime_2prime_order result result;
 
     lemma_core_0 result h1;
@@ -166,8 +154,8 @@ val ecdsa_verification_step4:
     (ensures fun h0 _ h1 ->
       modifies (loc bufferU1 |+| loc bufferU2) h0 h1 /\
       (
-	let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 hash % prime_p256_order in 
-	let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
+	let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 hash % prime_p256_order in
+	let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in
 	as_seq h1 bufferU1 == nat_to_bytes_be 32 p0 /\
 	as_seq h1 bufferU2 == nat_to_bytes_be 32 p1
       )
@@ -185,13 +173,13 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     montgomery_ladder_exponent inverseS;
     multPowerPartial s inverseS hash u1;
     multPowerPartial s inverseS r u2;
-  
-  let h1 = ST.get() in 
+
+  let h1 = ST.get() in
     Hacl.Impl.P256.LowLevel.changeEndian u1;
     Hacl.Impl.P256.LowLevel.changeEndian u2;
     toUint8 u1 bufferU1;
     toUint8 u2 bufferU2;
-  
+
   let h2 = ST.get() in
 
     calc(==) {
@@ -272,7 +260,7 @@ let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer =
 
 
 [@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")] 
+thus this code is not secret independent with respect to the operations done over the input.")]
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
@@ -300,32 +288,32 @@ let compare_felem_bool a b  =
 inline_for_extraction noextract
 val compare_points_bool: a: point -> b: point -> Stack bool
   (requires fun h -> live h a /\ live h b)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (
-      let xP = gsub a (size 0) (size 4) in 
-      let yP = gsub a (size 4) (size 4) in 
-      let zP = gsub a (size 8) (size 4) in 
+      let xP = gsub a (size 0) (size 4) in
+      let yP = gsub a (size 4) (size 4) in
+      let zP = gsub a (size 8) (size 4) in
 
-      let xQ = gsub b (size 0) (size 4) in 
-      let yQ = gsub b (size 4) (size 4) in 
-      let zQ = gsub b (size 8) (size 4) in 
+      let xQ = gsub b (size 0) (size 4) in
+      let yQ = gsub b (size 4) (size 4) in
+      let zQ = gsub b (size 8) (size 4) in
 
       r == ((as_nat h0 xP = as_nat h0 xQ) && (as_nat h0 yP = as_nat h0 yQ) && (as_nat h0 zP = as_nat h0 zQ))
     )
   )
 
-let compare_points_bool a b = 
-  let x0 = sub a (size 0) (size 4) in 
-  let y0 = sub a (size 4) (size 4) in 
-  let z0 = sub a (size 8) (size 4) in 
+let compare_points_bool a b =
+  let x0 = sub a (size 0) (size 4) in
+  let y0 = sub a (size 4) (size 4) in
+  let z0 = sub a (size 8) (size 4) in
 
-  let x1 = sub b (size 0) (size 4) in 
-  let y1 = sub b (size 4) (size 4) in 
-  let z1 = sub b (size 8) (size 4) in 
+  let x1 = sub b (size 0) (size 4) in
+  let y1 = sub b (size 4) (size 4) in
+  let z1 = sub b (size 8) (size 4) in
 
   let xEqual = compare_felem_bool x0 x1 in
-  let yEqual = compare_felem_bool y0 y1 in 
-  let zEqual = compare_felem_bool z0 z1 in 
+  let yEqual = compare_felem_bool y0 y1 in
+  let zEqual = compare_felem_bool z0 z1 in
   xEqual && yEqual && zEqual
 
 
@@ -339,29 +327,29 @@ val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
     as_nat h (gsub points (size 16) (size 4)) < prime256 /\
     as_nat h (gsub points (size 20) (size 4)) < prime256
   )
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (
-      let pointU1G = gsub points (size 0) (size 12) in 
-      let pointU2Q = gsub points (size 12) (size 12) in 
+      let pointU1G = gsub points (size 0) (size 12) in
+      let pointU2Q = gsub points (size 12) (size 12) in
       r = (
 	_norm (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU1G))) =
 	_norm (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU2Q))))
     )
   )
 
-let ecdsa_verification_step5_1 points = 
+let ecdsa_verification_step5_1 points =
   push_frame();
-  
-  let tmp = create (size 112) (u64 0) in 
-  let tmpForNorm = sub tmp (size 0) (size 88) in 
-  let result0Norm = sub tmp (size 88) (size 12) in 
-  let result1Norm = sub tmp (size 100) (size 12) in 
+
+  let tmp = create (size 112) (u64 0) in
+  let tmpForNorm = sub tmp (size 0) (size 88) in
+  let result0Norm = sub tmp (size 88) (size 12) in
+  let result1Norm = sub tmp (size 100) (size 12) in
   let pointU1G = sub points (size 0) (size 12) in
-  let pointU2Q = sub points (size 12) (size 12) in 
-  
+  let pointU2Q = sub points (size 12) (size 12) in
+
   norm pointU1G result0Norm tmpForNorm;
   norm pointU2Q result1Norm tmpForNorm;
-  let equalX = compare_points_bool result0Norm result1Norm in 
+  let equalX = compare_points_bool result0Norm result1Norm in
 
   pop_frame();
   equalX
@@ -396,12 +384,12 @@ val ecdsa_verification_step5_2:
         let pointAtInfinity = (0, 0, 0) in
         let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
         let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
-	let sumD = 
+	let sumD =
 	  if  _norm u1D =  _norm u2D
 	  then
 	    _point_double u1D
-	  else 
-	    _point_add u1D u2D in 
+	  else
+	    _point_add u1D u2D in
         let pointNorm = _norm sumD in
         let resultPoint =  point_prime_to_coordinates (as_seq h1 pointSum) in
         pointNorm == resultPoint
@@ -411,19 +399,19 @@ val ecdsa_verification_step5_2:
 
 let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
-  let points = create (size 24) (u64 0) in 
+  let points = create (size 24) (u64 0) in
   let buff = sub tempBuffer (size 12) (size 88) in
   ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer;
   let pointU1G = sub points (size 0) (size 12) in
-  let pointU2Q = sub points (size 12) (size 12) in 
+  let pointU2Q = sub points (size 12) (size 12) in
 
-  let equalX = ecdsa_verification_step5_1 points in 
+  let equalX = ecdsa_verification_step5_1 points in
   begin
   if equalX then
   	point_double pointU1G pointSum buff
-  else	
+  else
   	point_add pointU1G pointU2Q pointSum buff end;
-  norm pointSum pointSum buff; 
+  norm pointSum pointSum buff;
   pop_frame()
 
 
@@ -455,12 +443,12 @@ val ecdsa_verification_step5:
         let pointAtInfinity = (0, 0, 0) in
         let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
         let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
-        let sumD = 
+        let sumD =
 	  if  _norm u1D =  _norm u2D
 	  then
 	    _point_double u1D
-	  else 
-	    _point_add u1D u2D in 
+	  else
+	    _point_add u1D u2D in
         let pointNorm = _norm sumD in
         let (xResult, yResult, zResult) = pointNorm in
         state == not (Spec.P256.isPointAtInfinity pointNorm) /\
@@ -517,25 +505,25 @@ val ecdsa_verification_core:
        (
          assert_norm (pow2 32 < pow2 61);
 	 assert_norm (pow2 32 < pow2 125);
-	 
-	 let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
-	 let cutHashM = Lib.Sequence.sub hashM 0 32 in 
-	 let hashNat =  nat_from_bytes_be cutHashM % prime_p256_order in 
-	 
-         let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in 
-	 let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
 
-	 let bufferU1 = nat_to_bytes_be 32 p0  in 
-	 let bufferU2 = nat_to_bytes_be 32 p1 in 
+	 let hashM = hashSpec alg (v mLen) (as_seq h0 m) in
+	 let cutHashM = Lib.Sequence.sub hashM 0 32 in
+	 let hashNat =  nat_from_bytes_be cutHashM % prime_p256_order in
+
+         let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in
+	 let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in
+
+	 let bufferU1 = nat_to_bytes_be 32 p0  in
+	 let bufferU2 = nat_to_bytes_be 32 p1 in
 	 let pointAtInfinity = (0, 0, 0) in
          let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, basePoint) in
          let u2D, _ = montgomery_ladder_spec bufferU2 (pointAtInfinity, point_prime_to_coordinates (as_seq h0 publicKeyPoint)) in
-          let sumD = 
+          let sumD =
 	  if  _norm u1D =  _norm u2D
 	  then
 	    _point_double u1D
-	  else 
-	    _point_add u1D u2D in 
+	  else
+	    _point_add u1D u2D in
          let (xResult, yResult, zResult) = _norm sumD in
          state == not (Spec.P256.isPointAtInfinity (_norm sumD)) /\
          as_nat h1 xBuffer == xResult % prime_p256_order
@@ -557,7 +545,7 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
 
 
 [@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")] 
+thus this code is not secret independent with respect to the operations done over the input.")]
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)
@@ -639,24 +627,24 @@ let ecdsa_verification alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame();
-  let h0 = ST.get() in 
+  let h0 = ST.get() in
   let publicKeyAsFelem = create (size 8) (u64 0) in
-  let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in 
-  let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in 
-  let rAsFelem = create (size 4) (u64 0) in 
-  let sAsFelem = create (size 4) (u64 0) in 
+  let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in
+  let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in
+  let rAsFelem = create (size 4) (u64 0) in
+  let sAsFelem = create (size 4) (u64 0) in
   let pubKeyX = sub pubKey (size 0) (size 32) in
-  let pubKeyY = sub pubKey (size 32) (size 32) in 
-      
+  let pubKeyY = sub pubKey (size 32) (size 32) in
+
   toUint64ChangeEndian pubKeyX publicKeyFelemX;
   toUint64ChangeEndian pubKeyY publicKeyFelemY;
-   
+
   toUint64ChangeEndian r rAsFelem;
   toUint64ChangeEndian s sAsFelem;
 
-  let h1 = ST.get() in 
+  let h1 = ST.get() in
     lemma_core_0 publicKeyFelemX h1;
-    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
+    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);
     lemma_core_0 publicKeyFelemY h1;
     uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
 
@@ -665,18 +653,18 @@ let ecdsa_verification alg pubKey r s mLen m =
     lemma_core_0 sAsFelem h1;
     uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
 
-  let result = ecdsa_verification_ alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
+  let result = ecdsa_verification_ alg publicKeyAsFelem rAsFelem sAsFelem mLen m in
   pop_frame();
 
     changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
-    
+
     changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
-    
+
     changeEndianLemma (uints_from_bytes_be (as_seq h1 r));
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 r);
-    
+
     changeEndianLemma (uints_from_bytes_be (as_seq h1 s));
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 s);
 

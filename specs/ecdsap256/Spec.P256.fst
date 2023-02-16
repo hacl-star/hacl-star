@@ -1,6 +1,8 @@
 module Spec.P256
 
 open FStar.Mul
+open FStar.Math.Lemmas
+open FStar.Math.Lib
 
 open Lib.ByteSequence
 open Lib.IntTypes
@@ -9,16 +11,13 @@ open Lib.Sequence
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 
-open FStar.Math.Lemmas
-open FStar.Math.Lib
-
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 (* https://eprint.iacr.org/2013/816.pdf *)
 
 let prime = prime256
 
-let aCoordinateP256 = -3 
+let aCoordinateP256 = -3
 let bCoordinateP256 : (a: nat {a < prime256}) =
   assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < prime256);
   41058363725152142129326129780047268409114441015993725554835256314039467401291
@@ -34,13 +33,13 @@ let basePoint : point_nat_prime =
 
 let _point_double (p:point_nat_prime) : point_nat_prime =
   let x, y, z = p in
-  let delta = z * z in 
-  let gamma = y * y in 
-  let beta = x * gamma in 
-  let alpha = 3 * (x - delta) * (x + delta) in 
-  let x3 = (alpha * alpha - 8 * beta) % prime in 
-  let y3 = (alpha *  (4 * beta - x3) - 8 * gamma * gamma) % prime in 
-  let z3 = ((y + z) * (y + z) - delta - gamma) % prime in 
+  let delta = z * z in
+  let gamma = y * y in
+  let beta = x * gamma in
+  let alpha = 3 * (x - delta) * (x + delta) in
+  let x3 = (alpha * alpha - 8 * beta) % prime in
+  let y3 = (alpha *  (4 * beta - x3) - 8 * gamma * gamma) % prime in
+  let z3 = ((y + z) * (y + z) - delta - gamma) % prime in
   (x3, y3, z3)
 
 

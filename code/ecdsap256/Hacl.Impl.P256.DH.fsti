@@ -6,11 +6,10 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteSequence
 
 open Spec.DH
-open Spec.ECDSAP256.Definition
 
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val ecp256dh_i:
@@ -18,7 +17,7 @@ val ecp256dh_i:
   -> scalar:lbuffer uint8 (size 32)
   -> Stack bool
   (requires fun h ->
-    live h result /\ live h scalar /\ 
+    live h result /\ live h scalar /\
     disjoint result scalar)
   (ensures fun h0 r h1 ->
     let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
