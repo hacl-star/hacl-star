@@ -2,53 +2,40 @@ HACL_HOME=$(realpath ../..)
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
-
-CC = gcc-9.1
-all: dist/Hacl_Test_ECDSA.exe
-
-test: all
-	dist/Hacl_Test_ECDSA.exe
+all: dist/p256-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
 include $(HACL_HOME)/Makefile.local
 
 FSTAR_ROOTS += $(HACL_HOME)/code/tests/Hacl.Test.ECDSA.fst
 
-#BASE_FLAGS+= -funroll-loops 4
-
-CFLAGS += -I$(HACL_HOME)/lib/c -I . -march=native -mtune=native -O3
+CFLAGS += -I$(HACL_HOME)/lib/c -march=native -mtune=native -O3
 export CFLAGS
 
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(P256_BUNDLE) \
-	  -tmpdir dist \
-	  -fbuiltin-uint128 \
-	  -funroll-loops 12 \
-	  -add-include '"lib_intrinsics.h"' \
-	  -no-prefix 'Hacl.Test.ECDSA' \
-	  -skip-compilation
-
+# CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
-# We don't want Hacl_Test_ECDSA.o to be included so we redefine OBJS
-dist/libecdsa.a:dist/Hacl_P256.o
-	$(MAKE) -C dist -f Makefile.basic OBJS=$(notdir $^) $(notdir $@)
-	
-dist/%.o: dist/Makefile.basic
-	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
+dist/libp256.a: dist/Makefile.basic
+	$(MAKE) -C dist -f Makefile.basic
 
-dist/Hacl_Test_ECDSA.exe: dist/Hacl_P256.o dist/Hacl_Test_ECDSA.o \
-	$(KRML_HOME)/krmllib/dist/generic/libkrmllib.a dist/libecdsa.a
+HASH_BUNDLE=-bundle Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash]
+STREAMING_BUNDLE=-bundle Hacl.Streaming.*
+BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
 
+dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
+	$(KRML) $^ -o libp256.a \
+	$(BASE_FLAGS) $(HASH_BUNDLE) $(STREAMING_BUNDLE) $(BLAKE2_BUNDLE) \
+	$(BIGNUM_BUNDLE) $(P256_BUNDLE) \
+	-tmpdir dist \
+	-add-include '"lib_intrinsics.h"' \
+	-no-prefix 'Hacl.Test.ECDSA' \
+	-fbuiltin-uint128 \
+	-skip-compilation
 
-dist/p256-openssl-test.exe: dist/Hacl_P256.o
-	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I$(HACL_HOME)/dist/gcc64-only  -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
-	 $(HACL_HOME)/tests/p256-test.c $^ \
-	-o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
+dist/p256-test.exe: dist/libp256.a \
+	$(KRML_HOME)/krmllib/dist/generic/libkrmllib.a
 
 %.exe:
-	$(CC) $(CFLAGS) -flto $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
-
-
