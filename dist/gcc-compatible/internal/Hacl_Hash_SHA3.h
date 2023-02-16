@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Streaming_MD5_H
-#define __Hacl_Streaming_MD5_H
+#ifndef __internal_Hacl_Hash_SHA3_H
+#define __internal_Hacl_Hash_SHA3_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,35 +35,24 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Streaming_SHA2.h"
-#include "Hacl_Hash_MD5.h"
+#include "internal/Hacl_Krmllib.h"
+#include "../Hacl_Hash_SHA3.h"
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_MD5_state_md5;
+void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5(void);
+void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
 
-void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);
-
-/**
-0 = success, 1 = max length exceeded
-*/
-uint32_t
-Hacl_Streaming_MD5_legacy_update_md5(
-  Hacl_Streaming_SHA2_state_sha2_224 *p,
-  uint8_t *data,
-  uint32_t len
+void
+Hacl_Impl_SHA3_squeeze(
+  uint64_t *s,
+  uint32_t rateInBytes,
+  uint32_t outputByteLen,
+  uint8_t *output
 );
-
-void Hacl_Streaming_MD5_legacy_finish_md5(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
-
-void Hacl_Streaming_MD5_legacy_free_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);
-
-Hacl_Streaming_SHA2_state_sha2_224
-*Hacl_Streaming_MD5_legacy_copy_md5(Hacl_Streaming_SHA2_state_sha2_224 *s0);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Streaming_MD5_H_DEFINED
+#define __internal_Hacl_Hash_SHA3_H_DEFINED
 #endif

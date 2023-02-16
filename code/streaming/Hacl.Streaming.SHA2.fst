@@ -44,10 +44,10 @@ inline_for_extraction noextract
 let state_t_512 = state_t SHA2_512
 
 /// Type abbreviations - for pretty code generation
-let state_sha2_224 = F.state_s hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let state_sha2_256 = F.state_s hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
-let state_sha2_384 = F.state_s hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let state_sha2_512 = F.state_s hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+let state_sha2_224 = Hacl.Streaming.MD.state_32
+let state_sha2_256 = Hacl.Streaming.MD.state_32
+let state_sha2_384 = Hacl.Streaming.MD.state_64
+let state_sha2_512 = Hacl.Streaming.MD.state_64
 
 open Lib.Buffer
 open Lib.IntTypes

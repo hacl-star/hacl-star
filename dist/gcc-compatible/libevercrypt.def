@@ -33,13 +33,17 @@ EXPORTS
   Hacl_Blake2s_128_store_state128s_to_state32
   Hacl_Blake2s_128_load_state128s_from_state32
   Hacl_Blake2s_128_blake2s_malloc
-  Hacl_Impl_SHA3_rotl
   Hacl_Impl_SHA3_state_permute
   Hacl_Impl_SHA3_loadState
-  Hacl_Impl_SHA3_storeState
-  Hacl_Impl_SHA3_absorb
   Hacl_Impl_SHA3_squeeze
-  Hacl_Impl_SHA3_keccak
+  Hacl_Streaming_SHA3_create_in_256
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
+  Hacl_Streaming_SHA3_init_256
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
+  Hacl_Streaming_SHA3_update_256
+  Hacl_Streaming_SHA3_finish_256
+  Hacl_Streaming_SHA3_free_256
+  Hacl_Streaming_SHA3_copy_256
   Hacl_SHA3_shake128_hacl
   Hacl_SHA3_shake256_hacl
   Hacl_SHA3_sha3_224
@@ -55,11 +59,27 @@ EXPORTS
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
+  Hacl_Streaming_MD5_legacy_create_in
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_MD5_legacy_init
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_MD5_legacy_update
+  Hacl_Streaming_MD5_legacy_finish
+  Hacl_Streaming_MD5_legacy_free
+  Hacl_Streaming_MD5_legacy_copy
+  Hacl_Streaming_MD5_legacy_hash
   Hacl_Hash_Core_SHA1_legacy_init
   Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
+  Hacl_Streaming_SHA1_legacy_create_in
+  Hacl_Streaming_SHA1_legacy_init
+  Hacl_Streaming_SHA1_legacy_update
+  Hacl_Streaming_SHA1_legacy_finish
+  Hacl_Streaming_SHA1_legacy_free
+  Hacl_Streaming_SHA1_legacy_copy
+  Hacl_Streaming_SHA1_legacy_hash
   Hacl_Hash_Core_SHA2_init_224
   Hacl_Hash_Core_SHA2_init_256
   Hacl_Hash_Core_SHA2_init_384
@@ -193,10 +213,8 @@ EXPORTS
   Hacl_Curve25519_51_ecdh
   Hacl_SHA2_Scalar32_sha512_init
   Hacl_Streaming_SHA2_create_in_256
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Streaming_SHA2_copy_256
   Hacl_Streaming_SHA2_init_256
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Streaming_SHA2_update_256
   Hacl_Streaming_SHA2_finish_256
   Hacl_Streaming_SHA2_free_256
@@ -208,10 +226,8 @@ EXPORTS
   Hacl_Streaming_SHA2_free_224
   Hacl_Streaming_SHA2_sha224
   Hacl_Streaming_SHA2_create_in_512
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
   Hacl_Streaming_SHA2_copy_512
   Hacl_Streaming_SHA2_init_512
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
@@ -381,11 +397,6 @@ EXPORTS
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free
-  Hacl_Streaming_SHA3_create_in_256
-  Hacl_Streaming_SHA3_init_256
-  Hacl_Streaming_SHA3_update_256
-  Hacl_Streaming_SHA3_finish_256
-  Hacl_Streaming_SHA3_free_256
   Hacl_Frodo640_crypto_kem_keypair
   Hacl_Frodo640_crypto_kem_enc
   Hacl_Frodo640_crypto_kem_dec
@@ -732,16 +743,6 @@ EXPORTS
   Hacl_Frodo64_crypto_kem_keypair
   Hacl_Frodo64_crypto_kem_enc
   Hacl_Frodo64_crypto_kem_dec
-  Hacl_Streaming_SHA1_legacy_create_in_sha1
-  Hacl_Streaming_SHA1_legacy_init_sha1
-  Hacl_Streaming_SHA1_legacy_update_sha1
-  Hacl_Streaming_SHA1_legacy_finish_sha1
-  Hacl_Streaming_SHA1_legacy_free_sha1
-  Hacl_Streaming_MD5_legacy_create_in_md5
-  Hacl_Streaming_MD5_legacy_init_md5
-  Hacl_Streaming_MD5_legacy_update_md5
-  Hacl_Streaming_MD5_legacy_finish_md5
-  Hacl_Streaming_MD5_legacy_free_md5
   Hacl_HMAC_Blake2b_256_compute_blake2b_256
   Hacl_HKDF_Blake2b_256_expand_blake2b_256
   Hacl_HKDF_Blake2b_256_extract_blake2b_256

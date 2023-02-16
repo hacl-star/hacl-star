@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Streaming_SHA1_H
-#define __Hacl_Streaming_SHA1_H
+#ifndef __Hacl_Hash_SHA3_H
+#define __Hacl_Hash_SHA3_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,36 +35,54 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Streaming_SHA2.h"
-#include "Hacl_Hash_SHA1.h"
+#include "Lib_Memzero0.h"
+#include "Hacl_Hash_Types.h"
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
+typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1(void);
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_create_in_256(void);
 
-void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_MD_state_64 *s);
 
 /**
-0 = success, 1 = max length exceeded
+0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
 */
 uint32_t
-Hacl_Streaming_SHA1_legacy_update_sha1(
-  Hacl_Streaming_SHA2_state_sha2_224 *p,
-  uint8_t *data,
-  uint32_t len
+Hacl_Streaming_SHA3_update_256(Hacl_Streaming_MD_state_64 *p, uint8_t *data, uint32_t len);
+
+void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_MD_state_64 *p, uint8_t *dst);
+
+void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *s);
+
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *s0);
+
+void
+Hacl_SHA3_shake128_hacl(
+  uint32_t inputByteLen,
+  uint8_t *input,
+  uint32_t outputByteLen,
+  uint8_t *output
 );
 
 void
-Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
+Hacl_SHA3_shake256_hacl(
+  uint32_t inputByteLen,
+  uint8_t *input,
+  uint32_t outputByteLen,
+  uint8_t *output
+);
 
-void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
-Hacl_Streaming_SHA2_state_sha2_224
-*Hacl_Streaming_SHA1_legacy_copy_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s0);
+void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Streaming_SHA1_H_DEFINED
+#define __Hacl_Hash_SHA3_H_DEFINED
 #endif
