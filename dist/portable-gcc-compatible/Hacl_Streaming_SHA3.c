@@ -302,29 +302,25 @@ void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8
     Hacl_Impl_SHA3_loadState((uint32_t)136U, buf_last, tmp_block_state);
     Hacl_Impl_SHA3_state_permute(tmp_block_state);
     uint8_t *uu____0 = buf_last + r;
-    uint8_t b[136U] = { 0U };
-    memcpy(b, uu____0, (uint32_t)0U * sizeof (uint8_t));
-    b[0U] = (uint8_t)0x06U;
-    Hacl_Impl_SHA3_loadState((uint32_t)136U, b, tmp_block_state);
-    uint8_t b1[136U] = { 0U };
-    b1[135U] = (uint8_t)0x80U;
-    Hacl_Impl_SHA3_loadState((uint32_t)136U, b1, tmp_block_state);
+    uint8_t lastBlock[136U] = { 0U };
+    memcpy(lastBlock, uu____0, (uint32_t)0U * sizeof (uint8_t));
+    lastBlock[0U] = (uint8_t)0x06U;
+    Hacl_Impl_SHA3_loadState((uint32_t)136U, lastBlock, tmp_block_state);
+    uint8_t nextBlock[136U] = { 0U };
+    nextBlock[135U] = (uint8_t)0x80U;
+    Hacl_Impl_SHA3_loadState((uint32_t)136U, nextBlock, tmp_block_state);
     Hacl_Impl_SHA3_state_permute(tmp_block_state);
-    Lib_Memzero0_memzero(b1, (uint32_t)136U * sizeof (b1[0U]));
-    Lib_Memzero0_memzero(b, (uint32_t)136U * sizeof (b[0U]));
   }
   else
   {
-    uint8_t b[136U] = { 0U };
-    memcpy(b, buf_last, r * sizeof (uint8_t));
-    b[r] = (uint8_t)0x06U;
-    Hacl_Impl_SHA3_loadState((uint32_t)136U, b, tmp_block_state);
-    uint8_t b1[136U] = { 0U };
-    b1[135U] = (uint8_t)0x80U;
-    Hacl_Impl_SHA3_loadState((uint32_t)136U, b1, tmp_block_state);
+    uint8_t lastBlock[136U] = { 0U };
+    memcpy(lastBlock, buf_last, r * sizeof (uint8_t));
+    lastBlock[r] = (uint8_t)0x06U;
+    Hacl_Impl_SHA3_loadState((uint32_t)136U, lastBlock, tmp_block_state);
+    uint8_t nextBlock[136U] = { 0U };
+    nextBlock[135U] = (uint8_t)0x80U;
+    Hacl_Impl_SHA3_loadState((uint32_t)136U, nextBlock, tmp_block_state);
     Hacl_Impl_SHA3_state_permute(tmp_block_state);
-    Lib_Memzero0_memzero(b1, (uint32_t)136U * sizeof (b1[0U]));
-    Lib_Memzero0_memzero(b, (uint32_t)136U * sizeof (b[0U]));
   }
   Hacl_Impl_SHA3_squeeze(tmp_block_state, (uint32_t)136U, (uint32_t)32U, dst);
 }

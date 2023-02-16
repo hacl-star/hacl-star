@@ -140,11 +140,12 @@ val state_theta:
       modifies (loc s) h0 h1 /\
       as_seq h1 s == S.state_theta (as_seq h0 s))
 let state_theta s =
+  push_frame ();
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.state_theta (as_seq h0 s) /\ live h1 s in
-  let footprint = Ghost.hide (loc s) in
-  salloc1 h0 5ul (u64 0) (Ghost.hide (loc s)) spec
-    (fun _C -> state_theta0 s _C; state_theta1 s _C)
+  let _C = create 5ul (u64 0) in 
+  state_theta0 s _C; state_theta1 s _C;
+  pop_frame()
+  
 
 #reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
 
@@ -193,26 +194,26 @@ val state_pi_rho:
       modifies (loc s) h0 h1 /\
       as_seq h1 s == S.state_pi_rho (as_seq h0 s))
 let state_pi_rho s =
+  push_frame();
   let x = get s 1ul 0ul in
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.state_pi_rho (as_seq h0 s) /\ live h1 s in
-  salloc1 h0 1ul x (Ghost.hide (loc s)) spec
-     (fun current ->
-         let h1 = ST.get () in
-         assert (bget h1 current 0 == S.get (as_seq h0 s) 1 0);
-         [@ inline_let]
-         let refl h i : GTot (uint64 & S.state) = bget h current 0, as_seq h s in
-         [@ inline_let]
-         let footprint i = loc_union (loc current) (loc s) in
-         [@ inline_let]
-         let spec h0 = S.state_pi_rho_inner in
-         let h0 = ST.get () in
-         loop h0 24ul S.state_pi_rho_s refl footprint spec
-         (fun i ->
-           Loop.unfold_repeat_gen 24 S.state_pi_rho_s (spec h0) (refl h0 0) (v i);
-           state_pi_rho_inner i current s
-         )
-     )
+  let current = create 1ul x in
+  let h1 = ST.get () in
+  assert (bget h1 current 0 == S.get (as_seq h0 s) 1 0);
+  [@ inline_let]
+  let refl h i : GTot (uint64 & S.state) = bget h current 0, as_seq h s in
+  [@ inline_let]
+  let footprint i = loc_union (loc current) (loc s) in
+  [@ inline_let]
+  let spec h0 = S.state_pi_rho_inner in
+  let h0 = ST.get () in
+  loop h0 24ul S.state_pi_rho_s refl footprint spec
+  (fun i ->
+    Loop.unfold_repeat_gen 24 S.state_pi_rho_s (spec h0) (refl h0 0) (v i);
+    state_pi_rho_inner i current s
+  );
+  pop_frame()
+
 
 inline_for_extraction noextract
 val state_chi_inner:
@@ -301,22 +302,21 @@ val loadState:
       modifies (loc s) h0 h1 /\
       as_seq h1 s == S.loadState (v rateInBytes) (as_seq h0 input) (as_seq h0 s))
 let loadState rateInBytes input s =
+  push_frame();
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s ==
-    S.loadState (v rateInBytes) (as_seq h0 input) (as_seq h0 s) /\ live h1 s in
-  salloc1 h0 200ul (u8 0) (Ghost.hide (loc s)) spec
-    (fun block ->
-      update_sub block 0ul rateInBytes input;
-      [@ inline_let]
-      let spec h0 = S.loadState_inner (as_seq h0 block) in
-      let h0 = ST.get () in
-      loop1 h0 25ul s spec
-      (fun j ->
-        Loop.unfold_repeati 25 (spec h0) (as_seq h0 s) (v j);
-        let h0 = ST.get() in
-        let x = uint_from_bytes_le #U64 (sub block (j *! 8ul) 8ul) in
-        s.(j) <- s.(j) ^. x
-      ))
+  let block = create 200ul (u8 0) in
+  update_sub block 0ul rateInBytes input;
+  [@ inline_let]
+  let spec h0 = S.loadState_inner (as_seq h0 block) in
+  let h0 = ST.get () in
+  loop1 h0 25ul s spec
+  (fun j ->
+    Loop.unfold_repeati 25 (spec h0) (as_seq h0 s) (v j);
+    let h0 = ST.get() in
+    let x = uint_from_bytes_le #U64 (sub block (j *! 8ul) 8ul) in
+    s.(j) <- s.(j) ^. x
+  );
+  pop_frame()
 
 inline_for_extraction noextract
 val storeState_inner:
@@ -345,20 +345,20 @@ val storeState:
       modifies (loc res) h0 h1 /\
       as_seq h1 res == S.storeState (v rateInBytes) (as_seq h0 s))
 let storeState rateInBytes s res =
+  push_frame();
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 res == S.storeState (v rateInBytes) (as_seq h0 s) /\ live h1 res in
-  salloc1 h0 200ul (u8 0) (Ghost.hide (loc res)) spec
-    (fun block ->
-      [@ inline_let]
-      let spec h0 = S.storeState_inner (as_seq h0 s) in
-      let h0 = ST.get () in
-      loop1 h0 25ul block spec
-      (fun j ->
-        Loop.unfold_repeati 25 (spec h0) (as_seq h0 block) (v j);
-        storeState_inner s j block
-      );
-      copy res (sub block 0ul rateInBytes)
-    )
+  let block = create 200ul (u8 0) in
+  [@ inline_let]
+  let spec h0 = S.storeState_inner (as_seq h0 s) in
+  let h0 = ST.get () in
+  loop1 h0 25ul block spec
+  (fun j ->
+    Loop.unfold_repeati 25 (spec h0) (as_seq h0 block) (v j);
+    storeState_inner s j block
+  );
+  copy res (sub block 0ul rateInBytes);
+  pop_frame()
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -372,14 +372,13 @@ val absorb_next:
       modifies (loc s) h0 h1 /\
       as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes))
 let absorb_next s rateInBytes =
+  push_frame();
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes) /\ live h1 s in
-  salloc1 h0 rateInBytes (u8 0) (Ghost.hide (loc s)) spec
-    (fun nextBlock ->
-      nextBlock.(rateInBytes -! 1ul) <- u8 0x80;
-      loadState rateInBytes nextBlock s;
-      state_permute s
-    )
+  let nextBlock = create rateInBytes (u8 0) in
+  nextBlock.(rateInBytes -! 1ul) <- u8 0x80;
+  loadState rateInBytes nextBlock s;
+  state_permute s;
+  pop_frame()
 
 inline_for_extraction noextract
 val absorb_last:
@@ -396,21 +395,18 @@ val absorb_last:
       S.absorb_last delimitedSuffix (v rateInBytes) (v rem)
         (as_seq h0 input) (as_seq h0 s))
 let absorb_last delimitedSuffix rateInBytes rem input s =
+  push_frame();
   let h0 = ST.get() in
-  let spec _ h1 =
-    as_seq h1 s ==
-    S.absorb_last delimitedSuffix (v rateInBytes) (v rem) (as_seq h0 input) (as_seq h0 s) /\
-    live h1 s in
-  salloc1 h0 rateInBytes (u8 0) (Ghost.hide (loc s)) spec
-    (fun lastBlock ->
-      let open Lib.RawIntTypes in
-       update_sub lastBlock (size 0) rem input;
-      lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
-      loadState rateInBytes lastBlock s;
-      if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
-         (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. 1ul))
-      then state_permute s;
-      absorb_next s rateInBytes)
+  let lastBlock = create rateInBytes (u8 0) in
+  let open Lib.RawIntTypes in
+  update_sub lastBlock (size 0) rem input;
+  lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
+  loadState rateInBytes lastBlock s;
+  if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
+    (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. 1ul))
+  then state_permute s;
+  absorb_next s rateInBytes;
+  pop_frame()
 
 inline_for_extraction noextract
 val absorb_inner:

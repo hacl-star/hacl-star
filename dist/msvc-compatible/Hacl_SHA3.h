@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Lib_Memzero0.h"
-
 extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
 
 extern const uint32_t Hacl_Impl_SHA3_keccak_piln[24U];
