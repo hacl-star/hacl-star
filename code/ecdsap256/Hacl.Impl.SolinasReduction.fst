@@ -14,7 +14,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Spec.P256.Definitions
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
+open Hacl.Impl.P256.Field
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 

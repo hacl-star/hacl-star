@@ -15,7 +15,7 @@ open Lib.Buffer
 open Spec.P256
 open Spec.P256.MontgomeryMultiplication
 
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
+open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.Arithmetics

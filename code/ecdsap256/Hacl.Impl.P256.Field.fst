@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.LowLevel.PrimeSpecific
+module Hacl.Impl.P256.Field
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -17,13 +17,7 @@ open Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.LowLevel
 
-#reset-options " --z3rlimit 300"
-
-
-inline_for_extraction
-let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat (Lib.Sequence.of_list (p256_prime_list)) == prime256} =
-  assert_norm (felem_seq_as_nat (Lib.Sequence.of_list (p256_prime_list)) == prime256);
-  createL_global p256_prime_list
+#set-options "--z3rlimit 300"
 
 
 inline_for_extraction noextract
@@ -66,12 +60,6 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
   pop_frame()
 
 
-inline_for_extraction
-val reduction_prime256_2prime256_8_with_carry_impl: x: widefelem -> result: felem ->
-  Stack unit
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ wide_as_nat h x < 2 * prime256)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = wide_as_nat h0 x % prime256)
-
 let reduction_prime256_2prime256_8_with_carry_impl x result =
   push_frame();
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -99,6 +87,7 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
 	end );
  pop_frame()
 
+
 val lemma_reduction1_0: a: nat {a < pow2 256 /\ a >= prime256} -> r: nat{r = a - prime256} ->
   Lemma (r = a % prime256)
 
@@ -117,11 +106,6 @@ let lemma_reduction1 a r =
   else
     small_mod r prime256
 
-
-val reduction_prime_2prime_impl: x: felem -> result: felem ->
-  Stack unit
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result == as_nat h0 x % prime256)
 
 let reduction_prime_2prime_impl x result =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -176,20 +160,6 @@ let lemma_t_computation2 t =
   assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = prime256)
 
 
-val p256_add: arg1: felem -> arg2: felem ->  out: felem -> Stack unit
-  (requires (fun h0 ->
-    live h0 arg1 /\ live h0 arg2 /\ live h0 out /\
-    eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-    as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256
-   )
-  )
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      as_nat h1 out == (as_nat h0 arg1 + as_nat h0 arg2) % prime256 /\
-      as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2)) % prime256)
-    )
-  )
-
-
 let p256_add arg1 arg2 out =
   let h0 = ST.get() in
   let t = add4 arg1 arg2 out in
@@ -201,14 +171,6 @@ let p256_add arg1 arg2 out =
     (* lemma_eq_funct (as_seq h2 out) (felem_add_seq (as_seq h0 arg1) (as_seq h0 arg2)) *)
 
 
-val p256_double: arg1: felem ->  out: felem -> Stack unit
-  (requires (fun h0 ->  live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat h0 arg1 < prime256))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == (2 * as_nat h0 arg1) % prime256 /\ as_nat h1 out < prime256 /\
-    as_nat h1 out == toDomain_ (2 * fromDomain_ (as_nat h0 arg1) % prime256)
-  )
-)
-
 let p256_double arg1 out =
     let h0 = ST.get() in
   let t = add4 arg1 arg1 out in
@@ -218,17 +180,6 @@ let p256_double arg1 out =
   additionInDomain (as_nat h0 arg1) (as_nat h0 arg1);
   inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg1))
 
-
-val p256_sub: arg1: felem -> arg2: felem -> out: felem -> Stack unit
-  (requires
-    (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\
-      eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-      as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256))
-    (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-	as_nat h1 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256 /\
-	as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) - fromDomain_ (as_nat h0 arg2)) % prime256)
-    )
-)
 
 let p256_sub arg1 arg2 out =
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
