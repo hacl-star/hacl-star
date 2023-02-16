@@ -10,6 +10,7 @@ open FStar.Math.Lemmas
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.ByteBuffer
 
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
@@ -19,20 +20,6 @@ open Hacl.Spec.P256.Felem
 open Lib.IntTypes.Intrinsics
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
-
-val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
-
-let eq0_u64 a =
-  eq_mask_lemma a (u64 0);
-  eq_mask a (u64 0)
-
-
-val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 else uint_v r == pow2 64 - 1})
-
-let eq1_u64 a =
-  neq_mask_lemma a (u64 0);
-  neq_mask a (u64 0)
-
 
 val isZero_uint64_CT:  f: felem -> Stack uint64
   (requires fun h -> live h f)
@@ -92,44 +79,6 @@ let compare_felem a b =
       lemma_equality (a_0, a_1, a_2, a_3) (b_0, b_1, b_2, b_3);
   r
 
-inline_for_extraction noextract
-val load_buffer8:
-  a0: uint64 -> a1: uint64 ->
-  a2: uint64 -> a3: uint64 ->
-  a4: uint64 -> a5: uint64 ->
-  a6: uint64 -> a7: uint64 ->
-  o: lbuffer uint64 (size 8) ->
-  Stack unit
-    (requires fun h -> live h o)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ wide_as_nat h1 o == wide_as_nat4 (a0, a1, a2, a3, a4, a5, a6, a7))
-
-let load_buffer8 a0 a1 a2 a3 a4 a5 a6 a7  o =
-    let h0 = ST.get() in
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 (5 * 64));
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 (6 * 64));
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 (7 * 64));
-
-  upd o (size 0) a0;
-  upd o (size 1) a1;
-  upd o (size 2) a2;
-  upd o (size 3) a3;
-
-  upd o (size 4) a4;
-  upd o (size 5) a5;
-  upd o (size 6) a6;
-  upd o (size 7) a7
-
-(** This is unused *)
-inline_for_extraction noextract
-val copy_conditional_u64: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} ->
-  Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})
-
-let copy_conditional_u64 a b mask =
-  lemma_xor_copy_cond a b mask;
-  logxor a (logand mask (logxor a b))
 
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit
   (requires fun h -> live h out /\ live h x)
@@ -199,7 +148,7 @@ let add4 x y result =
 
   cc3
 
-
+// local function
 val add4_with_carry: c: uint64 ->  x: felem -> y: felem -> result: felem ->
   Stack uint64
     (requires fun h -> uint_v c <= 1 /\ live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\
@@ -374,6 +323,7 @@ let mul64 x y result temp =
   upd temp (size 0) h0
 
 
+// local function
 inline_for_extraction noextract
 val mult64_0: x: felem -> u: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit
   (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
@@ -388,6 +338,7 @@ let mult64_0 x u result temp =
   mul64 f0 u result temp
 
 
+// local function
 inline_for_extraction noextract
 val mult64_0il: x: glbuffer uint64 (size 4) -> u: uint64 -> result:  lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit
   (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
@@ -402,6 +353,7 @@ let mult64_0il x u result temp =
   mul64 f0 u result temp
 
 
+// local function
 inline_for_extraction noextract
 val mult64_c: x: uint64 -> u: uint64 -> cin: uint64{uint_v cin <= 1} -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack uint64
   (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
@@ -418,6 +370,7 @@ let mult64_c x u cin result temp =
   add_carry_u64 cin l h result
 
 
+// local function
 inline_for_extraction noextract
 val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
@@ -467,54 +420,7 @@ let mul1_il f u result =
   c3 +! temp0
 
 
-inline_for_extraction noextract
-val mul1: f: lbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
-  (requires fun h -> live h result /\ live h f)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\
-    as_nat h0 f * uint_v u = uint_v c * pow2 256 + as_nat h1 result /\
-    as_nat h0 f * uint_v u < pow2 320 /\
-    uint_v c < pow2 64 - 1)
-
-let mul1 f u result =
-  push_frame();
-
-    assert_norm (pow2 64 * pow2 64 = pow2 128);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320);
-
-  let temp = create (size 1) (u64 0) in
-
-  let f0 = index f (size 0) in
-  let f1 = index f (size 1) in
-  let f2 = index f (size 2) in
-  let f3 = index f (size 3) in
-
-  let o0 = sub result (size 0) (size 1) in
-  let o1 = sub result (size 1) (size 1) in
-  let o2 = sub result (size 2) (size 1) in
-  let o3 = sub result (size 3) (size 1) in
-
-    let h0 = ST.get() in
-  mult64_0 f u o0 temp;
-    let h1 = ST.get() in
-  let c1 = mult64_c f1 u (u64 0) o1 temp in
-    let h2 = ST.get() in
-  let c2 = mult64_c f2 u c1 o2 temp in
-    let h3 = ST.get() in
-  let c3 = mult64_c f3 u c2 o3 temp in
-    let h4 = ST.get() in
-  let temp0 = index temp (size 0) in
-    lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0);
-
-  mul_lemma_4 (as_nat h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
-  assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
-  assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
-
-  pop_frame();
-  c3 +! temp0
-
-
+// local function
 val lemma_powers: unit -> Lemma (
   pow2 64 * pow2 64 * pow2 64 = pow2 (3 * 64) /\
   pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 (4 * 64) /\
@@ -532,6 +438,7 @@ let lemma_powers () =
    assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
 
 
+// local function
 val bignum_bn_v_is_as_nat: h: mem -> a: felem -> Lemma (Hacl.Spec.Bignum.Definitions.bn_v (as_seq h a) == as_nat h a)
 
 let bignum_bn_v_is_as_nat h a =
@@ -561,6 +468,7 @@ let bignum_bn_v_is_as_nat h a =
   }
 
 
+// local function
 val wide_as_nat_is_as_nat: h: mem -> a: widefelem
   -> Lemma (wide_as_nat h a == as_nat h (gsub a (size 0) (size 4)) + pow2 (64 * 4) * as_nat h (gsub a (size 4) (size 4)))
 
@@ -568,6 +476,7 @@ let wide_as_nat_is_as_nat h a =
   lemma_powers()
 
 
+// local function
 val bignum_bn_v_is_wide_as_nat: h: mem -> a: widefelem
   -> Lemma (Hacl.Spec.Bignum.Definitions.bn_v (as_seq h a) == wide_as_nat h a)
 
@@ -595,25 +504,11 @@ let mul f r out =
   bignum_bn_v_is_wide_as_nat h1 out
 
 
+// local function
 let lemma_mult_le_both (a b:nat) (n1 n2:nat):
   Lemma (requires (a <= n1 /\ b <= n2))
         (ensures (a * b <= n1 * n2)) = ()
 
-val lemma_320_64:a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> e: uint64 -> u: uint64 -> Lemma
-  (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 + uint_v e  < pow2 320)
-
-#push-options "--z3rlimit 50"
-let lemma_320_64 a b c d e u =
-  lemma_mult_le_both (uint_v u) (uint_v a) (pow2 64 - 1) (pow2 64 - 1);
-  lemma_mult_le_both (uint_v u) (uint_v b) (pow2 64 - 1) (pow2 64 - 1);
-  lemma_mult_le_both (uint_v u) (uint_v c) (pow2 64 - 1) (pow2 64 - 1);
-  lemma_mult_le_both (uint_v u) (uint_v d) (pow2 64 - 1) (pow2 64 - 1);
-  assert_norm((pow2 64 - 1) * (pow2 64 - 1) +
-    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 +
-    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 +
-    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 * pow2 64 + (pow2 64 - 1) < pow2 320)
-
-#pop-options
 
 val sq: f: felem -> out: widefelem -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
@@ -655,6 +550,7 @@ let cmovznz4 cin x y r =
     cmovznz4_lemma cin (Seq.index x 2) (Seq.index y 2);
     cmovznz4_lemma cin (Seq.index x 3) (Seq.index y 3)
 
+// local function
 val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
     a * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
     b * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
@@ -798,18 +694,6 @@ let uploadOneImpl f =
   upd f (size 2) (u64 0);
   upd f (size 3) (u64 0)
 
-
-val toUint64: i: lbuffer uint8 (32ul) -> o: felem -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 ->
-    modifies (loc o) h0 h1 /\
-    as_seq h1 o == Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)
-  )
-
-let toUint64 i o =
-  Lib.ByteBuffer.uints_from_bytes_be o i
-
-
 val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 ->
@@ -819,20 +703,6 @@ val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
 
 let toUint8 i o =
   Lib.ByteBuffer.uints_to_bytes_be (size 4) o i
-
-
-val toUint8LE: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 ->
-    modifies (loc o) h0 h1 /\
-    as_seq h1 o == Lib.ByteSequence.uints_to_bytes_le #_ #_ #4 (as_seq h0 i)
-  )
-
-let toUint8LE i o =
-  Lib.ByteBuffer.uints_to_bytes_le (size 4) o i
-
-
-open Lib.ByteBuffer
 
 
 val changeEndian: i:felem -> Stack unit

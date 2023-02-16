@@ -17,46 +17,26 @@ inline_for_extraction
 let felem = lbuffer uint64 (size 4)
 inline_for_extraction
 let widefelem = lbuffer uint64 (size 8)
+inline_for_extraction
+type point = lbuffer uint64 (size 12)
+inline_for_extraction
+type scalar = lbuffer uint8 (size 32)
 
 
 let as_nat (h:mem) (e:felem) : GTot nat =
   let s = as_seq h e in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  as_nat4 (s0, s1, s2, s3)
+  as_nat4 (s.[0], s.[1], s.[2], s.[3])
 
 
 let as_nat_il (h:mem) (e:glbuffer uint64 (size 4)) : GTot nat =
   let s = as_seq h e in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  as_nat4 (s0, s1, s2, s3)
-
+  as_nat4 (s.[0], s.[1], s.[2], s.[3])
 
 
 let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   let s = as_seq h e in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  let s4 = s.[4] in
-  let s5 = s.[5] in
-  let s6 = s.[6] in
-  let s7 = s.[7] in
-  wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
+  wide_as_nat4 (s.[0], s.[1], s.[2], s.[3], s.[4], s.[5], s.[6], s.[7])
 
-
-inline_for_extraction
-type point = lbuffer uint64 (size 12)
-
-type scalar = lbuffer uint8 (size 32)
-
-open Lib.ByteSequence
 
 val lemma_core_0: a:lbuffer uint64 (size 4) -> h:mem
   -> Lemma (nat_from_intseq_le (as_seq h a) == as_nat h a)
@@ -73,15 +53,3 @@ let lemma_core_0 a h =
     nat_from_intseq_le_slice_lemma #_ #_ #2 k2 1;
     nat_from_intseq_le_lemma0 (Seq.slice k2 0 1);
     nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
-
-
-val lemma_core_1: a:lbuffer uint64 (size 4) -> h:mem ->
-  Lemma (nat_from_bytes_le (uints_to_bytes_le (as_seq h a)) == as_nat h a)
-
-
-let lemma_core_1 a h=
-  lemma_core_0 a h;
-  lemma_nat_from_to_intseq_le_preserves_value #U64 #SEC 4 (as_seq h a);
-  let n = nat_from_intseq_le (as_seq h a) in
-  uints_to_bytes_le_nat_lemma #U64 #SEC 4 n;
-  lemma_nat_to_from_bytes_le_preserves_value #SEC (uints_to_bytes_le #U64 #SEC #4 (as_seq h a)) 32 (as_nat h a)
