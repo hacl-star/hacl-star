@@ -39,7 +39,7 @@ inline_for_extraction noextract
 let index = n:size_t{v n < 5}
 
 inline_for_extraction noextract
-val readLane:
+val get:
     s:state
   -> x:index
   -> y:index
@@ -47,11 +47,11 @@ val readLane:
     (requires fun h -> live h s)
     (ensures  fun h0 r h1 ->
       modifies loc_none h0 h1 /\
-      r == S.readLane (as_seq h0 s) (v x) (v y))
-let readLane s x y = s.(x +! 5ul *! y)
+      r == S.get (as_seq h0 s) (v x) (v y))
+let get s x y = s.(x +! 5ul *! y)
 
 inline_for_extraction noextract
-val writeLane:
+val set:
     s:state
   -> x:index
   -> y:index
@@ -60,8 +60,8 @@ val writeLane:
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 ->
       modifies (loc s) h0 h1 /\
-      as_seq h1 s == S.writeLane (as_seq h0 s) (size_v x) (size_v y) v)
-let writeLane s x y v = s.(x +! 5ul *! y) <- v
+      as_seq h1 s == S.set (as_seq h0 s) (size_v x) (size_v y) v)
+let set s x y v = s.(x +! 5ul *! y) <- v
 
 [@"c_inline"]
 let rotl (a:uint64) (b:size_t{0 < uint_v b /\ uint_v b < 64}) =
@@ -84,11 +84,11 @@ let state_theta0 s _C =
   (fun x ->
     Loop.unfold_repeati 5 (spec h0) (as_seq h0 _C) (v x);
     _C.(x) <-
-      readLane s x 0ul ^.
-      readLane s x 1ul ^.
-      readLane s x 2ul ^.
-      readLane s x 3ul ^.
-      readLane s x 4ul
+      get s x 0ul ^.
+      get s x 1ul ^.
+      get s x 2ul ^.
+      get s x 3ul ^.
+      get s x 4ul
   )
 
 inline_for_extraction noextract
@@ -109,7 +109,7 @@ let state_theta_inner_s _C x s =
   loop1 h0 5ul s spec
   (fun y ->
     Loop.unfold_repeati 5 (spec h0) (as_seq h0 s) (v y);
-    writeLane s x y (readLane s x y ^. _D)
+    set s x y (get s x y ^. _D)
   )
 
 inline_for_extraction noextract
@@ -193,13 +193,13 @@ val state_pi_rho:
       modifies (loc s) h0 h1 /\
       as_seq h1 s == S.state_pi_rho (as_seq h0 s))
 let state_pi_rho s =
-  let x = readLane s 1ul 0ul in
+  let x = get s 1ul 0ul in
   let h0 = ST.get() in
   let spec _ h1 = as_seq h1 s == S.state_pi_rho (as_seq h0 s) /\ live h1 s in
   salloc1 h0 1ul x (Ghost.hide (loc s)) spec
      (fun current ->
          let h1 = ST.get () in
-         assert (bget h1 current 0 == S.readLane (as_seq h0 s) 1 0);
+         assert (bget h1 current 0 == S.get (as_seq h0 s) 1 0);
          [@ inline_let]
          let refl h i : GTot (uint64 & S.state) = bget h current 0, as_seq h s in
          [@ inline_let]
@@ -216,40 +216,28 @@ let state_pi_rho s =
 
 inline_for_extraction noextract
 val state_chi_inner:
-    s_pi_rho:state
+    st:state
   -> y:index
-  -> x:index
-  -> s:state
   -> Stack unit
-    (requires fun h0 -> live h0 s_pi_rho /\ live h0 s /\ disjoint s_pi_rho s)
+    (requires fun h0 -> live h0 st)
     (ensures  fun h0 _ h1 ->
-      modifies (loc s) h0 h1 /\
-      as_seq h1 s == S.state_chi_inner (as_seq h0 s_pi_rho) (v y) (v x) (as_seq h0 s))
-let state_chi_inner s_pi_rho y x s =
-  writeLane s x y
-    (readLane s_pi_rho x y ^.
-     ((lognot (readLane s_pi_rho ((x +. 1ul) %. 5ul) y)) &.
-     readLane s_pi_rho ((x +. 2ul) %. 5ul) y))
-
-inline_for_extraction noextract
-val state_chi_inner1:
-    s_pi_rho:state
-  -> y:index
-  -> s:state
-  -> Stack unit
-    (requires fun h0 -> live h0 s_pi_rho /\ live h0 s /\ disjoint s_pi_rho s)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc s) h0 h1 /\
-      as_seq h1 s == S.state_chi_inner1 (as_seq h0 s_pi_rho) (v y) (as_seq h0 s))
-let state_chi_inner1 s_pi_rho y s =
-  [@ inline_let]
-  let spec h0 = S.state_chi_inner (as_seq h0 s_pi_rho) (v y) in
-  let h0 = ST.get () in
-  loop1 h0 5ul s spec
-  (fun x ->
-    Loop.unfold_repeati 5 (spec h0) (as_seq h0 s) (v x);
-    state_chi_inner s_pi_rho y x s
-  )
+      modifies (loc st) h0 h1 /\
+      as_seq h1 st == S.state_chi_inner (v y) (as_seq h0 st))
+let state_chi_inner st y =
+  let h0 = ST.get() in
+  let v0  = get st 0ul y ^. ((lognot (get st 1ul y)) &. get st 2ul y) in
+  let v1  = get st 1ul y ^. ((lognot (get st 2ul y)) &. get st 3ul y) in
+  let v2  = get st 2ul y ^. ((lognot (get st 3ul y)) &. get st 4ul y) in
+  let v3  = get st 3ul y ^. ((lognot (get st 4ul y)) &. get st 0ul y) in
+  let v4  = get st 4ul y ^. ((lognot (get st 0ul y)) &. get st 1ul y) in
+  set st 0ul y v0;
+  set st 1ul y v1;
+  set st 2ul y v2;
+  set st 3ul y v3;
+  set st 4ul y v4;
+  let h1 = ST.get() in
+  assert (modifies (loc st) h0 h1);
+  assert (as_seq h1 st == S.state_chi_inner (v y) (as_seq h0 st))
 
 inline_for_extraction noextract
 val state_chi:
@@ -259,21 +247,16 @@ val state_chi:
     (ensures  fun h0 _ h1 ->
       modifies (loc s) h0 h1 /\
       as_seq h1 s == S.state_chi (as_seq h0 s))
-let state_chi s =
+let state_chi st =
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.state_chi (as_seq h0 s) /\ live h1 s in
-  salloc1 h0 25ul (u64 0) (Ghost.hide (loc s)) spec
-    (fun s_pi_rho ->
-      copy s_pi_rho s;
-      [@ inline_let]
-      let spec h0 = S.state_chi_inner1 (as_seq h0 s_pi_rho) in
-      let h0 = ST.get () in
-      loop1 h0 5ul s spec
-      (fun y ->
-        Loop.unfold_repeati 5 (spec h0) (as_seq h0 s) (v y);
-        state_chi_inner1 s_pi_rho y s
-      )
-    )
+  [@ inline_let]
+  let spec h0 = S.state_chi_inner in
+  let h0 = ST.get () in
+  loop1 h0 5ul st spec
+  (fun y ->
+     Loop.unfold_repeati 5 (spec h0) (as_seq h0 st) (v y);
+     state_chi_inner st y
+   )
 
 inline_for_extraction noextract
 val state_iota:
@@ -287,7 +270,7 @@ val state_iota:
 let state_iota s round =
   recall_contents keccak_rndc Spec.SHA3.Constants.keccak_rndc;
   let c = keccak_rndc.(round) in
-  writeLane s 0ul 0ul (readLane s 0ul 0ul ^. secret c)
+  set s 0ul 0ul (get s 0ul 0ul ^. secret c)
 
 val state_permute:
     s:state
