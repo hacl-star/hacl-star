@@ -13,7 +13,7 @@ module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 module BD = Hacl.Spec.Bignum.Definitions
 
-open Spec.P256.Definitions
+open Spec.P256.Constants
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 

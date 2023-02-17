@@ -11,10 +11,9 @@ open Lib.ByteSequence
 
 open Spec.P256
 open Spec.P256.Lemmas
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Spec.P256.MontgomeryMultiplication
 open Spec.ECDSA
-open Spec.ECDSAP256.Definition
 
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum

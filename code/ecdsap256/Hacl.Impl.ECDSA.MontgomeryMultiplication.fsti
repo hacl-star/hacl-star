@@ -10,7 +10,7 @@ open Lib.Buffer
 
 open Spec.P256.Lemmas
 open Spec.ECDSA
-open Spec.ECDSAP256.Definition
+open Spec.P256.Constants
 
 open Hacl.Spec.P256.Felem
 

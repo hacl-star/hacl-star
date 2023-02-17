@@ -8,7 +8,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.Felem
 

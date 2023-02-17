@@ -14,7 +14,7 @@ open Lib.Buffer
 open Lib.IntTypes.Intrinsics
 
 open Spec.P256.Lemmas
-open Spec.ECDSAP256.Definition
+open Spec.P256.Constants
 
 open Hacl.Impl.P256.Bignum
 

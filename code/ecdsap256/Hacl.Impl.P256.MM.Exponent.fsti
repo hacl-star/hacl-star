@@ -10,7 +10,7 @@ open Lib.Buffer
 
 
 open Spec.P256
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
 

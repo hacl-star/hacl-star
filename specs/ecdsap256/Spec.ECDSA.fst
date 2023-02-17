@@ -10,7 +10,7 @@ open Lib.Sequence
 
 open Spec.P256
 open Spec.P256.Lemmas
-open Spec.ECDSAP256.Definition
+open Spec.P256.Constants
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
@@ -375,9 +375,9 @@ val verifyQValidCurvePointSpec:
 
 let verifyQValidCurvePointSpec publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
-  x < Spec.P256.Definitions.prime256 &&
-  y < Spec.P256.Definitions.prime256 &&
-  z < Spec.P256.Definitions.prime256 &&
+  x < Spec.P256.Constants.prime256 &&
+  y < Spec.P256.Constants.prime256 &&
+  z < Spec.P256.Constants.prime256 &&
   isPointOnCurve (x, y, z)
 
 

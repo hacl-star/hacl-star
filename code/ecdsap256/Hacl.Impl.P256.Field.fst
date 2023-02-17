@@ -11,7 +11,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.IntTypes.Intrinsics
 
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Spec.P256.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Felem

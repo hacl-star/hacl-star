@@ -8,7 +8,7 @@ open FStar.Tactics.Canon
 
 open Lib.IntTypes
 
-open Spec.P256.Definitions
+open Spec.P256.Constants
 
 #set-options " --z3rlimit 100"
 

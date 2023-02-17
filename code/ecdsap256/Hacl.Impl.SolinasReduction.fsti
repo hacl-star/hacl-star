@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Hacl.Spec.P256.Felem
 open Hacl.SolinasReduction.Lemmas
 

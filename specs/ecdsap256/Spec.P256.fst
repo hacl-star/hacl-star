@@ -8,7 +8,7 @@ open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Spec.P256.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"

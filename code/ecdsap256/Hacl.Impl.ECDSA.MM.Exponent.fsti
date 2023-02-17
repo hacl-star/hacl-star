@@ -11,7 +11,7 @@ open Lib.Buffer
 open FStar.Math.Lemmas
 
 open Spec.P256.Lemmas
-open Spec.ECDSAP256.Definition
+open Spec.P256.Constants
 open Hacl.Spec.P256.Felem
 open Spec.ECDSA
 open Hacl.Impl.P256.Bignum

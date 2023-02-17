@@ -5,7 +5,7 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 
 open Spec.P256
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"

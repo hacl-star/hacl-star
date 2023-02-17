@@ -9,7 +9,7 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.P256
-open Spec.P256.Definitions
+open Spec.P256.Constants
 open Spec.ECDSA
 open Spec.DH
 
