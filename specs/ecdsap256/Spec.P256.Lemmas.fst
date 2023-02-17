@@ -13,7 +13,6 @@ open Spec.P256.Constants
 #set-options " --z3rlimit 100"
 
 val pow: a:nat -> b:nat -> nat
-
 let rec pow a b =
   if b = 0 then 1
   else a * (pow a (b - 1))
@@ -28,7 +27,6 @@ let modulo_distributivity_mult a b c =
 
 
 val power_one: a: nat -> Lemma (pow 1 a == 1)
-
 let rec power_one a =
   match a with
   | 0 -> assert_norm (pow 1 0 == 1)
@@ -48,7 +46,6 @@ let rec pow_plus a b c =
 
 
 val power_distributivity: a: nat -> b: nat -> c: pos -> Lemma ((pow (a % c) b) % c = (pow a b) % c)
-
 let rec power_distributivity a b c =
    match b with
    | 0 -> ()
@@ -60,7 +57,6 @@ let rec power_distributivity a b c =
 
 
 val power_distributivity_2: a: nat -> b: nat -> c: pos -> Lemma (pow (a * b) c == pow a c * pow b c)
-
 let rec power_distributivity_2 a b c =
   match c with
   |0 -> ()
@@ -70,9 +66,7 @@ let rec power_distributivity_2 a b c =
     assert_by_tactic (pow a (c - 1) * pow b (c - 1) * a * b == (pow a c * pow b c)) canon
 
 
-
 val power_mult: a: nat -> b: nat -> c: nat -> Lemma (pow (pow a b) c == pow a (b * c))
-
 let rec power_mult a b c =
   match c with
   |0 -> ()
@@ -81,55 +75,16 @@ let rec power_mult a b c =
 
 
 
-
-val log_and: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} ->
-  Lemma (if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
-
-let log_and a b =
-  logand_lemma b a;
-  logand_spec a b;
-  logand_spec b a;
-  UInt.logand_commutative #(bits U64) (v a) (v b)
-
-
-val logor_commutative: a: uint64 -> b: uint64 -> Lemma (logor a b == logor b a)
-
-let logor_commutative a b =
-  logor_spec a b;
-  logor_spec b a;
-  UInt.logor_commutative #(bits U64) (v a) (v b)
-
-
-
-val log_or: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> Lemma (
-  if uint_v b = 0 then uint_v (logor a b) == uint_v a else uint_v (logor a b) == uint_v b)
-
-let log_or a b =
-    if uint_v b = 0 then
-       begin
-	 logor_lemma b a;
-	 logor_commutative a b
-       end
-    else
-      begin
-	assert(uint_v a == 0);
-	logor_lemma a b
-      end
-
-
-
 type elem (n:pos) = x:nat{x < n}
 
 let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
 
 val exp: #n: pos -> a: elem n -> b: pos -> Tot (elem n) (decreases b)
-
 let rec exp #n a b =
   if b = 1 then a
   else
     if b % 2 = 0 then exp (fmul a a) (b / 2)
     else fmul a (exp (fmul a a) (b / 2))
-
 
 
 let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
@@ -144,11 +99,9 @@ let modp_inv2 (x: nat) : Tot (elem prime256) =
   modp_inv2_prime x prime256
 
 
-
 let modp_inv2_pow (x: nat) : Tot (elem prime256) =
    power_distributivity x (prime256 - 2) prime256;
    pow x (prime256 - 2) % prime256
-
 
 
 let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
@@ -158,18 +111,19 @@ let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
 
 
 (* Start of Marina RSA PSS code *)
+// local
 val lemma_fpow_unfold0: a: nat -> b: pos {1 < b /\ b % 2 = 0} -> prime: pos { a < prime} -> Lemma (
   exp #prime a b = exp #prime (fmul a a) (b / 2))
-
 let lemma_fpow_unfold0 a b prime = ()
 
 
+// local
 val lemma_fpow_unfold1: a: nat -> b: pos {1 < b /\ b % 2 = 1} -> prime: pos { a < prime} -> Lemma (
   exp #prime a b = fmul (exp #prime (fmul a a) (b / 2)) a)
-
 let lemma_fpow_unfold1 a b prime = ()
 
 
+// local
 val lemma_pow_unfold: a: nat -> b: pos -> Lemma (a * pow a (b - 1) == pow a b)
 let lemma_pow_unfold a b = ()
 
@@ -178,8 +132,8 @@ val lemma_mul_associativity_3: a: nat -> b: nat -> c: nat -> Lemma (a * b * c ==
 let lemma_mul_associativity_3 a b c = ()
 
 
+// local
 val lemma_pow_double: a: nat -> b: nat -> Lemma (pow (a * a) b == pow a (b + b))
-
 let rec lemma_pow_double a b =
   if b = 0 then ()
   else begin
@@ -338,7 +292,6 @@ val mult_one_round_ecdsa_prime: t: nat ->
     let result = (t + prime * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64 in
     result % prime == (co * modp_inv2_prime (pow2 64) prime) % prime)
 
-
 let mult_one_round_ecdsa_prime t prime co k0 =
   let t2 = ((k0 * (t % pow2 64)) % pow2 64) * prime in
   let t3 = t + t2 in
@@ -350,61 +303,18 @@ let mult_one_round_ecdsa_prime t prime co k0 =
     lemma_division_is_multiplication t3 prime;
     lemma_multiplication_to_same_number t3 co (modp_inv2_prime (pow2 64) prime) prime
 
-val lemma_decrease_pow: a: nat -> Lemma (
-  (a * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64)) % prime256 ==
-  (a * modp_inv2 (pow2 256)) % prime256)
-
-let lemma_decrease_pow a =
-  assert_norm(modp_inv2 (pow2 64) = 6277101733925179126845168871924920046849447032244165148672);
-  assert_norm(modp_inv2 (pow2 256) = 115792089183396302114378112356516095823261736990586219612555396166510339686400 );
-  assert_norm((modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2(pow2 64)) % prime256  = (modp_inv2 (pow2 256)) % prime256);
-  lemma_mod_mul_distr_r a (modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2(pow2 64)) prime256;
-  lemma_mod_mul_distr_r a (modp_inv2 (pow2 256)) prime256
-
 
 val lemma_brackets : a: int -> b: int -> c: int -> Lemma (a * b * c = a * (b * c))
-
 let lemma_brackets a b c = ()
-
-val lemma_brackets4 : a: int -> b: int -> c: int -> d: nat -> Lemma (a * b * c * d = a * (b * c * d))
-
-let lemma_brackets4 a b c d = ()
-
-val lemma_brackets5_0 : a: int -> b: int -> c: int -> d: nat ->e: nat ->  Lemma (a * b * c * d * e = a * (b * c * d * e))
-
-let lemma_brackets5_0 a b c d e= ()
-
 
 val lemma_twice_brackets: a: int -> b: int -> c: int -> d: int -> e: int -> f: int -> h: int-> Lemma (
   (a * b * c) * (d * e * f) * h = a * b * c * d * e * f * h)
-
 let lemma_twice_brackets a b c d e f h = ()
-
-
-val lemma_mul_nat2: a: nat -> b: nat -> Lemma (a * b >= 0)
-
-let lemma_mul_nat2 a b = ()
-
-
-val lemma_mul_nat: a:nat -> b:nat -> c: nat -> Lemma (a * b * c >= 0)
-
-let lemma_mul_nat a b c = ()
-
-
-val lemma_mul_nat4: a:nat -> b:nat -> c: nat -> d: nat -> Lemma (a * b * c * d >= 0)
-
-let lemma_mul_nat4 a b c d = ()
-
-
-val lemma_mul_nat5: a: nat -> b: nat -> c: nat -> d: nat -> e: nat -> Lemma (a * b * c * d * e >= 0)
-
-let lemma_mul_nat5 a b c d e = ()
 
 
 #reset-options " --z3rlimit 300"
 
 val modulo_distributivity_mult2: a: int -> b: int -> c: int -> d: pos -> Lemma (((a % d) * (b % d) * c) % d = (a * b * c) % d)
-
 let modulo_distributivity_mult2 a b c d =
   calc (==)
   {
@@ -428,99 +338,13 @@ let modulo_distributivity_mult2 a b c d =
   }
 
 
-val lemma_minus_distr (a: int) (b: int): Lemma ((a % prime256 - b % prime256) % prime256 = (a - b) % prime256)
-
-let lemma_minus_distr a b =
-  lemma_mod_sub_distr (a % prime256) b prime256;
-  lemma_mod_add_distr (- b) a prime256
-
-
-val lemma_xor_copy_cond: a: uint64 -> b: uint64 -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 -1} -> Lemma(
-  let r = logxor a (logand mask (logxor a b)) in
-  if uint_v mask = pow2 64 - 1 then r == b else r == a)
-
-let lemma_xor_copy_cond a b mask =
-  let fst = logxor a b in
-  let snd = logand mask fst in
-    logand_lemma mask fst;
-  let thrd = logxor a snd in
-    logxor_lemma a snd;
-    logxor_lemma a b
-
-
-val cmovznz4_lemma: cin: uint64 -> x: uint64 -> y: uint64 -> Lemma (
-  let mask = neq_mask cin (u64 0) in
-  let r = logor (logand y mask) (logand x (lognot mask)) in
-  if uint_v cin = 0 then uint_v r == uint_v x else uint_v r == uint_v y)
-
-let cmovznz4_lemma cin x y =
-  let x2 = neq_mask cin (u64 0) in
-      neq_mask_lemma cin (u64 0);
-  let x3 = logor (logand y x2) (logand x (lognot x2)) in
-  let ln = lognot (neq_mask cin (u64 0)) in
-    log_and y x2;
-    lognot_lemma x2;
-    log_and x ln;
-    log_or (logand y x2) (logand x (lognot x2))
-
-
-val lemma_equ_felem: a: nat {a < pow2 64} -> b: nat {b < pow2 64} -> c: nat {c < pow2 64} -> d: nat {d < pow2 64} ->
-  a1: nat{a1 < pow2 64} -> b1: nat {b1 < pow2 64} -> c1: nat {c1 < pow2 64} -> d1: nat {d1 < pow2 64} -> Lemma
-    (requires (
-      a + b * pow2 64 + c * pow2 64 * pow2 64 + d *  pow2 64 * pow2 64 * pow2 64 ==
-      a1 + b1 * pow2 64 + c1 * pow2 64 * pow2 64  + d1 *  pow2 64 * pow2 64 * pow2 64))
-    (ensures (a == a1 /\ b == b1 /\ c == c1 /\ d == d1))
-
-
-let lemma_equ_felem a b c d  a1 b1 c1 d1  =
-  assert(a = a1 + b1 * pow2 64 + c1 * pow2 128 + d1 * pow2 192 -  b * pow2 64 - c * pow2 128 - d * pow2 192);
-  assert(a == a1);
-  assert(b == b1);
-  assert(c == c1);
-  assert(d == d1)
-
-
 let mul_lemma_1 (a: nat) (c: nat) (b: pos) : Lemma (requires (a < c)) (ensures (a * b < c * b)) = ()
 
 let mul_lemma_ (a: nat) (b: nat) (c: nat) : Lemma (requires (a < c /\ b < c)) (ensures (a * b < c * c)) = ()
 
 let mul_lemma_2 (a: nat) (c: nat) (b: pos) : Lemma (requires (a <= c)) (ensures (a * b <= c * b)) = ()
 
-let mul_lemma_3 (a: nat) (c: nat) (b: nat) (d: nat) : Lemma (requires (a < c && b < d)) (ensures (a * b < c * d)) = ()
-
 let mul_lemma_4 (a: nat) (b: nat) (c: nat) (d: nat) : Lemma (requires (a <= c && b <= d)) (ensures (a * b <= c * d)) = ()
-
-
-val lemma_low_level0: o0: nat -> o1: nat -> o2: nat -> o3: nat -> f0: nat  ->  f1: nat -> f2: nat ->
-  f3: nat {f0 + f1 * pow2 64 + f2 * pow2 128  + f3 * pow2 192 < pow2 256} ->
-  u: nat {u < pow2 64} -> h2: nat -> c1: nat -> c2: nat -> c3: nat -> h3: nat -> h4: nat ->
-  Lemma
-  (requires (
-    h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 ==  f0 * u + f1 * u * pow2 64 /\
-    o2 + c2 * pow2 64 + h3 * pow2 64 - h2 - c1  == f2 * u /\
-    o3 + c3 * pow2 64 + h4 * pow2 64 - h3 - c2 == f3 * u)
-  )
-  (ensures
-    (o0 + o1 * pow2 64 + o2 * pow2 128 +  o3 * pow2 192 + (c3 + h4) * pow2 256  == (f0  + f1 * pow2 64 + f2  * pow2 128  + f3 * pow2 192) * u /\
-    f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192 < pow2 320 /\
-  (c3 + h4) < pow2 64)
-)
-
-
-let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320);
-  assert(h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 + o2 + c2 * pow2 64 + h3 * pow2 64 - h2 - c1 +
-    o3 + c3 * pow2 64 + h4 * pow2 64 - h3 - c2 == f0 * u + f1 * u * pow2 64 + f2 * u  + f3 * u);
-  assert(h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 + o2 * pow2 128 + c2 * pow2 64 * pow2 128 + h3 * pow2 64 * pow2 128 - h2 * pow2 128- c1 * pow2 128 + o3 * pow2 192 + c3 * pow2 64 * pow2 192 + h4 * pow2 64 * pow2 192 - h3 * pow2 192 - c2 * pow2 192 == f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192);
-  assert(o0 + o1 * pow2 64 + o2 * pow2 128 +  o3 * pow2 192 + (c3 + h4) * pow2 256  == f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192);
-  assert(f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192 == (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) * u);
-  mul_lemma_3  (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) (pow2 256) u (pow2 64);
-  assert((f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) * u < pow2 320);
-  assert((c3 + h4) * pow2 256 < pow2 320);
-  assert(c3 + h4 < pow2 64)
 
 
 (*This code is taken from Curve25519, written by Polubelova M *)

@@ -216,6 +216,40 @@ let mult64_c x u cin result temp =
   add_carry_u64 cin l h result
 
 
+let mul_lemma_3 (a: nat) (c: nat) (b: nat) (d: nat) : Lemma (requires (a < c && b < d)) (ensures (a * b < c * d)) = ()
+
+val lemma_low_level0: o0: nat -> o1: nat -> o2: nat -> o3: nat -> f0: nat  ->  f1: nat -> f2: nat ->
+  f3: nat {f0 + f1 * pow2 64 + f2 * pow2 128  + f3 * pow2 192 < pow2 256} ->
+  u: nat {u < pow2 64} -> h2: nat -> c1: nat -> c2: nat -> c3: nat -> h3: nat -> h4: nat ->
+  Lemma
+  (requires (
+    h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 ==  f0 * u + f1 * u * pow2 64 /\
+    o2 + c2 * pow2 64 + h3 * pow2 64 - h2 - c1  == f2 * u /\
+    o3 + c3 * pow2 64 + h4 * pow2 64 - h3 - c2 == f3 * u)
+  )
+  (ensures
+    (o0 + o1 * pow2 64 + o2 * pow2 128 +  o3 * pow2 192 + (c3 + h4) * pow2 256  == (f0  + f1 * pow2 64 + f2  * pow2 128  + f3 * pow2 192) * u /\
+    f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192 < pow2 320 /\
+  (c3 + h4) < pow2 64)
+)
+
+
+let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320);
+  assert(h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 + o2 + c2 * pow2 64 + h3 * pow2 64 - h2 - c1 +
+    o3 + c3 * pow2 64 + h4 * pow2 64 - h3 - c2 == f0 * u + f1 * u * pow2 64 + f2 * u  + f3 * u);
+  assert(h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 + o2 * pow2 128 + c2 * pow2 64 * pow2 128 + h3 * pow2 64 * pow2 128 - h2 * pow2 128- c1 * pow2 128 + o3 * pow2 192 + c3 * pow2 64 * pow2 192 + h4 * pow2 64 * pow2 192 - h3 * pow2 192 - c2 * pow2 192 == f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192);
+  assert(o0 + o1 * pow2 64 + o2 * pow2 128 +  o3 * pow2 192 + (c3 + h4) * pow2 256  == f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192);
+  assert(f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192 == (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) * u);
+  mul_lemma_3  (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) (pow2 256) u (pow2 64);
+  assert((f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) * u < pow2 320);
+  assert((c3 + h4) * pow2 256 < pow2 320);
+  assert(c3 + h4 < pow2 64)
+
+
 // local function
 inline_for_extraction noextract
 val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
@@ -256,7 +290,7 @@ let mul1_il f u result =
   let c3 = mult64_c f3 u c2 o3 temp in
     let h4 = ST.get() in
   let temp0 = index temp (size 0) in
-    Spec.P256.Lemmas.lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0);
+    lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0);
 
   Spec.P256.Lemmas.mul_lemma_4 (as_nat_il h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
   assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
