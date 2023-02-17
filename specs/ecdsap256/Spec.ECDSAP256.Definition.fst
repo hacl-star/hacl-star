@@ -32,26 +32,6 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
   x
 
 
-let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat =
-  let open FStar.Mul in
-  let a0 = Lib.Sequence.index a 0 in
-  let a1 = Lib.Sequence.index a 1 in
-  let a2 = Lib.Sequence.index a 2 in
-  let a3 = Lib.Sequence.index a 3 in
-  let a4 = Lib.Sequence.index a 4 in
-  let a5 = Lib.Sequence.index a 5 in
-  let a6 = Lib.Sequence.index a 6 in
-  let a7 = Lib.Sequence.index a 7 in
-  uint_v a0 +
-  uint_v a1 * pow2 64 +
-  uint_v a2 * pow2 64 * pow2 64 +
-  uint_v a3 * pow2 64 * pow2 64 * pow2 64 +
-  uint_v a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  uint_v a7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
-
-
 let felem_seq = lseq uint64 4
 
 

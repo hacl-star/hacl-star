@@ -18,6 +18,53 @@ open Spec.P256.Definitions
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction
+let felem4 = tuple4 uint64 uint64 uint64 uint64
+inline_for_extraction
+let felem8 = tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
+
+val as_nat4: f:felem4 -> Tot nat
+let as_nat4 f =
+  let (s0, s1, s2, s3) = f in
+  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+  v s3 * pow2 64 * pow2 64 * pow2 64
+
+val wide_as_nat4: f:felem8 -> Tot nat
+let wide_as_nat4 f =
+  let (s0, s1, s2, s3, s4, s5, s6, s7) = f in
+  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+  v s3 * pow2 64 * pow2 64 * pow2 64 +
+  v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+
+inline_for_extraction
+let felem_seq = lseq uint64 4
+
+let felem_seq_as_nat (a:felem_seq) : Tot nat =
+  as_nat4 (a.[0], a.[1], a.[2], a.[3])
+
+let felem_seq_as_nat_8 (a:lseq uint64 8) : Tot nat =
+  wide_as_nat4 (a.[0], a.[1], a.[2], a.[3], a.[4], a.[5], a.[6], a.[7])
+
+inline_for_extraction
+let point_seq = Lib.Sequence.lseq uint64 12
+
+let point_prime = p:point_seq{
+  let x = Lib.Sequence.sub p 0 4 in
+  let y = Lib.Sequence.sub p 4 4 in
+  let z = Lib.Sequence.sub p 8 4 in
+  felem_seq_as_nat x < prime256 /\
+  felem_seq_as_nat y < prime256 /\
+  felem_seq_as_nat z < prime256}
+
+let point_prime_to_coordinates (p:point_seq) =
+  felem_seq_as_nat (Lib.Sequence.sub p 0 4),
+  felem_seq_as_nat (Lib.Sequence.sub p 4 4),
+  felem_seq_as_nat (Lib.Sequence.sub p 8 4)
+
+
+inline_for_extraction
 let felem = lbuffer uint64 (size 4)
 inline_for_extraction
 let widefelem = lbuffer uint64 (size 8)
@@ -25,7 +72,6 @@ inline_for_extraction
 type point = lbuffer uint64 (size 12)
 inline_for_extraction
 type scalar = lbuffer uint8 (size 32)
-
 
 let as_nat (h:mem) (e:felem) : GTot nat =
   let s = as_seq h e in

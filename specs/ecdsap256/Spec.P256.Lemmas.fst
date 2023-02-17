@@ -448,15 +448,6 @@ let lemma_xor_copy_cond a b mask =
     logxor_lemma a b
 
 
-val lemma_equality: a: felem4 -> b: felem4 -> Lemma (
-  let (a_0, a_1, a_2, a_3) = a in
-  let (b_0, b_1, b_2, b_3) = b in
-  if  (uint_v a_0 = uint_v b_0 && uint_v a_1 = uint_v b_1 && uint_v a_2 = uint_v b_2 && uint_v a_3 = uint_v b_3)
-  then as_nat4 a == as_nat4 b else as_nat4 a <> as_nat4 b)
-
-let lemma_equality a b = ()
-
-
 val cmovznz4_lemma: cin: uint64 -> x: uint64 -> y: uint64 -> Lemma (
   let mask = neq_mask cin (u64 0) in
   let r = logor (logand y mask) (logand x (lognot mask)) in
@@ -487,37 +478,6 @@ let lemma_equ_felem a b c d  a1 b1 c1 d1  =
   assert(b == b1);
   assert(c == c1);
   assert(d == d1)
-
-
-val lemma_eq_funct: a: felem_seq -> b: felem_seq -> Lemma
-   (requires (felem_seq_as_nat a == felem_seq_as_nat b))
-   (ensures (a == b))
-
-let lemma_eq_funct a b =
-  let a0 = Lib.Sequence.index a 0 in
-  let a1 = Lib.Sequence.index a 1 in
-  let a2 = Lib.Sequence.index a 2 in
-  let a3 = Lib.Sequence.index a 3 in
-
-  let b0 = Lib.Sequence.index b 0 in
-  let b1 = Lib.Sequence.index b 1 in
-  let b2 = Lib.Sequence.index b 2 in
-  let b3 = Lib.Sequence.index b 3 in
-
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-
-  lemma_equ_felem (uint_v a0) (uint_v a1) (uint_v a2) (uint_v a3) (uint_v b0) (uint_v b1) (uint_v b2) (uint_v b3);
-
-  assert(Lib.Sequence.equal a b)
-
-
-val lemma_eq_funct_: a: felem_seq -> b: felem_seq -> Lemma
-   (if felem_seq_as_nat a = felem_seq_as_nat b then a == b else True)
-
-let lemma_eq_funct_ a b =
-  if felem_seq_as_nat a = felem_seq_as_nat b then
-    lemma_eq_funct a b
 
 
 let mul_lemma_1 (a: nat) (c: nat) (b: pos) : Lemma (requires (a < c)) (ensures (a * b < c * b)) = ()
