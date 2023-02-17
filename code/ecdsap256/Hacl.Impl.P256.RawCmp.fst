@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.LowLevel.RawCmp
+module Hacl.Impl.P256.RawCmp // before: Hacl.Impl.P256.LowLevel.RawCmp
 
 open Lib.IntTypes
 open Lib.RawIntTypes

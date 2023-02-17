@@ -15,7 +15,7 @@ open Lib.Buffer
 open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.Arithmetics
-open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Field
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
@@ -238,5 +238,5 @@ let isMoreThanZeroLessThanOrder x =
 
   pop_frame();
 
-  let open Hacl.Impl.P256.LowLevel.RawCmp in
+  let open Hacl.Impl.P256.RawCmp in
   unsafe_bool_of_u64 (lognot result)

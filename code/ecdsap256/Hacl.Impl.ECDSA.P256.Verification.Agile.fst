@@ -21,7 +21,7 @@ open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
-open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Signature.Common
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MM.Exponent

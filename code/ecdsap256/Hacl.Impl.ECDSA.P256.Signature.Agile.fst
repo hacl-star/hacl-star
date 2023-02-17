@@ -324,5 +324,5 @@ let ecdsa_signature alg result mLen m privKey k =
 
   pop_frame();
 
-  let open Hacl.Impl.P256.LowLevel.RawCmp in
+  let open Hacl.Impl.P256.RawCmp in
   unsafe_bool_of_u64  flag

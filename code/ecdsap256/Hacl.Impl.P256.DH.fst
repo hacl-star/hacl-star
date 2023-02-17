@@ -48,7 +48,7 @@ let ecp256dh_i result scalar =
   changeEndian_le_be (as_nat h0 resultBufferY);
   pop_frame();
 
-  let open Hacl.Impl.P256.LowLevel.RawCmp in
+  let open Hacl.Impl.P256.RawCmp in
   unsafe_bool_of_u64  flag
 
 
@@ -146,5 +146,5 @@ let ecp256dh_r result pubKey scalar =
 
   pop_frame();
 
-  let open Hacl.Impl.P256.LowLevel.RawCmp in
+  let open Hacl.Impl.P256.RawCmp in
   unsafe_bool_of_u64  flag

@@ -17,7 +17,7 @@ open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Arithmetics
-open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.P256.RawCmp
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
