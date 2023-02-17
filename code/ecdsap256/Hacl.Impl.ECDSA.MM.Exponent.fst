@@ -11,7 +11,7 @@ open Lib.Buffer
 open FStar.Math.Lemmas
 open Hacl.Impl.P256.Math
 
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 open Spec.P256.Lemmas
 open FStar.Tactics
 open FStar.Tactics.Canon

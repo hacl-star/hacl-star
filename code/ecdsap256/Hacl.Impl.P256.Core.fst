@@ -11,7 +11,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.SolinasReduction
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.PointAdd

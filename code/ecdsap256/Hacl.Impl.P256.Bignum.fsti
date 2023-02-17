@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.LowLevel
+module Hacl.Impl.P256.Bignum
 
 open FStar.Mul
 open FStar.HyperStack.All

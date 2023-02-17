@@ -17,7 +17,7 @@ open Spec.ECDSA
 open Spec.ECDSAP256.Definition
 
 open Hacl.Spec.P256.Felem
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
@@ -175,8 +175,8 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
 
   let h1 = ST.get() in
-    Hacl.Impl.P256.LowLevel.changeEndian u1;
-    Hacl.Impl.P256.LowLevel.changeEndian u2;
+    Hacl.Impl.P256.Bignum.changeEndian u1;
+    Hacl.Impl.P256.Bignum.changeEndian u2;
     toUint8 u1 bufferU1;
     toUint8 u2 bufferU2;
 

@@ -15,7 +15,7 @@ open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Felem
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Math
 

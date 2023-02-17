@@ -15,7 +15,7 @@ open Spec.P256.Definitions
 open Spec.P256.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Felem
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 
 #set-options "--z3rlimit 300"
 
@@ -71,7 +71,7 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
     let cin = Lib.Buffer.index x (size 4) in
     let x_ = Lib.Buffer.sub x (size 0) (size 4) in
       recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let c = Hacl.Impl.P256.LowLevel .sub4_il x_ prime256_buffer tempBuffer in
+    let c = Hacl.Impl.P256.Bignum.sub4_il x_ prime256_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
     cmovznz4 carry tempBuffer x_ result;
       let h4 = ST.get() in

@@ -12,7 +12,7 @@ open Lib.Buffer
 
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Core
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.MontgomeryMultiplication

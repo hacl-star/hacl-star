@@ -14,7 +14,7 @@ open Spec.P256.Lemmas
 open Spec.ECDSAP256.Definition
 open Hacl.Spec.P256.Felem
 open Spec.ECDSA
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 
 open Spec.P256.Lemmas
 

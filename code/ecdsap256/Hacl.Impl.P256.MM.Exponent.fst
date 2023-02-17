@@ -9,7 +9,7 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.MontgomeryMultiplication
 
 open Spec.P256.MontgomeryMultiplication
