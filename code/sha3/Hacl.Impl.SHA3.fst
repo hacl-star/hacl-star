@@ -20,6 +20,7 @@ module LSeq = Lib.Sequence
 module LB = Lib.ByteSequence
 module Loop = Lib.LoopCombinators
 module S = Spec.SHA3
+module Equiv = Spec.SHA3.Equivalence
 
 private let keccak_rotc :x:glbuffer rotc_t 24ul{witnessed x keccak_rotc /\ recallable x}
   = createL_global rotc_list
@@ -223,7 +224,7 @@ val state_chi_inner:
     (requires fun h0 -> live h0 st)
     (ensures  fun h0 _ h1 ->
       modifies (loc st) h0 h1 /\
-      as_seq h1 st == S.state_chi_inner (v y) (as_seq h0 st))
+      as_seq h1 st == Equiv.state_chi_inner (v y) (as_seq h0 st))
 let state_chi_inner st y =
   let h0 = ST.get() in
   let v0  = get st 0ul y ^. ((lognot (get st 1ul y)) &. get st 2ul y) in
@@ -238,7 +239,7 @@ let state_chi_inner st y =
   set st 4ul y v4;
   let h1 = ST.get() in
   assert (modifies (loc st) h0 h1);
-  assert (as_seq h1 st == S.state_chi_inner (v y) (as_seq h0 st))
+  assert (as_seq h1 st == Equiv.state_chi_inner (v y) (as_seq h0 st))
 
 inline_for_extraction noextract
 val state_chi:
@@ -251,13 +252,16 @@ val state_chi:
 let state_chi st =
   let h0 = ST.get() in
   [@ inline_let]
-  let spec h0 = S.state_chi_inner in
+  let spec h0 = Equiv.state_chi_inner in
   let h0 = ST.get () in
   loop1 h0 5ul st spec
   (fun y ->
      Loop.unfold_repeati 5 (spec h0) (as_seq h0 st) (v y);
      state_chi_inner st y
-   )
+   );
+  let h1 = ST.get() in
+  assert(as_seq h1 st == Equiv.state_chi (as_seq h0 st));
+  Equiv.state_chi_equivalence (as_seq h0 st)
 
 inline_for_extraction noextract
 val state_iota:

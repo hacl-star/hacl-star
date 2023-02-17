@@ -63,21 +63,18 @@ let state_pi_rho (s_theta:state) : Tot state =
     state_pi_rho_inner (current, s_theta) in
   s_pi_rho
 
-let state_chi_inner (y:index) (s:state) : Tot state =
-  let v0  = get s 0 y ^. ((lognot (get s 1 y)) &. get s 2 y) in
-  let v1  = get s 1 y ^. ((lognot (get s 2 y)) &. get s 3 y) in
-  let v2  = get s 2 y ^. ((lognot (get s 3 y)) &. get s 4 y) in
-  let v3  = get s 3 y ^. ((lognot (get s 4 y)) &. get s 0 y) in
-  let v4  = get s 4 y ^. ((lognot (get s 0 y)) &. get s 1 y) in
-  let s = set s 0 y v0 in
-  let s = set s 1 y v1 in
-  let s = set s 2 y v2 in
-  let s = set s 3 y v3 in
-  let s = set s 4 y v4 in
-  s
+
+let state_chi_inner0 (s_pi_rho:state) (y:index) (x:index) (s:state) : Tot state =
+  set s x y
+    (get s_pi_rho x y ^.
+     ((lognot (get s_pi_rho ((x + 1) % 5) y)) &.
+      get s_pi_rho ((x + 2) % 5) y))
+
+let state_chi_inner1 (s_pi_rho:state) (y:index) (s:state) : Tot state =
+  repeati 5 (state_chi_inner0 s_pi_rho y) s
 
 let state_chi (s_pi_rho:state) : Tot state  =
-  repeati 5 state_chi_inner s_pi_rho
+  repeati 5 (state_chi_inner1 s_pi_rho) s_pi_rho
 
 let state_iota (s:state) (round:size_nat{round < 24}) : Tot state =
   set s 0 0 (get s 0 0 ^. secret keccak_rndc.[round])
