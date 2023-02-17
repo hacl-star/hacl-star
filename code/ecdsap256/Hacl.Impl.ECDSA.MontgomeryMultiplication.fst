@@ -224,6 +224,11 @@ let montgomery_multiplication_round_twice t result k0 =
   pop_frame()
 
 
+val reduction_prime_2prime_with_carry : x: widefelem -> result: felem ->
+  Stack unit
+    (requires fun h -> live h x /\ live h result /\  eq_or_disjoint x result /\ wide_as_nat h x < 2 * prime_p256_order)
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = wide_as_nat h0 x % prime_p256_order)
+
 let reduction_prime_2prime_with_carry x result  =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
   push_frame();
@@ -247,6 +252,14 @@ let reduction_prime_2prime_with_carry x result  =
     cmovznz4 carry tempBuffer x_ result;
  pop_frame()
 
+
+inline_for_extraction noextract
+val reduction_prime_2prime_with_carry2 : carry: uint64 ->  x: felem -> result: felem ->
+  Stack unit
+    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\
+      uint_v carry * pow2 256 + as_nat h x < 2 * prime_p256_order )
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+      as_nat h1 result = (uint_v carry * pow2 256 + as_nat h0 x) % prime_p256_order)
 
 let reduction_prime_2prime_with_carry2 cin x result  =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
