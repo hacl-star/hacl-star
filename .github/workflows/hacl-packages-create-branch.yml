@@ -11,6 +11,7 @@ jobs:
       - name: checkout hacl-star
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.head_ref }}
           path: hacl-star
       - name: checkout hacl-packages
         uses: actions/checkout@v3
