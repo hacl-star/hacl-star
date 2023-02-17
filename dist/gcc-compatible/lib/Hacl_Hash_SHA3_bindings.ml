@@ -2,9 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Hash_Types_applied =
-      (Hacl_Hash_Types_bindings.Bindings)(Hacl_Hash_Types_stubs)
-    open Hacl_Hash_Types_applied
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     type hacl_Streaming_SHA3_state_256 = hacl_Streaming_MD_state_64
     let hacl_Streaming_SHA3_state_256 =
       typedef hacl_Streaming_MD_state_64 "Hacl_Streaming_SHA3_state_256"

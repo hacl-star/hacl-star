@@ -2,9 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Hash_Types_applied =
-      (Hacl_Hash_Types_bindings.Bindings)(Hacl_Hash_Types_stubs)
-    open Hacl_Hash_Types_applied
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     let hacl_SHA2_Scalar32_sha512_init =
       foreign "Hacl_SHA2_Scalar32_sha512_init"
         ((ptr uint64_t) @-> (returning void))

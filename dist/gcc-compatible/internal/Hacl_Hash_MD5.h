@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Hash_MD5.h"
 
 void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s);

@@ -35,8 +35,8 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
-#include "Hacl_Hash_Types.h"
 
 typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_SHA2_state_sha2_224;
 

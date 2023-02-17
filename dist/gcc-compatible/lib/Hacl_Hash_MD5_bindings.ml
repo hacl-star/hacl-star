@@ -2,9 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Hash_Types_applied =
-      (Hacl_Hash_Types_bindings.Bindings)(Hacl_Hash_Types_stubs)
-    open Hacl_Hash_Types_applied
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     let hacl_Hash_Core_MD5_legacy_init =
       foreign "Hacl_Hash_Core_MD5_legacy_init"
         ((ptr uint32_t) @-> (returning void))

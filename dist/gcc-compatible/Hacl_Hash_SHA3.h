@@ -36,7 +36,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Lib_Memzero0.h"
-#include "Hacl_Hash_Types.h"
+#include "Hacl_Streaming_Types.h"
 
 typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
 
