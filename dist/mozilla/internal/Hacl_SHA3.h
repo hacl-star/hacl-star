@@ -38,11 +38,9 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_SHA3.h"
 
-extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
+void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
-extern const uint32_t Hacl_Impl_SHA3_keccak_piln[24U];
-
-extern const uint64_t Hacl_Impl_SHA3_keccak_rndc[24U];
+void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
 
 #if defined(__cplusplus)
 }

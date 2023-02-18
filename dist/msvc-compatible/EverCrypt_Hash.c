@@ -26,6 +26,7 @@
 #include "internal/EverCrypt_Hash.h"
 
 #include "internal/Vale.h"
+#include "internal/Hacl_SHA3.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
@@ -401,8 +402,7 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
     for (uint32_t i = (uint32_t)0U; i < n; i++)
     {
       uint8_t *block = blocks + i * (uint32_t)136U;
-      Hacl_Impl_SHA3_loadState((uint32_t)136U, block, p1);
-      Hacl_Impl_SHA3_state_permute(p1);
+      Hacl_Impl_SHA3_absorb_inner((uint32_t)136U, block, p1);
     }
     return;
   }
@@ -540,8 +540,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
     uint64_t *p1 = scrut.case_SHA3_256_s;
     if (last_len == (uint32_t)136U)
     {
-      Hacl_Impl_SHA3_loadState((uint32_t)136U, last, p1);
-      Hacl_Impl_SHA3_state_permute(p1);
+      Hacl_Impl_SHA3_absorb_inner((uint32_t)136U, last, p1);
       uint8_t *uu____0 = last + last_len;
       uint8_t lastBlock[136U] = { 0U };
       memcpy(lastBlock, uu____0, (uint32_t)0U * sizeof (uint8_t));

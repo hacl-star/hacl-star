@@ -35,20 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-void Hacl_Impl_SHA3_state_permute(uint64_t *s);
-
-void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
-
-void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res);
-
-void
-Hacl_Impl_SHA3_absorb(
-  uint64_t *s,
-  uint32_t rateInBytes,
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint8_t delimitedSuffix
-);
+void Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t *s);
 
 void
 Hacl_Impl_SHA3_squeeze(

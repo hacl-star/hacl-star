@@ -277,7 +277,7 @@ let state_iota s round =
   let c = keccak_rndc.(round) in
   set s 0ul 0ul (get s 0ul 0ul ^. secret c)
 
-val state_permute:
+private val state_permute:
     s:state
   -> Stack unit
     (requires fun h -> live h s)
@@ -296,7 +296,7 @@ let state_permute s =
     state_chi s;
     state_iota s round)
 
-val loadState:
+private val loadState:
     rateInBytes:size_t{v rateInBytes <= 200}
   -> input:lbuffer uint8 rateInBytes
   -> s:state
@@ -339,7 +339,7 @@ let storeState_inner s j block =
     (fun h -> Lib.ByteSequence.uint_to_bytes_le sj)
     (fun _ -> uint_to_bytes_le #U64 (sub block (j *! 8ul) 8ul) sj)
 
-val storeState:
+private val storeState:
     rateInBytes:size_t{v rateInBytes <= 200}
   -> s:state
   -> res:lbuffer uint8 rateInBytes
@@ -412,7 +412,6 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
   absorb_next s rateInBytes;
   pop_frame()
 
-inline_for_extraction noextract
 val absorb_inner:
     rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> block:lbuffer uint8 rateInBytes
@@ -427,7 +426,7 @@ let absorb_inner rateInBytes block s =
   loadState rateInBytes block s;
   state_permute s
 
-val absorb:
+private val absorb:
     s:state
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> inputByteLen:size_t

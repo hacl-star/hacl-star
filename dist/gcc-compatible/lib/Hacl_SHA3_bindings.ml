@@ -8,14 +8,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Impl_SHA3_loadState =
       foreign "Hacl_Impl_SHA3_loadState"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Impl_SHA3_storeState =
-      foreign "Hacl_Impl_SHA3_storeState"
-        (uint32_t @-> ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void))))
-    let hacl_Impl_SHA3_absorb =
-      foreign "Hacl_Impl_SHA3_absorb"
-        ((ptr uint64_t) @->
-           (uint32_t @->
-              (uint32_t @-> (ocaml_bytes @-> (uint8_t @-> (returning void))))))
+    let hacl_Impl_SHA3_absorb_inner =
+      foreign "Hacl_Impl_SHA3_absorb_inner"
+        (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
     let hacl_Impl_SHA3_squeeze =
       foreign "Hacl_Impl_SHA3_squeeze"
         ((ptr uint64_t) @->

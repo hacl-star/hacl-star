@@ -226,33 +226,3 @@ let sha3_384 (inputByteLen:nat) (input:bytes{length input == inputByteLen}) : lb
 
 let sha3_512 (inputByteLen:nat) (input:bytes{length input == inputByteLen}) : lbytes 64 =
   keccak 576 1024 inputByteLen input (byte 0x06) 64
-
-
-val cshake128_frodo:
-    input_len:nat
-  -> input:bytes{length input == input_len}
-  -> cstm:uint16
-  -> output_len:size_nat ->
-  Tot (lbytes output_len)
-
-let cshake128_frodo input_len input cstm output_len =
-  let s = create 25 (u64 0) in
-  let s = s.[0] <- u64 0x10010001a801 |. shift_left (to_u64 cstm) (size 48) in
-  let s = state_permute s in
-  let s = absorb s 168 input_len input (byte 0x04) in
-  squeeze s 168 output_len
-
-
-val cshake256_frodo:
-    input_len:nat
-  -> input:bytes{length input == input_len}
-  -> cstm:uint16
-  -> output_len:size_nat ->
-  Tot (lbytes output_len)
-
-let cshake256_frodo input_len input cstm output_len =
-  let s = create 25 (u64 0) in
-  let s = s.[0] <- u64 0x100100018801 |. shift_left (to_u64 cstm) (size 48) in
-  let s = state_permute s in
-  let s = absorb s 136 input_len input (byte 0x04) in
-  squeeze s 136 output_len
