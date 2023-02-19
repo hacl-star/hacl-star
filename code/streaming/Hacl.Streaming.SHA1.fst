@@ -40,3 +40,5 @@ let legacy_init_sha1 = F.init hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erase
 let legacy_update_sha1 = F.update hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
 let legacy_finish_sha1 = F.mk_finish hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
 let legacy_free_sha1 = F.free hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
+
+let legacy_copy_sha1 = F.copy hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)

@@ -41,3 +41,5 @@ let legacy_init_md5 = F.init hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased u
 let legacy_update_md5 = F.update hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 let legacy_finish_md5 = F.mk_finish hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 let legacy_free_md5 = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+
+let legacy_copy_md5 = F.copy hacl_md5 () (state_t_md5.s ()) (G.erased unit)

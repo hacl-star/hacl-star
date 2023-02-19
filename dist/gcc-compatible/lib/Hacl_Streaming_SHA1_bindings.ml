@@ -26,4 +26,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA1_legacy_free_sha1 =
       foreign "Hacl_Streaming_SHA1_legacy_free_sha1"
         ((ptr hacl_Streaming_SHA2_state_sha2_224) @-> (returning void))
+    let hacl_Streaming_SHA1_legacy_copy_sha1 =
+      foreign "Hacl_Streaming_SHA1_legacy_copy_sha1"
+        ((ptr hacl_Streaming_SHA2_state_sha2_224) @->
+           (returning (ptr hacl_Streaming_SHA2_state_sha2_224)))
   end

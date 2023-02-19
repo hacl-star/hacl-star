@@ -58,6 +58,9 @@ void Hacl_Streaming_MD5_legacy_finish_md5(Hacl_Streaming_SHA2_state_sha2_224 *p,
 
 void Hacl_Streaming_MD5_legacy_free_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
+Hacl_Streaming_SHA2_state_sha2_224
+*Hacl_Streaming_MD5_legacy_copy_md5(Hacl_Streaming_SHA2_state_sha2_224 *s0);
+
 #if defined(__cplusplus)
 }
 #endif
