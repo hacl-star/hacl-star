@@ -30,3 +30,4 @@ let init_256 = F.init hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased uni
 let update_256 = F.update hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 let finish_256 = F.mk_finish hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
 let free_256 = F.free hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+let copy_256 = F.copy hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
