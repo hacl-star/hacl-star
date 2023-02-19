@@ -426,6 +426,8 @@ let absorb_inner rateInBytes block s =
   loadState rateInBytes block s;
   state_permute s
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
 private val absorb:
     s:state
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
@@ -465,7 +467,6 @@ let squeeze_inner rateInBytes outputByteLen s output i =
   storeState rateInBytes s output;
   state_permute s
 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 private
 let mult_plus_lt (i a b:nat) : Lemma (requires i < a) (ensures  i * b + b <= a * b) =
