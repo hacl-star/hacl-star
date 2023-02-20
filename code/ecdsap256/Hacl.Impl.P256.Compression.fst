@@ -14,7 +14,7 @@ open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
-open Hacl.Impl.P256.MM.Exponent
+open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Arithmetics
 open Hacl.Impl.P256.RawCmp

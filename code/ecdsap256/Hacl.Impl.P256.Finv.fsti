@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.MM.Exponent
+module Hacl.Impl.P256.Finv // before: Hacl.Impl.P256.MM.Exponent
 
 open FStar.Mul
 open FStar.HyperStack.All
