@@ -44,12 +44,3 @@ val montgomery_square_buffer: a:felem -> result:felem -> Stack unit
     as_nat h1 result = (as_nat h0 a * as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
-
-
-val exponent: a:felem -> result:felem -> tempBuffer:lbuffer uint64 (size 20) -> Stack unit
-  (requires fun h ->
-    live h a /\ live h tempBuffer /\ live h result /\
-    disjoint tempBuffer result /\ disjoint a tempBuffer /\
-    as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\
-    as_nat h1 result = toDomain_ ((pow (fromDomain_ (as_nat h0 a)) (prime256 - 2)) % prime256))

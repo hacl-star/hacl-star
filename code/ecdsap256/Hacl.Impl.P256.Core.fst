@@ -16,6 +16,7 @@ open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
+open Hacl.Impl.P256.Finv
 
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
