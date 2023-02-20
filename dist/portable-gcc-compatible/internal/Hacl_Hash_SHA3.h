@@ -23,14 +23,35 @@
  */
 
 
-#ifndef __Hacl_Test_CSHAKE_H
-#define __Hacl_Test_CSHAKE_H
+#ifndef __internal_Hacl_Hash_SHA3_H
+#define __internal_Hacl_Hash_SHA3_H
 
-#include "krmllib.h"
-#include "libintvector.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
-exit_code main(void);
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
+#include "../Hacl_Hash_SHA3.h"
 
-#define __Hacl_Test_CSHAKE_H_DEFINED
+/* SNIPPET_START: Hacl_Impl_SHA3_state_permute */
+
+void Hacl_Impl_SHA3_state_permute(uint64_t *s);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_state_permute */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_loadState */
+
+void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_loadState */
+
+#if defined(__cplusplus)
+}
+#endif
+
+#define __internal_Hacl_Hash_SHA3_H_DEFINED
 #endif
