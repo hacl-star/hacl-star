@@ -25,7 +25,6 @@
 
 #include "Hacl_Hash_Blake2s_128.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "internal/Hacl_Hash_Blake2.h"
 

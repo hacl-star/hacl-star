@@ -25,7 +25,6 @@
 
 #include "Hacl_EC_K256.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_K256_ECDSA.h"
 #include "internal/Hacl_Bignum_K256.h"
 

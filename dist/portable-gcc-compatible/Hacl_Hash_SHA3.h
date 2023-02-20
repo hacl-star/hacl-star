@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_SHA3_H
-#define __Hacl_SHA3_H
+#ifndef __Hacl_Hash_SHA3_H
+#define __Hacl_Hash_SHA3_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -36,6 +36,101 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Lib_Memzero0.h"
+#include "Hacl_Streaming_Types.h"
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_state_256 */
+
+typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_state_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_create_in_256 */
+
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_create_in_256(void);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_create_in_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_init_256 */
+
+void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_MD_state_64 *s);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_init_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_update_256 */
+
+/**
+0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
+*/
+uint32_t
+Hacl_Streaming_SHA3_update_256(Hacl_Streaming_MD_state_64 *p, uint8_t *data, uint32_t len);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_update_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_finish_256 */
+
+void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_MD_state_64 *p, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_finish_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_free_256 */
+
+void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *s);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_free_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_copy_256 */
+
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *s0);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_copy_256 */
+
+/* SNIPPET_START: Hacl_SHA3_shake128_hacl */
+
+void
+Hacl_SHA3_shake128_hacl(
+  uint32_t inputByteLen,
+  uint8_t *input,
+  uint32_t outputByteLen,
+  uint8_t *output
+);
+
+/* SNIPPET_END: Hacl_SHA3_shake128_hacl */
+
+/* SNIPPET_START: Hacl_SHA3_shake256_hacl */
+
+void
+Hacl_SHA3_shake256_hacl(
+  uint32_t inputByteLen,
+  uint8_t *input,
+  uint32_t outputByteLen,
+  uint8_t *output
+);
+
+/* SNIPPET_END: Hacl_SHA3_shake256_hacl */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_224 */
+
+void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+/* SNIPPET_END: Hacl_SHA3_sha3_224 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_256 */
+
+void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+/* SNIPPET_END: Hacl_SHA3_sha3_256 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_384 */
+
+void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+/* SNIPPET_END: Hacl_SHA3_sha3_384 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_512 */
+
+void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+/* SNIPPET_END: Hacl_SHA3_sha3_512 */
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
 
@@ -119,57 +214,9 @@ Hacl_Impl_SHA3_keccak(
 
 /* SNIPPET_END: Hacl_Impl_SHA3_keccak */
 
-/* SNIPPET_START: Hacl_SHA3_shake128_hacl */
-
-void
-Hacl_SHA3_shake128_hacl(
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
-
-/* SNIPPET_END: Hacl_SHA3_shake128_hacl */
-
-/* SNIPPET_START: Hacl_SHA3_shake256_hacl */
-
-void
-Hacl_SHA3_shake256_hacl(
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
-
-/* SNIPPET_END: Hacl_SHA3_shake256_hacl */
-
-/* SNIPPET_START: Hacl_SHA3_sha3_224 */
-
-void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
-
-/* SNIPPET_END: Hacl_SHA3_sha3_224 */
-
-/* SNIPPET_START: Hacl_SHA3_sha3_256 */
-
-void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
-
-/* SNIPPET_END: Hacl_SHA3_sha3_256 */
-
-/* SNIPPET_START: Hacl_SHA3_sha3_384 */
-
-void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
-
-/* SNIPPET_END: Hacl_SHA3_sha3_384 */
-
-/* SNIPPET_START: Hacl_SHA3_sha3_512 */
-
-void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
-
-/* SNIPPET_END: Hacl_SHA3_sha3_512 */
-
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_SHA3_H_DEFINED
+#define __Hacl_Hash_SHA3_H_DEFINED
 #endif

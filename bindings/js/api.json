@@ -647,8 +647,9 @@
   },
   "SHA3": {
     "hash_512": {
-      "module": "Hacl_SHA3",
-      "name": "sha3_512",
+      "module": "Hacl_Hash_SHA3",
+      "custom_module_name": true,
+      "name": "Hacl_SHA3_sha3_512",
       "args": [{
           "name": "input_len",
           "kind": "input",
@@ -685,8 +686,9 @@
       }
     },
     "hash_384": {
-      "module": "Hacl_SHA3",
-      "name": "sha3_384",
+      "module": "Hacl_Hash_SHA3",
+      "custom_module_name": true,
+      "name": "Hacl_SHA3_sha3_384",
       "args": [{
           "name": "input_len",
           "kind": "input",
@@ -723,8 +725,9 @@
       }
     },
     "hash_256": {
-      "module": "Hacl_SHA3",
-      "name": "sha3_256",
+      "module": "Hacl_Hash_SHA3",
+      "custom_module_name": true,
+      "name": "Hacl_SHA3_sha3_256",
       "args": [{
           "name": "input_len",
           "kind": "input",
@@ -761,8 +764,9 @@
       }
     },
     "hash_224": {
-      "module": "Hacl_SHA3",
-      "name": "sha3_224",
+      "module": "Hacl_Hash_SHA3",
+      "custom_module_name": true,
+      "name": "Hacl_SHA3_sha3_224",
       "args": [{
           "name": "input_len",
           "kind": "input",
@@ -799,7 +803,7 @@
       }
     },
     "keccak": {
-      "module": "Hacl_SHA3",
+      "module": "Hacl_Hash_SHA3",
       "name": "Hacl_Impl_SHA3_keccak",
       "custom_module_name": true,
       "args": [{
