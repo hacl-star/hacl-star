@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "../Hacl_SHA2_Types.h"
-
 typedef struct Hacl_Impl_SHA2_Types_uint8_2p_s
 {
   uint8_t *fst;

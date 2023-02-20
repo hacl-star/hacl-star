@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_SHA3_H
-#define __Hacl_SHA3_H
+#ifndef __Hacl_Hash_SHA3_H
+#define __Hacl_Hash_SHA3_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,38 +35,54 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-/* SNIPPET_START: Hacl_Impl_SHA3_absorb_inner */
+#include "Lib_Memzero0.h"
+#include "Hacl_Streaming_Types.h"
 
-void Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t *s);
+/* SNIPPET_START: Hacl_Streaming_SHA3_state_256 */
 
-/* SNIPPET_END: Hacl_Impl_SHA3_absorb_inner */
+typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
 
-/* SNIPPET_START: Hacl_Impl_SHA3_squeeze */
+/* SNIPPET_END: Hacl_Streaming_SHA3_state_256 */
 
-void
-Hacl_Impl_SHA3_squeeze(
-  uint64_t *s,
-  uint32_t rateInBytes,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
+/* SNIPPET_START: Hacl_Streaming_SHA3_create_in_256 */
 
-/* SNIPPET_END: Hacl_Impl_SHA3_squeeze */
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_create_in_256(void);
 
-/* SNIPPET_START: Hacl_Impl_SHA3_keccak */
+/* SNIPPET_END: Hacl_Streaming_SHA3_create_in_256 */
 
-void
-Hacl_Impl_SHA3_keccak(
-  uint32_t rate,
-  uint32_t capacity,
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint8_t delimitedSuffix,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
+/* SNIPPET_START: Hacl_Streaming_SHA3_init_256 */
 
-/* SNIPPET_END: Hacl_Impl_SHA3_keccak */
+void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_MD_state_64 *s);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_init_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_update_256 */
+
+/**
+0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
+*/
+uint32_t
+Hacl_Streaming_SHA3_update_256(Hacl_Streaming_MD_state_64 *p, uint8_t *data, uint32_t len);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_update_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_finish_256 */
+
+void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_MD_state_64 *p, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_finish_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_free_256 */
+
+void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *s);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_free_256 */
+
+/* SNIPPET_START: Hacl_Streaming_SHA3_copy_256 */
+
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *s0);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_copy_256 */
 
 /* SNIPPET_START: Hacl_SHA3_shake128_hacl */
 
@@ -116,9 +132,40 @@ void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
 /* SNIPPET_END: Hacl_SHA3_sha3_512 */
 
+void Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t *s);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_absorb_inner */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_squeeze */
+
+void
+Hacl_Impl_SHA3_squeeze(
+  uint64_t *s,
+  uint32_t rateInBytes,
+  uint32_t outputByteLen,
+  uint8_t *output
+);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_squeeze */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak */
+
+void
+Hacl_Impl_SHA3_keccak(
+  uint32_t rate,
+  uint32_t capacity,
+  uint32_t inputByteLen,
+  uint8_t *input,
+  uint8_t delimitedSuffix,
+  uint32_t outputByteLen,
+  uint8_t *output
+);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak */
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_SHA3_H_DEFINED
+#define __Hacl_Hash_SHA3_H_DEFINED
 #endif

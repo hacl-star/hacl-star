@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_SHA3_H
-#define __Hacl_SHA3_H
+#ifndef __Hacl_Streaming_Types_H
+#define __Hacl_Streaming_Types_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,54 +35,25 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-void Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t *s);
+typedef struct Hacl_Streaming_MD_state_32_s
+{
+  uint32_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_MD_state_32;
 
-void
-Hacl_Impl_SHA3_squeeze(
-  uint64_t *s,
-  uint32_t rateInBytes,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
-
-void
-Hacl_Impl_SHA3_keccak(
-  uint32_t rate,
-  uint32_t capacity,
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint8_t delimitedSuffix,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
-
-void
-Hacl_SHA3_shake128_hacl(
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
-
-void
-Hacl_SHA3_shake256_hacl(
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint32_t outputByteLen,
-  uint8_t *output
-);
-
-void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
-
-void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
-
-void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
-
-void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+typedef struct Hacl_Streaming_MD_state_64_s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_MD_state_64;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_SHA3_H_DEFINED
+#define __Hacl_Streaming_Types_H_DEFINED
 #endif

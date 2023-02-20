@@ -30,16 +30,18 @@ inline_for_extraction noextract
 let state_t_md5 = state_t MD5
 
 /// Type abbreviation - for pretty code generation
-let state_md5 = F.state_s hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let state = Hacl.Streaming.MD.state_32
 
 noextract
-let legacy_alloca_md5 = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_create_in_md5 = F.create_in hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_init_md5 = F.init hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+let legacy_alloca = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let legacy_create_in = F.create_in hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let legacy_init = F.init hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 
 [@@ Comment "0 = success, 1 = max length exceeded" ]
-let legacy_update_md5 = F.update hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
-let legacy_finish_md5 = F.mk_finish hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_free_md5 = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+let legacy_update = F.update hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+let legacy_finish = F.mk_finish hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let legacy_free = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 
-let legacy_copy_md5 = F.copy hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let legacy_copy = F.copy hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+
+let legacy_hash: Hacl.Hash.Definitions.hash_st MD5 = fun input input_len dst -> Hacl.Hash.MD5.legacy_hash input input_len dst
