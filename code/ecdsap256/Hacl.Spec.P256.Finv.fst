@@ -11,7 +11,6 @@ module S = Spec.P256.Constants
 
 // TODO: mv to specs/
 let felem = x:nat{x < S.prime256}
-let one  : felem = 1
 let fmul (x y:felem) : felem = (x * y) % S.prime256
 
 let nat_mod_comm_monoid = M.mk_nat_mod_comm_monoid S.prime256
@@ -23,7 +22,7 @@ let mk_to_nat_mod_comm_monoid : SE.to_comm_monoid felem = {
 }
 
 val one_mod : SE.one_st felem mk_to_nat_mod_comm_monoid
-let one_mod _ = one
+let one_mod _ = 1
 
 val mul_mod : SE.mul_st felem mk_to_nat_mod_comm_monoid
 let mul_mod x y = fmul x y
