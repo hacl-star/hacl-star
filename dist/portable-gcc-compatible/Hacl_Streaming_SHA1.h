@@ -83,6 +83,13 @@ void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s)
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_free_sha1 */
 
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_copy_sha1 */
+
+Hacl_Streaming_SHA2_state_sha2_224
+*Hacl_Streaming_SHA1_legacy_copy_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s0);
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_copy_sha1 */
+
 #if defined(__cplusplus)
 }
 #endif

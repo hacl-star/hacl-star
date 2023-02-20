@@ -83,6 +83,13 @@ void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA3_free_256 */
 
+/* SNIPPET_START: Hacl_Streaming_SHA3_copy_256 */
+
+Hacl_Streaming_SHA2_state_sha2_384
+*Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_SHA2_state_sha2_384 *s0);
+
+/* SNIPPET_END: Hacl_Streaming_SHA3_copy_256 */
+
 #if defined(__cplusplus)
 }
 #endif
