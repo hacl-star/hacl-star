@@ -143,12 +143,12 @@ lib_gen/Hacl_EC_K256_gen.exe: lib/Hacl_EC_K256_bindings.cmx lib_gen/Hacl_EC_K256
 lib/Hacl_Bignum4096_bindings.cmx: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx 
 lib_gen/Hacl_Bignum4096_gen.cmx: lib/Hacl_Bignum4096_bindings.cmx
 lib_gen/Hacl_Bignum4096_gen.exe: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx lib/Hacl_Bignum_c_stubs.o lib/Hacl_Bignum4096_bindings.cmx lib_gen/Hacl_Bignum4096_gen.cmx 
-lib/EverCrypt_Ed25519_bindings.cmx: 
-lib_gen/EverCrypt_Ed25519_gen.cmx: lib/EverCrypt_Ed25519_bindings.cmx
-lib_gen/EverCrypt_Ed25519_gen.exe: lib/EverCrypt_Ed25519_bindings.cmx lib_gen/EverCrypt_Ed25519_gen.cmx 
 lib/Hacl_Chacha20_Vec32_bindings.cmx: 
 lib_gen/Hacl_Chacha20_Vec32_gen.cmx: lib/Hacl_Chacha20_Vec32_bindings.cmx
 lib_gen/Hacl_Chacha20_Vec32_gen.exe: lib/Hacl_Chacha20_Vec32_bindings.cmx lib_gen/Hacl_Chacha20_Vec32_gen.cmx 
+lib/EverCrypt_Ed25519_bindings.cmx: 
+lib_gen/EverCrypt_Ed25519_gen.cmx: lib/EverCrypt_Ed25519_bindings.cmx
+lib_gen/EverCrypt_Ed25519_gen.exe: lib/EverCrypt_Ed25519_bindings.cmx lib_gen/EverCrypt_Ed25519_gen.cmx 
 lib/Hacl_Bignum4096_32_bindings.cmx: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx 
 lib_gen/Hacl_Bignum4096_32_gen.cmx: lib/Hacl_Bignum4096_32_bindings.cmx
 lib_gen/Hacl_Bignum4096_32_gen.exe: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx lib/Hacl_Bignum_c_stubs.o lib/Hacl_Bignum4096_32_bindings.cmx lib_gen/Hacl_Bignum4096_32_gen.cmx 

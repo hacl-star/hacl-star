@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Lib_Memzero0.h"
 #include "Hacl_Streaming_Types.h"
 
 /* SNIPPET_START: Hacl_Streaming_SHA3_state_256 */
@@ -131,6 +130,8 @@ void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
 /* SNIPPET_END: Hacl_SHA3_sha3_512 */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_absorb_inner */
 
 void Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t *s);
 

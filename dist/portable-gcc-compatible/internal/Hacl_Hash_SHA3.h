@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_EverCrypt_Hash_H
-#define __internal_EverCrypt_Hash_H
+#ifndef __internal_Hacl_Hash_SHA3_H
+#define __internal_Hacl_Hash_SHA3_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,28 +35,23 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Vale.h"
-#include "internal/Hacl_Hash_SHA3.h"
-#include "internal/Hacl_Hash_SHA2.h"
-#include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_MD5.h"
-#include "../EverCrypt_Hash.h"
+#include "../Hacl_Hash_SHA3.h"
 
-void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
+/* SNIPPET_START: Hacl_Impl_SHA3_state_permute */
 
-void
-EverCrypt_Hash_update_last_256(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
+void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
-void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
+/* SNIPPET_END: Hacl_Impl_SHA3_state_permute */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_loadState */
+
+void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_loadState */
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_EverCrypt_Hash_H_DEFINED
+#define __internal_Hacl_Hash_SHA3_H_DEFINED
 #endif
