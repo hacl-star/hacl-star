@@ -35,17 +35,27 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
+#include "Hacl_Streaming_Types.h"
 
-void
-Hacl_Hash_MD5_legacy_update_last(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
+typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_MD5_state;
 
-void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_MD5_legacy_create_in(void);
+
+void Hacl_Streaming_MD5_legacy_init(Hacl_Streaming_MD_state_32 *s);
+
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
+Hacl_Streaming_MD5_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, uint32_t len);
+
+void Hacl_Streaming_MD5_legacy_finish(Hacl_Streaming_MD_state_32 *p, uint8_t *dst);
+
+void Hacl_Streaming_MD5_legacy_free(Hacl_Streaming_MD_state_32 *s);
+
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_MD5_legacy_copy(Hacl_Streaming_MD_state_32 *s0);
+
+void Hacl_Streaming_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }

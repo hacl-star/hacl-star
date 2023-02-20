@@ -51,9 +51,6 @@ typedef struct Hacl_Streaming_MD_state_64_s
 }
 Hacl_Streaming_MD_state_64;
 
-Hacl_Streaming_SHA2_state_sha2_384
-*Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_SHA2_state_sha2_384 *s0);
-
 #if defined(__cplusplus)
 }
 #endif

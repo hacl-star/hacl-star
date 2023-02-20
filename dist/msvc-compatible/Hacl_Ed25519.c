@@ -1825,11 +1825,11 @@ static inline void sha512_pre_msg(uint8_t *hash, uint8_t *prefix, uint32_t len, 
 {
   uint8_t buf[128U] = { 0U };
   uint64_t block_state[8U] = { 0U };
-  Hacl_Streaming_SHA2_state_sha2_384
+  Hacl_Streaming_MD_state_64
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
-  Hacl_Streaming_SHA2_state_sha2_384 p = s;
+  Hacl_Streaming_MD_state_64 p = s;
   Hacl_SHA2_Scalar32_sha512_init(block_state);
-  Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
+  Hacl_Streaming_MD_state_64 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, input, len);
   Hacl_Streaming_SHA2_finish_512(st, hash);
@@ -1846,11 +1846,11 @@ sha512_pre_pre2_msg(
 {
   uint8_t buf[128U] = { 0U };
   uint64_t block_state[8U] = { 0U };
-  Hacl_Streaming_SHA2_state_sha2_384
+  Hacl_Streaming_MD_state_64
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
-  Hacl_Streaming_SHA2_state_sha2_384 p = s;
+  Hacl_Streaming_MD_state_64 p = s;
   Hacl_SHA2_Scalar32_sha512_init(block_state);
-  Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
+  Hacl_Streaming_MD_state_64 *st = &p;
   uint32_t uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
   uint32_t uu____1 = Hacl_Streaming_SHA2_update_512(st, prefix2, (uint32_t)32U);
   uint32_t uu____2 = Hacl_Streaming_SHA2_update_512(st, input, len);

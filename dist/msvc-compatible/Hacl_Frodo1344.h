@@ -36,7 +36,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Lib_Memzero0.h"
-#include "Hacl_SHA3.h"
+#include "Hacl_Hash_SHA3.h"
 
 extern uint32_t Hacl_Frodo1344_crypto_bytes;
 

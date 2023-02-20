@@ -35,29 +35,59 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-/* SNIPPET_START: Hacl_Hash_SHA1_legacy_update_multi */
+#include "Hacl_Streaming_Types.h"
 
-void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
+/* SNIPPET_START: Hacl_Streaming_SHA1_state */
 
-/* SNIPPET_END: Hacl_Hash_SHA1_legacy_update_multi */
+typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_SHA1_state;
 
-/* SNIPPET_START: Hacl_Hash_SHA1_legacy_update_last */
+/* SNIPPET_END: Hacl_Streaming_SHA1_state */
 
-void
-Hacl_Hash_SHA1_legacy_update_last(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_create_in */
 
-/* SNIPPET_END: Hacl_Hash_SHA1_legacy_update_last */
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_create_in(void);
 
-/* SNIPPET_START: Hacl_Hash_SHA1_legacy_hash */
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_create_in */
 
-void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_init */
 
-/* SNIPPET_END: Hacl_Hash_SHA1_legacy_hash */
+void Hacl_Streaming_SHA1_legacy_init(Hacl_Streaming_MD_state_32 *s);
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_init */
+
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_update */
+
+/**
+0 = success, 1 = max length exceeded
+*/
+uint32_t
+Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, uint32_t len);
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_update */
+
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_finish */
+
+void Hacl_Streaming_SHA1_legacy_finish(Hacl_Streaming_MD_state_32 *p, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_finish */
+
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_free */
+
+void Hacl_Streaming_SHA1_legacy_free(Hacl_Streaming_MD_state_32 *s);
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_free */
+
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_copy */
+
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_copy(Hacl_Streaming_MD_state_32 *s0);
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_copy */
+
+/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_hash */
+
+void Hacl_Streaming_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_hash */
 
 #if defined(__cplusplus)
 }
