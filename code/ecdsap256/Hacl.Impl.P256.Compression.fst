@@ -15,7 +15,6 @@ open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Finv
-open Hacl.Impl.P256.Arithmetics
 open Hacl.Impl.P256.RawCmp
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"

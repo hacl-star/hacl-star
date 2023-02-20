@@ -14,7 +14,6 @@ open Lib.Buffer
 
 open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.Bignum
-open Hacl.Impl.P256.Arithmetics
 open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Field
 open Hacl.Impl.ECDSA.MontgomeryMultiplication

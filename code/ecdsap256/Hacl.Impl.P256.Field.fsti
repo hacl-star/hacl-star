@@ -98,3 +98,53 @@ val montgomery_square_buffer: a:felem -> result:felem -> Stack unit
     as_nat h1 result = (as_nat h0 a * as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
+
+
+val cube: a:felem -> result:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h result /\ disjoint a result /\
+    as_nat h a < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 result < prime256 /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
+
+
+val multByTwo: a:felem -> result:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h result /\ eq_or_disjoint a result /\
+    as_nat h a < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 result == toDomain_ (2 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 result == toDomain_ (2 * fromDomain_ (as_nat h0 a)) /\
+    as_nat h1 result < prime256)
+
+
+val multByThree: a:felem -> result:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h result /\ disjoint a result /\
+    as_nat h a < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 result < prime256 /\
+    as_nat h1 result == toDomain_ (3 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 result == toDomain_ (3 * fromDomain_ (as_nat h0 a)))
+
+
+val multByFour: a:felem -> result:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h result /\ eq_or_disjoint a result /\
+    as_nat h a < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 result < prime256 /\
+    as_nat h1 result == toDomain_ (4 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 result == toDomain_ (4 * fromDomain_ (as_nat h0 a)))
+
+
+val multByEight: a:felem -> result:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h result /\ disjoint a result /\
+    as_nat h a < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 result < prime256 /\
+    as_nat h1 result == toDomain_ (8 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 result == toDomain_ (8 * fromDomain_ (as_nat h0 a)))
