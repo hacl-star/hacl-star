@@ -234,6 +234,9 @@ let normalisation_update z2x z3y p resultPoint =
   pop_frame()
 
 
+let lemmaEraseToDomainFromDomain z =
+  lemma_mod_mul_distr_l (z * z) z prime256
+
 let norm p resultPoint tempBuffer =
   let xf = sub p (size 0) (size 4) in
   let yf = sub p (size 4) (size 4) in
