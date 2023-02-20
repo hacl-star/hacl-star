@@ -15,7 +15,6 @@ open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Field
-open Hacl.Impl.P256.MontgomeryMultiplication
 
 friend Spec.P256.MontgomeryMultiplication
 

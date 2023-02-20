@@ -12,7 +12,7 @@ open Lib.Buffer
 
 open Hacl.Impl.SolinasReduction
 open Hacl.Impl.P256.Bignum
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble

@@ -12,7 +12,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.P256.Bignum
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.P256.Field
 
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
