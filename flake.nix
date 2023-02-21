@@ -2,35 +2,33 @@
   description = "Hacl*";
 
   inputs = {
-    fstar-src = {
-      url = "github:fstarlang/fstar";
-      flake = false;
-    };
+    fstar.url = "github:fstarlang/fstar";
+    flake-utils.follows = "fstar/flake-utils";
+    nixpkgs.follows = "fstar/nixpkgs";
     karamel-src = {
       url = "github:fstarlang/karamel";
       flake = false;
     };
-    hacl-nix = {
-      url = "github:hacl-star/hacl-nix";
-      inputs.fstar-src.follows = "fstar-src";
-      inputs.karamel-src.follows = "karamel-src";
-    };
-    nixpkgs.follows = "hacl-nix/nixpkgs";
-    flake-utils.follows = "hacl-nix/flake-utils";
   };
 
-  outputs = { hacl-nix, nixpkgs, flake-utils, ... }:
+  outputs = { self, fstar, flake-utils, nixpkgs, karamel-src }:
     flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        ocamlPackages = pkgs.ocaml-ng.ocamlPackages_4_12;
-        hacl = pkgs.callPackage ./. {
-          inherit (hacl-nix.packages.${system}) z3 fstar karamel vale;
-          inherit ocamlPackages;
+        fstarPackages = fstar.packages.${system};
+        karamel = pkgs.callPackage ./.nix/karamel.nix {
+          inherit (fstarPackages) ocamlPackages z3 fstar;
+          src = karamel-src;
+        };
+        vale = pkgs.callPackage ./.nix/vale.nix { };
+        hacl = pkgs.callPackage ./.nix/hacl.nix {
+          inherit (fstarPackages) ocamlPackages z3 fstar;
+          inherit karamel vale;
         };
       in {
         packages = {
-          inherit hacl;
+          inherit (fstarPackages) ocamlPackages z3 fstar;
+          inherit karamel vale hacl;
           default = hacl;
         };
         hydraJobs = {
