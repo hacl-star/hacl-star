@@ -50,6 +50,44 @@ let point_z_as_nat (h: mem) (e: point) : GTot nat =
   as_nat4 (s0, s1, s2, s3)
 
 
+val uploadBasePoint: p: point -> Stack unit
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
+    as_nat h1 (gsub p (size 0) (size 4)) < prime256 /\
+    as_nat h1 (gsub p (size 4) (size 4)) < prime256 /\
+    as_nat h1 (gsub p (size 8) (size 4)) < prime256 /\
+      (
+	let x1 = as_nat h1 (gsub p (size 0) (size 4)) in
+	let y1 = as_nat h1 (gsub p (size 4) (size 4)) in
+	let z1 = as_nat h1 (gsub p (size 8) (size 4)) in
+
+	let bpX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in
+	let bpY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in
+
+	fromDomain_ x1 == bpX /\ fromDomain_ y1 == bpY /\ fromDomain_ z1 ==  1
+    )
+)
+
+
+val zero_buffer: p: point ->
+  Stack unit
+    (requires fun h -> live h p)
+    (ensures fun h0 _ h1 ->
+      modifies (loc p) h0 h1 /\
+      (
+	let k = Lib.Sequence.create 12 (u64 0) in
+	as_nat h1 (gsub p (size 0) (size 4)) == 0 /\
+	as_nat h1 (gsub p (size 4) (size 4)) == 0 /\
+	as_nat h1 (gsub p (size 8) (size 4)) == 0
+    )
+  )
+
+
+val copy_point: p: point -> result: point -> Stack unit
+  (requires fun h -> live h p /\ live h result /\ disjoint p result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_seq h1 result == as_seq h0 p)
+
+
 val isPointAtInfinityPrivate: p: point -> Stack uint64
   (requires fun h -> live h p /\ as_nat h (gsub p (size 8) (size 4)) < prime)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\

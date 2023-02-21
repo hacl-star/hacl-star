@@ -17,6 +17,7 @@ open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
 open Hacl.Impl.P256.Finv
+open Hacl.Impl.P256.Point
 
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
@@ -44,14 +45,6 @@ let conditional_swap i p q =
     (p, q)
   else
     (q, p)
-
-
-val copy_point: p: point -> result: point -> Stack unit
-  (requires fun h -> live h p /\ live h result /\ disjoint p result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_seq h1 result == as_seq h0 p)
-
-let copy_point p result = copy result p
-
 
 
 [@ CInline]
@@ -304,33 +297,6 @@ let montgomery_ladder #a p q scalar tempBuffer =
       Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i)
     )
 
-val zero_buffer: p: point ->
-  Stack unit
-    (requires fun h -> live h p)
-    (ensures fun h0 _ h1 ->
-      modifies (loc p) h0 h1 /\
-      (
-	let k = Lib.Sequence.create 12 (u64 0) in
-	as_nat h1 (gsub p (size 0) (size 4)) == 0 /\
-	as_nat h1 (gsub p (size 4) (size 4)) == 0 /\
-	as_nat h1 (gsub p (size 8) (size 4)) == 0
-    )
-  )
-
-let zero_buffer p =
-  upd p (size 0) (u64 0);
-  upd p (size 1) (u64 0);
-  upd p (size 2) (u64 0);
-  upd p (size 3) (u64 0);
-  upd p (size 4) (u64 0);
-  upd p (size 5) (u64 0);
-  upd p (size 6) (u64 0);
-  upd p (size 7) (u64 0);
-  upd p (size 8) (u64 0);
-  upd p (size 9) (u64 0);
-  upd p (size 10) (u64 0);
-  upd p (size 11) (u64 0)
-
 
 val lemma_point_to_domain: h0: mem -> h1: mem ->  p: point -> result: point ->  Lemma
    (requires (point_x_as_nat h0 p < prime /\ point_y_as_nat h0 p < prime /\ point_z_as_nat h0 p < prime /\
@@ -412,6 +378,7 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
   norm q result buff;
     lemma_coord h3 q
 
+
 let scalarMultiplicationL = scalarMultiplication_t #MUT
 
 let scalarMultiplicationI = scalarMultiplication_t #IMMUT
@@ -422,52 +389,6 @@ let scalarMultiplication #buf_type p result scalar tempBuffer =
   |MUT -> scalarMultiplicationL p result scalar tempBuffer
   |IMMUT -> scalarMultiplicationI p result scalar tempBuffer
   |CONST -> scalarMultiplicationC p result scalar tempBuffer
-
-
-val uploadBasePoint: p: point -> Stack unit
-  (requires fun h -> live h p)
-  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    as_nat h1 (gsub p (size 0) (size 4)) < prime256 /\
-    as_nat h1 (gsub p (size 4) (size 4)) < prime256 /\
-    as_nat h1 (gsub p (size 8) (size 4)) < prime256 /\
-      (
-	let x1 = as_nat h1 (gsub p (size 0) (size 4)) in
-	let y1 = as_nat h1 (gsub p (size 4) (size 4)) in
-	let z1 = as_nat h1 (gsub p (size 8) (size 4)) in
-
-	let bpX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in
-	let bpY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in
-
-	fromDomain_ x1 == bpX /\ fromDomain_ y1 == bpY /\ fromDomain_ z1 ==  1
-    )
-)
-
-let uploadBasePoint p =
-    let h0 = ST.get() in
-  upd p (size 0) (u64 8784043285714375740);
-  upd p (size 1) (u64 8483257759279461889);
-  upd p (size 2) (u64 8789745728267363600);
-  upd p (size 3) (u64 1770019616739251654);
-  assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 < prime256);
-    assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948);
-  assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain_ 11110593207902424140321080247206512405358633331993495164878354046817554469948);
-
-  upd p (size 4) (u64 15992936863339206154);
-  upd p (size 5) (u64 10037038012062884956);
-  upd p (size 6) (u64 15197544864945402661);
-  upd p (size 7) (u64 9615747158586711429);
-  assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 < prime256);
-  assert_norm (15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-  assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain_ 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-
-
-  upd p (size 8) (u64 1);
-  upd p (size 9) (u64 18446744069414584320);
-  upd p (size 10) (u64 18446744073709551615);
-  upd p (size 11) (u64 4294967294);
-  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime256);
-  assert_norm (1 = fromDomain_ 26959946660873538059280334323183841250350249843923952699046031785985);
-  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985)
 
 
 
