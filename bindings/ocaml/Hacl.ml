@@ -13,7 +13,7 @@ module Lib_RandomBuffer_System = Lib_RandomBuffer_System_bindings.Bindings(Lib_R
 module Hacl_Chacha20Poly1305_32 = Hacl_Chacha20Poly1305_32_bindings.Bindings(Hacl_Chacha20Poly1305_32_stubs)
 module Hacl_Curve25519_51 = Hacl_Curve25519_51_bindings.Bindings(Hacl_Curve25519_51_stubs)
 module Hacl_Ed25519 = Hacl_Ed25519_bindings.Bindings(Hacl_Ed25519_stubs)
-module Hacl_SHA3 = Hacl_SHA3_bindings.Bindings(Hacl_SHA3_stubs)
+module Hacl_Hash_SHA3 = Hacl_Hash_SHA3_bindings.Bindings(Hacl_Hash_SHA3_stubs)
 module Hacl_HMAC = Hacl_HMAC_bindings.Bindings(Hacl_HMAC_stubs)
 module Hacl_Poly1305_32 = Hacl_Poly1305_32_bindings.Bindings(Hacl_Poly1305_32_stubs)
 module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
@@ -104,25 +104,25 @@ end)
 module SHA3_224 : HashFunction =
   Make_HashFunction (struct
     let hash_alg = SHA3_224
-    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_224 input_len input output
+    let hash input input_len output = Hacl_Hash_SHA3.hacl_SHA3_sha3_224 input_len input output
 end)
 
 module SHA3_256 : HashFunction =
   Make_HashFunction (struct
     let hash_alg = SHA3_256
-    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_256 input_len input output
+    let hash input input_len output = Hacl_Hash_SHA3.hacl_SHA3_sha3_256 input_len input output
 end)
 
 module SHA3_384 : HashFunction =
   Make_HashFunction (struct
     let hash_alg = SHA3_384
-    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_384 input_len input output
+    let hash input input_len output = Hacl_Hash_SHA3.hacl_SHA3_sha3_384 input_len input output
 end)
 
 module SHA3_512 : HashFunction =
   Make_HashFunction (struct
     let hash_alg = SHA3_512
-    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_512 input_len input output
+    let hash input input_len output = Hacl_Hash_SHA3.hacl_SHA3_sha3_512 input_len input output
 end)
 
 module Keccak = struct
@@ -130,17 +130,17 @@ module Keccak = struct
     let shake128 ~msg ~digest =
       (* Hacl.SHA3.shake128_hacl *)
       assert (C.disjoint msg digest);
-      Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 digest) (C.ctypes_buf digest)
+      Hacl_Hash_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 digest) (C.ctypes_buf digest)
     let shake256 ~msg ~digest =
       (* Hacl.SHA3.shake256_hacl *)
       assert (C.disjoint msg digest);
-      Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 digest) (C.ctypes_buf digest)
+      Hacl_Hash_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 digest) (C.ctypes_buf digest)
     let keccak ~rate ~capacity ~suffix ~msg ~digest =
       (* Hacl.Impl.SHA3.keccak *)
       assert (rate mod 8 = 0 && rate / 8 > 0 && rate <= 1600);
       assert (capacity + rate = 1600);
       assert (C.disjoint msg digest);
-      Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 msg) (C.ctypes_buf msg) (UInt8.of_int suffix) (C.size_uint32 digest) (C.ctypes_buf digest)
+      Hacl_Hash_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 msg) (C.ctypes_buf msg) (UInt8.of_int suffix) (C.size_uint32 digest) (C.ctypes_buf digest)
   end
   let shake128 ~msg ~size =
     let digest = C.make size in

@@ -68,7 +68,7 @@ let modules = [
   "Hacl_Hash_Blake2",
   "Hacl_Hash_Blake2s_128",
   "Hacl_Hash_Blake2b_256",
-  "Hacl_SHA3",
+  "Hacl_Hash_SHA3",
   "Vale",
   "EverCrypt",
   "EverCrypt_Hash",

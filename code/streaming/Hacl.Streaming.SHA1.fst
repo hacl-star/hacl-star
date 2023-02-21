@@ -30,15 +30,17 @@ inline_for_extraction noextract
 let state_t_sha1 = state_t SHA1
 
 /// Type abbreviation - for pretty code generation
-let state_sha1 = F.state_s hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+let state = Hacl.Streaming.MD.state_32
 
 noextract
-let legacy_alloca_sha1 = F.alloca hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
-let legacy_create_in_sha1 = F.create_in hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
-let legacy_init_sha1 = F.init hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
+let legacy_alloca = F.alloca hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+let legacy_create_in = F.create_in hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+let legacy_init = F.init hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
 [@@ Comment "0 = success, 1 = max length exceeded" ]
-let legacy_update_sha1 = F.update hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
-let legacy_finish_sha1 = F.mk_finish hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
-let legacy_free_sha1 = F.free hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
+let legacy_update = F.update hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
+let legacy_finish = F.mk_finish hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+let legacy_free = F.free hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
 
-let legacy_copy_sha1 = F.copy hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+let legacy_copy = F.copy hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+
+let legacy_hash: Hacl.Hash.Definitions.hash_st SHA1 = fun input input_len dst -> Hacl.Hash.SHA1.legacy_hash input input_len dst

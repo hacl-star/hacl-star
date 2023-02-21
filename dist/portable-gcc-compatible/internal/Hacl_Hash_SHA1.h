@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Hash_SHA1.h"
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_init */
@@ -49,6 +48,30 @@ void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
 void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_finish */
+
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_update_multi */
+
+void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
+
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_update_multi */
+
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_update_last */
+
+void
+Hacl_Hash_SHA1_legacy_update_last(
+  uint32_t *s,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_update_last */
+
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_hash */
+
+void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_hash */
 
 #if defined(__cplusplus)
 }
