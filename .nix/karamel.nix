@@ -6,7 +6,7 @@ stdenv.mkDerivation {
 
   inherit src;
 
-  buildInputs = [ z3 which symlinks ] ++ (with ocamlPackages; [
+  buildInputs = [ fstar z3 which symlinks ] ++ (with ocamlPackages; [
     ocaml
     ocamlbuild
     findlib
