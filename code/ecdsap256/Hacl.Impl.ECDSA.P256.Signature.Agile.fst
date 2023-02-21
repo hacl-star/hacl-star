@@ -19,7 +19,7 @@ open Spec.P256.Constants
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
-open Hacl.Impl.ECDSA.MM.Exponent
+open Hacl.Impl.P256.Qinv
 open Hacl.Impl.P256.Scalar
 
 open Spec.Hash.Definitions

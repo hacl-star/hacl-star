@@ -1,5 +1,4 @@
-module Hacl.Impl.ECDSA.MM.Exponent
-
+module Hacl.Impl.P256.Qinv
 
 open FStar.HyperStack.All
 open FStar.HyperStack
