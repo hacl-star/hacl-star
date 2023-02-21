@@ -74,6 +74,9 @@ let
       alcotest
       qcheck-core
       secp256k1-internal
+      menhirLib
+      process
+      sedlex
     ]);
 
     buildInputs = [ openssl.dev ];
