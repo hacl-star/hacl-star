@@ -5,9 +5,8 @@ stdenv.mkDerivation {
   version = src.rev;
 
   inherit src;
-  patches = [ ./karamel.patch ];
 
-  buildInputs = [ fstar z3 which symlinks ] ++ (with ocamlPackages; [
+  buildInputs = [ z3 which symlinks ] ++ (with ocamlPackages; [
     ocaml
     ocamlbuild
     findlib
