@@ -21,7 +21,7 @@ open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
 open Hacl.Impl.P256.RawCmp
-open Hacl.Impl.P256.Signature.Common
+open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Qinv
 

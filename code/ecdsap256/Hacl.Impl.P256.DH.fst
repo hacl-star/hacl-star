@@ -16,7 +16,7 @@ open Spec.DH
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
-open Hacl.Impl.P256.Signature.Common
+open Hacl.Impl.P256.Point
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 

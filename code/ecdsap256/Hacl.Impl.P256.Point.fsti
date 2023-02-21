@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Signature.Common
+module Hacl.Impl.P256.Point
 
 open FStar.Mul
 open FStar.HyperStack.All
@@ -37,6 +37,7 @@ val isPointAtInfinityPublic: p:point -> Stack bool
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
 
+
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")]
 val isPointOnCurvePublic: p:point -> Stack bool
@@ -63,6 +64,8 @@ val verifyQValidCurvePoint: pubKeyAsPoint:point -> Stack bool
     modifies0 h0 h1 /\
     r == verifyQValidCurvePointSpec (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
 
+
+// TODO: mv
 inline_for_extraction
 val verifyQ:
   pubKey: lbuffer uint8 (size 64) ->
@@ -77,6 +80,8 @@ val verifyQ:
       )
     )
 
+
+// TODO: mv
 val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack bool
   (requires fun h -> live h x)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\

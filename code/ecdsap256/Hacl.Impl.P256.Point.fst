@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Signature.Common
+module Hacl.Impl.P256.Point
 
 open FStar.HyperStack.All
 open FStar.HyperStack

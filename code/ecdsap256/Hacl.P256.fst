@@ -45,10 +45,10 @@ let ecdsa_verif_without_hash mLen m pubKey r s  =
 
 
 let validate_public_key pubKey =
-  Hacl.Impl.P256.Signature.Common.verifyQ pubKey
+  Hacl.Impl.P256.Point.verifyQ pubKey
 
 let validate_private_key x =
-  Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x
+  Hacl.Impl.P256.Point.isMoreThanZeroLessThanOrder x
 
 
 let uncompressed_to_raw b result =
