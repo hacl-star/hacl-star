@@ -9,7 +9,6 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.ByteBuffer
-open Lib.ByteSequence
 open Lib.Buffer
 
 open Hacl.Impl.P256.Math
@@ -18,10 +17,13 @@ open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Scalar
+open Hacl.Impl.P256.Core
 
 open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
+
+module BSeq = Lib.ByteSequence
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
@@ -103,6 +105,18 @@ let isPointAtInfinityPrivate p =
   let r = logand(logand z0_zero z1_zero) (logand z2_zero z3_zero) in
     lemma_pointAtInfInDomain (as_nat h0 (gsub p (size 0) (size 4))) (as_nat h0 (gsub p (size 4) (size 4))) (as_nat h0 (gsub p (size 8) (size 4)));
   r
+
+
+let isPointAtInfinityPublic p =
+  let z0 = index p (size 8) in
+  let z1 = index p (size 9) in
+  let z2 = index p (size 10) in
+  let z3 = index p (size 11) in
+  let z0_zero = eq_0_u64 z0 in
+  let z1_zero = eq_0_u64 z1 in
+  let z2_zero = eq_0_u64 z2 in
+  let z3_zero = eq_0_u64 z3 in
+  z0_zero && z1_zero && z2_zero && z3_zero
 
 
 let pointToDomain p result =
@@ -348,18 +362,6 @@ let xcube_minus_x x r =
   lemma_xcube2 x_
 
 
-let isPointAtInfinityPublic p =
-  let z0 = index p (size 8) in
-  let z1 = index p (size 9) in
-  let z2 = index p (size 10) in
-  let z3 = index p (size 11) in
-  let z0_zero = eq_0_u64 z0 in
-  let z1_zero = eq_0_u64 z1 in
-  let z2_zero = eq_0_u64 z2 in
-  let z3_zero = eq_0_u64 z3 in
-  z0_zero && z1_zero && z2_zero && z3_zero
-
-
 val lemma_modular_multiplication_p256_2_d: a:nat {a < prime256} -> b:nat {b < prime256} ->
   Lemma (toDomain_ a = toDomain_ b <==> a == b)
 
@@ -433,15 +435,15 @@ let verifyQ pubKey =
     toUint64ChangeEndian pubKeyY publicKeyY;
   let h1 = ST.get() in
       lemma_core_0 publicKeyX h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);
+      BSeq.uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);
       lemma_core_0 publicKeyY h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
+      BSeq.uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
 
-      changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
-      uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
+      changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
+      BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
 
-      changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
-      uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
+      changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
+      BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
 
   bufferToJac publicKeyB publicKeyJ;
   let r = verifyQValidCurvePoint publicKeyJ in
@@ -457,8 +459,8 @@ let isMoreThanZeroLessThanOrder x =
     let h1 = ST.get() in
 
       lemma_core_0 xAsFelem h1;
-      Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 x));
-      uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 x);
+      Spec.ECDSA.changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h0 x));
+      BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 x);
 
   let tempBuffer = create (size 4) (u64 0) in
     recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
