@@ -2,7 +2,7 @@
   description = "Hacl*";
 
   inputs = {
-    fstar.url = "github:fstarlang/fstar";
+    fstar.url = "git+https://github.com/fstarlang/fstar?ref=_taramana_dune";
     flake-utils.follows = "fstar/flake-utils";
     nixpkgs.follows = "fstar/nixpkgs";
     karamel-src = {
