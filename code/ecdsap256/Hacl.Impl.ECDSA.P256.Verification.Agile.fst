@@ -22,7 +22,7 @@ open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
 open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Signature.Common
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.P256.Scalar
 open Hacl.Impl.ECDSA.MM.Exponent
 
 open Hacl.Hash.SHA2

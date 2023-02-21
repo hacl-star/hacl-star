@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA.MontgomeryMultiplication
+module Hacl.Impl.P256.Scalar //before: Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open FStar.Mul
 open FStar.HyperStack.All
@@ -82,3 +82,9 @@ val felem_add: arg1:felem -> arg2:felem -> out:felem -> Stack unit
     as_nat h1 out == (as_nat h0 arg1 + as_nat h0 arg2) % prime_p256_order)
 
 val lemma_felem_add: a:nat -> b:nat -> Lemma ((fromDomain_ a + fromDomain_ b) % prime_p256_order = fromDomain_ (a + b))
+
+
+val fromDomainImpl: a:felem -> result:felem -> Stack unit
+  (requires fun h -> live h a /\ live h result /\ as_nat h a < prime)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+     as_nat h1 result < prime /\ as_nat h1 result == fromDomain_ (as_nat h0 a))

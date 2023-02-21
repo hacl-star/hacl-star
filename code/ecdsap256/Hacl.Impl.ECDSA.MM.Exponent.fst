@@ -20,7 +20,7 @@ open FStar.Mul
 
 open Lib.Loops
 
-friend Hacl.Impl.ECDSA.MontgomeryMultiplication
+friend Hacl.Impl.P256.Scalar
 
 #reset-options " --z3rlimit 200 --fuel 0 --ifuel 0"
 
@@ -171,14 +171,7 @@ let montgomery_ladder_exponent r =
     copy r p;
   pop_frame()
 
-
-let fromDomainImpl a result =
-  push_frame();
-    let one = create (size 4) (u64 0) in
-    uploadOneImpl one;
-    montgomery_multiplication_ecdsa_module one a result;
-  pop_frame()
-
+//--------------------------
 
 val lemma_fromDomain1: a: nat ->
   Lemma ((fromDomain_ (fromDomain_ (fromDomain_ a))) == ((a * modp_inv2_prime (pow2 256) prime_p256_order * modp_inv2_prime (pow2 256) prime_p256_order * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order))

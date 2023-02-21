@@ -20,7 +20,7 @@ open Spec.P256.Lemmas
 
 open FStar.Mul
 
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.P256.Scalar
 open Lib.Loops
 
 #reset-options " --z3rlimit 200"
@@ -28,29 +28,17 @@ open Lib.Loops
 noextract
 let prime = prime_p256_order
 
-val montgomery_ladder_exponent: a: felem -> Stack unit
+// qinv
+val montgomery_ladder_exponent: a:felem -> Stack unit
   (requires fun h -> live h a /\ as_nat h a < prime)
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-    (
-      let b_ = fromDomain_ (as_nat h0 a) in
-      let r0D = exponent_spec b_ in
-      fromDomain_ (as_nat h1 a) == r0D  /\
-      as_nat h1 a < prime
-    )
-)
+    fromDomain_ (as_nat h1 a) == exponent_spec (fromDomain_ (as_nat h0 a)) /\
+    as_nat h1 a < prime)
 
-val fromDomainImpl: a: felem -> result: felem -> Stack unit
-  (requires fun h -> live h a /\ live h result /\ as_nat h a < prime)
+val multPowerPartial: s:felem -> a:felem -> b:felem -> result:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h b /\ live h result /\
+    as_nat h a < prime /\ as_nat h b < prime /\
+    fromDomain_ (as_nat h a) == exponent_spec (fromDomain_ (fromDomain_ (as_nat h s))))
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-     as_nat h1 result < prime /\ as_nat h1 result == fromDomain_ (as_nat h0 a))
-
-
-val multPowerPartial: s: felem -> a: felem -> b: felem -> result: felem -> Stack unit
-  (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat h a < prime /\ as_nat h b < prime /\
-  (
-      let a_ = fromDomain_  (fromDomain_ (as_nat h s)) in
-      let r0D = exponent_spec a_ in
-      fromDomain_ (as_nat h a) == r0D)
-  )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result = (pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 b)) % prime_p256_order)
+    as_nat h1 result = (pow (as_nat h0 s) (prime_p256_order - 2) * (as_nat h0 b)) % prime_p256_order)

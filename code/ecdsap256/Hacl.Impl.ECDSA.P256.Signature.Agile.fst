@@ -20,7 +20,7 @@ open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
 open Hacl.Impl.ECDSA.MM.Exponent
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.P256.Scalar
 
 open Spec.Hash.Definitions
 open Hacl.Hash.SHA2

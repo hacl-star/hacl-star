@@ -16,7 +16,7 @@ open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Field
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.P256.Scalar
 
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication

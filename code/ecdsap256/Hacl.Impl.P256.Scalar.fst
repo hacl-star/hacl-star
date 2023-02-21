@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA.MontgomeryMultiplication
+module Hacl.Impl.P256.Scalar
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -412,3 +412,11 @@ let lemma_felem_add a b =
   assert(fromDomain_ (a + b) = (aD % prime_p256_order + bD % prime_p256_order) % prime_p256_order);
 
   assert(fromDomain_ (a + b) = (fromDomain_ a + fromDomain_ b) % prime_p256_order)
+
+
+let fromDomainImpl a result =
+  push_frame();
+    let one = create (size 4) (u64 0) in
+    uploadOneImpl one;
+    montgomery_multiplication_ecdsa_module one a result;
+  pop_frame()
