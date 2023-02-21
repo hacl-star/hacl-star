@@ -16,12 +16,203 @@ open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Field
+open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Scalar
 
+open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+
+(* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
+val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime256} ->
+  Lemma (isPointAtInfinity (x, y, z) == isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
+
+let lemma_pointAtInfInDomain x y z =
+  assert (if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
+  assert_norm (modp_inv2 (pow2 256) % prime256 <> 0);
+  lemmaFromDomain z;
+  assert (fromDomain_ z == (z * modp_inv2 (pow2 256) % prime256));
+  assert_norm (0 * modp_inv2 (pow2 256) % prime256 == 0);
+  lemma_multiplication_not_mod_prime z;
+  assert (if z = 0 then z * modp_inv2 (pow2 256) % prime256 == 0
+                   else fromDomain_ z <> 0)
+
+
+let isPointAtInfinityPrivate p =
+  let h0 = ST.get() in
+  let z0 = index p (size 8) in
+  let z1 = index p (size 9) in
+  let z2 = index p (size 10) in
+  let z3 = index p (size 11) in
+  let z0_zero = eq_mask z0 (u64 0) in
+  let z1_zero = eq_mask z1 (u64 0) in
+  let z2_zero = eq_mask z2 (u64 0) in
+  let z3_zero = eq_mask z3 (u64 0) in
+     eq_mask_lemma z0 (u64 0);
+     eq_mask_lemma z1 (u64 0);
+     eq_mask_lemma z2 (u64 0);
+     eq_mask_lemma z3 (u64 0);
+  let r = logand(logand z0_zero z1_zero) (logand z2_zero z3_zero) in
+    lemma_pointAtInfInDomain (as_nat h0 (gsub p (size 0) (size 4))) (as_nat h0 (gsub p (size 4) (size 4))) (as_nat h0 (gsub p (size 8) (size 4)));
+  r
+
+
+let pointToDomain p result =
+    let p_x = sub p (size 0) (size 4) in
+    let p_y = sub p (size 4) (size 4) in
+    let p_z = sub p (size 8) (size 4) in
+
+    let r_x = sub result (size 0) (size 4) in
+    let r_y = sub result (size 4) (size 4) in
+    let r_z = sub result (size 8) (size 4) in
+
+    toDomain p_x r_x;
+    toDomain p_y r_y;
+    toDomain p_z r_z
+
+
+let pointFromDomain p result =
+    let p_x = sub p (size 0) (size 4) in
+    let p_y = sub p (size 4) (size 4) in
+    let p_z = sub p (size 8) (size 4) in
+
+    let r_x = sub result (size 0) (size 4) in
+    let r_y = sub result (size 4) (size 4) in
+    let r_z = sub result (size 8) (size 4) in
+
+    fromDomain p_x r_x;
+    fromDomain p_y r_y;
+    fromDomain p_z r_z
+
+
+inline_for_extraction noextract
+val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: point -> Stack unit
+  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\
+    as_nat h z2x < prime256 /\ as_nat h z3y < prime /\
+    as_nat h (gsub p (size 8) (size 4)) < prime256 /\
+    disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
+  (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\
+    (
+      let x0 = as_nat h0 (gsub p (size 0) (size 4)) in
+      let y0 = as_nat h0 (gsub p (size 4) (size 4)) in
+      let z0 = as_nat h0 (gsub p (size 8) (size 4)) in
+
+      let x1 = as_nat h1 (gsub resultPoint (size 0) (size 4)) in
+      let y1 = as_nat h1 (gsub resultPoint (size 4) (size 4)) in
+      let z1 = as_nat h1 (gsub resultPoint (size 8) (size 4)) in
+
+      x1 == fromDomain_(as_nat h0 z2x) /\ y1 == fromDomain_(as_nat h0 z3y)  /\
+      (
+	if Spec.P256.isPointAtInfinity (fromDomain_ x0, fromDomain_ y0, fromDomain_ z0) then  z1 == 0 else z1 == 1
+      ))
+  )
+
+
+let normalisation_update z2x z3y p resultPoint =
+  push_frame();
+    let zeroBuffer = create (size 4) (u64 0) in
+
+  let resultX = sub resultPoint (size 0) (size 4) in
+  let resultY = sub resultPoint (size 4) (size 4) in
+  let resultZ = sub resultPoint (size 8) (size 4) in
+    let h0 = ST.get() in
+  let bit = isPointAtInfinityPrivate p in
+  fromDomain z2x resultX;
+  fromDomain z3y resultY;
+  uploadOneImpl resultZ;
+    let h1 = ST.get() in
+  copy_conditional resultZ zeroBuffer bit;
+    let h2 = ST.get() in
+  pop_frame()
+
+
+let lemmaEraseToDomainFromDomain z =
+  lemma_mod_mul_distr_l (z * z) z prime256
+
+
+val lemma_norm_as_specification: xD: nat{xD < prime256} -> yD: nat{yD < prime256} ->
+  zD: nat {zD < prime256} ->
+  x3 : nat {x3 == xD * (pow (zD * zD) (prime - 2) % prime) % prime}->
+  y3 : nat {y3 == yD * (pow (zD * zD * zD) (prime -2) % prime) % prime} ->
+  z3: nat {if isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} ->
+  Lemma (
+  let (xN, yN, zN) = _norm (xD, yD, zD) in
+  x3 == xN /\ y3 == yN /\ z3 == zN)
+
+
+let lemma_norm_as_specification xD yD zD x3 y3 z3 =
+  power_distributivity (zD * zD * zD) (prime - 2) prime;
+  power_distributivity (zD * zD) (prime -2) prime
+
+
+let norm p resultPoint tempBuffer =
+  let xf = sub p (size 0) (size 4) in
+  let yf = sub p (size 4) (size 4) in
+  let zf = sub p (size 8) (size 4) in
+
+
+  let z2f = sub tempBuffer (size 4) (size 4) in
+  let z3f = sub tempBuffer (size 8) (size 4) in
+  let tempBuffer20 = sub tempBuffer (size 12) (size 20) in
+
+    let h0 = ST.get() in
+  montgomery_square_buffer zf z2f;
+    let h1 = ST.get() in
+  montgomery_multiplication_buffer z2f zf z3f;
+    let h2 = ST.get() in
+      lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf)) prime256;
+      assert (as_nat h1 z2f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime256));
+      assert (as_nat h2 z3f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime256));
+
+  exponent z2f z2f tempBuffer20;
+    let h3 = ST.get() in
+      assert(as_nat h3 z2f = toDomain_ (pow (fromDomain_ (as_nat h2 z2f)) (prime256 - 2) % prime256));
+  exponent z3f z3f tempBuffer20;
+    let h4 = ST.get() in
+      assert(as_nat h4 z3f = toDomain_ (pow (fromDomain_ (as_nat h3 z3f)) (prime256 - 2) % prime256));
+
+  montgomery_multiplication_buffer xf z2f z2f;
+  montgomery_multiplication_buffer yf z3f z3f;
+  normalisation_update z2f z3f p resultPoint;
+
+    let h3 = ST.get() in
+    lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf));
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
+    Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+
+    lemma_norm_as_specification (fromDomain_ (point_x_as_nat h0 p)) (fromDomain_ (point_y_as_nat h0 p)) (fromDomain_ (point_z_as_nat h0 p)) (point_x_as_nat h3 resultPoint) (point_y_as_nat h3 resultPoint) (point_z_as_nat h3 resultPoint);
+
+    assert(
+       let zD = fromDomain_(point_z_as_nat h0 p) in
+       let xD = fromDomain_(point_x_as_nat h0 p) in
+       let yD = fromDomain_(point_y_as_nat h0 p) in
+       let (xN, yN, zN) = _norm (xD, yD, zD) in
+       point_x_as_nat h3 resultPoint == xN /\ point_y_as_nat h3 resultPoint == yN /\ point_z_as_nat h3 resultPoint == zN)
+
+
+let normX p result tempBuffer =
+  let xf = sub p (size 0) (size 4) in
+  let yf = sub p (size 4) (size 4) in
+  let zf = sub p (size 8) (size 4) in
+
+
+  let z2f = sub tempBuffer (size 4) (size 4) in
+  let z3f = sub tempBuffer (size 8) (size 4) in
+  let tempBuffer20 = sub tempBuffer (size 12) (size 20) in
+
+    let h0 = ST.get() in
+  montgomery_square_buffer zf z2f;
+  exponent z2f z2f tempBuffer20;
+  montgomery_multiplication_buffer z2f xf z2f;
+  fromDomain z2f result;
+  assert_norm (prime >= 2);
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
+
+
 
 #push-options "--ifuel 1"
 

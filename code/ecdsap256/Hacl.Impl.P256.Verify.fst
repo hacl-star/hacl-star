@@ -24,6 +24,7 @@ open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Qinv
+open Hacl.Impl.P256.PointMul
 
 open Hacl.Hash.SHA2
 open Spec.Hash.Definitions

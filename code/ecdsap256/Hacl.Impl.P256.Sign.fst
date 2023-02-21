@@ -21,6 +21,8 @@ open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Qinv
 open Hacl.Impl.P256.Scalar
+open Hacl.Impl.P256.Point
+open Hacl.Impl.P256.PointMul
 
 open Spec.Hash.Definitions
 open Hacl.Hash.SHA2
