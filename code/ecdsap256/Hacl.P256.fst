@@ -13,7 +13,7 @@ open Spec.ECDSA
 open Spec.Hash.Definitions
 
 open Hacl.Impl.ECDSA.P256.Signature.Agile
-open Hacl.Impl.ECDSA.P256.Verification.Agile
+open Hacl.Impl.P256.Verify
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
