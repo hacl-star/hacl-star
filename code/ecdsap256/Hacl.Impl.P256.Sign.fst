@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA.P256.Signature.Agile
+module Hacl.Impl.P256.Sign
 
 open FStar.HyperStack.All
 open FStar.HyperStack
