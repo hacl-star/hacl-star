@@ -22,7 +22,7 @@ friend Spec.P256.MontgomeryMultiplication
 let toDomain value result =
   push_frame();
     let multBuffer = create (size 8) (u64 0) in
-    shift_256_impl value multBuffer;
+    bn_lshift256 value multBuffer;
     solinas_reduction_impl multBuffer result;
   pop_frame()
 

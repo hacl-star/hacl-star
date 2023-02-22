@@ -27,7 +27,7 @@ val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  ->
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\  wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
 
 let add8_without_carry1 t t1 result  =
-  let _ = add8 t t1 result in
+  let _ = bn_add8 t t1 result in
     assert_norm (pow2 320 + prime_p256_order * prime_p256_order < pow2 512)
 
 
@@ -171,7 +171,7 @@ let montgomery_multiplication_round t round k0 =
 
     let t2 = create (size 8) (u64 0) in
     let t3 = create (size 8) (u64 0) in
-    let t1 = mod64 t in
+    let t1 = bn_mod_pow2_64 t in
     mul64 t1 k0 y temp;
       let h1 = ST.get() in
       assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) + uint_v (Lib.Sequence.index (as_seq h1 temp) 0) * pow2 64 = uint_v t1 * uint_v k0);
@@ -183,14 +183,14 @@ let montgomery_multiplication_round t round k0 =
       assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) == uint_v y_);
       assert(uint_v y_ == (uint_v t1 * uint_v k0) % pow2 64);
 
-    shortened_mul prime256order_buffer y_ t2;
+    bn_mul1 prime256order_buffer y_ t2;
       let h2 = ST.get() in
       assert(wide_as_nat h2 t2 = prime_p256_order * ((uint_v t1 * uint_v k0) % pow2 64));
     add8_without_carry1 t t2 t3;
       let h3 = ST.get() in
       assert_by_tactic ((wide_as_nat h0 t % pow2 64) * uint_v k0 == uint_v k0 * (wide_as_nat h0 t % pow2 64)) canon;
       assert(wide_as_nat h3 t3 = wide_as_nat h0 t + prime_p256_order * ((((wide_as_nat h0 t % pow2 64)) * uint_v k0) % pow2 64));
-    shift8 t3 round;
+    bn_rshift64 t3 round;
       let h4 = ST.get() in
       assert(wide_as_nat h4 round = (wide_as_nat h0 t + prime_p256_order * ((((wide_as_nat h0 t % pow2 64)) * uint_v k0) % pow2 64)) / pow2 64);
   pop_frame()
@@ -238,7 +238,7 @@ let reduction_prime_2prime_with_carry x result  =
     let cin = Lib.Buffer.index x (size 4) in
     let x_ = Lib.Buffer.sub x (size 0) (size 4) in
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let c = Hacl.Impl.P256.Bignum.sub4_il x_ prime256order_buffer tempBuffer in
+    let c = bn_sub4_il x_ prime256order_buffer tempBuffer in
       let h1 = ST.get() in
 
       assert(if uint_v c = 0 then as_nat h0 x_ >= prime_p256_order else as_nat h0 x_ < prime_p256_order);
@@ -249,7 +249,7 @@ let reduction_prime_2prime_with_carry x result  =
 	else if uint_v cin < uint_v c then uint_v carry = 1
 	else uint_v carry = 0);
 
-    cmovznz4 carry tempBuffer x_ result;
+    bn_cmovznz4 carry tempBuffer x_ result;
  pop_frame()
 
 
@@ -267,9 +267,9 @@ let reduction_prime_2prime_with_carry2 cin x result  =
     let tempBuffer = create (size 4) (u64 0) in
     let tempBufferForSubborrow = create (size 1) (u64 0) in
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let c = Hacl.Impl.P256.Bignum.sub4_il x prime256order_buffer tempBuffer in
+    let c = bn_sub4_il x prime256order_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-    cmovznz4 carry tempBuffer x result;
+    bn_cmovznz4 carry tempBuffer x result;
  pop_frame()
 
 
@@ -286,11 +286,11 @@ let reduction_prime_2prime_order x result  =
     let tempBuffer = create (size 4) (u64 0) in
     recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
       let h0 = ST.get() in
-    let c = sub4_il x prime256order_buffer tempBuffer in
+    let c = bn_sub4_il x prime256order_buffer tempBuffer in
       let h1 = ST.get() in
       assert(as_nat h1 tempBuffer = as_nat h0 x - prime_p256_order + uint_v c * pow2 256);
       assert(let x = as_nat h0 x in if x < prime_p256_order then uint_v c = 1 else uint_v c = 0);
-    cmovznz4 c tempBuffer x result;
+    bn_cmovznz4 c tempBuffer x result;
     let h2 = ST.get() in
       assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64);
     lemma_reduction1 (as_nat h0 x) (as_nat h2 result);
@@ -372,7 +372,7 @@ let montgomery_multiplication_ecdsa_module a b result =
     let k0 = upload_k0() in
 
       let h0 = ST.get() in
-    mul a b t;
+    bn_mul4 a b t;
       assert_by_tactic (as_nat h0 b * as_nat h0 a == as_nat h0 a * as_nat h0 b) canon;
       mul_lemma_ (as_nat h0 a) (as_nat h0 b) prime_p256_order;
    montgomery_multiplication_round_twice t round2 k0;
@@ -394,7 +394,7 @@ let montgomery_multiplication_ecdsa_module a b result =
 
 
 let felem_add arg1 arg2 out =
-  let t = add4 arg1 arg2 out in
+  let t = bn_add4 arg1 arg2 out in
   reduction_prime_2prime_with_carry2 t out out
 
 
@@ -417,6 +417,6 @@ let lemma_felem_add a b =
 let fromDomainImpl a result =
   push_frame();
     let one = create (size 4) (u64 0) in
-    uploadOneImpl one;
+    bn_set_one4 one;
     montgomery_multiplication_ecdsa_module one a result;
   pop_frame()

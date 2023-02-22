@@ -37,8 +37,8 @@ let ecp256dh_i result scalar =
   changeEndian resultBufferX;
   changeEndian resultBufferY;
 
-  toUint8 resultBufferX resultX;
-  toUint8 resultBufferY resultY;
+  bn_to_bytes_be4 resultBufferX resultX;
+  bn_to_bytes_be4 resultBufferY resultY;
 
   lemma_core_0 resultBufferX h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
@@ -116,8 +116,8 @@ let ecp256dh_r result pubKey scalar =
   let pubKeyX = sub pubKey (size 0) (size 32) in
   let pubKeyY = sub pubKey (size 32) (size 32) in
 
-  toUint64ChangeEndian pubKeyX publicKeyFelemX;
-  toUint64ChangeEndian pubKeyY publicKeyFelemY;
+  bn_from_bytes_be4 pubKeyX publicKeyFelemX;
+  bn_from_bytes_be4 pubKeyY publicKeyFelemY;
 
   let h1 = ST.get() in
   lemma_core_0 publicKeyFelemX h1;
@@ -134,8 +134,8 @@ let ecp256dh_r result pubKey scalar =
 
   changeEndian resultBufferFelemX;
   changeEndian resultBufferFelemY;
-  toUint8 resultBufferFelemX resultX;
-  toUint8 resultBufferFelemY resultY;
+  bn_to_bytes_be4 resultBufferFelemX resultX;
+  bn_to_bytes_be4 resultBufferFelemY resultY;
 
   lemma_core_0 resultBufferFelemX h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);

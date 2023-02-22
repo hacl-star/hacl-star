@@ -62,7 +62,7 @@ let isMoreThanZeroLessThanOrderMinusOne f =
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
     recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = sub4_il f prime256order_buffer tempBuffer in
+  let carry = bn_sub4_il f prime256order_buffer tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in
   let result = less && not more in
@@ -118,7 +118,7 @@ let ecdsa_verification_step23 alg mLen m result =
   end;
 
   let cutHash = sub mHash (size 0) (size 32) in
-  toUint64ChangeEndian cutHash result;
+  bn_from_bytes_be4 cutHash result;
   let h1 = ST.get() in
   reduction_prime_2prime_order result result;
 
@@ -177,8 +177,8 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
   let h1 = ST.get() in
     Hacl.Impl.P256.Bignum.changeEndian u1;
     Hacl.Impl.P256.Bignum.changeEndian u2;
-    toUint8 u1 bufferU1;
-    toUint8 u2 bufferU2;
+    bn_to_bytes_be4 u1 bufferU1;
+    bn_to_bytes_be4 u2 bufferU2;
 
   let h2 = ST.get() in
 
@@ -636,11 +636,11 @@ let ecdsa_verification alg pubKey r s mLen m =
   let pubKeyX = sub pubKey (size 0) (size 32) in
   let pubKeyY = sub pubKey (size 32) (size 32) in
 
-  toUint64ChangeEndian pubKeyX publicKeyFelemX;
-  toUint64ChangeEndian pubKeyY publicKeyFelemY;
+  bn_from_bytes_be4 pubKeyX publicKeyFelemX;
+  bn_from_bytes_be4 pubKeyY publicKeyFelemY;
 
-  toUint64ChangeEndian r rAsFelem;
-  toUint64ChangeEndian s sAsFelem;
+  bn_from_bytes_be4 r rAsFelem;
+  bn_from_bytes_be4 s sAsFelem;
 
   let h1 = ST.get() in
     lemma_core_0 publicKeyFelemX h1;

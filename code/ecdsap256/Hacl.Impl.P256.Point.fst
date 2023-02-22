@@ -181,9 +181,9 @@ let normalisation_update z2x z3y p resultPoint =
   let bit = isPointAtInfinityPrivate p in
   fromDomain z2x resultX;
   fromDomain z3y resultY;
-  uploadOneImpl resultZ;
+  bn_set_one4 resultZ;
     let h1 = ST.get() in
-  copy_conditional resultZ zeroBuffer bit;
+  bn_copy_conditional4 resultZ zeroBuffer bit;
     let h2 = ST.get() in
   pop_frame()
 
@@ -383,7 +383,7 @@ let isPointOnCurvePublic p =
 
     lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.bCoordinateP256) % prime);
 
-    let r = compare_felem y2Buffer xBuffer in
+    let r = bn_is_eq_mask4 y2Buffer xBuffer in
     let z = not (eq_0_u64 r) in
   pop_frame();
      z
@@ -403,8 +403,8 @@ let isCoordinateValid p =
   let x = sub p (size 0) (size 4) in
   let y = sub p (size 4) (size 4) in
 
-  let carryX = sub4_il x prime256_buffer tempBuffer in
-  let carryY = sub4_il y prime256_buffer tempBuffer in
+  let carryX = bn_sub4_il x prime256_buffer tempBuffer in
+  let carryY = bn_sub4_il y prime256_buffer tempBuffer in
 
   let lessX = eq_u64_nCT carryX (u64 1) in
   let lessY = eq_u64_nCT carryY (u64 1) in
@@ -431,8 +431,8 @@ let verifyQ pubKey =
 	let publicKeyX = sub publicKeyB (size 0) (size 4) in
 	let publicKeyY = sub publicKeyB (size 4) (size 4) in
 
-    toUint64ChangeEndian pubKeyX publicKeyX;
-    toUint64ChangeEndian pubKeyY publicKeyY;
+    bn_from_bytes_be4 pubKeyX publicKeyX;
+    bn_from_bytes_be4 pubKeyY publicKeyY;
   let h1 = ST.get() in
       lemma_core_0 publicKeyX h1;
       BSeq.uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);
@@ -455,7 +455,7 @@ let isMoreThanZeroLessThanOrder x =
   push_frame();
     let h0 = ST.get() in
       let xAsFelem = create (size 4) (u64 0) in
-      toUint64ChangeEndian x xAsFelem;
+      bn_from_bytes_be4 x xAsFelem;
     let h1 = ST.get() in
 
       lemma_core_0 xAsFelem h1;
@@ -464,9 +464,9 @@ let isMoreThanZeroLessThanOrder x =
 
   let tempBuffer = create (size 4) (u64 0) in
     recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = sub4_il xAsFelem prime256order_buffer tempBuffer in
+  let carry = bn_sub4_il xAsFelem prime256order_buffer tempBuffer in
   let less = eq_mask carry (u64 1) in
-  let more = isZero_uint64_CT xAsFelem in
+  let more = bn_is_zero_mask4 xAsFelem in
   let notMore = lognot more in
     lognot_lemma more;
   let result = logand less notMore in

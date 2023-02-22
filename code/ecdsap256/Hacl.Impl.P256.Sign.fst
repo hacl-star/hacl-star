@@ -63,7 +63,7 @@ let ecdsa_signature_step12 alg mLen m result =
   end;
 
   let cutHash = sub mHash (size 0) (size 32) in
-  toUint64ChangeEndian cutHash result;
+  bn_from_bytes_be4 cutHash result;
 
   let h1 = ST.get() in
 
@@ -107,7 +107,7 @@ let ecdsa_signature_step45 x k tempBuffer =
     normX result x tempForNorm;
     reduction_prime_2prime_order x x;
   pop_frame();
-    isZero_uint64_CT x
+    bn_is_zero_mask4 x
 
 #pop-options
 
@@ -246,7 +246,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   let hashAsFelem = create (size 4) (u64 0) in
   let tempBuffer = create (size 100) (u64 0) in
   let kAsFelem = create (size 4) (u64 0) in
-  toUint64ChangeEndian k kAsFelem;
+  bn_from_bytes_be4 k kAsFelem;
   ecdsa_signature_step12 alg mLen m hashAsFelem;
   let h1 = ST.get() in
   lemma_core_0 kAsFelem h1;
@@ -255,7 +255,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   let step5Flag = ecdsa_signature_step45 r k tempBuffer in
   assert_norm (pow2 32 < pow2 61);
   ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;
-  let sIsZero = isZero_uint64_CT s in
+  let sIsZero = bn_is_zero_mask4 s in
   logor_lemma step5Flag sIsZero;
   pop_frame();
   logor step5Flag sIsZero
@@ -300,7 +300,7 @@ let ecdsa_signature alg result mLen m privKey k =
   let s = create (size 4) (u64 0) in
   let resultR = sub result (size 0) (size 32) in
   let resultS = sub result (size 32) (size 32) in
-  toUint64ChangeEndian privKey privKeyAsFelem;
+  bn_from_bytes_be4 privKey privKeyAsFelem;
 
   let h1 = ST.get() in
   lemma_core_0 privKeyAsFelem h1;
@@ -311,12 +311,12 @@ let ecdsa_signature alg result mLen m privKey k =
   let h2 = ST.get() in
 
   changeEndian r;
-  toUint8 r resultR;
+  bn_to_bytes_be4 r resultR;
   lemma_core_0 r h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 r);
 
   changeEndian s;
-  toUint8 s resultS;
+  bn_to_bytes_be4 s resultS;
   let h3 = ST.get() in
   lemma_core_0 s h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);

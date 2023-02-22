@@ -81,7 +81,7 @@ let computeYFromX x result sign =
     p256_add result aCoordinateBuffer result;
     p256_add result bCoordinateBuffer result;
 
-    uploadZeroImpl aCoordinateBuffer;
+    bn_set_zero4 aCoordinateBuffer;
 
   let h6 = ST.get() in
 
@@ -108,7 +108,7 @@ let computeYFromX x result sign =
 
     let h10 = ST.get() in
 
-    cmovznz4 flag bCoordinateBuffer result result;
+    bn_cmovznz4 flag bCoordinateBuffer result result;
 
     lemma_core_0 result h10;
     Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h10 result);
@@ -150,7 +150,7 @@ let lessThanPrime f =
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let carry = sub4_il f prime256_buffer tempBuffer in
+    let carry = bn_sub4_il f prime256_buffer tempBuffer in
     let less = eq_u64_nCT carry (u64 1) in
   pop_frame();
     less
@@ -185,7 +185,7 @@ let decompressionCompressedForm b result =
 
       let x = sub b (size 1) (size 32) in
       copy (sub result (size 0) (size 32)) x;
-      toUint64ChangeEndian x t0;
+      bn_from_bytes_be4 x t0;
 	let h1 = ST.get() in
       lemma_core_0 t0 h1;
 
@@ -220,7 +220,7 @@ let decompressionCompressedForm b result =
 		as_nat h3 t1 = (0 - sqRootWithoutSign) % prime256);
 
 	  changeEndian t1;
-	  toUint8 t1 (sub result (size 32) (size 32));
+	  bn_to_bytes_be4 t1 (sub result (size 32) (size 32));
 	   let h5 = ST.get() in
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h3 t1)));
 

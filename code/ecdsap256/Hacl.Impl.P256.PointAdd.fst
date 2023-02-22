@@ -24,7 +24,7 @@ friend Spec.P256.MontgomeryMultiplication
 
 #reset-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 
-
+// TODO?: mv to Hacl.Impl.P256.Point
 val copy_point_conditional: x3_out: felem -> y3_out: felem -> z3_out: felem -> p: point -> maskPoint: point -> Stack unit
   (requires fun h -> live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h maskPoint /\
     LowStar.Monotonic.Buffer.all_disjoint[loc x3_out; loc y3_out; loc z3_out; loc p; loc maskPoint] /\
@@ -52,15 +52,15 @@ val copy_point_conditional: x3_out: felem -> y3_out: felem -> z3_out: felem -> p
 
 let copy_point_conditional x3_out y3_out z3_out p maskPoint =
   let z = sub maskPoint (size 8) (size 4) in
-  let mask = isZero_uint64_CT z in
+  let mask = bn_is_zero_mask4 z in
 
   let p_x = sub p (size 0) (size 4) in
   let p_y = sub p (size 4) (size 4) in
   let p_z = sub p (size 8) (size 4) in
 
-  copy_conditional x3_out p_x mask;
-  copy_conditional y3_out p_y mask;
-  copy_conditional z3_out p_z mask
+  bn_copy_conditional4 x3_out p_x mask;
+  bn_copy_conditional4 y3_out p_y mask;
+  bn_copy_conditional4 z3_out p_z mask
 
 
 inline_for_extraction noextract

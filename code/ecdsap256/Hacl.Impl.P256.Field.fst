@@ -37,12 +37,12 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
     let tempBuffer = create (size 4) (u64 0) in
     let tempBufferForSubborrow = create (size 1) (u64 0) in
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let c = sub4_il x prime256_buffer tempBuffer in
+    let c = bn_sub4_il x prime256_buffer tempBuffer in
   let h0 = ST.get() in
       assert(uint_v c <= 1);
       assert(if uint_v c = 0 then as_nat h0 x >= prime256 else as_nat h0 x < prime256);
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-    cmovznz4 carry tempBuffer x result;
+    bn_cmovznz4 carry tempBuffer x result;
   let h1 = ST.get() in
       assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
       assert_norm (prime256 < pow2 256);
@@ -72,9 +72,9 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
     let cin = Lib.Buffer.index x (size 4) in
     let x_ = Lib.Buffer.sub x (size 0) (size 4) in
       recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let c = Hacl.Impl.P256.Bignum.sub4_il x_ prime256_buffer tempBuffer in
+    let c = bn_sub4_il x_ prime256_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-    cmovznz4 carry tempBuffer x_ result;
+    bn_cmovznz4 carry tempBuffer x_ result;
       let h4 = ST.get() in
       assert_norm (pow2 256 > prime256);
       assert(if (wide_as_nat h0 x < prime256) then begin
@@ -114,8 +114,8 @@ let reduction_prime_2prime_impl x result =
   let tempBuffer = create (size 4) (u64 0) in
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
         let h0 = ST.get() in
-    let c = sub4_il x prime256_buffer tempBuffer in
-    cmovznz4 c tempBuffer x result;
+    let c = bn_sub4_il x prime256_buffer tempBuffer in
+    bn_cmovznz4 c tempBuffer x result;
       let h2 = ST.get() in
     lemma_reduction1 (as_nat h0 x) (as_nat h2 result);
   pop_frame()
@@ -163,7 +163,7 @@ let lemma_t_computation2 t =
 
 let p256_add arg1 arg2 out =
   let h0 = ST.get() in
-  let t = add4 arg1 arg2 out in
+  let t = bn_add4 arg1 arg2 out in
     lemma_t_computation t;
     reduction_prime256_2prime256_with_carry_impl t out out;
   let h2 = ST.get() in
@@ -174,7 +174,7 @@ let p256_add arg1 arg2 out =
 
 let p256_double arg1 out =
     let h0 = ST.get() in
-  let t = add4 arg1 arg1 out in
+  let t = bn_add4 arg1 arg1 out in
   lemma_t_computation t;
   reduction_prime256_2prime256_with_carry_impl t out out;
 
@@ -185,7 +185,7 @@ let p256_double arg1 out =
 let p256_sub arg1 arg2 out =
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
     let h0 = ST.get() in
-  let t = sub4 arg1 arg2 out in
+  let t = bn_sub4 arg1 arg2 out in
     let h1 = ST.get() in
     lemma_t_computation2 t;
   let t0 = (u64 0) -. t in
@@ -193,7 +193,7 @@ let p256_sub arg1 arg2 out =
   let t2 = u64 0 in
   let t3 = t -. (t <<. (size 32)) in
     modulo_addition_lemma  (as_nat h0 arg1 - as_nat h0 arg2) prime256 1;
-  let c = add4_variables out (u64 0)  t0 t1 t2 t3 out in
+  let c = bn_add4_variables out (u64 0)  t0 t1 t2 t3 out in
     let h2 = ST.get() in
       assert(
       if as_nat h0 arg1 - as_nat h0 arg2 >= 0 then
@@ -221,7 +221,7 @@ val add8_without_carry1: t:widefelem -> t1:widefelem -> result:widefelem -> Stac
     wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
 
 let add8_without_carry1 t t1 result  =
-  let _  = add8 t t1 result in
+  let _  = bn_add8 t t1 result in
     assert_norm (pow2 320 + prime256 * prime256 < pow2 512)
 
 
@@ -238,11 +238,11 @@ let montgomery_multiplication_round t round =
     let h0 = ST.get() in
     let t2 = create (size 8) (u64 0) in
     let t3 = create (size 8) (u64 0) in
-    let t1 = mod64 t in
+    let t1 = bn_mod_pow2_64 t in
       recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    shortened_mul prime256_buffer t1 t2;
+    bn_mul1 prime256_buffer t1 t2;
     add8_without_carry1 t t2 t3;
-    shift8 t3 round;
+    bn_rshift64 t3 round;
   pop_frame()
 
 
@@ -333,7 +333,7 @@ let montgomery_multiplication_buffer a b result =
     let round2 = create (size 8) (u64 0) in
     let round4 = create (size 8) (u64 0) in
       let h0 = ST.get() in
-    mul a b t;
+    bn_mul4 a b t;
       let h1 = ST.get() in
       mul_lemma_ (as_nat h0 a) (as_nat h0 b) prime256;
   montgomery_multiplication_round_twice t round2;
@@ -373,7 +373,7 @@ let montgomery_square_buffer a result =
     let round2 = create (size 8) (u64 0) in
     let round4 = create (size 8) (u64 0) in
       let h0 = ST.get() in
-    sq a t;
+    bn_sqr4 a t;
       let h1 = ST.get() in
       mul_lemma_ (as_nat h0 a) (as_nat h0 a) prime256;
   montgomery_multiplication_round_twice t round2;

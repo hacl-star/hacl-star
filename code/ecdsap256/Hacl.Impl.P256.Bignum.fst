@@ -33,14 +33,14 @@ let mul64 x y result temp =
 
 ///  Create zero and one
 
-let uploadZeroImpl f =
+let bn_set_zero4 f =
   upd f (size 0) (u64 0);
   upd f (size 1) (u64 0);
   upd f (size 2) (u64 0);
   upd f (size 3) (u64 0)
 
 
-let uploadOneImpl f =
+let bn_set_one4 f =
   upd f (size 0) (u64 1);
   upd f (size 1) (u64 0);
   upd f (size 2) (u64 0);
@@ -50,7 +50,7 @@ let uploadOneImpl f =
 ///  Comparison
 
 [@CInline]
-let isZero_uint64_CT f =
+let bn_is_zero_mask4 f =
   let h0 = ST.get () in
   SN.bn_is_zero_mask_lemma (as_seq h0 f);
   bignum_bn_v_is_as_nat h0 f;
@@ -58,7 +58,7 @@ let isZero_uint64_CT f =
 
 
 [@CInline]
-let compare_felem a b =
+let bn_is_eq_mask4 a b =
   let h0 = ST.get () in
   SN.bn_eq_mask_lemma (as_seq h0 a) (as_seq h0 b);
   bignum_bn_v_is_as_nat h0 a;
@@ -69,12 +69,12 @@ let compare_felem a b =
 ///  Conditional copy
 
 [@CInline]
-let copy_conditional out x mask =
+let bn_copy_conditional4 out x mask =
   buf_mask_select x out mask out
 
 
 [@CInline]
-let cmovznz4 cin x y out =
+let bn_cmovznz4 cin x y out =
   let mask = neq_mask cin (u64 0) in
   buf_mask_select y x mask out
 
@@ -82,7 +82,7 @@ let cmovznz4 cin x y out =
 ///  Addition and subtraction
 
 [@CInline]
-let add4 x y out =
+let bn_add4 x y out =
   let h0 = ST.get () in
   let c = BN.bn_add_eq_len 4ul x y out in
   let h1 = ST.get () in
@@ -94,32 +94,32 @@ let add4 x y out =
 
 
 [@CInline]
-let add4_variables x cin y0 y1 y2 y3 result =
-    let h0 = ST.get() in
+let bn_add4_variables x cin y0 y1 y2 y3 result =
+  let h0 = ST.get() in
 
-    let r0 = sub result (size 0) (size 1) in
-    let r1 = sub result (size 1) (size 1) in
-    let r2 = sub result (size 2) (size 1) in
-    let r3 = sub result (size 3) (size 1) in
+  let r0 = sub result (size 0) (size 1) in
+  let r1 = sub result (size 1) (size 1) in
+  let r2 = sub result (size 2) (size 1) in
+  let r3 = sub result (size 3) (size 1) in
 
-    let cc = add_carry_u64 cin x.(0ul) y0 r0 in
-    let cc = add_carry_u64 cc x.(1ul) y1 r1 in
-    let cc = add_carry_u64 cc x.(2ul) y2 r2 in
-    let cc = add_carry_u64 cc x.(3ul) y3 r3 in
+  let cc = add_carry_u64 cin x.(0ul) y0 r0 in
+  let cc = add_carry_u64 cc x.(1ul) y1 r1 in
+  let cc = add_carry_u64 cc x.(2ul) y2 r2 in
+  let cc = add_carry_u64 cc x.(3ul) y3 r3 in
 
-    assert_norm (pow2 64 * pow2 64 = pow2 128);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
 
-    assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
-    assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
-    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
+  assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
+  assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
+  assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
 
-    cc
+  cc
 
 
 [@CInline]
-let add8 x y out =
+let bn_add8 x y out =
   let h0 = ST.get () in
   let c = BN.bn_add_eq_len 8ul x y out in
   let h1 = ST.get () in
@@ -131,7 +131,7 @@ let add8 x y out =
 
 
 [@CInline]
-let sub4 x y out =
+let bn_sub4 x y out =
   let h0 = ST.get () in
   let c = BN.bn_sub_eq_len 4ul x y out in
   let h1 = ST.get () in
@@ -143,28 +143,28 @@ let sub4 x y out =
 
 
 [@CInline]
-let sub4_il x y result =
-    let r0 = sub result (size 0) (size 1) in
-    let r1 = sub result (size 1) (size 1) in
-    let r2 = sub result (size 2) (size 1) in
-    let r3 = sub result (size 3) (size 1) in
+let bn_sub4_il x y result =
+  let r0 = sub result (size 0) (size 1) in
+  let r1 = sub result (size 1) (size 1) in
+  let r2 = sub result (size 2) (size 1) in
+  let r3 = sub result (size 3) (size 1) in
 
-    let cc = sub_borrow_u64 (u64 0) x.(size 0) y.(size 0) r0 in
-    let cc = sub_borrow_u64 cc x.(size 1) y.(size 1) r1 in
-    let cc = sub_borrow_u64 cc x.(size 2) y.(size 2) r2 in
-    let cc = sub_borrow_u64 cc x.(size 3) y.(size 3) r3 in
+  let cc = sub_borrow_u64 (u64 0) x.(size 0) y.(size 0) r0 in
+  let cc = sub_borrow_u64 cc x.(size 1) y.(size 1) r1 in
+  let cc = sub_borrow_u64 cc x.(size 2) y.(size 2) r2 in
+  let cc = sub_borrow_u64 cc x.(size 3) y.(size 3) r3 in
 
-      assert_norm (pow2 64 * pow2 64 = pow2 128);
-      assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-      assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
 
-    cc
+  cc
 
 
 ///  Multiplication
 
 [@CInline]
-let mul f r out =
+let bn_mul4 f r out =
   let h0 = ST.get () in
   BN.bn_mul #U64 4ul 4ul f r out;
   let h1 = ST.get () in
@@ -175,7 +175,7 @@ let mul f r out =
 
 
 [@CInline]
-let sq f out =
+let bn_sqr4 f out =
   let h0 = ST.get () in
   BN.bn_sqr #U64 4ul f out;
   let h1 = ST.get () in
@@ -184,7 +184,6 @@ let sq f out =
   bignum_bn_v_is_wide_as_nat h1 out
 
 
-// local function
 inline_for_extraction noextract
 val mult64_0il: x: glbuffer uint64 (size 4) -> u: uint64 -> result:  lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit
   (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
@@ -199,7 +198,6 @@ let mult64_0il x u result temp =
   mul64 f0 u result temp
 
 
-// local function
 inline_for_extraction noextract
 val mult64_c: x: uint64 -> u: uint64 -> cin: uint64{uint_v cin <= 1} -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack uint64
   (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
@@ -250,7 +248,6 @@ let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
   assert(c3 + h4 < pow2 64)
 
 
-// local function
 inline_for_extraction noextract
 val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
@@ -301,7 +298,7 @@ let mul1_il f u result =
 
 
 [@CInline]
-let shortened_mul a b result =
+let bn_mul1 a b result =
   let result04 = sub result (size 0) (size 4) in
   let result48 = sub result (size 4) (size 4) in
   let c = mul1_il a b result04 in
@@ -317,7 +314,6 @@ let shortened_mul a b result =
 
 ///  pow2-operations
 
-// local function
 val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
     a * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
     b * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
@@ -329,7 +325,7 @@ let lemma_shift_256 a b c d = ()
 
 
 [@CInline]
-let shift_256_impl i o =
+let bn_lshift256 i o =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
 
   let h0 = ST.get() in
@@ -350,7 +346,7 @@ let shift_256_impl i o =
 
 
 [@CInline]
-let shift8 t out =
+let bn_rshift64 t out =
   let t1 = index t (size 1) in
   let t2 = index t (size 2) in
   let t3 = index t (size 3) in
@@ -369,7 +365,7 @@ let shift8 t out =
   upd out (size 7) (u64 0)
 
 
-let mod64 a =
+let bn_mod_pow2_64 a =
   let h0 = ST.get () in
   bignum_bn_v_is_wide_as_nat h0 a;
   Hacl.Spec.Bignum.Definitions.bn_eval_index (as_seq h0 a) 0;
@@ -380,8 +376,8 @@ let mod64 a =
 ///  Conversion between bignum and bytes representation
 
 [@CInline]
-let toUint8 i o =
-  Lib.ByteBuffer.uints_to_bytes_be (size 4) o i
+let bn_to_bytes_be4 f res =
+  Lib.ByteBuffer.uints_to_bytes_be (size 4) res f
 
 
 let changeEndian i =
@@ -399,6 +395,6 @@ let changeEndian i =
 
 
 [@CInline]
-let toUint64ChangeEndian i o =
-  Lib.ByteBuffer.uints_from_bytes_be o i;
-  changeEndian o
+let bn_from_bytes_be4 b res =
+  Lib.ByteBuffer.uints_from_bytes_be res b;
+  changeEndian res
