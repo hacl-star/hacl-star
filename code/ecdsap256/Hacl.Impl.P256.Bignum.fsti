@@ -34,6 +34,15 @@ val mul64: x:uint64 -> y:uint64
     let res = Seq.index (as_seq h1 res) 0 in
     uint_v res + uint_v h0 * pow2 64 = uint_v x * uint_v y))
 
+///  Create a bignum
+
+inline_for_extraction noextract
+val bn_make_u64_4: a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64
+  -> res:lbuffer uint64 (size 4) -> Stack unit
+  (requires fun h -> live h res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192)
+
 
 ///  Create zero and one
 
@@ -183,6 +192,7 @@ val bn_mod_pow2_64: a:widefelem -> Stack uint64
 
 
 ///  Conversion between bignum and bytes representation
+// TODO: rm Spec.ECDSA here
 
 val bn_to_bytes_be4: f:felem -> res:lbuffer uint8 (32ul) -> Stack unit
   (requires fun h -> live h f /\ live h res /\ disjoint f res)

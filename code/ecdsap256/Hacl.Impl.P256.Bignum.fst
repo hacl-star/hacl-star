@@ -30,21 +30,25 @@ let mul64 x y result temp =
   upd result (size 0) l0;
   upd temp (size 0) h0
 
+///  Create a bignum
+
+let bn_make_u64_4 a0 a1 a2 a3 res =
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  upd res (size 0) a0;
+  upd res (size 1) a1;
+  upd res (size 2) a2;
+  upd res (size 3) a3
+
 
 ///  Create zero and one
 
 let bn_set_zero4 f =
-  upd f (size 0) (u64 0);
-  upd f (size 1) (u64 0);
-  upd f (size 2) (u64 0);
-  upd f (size 3) (u64 0)
+  bn_make_u64_4 (u64 0) (u64 0) (u64 0) (u64 0) f
 
 
 let bn_set_one4 f =
-  upd f (size 0) (u64 1);
-  upd f (size 1) (u64 0);
-  upd f (size 2) (u64 0);
-  upd f (size 3) (u64 0)
+  bn_make_u64_4 (u64 1) (u64 0) (u64 0) (u64 0) f
 
 
 ///  Comparison

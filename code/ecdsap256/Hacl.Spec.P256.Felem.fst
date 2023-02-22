@@ -13,8 +13,6 @@ module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 module BD = Hacl.Spec.Bignum.Definitions
 
-open Spec.P256.Constants
-
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction
@@ -39,13 +37,10 @@ let wide_as_nat4 f =
   v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
 
 
-inline_for_extraction
-let felem_seq = lseq uint64 4
-
-let felem_seq_as_nat (a:felem_seq) : Tot nat =
+let felem_seq_as_nat (a:lseq uint64 4) : Tot nat =
   as_nat4 (a.[0], a.[1], a.[2], a.[3])
 
-let felem_seq_as_nat_8 (a:lseq uint64 8) : Tot nat =
+let felem_wide_seq_as_nat (a:lseq uint64 8) : Tot nat =
   wide_as_nat4 (a.[0], a.[1], a.[2], a.[3], a.[4], a.[5], a.[6], a.[7])
 
 
@@ -53,10 +48,6 @@ inline_for_extraction
 let felem = lbuffer uint64 (size 4)
 inline_for_extraction
 let widefelem = lbuffer uint64 (size 8)
-
-// TODO: rm
-inline_for_extraction
-type scalar = lbuffer uint8 (size 32)
 
 let as_nat (h:mem) (e:felem) : GTot nat =
   let s = as_seq h e in
@@ -73,6 +64,7 @@ let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   wide_as_nat4 (s.[0], s.[1], s.[2], s.[3], s.[4], s.[5], s.[6], s.[7])
 
 
+// TODO: rename
 val lemma_core_0: a:lbuffer uint64 (size 4) -> h:mem ->
   Lemma (BSeq.nat_from_intseq_le (as_seq h a) == as_nat h a)
 
@@ -90,7 +82,7 @@ let lemma_core_0 a h =
     BSeq.nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
 
 
-val bignum_bn_v_is_as_nat: h: mem -> a: felem ->
+val bignum_bn_v_is_as_nat: h:mem -> a:felem ->
   Lemma (BD.bn_v (as_seq h a) == as_nat h a)
 
 let bignum_bn_v_is_as_nat h a =
@@ -139,11 +131,11 @@ let lemma_powers () =
 
 
 // local function
-val wide_as_nat_is_as_nat: h: mem -> a: widefelem
-  -> Lemma (wide_as_nat h a == as_nat h (gsub a (size 0) (size 4)) + pow2 (64 * 4) * as_nat h (gsub a (size 4) (size 4)))
+val wide_as_nat_is_as_nat: h:mem -> a:widefelem ->
+  Lemma (wide_as_nat h a == as_nat h (gsub a (size 0) (size 4)) + pow2 (64 * 4) * as_nat h (gsub a (size 4) (size 4)))
 
 let wide_as_nat_is_as_nat h a =
-  lemma_powers()
+  lemma_powers ()
 
 
 val bignum_bn_v_is_wide_as_nat: h:mem -> a:widefelem ->
