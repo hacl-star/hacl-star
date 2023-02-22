@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Field // before: Hacl.Impl.P256.LowLevel.PrimeSpecific
+module Hacl.Impl.P256.Field
 
 open FStar.Mul
 open FStar.HyperStack.All
@@ -11,11 +11,12 @@ open Lib.Buffer
 open Spec.P256.Constants
 open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
+
 open Hacl.Spec.P256.Felem
 
-#set-options "--z3rlimit 300"
+#set-options "--z3rlimit 50"
 
-
+// TODO: fix and mv
 let prime256_buffer: x: glbuffer uint64 4ul {
   witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\
   recallable x /\
@@ -25,126 +26,125 @@ let prime256_buffer: x: glbuffer uint64 4ul {
   createL_global p256_prime_list
 
 
-inline_for_extraction
-val reduction_prime256_2prime256_8_with_carry_impl: x:widefelem -> result:felem -> Stack unit
+val fmod_short: x:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h x /\ live h result /\ eq_or_disjoint x result /\
-    wide_as_nat h x < 2 * prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result = wide_as_nat h0 x % prime256)
+    live h x /\ live h res /\ eq_or_disjoint x res)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == as_nat h0 x % prime256)
 
 
-val reduction_prime_2prime_impl: x:felem -> result:felem -> Stack unit
+// NOTE: changed precondition `eq_or_disjoint x y`
+val fadd: x:felem -> y:felem -> res:felem -> Stack unit
+  (requires fun h0 ->
+    live h0 x /\ live h0 y /\ live h0 res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h0 x < prime256 /\ as_nat h0 y < prime256)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == (as_nat h0 x + as_nat h0 y) % prime256 /\
+    as_nat h1 res == toDomain_ ((fromDomain_ (as_nat h0 x) + fromDomain_ (as_nat h0 y)) % prime256))
+
+
+inline_for_extraction noextract
+val fdouble: x:felem -> res:felem -> Stack unit
+  (requires fun h0 ->
+    live h0 x /\ live h0 res /\ eq_or_disjoint x res /\
+    as_nat h0 x < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == (2 * as_nat h0 x) % prime256 /\
+    as_nat h1 res < prime256 /\
+    as_nat h1 res == toDomain_ (2 * fromDomain_ (as_nat h0 x) % prime256))
+
+
+// NOTE: changed precondition `eq_or_disjoint x y`
+val fsub: x:felem -> y:felem -> res:felem -> Stack unit
+  (requires fun h0 ->
+    live h0 res /\ live h0 x /\ live h0 y /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h0 x < prime256 /\ as_nat h0 y < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == (as_nat h0 x - as_nat h0 y) % prime256 /\
+    as_nat h1 res == toDomain_ ((fromDomain_ (as_nat h0 x) - fromDomain_ (as_nat h0 y)) % prime256))
+
+
+// TODO: rename
+val montgomery_multiplication_buffer_by_one: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h x /\ live h result /\ eq_or_disjoint x result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result == as_nat h0 x % prime256)
+    live h a /\ live h res /\ as_nat h a < prime256)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+    as_nat h1 res = fromDomain_ (as_nat h0 a))
 
 
-val p256_add: arg1:felem -> arg2:felem -> out:felem -> Stack unit
-  (requires fun h0 ->
-    live h0 arg1 /\ live h0 arg2 /\ live h0 out /\
-    eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-    as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == (as_nat h0 arg1 + as_nat h0 arg2) % prime256 /\
-    as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2)) % prime256))
-
-
-val p256_double: arg1:felem -> out:felem -> Stack unit
-  (requires fun h0 ->
-    live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\
-    as_nat h0 arg1 < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == (2 * as_nat h0 arg1) % prime256 /\
-    as_nat h1 out < prime256 /\
-    as_nat h1 out == toDomain_ (2 * fromDomain_ (as_nat h0 arg1) % prime256))
-
-
-val p256_sub: arg1:felem -> arg2:felem -> out:felem -> Stack unit
-  (requires fun h0 ->
-    live h0 out /\ live h0 arg1 /\ live h0 arg2 /\
-    eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-    as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256 /\
-    as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) - fromDomain_ (as_nat h0 arg2)) % prime256))
-
-
-val montgomery_multiplication_buffer_by_one: a:felem -> result:felem -> Stack unit
-  (requires fun h -> live h a /\ as_nat h a < prime256 /\ live h result)
-  (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result = (as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
-    as_nat h1 result = fromDomain_ (as_nat h0 a))
-
-
-val montgomery_multiplication_buffer: a:felem -> b:felem -> result:felem -> Stack unit
+val fmul: a:felem -> b:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h result /\
+    live h a /\ live h b /\ live h res /\
     eq_or_disjoint a b /\
     as_nat h a < prime256 /\ as_nat h b < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime256 /\
-    as_nat h1 result = (as_nat h0 a * as_nat h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime256) /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b)))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < prime256 /\
+    as_nat h1 res = (as_nat h0 a * as_nat h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime256) /\
+    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b)))
 
 
-val montgomery_square_buffer: a:felem -> result:felem -> Stack unit
+val fsqr: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h result /\ as_nat h a < prime256)
-  (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime256 /\
-    as_nat h1 result = (as_nat h0 a * as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
+    live h a /\ live h res /\ as_nat h a < prime256)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < prime256 /\
+    as_nat h1 res = (as_nat h0 a * as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
 
 
-val cube: a:felem -> result:felem -> Stack unit
+///  Special cases of the above functions
+
+val fcube: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h result /\ disjoint a result /\
+    live h a /\ live h res /\ disjoint a res /\
     as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime256 /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < prime256 /\
+    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
 
 
-val multByTwo: a:felem -> result:felem -> Stack unit
+inline_for_extraction noextract
+val fmul_by_2: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h result /\ eq_or_disjoint a result /\
+    live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result == toDomain_ (2 * fromDomain_ (as_nat h0 a) % prime256) /\
-    as_nat h1 result == toDomain_ (2 * fromDomain_ (as_nat h0 a)) /\
-    as_nat h1 result < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == toDomain_ (2 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 res == toDomain_ (2 * fromDomain_ (as_nat h0 a)) /\
+    as_nat h1 res < prime256)
 
 
-val multByThree: a:felem -> result:felem -> Stack unit
+val fmul_by_3: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h result /\ disjoint a result /\
+    live h a /\ live h res /\ disjoint a res /\
     as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime256 /\
-    as_nat h1 result == toDomain_ (3 * fromDomain_ (as_nat h0 a) % prime256) /\
-    as_nat h1 result == toDomain_ (3 * fromDomain_ (as_nat h0 a)))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < prime256 /\
+    as_nat h1 res == toDomain_ (3 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 res == toDomain_ (3 * fromDomain_ (as_nat h0 a)))
 
 
-val multByFour: a:felem -> result:felem -> Stack unit
+val fmul_by_4: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h result /\ eq_or_disjoint a result /\
+    live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime256 /\
-    as_nat h1 result == toDomain_ (4 * fromDomain_ (as_nat h0 a) % prime256) /\
-    as_nat h1 result == toDomain_ (4 * fromDomain_ (as_nat h0 a)))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < prime256 /\
+    as_nat h1 res == toDomain_ (4 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 res == toDomain_ (4 * fromDomain_ (as_nat h0 a)))
 
 
-val multByEight: a:felem -> result:felem -> Stack unit
+val fmul_by_8: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h result /\ disjoint a result /\
+    live h a /\ live h res /\ disjoint a res /\
     as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime256 /\
-    as_nat h1 result == toDomain_ (8 * fromDomain_ (as_nat h0 a) % prime256) /\
-    as_nat h1 result == toDomain_ (8 * fromDomain_ (as_nat h0 a)))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < prime256 /\
+    as_nat h1 res == toDomain_ (8 * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 res == toDomain_ (8 * fromDomain_ (as_nat h0 a)))

@@ -107,16 +107,16 @@ let move_from_jacobian_coordinates u1 u2 s1 s2 p q tempBuffer =
    let z2Cube = sub tempBuffer (size 8) (size 4) in
    let z1Cube = sub tempBuffer (size 12) (size 4) in
 
-   montgomery_square_buffer qZ z2Square;
-   montgomery_square_buffer pZ z1Square;
-   montgomery_multiplication_buffer z2Square qZ z2Cube;
+   fsqr qZ z2Square;
+   fsqr pZ z1Square;
+   fmul z2Square qZ z2Cube;
 
-   montgomery_multiplication_buffer z1Square pZ z1Cube;
-   montgomery_multiplication_buffer z2Square pX u1;
-   montgomery_multiplication_buffer z1Square qX u2;
+   fmul z1Square pZ z1Cube;
+   fmul z2Square pX u1;
+   fmul z1Square qX u2;
 
-   montgomery_multiplication_buffer z2Cube pY s1;
-   montgomery_multiplication_buffer z1Cube qY s2;
+   fmul z2Cube pY s1;
+   fmul z1Cube qY s2;
 
 
      lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 qZ) * fromDomain_ (as_nat h0 qZ)) (fromDomain_ (as_nat h0 qZ)) prime256;
@@ -157,14 +157,14 @@ val compute_common_params_point_add: h: felem -> r: felem -> uh: felem -> hCube:
 let compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer =
     let h0 = ST.get() in
   let temp = sub tempBuffer (size 0) (size 4) in
-  p256_sub u2 u1 h;
+  fsub u2 u1 h;
     let h1 = ST.get() in
-  p256_sub s2 s1 r;
+  fsub s2 s1 r;
     let h2 = ST.get() in
-  montgomery_square_buffer h temp;
+  fsqr h temp;
     let h3 = ST.get() in
-  montgomery_multiplication_buffer temp u1 uh;
-  montgomery_multiplication_buffer temp h hCube;
+  fmul temp u1 uh;
+  fmul temp h hCube;
 
     lemma_mod_mul_distr_l (fromDomain_ (as_nat h2 h) * fromDomain_ (as_nat h2 h)) (fromDomain_ (as_nat h3 u1)) prime256;
     lemma_mod_mul_distr_l (fromDomain_ (as_nat h2 h) * fromDomain_ (as_nat h2 h)) (fromDomain_ (as_nat h1 h)) prime256
@@ -190,13 +190,13 @@ let computeX3_point_add x3 hCube uh r tempBuffer =
   let rSquare = sub tempBuffer (size 0) (size 4) in
   let rH = sub tempBuffer (size 4) (size 4) in
   let twoUh = sub tempBuffer (size 8) (size 4) in
-  montgomery_square_buffer r rSquare;
+  fsqr r rSquare;
     let h1 = ST.get() in
-  p256_sub rSquare hCube rH;
+  fsub rSquare hCube rH;
     let h2 = ST.get() in
-  multByTwo uh twoUh;
+  fmul_by_2 uh twoUh;
     let h3 = ST.get() in
-  p256_sub rH twoUh x3;
+  fsub rH twoUh x3;
 
     lemma_mod_add_distr (-fromDomain_ (as_nat h1 hCube)) (fromDomain_ (as_nat h0 r) * fromDomain_ (as_nat h0 r)) prime256;
     lemma_mod_add_distr (-fromDomain_ (as_nat h3 twoUh)) (fromDomain_ (as_nat h0 r) * fromDomain_ (as_nat h0 r) - fromDomain_ (as_nat h1 hCube)) prime256;
@@ -228,13 +228,13 @@ let computeY3_point_add y3 s1 hCube uh x3 r tempBuffer =
   let u1hx3 = sub tempBuffer (size 4) (size 4) in
   let ru1hx3 = sub tempBuffer (size 8) (size 4) in
 
-  montgomery_multiplication_buffer s1 hCube s1hCube;
-  p256_sub uh x3 u1hx3;
-  montgomery_multiplication_buffer u1hx3 r ru1hx3;
+  fmul s1 hCube s1hCube;
+  fsub uh x3 u1hx3;
+  fmul u1hx3 r ru1hx3;
 
     let h3 = ST.get() in
     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 uh) - fromDomain_ (as_nat h0 x3)) (fromDomain_ (as_nat h0 r)) prime256;
-  p256_sub ru1hx3 s1hCube y3;
+  fsub ru1hx3 s1hCube y3;
     lemma_mod_add_distr (-(fromDomain_ (as_nat h3 s1hCube)))  ((fromDomain_ (as_nat h0 uh) - fromDomain_ (as_nat h0 x3)) * fromDomain_ (as_nat h0 r))  prime256;
     lemma_mod_sub_distr ((fromDomain_ (as_nat h0 uh) - fromDomain_ (as_nat h0 x3)) * fromDomain_ (as_nat h0 r)) (fromDomain_ (as_nat h0 s1) * fromDomain_ (as_nat h0 hCube)) prime256
 
@@ -257,8 +257,8 @@ val computeZ3_point_add: z3: felem ->  z1: felem -> z2: felem -> h: felem -> tem
 let computeZ3_point_add z3 z1 z2 h tempBuffer =
     let h0 = ST.get() in
   let z1z2 = sub tempBuffer (size 0) (size 4) in
-  montgomery_multiplication_buffer z1 z2 z1z2;
-  montgomery_multiplication_buffer z1z2 h z3;
+  fmul z1 z2 z1z2;
+  fmul z1z2 h z3;
     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 z1) * fromDomain_ (as_nat h0 z2)) (fromDomain_ (as_nat h0 h)) prime256
 
 

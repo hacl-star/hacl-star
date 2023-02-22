@@ -39,7 +39,7 @@ let fsquarePowN n a =
   power_one (fromDomain_ (as_nat h0 a));
   Lib.Loops.for (size 0) n (inv h0) (fun x ->
     let h0_ = ST.get() in
-     montgomery_square_buffer a a;
+     fsqr a a;
      let k = fromDomain_ (as_nat h0 a) in
      inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ a) * fromDomain_ (as_nat h0_ a));
      lemmaFromDomainToDomainModuloPrime (let k = fromDomain_ (as_nat h0 a) in pow k (pow2 (v x)));
@@ -82,8 +82,8 @@ let fsquarePowNminusOne n a b =
     as_nat h1 a = toDomain_ (pow k (pow2 i)) /\ as_nat h1 b < prime256 /\ live h1 b /\ modifies (loc a |+| loc b) h0 h1 in
   Lib.Loops.for (size 0) n (inv h0) (fun x ->
     let h0_ = ST.get() in
-    montgomery_multiplication_buffer b a b;
-    montgomery_square_buffer a a;
+    fmul b a b;
+    fsqr a a;
     let k = fromDomain_ (as_nat h0 a) in
     inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ b) * fromDomain_ (as_nat h0_ a));
     inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ a) * fromDomain_ (as_nat h0_ a));
@@ -199,11 +199,11 @@ let exponent a result tempBuffer =
   norm_part_three a buffer_norm_3;
 
     let h1 = ST.get() in
-  montgomery_multiplication_buffer buffer_result1 buffer_result2 buffer_result1;
+  fmul buffer_result1 buffer_result2 buffer_result1;
     let h2 = ST.get() in
-  montgomery_multiplication_buffer buffer_result1 buffer_result3 buffer_result1;
+  fmul buffer_result1 buffer_result3 buffer_result1;
     let h3 = ST.get() in
-  montgomery_multiplication_buffer buffer_result1 a buffer_result1;
+  fmul buffer_result1 a buffer_result1;
     let h4 = ST.get() in
   copy result buffer_result1;
     let h5 = ST.get() in
@@ -302,9 +302,9 @@ val montgomery_ladder_power_step0: a: felem -> b: felem -> Stack unit
 
 let montgomery_ladder_power_step0 a b =
   let h0 = ST.get() in
-    montgomery_multiplication_buffer a b b;
+    fmul a b b;
       lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime);
-    montgomery_square_buffer a a ;
+    fsqr a a ;
       lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime)
 
 

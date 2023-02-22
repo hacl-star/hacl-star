@@ -277,16 +277,16 @@ let point_double_a_b_g p alpha beta gamma delta tempBuffer =
   let a1 = sub tempBuffer (size 4) (size 4) in
   let alpha0 = sub tempBuffer (size 8) (size 4) in
 
-  montgomery_square_buffer pZ delta; (* delta = z * z*)
-  montgomery_square_buffer pY gamma; (* gamma = y * y *)
-  montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
+  fsqr pZ delta; (* delta = z * z*)
+  fsqr pY gamma; (* gamma = y * y *)
+  fmul pX gamma beta; (* beta = x * gamma *)
 
   let h0 = ST.get() in
 
-  p256_sub pX delta a0; (* a0 = x - delta *)
-  p256_add pX delta a1; (* a1 = x + delta *)
-  montgomery_multiplication_buffer a0 a1 alpha0; (* alpha = (x - delta) * (x + delta) *)
-  multByThree alpha0 alpha;
+  fsub pX delta a0; (* a0 = x - delta *)
+  fadd pX delta a1; (* a1 = x + delta *)
+  fmul a0 a1 alpha0; (* alpha = (x - delta) * (x + delta) *)
+  fmul_by_3 alpha0 alpha;
 
     let xD = fromDomain_ (as_nat h0 pX) in
     let dlt = fromDomain_ (as_nat h0 delta) in
@@ -316,10 +316,10 @@ val point_double_x3: x3: felem -> alpha: felem -> fourBeta: felem -> beta: felem
 
 let point_double_x3 x3 alpha fourBeta beta eightBeta  =
     let h0 = ST.get() in
-  montgomery_square_buffer alpha x3; (* x3 = alpha ** 2 *)
-  multByFour beta fourBeta; (*  fourBeta = beta * 4 *)
-  multByTwo fourBeta eightBeta; (* eightBeta = beta * 8 *)
-  p256_sub x3 eightBeta x3 (* x3 = alpha ** 2 - beta * 8 *);
+  fsqr alpha x3; (* x3 = alpha ** 2 *)
+  fmul_by_4 beta fourBeta; (*  fourBeta = beta * 4 *)
+  fmul_by_2 fourBeta eightBeta; (* eightBeta = beta * 8 *)
+  fsub x3 eightBeta x3 (* x3 = alpha ** 2 - beta * 8 *);
 
   calc(==)
   {
@@ -353,10 +353,10 @@ val point_double_z3: z3: felem -> pY: felem -> pZ: felem -> gamma: felem -> delt
 let point_double_z3 z3 pY pZ gamma delta  =
     let h0 = ST.get() in
 
-  p256_add pY pZ z3; (* z3 = py + pz *)
-  montgomery_square_buffer z3 z3; (* z3 = (py + pz) ** 2 *)
-  p256_sub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
-  p256_sub z3 delta z3 (* z3 = (py + pz) ** 2 - gamma - delta *);
+  fadd pY pZ z3; (* z3 = py + pz *)
+  fsqr z3 z3; (* z3 = (py + pz) ** 2 *)
+  fsub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
+  fsub z3 delta z3 (* z3 = (py + pz) ** 2 - gamma - delta *);
 
     let pyD = fromDomain_ (as_nat h0 pY) in
     let pzD = fromDomain_ (as_nat h0 pZ) in
@@ -394,11 +394,11 @@ val point_double_y3: y3: felem -> x3: felem -> alpha: felem -> gamma: felem -> e
 
 let point_double_y3 y3 x3 alpha gamma eightGamma fourBeta =
     let h0 = ST.get() in
-  p256_sub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
-  montgomery_multiplication_buffer alpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
-  montgomery_square_buffer gamma gamma; (* gamma = gamma ** 2 *)
-  multByEight gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
-  p256_sub y3 eightGamma y3; (* y3 = alpha * y3 - 8 * gamma **2 *)
+  fsub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
+  fmul alpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
+  fsqr gamma gamma; (* gamma = gamma ** 2 *)
+  fmul_by_8 gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
+  fsub y3 eightGamma y3; (* y3 = alpha * y3 - 8 * gamma **2 *)
 
 
   let alphaD = fromDomain_ (as_nat h0 alpha) in

@@ -18,19 +18,19 @@ open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Math
 
-#set-options "--z3rlimit 300"
-
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val reduction_prime256_2prime256_with_carry_impl: cin: uint64 -> x: felem -> result: felem ->
+val reduction_prime256_2prime256_with_carry_impl:
+    cin:uint64
+  -> x:felem
+  -> result:felem ->
   Stack unit
-    (requires fun h -> live h x /\ live h result /\  eq_or_disjoint x result /\
-      (as_nat h x + uint_v cin * pow2 256) < 2 * prime256)
-    (ensures fun h0 _ h1 ->
-      modifies (loc result) h0 h1 /\
-      as_nat h1 result = (as_nat h0 x + uint_v cin * pow2 256) % prime256
-    )
-
+  (requires fun h ->
+    live h x /\ live h result /\ eq_or_disjoint x result /\
+    (as_nat h x + uint_v cin * pow2 256) < 2 * prime256)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 result = (as_nat h0 x + uint_v cin * pow2 256) % prime256)
 
 let reduction_prime256_2prime256_with_carry_impl cin x result =
   push_frame();
@@ -61,6 +61,14 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
   pop_frame()
 
 
+inline_for_extraction noextract
+val reduction_prime256_2prime256_8_with_carry_impl: x:widefelem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    wide_as_nat h x < 2 * prime256)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == wide_as_nat h0 x % prime256)
+
 let reduction_prime256_2prime256_8_with_carry_impl x result =
   push_frame();
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -89,7 +97,7 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
  pop_frame()
 
 
-val lemma_reduction1_0: a: nat {a < pow2 256 /\ a >= prime256} -> r: nat{r = a - prime256} ->
+val lemma_reduction1_0: a:nat{a < pow2 256 /\ a >= prime256} -> r:nat{r = a - prime256} ->
   Lemma (r = a % prime256)
 
 let lemma_reduction1_0 a r =
@@ -98,7 +106,7 @@ let lemma_reduction1_0 a r =
   lemma_mod_sub_distr a prime256 prime256
 
 
-val lemma_reduction1: a: nat {a < pow2 256} -> r: nat{if a >= prime256 then r = a - prime256 else r = a} ->
+val lemma_reduction1: a:nat{a < pow2 256} -> r:nat{if a >= prime256 then r = a - prime256 else r = a} ->
   Lemma (r = a % prime256)
 
 let lemma_reduction1 a r =
@@ -108,16 +116,17 @@ let lemma_reduction1 a r =
     small_mod r prime256
 
 
-let reduction_prime_2prime_impl x result =
+[@CInline]
+let fmod_short x result =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
-    recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-        let h0 = ST.get() in
-    let c = bn_sub4_il x prime256_buffer tempBuffer in
-    bn_cmovznz4 c tempBuffer x result;
-      let h2 = ST.get() in
-    lemma_reduction1 (as_nat h0 x) (as_nat h2 result);
+  recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
+  let h0 = ST.get() in
+  let c = bn_sub4_il x prime256_buffer tempBuffer in
+  bn_cmovznz4 c tempBuffer x result;
+  let h2 = ST.get() in
+  lemma_reduction1 (as_nat h0 x) (as_nat h2 result);
   pop_frame()
 
 
@@ -161,53 +170,48 @@ let lemma_t_computation2 t =
   assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = prime256)
 
 
-let p256_add arg1 arg2 out =
+[@CInline]
+let fadd x y out =
   let h0 = ST.get() in
-  let t = bn_add4 arg1 arg2 out in
-    lemma_t_computation t;
-    reduction_prime256_2prime256_with_carry_impl t out out;
-  let h2 = ST.get() in
-    additionInDomain (as_nat h0 arg1) (as_nat h0 arg2);
-    inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2))
-    (* lemma_eq_funct (as_seq h2 out) (felem_add_seq (as_seq h0 arg1) (as_seq h0 arg2)) *)
-
-
-let p256_double arg1 out =
-    let h0 = ST.get() in
-  let t = bn_add4 arg1 arg1 out in
+  let t = bn_add4 x y out in
   lemma_t_computation t;
   reduction_prime256_2prime256_with_carry_impl t out out;
+  let h2 = ST.get() in
+  additionInDomain (as_nat h0 x) (as_nat h0 y);
+  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 x) + fromDomain_ (as_nat h0 y))
 
-  additionInDomain (as_nat h0 arg1) (as_nat h0 arg1);
-  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg1))
+
+let fdouble x out =
+  fadd x x out
 
 
-let p256_sub arg1 arg2 out =
+[@CInline]
+let fsub x y out =
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
     let h0 = ST.get() in
-  let t = bn_sub4 arg1 arg2 out in
+  let t = bn_sub4 x y out in
     let h1 = ST.get() in
     lemma_t_computation2 t;
   let t0 = (u64 0) -. t in
   let t1 = ((u64 0) -. t) >>. (size 32) in
   let t2 = u64 0 in
   let t3 = t -. (t <<. (size 32)) in
-    modulo_addition_lemma  (as_nat h0 arg1 - as_nat h0 arg2) prime256 1;
+    modulo_addition_lemma  (as_nat h0 x - as_nat h0 y) prime256 1;
   let c = bn_add4_variables out (u64 0)  t0 t1 t2 t3 out in
     let h2 = ST.get() in
       assert(
-      if as_nat h0 arg1 - as_nat h0 arg2 >= 0 then
+      if as_nat h0 x - as_nat h0 y >= 0 then
 	begin
-	  modulo_lemma (as_nat h0 arg1 - as_nat h0 arg2) prime256;
-	  as_nat h2 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256
+	  modulo_lemma (as_nat h0 x - as_nat h0 y) prime256;
+	  as_nat h2 out == (as_nat h0 x - as_nat h0 y) % prime256
 	end
       else
           begin
 	    modulo_lemma (as_nat h2 out) prime256;
-            as_nat h2 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256
+            as_nat h2 out == (as_nat h0 x - as_nat h0 y) % prime256
 	  end);
-    substractionInDomain (felem_seq_as_nat (as_seq h0 arg1)) (felem_seq_as_nat (as_seq h0 arg2));
-    inDomain_mod_is_not_mod (fromDomain_ (felem_seq_as_nat (as_seq h0 arg1)) - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2)))
+    substractionInDomain (felem_seq_as_nat (as_seq h0 x)) (felem_seq_as_nat (as_seq h0 y));
+    inDomain_mod_is_not_mod (fromDomain_ (felem_seq_as_nat (as_seq h0 x)) - fromDomain_ (felem_seq_as_nat (as_seq h0 y)))
 
 //--------------------------------------
 
@@ -225,7 +229,7 @@ let add8_without_carry1 t t1 result  =
     assert_norm (pow2 320 + prime256 * prime256 < pow2 512)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val montgomery_multiplication_round: t:widefelem -> round:widefelem -> Stack unit
   (requires fun h ->
     live h t /\ live h round /\
@@ -291,6 +295,7 @@ let montgomery_multiplication_round_twice t result =
   pop_frame()
 
 
+[@CInline]
 let montgomery_multiplication_buffer_by_one a result =
   assert_norm (prime256 > 3);
   push_frame();
@@ -326,7 +331,8 @@ let montgomery_multiplication_buffer_by_one a result =
   pop_frame()
 
 
-let montgomery_multiplication_buffer a b result =
+[@CInline]
+let fmul a b result =
   assert_norm(prime256 > 3);
   push_frame();
     let t = create (size 8) (u64 0) in
@@ -366,7 +372,8 @@ let montgomery_multiplication_buffer a b result =
   pop_frame()
 
 
-let montgomery_square_buffer a result =
+[@CInline]
+let fsqr a result =
   assert_norm(prime256 > 3);
   push_frame();
     let t = create (size 8) (u64 0) in
@@ -406,49 +413,52 @@ let montgomery_square_buffer a result =
 
 //----------------------------------------------
 
-let cube a result =
+[@CInline]
+let fcube a result =
+  let h0 = ST.get () in
+  fsqr a result;
+  fmul result a result;
+  let h1 = ST.get () in
+  lemma_mod_mul_distr_l
+    (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a))
+    (fromDomain_ (as_nat h0 a)) prime256;
+  inDomain_mod_is_not_mod
+    (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a))
+
+
+let fmul_by_2 a out =
+  let h0 = ST.get () in
+  fadd a a out;
+  inDomain_mod_is_not_mod (2 * fromDomain_ (as_nat h0 a))
+
+
+[@CInline]
+let fmul_by_3 a result =
+  let h0 = ST.get () in
+  fmul_by_2 a result;
+  let h1 = ST.get () in
+  assert (as_nat h1 result == toDomain_ (2 * fromDomain_ (as_nat h0 a) % prime256));
+  fadd a result result;
+  let h2 = ST.get() in
+  lemma_mod_add_distr (fromDomain_ (as_nat h0 a)) (2 * fromDomain_ (as_nat h0 a)) prime256;
+  inDomain_mod_is_not_mod (3 * fromDomain_ (as_nat h0 a))
+
+
+[@CInline]
+let fmul_by_4 a result  =
   let h0 = ST.get() in
-    montgomery_square_buffer a result;
-    montgomery_multiplication_buffer result a result;
- let h1 = ST.get() in
- lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 a)) prime256;
-inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a))
+  fmul_by_2 a result;
+  fmul_by_2 result result;
+  lemma_mod_mul_distr_r 2 (2 * fromDomain_ (as_nat h0 a)) prime256;
+  lemma_brackets 2 2 (fromDomain_ (as_nat h0 a));
+  inDomain_mod_is_not_mod (4 * fromDomain_ (as_nat h0 a))
 
 
-let multByTwo a out =
-    let h0 = ST.get() in
-  p256_add a a out;
-    inDomain_mod_is_not_mod (2 * fromDomain_ (as_nat h0 a))
-
-
-let multByThree a result =
-    let h0 = ST.get() in
-  multByTwo a result;
-    let h1 = ST.get() in
-      assert(as_nat h1 result == toDomain_ (2 * fromDomain_ (as_nat h0 a) % prime256));
-  p256_add a result result;
-    let h2 = ST.get() in
-    lemma_mod_add_distr (fromDomain_ (as_nat h0 a)) (2 * fromDomain_ (as_nat h0 a)) prime256;
-    inDomain_mod_is_not_mod (3 * fromDomain_ (as_nat h0 a))
-
-
-let multByFour a result  =
-    let h0 = ST.get() in
-  multByTwo a result;
-  multByTwo result result;
-    lemma_mod_mul_distr_r 2 (2 * fromDomain_ (as_nat h0 a)) prime256;
-    lemma_brackets 2 2 (fromDomain_ (as_nat h0 a));
-    inDomain_mod_is_not_mod (4 * fromDomain_ (as_nat h0 a))
-
-
-let multByEight a result  =
-    let h0 = ST.get() in
-  multByTwo a result;
-  multByTwo result result;
-    lemma_mod_mul_distr_r 2 (2 * fromDomain_ (as_nat h0 a)) prime256;
-    lemma_brackets 2 2 (fromDomain_ (as_nat h0 a));
-    inDomain_mod_is_not_mod (4 * fromDomain_ (as_nat h0 a));
-  multByTwo result result;
-    lemma_mod_mul_distr_r 2 (4 * fromDomain_ (as_nat h0 a)) prime256;
-    lemma_brackets 2 4 (fromDomain_ (as_nat h0 a));
-    inDomain_mod_is_not_mod (8 * fromDomain_ (as_nat h0 a))
+[@CInline]
+let fmul_by_8 a result  =
+  let h0 = ST.get() in
+  fmul_by_4 a result;
+  fmul_by_2 result result;
+  lemma_mod_mul_distr_r 2 (4 * fromDomain_ (as_nat h0 a)) prime256;
+  lemma_brackets 2 4 (fromDomain_ (as_nat h0 a));
+  inDomain_mod_is_not_mod (8 * fromDomain_ (as_nat h0 a))

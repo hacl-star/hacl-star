@@ -19,11 +19,11 @@ open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Core
 
-open Spec.P256.Lemmas
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
 
 module BSeq = Lib.ByteSequence
+module S = Spec.P256.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
@@ -79,12 +79,12 @@ val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime256} ->
 
 let lemma_pointAtInfInDomain x y z =
   assert (if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
-  assert_norm (modp_inv2 (pow2 256) % prime256 <> 0);
+  assert_norm (S.modp_inv2 (pow2 256) % prime256 <> 0);
   lemmaFromDomain z;
-  assert (fromDomain_ z == (z * modp_inv2 (pow2 256) % prime256));
-  assert_norm (0 * modp_inv2 (pow2 256) % prime256 == 0);
+  assert (fromDomain_ z == (z * S.modp_inv2 (pow2 256) % prime256));
+  assert_norm (0 * S.modp_inv2 (pow2 256) % prime256 == 0);
   lemma_multiplication_not_mod_prime z;
-  assert (if z = 0 then z * modp_inv2 (pow2 256) % prime256 == 0
+  assert (if z = 0 then z * S.modp_inv2 (pow2 256) % prime256 == 0
                    else fromDomain_ z <> 0)
 
 
@@ -194,8 +194,8 @@ let lemmaEraseToDomainFromDomain z =
 
 val lemma_norm_as_specification: xD: nat{xD < prime256} -> yD: nat{yD < prime256} ->
   zD: nat {zD < prime256} ->
-  x3 : nat {x3 == xD * (pow (zD * zD) (prime - 2) % prime) % prime}->
-  y3 : nat {y3 == yD * (pow (zD * zD * zD) (prime -2) % prime) % prime} ->
+  x3 : nat {x3 == xD * (S.pow (zD * zD) (prime - 2) % prime) % prime}->
+  y3 : nat {y3 == yD * (S.pow (zD * zD * zD) (prime -2) % prime) % prime} ->
   z3: nat {if isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} ->
   Lemma (
   let (xN, yN, zN) = _norm (xD, yD, zD) in
@@ -203,8 +203,8 @@ val lemma_norm_as_specification: xD: nat{xD < prime256} -> yD: nat{yD < prime256
 
 
 let lemma_norm_as_specification xD yD zD x3 y3 z3 =
-  power_distributivity (zD * zD * zD) (prime - 2) prime;
-  power_distributivity (zD * zD) (prime -2) prime
+  S.power_distributivity (zD * zD * zD) (prime - 2) prime;
+  S.power_distributivity (zD * zD) (prime -2) prime
 
 
 let norm p resultPoint tempBuffer =
@@ -218,9 +218,9 @@ let norm p resultPoint tempBuffer =
   let tempBuffer20 = sub tempBuffer (size 12) (size 20) in
 
     let h0 = ST.get() in
-  montgomery_square_buffer zf z2f;
+  fsqr zf z2f;
     let h1 = ST.get() in
-  montgomery_multiplication_buffer z2f zf z3f;
+  fmul z2f zf z3f;
     let h2 = ST.get() in
       lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf)) prime256;
       assert (as_nat h1 z2f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime256));
@@ -228,21 +228,21 @@ let norm p resultPoint tempBuffer =
 
   exponent z2f z2f tempBuffer20;
     let h3 = ST.get() in
-      assert(as_nat h3 z2f = toDomain_ (pow (fromDomain_ (as_nat h2 z2f)) (prime256 - 2) % prime256));
+      assert(as_nat h3 z2f = toDomain_ (S.pow (fromDomain_ (as_nat h2 z2f)) (prime256 - 2) % prime256));
   exponent z3f z3f tempBuffer20;
     let h4 = ST.get() in
-      assert(as_nat h4 z3f = toDomain_ (pow (fromDomain_ (as_nat h3 z3f)) (prime256 - 2) % prime256));
+      assert(as_nat h4 z3f = toDomain_ (S.pow (fromDomain_ (as_nat h3 z3f)) (prime256 - 2) % prime256));
 
-  montgomery_multiplication_buffer xf z2f z2f;
-  montgomery_multiplication_buffer yf z3f z3f;
+  fmul xf z2f z2f;
+  fmul yf z3f z3f;
   normalisation_update z2f z3f p resultPoint;
 
     let h3 = ST.get() in
     lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf));
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    S.power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
     Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
     Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    S.power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
 
     lemma_norm_as_specification (fromDomain_ (point_x_as_nat h0 p)) (fromDomain_ (point_y_as_nat h0 p)) (fromDomain_ (point_z_as_nat h0 p)) (point_x_as_nat h3 resultPoint) (point_y_as_nat h3 resultPoint) (point_z_as_nat h3 resultPoint);
 
@@ -265,12 +265,12 @@ let normX p result tempBuffer =
   let tempBuffer20 = sub tempBuffer (size 12) (size 20) in
 
     let h0 = ST.get() in
-  montgomery_square_buffer zf z2f;
+  fsqr zf z2f;
   exponent z2f z2f tempBuffer20;
-  montgomery_multiplication_buffer z2f xf z2f;
+  fmul z2f xf z2f;
   fromDomain z2f result;
   assert_norm (prime >= 2);
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
+    S.power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
 
 
 
@@ -294,7 +294,7 @@ val y_2: y: felem -> r: felem -> Stack unit
 
 let y_2 y r =
   toDomain y r;
-  montgomery_square_buffer r r
+  fsqr r r
 
 
 inline_for_extraction noextract
@@ -347,13 +347,13 @@ let xcube_minus_x x r =
     let minusThreeXBuffer = create (size 4) (u64 0) in
     let p256_constant = create (size 4) (u64 0) in
   toDomain x xToDomainBuffer;
-  montgomery_square_buffer xToDomainBuffer r;
-  montgomery_multiplication_buffer r xToDomainBuffer r;
+  fsqr xToDomainBuffer r;
+  fmul r xToDomainBuffer r;
     lemma_mod_mul_distr_l ((as_nat h0 x) * (as_nat h0 x)) (as_nat h0 x) prime;
-  multByThree xToDomainBuffer minusThreeXBuffer;
-  p256_sub r minusThreeXBuffer r;
+  fmul_by_3 xToDomainBuffer minusThreeXBuffer;
+  fsub r minusThreeXBuffer r;
     upload_p256_point_on_curve_constant p256_constant;
-  p256_add r p256_constant r;
+  fadd r p256_constant r;
   pop_frame();
 
   let x_ = as_nat h0 x in

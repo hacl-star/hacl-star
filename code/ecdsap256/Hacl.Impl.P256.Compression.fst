@@ -76,10 +76,10 @@ let computeYFromX x result sign =
     uploadA aCoordinateBuffer;
     uploadB bCoordinateBuffer;
 
-    montgomery_multiplication_buffer aCoordinateBuffer x aCoordinateBuffer;
-  cube x result;
-    p256_add result aCoordinateBuffer result;
-    p256_add result bCoordinateBuffer result;
+    fmul aCoordinateBuffer x aCoordinateBuffer;
+  fcube x result;
+    fadd result aCoordinateBuffer result;
+    fadd result bCoordinateBuffer result;
 
     bn_set_zero4 aCoordinateBuffer;
 
@@ -95,7 +95,7 @@ let computeYFromX x result sign =
     fromDomain result result;
 
   let h8 = ST.get() in
-    p256_sub aCoordinateBuffer result bCoordinateBuffer;
+    fsub aCoordinateBuffer result bCoordinateBuffer;
 
   let h9 = ST.get() in
 
