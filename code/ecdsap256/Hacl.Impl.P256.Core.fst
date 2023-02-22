@@ -10,7 +10,7 @@ open FStar.Math.Lemmas
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.SolinasReduction
+open Hacl.Impl.P256.SolinasReduction
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 

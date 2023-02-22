@@ -1,4 +1,4 @@
-module Hacl.Impl.SolinasReduction
+module Hacl.Impl.P256.SolinasReduction
 
 open FStar.HyperStack.All
 open FStar.HyperStack

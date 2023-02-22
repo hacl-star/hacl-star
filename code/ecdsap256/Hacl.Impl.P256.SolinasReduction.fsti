@@ -1,4 +1,4 @@
-module Hacl.Impl.SolinasReduction
+module Hacl.Impl.P256.SolinasReduction
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -9,7 +9,7 @@ open Lib.Buffer
 
 open Spec.P256.Constants
 open Hacl.Spec.P256.Felem
-open Hacl.SolinasReduction.Lemmas
+open Hacl.Spec.P256.SolinasReduction.Lemmas
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
