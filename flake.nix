@@ -24,6 +24,7 @@
         hacl = pkgs.callPackage ./.nix/hacl.nix {
           inherit (fstarPackages) ocamlPackages z3 fstar;
           inherit karamel vale;
+          fstar-scripts = "${fstar}/.scripts";
         };
       in {
         packages = {

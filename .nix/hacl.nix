@@ -1,6 +1,6 @@
 { lib, dotnet-runtime, dune_3, fstar, git, karamel, nodePackages, nodejs
 , ocamlPackages, openssl, python3, stdenv, time, vale, which, writeTextFile, z3
-, fetchFromGitHub }:
+, fetchFromGitHub, fstar-scripts }:
 
 let
 
@@ -221,7 +221,7 @@ let
         dontBuild = true;
         installPhase = ''
           mkdir -p $out/nix-support
-          bash ${fstar.src}/.scripts/res_summary.sh > $out/resources.txt
+          bash ${fstar-scripts}/res_summary.sh > $out/resources.txt
           echo "file resources $out/resources.txt" >> $out/nix-support/hydra-build-products
         '';
       };
