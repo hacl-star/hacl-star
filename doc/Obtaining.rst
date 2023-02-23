@@ -89,11 +89,13 @@ OCaml
 ^^^^^
 
 OCaml bindings were moved to the `cryspen/hacl-packages` repository.
+Documentation is available here: `<https://tech.cryspen.com/hacl-packages/hacl-ocaml/index.html>`.
 
 JavaScript
 ^^^^^^^^^^
 
 JS bindings were moved to the `cryspen/hacl-packages` repository.
+Documentation is available here: `<https://tech.cryspen.com/hacl-packages/hacl-js/index.html>`.
 
 Rust
 ^^^^
