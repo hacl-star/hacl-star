@@ -15,6 +15,8 @@ module BD = Hacl.Spec.Bignum.Definitions
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
+// TODO: rm `h:mem` from lemmas
+
 inline_for_extraction
 let felem4 = tuple4 uint64 uint64 uint64 uint64
 inline_for_extraction
@@ -146,3 +148,9 @@ let bignum_bn_v_is_wide_as_nat h a =
   bignum_bn_v_is_as_nat h (gsub a (size 0) (size 4));
   bignum_bn_v_is_as_nat h (gsub a (size 4) (size 4));
   BD.bn_eval_split_i (as_seq h a) 4
+
+
+val as_nat_bound: h:mem -> f:felem -> Lemma (as_nat h f < pow2 256)
+let as_nat_bound h f =
+  bignum_bn_v_is_as_nat h f;
+  BD.bn_eval_bound (as_seq h f) 4

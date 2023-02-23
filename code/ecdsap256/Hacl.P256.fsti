@@ -18,6 +18,8 @@ open Spec.Hash.Definitions
 
 open Hacl.Impl.P256.Compression
 
+module S = Spec.P256.Constants
+
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 [@@ CPrologue "
@@ -383,7 +385,7 @@ val compressed_to_raw: b: compressedForm -> result: lbuffer uint8 (size 64) -> S
           r == true /\
         (
           let y =
-            let sq = sq_root_spec (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in
+            let sq = S.fsqrt (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in
               if (uint_v id) % 2 = (sq % 2) then
                 sq
               else

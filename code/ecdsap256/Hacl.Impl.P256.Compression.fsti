@@ -12,6 +12,8 @@ open Spec.P256
 open Spec.P256.Constants
 open Spec.P256.MontgomeryMultiplication
 
+module S = Spec.P256.Constants
+
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 let notCompressedForm = lbuffer uint8 (size 65)
@@ -47,7 +49,7 @@ val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (siz
 	  r == true /\
 	  (
 	    let y =
-              let sq = sq_root_spec (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in
+              let sq = S.fsqrt (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in
               if (uint_v id) % 2 = (sq % 2) then
 		sq
               else

@@ -82,10 +82,10 @@ let isPointAtInfinity (p:point_nat) =
 
 let _norm (p:point_nat_prime) : point_nat_prime =
   let (x, y, z) = p in
-  let z2 = z * z in
-  let z2i = modp_inv2_pow z2 in
-  let z3 = z * z * z in
-  let z3i = modp_inv2_pow z3 in
+  let z2 = z * z % prime256 in
+  let z2i = finv z2 in
+  let z3 = z * z * z % prime256 in
+  let z3i = finv z3 in
   let x3 = (z2i * x) % prime256 in
   let y3 = (z3i * y) % prime256 in
   let z3 = if isPointAtInfinity p then 0 else 1 in

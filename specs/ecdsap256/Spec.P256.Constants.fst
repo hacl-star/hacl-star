@@ -5,22 +5,34 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
+module M = Lib.NatMod
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-let prime256: (a: pos {a > 3 && a < pow2 256}) =
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 < pow2 256);
-  pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
+let prime256: (a:pos{3 < a && a < pow2 256}) =
+  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 > 3);
+  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 < pow2 256);
+  pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1
 
 let point_nat = tuple3 nat nat nat
-let point_nat_prime = (p:point_nat{let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
+let point_nat_prime = (p:point_nat{let (a, b, c) = p in
+  a < prime256 /\ b < prime256 /\ c < prime256})
 let nat_prime = n:nat{n < prime256}
 
 
-let prime_p256_order: (a: pos{a < pow2 256}) =
+let finv (a:nat_prime) : nat_prime =
+  M.pow_mod #prime256 a (prime256 - 2)
+
+let fsqrt (a:nat_prime) : nat_prime =
+  M.pow_mod #prime256 a ((prime256 + 1) / 4)
+
+
+
+let prime_p256_order: (a:pos{a < pow2 256}) =
   assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 256);
   115792089210356248762697446949407573529996955224135760342422259061068512044369
+
+
 
 
 // TODO: fix me; mv to code/

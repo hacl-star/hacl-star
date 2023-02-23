@@ -17,6 +17,8 @@ open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.RawCmp
 
+module S = Spec.P256.Constants
+
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
 inline_for_extraction noextract
@@ -57,7 +59,7 @@ val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit
     as_nat h1 result < prime256 /\
     (
       let xD = fromDomain_ (as_nat h0 x) in
-      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in
+      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in
 
       if sqRootWithoutSign  % pow2 1 = uint_v sign then
 	as_nat h1 result = sqRootWithoutSign
@@ -213,7 +215,7 @@ let decompressionCompressedForm b result =
 	    let h3 = ST.get() in
 	    assert(
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in
-	      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in
+	      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 as_nat h3 t1 = sqRootWithoutSign
 	      else
@@ -231,7 +233,7 @@ let decompressionCompressedForm b result =
 
 	  assert(
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in
-	      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in
+	      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in
 	      let to = as_seq h5 (gsub result (size 32) (size 32)) in
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 to == Lib.ByteSequence.nat_to_bytes_be 32 sqRootWithoutSign

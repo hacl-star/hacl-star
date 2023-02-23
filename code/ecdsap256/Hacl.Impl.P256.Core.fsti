@@ -19,15 +19,18 @@ open Hacl.Spec.P256.Felem
 
 // TODO: mv to Hacl.Impl.P256.Field
 inline_for_extraction noextract
-val toDomain: value: felem -> result: felem ->  Stack unit
-  (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = toDomain_ (as_nat h0 value))
+val toDomain: f:felem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h f /\live h res /\ eq_or_disjoint f res /\
+    as_nat h f < prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = toDomain_ (as_nat h0 f))
 
 
 // TODO: mv to Hacl.Impl.P256.Field
 inline_for_extraction noextract
-val fromDomain: f: felem-> result: felem-> Stack unit
-  (requires fun h -> live h f /\ live h result /\ as_nat h f < prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result = (as_nat h0 f * modp_inv2(pow2 256)) % prime /\
-    as_nat h1 result = fromDomain_ (as_nat h0 f))
+val fromDomain: f:felem -> res:felem -> Stack unit
+  (requires fun h -> live h f /\ live h res /\ as_nat h f < prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 f * modp_inv2 (pow2 256)) % prime /\
+    as_nat h1 res = fromDomain_ (as_nat h0 f))
