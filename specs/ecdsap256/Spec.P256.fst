@@ -1,15 +1,12 @@
 module Spec.P256
 
 open FStar.Mul
-open FStar.Math.Lemmas
-open FStar.Math.Lib
 
 open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
 open Spec.P256.Constants
-open Spec.P256.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
@@ -29,6 +26,33 @@ let basePoint : point_nat_prime =
    0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
    1)
 
+
+
+val isPointOnCurve: point_nat_prime -> bool
+let isPointOnCurve p =
+  let (x, y, z) = p in
+  (y * y) % prime =
+  (x * x * x + aCoordinateP256 * x + bCoordinateP256) % prime
+
+
+let isPointAtInfinity (p:point_nat) =
+  let (_, _, z) = p in z = 0
+
+
+val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
+let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
+
+
+let _norm (p:point_nat_prime) : point_nat_prime =
+  let (x, y, z) = p in
+  let z2 = z * z % prime256 in
+  let z2i = finv z2 in
+  let z3 = z * z * z % prime256 in
+  let z3i = finv z3 in
+  let x3 = (z2i * x) % prime256 in
+  let y3 = (z3i * y) % prime256 in
+  let z3 = if isPointAtInfinity p then 0 else 1 in
+  (x3, y3, z3)
 
 
 let _point_double (p:point_nat_prime) : point_nat_prime =
@@ -72,24 +96,9 @@ let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
     else (x3, y3, z3)
 
 
-let isPointAtInfinity (p:point_nat) =
-  let (_, _, z) = p in z = 0
-
-
-let _norm (p:point_nat_prime) : point_nat_prime =
-  let (x, y, z) = p in
-  let z2 = z * z % prime256 in
-  let z2i = finv z2 in
-  let z3 = z * z * z % prime256 in
-  let z3i = finv z3 in
-  let x3 = (z2i * x) % prime256 in
-  let y3 = (z3i * y) % prime256 in
-  let z3 = if isPointAtInfinity p then 0 else 1 in
-  (x3, y3, z3)
-
+///  Elliptic curve scalar multiplication
 
 let scalar = lbytes 32
-
 
 let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
   let q = 31 - i / 8 in let r = size (i % 8) in
@@ -103,16 +112,14 @@ let _ml_step0 r0 r1 =
   (r0, r1)
 
 
-val _ml_step1: p: point_nat_prime -> q: point_nat_prime -> tuple2 point_nat_prime point_nat_prime
+val _ml_step1: p: point_nat_prime -> q:point_nat_prime -> tuple2 point_nat_prime point_nat_prime
 let _ml_step1 r0 r1 =
   let r1 = _point_add r0 r1 in
   let r0 = _point_double r0 in
   (r0, r1)
 
 
-val _ml_step: k:scalar -> i:nat{i < 256} -> tuple2 point_nat_prime point_nat_prime
-  -> tuple2 point_nat_prime point_nat_prime
-
+val _ml_step: k:scalar -> i:nat{i < 256} -> tuple2 point_nat_prime point_nat_prime -> tuple2 point_nat_prime point_nat_prime
 let _ml_step k i (p, q) =
   let bit = 255 - i in
   let bit = ith_bit k bit in
@@ -123,8 +130,7 @@ let _ml_step k i (p, q) =
     _ml_step0 p q
 
 
-val montgomery_ladder_spec: k:scalar -> tuple2 point_nat_prime point_nat_prime
-  -> tuple2 point_nat_prime point_nat_prime
+val montgomery_ladder_spec: k:scalar -> tuple2 point_nat_prime point_nat_prime -> tuple2 point_nat_prime point_nat_prime
 let montgomery_ladder_spec k pq =
   Lib.LoopCombinators.repeati 256 (_ml_step k) pq
 
@@ -141,77 +147,3 @@ let secret_to_public k =
   let pai = (0, 0, 0) in
   let q, f = montgomery_ladder_spec k (pai, basePoint) in
   _norm q
-
-
-val isPointOnCurve: point_nat_prime -> bool
-let isPointOnCurve p =
-  let (x, y, z) = p in
-  (y * y) % prime =
-  (x * x * x + aCoordinateP256 * x + bCoordinateP256) % prime
-
-
-val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
-let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
-
-
-#push-options "--ifuel 1"
-
-val nat_from_intlist_le: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
-
-let rec nat_from_intlist_le #t #l = function
-  | [] -> 0
-  | hd :: tl -> v hd + pow2 (bits t) * nat_from_intlist_le tl
-
-val nat_from_intlist_be: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
-
-let rec nat_from_intlist_be #t #l = function
-  | [] -> 0
-  | hd :: tl -> pow2 (FStar.List.Tot.Base.length tl * bits t) * v hd + nat_from_intlist_be tl
-
-#pop-options
-
-#push-options "--fuel 1"
-
-val index_seq_of_list_cons: #a:Type -> x:a -> l:list a -> i:nat{i < List.Tot.length l} -> Lemma
-  (Seq.index (Seq.seq_of_list (x::l)) (i+1) == Seq.index (Seq.seq_of_list l) i)
-
-let index_seq_of_list_cons #a x l i =
-  assert (Seq.index (Seq.seq_of_list (x::l)) (i+1) == List.Tot.index (x::l) (i+1))
-
-val nat_from_intlist_seq_le: #t:inttype{unsigned t} -> #l:secrecy_level
-  -> len:size_nat -> b:list (uint_t t l){List.Tot.length b = len}
-  -> Lemma (nat_from_intlist_le b == nat_from_intseq_le (of_list b))
-
-let rec nat_from_intlist_seq_le #t #l len b =
-  match b with
-  | [] -> ()
-  | hd :: tl ->
-    begin
-    let s = of_list b in
-    Classical.forall_intro (index_seq_of_list_cons hd tl);
-    assert (equal (of_list tl) (slice s 1 len));
-    assert (index s 0 == List.Tot.index b 0);
-    nat_from_intseq_le_lemma0 (slice s 0 1);
-    nat_from_intseq_le_slice_lemma s 1;
-    nat_from_intlist_seq_le (len - 1) tl
-    end
-
-val nat_from_intlist_seq_be: #t: inttype {unsigned t} -> #l: secrecy_level
-  -> len: size_nat -> b: list (uint_t t l) {FStar.List.Tot.Base.length b = len}
-  -> Lemma (nat_from_intlist_be b == nat_from_intseq_be (of_list b))
-
-let rec nat_from_intlist_seq_be #t #l len b =
-  match b with
-  | [] -> ()
-  | hd :: tl ->
-    begin
-      let s = of_list b in
-      Classical.forall_intro (index_seq_of_list_cons hd tl);
-      assert (equal (of_list tl) (slice s 1 len));
-      assert (index s 0 == List.Tot.index b 0);
-      nat_from_intlist_seq_be (len - 1) tl;
-      nat_from_intseq_be_lemma0 (slice s 0 1);
-      nat_from_intseq_be_slice_lemma s 1
-      end
-
-#pop-options
