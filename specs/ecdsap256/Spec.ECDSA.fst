@@ -9,11 +9,8 @@ open Lib.IntTypes
 open Lib.Sequence
 
 open Spec.P256
-open Spec.P256.Lemmas
-open Spec.P256.Constants
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
-
 
 let prime = prime_p256_order
 
@@ -112,252 +109,12 @@ let _exponent_spec k (p, q) =
   Lib.LoopCombinators.repeati 256 (_exp_step k) (p, q)
 
 
-val lemma_even: index:pos{index <= 256} -> k:lseq uint8 32 {v (ith_bit k (256 - index)) == 0} ->
-  Lemma (
-    let number = nat_from_bytes_le k in
-    let newIndex = 256 - index in
-    2 * arithmetic_shift_right number (newIndex + 1) ==
-    arithmetic_shift_right number newIndex)
-
-let lemma_even index k =
-  let number = nat_from_bytes_le k in
-  let n = 256 - index in
-  FStar.Math.Lemmas.pow2_double_mult n;
-  lemma_div_def (number / pow2 n) 2;
-  FStar.Math.Lemmas.division_multiplication_lemma number (pow2 n) 2
-
-
-val lemma_odd: index:pos{index <= 256} -> k:lseq uint8 32 {uint_v (ith_bit k (256 - index)) == 1} ->
-  Lemma(
-    let number = nat_from_intseq_le k in
-    let n = 256 - index  in
-    2 * arithmetic_shift_right number (n + 1) + 1 ==
-    arithmetic_shift_right number n)
-
-let lemma_odd index k =
-  let number = nat_from_bytes_le k in
-  let n = 256 - index in
-  let a0 = 2 * arithmetic_shift_right number (n + 1) + 1 in
-  lemma_div_def (number / pow2 n) 2;
-  division_multiplication_lemma number (pow2 n) 2;
-  pow2_double_mult n;
-  assert (arithmetic_shift_right number (n + 1) == number / pow2 (n + 1));
-  assert (arithmetic_shift_right number n ==
-          2 * arithmetic_shift_right number (n + 1) + 1)
-
-
-val lemma_exponen_spec: k:lseq uint8 32
-  -> start:tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1}
-  -> index:nat{index <= 256} ->
-  Lemma (
-    let start0, start1 = start in
-    let number = nat_from_bytes_le k in
-    let newIndex = 256 - index in
-    let f0, f1 = Lib.LoopCombinators.repeati index (_exp_step k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % prime_p256_order /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
-  )
-
-#push-options "--fuel 1"
-
-val lemma_exponen_spec_0: k:lseq uint8 32
-  -> start:tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1} ->
-  Lemma (
-    let start0, start1 = start in
-    let number = nat_from_bytes_le k in
-    let newIndex = 256 in
-    let f0, f1 = Lib.LoopCombinators.repeati 0 (_exp_step k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % prime_p256_order /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
-  )
-
-let lemma_exponen_spec_0 k start =
-  let st0, st1 = start in
-  let number = nat_from_bytes_le k in
-  assert (arithmetic_shift_right number 256 == number / pow2 256);
-  FStar.Math.Lemmas.lemma_div_lt_nat number 256 256;
-  assert (arithmetic_shift_right number 256 == 0);
-  Lib.LoopCombinators.eq_repeati0 256 (_exp_step k) start
-
-#pop-options
-
-let rec lemma_exponen_spec k start index =
-  let f = _exp_step k in
-  let st0, st1 = start in
-  let number = nat_from_bytes_le k in
-  let newIndex = 256 - index in
-  let open Lib.LoopCombinators in
-  match index with
-  | 0 -> lemma_exponen_spec_0 k start
-  | _ ->
-    begin
-    unfold_repeati 256 f start (index - 1);
-    lemma_exponen_spec k start (index - 1);
-    let bitMask = uint_v (ith_bit k (256 - index)) in
-    match bitMask with
-      | 0 ->
-        let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
-        let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
-        calc (==) {
-          (a0 % prime_p256_order) * (a0 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a0 a0 prime_p256_order}
-          (a0 * a0) % prime_p256_order;
-          == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1))}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
-          == {}
-          (pow st1 (2 * arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
-          == {lemma_even index k}
-          pow st1 (arithmetic_shift_right number newIndex) % prime_p256_order;
-        };
-        calc (==) {
-          (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a0 a1 prime_p256_order}
-          (a0 * a1) % prime_p256_order;
-          == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {}
-          (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {lemma_even index k}
-          (pow st1 (arithmetic_shift_right number (256 - index) + 1)) % prime_p256_order;
-        }
-      | 1 ->
-        let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
-        let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
-        calc (==) {
-          (a1 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a1 a1 prime_p256_order}
-          (a1 * a1) % prime_p256_order;
-          == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1) + 1) (arithmetic_shift_right number (256 - index + 1) + 1)}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1 + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {}
-          (pow st1 (2 * arithmetic_shift_right number (256 - index + 1) + 2)) % prime_p256_order;
-          == {lemma_odd index k}
-          pow st1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order;
-        };
-        calc (==) {
-          (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a0 a1 prime_p256_order}
-          (a0 * a1) % prime_p256_order;
-          == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {}
-          (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {lemma_odd index k}
-          (pow st1 (arithmetic_shift_right (nat_from_bytes_le k) (256 - index)) % prime_p256_order);
-        }
-    end
-
-
-#push-options "--ifuel 1"
-
-val nat_from_intlist_le: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
-
-let rec nat_from_intlist_le #t #l = function
-  | [] -> 0
-  | hd :: tl -> v hd + pow2 (bits t) * nat_from_intlist_le tl
-
-val nat_from_intlist_be: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
-
-let rec nat_from_intlist_be #t #l = function
-  | [] -> 0
-  | hd :: tl -> pow2 (FStar.List.Tot.Base.length tl * bits t) * v hd + nat_from_intlist_be tl
-
-#pop-options
-
-#push-options "--fuel 1"
-
-val index_seq_of_list_cons: #a:Type -> x:a -> l:list a -> i:nat{i < List.Tot.length l} -> Lemma
-  (Seq.index (Seq.seq_of_list (x::l)) (i+1) == Seq.index (Seq.seq_of_list l) i)
-
-let index_seq_of_list_cons #a x l i =
-  assert (Seq.index (Seq.seq_of_list (x::l)) (i+1) == List.Tot.index (x::l) (i+1))
-
-val nat_from_intlist_seq_le: #t:inttype{unsigned t} -> #l:secrecy_level
-  -> len:size_nat -> b:list (uint_t t l){List.Tot.length b = len}
-  -> Lemma (nat_from_intlist_le b == nat_from_intseq_le (of_list b))
-
-let rec nat_from_intlist_seq_le #t #l len b =
-  match b with
-  | [] -> ()
-  | hd :: tl ->
-    begin
-    let s = of_list b in
-    Classical.forall_intro (index_seq_of_list_cons hd tl);
-    assert (equal (of_list tl) (slice s 1 len));
-    assert (index s 0 == List.Tot.index b 0);
-    nat_from_intseq_le_lemma0 (slice s 0 1);
-    nat_from_intseq_le_slice_lemma s 1;
-    nat_from_intlist_seq_le (len - 1) tl
-    end
-
-val nat_from_intlist_seq_be: #t: inttype {unsigned t} -> #l: secrecy_level
-  -> len: size_nat -> b: list (uint_t t l) {FStar.List.Tot.Base.length b = len}
-  -> Lemma (nat_from_intlist_be b == nat_from_intseq_be (of_list b))
-
-let rec nat_from_intlist_seq_be #t #l len b =
-  match b with
-  | [] -> ()
-  | hd :: tl ->
-    begin
-      let s = of_list b in
-      Classical.forall_intro (index_seq_of_list_cons hd tl);
-      assert (equal (of_list tl) (slice s 1 len));
-      assert (index s 0 == List.Tot.index b 0);
-      nat_from_intlist_seq_be (len - 1) tl;
-      nat_from_intseq_be_lemma0 (slice s 0 1);
-      nat_from_intseq_be_slice_lemma s 1
-      end
-
-#pop-options
-
-
-unfold let prime_p256_order_inverse_list: list uint8 =
- [
-   u8 79;  u8 37;  u8 99;  u8 252; u8 194; u8 202; u8 185; u8 243;
-   u8 132; u8 158; u8 23;  u8 167; u8 173; u8 250; u8 230; u8 188;
-   u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-   u8 0;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255; u8 255
- ]
-
-
-let prime_p256_order_inverse_seq: s:lseq uint8 32{nat_from_intseq_le s == prime_p256_order - 2} =
-  assert_norm (List.Tot.length prime_p256_order_inverse_list == 32);
-  nat_from_intlist_seq_le 32 prime_p256_order_inverse_list;
-  assert_norm (nat_from_intlist_le prime_p256_order_inverse_list == prime_p256_order - 2);
-  of_list prime_p256_order_inverse_list
-
-
-unfold let prime_p256_order_list: list uint8 =
- [
-  u8 255; u8 255; u8 255; u8 255; u8 0;  u8 0;   u8 0;   u8 0;
-  u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-  u8 188; u8 230; u8 250; u8 173; u8 167; u8 23; u8 158; u8 132;
-  u8 243; u8 185; u8 202; u8 194; u8 252; u8 99; u8 37; u8 81
- ]
-
-
-let prime_p256_order_seq: s:lseq uint8 32{nat_from_intseq_be s == prime_p256_order} =
-  assert_norm (List.Tot.length prime_p256_order_list == 32);
-  nat_from_intlist_seq_be 32 prime_p256_order_list;
-  assert_norm (nat_from_intlist_be prime_p256_order_list == prime_p256_order);
-  of_list prime_p256_order_list
-
-
 val exponent_spec: a:nat_prime -> r:nat_prime{r = pow a (prime_p256_order - 2) % prime_p256_order}
-
 let exponent_spec a =
-  let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in
-  lemma_exponen_spec prime_p256_order_inverse_seq (1, a) 256;
-  a0
+  pow a (prime_p256_order - 2) % prime_p256_order
 
+
+let felem_seq = lseq uint64 4
 
 val changeEndian: felem_seq -> felem_seq
 
@@ -438,9 +195,9 @@ val verifyQValidCurvePointSpec:
 
 let verifyQValidCurvePointSpec publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
-  x < Spec.P256.Constants.prime256 &&
-  y < Spec.P256.Constants.prime256 &&
-  z < Spec.P256.Constants.prime256 &&
+  x < Spec.P256.prime256 &&
+  y < Spec.P256.prime256 &&
+  z < Spec.P256.prime256 &&
   isPointOnCurve (x, y, z)
 
 

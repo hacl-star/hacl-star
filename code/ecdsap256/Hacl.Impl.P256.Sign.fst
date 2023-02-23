@@ -12,9 +12,8 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.P256
-open Spec.P256.Lemmas
+open Hacl.Spec.P256.Lemmas
 open Spec.ECDSA
-open Spec.P256.Constants
 
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum

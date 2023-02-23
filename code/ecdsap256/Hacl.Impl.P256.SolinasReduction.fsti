@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Constants
+open Spec.P256
 open Hacl.Spec.P256.Felem
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"

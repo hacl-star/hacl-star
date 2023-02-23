@@ -6,11 +6,62 @@ open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
-open Spec.P256.Constants
+module M = Lib.NatMod
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 (* https://eprint.iacr.org/2013/816.pdf *)
+
+let prime256: (a:pos{3 < a && a < pow2 256}) =
+  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 > 3);
+  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 < pow2 256);
+  pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1
+
+//---------------------------------------
+// TODO: clean up
+
+let point_nat = tuple3 nat nat nat
+let point_nat_prime = (p:point_nat{let (a, b, c) = p in
+  a < prime256 /\ b < prime256 /\ c < prime256})
+let nat_prime = n:nat{n < prime256}
+
+val pow: a:nat -> b:nat -> nat
+let rec pow a b =
+  if b = 0 then 1
+  else a * (pow a (b - 1))
+
+type elem (n:pos) = x:nat{x < n}
+let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
+
+val exp: #n: pos -> a: elem n -> b: pos -> Tot (elem n) (decreases b)
+let rec exp #n a b =
+  if b = 1 then a
+  else
+    if b % 2 = 0 then exp (fmul a a) (b / 2)
+    else fmul a (exp (fmul a a) (b / 2))
+
+let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
+  (exp #prime x (prime - 2)) % prime
+
+let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
+
+let modp_inv2 (x: nat) : Tot (elem prime256) =
+  assert_norm(prime256 > 3);
+  modp_inv2_prime x prime256
+//---------------------------------------
+
+
+let finv (a:nat_prime) : nat_prime =
+  M.pow_mod #prime256 a (prime256 - 2)
+
+let fsqrt (a:nat_prime) : nat_prime =
+  M.pow_mod #prime256 a ((prime256 + 1) / 4)
+
+
+let prime_p256_order: (a:pos{a < pow2 256}) =
+  assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 256);
+  115792089210356248762697446949407573529996955224135760342422259061068512044369
+
 
 let prime = prime256
 

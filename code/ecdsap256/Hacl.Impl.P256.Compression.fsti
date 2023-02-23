@@ -9,10 +9,9 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Spec.P256
-open Spec.P256.Constants
 open Hacl.Spec.P256.MontgomeryMultiplication
 
-module S = Spec.P256.Constants
+module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 

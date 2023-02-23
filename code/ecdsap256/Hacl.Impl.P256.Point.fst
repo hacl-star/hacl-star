@@ -18,12 +18,14 @@ open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Core
+open Hacl.Impl.P256.Constants
 
+open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.MontgomeryMultiplication
 friend Hacl.Spec.P256.MontgomeryMultiplication
 
 module BSeq = Lib.ByteSequence
-module S = Spec.P256.Lemmas
+module S = Spec.P256
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
@@ -203,8 +205,8 @@ val lemma_norm_as_specification: xD: nat{xD < prime256} -> yD: nat{yD < prime256
 
 
 let lemma_norm_as_specification xD yD zD x3 y3 z3 =
-  S.power_distributivity (zD * zD * zD) (prime - 2) prime;
-  S.power_distributivity (zD * zD) (prime -2) prime
+  power_distributivity (zD * zD * zD) (prime - 2) prime;
+  power_distributivity (zD * zD) (prime -2) prime
 
 
 let norm p resultPoint tempBuffer =
@@ -239,10 +241,10 @@ let norm p resultPoint tempBuffer =
 
     let h3 = ST.get() in
     lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf));
-    S.power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
     Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
     Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
-    S.power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
 
     lemma_norm_as_specification (fromDomain_ (point_x_as_nat h0 p)) (fromDomain_ (point_y_as_nat h0 p)) (fromDomain_ (point_z_as_nat h0 p)) (point_x_as_nat h3 resultPoint) (point_y_as_nat h3 resultPoint) (point_z_as_nat h3 resultPoint);
 
@@ -270,7 +272,7 @@ let normX p result tempBuffer =
   fmul z2f xf z2f;
   fromDomain z2f result;
   assert_norm (prime >= 2);
-    S.power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
 
 
 

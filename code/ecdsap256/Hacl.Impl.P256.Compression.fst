@@ -16,8 +16,9 @@ open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.RawCmp
+open Hacl.Impl.P256.Constants
 
-module S = Spec.P256.Constants
+module S = Spec.P256
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
@@ -88,7 +89,7 @@ let computeYFromX x result sign =
   let h6 = ST.get() in
 
     lemmaFromDomain (as_nat h6 aCoordinateBuffer);
-    assert_norm (0 * Spec.P256.Lemmas.modp_inv2 (pow2 256) % prime256 == 0);
+    assert_norm (0 * Spec.P256.modp_inv2 (pow2 256) % prime256 == 0);
     fsqrt result result;
 
   let h7 = ST.get() in

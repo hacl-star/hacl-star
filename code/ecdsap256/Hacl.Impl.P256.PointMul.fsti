@@ -9,8 +9,6 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Spec.P256
-open Spec.P256.Lemmas
-open Spec.P256.Constants
 open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Felem

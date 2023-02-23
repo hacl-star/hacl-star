@@ -1,4 +1,4 @@
-module Spec.P256.Lemmas
+module Hacl.Spec.P256.Lemmas
 
 open FStar.Mul
 open FStar.Math.Lemmas
@@ -8,15 +8,9 @@ open FStar.Tactics.Canon
 
 open Lib.IntTypes
 
-open Spec.P256.Constants
+open Spec.P256
 
 #set-options " --z3rlimit 100"
-
-val pow: a:nat -> b:nat -> nat
-let rec pow a b =
-  if b = 0 then 1
-  else a * (pow a (b - 1))
-
 
 val modulo_distributivity_mult: a: int -> b: int -> c: pos ->
   Lemma ((a * b) % c = ((a % c) * (b % c)) % c)
@@ -72,31 +66,6 @@ let rec power_mult a b c =
   |0 -> ()
   |_ ->  power_mult a b (c - 1);
     pow_plus a (b * (c - 1)) b
-
-
-
-type elem (n:pos) = x:nat{x < n}
-
-let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
-
-val exp: #n: pos -> a: elem n -> b: pos -> Tot (elem n) (decreases b)
-let rec exp #n a b =
-  if b = 1 then a
-  else
-    if b % 2 = 0 then exp (fmul a a) (b / 2)
-    else fmul a (exp (fmul a a) (b / 2))
-
-
-let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
-  (exp #prime x (prime - 2)) % prime
-
-
-let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
-
-
-let modp_inv2 (x: nat) : Tot (elem prime256) =
-  assert_norm(prime256 > 3);
-  modp_inv2_prime x prime256
 
 
 let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =

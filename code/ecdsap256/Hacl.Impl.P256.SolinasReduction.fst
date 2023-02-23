@@ -11,7 +11,7 @@ module Seq = FStar.Seq
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Constants
+open Spec.P256
 open Hacl.Spec.P256.SolinasReduction.Lemmas
 
 open Hacl.Impl.P256.Bignum

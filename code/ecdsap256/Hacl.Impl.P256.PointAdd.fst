@@ -12,7 +12,7 @@ open FStar.Tactics.Canon
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Lemmas
+open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
 

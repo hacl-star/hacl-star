@@ -1,5 +1,6 @@
 module Hacl.Impl.P256.Qinv
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -7,20 +8,11 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
-
-open Spec.P256.Lemmas
-open Spec.P256.Constants
-open Hacl.Spec.P256.Felem
+open Spec.P256
 open Spec.ECDSA
+open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
-
-open Spec.P256.Lemmas
-
-open FStar.Mul
-
 open Hacl.Impl.P256.Scalar
-open Lib.Loops
 
 #reset-options " --z3rlimit 200"
 

@@ -10,6 +10,7 @@ open FStar.Math.Lemmas
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Spec.P256.Lemmas
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Math

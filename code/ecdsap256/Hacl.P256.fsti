@@ -10,15 +10,13 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.P256
-open Spec.P256.Constants
-open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.DH
 
 open Spec.Hash.Definitions
 
 open Hacl.Impl.P256.Compression
 
-module S = Spec.P256.Constants
+module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 

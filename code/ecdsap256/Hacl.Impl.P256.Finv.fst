@@ -18,7 +18,7 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 
 module LSeq = Lib.Sequence
 module M = Lib.NatMod
-module S = Spec.P256.Constants
+module S = Spec.P256
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation

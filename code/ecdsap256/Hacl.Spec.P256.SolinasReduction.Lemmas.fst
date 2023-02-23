@@ -9,7 +9,7 @@ open FStar.Tactics.Canon
 open Lib.IntTypes
 open Lib.Sequence
 
-open Spec.P256.Constants
+open Spec.P256
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 

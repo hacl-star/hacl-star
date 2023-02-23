@@ -8,9 +8,8 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Lemmas
 open Spec.ECDSA
-open Spec.P256.Constants
+open Spec.P256
 
 open Hacl.Spec.P256.Felem
 
@@ -18,26 +17,6 @@ open Hacl.Spec.P256.Felem
 
 noextract
 let prime = prime_p256_order
-
-inline_for_extraction
-let prime256order_buffer: x: glbuffer uint64 (size 4)
-  {witnessed #uint64 #(size 4) x
-  (Lib.Sequence.of_list p256_order_prime_list) /\ recallable x /\
-  felem_seq_as_nat (Lib.Sequence.of_list (p256_order_prime_list)) == prime_p256_order} =
-  createL_global p256_order_prime_list
-
-
-// NOTE: used in Hacl.Impl.ECDSA.MM.Exponent.fst
-inline_for_extraction
-let order_inverse_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_inverse_seq /\ recallable x} =
-  createL_global prime_p256_order_inverse_list
-
-
-inline_for_extraction
-let order_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_seq /\ recallable x} =
-  createL_global prime_p256_order_list
-
-
 
 val reduction_prime_2prime_order: x:felem -> result:felem -> Stack unit
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)

@@ -13,7 +13,7 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.Felem
 
 module M = Lib.NatMod
-module S = Spec.P256.Constants
+module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 

@@ -10,8 +10,7 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.P256
-open Spec.P256.Lemmas
-open Spec.P256.Constants
+open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.ECDSA
 
@@ -25,6 +24,7 @@ open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Qinv
 open Hacl.Impl.P256.PointMul
+open Hacl.Impl.P256.Constants
 
 open Hacl.Hash.SHA2
 open Spec.Hash.Definitions
