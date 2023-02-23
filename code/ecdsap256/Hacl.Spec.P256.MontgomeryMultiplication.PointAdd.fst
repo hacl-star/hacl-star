@@ -1,4 +1,4 @@
-module Spec.P256.MontgomeryMultiplication.PointAdd
+module Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
 
 open FStar.Mul
 open FStar.Math.Lemmas
@@ -6,7 +6,7 @@ open FStar.Math.Lib
 
 open Spec.P256
 open Spec.P256.Constants
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 

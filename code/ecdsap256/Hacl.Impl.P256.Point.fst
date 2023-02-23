@@ -19,8 +19,8 @@ open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Core
 
-open Spec.P256.MontgomeryMultiplication
-friend Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 module BSeq = Lib.ByteSequence
 module S = Spec.P256.Lemmas

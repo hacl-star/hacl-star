@@ -13,12 +13,12 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Spec.P256
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Math
 
-friend Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"
 

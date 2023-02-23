@@ -12,7 +12,7 @@ open Lib.ByteSequence
 open Spec.P256
 open Spec.P256.Lemmas
 open Spec.P256.Constants
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.ECDSA
 
 open Hacl.Spec.P256.Felem

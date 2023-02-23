@@ -10,7 +10,7 @@ open Lib.Buffer
 
 open Spec.P256
 open Spec.P256.Constants
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 module S = Spec.P256.Constants
 

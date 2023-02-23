@@ -13,8 +13,8 @@ open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.SolinasReduction
 
-open Spec.P256.MontgomeryMultiplication
-friend Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 module LSeq = Lib.Sequence
 module M = Lib.NatMod

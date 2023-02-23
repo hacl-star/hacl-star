@@ -13,14 +13,14 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Spec.P256.Lemmas
-open Spec.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication.PointAdd
+open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Math
 
-friend Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #reset-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 

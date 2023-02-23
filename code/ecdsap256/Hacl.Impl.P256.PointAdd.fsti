@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Spec.P256
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Point

@@ -12,8 +12,8 @@ open Hacl.Impl.P256.SolinasReduction
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 
-open Spec.P256.MontgomeryMultiplication
-friend Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

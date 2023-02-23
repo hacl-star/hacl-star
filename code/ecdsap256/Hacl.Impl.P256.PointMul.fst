@@ -18,8 +18,8 @@ open Hacl.Impl.P256.PointDouble
 open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Point
 
-open Spec.P256.MontgomeryMultiplication
-friend Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
