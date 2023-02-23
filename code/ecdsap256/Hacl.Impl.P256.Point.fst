@@ -226,10 +226,10 @@ let norm p resultPoint tempBuffer =
       assert (as_nat h1 z2f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime256));
       assert (as_nat h2 z3f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime256));
 
-  exponent z2f z2f tempBuffer20;
+  finv z2f z2f tempBuffer20;
     let h3 = ST.get() in
       assert(as_nat h3 z2f = toDomain_ (S.pow (fromDomain_ (as_nat h2 z2f)) (prime256 - 2) % prime256));
-  exponent z3f z3f tempBuffer20;
+  finv z3f z3f tempBuffer20;
     let h4 = ST.get() in
       assert(as_nat h4 z3f = toDomain_ (S.pow (fromDomain_ (as_nat h3 z3f)) (prime256 - 2) % prime256));
 
@@ -266,7 +266,7 @@ let normX p result tempBuffer =
 
     let h0 = ST.get() in
   fsqr zf z2f;
-  exponent z2f z2f tempBuffer20;
+  finv z2f z2f tempBuffer20;
   fmul z2f xf z2f;
   fromDomain z2f result;
   assert_norm (prime >= 2);

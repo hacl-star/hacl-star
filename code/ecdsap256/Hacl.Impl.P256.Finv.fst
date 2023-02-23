@@ -186,7 +186,8 @@ let lemma_mul_nat a b = ()
 
 
 #reset-options " --z3rlimit 200"
-let exponent a result tempBuffer =
+[@CInline]
+let finv a result tempBuffer =
   let h0 = ST.get () in
   let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in
     let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in
@@ -408,6 +409,7 @@ let sqPower_buffer: x: glbuffer uint8 32ul {witnessed x sqPower_seq /\ recallabl
   createL_global sqPower_list
 
 
-let square_root a result =
+[@CInline]
+let fsqrt a result =
   recall_contents sqPower_buffer sqPower_seq;
   montgomery_ladder_power a sqPower_buffer result
