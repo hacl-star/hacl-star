@@ -131,17 +131,17 @@ let snd (_, y) = y
 
 // Our index captures all the possible choices of specialization. Here, our code
 // may be specialized for any choice of key and value types...
-let index_t = eqtype & Type0
-inline_for_extraction
-let key_t (i: index_t) = fst i
-inline_for_extraction
-let value_t (i: index_t) = snd i
+inline_for_extraction noeq
+type index_t = {
+  key: eqtype;
+  value: Type0
+}
 
 // (some derived types from the index)
 inline_for_extraction
-let assoc_list_t (i: index_t) = list (fst i & snd i)
+let assoc_list_t (i: index_t) = list (i.key & i.value)
 inline_for_extraction
-let key_eq_t (i: index_t) = fst i -> fst i -> bool
+let key_eq_t (i: index_t) = i.key -> i.key -> bool
 
 // ... as long as the user can, later, provide an equality function. Two options
 // here: either we put this in an fsti, and have an implementation underneath
@@ -154,8 +154,8 @@ assume val key_eq: (#i: index_t) -> key_eq_t i
 
 /// No intermediate let-bindings
 [@Meta.Attribute.specialize]
-let lookup_loop1 #i (k: key_t i) (ls: assoc_list_t i):
-  Stack (option (value_t i))
+let lookup_loop1 #i (k: i.key) (ls: assoc_list_t i):
+  Stack (option i.value)
   (requires (fun _ -> True))
   (ensures (fun _ _ _ -> True))
   =  
@@ -188,6 +188,6 @@ let lookup_loop1 #i (k: key_t i) (ls: assoc_list_t i):
 ])
 
 inline_for_extraction
-let concrete_index: index_t = int, string
+let concrete_index: index_t = { key = int; value = string }
 let concrete_key_eq: key_eq_t concrete_index = (=)
 let concrete_lookup_loop1 = example_lookup_loop1_higher #concrete_index True concrete_key_eq
