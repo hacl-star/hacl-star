@@ -38,13 +38,12 @@ let _point_double (p:point_nat_prime) : point_nat_prime =
   let beta = x * gamma in
   let alpha = 3 * (x - delta) * (x + delta) in
   let x3 = (alpha * alpha - 8 * beta) % prime in
-  let y3 = (alpha *  (4 * beta - x3) - 8 * gamma * gamma) % prime in
+  let y3 = (alpha * (4 * beta - x3) - 8 * gamma * gamma) % prime in
   let z3 = ((y + z) * (y + z) - delta - gamma) % prime in
   (x3, y3, z3)
 
 
 let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
-
   let (x1, y1, z1) = p in
   let (x2, y2, z2) = q in
 
@@ -67,13 +66,10 @@ let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
   let x3 = (rr - hhh - 2 * u1 * hh) % prime256 in
   let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime256 in
   let z3 = (h * z1 * z2) % prime256 in
-  if z2 = 0 then
-    (x1, y1, z1)
+  if z2 = 0 then (x1, y1, z1)
   else
-    if z1 = 0 then
-      (x2, y2, z2)
-    else
-      (x3, y3, z3)
+    if z1 = 0 then (x2, y2, z2)
+    else (x3, y3, z3)
 
 
 let isPointAtInfinity (p:point_nat) =
@@ -95,29 +91,12 @@ let _norm (p:point_nat_prime) : point_nat_prime =
 let scalar = lbytes 32
 
 
-val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
-  (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
-
-let lemma_scalar_ith sc k =
-  index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
-  nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
-
-
-val lemma_euclidian_for_ithbit: k: nat -> i: nat
-  -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
-
-let lemma_euclidian_for_ithbit k i =
-  lemma_div_def i 8;
-  pow2_plus (8 * (i / 8)) (i % 8)
-
-
 let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
   let q = 31 - i / 8 in let r = size (i % 8) in
   to_u64 ((index k q >>. r) &. u8 1)
 
 
 val _ml_step0: p:point_nat_prime -> q:point_nat_prime -> tuple2 point_nat_prime point_nat_prime
-
 let _ml_step0 r0 r1 =
   let r0 = _point_add r1 r0 in
   let r1 = _point_double r1 in
@@ -125,7 +104,6 @@ let _ml_step0 r0 r1 =
 
 
 val _ml_step1: p: point_nat_prime -> q: point_nat_prime -> tuple2 point_nat_prime point_nat_prime
-
 let _ml_step1 r0 r1 =
   let r1 = _point_add r0 r1 in
   let r0 = _point_double r0 in
