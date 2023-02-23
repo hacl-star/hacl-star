@@ -1,155 +1,193 @@
 module Example
 
-module I = Interface
+module B = LowStar.Buffer
+module HS = FStar.HyperStack
+module G = FStar.Ghost
+module L = FStar.List.Tot
+module ST = FStar.HyperStack.ST
 
-open FStar.Mul
+open FStar.HyperStack.ST
+open LowStar.BufferOps
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 25 --fuel 0 --ifuel 1"
 
-// Somehow miraculously, this works.
-%splice[
-  double_round_inline;
-  chacha20_core_inline;
-  chacha20_init_inline;
-  chacha20_encrypt_inline;
-  chacha20_decrypt_inline
-] (MetaInterface.specialize [
-  `Hacl.Impl.Chacha20.Vec.chacha20_encrypt;
-  `Hacl.Impl.Chacha20.Vec.chacha20_decrypt
+/// Meta parameters for the map
+noeq type meta = {
+  k : Type0; (* The type of the key *)
+  eq : k -> k -> bool; (* Equality test for the key *)
+  t : Type0; (* The type of values *)
+}
+
+/// Associative list
+type al (m : meta) : Type0 = list (m.k & m.t)
+
+/// Lookup
+let rec lookup (m : meta) (k : m.k) (ls : al m) : option m.t =
+  match ls with
+  | [] -> None
+  | (k', x) :: ls' ->
+    if m.eq k k' then Some x else lookup m k ls'
+
+type name = string
+assume type sym_key
+assume type bytes
+assume val encrypt (k : sym_key) (plain : bytes) : bytes
+assume val decrypt (k : sym_key) (cipher : bytes) : option bytes
+
+noeq type keypair = {
+  enc_key : sym_key;
+  dec_key : sym_key;
+}
+
+let dv_meta : meta = {
+  k = name;
+  eq = (fun x y -> x = y);
+  t = keypair;
+}
+
+/// Peer library
+noeq type device = {
+  peers : al dv_meta;
+  // Other fields...
+}
+
+let lookup_peer_keys (peer_name : name) (dv : device) : option keypair =
+  lookup dv_meta peer_name dv.peers
+
+let send_message_to_peer (peer_name : name) (dv : device) (plain : bytes) : option bytes =
+  match lookup_peer_keys peer_name dv with
+  | None -> None
+  | Some kp -> Some (encrypt kp.enc_key plain)
+
+let send_message_from_peer (peer_name : name) (dv : device) (cipher : bytes) : option bytes =
+  match lookup_peer_keys peer_name dv with
+  | None -> None
+  | Some kp -> decrypt kp.dec_key cipher
+
+/// Non-recursive version of lookup, but with intermediate let-bindings for test_pre, etc.
+let lookup_loop (m : meta) (k : m.k) (ls : al m) :
+  Stack (option m.t)
+  (requires (fun _ -> True))
+  (ensures (fun _ _ _ -> True))
+  =  
+  push_frame ();
+  let ptr = B.alloca ls 1ul in
+  let test_pre = fun h0 -> B.live h0 ptr in
+  let test_post = fun b h1 -> B.live h1 ptr /\ b = Cons? (B.get h1 ptr 0) in
+  let test () : Stack bool (requires test_pre) (ensures (fun h0 b h1 -> test_post b h1)) =
+    Cons? (!* ptr)
+  in
+  let body () : Stack unit
+    (requires (fun h0 -> test_post true h0))
+    (ensures (fun h0 _ h1 -> test_pre h1)) =
+    let tl = Cons?.tl (!* ptr) in
+    B.upd ptr 0ul tl
+  in
+  C.Loops.while #test_pre #test_post test body;
+  let x =
+    match !* ptr with
+    | [] -> None
+    | hd :: _ -> Some hd
+  in
+  pop_frame ();
+  x
+
+/// Auxiliary definitions
+inline_for_extraction
+let ref #a (init : a) :
+  ST.StackInline (B.buffer a)
+  (requires (fun _ -> True))
+  (ensures (fun h0 b h1 ->
+    B.live h1 b /\
+    B.alloc_post_mem_common b h0 h1 (Seq.create 1 init) /\
+    B.length b = 1 /\
+    B.frameOf b = HS.get_tip h0 /\
+    B.frameOf b <> HyperStack.root    
+  )) =
+  B.alloca init 1ul
+
+inline_for_extraction
+let upd
+  (#a:Type0) (#rrel #rel:B.srel a)
+  (b:B.mbuffer a rrel rel)
+  (v:a) :
+  Stack unit
+    (requires (fun h -> B.live h b /\ 0 < B.length b /\
+                      rel (B.as_seq h b) (Seq.upd (B.as_seq h b) 0 v)))
+    (ensures (fun h _ h' -> (not (B.g_is_null b)) /\
+                          B.modifies (B.loc_buffer b) h h' /\
+                          B.live h' b /\
+                          B.as_seq h' b == Seq.upd (B.as_seq h b) 0 v))
+  = B.upd b 0ul v
+
+inline_for_extraction
+let while #test_pre #test_post = C.Loops.while #test_pre #test_post
+
+inline_for_extraction noextract
+let fst (x, _) = x
+
+inline_for_extraction noextract
+let snd (_, y) = y
+
+// Our index captures all the possible choices of specialization. Here, our code
+// may be specialized for any choice of key and value types...
+let index_t = eqtype & Type0
+inline_for_extraction
+let key_t (i: index_t) = fst i
+inline_for_extraction
+let value_t (i: index_t) = snd i
+
+// (some derived types from the index)
+inline_for_extraction
+let assoc_list_t (i: index_t) = list (fst i & snd i)
+inline_for_extraction
+let key_eq_t (i: index_t) = fst i -> fst i -> bool
+
+// ... as long as the user can, later, provide an equality function. Two options
+// here: either we put this in an fsti, and have an implementation underneath
+// that guarantees that the type is inhabited (hard to explain). Or we just say
+// that it's ok to have assume val, if we made a mistake, then no one will be
+// able to call lookup_loop1.
+
+[@Meta.Attribute.specialize]
+assume val key_eq: (#i: index_t) -> key_eq_t i
+
+/// No intermediate let-bindings
+[@Meta.Attribute.specialize]
+let lookup_loop1 #i (k: key_t i) (ls: assoc_list_t i):
+  Stack (option (value_t i))
+  (requires (fun _ -> True))
+  (ensures (fun _ _ _ -> True))
+  =  
+  push_frame ();
+  let b = ref true in
+  let lsp = ref ls in
+  let test_pre = fun h0 -> B.live h0 b /\ B.live h0 lsp in
+  let test_post = fun bv h1 -> B.live h1 b /\ B.live h1 lsp /\ bv = B.get h1 b 0 in
+  while
+    ((fun () -> !* b)
+      <: unit -> Stack bool (requires test_pre) (ensures (fun h0 bv h1 -> test_post bv h1)))
+    ((fun () ->
+      let ls = !* lsp in
+      match ls with
+      | [] -> upd b false
+      | (k', _) :: tl ->
+        if key_eq k k' then upd b false
+        else upd lsp tl)
+      <: unit -> Stack unit
+        (requires (fun h0 -> test_post true h0))
+        (ensures (fun h0 _ h1 -> test_pre h1)));
+  let ls = !* lsp in
+  pop_frame ();
+  match ls with
+  | [] -> None
+  | (_, x) :: _ -> Some x
+
+%splice [ example_lookup_loop1_higher ] (Meta.Interface.specialize (`index_t) [
+  `lookup_loop1
 ])
 
-let double_round_32 = double_round_inline #1
-let chacha20_core_32 = chacha20_core_inline #1 double_round_32
-let chacha20_init_32 = chacha20_init_inline #1
-let chacha20_encrypt_32 = chacha20_encrypt_inline #1 chacha20_init_32 chacha20_core_32
-let chacha20_decrypt_32 = chacha20_decrypt_inline #1 chacha20_init_32 chacha20_core_32
-
-// Now on to the bugs -- on a smaller example.
-
-#set-options "--print_bound_var_types --print_implicits --print_full_names"
-
-// This is what comes out of the tactic.
-(*
-let times_two_inline_t =
-  fun (#w2285: Interface.w) -> x2286: Interface.word w2285 -> Prims.Tot (Interface.word w2285)
-
-let times_two_inline:
-    #w2392: Interface.w
-  -> Prims.Tot
-    (arg_Interface_add2393: (fun (#w2394: Interface.w) -> Interface.add_st w2394) #w2392
-        -> Prims.Tot (times_two_inline_t #w2392))
-=
-      fun
-  (#w2365: Interface.w)
-  (arg_Interface_add2366: (fun (#w2368: Interface.w) -> Interface.add_st w2368) #w2365)
-  (x2367: Interface.word w2365)
-  ->
-  arg_Interface_add2366 x2367 x2367
-
-let times_four_inline_t = fun (#w3040: Interface.w) -> x3041: Interface.word w3040 -> Prims.Tot (Interface.word w3040)
-
-let times_four_inline:   #w3147: Interface.w
-  -> Prims.Tot
-    (arg_Interface_add3148: (fun (#w3149: Interface.w) -> Interface.add_st w3149) #w3147
-        -> Prims.Tot (times_four_inline_t #w3147))
-=
-  fun
-  (#w3120: Interface.w)
-  (arg_Interface_add3121: (fun (#w3123: Interface.w) -> Interface.add_st w3123) #w3120)
-  (x3122: Interface.word w3120)
-  ->
-  times_two_inline #w3120
-    arg_Interface_add3121
-    (times_two_inline #w3120 arg_Interface_add3121 x3122)
-
-let times_sixteen_inline_t = fun (#w3675: Interface.w) -> x3676: Interface.word w3675 -> Prims.Tot (Interface.word w3675)
-let times_sixteen_inline:
-#w3740: Interface.w
-  -> Prims.Tot
-    (arg_Client_times_four3741: times_four_inline_t #w3740
-        -> Prims.Tot (times_sixteen_inline_t #w3740))
-=
-fun
-  (#w3742: Interface.w)
-  (arg_Client_times_four3743: times_four_inline_t #w3742)
-  (x3744: Interface.word w3742)
-  ->
-  arg_Client_times_four3743 (arg_Client_times_four3743 x3744)
-
-let four_inline_t = fun (#w6290: Interface.w) -> Interface.word w6290
-let four_inline:
-    #w6354: Interface.w -> Prims.Tot (four_inline_t #w6354)
-    =
-    fun (#w6355: Interface.w) ->
-  if Prims.op_Equality #Interface.w w6355 (Interface.W32)
-  then 4ul
-  else 4UL
-
-let times_four'_inline_t = fun (#w7062: Interface.w) -> x7063: Interface.word w7062 -> Prims.Tot (Interface.word w7062)
-let times_four'_inline:
-  #w7127: Interface.w
-  -> Prims.Tot
-    (arg_Interface_mul7128: (fun (#w7129: Interface.w) -> Interface.mul_st w7129) #w7127
-        -> Prims.Tot (times_four'_inline_t #w7127))
-  =
-  fun
-  (#w7130: Interface.w)
-  (arg_Interface_mul7131: (fun (#w7133: Interface.w) -> Interface.mul_st w7133) #w7130)
-  (x7132: Interface.word w7130)
-  ->
-  arg_Interface_mul7131 (four_inline #w7130) x7132
-
-let times_sixteen'_inline_t = fun (#w7808: Interface.w) -> x7809: Interface.word w7808 -> Prims.Tot (Interface.word w7808)
-let times_sixteen'_inline:
-#w7873: Interface.w
-  -> Prims.Tot
-    (arg_Client_times_four7874: times_four_inline_t #w7873
-        -> Prims.Tot
-          (arg_Interface_mul7875: (fun (#w7876: Interface.w) -> Interface.mul_st w7876) #w7873
-              -> Prims.Tot (times_sixteen'_inline_t #w7873)))
-=
-fun
-  (#w7877: Interface.w)
-  (arg_Client_times_four7878: times_four_inline_t #w7877)
-  (arg_Interface_mul7879: (fun (#w7881: Interface.w) -> Interface.mul_st w7881) #w7877)
-  (x7880: Interface.word w7877)
-  ->
-  arg_Client_times_four7878 (times_four'_inline #w7877 arg_Interface_mul7879 x7880)
-
-*)
-
-let _: squash (inversion I.w) = allow_inversion I.w
-
-#set-options "--max_fuel 0 --max_ifuel 0"
-
-// BUG: this is what the tactic generates (see debug output)
-
-let four_inline_t': #w1639: Interface.w -> Prims.Tot Type0 = fun (#w1640: Interface.w) -> Interface.word w1640
-let four_inline': #w1700: Interface.w -> Prims.Tot (four_inline_t' #w1700) =
-fun (#w1701: Interface.w) ->
-  if Prims.op_Equality #Interface.w w1701 (Interface.W32)
-  then 4ul
-  else 4UL
-
-let u1 = ()
-
-// But when trying to actually call the tactic, I get:
-//   Expected type "Example.four_inline_t #w1870"; but "FStar.UInt32.__uint_to_t
-//     4" has type "FStar.UInt32.t"
-// There seems to be a proof obligation emitted to Z3 when splicing; I don't
-// understand what the query is, and why it shows up.
-//
-// Note that the problem is somewhere in the definition of four_inline since
-// commenting out line 172 of the tactic fixes the problem.
-%splice[
-  //times_four_inline;
-  //times_sixteen_inline;
-  //times_sixteen'_inline
-] (MetaInterface.specialize [ `Client.four ])
-//] (MetaInterface.specialize [ `Client.times_sixteen; `Client.times_sixteen' ])
-
-let add: I.add_st I.W32 = FStar.UInt32.add_mod
-let mul: I.mul_st I.W32 = FStar.UInt32.mul_mod
-// let times_four = times_four_inline add
-// let times_sixteen = times_sixteen_inline times_four
-// let times_sixteen' = times_sixteen'_inline times_four mul
+inline_for_extraction
+let concrete_index: index_t = int, string
+let concrete_key_eq: key_eq_t concrete_index = (=)
+let concrete_lookup_loop1 = example_lookup_loop1_higher #concrete_index True concrete_key_eq
