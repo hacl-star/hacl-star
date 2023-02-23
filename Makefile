@@ -93,7 +93,7 @@ endif
 all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible \
-  compile-portable-gcc-compatible \
+  compile-portable-gcc-compatible compile-wasm \
   obj/libhaclml.cmxa
 
 # Mozilla does not want to run the configure script, so this means that the
