@@ -808,13 +808,6 @@ dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle EverCrypt.TargetConfig \
   -bundle 'EverCrypt.*'
 dist/wasm/Makefile.basic: REQUIRED_DROP =
 
-ifeq ($(OS),Windows_NT)
-doc-wasm:
-	echo "WASM documentation disabled (jsdoc segfaults on Windows)"
-else
-doc-wasm: dist/wasm/doc/out/index.html
-endif
-
 # Compact distributions
 # ---------------------
 #
