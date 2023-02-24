@@ -17,7 +17,7 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
-open Hacl.Impl.P256.Math
+open Hacl.Spec.P256.Math
 open Hacl.Impl.P256.Constants
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

@@ -11,7 +11,7 @@ open Lib.IntTypes
 open Lib.ByteBuffer
 open Lib.Buffer
 
-open Hacl.Impl.P256.Math
+open Hacl.Spec.P256.Math
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Field

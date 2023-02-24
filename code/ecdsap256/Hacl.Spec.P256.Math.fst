@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Math
+module Hacl.Spec.P256.Math
 
 open FStar.Math.Lemmas
 open FStar.Math
@@ -8,12 +8,6 @@ open Spec.P256
 open Hacl.Spec.P256.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
-
-noextract
-let prime: (p: pos {p > 3}) =
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
-  pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
-// 115792089210356248762697446949407573530086143415290314195533631308867097853951
 
 val mod_sub: n:pos -> a:int -> b:int -> Lemma
   (requires a % n = b % n)
