@@ -72,7 +72,7 @@ val _ecp256dh_r:
        if not (verifyQValidCurvePointSpec (pointJacX, pointJacY, pointJacZ)) then
          uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
        else
-        x3 < prime256 /\ y3 < prime256 /\ z3 < prime256 /\
+        x3 < prime /\ y3 < prime /\ z3 < prime /\
         (let xN, yN, zN = scalar_multiplication (as_seq h0 scalar) (pointJacX, pointJacY, pointJacZ) in
          xN == x3 /\ yN == y3 /\ zN == z3 /\
          (if isPointAtInfinity (xN, yN, zN) then

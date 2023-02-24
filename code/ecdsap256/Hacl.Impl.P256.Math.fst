@@ -10,7 +10,7 @@ open Hacl.Spec.P256.Lemmas
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 noextract
-let prime256: (p: pos {p > 3}) =
+let prime: (p: pos {p > 3}) =
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 // 115792089210356248762697446949407573530086143415290314195533631308867097853951
@@ -67,133 +67,133 @@ let euclid n a b r s =
 
 
 val lemma_modular_multiplication_p256_2_left:
-  a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma
-  (requires a * pow2 256 % prime256 = b * pow2 256 % prime256)
+  a:nat{a < prime} -> b:nat{b < prime} -> Lemma
+  (requires a * pow2 256 % prime = b * pow2 256 % prime)
   (ensures  a == b)
 
 let lemma_modular_multiplication_p256_2_left a b =
-  mod_sub prime256 (a * pow2 256) (b * pow2 256);
-  assert (pow2 256 * (a - b) % prime256 = 0);
+  mod_sub prime (a * pow2 256) (b * pow2 256);
+  assert (pow2 256 * (a - b) % prime = 0);
   let r = 26959946654596436323893653559348051827142583427821597254581997273087 in
   let s = -26959946648319334592891477706824406424704094582978235142356758167551 in
-  assert_norm (r * prime256 + s * pow2 256 = 1);
-  euclid prime256 (pow2 256) (a - b) r s;
-  assert ((a - b) % prime256 = 0);
-  sub_mod prime256 a b;
-  assert (a % prime256 = b % prime256);
-  FStar.Math.Lemmas.modulo_lemma a prime256;
-  FStar.Math.Lemmas.modulo_lemma b prime256
+  assert_norm (r * prime + s * pow2 256 = 1);
+  euclid prime (pow2 256) (a - b) r s;
+  assert ((a - b) % prime = 0);
+  sub_mod prime a b;
+  assert (a % prime = b % prime);
+  FStar.Math.Lemmas.modulo_lemma a prime;
+  FStar.Math.Lemmas.modulo_lemma b prime
 
-val lemma_modular_multiplication_p256_2: a: nat{a < prime256} -> b: nat{b < prime256} ->
+val lemma_modular_multiplication_p256_2: a: nat{a < prime} -> b: nat{b < prime} ->
   Lemma
-  (a * pow2 256 % prime256 = b * pow2 256 % prime256 <==> a == b)
+  (a * pow2 256 % prime = b * pow2 256 % prime <==> a == b)
 
 let lemma_modular_multiplication_p256_2 a b =
   Classical.move_requires_2 lemma_modular_multiplication_p256_2_left a b
 
 noextract
-let prime_p256_order:pos =
+let order:pos =
   assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369> 0);
   115792089210356248762697446949407573529996955224135760342422259061068512044369
 
 val lemma_montgomery_mod_inverse_addition: a:nat -> Lemma (
-  a * modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256 ==
-  a * modp_inv2_prime (pow2 128) prime256 % prime256)
+  a * modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime ==
+  a * modp_inv2_prime (pow2 128) prime % prime)
 
 let lemma_montgomery_mod_inverse_addition a =
   calc (==) {
-    a * modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256;
-    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 64) prime256) (modp_inv2_prime (pow2 64) prime256)}
-    a * (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256) % prime256;
+    a * modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime;
+    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 64) prime) (modp_inv2_prime (pow2 64) prime)}
+    a * (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime) % prime;
     == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a
-    (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256) prime256 }
-    a * (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256) % prime256;
-    == { assert_norm (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256 ==
-    modp_inv2_prime (pow2 128) prime256 % prime256) }
-    a * (modp_inv2_prime (pow2 128) prime256 % prime256) % prime256;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 128) prime256) prime256 }
-    a * modp_inv2_prime (pow2 128) prime256 % prime256;
+    (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime) prime }
+    a * (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime) % prime;
+    == { assert_norm (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime ==
+    modp_inv2_prime (pow2 128) prime % prime) }
+    a * (modp_inv2_prime (pow2 128) prime % prime) % prime;
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 128) prime) prime }
+    a * modp_inv2_prime (pow2 128) prime % prime;
   }
 
 val lemma_montgomery_mod_inverse_addition2: a:nat -> Lemma (
-  a * modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256 ==
-  a * modp_inv2_prime (pow2 256) prime256 % prime256)
+  a * modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime ==
+  a * modp_inv2_prime (pow2 256) prime % prime)
 
 let lemma_montgomery_mod_inverse_addition2 a =
   calc (==) {
-    a * modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256;
-    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256)}
-    a * (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256) % prime256;
+    a * modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime;
+    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 128) prime) (modp_inv2_prime (pow2 128) prime)}
+    a * (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime) % prime;
     == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a
-    (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256) prime256 }
-    a * (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256) % prime256;
-    == { assert_norm (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256 ==
-    modp_inv2_prime (pow2 256) prime256 % prime256) }
-    a * (modp_inv2_prime (pow2 256) prime256 % prime256) % prime256;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 256) prime256) prime256 }
-    a * modp_inv2_prime (pow2 256) prime256 % prime256;
+    (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime) prime }
+    a * (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime) % prime;
+    == { assert_norm (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime ==
+    modp_inv2_prime (pow2 256) prime % prime) }
+    a * (modp_inv2_prime (pow2 256) prime % prime) % prime;
+    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 256) prime) prime }
+    a * modp_inv2_prime (pow2 256) prime % prime;
   }
 
 (* Fermat's Little Theorem
-   applied to r = modp_inv2_prime (pow2 256) prime_p256_order
+   applied to r = modp_inv2_prime (pow2 256) order
 
   Verified in Sage:
-   prime256 = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
+   prime = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
    p = 41058363725152142129326129780047268409114441015993725554835256314039467401291
-   C = EllipticCurve(prime256, [-3, p])
-   prime_p256_order =/ C.cardinality()
-   Z = Integers(prime_p256_order)
-   r = Z(inverse_mod(2**256, prime_p256_order))
-   r ^ (prime_p256_order - 1)
+   C = EllipticCurve(prime, [-3, p])
+   order =/ C.cardinality()
+   Z = Integers(order)
+   r = Z(inverse_mod(2**256, order))
+   r ^ (order - 1)
 *)
 val lemma_l_ferm: unit -> Lemma
-  (let r = modp_inv2_prime (pow2 256) prime_p256_order in
-  (pow r (prime_p256_order - 1) % prime_p256_order == 1))
+  (let r = modp_inv2_prime (pow2 256) order in
+  (pow r (order - 1) % order == 1))
 
 let lemma_l_ferm () =
-  let r = modp_inv2_prime (pow2 256) prime_p256_order in
-  assert_norm (exp (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 1)  == 1);
-  lemma_pow_mod_n_is_fpow prime_p256_order r (prime_p256_order - 1)
+  let r = modp_inv2_prime (pow2 256) order in
+  assert_norm (exp (modp_inv2_prime (pow2 256) order) (order - 1)  == 1);
+  lemma_pow_mod_n_is_fpow order r (order - 1)
 
 
-val lemma_multiplication_not_mod_prime_left: a:nat{a < prime256} -> Lemma
-  (requires a * (modp_inv2 (pow2 256)) % prime256 == 0)
+val lemma_multiplication_not_mod_prime_left: a:nat{a < prime} -> Lemma
+  (requires a * (modp_inv2 (pow2 256)) % prime == 0)
   (ensures a == 0)
 
 let lemma_multiplication_not_mod_prime_left a =
   let b = modp_inv2 (pow2 256) in
-  lemma_mod_mul_distr_r a b prime256;
-  assert (a * b % prime256 == a * (b % prime256) % prime256);
+  lemma_mod_mul_distr_r a b prime;
+  assert (a * b % prime == a * (b % prime) % prime);
   let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
   let s = 26959946660873538059280334323183841250350249843923952699046031785985 in
-  assert_norm (r * prime256 + s * b == 1);
+  assert_norm (r * prime + s * b == 1);
   swap_mul a b;
-  assert (b * a % prime256 == 0);
-  euclid prime256 b a r s;
-  assert (a % prime256 == 0);
-  small_mod a prime256
+  assert (b * a % prime == 0);
+  euclid prime b a r s;
+  assert (a % prime == 0);
+  small_mod a prime
 
-val lemma_multiplication_not_mod_prime: a:nat{a < prime256} ->
-  Lemma (a * (modp_inv2 (pow2 256)) % prime256 == 0 <==> a == 0)
+val lemma_multiplication_not_mod_prime: a:nat{a < prime} ->
+  Lemma (a * (modp_inv2 (pow2 256)) % prime == 0 <==> a == 0)
 
 let lemma_multiplication_not_mod_prime a =
   Classical.move_requires lemma_multiplication_not_mod_prime_left a
 
 
-val lemma_modular_multiplication_p256: a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma
-  (requires a * modp_inv2 (pow2 256) % prime256 == b * modp_inv2 (pow2 256) % prime256)
+val lemma_modular_multiplication_p256: a:nat{a < prime} -> b:nat{b < prime} -> Lemma
+  (requires a * modp_inv2 (pow2 256) % prime == b * modp_inv2 (pow2 256) % prime)
   (ensures  a == b)
 
 let lemma_modular_multiplication_p256 a b =
   let c = modp_inv2 (pow2 256) in
-  mod_sub prime256 (a * c) (b * c);
-  assert (c * (a - b) % prime256 = 0);
+  mod_sub prime (a * c) (b * c);
+  assert (c * (a - b) % prime = 0);
   let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
   let s = 26959946660873538059280334323183841250350249843923952699046031785985 in
-  assert_norm (r * prime256 + s * c = 1);
-  euclid prime256 c (a - b) r s;
-  assert ((a - b) % prime256 = 0);
-  sub_mod prime256 a b;
-  assert (a % prime256 == b % prime256);
-  FStar.Math.Lemmas.modulo_lemma a prime256;
-  FStar.Math.Lemmas.modulo_lemma b prime256
+  assert_norm (r * prime + s * c = 1);
+  euclid prime c (a - b) r s;
+  assert ((a - b) % prime = 0);
+  sub_mod prime a b;
+  assert (a % prime == b % prime);
+  FStar.Math.Lemmas.modulo_lemma a prime;
+  FStar.Math.Lemmas.modulo_lemma b prime

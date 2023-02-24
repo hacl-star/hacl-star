@@ -207,22 +207,22 @@ val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
       (
 	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0) &&
 	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
-          Spec.P256.prime_p256_order)))
+          Spec.P256.order)))
 
 let check_bound b =
   let open FStar.Mul in
   let open Lib.ByteSequence in
   let open Spec.P256 in
   [@inline_let]
-  let q1 = normalize_term (prime_p256_order % pow2 64) in 
+  let q1 = normalize_term (order % pow2 64) in 
   [@inline_let]
-  let q2 = normalize_term ((prime_p256_order / pow2 64) % pow2 64) in
+  let q2 = normalize_term ((order / pow2 64) % pow2 64) in
   [@inline_let]
-  let q3 = normalize_term ((prime_p256_order / pow2 128) % pow2 64) in
+  let q3 = normalize_term ((order / pow2 128) % pow2 64) in
   [@inline_let]
-  let q4 = normalize_term (((prime_p256_order / pow2 128) / pow2 64) % pow2 64) in
+  let q4 = normalize_term (((order / pow2 128) / pow2 64) % pow2 64) in
   assert_norm (pow2 128 * pow2 64 == pow2 192);
-  assert (prime_p256_order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4); 
+  assert (order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4); 
 
   let zero = mk_int #U64 #PUB 0 in
   

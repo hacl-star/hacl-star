@@ -44,15 +44,15 @@ val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (siz
       let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in
       let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in
       if uint_v id = 2 || uint_v id = 3 then
-	if x < prime256 then
+	if x < prime then
 	  r == true /\
 	  (
 	    let y =
-              let sq = S.fsqrt (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in
+              let sq = S.fsqrt (((x * x * x + Spec.P256.a_coeff * x + Spec.P256.b_coeff) % prime)) in
               if (uint_v id) % 2 = (sq % 2) then
 		sq
               else
-	         (0 - sq) % prime256
+	         (0 - sq) % prime
 	    in
 	    as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
 	    as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y)

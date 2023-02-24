@@ -12,58 +12,58 @@ open FStar.Tactics.Canon
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256
-open Hacl.Spec.P256.MontgomeryMultiplication
-
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Math
 
+open Hacl.Spec.P256.MontgomeryMultiplication
 friend Hacl.Spec.P256.MontgomeryMultiplication
+
+module S = Spec.P256
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"
 
 val lemma_x3_0: x: int -> y: int -> z: int -> Lemma (
-  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime)  - 8 * (x * (y * y % prime) % prime)) % prime ==  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime)
+  ((3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) * (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime)  - 8 * (x * (y * y % S.prime) % S.prime)) % S.prime ==  ((3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) * (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) - 8 * x * y * y) % S.prime)
 
 let lemma_x3_0 x y z =
-  let t0 = (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) in
+  let t0 = (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) in
   calc (==)
   {
-    (t0 * t0 - 8 * (x * (y * y % prime) % prime)) % prime;
-    (==) {lemma_mod_mul_distr_r x (y * y) prime}
-    (t0 * t0 - 8 * ((x * (y * y)) % prime)) % prime;
+    (t0 * t0 - 8 * (x * (y * y % S.prime) % S.prime)) % S.prime;
+    (==) {lemma_mod_mul_distr_r x (y * y) S.prime}
+    (t0 * t0 - 8 * ((x * (y * y)) % S.prime)) % S.prime;
     (==) {assert_by_tactic (x * (y * y) == x * y * y) canon}
-    (t0 * t0 - 8 * (x * y * y % prime)) % prime;
-    (==) {lemma_mod_sub_distr (t0 * t0) (8 * (x * y * y % prime)) prime}
-    (t0 * t0 - (8 * (x * y * y % prime)) % prime) % prime;
-    (==) {lemma_mod_mul_distr_r 8 (x * y * y) prime}
-    (t0 * t0 - (8 * (x * y * y)) % prime) % prime;
+    (t0 * t0 - 8 * (x * y * y % S.prime)) % S.prime;
+    (==) {lemma_mod_sub_distr (t0 * t0) (8 * (x * y * y % S.prime)) S.prime}
+    (t0 * t0 - (8 * (x * y * y % S.prime)) % S.prime) % S.prime;
+    (==) {lemma_mod_mul_distr_r 8 (x * y * y) S.prime}
+    (t0 * t0 - (8 * (x * y * y)) % S.prime) % S.prime;
     (==) {assert_by_tactic (8 * (x * y * y) == 8 * x * y * y) canon}
-    (t0 * t0 - (8 * x * y * y) % prime) % prime;
-    (==) {lemma_mod_sub_distr (t0 * t0) (8 * x * y * y) prime}
-    (t0 * t0 - 8 * x * y * y) % prime;
+    (t0 * t0 - (8 * x * y * y) % S.prime) % S.prime;
+    (==) {lemma_mod_sub_distr (t0 * t0) (8 * x * y * y) S.prime}
+    (t0 * t0 - 8 * x * y * y) % S.prime;
 
   }
 
 
-val lemma_x3_1: a: int -> b: int -> Lemma (((a % prime) * (a % prime) - b) % prime == (a * a - b) % prime)
+val lemma_x3_1: a: int -> b: int -> Lemma (((a % S.prime) * (a % S.prime) - b) % S.prime == (a * a - b) % S.prime)
 
 let lemma_x3_1 a b =
   calc (==)
   {
-    ((a % prime) * (a % prime) - b) % prime;
-    (==) {lemma_mod_add_distr (- b) ((a % prime) * (a % prime)) prime}
-    ((a % prime) * (a % prime) % prime - b) % prime;
-    (==) {lemma_mod_mul_distr_l a (a % prime) prime; lemma_mod_mul_distr_r a a prime}
-    (a * a % prime - b) % prime;
-    (==) {lemma_mod_add_distr (- b) (a * a) prime}
-    (a * a - b) % prime;
+    ((a % S.prime) * (a % S.prime) - b) % S.prime;
+    (==) {lemma_mod_add_distr (- b) ((a % S.prime) * (a % S.prime)) S.prime}
+    ((a % S.prime) * (a % S.prime) % S.prime - b) % S.prime;
+    (==) {lemma_mod_mul_distr_l a (a % S.prime) S.prime; lemma_mod_mul_distr_r a a S.prime}
+    (a * a % S.prime - b) % S.prime;
+    (==) {lemma_mod_add_distr (- b) (a * a) S.prime}
+    (a * a - b) % S.prime;
   }
 
 
 val lemma_x3: x: int -> y: int -> z: int -> Lemma (
-  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * (x * (y * y % prime) % prime)) % prime ==
-  ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime
+  ((3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) * (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) - 8 * (x * (y * y % S.prime) % S.prime)) % S.prime ==
+  ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % S.prime
 )
 
 let lemma_x3 x y z =
@@ -72,115 +72,115 @@ let lemma_x3 x y z =
   calc (==)
   {
     (
-      (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *
-      (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+      (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) *
+      (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) - 8 * x * y * y) % S.prime;
 
-    (==) {lemma_mod_mul_distr_l (3 * (x - (z * z % prime))) (x + (z * z % prime)) prime}
-
-    (
-      (3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) *
-      (3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
-
-  (==) {lemma_mod_mul_distr_r 3 (x - (z * z % prime)) prime}
-
-     (
-       (3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) *
-       (3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
-
-   (==) {lemma_mod_sub_distr x (z * z) prime}
-
-     (
-       (3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) *
-       (3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
-
-  (==) {lemma_mod_mul_distr_r 3 (x - (z * z)) prime}
-
-     (
-       (3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) *
-       (3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
-
-  (==) {lemma_mod_mul_distr_l (3 * (x - z * z)) (x + (z * z % prime)) prime}
-
-     (
-       (3 * (x - z * z) * (x + (z * z % prime)) % prime) *
-       (3 * (x - z * z) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
-
-  (==) {lemma_mod_mul_distr_r (3 * (x - z * z)) (x + (z * z % prime)) prime;
-       lemma_mod_add_distr x (z * z) prime;
-       lemma_mod_mul_distr_r (3 * (x - z * z)) (x + z * z) prime}
+    (==) {lemma_mod_mul_distr_l (3 * (x - (z * z % S.prime))) (x + (z * z % S.prime)) S.prime}
 
     (
-      (3 * (x - z * z) * (x + (z * z)) % prime) *
-      (3 * (x - z * z) * (x + (z * z)) % prime) - 8 * x * y * y) % prime;
+      (3 * (x - (z * z % S.prime)) % S.prime * (x + (z * z % S.prime)) % S.prime) *
+      (3 * (x - (z * z % S.prime)) % S.prime * (x + (z * z % S.prime)) % S.prime) - 8 * x * y * y) % S.prime;
+
+  (==) {lemma_mod_mul_distr_r 3 (x - (z * z % S.prime)) S.prime}
+
+     (
+       (3 * ((x - (z * z % S.prime)) % S.prime) % S.prime * (x + (z * z % S.prime)) % S.prime) *
+       (3 * ((x - (z * z % S.prime)) % S.prime) % S.prime * (x + (z * z % S.prime)) % S.prime) - 8 * x * y * y) % S.prime;
+
+   (==) {lemma_mod_sub_distr x (z * z) S.prime}
+
+     (
+       (3 * ((x - z * z) % S.prime) % S.prime * (x + (z * z % S.prime)) % S.prime) *
+       (3 * ((x - z * z) % S.prime) % S.prime * (x + (z * z % S.prime)) % S.prime) - 8 * x * y * y) % S.prime;
+
+  (==) {lemma_mod_mul_distr_r 3 (x - (z * z)) S.prime}
+
+     (
+       (3 * ((x - z * z)) % S.prime * (x + (z * z % S.prime)) % S.prime) *
+       (3 * ((x - z * z)) % S.prime * (x + (z * z % S.prime)) % S.prime) - 8 * x * y * y) % S.prime;
+
+  (==) {lemma_mod_mul_distr_l (3 * (x - z * z)) (x + (z * z % S.prime)) S.prime}
+
+     (
+       (3 * (x - z * z) * (x + (z * z % S.prime)) % S.prime) *
+       (3 * (x - z * z) * (x + (z * z % S.prime)) % S.prime) - 8 * x * y * y) % S.prime;
+
+  (==) {lemma_mod_mul_distr_r (3 * (x - z * z)) (x + (z * z % S.prime)) S.prime;
+       lemma_mod_add_distr x (z * z) S.prime;
+       lemma_mod_mul_distr_r (3 * (x - z * z)) (x + z * z) S.prime}
+
+    (
+      (3 * (x - z * z) * (x + (z * z)) % S.prime) *
+      (3 * (x - z * z) * (x + (z * z)) % S.prime) - 8 * x * y * y) % S.prime;
 
   (==) {lemma_x3_1 (3 * (x - z * z) * (x + (z * z))) (8 * x * y * y)}
 
     (
       (3 * (x - z * z) * (x + z * z)) *
-      (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime;
+      (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % S.prime;
 
  (==) {assert_by_tactic (8 * x * y * y == 8 * x * (y * y)) canon}
      (
       (3 * (x - z * z) * (x + z * z)) *
-      (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime;
+      (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % S.prime;
 }
 
 
 val y3_lemma_0: x: int ->  y: int -> z: int ->  t0: int -> Lemma (
-   (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime == (t0 - 8 * y * y * y * y) % prime)
+   (t0 - 8 * (y * y % S.prime) * (y * y % S.prime)) % S.prime == (t0 - 8 * y * y * y * y) % S.prime)
 
 let y3_lemma_0 x y z t0 =
   calc (==) {
-    (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime;
-  (==) {lemma_mod_sub_distr t0 (8 * (y * y % prime) * (y * y % prime)) prime}
-    (t0 - (8 * (y * y % prime) * (y * y % prime)) % prime) % prime;
-  (==) {lemma_mod_mul_distr_r (8 * (y * y % prime)) (y * y) prime}
-    (t0 - (8 * (y * y % prime) * (y * y)) % prime) % prime;
-  (==) {lemma_mod_mul_distr_r (8 * (y * y)) (y * y) prime}
-    (t0 - (8 * (y * y) * (y * y)) % prime) % prime;
+    (t0 - 8 * (y * y % S.prime) * (y * y % S.prime)) % S.prime;
+  (==) {lemma_mod_sub_distr t0 (8 * (y * y % S.prime) * (y * y % S.prime)) S.prime}
+    (t0 - (8 * (y * y % S.prime) * (y * y % S.prime)) % S.prime) % S.prime;
+  (==) {lemma_mod_mul_distr_r (8 * (y * y % S.prime)) (y * y) S.prime}
+    (t0 - (8 * (y * y % S.prime) * (y * y)) % S.prime) % S.prime;
+  (==) {lemma_mod_mul_distr_r (8 * (y * y)) (y * y) S.prime}
+    (t0 - (8 * (y * y) * (y * y)) % S.prime) % S.prime;
   (==) {assert_by_tactic (8 * (y * y) * (y * y) == 8 * y * y * y * y) canon}
-    (t0 - (8 * y * y * y * y) % prime) % prime;
-  (==) {lemma_mod_sub_distr t0 (8 * y * y * y * y) prime}
-    (t0 - (8 * y * y * y * y)) % prime;
+    (t0 - (8 * y * y * y * y) % S.prime) % S.prime;
+  (==) {lemma_mod_sub_distr t0 (8 * y * y * y * y) S.prime}
+    (t0 - (8 * y * y * y * y)) % S.prime;
   (==) {assert_by_tactic (t0 - (8 * y * y * y * y) == t0 - 8 * y * y * y * y) canon}
-    (t0 - 8 * y * y * y * y) % prime;
+    (t0 - 8 * y * y * y * y) % S.prime;
   }
 
 
 val y3_lemma_1: x: int ->  y: int -> z: int ->
-  Lemma (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime == 3 * (x + z * z) * (x - z * z)  % prime)
+  Lemma (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime == 3 * (x + z * z) * (x - z * z)  % S.prime)
 
 let sym_decidable (#a:eqtype) (x y:a) : Lemma (requires y = x) (ensures x == y) = ()
 
 let y3_lemma_1 x y z =
   calc (==)
   {
-    3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime;
-    (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % prime))) (x + (z * z % prime)) prime}
-      3 * (x - (z * z % prime)) * ((x + (z * z % prime)) % prime) % prime;
-    (==) {lemma_mod_add_distr x (z * z) prime}
-      3 * (x - (z * z % prime)) * ((x + z * z) % prime) % prime;
-    (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % prime))) (x + z * z) prime}
-      3 * (x - (z * z % prime)) * (x + z * z) % prime;
-    (==) {assert_by_tactic (3 * (x - (z * z % prime)) * (x + z * z) == 3 * (x + z * z) * (x - (z * z % prime))) canon}
-      3 * (x + z * z) * (x - (z * z % prime)) % prime;
-    (==) {lemma_mod_mul_distr_r (3 * (x + z * z)) (x - (z * z % prime)) prime}
-      3 * (x + z * z) * ((x - (z * z % prime))  % prime)  % prime;
-    (==) {lemma_mod_sub_distr x (z * z) prime}
-      3 * (x + z * z) * ((x - z * z) % prime)  % prime;
+    3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % S.prime))) (x + (z * z % S.prime)) S.prime}
+      3 * (x - (z * z % S.prime)) * ((x + (z * z % S.prime)) % S.prime) % S.prime;
+    (==) {lemma_mod_add_distr x (z * z) S.prime}
+      3 * (x - (z * z % S.prime)) * ((x + z * z) % S.prime) % S.prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % S.prime))) (x + z * z) S.prime}
+      3 * (x - (z * z % S.prime)) * (x + z * z) % S.prime;
+    (==) {assert_by_tactic (3 * (x - (z * z % S.prime)) * (x + z * z) == 3 * (x + z * z) * (x - (z * z % S.prime))) canon}
+      3 * (x + z * z) * (x - (z * z % S.prime)) % S.prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x + z * z)) (x - (z * z % S.prime)) S.prime}
+      3 * (x + z * z) * ((x - (z * z % S.prime))  % S.prime)  % S.prime;
+    (==) {lemma_mod_sub_distr x (z * z) S.prime}
+      3 * (x + z * z) * ((x - z * z) % S.prime)  % S.prime;
     (==) { _ by FStar.Tactics.(mapply (`sym_decidable); mapply (`lemma_mod_mul_distr_r)) }
-      3 * (x + z * z) * (x - z * z)  % prime;
+      3 * (x + z * z) * (x - z * z)  % S.prime;
     }
 
 
 val lemma_y3: x: int -> y: int -> z: int -> x3: int -> Lemma (
-  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime)
+  ((3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) *  ((4 * (x * (y * y % S.prime) % S.prime) % S.prime) - x3) - 8 * (y * y % S.prime) * (y * y % S.prime)) % S.prime == (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % S.prime)
 
 
 let lemma_y3 x y z x3 =
-  let t = ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime in
-  let t0 = (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) in
-  assert(t == (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime);
+  let t = ((3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) *  ((4 * (x * (y * y % S.prime) % S.prime) % S.prime) - x3) - 8 * (y * y % S.prime) * (y * y % S.prime)) % S.prime in
+  let t0 = (3 * (x - (z * z % S.prime)) * (x + (z * z % S.prime)) % S.prime) *  ((4 * (x * (y * y % S.prime) % S.prime) % S.prime) - x3) in
+  assert(t == (t0 - 8 * (y * y % S.prime) * (y * y % S.prime)) % S.prime);
 
   y3_lemma_0 x y z t0;
   y3_lemma_1 x y z;
@@ -188,57 +188,57 @@ let lemma_y3 x y z x3 =
 
   calc (==)
   {
-      4 * (x * (y * y % prime) % prime) % prime;
-    (==) {lemma_mod_mul_distr_r x (y * y) prime}
-       4 * ((x * (y * y)) % prime) % prime;
+      4 * (x * (y * y % S.prime) % S.prime) % S.prime;
+    (==) {lemma_mod_mul_distr_r x (y * y) S.prime}
+       4 * ((x * (y * y)) % S.prime) % S.prime;
     (==) {assert_by_tactic (x * (y * y) == x * y * y) canon}
-      (4 * ((x * y * y) % prime)) % prime;
-    (==) {lemma_mod_mul_distr_r 4 (x * y * y) prime}
-      (4 * (x * y * y)) % prime;
+      (4 * ((x * y * y) % S.prime)) % S.prime;
+    (==) {lemma_mod_mul_distr_r 4 (x * y * y) S.prime}
+      (4 * (x * y * y)) % S.prime;
     (==) {assert_by_tactic (4 * (x * y * y) == 4 * x * y * y) canon}
-      4 * x * y * y % prime;
+      4 * x * y * y % S.prime;
 
    };
 
   calc (==)
   {
-    ((3 * (x + z * z) * (x - z * z)  % prime) *  (4 * x * y * y % prime - x3) - 8 * y * y * y * y) % prime;
-    (==) {lemma_mod_add_distr (- 8 * y * y * y * y) ((3 * (x + z * z) * (x - z * z)  % prime) *  (4 * x * y * y % prime - x3)) prime}
-    ((((3 * (x + z * z) * (x - z * z)) % prime) *  (4 * x * y * y % prime - x3)) % prime - 8 * y * y * y * y) % prime;
-    (==) {lemma_mod_mul_distr_l (3 * (x + z * z) * (x - z * z))  (4 * x * y * y % prime - x3) prime}
-    (((3 * (x + z * z) * (x - z * z)) *  (4 * x * y * y % prime - x3)) % prime - 8 * y * y * y * y) % prime;
-    (==) {lemma_mod_mul_distr_r (3 * (x + z * z) * (x - z * z)) (4 * x * y * y % prime - x3) prime}
-    (((3 * (x + z * z) * (x - z * z)) *  ((4 * x * y * y % prime - x3) % prime)) % prime - 8 * y * y * y * y) % prime;
-    (==) {lemma_mod_add_distr (- x3) (4 * x * y * y) prime}
-    (((3 * (x + z * z) * (x - z * z)) *  ((4 * x * y * y - x3) % prime)) % prime - 8 * y * y * y * y) % prime;
-    (==) {lemma_mod_mul_distr_r (3 * (x + z * z) * (x - z * z)) (4 * x * y * y - x3) prime}
-    ((3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) % prime - 8 * y * y * y * y) % prime;
-    (==) {lemma_mod_add_distr (- 8 * y * y * y * y) (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) prime}
-    (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % prime;
+    ((3 * (x + z * z) * (x - z * z)  % S.prime) *  (4 * x * y * y % S.prime - x3) - 8 * y * y * y * y) % S.prime;
+    (==) {lemma_mod_add_distr (- 8 * y * y * y * y) ((3 * (x + z * z) * (x - z * z)  % S.prime) *  (4 * x * y * y % S.prime - x3)) S.prime}
+    ((((3 * (x + z * z) * (x - z * z)) % S.prime) *  (4 * x * y * y % S.prime - x3)) % S.prime - 8 * y * y * y * y) % S.prime;
+    (==) {lemma_mod_mul_distr_l (3 * (x + z * z) * (x - z * z))  (4 * x * y * y % S.prime - x3) S.prime}
+    (((3 * (x + z * z) * (x - z * z)) *  (4 * x * y * y % S.prime - x3)) % S.prime - 8 * y * y * y * y) % S.prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x + z * z) * (x - z * z)) (4 * x * y * y % S.prime - x3) S.prime}
+    (((3 * (x + z * z) * (x - z * z)) *  ((4 * x * y * y % S.prime - x3) % S.prime)) % S.prime - 8 * y * y * y * y) % S.prime;
+    (==) {lemma_mod_add_distr (- x3) (4 * x * y * y) S.prime}
+    (((3 * (x + z * z) * (x - z * z)) *  ((4 * x * y * y - x3) % S.prime)) % S.prime - 8 * y * y * y * y) % S.prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x + z * z) * (x - z * z)) (4 * x * y * y - x3) S.prime}
+    ((3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) % S.prime - 8 * y * y * y * y) % S.prime;
+    (==) {lemma_mod_add_distr (- 8 * y * y * y * y) (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) S.prime}
+    (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % S.prime;
     (==) {assert_by_tactic (8 * y * y * y * y == 8 * (y * y) * (y * y)) canon}
-    (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * (y * y) * (y * y)) % prime;
+    (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * (y * y) * (y * y)) % S.prime;
     (==) {assert_by_tactic (4 * x * y * y == 4 * x * (y * y)) canon}
-    (3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime;
+    (3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % S.prime;
     (==) {assert_by_tactic ((3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) == (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y))) canon}
-    (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime;
+    (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % S.prime;
 
   }
 
 
 val lemma_z3: x: int -> y: int -> z: int -> Lemma
-  (((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime == ((y + z) * (y + z) - z * z - y * y) % prime)
+  (((y + z) * (y + z) - (y * y % S.prime) - (z * z % S.prime)) % S.prime == ((y + z) * (y + z) - z * z - y * y) % S.prime)
 
 
 let lemma_z3 x y z =
-  let t = ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime in
+  let t = ((y + z) * (y + z) - (y * y % S.prime) - (z * z % S.prime)) % S.prime in
 
   calc (==)
     {
-      ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime;
-      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - (y * y % prime)) (z * z) prime}
-      ((y + z) * (y + z) - (y * y % prime) - z * z) % prime;
-      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - z * z) (y * y) prime}
-      ((y + z) * (y + z) - z * z - y * y) % prime;}
+      ((y + z) * (y + z) - (y * y % S.prime) - (z * z % S.prime)) % S.prime;
+      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - (y * y % S.prime)) (z * z) S.prime}
+      ((y + z) * (y + z) - (y * y % S.prime) - z * z) % S.prime;
+      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - z * z) (y * y) S.prime}
+      ((y + z) * (y + z) - z * z - y * y) % S.prime;}
 
 
 val point_double_a_b_g: p: point -> alpha: felem -> beta: felem -> gamma: felem -> delta: felem -> tempBuffer: lbuffer uint64 (size 12) ->
@@ -246,19 +246,19 @@ val point_double_a_b_g: p: point -> alpha: felem -> beta: felem -> gamma: felem 
     (requires fun h ->
       live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\
       LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
-      as_nat h (gsub p (size 8) (size 4)) < prime /\
-      as_nat h (gsub p (size 0) (size 4)) < prime /\
-      as_nat h (gsub p (size 4) (size 4)) < prime
+      as_nat h (gsub p (size 8) (size 4)) < S.prime /\
+      as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+      as_nat h (gsub p (size 4) (size 4)) < S.prime
     )
     (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
       (
 	let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
 	let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
 	let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
-	as_nat h1 delta = toDomain_ (z * z % prime) /\
-	as_nat h1 gamma = toDomain_ (y * y % prime) /\
-	as_nat h1 beta = toDomain_ (x * fromDomain_(as_nat h1 gamma) % prime) /\
-	as_nat h1 alpha = toDomain_ (3 * (x - fromDomain_ (as_nat h1 delta)) * (x + fromDomain_ (as_nat h1 delta)) % prime)
+	as_nat h1 delta = toDomain_ (z * z % S.prime) /\
+	as_nat h1 gamma = toDomain_ (y * y % S.prime) /\
+	as_nat h1 beta = toDomain_ (x * fromDomain_(as_nat h1 gamma) % S.prime) /\
+	as_nat h1 alpha = toDomain_ (3 * (x - fromDomain_ (as_nat h1 delta)) * (x + fromDomain_ (as_nat h1 delta)) % S.prime)
       )
     )
 
@@ -293,25 +293,25 @@ let point_double_a_b_g p alpha beta gamma delta tempBuffer =
 
     calc (==)
     {
-      (3 * (((xD - dlt) % prime) *  ((xD + dlt) % prime) % prime) % prime);
-    (==) {lemma_mod_mul_distr_l (xD - dlt) ((xD + dlt) % prime) prime; lemma_mod_mul_distr_r (xD - dlt) (xD + dlt) prime}
-      (3 * ((xD - dlt) *  (xD + dlt) % prime) % prime);
-    (==) {lemma_mod_mul_distr_r 3 ((xD - dlt) * (xD + dlt)) prime}
-      (3 * ((xD - dlt) * (xD + dlt)) % prime);
+      (3 * (((xD - dlt) % S.prime) *  ((xD + dlt) % S.prime) % S.prime) % S.prime);
+    (==) {lemma_mod_mul_distr_l (xD - dlt) ((xD + dlt) % S.prime) S.prime; lemma_mod_mul_distr_r (xD - dlt) (xD + dlt) S.prime}
+      (3 * ((xD - dlt) *  (xD + dlt) % S.prime) % S.prime);
+    (==) {lemma_mod_mul_distr_r 3 ((xD - dlt) * (xD + dlt)) S.prime}
+      (3 * ((xD - dlt) * (xD + dlt)) % S.prime);
     (==) {lemma_point_abd xD dlt}
-      (3 * (xD - dlt) * (xD + dlt)) % prime;
+      (3 * (xD - dlt) * (xD + dlt)) % S.prime;
   }
 
 val point_double_x3: x3: felem -> alpha: felem -> fourBeta: felem -> beta: felem -> eightBeta: felem ->
   Stack unit
     (requires fun h -> live h x3 /\ live h alpha /\ live h fourBeta /\ live h beta /\ live h eightBeta /\
       LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc alpha; loc fourBeta; loc beta; loc eightBeta] /\
-      as_nat h alpha < prime /\
-      as_nat h beta < prime
+      as_nat h alpha < S.prime /\
+      as_nat h beta < S.prime
     )
     (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc fourBeta |+| loc eightBeta) h0 h1 /\
-      as_nat h1 fourBeta = toDomain_ (4 * fromDomain_ (as_nat h0 beta) % prime256) /\
-      as_nat h1 x3 = toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * (fromDomain_ (as_nat h0 beta))) % prime)
+      as_nat h1 fourBeta = toDomain_ (4 * fromDomain_ (as_nat h0 beta) % S.prime) /\
+      as_nat h1 x3 = toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * (fromDomain_ (as_nat h0 beta))) % S.prime)
     )
 
 let point_double_x3 x3 alpha fourBeta beta eightBeta  =
@@ -323,13 +323,13 @@ let point_double_x3 x3 alpha fourBeta beta eightBeta  =
 
   calc(==)
   {
-     toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) - (2 *  (4 * fromDomain_ (as_nat h0 beta) % prime256) % prime256)) % prime256);
-  (==) {lemma_mod_mul_distr_r 2 (4 * fromDomain_ (as_nat h0 beta)) prime256}
-  toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) - (8 * fromDomain_ (as_nat h0 beta)) % prime256) % prime256);
-  (==) {lemma_mod_sub_distr (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) (8 * fromDomain_ (as_nat h0 beta)) prime256}
-    toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) - (8 * fromDomain_ (as_nat h0 beta))) % prime256);
-  (==) {lemma_mod_add_distr (- 8 * fromDomain_ (as_nat h0 beta)) (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha)) prime}
-    toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * fromDomain_ (as_nat h0 beta)) % prime256);
+     toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) - (2 *  (4 * fromDomain_ (as_nat h0 beta) % S.prime) % S.prime)) % S.prime);
+  (==) {lemma_mod_mul_distr_r 2 (4 * fromDomain_ (as_nat h0 beta)) S.prime}
+  toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) - (8 * fromDomain_ (as_nat h0 beta)) % S.prime) % S.prime);
+  (==) {lemma_mod_sub_distr (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) (8 * fromDomain_ (as_nat h0 beta)) S.prime}
+    toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) - (8 * fromDomain_ (as_nat h0 beta))) % S.prime);
+  (==) {lemma_mod_add_distr (- 8 * fromDomain_ (as_nat h0 beta)) (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha)) S.prime}
+    toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * fromDomain_ (as_nat h0 beta)) % S.prime);
   }
 
 
@@ -337,16 +337,16 @@ val point_double_z3: z3: felem -> pY: felem -> pZ: felem -> gamma: felem -> delt
   Stack unit
     (requires fun h -> live h z3 /\ live h pY /\ live h pZ /\ live h gamma /\ live h delta /\
       eq_or_disjoint pZ z3 /\ disjoint z3 gamma /\ disjoint z3 delta /\ disjoint pY z3 /\
-      as_nat h gamma < prime /\
-      as_nat h delta < prime /\
-      as_nat h pY < prime /\
-      as_nat h pZ < prime
+      as_nat h gamma < S.prime /\
+      as_nat h delta < S.prime /\
+      as_nat h pY < S.prime /\
+      as_nat h pZ < S.prime
     )
     (ensures fun h0 _ h1 -> modifies (loc z3) h0 h1 /\
       (
 	let y = fromDomain_ (as_nat h0 pY) in
 	let z = fromDomain_ (as_nat h0 pZ) in
-	as_nat h1 z3 = toDomain_ (((y + z) * (y + z) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % prime)
+	as_nat h1 z3 = toDomain_ (((y + z) * (y + z) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % S.prime)
       )
     )
 
@@ -363,13 +363,13 @@ let point_double_z3 z3 pY pZ gamma delta  =
 
   calc (==)
   {
-    toDomain_ (((((( ((pyD + pzD) % prime) * ((pyD + pzD) % prime) % prime)) - fromDomain_ (as_nat h0 gamma)) % prime) - fromDomain_ (as_nat h0 delta)) % prime);
-  (==) {lemma_mod_mul_distr_l (pyD + pzD) ((pyD + pzD) % prime) prime; lemma_mod_mul_distr_r (pyD + pzD) (pyD + pzD) prime}
-    toDomain_ ((((((pyD + pzD) * (pyD + pzD) % prime) - fromDomain_ (as_nat h0 gamma)) % prime) - fromDomain_ (as_nat h0 delta)) % prime);
-  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 gamma)) ((pyD + pzD) * (pyD + pzD)) prime }
-    toDomain_ (((((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) % prime) - fromDomain_ (as_nat h0 delta)) % prime);
-  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 delta)) ((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) prime}
-    toDomain_ (((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % prime);
+    toDomain_ (((((( ((pyD + pzD) % S.prime) * ((pyD + pzD) % S.prime) % S.prime)) - fromDomain_ (as_nat h0 gamma)) % S.prime) - fromDomain_ (as_nat h0 delta)) % S.prime);
+  (==) {lemma_mod_mul_distr_l (pyD + pzD) ((pyD + pzD) % S.prime) S.prime; lemma_mod_mul_distr_r (pyD + pzD) (pyD + pzD) S.prime}
+    toDomain_ ((((((pyD + pzD) * (pyD + pzD) % S.prime) - fromDomain_ (as_nat h0 gamma)) % S.prime) - fromDomain_ (as_nat h0 delta)) % S.prime);
+  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 gamma)) ((pyD + pzD) * (pyD + pzD)) S.prime }
+    toDomain_ (((((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) % S.prime) - fromDomain_ (as_nat h0 delta)) % S.prime);
+  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 delta)) ((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) S.prime}
+    toDomain_ (((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % S.prime);
   }
 
 
@@ -377,16 +377,16 @@ val point_double_y3: y3: felem -> x3: felem -> alpha: felem -> gamma: felem -> e
   Stack unit
   (requires fun h -> live h y3 /\ live h x3 /\ live h alpha /\ live h gamma /\ live h eightGamma /\ live h fourBeta /\
     LowStar.Monotonic.Buffer.all_disjoint [loc y3; loc x3; loc alpha; loc gamma; loc eightGamma; loc fourBeta] /\
-    as_nat h x3 < prime /\
-    as_nat h alpha < prime /\
-    as_nat h gamma < prime /\
-    as_nat h fourBeta < prime
+    as_nat h x3 < S.prime /\
+    as_nat h alpha < S.prime /\
+    as_nat h gamma < S.prime /\
+    as_nat h fourBeta < S.prime
   )
   (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc gamma |+| loc eightGamma) h0 h1 /\
     (
       let alphaD = fromDomain_ (as_nat h0 alpha) in
       let gammaD = fromDomain_ (as_nat h0 gamma) in
-      as_nat h1 y3 == toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % prime)
+      as_nat h1 y3 == toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % S.prime)
     )
   )
 
@@ -406,38 +406,38 @@ let point_double_y3 y3 x3 alpha gamma eightGamma fourBeta =
 
   calc(==)
   {
-     toDomain_ (((fromDomain_ (as_nat h0 alpha) *  ((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % prime) % prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % prime) % prime)) % prime);
-  (==) {lemma_mod_mul_distr_r (fromDomain_ (as_nat h0 alpha)) (((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)))) prime}
-    toDomain_ (((fromDomain_ (as_nat h0 alpha) *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % prime) % prime)) % prime);
-  (==) {lemma_mod_mul_distr_r 8 (fromDomain_ (as_nat h0 gamma) * (fromDomain_ (as_nat h0 gamma))) prime}
-    toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % prime) - (8 * (gammaD * gammaD) % prime)) % prime);
-  (==) {lemma_mod_add_distr (-(8 * (gammaD * gammaD) % prime)) (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) prime  }
-      toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD) % prime)) % prime);
-  (==) {lemma_mod_sub_distr (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) (8 * (gammaD * gammaD)) prime}
-       toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD))) % prime);
+     toDomain_ (((fromDomain_ (as_nat h0 alpha) *  ((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % S.prime) % S.prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % S.prime) % S.prime)) % S.prime);
+  (==) {lemma_mod_mul_distr_r (fromDomain_ (as_nat h0 alpha)) (((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)))) S.prime}
+    toDomain_ (((fromDomain_ (as_nat h0 alpha) *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % S.prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % S.prime) % S.prime)) % S.prime);
+  (==) {lemma_mod_mul_distr_r 8 (fromDomain_ (as_nat h0 gamma) * (fromDomain_ (as_nat h0 gamma))) S.prime}
+    toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % S.prime) - (8 * (gammaD * gammaD) % S.prime)) % S.prime);
+  (==) {lemma_mod_add_distr (-(8 * (gammaD * gammaD) % S.prime)) (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) S.prime  }
+      toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD) % S.prime)) % S.prime);
+  (==) {lemma_mod_sub_distr (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) (8 * (gammaD * gammaD)) S.prime}
+       toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD))) % S.prime);
   (==) {assert_by_tactic (8 * (gammaD * gammaD) == 8 * gammaD * gammaD) canon}
-    toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % prime);
+    toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % S.prime);
 }
 
 
 val lemma_pd_to_spec: x: nat -> y: nat -> z: nat -> x3: nat -> y3: nat -> z3: nat ->  Lemma
   (requires (
     let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in
-    x3 == toDomain_ (((3 * (xD - zD * zD) * (xD + zD * zD)) * (3 * (xD - zD * zD) * (xD + zD * zD)) - 8 * xD * (yD * yD)) % prime) /\
-    y3 == toDomain_ ((3 * (xD - zD * zD) * (xD + zD * zD) *  (4 * xD * (yD * yD) - fromDomain_ x3) - 8 * (yD * yD) * (yD * yD)) % prime) /\
-    z3 = toDomain_ (((yD + zD) * (yD + zD) - zD * zD - yD * yD) % prime)
+    x3 == toDomain_ (((3 * (xD - zD * zD) * (xD + zD * zD)) * (3 * (xD - zD * zD) * (xD + zD * zD)) - 8 * xD * (yD * yD)) % S.prime) /\
+    y3 == toDomain_ ((3 * (xD - zD * zD) * (xD + zD * zD) *  (4 * xD * (yD * yD) - fromDomain_ x3) - 8 * (yD * yD) * (yD * yD)) % S.prime) /\
+    z3 = toDomain_ (((yD + zD) * (yD + zD) - zD * zD - yD * yD) % S.prime)
   )
 )
  (ensures(
    let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in
    let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in
-   let xN, yN, zN = _point_double (xD, yD, zD) in
+   let xN, yN, zN = S.point_double (xD, yD, zD) in
    x3D == xN /\ y3D == yN /\ z3D == zN))
 
 let lemma_pd_to_spec x y z x3 y3 z3 =
   let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in
   let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in
-  assert(let xN, yN, zN = _point_double (xD, yD, zD) in
+  assert(let xN, yN, zN = S.point_double (xD, yD, zD) in
       x3D == xN /\ y3D == yN /\ z3D == zN)
 
 

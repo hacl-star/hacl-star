@@ -14,9 +14,6 @@ open Spec.P256
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
 noextract
-let prime = prime256
-
-noextract
 let _uint32 = n:nat{n < pow2 32}
 
 noextract

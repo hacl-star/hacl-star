@@ -1,22 +1,18 @@
 module Spec.ECDSA
 
 open FStar.Mul
-open FStar.Math.Lemmas
-open FStar.Math.Lib
 
 open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
 open Spec.P256
+open Spec.Hash.Definitions
 
-#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let prime = prime_p256_order
-
-let nat_prime = n:nat{n < prime}
-
-
+//-------------------------------
+// TODO: remove
 val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
   (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
 
@@ -29,8 +25,8 @@ val lemma_euclidian_for_ithbit: k: nat -> i: nat
   -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
 
 let lemma_euclidian_for_ithbit k i =
-  lemma_div_def i 8;
-  pow2_plus (8 * (i / 8)) (i % 8)
+  Math.Lib.lemma_div_def i 8;
+  Math.Lemmas.pow2_plus (8 * (i / 8)) (i % 8)
 
 
 val ith_bit: k:lbytes 32 -> i:nat{i < 256}
@@ -46,41 +42,35 @@ let ith_bit k i =
   logand_mask tmp1 (u8 1) 1;
   lemma_scalar_ith k q;
   let k = nat_from_intseq_le k in
-  pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
-  division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
+  Math.Lemmas.pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
+  Math.Lemmas.division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
   lemma_euclidian_for_ithbit k i;
-  pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
   res
 
 
-let ( *% ) a b = (a * b) % prime
-
-
-val _exp_step0: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
-
+val _exp_step0: p:qelem -> q:qelem -> tuple2 qelem qelem
 let _exp_step0 r0 r1 =
-  let r1 = r0 *% r1 in
-  let r0 = r0 *% r0 in
+  let r1 = r0 *^ r1 in
+  let r0 = r0 *^ r0 in
   r0, r1
 
 
-val _exp_step1: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
-
+val _exp_step1: p:qelem -> q:qelem -> tuple2 qelem qelem
 let _exp_step1 r0 r1 =
-  let r0 = r0 *% r1 in
-  let r1 = r1 *% r1 in
+  let r0 = r0 *^ r1 in
+  let r1 = r1 *^ r1 in
   (r0, r1)
 
 
 let swap p q = q, p
 
-val conditional_swap: i:uint64 -> p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
-
+val conditional_swap: i:uint64 -> p:qelem -> q:qelem -> tuple2 qelem qelem
 let conditional_swap i p q =
   if v i = 0 then (p, q) else (q, p)
 
 
-val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
+val lemma_swaped_steps: p: qelem -> q: qelem ->
   Lemma (
     let afterSwapP, afterSwapQ = swap p q in
     let p1, q1 = _exp_step0 afterSwapP afterSwapQ in
@@ -91,9 +81,7 @@ val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
 let lemma_swaped_steps p q = ()
 
 
-val _exp_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 nat_prime nat_prime
-  -> tuple2 nat_prime nat_prime
-
+val _exp_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 qelem qelem -> tuple2 qelem qelem
 let _exp_step k i (p, q) =
   let bit = 255 - i in
   let bit = ith_bit k bit in
@@ -101,23 +89,19 @@ let _exp_step k i (p, q) =
   if uint_to_nat bit = 0 then _exp_step0 p q else _exp_step1 p q
 
 
-val _exponent_spec: k:lseq uint8 32  -> tuple2 nat_prime nat_prime
-  -> tuple2 nat_prime nat_prime
-
+val _exponent_spec: k:lseq uint8 32  -> tuple2 qelem qelem -> tuple2 qelem qelem
 let _exponent_spec k (p, q) =
-  let open Lib.LoopCombinators in
   Lib.LoopCombinators.repeati 256 (_exp_step k) (p, q)
 
 
-val exponent_spec: a:nat_prime -> r:nat_prime{r = pow a (prime_p256_order - 2) % prime_p256_order}
-let exponent_spec a =
-  pow a (prime_p256_order - 2) % prime_p256_order
+val exponent_spec: a:qelem -> r:qelem{r = pow a (order - 2) % order}
+let exponent_spec a = pow a (order - 2) % order
 
-
+//---------------------------------
+// TODO: remove
 let felem_seq = lseq uint64 4
 
 val changeEndian: felem_seq -> felem_seq
-
 let changeEndian i =
   let zero =  Lib.Sequence.index i 0 in
   let one =   Lib.Sequence.index i 1 in
@@ -130,8 +114,8 @@ let changeEndian i =
           Lib.Sequence.upd o 3 zero
 
 
-val changeEndianLemma: k: lseq uint64 4 -> Lemma
-  (nat_from_intseq_le (changeEndian k) == nat_from_intseq_be k)
+val changeEndianLemma: k: lseq uint64 4 ->
+  Lemma (nat_from_intseq_le (changeEndian k) == nat_from_intseq_be k)
 
 let changeEndianLemma k =
   let k0 = changeEndian k in
@@ -156,8 +140,8 @@ let changeEndianLemma k =
 
   assert_norm (pow2 (2 * 64) * pow2 64 == pow2 (3 * 64))
 
-val changeEndianLemmaI: a: nat {a < pow2 256} -> Lemma
-  (changeEndian (nat_to_intseq_le 4 a) == nat_to_intseq_be 4 a)
+val changeEndianLemmaI: a: nat {a < pow2 256} ->
+  Lemma (changeEndian (nat_to_intseq_le 4 a) == nat_to_intseq_be 4 a)
 
 let changeEndianLemmaI a =
   let a0 = nat_to_intseq_le #U64 #SEC 4 a in
@@ -182,41 +166,33 @@ let changeEndianLemmaI a =
   eq_intro (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a)
 
 
-val changeEndian_le_be: a:nat{a < pow2 256} -> Lemma
-  (uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a)) == nat_to_bytes_be 32 a)
+val changeEndian_le_be: a:nat{a < pow2 256} ->
+  Lemma (uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a)) == nat_to_bytes_be 32 a)
 
 let changeEndian_le_be a =
   changeEndianLemmaI a;
   uints_to_bytes_be_nat_lemma #U64 #SEC 4 a
 
+//----------------------------------
 
-val verifyQValidCurvePointSpec:
-  publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
-
+val verifyQValidCurvePointSpec: publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 let verifyQValidCurvePointSpec publicKey =
-  let (x: nat), (y:nat), (z:nat) = publicKey in
-  x < Spec.P256.prime256 &&
-  y < Spec.P256.prime256 &&
-  z < Spec.P256.prime256 &&
-  isPointOnCurve (x, y, z)
+  let x, y, z = publicKey in
+  x < prime && y < prime && z < prime &&
+  is_point_on_curve (x, y, z)
 
 
 val checkCoordinates: r:nat -> s:nat -> bool
-
 let checkCoordinates r s =
-  if r > 0 && r < prime_p256_order && s > 0 && s < prime_p256_order
-  then true
-  else false
-
-open Spec.Hash.Definitions
+  if 0 < r && r < order && 0 < s && s < order then true else false
 
 
 type hash_alg_ecdsa =
-  |NoHash
-  |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
+  | NoHash
+  | Hash of (a:hash_alg{a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
 
 
-let invert_state_s (a: hash_alg_ecdsa): Lemma
+let invert_state_s (a:hash_alg_ecdsa): Lemma
   (requires True)
   (ensures (inversion hash_alg_ecdsa))
   [ SMTPat (hash_alg_ecdsa) ]
@@ -225,36 +201,28 @@ let invert_state_s (a: hash_alg_ecdsa): Lemma
 
 
 val min_input_length: hash_alg_ecdsa -> Tot int
+let min_input_length a = match a with | NoHash -> 32 | Hash a -> 0
 
-let min_input_length a =
-  match a with
-    |NoHash -> 32
-    |Hash a -> 0
+(* let hash_length (a:hash_alg_ecdsa) = match a with | NoHash -> 32 | Hash a -> hash_length a *)
 
-(*
 
-let hash_length (a : hash_alg_ecdsa) =
-  match a with
-    |NoHash -> 32
-    |Hash a -> hash_length a
-*)
-
-val hashSpec: a: hash_alg_ecdsa
-  -> mLen: size_nat{mLen >= min_input_length a}
-  -> m: lseq uint8 mLen ->
+val hashSpec:
+    a:hash_alg_ecdsa
+  -> mLen:size_nat{mLen >= min_input_length a}
+  -> m:lseq uint8 mLen ->
   Tot (r:Lib.ByteSequence.lbytes
-    (if Hash? a then hash_length (match a with Hash a -> a) else mLen) {length r >= 32})
+    (if Hash? a then hash_length (match a with Hash a -> a) else mLen){length r >= 32})
 
 let hashSpec a mLen m =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   allow_inversion hash_alg_ecdsa;
   match a with
-  |NoHash ->  m
-  |Hash a -> Spec.Agile.Hash.hash a m
+  | NoHash -> m
+  | Hash a -> Spec.Agile.Hash.hash a m
 
-open Lib.ByteSequence
 
+// TODO: rm, once we use complete point addition and doubling
 (**
   Important changed was done comparing to the previous version:
   The point addition routine used in the code doesnot work correctly in case the points are equal to each other. In this case the produced result is equal to 0. To solve it, before the execution we check that points are equal and then call either point double, if the points are identical, or point add.
@@ -305,11 +273,11 @@ open Lib.ByteSequence
 
 
 val ecdsa_verification_agile:
-  alg: hash_alg_ecdsa
+    alg:hash_alg_ecdsa
   -> publicKey:tuple2 nat nat
-  -> r: nat
-  -> s: nat
-  -> mLen:size_nat {mLen >= min_input_length alg}
+  -> r:nat
+  -> s:nat
+  -> mLen:size_nat{mLen >= min_input_length alg}
   -> m:lseq uint8 mLen
   -> bool
 
@@ -317,38 +285,35 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
   allow_inversion hash_alg_ecdsa;
   let publicJacobian = toJacobianCoordinates publicKey in
   if not (verifyQValidCurvePointSpec publicJacobian) then false
-  else
-    begin
+  else begin
     if not (checkCoordinates r s) then false
-    else
-      begin
-
+    else begin
       let hashM = hashSpec alg mLen m in
-
       let cutHashM = sub hashM 0 32 in
-      let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
+      let hashNat = nat_from_bytes_be cutHashM % order in
 
-      let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
-      let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
+      let sinv = qinv s in
+      let u1 = nat_to_bytes_be 32 (sinv *^ hashNat) in
+      let u2 = nat_to_bytes_be 32 (sinv *^ r) in
 
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
+      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, base_point) in
       let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
-
-      let sumD = if  _norm u1D =  _norm u2D then
-       _point_double u1D
+      let sumD = if norm_jacob_point u1D = norm_jacob_point u2D then
+        point_double u1D
       else
-        _point_add u1D u2D in
-      let pointNorm = _norm sumD in
+        point_add u1D u2D in
+      let pointNorm = norm_jacob_point sumD in
 
       let x, y, z = pointNorm in
-      let x = x % prime_p256_order in
+      let x = x % order in
       if Spec.P256.isPointAtInfinity pointNorm then false else x = r
     end
   end
 
+
 val ecdsa_signature_agile:
-  alg: hash_alg_ecdsa
+    alg:hash_alg_ecdsa
   -> mLen:size_nat{mLen >= min_input_length alg}
   -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
@@ -358,16 +323,18 @@ val ecdsa_signature_agile:
 let ecdsa_signature_agile alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
-  let (xN, _, _) = _norm r in
+  let r, _ = montgomery_ladder_spec k ((0,0,0), base_point) in
+  let (xN, _, _) = norm_jacob_point r in
+
   let hashM = hashSpec alg mLen m in
   let cutHashM = sub hashM 0 32 in
-  let z = nat_from_bytes_be cutHashM % prime_p256_order in
+  let z = nat_from_bytes_be cutHashM % order in
+
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in
-  let resultR = xN % prime_p256_order in
-  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
-    if resultR = 0 || resultS = 0 then
-      resultR, resultS, false
-    else
-      resultR, resultS, true
+  let resultR = xN % order in
+  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (order - 2) % order in
+  if resultR = 0 || resultS = 0 then
+    resultR, resultS, false
+  else
+    resultR, resultS, true

@@ -40,7 +40,7 @@ val ecdsa_signature_step12: alg:hash_alg_ecdsa
       assert_norm (pow2 32 < pow2 125);
       let hashM = hashSpec alg (v mLen) (as_seq h0 m) in
       let cutHashM = Lib.Sequence.sub hashM 0 32 in
-      as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
+      as_nat h1 result = nat_from_bytes_be cutHashM % order
     )
   )
 
@@ -87,11 +87,11 @@ val ecdsa_signature_step45: x: felem
     )
     (ensures fun h0 r h1 ->
       modifies (loc x |+| loc tempBuffer) h0 h1 /\
-      as_nat h1 x < prime_p256_order /\
+      as_nat h1 x < order /\
       (
-	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in
-	let (xN, _, _) = _norm (rxN, ryN, rzN) in
-	as_nat h1 x == xN % prime_p256_order /\
+	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), base_point) in
+	let (xN, _, _) = norm_jacob_point (rxN, ryN, rzN) in
+	as_nat h1 x == xN % order /\
 	(
 	  if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
 	)
@@ -111,25 +111,25 @@ let ecdsa_signature_step45 x k tempBuffer =
 #pop-options
 
 val lemma_power_step6: kInv: nat -> Lemma
-  (Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
+  (Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (order - 2)))
 
 let lemma_power_step6 kInv =
   let a = Spec.ECDSA.exponent_spec (fromDomain_ kInv) in
   lemmaFromDomain kInv;
 
-  power_distributivity (kInv * modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2) prime_p256_order;
-  power_distributivity_2 kInv (modp_inv2_prime (pow2 256) prime_p256_order % prime_p256_order) (prime_p256_order - 2);
-  lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2)) prime_p256_order;
+  power_distributivity (kInv * modp_inv2_prime (pow2 256) order) (order - 2) order;
+  power_distributivity_2 kInv (modp_inv2_prime (pow2 256) order % order) (order - 2);
+  lemma_mod_mul_distr_r (pow kInv (order - 2)) (pow (modp_inv2_prime (pow2 256) order) (order - 2)) order;
 
-  lemma_pow_mod_n_is_fpow prime_p256_order (pow2 256 % prime_p256_order) (prime_p256_order - 2);
+  lemma_pow_mod_n_is_fpow order (pow2 256 % order) (order - 2);
 
   let inverse2_256 = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
-  assert_norm(modp_inv2_prime (pow2 256) prime_p256_order = inverse2_256);
-  lemma_pow_mod_n_is_fpow prime_p256_order inverse2_256 (prime_p256_order - 2);
-  assert_norm(exp #prime_p256_order inverse2_256 (prime_p256_order - 2) == pow2 256 % prime_p256_order);
+  assert_norm(modp_inv2_prime (pow2 256) order = inverse2_256);
+  lemma_pow_mod_n_is_fpow order inverse2_256 (order - 2);
+  assert_norm(exp #order inverse2_256 (order - 2) == pow2 256 % order);
 
-  lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow2 256) prime_p256_order;
-  lemmaToDomain (pow kInv (prime_p256_order - 2))
+  lemma_mod_mul_distr_r (pow kInv (order - 2)) (pow2 256) order;
+  lemmaToDomain (pow kInv (order - 2))
 
 
 inline_for_extraction
@@ -142,14 +142,14 @@ val ecdsa_signature_step6: result: felem
     (requires fun h ->
       live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
       eq_or_disjoint r da /\
-      as_nat h kFelem < prime_p256_order /\
-      as_nat h z < prime_p256_order /\
-      as_nat h r < prime_p256_order /\
-      as_nat h da < prime_p256_order
+      as_nat h kFelem < order /\
+      as_nat h z < order /\
+      as_nat h r < order /\
+      as_nat h da < order
     )
     (ensures fun h0 _ h1 ->
       modifies (loc result) h0 h1 /\
-      as_nat h1 result = (as_nat h0 z + as_nat h0 r * as_nat h0 da) * pow (as_nat h0 kFelem) (prime_p256_order - 2) % prime_p256_order
+      as_nat h1 result = (as_nat h0 z + as_nat h0 r * as_nat h0 da) * pow (as_nat h0 kFelem) (order - 2) % order
     )
 
 let ecdsa_signature_step6 result kFelem z r da =
@@ -168,7 +168,7 @@ let ecdsa_signature_step6 result kFelem z r da =
     montgomery_multiplication_ecdsa_module zBuffer kInv result;
   pop_frame();
       let br0 = as_nat h0 z + as_nat h0 r * as_nat h0 da in
-      let br1 = pow (as_nat h0 kFelem) (prime_p256_order - 2) in
+      let br1 = pow (as_nat h0 kFelem) (order - 2) in
 
       lemmaFromDomain (as_nat h0 r * as_nat h0 da);
       lemma_felem_add (as_nat h0 r * as_nat h0 da) (as_nat h0 z);
@@ -176,24 +176,24 @@ let ecdsa_signature_step6 result kFelem z r da =
 
       lemmaFromDomain (fromDomain_ br0);
       lemmaToDomain br1;
-      assert_norm ((modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) % prime_p256_order = 1);
+      assert_norm ((modp_inv2_prime (pow2 256) order * pow2 256) % order = 1);
 
-      lemma_mod_mul_distr_l (fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order) (br1 * pow2 256 % prime_p256_order) prime_p256_order;
-      lemma_mod_mul_distr_r (fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order) (br1 * pow2 256) prime_p256_order;
+      lemma_mod_mul_distr_l (fromDomain_ br0 * modp_inv2_prime (pow2 256) order) (br1 * pow2 256 % order) order;
+      lemma_mod_mul_distr_r (fromDomain_ br0 * modp_inv2_prime (pow2 256) order) (br1 * pow2 256) order;
 
-      assert_by_tactic (fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order * (br1 * pow2 256) == fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1 * pow2 256) canon;
-      assert_by_tactic (fromDomain_ br0 * br1 * (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) == fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1 * pow2 256) canon;
+      assert_by_tactic (fromDomain_ br0 * modp_inv2_prime (pow2 256) order * (br1 * pow2 256) == fromDomain_ br0 * modp_inv2_prime (pow2 256) order * br1 * pow2 256) canon;
+      assert_by_tactic (fromDomain_ br0 * br1 * (modp_inv2_prime (pow2 256) order * pow2 256) == fromDomain_ br0 * modp_inv2_prime (pow2 256) order * br1 * pow2 256) canon;
 
-      lemma_mod_mul_distr_r (fromDomain_ br0 * br1) (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order;
-      lemmaToDomain ((fromDomain_ br0 * br1) % prime_p256_order);
+      lemma_mod_mul_distr_r (fromDomain_ br0 * br1) (modp_inv2_prime (pow2 256) order * pow2 256) order;
+      lemmaToDomain ((fromDomain_ br0 * br1) % order);
       lemmaFromDomain br0;
 
-      lemma_mod_mul_distr_l (br0 * modp_inv2_prime (pow2 256) prime_p256_order) br1 prime_p256_order;
-      lemma_mod_mul_distr_l (br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1) (pow2 256) prime_p256_order;
+      lemma_mod_mul_distr_l (br0 * modp_inv2_prime (pow2 256) order) br1 order;
+      lemma_mod_mul_distr_l (br0 * modp_inv2_prime (pow2 256) order * br1) (pow2 256) order;
 
-      assert_by_tactic (br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1 * pow2 256 = br0 * br1 * (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256)) canon;
-      lemma_mod_mul_distr_r (br0 * br1) (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order;
-      lemma_mod_mul_distr_r br0 br1 prime_p256_order
+      assert_by_tactic (br0 * modp_inv2_prime (pow2 256) order * br1 * pow2 256 = br0 * br1 * (modp_inv2_prime (pow2 256) order * pow2 256)) canon;
+      lemma_mod_mul_distr_r (br0 * br1) (modp_inv2_prime (pow2 256) order * pow2 256) order;
+      lemma_mod_mul_distr_r br0 br1 order
 
 #push-options "--ifuel 1"
 
@@ -211,9 +211,9 @@ val ecdsa_signature_core: alg: hash_alg_ecdsa
     disjoint privKeyAsFelem s /\
     disjoint k r /\
     disjoint r s /\
-    as_nat h privKeyAsFelem < prime_p256_order /\
+    as_nat h privKeyAsFelem < order /\
     as_nat h s == 0 /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h k) < order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc r |+| loc s) h0 h1 /\
@@ -222,13 +222,13 @@ val ecdsa_signature_core: alg: hash_alg_ecdsa
       assert_norm (pow2 32 < pow2 125);
       let hashM = hashSpec alg (v mLen) (as_seq h0 m) in
       let cutHashM = Lib.Sequence.sub hashM 0 32 in
-      let z =  nat_from_bytes_be cutHashM % prime_p256_order in
-      let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in
-      let (xN, _, _) = _norm (rxN, ryN, rzN) in
+      let z =  nat_from_bytes_be cutHashM % order in
+      let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), base_point) in
+      let (xN, _, _) = norm_jacob_point (rxN, ryN, rzN) in
 
       let kFelem = nat_from_bytes_be (as_seq h0 k) in
-      as_nat h1 r == xN % prime_p256_order /\
-      as_nat h1 s == (z + (as_nat h1 r) * as_nat h0 privKeyAsFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order /\
+      as_nat h1 r == xN % order /\
+      as_nat h1 s == (z + (as_nat h1 r) * as_nat h0 privKeyAsFelem) * pow kFelem (order - 2) % order /\
       (
 	if as_nat h1 r = 0 || as_nat h1 s = 0 then
 	  uint_v flag == pow2 64 - 1
@@ -274,8 +274,8 @@ val ecdsa_signature: alg: hash_alg_ecdsa
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < order /\
+    nat_from_bytes_be (as_seq h k) < order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\

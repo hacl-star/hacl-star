@@ -26,9 +26,9 @@ let point_prime = p:point_seq{
   let x = LSeq.sub p 0 4 in
   let y = LSeq.sub p 4 4 in
   let z = LSeq.sub p 8 4 in
-  felem_seq_as_nat x < prime256 /\
-  felem_seq_as_nat y < prime256 /\
-  felem_seq_as_nat z < prime256}
+  felem_seq_as_nat x < prime /\
+  felem_seq_as_nat y < prime /\
+  felem_seq_as_nat z < prime}
 
 // TODO: rename
 let point_prime_to_coordinates (p:point_seq) =
@@ -63,9 +63,9 @@ let point_z_as_nat (h: mem) (e: point) : GTot nat =
 val uploadBasePoint: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    as_nat h1 (gsub p (size 0) (size 4)) < prime256 /\
-    as_nat h1 (gsub p (size 4) (size 4)) < prime256 /\
-    as_nat h1 (gsub p (size 8) (size 4)) < prime256 /\
+    as_nat h1 (gsub p (size 0) (size 4)) < prime /\
+    as_nat h1 (gsub p (size 4) (size 4)) < prime /\
+    as_nat h1 (gsub p (size 8) (size 4)) < prime /\
     (let x1 = as_nat h1 (gsub p (size 0) (size 4)) in
     let y1 = as_nat h1 (gsub p (size 4) (size 4)) in
     let z1 = as_nat h1 (gsub p (size 8) (size 4)) in
@@ -154,7 +154,7 @@ val norm:
     modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\
     (let resultPoint = point_prime_to_coordinates (as_seq h1 resultPoint) in
     let pointD = fromDomainPoint (point_prime_to_coordinates (as_seq h0 p)) in
-    let pointNorm = _norm pointD in
+    let pointNorm = norm_jacob_point pointD in
     pointNorm == resultPoint))
 
 
@@ -174,7 +174,7 @@ val normX:
     (let pxD = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
     let pyD = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
     let pzD = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
-    let (xN, _, _) = _norm (pxD, pyD, pzD) in
+    let (xN, _, _) = norm_jacob_point (pxD, pyD, pzD) in
     as_nat h1 result == xN))
 
 
@@ -197,11 +197,11 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
 thus this code is not secret independent with respect to the operations done over the input.")]
 val isPointOnCurvePublic: p:point -> Stack bool
   (requires fun h -> live h p /\
-    as_nat h (gsub p (size 0) (size 4)) < prime256 /\
-    as_nat h (gsub p (size 4) (size 4)) < prime256 /\
+    as_nat h (gsub p (size 0) (size 4)) < prime /\
+    as_nat h (gsub p (size 4) (size 4)) < prime /\
     as_nat h (gsub p (size 8) (size 4)) == 1)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    r == isPointOnCurve (as_nat h1 (gsub p (size 0) (size 4)),
+    r == is_point_on_curve (as_nat h1 (gsub p (size 0) (size 4)),
                         as_nat h1 (gsub p (size 4) (size 4)),
                         as_nat h1 (gsub p (size 8) (size 4))))
 
@@ -233,4 +233,4 @@ val isMoreThanZeroLessThanOrder: x:lbuffer uint8 (size 32) -> Stack bool
   (requires fun h -> live h x)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (let scalar = BSeq.nat_from_bytes_be (as_seq h0 x) in
-    r <==> (scalar > 0 && scalar < prime_p256_order)))
+    r <==> (scalar > 0 && scalar < order)))

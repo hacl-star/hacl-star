@@ -57,8 +57,8 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < order /\
+    nat_from_bytes_be (as_seq h k) < order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
@@ -89,8 +89,8 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < order /\
+    nat_from_bytes_be (as_seq h k) < order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
@@ -123,8 +123,8 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < order /\
+    nat_from_bytes_be (as_seq h k) < order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
@@ -168,8 +168,8 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < order /\
+    nat_from_bytes_be (as_seq h k) < order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
@@ -321,7 +321,7 @@ val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (
       let scalar = nat_from_bytes_be (as_seq h0 x) in
-      r <==> (scalar > 0 && scalar < prime_p256_order)
+      r <==> (scalar > 0 && scalar < order)
     )
   )
 
@@ -379,15 +379,15 @@ val compressed_to_raw: b: compressedForm -> result: lbuffer uint8 (size 64) -> S
       let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in
       let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in
       if uint_v id = 2 || uint_v id = 3 then
-        if x < prime256 then
+        if x < prime then
           r == true /\
         (
           let y =
-            let sq = S.fsqrt (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in
+            let sq = S.fsqrt (((x * x * x + Spec.P256.a_coeff * x + Spec.P256.b_coeff) % prime)) in
               if (uint_v id) % 2 = (sq % 2) then
                 sq
               else
-              (0 - sq) % prime256
+              (0 - sq) % prime
           in
           as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
           as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y)

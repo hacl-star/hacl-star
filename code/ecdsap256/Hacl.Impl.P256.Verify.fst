@@ -29,6 +29,8 @@ open Hacl.Impl.P256.Constants
 open Hacl.Hash.SHA2
 open Spec.Hash.Definitions
 
+module S = Spec.P256
+
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 
@@ -56,13 +58,13 @@ thus this code is not secret independent with respect to the operations done ove
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r = (as_nat h0 f > 0 && as_nat h0 f < prime_p256_order))
+    r = (as_nat h0 f > 0 && as_nat h0 f < order))
 
 let isMoreThanZeroLessThanOrderMinusOne f =
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
-    recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = bn_sub4_il f prime256order_buffer tempBuffer in
+    recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
+  let carry = bn_sub4_il f primeorder_buffer tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in
   let result = less && not more in
@@ -96,7 +98,7 @@ val ecdsa_verification_step23: alg:hash_alg_ecdsa
 	assert_norm (pow2 32 < pow2 125);
 	let hashM = hashSpec alg (v mLen) (as_seq h0 m) in
 	let cutHashM = Lib.Sequence.sub hashM 0 32 in
-	as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
+	as_nat h1 result = nat_from_bytes_be cutHashM % order
       )
     )
 
@@ -147,15 +149,15 @@ val ecdsa_verification_step4:
       disjoint bufferU2 hash /\
       disjoint bufferU2 r /\
       disjoint bufferU2 s /\
-      as_nat h s < prime_p256_order /\
-      as_nat h hash < prime_p256_order /\
-      as_nat h r < prime_p256_order
+      as_nat h s < order /\
+      as_nat h hash < order /\
+      as_nat h r < order
     )
     (ensures fun h0 _ h1 ->
       modifies (loc bufferU1 |+| loc bufferU2) h0 h1 /\
       (
-	let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 hash % prime_p256_order in
-	let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in
+	let p0 = pow (as_nat h0 s) (order - 2) * as_nat h0 hash % order in
+	let p1 = pow (as_nat h0 s) (order - 2) * as_nat h0 r % order in
 	as_seq h1 bufferU1 == nat_to_bytes_be 32 p0 /\
 	as_seq h1 bufferU2 == nat_to_bytes_be 32 p1
       )
@@ -227,18 +229,18 @@ val ecdsa_verification_step5_0:
       disjoint tempBuffer u1 /\
       disjoint tempBuffer u2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc points; loc pubKeyAsPoint; loc tempBuffer] /\
-      point_x_as_nat h pubKeyAsPoint < prime256 /\
-      point_y_as_nat h pubKeyAsPoint < prime256 /\
-      point_z_as_nat h pubKeyAsPoint < prime256
+      point_x_as_nat h pubKeyAsPoint < prime /\
+      point_y_as_nat h pubKeyAsPoint < prime /\
+      point_z_as_nat h pubKeyAsPoint < prime
     )
   (ensures fun h0 _ h1 ->
     modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc points) h0 h1 /\
-    as_nat h1 (gsub points (size 0) (size 4)) < prime256 /\
-    as_nat h1 (gsub points (size 4) (size 4)) < prime256 /\
-    as_nat h1 (gsub points (size 8) (size 4)) < prime256 /\
-    as_nat h1 (gsub points (size 12) (size 4)) < prime256 /\
-    as_nat h1 (gsub points (size 16) (size 4)) < prime256 /\
-    as_nat h1 (gsub points (size 20) (size 4)) < prime256 /\
+    as_nat h1 (gsub points (size 0) (size 4)) < prime /\
+    as_nat h1 (gsub points (size 4) (size 4)) < prime /\
+    as_nat h1 (gsub points (size 8) (size 4)) < prime /\
+    as_nat h1 (gsub points (size 12) (size 4)) < prime /\
+    as_nat h1 (gsub points (size 16) (size 4)) < prime /\
+    as_nat h1 (gsub points (size 20) (size 4)) < prime /\
     (
       let pointU1 = gsub points (size 0) (size 12) in
       let pointU2 = gsub points (size 12) (size 12) in
@@ -246,7 +248,7 @@ val ecdsa_verification_step5_0:
       let fromDomainPointU1 = fromDomainPoint (point_prime_to_coordinates (as_seq h1 pointU1)) in
       let fromDomainPointU2 = fromDomainPoint (point_prime_to_coordinates (as_seq h1 pointU2)) in
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+      let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, base_point) in
       let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
       fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D
     )
@@ -320,20 +322,20 @@ let compare_points_bool a b =
 inline_for_extraction noextract
 val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
   (requires fun h -> live h points /\
-    as_nat h (gsub points (size 0) (size 4)) < prime256 /\
-    as_nat h (gsub points (size 4) (size 4)) < prime256 /\
-    as_nat h (gsub points (size 8) (size 4)) < prime256 /\
-    as_nat h (gsub points (size 12) (size 4)) < prime256 /\
-    as_nat h (gsub points (size 16) (size 4)) < prime256 /\
-    as_nat h (gsub points (size 20) (size 4)) < prime256
+    as_nat h (gsub points (size 0) (size 4)) < prime /\
+    as_nat h (gsub points (size 4) (size 4)) < prime /\
+    as_nat h (gsub points (size 8) (size 4)) < prime /\
+    as_nat h (gsub points (size 12) (size 4)) < prime /\
+    as_nat h (gsub points (size 16) (size 4)) < prime /\
+    as_nat h (gsub points (size 20) (size 4)) < prime
   )
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (
       let pointU1G = gsub points (size 0) (size 12) in
       let pointU2Q = gsub points (size 12) (size 12) in
       r = (
-	_norm (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU1G))) =
-	_norm (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU2Q))))
+	norm_jacob_point (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU1G))) =
+	norm_jacob_point (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU2Q))))
     )
   )
 
@@ -373,24 +375,24 @@ val ecdsa_verification_step5_2:
       disjoint tempBuffer u1 /\
       disjoint tempBuffer u2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc pointSum; loc pubKeyAsPoint; loc tempBuffer] /\
-      point_x_as_nat h pubKeyAsPoint < prime256 /\
-      point_y_as_nat h pubKeyAsPoint < prime256 /\
-      point_z_as_nat h pubKeyAsPoint < prime256
+      point_x_as_nat h pubKeyAsPoint < prime /\
+      point_y_as_nat h pubKeyAsPoint < prime /\
+      point_z_as_nat h pubKeyAsPoint < prime
     )
     (ensures fun h0 _ h1 ->
       modifies (loc pointSum |+| loc tempBuffer |+| loc pubKeyAsPoint) h0 h1 /\
-      as_nat h1 (gsub pointSum (size 0) (size 4)) < prime256 /\
+      as_nat h1 (gsub pointSum (size 0) (size 4)) < prime /\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, base_point) in
         let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
 	let sumD =
-	  if  _norm u1D =  _norm u2D
+	  if  norm_jacob_point u1D = norm_jacob_point u2D
 	  then
-	    _point_double u1D
+	    S.point_double u1D
 	  else
-	    _point_add u1D u2D in
-        let pointNorm = _norm sumD in
+	    S.point_add u1D u2D in
+        let pointNorm = norm_jacob_point sumD in
         let resultPoint =  point_prime_to_coordinates (as_seq h1 pointSum) in
         pointNorm == resultPoint
       )
@@ -432,27 +434,27 @@ val ecdsa_verification_step5:
       disjoint tempBuffer u1 /\
       disjoint tempBuffer u2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc x; loc pubKeyAsPoint; loc tempBuffer] /\
-      point_x_as_nat h pubKeyAsPoint < prime256 /\
-      point_y_as_nat h pubKeyAsPoint < prime256 /\
-      point_z_as_nat h pubKeyAsPoint < prime256
+      point_x_as_nat h pubKeyAsPoint < prime /\
+      point_y_as_nat h pubKeyAsPoint < prime /\
+      point_z_as_nat h pubKeyAsPoint < prime
     )
     (ensures fun h0 state h1 ->
       modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 /\
-      as_nat h1 x < prime256 /\
+      as_nat h1 x < prime /\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, base_point) in
         let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
         let sumD =
-	  if  _norm u1D =  _norm u2D
+	  if  norm_jacob_point u1D = norm_jacob_point u2D
 	  then
-	    _point_double u1D
+	    S.point_double u1D
 	  else
-	    _point_add u1D u2D in
-        let pointNorm = _norm sumD in
+	    S.point_add u1D u2D in
+        let pointNorm = norm_jacob_point sumD in
         let (xResult, yResult, zResult) = pointNorm in
         state == not (Spec.P256.isPointAtInfinity pointNorm) /\
-        as_nat h1 x == xResult % prime_p256_order
+        as_nat h1 x == xResult % order
     )
   )
 
@@ -495,10 +497,10 @@ val ecdsa_verification_core:
       disjoint tempBuffer s /\
       disjoint tempBuffer m /\
       LowStar.Monotonic.Buffer.all_disjoint [loc publicKeyPoint; loc hashAsFelem; loc xBuffer; loc tempBuffer] /\
-      as_nat h s < prime_p256_order /\ as_nat h r < prime_p256_order /\
-      point_x_as_nat h publicKeyPoint < prime256 /\
-      point_y_as_nat h publicKeyPoint < prime256 /\
-      point_z_as_nat h publicKeyPoint < prime256
+      as_nat h s < order /\ as_nat h r < order /\
+      point_x_as_nat h publicKeyPoint < prime /\
+      point_y_as_nat h publicKeyPoint < prime /\
+      point_z_as_nat h publicKeyPoint < prime
     )
     (ensures fun h0 state h1 ->
       modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer |+| loc tempBuffer) h0 h1 /\
@@ -508,25 +510,25 @@ val ecdsa_verification_core:
 
 	 let hashM = hashSpec alg (v mLen) (as_seq h0 m) in
 	 let cutHashM = Lib.Sequence.sub hashM 0 32 in
-	 let hashNat =  nat_from_bytes_be cutHashM % prime_p256_order in
+	 let hashNat =  nat_from_bytes_be cutHashM % order in
 
-         let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in
-	 let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in
+         let p0 = pow (as_nat h0 s) (order - 2) * hashNat % order in
+	 let p1 = pow (as_nat h0 s) (order - 2) * as_nat h0 r % order in
 
 	 let bufferU1 = nat_to_bytes_be 32 p0  in
 	 let bufferU2 = nat_to_bytes_be 32 p1 in
 	 let pointAtInfinity = (0, 0, 0) in
-         let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, basePoint) in
+         let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, base_point) in
          let u2D, _ = montgomery_ladder_spec bufferU2 (pointAtInfinity, point_prime_to_coordinates (as_seq h0 publicKeyPoint)) in
           let sumD =
-	  if  _norm u1D =  _norm u2D
+	  if  norm_jacob_point u1D = norm_jacob_point u2D
 	  then
-	    _point_double u1D
+	    S.point_double u1D
 	  else
-	    _point_add u1D u2D in
-         let (xResult, yResult, zResult) = _norm sumD in
-         state == not (Spec.P256.isPointAtInfinity (_norm sumD)) /\
-         as_nat h1 xBuffer == xResult % prime_p256_order
+	    S.point_add u1D u2D in
+         let (xResult, yResult, zResult) = norm_jacob_point sumD in
+         state == not (Spec.P256.isPointAtInfinity (norm_jacob_point sumD)) /\
+         as_nat h1 xBuffer == xResult % order
       )
   )
 

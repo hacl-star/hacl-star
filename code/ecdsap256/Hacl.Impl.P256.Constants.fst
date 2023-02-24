@@ -23,12 +23,12 @@ let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\
     let l1 = uint_v (List.Tot.index x 1) in
     let l2 = uint_v (List.Tot.index x 2) in
     let l3 = uint_v (List.Tot.index x 3) in
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == S.prime256)
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == S.prime)
   } =
   [@inline_let]
   let x =
     [ u64 0xffffffffffffffff; u64 0xffffffff; u64 0; u64 0xffffffff00000001] in
-    assert_norm (0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == S.prime256);
+    assert_norm (0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == S.prime);
   x
 
 
@@ -39,28 +39,28 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
     let l1 = uint_v (List.Tot.index x 1) in
     let l2 = uint_v (List.Tot.index x 2) in
     let l3 = uint_v (List.Tot.index x 3) in
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == S.prime_p256_order)
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == S.order)
   } =
   [@inline_let]
   let x =
     [ u64 17562291160714782033; u64 13611842547513532036; u64 18446744073709551615; u64 18446744069414584320 ] in
-    assert_norm (17562291160714782033 + 13611842547513532036 * pow2 64 + 18446744073709551615* pow2 128 + 18446744069414584320 * pow2 192 == S.prime_p256_order);
+    assert_norm (17562291160714782033 + 13611842547513532036 * pow2 64 + 18446744073709551615* pow2 128 + 18446744069414584320 * pow2 192 == S.order);
   x
 
 
-let prime256_buffer: x: glbuffer uint64 4ul {
+let prime_buffer: x: glbuffer uint64 4ul {
   witnessed #uint64 #(size 4) x (LSeq.of_list p256_prime_list) /\
   recallable x /\
-  felem_seq_as_nat (LSeq.of_list (p256_prime_list)) == S.prime256} =
+  felem_seq_as_nat (LSeq.of_list (p256_prime_list)) == S.prime} =
 
-  assert_norm (felem_seq_as_nat (LSeq.of_list (p256_prime_list)) == S.prime256);
+  assert_norm (felem_seq_as_nat (LSeq.of_list (p256_prime_list)) == S.prime);
   createL_global p256_prime_list
 
 
-let prime256order_buffer: x: glbuffer uint64 (size 4) {
+let primeorder_buffer: x: glbuffer uint64 (size 4) {
   witnessed #uint64 #(size 4) x (LSeq.of_list p256_order_prime_list) /\
   recallable x /\
-  felem_seq_as_nat (LSeq.of_list (p256_order_prime_list)) == S.prime_p256_order} =
+  felem_seq_as_nat (LSeq.of_list (p256_order_prime_list)) == S.order} =
   createL_global p256_order_prime_list
 
 
@@ -126,7 +126,7 @@ let rec nat_from_intlist_seq_be #t #l len b =
 #pop-options
 
 
-unfold let prime_p256_order_inverse_list: list uint8 =
+unfold let order_inverse_list: list uint8 =
  [
    u8 79;  u8 37;  u8 99;  u8 252; u8 194; u8 202; u8 185; u8 243;
    u8 132; u8 158; u8 23;  u8 167; u8 173; u8 250; u8 230; u8 188;
@@ -135,14 +135,14 @@ unfold let prime_p256_order_inverse_list: list uint8 =
  ]
 
 
-let prime_p256_order_inverse_seq: s:LSeq.lseq uint8 32{BSeq.nat_from_intseq_le s == S.prime_p256_order - 2} =
-  assert_norm (List.Tot.length prime_p256_order_inverse_list == 32);
-  nat_from_intlist_seq_le 32 prime_p256_order_inverse_list;
-  assert_norm (nat_from_intlist_le prime_p256_order_inverse_list == S.prime_p256_order - 2);
-  LSeq.of_list prime_p256_order_inverse_list
+let order_inverse_seq: s:LSeq.lseq uint8 32{BSeq.nat_from_intseq_le s == S.order - 2} =
+  assert_norm (List.Tot.length order_inverse_list == 32);
+  nat_from_intlist_seq_le 32 order_inverse_list;
+  assert_norm (nat_from_intlist_le order_inverse_list == S.order - 2);
+  LSeq.of_list order_inverse_list
 
 
-unfold let prime_p256_order_list: list uint8 =
+unfold let order_list: list uint8 =
  [
   u8 255; u8 255; u8 255; u8 255; u8 0;  u8 0;   u8 0;   u8 0;
   u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
@@ -151,17 +151,17 @@ unfold let prime_p256_order_list: list uint8 =
  ]
 
 
-let prime_p256_order_seq: s:LSeq.lseq uint8 32{BSeq.nat_from_intseq_be s == S.prime_p256_order} =
-  assert_norm (List.Tot.length prime_p256_order_list == 32);
-  nat_from_intlist_seq_be 32 prime_p256_order_list;
-  assert_norm (nat_from_intlist_be prime_p256_order_list == S.prime_p256_order);
-  LSeq.of_list prime_p256_order_list
+let order_seq: s:LSeq.lseq uint8 32{BSeq.nat_from_intseq_be s == S.order} =
+  assert_norm (List.Tot.length order_list == 32);
+  nat_from_intlist_seq_be 32 order_list;
+  assert_norm (nat_from_intlist_be order_list == S.order);
+  LSeq.of_list order_list
 
 
 // NOTE: used in Hacl.Impl.ECDSA.MM.Exponent.fst
-let order_inverse_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_inverse_seq /\ recallable x} =
-  createL_global prime_p256_order_inverse_list
+let order_inverse_buffer: x: glbuffer uint8 32ul {witnessed x order_inverse_seq /\ recallable x} =
+  createL_global order_inverse_list
 
 
-let order_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_seq /\ recallable x} =
-  createL_global prime_p256_order_list
+let order_buffer: x: glbuffer uint8 32ul {witnessed x order_seq /\ recallable x} =
+  createL_global order_list

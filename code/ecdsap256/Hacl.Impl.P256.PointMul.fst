@@ -22,6 +22,8 @@ open Hacl.Impl.P256.Point
 open Hacl.Spec.P256.MontgomeryMultiplication
 friend Hacl.Spec.P256.MontgomeryMultiplication
 
+module S = Spec.P256
+
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in
@@ -53,13 +55,13 @@ val cswap: bit:uint64{v bit <= 1} -> p:point -> q:point
     (requires fun h ->
       live h p /\ live h q /\ (disjoint p q \/ p == q) /\
 
-      as_nat h (gsub p (size 0) (size 4)) < prime /\
-      as_nat h (gsub p (size 4) (size 4)) < prime /\
-      as_nat h (gsub p (size 8) (size 4)) < prime /\
+      as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+      as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+      as_nat h (gsub p (size 8) (size 4)) < S.prime /\
 
-      as_nat h (gsub q (size 0) (size 4)) < prime /\
-      as_nat h (gsub q (size 4) (size 4)) < prime /\
-      as_nat h (gsub q (size 8) (size 4)) < prime
+      as_nat h (gsub q (size 0) (size 4)) < S.prime /\
+      as_nat h (gsub q (size 4) (size 4)) < S.prime /\
+      as_nat h (gsub q (size 8) (size 4)) < S.prime
 )
     (ensures  fun h0 _ h1 ->
       modifies (loc p |+| loc q) h0 h1 /\
@@ -108,7 +110,7 @@ val scalar_bit:
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == S.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
 
 let scalar_bit #buf_type s n =
   let h0 = ST.get () in
@@ -123,13 +125,13 @@ val montgomery_ladder_step1: p: point -> q: point ->tempBuffer: lbuffer uint64 (
   (requires fun h -> live h p /\ live h q /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer] /\
 
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime /\
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
 
-    as_nat h (gsub q (size 0) (size 4)) < prime /\
-    as_nat h (gsub q (size 4) (size 4)) < prime /\
-    as_nat h (gsub q (size 8) (size 4)) < prime
+    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 8) (size 4)) < S.prime
 
   )
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+|  loc tempBuffer) h0 h1 /\
@@ -151,13 +153,13 @@ val montgomery_ladder_step1: p: point -> q: point ->tempBuffer: lbuffer uint64 (
       let r1Z = as_nat h1 (gsub q (size 8) (size 4)) in
 
 
-      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step1 (fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ) (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ) in
+      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = S._ml_step1 (fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ) (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ) in
 
       fromDomain_ r0X == rN0X /\ fromDomain_ r0Y == rN0Y /\ fromDomain_ r0Z == rN0Z /\
       fromDomain_ r1X == rN1X /\ fromDomain_ r1Y == rN1Y /\ fromDomain_ r1Z == rN1Z /\
 
-      r0X < prime /\ r0Y < prime /\ r0Z < prime /\
-      r1X < prime /\ r1Y < prime /\ r1Z < prime
+      r0X < S.prime /\ r0Y < S.prime /\ r0Z < S.prime /\
+      r1X < S.prime /\ r1Y < S.prime /\ r1Z < S.prime
   )
 )
 
@@ -180,13 +182,13 @@ val montgomery_ladder_step: #buf_type: buftype->
   (requires fun h -> live h p /\ live h q /\ live h tempBuffer /\ live h scalar /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
 
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime /\
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
 
-    as_nat h (gsub q (size 0) (size 4)) < prime /\
-    as_nat h (gsub q (size 4) (size 4)) < prime /\
-    as_nat h (gsub q (size 8) (size 4)) < prime
+    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 8) (size 4)) < S.prime
   )
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
     (
@@ -207,13 +209,13 @@ val montgomery_ladder_step: #buf_type: buftype->
       let r1Y = as_nat h1 (gsub q (size 4) (size 4)) in
       let r1Z = as_nat h1 (gsub q (size 8) (size 4)) in
 
-      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step (as_seq h0 scalar) (uint_v i) ((fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ), (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ)) in
+      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = S._ml_step (as_seq h0 scalar) (uint_v i) ((fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ), (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ)) in
 
       fromDomain_ r0X == rN0X /\ fromDomain_ r0Y == rN0Y /\ fromDomain_ r0Z == rN0Z /\
       fromDomain_ r1X == rN1X /\ fromDomain_ r1Y == rN1Y /\ fromDomain_ r1Z == rN1Z /\
 
-      r0X < prime /\ r0Y < prime /\ r0Z < prime /\
-      r1X < prime /\ r1Y < prime /\ r1Z < prime
+      r0X < S.prime /\ r0Y < S.prime /\ r0Z < S.prime /\
+      r1X < S.prime /\ r1Y < S.prime /\ r1Z < S.prime
     )
   )
 
@@ -234,28 +236,28 @@ val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
   Stack unit
   (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime /\
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
 
-    as_nat h (gsub q (size 0) (size 4)) < prime /\
-    as_nat h (gsub q (size 4) (size 4)) < prime /\
-    as_nat h (gsub q (size 8) (size 4)) < prime )
+    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 8) (size 4)) < S.prime )
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
     (
-      as_nat h1 (gsub p (size 0) (size 4)) < prime /\
-      as_nat h1 (gsub p (size 4) (size 4)) < prime /\
-      as_nat h1 (gsub p (size 8) (size 4)) < prime /\
+      as_nat h1 (gsub p (size 0) (size 4)) < S.prime /\
+      as_nat h1 (gsub p (size 4) (size 4)) < S.prime /\
+      as_nat h1 (gsub p (size 8) (size 4)) < S.prime /\
 
-      as_nat h1 (gsub q (size 0) (size 4)) < prime /\
-      as_nat h1 (gsub q (size 4) (size 4)) < prime /\
-      as_nat h1 (gsub q (size 8) (size 4)) < prime /\
+      as_nat h1 (gsub q (size 0) (size 4)) < S.prime /\
+      as_nat h1 (gsub q (size 4) (size 4)) < S.prime /\
+      as_nat h1 (gsub q (size 8) (size 4)) < S.prime /\
 
 
       (
 	let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 p)) in
 	let q1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 q)) in
-	let rN, qN = montgomery_ladder_spec (as_seq h0 scalar)
+	let rN, qN = S.montgomery_ladder_spec (as_seq h0 scalar)
 	  (
 	    fromDomainPoint(point_prime_to_coordinates (as_seq h0 p)),
 	    fromDomainPoint(point_prime_to_coordinates (as_seq h0 q))
@@ -270,22 +272,22 @@ let montgomery_ladder #a p q scalar tempBuffer =
 
 
   [@inline_let]
-  let spec_ml h0 = _ml_step (as_seq h0 scalar) in
+  let spec_ml h0 = S._ml_step (as_seq h0 scalar) in
 
   [@inline_let]
-  let acc (h:mem) : GTot (tuple2 point_nat_prime point_nat_prime) =
+  let acc (h:mem) : GTot (tuple2 S.jacob_point S.jacob_point) =
   (fromDomainPoint(point_prime_to_coordinates (as_seq h p)), fromDomainPoint(point_prime_to_coordinates (as_seq h q)))  in
 
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
   [@inline_let]
   let inv h (i: nat {i <= 256}) =
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime /\
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
 
-    as_nat h (gsub q (size 0) (size 4)) < prime /\
-    as_nat h (gsub q (size 4) (size 4)) < prime /\
-    as_nat h (gsub q (size 8) (size 4)) < prime /\
+    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub q (size 8) (size 4)) < S.prime /\
     modifies3 p q tempBuffer h0 h   /\
     acc h == Lib.LoopCombinators.repeati i (spec_ml h0) (acc h0)
 
@@ -299,7 +301,7 @@ let montgomery_ladder #a p q scalar tempBuffer =
 
 
 val lemma_point_to_domain: h0: mem -> h1: mem ->  p: point -> result: point ->  Lemma
-   (requires (point_x_as_nat h0 p < prime /\ point_y_as_nat h0 p < prime /\ point_z_as_nat h0 p < prime /\
+   (requires (point_x_as_nat h0 p < S.prime /\ point_y_as_nat h0 p < S.prime /\ point_z_as_nat h0 p < S.prime /\
        point_x_as_nat h1 result == toDomain_ (point_x_as_nat h0 p) /\
        point_y_as_nat h1 result == toDomain_ (point_y_as_nat h0 p) /\
        point_z_as_nat h1 result == toDomain_ (point_z_as_nat h0 p)
@@ -344,21 +346,21 @@ val scalarMultiplication_t: #t:buftype -> p: point -> result: point ->
     (requires fun h ->
       live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime
     )
   (ensures fun h0 _ h1 ->
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
 
-    as_nat h1 (gsub result (size 0) (size 4)) < prime256 /\
-    as_nat h1 (gsub result (size 4) (size 4)) < prime256 /\
-    as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
+    as_nat h1 (gsub result (size 0) (size 4)) < S.prime /\
+    as_nat h1 (gsub result (size 4) (size 4)) < S.prime /\
+    as_nat h1 (gsub result (size 8) (size 4)) < S.prime /\
 
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
-      let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in
+      let (xN, yN, zN) = S.scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in
       x3 == xN /\ y3 == yN /\ z3 == zN
   )
 )
