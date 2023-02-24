@@ -73,14 +73,6 @@ let rec nat_from_intlist_le #t #l = function
   | [] -> 0
   | hd :: tl -> v hd + pow2 (bits t) * nat_from_intlist_le tl
 
-val nat_from_intlist_be: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
-let rec nat_from_intlist_be #t #l = function
-  | [] -> 0
-  | hd :: tl -> pow2 (FStar.List.Tot.Base.length tl * bits t) * v hd + nat_from_intlist_be tl
-#pop-options
-
-
-#push-options "--fuel 1"
 val index_seq_of_list_cons: #a:Type -> x:a -> l:list a -> i:nat{i < List.Tot.length l} -> Lemma
   (Seq.index (Seq.seq_of_list (x::l)) (i+1) == Seq.index (Seq.seq_of_list l) i)
 
@@ -104,25 +96,6 @@ let rec nat_from_intlist_seq_le #t #l len b =
     BSeq.nat_from_intseq_le_slice_lemma s 1;
     nat_from_intlist_seq_le (len - 1) tl
     end
-
-
-val nat_from_intlist_seq_be: #t: inttype {unsigned t} -> #l: secrecy_level
-  -> len: size_nat -> b: list (uint_t t l) {FStar.List.Tot.Base.length b = len}
-  -> Lemma (nat_from_intlist_be b == BSeq.nat_from_intseq_be (LSeq.of_list b))
-
-let rec nat_from_intlist_seq_be #t #l len b =
-  match b with
-  | [] -> ()
-  | hd :: tl ->
-    begin
-      let s = LSeq.of_list b in
-      Classical.forall_intro (index_seq_of_list_cons hd tl);
-      assert (LSeq.equal (LSeq.of_list tl) (LSeq.slice s 1 len));
-      assert (LSeq.index s 0 == List.Tot.index b 0);
-      nat_from_intlist_seq_be (len - 1) tl;
-      BSeq.nat_from_intseq_be_lemma0 (LSeq.slice s 0 1);
-      BSeq.nat_from_intseq_be_slice_lemma s 1
-      end
 #pop-options
 
 
@@ -141,27 +114,6 @@ let order_inverse_seq: s:LSeq.lseq uint8 32{BSeq.nat_from_intseq_le s == S.order
   assert_norm (nat_from_intlist_le order_inverse_list == S.order - 2);
   LSeq.of_list order_inverse_list
 
-
-unfold let order_list: list uint8 =
- [
-  u8 255; u8 255; u8 255; u8 255; u8 0;  u8 0;   u8 0;   u8 0;
-  u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-  u8 188; u8 230; u8 250; u8 173; u8 167; u8 23; u8 158; u8 132;
-  u8 243; u8 185; u8 202; u8 194; u8 252; u8 99; u8 37; u8 81
- ]
-
-
-let order_seq: s:LSeq.lseq uint8 32{BSeq.nat_from_intseq_be s == S.order} =
-  assert_norm (List.Tot.length order_list == 32);
-  nat_from_intlist_seq_be 32 order_list;
-  assert_norm (nat_from_intlist_be order_list == S.order);
-  LSeq.of_list order_list
-
-
 // NOTE: used in Hacl.Impl.ECDSA.MM.Exponent.fst
 let order_inverse_buffer: x: glbuffer uint8 32ul {witnessed x order_inverse_seq /\ recallable x} =
   createL_global order_inverse_list
-
-
-let order_buffer: x: glbuffer uint8 32ul {witnessed x order_seq /\ recallable x} =
-  createL_global order_list
