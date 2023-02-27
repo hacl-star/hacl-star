@@ -13,8 +13,43 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 open Hacl.Spec.P256.Felem
+open Hacl.Impl.P256.Bignum
 
 #set-options "--z3rlimit 50"
+
+
+inline_for_extraction noextract
+val make_prime: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == S.prime)
+
+let make_prime n =
+  // 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
+  [@inline_let] let n0 = u64 0xffffffffffffffff in
+  [@inline_let] let n1 = u64 0xffffffff in
+  [@inline_let] let n2 = u64 0x0 in
+  [@inline_let] let n3 = u64 0xffffffff00000001 in
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.prime);
+  bn_make_u64_4 n0 n1 n2 n3 n
+
+
+inline_for_extraction noextract
+val make_order: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == S.order)
+
+let make_order n =
+  // 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551
+  [@inline_let] let n0 = u64 0xf3b9cac2fc632551 in
+  [@inline_let] let n1 = u64 0xbce6faada7179e84 in
+  [@inline_let] let n2 = u64 0xffffffffffffffff in
+  [@inline_let] let n3 = u64 0xffffffff00000000 in
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.order);
+  bn_make_u64_4 n0 n1 n2 n3 n
+
+//----------------
 
 inline_for_extraction noextract
 let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\
