@@ -123,6 +123,16 @@ val bn_add8: x:widefelem -> y:widefelem -> res:widefelem -> Stack uint64
     wide_as_nat h1 res + v c * pow2 512 == wide_as_nat h0 x + wide_as_nat h0 y)
 
 
+val bn_add_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h n /\ live h x /\ live h y /\ live h res /\
+    disjoint n x /\ disjoint n y /\ disjoint n res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < as_nat h n /\ as_nat h y < as_nat h n)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == (as_nat h0 x + as_nat h0 y) % as_nat h0 n)
+
+
 // NOTE: changed precondition `eq_or_disjoint x y`
 val bn_sub4: x:felem -> y:felem -> res:felem -> Stack uint64
   (requires fun h ->

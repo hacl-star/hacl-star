@@ -135,6 +135,18 @@ let bn_add8 x y out =
 
 
 [@CInline]
+let bn_add_mod4 x y n out =
+  let h0 = ST.get () in
+  BN.bn_add_mod_n 4ul n x y out;
+  let h1 = ST.get () in
+  bignum_bn_v_is_as_nat h0 n;
+  bignum_bn_v_is_as_nat h0 x;
+  bignum_bn_v_is_as_nat h0 y;
+  SN.bn_add_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
+  bignum_bn_v_is_as_nat h1 out
+
+
+[@CInline]
 let bn_sub4 x y out =
   let h0 = ST.get () in
   let c = BN.bn_sub_eq_len 4ul x y out in
