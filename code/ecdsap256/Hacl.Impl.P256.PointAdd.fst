@@ -13,14 +13,12 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Lemmas
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Spec.P256.Math
-
-open Hacl.Spec.P256.MontgomeryMultiplication
-friend Hacl.Spec.P256.MontgomeryMultiplication
 
 module S = Spec.P256
 

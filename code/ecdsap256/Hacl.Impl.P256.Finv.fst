@@ -8,21 +8,20 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Spec.P256.MontgomeryMultiplication
+
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.SolinasReduction
 
-open Hacl.Spec.P256.MontgomeryMultiplication
-friend Hacl.Spec.P256.MontgomeryMultiplication
-
 module LSeq = Lib.Sequence
 module M = Lib.NatMod
-module S = Spec.P256
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module SI = Hacl.Spec.P256.Finv
+module S = Spec.P256
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

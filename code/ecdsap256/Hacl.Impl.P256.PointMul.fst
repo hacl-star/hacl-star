@@ -10,6 +10,7 @@ open FStar.Math.Lemmas
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.Lemmas
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
@@ -18,9 +19,6 @@ open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
 open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Point
-
-open Hacl.Spec.P256.MontgomeryMultiplication
-friend Hacl.Spec.P256.MontgomeryMultiplication
 
 module S = Spec.P256
 

@@ -11,6 +11,8 @@ open Lib.IntTypes
 open Lib.ByteBuffer
 open Lib.Buffer
 
+open Hacl.Spec.P256.Lemmas
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.Math
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.RawCmp
@@ -19,10 +21,6 @@ open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Constants
-
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.MontgomeryMultiplication
-friend Hacl.Spec.P256.MontgomeryMultiplication
 
 module BSeq = Lib.ByteSequence
 module S = Spec.P256
