@@ -20,42 +20,51 @@ module SL = Hacl.Spec.P256.Lemmas
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-inline_for_extraction noextract
-val reduction_prime_2prime_with_carry_impl: cin:uint64 -> x:felem -> result:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h result /\ eq_or_disjoint x result /\
-    (as_nat h x + uint_v cin * pow2 256) < 2 * S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result = (as_nat h0 x + uint_v cin * pow2 256) % S.prime)
+val fmod_short_lemma: a:nat{a < pow2 256} ->
+  Lemma (let r = if a >= S.prime then a - S.prime else a in r = a % S.prime)
 
-let reduction_prime_2prime_with_carry_impl cin x result =
-  push_frame();
-    let tempBuffer = create (size 4) (u64 0) in
-    let tempBufferForSubborrow = create (size 1) (u64 0) in
-    recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
-    let c = bn_sub4_il x prime_buffer tempBuffer in
-  let h0 = ST.get() in
-      assert(uint_v c <= 1);
-      assert(if uint_v c = 0 then as_nat h0 x >= S.prime else as_nat h0 x < S.prime);
-    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-    bn_cmovznz4 carry tempBuffer x result;
-  let h1 = ST.get() in
-      assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-      assert_norm (S.prime < pow2 256);
-      assert_norm(pow2 256 < 2 * S.prime);
+let fmod_short_lemma a =
+  let r = if a >= S.prime then a - S.prime else a in
+  if a >= S.prime then begin
+    Math.Lemmas.lemma_mod_sub a S.prime 1;
+    assert_norm (pow2 256 - S.prime < S.prime);
+    Math.Lemmas.small_mod r S.prime end
+  else
+   Math.Lemmas.small_mod r S.prime
 
-      assert(uint_v cin <= 1);
-      assert(uint_v c <= 1);
 
-      assert(if as_nat h0 x >= S.prime then uint_v c = 0 else True);
-      assert(if uint_v cin < uint_v c then as_nat h1 result == as_nat h0 x else as_nat h1 result == as_nat h0 tempBuffer);
+[@CInline]
+let fmod_short x res =
+  push_frame ();
+  let tmp = create (size 4) (u64 0) in
+  recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
+  let h0 = ST.get () in
+  let c = bn_sub4_il x prime_buffer tmp in
+  bn_cmovznz4 c tmp x res;
+  as_nat_bound h0 x;
+  fmod_short_lemma (as_nat h0 x);
+  pop_frame ()
 
-      assert(as_nat h1 result < S.prime);
 
-      Math.Lemmas.modulo_addition_lemma (as_nat h1 result) S.prime 1;
-      Math.Lemmas.small_modulo_lemma_1 (as_nat h1 result) S.prime;
-  pop_frame()
+[@CInline]
+let fadd x y res =
+  let h0 = ST.get () in
+  push_frame ();
+  let n = create 4ul (u64 0) in
+  make_prime n;
+  bn_add_mod4 x y n res;
+  let h1 = ST.get () in
+  assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime);
+  pop_frame ();
+  SM.additionInDomain (as_nat h0 x) (as_nat h0 y);
+  SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 x) + SM.fromDomain_ (as_nat h0 y))
 
+
+let fdouble x out =
+  fadd x x out
+
+
+//---------------------
 
 inline_for_extraction noextract
 val reduction_prime_2prime_8_with_carry_impl: x:widefelem -> res:felem -> Stack unit
@@ -91,39 +100,6 @@ let reduction_prime_2prime_8_with_carry_impl x result =
 	as_nat h4 result = (wide_as_nat h0 x) % S.prime
 	end );
  pop_frame()
-
-
-val lemma_reduction1_0: a:nat{a < pow2 256 /\ a >= S.prime} -> r:nat{r = a - S.prime} ->
-  Lemma (r = a % S.prime)
-
-let lemma_reduction1_0 a r =
-  assert_norm (pow2 256 - S.prime < S.prime);
-  Math.Lemmas.small_modulo_lemma_1 r S.prime;
-  Math.Lemmas.lemma_mod_sub_distr a S.prime S.prime
-
-
-val lemma_reduction1: a:nat{a < pow2 256} -> r:nat{if a >= S.prime then r = a - S.prime else r = a} ->
-  Lemma (r = a % S.prime)
-
-let lemma_reduction1 a r =
-  if a >= S.prime then
-   lemma_reduction1_0 a r
-  else
-   Math.Lemmas.small_mod r S.prime
-
-
-[@CInline]
-let fmod_short x result =
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  push_frame();
-  let tempBuffer = create (size 4) (u64 0) in
-  recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
-  let h0 = ST.get() in
-  let c = bn_sub4_il x prime_buffer tempBuffer in
-  bn_cmovznz4 c tempBuffer x result;
-  let h2 = ST.get() in
-  lemma_reduction1 (as_nat h0 x) (as_nat h2 result);
-  pop_frame()
 
 
 val lemma_t_computation: t: uint64{uint_v t == 0 \/ uint_v t == 1} ->
@@ -166,19 +142,6 @@ let lemma_t_computation2 t =
   assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = S.prime)
 
 
-[@CInline]
-let fadd x y out =
-  let h0 = ST.get() in
-  let t = bn_add4 x y out in
-  lemma_t_computation t;
-  reduction_prime_2prime_with_carry_impl t out out;
-  let h2 = ST.get() in
-  SM.additionInDomain (as_nat h0 x) (as_nat h0 y);
-  SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 x) + SM.fromDomain_ (as_nat h0 y))
-
-
-let fdouble x out =
-  fadd x x out
 
 
 [@CInline]
