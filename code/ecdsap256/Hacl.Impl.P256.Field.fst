@@ -64,6 +64,19 @@ let fdouble x out =
   fadd x x out
 
 
+[@CInline]
+let fsub x y res =
+  let h0 = ST.get () in
+  push_frame ();
+  let n = create 4ul (u64 0) in
+  make_prime n;
+  bn_sub_mod4 x y n res;
+  let h1 = ST.get () in
+  assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
+  pop_frame ();
+  SM.substractionInDomain (as_nat h0 x) (as_nat h0 y);
+  SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 x) - SM.fromDomain_ (as_nat h0 y))
+
 //---------------------
 
 inline_for_extraction noextract
@@ -140,37 +153,6 @@ let lemma_t_computation2 t =
   let t3 = t -. (t <<. (size 32)) in
   let s = uint_v t0 + uint_v t1 * pow2 64 + uint_v t2 * pow2 128 + uint_v t3 * pow2 192 in
   assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = S.prime)
-
-
-
-
-[@CInline]
-let fsub x y out =
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    let h0 = ST.get() in
-  let t = bn_sub4 x y out in
-    let h1 = ST.get() in
-    lemma_t_computation2 t;
-  let t0 = (u64 0) -. t in
-  let t1 = ((u64 0) -. t) >>. (size 32) in
-  let t2 = u64 0 in
-  let t3 = t -. (t <<. (size 32)) in
-    Math.Lemmas.modulo_addition_lemma  (as_nat h0 x - as_nat h0 y) S.prime 1;
-  let c = bn_add4_variables out (u64 0)  t0 t1 t2 t3 out in
-    let h2 = ST.get() in
-      assert(
-      if as_nat h0 x - as_nat h0 y >= 0 then
-	begin
-	  Math.Lemmas.modulo_lemma (as_nat h0 x - as_nat h0 y) S.prime;
-	  as_nat h2 out == (as_nat h0 x - as_nat h0 y) % S.prime
-	end
-      else
-          begin
-	    Math.Lemmas.modulo_lemma (as_nat h2 out) S.prime;
-            as_nat h2 out == (as_nat h0 x - as_nat h0 y) % S.prime
-	  end);
-    SM.substractionInDomain (felem_seq_as_nat (as_seq h0 x)) (felem_seq_as_nat (as_seq h0 y));
-    SM.inDomain_mod_is_not_mod (SM.fromDomain_ (felem_seq_as_nat (as_seq h0 x)) - SM.fromDomain_ (felem_seq_as_nat (as_seq h0 y)))
 
 //--------------------------------------
 
