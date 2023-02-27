@@ -103,17 +103,6 @@ val bn_add4: x:felem -> y:felem -> res:felem -> Stack uint64
     as_nat h1 res + v c * pow2 256 == as_nat h0 x + as_nat h0 y)
 
 
-// TODO: rm, use add4
-val bn_add4_variables: x:felem -> cin:uint64{uint_v cin <= 1}
-  -> y0:uint64 -> y1:uint64 -> y2:uint64 -> y3:uint64 -> res:felem ->
-  Stack uint64
-  (requires fun h -> live h x /\ live h res /\ eq_or_disjoint x res)
-  (ensures fun h0 c h1 -> modifies (loc res) h0 h1 /\ v c <= 1 /\
-    as_nat h1 res + uint_v c * pow2 256 ==
-    as_nat h0 x + uint_v y0 + uint_v y1 * pow2 64 +
-    uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin)
-
-
 // NOTE: changed precondition `eq_or_disjoint x y`
 val bn_add8: x:widefelem -> y:widefelem -> res:widefelem -> Stack uint64
   (requires fun h ->

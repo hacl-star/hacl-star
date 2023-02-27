@@ -98,31 +98,6 @@ let bn_add4 x y out =
 
 
 [@CInline]
-let bn_add4_variables x cin y0 y1 y2 y3 result =
-  let h0 = ST.get() in
-
-  let r0 = sub result (size 0) (size 1) in
-  let r1 = sub result (size 1) (size 1) in
-  let r2 = sub result (size 2) (size 1) in
-  let r3 = sub result (size 3) (size 1) in
-
-  let cc = add_carry_u64 cin x.(0ul) y0 r0 in
-  let cc = add_carry_u64 cc x.(1ul) y1 r1 in
-  let cc = add_carry_u64 cc x.(2ul) y2 r2 in
-  let cc = add_carry_u64 cc x.(3ul) y3 r3 in
-
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-
-  assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
-  assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
-  assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
-
-  cc
-
-
-[@CInline]
 let bn_add8 x y out =
   let h0 = ST.get () in
   let c = BN.bn_add_eq_len 8ul x y out in
