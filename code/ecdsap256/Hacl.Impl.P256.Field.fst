@@ -115,90 +115,48 @@ let reduction_prime_2prime_8_with_carry_impl x result =
  pop_frame()
 
 
-val lemma_t_computation: t: uint64{uint_v t == 0 \/ uint_v t == 1} ->
-  Lemma
-    (
-        let t0 = u64 0 in
-	let t1 = (u64 0) -. (t <<. (size 32)) in
-	let t2 = (u64 0) -. t in
-	let t3 = (t <<. (size 32)) -. (t <<. (size 1)) in
-	let s = uint_v t0 + uint_v t1 * pow2 64 + uint_v t2 * pow2 128 + uint_v t3 * pow2 192 in
-	if uint_v t = 1 then s == pow2 256 - S.prime - 1 else s == 0
-    )
-
-let lemma_t_computation t =
-  let t0 = u64 0 in
-  let t1 = (u64 0) -. (t <<. (size 32)) in
-  let t2 = (u64 0) -. t in
-  let t3 = (t <<. (size 32)) -. (t <<. (size 1)) in
-  let s = uint_v t0 + uint_v t1 * pow2 64 + uint_v t2 * pow2 128 + uint_v t3 * pow2 192 in
-  assert_norm(18446744069414584320 * pow2 64 + 18446744073709551615 * pow2 128 + 4294967294 * pow2 192 = pow2 256 - S.prime - 1)
-
-
-val lemma_t_computation2: t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
-  Lemma
-    (
-      let t0 = (u64 0) -. t in
-      let t1 = ((u64 0) -. t) >>. (size 32) in
-      let t2 = u64 0 in
-      let t3 = t -. (t <<. (size 32)) in
-      let s = uint_v t0 + uint_v t1 * pow2 64 + uint_v t2 * pow2 128 + uint_v t3 * pow2 192 in
-      if uint_v t = 1 then s == S.prime else s == 0
-    )
-
-let lemma_t_computation2 t =
-  let t0 = (u64 0) -. t in
-  let t1 = ((u64 0) -. t) >>. (size 32) in
-  let t2 = u64 0 in
-  let t3 = t -. (t <<. (size 32)) in
-  let s = uint_v t0 + uint_v t1 * pow2 64 + uint_v t2 * pow2 128 + uint_v t3 * pow2 192 in
-  assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = S.prime)
-
-//--------------------------------------
-
 inline_for_extraction noextract
-val add8_without_carry1: t:widefelem -> t1:widefelem -> result:widefelem -> Stack unit
+val add8_without_carry1: x:widefelem -> y:widefelem -> res:widefelem -> Stack unit
   (requires fun h ->
-    live h t /\ live h t1 /\ live h result /\
-    eq_or_disjoint t1 t /\ eq_or_disjoint t1 result /\ eq_or_disjoint t result /\
-    wide_as_nat h t1 < pow2 320 /\ wide_as_nat h t < S.prime * S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint y x /\ eq_or_disjoint y res /\ eq_or_disjoint x res /\
+    wide_as_nat h y < pow2 320 /\ wide_as_nat h x < S.prime * S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    wide_as_nat h1 res = wide_as_nat h0 x + wide_as_nat h0 y)
 
-let add8_without_carry1 t t1 result  =
-  let _  = bn_add8 t t1 result in
+let add8_without_carry1 x y res  =
+  let _  = bn_add8 x y res in
     assert_norm (pow2 320 + S.prime * S.prime < pow2 512)
 
 
 inline_for_extraction noextract
-val montgomery_multiplication_round: t:widefelem -> round:widefelem -> Stack unit
+val mont_mul_round: t:widefelem -> res:widefelem -> Stack unit
   (requires fun h ->
-    live h t /\ live h round /\
+    live h t /\ live h res /\ eq_or_disjoint t res /\
     wide_as_nat h t < S.prime * S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\
-    wide_as_nat h1 round = (wide_as_nat h0 t + S.prime * (wide_as_nat h0 t % pow2 64)) / pow2 64)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    wide_as_nat h1 res = (wide_as_nat h0 t + S.prime * (wide_as_nat h0 t % pow2 64)) / pow2 64)
 
-let montgomery_multiplication_round t round =
-  push_frame();
-    let h0 = ST.get() in
-    let t2 = create (size 8) (u64 0) in
-    let t3 = create (size 8) (u64 0) in
-    let t1 = bn_mod_pow2_64 t in
-      recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
-    bn_mul1 prime_buffer t1 t2;
-    add8_without_carry1 t t2 t3;
-    bn_rshift64 t3 round;
-  pop_frame()
+let mont_mul_round t res =
+  push_frame ();
+  let h0 = ST.get () in
+  let t2 = create (size 8) (u64 0) in
+  let t3 = create (size 8) (u64 0) in
+  let t1 = bn_mod_pow2_64 t in
+  recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
+  bn_mul1 prime_buffer t1 t2;  // t2 = prime * (t % pow2 64)
+  add8_without_carry1 t t2 t3; // t3 = t + t2
+  bn_rshift64 t3 res;          // res = t3 / pow2 64
+  pop_frame ()
 
 
-val montgomery_multiplication_one_round_proof:
-  t: nat {t < S.prime * S.prime} ->
-  result: nat {result = (t + (t % pow2 64) * S.prime) / pow2 64} ->
-  co: nat {co % S.prime == t % S.prime} -> Lemma (
-    result % S.prime == co * S.modp_inv2 (pow2 64) % S.prime /\
-    result < S.prime * S.prime)
+val mont_mul_round_lemma:
+    t:nat{t < S.prime * S.prime}
+  -> res:nat{res = (t + (t % pow2 64) * S.prime) / pow2 64}
+  -> co:nat{co % S.prime == t % S.prime} ->
+  Lemma (res % S.prime == co * S.modp_inv2 (pow2 64) % S.prime /\ res < S.prime * S.prime)
 
-let montgomery_multiplication_one_round_proof t result co =
+let mont_mul_round_lemma t res co =
   SL.mult_one_round t co;
   SL.mul_lemma_1 (t % pow2 64) (pow2 64) S.prime;
   assert_norm (S.prime * S.prime + pow2 64 * S.prime < pow2 575);
@@ -207,150 +165,145 @@ let montgomery_multiplication_one_round_proof t result co =
 
 
 inline_for_extraction noextract
-val montgomery_multiplication_round_twice: t: widefelem -> result: widefelem -> Stack unit
-  (requires fun h -> live h t /\ live h result  /\ wide_as_nat h t < S.prime * S.prime)
-  (ensures fun h0 _ h1 ->
-    modifies (loc result) h0 h1 /\
-    (
-      let round = (wide_as_nat h0 t + S.prime * (wide_as_nat h0 t % pow2 64)) / pow2 64 in
-      wide_as_nat h1 result < S.prime * S.prime /\
-      wide_as_nat h1 result % S.prime == (wide_as_nat h0 t * S.modp_inv2_prime (pow2 128) S.prime) % S.prime /\
-      wide_as_nat h1 result == (round + S.prime * (round % pow2 64)) / pow2 64
-    )
- )
+val mont_mul_round_twice: t:widefelem -> res:widefelem -> Stack unit
+  (requires fun h ->
+    live h t /\ live h res /\ eq_or_disjoint t res /\
+    wide_as_nat h t < S.prime * S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    (let round = (wide_as_nat h0 t + S.prime * (wide_as_nat h0 t % pow2 64)) / pow2 64 in
+    wide_as_nat h1 res < S.prime * S.prime /\
+    wide_as_nat h1 res % S.prime ==
+      (wide_as_nat h0 t * S.modp_inv2_prime (pow2 128) S.prime) % S.prime /\
+    wide_as_nat h1 res == (round + S.prime * (round % pow2 64)) / pow2 64))
 
-let montgomery_multiplication_round_twice t result =
-  assert_norm(S.prime > 3);
-  push_frame();
-    let tempRound = create (size 8) (u64 0) in
-      let h0 = ST.get() in
-    montgomery_multiplication_round t tempRound;
-      let h1 = ST.get() in
-      Math.Lemmas.swap_mul (wide_as_nat h0 t % pow2 64) S.prime;
-      montgomery_multiplication_one_round_proof (wide_as_nat h0 t) (wide_as_nat h1 tempRound) (wide_as_nat h0 t);
-    montgomery_multiplication_round tempRound result;
-      let h2 = ST.get() in
-      Math.Lemmas.swap_mul (wide_as_nat h1 tempRound % pow2 64) S.prime;
-      montgomery_multiplication_one_round_proof (wide_as_nat h1 tempRound) (wide_as_nat h2 result) (wide_as_nat h0 t * S.modp_inv2_prime (pow2 64) S.prime);
-      lemma_montgomery_mod_inverse_addition (wide_as_nat h0 t);
-  pop_frame()
+let mont_mul_round_twice t res =
+  push_frame ();
+  let tmp = create (size 8) (u64 0) in
+  let h0 = ST.get () in
+  mont_mul_round t tmp;
+  let h1 = ST.get () in
+  Math.Lemmas.swap_mul (wide_as_nat h0 t % pow2 64) S.prime;
+  mont_mul_round_lemma (wide_as_nat h0 t) (wide_as_nat h1 tmp) (wide_as_nat h0 t);
+
+  mont_mul_round tmp res;
+  let h2 = ST.get () in
+  Math.Lemmas.swap_mul (wide_as_nat h1 tmp % pow2 64) S.prime;
+  mont_mul_round_lemma (wide_as_nat h1 tmp) (wide_as_nat h2 res)
+    (wide_as_nat h0 t * S.modp_inv2_prime (pow2 64) S.prime);
+
+  lemma_montgomery_mod_inverse_addition (wide_as_nat h0 t);
+  pop_frame ()
+
+
+val mont_reduction_lemma: x:nat{x < S.prime * S.prime} ->
+  Lemma (
+    let round1 = (x + S.prime * (x % pow2 64)) / pow2 64 in
+    let nat_round2 = (round1 + S.prime * (round1 % pow2 64)) / pow2 64 in
+    let round2 = (nat_round2 + S.prime * (nat_round2 % pow2 64)) / pow2 64 in
+    let round4 = (round2 + S.prime * (round2 % pow2 64)) / pow2 64 in
+    round4 < 2 * S.prime)
+
+let mont_reduction_lemma x =
+  let round1 = (x + S.prime * (x % pow2 64)) / pow2 64 in
+  let nat_round2 = (round1 + S.prime * (round1 % pow2 64)) / pow2 64 in
+  let round2 = (nat_round2 + S.prime * (nat_round2 % pow2 64)) / pow2 64 in
+  let round4 = (round2 + S.prime * (round2 % pow2 64)) / pow2 64 in
+  SL.mul_lemma_2 (x % pow2 64) (pow2 64 - 1) S.prime;
+  SL.mul_lemma_1 (round1 % pow2 64) (pow2 64) S.prime;
+  SL.mul_lemma_1 (nat_round2 % pow2 64) (pow2 64) S.prime;
+  SL.mul_lemma_1 (round2 % pow2 64) (pow2 64) S.prime;
+  assert_norm (
+    (S.prime * pow2 64 + (S.prime * pow2 64 + (S.prime * pow2 64 +
+      ((pow2 64 - 1) * S.prime + S.prime * S.prime) / pow2 64) / pow2 64) / pow2 64) / pow2 64
+      < 2 * S.prime)
+
+
+val mont_reduction: x:widefelem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ disjoint x res /\
+    wide_as_nat h x < S.prime * S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == wide_as_nat h0 x * SM.mont_R_inv % S.prime)
+
+[@CInline]
+let mont_reduction x res =
+  push_frame ();
+  let round2 = create (size 8) (u64 0) in
+  let round4 = create (size 8) (u64 0) in
+
+  let h0 = ST.get () in
+  mont_mul_round_twice x round2;
+  let h1 = ST.get () in
+  mont_mul_round_twice round2 round4;
+  let h2 = ST.get () in
+
+  [@inline_let] let inv_pow128 = S.modp_inv2_prime (pow2 128) S.prime in
+  calc (==) {
+    wide_as_nat h2 round4 % S.prime;
+    (==) { }
+    (wide_as_nat h1 round2 * inv_pow128) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h2 round2) inv_pow128 S.prime }
+    (((wide_as_nat h0 x * inv_pow128) % S.prime) * inv_pow128) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h0 x * inv_pow128) inv_pow128 S.prime }
+    ((wide_as_nat h0 x * inv_pow128) * inv_pow128) % S.prime;
+    (==) { lemma_montgomery_mod_inverse_addition2 (wide_as_nat h0 x) }
+    (wide_as_nat h0 x * SM.mont_R_inv) % S.prime;
+  };
+
+  mont_reduction_lemma (wide_as_nat h0 x);
+  assert (wide_as_nat h2 round4 < 2 * S.prime);
+  reduction_prime_2prime_8_with_carry_impl round4 res;
+  pop_frame ()
 
 
 [@CInline]
-let fromDomain a result =
-  assert_norm (S.prime > 3);
-  push_frame();
-    let t = create (size 8) (u64 0) in
-      let t_low = sub t (size 0) (size 4) in
-      let t_high = sub t (size 4) (size 4) in
-    let round2 = create (size 8) (u64 0) in
-    let round4 = create (size 8) (u64 0) in
-      let h0 = ST.get() in
-    copy t_low a;
-      let h1 = ST.get() in
-      assert(wide_as_nat h0 t = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
-      assert_norm (S.prime < S.prime * S.prime);
-    montgomery_multiplication_round_twice t round2;
-      let h2 = ST.get() in
-    montgomery_multiplication_round_twice round2 round4;
-      lemma_montgomery_mod_inverse_addition2 (wide_as_nat h1 t);
-      Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h2 round2) (S.modp_inv2_prime (pow2 128) S.prime) S.prime;
-      Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h1 t * S.modp_inv2_prime (pow2 128) S.prime) (S.modp_inv2_prime (pow2 128) S.prime) S.prime;
-	SL.mul_lemma_2 (wide_as_nat h1 t % pow2 64) (pow2 64 - 1) S.prime;
-	SL.mul_lemma_2 (let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in round % pow2 64) (pow2 64 - 1) S.prime;
-	SL.mul_lemma_2 (
-	  let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-	  let round2 = (round + S.prime * (round % pow2 64)) / pow2 64 in
-	  round2 % pow2 64) (pow2 64 - 1) S.prime;
-	SL.mul_lemma_2 (
-	  let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-	  let round2 = (round + S.prime * (round % pow2 64)) / pow2 64 in
-	  let round3 = (round2 + S.prime * (round2 % pow2 64)) / pow2 64 in
-	  round3 % pow2 64) (pow2 64 - 1) S.prime;
-    reduction_prime_2prime_8_with_carry_impl round4 result;
-    SM.lemmaFromDomain (as_nat h0 a);
-  pop_frame()
+let fromDomain a res =
+  push_frame ();
+  let t = create (size 8) (u64 0) in
+  let t_low = sub t (size 0) (size 4) in
+  let t_high = sub t (size 4) (size 4) in
+
+  let h0 = ST.get () in
+  copy t_low a;
+  let h1 = ST.get () in
+  assert (wide_as_nat h0 t = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
+  assert_norm (S.prime < S.prime * S.prime);
+  mont_reduction t res;
+  SM.lemmaFromDomain (as_nat h0 a);
+  pop_frame ()
 
 
 [@CInline]
-let fmul a b result =
-  assert_norm(S.prime > 3);
-  push_frame();
-    let t = create (size 8) (u64 0) in
-    let round2 = create (size 8) (u64 0) in
-    let round4 = create (size 8) (u64 0) in
-      let h0 = ST.get() in
-    bn_mul4 a b t;
-      let h1 = ST.get() in
-      SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.prime;
-  montgomery_multiplication_round_twice t round2;
-      let h2 = ST.get() in
-  montgomery_multiplication_round_twice round2 round4;
-      let h3 = ST.get() in
-	lemma_montgomery_mod_inverse_addition2 (wide_as_nat h1 t);
-	Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h2 round2) (S.modp_inv2_prime (pow2 128) S.prime) S.prime;
-	Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h1 t * S.modp_inv2_prime (pow2 128) S.prime) (S.modp_inv2_prime (pow2 128) S.prime) S.prime;
-      SL.mul_lemma_2 (wide_as_nat h1 t % pow2 64) (pow2 64 - 1) S.prime;
-      SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.prime;
-      SL.mul_lemma_1 (
-         let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-	 round % pow2 64) (pow2 64) S.prime;
-      SL.mul_lemma_1 (
-	let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-	let round2 = (round + S.prime * (round % pow2 64)) / pow2 64 in
-	round2 % pow2 64) (pow2 64) S.prime;
-      SL.mul_lemma_1 (
-	let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-	let round2 = (round + S.prime * (round % pow2 64)) / pow2 64 in
-	let round3 = (round2 + S.prime * (round2 % pow2 64)) / pow2 64 in
-	round3 % pow2 64) (pow2 64) S.prime;
-      assert_norm((S.prime * pow2 64 + (S.prime * pow2 64 + (S.prime * pow2 64 + ((pow2 64 - 1) * S.prime + S.prime * S.prime) / pow2 64) / pow2 64)/ pow2 64) / pow2 64 < 2 * S.prime);
-  reduction_prime_2prime_8_with_carry_impl round4 result;
+let fmul a b res =
+  push_frame ();
+  let t = create (size 8) (u64 0) in
+  let h0 = ST.get () in
+  bn_mul4 a b t;
+  let h1 = ST.get () in
+  SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.prime;
+  mont_reduction t res;
   SM.lemmaFromDomainToDomain (as_nat h0 a);
   SM.lemmaFromDomainToDomain (as_nat h0 b);
-  SM.multiplicationInDomainNat #(SM.fromDomain_ (as_nat h0 a)) #(SM.fromDomain_ (as_nat h0 b))  (as_nat h0 a) (as_nat h0 b);
+  SM.multiplicationInDomainNat
+    #(SM.fromDomain_ (as_nat h0 a)) #(SM.fromDomain_ (as_nat h0 b)) (as_nat h0 a) (as_nat h0 b);
   SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 a) * SM.fromDomain_ (as_nat h0 b));
-  pop_frame()
+  pop_frame ()
 
 
 [@CInline]
-let fsqr a result =
-  assert_norm(S.prime > 3);
-  push_frame();
-    let t = create (size 8) (u64 0) in
-    let round2 = create (size 8) (u64 0) in
-    let round4 = create (size 8) (u64 0) in
-      let h0 = ST.get() in
-    bn_sqr4 a t;
-      let h1 = ST.get() in
-      SL.mul_lemma_ (as_nat h0 a) (as_nat h0 a) S.prime;
-  montgomery_multiplication_round_twice t round2;
-      let h2 = ST.get() in
-  montgomery_multiplication_round_twice round2 round4;
-      let h3 = ST.get() in
-  lemma_montgomery_mod_inverse_addition2 (wide_as_nat h1 t);
-  Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h2 round2) (S.modp_inv2_prime (pow2 128) S.prime) S.prime;
-  Math.Lemmas.lemma_mod_mul_distr_l (wide_as_nat h1 t * S.modp_inv2_prime (pow2 128) S.prime) (S.modp_inv2_prime (pow2 128) S.prime) S.prime;
-      SL.mul_lemma_2 (wide_as_nat h1 t % pow2 64) (pow2 64 - 1) S.prime;
-      SL.mul_lemma_ (as_nat h0 a) (as_nat h0 a) S.prime;
-      SL.mul_lemma_1 (
-         let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-   round % pow2 64) (pow2 64) S.prime;
-      SL.mul_lemma_1 (
-  let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-  let round2 = (round + S.prime * (round % pow2 64)) / pow2 64 in
-  round2 % pow2 64) (pow2 64) S.prime;
-      SL.mul_lemma_1 (
-  let round = (wide_as_nat h1 t + S.prime * (wide_as_nat h1 t % pow2 64)) / pow2 64 in
-  let round2 = (round + S.prime * (round % pow2 64)) / pow2 64 in
-  let round3 = (round2 + S.prime * (round2 % pow2 64)) / pow2 64 in
-  round3 % pow2 64) (pow2 64) S.prime;
-      assert_norm((S.prime * pow2 64 + (S.prime * pow2 64 + (S.prime * pow2 64 + ((pow2 64 - 1) * S.prime + S.prime * S.prime) / pow2 64) / pow2 64)/ pow2 64) / pow2 64 < 2 * S.prime);
-  reduction_prime_2prime_8_with_carry_impl round4 result;
+let fsqr a res =
+  push_frame ();
+  let t = create (size 8) (u64 0) in
+  let h0 = ST.get() in
+  bn_sqr4 a t;
+  let h1 = ST.get() in
+  SL.mul_lemma_ (as_nat h0 a) (as_nat h0 a) S.prime;
+  mont_reduction t res;
   SM.lemmaFromDomainToDomain (as_nat h0 a);
-  SM.multiplicationInDomainNat #(SM.fromDomain_ (as_nat h0 a)) #(SM.fromDomain_ (as_nat h0 a))  (as_nat h0 a) (as_nat h0 a);
+  SM.multiplicationInDomainNat
+    #(SM.fromDomain_ (as_nat h0 a)) #(SM.fromDomain_ (as_nat h0 a)) (as_nat h0 a) (as_nat h0 a);
   SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 a) * SM.fromDomain_ (as_nat h0 a));
-  pop_frame()
+  pop_frame ()
 
 //----------------------------------------------
 
