@@ -152,6 +152,15 @@ val bn_sub4_il: x:felem -> y:glbuffer uint64 (size 4) -> res:felem -> Stack uint
     (if uint_v c = 0 then as_nat h0 x >= as_nat_il h0 y else as_nat h0 x < as_nat_il h0 y))
 
 
+val bn_sub_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h n /\ live h x /\ live h y /\ live h res /\
+    disjoint n x /\ disjoint n y /\ disjoint n res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < as_nat h n /\ as_nat h y < as_nat h n)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == (as_nat h0 x - as_nat h0 y) % as_nat h0 n)
+
 ///  Multiplication
 
 val bn_mul4: f:felem -> r:felem -> res:widefelem -> Stack unit

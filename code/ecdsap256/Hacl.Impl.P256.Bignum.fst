@@ -177,6 +177,18 @@ let bn_sub4_il x y result =
   cc
 
 
+[@CInline]
+let bn_sub_mod4 x y n out =
+  let h0 = ST.get () in
+  BN.bn_sub_mod_n 4ul n x y out;
+  let h1 = ST.get () in
+  bignum_bn_v_is_as_nat h0 n;
+  bignum_bn_v_is_as_nat h0 x;
+  bignum_bn_v_is_as_nat h0 y;
+  SN.bn_sub_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
+  bignum_bn_v_is_as_nat h1 out
+
+
 ///  Multiplication
 
 [@CInline]
