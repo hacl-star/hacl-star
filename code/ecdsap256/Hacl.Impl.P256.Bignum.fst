@@ -164,6 +164,17 @@ let bn_sub_mod4 x y n out =
   bignum_bn_v_is_as_nat h1 out
 
 
+[@CInline]
+let bn_reduce_once4 c x n =
+  let h0 = ST.get () in
+  BN.bn_reduce_once 4ul n c x;
+  let h1 = ST.get () in
+  bignum_bn_v_is_as_nat h0 n;
+  bignum_bn_v_is_as_nat h0 x;
+  SN.bn_reduce_once_lemma (as_seq h0 n) c (as_seq h0 x);
+  bignum_bn_v_is_as_nat h1 x
+
+
 ///  Multiplication
 
 [@CInline]

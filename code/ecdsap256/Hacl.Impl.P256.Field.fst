@@ -80,39 +80,28 @@ let fsub x y res =
 //---------------------
 
 inline_for_extraction noextract
-val reduction_prime_2prime_8_with_carry_impl: x:widefelem -> res:felem -> Stack unit
+val widefelem_reduce_once: x:widefelem -> res:felem -> Stack unit
   (requires fun h ->
-    live h x /\ live h res /\ eq_or_disjoint x res /\
+    live h x /\ live h res /\ disjoint x res /\
     wide_as_nat h x < 2 * S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == wide_as_nat h0 x % S.prime)
 
-let reduction_prime_2prime_8_with_carry_impl x result =
-  push_frame();
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    assert_norm (S.prime < pow2 256);
-    assert_norm(pow2 256 < 2 * S.prime);
-    let h0 = ST.get() in
-    let tempBuffer = create (size 4) (u64 0) in
-    let tempBufferForSubborrow = create (size 1) (u64 0) in
-    let cin = Lib.Buffer.index x (size 4) in
-    let x_ = Lib.Buffer.sub x (size 0) (size 4) in
-      recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
-    let c = bn_sub4_il x_ prime_buffer tempBuffer in
-    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-    bn_cmovznz4 carry tempBuffer x_ result;
-      let h4 = ST.get() in
-      assert_norm (pow2 256 > S.prime);
-      assert(if (wide_as_nat h0 x < S.prime) then begin
-      Math.Lemmas.small_modulo_lemma_1 (wide_as_nat h0 x) S.prime;
-      as_nat h4 result = (wide_as_nat h0 x) % S.prime end
-      else
-	begin
-	Math.Lemmas.small_modulo_lemma_1 (as_nat h4 result) S.prime;
-	Math.Lemmas.lemma_mod_sub (wide_as_nat h0 x) S.prime 1;
-	as_nat h4 result = (wide_as_nat h0 x) % S.prime
-	end );
- pop_frame()
+let widefelem_reduce_once x res =
+  push_frame ();
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (S.prime < pow2 256);
+  assert_norm (pow2 256 < 2 * S.prime);
+  let h0 = ST.get () in
+  let n = create 4ul (u64 0) in
+  make_prime n;
+
+  let x_ = Lib.Buffer.sub x (size 0) (size 4) in
+  copy res x_;
+
+  let cin = x.(4ul) in
+  bn_reduce_once4 cin res n;
+  pop_frame ()
 
 
 inline_for_extraction noextract
@@ -252,7 +241,7 @@ let mont_reduction x res =
 
   mont_reduction_lemma (wide_as_nat h0 x);
   assert (wide_as_nat h2 round4 < 2 * S.prime);
-  reduction_prime_2prime_8_with_carry_impl round4 res;
+  widefelem_reduce_once round4 res;
   pop_frame ()
 
 
