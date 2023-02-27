@@ -56,7 +56,7 @@ val fsub: x:felem -> y:felem -> res:felem -> Stack unit
 
 
 // TODO: rename
-val montgomery_multiplication_buffer_by_one: a:felem -> res:felem -> Stack unit
+val fromDomain: a:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ as_nat h a < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\

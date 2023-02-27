@@ -292,7 +292,7 @@ let montgomery_multiplication_round_twice t result =
 
 
 [@CInline]
-let montgomery_multiplication_buffer_by_one a result =
+let fromDomain a result =
   assert_norm (S.prime > 3);
   push_frame();
     let t = create (size 8) (u64 0) in
