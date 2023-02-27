@@ -176,44 +176,44 @@ let montgomery_ladder_exponent r =
 //--------------------------
 
 val lemma_fromDomain1: a: nat ->
-  Lemma ((fromDomain_ (fromDomain_ (fromDomain_ a))) == ((a * S.modp_inv2_prime (pow2 256) order * S.modp_inv2_prime (pow2 256) order * S.modp_inv2_prime (pow2 256) order) % order))
+  Lemma ((fromDomain_ (fromDomain_ (fromDomain_ a))) == ((a * S.modp_inv2_prime (pow2 256) S.order * S.modp_inv2_prime (pow2 256) S.order * S.modp_inv2_prime (pow2 256) S.order) % S.order))
 
 let lemma_fromDomain1 a =
-  let f = S.modp_inv2_prime (pow2 256) order in
-  lemma_mod_mul_distr_l (a * f) f order;
-  lemma_mod_mul_distr_l (a * f * f) f order
+  let f = S.modp_inv2_prime (pow2 256) S.order in
+  lemma_mod_mul_distr_l (a * f) f S.order;
+  lemma_mod_mul_distr_l (a * f * f) f S.order
 
 
 val lemma_fromDomain2: a: nat ->
-  Lemma (S.pow (fromDomain_ (fromDomain_ a)) (order - 2) % order ==
+  Lemma (S.pow (fromDomain_ (fromDomain_ a)) (S.order - 2) % S.order ==
     (
-      S.pow a (order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) order) (order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) order) (order - 2)) % order /\
-      S.pow (S.modp_inv2_prime (pow2 256) order) (order - 2) * S.pow (pow2 256) (order -2) % order == 1
+      S.pow a (S.order - 2) *
+      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) *
+      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) % S.order /\
+      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) * S.pow (pow2 256) (S.order -2) % S.order == 1
     )
 
 
 let lemma_fromDomain2 a =
-  let r = S.modp_inv2_prime (pow2 256) order in
-  lemma_mod_mul_distr_l (a * r) r order;
-  power_distributivity (a * r * r) (order - 2) order;
+  let r = S.modp_inv2_prime (pow2 256) S.order in
+  lemma_mod_mul_distr_l (a * r) r S.order;
+  power_distributivity (a * r * r) (S.order - 2) S.order;
     assert_by_tactic (a * r * r == a * (r * r)) canon;
-  power_distributivity_2 a (r * r) (order - 2);
-  power_distributivity_2 (S.modp_inv2_prime (pow2 256) order) (S.modp_inv2_prime (pow2 256) order) (order -2);
-  assert_by_tactic (S.pow a (order - 2) * (
-      S.pow (S.modp_inv2_prime (pow2 256) order) (order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) order) (order - 2)) ==
-      S.pow a (order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) order) (order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) order) (order - 2)) canon;
+  power_distributivity_2 a (r * r) (S.order - 2);
+  power_distributivity_2 (S.modp_inv2_prime (pow2 256) S.order) (S.modp_inv2_prime (pow2 256) S.order) (S.order -2);
+  assert_by_tactic (S.pow a (S.order - 2) * (
+      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) *
+      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) ==
+      S.pow a (S.order - 2) *
+      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) *
+      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) canon;
 
   let inv_pow256_order = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
-  assert_norm (S.modp_inv2_prime (pow2 256) order == inv_pow256_order);
-  assert_norm (inv_pow256_order * (pow2 256) % order == 1);
-  power_distributivity_2 (inv_pow256_order) (pow2 256) (order - 2);
-  power_distributivity (inv_pow256_order * pow2 256) (order - 2) order;
-  power_one (order -2)
+  assert_norm (S.modp_inv2_prime (pow2 256) S.order == inv_pow256_order);
+  assert_norm (inv_pow256_order * (pow2 256) % S.order == 1);
+  power_distributivity_2 (inv_pow256_order) (pow2 256) (S.order - 2);
+  power_distributivity (inv_pow256_order * pow2 256) (S.order - 2) S.order;
+  power_one (S.order -2)
 
 
 #push-options "--fuel 2"
@@ -226,27 +226,27 @@ let multPowerPartial s a b result =
     montgomery_multiplication_ecdsa_module a buffFromDB result;
   pop_frame();
 
-    let p = S.pow (fromDomain_ (fromDomain_ (as_nat h0 s))) (order - 2) % order in
+    let p = S.pow (fromDomain_ (fromDomain_ (as_nat h0 s))) (S.order - 2) % S.order in
     let q = fromDomain_ (fromDomain_ (fromDomain_ (as_nat h0 b))) in
-    let r = S.modp_inv2_prime (pow2 256) order in
+    let r = S.modp_inv2_prime (pow2 256) S.order in
       lemma_fromDomain1 (as_nat h0 b);
       lemma_fromDomain2 (as_nat h0 s);
 
-      lemma_mod_mul_distr_l (S.pow (as_nat h0 s) (order - 2) * S.pow r (order - 2) * S.pow r (order - 2)) (((as_nat h0 b) * r * r * r) % order) order;
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (order - 2) * S.pow r (order - 2) * S.pow r (order - 2)) ((as_nat h0 b) * r * r * r) order;
-      assert_by_tactic (S.pow (as_nat h0 s) (order - 2) * S.pow r (order - 2) * S.pow r (order - 2) * ((as_nat h0 b) * r * r * r) == S.pow (as_nat h0 s) (order - 2) * (S.pow r (order - 2) * r) * (S.pow r (order - 2) * r) * (as_nat h0 b) * r) canon;
+      lemma_mod_mul_distr_l (S.pow (as_nat h0 s) (S.order - 2) * S.pow r (S.order - 2) * S.pow r (S.order - 2)) (((as_nat h0 b) * r * r * r) % S.order) S.order;
+      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * S.pow r (S.order - 2) * S.pow r (S.order - 2)) ((as_nat h0 b) * r * r * r) S.order;
+      assert_by_tactic (S.pow (as_nat h0 s) (S.order - 2) * S.pow r (S.order - 2) * S.pow r (S.order - 2) * ((as_nat h0 b) * r * r * r) == S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 2) * r) * (S.pow r (S.order - 2) * r) * (as_nat h0 b) * r) canon;
 
-      pow_plus r (order - 2) 1;
+      pow_plus r (S.order - 2) 1;
       power_one r;
-      lemma_mod_mul_distr_l (S.pow (as_nat h0 s) (order - 2) * (S.pow r (order - 1)) * (S.pow r (order - 1)) * (as_nat h0 b) * r) (pow2 256) order;
+      lemma_mod_mul_distr_l (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) * r) (pow2 256) S.order;
 
-      assert_by_tactic (S.pow (as_nat h0 s) (order - 2) * (S.pow r (order - 1)) * (S.pow r (order - 1)) * (as_nat h0 b) * r * pow2 256 == S.pow (as_nat h0 s) (order - 2) * (S.pow r (order - 1)) * (S.pow r (order - 1)) * (as_nat h0 b) * (r * pow2 256)) canon;
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (order - 2) * (S.pow r (order - 1)) * (S.pow r (order - 1)) * (as_nat h0 b)) (r * pow2 256) order;
-      assert_norm ((pow2 256 * S.modp_inv2_prime (pow2 256) order) % order == 1);
+      assert_by_tactic (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) * r * pow2 256 == S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) * (r * pow2 256)) canon;
+      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b)) (r * pow2 256) S.order;
+      assert_norm ((pow2 256 * S.modp_inv2_prime (pow2 256) S.order) % S.order == 1);
 
-      assert_by_tactic (S.pow (as_nat h0 s) (order - 2) * (S.pow r (order - 1)) * (S.pow r (order - 1)) * (as_nat h0 b) == S.pow (as_nat h0 s) (order - 2) * (as_nat h0 b)  * (S.pow r (order - 1)) * (S.pow r (order - 1))) canon;
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (order - 2) * (as_nat h0 b)  * (S.pow r (order - 1))) (S.pow r (order - 1)) order;
+      assert_by_tactic (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) == S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)  * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1))) canon;
+      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)  * (S.pow r (S.order - 1))) (S.pow r (S.order - 1)) S.order;
       lemma_l_ferm ();
 
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (order - 2) * (as_nat h0 b)) (S.pow r (order - 1)) order
+      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)) (S.pow r (S.order - 1)) S.order
 #pop-options
