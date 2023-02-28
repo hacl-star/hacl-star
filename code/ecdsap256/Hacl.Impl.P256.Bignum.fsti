@@ -94,24 +94,6 @@ val bn_cmovznz4: cin:uint64 -> x:felem -> y:felem -> res:felem -> Stack unit
 
 ///  Addition and subtraction
 
-// NOTE: changed precondition `eq_or_disjoint x y`
-val bn_add4: x:felem -> y:felem -> res:felem -> Stack uint64
-  (requires fun h ->
-    live h x /\ live h y /\ live h res /\
-    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res)
-  (ensures fun h0 c h1 -> modifies (loc res) h0 h1 /\ v c <= 1 /\
-    as_nat h1 res + v c * pow2 256 == as_nat h0 x + as_nat h0 y)
-
-
-// NOTE: changed precondition `eq_or_disjoint x y`
-val bn_add8: x:widefelem -> y:widefelem -> res:widefelem -> Stack uint64
-  (requires fun h ->
-    live h x /\ live h y /\ live h res /\
-    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res)
-  (ensures fun h0 c h1 -> modifies (loc res) h0 h1 /\ v c <= 1 /\
-    wide_as_nat h1 res + v c * pow2 512 == wide_as_nat h0 x + wide_as_nat h0 y)
-
-
 val bn_add_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h n /\ live h x /\ live h y /\ live h res /\
@@ -169,15 +151,6 @@ val bn_sqr4: f:felem -> res:widefelem -> Stack unit
     wide_as_nat h1 res = as_nat h0 f * as_nat h0 f)
 
 
-// TODO: rm glbuffer and use generic bignum
-val bn_mul1: a:glbuffer uint64 (size 4) -> b:uint64 -> res:widefelem -> Stack unit
-  (requires fun h ->
-    live h a /\ live h res /\ wide_as_nat h res = 0)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat_il h0 a * uint_v b = wide_as_nat h1 res /\
-    wide_as_nat h1 res < pow2 320)
-
-
 ///  pow2-operations
 
 val bn_lshift256: f:felem -> res:lbuffer uint64 (size 8) -> Stack unit
@@ -185,20 +158,6 @@ val bn_lshift256: f:felem -> res:lbuffer uint64 (size 8) -> Stack unit
     live h f /\ live h res /\ disjoint f res)
   (ensures fun h0 _ h1 -> modifies1 res h0 h1 /\
     wide_as_nat h1 res == as_nat h0 f * pow2 256)
-
-
-val bn_rshift64: f:widefelem -> res:widefelem -> Stack unit
-  (requires fun h ->
-    live h f /\ live h res /\ eq_or_disjoint f res)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    wide_as_nat h1 res == wide_as_nat h0 f / pow2 64)
-
-
-inline_for_extraction noextract
-val bn_mod_pow2_64: a:widefelem -> Stack uint64
-  (requires fun h -> live h a)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    uint_v r == wide_as_nat h1 a % pow2 64)
 
 
 ///  Conversion between bignum and bytes representation

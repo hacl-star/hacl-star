@@ -86,30 +86,6 @@ let bn_cmovznz4 cin x y out =
 ///  Addition and subtraction
 
 [@CInline]
-let bn_add4 x y out =
-  let h0 = ST.get () in
-  let c = BN.bn_add_eq_len 4ul x y out in
-  let h1 = ST.get () in
-  SN.bn_add_lemma (as_seq h0 x) (as_seq h0 y);
-  bignum_bn_v_is_as_nat h0 x;
-  bignum_bn_v_is_as_nat h0 y;
-  bignum_bn_v_is_as_nat h1 out;
-  c
-
-
-[@CInline]
-let bn_add8 x y out =
-  let h0 = ST.get () in
-  let c = BN.bn_add_eq_len 8ul x y out in
-  let h1 = ST.get () in
-  SN.bn_add_lemma (as_seq h0 x) (as_seq h0 y);
-  bignum_bn_v_is_wide_as_nat h0 x;
-  bignum_bn_v_is_wide_as_nat h0 y;
-  bignum_bn_v_is_wide_as_nat h1 out;
-  c
-
-
-[@CInline]
 let bn_add_mod4 x y n out =
   let h0 = ST.get () in
   BN.bn_add_mod_n 4ul n x y out;
@@ -186,135 +162,6 @@ let bn_sqr4 f out =
   bignum_bn_v_is_as_nat h0 f;
   bignum_bn_v_is_wide_as_nat h1 out
 
-
-inline_for_extraction noextract
-val mult64_0il: x: glbuffer uint64 (size 4) -> u: uint64 -> result:  lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit
-  (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
-  (ensures fun h0 _ h1 ->
-    let result_ = Seq.index (as_seq h1 result) 0 in
-    let c = Seq.index (as_seq h1 temp) 0 in
-    let f0 = Seq.index (as_seq h0 x) 0 in
-    uint_v result_ + uint_v c * pow2 64 = uint_v f0 * uint_v u /\ modifies (loc result |+| loc temp) h0 h1)
-
-let mult64_0il x u result temp =
-  let f0 = index x (size 0) in
-  mul64 f0 u result temp
-
-
-inline_for_extraction noextract
-val mult64_c: x: uint64 -> u: uint64 -> cin: uint64{uint_v cin <= 1} -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack uint64
-  (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
-  (ensures fun h0 c2 h1 -> modifies (loc result |+| loc temp) h0 h1 /\ uint_v c2 <= 1 /\ (
-    let r = Seq.index (as_seq h1 result) 0 in
-    let h1 = Seq.index (as_seq h1 temp) 0 in
-    let h0 = Seq.index (as_seq h0 temp) 0 in
-    uint_v r + uint_v c2 * pow2 64 == uint_v x * uint_v u - uint_v h1 * pow2 64 + uint_v h0 + uint_v cin))
-
-let mult64_c x u cin result temp =
-  let h = index temp (size 0) in
-  mul64 x u result temp;
-  let l = index result (size 0) in
-  add_carry_u64 cin l h result
-
-
-let mul_lemma_3 (a: nat) (c: nat) (b: nat) (d: nat) : Lemma (requires (a < c && b < d)) (ensures (a * b < c * d)) = ()
-
-val lemma_low_level0: o0: nat -> o1: nat -> o2: nat -> o3: nat -> f0: nat  ->  f1: nat -> f2: nat ->
-  f3: nat {f0 + f1 * pow2 64 + f2 * pow2 128  + f3 * pow2 192 < pow2 256} ->
-  u: nat {u < pow2 64} -> h2: nat -> c1: nat -> c2: nat -> c3: nat -> h3: nat -> h4: nat ->
-  Lemma
-  (requires (
-    h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 ==  f0 * u + f1 * u * pow2 64 /\
-    o2 + c2 * pow2 64 + h3 * pow2 64 - h2 - c1  == f2 * u /\
-    o3 + c3 * pow2 64 + h4 * pow2 64 - h3 - c2 == f3 * u)
-  )
-  (ensures
-    (o0 + o1 * pow2 64 + o2 * pow2 128 +  o3 * pow2 192 + (c3 + h4) * pow2 256  == (f0  + f1 * pow2 64 + f2  * pow2 128  + f3 * pow2 192) * u /\
-    f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192 < pow2 320 /\
-  (c3 + h4) < pow2 64)
-)
-
-
-let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320);
-  assert(h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 + o2 + c2 * pow2 64 + h3 * pow2 64 - h2 - c1 +
-    o3 + c3 * pow2 64 + h4 * pow2 64 - h3 - c2 == f0 * u + f1 * u * pow2 64 + f2 * u  + f3 * u);
-  assert(h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 + o2 * pow2 128 + c2 * pow2 64 * pow2 128 + h3 * pow2 64 * pow2 128 - h2 * pow2 128- c1 * pow2 128 + o3 * pow2 192 + c3 * pow2 64 * pow2 192 + h4 * pow2 64 * pow2 192 - h3 * pow2 192 - c2 * pow2 192 == f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192);
-  assert(o0 + o1 * pow2 64 + o2 * pow2 128 +  o3 * pow2 192 + (c3 + h4) * pow2 256  == f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192);
-  assert(f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192 == (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) * u);
-  mul_lemma_3  (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) (pow2 256) u (pow2 64);
-  assert((f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) * u < pow2 320);
-  assert((c3 + h4) * pow2 256 < pow2 320);
-  assert(c3 + h4 < pow2 64)
-
-
-inline_for_extraction noextract
-val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
-  (requires fun h -> live h result /\ live h f)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\
-    as_nat_il h0 f * uint_v u = uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat h1 result /\
-    as_nat_il h0 f * uint_v u < pow2 320 /\
-    uint_v c < pow2 64 - 1)
-
-
-let mul1_il f u result =
-  push_frame();
-
-    assert_norm (pow2 64 * pow2 64 = pow2 128);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320);
-
-  let temp = create (size 1) (u64 0) in
-
-  let f0 = index f (size 0) in
-  let f1 = index f (size 1) in
-  let f2 = index f (size 2) in
-  let f3 = index f (size 3) in
-
-  let o0 = sub result (size 0) (size 1) in
-  let o1 = sub result (size 1) (size 1) in
-  let o2 = sub result (size 2) (size 1) in
-  let o3 = sub result (size 3) (size 1) in
-
-    let h0 = ST.get() in
-  mult64_0il f u o0 temp;
-    let h1 = ST.get() in
-  let c1 = mult64_c f1 u (u64 0) o1 temp in
-    let h2 = ST.get() in
-  let c2 = mult64_c f2 u c1 o2 temp in
-    let h3 = ST.get() in
-  let c3 = mult64_c f3 u c2 o3 temp in
-    let h4 = ST.get() in
-  let temp0 = index temp (size 0) in
-    lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0);
-
-  Hacl.Spec.P256.Lemmas.mul_lemma_4 (as_nat_il h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
-  assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
-  assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
-
-  pop_frame();
-  c3 +! temp0
-
-
-[@CInline]
-let bn_mul1 a b result =
-  let result04 = sub result (size 0) (size 4) in
-  let result48 = sub result (size 4) (size 4) in
-  let c = mul1_il a b result04 in
-    let h0 = ST.get() in
-  upd result (size 4) c;
-
-    assert(Lib.Sequence.index (as_seq h0 result) 5 == Lib.Sequence.index (as_seq h0 result48) 1);
-    assert(Lib.Sequence.index (as_seq h0 result) 6 == Lib.Sequence.index (as_seq h0 result48) 2);
-    assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result48) 3);
-
-    assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
-
-
 ///  pow2-operations
 
 val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
@@ -346,34 +193,6 @@ let bn_lshift256 i o =
     (v (Lib.Sequence.index (as_seq h0 i) 1))
     (v (Lib.Sequence.index (as_seq h0 i) 2))
     (v (Lib.Sequence.index (as_seq h0 i) 3))
-
-
-[@CInline]
-let bn_rshift64 t out =
-  let t1 = index t (size 1) in
-  let t2 = index t (size 2) in
-  let t3 = index t (size 3) in
-  let t4 = index t (size 4) in
-  let t5 = index t (size 5) in
-  let t6 = index t (size 6) in
-  let t7 = index t (size 7) in
-
-  upd out (size 0) t1;
-  upd out (size 1) t2;
-  upd out (size 2) t3;
-  upd out (size 3) t4;
-  upd out (size 4) t5;
-  upd out (size 5) t6;
-  upd out (size 6) t7;
-  upd out (size 7) (u64 0)
-
-
-let bn_mod_pow2_64 a =
-  let h0 = ST.get () in
-  bignum_bn_v_is_wide_as_nat h0 a;
-  Hacl.Spec.Bignum.Definitions.bn_eval_index (as_seq h0 a) 0;
-  assert (v (Lib.Sequence.index (as_seq h0 a) 0) == wide_as_nat h0 a / pow2 0 % pow2 64);
-  index a (size 0)
 
 
 ///  Conversion between bignum and bytes representation
