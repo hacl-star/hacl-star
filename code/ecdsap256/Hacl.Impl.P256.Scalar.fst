@@ -366,7 +366,7 @@ let lemmaToDomainFromDomain a =
 
 #reset-options "--z3rlimit 200"
 
-let montgomery_multiplication_ecdsa_module a b result =
+let qmul a b result =
   push_frame();
     let t = create (size 8) (u64 0) in
     let round2 = create (size 8) (u64 0) in
@@ -397,12 +397,12 @@ let montgomery_multiplication_ecdsa_module a b result =
 
 
 
-let felem_add arg1 arg2 out =
+let qadd arg1 arg2 out =
   let t = bn_add4 arg1 arg2 out in
   reduction_prime_2prime_with_carry2 t out out
 
 
-let lemma_felem_add a b =
+let qadd_lemma a b =
   lemmaFromDomain a;
   lemmaFromDomain b;
   lemmaFromDomain (a + b);
@@ -422,5 +422,5 @@ let fromDomainImpl a result =
   push_frame();
     let one = create (size 4) (u64 0) in
     bn_set_one4 one;
-    montgomery_multiplication_ecdsa_module one a result;
+    qmul one a result;
   pop_frame()

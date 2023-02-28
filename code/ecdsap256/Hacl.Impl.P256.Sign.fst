@@ -160,18 +160,18 @@ let ecdsa_signature_step6 result kFelem z r da =
     let zBuffer = create (size 4) (u64 0) in
     let kInv = create (size 4) (u64 0) in
   let h0 = ST.get() in
-    montgomery_multiplication_ecdsa_module r da rda;
+    qmul r da rda;
     fromDomainImpl z zBuffer;
-    felem_add rda zBuffer zBuffer;
+    qadd rda zBuffer zBuffer;
     copy kInv kFelem;
     montgomery_ladder_exponent kInv;
-    montgomery_multiplication_ecdsa_module zBuffer kInv result;
+    qmul zBuffer kInv result;
   pop_frame();
       let br0 = as_nat h0 z + as_nat h0 r * as_nat h0 da in
       let br1 = pow (as_nat h0 kFelem) (order - 2) in
 
       lemmaFromDomain (as_nat h0 r * as_nat h0 da);
-      lemma_felem_add (as_nat h0 r * as_nat h0 da) (as_nat h0 z);
+      qadd_lemma (as_nat h0 r * as_nat h0 da) (as_nat h0 z);
       lemma_power_step6 (as_nat h0 kFelem);
 
       lemmaFromDomain (fromDomain_ br0);

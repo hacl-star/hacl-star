@@ -85,9 +85,9 @@ val montgomery_ladder_exponent_step0: a: felem -> b: felem -> Stack unit
 
 let montgomery_ladder_exponent_step0 a b =
     let h0 = ST.get() in
-  montgomery_multiplication_ecdsa_module a b b;
+  qmul a b b;
     lemmaToDomainFromDomain (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % S.order);
-  montgomery_multiplication_ecdsa_module a a a ;
+  qmul a a a ;
     lemmaToDomainFromDomain (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % S.order)
 
 
@@ -223,7 +223,7 @@ let multPowerPartial s a b result =
     let buffFromDB = create (size 4) (u64 0) in
     fromDomainImpl b buffFromDB;
     fromDomainImpl buffFromDB buffFromDB;
-    montgomery_multiplication_ecdsa_module a buffFromDB result;
+    qmul a buffFromDB result;
   pop_frame();
 
     let p = S.pow (fromDomain_ (fromDomain_ (as_nat h0 s))) (S.order - 2) % S.order in

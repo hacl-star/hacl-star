@@ -35,8 +35,7 @@ val lemmaFromDomainToDomain: a:S.qelem -> Lemma (toDomain_ (fromDomain_ a) == a)
 val lemmaToDomainFromDomain: a:S.qelem -> Lemma (fromDomain_ (toDomain_ a) == a)
 
 
-// rename with qmul
-val montgomery_multiplication_ecdsa_module: a:felem -> b:felem -> res:felem -> Stack unit
+val qmul: a:felem -> b:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
     eq_or_disjoint a b /\
@@ -45,9 +44,9 @@ val montgomery_multiplication_ecdsa_module: a:felem -> b:felem -> res:felem -> S
     as_nat h1 res = (as_nat h0 a * as_nat h0 b * qmont_R_inv) % S.order /\
     as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % S.order))
 
-// rename with qadd
+
 // NOTE: changed precondition `eq_or_disjoint x y`
-val felem_add: x:felem -> y:felem -> res:felem -> Stack unit
+val qadd: x:felem -> y:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
@@ -55,8 +54,8 @@ val felem_add: x:felem -> y:felem -> res:felem -> Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order)
 
-// rename with qadd_lemma
-val lemma_felem_add: a:nat -> b:nat ->
+
+val qadd_lemma: a:nat -> b:nat ->
   Lemma ((fromDomain_ a + fromDomain_ b) % S.order = fromDomain_ (a + b))
 
 
