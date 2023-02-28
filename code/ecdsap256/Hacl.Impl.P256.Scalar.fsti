@@ -34,15 +34,8 @@ val lemmaToDomain:   a:nat -> Lemma (toDomain_ a == a * qmont_R % S.order)
 val lemmaFromDomainToDomain: a:S.qelem -> Lemma (toDomain_ (fromDomain_ a) == a)
 val lemmaToDomainFromDomain: a:S.qelem -> Lemma (fromDomain_ (toDomain_ a) == a)
 
-
-val qmul: a:felem -> b:felem -> res:felem -> Stack unit
-  (requires fun h ->
-    live h a /\ live h b /\ live h res /\
-    eq_or_disjoint a b /\
-    as_nat h a < S.order /\ as_nat h b < S.order)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = (as_nat h0 a * as_nat h0 b * qmont_R_inv) % S.order /\
-    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % S.order))
+val qadd_lemma: a:nat -> b:nat ->
+  Lemma ((fromDomain_ a + fromDomain_ b) % S.order = fromDomain_ (a + b))
 
 
 // NOTE: changed precondition `eq_or_disjoint x y`
@@ -55,8 +48,14 @@ val qadd: x:felem -> y:felem -> res:felem -> Stack unit
     as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order)
 
 
-val qadd_lemma: a:nat -> b:nat ->
-  Lemma ((fromDomain_ a + fromDomain_ b) % S.order = fromDomain_ (a + b))
+val qmul: a:felem -> b:felem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h b /\ live h res /\
+    eq_or_disjoint a b /\
+    as_nat h a < S.order /\ as_nat h b < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 a * as_nat h0 b * qmont_R_inv) % S.order /\
+    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % S.order))
 
 
 // rename

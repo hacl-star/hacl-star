@@ -48,6 +48,76 @@ let qmod_short x res =
   qmod_short_lemma (as_nat h0 x);
   pop_frame ()
 
+//----------------------
+
+let lemmaFromDomain a = ()
+
+let lemmaToDomain a = ()
+
+// toDomain_ (fromDomain_ a) == a
+let lemmaFromDomainToDomain a =
+  calc (==) {
+    toDomain_ (fromDomain_ a); // == a
+    (==) { }
+    (a * qmont_R_inv % S.order) * qmont_R % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * qmont_R_inv) qmont_R S.order }
+    a * qmont_R_inv * qmont_R % S.order;
+    (==) { Math.Lemmas.paren_mul_right a qmont_R_inv qmont_R }
+    a * (qmont_R_inv * qmont_R) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r a (qmont_R_inv * qmont_R) S.order }
+    a * (qmont_R_inv * qmont_R % S.order) % S.order;
+    (==) { assert_norm (qmont_R_inv * qmont_R % S.order = 1) }
+    a % S.order;
+    (==) { Math.Lemmas.modulo_lemma a S.order }
+    a;
+  }
+
+
+// fromDomain_ (toDomain_ a) == a
+let lemmaToDomainFromDomain a =
+  calc (==) {
+    fromDomain_ (toDomain_ a); // == a
+    (==) { }
+    (a * qmont_R % S.order) * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * qmont_R) qmont_R_inv S.order }
+    a * qmont_R * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.paren_mul_right a qmont_R qmont_R_inv }
+    a * (qmont_R * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r a (qmont_R * qmont_R_inv) S.order }
+    a * (qmont_R * qmont_R_inv % S.order) % S.order;
+    (==) { assert_norm (qmont_R * qmont_R_inv % S.order = 1) }
+    a % S.order;
+    (==) { Math.Lemmas.modulo_lemma a S.order }
+    a;
+  }
+
+
+// (fromDomain_ a + fromDomain_ b) % S.order = fromDomain_ (a + b)
+let qadd_lemma a b =
+  calc (==) {
+    (fromDomain_ a + fromDomain_ b) % S.order;
+    (==) { }
+    (a * qmont_R_inv % S.order + b * qmont_R_inv % S.order) % S.order;
+    (==) { Math.Lemmas.modulo_distributivity (a * qmont_R_inv) (b * qmont_R_inv) S.order }
+    (a * qmont_R_inv + b * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.distributivity_add_left a b qmont_R_inv }
+    (a + b) * qmont_R_inv % S.order;
+    (==) { }
+    fromDomain_ (a + b);
+  }
+
+//---------------------
+
+[@CInline]
+let qadd x y res =
+  let h0 = ST.get () in
+  push_frame ();
+  let n = create 4ul (u64 0) in
+  make_order n;
+  bn_add_mod4 x y n res;
+  let h1 = ST.get () in
+  assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order);
+  pop_frame ()
 
 
 inline_for_extraction noextract
@@ -283,26 +353,6 @@ let reduction_prime_2prime_with_carry x result  =
  pop_frame()
 
 
-inline_for_extraction noextract
-val reduction_prime_2prime_with_carry2 : carry: uint64 ->  x: felem -> result: felem ->
-  Stack unit
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\
-      uint_v carry * pow2 256 + as_nat h x < 2 * S.order )
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      as_nat h1 result = (uint_v carry * pow2 256 + as_nat h0 x) % S.order)
-
-let reduction_prime_2prime_with_carry2 cin x result  =
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
-  push_frame();
-    let tempBuffer = create (size 4) (u64 0) in
-    let tempBufferForSubborrow = create (size 1) (u64 0) in
-        recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let c = bn_sub4_il x primeorder_buffer tempBuffer in
-    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-    bn_cmovznz4 carry tempBuffer x result;
- pop_frame()
-
-
 
 inline_for_extraction noextract
 val upload_k0: unit ->  Tot (r: uint64 {uint_v r == SL.min_one_prime (pow2 64) (- S.order)})
@@ -312,19 +362,6 @@ let upload_k0 () =
   (u64 14758798090332847183)
 
 
-
-let lemmaFromDomain a = ()
-
-let lemmaToDomain a = ()
-
-let lemmaFromDomainToDomain a =
-   let fromA = (a * S.modp_inv2_prime (pow2 256) S.order) % S.order in
-   let toFromA = (((a * S.modp_inv2_prime (pow2 256) S.order) % S.order) * pow2 256) % S.order in
-   lemma_mod_mul_distr_l (a * S.modp_inv2_prime (pow2 256) S.order) (pow2 256) S.order;
-     assert_by_tactic (a * (S.modp_inv2_prime (pow2 256) S.order * pow2 256) = a * S.modp_inv2_prime (pow2 256) S.order * pow2 256) canon;
-   lemma_mod_mul_distr_r a (S.modp_inv2_prime (pow2 256) S.order * pow2 256) S.order;
-   assert_norm((S.modp_inv2_prime (pow2 256) S.order * pow2 256) % S.order == 1);
-   small_modulo_lemma_1 a S.order
 
 
 val multiplicationInDomain: #k: nat -> #l: nat ->
@@ -354,14 +391,6 @@ val inDomain_mod_is_not_mod: a: nat -> Lemma (toDomain_ a == toDomain_ (a % S.or
 let inDomain_mod_is_not_mod a =
    lemma_mod_mul_distr_l a (pow2 256) S.order
 
-
-let lemmaToDomainFromDomain a =
-  let to = (a * pow2 256) % S.order in
-  let from_to = ((((a * pow2 256) % S.order) * S.modp_inv2_prime (pow2 256) S.order) % S.order) in
-  lemma_mod_mul_distr_l (a * pow2 256) (S.modp_inv2_prime (pow2 256) S.order) S.order;
-  assert_by_tactic ((a * pow2 256) * S.modp_inv2_prime (pow2 256) S.order == a * (pow2 256 * S.modp_inv2_prime (pow2 256) S.order)) canon;
-  lemma_mod_mul_distr_r a (pow2 256 * S.modp_inv2_prime (pow2 256) S.order) S.order;
-  assert_norm ((pow2 256 * S.modp_inv2_prime (pow2 256) S.order) % S.order == 1)
 
 
 #reset-options "--z3rlimit 200"
@@ -394,28 +423,6 @@ let qmul a b result =
      multiplicationInDomain #(fromDomain_ (as_nat h0 a)) #(fromDomain_ (as_nat h0 b)) (as_nat h0 a) (as_nat h0 b);
      inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b));
     pop_frame()
-
-
-
-let qadd arg1 arg2 out =
-  let t = bn_add4 arg1 arg2 out in
-  reduction_prime_2prime_with_carry2 t out out
-
-
-let qadd_lemma a b =
-  lemmaFromDomain a;
-  lemmaFromDomain b;
-  lemmaFromDomain (a + b);
-  assert(fromDomain_ a + fromDomain_ b = (a * S.modp_inv2_prime (pow2 256) S.order) % S.order + (b * S.modp_inv2_prime (pow2 256) S.order) % S.order);
-  let aD = a * S.modp_inv2_prime (pow2 256) S.order in
-  let bD = b * S.modp_inv2_prime (pow2 256) S.order in
-  assert(fromDomain_ (a + b) = (aD + bD) % S.order);
-
-  lemma_mod_plus_distr_l aD bD S.order;
-  lemma_mod_plus_distr_l bD (aD % S.order) S.order;
-  assert(fromDomain_ (a + b) = (aD % S.order + bD % S.order) % S.order);
-
-  assert(fromDomain_ (a + b) = (fromDomain_ a + fromDomain_ b) % S.order)
 
 
 let fromDomainImpl a result =
