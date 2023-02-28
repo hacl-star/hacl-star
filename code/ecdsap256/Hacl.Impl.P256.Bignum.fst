@@ -123,6 +123,7 @@ let bn_add_mod4 x y n out =
 
 [@CInline]
 let bn_sub4 x y out =
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   let h0 = ST.get () in
   let c = BN.bn_sub_eq_len 4ul x y out in
   let h1 = ST.get () in

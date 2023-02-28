@@ -128,7 +128,8 @@ val bn_sub4: x:felem -> y:felem -> res:felem -> Stack uint64
     live h x /\ live h y /\ live h res /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res)
   (ensures fun h0 c h1 -> modifies1 res h0 h1 /\ v c <= 1 /\
-    as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat h0 y)
+    as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat h0 y /\
+    (if uint_v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
 
 
 // TODO: rm; use sub4

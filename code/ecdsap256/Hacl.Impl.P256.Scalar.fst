@@ -23,6 +23,33 @@ open Lib.IntTypes.Intrinsics
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val qmod_short_lemma: a:nat{a < pow2 256} ->
+  Lemma (let r = if a >= S.order then a - S.order else a in r = a % S.order)
+
+let qmod_short_lemma a =
+  let r = if a >= S.order then a - S.order else a in
+  if a >= S.order then begin
+    Math.Lemmas.lemma_mod_sub a S.order 1;
+    assert_norm (pow2 256 - S.order < S.order);
+    Math.Lemmas.small_mod r S.order end
+  else
+   Math.Lemmas.small_mod r S.order
+
+
+[@CInline]
+let qmod_short x res =
+  push_frame ();
+  let tmp = create (size 4) (u64 0) in
+  make_order tmp;
+  let h0 = ST.get () in
+  let c = bn_sub4 x tmp tmp in
+  bn_cmovznz4 c tmp x res;
+  as_nat_bound h0 x;
+  qmod_short_lemma (as_nat h0 x);
+  pop_frame ()
+
+
+
 inline_for_extraction noextract
 val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
   (requires fun h -> live h t /\ live h t1 /\ live h result /\ wide_as_nat h t1 < pow2 320 /\
@@ -275,29 +302,6 @@ let reduction_prime_2prime_with_carry2 cin x result  =
     bn_cmovznz4 carry tempBuffer x result;
  pop_frame()
 
-
-val lemma_reduction1: a: nat {a < pow2 256} -> r: nat{if a >= S.order then r = a - S.order else r = a} ->
-  Lemma (r = a % S.order)
-
-let lemma_reduction1 a r =
-  let prime = S.order in
-  assert_norm (pow2 256 - S.order < S.order)
-
-
-let qmod_short x result  =
-  push_frame();
-    let tempBuffer = create (size 4) (u64 0) in
-    recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
-      let h0 = ST.get() in
-    let c = bn_sub4_il x primeorder_buffer tempBuffer in
-      let h1 = ST.get() in
-      assert(as_nat h1 tempBuffer = as_nat h0 x - S.order + uint_v c * pow2 256);
-      assert(let x = as_nat h0 x in if x < S.order then uint_v c = 1 else uint_v c = 0);
-    bn_cmovznz4 c tempBuffer x result;
-    let h2 = ST.get() in
-      assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64);
-    lemma_reduction1 (as_nat h0 x) (as_nat h2 result);
-  pop_frame()
 
 
 inline_for_extraction noextract

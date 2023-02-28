@@ -125,9 +125,9 @@ let fmod_short_lemma a =
 let fmod_short x res =
   push_frame ();
   let tmp = create (size 4) (u64 0) in
-  recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
+  make_prime tmp;
   let h0 = ST.get () in
-  let c = bn_sub4_il x prime_buffer tmp in
+  let c = bn_sub4 x tmp tmp in
   bn_cmovznz4 c tmp x res;
   as_nat_bound h0 x;
   fmod_short_lemma (as_nat h0 x);
