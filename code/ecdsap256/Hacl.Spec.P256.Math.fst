@@ -70,47 +70,6 @@ let lemma_modular_multiplication_p256_2 a b =
   Classical.move_requires_2 lemma_modular_multiplication_p256_2_left a b
 
 
-// used in Hacl.Impl.P256.Scalar and Hacl.Impl.P256.Field
-val lemma_montgomery_mod_inverse_addition: a:nat -> Lemma (
-  a * modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime ==
-  a * modp_inv2_prime (pow2 128) prime % prime)
-
-let lemma_montgomery_mod_inverse_addition a =
-  calc (==) {
-    a * modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime;
-    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 64) prime) (modp_inv2_prime (pow2 64) prime)}
-    a * (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime) % prime;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a
-    (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime) prime }
-    a * (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime) % prime;
-    == { assert_norm (modp_inv2_prime (pow2 64) prime * modp_inv2_prime (pow2 64) prime % prime ==
-    modp_inv2_prime (pow2 128) prime % prime) }
-    a * (modp_inv2_prime (pow2 128) prime % prime) % prime;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 128) prime) prime }
-    a * modp_inv2_prime (pow2 128) prime % prime;
-  }
-
-
-// used in Hacl.Impl.P256.Scalar and Hacl.Impl.P256.Field
-val lemma_montgomery_mod_inverse_addition2: a:nat -> Lemma (
-  a * modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime ==
-  a * modp_inv2_prime (pow2 256) prime % prime)
-
-let lemma_montgomery_mod_inverse_addition2 a =
-  calc (==) {
-    a * modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime;
-    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 128) prime) (modp_inv2_prime (pow2 128) prime)}
-    a * (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime) % prime;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a
-    (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime) prime }
-    a * (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime) % prime;
-    == { assert_norm (modp_inv2_prime (pow2 128) prime * modp_inv2_prime (pow2 128) prime % prime ==
-    modp_inv2_prime (pow2 256) prime % prime) }
-    a * (modp_inv2_prime (pow2 256) prime % prime) % prime;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 256) prime) prime }
-    a * modp_inv2_prime (pow2 256) prime % prime;
-  }
-
 (* Fermat's Little Theorem
    applied to r = modp_inv2_prime (pow2 256) order
 
