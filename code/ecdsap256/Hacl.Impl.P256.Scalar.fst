@@ -15,11 +15,12 @@ open Hacl.Impl.P256.Constants
 module S = Spec.P256
 module SL = Hacl.Spec.P256.Lemmas
 
-// TODO: rm
-open FStar.Math.Lemmas
-open FStar.Tactics
-open FStar.Tactics.Canon
-open Lib.IntTypes.Intrinsics
+module BD = Hacl.Spec.Bignum.Definitions
+module BM = Hacl.Bignum.Montgomery
+module SBM = Hacl.Spec.Bignum.Montgomery
+module SBML = Hacl.Spec.Montgomery.Lemmas
+
+friend Hacl.Bignum256
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -49,6 +50,7 @@ let qmod_short x res =
   pop_frame ()
 
 //----------------------
+// TODO: share the proofs with Hacl.Spec.P256.Montgomerymultiplication
 
 let lemmaFromDomain a = ()
 
@@ -106,7 +108,132 @@ let qadd_lemma a b =
     fromDomain_ (a + b);
   }
 
+
+val inDomain_mod_is_not_mod: a:nat -> Lemma (toDomain_ a == toDomain_ (a % S.order))
+let inDomain_mod_is_not_mod a =
+  calc (==) {
+    toDomain_ (a % S.order); // == toDomain_ a
+    (==) { }
+    (a % S.order) * qmont_R % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l a qmont_R S.order }
+    a * qmont_R % S.order;
+  }
+
+
+val multiplicationInDomain: #k:S.qelem -> #l:S.qelem
+  -> a:S.qelem{a == toDomain_ k}
+  -> b:S.qelem{b == toDomain_ l} ->
+  Lemma (a * b * qmont_R_inv % S.order == toDomain_ (k * l))
+
+let multiplicationInDomain #k #l a b =
+  // a = k * qmont_R % S.order = toDomain_ k
+  // b = l * qmont_R % S.order = toDomain_ l
+  calc (==) {
+    a * b * qmont_R_inv % S.order; // == toDomain_ (k * l)
+    (==) { }
+    a * (l * qmont_R % S.order) * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.paren_mul_right a (l * qmont_R % S.order) qmont_R_inv }
+    a * ((l * qmont_R % S.order) * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r a ((l * qmont_R % S.order) * qmont_R_inv) S.order }
+    a * ((l * qmont_R % S.order) * qmont_R_inv % S.order) % S.order;
+    (==) { lemmaToDomainFromDomain l }
+    (k * qmont_R % S.order) * l % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (k * qmont_R) l S.order }
+    (k * qmont_R) * l % S.order;
+    (==) { Math.Lemmas.paren_mul_right k qmont_R l;
+      Math.Lemmas.swap_mul qmont_R l;
+      Math.Lemmas.paren_mul_right k l qmont_R }
+    (k * l) * qmont_R % S.order;
+    (==) { }
+    toDomain_ (k * l);
+  }
+
 //---------------------
+
+val qmont_R_inv_is_bn_mont_d: unit -> Lemma
+  (requires S.order % 2 = 1)
+  (ensures  (let d, _ = SBML.eea_pow2_odd 256 S.order in qmont_R_inv == d % S.order))
+
+let qmont_R_inv_is_bn_mont_d () =
+  let d, k = SBML.eea_pow2_odd 256 S.order in
+  SBML.mont_preconditions_d 64 4 S.order;
+  assert (d * pow2 256 % S.order = 1);
+
+  assert_norm (qmont_R * qmont_R_inv % S.order = 1);
+  Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) qmont_R_inv S.order;
+  assert (qmont_R_inv * pow2 256 % S.order = 1);
+
+  assert (qmont_R_inv * pow2 256 % S.order = d * pow2 256 % S.order);
+  Hacl.Spec.P256.Math.lemma_modular_multiplication_pow256_order qmont_R_inv d;
+  assert (qmont_R_inv % S.order == d % S.order);
+  Math.Lemmas.modulo_lemma qmont_R_inv S.order;
+  assert (qmont_R_inv == d % S.order)
+
+
+val lemma_order_mont: unit ->
+  Lemma (S.order % 2 = 1 /\ S.order < pow2 256 /\ (1 + S.order * 0xccd1c8aaee00bc4f) % pow2 64 = 0)
+
+let lemma_order_mont () =
+  assert_norm (S.order % 2 = 1);
+  assert_norm (S.order < pow2 256);
+  assert_norm ((1 + S.order * 0xccd1c8aaee00bc4f) % pow2 64 = 0)
+
+
+val qmont_reduction_lemma: x:Lib.Sequence.lseq uint64 8 -> n:Lib.Sequence.lseq uint64 4 -> Lemma
+  (requires BD.bn_v n = S.order /\ BD.bn_v x < S.order * S.order)
+  (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 0xccd1c8aaee00bc4f) x) ==
+    BD.bn_v x * qmont_R_inv % S.order)
+
+let qmont_reduction_lemma x n =
+  let k0 = 0xccd1c8aaee00bc4f in
+  lemma_order_mont ();
+  assert (SBM.bn_mont_pre n (u64 k0));
+  let d, _ = SBML.eea_pow2_odd 256 (BD.bn_v n) in
+
+  let res = SBM.bn_mont_reduction n (u64 k0) x in
+  assert_norm (S.order * S.order < S.order * pow2 256);
+  assert (BD.bn_v x < S.order * pow2 256);
+
+  SBM.bn_mont_reduction_lemma n (u64 k0) x;
+  assert (BD.bn_v res == SBML.mont_reduction 64 4 (BD.bn_v n) k0 (BD.bn_v x));
+  SBML.mont_reduction_lemma 64 4 (BD.bn_v n) k0 (BD.bn_v x);
+  assert (BD.bn_v res == BD.bn_v x * d % S.order);
+  calc (==) {
+    (BD.bn_v x) * d % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (BD.bn_v x) d S.order }
+    (BD.bn_v x) * (d % S.order) % S.order;
+    (==) { qmont_R_inv_is_bn_mont_d () }
+    (BD.bn_v x) * qmont_R_inv % S.order;
+  }
+
+
+val qmont_reduction: x:widefelem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ disjoint x res /\
+    wide_as_nat h x < S.order * S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
+    as_nat h1 res == wide_as_nat h0 x * qmont_R_inv % S.order)
+
+[@CInline]
+let qmont_reduction x res =
+  push_frame ();
+  let n = create 4ul (u64 0) in
+  make_order n;
+
+  let h0 = ST.get () in
+  BM.bn_mont_reduction Hacl.Bignum256.bn_inst n (u64 0xccd1c8aaee00bc4f) x res;
+  let h1 = ST.get () in
+  bignum_bn_v_is_as_nat h0 n;
+  bignum_bn_v_is_wide_as_nat h0 x;
+  assert (BD.bn_v (as_seq h0 n) == as_nat h0 n);
+  assert (BD.bn_v (as_seq h0 x) == wide_as_nat h0 x);
+  qmont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
+  assert (BD.bn_v (as_seq h1 res) == BD.bn_v (as_seq h0 x) * qmont_R_inv % S.order);
+  bignum_bn_v_is_as_nat h1 res;
+  assert (as_nat h1 res == wide_as_nat h0 x * qmont_R_inv % S.order);
+  pop_frame ()
+
+//-------------------
 
 [@CInline]
 let qadd x y res =
@@ -120,314 +247,32 @@ let qadd x y res =
   pop_frame ()
 
 
-inline_for_extraction noextract
-val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
-  (requires fun h -> live h t /\ live h t1 /\ live h result /\ wide_as_nat h t1 < pow2 320 /\
-    wide_as_nat h t <  S.order * S.order /\ eq_or_disjoint t result /\ eq_or_disjoint t1 result  )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\  wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
-
-let add8_without_carry1 t t1 result  =
-  let _ = bn_add8 t t1 result in
-    assert_norm (pow2 320 + S.order * S.order < pow2 512)
-
-
-val lemma_montgomery_mult_1: t : int  ->
-  k0:nat {k0 = SL.min_one_prime (pow2 64) (- S.order)} ->
-  r: nat {t <= r} ->
-  Lemma ((t + (((t % pow2 64) * k0) % pow2 64 * S.order)) / pow2 64 <= (pow2 64 * S.order + r) / pow2 64)
-
-let lemma_montgomery_mult_1 t k0 r =
-  let t1 = t % pow2 64 in
-  let y = (t1 * k0) % pow2 64 in
-  let t2 = y * S.order in
-    SL.mul_lemma_1 y (pow2 64) S.order
-
-
-val lemma_montgomery_mult_result_less_than_order:
-  a: nat{a < S.order} ->
-  b: nat{b < S.order} ->
-  k0:nat {k0 = SL.min_one_prime (pow2 64) (- S.order)} ->
-  Lemma
-  (
-    let t = a * b in
-    let s = 64 in
-
-    let t1 = t % pow2 s in
-    let y = (t1 * k0) % pow2 s in
-    let t2 = y * S.order in
-    let t3 = t + t2 in
-    let t = t3 / pow2 s in
-
-    let t1 = t % pow2 s in
-    let y = (t1 * k0) % pow2 s in
-    let t2 = y * S.order in
-    let t3 = t + t2 in
-    let t = t3 / pow2 s in
-
-    let t1 = t % pow2 s in
-    let y = (t1 * k0) % pow2 s in
-    let t2 = y * S.order in
-    let t3 = t + t2 in
-    let t = t3 / pow2 s in
-
-    let t1 = t % pow2 s in
-    let y = (t1 * k0) % pow2 s in
-    let t2 = y * S.order in
-    let t3 = t + t2 in
-    let t = t3 / pow2 s in
-    t < 2 * S.order)
-
-
-let lemma_montgomery_mult_result_less_than_order a b k0 =
-  let t = a * b in
-  let s = 64 in
-    SL.mul_lemma_ a b S.order;
-
-  let r = S.order * S.order + 1 in
-
-  let t1 = t % pow2 s in
-  let y = (t1 * k0) % pow2 s in
-  let t2 = y * S.order in
-  let t3 = t + t2 in
-  let tU = t3 / pow2 s in
-  lemma_montgomery_mult_1 t k0 r;
-
-  let t = tU in
-  let r = (pow2 64 * S.order + r) / pow2 64 in
-  let t1 = t % pow2 s in
-  let y = (t1 * k0) % pow2 s in
-  let t2 = y * S.order in
-  let t3 = t + t2 in
-  let tU = t3 / pow2 s in
-  lemma_montgomery_mult_1 t k0 r;
-
-  let t = tU in
-  let r = (pow2 64 * S.order + r) / pow2 64 in
-  let t1 = t % pow2 s in
-  let y = (t1 * k0) % pow2 s in
-  let t2 = y * S.order in
-  let t3 = t + t2 in
-  let tU = t3 / pow2 s in
-  lemma_montgomery_mult_1 t k0 r;
-
-  let r = (pow2 64 * S.order + r) / pow2 64 in
-  let t = tU in
-  let t1 = t % pow2 s in
-  let y = (t1 * k0) % pow2 s in
-  let t2 = y * S.order in
-  let t3 = t + t2 in
-  let tU = t3 / pow2 s in
-  lemma_montgomery_mult_1 t k0 r;
-  assert_norm ((pow2 64 * S.order +  (pow2 64 * S.order +  (pow2 64 * S.order +  (pow2 64 * S.order +  S.order * S.order + 1) / pow2 64) / pow2 64) / pow2 64) / pow2 64 < 2 * S.order)
-
-
-val lemma_montgomery_mod_inverse_addition: a: nat ->
-  Lemma (
-    (a * S.modp_inv2_prime(pow2 64) S.order  * S.modp_inv2_prime (pow2 64) S.order) % S.order ==
-    (a * S.modp_inv2_prime(pow2 128) S.order) % S.order)
-
-let lemma_montgomery_mod_inverse_addition a =
-    assert_norm ((S.modp_inv2_prime(pow2 64) S.order * S.modp_inv2_prime (pow2 64) S.order) % S.order == S.modp_inv2_prime (pow2 128) S.order % S.order);
-    assert_by_tactic ((a * S.modp_inv2_prime (pow2 64) S.order * S.modp_inv2_prime (pow2 64) S.order)  == (a * (S.modp_inv2_prime (pow2 64) S.order * S.modp_inv2_prime (pow2 64) S.order))) canon;
-    lemma_mod_mul_distr_r a (S.modp_inv2_prime (pow2 64) S.order * S.modp_inv2_prime (pow2 64) S.order) S.order;
-    lemma_mod_mul_distr_r a (S.modp_inv2_prime (pow2 128) S.order) S.order
-
-
-val lemma_montgomery_mod_inverse_addition2: a: int ->
-  Lemma (
-    (a * S.modp_inv2_prime (pow2 128) S.order  * S.modp_inv2_prime (pow2 128) S.order) % S.order ==
-    (a * S.modp_inv2_prime (pow2 256) S.order) % S.order)
-
-let lemma_montgomery_mod_inverse_addition2 a =
-  assert_norm ((S.modp_inv2_prime (pow2 128) S.order * S.modp_inv2_prime (pow2 128) S.order) % S.order == (S.modp_inv2_prime (pow2 256) S.order) % S.order);
-    assert_by_tactic ((a * S.modp_inv2_prime (pow2 128) S.order * S.modp_inv2_prime (pow2 128) S.order)  == (a * (S.modp_inv2_prime (pow2 128) S.order * S.modp_inv2_prime (pow2 128) S.order))) canon;
-    lemma_mod_mul_distr_r a (S.modp_inv2_prime (pow2 128) S.order * S.modp_inv2_prime (pow2 128) S.order) S.order;
-    lemma_mod_mul_distr_r a (S.modp_inv2_prime (pow2 256) S.order) S.order
-
-
-val montgomery_multiplication_one_round_proof:
-  t: nat ->
-  k0: nat {k0 = SL.min_one_prime (pow2 64) (- S.order)}  ->
-  round: nat {round = (t + S.order * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64} ->
-  co: nat {co % S.order = t % S.order} ->
-  Lemma (round  % S.order == co * (S.modp_inv2_prime (pow2 64) S.order) % S.order)
-
-let montgomery_multiplication_one_round_proof t k0 round co =
-  SL.mult_one_round_ecdsa_prime t S.order co k0
-
-#reset-options "--z3rlimit 700"
-
-val montgomery_multiplication_round: t: widefelem ->  round: widefelem -> k0: uint64 ->
-  Stack unit
-    (requires fun h -> live h t /\ live h round  /\ wide_as_nat h t < S.order * S.order)
-    (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\
-      wide_as_nat h1 round = (wide_as_nat h0 t + S.order * ((uint_v k0 * (wide_as_nat h0 t % pow2 64)) % pow2 64)) / pow2 64)
-
-let montgomery_multiplication_round t round k0 =
-  push_frame();
-    let h0 = ST.get() in
-    let temp = create (size 1) (u64 0) in
-    let y = create (size 1) (u64 0) in
-
-    let t2 = create (size 8) (u64 0) in
-    let t3 = create (size 8) (u64 0) in
-    let t1 = bn_mod_pow2_64 t in
-    mul64 t1 k0 y temp;
-      let h1 = ST.get() in
-      assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) + uint_v (Lib.Sequence.index (as_seq h1 temp) 0) * pow2 64 = uint_v t1 * uint_v k0);
-      assert((uint_v (Lib.Sequence.index (as_seq h1 y) 0) + uint_v (Lib.Sequence.index (as_seq h1 temp) 0) * pow2 64) % pow2 64 = uint_v (Lib.Sequence.index (as_seq h1 y) 0));
-      assert((uint_v (Lib.Sequence.index (as_seq h1 y) 0) + uint_v (Lib.Sequence.index (as_seq h1 temp) 0) * pow2 64) % pow2 64 = (uint_v t1 * uint_v k0) % pow2 64);
-      assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) = (uint_v t1 * uint_v k0) % pow2 64);
-      recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let y_ = index y (size 0) in
-      assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) == uint_v y_);
-      assert(uint_v y_ == (uint_v t1 * uint_v k0) % pow2 64);
-
-    bn_mul1 primeorder_buffer y_ t2;
-      let h2 = ST.get() in
-      assert(wide_as_nat h2 t2 = S.order * ((uint_v t1 * uint_v k0) % pow2 64));
-    add8_without_carry1 t t2 t3;
-      let h3 = ST.get() in
-      assert_by_tactic ((wide_as_nat h0 t % pow2 64) * uint_v k0 == uint_v k0 * (wide_as_nat h0 t % pow2 64)) canon;
-      assert(wide_as_nat h3 t3 = wide_as_nat h0 t + S.order * ((((wide_as_nat h0 t % pow2 64)) * uint_v k0) % pow2 64));
-    bn_rshift64 t3 round;
-      let h4 = ST.get() in
-      assert(wide_as_nat h4 round = (wide_as_nat h0 t + S.order * ((((wide_as_nat h0 t % pow2 64)) * uint_v k0) % pow2 64)) / pow2 64);
+let qmul a b res =
+  push_frame ();
+  let tmp = create (size 8) (u64 0) in
+  let h0 = ST.get () in
+  bn_mul4 a b tmp;
+  let h1 = ST.get () in
+  SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.order;
+  qmont_reduction tmp res;
+  lemmaFromDomainToDomain (as_nat h0 a);
+  lemmaFromDomainToDomain (as_nat h0 b);
+  multiplicationInDomain
+    #(fromDomain_ (as_nat h0 a)) #(fromDomain_ (as_nat h0 b)) (as_nat h0 a) (as_nat h0 b);
+  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b));
   pop_frame()
 
 
-#reset-options "--z3rlimit 200"
+let fromDomainImpl a res =
+  push_frame ();
+  let t = create (size 8) (u64 0) in
+  let t_low = sub t (size 0) (size 4) in
+  let t_high = sub t (size 4) (size 4) in
 
-val montgomery_multiplication_round_twice: t: widefelem -> result: widefelem -> k0: uint64->
-  Stack unit
-    (requires fun h -> live h t /\ live h result /\ uint_v k0 = SL.min_one_prime (pow2 64) (- S.order) /\
-      wide_as_nat h t < S.order * S.order)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      wide_as_nat h1 result % S.order == (wide_as_nat h0 t * S.modp_inv2_prime (pow2 128) S.order) % S.order /\
-      (
-	let round = (wide_as_nat h0 t + S.order * ((uint_v k0 * (wide_as_nat h0 t % pow2 64)) % pow2 64)) / pow2 64 in
-	wide_as_nat h1 result == (round + S.order * ((uint_v k0 * (round % pow2 64)) % pow2 64)) / pow2 64)  /\
-	wide_as_nat h1 result < S.order * S.order
-      )
-
-let montgomery_multiplication_round_twice t result k0 =
-   push_frame();
-     let tempRound = create (size 8) (u64 0) in
-       let h0 = ST.get() in
-   montgomery_multiplication_round t tempRound k0;
-       let h1 = ST.get() in
-   montgomery_multiplication_one_round_proof (wide_as_nat h0 t) (uint_v k0) (wide_as_nat h1 tempRound) (wide_as_nat h0 t);
-   montgomery_multiplication_round tempRound result k0;
-      let h2 = ST.get() in
-   montgomery_multiplication_one_round_proof (wide_as_nat h1 tempRound) (uint_v k0) (wide_as_nat h2 result) (wide_as_nat h0 t * S.modp_inv2_prime (pow2 64) S.order);
-   lemma_montgomery_mod_inverse_addition (wide_as_nat h0 t);
-  pop_frame()
-
-
-val reduction_prime_2prime_with_carry : x: widefelem -> result: felem ->
-  Stack unit
-    (requires fun h -> live h x /\ live h result /\  eq_or_disjoint x result /\ wide_as_nat h x < 2 * S.order)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = wide_as_nat h0 x % S.order)
-
-let reduction_prime_2prime_with_carry x result  =
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
-  push_frame();
-    let h0 = ST.get() in
-    let tempBuffer = create (size 4) (u64 0) in
-    let tempBufferForSubborrow = create (size 1) (u64 0) in
-    let cin = Lib.Buffer.index x (size 4) in
-    let x_ = Lib.Buffer.sub x (size 0) (size 4) in
-        recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let c = bn_sub4_il x_ primeorder_buffer tempBuffer in
-      let h1 = ST.get() in
-
-      assert(if uint_v c = 0 then as_nat h0 x_ >= S.order else as_nat h0 x_ < S.order);
-      assert(wide_as_nat h0 x = as_nat h0 x_ + uint_v cin * pow2 256);
-    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-      let h2 = ST.get() in
-      assert(if (as_nat h0 x_ >= S.order) then uint_v carry = 0
-	else if uint_v cin < uint_v c then uint_v carry = 1
-	else uint_v carry = 0);
-
-    bn_cmovznz4 carry tempBuffer x_ result;
- pop_frame()
-
-
-
-inline_for_extraction noextract
-val upload_k0: unit ->  Tot (r: uint64 {uint_v r == SL.min_one_prime (pow2 64) (- S.order)})
-
-let upload_k0 () =
-  assert_norm(SL.min_one_prime (pow2 64) (- S.order) == 14758798090332847183);
-  (u64 14758798090332847183)
-
-
-
-
-val multiplicationInDomain: #k: nat -> #l: nat ->
-  a: nat {a == toDomain_ (k) /\ a < S.order} ->
-  b: nat {b == toDomain_ (l) /\ b < S.order} ->
-  Lemma  ((a *  b * S.modp_inv2_prime (pow2 256) S.order) % S.order == toDomain_ (k * l))
-
-let multiplicationInDomain #k #l a b =
-  let f = a * b * S.modp_inv2_prime (pow2 256) S.order in
-  let z = toDomain_ (k * l) in
-  assert_by_tactic (((k * pow2 256) % S.order) * ((l * pow2 256) % S.order) * S.modp_inv2_prime (pow2 256) S.order =
-    ((k * pow2 256) % S.order) * (((l * pow2 256) % S.order) * S.modp_inv2_prime (pow2 256) S.order)) canon;
-  lemma_mod_mul_distr_l (k * pow2 256) (((l * pow2 256) % S.order) * S.modp_inv2_prime (pow2 256) S.order) S.order;
-  assert_by_tactic (
-    ((k * pow2 256) * (((l * pow2 256) % S.order) * S.modp_inv2_prime (pow2 256) S.order)) % S.order =
-    ((((l * pow2 256) % S.order) * (((k * pow2 256) * S.modp_inv2_prime (pow2 256) S.order)) % S.order))) canon;
-  lemma_mod_mul_distr_l (l * pow2 256)  ((k * pow2 256) * S.modp_inv2_prime (pow2 256) S.order) S.order;
-  assert_by_tactic ( ((l * pow2 256 * ((k * pow2 256) * S.modp_inv2_prime (pow2 256) S.order))) ==
-     ((l * pow2 256 * k) * (pow2 256 * S.modp_inv2_prime (pow2 256) S.order))) canon;
-  lemma_mod_mul_distr_r (l * pow2 256 * k) (pow2 256 * S.modp_inv2_prime (pow2 256) S.order) S.order;
-  assert_norm ((pow2 256 * S.modp_inv2_prime (pow2 256) S.order) % S.order == 1);
-  assert_by_tactic ((l * pow2 256 * k) == ((k * l) * pow2 256)) canon
-
-
-val inDomain_mod_is_not_mod: a: nat -> Lemma (toDomain_ a == toDomain_ (a % S.order))
-
-let inDomain_mod_is_not_mod a =
-   lemma_mod_mul_distr_l a (pow2 256) S.order
-
-
-
-#reset-options "--z3rlimit 200"
-
-let qmul a b result =
-  push_frame();
-    let t = create (size 8) (u64 0) in
-    let round2 = create (size 8) (u64 0) in
-    let round4 = create (size 8) (u64 0) in
-    let orderBuffer = create (size 4) (u64 0) in
-
-    let k0 = upload_k0() in
-
-      let h0 = ST.get() in
-    bn_mul4 a b t;
-      assert_by_tactic (as_nat h0 b * as_nat h0 a == as_nat h0 a * as_nat h0 b) canon;
-      SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.order;
-   montgomery_multiplication_round_twice t round2 k0;
-     let h2 = ST.get() in
-   montgomery_multiplication_round_twice round2 round4 k0;
-     lemma_mod_mul_distr_l (wide_as_nat h2 round2) (S.modp_inv2_prime (pow2 128) S.order) S.order;
-     lemma_mod_mul_distr_l (as_nat h0 a * as_nat h0 b * S.modp_inv2_prime (pow2 128) S.order) (S.modp_inv2_prime (pow2 128) S.order) S.order;
-     lemma_montgomery_mod_inverse_addition2 (as_nat h0 a * as_nat h0 b);
-
-     lemma_montgomery_mult_result_less_than_order (as_nat h0 a) (as_nat h0 b) (uint_v k0);
-   reduction_prime_2prime_with_carry round4 result;
-
-     lemmaFromDomainToDomain (as_nat h0 a);
-     lemmaFromDomainToDomain (as_nat h0 b);
-     multiplicationInDomain #(fromDomain_ (as_nat h0 a)) #(fromDomain_ (as_nat h0 b)) (as_nat h0 a) (as_nat h0 b);
-     inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b));
-    pop_frame()
-
-
-let fromDomainImpl a result =
-  push_frame();
-    let one = create (size 4) (u64 0) in
-    bn_set_one4 one;
-    qmul one a result;
-  pop_frame()
+  let h0 = ST.get () in
+  copy t_low a;
+  let h1 = ST.get () in
+  assert (wide_as_nat h0 t = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
+  assert_norm (S.order < S.order * S.order);
+  qmont_reduction t res;
+  pop_frame ()

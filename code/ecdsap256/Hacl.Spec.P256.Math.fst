@@ -35,6 +35,22 @@ let lemma_modular_multiplication_pow256 a b =
   assert (a % prime = b % prime)
 
 
+val lemma_modular_multiplication_pow256_order: a:int -> b:int -> Lemma
+  (requires a * pow2 256 % order = b * pow2 256 % order)
+  (ensures  a % order == b % order)
+
+let lemma_modular_multiplication_pow256_order a b =
+  mod_sub order (a * pow2 256) (b * pow2 256);
+  assert (pow2 256 * (a - b) % order = 0);
+  let r = -43790243024438006127650828685417305984841428635278707415088219106730833919055 in
+  let s = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
+  assert_norm (r * order + s * pow2 256 = 1);
+  FStar.Math.Euclid.euclid order (pow2 256) (a - b) r s;
+  assert ((a - b) % order = 0);
+  sub_mod order a b;
+  assert (a % order = b % order)
+
+
 val lemma_modular_multiplication_p256_2_left:
   a:nat{a < prime} -> b:nat{b < prime} -> Lemma
   (requires a * pow2 256 % prime = b * pow2 256 % prime)
