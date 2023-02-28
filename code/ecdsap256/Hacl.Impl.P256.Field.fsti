@@ -24,10 +24,10 @@ val fmod_short: x:felem -> res:felem -> Stack unit
 
 // NOTE: changed precondition `eq_or_disjoint x y`
 val fadd: x:felem -> y:felem -> res:felem -> Stack unit
-  (requires fun h0 ->
-    live h0 x /\ live h0 y /\ live h0 res /\
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
-    as_nat h0 x < S.prime /\ as_nat h0 y < S.prime)
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime /\
     as_nat h1 res == SM.toDomain_ ((SM.fromDomain_ (as_nat h0 x) + SM.fromDomain_ (as_nat h0 y)) % S.prime))
@@ -35,9 +35,9 @@ val fadd: x:felem -> y:felem -> res:felem -> Stack unit
 
 inline_for_extraction noextract
 val fdouble: x:felem -> res:felem -> Stack unit
-  (requires fun h0 ->
-    live h0 x /\ live h0 res /\ eq_or_disjoint x res /\
-    as_nat h0 x < S.prime)
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == (2 * as_nat h0 x) % S.prime /\
     as_nat h1 res < S.prime /\
@@ -46,10 +46,10 @@ val fdouble: x:felem -> res:felem -> Stack unit
 
 // NOTE: changed precondition `eq_or_disjoint x y`
 val fsub: x:felem -> y:felem -> res:felem -> Stack unit
-  (requires fun h0 ->
-    live h0 res /\ live h0 x /\ live h0 y /\
+  (requires fun h ->
+    live h res /\ live h x /\ live h y /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
-    as_nat h0 x < S.prime /\ as_nat h0 y < S.prime)
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime /\
     as_nat h1 res == SM.toDomain_ ((SM.fromDomain_ (as_nat h0 x) - SM.fromDomain_ (as_nat h0 y)) % S.prime))

@@ -312,9 +312,6 @@ let upload_k0 () =
   (u64 14758798090332847183)
 
 
-let fromDomain_ a = (a * S.modp_inv2_prime (pow2 256) S.order) % S.order
-
-let toDomain_ a = (a * pow2 256) % S.order
 
 let lemmaFromDomain a = ()
 

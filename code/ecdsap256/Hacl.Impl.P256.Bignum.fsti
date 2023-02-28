@@ -19,7 +19,7 @@ val scalar_bit:
     s:lbuffer_t buf_type uint8 (size 32)
   -> n:size_t{v n < 256}
   -> Stack uint64
-    (requires fun h0 -> live h0 s)
+    (requires fun h -> live h s)
     (ensures  fun h0 r h1 -> h0 == h1 /\
       r == Spec.ECDSA.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
 
