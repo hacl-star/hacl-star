@@ -151,14 +151,6 @@ val bn_sub_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
     as_nat h1 res == (as_nat h0 x - as_nat h0 y) % as_nat h0 n)
 
 
-val bn_reduce_once4: c:uint64 -> x:felem -> n:felem -> Stack unit
-  (requires fun h -> v c <= 1 /\
-    live h x /\ live h n /\ disjoint x n /\
-    v c * pow2 256 + as_nat h x < 2 * as_nat h n)
-  (ensures  fun h0 _ h1 -> modifies (loc x) h0 h1 /\
-    as_nat h1 x == (v c * pow2 256 + as_nat h0 x) % as_nat h0 n)
-
-
 ///  Multiplication
 
 val bn_mul4: f:felem -> r:felem -> res:widefelem -> Stack unit

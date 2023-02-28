@@ -19,12 +19,11 @@ let sub_mod n a b =
   Math.Lemmas.mod_add_both (a - b) 0 b n
 
 
-val lemma_modular_multiplication_p256_2_left:
-  a:nat{a < prime} -> b:nat{b < prime} -> Lemma
+val lemma_modular_multiplication_pow256: a:int -> b:int -> Lemma
   (requires a * pow2 256 % prime = b * pow2 256 % prime)
-  (ensures  a == b)
+  (ensures  a % prime == b % prime)
 
-let lemma_modular_multiplication_p256_2_left a b =
+let lemma_modular_multiplication_pow256 a b =
   mod_sub prime (a * pow2 256) (b * pow2 256);
   assert (pow2 256 * (a - b) % prime = 0);
   let r = 26959946654596436323893653559348051827142583427821597254581997273087 in
@@ -33,7 +32,16 @@ let lemma_modular_multiplication_p256_2_left a b =
   FStar.Math.Euclid.euclid prime (pow2 256) (a - b) r s;
   assert ((a - b) % prime = 0);
   sub_mod prime a b;
-  assert (a % prime = b % prime);
+  assert (a % prime = b % prime)
+
+
+val lemma_modular_multiplication_p256_2_left:
+  a:nat{a < prime} -> b:nat{b < prime} -> Lemma
+  (requires a * pow2 256 % prime = b * pow2 256 % prime)
+  (ensures  a == b)
+
+let lemma_modular_multiplication_p256_2_left a b =
+  lemma_modular_multiplication_pow256 a b;
   FStar.Math.Lemmas.modulo_lemma a prime;
   FStar.Math.Lemmas.modulo_lemma b prime
 
