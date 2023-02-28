@@ -7,9 +7,7 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.IntTypes.Intrinsics
 
-open Hacl.Spec.P256.Math
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Constants
@@ -41,7 +39,7 @@ let mont_R_inv_is_bn_mont_d () =
   assert (SM.mont_R_inv * pow2 256 % S.prime = 1);
 
   assert (SM.mont_R_inv * pow2 256 % S.prime = d * pow2 256 % S.prime);
-  lemma_modular_multiplication_pow256 SM.mont_R_inv d;
+  Hacl.Spec.P256.Math.lemma_modular_multiplication_pow256 SM.mont_R_inv d;
   assert (SM.mont_R_inv % S.prime == d % S.prime);
   Math.Lemmas.modulo_lemma SM.mont_R_inv S.prime;
   assert (SM.mont_R_inv == d % S.prime)

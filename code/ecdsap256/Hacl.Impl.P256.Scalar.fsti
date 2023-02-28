@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Scalar //before: Hacl.Impl.ECDSA.MontgomeryMultiplication
+module Hacl.Impl.P256.Scalar
 
 open FStar.Mul
 open FStar.HyperStack.All
@@ -8,17 +8,18 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.ECDSA
-module S = Spec.P256
-
 open Hacl.Spec.P256.Felem
 
-//#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
+module S = Spec.P256
+module SD = Spec.ECDSA
 
-val reduction_prime_2prime_order: x:felem -> result:felem -> Stack unit
-  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result == as_nat h0 x % S.order)
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
+
+val qmod_short: x:felem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == as_nat h0 x % S.order)
 
 
 noextract

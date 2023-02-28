@@ -9,13 +9,11 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Felem
-open Hacl.Spec.P256.MontgomeryMultiplication
-
 open Hacl.Impl.P256.SolinasReduction
 open Hacl.Impl.P256.Bignum
-open Hacl.Impl.P256.Field
 
 module S = Spec.P256
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -26,7 +24,7 @@ val toDomain: f:felem -> res:felem -> Stack unit
     live h f /\live h res /\ eq_or_disjoint f res /\
     as_nat h f < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = toDomain_ (as_nat h0 f))
+    as_nat h1 res = SM.toDomain_ (as_nat h0 f))
 
 let toDomain f res =
   push_frame ();

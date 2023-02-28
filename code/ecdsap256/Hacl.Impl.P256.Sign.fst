@@ -66,7 +66,7 @@ let ecdsa_signature_step12 alg mLen m result =
 
   let h1 = ST.get() in
 
-  reduction_prime_2prime_order result result;
+  qmod_short result result;
 
   lemma_core_0 result h1;
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
@@ -104,7 +104,7 @@ let ecdsa_signature_step45 x k tempBuffer =
     let tempForNorm = sub tempBuffer (size 0) (size 88) in
     secretToPublicWithoutNorm result k tempBuffer;
     normX result x tempForNorm;
-    reduction_prime_2prime_order x x;
+    qmod_short x x;
   pop_frame();
     bn_is_zero_mask4 x
 

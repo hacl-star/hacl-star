@@ -1,26 +1,27 @@
 module Hacl.Impl.P256.Scalar
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open FStar.Mul
-open FStar.Math.Lemmas
-open FStar.Tactics
-open FStar.Tactics.Canon
-
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.IntTypes.Intrinsics
 
-open Hacl.Spec.P256.Lemmas
-
+open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
+module SL = Hacl.Spec.P256.Lemmas
 
-#reset-options "--z3rlimit 200 --fuel 0 --ifuel 0"
+// TODO: rm
+open FStar.Math.Lemmas
+open FStar.Tactics
+open FStar.Tactics.Canon
+open Lib.IntTypes.Intrinsics
+
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
@@ -34,7 +35,7 @@ let add8_without_carry1 t t1 result  =
 
 
 val lemma_montgomery_mult_1: t : int  ->
-  k0:nat {k0 = min_one_prime (pow2 64) (- S.order)} ->
+  k0:nat {k0 = SL.min_one_prime (pow2 64) (- S.order)} ->
   r: nat {t <= r} ->
   Lemma ((t + (((t % pow2 64) * k0) % pow2 64 * S.order)) / pow2 64 <= (pow2 64 * S.order + r) / pow2 64)
 
@@ -42,13 +43,13 @@ let lemma_montgomery_mult_1 t k0 r =
   let t1 = t % pow2 64 in
   let y = (t1 * k0) % pow2 64 in
   let t2 = y * S.order in
-    mul_lemma_1 y (pow2 64) S.order
+    SL.mul_lemma_1 y (pow2 64) S.order
 
 
 val lemma_montgomery_mult_result_less_than_order:
   a: nat{a < S.order} ->
   b: nat{b < S.order} ->
-  k0:nat {k0 = min_one_prime (pow2 64) (- S.order)} ->
+  k0:nat {k0 = SL.min_one_prime (pow2 64) (- S.order)} ->
   Lemma
   (
     let t = a * b in
@@ -83,7 +84,7 @@ val lemma_montgomery_mult_result_less_than_order:
 let lemma_montgomery_mult_result_less_than_order a b k0 =
   let t = a * b in
   let s = 64 in
-    mul_lemma_ a b S.order;
+    SL.mul_lemma_ a b S.order;
 
   let r = S.order * S.order + 1 in
 
@@ -149,13 +150,13 @@ let lemma_montgomery_mod_inverse_addition2 a =
 
 val montgomery_multiplication_one_round_proof:
   t: nat ->
-  k0: nat {k0 = min_one_prime (pow2 64) (- S.order)}  ->
+  k0: nat {k0 = SL.min_one_prime (pow2 64) (- S.order)}  ->
   round: nat {round = (t + S.order * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64} ->
   co: nat {co % S.order = t % S.order} ->
   Lemma (round  % S.order == co * (S.modp_inv2_prime (pow2 64) S.order) % S.order)
 
 let montgomery_multiplication_one_round_proof t k0 round co =
-  mult_one_round_ecdsa_prime t S.order co k0
+  SL.mult_one_round_ecdsa_prime t S.order co k0
 
 #reset-options "--z3rlimit 700"
 
@@ -202,7 +203,7 @@ let montgomery_multiplication_round t round k0 =
 
 val montgomery_multiplication_round_twice: t: widefelem -> result: widefelem -> k0: uint64->
   Stack unit
-    (requires fun h -> live h t /\ live h result /\ uint_v k0 = min_one_prime (pow2 64) (- S.order) /\
+    (requires fun h -> live h t /\ live h result /\ uint_v k0 = SL.min_one_prime (pow2 64) (- S.order) /\
       wide_as_nat h t < S.order * S.order)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
       wide_as_nat h1 result % S.order == (wide_as_nat h0 t * S.modp_inv2_prime (pow2 128) S.order) % S.order /\
@@ -283,7 +284,7 @@ let lemma_reduction1 a r =
   assert_norm (pow2 256 - S.order < S.order)
 
 
-let reduction_prime_2prime_order x result  =
+let qmod_short x result  =
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in
     recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
@@ -300,10 +301,10 @@ let reduction_prime_2prime_order x result  =
 
 
 inline_for_extraction noextract
-val upload_k0: unit ->  Tot (r: uint64 {uint_v r == min_one_prime (pow2 64) (- S.order)})
+val upload_k0: unit ->  Tot (r: uint64 {uint_v r == SL.min_one_prime (pow2 64) (- S.order)})
 
 let upload_k0 () =
-  assert_norm(min_one_prime (pow2 64) (- S.order) == 14758798090332847183);
+  assert_norm(SL.min_one_prime (pow2 64) (- S.order) == 14758798090332847183);
   (u64 14758798090332847183)
 
 
@@ -376,7 +377,7 @@ let montgomery_multiplication_ecdsa_module a b result =
       let h0 = ST.get() in
     bn_mul4 a b t;
       assert_by_tactic (as_nat h0 b * as_nat h0 a == as_nat h0 a * as_nat h0 b) canon;
-      mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.order;
+      SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.order;
    montgomery_multiplication_round_twice t round2 k0;
      let h2 = ST.get() in
    montgomery_multiplication_round_twice round2 round4 k0;

@@ -122,7 +122,7 @@ let ecdsa_verification_step23 alg mLen m result =
   let cutHash = sub mHash (size 0) (size 32) in
   bn_from_bytes_be4 cutHash result;
   let h1 = ST.get() in
-  reduction_prime_2prime_order result result;
+  qmod_short result result;
 
     lemma_core_0 result h1;
     Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
@@ -465,7 +465,7 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   let resultIsPAI = isPointAtInfinityPublic pointSum in
   let xCoordinateSum = sub pointSum (size 0) (size 4) in
   copy x xCoordinateSum;
-  reduction_prime_2prime_order x x;
+  qmod_short x x;
   pop_frame();
   not resultIsPAI
 
