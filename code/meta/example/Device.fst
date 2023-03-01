@@ -303,63 +303,43 @@ assume val enc : ckey -> bytes -> bytes
 [@Meta.Attribute.specialize]
 assume val dec : ckey -> bytes -> option bytes
 
-(*assume val  (pid : pid_t) =
-  pid ->
-  dv:ll (pid * ckey) ->
-  bytes ->
-  Stack (option bytes)
-    (requires (fun h0 -> ll_inv h0 dv))
-    (ensures (fun _ _ _ -> True))
-
-inline_for_extraction noextract
-type recv_t (pid : pid_t) =
-  pid ->
-  dv:ll (pid * ckey) ->
-  bytes ->
-  Stack (option bytes)
-    (requires (fun h0 -> ll_inv h0 dv))
-    (ensures (fun _ _ _ -> True))*)
-
-(*inline_for_extraction noextract
-noeq type device = {
-  pid : Type;
-  send : send_t pid;
-  recv : recv_t pid;
-}
-
-noeq type cipher = {
-  enc : ckey -> bytes -> bytes;
-  dec : ckey -> bytes -> option bytes;
-}*)
-
 [@Meta.Attribute.specialize]
-let send (#pid : pid_t)
-  (k:pid)
-  (dv:ll (pid * ckey))
-  (plain:bytes) :
+let send : (#pid : pid_t) ->
+  (k:pid) ->
+  (dv:ll (pid * ckey)) ->
+  (plain:bytes) ->
   Stack (option bytes)
     (requires (fun h0 -> ll_inv h0 dv))
     (ensures (fun _ _ _ -> True))
-  =
+  = fun #pid k dv plain ->
   match find_peer #pid k dv with
   | None -> None
   | Some sk -> Some (enc sk plain)
 
 [@Meta.Attribute.specialize]
-let recv (#pid : pid_t)
-  (k:pid)
-  (dv:ll (pid * ckey))
-  (cipher:bytes) :
+let recv : (#pid : pid_t) ->
+  (k:pid) ->
+  (dv:ll (pid * ckey)) ->
+  (cipher:bytes) ->
   Stack (option bytes)
     (requires (fun h0 -> ll_inv h0 dv))
     (ensures (fun _ _ _ -> True))
-  =
+  = fun #pid k dv cipher ->
   match find_peer #pid k dv with
   | None -> None
   | Some sk -> dec sk cipher
 
-#set-options "--query_stats --log_queries"
-%splice [ ] (Meta.Interface.specialize (`pid_t) [
-  `send
-//  `recv
+%splice [ device_send_higher; device_recv_higher ] (Meta.Interface.specialize (`pid_t) [
+  `send;
+  `recv
 ])
+
+(* Using identity for encryption/decryption for presentation purposes.
+
+   In practice, any function from Spec.* in Hacl* would do.
+ *)
+let id_enc (k : ckey) (plain : bytes) = plain
+let id_dec (k : ckey) (cipher : bytes) = Some cipher
+
+let isend = device_send_higher #string True id_enc ifind
+let irecv = device_recv_higher #string True id_dec ifind
