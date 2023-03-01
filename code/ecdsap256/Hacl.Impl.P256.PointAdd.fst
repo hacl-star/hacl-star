@@ -194,7 +194,7 @@ let computeX3_point_add x3 hCube uh r tempBuffer =
     let h1 = ST.get() in
   fsub rSquare hCube rH;
     let h2 = ST.get() in
-  fmul_by_2 uh twoUh;
+  fdouble uh twoUh;
     let h3 = ST.get() in
   fsub rH twoUh x3;
 

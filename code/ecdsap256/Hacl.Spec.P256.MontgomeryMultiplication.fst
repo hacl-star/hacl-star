@@ -25,7 +25,6 @@ val lemmaToDomain: a:int -> Lemma (toDomain_ a == a * mont_R % S.prime)
 let lemmaToDomain a = ()
 
 val lemmaToDomainAndBackIsTheSame: a:S.felem -> Lemma (fromDomain_ (toDomain_ a) == a)
-  [SMTPat (fromDomain_ (toDomain_ a))]
 let lemmaToDomainAndBackIsTheSame a =
   calc (==) {
     fromDomain_ (toDomain_ a); // == a
@@ -74,74 +73,69 @@ let inDomain_mod_is_not_mod a =
   }
 
 
-val multiplicationInDomainNat: #k:S.felem -> #l:S.felem
-  -> a:S.felem{a == toDomain_ k}
-  -> b:S.felem{b == toDomain_ l} ->
-  Lemma (a * b * mont_R_inv % S.prime == toDomain_ (k * l))
+val fmont_mul_lemma: a:S.felem -> b:S.felem ->
+  Lemma (S.fmul (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a * b * mont_R_inv) % S.prime))
 
-let multiplicationInDomainNat #k #l a b =
-  // a = k * mont_R % S.prime = toDomain_ k
-  // b = l * mont_R % S.prime = toDomain_ l
+let fmont_mul_lemma a b =
   calc (==) {
-    a * b * mont_R_inv % S.prime; // == toDomain_ (k * l)
+    (fromDomain_ a * fromDomain_ b) % S.prime;
     (==) { }
-    a * (l * mont_R % S.prime) * mont_R_inv % S.prime;
-    (==) { Math.Lemmas.paren_mul_right a (l * mont_R % S.prime) mont_R_inv }
-    a * ((l * mont_R % S.prime) * mont_R_inv) % S.prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r a ((l * mont_R % S.prime) * mont_R_inv) S.prime }
-    a * ((l * mont_R % S.prime) * mont_R_inv % S.prime) % S.prime;
-    (==) { lemmaToDomainAndBackIsTheSame l }
-    (k * mont_R % S.prime) * l % S.prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (k * mont_R) l S.prime }
-    (k * mont_R) * l % S.prime;
-    (==) { Math.Lemmas.paren_mul_right k mont_R l;
-      Math.Lemmas.swap_mul mont_R l;
-      Math.Lemmas.paren_mul_right k l mont_R }
-    (k * l) * mont_R % S.prime;
-    (==) { }
-    toDomain_ (k * l);
+    ((a * mont_R_inv % S.prime) * (b * mont_R_inv % S.prime)) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l
+      (a * mont_R_inv) (b * mont_R_inv % S.prime) S.prime }
+    (a * mont_R_inv * (b * mont_R_inv % S.prime)) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a * mont_R_inv) (b * mont_R_inv) S.prime }
+    (a * mont_R_inv * (b * mont_R_inv)) % S.prime;
+    (==) { Math.Lemmas.paren_mul_right a mont_R_inv (b * mont_R_inv) }
+    (a * (mont_R_inv * (b * mont_R_inv))) % S.prime;
+    (==) { Math.Lemmas.paren_mul_right mont_R_inv b mont_R_inv }
+    (a * (mont_R_inv * b * mont_R_inv)) % S.prime;
+    (==) { Math.Lemmas.swap_mul mont_R_inv b }
+    (a * (b * mont_R_inv * mont_R_inv)) % S.prime;
+    (==) { Math.Lemmas.paren_mul_right a (b * mont_R_inv) mont_R_inv }
+    (a * (b * mont_R_inv) * mont_R_inv) % S.prime;
+    (==) { Math.Lemmas.paren_mul_right a b mont_R_inv }
+    (a * b * mont_R_inv * mont_R_inv) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * b * mont_R_inv) mont_R_inv S.prime }
+    fromDomain_ ((a * b * mont_R_inv) % S.prime);
   }
 
 
-val additionInDomain: a:S.felem -> b:S.felem ->
-  Lemma ((a + b) % S.prime == toDomain_ (fromDomain_ a + fromDomain_ b))
+val fmont_add_lemma: a:S.felem -> b:S.felem ->
+  Lemma (S.fadd (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a + b) % S.prime))
 
-let additionInDomain a b =
-  let k = fromDomain_ a in
-  let l = fromDomain_ b in
+let fmont_add_lemma a b =
   calc (==) {
-    (a + b) % S.prime;
-    (==) { lemmaFromDomainToDomain a; lemmaFromDomainToDomain b }
-    (toDomain_ k + toDomain_ l) % S.prime;
+    (fromDomain_ a + fromDomain_ b) % S.prime;
     (==) { }
-    (k * mont_R % S.prime + l * mont_R % S.prime) % S.prime;
-    (==) { Math.Lemmas.modulo_distributivity (k * mont_R) (l * mont_R) S.prime }
-    (k * mont_R + l * mont_R) % S.prime;
-    (==) { Math.Lemmas.distributivity_add_left k l mont_R }
-    ((k + l) * mont_R) % S.prime;
+    (a * mont_R_inv % S.prime + b * mont_R_inv % S.prime) % S.prime;
+    (==) { Math.Lemmas.modulo_distributivity (a * mont_R_inv) (b * mont_R_inv) S.prime }
+    (a * mont_R_inv + b * mont_R_inv) % S.prime;
+    (==) { Math.Lemmas.distributivity_add_left a b mont_R_inv }
+    (a + b) * mont_R_inv % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a + b) mont_R_inv S.prime }
+    (a + b) % S.prime * mont_R_inv % S.prime;
     (==) { }
-    toDomain_ (fromDomain_ a + fromDomain_ b);
+    fromDomain_ ((a + b) % S.prime);
   }
 
 
-val substractionInDomain: a:S.felem -> b:S.felem ->
-  Lemma ((a - b) % S.prime == toDomain_ (fromDomain_ a - fromDomain_ b))
+val fmont_sub_lemma: a:S.felem -> b:S.felem ->
+  Lemma (S.fsub (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a - b) % S.prime))
 
-let substractionInDomain a b =
-  let k = fromDomain_ a in
-  let l = fromDomain_ b in
+let fmont_sub_lemma a b =
   calc (==) {
-    (a - b) % S.prime;
-    (==) { lemmaFromDomainToDomain a; lemmaFromDomainToDomain b }
-    (toDomain_ k - toDomain_ l) % S.prime;
+    (fromDomain_ a - fromDomain_ b) % S.prime;
     (==) { }
-    (k * mont_R % S.prime - l * mont_R % S.prime) % S.prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (k * mont_R % S.prime) (l * mont_R) S.prime }
-    (k * mont_R % S.prime - l * mont_R) % S.prime;
-    (==) { Math.Lemmas.lemma_mod_add_distr (-(l * mont_R)) (k * mont_R) S.prime }
-    (k * mont_R - l * mont_R) % S.prime;
-    (==) { Math.Lemmas.distributivity_sub_left k l mont_R }
-    ((k - l) * mont_R) % S.prime;
+    (a * mont_R_inv % S.prime - b * mont_R_inv % S.prime) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_sub_distr (a * mont_R_inv % S.prime) (b * mont_R_inv) S.prime }
+    (a * mont_R_inv % S.prime - b * mont_R_inv) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l (a * mont_R_inv) (- b * mont_R_inv) S.prime }
+    (a * mont_R_inv - b * mont_R_inv) % S.prime;
+    (==) { Math.Lemmas.distributivity_sub_left a b mont_R_inv }
+    (a - b) * mont_R_inv % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a - b) mont_R_inv S.prime }
+    (a - b) % S.prime * mont_R_inv % S.prime;
     (==) { }
-    toDomain_ (fromDomain_ a - fromDomain_ b);
+    fromDomain_ ((a - b) % S.prime);
   }

@@ -143,9 +143,8 @@ let fadd x y res =
   bn_add_mod4 x y n res;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime);
-  pop_frame ();
-  SM.additionInDomain (as_nat h0 x) (as_nat h0 y);
-  SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 x) + SM.fromDomain_ (as_nat h0 y))
+  SM.fmont_add_lemma (as_nat h0 x) (as_nat h0 y);
+  pop_frame ()
 
 
 let fdouble x out =
@@ -161,9 +160,8 @@ let fsub x y res =
   bn_sub_mod4 x y n res;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
-  pop_frame ();
-  SM.substractionInDomain (as_nat h0 x) (as_nat h0 y);
-  SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 x) - SM.fromDomain_ (as_nat h0 y))
+  SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
+  pop_frame ()
 
 
 [@CInline]
@@ -192,11 +190,7 @@ let fmul a b res =
   let h1 = ST.get () in
   SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.prime;
   mont_reduction t res;
-  SM.lemmaFromDomainToDomain (as_nat h0 a);
-  SM.lemmaFromDomainToDomain (as_nat h0 b);
-  SM.multiplicationInDomainNat
-    #(SM.fromDomain_ (as_nat h0 a)) #(SM.fromDomain_ (as_nat h0 b)) (as_nat h0 a) (as_nat h0 b);
-  SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 a) * SM.fromDomain_ (as_nat h0 b));
+  SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 b);
   pop_frame ()
 
 
@@ -209,60 +203,44 @@ let fsqr a res =
   let h1 = ST.get() in
   SL.mul_lemma_ (as_nat h0 a) (as_nat h0 a) S.prime;
   mont_reduction t res;
-  SM.lemmaFromDomainToDomain (as_nat h0 a);
-  SM.multiplicationInDomainNat
-    #(SM.fromDomain_ (as_nat h0 a)) #(SM.fromDomain_ (as_nat h0 a)) (as_nat h0 a) (as_nat h0 a);
-  SM.inDomain_mod_is_not_mod (SM.fromDomain_ (as_nat h0 a) * SM.fromDomain_ (as_nat h0 a));
+  SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 a);
   pop_frame ()
 
 //----------------------------------------------
 
 [@CInline]
-let fcube a result =
+let fcube a res =
+  fsqr a res;
+  fmul res a res
+
+
+[@CInline]
+let fmul_by_3 a res =
   let h0 = ST.get () in
-  fsqr a result;
-  fmul result a result;
+  fdouble a res;
   let h1 = ST.get () in
-  Math.Lemmas.lemma_mod_mul_distr_l
-    (SM.fromDomain_ (as_nat h0 a) * SM.fromDomain_ (as_nat h0 a))
-    (SM.fromDomain_ (as_nat h0 a)) S.prime;
-  SM.inDomain_mod_is_not_mod
-    (SM.fromDomain_ (as_nat h0 a) * SM.fromDomain_ (as_nat h0 a) * SM.fromDomain_ (as_nat h0 a))
-
-
-let fmul_by_2 a out =
-  let h0 = ST.get () in
-  fadd a a out;
-  SM.inDomain_mod_is_not_mod (2 * SM.fromDomain_ (as_nat h0 a))
+  fadd a res res;
+  let h2 = ST.get () in
+  assert (fmont_as_nat h1 res == (2 * fmont_as_nat h0 a) % S.prime);
+  assert (fmont_as_nat h2 res == (fmont_as_nat h0 a + fmont_as_nat h1 res) % S.prime);
+  Math.Lemmas.lemma_mod_plus_distr_r (fmont_as_nat h0 a) (2 * fmont_as_nat h0 a) S.prime
 
 
 [@CInline]
-let fmul_by_3 a result =
+let fmul_by_4 a res  =
   let h0 = ST.get () in
-  fmul_by_2 a result;
+  fdouble a res;
+  fdouble res res;
+  Math.Lemmas.modulo_distributivity (2 * fmont_as_nat h0 a) (2 * fmont_as_nat h0 a) S.prime
+
+
+[@CInline]
+let fmul_by_8 a res  =
+  let h0 = ST.get () in
+  fmul_by_4 a res;
   let h1 = ST.get () in
-  assert (as_nat h1 result == SM.toDomain_ (2 * SM.fromDomain_ (as_nat h0 a) % S.prime));
-  fadd a result result;
-  let h2 = ST.get() in
-  Math.Lemmas.lemma_mod_add_distr (SM.fromDomain_ (as_nat h0 a)) (2 * SM.fromDomain_ (as_nat h0 a)) S.prime;
-  SM.inDomain_mod_is_not_mod (3 * SM.fromDomain_ (as_nat h0 a))
-
-
-[@CInline]
-let fmul_by_4 a result  =
-  let h0 = ST.get() in
-  fmul_by_2 a result;
-  fmul_by_2 result result;
-  Math.Lemmas.lemma_mod_mul_distr_r 2 (2 * SM.fromDomain_ (as_nat h0 a)) S.prime;
-  SL.lemma_brackets 2 2 (SM.fromDomain_ (as_nat h0 a));
-  SM.inDomain_mod_is_not_mod (4 * SM.fromDomain_ (as_nat h0 a))
-
-
-[@CInline]
-let fmul_by_8 a result  =
-  let h0 = ST.get() in
-  fmul_by_4 a result;
-  fmul_by_2 result result;
-  Math.Lemmas.lemma_mod_mul_distr_r 2 (4 * SM.fromDomain_ (as_nat h0 a)) S.prime;
-  SL.lemma_brackets 2 4 (SM.fromDomain_ (as_nat h0 a));
-  SM.inDomain_mod_is_not_mod (8 * SM.fromDomain_ (as_nat h0 a))
+  fdouble res res;
+  let h2 = ST.get () in
+  assert (fmont_as_nat h1 res == (4 * fmont_as_nat h0 a) % S.prime);
+  assert (fmont_as_nat h2 res == (2 * fmont_as_nat h1 res) % S.prime);
+  Math.Lemmas.lemma_mod_mul_distr_r 2 (4 * fmont_as_nat h0 a) S.prime

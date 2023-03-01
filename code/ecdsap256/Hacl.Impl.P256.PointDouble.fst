@@ -316,7 +316,7 @@ let point_double_x3 x3 alpha fourBeta beta eightBeta  =
     let h0 = ST.get() in
   fsqr alpha x3; (* x3 = alpha ** 2 *)
   fmul_by_4 beta fourBeta; (*  fourBeta = beta * 4 *)
-  fmul_by_2 fourBeta eightBeta; (* eightBeta = beta * 8 *)
+  fdouble fourBeta eightBeta; (* eightBeta = beta * 8 *)
   fsub x3 eightBeta x3 (* x3 = alpha ** 2 - beta * 8 *);
 
   calc(==)
