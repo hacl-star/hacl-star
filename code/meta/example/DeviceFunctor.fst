@@ -1,4 +1,4 @@
-module Device
+module DeviceFunctor
 
 module B = LowStar.Buffer
 module HS = FStar.HyperStack
@@ -9,7 +9,7 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.ST
 open LowStar.BufferOps
 
-#set-options "--z3rlimit 100 --fuel 1 --ifuel 1 --__no_positivity --record_options --split_queries"
+#set-options "--z3rlimit 25 --fuel 1 --ifuel 1 --__no_positivity"
 
 (*** Linked lists *)
 noeq
@@ -136,10 +136,10 @@ noeq type map (a : Type) = {
 }
 
 inline_for_extraction noextract
-noeq type eq_index = {
-  k: Type0;
-  t: Type0
-} 
+noeq type eq_type = {
+  t : Type;
+  eq : t -> t -> bool;
+}
 
 /// Auxiliary definitions
 inline_for_extraction
@@ -169,19 +169,13 @@ let upd
                           B.as_seq h' b == Seq.upd (B.as_seq h b) 0 v))
   = B.upd b 0ul v
 
-[@Meta.Attribute.specialize]
-assume val eq: #i:eq_index -> i.k -> i.k -> bool
-
 (** Auxiliary definition for [find] *)
 inline_for_extraction noextract
-[@Meta.Attribute.specialize]
-let find (#i : eq_index) (x : i.k) (ls : ll (i.k * i.t)) :
-  Stack (option i.t)
+let mk_find (e : eq_type) (a : Type) (x : e.t) (ls : ll (e.t * a)) :
+  Stack (option a)
   (requires (fun h0 -> ll_inv h0 ls))
   (ensures (fun h0 _ h1 -> True))
   =
-  (**) let h00 = ST.get () in
-  (**) assert (B.loc_in (footprint h00 ls) h00);
   (* Push a new frame for stack allocation *)
   push_frame ();
   (* Stack allocation *)
@@ -231,7 +225,7 @@ let find (#i : eq_index) (x : i.k) (ls : ll (i.k * i.t)) :
       let { data=data; next=tl } = !* ls in
       let (x', _) = data in
       (* Check the key *)
-      if eq x x' then
+      if e.eq x x' then
         (* Found: exit the loop *)
         upd b false
       else
@@ -256,12 +250,10 @@ let find (#i : eq_index) (x : i.k) (ls : ll (i.k * i.t)) :
         end
       end
   in
-  (**) let h01 = ST.get () in
-  (**) assert (footprint h01 ls == footprint h00 ls);
   C.Loops.while #test_pre #test_post test body;
   (* Retrieve the found element, if there is *)
   let ls = !* lsp in
-  let o: option i.t =
+  let o: option a =
     if B.is_null ls then
       None
     else
@@ -276,71 +268,64 @@ let find (#i : eq_index) (x : i.k) (ls : ll (i.k * i.t)) :
   (* Return *)
   o
 
-%splice [ device_find_higher ] (Meta.Interface.specialize (`eq_index) [
-  `find
-])
+inline_for_extraction noextract
+let mk_map (e : eq_type) (a : Type) : m:map a{m.k == e.t} = {
+  k = e.t;
+  find = mk_find e a;
+}
 
 (*** Map Instantiation *)
+inline_for_extraction noextract
+let string_eq_type = {
+  t = string;
+  eq = (fun x y -> x = y); // In the paper: String.eq
+}
+
+let find_s = (mk_map string_eq_type int).find
+
+(*** Device *)
 type bytes = Seq.seq FStar.UInt8.t
 type ckey = Seq.seq FStar.UInt8.t
 
-let i:eq_index = { k=string; t=ckey}
-let ifind = device_find_higher #i True (=)
-
-(*** Device *)
-
-let pid_t = Type0
-
-[@Meta.Attribute.specialize]
-assume val find_peer : #pid:pid_t -> k:pid -> dv:ll (pid * ckey) ->
-  Stack (option ckey)
-    (requires (fun h0 -> ll_inv h0 dv))
-    (ensures (fun h0 _ h1 -> True))
-
-[@Meta.Attribute.specialize]
-assume val enc : ckey -> bytes -> bytes
-
-[@Meta.Attribute.specialize]
-assume val dec : ckey -> bytes -> option bytes
-
-[@Meta.Attribute.specialize]
-let send : (#pid : pid_t) ->
-  (k:pid) ->
-  (dv:ll (pid * ckey)) ->
-  (plain:bytes) ->
+inline_for_extraction noextract
+type send_t (pid : Type0) =
+  pid ->
+  dv:ll (pid * ckey) ->
+  bytes ->
   Stack (option bytes)
     (requires (fun h0 -> ll_inv h0 dv))
     (ensures (fun _ _ _ -> True))
-  = fun #pid k dv plain ->
-  match find_peer #pid k dv with
-  | None -> None
-  | Some sk -> Some (enc sk plain)
 
-[@Meta.Attribute.specialize]
-let recv : (#pid : pid_t) ->
-  (k:pid) ->
-  (dv:ll (pid * ckey)) ->
-  (cipher:bytes) ->
+inline_for_extraction noextract
+type recv_t (pid : Type0) =
+  pid ->
+  dv:ll (pid * ckey) ->
+  bytes ->
   Stack (option bytes)
     (requires (fun h0 -> ll_inv h0 dv))
     (ensures (fun _ _ _ -> True))
-  = fun #pid k dv cipher ->
-  match find_peer #pid k dv with
-  | None -> None
-  | Some sk -> dec sk cipher
 
-%splice [ device_send_higher; device_recv_higher ] (Meta.Interface.specialize (`pid_t) [
-  `send;
-  `recv
-])
+inline_for_extraction noextract
+noeq type device = {
+  pid : Type;
+  send : send_t pid;
+  recv : recv_t pid;
+}
 
-(*** Device Instantiation *)
-(* Using identity for encryption/decryption for presentation purposes.
+noeq type cipher = {
+  enc : ckey -> bytes -> bytes;
+  dec : ckey -> bytes -> option bytes;
+}
 
-   In practice, any function from Spec.* in Hacl* would do.
- *)
-let id_enc (k : ckey) (plain : bytes) = plain
-let id_dec (k : ckey) (cipher : bytes) = Some cipher
-
-let isend = device_send_higher #string True id_enc ifind
-let irecv = device_recv_higher #string True id_dec ifind
+let mk_device (m : map ckey) (c : cipher) :
+  d:device{d.pid == m.k} = {
+  pid = m.k;
+  send = (fun pid dv plain ->
+    match m.find pid dv with
+    | None -> None
+    | Some sk -> Some (c.enc sk plain));
+  recv = (fun pid dv secret ->
+    match m.find pid dv with
+    | None -> None
+    | Some sk -> c.dec sk secret)
+}
