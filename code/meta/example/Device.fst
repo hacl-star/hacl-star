@@ -9,7 +9,7 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.ST
 open LowStar.BufferOps
 
-#set-options "--z3rlimit 25 --fuel 1 --ifuel 1 --__no_positivity"
+#set-options "--z3rlimit 100 --fuel 1 --ifuel 1 --__no_positivity --record_options --split_queries"
 
 (*** Linked lists *)
 noeq
@@ -180,6 +180,8 @@ let find (#i : eq_index) (x : i.k) (ls : ll (i.k * i.t)) :
   (requires (fun h0 -> ll_inv h0 ls))
   (ensures (fun h0 _ h1 -> True))
   =
+  (**) let h00 = ST.get () in
+  (**) assert (B.loc_in (footprint h00 ls) h00);
   (* Push a new frame for stack allocation *)
   push_frame ();
   (* Stack allocation *)
@@ -254,6 +256,8 @@ let find (#i : eq_index) (x : i.k) (ls : ll (i.k * i.t)) :
         end
       end
   in
+  (**) let h01 = ST.get () in
+  (**) assert (footprint h01 ls == footprint h00 ls);
   C.Loops.while #test_pre #test_post test body;
   (* Retrieve the found element, if there is *)
   let ls = !* lsp in
@@ -272,334 +276,34 @@ let find (#i : eq_index) (x : i.k) (ls : ll (i.k * i.t)) :
   (* Return *)
   o
 
-#set-options "--print_implicits --print_effect_args"
-
-let device_find_higher_t: #i: Device.eq_index -> p: Type0 -> Prims.Tot Type0 = fun #i p ->
-  x: Mkeq_index?.k i -> ls: Device.ll (Mkeq_index?.k i * Mkeq_index?.t i)
-    -> FStar.HyperStack.ST.Stack (FStar.Pervasives.Native.option (Mkeq_index?.t i))
-        (fun h0 -> Prims.l_and p (Device.ll_inv #(Mkeq_index?.k i * Mkeq_index?.t i) h0 ls))
-        (fun _ _ _ -> Prims.l_True)
-
-let device_find_higher:
-
-    #i: Device.eq_index ->
-    p: Type0 ->
-    arg_Device_eq:
-      (fun #i _ -> _: Mkeq_index?.k i -> _: Mkeq_index?.k i -> Prims.Tot Prims.bool) #i p
-  -> Prims.Tot (Device.device_find_higher_t #i p)
-=
-fun #i _ arg_Device_eq x ls ->
-  (let _ = FStar.HyperStack.ST.push_frame () in
-    let lsp =
-      Device.alloc #(Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i)))
-        (Mkll?.l #(Mkeq_index?.k i (Mkeq_index?.t i)) ls)
-    in
-    let glsp =
-      Device.alloc #(FStar.Ghost.erased (Prims.list (Mkeq_index?.k i (Mkeq_index?.t i))))
-        (Mkll?.elems #(Mkeq_index?.k i (Mkeq_index?.t i)) ls)
-    in
-    let b = Device.alloc #Prims.bool true in
-    let inv h =
-      let l =
-        LowStar.Monotonic.Buffer.deref #(Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i)))
-          #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i))))
-          #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i))))
-          h
-          lsp
-      in
-      let elems =
-        FStar.Ghost.reveal #(Prims.list (Mkeq_index?.k i (Mkeq_index?.t i)))
-          (LowStar.Monotonic.Buffer.deref #(FStar.Ghost.erased (Prims.list (Mkeq_index?.k i
-                          (Mkeq_index?.t i))))
-              #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k i
-                              (Mkeq_index?.t i)))))
-              #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k i
-                              (Mkeq_index?.t i)))))
-              h
-              glsp)
-      in
-      Prims.l_and (Prims.l_and (Prims.l_and (Prims.l_and (Prims.l_and (Prims.l_and (Prims.l_and (Device.ll_wf
-                                    #(Mkeq_index?.k i (Mkeq_index?.t i))
-                                    h
-                                    l
-                                    elems)
-                                (LowStar.Monotonic.Buffer.live #(Device.ll_ (Mkeq_index?.k i
-                                            (Mkeq_index?.t i)))
-                                    #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                                (Mkeq_index?.t i))))
-                                    #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                                (Mkeq_index?.t i))))
-                                    h
-                                    lsp))
-                            (LowStar.Monotonic.Buffer.live #(FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                            i
-                                            (Mkeq_index?.t i))))
-                                #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                                i
-                                                (Mkeq_index?.t i)))))
-                                #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                                i
-                                                (Mkeq_index?.t i)))))
-                                h
-                                glsp))
-                        (LowStar.Monotonic.Buffer.live #Prims.bool
-                            #(LowStar.Buffer.trivial_preorder Prims.bool)
-                            #(LowStar.Buffer.trivial_preorder Prims.bool)
-                            h
-                            b))
-                    (LowStar.Monotonic.Buffer.loc_disjoint (Device.footprint_ #(Mkeq_index?.k i
-                                (Mkeq_index?.t i))
-                            h
-                            l
-                            elems)
-                        (LowStar.Monotonic.Buffer.loc_buffer #(Device.ll_ (Mkeq_index?.k i
-                                    (Mkeq_index?.t i)))
-                            #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                        (Mkeq_index?.t i))))
-                            #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                        (Mkeq_index?.t i))))
-                            lsp)))
-                (LowStar.Monotonic.Buffer.loc_disjoint (Device.footprint_ #(Mkeq_index?.k i
-                            (Mkeq_index?.t i))
-                        h
-                        l
-                        elems)
-                    (LowStar.Monotonic.Buffer.loc_buffer #(FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                    i
-                                    (Mkeq_index?.t i))))
-                        #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                        i
-                                        (Mkeq_index?.t i)))))
-                        #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                        i
-                                        (Mkeq_index?.t i)))))
-                        glsp)))
-            (LowStar.Monotonic.Buffer.loc_disjoint (Device.footprint_ #(Mkeq_index?.k i
-                        (Mkeq_index?.t i))
-                    h
-                    l
-                    elems)
-                (LowStar.Monotonic.Buffer.loc_buffer #Prims.bool
-                    #(LowStar.Buffer.trivial_preorder Prims.bool)
-                    #(LowStar.Buffer.trivial_preorder Prims.bool)
-                    b)))
-        Prims.l_True
-    in
-    let test_pre h0 = inv h0 in
-    let test_post x h1 =
-      Prims.l_and (inv h1)
-        (Prims.b2t (Prims.op_Equality #Prims.bool
-                x
-                (LowStar.Monotonic.Buffer.deref #Prims.bool
-                    #(LowStar.Buffer.trivial_preorder Prims.bool)
-                    #(LowStar.Buffer.trivial_preorder Prims.bool)
-                    h1
-                    b)))
-    in
-    [@@ FStar.Pervasives.inline_let ]let test _ =
-      !*Prims.bool #(LowStar.Buffer.trivial_preorder Prims.bool)
-        #(LowStar.Buffer.trivial_preorder Prims.bool)
-        b
-      <:
-      FStar.HyperStack.ST.Stack Prims.bool test_pre (fun _ b h1 -> test_post b h1)
-    in
-    [@@ FStar.Pervasives.inline_let ]let body _ =
-      (let h0 = FStar.HyperStack.ST.get () in
-        let ls =
-          !*(Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i))) #(LowStar.Buffer.trivial_preorder (Device.ll_
-                    (Mkeq_index?.k i (Mkeq_index?.t i))))
-            #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i))))
-            lsp
-        in
-        let _ =
-          LowStar.Monotonic.Buffer.is_null #(Device.cell (Mkeq_index?.k i (Mkeq_index?.t i)))
-            #(LowStar.Buffer.trivial_preorder (Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))))
-            #(LowStar.Buffer.trivial_preorder (Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))))
-            ls
-          <:
-          Prims.bool
-        in
-        (if _
-          then
-            Device.upd #Prims.bool
-              #(LowStar.Buffer.trivial_preorder Prims.bool)
-              #(LowStar.Buffer.trivial_preorder Prims.bool)
-              b
-              false
-          else
-            let _ =
-              !*(Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))) #(LowStar.Buffer.trivial_preorder (
-                      Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))))
-                #(LowStar.Buffer.trivial_preorder (Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))))
-                ls
-            in
-            (let { next = tl ; data = data } = _ in
-              let _ = data in
-              (let FStar.Pervasives.Native.Mktuple2 #_ #_ x' _ = _ in
-                (if arg_Device_eq x x'
-                  then
-                    Device.upd #Prims.bool
-                      #(LowStar.Buffer.trivial_preorder Prims.bool)
-                      #(LowStar.Buffer.trivial_preorder Prims.bool)
-                      b
-                      false
-                  else
-                    let els =
-                      !*(FStar.Ghost.erased (Prims.list (Mkeq_index?.k i (Mkeq_index?.t i)))) #(LowStar.Buffer.trivial_preorder
-                            (FStar.Ghost.erased (Prims.list (Mkeq_index?.k i (Mkeq_index?.t i)))))
-                        #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                        i
-                                        (Mkeq_index?.t i)))))
-                        glsp
-                    in
-                    [@@ FStar.Pervasives.inline_let ]let _ =
-                      let etl =
-                        Cons?.tl #(Mkeq_index?.k i (Mkeq_index?.t i))
-                          (FStar.Ghost.reveal #(Prims.list (Mkeq_index?.k i (Mkeq_index?.t i))) els)
-                      in
-                      [@@ FStar.Pervasives.inline_let ]let _ =
-                        assert (Device.ll_wf #(Mkeq_index?.k i (Mkeq_index?.t i))
-                              h0
-                              ls
-                              (FStar.Ghost.reveal #(Prims.list (Mkeq_index?.k i (Mkeq_index?.t i)))
-                                  els))
-                      in
-                      assert (Device.ll_wf #(Mkeq_index?.k i (Mkeq_index?.t i)) h0 tl etl)
-                    in
-                    let _ =
-                      LowStar.Monotonic.Buffer.upd #(Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i)))
-                        #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                    (Mkeq_index?.t i))))
-                        #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                    (Mkeq_index?.t i))))
-                        lsp
-                        0ul
-                        tl
-                    in
-                    let h1 = FStar.HyperStack.ST.get () in
-                    let _ =
-                      LowStar.Monotonic.Buffer.upd #(FStar.Ghost.erased (Prims.list (Mkeq_index?.k i
-                                    (Mkeq_index?.t i))))
-                        #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                        i
-                                        (Mkeq_index?.t i)))))
-                        #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                        i
-                                        (Mkeq_index?.t i)))))
-                        glsp
-                        0ul
-                        (FStar.Ghost.hide #(Prims.list (Mkeq_index?.k i (Mkeq_index?.t i)))
-                            (Cons?.tl #(Mkeq_index?.k i (Mkeq_index?.t i))
-                                (FStar.Ghost.reveal #(Prims.list (Mkeq_index?.k i (Mkeq_index?.t i))
-                                    )
-                                    els)))
-                    in
-                    let hf = FStar.HyperStack.ST.get () in
-                    let h = hf in
-                    let l =
-                      LowStar.Monotonic.Buffer.deref #(Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i)
-                            ))
-                        #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                    (Mkeq_index?.t i))))
-                        #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i
-                                    (Mkeq_index?.t i))))
-                        h
-                        lsp
-                    in
-                    let elems =
-                      FStar.Ghost.reveal #(Prims.list (Mkeq_index?.k i (Mkeq_index?.t i)))
-                        (LowStar.Monotonic.Buffer.deref #(FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                        i
-                                        (Mkeq_index?.t i))))
-                            #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                            i
-                                            (Mkeq_index?.t i)))))
-                            #(LowStar.Buffer.trivial_preorder (FStar.Ghost.erased (Prims.list (Mkeq_index?.k
-                                            i
-                                            (Mkeq_index?.t i)))))
-                            h
-                            glsp)
-                    in
-                    assert (LowStar.Monotonic.Buffer.loc_includes (Device.footprint_ #(Mkeq_index?.k
-                                  i
-                                  (Mkeq_index?.t i))
-                              h0
-                              l
-                              elems)
-                          (Device.footprint_ #(Mkeq_index?.k i (Mkeq_index?.t i)) hf l elems)))
-                <:
-                Prims.unit)
-              <:
-              Prims.unit)
-            <:
-            Prims.unit)
-        <:
-        Prims.unit)
-      <:
-      FStar.HyperStack.ST.Stack Prims.unit (fun h0 -> test_post true h0) (fun _ _ h1 -> test_pre h1)
-    in
-    let _ = C.Loops.while #test_pre #test_post test body in
-    let ls =
-      !*(Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i))) #(LowStar.Buffer.trivial_preorder (Device.ll_
-                (Mkeq_index?.k i (Mkeq_index?.t i))))
-        #(LowStar.Buffer.trivial_preorder (Device.ll_ (Mkeq_index?.k i (Mkeq_index?.t i))))
-        lsp
-    in
-    let o =
-      let _ =
-        LowStar.Monotonic.Buffer.is_null #(Device.cell (Mkeq_index?.k i (Mkeq_index?.t i)))
-          #(LowStar.Buffer.trivial_preorder (Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))))
-          #(LowStar.Buffer.trivial_preorder (Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))))
-          ls
-        <:
-        Prims.bool
-      in
-      (if _
-        then FStar.Pervasives.Native.None #(Mkeq_index?.t i)
-        else
-          let _ =
-            !*(Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))) #(LowStar.Buffer.trivial_preorder (Device.cell
-                      (Mkeq_index?.k i (Mkeq_index?.t i))))
-              #(LowStar.Buffer.trivial_preorder (Device.cell (Mkeq_index?.k i (Mkeq_index?.t i))))
-              ls
-          in
-          (let { next = _ ; data = data } = _ in
-            let _ = data in
-            (let FStar.Pervasives.Native.Mktuple2 #_ #_ _ y = _ in
-              FStar.Pervasives.Native.Some #(Mkeq_index?.t i) y)
-            <:
-            FStar.Pervasives.Native.option (Mkeq_index?.t i))
-          <:
-          FStar.Pervasives.Native.option (Mkeq_index?.t i))
-      <:
-      FStar.Pervasives.Native.option (Mkeq_index?.t i)
-    in
-    let _ = FStar.HyperStack.ST.pop_frame () in
-    o)
-  <:
-  FStar.HyperStack.ST.Stack (FStar.Pervasives.Native.option (Mkeq_index?.t i))
-    (fun h0 -> Device.ll_inv #(Mkeq_index?.k i * Mkeq_index?.t i) h0 ls)
-    (fun _ _ _ -> Prims.l_True)
-
 %splice [ ] (Meta.Interface.specialize (`eq_index) [
   `find
 ])
 
 (*** Map Instantiation *)
-inline_for_extraction noextract
-let string_eq_type = {
-  t = string;
-  eq = (fun x y -> x = y); // In the paper: String.eq
-}
-
-let find_s = (mk_map string_eq_type int).find
-
-(*** Device *)
 type bytes = Seq.seq FStar.UInt8.t
 type ckey = Seq.seq FStar.UInt8.t
 
-inline_for_extraction noextract
-type send_t (pid : Type0) =
+let i:eq_index = { k=string; t=ckey}
+let ifind = device_find_higher #i True (=)
+
+(*** Device *)
+
+let pid_t = Type0
+
+[@Meta.Attribute.specialize]
+assume val find_peer : #pid:pid_t -> k:pid -> dv:ll (pid * ckey) ->
+  Stack (option ckey)
+    (requires (fun h0 -> ll_inv h0 dv))
+    (ensures (fun h0 _ h1 -> True))
+
+[@Meta.Attribute.specialize]
+assume val enc : ckey -> bytes -> bytes
+
+[@Meta.Attribute.specialize]
+assume val dec : ckey -> bytes -> option bytes
+
+(*assume val  (pid : pid_t) =
   pid ->
   dv:ll (pid * ckey) ->
   bytes ->
@@ -608,15 +312,15 @@ type send_t (pid : Type0) =
     (ensures (fun _ _ _ -> True))
 
 inline_for_extraction noextract
-type recv_t (pid : Type0) =
+type recv_t (pid : pid_t) =
   pid ->
   dv:ll (pid * ckey) ->
   bytes ->
   Stack (option bytes)
     (requires (fun h0 -> ll_inv h0 dv))
-    (ensures (fun _ _ _ -> True))
+    (ensures (fun _ _ _ -> True))*)
 
-inline_for_extraction noextract
+(*inline_for_extraction noextract
 noeq type device = {
   pid : Type;
   send : send_t pid;
@@ -626,17 +330,36 @@ noeq type device = {
 noeq type cipher = {
   enc : ckey -> bytes -> bytes;
   dec : ckey -> bytes -> option bytes;
-}
+}*)
 
-let mk_device (m : map ckey) (c : cipher) :
-  d:device{d.pid == m.k} = {
-  pid = m.k;
-  send = (fun pid dv plain ->
-    match m.find pid dv with
-    | None -> None
-    | Some sk -> Some (c.enc sk plain));
-  recv = (fun pid dv secret ->
-    match m.find pid dv with
-    | None -> None
-    | Some sk -> c.dec sk secret)
-}
+[@Meta.Attribute.specialize]
+let send (#pid : pid_t)
+  (k:pid)
+  (dv:ll (pid * ckey))
+  (plain:bytes) :
+  Stack (option bytes)
+    (requires (fun h0 -> ll_inv h0 dv))
+    (ensures (fun _ _ _ -> True))
+  =
+  match find_peer #pid k dv with
+  | None -> None
+  | Some sk -> Some (enc sk plain)
+
+[@Meta.Attribute.specialize]
+let recv (#pid : pid_t)
+  (k:pid)
+  (dv:ll (pid * ckey))
+  (cipher:bytes) :
+  Stack (option bytes)
+    (requires (fun h0 -> ll_inv h0 dv))
+    (ensures (fun _ _ _ -> True))
+  =
+  match find_peer #pid k dv with
+  | None -> None
+  | Some sk -> dec sk cipher
+
+#set-options "--query_stats --log_queries"
+%splice [ ] (Meta.Interface.specialize (`pid_t) [
+  `send
+//  `recv
+])
