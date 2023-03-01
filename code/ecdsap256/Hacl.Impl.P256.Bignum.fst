@@ -24,12 +24,6 @@ let scalar_bit #buf_type s n =
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
-let mul64 x y result temp =
-  let res = mul64_wide x y in
-  let l0, h0 = to_u64 res, to_u64 (res >>. 64ul) in
-  upd result (size 0) l0;
-  upd temp (size 0) h0
-
 ///  Create a bignum
 
 let bn_make_u64_4 a0 a1 a2 a3 res =

@@ -23,17 +23,6 @@ val scalar_bit:
     (ensures  fun h0 r h1 -> h0 == h1 /\
       r == Spec.ECDSA.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
 
-
-// TODO: mv
-inline_for_extraction noextract
-val mul64: x:uint64 -> y:uint64
-  -> res:lbuffer uint64 (size 1) -> tmp:lbuffer uint64 (size 1) -> Stack unit
-  (requires fun h -> live h res /\ live h tmp /\ disjoint res tmp)
-  (ensures fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1 /\ (
-    let h0 = Seq.index (as_seq h1 tmp) 0 in
-    let res = Seq.index (as_seq h1 res) 0 in
-    uint_v res + uint_v h0 * pow2 64 = uint_v x * uint_v y))
-
 ///  Create a bignum
 
 inline_for_extraction noextract

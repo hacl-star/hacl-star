@@ -70,28 +70,6 @@ let lemma_modular_multiplication_p256_2 a b =
   Classical.move_requires_2 lemma_modular_multiplication_p256_2_left a b
 
 
-(* Fermat's Little Theorem
-   applied to r = modp_inv2_prime (pow2 256) order
-
-  Verified in Sage:
-   prime = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
-   p = 41058363725152142129326129780047268409114441015993725554835256314039467401291
-   C = EllipticCurve(prime, [-3, p])
-   order =/ C.cardinality()
-   Z = Integers(order)
-   r = Z(inverse_mod(2**256, order))
-   r ^ (order - 1)
-*)
-// used in Hacl.Impl.P256.Qinv
-val lemma_l_ferm: unit ->
-  Lemma (let r = modp_inv2_prime (pow2 256) order in (pow r (order - 1) % order == 1))
-
-let lemma_l_ferm () =
-  let r = modp_inv2_prime (pow2 256) order in
-  assert_norm (exp (modp_inv2_prime (pow2 256) order) (order - 1) == 1);
-  Hacl.Spec.P256.Lemmas.lemma_pow_mod_n_is_fpow order r (order - 1)
-
-
 val lemma_multiplication_not_mod_prime_left: a:nat{a < prime} -> Lemma
   (requires a * (modp_inv2 (pow2 256)) % prime == 0)
   (ensures a == 0)
