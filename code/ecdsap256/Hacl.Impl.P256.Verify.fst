@@ -172,7 +172,7 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     let u2 = sub tempBuffer (size 8) (size 4) in
 
     fromDomainImpl s inverseS;
-    montgomery_ladder_exponent inverseS;
+    qinv inverseS;
     multPowerPartial s inverseS hash u1;
     multPowerPartial s inverseS r u2;
 

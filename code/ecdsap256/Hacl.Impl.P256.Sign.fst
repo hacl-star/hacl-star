@@ -164,14 +164,13 @@ let ecdsa_signature_step6 result kFelem z r da =
     fromDomainImpl z zBuffer;
     qadd rda zBuffer zBuffer;
     copy kInv kFelem;
-    montgomery_ladder_exponent kInv;
+    qinv kInv;
     qmul zBuffer kInv result;
   pop_frame();
       let br0 = as_nat h0 z + as_nat h0 r * as_nat h0 da in
       let br1 = pow (as_nat h0 kFelem) (order - 2) in
 
       lemmaFromDomain (as_nat h0 r * as_nat h0 da);
-      qadd_lemma (as_nat h0 r * as_nat h0 da) (as_nat h0 z);
       lemma_power_step6 (as_nat h0 kFelem);
 
       lemmaFromDomain (fromDomain_ br0);

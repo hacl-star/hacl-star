@@ -94,7 +94,9 @@ let lemmaToDomainFromDomain a =
   }
 
 
-// (fromDomain_ a + fromDomain_ b) % S.order = fromDomain_ (a + b)
+val qadd_lemma: a:S.qelem -> b:S.qelem ->
+  Lemma (S.qadd (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a + b) % S.order))
+
 let qadd_lemma a b =
   calc (==) {
     (fromDomain_ a + fromDomain_ b) % S.order;
@@ -104,48 +106,38 @@ let qadd_lemma a b =
     (a * qmont_R_inv + b * qmont_R_inv) % S.order;
     (==) { Math.Lemmas.distributivity_add_left a b qmont_R_inv }
     (a + b) * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a + b) qmont_R_inv S.order }
+    (a + b) % S.order * qmont_R_inv % S.order;
     (==) { }
-    fromDomain_ (a + b);
+    fromDomain_ ((a + b) % S.order);
   }
 
 
-val inDomain_mod_is_not_mod: a:nat -> Lemma (toDomain_ a == toDomain_ (a % S.order))
-let inDomain_mod_is_not_mod a =
+val qmul_lemma: a:S.qelem -> b:S.qelem ->
+  Lemma (S.qmul (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a * b * qmont_R_inv) % S.order))
+
+let qmul_lemma a b =
   calc (==) {
-    toDomain_ (a % S.order); // == toDomain_ a
+    (fromDomain_ a * fromDomain_ b) % S.order;
     (==) { }
-    (a % S.order) * qmont_R % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l a qmont_R S.order }
-    a * qmont_R % S.order;
-  }
-
-
-val multiplicationInDomain: #k:S.qelem -> #l:S.qelem
-  -> a:S.qelem{a == toDomain_ k}
-  -> b:S.qelem{b == toDomain_ l} ->
-  Lemma (a * b * qmont_R_inv % S.order == toDomain_ (k * l))
-
-let multiplicationInDomain #k #l a b =
-  // a = k * qmont_R % S.order = toDomain_ k
-  // b = l * qmont_R % S.order = toDomain_ l
-  calc (==) {
-    a * b * qmont_R_inv % S.order; // == toDomain_ (k * l)
-    (==) { }
-    a * (l * qmont_R % S.order) * qmont_R_inv % S.order;
-    (==) { Math.Lemmas.paren_mul_right a (l * qmont_R % S.order) qmont_R_inv }
-    a * ((l * qmont_R % S.order) * qmont_R_inv) % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r a ((l * qmont_R % S.order) * qmont_R_inv) S.order }
-    a * ((l * qmont_R % S.order) * qmont_R_inv % S.order) % S.order;
-    (==) { lemmaToDomainFromDomain l }
-    (k * qmont_R % S.order) * l % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (k * qmont_R) l S.order }
-    (k * qmont_R) * l % S.order;
-    (==) { Math.Lemmas.paren_mul_right k qmont_R l;
-      Math.Lemmas.swap_mul qmont_R l;
-      Math.Lemmas.paren_mul_right k l qmont_R }
-    (k * l) * qmont_R % S.order;
-    (==) { }
-    toDomain_ (k * l);
+    ((a * qmont_R_inv % S.order) * (b * qmont_R_inv % S.order)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l
+      (a * qmont_R_inv) (b * qmont_R_inv % S.order) S.order }
+    (a * qmont_R_inv * (b * qmont_R_inv % S.order)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a * qmont_R_inv) (b * qmont_R_inv) S.order }
+    (a * qmont_R_inv * (b * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a qmont_R_inv (b * qmont_R_inv) }
+    (a * (qmont_R_inv * (b * qmont_R_inv))) % S.order;
+    (==) { Math.Lemmas.paren_mul_right qmont_R_inv b qmont_R_inv }
+    (a * (qmont_R_inv * b * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.swap_mul qmont_R_inv b }
+    (a * (b * qmont_R_inv * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a (b * qmont_R_inv) qmont_R_inv }
+    (a * (b * qmont_R_inv) * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a b qmont_R_inv }
+    (a * b * qmont_R_inv * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * b * qmont_R_inv) qmont_R_inv S.order }
+    fromDomain_ ((a * b * qmont_R_inv) % S.order);
   }
 
 //---------------------
@@ -244,6 +236,7 @@ let qadd x y res =
   bn_add_mod4 x y n res;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order);
+  qadd_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
 
@@ -255,12 +248,8 @@ let qmul a b res =
   let h1 = ST.get () in
   SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.order;
   qmont_reduction tmp res;
-  lemmaFromDomainToDomain (as_nat h0 a);
-  lemmaFromDomainToDomain (as_nat h0 b);
-  multiplicationInDomain
-    #(fromDomain_ (as_nat h0 a)) #(fromDomain_ (as_nat h0 b)) (as_nat h0 a) (as_nat h0 b);
-  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b));
-  pop_frame()
+  qmul_lemma (as_nat h0 a) (as_nat h0 b);
+  pop_frame ()
 
 
 let fromDomainImpl a res =

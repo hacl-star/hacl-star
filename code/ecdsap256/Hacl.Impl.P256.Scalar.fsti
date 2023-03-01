@@ -24,6 +24,7 @@ val qmod_short: x:felem -> res:felem -> Stack unit
 let qmont_R = pow2 256
 let qmont_R_inv = S.modp_inv2_prime (pow2 256) S.order
 
+// TODO: rename
 let fromDomain_ (a:nat) : S.qelem = a * qmont_R_inv % S.order
 let toDomain_   (a:nat) : S.qelem = a * qmont_R % S.order
 
@@ -34,9 +35,7 @@ val lemmaToDomain:   a:nat -> Lemma (toDomain_ a == a * qmont_R % S.order)
 val lemmaFromDomainToDomain: a:S.qelem -> Lemma (toDomain_ (fromDomain_ a) == a)
 val lemmaToDomainFromDomain: a:S.qelem -> Lemma (fromDomain_ (toDomain_ a) == a)
 
-val qadd_lemma: a:nat -> b:nat ->
-  Lemma ((fromDomain_ a + fromDomain_ b) % S.order = fromDomain_ (a + b))
-
+let qmont_as_nat (h:mem) (a:felem) = fromDomain_ (as_nat h a)
 
 // NOTE: changed precondition `eq_or_disjoint x y`
 val qadd: x:felem -> y:felem -> res:felem -> Stack unit
@@ -45,7 +44,8 @@ val qadd: x:felem -> y:felem -> res:felem -> Stack unit
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
     as_nat h x < S.order /\ as_nat h y < S.order)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order)
+    as_nat h1 res == S.qadd (as_nat h0 x) (as_nat h0 y) /\
+    qmont_as_nat h1 res == S.qadd (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
 
 val qmul: a:felem -> b:felem -> res:felem -> Stack unit
@@ -55,7 +55,7 @@ val qmul: a:felem -> b:felem -> res:felem -> Stack unit
     as_nat h a < S.order /\ as_nat h b < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res = (as_nat h0 a * as_nat h0 b * qmont_R_inv) % S.order /\
-    as_nat h1 res = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % S.order))
+    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 a) (qmont_as_nat h0 b))
 
 
 // rename
@@ -63,5 +63,5 @@ val fromDomainImpl: a:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ as_nat h a < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-     as_nat h1 res < S.order /\
-     as_nat h1 res == fromDomain_ (as_nat h0 a))
+    as_nat h1 res < S.order /\
+    as_nat h1 res == qmont_as_nat h0 a)

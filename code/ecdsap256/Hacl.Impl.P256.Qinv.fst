@@ -1,5 +1,6 @@
 module Hacl.Impl.P256.Qinv
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -7,246 +8,170 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
-open Hacl.Spec.P256.Math
-
 open Hacl.Impl.P256.Bignum
+open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Constants
-open Hacl.Spec.P256.Lemmas
-open FStar.Tactics
-open FStar.Tactics.Canon
 
-open FStar.Mul
+module LSeq = Lib.Sequence
 
-open Lib.Loops
-
-friend Hacl.Impl.P256.Scalar
+module M = Lib.NatMod
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
+module BE = Hacl.Impl.Exponentiation
 
 module S = Spec.P256
+module SI = Hacl.Spec.P256.Qinv
 
-#reset-options " --z3rlimit 200 --fuel 0 --ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+unfold
+let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
-[@ CInline]
-val cswap: bit:uint64{v bit <= 1} -> p:felem -> q:felem
-  -> Stack unit
-    (requires fun h ->
-      as_nat h p < S.order /\ as_nat h q < S.order /\
-      live h p /\ live h q /\ (disjoint p q \/ p == q))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc p |+| loc q) h0 h1 /\
-	(
-	  let (r0, r1) = Spec.ECDSA.conditional_swap bit (as_nat h0 p) (as_nat h0 q) in
-	  let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in
-	  let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in
-	  if uint_v bit = 0 then r0 == as_nat h0 p /\ r1 == as_nat h0 q else r0 == as_nat h0 q /\ r1 == as_nat h0 p) /\
-	  as_nat h1 p < S.order /\ as_nat h1 q < S.order /\
-      (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q))
-
-
-let cswap bit p1 p2 =
-  let h0 = ST.get () in
-  let mask = u64 0 -. bit in
+unfold
+let linv (a:LSeq.lseq uint64 4) : Type0 =
   let open Lib.Sequence in
-  [@ inline_let]
-  let inv h1 (i:nat{i <= 4}) =
-    (forall (k:nat{k < i}).
-      if v bit = 1
-      then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
-      else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    (forall (k:nat{i <= k /\ k < 4}).
-      (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    modifies (loc p1 |+| loc p2) h0 h1 in
+  felem_seq_as_nat a < S.order
 
-  Lib.Loops.for 0ul 4ul inv
-    (fun i ->
-      let dummy = mask &. (p1.(i) ^. p2.(i)) in
-      p1.(i) <- p1.(i) ^. dummy;
-      p2.(i) <- p2.(i) ^. dummy;
-      lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
-    );
+unfold
+let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.qelem =
+  fromDomain_ (felem_seq_as_nat a)
+
+
+inline_for_extraction noextract
+let mk_to_p256_order_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
+  BE.a_spec = S.qelem;
+  BE.comm_monoid = SI.nat_mod_comm_monoid;
+  BE.linv_ctx = linv_ctx;
+  BE.linv = linv;
+  BE.refl = refl;
+}
+
+
+val make_qone: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == toDomain_ 1 /\
+    qmont_as_nat h1 n == 1)
+
+[@CInline]
+let make_qone n =
+  [@inline_let] let n0 = u64 0xc46353d039cdaaf in
+  [@inline_let] let n1 = u64 0x4319055258e8617b in
+  [@inline_let] let n2 = u64 0x0 in
+  [@inline_let] let n3 = u64 0xffffffff in
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == toDomain_ 1);
+  assert_norm (fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
+  bn_make_u64_4 n0 n1 n2 n3 n
+
+
+inline_for_extraction noextract
+val one_mod : BE.lone_st U64 4ul 0ul mk_to_p256_order_comm_monoid
+let one_mod ctx one = make_qone one
+
+
+inline_for_extraction noextract
+val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_p256_order_comm_monoid
+let mul_mod ctx x y xy = qmul x y xy
+
+
+inline_for_extraction noextract
+val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_order_comm_monoid
+let sqr_mod ctx x xx = qmul x x xx
+
+
+inline_for_extraction noextract
+let mk_p256_order_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
+  BE.to = mk_to_p256_order_comm_monoid;
+  BE.lone = one_mod;
+  BE.lmul = mul_mod;
+  BE.lsqr = sqr_mod;
+}
+
+
+val fsquare_times (out a:felem) (b:size_t) : Stack unit
+  (requires fun h ->
+    live h out /\ live h a /\ disjoint out a /\
+    as_nat h a < S.order)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qmont_as_nat h1 out == SI.qsquare_times (qmont_as_nat h0 a) (v b))
+
+[@CInline]
+let fsquare_times out a b =
+  let h0 = ST.get () in
+  BE.lexp_pow2 4ul 0ul mk_p256_order_concrete_ops (null uint64) a b out;
   let h1 = ST.get () in
-  Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
-  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
+  assert (qmont_as_nat h1 out == LE.exp_pow2 SI.nat_mod_comm_monoid (qmont_as_nat h0 a) (v b));
+
+  SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qmont_as_nat h0 a) (v b);
+  assert (SI.qsquare_times (qmont_as_nat h0 a) (v b) ==
+    LE.exp_pow2 SI.nat_mod_comm_monoid (qmont_as_nat h0 a) (v b))
 
 
+// TODO: rm
+val qexp_vartime (out a b:felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h a /\ live h b /\
+    disjoint out a /\ disjoint out b /\
+    as_nat h a < S.order)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_nat h1 out < S.order /\
+    qmont_as_nat h1 out == M.pow_mod #S.order (qmont_as_nat h0 a) (as_nat h0 b))
+
+[@CInline]
+let qexp_vartime out a b =
+  let h0 = ST.get () in
+  assert_norm (pow2 5 = 32);
+  as_nat_bound h0 b;
+  bignum_bn_v_is_as_nat h0 b;
+  BE.lexp_fw_vartime 4ul 0ul
+    mk_p256_order_concrete_ops 5ul (null uint64) a 4ul 256ul b out;
+  let h1 = ST.get () in
+  SE.exp_fw_lemma SI.mk_nat_mod_concrete_ops (qmont_as_nat h0 a) 256 (as_nat h0 b) 5;
+  LE.exp_fw_lemma SI.nat_mod_comm_monoid (qmont_as_nat h0 a) 256 (as_nat h0 b) 5;
+  assert (qmont_as_nat h1 out == LE.pow SI.nat_mod_comm_monoid (qmont_as_nat h0 a) (as_nat h0 b));
+  M.lemma_pow_nat_mod_is_pow #S.order (qmont_as_nat h0 a) (as_nat h0 b);
+  assert (qmont_as_nat h1 out == M.pow (qmont_as_nat h0 a) (as_nat h0 b) % S.order);
+  M.lemma_pow_mod #S.order (qmont_as_nat h0 a) (as_nat h0 b)
+
+
+//--------------------------------
+// TODO: use an addition chain from Hacl.Spec.P256.Qinv
 inline_for_extraction noextract
-val montgomery_ladder_exponent_step0: a: felem -> b: felem -> Stack unit
-  (requires fun h -> live h a /\ live h b /\
-    as_nat h a < S.order /\ as_nat h b < S.order /\ disjoint a b)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\
-    as_nat h1 a < S.order /\ as_nat h1 b < S.order /\
-    (
-      let (r0D, r1D) = _exp_step0 (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b)) in
-      r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b)
-    )
-)
-
-let montgomery_ladder_exponent_step0 a b =
-    let h0 = ST.get() in
-  qmul a b b;
-    lemmaToDomainFromDomain (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % S.order);
-  qmul a a a ;
-    lemmaToDomainFromDomain (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % S.order)
-
-
-inline_for_extraction noextract
-val montgomery_ladder_exponent_step: a: felem -> b: felem -> scalar: glbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
-  (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat h a < S.order /\ as_nat h b < S.order /\ disjoint a b)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1  /\
-    (
-      let a_ = fromDomain_ (as_nat h0 a) in
-      let b_ = fromDomain_ (as_nat h0 b) in
-      let (r0D, r1D) = _exp_step (as_seq h0 scalar) (uint_v i) (a_, b_) in
-      r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b) /\
-      as_nat h1 a < S.order /\ as_nat h1 b < S.order
-    )
-  )
-
-let montgomery_ladder_exponent_step a b scalar i =
-    let h0 = ST.get() in
-  let bit0 = (size 255) -. i in
-  let bit = scalar_bit scalar bit0 in
-  cswap bit a b;
-  montgomery_ladder_exponent_step0 a b;
-  cswap bit a b;
-  Spec.ECDSA.lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
-
-
-inline_for_extraction noextract
-val _montgomery_ladder_exponent: a: felem ->b: felem ->  scalar: glbuffer uint8 (size 32) -> Stack unit
-  (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat h a < S.order /\
-    as_nat h b < S.order /\ disjoint a b /\disjoint a scalar /\ disjoint b scalar)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\
-    (
-      let a_ = fromDomain_ (as_nat h0 a) in
-      let b_ = fromDomain_ (as_nat h0 b) in
-      let (r0D, r1D) = _exponent_spec (as_seq h0 scalar) (a_, b_) in
-      r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b) /\
-      as_nat h1 a < S.order /\ as_nat h1 b < S.order )
-  )
-
-
-let _montgomery_ladder_exponent a b scalar =
-  let h0 = ST.get() in
-  [@inline_let]
-  let spec_exp h0  = _exp_step (as_seq h0 scalar) in
-  [@inline_let]
-  let acc (h: mem) : GTot (tuple2 S.qelem S.qelem) = (fromDomain_ (as_nat h a), fromDomain_ (as_nat h b)) in
-  Lib.LoopCombinators.eq_repeati0 256 (spec_exp h0) (acc h0);
-  [@inline_let]
-  let inv h (i: nat {i <= 256}) =
-    live h a /\ live h b /\ live h scalar /\ modifies (loc a |+| loc b) h0 h /\ as_nat h a < S.order /\ as_nat h b < S.order /\
-    acc h == Lib.LoopCombinators.repeati i (spec_exp h0) (acc h0) in
-  for 0ul 256ul inv (
-    fun i ->
-	  montgomery_ladder_exponent_step a b scalar i;
-	  Lib.LoopCombinators.unfold_repeati 256 (spec_exp h0) (acc h0) (uint_v i))
-
-
-inline_for_extraction noextract
-val upload_one_montg_form: b: felem -> Stack unit
+val make_order_minus_2: b:felem -> Stack unit
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b == toDomain_ (1))
+  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    as_nat h1 b == S.order - 2)
 
-let upload_one_montg_form b =
-  upd b (size 0) (u64 884452912994769583);
-  upd b (size 1) (u64 4834901526196019579);
-  upd b (size 2) (u64 0);
-  upd b (size 3) (u64 4294967295);
-    assert_norm(toDomain_ 1 == 26959946660873538059280334323273029441504803697035324946844617595567)
+let make_order_minus_2 b =
+  // 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254f
+  [@inline_let] let b0 = u64 0xf3b9cac2fc63254f in
+  [@inline_let] let b1 = u64 0xbce6faada7179e84 in
+  [@inline_let] let b2 = u64 0xffffffffffffffff in
+  [@inline_let] let b3 = u64 0xffffffff00000000 in
+  assert_norm (v b0 + v b1 * pow2 64 + v b2 * pow2 128 + v b3 * pow2 192 = S.order - 2);
+  bn_make_u64_4 b0 b1 b2 b3 b
 
 
-let montgomery_ladder_exponent r =
-  push_frame();
-    let p = create (size 4) (u64 0) in
-    upload_one_montg_form p;
-    recall_contents order_inverse_buffer order_inverse_seq;
-    let h = ST.get() in
-    mut_const_immut_disjoint #uint64 #uint8 p order_inverse_buffer h;
-    mut_const_immut_disjoint #uint64 #uint8 r order_inverse_buffer h;
-    assert (disjoint p order_inverse_buffer);
-    assert (disjoint r order_inverse_buffer);
-    _montgomery_ladder_exponent p r order_inverse_buffer;
-      lemmaToDomainFromDomain 1;
-    copy r p;
-  pop_frame()
+[@CInline]
+let qinv r =
+  push_frame ();
+  let tmp = create 4ul (u64 0) in
+  let b = create 4ul (u64 0) in
+  copy tmp r;
+  make_order_minus_2 b;
+  qexp_vartime r tmp b;
+  pop_frame ()
 
 //--------------------------
 
-val lemma_fromDomain1: a: nat ->
-  Lemma ((fromDomain_ (fromDomain_ (fromDomain_ a))) == ((a * S.modp_inv2_prime (pow2 256) S.order * S.modp_inv2_prime (pow2 256) S.order * S.modp_inv2_prime (pow2 256) S.order) % S.order))
-
-let lemma_fromDomain1 a =
-  let f = S.modp_inv2_prime (pow2 256) S.order in
-  lemma_mod_mul_distr_l (a * f) f S.order;
-  lemma_mod_mul_distr_l (a * f * f) f S.order
-
-
-val lemma_fromDomain2: a: nat ->
-  Lemma (S.pow (fromDomain_ (fromDomain_ a)) (S.order - 2) % S.order ==
-    (
-      S.pow a (S.order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) % S.order /\
-      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) * S.pow (pow2 256) (S.order -2) % S.order == 1
-    )
-
-
-let lemma_fromDomain2 a =
-  let r = S.modp_inv2_prime (pow2 256) S.order in
-  lemma_mod_mul_distr_l (a * r) r S.order;
-  power_distributivity (a * r * r) (S.order - 2) S.order;
-    assert_by_tactic (a * r * r == a * (r * r)) canon;
-  power_distributivity_2 a (r * r) (S.order - 2);
-  power_distributivity_2 (S.modp_inv2_prime (pow2 256) S.order) (S.modp_inv2_prime (pow2 256) S.order) (S.order -2);
-  assert_by_tactic (S.pow a (S.order - 2) * (
-      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) ==
-      S.pow a (S.order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) *
-      S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) canon;
-
-  let inv_pow256_order = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
-  assert_norm (S.modp_inv2_prime (pow2 256) S.order == inv_pow256_order);
-  assert_norm (inv_pow256_order * (pow2 256) % S.order == 1);
-  power_distributivity_2 (inv_pow256_order) (pow2 256) (S.order - 2);
-  power_distributivity (inv_pow256_order * pow2 256) (S.order - 2) S.order;
-  power_one (S.order -2)
-
-
-#push-options "--fuel 2"
-let multPowerPartial s a b result =
+[@CInline]
+let multPowerPartial s a b res =
   let h0 = ST.get() in
-  push_frame();
-    let buffFromDB = create (size 4) (u64 0) in
-    fromDomainImpl b buffFromDB;
-    fromDomainImpl buffFromDB buffFromDB;
-    qmul a buffFromDB result;
-  pop_frame();
-
-    let p = S.pow (fromDomain_ (fromDomain_ (as_nat h0 s))) (S.order - 2) % S.order in
-    let q = fromDomain_ (fromDomain_ (fromDomain_ (as_nat h0 b))) in
-    let r = S.modp_inv2_prime (pow2 256) S.order in
-      lemma_fromDomain1 (as_nat h0 b);
-      lemma_fromDomain2 (as_nat h0 s);
-
-      lemma_mod_mul_distr_l (S.pow (as_nat h0 s) (S.order - 2) * S.pow r (S.order - 2) * S.pow r (S.order - 2)) (((as_nat h0 b) * r * r * r) % S.order) S.order;
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * S.pow r (S.order - 2) * S.pow r (S.order - 2)) ((as_nat h0 b) * r * r * r) S.order;
-      assert_by_tactic (S.pow (as_nat h0 s) (S.order - 2) * S.pow r (S.order - 2) * S.pow r (S.order - 2) * ((as_nat h0 b) * r * r * r) == S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 2) * r) * (S.pow r (S.order - 2) * r) * (as_nat h0 b) * r) canon;
-
-      pow_plus r (S.order - 2) 1;
-      power_one r;
-      lemma_mod_mul_distr_l (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) * r) (pow2 256) S.order;
-
-      assert_by_tactic (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) * r * pow2 256 == S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) * (r * pow2 256)) canon;
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b)) (r * pow2 256) S.order;
-      assert_norm ((pow2 256 * S.modp_inv2_prime (pow2 256) S.order) % S.order == 1);
-
-      assert_by_tactic (S.pow (as_nat h0 s) (S.order - 2) * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1)) * (as_nat h0 b) == S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)  * (S.pow r (S.order - 1)) * (S.pow r (S.order - 1))) canon;
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)  * (S.pow r (S.order - 1))) (S.pow r (S.order - 1)) S.order;
-      lemma_l_ferm ();
-
-      lemma_mod_mul_distr_r (S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)) (S.pow r (S.order - 1)) S.order
-#pop-options
+  push_frame ();
+  let buffFromDB = create (size 4) (u64 0) in
+  fromDomainImpl b buffFromDB;
+  fromDomainImpl buffFromDB buffFromDB;
+  qmul a buffFromDB res;
+  let h1 = ST.get () in
+  assume (as_nat h1 res = (S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)) % S.order);
+  pop_frame ()
