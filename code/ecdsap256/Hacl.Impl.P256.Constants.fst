@@ -8,13 +8,14 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-module S = Spec.P256
-module LSeq = Lib.Sequence
-
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 
-#set-options "--z3rlimit 50"
+module S = Spec.P256
+module LSeq = Lib.Sequence
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
+
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val make_prime: n:felem -> Stack unit
@@ -46,6 +47,51 @@ let make_order n =
   [@inline_let] let n3 = u64 0xffffffff00000000 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.order);
   bn_make_u64_4 n0 n1 n2 n3 n
+
+
+inline_for_extraction noextract
+val make_a_coeff: a:felem -> Stack unit
+  (requires fun h -> live h a)
+  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\
+    as_nat h1 a == SM.toDomain_ S.a_coeff /\
+    SM.fromDomain_ (as_nat h1 a) == S.a_coeff /\
+    as_nat h1 a < S.prime)
+
+let make_a_coeff a =
+  // a_coeff      = 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc
+  // a_coeff_mont = 0xfffffffc00000004000000000000000000000003fffffffffffffffffffffffc
+  [@inline_let] let n0 = u64 0xfffffffffffffffc in
+  [@inline_let] let n1 = u64 0x3ffffffff in
+  [@inline_let] let n2 = u64 0x0 in
+  [@inline_let] let n3 = u64 0xfffffffc00000004 in
+  assert_norm (
+    v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ S.a_coeff);
+  assert_norm (
+    SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.a_coeff);
+  bn_make_u64_4 n0 n1 n2 n3 a
+
+
+inline_for_extraction noextract
+val make_b_coeff: b:felem -> Stack unit
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    as_nat h1 b == SM.toDomain_ S.b_coeff /\
+    SM.fromDomain_ (as_nat h1 b) == S.b_coeff /\
+    as_nat h1 b < S.prime)
+
+let make_b_coeff b =
+  // b_coeff      = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b
+  // b_coeff_mont = 0xdc30061d04874834e5a220abf7212ed6acf005cd78843090d89cdf6229c4bddf
+  [@inline_let] let n0 = u64 0xd89cdf6229c4bddf in
+  [@inline_let] let n1 = u64 0xacf005cd78843090 in
+  [@inline_let] let n2 = u64 0xe5a220abf7212ed6 in
+  [@inline_let] let n3 = u64 0xdc30061d04874834 in
+  assert_norm (
+    v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ S.b_coeff);
+  assert_norm (
+    SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.b_coeff);
+  bn_make_u64_4 n0 n1 n2 n3 b
+
 
 //----------------
 

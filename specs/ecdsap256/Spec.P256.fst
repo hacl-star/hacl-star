@@ -87,7 +87,7 @@ let jacob_point = p:point_nat{let (a, b, c) = p in
 // let aff_point = felem & felem           // Affine point
 // let jacob_point = felem & felem & felem // Jacobian coordinates
 
-let a_coeff = -3
+let a_coeff : felem = (-3) % prime
 let b_coeff : felem =
   assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < prime);
   41058363725152142129326129780047268409114441015993725554835256314039467401291
@@ -102,14 +102,13 @@ let g_y : felem =
 
 let base_point : jacob_point = (g_x, g_y, one)
 
-
-//------------------------------------
-// TODO: clean up
 val is_point_on_curve: jacob_point -> bool
 let is_point_on_curve p =
   let (x, y, z) = p in
-  y *% y = (x * x * x + a_coeff * x + b_coeff) % prime
+  y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 
+//------------------------------------
+// TODO: clean up
 let isPointAtInfinity (p:point_nat) =
   let (_, _, z) = p in z = 0
 

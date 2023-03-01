@@ -22,38 +22,6 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
-inline_for_extraction noextract
-val uploadA: a: felem -> Stack unit
-  (requires fun h -> live h a)
-  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-    as_nat h1 a == toDomain_ (Spec.P256.a_coeff % prime) /\
-    as_nat h1 a < prime
-  )
-
-let uploadA a =
-  lemmaToDomain (Spec.P256.a_coeff % prime);
-  upd a (size 0) (u64 18446744073709551612);
-  upd a (size 1) (u64 17179869183);
-  upd a (size 2) (u64 0);
-  upd a (size 3) (u64 18446744056529682436);
-  assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (Spec.P256.a_coeff % prime) * pow2 256 % prime)
-
-inline_for_extraction noextract
-val uploadB: b: felem -> Stack unit
-  (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b < prime /\
-    as_nat h1 b == toDomain_ (Spec.P256.b_coeff)
-  )
-
-let uploadB b =
-  lemmaToDomain (Spec.P256.b_coeff);
-  upd b (size 0) (u64 15608596021259845087);
-  upd b (size 1) (u64 12461466548982526096);
-  upd b (size 2) (u64 16546823903870267094);
-  upd b (size 3) (u64 15866188208926050356);
-  assert_norm (15608596021259845087 + 12461466548982526096 * pow2 64 + 16546823903870267094 * pow2 64 * pow2 64 + 15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (Spec.P256.b_coeff * pow2 256 % prime))
-
-
 val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit
   (requires fun h -> live h x /\ live h result /\ as_nat h x < prime /\ disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -76,8 +44,8 @@ let computeYFromX x result sign =
     let bCoordinateBuffer = create (size 4) (u64 0) in
 
   let h0 = ST.get() in
-    uploadA aCoordinateBuffer;
-    uploadB bCoordinateBuffer;
+    make_a_coeff aCoordinateBuffer;
+    make_b_coeff bCoordinateBuffer;
 
     fmul aCoordinateBuffer x aCoordinateBuffer;
   fcube x result;
