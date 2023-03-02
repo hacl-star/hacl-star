@@ -14,6 +14,10 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Security in case of vulnerabilities.
 
 
+## 2023-02-20
+
+- Removed OCaml and JS bindings
+
 ## 2022-12-19
 
 - Added JS bindings for secp256k1
