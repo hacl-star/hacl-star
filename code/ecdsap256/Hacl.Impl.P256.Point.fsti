@@ -72,47 +72,27 @@ val make_base_point: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv (as_seq h1 p) /\
-    (let (x1, y1, z1) = as_point_nat (as_seq h1 p) in
-    SM.fromDomain_ x1 == S.g_x /\
-    SM.fromDomain_ y1 == S.g_y /\
-    SM.fromDomain_ z1 == 1))
+    (let (px, py, pz) = as_point_nat (as_seq h1 p) in
+    SM.fromDomain_ px == S.g_x /\
+    SM.fromDomain_ py == S.g_y /\
+    SM.fromDomain_ pz == 1))
 
 
 val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv (as_seq h1 p) /\
-    (let (x1, y1, z1) = as_point_nat (as_seq h1 p) in
-    SM.fromDomain_ x1 == 0 /\
-    SM.fromDomain_ y1 == 0 /\
-    SM.fromDomain_ z1 == 0))
+    (let (px, py, pz) = as_point_nat (as_seq h1 p) in
+    SM.fromDomain_ px == 0 /\
+    SM.fromDomain_ py == 0 /\
+    SM.fromDomain_ pz == 0))
 
 
+inline_for_extraction noextract
 val copy_point: p:point -> res:point -> Stack unit
   (requires fun h -> live h p /\ live h res /\ disjoint p res)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == as_seq h0 p)
-
-
-///  check if a point is a point-at-infinity
-
-val isPointAtInfinityPrivate: p:point -> Stack uint64
-  (requires fun h ->
-    live h p /\ as_nat h (gsub p (size 8) (size 4)) < S.prime)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    ((uint_v r == 0 \/ uint_v r == maxint U64) /\
-    (let x, y, z = SM.fromDomainPoint (as_point_nat (as_seq h0 p)) in
-     if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0) /\
-     (let x, y, z = as_point_nat (as_seq h0 p) in
-     if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0)))
-
-
-[@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")]
-val isPointAtInfinityPublic: p:point -> Stack bool
-  (requires fun h -> live h p)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == Spec.P256.isPointAtInfinity (as_point_nat (as_seq h0 p)))
 
 
 ///  Point conversion between Montgomery and Regular representations
@@ -123,79 +103,76 @@ val point_to_mont: p:point -> res:point -> Stack unit
     point_inv (as_seq h p))
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv (as_seq h1 res) /\
-   (let x0, y0, z0 = as_point_nat (as_seq h0 p) in
-    let x1, y1, z1 = as_point_nat (as_seq h1 res) in
-    x1 == SM.toDomain_ x0 /\
-    y1 == SM.toDomain_ y0 /\
-    z1 == SM.toDomain_ z0))
+   (let px, py, pz = as_point_nat (as_seq h0 p) in
+    let rx, ry, rz = as_point_nat (as_seq h1 res) in
+    rx == SM.toDomain_ px /\
+    ry == SM.toDomain_ py /\
+    rz == SM.toDomain_ pz))
 
 
+// NOT used?
 val point_from_mont: p:point -> res:point-> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv (as_seq h p))
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv (as_seq h1 res) /\
-   (let x0, y0, z0 = as_point_nat (as_seq h0 p) in
-    let x1, y1, z1 = as_point_nat (as_seq h1 res) in
-    x1 == SM.fromDomain_ x0 /\
-    y1 == SM.fromDomain_ y0 /\
-    z1 == SM.fromDomain_ z0))
+   (let px, py, pz = as_point_nat (as_seq h0 p) in
+    let rx, ry, rz = as_point_nat (as_seq h1 res) in
+    rx == SM.fromDomain_ px /\
+    ry == SM.fromDomain_ py /\
+    rz == SM.fromDomain_ pz))
+
+
+///  check if a point is a point-at-infinity
+
+// TODO: add point_inv (as_seq h p) as precondition
+val is_point_at_inf: p:point -> Stack uint64
+  (requires fun h ->
+    live h p /\ point_z_as_nat h p < S.prime)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
+    ((uint_v r == 0 \/ uint_v r == ones_v U64) /\
+    (if Spec.P256.isPointAtInfinity (SM.fromDomainPoint (as_point_nat (as_seq h0 p)))
+     then uint_v r = maxint U64 else uint_v r = 0) /\
+    (if Spec.P256.isPointAtInfinity (as_point_nat (as_seq h0 p))
+    then uint_v r = maxint U64 else uint_v r = 0)))
+
+
+// TODO: add point_inv (as_seq h p) as precondition
+val is_point_at_inf_vartime: p:point -> Stack bool
+  (requires fun h -> live h p)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == Spec.P256.isPointAtInfinity (as_point_nat (as_seq h0 p)))
 
 
 ///  Point conversion between Jacobian and Affine coordinates representations
 
-val norm:
-    p:point
-  -> resultPoint:point
-  -> tempBuffer:lbuffer uint64 (size 88) ->
-  Stack unit
+val norm_jacob_point_x: p:point -> res:felem -> Stack unit
   (requires fun h ->
-    live h p /\ live h resultPoint /\ live h tempBuffer /\
-    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime)
-  (ensures fun h0 _ h1 ->
-    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\
-    (let resultPoint = as_point_nat (as_seq h1 resultPoint) in
-    let pointD = SM.fromDomainPoint (as_point_nat (as_seq h0 p)) in
-    let pointNorm = S.norm_jacob_point pointD in
-    pointNorm == resultPoint))
+    live h p /\ live h res /\ disjoint p res /\
+    point_inv (as_seq h p))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1  /\
+   (let rx, _, _ = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat (as_seq h0 p))) in
+    as_nat h1 res == rx))
 
 
-val normX:
-    p:point
-  -> result:felem
-  -> tempBuffer:lbuffer uint64 (size 88) ->
-  Stack unit
+val norm_jacob_point: p:point -> res:point -> Stack unit
   (requires fun h ->
-    live h p /\ live h result /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc result; loc tempBuffer] /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime)
-  (ensures fun h0 _ h1 ->
-    modifies (loc tempBuffer |+| loc result) h0 h1  /\
-    (let pxD = SM.fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
-    let pyD = SM.fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
-    let pzD = SM.fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
-    let (xN, _, _) = S.norm_jacob_point (pxD, pyD, pzD) in
-    as_nat h1 result == xN))
+    live h p /\ live h res /\ eq_or_disjoint p res /\
+    point_inv (as_seq h p))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_point_nat (as_seq h1 res) ==
+      S.norm_jacob_point (SM.fromDomainPoint (as_point_nat (as_seq h0 p))))
 
 
-val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
+val to_jacob_point: p:lbuffer uint64 (size 8) -> res:point -> Stack unit
   (requires fun h ->
-    live h p /\ live h result /\ disjoint p result)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc result) h0 h1 /\
-    as_nat h1 (gsub result (size 8) (size 4)) == 1 /\
+    live h p /\ live h res /\ disjoint p res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     (let x = as_nat h0 (gsub p (size 0) (size 4)) in
      let y = as_nat h0 (gsub p (size 4) (size 4)) in
-     let x3, y3, z3 =
-       point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
-     let pointJacX, pointJacY, pointJacZ = S.toJacobianCoordinates (x, y) in
-     x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
+     as_point_nat (as_seq h1 res) == S.toJacobianCoordinates (x, y)))
+
 
 ///  Check if a point is on the curve
 

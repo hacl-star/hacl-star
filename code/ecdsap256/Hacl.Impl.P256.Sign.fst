@@ -92,7 +92,7 @@ val ecdsa_signature_step45: x: felem
       as_nat h1 x < order /\
       (
 	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), base_point) in
-	let (xN, _, _) = norm_jacob_point (rxN, ryN, rzN) in
+	let (xN, _, _) = S.norm_jacob_point (rxN, ryN, rzN) in
 	as_nat h1 x == xN % order /\
 	(
 	  if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
@@ -105,7 +105,7 @@ let ecdsa_signature_step45 x k tempBuffer =
     let result = create (size 12) (u64 0) in
     let tempForNorm = sub tempBuffer (size 0) (size 88) in
     secretToPublicWithoutNorm result k tempBuffer;
-    normX result x tempForNorm;
+    norm_jacob_point_x result x;
     qmod_short x x;
   pop_frame();
     bn_is_zero_mask4 x
@@ -225,7 +225,7 @@ val ecdsa_signature_core: alg: hash_alg_ecdsa
       let cutHashM = Lib.Sequence.sub hashM 0 32 in
       let z =  nat_from_bytes_be cutHashM % order in
       let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), base_point) in
-      let (xN, _, _) = norm_jacob_point (rxN, ryN, rzN) in
+      let (xN, _, _) = S.norm_jacob_point (rxN, ryN, rzN) in
 
       let kFelem = nat_from_bytes_be (as_seq h0 k) in
       as_nat h1 r == xN % order /\

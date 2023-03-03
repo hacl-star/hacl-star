@@ -9,6 +9,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Felem
+open Hacl.Impl.P256.Field
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
@@ -17,17 +18,17 @@ module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 val finv: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ disjoint a res /\
+    live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.prime /\
-    as_nat h1 res = SM.toDomain_ (S.finv (SM.fromDomain_ (as_nat h0 a))))
+    fmont_as_nat h1 res = S.finv (fmont_as_nat h0 a))
 
 
 val fsqrt: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ disjoint a res /\
+    live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.prime /\
-    as_nat h1 res = SM.toDomain_ (S.fsqrt (SM.fromDomain_ (as_nat h0 a))))
+    fmont_as_nat h1 res = S.fsqrt (fmont_as_nat h0 a))

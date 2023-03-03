@@ -30,7 +30,7 @@ let ecp256dh_i result scalar =
   let resultY = sub result (size 32) (size 32) in
 
   secretToPublic resultBuffer scalar tempBuffer;
-  let flag = isPointAtInfinityPrivate resultBuffer in
+  let flag = is_point_at_inf resultBuffer in
 
   let h0 = ST.get() in
   changeEndian resultBufferX;
@@ -84,12 +84,12 @@ let _ecp256dh_r result pubKey scalar =
   push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let publicKeyBuffer = create (size 12) (u64 0) in
-  bufferToJac pubKey publicKeyBuffer;
+  to_jacob_point pubKey publicKeyBuffer;
   let publicKeyCorrect = verifyQValidCurvePoint publicKeyBuffer in
   if publicKeyCorrect then
     begin
     scalarMultiplication publicKeyBuffer result scalar tempBuffer;
-    let flag = isPointAtInfinityPrivate result in
+    let flag = is_point_at_inf result in
     pop_frame();
     flag
     end

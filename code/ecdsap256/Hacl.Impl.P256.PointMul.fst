@@ -375,7 +375,7 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
     let h3 = ST.get() in
     lemma_point_to_domain h0 h2 p result;
     lemma_pif_to_domain h2 q;
-  norm q result buff;
+  norm_jacob_point q result;
     lemma_coord h3 q
 
 
@@ -416,7 +416,7 @@ let secretToPublic result scalar tempBuffer =
       let h1 = ST.get() in
       lemma_pif_to_domain h1 q;
     montgomery_ladder q basePoint scalar buff;
-    norm q result buff;
+    norm_jacob_point q result;
   pop_frame()
 
 

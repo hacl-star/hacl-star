@@ -349,8 +349,8 @@ let ecdsa_verification_step5_1 points =
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in
 
-  norm pointU1G result0Norm tmpForNorm;
-  norm pointU2Q result1Norm tmpForNorm;
+  norm_jacob_point pointU1G result0Norm;
+  norm_jacob_point pointU2Q result1Norm;
   let equalX = compare_points_bool result0Norm result1Norm in
 
   pop_frame();
@@ -392,7 +392,7 @@ val ecdsa_verification_step5_2:
 	    S.point_double u1D
 	  else
 	    S.point_add u1D u2D in
-        let pointNorm = norm_jacob_point sumD in
+        let pointNorm = S.norm_jacob_point sumD in
         let resultPoint =  as_point_nat (as_seq h1 pointSum) in
         pointNorm == resultPoint
       )
@@ -413,7 +413,7 @@ let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer =
   	point_double pointU1G pointSum buff
   else
   	point_add pointU1G pointU2Q pointSum buff end;
-  norm pointSum pointSum buff;
+  norm_jacob_point pointSum pointSum;
   pop_frame()
 
 
@@ -451,7 +451,7 @@ val ecdsa_verification_step5:
 	    S.point_double u1D
 	  else
 	    S.point_add u1D u2D in
-        let pointNorm = norm_jacob_point sumD in
+        let pointNorm = S.norm_jacob_point sumD in
         let (xResult, yResult, zResult) = pointNorm in
         state == not (Spec.P256.isPointAtInfinity pointNorm) /\
         as_nat h1 x == xResult % order
@@ -462,7 +462,7 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
   let pointSum = create (size 12) (u64 0) in
   ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer;
-  let resultIsPAI = isPointAtInfinityPublic pointSum in
+  let resultIsPAI = is_point_at_inf_vartime pointSum in
   let xCoordinateSum = sub pointSum (size 0) (size 4) in
   copy x xCoordinateSum;
   qmod_short x x;
@@ -526,8 +526,8 @@ val ecdsa_verification_core:
 	    S.point_double u1D
 	  else
 	    S.point_add u1D u2D in
-         let (xResult, yResult, zResult) = norm_jacob_point sumD in
-         state == not (Spec.P256.isPointAtInfinity (norm_jacob_point sumD)) /\
+         let (xResult, yResult, zResult) = S.norm_jacob_point sumD in
+         state == not (Spec.P256.isPointAtInfinity (S.norm_jacob_point sumD)) /\
          as_nat h1 xBuffer == xResult % order
       )
   )
@@ -576,7 +576,7 @@ let ecdsa_verification_ alg pubKey r s mLen m =
   let tempBuffer = sub tempBufferU64 (size 16) (size 100) in
   let xBuffer = sub tempBufferU64 (size 116) (size 4) in
 
-  bufferToJac pubKey publicKeyBuffer;
+  to_jacob_point pubKey publicKeyBuffer;
   let publicKeyCorrect = verifyQValidCurvePoint publicKeyBuffer in
   if publicKeyCorrect = false then
     begin

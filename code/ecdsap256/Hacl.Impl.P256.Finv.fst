@@ -185,7 +185,9 @@ let finv a res =
   let tmp = create 4ul (u64 0) in
   fromDomain a tmp;
   fexp_vartime res tmp b;
+  let h = ST.get () in
   toDomain res res;
+  SM.lemmaToDomainAndBackIsTheSame (as_nat h res);
   pop_frame ()
 
 
@@ -213,7 +215,9 @@ let fsqrt a res =
   let tmp = create 4ul (u64 0) in
   fromDomain a tmp;
   fexp_vartime res tmp b;
+  let h = ST.get () in
   toDomain res res;
+  SM.lemmaToDomainAndBackIsTheSame (as_nat h res);
   pop_frame ()
 
 //-----------------------------------------------
