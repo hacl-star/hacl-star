@@ -7,99 +7,103 @@ open FStar.HyperStack
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256
-open Spec.ECDSA
-
-open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.Felem
 
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
+
+module S = Spec.P256
+module SD = Spec.ECDSA
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let point_seq = LSeq.lseq uint64 12
 
-// TODO: rename
-let point_prime = p:point_seq{
-  let x = LSeq.sub p 0 4 in
-  let y = LSeq.sub p 4 4 in
-  let z = LSeq.sub p 8 4 in
-  felem_seq_as_nat x < prime /\
-  felem_seq_as_nat y < prime /\
-  felem_seq_as_nat z < prime}
-
-// TODO: rename
-let point_prime_to_coordinates (p:point_seq) =
+let as_point_nat (p:point_seq) =
   felem_seq_as_nat (LSeq.sub p 0 4),
   felem_seq_as_nat (LSeq.sub p 4 4),
   felem_seq_as_nat (LSeq.sub p 8 4)
 
+let point_inv (p:point_seq) =
+  let x, y, z = as_point_nat p in
+  x < S.prime /\ y < S.prime /\ z < S.prime
+
+// TODO: rename
+let point_prime = p:point_seq{point_inv p}
 
 inline_for_extraction noextract
 let point = lbuffer uint64 (size 12)
 
 noextract
 let point_x_as_nat (h:mem) (e:point) : GTot nat =
-  let open Lib.Sequence in
-  let s = as_seq h e in
-  as_nat4 (s.[0], s.[1], s.[2], s.[3])
+  as_nat h (gsub e 0ul 4ul)
 
 noextract
 let point_y_as_nat (h:mem) (e:point) : GTot nat =
-  let open Lib.Sequence in
-  let s = as_seq h e in
-  as_nat4 (s.[4], s.[5], s.[6], s.[7])
+  as_nat h (gsub e 4ul 4ul)
 
 noextract
 let point_z_as_nat (h: mem) (e: point) : GTot nat =
-  let open Lib.Sequence in
-  let s = as_seq h e in
-  as_nat4 (s.[8], s.[9], s.[10], s.[11])
+  as_nat h (gsub e 8ul 4ul)
+
+inline_for_extraction noextract
+let getx (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 0ul 4ul /\ h0 == h1)
+  = sub p 0ul 4ul
+
+inline_for_extraction noextract
+let gety (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 4ul 4ul /\ h0 == h1)
+  = sub p 4ul 4ul
+
+inline_for_extraction noextract
+let getz (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 8ul 4ul /\ h0 == h1)
+  = sub p 8ul 4ul
 
 
-// TODO: rename
-val uploadBasePoint: p:point -> Stack unit
+
+val make_base_point: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    as_nat h1 (gsub p (size 0) (size 4)) < prime /\
-    as_nat h1 (gsub p (size 4) (size 4)) < prime /\
-    as_nat h1 (gsub p (size 8) (size 4)) < prime /\
-    (let x1 = as_nat h1 (gsub p (size 0) (size 4)) in
-    let y1 = as_nat h1 (gsub p (size 4) (size 4)) in
-    let z1 = as_nat h1 (gsub p (size 8) (size 4)) in
-    let bpX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in
-    let bpY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in
-
-    fromDomain_ x1 == bpX /\ fromDomain_ y1 == bpY /\ fromDomain_ z1 == 1))
+    point_inv (as_seq h1 p) /\
+    (let (x1, y1, z1) = as_point_nat (as_seq h1 p) in
+    SM.fromDomain_ x1 == S.g_x /\
+    SM.fromDomain_ y1 == S.g_y /\
+    SM.fromDomain_ z1 == 1))
 
 
-// TODO: rename
-val zero_buffer: p:point -> Stack unit
+val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    as_nat h1 (gsub p (size 0) (size 4)) == 0 /\
-    as_nat h1 (gsub p (size 4) (size 4)) == 0 /\
-    as_nat h1 (gsub p (size 8) (size 4)) == 0)
+    point_inv (as_seq h1 p) /\
+    (let (x1, y1, z1) = as_point_nat (as_seq h1 p) in
+    SM.fromDomain_ x1 == 0 /\
+    SM.fromDomain_ y1 == 0 /\
+    SM.fromDomain_ z1 == 0))
 
 
-val copy_point: p: point -> result:point -> Stack unit
-  (requires fun h -> live h p /\ live h result /\ disjoint p result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_seq h1 result == as_seq h0 p)
+val copy_point: p:point -> res:point -> Stack unit
+  (requires fun h -> live h p /\ live h res /\ disjoint p res)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == as_seq h0 p)
 
 
 ///  check if a point is a point-at-infinity
 
 val isPointAtInfinityPrivate: p:point -> Stack uint64
   (requires fun h ->
-    live h p /\ as_nat h (gsub p (size 8) (size 4)) < prime)
+    live h p /\ as_nat h (gsub p (size 8) (size 4)) < S.prime)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     ((uint_v r == 0 \/ uint_v r == maxint U64) /\
-    (let x, y, z = fromDomainPoint (point_prime_to_coordinates (as_seq h0 p)) in
+    (let x, y, z = SM.fromDomainPoint (as_point_nat (as_seq h0 p)) in
      if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0) /\
-     (let x, y, z = point_prime_to_coordinates (as_seq h0 p) in
+     (let x, y, z = as_point_nat (as_seq h0 p) in
      if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0)))
 
 
@@ -108,7 +112,7 @@ thus this code is not secret independent with respect to the operations done ove
 val isPointAtInfinityPublic: p:point -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
+    r == Spec.P256.isPointAtInfinity (as_point_nat (as_seq h0 p)))
 
 
 ///  Point conversion between Montgomery and Regular representations
@@ -116,25 +120,25 @@ val isPointAtInfinityPublic: p:point -> Stack bool
 val pointToDomain: p:point -> result:point -> Stack unit
   (requires fun h ->
     live h p /\ live h result /\ eq_or_disjoint p result /\
-    point_x_as_nat h p < prime /\
-    point_y_as_nat h p < prime /\
-    point_z_as_nat h p < prime)
+    point_x_as_nat h p < S.prime /\
+    point_y_as_nat h p < S.prime /\
+    point_z_as_nat h p < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    point_x_as_nat h1 result == toDomain_ (point_x_as_nat h0 p) /\
-    point_y_as_nat h1 result == toDomain_ (point_y_as_nat h0 p) /\
-    point_z_as_nat h1 result == toDomain_ (point_z_as_nat h0 p))
+    point_x_as_nat h1 result == SM.toDomain_ (point_x_as_nat h0 p) /\
+    point_y_as_nat h1 result == SM.toDomain_ (point_y_as_nat h0 p) /\
+    point_z_as_nat h1 result == SM.toDomain_ (point_z_as_nat h0 p))
 
 
 val pointFromDomain: p:point -> result:point-> Stack unit
   (requires fun h ->
     live h p /\ live h result /\ eq_or_disjoint p result /\
-    point_x_as_nat h p < prime /\
-    point_y_as_nat h p < prime /\
-    point_z_as_nat h p < prime)
+    point_x_as_nat h p < S.prime /\
+    point_y_as_nat h p < S.prime /\
+    point_z_as_nat h p < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    point_x_as_nat h1 result == fromDomain_ (point_x_as_nat h0 p) /\
-    point_y_as_nat h1 result == fromDomain_ (point_y_as_nat h0 p) /\
-    point_z_as_nat h1 result == fromDomain_ (point_z_as_nat h0 p))
+    point_x_as_nat h1 result == SM.fromDomain_ (point_x_as_nat h0 p) /\
+    point_y_as_nat h1 result == SM.fromDomain_ (point_y_as_nat h0 p) /\
+    point_z_as_nat h1 result == SM.fromDomain_ (point_z_as_nat h0 p))
 
 
 ///  Point conversion between Jacobian and Affine coordinates representations
@@ -147,14 +151,14 @@ val norm:
   (requires fun h ->
     live h p /\ live h resultPoint /\ live h tempBuffer /\
     disjoint p tempBuffer /\ disjoint tempBuffer resultPoint /\
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime)
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime)
   (ensures fun h0 _ h1 ->
     modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\
-    (let resultPoint = point_prime_to_coordinates (as_seq h1 resultPoint) in
-    let pointD = fromDomainPoint (point_prime_to_coordinates (as_seq h0 p)) in
-    let pointNorm = norm_jacob_point pointD in
+    (let resultPoint = as_point_nat (as_seq h1 resultPoint) in
+    let pointD = SM.fromDomainPoint (as_point_nat (as_seq h0 p)) in
+    let pointNorm = S.norm_jacob_point pointD in
     pointNorm == resultPoint))
 
 
@@ -166,15 +170,15 @@ val normX:
   (requires fun h ->
     live h p /\ live h result /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc result; loc tempBuffer] /\
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime)
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime)
   (ensures fun h0 _ h1 ->
     modifies (loc tempBuffer |+| loc result) h0 h1  /\
-    (let pxD = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
-    let pyD = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
-    let pzD = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
-    let (xN, _, _) = norm_jacob_point (pxD, pyD, pzD) in
+    (let pxD = SM.fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
+    let pyD = SM.fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
+    let pzD = SM.fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
+    let (xN, _, _) = S.norm_jacob_point (pxD, pyD, pzD) in
     as_nat h1 result == xN))
 
 
@@ -188,7 +192,7 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
      let y = as_nat h0 (gsub p (size 4) (size 4)) in
      let x3, y3, z3 =
        point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
-     let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
+     let pointJacX, pointJacY, pointJacZ = S.toJacobianCoordinates (x, y) in
      x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
 ///  Check if a point is on the curve
@@ -197,11 +201,11 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
 thus this code is not secret independent with respect to the operations done over the input.")]
 val isPointOnCurvePublic: p:point -> Stack bool
   (requires fun h -> live h p /\
-    as_nat h (gsub p (size 0) (size 4)) < prime /\
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
+    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
+    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
     as_nat h (gsub p (size 8) (size 4)) == 1)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    r == is_point_on_curve (as_nat h1 (gsub p (size 0) (size 4)),
+    r == S.is_point_on_curve (as_nat h1 (gsub p (size 0) (size 4)),
                         as_nat h1 (gsub p (size 4) (size 4)),
                         as_nat h1 (gsub p (size 8) (size 4))))
 
@@ -214,7 +218,7 @@ val verifyQValidCurvePoint: pubKeyAsPoint:point -> Stack bool
     live h pubKeyAsPoint /\
     point_z_as_nat h pubKeyAsPoint == 1)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == verifyQValidCurvePointSpec (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
+    r == SD.verifyQValidCurvePointSpec (as_point_nat (as_seq h0 pubKeyAsPoint)))
 
 
 // TODO: mv
@@ -225,7 +229,7 @@ val verifyQ: pubKey:lbuffer uint8 (size 64) -> Stack bool
     (let publicKeyX = BSeq.nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
     let publicKeyY = BSeq.nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
     let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in
-    r == verifyQValidCurvePointSpec pkJ))
+    r == SD.verifyQValidCurvePointSpec pkJ))
 
 
 // TODO: mv
@@ -233,4 +237,4 @@ val isMoreThanZeroLessThanOrder: x:lbuffer uint8 (size 32) -> Stack bool
   (requires fun h -> live h x)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (let scalar = BSeq.nat_from_bytes_be (as_seq h0 x) in
-    r <==> (scalar > 0 && scalar < order)))
+    r <==> (scalar > 0 && scalar < S.order)))

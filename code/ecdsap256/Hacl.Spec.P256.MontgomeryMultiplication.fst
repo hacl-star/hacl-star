@@ -12,7 +12,7 @@ let mont_R_inv = S.modp_inv2 (pow2 256)
 let fromDomain_ (a:int) : S.felem = a * mont_R_inv % S.prime
 let toDomain_   (a:int) : S.felem = a * mont_R % S.prime
 
-let fromDomainPoint (a:tuple3 nat nat nat) =
+let fromDomainPoint (a:tuple3 nat nat nat) : S.jacob_point =
   let x, y, z = a in
   fromDomain_ x, fromDomain_ y, fromDomain_ z
 

@@ -25,66 +25,43 @@ open Hacl.Impl.P256.Constants
 module BSeq = Lib.ByteSequence
 module S = Spec.P256
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let uploadBasePoint p =
-    let h0 = ST.get() in
-  upd p (size 0) (u64 8784043285714375740);
-  upd p (size 1) (u64 8483257759279461889);
-  upd p (size 2) (u64 8789745728267363600);
-  upd p (size 3) (u64 1770019616739251654);
-  assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 < prime);
-    assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948);
-  assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain_ 11110593207902424140321080247206512405358633331993495164878354046817554469948);
-
-  upd p (size 4) (u64 15992936863339206154);
-  upd p (size 5) (u64 10037038012062884956);
-  upd p (size 6) (u64 15197544864945402661);
-  upd p (size 7) (u64 9615747158586711429);
-  assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 < prime);
-  assert_norm (15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-  assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain_ 60359023176204190920225817201443260813112970217682417638161152432929735267850);
+[@CInline]
+let make_base_point p =
+  let x = getx p in
+  let y = gety p in
+  let z = getz p in
+  make_g_x x;
+  make_g_y y;
+  make_fone z
 
 
-  upd p (size 8) (u64 1);
-  upd p (size 9) (u64 18446744069414584320);
-  upd p (size 10) (u64 18446744073709551615);
-  upd p (size 11) (u64 4294967294);
-  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime);
-  assert_norm (1 = fromDomain_ 26959946660873538059280334323183841250350249843923952699046031785985);
-  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985)
+[@CInline]
+let make_point_at_inf p =
+  let x = getx p in
+  let y = gety p in
+  let z = getz p in
+  make_fzero x;
+  make_fzero y;
+  make_fzero z
 
 
-let zero_buffer p =
-  upd p (size 0) (u64 0);
-  upd p (size 1) (u64 0);
-  upd p (size 2) (u64 0);
-  upd p (size 3) (u64 0);
-  upd p (size 4) (u64 0);
-  upd p (size 5) (u64 0);
-  upd p (size 6) (u64 0);
-  upd p (size 7) (u64 0);
-  upd p (size 8) (u64 0);
-  upd p (size 9) (u64 0);
-  upd p (size 10) (u64 0);
-  upd p (size 11) (u64 0)
-
-
-let copy_point p result = copy result p
+let copy_point p res = copy res p
 
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime} ->
-  Lemma (isPointAtInfinity (x, y, z) == isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
+val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < S.prime} ->
+  Lemma (S.isPointAtInfinity (x, y, z) == S.isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
 
 let lemma_pointAtInfInDomain x y z =
-  assert (if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
-  assert_norm (S.modp_inv2 (pow2 256) % prime <> 0);
+  assert (if S.isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
+  assert_norm (S.modp_inv2 (pow2 256) % S.prime <> 0);
   lemmaFromDomain z;
-  assert (fromDomain_ z == (z * S.modp_inv2 (pow2 256) % prime));
-  assert_norm (0 * S.modp_inv2 (pow2 256) % prime == 0);
+  assert (fromDomain_ z == (z * S.modp_inv2 (pow2 256) % S.prime));
+  assert_norm (0 * S.modp_inv2 (pow2 256) % S.prime == 0);
   lemma_multiplication_not_mod_prime z;
-  assert (if z = 0 then z * S.modp_inv2 (pow2 256) % prime == 0
+  assert (if z = 0 then z * S.modp_inv2 (pow2 256) % S.prime == 0
                    else fromDomain_ z <> 0)
 
 
@@ -150,8 +127,8 @@ let pointFromDomain p result =
 inline_for_extraction noextract
 val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: point -> Stack unit
   (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\
-    as_nat h z2x < prime /\ as_nat h z3y < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime /\
+    as_nat h z2x < S.prime /\ as_nat h z3y < S.prime /\
+    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
     disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
   (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\
     (
@@ -189,22 +166,22 @@ let normalisation_update z2x z3y p resultPoint =
 
 
 let lemmaEraseToDomainFromDomain z =
-  lemma_mod_mul_distr_l (z * z) z prime
+  lemma_mod_mul_distr_l (z * z) z S.prime
 
 
-val lemma_norm_as_specification: xD: nat{xD < prime} -> yD: nat{yD < prime} ->
-  zD: nat {zD < prime} ->
-  x3 : nat {x3 == xD * (S.pow (zD * zD) (prime - 2) % prime) % prime}->
-  y3 : nat {y3 == yD * (S.pow (zD * zD * zD) (prime -2) % prime) % prime} ->
-  z3: nat {if isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} ->
+val lemma_norm_as_specification: xD: nat{xD < S.prime} -> yD: nat{yD < S.prime} ->
+  zD: nat {zD < S.prime} ->
+  x3 : nat {x3 == xD * (S.pow (zD * zD) (S.prime - 2) % S.prime) % S.prime}->
+  y3 : nat {y3 == yD * (S.pow (zD * zD * zD) (S.prime -2) % S.prime) % S.prime} ->
+  z3: nat {if S.isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} ->
   Lemma (
-  let (xN, yN, zN) = norm_jacob_point (xD, yD, zD) in
+  let (xN, yN, zN) = S.norm_jacob_point (xD, yD, zD) in
   x3 == xN /\ y3 == yN /\ z3 == zN)
 
 
 let lemma_norm_as_specification xD yD zD x3 y3 z3 =
-  power_distributivity (zD * zD * zD) (prime - 2) prime;
-  power_distributivity (zD * zD) (prime -2) prime
+  power_distributivity (zD * zD * zD) (S.prime - 2) S.prime;
+  power_distributivity (zD * zD) (S.prime -2) S.prime
 
 
 let norm p resultPoint tempBuffer =
@@ -222,16 +199,16 @@ let norm p resultPoint tempBuffer =
     let h1 = ST.get() in
   fmul z2f zf z3f;
     let h2 = ST.get() in
-      lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf)) prime;
-      assert (as_nat h1 z2f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime));
-      assert (as_nat h2 z3f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime));
+      lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf)) S.prime;
+      assert (as_nat h1 z2f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % S.prime));
+      assert (as_nat h2 z3f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % S.prime));
 
   finv z2f z2f;
     let h3 = ST.get() in
-      assert(as_nat h3 z2f = toDomain_ (S.pow (fromDomain_ (as_nat h2 z2f)) (prime - 2) % prime));
+      assert(as_nat h3 z2f = toDomain_ (S.pow (fromDomain_ (as_nat h2 z2f)) (S.prime - 2) % S.prime));
   finv z3f z3f;
     let h4 = ST.get() in
-      assert(as_nat h4 z3f = toDomain_ (S.pow (fromDomain_ (as_nat h3 z3f)) (prime - 2) % prime));
+      assert(as_nat h4 z3f = toDomain_ (S.pow (fromDomain_ (as_nat h3 z3f)) (S.prime - 2) % S.prime));
 
   fmul xf z2f z2f;
   fmul yf z3f z3f;
@@ -239,10 +216,10 @@ let norm p resultPoint tempBuffer =
 
     let h3 = ST.get() in
     lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf));
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (S.prime -2) S.prime;
     Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
     Math.Lemmas.nat_times_nat_is_nat (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (fromDomain_ (as_nat h0 zf));
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (S.prime -2) S.prime;
 
     lemma_norm_as_specification (fromDomain_ (point_x_as_nat h0 p)) (fromDomain_ (point_y_as_nat h0 p)) (fromDomain_ (point_z_as_nat h0 p)) (point_x_as_nat h3 resultPoint) (point_y_as_nat h3 resultPoint) (point_z_as_nat h3 resultPoint);
 
@@ -250,7 +227,7 @@ let norm p resultPoint tempBuffer =
        let zD = fromDomain_(point_z_as_nat h0 p) in
        let xD = fromDomain_(point_x_as_nat h0 p) in
        let yD = fromDomain_(point_y_as_nat h0 p) in
-       let (xN, yN, zN) = norm_jacob_point (xD, yD, zD) in
+       let (xN, yN, zN) = S.norm_jacob_point (xD, yD, zD) in
        point_x_as_nat h3 resultPoint == xN /\ point_y_as_nat h3 resultPoint == yN /\ point_z_as_nat h3 resultPoint == zN)
 
 
@@ -269,8 +246,8 @@ let normX p result tempBuffer =
   finv z2f z2f;
   fmul z2f xf z2f;
   fromDomain z2f result;
-  assert_norm (prime >= 2);
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
+  assert_norm (S.prime >= 2);
+    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (S.prime -2) S.prime
 
 
 
@@ -289,8 +266,8 @@ let bufferToJac p result =
 
 inline_for_extraction noextract
 val y_2: y: felem -> r: felem -> Stack unit
-  (requires fun h -> as_nat h y < prime /\ live h y /\ live h r /\ eq_or_disjoint y r)
-  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat h1 r == toDomain_ ((as_nat h0 y) * (as_nat h0 y) % prime))
+  (requires fun h -> as_nat h y < S.prime /\ live h y /\ live h r /\ eq_or_disjoint y r)
+  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat h1 r == toDomain_ ((as_nat h0 y) * (as_nat h0 y) % S.prime))
 
 let y_2 y r =
   toDomain y r;
@@ -302,7 +279,7 @@ val upload_p256_point_on_curve_constant: x: felem -> Stack unit
   (requires fun h -> live h x)
   (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\
     as_nat h1 x == toDomain_ Spec.P256.b_coeff /\
-    as_nat h1 x < prime
+    as_nat h1 x < S.prime
  )
 
 let upload_p256_point_on_curve_constant x =
@@ -313,31 +290,31 @@ let upload_p256_point_on_curve_constant x =
   assert_norm (
     15608596021259845087 + 12461466548982526096 * pow2 64 +
     16546823903870267094 * pow2 64 * pow2 64 +
-    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == Spec.P256.b_coeff * pow2 256 % prime)
+    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == Spec.P256.b_coeff * pow2 256 % S.prime)
 
 
-val lemma_xcube: x_: nat {x_ < prime} -> Lemma
-  (((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
+val lemma_xcube: x_: nat {x_ < S.prime} -> Lemma
+  (((x_ * x_ * x_ % S.prime) - (3 * x_ % S.prime)) % S.prime == (x_ * x_ * x_ - 3 * x_) % S.prime)
 
 let lemma_xcube x_ =
-  lemma_mod_add_distr (- (3 * x_ % prime)) (x_ * x_ * x_) prime;
-  lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) prime
+  lemma_mod_add_distr (- (3 * x_ % S.prime)) (x_ * x_ * x_) S.prime;
+  lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) S.prime
 
 
-val lemma_xcube2: x_ : nat {x_ < prime} -> Lemma (toDomain_ (((((x_ * x_ * x_) - (3 * x_)) % prime) + Spec.P256.b_coeff) % prime) == toDomain_ ((x_ * x_ * x_  + Spec.P256.a_coeff * x_ + Spec.P256.b_coeff) % prime))
+val lemma_xcube2: x_ : nat {x_ < S.prime} -> Lemma (toDomain_ (((((x_ * x_ * x_) - (3 * x_)) % S.prime) + Spec.P256.b_coeff) % S.prime) == toDomain_ ((x_ * x_ * x_  + Spec.P256.a_coeff * x_ + Spec.P256.b_coeff) % S.prime))
 
 let lemma_xcube2 x_ =
-  lemma_mod_add_distr Spec.P256.b_coeff ((x_ * x_ * x_) - (3 * x_)) prime
+  lemma_mod_add_distr Spec.P256.b_coeff ((x_ * x_ * x_) - (3 * x_)) S.prime
 
 
 inline_for_extraction noextract
 val xcube_minus_x: x: felem -> r: felem -> Stack unit
-  (requires fun h -> as_nat h x < prime /\ live h x  /\ live h r /\ eq_or_disjoint x r)
+  (requires fun h -> as_nat h x < S.prime /\ live h x  /\ live h r /\ eq_or_disjoint x r)
   (ensures fun h0 _ h1 ->
     modifies (loc r) h0 h1 /\
     (
       let x_ = as_nat h0 x in
-      as_nat h1 r = toDomain_((x_ * x_ * x_ - 3 * x_ + Spec.P256.b_coeff) % prime))
+      as_nat h1 r = toDomain_((x_ * x_ * x_ - 3 * x_ + Spec.P256.b_coeff) % S.prime))
     )
 
 let xcube_minus_x x r =
@@ -349,7 +326,7 @@ let xcube_minus_x x r =
   toDomain x xToDomainBuffer;
   fsqr xToDomainBuffer r;
   fmul r xToDomainBuffer r;
-    lemma_mod_mul_distr_l ((as_nat h0 x) * (as_nat h0 x)) (as_nat h0 x) prime;
+    lemma_mod_mul_distr_l ((as_nat h0 x) * (as_nat h0 x)) (as_nat h0 x) S.prime;
   fmul_by_3 xToDomainBuffer minusThreeXBuffer;
   fsub r minusThreeXBuffer r;
     upload_p256_point_on_curve_constant p256_constant;
@@ -358,11 +335,11 @@ let xcube_minus_x x r =
 
   let x_ = as_nat h0 x in
   lemma_xcube x_;
-  lemma_mod_add_distr Spec.P256.b_coeff ((x_ * x_ * x_) - (3 * x_)) prime;
+  lemma_mod_add_distr Spec.P256.b_coeff ((x_ * x_ * x_) - (3 * x_)) S.prime;
   lemma_xcube2 x_
 
 
-val lemma_modular_multiplication_p256_2_d: a:nat {a < prime} -> b:nat {b < prime} ->
+val lemma_modular_multiplication_p256_2_d: a:nat {a < S.prime} -> b:nat {b < S.prime} ->
   Lemma (toDomain_ a = toDomain_ b <==> a == b)
 
 let lemma_modular_multiplication_p256_2_d a b =
@@ -381,7 +358,7 @@ let isPointOnCurvePublic p =
     y_2 y y2Buffer;
     xcube_minus_x x xBuffer;
 
-    lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.b_coeff) % prime);
+    lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % S.prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.b_coeff) % S.prime);
 
     let r = bn_is_eq_mask4 y2Buffer xBuffer in
     let z = not (eq_0_u64 r) in
@@ -393,7 +370,7 @@ val isCoordinateValid: p: point -> Stack bool
   (requires fun h -> live h p /\ point_z_as_nat h p == 1)
   (ensures fun h0 r h1 ->
     modifies0 h0 h1 /\
-    r == (point_x_as_nat h0 p < prime && point_y_as_nat h0 p < prime && point_z_as_nat h0 p < prime)
+    r == (point_x_as_nat h0 p < S.prime && point_y_as_nat h0 p < S.prime && point_z_as_nat h0 p < S.prime)
   )
 
 let isCoordinateValid p =
@@ -439,10 +416,10 @@ let verifyQ pubKey =
       lemma_core_0 publicKeyY h1;
       BSeq.uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
 
-      changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
+      SD.changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
       BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
 
-      changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
+      SD.changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
       BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
 
   bufferToJac publicKeyB publicKeyJ;

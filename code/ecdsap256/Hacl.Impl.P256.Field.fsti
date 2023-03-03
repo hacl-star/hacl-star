@@ -17,6 +17,21 @@ module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 let fmont_as_nat (h:mem) (a:felem) = SM.fromDomain_ (as_nat h a)
 
+
+val make_fzero: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == SM.toDomain_ 0 /\
+    SM.fromDomain_ (as_nat h1 n) == 0)
+
+
+val make_fone: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == SM.toDomain_ 1 /\
+    SM.fromDomain_ (as_nat h1 n) == 1)
+
+
 val fmod_short: x:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res)

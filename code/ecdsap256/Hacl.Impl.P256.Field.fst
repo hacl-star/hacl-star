@@ -25,6 +25,26 @@ friend Hacl.Bignum256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+[@CInline]
+let make_fzero n =
+  bn_set_zero4 n;
+  assert_norm (SM.toDomain_ 0 = 0);
+  assert_norm (SM.fromDomain_ 0 == 0)
+
+
+[@CInline]
+let make_fone n =
+  // 0xfffffffeffffffffffffffffffffffff000000000000000000000001
+  [@inline_let] let n0 = u64 0x1 in
+  [@inline_let] let n1 = u64 0xffffffff00000000 in
+  [@inline_let] let n2 = u64 0xffffffffffffffff in
+  [@inline_let] let n3 = u64 0xfffffffe in
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ 1);
+  assert_norm (SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
+  bn_make_u64_4 n0 n1 n2 n3 n
+
+//----------
+
 val mont_R_inv_is_bn_mont_d: unit -> Lemma
   (requires S.prime % 2 = 1)
   (ensures  (let d, _ = SBML.eea_pow2_odd 256 S.prime in SM.mont_R_inv == d % S.prime))

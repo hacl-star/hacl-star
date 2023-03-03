@@ -35,7 +35,7 @@ val scalarMultiplication:
     as_nat h1 (gsub result (size 4) (size 4)) < S.prime /\
     as_nat h1 (gsub result (size 8) (size 4)) < S.prime /\
     (let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
-    let (xN, yN, zN) = S.scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in
+    let (xN, yN, zN) = S.scalar_multiplication (as_seq h0 scalar) (as_point_nat (as_seq h0 p)) in
     x3 == xN /\ y3 == yN /\ z3 == zN))
 
 
@@ -56,8 +56,8 @@ val scalarMultiplicationWithoutNorm:
     as_nat h1 (gsub result (size 0) (size 4)) < S.prime /\
     as_nat h1 (gsub result (size 4) (size 4)) < S.prime /\
     as_nat h1 (gsub result (size 8) (size 4)) < S.prime /\
-    (let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in
-    let rN, _ = S.montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates (as_seq h0 p)) in
+    (let p1 = fromDomainPoint(as_point_nat (as_seq h1 result)) in
+    let rN, _ = S.montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0),  as_point_nat (as_seq h0 p)) in
     rN == p1))
 
 
@@ -91,6 +91,6 @@ val secretToPublicWithoutNorm:
     as_nat h1 (gsub result (size 0) (size 4)) < S.prime /\
     as_nat h1 (gsub result (size 4) (size 4)) < S.prime /\
     as_nat h1 (gsub result (size 8) (size 4)) < S.prime /\
-    (let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in
+    (let p1 = fromDomainPoint(as_point_nat (as_seq h1 result)) in
     let rN, _ = S.montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), S.base_point) in
     rN == p1))
