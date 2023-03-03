@@ -48,6 +48,19 @@ let bn_set_one4 f =
 ///  Comparison
 
 [@CInline]
+let bn_is_zero_vartime4 f =
+  let open Lib.RawIntTypes in
+  let f0 = index f 0ul in
+  let f1 = index f 1ul in
+  let f2 = index f 2ul in
+  let f3 = index f 3ul in
+  u64_to_UInt64 f0 =. 0uL &&
+  u64_to_UInt64 f1 =. 0uL &&
+  u64_to_UInt64 f2 =. 0uL &&
+  u64_to_UInt64 f3 =. 0uL
+
+
+[@CInline]
 let bn_is_zero_mask4 f =
   let h0 = ST.get () in
   SN.bn_is_zero_mask_lemma (as_seq h0 f);

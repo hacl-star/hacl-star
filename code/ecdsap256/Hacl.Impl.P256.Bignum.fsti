@@ -51,6 +51,11 @@ val bn_set_one4: f:felem -> Stack unit
 
 ///  Comparison
 
+val bn_is_zero_vartime4: f:felem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 f = 0))
+
+
 val bn_is_zero_mask4: f:felem -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
