@@ -48,55 +48,6 @@ let ith_bit k i =
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
   res
 
-
-val _exp_step0: p:qelem -> q:qelem -> tuple2 qelem qelem
-let _exp_step0 r0 r1 =
-  let r1 = r0 *^ r1 in
-  let r0 = r0 *^ r0 in
-  r0, r1
-
-
-val _exp_step1: p:qelem -> q:qelem -> tuple2 qelem qelem
-let _exp_step1 r0 r1 =
-  let r0 = r0 *^ r1 in
-  let r1 = r1 *^ r1 in
-  (r0, r1)
-
-
-let swap p q = q, p
-
-val conditional_swap: i:uint64 -> p:qelem -> q:qelem -> tuple2 qelem qelem
-let conditional_swap i p q =
-  if v i = 0 then (p, q) else (q, p)
-
-
-val lemma_swaped_steps: p: qelem -> q: qelem ->
-  Lemma (
-    let afterSwapP, afterSwapQ = swap p q in
-    let p1, q1 = _exp_step0 afterSwapP afterSwapQ in
-    let p2, q2 = swap p1 q1 in
-    let r0, r1 = _exp_step1 p q in
-    p2 == r0 /\ q2 == r1)
-
-let lemma_swaped_steps p q = ()
-
-
-val _exp_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 qelem qelem -> tuple2 qelem qelem
-let _exp_step k i (p, q) =
-  let bit = 255 - i in
-  let bit = ith_bit k bit in
-  let open Lib.RawIntTypes in
-  if uint_to_nat bit = 0 then _exp_step0 p q else _exp_step1 p q
-
-
-val _exponent_spec: k:lseq uint8 32  -> tuple2 qelem qelem -> tuple2 qelem qelem
-let _exponent_spec k (p, q) =
-  Lib.LoopCombinators.repeati 256 (_exp_step k) (p, q)
-
-
-val exponent_spec: a:qelem -> r:qelem{r = pow a (order - 2) % order}
-let exponent_spec a = pow a (order - 2) % order
-
 //---------------------------------
 // TODO: remove
 let felem_seq = lseq uint64 4

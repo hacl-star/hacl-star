@@ -28,6 +28,6 @@ val multPowerPartial: s:felem -> a:felem -> b:felem -> result:felem -> Stack uni
   (requires fun h ->
     live h a /\ live h b /\ live h result /\
     as_nat h a < S.order /\ as_nat h b < S.order /\
-    fromDomain_ (as_nat h a) == SD.exponent_spec (fromDomain_ (fromDomain_ (as_nat h s))))
+    fromDomain_ (as_nat h a) == S.qinv (fromDomain_ (fromDomain_ (as_nat h s))))
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     as_nat h1 result = (S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)) % S.order)

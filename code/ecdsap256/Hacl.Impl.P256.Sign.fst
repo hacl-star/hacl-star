@@ -26,6 +26,8 @@ open Hacl.Impl.P256.PointMul
 open Spec.Hash.Definitions
 open Hacl.Hash.SHA2
 
+module S = Spec.P256
+
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
 
@@ -111,10 +113,10 @@ let ecdsa_signature_step45 x k tempBuffer =
 #pop-options
 
 val lemma_power_step6: kInv: nat -> Lemma
-  (Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (order - 2)))
+  (S.qinv (fromDomain_ kInv) == toDomain_ (pow kInv (order - 2)))
 
 let lemma_power_step6 kInv =
-  let a = Spec.ECDSA.exponent_spec (fromDomain_ kInv) in
+  let a = S.qinv (fromDomain_ kInv) in
   lemmaFromDomain kInv;
 
   power_distributivity (kInv * modp_inv2_prime (pow2 256) order) (order - 2) order;
