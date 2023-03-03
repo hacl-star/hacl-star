@@ -96,32 +96,34 @@ let isPointAtInfinityPublic p =
   z0_zero && z1_zero && z2_zero && z3_zero
 
 
-let pointToDomain p result =
-    let p_x = sub p (size 0) (size 4) in
-    let p_y = sub p (size 4) (size 4) in
-    let p_z = sub p (size 8) (size 4) in
+[@CInline]
+let point_to_mont p res =
+  let px = getx p in
+  let py = gety p in
+  let pz = getz p in
 
-    let r_x = sub result (size 0) (size 4) in
-    let r_y = sub result (size 4) (size 4) in
-    let r_z = sub result (size 8) (size 4) in
+  let rx = getx res in
+  let ry = gety res in
+  let rz = getz res in
 
-    toDomain p_x r_x;
-    toDomain p_y r_y;
-    toDomain p_z r_z
+  toDomain px rx;
+  toDomain py ry;
+  toDomain pz rz
 
 
-let pointFromDomain p result =
-    let p_x = sub p (size 0) (size 4) in
-    let p_y = sub p (size 4) (size 4) in
-    let p_z = sub p (size 8) (size 4) in
+[@CInline]
+let point_from_mont p res =
+  let px = getx p in
+  let py = gety p in
+  let pz = getz p in
 
-    let r_x = sub result (size 0) (size 4) in
-    let r_y = sub result (size 4) (size 4) in
-    let r_z = sub result (size 8) (size 4) in
+  let rx = getx res in
+  let ry = gety res in
+  let rz = getz res in
 
-    fromDomain p_x r_x;
-    fromDomain p_y r_y;
-    fromDomain p_z r_z
+  fromDomain px rx;
+  fromDomain py ry;
+  fromDomain pz rz
 
 
 inline_for_extraction noextract
@@ -274,25 +276,6 @@ let y_2 y r =
   fsqr r r
 
 
-inline_for_extraction noextract
-val upload_p256_point_on_curve_constant: x: felem -> Stack unit
-  (requires fun h -> live h x)
-  (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\
-    as_nat h1 x == toDomain_ Spec.P256.b_coeff /\
-    as_nat h1 x < S.prime
- )
-
-let upload_p256_point_on_curve_constant x =
-  upd x (size 0) (u64 15608596021259845087);
-  upd x (size 1) (u64 12461466548982526096);
-  upd x (size 2) (u64 16546823903870267094);
-  upd x (size 3) (u64 15866188208926050356);
-  assert_norm (
-    15608596021259845087 + 12461466548982526096 * pow2 64 +
-    16546823903870267094 * pow2 64 * pow2 64 +
-    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == Spec.P256.b_coeff * pow2 256 % S.prime)
-
-
 val lemma_xcube: x_: nat {x_ < S.prime} -> Lemma
   (((x_ * x_ * x_ % S.prime) - (3 * x_ % S.prime)) % S.prime == (x_ * x_ * x_ - 3 * x_) % S.prime)
 
@@ -329,7 +312,7 @@ let xcube_minus_x x r =
     lemma_mod_mul_distr_l ((as_nat h0 x) * (as_nat h0 x)) (as_nat h0 x) S.prime;
   fmul_by_3 xToDomainBuffer minusThreeXBuffer;
   fsub r minusThreeXBuffer r;
-    upload_p256_point_on_curve_constant p256_constant;
+    make_b_coeff p256_constant;
   fadd r p256_constant r;
   pop_frame();
 

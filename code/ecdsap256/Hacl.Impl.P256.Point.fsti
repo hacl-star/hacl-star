@@ -117,28 +117,30 @@ val isPointAtInfinityPublic: p:point -> Stack bool
 
 ///  Point conversion between Montgomery and Regular representations
 
-val pointToDomain: p:point -> result:point -> Stack unit
+val point_to_mont: p:point -> res:point -> Stack unit
   (requires fun h ->
-    live h p /\ live h result /\ eq_or_disjoint p result /\
-    point_x_as_nat h p < S.prime /\
-    point_y_as_nat h p < S.prime /\
-    point_z_as_nat h p < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    point_x_as_nat h1 result == SM.toDomain_ (point_x_as_nat h0 p) /\
-    point_y_as_nat h1 result == SM.toDomain_ (point_y_as_nat h0 p) /\
-    point_z_as_nat h1 result == SM.toDomain_ (point_z_as_nat h0 p))
+    live h p /\ live h res /\ eq_or_disjoint p res /\
+    point_inv (as_seq h p))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    point_inv (as_seq h1 res) /\
+   (let x0, y0, z0 = as_point_nat (as_seq h0 p) in
+    let x1, y1, z1 = as_point_nat (as_seq h1 res) in
+    x1 == SM.toDomain_ x0 /\
+    y1 == SM.toDomain_ y0 /\
+    z1 == SM.toDomain_ z0))
 
 
-val pointFromDomain: p:point -> result:point-> Stack unit
+val point_from_mont: p:point -> res:point-> Stack unit
   (requires fun h ->
-    live h p /\ live h result /\ eq_or_disjoint p result /\
-    point_x_as_nat h p < S.prime /\
-    point_y_as_nat h p < S.prime /\
-    point_z_as_nat h p < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    point_x_as_nat h1 result == SM.fromDomain_ (point_x_as_nat h0 p) /\
-    point_y_as_nat h1 result == SM.fromDomain_ (point_y_as_nat h0 p) /\
-    point_z_as_nat h1 result == SM.fromDomain_ (point_z_as_nat h0 p))
+    live h p /\ live h res /\ eq_or_disjoint p res /\
+    point_inv (as_seq h p))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    point_inv (as_seq h1 res) /\
+   (let x0, y0, z0 = as_point_nat (as_seq h0 p) in
+    let x1, y1, z1 = as_point_nat (as_seq h1 res) in
+    x1 == SM.fromDomain_ x0 /\
+    y1 == SM.fromDomain_ y0 /\
+    z1 == SM.fromDomain_ z0))
 
 
 ///  Point conversion between Jacobian and Affine coordinates representations

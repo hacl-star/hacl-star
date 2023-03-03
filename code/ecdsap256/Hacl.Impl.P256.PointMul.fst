@@ -369,7 +369,7 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
   let q = sub tempBuffer (size 0) (size 12) in
   make_point_at_inf q;
   let buff = sub tempBuffer (size 12) (size 88) in
-  pointToDomain p result;
+  point_to_mont p result;
     let h2 = ST.get() in
   montgomery_ladder q result scalar buff;
     let h3 = ST.get() in
@@ -397,7 +397,7 @@ let scalarMultiplicationWithoutNorm p result scalar tempBuffer =
   let q = sub tempBuffer (size 0) (size 12) in
   make_point_at_inf q;
   let buff = sub tempBuffer (size 12) (size 88) in
-  pointToDomain p result;
+  point_to_mont p result;
     let h2 = ST.get() in
   montgomery_ladder q result scalar buff;
   copy_point q result;
