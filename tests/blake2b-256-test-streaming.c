@@ -32,7 +32,7 @@ main()
   blake2_test_vector* v = &vectors2b[2];
 
   if (EverCrypt_AutoConfig2_has_avx2()) {
-    blake2_state* s = Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in();
+    blake2_state* s = Hacl_Streaming_Blake2b_256_blake2b_256_no_key_malloc();
     assert(Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(s, NULL, 0) ==
            0);
     assert(Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
@@ -43,11 +43,11 @@ main()
              s, v->input + 16, 16) == 0);
     assert(Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
              s, v->input + 32, v->input_len - 32) == 0);
-    Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(s, tag);
+    Hacl_Streaming_Blake2b_256_blake2b_256_no_key_digest(s, tag);
     ok &= compare_and_print(64, tag, v->expected);
 
     v++;
-    Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(s);
+    Hacl_Streaming_Blake2b_256_blake2b_256_no_key_reset(s);
     assert(Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(s, NULL, 0) ==
            0);
     assert(Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
@@ -60,7 +60,7 @@ main()
              s, v->input + 32, 32) == 0);
     assert(Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
              s, v->input + 64, v->input_len - 64) == 0);
-    Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(s, tag);
+    Hacl_Streaming_Blake2b_256_blake2b_256_no_key_digest(s, tag);
     ok &= compare_and_print(64, tag, v->expected);
 
     Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(s);

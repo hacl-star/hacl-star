@@ -647,20 +647,20 @@ let blake2s_32_no_key_alloca =
   F.alloca (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  State allocation function when there is no key")]
-let blake2s_32_no_key_create_in =
-  F.create_in (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_malloc =
+  F.malloc (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  (Re-)initialization function when there is no key")]
-let blake2s_32_no_key_init =
-  F.init (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_reset =
+  F.reset (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let blake2s_32_no_key_update =
   F.update (blake2s_32 0) (G.hide ()) (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  Finish function when there is no key")]
-let blake2s_32_no_key_finish =
-  F.mk_finish (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_digest =
+  F.digest (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  Free state function when there is no key")]
 let blake2s_32_no_key_free =
@@ -672,20 +672,20 @@ let blake2b_32_no_key_alloca =
   F.alloca (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2B)
 
 [@ (Comment "  State allocation function when there is no key")]
-let blake2b_32_no_key_create_in =
-  F.create_in (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+let blake2b_32_no_key_malloc =
+  F.malloc (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
 
-[@ (Comment "  (Re)-initialization function when there is no key")]
-let blake2b_32_no_key_init =
-  F.init (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+[@ (Comment "  Re-initialization function when there is no key")]
+let blake2b_32_no_key_reset =
+  F.reset (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let blake2b_32_no_key_update =
   F.update (blake2b_32 0) (G.hide ()) (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  Finish function when there is no key")]
-let blake2b_32_no_key_finish =
-  F.mk_finish (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+let blake2b_32_no_key_digest =
+  F.digest (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
 
 [@ (Comment "  Free state function when there is no key")]
 let blake2b_32_no_key_free =

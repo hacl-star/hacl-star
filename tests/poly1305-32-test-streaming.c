@@ -29,23 +29,23 @@ main()
   uint8_t tag[16] = {};
   poly1305_test_vector* v = vectors;
 
-  poly1305_state* s = Hacl_Streaming_Poly1305_32_create_in(v->key);
+  poly1305_state* s = Hacl_Streaming_Poly1305_32_malloc(v->key);
   assert(Hacl_Streaming_Poly1305_32_update(s, v->input, 8) == 0);
   assert(Hacl_Streaming_Poly1305_32_update(s, v->input + 8, 6) == 0);
   assert(Hacl_Streaming_Poly1305_32_update(
            s, v->input + 14, v->input_len - 14) == 0);
-  Hacl_Streaming_Poly1305_32_finish(s, tag);
+  Hacl_Streaming_Poly1305_32_digest(s, tag);
   ok &= compare_and_print(16, tag, v->tag);
 
   v++;
-  Hacl_Streaming_Poly1305_32_init(v->key, s);
+  Hacl_Streaming_Poly1305_32_reset(v->key, s);
   assert(Hacl_Streaming_Poly1305_32_update(s, NULL, 0) == 0);
   assert(Hacl_Streaming_Poly1305_32_update(s, v->input, v->input_len) == 0);
-  Hacl_Streaming_Poly1305_32_finish(s, tag);
+  Hacl_Streaming_Poly1305_32_digest(s, tag);
   ok &= compare_and_print(16, tag, v->tag);
 
   v++;
-  Hacl_Streaming_Poly1305_32_init(v->key, s);
+  Hacl_Streaming_Poly1305_32_reset(v->key, s);
   assert(Hacl_Streaming_Poly1305_32_update(s, NULL, 0) == 0);
   assert(Hacl_Streaming_Poly1305_32_update(s, v->input, 8) == 0);
   assert(Hacl_Streaming_Poly1305_32_update(s, v->input + 8, 8) == 0);
@@ -53,7 +53,7 @@ main()
   assert(Hacl_Streaming_Poly1305_32_update(s, v->input + 32, 8) == 0);
   assert(Hacl_Streaming_Poly1305_32_update(
            s, v->input + 40, v->input_len - 40) == 0);
-  Hacl_Streaming_Poly1305_32_finish(s, tag);
+  Hacl_Streaming_Poly1305_32_digest(s, tag);
   ok &= compare_and_print(16, tag, v->tag);
 
   Hacl_Streaming_Poly1305_32_free(s);

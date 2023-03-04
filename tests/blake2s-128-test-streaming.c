@@ -30,23 +30,23 @@ main()
   // implemented.
   blake2_test_vector* v = &vectors2s[5];
 
-  blake2_state* s = Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in();
+  blake2_state* s = Hacl_Streaming_Blake2s_128_blake2s_128_no_key_malloc();
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, NULL, 0) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
            s, v->input, v->input_len) == 0);
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(s, tag);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(s);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset(s);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, NULL, 0) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
            s, v->input, v->input_len) == 0);
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(s, tag);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(s);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset(s);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, NULL, 0) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, v->input, 8) ==
          0);
@@ -60,11 +60,11 @@ main()
            s, v->input + 64, 64) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
            s, v->input + 128, 127) == 0);
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(s, tag);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(s);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset(s);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, NULL, 0) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, v->input, 8) ==
          0);
@@ -78,11 +78,11 @@ main()
            s, v->input + 64, 64) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
            s, v->input + 128, v->input_len - 128) == 0);
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(s, tag);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(s);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset(s);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, NULL, 0) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(s, v->input, 8) ==
          0);
@@ -92,7 +92,7 @@ main()
            s, v->input + 16, 16) == 0);
   assert(Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
            s, v->input + 32, v->input_len - 32) == 0);
-  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(s, tag);
+  Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(s);

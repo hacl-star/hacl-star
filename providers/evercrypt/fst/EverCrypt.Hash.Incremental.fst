@@ -153,11 +153,11 @@ let hash_state =
 choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
 efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
 before. The state is to be freed by calling `free`."]
-let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
+let malloc a = F.malloc evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
 [@@ Comment
 "Reset an existing state to the initial hash state with empty data."]
-let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
+let reset (a: G.erased hash_alg) = F.reset evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns
@@ -166,73 +166,73 @@ the combined length of all of the data passed to `update` (since the last call
 to `init`) exceeds 2^61-1 bytes or 2^64-1 bytes, depending on the choice of
 algorithm. Both limits are unlikely to be attained in practice."]
 let update (i: G.erased hash_alg)
-  (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
-  (data: B.buffer uint8)
-  (len: UInt32.t):
+  (state:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
+  (chunk: B.buffer uint8)
+  (chunk_len: UInt32.t):
   Stack EverCrypt.Error.error_code
-    (requires fun h0 -> F.update_pre evercrypt_hash i s data len h0)
+    (requires fun h0 -> F.update_pre evercrypt_hash i state chunk chunk_len h0)
     (ensures fun h0 e h1 ->
       match e with
       | EverCrypt.Error.Success ->
-          S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i) /\
-          F.update_post evercrypt_hash i s data len h0 h1
+          S.length (F.seen evercrypt_hash i h0 state) + U32.v chunk_len <= U64.v (evercrypt_hash.max_input_len i) /\
+          F.update_post evercrypt_hash i state chunk chunk_len h0 h1
       | EverCrypt.Error.MaximumLengthExceeded ->
           h0 == h1 /\
-          not (S.length (F.seen evercrypt_hash i h0 s) + U32.v len <= U64.v (evercrypt_hash.max_input_len i))
+          not (S.length (F.seen evercrypt_hash i h0 state) + U32.v chunk_len <= U64.v (evercrypt_hash.max_input_len i))
       | _ -> False)
 =
-  match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s data len with
+  match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) state chunk chunk_len with
   | 0ul -> EverCrypt.Error.Success
   | 1ul -> EverCrypt.Error.MaximumLengthExceeded
 
 inline_for_extraction noextract
-let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
+let digest_st a = F.digest_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly
 /// monomorphized.
 private
-let finish_md5: finish_st MD5 = F.mk_finish evercrypt_hash MD5 (EverCrypt.Hash.state MD5) (G.erased unit)
+let digest_md5: digest_st MD5 = F.digest evercrypt_hash MD5 (EverCrypt.Hash.state MD5) (G.erased unit)
 private
-let finish_sha1: finish_st SHA1 = F.mk_finish evercrypt_hash SHA1 (EverCrypt.Hash.state SHA1) (G.erased unit)
+let digest_sha1: digest_st SHA1 = F.digest evercrypt_hash SHA1 (EverCrypt.Hash.state SHA1) (G.erased unit)
 private
-let finish_sha224: finish_st SHA2_224 = F.mk_finish evercrypt_hash SHA2_224 (EverCrypt.Hash.state SHA2_224) (G.erased unit)
+let digest_sha224: digest_st SHA2_224 = F.digest evercrypt_hash SHA2_224 (EverCrypt.Hash.state SHA2_224) (G.erased unit)
 private
-let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
+let digest_sha256: digest_st SHA2_256 = F.digest evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
 private
-let finish_sha3_256: finish_st SHA3_256 = F.mk_finish evercrypt_hash SHA3_256 (EverCrypt.Hash.state SHA3_256) (G.erased unit)
+let digest_sha3_256: digest_st SHA3_256 = F.digest evercrypt_hash SHA3_256 (EverCrypt.Hash.state SHA3_256) (G.erased unit)
 private
-let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
+let digest_sha384: digest_st SHA2_384 = F.digest evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
 private
-let finish_sha512: finish_st SHA2_512 = F.mk_finish evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512) (G.erased unit)
+let digest_sha512: digest_st SHA2_512 = F.digest evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512) (G.erased unit)
 private
-let finish_blake2s: finish_st Blake2S = F.mk_finish evercrypt_hash Blake2S (EverCrypt.Hash.state Blake2S) (G.erased unit)
+let digest_blake2s: digest_st Blake2S = F.digest evercrypt_hash Blake2S (EverCrypt.Hash.state Blake2S) (G.erased unit)
 private
-let finish_blake2b: finish_st Blake2B = F.mk_finish evercrypt_hash Blake2B (EverCrypt.Hash.state Blake2B) (G.erased unit)
+let digest_blake2b: digest_st Blake2B = F.digest evercrypt_hash Blake2B (EverCrypt.Hash.state Blake2B) (G.erased unit)
 
 [@@ Comment
 "Perform a run-time test to determine which algorithm was chosen for the given piece of state."]
 let alg_of_state (a: G.erased hash_alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 [@@ Comment
-"Write the resulting hash into `dst`, an array whose length is
+"Write the resulting hash into `output`, an array whose length is
 algorithm-specific. You can use the macros defined earlier in this file to
 allocate a destination buffer of the right length. The state remains valid after
-a call to `finish`, meaning the user may feed more data into the hash via
+a call to `digest`, meaning the user may feed more data into the hash via
 `update`. (The finish function operates on an internal copy of the state and
 therefore does not invalidate the client-held state.)"]
-val finish: a:G.erased hash_alg -> finish_st a
-let finish a s dst =
-  let a = alg_of_state a s in
+val digest: a:G.erased hash_alg -> digest_st a
+let digest a state output =
+  let a = alg_of_state a state in
   match a with
-  | MD5 -> finish_md5 s dst
-  | SHA1 -> finish_sha1 s dst
-  | SHA2_224 -> finish_sha224 s dst
-  | SHA2_256 -> finish_sha256 s dst
-  | SHA2_384 -> finish_sha384 s dst
-  | SHA2_512 -> finish_sha512 s dst
-  | SHA3_256 -> finish_sha3_256 s dst
-  | Blake2S -> finish_blake2s s dst
-  | Blake2B -> finish_blake2b s dst
+  | MD5 -> digest_md5 state output
+  | SHA1 -> digest_sha1 state output
+  | SHA2_224 -> digest_sha224 state output
+  | SHA2_256 -> digest_sha256 state output
+  | SHA2_384 -> digest_sha384 state output
+  | SHA2_512 -> digest_sha512 state output
+  | SHA3_256 -> digest_sha3_256 state output
+  | Blake2S -> digest_blake2s state output
+  | Blake2B -> digest_blake2b state output
 
 [@@ Comment
 "Free a state previously allocated with `create_in`."]

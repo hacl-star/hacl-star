@@ -34,12 +34,12 @@ let state = Hacl.Streaming.MD.state_32
 
 noextract
 let legacy_alloca = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_create_in = F.create_in hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_init = F.init hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+let legacy_malloc = F.malloc hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let legacy_reset = F.reset hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 
 [@@ Comment "0 = success, 1 = max length exceeded" ]
 let legacy_update = F.update hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
-let legacy_finish = F.mk_finish hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let legacy_digest = F.digest hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 let legacy_free = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 
 let legacy_copy = F.copy hacl_md5 () (state_t_md5.s ()) (G.erased unit)

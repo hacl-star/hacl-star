@@ -29,26 +29,26 @@ main()
   uint8_t tag[32] = {};
   sha2_test_vector* v = vectors;
 
-  sha2_state* s = Hacl_Streaming_SHA2_create_in_256();
+  sha2_state* s = Hacl_Streaming_SHA2_malloc_256();
   assert(Hacl_Streaming_SHA2_update_256(s, v->input, 3) == 0);
-  Hacl_Streaming_SHA2_finish_256(s, tag);
+  Hacl_Streaming_SHA2_digest_256(s, tag);
   ok &= compare_and_print(32, tag, v->tag_256);
 
   v++;
-  Hacl_Streaming_SHA2_init_256(s);
+  Hacl_Streaming_SHA2_reset_256(s);
   assert(Hacl_Streaming_SHA2_update_256(s, NULL, 0) == 0);
   assert(Hacl_Streaming_SHA2_update_256(s, v->input, v->input_len) == 0);
-  Hacl_Streaming_SHA2_finish_256(s, tag);
+  Hacl_Streaming_SHA2_digest_256(s, tag);
   ok &= compare_and_print(32, tag, v->tag_256);
 
   v++;
-  Hacl_Streaming_SHA2_init_256(s);
+  Hacl_Streaming_SHA2_reset_256(s);
   assert(Hacl_Streaming_SHA2_update_256(s, NULL, 0) == 0);
   assert(Hacl_Streaming_SHA2_update_256(s, v->input, 16) == 0);
   assert(Hacl_Streaming_SHA2_update_256(s, v->input + 16, 16) == 0);
   assert(Hacl_Streaming_SHA2_update_256(s, v->input + 32, v->input_len - 32) ==
          0);
-  Hacl_Streaming_SHA2_finish_256(s, tag);
+  Hacl_Streaming_SHA2_digest_256(s, tag);
   ok &= compare_and_print(32, tag, v->tag_256);
 
   Hacl_Streaming_SHA2_free_256(s);

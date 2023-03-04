@@ -261,11 +261,11 @@ let seen_length #index c i t t' s =
   let State _ _ total_len _ _ = !*s in
   total_len
 
-(* TODO: create_in and alloca have big portions of proofs in common, so it may
+(* TODO: malloc and alloca have big portions of proofs in common, so it may
  * be possible to factorize them, but it is not clear how *)
 #restart-solver
 #push-options "--z3rlimit 100"
-let create_in #index c i t t' k r =
+let malloc #index c i t t' k r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
@@ -553,14 +553,14 @@ let alloca #index c i t t' k =
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let init #index c i t t' k s =
+let reset #index c i t t' k state =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
 
   let open LowStar.BufferOps in
   (**) let h1 = ST.get () in
-  let State block_state buf _ _ k' = !*s in
+  let State block_state buf _ _ k' = !*state in
   let i = c.index_of_state i block_state in
   [@inline_let]
   let block_state: c.state.s i = block_state in
@@ -588,37 +588,37 @@ let init #index c i t t' k s =
         G.hide (c.key.v i h1 k)
   in
   (**) let h2 = ST.get () in
-  (**) assert(preserves_freeable c i s h1 h2);
+  (**) assert(preserves_freeable c i state h1 h2);
 
   [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
   let tmp: state_s c i t t' = State block_state buf total_len (G.hide S.empty) k' in
-  B.upd s 0ul tmp;
+  B.upd state 0ul tmp;
   (**) let h3 = ST.get () in
-  (**) c.state.frame_invariant B.(loc_buffer s) block_state h2 h3;
-  (**) optional_frame #_ #i #c.km #c.key B.(loc_buffer s) k' h2 h3;
-  (**) stateful_frame_preserves_freeable B.(loc_buffer s) block_state h2 h3;
-  (**) assert(preserves_freeable c i s h2 h3);
+  (**) c.state.frame_invariant B.(loc_buffer state) block_state h2 h3;
+  (**) optional_frame #_ #i #c.km #c.key B.(loc_buffer state) k' h2 h3;
+  (**) stateful_frame_preserves_freeable B.(loc_buffer state) block_state h2 h3;
+  (**) assert(preserves_freeable c i state h2 h3);
 
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
 
   // AR: 07/22: same old `Seq.equal` and `==` story
-  (**) assert (Seq.equal (seen c i h3 s) Seq.empty);
+  (**) assert (Seq.equal (seen c i h3 state) Seq.empty);
 
-  (**) assert (footprint c i h1 s == footprint c i h3 s);
-  (**) assert (B.(modifies (footprint c i h1 s) h1 h3));
+  (**) assert (footprint c i h1 state == footprint c i h3 state);
+  (**) assert (B.(modifies (footprint c i h1 state) h1 h3));
   (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
   (**) begin
-  (**) let key_v = key c i h3 s in
-  (**) let all_seen_ = all_seen c i h3 s in
+  (**) let key_v = key c i h3 state in
+  (**) let all_seen_ = all_seen c i h3 state in
   // SH (11/22): the proof fails if we don't introduce the call to [split_at_last]
   (**) let blocks, rest = split_at_last c i all_seen_ in
   (**) let init_input = c.init_input_s i key_v in
   (**) split_at_last_init c i init_input;
-  (**) assert (invariant_s c i h3 (B.get h3 s 0))
+  (**) assert (invariant_s c i h3 (B.get h3 state 0))
   (**) end;
 
-  (**) assert(preserves_freeable c i s h1 h3)
+  (**) assert(preserves_freeable c i state h1 h3)
 #pop-options
 
 /// Some helpers to minimize modulo-reasoning
@@ -1490,39 +1490,39 @@ let update_round #index c i t t' p data len =
 /// ==================================================================
 
 #push-options "--z3rlimit 200"
-let update #index c i t t' p data len =
+let update #index c i t t' state chunk chunk_len =
   let open LowStar.BufferOps in
-  let s = !*p in
+  let s = !*state in
   let State block_state buf_ total_len seen k' = s in
   let i = c.index_of_state i block_state in
 
-  if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 len >^ c.max_input_len i -^ total_len) then
+  if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 chunk_len >^ c.max_input_len i -^ total_len) then
     1ul
   else
     let sz = rest c i total_len in
-    if len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
-      update_small c (G.hide i) t t' p data len
+    if chunk_len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
+      update_small c (G.hide i) t t' state chunk chunk_len
     else if sz = 0ul then
-      update_empty_or_full_buf c (G.hide i) t t' p data len
+      update_empty_or_full_buf c (G.hide i) t t' state chunk chunk_len
     else begin
       let h0 = ST.get () in
       let diff = c.blocks_state_len i `U32.sub` sz in
-      let data1 = B.sub data 0ul diff in
-      let data2 = B.sub data diff (len `U32.sub` diff) in
-      update_round c (G.hide i) t t' p data1 diff;
+      let chunk1 = B.sub chunk 0ul diff in
+      let chunk2 = B.sub chunk diff (chunk_len `U32.sub` diff) in
+      update_round c (G.hide i) t t' state chunk1 diff;
       let h1 = ST.get () in
-      update_empty_or_full_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
+      update_empty_or_full_buf c (G.hide i) t t' state chunk2 (chunk_len `U32.sub` diff);
       let h2 = ST.get () in
       (
         let seen = G.reveal seen in
-        assert (seen_h c i h1 p `S.equal` (S.append seen (B.as_seq h0 data1)));
-        assert (seen_h c i h2 p `S.equal` (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2)));
-        S.append_assoc seen (B.as_seq h0 data1) (B.as_seq h0 data2);
-        assert (S.equal (S.append (B.as_seq h0 data1) (B.as_seq h0 data2)) (B.as_seq h0 data));
+        assert (seen_h c i h1 state `S.equal` (S.append seen (B.as_seq h0 chunk1)));
+        assert (seen_h c i h2 state `S.equal` (S.append (S.append seen (B.as_seq h0 chunk1)) (B.as_seq h0 chunk2)));
+        S.append_assoc seen (B.as_seq h0 chunk1) (B.as_seq h0 chunk2);
+        assert (S.equal (S.append (B.as_seq h0 chunk1) (B.as_seq h0 chunk2)) (B.as_seq h0 chunk));
         assert (S.equal
-          (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2))
-          (S.append seen (B.as_seq h0 data)));
-        assert (seen_h c i h2 p `S.equal` (S.append seen (B.as_seq h0 data)));
+          (S.append (S.append seen (B.as_seq h0 chunk1)) (B.as_seq h0 chunk2))
+          (S.append seen (B.as_seq h0 chunk)));
+        assert (seen_h c i h2 state `S.equal` (S.append seen (B.as_seq h0 chunk)));
         ()
       )
     end;
@@ -1530,7 +1530,7 @@ let update #index c i t t' p data len =
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-val mk_finish_process_begin_functional_correctness :
+val digest_process_begin_functional_correctness :
   #index:Type0 ->
   (c: block index) ->
   i:G.erased index -> (
@@ -1544,7 +1544,7 @@ val mk_finish_process_begin_functional_correctness :
   tmp_block_state: t ->
   Lemma
   (requires (
-    // The precondition of [mk_finish]
+    // The precondition of [digest]
     invariant c i h0 s /\
     c.state.invariant #i h1 tmp_block_state /\
 
@@ -1586,7 +1586,7 @@ val mk_finish_process_begin_functional_correctness :
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h1 tmp_block_state =
+let digest_process_begin_functional_correctness #index c i t t' p dst h0 h1 tmp_block_state =
   let h3 = h0 in
   let h4 = h1 in
   let s = B.get h0 p 0 in
@@ -1651,7 +1651,7 @@ let mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h1 t
 
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
-let mk_finish #index c i t t' p dst =
+let digest #index c i t t' state output =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.update_multi_associative i in
@@ -1659,7 +1659,7 @@ let mk_finish #index c i t t' p dst =
 
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let State block_state buf_ total_len seen k' = !*p in
+  let State block_state buf_ total_len seen k' = !*state in
 
   push_frame ();
   let h1 = ST.get () in
@@ -1714,8 +1714,8 @@ let mk_finish #index c i t t' p dst =
   let h4 = get () in
 
   // Functional correctness
-  mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h4 tmp_block_state;
-  split_at_last_finish c i (all_seen c i h0 p);
+  digest_process_begin_functional_correctness #index c i t t' state output h0 h4 tmp_block_state;
+  split_at_last_finish c i (all_seen c i h0 state);
 
   // Process the remaining data
   assert(UInt32.v r_last <= UInt32.v (Block?.block_len c (Ghost.reveal (Ghost.hide i))));
@@ -1734,12 +1734,12 @@ let mk_finish #index c i t t' p dst =
   stateful_frame_preserves_freeable #index #c.state #i (c.state.footprint h3 tmp_block_state) block_state h3 h5;
   optional_frame #_ #i #c.km #c.key (c.state.footprint h3 tmp_block_state) k' h3 h5;
 
-  c.finish (G.hide i) k' tmp_block_state dst;
+  c.finish (G.hide i) k' tmp_block_state output;
 
   let h6 = ST.get () in
   begin
     let r = r_last in
-    let all_seen = all_seen c i h0 p in
+    let all_seen = all_seen c i h0 state in
     let blocks_state_length = U32.v (c.blocks_state_len i) in
     let block_length = U32.v (c.block_len i) in
 
@@ -1753,7 +1753,7 @@ let mk_finish #index c i t t' p dst =
     assert(B.as_seq h3 buf_last == rest_);
 
     calc (S.equal) {
-      B.as_seq h6 dst;
+      B.as_seq h6 output;
     (S.equal) { }
       c.finish_s i k (c.state.v i h5 tmp_block_state);
     (S.equal) { }
@@ -1775,31 +1775,31 @@ let mk_finish #index c i t t' p dst =
     }
   end;
 
-  c.state.frame_invariant #i B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
-  stateful_frame_preserves_freeable #index #c.state #i B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
-  optional_frame #_ #i #c.km #c.key B.(loc_buffer dst `loc_union` c.state.footprint h5 tmp_block_state) k' h5 h6;
+  c.state.frame_invariant #i B.(loc_buffer output `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
+  stateful_frame_preserves_freeable #index #c.state #i B.(loc_buffer output `loc_union` c.state.footprint h5 tmp_block_state) block_state h5 h6;
+  optional_frame #_ #i #c.km #c.key B.(loc_buffer output `loc_union` c.state.footprint h5 tmp_block_state) k' h5 h6;
 
   pop_frame ();
   let h7 = ST.get () in
   c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
   stateful_frame_preserves_freeable #index #c.state #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
   optional_frame #_ #i #c.km #c.key B.(loc_region_only false (HS.get_tip h6)) k' h6 h7;
-  assert (seen_h c i h7 p `S.equal` (G.reveal seen));
+  assert (seen_h c i h7 state `S.equal` (G.reveal seen));
 
   // JP: this is not the right way to prove do this proof. Need to use
   // modifies_fresh_frame_popped instead, see e.g.
   // https://github.com/project-everest/everquic-crypto/blob/d812be94e9b1a77261f001c9accb2040b80b7c39/src/QUIC.Impl.fst#L1111
   // for an example
-  let mloc = B.loc_union (B.loc_buffer dst) (footprint c i h0 p) in
+  let mloc = B.loc_union (B.loc_buffer output) (footprint c i h0 state) in
   B.modifies_remove_fresh_frame h0 h1 h7 mloc;
   B.popped_modifies h6 h7;
   assert (B.(modifies mloc h0 h7))
 #pop-options
 
-let free #index c i t t' s =
+let free #index c i t t' state =
   let _ = allow_inversion key_management in
   let open LowStar.BufferOps in
-  let State block_state buf _ _ k' = !*s in
+  let State block_state buf _ _ k' = !*state in
   let h0 = ST.get () in
   begin match c.km with
   | Runtime -> c.key.free i k'
@@ -1810,4 +1810,4 @@ let free #index c i t t' s =
   c.state.frame_invariant #i (optional_footprint #index #i #c.km #c.key h0 k') block_state h0 h1;
   c.state.free i block_state;
   B.free buf;
-  B.free s
+  B.free state

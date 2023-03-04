@@ -255,7 +255,7 @@ val seen_length:
   (fun h0 l h1 -> h0 == h1 /\ U64.v l == U32.v (c.init_input_len i) +  S.length (seen c i h0 s)))
 
 inline_for_extraction noextract
-let create_in_st
+let malloc_st
   (#index: Type0)
   (c:block index)
   (i:index)
@@ -277,13 +277,13 @@ let create_in_st
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 
 inline_for_extraction noextract
-val create_in:
+val malloc:
   #index: Type0 ->
   c:block index ->
   i:index ->
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
-  create_in_st c i t t'
+  malloc_st c i t t'
 
 inline_for_extraction noextract
 let copy_st
@@ -344,9 +344,8 @@ val alloca:
   t':Type0 { t' == optional_key i c.km c.key } ->
   alloca_st #index c i t t'
 
-/// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
-let init_st
+let reset_st
   (#index: Type0)
   (c:block index)
   (i:index)
@@ -368,14 +367,14 @@ let init_st
     preserves_freeable c i s h0 h1))
 
 inline_for_extraction noextract
-val init:
+val reset:
   #index:Type0 ->
   c:block index ->
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
-  init_st #index c i t t')
+  reset_st #index c i t t')
 
 unfold noextract
 let update_pre
@@ -443,7 +442,7 @@ val update:
   update_st #index c i t t')
 
 inline_for_extraction noextract
-let finish_st
+let digest_st
   #index
   (c: block index)
   (i: index)
@@ -469,21 +468,21 @@ let finish_st
 /// A word of caution. Once partially applied to a type class, this function
 /// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
 /// ``state`` is indexed over ``i``, then this function will not compile to C.
-/// (In other words: there's a reason why mk_finish does *NOT* take i ghostly.)
+/// (In other words: there's a reason why digest does *NOT* take i ghostly.)
 ///
-/// To work around this, it suffices to apply ``mk_finish`` to each possible
+/// To work around this, it suffices to apply ``digest`` to each possible
 /// value for the index, then to abstract over ``i`` again if agility is
 /// desired. See EverCrypt.Hash.Incremental for an example. Alternatively, we
 /// could provide a finish that relies on a heap allocation of abstract state
 /// and does not need to be specialized.
 inline_for_extraction noextract
-val mk_finish:
+val digest:
   #index:Type0 ->
   c:block index ->
   i:index ->
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
-  finish_st c i t t'
+  digest_st c i t t'
 
 inline_for_extraction noextract
 let free_st

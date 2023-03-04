@@ -24,10 +24,10 @@ let state_256 = Hacl.Streaming.MD.state_64
 
 inline_for_extraction noextract
 let alloca_256 = F.alloca hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
-let create_in_256 = F.create_in hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
-let init_256 = F.init hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+let malloc_256 = F.malloc hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
+let reset_256 = F.reset hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 [@@ Comment "0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface." ]
 let update_256 = F.update hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
-let finish_256 = F.mk_finish hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
+let digest_256 = F.digest hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
 let free_256 = F.free hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 let copy_256 = F.copy hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
