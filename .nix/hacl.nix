@@ -141,8 +141,8 @@ let
             | sed 's/^Files \([^ ]*\).*/\1/' \
             | sed 's/^Only in source\/dist\([^\:]*\)\: \(.*\)/\.\1\/\2/' \
             | sed 's/^Only in \.\([^\:]*\)\: \(.*\)/\.\1\/\2/' \
-            | grep '\.\/[^\/]*\/' \
-            | grep -v INFO.txt
+            | { grep '\.\/[^\/]*\/' || true; } \
+            | { grep -v INFO.txt || true; }
         '';
         installPhase = ''
           touch $out
