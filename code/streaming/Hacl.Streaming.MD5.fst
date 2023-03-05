@@ -44,4 +44,4 @@ let legacy_free = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 
 let legacy_copy = F.copy hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 
-let legacy_hash: Hacl.Hash.Definitions.hash_st MD5 = fun input input_len dst -> Hacl.Hash.MD5.legacy_hash input input_len dst
+let legacy_hash: Hacl.Hash.Definitions.hash_st MD5 = fun output input input_len -> Hacl.Hash.MD5.legacy_hash output input input_len

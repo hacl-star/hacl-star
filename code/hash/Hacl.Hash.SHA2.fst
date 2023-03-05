@@ -42,4 +42,4 @@ friend Lib.IntTypes
 
 noextract inline_for_extraction
 let hash_512_lib input_len input dst =
-  hash_512 input input_len dst
+  hash_512 dst input input_len

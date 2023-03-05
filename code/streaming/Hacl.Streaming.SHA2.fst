@@ -107,19 +107,19 @@ This function is identical to the free function for SHA2_224."]
 let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 
 [@@ Comment
-"Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes."]
+"Hash `input`, of len `input_len`, into `output`, an array of 32 bytes."]
 val sha256: Hacl.Hash.Definitions.hash_st SHA2_256
-let sha256 input input_len dst =
+let sha256 output input input_len =
   [@inline_let]
-  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_256) = dst in
+  let output: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_256) = output in
   let ib = ntup1 input in
-  let rb = ntup1 dst in
+  let rb = ntup1 output in
   let h0 = ST.get() in
   loc_multi1 rb;
   hash #SHA2_256 #M32 sha256_init sha256_update_nblocks sha256_update_last sha256_finish rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_256 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output)
 
 // SHA2-224
 // --------
@@ -139,19 +139,19 @@ let digest_224 = F.digest hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
 let free_224: F.free_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit) = fun p -> free_256 p
 
 [@@ Comment
-"Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes."]
+"Hash `input`, of len `input_len`, into `output`, an array of 28 bytes."]
 val sha224: Hacl.Hash.Definitions.hash_st SHA2_224
-let sha224 input input_len dst =
+let sha224 output input input_len =
   [@inline_let]
-  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_224) = dst in
+  let output: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_224) = output in
   let ib = ntup1 input in
-  let rb = ntup1 dst in
+  let rb = ntup1 output in
   let h0 = ST.get() in
   loc_multi1 rb;
   hash #SHA2_224 #M32 sha224_init sha224_update_nblocks sha224_update_last sha224_finish rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output)
 
 // SHA2-512
 // --------
@@ -196,19 +196,19 @@ This function is identical to the free function for SHA2_384.";
 let free_512 = F.free hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 
 [@@ Comment
-"Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes."]
+"Hash `input`, of len `input_len`, into `output`, an array of 64 bytes."]
 val sha512: Hacl.Hash.Definitions.hash_st SHA2_512
-let sha512 input input_len dst =
+let sha512 output input input_len =
   [@inline_let]
-  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_512) = dst in
+  let output: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_512) = output in
   let ib = ntup1 input in
-  let rb = ntup1 dst in
+  let rb = ntup1 output in
   let h0 = ST.get() in
   loc_multi1 rb;
   hash #SHA2_512 #M32 sha512_init sha512_update_nblocks sha512_update_last sha512_finish rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_512 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output)
 
 // SHA2-384
 // --------
@@ -228,16 +228,16 @@ let digest_384 = F.digest hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
 let free_384: F.free_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit) = fun p -> free_512 p
 
 [@@ Comment
-"Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes."]
+"Hash `input`, of len `input_len`, into `output`, an array of 48 bytes."]
 val sha384: Hacl.Hash.Definitions.hash_st SHA2_384
-let sha384 input input_len dst =
+let sha384 output input input_len =
   [@inline_let]
-  let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_384) = dst in
+  let output: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_384) = output in
   let ib = ntup1 input in
-  let rb = ntup1 dst in
+  let rb = ntup1 output in
   let h0 = ST.get() in
   loc_multi1 rb;
   hash #SHA2_384 #M32 sha384_init sha384_update_nblocks sha384_update_last sha384_finish rb input_len ib;
   let h1 = ST.get() in
   Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M32 (v input_len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst)
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output)

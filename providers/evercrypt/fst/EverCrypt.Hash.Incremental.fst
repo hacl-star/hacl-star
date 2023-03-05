@@ -245,18 +245,18 @@ private
 val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 
 // A full one-shot hash that relies on vale at each multiplexing point
-let hash_256 input input_len dst =
+let hash_256 output input input_len =
   let open EverCrypt.Hash in
   Hacl.Hash.MD.mk_hash SHA2_256 Hacl.Hash.SHA2.alloca_256 update_multi_256
-    update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst
+    update_last_256 Hacl.Hash.SHA2.finish_256 output input input_len
 
 private
 val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
 
-let hash_224 input input_len dst =
+let hash_224 output input input_len =
   let open EverCrypt.Hash in
   Hacl.Hash.MD.mk_hash SHA2_224 Hacl.Hash.SHA2.alloca_224 update_multi_224
-    update_last_224 Hacl.Hash.SHA2.finish_224 input input_len dst
+    update_last_224 Hacl.Hash.SHA2.finish_224 output input input_len
 
 // Public API (one-shot, agile and multiplexing)
 // ---------------------------------------------
@@ -290,25 +290,25 @@ val hash:
     B.as_seq h1 output == Spec.Agile.Hash.hash a (B.as_seq h0 input))
 let hash a output input input_len =
   match a with
-  | MD5 -> Hacl.Hash.MD5.legacy_hash input input_len output
-  | SHA1 -> Hacl.Hash.SHA1.legacy_hash input input_len output
-  | SHA2_224 -> hash_224 input input_len output
-  | SHA2_256 -> hash_256 input input_len output
-  | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input input_len output
-  | SHA2_512 -> Hacl.Hash.SHA2.hash_512 input input_len output
-  | SHA3_256 -> Hacl.Hash.SHA3.hash_256 input input_len output
+  | MD5 -> Hacl.Hash.MD5.legacy_hash output input input_len
+  | SHA1 -> Hacl.Hash.SHA1.legacy_hash output input input_len
+  | SHA2_224 -> hash_224 output input input_len
+  | SHA2_256 -> hash_256 output input input_len
+  | SHA2_384 -> Hacl.Hash.SHA2.hash_384 output input input_len
+  | SHA2_512 -> Hacl.Hash.SHA2.hash_512 output input input_len
+  | SHA3_256 -> Hacl.Hash.SHA3.hash_256 output input input_len
   | Blake2S ->
       let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
-        Hacl.Hash.Blake2.hash_blake2s_128 input input_len output
+        Hacl.Hash.Blake2.hash_blake2s_128 output input input_len
       else
-        Hacl.Hash.Blake2.hash_blake2s_32 input input_len output
+        Hacl.Hash.Blake2.hash_blake2s_32 output input input_len
   | Blake2B ->
       let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then
-        Hacl.Hash.Blake2.hash_blake2b_256 input input_len output
+        Hacl.Hash.Blake2.hash_blake2b_256 output input input_len
       else
-        Hacl.Hash.Blake2.hash_blake2b_32 input input_len output
+        Hacl.Hash.Blake2.hash_blake2b_32 output input input_len
 
 // Public API (verified clients)
 // -----------------------------

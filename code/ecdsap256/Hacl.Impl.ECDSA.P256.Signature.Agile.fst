@@ -68,9 +68,9 @@ let ecdsa_signature_step12 alg mLen m result =
   match alg with 
     |NoHash -> copy mHash m 
     |Hash a -> match a with 
-      |SHA2_256 -> hash_256 m mLen mHash
-      |SHA2_384 -> hash_384 m mLen mHash
-      |SHA2_512 -> hash_512 m mLen mHash 
+      |SHA2_256 -> hash_256 mHash m mLen
+      |SHA2_384 -> hash_384 mHash m mLen
+      |SHA2_512 -> hash_512 mHash m mLen
   end;
   
   let cutHash = sub mHash (size 0) (size 32) in 

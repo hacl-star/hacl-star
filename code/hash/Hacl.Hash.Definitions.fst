@@ -265,15 +265,15 @@ let finish_st (i:impl) =
 
 noextract inline_for_extraction
 let hash_st (a: hash_alg) =
+  output:hash_t a->
   input:B.buffer uint8 ->
   input_len:size_t { B.length input = v input_len } ->
-  dst:hash_t a->
   ST.Stack unit
     (requires (fun h ->
       B.live h input /\
-      B.live h dst /\
-      B.disjoint input dst /\
+      B.live h output /\
+      B.disjoint input output /\
       B.length input `less_than_max_input_length` a))
     (ensures (fun h0 _ h1 ->
-      B.(modifies (loc_buffer dst) h0 h1) /\
-      Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (B.as_seq h0 input))))
+      B.(modifies (loc_buffer output) h0 h1) /\
+      Seq.equal (B.as_seq h1 output) (Spec.Agile.Hash.hash a (B.as_seq h0 input))))

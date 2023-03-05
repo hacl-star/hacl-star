@@ -82,7 +82,7 @@ fun output key len ->
     (**) Seq.lemma_eq_elim (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes));
     (**) assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
   end else begin
-    hash key len nkey;
+    hash nkey key len;
     (**) let h1 = ST.get () in
     (**) assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
     (**) assert (Seq.equal (B.as_seq h1 nkey) (Spec.Agile.Hash.hash a (B.as_seq h0 key)));

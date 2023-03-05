@@ -31,10 +31,10 @@ let test_sha2 msg_len msg expected224 expected256 expected384 expected512 =
   let test256 = create 32ul (u8 0) in
   let test384 = create 48ul (u8 0) in
   let test512 = create 64ul (u8 0) in
-  hash_224 msg msg_len (test224 <: lbuffer uint8 28ul);
-  hash_256 msg msg_len (test256 <: lbuffer uint8 32ul);
-  hash_384 msg msg_len (test384 <: lbuffer uint8 48ul);
-  hash_512 msg msg_len (test512 <: lbuffer uint8 64ul);
+  hash_224 (test224 <: lbuffer uint8 28ul) msg msg_len;
+  hash_256 (test256 <: lbuffer uint8 32ul) msg msg_len;
+  hash_384 (test384 <: lbuffer uint8 48ul) msg msg_len;
+  hash_512 (test512 <: lbuffer uint8 64ul) msg msg_len;
 
   if not (result_compare_display 28ul (to_const test224) (to_const expected224)) then C.exit 255l;
   if not (result_compare_display 32ul (to_const test256) (to_const expected256)) then C.exit 255l;

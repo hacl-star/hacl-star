@@ -42,7 +42,7 @@ let update_last_blake2b_32 s prev input input_len =
 
 let finish_blake2b_32 s dst = BlB32.blake2b_finish (hash_len Blake2B) dst s
 
-let hash_blake2b_32 input input_len dst = BlB32.blake2b 64ul dst input_len input 0ul (null #MUT uint8)
+let hash_blake2b_32 output input input_len = BlB32.blake2b 64ul output input_len input 0ul (null #MUT uint8)
 
 // Blake2s_32
 
@@ -73,7 +73,7 @@ let update_last_blake2s_32 s prev input input_len =
 
 let finish_blake2s_32 s dst = BlS32.blake2s_finish (hash_len Blake2S) dst s
 
-let hash_blake2s_32 input input_len dst = BlS32.blake2s 32ul dst input_len input 0ul (null #MUT uint8)
+let hash_blake2s_32 output input input_len = BlS32.blake2s 32ul output input_len input 0ul (null #MUT uint8)
 
 // Blake2s_128
 
@@ -104,7 +104,7 @@ let update_last_blake2s_128 s prev input input_len =
 
 let finish_blake2s_128 s dst = BlS128.blake2s_finish (hash_len Blake2S) dst s
 
-let hash_blake2s_128 input input_len dst = BlS128.blake2s 32ul dst input_len input 0ul (null #MUT uint8)
+let hash_blake2s_128 output input input_len = BlS128.blake2s 32ul output input_len input 0ul (null #MUT uint8)
 
 // Blake2b_256
 
@@ -135,4 +135,4 @@ let update_last_blake2b_256 s prev input input_len =
 
 let finish_blake2b_256 s dst = BlB256.blake2b_finish (hash_len Blake2B) dst s
 
-let hash_blake2b_256 input input_len dst = BlB256.blake2b 64ul dst input_len input 0ul (null #MUT uint8)
+let hash_blake2b_256 output input input_len = BlB256.blake2b 64ul output input_len input 0ul (null #MUT uint8)

@@ -45,4 +45,4 @@ let update_last_256: update_last_st (| SHA3_256, () |) = fun s () input input_le
 
 let finish_256: finish_st (| SHA3_256, () |) = Hacl.Hash.PadFinish.finish (| SHA3_256, () |)
 
-let hash_256: hash_st SHA3_256 = fun input len dst -> Hacl.SHA3.sha3_256 len input dst
+let hash_256: hash_st SHA3_256 = fun output input input_len -> Hacl.SHA3.sha3_256 input_len input output
