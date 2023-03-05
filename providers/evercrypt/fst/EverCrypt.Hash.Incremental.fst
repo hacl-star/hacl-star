@@ -270,45 +270,45 @@ let hash_224 input input_len dst =
 // fixing at some point.
 
 [@@ Comment
-"Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+"Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
 your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
 earlier in this file to allocate a destination buffer of the right length. This
 API will automatically pick the most efficient implementation, provided you have
 called EverCrypt_AutoConfig2_init() before. "]
 val hash:
   a:Spec.Agile.Hash.hash_alg ->
-  dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
+  output:B.buffer Lib.IntTypes.uint8 {B.length output = hash_length a} ->
   input:B.buffer Lib.IntTypes.uint8 ->
-  len:FStar.UInt32.t {B.length input = FStar.UInt32.v len /\ FStar.UInt32.v len `less_than_max_input_length` a} ->
+  input_len:FStar.UInt32.t {B.length input = FStar.UInt32.v input_len /\ FStar.UInt32.v input_len `less_than_max_input_length` a} ->
   Stack unit
   (requires fun h0 ->
-    B.live h0 dst /\
+    B.live h0 output /\
     B.live h0 input /\
-    B.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
+    B.(loc_disjoint (loc_buffer input) (loc_buffer output)))
   (ensures fun h0 _ h1 ->
-    B.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.Agile.Hash.hash a (B.as_seq h0 input))
-let hash a dst input len =
+    B.(modifies (loc_buffer output) h0 h1) /\
+    B.as_seq h1 output == Spec.Agile.Hash.hash a (B.as_seq h0 input))
+let hash a output input input_len =
   match a with
-  | MD5 -> Hacl.Hash.MD5.legacy_hash input len dst
-  | SHA1 -> Hacl.Hash.SHA1.legacy_hash input len dst
-  | SHA2_224 -> hash_224 input len dst
-  | SHA2_256 -> hash_256 input len dst
-  | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input len dst
-  | SHA2_512 -> Hacl.Hash.SHA2.hash_512 input len dst
-  | SHA3_256 -> Hacl.Hash.SHA3.hash_256 input len dst
+  | MD5 -> Hacl.Hash.MD5.legacy_hash input input_len output
+  | SHA1 -> Hacl.Hash.SHA1.legacy_hash input input_len output
+  | SHA2_224 -> hash_224 input input_len output
+  | SHA2_256 -> hash_256 input input_len output
+  | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input input_len output
+  | SHA2_512 -> Hacl.Hash.SHA2.hash_512 input input_len output
+  | SHA3_256 -> Hacl.Hash.SHA3.hash_256 input input_len output
   | Blake2S ->
       let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
-        Hacl.Hash.Blake2.hash_blake2s_128 input len dst
+        Hacl.Hash.Blake2.hash_blake2s_128 input input_len output
       else
-        Hacl.Hash.Blake2.hash_blake2s_32 input len dst
+        Hacl.Hash.Blake2.hash_blake2s_32 input input_len output
   | Blake2B ->
       let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then
-        Hacl.Hash.Blake2.hash_blake2b_256 input len dst
+        Hacl.Hash.Blake2.hash_blake2b_256 input input_len output
       else
-        Hacl.Hash.Blake2.hash_blake2b_32 input len dst
+        Hacl.Hash.Blake2.hash_blake2b_32 input input_len output
 
 // Public API (verified clients)
 // -----------------------------
