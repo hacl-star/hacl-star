@@ -308,7 +308,7 @@ val validate_public_key:
         let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
         let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
         let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in
-        r == Spec.ECDSA.verifyQValidCurvePointSpec pkJ
+        r == Spec.ECDSA.validate_pubkey_point pkJ
       )
     )
 

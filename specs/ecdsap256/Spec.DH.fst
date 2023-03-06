@@ -27,7 +27,7 @@ val ecp256_dh_r: x:lbytes 32 -> y:lbytes 32 -> s:lbytes 32
 let ecp256_dh_r x y s =
   let x_, y_ = nat_from_bytes_be x, nat_from_bytes_be y in
   let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x_, y_) in
-  if verifyQValidCurvePointSpec (pointJacX, pointJacY, pointJacZ) then
+  if validate_pubkey_point (pointJacX, pointJacY, pointJacZ) then
     let xN, yN, zN = scalar_multiplication s (pointJacX, pointJacY, pointJacZ) in
     if isPointAtInfinity (xN, yN, zN) then
       nat_to_bytes_be 32 xN, nat_to_bytes_be 32 yN, false

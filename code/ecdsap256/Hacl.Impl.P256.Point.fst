@@ -265,7 +265,7 @@ let isCoordinateValid p =
   lessX && lessY
 
 
-let verifyQValidCurvePoint pubKeyAsPoint =
+let validate_pubkey_point pubKeyAsPoint =
   let coordinatesValid = isCoordinateValid pubKeyAsPoint in
   if not coordinatesValid then false else
     let belongsToCurve = is_point_on_curve_vartime pubKeyAsPoint in
@@ -297,7 +297,7 @@ let verifyQ pubKey =
       BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
 
   to_jacob_point publicKeyB publicKeyJ;
-  let r = verifyQValidCurvePoint publicKeyJ in
+  let r = validate_pubkey_point publicKeyJ in
   pop_frame();
   r
 

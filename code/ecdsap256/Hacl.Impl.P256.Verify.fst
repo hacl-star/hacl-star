@@ -577,7 +577,7 @@ let ecdsa_verification_ alg pubKey r s mLen m =
   let xBuffer = sub tempBufferU64 (size 116) (size 4) in
 
   to_jacob_point pubKey publicKeyBuffer;
-  let publicKeyCorrect = verifyQValidCurvePoint publicKeyBuffer in
+  let publicKeyCorrect = validate_pubkey_point publicKeyBuffer in
   if publicKeyCorrect = false then
     begin
     pop_frame();

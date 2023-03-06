@@ -126,8 +126,8 @@ let changeEndian_le_be a =
 
 //----------------------------------
 
-val verifyQValidCurvePointSpec: publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
-let verifyQValidCurvePointSpec publicKey =
+val validate_pubkey_point: publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
+let validate_pubkey_point publicKey =
   let x, y, z = publicKey in
   x < prime && y < prime && z < prime &&
   is_point_on_curve (x, y, z)
@@ -235,7 +235,7 @@ val ecdsa_verification_agile:
 let ecdsa_verification_agile alg publicKey r s mLen m =
   allow_inversion hash_alg_ecdsa;
   let publicJacobian = toJacobianCoordinates publicKey in
-  if not (verifyQValidCurvePointSpec publicJacobian) then false
+  if not (validate_pubkey_point publicJacobian) then false
   else begin
     if not (checkCoordinates r s) then false
     else begin

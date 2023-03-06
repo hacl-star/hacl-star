@@ -48,6 +48,7 @@ noextract
 let point_z_as_nat (h: mem) (e: point) : GTot nat =
   as_nat h (gsub e 8ul 4ul)
 
+
 inline_for_extraction noextract
 let getx (p:point) : Stack felem
   (requires fun h -> live h p)
@@ -183,14 +184,10 @@ val is_point_on_curve_vartime: p:point -> Stack bool
     r == S.is_point_on_curve (as_point_nat (as_seq h0 p)))
 
 
-[@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")]
-val verifyQValidCurvePoint: pubKeyAsPoint:point -> Stack bool
-  (requires fun h ->
-    live h pubKeyAsPoint /\
-    point_z_as_nat h pubKeyAsPoint == 1)
+val validate_pubkey_point: p:point -> Stack bool
+  (requires fun h -> live h p /\ point_z_as_nat h p == 1)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == SD.verifyQValidCurvePointSpec (as_point_nat (as_seq h0 pubKeyAsPoint)))
+    r == SD.validate_pubkey_point (as_point_nat (as_seq h0 p)))
 
 
 // TODO: mv
@@ -201,7 +198,7 @@ val verifyQ: pubKey:lbuffer uint8 (size 64) -> Stack bool
     (let publicKeyX = BSeq.nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
     let publicKeyY = BSeq.nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
     let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in
-    r == SD.verifyQValidCurvePointSpec pkJ))
+    r == SD.validate_pubkey_point pkJ))
 
 
 // TODO: mv
