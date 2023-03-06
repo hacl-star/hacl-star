@@ -265,40 +265,26 @@ let isCoordinateValid p =
   lessX && lessY
 
 
-let validate_pubkey_point pubKeyAsPoint =
-  let coordinatesValid = isCoordinateValid pubKeyAsPoint in
-  if not coordinatesValid then false else
-    let belongsToCurve = is_point_on_curve_vartime pubKeyAsPoint in
-    coordinatesValid && belongsToCurve
+[@CInline]
+let validate_pubkey_point pk =
+  let is_coordinates_valid = isCoordinateValid pk in
+  if not is_coordinates_valid then false
+  else is_point_on_curve_vartime pk
 
 
-let verifyQ pubKey =
-  push_frame();
-    let h0 = ST.get() in
-    let pubKeyX = sub pubKey (size 0) (size 32) in
-    let pubKeyY = sub pubKey (size 32) (size 32) in
-    let publicKeyJ = create (size 12) (u64 0) in
-    let publicKeyB = create (size 8) (u64 0) in
-	let publicKeyX = sub publicKeyB (size 0) (size 4) in
-	let publicKeyY = sub publicKeyB (size 4) (size 4) in
-
-    bn_from_bytes_be4 pubKeyX publicKeyX;
-    bn_from_bytes_be4 pubKeyY publicKeyY;
-  let h1 = ST.get() in
-      lemma_core_0 publicKeyX h1;
-      BSeq.uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);
-      lemma_core_0 publicKeyY h1;
-      BSeq.uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
-
-      SD.changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
-      BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
-
-      SD.changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
-      BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
-
-  to_jacob_point publicKeyB publicKeyJ;
-  let r = validate_pubkey_point publicKeyJ in
-  pop_frame();
+let validate_pubkey pk =
+  push_frame ();
+  let pk_x = sub pk 0ul 32ul in
+  let pk_y = sub pk 32ul 32ul in
+  let point_aff = create 8ul (u64 0) in
+  let point_jac = create 12ul (u64 0) in
+  let bn_pk_x = sub point_aff 0ul 4ul in
+  let bn_pk_y = sub point_aff 4ul 4ul in
+  bn_from_bytes_be4 pk_x bn_pk_x;
+  bn_from_bytes_be4 pk_y bn_pk_y;
+  to_jacob_point point_aff point_jac;
+  let r = validate_pubkey_point point_jac in
+  pop_frame ();
   r
 
 

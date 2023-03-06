@@ -191,13 +191,13 @@ val validate_pubkey_point: p:point -> Stack bool
 
 
 // TODO: mv
-inline_for_extraction
-val verifyQ: pubKey:lbuffer uint8 (size 64) -> Stack bool
-  (requires fun h -> live h pubKey)
+inline_for_extraction noextract
+val validate_pubkey: pk:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h pk)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    (let publicKeyX = BSeq.nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-    let publicKeyY = BSeq.nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-    let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in
+   (let pk_x = BSeq.nat_from_bytes_be (as_seq h1 (gsub pk 0ul 32ul)) in
+    let pk_y = BSeq.nat_from_bytes_be (as_seq h1 (gsub pk 32ul 32ul)) in
+    let pkJ = Spec.P256.toJacobianCoordinates (pk_x, pk_y) in
     r == SD.validate_pubkey_point pkJ))
 
 
