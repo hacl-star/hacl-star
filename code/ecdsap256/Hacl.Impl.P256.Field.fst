@@ -155,13 +155,15 @@ let fmod_short x res =
 
 
 [@CInline]
-let is_felem_lt_prime_vartime f =
+let bn_is_lt_prime_mask4 f =
+  let h0 = ST.get () in
   push_frame ();
   let tmp = create (size 4) (u64 0) in
   make_prime tmp;
   let c = bn_sub4 f tmp tmp in
+  assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
   pop_frame ();
-  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 c =^ 1uL)
+  u64 0 -. c
 
 
 [@CInline]

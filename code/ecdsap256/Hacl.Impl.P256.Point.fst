@@ -251,9 +251,11 @@ val isCoordinateValid: p:point -> Stack bool
 let isCoordinateValid p =
   let px = getx p in
   let py = gety p in
-  let lessX = is_felem_lt_prime_vartime px in
-  let lessY = is_felem_lt_prime_vartime py in
-  lessX && lessY
+  let lessX = bn_is_lt_prime_mask4 px in
+  let lessY = bn_is_lt_prime_mask4 py in
+  let res = logand lessX lessY in
+  logand_lemma lessX lessY;
+  Hacl.Bignum.Base.unsafe_bool_of_limb res
 
 
 [@CInline]

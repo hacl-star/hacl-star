@@ -39,10 +39,10 @@ val fmod_short: x:felem -> res:felem -> Stack unit
     as_nat h1 res == as_nat h0 x % S.prime)
 
 
-val is_felem_lt_prime_vartime: f:felem -> Stack bool
+val bn_is_lt_prime_mask4: f:felem -> Stack uint64
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == (as_nat h0 f < S.prime))
+    (if as_nat h0 f < S.prime then v r = ones_v U64 else v r = 0))
 
 
 // NOTE: changed precondition `eq_or_disjoint x y`
