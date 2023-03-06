@@ -36,7 +36,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_Hash_Blake2.h"
+#include "Hacl_Hash_Blake2s_32.h"
+#include "Hacl_Hash_Blake2b_32.h"
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_block_state */
 

@@ -26,7 +26,7 @@
 #include "Hacl_HMAC_Blake2b_256.h"
 
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_Blake2.h"
+#include "internal/Hacl_HMAC.h"
 
 /**
 Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.

@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Hash_Blake2_H
-#define __Hacl_Hash_Blake2_H
+#ifndef __Hacl_Hash_Blake2b_32_H
+#define __Hacl_Hash_Blake2b_32_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -93,64 +93,9 @@ Hacl_Blake2b_32_blake2b(
 
 uint64_t *Hacl_Blake2b_32_blake2b_malloc(void);
 
-void Hacl_Blake2s_32_blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn);
-
-void
-Hacl_Blake2s_32_blake2s_update_key(
-  uint32_t *wv,
-  uint32_t *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t ll
-);
-
-void
-Hacl_Blake2s_32_blake2s_update_multi(
-  uint32_t len,
-  uint32_t *wv,
-  uint32_t *hash,
-  uint64_t prev,
-  uint8_t *blocks,
-  uint32_t nb
-);
-
-void
-Hacl_Blake2s_32_blake2s_update_last(
-  uint32_t len,
-  uint32_t *wv,
-  uint32_t *hash,
-  uint64_t prev,
-  uint32_t rem,
-  uint8_t *d
-);
-
-void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
-
-/**
-Write the BLAKE2s digest of message `d` using key `k` into `output`.
-
-@param nn Length of to-be-generated digest with 1 <= `nn` <= 32.
-@param output Pointer to `nn` bytes of memory where the digest is written to.
-@param ll Length of the input message.
-@param d Pointer to `ll` bytes of memory where the input message is read from.
-@param kk Length of the key. Can be 0.
-@param k Pointer to `kk` bytes of memory where the key is read from.
-*/
-void
-Hacl_Blake2s_32_blake2s(
-  uint32_t nn,
-  uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
-);
-
-uint32_t *Hacl_Blake2s_32_blake2s_malloc(void);
-
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Hash_Blake2_H_DEFINED
+#define __Hacl_Hash_Blake2b_32_H_DEFINED
 #endif

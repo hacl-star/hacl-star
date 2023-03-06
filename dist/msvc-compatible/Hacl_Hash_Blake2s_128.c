@@ -26,7 +26,6 @@
 #include "Hacl_Hash_Blake2s_128.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
-#include "internal/Hacl_Hash_Blake2.h"
 
 static inline void
 blake2s_update_block(
@@ -304,19 +303,24 @@ blake2s_update_blocks(
 {
   uint32_t nb0 = len / (uint32_t)64U;
   uint32_t rem0 = len % (uint32_t)64U;
-  K___uint32_t_uint32_t scrut;
+  uint32_t nb;
   if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
   {
-    uint32_t nb_ = nb0 - (uint32_t)1U;
-    uint32_t rem_ = (uint32_t)64U;
-    scrut = ((K___uint32_t_uint32_t){ .fst = nb_, .snd = rem_ });
+    nb = nb0 - (uint32_t)1U;
   }
   else
   {
-    scrut = ((K___uint32_t_uint32_t){ .fst = nb0, .snd = rem0 });
+    nb = nb0;
   }
-  uint32_t nb = scrut.fst;
-  uint32_t rem = scrut.snd;
+  uint32_t rem;
+  if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
+  {
+    rem = (uint32_t)64U;
+  }
+  else
+  {
+    rem = rem0;
+  }
   Hacl_Blake2s_128_blake2s_update_multi(len, wv, hash, prev, blocks, nb);
   Hacl_Blake2s_128_blake2s_update_last(len, wv, hash, prev, rem, blocks);
 }

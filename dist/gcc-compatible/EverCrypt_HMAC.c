@@ -28,7 +28,7 @@
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_Blake2.h"
+#include "internal/Hacl_HMAC.h"
 #include "internal/EverCrypt_Hash.h"
 
 bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___)

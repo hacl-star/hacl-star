@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_Blake2_H
-#define __internal_Hacl_Hash_Blake2_H
+#ifndef __internal_Hacl_HMAC_H
+#define __internal_Hacl_HMAC_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,8 +35,10 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Impl_Blake2_Constants.h"
-#include "../Hacl_Hash_Blake2.h"
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA1.h"
+#include "../Hacl_HMAC.h"
 
 /* SNIPPET_START: K___uint32_t_uint32_t */
 
@@ -53,5 +55,5 @@ K___uint32_t_uint32_t;
 }
 #endif
 
-#define __internal_Hacl_Hash_Blake2_H_DEFINED
+#define __internal_Hacl_HMAC_H_DEFINED
 #endif

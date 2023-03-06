@@ -39,9 +39,10 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA3.h"
 #include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_Blake2s_32.h"
 #include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2b_32.h"
 #include "Hacl_Hash_Blake2b_256.h"
-#include "Hacl_Hash_Blake2.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 
