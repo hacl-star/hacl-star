@@ -39,23 +39,27 @@ extern "C" {
 
 typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_SHA1_state;
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_create_in(void);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_malloc(void);
 
-void Hacl_Streaming_SHA1_legacy_init(Hacl_Streaming_MD_state_32 *s);
+void Hacl_Streaming_SHA1_reset(Hacl_Streaming_MD_state_32 *state1);
 
 /**
 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, uint32_t len);
+Hacl_Streaming_SHA1_update(
+  Hacl_Streaming_MD_state_32 *state1,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
 
-void Hacl_Streaming_SHA1_legacy_finish(Hacl_Streaming_MD_state_32 *p, uint8_t *dst);
+void Hacl_Streaming_SHA1_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output);
 
-void Hacl_Streaming_SHA1_legacy_free(Hacl_Streaming_MD_state_32 *s);
+void Hacl_Streaming_SHA1_free(Hacl_Streaming_MD_state_32 *state1);
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_copy(Hacl_Streaming_MD_state_32 *s0);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_copy(Hacl_Streaming_MD_state_32 *s0);
 
-void Hacl_Streaming_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Streaming_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 #if defined(__cplusplus)
 }

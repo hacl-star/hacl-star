@@ -692,7 +692,7 @@ update_last_512(
   update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
-static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_224(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[8U] =
@@ -721,10 +721,10 @@ static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   update_multi_224(s, blocks, blocks_n);
   update_last_224(s, (uint64_t)blocks_len, rest, rest_len);
-  finish_224(s, dst);
+  finish_224(s, output);
 }
 
-static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[8U] =
@@ -753,10 +753,10 @@ static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   update_multi_256(s, blocks, blocks_n);
   update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  finish_256(s, dst);
+  finish_256(s, output);
 }
 
-static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint64_t
   s[8U] =
@@ -786,10 +786,10 @@ static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   update_multi_384(s, blocks, blocks_n);
   update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
-  finish_384(s, dst);
+  finish_384(s, output);
 }
 
-static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint64_t
   s[8U] =
@@ -819,7 +819,7 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   update_multi_512(s, blocks, blocks_n);
   update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
-  finish_512(s, dst);
+  finish_512(s, output);
 }
 
 extern void C_String_print(C_String_t uu___);
@@ -841,10 +841,10 @@ test_sha2(
   uint8_t test256[32U] = { 0U };
   uint8_t test384[48U] = { 0U };
   uint8_t test512[64U] = { 0U };
-  hash_224(msg, msg_len, test224);
-  hash_256(msg, msg_len, test256);
-  hash_384(msg, msg_len, test384);
-  hash_512(msg, msg_len, test512);
+  hash_224(test224, msg, msg_len);
+  hash_256(test256, msg, msg_len);
+  hash_384(test384, msg, msg_len);
+  hash_512(test512, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display((uint32_t)28U, test224, expected224))
   {
     exit((int32_t)255);

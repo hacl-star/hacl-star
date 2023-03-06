@@ -71,72 +71,74 @@ Hacl_Streaming_Blake2_blake2b_32_state;
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2_blake2s_32_state
-*Hacl_Streaming_Blake2_blake2s_32_no_key_create_in(void);
+Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_malloc(void);
 
 /**
   (Re-)initialization function when there is no key
 */
-void Hacl_Streaming_Blake2_blake2s_32_no_key_init(Hacl_Streaming_Blake2_blake2s_32_state *s1);
+void
+Hacl_Streaming_Blake2_blake2s_32_no_key_reset(Hacl_Streaming_Blake2_blake2s_32_state *state);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 uint32_t
 Hacl_Streaming_Blake2_blake2s_32_no_key_update(
-  Hacl_Streaming_Blake2_blake2s_32_state *p,
-  uint8_t *data,
-  uint32_t len
+  Hacl_Streaming_Blake2_blake2s_32_state *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
 );
 
 /**
   Finish function when there is no key
 */
 void
-Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
-  Hacl_Streaming_Blake2_blake2s_32_state *p,
-  uint8_t *dst
+Hacl_Streaming_Blake2_blake2s_32_no_key_digest(
+  Hacl_Streaming_Blake2_blake2s_32_state *state,
+  uint8_t *output
 );
 
 /**
   Free state function when there is no key
 */
-void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_32_state *s1);
+void
+Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_32_state *state);
 
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2_blake2b_32_state
-*Hacl_Streaming_Blake2_blake2b_32_no_key_create_in(void);
+Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_malloc(void);
 
 /**
-  (Re)-initialization function when there is no key
+  Re-initialization function when there is no key
 */
-void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_32_state *s1);
+void
+Hacl_Streaming_Blake2_blake2b_32_no_key_reset(Hacl_Streaming_Blake2_blake2b_32_state *state);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 uint32_t
 Hacl_Streaming_Blake2_blake2b_32_no_key_update(
-  Hacl_Streaming_Blake2_blake2b_32_state *p,
-  uint8_t *data,
-  uint32_t len
+  Hacl_Streaming_Blake2_blake2b_32_state *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
 );
 
 /**
   Finish function when there is no key
 */
 void
-Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
-  Hacl_Streaming_Blake2_blake2b_32_state *p,
-  uint8_t *dst
+Hacl_Streaming_Blake2_blake2b_32_no_key_digest(
+  Hacl_Streaming_Blake2_blake2b_32_state *state,
+  uint8_t *output
 );
 
 /**
   Free state function when there is no key
 */
-void Hacl_Streaming_Blake2_blake2b_32_no_key_free(Hacl_Streaming_Blake2_blake2b_32_state *s1);
+void
+Hacl_Streaming_Blake2_blake2b_32_no_key_free(Hacl_Streaming_Blake2_blake2b_32_state *state);
 
 #if defined(__cplusplus)
 }

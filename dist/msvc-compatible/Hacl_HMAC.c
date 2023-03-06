@@ -65,7 +65,7 @@ Hacl_HMAC_legacy_compute_sha1(
   }
   else
   {
-    Hacl_Hash_SHA1_legacy_hash(key, key_len, nkey);
+    Hacl_Hash_SHA1_legacy_hash(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -189,7 +189,7 @@ Hacl_HMAC_compute_sha2_256(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_256(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_256(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -313,7 +313,7 @@ Hacl_HMAC_compute_sha2_384(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_384(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_384(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -443,7 +443,7 @@ Hacl_HMAC_compute_sha2_512(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_512(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_512(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));

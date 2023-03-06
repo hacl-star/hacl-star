@@ -46,29 +46,31 @@ typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s
 }
 Hacl_Streaming_Poly1305_128_poly1305_128_state;
 
-Hacl_Streaming_Poly1305_128_poly1305_128_state
-*Hacl_Streaming_Poly1305_128_create_in(uint8_t *k);
+Hacl_Streaming_Poly1305_128_poly1305_128_state *Hacl_Streaming_Poly1305_128_malloc(uint8_t *k);
 
 void
-Hacl_Streaming_Poly1305_128_init(uint8_t *k, Hacl_Streaming_Poly1305_128_poly1305_128_state *s);
+Hacl_Streaming_Poly1305_128_reset(
+  uint8_t *k,
+  Hacl_Streaming_Poly1305_128_poly1305_128_state *state
+);
 
 /**
 0 = success, 1 = max length exceeded
 */
 uint32_t
 Hacl_Streaming_Poly1305_128_update(
-  Hacl_Streaming_Poly1305_128_poly1305_128_state *p,
-  uint8_t *data,
-  uint32_t len
+  Hacl_Streaming_Poly1305_128_poly1305_128_state *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
 );
 
 void
-Hacl_Streaming_Poly1305_128_finish(
-  Hacl_Streaming_Poly1305_128_poly1305_128_state *p,
-  uint8_t *dst
+Hacl_Streaming_Poly1305_128_digest(
+  Hacl_Streaming_Poly1305_128_poly1305_128_state *state,
+  uint8_t *output
 );
 
-void Hacl_Streaming_Poly1305_128_free(Hacl_Streaming_Poly1305_128_poly1305_128_state *s);
+void Hacl_Streaming_Poly1305_128_free(Hacl_Streaming_Poly1305_128_poly1305_128_state *state);
 
 #if defined(__cplusplus)
 }

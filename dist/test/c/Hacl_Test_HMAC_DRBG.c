@@ -609,7 +609,7 @@ update_last_512(
   update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
-static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[8U] =
@@ -638,10 +638,10 @@ static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   update_multi_256(s, blocks, blocks_n);
   update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  finish_256(s, dst);
+  finish_256(s, output);
 }
 
-static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint64_t
   s[8U] =
@@ -671,10 +671,10 @@ static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   update_multi_384(s, blocks, blocks_n);
   update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
-  finish_384(s, dst);
+  finish_384(s, output);
 }
 
-static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint64_t
   s[8U] =
@@ -704,7 +704,7 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   update_multi_512(s, blocks, blocks_n);
   update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
-  finish_512(s, dst);
+  finish_512(s, output);
 }
 
 static uint32_t
@@ -883,7 +883,7 @@ legacy_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t inpu
   legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
-static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[5U] =
@@ -912,7 +912,7 @@ static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   legacy_update_multi(s, blocks, blocks_n);
   legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  legacy_finish(s, dst);
+  legacy_finish(s, output);
 }
 
 extern void C_String_print(C_String_t uu___);
@@ -959,7 +959,7 @@ legacy_compute_sha1(
   }
   else
   {
-    legacy_hash(key, key_len, nkey);
+    legacy_hash(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -1077,7 +1077,7 @@ compute_sha2_256(
   }
   else
   {
-    hash_256(key, key_len, nkey);
+    hash_256(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -1195,7 +1195,7 @@ compute_sha2_384(
   }
   else
   {
-    hash_384(key, key_len, nkey);
+    hash_384(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -1322,7 +1322,7 @@ compute_sha2_512(
   }
   else
   {
-    hash_512(key, key_len, nkey);
+    hash_512(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];

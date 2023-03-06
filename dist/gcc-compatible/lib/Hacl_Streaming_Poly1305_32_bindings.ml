@@ -18,12 +18,12 @@ module Bindings(F:Cstubs.FOREIGN) =
       field hacl_Streaming_Poly1305_32_poly1305_32_state "p_key"
         (ptr uint8_t)
     let _ = seal hacl_Streaming_Poly1305_32_poly1305_32_state
-    let hacl_Streaming_Poly1305_32_create_in =
-      foreign "Hacl_Streaming_Poly1305_32_create_in"
+    let hacl_Streaming_Poly1305_32_malloc =
+      foreign "Hacl_Streaming_Poly1305_32_malloc"
         (ocaml_bytes @->
            (returning (ptr hacl_Streaming_Poly1305_32_poly1305_32_state)))
-    let hacl_Streaming_Poly1305_32_init =
-      foreign "Hacl_Streaming_Poly1305_32_init"
+    let hacl_Streaming_Poly1305_32_reset =
+      foreign "Hacl_Streaming_Poly1305_32_reset"
         (ocaml_bytes @->
            ((ptr hacl_Streaming_Poly1305_32_poly1305_32_state) @->
               (returning void)))
@@ -31,8 +31,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Streaming_Poly1305_32_update"
         ((ptr hacl_Streaming_Poly1305_32_poly1305_32_state) @->
            (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
-    let hacl_Streaming_Poly1305_32_finish =
-      foreign "Hacl_Streaming_Poly1305_32_finish"
+    let hacl_Streaming_Poly1305_32_digest =
+      foreign "Hacl_Streaming_Poly1305_32_digest"
         ((ptr hacl_Streaming_Poly1305_32_poly1305_32_state) @->
            (ocaml_bytes @-> (returning void)))
     let hacl_Streaming_Poly1305_32_free =

@@ -43,17 +43,17 @@ typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
 
 /* SNIPPET_END: Hacl_Streaming_SHA3_state_256 */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_create_in_256 */
+/* SNIPPET_START: Hacl_Streaming_SHA3_malloc_256 */
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_create_in_256(void);
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_malloc_256(void);
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_create_in_256 */
+/* SNIPPET_END: Hacl_Streaming_SHA3_malloc_256 */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_init_256 */
+/* SNIPPET_START: Hacl_Streaming_SHA3_reset_256 */
 
-void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_MD_state_64 *s);
+void Hacl_Streaming_SHA3_reset_256(Hacl_Streaming_MD_state_64 *state);
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_init_256 */
+/* SNIPPET_END: Hacl_Streaming_SHA3_reset_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA3_update_256 */
 
@@ -61,19 +61,23 @@ void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_MD_state_64 *s);
 0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
 */
 uint32_t
-Hacl_Streaming_SHA3_update_256(Hacl_Streaming_MD_state_64 *p, uint8_t *data, uint32_t len);
+Hacl_Streaming_SHA3_update_256(
+  Hacl_Streaming_MD_state_64 *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
 
 /* SNIPPET_END: Hacl_Streaming_SHA3_update_256 */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_finish_256 */
+/* SNIPPET_START: Hacl_Streaming_SHA3_digest_256 */
 
-void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_MD_state_64 *p, uint8_t *dst);
+void Hacl_Streaming_SHA3_digest_256(Hacl_Streaming_MD_state_64 *state, uint8_t *output);
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_finish_256 */
+/* SNIPPET_END: Hacl_Streaming_SHA3_digest_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA3_free_256 */
 
-void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *s);
+void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *state);
 
 /* SNIPPET_END: Hacl_Streaming_SHA3_free_256 */
 

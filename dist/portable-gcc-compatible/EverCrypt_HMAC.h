@@ -54,7 +54,7 @@ typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 
 /* SNIPPET_START: EverCrypt_HMAC_hash_256 */
 
-extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint8_t *x1, uint32_t x2);
 
 /* SNIPPET_END: EverCrypt_HMAC_hash_256 */
 

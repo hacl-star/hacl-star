@@ -84,17 +84,17 @@ hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t 
   {
     case Spec_Hash_Definitions_SHA2_256:
       {
-        Hacl_Hash_SHA2_hash_256(msg, msgLen, mHash);
+        Hacl_Hash_SHA2_hash_256(mHash, msg, msgLen);
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        Hacl_Hash_SHA2_hash_384(msg, msgLen, mHash);
+        Hacl_Hash_SHA2_hash_384(mHash, msg, msgLen);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        Hacl_Hash_SHA2_hash_512(msg, msgLen, mHash);
+        Hacl_Hash_SHA2_hash_512(mHash, msg, msgLen);
         break;
       }
     default:

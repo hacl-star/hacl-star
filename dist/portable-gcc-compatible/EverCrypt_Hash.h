@@ -69,7 +69,7 @@ EverCrypt_Hash_Incremental_hash_state;
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_hash_state */
 
-/* SNIPPET_START: EverCrypt_Hash_Incremental_create_in */
+/* SNIPPET_START: EverCrypt_Hash_Incremental_malloc */
 
 /**
 Allocate initial state for the agile hash. The argument `a` stands for the
@@ -78,18 +78,18 @@ efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
 before. The state is to be freed by calling `free`.
 */
 EverCrypt_Hash_Incremental_hash_state
-*EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a);
+*EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_hash_alg a);
 
-/* SNIPPET_END: EverCrypt_Hash_Incremental_create_in */
+/* SNIPPET_END: EverCrypt_Hash_Incremental_malloc */
 
-/* SNIPPET_START: EverCrypt_Hash_Incremental_init */
+/* SNIPPET_START: EverCrypt_Hash_Incremental_reset */
 
 /**
 Reset an existing state to the initial hash state with empty data.
 */
-void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_hash_state *s);
+void EverCrypt_Hash_Incremental_reset(EverCrypt_Hash_Incremental_hash_state *state);
 
-/* SNIPPET_END: EverCrypt_Hash_Incremental_init */
+/* SNIPPET_END: EverCrypt_Hash_Incremental_reset */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_update */
 
@@ -102,9 +102,9 @@ algorithm. Both limits are unlikely to be attained in practice.
 */
 EverCrypt_Error_error_code
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_hash_state *s,
-  uint8_t *data,
-  uint32_t len
+  EverCrypt_Hash_Incremental_hash_state *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
 );
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_update */
@@ -119,33 +119,37 @@ EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_hash_state *s
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_alg_of_state */
 
-/* SNIPPET_START: EverCrypt_Hash_Incremental_finish */
+/* SNIPPET_START: EverCrypt_Hash_Incremental_digest */
 
 /**
-Write the resulting hash into `dst`, an array whose length is
+Write the resulting hash into `output`, an array whose length is
 algorithm-specific. You can use the macros defined earlier in this file to
 allocate a destination buffer of the right length. The state remains valid after
-a call to `finish`, meaning the user may feed more data into the hash via
+a call to `digest`, meaning the user may feed more data into the hash via
 `update`. (The finish function operates on an internal copy of the state and
 therefore does not invalidate the client-held state.)
 */
-void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_hash_state *s, uint8_t *dst);
+void
+EverCrypt_Hash_Incremental_digest(
+  EverCrypt_Hash_Incremental_hash_state *state,
+  uint8_t *output
+);
 
-/* SNIPPET_END: EverCrypt_Hash_Incremental_finish */
+/* SNIPPET_END: EverCrypt_Hash_Incremental_digest */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_free */
 
 /**
 Free a state previously allocated with `create_in`.
 */
-void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_hash_state *s);
+void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_hash_state *state);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_free */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_hash */
 
 /**
-Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
 your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
 earlier in this file to allocate a destination buffer of the right length. This
 API will automatically pick the most efficient implementation, provided you have
@@ -154,9 +158,9 @@ called EverCrypt_AutoConfig2_init() before.
 void
 EverCrypt_Hash_Incremental_hash(
   Spec_Hash_Definitions_hash_alg a,
-  uint8_t *dst,
+  uint8_t *output,
   uint8_t *input,
-  uint32_t len
+  uint32_t input_len
 );
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_hash */

@@ -20,22 +20,22 @@ module Bindings(F:Cstubs.FOREIGN) =
            (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let hacl_Hash_MD5_legacy_hash =
       foreign "Hacl_Hash_MD5_legacy_hash"
-        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     type hacl_Streaming_MD5_state = hacl_Streaming_MD_state_32
     let hacl_Streaming_MD5_state =
       typedef hacl_Streaming_MD_state_32 "Hacl_Streaming_MD5_state"
-    let hacl_Streaming_MD5_legacy_create_in =
-      foreign "Hacl_Streaming_MD5_legacy_create_in"
+    let hacl_Streaming_MD5_legacy_malloc =
+      foreign "Hacl_Streaming_MD5_legacy_malloc"
         (void @-> (returning (ptr hacl_Streaming_MD_state_32)))
-    let hacl_Streaming_MD5_legacy_init =
-      foreign "Hacl_Streaming_MD5_legacy_init"
+    let hacl_Streaming_MD5_legacy_reset =
+      foreign "Hacl_Streaming_MD5_legacy_reset"
         ((ptr hacl_Streaming_MD_state_32) @-> (returning void))
     let hacl_Streaming_MD5_legacy_update =
       foreign "Hacl_Streaming_MD5_legacy_update"
         ((ptr hacl_Streaming_MD_state_32) @->
            (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
-    let hacl_Streaming_MD5_legacy_finish =
-      foreign "Hacl_Streaming_MD5_legacy_finish"
+    let hacl_Streaming_MD5_legacy_digest =
+      foreign "Hacl_Streaming_MD5_legacy_digest"
         ((ptr hacl_Streaming_MD_state_32) @->
            (ocaml_bytes @-> (returning void)))
     let hacl_Streaming_MD5_legacy_free =
@@ -47,5 +47,5 @@ module Bindings(F:Cstubs.FOREIGN) =
            (returning (ptr hacl_Streaming_MD_state_32)))
     let hacl_Streaming_MD5_legacy_hash =
       foreign "Hacl_Streaming_MD5_legacy_hash"
-        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
   end

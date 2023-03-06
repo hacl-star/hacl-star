@@ -43,17 +43,17 @@ typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_MD5_state;
 
 /* SNIPPET_END: Hacl_Streaming_MD5_state */
 
-/* SNIPPET_START: Hacl_Streaming_MD5_legacy_create_in */
+/* SNIPPET_START: Hacl_Streaming_MD5_legacy_malloc */
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_MD5_legacy_create_in(void);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_MD5_legacy_malloc(void);
 
-/* SNIPPET_END: Hacl_Streaming_MD5_legacy_create_in */
+/* SNIPPET_END: Hacl_Streaming_MD5_legacy_malloc */
 
-/* SNIPPET_START: Hacl_Streaming_MD5_legacy_init */
+/* SNIPPET_START: Hacl_Streaming_MD5_legacy_reset */
 
-void Hacl_Streaming_MD5_legacy_init(Hacl_Streaming_MD_state_32 *s);
+void Hacl_Streaming_MD5_legacy_reset(Hacl_Streaming_MD_state_32 *state1);
 
-/* SNIPPET_END: Hacl_Streaming_MD5_legacy_init */
+/* SNIPPET_END: Hacl_Streaming_MD5_legacy_reset */
 
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_update */
 
@@ -61,19 +61,23 @@ void Hacl_Streaming_MD5_legacy_init(Hacl_Streaming_MD_state_32 *s);
 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Streaming_MD5_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, uint32_t len);
+Hacl_Streaming_MD5_legacy_update(
+  Hacl_Streaming_MD_state_32 *state1,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_update */
 
-/* SNIPPET_START: Hacl_Streaming_MD5_legacy_finish */
+/* SNIPPET_START: Hacl_Streaming_MD5_legacy_digest */
 
-void Hacl_Streaming_MD5_legacy_finish(Hacl_Streaming_MD_state_32 *p, uint8_t *dst);
+void Hacl_Streaming_MD5_legacy_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output);
 
-/* SNIPPET_END: Hacl_Streaming_MD5_legacy_finish */
+/* SNIPPET_END: Hacl_Streaming_MD5_legacy_digest */
 
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_free */
 
-void Hacl_Streaming_MD5_legacy_free(Hacl_Streaming_MD_state_32 *s);
+void Hacl_Streaming_MD5_legacy_free(Hacl_Streaming_MD_state_32 *state1);
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_free */
 
@@ -85,7 +89,7 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_MD5_legacy_copy(Hacl_Streaming_MD_sta
 
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_hash */
 
-void Hacl_Streaming_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Streaming_MD5_legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_hash */
 

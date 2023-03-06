@@ -764,7 +764,7 @@ Hacl_Hash_SHA2_update_last_512(
   Hacl_Hash_SHA2_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
-void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_Hash_SHA2_hash_224(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[8U] =
@@ -793,10 +793,10 @@ void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   Hacl_Hash_SHA2_update_multi_224(s, blocks, blocks_n);
   Hacl_Hash_SHA2_update_last_224(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA2_finish_224(s, dst);
+  Hacl_Hash_Core_SHA2_finish_224(s, output);
 }
 
-void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_Hash_SHA2_hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[8U] =
@@ -825,10 +825,10 @@ void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   Hacl_Hash_SHA2_update_multi_256(s, blocks, blocks_n);
   Hacl_Hash_SHA2_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA2_finish_256(s, dst);
+  Hacl_Hash_Core_SHA2_finish_256(s, output);
 }
 
-void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_Hash_SHA2_hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint64_t
   s[8U] =
@@ -861,10 +861,10 @@ void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
     FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len),
     rest,
     rest_len);
-  Hacl_Hash_Core_SHA2_finish_384(s, dst);
+  Hacl_Hash_Core_SHA2_finish_384(s, output);
 }
 
-void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_Hash_SHA2_hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint64_t
   s[8U] =
@@ -897,6 +897,6 @@ void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
     FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len),
     rest,
     rest_len);
-  Hacl_Hash_Core_SHA2_finish_512(s, dst);
+  Hacl_Hash_Core_SHA2_finish_512(s, output);
 }
 

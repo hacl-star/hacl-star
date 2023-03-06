@@ -73,7 +73,7 @@ bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___)
 /* SNIPPET_START: EverCrypt_HMAC_hash_256 */
 
 void
-(*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2) =
+(*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint8_t *x1, uint32_t x2) =
   EverCrypt_Hash_Incremental_hash_256;
 
 /* SNIPPET_END: EverCrypt_HMAC_hash_256 */
@@ -109,7 +109,7 @@ EverCrypt_HMAC_compute_sha1(
   }
   else
   {
-    Hacl_Hash_SHA1_legacy_hash(key, key_len, nkey);
+    Hacl_Hash_SHA1_legacy_hash(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -231,7 +231,7 @@ EverCrypt_HMAC_compute_sha2_256(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_256(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_256(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -353,7 +353,7 @@ EverCrypt_HMAC_compute_sha2_384(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_384(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_384(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -481,7 +481,7 @@ EverCrypt_HMAC_compute_sha2_512(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_512(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_512(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];

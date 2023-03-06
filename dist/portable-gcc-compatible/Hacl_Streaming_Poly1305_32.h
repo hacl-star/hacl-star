@@ -50,18 +50,21 @@ Hacl_Streaming_Poly1305_32_poly1305_32_state;
 
 /* SNIPPET_END: Hacl_Streaming_Poly1305_32_poly1305_32_state */
 
-/* SNIPPET_START: Hacl_Streaming_Poly1305_32_create_in */
+/* SNIPPET_START: Hacl_Streaming_Poly1305_32_malloc */
 
-Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_in(uint8_t *k);
+Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_malloc(uint8_t *k);
 
-/* SNIPPET_END: Hacl_Streaming_Poly1305_32_create_in */
+/* SNIPPET_END: Hacl_Streaming_Poly1305_32_malloc */
 
-/* SNIPPET_START: Hacl_Streaming_Poly1305_32_init */
+/* SNIPPET_START: Hacl_Streaming_Poly1305_32_reset */
 
 void
-Hacl_Streaming_Poly1305_32_init(uint8_t *k, Hacl_Streaming_Poly1305_32_poly1305_32_state *s);
+Hacl_Streaming_Poly1305_32_reset(
+  uint8_t *k,
+  Hacl_Streaming_Poly1305_32_poly1305_32_state *state
+);
 
-/* SNIPPET_END: Hacl_Streaming_Poly1305_32_init */
+/* SNIPPET_END: Hacl_Streaming_Poly1305_32_reset */
 
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_update */
 
@@ -70,26 +73,26 @@ Hacl_Streaming_Poly1305_32_init(uint8_t *k, Hacl_Streaming_Poly1305_32_poly1305_
 */
 uint32_t
 Hacl_Streaming_Poly1305_32_update(
-  Hacl_Streaming_Poly1305_32_poly1305_32_state *p,
-  uint8_t *data,
-  uint32_t len
+  Hacl_Streaming_Poly1305_32_poly1305_32_state *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
 );
 
 /* SNIPPET_END: Hacl_Streaming_Poly1305_32_update */
 
-/* SNIPPET_START: Hacl_Streaming_Poly1305_32_finish */
+/* SNIPPET_START: Hacl_Streaming_Poly1305_32_digest */
 
 void
-Hacl_Streaming_Poly1305_32_finish(
-  Hacl_Streaming_Poly1305_32_poly1305_32_state *p,
-  uint8_t *dst
+Hacl_Streaming_Poly1305_32_digest(
+  Hacl_Streaming_Poly1305_32_poly1305_32_state *state,
+  uint8_t *output
 );
 
-/* SNIPPET_END: Hacl_Streaming_Poly1305_32_finish */
+/* SNIPPET_END: Hacl_Streaming_Poly1305_32_digest */
 
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_free */
 
-void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Poly1305_32_poly1305_32_state *s);
+void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Poly1305_32_poly1305_32_state *state);
 
 /* SNIPPET_END: Hacl_Streaming_Poly1305_32_free */
 

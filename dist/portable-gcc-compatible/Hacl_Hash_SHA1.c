@@ -234,7 +234,7 @@ Hacl_Hash_SHA1_legacy_update_last(
 
 /* SNIPPET_START: Hacl_Hash_SHA1_legacy_hash */
 
-void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_Hash_SHA1_legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[5U] =
@@ -263,14 +263,14 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint8_t *rest = rest0;
   Hacl_Hash_SHA1_legacy_update_multi(s, blocks, blocks_n);
   Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
+  Hacl_Hash_Core_SHA1_legacy_finish(s, output);
 }
 
 /* SNIPPET_END: Hacl_Hash_SHA1_legacy_hash */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_create_in */
+/* SNIPPET_START: Hacl_Streaming_SHA1_malloc */
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_create_in(void)
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_malloc(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)5U, sizeof (uint32_t));
@@ -283,34 +283,38 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_create_in(void)
   return p;
 }
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_create_in */
+/* SNIPPET_END: Hacl_Streaming_SHA1_malloc */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_init */
+/* SNIPPET_START: Hacl_Streaming_SHA1_reset */
 
-void Hacl_Streaming_SHA1_legacy_init(Hacl_Streaming_MD_state_32 *s)
+void Hacl_Streaming_SHA1_reset(Hacl_Streaming_MD_state_32 *state1)
 {
-  Hacl_Streaming_MD_state_32 scrut = *s;
+  Hacl_Streaming_MD_state_32 scrut = *state1;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
   Hacl_Hash_Core_SHA1_legacy_init(block_state);
   Hacl_Streaming_MD_state_32
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
-  s[0U] = tmp;
+  state1[0U] = tmp;
 }
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_init */
+/* SNIPPET_END: Hacl_Streaming_SHA1_reset */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_update */
+/* SNIPPET_START: Hacl_Streaming_SHA1_update */
 
 /**
 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, uint32_t len)
+Hacl_Streaming_SHA1_update(
+  Hacl_Streaming_MD_state_32 *state1,
+  uint8_t *chunk,
+  uint32_t chunk_len
+)
 {
-  Hacl_Streaming_MD_state_32 s = *p;
+  Hacl_Streaming_MD_state_32 s = *state1;
   uint64_t total_len = s.total_len;
-  if ((uint64_t)len > (uint64_t)2305843009213693951U - total_len)
+  if ((uint64_t)chunk_len > (uint64_t)2305843009213693951U - total_len)
   {
     return (uint32_t)1U;
   }
@@ -323,9 +327,9 @@ Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, 
   {
     sz = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
   }
-  if (len <= (uint32_t)64U - sz)
+  if (chunk_len <= (uint32_t)64U - sz)
   {
-    Hacl_Streaming_MD_state_32 s1 = *p;
+    Hacl_Streaming_MD_state_32 s1 = *state1;
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -339,9 +343,9 @@ Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, 
       sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
     }
     uint8_t *buf2 = buf + sz1;
-    memcpy(buf2, data, len * sizeof (uint8_t));
-    uint64_t total_len2 = total_len1 + (uint64_t)len;
-    *p
+    memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
+    uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
+    *state1
     =
       (
         (Hacl_Streaming_MD_state_32){
@@ -353,7 +357,7 @@ Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, 
   }
   else if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_MD_state_32 s1 = *p;
+    Hacl_Streaming_MD_state_32 s1 = *state1;
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -371,38 +375,44 @@ Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, 
       Hacl_Hash_SHA1_legacy_update_multi(block_state1, buf, (uint32_t)1U);
     }
     uint32_t ite;
-    if ((uint64_t)len % (uint64_t)(uint32_t)64U == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
+    if
+    (
+      (uint64_t)chunk_len
+      % (uint64_t)(uint32_t)64U
+      == (uint64_t)0U
+      && (uint64_t)chunk_len > (uint64_t)0U
+    )
     {
       ite = (uint32_t)64U;
     }
     else
     {
-      ite = (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)64U);
+      ite = (uint32_t)((uint64_t)chunk_len % (uint64_t)(uint32_t)64U);
     }
-    uint32_t n_blocks = (len - ite) / (uint32_t)64U;
+    uint32_t n_blocks = (chunk_len - ite) / (uint32_t)64U;
     uint32_t data1_len = n_blocks * (uint32_t)64U;
-    uint32_t data2_len = len - data1_len;
-    uint8_t *data1 = data;
-    uint8_t *data2 = data + data1_len;
+    uint32_t data2_len = chunk_len - data1_len;
+    uint8_t *data1 = chunk;
+    uint8_t *data2 = chunk + data1_len;
     Hacl_Hash_SHA1_legacy_update_multi(block_state1, data1, data1_len / (uint32_t)64U);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *p
+    *state1
     =
       (
         (Hacl_Streaming_MD_state_32){
           .block_state = block_state1,
           .buf = buf,
-          .total_len = total_len1 + (uint64_t)len
+          .total_len = total_len1 + (uint64_t)chunk_len
         }
       );
   }
   else
   {
     uint32_t diff = (uint32_t)64U - sz;
-    uint8_t *data1 = data;
-    uint8_t *data2 = data + diff;
-    Hacl_Streaming_MD_state_32 s1 = *p;
+    uint8_t *chunk1 = chunk;
+    uint8_t *chunk2 = chunk + diff;
+    Hacl_Streaming_MD_state_32 s1 = *state1;
     uint32_t *block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
@@ -416,9 +426,9 @@ Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, 
       sz10 = (uint32_t)(total_len10 % (uint64_t)(uint32_t)64U);
     }
     uint8_t *buf2 = buf0 + sz10;
-    memcpy(buf2, data1, diff * sizeof (uint8_t));
+    memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *p
+    *state1
     =
       (
         (Hacl_Streaming_MD_state_32){
@@ -427,7 +437,7 @@ Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, 
           .total_len = total_len2
         }
       );
-    Hacl_Streaming_MD_state_32 s10 = *p;
+    Hacl_Streaming_MD_state_32 s10 = *state1;
     uint32_t *block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
@@ -447,46 +457,46 @@ Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, 
     uint32_t ite;
     if
     (
-      (uint64_t)(len - diff)
+      (uint64_t)(chunk_len - diff)
       % (uint64_t)(uint32_t)64U
       == (uint64_t)0U
-      && (uint64_t)(len - diff) > (uint64_t)0U
+      && (uint64_t)(chunk_len - diff) > (uint64_t)0U
     )
     {
       ite = (uint32_t)64U;
     }
     else
     {
-      ite = (uint32_t)((uint64_t)(len - diff) % (uint64_t)(uint32_t)64U);
+      ite = (uint32_t)((uint64_t)(chunk_len - diff) % (uint64_t)(uint32_t)64U);
     }
-    uint32_t n_blocks = (len - diff - ite) / (uint32_t)64U;
+    uint32_t n_blocks = (chunk_len - diff - ite) / (uint32_t)64U;
     uint32_t data1_len = n_blocks * (uint32_t)64U;
-    uint32_t data2_len = len - diff - data1_len;
-    uint8_t *data11 = data2;
-    uint8_t *data21 = data2 + data1_len;
-    Hacl_Hash_SHA1_legacy_update_multi(block_state1, data11, data1_len / (uint32_t)64U);
+    uint32_t data2_len = chunk_len - diff - data1_len;
+    uint8_t *data1 = chunk2;
+    uint8_t *data2 = chunk2 + data1_len;
+    Hacl_Hash_SHA1_legacy_update_multi(block_state1, data1, data1_len / (uint32_t)64U);
     uint8_t *dst = buf;
-    memcpy(dst, data21, data2_len * sizeof (uint8_t));
-    *p
+    memcpy(dst, data2, data2_len * sizeof (uint8_t));
+    *state1
     =
       (
         (Hacl_Streaming_MD_state_32){
           .block_state = block_state1,
           .buf = buf,
-          .total_len = total_len1 + (uint64_t)(len - diff)
+          .total_len = total_len1 + (uint64_t)(chunk_len - diff)
         }
       );
   }
   return (uint32_t)0U;
 }
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_update */
+/* SNIPPET_END: Hacl_Streaming_SHA1_update */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_finish */
+/* SNIPPET_START: Hacl_Streaming_SHA1_digest */
 
-void Hacl_Streaming_SHA1_legacy_finish(Hacl_Streaming_MD_state_32 *p, uint8_t *dst)
+void Hacl_Streaming_SHA1_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output)
 {
-  Hacl_Streaming_MD_state_32 scrut = *p;
+  Hacl_Streaming_MD_state_32 scrut = *state1;
   uint32_t *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -516,28 +526,28 @@ void Hacl_Streaming_SHA1_legacy_finish(Hacl_Streaming_MD_state_32 *p, uint8_t *d
   Hacl_Hash_SHA1_legacy_update_multi(tmp_block_state, buf_multi, (uint32_t)0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   Hacl_Hash_SHA1_legacy_update_last(tmp_block_state, prev_len_last, buf_last, r);
-  Hacl_Hash_Core_SHA1_legacy_finish(tmp_block_state, dst);
+  Hacl_Hash_Core_SHA1_legacy_finish(tmp_block_state, output);
 }
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_finish */
+/* SNIPPET_END: Hacl_Streaming_SHA1_digest */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_free */
+/* SNIPPET_START: Hacl_Streaming_SHA1_free */
 
-void Hacl_Streaming_SHA1_legacy_free(Hacl_Streaming_MD_state_32 *s)
+void Hacl_Streaming_SHA1_free(Hacl_Streaming_MD_state_32 *state1)
 {
-  Hacl_Streaming_MD_state_32 scrut = *s;
+  Hacl_Streaming_MD_state_32 scrut = *state1;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
   KRML_HOST_FREE(block_state);
   KRML_HOST_FREE(buf);
-  KRML_HOST_FREE(s);
+  KRML_HOST_FREE(state1);
 }
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_free */
+/* SNIPPET_END: Hacl_Streaming_SHA1_free */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_copy */
+/* SNIPPET_START: Hacl_Streaming_SHA1_copy */
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_copy(Hacl_Streaming_MD_state_32 *s0)
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_copy(Hacl_Streaming_MD_state_32 *s0)
 {
   Hacl_Streaming_MD_state_32 scrut = *s0;
   uint32_t *block_state0 = scrut.block_state;
@@ -555,14 +565,14 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_copy(Hacl_Streaming_MD_st
   return p;
 }
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_copy */
+/* SNIPPET_END: Hacl_Streaming_SHA1_copy */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_legacy_hash */
+/* SNIPPET_START: Hacl_Streaming_SHA1_hash */
 
-void Hacl_Streaming_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_Streaming_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
-  Hacl_Hash_SHA1_legacy_hash(input, input_len, dst);
+  Hacl_Hash_SHA1_legacy_hash(output, input, input_len);
 }
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_legacy_hash */
+/* SNIPPET_END: Hacl_Streaming_SHA1_hash */
 

@@ -77,13 +77,13 @@ Hacl_Hash_SHA2_update_last_512(
   uint32_t input_len
 );
 
-void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Hash_SHA2_hash_224(uint8_t *output, uint8_t *input, uint32_t input_len);
 
-void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Hash_SHA2_hash_256(uint8_t *output, uint8_t *input, uint32_t input_len);
 
-void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Hash_SHA2_hash_384(uint8_t *output, uint8_t *input, uint32_t input_len);
 
-void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Hash_SHA2_hash_512(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 #if defined(__cplusplus)
 }

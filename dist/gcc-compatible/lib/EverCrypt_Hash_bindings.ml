@@ -46,12 +46,12 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_Hash_Incremental_hash_state_total_len =
       field everCrypt_Hash_Incremental_hash_state "total_len" uint64_t
     let _ = seal everCrypt_Hash_Incremental_hash_state
-    let everCrypt_Hash_Incremental_create_in =
-      foreign "EverCrypt_Hash_Incremental_create_in"
+    let everCrypt_Hash_Incremental_malloc =
+      foreign "EverCrypt_Hash_Incremental_malloc"
         (spec_Hash_Definitions_hash_alg @->
            (returning (ptr everCrypt_Hash_Incremental_hash_state)))
-    let everCrypt_Hash_Incremental_init =
-      foreign "EverCrypt_Hash_Incremental_init"
+    let everCrypt_Hash_Incremental_reset =
+      foreign "EverCrypt_Hash_Incremental_reset"
         ((ptr everCrypt_Hash_Incremental_hash_state) @-> (returning void))
     let everCrypt_Hash_Incremental_update =
       foreign "EverCrypt_Hash_Incremental_update"
@@ -62,8 +62,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_Hash_Incremental_alg_of_state"
         ((ptr everCrypt_Hash_Incremental_hash_state) @->
            (returning spec_Hash_Definitions_hash_alg))
-    let everCrypt_Hash_Incremental_finish =
-      foreign "EverCrypt_Hash_Incremental_finish"
+    let everCrypt_Hash_Incremental_digest =
+      foreign "EverCrypt_Hash_Incremental_digest"
         ((ptr everCrypt_Hash_Incremental_hash_state) @->
            (ocaml_bytes @-> (returning void)))
     let everCrypt_Hash_Incremental_free =
@@ -71,7 +71,7 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr everCrypt_Hash_Incremental_hash_state) @-> (returning void))
     let everCrypt_Hash_Incremental_hash_256 =
       foreign "EverCrypt_Hash_Incremental_hash_256"
-        (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let everCrypt_Hash_Incremental_hash =
       foreign "EverCrypt_Hash_Incremental_hash"
         (spec_Hash_Definitions_hash_alg @->

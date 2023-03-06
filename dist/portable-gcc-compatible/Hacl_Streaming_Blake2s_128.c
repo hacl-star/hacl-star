@@ -25,13 +25,13 @@
 
 #include "Hacl_Streaming_Blake2s_128.h"
 
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in */
+/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_malloc */
 
 /**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2s_128_blake2s_128_state
-*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in(void)
+*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_malloc(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec128
@@ -57,28 +57,28 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
   return p;
 }
 
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in */
+/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_malloc */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init */
+/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset */
 
 /**
-  (Re-)initialization function when there is no key
+  Re-initialization function when there is no key
 */
 void
-Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
+Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset(
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *state
 )
 {
-  Hacl_Streaming_Blake2s_128_blake2s_128_state scrut = *s;
+  Hacl_Streaming_Blake2s_128_blake2s_128_state scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state = scrut.block_state;
   Hacl_Blake2s_128_blake2s_init(block_state.snd, (uint32_t)0U, (uint32_t)32U);
   Hacl_Streaming_Blake2s_128_blake2s_128_state
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
-  s[0U] = tmp;
+  state[0U] = tmp;
 }
 
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init */
+/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update */
 
@@ -87,14 +87,14 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
 */
 uint32_t
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
-  uint8_t *data,
-  uint32_t len
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
 )
 {
-  Hacl_Streaming_Blake2s_128_blake2s_128_state s = *p;
+  Hacl_Streaming_Blake2s_128_blake2s_128_state s = *state;
   uint64_t total_len = s.total_len;
-  if ((uint64_t)len > (uint64_t)0xffffffffffffffffU - total_len)
+  if ((uint64_t)chunk_len > (uint64_t)0xffffffffffffffffU - total_len)
   {
     return (uint32_t)1U;
   }
@@ -107,9 +107,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   {
     sz = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
   }
-  if (len <= (uint32_t)64U - sz)
+  if (chunk_len <= (uint32_t)64U - sz)
   {
-    Hacl_Streaming_Blake2s_128_blake2s_128_state s1 = *p;
+    Hacl_Streaming_Blake2s_128_blake2s_128_state s1 = *state;
     Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -123,9 +123,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
       sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
     }
     uint8_t *buf2 = buf + sz1;
-    memcpy(buf2, data, len * sizeof (uint8_t));
-    uint64_t total_len2 = total_len1 + (uint64_t)len;
-    *p
+    memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
+    uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
+    *state
     =
       (
         (Hacl_Streaming_Blake2s_128_blake2s_128_state){
@@ -137,7 +137,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   }
   else if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_Blake2s_128_blake2s_128_state s1 = *p;
+    Hacl_Streaming_Blake2s_128_blake2s_128_state s1 = *state;
     Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -159,41 +159,47 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
       Hacl_Blake2s_128_blake2s_update_multi((uint32_t)64U, wv, hash, prevlen, buf, nb);
     }
     uint32_t ite;
-    if ((uint64_t)len % (uint64_t)(uint32_t)64U == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
+    if
+    (
+      (uint64_t)chunk_len
+      % (uint64_t)(uint32_t)64U
+      == (uint64_t)0U
+      && (uint64_t)chunk_len > (uint64_t)0U
+    )
     {
       ite = (uint32_t)64U;
     }
     else
     {
-      ite = (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)64U);
+      ite = (uint32_t)((uint64_t)chunk_len % (uint64_t)(uint32_t)64U);
     }
-    uint32_t n_blocks = (len - ite) / (uint32_t)64U;
+    uint32_t n_blocks = (chunk_len - ite) / (uint32_t)64U;
     uint32_t data1_len = n_blocks * (uint32_t)64U;
-    uint32_t data2_len = len - data1_len;
-    uint8_t *data1 = data;
-    uint8_t *data2 = data + data1_len;
+    uint32_t data2_len = chunk_len - data1_len;
+    uint8_t *data1 = chunk;
+    uint8_t *data2 = chunk + data1_len;
     Lib_IntVector_Intrinsics_vec128 *wv = block_state1.fst;
     Lib_IntVector_Intrinsics_vec128 *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)64U;
     Hacl_Blake2s_128_blake2s_update_multi(data1_len, wv, hash, total_len1, data1, nb);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *p
+    *state
     =
       (
         (Hacl_Streaming_Blake2s_128_blake2s_128_state){
           .block_state = block_state1,
           .buf = buf,
-          .total_len = total_len1 + (uint64_t)len
+          .total_len = total_len1 + (uint64_t)chunk_len
         }
       );
   }
   else
   {
     uint32_t diff = (uint32_t)64U - sz;
-    uint8_t *data1 = data;
-    uint8_t *data2 = data + diff;
-    Hacl_Streaming_Blake2s_128_blake2s_128_state s1 = *p;
+    uint8_t *chunk1 = chunk;
+    uint8_t *chunk2 = chunk + diff;
+    Hacl_Streaming_Blake2s_128_blake2s_128_state s1 = *state;
     Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
@@ -207,9 +213,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
       sz10 = (uint32_t)(total_len10 % (uint64_t)(uint32_t)64U);
     }
     uint8_t *buf2 = buf0 + sz10;
-    memcpy(buf2, data1, diff * sizeof (uint8_t));
+    memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *p
+    *state
     =
       (
         (Hacl_Streaming_Blake2s_128_blake2s_128_state){
@@ -218,7 +224,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
           .total_len = total_len2
         }
       );
-    Hacl_Streaming_Blake2s_128_blake2s_128_state s10 = *p;
+    Hacl_Streaming_Blake2s_128_blake2s_128_state s10 = *state;
     Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
@@ -242,36 +248,36 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
     uint32_t ite;
     if
     (
-      (uint64_t)(len - diff)
+      (uint64_t)(chunk_len - diff)
       % (uint64_t)(uint32_t)64U
       == (uint64_t)0U
-      && (uint64_t)(len - diff) > (uint64_t)0U
+      && (uint64_t)(chunk_len - diff) > (uint64_t)0U
     )
     {
       ite = (uint32_t)64U;
     }
     else
     {
-      ite = (uint32_t)((uint64_t)(len - diff) % (uint64_t)(uint32_t)64U);
+      ite = (uint32_t)((uint64_t)(chunk_len - diff) % (uint64_t)(uint32_t)64U);
     }
-    uint32_t n_blocks = (len - diff - ite) / (uint32_t)64U;
+    uint32_t n_blocks = (chunk_len - diff - ite) / (uint32_t)64U;
     uint32_t data1_len = n_blocks * (uint32_t)64U;
-    uint32_t data2_len = len - diff - data1_len;
-    uint8_t *data11 = data2;
-    uint8_t *data21 = data2 + data1_len;
+    uint32_t data2_len = chunk_len - diff - data1_len;
+    uint8_t *data1 = chunk2;
+    uint8_t *data2 = chunk2 + data1_len;
     Lib_IntVector_Intrinsics_vec128 *wv = block_state1.fst;
     Lib_IntVector_Intrinsics_vec128 *hash = block_state1.snd;
     uint32_t nb = data1_len / (uint32_t)64U;
-    Hacl_Blake2s_128_blake2s_update_multi(data1_len, wv, hash, total_len1, data11, nb);
+    Hacl_Blake2s_128_blake2s_update_multi(data1_len, wv, hash, total_len1, data1, nb);
     uint8_t *dst = buf;
-    memcpy(dst, data21, data2_len * sizeof (uint8_t));
-    *p
+    memcpy(dst, data2, data2_len * sizeof (uint8_t));
+    *state
     =
       (
         (Hacl_Streaming_Blake2s_128_blake2s_128_state){
           .block_state = block_state1,
           .buf = buf,
-          .total_len = total_len1 + (uint64_t)(len - diff)
+          .total_len = total_len1 + (uint64_t)(chunk_len - diff)
         }
       );
   }
@@ -280,18 +286,18 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish */
+/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest */
 
 /**
   Finish function when there is no key
 */
 void
-Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
-  uint8_t *dst
+Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest(
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *state,
+  uint8_t *output
 )
 {
-  Hacl_Streaming_Blake2s_128_blake2s_128_state scrut = *p;
+  Hacl_Streaming_Blake2s_128_blake2s_128_state scrut = *state;
   Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -331,10 +337,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   Lib_IntVector_Intrinsics_vec128 *wv = tmp_block_state.fst;
   Lib_IntVector_Intrinsics_vec128 *hash = tmp_block_state.snd;
   Hacl_Blake2s_128_blake2s_update_last(r, wv, hash, prev_len_last, r, buf_last);
-  Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
+  Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, output, tmp_block_state.snd);
 }
 
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish */
+/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free */
 
@@ -343,10 +349,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
 */
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *state
 )
 {
-  Hacl_Streaming_Blake2s_128_blake2s_128_state scrut = *s;
+  Hacl_Streaming_Blake2s_128_blake2s_128_state scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state = scrut.block_state;
   Lib_IntVector_Intrinsics_vec128 *wv = block_state.fst;
@@ -354,7 +360,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
   KRML_ALIGNED_FREE(wv);
   KRML_ALIGNED_FREE(b);
   KRML_HOST_FREE(buf);
-  KRML_HOST_FREE(s);
+  KRML_HOST_FREE(state);
 }
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free */

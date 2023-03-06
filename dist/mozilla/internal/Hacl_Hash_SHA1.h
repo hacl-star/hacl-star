@@ -51,7 +51,7 @@ Hacl_Hash_SHA1_legacy_update_last(
   uint32_t input_len
 );
 
-void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Hash_SHA1_legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 #if defined(__cplusplus)
 }

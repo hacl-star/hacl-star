@@ -8,18 +8,18 @@ module Bindings(F:Cstubs.FOREIGN) =
     type hacl_Streaming_SHA3_state_256 = hacl_Streaming_MD_state_64
     let hacl_Streaming_SHA3_state_256 =
       typedef hacl_Streaming_MD_state_64 "Hacl_Streaming_SHA3_state_256"
-    let hacl_Streaming_SHA3_create_in_256 =
-      foreign "Hacl_Streaming_SHA3_create_in_256"
+    let hacl_Streaming_SHA3_malloc_256 =
+      foreign "Hacl_Streaming_SHA3_malloc_256"
         (void @-> (returning (ptr hacl_Streaming_MD_state_64)))
-    let hacl_Streaming_SHA3_init_256 =
-      foreign "Hacl_Streaming_SHA3_init_256"
+    let hacl_Streaming_SHA3_reset_256 =
+      foreign "Hacl_Streaming_SHA3_reset_256"
         ((ptr hacl_Streaming_MD_state_64) @-> (returning void))
     let hacl_Streaming_SHA3_update_256 =
       foreign "Hacl_Streaming_SHA3_update_256"
         ((ptr hacl_Streaming_MD_state_64) @->
            (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
-    let hacl_Streaming_SHA3_finish_256 =
-      foreign "Hacl_Streaming_SHA3_finish_256"
+    let hacl_Streaming_SHA3_digest_256 =
+      foreign "Hacl_Streaming_SHA3_digest_256"
         ((ptr hacl_Streaming_MD_state_64) @->
            (ocaml_bytes @-> (returning void)))
     let hacl_Streaming_SHA3_free_256 =

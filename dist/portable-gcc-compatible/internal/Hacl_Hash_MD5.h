@@ -69,7 +69,7 @@ Hacl_Hash_MD5_legacy_update_last(
 
 /* SNIPPET_START: Hacl_Hash_MD5_legacy_hash */
 
-void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Hash_MD5_legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 /* SNIPPET_END: Hacl_Hash_MD5_legacy_hash */
 

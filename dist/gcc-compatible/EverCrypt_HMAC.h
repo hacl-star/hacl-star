@@ -44,7 +44,7 @@ bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 
-extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint8_t *x1, uint32_t x2);
 
 void
 EverCrypt_HMAC_compute(

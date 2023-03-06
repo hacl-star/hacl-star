@@ -52,7 +52,7 @@ EverCrypt_Hash_update_last_256(
   uint32_t input_len
 );
 
-void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void EverCrypt_Hash_Incremental_hash_256(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 #if defined(__cplusplus)
 }
