@@ -1,28 +1,18 @@
 module Hacl.Impl.P256.Point
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open FStar.Math.Lemmas
-open FStar.Mul
-
 open Lib.IntTypes
-open Lib.ByteBuffer
 open Lib.Buffer
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.Math
 open Hacl.Impl.P256.Bignum
-open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Finv
-open Hacl.Impl.P256.Scalar
-open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Constants
 
-module BSeq = Lib.ByteSequence
 module S = Spec.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -54,6 +44,7 @@ let copy_point p res = copy res p
 
 [@CInline]
 let point_to_mont p res =
+  let open Hacl.Impl.P256.Core in
   let px = getx p in
   let py = gety p in
   let pz = getz p in
@@ -94,7 +85,7 @@ let lemma_mont_is_point_at_inf p =
   assert (SM.fromDomain_ pz == pz * SM.mont_R_inv % S.prime);
   assert_norm (SM.mont_R_inv % S.prime <> 0);
   assert_norm (0 * SM.mont_R_inv % S.prime == 0);
-  lemma_multiplication_not_mod_prime pz;
+  Hacl.Spec.P256.Math.lemma_multiplication_not_mod_prime pz;
   assert (if pz = 0 then SM.fromDomain_ pz == 0 else SM.fromDomain_ pz <> 0)
 
 
@@ -237,14 +228,14 @@ let is_point_on_curve_vartime p =
   let ty = create 4ul (u64 0) in
   let px = getx p in
   let py = gety p in
-  toDomain px tx;
-  toDomain py ty;
+  Hacl.Impl.P256.Core.toDomain px tx;
+  Hacl.Impl.P256.Core.toDomain py ty;
 
   fsqr ty ty;
   compute_rp_ec_equation tx rp;
   let r = bn_is_eq_mask4 ty rp in admit();
   pop_frame ();
-  not (eq_0_u64 r)
+  Hacl.Bignum.Base.unsafe_bool_of_limb r
 
 
 //-------------------------
@@ -289,28 +280,19 @@ let validate_pubkey pk =
 
 
 let isMoreThanZeroLessThanOrder x =
-  push_frame();
-    let h0 = ST.get() in
-      let xAsFelem = create (size 4) (u64 0) in
-      bn_from_bytes_be4 x xAsFelem;
-    let h1 = ST.get() in
+  push_frame ();
+  let bn_x = create 4ul (u64 0) in
+  bn_from_bytes_be4 x bn_x;
+  let h0 = ST.get () in
+  let is_bn_x_lt_order = Hacl.Impl.P256.Scalar.bn_is_lt_order_mask4 bn_x in
+  assert (v is_bn_x_lt_order = (if as_nat h0 bn_x < S.order then ones_v U64 else 0));
+  let is_bn_x_eq_zero = bn_is_zero_mask4 bn_x in
+  assert (v is_bn_x_eq_zero = (if as_nat h0 bn_x = 0 then ones_v U64 else 0));
+  lognot_lemma is_bn_x_eq_zero;
+  assert (v (lognot is_bn_x_eq_zero) = (if 0 < as_nat h0 bn_x then ones_v U64 else 0));
 
-      lemma_core_0 xAsFelem h1;
-      Spec.ECDSA.changeEndianLemma (BSeq.uints_from_bytes_be (as_seq h0 x));
-      BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 x);
-
-  let tempBuffer = create (size 4) (u64 0) in
-    recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = bn_sub4_il xAsFelem primeorder_buffer tempBuffer in
-  let less = eq_mask carry (u64 1) in
-  let more = bn_is_zero_mask4 xAsFelem in
-  let notMore = lognot more in
-    lognot_lemma more;
-  let result = logand less notMore in
-    logand_lemma less notMore;
-    lognot_lemma result;
-
-  pop_frame();
-
-  let open Hacl.Impl.P256.RawCmp in
-  unsafe_bool_of_u64 (lognot result)
+  let res = logand is_bn_x_lt_order (lognot is_bn_x_eq_zero) in
+  logand_lemma is_bn_x_lt_order (lognot is_bn_x_eq_zero);
+  assert (v res == (if 0 < as_nat h0 bn_x && as_nat h0 bn_x < S.order then ones_v U64 else 0));
+  pop_frame ();
+  Hacl.Bignum.Base.unsafe_bool_of_limb res

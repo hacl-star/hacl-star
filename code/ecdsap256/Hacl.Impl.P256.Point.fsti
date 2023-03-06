@@ -30,8 +30,6 @@ let point_inv (p:point_seq) =
   let x, y, z = as_point_nat p in
   x < S.prime /\ y < S.prime /\ z < S.prime
 
-// TODO: rename
-let point_prime = p:point_seq{point_inv p}
 
 inline_for_extraction noextract
 let point = lbuffer uint64 (size 12)
@@ -45,7 +43,7 @@ let point_y_as_nat (h:mem) (e:point) : GTot nat =
   as_nat h (gsub e 4ul 4ul)
 
 noextract
-let point_z_as_nat (h: mem) (e: point) : GTot nat =
+let point_z_as_nat (h:mem) (e:point) : GTot nat =
   as_nat h (gsub e 8ul 4ul)
 
 
@@ -132,11 +130,11 @@ val is_point_at_inf: p:point -> Stack uint64
   (requires fun h ->
     live h p /\ point_z_as_nat h p < S.prime)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    ((uint_v r == 0 \/ uint_v r == ones_v U64) /\
+    ((v r == 0 \/ v r == ones_v U64) /\
     (if Spec.P256.isPointAtInfinity (SM.fromDomainPoint (as_point_nat (as_seq h0 p)))
-     then uint_v r = maxint U64 else uint_v r = 0) /\
+     then v r = ones_v U64 else v r = 0) /\
     (if Spec.P256.isPointAtInfinity (as_point_nat (as_seq h0 p))
-    then uint_v r = maxint U64 else uint_v r = 0)))
+     then v r = ones_v U64 else v r = 0)))
 
 
 // TODO: add point_inv (as_seq h p) as precondition
@@ -202,8 +200,8 @@ val validate_pubkey: pk:lbuffer uint8 64ul -> Stack bool
 
 
 // TODO: mv
-val isMoreThanZeroLessThanOrder: x:lbuffer uint8 (size 32) -> Stack bool
+val isMoreThanZeroLessThanOrder: x:lbuffer uint8 32ul -> Stack bool
   (requires fun h -> live h x)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (let scalar = BSeq.nat_from_bytes_be (as_seq h0 x) in
-    r <==> (scalar > 0 && scalar < S.order)))
+    r <==> (0 < scalar && scalar < S.order)))

@@ -24,6 +24,9 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
+// TODO: rename
+let point_prime = p:point_seq{point_inv p}
+
 val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in
   pNew == q /\ qNew == p})
 

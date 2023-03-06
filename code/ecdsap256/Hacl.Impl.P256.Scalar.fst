@@ -49,6 +49,19 @@ let qmod_short x res =
   qmod_short_lemma (as_nat h0 x);
   pop_frame ()
 
+
+[@CInline]
+let bn_is_lt_order_mask4 f =
+  let h0 = ST.get () in
+  push_frame ();
+  let tmp = create (size 4) (u64 0) in
+  make_order tmp;
+  let c = bn_sub4 f tmp tmp in
+  assert (if v c = 0 then as_nat h0 f >= S.order else as_nat h0 f < S.order);
+  pop_frame ();
+  u64 0 -. c
+
+
 //----------------------
 // TODO: share the proofs with Hacl.Spec.P256.Montgomerymultiplication
 

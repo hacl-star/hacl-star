@@ -21,6 +21,13 @@ val qmod_short: x:felem -> res:felem -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == as_nat h0 x % S.order)
 
+
+val bn_is_lt_order_mask4: f:felem -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (if as_nat h0 f < S.order then v r = ones_v U64 else v r = 0))
+
+
 let qmont_R = pow2 256
 let qmont_R_inv = S.modp_inv2_prime (pow2 256) S.order
 
