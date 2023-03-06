@@ -125,7 +125,6 @@ let ecdsa_verification_step23 alg mLen m result =
   qmod_short result result;
 
     lemma_core_0 result h1;
-    Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
 
   pop_frame()
@@ -181,31 +180,6 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     bn_to_bytes_be4 u2 bufferU2;
 
   let h2 = ST.get() in
-
-    calc(==) {
-    as_seq h2 bufferU1;
-    == {}
-    uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h1 u1));
-    == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1)}
-    uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
-    == {lemma_core_0 u1 h1}
-    uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u1)));
-    == { changeEndian_le_be (as_nat h1 u1) }
-    nat_to_bytes_be 32 (as_nat h1 u1);
-    };
-
-    calc(==) {
-      as_seq h2 bufferU2;
-      == {}
-      uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h1 u2));
-      == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2)}
-      uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
-      == {lemma_core_0 u2 h1}
-      uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u2)));
-      == { changeEndian_le_be (as_nat h1 u2) }
-      nat_to_bytes_be 32 (as_nat h1 u2);
-    };
-
   pop_frame()
 
 
@@ -655,17 +629,4 @@ let ecdsa_verification alg pubKey r s mLen m =
 
   let result = ecdsa_verification_ alg publicKeyAsFelem rAsFelem sAsFelem mLen m in
   pop_frame();
-
-    changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
-
-    changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
-
-    changeEndianLemma (uints_from_bytes_be (as_seq h1 r));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 r);
-
-    changeEndianLemma (uints_from_bytes_be (as_seq h1 s));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 s);
-
   result

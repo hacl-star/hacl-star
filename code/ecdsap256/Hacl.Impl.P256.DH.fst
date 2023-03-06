@@ -39,12 +39,10 @@ let ecp256dh_i result scalar =
   bn_to_bytes_be4 resultBufferY resultY;
 
   lemma_core_0 resultBufferX h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
-  changeEndian_le_be (as_nat h0 resultBufferX);
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);  
 
   lemma_core_0 resultBufferY h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  changeEndian_le_be (as_nat h0 resultBufferY);
   pop_frame();
 
   let open Hacl.Impl.P256.RawCmp in
@@ -119,11 +117,9 @@ let ecp256dh_r result pubKey scalar =
 
   let h1 = ST.get() in
   lemma_core_0 publicKeyFelemX h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyX));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyX);
 
   lemma_core_0 publicKeyFelemY h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyY));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);
 
   let flag = _ecp256dh_r resultBufferFelem publicKeyAsFelem scalar in
@@ -135,11 +131,9 @@ let ecp256dh_r result pubKey scalar =
 
   lemma_core_0 resultBufferFelemX h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
-  changeEndian_le_be (as_nat h2 resultBufferFelemX);
 
   lemma_core_0 resultBufferFelemY h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
-  changeEndian_le_be (as_nat h2 resultBufferFelemY);
 
   pop_frame();
 

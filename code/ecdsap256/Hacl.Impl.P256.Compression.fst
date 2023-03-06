@@ -161,7 +161,6 @@ let decompressionCompressedForm b result =
       lemma_core_0 t0 h1;
 
       let lessThanPrimeXCoordinate = lessThanPrime t0 in
-	Spec.ECDSA.changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
 	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
 
       if not (lessThanPrimeXCoordinate) then
@@ -174,7 +173,6 @@ let decompressionCompressedForm b result =
 	  toDomain t0 t0;
 	  lemmaToDomain (as_nat h1 t0);
 	    let h2 = ST.get() in
-	    assert(as_nat h2 t0 =  (toDomain_ (Lib.ByteSequence.nat_from_intseq_le (Spec.ECDSA.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
 
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in
 	  logand_mask compressedIdentifier (u8 1) 1;
@@ -192,12 +190,10 @@ let decompressionCompressedForm b result =
 
 	  bn_to_bytes_be4 t1 (sub result (size 32) (size 32));
 	   let h5 = ST.get() in
-	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h3 t1)));
 
 	  lemma_core_0 t1 h3;
 
 	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 t1);
-	  Spec.ECDSA.changeEndian_le_be (as_nat h3 t1);
 
 	  assert(
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in
