@@ -9,8 +9,8 @@ let
     src = fetchFromGitHub {
       owner = "arminbiere";
       repo = "runlim";
-      rev = "master";
-      sha256 = "sha256-0aCt3Mb6cuuR/srhNLPXEs4/AooPn3ivEWb8cA76BEE=";
+      rev = "3821e7a1d1ada328cda7a9cff33ea13228d8013a";
+      sha256 = "sha256-f1jp83GDrRjqEqXEDW2eD6IJzI53pBFkp+qOdpOR6sc=";
     };
     configurePhase = ''
       CC="" ./configure.sh
@@ -141,8 +141,8 @@ let
             | sed 's/^Files \([^ ]*\).*/\1/' \
             | sed 's/^Only in source\/dist\([^\:]*\)\: \(.*\)/\.\1\/\2/' \
             | sed 's/^Only in \.\([^\:]*\)\: \(.*\)/\.\1\/\2/' \
-            | grep '\.\/[^\/]*\/' \
-            | grep -v INFO.txt
+            | { grep '\.\/[^\/]*\/' || true; } \
+            | { grep -v INFO.txt || true; }
         '';
         installPhase = ''
           touch $out
