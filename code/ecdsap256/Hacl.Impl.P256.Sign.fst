@@ -310,12 +310,10 @@ let ecdsa_signature alg result mLen m privKey k =
 
   let h2 = ST.get() in
 
-  changeEndian r;
   bn_to_bytes_be4 r resultR;
   lemma_core_0 r h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 r);
 
-  changeEndian s;
   bn_to_bytes_be4 s resultS;
   let h3 = ST.get() in
   lemma_core_0 s h2;

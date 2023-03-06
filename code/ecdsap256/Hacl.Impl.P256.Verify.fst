@@ -177,8 +177,6 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
 
   let h1 = ST.get() in
-    Hacl.Impl.P256.Bignum.changeEndian u1;
-    Hacl.Impl.P256.Bignum.changeEndian u2;
     bn_to_bytes_be4 u1 bufferU1;
     bn_to_bytes_be4 u2 bufferU2;
 

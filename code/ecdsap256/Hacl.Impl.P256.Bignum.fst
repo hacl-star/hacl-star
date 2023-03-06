@@ -7,7 +7,6 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
 open Lib.IntTypes.Intrinsics
 
 open Hacl.Spec.P256.Felem
@@ -81,13 +80,13 @@ let bn_is_eq_mask4 a b =
 
 [@CInline]
 let bn_copy_conditional4 out x mask =
-  buf_mask_select x out mask out
+  Lib.ByteBuffer.buf_mask_select x out mask out
 
 
 [@CInline]
 let bn_cmovznz4 cin x y out =
   let mask = neq_mask cin (u64 0) in
-  buf_mask_select y x mask out
+  Lib.ByteBuffer.buf_mask_select y x mask out
 
 
 ///  Addition and subtraction
@@ -147,6 +146,7 @@ let bn_sub_mod4 x y n out =
   SN.bn_sub_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
   bignum_bn_v_is_as_nat h1 out
 
+
 ///  Multiplication
 
 [@CInline]
@@ -168,6 +168,7 @@ let bn_sqr4 f out =
   SN.bn_sqr_lemma (as_seq h0 f);
   bignum_bn_v_is_as_nat h0 f;
   bignum_bn_v_is_wide_as_nat h1 out
+
 
 ///  pow2-operations
 
@@ -206,24 +207,33 @@ let bn_lshift256 i o =
 
 [@CInline]
 let bn_to_bytes_be4 f res =
-  Lib.ByteBuffer.uints_to_bytes_be (size 4) res f
-
-
-let changeEndian i =
-  assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
-  assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
-  assert_norm (pow2 (3 * 64) * pow2 64 = pow2 (4 * 64));
-  let zero = index i (size 0) in
-  let one = index i (size 1) in
-  let two = index i (size 2) in
-  let three = index i (size 3) in
-  upd i (size 0) three;
-  upd i (size 1) two;
-  upd i (size 2) one;
-  upd i (size 3) zero
+  let h0 = ST.get () in
+  bignum_bn_v_is_as_nat h0 f;
+  Hacl.Spec.Bignum.Convert.bn_to_bytes_be_lemma #U64 32 (as_seq h0 f);
+  Hacl.Bignum.Convert.mk_bn_to_bytes_be true 32ul f res
 
 
 [@CInline]
 let bn_from_bytes_be4 b res =
-  Lib.ByteBuffer.uints_from_bytes_be res b;
-  changeEndian res
+  let h0 = ST.get () in
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
+  Hacl.Bignum.Convert.mk_bn_from_bytes_be true 32ul b res;
+  let h1 = ST.get () in
+  bignum_bn_v_is_as_nat h1 res
+
+
+[@CInline]
+let bn_to_bytes_le4 f res =
+  let h0 = ST.get () in
+  bignum_bn_v_is_as_nat h0 f;
+  Hacl.Spec.Bignum.Convert.bn_to_bytes_le_lemma #U64 32 (as_seq h0 f);
+  Hacl.Bignum.Convert.mk_bn_to_bytes_le true 32ul f res
+
+
+[@CInline]
+let bn_from_bytes_le4 b res =
+  let h0 = ST.get () in
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 32 (as_seq h0 b);
+  Hacl.Bignum.Convert.mk_bn_from_bytes_le true 32ul b res;
+  let h1 = ST.get () in
+  bignum_bn_v_is_as_nat h1 res

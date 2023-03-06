@@ -35,9 +35,6 @@ let ecp256dh_i result scalar =
   let flag = is_point_at_inf resultBuffer in
 
   let h0 = ST.get() in
-  changeEndian resultBufferX;
-  changeEndian resultBufferY;
-
   bn_to_bytes_be4 resultBufferX resultX;
   bn_to_bytes_be4 resultBufferY resultY;
 
@@ -133,8 +130,6 @@ let ecp256dh_r result pubKey scalar =
 
   let h2 = ST.get() in
 
-  changeEndian resultBufferFelemX;
-  changeEndian resultBufferFelemY;
   bn_to_bytes_be4 resultBufferFelemX resultX;
   bn_to_bytes_be4 resultBufferFelemY resultY;
 

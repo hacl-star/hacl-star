@@ -190,7 +190,6 @@ let decompressionCompressedForm b result =
 	      else
 		as_nat h3 t1 = (0 - sqRootWithoutSign) % prime);
 
-	  changeEndian t1;
 	  bn_to_bytes_be4 t1 (sub result (size 32) (size 32));
 	   let h5 = ST.get() in
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h3 t1)));
