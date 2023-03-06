@@ -155,6 +155,16 @@ let fmod_short x res =
 
 
 [@CInline]
+let is_felem_lt_prime_vartime f =
+  push_frame ();
+  let tmp = create (size 4) (u64 0) in
+  make_prime tmp;
+  let c = bn_sub4 f tmp tmp in
+  pop_frame ();
+  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 c =^ 1uL)
+
+
+[@CInline]
 let fadd x y res =
   let h0 = ST.get () in
   push_frame ();

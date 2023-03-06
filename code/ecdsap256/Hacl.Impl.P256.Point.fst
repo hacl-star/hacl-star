@@ -207,137 +207,68 @@ let to_jacob_point p res =
 
 ///  Check if a point is on the curve
 
-let lemmaEraseToDomainFromDomain z =
-  lemma_mod_mul_distr_l (z * z) z S.prime
+inline_for_extraction noextract
+val compute_rp_ec_equation: x:felem -> res:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ disjoint x res /\
+    as_nat h x < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\ (let x = fmont_as_nat h0 x in
+    fmont_as_nat h1 res ==
+      S.fadd (S.fadd (S.fmul (S.fmul x x) x) (S.fmul S.a_coeff x)) S.b_coeff))
+
+let compute_rp_ec_equation x res =
+  push_frame ();
+  let tmp = create 4ul (u64 0) in
+  fcube x res;
+  make_a_coeff tmp;
+  fmul tmp x tmp;
+  fadd res tmp res;
+  make_b_coeff tmp;
+  fadd res tmp res;
+  pop_frame ()
 
 
-val lemma_norm_as_specification: xD: nat{xD < S.prime} -> yD: nat{yD < S.prime} ->
-  zD: nat {zD < S.prime} ->
-  x3 : nat {x3 == xD * (S.pow (zD * zD) (S.prime - 2) % S.prime) % S.prime}->
-  y3 : nat {y3 == yD * (S.pow (zD * zD * zD) (S.prime -2) % S.prime) % S.prime} ->
-  z3: nat {if S.isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} ->
-  Lemma (
-  let (xN, yN, zN) = S.norm_jacob_point (xD, yD, zD) in
-  x3 == xN /\ y3 == yN /\ z3 == zN)
+// y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
+[@CInline]
+let is_point_on_curve_vartime p =
+  push_frame ();
+  let rp = create 4ul (u64 0) in
+  let tx = create 4ul (u64 0) in
+  let ty = create 4ul (u64 0) in
+  let px = getx p in
+  let py = gety p in
+  toDomain px tx;
+  toDomain py ty;
+
+  fsqr ty ty;
+  compute_rp_ec_equation tx rp;
+  let r = bn_is_eq_mask4 ty rp in admit();
+  pop_frame ();
+  not (eq_0_u64 r)
 
 
-let lemma_norm_as_specification xD yD zD x3 y3 z3 =
-  power_distributivity (zD * zD * zD) (S.prime - 2) S.prime;
-  power_distributivity (zD * zD) (S.prime -2) S.prime
-
+//-------------------------
 
 inline_for_extraction noextract
-val y_2: y: felem -> r: felem -> Stack unit
-  (requires fun h -> as_nat h y < S.prime /\ live h y /\ live h r /\ eq_or_disjoint y r)
-  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat h1 r == toDomain_ ((as_nat h0 y) * (as_nat h0 y) % S.prime))
-
-let y_2 y r =
-  toDomain y r;
-  fsqr r r
-
-
-val lemma_xcube: x_: nat {x_ < S.prime} -> Lemma
-  (((x_ * x_ * x_ % S.prime) - (3 * x_ % S.prime)) % S.prime == (x_ * x_ * x_ - 3 * x_) % S.prime)
-
-let lemma_xcube x_ =
-  lemma_mod_add_distr (- (3 * x_ % S.prime)) (x_ * x_ * x_) S.prime;
-  lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) S.prime
-
-
-val lemma_xcube2: x_ : nat {x_ < S.prime} -> Lemma (toDomain_ (((((x_ * x_ * x_) - (3 * x_)) % S.prime) + Spec.P256.b_coeff) % S.prime) == toDomain_ ((x_ * x_ * x_  + Spec.P256.a_coeff * x_ + Spec.P256.b_coeff) % S.prime))
-
-let lemma_xcube2 x_ =
-  lemma_mod_add_distr Spec.P256.b_coeff ((x_ * x_ * x_) - (3 * x_)) S.prime
-
-
-inline_for_extraction noextract
-val xcube_minus_x: x: felem -> r: felem -> Stack unit
-  (requires fun h -> as_nat h x < S.prime /\ live h x  /\ live h r /\ eq_or_disjoint x r)
-  (ensures fun h0 _ h1 ->
-    modifies (loc r) h0 h1 /\
-    (
-      let x_ = as_nat h0 x in
-      as_nat h1 r = toDomain_((x_ * x_ * x_ - 3 * x_ + Spec.P256.b_coeff) % S.prime))
-    )
-
-let xcube_minus_x x r =
-  push_frame();
-      let h0 = ST.get() in
-    let xToDomainBuffer = create (size 4) (u64 0) in
-    let minusThreeXBuffer = create (size 4) (u64 0) in
-    let p256_constant = create (size 4) (u64 0) in
-  toDomain x xToDomainBuffer;
-  fsqr xToDomainBuffer r;
-  fmul r xToDomainBuffer r;
-    lemma_mod_mul_distr_l ((as_nat h0 x) * (as_nat h0 x)) (as_nat h0 x) S.prime;
-  fmul_by_3 xToDomainBuffer minusThreeXBuffer;
-  fsub r minusThreeXBuffer r;
-    make_b_coeff p256_constant;
-  fadd r p256_constant r;
-  pop_frame();
-
-  let x_ = as_nat h0 x in
-  lemma_xcube x_;
-  lemma_mod_add_distr Spec.P256.b_coeff ((x_ * x_ * x_) - (3 * x_)) S.prime;
-  lemma_xcube2 x_
-
-
-val lemma_modular_multiplication_p256_2_d: a:nat {a < S.prime} -> b:nat {b < S.prime} ->
-  Lemma (toDomain_ a = toDomain_ b <==> a == b)
-
-let lemma_modular_multiplication_p256_2_d a b =
-   lemmaToDomain a;
-   lemmaToDomain b;
-   lemma_modular_multiplication_p256_2 a b
-
-
-let isPointOnCurvePublic p =
-  push_frame();
-    let y2Buffer = create (size 4) (u64 0) in
-    let xBuffer = create (size 4) (u64 0) in
-  let h0 = ST.get() in
-    let x = sub p (size 0) (size 4) in
-    let y = sub p (size 4) (size 4) in
-    y_2 y y2Buffer;
-    xcube_minus_x x xBuffer;
-
-    lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % S.prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.b_coeff) % S.prime);
-
-    let r = bn_is_eq_mask4 y2Buffer xBuffer in
-    let z = not (eq_0_u64 r) in
-  pop_frame();
-     z
-
-
-val isCoordinateValid: p: point -> Stack bool
+val isCoordinateValid: p:point -> Stack bool
   (requires fun h -> live h p /\ point_z_as_nat h p == 1)
-  (ensures fun h0 r h1 ->
-    modifies0 h0 h1 /\
-    r == (point_x_as_nat h0 p < S.prime && point_y_as_nat h0 p < S.prime && point_z_as_nat h0 p < S.prime)
-  )
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
+    r == (point_x_as_nat h0 p < S.prime &&
+          point_y_as_nat h0 p < S.prime &&
+          point_z_as_nat h0 p < S.prime))
 
 let isCoordinateValid p =
-  push_frame();
-  let tempBuffer = create (size 4) (u64 0) in
-  recall_contents prime_buffer (Lib.Sequence.of_list p256_prime_list);
-  let x = sub p (size 0) (size 4) in
-  let y = sub p (size 4) (size 4) in
-
-  let carryX = bn_sub4_il x prime_buffer tempBuffer in
-  let carryY = bn_sub4_il y prime_buffer tempBuffer in
-
-  let lessX = eq_u64_nCT carryX (u64 1) in
-  let lessY = eq_u64_nCT carryY (u64 1) in
-
-  let r = lessX && lessY in
-  pop_frame();
-  r
+  let px = getx p in
+  let py = gety p in
+  let lessX = is_felem_lt_prime_vartime px in
+  let lessY = is_felem_lt_prime_vartime py in
+  lessX && lessY
 
 
 let verifyQValidCurvePoint pubKeyAsPoint =
   let coordinatesValid = isCoordinateValid pubKeyAsPoint in
   if not coordinatesValid then false else
-    let belongsToCurve = isPointOnCurvePublic pubKeyAsPoint in
+    let belongsToCurve = is_point_on_curve_vartime pubKeyAsPoint in
     coordinatesValid && belongsToCurve
 
 

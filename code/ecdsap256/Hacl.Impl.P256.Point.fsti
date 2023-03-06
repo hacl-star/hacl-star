@@ -176,18 +176,11 @@ val to_jacob_point: p:lbuffer uint64 (size 8) -> res:point -> Stack unit
 
 ///  Check if a point is on the curve
 
-[@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")]
-val isPointOnCurvePublic: p:point -> Stack bool
+val is_point_on_curve_vartime: p:point -> Stack bool
   (requires fun h -> live h p /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 8) (size 4)) == 1)
+    point_inv (as_seq h p) /\ point_z_as_nat h p == 1)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.is_point_on_curve (as_nat h1 (gsub p (size 0) (size 4)),
-                        as_nat h1 (gsub p (size 4) (size 4)),
-                        as_nat h1 (gsub p (size 8) (size 4))))
-
+    r == S.is_point_on_curve (as_point_nat (as_seq h0 p)))
 
 
 [@ (Comment "   The input of the function is considered to be public,
