@@ -205,12 +205,10 @@ val ecdsa_verif_p256_sha2:
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
       assert_norm (pow2 32 < pow2 61);
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == S.ecdsa_verification_agile (S.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == S.ecdsa_verification_agile (S.Hash SHA2_256) (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m)
     )
 
 
@@ -228,12 +226,10 @@ val ecdsa_verif_p256_sha384:
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
       assert_norm (pow2 32 < pow2 61);
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == S.ecdsa_verification_agile (S.Hash SHA2_384) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == S.ecdsa_verification_agile (S.Hash SHA2_384) (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m)
    )
 
 
@@ -251,12 +247,10 @@ val ecdsa_verif_p256_sha512:
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
       assert_norm (pow2 32 < pow2 61);
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == S.ecdsa_verification_agile (S.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == S.ecdsa_verification_agile (S.Hash SHA2_512) (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m)
    )
 
 [@ (Comment " The input of the function is considered to be public,
@@ -274,12 +268,10 @@ val ecdsa_verif_without_hash:
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == S.ecdsa_verification_agile S.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
+      result == S.ecdsa_verification_agile S.NoHash (as_seq h0 pubKey) r s (v mLen)  (as_seq h0 m)
    )
 
 
@@ -296,31 +288,22 @@ Comment "Validate a public key.
     • Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field.
     • Verify that y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
   The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
-val validate_public_key:
-  pubKey: lbuffer uint8 (size 64) ->
-  Stack bool
-    (requires fun h -> live h pubKey)
-    (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-      (
-        let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-        let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-        let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in
-        r == S.validate_pubkey_point pkJ
-      )
-    )
+val validate_public_key: pubKey:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h pubKey)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.validate_pubkey_point (as_seq h0 pubKey))
+
 
 [@@ Comment "Validate a private key, e.g. prior to signing.
 
 Input: scalar: uint8[32].
   \n Output: bool, where true stands for the scalar to be more than 0 and less than order."]
-val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
+val validate_private_key: x:lbuffer uint8 32ul -> Stack bool
   (requires fun h -> live h x)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    (
-      let scalar = nat_from_bytes_be (as_seq h0 x) in
-      r <==> (scalar > 0 && scalar < S.order)
-    )
-  )
+    (let scalar = nat_from_bytes_be (as_seq h0 x) in
+     r <==> (0 < scalar && scalar < S.order)))
+
 
 [@@ CPrologue "
 /*****************************************/
@@ -461,11 +444,9 @@ val dh_initiator:
     live h result /\ live h scalar /\
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = S.ecp256_dh_i (as_seq h0 scalar) in
+    let point, flag = S.ecp256_dh_i (as_seq h0 scalar) in
     modifies (loc result) h0 h1 /\
-    r == flag /\
-    as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+    r == flag /\ as_seq h1 result == point)
 
 
 [@ (Comment "ECDH key agreement.
@@ -489,11 +470,7 @@ val dh_responder:
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
     (ensures fun h0 r h1 ->
-      let pubKeyX = gsub pubKey (size 0) (size 32) in
-      let pubKeyY = gsub pubKey (size 32) (size 32) in
-      let pointX, pointY, flag =
-        S.ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+      let point, flag = S.ecp256_dh_r (as_seq h0 pubKey) (as_seq h0 scalar) in
       r == flag /\
       modifies (loc result) h0 h1 /\
-      as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+      as_seq h1 result == point)

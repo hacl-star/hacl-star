@@ -6,6 +6,7 @@ open Lib.IntTypes
 open Lib.Sequence
 
 module M = Lib.NatMod
+module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -71,8 +72,8 @@ let ( *^ ) = qmul
 ///  Elliptic curve `y^2 = x^3 + a * x + b`
 
 let point_nat = tuple3 nat nat nat
-let jacob_point = p:point_nat{let (a, b, c) = p in
-  a < prime /\ b < prime /\ c < prime}
+let aff_point = p:tuple2 nat nat{let (px, py) = p in px < prime /\ py < prime}
+let jacob_point = p:point_nat{let (px, py, pz) = p in px < prime /\ py < prime /\ pz < prime}
 
 // let aff_point = felem & felem           // Affine point
 // let jacob_point = felem & felem & felem // Jacobian coordinates
@@ -92,20 +93,17 @@ let g_y : felem =
 
 let base_point : jacob_point = (g_x, g_y, one)
 
-// TODO: fixme
-val is_point_on_curve: jacob_point -> bool
-let is_point_on_curve p =
-  let (x, y, z) = p in
+val is_point_on_curve: aff_point -> bool
+let is_point_on_curve (x, y) =
   y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 
-//------------------------------------
-// TODO: clean up
-let isPointAtInfinity (p:point_nat) =
+
+let is_point_at_inf (p:jacob_point) =
   let (_, _, z) = p in z = 0
 
-val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
-let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
-//------------------------------------
+val to_jacob_point: aff_point -> jacob_point
+let to_jacob_point (x, y) = (x, y, one)
+
 
 // TODO: avoid computing finv twice
 let norm_jacob_point (p:jacob_point) : jacob_point =
@@ -116,7 +114,7 @@ let norm_jacob_point (p:jacob_point) : jacob_point =
   let z3i = finv z3 in
   let x3 = z2i *% x in
   let y3 = z3i *% y in
-  let z3 = if isPointAtInfinity (x, y, z) then zero else one in
+  let z3 = if is_point_at_inf (x, y, z) then zero else one in
   (x3, y3, z3)
 
 
@@ -162,3 +160,22 @@ let point_add (p:jacob_point) (q:jacob_point) : jacob_point =
   else
     if z1 = zero then (x2, y2, z2)
     else (x3, y3, z3)
+
+
+///  Point conversion between affine, jacobian and bytes representation
+
+let load_point (b:BSeq.lbytes 64) : option jacob_point =
+  let pk_x = BSeq.nat_from_bytes_be (sub b 0 32) in
+  let pk_y = BSeq.nat_from_bytes_be (sub b 32 32) in
+  let is_x_valid = pk_x < prime in
+  let is_y_valid = pk_y < prime in
+  let is_xy_on_curve =
+    if is_x_valid && is_y_valid then is_point_on_curve (pk_x, pk_y) else false in
+  if is_xy_on_curve then Some (to_jacob_point (pk_x, pk_y)) else None
+
+
+let aff_store_point (p:aff_point) : BSeq.lbytes 64 =
+  let (px, py) = p in
+  let pxb = BSeq.nat_to_bytes_be 32 px in
+  let pxy = BSeq.nat_to_bytes_be 32 py in
+  concat #uint8 #32 #32 pxb pxy

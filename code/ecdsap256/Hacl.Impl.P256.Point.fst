@@ -76,12 +76,12 @@ let point_from_mont p res =
 ///  check if a point is a point-at-infinity
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-val lemma_mont_is_point_at_inf: p:S.point_nat{let (_, _, z) = p in z < S.prime} ->
-  Lemma (S.isPointAtInfinity p == S.isPointAtInfinity (SM.fromDomainPoint p))
+val lemma_mont_is_point_at_inf: p:S.jacob_point{let (_, _, z) = p in z < S.prime} ->
+  Lemma (S.is_point_at_inf p == S.is_point_at_inf (SM.fromDomainPoint p))
 
 let lemma_mont_is_point_at_inf p =
   let px, py, pz = p in
-  assert (if S.isPointAtInfinity p then pz == 0 else pz <> 0);
+  assert (if S.is_point_at_inf p then pz == 0 else pz <> 0);
   assert (SM.fromDomain_ pz == pz * SM.mont_R_inv % S.prime);
   assert_norm (SM.mont_R_inv % S.prime <> 0);
   assert_norm (0 * SM.mont_R_inv % S.prime == 0);
@@ -109,7 +109,7 @@ inline_for_extraction noextract
 val norm_jacob_point_z: p:point -> res:felem -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint p res /\
-    point_z_as_nat h p < S.prime)
+    point_inv (as_seq h p))
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     (let _, _, rz = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat (as_seq h0 p))) in
     as_nat h1 res == rz))
@@ -188,12 +188,15 @@ let norm_jacob_point p res =
 
 [@CInline]
 let to_jacob_point p res =
-  let px = getx res in
-  let py = gety res in
-  let pz = getz res in
-  copy px (sub p 0ul 4ul);
-  copy py (sub p 4ul 4ul);
-  bn_set_one4 pz
+  let px = aff_getx p in
+  let py = aff_gety p in
+
+  let rx = getx res in
+  let ry = gety res in
+  let rz = getz res in
+  copy rx px;
+  copy ry py;
+  bn_set_one4 rz
 
 
 ///  Check if a point is on the curve
@@ -226,8 +229,8 @@ let is_point_on_curve_vartime p =
   let rp = create 4ul (u64 0) in
   let tx = create 4ul (u64 0) in
   let ty = create 4ul (u64 0) in
-  let px = getx p in
-  let py = gety p in
+  let px = aff_getx p in
+  let py = aff_gety p in
   Hacl.Impl.P256.Core.toDomain px tx;
   Hacl.Impl.P256.Core.toDomain py ty;
 
@@ -240,17 +243,37 @@ let is_point_on_curve_vartime p =
 
 //-------------------------
 
-inline_for_extraction noextract
-val isCoordinateValid: p:point -> Stack bool
-  (requires fun h -> live h p /\ point_z_as_nat h p == 1)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    r == (point_x_as_nat h0 p < S.prime &&
-          point_y_as_nat h0 p < S.prime &&
-          point_z_as_nat h0 p < S.prime))
+[@CInline]
+let aff_store_point res p =
+  let px = aff_getx p in
+  let py = aff_gety p in
 
-let isCoordinateValid p =
-  let px = getx p in
-  let py = gety p in
+  let h0 = ST.get () in
+  update_sub_f h0 res 0ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 px))
+    (fun _ -> bn_to_bytes_be4 px (sub res 0ul 32ul));
+
+  let h1 = ST.get () in
+  update_sub_f h1 res 32ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 py))
+    (fun _ -> bn_to_bytes_be4 py (sub res 32ul 32ul));
+
+  let h2 = ST.get () in
+  let px = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 px)) in
+  let py = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 py)) in
+  LSeq.eq_intro (as_seq h2 res) (LSeq.concat #_ #32 #32 px py)
+
+
+inline_for_extraction noextract
+val is_xy_valid: p:aff_point -> Stack bool
+  (requires fun h -> live h p)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
+    r == (aff_point_x_as_nat h0 p < S.prime &&
+          aff_point_y_as_nat h0 p < S.prime))
+
+let is_xy_valid p =
+  let px = aff_getx p in
+  let py = aff_gety p in
   let lessX = bn_is_lt_prime_mask4 px in
   let lessY = bn_is_lt_prime_mask4 py in
   let res = logand lessX lessY in
@@ -259,28 +282,32 @@ let isCoordinateValid p =
 
 
 [@CInline]
-let validate_pubkey_point pk =
-  let is_coordinates_valid = isCoordinateValid pk in
-  if not is_coordinates_valid then false
-  else is_point_on_curve_vartime pk
+let load_point_vartime p b =
+  push_frame ();
+  let p_x = sub b 0ul 32ul in
+  let p_y = sub b 32ul 32ul in
+  let point_aff = create 8ul (u64 0) in
+  let bn_p_x = aff_getx point_aff in
+  let bn_p_y = aff_gety point_aff in
+  bn_from_bytes_be4 p_x bn_p_x;
+  bn_from_bytes_be4 p_y bn_p_y;
+  let is_xy_valid = is_xy_valid point_aff in
+  let res = if not is_xy_valid then false else is_point_on_curve_vartime point_aff in
+  if res then
+    to_jacob_point point_aff p;
+  pop_frame ();
+  res
 
 
 let validate_pubkey pk =
   push_frame ();
-  let pk_x = sub pk 0ul 32ul in
-  let pk_y = sub pk 32ul 32ul in
-  let point_aff = create 8ul (u64 0) in
   let point_jac = create 12ul (u64 0) in
-  let bn_pk_x = sub point_aff 0ul 4ul in
-  let bn_pk_y = sub point_aff 4ul 4ul in
-  bn_from_bytes_be4 pk_x bn_pk_x;
-  bn_from_bytes_be4 pk_y bn_pk_y;
-  to_jacob_point point_aff point_jac;
-  let r = validate_pubkey_point point_jac in
+  let res = load_point_vartime point_jac pk in
   pop_frame ();
-  r
+  res
 
 
+[@CInline]
 let isMoreThanZeroLessThanOrder x =
   push_frame ();
   let bn_x = create 4ul (u64 0) in

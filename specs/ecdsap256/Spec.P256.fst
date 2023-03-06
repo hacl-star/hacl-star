@@ -4,11 +4,10 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Sequence
+open Lib.ByteSequence
 
 open Spec.Hash.Definitions
-
 module M = Lib.NatMod
-module BSeq = Lib.ByteSequence
 
 include Spec.P256.PointOps
 
@@ -19,7 +18,7 @@ include Spec.P256.PointOps
 ///  Elliptic curve scalar multiplication
 // TODO: use Lib.Exponentiation
 
-let scalar = Lib.ByteSequence.lbytes 32
+let scalar = lbytes 32
 
 let ith_bit (k:scalar) (i:nat{i < 256}) : uint64 =
   let q = 31 - i / 8 in let r = size (i % 8) in
@@ -71,11 +70,8 @@ let secret_to_public k =
 
 // from Spec.ECDSA.fst
 
-val validate_pubkey_point: publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
-let validate_pubkey_point publicKey =
-  let x, y, z = publicKey in
-  x < prime && y < prime && z < prime &&
-  is_point_on_curve (x, y, z)
+let validate_pubkey_point (pk:lbytes 64) : bool =
+  Some? (load_point pk)
 
 
 val checkCoordinates: r:nat -> s:nat -> bool
@@ -170,31 +166,31 @@ let hashSpec a mLen m =
 
 val ecdsa_verification_agile:
     alg:hash_alg_ecdsa
-  -> publicKey:tuple2 nat nat
+  -> public_key:lbytes 64
   -> r:nat
   -> s:nat
-  -> mLen:size_nat{mLen >= min_input_length alg}
-  -> m:lseq uint8 mLen
-  -> bool
+  -> msg_len:size_nat{msg_len >= min_input_length alg}
+  -> msg:lbytes msg_len ->
+  bool
 
-let ecdsa_verification_agile alg publicKey r s mLen m =
+let ecdsa_verification_agile alg public_key r s msg_len msg =
   allow_inversion hash_alg_ecdsa;
-  let publicJacobian = toJacobianCoordinates publicKey in
-  if not (validate_pubkey_point publicJacobian) then false
+  let pk = load_point public_key in
+  if not (Some? pk) then false
   else begin
     if not (checkCoordinates r s) then false
     else begin
-      let hashM = hashSpec alg mLen m in
+      let hashM = hashSpec alg msg_len msg in
       let cutHashM = sub hashM 0 32 in
-      let hashNat = BSeq.nat_from_bytes_be cutHashM % order in
+      let hashNat = nat_from_bytes_be cutHashM % order in
 
       let sinv = qinv s in
-      let u1 = BSeq.nat_to_bytes_be 32 (sinv *^ hashNat) in
-      let u2 = BSeq.nat_to_bytes_be 32 (sinv *^ r) in
+      let u1 = nat_to_bytes_be 32 (sinv *^ hashNat) in
+      let u2 = nat_to_bytes_be 32 (sinv *^ r) in
 
       let pointAtInfinity = (0, 0, 0) in
       let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, base_point) in
-      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
+      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, Some?.v pk) in
       let sumD = if norm_jacob_point u1D = norm_jacob_point u2D then
         point_double u1D
       else
@@ -203,7 +199,7 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
 
       let x, y, z = pointNorm in
       let x = x % order in
-      if Spec.P256.isPointAtInfinity pointNorm then false else x = r
+      if is_point_at_inf pointNorm then false else x = r
     end
   end
 
@@ -224,10 +220,10 @@ let ecdsa_signature_agile alg mLen m privateKey k =
 
   let hashM = hashSpec alg mLen m in
   let cutHashM = sub hashM 0 32 in
-  let z = BSeq.nat_from_bytes_be cutHashM % order in
+  let z = nat_from_bytes_be cutHashM % order in
 
-  let kFelem = BSeq.nat_from_bytes_be k in
-  let privateKeyFelem = BSeq.nat_from_bytes_be privateKey in
+  let kFelem = nat_from_bytes_be k in
+  let privateKeyFelem = nat_from_bytes_be privateKey in
   let resultR = xN % order in
   let resultS = (z + resultR * privateKeyFelem) * pow kFelem (order - 2) % order in
   if resultR = 0 || resultS = 0 then
@@ -238,27 +234,18 @@ let ecdsa_signature_agile alg mLen m privateKey k =
 // from Spec.DH
 
 (* Initiator *)
-val ecp256_dh_i: s:BSeq.lbytes 32 -> tuple3 (BSeq.lbytes 32) (BSeq.lbytes 32) bool
+val ecp256_dh_i: s:lbytes 32 -> tuple2 (lbytes 64) bool
 let ecp256_dh_i s =
   let xN, yN, zN = secret_to_public s in
-  if isPointAtInfinity (xN, yN, zN) then
-    BSeq.nat_to_bytes_be 32 xN, BSeq.nat_to_bytes_be 32 yN, false
-  else
-    BSeq.nat_to_bytes_be 32 xN, BSeq.nat_to_bytes_be 32 yN, true
+  aff_store_point (xN, yN), not (is_point_at_inf (xN, yN, zN))
 
 
 (* Responder *)
-val ecp256_dh_r: x:BSeq.lbytes 32 -> y:BSeq.lbytes 32 -> s:BSeq.lbytes 32
-  -> tuple3 (BSeq.lbytes 32) (BSeq.lbytes 32) bool
-
-let ecp256_dh_r x y s =
-  let x_, y_ = BSeq.nat_from_bytes_be x, BSeq.nat_from_bytes_be y in
-  let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x_, y_) in
-  if validate_pubkey_point (pointJacX, pointJacY, pointJacZ) then
-    let xN, yN, zN = scalar_multiplication s (pointJacX, pointJacY, pointJacZ) in
-    if isPointAtInfinity (xN, yN, zN) then
-      BSeq.nat_to_bytes_be 32 xN, BSeq.nat_to_bytes_be 32 yN, false
-    else
-      BSeq.nat_to_bytes_be 32 xN, BSeq.nat_to_bytes_be 32 yN, true
+val ecp256_dh_r: pk:lbytes 64 -> s:lbytes 32 -> tuple2 (lbytes 64) bool
+let ecp256_dh_r public_key s =
+  let pk = load_point public_key in
+  if Some? pk then
+    let xN, yN, zN = scalar_multiplication s (Some?.v pk) in
+    aff_store_point (xN, yN), not (is_point_at_inf (xN, yN, zN))
   else
-    BSeq.nat_to_bytes_be 32 0, BSeq.nat_to_bytes_be 32 0, false
+    aff_store_point (0, 0), false

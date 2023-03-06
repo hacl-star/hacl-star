@@ -19,21 +19,22 @@ open Hacl.Impl.P256.RawCmp
 open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
 val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit
-  (requires fun h -> live h x /\ live h result /\ as_nat h x < prime /\ disjoint x result)
+  (requires fun h -> live h x /\ live h result /\ as_nat h x < S.prime /\ disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime /\
+    as_nat h1 result < S.prime /\
     (
-      let xD = fromDomain_ (as_nat h0 x) in
-      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.a_coeff * xD + Spec.P256.b_coeff) % prime)) in
+      let xD = SM.fromDomain_ (as_nat h0 x) in
+      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.a_coeff * xD + Spec.P256.b_coeff) % S.prime)) in
 
       if sqRootWithoutSign  % pow2 1 = uint_v sign then
 	as_nat h1 result = sqRootWithoutSign
       else
-	as_nat h1 result = (0 - sqRootWithoutSign) % prime
+	as_nat h1 result = (0 - sqRootWithoutSign) % S.prime
   )
 )
 
@@ -56,13 +57,13 @@ let computeYFromX x result sign =
 
   let h6 = ST.get() in
 
-    lemmaFromDomain (as_nat h6 aCoordinateBuffer);
-    assert_norm (0 * Spec.P256.modp_inv2_prime (pow2 256) prime % prime == 0);
+    SM.lemmaFromDomain (as_nat h6 aCoordinateBuffer);
+    assert_norm (0 * Spec.P256.modp_inv2_prime (pow2 256) S.prime % S.prime == 0);
     fsqrt result result;
 
   let h7 = ST.get() in
 
-    lemmaFromDomainToDomain (as_nat h7 result);
+    SM.lemmaFromDomainToDomain (as_nat h7 result);
     fromDomain result result;
 
   let h8 = ST.get() in
@@ -90,18 +91,18 @@ let computeYFromX x result sign =
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
     pop_frame();
 
-  let x_ = fromDomain_ (as_nat h0 x) in
+  let x_ = SM.fromDomain_ (as_nat h0 x) in
 
   calc (==) {
-    ((((x_ * x_ * x_ % prime + ((Spec.P256.a_coeff % prime) * x_ % prime)) % prime) + Spec.P256.b_coeff) % prime);
-    (==) {lemma_mod_add_distr Spec.P256.b_coeff (x_ * x_ * x_ % prime + ((Spec.P256.a_coeff % prime) * x_ % prime)) prime}
-     ((x_ * x_ * x_ % prime + (Spec.P256.a_coeff % prime) * x_ % prime + Spec.P256.b_coeff) % prime);
-    (==) {lemma_mod_add_distr ((Spec.P256.a_coeff % prime) * x_ % prime + Spec.P256.b_coeff) (x_ * x_ * x_) prime}
-     ((x_ * x_ * x_ + (Spec.P256.a_coeff % prime) * x_ % prime + Spec.P256.b_coeff) % prime);
-    (==) {lemma_mod_mul_distr_l Spec.P256.a_coeff x_ prime}
-    ((x_ * x_ * x_ + Spec.P256.a_coeff * x_ % prime + Spec.P256.b_coeff) % prime);
-    (==) {lemma_mod_add_distr (x_ * x_ * x_ + Spec.P256.b_coeff) (Spec.P256.a_coeff * x_) prime}
-    ((x_ * x_ * x_ + Spec.P256.a_coeff * x_ + Spec.P256.b_coeff) % prime); }
+    ((((x_ * x_ * x_ % S.prime + ((Spec.P256.a_coeff % S.prime) * x_ % S.prime)) % S.prime) + Spec.P256.b_coeff) % S.prime);
+    (==) {lemma_mod_add_distr Spec.P256.b_coeff (x_ * x_ * x_ % S.prime + ((Spec.P256.a_coeff % S.prime) * x_ % S.prime)) S.prime}
+     ((x_ * x_ * x_ % S.prime + (Spec.P256.a_coeff % S.prime) * x_ % S.prime + Spec.P256.b_coeff) % S.prime);
+    (==) {lemma_mod_add_distr ((Spec.P256.a_coeff % S.prime) * x_ % S.prime + Spec.P256.b_coeff) (x_ * x_ * x_) S.prime}
+     ((x_ * x_ * x_ + (Spec.P256.a_coeff % S.prime) * x_ % S.prime + Spec.P256.b_coeff) % S.prime);
+    (==) {lemma_mod_mul_distr_l Spec.P256.a_coeff x_ S.prime}
+    ((x_ * x_ * x_ + Spec.P256.a_coeff * x_ % S.prime + Spec.P256.b_coeff) % S.prime);
+    (==) {lemma_mod_add_distr (x_ * x_ * x_ + Spec.P256.b_coeff) (Spec.P256.a_coeff * x_) S.prime}
+    ((x_ * x_ * x_ + Spec.P256.a_coeff * x_ + Spec.P256.b_coeff) % S.prime); }
 
 
 let decompressionNotCompressedForm b result =
@@ -115,7 +116,7 @@ let decompressionNotCompressedForm b result =
 inline_for_extraction noextract
 val lessThanPrime: f: felem -> Stack bool
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f < prime))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f < S.prime))
 
 let lessThanPrime f =
   push_frame();
@@ -171,22 +172,22 @@ let decompressionCompressedForm b result =
       else
 	begin
 	  toDomain t0 t0;
-	  lemmaToDomain (as_nat h1 t0);
+	  SM.lemmaToDomain (as_nat h1 t0);
 	    let h2 = ST.get() in
 
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in
 	  logand_mask compressedIdentifier (u8 1) 1;
 	  computeYFromX t0 t1 identifierBit;
-	  lemmaToDomainAndBackIsTheSame (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
+	  SM.lemmaToDomainAndBackIsTheSame (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
 
 	    let h3 = ST.get() in
 	    assert(
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in
-	      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.a_coeff * xD + Spec.P256.b_coeff) % prime)) in
+	      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.a_coeff * xD + Spec.P256.b_coeff) % S.prime)) in
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 as_nat h3 t1 = sqRootWithoutSign
 	      else
-		as_nat h3 t1 = (0 - sqRootWithoutSign) % prime);
+		as_nat h3 t1 = (0 - sqRootWithoutSign) % S.prime);
 
 	  bn_to_bytes_be4 t1 (sub result (size 32) (size 32));
 	   let h5 = ST.get() in
@@ -197,12 +198,12 @@ let decompressionCompressedForm b result =
 
 	  assert(
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in
-	      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.a_coeff * xD + Spec.P256.b_coeff) % prime)) in
+	      let sqRootWithoutSign = S.fsqrt (((xD * xD * xD + Spec.P256.a_coeff * xD + Spec.P256.b_coeff) % S.prime)) in
 	      let to = as_seq h5 (gsub result (size 32) (size 32)) in
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 to == Lib.ByteSequence.nat_to_bytes_be 32 sqRootWithoutSign
 	      else
-		to == Lib.ByteSequence.nat_to_bytes_be 32 ((0 - sqRootWithoutSign) % prime));
+		to == Lib.ByteSequence.nat_to_bytes_be 32 ((0 - sqRootWithoutSign) % S.prime));
 
 
 	  pop_frame();
