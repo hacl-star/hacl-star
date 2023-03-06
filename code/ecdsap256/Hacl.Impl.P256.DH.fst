@@ -9,16 +9,11 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.P256
-open Spec.ECDSA
-open Spec.DH
-
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.PointMul
-
-module SD = Spec.ECDSA
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
@@ -66,7 +61,7 @@ val _ecp256dh_r:
       (let x, y = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)) in
        let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
        let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
-       if not (SD.validate_pubkey_point (pointJacX, pointJacY, pointJacZ)) then
+       if not (S.validate_pubkey_point (pointJacX, pointJacY, pointJacZ)) then
          uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
        else
         x3 < prime /\ y3 < prime /\ z3 < prime /\

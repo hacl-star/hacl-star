@@ -12,7 +12,6 @@ open Lib.ByteSequence
 open Spec.P256
 open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.MontgomeryMultiplication
-open Spec.ECDSA
 
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
@@ -87,7 +86,7 @@ let ecdsa_verification_step1 r s =
 
 inline_for_extraction
 val ecdsa_verification_step23: alg:hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= S.min_input_length alg}
   -> m: lbuffer uint8 mLen
   -> result: felem
   -> Stack unit
@@ -449,7 +448,7 @@ val ecdsa_verification_core:
   -> hashAsFelem:felem
   -> r:lbuffer uint64 (size 4)
   -> s:lbuffer uint64 (size 4)
-  -> mLen:size_t{v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen:size_t{v mLen >= S.min_input_length alg}
   -> m:lbuffer uint8 mLen
   -> xBuffer:felem
   -> tempBuffer:lbuffer uint64 (size 100) ->
@@ -524,7 +523,7 @@ val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)
   -> s: lbuffer uint64 (size 4)
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= S.min_input_length alg}
   -> m:lbuffer uint8 mLen ->
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
@@ -536,7 +535,7 @@ val ecdsa_verification_:alg:hash_alg_ecdsa
       let r = as_nat h0 r in
       let s = as_nat h0 s in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
+      result == S.ecdsa_verification_agile alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification_ alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
@@ -583,7 +582,7 @@ val ecdsa_verification:
   -> pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
   -> s:lbuffer uint8 (size 32)
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= S.min_input_length alg}
   -> m:lbuffer uint8 mLen ->
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
@@ -595,7 +594,7 @@ val ecdsa_verification:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile alg (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == S.ecdsa_verification_agile alg (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);

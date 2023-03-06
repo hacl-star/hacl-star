@@ -9,9 +9,6 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open Spec.P256
-open Spec.DH
-
 open Spec.Hash.Definitions
 
 open Hacl.Impl.P256.Compression
@@ -57,15 +54,15 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < order /\
-    nat_from_bytes_be (as_seq h k) < order
+    nat_from_bytes_be (as_seq h privKey) < S.order /\
+    nat_from_bytes_be (as_seq h k) < S.order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in
       let resultS = gsub result (size 32) (size 32) in
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_256) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
+      let r, s, flagSpec = S.ecdsa_signature_agile (S.Hash SHA2_256) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec
@@ -89,15 +86,15 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < order /\
-    nat_from_bytes_be (as_seq h k) < order
+    nat_from_bytes_be (as_seq h privKey) < S.order /\
+    nat_from_bytes_be (as_seq h k) < S.order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in
       let resultS = gsub result (size 32) (size 32) in
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_384) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
+      let r, s, flagSpec = S.ecdsa_signature_agile (S.Hash SHA2_384) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec
@@ -123,15 +120,15 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < order /\
-    nat_from_bytes_be (as_seq h k) < order
+    nat_from_bytes_be (as_seq h privKey) < S.order /\
+    nat_from_bytes_be (as_seq h k) < S.order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in
       let resultS = gsub result (size 32) (size 32) in
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_512) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
+      let r, s, flagSpec = S.ecdsa_signature_agile (S.Hash SHA2_512) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec
@@ -156,7 +153,7 @@ Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uin
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
 val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
-  -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
+  -> mLen: size_t {uint_v mLen >= S.min_input_length S.NoHash}
   -> m: lbuffer uint8 mLen
   -> privKey: lbuffer uint8 (size 32)
   -> k: lbuffer uint8 (size 32) ->
@@ -168,15 +165,15 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
     disjoint result k /\
     nat_from_bytes_be (as_seq h privKey) > 0 /\
     nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < order /\
-    nat_from_bytes_be (as_seq h k) < order
+    nat_from_bytes_be (as_seq h privKey) < S.order /\
+    nat_from_bytes_be (as_seq h k) < S.order
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in
       let resultS = gsub result (size 32) (size 32) in
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile Spec.ECDSA.NoHash (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
+      let r, s, flagSpec = S.ecdsa_signature_agile S.NoHash (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec
@@ -213,7 +210,7 @@ val ecdsa_verif_p256_sha2:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == S.ecdsa_verification_agile (S.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
     )
 
 
@@ -236,7 +233,7 @@ val ecdsa_verif_p256_sha384:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_384) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == S.ecdsa_verification_agile (S.Hash SHA2_384) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
    )
 
 
@@ -259,7 +256,7 @@ val ecdsa_verif_p256_sha512:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == S.ecdsa_verification_agile (S.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
    )
 
 [@ (Comment " The input of the function is considered to be public,
@@ -268,7 +265,7 @@ val ecdsa_verif_p256_sha512:
   \n Output: bool, where true stands for the correct signature verification.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
 val ecdsa_verif_without_hash:
-  mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
+  mLen: size_t {uint_v mLen >= S.min_input_length S.NoHash}
   -> m:lbuffer uint8 mLen
   -> pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
@@ -282,7 +279,7 @@ val ecdsa_verif_without_hash:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
+      result == S.ecdsa_verification_agile S.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
    )
 
 
@@ -308,7 +305,7 @@ val validate_public_key:
         let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
         let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
         let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in
-        r == Spec.ECDSA.validate_pubkey_point pkJ
+        r == S.validate_pubkey_point pkJ
       )
     )
 
@@ -321,7 +318,7 @@ val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (
       let scalar = nat_from_bytes_be (as_seq h0 x) in
-      r <==> (scalar > 0 && scalar < order)
+      r <==> (scalar > 0 && scalar < S.order)
     )
   )
 
@@ -379,15 +376,15 @@ val compressed_to_raw: b: compressedForm -> result: lbuffer uint8 (size 64) -> S
       let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in
       let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in
       if uint_v id = 2 || uint_v id = 3 then
-        if x < prime then
+        if x < S.prime then
           r == true /\
         (
           let y =
-            let sq = S.fsqrt (((x * x * x + Spec.P256.a_coeff * x + Spec.P256.b_coeff) % prime)) in
+            let sq = S.fsqrt (((x * x * x + Spec.P256.a_coeff * x + Spec.P256.b_coeff) % S.prime)) in
               if (uint_v id) % 2 = (sq % 2) then
                 sq
               else
-              (0 - sq) % prime
+              (0 - sq) % S.prime
           in
           as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
           as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y)
@@ -464,7 +461,7 @@ val dh_initiator:
     live h result /\ live h scalar /\
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
+    let pointX, pointY, flag = S.ecp256_dh_i (as_seq h0 scalar) in
     modifies (loc result) h0 h1 /\
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
@@ -495,7 +492,7 @@ val dh_responder:
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
       let pointX, pointY, flag =
-        ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+        S.ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\

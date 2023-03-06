@@ -13,7 +13,6 @@ open Lib.ByteSequence
 
 open Spec.P256
 open Hacl.Spec.P256.Lemmas
-open Spec.ECDSA
 
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
@@ -33,7 +32,7 @@ module S = Spec.P256
 
 inline_for_extraction noextract
 val ecdsa_signature_step12: alg:hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= S.min_input_length alg}
   -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -200,7 +199,7 @@ let ecdsa_signature_step6 result kFelem z r da =
 val ecdsa_signature_core: alg: hash_alg_ecdsa
   -> r: felem
   -> s: felem
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= S.min_input_length alg}
   -> m: lbuffer uint8 mLen
   -> privKeyAsFelem: felem
   -> k: lbuffer uint8 (size 32) ->
@@ -263,7 +262,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
 inline_for_extraction noextract
 val ecdsa_signature: alg: hash_alg_ecdsa
   -> result: lbuffer uint8 (size 64)
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= S.min_input_length alg}
   -> m: lbuffer uint8 mLen
   -> privKey: lbuffer uint8 (size 32)
   -> k: lbuffer uint8 (size 32) ->
@@ -281,7 +280,7 @@ val ecdsa_signature: alg: hash_alg_ecdsa
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in
       let resultS = gsub result (size 32) (size 32) in
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
+      let r, s, flagSpec = S.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec

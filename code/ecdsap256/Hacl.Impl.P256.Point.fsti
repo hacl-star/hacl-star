@@ -13,7 +13,6 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module S = Spec.P256
-module SD = Spec.ECDSA
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
@@ -185,7 +184,7 @@ val is_point_on_curve_vartime: p:point -> Stack bool
 val validate_pubkey_point: p:point -> Stack bool
   (requires fun h -> live h p /\ point_z_as_nat h p == 1)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == SD.validate_pubkey_point (as_point_nat (as_seq h0 p)))
+    r == S.validate_pubkey_point (as_point_nat (as_seq h0 p)))
 
 
 // TODO: mv
@@ -196,7 +195,7 @@ val validate_pubkey: pk:lbuffer uint8 64ul -> Stack bool
    (let pk_x = BSeq.nat_from_bytes_be (as_seq h1 (gsub pk 0ul 32ul)) in
     let pk_y = BSeq.nat_from_bytes_be (as_seq h1 (gsub pk 32ul 32ul)) in
     let pkJ = Spec.P256.toJacobianCoordinates (pk_x, pk_y) in
-    r == SD.validate_pubkey_point pkJ))
+    r == S.validate_pubkey_point pkJ))
 
 
 // TODO: mv

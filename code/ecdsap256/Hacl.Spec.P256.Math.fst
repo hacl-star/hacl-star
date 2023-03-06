@@ -71,11 +71,11 @@ let lemma_modular_multiplication_p256_2 a b =
 
 
 val lemma_multiplication_not_mod_prime_left: a:nat{a < prime} -> Lemma
-  (requires a * (modp_inv2 (pow2 256)) % prime == 0)
+  (requires a * (modp_inv2_prime (pow2 256) prime) % prime == 0)
   (ensures a == 0)
 
 let lemma_multiplication_not_mod_prime_left a =
-  let b = modp_inv2 (pow2 256) in
+  let b = modp_inv2_prime (pow2 256) prime in
   Math.Lemmas.lemma_mod_mul_distr_r a b prime;
   assert (a * b % prime == a * (b % prime) % prime);
   let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
@@ -90,7 +90,7 @@ let lemma_multiplication_not_mod_prime_left a =
 
 // used in Hacl.Impl.P256.PointAdd, Hacl.Impl.P256.PointMul, Hacl.Impl.P256.Point
 val lemma_multiplication_not_mod_prime: a:nat{a < prime} ->
-  Lemma (a * (modp_inv2 (pow2 256)) % prime == 0 <==> a == 0)
+  Lemma (a * (modp_inv2_prime (pow2 256) prime) % prime == 0 <==> a == 0)
 
 let lemma_multiplication_not_mod_prime a =
   Classical.move_requires lemma_multiplication_not_mod_prime_left a

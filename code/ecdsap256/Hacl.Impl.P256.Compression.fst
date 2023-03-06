@@ -57,7 +57,7 @@ let computeYFromX x result sign =
   let h6 = ST.get() in
 
     lemmaFromDomain (as_nat h6 aCoordinateBuffer);
-    assert_norm (0 * Spec.P256.modp_inv2 (pow2 256) % prime == 0);
+    assert_norm (0 * Spec.P256.modp_inv2_prime (pow2 256) prime % prime == 0);
     fsqrt result result;
 
   let h7 = ST.get() in

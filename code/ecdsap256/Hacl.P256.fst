@@ -9,7 +9,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open Spec.ECDSA
+open Spec.P256
 open Spec.Hash.Definitions
 
 open Hacl.Impl.P256.Sign

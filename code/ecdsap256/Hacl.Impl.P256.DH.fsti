@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.DH
+module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
@@ -20,7 +20,7 @@ val ecp256dh_i:
     live h result /\ live h scalar /\
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
+    let pointX, pointY, flag = S.ecp256_dh_i (as_seq h0 scalar) in
     modifies (loc result) h0 h1 /\
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
@@ -40,7 +40,7 @@ val ecp256dh_r:
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
       let pointX, pointY, flag =
-        ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+        S.ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
