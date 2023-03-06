@@ -11,45 +11,6 @@ open Spec.Hash.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-//-------------------------------
-// TODO: remove
-val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
-  (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
-
-let lemma_scalar_ith sc k =
-  index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
-  nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
-
-
-val lemma_euclidian_for_ithbit: k: nat -> i: nat
-  -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
-
-let lemma_euclidian_for_ithbit k i =
-  Math.Lib.lemma_div_def i 8;
-  Math.Lemmas.pow2_plus (8 * (i / 8)) (i % 8)
-
-
-val ith_bit: k:lbytes 32 -> i:nat{i < 256}
-  -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
-
-let ith_bit k i =
-  let q = i / 8 in
-  let r = i % 8 in
-  let tmp1 = k.[q] >>. (size r) in
-  let tmp2 = tmp1 &. u8 1 in
-  let res = to_u64 tmp2 in
-  logand_le tmp1 (u8 1);
-  logand_mask tmp1 (u8 1) 1;
-  lemma_scalar_ith k q;
-  let k = nat_from_intseq_le k in
-  Math.Lemmas.pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
-  Math.Lemmas.division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
-  lemma_euclidian_for_ithbit k i;
-  Math.Lemmas.pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
-  res
-
-//---------------------------------
-
 val validate_pubkey_point: publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 let validate_pubkey_point publicKey =
   let x, y, z = publicKey in

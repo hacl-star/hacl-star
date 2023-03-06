@@ -14,18 +14,6 @@ module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// TODO: mv
-inline_for_extraction noextract
-val scalar_bit:
-    #buf_type: buftype ->
-    s:lbuffer_t buf_type uint8 (size 32)
-  -> n:size_t{v n < 256}
-  -> Stack uint64
-    (requires fun h -> live h s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Spec.ECDSA.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
-
-
 ///  Create a bignum
 
 inline_for_extraction noextract

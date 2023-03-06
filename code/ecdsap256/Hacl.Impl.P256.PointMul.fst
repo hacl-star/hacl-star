@@ -21,8 +21,48 @@ open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Point
 
 module S = Spec.P256
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+
+
+val lemma_scalar_ith: sc:BSeq.lbytes 32 -> k:nat{k < 32} ->
+  Lemma (v (LSeq.index sc k) == BSeq.nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
+
+let lemma_scalar_ith sc k =
+  BSeq.index_nat_to_intseq_le #U8 #SEC 32 (BSeq.nat_from_intseq_le sc) k;
+  BSeq.nat_from_intseq_le_inj sc (BSeq.nat_to_intseq_le 32 (BSeq.nat_from_intseq_le sc))
+
+
+val lemma_euclidian_for_ithbit: k: nat -> i: nat
+  -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
+
+let lemma_euclidian_for_ithbit k i =
+  Math.Lib.lemma_div_def i 8;
+  Math.Lemmas.pow2_plus (8 * (i / 8)) (i % 8)
+
+
+val ith_bit: k:BSeq.lbytes 32 -> i:nat{i < 256}
+  -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == BSeq.nat_from_intseq_le k / pow2 i % 2}
+
+let ith_bit k i =
+  let open Lib.Sequence in
+  let q = i / 8 in
+  let r = i % 8 in
+  let tmp1 = k.[q] >>. (size r) in
+  let tmp2 = tmp1 &. u8 1 in
+  let res = to_u64 tmp2 in
+  logand_le tmp1 (u8 1);
+  logand_mask tmp1 (u8 1) 1;
+  lemma_scalar_ith k q;
+  let k = BSeq.nat_from_intseq_le k in
+  Math.Lemmas.pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
+  Math.Lemmas.division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
+  lemma_euclidian_for_ithbit k i;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
+  res
+
 
 // TODO: rename
 let point_prime = p:point_seq{point_inv p}
@@ -111,7 +151,7 @@ val scalar_bit:
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == S.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
 
 let scalar_bit #buf_type s n =
   let h0 = ST.get () in
