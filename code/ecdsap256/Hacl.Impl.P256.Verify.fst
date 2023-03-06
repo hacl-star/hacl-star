@@ -214,11 +214,11 @@ val ecdsa_verification_step5_0:
       let pointU1 = gsub points (size 0) (size 12) in
       let pointU2 = gsub points (size 12) (size 12) in
 
-      let fromDomainPointU1 = SM.fromDomainPoint (as_point_nat (as_seq h1 pointU1)) in
-      let fromDomainPointU2 = SM.fromDomainPoint (as_point_nat (as_seq h1 pointU2)) in
+      let fromDomainPointU1 = SM.fromDomainPoint (as_point_nat h1 pointU1) in
+      let fromDomainPointU2 = SM.fromDomainPoint (as_point_nat h1 pointU2) in
       let pointAtInfinity = (0, 0, 0) in
       let u1D, _ = S.montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, S.base_point) in
-      let u2D, _ = S.montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, as_point_nat (as_seq h0 pubKeyAsPoint)) in
+      let u2D, _ = S.montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, as_point_nat h0 pubKeyAsPoint) in
       fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D
     )
   )
@@ -303,8 +303,8 @@ val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
       let pointU1G = gsub points (size 0) (size 12) in
       let pointU2Q = gsub points (size 12) (size 12) in
       r = (
-	norm_jacob_point (SM.fromDomainPoint (as_point_nat (as_seq h0 pointU1G))) =
-	norm_jacob_point (SM.fromDomainPoint (as_point_nat (as_seq h0 pointU2Q))))
+	norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 pointU1G)) =
+	norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 pointU2Q)))
     )
   )
 
@@ -354,7 +354,7 @@ val ecdsa_verification_step5_2:
       (
         let pointAtInfinity = (0, 0, 0) in
         let u1D, _ = S.montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, S.base_point) in
-        let u2D, _ = S.montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, as_point_nat (as_seq h0 pubKeyAsPoint)) in
+        let u2D, _ = S.montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, as_point_nat h0 pubKeyAsPoint) in
 	let sumD =
 	  if  norm_jacob_point u1D = norm_jacob_point u2D
 	  then
@@ -362,7 +362,7 @@ val ecdsa_verification_step5_2:
 	  else
 	    S.point_add u1D u2D in
         let pointNorm = S.norm_jacob_point sumD in
-        let resultPoint =  as_point_nat (as_seq h1 pointSum) in
+        let resultPoint =  as_point_nat h1 pointSum in
         pointNorm == resultPoint
       )
    )
@@ -413,7 +413,7 @@ val ecdsa_verification_step5:
       (
         let pointAtInfinity = (0, 0, 0) in
         let u1D, _ = S.montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, S.base_point) in
-        let u2D, _ = S.montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, as_point_nat (as_seq h0 pubKeyAsPoint)) in
+        let u2D, _ = S.montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, as_point_nat h0 pubKeyAsPoint) in
         let sumD =
 	  if  norm_jacob_point u1D = norm_jacob_point u2D
 	  then
@@ -488,7 +488,7 @@ val ecdsa_verification_core:
 	 let bufferU2 = BSeq.nat_to_bytes_be 32 p1 in
 	 let pointAtInfinity = (0, 0, 0) in
          let u1D, _ = S.montgomery_ladder_spec bufferU1 (pointAtInfinity, S.base_point) in
-         let u2D, _ = S.montgomery_ladder_spec bufferU2 (pointAtInfinity, as_point_nat (as_seq h0 publicKeyPoint)) in
+         let u2D, _ = S.montgomery_ladder_spec bufferU2 (pointAtInfinity, as_point_nat h0 publicKeyPoint) in
           let sumD =
 	  if  norm_jacob_point u1D = norm_jacob_point u2D
 	  then

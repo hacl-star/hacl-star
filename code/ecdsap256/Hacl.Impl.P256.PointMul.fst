@@ -65,7 +65,7 @@ let ith_bit k i =
 
 
 // TODO: rename
-let point_prime = p:point_seq{point_inv p}
+let point_prime = p:point_seq{point_inv_seq p}
 
 val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in
   pNew == q /\ qNew == p})
@@ -296,12 +296,12 @@ val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
 
 
       (
-	let p1 = fromDomainPoint(as_point_nat (as_seq h1 p)) in
-	let q1 = fromDomainPoint(as_point_nat (as_seq h1 q)) in
+	let p1 = fromDomainPoint(as_point_nat h1 p) in
+	let q1 = fromDomainPoint(as_point_nat h1 q) in
 	let rN, qN = S.montgomery_ladder_spec (as_seq h0 scalar)
 	  (
-	    fromDomainPoint(as_point_nat (as_seq h0 p)),
-	    fromDomainPoint(as_point_nat (as_seq h0 q))
+	    fromDomainPoint(as_point_nat h0 p),
+	    fromDomainPoint(as_point_nat h0 q)
 	  ) in
 	rN == p1 /\ qN == q1
       )
@@ -317,7 +317,7 @@ let montgomery_ladder #a p q scalar tempBuffer =
 
   [@inline_let]
   let acc (h:mem) : GTot (tuple2 S.jacob_point S.jacob_point) =
-  (fromDomainPoint(as_point_nat (as_seq h p)), fromDomainPoint(as_point_nat (as_seq h q)))  in
+  (fromDomainPoint(as_point_nat h p), fromDomainPoint(as_point_nat h q))  in
 
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
   [@inline_let]
@@ -348,18 +348,18 @@ val lemma_point_to_domain: h0: mem -> h1: mem ->  p: point -> result: point ->  
        point_z_as_nat h1 result == toDomain_ (point_z_as_nat h0 p)
      )
    )
-   (ensures (fromDomainPoint(as_point_nat (as_seq h1 result)) == as_point_nat (as_seq h0 p)))
+   (ensures (fromDomainPoint(as_point_nat h1 result) == as_point_nat h0 p))
 
 let lemma_point_to_domain h0 h1 p result =
-  let (x, y, z) = as_point_nat (as_seq h1 result) in ()
+  let (x, y, z) = as_point_nat h1 result in ()
 
 
 val lemma_pif_to_domain: h: mem ->  p: point -> Lemma
   (requires (point_x_as_nat h p == 0 /\ point_y_as_nat h p == 0 /\ point_z_as_nat h p == 0))
-  (ensures (fromDomainPoint (as_point_nat (as_seq h p)) == as_point_nat (as_seq h p)))
+  (ensures (fromDomainPoint (as_point_nat h p) == as_point_nat h p))
 
 let lemma_pif_to_domain h p =
-  let (x, y, z) = as_point_nat (as_seq h p) in
+  let (x, y, z) = as_point_nat h p in
   let (x3, y3, z3) = fromDomainPoint (x, y, z) in
   lemmaFromDomain x;
   lemmaFromDomain y;
@@ -370,7 +370,7 @@ let lemma_pif_to_domain h p =
 
 
 val lemma_coord: h3: mem -> q: point -> Lemma (
-   let (r0, r1, r2) = fromDomainPoint(as_point_nat (as_seq h3 q)) in
+   let (r0, r1, r2) = fromDomainPoint(as_point_nat h3 q) in
 	let xD = fromDomain_ (point_x_as_nat h3 q) in
 	let yD = fromDomain_ (point_y_as_nat h3 q) in
 	let zD = fromDomain_ (point_z_as_nat h3 q) in
@@ -401,7 +401,7 @@ val scalarMultiplication_t: #t:buftype -> p: point -> result: point ->
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
-      let (xN, yN, zN) = S.scalar_multiplication (as_seq h0 scalar) (as_point_nat (as_seq h0 p)) in
+      let (xN, yN, zN) = S.scalar_multiplication (as_seq h0 scalar) (as_point_nat h0 p) in
       x3 == xN /\ y3 == yN /\ z3 == zN
   )
 )

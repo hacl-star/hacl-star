@@ -33,11 +33,10 @@ val ecp256dh_r_: ss:point -> pk:point -> private_key:lbuffer uint8 32ul -> Stack
   (requires fun h ->
     live h ss /\ live h pk /\ live h private_key /\
     disjoint ss pk /\ disjoint ss private_key /\ disjoint pk private_key /\
-    point_inv (as_seq h pk))
+    point_inv h pk)
   (ensures fun  h0 flag h1 -> modifies (loc ss |+| loc pk) h0 h1 /\
-    as_point_nat (as_seq h1 ss) ==
-     S.scalar_multiplication (as_seq h0 private_key) (as_point_nat (as_seq h0 pk)) /\
-    v flag == (if S.is_point_at_inf (as_point_nat (as_seq h1 ss)) then ones_v U64 else 0))
+    as_point_nat h1 ss ==  S.scalar_multiplication (as_seq h0 private_key) (as_point_nat h0 pk) /\
+    v flag == (if S.is_point_at_inf (as_point_nat h1 ss) then ones_v U64 else 0))
 
 let ecp256dh_r_ ss pk private_key =
   push_frame ();

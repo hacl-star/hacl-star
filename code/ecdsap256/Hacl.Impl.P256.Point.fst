@@ -92,7 +92,7 @@ let lemma_mont_is_point_at_inf p =
 [@CInline]
 let is_point_at_inf p =
   let h0 = ST.get () in
-  lemma_mont_is_point_at_inf (as_point_nat (as_seq h0 p));
+  lemma_mont_is_point_at_inf (as_point_nat h0 p);
   let pz = getz p in
   bn_is_zero_mask4 pz
 
@@ -109,9 +109,9 @@ inline_for_extraction noextract
 val norm_jacob_point_z: p:point -> res:felem -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint p res /\
-    point_inv (as_seq h p))
+    point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let _, _, rz = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat (as_seq h0 p))) in
+    (let _, _, rz = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) in
     as_nat h1 res == rz))
 
 let norm_jacob_point_z p res =
@@ -149,9 +149,9 @@ inline_for_extraction noextract
 val norm_jacob_point_y: p:point -> res:felem -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint p res /\
-    point_inv (as_seq h p))
+    point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let _, ry, _ = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat (as_seq h0 p))) in
+    (let _, ry, _ = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) in
     as_nat h1 res == ry))
 
 let norm_jacob_point_y p res =
