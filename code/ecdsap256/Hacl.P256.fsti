@@ -243,22 +243,14 @@ Comment "Convert 65-byte uncompressed to raw.
   The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
   Input:
-  • a point in not compressed form (uint8[65])
-  • result: uint8[64] (internal point representation)
+  • pk: uint8 [65]
+  • pk_raw: uint8 [64]
   Output: bool, where true stands for the correct decompression."]
-val uncompressed_to_raw: b:notCompressedForm -> result:lbuffer uint8 64ul -> Stack bool
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
-    (
-      let id = Lib.Sequence.index (as_seq h0 b) 0 in
-      let x = Lib.Sequence.sub (as_seq h0 b) 1 32 in
-      let xResult = Lib.Sequence.sub (as_seq h1 result) 0 32 in
-      let y = Lib.Sequence.sub (as_seq h0 b) 33 32 in
-      let yResult = Lib.Sequence.sub (as_seq h1 result) 32 32 in
-      if v id = 4 then
-	r == true /\ x == xResult /\ y == yResult
-      else
-	r == false))
+val uncompressed_to_raw: pk:notCompressedForm -> pk_raw:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
+    (b <==> Some? (S.pk_uncompressed_to_raw (as_seq h0 pk))) /\
+    (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_uncompressed_to_raw (as_seq h0 pk)))))
 
 
 [@@ Comment "Convert 33-byte compressed to raw.
@@ -266,36 +258,14 @@ val uncompressed_to_raw: b:notCompressedForm -> result:lbuffer uint8 64ul -> Sta
   The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
   Input:
-  • a point in compressed form (uint8[33])
-  • result: uint8[64] (internal point representation)
+  • pk: uint8 [33]
+  • pk_raw: uint8 [64]
   Output: bool, where true stands for the correct decompression."]
-val compressed_to_raw: b:compressedForm -> result:lbuffer uint8 64ul -> Stack bool
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 r h1 ->
-    (
-      let id = Lib.Sequence.index (as_seq h0 b) 0 in
-      let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in
-      let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in
-      if uint_v id = 2 || uint_v id = 3 then
-        if x < S.prime then
-          r == true /\
-        (
-          let y =
-            let sq = S.fsqrt (((x * x * x + Spec.P256.a_coeff * x + Spec.P256.b_coeff) % S.prime)) in
-              if (uint_v id) % 2 = (sq % 2) then
-                sq
-              else
-              (0 - sq) % S.prime
-          in
-          as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
-          as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y)
-        else
-          r == false
-      else
-        r == false
-    ) /\
-    modifies (loc result) h0 h1
-  )
+val compressed_to_raw: pk:compressedForm -> pk_raw:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures  fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
+    (b <==> Some? (S.pk_compressed_to_raw (as_seq h0 pk))) /\
+    (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_compressed_to_raw (as_seq h0 pk)))))
 
 
 [@@ Comment "Convert raw to 65-byte uncompressed.
@@ -303,34 +273,22 @@ val compressed_to_raw: b:compressedForm -> result:lbuffer uint8 64ul -> Stack bo
   This function effectively prepends a 0x04 byte.
 
   Input:
-  • a point buffer (internal representation: uint8[64])
-  • result: a point in not compressed form (uint8[65])."]
-val raw_to_uncompressed: b:lbuffer uint8 64ul -> result:notCompressedForm -> Stack unit
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    (
-    let id = Lib.Sequence.index (as_seq h1 result) 0 in
-    let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in
-    let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in
-    let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in
-    let yResult = Lib.Sequence.sub (as_seq h1 result) 33 32 in
-    uint_v id == 4 /\ xResult == x /\ yResult == y))
+  • pk_raw: uint8 [64]
+  • pk: uint8 [65]"]
+val raw_to_uncompressed: pk_raw:lbuffer uint8 64ul -> pk:notCompressedForm -> Stack unit
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
+    as_seq h1 pk == S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
 
 
 [@@ Comment "Convert raw to 33-byte compressed.
 
-  Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
-  Output: `result`, a point in compressed form, of type `uint8[33]`"]
-val raw_to_compressed: b:lbuffer uint8 (size 64) -> result:compressedForm -> Stack unit
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    (
-    let identifier = Lib.Sequence.index (as_seq h1 result) 0 in
-    let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in
-    let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in
-    let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in
-    uint_v identifier == (Lib.ByteSequence.nat_from_intseq_be y % pow2 1)  + 2 /\
-    x == xResult))
+  Input: pk_raw: uint8 [64]
+  Output: pk: uint8 [33]"]
+val raw_to_compressed: pk_raw:lbuffer uint8 64ul -> pk:compressedForm -> Stack unit
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
+    as_seq h1 pk == S.pk_compressed_from_raw (as_seq h0 pk_raw))
 
 
 [@@ CPrologue "
