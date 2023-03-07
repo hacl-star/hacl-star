@@ -238,3 +238,29 @@ let ecp256_dh_r public_key s =
     aff_store_point (xN, yN), not (is_point_at_inf (xN, yN, zN))
   else
     aff_store_point (0, 0), false
+
+
+///  Parsing and Serializing public keys
+
+// raw          = [ x; y ], 64 bytes
+// uncompressed = [ 0x04; x; y ], 65 bytes
+// compressed   = [ 0x02 for even `y` and 0x03 for odd `y`; x ], 33 bytes
+
+let pk_uncompressed_to_raw (pk:lbytes 65) : option (lbytes 64) =
+  if Lib.RawIntTypes.u8_to_UInt8 pk.[0] <> 0x04uy then None else Some (sub pk 1 64)
+
+let pk_uncompressed_from_raw (pk:lbytes 64) : lbytes 65 =
+  concat (create 1 (u8 0x04)) pk
+
+let pk_compressed_to_raw (pk:lbytes 33) : option (lbytes 64) =
+  let pk_x = sub pk 1 32 in
+  match (aff_point_decompress pk) with
+  | Some (x, y) -> Some (concat #_ #32 #32 pk_x (nat_to_bytes_be 32 y))
+  | None -> None
+
+let pk_compressed_from_raw (pk:lbytes 64) : lbytes 33 =
+  let pk_x = sub pk 0 32 in
+  let pk_y = sub pk 32 32 in
+  let is_pk_y_odd = nat_from_bytes_be pk_y % 2 = 1 in // <==> pk_y % 2 = 1
+  let pk0 = if is_pk_y_odd then u8 0x03 else u8 0x02 in
+  concat (create 1 pk0) pk_x

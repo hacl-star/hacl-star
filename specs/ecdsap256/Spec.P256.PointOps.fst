@@ -47,6 +47,7 @@ let fsub (x y:felem) : felem = (x - y) % prime
 let fmul (x y:felem) : felem = (x * y) % prime
 let finv (a:felem) : felem = M.pow_mod #prime a (prime - 2)
 let fsqrt (a:felem) : felem = M.pow_mod #prime a ((prime + 1) / 4)
+let is_fodd (x:nat) : bool = x % 2 = 1
 
 let ( +% ) = fadd
 let ( -% ) = fsub
@@ -178,3 +179,27 @@ let aff_store_point (p:aff_point) : BSeq.lbytes 64 =
   let pxb = BSeq.nat_to_bytes_be 32 px in
   let pxy = BSeq.nat_to_bytes_be 32 py in
   concat #uint8 #32 #32 pxb pxy
+
+
+let recover_y (x:felem) (is_odd:bool) : option felem =
+  let y2 = x *% x *% x +% a_coeff *% x +% b_coeff in
+  let y = fsqrt y2 in
+  if y *% y <> y2 then None
+  else begin
+    let y = if is_fodd y <> is_odd then (prime - y) % prime else y in
+    Some y end
+
+
+let aff_point_decompress (s:BSeq.lbytes 33) : option aff_point =
+  let s0 = Lib.RawIntTypes.u8_to_UInt8 s.[0] in
+  if not (s0 = 0x02uy || s0 = 0x03uy) then None
+  else begin
+    let x = BSeq.nat_from_bytes_be (sub s 1 32) in
+    let is_x_valid = x < prime in
+    let is_y_odd = s0 = 0x03uy in
+
+    if not is_x_valid then None
+    else
+      match (recover_y x is_y_odd) with
+      | Some y -> Some (x, y)
+      | None -> None end
