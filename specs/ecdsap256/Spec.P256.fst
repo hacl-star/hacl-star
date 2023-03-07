@@ -57,67 +57,61 @@ let montgomery_ladder_spec k pq =
 
 val scalar_multiplication: scalar -> jacob_point -> jacob_point
 let scalar_multiplication k p =
-  let pai = (0, 0, 0) in
-  let q, f = montgomery_ladder_spec k (pai, p) in
+  let q, f = montgomery_ladder_spec k (point_at_inf, p) in
   norm_jacob_point q
 
 
 val secret_to_public: scalar -> jacob_point
 let secret_to_public k =
-  let pai = (0, 0, 0) in
-  let q, f = montgomery_ladder_spec k (pai, base_point) in
+  let q, f = montgomery_ladder_spec k (point_at_inf, base_point) in
   norm_jacob_point q
 
+
+let point_mul_double_g (a1 a2:qelem) (pk:jacob_point) : jacob_point =
+  let a1 = nat_to_bytes_be 32 a1 in
+  let a2 = nat_to_bytes_be 32 a2 in
+  let u1D, _ = montgomery_ladder_spec a1 (point_at_inf, base_point) in
+  let u2D, _ = montgomery_ladder_spec a2 (point_at_inf, pk) in
+  let sumD =
+    if norm_jacob_point u1D = norm_jacob_point u2D then point_double u1D
+    else point_add u1D u2D in
+  norm_jacob_point sumD
+
 // from Spec.ECDSA.fst
-
-let validate_pubkey_point (pk:lbytes 64) : bool =
-  Some? (load_point pk)
-
-
-val checkCoordinates: r:nat -> s:nat -> bool
-let checkCoordinates r s =
-  if 0 < r && r < order && 0 < s && s < order then true else false
-
 
 type hash_alg_ecdsa =
   | NoHash
   | Hash of (a:hash_alg{a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
 
+let _: squash (inversion hash_alg_ecdsa) = allow_inversion hash_alg_ecdsa
 
-let invert_state_s (a:hash_alg_ecdsa): Lemma
-  (requires True)
-  (ensures (inversion hash_alg_ecdsa))
-  [ SMTPat (hash_alg_ecdsa) ]
-=
-  allow_inversion (hash_alg_ecdsa)
+let _: squash (pow2 32 < pow2 61 /\ pow2 32 < pow2 125) =
+  Math.Lemmas.pow2_lt_compat 61 32;
+  Math.Lemmas.pow2_lt_compat 125 32
 
-
-val min_input_length: hash_alg_ecdsa -> Tot int
-let min_input_length a = match a with | NoHash -> 32 | Hash a -> 0
+let min_input_length (a:hash_alg_ecdsa) : nat =
+  match a with | NoHash -> 32 | Hash a -> 0
 
 (* let hash_length (a:hash_alg_ecdsa) = match a with | NoHash -> 32 | Hash a -> hash_length a *)
 
-
-val hashSpec:
+val hash_ecdsa:
     a:hash_alg_ecdsa
-  -> mLen:size_nat{mLen >= min_input_length a}
-  -> m:lseq uint8 mLen ->
-  Tot (r:Lib.ByteSequence.lbytes
-    (if Hash? a then hash_length (match a with Hash a -> a) else mLen){length r >= 32})
+  -> msg_len:size_nat{msg_len >= min_input_length a}
+  -> msg:lseq uint8 msg_len ->
+  Tot (r:lbytes
+    (if Hash? a then hash_length (match a with Hash a -> a) else msg_len){length r >= 32})
 
-let hashSpec a mLen m =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  allow_inversion hash_alg_ecdsa;
-  match a with
-  | NoHash -> m
-  | Hash a -> Spec.Agile.Hash.hash a m
+let hash_ecdsa a msg_len msg =
+  match a with | NoHash -> msg | Hash a -> Spec.Agile.Hash.hash a msg
 
 
 // TODO: rm, once we use complete point addition and doubling
 (**
   Important changed was done comparing to the previous version:
-  The point addition routine used in the code doesnot work correctly in case the points are equal to each other. In this case the produced result is equal to 0. To solve it, before the execution we check that points are equal and then call either point double, if the points are identical, or point add.
+  The point addition routine used in the code doesnot work correctly in case the points are equal to each other.
+  In this case the produced result is equal to 0.
+  To solve it, before the execution we check that points are equal and then call either point double,
+  if the points are identical, or point add.
 
   Sage script:
 
@@ -164,72 +158,67 @@ let hashSpec a mLen m =
 **)
 
 
+let validate_pubkey_point (pk:lbytes 64) : bool =
+  Some? (load_point pk)
+
+
 val ecdsa_verification_agile:
     alg:hash_alg_ecdsa
   -> public_key:lbytes 64
-  -> r:nat
-  -> s:nat
+  -> signature_r:lbytes 32
+  -> signature_s:lbytes 32
   -> msg_len:size_nat{msg_len >= min_input_length alg}
   -> msg:lbytes msg_len ->
   bool
 
-let ecdsa_verification_agile alg public_key r s msg_len msg =
-  allow_inversion hash_alg_ecdsa;
+let ecdsa_verification_agile alg public_key signature_r signature_s msg_len msg =
   let pk = load_point public_key in
-  if not (Some? pk) then false
+  let r = nat_from_bytes_be signature_r in
+  let s = nat_from_bytes_be signature_s in
+  let hashM = hash_ecdsa alg msg_len msg in
+  let z = nat_from_bytes_be (sub hashM 0 32) % order in
+
+  let is_r_valid = 0 < r && r < order in
+  let is_s_valid = 0 < s && s < order in
+
+  if not (Some? pk && is_r_valid && is_s_valid) then false
   else begin
-    if not (checkCoordinates r s) then false
-    else begin
-      let hashM = hashSpec alg msg_len msg in
-      let cutHashM = sub hashM 0 32 in
-      let hashNat = nat_from_bytes_be cutHashM % order in
-
-      let sinv = qinv s in
-      let u1 = nat_to_bytes_be 32 (sinv *^ hashNat) in
-      let u2 = nat_to_bytes_be 32 (sinv *^ r) in
-
-      let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, base_point) in
-      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, Some?.v pk) in
-      let sumD = if norm_jacob_point u1D = norm_jacob_point u2D then
-        point_double u1D
-      else
-        point_add u1D u2D in
-      let pointNorm = norm_jacob_point sumD in
-
-      let x, y, z = pointNorm in
-      let x = x % order in
-      if is_point_at_inf pointNorm then false else x = r
-    end
+    let sinv = qinv s in
+    let u1 = sinv *^ z in
+    let u2 = sinv *^ r in
+    let x, y, z = point_mul_double_g u1 u2 (Some?.v pk) in // FIXME: rm norm_jacob_point
+    if is_point_at_inf (x, y, z) then false else x % order = r
   end
 
 
 val ecdsa_signature_agile:
     alg:hash_alg_ecdsa
-  -> mLen:size_nat{mLen >= min_input_length alg}
-  -> m:lseq uint8 mLen
-  -> privateKey:lseq uint8 32
-  -> k:lseq uint8 32
-  -> tuple3 nat nat bool
+  -> msg_len:size_nat{msg_len >= min_input_length alg}
+  -> msg:lbytes msg_len
+  -> private_key:lbytes 32
+  -> nonce:lbytes 32 ->
+  option (lbytes 64)
 
-let ecdsa_signature_agile alg mLen m privateKey k =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  let r, _ = montgomery_ladder_spec k ((0,0,0), base_point) in
-  let (xN, _, _) = norm_jacob_point r in
+let ecdsa_signature_agile alg msg_len msg private_key nonce =
+  let k_q = nat_from_bytes_be nonce in
+  let d_a = nat_from_bytes_be private_key in
+  let hashM = hash_ecdsa alg msg_len msg in
+  let z = nat_from_bytes_be (sub hashM 0 32) % order in
 
-  let hashM = hashSpec alg mLen m in
-  let cutHashM = sub hashM 0 32 in
-  let z = nat_from_bytes_be cutHashM % order in
+  let is_privkey_valid = 0 < d_a && d_a < order in
+  let is_nonce_valid = 0 < k_q && k_q < order in
 
-  let kFelem = nat_from_bytes_be k in
-  let privateKeyFelem = nat_from_bytes_be privateKey in
-  let resultR = xN % order in
-  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (order - 2) % order in
-  if resultR = 0 || resultS = 0 then
-    resultR, resultS, false
-  else
-    resultR, resultS, true
+  if not (is_privkey_valid && is_nonce_valid) then None
+  else begin
+    let r, _ = montgomery_ladder_spec nonce (point_at_inf, base_point) in
+    let (xN, _, _) = norm_jacob_point r in
+    let r = xN % order in
+
+    let kinv = qinv k_q in
+    let s = kinv *^ (z +^ r *^ d_a) in
+    let rb = nat_to_bytes_be 32 r in
+    let sb = nat_to_bytes_be 32 s in
+    if r = 0 || s = 0 then None else Some (concat #_ #32 #32 rb sb) end
 
 // from Spec.DH
 

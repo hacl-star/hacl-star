@@ -71,9 +71,8 @@ let ( *^ ) = qmul
 
 ///  Elliptic curve `y^2 = x^3 + a * x + b`
 
-let point_nat = tuple3 nat nat nat
 let aff_point = p:tuple2 nat nat{let (px, py) = p in px < prime /\ py < prime}
-let jacob_point = p:point_nat{let (px, py, pz) = p in px < prime /\ py < prime /\ pz < prime}
+let jacob_point = p:tuple3 nat nat nat{let (px, py, pz) = p in px < prime /\ py < prime /\ pz < prime}
 
 // let aff_point = felem & felem           // Affine point
 // let jacob_point = felem & felem & felem // Jacobian coordinates
@@ -93,16 +92,16 @@ let g_y : felem =
 
 let base_point : jacob_point = (g_x, g_y, one)
 
-val is_point_on_curve: aff_point -> bool
-let is_point_on_curve (x, y) =
+let is_point_on_curve (p:aff_point) : bool =
+  let (x, y) = p in
   y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 
-
+let point_at_inf : jacob_point = (zero, zero, zero)
 let is_point_at_inf (p:jacob_point) =
   let (_, _, z) = p in z = 0
 
-val to_jacob_point: aff_point -> jacob_point
-let to_jacob_point (x, y) = (x, y, one)
+let to_jacob_point (p:aff_point) : jacob_point =
+  let (x, y) = p in (x, y, one)
 
 
 // TODO: avoid computing finv twice
