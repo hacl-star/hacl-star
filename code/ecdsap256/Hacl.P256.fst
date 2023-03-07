@@ -18,37 +18,37 @@ module S = Spec.P256
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 
-let ecdsa_sign_p256_sha2 result mLen m privKey k =
-  ecdsa_signature (S.Hash SHA2_256) result mLen m privKey k
+let ecdsa_sign_p256_sha2 signature msg_len msg private_key nonce =
+  ecdsa_signature (S.Hash SHA2_256) signature msg_len msg private_key nonce
 
-let ecdsa_sign_p256_sha384 result mLen m privKey k =
-  ecdsa_signature (S.Hash SHA2_384) result mLen m privKey k
+let ecdsa_sign_p256_sha384 signature msg_len msg private_key nonce =
+  ecdsa_signature (S.Hash SHA2_384) signature msg_len msg private_key nonce
 
-let ecdsa_sign_p256_sha512 result mLen m privKey k =
-  ecdsa_signature (S.Hash SHA2_512) result mLen m privKey k
+let ecdsa_sign_p256_sha512 signature msg_len msg private_key nonce =
+  ecdsa_signature (S.Hash SHA2_512) signature msg_len msg private_key nonce
 
-let ecdsa_sign_p256_without_hash result mLen m privKey k =
-  ecdsa_signature S.NoHash result mLen m privKey k
-
-
-let ecdsa_verif_p256_sha2 mLen m pubKey r s =
-  ecdsa_verification (S.Hash SHA2_256) pubKey r s mLen m
-
-let ecdsa_verif_p256_sha384 mLen m pubKey r s =
-  ecdsa_verification (S.Hash SHA2_384) pubKey r s mLen m
-
-let ecdsa_verif_p256_sha512 mLen m pubKey r s =
-  ecdsa_verification (S.Hash SHA2_512) pubKey r s mLen m
-
-let ecdsa_verif_without_hash mLen m pubKey r s =
-  ecdsa_verification S.NoHash pubKey r s mLen m
+let ecdsa_sign_p256_without_hash signature msg_len msg private_key nonce =
+  ecdsa_signature S.NoHash signature msg_len msg private_key nonce
 
 
-let validate_public_key pubKey =
-  Hacl.Impl.P256.Point.validate_pubkey pubKey
+let ecdsa_verif_p256_sha2 msg_len msg public_key signature_r signature_s =
+  ecdsa_verification (S.Hash SHA2_256) public_key signature_r signature_s msg_len msg
 
-let validate_private_key x =
-  Hacl.Impl.P256.Point.isMoreThanZeroLessThanOrder x
+let ecdsa_verif_p256_sha384 msg_len msg public_key signature_r signature_s =
+  ecdsa_verification (S.Hash SHA2_384) public_key signature_r signature_s msg_len msg
+
+let ecdsa_verif_p256_sha512 msg_len msg public_key signature_r signature_s =
+  ecdsa_verification (S.Hash SHA2_512) public_key signature_r signature_s msg_len msg
+
+let ecdsa_verif_without_hash msg_len msg public_key signature_r signature_s =
+  ecdsa_verification S.NoHash public_key signature_r signature_s msg_len msg
+
+
+let validate_public_key public_key =
+  Hacl.Impl.P256.Point.validate_pubkey public_key
+
+let validate_private_key private_key =
+  Hacl.Impl.P256.Point.isMoreThanZeroLessThanOrder private_key
 
 
 let uncompressed_to_raw b result =
@@ -64,8 +64,8 @@ let raw_to_compressed b result =
   Hacl.Impl.P256.Compression.compressionCompressedForm b result
 
 
-let dh_initiator result scalar =
-  Hacl.Impl.P256.DH.ecp256dh_i result scalar
+let dh_initiator public_key private_key =
+  Hacl.Impl.P256.DH.ecp256dh_i public_key private_key
 
-let dh_responder result pubKey scalar =
-  Hacl.Impl.P256.DH.ecp256dh_r result pubKey scalar
+let dh_responder shared_secret their_pubkey private_key =
+  Hacl.Impl.P256.DH.ecp256dh_r shared_secret their_pubkey private_key

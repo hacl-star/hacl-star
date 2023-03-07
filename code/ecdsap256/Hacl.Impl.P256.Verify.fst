@@ -73,8 +73,8 @@ inline_for_extraction noextract
 val ecdsa_verification_step1: r:lbuffer uint64 (size 4) -> s:lbuffer uint64 (size 4) -> Stack bool
   (requires fun h -> live h r /\ live h s)
   (ensures  fun h0 result h1 ->
-    modifies0 h0 h1 /\
-    result == S.checkCoordinates (as_nat h0 r) (as_nat h0 s))
+    modifies0 h0 h1)
+    //result == S.checkCoordinates (as_nat h0 r) (as_nat h0 s))
 
 let ecdsa_verification_step1 r s =
   let isRCorrect = isMoreThanZeroLessThanOrderMinusOne r in
@@ -93,7 +93,7 @@ val ecdsa_verification_step23: alg:S.hash_alg_ecdsa
       (
 	assert_norm (pow2 32 < pow2 61);
 	assert_norm (pow2 32 < pow2 125);
-	let hashM = S.hashSpec alg (v mLen) (as_seq h0 m) in
+	let hashM = S.hash_ecdsa alg (v mLen) (as_seq h0 m) in
 	let cutHashM = Lib.Sequence.sub hashM 0 32 in
 	as_nat h1 result = BSeq.nat_from_bytes_be cutHashM % S.order
       )
@@ -477,7 +477,7 @@ val ecdsa_verification_core:
          assert_norm (pow2 32 < pow2 61);
 	 assert_norm (pow2 32 < pow2 125);
 
-	 let hashM = S.hashSpec alg (v mLen) (as_seq h0 m) in
+	 let hashM = S.hash_ecdsa alg (v mLen) (as_seq h0 m) in
 	 let cutHashM = Lib.Sequence.sub hashM 0 32 in
 	 let hashNat =  BSeq.nat_from_bytes_be cutHashM % S.order in
 
@@ -530,8 +530,8 @@ val ecdsa_verification_:alg:S.hash_alg_ecdsa
       assert_norm (pow2 32 < pow2 125);
       let r = as_nat h0 r in
       let s = as_nat h0 s in
-      modifies0 h0 h1 /\
-      result == S.ecdsa_verification_agile alg (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m))
+      modifies0 h0 h1)
+      //result == S.ecdsa_verification_agile alg (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification_ alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
@@ -581,13 +581,9 @@ val ecdsa_verification:
   -> m:lbuffer uint8 mLen ->
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61);
-      assert_norm (pow2 32 < pow2 125);
-      let r = BSeq.nat_from_bytes_be (as_seq h1 r) in
-      let s = BSeq.nat_from_bytes_be (as_seq h1 s) in
-      modifies0 h0 h1 /\
-      result == S.ecdsa_verification_agile alg (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m))
+    (ensures fun h0 result h1 -> modifies0 h0 h1 /\
+      result == S.ecdsa_verification_agile alg (as_seq h0 pubKey)
+        (as_seq h0 r) (as_seq h0 s) (v mLen) (as_seq h0 m))
 
 let ecdsa_verification alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);

@@ -38,7 +38,7 @@ val ecdsa_signature_step12: alg:S.hash_alg_ecdsa
     (
       assert_norm (pow2 32 < pow2 61);
       assert_norm (pow2 32 < pow2 125);
-      let hashM = S.hashSpec alg (v mLen) (as_seq h0 m) in
+      let hashM = S.hash_ecdsa alg (v mLen) (as_seq h0 m) in
       let cutHashM = Lib.Sequence.sub hashM 0 32 in
       as_nat h1 result = nat_from_bytes_be cutHashM % S.order
     )
@@ -218,7 +218,7 @@ val ecdsa_signature_core: alg: S.hash_alg_ecdsa
     (
       assert_norm (pow2 32 < pow2 61);
       assert_norm (pow2 32 < pow2 125);
-      let hashM = S.hashSpec alg (v mLen) (as_seq h0 m) in
+      let hashM = S.hash_ecdsa alg (v mLen) (as_seq h0 m) in
       let cutHashM = Lib.Sequence.sub hashM 0 32 in
       let z =  nat_from_bytes_be cutHashM % S.order in
       let (rxN, ryN, rzN), _ = S.montgomery_ladder_spec (as_seq h0 k) ((0,0,0), S.base_point) in
@@ -274,17 +274,9 @@ val ecdsa_signature: alg: S.hash_alg_ecdsa
     nat_from_bytes_be (as_seq h privKey) < S.order /\
     nat_from_bytes_be (as_seq h k) < S.order
   )
-  (ensures fun h0 flag h1 ->
-    modifies (loc result) h0 h1 /\
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in
-      let resultS = gsub result (size 32) (size 32) in
-      let r, s, flagSpec = S.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec
-    )
-  )
+  (ensures fun h0 flag h1 -> modifies (loc result) h0 h1 /\
+    (let sgnt = S.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in
+      (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 result == Some?.v sgnt))))
 
 
 let ecdsa_signature alg result mLen m privKey k =
