@@ -1,14 +1,12 @@
-module Hacl.Streaming.Blake2
+module Hacl.Streaming.Blake2.Common
 
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module G = FStar.Ghost
 module S = FStar.Seq
 module LS = Lib.Sequence
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U128 = FStar.UInt128
-module F = Hacl.Streaming.Functor
 module I = Hacl.Streaming.Interface
 module ST = FStar.HyperStack.ST
 
@@ -37,8 +35,6 @@ let lbytes = Lib.ByteSequence.lbytes
 module Spec = Spec.Blake2
 module Core = Hacl.Impl.Blake2.Core
 open Hacl.Impl.Blake2.Generic
-module Blake2s32 = Hacl.Blake2s_32
-module Blake2b32 = Hacl.Blake2b_32
 
 /// An instance of the stateful type class for blake2
 /// =================================================
@@ -615,78 +611,5 @@ let blake2 (a : alg)
       finish (output_len a) dst h)
 #pop-options
 
-/// Introducing intermediate definitions for the instantiation
-
-inline_for_extraction noextract
-let blake2s_32 kk =
-  blake2 Spec.Blake2S Core.M32 kk Blake2s32.blake2s_init Blake2s32.blake2s_update_multi
-         Blake2s32.blake2s_update_last Blake2s32.blake2s_finish
-
-inline_for_extraction noextract
-let blake2b_32 kk =
-  blake2 Spec.Blake2B Core.M32 kk Blake2b32.blake2b_init Blake2b32.blake2b_update_multi
-         Blake2b32.blake2b_update_last Blake2b32.blake2b_finish
-
 inline_for_extraction noextract
 let empty_key a = I.optional_key () I.Erased (stateful_key a 0)
-
-/// Type abbreviations - makes KaRaMeL use pretty names in the generated code
-
-let blake2s_32_block_state = s Spec.Blake2S Core.M32
-let blake2b_32_block_state = s Spec.Blake2B Core.M32
-let blake2s_32_state = F.state_s (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-let blake2b_32_state = F.state_s (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2B)
-
-/// The incremental hash functions instantiations. Note that we can't write a
-/// generic one, because the normalization then performed by KaRaMeL explodes.
-
-/// All those implementations are for non-keyed hash.
-
-inline_for_extraction noextract
-let blake2s_32_no_key_alloca =
-  F.alloca (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  State allocation function when there is no key")]
-let blake2s_32_no_key_malloc =
-  F.malloc (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  (Re-)initialization function when there is no key")]
-let blake2s_32_no_key_reset =
-  F.reset (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
-let blake2s_32_no_key_update =
-  F.update (blake2s_32 0) (G.hide ()) (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  Finish function when there is no key")]
-let blake2s_32_no_key_digest =
-  F.digest (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  Free state function when there is no key")]
-let blake2s_32_no_key_free =
-  F.free (blake2s_32 0) (G.hide ()) (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-
-inline_for_extraction noextract
-[@ (Comment "  State allocation function when there is no key")]
-let blake2b_32_no_key_alloca =
-  F.alloca (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2B)
-
-[@ (Comment "  State allocation function when there is no key")]
-let blake2b_32_no_key_malloc =
-  F.malloc (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  Re-initialization function when there is no key")]
-let blake2b_32_no_key_reset =
-  F.reset (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
-let blake2b_32_no_key_update =
-  F.update (blake2b_32 0) (G.hide ()) (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  Finish function when there is no key")]
-let blake2b_32_no_key_digest =
-  F.digest (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
-
-[@ (Comment "  Free state function when there is no key")]
-let blake2b_32_no_key_free =
-  F.free (blake2b_32 0) (G.hide ()) (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
