@@ -38,89 +38,79 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2b_256.h"
 
-/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_block_state */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_block_state */
 
-typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_block_state_s
+typedef struct Hacl_Streaming_Blake2b_256_block_state_s
 {
   Lib_IntVector_Intrinsics_vec256 *fst;
   Lib_IntVector_Intrinsics_vec256 *snd;
 }
-Hacl_Streaming_Blake2b_256_blake2b_256_block_state;
+Hacl_Streaming_Blake2b_256_block_state;
 
-/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_block_state */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_block_state */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_state */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_state */
 
-typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s
+typedef struct Hacl_Streaming_Blake2b_256_state_s
 {
-  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state;
+  Hacl_Streaming_Blake2b_256_block_state block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Blake2b_256_blake2b_256_state;
+Hacl_Streaming_Blake2b_256_state;
 
-/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_state */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_state */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_malloc */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_malloc */
 
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2b_256_blake2b_256_state
-*Hacl_Streaming_Blake2b_256_blake2b_256_no_key_malloc(void);
+Hacl_Streaming_Blake2b_256_state *Hacl_Streaming_Blake2b_256_malloc(void);
 
-/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_malloc */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_malloc */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_reset */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_reset */
 
 /**
   (Re-)initialization function when there is no key
 */
-void
-Hacl_Streaming_Blake2b_256_blake2b_256_no_key_reset(
-  Hacl_Streaming_Blake2b_256_blake2b_256_state *state
-);
+void Hacl_Streaming_Blake2b_256_reset(Hacl_Streaming_Blake2b_256_state *state1);
 
-/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_reset */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_reset */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_update */
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
-  Hacl_Streaming_Blake2b_256_blake2b_256_state *state,
+Hacl_Streaming_Blake2b_256_update(
+  Hacl_Streaming_Blake2b_256_state *state1,
   uint8_t *chunk,
   uint32_t chunk_len
 );
 
-/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_update */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_digest */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_digest */
 
 /**
   Finish function when there is no key
 */
 void
-Hacl_Streaming_Blake2b_256_blake2b_256_no_key_digest(
-  Hacl_Streaming_Blake2b_256_blake2b_256_state *state,
-  uint8_t *output
-);
+Hacl_Streaming_Blake2b_256_digest(Hacl_Streaming_Blake2b_256_state *state1, uint8_t *output);
 
-/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_digest */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_digest */
 
-/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_free */
 
 /**
   Free state function when there is no key
 */
-void
-Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(
-  Hacl_Streaming_Blake2b_256_blake2b_256_state *state
-);
+void Hacl_Streaming_Blake2b_256_free(Hacl_Streaming_Blake2b_256_state *state1);
 
-/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_free */
 
 #if defined(__cplusplus)
 }

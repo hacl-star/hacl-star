@@ -37,41 +37,37 @@ extern "C" {
 
 #include "Hacl_Hash_Blake2s_128.h"
 
-typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_block_state_s
+typedef struct Hacl_Streaming_Blake2s_128_block_state_s
 {
   Lib_IntVector_Intrinsics_vec128 *fst;
   Lib_IntVector_Intrinsics_vec128 *snd;
 }
-Hacl_Streaming_Blake2s_128_blake2s_128_block_state;
+Hacl_Streaming_Blake2s_128_block_state;
 
-typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_state_s
+typedef struct Hacl_Streaming_Blake2s_128_state_s
 {
-  Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state;
+  Hacl_Streaming_Blake2s_128_block_state block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Blake2s_128_blake2s_128_state;
+Hacl_Streaming_Blake2s_128_state;
 
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2s_128_blake2s_128_state
-*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_malloc(void);
+Hacl_Streaming_Blake2s_128_state *Hacl_Streaming_Blake2s_128_malloc(void);
 
 /**
   Re-initialization function when there is no key
 */
-void
-Hacl_Streaming_Blake2s_128_blake2s_128_no_key_reset(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *state
-);
+void Hacl_Streaming_Blake2s_128_reset(Hacl_Streaming_Blake2s_128_state *state1);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *state,
+Hacl_Streaming_Blake2s_128_update(
+  Hacl_Streaming_Blake2s_128_state *state1,
   uint8_t *chunk,
   uint32_t chunk_len
 );
@@ -80,18 +76,12 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   Finish function when there is no key
 */
 void
-Hacl_Streaming_Blake2s_128_blake2s_128_no_key_digest(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *state,
-  uint8_t *output
-);
+Hacl_Streaming_Blake2s_128_digest(Hacl_Streaming_Blake2s_128_state *state1, uint8_t *output);
 
 /**
   Free state function when there is no key
 */
-void
-Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *state
-);
+void Hacl_Streaming_Blake2s_128_free(Hacl_Streaming_Blake2s_128_state *state1);
 
 #if defined(__cplusplus)
 }
