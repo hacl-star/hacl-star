@@ -261,3 +261,13 @@ val isMoreThanZeroLessThanOrder: x:lbuffer uint8 32ul -> Stack bool
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (let scalar = BSeq.nat_from_bytes_be (as_seq h0 x) in
     r <==> (0 < scalar && scalar < S.order)))
+
+
+val aff_point_decompress_vartime (x y:felem) (s:lbuffer uint8 33ul) : Stack bool
+  (requires fun h ->
+    live h x /\ live h y /\ live h s /\
+    disjoint x y /\ disjoint x s /\ disjoint y s)
+  (ensures fun h0 b h1 -> modifies (loc x |+| loc y) h0 h1 /\
+    (b <==> Some? (S.aff_point_decompress (as_seq h0 s))) /\
+    (b ==> (let (xa, ya) = Some?.v (S.aff_point_decompress (as_seq h0 s)) in
+    as_nat h1 x < S.prime /\ as_nat h1 y < S.prime /\ as_nat h1 x == xa /\ as_nat h1 y == ya)))

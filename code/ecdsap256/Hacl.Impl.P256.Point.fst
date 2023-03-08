@@ -206,7 +206,8 @@ val compute_rp_ec_equation: x:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
     as_nat h x < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\ (let x = fmont_as_nat h0 x in
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\ as_nat h1 res < S.prime /\
+    (let x = fmont_as_nat h0 x in
     fmont_as_nat h1 res ==
       S.fadd (S.fadd (S.fmul (S.fmul x x) x) (S.fmul S.a_coeff x)) S.b_coeff))
 
@@ -222,6 +223,20 @@ let compute_rp_ec_equation x res =
   pop_frame ()
 
 
+inline_for_extraction noextract
+val is_y_sqr_is_y2_vartime (y2 y:felem) : Stack bool
+  (requires fun h ->
+    live h y /\ live h y2 /\ disjoint y y2 /\
+    as_nat h y2 < S.prime /\ as_nat h y < S.prime)
+  (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\
+    b == (fmont_as_nat h0 y2 = S.fmul (fmont_as_nat h0 y) (fmont_as_nat h0 y)))
+
+let is_y_sqr_is_y2_vartime y2 y =
+  fsqr y y; // y = y * y
+  let r = feq_mask y y2 in
+  Hacl.Bignum.Base.unsafe_bool_of_limb r
+
+
 // y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 [@CInline]
 let is_point_on_curve_vartime p =
@@ -231,15 +246,16 @@ let is_point_on_curve_vartime p =
   let ty = create 4ul (u64 0) in
   let px = aff_getx p in
   let py = aff_gety p in
+  let h0 = ST.get () in
   Hacl.Impl.P256.Core.toDomain px tx;
   Hacl.Impl.P256.Core.toDomain py ty;
 
-  fsqr ty ty;
+  SM.lemmaToDomainAndBackIsTheSame (as_nat h0 px);
+  SM.lemmaToDomainAndBackIsTheSame (as_nat h0 py);
   compute_rp_ec_equation tx rp;
-  let r = bn_is_eq_mask4 ty rp in admit();
+  let r = is_y_sqr_is_y2_vartime rp ty in
   pop_frame ();
-  Hacl.Bignum.Base.unsafe_bool_of_limb r
-
+  r
 
 //-------------------------
 
@@ -325,3 +341,65 @@ let isMoreThanZeroLessThanOrder x =
   assert (v res == (if 0 < as_nat h0 bn_x && as_nat h0 bn_x < S.order then ones_v U64 else 0));
   pop_frame ();
   Hacl.Bignum.Base.unsafe_bool_of_limb res
+
+
+inline_for_extraction noextract
+val recover_y_vartime_candidate (y x:felem) : Stack bool
+  (requires fun h ->
+    live h x /\ live h y /\ disjoint x y /\ as_nat h x < S.prime)
+  (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\ as_nat h1 y < S.prime /\
+   (let x = as_nat h0 x in
+    let y2 = S.(x *% x *% x +% a_coeff *% x +% b_coeff) in
+    as_nat h1 y == S.fsqrt y2 /\ (b <==> (S.fmul (as_nat h1 y) (as_nat h1 y) == y2))))
+
+let recover_y_vartime_candidate y x =
+  push_frame ();
+  let y2M = create_felem () in
+  let xM = create_felem () in
+  let yM = create_felem () in
+  let h0 = ST.get () in
+  SM.lemmaToDomainAndBackIsTheSame (as_nat h0 x);
+  Hacl.Impl.P256.Core.toDomain x xM;
+  compute_rp_ec_equation xM y2M; // y2M = x *% x *% x +% S.a_coeff *% x +% S.b_coeff
+  fsqrt y2M yM; // yM = fsqrt y2M
+  let h1 = ST.get () in
+  fromDomain yM y;
+  let is_y_valid = is_y_sqr_is_y2_vartime y2M yM in
+  pop_frame ();
+  is_y_valid
+
+
+
+inline_for_extraction noextract
+val recover_y_vartime (y x:felem) (is_odd:bool) : Stack bool
+  (requires fun h ->
+    live h x /\ live h y /\ disjoint x y /\ as_nat h x < S.prime)
+  (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\
+    (b <==> Some? (S.recover_y (as_nat h0 x) is_odd)) /\
+    (b ==> (as_nat h1 y < S.prime/\
+      as_nat h1 y == Some?.v (S.recover_y (as_nat h0 x) is_odd))))
+
+let recover_y_vartime y x is_odd =
+  let is_y_valid = recover_y_vartime_candidate y x in
+  if not is_y_valid then false
+  else begin
+    let is_y_odd = bn_is_odd4 y in
+    let is_y_odd = Lib.RawIntTypes.u64_to_UInt64 is_y_odd =. 1uL in
+    fnegate_conditional_vartime y (is_y_odd <> is_odd);
+    true end
+
+
+[@CInline]
+let aff_point_decompress_vartime x y s =
+  let s0 = s.(0ul) in
+  let s0 = Lib.RawIntTypes.u8_to_UInt8 s0 in
+  if not (s0 = 0x02uy || s0 = 0x03uy) then false
+  else begin
+    let xb = sub s 1ul 32ul in
+    bn_from_bytes_be4 xb x;
+    let is_x_valid = bn_is_lt_prime_mask4 x in
+    let is_x_valid = Hacl.Bignum.Base.unsafe_bool_of_limb is_x_valid in
+    let is_y_odd = s0 = 0x03uy in
+
+    if not is_x_valid then false
+    else recover_y_vartime y x is_y_odd end
