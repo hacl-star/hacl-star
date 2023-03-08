@@ -105,7 +105,7 @@ let computeYFromX x result sign =
     ((x_ * x_ * x_ + Spec.P256.a_coeff * x_ + Spec.P256.b_coeff) % S.prime); }
 
 
-let decompressionNotCompressedForm b result =
+let uncompressed_to_raw b result =
   let h0 = ST.get() in
   let compressionIdentifier = index b (size 0) in
   let correctIdentifier = eq_u8_nCT (u8 4) compressionIdentifier in
@@ -144,7 +144,7 @@ let isIdentifierCorrect compressedIdentifier =
 
 #push-options "--z3rlimit 500"
 
-let decompressionCompressedForm b result =
+let compressed_to_raw b result =
   push_frame();
     let h0 = ST.get() in
     let temp = create (size 8) (u64 0) in
@@ -219,13 +219,13 @@ let decompressionCompressedForm b result =
 #pop-options
 
 
-let compressionNotCompressedForm b result =
+let raw_to_uncompressed b result =
   let to = sub result (size 1) (size 64) in
   copy to b;
   upd result (size 0) (u8 4)
 
 
-let compressionCompressedForm b result =
+let raw_to_compressed b result =
   let open Lib.ByteSequence in
     let h0 = ST.get() in
   let y = sub b (size 32) (size 32) in

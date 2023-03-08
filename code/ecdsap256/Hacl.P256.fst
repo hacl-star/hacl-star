@@ -51,17 +51,17 @@ let validate_private_key private_key =
   Hacl.Impl.P256.Point.isMoreThanZeroLessThanOrder private_key
 
 
-let uncompressed_to_raw b result =
-  Hacl.Impl.P256.Compression.decompressionNotCompressedForm b result
+let uncompressed_to_raw pk pk_raw =
+  Hacl.Impl.P256.Compression.uncompressed_to_raw pk pk_raw
 
-let compressed_to_raw b result =
-  Hacl.Impl.P256.Compression.decompressionCompressedForm b result
+let compressed_to_raw pk pk_raw =
+  Hacl.Impl.P256.Compression.compressed_to_raw pk pk_raw
 
-let raw_to_uncompressed b result =
-  Hacl.Impl.P256.Compression.compressionNotCompressedForm b result
+let raw_to_uncompressed pk_raw pk =
+  Hacl.Impl.P256.Compression.raw_to_uncompressed pk_raw pk
 
-let raw_to_compressed b result =
-  Hacl.Impl.P256.Compression.compressionCompressedForm b result
+let raw_to_compressed pk_raw pk =
+  Hacl.Impl.P256.Compression.raw_to_compressed pk_raw pk
 
 
 let dh_initiator public_key private_key =
