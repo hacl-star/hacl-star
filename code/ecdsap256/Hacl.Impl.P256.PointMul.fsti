@@ -16,6 +16,7 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
 val scalarMultiplication:
     #buf_type:buftype
   -> p:point

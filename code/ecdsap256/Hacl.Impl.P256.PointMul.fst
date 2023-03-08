@@ -422,9 +422,11 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
     lemma_coord h3 q
 
 
+[@CInline]
 let scalarMultiplicationL = scalarMultiplication_t #MUT
-
+[@CInline]
 let scalarMultiplicationI = scalarMultiplication_t #IMMUT
+[@CInline]
 let scalarMultiplicationC = scalarMultiplication_t #CONST
 
 let scalarMultiplication #buf_type p result scalar tempBuffer =
