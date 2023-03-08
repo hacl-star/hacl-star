@@ -253,6 +253,7 @@ let qadd x y res =
   pop_frame ()
 
 
+[@CInline]
 let qmul a b res =
   push_frame ();
   let tmp = create (size 8) (u64 0) in
@@ -265,6 +266,7 @@ let qmul a b res =
   pop_frame ()
 
 
+[@CInline]
 let fromDomainImpl a res =
   push_frame ();
   let t = create (size 8) (u64 0) in
