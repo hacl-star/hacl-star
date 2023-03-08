@@ -15,13 +15,6 @@ module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-inline_for_extraction noextract
-val bn_is_odd4: f:felem -> Stack uint64
-  (requires fun h -> live h f)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    v r = (as_nat h0 f % 2))
-
-
 ///  Create a bignum
 
 inline_for_extraction noextract
@@ -75,6 +68,13 @@ val bn_is_eq_mask4: a:felem -> b:felem -> Stack uint64
     (if as_nat h0 a = as_nat h0 b then v r == ones_v U64 else v r = 0))
 
 
+inline_for_extraction noextract
+val bn_is_odd4: f:felem -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r = (as_nat h0 f % 2))
+
+
 ///  Conditional copy
 
 // NOTE: changed precondition `eq_or_disjoint res x`
@@ -113,16 +113,6 @@ val bn_sub4: x:felem -> y:felem -> res:felem -> Stack uint64
   (ensures fun h0 c h1 -> modifies1 res h0 h1 /\ v c <= 1 /\
     as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat h0 y /\
     (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
-
-
-// TODO: rm; use sub4
-val bn_sub4_il: x:felem -> y:glbuffer uint64 (size 4) -> res:felem -> Stack uint64
-  (requires fun h ->
-    live h x /\ live h y /\ live h res /\
-    disjoint x res /\ disjoint res y)
-  (ensures fun h0 c h1 -> modifies1 res h0 h1 /\ v c <= 1 /\
-    as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat_il h0 y /\
-    (if v c = 0 then as_nat h0 x >= as_nat_il h0 y else as_nat h0 x < as_nat_il h0 y))
 
 
 val bn_sub_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
@@ -175,17 +165,3 @@ val bn_from_bytes_be4: b:lbuffer uint8 32ul -> res:felem -> Stack unit
   (requires fun h -> live h b /\ live h res /\ disjoint b res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == BSeq.nat_from_bytes_be (as_seq h0 b))
-
-
-val bn_to_bytes_le4: f:felem -> res:lbuffer uint8 32ul -> Stack unit
-  (requires fun h ->
-    live h f /\ live h res /\ disjoint f res /\
-    as_nat h f < pow2 256)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == BSeq.nat_to_bytes_le 32 (as_nat h0 f))
-
-
-val bn_from_bytes_le4: b:lbuffer uint8 32ul -> res:felem -> Stack unit
-  (requires fun h -> live h b /\ live h res /\ disjoint b res)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res == BSeq.nat_from_bytes_le (as_seq h0 b))

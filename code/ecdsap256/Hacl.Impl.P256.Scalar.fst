@@ -62,6 +62,22 @@ let bn_is_lt_order_mask4 f =
   u64 0 -. c
 
 
+[@CInline]
+let bn_is_lt_order_and_gt_zero_mask4 f =
+  let h0 = ST.get () in
+  let is_lt_order = bn_is_lt_order_mask4 f in
+  assert (v is_lt_order = (if as_nat h0 f < S.order then ones_v U64 else 0));
+  let is_eq_zero = bn_is_zero_mask4 f in
+  assert (v is_eq_zero = (if as_nat h0 f = 0 then ones_v U64 else 0));
+  lognot_lemma is_eq_zero;
+  assert (v (lognot is_eq_zero) = (if 0 < as_nat h0 f then ones_v U64 else 0));
+
+  let res = logand is_lt_order (lognot is_eq_zero) in
+  logand_lemma is_lt_order (lognot is_eq_zero);
+  assert (v res == (if 0 < as_nat h0 f && as_nat h0 f < S.order then ones_v U64 else 0));
+  res
+
+
 //----------------------
 // TODO: share the proofs with Hacl.Spec.P256.Montgomerymultiplication
 

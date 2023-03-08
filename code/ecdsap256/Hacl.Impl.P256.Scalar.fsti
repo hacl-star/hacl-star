@@ -27,6 +27,12 @@ val bn_is_lt_order_mask4: f:felem -> Stack uint64
     (if as_nat h0 f < S.order then v r = ones_v U64 else v r = 0))
 
 
+val bn_is_lt_order_and_gt_zero_mask4: f:felem -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (if 0 < as_nat h0 f && as_nat h0 f < S.order then v r = ones_v U64 else v r = 0))
+
+
 let qmont_R = pow2 256
 let qmont_R_inv = S.modp_inv2_prime (pow2 256) S.order
 

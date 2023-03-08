@@ -328,17 +328,7 @@ let isMoreThanZeroLessThanOrder x =
   push_frame ();
   let bn_x = create 4ul (u64 0) in
   bn_from_bytes_be4 x bn_x;
-  let h0 = ST.get () in
-  let is_bn_x_lt_order = Hacl.Impl.P256.Scalar.bn_is_lt_order_mask4 bn_x in
-  assert (v is_bn_x_lt_order = (if as_nat h0 bn_x < S.order then ones_v U64 else 0));
-  let is_bn_x_eq_zero = bn_is_zero_mask4 bn_x in
-  assert (v is_bn_x_eq_zero = (if as_nat h0 bn_x = 0 then ones_v U64 else 0));
-  lognot_lemma is_bn_x_eq_zero;
-  assert (v (lognot is_bn_x_eq_zero) = (if 0 < as_nat h0 bn_x then ones_v U64 else 0));
-
-  let res = logand is_bn_x_lt_order (lognot is_bn_x_eq_zero) in
-  logand_lemma is_bn_x_lt_order (lognot is_bn_x_eq_zero);
-  assert (v res == (if 0 < as_nat h0 bn_x && as_nat h0 bn_x < S.order then ones_v U64 else 0));
+  let res = Hacl.Impl.P256.Scalar.bn_is_lt_order_and_gt_zero_mask4 bn_x in
   pop_frame ();
   Hacl.Bignum.Base.unsafe_bool_of_limb res
 

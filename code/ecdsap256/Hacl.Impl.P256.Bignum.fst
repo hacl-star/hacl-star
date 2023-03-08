@@ -15,13 +15,6 @@ module SN = Hacl.Spec.Bignum
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let bn_is_odd4 f =
-  let h0 = ST.get () in
-  bignum_bn_v_is_as_nat h0 f;
-  SN.bn_is_odd_lemma (as_seq h0 f);
-  BN.bn_is_odd 4ul f
-
-
 ///  Create a bignum
 
 let create_felem () =
@@ -79,6 +72,13 @@ let bn_is_eq_mask4 a b =
   BN.bn_eq_mask #U64 4ul a b
 
 
+let bn_is_odd4 f =
+  let h0 = ST.get () in
+  bignum_bn_v_is_as_nat h0 f;
+  SN.bn_is_odd_lemma (as_seq h0 f);
+  BN.bn_is_odd 4ul f
+
+
 ///  Conditional copy
 
 [@CInline]
@@ -117,25 +117,6 @@ let bn_sub4 x y out =
   bignum_bn_v_is_as_nat h0 y;
   bignum_bn_v_is_as_nat h1 out;
   c
-
-
-[@CInline]
-let bn_sub4_il x y result =
-  let r0 = sub result (size 0) (size 1) in
-  let r1 = sub result (size 1) (size 1) in
-  let r2 = sub result (size 2) (size 1) in
-  let r3 = sub result (size 3) (size 1) in
-
-  let cc = sub_borrow_u64 (u64 0) x.(size 0) y.(size 0) r0 in
-  let cc = sub_borrow_u64 cc x.(size 1) y.(size 1) r1 in
-  let cc = sub_borrow_u64 cc x.(size 2) y.(size 2) r2 in
-  let cc = sub_borrow_u64 cc x.(size 3) y.(size 3) r3 in
-
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-
-  cc
 
 
 [@CInline]
@@ -221,22 +202,5 @@ let bn_from_bytes_be4 b res =
   let h0 = ST.get () in
   Hacl.Spec.Bignum.Convert.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
   Hacl.Bignum.Convert.mk_bn_from_bytes_be true 32ul b res;
-  let h1 = ST.get () in
-  bignum_bn_v_is_as_nat h1 res
-
-
-[@CInline]
-let bn_to_bytes_le4 f res =
-  let h0 = ST.get () in
-  bignum_bn_v_is_as_nat h0 f;
-  Hacl.Spec.Bignum.Convert.bn_to_bytes_le_lemma #U64 32 (as_seq h0 f);
-  Hacl.Bignum.Convert.mk_bn_to_bytes_le true 32ul f res
-
-
-[@CInline]
-let bn_from_bytes_le4 b res =
-  let h0 = ST.get () in
-  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma #U64 32 (as_seq h0 b);
-  Hacl.Bignum.Convert.mk_bn_from_bytes_le true 32ul b res;
   let h1 = ST.get () in
   bignum_bn_v_is_as_nat h1 res

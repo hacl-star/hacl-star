@@ -32,44 +32,6 @@ module BSeq = Lib.ByteSequence
 
 
 inline_for_extraction noextract
-val isZero_uint64_nCT: f: felem -> Stack bool
-  (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f = 0))
-
-let isZero_uint64_nCT f =
-    let f0 = index f (size 0) in
-    let f1 = index f (size 1) in
-    let f2 = index f (size 2) in
-    let f3 = index f (size 3) in
-
-    let z0_zero = eq_0_u64 f0 in
-    let z1_zero = eq_0_u64 f1 in
-    let z2_zero = eq_0_u64 f2 in
-    let z3_zero = eq_0_u64 f3 in
-
-    z0_zero && z1_zero && z2_zero && z3_zero
-
-
-[@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")]
-val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
-  (requires fun h -> live h f)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r = (as_nat h0 f > 0 && as_nat h0 f < S.order))
-
-let isMoreThanZeroLessThanOrderMinusOne f =
-  push_frame();
-  let tempBuffer = create (size 4) (u64 0) in
-    recall_contents primeorder_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = bn_sub4_il f primeorder_buffer tempBuffer in
-  let less = eq_u64_nCT carry (u64 1) in
-  let more = isZero_uint64_nCT f in
-  let result = less && not more in
-  pop_frame();
-  result
-
-
-inline_for_extraction noextract
 val ecdsa_verification_step1: r:lbuffer uint64 (size 4) -> s:lbuffer uint64 (size 4) -> Stack bool
   (requires fun h -> live h r /\ live h s)
   (ensures  fun h0 result h1 ->
@@ -77,9 +39,10 @@ val ecdsa_verification_step1: r:lbuffer uint64 (size 4) -> s:lbuffer uint64 (siz
     //result == S.checkCoordinates (as_nat h0 r) (as_nat h0 s))
 
 let ecdsa_verification_step1 r s =
-  let isRCorrect = isMoreThanZeroLessThanOrderMinusOne r in
-  let isSCorrect = isMoreThanZeroLessThanOrderMinusOne s in
-  isRCorrect && isSCorrect
+  let isRCorrect = bn_is_lt_order_and_gt_zero_mask4 r in
+  let isSCorrect = bn_is_lt_order_and_gt_zero_mask4 s in
+  Hacl.Bignum.Base.unsafe_bool_of_limb isRCorrect &&
+  Hacl.Bignum.Base.unsafe_bool_of_limb isSCorrect
 
 
 inline_for_extraction
