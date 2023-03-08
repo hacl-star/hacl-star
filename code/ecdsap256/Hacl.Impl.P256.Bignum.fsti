@@ -10,11 +10,27 @@ open Lib.Buffer
 
 open Hacl.Spec.P256.Felem
 
+module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
+val bn_is_odd4: f:felem -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r = (as_nat h0 f % 2))
+
+
 ///  Create a bignum
+
+inline_for_extraction noextract
+val create_felem: unit -> StackInline felem
+  (requires fun h -> True)
+  (ensures  fun h0 f h1 ->
+    stack_allocated f h0 h1 (LSeq.create 4 (u64 0)) /\
+    as_nat h1 f == 0)
+
 
 inline_for_extraction noextract
 val bn_make_u64_4: a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64

@@ -15,7 +15,18 @@ module SN = Hacl.Spec.Bignum
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let bn_is_odd4 f =
+  let h0 = ST.get () in
+  bignum_bn_v_is_as_nat h0 f;
+  SN.bn_is_odd_lemma (as_seq h0 f);
+  BN.bn_is_odd 4ul f
+
+
 ///  Create a bignum
+
+let create_felem () =
+  create 4ul (u64 0)
+
 
 let bn_make_u64_4 a0 a1 a2 a3 res =
   assert_norm (pow2 64 * pow2 64 = pow2 128);
