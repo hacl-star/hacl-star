@@ -167,6 +167,18 @@ let bn_is_lt_prime_mask4 f =
 
 
 [@CInline]
+let feq_mask a b =
+  let h0 = ST.get () in
+  let r = bn_is_eq_mask4 a b in
+  let h1 = ST.get () in
+  assert (if as_nat h1 a = as_nat h1 b then v r == ones_v U64 else v r = 0);
+  SM.lemmaFromDomainToDomain (as_nat h0 a);
+  SM.lemmaFromDomainToDomain (as_nat h0 b);
+  assert (if fmont_as_nat h1 a = fmont_as_nat h1 b then v r == ones_v U64 else v r = 0);
+  r
+
+
+[@CInline]
 let fadd x y res =
   let h0 = ST.get () in
   push_frame ();
@@ -193,6 +205,20 @@ let fsub x y res =
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
   SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
+  pop_frame ()
+
+
+[@CInline]
+let fnegate_conditional_vartime f is_negate =
+  push_frame ();
+  let zero = create_felem () in
+  if is_negate then begin
+    let h0 = ST.get () in
+    fsub zero f f;
+    let h1 = ST.get () in
+    assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
+    Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
+    assert (as_nat h1 f == (S.prime - as_nat h0 f) % S.prime) end;
   pop_frame ()
 
 

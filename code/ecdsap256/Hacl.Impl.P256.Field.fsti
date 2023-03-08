@@ -45,6 +45,14 @@ val bn_is_lt_prime_mask4: f:felem -> Stack uint64
     (if as_nat h0 f < S.prime then v r = ones_v U64 else v r = 0))
 
 
+val feq_mask: a:felem -> b:felem -> Stack uint64
+  (requires fun h ->
+    live h a /\ live h b /\ eq_or_disjoint a b /\
+    as_nat h a < S.prime /\ as_nat h b < S.prime)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
+    (if fmont_as_nat h0 a = fmont_as_nat h0 b then v r == ones_v U64 else v r = 0))
+
+
 // NOTE: changed precondition `eq_or_disjoint x y`
 val fadd: x:felem -> y:felem -> res:felem -> Stack unit
   (requires fun h ->
@@ -76,6 +84,12 @@ val fsub: x:felem -> y:felem -> res:felem -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == S.fsub (as_nat h0 x) (as_nat h0 y) /\
     fmont_as_nat h1 res == S.fsub (fmont_as_nat h0 x) (fmont_as_nat h0 y))
+
+
+val fnegate_conditional_vartime (f:felem) (is_negate:bool) : Stack unit
+  (requires fun h -> live h f /\ as_nat h f < S.prime)
+  (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\ as_nat h1 f < S.prime /\
+    as_nat h1 f == (if is_negate then (S.prime - as_nat h0 f) % S.prime else as_nat h0 f))
 
 
 // TODO: rename
