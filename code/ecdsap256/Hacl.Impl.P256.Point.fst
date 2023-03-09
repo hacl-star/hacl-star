@@ -17,6 +17,10 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let create_point () =
+  create 12ul (u64 0)
+
+
 [@CInline]
 let make_base_point p =
   let x = getx p in
@@ -38,6 +42,36 @@ let make_point_at_inf p =
 
 
 let copy_point p res = copy res p
+
+
+///  check if a point is a point-at-infinity
+
+(* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
+val lemma_mont_is_point_at_inf: p:S.jacob_point{let (_, _, z) = p in z < S.prime} ->
+  Lemma (S.is_point_at_inf p == S.is_point_at_inf (SM.fromDomainPoint p))
+
+let lemma_mont_is_point_at_inf p =
+  let px, py, pz = p in
+  assert (if S.is_point_at_inf p then pz == 0 else pz <> 0);
+  assert (SM.fromDomain_ pz == pz * SM.mont_R_inv % S.prime);
+  assert_norm (SM.mont_R_inv % S.prime <> 0);
+  assert_norm (0 * SM.mont_R_inv % S.prime == 0);
+  Hacl.Spec.P256.Math.lemma_multiplication_not_mod_prime pz;
+  assert (if pz = 0 then SM.fromDomain_ pz == 0 else SM.fromDomain_ pz <> 0)
+
+
+[@CInline]
+let is_point_at_inf p =
+  let h0 = ST.get () in
+  lemma_mont_is_point_at_inf (as_point_nat h0 p);
+  let pz = getz p in
+  bn_is_zero_mask4 pz
+
+
+[@CInline]
+let is_point_at_inf_vartime p =
+  let pz = getz p in
+  bn_is_zero_vartime4 pz
 
 
 ///  Point conversion between Montgomery and Regular representations
@@ -71,36 +105,6 @@ let point_from_mont p res =
   fromDomain px rx;
   fromDomain py ry;
   fromDomain pz rz
-
-
-///  check if a point is a point-at-infinity
-
-(* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-val lemma_mont_is_point_at_inf: p:S.jacob_point{let (_, _, z) = p in z < S.prime} ->
-  Lemma (S.is_point_at_inf p == S.is_point_at_inf (SM.fromDomainPoint p))
-
-let lemma_mont_is_point_at_inf p =
-  let px, py, pz = p in
-  assert (if S.is_point_at_inf p then pz == 0 else pz <> 0);
-  assert (SM.fromDomain_ pz == pz * SM.mont_R_inv % S.prime);
-  assert_norm (SM.mont_R_inv % S.prime <> 0);
-  assert_norm (0 * SM.mont_R_inv % S.prime == 0);
-  Hacl.Spec.P256.Math.lemma_multiplication_not_mod_prime pz;
-  assert (if pz = 0 then SM.fromDomain_ pz == 0 else SM.fromDomain_ pz <> 0)
-
-
-[@CInline]
-let is_point_at_inf p =
-  let h0 = ST.get () in
-  lemma_mont_is_point_at_inf (as_point_nat h0 p);
-  let pz = getz p in
-  bn_is_zero_mask4 pz
-
-
-[@CInline]
-let is_point_at_inf_vartime p =
-  let pz = getz p in
-  bn_is_zero_vartime4 pz
 
 
 ///  Point conversion between Jacobian and Affine coordinates representations
@@ -257,7 +261,8 @@ let is_point_on_curve_vartime p =
   pop_frame ();
   r
 
-//-------------------------
+
+///  Point load and store functions
 
 [@CInline]
 let aff_store_point res p =
@@ -281,13 +286,13 @@ let aff_store_point res p =
 
 
 inline_for_extraction noextract
-val is_xy_valid: p:aff_point -> Stack bool
+val is_xy_valid_vartime: p:aff_point -> Stack bool
   (requires fun h -> live h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     r == (aff_point_x_as_nat h0 p < S.prime &&
           aff_point_y_as_nat h0 p < S.prime))
 
-let is_xy_valid p =
+let is_xy_valid_vartime p =
   let px = aff_getx p in
   let py = aff_gety p in
   let lessX = bn_is_lt_prime_mask4 px in
@@ -307,30 +312,12 @@ let load_point_vartime p b =
   let bn_p_y = aff_gety point_aff in
   bn_from_bytes_be4 p_x bn_p_x;
   bn_from_bytes_be4 p_y bn_p_y;
-  let is_xy_valid = is_xy_valid point_aff in
+  let is_xy_valid = is_xy_valid_vartime point_aff in
   let res = if not is_xy_valid then false else is_point_on_curve_vartime point_aff in
   if res then
     to_jacob_point point_aff p;
   pop_frame ();
   res
-
-
-let validate_pubkey pk =
-  push_frame ();
-  let point_jac = create 12ul (u64 0) in
-  let res = load_point_vartime point_jac pk in
-  pop_frame ();
-  res
-
-
-[@CInline]
-let isMoreThanZeroLessThanOrder x =
-  push_frame ();
-  let bn_x = create 4ul (u64 0) in
-  bn_from_bytes_be4 x bn_x;
-  let res = Hacl.Impl.P256.Scalar.bn_is_lt_order_and_gt_zero_mask4 bn_x in
-  pop_frame ();
-  Hacl.Bignum.Base.unsafe_bool_of_limb res
 
 
 inline_for_extraction noextract
@@ -357,7 +344,6 @@ let recover_y_vartime_candidate y x =
   let is_y_valid = is_y_sqr_is_y2_vartime y2M yM in
   pop_frame ();
   is_y_valid
-
 
 
 inline_for_extraction noextract
@@ -393,3 +379,21 @@ let aff_point_decompress_vartime x y s =
 
     if not is_x_valid then false
     else recover_y_vartime y x is_y_odd end
+
+
+let validate_pubkey pk =
+  push_frame ();
+  let point_jac = create 12ul (u64 0) in
+  let res = load_point_vartime point_jac pk in
+  pop_frame ();
+  res
+
+
+[@CInline]
+let isMoreThanZeroLessThanOrder x =
+  push_frame ();
+  let bn_x = create 4ul (u64 0) in
+  bn_from_bytes_be4 x bn_x;
+  let res = Hacl.Impl.P256.Scalar.bn_is_lt_order_and_gt_zero_mask4 bn_x in
+  pop_frame ();
+  Hacl.Bignum.Base.unsafe_bool_of_limb res
