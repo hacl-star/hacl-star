@@ -300,15 +300,15 @@ let hash a output input input_len =
   | Blake2S ->
       let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
-        Hacl.Hash.Blake2.hash_blake2s_128 output input input_len
+        Hacl.Hash.Blake2s_128.hash output input input_len
       else
-        Hacl.Hash.Blake2.hash_blake2s_32 output input input_len
+        Hacl.Hash.Blake2s_32.hash output input input_len
   | Blake2B ->
       let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then
-        Hacl.Hash.Blake2.hash_blake2b_256 output input input_len
+        Hacl.Hash.Blake2b_256.hash output input input_len
       else
-        Hacl.Hash.Blake2.hash_blake2b_32 output input input_len
+        Hacl.Hash.Blake2b_32.hash output input input_len
 
 // Public API (verified clients)
 // -----------------------------

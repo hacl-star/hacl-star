@@ -77,14 +77,14 @@ let compute_sha2_512 =
              update_last_512 finish_512
 
 let compute_blake2s =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (|Blake2S, Hacl.Impl.Blake2.Core.M32|) hash_blake2s_32 alloca_blake2s_32
-             init_blake2s_32 update_multi_blake2s_32 update_last_blake2s_32 finish_blake2s_32
+  let open Hacl.Hash.Blake2s_32 in
+  mk_compute (|Blake2S, Hacl.Impl.Blake2.Core.M32|) hash alloca init update_multi
+             update_last finish
 
 let compute_blake2b =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (|Blake2B, Hacl.Impl.Blake2.Core.M32|) hash_blake2b_32 alloca_blake2b_32
-             init_blake2b_32 update_multi_blake2b_32 update_last_blake2b_32 finish_blake2b_32
+  let open Hacl.Hash.Blake2b_32 in
+  mk_compute (|Blake2B, Hacl.Impl.Blake2.Core.M32|) hash alloca init update_multi
+             update_last finish
 
 let compute a mac key keylen data datalen =
   match a with
