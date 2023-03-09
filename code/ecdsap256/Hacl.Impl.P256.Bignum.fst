@@ -9,7 +9,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.IntTypes.Intrinsics
 
-open Hacl.Spec.P256.Felem
+open Hacl.Spec.P256.Bignum
 module BN = Hacl.Bignum
 module SN = Hacl.Spec.Bignum
 

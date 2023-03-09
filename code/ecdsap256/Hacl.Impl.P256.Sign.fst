@@ -11,7 +11,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open Hacl.Spec.P256.Felem
+open Hacl.Spec.P256.Bignum
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Qinv

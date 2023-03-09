@@ -1,4 +1,4 @@
-module Hacl.Spec.P256.Felem
+module Hacl.Spec.P256.Bignum
 
 open FStar.Mul
 open FStar.HyperStack.All
