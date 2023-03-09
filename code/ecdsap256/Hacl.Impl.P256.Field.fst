@@ -14,7 +14,6 @@ open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
-module SL = Hacl.Spec.P256.Lemmas
 
 module BD = Hacl.Spec.Bignum.Definitions
 module BM = Hacl.Bignum.Montgomery
@@ -246,7 +245,7 @@ let fmul a b res =
   let h0 = ST.get () in
   bn_mul4 a b t;
   let h1 = ST.get () in
-  SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.prime;
+  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 b) S.prime;
   mont_reduction t res;
   SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 b);
   pop_frame ()
@@ -259,7 +258,7 @@ let fsqr a res =
   let h0 = ST.get() in
   bn_sqr4 a t;
   let h1 = ST.get() in
-  SL.mul_lemma_ (as_nat h0 a) (as_nat h0 a) S.prime;
+  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 a) S.prime;
   mont_reduction t res;
   SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 a);
   pop_frame ()

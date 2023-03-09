@@ -13,8 +13,6 @@ open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
-module SL = Hacl.Spec.P256.Lemmas
-
 module BD = Hacl.Spec.Bignum.Definitions
 module BM = Hacl.Bignum.Montgomery
 module SBM = Hacl.Spec.Bignum.Montgomery
@@ -276,7 +274,7 @@ let qmul a b res =
   let h0 = ST.get () in
   bn_mul4 a b tmp;
   let h1 = ST.get () in
-  SL.mul_lemma_ (as_nat h0 a) (as_nat h0 b) S.order;
+  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 b) S.order;
   qmont_reduction tmp res;
   qmul_lemma (as_nat h0 a) (as_nat h0 b);
   pop_frame ()

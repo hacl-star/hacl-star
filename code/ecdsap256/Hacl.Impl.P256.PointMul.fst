@@ -11,7 +11,6 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.Lemmas
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Spec.P256.Math
@@ -26,6 +25,34 @@ module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
+
+(*This code is taken from Curve25519, written by Polubelova M *)
+val lemma_cswap2_step:
+    bit:uint64{v bit <= 1}
+  -> p1:uint64
+  -> p2:uint64
+  -> Lemma (
+      let mask = u64 0 -. bit in
+      let dummy = mask &. (p1 ^. p2) in
+      let p1' = p1 ^. dummy in
+      let p2' = p2 ^. dummy in
+      if v bit = 1 then p1' == p2 /\ p2' == p1 else p1' == p1 /\ p2' == p2)
+
+let lemma_cswap2_step bit p1 p2 =
+  let mask = u64 0 -. bit in
+  assert (v bit == 0 ==> v mask == 0);
+  assert (v bit == 1 ==> v mask == pow2 64 - 1);
+  let dummy = mask &. (p1 ^. p2) in
+  logand_lemma mask (p1 ^. p2);
+  assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
+  assert (v bit == 0 ==> v dummy == 0);
+  let p1' = p1 ^. dummy in
+  (* uintv_extensionality dummy (if v bit = 1 then (p1 ^. p2) else u64 0); *)
+  logxor_lemma p1 p2;
+  let p2' = p2 ^. dummy in
+  logxor_lemma p2 p1
+
+(* </> *)
 
 val lemma_scalar_ith: sc:BSeq.lbytes 32 -> k:nat{k < 32} ->
   Lemma (v (LSeq.index sc k) == BSeq.nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)

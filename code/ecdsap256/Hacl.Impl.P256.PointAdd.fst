@@ -12,7 +12,6 @@ open FStar.Tactics.Canon
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Bignum

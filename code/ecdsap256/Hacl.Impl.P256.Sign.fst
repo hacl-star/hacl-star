@@ -11,8 +11,6 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open Hacl.Spec.P256.Lemmas
-
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Core
@@ -116,15 +114,15 @@ let lemma_power_step6 kInv =
   let a = S.qinv (fromDomain_ kInv) in
   lemmaFromDomain kInv;
 
-  power_distributivity (kInv * S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) S.order;
-  power_distributivity_2 kInv (S.modp_inv2_prime (pow2 256) S.order % S.order) (S.order - 2);
+  //power_distributivity (kInv * S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) S.order;
+  //power_distributivity_2 kInv (S.modp_inv2_prime (pow2 256) S.order % S.order) (S.order - 2);
   lemma_mod_mul_distr_r (S.pow kInv (S.order - 2)) (S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) S.order;
 
-  lemma_pow_mod_n_is_fpow S.order (pow2 256 % S.order) (S.order - 2);
+  //lemma_pow_mod_n_is_fpow S.order (pow2 256 % S.order) (S.order - 2);
 
   let inverse2_256 = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
   assert_norm(S.modp_inv2_prime (pow2 256) S.order = inverse2_256);
-  lemma_pow_mod_n_is_fpow S.order inverse2_256 (S.order - 2);
+  //lemma_pow_mod_n_is_fpow S.order inverse2_256 (S.order - 2);
   assert_norm(S.exp #S.order inverse2_256 (S.order - 2) == pow2 256 % S.order);
 
   lemma_mod_mul_distr_r (S.pow kInv (S.order - 2)) (pow2 256) S.order;
