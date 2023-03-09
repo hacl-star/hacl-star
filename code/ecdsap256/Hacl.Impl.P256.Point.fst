@@ -379,21 +379,3 @@ let aff_point_decompress_vartime x y s =
 
     if not is_x_valid then false
     else recover_y_vartime y x is_y_odd end
-
-
-let validate_pubkey pk =
-  push_frame ();
-  let point_jac = create 12ul (u64 0) in
-  let res = load_point_vartime point_jac pk in
-  pop_frame ();
-  res
-
-
-[@CInline]
-let isMoreThanZeroLessThanOrder x =
-  push_frame ();
-  let bn_x = create 4ul (u64 0) in
-  bn_from_bytes_be4 x bn_x;
-  let res = Hacl.Impl.P256.Scalar.bn_is_lt_order_and_gt_zero_mask4 bn_x in
-  pop_frame ();
-  Hacl.Bignum.Base.unsafe_bool_of_limb res

@@ -259,20 +259,3 @@ val aff_point_decompress_vartime (x y:felem) (s:lbuffer uint8 33ul) : Stack bool
     (b <==> Some? (S.aff_point_decompress (as_seq h0 s))) /\
     (b ==> (let (xa, ya) = Some?.v (S.aff_point_decompress (as_seq h0 s)) in
     as_nat h1 x < S.prime /\ as_nat h1 y < S.prime /\ as_nat h1 x == xa /\ as_nat h1 y == ya)))
-
-
-
-// TODO: mv
-inline_for_extraction noextract
-val validate_pubkey: pk:lbuffer uint8 64ul -> Stack bool
-  (requires fun h -> live h pk)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.validate_pubkey_point (as_seq h0 pk))
-
-
-// TODO: mv
-val isMoreThanZeroLessThanOrder: x:lbuffer uint8 32ul -> Stack bool
-  (requires fun h -> live h x)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    (let scalar = BSeq.nat_from_bytes_be (as_seq h0 x) in
-    r <==> (0 < scalar && scalar < S.order)))

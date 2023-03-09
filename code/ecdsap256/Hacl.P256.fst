@@ -14,6 +14,8 @@ open Hacl.Impl.P256.Sign
 open Hacl.Impl.P256.Verify
 
 module S = Spec.P256
+module BN = Hacl.Impl.P256.Bignum
+module P = Hacl.Impl.P256.Point
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
@@ -45,10 +47,20 @@ let ecdsa_verif_without_hash msg_len msg public_key signature_r signature_s =
 
 
 let validate_public_key public_key =
-  Hacl.Impl.P256.Point.validate_pubkey public_key
+  push_frame ();
+  let point_jac = P.create_point () in
+  let res = P.load_point_vartime point_jac public_key in
+  pop_frame ();
+  res
+
 
 let validate_private_key private_key =
-  Hacl.Impl.P256.Point.isMoreThanZeroLessThanOrder private_key
+  push_frame ();
+  let bn_sk = BN.create_felem () in
+  BN.bn_from_bytes_be4 private_key bn_sk;
+  let res = Hacl.Impl.P256.Scalar.bn_is_lt_order_and_gt_zero_mask4 bn_sk in
+  pop_frame ();
+  Hacl.Bignum.Base.unsafe_bool_of_limb res
 
 
 let uncompressed_to_raw pk pk_raw =
