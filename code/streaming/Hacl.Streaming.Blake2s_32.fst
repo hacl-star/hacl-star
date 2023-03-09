@@ -14,8 +14,8 @@ let blake2s_32 kk =
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
 
-let block_state = Common.s Spec.Blake2S Core.M32
-let state = F.state_s (blake2s_32 0) () (Common.s Spec.Blake2S Core.M32) (Common.empty_key Spec.Blake2S)
+let block_state_t = Common.s Spec.Blake2S Core.M32
+let state_t = F.state_s (blake2s_32 0) () (Common.s Spec.Blake2S Core.M32) (Common.empty_key Spec.Blake2S)
 
 /// The incremental hash functions instantiations. Note that we can't write a
 /// generic one, because the normalization then performed by KaRaMeL explodes.

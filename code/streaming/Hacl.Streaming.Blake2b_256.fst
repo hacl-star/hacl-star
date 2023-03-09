@@ -16,8 +16,8 @@ let blake2b_256 kk =
          Blake2b256.blake2b_update_last Blake2b256.blake2b_finish
 
 /// Type abbreviations
-let block_state = Common.s Spec.Blake2B Core.M256
-let state = F.state_s (blake2b_256 0) () (Common.s Spec.Blake2B Core.M256) (Common.empty_key Spec.Blake2B)
+let block_state_t = Common.s Spec.Blake2B Core.M256
+let state_t = F.state_s (blake2b_256 0) () (Common.s Spec.Blake2B Core.M256) (Common.empty_key Spec.Blake2B)
 
 /// No key
 inline_for_extraction noextract
