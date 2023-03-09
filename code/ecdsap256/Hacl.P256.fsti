@@ -17,10 +17,14 @@ module BSeq = Lib.ByteSequence
 
 // TODO: clean up the documentation
 
+// TODO: add check for private_key and nonce (0 < && < q) in `ecdsa_sign`
+
+// TODO?: change API for `ecdsa_verify`, namely, take `signature` as an argument
+
 inline_for_extraction noextract
-let ecdsa_sign_p256_st (a:S.hash_alg_ecdsa) =
+let ecdsa_sign_p256_st (alg:S.hash_alg_ecdsa) =
     signature:lbuffer uint8 64ul
-  -> msg_len:size_t{v msg_len >= S.min_input_length a}
+  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
   -> msg:lbuffer uint8 msg_len
   -> private_key:lbuffer uint8 32ul
   -> nonce:lbuffer uint8 32ul ->
@@ -34,14 +38,14 @@ let ecdsa_sign_p256_st (a:S.hash_alg_ecdsa) =
     0 < BSeq.nat_from_bytes_be (as_seq h nonce) /\
     BSeq.nat_from_bytes_be (as_seq h nonce) < S.order)
   (ensures fun h0 flag h1 -> modifies (loc signature) h0 h1 /\
-    (let sgnt = S.ecdsa_signature_agile a (v msg_len)
+    (let sgnt = S.ecdsa_signature_agile alg (v msg_len)
       (as_seq h0 msg) (as_seq h0 private_key) (as_seq h0 nonce) in
      (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 signature == Some?.v sgnt))))
 
 
 inline_for_extraction noextract
-let ecdsa_verify_p256_st (a:S.hash_alg_ecdsa) =
-    msg_len:size_t{v msg_len >= S.min_input_length a}
+let ecdsa_verify_p256_st (alg:S.hash_alg_ecdsa) =
+    msg_len:size_t{v msg_len >= S.min_input_length alg}
   -> msg:lbuffer uint8 msg_len
   -> public_key:lbuffer uint8 64ul
   -> signature_r:lbuffer uint8 32ul
@@ -50,7 +54,7 @@ let ecdsa_verify_p256_st (a:S.hash_alg_ecdsa) =
   (requires fun h ->
     live h public_key /\ live h signature_r /\ live h signature_s /\ live h msg)
   (ensures fun h0 result h1 -> modifies0 h0 h1 /\
-    result == S.ecdsa_verification_agile a (as_seq h0 public_key)
+    result == S.ecdsa_verification_agile alg (as_seq h0 public_key)
       (as_seq h0 signature_r) (as_seq h0 signature_s) (v msg_len) (as_seq h0 msg))
 
 
