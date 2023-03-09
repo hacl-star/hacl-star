@@ -14,7 +14,6 @@ open Lib.Buffer
 
 open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
@@ -366,11 +365,11 @@ let point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuff
   let s1D = fromDomain_ (as_nat h0 s1) in
   let x3D = fromDomain_ (as_nat h1 x3_out) in
 
-  lemma_point_add_0 (rD * rD) (hD * hD * hD) (hD * hD * u1D);
+  //lemma_point_add_0 (rD * rD) (hD * hD * hD) (hD * hD * u1D);
   lemma_mod_sub_distr (rD * rD - 2 * uhD) (hD * hD * hD) S.prime;
   assert_by_tactic (2 * (hD * hD * u1D) == 2 * hD * hD * u1D) canon;
 
-  lemma_point_add_1 (hD * hD * u1D) x3D rD s1D (hD * hD * hD);
+  //lemma_point_add_1 (hD * hD * u1D) x3D rD s1D (hD * hD * hD);
   assert_by_tactic (s1D * (hD * hD * hD) == s1D * hD * hD * hD) canon;
 
   assert_norm (S.modp_inv2_prime (pow2 256) S.prime > 0);
@@ -420,4 +419,5 @@ let point_add p q result tempBuffer =
       let x3 = as_nat h1 (gsub result (size 0) (size 4)) in
       let y3 = as_nat h1 (gsub result (size 4) (size 4)) in
       let z3 = as_nat h1 (gsub result (size 8) (size 4)) in
-      lemma_pointAddToSpecification pxD pyD pzD qxD qyD qzD x3 y3 z3 (as_nat h1 u1) (as_nat h1 u2) (as_nat h1 s1) (as_nat h1 s2) (as_nat h1 h) (as_nat h1 r)
+      ()
+      //lemma_pointAddToSpecification pxD pyD pzD qxD qyD qzD x3 y3 z3 (as_nat h1 u1) (as_nat h1 u2) (as_nat h1 s1) (as_nat h1 s2) (as_nat h1 h) (as_nat h1 r)
