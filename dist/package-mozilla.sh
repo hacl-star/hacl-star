@@ -19,6 +19,7 @@ FILES=" \
   Hacl_Curve25519_64 \
   Hacl_Hash_SHA1 \
   Hacl_Hash_SHA2 \
+  Hacl_Hash_SHA3 \
   Hacl_IntTypes_Intrinsics \
   Hacl_IntTypes_Intrinsics_128 \
   Hacl_Krmllib \
@@ -28,10 +29,8 @@ FILES=" \
   Hacl_Poly1305_32 \
   Hacl_RSAPSS \
   Hacl_SHA2_Types \
-  Hacl_SHA3 \
   Hacl_Spec \
-  Hacl_Streaming_SHA1 \
-  Hacl_Streaming_SHA3 \
+  Hacl_Streaming_Types \
   Lib_Memzero0 \
   TestLib \
   Vale \

@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +25,7 @@
 
 #include "EverCrypt_DRBG.h"
 
-
+#include "internal/EverCrypt_HMAC.h"
 
 /* SNIPPET_START: EverCrypt_DRBG_reseed_interval */
 
@@ -285,10 +286,10 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
 
 /* SNIPPET_END: EverCrypt_DRBG_create */
 
-/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha1 */
+/* SNIPPET_START: instantiate_sha1 */
 
-bool
-EverCrypt_DRBG_instantiate_sha1(
+static bool
+instantiate_sha1(
   EverCrypt_DRBG_state_s *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
@@ -377,12 +378,12 @@ EverCrypt_DRBG_instantiate_sha1(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha1 */
+/* SNIPPET_END: instantiate_sha1 */
 
-/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha2_256 */
+/* SNIPPET_START: instantiate_sha2_256 */
 
-bool
-EverCrypt_DRBG_instantiate_sha2_256(
+static bool
+instantiate_sha2_256(
   EverCrypt_DRBG_state_s *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
@@ -471,12 +472,12 @@ EverCrypt_DRBG_instantiate_sha2_256(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha2_256 */
+/* SNIPPET_END: instantiate_sha2_256 */
 
-/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha2_384 */
+/* SNIPPET_START: instantiate_sha2_384 */
 
-bool
-EverCrypt_DRBG_instantiate_sha2_384(
+static bool
+instantiate_sha2_384(
   EverCrypt_DRBG_state_s *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
@@ -565,12 +566,12 @@ EverCrypt_DRBG_instantiate_sha2_384(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha2_384 */
+/* SNIPPET_END: instantiate_sha2_384 */
 
-/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha2_512 */
+/* SNIPPET_START: instantiate_sha2_512 */
 
-bool
-EverCrypt_DRBG_instantiate_sha2_512(
+static bool
+instantiate_sha2_512(
   EverCrypt_DRBG_state_s *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
@@ -659,12 +660,12 @@ EverCrypt_DRBG_instantiate_sha2_512(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha2_512 */
+/* SNIPPET_END: instantiate_sha2_512 */
 
-/* SNIPPET_START: EverCrypt_DRBG_reseed_sha1 */
+/* SNIPPET_START: reseed_sha1 */
 
-bool
-EverCrypt_DRBG_reseed_sha1(
+static bool
+reseed_sha1(
   EverCrypt_DRBG_state_s *st,
   uint8_t *additional_input,
   uint32_t additional_input_len
@@ -744,12 +745,12 @@ EverCrypt_DRBG_reseed_sha1(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_reseed_sha1 */
+/* SNIPPET_END: reseed_sha1 */
 
-/* SNIPPET_START: EverCrypt_DRBG_reseed_sha2_256 */
+/* SNIPPET_START: reseed_sha2_256 */
 
-bool
-EverCrypt_DRBG_reseed_sha2_256(
+static bool
+reseed_sha2_256(
   EverCrypt_DRBG_state_s *st,
   uint8_t *additional_input,
   uint32_t additional_input_len
@@ -829,12 +830,12 @@ EverCrypt_DRBG_reseed_sha2_256(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_reseed_sha2_256 */
+/* SNIPPET_END: reseed_sha2_256 */
 
-/* SNIPPET_START: EverCrypt_DRBG_reseed_sha2_384 */
+/* SNIPPET_START: reseed_sha2_384 */
 
-bool
-EverCrypt_DRBG_reseed_sha2_384(
+static bool
+reseed_sha2_384(
   EverCrypt_DRBG_state_s *st,
   uint8_t *additional_input,
   uint32_t additional_input_len
@@ -914,12 +915,12 @@ EverCrypt_DRBG_reseed_sha2_384(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_reseed_sha2_384 */
+/* SNIPPET_END: reseed_sha2_384 */
 
-/* SNIPPET_START: EverCrypt_DRBG_reseed_sha2_512 */
+/* SNIPPET_START: reseed_sha2_512 */
 
-bool
-EverCrypt_DRBG_reseed_sha2_512(
+static bool
+reseed_sha2_512(
   EverCrypt_DRBG_state_s *st,
   uint8_t *additional_input,
   uint32_t additional_input_len
@@ -999,12 +1000,12 @@ EverCrypt_DRBG_reseed_sha2_512(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_reseed_sha2_512 */
+/* SNIPPET_END: reseed_sha2_512 */
 
-/* SNIPPET_START: EverCrypt_DRBG_generate_sha1 */
+/* SNIPPET_START: generate_sha1 */
 
-bool
-EverCrypt_DRBG_generate_sha1(
+static bool
+generate_sha1(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
   uint32_t n,
@@ -1224,12 +1225,12 @@ EverCrypt_DRBG_generate_sha1(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_generate_sha1 */
+/* SNIPPET_END: generate_sha1 */
 
-/* SNIPPET_START: EverCrypt_DRBG_generate_sha2_256 */
+/* SNIPPET_START: generate_sha2_256 */
 
-bool
-EverCrypt_DRBG_generate_sha2_256(
+static bool
+generate_sha2_256(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
   uint32_t n,
@@ -1449,12 +1450,12 @@ EverCrypt_DRBG_generate_sha2_256(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_generate_sha2_256 */
+/* SNIPPET_END: generate_sha2_256 */
 
-/* SNIPPET_START: EverCrypt_DRBG_generate_sha2_384 */
+/* SNIPPET_START: generate_sha2_384 */
 
-bool
-EverCrypt_DRBG_generate_sha2_384(
+static bool
+generate_sha2_384(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
   uint32_t n,
@@ -1674,12 +1675,12 @@ EverCrypt_DRBG_generate_sha2_384(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_generate_sha2_384 */
+/* SNIPPET_END: generate_sha2_384 */
 
-/* SNIPPET_START: EverCrypt_DRBG_generate_sha2_512 */
+/* SNIPPET_START: generate_sha2_512 */
 
-bool
-EverCrypt_DRBG_generate_sha2_512(
+static bool
+generate_sha2_512(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
   uint32_t n,
@@ -1899,11 +1900,11 @@ EverCrypt_DRBG_generate_sha2_512(
   return true;
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_generate_sha2_512 */
+/* SNIPPET_END: generate_sha2_512 */
 
-/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha1 */
+/* SNIPPET_START: uninstantiate_sha1 */
 
-void EverCrypt_DRBG_uninstantiate_sha1(EverCrypt_DRBG_state_s *st)
+static void uninstantiate_sha1(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
@@ -1927,11 +1928,11 @@ void EverCrypt_DRBG_uninstantiate_sha1(EverCrypt_DRBG_state_s *st)
   KRML_HOST_FREE(st);
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha1 */
+/* SNIPPET_END: uninstantiate_sha1 */
 
-/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha2_256 */
+/* SNIPPET_START: uninstantiate_sha2_256 */
 
-void EverCrypt_DRBG_uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st)
+static void uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
@@ -1955,11 +1956,11 @@ void EverCrypt_DRBG_uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st)
   KRML_HOST_FREE(st);
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha2_256 */
+/* SNIPPET_END: uninstantiate_sha2_256 */
 
-/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha2_384 */
+/* SNIPPET_START: uninstantiate_sha2_384 */
 
-void EverCrypt_DRBG_uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st)
+static void uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
@@ -1983,11 +1984,11 @@ void EverCrypt_DRBG_uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st)
   KRML_HOST_FREE(st);
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha2_384 */
+/* SNIPPET_END: uninstantiate_sha2_384 */
 
-/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha2_512 */
+/* SNIPPET_START: uninstantiate_sha2_512 */
 
-void EverCrypt_DRBG_uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st)
+static void uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st)
 {
   EverCrypt_DRBG_state_s st_s = *st;
   Hacl_HMAC_DRBG_state s;
@@ -2011,7 +2012,7 @@ void EverCrypt_DRBG_uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st)
   KRML_HOST_FREE(st);
 }
 
-/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha2_512 */
+/* SNIPPET_END: uninstantiate_sha2_512 */
 
 /* SNIPPET_START: EverCrypt_DRBG_instantiate */
 
@@ -2034,28 +2035,19 @@ EverCrypt_DRBG_instantiate(
   EverCrypt_DRBG_state_s scrut = *st;
   if (scrut.tag == SHA1_s)
   {
-    return EverCrypt_DRBG_instantiate_sha1(st, personalization_string, personalization_string_len);
+    return instantiate_sha1(st, personalization_string, personalization_string_len);
   }
   if (scrut.tag == SHA2_256_s)
   {
-    return
-      EverCrypt_DRBG_instantiate_sha2_256(st,
-        personalization_string,
-        personalization_string_len);
+    return instantiate_sha2_256(st, personalization_string, personalization_string_len);
   }
   if (scrut.tag == SHA2_384_s)
   {
-    return
-      EverCrypt_DRBG_instantiate_sha2_384(st,
-        personalization_string,
-        personalization_string_len);
+    return instantiate_sha2_384(st, personalization_string, personalization_string_len);
   }
   if (scrut.tag == SHA2_512_s)
   {
-    return
-      EverCrypt_DRBG_instantiate_sha2_512(st,
-        personalization_string,
-        personalization_string_len);
+    return instantiate_sha2_512(st, personalization_string, personalization_string_len);
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -2087,19 +2079,19 @@ EverCrypt_DRBG_reseed(
   EverCrypt_DRBG_state_s scrut = *st;
   if (scrut.tag == SHA1_s)
   {
-    return EverCrypt_DRBG_reseed_sha1(st, additional_input, additional_input_len);
+    return reseed_sha1(st, additional_input, additional_input_len);
   }
   if (scrut.tag == SHA2_256_s)
   {
-    return EverCrypt_DRBG_reseed_sha2_256(st, additional_input, additional_input_len);
+    return reseed_sha2_256(st, additional_input, additional_input_len);
   }
   if (scrut.tag == SHA2_384_s)
   {
-    return EverCrypt_DRBG_reseed_sha2_384(st, additional_input, additional_input_len);
+    return reseed_sha2_384(st, additional_input, additional_input_len);
   }
   if (scrut.tag == SHA2_512_s)
   {
-    return EverCrypt_DRBG_reseed_sha2_512(st, additional_input, additional_input_len);
+    return reseed_sha2_512(st, additional_input, additional_input_len);
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -2135,19 +2127,19 @@ EverCrypt_DRBG_generate(
   EverCrypt_DRBG_state_s scrut = *st;
   if (scrut.tag == SHA1_s)
   {
-    return EverCrypt_DRBG_generate_sha1(output, st, n, additional_input, additional_input_len);
+    return generate_sha1(output, st, n, additional_input, additional_input_len);
   }
   if (scrut.tag == SHA2_256_s)
   {
-    return EverCrypt_DRBG_generate_sha2_256(output, st, n, additional_input, additional_input_len);
+    return generate_sha2_256(output, st, n, additional_input, additional_input_len);
   }
   if (scrut.tag == SHA2_384_s)
   {
-    return EverCrypt_DRBG_generate_sha2_384(output, st, n, additional_input, additional_input_len);
+    return generate_sha2_384(output, st, n, additional_input, additional_input_len);
   }
   if (scrut.tag == SHA2_512_s)
   {
-    return EverCrypt_DRBG_generate_sha2_512(output, st, n, additional_input, additional_input_len);
+    return generate_sha2_512(output, st, n, additional_input, additional_input_len);
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
@@ -2170,22 +2162,22 @@ void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st)
   EverCrypt_DRBG_state_s scrut = *st;
   if (scrut.tag == SHA1_s)
   {
-    EverCrypt_DRBG_uninstantiate_sha1(st);
+    uninstantiate_sha1(st);
     return;
   }
   if (scrut.tag == SHA2_256_s)
   {
-    EverCrypt_DRBG_uninstantiate_sha2_256(st);
+    uninstantiate_sha2_256(st);
     return;
   }
   if (scrut.tag == SHA2_384_s)
   {
-    EverCrypt_DRBG_uninstantiate_sha2_384(st);
+    uninstantiate_sha2_384(st);
     return;
   }
   if (scrut.tag == SHA2_512_s)
   {
-    EverCrypt_DRBG_uninstantiate_sha2_512(st);
+    uninstantiate_sha2_512(st);
     return;
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",

@@ -38,33 +38,6 @@ let compute_st (a: hash_alg) =
     LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\
     B.as_seq h1 tag == hmac a (B.as_seq h0 key) (B.as_seq h0 data))
 
-/// Four monomorphized variants, for callers who already know which algorithm they want
-
-(** @type: true
-*)
-val compute_sha1: compute_st SHA1
-
-(** @type: true
-*)
-val compute_sha2_256: compute_st SHA2_256
-
-(** @type: true
-*)
-val compute_sha2_384: compute_st SHA2_384
-
-(** @type: true
-*)
-val compute_sha2_512: compute_st SHA2_512
-
-(** @type: true
-*)
-val compute_blake2s: compute_st Blake2S
-
-(** @type: true
-*)
-val compute_blake2b: compute_st Blake2B
-
-
 let is_supported_alg = function
 | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 | Blake2S | Blake2B -> true
 | _ -> false

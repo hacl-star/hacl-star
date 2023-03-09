@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +25,9 @@
 
 #include "Hacl_Chacha20_Vec128.h"
 
-#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Chacha20.h"
 #include "libintvector.h"
+
 /* SNIPPET_START: double_round_128 */
 
 static inline void double_round_128(Lib_IntVector_Intrinsics_vec128 *st)

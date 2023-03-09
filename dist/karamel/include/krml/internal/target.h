@@ -53,6 +53,10 @@
 #  define KRML_HOST_FREE free
 #endif
 
+#ifndef KRML_HOST_IGNORE
+#  define KRML_HOST_IGNORE(x) (void)(x)
+#endif
+
 #ifndef KRML_PRE_ALIGN
 #  ifdef _MSC_VER
 #    define KRML_PRE_ALIGN(X) __declspec(align(X))

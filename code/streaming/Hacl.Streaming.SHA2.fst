@@ -44,10 +44,10 @@ inline_for_extraction noextract
 let state_t_512 = state_t SHA2_512
 
 /// Type abbreviations - for pretty code generation
-let state_sha2_224 = F.state_s hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let state_sha2_256 = F.state_s hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
-let state_sha2_384 = F.state_s hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let state_sha2_512 = F.state_s hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+let state_sha2_224 = Hacl.Streaming.MD.state_32
+let state_sha2_256 = Hacl.Streaming.MD.state_32
+let state_sha2_384 = Hacl.Streaming.MD.state_64
+let state_sha2_512 = Hacl.Streaming.MD.state_64
 
 open Lib.Buffer
 open Lib.IntTypes
@@ -159,6 +159,14 @@ let sha224 input input_len dst =
 inline_for_extraction noextract
 let alloca_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let create_in_512 = F.create_in hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+
+[@@ Comment
+"Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_512`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch."]
+let copy_512 = F.copy hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+
 let init_512 = F.init hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 
 [@@ CInline ]

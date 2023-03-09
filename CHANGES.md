@@ -13,6 +13,11 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+
+## 2023-02-20
+
+- Removed OCaml and JS bindings
+
 ## 2022-12-19
 
 - Added JS bindings for secp256k1
@@ -24,7 +29,13 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
   latter now observes the argument order of the former.
 
 ## 2022-12-07
+
 - Added secret_to_public for secp256k1
+
+## 2022-12-06
+
+- Tighten the `EverCrypt_Hash` header file to only expose the one-shot and
+  "streaming" APIs.
 
 ## 2022-12-01
 

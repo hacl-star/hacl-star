@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,12 +23,60 @@
  */
 
 
-#include "EverCrypt_HMAC.h"
+#include "internal/EverCrypt_HMAC.h"
 
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_Blake2.h"
+#include "internal/EverCrypt_Hash.h"
+
+/* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
+
+bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___)
+{
+  switch (uu___)
+  {
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return true;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return true;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return true;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return true;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return true;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
+
+/* SNIPPET_END: EverCrypt_HMAC_is_supported_alg */
+
+/* SNIPPET_START: EverCrypt_HMAC_hash_256 */
+
+void
+(*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2) =
+  EverCrypt_Hash_Incremental_hash_256;
+
+/* SNIPPET_END: EverCrypt_HMAC_hash_256 */
 
 /* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
 
@@ -182,7 +231,7 @@ EverCrypt_HMAC_compute_sha2_256(
   }
   else
   {
-    EverCrypt_Hash_hash_256(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_256(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -825,45 +874,6 @@ EverCrypt_HMAC_compute_blake2b(
 }
 
 /* SNIPPET_END: EverCrypt_HMAC_compute_blake2b */
-
-/* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
-
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___)
-{
-  switch (uu___)
-  {
-    case Spec_Hash_Definitions_SHA1:
-      {
-        return true;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        return true;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        return true;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        return true;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        return true;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        return true;
-      }
-    default:
-      {
-        return false;
-      }
-  }
-}
-
-/* SNIPPET_END: EverCrypt_HMAC_is_supported_alg */
 
 /* SNIPPET_START: EverCrypt_HMAC_compute */
 

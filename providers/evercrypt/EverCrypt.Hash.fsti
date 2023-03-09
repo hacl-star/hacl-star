@@ -328,7 +328,7 @@ val finish:
 
 (** @type: true
 *)
-val free:
+val free_:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a -> ST unit
@@ -337,6 +337,19 @@ val free:
     invariant s h0)
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1)))
+
+// Avoids C-level collisions with the stdlib free.
+// Not clear why we need to repeat the type annotation.
+inline_for_extraction noextract
+let free: #a:e_alg -> (
+  let a = Ghost.reveal a in
+  s:state a -> ST unit
+  (requires fun h0 ->
+    freeable h0 s /\
+    invariant s h0)
+  (ensures fun h0 _ h1 ->
+    M.(modifies (footprint s h0) h0 h1)))
+ = free_
 
 (** @type: true
 *)
@@ -356,22 +369,3 @@ val copy:
       preserves_freeable s_dst h0 h1 /\
       invariant s_dst h1 /\
       repr s_dst h1 == repr s_src h0))
-
-val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
-val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
-
-(** @type: true
-*)
-val hash:
-  a:alg ->
-  dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
-  input:B.buffer Lib.IntTypes.uint8 ->
-  len:uint32_t {B.length input = v len /\ v len `less_than_max_input_length` a} ->
-  Stack unit
-  (requires fun h0 ->
-    B.live h0 dst /\
-    B.live h0 input /\
-    M.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
-  (ensures fun h0 _ h1 ->
-    M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.Agile.Hash.hash a (B.as_seq h0 input))

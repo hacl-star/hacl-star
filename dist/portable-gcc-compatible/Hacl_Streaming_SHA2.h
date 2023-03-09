@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,42 +35,30 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_224 */
 
-typedef struct Hacl_Streaming_SHA2_state_sha2_224_s
-{
-  uint32_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Streaming_SHA2_state_sha2_224;
+typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_SHA2_state_sha2_224;
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_state_sha2_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_256 */
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA2_state_sha2_256;
+typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_SHA2_state_sha2_256;
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_state_sha2_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_384 */
 
-typedef struct Hacl_Streaming_SHA2_state_sha2_384_s
-{
-  uint64_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Streaming_SHA2_state_sha2_384;
+typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA2_state_sha2_384;
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_state_sha2_384 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_512 */
 
-typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA2_state_sha2_512;
+typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA2_state_sha2_512;
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_state_sha2_512 */
 
@@ -79,7 +68,7 @@ typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA2_state_sha2_512;
 Allocate initial state for the SHA2_256 hash. The state is to be freed by
 calling `free_256`.
 */
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256(void);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_create_in_256(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_256 */
 
@@ -91,8 +80,7 @@ The state is to be freed by calling `free_256`. Cloning the state this way is
 useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch.
 */
-Hacl_Streaming_SHA2_state_sha2_224
-*Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_SHA2_state_sha2_224 *s0);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_MD_state_32 *s0);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_copy_256 */
 
@@ -101,7 +89,7 @@ Hacl_Streaming_SHA2_state_sha2_224
 /**
 Reset an existing state to the initial hash state with empty data.
 */
-void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_MD_state_32 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_init_256 */
 
@@ -116,7 +104,7 @@ This function is identical to the update function for SHA2_224.
 */
 uint32_t
 Hacl_Streaming_SHA2_update_256(
-  Hacl_Streaming_SHA2_state_sha2_224 *p,
+  Hacl_Streaming_MD_state_32 *p,
   uint8_t *input,
   uint32_t input_len
 );
@@ -131,7 +119,7 @@ valid after a call to `finish_256`, meaning the user may feed more data into
 the hash via `update_256`. (The finish_256 function operates on an internal copy of
 the state and therefore does not invalidate the client-held state `p`.)
 */
-void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_MD_state_32 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_finish_256 */
 
@@ -142,7 +130,7 @@ Free a state allocated with `create_in_256`.
 
 This function is identical to the free function for SHA2_224.
 */
-void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_MD_state_32 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_free_256 */
 
@@ -157,13 +145,13 @@ void Hacl_Streaming_SHA2_sha256(uint8_t *input, uint32_t input_len, uint8_t *dst
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_224 */
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224(void);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_create_in_224(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_init_224 */
 
-void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_MD_state_32 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_init_224 */
 
@@ -171,7 +159,7 @@ void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 uint32_t
 Hacl_Streaming_SHA2_update_224(
-  Hacl_Streaming_SHA2_state_sha2_224 *p,
+  Hacl_Streaming_MD_state_32 *p,
   uint8_t *input,
   uint32_t input_len
 );
@@ -185,13 +173,13 @@ Write the resulting hash into `dst`, an array of 28 bytes. The state remains
 valid after a call to `finish_224`, meaning the user may feed more data into
 the hash via `update_224`.
 */
-void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_MD_state_32 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_finish_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_free_224 */
 
-void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA2_state_sha2_224 *p);
+void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_MD_state_32 *p);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_free_224 */
 
@@ -206,13 +194,25 @@ void Hacl_Streaming_SHA2_sha224(uint8_t *input, uint32_t input_len, uint8_t *dst
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_512 */
 
-Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512(void);
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_create_in_512(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_512 */
 
+/* SNIPPET_START: Hacl_Streaming_SHA2_copy_512 */
+
+/**
+Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_512`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch.
+*/
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_copy_512(Hacl_Streaming_MD_state_64 *s0);
+
+/* SNIPPET_END: Hacl_Streaming_SHA2_copy_512 */
+
 /* SNIPPET_START: Hacl_Streaming_SHA2_init_512 */
 
-void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
+void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_MD_state_64 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_init_512 */
 
@@ -227,7 +227,7 @@ This function is identical to the update function for SHA2_384.
 */
 uint32_t
 Hacl_Streaming_SHA2_update_512(
-  Hacl_Streaming_SHA2_state_sha2_384 *p,
+  Hacl_Streaming_MD_state_64 *p,
   uint8_t *input,
   uint32_t input_len
 );
@@ -242,7 +242,7 @@ valid after a call to `finish_512`, meaning the user may feed more data into
 the hash via `update_512`. (The finish_512 function operates on an internal copy of
 the state and therefore does not invalidate the client-held state `p`.)
 */
-void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_MD_state_64 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_finish_512 */
 
@@ -253,7 +253,7 @@ Free a state allocated with `create_in_512`.
 
 This function is identical to the free function for SHA2_384.
 */
-void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
+void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_MD_state_64 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_free_512 */
 
@@ -268,13 +268,13 @@ void Hacl_Streaming_SHA2_sha512(uint8_t *input, uint32_t input_len, uint8_t *dst
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_384 */
 
-Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384(void);
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_create_in_384(void);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_384 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_init_384 */
 
-void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_SHA2_state_sha2_384 *s);
+void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_MD_state_64 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_init_384 */
 
@@ -282,7 +282,7 @@ void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 uint32_t
 Hacl_Streaming_SHA2_update_384(
-  Hacl_Streaming_SHA2_state_sha2_384 *p,
+  Hacl_Streaming_MD_state_64 *p,
   uint8_t *input,
   uint32_t input_len
 );
@@ -296,13 +296,13 @@ Write the resulting hash into `dst`, an array of 48 bytes. The state remains
 valid after a call to `finish_384`, meaning the user may feed more data into
 the hash via `update_384`.
 */
-void Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_MD_state_64 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_finish_384 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_free_384 */
 
-void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_SHA2_state_sha2_384 *p);
+void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_MD_state_64 *p);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_free_384 */
 

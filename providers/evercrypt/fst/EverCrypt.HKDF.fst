@@ -2,6 +2,58 @@ module EverCrypt.HKDF
 
 open Hacl.HKDF
 
+friend EverCrypt.HMAC
+
+/// Four monomorphized variants, for callers who already know which algorithm they want
+
+(** @type: true
+*)
+val expand_sha1: expand_st SHA1
+
+(** @type: true
+*)
+val extract_sha1: extract_st SHA1
+
+(** @type: true
+*)
+val expand_sha2_256: expand_st SHA2_256
+
+(** @type: true
+*)
+val extract_sha2_256: extract_st SHA2_256
+
+(** @type: true
+*)
+val expand_sha2_384: expand_st SHA2_384
+
+(** @type: true
+*)
+val extract_sha2_384: extract_st SHA2_384
+
+(** @type: true
+*)
+val expand_sha2_512: expand_st SHA2_512
+
+(** @type: true
+*)
+val extract_sha2_512: extract_st SHA2_512
+
+(** @type: true
+*)
+val expand_blake2s: expand_st Blake2S
+
+(** @type: true
+*)
+val extract_blake2s: extract_st Blake2S
+
+(** @type: true
+*)
+val expand_blake2b: expand_st Blake2B
+
+(** @type: true
+*)
+val extract_blake2b: extract_st Blake2B
+
 let expand_sha1 =
   mk_expand SHA1 EverCrypt.HMAC.compute_sha1
 

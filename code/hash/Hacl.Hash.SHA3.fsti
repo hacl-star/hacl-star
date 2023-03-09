@@ -25,3 +25,6 @@ val update_last_256: update_last_st (|SHA3_256, ()|)
 
 inline_for_extraction noextract
 val finish_256: finish_st (|SHA3_256, ()|)
+
+inline_for_extraction noextract
+val hash_256: hash_st SHA3_256

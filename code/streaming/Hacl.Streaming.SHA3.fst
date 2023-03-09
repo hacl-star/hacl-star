@@ -20,7 +20,7 @@ inline_for_extraction noextract
 let state_t_256 = state_t SHA3_256
 
 /// Type abbreviations - for pretty code generation
-let state_sha3_256 = F.state_s hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
+let state_256 = Hacl.Streaming.MD.state_64
 
 inline_for_extraction noextract
 let alloca_256 = F.alloca hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
@@ -30,3 +30,4 @@ let init_256 = F.init hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased uni
 let update_256 = F.update hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
 let finish_256 = F.mk_finish hacl_sha3_256 () (state_t_256.s ()) (G.erased unit)
 let free_256 = F.free hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+let copy_256 = F.copy hacl_sha3_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)

@@ -33,19 +33,25 @@ EXPORTS
   Hacl_Blake2s_128_store_state128s_to_state32
   Hacl_Blake2s_128_load_state128s_from_state32
   Hacl_Blake2s_128_blake2s_malloc
-  Hacl_Impl_SHA3_rotl
-  Hacl_Impl_SHA3_state_permute
-  Hacl_Impl_SHA3_loadState
-  Hacl_Impl_SHA3_storeState
-  Hacl_Impl_SHA3_absorb
-  Hacl_Impl_SHA3_squeeze
-  Hacl_Impl_SHA3_keccak
+  Hacl_Streaming_SHA3_create_in_256
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
+  Hacl_Streaming_SHA3_init_256
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
+  Hacl_Streaming_SHA3_update_256
+  Hacl_Streaming_SHA3_finish_256
+  Hacl_Streaming_SHA3_free_256
+  Hacl_Streaming_SHA3_copy_256
   Hacl_SHA3_shake128_hacl
   Hacl_SHA3_shake256_hacl
   Hacl_SHA3_sha3_224
   Hacl_SHA3_sha3_256
   Hacl_SHA3_sha3_384
   Hacl_SHA3_sha3_512
+  Hacl_Impl_SHA3_state_permute
+  Hacl_Impl_SHA3_loadState
+  Hacl_Impl_SHA3_absorb_inner
+  Hacl_Impl_SHA3_squeeze
+  Hacl_Impl_SHA3_keccak
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
@@ -55,11 +61,27 @@ EXPORTS
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
+  Hacl_Streaming_MD5_legacy_create_in
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_MD5_legacy_init
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_MD5_legacy_update
+  Hacl_Streaming_MD5_legacy_finish
+  Hacl_Streaming_MD5_legacy_free
+  Hacl_Streaming_MD5_legacy_copy
+  Hacl_Streaming_MD5_legacy_hash
   Hacl_Hash_Core_SHA1_legacy_init
   Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
+  Hacl_Streaming_SHA1_legacy_create_in
+  Hacl_Streaming_SHA1_legacy_init
+  Hacl_Streaming_SHA1_legacy_update
+  Hacl_Streaming_SHA1_legacy_finish
+  Hacl_Streaming_SHA1_legacy_free
+  Hacl_Streaming_SHA1_legacy_copy
+  Hacl_Streaming_SHA1_legacy_hash
   Hacl_Hash_Core_SHA2_init_224
   Hacl_Hash_Core_SHA2_init_256
   Hacl_Hash_Core_SHA2_init_384
@@ -107,49 +129,17 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_avx512
   EverCrypt_AutoConfig2_has_vec128
   EverCrypt_AutoConfig2_has_vec256
-  EverCrypt_Hash_string_of_alg
-  EverCrypt_Hash_uu___is_MD5_s
-  EverCrypt_Hash_uu___is_SHA1_s
-  EverCrypt_Hash_uu___is_SHA2_224_s
-  EverCrypt_Hash_uu___is_SHA2_256_s
-  EverCrypt_Hash_uu___is_SHA2_384_s
-  EverCrypt_Hash_uu___is_SHA2_512_s
-  EverCrypt_Hash_uu___is_SHA3_256_s
-  EverCrypt_Hash_uu___is_Blake2S_s
-  EverCrypt_Hash_uu___is_Blake2S_128_s
-  EverCrypt_Hash_uu___is_Blake2B_s
-  EverCrypt_Hash_uu___is_Blake2B_256_s
-  EverCrypt_Hash_alg_of_state
-  EverCrypt_Hash_create_in
-  EverCrypt_Hash_create
-  EverCrypt_Hash_init
   EverCrypt_Hash_update_multi_256
-  EverCrypt_Hash_update_multi
   EverCrypt_Hash_update_last_256
-  EverCrypt_Hash_update_last
-  EverCrypt_Hash_finish
-  EverCrypt_Hash_free
-  EverCrypt_Hash_copy
-  EverCrypt_Hash_hash_256
-  EverCrypt_Hash_hash_224
-  EverCrypt_Hash_hash
   EverCrypt_Hash_Incremental_hash_len
-  EverCrypt_Hash_Incremental_block_len
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
   EverCrypt_Hash_Incremental_update
-  EverCrypt_Hash_Incremental_finish_md5
-  EverCrypt_Hash_Incremental_finish_sha1
-  EverCrypt_Hash_Incremental_finish_sha224
-  EverCrypt_Hash_Incremental_finish_sha256
-  EverCrypt_Hash_Incremental_finish_sha3_256
-  EverCrypt_Hash_Incremental_finish_sha384
-  EverCrypt_Hash_Incremental_finish_sha512
-  EverCrypt_Hash_Incremental_finish_blake2s
-  EverCrypt_Hash_Incremental_finish_blake2b
   EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
+  EverCrypt_Hash_Incremental_hash_256
+  EverCrypt_Hash_Incremental_hash
   Hacl_Impl_Chacha20_chacha20_init
   Hacl_Impl_Chacha20_chacha20_update
   Hacl_Chacha20_chacha20_encrypt
@@ -225,10 +215,8 @@ EXPORTS
   Hacl_Curve25519_51_ecdh
   Hacl_SHA2_Scalar32_sha512_init
   Hacl_Streaming_SHA2_create_in_256
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Streaming_SHA2_copy_256
   Hacl_Streaming_SHA2_init_256
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Streaming_SHA2_update_256
   Hacl_Streaming_SHA2_finish_256
   Hacl_Streaming_SHA2_free_256
@@ -240,9 +228,8 @@ EXPORTS
   Hacl_Streaming_SHA2_free_224
   Hacl_Streaming_SHA2_sha224
   Hacl_Streaming_SHA2_create_in_512
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
+  Hacl_Streaming_SHA2_copy_512
   Hacl_Streaming_SHA2_init_512
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
@@ -412,11 +399,6 @@ EXPORTS
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free
-  Hacl_Streaming_SHA3_create_in_256
-  Hacl_Streaming_SHA3_init_256
-  Hacl_Streaming_SHA3_update_256
-  Hacl_Streaming_SHA3_finish_256
-  Hacl_Streaming_SHA3_free_256
   Hacl_Frodo640_crypto_kem_keypair
   Hacl_Frodo640_crypto_kem_enc
   Hacl_Frodo640_crypto_kem_dec
@@ -437,6 +419,8 @@ EXPORTS
   Hacl_HMAC_compute_blake2b_32
   Hacl_HKDF_expand_sha2_256
   Hacl_HKDF_extract_sha2_256
+  Hacl_HKDF_expand_sha2_384
+  Hacl_HKDF_extract_sha2_384
   Hacl_HKDF_expand_sha2_512
   Hacl_HKDF_extract_sha2_512
   Hacl_HKDF_expand_blake2s_32
@@ -562,13 +546,13 @@ EXPORTS
   Hacl_Bignum4096_32_bn_to_bytes_le
   Hacl_Bignum4096_32_lt_mask
   Hacl_Bignum4096_32_eq_mask
+  EverCrypt_HMAC_is_supported_alg
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
   EverCrypt_HMAC_compute_sha2_512
   EverCrypt_HMAC_compute_blake2s
   EverCrypt_HMAC_compute_blake2b
-  EverCrypt_HMAC_is_supported_alg
   EverCrypt_HMAC_compute
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
@@ -584,22 +568,6 @@ EXPORTS
   EverCrypt_DRBG_uu___is_SHA2_512_s
   EverCrypt_DRBG_create_in
   EverCrypt_DRBG_create
-  EverCrypt_DRBG_instantiate_sha1
-  EverCrypt_DRBG_instantiate_sha2_256
-  EverCrypt_DRBG_instantiate_sha2_384
-  EverCrypt_DRBG_instantiate_sha2_512
-  EverCrypt_DRBG_reseed_sha1
-  EverCrypt_DRBG_reseed_sha2_256
-  EverCrypt_DRBG_reseed_sha2_384
-  EverCrypt_DRBG_reseed_sha2_512
-  EverCrypt_DRBG_generate_sha1
-  EverCrypt_DRBG_generate_sha2_256
-  EverCrypt_DRBG_generate_sha2_384
-  EverCrypt_DRBG_generate_sha2_512
-  EverCrypt_DRBG_uninstantiate_sha1
-  EverCrypt_DRBG_uninstantiate_sha2_256
-  EverCrypt_DRBG_uninstantiate_sha2_384
-  EverCrypt_DRBG_uninstantiate_sha2_512
   EverCrypt_DRBG_instantiate
   EverCrypt_DRBG_reseed
   EverCrypt_DRBG_generate
@@ -720,11 +688,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
-  EverCrypt_Poly1305_poly1305
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
+  EverCrypt_Poly1305_poly1305
   Hacl_Streaming_Poly1305_32_create_in
   Hacl_Streaming_Poly1305_32_init
   Hacl_Streaming_Poly1305_32_update
@@ -777,16 +745,6 @@ EXPORTS
   Hacl_Frodo64_crypto_kem_keypair
   Hacl_Frodo64_crypto_kem_enc
   Hacl_Frodo64_crypto_kem_dec
-  Hacl_Streaming_SHA1_legacy_create_in_sha1
-  Hacl_Streaming_SHA1_legacy_init_sha1
-  Hacl_Streaming_SHA1_legacy_update_sha1
-  Hacl_Streaming_SHA1_legacy_finish_sha1
-  Hacl_Streaming_SHA1_legacy_free_sha1
-  Hacl_Streaming_MD5_legacy_create_in_md5
-  Hacl_Streaming_MD5_legacy_init_md5
-  Hacl_Streaming_MD5_legacy_update_md5
-  Hacl_Streaming_MD5_legacy_finish_md5
-  Hacl_Streaming_MD5_legacy_free_md5
   Hacl_HMAC_Blake2b_256_compute_blake2b_256
   Hacl_HKDF_Blake2b_256_expand_blake2b_256
   Hacl_HKDF_Blake2b_256_extract_blake2b_256
@@ -798,18 +756,6 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
-  EverCrypt_HKDF_expand_sha1
-  EverCrypt_HKDF_extract_sha1
-  EverCrypt_HKDF_expand_sha2_256
-  EverCrypt_HKDF_extract_sha2_256
-  EverCrypt_HKDF_expand_sha2_384
-  EverCrypt_HKDF_extract_sha2_384
-  EverCrypt_HKDF_expand_sha2_512
-  EverCrypt_HKDF_extract_sha2_512
-  EverCrypt_HKDF_expand_blake2s
-  EverCrypt_HKDF_extract_blake2s
-  EverCrypt_HKDF_expand_blake2b
-  EverCrypt_HKDF_extract_blake2b
   EverCrypt_HKDF_expand
   EverCrypt_HKDF_extract
   Hacl_EC_Ed25519_mk_felem_zero

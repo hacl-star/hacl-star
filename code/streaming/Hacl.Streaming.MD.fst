@@ -938,3 +938,16 @@ let hacl_md (a:alg)// : block unit =
         in
         finish s dst)
 #pop-options
+
+// Putting some type abbreviations here, so that they appear in a separate file that can then be included by all streaming algorithms, rather than having e.g. SHA1 depend on e.g. MD5
+
+// Could be anything that's 32-bit
+inline_for_extraction noextract
+let hacl_sha2_256 = hacl_md SHA2_256
+
+let state_32 = F.state_s hacl_sha2_256 () ((state_t SHA2_256).s ()) (G.erased unit)
+
+inline_for_extraction noextract
+let hacl_sha2_512 = hacl_md SHA2_512
+
+let state_64 = F.state_s hacl_sha2_512 () ((state_t SHA2_512).s ()) (G.erased unit)

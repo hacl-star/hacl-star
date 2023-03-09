@@ -230,20 +230,21 @@ val bn_sqr_f_lemma:
   -> #aLen:size_nat{aLen + aLen <= max_size_t}
   -> a:lbignum t aLen
   -> j:size_nat{j < aLen}
-  -> acc:lbignum t (aLen + aLen) ->
+  -> acc:lbignum t (aLen + aLen)
+  -> i:nat{j + j < i /\ i < aLen + aLen} ->
   Lemma (let res = bn_sqr_f a j acc in
    eval_ (aLen + aLen) res (j + j + 1) ==
    eval_ (aLen + aLen) acc (j + j) + eval_ aLen a j * v a.[j] * pow2 (bits t * j) /\
-  (forall (i:nat{j + j < i /\ i < aLen + aLen}). index res i == index acc i))
+   Seq.index res i == Seq.index acc i)
 
-let bn_sqr_f_lemma #t #aLen a j acc =
+let bn_sqr_f_lemma #t #aLen a j acc i =
   let resLen = aLen + aLen in
 
   let c, acc' = SM.bn_mul1_add_in_place #t #j (sub a 0 j) a.[j] (sub acc j j) in
   let acc1 = update_sub acc j j acc' in
-  assert (forall (i:nat{j + j <= i /\ i < aLen + aLen}). index acc1 i == index acc i);
+  assert (index acc1 i == index acc i);
   let res = acc1.[j + j] <- c in
-  assert (forall (i:nat{j + j < i /\ i < aLen + aLen}). index res i == index acc i);
+  assert (index res i == index acc i);
 
   SM.bn_mul1_lshift_add_lemma #t #j #resLen (sub a 0 j) a.[j] j acc;
   bn_eval_extensionality_j acc1 res (j + j);
@@ -274,8 +275,8 @@ let bn_sqr_inductive #t #aLen a k =
     unfold_repeati k (bn_sqr_f a) acc0 i;
     let acc1 = bn_sqr_f a i acci in
     assert (acc1 == repeati (i + 1) (bn_sqr_f a) acc0);
-    bn_sqr_f_lemma a i acci;
-    assert (forall (i0:nat{i + i + 2 < i0 /\ i0 < aLen + aLen}). index acc1 i0 == index acc0 i0);
+    Classical.forall_intro (bn_sqr_f_lemma a i acci);
+    assert (forall (i0:nat{i + i + 2 < i0 /\ i0 < aLen + aLen}). Seq.index acc1 i0 == Seq.index acc0 i0);
     acc1)
   acc0
 
@@ -359,7 +360,7 @@ let rec bn_sqr_loop_lemma #t #aLen a i =
     unfold_repeati i (bn_sqr_f a) bn_zero (i - 1);
     assert (acc == bn_sqr_f a (i - 1) acc1);
 
-    bn_sqr_f_lemma a (i - 1) acc1;
+    bn_sqr_f_lemma a (i - 1) acc1 (i + i - 1);
     assert (acc.[i + i - 1] == acc1.[i + i - 1]);
     bn_sqr_tail a (i - 1);
     assert (acc.[i + i - 1] == uint #t 0);
@@ -371,7 +372,7 @@ let rec bn_sqr_loop_lemma #t #aLen a i =
       (==) { bn_eval_unfold_i acc (i + i) }
       2 * (eval_ resLen acc (i + i - 1) + v acc.[i + i - 1] * p1) +
       eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
-      (==) { bn_sqr_f_lemma a (i - 1) acc1 }
+      (==) { Classical.forall_intro (bn_sqr_f_lemma a (i - 1) acc1) }
       2 * (eval_ resLen acc1 (i + i - 2) + eval_ aLen a (i - 1) * v a.[i - 1] * p3) +
       eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
       (==) { Math.Lemmas.distributivity_add_right 2 (eval_ resLen acc1 (i + i - 2)) (eval_ aLen a (i - 1) * v a.[i - 1] * p3) }

@@ -14,6 +14,7 @@ open Lib.RandomBuffer.System
 open LowStar.BufferOps
 
 friend Hacl.HMAC_DRBG
+friend EverCrypt.HMAC
 
 #set-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 50"
 
@@ -122,6 +123,22 @@ let mk_instantiate #a hmac st personalization_string personalization_string_len 
     pop_frame();
     result
 
+(** @type: true 
+*)
+val instantiate_sha1    : instantiate_st SHA1
+
+(** @type: true 
+*)
+val instantiate_sha2_256: instantiate_st SHA2_256
+
+(** @type: true 
+*)
+val instantiate_sha2_384: instantiate_st SHA2_384
+
+(** @type: true 
+*)
+val instantiate_sha2_512: instantiate_st SHA2_512
+
 let instantiate_sha1     = mk_instantiate EverCrypt.HMAC.compute_sha1
 let instantiate_sha2_256 = mk_instantiate EverCrypt.HMAC.compute_sha2_256
 let instantiate_sha2_384 = mk_instantiate EverCrypt.HMAC.compute_sha2_384
@@ -156,6 +173,22 @@ let mk_reseed #a hmac st additional_input additional_input_len =
     pop_frame();
     result
 
+(** @type: true 
+*)
+val reseed_sha1    : reseed_st SHA1
+
+(** @type: true 
+*)
+val reseed_sha2_256: reseed_st SHA2_256
+
+(** @type: true 
+*)
+val reseed_sha2_384: reseed_st SHA2_384
+
+(** @type: true 
+*)
+val reseed_sha2_512: reseed_st SHA2_512
+
 let reseed_sha1     = mk_reseed EverCrypt.HMAC.compute_sha1
 let reseed_sha2_256 = mk_reseed EverCrypt.HMAC.compute_sha2_256
 let reseed_sha2_384 = mk_reseed EverCrypt.HMAC.compute_sha2_384
@@ -189,6 +222,22 @@ let mk_generate #a hmac output st n additional_input additional_input_len =
   frame_invariant (B.loc_all_regions_from false (HS.get_tip h1)) st h1 h2;
   result
 
+(** @type: true 
+*)
+val generate_sha1    : generate_st SHA1
+
+(** @type: true 
+*)
+val generate_sha2_256: generate_st SHA2_256
+
+(** @type: true 
+*)
+val generate_sha2_384: generate_st SHA2_384
+
+(** @type: true 
+*)
+val generate_sha2_512: generate_st SHA2_512
+
 let generate_sha1     = mk_generate EverCrypt.HMAC.compute_sha1
 let generate_sha2_256 = mk_generate EverCrypt.HMAC.compute_sha2_256
 let generate_sha2_384 = mk_generate EverCrypt.HMAC.compute_sha2_384
@@ -213,6 +262,22 @@ let mk_uninstantiate a st =
   B.free v;
   B.free ctr;
   B.free st
+
+(** @type: true 
+*)
+val uninstantiate_sha1    : uninstantiate_st SHA1
+
+(** @type: true 
+*)
+val uninstantiate_sha2_256: uninstantiate_st SHA2_256
+
+(** @type: true 
+*)
+val uninstantiate_sha2_384: uninstantiate_st SHA2_384
+
+(** @type: true 
+*)
+val uninstantiate_sha2_512: uninstantiate_st SHA2_512
 
 let uninstantiate_sha1     = mk_uninstantiate SHA1
 let uninstantiate_sha2_256 = mk_uninstantiate SHA2_256
