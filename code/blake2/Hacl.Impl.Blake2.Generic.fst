@@ -761,24 +761,23 @@ let blake2_update #al #ms blake2_update_key blake2_update_blocks
       else blake2_update_blocks wv hash lb d)
     else blake2_update_blocks wv hash (size_to_limb al 0ul) d
 
-
 inline_for_extraction noextract
 let blake2_st (al:Spec.alg) (ms:m_spec) =
-    nn:size_t{1 <= v nn /\ v nn <= Spec.max_output al}
-  -> output: lbuffer uint8 nn
-  -> ll: size_t
-  -> d: lbuffer uint8 ll
-  -> kk: size_t{v kk <= Spec.max_key al}
-  -> k: lbuffer uint8 kk ->
+    output: buffer_t MUT uint8
+  -> output_len: size_t{v output_len == length output /\ 1 <= v output_len /\ v output_len <= Spec.max_output al}
+  -> input: buffer_t MUT uint8
+  -> input_len: size_t{v input_len == length input}
+  -> key: buffer_t MUT uint8
+  -> key_len: size_t{v key_len == length key /\ v key_len <= Spec.max_key al} ->
   Stack unit
-    (requires (fun h -> live h output /\ live h d /\ live h k
-                   /\ disjoint output d /\ disjoint output k /\ disjoint d k))
+    (requires (fun h -> live h output /\ live h input /\ live h key
+                   /\ disjoint output input /\ disjoint output key /\ disjoint input key))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
-                         /\ h1.[|output|] == Spec.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn)))
+                         /\ h1.[|(output <: lbuffer uint8 output_len)|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (v key_len) h0.[|(key <: lbuffer uint8 key_len)|] (v output_len)))
 
 inline_for_extraction noextract
 val blake2:
-     #al:Spec.alg
+    #al:Spec.alg
   -> #ms:m_spec
   -> blake2_init_st al ms
   -> blake2_update_st al ms
@@ -786,23 +785,23 @@ val blake2:
   -> blake2_st al ms
 
 #push-options "--z3rlimit 100"
-let blake2 #al #ms blake2_init blake2_update blake2_finish nn output ll d kk k =
+let blake2 #al #ms blake2_init blake2_update blake2_finish output output_len input input_len key key_len =
   [@inline_let]
   let stlen = le_sigh al ms in
   [@inline_let]
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]
-  let spec _ h1 = h1.[|output|] == Spec.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn) in
+  let spec _ h1 = h1.[|output|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (v key_len) h0.[|key|] (v output_len) in
   salloc1 h0 stlen stzero (Ghost.hide (loc output)) spec
   (fun h ->
     assert (max_size_t <= Spec.max_limb al);
     let h1 = ST.get() in
     salloc1 h1 stlen stzero (Ghost.hide (loc output |+| loc h)) spec
     (fun wv ->
-      blake2_init h kk nn;
-      blake2_update wv h kk k ll d;
-      blake2_finish nn output h))
+      blake2_init h key_len output_len;
+      blake2_update wv h key_len key input_len input;
+      blake2_finish output_len output h))
 #pop-options
 
 module B = LowStar.Buffer

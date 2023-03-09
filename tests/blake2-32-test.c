@@ -41,7 +41,7 @@ print_test2b(int in_len,
   uint8_t comp[exp_len];
   memset(comp, 0, exp_len * sizeof comp[0]);
 
-  Hacl_Blake2b_32_blake2b(exp_len, comp, in_len, in, key_len, key);
+  Hacl_Blake2b_32_hash_with_key(comp, exp_len, in, in_len, key, key_len);
   printf("testing blake2b vec-32:\n");
   bool ok = print_result(exp_len, comp, exp);
   return ok;
@@ -58,12 +58,12 @@ print_test2s(int in_len,
   uint8_t comp[exp_len];
   memset(comp, 0, exp_len * sizeof comp[0]);
 
-  Hacl_Blake2s_32_blake2s(exp_len, comp, in_len, in, key_len, key);
+  Hacl_Blake2s_32_hash_with_key(comp, exp_len, in, in_len, key, key_len);
   printf("testing blake2s vec-32:\n");
   bool ok = print_result(exp_len, comp, exp);
 
 #if defined(HACL_CAN_COMPILE_VEC128)
-  Hacl_Blake2s_128_blake2s(exp_len, comp, in_len, in, key_len, key);
+  Hacl_Blake2s_128_hash_with_key(comp, exp_len, in, in_len, key, key_len);
   printf("testing blake2s vec-128:\n");
   ok = ok && print_result(exp_len, comp, exp);
 #endif
@@ -100,24 +100,24 @@ main()
   memset(plain, 'P', SIZE);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_32_blake2s(32, plain, SIZE, plain, 0, NULL);
+    Hacl_Blake2s_32_hash_with_key(plain, 32 ,plain, SIZE, NULL, 0);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_32_blake2s(32, plain, SIZE, plain, 0, NULL);
+    Hacl_Blake2s_32_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
   }
   b = cpucycles_end();
   t2 = clock();
   clock_t tdiff1 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2b_32_blake2b(64, plain, SIZE, plain, 0, NULL);
+    Hacl_Blake2b_32_hash_with_key(plain, 64, plain, SIZE, NULL, 0);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2b_32_blake2b(64, plain, SIZE, plain, 0, NULL);
+    Hacl_Blake2b_32_hash_with_key(plain, 64, plain, SIZE, NULL, 0);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -125,11 +125,11 @@ main()
 
 #if defined(HACL_CAN_COMPILE_VEC128)
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_128_blake2s(32, plain, SIZE, plain, 0, NULL);
+    Hacl_Blake2s_128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
   }
   t1 = clock();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_128_blake2s(32, plain, SIZE, plain, 0, NULL);
+    Hacl_Blake2s_128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
   }
   t2 = clock();
   clock_t tdiff3 = (t2 - t1);
