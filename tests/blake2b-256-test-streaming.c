@@ -11,11 +11,11 @@
 #include <unistd.h>
 
 #include "EverCrypt_AutoConfig2.h"
-#include "Hacl_Streaming_Blake2b_256.h"
+#include "Hacl_Hash_Blake2b_256.h"
 #include "blake2_vectors.h"
 #include "test_helpers.h"
 
-typedef struct Hacl_Streaming_Blake2b_256_state_s blake2_state;
+typedef struct Hacl_Hash_Blake2b_256_state_s blake2_state;
 
 int
 main()
@@ -32,38 +32,38 @@ main()
   blake2_test_vector* v = &vectors2b[2];
 
   if (EverCrypt_AutoConfig2_has_avx2()) {
-    blake2_state* s = Hacl_Streaming_Blake2b_256_malloc();
-    assert(Hacl_Streaming_Blake2b_256_update(s, NULL, 0) ==
+    blake2_state* s = Hacl_Hash_Blake2b_256_malloc();
+    assert(Hacl_Hash_Blake2b_256_update(s, NULL, 0) ==
            0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input, 8) == 0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input + 8, 8) == 0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input + 16, 16) == 0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input + 32, v->input_len - 32) == 0);
-    Hacl_Streaming_Blake2b_256_digest(s, tag);
+    Hacl_Hash_Blake2b_256_digest(s, tag);
     ok &= compare_and_print(64, tag, v->expected);
 
     v++;
-    Hacl_Streaming_Blake2b_256_reset(s);
-    assert(Hacl_Streaming_Blake2b_256_update(s, NULL, 0) ==
+    Hacl_Hash_Blake2b_256_reset(s);
+    assert(Hacl_Hash_Blake2b_256_update(s, NULL, 0) ==
            0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input, 8) == 0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input + 8, 8) == 0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input + 16, 16) == 0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input + 32, 32) == 0);
-    assert(Hacl_Streaming_Blake2b_256_update(
+    assert(Hacl_Hash_Blake2b_256_update(
              s, v->input + 64, v->input_len - 64) == 0);
-    Hacl_Streaming_Blake2b_256_digest(s, tag);
+    Hacl_Hash_Blake2b_256_digest(s, tag);
     ok &= compare_and_print(64, tag, v->expected);
 
-    Hacl_Streaming_Blake2b_256_free(s);
+    Hacl_Hash_Blake2b_256_free(s);
   } else {
     printf("Blake2b (256-bit) streaming: no AVX2 support: ignoring tests\n");
   }
