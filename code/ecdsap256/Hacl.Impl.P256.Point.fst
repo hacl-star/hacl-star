@@ -44,6 +44,10 @@ let make_point_at_inf p =
 let copy_point p res = copy res p
 
 
+let create_aff_point () =
+  create 8ul (u64 0)
+
+
 ///  check if a point is a point-at-infinity
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
@@ -120,11 +124,11 @@ val norm_jacob_point_z: p:point -> res:felem -> Stack unit
 
 let norm_jacob_point_z p res =
   push_frame ();
-  let fresero = create (size 4) (u64 0) in
+  let zero = create_felem () in
   let bit = is_point_at_inf p in
 
   bn_set_one4 res;
-  bn_copy_conditional4 res fresero bit;
+  bn_copy_conditional4 res zero bit;
   pop_frame ()
 
 
@@ -179,7 +183,7 @@ let norm_jacob_point_y p res =
 [@CInline]
 let norm_jacob_point p res =
   push_frame ();
-  let tmp = create 12ul (u64 0) in
+  let tmp = create_point () in
   let tx = getx tmp in
   let ty = gety tmp in
   let tz = getz tmp in
@@ -217,7 +221,7 @@ val compute_rp_ec_equation: x:felem -> res:felem -> Stack unit
 
 let compute_rp_ec_equation x res =
   push_frame ();
-  let tmp = create 4ul (u64 0) in
+  let tmp = create_felem () in
   fcube x res;
   make_a_coeff tmp;
   fmul tmp x tmp;
@@ -245,9 +249,9 @@ let is_y_sqr_is_y2_vartime y2 y =
 [@CInline]
 let is_point_on_curve_vartime p =
   push_frame ();
-  let rp = create 4ul (u64 0) in
-  let tx = create 4ul (u64 0) in
-  let ty = create 4ul (u64 0) in
+  let rp = create_felem () in
+  let tx = create_felem () in
+  let ty = create_felem () in
   let px = aff_getx p in
   let py = aff_gety p in
   let h0 = ST.get () in
@@ -307,7 +311,7 @@ let load_point_vartime p b =
   push_frame ();
   let p_x = sub b 0ul 32ul in
   let p_y = sub b 32ul 32ul in
-  let point_aff = create 8ul (u64 0) in
+  let point_aff = create_aff_point () in
   let bn_p_x = aff_getx point_aff in
   let bn_p_y = aff_gety point_aff in
   bn_from_bytes_be4 p_x bn_p_x;

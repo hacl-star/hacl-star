@@ -26,6 +26,14 @@ val create_felem: unit -> StackInline felem
 
 
 inline_for_extraction noextract
+val create_widefelem: unit -> StackInline widefelem
+  (requires fun h -> True)
+  (ensures  fun h0 f h1 ->
+    stack_allocated f h0 h1 (LSeq.create 8 (u64 0)) /\
+    wide_as_nat h1 f == 0)
+
+
+inline_for_extraction noextract
 val bn_make_u64_4: a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64
   -> res:lbuffer uint64 (size 4) -> Stack unit
   (requires fun h -> live h res)

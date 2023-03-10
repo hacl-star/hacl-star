@@ -109,7 +109,7 @@ val mont_reduction: x:widefelem -> res:felem -> Stack unit
 [@CInline]
 let mont_reduction x res =
   push_frame ();
-  let n = create 4ul (u64 0) in
+  let n = create_felem () in
   make_prime n;
 
   let h0 = ST.get () in
@@ -143,7 +143,7 @@ let fmod_short_lemma a =
 [@CInline]
 let fmod_short x res =
   push_frame ();
-  let tmp = create (size 4) (u64 0) in
+  let tmp = create_felem () in
   make_prime tmp;
   let h0 = ST.get () in
   let c = bn_sub4 x tmp tmp in
@@ -157,7 +157,7 @@ let fmod_short x res =
 let bn_is_lt_prime_mask4 f =
   let h0 = ST.get () in
   push_frame ();
-  let tmp = create (size 4) (u64 0) in
+  let tmp = create_felem () in
   make_prime tmp;
   let c = bn_sub4 f tmp tmp in
   assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
@@ -181,7 +181,7 @@ let feq_mask a b =
 let fadd x y res =
   let h0 = ST.get () in
   push_frame ();
-  let n = create 4ul (u64 0) in
+  let n = create_felem () in
   make_prime n;
   bn_add_mod4 x y n res;
   let h1 = ST.get () in
@@ -198,7 +198,7 @@ let fdouble x out =
 let fsub x y res =
   let h0 = ST.get () in
   push_frame ();
-  let n = create 4ul (u64 0) in
+  let n = create_felem () in
   make_prime n;
   bn_sub_mod4 x y n res;
   let h1 = ST.get () in
@@ -224,7 +224,7 @@ let fnegate_conditional_vartime f is_negate =
 [@CInline]
 let fromDomain a res =
   push_frame ();
-  let t = create (size 8) (u64 0) in
+  let t = create_widefelem () in
   let t_low = sub t (size 0) (size 4) in
   let t_high = sub t (size 4) (size 4) in
 
@@ -241,7 +241,7 @@ let fromDomain a res =
 [@CInline]
 let fmul a b res =
   push_frame ();
-  let t = create (size 8) (u64 0) in
+  let t = create_widefelem () in
   let h0 = ST.get () in
   bn_mul4 a b t;
   let h1 = ST.get () in
@@ -254,10 +254,10 @@ let fmul a b res =
 [@CInline]
 let fsqr a res =
   push_frame ();
-  let t = create (size 8) (u64 0) in
-  let h0 = ST.get() in
+  let t = create_widefelem () in
+  let h0 = ST.get () in
   bn_sqr4 a t;
-  let h1 = ST.get() in
+  let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 a) S.prime;
   mont_reduction t res;
   SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 a);

@@ -66,14 +66,10 @@ let msg_as_felem alg msg_len msg res =
 inline_for_extraction
 val ecdsa_signature_step45: x:felem
   -> k:lbuffer uint8 32ul
-  -> tempBuffer:lbuffer uint64 (size 100)
   -> Stack uint64
     (requires fun h ->
-      live h x /\ live h k /\ live h tempBuffer /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc k; loc x]
-    )
-    (ensures fun h0 r h1 ->
-      modifies (loc x |+| loc tempBuffer) h0 h1 /\
+      live h x /\ live h k /\ disjoint x k)
+    (ensures fun h0 r h1 ->  modifies (loc x) h0 h1 /\
       as_nat h1 x < S.order /\
       (
 	let (rxN, ryN, rzN), _ = S.montgomery_ladder_spec (as_seq h0 k) ((0,0,0), S.base_point) in
@@ -85,10 +81,10 @@ val ecdsa_signature_step45: x:felem
       )
     )
 
-let ecdsa_signature_step45 x k tempBuffer =
+let ecdsa_signature_step45 x k =
   push_frame();
     let result = create (size 12) (u64 0) in
-    secretToPublicWithoutNorm result k tempBuffer;
+    secretToPublicWithoutNorm result k;
     norm_jacob_point_x result x;
     qmod_short x x;
   pop_frame();
@@ -227,14 +223,13 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   push_frame();
   let h0 = ST.get() in
   let hashAsFelem = create (size 4) (u64 0) in
-  let tempBuffer = create (size 100) (u64 0) in
   let kAsFelem = create (size 4) (u64 0) in
   bn_from_bytes_be4 k kAsFelem;
   msg_as_felem alg mLen m hashAsFelem;
   let h1 = ST.get() in
   lemma_core_0 kAsFelem h1;
   BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
-  let step5Flag = ecdsa_signature_step45 r k tempBuffer in
+  let step5Flag = ecdsa_signature_step45 r k in
   assert_norm (pow2 32 < pow2 61);
   ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;
   let sIsZero = bn_is_zero_mask4 s in

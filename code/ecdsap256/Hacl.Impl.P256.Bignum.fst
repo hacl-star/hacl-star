@@ -21,6 +21,10 @@ let create_felem () =
   create 4ul (u64 0)
 
 
+let create_widefelem () =
+  create 8ul (u64 0)
+
+
 let bn_make_u64_4 a0 a1 a2 a3 res =
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);

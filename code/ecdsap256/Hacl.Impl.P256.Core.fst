@@ -28,7 +28,7 @@ val toDomain: f:felem -> res:felem -> Stack unit
 
 let toDomain f res =
   push_frame ();
-  let multBuffer = create (size 8) (u64 0) in
-  bn_lshift256 f multBuffer;
-  solinas_reduction_impl multBuffer res;
+  let tmp = create_widefelem () in
+  bn_lshift256 f tmp;
+  solinas_reduction_impl tmp res;
   pop_frame()

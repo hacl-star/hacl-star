@@ -16,45 +16,50 @@ module S = Spec.P256
 
 let ecp256dh_i public_key private_key =
   push_frame ();
-  let tmp = create 100ul (u64 0) in
-  let pk = create 12ul (u64 0) in
+  let pk = create_point () in
 
-  secretToPublic pk private_key tmp;
+  secretToPublic pk private_key;
   let flag = is_point_at_inf pk in
   aff_store_point public_key (sub pk 0ul 8ul);
   pop_frame ();
 
-  let open Hacl.Impl.P256.RawCmp in
-  unsafe_bool_of_u64 flag
+  Hacl.Bignum.Base.unsafe_bool_of_limb0 flag
 
 
 inline_for_extraction noextract
-val ecp256dh_r_: ss:point -> pk:point -> private_key:lbuffer uint8 32ul -> Stack uint64
+val ecp256dh_r_:
+    is_pk_valid:bool
+  -> ss:point
+  -> pk:point
+  -> private_key:lbuffer uint8 32ul ->
+  Stack uint64
   (requires fun h ->
     live h ss /\ live h pk /\ live h private_key /\
     disjoint ss pk /\ disjoint ss private_key /\ disjoint pk private_key /\
-    point_inv h pk)
+    (is_pk_valid ==> point_inv h pk) /\ as_point_nat h ss = (0, 0, 0))
   (ensures fun  h0 flag h1 -> modifies (loc ss |+| loc pk) h0 h1 /\
-    as_point_nat h1 ss ==  S.scalar_multiplication (as_seq h0 private_key) (as_point_nat h0 pk) /\
-    v flag == (if S.is_point_at_inf (as_point_nat h1 ss) then ones_v U64 else 0))
+    as_point_nat h1 ss ==
+    (if is_pk_valid then S.scalar_multiplication (as_seq h0 private_key) (as_point_nat h0 pk)
+    else (0, 0, 0)) /\
+    v flag ==
+    (if is_pk_valid then (if S.is_point_at_inf (as_point_nat h1 ss) then ones_v U64 else 0)
+    else ones_v U64))
 
-let ecp256dh_r_ ss pk private_key =
-  push_frame ();
-  let tmp = create 100ul (u64 0) in
-  scalarMultiplication pk ss private_key tmp;
-  pop_frame ();
-  is_point_at_inf ss
+let ecp256dh_r_ is_pk_valid ss pk private_key =
+  if is_pk_valid then begin
+    scalarMultiplication pk ss private_key;
+    is_point_at_inf ss end
+  else
+    ones U64 SEC
 
 
 let ecp256dh_r shared_secret their_pubkey private_key =
   push_frame ();
-  let ss = create 12ul (u64 0) in
-  let pk = create 12ul (u64 0) in
+  let ss = create_point () in
+  let pk = create_point () in
   let is_pk_valid = load_point_vartime pk their_pubkey in
-
-  let flag = if is_pk_valid then ecp256dh_r_ ss pk private_key else u64 0xFFFFFFFFFFFFFFFF in
+  let flag = ecp256dh_r_ is_pk_valid ss pk private_key in
   aff_store_point shared_secret (sub ss 0ul 8ul);
   pop_frame ();
 
-  let open Hacl.Impl.P256.RawCmp in
-  unsafe_bool_of_u64 flag
+  Hacl.Bignum.Base.unsafe_bool_of_limb0 flag

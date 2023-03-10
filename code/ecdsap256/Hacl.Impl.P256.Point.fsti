@@ -127,7 +127,8 @@ inline_for_extraction noextract
 val create_point: unit -> StackInline point
   (requires fun h -> True)
   (ensures  fun h0 f h1 ->
-    stack_allocated f h0 h1 (LSeq.create 12 (u64 0)))
+    stack_allocated f h0 h1 (LSeq.create 12 (u64 0)) /\
+    as_point_nat h1 f == (0, 0, 0))
 
 
 val make_base_point: p:point -> Stack unit
@@ -147,6 +148,13 @@ val copy_point: p:point -> res:point -> Stack unit
   (requires fun h -> live h p /\ live h res /\ disjoint p res)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == as_seq h0 p)
+
+
+inline_for_extraction noextract
+val create_aff_point: unit -> StackInline aff_point
+  (requires fun h -> True)
+  (ensures  fun h0 f h1 ->
+    stack_allocated f h0 h1 (LSeq.create 8 (u64 0)))
 
 
 ///  check if a point is a point-at-infinity

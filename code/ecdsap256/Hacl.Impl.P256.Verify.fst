@@ -148,24 +148,21 @@ val ecdsa_verification_step5_0:
     points:lbuffer uint64 (size 24)
   -> pubKeyAsPoint: point
   -> u1: lbuffer uint8 (size 32)
-  -> u2: lbuffer uint8 (size 32)
-  -> tempBuffer: lbuffer uint64 (size 100) ->
+  -> u2: lbuffer uint8 (size 32) ->
   Stack unit
     (requires fun h ->
-      live h points /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
+      live h points /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\
       disjoint points u1 /\
       disjoint points u2 /\
       disjoint pubKeyAsPoint u1 /\
       disjoint pubKeyAsPoint u2 /\
-      disjoint tempBuffer u1 /\
-      disjoint tempBuffer u2 /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc points; loc pubKeyAsPoint; loc tempBuffer] /\
+      disjoint points pubKeyAsPoint /\
       point_x_as_nat h pubKeyAsPoint < S.prime /\
       point_y_as_nat h pubKeyAsPoint < S.prime /\
       point_z_as_nat h pubKeyAsPoint < S.prime
     )
   (ensures fun h0 _ h1 ->
-    modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc points) h0 h1 /\
+    modifies (loc pubKeyAsPoint |+| loc points) h0 h1 /\
     as_nat h1 (gsub points (size 0) (size 4)) < S.prime /\
     as_nat h1 (gsub points (size 4) (size 4)) < S.prime /\
     as_nat h1 (gsub points (size 8) (size 4)) < S.prime /\
@@ -185,11 +182,11 @@ val ecdsa_verification_step5_0:
     )
   )
 
-let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 =
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in
-  secretToPublicWithoutNorm pointU1G u1 tempBuffer;
-  scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
+  secretToPublicWithoutNorm pointU1G u1;
+  scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2
 
 
 [@ (Comment "   The input of the function is considered to be public,
@@ -294,24 +291,21 @@ val ecdsa_verification_step5_2:
     pointSum: point
   -> pubKeyAsPoint: point
   -> u1: lbuffer uint8 (size 32)
-  -> u2: lbuffer uint8 (size 32)
-  -> tempBuffer: lbuffer uint64 (size 100) ->
+  -> u2: lbuffer uint8 (size 32) ->
   Stack unit
     (requires fun h ->
-      live h pointSum /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
+      live h pointSum /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\
       disjoint pointSum u1 /\
       disjoint pointSum u2 /\
       disjoint pubKeyAsPoint u1 /\
       disjoint pubKeyAsPoint u2 /\
-      disjoint tempBuffer u1 /\
-      disjoint tempBuffer u2 /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc pointSum; loc pubKeyAsPoint; loc tempBuffer] /\
+      disjoint pubKeyAsPoint pointSum /\
       point_x_as_nat h pubKeyAsPoint < S.prime /\
       point_y_as_nat h pubKeyAsPoint < S.prime /\
       point_z_as_nat h pubKeyAsPoint < S.prime
     )
     (ensures fun h0 _ h1 ->
-      modifies (loc pointSum |+| loc tempBuffer |+| loc pubKeyAsPoint) h0 h1 /\
+      modifies (loc pointSum |+| loc pubKeyAsPoint) h0 h1 /\
       as_nat h1 (gsub pointSum (size 0) (size 4)) < S.prime /\
       (
         let pointAtInfinity = (0, 0, 0) in
@@ -330,11 +324,11 @@ val ecdsa_verification_step5_2:
    )
 
 
-let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 =
   push_frame();
   let points = create (size 24) (u64 0) in
-  let buff = sub tempBuffer (size 12) (size 88) in
-  ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer;
+  let buff = create (size 88) (u64 0) in
+  ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2;
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in
 
@@ -353,24 +347,21 @@ val ecdsa_verification_step5:
     x:felem
   -> pubKeyAsPoint: point
   -> u1: lbuffer uint8 (size 32)
-  -> u2: lbuffer uint8 (size 32)
-  -> tempBuffer: lbuffer uint64 (size 100) ->
+  -> u2: lbuffer uint8 (size 32) ->
   Stack bool
     (requires fun h ->
-      live h x /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
+      live h x /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\
       disjoint x u1 /\
       disjoint x u2 /\
       disjoint pubKeyAsPoint u1 /\
       disjoint pubKeyAsPoint u2 /\
-      disjoint tempBuffer u1 /\
-      disjoint tempBuffer u2 /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc x; loc pubKeyAsPoint; loc tempBuffer] /\
+      disjoint x pubKeyAsPoint /\
       point_x_as_nat h pubKeyAsPoint < S.prime /\
       point_y_as_nat h pubKeyAsPoint < S.prime /\
       point_z_as_nat h pubKeyAsPoint < S.prime
     )
     (ensures fun h0 state h1 ->
-      modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 /\
+      modifies (loc x |+| loc pubKeyAsPoint) h0 h1 /\
       as_nat h1 x < S.prime /\
       (
         let pointAtInfinity = (0, 0, 0) in
@@ -389,10 +380,10 @@ val ecdsa_verification_step5:
     )
   )
 
-let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 =
   push_frame();
   let pointSum = create (size 12) (u64 0) in
-  ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer;
+  ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2;
   let resultIsPAI = is_point_at_inf_vartime pointSum in
   let xCoordinateSum = sub pointSum (size 0) (size 4) in
   copy x xCoordinateSum;
@@ -410,11 +401,10 @@ val ecdsa_verification_core:
   -> s:lbuffer uint64 (size 4)
   -> mLen:size_t{v mLen >= S.min_input_length alg}
   -> m:lbuffer uint8 mLen
-  -> xBuffer:felem
-  -> tempBuffer:lbuffer uint64 (size 100) ->
+  -> xBuffer:felem ->
   Stack bool
     (requires fun h ->
-      live h publicKeyPoint /\ live h hashAsFelem /\ live h r /\ live h s /\ live h m /\ live h xBuffer /\ live h tempBuffer /\
+      live h publicKeyPoint /\ live h hashAsFelem /\ live h r /\ live h s /\ live h m /\ live h xBuffer /\ 
       disjoint publicKeyPoint r /\
       disjoint publicKeyPoint s /\
       disjoint publicKeyPoint m /\
@@ -424,17 +414,14 @@ val ecdsa_verification_core:
       disjoint xBuffer r /\
       disjoint xBuffer s /\
       disjoint xBuffer m /\
-      disjoint tempBuffer r /\
-      disjoint tempBuffer s /\
-      disjoint tempBuffer m /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc publicKeyPoint; loc hashAsFelem; loc xBuffer; loc tempBuffer] /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc publicKeyPoint; loc hashAsFelem; loc xBuffer] /\
       as_nat h s < S.order /\ as_nat h r < S.order /\
       point_x_as_nat h publicKeyPoint < S.prime /\
       point_y_as_nat h publicKeyPoint < S.prime /\
       point_z_as_nat h publicKeyPoint < S.prime
     )
     (ensures fun h0 state h1 ->
-      modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer |+| loc tempBuffer) h0 h1 /\
+      modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer) h0 h1 /\
        (
          assert_norm (pow2 32 < pow2 61);
 	 assert_norm (pow2 32 < pow2 125);
@@ -463,7 +450,7 @@ val ecdsa_verification_core:
       )
   )
 
-let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer =
+let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer =
   assert_norm (pow2 32 < pow2 61 - 1);
   assert_norm (pow2 32 < pow2 125);
   push_frame();
@@ -472,7 +459,7 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   let bufferU2 = sub tempBufferU8 (size 32) (size 32) in
   ecdsa_verification_step23 alg mLen m hashAsFelem;
   ecdsa_verification_step4  bufferU1 bufferU2 r s hashAsFelem;
-  let r = ecdsa_verification_step5 xBuffer publicKeyBuffer bufferU1 bufferU2 tempBuffer in
+  let r = ecdsa_verification_step5 xBuffer publicKeyBuffer bufferU1 bufferU2 in
   pop_frame();
   r
 
@@ -519,7 +506,7 @@ let ecdsa_verification_ alg pubKey r s mLen m =
       false
       end
     else
-      let state = ecdsa_verification_core alg pk hashAsFelem r s mLen m xBuffer tempBuffer in
+      let state = ecdsa_verification_core alg pk hashAsFelem r s mLen m xBuffer in
       if state = false then
         begin
         pop_frame();

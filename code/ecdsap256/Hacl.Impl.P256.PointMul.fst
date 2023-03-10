@@ -406,35 +406,9 @@ val lemma_coord: h3: mem -> q: point -> Lemma (
 let lemma_coord h3 q = ()
 
 
-inline_for_extraction
-val scalarMultiplication_t: #t:buftype -> p: point -> result: point ->
-  scalar: lbuffer_t t uint8 (size 32) ->
-  tempBuffer: lbuffer uint64 (size 100) ->
-  Stack unit
-    (requires fun h ->
-      live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime
-    )
-  (ensures fun h0 _ h1 ->
-    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
-
-    as_nat h1 (gsub result (size 0) (size 4)) < S.prime /\
-    as_nat h1 (gsub result (size 4) (size 4)) < S.prime /\
-    as_nat h1 (gsub result (size 8) (size 4)) < S.prime /\
-
-    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
-    (
-      let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
-      let (xN, yN, zN) = S.scalar_multiplication (as_seq h0 scalar) (as_point_nat h0 p) in
-      x3 == xN /\ y3 == yN /\ z3 == zN
-  )
-)
-
-
-let scalarMultiplication_t #t p result scalar tempBuffer  =
+let scalarMultiplication p result scalar =
+  push_frame ();
+  let tempBuffer = create 100ul (u64 0) in
     let h0 = ST.get() in
   let q = sub tempBuffer (size 0) (size 12) in
   make_point_at_inf q;
@@ -446,25 +420,14 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
     lemma_point_to_domain h0 h2 p result;
     lemma_pif_to_domain h2 q;
   norm_jacob_point q result;
-    lemma_coord h3 q
-
-
-[@CInline]
-let scalarMultiplicationL = scalarMultiplication_t #MUT
-[@CInline]
-let scalarMultiplicationI = scalarMultiplication_t #IMMUT
-[@CInline]
-let scalarMultiplicationC = scalarMultiplication_t #CONST
-
-let scalarMultiplication #buf_type p result scalar tempBuffer =
-  match buf_type with
-  |MUT -> scalarMultiplicationL p result scalar tempBuffer
-  |IMMUT -> scalarMultiplicationI p result scalar tempBuffer
-  |CONST -> scalarMultiplicationC p result scalar tempBuffer
+    lemma_coord h3 q;
+  pop_frame ()
 
 
 
-let scalarMultiplicationWithoutNorm p result scalar tempBuffer =
+let scalarMultiplicationWithoutNorm p result scalar =
+  push_frame ();
+  let tempBuffer = create 100ul (u64 0) in
   let h0 = ST.get() in
   let q = sub tempBuffer (size 0) (size 12) in
   make_point_at_inf q;
@@ -475,11 +438,13 @@ let scalarMultiplicationWithoutNorm p result scalar tempBuffer =
   copy_point q result;
     let h3 = ST.get() in
     lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q
+    lemma_pif_to_domain h2 q;
+  pop_frame ()
 
 
-let secretToPublic result scalar tempBuffer =
+let secretToPublic result scalar =
   push_frame();
+      let tempBuffer = create 100ul (u64 0) in
        let basePoint = create (size 12) (u64 0) in
     make_base_point basePoint;
       let q = sub tempBuffer (size 0) (size 12) in
@@ -492,8 +457,9 @@ let secretToPublic result scalar tempBuffer =
   pop_frame()
 
 
-let secretToPublicWithoutNorm result scalar tempBuffer =
+let secretToPublicWithoutNorm result scalar =
     push_frame();
+      let tempBuffer = create 100ul (u64 0) in
       let basePoint = create (size 12) (u64 0) in
     make_base_point basePoint;
       let q = sub tempBuffer (size 0) (size 12) in
