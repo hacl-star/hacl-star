@@ -1,38 +1,38 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  Hacl_Blake2b_32_blake2b_init
-  Hacl_Blake2b_32_blake2b_update_key
-  Hacl_Blake2b_32_blake2b_update_multi
-  Hacl_Blake2b_32_blake2b_update_last
-  Hacl_Blake2b_32_blake2b_finish
-  Hacl_Blake2b_32_blake2b
-  Hacl_Blake2b_32_blake2b_malloc
-  Hacl_Blake2s_32_blake2s_init
-  Hacl_Blake2s_32_blake2s_update_key
-  Hacl_Blake2s_32_blake2s_update_multi
-  Hacl_Blake2s_32_blake2s_update_last
-  Hacl_Blake2s_32_blake2s_finish
-  Hacl_Blake2s_32_blake2s
-  Hacl_Blake2s_32_blake2s_malloc
-  Hacl_Blake2b_256_blake2b_init
-  Hacl_Blake2b_256_blake2b_update_key
-  Hacl_Blake2b_256_blake2b_update_multi
-  Hacl_Blake2b_256_blake2b_update_last
-  Hacl_Blake2b_256_blake2b_finish
-  Hacl_Blake2b_256_blake2b
+  Hacl_Blake2b_32_init
+  Hacl_Blake2b_32_update_key
+  Hacl_Blake2b_32_update_multi
+  Hacl_Blake2b_32_update_last
+  Hacl_Blake2b_32_finish
+  Hacl_Blake2b_32_hash_with_key
+  Hacl_Blake2b_32_malloc_with_key
+  Hacl_Blake2s_32_init
+  Hacl_Blake2s_32_update_key
+  Hacl_Blake2s_32_update_multi
+  Hacl_Blake2s_32_update_last
+  Hacl_Blake2s_32_finish
+  Hacl_Blake2s_32_hash_with_key
+  Hacl_Blake2s_32_malloc_with_key
+  Hacl_Blake2b_256_init
+  Hacl_Blake2b_256_update_key
+  Hacl_Blake2b_256_update_multi
+  Hacl_Blake2b_256_update_last
+  Hacl_Blake2b_256_finish
+  Hacl_Blake2b_256_hash_with_key
   Hacl_Blake2b_256_load_state256b_from_state32
   Hacl_Blake2b_256_store_state256b_to_state32
-  Hacl_Blake2b_256_blake2b_malloc
-  Hacl_Blake2s_128_blake2s_init
-  Hacl_Blake2s_128_blake2s_update_key
-  Hacl_Blake2s_128_blake2s_update_multi
-  Hacl_Blake2s_128_blake2s_update_last
-  Hacl_Blake2s_128_blake2s_finish
-  Hacl_Blake2s_128_blake2s
+  Hacl_Blake2b_256_malloc_with_key
+  Hacl_Blake2s_128_init
+  Hacl_Blake2s_128_update_key
+  Hacl_Blake2s_128_update_multi
+  Hacl_Blake2s_128_update_last
+  Hacl_Blake2s_128_finish
+  Hacl_Blake2s_128_hash_with_key
   Hacl_Blake2s_128_store_state128s_to_state32
   Hacl_Blake2s_128_load_state128s_from_state32
-  Hacl_Blake2s_128_blake2s_malloc
+  Hacl_Blake2s_128_malloc_with_key
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len

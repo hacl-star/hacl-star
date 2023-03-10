@@ -39,11 +39,10 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "libintvector.h"
 
-void
-Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
+void Hacl_Blake2b_256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
 
 void
-Hacl_Blake2b_256_blake2b_update_key(
+Hacl_Blake2b_256_update_key(
   Lib_IntVector_Intrinsics_vec256 *wv,
   Lib_IntVector_Intrinsics_vec256 *hash,
   uint32_t kk,
@@ -52,7 +51,7 @@ Hacl_Blake2b_256_blake2b_update_key(
 );
 
 void
-Hacl_Blake2b_256_blake2b_update_multi(
+Hacl_Blake2b_256_update_multi(
   uint32_t len,
   Lib_IntVector_Intrinsics_vec256 *wv,
   Lib_IntVector_Intrinsics_vec256 *hash,
@@ -62,7 +61,7 @@ Hacl_Blake2b_256_blake2b_update_multi(
 );
 
 void
-Hacl_Blake2b_256_blake2b_update_last(
+Hacl_Blake2b_256_update_last(
   uint32_t len,
   Lib_IntVector_Intrinsics_vec256 *wv,
   Lib_IntVector_Intrinsics_vec256 *hash,
@@ -72,30 +71,26 @@ Hacl_Blake2b_256_blake2b_update_last(
 );
 
 void
-Hacl_Blake2b_256_blake2b_finish(
-  uint32_t nn,
-  uint8_t *output,
-  Lib_IntVector_Intrinsics_vec256 *hash
-);
+Hacl_Blake2b_256_finish(uint32_t nn, uint8_t *output, Lib_IntVector_Intrinsics_vec256 *hash);
 
 /**
-Write the BLAKE2b digest of message `d` using key `k` into `output`.
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
 
-@param nn Length of the to-be-generated digest with 1 <= `nn` <= 64.
-@param output Pointer to `nn` bytes of memory where the digest is written to.
-@param ll Length of the input message.
-@param d Pointer to `ll` bytes of memory where the input message is read from.
-@param kk Length of the key. Can be 0.
-@param k Pointer to `kk` bytes of memory where the key is read from.
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Blake2b_256_blake2b(
-  uint32_t nn,
+Hacl_Blake2b_256_hash_with_key(
   uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
 );
 
 void
@@ -110,7 +105,7 @@ Hacl_Blake2b_256_store_state256b_to_state32(
   Lib_IntVector_Intrinsics_vec256 *st
 );
 
-Lib_IntVector_Intrinsics_vec256 *Hacl_Blake2b_256_blake2b_malloc(void);
+Lib_IntVector_Intrinsics_vec256 *Hacl_Blake2b_256_malloc_with_key(void);
 
 #if defined(__cplusplus)
 }

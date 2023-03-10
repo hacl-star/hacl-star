@@ -38,11 +38,10 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "libintvector.h"
 
-void
-Hacl_Blake2s_128_blake2s_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t kk, uint32_t nn);
+void Hacl_Blake2s_128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t kk, uint32_t nn);
 
 void
-Hacl_Blake2s_128_blake2s_update_key(
+Hacl_Blake2s_128_update_key(
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
   uint32_t kk,
@@ -51,7 +50,7 @@ Hacl_Blake2s_128_blake2s_update_key(
 );
 
 void
-Hacl_Blake2s_128_blake2s_update_multi(
+Hacl_Blake2s_128_update_multi(
   uint32_t len,
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
@@ -61,7 +60,7 @@ Hacl_Blake2s_128_blake2s_update_multi(
 );
 
 void
-Hacl_Blake2s_128_blake2s_update_last(
+Hacl_Blake2s_128_update_last(
   uint32_t len,
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
@@ -71,30 +70,26 @@ Hacl_Blake2s_128_blake2s_update_last(
 );
 
 void
-Hacl_Blake2s_128_blake2s_finish(
-  uint32_t nn,
-  uint8_t *output,
-  Lib_IntVector_Intrinsics_vec128 *hash
-);
+Hacl_Blake2s_128_finish(uint32_t nn, uint8_t *output, Lib_IntVector_Intrinsics_vec128 *hash);
 
 /**
-Write the BLAKE2s digest of message `d` using key `k` into `output`.
+Write the BLAKE2s digest of message `input` using key `key` into `output`.
 
-@param nn Length of to-be-generated digest with 1 <= `nn` <= 32.
-@param output Pointer to `nn` bytes of memory where the digest is written to.
-@param ll Length of the input message.
-@param d Pointer to `ll` bytes of memory where the input message is read from.
-@param kk Length of the key. Can be 0.
-@param k Pointer to `kk` bytes of memory where the key is read from.
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Blake2s_128_blake2s(
-  uint32_t nn,
+Hacl_Blake2s_128_hash_with_key(
   uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
 );
 
 void
@@ -109,7 +104,7 @@ Hacl_Blake2s_128_load_state128s_from_state32(
   uint32_t *st32
 );
 
-Lib_IntVector_Intrinsics_vec128 *Hacl_Blake2s_128_blake2s_malloc(void);
+Lib_IntVector_Intrinsics_vec128 *Hacl_Blake2s_128_malloc_with_key(void);
 
 #if defined(__cplusplus)
 }

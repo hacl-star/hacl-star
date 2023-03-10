@@ -27,16 +27,10 @@
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 
-/* SNIPPET_START: blake2b_update_block */
+/* SNIPPET_START: update_block */
 
 static void
-blake2b_update_block(
-  uint64_t *wv,
-  uint64_t *hash,
-  bool flag,
-  FStar_UInt128_uint128 totlen,
-  uint8_t *d
-)
+update_block(uint64_t *wv, uint64_t *hash, bool flag, FStar_UInt128_uint128 totlen, uint8_t *d)
 {
   uint64_t m_w[16U] = { 0U };
   KRML_MAYBE_FOR16(i,
@@ -479,11 +473,11 @@ blake2b_update_block(
     os[i] = x;);
 }
 
-/* SNIPPET_END: blake2b_update_block */
+/* SNIPPET_END: update_block */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_init */
+/* SNIPPET_START: Hacl_Blake2b_32_init */
 
-void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
+void Hacl_Blake2b_32_init(uint64_t *hash, uint32_t kk, uint32_t nn)
 {
   uint64_t *r0 = hash;
   uint64_t *r1 = hash + (uint32_t)4U;
@@ -517,39 +511,33 @@ void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
   r1[3U] = iv7;
 }
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_init */
+/* SNIPPET_END: Hacl_Blake2b_32_init */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_key */
+/* SNIPPET_START: Hacl_Blake2b_32_update_key */
 
 void
-Hacl_Blake2b_32_blake2b_update_key(
-  uint64_t *wv,
-  uint64_t *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t ll
-)
+Hacl_Blake2b_32_update_key(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll)
 {
   FStar_UInt128_uint128 lb = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
   uint8_t b[128U] = { 0U };
   memcpy(b, k, kk * sizeof (uint8_t));
   if (ll == (uint32_t)0U)
   {
-    blake2b_update_block(wv, hash, true, lb, b);
+    update_block(wv, hash, true, lb, b);
   }
   else
   {
-    blake2b_update_block(wv, hash, false, lb, b);
+    update_block(wv, hash, false, lb, b);
   }
   Lib_Memzero0_memzero(b, (uint32_t)128U * sizeof (b[0U]));
 }
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_key */
+/* SNIPPET_END: Hacl_Blake2b_32_update_key */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_multi */
+/* SNIPPET_START: Hacl_Blake2b_32_update_multi */
 
 void
-Hacl_Blake2b_32_blake2b_update_multi(
+Hacl_Blake2b_32_update_multi(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
@@ -565,16 +553,16 @@ Hacl_Blake2b_32_blake2b_update_multi(
       FStar_UInt128_add_mod(prev,
         FStar_UInt128_uint64_to_uint128((uint64_t)((i + (uint32_t)1U) * (uint32_t)128U)));
     uint8_t *b = blocks + i * (uint32_t)128U;
-    blake2b_update_block(wv, hash, false, totlen, b);
+    update_block(wv, hash, false, totlen, b);
   }
 }
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_multi */
+/* SNIPPET_END: Hacl_Blake2b_32_update_multi */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_last */
+/* SNIPPET_START: Hacl_Blake2b_32_update_last */
 
 void
-Hacl_Blake2b_32_blake2b_update_last(
+Hacl_Blake2b_32_update_last(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
@@ -588,16 +576,16 @@ Hacl_Blake2b_32_blake2b_update_last(
   memcpy(b, last, rem * sizeof (uint8_t));
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));
-  blake2b_update_block(wv, hash, true, totlen, b);
+  update_block(wv, hash, true, totlen, b);
   Lib_Memzero0_memzero(b, (uint32_t)128U * sizeof (b[0U]));
 }
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_last */
+/* SNIPPET_END: Hacl_Blake2b_32_update_last */
 
-/* SNIPPET_START: blake2b_update_blocks */
+/* SNIPPET_START: update_blocks */
 
 static void
-blake2b_update_blocks(
+update_blocks(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
@@ -625,40 +613,36 @@ blake2b_update_blocks(
   {
     rem = rem0;
   }
-  Hacl_Blake2b_32_blake2b_update_multi(len, wv, hash, prev, blocks, nb);
-  Hacl_Blake2b_32_blake2b_update_last(len, wv, hash, prev, rem, blocks);
+  Hacl_Blake2b_32_update_multi(len, wv, hash, prev, blocks, nb);
+  Hacl_Blake2b_32_update_last(len, wv, hash, prev, rem, blocks);
 }
 
-/* SNIPPET_END: blake2b_update_blocks */
+/* SNIPPET_END: update_blocks */
 
-/* SNIPPET_START: blake2b_update */
+/* SNIPPET_START: update */
 
 static inline void
-blake2b_update(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll, uint8_t *d)
+update(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll, uint8_t *d)
 {
   FStar_UInt128_uint128 lb = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
   if (kk > (uint32_t)0U)
   {
-    Hacl_Blake2b_32_blake2b_update_key(wv, hash, kk, k, ll);
+    Hacl_Blake2b_32_update_key(wv, hash, kk, k, ll);
     if (!(ll == (uint32_t)0U))
     {
-      blake2b_update_blocks(ll, wv, hash, lb, d);
+      update_blocks(ll, wv, hash, lb, d);
       return;
     }
     return;
   }
-  blake2b_update_blocks(ll,
-    wv,
-    hash,
-    FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U),
-    d);
+  update_blocks(ll, wv, hash, FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U), d);
 }
 
-/* SNIPPET_END: blake2b_update */
+/* SNIPPET_END: update */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_finish */
+/* SNIPPET_START: Hacl_Blake2b_32_finish */
 
-void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
+void Hacl_Blake2b_32_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
 {
   uint32_t double_row = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
@@ -683,48 +667,48 @@ void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash
   Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
 }
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_finish */
+/* SNIPPET_END: Hacl_Blake2b_32_finish */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b */
+/* SNIPPET_START: Hacl_Blake2b_32_hash_with_key */
 
 /**
-Write the BLAKE2b digest of message `d` using key `k` into `output`.
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
 
-@param nn Length of the to-be-generated digest with 1 <= `nn` <= 64.
-@param output Pointer to `nn` bytes of memory where the digest is written to.
-@param ll Length of the input message.
-@param d Pointer to `ll` bytes of memory where the input message is read from.
-@param kk Length of the key. Can be 0.
-@param k Pointer to `kk` bytes of memory where the key is read from.
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Blake2b_32_blake2b(
-  uint32_t nn,
+Hacl_Blake2b_32_hash_with_key(
   uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
 )
 {
   uint64_t b[16U] = { 0U };
   uint64_t b1[16U] = { 0U };
-  Hacl_Blake2b_32_blake2b_init(b, kk, nn);
-  blake2b_update(b1, b, kk, k, ll, d);
-  Hacl_Blake2b_32_blake2b_finish(nn, output, b);
+  Hacl_Blake2b_32_init(b, key_len, output_len);
+  update(b1, b, key_len, key, input_len, input);
+  Hacl_Blake2b_32_finish(output_len, output, b);
   Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
   Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
 }
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b */
+/* SNIPPET_END: Hacl_Blake2b_32_hash_with_key */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_malloc */
+/* SNIPPET_START: Hacl_Blake2b_32_malloc_with_key */
 
-uint64_t *Hacl_Blake2b_32_blake2b_malloc(void)
+uint64_t *Hacl_Blake2b_32_malloc_with_key(void)
 {
   uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
   return buf;
 }
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_malloc */
+/* SNIPPET_END: Hacl_Blake2b_32_malloc_with_key */
 

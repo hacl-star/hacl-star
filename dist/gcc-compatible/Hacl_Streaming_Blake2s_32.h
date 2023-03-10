@@ -37,37 +37,37 @@ extern "C" {
 
 #include "Hacl_Hash_Blake2s_32.h"
 
-typedef struct Hacl_Streaming_Blake2s_32_block_state_s
+typedef struct Hacl_Streaming_Blake2s_32_block_state_t_s
 {
   uint32_t *fst;
   uint32_t *snd;
 }
-Hacl_Streaming_Blake2s_32_block_state;
+Hacl_Streaming_Blake2s_32_block_state_t;
 
-typedef struct Hacl_Streaming_Blake2s_32_state_s
+typedef struct Hacl_Streaming_Blake2s_32_state_t_s
 {
-  Hacl_Streaming_Blake2s_32_block_state block_state;
+  Hacl_Streaming_Blake2s_32_block_state_t block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Blake2s_32_state;
+Hacl_Streaming_Blake2s_32_state_t;
 
 /**
   State allocation function when there is no key
 */
-Hacl_Streaming_Blake2s_32_state *Hacl_Streaming_Blake2s_32_malloc(void);
+Hacl_Streaming_Blake2s_32_state_t *Hacl_Streaming_Blake2s_32_malloc(void);
 
 /**
   (Re-)initialization function when there is no key
 */
-void Hacl_Streaming_Blake2s_32_reset(Hacl_Streaming_Blake2s_32_state *state1);
+void Hacl_Streaming_Blake2s_32_reset(Hacl_Streaming_Blake2s_32_state_t *state);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 uint32_t
 Hacl_Streaming_Blake2s_32_update(
-  Hacl_Streaming_Blake2s_32_state *state1,
+  Hacl_Streaming_Blake2s_32_state_t *state,
   uint8_t *chunk,
   uint32_t chunk_len
 );
@@ -76,12 +76,12 @@ Hacl_Streaming_Blake2s_32_update(
   Finish function when there is no key
 */
 void
-Hacl_Streaming_Blake2s_32_digest(Hacl_Streaming_Blake2s_32_state *state1, uint8_t *output);
+Hacl_Streaming_Blake2s_32_digest(Hacl_Streaming_Blake2s_32_state_t *state, uint8_t *output);
 
 /**
   Free state function when there is no key
 */
-void Hacl_Streaming_Blake2s_32_free(Hacl_Streaming_Blake2s_32_state *state1);
+void Hacl_Streaming_Blake2s_32_free(Hacl_Streaming_Blake2s_32_state_t *state);
 
 #if defined(__cplusplus)
 }

@@ -38,29 +38,23 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Krmllib.h"
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_init */
+/* SNIPPET_START: Hacl_Blake2b_32_init */
 
-void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
+void Hacl_Blake2b_32_init(uint64_t *hash, uint32_t kk, uint32_t nn);
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_init */
+/* SNIPPET_END: Hacl_Blake2b_32_init */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_key */
-
-void
-Hacl_Blake2b_32_blake2b_update_key(
-  uint64_t *wv,
-  uint64_t *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t ll
-);
-
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_key */
-
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_multi */
+/* SNIPPET_START: Hacl_Blake2b_32_update_key */
 
 void
-Hacl_Blake2b_32_blake2b_update_multi(
+Hacl_Blake2b_32_update_key(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll);
+
+/* SNIPPET_END: Hacl_Blake2b_32_update_key */
+
+/* SNIPPET_START: Hacl_Blake2b_32_update_multi */
+
+void
+Hacl_Blake2b_32_update_multi(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
@@ -69,12 +63,12 @@ Hacl_Blake2b_32_blake2b_update_multi(
   uint32_t nb
 );
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_multi */
+/* SNIPPET_END: Hacl_Blake2b_32_update_multi */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_last */
+/* SNIPPET_START: Hacl_Blake2b_32_update_last */
 
 void
-Hacl_Blake2b_32_blake2b_update_last(
+Hacl_Blake2b_32_update_last(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
@@ -83,43 +77,43 @@ Hacl_Blake2b_32_blake2b_update_last(
   uint8_t *d
 );
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_last */
+/* SNIPPET_END: Hacl_Blake2b_32_update_last */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_finish */
+/* SNIPPET_START: Hacl_Blake2b_32_finish */
 
-void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
+void Hacl_Blake2b_32_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_finish */
+/* SNIPPET_END: Hacl_Blake2b_32_finish */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b */
+/* SNIPPET_START: Hacl_Blake2b_32_hash_with_key */
 
 /**
-Write the BLAKE2b digest of message `d` using key `k` into `output`.
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
 
-@param nn Length of the to-be-generated digest with 1 <= `nn` <= 64.
-@param output Pointer to `nn` bytes of memory where the digest is written to.
-@param ll Length of the input message.
-@param d Pointer to `ll` bytes of memory where the input message is read from.
-@param kk Length of the key. Can be 0.
-@param k Pointer to `kk` bytes of memory where the key is read from.
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Blake2b_32_blake2b(
-  uint32_t nn,
+Hacl_Blake2b_32_hash_with_key(
   uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
 );
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b */
+/* SNIPPET_END: Hacl_Blake2b_32_hash_with_key */
 
-/* SNIPPET_START: Hacl_Blake2b_32_blake2b_malloc */
+/* SNIPPET_START: Hacl_Blake2b_32_malloc_with_key */
 
-uint64_t *Hacl_Blake2b_32_blake2b_malloc(void);
+uint64_t *Hacl_Blake2b_32_malloc_with_key(void);
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_malloc */
+/* SNIPPET_END: Hacl_Blake2b_32_malloc_with_key */
 
 #if defined(__cplusplus)
 }

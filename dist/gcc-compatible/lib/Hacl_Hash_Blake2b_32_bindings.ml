@@ -2,25 +2,25 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_Blake2b_32_blake2b_init =
-      foreign "Hacl_Blake2b_32_blake2b_init"
+    let hacl_Blake2b_32_init =
+      foreign "Hacl_Blake2b_32_init"
         ((ptr uint64_t) @-> (uint32_t @-> (uint32_t @-> (returning void))))
-    let hacl_Blake2b_32_blake2b_update_key =
-      foreign "Hacl_Blake2b_32_blake2b_update_key"
+    let hacl_Blake2b_32_update_key =
+      foreign "Hacl_Blake2b_32_update_key"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let hacl_Blake2b_32_blake2b_finish =
-      foreign "Hacl_Blake2b_32_blake2b_finish"
+    let hacl_Blake2b_32_finish =
+      foreign "Hacl_Blake2b_32_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Blake2b_32_blake2b =
-      foreign "Hacl_Blake2b_32_blake2b"
-        (uint32_t @->
-           (ocaml_bytes @->
-              (uint32_t @->
-                 (ocaml_bytes @->
-                    (uint32_t @-> (ocaml_bytes @-> (returning void)))))))
-    let hacl_Blake2b_32_blake2b_malloc =
-      foreign "Hacl_Blake2b_32_blake2b_malloc"
+    let hacl_Blake2b_32_hash_with_key =
+      foreign "Hacl_Blake2b_32_hash_with_key"
+        (ocaml_bytes @->
+           (uint32_t @->
+              (ocaml_bytes @->
+                 (uint32_t @->
+                    (ocaml_bytes @-> (uint32_t @-> (returning void)))))))
+    let hacl_Blake2b_32_malloc_with_key =
+      foreign "Hacl_Blake2b_32_malloc_with_key"
         (void @-> (returning (ptr uint64_t)))
   end
