@@ -38,16 +38,17 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "libintvector.h"
 
-/* SNIPPET_START: Hacl_Blake2s_128_init */
-
-void Hacl_Blake2s_128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t kk, uint32_t nn);
-
-/* SNIPPET_END: Hacl_Blake2s_128_init */
-
-/* SNIPPET_START: Hacl_Blake2s_128_update_key */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_init */
 
 void
-Hacl_Blake2s_128_update_key(
+Hacl_Hash_Blake2s_128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t kk, uint32_t nn);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_init */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_update_key */
+
+void
+Hacl_Hash_Blake2s_128_update_key(
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
   uint32_t kk,
@@ -55,12 +56,12 @@ Hacl_Blake2s_128_update_key(
   uint32_t ll
 );
 
-/* SNIPPET_END: Hacl_Blake2s_128_update_key */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_update_key */
 
-/* SNIPPET_START: Hacl_Blake2s_128_update_multi */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_update_multi */
 
 void
-Hacl_Blake2s_128_update_multi(
+Hacl_Hash_Blake2s_128_update_multi(
   uint32_t len,
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
@@ -69,12 +70,12 @@ Hacl_Blake2s_128_update_multi(
   uint32_t nb
 );
 
-/* SNIPPET_END: Hacl_Blake2s_128_update_multi */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_update_multi */
 
-/* SNIPPET_START: Hacl_Blake2s_128_update_last */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_update_last */
 
 void
-Hacl_Blake2s_128_update_last(
+Hacl_Hash_Blake2s_128_update_last(
   uint32_t len,
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
@@ -83,16 +84,20 @@ Hacl_Blake2s_128_update_last(
   uint8_t *d
 );
 
-/* SNIPPET_END: Hacl_Blake2s_128_update_last */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_update_last */
 
-/* SNIPPET_START: Hacl_Blake2s_128_finish */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_finish */
 
 void
-Hacl_Blake2s_128_finish(uint32_t nn, uint8_t *output, Lib_IntVector_Intrinsics_vec128 *hash);
+Hacl_Hash_Blake2s_128_finish(
+  uint32_t nn,
+  uint8_t *output,
+  Lib_IntVector_Intrinsics_vec128 *hash
+);
 
-/* SNIPPET_END: Hacl_Blake2s_128_finish */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_finish */
 
-/* SNIPPET_START: Hacl_Blake2s_128_hash_with_key */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_hash_with_key */
 
 /**
 Write the BLAKE2s digest of message `input` using key `key` into `output`.
@@ -105,7 +110,7 @@ Write the BLAKE2s digest of message `input` using key `key` into `output`.
 @param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Blake2s_128_hash_with_key(
+Hacl_Hash_Blake2s_128_hash_with_key(
   uint8_t *output,
   uint32_t output_len,
   uint8_t *input,
@@ -114,33 +119,106 @@ Hacl_Blake2s_128_hash_with_key(
   uint32_t key_len
 );
 
-/* SNIPPET_END: Hacl_Blake2s_128_hash_with_key */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_hash_with_key */
 
-/* SNIPPET_START: Hacl_Blake2s_128_store_state128s_to_state32 */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_store_state128s_to_state32 */
 
 void
-Hacl_Blake2s_128_store_state128s_to_state32(
+Hacl_Hash_Blake2s_128_store_state128s_to_state32(
   uint32_t *st32,
   Lib_IntVector_Intrinsics_vec128 *st
 );
 
-/* SNIPPET_END: Hacl_Blake2s_128_store_state128s_to_state32 */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_store_state128s_to_state32 */
 
-/* SNIPPET_START: Hacl_Blake2s_128_load_state128s_from_state32 */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_load_state128s_from_state32 */
 
 void
-Hacl_Blake2s_128_load_state128s_from_state32(
+Hacl_Hash_Blake2s_128_load_state128s_from_state32(
   Lib_IntVector_Intrinsics_vec128 *st,
   uint32_t *st32
 );
 
-/* SNIPPET_END: Hacl_Blake2s_128_load_state128s_from_state32 */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_load_state128s_from_state32 */
 
-/* SNIPPET_START: Hacl_Blake2s_128_malloc_with_key */
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_malloc_with_key */
 
-Lib_IntVector_Intrinsics_vec128 *Hacl_Blake2s_128_malloc_with_key(void);
+Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_128_malloc_with_key(void);
 
-/* SNIPPET_END: Hacl_Blake2s_128_malloc_with_key */
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_malloc_with_key */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_block_state_t */
+
+typedef struct Hacl_Hash_Blake2s_128_block_state_t_s
+{
+  Lib_IntVector_Intrinsics_vec128 *fst;
+  Lib_IntVector_Intrinsics_vec128 *snd;
+}
+Hacl_Hash_Blake2s_128_block_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_block_state_t */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_state_t */
+
+typedef struct Hacl_Hash_Blake2s_128_state_t_s
+{
+  Hacl_Hash_Blake2s_128_block_state_t block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_Blake2s_128_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_state_t */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_malloc */
+
+/**
+  State allocation function when there is no key
+*/
+Hacl_Hash_Blake2s_128_state_t *Hacl_Hash_Blake2s_128_malloc(void);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_malloc */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_reset */
+
+/**
+  Re-initialization function when there is no key
+*/
+void Hacl_Hash_Blake2s_128_reset(Hacl_Hash_Blake2s_128_state_t *state);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_reset */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_update */
+
+/**
+  Update function when there is no key; 0 = success, 1 = max length exceeded
+*/
+uint32_t
+Hacl_Hash_Blake2s_128_update(
+  Hacl_Hash_Blake2s_128_state_t *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_update */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_digest */
+
+/**
+  Finish function when there is no key
+*/
+void Hacl_Hash_Blake2s_128_digest(Hacl_Hash_Blake2s_128_state_t *state, uint8_t *output);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_digest */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_128_free */
+
+/**
+  Free state function when there is no key
+*/
+void Hacl_Hash_Blake2s_128_free(Hacl_Hash_Blake2s_128_state_t *state);
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_128_free */
 
 #if defined(__cplusplus)
 }

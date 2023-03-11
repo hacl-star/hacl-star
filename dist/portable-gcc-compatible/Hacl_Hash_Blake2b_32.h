@@ -38,23 +38,29 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Krmllib.h"
 
-/* SNIPPET_START: Hacl_Blake2b_32_init */
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_init */
 
-void Hacl_Blake2b_32_init(uint64_t *hash, uint32_t kk, uint32_t nn);
+void Hacl_Hash_Blake2b_32_init(uint64_t *hash, uint32_t kk, uint32_t nn);
 
-/* SNIPPET_END: Hacl_Blake2b_32_init */
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_init */
 
-/* SNIPPET_START: Hacl_Blake2b_32_update_key */
-
-void
-Hacl_Blake2b_32_update_key(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll);
-
-/* SNIPPET_END: Hacl_Blake2b_32_update_key */
-
-/* SNIPPET_START: Hacl_Blake2b_32_update_multi */
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_update_key */
 
 void
-Hacl_Blake2b_32_update_multi(
+Hacl_Hash_Blake2b_32_update_key(
+  uint64_t *wv,
+  uint64_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t ll
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_update_key */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_update_multi */
+
+void
+Hacl_Hash_Blake2b_32_update_multi(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
@@ -63,12 +69,12 @@ Hacl_Blake2b_32_update_multi(
   uint32_t nb
 );
 
-/* SNIPPET_END: Hacl_Blake2b_32_update_multi */
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_update_multi */
 
-/* SNIPPET_START: Hacl_Blake2b_32_update_last */
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_update_last */
 
 void
-Hacl_Blake2b_32_update_last(
+Hacl_Hash_Blake2b_32_update_last(
   uint32_t len,
   uint64_t *wv,
   uint64_t *hash,
@@ -77,15 +83,15 @@ Hacl_Blake2b_32_update_last(
   uint8_t *d
 );
 
-/* SNIPPET_END: Hacl_Blake2b_32_update_last */
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_update_last */
 
-/* SNIPPET_START: Hacl_Blake2b_32_finish */
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_finish */
 
-void Hacl_Blake2b_32_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
+void Hacl_Hash_Blake2b_32_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
-/* SNIPPET_END: Hacl_Blake2b_32_finish */
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_finish */
 
-/* SNIPPET_START: Hacl_Blake2b_32_hash_with_key */
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_hash_with_key */
 
 /**
 Write the BLAKE2b digest of message `input` using key `key` into `output`.
@@ -98,7 +104,7 @@ Write the BLAKE2b digest of message `input` using key `key` into `output`.
 @param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Blake2b_32_hash_with_key(
+Hacl_Hash_Blake2b_32_hash_with_key(
   uint8_t *output,
   uint32_t output_len,
   uint8_t *input,
@@ -107,13 +113,86 @@ Hacl_Blake2b_32_hash_with_key(
   uint32_t key_len
 );
 
-/* SNIPPET_END: Hacl_Blake2b_32_hash_with_key */
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_hash_with_key */
 
-/* SNIPPET_START: Hacl_Blake2b_32_malloc_with_key */
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_malloc_with_key */
 
-uint64_t *Hacl_Blake2b_32_malloc_with_key(void);
+uint64_t *Hacl_Hash_Blake2b_32_malloc_with_key(void);
 
-/* SNIPPET_END: Hacl_Blake2b_32_malloc_with_key */
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_malloc_with_key */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_block_state_t */
+
+typedef struct Hacl_Hash_Blake2b_32_block_state_t_s
+{
+  uint64_t *fst;
+  uint64_t *snd;
+}
+Hacl_Hash_Blake2b_32_block_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_block_state_t */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_state_t */
+
+typedef struct Hacl_Hash_Blake2b_32_state_t_s
+{
+  Hacl_Hash_Blake2b_32_block_state_t block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_Blake2b_32_state_t;
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_state_t */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_malloc */
+
+/**
+  State allocation function when there is no key
+*/
+Hacl_Hash_Blake2b_32_state_t *Hacl_Hash_Blake2b_32_malloc(void);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_malloc */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_reset */
+
+/**
+  Re-initialization function when there is no key
+*/
+void Hacl_Hash_Blake2b_32_reset(Hacl_Hash_Blake2b_32_state_t *state);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_reset */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_update */
+
+/**
+  Update function when there is no key; 0 = success, 1 = max length exceeded
+*/
+uint32_t
+Hacl_Hash_Blake2b_32_update(
+  Hacl_Hash_Blake2b_32_state_t *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_update */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_digest */
+
+/**
+  Finish function when there is no key
+*/
+void Hacl_Hash_Blake2b_32_digest(Hacl_Hash_Blake2b_32_state_t *state, uint8_t *output);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_digest */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_32_free */
+
+/**
+  Free state function when there is no key
+*/
+void Hacl_Hash_Blake2b_32_free(Hacl_Hash_Blake2b_32_state_t *state);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_32_free */
 
 #if defined(__cplusplus)
 }

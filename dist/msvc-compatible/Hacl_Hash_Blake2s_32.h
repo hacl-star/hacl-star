@@ -37,13 +37,19 @@ extern "C" {
 
 #include "Lib_Memzero0.h"
 
-void Hacl_Blake2s_32_init(uint32_t *hash, uint32_t kk, uint32_t nn);
+void Hacl_Hash_Blake2s_32_init(uint32_t *hash, uint32_t kk, uint32_t nn);
 
 void
-Hacl_Blake2s_32_update_key(uint32_t *wv, uint32_t *hash, uint32_t kk, uint8_t *k, uint32_t ll);
+Hacl_Hash_Blake2s_32_update_key(
+  uint32_t *wv,
+  uint32_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t ll
+);
 
 void
-Hacl_Blake2s_32_update_multi(
+Hacl_Hash_Blake2s_32_update_multi(
   uint32_t len,
   uint32_t *wv,
   uint32_t *hash,
@@ -53,7 +59,7 @@ Hacl_Blake2s_32_update_multi(
 );
 
 void
-Hacl_Blake2s_32_update_last(
+Hacl_Hash_Blake2s_32_update_last(
   uint32_t len,
   uint32_t *wv,
   uint32_t *hash,
@@ -62,7 +68,7 @@ Hacl_Blake2s_32_update_last(
   uint8_t *d
 );
 
-void Hacl_Blake2s_32_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
+void Hacl_Hash_Blake2s_32_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
 
 /**
 Write the BLAKE2s digest of message `input` using key `key` into `output`.
@@ -75,7 +81,7 @@ Write the BLAKE2s digest of message `input` using key `key` into `output`.
 @param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Blake2s_32_hash_with_key(
+Hacl_Hash_Blake2s_32_hash_with_key(
   uint8_t *output,
   uint32_t output_len,
   uint8_t *input,
@@ -84,7 +90,52 @@ Hacl_Blake2s_32_hash_with_key(
   uint32_t key_len
 );
 
-uint32_t *Hacl_Blake2s_32_malloc_with_key(void);
+uint32_t *Hacl_Hash_Blake2s_32_malloc_with_key(void);
+
+typedef struct Hacl_Hash_Blake2s_32_block_state_t_s
+{
+  uint32_t *fst;
+  uint32_t *snd;
+}
+Hacl_Hash_Blake2s_32_block_state_t;
+
+typedef struct Hacl_Hash_Blake2s_32_state_t_s
+{
+  Hacl_Hash_Blake2s_32_block_state_t block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Hash_Blake2s_32_state_t;
+
+/**
+  State allocation function when there is no key
+*/
+Hacl_Hash_Blake2s_32_state_t *Hacl_Hash_Blake2s_32_malloc(void);
+
+/**
+  (Re-)initialization function when there is no key
+*/
+void Hacl_Hash_Blake2s_32_reset(Hacl_Hash_Blake2s_32_state_t *state);
+
+/**
+  Update function when there is no key; 0 = success, 1 = max length exceeded
+*/
+uint32_t
+Hacl_Hash_Blake2s_32_update(
+  Hacl_Hash_Blake2s_32_state_t *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
+);
+
+/**
+  Finish function when there is no key
+*/
+void Hacl_Hash_Blake2s_32_digest(Hacl_Hash_Blake2s_32_state_t *state, uint8_t *output);
+
+/**
+  Free state function when there is no key
+*/
+void Hacl_Hash_Blake2s_32_free(Hacl_Hash_Blake2s_32_state_t *state);
 
 #if defined(__cplusplus)
 }
