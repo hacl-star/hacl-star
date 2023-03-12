@@ -30,7 +30,7 @@ let alloca =
 let malloc =
   F.malloc (blake2s_32 0) () (Common.s Spec.Blake2S Core.M32) (Common.empty_key Spec.Blake2S)
 
-[@ (Comment "  (Re-)initialization function when there is no key")]
+[@ (Comment "  Re-initialization function when there is no key")]
 let reset =
   F.reset (blake2s_32 0) () (Common.s Spec.Blake2S Core.M32) (Common.empty_key Spec.Blake2S)
 

@@ -28,7 +28,7 @@ let alloca =
 let malloc =
   F.malloc (blake2b_256 0) () (Common.s Spec.Blake2B Core.M256) (Common.empty_key Spec.Blake2B)
 
-[@ (Comment "  (Re-)initialization function when there is no key")]
+[@ (Comment "  Re-initialization function when there is no key")]
 let reset =
   F.reset (blake2b_256 0) () (Common.s Spec.Blake2B Core.M256) (Common.empty_key Spec.Blake2B)
 
