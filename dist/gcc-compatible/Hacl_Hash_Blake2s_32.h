@@ -113,7 +113,7 @@ Hacl_Hash_Blake2s_32_state_t;
 Hacl_Hash_Blake2s_32_state_t *Hacl_Hash_Blake2s_32_malloc(void);
 
 /**
-  (Re-)initialization function when there is no key
+  Re-initialization function when there is no key
 */
 void Hacl_Hash_Blake2s_32_reset(Hacl_Hash_Blake2s_32_state_t *state);
 

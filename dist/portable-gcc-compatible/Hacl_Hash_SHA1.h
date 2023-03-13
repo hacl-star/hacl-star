@@ -37,61 +37,57 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_state */
+/* SNIPPET_START: Hacl_Hash_SHA1_state */
 
-typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_SHA1_state;
+typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA1_state;
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_state */
+/* SNIPPET_END: Hacl_Hash_SHA1_state */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_malloc */
+/* SNIPPET_START: Hacl_Hash_SHA1_malloc */
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_malloc(void);
+Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_malloc(void);
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_malloc */
+/* SNIPPET_END: Hacl_Hash_SHA1_malloc */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_reset */
+/* SNIPPET_START: Hacl_Hash_SHA1_reset */
 
-void Hacl_Streaming_SHA1_reset(Hacl_Streaming_MD_state_32 *state1);
+void Hacl_Hash_SHA1_reset(Hacl_Streaming_MD_state_32 *state1);
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_reset */
+/* SNIPPET_END: Hacl_Hash_SHA1_reset */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_update */
+/* SNIPPET_START: Hacl_Hash_SHA1_update */
 
 /**
 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Streaming_SHA1_update(
-  Hacl_Streaming_MD_state_32 *state1,
-  uint8_t *chunk,
-  uint32_t chunk_len
-);
+Hacl_Hash_SHA1_update(Hacl_Streaming_MD_state_32 *state1, uint8_t *chunk, uint32_t chunk_len);
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_update */
+/* SNIPPET_END: Hacl_Hash_SHA1_update */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_digest */
+/* SNIPPET_START: Hacl_Hash_SHA1_digest */
 
-void Hacl_Streaming_SHA1_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output);
+void Hacl_Hash_SHA1_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output);
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_digest */
+/* SNIPPET_END: Hacl_Hash_SHA1_digest */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_free */
+/* SNIPPET_START: Hacl_Hash_SHA1_free */
 
-void Hacl_Streaming_SHA1_free(Hacl_Streaming_MD_state_32 *state1);
+void Hacl_Hash_SHA1_free(Hacl_Streaming_MD_state_32 *state1);
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_free */
+/* SNIPPET_END: Hacl_Hash_SHA1_free */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_copy */
+/* SNIPPET_START: Hacl_Hash_SHA1_copy */
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_copy(Hacl_Streaming_MD_state_32 *s0);
+Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_copy(Hacl_Streaming_MD_state_32 *s0);
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_copy */
+/* SNIPPET_END: Hacl_Hash_SHA1_copy */
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_hash */
+/* SNIPPET_START: Hacl_Hash_SHA1_hash */
 
-void Hacl_Streaming_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
+void Hacl_Hash_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
 
-/* SNIPPET_END: Hacl_Streaming_SHA1_hash */
+/* SNIPPET_END: Hacl_Hash_SHA1_hash */
 
 #if defined(__cplusplus)
 }

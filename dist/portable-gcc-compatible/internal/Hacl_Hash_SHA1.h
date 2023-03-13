@@ -37,17 +37,17 @@ extern "C" {
 
 #include "../Hacl_Hash_SHA1.h"
 
-/* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_init */
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_init */
 
-void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
+void Hacl_Hash_SHA1_legacy_init(uint32_t *s);
 
-/* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_init */
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_init */
 
-/* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_finish */
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_finish */
 
-void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
+void Hacl_Hash_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
 
-/* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_finish */
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_finish */
 
 /* SNIPPET_START: Hacl_Hash_SHA1_legacy_update_multi */
 

@@ -122,9 +122,9 @@ Hacl_HMAC_legacy_compute_sha1(
       rem,
       rem_len);
   }
-  Hacl_Hash_Core_SHA1_legacy_finish(s, dst1);
+  Hacl_Hash_SHA1_legacy_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_Hash_Core_SHA1_legacy_init(s);
+  Hacl_Hash_SHA1_legacy_init(s);
   uint32_t block_len = (uint32_t)64U;
   uint32_t n_blocks0 = (uint32_t)20U / block_len;
   uint32_t rem0 = (uint32_t)20U % block_len;
@@ -150,7 +150,7 @@ Hacl_HMAC_legacy_compute_sha1(
     (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
     rem,
     rem_len);
-  Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
+  Hacl_Hash_SHA1_legacy_finish(s, dst);
 }
 
 /**

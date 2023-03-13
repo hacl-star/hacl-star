@@ -32,7 +32,7 @@ _h0[5U] =
     (uint32_t)0xc3d2e1f0U
   };
 
-void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
+void Hacl_Hash_SHA1_legacy_init(uint32_t *s)
 {
   KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, s[i] = _h0[i];);
 }
@@ -153,7 +153,7 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
-void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
+void Hacl_Hash_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
 {
   KRML_MAYBE_FOR5(i,
     (uint32_t)0U,
@@ -233,10 +233,10 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_
   uint8_t *rest = rest0;
   Hacl_Hash_SHA1_legacy_update_multi(s, blocks, blocks_n);
   Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA1_legacy_finish(s, output);
+  Hacl_Hash_SHA1_legacy_finish(s, output);
 }
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_malloc(void)
+Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_malloc(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)5U, sizeof (uint32_t));
@@ -245,16 +245,16 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_malloc(void)
   Hacl_Streaming_MD_state_32
   *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
   p[0U] = s;
-  Hacl_Hash_Core_SHA1_legacy_init(block_state);
+  Hacl_Hash_SHA1_legacy_init(block_state);
   return p;
 }
 
-void Hacl_Streaming_SHA1_reset(Hacl_Streaming_MD_state_32 *state1)
+void Hacl_Hash_SHA1_reset(Hacl_Streaming_MD_state_32 *state1)
 {
   Hacl_Streaming_MD_state_32 scrut = *state1;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
-  Hacl_Hash_Core_SHA1_legacy_init(block_state);
+  Hacl_Hash_SHA1_legacy_init(block_state);
   Hacl_Streaming_MD_state_32
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   state1[0U] = tmp;
@@ -264,11 +264,7 @@ void Hacl_Streaming_SHA1_reset(Hacl_Streaming_MD_state_32 *state1)
 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Streaming_SHA1_update(
-  Hacl_Streaming_MD_state_32 *state1,
-  uint8_t *chunk,
-  uint32_t chunk_len
-)
+Hacl_Hash_SHA1_update(Hacl_Streaming_MD_state_32 *state1, uint8_t *chunk, uint32_t chunk_len)
 {
   Hacl_Streaming_MD_state_32 s = *state1;
   uint64_t total_len = s.total_len;
@@ -448,7 +444,7 @@ Hacl_Streaming_SHA1_update(
   return (uint32_t)0U;
 }
 
-void Hacl_Streaming_SHA1_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output)
+void Hacl_Hash_SHA1_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output)
 {
   Hacl_Streaming_MD_state_32 scrut = *state1;
   uint32_t *block_state = scrut.block_state;
@@ -480,10 +476,10 @@ void Hacl_Streaming_SHA1_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *out
   Hacl_Hash_SHA1_legacy_update_multi(tmp_block_state, buf_multi, (uint32_t)0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   Hacl_Hash_SHA1_legacy_update_last(tmp_block_state, prev_len_last, buf_last, r);
-  Hacl_Hash_Core_SHA1_legacy_finish(tmp_block_state, output);
+  Hacl_Hash_SHA1_legacy_finish(tmp_block_state, output);
 }
 
-void Hacl_Streaming_SHA1_free(Hacl_Streaming_MD_state_32 *state1)
+void Hacl_Hash_SHA1_free(Hacl_Streaming_MD_state_32 *state1)
 {
   Hacl_Streaming_MD_state_32 scrut = *state1;
   uint8_t *buf = scrut.buf;
@@ -493,7 +489,7 @@ void Hacl_Streaming_SHA1_free(Hacl_Streaming_MD_state_32 *state1)
   KRML_HOST_FREE(state1);
 }
 
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_copy(Hacl_Streaming_MD_state_32 *s0)
+Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_copy(Hacl_Streaming_MD_state_32 *s0)
 {
   Hacl_Streaming_MD_state_32 scrut = *s0;
   uint32_t *block_state0 = scrut.block_state;
@@ -511,7 +507,7 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_copy(Hacl_Streaming_MD_state_32 
   return p;
 }
 
-void Hacl_Streaming_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
+void Hacl_Hash_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   Hacl_Hash_SHA1_legacy_hash(output, input, input_len);
 }

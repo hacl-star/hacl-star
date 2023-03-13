@@ -37,9 +37,9 @@ extern "C" {
 
 #include "../Hacl_Hash_SHA1.h"
 
-void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
+void Hacl_Hash_SHA1_legacy_init(uint32_t *s);
 
-void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
+void Hacl_Hash_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
 
 void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
