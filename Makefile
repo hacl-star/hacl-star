@@ -662,14 +662,14 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2s_128:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2s_Simd128:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
   \
   -add-include 'Hacl_Chacha20Poly1305_256.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2b_Simd256:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_256:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.

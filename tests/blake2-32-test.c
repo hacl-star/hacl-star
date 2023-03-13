@@ -13,7 +13,7 @@
 #include "Hacl_Hash_Blake2s_32.h"
 
 #if defined(HACL_CAN_COMPILE_VEC128)
-#include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2s_Simd128.h"
 #endif
 
 #include "test_helpers.h"
@@ -63,7 +63,7 @@ print_test2s(int in_len,
   bool ok = print_result(exp_len, comp, exp);
 
 #if defined(HACL_CAN_COMPILE_VEC128)
-  Hacl_Hash_Blake2s_128_hash_with_key(comp, exp_len, in, in_len, key, key_len);
+  Hacl_Hash_Blake2s_Simd128_hash_with_key(comp, exp_len, in, in_len, key, key_len);
   printf("testing blake2s vec-128:\n");
   ok = ok && print_result(exp_len, comp, exp);
 #endif
@@ -125,11 +125,11 @@ main()
 
 #if defined(HACL_CAN_COMPILE_VEC128)
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_Blake2s_128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
+    Hacl_Hash_Blake2s_Simd128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
   }
   t1 = clock();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_Blake2s_128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
+    Hacl_Hash_Blake2s_Simd128_hash_with_key(plain, 32, plain, SIZE, NULL, 0);
   }
   t2 = clock();
   clock_t tdiff3 = (t2 - t1);

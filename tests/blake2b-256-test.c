@@ -9,7 +9,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "Hacl_Hash_Blake2b_256.h"
+#include "Hacl_Hash_Blake2b_Simd256.h"
 
 #include "test_helpers.h"
 
@@ -36,7 +36,7 @@ print_test2b(int in_len,
   uint8_t comp[exp_len];
   memset(comp, 0, exp_len * sizeof comp[0]);
 
-  Hacl_Hash_Blake2b_256_hash_with_key(comp, exp_len, in, in_len, key, key_len);
+  Hacl_Hash_Blake2b_Simd256_hash_with_key(comp, exp_len, in, in_len, key, key_len);
   printf("testing blake2b vec-256:\n");
   bool ok = print_result(exp_len, comp, exp);
   return ok;
@@ -70,12 +70,12 @@ main()
   memset(plain, 'P', SIZE);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_Blake2b_256_hash_with_key(plain, 64, plain, SIZE, NULL, 0);
+    Hacl_Hash_Blake2b_Simd256_hash_with_key(plain, 64, plain, SIZE, NULL, 0);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_Blake2b_256_hash_with_key(plain, 64, plain, SIZE, NULL, 0);
+    Hacl_Hash_Blake2b_Simd256_hash_with_key(plain, 64, plain, SIZE, NULL, 0);
   }
   b = cpucycles_end();
   t2 = clock();

@@ -10,7 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2s_Simd128.h"
 #include "blake2_vectors.h"
 #include "test_helpers.h"
 
@@ -30,72 +30,72 @@ main()
   // implemented.
   blake2_test_vector* v = &vectors2s[5];
 
-  blake2_state* s = Hacl_Hash_Blake2s_128_malloc();
-  assert(Hacl_Hash_Blake2s_128_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  blake2_state* s = Hacl_Hash_Blake2s_Simd128_malloc();
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input, v->input_len) == 0);
-  Hacl_Hash_Blake2s_128_digest(s, tag);
+  Hacl_Hash_Blake2s_Simd128_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_128_reset(s);
-  assert(Hacl_Hash_Blake2s_128_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  Hacl_Hash_Blake2s_Simd128_reset(s);
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input, v->input_len) == 0);
-  Hacl_Hash_Blake2s_128_digest(s, tag);
+  Hacl_Hash_Blake2s_Simd128_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_128_reset(s);
-  assert(Hacl_Hash_Blake2s_128_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(s, v->input, 8) ==
+  Hacl_Hash_Blake2s_Simd128_reset(s);
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, v->input, 8) ==
          0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 8, 8) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 16, 16) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 32, 32) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 64, 64) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 128, 127) == 0);
-  Hacl_Hash_Blake2s_128_digest(s, tag);
+  Hacl_Hash_Blake2s_Simd128_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_128_reset(s);
-  assert(Hacl_Hash_Blake2s_128_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(s, v->input, 8) ==
+  Hacl_Hash_Blake2s_Simd128_reset(s);
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, v->input, 8) ==
          0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 8, 8) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 16, 16) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 32, 32) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 64, 64) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 128, v->input_len - 128) == 0);
-  Hacl_Hash_Blake2s_128_digest(s, tag);
+  Hacl_Hash_Blake2s_Simd128_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_128_reset(s);
-  assert(Hacl_Hash_Blake2s_128_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(s, v->input, 8) ==
+  Hacl_Hash_Blake2s_Simd128_reset(s);
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_Simd128_update(s, v->input, 8) ==
          0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 8, 8) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 16, 16) == 0);
-  assert(Hacl_Hash_Blake2s_128_update(
+  assert(Hacl_Hash_Blake2s_Simd128_update(
            s, v->input + 32, v->input_len - 32) == 0);
-  Hacl_Hash_Blake2s_128_digest(s, tag);
+  Hacl_Hash_Blake2s_Simd128_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
-  Hacl_Hash_Blake2s_128_free(s);
+  Hacl_Hash_Blake2s_Simd128_free(s);
 
   if (ok)
     return EXIT_SUCCESS;
