@@ -43,4 +43,4 @@ let free = F.free hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
 
 let copy = F.copy hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
 
-let hash: Hacl.Hash.Definitions.hash_st SHA1 = fun output input input_len -> Hacl.Hash.SHA1.legacy_hash output input input_len
+let hash: Hacl.Hash.Definitions.hash_st SHA1 = fun output input input_len -> Hacl.Hash.SHA1.hash output input input_len

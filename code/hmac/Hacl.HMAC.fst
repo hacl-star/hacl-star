@@ -419,10 +419,10 @@ let mk_compute i hash alloca init update_multi update_last finish dst key key_le
   (**)                     loc_buffer opad `loc_union` loc_buffer s) h1 h2);
   (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7
 
-let legacy_compute_sha1: compute_st SHA1 =
+let compute_sha1: compute_st SHA1 =
   let open Hacl.Hash.SHA1 in
-  mk_compute (D.mk_impl SHA1 ()) legacy_hash legacy_alloca legacy_init
-             legacy_update_multi legacy_update_last legacy_finish
+  mk_compute (D.mk_impl SHA1 ()) hash alloca init
+             update_multi update_last finish
 
 let compute_sha2_256: compute_st SHA2_256 =
   let open Hacl.Hash.SHA2 in

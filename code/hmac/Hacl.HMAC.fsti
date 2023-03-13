@@ -55,7 +55,7 @@ val mk_compute:
 
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
 `dst` must point to 20 bytes of memory."]
-val legacy_compute_sha1: compute_st SHA1
+val compute_sha1: compute_st SHA1
 
 [@@ Comment "Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
 

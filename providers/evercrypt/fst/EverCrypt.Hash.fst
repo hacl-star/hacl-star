@@ -268,8 +268,8 @@ let create a =
 // how to do it for future reference and/or future other implementations.
 let init #a s =
   match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.legacy_init p
-  | SHA1_s p -> Hacl.Hash.SHA1.legacy_init p
+  | MD5_s p -> Hacl.Hash.MD5.init p
+  | SHA1_s p -> Hacl.Hash.SHA1.init p
   | SHA2_224_s p -> Hacl.Hash.SHA2.init_224 p
   | SHA2_256_s p -> Hacl.Hash.SHA2.init_256 p
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
@@ -332,10 +332,10 @@ let update_multi #a s prevlen blocks len =
   match !*s with
   | MD5_s p ->
       let n = len / block_len MD5 in
-      Hacl.Hash.MD5.legacy_update_multi p () blocks n
+      Hacl.Hash.MD5.update_multi p () blocks n
   | SHA1_s p ->
       let n = len / block_len SHA1 in
-      Hacl.Hash.SHA1.legacy_update_multi p () blocks n
+      Hacl.Hash.SHA1.update_multi p () blocks n
   | SHA2_224_s p ->
       let n = len / block_len SHA2_224 in
       update_multi_224 p () blocks n
@@ -395,9 +395,9 @@ let update_last #a s prev_len last last_len =
   [@inline_let] let cast = FStar.Int.Cast.Full.uint64_to_uint128 in
   match !*s with
   | MD5_s p ->
-      Hacl.Hash.MD5.legacy_update_last p prev_len last last_len
+      Hacl.Hash.MD5.update_last p prev_len last last_len
   | SHA1_s p ->
-      Hacl.Hash.SHA1.legacy_update_last p prev_len last last_len
+      Hacl.Hash.SHA1.update_last p prev_len last last_len
   | SHA2_224_s p ->
       update_last_224 p prev_len last last_len
   | SHA2_256_s p ->
@@ -459,8 +459,8 @@ let modulo_sub_lemma a b c =
 
 let finish #a s dst =
   match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.legacy_finish p dst
-  | SHA1_s p -> Hacl.Hash.SHA1.legacy_finish p dst
+  | MD5_s p -> Hacl.Hash.MD5.finish p dst
+  | SHA1_s p -> Hacl.Hash.SHA1.finish p dst
   | SHA2_224_s p -> Hacl.Hash.SHA2.finish_224 p dst
   | SHA2_256_s p -> Hacl.Hash.SHA2.finish_256 p dst
   | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p dst

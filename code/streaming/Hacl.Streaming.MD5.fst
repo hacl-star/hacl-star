@@ -33,15 +33,15 @@ let state_t_md5 = state_t MD5
 let state_t = Hacl.Streaming.MD.state_32
 
 noextract
-let legacy_alloca = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_malloc = F.malloc hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_reset = F.reset hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+let alloca = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let malloc = F.malloc hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let reset = F.reset hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 
 [@@ Comment "0 = success, 1 = max length exceeded" ]
-let legacy_update = F.update hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
-let legacy_digest = F.digest hacl_md5 () (state_t_md5.s ()) (G.erased unit)
-let legacy_free = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+let update = F.update hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
+let digest = F.digest hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let free = F.free hacl_md5 (G.hide ()) (state_t_md5.s ()) (G.erased unit)
 
-let legacy_copy = F.copy hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+let copy = F.copy hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 
-let legacy_hash: Hacl.Hash.Definitions.hash_st MD5 = fun output input input_len -> Hacl.Hash.MD5.legacy_hash output input input_len
+let hash: Hacl.Hash.Definitions.hash_st MD5 = fun output input input_len -> Hacl.Hash.MD5.hash output input input_len
