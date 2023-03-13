@@ -142,7 +142,7 @@ let evercrypt_hash : block hash_alg =
 
 #pop-options
 
-let hash_state =
+let state_t =
   F.state_s evercrypt_hash SHA2_256 ((agile_state).s SHA2_256) (G.erased unit)
 
 // Public API (streaming)
