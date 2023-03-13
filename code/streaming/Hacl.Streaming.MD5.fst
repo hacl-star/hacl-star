@@ -30,7 +30,7 @@ inline_for_extraction noextract
 let state_t_md5 = state_t MD5
 
 /// Type abbreviation - for pretty code generation
-let state = Hacl.Streaming.MD.state_32
+let state_t = Hacl.Streaming.MD.state_32
 
 noextract
 let legacy_alloca = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
