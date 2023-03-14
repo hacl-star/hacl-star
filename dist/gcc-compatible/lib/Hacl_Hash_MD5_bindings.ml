@@ -17,8 +17,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_MD5_update_last"
         ((ptr uint32_t) @->
            (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
-    let hacl_Hash_MD5_hash =
-      foreign "Hacl_Hash_MD5_hash"
+    let hacl_Hash_MD5_hash_oneshot =
+      foreign "Hacl_Hash_MD5_hash_oneshot"
         (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     type hacl_Hash_MD5_state_t = hacl_Streaming_MD_state_32
     let hacl_Hash_MD5_state_t =
@@ -44,7 +44,7 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_MD5_copy"
         ((ptr hacl_Streaming_MD_state_32) @->
            (returning (ptr hacl_Streaming_MD_state_32)))
-    let hacl_Hash_MD5_hash0 =
-      foreign "Hacl_Hash_MD5_hash0"
+    let hacl_Hash_MD5_hash =
+      foreign "Hacl_Hash_MD5_hash"
         (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
   end

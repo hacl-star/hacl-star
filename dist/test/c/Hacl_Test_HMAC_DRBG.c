@@ -882,7 +882,7 @@ static void update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t
   update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
-static void hash(uint8_t *output, uint8_t *input, uint32_t input_len)
+static void hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[5U] =
@@ -952,7 +952,7 @@ compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32
   }
   else
   {
-    hash(nkey, key, key_len);
+    hash_oneshot(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];

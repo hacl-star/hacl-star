@@ -1198,9 +1198,9 @@ Hacl_Hash_MD5_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32
 
 /* SNIPPET_END: Hacl_Hash_MD5_update_last */
 
-/* SNIPPET_START: Hacl_Hash_MD5_hash */
+/* SNIPPET_START: Hacl_Hash_MD5_hash_oneshot */
 
-void Hacl_Hash_MD5_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
+void Hacl_Hash_MD5_hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[4U] =
@@ -1229,7 +1229,7 @@ void Hacl_Hash_MD5_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
   Hacl_Hash_MD5_finish(s, output);
 }
 
-/* SNIPPET_END: Hacl_Hash_MD5_hash */
+/* SNIPPET_END: Hacl_Hash_MD5_hash_oneshot */
 
 /* SNIPPET_START: Hacl_Hash_MD5_malloc */
 
@@ -1526,12 +1526,12 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_copy(Hacl_Streaming_MD_state_32 *s0)
 
 /* SNIPPET_END: Hacl_Hash_MD5_copy */
 
-/* SNIPPET_START: Hacl_Hash_MD5_hash0 */
+/* SNIPPET_START: Hacl_Hash_MD5_hash */
 
-void Hacl_Hash_MD5_hash0(uint8_t *output, uint8_t *input, uint32_t input_len)
+void Hacl_Hash_MD5_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
-  Hacl_Hash_MD5_hash(output, input, input_len);
+  Hacl_Hash_MD5_hash_oneshot(output, input, input_len);
 }
 
-/* SNIPPET_END: Hacl_Hash_MD5_hash0 */
+/* SNIPPET_END: Hacl_Hash_MD5_hash */
 

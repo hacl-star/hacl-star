@@ -64,7 +64,7 @@ Hacl_HMAC_compute_sha1(
   }
   else
   {
-    Hacl_Hash_SHA1_hash(nkey, key, key_len);
+    Hacl_Hash_SHA1_hash_oneshot(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));

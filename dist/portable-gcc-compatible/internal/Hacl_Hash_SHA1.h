@@ -62,11 +62,11 @@ Hacl_Hash_SHA1_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint3
 
 /* SNIPPET_END: Hacl_Hash_SHA1_update_last */
 
-/* SNIPPET_START: Hacl_Hash_SHA1_hash */
+/* SNIPPET_START: Hacl_Hash_SHA1_hash_oneshot */
 
-void Hacl_Hash_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
+void Hacl_Hash_SHA1_hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_len);
 
-/* SNIPPET_END: Hacl_Hash_SHA1_hash */
+/* SNIPPET_END: Hacl_Hash_SHA1_hash_oneshot */
 
 #if defined(__cplusplus)
 }

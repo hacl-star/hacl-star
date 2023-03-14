@@ -83,11 +83,11 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_copy(Hacl_Streaming_MD_state_32 *s0);
 
 /* SNIPPET_END: Hacl_Hash_SHA1_copy */
 
-/* SNIPPET_START: Hacl_Hash_SHA1_hash0 */
+/* SNIPPET_START: Hacl_Hash_SHA1_hash */
 
-void Hacl_Hash_SHA1_hash0(uint8_t *output, uint8_t *input, uint32_t input_len);
+void Hacl_Hash_SHA1_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
 
-/* SNIPPET_END: Hacl_Hash_SHA1_hash0 */
+/* SNIPPET_END: Hacl_Hash_SHA1_hash */
 
 #if defined(__cplusplus)
 }

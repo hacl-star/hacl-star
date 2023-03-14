@@ -2003,12 +2003,12 @@ EverCrypt_Hash_Incremental_hash(
   {
     case Spec_Hash_Definitions_MD5:
       {
-        Hacl_Hash_MD5_hash(output, input, input_len);
+        Hacl_Hash_MD5_hash_oneshot(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        Hacl_Hash_SHA1_hash(output, input, input_len);
+        Hacl_Hash_SHA1_hash_oneshot(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_224:

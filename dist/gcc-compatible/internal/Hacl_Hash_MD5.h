@@ -46,7 +46,7 @@ void Hacl_Hash_MD5_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 void
 Hacl_Hash_MD5_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len);
 
-void Hacl_Hash_MD5_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
+void Hacl_Hash_MD5_hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 #if defined(__cplusplus)
 }

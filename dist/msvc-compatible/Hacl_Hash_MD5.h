@@ -55,7 +55,7 @@ void Hacl_Hash_MD5_free(Hacl_Streaming_MD_state_32 *state);
 
 Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_copy(Hacl_Streaming_MD_state_32 *s0);
 
-void Hacl_Hash_MD5_hash0(uint8_t *output, uint8_t *input, uint32_t input_len);
+void Hacl_Hash_MD5_hash(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 #if defined(__cplusplus)
 }
