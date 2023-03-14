@@ -10,12 +10,12 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "Hacl_Hash_Blake2s_32.h"
+#include "Hacl_Hash_Blake2s.h"
 
 #include "blake2_vectors.h"
 #include "test_helpers.h"
 
-typedef struct Hacl_Hash_Blake2s_32_state_s blake2_state;
+typedef struct Hacl_Hash_Blake2s_state_s blake2_state;
 
 int
 main()
@@ -31,69 +31,69 @@ main()
   // implemented.
   blake2_test_vector* v = &vectors2s[5];
 
-  blake2_state* s = Hacl_Hash_Blake2s_32_malloc();
-  assert(Hacl_Hash_Blake2s_32_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(
+  blake2_state* s = Hacl_Hash_Blake2s_malloc();
+  assert(Hacl_Hash_Blake2s_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_update(
            s, v->input, v->input_len) == 0);
-  Hacl_Hash_Blake2s_32_digest(s, tag);
+  Hacl_Hash_Blake2s_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_32_reset(s);
-  assert(Hacl_Hash_Blake2s_32_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(
+  Hacl_Hash_Blake2s_reset(s);
+  assert(Hacl_Hash_Blake2s_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_update(
            s, v->input, v->input_len) == 0);
-  Hacl_Hash_Blake2s_32_digest(s, tag);
+  Hacl_Hash_Blake2s_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_32_reset(s);
-  assert(Hacl_Hash_Blake2s_32_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input, 8) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 8, 8) ==
+  Hacl_Hash_Blake2s_reset(s);
+  assert(Hacl_Hash_Blake2s_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_update(s, v->input, 8) == 0);
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 8, 8) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 16, 16) ==
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 16, 16) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 32, 32) ==
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 32, 32) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 64, 64) ==
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 64, 64) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(
+  assert(Hacl_Hash_Blake2s_update(
            s, v->input + 128, 127) == 0);
-  Hacl_Hash_Blake2s_32_digest(s, tag);
+  Hacl_Hash_Blake2s_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_32_reset(s);
-  assert(Hacl_Hash_Blake2s_32_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input, 8) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 8, 8) ==
+  Hacl_Hash_Blake2s_reset(s);
+  assert(Hacl_Hash_Blake2s_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_update(s, v->input, 8) == 0);
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 8, 8) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 16, 16) ==
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 16, 16) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 32, 32) ==
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 32, 32) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 64, 64) ==
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 64, 64) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(
+  assert(Hacl_Hash_Blake2s_update(
            s, v->input + 128, v->input_len - 128) == 0);
-  Hacl_Hash_Blake2s_32_digest(s, tag);
+  Hacl_Hash_Blake2s_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
   v++;
-  Hacl_Hash_Blake2s_32_reset(s);
-  assert(Hacl_Hash_Blake2s_32_update(s, NULL, 0) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input, 8) == 0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 8, 8) ==
+  Hacl_Hash_Blake2s_reset(s);
+  assert(Hacl_Hash_Blake2s_update(s, NULL, 0) == 0);
+  assert(Hacl_Hash_Blake2s_update(s, v->input, 8) == 0);
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 8, 8) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(s, v->input + 16, 16) ==
+  assert(Hacl_Hash_Blake2s_update(s, v->input + 16, 16) ==
          0);
-  assert(Hacl_Hash_Blake2s_32_update(
+  assert(Hacl_Hash_Blake2s_update(
            s, v->input + 32, v->input_len - 32) == 0);
-  Hacl_Hash_Blake2s_32_digest(s, tag);
+  Hacl_Hash_Blake2s_digest(s, tag);
   ok &= compare_and_print(32, tag, v->expected);
 
-  Hacl_Hash_Blake2s_32_free(s);
+  Hacl_Hash_Blake2s_free(s);
 
   if (ok)
     return EXIT_SUCCESS;
