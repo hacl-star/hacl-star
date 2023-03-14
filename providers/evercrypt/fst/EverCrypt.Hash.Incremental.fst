@@ -290,8 +290,8 @@ val hash:
     B.as_seq h1 output == Spec.Agile.Hash.hash a (B.as_seq h0 input))
 let hash a output input input_len =
   match a with
-  | MD5 -> Hacl.Hash.MD5.hash output input input_len
-  | SHA1 -> Hacl.Hash.SHA1.hash output input input_len
+  | MD5 -> Hacl.Hash.MD5.hash_oneshot output input input_len
+  | SHA1 -> Hacl.Hash.SHA1.hash_oneshot output input input_len
   | SHA2_224 -> hash_224 output input input_len
   | SHA2_256 -> hash_256 output input input_len
   | SHA2_384 -> Hacl.Hash.SHA2.hash_384 output input input_len

@@ -13,5 +13,5 @@ let update_multi: update_multi_st (|MD5, ()|) =
 let update_last: update_last_st (|MD5, ()|) =
   Hacl.Hash.MD.mk_update_last MD5 update_multi pad
 
-let hash: hash_st MD5 =
+let hash_oneshot: hash_st MD5 =
   Hacl.Hash.MD.mk_hash MD5 alloca update_multi update_last finish

@@ -421,7 +421,7 @@ let mk_compute i hash alloca init update_multi update_last finish dst key key_le
 
 let compute_sha1: compute_st SHA1 =
   let open Hacl.Hash.SHA1 in
-  mk_compute (D.mk_impl SHA1 ()) hash alloca init
+  mk_compute (D.mk_impl SHA1 ()) hash_oneshot alloca init
              update_multi update_last finish
 
 let compute_sha2_256: compute_st SHA2_256 =

@@ -13,5 +13,5 @@ let update_multi: update_multi_st (|SHA1, ()|) =
 let update_last: update_last_st (|SHA1, ()|) =
   Hacl.Hash.MD.mk_update_last SHA1 update_multi pad
 
-let hash: hash_st SHA1 =
+let hash_oneshot: hash_st SHA1 =
   Hacl.Hash.MD.mk_hash SHA1 alloca update_multi update_last finish

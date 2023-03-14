@@ -7,4 +7,4 @@ include Hacl.Hash.Core.SHA1
 
 val update_multi: update_multi_st (|SHA1, ()|)
 val update_last: update_last_st (|SHA1, ()|)
-val hash: hash_st SHA1
+val hash_oneshot: hash_st SHA1
