@@ -36,7 +36,7 @@ The key can be any length and will be hashed if it is longer and padded if it is
 `dst` must point to 20 bytes of memory.
 */
 void
-Hacl_HMAC_legacy_compute_sha1(
+Hacl_HMAC_compute_sha1(
   uint8_t *dst,
   uint8_t *key,
   uint32_t key_len,
@@ -64,7 +64,7 @@ Hacl_HMAC_legacy_compute_sha1(
   }
   else
   {
-    Hacl_Hash_SHA1_legacy_hash(nkey, key, key_len);
+    Hacl_Hash_SHA1_hash(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -93,7 +93,7 @@ Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst1 = ipad;
   if (data_len == (uint32_t)0U)
   {
-    Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)0U, ipad, (uint32_t)64U);
+    Hacl_Hash_SHA1_update_last(s, (uint64_t)0U, ipad, (uint32_t)64U);
   }
   else
   {
@@ -115,16 +115,16 @@ Hacl_HMAC_legacy_compute_sha1(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    Hacl_Hash_SHA1_legacy_update_multi(s, ipad, (uint32_t)1U);
-    Hacl_Hash_SHA1_legacy_update_multi(s, full_blocks, n_blocks);
-    Hacl_Hash_SHA1_legacy_update_last(s,
+    Hacl_Hash_SHA1_update_multi(s, ipad, (uint32_t)1U);
+    Hacl_Hash_SHA1_update_multi(s, full_blocks, n_blocks);
+    Hacl_Hash_SHA1_update_last(s,
       (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
       rem,
       rem_len);
   }
-  Hacl_Hash_SHA1_legacy_finish(s, dst1);
+  Hacl_Hash_SHA1_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_Hash_SHA1_legacy_init(s);
+  Hacl_Hash_SHA1_init(s);
   uint32_t block_len = (uint32_t)64U;
   uint32_t n_blocks0 = (uint32_t)20U / block_len;
   uint32_t rem0 = (uint32_t)20U % block_len;
@@ -144,13 +144,13 @@ Hacl_HMAC_legacy_compute_sha1(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  Hacl_Hash_SHA1_legacy_update_multi(s, opad, (uint32_t)1U);
-  Hacl_Hash_SHA1_legacy_update_multi(s, full_blocks, n_blocks);
-  Hacl_Hash_SHA1_legacy_update_last(s,
+  Hacl_Hash_SHA1_update_multi(s, opad, (uint32_t)1U);
+  Hacl_Hash_SHA1_update_multi(s, full_blocks, n_blocks);
+  Hacl_Hash_SHA1_update_last(s,
     (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
     rem,
     rem_len);
-  Hacl_Hash_SHA1_legacy_finish(s, dst);
+  Hacl_Hash_SHA1_finish(s, dst);
 }
 
 /**

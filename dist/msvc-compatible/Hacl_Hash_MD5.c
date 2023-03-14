@@ -50,12 +50,12 @@ _t[64U] =
     (uint32_t)0xf7537e82U, (uint32_t)0xbd3af235U, (uint32_t)0x2ad7d2bbU, (uint32_t)0xeb86d391U
   };
 
-void Hacl_Hash_MD5_legacy_init(uint32_t *s)
+void Hacl_Hash_MD5_init(uint32_t *s)
 {
   KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, s[i] = _h0[i];);
 }
 
-static void legacy_update(uint32_t *abcd, uint8_t *x)
+static void update(uint32_t *abcd, uint8_t *x)
 {
   uint32_t aa = abcd[0U];
   uint32_t bb = abcd[1U];
@@ -1095,7 +1095,7 @@ static void legacy_update(uint32_t *abcd, uint8_t *x)
   abcd[3U] = d + dd;
 }
 
-static void legacy_pad(uint64_t len, uint8_t *dst)
+static void pad(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
@@ -1120,7 +1120,7 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   store64_le(dst3, len << (uint32_t)3U);
 }
 
-void Hacl_Hash_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
+void Hacl_Hash_MD5_finish(uint32_t *s, uint8_t *dst)
 {
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -1129,30 +1129,25 @@ void Hacl_Hash_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
     store32_le(dst + i * (uint32_t)4U, s[i]););
 }
 
-void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
+void Hacl_Hash_MD5_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    legacy_update(s, block);
+    update(s, block);
   }
 }
 
 void
-Hacl_Hash_MD5_legacy_update_last(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-)
+Hacl_Hash_MD5_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len)
 {
   uint32_t blocks_n = input_len / (uint32_t)64U;
   uint32_t blocks_len = blocks_n * (uint32_t)64U;
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_MD5_legacy_update_multi(s, blocks, blocks_n);
+  Hacl_Hash_MD5_update_multi(s, blocks, blocks_n);
   uint64_t total_input_len = prev_len + (uint64_t)input_len;
   uint32_t
   pad_len =
@@ -1167,11 +1162,11 @@ Hacl_Hash_MD5_legacy_update_last(
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
-  legacy_pad(total_input_len, tmp_pad);
-  Hacl_Hash_MD5_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
+  pad(total_input_len, tmp_pad);
+  Hacl_Hash_MD5_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
-void Hacl_Hash_MD5_legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
+void Hacl_Hash_MD5_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[4U] =
@@ -1195,12 +1190,12 @@ void Hacl_Hash_MD5_legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_l
   uint8_t *blocks = blocks0;
   uint32_t rest_len = rest_len0;
   uint8_t *rest = rest0;
-  Hacl_Hash_MD5_legacy_update_multi(s, blocks, blocks_n);
-  Hacl_Hash_MD5_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_MD5_legacy_finish(s, output);
+  Hacl_Hash_MD5_update_multi(s, blocks, blocks_n);
+  Hacl_Hash_MD5_update_last(s, (uint64_t)blocks_len, rest, rest_len);
+  Hacl_Hash_MD5_finish(s, output);
 }
 
-Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_legacy_malloc(void)
+Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_malloc(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint32_t));
@@ -1209,32 +1204,28 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_legacy_malloc(void)
   Hacl_Streaming_MD_state_32
   *p = (Hacl_Streaming_MD_state_32 *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_MD_state_32));
   p[0U] = s;
-  Hacl_Hash_MD5_legacy_init(block_state);
+  Hacl_Hash_MD5_init(block_state);
   return p;
 }
 
-void Hacl_Hash_MD5_legacy_reset(Hacl_Streaming_MD_state_32 *state1)
+void Hacl_Hash_MD5_reset(Hacl_Streaming_MD_state_32 *state)
 {
-  Hacl_Streaming_MD_state_32 scrut = *state1;
+  Hacl_Streaming_MD_state_32 scrut = *state;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
-  Hacl_Hash_MD5_legacy_init(block_state);
+  Hacl_Hash_MD5_init(block_state);
   Hacl_Streaming_MD_state_32
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
-  state1[0U] = tmp;
+  state[0U] = tmp;
 }
 
 /**
 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Hash_MD5_legacy_update(
-  Hacl_Streaming_MD_state_32 *state1,
-  uint8_t *chunk,
-  uint32_t chunk_len
-)
+Hacl_Hash_MD5_update(Hacl_Streaming_MD_state_32 *state, uint8_t *chunk, uint32_t chunk_len)
 {
-  Hacl_Streaming_MD_state_32 s = *state1;
+  Hacl_Streaming_MD_state_32 s = *state;
   uint64_t total_len = s.total_len;
   if ((uint64_t)chunk_len > (uint64_t)2305843009213693951U - total_len)
   {
@@ -1251,7 +1242,7 @@ Hacl_Hash_MD5_legacy_update(
   }
   if (chunk_len <= (uint32_t)64U - sz)
   {
-    Hacl_Streaming_MD_state_32 s1 = *state1;
+    Hacl_Streaming_MD_state_32 s1 = *state;
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -1267,7 +1258,7 @@ Hacl_Hash_MD5_legacy_update(
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state1
+    *state
     =
       (
         (Hacl_Streaming_MD_state_32){
@@ -1279,7 +1270,7 @@ Hacl_Hash_MD5_legacy_update(
   }
   else if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_MD_state_32 s1 = *state1;
+    Hacl_Streaming_MD_state_32 s1 = *state;
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -1294,7 +1285,7 @@ Hacl_Hash_MD5_legacy_update(
     }
     if (!(sz1 == (uint32_t)0U))
     {
-      Hacl_Hash_MD5_legacy_update_multi(block_state1, buf, (uint32_t)1U);
+      Hacl_Hash_MD5_update_multi(block_state1, buf, (uint32_t)1U);
     }
     uint32_t ite;
     if
@@ -1316,10 +1307,10 @@ Hacl_Hash_MD5_legacy_update(
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    Hacl_Hash_MD5_legacy_update_multi(block_state1, data1, data1_len / (uint32_t)64U);
+    Hacl_Hash_MD5_update_multi(block_state1, data1, data1_len / (uint32_t)64U);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state1
+    *state
     =
       (
         (Hacl_Streaming_MD_state_32){
@@ -1334,7 +1325,7 @@ Hacl_Hash_MD5_legacy_update(
     uint32_t diff = (uint32_t)64U - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_Streaming_MD_state_32 s1 = *state1;
+    Hacl_Streaming_MD_state_32 s1 = *state;
     uint32_t *block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
@@ -1350,7 +1341,7 @@ Hacl_Hash_MD5_legacy_update(
     uint8_t *buf2 = buf0 + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state1
+    *state
     =
       (
         (Hacl_Streaming_MD_state_32){
@@ -1359,7 +1350,7 @@ Hacl_Hash_MD5_legacy_update(
           .total_len = total_len2
         }
       );
-    Hacl_Streaming_MD_state_32 s10 = *state1;
+    Hacl_Streaming_MD_state_32 s10 = *state;
     uint32_t *block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
@@ -1374,7 +1365,7 @@ Hacl_Hash_MD5_legacy_update(
     }
     if (!(sz1 == (uint32_t)0U))
     {
-      Hacl_Hash_MD5_legacy_update_multi(block_state1, buf, (uint32_t)1U);
+      Hacl_Hash_MD5_update_multi(block_state1, buf, (uint32_t)1U);
     }
     uint32_t ite;
     if
@@ -1396,10 +1387,10 @@ Hacl_Hash_MD5_legacy_update(
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    Hacl_Hash_MD5_legacy_update_multi(block_state1, data1, data1_len / (uint32_t)64U);
+    Hacl_Hash_MD5_update_multi(block_state1, data1, data1_len / (uint32_t)64U);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state1
+    *state
     =
       (
         (Hacl_Streaming_MD_state_32){
@@ -1412,9 +1403,9 @@ Hacl_Hash_MD5_legacy_update(
   return (uint32_t)0U;
 }
 
-void Hacl_Hash_MD5_legacy_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *output)
+void Hacl_Hash_MD5_digest(Hacl_Streaming_MD_state_32 *state, uint8_t *output)
 {
-  Hacl_Streaming_MD_state_32 scrut = *state1;
+  Hacl_Streaming_MD_state_32 scrut = *state;
   uint32_t *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1441,23 +1432,23 @@ void Hacl_Hash_MD5_legacy_digest(Hacl_Streaming_MD_state_32 *state1, uint8_t *ou
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
-  Hacl_Hash_MD5_legacy_update_multi(tmp_block_state, buf_multi, (uint32_t)0U);
+  Hacl_Hash_MD5_update_multi(tmp_block_state, buf_multi, (uint32_t)0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  Hacl_Hash_MD5_legacy_update_last(tmp_block_state, prev_len_last, buf_last, r);
-  Hacl_Hash_MD5_legacy_finish(tmp_block_state, output);
+  Hacl_Hash_MD5_update_last(tmp_block_state, prev_len_last, buf_last, r);
+  Hacl_Hash_MD5_finish(tmp_block_state, output);
 }
 
-void Hacl_Hash_MD5_legacy_free(Hacl_Streaming_MD_state_32 *state1)
+void Hacl_Hash_MD5_free(Hacl_Streaming_MD_state_32 *state)
 {
-  Hacl_Streaming_MD_state_32 scrut = *state1;
+  Hacl_Streaming_MD_state_32 scrut = *state;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
   KRML_HOST_FREE(block_state);
   KRML_HOST_FREE(buf);
-  KRML_HOST_FREE(state1);
+  KRML_HOST_FREE(state);
 }
 
-Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_legacy_copy(Hacl_Streaming_MD_state_32 *s0)
+Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_copy(Hacl_Streaming_MD_state_32 *s0)
 {
   Hacl_Streaming_MD_state_32 scrut = *s0;
   uint32_t *block_state0 = scrut.block_state;
@@ -1475,8 +1466,8 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_legacy_copy(Hacl_Streaming_MD_state_32
   return p;
 }
 
-void Hacl_Hash_MD5_legacy_hash0(uint8_t *output, uint8_t *input, uint32_t input_len)
+void Hacl_Hash_MD5_hash0(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
-  Hacl_Hash_MD5_legacy_hash(output, input, input_len);
+  Hacl_Hash_MD5_hash(output, input, input_len);
 }
 

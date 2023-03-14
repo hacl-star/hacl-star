@@ -40,7 +40,7 @@ extern "C" {
 #include "Hacl_Hash_Blake2s_32.h"
 #include "Hacl_Hash_Blake2b_32.h"
 
-/* SNIPPET_START: Hacl_HMAC_legacy_compute_sha1 */
+/* SNIPPET_START: Hacl_HMAC_compute_sha1 */
 
 /**
 Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
@@ -49,7 +49,7 @@ The key can be any length and will be hashed if it is longer and padded if it is
 `dst` must point to 20 bytes of memory.
 */
 void
-Hacl_HMAC_legacy_compute_sha1(
+Hacl_HMAC_compute_sha1(
   uint8_t *dst,
   uint8_t *key,
   uint32_t key_len,
@@ -57,7 +57,7 @@ Hacl_HMAC_legacy_compute_sha1(
   uint32_t data_len
 );
 
-/* SNIPPET_END: Hacl_HMAC_legacy_compute_sha1 */
+/* SNIPPET_END: Hacl_HMAC_compute_sha1 */
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha2_256 */
 

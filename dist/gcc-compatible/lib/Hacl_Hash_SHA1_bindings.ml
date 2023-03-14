@@ -5,25 +5,24 @@ module Bindings(F:Cstubs.FOREIGN) =
     module Hacl_Streaming_Types_applied =
       (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
     open Hacl_Streaming_Types_applied
-    let hacl_Hash_SHA1_legacy_init =
-      foreign "Hacl_Hash_SHA1_legacy_init"
-        ((ptr uint32_t) @-> (returning void))
-    let hacl_Hash_SHA1_legacy_finish =
-      foreign "Hacl_Hash_SHA1_legacy_finish"
+    let hacl_Hash_SHA1_init =
+      foreign "Hacl_Hash_SHA1_init" ((ptr uint32_t) @-> (returning void))
+    let hacl_Hash_SHA1_finish =
+      foreign "Hacl_Hash_SHA1_finish"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (returning void)))
-    let hacl_Hash_SHA1_legacy_update_multi =
-      foreign "Hacl_Hash_SHA1_legacy_update_multi"
+    let hacl_Hash_SHA1_update_multi =
+      foreign "Hacl_Hash_SHA1_update_multi"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
-    let hacl_Hash_SHA1_legacy_update_last =
-      foreign "Hacl_Hash_SHA1_legacy_update_last"
+    let hacl_Hash_SHA1_update_last =
+      foreign "Hacl_Hash_SHA1_update_last"
         ((ptr uint32_t) @->
            (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
-    let hacl_Hash_SHA1_legacy_hash =
-      foreign "Hacl_Hash_SHA1_legacy_hash"
+    let hacl_Hash_SHA1_hash =
+      foreign "Hacl_Hash_SHA1_hash"
         (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
-    type hacl_Hash_SHA1_state = hacl_Streaming_MD_state_32
-    let hacl_Hash_SHA1_state =
-      typedef hacl_Streaming_MD_state_32 "Hacl_Hash_SHA1_state"
+    type hacl_Hash_SHA1_state_t = hacl_Streaming_MD_state_32
+    let hacl_Hash_SHA1_state_t =
+      typedef hacl_Streaming_MD_state_32 "Hacl_Hash_SHA1_state_t"
     let hacl_Hash_SHA1_malloc =
       foreign "Hacl_Hash_SHA1_malloc"
         (void @-> (returning (ptr hacl_Streaming_MD_state_32)))
@@ -45,7 +44,7 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Hash_SHA1_copy"
         ((ptr hacl_Streaming_MD_state_32) @->
            (returning (ptr hacl_Streaming_MD_state_32)))
-    let hacl_Hash_SHA1_hash =
-      foreign "Hacl_Hash_SHA1_hash"
+    let hacl_Hash_SHA1_hash0 =
+      foreign "Hacl_Hash_SHA1_hash0"
         (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
   end

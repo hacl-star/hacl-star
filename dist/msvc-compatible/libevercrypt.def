@@ -57,11 +57,11 @@ EXPORTS
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
   Hacl_Hash_Definitions_hash_len
-  Hacl_Hash_SHA1_legacy_init
-  Hacl_Hash_SHA1_legacy_finish
-  Hacl_Hash_SHA1_legacy_update_multi
-  Hacl_Hash_SHA1_legacy_update_last
-  Hacl_Hash_SHA1_legacy_hash
+  Hacl_Hash_SHA1_init
+  Hacl_Hash_SHA1_finish
+  Hacl_Hash_SHA1_update_multi
+  Hacl_Hash_SHA1_update_last
+  Hacl_Hash_SHA1_hash
   Hacl_Hash_SHA1_malloc
   LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Hash_SHA1_reset
@@ -70,7 +70,7 @@ EXPORTS
   Hacl_Hash_SHA1_digest
   Hacl_Hash_SHA1_free
   Hacl_Hash_SHA1_copy
-  Hacl_Hash_SHA1_hash
+  Hacl_Hash_SHA1_hash0
   Hacl_Hash_Core_SHA2_init_224
   Hacl_Hash_Core_SHA2_init_256
   Hacl_Hash_Core_SHA2_init_384
@@ -92,7 +92,7 @@ EXPORTS
   Hacl_Hash_SHA2_hash_256
   Hacl_Hash_SHA2_hash_384
   Hacl_Hash_SHA2_hash_512
-  Hacl_HMAC_legacy_compute_sha1
+  Hacl_HMAC_compute_sha1
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
   Hacl_HMAC_compute_sha2_512
@@ -119,18 +119,18 @@ EXPORTS
   Hacl_Impl_SHA3_absorb_inner
   Hacl_Impl_SHA3_squeeze
   Hacl_Impl_SHA3_keccak
-  Hacl_Hash_MD5_legacy_init
-  Hacl_Hash_MD5_legacy_finish
-  Hacl_Hash_MD5_legacy_update_multi
-  Hacl_Hash_MD5_legacy_update_last
-  Hacl_Hash_MD5_legacy_hash
-  Hacl_Hash_MD5_legacy_malloc
-  Hacl_Hash_MD5_legacy_reset
-  Hacl_Hash_MD5_legacy_update
-  Hacl_Hash_MD5_legacy_digest
-  Hacl_Hash_MD5_legacy_free
-  Hacl_Hash_MD5_legacy_copy
-  Hacl_Hash_MD5_legacy_hash0
+  Hacl_Hash_MD5_init
+  Hacl_Hash_MD5_finish
+  Hacl_Hash_MD5_update_multi
+  Hacl_Hash_MD5_update_last
+  Hacl_Hash_MD5_hash
+  Hacl_Hash_MD5_malloc
+  Hacl_Hash_MD5_reset
+  Hacl_Hash_MD5_update
+  Hacl_Hash_MD5_digest
+  Hacl_Hash_MD5_free
+  Hacl_Hash_MD5_copy
+  Hacl_Hash_MD5_hash0
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq

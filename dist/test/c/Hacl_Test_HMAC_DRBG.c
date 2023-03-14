@@ -714,7 +714,7 @@ _h0[5U] =
     (uint32_t)0xc3d2e1f0U
   };
 
-static void legacy_init(uint32_t *s)
+static void init(uint32_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
@@ -722,7 +722,7 @@ static void legacy_init(uint32_t *s)
   }
 }
 
-static void legacy_update(uint32_t *h, uint8_t *l)
+static void update(uint32_t *h, uint8_t *l)
 {
   uint32_t ha = h[0U];
   uint32_t hb = h[1U];
@@ -813,7 +813,7 @@ static void legacy_update(uint32_t *h, uint8_t *l)
   h[4U] = ste + he;
 }
 
-static void legacy_pad(uint64_t len, uint8_t *dst)
+static void pad(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
@@ -838,7 +838,7 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
-static void legacy_finish(uint32_t *s, uint8_t *dst)
+static void finish(uint32_t *s, uint8_t *dst)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
@@ -846,25 +846,24 @@ static void legacy_finish(uint32_t *s, uint8_t *dst)
   }
 }
 
-static void legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
+static void update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    legacy_update(s, block);
+    update(s, block);
   }
 }
 
-static void
-legacy_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len)
+static void update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len)
 {
   uint32_t blocks_n = input_len / (uint32_t)64U;
   uint32_t blocks_len = blocks_n * (uint32_t)64U;
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  legacy_update_multi(s, blocks, blocks_n);
+  update_multi(s, blocks, blocks_n);
   uint64_t total_input_len = prev_len + (uint64_t)input_len;
   uint32_t
   pad_len =
@@ -879,11 +878,11 @@ legacy_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t inpu
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
-  legacy_pad(total_input_len, tmp_pad);
-  legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
+  pad(total_input_len, tmp_pad);
+  update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
-static void legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
+static void hash(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t
   s[5U] =
@@ -910,9 +909,9 @@ static void legacy_hash(uint8_t *output, uint8_t *input, uint32_t input_len)
   uint8_t *blocks = blocks0;
   uint32_t rest_len = rest_len0;
   uint8_t *rest = rest0;
-  legacy_update_multi(s, blocks, blocks_n);
-  legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  legacy_finish(s, output);
+  update_multi(s, blocks, blocks_n);
+  update_last(s, (uint64_t)blocks_len, rest, rest_len);
+  finish(s, output);
 }
 
 extern void C_String_print(C_String_t uu___);
@@ -931,13 +930,7 @@ The key can be any length and will be hashed if it is longer and padded if it is
 `dst` must point to 20 bytes of memory.
 */
 static void
-legacy_compute_sha1(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-)
+compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32_t data_len)
 {
   uint32_t l = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
@@ -959,7 +952,7 @@ legacy_compute_sha1(
   }
   else
   {
-    legacy_hash(nkey, key, key_len);
+    hash(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -988,7 +981,7 @@ legacy_compute_sha1(
   uint8_t *dst1 = ipad;
   if (data_len == (uint32_t)0U)
   {
-    legacy_update_last(s, (uint64_t)0U, ipad, (uint32_t)64U);
+    update_last(s, (uint64_t)0U, ipad, (uint32_t)64U);
   }
   else
   {
@@ -1010,13 +1003,13 @@ legacy_compute_sha1(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    legacy_update_multi(s, ipad, (uint32_t)1U);
-    legacy_update_multi(s, full_blocks, n_blocks);
-    legacy_update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
+    update_multi(s, ipad, (uint32_t)1U);
+    update_multi(s, full_blocks, n_blocks);
+    update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
-  legacy_finish(s, dst1);
+  finish(s, dst1);
   uint8_t *hash1 = ipad;
-  legacy_init(s);
+  init(s);
   uint32_t block_len = (uint32_t)64U;
   uint32_t n_blocks0 = (uint32_t)20U / block_len;
   uint32_t rem0 = (uint32_t)20U % block_len;
@@ -1036,10 +1029,10 @@ legacy_compute_sha1(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  legacy_update_multi(s, opad, (uint32_t)1U);
-  legacy_update_multi(s, full_blocks, n_blocks);
-  legacy_update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
-  legacy_finish(s, dst);
+  update_multi(s, opad, (uint32_t)1U);
+  update_multi(s, full_blocks, n_blocks);
+  update_last(s, (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
+  finish(s, dst);
 }
 
 /**
@@ -1557,8 +1550,8 @@ instantiate(
             (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         }
         input0[20U] = (uint8_t)0U;
-        legacy_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
-        legacy_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
+        compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
+        compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
         memcpy(k, k_, (uint32_t)20U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
         {
@@ -1576,8 +1569,8 @@ instantiate(
               (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
           }
           input[20U] = (uint8_t)1U;
-          legacy_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
-          legacy_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
+          compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
+          compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
           memcpy(k, k_0, (uint32_t)20U * sizeof (uint8_t));
         }
         break;
@@ -1814,8 +1807,8 @@ reseed(
             (entropy_input_len + additional_input_input_len) * sizeof (uint8_t));
         }
         input0[20U] = (uint8_t)0U;
-        legacy_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
-        legacy_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
+        compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
+        compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
         memcpy(k, k_, (uint32_t)20U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != (uint32_t)0U)
         {
@@ -1832,8 +1825,8 @@ reseed(
               (entropy_input_len + additional_input_input_len) * sizeof (uint8_t));
           }
           input[20U] = (uint8_t)1U;
-          legacy_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
-          legacy_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
+          compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
+          compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
           memcpy(k, k_0, (uint32_t)20U * sizeof (uint8_t));
         }
         ctr[0U] = (uint32_t)1U;
@@ -2054,8 +2047,8 @@ generate(
                 additional_input_len * sizeof (uint8_t));
             }
             input0[20U] = (uint8_t)0U;
-            legacy_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
-            legacy_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
+            compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
+            compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
             memcpy(k, k_, (uint32_t)20U * sizeof (uint8_t));
             if (additional_input_len != (uint32_t)0U)
             {
@@ -2072,8 +2065,8 @@ generate(
                   additional_input_len * sizeof (uint8_t));
               }
               input[20U] = (uint8_t)1U;
-              legacy_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
-              legacy_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
+              compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
+              compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
               memcpy(k, k_0, (uint32_t)20U * sizeof (uint8_t));
             }
           }
@@ -2082,13 +2075,13 @@ generate(
           uint8_t *out = output1;
           for (uint32_t i = (uint32_t)0U; i < max; i++)
           {
-            legacy_compute_sha1(v, k, (uint32_t)20U, v, (uint32_t)20U);
+            compute_sha1(v, k, (uint32_t)20U, v, (uint32_t)20U);
             memcpy(out + i * (uint32_t)20U, v, (uint32_t)20U * sizeof (uint8_t));
           }
           if (max * (uint32_t)20U < n)
           {
             uint8_t *block = output1 + max * (uint32_t)20U;
-            legacy_compute_sha1(v, k, (uint32_t)20U, v, (uint32_t)20U);
+            compute_sha1(v, k, (uint32_t)20U, v, (uint32_t)20U);
             memcpy(block, v, (n - max * (uint32_t)20U) * sizeof (uint8_t));
           }
           uint32_t input_len = (uint32_t)21U + additional_input_len;
@@ -2104,8 +2097,8 @@ generate(
               additional_input_len * sizeof (uint8_t));
           }
           input0[20U] = (uint8_t)0U;
-          legacy_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
-          legacy_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
+          compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
+          compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
           memcpy(k, k_, (uint32_t)20U * sizeof (uint8_t));
           if (additional_input_len != (uint32_t)0U)
           {
@@ -2122,8 +2115,8 @@ generate(
                 additional_input_len * sizeof (uint8_t));
             }
             input[20U] = (uint8_t)1U;
-            legacy_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
-            legacy_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
+            compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
+            compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
             memcpy(k, k_0, (uint32_t)20U * sizeof (uint8_t));
           }
           uint32_t old_ctr = ctr[0U];

@@ -47,7 +47,7 @@ The key can be any length and will be hashed if it is longer and padded if it is
 `dst` must point to 20 bytes of memory.
 */
 void
-Hacl_HMAC_legacy_compute_sha1(
+Hacl_HMAC_compute_sha1(
   uint8_t *dst,
   uint8_t *key,
   uint32_t key_len,

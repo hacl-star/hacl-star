@@ -58,17 +58,17 @@ uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_hash_len */
 
-/* SNIPPET_START: EverCrypt_Hash_Incremental_hash_state */
+/* SNIPPET_START: EverCrypt_Hash_Incremental_state_t */
 
-typedef struct EverCrypt_Hash_Incremental_hash_state_s
+typedef struct EverCrypt_Hash_Incremental_state_t_s
 {
   EverCrypt_Hash_state_s *block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-EverCrypt_Hash_Incremental_hash_state;
+EverCrypt_Hash_Incremental_state_t;
 
-/* SNIPPET_END: EverCrypt_Hash_Incremental_hash_state */
+/* SNIPPET_END: EverCrypt_Hash_Incremental_state_t */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_malloc */
 
@@ -78,7 +78,7 @@ choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
 efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
 before. The state is to be freed by calling `free`.
 */
-EverCrypt_Hash_Incremental_hash_state
+EverCrypt_Hash_Incremental_state_t
 *EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_malloc */
@@ -88,7 +88,7 @@ EverCrypt_Hash_Incremental_hash_state
 /**
 Reset an existing state to the initial hash state with empty data.
 */
-void EverCrypt_Hash_Incremental_reset(EverCrypt_Hash_Incremental_hash_state *state);
+void EverCrypt_Hash_Incremental_reset(EverCrypt_Hash_Incremental_state_t *state);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_reset */
 
@@ -103,7 +103,7 @@ algorithm. Both limits are unlikely to be attained in practice.
 */
 EverCrypt_Error_error_code
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_hash_state *state,
+  EverCrypt_Hash_Incremental_state_t *state,
   uint8_t *chunk,
   uint32_t chunk_len
 );
@@ -116,7 +116,7 @@ EverCrypt_Hash_Incremental_update(
 Perform a run-time test to determine which algorithm was chosen for the given piece of state.
 */
 Spec_Hash_Definitions_hash_alg
-EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_hash_state *s);
+EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_state_t *s);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_alg_of_state */
 
@@ -131,10 +131,7 @@ a call to `digest`, meaning the user may feed more data into the hash via
 therefore does not invalidate the client-held state.)
 */
 void
-EverCrypt_Hash_Incremental_digest(
-  EverCrypt_Hash_Incremental_hash_state *state,
-  uint8_t *output
-);
+EverCrypt_Hash_Incremental_digest(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_digest */
 
@@ -143,7 +140,7 @@ EverCrypt_Hash_Incremental_digest(
 /**
 Free a state previously allocated with `create_in`.
 */
-void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_hash_state *state);
+void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_t *state);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_free */
 
