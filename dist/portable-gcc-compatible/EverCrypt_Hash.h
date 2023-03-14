@@ -40,9 +40,9 @@ extern "C" {
 #include "Hacl_Hash_SHA3.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_Blake2s_Simd128.h"
-#include "Hacl_Hash_Blake2s_32.h"
+#include "Hacl_Hash_Blake2s.h"
 #include "Hacl_Hash_Blake2b_Simd256.h"
-#include "Hacl_Hash_Blake2b_32.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 

@@ -37,8 +37,8 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_Blake2s_32.h"
-#include "Hacl_Hash_Blake2b_32.h"
+#include "Hacl_Hash_Blake2s.h"
+#include "Hacl_Hash_Blake2b.h"
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha1 */
 

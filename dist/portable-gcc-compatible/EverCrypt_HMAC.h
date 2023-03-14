@@ -38,8 +38,8 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_Blake2s_32.h"
-#include "Hacl_Hash_Blake2b_32.h"
+#include "Hacl_Hash_Blake2s.h"
+#include "Hacl_Hash_Blake2b.h"
 
 /* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
 

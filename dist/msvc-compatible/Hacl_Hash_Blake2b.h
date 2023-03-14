@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_Hash_Blake2s_32_H
-#define __Hacl_Hash_Blake2s_32_H
+#ifndef __Hacl_Hash_Blake2b_H
+#define __Hacl_Hash_Blake2b_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -36,52 +36,53 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Lib_Memzero0.h"
+#include "Hacl_Krmllib.h"
 
-void Hacl_Hash_Blake2s_32_init(uint32_t *hash, uint32_t kk, uint32_t nn);
+void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
 
 void
-Hacl_Hash_Blake2s_32_update_key(
-  uint32_t *wv,
-  uint32_t *hash,
+Hacl_Hash_Blake2b_update_key(
+  uint64_t *wv,
+  uint64_t *hash,
   uint32_t kk,
   uint8_t *k,
   uint32_t ll
 );
 
 void
-Hacl_Hash_Blake2s_32_update_multi(
+Hacl_Hash_Blake2b_update_multi(
   uint32_t len,
-  uint32_t *wv,
-  uint32_t *hash,
-  uint64_t prev,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
   uint8_t *blocks,
   uint32_t nb
 );
 
 void
-Hacl_Hash_Blake2s_32_update_last(
+Hacl_Hash_Blake2b_update_last(
   uint32_t len,
-  uint32_t *wv,
-  uint32_t *hash,
-  uint64_t prev,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
   uint32_t rem,
   uint8_t *d
 );
 
-void Hacl_Hash_Blake2s_32_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
+void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
 /**
-Write the BLAKE2s digest of message `input` using key `key` into `output`.
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
 
 @param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
 @param key_len Length of the key. Can be 0.
 */
 void
-Hacl_Hash_Blake2s_32_hash_with_key(
+Hacl_Hash_Blake2b_hash_with_key(
   uint8_t *output,
   uint32_t output_len,
   uint8_t *input,
@@ -90,56 +91,52 @@ Hacl_Hash_Blake2s_32_hash_with_key(
   uint32_t key_len
 );
 
-uint32_t *Hacl_Hash_Blake2s_32_malloc_with_key(void);
+uint64_t *Hacl_Hash_Blake2b_malloc_with_key(void);
 
-typedef struct Hacl_Hash_Blake2s_32_block_state_t_s
+typedef struct Hacl_Hash_Blake2b_block_state_t_s
 {
-  uint32_t *fst;
-  uint32_t *snd;
+  uint64_t *fst;
+  uint64_t *snd;
 }
-Hacl_Hash_Blake2s_32_block_state_t;
+Hacl_Hash_Blake2b_block_state_t;
 
-typedef struct Hacl_Hash_Blake2s_32_state_t_s
+typedef struct Hacl_Hash_Blake2b_state_t_s
 {
-  Hacl_Hash_Blake2s_32_block_state_t block_state;
+  Hacl_Hash_Blake2b_block_state_t block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Hash_Blake2s_32_state_t;
+Hacl_Hash_Blake2b_state_t;
 
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2s_32_state_t *Hacl_Hash_Blake2s_32_malloc(void);
+Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_32_reset(Hacl_Hash_Blake2s_32_state_t *state);
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 uint32_t
-Hacl_Hash_Blake2s_32_update(
-  Hacl_Hash_Blake2s_32_state_t *state,
-  uint8_t *chunk,
-  uint32_t chunk_len
-);
+Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint32_t chunk_len);
 
 /**
   Finish function when there is no key
 */
-void Hacl_Hash_Blake2s_32_digest(Hacl_Hash_Blake2s_32_state_t *state, uint8_t *output);
+void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output);
 
 /**
   Free state function when there is no key
 */
-void Hacl_Hash_Blake2s_32_free(Hacl_Hash_Blake2s_32_state_t *state);
+void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Hash_Blake2s_32_H_DEFINED
+#define __Hacl_Hash_Blake2b_H_DEFINED
 #endif
