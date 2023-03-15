@@ -130,7 +130,7 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     let u2 = sub tempBuffer (size 8) (size 4) in
 
     fromDomainImpl s inverseS;
-    qinv inverseS;
+    qinv inverseS inverseS;
     multPowerPartial s inverseS hash u1;
     multPowerPartial s inverseS r u2;
 
@@ -162,7 +162,7 @@ val ecdsa_verification_step5_0:
       point_z_as_nat h pubKeyAsPoint < S.prime
     )
   (ensures fun h0 _ h1 ->
-    modifies (loc pubKeyAsPoint |+| loc points) h0 h1 /\
+    modifies (loc points) h0 h1 /\
     as_nat h1 (gsub points (size 0) (size 4)) < S.prime /\
     as_nat h1 (gsub points (size 4) (size 4)) < S.prime /\
     as_nat h1 (gsub points (size 8) (size 4)) < S.prime /\
@@ -183,10 +183,16 @@ val ecdsa_verification_step5_0:
   )
 
 let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 =
+  push_frame ();
+  let u1_q = create_felem () in
+  let u2_q = create_felem () in
+  bn_from_bytes_be4 u1 u1_q;
+  bn_from_bytes_be4 u2 u2_q;
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in
-  secretToPublicWithoutNorm pointU1G u1;
-  scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2
+  point_mul_g pointU1G u1_q;
+  point_mul pointU2Q pubKeyAsPoint u2_q;
+  pop_frame ()
 
 
 [@ (Comment "   The input of the function is considered to be public,
@@ -404,7 +410,7 @@ val ecdsa_verification_core:
   -> xBuffer:felem ->
   Stack bool
     (requires fun h ->
-      live h publicKeyPoint /\ live h hashAsFelem /\ live h r /\ live h s /\ live h m /\ live h xBuffer /\ 
+      live h publicKeyPoint /\ live h hashAsFelem /\ live h r /\ live h s /\ live h m /\ live h xBuffer /\
       disjoint publicKeyPoint r /\
       disjoint publicKeyPoint s /\
       disjoint publicKeyPoint m /\

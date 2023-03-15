@@ -7,18 +7,20 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.PointMul
 
 module S = Spec.P256
+module BSeq = Lib.ByteSequence
+
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let ecp256dh_i public_key private_key =
   push_frame ();
   let pk = create_point () in
-
-  secretToPublic pk private_key;
+  point_mul_g_bytes pk private_key;
   let flag = is_point_at_inf pk in
   aff_store_point public_key (sub pk 0ul 8ul);
   pop_frame ();
@@ -37,9 +39,11 @@ val ecp256dh_r_:
     live h ss /\ live h pk /\ live h private_key /\
     disjoint ss pk /\ disjoint ss private_key /\ disjoint pk private_key /\
     (is_pk_valid ==> point_inv h pk) /\ as_point_nat h ss = (0, 0, 0))
-  (ensures fun  h0 flag h1 -> modifies (loc ss |+| loc pk) h0 h1 /\
+  (ensures fun  h0 flag h1 -> modifies (loc ss) h0 h1 /\
     as_point_nat h1 ss ==
-    (if is_pk_valid then S.scalar_multiplication (as_seq h0 private_key) (as_point_nat h0 pk)
+    (if is_pk_valid then
+      S.norm_jacob_point (S.point_mul 
+        (BSeq.nat_from_bytes_be (as_seq h0 private_key)) (as_point_nat h0 pk))
     else (0, 0, 0)) /\
     v flag ==
     (if is_pk_valid then (if S.is_point_at_inf (as_point_nat h1 ss) then ones_v U64 else 0)
@@ -47,7 +51,7 @@ val ecp256dh_r_:
 
 let ecp256dh_r_ is_pk_valid ss pk private_key =
   if is_pk_valid then begin
-    scalarMultiplication pk ss private_key;
+    point_mul_bytes ss pk private_key;
     is_point_at_inf ss end
   else
     ones U64 SEC
