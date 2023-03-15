@@ -177,6 +177,7 @@ let make_prime_minus_2 b =
   bn_make_u64_4 b0 b1 b2 b3 b
 
 
+[@CInline]
 let finv a res =
   push_frame ();
   let b = create 4ul (u64 0) in
@@ -207,6 +208,7 @@ let make_prime_plus_1_div_4 b =
   bn_make_u64_4 b0 b1 b2 b3 b
 
 
+[@CInline]
 let fsqrt a res =
   push_frame ();
   let b = create 4ul (u64 0) in
