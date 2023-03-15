@@ -297,47 +297,26 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
     lemma_step i
 
 
-inline_for_extraction noextract
-val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
-  scalar: lbuffer_t buf_type uint8 (size 32) ->
-  tempBuffer:  lbuffer uint64 (size 88)  ->
+val montgomery_ladder: p:point -> q:point
+  -> scalar:lbuffer uint8 32ul
+  -> tmp:lbuffer uint64 88ul ->
   Stack unit
-  (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
+  (requires fun h ->
+    live h p /\ live h q /\ live h scalar /\  live h tmp /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tmp; loc scalar] /\
+    point_inv h p /\ point_inv h q)
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tmp) h0 h1 /\
+    (point_inv h1 p /\ point_inv h1 q /\
+    (let p1 = fromDomainPoint (as_point_nat h1 p) in
+     let q1 = fromDomainPoint (as_point_nat h1 q) in
+     let rN, qN =
+       S.montgomery_ladder_spec (as_seq h0 scalar)
+         (fromDomainPoint (as_point_nat h0 p), fromDomainPoint (as_point_nat h0 q)) in
+       rN == p1 /\ qN == q1)))
 
-    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 8) (size 4)) < S.prime )
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
-    (
-      as_nat h1 (gsub p (size 0) (size 4)) < S.prime /\
-      as_nat h1 (gsub p (size 4) (size 4)) < S.prime /\
-      as_nat h1 (gsub p (size 8) (size 4)) < S.prime /\
-
-      as_nat h1 (gsub q (size 0) (size 4)) < S.prime /\
-      as_nat h1 (gsub q (size 4) (size 4)) < S.prime /\
-      as_nat h1 (gsub q (size 8) (size 4)) < S.prime /\
-
-
-      (
-	let p1 = fromDomainPoint(as_point_nat h1 p) in
-	let q1 = fromDomainPoint(as_point_nat h1 q) in
-	let rN, qN = S.montgomery_ladder_spec (as_seq h0 scalar)
-	  (
-	    fromDomainPoint(as_point_nat h0 p),
-	    fromDomainPoint(as_point_nat h0 q)
-	  ) in
-	rN == p1 /\ qN == q1
-      )
-   )
- )
-
-let montgomery_ladder #a p q scalar tempBuffer =
+[@CInline]
+let montgomery_ladder p q scalar tmp =
   let h0 = ST.get() in
-
 
   [@inline_let]
   let spec_ml h0 = S._ml_step (as_seq h0 scalar) in
@@ -349,124 +328,111 @@ let montgomery_ladder #a p q scalar tempBuffer =
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
   [@inline_let]
   let inv h (i: nat {i <= 256}) =
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
-
-    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 8) (size 4)) < S.prime /\
-    modifies3 p q tempBuffer h0 h   /\
-    acc h == Lib.LoopCombinators.repeati i (spec_ml h0) (acc h0)
-
-    in
+    point_inv h p /\ point_inv h q /\
+    modifies3 p q tmp h0 h /\
+    acc h == Lib.LoopCombinators.repeati i (spec_ml h0) (acc h0) in
 
   Lib.Loops.for 0ul 256ul inv
-    (fun i -> let h2 = ST.get() in
-      montgomery_ladder_step p q tempBuffer scalar i;
+    (fun i ->
+      montgomery_ladder_step p q tmp scalar i;
       Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i)
     )
 
 
-val lemma_point_to_domain: h0: mem -> h1: mem ->  p: point -> result: point ->  Lemma
-   (requires (point_x_as_nat h0 p < S.prime /\ point_y_as_nat h0 p < S.prime /\ point_z_as_nat h0 p < S.prime /\
-       point_x_as_nat h1 result == toDomain_ (point_x_as_nat h0 p) /\
-       point_y_as_nat h1 result == toDomain_ (point_y_as_nat h0 p) /\
-       point_z_as_nat h1 result == toDomain_ (point_z_as_nat h0 p)
-     )
-   )
-   (ensures (fromDomainPoint(as_point_nat h1 result) == as_point_nat h0 p))
+val lemma_point_to_domain: h0:mem -> h1:mem -> p:point -> res:point ->  Lemma
+  (requires
+    point_inv h0 p /\
+    point_x_as_nat h1 res == toDomain_ (point_x_as_nat h0 p) /\
+    point_y_as_nat h1 res == toDomain_ (point_y_as_nat h0 p) /\
+    point_z_as_nat h1 res == toDomain_ (point_z_as_nat h0 p))
+  (ensures (fromDomainPoint (as_point_nat h1 res) == as_point_nat h0 p))
 
-let lemma_point_to_domain h0 h1 p result =
-  let (x, y, z) = as_point_nat h1 result in ()
-
-
-val lemma_pif_to_domain: h: mem ->  p: point -> Lemma
-  (requires (point_x_as_nat h p == 0 /\ point_y_as_nat h p == 0 /\ point_z_as_nat h p == 0))
-  (ensures (fromDomainPoint (as_point_nat h p) == as_point_nat h p))
-
-let lemma_pif_to_domain h p =
-  let (x, y, z) = as_point_nat h p in
-  let (x3, y3, z3) = fromDomainPoint (x, y, z) in
-  lemmaFromDomain x;
-  lemmaFromDomain y;
-  lemmaFromDomain z;
-  lemma_multiplication_not_mod_prime x;
-  lemma_multiplication_not_mod_prime y;
-  lemma_multiplication_not_mod_prime z
+let lemma_point_to_domain h0 h1 p res =
+  SM.lemmaToDomainAndBackIsTheSame (point_x_as_nat h0 p);
+  SM.lemmaToDomainAndBackIsTheSame (point_y_as_nat h0 p);
+  SM.lemmaToDomainAndBackIsTheSame (point_z_as_nat h0 p)
 
 
-val lemma_coord: h3: mem -> q: point -> Lemma (
-   let (r0, r1, r2) = fromDomainPoint(as_point_nat h3 q) in
-	let xD = fromDomain_ (point_x_as_nat h3 q) in
-	let yD = fromDomain_ (point_y_as_nat h3 q) in
-	let zD = fromDomain_ (point_z_as_nat h3 q) in
-    r0 == xD /\ r1 == yD /\ r2 == zD)
+val scalarMultiplicationWithoutNorm: p:point -> res:point -> scalar:lbuffer uint8 32ul ->
+  Stack unit
+  (requires fun h ->
+    live h p /\ live h res /\ live h scalar /\
+    disjoint p res /\ disjoint scalar res /\ disjoint p scalar /\
+    point_inv h p)
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc res) h0 h1 /\
+    point_inv h1 res /\
+    SM.fromDomainPoint (as_point_nat h1 res) ==
+      fst (S.montgomery_ladder_spec (as_seq h0 scalar) (S.point_at_inf, as_point_nat h0 p)))
 
-let lemma_coord h3 q = ()
-
-
-let scalarMultiplication p result scalar =
+[@CInline]
+let scalarMultiplicationWithoutNorm p res scalar =
   push_frame ();
-  let tempBuffer = create 100ul (u64 0) in
-    let h0 = ST.get() in
-  let q = sub tempBuffer (size 0) (size 12) in
+  let tmp = create 100ul (u64 0) in
+  let q = sub tmp 0ul 12ul in
   make_point_at_inf q;
-  let buff = sub tempBuffer (size 12) (size 88) in
-  point_to_mont p result;
-    let h2 = ST.get() in
-  montgomery_ladder q result scalar buff;
-    let h3 = ST.get() in
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q;
-  norm_jacob_point q result;
-    lemma_coord h3 q;
+
+  let h0 = ST.get () in
+  point_to_mont p res;
+  let h1 = ST.get () in
+  lemma_point_to_domain h0 h1 p res;
+
+  let buff = sub tmp 12ul 88ul in
+  montgomery_ladder q res scalar buff;
+  let h3 = ST.get () in
+  copy res q;
   pop_frame ()
 
 
-
-let scalarMultiplicationWithoutNorm p result scalar =
+[@CInline]
+let point_mul res p scalar =
   push_frame ();
-  let tempBuffer = create 100ul (u64 0) in
-  let h0 = ST.get() in
-  let q = sub tempBuffer (size 0) (size 12) in
-  make_point_at_inf q;
-  let buff = sub tempBuffer (size 12) (size 88) in
-  point_to_mont p result;
-    let h2 = ST.get() in
-  montgomery_ladder q result scalar buff;
-  copy_point q result;
-    let h3 = ST.get() in
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q;
+  let tmp = create_point () in
+  copy_point p tmp;
+
+  let bytes_scalar = create 32ul (u8 0) in
+  bn_to_bytes_be4 scalar bytes_scalar;
+
+  scalarMultiplicationWithoutNorm tmp res bytes_scalar;
+  //point_from_mont res res;
   pop_frame ()
 
 
-let secretToPublic result scalar =
-  push_frame();
-      let tempBuffer = create 100ul (u64 0) in
-       let basePoint = create (size 12) (u64 0) in
-    make_base_point basePoint;
-      let q = sub tempBuffer (size 0) (size 12) in
-      let buff = sub tempBuffer (size 12) (size 88) in
-    make_point_at_inf q;
-      let h1 = ST.get() in
-      lemma_pif_to_domain h1 q;
-    montgomery_ladder q basePoint scalar buff;
-    norm_jacob_point q result;
-  pop_frame()
+[@CInline]
+let point_mul_g res scalar =
+  push_frame ();
+  let bytes_scalar = create 32ul (u8 0) in
+  bn_to_bytes_be4 scalar bytes_scalar;
+
+  let g = create_point () in
+  make_base_point g;
+
+  let tmp = create 100ul (u64 0) in
+  let q = sub tmp 0ul 12ul in
+  make_point_at_inf q;
+
+  let buff = sub tmp 12ul 88ul in
+  montgomery_ladder q g bytes_scalar buff;
+  let h3 = ST.get () in
+  copy_point q res;
+  //point_from_mont q res;
+  pop_frame ()
 
 
-let secretToPublicWithoutNorm result scalar =
-    push_frame();
-      let tempBuffer = create 100ul (u64 0) in
-      let basePoint = create (size 12) (u64 0) in
-    make_base_point basePoint;
-      let q = sub tempBuffer (size 0) (size 12) in
-      let buff = sub tempBuffer (size 12) (size 88) in
-    make_point_at_inf q;
-      let h1 = ST.get() in
-      lemma_pif_to_domain h1 q;
-    montgomery_ladder q basePoint scalar buff;
-    copy_point q result;
-  pop_frame()
+[@CInline]
+let point_mul_bytes res p scalar =
+  push_frame ();
+  let s_q = create_felem () in
+  bn_from_bytes_be4 scalar s_q;
+  point_mul res p s_q;
+  norm_jacob_point res res;
+  pop_frame ()
+
+
+[@CInline]
+let point_mul_g_bytes res scalar =
+  push_frame ();
+  let s_q = create_felem () in
+  bn_from_bytes_be4 scalar s_q;
+  point_mul_g res s_q;
+  norm_jacob_point res res;
+  pop_frame ()
