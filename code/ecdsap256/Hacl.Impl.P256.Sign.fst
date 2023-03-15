@@ -18,17 +18,21 @@ open Spec.Hash.Definitions
 open Hacl.Hash.SHA2
 
 module S = Spec.P256
+module M = Lib.NatMod
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
-
 module QI = Hacl.Impl.P256.Qinv
+module BB = Hacl.Bignum.Base
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
+
+inline_for_extraction noextract
+let lbytes len = lbuffer uint8 len
 
 val msg_as_felem:
     alg:S.hash_alg_ecdsa
   -> msg_len:size_t{v msg_len >= S.min_input_length alg}
-  -> msg:lbuffer uint8 msg_len
+  -> msg:lbytes msg_len
   -> res:felem ->
   Stack unit
   (requires fun h ->
@@ -63,181 +67,227 @@ let msg_as_felem alg msg_len msg res =
   pop_frame ()
 
 
-inline_for_extraction
-val ecdsa_signature_step45: x:felem
-  -> k:lbuffer uint8 32ul
-  -> Stack uint64
-    (requires fun h ->
-      live h x /\ live h k /\ disjoint x k)
-    (ensures fun h0 r h1 ->  modifies (loc x) h0 h1 /\
-      as_nat h1 x < S.order /\
-      (
-	let (rxN, ryN, rzN), _ = S.montgomery_ladder_spec (as_seq h0 k) ((0,0,0), S.base_point) in
-	let (xN, _, _) = S.norm_jacob_point (rxN, ryN, rzN) in
-	as_nat h1 x == xN % S.order /\
-	(
-	  if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
-	)
-      )
-    )
-
-let ecdsa_signature_step45 x k =
-  push_frame();
-    let result = create (size 12) (u64 0) in
-    secretToPublicWithoutNorm result k;
-    norm_jacob_point_x result x;
-    qmod_short x x;
-  pop_frame();
-    bn_is_zero_mask4 x
-
-
-val lemma_power_step6: kInv: nat -> Lemma
-  (S.qinv (fromDomain_ kInv) == toDomain_ (S.pow kInv (S.order - 2)))
-
-let lemma_power_step6 kInv =
-  let a = S.qinv (fromDomain_ kInv) in
-  lemmaFromDomain kInv;
-
-  //power_distributivity (kInv * S.modp_inv2_prime (pow2 256) S.order) (S.order - 2) S.order;
-  //power_distributivity_2 kInv (S.modp_inv2_prime (pow2 256) S.order % S.order) (S.order - 2);
-  Math.Lemmas.lemma_mod_mul_distr_r (S.pow kInv (S.order - 2)) (S.pow (S.modp_inv2_prime (pow2 256) S.order) (S.order - 2)) S.order;
-
-  //lemma_pow_mod_n_is_fpow S.order (pow2 256 % S.order) (S.order - 2);
-
-  let inverse2_256 = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
-  assert_norm(S.modp_inv2_prime (pow2 256) S.order = inverse2_256);
-  //lemma_pow_mod_n_is_fpow S.order inverse2_256 (S.order - 2);
-  assert_norm(S.exp #S.order inverse2_256 (S.order - 2) == pow2 256 % S.order);
-
-  Math.Lemmas.lemma_mod_mul_distr_r (S.pow kInv (S.order - 2)) (pow2 256) S.order;
-  lemmaToDomain (S.pow kInv (S.order - 2))
-
-
-inline_for_extraction
-val ecdsa_signature_step6: result: felem
-  -> kFelem: felem
-  -> z: felem
-  -> r: felem
-  -> da: felem
-  -> Stack unit
-    (requires fun h ->
-      live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
-      eq_or_disjoint r da /\
-      as_nat h kFelem < S.order /\
-      as_nat h z < S.order /\
-      as_nat h r < S.order /\
-      as_nat h da < S.order
-    )
-    (ensures fun h0 _ h1 ->
-      modifies (loc result) h0 h1 /\
-      as_nat h1 result = (as_nat h0 z + as_nat h0 r * as_nat h0 da) * S.pow (as_nat h0 kFelem) (S.order - 2) % S.order
-    )
-
-let ecdsa_signature_step6 result kFelem z r da =
-  let open FStar.Tactics in
-  let open FStar.Tactics.Canon in
-  push_frame();
-    let rda = create (size 4) (u64 0) in
-    let zBuffer = create (size 4) (u64 0) in
-    let kInv = create (size 4) (u64 0) in
-  let h0 = ST.get() in
-    qmul r da rda;
-    fromDomainImpl z zBuffer;
-    qadd rda zBuffer zBuffer;
-    copy kInv kFelem;
-    QI.qinv kInv;
-    qmul zBuffer kInv result;
-  pop_frame();
-      let br0 = as_nat h0 z + as_nat h0 r * as_nat h0 da in
-      let br1 = S.pow (as_nat h0 kFelem) (S.order - 2) in
-
-      lemmaFromDomain (as_nat h0 r * as_nat h0 da);
-      lemma_power_step6 (as_nat h0 kFelem);
-
-      lemmaFromDomain (fromDomain_ br0);
-      lemmaToDomain br1;
-      assert_norm ((S.modp_inv2_prime (pow2 256) S.order * pow2 256) % S.order = 1);
-
-      Math.Lemmas.lemma_mod_mul_distr_l (fromDomain_ br0 * S.modp_inv2_prime (pow2 256) S.order) (br1 * pow2 256 % S.order) S.order;
-      Math.Lemmas.lemma_mod_mul_distr_r (fromDomain_ br0 * S.modp_inv2_prime (pow2 256) S.order) (br1 * pow2 256) S.order;
-
-      assert_by_tactic (fromDomain_ br0 * S.modp_inv2_prime (pow2 256) S.order * (br1 * pow2 256) == fromDomain_ br0 * S.modp_inv2_prime (pow2 256) S.order * br1 * pow2 256) canon;
-      assert_by_tactic (fromDomain_ br0 * br1 * (S.modp_inv2_prime (pow2 256) S.order * pow2 256) == fromDomain_ br0 * S.modp_inv2_prime (pow2 256) S.order * br1 * pow2 256) canon;
-
-      Math.Lemmas.lemma_mod_mul_distr_r (fromDomain_ br0 * br1) (S.modp_inv2_prime (pow2 256) S.order * pow2 256) S.order;
-      lemmaToDomain ((fromDomain_ br0 * br1) % S.order);
-      lemmaFromDomain br0;
-
-      Math.Lemmas.lemma_mod_mul_distr_l (br0 * S.modp_inv2_prime (pow2 256) S.order) br1 S.order;
-      Math.Lemmas.lemma_mod_mul_distr_l (br0 * S.modp_inv2_prime (pow2 256) S.order * br1) (pow2 256) S.order;
-
-      assert_by_tactic (br0 * S.modp_inv2_prime (pow2 256) S.order * br1 * pow2 256 = br0 * br1 * (S.modp_inv2_prime (pow2 256) S.order * pow2 256)) canon;
-      Math.Lemmas.lemma_mod_mul_distr_r (br0 * br1) (S.modp_inv2_prime (pow2 256) S.order * pow2 256) S.order;
-      Math.Lemmas.lemma_mod_mul_distr_r br0 br1 S.order
-
-#push-options "--ifuel 1"
-
-val ecdsa_signature_core: alg: S.hash_alg_ecdsa
-  -> r: felem
-  -> s: felem
-  -> mLen: size_t {v mLen >= S.min_input_length alg}
-  -> m: lbuffer uint8 mLen
-  -> privKeyAsFelem: felem
-  -> k: lbuffer uint8 (size 32) ->
-  Stack uint64
+inline_for_extraction noextract
+val ecdsa_sign_r (r k:felem) : Stack unit
   (requires fun h ->
-    live h r /\ live h s /\ live h m /\ live h privKeyAsFelem /\ live h k /\
-    disjoint privKeyAsFelem r /\
-    disjoint privKeyAsFelem s /\
-    disjoint k r /\
-    disjoint r s /\
-    as_nat h privKeyAsFelem < S.order /\
-    as_nat h s == 0 /\
-    BSeq.nat_from_bytes_be (as_seq h k) < S.order
-  )
-  (ensures fun h0 flag h1 ->
-    modifies (loc r |+| loc s) h0 h1 /\
-    (
-      assert_norm (pow2 32 < pow2 61);
-      assert_norm (pow2 32 < pow2 125);
-      let hashM = S.hash_ecdsa alg (v mLen) (as_seq h0 m) in
-      let cutHashM = Lib.Sequence.sub hashM 0 32 in
-      let z =  BSeq.nat_from_bytes_be cutHashM % S.order in
-      let (rxN, ryN, rzN), _ = S.montgomery_ladder_spec (as_seq h0 k) ((0,0,0), S.base_point) in
-      let (xN, _, _) = S.norm_jacob_point (rxN, ryN, rzN) in
+    live h r /\ live h k /\ disjoint r k /\
+    as_nat h k < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\
+   (let _X, _Y, _Z = S.point_mul_g (as_nat h0 k) in
+    let x, _, _ = S.norm_jacob_point (_X, _Y, _Z) in
+    let r_s = x % S.order in
+    as_nat h1 r == r_s))
 
-      let kFelem = BSeq.nat_from_bytes_be (as_seq h0 k) in
-      as_nat h1 r == xN % S.order /\
-      as_nat h1 s == (z + (as_nat h1 r) * as_nat h0 privKeyAsFelem) * S.pow kFelem (S.order - 2) % S.order /\
-      (
-	if as_nat h1 r = 0 || as_nat h1 s = 0 then
-	  uint_v flag == pow2 64 - 1
-	else
-	  uint_v flag == 0
-      )
-    )
-  )
+let ecdsa_sign_r r k =
+  push_frame ();
+  let p = create_point () in
+  point_mul_g p k; // p = [k]G
+  norm_jacob_point_x p r;
+  qmod_short r r;
+  pop_frame ()
 
 
-let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
-  push_frame();
-  let h0 = ST.get() in
-  let hashAsFelem = create (size 4) (u64 0) in
-  let kAsFelem = create (size 4) (u64 0) in
-  bn_from_bytes_be4 k kAsFelem;
-  msg_as_felem alg mLen m hashAsFelem;
-  let h1 = ST.get() in
-  lemma_core_0 kAsFelem h1;
-  BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
-  let step5Flag = ecdsa_signature_step45 r k in
-  assert_norm (pow2 32 < pow2 61);
-  ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;
-  let sIsZero = bn_is_zero_mask4 s in
-  logor_lemma step5Flag sIsZero;
-  pop_frame();
-  logor step5Flag sIsZero
+val lemma_mont_qinv: k:S.qelem ->
+  Lemma (S.qinv (fromDomain_ k) == toDomain_ (S.qinv k))
 
-#pop-options
+let lemma_mont_qinv k =
+  assert_norm (M.pow_mod_ #S.order qmont_R_inv (S.order - 2) == qmont_R % S.order);
+  M.pow_mod_def #S.order qmont_R_inv (S.order - 2);
+  assert (M.pow_mod #S.order qmont_R_inv (S.order - 2) == qmont_R % S.order);
+
+  M.lemma_pow_mod #S.order (k * qmont_R_inv % S.order) (S.order - 2);
+  //assert (S.qinv (fromDomain_ k) ==
+    //(M.pow (k * qmont_R_inv % S.order) (S.order - 2)) % S.order);
+
+  M.lemma_pow_mod_base (k * qmont_R_inv) (S.order - 2) S.order;
+  // assert (S.qinv (fromDomain_ k) == (M.pow (k * qmont_R_inv) (S.order - 2)) % S.order);
+  M.lemma_pow_mul_base k qmont_R_inv (S.order - 2);
+  // assert (S.qinv (fromDomain_ k) ==
+    // (M.pow k (S.order - 2) * M.pow qmont_R_inv (S.order - 2)) % S.order);
+  Math.Lemmas.lemma_mod_mul_distr_r
+    (M.pow k (S.order - 2)) (M.pow qmont_R_inv (S.order - 2)) S.order;
+  // assert (S.qinv (fromDomain_ k) ==
+    // (M.pow k (S.order - 2) * M.pow qmont_R_inv (S.order - 2) % S.order) % S.order);
+  M.lemma_pow_mod #S.order qmont_R_inv (S.order - 2);
+  assert (S.qinv (fromDomain_ k) ==
+    (M.pow k (S.order - 2) * (qmont_R % S.order)) % S.order);
+  Math.Lemmas.lemma_mod_mul_distr_r (M.pow k (S.order - 2)) qmont_R S.order;
+  //assert (S.qinv (fromDomain_ k) == (M.pow k (S.order - 2) * qmont_R) % S.order);
+  Math.Lemmas.lemma_mod_mul_distr_l (M.pow k (S.order - 2)) qmont_R S.order;
+  //assert (S.qinv (fromDomain_ k) == (M.pow k (S.order - 2) % S.order * qmont_R) % S.order);
+  M.lemma_pow_mod #S.order k (S.order - 2)
+
+
+val lemma_abc_is_acb (a b c:nat) : Lemma (a * b * c = a * c * b)
+let lemma_abc_is_acb a b c =
+  Math.Lemmas.paren_mul_right a b c;
+  Math.Lemmas.swap_mul b c;
+  Math.Lemmas.paren_mul_right a c b
+
+
+val lemma_ecdsa_sign_s (k kinv r d_a m:S.qelem) : Lemma
+  (requires
+    kinv * qmont_R_inv % S.order == S.qinv k * qmont_R % S.order)
+  (ensures
+   (let s = (m * qmont_R_inv % S.order + (r * d_a * qmont_R_inv) % S.order) % S.order in
+    (kinv * s * qmont_R_inv) % S.order == S.qmul (S.qinv k) (S.qadd m (S.qmul r d_a))))
+
+let lemma_ecdsa_sign_s k kinv r d_a m =
+  let s = (m * qmont_R_inv % S.order + (r * d_a * qmont_R_inv) % S.order) % S.order in
+  calc (==) { // s =
+    (m * qmont_R_inv % S.order + (r * d_a * qmont_R_inv) % S.order) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (r * d_a) qmont_R_inv S.order }
+    (m * qmont_R_inv % S.order + (S.qmul r d_a * qmont_R_inv) % S.order) % S.order;
+    (==) { Math.Lemmas.modulo_distributivity (m * qmont_R_inv)
+      (S.qmul r d_a * qmont_R_inv) S.order }
+    (m * qmont_R_inv + S.qmul r d_a * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.distributivity_add_left m (S.qmul r d_a) qmont_R_inv }
+    (m + S.qmul r d_a) * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (m + S.qmul r d_a) qmont_R_inv S.order }
+    (S.qadd m (S.qmul r d_a)) * qmont_R_inv % S.order;
+    };
+
+  calc (==) {
+    (kinv * s * qmont_R_inv) % S.order;
+    (==) { lemma_abc_is_acb kinv s qmont_R_inv }
+    (kinv * qmont_R_inv * s) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (kinv * qmont_R_inv) s S.order }
+    ((kinv * qmont_R_inv % S.order) * s) % S.order;
+    (==) { }
+    ((S.qinv k * qmont_R % S.order) * s) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (S.qinv k * qmont_R) s S.order }
+    (S.qinv k * qmont_R * s) % S.order;
+    (==) { }
+    (S.qinv k * qmont_R * ((S.qadd m (S.qmul r d_a)) * qmont_R_inv % S.order)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (S.qinv k * qmont_R)
+      ((S.qadd m (S.qmul r d_a)) * qmont_R_inv) S.order }
+    (S.qinv k * qmont_R * ((S.qadd m (S.qmul r d_a)) * qmont_R_inv)) % S.order;
+    (==) { lemma_abc_is_acb (S.qinv k) qmont_R ((S.qadd m (S.qmul r d_a)) * qmont_R_inv) }
+    (S.qinv k * ((S.qadd m (S.qmul r d_a)) * qmont_R_inv) * qmont_R) % S.order;
+    (==) { Math.Lemmas.paren_mul_right (S.qinv k) (S.qadd m (S.qmul r d_a)) qmont_R_inv }
+    (S.qinv k * (S.qadd m (S.qmul r d_a)) * qmont_R_inv * qmont_R) % S.order;
+    (==) { Math.Lemmas.paren_mul_right (S.qinv k * (S.qadd m (S.qmul r d_a)))
+      qmont_R_inv qmont_R }
+    (S.qinv k * (S.qadd m (S.qmul r d_a)) * (qmont_R_inv * qmont_R)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (S.qinv k * (S.qadd m (S.qmul r d_a)))
+      (qmont_R_inv * qmont_R) S.order }
+    (S.qinv k * (S.qadd m (S.qmul r d_a)) * (qmont_R_inv * qmont_R % S.order)) % S.order;
+    (==) { assert_norm (qmont_R_inv * qmont_R % S.order = 1) }
+    (S.qinv k * (S.qadd m (S.qmul r d_a))) % S.order;
+    }
+
+
+inline_for_extraction noextract
+val ecdsa_sign_s (s k r d_a m:felem) : Stack unit
+  (requires fun h ->
+    live h s /\ live h m /\ live h d_a /\ live h k /\ live h r /\
+    disjoint s r /\ disjoint s k /\ disjoint r k /\
+    disjoint s d_a /\ disjoint r d_a /\ disjoint m s /\
+
+    0 < as_nat h k /\ as_nat h k < S.order /\
+    as_nat h r < S.order /\ as_nat h m < S.order /\
+    0 < as_nat h d_a /\ as_nat h d_a < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc s |+| loc m) h0 h1 /\
+   (let kinv = S.qinv (as_nat h0 k) in
+    let s_s =
+      S.qmul kinv (S.qadd (as_nat h0 m)
+        (S.qmul (as_nat h0 r) (as_nat h0 d_a))) in
+    as_nat h1 s == s_s))
+
+let ecdsa_sign_s s k r d_a m =
+  push_frame ();
+  let h0 = ST.get () in
+  let kinv = create_felem () in
+  QI.qinv kinv k;
+  let h1 = ST.get () in
+  assert (qmont_as_nat h1 kinv == S.qinv (qmont_as_nat h0 k));
+  lemma_mont_qinv (as_nat h0 k);
+  assert (qmont_as_nat h1 kinv == S.qinv (as_nat h0 k) * qmont_R % S.order);
+
+  qmul r d_a s; // s = r * d_a
+  let h2 = ST.get () in
+  assert (as_nat h2 s == (as_nat h0 r * as_nat h0 d_a * qmont_R_inv) % S.order);
+  fromDomainImpl m m;
+  let h3 = ST.get () in
+  assert (as_nat h3 m == as_nat h2 m * qmont_R_inv % S.order);
+  qadd m s s; // s = z + s
+  let h4 = ST.get () in
+  assert (as_nat h4 s == (as_nat h3 m + as_nat h2 s) % S.order);
+  qmul kinv s s; // s = kinv * s
+  let h5 = ST.get () in
+  assert (as_nat h5 s == (as_nat h1 kinv * as_nat h4 s * qmont_R_inv) % S.order);
+  lemma_ecdsa_sign_s (as_nat h0 k) (as_nat h1 kinv) (as_nat h0 r) (as_nat h0 d_a) (as_nat h0 m);
+  pop_frame ()
+
+
+// TODO: add check for nonce and private_key
+inline_for_extraction noextract
+val ecdsa_sign_load (d_a k_q:felem) (private_key nonce:lbytes 32ul) : Stack unit
+  (requires fun h ->
+    live h private_key /\ live h nonce /\ live h d_a /\ live h k_q /\
+    disjoint d_a k_q /\ disjoint d_a private_key /\ disjoint d_a nonce /\
+    disjoint k_q private_key /\ disjoint k_q nonce /\
+
+    0 < BSeq.nat_from_bytes_be (as_seq h private_key) /\
+    BSeq.nat_from_bytes_be (as_seq h private_key) < S.order /\
+    0 < BSeq.nat_from_bytes_be (as_seq h nonce) /\
+    BSeq.nat_from_bytes_be (as_seq h nonce) < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc d_a |+| loc k_q) h0 h1 /\
+   (let d_a_nat = BSeq.nat_from_bytes_be (as_seq h0 private_key) in
+    let k_nat = BSeq.nat_from_bytes_be (as_seq h0 nonce) in
+    as_nat h1 d_a = d_a_nat /\ as_nat h1 k_q = k_nat))
+
+let ecdsa_sign_load d_a k_q private_key nonce =
+  bn_from_bytes_be4 private_key d_a;
+  bn_from_bytes_be4 nonce k_q
+
+
+inline_for_extraction noextract
+val ecdsa_sign_store (signature:lbytes 64ul) (r_q s_q:felem) : Stack unit
+  (requires fun h ->
+    live h signature /\ live h r_q /\ live h s_q /\
+    disjoint signature r_q /\ disjoint signature s_q /\
+    as_nat h r_q < S.order /\ as_nat h s_q < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
+   (let r = BSeq.nat_to_bytes_be 32 (as_nat h0 r_q) in
+    let s = BSeq.nat_to_bytes_be 32 (as_nat h0 s_q) in
+    as_seq h1 signature == LSeq.concat #_ #32 #32 r s))
+
+let ecdsa_sign_store signature r_q s_q =
+  let h0 = ST.get () in
+  update_sub_f h0 signature 0ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 r_q))
+    (fun _ -> bn_to_bytes_be4 r_q (sub signature 0ul 32ul));
+
+  let h1 = ST.get () in
+  update_sub_f h1 signature 32ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 s_q))
+    (fun _ -> bn_to_bytes_be4 s_q (sub signature 32ul 32ul));
+
+  let h2 = ST.get () in
+  let r = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 r_q)) in
+  let s = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 s_q)) in
+  LSeq.eq_intro (as_seq h2 signature) (LSeq.concat #_ #32 #32 r s)
+
+
+inline_for_extraction noextract
+val check_signature: r_q:felem -> s_q:felem -> Stack bool
+  (requires fun h ->
+    live h r_q /\ live h s_q /\ disjoint r_q s_q)
+  (ensures fun h0 res h1 -> modifies0 h0 h1 /\
+    res == ((0 < as_nat h0 r_q) && (0 < as_nat h0 s_q)))
+
+let check_signature r_q s_q =
+  let h0 = ST.get () in
+  let is_r_zero = bn_is_zero_mask4 r_q in
+  let is_s_zero = bn_is_zero_mask4 s_q in
+  [@inline_let] let m0 = lognot is_r_zero in
+  [@inline_let] let m1 = lognot is_s_zero in
+  [@inline_let] let m2 = m0 &. m1 in
+  lognot_lemma is_r_zero;
+  lognot_lemma is_s_zero;
+  logand_lemma m0 m1;
+  BB.unsafe_bool_of_limb m2
 
 
 inline_for_extraction noextract
@@ -264,19 +314,17 @@ val ecdsa_signature:
 
 let ecdsa_signature alg signature msg_len msg private_key nonce =
   push_frame ();
-  let h0 = ST.get() in
-  let privKeyAsFelem = create_felem () in
-  bn_from_bytes_be4 private_key privKeyAsFelem;
-
-  let r = create_felem () in
-  let s = create_felem () in
-
-  let flag = ecdsa_signature_core alg r s msg_len msg privKeyAsFelem nonce in
-
-  let signature_r = sub signature 0ul 32ul in
-  let signature_s = sub signature 32ul 32ul in
-  bn_to_bytes_be4 r signature_r;
-  bn_to_bytes_be4 s signature_s;
-
+  let rsdk_q = create 20ul (u64 0) in
+  let r_q = sub rsdk_q 0ul 4ul in
+  let s_q = sub rsdk_q 4ul 4ul in
+  let d_a = sub rsdk_q 8ul 4ul in
+  let k_q = sub rsdk_q 12ul 4ul in
+  let m_q = sub rsdk_q 16ul 4ul in
+  ecdsa_sign_load d_a k_q private_key nonce;
+  msg_as_felem alg msg_len msg m_q;
+  ecdsa_sign_r r_q k_q;
+  ecdsa_sign_s s_q k_q r_q d_a m_q;
+  ecdsa_sign_store signature r_q s_q;
+  let res = check_signature r_q s_q in
   pop_frame ();
-  Hacl.Impl.P256.RawCmp.unsafe_bool_of_u64 flag
+  res
