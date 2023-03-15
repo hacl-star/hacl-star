@@ -37,40 +37,34 @@ extern "C" {
 
 #include "Hacl_Poly1305_256.h"
 
-typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s
+typedef struct Hacl_Streaming_Poly1305_256_state_t_s
 {
   Lib_IntVector_Intrinsics_vec256 *block_state;
   uint8_t *buf;
   uint64_t total_len;
   uint8_t *p_key;
 }
-Hacl_Streaming_Poly1305_256_poly1305_256_state;
+Hacl_Streaming_Poly1305_256_state_t;
 
-Hacl_Streaming_Poly1305_256_poly1305_256_state *Hacl_Streaming_Poly1305_256_malloc(uint8_t *k);
+Hacl_Streaming_Poly1305_256_state_t *Hacl_Streaming_Poly1305_256_malloc(uint8_t *key);
 
 void
-Hacl_Streaming_Poly1305_256_reset(
-  uint8_t *k,
-  Hacl_Streaming_Poly1305_256_poly1305_256_state *state
-);
+Hacl_Streaming_Poly1305_256_reset(uint8_t *key, Hacl_Streaming_Poly1305_256_state_t *state);
 
 /**
 0 = success, 1 = max length exceeded
 */
 uint32_t
 Hacl_Streaming_Poly1305_256_update(
-  Hacl_Streaming_Poly1305_256_poly1305_256_state *state,
+  Hacl_Streaming_Poly1305_256_state_t *state,
   uint8_t *chunk,
   uint32_t chunk_len
 );
 
 void
-Hacl_Streaming_Poly1305_256_digest(
-  Hacl_Streaming_Poly1305_256_poly1305_256_state *state,
-  uint8_t *output
-);
+Hacl_Streaming_Poly1305_256_digest(Hacl_Streaming_Poly1305_256_state_t *state, uint8_t *output);
 
-void Hacl_Streaming_Poly1305_256_free(Hacl_Streaming_Poly1305_256_poly1305_256_state *state);
+void Hacl_Streaming_Poly1305_256_free(Hacl_Streaming_Poly1305_256_state_t *state);
 
 #if defined(__cplusplus)
 }

@@ -27,24 +27,24 @@
 
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_malloc */
 
-Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_malloc(uint8_t *k)
+Hacl_Streaming_Poly1305_32_state_t *Hacl_Streaming_Poly1305_32_malloc(uint8_t *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
   uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   uint64_t *block_state = r1;
   uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-  memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(k_, key, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_0 = k_;
-  Hacl_Streaming_Poly1305_32_poly1305_32_state
+  Hacl_Streaming_Poly1305_32_state_t
   s =
     { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U, .p_key = k_0 };
-  Hacl_Streaming_Poly1305_32_poly1305_32_state
+  Hacl_Streaming_Poly1305_32_state_t
   *p =
-    (Hacl_Streaming_Poly1305_32_poly1305_32_state *)KRML_HOST_MALLOC(sizeof (
-        Hacl_Streaming_Poly1305_32_poly1305_32_state
+    (Hacl_Streaming_Poly1305_32_state_t *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_Poly1305_32_state_t
       ));
   p[0U] = s;
-  Hacl_Poly1305_32_poly1305_init(block_state, k);
+  Hacl_Poly1305_32_poly1305_init(block_state, key);
   return p;
 }
 
@@ -52,20 +52,16 @@ Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_malloc(
 
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_reset */
 
-void
-Hacl_Streaming_Poly1305_32_reset(
-  uint8_t *k,
-  Hacl_Streaming_Poly1305_32_poly1305_32_state *state
-)
+void Hacl_Streaming_Poly1305_32_reset(uint8_t *key, Hacl_Streaming_Poly1305_32_state_t *state)
 {
-  Hacl_Streaming_Poly1305_32_poly1305_32_state scrut = *state;
+  Hacl_Streaming_Poly1305_32_state_t scrut = *state;
   uint8_t *k_ = scrut.p_key;
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
-  Hacl_Poly1305_32_poly1305_init(block_state, k);
-  memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
+  Hacl_Poly1305_32_poly1305_init(block_state, key);
+  memcpy(k_, key, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
-  Hacl_Streaming_Poly1305_32_poly1305_32_state
+  Hacl_Streaming_Poly1305_32_state_t
   tmp =
     { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U, .p_key = k_1 };
   state[0U] = tmp;
@@ -80,12 +76,12 @@ Hacl_Streaming_Poly1305_32_reset(
 */
 uint32_t
 Hacl_Streaming_Poly1305_32_update(
-  Hacl_Streaming_Poly1305_32_poly1305_32_state *state,
+  Hacl_Streaming_Poly1305_32_state_t *state,
   uint8_t *chunk,
   uint32_t chunk_len
 )
 {
-  Hacl_Streaming_Poly1305_32_poly1305_32_state s = *state;
+  Hacl_Streaming_Poly1305_32_state_t s = *state;
   uint64_t total_len = s.total_len;
   if ((uint64_t)chunk_len > (uint64_t)0xffffffffU - total_len)
   {
@@ -102,7 +98,7 @@ Hacl_Streaming_Poly1305_32_update(
   }
   if (chunk_len <= (uint32_t)16U - sz)
   {
-    Hacl_Streaming_Poly1305_32_poly1305_32_state s1 = *state;
+    Hacl_Streaming_Poly1305_32_state_t s1 = *state;
     uint64_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -122,7 +118,7 @@ Hacl_Streaming_Poly1305_32_update(
     *state
     =
       (
-        (Hacl_Streaming_Poly1305_32_poly1305_32_state){
+        (Hacl_Streaming_Poly1305_32_state_t){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len2,
@@ -132,7 +128,7 @@ Hacl_Streaming_Poly1305_32_update(
   }
   else if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_Poly1305_32_poly1305_32_state s1 = *state;
+    Hacl_Streaming_Poly1305_32_state_t s1 = *state;
     uint64_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -176,7 +172,7 @@ Hacl_Streaming_Poly1305_32_update(
     *state
     =
       (
-        (Hacl_Streaming_Poly1305_32_poly1305_32_state){
+        (Hacl_Streaming_Poly1305_32_state_t){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len1 + (uint64_t)chunk_len,
@@ -189,7 +185,7 @@ Hacl_Streaming_Poly1305_32_update(
     uint32_t diff = (uint32_t)16U - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_Streaming_Poly1305_32_poly1305_32_state s1 = *state;
+    Hacl_Streaming_Poly1305_32_state_t s1 = *state;
     uint64_t *block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
@@ -209,14 +205,14 @@ Hacl_Streaming_Poly1305_32_update(
     *state
     =
       (
-        (Hacl_Streaming_Poly1305_32_poly1305_32_state){
+        (Hacl_Streaming_Poly1305_32_state_t){
           .block_state = block_state10,
           .buf = buf0,
           .total_len = total_len2,
           .p_key = k_1
         }
       );
-    Hacl_Streaming_Poly1305_32_poly1305_32_state s10 = *state;
+    Hacl_Streaming_Poly1305_32_state_t s10 = *state;
     uint64_t *block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
@@ -260,7 +256,7 @@ Hacl_Streaming_Poly1305_32_update(
     *state
     =
       (
-        (Hacl_Streaming_Poly1305_32_poly1305_32_state){
+        (Hacl_Streaming_Poly1305_32_state_t){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len1 + (uint64_t)(chunk_len - diff),
@@ -276,12 +272,9 @@ Hacl_Streaming_Poly1305_32_update(
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_digest */
 
 void
-Hacl_Streaming_Poly1305_32_digest(
-  Hacl_Streaming_Poly1305_32_poly1305_32_state *state,
-  uint8_t *output
-)
+Hacl_Streaming_Poly1305_32_digest(Hacl_Streaming_Poly1305_32_state_t *state, uint8_t *output)
 {
-  Hacl_Streaming_Poly1305_32_poly1305_32_state scrut = *state;
+  Hacl_Streaming_Poly1305_32_state_t scrut = *state;
   uint64_t *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -321,9 +314,9 @@ Hacl_Streaming_Poly1305_32_digest(
 
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_free */
 
-void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Poly1305_32_poly1305_32_state *state)
+void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Poly1305_32_state_t *state)
 {
-  Hacl_Streaming_Poly1305_32_poly1305_32_state scrut = *state;
+  Hacl_Streaming_Poly1305_32_state_t scrut = *state;
   uint8_t *k_ = scrut.p_key;
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
