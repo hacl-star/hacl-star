@@ -153,13 +153,11 @@ let make_order_minus_2 b =
 
 
 [@CInline]
-let qinv r =
+let qinv res r =
   push_frame ();
-  let tmp = create 4ul (u64 0) in
-  let b = create 4ul (u64 0) in
-  copy tmp r;
+  let b = create_felem () in
   make_order_minus_2 b;
-  qexp_vartime r tmp b;
+  qexp_vartime res r b;
   pop_frame ()
 
 //--------------------------

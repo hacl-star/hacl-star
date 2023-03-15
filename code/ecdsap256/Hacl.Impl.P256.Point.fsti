@@ -189,7 +189,6 @@ val point_to_mont: p:point -> res:point -> Stack unit
     rz == SM.toDomain_ pz))
 
 
-// NOT used?
 val point_from_mont: p:point -> res:point-> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
@@ -207,7 +206,7 @@ val point_from_mont: p:point -> res:point-> Stack unit
 
 val norm_jacob_point_x: p:point -> res:felem -> Stack unit
   (requires fun h ->
-    live h p /\ live h res /\ disjoint p res /\
+    live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1  /\
    (let rx, _, _ = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) in

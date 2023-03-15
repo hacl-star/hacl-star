@@ -73,7 +73,8 @@ val qmul: a:felem -> b:felem -> res:felem -> Stack unit
 // rename
 val fromDomainImpl: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ as_nat h a < S.order)
+    live h a /\ live h res /\ eq_or_disjoint a res /\
+    as_nat h a < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.order /\
     as_nat h1 res == qmont_as_nat h0 a)

@@ -15,12 +15,14 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-// TODO: pass a resulting array
-val qinv: a:felem -> Stack unit
-  (requires fun h -> live h a /\ as_nat h a < S.order)
-  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-    as_nat h1 a < S.order /\
-    qmont_as_nat h1 a == S.qinv (qmont_as_nat h0 a))
+val qinv: res:felem -> a:felem -> Stack unit
+  (requires fun h ->
+    live h a /\ live h res /\ disjoint a res /\
+    as_nat h a < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < S.order /\
+    qmont_as_nat h1 res == S.qinv (qmont_as_nat h0 a))
+
 
 // TODO: rm
 val multPowerPartial: s:felem -> a:felem -> b:felem -> result:felem -> Stack unit
