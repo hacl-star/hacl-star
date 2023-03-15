@@ -227,6 +227,8 @@ let seen_bounded #index c i h s =
 let key #index c i h s =
   optional_reveal h (State?.p_key (B.deref h s))
 
+let reveal_key = key
+
 let init_input (#index:Type0) (c:block index) (i:index) (h:HS.mem) (s:state' c i) : GTot bytes =
   c.init_input_s i (key c i h s)
 
@@ -265,7 +267,7 @@ let seen_length #index c i t t' s =
  * be possible to factorize them, but it is not clear how *)
 #restart-solver
 #push-options "--z3rlimit 100"
-let malloc #index c i t t' k r =
+let malloc #index c i t t' key r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
@@ -278,14 +280,14 @@ let malloc #index c i t t' k r =
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
   (**) B.(modifies_only_not_unused_in loc_none h0 h1);
-  (**) c.key.frame_invariant B.loc_none k h0 h1;
+  (**) c.key.frame_invariant B.loc_none key h0 h1;
 
   let block_state = c.state.create_in i r in
   (**) let h2 = ST.get () in
   (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
-  (**) c.key.frame_invariant B.loc_none k h1 h2;
+  (**) c.key.frame_invariant B.loc_none key h1 h2;
 
   let k': optional_key i c.km c.key =
     match c.km with
@@ -294,25 +296,25 @@ let malloc #index c i t t' k r =
         (**) let h3 = ST.get () in
         (**) B.loc_unused_in_not_unused_in_disjoint h3;
         (**) B.(modifies_only_not_unused_in loc_none h2 h3);
-        (**) c.key.frame_invariant B.loc_none k h2 h3;
+        (**) c.key.frame_invariant B.loc_none key h2 h3;
         (**) c.state.frame_invariant B.loc_none block_state h2 h3;
         (**) c.state.frame_freeable B.loc_none block_state h2 h3;
         (**) assert (B.fresh_loc (c.key.footprint #i h3 k') h0 h3);
         (**) assert (c.key.invariant #i h3 k');
-        (**) assert (c.key.invariant #i h3 k);
-        (**) assert B.(loc_disjoint (c.key.footprint #i h3 k) (c.key.footprint #i h3 k'));
-        c.key.copy i k k';
+        (**) assert (c.key.invariant #i h3 key);
+        (**) assert B.(loc_disjoint (c.key.footprint #i h3 key) (c.key.footprint #i h3 k'));
+        c.key.copy i key k';
         (**) let h4 = ST.get () in
         (**) assert (B.fresh_loc (c.key.footprint #i h4 k') h0 h4);
         (**) B.loc_unused_in_not_unused_in_disjoint h4;
         (**) B.(modifies_only_not_unused_in loc_none h2 h4);
         (**) assert (c.key.invariant #i h4 k');
-        (**) c.key.frame_invariant (c.key.footprint #i h3 k') k h3 h4;
+        (**) c.key.frame_invariant (c.key.footprint #i h3 k') key h3 h4;
         (**) c.state.frame_invariant (c.key.footprint #i h3 k') block_state h3 h4;
         (**) c.state.frame_freeable (c.key.footprint #i h3 k') block_state h3 h4;
         k'
     | Erased ->
-        G.hide (c.key.v i h0 k)
+        G.hide (c.key.v i h0 key)
   in
   (**) let h5 = ST.get () in
   (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
@@ -327,7 +329,7 @@ let malloc #index c i t t' k r =
   (**) let h6 = ST.get () in
   (**) B.(modifies_only_not_unused_in loc_none h5 h6);
   (**) B.(modifies_only_not_unused_in loc_none h0 h6);
-  (**) c.key.frame_invariant B.loc_none k h5 h6;
+  (**) c.key.frame_invariant B.loc_none key h5 h6;
   (**) c.state.frame_invariant B.loc_none block_state h5 h6;
   (**) optional_frame B.loc_none k' h5 h6;
   (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
@@ -335,7 +337,7 @@ let malloc #index c i t t' k r =
   (**) c.state.frame_freeable B.loc_none block_state h5 h6;
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
-  c.init (G.hide i) k buf block_state;
+  c.init (G.hide i) key buf block_state;
   (**) let h7 = ST.get () in
   (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
@@ -349,7 +351,7 @@ let malloc #index c i t t' k r =
 
   (**) begin
   (**) let s = B.get h8 p 0 in
-  (**) let key_v = key c i h8 p in
+  (**) let key_v = reveal_key c i h8 p in
   (**) let init_input = c.init_input_s i key_v in
   (**) split_at_last_init c i init_input;
   (**) assert(invariant_s c i h8 s)
@@ -553,7 +555,7 @@ let alloca #index c i t t' k =
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let reset #index c i t t' k state =
+let reset #index c i t t' key state =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
@@ -565,11 +567,11 @@ let reset #index c i t t' k state =
   [@inline_let]
   let block_state: c.state.s i = block_state in
 
-  c.init (G.hide i) k buf block_state;
+  c.init (G.hide i) key buf block_state;
 
   (**) let h2 = ST.get () in
   (**) optional_frame #_ #i #c.km #c.key (B.loc_union (c.state.footprint #i h1 block_state) (B.loc_buffer buf)) k' h1 h2;
-  (**) c.key.frame_invariant (B.loc_union (c.state.footprint #i h1 block_state) (B.loc_buffer buf)) k h1 h2;
+  (**) c.key.frame_invariant (B.loc_union (c.state.footprint #i h1 block_state) (B.loc_buffer buf)) key h1 h2;
   (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
   (**) assert(0 % UInt32.v (Block?.block_len c i) = 0);
   (**) c.update_multi_zero i (c.state.v i h2 block_state) 0;
@@ -577,15 +579,15 @@ let reset #index c i t t' k state =
   let k': optional_key i c.km c.key =
     match c.km with
     | Runtime ->
-        c.key.copy i k k';
+        c.key.copy i key k';
         (**) let h4 = ST.get () in
         (**) assert (c.key.invariant #i h4 k');
-        (**) c.key.frame_invariant (c.key.footprint #i h2 k') k h2 h4;
+        (**) c.key.frame_invariant (c.key.footprint #i h2 k') key h2 h4;
         (**) c.state.frame_invariant (c.key.footprint #i h2 k') block_state h2 h4;
         (**) stateful_frame_preserves_freeable (c.key.footprint #i h2 k') block_state h2 h4;
         k'
     | Erased ->
-        G.hide (c.key.v i h1 k)
+        G.hide (c.key.v i h1 key)
   in
   (**) let h2 = ST.get () in
   (**) assert(preserves_freeable c i state h1 h2);
@@ -609,7 +611,7 @@ let reset #index c i t t' k state =
   (**) assert (B.(modifies (footprint c i h1 state) h1 h3));
   (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
   (**) begin
-  (**) let key_v = key c i h3 state in
+  (**) let key_v = reveal_key c i h3 state in
   (**) let all_seen_ = all_seen c i h3 state in
   // SH (11/22): the proof fails if we don't introduce the call to [split_at_last]
   (**) let blocks, rest = split_at_last c i all_seen_ in
