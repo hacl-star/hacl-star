@@ -49,10 +49,7 @@ let bn_set_one4 f =
 [@CInline]
 let bn_is_zero_vartime4 f =
   let open Lib.RawIntTypes in
-  let f0 = index f 0ul in
-  let f1 = index f 1ul in
-  let f2 = index f 2ul in
-  let f3 = index f 3ul in
+  let (f0, f1, f2, f3) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul)) in
   u64_to_UInt64 f0 =. 0uL &&
   u64_to_UInt64 f1 =. 0uL &&
   u64_to_UInt64 f2 =. 0uL &&
@@ -65,6 +62,17 @@ let bn_is_zero_mask4 f =
   SN.bn_is_zero_mask_lemma (as_seq h0 f);
   bignum_bn_v_is_as_nat h0 f;
   BN.bn_is_zero_mask #U64 4ul f
+
+
+[@CInline]
+let bn_is_eq_vartime4 a b =
+  let open Lib.RawIntTypes in
+  let (a0, a1, a2, a3) = (a.(0ul), a.(1ul), a.(2ul), a.(3ul)) in
+  let (b0, b1, b2, b3) = (b.(0ul), b.(1ul), b.(2ul), b.(3ul)) in
+  u64_to_UInt64 a0 =. u64_to_UInt64 b0 &&
+  u64_to_UInt64 a1 =. u64_to_UInt64 b1 &&
+  u64_to_UInt64 a2 =. u64_to_UInt64 b2 &&
+  u64_to_UInt64 a3 =. u64_to_UInt64 b3
 
 
 [@CInline]

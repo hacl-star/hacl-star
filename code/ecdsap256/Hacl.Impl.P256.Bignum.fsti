@@ -70,6 +70,12 @@ val bn_is_zero_mask4: f:felem -> Stack uint64
     (if as_nat h0 f = 0 then v r == ones_v U64 else v r == 0))
 
 
+val bn_is_eq_vartime4: a:felem -> b:felem -> Stack bool
+  (requires fun h -> live h a /\ live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == (as_nat h0 a = as_nat h0 b))
+
+
 val bn_is_eq_mask4: a:felem -> b:felem -> Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
