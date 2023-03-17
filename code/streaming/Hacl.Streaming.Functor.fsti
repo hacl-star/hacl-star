@@ -186,7 +186,7 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
 /// key remains the same (i.e. we specify it fully just like ``seen``).
 ///
 /// Note: annotating the projector because of an interleaving bug.
-val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot (c.key.I.t i)
+val reveal_key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot (c.key.I.t i)
 
 /// Framing
 /// =======
@@ -271,7 +271,7 @@ let malloc_st
     invariant c i h1 s /\
     freeable c i h1 s /\
     seen c i h1 s == S.empty /\
-    key c i h1 s == c.key.v i h0 k /\
+    reveal_key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
@@ -302,7 +302,7 @@ let copy_st
     invariant c i h1 s /\
     freeable c i h1 s /\
     seen c i h1 s == seen c i h0 s0 /\
-    key c i h1 s == key c i h0 s0 /\
+    reveal_key c i h1 s == reveal_key c i h0 s0 /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
@@ -330,7 +330,7 @@ let alloca_st
   (ensures (fun h0 s h1 ->
     invariant c i h1 s /\
     seen c i h1 s == S.empty /\
-    key c i h1 s == c.key.v i h0 k /\
+    reveal_key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint c i h1 s))))
@@ -361,7 +361,7 @@ let reset_st
   (ensures (fun h0 _ h1 ->
     invariant c i h1 s /\
     seen c i h1 s == S.empty /\
-    key c i h1 s == c.key.v i h0 k /\
+    reveal_key c i h1 s == c.key.v i h0 k /\
     footprint c i h0 s == footprint c i h1 s /\
     B.(modifies (footprint c i h0 s) h0 h1) /\
     preserves_freeable c i s h0 h1))
@@ -405,7 +405,7 @@ let update_post
   B.(modifies (footprint c i h0 s) h0 h1) /\
   footprint c i h0 s == footprint c i h1 s /\
   seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data /\
-  key c i h1 s == key c i h0 s /\
+  reveal_key c i h1 s == reveal_key c i h0 s /\
   preserves_freeable c i s h0 h1
 
 inline_for_extraction noextract
@@ -458,11 +458,11 @@ let digest_st
     (ensures fun h0 s' h1 ->
       invariant c i h1 s /\
       seen c i h0 s == seen c i h1 s /\
-      key c i h1 s == key c i h0 s /\
+      reveal_key c i h1 s == reveal_key c i h0 s /\
       footprint c i h0 s == footprint c i h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
       seen_bounded c i h0 s;
-      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))) /\
+      S.equal (B.as_seq h1 dst) (c.spec_s i (reveal_key c i h0 s) (seen c i h0 s))) /\
       preserves_freeable c i s h0 h1)
 
 /// A word of caution. Once partially applied to a type class, this function

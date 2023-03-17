@@ -224,13 +224,11 @@ let seen #index c i h s =
 let seen_bounded #index c i h s =
   ()
 
-let key #index c i h s =
+let reveal_key #index c i h s =
   optional_reveal h (State?.p_key (B.deref h s))
 
-let reveal_key = key
-
 let init_input (#index:Type0) (c:block index) (i:index) (h:HS.mem) (s:state' c i) : GTot bytes =
-  c.init_input_s i (key c i h s)
+  c.init_input_s i (reveal_key c i h s)
 
 let all_seen (#index:Type0) (c:block index) (i:index) (h:HS.mem) (s:state' c i) : GTot bytes =
   S.append (init_input c i h s) (seen c i h s)
@@ -266,7 +264,7 @@ let seen_length #index c i t t' s =
 (* TODO: malloc and alloca have big portions of proofs in common, so it may
  * be possible to factorize them, but it is not clear how *)
 #restart-solver
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 500"
 let malloc #index c i t t' key r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -539,7 +537,7 @@ let alloca #index c i t t' k =
   (**) let h8 = ST.get () in
   (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
   (**) begin
-  (**) let key_v = key c i h8 p in
+  (**) let key_v = reveal_key c i h8 p in
   (**) let init_input = c.init_input_s i key_v in
   (**) split_at_last_init c i init_input;
   (**) assert(invariant_s c i h8 s)
@@ -1320,7 +1318,7 @@ val update_empty_or_full_buf:
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
-#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 300"
 let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -1692,6 +1690,7 @@ let digest #index c i t t' state output =
   // Process as many blocks as possible (but leave at least one block for update_last)
   let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r) in
   // The data length to give to update_last
+
   [@inline_let]
   let r_last = rest_finish c i r in
   // The data length to process with update_multi before calling update_last
@@ -1725,6 +1724,7 @@ let digest #index c i t t' state output =
   begin
   // Proving: prev_len_last % block_len = 0
   assert(U64.v prev_len_last = U64.v prev_len + U32.v r_multi);
+
   Math.Lemmas.modulo_distributivity (U64.v prev_len) (U32.v r_multi) (U32.v (c.block_len i));
   Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
   assert(U64.v prev_len_last % U32.v (c.block_len i) = 0)
@@ -1782,6 +1782,7 @@ let digest #index c i t t' state output =
   optional_frame #_ #i #c.km #c.key B.(loc_buffer output `loc_union` c.state.footprint h5 tmp_block_state) k' h5 h6;
 
   pop_frame ();
+
   let h7 = ST.get () in
   c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
   stateful_frame_preserves_freeable #index #c.state #i B.(loc_region_only false (HS.get_tip h6)) block_state h6 h7;
