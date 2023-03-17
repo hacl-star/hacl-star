@@ -26,68 +26,24 @@ open Spec.Hash.Definitions
 module S = Spec.P256
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
 module BSeq = Lib.ByteSequence
+module PS = Hacl.Impl.P256.Sign
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-
+// TODO: use variable time cmp with scalar
 inline_for_extraction noextract
-val ecdsa_verification_step1: r:lbuffer uint64 (size 4) -> s:lbuffer uint64 (size 4) -> Stack bool
+val are_r_and_s_valid: r:felem -> s:felem -> Stack bool
   (requires fun h -> live h r /\ live h s)
-  (ensures  fun h0 result h1 ->
-    modifies0 h0 h1)
-    //result == S.checkCoordinates (as_nat h0 r) (as_nat h0 s))
+  (ensures  fun h0 res h1 -> modifies0 h0 h1 /\
+    res ==
+      (0 < as_nat h0 r && as_nat h0 r < S.order &&
+       0 < as_nat h0 s && as_nat h0 s < S.order))
 
-let ecdsa_verification_step1 r s =
-  let isRCorrect = bn_is_lt_order_and_gt_zero_mask4 r in
-  let isSCorrect = bn_is_lt_order_and_gt_zero_mask4 s in
-  Hacl.Bignum.Base.unsafe_bool_of_limb isRCorrect &&
-  Hacl.Bignum.Base.unsafe_bool_of_limb isSCorrect
-
-
-inline_for_extraction
-val ecdsa_verification_step23: alg:S.hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= S.min_input_length alg}
-  -> m: lbuffer uint8 mLen
-  -> result: felem
-  -> Stack unit
-    (requires fun h -> live h m /\ live h result )
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      (
-	assert_norm (pow2 32 < pow2 61);
-	assert_norm (pow2 32 < pow2 125);
-	let hashM = S.hash_ecdsa alg (v mLen) (as_seq h0 m) in
-	let cutHashM = Lib.Sequence.sub hashM 0 32 in
-	as_nat h1 result = BSeq.nat_from_bytes_be cutHashM % S.order
-      )
-    )
-
-
-let ecdsa_verification_step23 alg mLen m result =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  push_frame();
-  let sz: FStar.UInt32.t = match alg with | S.NoHash -> mLen | S.Hash a -> Hacl.Hash.Definitions.hash_len a in
-  let mHash = create sz (u8 0) in
-
-  begin
-  match alg with
-    | S.NoHash -> copy mHash m
-    | S.Hash a -> match a with
-      |SHA2_256 -> hash_256 m mLen mHash
-      |SHA2_384 -> hash_384 m mLen mHash
-      |SHA2_512 -> hash_512 m mLen mHash
-  end;
-
-  let cutHash = sub mHash (size 0) (size 32) in
-  bn_from_bytes_be4 cutHash result;
-  let h1 = ST.get() in
-  qmod_short result result;
-
-    lemma_core_0 result h1;
-    BSeq.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
-
-  pop_frame()
-
+let are_r_and_s_valid r s =
+  let is_r_valid = bn_is_lt_order_and_gt_zero_mask4 r in
+  let is_s_valid = bn_is_lt_order_and_gt_zero_mask4 s in
+  Hacl.Bignum.Base.unsafe_bool_of_limb is_r_valid &&
+  Hacl.Bignum.Base.unsafe_bool_of_limb is_s_valid
 
 
 inline_for_extraction noextract
@@ -195,103 +151,6 @@ let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 =
   pop_frame ()
 
 
-[@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")]
-val compare_felem_bool: a: felem -> b: felem -> Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
-
-let compare_felem_bool a b  =
-  assert_norm (pow2 64 * pow2 64 == pow2 128);
-  assert_norm (pow2 128 * pow2 64 == pow2 192);
-  let a_0 = index a (size 0) in
-  let a_1 = index a (size 1) in
-  let a_2 = index a (size 2) in
-  let a_3 = index a (size 3) in
-
-  let b_0 = index b (size 0) in
-  let b_1 = index b (size 1) in
-  let b_2 = index b (size 2) in
-  let b_3 = index b (size 3) in
-
-  eq_u64_nCT a_0 b_0 &&
-  eq_u64_nCT a_1 b_1 &&
-  eq_u64_nCT a_2 b_2 &&
-  eq_u64_nCT a_3 b_3
-
-
-
-inline_for_extraction noextract
-val compare_points_bool: a: point -> b: point -> Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (
-      let xP = gsub a (size 0) (size 4) in
-      let yP = gsub a (size 4) (size 4) in
-      let zP = gsub a (size 8) (size 4) in
-
-      let xQ = gsub b (size 0) (size 4) in
-      let yQ = gsub b (size 4) (size 4) in
-      let zQ = gsub b (size 8) (size 4) in
-
-      r == ((as_nat h0 xP = as_nat h0 xQ) && (as_nat h0 yP = as_nat h0 yQ) && (as_nat h0 zP = as_nat h0 zQ))
-    )
-  )
-
-let compare_points_bool a b =
-  let x0 = sub a (size 0) (size 4) in
-  let y0 = sub a (size 4) (size 4) in
-  let z0 = sub a (size 8) (size 4) in
-
-  let x1 = sub b (size 0) (size 4) in
-  let y1 = sub b (size 4) (size 4) in
-  let z1 = sub b (size 8) (size 4) in
-
-  let xEqual = compare_felem_bool x0 x1 in
-  let yEqual = compare_felem_bool y0 y1 in
-  let zEqual = compare_felem_bool z0 z1 in
-  xEqual && yEqual && zEqual
-
-
-inline_for_extraction noextract
-val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
-  (requires fun h -> live h points /\
-    as_nat h (gsub points (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub points (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub points (size 8) (size 4)) < S.prime /\
-    as_nat h (gsub points (size 12) (size 4)) < S.prime /\
-    as_nat h (gsub points (size 16) (size 4)) < S.prime /\
-    as_nat h (gsub points (size 20) (size 4)) < S.prime
-  )
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (
-      let pointU1G = gsub points (size 0) (size 12) in
-      let pointU2Q = gsub points (size 12) (size 12) in
-      r = (
-	norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 pointU1G)) =
-	norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 pointU2Q)))
-    )
-  )
-
-let ecdsa_verification_step5_1 points =
-  push_frame();
-
-  let tmp = create (size 112) (u64 0) in
-  let tmpForNorm = sub tmp (size 0) (size 88) in
-  let result0Norm = sub tmp (size 88) (size 12) in
-  let result1Norm = sub tmp (size 100) (size 12) in
-  let pointU1G = sub points (size 0) (size 12) in
-  let pointU2Q = sub points (size 12) (size 12) in
-
-  norm_jacob_point pointU1G result0Norm;
-  norm_jacob_point pointU2Q result1Norm;
-  let equalX = compare_points_bool result0Norm result1Norm in
-
-  pop_frame();
-  equalX
-
-
-
 inline_for_extraction noextract
 val ecdsa_verification_step5_2:
     pointSum: point
@@ -338,7 +197,7 @@ let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 =
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in
 
-  let equalX = ecdsa_verification_step5_1 points in
+  let equalX = is_point_eq_vartime pointU1G pointU2Q in
   begin
   if equalX then
   	point_double pointU1G pointSum buff
@@ -429,9 +288,6 @@ val ecdsa_verification_core:
     (ensures fun h0 state h1 ->
       modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer) h0 h1 /\
        (
-         assert_norm (pow2 32 < pow2 61);
-	 assert_norm (pow2 32 < pow2 125);
-
 	 let hashM = S.hash_ecdsa alg (v mLen) (as_seq h0 m) in
 	 let cutHashM = Lib.Sequence.sub hashM 0 32 in
 	 let hashNat =  BSeq.nat_from_bytes_be cutHashM % S.order in
@@ -457,101 +313,86 @@ val ecdsa_verification_core:
   )
 
 let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer =
-  assert_norm (pow2 32 < pow2 61 - 1);
-  assert_norm (pow2 32 < pow2 125);
   push_frame();
   let tempBufferU8 = create (size 64) (u8 0) in
   let bufferU1 = sub tempBufferU8 (size 0) (size 32) in
   let bufferU2 = sub tempBufferU8 (size 32) (size 32) in
-  ecdsa_verification_step23 alg mLen m hashAsFelem;
+  PS.msg_as_felem alg mLen m hashAsFelem;
   ecdsa_verification_step4  bufferU1 bufferU2 r s hashAsFelem;
   let r = ecdsa_verification_step5 xBuffer publicKeyBuffer bufferU1 bufferU2 in
   pop_frame();
   r
 
 
-[@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")]
-val ecdsa_verification_:alg:S.hash_alg_ecdsa
-  -> pubKey:lbuffer uint8 32ul
-  -> r:lbuffer uint64 (size 4)
-  -> s: lbuffer uint64 (size 4)
-  -> mLen: size_t {v mLen >= S.min_input_length alg}
-  -> m:lbuffer uint8 mLen ->
+val ecdsa_verification_:
+    alg:S.hash_alg_ecdsa
+  -> public_key:lbuffer uint8 64ul
+  -> r_q:lbuffer uint64 4ul
+  -> s_q:lbuffer uint64 4ul
+  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
+  -> msg:lbuffer uint8 msg_len ->
   Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61);
-      assert_norm (pow2 32 < pow2 125);
-      let r = as_nat h0 r in
-      let s = as_nat h0 s in
-      modifies0 h0 h1)
-      //result == S.ecdsa_verification_agile alg (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m))
+  (requires fun h ->
+    live h public_key /\ live h r_q /\ live h s_q /\ live h msg)
+  (ensures fun h0 res h1 -> modifies0 h0 h1)
+    //res == S.ecdsa_verification_agile alg (as_seq h0 pubKey) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification_ alg pubKey r s mLen m =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  push_frame();
-  let tempBufferU64 = create (size 120) (u64 0) in
-  let hashAsFelem = sub tempBufferU64 (size 12) (size 4) in
-  let tempBuffer = sub tempBufferU64 (size 16) (size 100) in
-  let xBuffer = sub tempBufferU64 (size 116) (size 4) in
+let ecdsa_verification_ alg public_key r_q s_q msg_len msg =
+  push_frame ();
+  let hashAsFelem = create_felem () in
+  let xBuffer = create_felem () in
+  let pk = create_point () in
 
-  let pk = create 12ul (u64 0) in
-  let publicKeyCorrect = load_point_vartime pk pubKey in
+  let publicKeyCorrect = load_point_vartime pk public_key in
   if publicKeyCorrect = false then
     begin
-    pop_frame();
+    pop_frame ();
     false
     end
   else
-    let step1 = ecdsa_verification_step1 r s in
+    let step1 = are_r_and_s_valid r_q s_q in
     if step1 = false then
       begin
-      pop_frame();
+      pop_frame ();
       false
       end
     else
-      let state = ecdsa_verification_core alg pk hashAsFelem r s mLen m xBuffer in
+      let state = ecdsa_verification_core alg pk hashAsFelem r_q s_q msg_len msg xBuffer in
       if state = false then
         begin
-        pop_frame();
+        pop_frame ();
         false
         end
       else
         begin
-        let result = compare_felem_bool xBuffer r in
-        pop_frame();
-        result
+        let res = bn_is_eq_vartime4 xBuffer r_q in
+        pop_frame ();
+        res
         end
 
 
 inline_for_extraction
 val ecdsa_verification:
-  alg:S.hash_alg_ecdsa
-  -> pubKey:lbuffer uint8 (size 64)
-  -> r:lbuffer uint8 (size 32)
-  -> s:lbuffer uint8 (size 32)
-  -> mLen: size_t {v mLen >= S.min_input_length alg}
-  -> m:lbuffer uint8 mLen ->
+    alg:S.hash_alg_ecdsa
+  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
+  -> msg:lbuffer uint8 msg_len
+  -> public_key:lbuffer uint8 64ul
+  -> signature_r:lbuffer uint8 32ul
+  -> signature_s:lbuffer uint8 32ul ->
   Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 -> modifies0 h0 h1 /\
-      result == S.ecdsa_verification_agile alg (as_seq h0 pubKey)
-        (as_seq h0 r) (as_seq h0 s) (v mLen) (as_seq h0 m))
+  (requires fun h ->
+    live h public_key /\ live h signature_r /\ live h signature_s /\ live h msg)
+  (ensures fun h0 result h1 -> modifies0 h0 h1 /\
+    result == S.ecdsa_verification_agile alg (as_seq h0 public_key)
+      (as_seq h0 signature_r) (as_seq h0 signature_s) (v msg_len) (as_seq h0 msg))
 
-let ecdsa_verification alg pubKey r s mLen m =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  push_frame();
-  let h0 = ST.get() in
-  let rAsFelem = create (size 4) (u64 0) in
-  let sAsFelem = create (size 4) (u64 0) in
+let ecdsa_verification alg msg_len msg public_key signature_r signature_s =
+  push_frame ();
+  let r_q = create_felem () in
+  let s_q = create_felem () in
+  bn_from_bytes_be4 signature_r r_q;
+  bn_from_bytes_be4 signature_s s_q;
 
-  bn_from_bytes_be4 r rAsFelem;
-  bn_from_bytes_be4 s sAsFelem;
-
-  let h1 = ST.get() in
-  let result = ecdsa_verification_ alg pubKey rAsFelem sAsFelem mLen m in
-  pop_frame();
-  result
+  let res = ecdsa_verification_ alg public_key r_q s_q msg_len msg in
+  pop_frame ();
+  res

@@ -34,16 +34,16 @@ let ecdsa_sign_p256_without_hash signature msg_len msg private_key nonce =
 
 
 let ecdsa_verif_p256_sha2 msg_len msg public_key signature_r signature_s =
-  ecdsa_verification (S.Hash SHA2_256) public_key signature_r signature_s msg_len msg
+  ecdsa_verification (S.Hash SHA2_256) msg_len msg public_key signature_r signature_s
 
 let ecdsa_verif_p256_sha384 msg_len msg public_key signature_r signature_s =
-  ecdsa_verification (S.Hash SHA2_384) public_key signature_r signature_s msg_len msg
+  ecdsa_verification (S.Hash SHA2_384) msg_len msg public_key signature_r signature_s
 
 let ecdsa_verif_p256_sha512 msg_len msg public_key signature_r signature_s =
-  ecdsa_verification (S.Hash SHA2_512) public_key signature_r signature_s msg_len msg
+  ecdsa_verification (S.Hash SHA2_512) msg_len msg public_key signature_r signature_s
 
 let ecdsa_verif_without_hash msg_len msg public_key signature_r signature_s =
-  ecdsa_verification S.NoHash public_key signature_r signature_s msg_len msg
+  ecdsa_verification S.NoHash msg_len msg public_key signature_r signature_s
 
 
 let validate_public_key public_key =
