@@ -207,6 +207,46 @@ let to_jacob_point p res =
   bn_set_one4 rz
 
 
+///  Point comparison
+
+inline_for_extraction noextract
+val is_point_strong_eq_vartime: p:point -> q:point -> Stack bool
+  (requires fun h -> live h p /\ live h q)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r ==
+     (point_x_as_nat h0 p = point_x_as_nat h0 q &&
+      point_y_as_nat h0 p = point_y_as_nat h0 q &&
+      point_z_as_nat h0 p = point_z_as_nat h0 q))
+
+let is_point_strong_eq_vartime p q =
+  let px = getx p in
+  let py = gety p in
+  let pz = getz p in
+
+  let qx = getx q in
+  let qy = gety q in
+  let qz = getz q in
+
+  let is_x_eq = bn_is_eq_vartime4 px qx in
+  let is_y_eq = bn_is_eq_vartime4 py qy in
+  let is_z_eq = bn_is_eq_vartime4 pz qz in
+  is_x_eq && is_y_eq && is_z_eq
+
+
+// TODO: avoid calling norm_jacob_point
+[@CInline]
+let is_point_eq_vartime p q =
+  push_frame ();
+  let p_norm = create_point () in
+  let q_norm = create_point () in
+
+  norm_jacob_point p p_norm;
+  norm_jacob_point q q_norm;
+  let is_pq_equal = is_point_strong_eq_vartime p_norm q_norm in
+  pop_frame ();
+  is_pq_equal
+
+
 ///  Check if a point is on the curve
 
 inline_for_extraction noextract

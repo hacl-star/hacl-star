@@ -231,6 +231,18 @@ val to_jacob_point: p:aff_point -> res:point -> Stack unit
       S.to_jacob_point (aff_point_x_as_nat h0 p, aff_point_y_as_nat h0 p))
 
 
+///  Point comparison
+
+val is_point_eq_vartime: p:point -> q:point -> Stack bool
+  (requires fun h ->
+    live h p /\ live h q /\
+    point_inv h p /\ point_inv h q)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r =
+      (S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) =
+       S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 q))))
+
+
 ///  Check if a point is on the curve
 
 val is_point_on_curve_vartime: p:aff_point -> Stack bool
