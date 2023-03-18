@@ -1,6 +1,6 @@
-{ lib, dotnet-runtime, dune_3, fstar, git, karamel, nodePackages, nodejs
+{ dotnet-runtime, fetchFromGitHub, fstar, fstar-scripts, git, karamel, lib
 , ocamlPackages, openssl, python3, stdenv, time, vale, which, writeTextFile, z3
-, fetchFromGitHub, fstar-scripts }:
+}:
 
 let
 
@@ -9,8 +9,8 @@ let
     src = fetchFromGitHub {
       owner = "arminbiere";
       repo = "runlim";
-      rev = "master";
-      sha256 = "sha256-0aCt3Mb6cuuR/srhNLPXEs4/AooPn3ivEWb8cA76BEE=";
+      rev = "3821e7a1d1ada328cda7a9cff33ea13228d8013a";
+      sha256 = "sha256-f1jp83GDrRjqEqXEDW2eD6IJzI53pBFkp+qOdpOR6sc=";
     };
     configurePhase = ''
       CC="" ./configure.sh
@@ -39,12 +39,9 @@ let
           "dist/Makefile.test"
           "dist/Makefile.tmpl"
           "dist/configure"
-          "dist/hacl-star-raw.opam"
           "dist/package-mozilla.sh"
         ] || lib.any (lib.flip lib.hasPrefix relPath) [
-          "bindings"
           "code"
-          "doc"
           "hints"
           "lib"
           "providers"
@@ -64,38 +61,27 @@ let
       echo "0.3.19" > vale/.vale_version
     '';
 
-    nativeBuildInputs = [
-      z3
-      fstar
-      python3
-      which
-      dotnet-runtime
-      time
-      nodejs
-      nodePackages.jsdoc
-      dune_3
-      runlim
-    ] ++ (with ocamlPackages; [
-      ocaml
-      findlib
-      batteries
-      pprint
-      stdint
-      yojson
-      zarith
-      ppxlib
-      ppx_deriving
-      ppx_deriving_yojson
-      ctypes
-      cppo
-      odoc
-      alcotest
-      qcheck-core
-      secp256k1-internal
-      menhirLib
-      process
-      sedlex
-    ]);
+    nativeBuildInputs = [ z3 fstar python3 which dotnet-runtime time runlim ]
+      ++ (with ocamlPackages; [
+        ocaml
+        findlib
+        batteries
+        pprint
+        stdint
+        yojson
+        zarith
+        ppxlib
+        ppx_deriving
+        ppx_deriving_yojson
+        ctypes
+        cppo
+        alcotest
+        qcheck-core
+        secp256k1-internal
+        menhirLib
+        process
+        sedlex
+      ]);
 
     buildInputs = [ openssl.dev ];
 
@@ -103,13 +89,7 @@ let
     FSTAR_HOME = fstar;
     KRML_HOME = karamel;
 
-    configurePhase = ''
-      export HACL_HOME=$(pwd)
-
-      export OCAMLPATH=$HACL_HOME/dist:$OCAMLPATH
-      export OCAMLFIND_OPTS="-destdir $HACL_HOME/dist"
-      export LD_LIBRARY_PATH=$HACL_HOME/dist/hacl-star-raw
-    '';
+    configurePhase = "export HACL_HOME=$(pwd)";
 
     enableParallelBuilding = true;
 
@@ -161,8 +141,8 @@ let
             | sed 's/^Files \([^ ]*\).*/\1/' \
             | sed 's/^Only in source\/dist\([^\:]*\)\: \(.*\)/\.\1\/\2/' \
             | sed 's/^Only in \.\([^\:]*\)\: \(.*\)/\.\1\/\2/' \
-            | grep '\.\/[^\/]*\/' \
-            | grep -v INFO.txt
+            | { grep '\.\/[^\/]*\/' || true; } \
+            | { grep -v INFO.txt || true; }
         '';
         installPhase = ''
           touch $out
@@ -173,8 +153,6 @@ let
         src = hacl;
         buildInputs = [ git ];
         buildPhase = ''
-          rm -r dist/hacl-star-raw
-
           sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/configure
           sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/package-mozilla.sh
           for target in gcc-compatible msvc-compatible portable-gcc-compatible
