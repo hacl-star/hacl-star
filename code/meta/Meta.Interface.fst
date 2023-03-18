@@ -457,7 +457,6 @@ and visit_body (t_i: term)
   //   through as well to avoid allocating the same thing twice
   // ses is strictly bottom-up
   match inspect e with
-  // | Tv_FVar _
   | Tv_App _ _ ->
       let e, es = collect_app e in
 
@@ -561,14 +560,9 @@ and visit_body (t_i: term)
       st, e, bvs, []
 
   | Tv_Abs b e ->
-      (* BETA: arguments of functions are allowed to refer to types to be
-         specialized over, assuming no higher-order types *)
-      // let bv, _ = inspect_binder b in
-      // let { bv_sort = t } = inspect_bv bv in
-      // let st, _, bvs, ses0 = visit_body t_i index_bv inv_bv st bvs t in
       let st, e, bvs, ses = visit_body t_i index_bv inv_bv st bvs e in
       let e = pack (Tv_Abs b e) in
-      st, e, bvs, ses // @ ses0
+      st, e, bvs, ses
 
   | Tv_Match scrut _returns branches ->
       let st, scrut, bvs, ses = visit_body t_i index_bv inv_bv st bvs scrut in
