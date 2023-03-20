@@ -156,8 +156,10 @@ let make_order_minus_2 b =
 let qinv res r =
   push_frame ();
   let b = create_felem () in
+  let tmp = create_felem () in
+  copy tmp r;
   make_order_minus_2 b;
-  qexp_vartime res r b;
+  qexp_vartime res tmp b;
   pop_frame ()
 
 //--------------------------

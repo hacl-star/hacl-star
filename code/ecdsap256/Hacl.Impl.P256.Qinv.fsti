@@ -17,7 +17,7 @@ module S = Spec.P256
 
 val qinv: res:felem -> a:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ disjoint a res /\
+    live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.order /\
