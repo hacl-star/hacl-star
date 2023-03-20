@@ -58,7 +58,7 @@ let mont_R_inv_is_bn_mont_d () =
   assert (SM.mont_R_inv * pow2 256 % S.prime = 1);
 
   assert (SM.mont_R_inv * pow2 256 % S.prime = d * pow2 256 % S.prime);
-  Hacl.Spec.P256.Math.lemma_modular_multiplication_pow256 SM.mont_R_inv d;
+  Hacl.Spec.P256.Math.lemma_mod_mul_pow256_prime SM.mont_R_inv d;
   assert (SM.mont_R_inv % S.prime == d % S.prime);
   Math.Lemmas.modulo_lemma SM.mont_R_inv S.prime;
   assert (SM.mont_R_inv == d % S.prime)
