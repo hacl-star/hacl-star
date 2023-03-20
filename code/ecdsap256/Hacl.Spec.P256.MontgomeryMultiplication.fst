@@ -17,13 +17,6 @@ let fromDomainPoint (a:tuple3 nat nat nat) : S.jacob_point =
   fromDomain_ x, fromDomain_ y, fromDomain_ z
 
 
-// TODO: rm if we expose the defs of fromDomain and toDomain
-val lemmaFromDomain: a:int -> Lemma (fromDomain_ a == a * mont_R_inv % S.prime)
-let lemmaFromDomain a = ()
-
-val lemmaToDomain: a:int -> Lemma (toDomain_ a == a * mont_R % S.prime)
-let lemmaToDomain a = ()
-
 val lemmaToDomainAndBackIsTheSame: a:S.felem -> Lemma (fromDomain_ (toDomain_ a) == a)
 let lemmaToDomainAndBackIsTheSame a =
   calc (==) {

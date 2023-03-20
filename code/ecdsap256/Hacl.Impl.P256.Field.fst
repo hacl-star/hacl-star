@@ -234,7 +234,6 @@ let fromDomain a res =
   assert (wide_as_nat h0 t = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
   assert_norm (S.prime < S.prime * S.prime);
   mont_reduction t res;
-  SM.lemmaFromDomain (as_nat h0 a);
   pop_frame ()
 
 

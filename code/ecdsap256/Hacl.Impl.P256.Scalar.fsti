@@ -40,10 +40,6 @@ let qmont_R_inv = S.modp_inv2_prime (pow2 256) S.order
 let fromDomain_ (a:nat) : S.qelem = a * qmont_R_inv % S.order
 let toDomain_   (a:nat) : S.qelem = a * qmont_R % S.order
 
-// TODO: rm if we expose the defs of fromDomain and toDomain
-val lemmaFromDomain: a:nat -> Lemma (fromDomain_ a == a * qmont_R_inv % S.order)
-val lemmaToDomain:   a:nat -> Lemma (toDomain_ a == a * qmont_R % S.order)
-
 val lemmaFromDomainToDomain: a:S.qelem -> Lemma (toDomain_ (fromDomain_ a) == a)
 val lemmaToDomainFromDomain: a:S.qelem -> Lemma (fromDomain_ (toDomain_ a) == a)
 
