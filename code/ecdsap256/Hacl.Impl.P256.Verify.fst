@@ -68,19 +68,28 @@ let lemma_cancel_mont a b =
 
 
 val qmul_mont_lemma: s:S.qelem -> sinv:S.qelem -> b:S.qelem -> Lemma
-  (requires fromDomain_ sinv == S.qinv (fromDomain_ (fromDomain_ s)))
-  (ensures  (sinv * fromDomain_ (fromDomain_ b) * qmont_R_inv) % S.order == S.qinv s * b)
+  (requires fromDomain_ sinv == S.qinv (fromDomain_ s))
+  (ensures  (sinv * fromDomain_ b * qmont_R_inv) % S.order == S.qinv s * b % S.order)
 
 let qmul_mont_lemma s sinv b =
-  let s_mont = fromDomain_ (fromDomain_ s) in
-  let b_mont = fromDomain_ (fromDomain_ b) in
+  let s_mont = fromDomain_ s in
+  let b_mont = fromDomain_ b in
   calc (==) {
     (sinv * b_mont * qmont_R_inv) % S.order;
     (==) { lemmaFromDomainToDomain sinv }
     (S.qinv s_mont * qmont_R % S.order * b_mont * qmont_R_inv) % S.order;
     (==) { lemma_cancel_mont (S.qinv s_mont) b_mont }
     (S.qinv s_mont * b_mont) % S.order;
-    }; admit()
+    (==) { PS.lemma_mont_qinv s }
+    ((S.qinv s * qmont_R % S.order) * (b * qmont_R_inv % S.order)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r
+      (S.qinv s * qmont_R % S.order) (b * qmont_R_inv) S.order }
+    ((S.qinv s * qmont_R % S.order) * (b * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.paren_mul_right (S.qinv s * qmont_R % S.order) b qmont_R_inv }
+    ((S.qinv s * qmont_R % S.order) * b * qmont_R_inv) % S.order;
+    (==) { lemma_cancel_mont (S.qinv s) b }
+    S.qinv s * b % S.order;
+  }
 
 
 val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
@@ -90,8 +99,7 @@ val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
     as_nat h sinv < S.order /\ as_nat h b < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.order /\
-    as_nat h1 res =
-    (as_nat h0 sinv * fromDomain_ (fromDomain_ (as_nat h0 b)) * qmont_R_inv) % S.order)
+    as_nat h1 res = (as_nat h0 sinv * fromDomain_ (as_nat h0 b) * qmont_R_inv) % S.order)
 
 [@CInline]
 let qmul_mont sinv b res =
@@ -99,9 +107,8 @@ let qmul_mont sinv b res =
   push_frame ();
   let tmp = create_felem () in
   fromDomainImpl b tmp;
-  fromDomainImpl tmp tmp;
   let h1 = ST.get () in
-  assert (as_nat h1 tmp == fromDomain_ (fromDomain_ (as_nat h0 b)));
+  assert (as_nat h1 tmp == fromDomain_ (as_nat h0 b));
   qmul sinv tmp res;
   let h2 = ST.get () in
   assert (as_nat h2 res = (as_nat h1 sinv * as_nat h1 tmp * qmont_R_inv) % S.order);
@@ -124,18 +131,14 @@ let ecdsa_verification_get_u12 u1 u2 r s z =
   push_frame ();
   let h0 = ST.get () in
   let sinv = create_felem () in
-  fromDomainImpl s sinv;
+  QI.qinv sinv s;
   let h1 = ST.get () in
-  assert (as_nat h1 sinv == qmont_as_nat h0 s);
-  // assert (as_nat h1 sinv == as_nat h0 s * qmont_R_inv % S.order);
-  QI.qinv sinv sinv;
-  let h2 = ST.get () in
-  assert (qmont_as_nat h2 sinv == S.qinv (qmont_as_nat h1 sinv));
+  assert (qmont_as_nat h1 sinv == S.qinv (qmont_as_nat h0 s));
   //assert (as_nat h2 sinv * qmont_R_inv % S.order ==
     //S.qinv (as_nat h1 sinv * qmont_R_inv % S.order));
 
-  qmul_mont_lemma (as_nat h0 s) (as_nat h2 sinv) (as_nat h0 z);
-  qmul_mont_lemma (as_nat h0 s) (as_nat h2 sinv) (as_nat h0 r);
+  qmul_mont_lemma (as_nat h0 s) (as_nat h1 sinv) (as_nat h0 z);
+  qmul_mont_lemma (as_nat h0 s) (as_nat h1 sinv) (as_nat h0 r);
   qmul_mont sinv z u1;
   qmul_mont sinv r u2;
   pop_frame ()
