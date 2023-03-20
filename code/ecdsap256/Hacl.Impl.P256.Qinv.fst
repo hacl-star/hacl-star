@@ -161,17 +161,3 @@ let qinv res r =
   make_order_minus_2 b;
   qexp_vartime res tmp b;
   pop_frame ()
-
-//--------------------------
-
-[@CInline]
-let multPowerPartial s a b res =
-  let h0 = ST.get() in
-  push_frame ();
-  let buffFromDB = create (size 4) (u64 0) in
-  fromDomainImpl b buffFromDB;
-  fromDomainImpl buffFromDB buffFromDB;
-  qmul a buffFromDB res;
-  let h1 = ST.get () in
-  assume (as_nat h1 res = (S.pow (as_nat h0 s) (S.order - 2) * (as_nat h0 b)) % S.order);
-  pop_frame ()

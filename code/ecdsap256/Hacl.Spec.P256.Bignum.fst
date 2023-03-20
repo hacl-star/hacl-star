@@ -66,24 +66,6 @@ let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   wide_as_nat4 (s.[0], s.[1], s.[2], s.[3], s.[4], s.[5], s.[6], s.[7])
 
 
-// TODO: rename
-val lemma_core_0: a:lbuffer uint64 (size 4) -> h:mem ->
-  Lemma (BSeq.nat_from_intseq_le (as_seq h a) == as_nat h a)
-
-let lemma_core_0 a h =
-  let k = as_seq h a in
-  let z = BSeq.nat_from_intseq_le k in
-    BSeq.nat_from_intseq_le_slice_lemma k 1;
-    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k 0 1);
-  let k1 = Seq.slice k 1 4 in
-    BSeq.nat_from_intseq_le_slice_lemma #_ #_ #3 k1 1;
-    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k1 0 1);
-  let k2 = Seq.slice k1 1 3 in
-    BSeq.nat_from_intseq_le_slice_lemma #_ #_ #2 k2 1;
-    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k2 0 1);
-    BSeq.nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
-
-
 val bignum_bn_v_is_as_nat: h:mem -> a:felem ->
   Lemma (BD.bn_v (as_seq h a) == as_nat h a)
 

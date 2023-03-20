@@ -56,7 +56,7 @@ let montgomery_ladder_spec k pq =
 
 //---------------------------
 
-// TODO: some functions don't have check for `a < order`
+// TODO: some functions don't check for `a < order`
 let lbytes_as_nat = x:nat{x < pow2 256}
 
 // [a]P
@@ -70,14 +70,12 @@ let point_mul_g (a:lbytes_as_nat) : jacob_point = point_mul a base_point
 
 // [a1]G + [a2]P
 let point_mul_double_g (a1 a2:lbytes_as_nat) (p:jacob_point) : jacob_point =
-  let u1D = point_mul_g a1 in
-  let u2D = point_mul a2 p in
-  let sumD =
-    if norm_jacob_point u1D = norm_jacob_point u2D then point_double u1D
-    else point_add u1D u2D in
-  sumD
+  let a1g = point_mul_g a1 in
+  let a2p = point_mul a2 p in
+  if norm_jacob_point a1g = norm_jacob_point a2p
+  then point_double a1g
+  else point_add a1g a2p
 
-//--------------------------
 
 ///  ECDSA over the P256 elliptic curve
 
@@ -188,8 +186,7 @@ let ecdsa_verification_agile alg public_key signature_r signature_s msg_len msg 
     let sinv = qinv s in
     let u1 = sinv *^ z in
     let u2 = sinv *^ r in
-    let x, y, z = point_mul_double_g u1 u2 (Some?.v pk) in
-    let x, y, z = norm_jacob_point (x, y, z) in
+    let x, y, z = norm_jacob_point (point_mul_double_g u1 u2 (Some?.v pk)) in
     if is_point_at_inf (x, y, z) then false else x % order = r
   end
 
@@ -213,8 +210,7 @@ let ecdsa_signature_agile alg msg_len msg private_key nonce =
 
   if not (is_privkey_valid && is_nonce_valid) then None
   else begin
-    let r = point_mul_g k_q in
-    let x, _, _ = norm_jacob_point r in
+    let x, _, _ = norm_jacob_point (point_mul_g k_q) in
     let r = x % order in
 
     let kinv = qinv k_q in
@@ -229,8 +225,7 @@ let ecdsa_signature_agile alg msg_len msg private_key nonce =
 (* Initiator *)
 let ecp256_dh_i (private_key:lbytes 32) : tuple2 (lbytes 64) bool =
   let sk = nat_from_bytes_be private_key in
-  let x, y, z = point_mul_g sk in
-  let x, y, z = norm_jacob_point (x, y, z) in
+  let x, y, z = norm_jacob_point (point_mul_g sk) in
   aff_store_point (x, y), not (is_point_at_inf (x, y, z))
 
 
@@ -239,8 +234,7 @@ let ecp256_dh_r (their_public_key:lbytes 64) (private_key:lbytes 32) : tuple2 (l
   let pk = load_point their_public_key in
   if Some? pk then
     let sk = nat_from_bytes_be private_key in
-    let x, y, z = point_mul sk (Some?.v pk) in
-    let x, y, z = norm_jacob_point (x, y, z) in
+    let x, y, z = norm_jacob_point (point_mul sk (Some?.v pk)) in
     aff_store_point (x, y), not (is_point_at_inf (x, y, z))
   else
     aff_store_point (0, 0), false

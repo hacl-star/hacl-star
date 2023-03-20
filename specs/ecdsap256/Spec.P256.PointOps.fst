@@ -34,9 +34,8 @@ let modp_inv2_prime (x:int) (p:nat{p > 3}) : elem p =
 
 // 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
 let prime: (a:pos{8 < a && a < pow2 256}) =
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 > 8);
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 < pow2 256);
-  pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1
+  let p = pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 in
+  assert_norm (8 < p); assert_norm (p < pow2 256); p
 
 let felem = x:nat{x < prime}
 let zero : felem = 0
@@ -58,8 +57,8 @@ let ( *% ) = fmul
 
 // Group order
 let order: (a:pos{a < pow2 256}) =
-  assert_norm (0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551 < pow2 256);
-  0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551
+  let o = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551 in
+  assert_norm (o < pow2 256); o
 
 let qelem = x:nat{x < order}
 let qadd (x y:qelem) : qelem = (x + y) % order
@@ -80,24 +79,24 @@ let jacob_point = p:tuple3 nat nat nat{let (px, py, pz) = p in px < prime /\ py 
 
 let a_coeff : felem = (-3) % prime
 let b_coeff : felem =
-  assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < prime);
-  41058363725152142129326129780047268409114441015993725554835256314039467401291
+  let b = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b in
+  assert_norm (b < prime); b
 
 // Base point
 let g_x : felem =
-  let x = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in
+  let x = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296 in
   assert_norm (x < prime); x
 let g_y : felem =
-  let y = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in
+  let y = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5 in
   assert_norm (y < prime); y
 
 let base_point : jacob_point = (g_x, g_y, one)
 
 let is_point_on_curve (p:aff_point) : bool =
-  let (x, y) = p in
-  y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
+  let (x, y) = p in y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 
 let point_at_inf : jacob_point = (zero, zero, zero)
+
 let is_point_at_inf (p:jacob_point) =
   let (_, _, z) = p in z = 0
 

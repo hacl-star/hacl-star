@@ -100,7 +100,7 @@ val make_g_x: n:felem -> Stack unit
 
 [@CInline]
 let make_g_x n =
-  // g_x = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296
+  // g_x = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296
   // mont_g_x = 0x18905f76a53755c679fb732b7762251075ba95fc5fedb60179e730d418a9143c
   [@inline_let] let n0 = u64 0x79e730d418a9143c in
   [@inline_let] let n1 = u64 0x75ba95fc5fedb601 in
@@ -119,7 +119,7 @@ val make_g_y: n:felem -> Stack unit
 
 [@CInline]
 let make_g_y n =
-  // g_y = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5
+  // g_y = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
   // mont_g_x = 0x8571ff1825885d85d2e88688dd21f3258b4ab8e4ba19e45cddf25357ce95560a
   [@inline_let] let n0 = u64 0xddf25357ce95560a in
   [@inline_let] let n1 = u64 0x8b4ab8e4ba19e45c in
