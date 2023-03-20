@@ -51,8 +51,8 @@ let make_order n =
 val make_a_coeff: a:felem -> Stack unit
   (requires fun h -> live h a)
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-    as_nat h1 a == SM.toDomain_ S.a_coeff /\
-    SM.fromDomain_ (as_nat h1 a) == S.a_coeff /\
+    as_nat h1 a == SM.to_mont S.a_coeff /\
+    SM.from_mont (as_nat h1 a) == S.a_coeff /\
     as_nat h1 a < S.prime)
 
 [@CInline]
@@ -64,17 +64,17 @@ let make_a_coeff a =
   [@inline_let] let n2 = u64 0x0 in
   [@inline_let] let n3 = u64 0xfffffffc00000004 in
   assert_norm (
-    v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ S.a_coeff);
+    v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.a_coeff);
   assert_norm (
-    SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.a_coeff);
+    SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.a_coeff);
   bn_make_u64_4 n0 n1 n2 n3 a
 
 
 val make_b_coeff: b:felem -> Stack unit
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-    as_nat h1 b == SM.toDomain_ S.b_coeff /\
-    SM.fromDomain_ (as_nat h1 b) == S.b_coeff /\
+    as_nat h1 b == SM.to_mont S.b_coeff /\
+    SM.from_mont (as_nat h1 b) == S.b_coeff /\
     as_nat h1 b < S.prime)
 
 [@CInline]
@@ -86,17 +86,17 @@ let make_b_coeff b =
   [@inline_let] let n2 = u64 0xe5a220abf7212ed6 in
   [@inline_let] let n3 = u64 0xdc30061d04874834 in
   assert_norm (
-    v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ S.b_coeff);
+    v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.b_coeff);
   assert_norm (
-    SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.b_coeff);
+    SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.b_coeff);
   bn_make_u64_4 n0 n1 n2 n3 b
 
 
 val make_g_x: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == SM.toDomain_ S.g_x /\
-    SM.fromDomain_ (as_nat h1 n) == S.g_x)
+    as_nat h1 n == SM.to_mont S.g_x /\
+    SM.from_mont (as_nat h1 n) == S.g_x)
 
 [@CInline]
 let make_g_x n =
@@ -106,16 +106,16 @@ let make_g_x n =
   [@inline_let] let n1 = u64 0x75ba95fc5fedb601 in
   [@inline_let] let n2 = u64 0x79fb732b77622510 in
   [@inline_let] let n3 = u64 0x18905f76a53755c6 in
-  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ S.g_x);
-  assert_norm (SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.g_x);
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.g_x);
+  assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.g_x);
   bn_make_u64_4 n0 n1 n2 n3 n
 
 
 val make_g_y: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == SM.toDomain_ S.g_y /\
-    SM.fromDomain_ (as_nat h1 n) == S.g_y)
+    as_nat h1 n == SM.to_mont S.g_y /\
+    SM.from_mont (as_nat h1 n) == S.g_y)
 
 [@CInline]
 let make_g_y n =
@@ -125,6 +125,6 @@ let make_g_y n =
   [@inline_let] let n1 = u64 0x8b4ab8e4ba19e45c in
   [@inline_let] let n2 = u64 0xd2e88688dd21f325 in
   [@inline_let] let n3 = u64 0x8571ff1825885d85 in
-  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ S.g_y);
-  assert_norm (SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.g_y);
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.g_y);
+  assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.g_y);
   bn_make_u64_4 n0 n1 n2 n3 n

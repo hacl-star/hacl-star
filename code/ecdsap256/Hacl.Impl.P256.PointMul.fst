@@ -10,7 +10,6 @@ open FStar.Math.Lemmas
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Spec.P256.Math
@@ -19,12 +18,13 @@ open Hacl.Impl.P256.PointDouble
 open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Point
 
-module S = Spec.P256
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+module S = Spec.P256
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 (*This code is taken from Curve25519, written by Polubelova M *)
 val lemma_cswap2_step:
@@ -221,10 +221,10 @@ val montgomery_ladder_step1: p: point -> q: point ->tempBuffer: lbuffer uint64 (
       let r1Z = as_nat h1 (gsub q (size 8) (size 4)) in
 
 
-      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = S._ml_step1 (fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ) (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ) in
+      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = S._ml_step1 (SM.from_mont pX, SM.from_mont pY, SM.from_mont pZ) (SM.from_mont qX, SM.from_mont qY, SM.from_mont qZ) in
 
-      fromDomain_ r0X == rN0X /\ fromDomain_ r0Y == rN0Y /\ fromDomain_ r0Z == rN0Z /\
-      fromDomain_ r1X == rN1X /\ fromDomain_ r1Y == rN1Y /\ fromDomain_ r1Z == rN1Z /\
+      SM.from_mont r0X == rN0X /\ SM.from_mont r0Y == rN0Y /\ SM.from_mont r0Z == rN0Z /\
+      SM.from_mont r1X == rN1X /\ SM.from_mont r1Y == rN1Y /\ SM.from_mont r1Z == rN1Z /\
 
       r0X < S.prime /\ r0Y < S.prime /\ r0Z < S.prime /\
       r1X < S.prime /\ r1Y < S.prime /\ r1Z < S.prime
@@ -277,10 +277,10 @@ val montgomery_ladder_step: #buf_type: buftype->
       let r1Y = as_nat h1 (gsub q (size 4) (size 4)) in
       let r1Z = as_nat h1 (gsub q (size 8) (size 4)) in
 
-      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = S._ml_step (as_seq h0 scalar) (uint_v i) ((fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ), (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ)) in
+      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = S._ml_step (as_seq h0 scalar) (uint_v i) ((SM.from_mont pX, SM.from_mont pY, SM.from_mont pZ), (SM.from_mont qX, SM.from_mont qY, SM.from_mont qZ)) in
 
-      fromDomain_ r0X == rN0X /\ fromDomain_ r0Y == rN0Y /\ fromDomain_ r0Z == rN0Z /\
-      fromDomain_ r1X == rN1X /\ fromDomain_ r1Y == rN1Y /\ fromDomain_ r1Z == rN1Z /\
+      SM.from_mont r0X == rN0X /\ SM.from_mont r0Y == rN0Y /\ SM.from_mont r0Z == rN0Z /\
+      SM.from_mont r1X == rN1X /\ SM.from_mont r1Y == rN1Y /\ SM.from_mont r1Z == rN1Z /\
 
       r0X < S.prime /\ r0Y < S.prime /\ r0Z < S.prime /\
       r1X < S.prime /\ r1Y < S.prime /\ r1Z < S.prime
@@ -307,11 +307,11 @@ val montgomery_ladder: p:point -> q:point
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tmp) h0 h1 /\
     (point_inv h1 p /\ point_inv h1 q /\
-    (let p1 = fromDomainPoint (as_point_nat h1 p) in
-     let q1 = fromDomainPoint (as_point_nat h1 q) in
+    (let p1 = SM.from_mont_point (as_point_nat h1 p) in
+     let q1 = SM.from_mont_point (as_point_nat h1 q) in
      let rN, qN =
        S.montgomery_ladder_spec (as_seq h0 scalar)
-         (fromDomainPoint (as_point_nat h0 p), fromDomainPoint (as_point_nat h0 q)) in
+         (SM.from_mont_point (as_point_nat h0 p), SM.from_mont_point (as_point_nat h0 q)) in
        rN == p1 /\ qN == q1)))
 
 [@CInline]
@@ -323,7 +323,7 @@ let montgomery_ladder p q scalar tmp =
 
   [@inline_let]
   let acc (h:mem) : GTot (tuple2 S.jacob_point S.jacob_point) =
-  (fromDomainPoint(as_point_nat h p), fromDomainPoint(as_point_nat h q))  in
+  (SM.from_mont_point(as_point_nat h p), SM.from_mont_point(as_point_nat h q))  in
 
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
   [@inline_let]
@@ -342,10 +342,10 @@ let montgomery_ladder p q scalar tmp =
 val lemma_point_to_domain: h0:mem -> h1:mem -> p:point -> res:point ->  Lemma
   (requires
     point_inv h0 p /\
-    point_x_as_nat h1 res == toDomain_ (point_x_as_nat h0 p) /\
-    point_y_as_nat h1 res == toDomain_ (point_y_as_nat h0 p) /\
-    point_z_as_nat h1 res == toDomain_ (point_z_as_nat h0 p))
-  (ensures (fromDomainPoint (as_point_nat h1 res) == as_point_nat h0 p))
+    point_x_as_nat h1 res == SM.to_mont (point_x_as_nat h0 p) /\
+    point_y_as_nat h1 res == SM.to_mont (point_y_as_nat h0 p) /\
+    point_z_as_nat h1 res == SM.to_mont (point_z_as_nat h0 p))
+  (ensures (SM.from_mont_point (as_point_nat h1 res) == as_point_nat h0 p))
 
 let lemma_point_to_domain h0 h1 p res =
   SM.lemmaToDomainAndBackIsTheSame (point_x_as_nat h0 p);
@@ -361,7 +361,7 @@ val scalarMultiplicationWithoutNorm: p:point -> res:point -> scalar:lbuffer uint
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.fromDomainPoint (as_point_nat h1 res) ==
+    SM.from_mont_point (as_point_nat h1 res) ==
       fst (S.montgomery_ladder_spec (as_seq h0 scalar) (S.point_at_inf, as_point_nat h0 p)))
 
 [@CInline]
@@ -448,15 +448,15 @@ let point_mul_double_g res scalar1 scalar2 p =
   point_mul_g sg1 scalar1; // sg1 = [scalar1]G
   point_mul sp2 p scalar2; // sp2 = [scalar2]P
   let h1 = ST.get () in
-  assert (SM.fromDomainPoint (as_point_nat h1 sg1) ==
+  assert (SM.from_mont_point (as_point_nat h1 sg1) ==
     S.point_mul_g (as_nat h0 scalar1));
-  assert (SM.fromDomainPoint (as_point_nat h1 sp2) ==
+  assert (SM.from_mont_point (as_point_nat h1 sp2) ==
     S.point_mul (as_nat h0 scalar2) (as_point_nat h0 p));
 
   let is_points_eq = is_point_eq_vartime sg1 sp2 in
   assert (is_points_eq =
-    (S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h1 sg1)) =
-     S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h1 sp2))));
+    (S.norm_jacob_point (SM.from_mont_point (as_point_nat h1 sg1)) =
+     S.norm_jacob_point (SM.from_mont_point (as_point_nat h1 sp2))));
 
   begin
   if is_points_eq

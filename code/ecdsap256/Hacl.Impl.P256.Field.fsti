@@ -15,21 +15,21 @@ module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let fmont_as_nat (h:mem) (a:felem) = SM.fromDomain_ (as_nat h a)
+let fmont_as_nat (h:mem) (a:felem) = SM.from_mont (as_nat h a)
 
 
 val make_fzero: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == SM.toDomain_ 0 /\
-    SM.fromDomain_ (as_nat h1 n) == 0)
+    as_nat h1 n == SM.to_mont 0 /\
+    SM.from_mont (as_nat h1 n) == 0)
 
 
 val make_fone: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == SM.toDomain_ 1 /\
-    SM.fromDomain_ (as_nat h1 n) == 1)
+    as_nat h1 n == SM.to_mont 1 /\
+    SM.from_mont (as_nat h1 n) == 1)
 
 
 val fmod_short: x:felem -> res:felem -> Stack unit
@@ -97,7 +97,7 @@ val fromDomain: a:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ as_nat h a < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = (as_nat h0 a * SM.mont_R_inv) % S.prime /\
+    as_nat h1 res = (as_nat h0 a * SM.fmont_R_inv) % S.prime /\
     as_nat h1 res = fmont_as_nat h0 a)
 
 
@@ -108,7 +108,7 @@ val fmul: a:felem -> b:felem -> res:felem -> Stack unit
     as_nat h a < S.prime /\ as_nat h b < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.prime /\
-    as_nat h1 res = (as_nat h0 a * as_nat h0 b * SM.mont_R_inv) % S.prime /\
+    as_nat h1 res = (as_nat h0 a * as_nat h0 b * SM.fmont_R_inv) % S.prime /\
     fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 a) (fmont_as_nat h0 b))
 
 
@@ -117,7 +117,7 @@ val fsqr: a:felem -> res:felem -> Stack unit
     live h a /\ live h res /\ as_nat h a < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.prime /\
-    as_nat h1 res = (as_nat h0 a * as_nat h0 a * SM.mont_R_inv) % S.prime /\
+    as_nat h1 res = (as_nat h0 a * as_nat h0 a * SM.fmont_R_inv) % S.prime /\
     fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 a) (fmont_as_nat h0 a))
 
 

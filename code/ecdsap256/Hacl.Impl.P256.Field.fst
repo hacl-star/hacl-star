@@ -27,8 +27,8 @@ friend Hacl.Bignum256
 [@CInline]
 let make_fzero n =
   bn_set_zero4 n;
-  assert_norm (SM.toDomain_ 0 = 0);
-  assert_norm (SM.fromDomain_ 0 == 0)
+  assert_norm (SM.to_mont 0 = 0);
+  assert_norm (SM.from_mont 0 == 0)
 
 
 [@CInline]
@@ -38,30 +38,30 @@ let make_fone n =
   [@inline_let] let n1 = u64 0xffffffff00000000 in
   [@inline_let] let n2 = u64 0xffffffffffffffff in
   [@inline_let] let n3 = u64 0xfffffffe in
-  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ 1);
-  assert_norm (SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont 1);
+  assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
   bn_make_u64_4 n0 n1 n2 n3 n
 
 //----------
 
 val mont_R_inv_is_bn_mont_d: unit -> Lemma
   (requires S.prime % 2 = 1)
-  (ensures  (let d, _ = SBML.eea_pow2_odd 256 S.prime in SM.mont_R_inv == d % S.prime))
+  (ensures  (let d, _ = SBML.eea_pow2_odd 256 S.prime in SM.fmont_R_inv == d % S.prime))
 
 let mont_R_inv_is_bn_mont_d () =
   let d, k = SBML.eea_pow2_odd 256 S.prime in
   SBML.mont_preconditions_d 64 4 S.prime;
   assert (d * pow2 256 % S.prime = 1);
 
-  assert_norm (SM.mont_R * SM.mont_R_inv % S.prime = 1);
-  Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) SM.mont_R_inv S.prime;
-  assert (SM.mont_R_inv * pow2 256 % S.prime = 1);
+  assert_norm (SM.fmont_R * SM.fmont_R_inv % S.prime = 1);
+  Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) SM.fmont_R_inv S.prime;
+  assert (SM.fmont_R_inv * pow2 256 % S.prime = 1);
 
-  assert (SM.mont_R_inv * pow2 256 % S.prime = d * pow2 256 % S.prime);
-  Hacl.Spec.P256.Math.lemma_mod_mul_pow256_prime SM.mont_R_inv d;
-  assert (SM.mont_R_inv % S.prime == d % S.prime);
-  Math.Lemmas.modulo_lemma SM.mont_R_inv S.prime;
-  assert (SM.mont_R_inv == d % S.prime)
+  assert (SM.fmont_R_inv * pow2 256 % S.prime = d * pow2 256 % S.prime);
+  Hacl.Spec.P256.Math.lemma_mod_mul_pow256_prime SM.fmont_R_inv d;
+  assert (SM.fmont_R_inv % S.prime == d % S.prime);
+  Math.Lemmas.modulo_lemma SM.fmont_R_inv S.prime;
+  assert (SM.fmont_R_inv == d % S.prime)
 
 
 val lemma_prime_mont: unit ->
@@ -75,7 +75,7 @@ let lemma_prime_mont () =
 
 val mont_reduction_lemma: x:Lib.Sequence.lseq uint64 8 -> n:Lib.Sequence.lseq uint64 4 -> Lemma
   (requires BD.bn_v n = S.prime /\ BD.bn_v x < S.prime * S.prime)
-  (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 1) x) == BD.bn_v x * SM.mont_R_inv % S.prime)
+  (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 1) x) == BD.bn_v x * SM.fmont_R_inv % S.prime)
 
 let mont_reduction_lemma x n =
   lemma_prime_mont ();
@@ -95,7 +95,7 @@ let mont_reduction_lemma x n =
     (==) { Math.Lemmas.lemma_mod_mul_distr_r (BD.bn_v x) d S.prime }
     (BD.bn_v x) * (d % S.prime) % S.prime;
     (==) { mont_R_inv_is_bn_mont_d () }
-    (BD.bn_v x) * SM.mont_R_inv % S.prime;
+    (BD.bn_v x) * SM.fmont_R_inv % S.prime;
   }
 
 
@@ -104,7 +104,7 @@ val mont_reduction: x:widefelem -> res:felem -> Stack unit
     live h x /\ live h res /\ disjoint x res /\
     wide_as_nat h x < S.prime * S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
-    as_nat h1 res == wide_as_nat h0 x * SM.mont_R_inv % S.prime)
+    as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime)
 
 [@CInline]
 let mont_reduction x res =
@@ -120,9 +120,9 @@ let mont_reduction x res =
   assert (BD.bn_v (as_seq h0 n) == as_nat h0 n);
   assert (BD.bn_v (as_seq h0 x) == wide_as_nat h0 x);
   mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
-  assert (BD.bn_v (as_seq h1 res) == BD.bn_v (as_seq h0 x) * SM.mont_R_inv % S.prime);
+  assert (BD.bn_v (as_seq h1 res) == BD.bn_v (as_seq h0 x) * SM.fmont_R_inv % S.prime);
   bignum_bn_v_is_as_nat h1 res;
-  assert (as_nat h1 res == wide_as_nat h0 x * SM.mont_R_inv % S.prime);
+  assert (as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime);
   pop_frame ()
 
 //---------------------

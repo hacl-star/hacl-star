@@ -12,13 +12,12 @@ open FStar.Tactics.Canon
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.MontgomeryMultiplication
-
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Spec.P256.Math
 
 module S = Spec.P256
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #reset-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 
@@ -80,13 +79,13 @@ val move_from_jacobian_coordinates: u1: felem -> u2: felem -> s1: felem -> s2: f
       let pX, pY, pZ = as_nat h0 (gsub p (size 0) (size 4)), as_nat h0 (gsub p (size 4) (size 4)), as_nat h0 (gsub p (size 8) (size 4)) in
       let qX, qY, qZ = as_nat h0 (gsub q (size 0) (size 4)), as_nat h0 (gsub q (size 4) (size 4)), as_nat h0 (gsub q (size 8) (size 4)) in
 
-      let pxD, pyD, pzD = fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ in
-      let qxD, qyD, qzD = fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ in
+      let pxD, pyD, pzD = SM.from_mont_point (pX, pY, pZ) in
+      let qxD, qyD, qzD = SM.from_mont_point (qX, qY, qZ) in
 
-      as_nat h1 u1 == toDomain_ (qzD * qzD * pxD % S.prime) /\
-      as_nat h1 u2 == toDomain_ (pzD * pzD * qxD % S.prime) /\
-      as_nat h1 s1 == toDomain_ (qzD * qzD * qzD * pyD % S.prime) /\
-      as_nat h1 s2 == toDomain_ (pzD * pzD * pzD * qyD % S.prime)
+      as_nat h1 u1 == SM.to_mont (qzD * qzD * pxD % S.prime) /\
+      as_nat h1 u2 == SM.to_mont (pzD * pzD * qxD % S.prime) /\
+      as_nat h1 s1 == SM.to_mont (qzD * qzD * qzD * pyD % S.prime) /\
+      as_nat h1 s2 == SM.to_mont (pzD * pzD * pzD * qyD % S.prime)
 )
 )
 
@@ -117,13 +116,13 @@ let move_from_jacobian_coordinates u1 u2 s1 s2 p q tempBuffer =
    fmul z1Cube qY s2;
 
 
-     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 qZ) * fromDomain_ (as_nat h0 qZ)) (fromDomain_ (as_nat h0 qZ)) S.prime;
-     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 pZ) * fromDomain_ (as_nat h0 pZ)) (fromDomain_ (as_nat h0 pZ)) S.prime;
-     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 qZ) * fromDomain_ (as_nat h0 qZ)) (fromDomain_ (as_nat h0 pX)) S.prime;
+     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ)) (SM.from_mont (as_nat h0 qZ)) S.prime;
+     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ)) (SM.from_mont (as_nat h0 pZ)) S.prime;
+     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ)) (SM.from_mont (as_nat h0 pX)) S.prime;
 
-     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 pZ) * fromDomain_ (as_nat h0 pZ)) (fromDomain_ (as_nat h0 qX)) S.prime;
-     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 qZ) * fromDomain_ (as_nat h0 qZ) * fromDomain_ (as_nat h0 qZ)) (fromDomain_ (as_nat h0 pY)) S.prime;
-     lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 pZ) * fromDomain_ (as_nat h0 pZ) * fromDomain_ (as_nat h0 pZ)) (fromDomain_ (as_nat h0 qY)) S.prime
+     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ)) (SM.from_mont (as_nat h0 qX)) S.prime;
+     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ)) (SM.from_mont (as_nat h0 pY)) S.prime;
+     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ)) (SM.from_mont (as_nat h0 qY)) S.prime
 
 
 
@@ -137,17 +136,17 @@ val compute_common_params_point_add: h: felem -> r: felem -> uh: felem -> hCube:
       modifies (loc h |+| loc r |+| loc uh |+| loc hCube |+| loc tempBuffer) h0 h1 /\
       as_nat h1 h < S.prime /\ as_nat h1 r < S.prime /\ as_nat h1 uh < S.prime /\ as_nat h1 hCube < S.prime /\
       (
-	let u1D = fromDomain_ (as_nat h0 u1) in
-	let u2D = fromDomain_ (as_nat h0 u2) in
-	let s1D = fromDomain_ (as_nat h0 s1) in
-	let s2D = fromDomain_ (as_nat h0 s2) in
+	let u1D = SM.from_mont (as_nat h0 u1) in
+	let u2D = SM.from_mont (as_nat h0 u2) in
+	let s1D = SM.from_mont (as_nat h0 s1) in
+	let s2D = SM.from_mont (as_nat h0 s2) in
 
-	let hD = fromDomain_ (as_nat h1 h) in
+	let hD = SM.from_mont (as_nat h1 h) in
 
-	as_nat h1 h == toDomain_ ((u2D - u1D) % S.prime) /\
-	as_nat h1 r == toDomain_ ((s2D - s1D) % S.prime) /\
-	as_nat h1 uh == toDomain_ (hD * hD * u1D % S.prime) /\
-	as_nat h1 hCube == toDomain_ (hD * hD * hD % S.prime)
+	as_nat h1 h == SM.to_mont ((u2D - u1D) % S.prime) /\
+	as_nat h1 r == SM.to_mont ((s2D - s1D) % S.prime) /\
+	as_nat h1 uh == SM.to_mont (hD * hD * u1D % S.prime) /\
+	as_nat h1 hCube == SM.to_mont (hD * hD * hD % S.prime)
   )
 )
 
@@ -164,8 +163,8 @@ let compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer =
   fmul temp u1 uh;
   fmul temp h hCube;
 
-    lemma_mod_mul_distr_l (fromDomain_ (as_nat h2 h) * fromDomain_ (as_nat h2 h)) (fromDomain_ (as_nat h3 u1)) S.prime;
-    lemma_mod_mul_distr_l (fromDomain_ (as_nat h2 h) * fromDomain_ (as_nat h2 h)) (fromDomain_ (as_nat h1 h)) S.prime
+    lemma_mod_mul_distr_l (SM.from_mont (as_nat h2 h) * SM.from_mont (as_nat h2 h)) (SM.from_mont (as_nat h3 u1)) S.prime;
+    lemma_mod_mul_distr_l (SM.from_mont (as_nat h2 h) * SM.from_mont (as_nat h2 h)) (SM.from_mont (as_nat h1 h)) S.prime
 
 
 inline_for_extraction noextract
@@ -176,10 +175,10 @@ val computeX3_point_add: x3: felem -> hCube: felem -> uh: felem -> r: felem -> t
   )
   (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc tempBuffer) h0 h1 /\ as_nat h1 x3 < S.prime /\
     (
-      let hCubeD = fromDomain_ (as_nat h0 hCube) in
-      let uhD = fromDomain_ (as_nat h0 uh) in
-      let rD = fromDomain_ (as_nat h0 r) in
-      as_nat h1 x3 == toDomain_ ((rD * rD - hCubeD - 2 * uhD) % S.prime)
+      let hCubeD = SM.from_mont (as_nat h0 hCube) in
+      let uhD = SM.from_mont (as_nat h0 uh) in
+      let rD = SM.from_mont (as_nat h0 r) in
+      as_nat h1 x3 == SM.to_mont ((rD * rD - hCubeD - 2 * uhD) % S.prime)
     )
   )
 
@@ -196,9 +195,9 @@ let computeX3_point_add x3 hCube uh r tempBuffer =
     let h3 = ST.get() in
   fsub rH twoUh x3;
 
-    lemma_mod_add_distr (-fromDomain_ (as_nat h1 hCube)) (fromDomain_ (as_nat h0 r) * fromDomain_ (as_nat h0 r)) S.prime;
-    lemma_mod_add_distr (-fromDomain_ (as_nat h3 twoUh)) (fromDomain_ (as_nat h0 r) * fromDomain_ (as_nat h0 r) - fromDomain_ (as_nat h1 hCube)) S.prime;
-    lemma_mod_sub_distr (fromDomain_ (as_nat h0 r) * fromDomain_ (as_nat h0 r) - fromDomain_ (as_nat h1 hCube)) (2 * fromDomain_ (as_nat h2 uh)) S.prime
+    lemma_mod_add_distr (-SM.from_mont (as_nat h1 hCube)) (SM.from_mont (as_nat h0 r) * SM.from_mont (as_nat h0 r)) S.prime;
+    lemma_mod_add_distr (-SM.from_mont (as_nat h3 twoUh)) (SM.from_mont (as_nat h0 r) * SM.from_mont (as_nat h0 r) - SM.from_mont (as_nat h1 hCube)) S.prime;
+    lemma_mod_sub_distr (SM.from_mont (as_nat h0 r) * SM.from_mont (as_nat h0 r) - SM.from_mont (as_nat h1 hCube)) (2 * SM.from_mont (as_nat h2 uh)) S.prime
 
 
 inline_for_extraction noextract
@@ -210,12 +209,12 @@ val computeY3_point_add:y3: felem -> s1: felem -> hCube: felem -> uh: felem -> x
     (ensures fun h0 _ h1 ->
       modifies (loc y3 |+| loc tempBuffer) h0 h1 /\ as_nat h1 y3 < S.prime /\
       (
-	let s1D = fromDomain_ (as_nat h0 s1) in
-	let hCubeD = fromDomain_ (as_nat h0 hCube) in
-	let uhD = fromDomain_ (as_nat h0 uh) in
-	let x3D = fromDomain_ (as_nat h0 x3_out) in
-	let rD = fromDomain_ (as_nat h0 r) in
-	as_nat h1 y3 = toDomain_ (((uhD - x3D) * rD - s1D * hCubeD) % S.prime)
+	let s1D = SM.from_mont (as_nat h0 s1) in
+	let hCubeD = SM.from_mont (as_nat h0 hCube) in
+	let uhD = SM.from_mont (as_nat h0 uh) in
+	let x3D = SM.from_mont (as_nat h0 x3_out) in
+	let rD = SM.from_mont (as_nat h0 r) in
+	as_nat h1 y3 = SM.to_mont (((uhD - x3D) * rD - s1D * hCubeD) % S.prime)
     )
 )
 
@@ -231,10 +230,10 @@ let computeY3_point_add y3 s1 hCube uh x3 r tempBuffer =
   fmul u1hx3 r ru1hx3;
 
     let h3 = ST.get() in
-    lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 uh) - fromDomain_ (as_nat h0 x3)) (fromDomain_ (as_nat h0 r)) S.prime;
+    lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 uh) - SM.from_mont (as_nat h0 x3)) (SM.from_mont (as_nat h0 r)) S.prime;
   fsub ru1hx3 s1hCube y3;
-    lemma_mod_add_distr (-(fromDomain_ (as_nat h3 s1hCube)))  ((fromDomain_ (as_nat h0 uh) - fromDomain_ (as_nat h0 x3)) * fromDomain_ (as_nat h0 r))  S.prime;
-    lemma_mod_sub_distr ((fromDomain_ (as_nat h0 uh) - fromDomain_ (as_nat h0 x3)) * fromDomain_ (as_nat h0 r)) (fromDomain_ (as_nat h0 s1) * fromDomain_ (as_nat h0 hCube)) S.prime
+    lemma_mod_add_distr (-(SM.from_mont (as_nat h3 s1hCube)))  ((SM.from_mont (as_nat h0 uh) - SM.from_mont (as_nat h0 x3)) * SM.from_mont (as_nat h0 r))  S.prime;
+    lemma_mod_sub_distr ((SM.from_mont (as_nat h0 uh) - SM.from_mont (as_nat h0 x3)) * SM.from_mont (as_nat h0 r)) (SM.from_mont (as_nat h0 s1) * SM.from_mont (as_nat h0 hCube)) S.prime
 
 
 
@@ -245,10 +244,10 @@ val computeZ3_point_add: z3: felem ->  z1: felem -> z2: felem -> h: felem -> tem
   as_nat h0 z1 < S.prime /\ as_nat h0 z2 < S.prime /\ as_nat h0 h < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc z3 |+| loc tempBuffer) h0 h1 /\ as_nat h1 z3 < S.prime /\
     (
-      let z1D = fromDomain_ (as_nat h0 z1) in
-      let z2D = fromDomain_ (as_nat h0 z2) in
-      let hD = fromDomain_ (as_nat h0 h) in
-      as_nat h1 z3 == toDomain_ (z1D * z2D * hD % S.prime)
+      let z1D = SM.from_mont (as_nat h0 z1) in
+      let z2D = SM.from_mont (as_nat h0 z2) in
+      let hD = SM.from_mont (as_nat h0 h) in
+      as_nat h1 z3 == SM.to_mont (z1D * z2D * hD % S.prime)
     )
   )
 
@@ -257,7 +256,7 @@ let computeZ3_point_add z3 z1 z2 h tempBuffer =
   let z1z2 = sub tempBuffer (size 0) (size 4) in
   fmul z1 z2 z1z2;
   fmul z1z2 h z3;
-    lemma_mod_mul_distr_l (fromDomain_ (as_nat h0 z1) * fromDomain_ (as_nat h0 z2)) (fromDomain_ (as_nat h0 h)) S.prime
+    lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 z1) * SM.from_mont (as_nat h0 z2)) (SM.from_mont (as_nat h0 h)) S.prime
 
 
 inline_for_extraction noextract
@@ -283,25 +282,25 @@ val point_add_if_second_branch_impl: result: point -> p: point -> q: point -> u1
     (
       let pX, pY, pZ = as_nat h0 (gsub p (size 0) (size 4)), as_nat h0 (gsub p (size 4) (size 4)), as_nat h0 (gsub p (size 8) (size 4)) in
       let qX, qY, qZ = as_nat h0 (gsub q (size 0) (size 4)), as_nat h0 (gsub q (size 4) (size 4)), as_nat h0 (gsub q (size 8) (size 4)) in
-      let pxD, pyD, pzD = fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ in
-      let qxD, qyD, qzD = fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ in
+      let pxD, pyD, pzD = SM.from_mont pX, SM.from_mont pY, SM.from_mont pZ in
+      let qxD, qyD, qzD = SM.from_mont qX, SM.from_mont qY, SM.from_mont qZ in
 
-      let u1D = fromDomain_ (as_nat h0 u1) in
-      let u2D = fromDomain_ (as_nat h0 u2) in
-      let s1D = fromDomain_ (as_nat h0 s1) in
-      let s2D = fromDomain_ (as_nat h0 s2) in
+      let u1D = SM.from_mont (as_nat h0 u1) in
+      let u2D = SM.from_mont (as_nat h0 u2) in
+      let s1D = SM.from_mont (as_nat h0 s1) in
+      let s2D = SM.from_mont (as_nat h0 s2) in
 
-      let hD = fromDomain_ (as_nat h0 h) in
+      let hD = SM.from_mont (as_nat h0 h) in
 
-      as_nat h0 u1 == toDomain_ (qzD * qzD * pxD % S.prime) /\
-      as_nat h0 u2 == toDomain_ (pzD * pzD * qxD % S.prime) /\
-      as_nat h0 s1 == toDomain_ (qzD * qzD * qzD * pyD % S.prime) /\
-      as_nat h0 s2 == toDomain_ (pzD * pzD * pzD * qyD % S.prime) /\
+      as_nat h0 u1 == SM.to_mont (qzD * qzD * pxD % S.prime) /\
+      as_nat h0 u2 == SM.to_mont (pzD * pzD * qxD % S.prime) /\
+      as_nat h0 s1 == SM.to_mont (qzD * qzD * qzD * pyD % S.prime) /\
+      as_nat h0 s2 == SM.to_mont (pzD * pzD * pzD * qyD % S.prime) /\
 
-      as_nat h0 h == toDomain_ ((u2D - u1D) % S.prime) /\
-      as_nat h0 r == toDomain_ ((s2D - s1D) % S.prime) /\
-      as_nat h0 uh == toDomain_ (hD * hD * u1D % S.prime) /\
-      as_nat h0 hCube == toDomain_ (hD * hD * hD % S.prime)
+      as_nat h0 h == SM.to_mont ((u2D - u1D) % S.prime) /\
+      as_nat h0 r == SM.to_mont ((s2D - s1D) % S.prime) /\
+      as_nat h0 uh == SM.to_mont (hD * hD * u1D % S.prime) /\
+      as_nat h0 hCube == SM.to_mont (hD * hD * hD % S.prime)
   )
 )
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer28 |+| loc result) h0 h1 /\
@@ -313,23 +312,23 @@ val point_add_if_second_branch_impl: result: point -> p: point -> q: point -> u1
       let qX, qY, qZ = as_nat h0 (gsub q (size 0) (size 4)), as_nat h0 (gsub q (size 4) (size 4)), as_nat h0 (gsub q (size 8) (size 4)) in
       let x3, y3, z3 = as_nat h1 (gsub result (size 0) (size 4)), as_nat h1 (gsub result (size 4) (size 4)), as_nat h1 (gsub result (size 8) (size 4)) in
 
-      let pxD, pyD, pzD = fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ in
-      let qxD, qyD, qzD = fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ in
-      let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in
+      let pxD, pyD, pzD = SM.from_mont pX, SM.from_mont pY, SM.from_mont pZ in
+      let qxD, qyD, qzD = SM.from_mont qX, SM.from_mont qY, SM.from_mont qZ in
+      let x3D, y3D, z3D = SM.from_mont x3, SM.from_mont y3, SM.from_mont z3 in
 
-      let rD = fromDomain_ (as_nat h0 r) in
-      let hD = fromDomain_ (as_nat h0 h) in
-      let s1D = fromDomain_ (as_nat h0 s1) in
-      let u1D = fromDomain_ (as_nat h0 u1) in
+      let rD = SM.from_mont (as_nat h0 r) in
+      let hD = SM.from_mont (as_nat h0 h) in
+      let s1D = SM.from_mont (as_nat h0 s1) in
+      let u1D = SM.from_mont (as_nat h0 u1) in
 
   if qzD = 0 then
     x3D == pxD /\ y3D == pyD /\ z3D == pzD
    else if pzD = 0 then
     x3D == qxD /\  y3D == qyD /\ z3D == qzD
    else
-    x3 == toDomain_ ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % S.prime) /\
-    y3 == toDomain_(((hD * hD * u1D - fromDomain_ (x3)) * rD - s1D * hD * hD * hD) % S.prime) /\
-    z3 == toDomain_ (pzD * qzD * hD % S.prime)
+    x3 == SM.to_mont ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % S.prime) /\
+    y3 == SM.to_mont (((hD * hD * u1D - SM.from_mont (x3)) * rD - s1D * hD * hD * hD) % S.prime) /\
+    z3 == SM.to_mont (pzD * qzD * hD % S.prime)
   )
 )
 
@@ -356,13 +355,13 @@ let point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuff
 
     let hEnd = ST.get() in
 
-  let rD = fromDomain_ (as_nat h0 r) in
-  let hD = fromDomain_ (as_nat h0 h) in
-  let u1D = fromDomain_ (as_nat h0 u1) in
-  let uhD = fromDomain_ (as_nat h0 uh) in
+  let rD = SM.from_mont (as_nat h0 r) in
+  let hD = SM.from_mont (as_nat h0 h) in
+  let u1D = SM.from_mont (as_nat h0 u1) in
+  let uhD = SM.from_mont (as_nat h0 uh) in
 
-  let s1D = fromDomain_ (as_nat h0 s1) in
-  let x3D = fromDomain_ (as_nat h1 x3_out) in
+  let s1D = SM.from_mont (as_nat h0 s1) in
+  let x3D = SM.from_mont (as_nat h1 x3_out) in
 
   //lemma_point_add_0 (rD * rD) (hD * hD * hD) (hD * hD * u1D);
   lemma_mod_sub_distr (rD * rD - 2 * uhD) (hD * hD * hD) S.prime;
@@ -407,12 +406,12 @@ let point_add p q result tempBuffer =
   compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer16;
   point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuffer28;
     let h1 = ST.get() in
-      let pxD = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
-      let pyD = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
-      let pzD = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
-      let qxD = fromDomain_ (as_nat h0 (gsub q (size 0) (size 4))) in
-      let qyD = fromDomain_ (as_nat h0 (gsub q (size 4) (size 4))) in
-      let qzD = fromDomain_ (as_nat h0 (gsub q (size 8) (size 4))) in
+      let pxD = SM.from_mont (as_nat h0 (gsub p (size 0) (size 4))) in
+      let pyD = SM.from_mont (as_nat h0 (gsub p (size 4) (size 4))) in
+      let pzD = SM.from_mont (as_nat h0 (gsub p (size 8) (size 4))) in
+      let qxD = SM.from_mont (as_nat h0 (gsub q (size 0) (size 4))) in
+      let qyD = SM.from_mont (as_nat h0 (gsub q (size 4) (size 4))) in
+      let qzD = SM.from_mont (as_nat h0 (gsub q (size 8) (size 4))) in
       let x3 = as_nat h1 (gsub result (size 0) (size 4)) in
       let y3 = as_nat h1 (gsub result (size 4) (size 4)) in
       let z3 = as_nat h1 (gsub result (size 8) (size 4)) in

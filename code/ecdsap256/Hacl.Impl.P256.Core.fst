@@ -24,7 +24,7 @@ val toDomain: f:felem -> res:felem -> Stack unit
     live h f /\live h res /\ eq_or_disjoint f res /\
     as_nat h f < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = SM.toDomain_ (as_nat h0 f))
+    as_nat h1 res = SM.to_mont (as_nat h0 f))
 
 let toDomain f res =
   push_frame ();

@@ -52,16 +52,16 @@ let create_aff_point () =
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
 val lemma_mont_is_point_at_inf: p:S.jacob_point{let (_, _, z) = p in z < S.prime} ->
-  Lemma (S.is_point_at_inf p == S.is_point_at_inf (SM.fromDomainPoint p))
+  Lemma (S.is_point_at_inf p == S.is_point_at_inf (SM.from_mont_point p))
 
 let lemma_mont_is_point_at_inf p =
   let px, py, pz = p in
   assert (if S.is_point_at_inf p then pz == 0 else pz <> 0);
-  assert (SM.fromDomain_ pz == pz * SM.mont_R_inv % S.prime);
-  assert_norm (SM.mont_R_inv % S.prime <> 0);
-  assert_norm (0 * SM.mont_R_inv % S.prime == 0);
+  assert (SM.from_mont pz == pz * SM.fmont_R_inv % S.prime);
+  assert_norm (SM.fmont_R_inv % S.prime <> 0);
+  assert_norm (0 * SM.fmont_R_inv % S.prime == 0);
   Hacl.Spec.P256.Math.lemma_multiplication_not_mod_prime pz;
-  assert (if pz = 0 then SM.fromDomain_ pz == 0 else SM.fromDomain_ pz <> 0)
+  assert (if pz = 0 then SM.from_mont pz == 0 else SM.from_mont pz <> 0)
 
 
 [@CInline]
@@ -119,7 +119,7 @@ val norm_jacob_point_z: p:point -> res:felem -> Stack unit
     live h res /\ live h p /\ disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let _, _, rz = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) in
+    (let _, _, rz = S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)) in
     as_nat h1 res == rz))
 
 let norm_jacob_point_z p res =
@@ -159,7 +159,7 @@ val norm_jacob_point_y: p:point -> res:felem -> Stack unit
     live h res /\ live h p /\ disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let _, ry, _ = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) in
+    (let _, ry, _ = S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)) in
     as_nat h1 res == ry))
 
 let norm_jacob_point_y p res =

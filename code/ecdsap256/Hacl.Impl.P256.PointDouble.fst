@@ -14,9 +14,9 @@ open Lib.Buffer
 
 open Hacl.Impl.P256.Field
 open Hacl.Spec.P256.Math
-open Hacl.Spec.P256.MontgomeryMultiplication
 
 module S = Spec.P256
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"
 
@@ -250,13 +250,13 @@ val point_double_a_b_g: p: point -> alpha: felem -> beta: felem -> gamma: felem 
     )
     (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
       (
-	let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
-	let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
-	let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
-	as_nat h1 delta = toDomain_ (z * z % S.prime) /\
-	as_nat h1 gamma = toDomain_ (y * y % S.prime) /\
-	as_nat h1 beta = toDomain_ (x * fromDomain_(as_nat h1 gamma) % S.prime) /\
-	as_nat h1 alpha = toDomain_ (3 * (x - fromDomain_ (as_nat h1 delta)) * (x + fromDomain_ (as_nat h1 delta)) % S.prime)
+	let x = SM.from_mont (as_nat h0 (gsub p (size 0) (size 4))) in
+	let y = SM.from_mont (as_nat h0 (gsub p (size 4) (size 4))) in
+	let z = SM.from_mont (as_nat h0 (gsub p (size 8) (size 4))) in
+	as_nat h1 delta = SM.to_mont (z * z % S.prime) /\
+	as_nat h1 gamma = SM.to_mont (y * y % S.prime) /\
+	as_nat h1 beta = SM.to_mont (x * SM.from_mont(as_nat h1 gamma) % S.prime) /\
+	as_nat h1 alpha = SM.to_mont (3 * (x - SM.from_mont (as_nat h1 delta)) * (x + SM.from_mont (as_nat h1 delta)) % S.prime)
       )
     )
 
@@ -286,8 +286,8 @@ let point_double_a_b_g p alpha beta gamma delta tempBuffer =
   fmul a0 a1 alpha0; (* alpha = (x - delta) * (x + delta) *)
   fmul_by_3 alpha0 alpha;
 
-    let xD = fromDomain_ (as_nat h0 pX) in
-    let dlt = fromDomain_ (as_nat h0 delta) in
+    let xD = SM.from_mont (as_nat h0 pX) in
+    let dlt = SM.from_mont (as_nat h0 delta) in
 
     calc (==)
     {
@@ -308,8 +308,8 @@ val point_double_x3: x3: felem -> alpha: felem -> fourBeta: felem -> beta: felem
       as_nat h beta < S.prime
     )
     (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc fourBeta |+| loc eightBeta) h0 h1 /\
-      as_nat h1 fourBeta = toDomain_ (4 * fromDomain_ (as_nat h0 beta) % S.prime) /\
-      as_nat h1 x3 = toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * (fromDomain_ (as_nat h0 beta))) % S.prime)
+      as_nat h1 fourBeta = SM.to_mont (4 * SM.from_mont (as_nat h0 beta) % S.prime) /\
+      as_nat h1 x3 = SM.to_mont ((SM.from_mont (as_nat h0 alpha) * SM.from_mont (as_nat h0 alpha) - 8 * (SM.from_mont (as_nat h0 beta))) % S.prime)
     )
 
 let point_double_x3 x3 alpha fourBeta beta eightBeta  =
@@ -321,13 +321,13 @@ let point_double_x3 x3 alpha fourBeta beta eightBeta  =
 
   calc(==)
   {
-     toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) - (2 *  (4 * fromDomain_ (as_nat h0 beta) % S.prime) % S.prime)) % S.prime);
-  (==) {lemma_mod_mul_distr_r 2 (4 * fromDomain_ (as_nat h0 beta)) S.prime}
-  toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) - (8 * fromDomain_ (as_nat h0 beta)) % S.prime) % S.prime);
-  (==) {lemma_mod_sub_distr (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) (8 * fromDomain_ (as_nat h0 beta)) S.prime}
-    toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % S.prime) - (8 * fromDomain_ (as_nat h0 beta))) % S.prime);
-  (==) {lemma_mod_add_distr (- 8 * fromDomain_ (as_nat h0 beta)) (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha)) S.prime}
-    toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * fromDomain_ (as_nat h0 beta)) % S.prime);
+     SM.to_mont (((SM.from_mont (as_nat h0 alpha) * SM.from_mont (as_nat h0 alpha) % S.prime) - (2 *  (4 * SM.from_mont (as_nat h0 beta) % S.prime) % S.prime)) % S.prime);
+  (==) {lemma_mod_mul_distr_r 2 (4 * SM.from_mont (as_nat h0 beta)) S.prime}
+  SM.to_mont (((SM.from_mont (as_nat h0 alpha) * SM.from_mont (as_nat h0 alpha) % S.prime) - (8 * SM.from_mont (as_nat h0 beta)) % S.prime) % S.prime);
+  (==) {lemma_mod_sub_distr (SM.from_mont (as_nat h0 alpha) * SM.from_mont (as_nat h0 alpha) % S.prime) (8 * SM.from_mont (as_nat h0 beta)) S.prime}
+    SM.to_mont (((SM.from_mont (as_nat h0 alpha) * SM.from_mont (as_nat h0 alpha) % S.prime) - (8 * SM.from_mont (as_nat h0 beta))) % S.prime);
+  (==) {lemma_mod_add_distr (- 8 * SM.from_mont (as_nat h0 beta)) (SM.from_mont (as_nat h0 alpha) * SM.from_mont (as_nat h0 alpha)) S.prime}
+    SM.to_mont ((SM.from_mont (as_nat h0 alpha) * SM.from_mont (as_nat h0 alpha) - 8 * SM.from_mont (as_nat h0 beta)) % S.prime);
   }
 
 
@@ -342,9 +342,9 @@ val point_double_z3: z3: felem -> pY: felem -> pZ: felem -> gamma: felem -> delt
     )
     (ensures fun h0 _ h1 -> modifies (loc z3) h0 h1 /\
       (
-	let y = fromDomain_ (as_nat h0 pY) in
-	let z = fromDomain_ (as_nat h0 pZ) in
-	as_nat h1 z3 = toDomain_ (((y + z) * (y + z) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % S.prime)
+	let y = SM.from_mont (as_nat h0 pY) in
+	let z = SM.from_mont (as_nat h0 pZ) in
+	as_nat h1 z3 = SM.to_mont (((y + z) * (y + z) - SM.from_mont (as_nat h0 gamma) - SM.from_mont (as_nat h0 delta)) % S.prime)
       )
     )
 
@@ -356,18 +356,18 @@ let point_double_z3 z3 pY pZ gamma delta  =
   fsub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
   fsub z3 delta z3 (* z3 = (py + pz) ** 2 - gamma - delta *);
 
-    let pyD = fromDomain_ (as_nat h0 pY) in
-    let pzD = fromDomain_ (as_nat h0 pZ) in
+    let pyD = SM.from_mont (as_nat h0 pY) in
+    let pzD = SM.from_mont (as_nat h0 pZ) in
 
   calc (==)
   {
-    toDomain_ (((((( ((pyD + pzD) % S.prime) * ((pyD + pzD) % S.prime) % S.prime)) - fromDomain_ (as_nat h0 gamma)) % S.prime) - fromDomain_ (as_nat h0 delta)) % S.prime);
+    SM.to_mont (((((( ((pyD + pzD) % S.prime) * ((pyD + pzD) % S.prime) % S.prime)) - SM.from_mont (as_nat h0 gamma)) % S.prime) - SM.from_mont (as_nat h0 delta)) % S.prime);
   (==) {lemma_mod_mul_distr_l (pyD + pzD) ((pyD + pzD) % S.prime) S.prime; lemma_mod_mul_distr_r (pyD + pzD) (pyD + pzD) S.prime}
-    toDomain_ ((((((pyD + pzD) * (pyD + pzD) % S.prime) - fromDomain_ (as_nat h0 gamma)) % S.prime) - fromDomain_ (as_nat h0 delta)) % S.prime);
-  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 gamma)) ((pyD + pzD) * (pyD + pzD)) S.prime }
-    toDomain_ (((((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) % S.prime) - fromDomain_ (as_nat h0 delta)) % S.prime);
-  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 delta)) ((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) S.prime}
-    toDomain_ (((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % S.prime);
+    SM.to_mont ((((((pyD + pzD) * (pyD + pzD) % S.prime) - SM.from_mont (as_nat h0 gamma)) % S.prime) - SM.from_mont (as_nat h0 delta)) % S.prime);
+  (==) {lemma_mod_add_distr (- SM.from_mont (as_nat h0 gamma)) ((pyD + pzD) * (pyD + pzD)) S.prime }
+    SM.to_mont (((((pyD + pzD) * (pyD + pzD) - SM.from_mont (as_nat h0 gamma)) % S.prime) - SM.from_mont (as_nat h0 delta)) % S.prime);
+  (==) {lemma_mod_add_distr (- SM.from_mont (as_nat h0 delta)) ((pyD + pzD) * (pyD + pzD) - SM.from_mont (as_nat h0 gamma)) S.prime}
+    SM.to_mont (((pyD + pzD) * (pyD + pzD) - SM.from_mont (as_nat h0 gamma) - SM.from_mont (as_nat h0 delta)) % S.prime);
   }
 
 
@@ -382,9 +382,9 @@ val point_double_y3: y3: felem -> x3: felem -> alpha: felem -> gamma: felem -> e
   )
   (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc gamma |+| loc eightGamma) h0 h1 /\
     (
-      let alphaD = fromDomain_ (as_nat h0 alpha) in
-      let gammaD = fromDomain_ (as_nat h0 gamma) in
-      as_nat h1 y3 == toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % S.prime)
+      let alphaD = SM.from_mont (as_nat h0 alpha) in
+      let gammaD = SM.from_mont (as_nat h0 gamma) in
+      as_nat h1 y3 == SM.to_mont ((alphaD *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3)) - 8 * gammaD * gammaD) % S.prime)
     )
   )
 
@@ -399,42 +399,42 @@ let point_double_y3 y3 x3 alpha gamma eightGamma fourBeta =
   fsub y3 eightGamma y3; (* y3 = alpha * y3 - 8 * gamma **2 *)
 
 
-  let alphaD = fromDomain_ (as_nat h0 alpha) in
-  let gammaD = fromDomain_ (as_nat h0 gamma) in
+  let alphaD = SM.from_mont (as_nat h0 alpha) in
+  let gammaD = SM.from_mont (as_nat h0 gamma) in
 
   calc(==)
   {
-     toDomain_ (((fromDomain_ (as_nat h0 alpha) *  ((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % S.prime) % S.prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % S.prime) % S.prime)) % S.prime);
-  (==) {lemma_mod_mul_distr_r (fromDomain_ (as_nat h0 alpha)) (((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)))) S.prime}
-    toDomain_ (((fromDomain_ (as_nat h0 alpha) *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % S.prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % S.prime) % S.prime)) % S.prime);
-  (==) {lemma_mod_mul_distr_r 8 (fromDomain_ (as_nat h0 gamma) * (fromDomain_ (as_nat h0 gamma))) S.prime}
-    toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % S.prime) - (8 * (gammaD * gammaD) % S.prime)) % S.prime);
-  (==) {lemma_mod_add_distr (-(8 * (gammaD * gammaD) % S.prime)) (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) S.prime  }
-      toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD) % S.prime)) % S.prime);
-  (==) {lemma_mod_sub_distr (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) (8 * (gammaD * gammaD)) S.prime}
-       toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD))) % S.prime);
+     SM.to_mont (((SM.from_mont (as_nat h0 alpha) *  ((SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3)) % S.prime) % S.prime) - (8 *  (SM.from_mont (as_nat h0 gamma) * SM.from_mont (as_nat h0 gamma) % S.prime) % S.prime)) % S.prime);
+  (==) {lemma_mod_mul_distr_r (SM.from_mont (as_nat h0 alpha)) (((SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3)))) S.prime}
+    SM.to_mont (((SM.from_mont (as_nat h0 alpha) *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3)) % S.prime) - (8 *  (SM.from_mont (as_nat h0 gamma) * SM.from_mont (as_nat h0 gamma) % S.prime) % S.prime)) % S.prime);
+  (==) {lemma_mod_mul_distr_r 8 (SM.from_mont (as_nat h0 gamma) * (SM.from_mont (as_nat h0 gamma))) S.prime}
+    SM.to_mont (((alphaD *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3)) % S.prime) - (8 * (gammaD * gammaD) % S.prime)) % S.prime);
+  (==) {lemma_mod_add_distr (-(8 * (gammaD * gammaD) % S.prime)) (alphaD *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3))) S.prime  }
+      SM.to_mont (((alphaD *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3))) - (8 * (gammaD * gammaD) % S.prime)) % S.prime);
+  (==) {lemma_mod_sub_distr (alphaD *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3))) (8 * (gammaD * gammaD)) S.prime}
+       SM.to_mont (((alphaD *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3))) - (8 * (gammaD * gammaD))) % S.prime);
   (==) {assert_by_tactic (8 * (gammaD * gammaD) == 8 * gammaD * gammaD) canon}
-    toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % S.prime);
+    SM.to_mont ((alphaD *  (SM.from_mont (as_nat h0 fourBeta) - SM.from_mont (as_nat h0 x3)) - 8 * gammaD * gammaD) % S.prime);
 }
 
 
 val lemma_pd_to_spec: x: nat -> y: nat -> z: nat -> x3: nat -> y3: nat -> z3: nat ->  Lemma
   (requires (
-    let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in
-    x3 == toDomain_ (((3 * (xD - zD * zD) * (xD + zD * zD)) * (3 * (xD - zD * zD) * (xD + zD * zD)) - 8 * xD * (yD * yD)) % S.prime) /\
-    y3 == toDomain_ ((3 * (xD - zD * zD) * (xD + zD * zD) *  (4 * xD * (yD * yD) - fromDomain_ x3) - 8 * (yD * yD) * (yD * yD)) % S.prime) /\
-    z3 = toDomain_ (((yD + zD) * (yD + zD) - zD * zD - yD * yD) % S.prime)
+    let xD, yD, zD = SM.from_mont x, SM.from_mont y, SM.from_mont z in
+    x3 == SM.to_mont (((3 * (xD - zD * zD) * (xD + zD * zD)) * (3 * (xD - zD * zD) * (xD + zD * zD)) - 8 * xD * (yD * yD)) % S.prime) /\
+    y3 == SM.to_mont ((3 * (xD - zD * zD) * (xD + zD * zD) *  (4 * xD * (yD * yD) - SM.from_mont x3) - 8 * (yD * yD) * (yD * yD)) % S.prime) /\
+    z3 = SM.to_mont (((yD + zD) * (yD + zD) - zD * zD - yD * yD) % S.prime)
   )
 )
  (ensures(
-   let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in
-   let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in
+   let xD, yD, zD = SM.from_mont x, SM.from_mont y, SM.from_mont z in
+   let x3D, y3D, z3D = SM.from_mont x3, SM.from_mont y3, SM.from_mont z3 in
    let xN, yN, zN = S.point_double (xD, yD, zD) in
    x3D == xN /\ y3D == yN /\ z3D == zN))
 
 let lemma_pd_to_spec x y z x3 y3 z3 =
-  let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in
-  let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in
+  let xD, yD, zD = SM.from_mont x, SM.from_mont y, SM.from_mont z in
+  let x3D, y3D, z3D = SM.from_mont x3, SM.from_mont y3, SM.from_mont z3 in
   assert(let xN, yN, zN = S.point_double (xD, yD, zD) in
       x3D == xN /\ y3D == yN /\ z3D == zN)
 
@@ -469,13 +469,13 @@ let point_double p result tempBuffer =
 
   let h4 = ST.get() in
 
-  let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in
-  let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in
-  let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in
+  let x = SM.from_mont (as_nat h0 (gsub p (size 0) (size 4))) in
+  let y = SM.from_mont (as_nat h0 (gsub p (size 4) (size 4))) in
+  let z = SM.from_mont (as_nat h0 (gsub p (size 8) (size 4))) in
 
   lemma_x3 x y z;
   lemma_z3 x y z;
-  lemma_y3 x y z (fromDomain_ (as_nat h4 x3));
+  lemma_y3 x y z (SM.from_mont (as_nat h4 x3));
   lemma_pd_to_spec
     (as_nat h0 (gsub p (size 0) (size 4)))
       (as_nat h0 (gsub p (size 4) (size 4)))

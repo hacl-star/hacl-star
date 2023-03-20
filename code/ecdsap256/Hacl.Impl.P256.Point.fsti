@@ -134,13 +134,13 @@ val create_point: unit -> StackInline point
 val make_base_point: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\ SM.fromDomainPoint (as_point_nat h1 p) == S.base_point)
+    point_inv h1 p /\ SM.from_mont_point (as_point_nat h1 p) == S.base_point)
 
 
 val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\ SM.fromDomainPoint (as_point_nat h1 p) == S.point_at_inf)
+    point_inv h1 p /\ SM.from_mont_point (as_point_nat h1 p) == S.point_at_inf)
 
 
 inline_for_extraction noextract
@@ -162,7 +162,7 @@ val create_aff_point: unit -> StackInline aff_point
 val is_point_at_inf: p:point -> Stack uint64
   (requires fun h -> live h p /\ point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if S.is_point_at_inf (SM.fromDomainPoint (as_point_nat h0 p))
+    (if S.is_point_at_inf (SM.from_mont_point (as_point_nat h0 p))
      then v r = ones_v U64 else v r = 0) /\
     (if S.is_point_at_inf (as_point_nat h0 p)
      then v r = ones_v U64 else v r = 0))
@@ -184,9 +184,9 @@ val point_to_mont: p:point -> res:point -> Stack unit
     point_inv h1 res /\
    (let px, py, pz = as_point_nat h0 p in
     let rx, ry, rz = as_point_nat h1 res in
-    rx == SM.toDomain_ px /\
-    ry == SM.toDomain_ py /\
-    rz == SM.toDomain_ pz))
+    rx == SM.to_mont px /\
+    ry == SM.to_mont py /\
+    rz == SM.to_mont pz))
 
 
 val point_from_mont: p:point -> res:point-> Stack unit
@@ -197,9 +197,9 @@ val point_from_mont: p:point -> res:point-> Stack unit
     point_inv h1 res /\
    (let px, py, pz = as_point_nat h0 p in
     let rx, ry, rz = as_point_nat h1 res in
-    rx == SM.fromDomain_ px /\
-    ry == SM.fromDomain_ py /\
-    rz == SM.fromDomain_ pz))
+    rx == SM.from_mont px /\
+    ry == SM.from_mont py /\
+    rz == SM.from_mont pz))
 
 
 ///  Point conversion between Jacobian and Affine coordinates representations
@@ -209,7 +209,7 @@ val norm_jacob_point_x: p:point -> res:felem -> Stack unit
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1  /\
-   (let rx, _, _ = S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) in
+   (let rx, _, _ = S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)) in
     as_nat h1 res == rx))
 
 
@@ -219,7 +219,7 @@ val norm_jacob_point: p:point -> res:point -> Stack unit
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_point_nat h1 res ==
-      S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)))
+      S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)))
 
 
 val to_jacob_point: p:aff_point -> res:point -> Stack unit
@@ -239,8 +239,8 @@ val is_point_eq_vartime: p:point -> q:point -> Stack bool
     point_inv h p /\ point_inv h q)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r =
-      (S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 p)) =
-       S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h0 q))))
+      (S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)) =
+       S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 q))))
 
 
 ///  Check if a point is on the curve
