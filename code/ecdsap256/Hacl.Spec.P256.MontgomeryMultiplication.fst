@@ -16,8 +16,8 @@ let from_mont_point (a:tuple3 nat nat nat) : S.jacob_point =
   let x, y, z = a in from_mont x, from_mont y, from_mont z
 
 
-val lemmaToDomainAndBackIsTheSame: a:S.felem -> Lemma (from_mont (to_mont a) == a)
-let lemmaToDomainAndBackIsTheSame a =
+val lemma_to_from_mont_id: a:S.felem -> Lemma (from_mont (to_mont a) == a)
+let lemma_to_from_mont_id a =
   calc (==) {
     from_mont (to_mont a); // == a
     (==) { }
@@ -35,8 +35,8 @@ let lemmaToDomainAndBackIsTheSame a =
   }
 
 
-val lemmaFromDomainToDomain: a:S.felem -> Lemma (to_mont (from_mont a) == a)
-let lemmaFromDomainToDomain a =
+val lemma_from_to_mont_id: a:S.felem -> Lemma (to_mont (from_mont a) == a)
+let lemma_from_to_mont_id a =
   calc (==) {
     to_mont (from_mont a); // == a
     (==) { }
@@ -51,17 +51,6 @@ let lemmaFromDomainToDomain a =
     a % S.prime;
     (==) { Math.Lemmas.modulo_lemma a S.prime }
     a;
-  }
-
-
-val inDomain_mod_is_not_mod: a:int -> Lemma (to_mont a == to_mont (a % S.prime))
-let inDomain_mod_is_not_mod a =
-  calc (==) {
-    to_mont (a % S.prime);
-    (==) { }
-    (a % S.prime) * fmont_R % S.prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l a fmont_R S.prime }
-    a * fmont_R % S.prime;
   }
 
 

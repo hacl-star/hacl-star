@@ -298,8 +298,8 @@ let is_point_on_curve_vartime p =
   Hacl.Impl.P256.Core.toDomain px tx;
   Hacl.Impl.P256.Core.toDomain py ty;
 
-  SM.lemmaToDomainAndBackIsTheSame (as_nat h0 px);
-  SM.lemmaToDomainAndBackIsTheSame (as_nat h0 py);
+  SM.lemma_to_from_mont_id (as_nat h0 px);
+  SM.lemma_to_from_mont_id (as_nat h0 py);
   compute_rp_ec_equation tx rp;
   let r = is_y_sqr_is_y2_vartime rp ty in
   pop_frame ();
@@ -379,7 +379,7 @@ let recover_y_vartime_candidate y x =
   let xM = create_felem () in
   let yM = create_felem () in
   let h0 = ST.get () in
-  SM.lemmaToDomainAndBackIsTheSame (as_nat h0 x);
+  SM.lemma_to_from_mont_id (as_nat h0 x);
   Hacl.Impl.P256.Core.toDomain x xM;
   compute_rp_ec_equation xM y2M; // y2M = x *% x *% x +% S.a_coeff *% x +% S.b_coeff
   fsqrt y2M yM; // yM = fsqrt y2M

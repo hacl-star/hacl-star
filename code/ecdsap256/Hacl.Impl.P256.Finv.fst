@@ -188,7 +188,7 @@ let finv a res =
   fexp_vartime res tmp b;
   let h = ST.get () in
   toDomain res res;
-  SM.lemmaToDomainAndBackIsTheSame (as_nat h res);
+  SM.lemma_to_from_mont_id (as_nat h res);
   pop_frame ()
 
 
@@ -219,7 +219,7 @@ let fsqrt a res =
   fexp_vartime res tmp b;
   let h = ST.get () in
   toDomain res res;
-  SM.lemmaToDomainAndBackIsTheSame (as_nat h res);
+  SM.lemma_to_from_mont_id (as_nat h res);
   pop_frame ()
 
 //-----------------------------------------------

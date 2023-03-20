@@ -348,9 +348,9 @@ val lemma_point_to_domain: h0:mem -> h1:mem -> p:point -> res:point ->  Lemma
   (ensures (SM.from_mont_point (as_point_nat h1 res) == as_point_nat h0 p))
 
 let lemma_point_to_domain h0 h1 p res =
-  SM.lemmaToDomainAndBackIsTheSame (point_x_as_nat h0 p);
-  SM.lemmaToDomainAndBackIsTheSame (point_y_as_nat h0 p);
-  SM.lemmaToDomainAndBackIsTheSame (point_z_as_nat h0 p)
+  SM.lemma_to_from_mont_id (point_x_as_nat h0 p);
+  SM.lemma_to_from_mont_id (point_y_as_nat h0 p);
+  SM.lemma_to_from_mont_id (point_z_as_nat h0 p)
 
 
 val scalarMultiplicationWithoutNorm: p:point -> res:point -> scalar:lbuffer uint8 32ul ->

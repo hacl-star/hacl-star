@@ -171,8 +171,8 @@ let feq_mask a b =
   let r = bn_is_eq_mask4 a b in
   let h1 = ST.get () in
   assert (if as_nat h1 a = as_nat h1 b then v r == ones_v U64 else v r = 0);
-  SM.lemmaFromDomainToDomain (as_nat h0 a);
-  SM.lemmaFromDomainToDomain (as_nat h0 b);
+  SM.lemma_from_to_mont_id (as_nat h0 a);
+  SM.lemma_from_to_mont_id (as_nat h0 b);
   assert (if fmont_as_nat h1 a = fmont_as_nat h1 b then v r == ones_v U64 else v r = 0);
   r
 
