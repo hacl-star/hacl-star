@@ -7,40 +7,21 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.Bignum
 open Hacl.Impl.P256.Point
 
 module S = Spec.P256
+module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val point_add: p: point -> q: point -> result: point -> tempBuffer: lbuffer uint64 (size 88) ->
-   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ live h tempBuffer /\
-   eq_or_disjoint q result /\
-   disjoint p q /\ disjoint p tempBuffer /\ disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 8) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 4) (size 4)) < S.prime
-    )
-   (ensures fun h0 _ h1 ->
-     modifies (loc tempBuffer |+| loc result) h0 h1 /\
-     as_nat h1 (gsub result (size 8) (size 4)) < S.prime /\
-     as_nat h1 (gsub result (size 0) (size 4)) < S.prime /\
-     as_nat h1 (gsub result (size 4) (size 4)) < S.prime /\
-     (
-       let pX, pY, pZ = gsub p (size 0) (size 4), gsub p (size 4) (size 4), gsub p (size 8) (size 4) in
-       let qX, qY, qZ = gsub q (size 0) (size 4), gsub q (size 4) (size 4), gsub q (size 8) (size 4) in
-       let x3, y3, z3 = gsub result (size 0) (size 4), gsub result (size 4) (size 4), gsub result (size 8) (size 4) in
-
-       let pxD, pyD, pzD = fromDomain_ (as_nat h0 pX), fromDomain_ (as_nat h0 pY), fromDomain_ (as_nat h0 pZ) in
-       let qxD, qyD, qzD = fromDomain_ (as_nat h0 qX), fromDomain_ (as_nat h0 qY), fromDomain_ (as_nat h0 qZ) in
-       let x3D, y3D, z3D = fromDomain_ (as_nat h1 x3), fromDomain_ (as_nat h1 y3), fromDomain_ (as_nat h1 z3) in
-
-       let xN, yN, zN = S.point_add (pxD, pyD, pzD) (qxD, qyD, qzD) in
-       x3D == xN /\ y3D == yN /\ z3D == zN
-  )
-)
+val point_add: p:point -> q:point -> res:point -> tmp:lbuffer uint64 (size 88) -> Stack unit
+  (requires fun h ->
+    live h p /\ live h q /\ live h res /\ live h tmp /\
+    eq_or_disjoint q res /\ disjoint p q /\ disjoint p tmp /\
+    disjoint q tmp /\ disjoint p res /\ disjoint res tmp /\
+    point_inv h p /\ point_inv h q)
+  (ensures fun h0 _ h1 -> modifies (loc tmp |+| loc res) h0 h1 /\
+    point_inv h1 res /\
+    SM.fromDomainPoint (as_point_nat h1 res) ==
+    S.point_add (SM.fromDomainPoint (as_point_nat h0 p)) (SM.fromDomainPoint (as_point_nat h0 q)))

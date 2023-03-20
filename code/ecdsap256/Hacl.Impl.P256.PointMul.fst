@@ -436,3 +436,30 @@ let point_mul_g_bytes res scalar =
   point_mul_g res s_q;
   norm_jacob_point res res;
   pop_frame ()
+
+
+[@CInline]
+let point_mul_double_g res scalar1 scalar2 p =
+  push_frame ();
+  let sg1 = create_point () in
+  let sp2 = create_point () in
+  let tmp = create (size 88) (u64 0) in
+  let h0 = ST.get () in
+  point_mul_g sg1 scalar1; // sg1 = [scalar1]G
+  point_mul sp2 p scalar2; // sp2 = [scalar2]P
+  let h1 = ST.get () in
+  assert (SM.fromDomainPoint (as_point_nat h1 sg1) ==
+    S.point_mul_g (as_nat h0 scalar1));
+  assert (SM.fromDomainPoint (as_point_nat h1 sp2) ==
+    S.point_mul (as_nat h0 scalar2) (as_point_nat h0 p));
+
+  let is_points_eq = is_point_eq_vartime sg1 sp2 in
+  assert (is_points_eq =
+    (S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h1 sg1)) =
+     S.norm_jacob_point (SM.fromDomainPoint (as_point_nat h1 sp2))));
+
+  begin
+  if is_points_eq
+  then point_double sg1 res tmp
+  else point_add sg1 sp2 res tmp end;
+  pop_frame ()
