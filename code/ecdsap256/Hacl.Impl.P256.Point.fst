@@ -44,6 +44,23 @@ let make_point_at_inf p =
 let copy_point p res = copy res p
 
 
+[@CInline]
+let copy_point_conditional res p q_mask =
+  let z = getz q_mask in
+  let mask = bn_is_zero_mask4 z in
+  let px = getx p in
+  let py = gety p in
+  let pz = getz p in
+
+  let rx = getx res in
+  let ry = gety res in
+  let rz = getz res in
+
+  bn_copy_conditional4 rx px mask;
+  bn_copy_conditional4 ry py mask;
+  bn_copy_conditional4 rz pz mask
+
+
 let create_aff_point () =
   create 8ul (u64 0)
 

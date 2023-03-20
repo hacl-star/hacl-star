@@ -21,45 +21,6 @@ module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #reset-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 
-// TODO?: mv to Hacl.Impl.P256.Point
-val copy_point_conditional: x3_out: felem -> y3_out: felem -> z3_out: felem -> p: point -> maskPoint: point -> Stack unit
-  (requires fun h -> live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h maskPoint /\
-    LowStar.Monotonic.Buffer.all_disjoint[loc x3_out; loc y3_out; loc z3_out; loc p; loc maskPoint] /\
-    as_nat h x3_out < S.prime /\ as_nat h y3_out < S.prime /\ as_nat h z3_out < S.prime /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime
-  )
-  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out) h0 h1 /\
-    as_nat h1 x3_out < S.prime /\
-    as_nat h1 y3_out < S.prime /\
-    as_nat h1 z3_out < S.prime /\
-    (
-      let mask = as_nat h0 (gsub maskPoint (size 8) (size 4)) in
-      let x = gsub p (size 0) (size 4) in
-      let y = gsub p (size 4) (size 4) in
-      let z = gsub p (size 8) (size 4) in
-
-      if mask = 0 then
-	as_nat h1 x3_out == as_nat h0 x /\ as_nat h1 y3_out == as_nat h0 y /\ as_nat h1 z3_out == as_nat h0 z
-      else
-	as_nat h1 x3_out == as_nat h0 x3_out /\ as_nat h1 y3_out == as_nat h0 y3_out /\ as_nat h1 z3_out == as_nat h0 z3_out
-    )
-)
-
-let copy_point_conditional x3_out y3_out z3_out p maskPoint =
-  let z = sub maskPoint (size 8) (size 4) in
-  let mask = bn_is_zero_mask4 z in
-
-  let p_x = sub p (size 0) (size 4) in
-  let p_y = sub p (size 4) (size 4) in
-  let p_z = sub p (size 8) (size 4) in
-
-  bn_copy_conditional4 x3_out p_x mask;
-  bn_copy_conditional4 y3_out p_y mask;
-  bn_copy_conditional4 z3_out p_z mask
-
-
 inline_for_extraction noextract
 val move_from_jacobian_coordinates: u1: felem -> u2: felem -> s1: felem -> s2: felem ->  p: point -> q: point ->
   tempBuffer16: lbuffer uint64 (size 16) ->
@@ -340,6 +301,7 @@ let point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuff
 
   let tempBuffer16 = sub tempBuffer28 (size 0) (size 16) in
 
+  let xyz_out = Lib.Buffer.sub tempBuffer28 16ul 12ul in
   let x3_out = Lib.Buffer.sub tempBuffer28 (size 16) (size 4) in
   let y3_out = Lib.Buffer.sub tempBuffer28 (size 20) (size 4) in
   let z3_out = Lib.Buffer.sub tempBuffer28 (size 24) (size 4) in
@@ -348,9 +310,9 @@ let point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuff
     let h1 = ST.get() in
   computeY3_point_add y3_out s1 hCube uh x3_out r tempBuffer16;
   computeZ3_point_add z3_out pZ qZ h tempBuffer16;
-  copy_point_conditional x3_out y3_out z3_out q p;
+  copy_point_conditional xyz_out q p;
 
-  copy_point_conditional x3_out y3_out z3_out p q;
+  copy_point_conditional xyz_out p q;
   concat3 (size 4) x3_out (size 4) y3_out (size 4) z3_out result;
 
     let hEnd = ST.get() in

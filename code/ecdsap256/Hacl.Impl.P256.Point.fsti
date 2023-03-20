@@ -150,6 +150,17 @@ val copy_point: p:point -> res:point -> Stack unit
     as_seq h1 res == as_seq h0 p)
 
 
+val copy_point_conditional: res:point -> p:point -> q_mask:point -> Stack unit
+  (requires fun h ->
+    live h res /\ live h p /\ live h q_mask /\
+    disjoint res p /\ disjoint res q_mask /\ disjoint p q_mask /\
+    point_inv h res /\ point_inv h p)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    point_inv h1 res /\
+   (if point_z_as_nat h0 q_mask = 0 then as_point_nat h1 res == as_point_nat h0 p
+    else as_point_nat h1 res == as_point_nat h0 res))
+
+
 inline_for_extraction noextract
 val create_aff_point: unit -> StackInline aff_point
   (requires fun h -> True)
