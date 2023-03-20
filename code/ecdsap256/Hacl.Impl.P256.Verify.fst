@@ -43,25 +43,68 @@ let are_r_and_s_valid r s =
   Hacl.Bignum.Base.unsafe_bool_of_limb is_s_valid
 
 
-// TODO: rm
-val multPowerPartial: s:felem -> a:felem -> b:felem -> res:felem -> Stack unit
+val lemma_cancel_mont: a:S.qelem -> b:S.qelem ->
+  Lemma ((a * qmont_R % S.order * b * qmont_R_inv) % S.order = a * b % S.order)
+
+let lemma_cancel_mont a b =
+  calc (==) {
+    (a * qmont_R % S.order * b * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.paren_mul_right (a * qmont_R % S.order) b qmont_R_inv }
+    (a * qmont_R % S.order * (b * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * qmont_R) (b * qmont_R_inv) S.order }
+    (a * qmont_R * (b * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a qmont_R (b * qmont_R_inv);
+           Math.Lemmas.swap_mul qmont_R (b * qmont_R_inv) }
+    (a * (b * qmont_R_inv * qmont_R)) % S.order;
+    (==) { Math.Lemmas.paren_mul_right b qmont_R_inv qmont_R }
+    (a * (b * (qmont_R_inv * qmont_R))) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a b (qmont_R_inv * qmont_R) }
+    (a * b * (qmont_R_inv * qmont_R)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a * b) (qmont_R_inv * qmont_R) S.order }
+    (a * b * (qmont_R_inv * qmont_R % S.order)) % S.order;
+    (==) { assert_norm (qmont_R_inv * qmont_R % S.order = 1) }
+    (a * b) % S.order;
+  }
+
+
+val qmul_mont_lemma: s:S.qelem -> sinv:S.qelem -> b:S.qelem -> Lemma
+  (requires fromDomain_ sinv == S.qinv (fromDomain_ (fromDomain_ s)))
+  (ensures  (sinv * fromDomain_ (fromDomain_ b) * qmont_R_inv) % S.order == S.qinv s * b)
+
+let qmul_mont_lemma s sinv b =
+  let s_mont = fromDomain_ (fromDomain_ s) in
+  let b_mont = fromDomain_ (fromDomain_ b) in
+  calc (==) {
+    (sinv * b_mont * qmont_R_inv) % S.order;
+    (==) { lemmaFromDomainToDomain sinv }
+    (S.qinv s_mont * qmont_R % S.order * b_mont * qmont_R_inv) % S.order;
+    (==) { lemma_cancel_mont (S.qinv s_mont) b_mont }
+    (S.qinv s_mont * b_mont) % S.order;
+    }; admit()
+
+
+val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h res /\ live h s /\
-    as_nat h s < S.order /\ as_nat h a < S.order /\ as_nat h b < S.order /\
-    qmont_as_nat h a == S.qinv (fromDomain_ (qmont_as_nat h s)))
+    live h sinv /\ live h b /\ live h res /\
+    disjoint sinv res /\ disjoint b res /\
+    as_nat h sinv < S.order /\ as_nat h b < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = S.qinv (as_nat h0 s) * as_nat h0 b % S.order)
+    as_nat h1 res < S.order /\
+    as_nat h1 res =
+    (as_nat h0 sinv * fromDomain_ (fromDomain_ (as_nat h0 b)) * qmont_R_inv) % S.order)
 
 [@CInline]
-let multPowerPartial s a b res =
+let qmul_mont sinv b res =
   let h0 = ST.get () in
   push_frame ();
   let tmp = create_felem () in
   fromDomainImpl b tmp;
   fromDomainImpl tmp tmp;
-  qmul a tmp res;
   let h1 = ST.get () in
-  assume (as_nat h1 res = S.qinv (as_nat h0 s) * as_nat h0 b % S.order);
+  assert (as_nat h1 tmp == fromDomain_ (fromDomain_ (as_nat h0 b)));
+  qmul sinv tmp res;
+  let h2 = ST.get () in
+  assert (as_nat h2 res = (as_nat h1 sinv * as_nat h1 tmp * qmont_R_inv) % S.order);
   pop_frame ()
 
 
@@ -91,8 +134,10 @@ let ecdsa_verification_get_u12 u1 u2 r s z =
   //assert (as_nat h2 sinv * qmont_R_inv % S.order ==
     //S.qinv (as_nat h1 sinv * qmont_R_inv % S.order));
 
-  multPowerPartial s sinv z u1;
-  multPowerPartial s sinv r u2;
+  qmul_mont_lemma (as_nat h0 s) (as_nat h2 sinv) (as_nat h0 z);
+  qmul_mont_lemma (as_nat h0 s) (as_nat h2 sinv) (as_nat h0 r);
+  qmul_mont sinv z u1;
+  qmul_mont sinv r u2;
   pop_frame ()
 
 
