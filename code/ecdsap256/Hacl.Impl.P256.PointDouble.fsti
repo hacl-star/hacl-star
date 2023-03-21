@@ -15,6 +15,7 @@ module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
+// |tmp| = 20ul
 val point_double: p:point -> res:point -> tmp:lbuffer uint64 (size 88) -> Stack unit
   (requires fun h ->
     live h p /\ live h tmp /\ live h res /\

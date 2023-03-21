@@ -44,10 +44,7 @@ let lemma_cswap2_step bit p1 p2 =
   logxor_lemma p2 p1
 
 
-// TODO: rename
-let point_prime = p:point_seq{point_inv_seq p}
-
-let conditional_swap (i:uint64) (p:point_prime) (q:point_prime) =
+let conditional_swap (i:uint64) (p:point_seq) (q:point_seq) =
   if uint_v i = 0 then (p, q) else (q, p)
 
 

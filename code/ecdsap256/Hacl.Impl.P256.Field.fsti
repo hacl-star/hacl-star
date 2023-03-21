@@ -53,7 +53,6 @@ val feq_mask: a:felem -> b:felem -> Stack uint64
     (if fmont_as_nat h0 a = fmont_as_nat h0 b then v r == ones_v U64 else v r = 0))
 
 
-// NOTE: changed precondition `eq_or_disjoint x y`
 val fadd: x:felem -> y:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
@@ -75,7 +74,6 @@ val fdouble: x:felem -> res:felem -> Stack unit
     fmont_as_nat h1 res == (2 * fmont_as_nat h0 x) % S.prime)
 
 
-// NOTE: changed precondition `eq_or_disjoint x y`
 val fsub: x:felem -> y:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h res /\ live h x /\ live h y /\
@@ -104,7 +102,7 @@ val fromDomain: a:felem -> res:felem -> Stack unit
 val fmul: a:felem -> b:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
-    eq_or_disjoint a b /\
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res /\
     as_nat h a < S.prime /\ as_nat h b < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.prime /\
@@ -114,7 +112,8 @@ val fmul: a:felem -> b:felem -> res:felem -> Stack unit
 
 val fsqr: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ as_nat h a < S.prime)
+    live h a /\ live h res /\ eq_or_disjoint a res /\
+    as_nat h a < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.prime /\
     as_nat h1 res = (as_nat h0 a * as_nat h0 a * SM.fmont_R_inv) % S.prime /\
@@ -153,7 +152,7 @@ val fmul_by_4: a:felem -> res:felem -> Stack unit
 
 val fmul_by_8: a:felem -> res:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ disjoint a res /\
+    live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.prime /\
