@@ -102,7 +102,7 @@ let scalar_bit s n =
 
 
 inline_for_extraction noextract
-val montgomery_ladder_step1: p:point -> q:point -> tmp:lbuffer uint64 (size 88) -> Stack unit
+val montgomery_ladder_step1: p:point -> q:point -> tmp:lbuffer uint64 88ul -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h tmp /\
     disjoint p q /\ disjoint p tmp /\ disjoint q tmp /\
@@ -114,8 +114,11 @@ val montgomery_ladder_step1: p:point -> q:point -> tmp:lbuffer uint64 (size 88) 
       (SM.from_mont_point (as_point_nat h0 p)) (SM.from_mont_point (as_point_nat h0 q)))
 
 let montgomery_ladder_step1 r0 r1 tmp =
-  point_add r0 r1 r1 tmp;
-  point_double r0 r0 tmp
+  let tmp32 = sub tmp 0ul 32ul in
+  let r1_copy = sub tmp 32ul 12ul in
+  copy r1_copy r1;
+  point_add r0 r1_copy r1 tmp32;
+  point_double r0 r0 tmp32
 
 
 inline_for_extraction noextract

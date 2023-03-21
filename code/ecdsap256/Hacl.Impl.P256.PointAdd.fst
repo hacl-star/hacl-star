@@ -1,381 +1,235 @@
 module Hacl.Impl.P256.PointAdd
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
-
-open FStar.Mul
-open FStar.Math.Lemmas
-open FStar.Tactics
-open FStar.Tactics.Canon
 
 open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
-open Hacl.Spec.P256.Math
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
+module SL = Hacl.Spec.P256.Math
 
-#reset-options "--z3rlimit 300 --fuel 0 --ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val move_from_jacobian_coordinates: u1: felem -> u2: felem -> s1: felem -> s2: felem ->  p: point -> q: point ->
-  tempBuffer16: lbuffer uint64 (size 16) ->
-  Stack unit (requires fun h -> live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ live h p /\ live h q /\ live h tempBuffer16 /\
-   LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer16; loc p; loc q; loc u1; loc u2; loc s1; loc s2] /\
-    as_nat h (gsub p (size 8) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 8) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 0) (size 4)) < S.prime /\
-    as_nat h (gsub q (size 4) (size 4)) < S.prime
-    )
+val point_add_u12_s12: u1:felem -> u2:felem -> s1:felem -> s2:felem -> p:point -> q:point ->
+  Stack unit
+  (requires fun h ->
+    live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ live h p /\ live h q /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc u1; loc u2; loc s1; loc s2] /\
+    point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 ->
-    modifies (loc u1 |+| loc u2 |+| loc s1 |+| loc s2 |+| loc tempBuffer16) h0 h1 /\
-    as_nat h1 u1 < S.prime /\ as_nat h1 u2 < S.prime /\ as_nat h1 s1 < S.prime /\ as_nat h1 s2 < S.prime  /\
-    (
-      let pX, pY, pZ = as_nat h0 (gsub p (size 0) (size 4)), as_nat h0 (gsub p (size 4) (size 4)), as_nat h0 (gsub p (size 8) (size 4)) in
-      let qX, qY, qZ = as_nat h0 (gsub q (size 0) (size 4)), as_nat h0 (gsub q (size 4) (size 4)), as_nat h0 (gsub q (size 8) (size 4)) in
+    modifies (loc u1 |+| loc u2 |+| loc s1 |+| loc s2) h0 h1 /\
+    as_nat h1 u1 < S.prime /\ as_nat h1 u2 < S.prime /\
+    as_nat h1 s1 < S.prime /\ as_nat h1 s2 < S.prime /\
+    (let px, py, pz = SM.from_mont_point (as_point_nat h0 p) in
+    let qx, qy, qz = SM.from_mont_point (as_point_nat h0 q) in
+    let z2z2 = S.fmul qz qz in
+    let z1z1 = S.fmul pz pz in
+    fmont_as_nat h1 u1 == S.fmul px z2z2 /\
+    fmont_as_nat h1 u2 == S.fmul qx z1z1 /\
+    fmont_as_nat h1 s1 == S.fmul (S.fmul py qz) z2z2 /\
+    fmont_as_nat h1 s2 == S.fmul (S.fmul qy pz) z1z1))
 
-      let pxD, pyD, pzD = SM.from_mont_point (pX, pY, pZ) in
-      let qxD, qyD, qzD = SM.from_mont_point (qX, qY, qZ) in
+let point_add_u12_s12 u1 u2 s1 s2 p q =
+  let px = getx p in
+  let py = gety p in
+  let pz = getz p in
 
-      as_nat h1 u1 == SM.to_mont (qzD * qzD * pxD % S.prime) /\
-      as_nat h1 u2 == SM.to_mont (pzD * pzD * qxD % S.prime) /\
-      as_nat h1 s1 == SM.to_mont (qzD * qzD * qzD * pyD % S.prime) /\
-      as_nat h1 s2 == SM.to_mont (pzD * pzD * pzD * qyD % S.prime)
-)
-)
+  let qx = getx q in
+  let qy = gety q in
+  let qz = getz q in
 
-let move_from_jacobian_coordinates u1 u2 s1 s2 p q tempBuffer =
-    let h0 = ST.get() in
-   let pX = sub p (size 0) (size 4) in
-   let pY = sub p (size 4) (size 4) in
-   let pZ = sub p (size 8) (size 4) in
+  let h0 = ST.get () in
+  fsqr qz s1;           // s1 = z2z2 = qz * qz
+  fsqr pz s2;           // s2 = z1z1 = pz * pz
+  let h1 = ST.get () in
+  assert (fmont_as_nat h1 s1 == S.fmul (fmont_as_nat h0 qz) (fmont_as_nat h0 qz));
+  assert (fmont_as_nat h1 s2 == S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h0 pz));
 
-   let qX = sub q (size 0) (size 4) in
-   let qY = sub q (size 4) (size 4) in
-   let qZ = sub q (size 8) (size 4) in
+  fmul px s1 u1;        // u1 = px * z2z2
+  fmul qx s2 u2;        // u2 = qx * z1z1
+  let h2 = ST.get () in
+  assert (fmont_as_nat h2 u1 == S.fmul (fmont_as_nat h0 px) (fmont_as_nat h1 s1));
+  assert (fmont_as_nat h2 u2 == S.fmul (fmont_as_nat h0 qx) (fmont_as_nat h1 s2));
 
-   let z2Square = sub tempBuffer (size 0) (size 4) in
-   let z1Square = sub tempBuffer (size 4) (size 4) in
-   let z2Cube = sub tempBuffer (size 8) (size 4) in
-   let z1Cube = sub tempBuffer (size 12) (size 4) in
+  fmul qz s1 s1;
+  fmul py s1 s1;
+  let h3 = ST.get () in
+  assert (fmont_as_nat h3 s1 ==
+    S.fmul (fmont_as_nat h0 py) (S.fmul (fmont_as_nat h0 qz) (fmont_as_nat h1 s1)));
+  Lib.NatMod.lemma_mul_mod_assoc #S.prime
+    (fmont_as_nat h0 py) (fmont_as_nat h0 qz) (fmont_as_nat h1 s1);
 
-   fsqr qZ z2Square;
-   fsqr pZ z1Square;
-   fmul z2Square qZ z2Cube;
-
-   fmul z1Square pZ z1Cube;
-   fmul z2Square pX u1;
-   fmul z1Square qX u2;
-
-   fmul z2Cube pY s1;
-   fmul z1Cube qY s2;
-
-
-     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ)) (SM.from_mont (as_nat h0 qZ)) S.prime;
-     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ)) (SM.from_mont (as_nat h0 pZ)) S.prime;
-     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ)) (SM.from_mont (as_nat h0 pX)) S.prime;
-
-     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ)) (SM.from_mont (as_nat h0 qX)) S.prime;
-     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ) * SM.from_mont (as_nat h0 qZ)) (SM.from_mont (as_nat h0 pY)) S.prime;
-     lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ) * SM.from_mont (as_nat h0 pZ)) (SM.from_mont (as_nat h0 qY)) S.prime
-
+  fmul pz s2 s2;
+  fmul qy s2 s2;
+  let h4 = ST.get () in
+  assert (fmont_as_nat h4 s2 ==
+    S.fmul (fmont_as_nat h0 qy) (S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h1 s2)));
+  Lib.NatMod.lemma_mul_mod_assoc #S.prime
+    (fmont_as_nat h0 qy) (fmont_as_nat h0 pz) (fmont_as_nat h1 s2)
 
 
 inline_for_extraction noextract
-val compute_common_params_point_add: h: felem -> r: felem -> uh: felem -> hCube: felem ->
-  u1: felem -> u2: felem -> s1: felem -> s2: felem -> tempBuffer: lbuffer uint64 (size 16) ->
+val point_add_hhh_uhh_h_r:
+    h:felem -> r:felem -> hhh:felem
+  -> u1:felem -> u2:felem -> s1:felem -> s2:felem ->
   Stack unit
-    (requires fun h0 -> live h0 h /\ live h0 r /\ live h0 uh /\ live h0 hCube /\ live h0 u1 /\ live h0 u2 /\ live h0 s1 /\ live h0 s2 /\ live h0 tempBuffer /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc u1; loc u2; loc s1; loc s2; loc h; loc r; loc uh; loc hCube; loc tempBuffer] /\ as_nat h0 u1 < S.prime /\ as_nat h0 u2 < S.prime /\ as_nat h0 s1 < S.prime /\ as_nat h0 s2 < S.prime)
-    (ensures fun h0 _ h1 ->
-      modifies (loc h |+| loc r |+| loc uh |+| loc hCube |+| loc tempBuffer) h0 h1 /\
-      as_nat h1 h < S.prime /\ as_nat h1 r < S.prime /\ as_nat h1 uh < S.prime /\ as_nat h1 hCube < S.prime /\
-      (
-	let u1D = SM.from_mont (as_nat h0 u1) in
-	let u2D = SM.from_mont (as_nat h0 u2) in
-	let s1D = SM.from_mont (as_nat h0 s1) in
-	let s2D = SM.from_mont (as_nat h0 s2) in
+  (requires fun h0 ->
+    live h0 h /\ live h0 r /\ live h0 hhh /\
+    live h0 u1 /\ live h0 u2 /\ live h0 s1 /\ live h0 s2 /\
+    LowStar.Monotonic.Buffer.all_disjoint
+      [loc u1; loc u2; loc s1; loc s2; loc h; loc r; loc hhh] /\
+    as_nat h0 u1 < S.prime /\ as_nat h0 u2 < S.prime /\
+    as_nat h0 s1 < S.prime /\ as_nat h0 s2 < S.prime)
+  (ensures fun h0 _ h1 ->
+    modifies (loc h |+| loc r |+| loc u1 |+| loc hhh) h0 h1 /\
+    as_nat h1 h < S.prime /\ as_nat h1 r < S.prime /\
+    as_nat h1 u1 < S.prime /\ as_nat h1 hhh < S.prime /\
+    fmont_as_nat h1 h == S.fsub (fmont_as_nat h0 u2) (fmont_as_nat h0 u1) /\
+    fmont_as_nat h1 r == S.fsub (fmont_as_nat h0 s2) (fmont_as_nat h0 s1) /\
+    fmont_as_nat h1 u1 ==
+      S.fmul (fmont_as_nat h0 u1) (S.fmul (fmont_as_nat h1 h) (fmont_as_nat h1 h)) /\
+    fmont_as_nat h1 hhh ==
+      S.fmul (S.fmul (fmont_as_nat h1 h) (fmont_as_nat h1 h)) (fmont_as_nat h1 h))
 
-	let hD = SM.from_mont (as_nat h1 h) in
+let point_add_hhh_uhh_h_r h r hhh u1 u2 s1 s2 =
+  let h0 = ST.get () in
+  fsub u2 u1 h;     // h = u2 - u1
+  fsub s2 s1 r;     // r = s2 - s1
+  let h1 = ST.get () in
+  assert (fmont_as_nat h1 h == S.fsub (fmont_as_nat h0 u2) (fmont_as_nat h0 u1));
+  assert (fmont_as_nat h1 r == S.fsub (fmont_as_nat h0 s2) (fmont_as_nat h0 s1));
 
-	as_nat h1 h == SM.to_mont ((u2D - u1D) % S.prime) /\
-	as_nat h1 r == SM.to_mont ((s2D - s1D) % S.prime) /\
-	as_nat h1 uh == SM.to_mont (hD * hD * u1D % S.prime) /\
-	as_nat h1 hCube == SM.to_mont (hD * hD * hD % S.prime)
-  )
-)
-
-
-let compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer =
-    let h0 = ST.get() in
-  let temp = sub tempBuffer (size 0) (size 4) in
-  fsub u2 u1 h;
-    let h1 = ST.get() in
-  fsub s2 s1 r;
-    let h2 = ST.get() in
-  fsqr h temp;
-    let h3 = ST.get() in
-  fmul temp u1 uh;
-  fmul temp h hCube;
-
-    lemma_mod_mul_distr_l (SM.from_mont (as_nat h2 h) * SM.from_mont (as_nat h2 h)) (SM.from_mont (as_nat h3 u1)) S.prime;
-    lemma_mod_mul_distr_l (SM.from_mont (as_nat h2 h) * SM.from_mont (as_nat h2 h)) (SM.from_mont (as_nat h1 h)) S.prime
+  fsqr h hhh;      // hh = h * h
+  fmul u1 hhh u1;  // u1hh = u1 * hh
+  fmul hhh h hhh   // hhh = hh * h
 
 
 inline_for_extraction noextract
-val computeX3_point_add: x3: felem -> hCube: felem -> uh: felem -> r: felem -> tempBuffer: lbuffer uint64 (size 16)->  Stack unit
-  (requires fun h0 -> live h0 x3 /\ live h0 hCube /\ live h0 uh /\ live h0 r /\ live h0 tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc hCube; loc uh; loc r; loc tempBuffer] /\
-    as_nat h0 hCube < S.prime /\as_nat h0 uh < S.prime /\ as_nat h0 r < S.prime
-  )
-  (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc tempBuffer) h0 h1 /\ as_nat h1 x3 < S.prime /\
-    (
-      let hCubeD = SM.from_mont (as_nat h0 hCube) in
-      let uhD = SM.from_mont (as_nat h0 uh) in
-      let rD = SM.from_mont (as_nat h0 r) in
-      as_nat h1 x3 == SM.to_mont ((rD * rD - hCubeD - 2 * uhD) % S.prime)
-    )
-  )
-
-let computeX3_point_add x3 hCube uh r tempBuffer =
-    let h0 = ST.get() in
-  let rSquare = sub tempBuffer (size 0) (size 4) in
-  let rH = sub tempBuffer (size 4) (size 4) in
-  let twoUh = sub tempBuffer (size 8) (size 4) in
-  fsqr r rSquare;
-    let h1 = ST.get() in
-  fsub rSquare hCube rH;
-    let h2 = ST.get() in
-  fdouble uh twoUh;
-    let h3 = ST.get() in
-  fsub rH twoUh x3;
-
-    lemma_mod_add_distr (-SM.from_mont (as_nat h1 hCube)) (SM.from_mont (as_nat h0 r) * SM.from_mont (as_nat h0 r)) S.prime;
-    lemma_mod_add_distr (-SM.from_mont (as_nat h3 twoUh)) (SM.from_mont (as_nat h0 r) * SM.from_mont (as_nat h0 r) - SM.from_mont (as_nat h1 hCube)) S.prime;
-    lemma_mod_sub_distr (SM.from_mont (as_nat h0 r) * SM.from_mont (as_nat h0 r) - SM.from_mont (as_nat h1 hCube)) (2 * SM.from_mont (as_nat h2 uh)) S.prime
-
-
-inline_for_extraction noextract
-val computeY3_point_add:y3: felem -> s1: felem -> hCube: felem -> uh: felem -> x3_out: felem -> r: felem -> tempBuffer: lbuffer uint64 (size 16) ->
+val point_add_x3: x3:felem -> hhh:felem -> u1:felem -> r:felem -> tmp:felem ->
   Stack unit
-    (requires fun h -> live h y3 /\ live h s1 /\ live h hCube /\ live h uh /\ live h x3_out /\ live h r /\ live h tempBuffer /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc y3; loc s1; loc hCube; loc uh; loc x3_out; loc r; loc tempBuffer] /\
-      as_nat h s1 < S.prime /\ as_nat h hCube < S.prime /\ as_nat h uh < S.prime /\ as_nat h x3_out <S.prime /\ as_nat h r < S.prime)
-    (ensures fun h0 _ h1 ->
-      modifies (loc y3 |+| loc tempBuffer) h0 h1 /\ as_nat h1 y3 < S.prime /\
-      (
-	let s1D = SM.from_mont (as_nat h0 s1) in
-	let hCubeD = SM.from_mont (as_nat h0 hCube) in
-	let uhD = SM.from_mont (as_nat h0 uh) in
-	let x3D = SM.from_mont (as_nat h0 x3_out) in
-	let rD = SM.from_mont (as_nat h0 r) in
-	as_nat h1 y3 = SM.to_mont (((uhD - x3D) * rD - s1D * hCubeD) % S.prime)
-    )
-)
+  (requires fun h0 ->
+    live h0 x3 /\ live h0 hhh /\ live h0 u1 /\ live h0 r /\ live h0 tmp /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc hhh; loc u1; loc r; loc tmp] /\
+    as_nat h0 hhh < S.prime /\ as_nat h0 u1 < S.prime /\ as_nat h0 r < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc tmp) h0 h1 /\
+    as_nat h1 x3 < S.prime /\
+    fmont_as_nat h1 x3 ==
+      S.fsub
+        (S.fsub (S.fmul (fmont_as_nat h0 r) (fmont_as_nat h0 r)) (fmont_as_nat h0 hhh))
+        (S.fmul 2 (fmont_as_nat h0 u1)))
 
-
-let computeY3_point_add y3 s1 hCube uh x3 r tempBuffer =
-    let h0 = ST.get() in
-  let s1hCube = sub tempBuffer (size 0) (size 4) in
-  let u1hx3 = sub tempBuffer (size 4) (size 4) in
-  let ru1hx3 = sub tempBuffer (size 8) (size 4) in
-
-  fmul s1 hCube s1hCube;
-  fsub uh x3 u1hx3;
-  fmul u1hx3 r ru1hx3;
-
-    let h3 = ST.get() in
-    lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 uh) - SM.from_mont (as_nat h0 x3)) (SM.from_mont (as_nat h0 r)) S.prime;
-  fsub ru1hx3 s1hCube y3;
-    lemma_mod_add_distr (-(SM.from_mont (as_nat h3 s1hCube)))  ((SM.from_mont (as_nat h0 uh) - SM.from_mont (as_nat h0 x3)) * SM.from_mont (as_nat h0 r))  S.prime;
-    lemma_mod_sub_distr ((SM.from_mont (as_nat h0 uh) - SM.from_mont (as_nat h0 x3)) * SM.from_mont (as_nat h0 r)) (SM.from_mont (as_nat h0 s1) * SM.from_mont (as_nat h0 hCube)) S.prime
-
+let point_add_x3 x3 hhh u1 r tmp =
+  fsqr r x3;       // rr = r * r
+  fsub x3 hhh x3;  // rr - hhh
+  fdouble u1 tmp;  // 2 * u1
+  fsub x3 tmp x3   // rr - hhh - 2 * u1
 
 
 inline_for_extraction noextract
-val computeZ3_point_add: z3: felem ->  z1: felem -> z2: felem -> h: felem -> tempBuffer: lbuffer uint64 (size 16) ->
-  Stack unit (requires fun h0 -> live h0 z3 /\ live h0 z1 /\ live h0 z2 /\ live h0 h /\ live h0 tempBuffer /\ live h0 z3 /\
-  LowStar.Monotonic.Buffer.all_disjoint [loc z1; loc z2; loc h; loc tempBuffer; loc z3] /\
-  as_nat h0 z1 < S.prime /\ as_nat h0 z2 < S.prime /\ as_nat h0 h < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc z3 |+| loc tempBuffer) h0 h1 /\ as_nat h1 z3 < S.prime /\
-    (
-      let z1D = SM.from_mont (as_nat h0 z1) in
-      let z2D = SM.from_mont (as_nat h0 z2) in
-      let hD = SM.from_mont (as_nat h0 h) in
-      as_nat h1 z3 == SM.to_mont (z1D * z2D * hD % S.prime)
-    )
-  )
-
-let computeZ3_point_add z3 z1 z2 h tempBuffer =
-    let h0 = ST.get() in
-  let z1z2 = sub tempBuffer (size 0) (size 4) in
-  fmul z1 z2 z1z2;
-  fmul z1z2 h z3;
-    lemma_mod_mul_distr_l (SM.from_mont (as_nat h0 z1) * SM.from_mont (as_nat h0 z2)) (SM.from_mont (as_nat h0 h)) S.prime
-
-
-inline_for_extraction noextract
-val point_add_if_second_branch_impl: result: point -> p: point -> q: point -> u1: felem -> u2: felem -> s1: felem ->
-  s2: felem -> r: felem -> h: felem -> uh: felem -> hCube: felem -> tempBuffer28 : lbuffer uint64 (size 28) ->
+val point_add_y3: y3:felem -> s1:felem -> hhh:felem -> u1:felem -> x3:felem -> r:felem ->
   Stack unit
-    (requires fun h0 -> live h0 result /\ live h0 p /\ live h0 q /\ live h0 u1 /\ live h0 u2 /\ live h0 s1 /\ live h0 s2 /\ live h0 r /\ live h0 h /\ live h0 uh /\ live h0 hCube /\ live h0 tempBuffer28 /\
+  (requires fun h ->
+    live h y3 /\ live h s1 /\ live h hhh /\ live h u1 /\ live h x3 /\ live h r /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc y3; loc s1; loc hhh; loc u1; loc x3; loc r] /\
+    as_nat h s1 < S.prime /\ as_nat h hhh < S.prime /\
+    as_nat h u1 < S.prime /\ as_nat h x3 < S.prime /\ as_nat h r < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc u1) h0 h1 /\
+    as_nat h1 y3 < S.prime /\
+    fmont_as_nat h1 y3 =
+      S.fsub
+        (S.fmul (fmont_as_nat h0 r) (S.fsub (fmont_as_nat h0 u1) (fmont_as_nat h0 x3)))
+        (S.fmul (fmont_as_nat h0 s1) (fmont_as_nat h0 hhh)))
 
-    as_nat h0 u1 < S.prime  /\ as_nat h0 u2 < S.prime  /\ as_nat h0 s1 < S.prime /\ as_nat h0 s2 < S.prime /\ as_nat h0 r < S.prime /\
-    as_nat h0 h < S.prime /\ as_nat h0 uh < S.prime /\ as_nat h0 hCube < S.prime /\
-
-    eq_or_disjoint p result /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc u1; loc u2; loc s1; loc s2; loc r; loc h; loc uh; loc hCube; loc tempBuffer28] /\
-    disjoint result tempBuffer28 /\
-
-    as_nat h0 (gsub p (size 8) (size 4)) < S.prime /\
-    as_nat h0 (gsub p (size 0) (size 4)) < S.prime /\
-    as_nat h0 (gsub p (size 4) (size 4)) < S.prime /\
-    as_nat h0 (gsub q (size 8) (size 4)) < S.prime /\
-    as_nat h0 (gsub q (size 0) (size 4)) < S.prime /\
-    as_nat h0 (gsub q (size 4) (size 4)) < S.prime /\
-
-    (
-      let pX, pY, pZ = as_nat h0 (gsub p (size 0) (size 4)), as_nat h0 (gsub p (size 4) (size 4)), as_nat h0 (gsub p (size 8) (size 4)) in
-      let qX, qY, qZ = as_nat h0 (gsub q (size 0) (size 4)), as_nat h0 (gsub q (size 4) (size 4)), as_nat h0 (gsub q (size 8) (size 4)) in
-      let pxD, pyD, pzD = SM.from_mont pX, SM.from_mont pY, SM.from_mont pZ in
-      let qxD, qyD, qzD = SM.from_mont qX, SM.from_mont qY, SM.from_mont qZ in
-
-      let u1D = SM.from_mont (as_nat h0 u1) in
-      let u2D = SM.from_mont (as_nat h0 u2) in
-      let s1D = SM.from_mont (as_nat h0 s1) in
-      let s2D = SM.from_mont (as_nat h0 s2) in
-
-      let hD = SM.from_mont (as_nat h0 h) in
-
-      as_nat h0 u1 == SM.to_mont (qzD * qzD * pxD % S.prime) /\
-      as_nat h0 u2 == SM.to_mont (pzD * pzD * qxD % S.prime) /\
-      as_nat h0 s1 == SM.to_mont (qzD * qzD * qzD * pyD % S.prime) /\
-      as_nat h0 s2 == SM.to_mont (pzD * pzD * pzD * qyD % S.prime) /\
-
-      as_nat h0 h == SM.to_mont ((u2D - u1D) % S.prime) /\
-      as_nat h0 r == SM.to_mont ((s2D - s1D) % S.prime) /\
-      as_nat h0 uh == SM.to_mont (hD * hD * u1D % S.prime) /\
-      as_nat h0 hCube == SM.to_mont (hD * hD * hD % S.prime)
-  )
-)
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer28 |+| loc result) h0 h1 /\
-    as_nat h1 (gsub result (size 8) (size 4)) < S.prime /\
-    as_nat h1 (gsub result (size 0) (size 4)) < S.prime /\
-    as_nat h1 (gsub result (size 4) (size 4)) < S.prime /\
-    (
-      let pX, pY, pZ = as_nat h0 (gsub p (size 0) (size 4)), as_nat h0 (gsub p (size 4) (size 4)), as_nat h0 (gsub p (size 8) (size 4)) in
-      let qX, qY, qZ = as_nat h0 (gsub q (size 0) (size 4)), as_nat h0 (gsub q (size 4) (size 4)), as_nat h0 (gsub q (size 8) (size 4)) in
-      let x3, y3, z3 = as_nat h1 (gsub result (size 0) (size 4)), as_nat h1 (gsub result (size 4) (size 4)), as_nat h1 (gsub result (size 8) (size 4)) in
-
-      let pxD, pyD, pzD = SM.from_mont pX, SM.from_mont pY, SM.from_mont pZ in
-      let qxD, qyD, qzD = SM.from_mont qX, SM.from_mont qY, SM.from_mont qZ in
-      let x3D, y3D, z3D = SM.from_mont x3, SM.from_mont y3, SM.from_mont z3 in
-
-      let rD = SM.from_mont (as_nat h0 r) in
-      let hD = SM.from_mont (as_nat h0 h) in
-      let s1D = SM.from_mont (as_nat h0 s1) in
-      let u1D = SM.from_mont (as_nat h0 u1) in
-
-  if qzD = 0 then
-    x3D == pxD /\ y3D == pyD /\ z3D == pzD
-   else if pzD = 0 then
-    x3D == qxD /\  y3D == qyD /\ z3D == qzD
-   else
-    x3 == SM.to_mont ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % S.prime) /\
-    y3 == SM.to_mont (((hD * hD * u1D - SM.from_mont (x3)) * rD - s1D * hD * hD * hD) % S.prime) /\
-    z3 == SM.to_mont (pzD * qzD * hD % S.prime)
-  )
-)
+let point_add_y3 y3 s1 hhh u1 x3 r =
+  fmul s1 hhh y3;  // s1 * hhh
+  fsub u1 x3 u1;   // u1 - x3
+  fmul r u1 u1;    // r * (u1 - x3)
+  fsub u1 y3 y3    // r * (u1 - x3) - s1 * hhh
 
 
-let point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuffer28 =
-    let h0 = ST.get() in
-  let pZ = sub p (size 8) (size 4) in
-  let qZ = sub q (size 8) (size 4) in
+inline_for_extraction noextract
+val point_add_z3: z3:felem -> z1:felem -> z2:felem -> h:felem -> Stack unit
+  (requires fun h0 ->
+    live h0 z3 /\ live h0 z1 /\ live h0 z2 /\ live h0 h /\
+    eq_or_disjoint z1 z3 /\ eq_or_disjoint z2 z3 /\ eq_or_disjoint z1 z2 /\
+    disjoint h z1 /\ disjoint h z2 /\ disjoint h z3 /\
+    as_nat h0 z1 < S.prime /\ as_nat h0 z2 < S.prime /\ as_nat h0 h < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc z3 |+| loc h) h0 h1 /\
+    as_nat h1 z3 < S.prime /\
+    fmont_as_nat h1 z3 ==
+      S.fmul (S.fmul (fmont_as_nat h0 h) (fmont_as_nat h0 z1)) (fmont_as_nat h0 z2))
 
-  let tempBuffer16 = sub tempBuffer28 (size 0) (size 16) in
-
-  let xyz_out = Lib.Buffer.sub tempBuffer28 16ul 12ul in
-  let x3_out = Lib.Buffer.sub tempBuffer28 (size 16) (size 4) in
-  let y3_out = Lib.Buffer.sub tempBuffer28 (size 20) (size 4) in
-  let z3_out = Lib.Buffer.sub tempBuffer28 (size 24) (size 4) in
-
-  computeX3_point_add x3_out hCube uh r tempBuffer16;
-    let h1 = ST.get() in
-  computeY3_point_add y3_out s1 hCube uh x3_out r tempBuffer16;
-  computeZ3_point_add z3_out pZ qZ h tempBuffer16;
-  copy_point_conditional xyz_out q p;
-
-  copy_point_conditional xyz_out p q;
-  concat3 (size 4) x3_out (size 4) y3_out (size 4) z3_out result;
-
-    let hEnd = ST.get() in
-
-  let rD = SM.from_mont (as_nat h0 r) in
-  let hD = SM.from_mont (as_nat h0 h) in
-  let u1D = SM.from_mont (as_nat h0 u1) in
-  let uhD = SM.from_mont (as_nat h0 uh) in
-
-  let s1D = SM.from_mont (as_nat h0 s1) in
-  let x3D = SM.from_mont (as_nat h1 x3_out) in
-
-  //lemma_point_add_0 (rD * rD) (hD * hD * hD) (hD * hD * u1D);
-  lemma_mod_sub_distr (rD * rD - 2 * uhD) (hD * hD * hD) S.prime;
-  assert_by_tactic (2 * (hD * hD * u1D) == 2 * hD * hD * u1D) canon;
-
-  //lemma_point_add_1 (hD * hD * u1D) x3D rD s1D (hD * hD * hD);
-  assert_by_tactic (s1D * (hD * hD * hD) == s1D * hD * hD * hD) canon;
-
-  assert_norm (S.modp_inv2_prime (pow2 256) S.prime > 0);
-  assert_norm (S.modp_inv2_prime (pow2 256) S.prime % S.prime <> 0);
-
-  lemma_multiplication_not_mod_prime (as_nat h0 pZ);
-  lemma_multiplication_not_mod_prime (as_nat h0 qZ)
+let point_add_z3 z3 z1 z2 h =
+  fmul h z1 h;
+  fmul h z2 z3
 
 
-let point_add p q result tempBuffer =
-    let h0 = ST.get() in
+inline_for_extraction noextract
+val point_add_no_point_at_inf:
+  p:point -> q:point -> res:point -> tmp:lbuffer uint64 32ul -> Stack unit
+  (requires fun h ->
+    live h p /\ live h q /\ live h res /\ live h tmp /\
+    eq_or_disjoint q res /\ disjoint p q /\ disjoint p tmp /\
+    disjoint q tmp /\ disjoint p res /\ disjoint res tmp /\
+    point_inv h p /\ point_inv h q)
+  (ensures fun h0 _ h1 -> modifies (loc tmp |+| loc res) h0 h1 /\
+    point_inv h1 res /\
+    SM.from_mont_point (as_point_nat h1 res) == S.point_add_no_point_at_inf
+      (SM.from_mont_point (as_point_nat h0 p)) (SM.from_mont_point (as_point_nat h0 q)))
 
-  let z1 = sub p (size 8) (size 4) in
-  let z2 = sub q (size 8) (size 4) in
+let point_add_no_point_at_inf p q res tmp =
+  let z1 = getz p in
+  let z2 = getz q in
 
-  let tempBuffer16 = sub tempBuffer (size 0) (size 16) in
+  let u1 = sub tmp 0ul 4ul in
+  let u2 = sub tmp 4ul 4ul in
+  let s1 = sub tmp 8ul 4ul in
+  let s2 = sub tmp 12ul 4ul in
 
-  let u1 = sub tempBuffer (size 16) (size 4) in
-  let u2 = sub tempBuffer (size 20) (size 4) in
-  let s1 = sub tempBuffer (size 24) (size 4) in
-  let s2 = sub tempBuffer (size 28) (size 4) in
+  let h = sub tmp 16ul 4ul in
+  let r = sub tmp 20ul 4ul in
+  let hhh = sub tmp 24ul 4ul in
+  let ftmp = sub tmp 28ul 4ul in
 
-  let h = sub tempBuffer (size 32) (size 4) in
-  let r = sub tempBuffer (size 36) (size 4) in
-  let uh = sub tempBuffer (size 40) (size 4) in
+  let x3 = getx res in
+  let y3 = gety res in
+  let z3 = getz res in
 
-  let hCube = sub tempBuffer (size 44) (size 4) in
+  point_add_u12_s12 u1 u2 s1 s2 p q;
+  point_add_hhh_uhh_h_r h r hhh u1 u2 s1 s2;
+  point_add_x3 x3 hhh u1 r ftmp;
+  point_add_y3 y3 s1 hhh u1 x3 r;
+  point_add_z3 z3 z1 z2 h
 
-  let x3_out = sub tempBuffer (size 48) (size 4) in
-  let y3_out = sub tempBuffer (size 52) (size 4) in
-  let z3_out = sub tempBuffer (size 56) (size 4) in
 
-  let tempBuffer28 = sub tempBuffer (size 60) (size 28) in
+inline_for_extraction noextract
+val point_add_condional_branch: p:point -> q:point -> res:point -> Stack unit
+  (requires fun h ->
+    live h p /\ live h q /\ live h res /\
+    disjoint p res /\ disjoint q res /\ disjoint p q /\
+    point_inv h p /\ point_inv h q /\ point_inv h res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    point_inv h1 res /\
+   (let p = SM.from_mont_point (as_point_nat h0 p) in
+    let q = SM.from_mont_point (as_point_nat h0 q) in
+    let r = SM.from_mont_point (as_point_nat h0 res) in
+    SM.from_mont_point (as_point_nat h1 res) ==
+      (if S.is_point_at_inf q then p else if S.is_point_at_inf p then q else r)))
 
-  move_from_jacobian_coordinates u1 u2 s1 s2 p q tempBuffer16;
-  compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer16;
-  point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuffer28;
-    let h1 = ST.get() in
-      let pxD = SM.from_mont (as_nat h0 (gsub p (size 0) (size 4))) in
-      let pyD = SM.from_mont (as_nat h0 (gsub p (size 4) (size 4))) in
-      let pzD = SM.from_mont (as_nat h0 (gsub p (size 8) (size 4))) in
-      let qxD = SM.from_mont (as_nat h0 (gsub q (size 0) (size 4))) in
-      let qyD = SM.from_mont (as_nat h0 (gsub q (size 4) (size 4))) in
-      let qzD = SM.from_mont (as_nat h0 (gsub q (size 8) (size 4))) in
-      let x3 = as_nat h1 (gsub result (size 0) (size 4)) in
-      let y3 = as_nat h1 (gsub result (size 4) (size 4)) in
-      let z3 = as_nat h1 (gsub result (size 8) (size 4)) in
-      ()
-      //lemma_pointAddToSpecification pxD pyD pzD qxD qyD qzD x3 y3 z3 (as_nat h1 u1) (as_nat h1 u2) (as_nat h1 s1) (as_nat h1 s2) (as_nat h1 h) (as_nat h1 r)
+let point_add_condional_branch p q res =
+  copy_point_conditional res q p;
+  copy_point_conditional res p q
+
+
+[@CInline]
+let point_add p q res tmp =
+  point_add_no_point_at_inf p q res tmp;
+  point_add_condional_branch p q res

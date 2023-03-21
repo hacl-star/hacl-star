@@ -150,17 +150,6 @@ val copy_point: p:point -> res:point -> Stack unit
     as_seq h1 res == as_seq h0 p)
 
 
-val copy_point_conditional: res:point -> p:point -> q_mask:point -> Stack unit
-  (requires fun h ->
-    live h res /\ live h p /\ live h q_mask /\
-    disjoint res p /\ disjoint res q_mask /\ disjoint p q_mask /\
-    point_inv h res /\ point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-   (if point_z_as_nat h0 q_mask = 0 then as_point_nat h1 res == as_point_nat h0 p
-    else as_point_nat h1 res == as_point_nat h0 res))
-
-
 inline_for_extraction noextract
 val create_aff_point: unit -> StackInline aff_point
   (requires fun h -> True)
@@ -183,6 +172,19 @@ val is_point_at_inf_vartime: p:point -> Stack bool
   (requires fun h -> live h p /\ point_inv h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.is_point_at_inf (as_point_nat h0 p))
+
+
+val copy_point_conditional: res:point -> p:point -> q_mask:point -> Stack unit
+  (requires fun h ->
+    live h res /\ live h p /\ live h q_mask /\
+    eq_or_disjoint res p /\ eq_or_disjoint res q_mask /\ eq_or_disjoint p q_mask /\
+    point_inv h res /\ point_inv h p /\ point_inv h q_mask)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    point_inv h1 res /\
+    SM.from_mont_point (as_point_nat h1 res) =
+   (if S.is_point_at_inf (SM.from_mont_point (as_point_nat h0 q_mask))
+    then SM.from_mont_point (as_point_nat h0 p)
+    else SM.from_mont_point (as_point_nat h0 res)))
 
 
 ///  Point conversion between Montgomery and Regular representations

@@ -15,10 +15,10 @@ module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val point_add: p:point -> q:point -> res:point -> tmp:lbuffer uint64 (size 88) -> Stack unit
+val point_add: p:point -> q:point -> res:point -> tmp:lbuffer uint64 32ul -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h res /\ live h tmp /\
-    eq_or_disjoint q res /\ disjoint p q /\ disjoint p tmp /\
+    disjoint q res /\ disjoint p q /\ disjoint p tmp /\
     disjoint q tmp /\ disjoint p res /\ disjoint res tmp /\
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc tmp |+| loc res) h0 h1 /\

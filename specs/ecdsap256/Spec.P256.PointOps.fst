@@ -132,7 +132,7 @@ let point_double (p:jacob_point) : jacob_point =
   (x3, y3, z3)
 
 
-let point_add (p:jacob_point) (q:jacob_point) : jacob_point =
+let point_add_no_point_at_inf (p:jacob_point) (q:jacob_point) : jacob_point =
   let (x1, y1, z1) = p in
   let (x2, y2, z2) = q in
 
@@ -150,15 +150,19 @@ let point_add (p:jacob_point) (q:jacob_point) : jacob_point =
 
   let rr = r *% r in
   let hh = h *% h in
-  let hhh = h *% h *% h in
+  let hhh = hh *% h in
 
-  let x3 = rr -% hhh -% 2 *% u1 *% hh in
+  let x3 = rr -% hhh -% 2 *% (u1 *% hh) in
   let y3 = r *% (u1 *% hh -% x3) -% s1 *% hhh in
   let z3 = h *% z1 *% z2 in
-  if z2 = zero then (x1, y1, z1)
+  (x3, y3, z3)
+
+let point_add (p:jacob_point) (q:jacob_point) : jacob_point =
+  let r = point_add_no_point_at_inf p q in
+  if is_point_at_inf q then p
   else
-    if z1 = zero then (x2, y2, z2)
-    else (x3, y3, z3)
+    if is_point_at_inf p then q
+    else r
 
 
 ///  Point conversion between affine, jacobian and bytes representation
