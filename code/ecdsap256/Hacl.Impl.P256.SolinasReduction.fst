@@ -1,21 +1,18 @@
 module Hacl.Impl.P256.SolinasReduction
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open FStar.Mul
-module BV = FStar.BitVector
-module Seq = FStar.Seq
-
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256
-open Hacl.Spec.P256.SolinasReduction.Lemmas
-
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
+
+module S = Spec.P256
+module SL = Hacl.Spec.P256.SolinasReduction.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -28,66 +25,18 @@ val get_low_part: a:uint64 -> r:uint32{uint_v r == uint_v a % pow2 32}
 let get_low_part a = to_u32 a
 
 
-val shift_bound: #n:nat -> num:UInt.uint_t n -> n':nat ->
-  Lemma (num * pow2 n' <= pow2 (n' + n) - pow2 n')
+val lemma_logor_zero:
+    low:uint64{v (get_high_part low) == 0}
+  -> high:uint64{v (get_low_part high) == 0} ->
+  Lemma (v (logor low high) = v high + v low)
 
-let shift_bound #n num n' =
-  Math.Lemmas.lemma_mult_le_right (pow2 n') num (pow2 n - 1);
-  Math.Lemmas.distributivity_sub_left (pow2 n) 1 (pow2 n');
-  Math.Lemmas.pow2_plus n' n
-
-
-val logxor_vec_append (#n1 #n2: pos) (a1 b1: BV.bv_t n1) (a2 b2: BV.bv_t n2) :
-  Lemma (Seq.append (BV.logxor_vec a1 b1) (BV.logxor_vec a2 b2) ==
-         BV.logxor_vec #(n1 + n2) (FStar.Seq.append a1 a2) (FStar.Seq.append b1 b2))
-
-let logxor_vec_append #n1 #n2 a1 b1 a2 b2 =
-  Seq.lemma_eq_intro (Seq.append (BV.logxor_vec a1 b1) (BV.logxor_vec a2 b2))
-                     (BV.logxor_vec #(n1 + n2) (Seq.append a1 a2) (Seq.append b1 b2))
-
-val append_uint: #n1:nat -> #n2:nat
-  -> num1:UInt.uint_t n1 -> num2:UInt.uint_t n2 -> UInt.uint_t (n1 + n2)
-
-let append_uint #n1 #n2 num1 num2 =
-  shift_bound num2 n1;
-  num1 + num2 * pow2 n1
-
-val to_vec_append : #n1:pos-> #n2:pos -> num1:UInt.uint_t n1 -> num2:UInt.uint_t n2 ->
-  Lemma (UInt.to_vec (append_uint num1 num2) ==
-         Seq.append (UInt.to_vec num2) (UInt.to_vec num1))
-
-let to_vec_append #n1 #n2 num1 num2 =
-  UInt.append_lemma (UInt.to_vec num2) (UInt.to_vec num1)
-
-val to_vec_low_high: a:UInt.uint_t 64 -> Lemma
-  (UInt.to_vec a ==
-   Seq.append (UInt.to_vec #32 (a / pow2 32)) (UInt.to_vec #32 (a % pow2 32)))
-
-let to_vec_low_high a =
-  assert (a == append_uint #32 #32 (a % pow2 32) (a / pow2 32));
-  to_vec_append #32 #32 (a % pow2 32) (a / pow2 32)
-
-
-val lemma_xor_zero:
-    low:  uint64{v (get_high_part low) == 0}
-  -> high: uint64{v (get_low_part high) == 0}
-  -> Lemma (v (logxor low high) = v high + v low)
-
-let lemma_xor_zero l h =
-  to_vec_low_high (v h);
-  to_vec_low_high (v l);
-  let a1 = BV.zero_vec #32 in
-  let a2 = UInt.to_vec #32 (v l % pow2 32) in
-  let b1 = UInt.to_vec #32 (v h / pow2 32) in
-  let b2 = BV.zero_vec #32 in
-  assert (Seq.equal (UInt.to_vec (UInt.zero 32)) (BV.zero_vec #32));
-  assert (UInt.to_vec #64 (UInt.logxor (v l) (v h)) ==
-          BV.logxor_vec (Seq.append a1 a2) (Seq.append b1 b2));
-  logxor_vec_append a1 b1 a2 b2;
-  assert (Seq.equal (BV.logxor_vec a1 b1) b1);
-  assert (Seq.equal (BV.logxor_vec a2 b2) a2);
-  UInt.append_lemma b1 a2;
-  logxor_spec l h
+let lemma_logor_zero l h =
+  assert (v l / pow2 32 = 0);
+  Math.Lemmas.small_division_lemma_2 (v l) (pow2 32);
+  assert (v l < pow2 32);
+  assert (v h % pow2 32 = 0);
+  logor_disjoint l h 32;
+  assert (v (l `logor` h) == v l + v h)
 
 
 inline_for_extraction noextract
@@ -97,8 +46,8 @@ let store_high_low_u high low =
   [@inline_let] let as_uint64_low = to_u64 low in
   assert (v as_uint64_high = v high * pow2 32);
   assert (v as_uint64_low = v low);
-  lemma_xor_zero as_uint64_low as_uint64_high;
-  logxor as_uint64_low as_uint64_high
+  lemma_logor_zero as_uint64_low as_uint64_high;
+  logor as_uint64_low as_uint64_high
 
 #push-options "--z3rlimit 100"
 
@@ -111,7 +60,7 @@ val upl_zer_buffer:
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32)) % prime
+      as_nat h1 o == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32)) % S.prime
    )
 
 let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 o =
@@ -133,7 +82,7 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 o =
     bn_make_u64_4 b0 b1 b2 b3 o;
     fmod_short o o;
     let h2 = ST.get() in
-    assert(as_nat h2 o = (v c1 * pow2 32 + v c0 + v c3 * pow2 (3 * 32) + v c2 * pow2 (2 * 32) + v c5 * pow2 (32 * 5) + v c4 * pow2 (32 * 4) + v c7 * pow2 (32 * 7) + v c6 * pow2 (32 * 6)) % prime)
+    assert(as_nat h2 o = (v c1 * pow2 32 + v c0 + v c3 * pow2 (3 * 32) + v c2 * pow2 (2 * 32) + v c5 * pow2 (32 * 5) + v c4 * pow2 (32 * 4) + v c7 * pow2 (32 * 7) + v c6 * pow2 (32 * 6)) % S.prime)
 
 inline_for_extraction noextract
 val upl_fir_buffer: c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
@@ -142,7 +91,7 @@ val upl_fir_buffer: c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> 
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c11 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime
+      as_nat h1 o == (v c11 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % S.prime
     )
 
 let upl_fir_buffer c11 c12 c13 c14 c15 o =
@@ -165,7 +114,7 @@ val upl_sec_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32)) % prime /\ as_nat h1 o < prime
+      as_nat h1 o == (v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32)) % S.prime /\ as_nat h1 o < S.prime
     )
 
 let upl_sec_buffer c12 c13 c14 c15 o =
@@ -179,9 +128,9 @@ let upl_sec_buffer c12 c13 c14 c15 o =
     let b2 = store_high_low_u c14 c13 in
     let b3 = store_high_low_u (u32 0) c15 in
     bn_make_u64_4 b0 b1 b2 b3 o;
-    assert_norm(v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32) < prime);
+    assert_norm(v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32) < S.prime);
     let h1 = ST.get() in
-    FStar.Math.Lemmas.modulo_lemma (as_nat h1 o) prime
+    FStar.Math.Lemmas.modulo_lemma (as_nat h1 o) S.prime
 
 inline_for_extraction noextract
 val upl_thi_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c14: uint32 -> c15: uint32
@@ -189,7 +138,7 @@ val upl_thi_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c14: uint32 -> c1
   Stack unit
  (requires fun h -> live h o)
  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c8 + v c9 * pow2 32 + v c10 * pow2 (2 * 32) +  v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime)
+      as_nat h1 o == (v c8 + v c9 * pow2 32 + v c10 * pow2 (2 * 32) +  v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % S.prime)
 
 let upl_thi_buffer c8 c9 c10 c14 c15 o =
    assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -204,13 +153,14 @@ let upl_thi_buffer c8 c9 c10 c14 c15 o =
    bn_make_u64_4 b0 b1 b2 b3 o;
    fmod_short o o
 
+
 inline_for_extraction noextract
 val upl_for_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c11: uint32 -> c13: uint32 ->
   c14: uint32 -> c15: uint32-> o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h -> live h o)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-        as_nat h1 o == (v c9 + v c10 * pow2 32 + v c11 * pow2 (2 * 32) + v c13 * pow2 (3 * 32) + v c14 * pow2 (4 * 32) + v c15 * pow2 (5 * 32) + v c13 * pow2 (6 * 32) +  v c8 * pow2 (7 * 32)) % prime)
+  (requires fun h -> live h o)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+    as_nat h1 o == (v c9 + v c10 * pow2 32 + v c11 * pow2 (2 * 32) + v c13 * pow2 (3 * 32) + v c14 * pow2 (4 * 32) + v c15 * pow2 (5 * 32) + v c13 * pow2 (6 * 32) +  v c8 * pow2 (7 * 32)) % S.prime)
 
 let upl_for_buffer c8 c9 c10 c11 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -231,7 +181,7 @@ val upl_fif_buffer: c8: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c
   Stack unit
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-    as_nat h1 o == (v c11 + v c12 * pow2 32 + v c13 * pow2 (2 * 32) + v c8 * pow2 (6 * 32) + v c10 * pow2 (7 * 32)) % prime)
+    as_nat h1 o == (v c11 + v c12 * pow2 32 + v c13 * pow2 (2 * 32) + v c8 * pow2 (6 * 32) + v c10 * pow2 (7 * 32)) % S.prime)
 
 let upl_fif_buffer c8 c10 c11 c12 c13 o =
      assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -253,7 +203,7 @@ val upl_six_buffer: c9: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 -> c
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat h1 o == (
     v c12 + v c13 * pow2 32 + v c14 * pow2 (2 * 32) + v c15 * pow2 (3 * 32) +
-          v c9 * pow2 (6 * 32) + v c11 * pow2 (7 * 32)) % prime)
+          v c9 * pow2 (6 * 32) + v c11 * pow2 (7 * 32)) % S.prime)
 
 let upl_six_buffer c9 c11 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -275,7 +225,7 @@ val upl_sev_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c12: uint32 -> c1
   Stack unit
     (requires fun h -> live h o)
       (ensures fun h0 _ h1 -> modifies (loc o)  h0 h1 /\
-        as_nat h1 o == (v c13 + v c14 * pow2 32 + v c15 * pow2 (2 * 32) + v c8 * pow2 (3 * 32) +  v c9 * pow2 (4 * 32) + v c10 * pow2 (5 * 32) + v c12 * pow2 (7 * 32)) % prime)
+        as_nat h1 o == (v c13 + v c14 * pow2 32 + v c15 * pow2 (2 * 32) + v c8 * pow2 (3 * 32) +  v c9 * pow2 (4 * 32) + v c10 * pow2 (5 * 32) + v c12 * pow2 (7 * 32)) % S.prime)
 
 let upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -296,7 +246,7 @@ val upl_eig_buffer: c9: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
     (requires fun h -> live h o)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat h1 o == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) + v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % prime)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat h1 o == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) + v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % S.prime)
 
 let upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -327,16 +277,16 @@ val solinas_reduction_upload: c0: uint32 -> c1: uint32 -> c2: uint32 -> c3: uint
           let t6 = as_nat h1 (gsub tempBuffer (size 24) (size 4)) in
           let t7 = as_nat h1 (gsub tempBuffer (size 28) (size 4)) in
           let t8 = as_nat h1 (gsub tempBuffer (size 32) (size 4)) in
-          t0 == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) +  v c7 * pow2 (7 * 32)) % prime /\
+          t0 == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) +  v c7 * pow2 (7 * 32)) % S.prime /\
           t1 == (v c11 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) +
-           v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime /\
-          t2 == (v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) +  v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32)) % prime  /\
-          t3 == (v c8 + v c9 * pow2 32 + v c10 * pow2 (2 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime /\
-          t4 == (v c9 + v c10 * pow2 32 + v c11 * pow2 (2 * 32) + v c13 * pow2 (3 * 32) + v c14 * pow2 (4 * 32) + v c15 * pow2 (5 * 32) + v c13 * pow2 (6 * 32) + v c8 * pow2 (7 * 32)) % prime /\
-          t5 == (v c11 + v c12 * pow2 32 + v c13 * pow2 (2 * 32) + v c8 * pow2 (6 * 32) + v c10 * pow2 (7 * 32)) % prime /\
-          t6 == (v c12 + v c13 * pow2 32 + v c14 * pow2 (2 * 32) + v c15 * pow2 (3 * 32) + v c9 * pow2 (6 * 32) + v c11 * pow2 (7 * 32)) % prime /\
-          t7 == (v c13 + v c14 * pow2 32 + v c15 * pow2 (2 * 32) +  v c8 * pow2 (3 * 32) +  v c9 * pow2 (4 * 32) + v c10 * pow2 (5 * 32) + v c12 * pow2 (7 * 32)) % prime /\
-          t8 == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) +  v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % prime
+           v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % S.prime /\
+          t2 == (v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) +  v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32)) % S.prime  /\
+          t3 == (v c8 + v c9 * pow2 32 + v c10 * pow2 (2 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % S.prime /\
+          t4 == (v c9 + v c10 * pow2 32 + v c11 * pow2 (2 * 32) + v c13 * pow2 (3 * 32) + v c14 * pow2 (4 * 32) + v c15 * pow2 (5 * 32) + v c13 * pow2 (6 * 32) + v c8 * pow2 (7 * 32)) % S.prime /\
+          t5 == (v c11 + v c12 * pow2 32 + v c13 * pow2 (2 * 32) + v c8 * pow2 (6 * 32) + v c10 * pow2 (7 * 32)) % S.prime /\
+          t6 == (v c12 + v c13 * pow2 32 + v c14 * pow2 (2 * 32) + v c15 * pow2 (3 * 32) + v c9 * pow2 (6 * 32) + v c11 * pow2 (7 * 32)) % S.prime /\
+          t7 == (v c13 + v c14 * pow2 32 + v c15 * pow2 (2 * 32) +  v c8 * pow2 (3 * 32) +  v c9 * pow2 (4 * 32) + v c10 * pow2 (5 * 32) + v c12 * pow2 (7 * 32)) % S.prime /\
+          t8 == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) +  v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % S.prime
     ))
 
 
@@ -375,8 +325,8 @@ val solinas_reduction_operations: tempBuffer: lbuffer uint64 (size 36) ->  o: lb
           let t6 = as_nat h (gsub tempBuffer (size 24) (size 4)) in
           let t7 = as_nat h (gsub tempBuffer (size 28) (size 4)) in
           let t8 = as_nat h (gsub tempBuffer (size 32) (size 4)) in
-          t0 < prime /\ t1 < prime /\ t2 < prime /\ t3 < prime /\ t4 < prime /\
-          t5 < prime /\ t6 < prime /\ t7 < prime /\ t8 < prime
+          t0 < S.prime /\ t1 < S.prime /\ t2 < S.prime /\ t3 < S.prime /\ t4 < S.prime /\
+          t5 < S.prime /\ t6 < S.prime /\ t7 < S.prime /\ t8 < S.prime
       )
     )
     (ensures fun h0 _ h1 -> modifies2 tempBuffer o h0 h1 /\
@@ -390,7 +340,7 @@ val solinas_reduction_operations: tempBuffer: lbuffer uint64 (size 36) ->  o: lb
           let t6 = as_nat h0 (gsub tempBuffer (size 24) (size 4)) in
           let t7 = as_nat h0 (gsub tempBuffer (size 28) (size 4)) in
           let t8 = as_nat h0 (gsub tempBuffer (size 32) (size 4)) in
-          as_nat h1 o == (t0 + 2 * t1 + 2 * t2  + t3 + t4 - t5  - t6 - t7 - t8) % prime
+          as_nat h1 o == (t0 + 2 * t1 + 2 * t2  + t3 + t4 - t5  - t6 - t7 - t8) % S.prime
     )
   )
 
@@ -417,7 +367,7 @@ let solinas_reduction_operations tempBuffer o =
     fsub o t7 o;
     fsub o t8 o;
 
-    reduce_brackets (as_nat h0 t0) (as_nat h0 t1) (as_nat h0 t2) (as_nat h0 t3) (as_nat h0 t4) (as_nat h0 t5) (as_nat h0 t6) (as_nat h0 t7) (as_nat h0 t8)
+    SL.reduce_brackets (as_nat h0 t0) (as_nat h0 t1) (as_nat h0 t2) (as_nat h0 t3) (as_nat h0 t4) (as_nat h0 t5) (as_nat h0 t6) (as_nat h0 t7) (as_nat h0 t8)
 
 
 val lemma_opened: i:Lib.Sequence.lseq uint64 8 -> Lemma
@@ -676,7 +626,7 @@ let solinas_reduction_impl i o =
     solinas_reduction_operations tempBuffer o;
     let h2 = ST.get() in
 
-    solinas_reduction_mod (v c0) (v c1) (v c2) (v c3) (v c4) (v c5) (v c6) (v c7) (v c8) (v c9) (v c10) (v c11) (v c12) (v c13) (v c14) (v c15) (as_nat h1 t0) (as_nat h1 t1) (as_nat h1 t2) (as_nat h1 t3) (as_nat h1 t4) (as_nat h1 t5) (as_nat h1 t6) (as_nat h1 t7) (as_nat h1 t8) (as_nat h2 o);
+    SL.solinas_reduction_mod (v c0) (v c1) (v c2) (v c3) (v c4) (v c5) (v c6) (v c7) (v c8) (v c9) (v c10) (v c11) (v c12) (v c13) (v c14) (v c15) (as_nat h1 t0) (as_nat h1 t1) (as_nat h1 t2) (as_nat h1 t3) (as_nat h1 t4) (as_nat h1 t5) (as_nat h1 t6) (as_nat h1 t7) (as_nat h1 t8) (as_nat h2 o);
 
-  FStar.Math.Lemmas.modulo_lemma (as_nat h2 o) prime;
+  FStar.Math.Lemmas.modulo_lemma (as_nat h2 o) S.prime;
   pop_frame()
