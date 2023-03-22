@@ -14,6 +14,7 @@ open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
+module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -60,7 +61,7 @@ let lemma_mont_is_point_at_inf p =
   assert (SM.from_mont pz == pz * SM.fmont_R_inv % S.prime);
   assert_norm (SM.fmont_R_inv % S.prime <> 0);
   assert_norm (0 * SM.fmont_R_inv % S.prime == 0);
-  Hacl.Spec.P256.Math.lemma_multiplication_not_mod_prime pz;
+  SM.lemma_multiplication_not_mod_prime pz;
   assert (if pz = 0 then SM.from_mont pz == 0 else SM.from_mont pz <> 0)
 
 

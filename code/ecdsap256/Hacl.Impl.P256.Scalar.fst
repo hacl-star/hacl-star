@@ -13,6 +13,7 @@ open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
 module SB = Hacl.Spec.P256.Bignum
+module SM = Hacl.Spec.P256.Montgomery
 
 module BD = Hacl.Spec.Bignum.Definitions
 module BM = Hacl.Bignum.Montgomery
@@ -184,7 +185,7 @@ let qmont_R_inv_is_bn_mont_d () =
   assert (qmont_R_inv * pow2 256 % S.order = 1);
 
   assert (qmont_R_inv * pow2 256 % S.order = d * pow2 256 % S.order);
-  Hacl.Spec.P256.Math.lemma_mod_mul_pow256_order qmont_R_inv d;
+  SM.lemma_mod_mul_pow256_order qmont_R_inv d;
   assert (qmont_R_inv % S.order == d % S.order);
   Math.Lemmas.modulo_lemma qmont_R_inv S.order;
   assert (qmont_R_inv == d % S.order)
