@@ -155,3 +155,15 @@ let lemma_valid_taint_stack128_reveal ptr t stackTaint = ()
 let lemma_correct_store_load_taint_stack128 ptr t stackTaint = ()
 
 let lemma_frame_store_load_taint_stack128 ptr t stackTaint i t' = ()
+
+let lemma_store_stack_same_valid64_128 ptr v h i =
+  reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  BS.update_heap128_reveal ();
+  BS.update_heap32_reveal ()
+
+let lemma_frame_store_load_stack64_128 ptr v h i =
+  let Machine_stack _ mem = h in
+  frame_update_heap128 ptr v mem;
+  BS.get_heap_val64_reveal ()
+
+let lemma_frame_store_load_taint_stack64_128 ptr t stackTaint i t' = ()

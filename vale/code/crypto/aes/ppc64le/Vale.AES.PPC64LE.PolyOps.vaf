@@ -1,0 +1,129 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Math.Poly2_s"
+include{:fstar}{:open} "Vale.Math.Poly2"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits_s"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits"
+include{:fstar}{:open} "Vale.Math.Poly2.Words"
+include{:fstar}{:open} "Vale.Math.Poly2.Lemmas"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCodes"
+include{:fstar}{:open} "Vale.AES.GHash_BE"
+
+module Vale.AES.PPC64LE.PolyOps
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.Math.Poly2_s
+open Vale.Math.Poly2
+open Vale.Math.Poly2.Bits_s
+open Vale.Math.Poly2.Bits
+open Vale.Math.Poly2.Lemmas
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.AES.GHash_BE
+#endverbatim
+
+procedure VPolyAdd(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    ensures
+        of_quad32(dst) == add(a1, a2);
+{
+    lemma_add_quad32(src1, src2);
+    Vxor(dst, src1, src2);
+}
+
+procedure VPolyAnd(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    ensures
+        of_quad32(dst) == poly_and(a1, a2);
+{
+    lemma_and_quad32(src1, src2);
+    Vand(dst, src1, src2);
+}
+
+procedure VSwap(out dst:vec_opr, in src:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    lets
+        a := of_quad32(src);
+    ensures
+        of_quad32(dst) == swap(a, 64);
+{
+    Vsldoi(dst, src, src, 8);
+    lemma_quad32_double_swap(a);
+    lemma_of_to_quad32(swap(a, 64));
+}
+
+procedure VPolyMul(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    ensures
+        of_quad32(dst) == add(
+            mul(mask(a1, 64), mask(a2, 64)),
+            mul(shift(a1, (-64)), shift(a2, (-64))));
+{
+    Vpmsumd(dst, src1, src2);
+    lemma_quad32_double(a1);
+    lemma_quad32_double(a2);
+    lemma_shift_is_div(a1, 64);
+    lemma_shift_is_div(a2, 64);
+    lemma_mask_is_mod(a1, 64);
+    lemma_mask_is_mod(a2, 64);
+    lemma_of_to_quad32(add(
+        mul(mask(a1, 64), mask(a2, 64)),
+        mul(shift(a1, (-64)), shift(a2, (-64)))));
+}
+
+procedure VPolyMulLow(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    requires
+        shift(a1, (-64)) == zero \/ shift(a2, (-64)) == zero;
+    ensures
+        of_quad32(dst) == mul(mask(a1, 64), mask(a2, 64));
+{
+    VPolyMul(dst, src1, src2);
+    lemma_add_mul_zero_low(mask(a1, 64), shift(a1, (-64)), mask(a2, 64), shift(a2, (-64)));
+}
+
+procedure VPolyMulHigh(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    requires
+        mask(a1, 64) == zero \/ mask(a2, 64) == zero;
+    ensures
+        of_quad32(dst) == mul(shift(a1, (-64)), shift(a2, (-64)));
+{
+    VPolyMul(dst, src1, src2);
+    lemma_add_mul_zero_high(mask(a1, 64), shift(a1, (-64)), mask(a2, 64), shift(a2, (-64)));
+}

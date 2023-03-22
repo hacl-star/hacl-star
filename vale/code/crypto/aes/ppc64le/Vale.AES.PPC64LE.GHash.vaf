@@ -1,0 +1,609 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsMem.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include "../../../crypto/aes/ppc64le/Vale.AES.PPC64LE.PolyOps.vaf"
+include "../../../crypto/aes/ppc64le/Vale.AES.PPC64LE.GF128_Mul.vaf"
+include{:fstar}{:open} "Vale.Def.Prop_s"
+include{:fstar}{:open} "Vale.Def.Opaque_s"
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Vale.AES.AES_BE_s"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.Memory"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCodes"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.AES.AES_helpers"
+include{:fstar}{:open} "Vale.Poly1305.Math"
+include{:fstar}{:open} "Vale.AES.GCM_helpers_BE"
+include{:fstar}{:open} "Vale.AES.GCTR_BE_s"
+include{:fstar}{:open} "Vale.AES.GCTR_BE"
+include{:fstar}{:open} "Vale.Arch.TypesNative"
+
+include{:fstar}{:open} "Vale.Math.Poly2_s"
+include{:fstar}{:open} "Vale.Math.Poly2"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits_s"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits"
+include{:fstar}{:open} "Vale.Math.Poly2.Words"
+include{:fstar}{:open} "Vale.Math.Poly2.Lemmas"
+include{:fstar}{:open} "Vale.AES.GF128_s"
+include{:fstar}{:open} "Vale.AES.GF128"
+include{:fstar}{:open} "Vale.AES.GHash_BE"
+module Vale.AES.PPC64LE.GHash
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Prop_s
+open Vale.Def.Opaque_s
+open Vale.Def.Words_s
+open Vale.Def.Types_s
+open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
+open Vale.AES.AES_BE_s
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.AES.AES_helpers
+open Vale.Poly1305.Math    // For lemma_poly_bits64()
+open Vale.AES.GCM_helpers_BE
+open Vale.AES.GCTR_BE_s
+open Vale.AES.GCTR_BE
+open Vale.Arch.TypesNative
+open Vale.AES.PPC64LE.PolyOps
+open Vale.AES.PPC64LE.GF128_Mul
+open Vale.Math.Poly2_s
+open Vale.Math.Poly2
+open Vale.Math.Poly2.Bits_s
+open Vale.Math.Poly2.Bits
+open Vale.Math.Poly2.Lemmas
+open Vale.AES.GF128_s
+open Vale.AES.GF128
+open Vale.AES.GHash_BE
+#reset-options "--z3rlimit 50"
+#endverbatim
+
+#token +. precedence +
+#token *. precedence *
+#token %. precedence *
+#token ~~ precedence !
+function operator(+.) (a:poly, b:poly):poly := add;
+function operator(*.) (a:poly, b:poly):poly := mul;
+function operator(%.) (a:poly, b:poly):poly := mod;
+function operator(~~) (a:quad32):poly := of_quad32;
+function operator([]) #[a:Type(0)](s:FStar.Seq.Base.seq(a), i:int):a extern;
+//(*)
+
+#verbatim{:interface}
+
+unfold let va_subscript_FStar__Seq__Base__seq = Seq.index
+
+let hkeys_b_powers (hkeys_b:buffer128) (heap0:vale_heap) (layout:vale_heap_layout) (ptr:int) (h:poly) =
+  validSrcAddrs128 heap0 ptr hkeys_b 3 layout Secret /\
+  of_quad32 (reverse_bytes_quad32 (buffer128_read hkeys_b 0 heap0)) == gf128_power h 1 /\
+  of_quad32 (reverse_bytes_quad32 (buffer128_read hkeys_b 1 heap0)) == gf128_power h 2
+
+let in_b_blocks
+    (in_b:buffer128) (in_index count:int) (heap_s:vale_heap) (layout:vale_heap_layout) (ptr:int) (data:seq quad32)
+  =
+  validSrcAddrsOffset128 heap_s ptr in_b in_index count layout Secret /\
+  (forall (i:nat).{:pattern (index data i)}
+    i < count /\ i < length data ==>
+      reverse_bytes_quad32 (buffer128_read in_b (in_index + i) heap_s) == index data i)
+#endverbatim
+
+function hkeys_b_powers(hkeys_b:buffer128, heap0:vale_heap, layout:vale_heap_layout, ptr:int, h:poly):prop extern;
+function in_b_blocks(in_b:buffer128, in_index:int, count:int, heap_s:vale_heap, layout:vale_heap_layout, ptr:int, data:seq(quad32)):prop extern;
+
+procedure MulAdd_unroll_1way(
+        ghost in_b:buffer128,
+        ghost index:nat,
+        ghost h:poly,
+        ghost prev:poly,
+        ghost data:seq(quad32))
+    {:quick}
+    lets
+        in_ptr @= r7; 
+        I0 @= v0; Xi @= v1;
+        Z0 @= v2; Z2 @= v3; Z3 @= v4;
+        Z1_SW @= v5; Z1_HI @= v6; Z1_LO @= v7;
+        pdata := fun_seq_quad32_BE_poly128(data);
+    reads
+        heap1; memLayout; in_ptr; Xi;
+        Z1_SW; Z1_HI; Z1_LO;
+    modifies
+        I0; Z0; Z2; Z3;
+    requires
+        length(data) == 1;
+        in_b_blocks(in_b, index, 1, heap1, memLayout, in_ptr, data);
+        of_quad32(Xi) == prev;
+        of_quad32(Z1_SW) == swap(gf128_power(h, 1), 64);
+        of_quad32(Z1_HI) == mul(div(gf128_power(h, 1), monomial(64)), monomial(64));
+        of_quad32(Z1_LO) == mod(gf128_power(h, 1), monomial(64));
+    ensures
+        of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(h, prev, pdata, 0, 1, 0);
+{
+    let data_i := #poly(pdata(0));
+    Load128_byte16_buffer(heap1, I0, in_ptr, Secret, in_b, index);
+
+    lemma_gf128_power(h, 1);
+    VPolyAdd(I0, Xi, I0);
+    lemma_degree_negative(div(of_quad32(Z1_LO), monomial(64)));
+    lemma_shift_is_div(of_quad32(Z1_LO), 64);
+    VPolyMulLow(Z0, I0, Z1_LO);
+    VPolyMul(Z2, I0, Z1_SW);
+    lemma_div_mod_exact(div(gf128_power(h, 1), monomial(64)), monomial(64));
+    lemma_mask_is_mod(of_quad32(Z1_HI), 64);
+    VPolyMulHigh(Z3, I0, Z1_HI);
+    lemma_mod_mod(gf128_power(h, 1), monomial(64));
+    lemma_mask_is_mod(gf128_power(h, 1), 64);
+    lemma_mask_is_mod(mod(gf128_power(h, 1), monomial(64)), 64);
+    lemma_swap128_mask_shift(gf128_power(h, 1));
+    lemma_shift_is_div(gf128_power(h, 1), 64);
+    lemma_shift_is_div(mul(div(gf128_power(h, 1), monomial(64)), monomial(64)), 64);
+    lemma_Mul128(prev +. data_i, gf128_power(h, 1));
+}
+
+procedure MulAdd_unroll_2way(
+        ghost in_b:buffer128,
+        ghost index:nat,
+        ghost h:poly,
+        ghost prev:poly,
+        ghost data:seq(quad32))
+    {:quick}
+    lets
+        in_ptr @= r7;
+        I0 @= v0; Xi @= v1;
+        Z0 @= v2; Z2 @= v3; Z3 @= v4;
+        Z1_SW @= v5; Z1_HI @= v6; Z1_LO @= v7;
+        I1 @= v8;
+        Z2_0 @= v9; Z2_2 @= v10; Z2_3 @= v11;
+        Z2_SW @= v12; Z2_HI @= v13; Z2_LO @= v14;
+        pdata := fun_seq_quad32_BE_poly128(data);
+    reads
+        heap1; memLayout; in_ptr; Xi;
+        Z1_SW; Z1_HI; Z1_LO;
+        Z2_SW; Z2_HI; Z2_LO;
+    modifies
+        r10;
+        I0; Z0; Z2; Z3;
+        I1; Z2_0; Z2_2; Z2_3;
+    requires
+        length(data) == 2;
+        in_b_blocks(in_b, index, 2, heap1, memLayout, in_ptr, data);
+        of_quad32(Xi) == prev;
+        of_quad32(Z1_SW) == swap(gf128_power(h, 1), 64);
+        of_quad32(Z1_HI) == mul(div(gf128_power(h, 1), monomial(64)), monomial(64));
+        of_quad32(Z1_LO) == mod(gf128_power(h, 1), monomial(64));
+        of_quad32(Z2_SW) == swap(gf128_power(h, 2), 64);
+        of_quad32(Z2_HI) == mul(div(gf128_power(h, 2), monomial(64)), monomial(64));
+        of_quad32(Z2_LO) == mod(gf128_power(h, 2), monomial(64));
+    ensures
+        of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(h, prev, pdata, 0, 2, 1);
+{
+    let data_0 := #poly(pdata(0));
+    let data_1 := #poly(pdata(1));
+    LoadImm64(r10, 16);
+    Load128_byte16_buffer(heap1, I0, in_ptr, Secret, in_b, index);
+    Load128_byte16_buffer_index(heap1, I1, in_ptr, r10, Secret, in_b, index + 1);
+
+    lemma_gf128_power(h, 1);
+    lemma_degree_negative(div(of_quad32(Z1_LO), monomial(64)));
+    lemma_shift_is_div(of_quad32(Z1_LO), 64);
+    VPolyMulLow(Z0, I1, Z1_LO);
+    VPolyMul(Z2, I1, Z1_SW);
+    lemma_div_mod_exact(div(gf128_power(h, 1), monomial(64)), monomial(64));
+    lemma_mask_is_mod(of_quad32(Z1_HI), 64);
+    VPolyMulHigh(Z3, I1, Z1_HI);
+    lemma_mod_mod(gf128_power(h, 1), monomial(64));
+    lemma_mask_is_mod(gf128_power(h, 1), 64);
+    lemma_mask_is_mod(mod(gf128_power(h, 1), monomial(64)), 64);
+    lemma_swap128_mask_shift(gf128_power(h, 1));
+    lemma_shift_is_div(gf128_power(h, 1), 64);
+    lemma_shift_is_div(mul(div(gf128_power(h, 1), monomial(64)), monomial(64)), 64);
+    lemma_Mul128(data_1, gf128_power(h, 1));
+    assert(of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+        ghash_unroll_back(h, prev, pdata, 0, 2, 0));
+
+    lemma_gf128_power(h, 2);
+    VPolyAdd(I0, Xi, I0);
+    lemma_degree_negative(div(of_quad32(Z2_LO), monomial(64)));
+    lemma_shift_is_div(of_quad32(Z2_LO), 64);
+    VPolyMulLow(Z2_0, I0, Z2_LO);
+    VPolyMul(Z2_2, I0, Z2_SW);
+    lemma_div_mod_exact(div(gf128_power(h, 2), monomial(64)), monomial(64));
+    lemma_mask_is_mod(of_quad32(Z2_HI), 64);
+    VPolyMulHigh(Z2_3, I0, Z2_HI);
+    lemma_mod_mod(gf128_power(h, 2), monomial(64));
+    lemma_mask_is_mod(gf128_power(h, 2), 64);
+    lemma_mask_is_mod(mod(gf128_power(h, 2), monomial(64)), 64);
+    lemma_swap128_mask_shift(gf128_power(h, 2));
+    lemma_shift_is_div(gf128_power(h, 2), 64);
+    lemma_shift_is_div(mul(div(gf128_power(h, 2), monomial(64)), monomial(64)), 64);
+    lemma_add_associate(~~Z2,
+        mul(mask(prev +. data_0, 64), shift(gf128_power(h, 2), (-64))),
+        mul(shift(prev +. data_0, (-64)), mask(gf128_power(h, 2), 64)));
+    lemma_Mul128_accum(~~Z0, ~~Z2, ~~Z3, prev +. data_0, gf128_power(h, 2));
+    VPolyAdd(Z0, Z0, Z2_0);
+    VPolyAdd(Z2, Z2, Z2_2);
+    VPolyAdd(Z3, Z3, Z2_3);
+}
+
+procedure Reduce(ghost f:poly)
+    {:quick}
+    lets
+        Xi @= v1; Hkey @= v8;
+        Z0 @= v2; Z1 @= v9; Z2 @= v3; Z3 @= v4;
+        Ii @= v10;
+        g := monomial(128) +. f;
+        c := reverse(shift(f, (-1)), 63);
+        a0 := of_quad32(Z0);
+        a1 := of_quad32(Z2);
+        a2 := of_quad32(Z3);
+        a := a0 +. shift(a1, 64) +. shift(a2, 128);
+    modifies
+        v0; Ii; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        shift(of_quad32(Hkey), (-64)) == zero;
+        mask(of_quad32(Hkey), 64) == c;
+        degree(f) < 64;
+        degree(g) == 128;
+        poly_index(f, 0);
+    ensures
+        of_quad32(Xi) == reverse(reverse(a, 255) %. g, 127);
+{
+    Vspltisw(v0, 0);
+    lemma_mask_is_mod(a1, 64);
+    lemma_shift_is_mul(mask(a1, 64), 64);
+    Low64ToHigh(Z1, Z2, a1);
+    lemma_of_to_quad32(shift(mask(a1, 64), 64));
+    VPolyAdd(Z0, Z0, Z1);
+    VSwap(Ii, Z0);
+    VPolyMulLow(Z0, Z0, Hkey);
+    lemma_shift_is_div(a1, 64);
+    High64ToLow(Z2, Z2, a1);
+    lemma_of_to_quad32(shift(a1, (-64)));
+    VPolyAdd(Z3, Z3, Z2);
+    lemma_add_commute(of_quad32(Z0), of_quad32(Ii));
+    VPolyAdd(Z0, Z0, Ii);
+    VSwap(Xi, Z0);
+    VPolyMulLow(Z0, Z0, Hkey);
+    VPolyAdd(Xi, Xi, Z3);
+    VPolyAdd(Xi, Xi, Z0);
+    lemma_reduce_rev(a0, a1, a2, f, 64);
+}
+
+procedure ReduceLast(
+        ghost h_BE:quad32,
+        ghost y_prev:quad32,
+        ghost data:seq(quad32))
+    {:public}
+    {:quick}
+    lets
+        Xi @= v1; Hkey @= v8;
+        Z0 @= v2; Z2 @= v3; Z3 @= v4;
+        h := of_quad32(h_BE);
+        prev := of_quad32(y_prev);
+        pdata := fun_seq_quad32_BE_poly128(data);
+        n := length(data);
+    modifies
+        v0; Xi; Z0; Z2; Z3; Hkey; v9; v10;
+    requires
+        Hkey == Mkfour(0, 0xc2000000, 0, 0);
+        n > 0;
+        of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(h, prev, pdata, 0, n, #nat(n - 1));
+    ensures
+        let xi := of_quad32(Xi);
+        to_quad32(xi) == ghash_incremental(h_BE, y_prev, data);
+        xi == of_quad32(to_quad32(xi));
+{
+    lemma_gf128_constant_shift_rev();
+    lemma_gf128_degree();
+    Reduce(gf128_modulus_low_terms);
+    lemma_ghash_unroll_back_forward(h, prev, pdata, 0, #nat(n - 1));
+    lemma_ghash_poly_of_unroll(h, prev, pdata, 0, #nat(n - 1));
+    lemma_ghash_incremental_poly(h_BE, y_prev, data);
+    lemma_to_of_quad32(ghash_incremental(h_BE, y_prev, data));
+}
+
+procedure GhashUnroll_n(
+        inline exactly2:bool,
+        ghost in_b:buffer128,
+        ghost index:nat,
+        ghost h_BE:quad32,
+        ghost y_prev:quad32,
+        ghost data:seq(quad32))
+    {:public}
+    {:quick}
+    lets
+        in_ptr @= r7;
+        Xi @= v1;
+        Z1_SW @= v5; Z1_HI @= v6; Z1_LO @= v7;
+        Hkey @= v8;
+        Z2_SW @= v12; Z2_HI @= v13; Z2_LO @= v14;
+        h := of_quad32(h_BE);
+        prev := of_quad32(y_prev);
+        pdata := fun_seq_quad32_BE_poly128(data);
+        n := length(data);
+    reads
+        heap1; memLayout; in_ptr;
+        Z1_SW; Z1_HI; Z1_LO;
+        Z2_SW; Z2_HI; Z2_LO;
+    modifies
+        r10;
+        v0; Xi; v2; v3; v4;
+        Hkey; v9; v10; v11;
+    requires
+        exactly2 ==> n == 2;
+        !exactly2 ==> n == 1;
+        in_b_blocks(in_b, index, n, heap1, memLayout, in_ptr, data);
+        of_quad32(Xi) == prev;
+        of_quad32(Z1_SW) == swap(gf128_power(h, 1), 64);
+        of_quad32(Z1_HI) == mul(div(gf128_power(h, 1), monomial(64)), monomial(64));
+        of_quad32(Z1_LO) == mod(gf128_power(h, 1), monomial(64));
+        exactly2 ==> of_quad32(Z2_SW) == swap(gf128_power(h, 2), 64);
+        exactly2 ==> of_quad32(Z2_HI) == mul(div(gf128_power(h, 2), monomial(64)), monomial(64));
+        exactly2 ==> of_quad32(Z2_LO) == mod(gf128_power(h, 2), monomial(64));
+    ensures
+        Xi == ghash_incremental(h_BE, y_prev, data);
+{
+    inline if (exactly2)
+    {
+        MulAdd_unroll_2way(in_b, index, h, prev, data);
+    }
+    else
+    {
+        MulAdd_unroll_1way(in_b, index, h, prev, data);
+    }
+    Vspltisw(Hkey, 0);
+    LoadImmShl64(r10, (-15872));
+    lemma_ishl_64((-15872) % pow2_64, 16);
+    Mtvsrws(v0, r10);
+    Vsldoi(v1, Hkey, v0, 4);
+    Vsldoi(Hkey, v1, Hkey, 4);
+    ReduceLast(h_BE, y_prev, data);
+}
+
+procedure Ghash_register(
+        ghost hkeys_b:buffer128,
+        ghost h_BE:quad32,
+        ghost y_prev:quad32)
+    {:public}
+    {:quick}
+    lets
+        Xip @= r5;
+        Ii @= v9;
+        Xi @= v1;
+        Z0 @= v2; Z2 @= v3; Z3 @= v4;
+        Z1_SW @= v5; Z1_HI @= v6; Z1_LO @= v7;
+        Hkey @= v8;
+        h := of_quad32(h_BE);
+        data := create(1, Ii);
+        prev := of_quad32(y_prev);
+        pdata := fun_seq_quad32_BE_poly128(data);
+    reads
+        heap0; memLayout; Xip;
+    modifies
+        r10; v0; Xi; Z0; Z2; Z3; Z1_SW; Z1_HI; Z1_LO; Hkey; Ii; v10;
+    requires
+        hkeys_b_powers(hkeys_b, heap0, memLayout, Xip, h);
+        of_quad32(Xi) == prev;
+    ensures
+        Xi == ghash_incremental(h_BE, y_prev, old(data));
+{
+    Load128_byte16_buffer(heap0, Z1_SW, Xip, Secret, hkeys_b, 0);
+    Vspltisw(v0, 0);
+    VSwap(Z1_SW, Z1_SW);
+    lemma_quad32_double(gf128_power(h, 1));
+    lemma_quad32_double_swap(gf128_power(h, 1));
+    lemma_quad32_double(swap(gf128_power(h, 1), 64));
+    High64ToLow(Z1_LO, Z1_SW, swap(gf128_power(h, 1), 64));
+    Low64ToHigh(Z1_HI, Z1_SW, swap(gf128_power(h, 1), 64));
+    lemma_of_to_quad32(mod(gf128_power(h, 1), monomial(64)));
+    lemma_of_to_quad32(mul(div(gf128_power(h, 1), monomial(64)), monomial(64)));
+
+    assert Ii == index(data, #nat(0));
+    let data_i := #poly(pdata(0));
+
+    lemma_gf128_power(h, 1);
+    VPolyAdd(Ii, Xi, Ii);
+    lemma_degree_negative(div(of_quad32(Z1_LO), monomial(64)));
+    lemma_shift_is_div(of_quad32(Z1_LO), 64);
+    VPolyMulLow(Z0, Ii, Z1_LO);
+    VPolyMul(Z2, Ii, Z1_SW);
+    lemma_div_mod_exact(div(gf128_power(h, 1), monomial(64)), monomial(64));
+    lemma_mask_is_mod(of_quad32(Z1_HI), 64);
+    VPolyMulHigh(Z3, Ii, Z1_HI);
+    lemma_mod_mod(gf128_power(h, 1), monomial(64));
+    lemma_mask_is_mod(gf128_power(h, 1), 64);
+    lemma_mask_is_mod(mod(gf128_power(h, 1), monomial(64)), 64);
+    lemma_swap128_mask_shift(gf128_power(h, 1));
+    lemma_shift_is_div(gf128_power(h, 1), 64);
+    lemma_shift_is_div(mul(div(gf128_power(h, 1), monomial(64)), monomial(64)), 64);
+    lemma_Mul128(prev +. data_i, gf128_power(h, 1));
+
+    Vspltisw(Hkey, 0);
+    LoadImmShl64(r10, (-15872));
+    lemma_ishl_64((-15872) % pow2_64, 16);
+    Mtvsrws(v0, r10);
+    Vsldoi(v1, Hkey, v0, 4);
+    Vsldoi(Hkey, v1, Hkey, 4);
+    ReduceLast(h_BE, y_prev, data);
+}
+
+procedure Ghash_buffer_loop_body(
+        ghost in_b:buffer128,
+        ghost h_BE:quad32,
+        ghost y_prev:quad32,
+        ghost old_len:nat64,
+        ghost index:nat
+        )
+    {:quick}
+    lets
+        in_ptr @= r7; len @= r6;
+        Xi @= v1;
+        Z1_SW @= v5; Z1_HI @= v6; Z1_LO @= v7;
+        Z2_SW @= v12; Z2_HI @= v13; Z2_LO @= v14;
+        h := of_quad32(h_BE);
+        prev := of_quad32(y_prev);
+    reads
+        heap1; memLayout;
+        Z1_SW; Z1_HI; Z1_LO;
+        Z2_SW; Z2_HI; Z2_LO;
+    modifies
+        in_ptr; len; r10;
+        v0; Xi; v2; v3; v4;
+        v8; v9; v10; v11;
+    requires
+        len >= 2;   // From the while loop condition
+
+        // Loop invariants
+        index + len == old_len;
+
+        // Copy over preconditions
+        validSrcAddrsOffset128(heap1, in_ptr, in_b, index, len, memLayout, Secret);
+        buffer_length(in_b) == old_len;
+        in_ptr + 0x10 * len < pow2_64;
+        Xi == ghash_incremental0(h_BE, y_prev, slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index));
+
+        of_quad32(Z1_SW) == swap(gf128_power(h, 1), 64);
+        of_quad32(Z1_HI) == mul(div(gf128_power(h, 1), monomial(64)), monomial(64));
+        of_quad32(Z1_LO) == mod(gf128_power(h, 1), monomial(64));
+        of_quad32(Z2_SW) == swap(gf128_power(h, 2), 64);
+        of_quad32(Z2_HI) == mul(div(gf128_power(h, 2), monomial(64)), monomial(64));
+        of_quad32(Z2_LO) == mod(gf128_power(h, 2), monomial(64));
+    ensures
+        let index' := index + 2;
+        // Loop invariants
+        index' + len == old_len;
+
+        // Copy over preconditions
+        validSrcAddrsOffset128(heap1, in_ptr, in_b, index', len, memLayout, Secret);
+        buffer_length(in_b) == old_len;
+        in_ptr + 0x10 * len < pow2_64;
+        Xi == ghash_incremental0(h_BE, y_prev, slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index'));
+
+        // Loop updates
+        in_ptr == old(in_ptr) + 0x20;
+        len == old(len) - 2;
+{
+    let data := Seq.slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), index, index + 2);
+    GhashUnroll_n(true, in_b, index, h_BE, ghash_incremental0(h_BE, y_prev, slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index)), data);
+    lemma_ghash_incremental0_append(h_BE, y_prev, old(Xi), Xi, 
+                                    slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index), data);
+    assert equal(append(slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index), data), slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index + 2));
+
+    AddImm(in_ptr, in_ptr, 0x20);
+    SubImm(len, len, 2);
+}
+
+procedure Mod_cr0()
+    {:quick}
+    modifies
+        cr0;
+{}
+
+procedure Ghash_buffer(
+        ghost hkeys_b:buffer128,
+        ghost in_b:buffer128,
+        ghost h_BE:quad32,
+        ghost y_prev:quad32
+        )
+    {:public}
+    {:quick}
+    lets
+        in_ptr @= r7; len @= r6; Xip @= r5;
+        Xi @= v1;
+        Z1_SW @= v5; Z1_HI @= v6; Z1_LO @= v7;
+        Z2_SW @= v12; Z2_HI @= v13; Z2_LO @= v14;
+        h:poly := of_quad32(h_BE);
+    reads
+        Xip; heap0; heap1; memLayout;
+    modifies
+        in_ptr; len; r10;
+        v0; Xi; v2; v3; v4; Z1_SW; Z1_HI; Z1_LO;
+        v8; v9; v10; v11; Z2_SW; Z2_HI; Z2_LO;
+        cr0;
+    requires
+        hkeys_b_powers(hkeys_b, heap0, memLayout, Xip, h);
+        validSrcAddrs128(heap1, in_ptr, in_b, len, memLayout, Secret);
+        buffer_length(in_b) == len;
+        in_ptr + 0x10 * len < pow2_64;
+        Xi == y_prev;
+    ensures
+        Xi == ghash_incremental0(h_BE, y_prev, reverse_bytes_quad32_seq(s128(heap1, in_b)));
+        old(len) == 0 ==> Xi == old(Xi);
+{
+    LoadImm64(r10, 16);
+    Load128_byte16_buffer(heap0, Z1_SW, Xip, Secret, hkeys_b, 0);
+    Load128_byte16_buffer_index(heap0, Z2_SW, Xip, r10, Secret, hkeys_b, 1);
+    Vspltisw(v0, 0);
+
+    VSwap(Z1_SW, Z1_SW);
+    lemma_quad32_double(gf128_power(h, 1));
+    lemma_quad32_double_swap(gf128_power(h, 1));
+    lemma_quad32_double(swap(gf128_power(h, 1), 64));
+    High64ToLow(Z1_LO, Z1_SW, swap(gf128_power(h, 1), 64));
+    Low64ToHigh(Z1_HI, Z1_SW, swap(gf128_power(h, 1), 64));
+    lemma_of_to_quad32(mod(gf128_power(h, 1), monomial(64)));
+    lemma_of_to_quad32(mul(div(gf128_power(h, 1), monomial(64)), monomial(64)));
+
+    VSwap(Z2_SW, Z2_SW);
+    lemma_quad32_double(gf128_power(h, 2));
+    lemma_quad32_double_swap(gf128_power(h, 2));
+    lemma_quad32_double(swap(gf128_power(h, 2), 64));
+    High64ToLow(Z2_LO, Z2_SW, swap(gf128_power(h, 2), 64));
+    Low64ToHigh(Z2_HI, Z2_SW, swap(gf128_power(h, 2), 64));
+    lemma_of_to_quad32(mod(gf128_power(h, 2), monomial(64)));
+    lemma_of_to_quad32(mul(div(gf128_power(h, 2), monomial(64)), monomial(64)));
+
+    ghost var index:nat := 0;
+    while (len >= 2) 
+        invariant 
+            // Loop invariants
+            index + len == old(len);
+            in_ptr == old(in_ptr) + 0x10 * index;
+
+            // Copy over preconditions
+            of_quad32(Z1_SW) == swap(gf128_power(h, 1), 64);
+            of_quad32(Z1_HI) == mul(div(gf128_power(h, 1), monomial(64)), monomial(64));
+            of_quad32(Z1_LO) == mod(gf128_power(h, 1), monomial(64));
+            of_quad32(Z2_SW) == swap(gf128_power(h, 2), 64);
+            of_quad32(Z2_HI) == mul(div(gf128_power(h, 2), monomial(64)), monomial(64));
+            of_quad32(Z2_LO) == mod(gf128_power(h, 2), monomial(64));
+            validSrcAddrsOffset128(heap1, in_ptr, in_b, index, len, memLayout, Secret);
+            buffer_length(in_b) == old(len);
+            in_ptr + 0x10 * len < pow2_64;
+            Xi == ghash_incremental0(h_BE, y_prev, slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index));
+            old(len) == 0 ==> Xi == old(Xi);
+            h == of_quad32(h_BE);
+
+        decreases
+            len;
+    {
+        Mod_cr0();
+        Ghash_buffer_loop_body(in_b, h_BE, y_prev, old(len), index);
+        index := index + 2;
+    }
+
+    if (len > 0) {
+        let data := Seq.slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), index, old(len));
+        let y_loop := Xi;
+  
+        GhashUnroll_n(false, in_b, index, h_BE, y_loop, data);
+        lemma_ghash_incremental0_append(h_BE, y_prev, y_loop, Xi, 
+                                        slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index), data);
+        assert equal(append(slice(reverse_bytes_quad32_seq(s128(heap1, in_b)), 0, index), data), reverse_bytes_quad32_seq(s128(heap1, in_b)));     // OBSERVE
+    }
+}

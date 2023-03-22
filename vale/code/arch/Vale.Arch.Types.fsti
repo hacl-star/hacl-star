@@ -174,11 +174,23 @@ val le_nat64_to_bytes_to_nat64 (s:seq nat8 { length s == 8 }) :
 val le_bytes_to_seq_quad32_empty: unit ->
   Lemma (forall s . {:pattern (length (le_bytes_to_seq_quad32 s)) } length s == 0 ==> length (le_bytes_to_seq_quad32 s) == 0)
 
+val be_bytes_to_seq_quad32_empty: unit ->
+  Lemma (forall s . {:pattern (length (be_bytes_to_seq_quad32 s)) } length s == 0 ==> length (be_bytes_to_seq_quad32 s) == 0)
+
 val le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)
 
+let be_quad32_to_bytes (q:quad32) : seq16 nat8 =
+  seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q))
+
+val be_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
+  Lemma (be_bytes_to_seq_quad32 (be_quad32_to_bytes b) == create 1 b)
+
 val le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_seq_quad32_to_bytes s) == s)
+
+val be_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
+  Lemma (be_bytes_to_seq_quad32 (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) == s)
 
 val le_seq_quad32_to_bytes_to_seq_quad32 (s:seq nat8{length s % 16 = 0}) :
   Lemma (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 s) == s)
@@ -186,14 +198,26 @@ val le_seq_quad32_to_bytes_to_seq_quad32 (s:seq nat8{length s % 16 = 0}) :
 val le_quad32_to_bytes_to_quad32 (s:seq nat8 { length s == 16 }) :
   Lemma(le_quad32_to_bytes (le_bytes_to_quad32 s) == s)
 
+val be_quad32_to_bytes_to_quad32 (s:seq nat8 { length s == 16 }) :
+  Lemma(be_quad32_to_bytes (be_bytes_to_quad32 s) == s)
+
 val le_seq_quad32_to_bytes_of_singleton (q:quad32) :
   Lemma (le_quad32_to_bytes q == le_seq_quad32_to_bytes (create 1 q))
+
+val be_seq_quad32_to_bytes_of_singleton (q:quad32) :
+  Lemma (be_quad32_to_bytes q == seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (create 1 q)))
 
 val le_quad32_to_bytes_injective: unit ->
   Lemma (forall b b' . le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b')
 
+val be_quad32_to_bytes_injective: unit ->
+  Lemma (forall b b' . be_quad32_to_bytes b == be_quad32_to_bytes b' ==> b == b')
+
 val le_quad32_to_bytes_injective_specific (b b':quad32) :
   Lemma (le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b')
+
+val be_quad32_to_bytes_injective_specific (b b':quad32) :
+  Lemma (be_quad32_to_bytes b == be_quad32_to_bytes b' ==> b == b')
 
 val le_seq_quad32_to_bytes_injective (b b':Seq.seq quad32) : Lemma
   (requires Seq.equal (le_seq_quad32_to_bytes b) (le_seq_quad32_to_bytes b'))
@@ -202,15 +226,19 @@ val le_seq_quad32_to_bytes_injective (b b':Seq.seq quad32) : Lemma
 val seq_to_four_LE_is_seq_to_seq_four_LE (#a:Type) (s:seq4 a) : Lemma
   (create 1 (seq_to_four_LE s) == seq_to_seq_four_LE s)
 
+val seq_to_four_BE_is_seq_to_seq_four_BE (#a:Type) (s:seq4 a) : Lemma
+  (create 1 (seq_to_four_BE s) == seq_to_seq_four_BE s)
+
 val le_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 }) : Lemma
   (requires q == le_bytes_to_quad32 b)
   (ensures create 1 q == le_bytes_to_seq_quad32 b)
 
+val be_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 }) : Lemma
+  (requires q == be_bytes_to_quad32 b)
+  (ensures create 1 q == be_bytes_to_seq_quad32 b)
+
 val le_bytes_to_quad32_to_bytes (q:quad32) :
   Lemma(le_bytes_to_quad32 (le_quad32_to_bytes q) == q)
-
-let be_quad32_to_bytes (q:quad32) : seq16 nat8 =
-  seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q))
 
 val be_bytes_to_quad32_to_bytes (q:quad32) :
   Lemma (be_bytes_to_quad32 (be_quad32_to_bytes q) == q)
@@ -241,18 +269,32 @@ val lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
 val lemma_le_seq_quad32_to_bytes_length (s:seq quad32) :
   Lemma(length (le_seq_quad32_to_bytes s) == (length s) * 16)
 
+val lemma_be_seq_quad32_to_bytes_length (s:seq quad32) :
+  Lemma(length (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) == (length s) * 16)
 
 val slice_commutes_seq_four_to_seq_LE (#a:Type) (s:seq (four a)) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
   Lemma(slice (seq_four_to_seq_LE s) (n * 4) (n' * 4) ==
         seq_four_to_seq_LE (slice s n n'))
 
+val slice_commutes_seq_four_to_seq_BE (#a:Type) (s:seq (four a)) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
+  Lemma(slice (seq_four_to_seq_BE s) (n * 4) (n' * 4) ==
+        seq_four_to_seq_BE (slice s n n'))
+
 val slice_commutes_le_seq_quad32_to_bytes (s:seq quad32) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
   Lemma(slice (le_seq_quad32_to_bytes s) (n * 16) (n' * 16) ==
         le_seq_quad32_to_bytes (slice s n n'))
 
+val slice_commutes_be_seq_quad32_to_bytes (s:seq quad32) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
+  Lemma(slice (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) (n * 16) (n' * 16) ==
+        seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (slice s n n')))
+
 val slice_commutes_le_seq_quad32_to_bytes0 (s:seq quad32) (n:nat{n <= length s}) :
   Lemma(slice (le_seq_quad32_to_bytes s) 0 (n * 16) ==
         le_seq_quad32_to_bytes (slice s 0 n))
+
+val slice_commutes_be_seq_quad32_to_bytes0 (s:seq quad32) (n:nat{n <= length s}) :
+  Lemma(slice (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) 0 (n * 16) ==
+        seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (slice s 0 n)))
 
 (*
 val slice_commutes_le_bytes_to_seq_quad32 (s:seq nat8 { length s % 16 == 0 }) (n:nat{n * 16 <= length s}) :
@@ -264,5 +306,11 @@ val slice_commutes_le_bytes_to_seq_quad32 (s:seq nat8 { length s % 16 == 0 }) (n
 val append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
 
+val append_distributes_be_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
+  Lemma(be_bytes_to_seq_quad32 (s1 @| s2) == (be_bytes_to_seq_quad32 s1) @| (be_bytes_to_seq_quad32 s2))
+
 val append_distributes_le_seq_quad32_to_bytes (s1:seq quad32) (s2:seq quad32) :
   Lemma(le_seq_quad32_to_bytes (s1 @| s2) == (le_seq_quad32_to_bytes s1) @| (le_seq_quad32_to_bytes s2))
+
+val append_distributes_be_seq_quad32_to_bytes (s1:seq quad32) (s2:seq quad32) :
+  Lemma(seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (s1 @| s2)) == (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s1)) @| (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s2)))
