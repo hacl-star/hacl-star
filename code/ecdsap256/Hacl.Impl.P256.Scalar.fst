@@ -42,8 +42,8 @@ let qmod_short x res =
   let tmp = create_felem () in
   make_order tmp;
   let h0 = ST.get () in
-  let c = bn_sub4 x tmp tmp in
-  bn_cmovznz4 c tmp x res;
+  let c = bn_sub4 tmp x tmp in
+  bn_cmovznz4 res c tmp x;
   SB.as_nat_bound (as_seq h0 x);
   qmod_short_lemma (as_nat h0 x);
   pop_frame ()
@@ -55,7 +55,7 @@ let bn_is_lt_order_mask4 f =
   push_frame ();
   let tmp = create_felem () in
   make_order tmp;
-  let c = bn_sub4 f tmp tmp in
+  let c = bn_sub4 tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.order else as_nat h0 f < S.order);
   pop_frame ();
   u64 0 -. c
@@ -261,7 +261,7 @@ let qadd x y res =
   push_frame ();
   let n = create_felem () in
   make_order n;
-  bn_add_mod4 x y n res;
+  bn_add_mod4 res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order);
   qadd_lemma (as_nat h0 x) (as_nat h0 y);
@@ -273,7 +273,7 @@ let qmul a b res =
   push_frame ();
   let tmp = create_widefelem () in
   let h0 = ST.get () in
-  bn_mul4 a b tmp;
+  bn_mul4 tmp a b;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 b) S.order;
   qmont_reduction tmp res;

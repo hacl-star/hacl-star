@@ -39,7 +39,7 @@ let compressed_to_raw pk pk_raw =
     let h1 = ST.get () in
     update_sub_f h1 pk_raw 32ul 32ul
       (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 ya))
-      (fun _ -> bn_to_bytes_be4 ya (sub pk_raw 32ul 32ul));
+      (fun _ -> bn_to_bytes_be4 (sub pk_raw 32ul 32ul) ya);
     let h2 = ST.get () in
     LSeq.eq_intro (as_seq h2 pk_raw)
       (LSeq.concat #_ #32 #32 (as_seq h0 pk_xb) (BSeq.nat_to_bytes_be 32 (as_nat h0 ya))) end;
@@ -64,7 +64,7 @@ val raw_to_compressed_get_pk0: f:lbuffer uint8 32ul -> Stack uint8
 let raw_to_compressed_get_pk0 f =
   push_frame ();
   let bn_f = create_felem () in
-  bn_from_bytes_be4 f bn_f;
+  bn_from_bytes_be4 bn_f f;
   let is_odd_f = bn_is_odd4 bn_f in
   pop_frame ();
   to_u8 is_odd_f +! u8 0x02

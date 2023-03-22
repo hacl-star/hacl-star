@@ -28,6 +28,6 @@ val toDomain: f:felem -> res:felem -> Stack unit
 let toDomain f res =
   push_frame ();
   let tmp = create_widefelem () in
-  bn_lshift256 f tmp;
+  bn_lshift256 tmp f;
   solinas_reduction_impl tmp res;
   pop_frame()

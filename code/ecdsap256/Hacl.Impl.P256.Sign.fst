@@ -61,7 +61,7 @@ let msg_as_felem alg msg_len msg res =
   end;
 
   let mHash32 = sub mHash 0ul 32ul in
-  bn_from_bytes_be4 mHash32 res;
+  bn_from_bytes_be4 res mHash32;
   qmod_short res res;
   pop_frame ()
 
@@ -237,8 +237,8 @@ val ecdsa_sign_load (d_a k_q:felem) (private_key nonce:lbytes 32ul) : Stack unit
     as_nat h1 d_a = d_a_nat /\ as_nat h1 k_q = k_nat))
 
 let ecdsa_sign_load d_a k_q private_key nonce =
-  bn_from_bytes_be4 private_key d_a;
-  bn_from_bytes_be4 nonce k_q
+  bn_from_bytes_be4 d_a private_key;
+  bn_from_bytes_be4 k_q nonce
 
 
 inline_for_extraction noextract
@@ -256,12 +256,12 @@ let ecdsa_sign_store signature r_q s_q =
   let h0 = ST.get () in
   update_sub_f h0 signature 0ul 32ul
     (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 r_q))
-    (fun _ -> bn_to_bytes_be4 r_q (sub signature 0ul 32ul));
+    (fun _ -> bn_to_bytes_be4 (sub signature 0ul 32ul) r_q);
 
   let h1 = ST.get () in
   update_sub_f h1 signature 32ul 32ul
     (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 s_q))
-    (fun _ -> bn_to_bytes_be4 s_q (sub signature 32ul 32ul));
+    (fun _ -> bn_to_bytes_be4 (sub signature 32ul 32ul) s_q);
 
   let h2 = ST.get () in
   let r = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 r_q)) in

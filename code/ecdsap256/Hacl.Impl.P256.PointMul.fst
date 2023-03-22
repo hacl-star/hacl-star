@@ -239,7 +239,7 @@ let point_mul res p scalar =
   copy_point p tmp;
 
   let bytes_scalar = create 32ul (u8 0) in
-  bn_to_bytes_be4 scalar bytes_scalar;
+  bn_to_bytes_be4 bytes_scalar scalar;
 
   scalarMultiplicationWithoutNorm tmp res bytes_scalar;
   //point_from_mont res res;
@@ -250,7 +250,7 @@ let point_mul res p scalar =
 let point_mul_g res scalar =
   push_frame ();
   let bytes_scalar = create 32ul (u8 0) in
-  bn_to_bytes_be4 scalar bytes_scalar;
+  bn_to_bytes_be4 bytes_scalar scalar;
 
   let g = create_point () in
   make_base_point g;
@@ -271,7 +271,7 @@ let point_mul_g res scalar =
 let point_mul_bytes res p scalar =
   push_frame ();
   let s_q = create_felem () in
-  bn_from_bytes_be4 scalar s_q;
+  bn_from_bytes_be4 s_q scalar;
   point_mul res p s_q;
   norm_jacob_point res res;
   pop_frame ()
@@ -281,7 +281,7 @@ let point_mul_bytes res p scalar =
 let point_mul_g_bytes res scalar =
   push_frame ();
   let s_q = create_felem () in
-  bn_from_bytes_be4 scalar s_q;
+  bn_from_bytes_be4 s_q scalar;
   point_mul_g res s_q;
   norm_jacob_point res res;
   pop_frame ()

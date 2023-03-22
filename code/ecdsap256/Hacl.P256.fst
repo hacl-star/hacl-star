@@ -57,7 +57,7 @@ let validate_public_key public_key =
 let validate_private_key private_key =
   push_frame ();
   let bn_sk = BN.create_felem () in
-  BN.bn_from_bytes_be4 private_key bn_sk;
+  BN.bn_from_bytes_be4 bn_sk private_key;
   let res = Hacl.Impl.P256.Scalar.bn_is_lt_order_and_gt_zero_mask4 bn_sk in
   pop_frame ();
   Hacl.Bignum.Base.unsafe_bool_of_limb res

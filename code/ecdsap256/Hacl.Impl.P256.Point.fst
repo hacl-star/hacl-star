@@ -90,9 +90,9 @@ let copy_point_conditional res p q_mask =
   let ry = gety res in
   let rz = getz res in
 
-  bn_copy_conditional4 rx px mask;
-  bn_copy_conditional4 ry py mask;
-  bn_copy_conditional4 rz pz mask
+  bn_copy_conditional4 rx mask rx px;
+  bn_copy_conditional4 ry mask ry py;
+  bn_copy_conditional4 rz mask rz pz
 
 
 ///  Point conversion between Montgomery and Regular representations
@@ -145,7 +145,7 @@ let norm_jacob_point_z p res =
   let bit = is_point_at_inf p in
 
   bn_set_one4 res;
-  bn_copy_conditional4 res zero bit;
+  bn_copy_conditional4 res bit res zero;
   pop_frame ()
 
 
@@ -333,12 +333,12 @@ let aff_store_point res p =
   let h0 = ST.get () in
   update_sub_f h0 res 0ul 32ul
     (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 px))
-    (fun _ -> bn_to_bytes_be4 px (sub res 0ul 32ul));
+    (fun _ -> bn_to_bytes_be4 (sub res 0ul 32ul) px);
 
   let h1 = ST.get () in
   update_sub_f h1 res 32ul 32ul
     (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 py))
-    (fun _ -> bn_to_bytes_be4 py (sub res 32ul 32ul));
+    (fun _ -> bn_to_bytes_be4 (sub res 32ul 32ul) py);
 
   let h2 = ST.get () in
   let px = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 px)) in
@@ -371,8 +371,8 @@ let load_point_vartime p b =
   let point_aff = create_aff_point () in
   let bn_p_x = aff_getx point_aff in
   let bn_p_y = aff_gety point_aff in
-  bn_from_bytes_be4 p_x bn_p_x;
-  bn_from_bytes_be4 p_y bn_p_y;
+  bn_from_bytes_be4 bn_p_x p_x;
+  bn_from_bytes_be4 bn_p_y p_y;
   let is_xy_valid = is_xy_valid_vartime point_aff in
   let res = if not is_xy_valid then false else is_point_on_curve_vartime point_aff in
   if res then
@@ -433,7 +433,7 @@ let aff_point_decompress_vartime x y s =
   if not (s0 = 0x02uy || s0 = 0x03uy) then false
   else begin
     let xb = sub s 1ul 32ul in
-    bn_from_bytes_be4 xb x;
+    bn_from_bytes_be4 x xb;
     let is_x_valid = bn_is_lt_prime_mask4 x in
     let is_x_valid = Hacl.Bignum.Base.unsafe_bool_of_limb is_x_valid in
     let is_y_odd = s0 = 0x03uy in

@@ -21,7 +21,7 @@ inline_for_extraction
 let widefelem = lbuffer uint64 (size 8)
 
 unfold
-let as_nat (h:mem) (e:felem) : GTot nat = 
+let as_nat (h:mem) (e:felem) : GTot nat =
   as_nat4 (as_felem4 (as_seq h e))
 
 unfold
@@ -47,8 +47,7 @@ val create_widefelem: unit -> StackInline widefelem
 
 
 inline_for_extraction noextract
-val bn_make_u64_4: a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64
-  -> res:lbuffer uint64 4ul -> Stack unit
+val bn_make_u64_4: res:felem -> a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64 -> Stack unit
   (requires fun h -> live h res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192)
@@ -83,16 +82,16 @@ val bn_is_zero_mask4: f:felem -> Stack uint64
     (if as_nat h0 f = 0 then v r == ones_v U64 else v r == 0))
 
 
-val bn_is_eq_vartime4: a:felem -> b:felem -> Stack bool
-  (requires fun h -> live h a /\ live h b)
+val bn_is_eq_vartime4: x:felem -> y:felem -> Stack bool
+  (requires fun h -> live h x /\ live h y)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == (as_nat h0 a = as_nat h0 b))
+    r == (as_nat h0 x = as_nat h0 y))
 
 
-val bn_is_eq_mask4: a:felem -> b:felem -> Stack uint64
-  (requires fun h -> live h a /\ live h b)
+val bn_is_eq_mask4: x:felem -> y:felem -> Stack uint64
+  (requires fun h -> live h x /\ live h y)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if as_nat h0 a = as_nat h0 b then v r == ones_v U64 else v r = 0))
+    (if as_nat h0 x = as_nat h0 y then v r == ones_v U64 else v r = 0))
 
 
 inline_for_extraction noextract
@@ -104,24 +103,26 @@ val bn_is_odd4: f:felem -> Stack uint64
 
 ///  Conditional copy
 
-val bn_copy_conditional4: res:felem -> x:felem
-  -> mask:uint64{v mask = 0 \/ v mask = ones_v U64} -> Stack unit
-  (requires fun h -> live h res /\ live h x /\ eq_or_disjoint res x)
+val bn_copy_conditional4: res:felem -> mask:uint64 -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h res /\ live h x /\ live h y /\
+    eq_or_disjoint res x /\ eq_or_disjoint res y /\ eq_or_disjoint x y /\
+    (v mask = 0 \/ v mask = ones_v U64))
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (if v mask = 0 then as_seq h1 res == as_seq h0 res else as_seq h1 res == as_seq h0 x))
+    (if v mask = 0 then as_seq h1 res == as_seq h0 x else as_seq h1 res == as_seq h0 y))
 
 
-val bn_cmovznz4: cin:uint64 -> x:felem -> y:felem -> res:felem -> Stack unit
+val bn_cmovznz4: res:felem -> cin:uint64 -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
-    disjoint x res /\ eq_or_disjoint y res)
-  (ensures fun h0 _ h1 -> modifies1 res h0 h1 /\
+    eq_or_disjoint res x /\ eq_or_disjoint res y /\ eq_or_disjoint x y)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     (if v cin = 0 then as_nat h1 res == as_nat h0 x else as_nat h1 res == as_nat h0 y))
 
 
 ///  Addition and subtraction
 
-val bn_add_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
+val bn_add_mod4: res:felem -> n:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h n /\ live h x /\ live h y /\ live h res /\
     disjoint n x /\ disjoint n y /\ disjoint n res /\
@@ -131,16 +132,16 @@ val bn_add_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
     as_nat h1 res == (as_nat h0 x + as_nat h0 y) % as_nat h0 n)
 
 
-val bn_sub4: x:felem -> y:felem -> res:felem -> Stack uint64
+val bn_sub4: res:felem -> x:felem -> y:felem -> Stack uint64
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res)
-  (ensures fun h0 c h1 -> modifies1 res h0 h1 /\ v c <= 1 /\
+  (ensures fun h0 c h1 -> modifies (loc res) h0 h1 /\ v c <= 1 /\
     as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat h0 y /\
     (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
 
 
-val bn_sub_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
+val bn_sub_mod4: res:felem -> n:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h n /\ live h x /\ live h y /\ live h res /\
     disjoint n x /\ disjoint n y /\ disjoint n res /\
@@ -152,33 +153,34 @@ val bn_sub_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
 
 ///  Multiplication
 
-val bn_mul4: f:felem -> r:felem -> res:widefelem -> Stack unit
+val bn_mul4: res:widefelem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
-    live h res /\ live h f /\ live h r /\
-    eq_or_disjoint r f /\ disjoint f res /\ disjoint r res)
+    live h res /\ live h x /\ live h y /\
+    eq_or_disjoint x y /\ disjoint x res /\ disjoint y res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    wide_as_nat h1 res = as_nat h0 r * as_nat h0 f)
+    wide_as_nat h1 res = as_nat h0 x * as_nat h0 y)
 
 
-val bn_sqr4: f:felem -> res:widefelem -> Stack unit
+val bn_sqr4: res:widefelem -> x:felem -> Stack unit
   (requires fun h ->
-    live h res /\ live h f /\ eq_or_disjoint f res)
+    live h res /\ live h x /\ eq_or_disjoint x res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    wide_as_nat h1 res = as_nat h0 f * as_nat h0 f)
+    wide_as_nat h1 res = as_nat h0 x * as_nat h0 x)
 
 
 ///  pow2-operations
 
-val bn_lshift256: f:felem -> res:lbuffer uint64 8ul -> Stack unit
+// used in Hacl.Impl.P256.Core
+val bn_lshift256: res:widefelem -> f:felem -> Stack unit
   (requires fun h ->
     live h f /\ live h res /\ disjoint f res)
-  (ensures fun h0 _ h1 -> modifies1 res h0 h1 /\
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     wide_as_nat h1 res == as_nat h0 f * pow2 256)
 
 
 ///  Conversion between bignum and bytes representation
 
-val bn_to_bytes_be4: f:felem -> res:lbuffer uint8 32ul -> Stack unit
+val bn_to_bytes_be4: res:lbuffer uint8 32ul -> f:felem -> Stack unit
   (requires fun h ->
     live h f /\ live h res /\ disjoint f res /\
     as_nat h f < pow2 256)
@@ -186,7 +188,7 @@ val bn_to_bytes_be4: f:felem -> res:lbuffer uint8 32ul -> Stack unit
     as_seq h1 res == BSeq.nat_to_bytes_be 32 (as_nat h0 f))
 
 
-val bn_from_bytes_be4: b:lbuffer uint8 32ul -> res:felem -> Stack unit
+val bn_from_bytes_be4: res:felem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h -> live h b /\ live h res /\ disjoint b res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == BSeq.nat_from_bytes_be (as_seq h0 b))

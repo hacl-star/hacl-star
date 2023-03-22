@@ -80,7 +80,7 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 o =
     assert(v b2 = v c5 * pow2 32 + v c4);
     assert(v b3 = v c7 * pow2 32 + v c6);
 
-    bn_make_u64_4 b0 b1 b2 b3 o;
+    bn_make_u64_4 o b0 b1 b2 b3;
     fmod_short o o;
     let h2 = ST.get() in
     assert(as_nat h2 o = (v c1 * pow2 32 + v c0 + v c3 * pow2 (3 * 32) + v c2 * pow2 (2 * 32) + v c5 * pow2 (32 * 5) + v c4 * pow2 (32 * 4) + v c7 * pow2 (32 * 7) + v c6 * pow2 (32 * 6)) % S.prime)
@@ -105,7 +105,7 @@ let upl_fir_buffer c11 c12 c13 c14 c15 o =
   let b1 = store_high_low_u c11 (u32 0) in
   let b2 = store_high_low_u c13 c12 in
   let b3 = store_high_low_u c15 c14 in
-  bn_make_u64_4 b0 b1 b2 b3 o;
+  bn_make_u64_4 o b0 b1 b2 b3;
   fmod_short o o
 
 inline_for_extraction noextract
@@ -128,7 +128,7 @@ let upl_sec_buffer c12 c13 c14 c15 o =
     let b1 = store_high_low_u c12 (u32 0) in
     let b2 = store_high_low_u c14 c13 in
     let b3 = store_high_low_u (u32 0) c15 in
-    bn_make_u64_4 b0 b1 b2 b3 o;
+    bn_make_u64_4 o b0 b1 b2 b3;
     assert_norm(v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32) < S.prime);
     let h1 = ST.get() in
     FStar.Math.Lemmas.modulo_lemma (as_nat h1 o) S.prime
@@ -151,7 +151,7 @@ let upl_thi_buffer c8 c9 c10 c14 c15 o =
    let b1 = store_high_low_u (u32 0) c10 in
    let b2 = u64 0 in
    let b3 = store_high_low_u c15 c14 in
-   bn_make_u64_4 b0 b1 b2 b3 o;
+   bn_make_u64_4 o b0 b1 b2 b3;
    fmod_short o o
 
 
@@ -173,7 +173,7 @@ let upl_for_buffer c8 c9 c10 c11 c13 c14 c15 o =
   let b1 = store_high_low_u c13 c11 in
   let b2 = store_high_low_u c15 c14 in
   let b3 = store_high_low_u c8 c13 in
-  bn_make_u64_4 b0 b1 b2 b3 o;
+  bn_make_u64_4 o b0 b1 b2 b3;
   fmod_short o o
 
 inline_for_extraction noextract
@@ -194,7 +194,7 @@ let upl_fif_buffer c8 c10 c11 c12 c13 o =
     let b1 = store_high_low_u (u32 0) c13 in
     let b2 = u64 0 in
     let b3 = store_high_low_u c10 c8 in
-    bn_make_u64_4 b0 b1 b2 b3 o;
+    bn_make_u64_4 o b0 b1 b2 b3;
     fmod_short o o
 
 inline_for_extraction noextract
@@ -216,7 +216,7 @@ let upl_six_buffer c9 c11 c12 c13 c14 c15 o =
     let b1 = store_high_low_u c15 c14 in
     let b2 = u64 0 in
     let b3 = store_high_low_u c11 c9 in
-    bn_make_u64_4 b0 b1 b2 b3 o;
+    bn_make_u64_4 o b0 b1 b2 b3;
     fmod_short o o
 
 inline_for_extraction noextract
@@ -238,7 +238,7 @@ let upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 o =
     let b1 = store_high_low_u c8 c15 in
     let b2 = store_high_low_u c10 c9 in
     let b3 = store_high_low_u c12 (u32 0) in
-    bn_make_u64_4 b0 b1 b2 b3 o;
+    bn_make_u64_4 o b0 b1 b2 b3;
     fmod_short o o
 
 inline_for_extraction noextract
@@ -259,7 +259,7 @@ let upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 o =
     let b1 = store_high_low_u c9 (u32 0) in
     let b2 = store_high_low_u c11 c10 in
     let b3 = store_high_low_u c13 (u32 0) in
-    bn_make_u64_4 b0 b1 b2 b3 o;
+    bn_make_u64_4 o b0 b1 b2 b3;
     fmod_short o o
 
 

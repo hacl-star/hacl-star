@@ -61,7 +61,7 @@ let make_qone n =
   [@inline_let] let n3 = u64 0xffffffff in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == toDomain_ 1);
   assert_norm (fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
-  bn_make_u64_4 n0 n1 n2 n3 n
+  bn_make_u64_4 n n0 n1 n2 n3
 
 
 inline_for_extraction noextract
@@ -149,7 +149,7 @@ let make_order_minus_2 b =
   [@inline_let] let b2 = u64 0xffffffffffffffff in
   [@inline_let] let b3 = u64 0xffffffff00000000 in
   assert_norm (v b0 + v b1 * pow2 64 + v b2 * pow2 128 + v b3 * pow2 192 = S.order - 2);
-  bn_make_u64_4 b0 b1 b2 b3 b
+  bn_make_u64_4 b b0 b1 b2 b3
 
 
 [@CInline]

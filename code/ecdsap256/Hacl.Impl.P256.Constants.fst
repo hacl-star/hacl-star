@@ -28,7 +28,7 @@ let make_prime n =
   [@inline_let] let n2 = u64 0x0 in
   [@inline_let] let n3 = u64 0xffffffff00000001 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.prime);
-  bn_make_u64_4 n0 n1 n2 n3 n
+  bn_make_u64_4 n n0 n1 n2 n3
 
 
 val make_order: n:felem -> Stack unit
@@ -44,7 +44,7 @@ let make_order n =
   [@inline_let] let n2 = u64 0xffffffffffffffff in
   [@inline_let] let n3 = u64 0xffffffff00000000 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.order);
-  bn_make_u64_4 n0 n1 n2 n3 n
+  bn_make_u64_4 n n0 n1 n2 n3
 
 
 val make_a_coeff: a:felem -> Stack unit
@@ -66,7 +66,7 @@ let make_a_coeff a =
     v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.a_coeff);
   assert_norm (
     SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.a_coeff);
-  bn_make_u64_4 n0 n1 n2 n3 a
+  bn_make_u64_4 a n0 n1 n2 n3
 
 
 val make_b_coeff: b:felem -> Stack unit
@@ -88,7 +88,7 @@ let make_b_coeff b =
     v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.b_coeff);
   assert_norm (
     SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.b_coeff);
-  bn_make_u64_4 n0 n1 n2 n3 b
+  bn_make_u64_4 b n0 n1 n2 n3
 
 
 val make_g_x: n:felem -> Stack unit
@@ -107,7 +107,7 @@ let make_g_x n =
   [@inline_let] let n3 = u64 0x18905f76a53755c6 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.g_x);
   assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.g_x);
-  bn_make_u64_4 n0 n1 n2 n3 n
+  bn_make_u64_4 n n0 n1 n2 n3
 
 
 val make_g_y: n:felem -> Stack unit
@@ -126,4 +126,4 @@ let make_g_y n =
   [@inline_let] let n3 = u64 0x8571ff1825885d85 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.g_y);
   assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.g_y);
-  bn_make_u64_4 n0 n1 n2 n3 n
+  bn_make_u64_4 n n0 n1 n2 n3

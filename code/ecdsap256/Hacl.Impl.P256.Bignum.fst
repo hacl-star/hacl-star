@@ -24,7 +24,7 @@ let create_widefelem () =
   create 8ul (u64 0)
 
 
-let bn_make_u64_4 a0 a1 a2 a3 res =
+let bn_make_u64_4 res a0 a1 a2 a3 =
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
   upd res 0ul a0;
@@ -36,11 +36,11 @@ let bn_make_u64_4 a0 a1 a2 a3 res =
 ///  Create zero and one
 
 let bn_set_zero4 f =
-  bn_make_u64_4 (u64 0) (u64 0) (u64 0) (u64 0) f
+  bn_make_u64_4 f (u64 0) (u64 0) (u64 0) (u64 0)
 
 
 let bn_set_one4 f =
-  bn_make_u64_4 (u64 1) (u64 0) (u64 0) (u64 0) f
+  bn_make_u64_4 f (u64 1) (u64 0) (u64 0) (u64 0)
 
 
 ///  Comparison
@@ -93,76 +93,76 @@ let bn_is_odd4 f =
 ///  Conditional copy
 
 [@CInline]
-let bn_copy_conditional4 out x mask =
-  Lib.ByteBuffer.buf_mask_select x out mask out
+let bn_copy_conditional4 res mask x y =
+  Lib.ByteBuffer.buf_mask_select y x mask res
 
 
 [@CInline]
-let bn_cmovznz4 cin x y out =
+let bn_cmovznz4 res cin x y =
   let mask = neq_mask cin (u64 0) in
-  Lib.ByteBuffer.buf_mask_select y x mask out
+  Lib.ByteBuffer.buf_mask_select y x mask res
 
 
 ///  Addition and subtraction
 
 [@CInline]
-let bn_add_mod4 x y n out =
+let bn_add_mod4 res n x y =
   let h0 = ST.get () in
-  BN.bn_add_mod_n 4ul n x y out;
+  BN.bn_add_mod_n 4ul n x y res;
   let h1 = ST.get () in
   bn_v_is_as_nat (as_seq h0 n);
   bn_v_is_as_nat (as_seq h0 x);
   bn_v_is_as_nat (as_seq h0 y);
   SN.bn_add_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
-  bn_v_is_as_nat (as_seq h1 out)
+  bn_v_is_as_nat (as_seq h1 res)
 
 
 [@CInline]
-let bn_sub4 x y out =
+let bn_sub4 res x y =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   let h0 = ST.get () in
-  let c = BN.bn_sub_eq_len 4ul x y out in
+  let c = BN.bn_sub_eq_len 4ul x y res in
   let h1 = ST.get () in
   SN.bn_sub_lemma (as_seq h0 x) (as_seq h0 y);
   bn_v_is_as_nat (as_seq h0 x);
   bn_v_is_as_nat (as_seq h0 y);
-  bn_v_is_as_nat (as_seq h1 out);
+  bn_v_is_as_nat (as_seq h1 res);
   c
 
 
 [@CInline]
-let bn_sub_mod4 x y n out =
+let bn_sub_mod4 res n x y =
   let h0 = ST.get () in
-  BN.bn_sub_mod_n 4ul n x y out;
+  BN.bn_sub_mod_n 4ul n x y res;
   let h1 = ST.get () in
   bn_v_is_as_nat (as_seq h0 n);
   bn_v_is_as_nat (as_seq h0 x);
   bn_v_is_as_nat (as_seq h0 y);
   SN.bn_sub_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
-  bn_v_is_as_nat (as_seq h1 out)
+  bn_v_is_as_nat (as_seq h1 res)
 
 
 ///  Multiplication
 
 [@CInline]
-let bn_mul4 f r out =
+let bn_mul4 res x y =
   let h0 = ST.get () in
-  BN.bn_mul #U64 4ul 4ul f r out;
+  BN.bn_mul #U64 4ul 4ul x y res;
   let h1 = ST.get () in
-  SN.bn_mul_lemma (as_seq h0 f) (as_seq h0 r);
-  bn_v_is_as_nat (as_seq h0 f);
-  bn_v_is_as_nat (as_seq h0 r);
-  bn_v_is_wide_as_nat (as_seq h1 out)
+  SN.bn_mul_lemma (as_seq h0 x) (as_seq h0 y);
+  bn_v_is_as_nat (as_seq h0 x);
+  bn_v_is_as_nat (as_seq h0 y);
+  bn_v_is_wide_as_nat (as_seq h1 res)
 
 
 [@CInline]
-let bn_sqr4 f out =
+let bn_sqr4 res x =
   let h0 = ST.get () in
-  BN.bn_sqr #U64 4ul f out;
+  BN.bn_sqr #U64 4ul x res;
   let h1 = ST.get () in
-  SN.bn_sqr_lemma (as_seq h0 f);
-  bn_v_is_as_nat (as_seq h0 f);
-  bn_v_is_wide_as_nat (as_seq h1 out)
+  SN.bn_sqr_lemma (as_seq h0 x);
+  bn_v_is_as_nat (as_seq h0 x);
+  bn_v_is_wide_as_nat (as_seq h1 res)
 
 
 ///  pow2-operations
@@ -178,30 +178,30 @@ let lemma_shift_256 a b c d = ()
 
 
 [@CInline]
-let bn_lshift256 i o =
+let bn_lshift256 res x =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
 
-  let h0 = ST.get() in
-  upd o 0ul (u64 0);
-  upd o 1ul (u64 0);
-  upd o 2ul (u64 0);
-  upd o 3ul (u64 0);
-  upd o 4ul i.(0ul);
-  upd o 5ul i.(1ul);
-  upd o 6ul i.(2ul);
-  upd o 7ul i.(3ul);
+  let h0 = ST.get () in
+  upd res 0ul (u64 0);
+  upd res 1ul (u64 0);
+  upd res 2ul (u64 0);
+  upd res 3ul (u64 0);
+  upd res 4ul x.(0ul);
+  upd res 5ul x.(1ul);
+  upd res 6ul x.(2ul);
+  upd res 7ul x.(3ul);
 
   lemma_shift_256
-    (v (Lib.Sequence.index (as_seq h0 i) 0))
-    (v (Lib.Sequence.index (as_seq h0 i) 1))
-    (v (Lib.Sequence.index (as_seq h0 i) 2))
-    (v (Lib.Sequence.index (as_seq h0 i) 3))
+    (v (Lib.Sequence.index (as_seq h0 x) 0))
+    (v (Lib.Sequence.index (as_seq h0 x) 1))
+    (v (Lib.Sequence.index (as_seq h0 x) 2))
+    (v (Lib.Sequence.index (as_seq h0 x) 3))
 
 
 ///  Conversion between bignum and bytes representation
 
 [@CInline]
-let bn_to_bytes_be4 f res =
+let bn_to_bytes_be4 res f =
   let h0 = ST.get () in
   bn_v_is_as_nat (as_seq h0 f);
   Hacl.Spec.Bignum.Convert.bn_to_bytes_be_lemma #U64 32 (as_seq h0 f);
@@ -209,7 +209,7 @@ let bn_to_bytes_be4 f res =
 
 
 [@CInline]
-let bn_from_bytes_be4 b res =
+let bn_from_bytes_be4 res b =
   let h0 = ST.get () in
   Hacl.Spec.Bignum.Convert.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
   Hacl.Bignum.Convert.mk_bn_from_bytes_be true 32ul b res;

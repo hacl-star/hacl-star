@@ -65,7 +65,7 @@ let mul_mod_solinas x y res =
   push_frame ();
   let tmp = create 8ul (u64 0) in
   let h0 = ST.get () in
-  bn_mul4 x y tmp;
+  bn_mul4 tmp x y;
   let h1 = ST.get () in
   assert (wide_as_nat h1 tmp == as_nat h0 x * as_nat h0 y);
   solinas_reduction_impl tmp res;
@@ -86,7 +86,7 @@ let sqr_mod_solinas x res =
   push_frame ();
   let tmp = create 8ul (u64 0) in
   let h0 = ST.get () in
-  bn_sqr4 x tmp;
+  bn_sqr4 tmp x;
   let h1 = ST.get () in
   assert (wide_as_nat h1 tmp == as_nat h0 x * as_nat h0 x);
   solinas_reduction_impl tmp res;
@@ -175,7 +175,7 @@ let make_prime_minus_2 b =
   [@inline_let] let b2 = u64 0x0 in
   [@inline_let] let b3 = u64 0xffffffff00000001 in
   assert_norm (v b0 + v b1 * pow2 64 + v b2 * pow2 128 + v b3 * pow2 192 = S.prime - 2);
-  bn_make_u64_4 b0 b1 b2 b3 b
+  bn_make_u64_4 b b0 b1 b2 b3
 
 
 [@CInline]
@@ -206,7 +206,7 @@ let make_prime_plus_1_div_4 b =
   [@inline_let] let b2 = u64 0x4000000000000000 in
   [@inline_let] let b3 = u64 0x3fffffffc0000000 in
   assert_norm (v b0 + v b1 * pow2 64 + v b2 * pow2 128 + v b3 * pow2 192 = (S.prime + 1) / 4);
-  bn_make_u64_4 b0 b1 b2 b3 b
+  bn_make_u64_4 b b0 b1 b2 b3
 
 
 [@CInline]

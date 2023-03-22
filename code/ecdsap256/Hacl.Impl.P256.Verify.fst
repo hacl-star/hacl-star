@@ -230,8 +230,8 @@ let ecdsa_verification alg msg_len msg public_key signature_r signature_s =
   let x = sub pkrsx 8ul 4ul in
   let pk = sub pkrsx 12ul 12ul in
 
-  bn_from_bytes_be4 signature_r r_q;
-  bn_from_bytes_be4 signature_s s_q;
+  bn_from_bytes_be4 r_q signature_r;
+  bn_from_bytes_be4 s_q signature_s;
   let is_pk_valid = load_point_vartime pk public_key in
   let is_rs_valid = are_r_and_s_valid r_q s_q in
 

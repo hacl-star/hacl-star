@@ -40,7 +40,7 @@ let make_fone n =
   [@inline_let] let n3 = u64 0xfffffffe in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont 1);
   assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
-  bn_make_u64_4 n0 n1 n2 n3 n
+  bn_make_u64_4 n n0 n1 n2 n3
 
 //----------
 
@@ -146,8 +146,8 @@ let fmod_short x res =
   let tmp = create_felem () in
   make_prime tmp;
   let h0 = ST.get () in
-  let c = bn_sub4 x tmp tmp in
-  bn_cmovznz4 c tmp x res;
+  let c = bn_sub4 tmp x tmp in
+  bn_cmovznz4 res c tmp x;
   SB.as_nat_bound (as_seq h0 x);
   fmod_short_lemma (as_nat h0 x);
   pop_frame ()
@@ -159,7 +159,7 @@ let bn_is_lt_prime_mask4 f =
   push_frame ();
   let tmp = create_felem () in
   make_prime tmp;
-  let c = bn_sub4 f tmp tmp in
+  let c = bn_sub4 tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
   pop_frame ();
   u64 0 -. c
@@ -183,7 +183,7 @@ let fadd x y res =
   push_frame ();
   let n = create_felem () in
   make_prime n;
-  bn_add_mod4 x y n res;
+  bn_add_mod4 res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime);
   SM.fmont_add_lemma (as_nat h0 x) (as_nat h0 y);
@@ -200,7 +200,7 @@ let fsub x y res =
   push_frame ();
   let n = create_felem () in
   make_prime n;
-  bn_sub_mod4 x y n res;
+  bn_sub_mod4 res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
   SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
@@ -240,12 +240,12 @@ let fromDomain a res =
 [@CInline]
 let fmul a b res =
   push_frame ();
-  let t = create_widefelem () in
+  let tmp = create_widefelem () in
   let h0 = ST.get () in
-  bn_mul4 a b t;
+  bn_mul4 tmp a b;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 b) S.prime;
-  mont_reduction t res;
+  mont_reduction tmp res;
   SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 b);
   pop_frame ()
 
@@ -253,12 +253,12 @@ let fmul a b res =
 [@CInline]
 let fsqr a res =
   push_frame ();
-  let t = create_widefelem () in
+  let tmp = create_widefelem () in
   let h0 = ST.get () in
-  bn_sqr4 a t;
+  bn_sqr4 tmp a;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 a) S.prime;
-  mont_reduction t res;
+  mont_reduction tmp res;
   SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 a);
   pop_frame ()
 
