@@ -43,7 +43,24 @@ val fmont_sub_lemma: a:S.felem -> b:S.felem ->
 
 ///  Montgomery arithmetic for a scalar field
 
-// used in Hacl.Impl.P256.Scalar
-val lemma_mod_mul_pow256_order: a:int -> b:int -> Lemma
-  (requires a * pow2 256 % S.order = b * pow2 256 % S.order)
-  (ensures  a % S.order == b % S.order)
+let qmont_R = pow2 256
+let qmont_R_inv = S.modp_inv2_prime (pow2 256) S.order
+
+// TODO: rename
+let fromDomain_ (a:nat) : S.qelem = a * qmont_R_inv % S.order
+let toDomain_   (a:nat) : S.qelem = a * qmont_R % S.order
+
+val qmont_reduction_lemma: x:LSeq.lseq uint64 8 -> n:LSeq.lseq uint64 4 -> Lemma
+  (requires BD.bn_v n = S.order /\ BD.bn_v x < S.order * S.order)
+  (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 0xccd1c8aaee00bc4f) x) ==
+    BD.bn_v x * qmont_R_inv % S.order)
+
+
+val lemmaFromDomainToDomain: a:S.qelem -> Lemma (toDomain_ (fromDomain_ a) == a)
+val lemmaToDomainFromDomain: a:S.qelem -> Lemma (fromDomain_ (toDomain_ a) == a)
+
+val qadd_lemma: a:S.qelem -> b:S.qelem ->
+  Lemma (S.qadd (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a + b) % S.order))
+
+val qmul_lemma: a:S.qelem -> b:S.qelem ->
+  Lemma (S.qmul (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a * b * qmont_R_inv) % S.order))

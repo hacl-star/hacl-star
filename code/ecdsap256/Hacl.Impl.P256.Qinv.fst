@@ -20,6 +20,7 @@ module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 
 module S = Spec.P256
+module SM = Hacl.Spec.P256.Montgomery
 module SB = Hacl.Spec.P256.Bignum
 module SI = Hacl.Spec.P256.Qinv
 
@@ -34,7 +35,7 @@ let linv (a:LSeq.lseq uint64 4) : Type0 =
 
 unfold
 let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.qelem =
-  fromDomain_ (SB.felem_seq_as_nat a)
+  SM.fromDomain_ (SB.felem_seq_as_nat a)
 
 
 inline_for_extraction noextract
@@ -45,24 +46,6 @@ let mk_to_p256_order_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
   BE.linv = linv;
   BE.refl = refl;
 }
-
-
-val make_qone: n:felem -> Stack unit
-  (requires fun h -> live h n)
-  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == toDomain_ 1 /\
-    qmont_as_nat h1 n == 1)
-
-[@CInline]
-let make_qone n =
-  [@inline_let] let n0 = u64 0xc46353d039cdaaf in
-  [@inline_let] let n1 = u64 0x4319055258e8617b in
-  [@inline_let] let n2 = u64 0x0 in
-  [@inline_let] let n3 = u64 0xffffffff in
-  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == toDomain_ 1);
-  assert_norm (fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
-  bn_make_u64_4 n n0 n1 n2 n3
-
 
 inline_for_extraction noextract
 val one_mod : BE.lone_st U64 4ul 0ul mk_to_p256_order_comm_monoid
@@ -76,7 +59,7 @@ let mul_mod ctx x y xy = qmul x y xy
 
 inline_for_extraction noextract
 val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_order_comm_monoid
-let sqr_mod ctx x xx = qmul x x xx
+let sqr_mod ctx x xx = qsqr x xx
 
 
 inline_for_extraction noextract

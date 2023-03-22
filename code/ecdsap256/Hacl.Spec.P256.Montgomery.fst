@@ -216,7 +216,16 @@ let fmont_sub_lemma a b =
     from_mont ((a - b) % S.prime);
   }
 
+
 ///  Montgomery arithmetic for a scalar field
+
+//--------------------------------------//
+// bn_mont_reduction is x * qmont_R_inv //
+//--------------------------------------//
+
+val lemma_mod_mul_pow256_order: a:int -> b:int -> Lemma
+  (requires a * pow2 256 % S.order = b * pow2 256 % S.order)
+  (ensures  a % S.order == b % S.order)
 
 let lemma_mod_mul_pow256_order a b =
   mod_sub S.order (a * pow2 256) (b * pow2 256);
@@ -228,3 +237,135 @@ let lemma_mod_mul_pow256_order a b =
   assert ((a - b) % S.order = 0);
   sub_mod S.order a b;
   assert (a % S.order = b % S.order)
+
+
+val qmont_R_inv_is_bn_mont_d: unit -> Lemma
+  (requires S.order % 2 = 1)
+  (ensures  (let d, _ = SBML.eea_pow2_odd 256 S.order in qmont_R_inv == d % S.order))
+
+let qmont_R_inv_is_bn_mont_d () =
+  let d, k = SBML.eea_pow2_odd 256 S.order in
+  SBML.mont_preconditions_d 64 4 S.order;
+  assert (d * pow2 256 % S.order = 1);
+
+  assert_norm (qmont_R * qmont_R_inv % S.order = 1);
+  Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) qmont_R_inv S.order;
+  assert (qmont_R_inv * pow2 256 % S.order = 1);
+
+  assert (qmont_R_inv * pow2 256 % S.order = d * pow2 256 % S.order);
+  lemma_mod_mul_pow256_order qmont_R_inv d;
+  assert (qmont_R_inv % S.order == d % S.order);
+  Math.Lemmas.modulo_lemma qmont_R_inv S.order;
+  assert (qmont_R_inv == d % S.order)
+
+
+val lemma_order_mont: unit ->
+  Lemma (S.order % 2 = 1 /\ S.order < pow2 256 /\ (1 + S.order * 0xccd1c8aaee00bc4f) % pow2 64 = 0)
+
+let lemma_order_mont () =
+  assert_norm (S.order % 2 = 1);
+  assert_norm (S.order < pow2 256);
+  assert_norm ((1 + S.order * 0xccd1c8aaee00bc4f) % pow2 64 = 0)
+
+
+let qmont_reduction_lemma x n =
+  let k0 = 0xccd1c8aaee00bc4f in
+  lemma_order_mont ();
+  assert (SBM.bn_mont_pre n (u64 k0));
+  let d, _ = SBML.eea_pow2_odd 256 (BD.bn_v n) in
+
+  let res = SBM.bn_mont_reduction n (u64 k0) x in
+  assert_norm (S.order * S.order < S.order * pow2 256);
+  assert (BD.bn_v x < S.order * pow2 256);
+
+  SBM.bn_mont_reduction_lemma n (u64 k0) x;
+  assert (BD.bn_v res == SBML.mont_reduction 64 4 (BD.bn_v n) k0 (BD.bn_v x));
+  SBML.mont_reduction_lemma 64 4 (BD.bn_v n) k0 (BD.bn_v x);
+  assert (BD.bn_v res == BD.bn_v x * d % S.order);
+  calc (==) {
+    (BD.bn_v x) * d % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (BD.bn_v x) d S.order }
+    (BD.bn_v x) * (d % S.order) % S.order;
+    (==) { qmont_R_inv_is_bn_mont_d () }
+    (BD.bn_v x) * qmont_R_inv % S.order;
+  }
+
+//--------------------------
+
+// toDomain_ (fromDomain_ a) == a
+let lemmaFromDomainToDomain a =
+  calc (==) {
+    toDomain_ (fromDomain_ a); // == a
+    (==) { }
+    (a * qmont_R_inv % S.order) * qmont_R % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * qmont_R_inv) qmont_R S.order }
+    a * qmont_R_inv * qmont_R % S.order;
+    (==) { Math.Lemmas.paren_mul_right a qmont_R_inv qmont_R }
+    a * (qmont_R_inv * qmont_R) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r a (qmont_R_inv * qmont_R) S.order }
+    a * (qmont_R_inv * qmont_R % S.order) % S.order;
+    (==) { assert_norm (qmont_R_inv * qmont_R % S.order = 1) }
+    a % S.order;
+    (==) { Math.Lemmas.modulo_lemma a S.order }
+    a;
+  }
+
+
+// fromDomain_ (toDomain_ a) == a
+let lemmaToDomainFromDomain a =
+  calc (==) {
+    fromDomain_ (toDomain_ a); // == a
+    (==) { }
+    (a * qmont_R % S.order) * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * qmont_R) qmont_R_inv S.order }
+    a * qmont_R * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.paren_mul_right a qmont_R qmont_R_inv }
+    a * (qmont_R * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r a (qmont_R * qmont_R_inv) S.order }
+    a * (qmont_R * qmont_R_inv % S.order) % S.order;
+    (==) { assert_norm (qmont_R * qmont_R_inv % S.order = 1) }
+    a % S.order;
+    (==) { Math.Lemmas.modulo_lemma a S.order }
+    a;
+  }
+
+
+let qadd_lemma a b =
+  calc (==) {
+    (fromDomain_ a + fromDomain_ b) % S.order;
+    (==) { }
+    (a * qmont_R_inv % S.order + b * qmont_R_inv % S.order) % S.order;
+    (==) { Math.Lemmas.modulo_distributivity (a * qmont_R_inv) (b * qmont_R_inv) S.order }
+    (a * qmont_R_inv + b * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.distributivity_add_left a b qmont_R_inv }
+    (a + b) * qmont_R_inv % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a + b) qmont_R_inv S.order }
+    (a + b) % S.order * qmont_R_inv % S.order;
+    (==) { }
+    fromDomain_ ((a + b) % S.order);
+  }
+
+
+let qmul_lemma a b =
+  calc (==) {
+    (fromDomain_ a * fromDomain_ b) % S.order;
+    (==) { }
+    ((a * qmont_R_inv % S.order) * (b * qmont_R_inv % S.order)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l
+      (a * qmont_R_inv) (b * qmont_R_inv % S.order) S.order }
+    (a * qmont_R_inv * (b * qmont_R_inv % S.order)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a * qmont_R_inv) (b * qmont_R_inv) S.order }
+    (a * qmont_R_inv * (b * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a qmont_R_inv (b * qmont_R_inv) }
+    (a * (qmont_R_inv * (b * qmont_R_inv))) % S.order;
+    (==) { Math.Lemmas.paren_mul_right qmont_R_inv b qmont_R_inv }
+    (a * (qmont_R_inv * b * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.swap_mul qmont_R_inv b }
+    (a * (b * qmont_R_inv * qmont_R_inv)) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a (b * qmont_R_inv) qmont_R_inv }
+    (a * (b * qmont_R_inv) * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.paren_mul_right a b qmont_R_inv }
+    (a * b * qmont_R_inv * qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * b * qmont_R_inv) qmont_R_inv S.order }
+    fromDomain_ ((a * b * qmont_R_inv) % S.order);
+  }
