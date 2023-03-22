@@ -25,14 +25,14 @@ friend Hacl.Bignum256
 ///  Create one
 
 [@CInline]
-let make_qone n =
-  [@inline_let] let n0 = u64 0xc46353d039cdaaf in
-  [@inline_let] let n1 = u64 0x4319055258e8617b in
-  [@inline_let] let n2 = u64 0x0 in
-  [@inline_let] let n3 = u64 0xffffffff in
-  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.toDomain_ 1);
-  assert_norm (SM.fromDomain_ (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
-  bn_make_u64_4 n n0 n1 n2 n3
+let make_qone f =
+  [@inline_let] let f0 = u64 0xc46353d039cdaaf in
+  [@inline_let] let f1 = u64 0x4319055258e8617b in
+  [@inline_let] let f2 = u64 0x0 in
+  [@inline_let] let f3 = u64 0xffffffff in
+  assert_norm (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192 == SM.toDomain_ 1);
+  assert_norm (SM.fromDomain_ (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192) == 1);
+  bn_make_u64_4 f f0 f1 f2 f3
 
 
 ///  Comparison
@@ -81,7 +81,7 @@ let qmod_short_lemma a =
 
 
 [@CInline]
-let qmod_short x res =
+let qmod_short res x =
   push_frame ();
   let tmp = create_felem () in
   make_order tmp;
@@ -94,7 +94,7 @@ let qmod_short x res =
 
 
 [@CInline]
-let qadd x y res =
+let qadd res x y =
   let h0 = ST.get () in
   push_frame ();
   let n = create_felem () in
@@ -106,7 +106,7 @@ let qadd x y res =
   pop_frame ()
 
 
-val qmont_reduction: x:widefelem -> res:felem -> Stack unit
+val qmont_reduction: res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
     wide_as_nat h x < S.order * S.order)
@@ -114,7 +114,7 @@ val qmont_reduction: x:widefelem -> res:felem -> Stack unit
     as_nat h1 res == wide_as_nat h0 x * SM.qmont_R_inv % S.order)
 
 [@CInline]
-let qmont_reduction x res =
+let qmont_reduction res x =
   push_frame ();
   let n = create_felem () in
   make_order n;
@@ -134,42 +134,42 @@ let qmont_reduction x res =
 
 
 [@CInline]
-let from_qmont a res =
+let from_qmont res x =
   push_frame ();
-  let t = create_widefelem () in
-  let t_low = sub t (size 0) (size 4) in
-  let t_high = sub t (size 4) (size 4) in
+  let tmp = create_widefelem () in
+  let t_low = sub tmp 0ul 4ul in
+  let t_high = sub tmp 4ul 4ul in
 
   let h0 = ST.get () in
-  copy t_low a;
+  copy t_low x;
   let h1 = ST.get () in
-  assert (wide_as_nat h0 t = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
+  assert (wide_as_nat h0 tmp = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
   assert_norm (S.order < S.order * S.order);
-  qmont_reduction t res;
+  qmont_reduction res tmp;
   pop_frame ()
 
 
 [@CInline]
-let qmul a b res =
+let qmul res x y =
   push_frame ();
   let tmp = create_widefelem () in
   let h0 = ST.get () in
-  bn_mul4 tmp a b;
+  bn_mul4 tmp x y;
   let h1 = ST.get () in
-  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 b) S.order;
-  qmont_reduction tmp res;
-  SM.qmul_lemma (as_nat h0 a) (as_nat h0 b);
+  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 y) S.order;
+  qmont_reduction res tmp;
+  SM.qmul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
 
 [@CInline]
-let qsqr a res =
+let qsqr res x =
   push_frame ();
   let tmp = create_widefelem () in
   let h0 = ST.get () in
-  bn_sqr4 tmp a;
+  bn_sqr4 tmp x;
   let h1 = ST.get () in
-  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 a) S.order;
-  qmont_reduction tmp res;
-  SM.qmul_lemma (as_nat h0 a) (as_nat h0 a);
+  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.order;
+  qmont_reduction res tmp;
+  SM.qmul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()

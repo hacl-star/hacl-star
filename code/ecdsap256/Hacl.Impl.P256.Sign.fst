@@ -206,16 +206,16 @@ let ecdsa_sign_s s k r d_a m =
   lemma_mont_qinv (as_nat h0 k);
   assert (qmont_as_nat h1 kinv == S.qinv (as_nat h0 k) * SM.qmont_R % S.order);
 
-  qmul r d_a s; // s = r * d_a
+  qmul s r d_a; // s = r * d_a
   let h2 = ST.get () in
   assert (as_nat h2 s == (as_nat h0 r * as_nat h0 d_a * SM.qmont_R_inv) % S.order);
   from_qmont m m;
   let h3 = ST.get () in
   assert (as_nat h3 m == as_nat h2 m * SM.qmont_R_inv % S.order);
-  qadd m s s; // s = z + s
+  qadd s m s; // s = z + s
   let h4 = ST.get () in
   assert (as_nat h4 s == (as_nat h3 m + as_nat h2 s) % S.order);
-  qmul kinv s s; // s = kinv * s
+  qmul s kinv s; // s = kinv * s
   let h5 = ST.get () in
   assert (as_nat h5 s == (as_nat h1 kinv * as_nat h4 s * SM.qmont_R_inv) % S.order);
   lemma_ecdsa_sign_s (as_nat h0 k) (as_nat h1 kinv) (as_nat h0 r) (as_nat h0 d_a) (as_nat h0 m);

@@ -19,11 +19,11 @@ let qmont_as_nat (h:mem) (a:felem) = SM.fromDomain_ (as_nat h a)
 
 ///  Create one
 
-val make_qone: n:felem -> Stack unit
-  (requires fun h -> live h n)
-  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == SM.toDomain_ 1 /\
-    qmont_as_nat h1 n == 1)
+val make_qone: f:felem -> Stack unit
+  (requires fun h -> live h f)
+  (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
+    as_nat h1 f == SM.toDomain_ 1 /\
+    qmont_as_nat h1 f == 1)
 
 
 ///  Comparison
@@ -42,14 +42,14 @@ val bn_is_lt_order_and_gt_zero_mask4: f:felem -> Stack uint64
 
 ///  Field Arithmetic
 
-val qmod_short: x:felem -> res:felem -> Stack unit
+val qmod_short: res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == as_nat h0 x % S.order)
 
 
-val qadd: x:felem -> y:felem -> res:felem -> Stack unit
+val qadd: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
@@ -59,29 +59,29 @@ val qadd: x:felem -> y:felem -> res:felem -> Stack unit
     qmont_as_nat h1 res == S.qadd (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
 
-val from_qmont: a:felem -> res:felem -> Stack unit
+val from_qmont: res:felem -> x:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ eq_or_disjoint a res /\
-    as_nat h a < S.order)
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.order /\
-    as_nat h1 res == qmont_as_nat h0 a)
+    as_nat h1 res == qmont_as_nat h0 x)
 
 
-val qmul: a:felem -> b:felem -> res:felem -> Stack unit
+val qmul: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h res /\
-    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res /\
-    as_nat h a < S.order /\ as_nat h b < S.order)
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.order /\ as_nat h y < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = (as_nat h0 a * as_nat h0 b * SM.qmont_R_inv) % S.order /\
-    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 a) (qmont_as_nat h0 b))
+    as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.qmont_R_inv) % S.order /\
+    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
 
-val qsqr: a:felem -> res:felem -> Stack unit
+val qsqr: res:felem -> x:felem -> Stack unit
   (requires fun h ->
-    live h a /\ live h res /\ eq_or_disjoint a res /\
-    as_nat h a < S.order)
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = (as_nat h0 a * as_nat h0 a * SM.qmont_R_inv) % S.order /\
-    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 a) (qmont_as_nat h0 a))
+    as_nat h1 res = (as_nat h0 x * as_nat h0 x * SM.qmont_R_inv) % S.order /\
+    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 x))

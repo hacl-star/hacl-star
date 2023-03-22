@@ -105,10 +105,10 @@ let qmul_mont sinv b res =
   let h0 = ST.get () in
   push_frame ();
   let tmp = create_felem () in
-  from_qmont b tmp;
+  from_qmont tmp b;
   let h1 = ST.get () in
   assert (as_nat h1 tmp == SM.fromDomain_ (as_nat h0 b));
-  qmul sinv tmp res;
+  qmul res sinv tmp;
   let h2 = ST.get () in
   assert (as_nat h2 res = (as_nat h1 sinv * as_nat h1 tmp * SM.qmont_R_inv) % S.order);
   pop_frame ()
@@ -164,7 +164,7 @@ let ecdsa_verification_getx x pk u1 u2 =
   norm_jacob_point res res;
   let is_res_point_at_inf = is_point_at_inf_vartime res in
   let res_x = getx res in
-  qmod_short res_x x;
+  qmod_short x res_x;
   pop_frame ();
   not is_res_point_at_inf
 

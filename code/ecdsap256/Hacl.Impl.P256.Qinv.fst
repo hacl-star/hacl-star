@@ -54,12 +54,12 @@ let one_mod ctx one = make_qone one
 
 inline_for_extraction noextract
 val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_p256_order_comm_monoid
-let mul_mod ctx x y xy = qmul x y xy
+let mul_mod ctx x y xy = qmul xy x y
 
 
 inline_for_extraction noextract
 val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_order_comm_monoid
-let sqr_mod ctx x xx = qsqr x xx
+let sqr_mod ctx x xx = qsqr xx x
 
 
 inline_for_extraction noextract
