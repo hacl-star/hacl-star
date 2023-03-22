@@ -18,14 +18,14 @@ module SM = Hacl.Spec.P256.Montgomery
 
 // TODO: mv to Hacl.Impl.P256.Field
 inline_for_extraction noextract
-val toDomain: f:felem -> res:felem -> Stack unit
+val to_mont: res:felem -> f:felem -> Stack unit
   (requires fun h ->
-    live h f /\live h res /\ eq_or_disjoint f res /\
+    live h f /\ live h res /\ eq_or_disjoint f res /\
     as_nat h f < S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res = SM.to_mont (as_nat h0 f))
 
-let toDomain f res =
+let to_mont res f =
   push_frame ();
   let tmp = create_widefelem () in
   bn_lshift256 tmp f;

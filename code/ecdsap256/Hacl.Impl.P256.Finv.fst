@@ -188,7 +188,7 @@ let finv a res =
   from_mont tmp a;
   fexp_vartime res tmp b;
   let h = ST.get () in
-  toDomain res res;
+  to_mont res res;
   SM.lemma_to_from_mont_id (as_nat h res);
   pop_frame ()
 
@@ -219,7 +219,7 @@ let fsqrt a res =
   from_mont tmp a;
   fexp_vartime res tmp b;
   let h = ST.get () in
-  toDomain res res;
+  to_mont res res;
   SM.lemma_to_from_mont_id (as_nat h res);
   pop_frame ()
 

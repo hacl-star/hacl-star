@@ -109,9 +109,9 @@ let point_to_mont p res =
   let ry = gety res in
   let rz = getz res in
 
-  toDomain px rx;
-  toDomain py ry;
-  toDomain pz rz
+  to_mont rx px;
+  to_mont ry py;
+  to_mont rz pz
 
 
 [@CInline]
@@ -313,8 +313,8 @@ let is_point_on_curve_vartime p =
   let px = aff_getx p in
   let py = aff_gety p in
   let h0 = ST.get () in
-  Hacl.Impl.P256.Core.toDomain px tx;
-  Hacl.Impl.P256.Core.toDomain py ty;
+  Hacl.Impl.P256.Core.to_mont tx px;
+  Hacl.Impl.P256.Core.to_mont ty py;
 
   SM.lemma_to_from_mont_id (as_nat h0 px);
   SM.lemma_to_from_mont_id (as_nat h0 py);
@@ -398,7 +398,7 @@ let recover_y_vartime_candidate y x =
   let yM = create_felem () in
   let h0 = ST.get () in
   SM.lemma_to_from_mont_id (as_nat h0 x);
-  Hacl.Impl.P256.Core.toDomain x xM;
+  Hacl.Impl.P256.Core.to_mont xM x;
   compute_rp_ec_equation xM y2M; // y2M = x *% x *% x +% S.a_coeff *% x +% S.b_coeff
   fsqrt y2M yM; // yM = fsqrt y2M
   let h1 = ST.get () in
