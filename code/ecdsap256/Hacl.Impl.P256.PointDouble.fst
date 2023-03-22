@@ -45,24 +45,24 @@ let point_double_a_b_g_d p alpha beta gamma delta tmp =
   let pz = getz p in
 
   let h0 = ST.get () in
-  fsqr pz delta;      // delta = z * z
-  fsqr py gamma;      // gamma = y * y
-  fmul px gamma beta; // beta = x * gamma
+  fsqr delta pz;      // delta = z * z
+  fsqr gamma py;      // gamma = y * y
+  fmul beta px gamma; // beta = x * gamma
   let h1 = ST.get () in
   assert (fmont_as_nat h1 delta = S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h0 pz));
   assert (fmont_as_nat h1 gamma = S.fmul (fmont_as_nat h0 py) (fmont_as_nat h0 py));
   assert (fmont_as_nat h1 beta = S.fmul (fmont_as_nat h0 px) (fmont_as_nat h1 gamma));
 
-  fsub px delta alpha;   // a0 = x - delta
+  fsub alpha px delta;   // a0 = x - delta
   let h2 = ST.get () in
   assert (fmont_as_nat h2 alpha = S.fsub (fmont_as_nat h0 px) (fmont_as_nat h1 delta));
-  fmul_by_3 alpha tmp;
+  fmul_by_3 tmp alpha;
   let h3 = ST.get () in
   assert (fmont_as_nat h3 tmp = S.fmul 3 (fmont_as_nat h2 alpha));
-  fadd px delta alpha;   // a1 = x + delta
+  fadd alpha px delta;   // a1 = x + delta
   let h4 = ST.get () in
   assert (fmont_as_nat h4 alpha = S.fadd (fmont_as_nat h0 px) (fmont_as_nat h1 delta));
-  fmul tmp alpha alpha
+  fmul alpha tmp alpha
 
 
 inline_for_extraction noextract
@@ -81,17 +81,17 @@ val point_double_x3: x3:felem -> alpha:felem -> beta:felem -> tmp:felem ->
 
 let point_double_x3 x3 alpha beta tmp =
   let h0 = ST.get () in
-  fsqr alpha x3;          // x3 = alpha * alpha
+  fsqr x3 alpha;          // x3 = alpha * alpha
   fmul_by_4 beta beta;    // beta = 4 * beta
   let h1 = ST.get () in
   assert (fmont_as_nat h1 x3 = S.fmul (fmont_as_nat h0 alpha) (fmont_as_nat h0 alpha));
   assert (fmont_as_nat h1 beta = S.fmul 4 (fmont_as_nat h0 beta));
-  fdouble beta tmp;      // tmp = 8 * beta
+  fdouble tmp beta;      // tmp = 8 * beta
   let h2 = ST.get () in
   assert (fmont_as_nat h2 tmp = S.fmul 2 (S.fmul 4 (fmont_as_nat h0 beta)));
   Math.Lemmas.lemma_mod_mul_distr_r 2 (4 * fmont_as_nat h0 beta) S.prime;
   assert (fmont_as_nat h2 tmp = S.fmul 8 (fmont_as_nat h0 beta));
-  fsub x3 tmp x3         // x3 = alpha * alpha - 8 * beta
+  fsub x3 x3 tmp         // x3 = alpha * alpha - 8 * beta
 
 
 inline_for_extraction noextract
@@ -111,14 +111,14 @@ val point_double_z3: z3:felem -> py:felem -> pz:felem -> gamma:felem -> delta:fe
 
 let point_double_z3 z3 py pz gamma delta =
   let h0 = ST.get () in
-  fadd py pz z3;  // z3 = py + pz
+  fadd z3 py pz;  // z3 = py + pz
   fsqr z3 z3;     // z3 = (py + pz) * (py + pz)
   let h1 = ST.get () in
   assert (let yz = S.fadd (fmont_as_nat h0 py) (fmont_as_nat h0 pz) in
     fmont_as_nat h1 z3 = S.fmul yz yz);
 
-  fsub z3 delta z3;  // z3 = (py + pz) ** 2 - delta
-  fsub z3 gamma z3   // z3 = (py + pz) ** 2 - delta - gamma
+  fsub z3 z3 delta;  // z3 = (py + pz) ** 2 - delta
+  fsub z3 z3 gamma   // z3 = (py + pz) ** 2 - delta - gamma
 
 
 inline_for_extraction noextract
@@ -139,8 +139,8 @@ val point_double_y3: y3:felem -> x3:felem -> alpha:felem -> gamma:felem -> beta:
 
 let point_double_y3 y3 x3 alpha gamma beta =
   let h0 = ST.get () in
-  fsub beta x3 y3;      // y3 = beta - x3
-  fmul alpha y3 y3;     // y3 = alpha * (beta - x3)
+  fsub y3 beta x3;      // y3 = beta - x3
+  fmul y3 alpha y3;     // y3 = alpha * (beta - x3)
   let h1 = ST.get () in
   assert (fmont_as_nat h1 y3 =
     S.fmul (fmont_as_nat h0 alpha) (S.fsub (fmont_as_nat h0 beta) (fmont_as_nat h0 x3)));
@@ -151,7 +151,7 @@ let point_double_y3 y3 x3 alpha gamma beta =
   assert (let g = fmont_as_nat h0 gamma in
     fmont_as_nat h2 gamma == S.fmul 8 (S.fmul g g));
   Lib.NatMod.lemma_mul_mod_assoc #S.prime 8 (fmont_as_nat h0 gamma) (fmont_as_nat h0 gamma);
-  fsub y3 gamma y3       // y3 = alpha * (beta - x3) - 8 * gamma * gamma
+  fsub y3 y3 gamma       // y3 = alpha * (beta - x3) - 8 * gamma * gamma
 
 
 [@CInline]

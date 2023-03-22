@@ -46,28 +46,28 @@ let point_add_u12_s12 u1 u2 s1 s2 p q =
   let qz = getz q in
 
   let h0 = ST.get () in
-  fsqr qz s1;           // s1 = z2z2 = qz * qz
-  fsqr pz s2;           // s2 = z1z1 = pz * pz
+  fsqr s1 qz;           // s1 = z2z2 = qz * qz
+  fsqr s2 pz;           // s2 = z1z1 = pz * pz
   let h1 = ST.get () in
   assert (fmont_as_nat h1 s1 == S.fmul (fmont_as_nat h0 qz) (fmont_as_nat h0 qz));
   assert (fmont_as_nat h1 s2 == S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h0 pz));
 
-  fmul px s1 u1;        // u1 = px * z2z2
-  fmul qx s2 u2;        // u2 = qx * z1z1
+  fmul u1 px s1;        // u1 = px * z2z2
+  fmul u2 qx s2;        // u2 = qx * z1z1
   let h2 = ST.get () in
   assert (fmont_as_nat h2 u1 == S.fmul (fmont_as_nat h0 px) (fmont_as_nat h1 s1));
   assert (fmont_as_nat h2 u2 == S.fmul (fmont_as_nat h0 qx) (fmont_as_nat h1 s2));
 
-  fmul qz s1 s1;
-  fmul py s1 s1;
+  fmul s1 qz s1;
+  fmul s1 py s1;
   let h3 = ST.get () in
   assert (fmont_as_nat h3 s1 ==
     S.fmul (fmont_as_nat h0 py) (S.fmul (fmont_as_nat h0 qz) (fmont_as_nat h1 s1)));
   Lib.NatMod.lemma_mul_mod_assoc #S.prime
     (fmont_as_nat h0 py) (fmont_as_nat h0 qz) (fmont_as_nat h1 s1);
 
-  fmul pz s2 s2;
-  fmul qy s2 s2;
+  fmul s2 pz s2;
+  fmul s2 qy s2;
   let h4 = ST.get () in
   assert (fmont_as_nat h4 s2 ==
     S.fmul (fmont_as_nat h0 qy) (S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h1 s2)));
@@ -100,13 +100,13 @@ val point_add_hhh_uhh_h_r:
 
 let point_add_hhh_uhh_h_r h r hhh u1 u2 s1 s2 =
   let h0 = ST.get () in
-  fsub u2 u1 h;     // h = u2 - u1
-  fsub s2 s1 r;     // r = s2 - s1
+  fsub h u2 u1;     // h = u2 - u1
+  fsub r s2 s1;     // r = s2 - s1
   let h1 = ST.get () in
   assert (fmont_as_nat h1 h == S.fsub (fmont_as_nat h0 u2) (fmont_as_nat h0 u1));
   assert (fmont_as_nat h1 r == S.fsub (fmont_as_nat h0 s2) (fmont_as_nat h0 s1));
 
-  fsqr h hhh;      // hh = h * h
+  fsqr hhh h;      // hh = h * h
   fmul u1 hhh u1;  // u1hh = u1 * hh
   fmul hhh h hhh   // hhh = hh * h
 
@@ -126,10 +126,10 @@ val point_add_x3: x3:felem -> hhh:felem -> u1:felem -> r:felem -> tmp:felem ->
         (S.fmul 2 (fmont_as_nat h0 u1)))
 
 let point_add_x3 x3 hhh u1 r tmp =
-  fsqr r x3;       // rr = r * r
-  fsub x3 hhh x3;  // rr - hhh
-  fdouble u1 tmp;  // 2 * u1
-  fsub x3 tmp x3   // rr - hhh - 2 * u1
+  fsqr x3 r;       // rr = r * r
+  fsub x3 x3 hhh;  // rr - hhh
+  fdouble tmp u1;  // 2 * u1
+  fsub x3 x3 tmp   // rr - hhh - 2 * u1
 
 
 inline_for_extraction noextract
@@ -148,10 +148,10 @@ val point_add_y3: y3:felem -> s1:felem -> hhh:felem -> u1:felem -> x3:felem -> r
         (S.fmul (fmont_as_nat h0 s1) (fmont_as_nat h0 hhh)))
 
 let point_add_y3 y3 s1 hhh u1 x3 r =
-  fmul s1 hhh y3;  // s1 * hhh
-  fsub u1 x3 u1;   // u1 - x3
-  fmul r u1 u1;    // r * (u1 - x3)
-  fsub u1 y3 y3    // r * (u1 - x3) - s1 * hhh
+  fmul y3 s1 hhh;  // s1 * hhh
+  fsub u1 u1 x3;   // u1 - x3
+  fmul u1 r u1;    // r * (u1 - x3)
+  fsub y3 u1 y3    // r * (u1 - x3) - s1 * hhh
 
 
 inline_for_extraction noextract
@@ -168,7 +168,7 @@ val point_add_z3: z3:felem -> z1:felem -> z2:felem -> h:felem -> Stack unit
 
 let point_add_z3 z3 z1 z2 h =
   fmul h z1 h;
-  fmul h z2 z3
+  fmul z3 h z2
 
 
 inline_for_extraction noextract

@@ -123,9 +123,9 @@ let point_from_mont p res =
   let ry = gety res in
   let rz = getz res in
 
-  fromDomain px rx;
-  fromDomain py ry;
-  fromDomain pz rz
+  from_mont rx px;
+  from_mont ry py;
+  from_mont rz pz
 
 
 ///  Point conversion between Jacobian and Affine coordinates representations
@@ -155,16 +155,16 @@ let norm_jacob_point_x p res =
   let pz = getz p in
 
   let h0 = ST.get () in
-  fsqr pz res;       // rx = pz * pz
+  fsqr res pz;       // rx = pz * pz
   let h1 = ST.get () in
   assert (fmont_as_nat h1 res == S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h0 pz));
   finv res res;       // rx = finv rx
   let h2 = ST.get () in
   assert (fmont_as_nat h2 res == S.finv (fmont_as_nat h1 res));
-  fmul px res res;    // rx = px * rx
+  fmul res px res;    // rx = px * rx
   let h3 = ST.get () in
   assert (fmont_as_nat h3 res == S.fmul (fmont_as_nat h0 px) (fmont_as_nat h2 res));
-  fromDomain res res;
+  from_mont res res;
   let h4 = ST.get () in
   assert (as_nat h4 res == fmont_as_nat h3 res)
 
@@ -184,15 +184,15 @@ let norm_jacob_point_y p res =
   let pz = getz p in
 
   let h0 = ST.get () in
-  fcube pz res;       // ry = pz * pz * pz
+  fcube res pz;       // ry = pz * pz * pz
   let h1 = ST.get () in
   finv res res;       // ry = finv ry
   let h2 = ST.get () in
   assert (fmont_as_nat h2 res == S.finv (fmont_as_nat h1 res));
-  fmul py res res;    // ry = px * ry
+  fmul res py res;    // ry = px * ry
   let h3 = ST.get () in
   assert (fmont_as_nat h3 res == S.fmul (fmont_as_nat h0 py) (fmont_as_nat h2 res));
-  fromDomain res res;
+  from_mont res res;
   let h4 = ST.get () in
   assert (as_nat h4 res == fmont_as_nat h3 res)
 
@@ -279,9 +279,9 @@ val compute_rp_ec_equation: x:felem -> res:felem -> Stack unit
 let compute_rp_ec_equation x res =
   push_frame ();
   let tmp = create_felem () in
-  fcube x res;
+  fcube res x;
   make_a_coeff tmp;
-  fmul tmp x tmp;
+  fmul tmp tmp x;
   fadd res tmp res;
   make_b_coeff tmp;
   fadd res tmp res;
@@ -401,7 +401,7 @@ let recover_y_vartime_candidate y x =
   compute_rp_ec_equation xM y2M; // y2M = x *% x *% x +% S.a_coeff *% x +% S.b_coeff
   fsqrt y2M yM; // yM = fsqrt y2M
   let h1 = ST.get () in
-  fromDomain yM y;
+  from_mont y yM;
   let is_y_valid = is_y_sqr_is_y2_vartime y2M yM in
   pop_frame ();
   is_y_valid

@@ -185,7 +185,7 @@ let finv a res =
   make_prime_minus_2 b;
 
   let tmp = create 4ul (u64 0) in
-  fromDomain a tmp;
+  from_mont tmp a;
   fexp_vartime res tmp b;
   let h = ST.get () in
   toDomain res res;
@@ -216,7 +216,7 @@ let fsqrt a res =
   make_prime_plus_1_div_4 b;
 
   let tmp = create 4ul (u64 0) in
-  fromDomain a tmp;
+  from_mont tmp a;
   fexp_vartime res tmp b;
   let h = ST.get () in
   toDomain res res;

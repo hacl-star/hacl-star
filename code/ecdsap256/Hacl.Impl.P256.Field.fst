@@ -24,6 +24,8 @@ friend Hacl.Bignum256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+///  Create zero and one
+
 [@CInline]
 let make_fzero n =
   bn_set_zero4 n;
@@ -41,6 +43,105 @@ let make_fone n =
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont 1);
   assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
   bn_make_u64_4 n n0 n1 n2 n3
+
+
+///  Comparison
+
+[@CInline]
+let bn_is_lt_prime_mask4 f =
+  let h0 = ST.get () in
+  push_frame ();
+  let tmp = create_felem () in
+  make_prime tmp;
+  let c = bn_sub4 tmp f tmp in
+  assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
+  pop_frame ();
+  u64 0 -. c
+
+
+[@CInline]
+let feq_mask a b =
+  let h0 = ST.get () in
+  let r = bn_is_eq_mask4 a b in
+  let h1 = ST.get () in
+  assert (if as_nat h1 a = as_nat h1 b then v r == ones_v U64 else v r = 0);
+  SM.lemma_from_to_mont_id (as_nat h0 a);
+  SM.lemma_from_to_mont_id (as_nat h0 b);
+  assert (if fmont_as_nat h1 a = fmont_as_nat h1 b then v r == ones_v U64 else v r = 0);
+  r
+
+
+///  Field Arithmetic
+
+val fmod_short_lemma: a:nat{a < pow2 256} ->
+  Lemma (let r = if a >= S.prime then a - S.prime else a in r = a % S.prime)
+
+let fmod_short_lemma a =
+  let r = if a >= S.prime then a - S.prime else a in
+  if a >= S.prime then begin
+    Math.Lemmas.lemma_mod_sub a S.prime 1;
+    assert_norm (pow2 256 - S.prime < S.prime);
+    Math.Lemmas.small_mod r S.prime end
+  else
+   Math.Lemmas.small_mod r S.prime
+
+
+[@CInline]
+let fmod_short res x =
+  push_frame ();
+  let tmp = create_felem () in
+  make_prime tmp;
+  let h0 = ST.get () in
+  let c = bn_sub4 tmp x tmp in
+  bn_cmovznz4 res c tmp x;
+  SB.as_nat_bound (as_seq h0 x);
+  fmod_short_lemma (as_nat h0 x);
+  pop_frame ()
+
+
+[@CInline]
+let fadd res x y =
+  let h0 = ST.get () in
+  push_frame ();
+  let n = create_felem () in
+  make_prime n;
+  bn_add_mod4 res n x y;
+  let h1 = ST.get () in
+  assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime);
+  SM.fmont_add_lemma (as_nat h0 x) (as_nat h0 y);
+  pop_frame ()
+
+
+let fdouble out x =
+  fadd out x x
+
+
+[@CInline]
+let fsub res x y =
+  let h0 = ST.get () in
+  push_frame ();
+  let n = create_felem () in
+  make_prime n;
+  bn_sub_mod4 res n x y;
+  let h1 = ST.get () in
+  assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
+  SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
+  pop_frame ()
+
+
+[@CInline]
+let fnegate_conditional_vartime f is_negate =
+  push_frame ();
+  let zero = create_felem () in
+  if is_negate then begin
+    let h0 = ST.get () in
+    fsub f zero f;
+    let h1 = ST.get () in
+    assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
+    Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
+    assert (as_nat h1 f == (S.prime - as_nat h0 f) % S.prime) end;
+  pop_frame ()
+
 
 //----------
 
@@ -127,176 +228,83 @@ let mont_reduction x res =
 
 //---------------------
 
-val fmod_short_lemma: a:nat{a < pow2 256} ->
-  Lemma (let r = if a >= S.prime then a - S.prime else a in r = a % S.prime)
-
-let fmod_short_lemma a =
-  let r = if a >= S.prime then a - S.prime else a in
-  if a >= S.prime then begin
-    Math.Lemmas.lemma_mod_sub a S.prime 1;
-    assert_norm (pow2 256 - S.prime < S.prime);
-    Math.Lemmas.small_mod r S.prime end
-  else
-   Math.Lemmas.small_mod r S.prime
-
 
 [@CInline]
-let fmod_short x res =
+let from_mont res a =
   push_frame ();
-  let tmp = create_felem () in
-  make_prime tmp;
-  let h0 = ST.get () in
-  let c = bn_sub4 tmp x tmp in
-  bn_cmovznz4 res c tmp x;
-  SB.as_nat_bound (as_seq h0 x);
-  fmod_short_lemma (as_nat h0 x);
-  pop_frame ()
-
-
-[@CInline]
-let bn_is_lt_prime_mask4 f =
-  let h0 = ST.get () in
-  push_frame ();
-  let tmp = create_felem () in
-  make_prime tmp;
-  let c = bn_sub4 tmp f tmp in
-  assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
-  pop_frame ();
-  u64 0 -. c
-
-
-[@CInline]
-let feq_mask a b =
-  let h0 = ST.get () in
-  let r = bn_is_eq_mask4 a b in
-  let h1 = ST.get () in
-  assert (if as_nat h1 a = as_nat h1 b then v r == ones_v U64 else v r = 0);
-  SM.lemma_from_to_mont_id (as_nat h0 a);
-  SM.lemma_from_to_mont_id (as_nat h0 b);
-  assert (if fmont_as_nat h1 a = fmont_as_nat h1 b then v r == ones_v U64 else v r = 0);
-  r
-
-
-[@CInline]
-let fadd x y res =
-  let h0 = ST.get () in
-  push_frame ();
-  let n = create_felem () in
-  make_prime n;
-  bn_add_mod4 res n x y;
-  let h1 = ST.get () in
-  assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime);
-  SM.fmont_add_lemma (as_nat h0 x) (as_nat h0 y);
-  pop_frame ()
-
-
-let fdouble x out =
-  fadd x x out
-
-
-[@CInline]
-let fsub x y res =
-  let h0 = ST.get () in
-  push_frame ();
-  let n = create_felem () in
-  make_prime n;
-  bn_sub_mod4 res n x y;
-  let h1 = ST.get () in
-  assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
-  SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
-  pop_frame ()
-
-
-[@CInline]
-let fnegate_conditional_vartime f is_negate =
-  push_frame ();
-  let zero = create_felem () in
-  if is_negate then begin
-    let h0 = ST.get () in
-    fsub zero f f;
-    let h1 = ST.get () in
-    assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
-    Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
-    assert (as_nat h1 f == (S.prime - as_nat h0 f) % S.prime) end;
-  pop_frame ()
-
-
-[@CInline]
-let fromDomain a res =
-  push_frame ();
-  let t = create_widefelem () in
-  let t_low = sub t (size 0) (size 4) in
-  let t_high = sub t (size 4) (size 4) in
+  let tmp = create_widefelem () in
+  let t_low = sub tmp 0ul 4ul in
+  let t_high = sub tmp 4ul 4ul in
 
   let h0 = ST.get () in
   copy t_low a;
   let h1 = ST.get () in
-  assert (wide_as_nat h0 t = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
+  assert (wide_as_nat h0 tmp = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
   assert_norm (S.prime < S.prime * S.prime);
-  mont_reduction t res;
+  mont_reduction tmp res;
   pop_frame ()
 
 
 [@CInline]
-let fmul a b res =
+let fmul res x y =
   push_frame ();
   let tmp = create_widefelem () in
   let h0 = ST.get () in
-  bn_mul4 tmp a b;
+  bn_mul4 tmp x y;
   let h1 = ST.get () in
-  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 b) S.prime;
+  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 y) S.prime;
   mont_reduction tmp res;
-  SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 b);
+  SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
 
 [@CInline]
-let fsqr a res =
+let fsqr res x =
   push_frame ();
   let tmp = create_widefelem () in
   let h0 = ST.get () in
-  bn_sqr4 tmp a;
+  bn_sqr4 tmp x;
   let h1 = ST.get () in
-  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 a) (as_nat h0 a) S.prime;
+  Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.prime;
   mont_reduction tmp res;
-  SM.fmont_mul_lemma (as_nat h0 a) (as_nat h0 a);
+  SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()
 
 //----------------------------------------------
 
 [@CInline]
-let fcube a res =
-  fsqr a res;
-  fmul res a res
+let fcube res x =
+  fsqr res x;
+  fmul res res x
 
 
 [@CInline]
-let fmul_by_3 a res =
+let fmul_by_3 res x =
   let h0 = ST.get () in
-  fdouble a res;
+  fdouble res x;
   let h1 = ST.get () in
-  fadd a res res;
+  fadd res res x;
   let h2 = ST.get () in
-  assert (fmont_as_nat h1 res == (2 * fmont_as_nat h0 a) % S.prime);
-  assert (fmont_as_nat h2 res == (fmont_as_nat h0 a + fmont_as_nat h1 res) % S.prime);
-  Math.Lemmas.lemma_mod_plus_distr_r (fmont_as_nat h0 a) (2 * fmont_as_nat h0 a) S.prime
+  assert (fmont_as_nat h1 res == (2 * fmont_as_nat h0 x) % S.prime);
+  assert (fmont_as_nat h2 res == (fmont_as_nat h0 x + fmont_as_nat h1 res) % S.prime);
+  Math.Lemmas.lemma_mod_plus_distr_r (fmont_as_nat h0 x) (2 * fmont_as_nat h0 x) S.prime
 
 
 [@CInline]
-let fmul_by_4 a res  =
+let fmul_by_4 res x =
   let h0 = ST.get () in
-  fdouble a res;
+  fdouble res x;
   fdouble res res;
-  Math.Lemmas.modulo_distributivity (2 * fmont_as_nat h0 a) (2 * fmont_as_nat h0 a) S.prime
+  Math.Lemmas.modulo_distributivity (2 * fmont_as_nat h0 x) (2 * fmont_as_nat h0 x) S.prime
 
 
 [@CInline]
-let fmul_by_8 a res  =
+let fmul_by_8 res x =
   let h0 = ST.get () in
-  fmul_by_4 a res;
+  fmul_by_4 res x;
   let h1 = ST.get () in
   fdouble res res;
   let h2 = ST.get () in
-  assert (fmont_as_nat h1 res == (4 * fmont_as_nat h0 a) % S.prime);
+  assert (fmont_as_nat h1 res == (4 * fmont_as_nat h0 x) % S.prime);
   assert (fmont_as_nat h2 res == (2 * fmont_as_nat h1 res) % S.prime);
-  Math.Lemmas.lemma_mod_mul_distr_r 2 (4 * fmont_as_nat h0 a) S.prime
+  Math.Lemmas.lemma_mod_mul_distr_r 2 (4 * fmont_as_nat h0 x) S.prime

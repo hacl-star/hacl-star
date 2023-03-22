@@ -359,14 +359,14 @@ let solinas_reduction_operations tempBuffer o =
 
     fdouble t2 t2;
     fdouble t1 t1;
-    fadd t0 t1 o;
-    fadd t2 o o;
-    fadd t3 o o;
-    fadd t4 o o;
-    fsub o t5 o;
-    fsub o t6 o;
-    fsub o t7 o;
-    fsub o t8 o;
+    fadd o t0 t1;
+    fadd o t2 o;
+    fadd o t3 o;
+    fadd o t4 o;
+    fsub o o t5;
+    fsub o o t6;
+    fsub o o t7;
+    fsub o o t8;
 
     SL.reduce_brackets (as_nat h0 t0) (as_nat h0 t1) (as_nat h0 t2) (as_nat h0 t3) (as_nat h0 t4) (as_nat h0 t5) (as_nat h0 t6) (as_nat h0 t7) (as_nat h0 t8)
 
