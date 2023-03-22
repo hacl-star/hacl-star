@@ -25,7 +25,7 @@ val point_mul: res:point -> p:point -> scalar:felem -> Stack unit
     point_inv h p /\ as_nat h scalar < pow2 256)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) ==
+    from_mont_point (as_point_nat h1 res) ==
     S.point_mul (as_nat h0 scalar) (as_point_nat h0 p))
 
 
@@ -35,7 +35,7 @@ val point_mul_g: res:point -> scalar:felem -> Stack unit
     as_nat h scalar < pow2 256)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) == S.point_mul_g (as_nat h0 scalar))
+    from_mont_point (as_point_nat h1 res) == S.point_mul_g (as_nat h0 scalar))
 
 
 val point_mul_bytes: res:point -> p:point -> scalar:lbuffer uint8 32ul -> Stack unit
@@ -66,5 +66,5 @@ val point_mul_double_g: res:point -> scalar1:felem -> scalar2:felem -> p:point -
     point_inv h p /\ as_nat h scalar1 < pow2 256 /\ as_nat h scalar2 < pow2 256)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) ==
+    from_mont_point (as_point_nat h1 res) ==
       S.point_mul_double_g (as_nat h0 scalar1) (as_nat h0 scalar2) (as_point_nat h0 p))

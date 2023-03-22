@@ -22,5 +22,5 @@ val point_double: p:point -> res:point -> tmp:lbuffer uint64 32ul -> Stack unit
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc tmp |+| loc res)  h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) ==
-      S.point_double (SM.from_mont_point (as_point_nat h0 p)))
+    from_mont_point (as_point_nat h1 res) ==
+      S.point_double (from_mont_point (as_point_nat h0 p)))

@@ -32,7 +32,7 @@ val point_double_a_b_g_d:
     modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tmp) h0 h1 /\
     as_nat h1 alpha < S.prime /\ as_nat h1 beta < S.prime /\
     as_nat h1 gamma < S.prime /\ as_nat h1 delta < S.prime /\
-   (let x, y, z = SM.from_mont_point (as_point_nat h0 p) in
+   (let x, y, z = from_mont_point (as_point_nat h0 p) in
     fmont_as_nat h1 delta = S.fmul z z /\
     fmont_as_nat h1 gamma = S.fmul y y /\
     fmont_as_nat h1 beta = S.fmul x (fmont_as_nat h1 gamma) /\

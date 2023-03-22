@@ -12,9 +12,6 @@ let fmont_R_inv = S.modp_inv2_prime (pow2 256) S.prime
 let from_mont (a:int) : S.felem = a * fmont_R_inv % S.prime
 let to_mont   (a:int) : S.felem = a * fmont_R % S.prime
 
-let from_mont_point (a:tuple3 nat nat nat) : S.jacob_point =
-  let x, y, z = a in from_mont x, from_mont y, from_mont z
-
 
 val lemma_to_from_mont_id: a:S.felem -> Lemma (from_mont (to_mont a) == a)
 let lemma_to_from_mont_id a =

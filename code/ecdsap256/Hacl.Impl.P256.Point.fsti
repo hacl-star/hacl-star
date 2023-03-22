@@ -18,6 +18,10 @@ module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
+let from_mont_point (a:tuple3 nat nat nat) : S.jacob_point =
+  let x, y, z = a in SM.from_mont x, SM.from_mont y, SM.from_mont z
+
+
 ///  Affine coordinates
 
 inline_for_extraction noextract
@@ -135,13 +139,13 @@ val create_point: unit -> StackInline point
 val make_base_point: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\ SM.from_mont_point (as_point_nat h1 p) == S.base_point)
+    point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.base_point)
 
 
 val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\ SM.from_mont_point (as_point_nat h1 p) == S.point_at_inf)
+    point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.point_at_inf)
 
 
 inline_for_extraction noextract
@@ -163,7 +167,7 @@ val create_aff_point: unit -> StackInline aff_point
 val is_point_at_inf: p:point -> Stack uint64
   (requires fun h -> live h p /\ point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if S.is_point_at_inf (SM.from_mont_point (as_point_nat h0 p))
+    (if S.is_point_at_inf (from_mont_point (as_point_nat h0 p))
      then v r = ones_v U64 else v r = 0) /\
     (if S.is_point_at_inf (as_point_nat h0 p)
      then v r = ones_v U64 else v r = 0))
@@ -182,10 +186,10 @@ val copy_point_conditional: res:point -> p:point -> q_mask:point -> Stack unit
     point_inv h res /\ point_inv h p /\ point_inv h q_mask)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) =
-   (if S.is_point_at_inf (SM.from_mont_point (as_point_nat h0 q_mask))
-    then SM.from_mont_point (as_point_nat h0 p)
-    else SM.from_mont_point (as_point_nat h0 res)))
+    from_mont_point (as_point_nat h1 res) =
+   (if S.is_point_at_inf (from_mont_point (as_point_nat h0 q_mask))
+    then from_mont_point (as_point_nat h0 p)
+    else from_mont_point (as_point_nat h0 res)))
 
 
 ///  Point conversion between Montgomery and Regular representations
@@ -223,7 +227,7 @@ val norm_jacob_point_x: p:point -> res:felem -> Stack unit
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1  /\
-   (let rx, _, _ = S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)) in
+   (let rx, _, _ = S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) in
     as_nat h1 res == rx))
 
 
@@ -233,7 +237,7 @@ val norm_jacob_point: p:point -> res:point -> Stack unit
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_point_nat h1 res ==
-      S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)))
+      S.norm_jacob_point (from_mont_point (as_point_nat h0 p)))
 
 
 val to_jacob_point: p:aff_point -> res:point -> Stack unit
@@ -253,8 +257,8 @@ val is_point_eq_vartime: p:point -> q:point -> Stack bool
     point_inv h p /\ point_inv h q)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r =
-      (S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 p)) =
-       S.norm_jacob_point (SM.from_mont_point (as_point_nat h0 q))))
+      (S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) =
+       S.norm_jacob_point (from_mont_point (as_point_nat h0 q))))
 
 
 ///  Check if a point is on the curve

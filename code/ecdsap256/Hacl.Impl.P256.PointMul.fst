@@ -109,9 +109,9 @@ val montgomery_ladder_step1: p:point -> q:point -> tmp:lbuffer uint64 88ul -> St
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tmp) h0 h1 /\
     point_inv h1 p /\ point_inv h1 q /\
-    (SM.from_mont_point (as_point_nat h1 p), SM.from_mont_point (as_point_nat h1 q)) ==
+    (from_mont_point (as_point_nat h1 p), from_mont_point (as_point_nat h1 q)) ==
      S._ml_step1
-      (SM.from_mont_point (as_point_nat h0 p)) (SM.from_mont_point (as_point_nat h0 q)))
+      (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
 
 let montgomery_ladder_step1 r0 r1 tmp =
   let tmp32 = sub tmp 0ul 32ul in
@@ -133,9 +133,9 @@ val montgomery_ladder_step:
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tmp) h0 h1 /\
     point_inv h1 p /\ point_inv h1 q /\
-    (SM.from_mont_point (as_point_nat h1 p), SM.from_mont_point (as_point_nat h1 q)) ==
+    (from_mont_point (as_point_nat h1 p), from_mont_point (as_point_nat h1 q)) ==
      S._ml_step (as_seq h0 scalar) (v i)
-      (SM.from_mont_point (as_point_nat h0 p), SM.from_mont_point (as_point_nat h0 q)))
+      (from_mont_point (as_point_nat h0 p), from_mont_point (as_point_nat h0 q)))
 
 let montgomery_ladder_step r0 r1 tmp scalar i =
   let bit0 = 255ul -. i in
@@ -156,11 +156,11 @@ val montgomery_ladder: p:point -> q:point
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tmp) h0 h1 /\
     (point_inv h1 p /\ point_inv h1 q /\
-    (let p1 = SM.from_mont_point (as_point_nat h1 p) in
-     let q1 = SM.from_mont_point (as_point_nat h1 q) in
+    (let p1 = from_mont_point (as_point_nat h1 p) in
+     let q1 = from_mont_point (as_point_nat h1 q) in
      let rN, qN =
        S.montgomery_ladder_spec (as_seq h0 scalar)
-         (SM.from_mont_point (as_point_nat h0 p), SM.from_mont_point (as_point_nat h0 q)) in
+         (from_mont_point (as_point_nat h0 p), from_mont_point (as_point_nat h0 q)) in
        rN == p1 /\ qN == q1)))
 
 [@CInline]
@@ -172,7 +172,7 @@ let montgomery_ladder p q scalar tmp =
 
   [@inline_let]
   let acc (h:mem) : GTot (tuple2 S.jacob_point S.jacob_point) =
-  (SM.from_mont_point(as_point_nat h p), SM.from_mont_point(as_point_nat h q))  in
+  (from_mont_point(as_point_nat h p), from_mont_point(as_point_nat h q))  in
 
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
   [@inline_let]
@@ -194,7 +194,7 @@ val lemma_point_to_domain: h0:mem -> h1:mem -> p:point -> res:point ->  Lemma
     point_x_as_nat h1 res == SM.to_mont (point_x_as_nat h0 p) /\
     point_y_as_nat h1 res == SM.to_mont (point_y_as_nat h0 p) /\
     point_z_as_nat h1 res == SM.to_mont (point_z_as_nat h0 p))
-  (ensures (SM.from_mont_point (as_point_nat h1 res) == as_point_nat h0 p))
+  (ensures (from_mont_point (as_point_nat h1 res) == as_point_nat h0 p))
 
 let lemma_point_to_domain h0 h1 p res =
   SM.lemma_to_from_mont_id (point_x_as_nat h0 p);
@@ -210,7 +210,7 @@ val scalarMultiplicationWithoutNorm: p:point -> res:point -> scalar:lbuffer uint
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) ==
+    from_mont_point (as_point_nat h1 res) ==
       fst (S.montgomery_ladder_spec (as_seq h0 scalar) (S.point_at_inf, as_point_nat h0 p)))
 
 [@CInline]
@@ -297,15 +297,15 @@ let point_mul_double_g res scalar1 scalar2 p =
   point_mul_g sg1 scalar1; // sg1 = [scalar1]G
   point_mul sp2 p scalar2; // sp2 = [scalar2]P
   let h1 = ST.get () in
-  assert (SM.from_mont_point (as_point_nat h1 sg1) ==
+  assert (from_mont_point (as_point_nat h1 sg1) ==
     S.point_mul_g (as_nat h0 scalar1));
-  assert (SM.from_mont_point (as_point_nat h1 sp2) ==
+  assert (from_mont_point (as_point_nat h1 sp2) ==
     S.point_mul (as_nat h0 scalar2) (as_point_nat h0 p));
 
   let is_points_eq = is_point_eq_vartime sg1 sp2 in
   assert (is_points_eq =
-    (S.norm_jacob_point (SM.from_mont_point (as_point_nat h1 sg1)) =
-     S.norm_jacob_point (SM.from_mont_point (as_point_nat h1 sp2))));
+    (S.norm_jacob_point (from_mont_point (as_point_nat h1 sg1)) =
+     S.norm_jacob_point (from_mont_point (as_point_nat h1 sp2))));
 
   begin
   if is_points_eq

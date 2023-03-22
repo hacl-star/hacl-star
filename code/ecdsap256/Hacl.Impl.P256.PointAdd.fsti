@@ -22,5 +22,5 @@ val point_add: p:point -> q:point -> res:point -> tmp:lbuffer uint64 32ul -> Sta
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc tmp |+| loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) ==
-    S.point_add (SM.from_mont_point (as_point_nat h0 p)) (SM.from_mont_point (as_point_nat h0 q)))
+    from_mont_point (as_point_nat h1 res) ==
+    S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))

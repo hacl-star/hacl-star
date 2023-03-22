@@ -27,8 +27,8 @@ val point_add_u12_s12: u1:felem -> u2:felem -> s1:felem -> s2:felem -> p:point -
     modifies (loc u1 |+| loc u2 |+| loc s1 |+| loc s2) h0 h1 /\
     as_nat h1 u1 < S.prime /\ as_nat h1 u2 < S.prime /\
     as_nat h1 s1 < S.prime /\ as_nat h1 s2 < S.prime /\
-    (let px, py, pz = SM.from_mont_point (as_point_nat h0 p) in
-    let qx, qy, qz = SM.from_mont_point (as_point_nat h0 q) in
+    (let px, py, pz = from_mont_point (as_point_nat h0 p) in
+    let qx, qy, qz = from_mont_point (as_point_nat h0 q) in
     let z2z2 = S.fmul qz qz in
     let z1z1 = S.fmul pz pz in
     fmont_as_nat h1 u1 == S.fmul px z2z2 /\
@@ -181,8 +181,8 @@ val point_add_no_point_at_inf:
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc tmp |+| loc res) h0 h1 /\
     point_inv h1 res /\
-    SM.from_mont_point (as_point_nat h1 res) == S.point_add_no_point_at_inf
-      (SM.from_mont_point (as_point_nat h0 p)) (SM.from_mont_point (as_point_nat h0 q)))
+    from_mont_point (as_point_nat h1 res) == S.point_add_no_point_at_inf
+      (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
 
 let point_add_no_point_at_inf p q res tmp =
   let z1 = getz p in
@@ -217,10 +217,10 @@ val point_add_condional_branch: p:point -> q:point -> res:point -> Stack unit
     point_inv h p /\ point_inv h q /\ point_inv h res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-   (let p = SM.from_mont_point (as_point_nat h0 p) in
-    let q = SM.from_mont_point (as_point_nat h0 q) in
-    let r = SM.from_mont_point (as_point_nat h0 res) in
-    SM.from_mont_point (as_point_nat h1 res) ==
+   (let p = from_mont_point (as_point_nat h0 p) in
+    let q = from_mont_point (as_point_nat h0 q) in
+    let r = from_mont_point (as_point_nat h0 res) in
+    from_mont_point (as_point_nat h1 res) ==
       (if S.is_point_at_inf q then p else if S.is_point_at_inf p then q else r)))
 
 let point_add_condional_branch p q res =
