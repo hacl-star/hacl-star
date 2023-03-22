@@ -21,9 +21,9 @@ module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 
 module S = Spec.P256
-//module SM = Hacl.Spec.P256.Montgomery
-module SB = Hacl.Spec.P256.Bignum
 module SI = Hacl.Spec.P256.Finv
+module SB = Hacl.Spec.P256.Bignum
+module SM = Hacl.Spec.P256.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -179,7 +179,7 @@ let make_prime_minus_2 b =
 
 
 [@CInline]
-let finv a res =
+let finv res a =
   push_frame ();
   let b = create 4ul (u64 0) in
   make_prime_minus_2 b;
@@ -210,7 +210,7 @@ let make_prime_plus_1_div_4 b =
 
 
 [@CInline]
-let fsqrt a res =
+let fsqrt res a =
   push_frame ();
   let b = create 4ul (u64 0) in
   make_prime_plus_1_div_4 b;

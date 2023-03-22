@@ -12,11 +12,10 @@ open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 
 module S = Spec.P256
-module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val finv: a:felem -> res:felem -> Stack unit
+val finv: res:felem -> a:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.prime)
@@ -25,7 +24,7 @@ val finv: a:felem -> res:felem -> Stack unit
     fmont_as_nat h1 res = S.finv (fmont_as_nat h0 a))
 
 
-val fsqrt: a:felem -> res:felem -> Stack unit
+val fsqrt: res:felem -> a:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.prime)

@@ -400,7 +400,7 @@ let recover_y_vartime_candidate y x =
   SM.lemma_to_from_mont_id (as_nat h0 x);
   Hacl.Impl.P256.Core.to_mont xM x;
   compute_rp_ec_equation xM y2M; // y2M = x *% x *% x +% S.a_coeff *% x +% S.b_coeff
-  fsqrt y2M yM; // yM = fsqrt y2M
+  fsqrt yM y2M; // yM = fsqrt y2M
   let h1 = ST.get () in
   from_mont y yM;
   let is_y_valid = is_y_sqr_is_y2_vartime y2M yM in
