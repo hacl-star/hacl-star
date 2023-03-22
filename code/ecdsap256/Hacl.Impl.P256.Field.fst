@@ -17,8 +17,6 @@ module SM = Hacl.Spec.P256.Montgomery
 
 module BD = Hacl.Spec.Bignum.Definitions
 module BM = Hacl.Bignum.Montgomery
-module SBM = Hacl.Spec.Bignum.Montgomery
-module SBML = Hacl.Spec.Montgomery.Lemmas
 
 friend Hacl.Bignum256
 
@@ -143,64 +141,7 @@ let fnegate_conditional_vartime f is_negate =
   pop_frame ()
 
 
-//----------
-
-val mont_R_inv_is_bn_mont_d: unit -> Lemma
-  (requires S.prime % 2 = 1)
-  (ensures  (let d, _ = SBML.eea_pow2_odd 256 S.prime in SM.fmont_R_inv == d % S.prime))
-
-let mont_R_inv_is_bn_mont_d () =
-  let d, k = SBML.eea_pow2_odd 256 S.prime in
-  SBML.mont_preconditions_d 64 4 S.prime;
-  assert (d * pow2 256 % S.prime = 1);
-
-  assert_norm (SM.fmont_R * SM.fmont_R_inv % S.prime = 1);
-  Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) SM.fmont_R_inv S.prime;
-  assert (SM.fmont_R_inv * pow2 256 % S.prime = 1);
-
-  assert (SM.fmont_R_inv * pow2 256 % S.prime = d * pow2 256 % S.prime);
-  SM.lemma_mod_mul_pow256_prime SM.fmont_R_inv d;
-  assert (SM.fmont_R_inv % S.prime == d % S.prime);
-  Math.Lemmas.modulo_lemma SM.fmont_R_inv S.prime;
-  assert (SM.fmont_R_inv == d % S.prime)
-
-
-val lemma_prime_mont: unit ->
-  Lemma (S.prime % 2 = 1 /\ S.prime < pow2 256 /\ (1 + S.prime) % pow2 64 = 0)
-
-let lemma_prime_mont () =
-  assert_norm (S.prime % 2 = 1);
-  assert_norm (S.prime < pow2 256);
-  assert_norm ((1 + S.prime) % pow2 64 = 0)
-
-
-val mont_reduction_lemma: x:Lib.Sequence.lseq uint64 8 -> n:Lib.Sequence.lseq uint64 4 -> Lemma
-  (requires BD.bn_v n = S.prime /\ BD.bn_v x < S.prime * S.prime)
-  (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 1) x) == BD.bn_v x * SM.fmont_R_inv % S.prime)
-
-let mont_reduction_lemma x n =
-  lemma_prime_mont ();
-  assert (SBM.bn_mont_pre n (u64 1));
-  let d, _ = SBML.eea_pow2_odd 256 (BD.bn_v n) in
-
-  let res = SBM.bn_mont_reduction n (u64 1) x in
-  assert_norm (S.prime * S.prime < S.prime * pow2 256);
-  assert (BD.bn_v x < S.prime * pow2 256);
-
-  SBM.bn_mont_reduction_lemma n (u64 1) x;
-  assert (BD.bn_v res == SBML.mont_reduction 64 4 (BD.bn_v n) 1 (BD.bn_v x));
-  SBML.mont_reduction_lemma 64 4 (BD.bn_v n) 1 (BD.bn_v x);
-  assert (BD.bn_v res == BD.bn_v x * d % S.prime);
-  calc (==) {
-    (BD.bn_v x) * d % S.prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (BD.bn_v x) d S.prime }
-    (BD.bn_v x) * (d % S.prime) % S.prime;
-    (==) { mont_R_inv_is_bn_mont_d () }
-    (BD.bn_v x) * SM.fmont_R_inv % S.prime;
-  }
-
-
-val mont_reduction: x:widefelem -> res:felem -> Stack unit
+val mont_reduction: res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
     wide_as_nat h x < S.prime * S.prime)
@@ -208,7 +149,7 @@ val mont_reduction: x:widefelem -> res:felem -> Stack unit
     as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime)
 
 [@CInline]
-let mont_reduction x res =
+let mont_reduction res x =
   push_frame ();
   let n = create_felem () in
   make_prime n;
@@ -220,13 +161,11 @@ let mont_reduction x res =
   SB.bn_v_is_wide_as_nat (as_seq h0 x);
   assert (BD.bn_v (as_seq h0 n) == as_nat h0 n);
   assert (BD.bn_v (as_seq h0 x) == wide_as_nat h0 x);
-  mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
+  SM.bn_mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
   assert (BD.bn_v (as_seq h1 res) == BD.bn_v (as_seq h0 x) * SM.fmont_R_inv % S.prime);
   SB.bn_v_is_as_nat (as_seq h1 res);
   assert (as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime);
   pop_frame ()
-
-//---------------------
 
 
 [@CInline]
@@ -241,7 +180,7 @@ let from_mont res a =
   let h1 = ST.get () in
   assert (wide_as_nat h0 tmp = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
   assert_norm (S.prime < S.prime * S.prime);
-  mont_reduction tmp res;
+  mont_reduction res tmp;
   pop_frame ()
 
 
@@ -253,7 +192,7 @@ let fmul res x y =
   bn_mul4 tmp x y;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 y) S.prime;
-  mont_reduction tmp res;
+  mont_reduction res tmp;
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
@@ -266,11 +205,10 @@ let fsqr res x =
   bn_sqr4 tmp x;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.prime;
-  mont_reduction tmp res;
+  mont_reduction res tmp;
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()
 
-//----------------------------------------------
 
 [@CInline]
 let fcube res x =

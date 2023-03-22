@@ -1,8 +1,13 @@
 module Hacl.Spec.P256.Montgomery
 
 open FStar.Mul
+open Lib.IntTypes
 
 module S = Spec.P256
+module LSeq = Lib.Sequence
+
+module BD = Hacl.Spec.Bignum.Definitions
+module SBM = Hacl.Spec.Bignum.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -14,10 +19,10 @@ let fmont_R_inv = S.modp_inv2_prime (pow2 256) S.prime
 let from_mont (a:int) : S.felem = a * fmont_R_inv % S.prime
 let to_mont   (a:int) : S.felem = a * fmont_R % S.prime
 
-// used in Hacl.Impl.P256.Field
-val lemma_mod_mul_pow256_prime: a:int -> b:int -> Lemma
-  (requires a * pow2 256 % S.prime = b * pow2 256 % S.prime)
-  (ensures  a % S.prime == b % S.prime)
+val bn_mont_reduction_lemma: x:LSeq.lseq uint64 8 -> n:LSeq.lseq uint64 4 -> Lemma
+  (requires BD.bn_v n = S.prime /\ BD.bn_v x < S.prime * S.prime)
+  (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 1) x) == BD.bn_v x * fmont_R_inv % S.prime)
+
 
 // used in Hacl.Impl.P256.Point
 val lemma_multiplication_not_mod_prime: a:S.felem ->
