@@ -330,21 +330,7 @@ let is_point_on_curve_vartime p =
 let aff_store_point res p =
   let px = aff_getx p in
   let py = aff_gety p in
-
-  let h0 = ST.get () in
-  update_sub_f h0 res 0ul 32ul
-    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 px))
-    (fun _ -> bn_to_bytes_be4 (sub res 0ul 32ul) px);
-
-  let h1 = ST.get () in
-  update_sub_f h1 res 32ul 32ul
-    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 py))
-    (fun _ -> bn_to_bytes_be4 (sub res 32ul 32ul) py);
-
-  let h2 = ST.get () in
-  let px = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 px)) in
-  let py = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 py)) in
-  LSeq.eq_intro (as_seq h2 res) (LSeq.concat #_ #32 #32 px py)
+  bn2_to_bytes_be4 res px py
 
 
 inline_for_extraction noextract

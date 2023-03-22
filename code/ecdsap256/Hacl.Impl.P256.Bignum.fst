@@ -215,3 +215,21 @@ let bn_from_bytes_be4 res b =
   Hacl.Bignum.Convert.mk_bn_from_bytes_be true 32ul b res;
   let h1 = ST.get () in
   bn_v_is_as_nat (as_seq h1 res)
+
+
+[@CInline]
+let bn2_to_bytes_be4 res x y =
+  let h0 = ST.get () in
+  update_sub_f h0 res 0ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 x))
+    (fun _ -> bn_to_bytes_be4 (sub res 0ul 32ul) x);
+
+  let h1 = ST.get () in
+  update_sub_f h1 res 32ul 32ul
+    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 y))
+    (fun _ -> bn_to_bytes_be4 (sub res 32ul 32ul) y);
+
+  let h2 = ST.get () in
+  let x = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 x)) in
+  let y = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 y)) in
+  LSeq.eq_intro (as_seq h2 res) (LSeq.concat #_ #32 #32 x y)

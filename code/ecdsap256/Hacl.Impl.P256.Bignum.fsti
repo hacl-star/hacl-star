@@ -192,3 +192,13 @@ val bn_from_bytes_be4: res:felem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h -> live h b /\ live h res /\ disjoint b res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == BSeq.nat_from_bytes_be (as_seq h0 b))
+
+
+val bn2_to_bytes_be4: res:lbuffer uint8 64ul -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    disjoint x res /\ disjoint y res /\
+    as_nat h x < pow2 256 /\ as_nat h y < pow2 256)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == LSeq.concat #uint8 #32 #32
+      (BSeq.nat_to_bytes_be 32 (as_nat h0 x)) (BSeq.nat_to_bytes_be 32 (as_nat h0 y)))

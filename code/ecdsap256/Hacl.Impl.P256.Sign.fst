@@ -245,34 +245,6 @@ let ecdsa_sign_load d_a k_q private_key nonce =
 
 
 inline_for_extraction noextract
-val ecdsa_sign_store (signature:lbytes 64ul) (r_q s_q:felem) : Stack unit
-  (requires fun h ->
-    live h signature /\ live h r_q /\ live h s_q /\
-    disjoint signature r_q /\ disjoint signature s_q /\
-    as_nat h r_q < S.order /\ as_nat h s_q < S.order)
-  (ensures fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
-   (let r = BSeq.nat_to_bytes_be 32 (as_nat h0 r_q) in
-    let s = BSeq.nat_to_bytes_be 32 (as_nat h0 s_q) in
-    as_seq h1 signature == LSeq.concat #_ #32 #32 r s))
-
-let ecdsa_sign_store signature r_q s_q =
-  let h0 = ST.get () in
-  update_sub_f h0 signature 0ul 32ul
-    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h0 r_q))
-    (fun _ -> bn_to_bytes_be4 (sub signature 0ul 32ul) r_q);
-
-  let h1 = ST.get () in
-  update_sub_f h1 signature 32ul 32ul
-    (fun h -> BSeq.nat_to_bytes_be 32 (as_nat h1 s_q))
-    (fun _ -> bn_to_bytes_be4 (sub signature 32ul 32ul) s_q);
-
-  let h2 = ST.get () in
-  let r = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 r_q)) in
-  let s = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 s_q)) in
-  LSeq.eq_intro (as_seq h2 signature) (LSeq.concat #_ #32 #32 r s)
-
-
-inline_for_extraction noextract
 val check_signature: r_q:felem -> s_q:felem -> Stack bool
   (requires fun h ->
     live h r_q /\ live h s_q /\ disjoint r_q s_q)
@@ -326,7 +298,7 @@ let ecdsa_signature alg signature msg_len msg private_key nonce =
   msg_as_felem alg msg_len msg m_q;
   ecdsa_sign_r r_q k_q;
   ecdsa_sign_s s_q k_q r_q d_a m_q;
-  ecdsa_sign_store signature r_q s_q;
+  bn2_to_bytes_be4 signature r_q s_q;
   let res = check_signature r_q s_q in
   pop_frame ();
   res
