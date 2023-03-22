@@ -22,6 +22,7 @@ module BE = Hacl.Impl.Exponentiation
 
 module S = Spec.P256
 //module SM = Hacl.Spec.P256.MontgomeryMultiplication
+module SB = Hacl.Spec.P256.Bignum
 module SI = Hacl.Spec.P256.Finv
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -32,11 +33,11 @@ let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 unfold
 let linv (a:LSeq.lseq uint64 4) : Type0 =
   let open Lib.Sequence in
-  felem_seq_as_nat a < S.prime
+  SB.felem_seq_as_nat a < S.prime
 
 unfold
 let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.felem =
-  felem_seq_as_nat a
+  SB.felem_seq_as_nat a
 
 
 inline_for_extraction noextract
@@ -146,8 +147,8 @@ val fexp_vartime (out a b:felem) : Stack unit
 let fexp_vartime out a b =
   let h0 = ST.get () in
   assert_norm (pow2 5 = 32);
-  as_nat_bound h0 b;
-  bignum_bn_v_is_as_nat h0 b;
+  SB.as_nat_bound (as_seq h0 b);
+  SB.bn_v_is_as_nat (as_seq h0 b);
   BE.lexp_fw_vartime 4ul 0ul
     mk_p256_prime_concrete_ops 5ul (null uint64) a 4ul 256ul b out;
   let h1 = ST.get () in

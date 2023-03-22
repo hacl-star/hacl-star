@@ -8,11 +8,11 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Bignum
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
+module SB = Hacl.Spec.P256.Bignum
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 module BD = Hacl.Spec.Bignum.Definitions
@@ -115,13 +115,13 @@ let mont_reduction x res =
   let h0 = ST.get () in
   BM.bn_mont_reduction Hacl.Bignum256.bn_inst n (u64 1) x res;
   let h1 = ST.get () in
-  bignum_bn_v_is_as_nat h0 n;
-  bignum_bn_v_is_wide_as_nat h0 x;
+  SB.bn_v_is_as_nat (as_seq h0 n);
+  SB.bn_v_is_wide_as_nat (as_seq h0 x);
   assert (BD.bn_v (as_seq h0 n) == as_nat h0 n);
   assert (BD.bn_v (as_seq h0 x) == wide_as_nat h0 x);
   mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
   assert (BD.bn_v (as_seq h1 res) == BD.bn_v (as_seq h0 x) * SM.fmont_R_inv % S.prime);
-  bignum_bn_v_is_as_nat h1 res;
+  SB.bn_v_is_as_nat (as_seq h1 res);
   assert (as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime);
   pop_frame ()
 
@@ -148,7 +148,7 @@ let fmod_short x res =
   let h0 = ST.get () in
   let c = bn_sub4 x tmp tmp in
   bn_cmovznz4 c tmp x res;
-  as_nat_bound h0 x;
+  SB.as_nat_bound (as_seq h0 x);
   fmod_short_lemma (as_nat h0 x);
   pop_frame ()
 

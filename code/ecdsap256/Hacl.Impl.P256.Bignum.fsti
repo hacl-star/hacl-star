@@ -15,6 +15,19 @@ module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction
+let felem = lbuffer uint64 (size 4)
+inline_for_extraction
+let widefelem = lbuffer uint64 (size 8)
+
+unfold
+let as_nat (h:mem) (e:felem) : GTot nat = 
+  as_nat4 (as_felem4 (as_seq h e))
+
+unfold
+let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
+  wide_as_nat4 (as_felem8 (as_seq h e))
+
 ///  Create a bignum
 
 inline_for_extraction noextract
@@ -35,7 +48,7 @@ val create_widefelem: unit -> StackInline widefelem
 
 inline_for_extraction noextract
 val bn_make_u64_4: a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64
-  -> res:lbuffer uint64 (size 4) -> Stack unit
+  -> res:lbuffer uint64 4ul -> Stack unit
   (requires fun h -> live h res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192)
@@ -91,7 +104,6 @@ val bn_is_odd4: f:felem -> Stack uint64
 
 ///  Conditional copy
 
-// NOTE: changed precondition `eq_or_disjoint res x`
 val bn_copy_conditional4: res:felem -> x:felem
   -> mask:uint64{v mask = 0 \/ v mask = ones_v U64} -> Stack unit
   (requires fun h -> live h res /\ live h x /\ eq_or_disjoint res x)
@@ -119,7 +131,6 @@ val bn_add_mod4: x:felem -> y:felem -> n:felem -> res:felem -> Stack unit
     as_nat h1 res == (as_nat h0 x + as_nat h0 y) % as_nat h0 n)
 
 
-// NOTE: changed precondition `eq_or_disjoint x y`
 val bn_sub4: x:felem -> y:felem -> res:felem -> Stack uint64
   (requires fun h ->
     live h x /\ live h y /\ live h res /\

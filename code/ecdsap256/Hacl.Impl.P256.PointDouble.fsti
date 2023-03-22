@@ -7,7 +7,6 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Bignum
 open Hacl.Impl.P256.Point
 
 module S = Spec.P256

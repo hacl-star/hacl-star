@@ -7,12 +7,13 @@ open FStar.HyperStack
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Bignum
+open Hacl.Impl.P256.Bignum
 
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module S = Spec.P256
+module SB = Hacl.Spec.P256.Bignum
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
@@ -23,8 +24,8 @@ inline_for_extraction noextract
 let aff_point_seq = LSeq.lseq uint64 8
 
 let as_aff_point_nat_seq (p:aff_point_seq) =
-  felem_seq_as_nat (LSeq.sub p 0 4),
-  felem_seq_as_nat (LSeq.sub p 4 4)
+  SB.felem_seq_as_nat (LSeq.sub p 0 4),
+  SB.felem_seq_as_nat (LSeq.sub p 4 4)
 
 let aff_point_inv_seq (p:aff_point_seq) =
   let x, y = as_aff_point_nat_seq p in
@@ -69,9 +70,9 @@ inline_for_extraction noextract
 let point_seq = LSeq.lseq uint64 12
 
 let as_point_nat_seq (p:point_seq) =
-  felem_seq_as_nat (LSeq.sub p 0 4),
-  felem_seq_as_nat (LSeq.sub p 4 4),
-  felem_seq_as_nat (LSeq.sub p 8 4)
+  SB.felem_seq_as_nat (LSeq.sub p 0 4),
+  SB.felem_seq_as_nat (LSeq.sub p 4 4),
+  SB.felem_seq_as_nat (LSeq.sub p 8 4)
 
 let point_inv_seq (p:point_seq) =
   let x, y, z = as_point_nat_seq p in

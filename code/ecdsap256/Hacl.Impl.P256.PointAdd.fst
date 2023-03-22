@@ -13,7 +13,6 @@ open Hacl.Impl.P256.Field
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.MontgomeryMultiplication
-module SL = Hacl.Spec.P256.Math
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

@@ -19,6 +19,7 @@ let sub_mod n a b =
   Math.Lemmas.mod_add_both (a - b) 0 b n
 
 
+// used in Hacl.Impl.P256.Field
 val lemma_mod_mul_pow256_prime: a:int -> b:int -> Lemma
   (requires a * pow2 256 % S.prime = b * pow2 256 % S.prime)
   (ensures  a % S.prime == b % S.prime)
@@ -35,6 +36,7 @@ let lemma_mod_mul_pow256_prime a b =
   assert (a % S.prime = b % S.prime)
 
 
+// used in Hacl.Impl.P256.Scalar
 val lemma_mod_mul_pow256_order: a:int -> b:int -> Lemma
   (requires a * pow2 256 % S.order = b * pow2 256 % S.order)
   (ensures  a % S.order == b % S.order)
@@ -69,7 +71,7 @@ let lemma_multiplication_not_mod_prime_left a =
   Math.Lemmas.small_mod a S.prime
 
 
-// used in Hacl.Impl.P256.PointAdd, Hacl.Impl.P256.Point
+// used in Hacl.Impl.P256.Point
 val lemma_multiplication_not_mod_prime: a:S.felem ->
   Lemma (a * (S.modp_inv2_prime (pow2 256) S.prime) % S.prime == 0 <==> a == 0)
 

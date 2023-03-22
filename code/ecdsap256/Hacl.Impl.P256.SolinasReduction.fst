@@ -12,6 +12,7 @@ open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 
 module S = Spec.P256
+module SB = Hacl.Spec.P256.Bignum
 module SL = Hacl.Spec.P256.SolinasReduction.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -399,7 +400,7 @@ val lemma_opened: i:Lib.Sequence.lseq uint64 8 -> Lemma
    let c14 = get_low_part  i7 in
    let c15 = get_high_part i7 in
 
-   felem_wide_seq_as_nat i =
+   SB.widefelem_seq_as_nat i =
      v c0  * pow2 (0 * 32) +
      v c1  * pow2 (1 * 32) +
      v c2  * pow2 (2 * 32) +
@@ -537,7 +538,7 @@ let lemma_opened i =
   };
 
   calc (==) {
-    felem_wide_seq_as_nat i;
+    SB.widefelem_seq_as_nat i;
     == { }
     v i0 * pow2 (0 * 64) +
     v i1 * pow2 (1 * 64) +
