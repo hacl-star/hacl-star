@@ -6,12 +6,7 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let fmont_R = pow2 256
-let fmont_R_inv = S.modp_inv2_prime (pow2 256) S.prime
-
-let from_mont (a:int) : S.felem = a * fmont_R_inv % S.prime
-let to_mont   (a:int) : S.felem = a * fmont_R % S.prime
-
+///  Montgomery arithmetic for a base field
 
 val mod_sub: n:pos -> a:int -> b:int -> Lemma
   (requires a % n = b % n)
@@ -27,11 +22,6 @@ let sub_mod n a b =
   Math.Lemmas.mod_add_both (a - b) 0 b n
 
 
-// used in Hacl.Impl.P256.Field
-val lemma_mod_mul_pow256_prime: a:int -> b:int -> Lemma
-  (requires a * pow2 256 % S.prime = b * pow2 256 % S.prime)
-  (ensures  a % S.prime == b % S.prime)
-
 let lemma_mod_mul_pow256_prime a b =
   mod_sub S.prime (a * pow2 256) (b * pow2 256);
   assert (pow2 256 * (a - b) % S.prime = 0);
@@ -42,23 +32,6 @@ let lemma_mod_mul_pow256_prime a b =
   assert ((a - b) % S.prime = 0);
   sub_mod S.prime a b;
   assert (a % S.prime = b % S.prime)
-
-
-// used in Hacl.Impl.P256.Scalar
-val lemma_mod_mul_pow256_order: a:int -> b:int -> Lemma
-  (requires a * pow2 256 % S.order = b * pow2 256 % S.order)
-  (ensures  a % S.order == b % S.order)
-
-let lemma_mod_mul_pow256_order a b =
-  mod_sub S.order (a * pow2 256) (b * pow2 256);
-  assert (pow2 256 * (a - b) % S.order = 0);
-  let r = -43790243024438006127650828685417305984841428635278707415088219106730833919055 in
-  let s = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
-  assert_norm (r * S.order + s * pow2 256 = 1);
-  FStar.Math.Euclid.euclid S.order (pow2 256) (a - b) r s;
-  assert ((a - b) % S.order = 0);
-  sub_mod S.order a b;
-  assert (a % S.order = b % S.order)
 
 
 val lemma_multiplication_not_mod_prime_left: a:S.felem -> Lemma
@@ -79,15 +52,10 @@ let lemma_multiplication_not_mod_prime_left a =
   Math.Lemmas.small_mod a S.prime
 
 
-// used in Hacl.Impl.P256.Point
-val lemma_multiplication_not_mod_prime: a:S.felem ->
-  Lemma (a * (S.modp_inv2_prime (pow2 256) S.prime) % S.prime == 0 <==> a == 0)
-
 let lemma_multiplication_not_mod_prime a =
   Classical.move_requires lemma_multiplication_not_mod_prime_left a
 
 
-val lemma_to_from_mont_id: a:S.felem -> Lemma (from_mont (to_mont a) == a)
 let lemma_to_from_mont_id a =
   calc (==) {
     from_mont (to_mont a); // == a
@@ -106,7 +74,6 @@ let lemma_to_from_mont_id a =
   }
 
 
-val lemma_from_to_mont_id: a:S.felem -> Lemma (to_mont (from_mont a) == a)
 let lemma_from_to_mont_id a =
   calc (==) {
     to_mont (from_mont a); // == a
@@ -124,9 +91,6 @@ let lemma_from_to_mont_id a =
     a;
   }
 
-
-val fmont_mul_lemma: a:S.felem -> b:S.felem ->
-  Lemma (S.fmul (from_mont a) (from_mont b) = from_mont ((a * b * fmont_R_inv) % S.prime))
 
 let fmont_mul_lemma a b =
   calc (==) {
@@ -153,9 +117,6 @@ let fmont_mul_lemma a b =
   }
 
 
-val fmont_add_lemma: a:S.felem -> b:S.felem ->
-  Lemma (S.fadd (from_mont a) (from_mont b) = from_mont ((a + b) % S.prime))
-
 let fmont_add_lemma a b =
   calc (==) {
     (from_mont a + from_mont b) % S.prime;
@@ -171,9 +132,6 @@ let fmont_add_lemma a b =
     from_mont ((a + b) % S.prime);
   }
 
-
-val fmont_sub_lemma: a:S.felem -> b:S.felem ->
-  Lemma (S.fsub (from_mont a) (from_mont b) = from_mont ((a - b) % S.prime))
 
 let fmont_sub_lemma a b =
   calc (==) {
@@ -191,3 +149,17 @@ let fmont_sub_lemma a b =
     (==) { }
     from_mont ((a - b) % S.prime);
   }
+
+
+///  Montgomery arithmetic for a scalar field
+
+let lemma_mod_mul_pow256_order a b =
+  mod_sub S.order (a * pow2 256) (b * pow2 256);
+  assert (pow2 256 * (a - b) % S.order = 0);
+  let r = -43790243024438006127650828685417305984841428635278707415088219106730833919055 in
+  let s = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in
+  assert_norm (r * S.order + s * pow2 256 = 1);
+  FStar.Math.Euclid.euclid S.order (pow2 256) (a - b) r s;
+  assert ((a - b) % S.order = 0);
+  sub_mod S.order a b;
+  assert (a % S.order = b % S.order)
