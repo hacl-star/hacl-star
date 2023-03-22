@@ -21,7 +21,7 @@ module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 
 module S = Spec.P256
-//module SM = Hacl.Spec.P256.MontgomeryMultiplication
+//module SM = Hacl.Spec.P256.Montgomery
 module SB = Hacl.Spec.P256.Bignum
 module SI = Hacl.Spec.P256.Finv
 

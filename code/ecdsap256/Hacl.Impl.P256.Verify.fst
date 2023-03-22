@@ -20,7 +20,7 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module S = Spec.P256
-module SM = Hacl.Spec.P256.MontgomeryMultiplication
+module SM = Hacl.Spec.P256.Montgomery
 module PS = Hacl.Impl.P256.Sign
 module QI = Hacl.Impl.P256.Qinv
 

@@ -1,4 +1,4 @@
-module Hacl.Spec.P256.MontgomeryMultiplication
+module Hacl.Spec.P256.Montgomery
 
 open FStar.Mul
 

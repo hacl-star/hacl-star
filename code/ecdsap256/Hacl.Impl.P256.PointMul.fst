@@ -18,7 +18,7 @@ module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
 module S = Spec.P256
-module SM = Hacl.Spec.P256.MontgomeryMultiplication
+module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 

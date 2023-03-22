@@ -13,7 +13,7 @@ open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
 module SB = Hacl.Spec.P256.Bignum
-module SM = Hacl.Spec.P256.MontgomeryMultiplication
+module SM = Hacl.Spec.P256.Montgomery
 
 module BD = Hacl.Spec.Bignum.Definitions
 module BM = Hacl.Bignum.Montgomery
