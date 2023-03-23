@@ -158,7 +158,7 @@ let hash_ecdsa a msg_len msg =
 **)
 
 
-let validate_pubkey_point (pk:lbytes 64) : bool =
+let validate_public_key (pk:lbytes 64) : bool =
   Some? (load_point pk)
 
 
@@ -226,7 +226,7 @@ let ecdsa_signature_agile alg msg_len msg private_key nonce =
 let ecp256_dh_i (private_key:lbytes 32) : tuple2 (lbytes 64) bool =
   let sk = nat_from_bytes_be private_key in
   let x, y, z = norm_jacob_point (point_mul_g sk) in
-  aff_store_point (x, y), not (is_point_at_inf (x, y, z))
+  aff_point_store (x, y), not (is_point_at_inf (x, y, z))
 
 
 (* Responder *)
@@ -235,9 +235,9 @@ let ecp256_dh_r (their_public_key:lbytes 64) (private_key:lbytes 32) : tuple2 (l
   if Some? pk then
     let sk = nat_from_bytes_be private_key in
     let x, y, z = norm_jacob_point (point_mul sk (Some?.v pk)) in
-    aff_store_point (x, y), not (is_point_at_inf (x, y, z))
+    aff_point_store (x, y), not (is_point_at_inf (x, y, z))
   else
-    aff_store_point (0, 0), false
+    aff_point_store (0, 0), false
 
 
 ///  Parsing and Serializing public keys

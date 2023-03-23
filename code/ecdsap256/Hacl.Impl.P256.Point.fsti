@@ -269,7 +269,7 @@ val aff_point_store: res:lbuffer uint8 64ul -> p:aff_point -> Stack unit
     live h res /\ live h p /\ disjoint res p /\
     aff_point_inv h p)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.aff_store_point (as_aff_point_nat h0 p))
+    as_seq h1 res == S.aff_point_store (as_aff_point_nat h0 p))
 
 
 val load_point_vartime: res:point -> b:lbuffer uint8 64ul -> Stack bool

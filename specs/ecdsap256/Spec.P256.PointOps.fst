@@ -157,7 +157,7 @@ let load_point (b:BSeq.lbytes 64) : option jacob_point =
   if is_xy_on_curve then Some (to_jacob_point (pk_x, pk_y)) else None
 
 
-let aff_store_point (p:aff_point) : BSeq.lbytes 64 =
+let aff_point_store (p:aff_point) : BSeq.lbytes 64 =
   let (px, py) = p in
   let pxb = BSeq.nat_to_bytes_be 32 px in
   let pxy = BSeq.nat_to_bytes_be 32 py in

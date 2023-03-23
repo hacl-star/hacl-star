@@ -212,7 +212,7 @@ Comment "Validate a public key.
 val validate_public_key: public_key:lbuffer uint8 64ul -> Stack bool
   (requires fun h -> live h public_key)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.validate_pubkey_point (as_seq h0 public_key))
+    r == S.validate_public_key (as_seq h0 public_key))
 
 
 [@@ Comment "Validate a private key, e.g. prior to signing.
