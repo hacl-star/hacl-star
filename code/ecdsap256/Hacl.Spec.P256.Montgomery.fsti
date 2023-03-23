@@ -17,7 +17,6 @@ module SBM = Hacl.Spec.Bignum.Montgomery
 let fmont_R = pow2 256
 let fmont_R_inv = M.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)
 
-
 let from_mont (a:int) : S.felem = a * fmont_R_inv % S.prime
 let to_mont   (a:int) : S.felem = a * fmont_R % S.prime
 
@@ -25,11 +24,7 @@ val bn_mont_reduction_lemma: x:LSeq.lseq uint64 8 -> n:LSeq.lseq uint64 4 -> Lem
   (requires BD.bn_v n = S.prime /\ BD.bn_v x < S.prime * S.prime)
   (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 1) x) == BD.bn_v x * fmont_R_inv % S.prime)
 
-
-// used in Hacl.Impl.P256.Point
-val lemma_multiplication_not_mod_prime: a:S.felem ->
-  Lemma (a * fmont_R_inv % S.prime == 0 <==> a == 0)
-
+val lemma_from_mont_zero: a:S.felem -> Lemma (from_mont a == 0 <==> a == 0)
 val lemma_to_from_mont_id: a:S.felem -> Lemma (from_mont (to_mont a) == a)
 val lemma_from_to_mont_id: a:S.felem -> Lemma (to_mont (from_mont a) == a)
 
@@ -48,34 +43,31 @@ val fmont_sub_lemma: a:S.felem -> b:S.felem ->
 let qmont_R = pow2 256
 let qmont_R_inv = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2)
 
-// TODO: rename
-let fromDomain_ (a:nat) : S.qelem = a * qmont_R_inv % S.order
-let toDomain_   (a:nat) : S.qelem = a * qmont_R % S.order
+let from_qmont (a:nat) : S.qelem = a * qmont_R_inv % S.order
+let to_qmont   (a:nat) : S.qelem = a * qmont_R % S.order
 
-val qmont_reduction_lemma: x:LSeq.lseq uint64 8 -> n:LSeq.lseq uint64 4 -> Lemma
+val bn_qmont_reduction_lemma: x:LSeq.lseq uint64 8 -> n:LSeq.lseq uint64 4 -> Lemma
   (requires BD.bn_v n = S.order /\ BD.bn_v x < S.order * S.order)
   (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 0xccd1c8aaee00bc4f) x) ==
     BD.bn_v x * qmont_R_inv % S.order)
 
+val lemma_to_from_qmont_id: a:S.qelem -> Lemma (to_qmont (from_qmont a) == a)
+val lemma_from_to_qmont_id: a:S.qelem -> Lemma (from_qmont (to_qmont a) == a)
 
-val lemmaFromDomainToDomain: a:S.qelem -> Lemma (toDomain_ (fromDomain_ a) == a)
-val lemmaToDomainFromDomain: a:S.qelem -> Lemma (fromDomain_ (toDomain_ a) == a)
+val qmont_add_lemma: a:S.qelem -> b:S.qelem ->
+  Lemma (S.qadd (from_qmont a) (from_qmont b) = from_qmont ((a + b) % S.order))
 
-val qadd_lemma: a:S.qelem -> b:S.qelem ->
-  Lemma (S.qadd (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a + b) % S.order))
+val qmont_mul_lemma: a:S.qelem -> b:S.qelem ->
+  Lemma (S.qmul (from_qmont a) (from_qmont b) = from_qmont ((a * b * qmont_R_inv) % S.order))
 
-val qmul_lemma: a:S.qelem -> b:S.qelem ->
-  Lemma (S.qmul (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a * b * qmont_R_inv) % S.order))
+val qmont_inv_lemma: k:S.qelem ->
+  Lemma (S.qinv (from_qmont k) == to_qmont (S.qinv k))
 
-val lemma_mont_qinv: k:S.qelem ->
-  Lemma (S.qinv (fromDomain_ k) == toDomain_ (S.qinv k))
 
-val lemma_cancel_mont: a:S.qelem -> b:S.qelem ->
-  Lemma ((a * qmont_R % S.order * b * qmont_R_inv) % S.order = a * b % S.order)
-
+// TODO: rename
 val qmul_mont_lemma: s:S.qelem -> sinv:S.qelem -> b:S.qelem -> Lemma
-  (requires fromDomain_ sinv == S.qinv (fromDomain_ s))
-  (ensures  (sinv * fromDomain_ b * qmont_R_inv) % S.order == S.qinv s * b % S.order)
+  (requires from_qmont sinv == S.qinv (from_qmont s))
+  (ensures  (sinv * from_qmont b * qmont_R_inv) % S.order == S.qinv s * b % S.order)
 
 
 val lemma_ecdsa_sign_s (k kinv r d_a m:S.qelem) : Lemma

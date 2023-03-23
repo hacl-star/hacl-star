@@ -30,8 +30,8 @@ let make_qone f =
   [@inline_let] let f1 = u64 0x4319055258e8617b in
   [@inline_let] let f2 = u64 0x0 in
   [@inline_let] let f3 = u64 0xffffffff in
-  assert_norm (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192 == SM.toDomain_ 1);
-  assert_norm (SM.fromDomain_ (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192) == 1);
+  assert_norm (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192 == SM.to_qmont 1);
+  assert_norm (SM.from_qmont (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192) == 1);
   bn_make_u64_4 f f0 f1 f2 f3
 
 
@@ -102,7 +102,7 @@ let qadd res x y =
   bn_add_mod4 res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.order);
-  SM.qadd_lemma (as_nat h0 x) (as_nat h0 y);
+  SM.qmont_add_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
 
@@ -126,7 +126,7 @@ let qmont_reduction res x =
   SB.bn_v_is_wide_as_nat (as_seq h0 x);
   assert (BD.bn_v (as_seq h0 n) == as_nat h0 n);
   assert (BD.bn_v (as_seq h0 x) == wide_as_nat h0 x);
-  SM.qmont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
+  SM.bn_qmont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
   assert (BD.bn_v (as_seq h1 res) == BD.bn_v (as_seq h0 x) * SM.qmont_R_inv % S.order);
   SB.bn_v_is_as_nat (as_seq h1 res);
   assert (as_nat h1 res == wide_as_nat h0 x * SM.qmont_R_inv % S.order);
@@ -158,7 +158,7 @@ let qmul res x y =
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 y) S.order;
   qmont_reduction res tmp;
-  SM.qmul_lemma (as_nat h0 x) (as_nat h0 y);
+  SM.qmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
 
@@ -171,5 +171,5 @@ let qsqr res x =
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.order;
   qmont_reduction res tmp;
-  SM.qmul_lemma (as_nat h0 x) (as_nat h0 x);
+  SM.qmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()

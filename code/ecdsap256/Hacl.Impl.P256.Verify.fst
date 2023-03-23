@@ -37,7 +37,7 @@ val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
     as_nat h sinv < S.order /\ as_nat h b < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res < S.order /\
-    as_nat h1 res = (as_nat h0 sinv * SM.fromDomain_ (as_nat h0 b) * SM.qmont_R_inv) % S.order)
+    as_nat h1 res = (as_nat h0 sinv * SM.from_qmont (as_nat h0 b) * SM.qmont_R_inv) % S.order)
 
 [@CInline]
 let qmul_mont sinv b res =
@@ -46,7 +46,7 @@ let qmul_mont sinv b res =
   let tmp = create_felem () in
   from_qmont tmp b;
   let h1 = ST.get () in
-  assert (as_nat h1 tmp == SM.fromDomain_ (as_nat h0 b));
+  assert (as_nat h1 tmp == SM.from_qmont (as_nat h0 b));
   qmul res sinv tmp;
   let h2 = ST.get () in
   assert (as_nat h2 res = (as_nat h1 sinv * as_nat h1 tmp * SM.qmont_R_inv) % S.order);

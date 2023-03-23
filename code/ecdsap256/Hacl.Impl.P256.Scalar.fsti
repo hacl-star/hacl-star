@@ -15,14 +15,14 @@ module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-let qmont_as_nat (h:mem) (a:felem) = SM.fromDomain_ (as_nat h a)
+let qmont_as_nat (h:mem) (a:felem) = SM.from_qmont (as_nat h a)
 
 ///  Create one
 
 val make_qone: f:felem -> Stack unit
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
-    as_nat h1 f == SM.toDomain_ 1 /\
+    as_nat h1 f == SM.to_qmont 1 /\
     qmont_as_nat h1 f == 1)
 
 

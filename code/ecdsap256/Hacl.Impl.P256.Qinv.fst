@@ -35,7 +35,7 @@ let linv (a:LSeq.lseq uint64 4) : Type0 =
 
 unfold
 let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.qelem =
-  SM.fromDomain_ (SB.felem_seq_as_nat a)
+  SM.from_qmont (SB.felem_seq_as_nat a)
 
 
 inline_for_extraction noextract

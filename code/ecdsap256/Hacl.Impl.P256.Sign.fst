@@ -106,7 +106,7 @@ let ecdsa_sign_s s k r d_a m =
   QI.qinv kinv k;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 kinv == S.qinv (qmont_as_nat h0 k));
-  SM.lemma_mont_qinv (as_nat h0 k);
+  SM.qmont_inv_lemma (as_nat h0 k);
   assert (qmont_as_nat h1 kinv == S.qinv (as_nat h0 k) * SM.qmont_R % S.order);
 
   qmul s r d_a;  // s = r * d_a

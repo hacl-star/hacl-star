@@ -60,7 +60,7 @@ let lemma_mont_is_point_at_inf p =
   assert (SM.from_mont pz == pz * SM.fmont_R_inv % S.prime);
   assert_norm (SM.fmont_R_inv % S.prime <> 0);
   assert_norm (0 * SM.fmont_R_inv % S.prime == 0);
-  SM.lemma_multiplication_not_mod_prime pz;
+  SM.lemma_from_mont_zero pz;
   assert (if pz = 0 then SM.from_mont pz == 0 else SM.from_mont pz <> 0)
 
 
