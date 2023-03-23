@@ -51,8 +51,8 @@ val bn_qmont_reduction_lemma: x:LSeq.lseq uint64 8 -> n:LSeq.lseq uint64 4 -> Le
   (ensures  BD.bn_v (SBM.bn_mont_reduction n (u64 0xccd1c8aaee00bc4f) x) ==
     BD.bn_v x * qmont_R_inv % S.order)
 
-val lemma_to_from_qmont_id: a:S.qelem -> Lemma (to_qmont (from_qmont a) == a)
-val lemma_from_to_qmont_id: a:S.qelem -> Lemma (from_qmont (to_qmont a) == a)
+val lemma_to_from_qmont_id: a:S.qelem -> Lemma (from_qmont (to_qmont a) == a)
+val lemma_from_to_qmont_id: a:S.qelem -> Lemma (to_qmont (from_qmont a) == a)
 
 val qmont_add_lemma: a:S.qelem -> b:S.qelem ->
   Lemma (S.qadd (from_qmont a) (from_qmont b) = from_qmont ((a + b) % S.order))
