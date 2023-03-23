@@ -4,6 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 
 module S = Spec.P256
+module M = Lib.NatMod
 module LSeq = Lib.Sequence
 
 module BD = Hacl.Spec.Bignum.Definitions
@@ -14,7 +15,8 @@ module SBM = Hacl.Spec.Bignum.Montgomery
 ///  Montgomery arithmetic for a base field
 
 let fmont_R = pow2 256
-let fmont_R_inv = S.modp_inv2_prime (pow2 256) S.prime
+let fmont_R_inv = M.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)
+
 
 let from_mont (a:int) : S.felem = a * fmont_R_inv % S.prime
 let to_mont   (a:int) : S.felem = a * fmont_R % S.prime
@@ -44,7 +46,7 @@ val fmont_sub_lemma: a:S.felem -> b:S.felem ->
 ///  Montgomery arithmetic for a scalar field
 
 let qmont_R = pow2 256
-let qmont_R_inv = S.modp_inv2_prime (pow2 256) S.order
+let qmont_R_inv = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2)
 
 // TODO: rename
 let fromDomain_ (a:nat) : S.qelem = a * qmont_R_inv % S.order

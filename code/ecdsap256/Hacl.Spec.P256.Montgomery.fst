@@ -109,11 +109,11 @@ let bn_mont_reduction_lemma x n =
 //---------------------------
 
 val lemma_multiplication_not_mod_prime_left: a:S.felem -> Lemma
-  (requires a * (S.modp_inv2_prime (pow2 256) S.prime) % S.prime == 0)
+  (requires a * fmont_R_inv % S.prime == 0)
   (ensures a == 0)
 
 let lemma_multiplication_not_mod_prime_left a =
-  let b = S.modp_inv2_prime (pow2 256) S.prime in
+  let b = fmont_R_inv in
   Math.Lemmas.lemma_mod_mul_distr_r a b S.prime;
   assert (a * b % S.prime == a * (b % S.prime) % S.prime);
   let r = -26959946654596436328278158470660195847911760999080590586820792680449 in

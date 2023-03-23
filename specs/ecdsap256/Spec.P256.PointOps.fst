@@ -10,26 +10,6 @@ module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-//---------------------------------------
-// TODO: remove
-val pow: a:nat -> b:nat -> nat
-let rec pow a b =
-  if b = 0 then 1 else a * (pow a (b - 1))
-
-type elem (n:pos) = x:nat{x < n}
-let mul_n (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
-
-val exp: #n:pos -> a:elem n -> b:pos -> Tot (elem n) (decreases b)
-let rec exp #n a b =
-  if b = 1 then a
-  else
-    if b % 2 = 0 then exp (mul_n a a) (b / 2)
-    else mul_n a (exp (mul_n a a) (b / 2))
-
-let modp_inv2_prime (x:int) (p:nat{p > 3}) : elem p =
-  (exp #p (x % p) (p - 2)) % p
-//---------------------------------------
-
 ///  Base field
 
 // 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
