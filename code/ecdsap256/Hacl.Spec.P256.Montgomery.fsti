@@ -64,3 +64,21 @@ val qadd_lemma: a:S.qelem -> b:S.qelem ->
 
 val qmul_lemma: a:S.qelem -> b:S.qelem ->
   Lemma (S.qmul (fromDomain_ a) (fromDomain_ b) = fromDomain_ ((a * b * qmont_R_inv) % S.order))
+
+val lemma_mont_qinv: k:S.qelem ->
+  Lemma (S.qinv (fromDomain_ k) == toDomain_ (S.qinv k))
+
+val lemma_cancel_mont: a:S.qelem -> b:S.qelem ->
+  Lemma ((a * qmont_R % S.order * b * qmont_R_inv) % S.order = a * b % S.order)
+
+val qmul_mont_lemma: s:S.qelem -> sinv:S.qelem -> b:S.qelem -> Lemma
+  (requires fromDomain_ sinv == S.qinv (fromDomain_ s))
+  (ensures  (sinv * fromDomain_ b * qmont_R_inv) % S.order == S.qinv s * b % S.order)
+
+
+val lemma_ecdsa_sign_s (k kinv r d_a m:S.qelem) : Lemma
+  (requires
+    kinv * qmont_R_inv % S.order == S.qinv k * qmont_R % S.order)
+  (ensures
+   (let s = (m * qmont_R_inv % S.order + (r * d_a * qmont_R_inv) % S.order) % S.order in
+    (kinv * s * qmont_R_inv) % S.order == S.qmul (S.qinv k) (S.qadd m (S.qmul r d_a))))
