@@ -63,8 +63,7 @@ val lemma_from_to_mont_id_gen (n mont_R mont_R_inv:pos) (a:nat{a < n}) : Lemma
   (ensures  (a * mont_R_inv % n) * mont_R % n == a)
 
 let lemma_from_to_mont_id_gen n mont_R mont_R_inv a =
-  lemma_mod_mul_assoc n a mont_R_inv mont_R;
-  Math.Lemmas.modulo_lemma a n
+  lemma_to_from_mont_id_gen n mont_R_inv mont_R a
 
 
 val mont_mul_lemma_gen (n:pos) (mont_R_inv a b: nat) :
@@ -124,6 +123,58 @@ let mont_sub_lemma_gen n mont_R_inv a b =
     (==) { Math.Lemmas.lemma_mod_mul_distr_l (a - b) mont_R_inv n }
     (a - b) % n * mont_R_inv % n;
   }
+
+
+val lemma_mont_inv_gen (n:pos{1 < n}) (mont_R:pos) (mont_R_inv:nat{mont_R_inv < n}) (a:nat{a < n}) :
+  Lemma
+  (requires M.pow_mod #n mont_R_inv (n - 2) == mont_R % n)
+  (ensures  M.pow_mod #n (a * mont_R_inv % n) (n - 2) == M.pow_mod #n a (n - 2) * mont_R % n)
+
+let lemma_mont_inv_gen n mont_R mont_R_inv k =
+  M.lemma_pow_mod #n (k * mont_R_inv % n) (n - 2);
+  // assert (M.pow_mod #n (k * mont_R_inv % n) (n - 2) ==
+    // M.pow (k * mont_R_inv % n) (n - 2) % n);
+
+  M.lemma_pow_mod_base (k * mont_R_inv) (n - 2) n;
+  // == M.pow (k * mont_R_inv) (n - 2) % n
+  M.lemma_pow_mul_base k mont_R_inv (n - 2);
+  // == M.pow k (n - 2) * M.pow mont_R_inv (n - 2) % n
+  Math.Lemmas.lemma_mod_mul_distr_r (M.pow k (n - 2)) (M.pow mont_R_inv (n - 2)) n;
+  // == M.pow k (n - 2) * (M.pow mont_R_inv (n - 2) % n) % n
+  M.lemma_pow_mod #n mont_R_inv (n - 2);
+  assert (M.pow_mod #n (k * mont_R_inv % n) (n - 2) == M.pow k (n - 2) * (mont_R % n) % n);
+
+  Math.Lemmas.lemma_mod_mul_distr_r (M.pow k (n - 2)) mont_R n;
+  // == M.pow k (n - 2) * mont_R % n
+  Math.Lemmas.lemma_mod_mul_distr_l (M.pow k (n - 2)) mont_R n;
+  // == M.pow k (n - 2) % n * mont_R % n
+  M.lemma_pow_mod #n k (n - 2)
+
+
+val mont_cancel_lemma_gen (n:pos) (mont_R mont_R_inv a b:nat) : Lemma
+  (requires mont_R_inv * mont_R % n = 1)
+  (ensures (a * mont_R % n * b * mont_R_inv) % n = a * b % n)
+
+let mont_cancel_lemma_gen n mont_R mont_R_inv a b =
+  calc (==) {
+    (a * mont_R % n * b * mont_R_inv) % n;
+    (==) { Math.Lemmas.paren_mul_right (a * mont_R % n) b mont_R_inv }
+    (a * mont_R % n * (b * mont_R_inv)) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * mont_R) (b * mont_R_inv) n }
+    (a * mont_R * (b * mont_R_inv)) % n;
+    (==) { Math.Lemmas.paren_mul_right a mont_R (b * mont_R_inv);
+           Math.Lemmas.swap_mul mont_R (b * mont_R_inv) }
+    (a * (b * mont_R_inv * mont_R)) % n;
+    (==) { Math.Lemmas.paren_mul_right b mont_R_inv mont_R }
+    (a * (b * (mont_R_inv * mont_R))) % n;
+    (==) { Math.Lemmas.paren_mul_right a b (mont_R_inv * mont_R) }
+    (a * b * (mont_R_inv * mont_R)) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a * b) (mont_R_inv * mont_R) n }
+    (a * b * (mont_R_inv * mont_R % n)) % n;
+    (==) { assert (mont_R_inv * mont_R % n = 1) }
+    (a * b) % n;
+  }
+
 
 //--------------------------------------//
 // bn_mont_reduction is x * fmont_R_inv //
@@ -338,89 +389,60 @@ let qmont_inv_lemma k =
   assert_norm (M.pow_mod_ #S.order qmont_R_inv (S.order - 2) == qmont_R % S.order);
   M.pow_mod_def #S.order qmont_R_inv (S.order - 2);
   assert (M.pow_mod #S.order qmont_R_inv (S.order - 2) == qmont_R % S.order);
-
-  M.lemma_pow_mod #S.order (k * qmont_R_inv % S.order) (S.order - 2);
-  //assert (S.qinv (from_qmont k) ==
-    //(M.pow (k * qmont_R_inv % S.order) (S.order - 2)) % S.order);
-
-  M.lemma_pow_mod_base (k * qmont_R_inv) (S.order - 2) S.order;
-  // assert (S.qinv (from_qmont k) == (M.pow (k * qmont_R_inv) (S.order - 2)) % S.order);
-  M.lemma_pow_mul_base k qmont_R_inv (S.order - 2);
-  // assert (S.qinv (from_qmont k) ==
-    // (M.pow k (S.order - 2) * M.pow qmont_R_inv (S.order - 2)) % S.order);
-  Math.Lemmas.lemma_mod_mul_distr_r
-    (M.pow k (S.order - 2)) (M.pow qmont_R_inv (S.order - 2)) S.order;
-  // assert (S.qinv (from_qmont k) ==
-    // (M.pow k (S.order - 2) * M.pow qmont_R_inv (S.order - 2) % S.order) % S.order);
-  M.lemma_pow_mod #S.order qmont_R_inv (S.order - 2);
-  assert (S.qinv (from_qmont k) ==
-    (M.pow k (S.order - 2) * (qmont_R % S.order)) % S.order);
-  Math.Lemmas.lemma_mod_mul_distr_r (M.pow k (S.order - 2)) qmont_R S.order;
-  //assert (S.qinv (from_qmont k) == (M.pow k (S.order - 2) * qmont_R) % S.order);
-  Math.Lemmas.lemma_mod_mul_distr_l (M.pow k (S.order - 2)) qmont_R S.order;
-  //assert (S.qinv (from_qmont k) == (M.pow k (S.order - 2) % S.order * qmont_R) % S.order);
-  M.lemma_pow_mod #S.order k (S.order - 2)
+  lemma_mont_inv_gen S.order qmont_R qmont_R_inv k
 
 
-// from_mont ((to_qmont a) * b) = a * b % S.order
-val qmont_cancel_lemma: a:S.qelem -> b:S.qelem ->
+val qmont_cancel_lemma1: a:S.qelem -> b:S.qelem ->
   Lemma ((a * qmont_R % S.order * b * qmont_R_inv) % S.order = a * b % S.order)
 
-let qmont_cancel_lemma a b =
+let qmont_cancel_lemma1 a b =
+  assert_norm (qmont_R_inv * qmont_R % S.order = 1);
+  mont_cancel_lemma_gen S.order qmont_R qmont_R_inv a b
+
+
+val qmont_cancel_lemma2: a:S.qelem -> b:S.qelem ->
+  Lemma (to_qmont a * from_qmont b % S.order = a * b % S.order)
+
+let qmont_cancel_lemma2 a b =
   calc (==) {
-    (a * qmont_R % S.order * b * qmont_R_inv) % S.order;
-    (==) { Math.Lemmas.paren_mul_right (a * qmont_R % S.order) b qmont_R_inv }
+    to_qmont a * from_qmont b % S.order;
+    (==) { }
+    (a * qmont_R % S.order * (b * qmont_R_inv % S.order)) % S.order;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a * qmont_R % S.order) (b * qmont_R_inv) S.order }
     (a * qmont_R % S.order * (b * qmont_R_inv)) % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * qmont_R) (b * qmont_R_inv) S.order }
-    (a * qmont_R * (b * qmont_R_inv)) % S.order;
-    (==) { Math.Lemmas.paren_mul_right a qmont_R (b * qmont_R_inv);
-           Math.Lemmas.swap_mul qmont_R (b * qmont_R_inv) }
-    (a * (b * qmont_R_inv * qmont_R)) % S.order;
-    (==) { Math.Lemmas.paren_mul_right b qmont_R_inv qmont_R }
-    (a * (b * (qmont_R_inv * qmont_R))) % S.order;
-    (==) { Math.Lemmas.paren_mul_right a b (qmont_R_inv * qmont_R) }
-    (a * b * (qmont_R_inv * qmont_R)) % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a * b) (qmont_R_inv * qmont_R) S.order }
-    (a * b * (qmont_R_inv * qmont_R % S.order)) % S.order;
-    (==) { assert_norm (qmont_R_inv * qmont_R % S.order = 1) }
-    (a * b) % S.order;
+    (==) { Math.Lemmas.paren_mul_right (a * qmont_R % S.order) b qmont_R_inv }
+    (a * qmont_R % S.order * b * qmont_R_inv) % S.order;
+    (==) { qmont_cancel_lemma1 a b }
+    a * b % S.order;
   }
 
 
-let qmul_mont_lemma s sinv b =
+let qmont_inv_mul_lemma s sinv b =
   let s_mont = from_qmont s in
   let b_mont = from_qmont b in
   calc (==) {
     (sinv * b_mont * qmont_R_inv) % S.order;
     (==) { lemma_from_to_qmont_id sinv }
     (S.qinv s_mont * qmont_R % S.order * b_mont * qmont_R_inv) % S.order;
-    (==) { qmont_cancel_lemma (S.qinv s_mont) b_mont }
-    (S.qinv s_mont * b_mont) % S.order;
+    (==) { qmont_cancel_lemma1 (S.qinv s_mont) b_mont }
+    S.qinv s_mont * b_mont % S.order;
     (==) { qmont_inv_lemma s }
-    ((S.qinv s * qmont_R % S.order) * (b * qmont_R_inv % S.order)) % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r
-      (S.qinv s * qmont_R % S.order) (b * qmont_R_inv) S.order }
-    ((S.qinv s * qmont_R % S.order) * (b * qmont_R_inv)) % S.order;
-    (==) { Math.Lemmas.paren_mul_right (S.qinv s * qmont_R % S.order) b qmont_R_inv }
-    ((S.qinv s * qmont_R % S.order) * b * qmont_R_inv) % S.order;
-    (==) { qmont_cancel_lemma (S.qinv s) b }
+    (S.qinv s * qmont_R % S.order * (b * qmont_R_inv % S.order)) % S.order;
+    (==) { qmont_cancel_lemma2 (S.qinv s) b }
     S.qinv s * b % S.order;
   }
 
 
 let lemma_ecdsa_sign_s k kinv r d_a m =
-  let s = (m * qmont_R_inv % S.order + (r * d_a * qmont_R_inv) % S.order) % S.order in
+  let s = (from_qmont m + from_qmont (r * d_a)) % S.order in
   calc (==) { // s =
     (m * qmont_R_inv % S.order + (r * d_a * qmont_R_inv) % S.order) % S.order;
     (==) { Math.Lemmas.lemma_mod_mul_distr_l (r * d_a) qmont_R_inv S.order }
     (m * qmont_R_inv % S.order + (S.qmul r d_a * qmont_R_inv) % S.order) % S.order;
-    (==) { Math.Lemmas.modulo_distributivity (m * qmont_R_inv)
-      (S.qmul r d_a * qmont_R_inv) S.order }
-    (m * qmont_R_inv + S.qmul r d_a * qmont_R_inv) % S.order;
-    (==) { Math.Lemmas.distributivity_add_left m (S.qmul r d_a) qmont_R_inv }
-    (m + S.qmul r d_a) * qmont_R_inv % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (m + S.qmul r d_a) qmont_R_inv S.order }
+    (==) { qmont_add_lemma m (S.qmul r d_a) }
     (S.qadd m (S.qmul r d_a)) * qmont_R_inv % S.order;
+    (==) { }
+    from_qmont (S.qadd m (S.qmul r d_a));
     };
 
   calc (==) {
@@ -430,24 +452,7 @@ let lemma_ecdsa_sign_s k kinv r d_a m =
     (==) { Math.Lemmas.lemma_mod_mul_distr_l (kinv * qmont_R_inv) s S.order }
     ((kinv * qmont_R_inv % S.order) * s) % S.order;
     (==) { }
-    ((S.qinv k * qmont_R % S.order) * s) % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (S.qinv k * qmont_R) s S.order }
-    (S.qinv k * qmont_R * s) % S.order;
-    (==) { }
-    (S.qinv k * qmont_R * ((S.qadd m (S.qmul r d_a)) * qmont_R_inv % S.order)) % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (S.qinv k * qmont_R)
-      ((S.qadd m (S.qmul r d_a)) * qmont_R_inv) S.order }
-    (S.qinv k * qmont_R * ((S.qadd m (S.qmul r d_a)) * qmont_R_inv)) % S.order;
-    (==) { lemma_abc_is_acb (S.qinv k) qmont_R ((S.qadd m (S.qmul r d_a)) * qmont_R_inv) }
-    (S.qinv k * ((S.qadd m (S.qmul r d_a)) * qmont_R_inv) * qmont_R) % S.order;
-    (==) { Math.Lemmas.paren_mul_right (S.qinv k) (S.qadd m (S.qmul r d_a)) qmont_R_inv }
-    (S.qinv k * (S.qadd m (S.qmul r d_a)) * qmont_R_inv * qmont_R) % S.order;
-    (==) { Math.Lemmas.paren_mul_right (S.qinv k * (S.qadd m (S.qmul r d_a)))
-      qmont_R_inv qmont_R }
-    (S.qinv k * (S.qadd m (S.qmul r d_a)) * (qmont_R_inv * qmont_R)) % S.order;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (S.qinv k * (S.qadd m (S.qmul r d_a)))
-      (qmont_R_inv * qmont_R) S.order }
-    (S.qinv k * (S.qadd m (S.qmul r d_a)) * (qmont_R_inv * qmont_R % S.order)) % S.order;
-    (==) { assert_norm (qmont_R_inv * qmont_R % S.order = 1) }
+    to_qmont (S.qinv k) * s % S.order;
+    (==) { qmont_cancel_lemma2 (S.qinv k) (S.qadd m (S.qmul r d_a)) }
     (S.qinv k * (S.qadd m (S.qmul r d_a))) % S.order;
-    }
+  }

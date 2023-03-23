@@ -75,8 +75,8 @@ let ecdsa_verification_get_u12 u1 u2 r s z =
   //assert (as_nat h2 sinv * SM.qmont_R_inv % S.order ==
     //S.qinv (as_nat h1 sinv * SM.qmont_R_inv % S.order));
 
-  SM.qmul_mont_lemma (as_nat h0 s) (as_nat h1 sinv) (as_nat h0 z);
-  SM.qmul_mont_lemma (as_nat h0 s) (as_nat h1 sinv) (as_nat h0 r);
+  SM.qmont_inv_mul_lemma (as_nat h0 s) (as_nat h1 sinv) (as_nat h0 z);
+  SM.qmont_inv_mul_lemma (as_nat h0 s) (as_nat h1 sinv) (as_nat h0 r);
   qmul_mont sinv z u1;
   qmul_mont sinv r u2;
   pop_frame ()

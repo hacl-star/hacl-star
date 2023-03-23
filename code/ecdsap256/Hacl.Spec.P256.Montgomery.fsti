@@ -64,15 +64,12 @@ val qmont_inv_lemma: k:S.qelem ->
   Lemma (S.qinv (from_qmont k) == to_qmont (S.qinv k))
 
 
-// TODO: rename
-val qmul_mont_lemma: s:S.qelem -> sinv:S.qelem -> b:S.qelem -> Lemma
-  (requires from_qmont sinv == S.qinv (from_qmont s))
-  (ensures  (sinv * from_qmont b * qmont_R_inv) % S.order == S.qinv s * b % S.order)
+val qmont_inv_mul_lemma: s:S.qelem -> sinv:S.qelem -> b:S.qelem -> Lemma
+  (requires from_qmont sinv == S.qinv (from_qmont s)) // post-condition of qinv
+  (ensures  S.qinv s * b % S.order == from_qmont (sinv * from_qmont b))
 
 
 val lemma_ecdsa_sign_s (k kinv r d_a m:S.qelem) : Lemma
-  (requires
-    kinv * qmont_R_inv % S.order == S.qinv k * qmont_R % S.order)
-  (ensures
-   (let s = (m * qmont_R_inv % S.order + (r * d_a * qmont_R_inv) % S.order) % S.order in
-    (kinv * s * qmont_R_inv) % S.order == S.qmul (S.qinv k) (S.qadd m (S.qmul r d_a))))
+  (requires from_qmont kinv == to_qmont (S.qinv k))
+  (ensures (let s = (from_qmont m + from_qmont (r * d_a)) % S.order in
+   from_qmont (kinv * s) == S.qmul (S.qinv k) (S.qadd m (S.qmul r d_a))))
