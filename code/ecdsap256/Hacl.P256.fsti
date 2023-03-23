@@ -53,9 +53,9 @@ let ecdsa_verify_p256_st (alg:S.hash_alg_ecdsa) =
   Stack bool
   (requires fun h ->
     live h public_key /\ live h signature_r /\ live h signature_s /\ live h msg)
-  (ensures fun h0 result h1 -> modifies0 h0 h1 /\
-    result == S.ecdsa_verification_agile alg (as_seq h0 public_key)
-      (as_seq h0 signature_r) (as_seq h0 signature_s) (v msg_len) (as_seq h0 msg))
+  (ensures fun h0 res h1 -> modifies0 h0 h1 /\
+    res == S.ecdsa_verification_agile alg (v msg_len) (as_seq h0 msg)
+      (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
 
 
 [@@ CPrologue "

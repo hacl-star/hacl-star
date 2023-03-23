@@ -26,20 +26,8 @@ module QI = Hacl.Impl.P256.Qinv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// TODO: use variable time cmp with scalar
 inline_for_extraction noextract
-val are_r_and_s_valid: r:felem -> s:felem -> Stack bool
-  (requires fun h -> live h r /\ live h s)
-  (ensures  fun h0 res h1 -> modifies0 h0 h1 /\
-    res ==
-      (0 < as_nat h0 r && as_nat h0 r < S.order &&
-       0 < as_nat h0 s && as_nat h0 s < S.order))
-
-let are_r_and_s_valid r s =
-  let is_r_valid = bn_is_lt_order_and_gt_zero_mask4 r in
-  let is_s_valid = bn_is_lt_order_and_gt_zero_mask4 s in
-  Hacl.Bignum.Base.unsafe_bool_of_limb is_r_valid &&
-  Hacl.Bignum.Base.unsafe_bool_of_limb is_s_valid
+let lbytes len = lbuffer uint8 len
 
 
 val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
@@ -128,42 +116,64 @@ let ecdsa_verification_getx x pk u1 u2 =
   not is_res_point_at_inf
 
 
-inline_for_extraction
-val ecdsa_verification_core:
-    alg:S.hash_alg_ecdsa
-  -> pk:point
-  -> r:felem
-  -> s:felem
-  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
-  -> msg:lbuffer uint8 msg_len
-  -> x:felem ->
+// TODO: use variable time cmp with scalar
+inline_for_extraction noextract
+val load_signature (r_q s_q:felem) (sign_r sign_s:lbytes 32ul) : Stack bool
+  (requires fun h ->
+    live h sign_r /\ live h sign_s /\ live h r_q /\ live h s_q /\
+    disjoint r_q s_q /\ disjoint r_q sign_r /\ disjoint r_q sign_s /\
+    disjoint s_q sign_r /\ disjoint s_q sign_s)
+  (ensures fun h0 res h1 -> modifies (loc r_q |+| loc s_q) h0 h1 /\
+   (let r_q_nat = BSeq.nat_from_bytes_be (as_seq h0 sign_r) in
+    let s_q_nat = BSeq.nat_from_bytes_be (as_seq h0 sign_s) in
+    as_nat h1 r_q = r_q_nat /\ as_nat h1 s_q = s_q_nat /\
+    res == (0 < r_q_nat && r_q_nat < S.order && 0 < s_q_nat && s_q_nat < S.order)))
+
+let load_signature r_q s_q sign_r sign_s =
+  bn_from_bytes_be4 r_q sign_r;
+  bn_from_bytes_be4 s_q sign_s;
+  let is_r_valid = bn_is_lt_order_and_gt_zero_mask4 r_q in
+  let is_s_valid = bn_is_lt_order_and_gt_zero_mask4 s_q in
+  Hacl.Bignum.Base.unsafe_bool_of_limb is_r_valid &&
+  Hacl.Bignum.Base.unsafe_bool_of_limb is_s_valid
+
+
+val ecdsa_verify_msg_as_qelem:
+    m_q:felem
+  -> public_key:lbuffer uint8 64ul
+  -> signature_r:lbuffer uint8 32ul
+  -> signature_s:lbuffer uint8 32ul ->
   Stack bool
   (requires fun h ->
-    live h pk /\ live h r /\ live h s /\ live h msg /\ live h x /\
-    disjoint pk r /\ disjoint pk s /\ disjoint pk msg /\ disjoint pk x /\
-    disjoint x r /\ disjoint x s /\ disjoint x msg /\
-    as_nat h s < S.order /\ as_nat h r < S.order /\
-    point_inv h pk)
-  (ensures fun h0 b h1 -> modifies (loc x) h0 h1 /\
-    (let hashM = S.hash_ecdsa alg (v msg_len) (as_seq h0 msg) in
-    let z = BSeq.nat_from_bytes_be (LSeq.sub hashM 0 32) % S.order in
-    let sinv = S.qinv (as_nat h0 s) in
-    let u1 = sinv * z % S.order in
-    let u2 = sinv * as_nat h0 r % S.order in
-    let rx, ry, rz = S.norm_jacob_point (S.point_mul_double_g u1 u2 (as_point_nat h0 pk)) in
-    b == not (S.is_point_at_inf (rx, ry, rz)) /\ as_nat h1 x == rx % S.order))
+    live h public_key /\ live h signature_r /\ live h signature_s /\ live h m_q /\
+    as_nat h m_q < S.order)
+  (ensures fun h0 result h1 -> modifies0 h0 h1 /\
+    result == S.ecdsa_verify_msg_as_qelem (as_nat h0 m_q)
+      (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
 
-let ecdsa_verification_core alg pk r s msg_len msg x =
+[@CInline]
+let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
   push_frame ();
-  let u1u2z = create 12ul (u64 0) in
-  let u1 = sub u1u2z 0ul 4ul in
-  let u2 = sub u1u2z 4ul 4ul in
-  let z = sub u1u2z 8ul 4ul in
-  PS.msg_as_felem alg msg_len msg z;
-  ecdsa_verification_get_u12 u1 u2 r s z;
-  let r = ecdsa_verification_getx x pk u1 u2 in
-  pop_frame ();
-  r
+  let tmp = create 32ul (u64 0) in
+  let pk  = sub tmp 0ul 12ul in
+  let r_q = sub tmp 12ul 4ul in
+  let s_q = sub tmp 16ul 4ul in
+  let u1  = sub tmp 20ul 4ul in
+  let u2  = sub tmp 24ul 4ul in
+  let x   = sub tmp 28ul 4ul in
+
+  let is_pk_valid = load_point_vartime pk public_key in
+  let is_rs_valid = load_signature r_q s_q signature_r signature_s in
+
+  if not (is_pk_valid && is_rs_valid) then
+    begin pop_frame (); false end
+  else begin
+    ecdsa_verification_get_u12 u1 u2 r_q s_q m_q;
+    let b = ecdsa_verification_getx x pk u1 u2 in
+    if not b then
+      begin pop_frame (); false end
+      else
+        begin let res = bn_is_eq_vartime4 x r_q in pop_frame (); res end end
 
 
 inline_for_extraction
@@ -178,27 +188,13 @@ val ecdsa_verification:
   (requires fun h ->
     live h public_key /\ live h signature_r /\ live h signature_s /\ live h msg)
   (ensures fun h0 result h1 -> modifies0 h0 h1 /\
-    result == S.ecdsa_verification_agile alg (as_seq h0 public_key)
-      (as_seq h0 signature_r) (as_seq h0 signature_s) (v msg_len) (as_seq h0 msg))
+    result == S.ecdsa_verification_agile alg (v msg_len) (as_seq h0 msg)
+      (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
 
 let ecdsa_verification alg msg_len msg public_key signature_r signature_s =
   push_frame ();
-  let pkrsx = create 24ul (u64 0) in
-  let r_q = sub pkrsx 0ul 4ul in
-  let s_q = sub pkrsx 4ul 4ul in
-  let x = sub pkrsx 8ul 4ul in
-  let pk = sub pkrsx 12ul 12ul in
-
-  bn_from_bytes_be4 r_q signature_r;
-  bn_from_bytes_be4 s_q signature_s;
-  let is_pk_valid = load_point_vartime pk public_key in
-  let is_rs_valid = are_r_and_s_valid r_q s_q in
-
-  if not (is_pk_valid && is_rs_valid) then
-    begin pop_frame (); false end
-  else
-    let b = ecdsa_verification_core alg pk r_q s_q msg_len msg x in
-    if not b then
-      begin pop_frame (); false end
-      else
-        begin let res = bn_is_eq_vartime4 x r_q in pop_frame (); res end
+  let m_q = create_felem () in
+  PS.msg_as_felem alg msg_len msg m_q;
+  let res = ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s in
+  pop_frame ();
+  res

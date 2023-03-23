@@ -29,6 +29,7 @@ module BB = Hacl.Bignum.Base
 inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
 
+inline_for_extraction noextract
 val msg_as_felem:
     alg:S.hash_alg_ecdsa
   -> msg_len:size_t{v msg_len >= S.min_input_length alg}
@@ -41,11 +42,10 @@ val msg_as_felem:
     (let hashM = S.hash_ecdsa alg (v msg_len) (as_seq h0 msg) in
     as_nat h1 res = BSeq.nat_from_bytes_be (LSeq.sub hashM 0 32) % S.order))
 
-[@CInline]
 let msg_as_felem alg msg_len msg res =
   push_frame ();
 
-  let sz: size_t =
+  [@inline_let] let sz: size_t =
     match alg with
     | S.NoHash -> 32ul
     | S.Hash a -> Hacl.Hash.Definitions.hash_len a in
@@ -168,6 +168,43 @@ let check_signature r_q s_q =
   BB.unsafe_bool_of_limb m2
 
 
+val ecdsa_sign_msg_as_qelem:
+    signature:lbuffer uint8 64ul
+  -> m_q:felem
+  -> private_key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 32ul ->
+  Stack bool
+  (requires fun h ->
+    live h signature /\ live h m_q /\ live h private_key /\ live h nonce /\
+    disjoint signature m_q /\ disjoint signature private_key /\ disjoint signature nonce /\
+    as_nat h m_q < S.order /\
+
+    0 < BSeq.nat_from_bytes_be (as_seq h private_key) /\
+    BSeq.nat_from_bytes_be (as_seq h private_key) < S.order /\
+    0 < BSeq.nat_from_bytes_be (as_seq h nonce) /\
+    BSeq.nat_from_bytes_be (as_seq h nonce) < S.order)
+  (ensures fun h0 flag h1 -> modifies (loc signature |+| loc m_q) h0 h1 /\
+    (let sgnt = S.ecdsa_sign_msg_as_qelem
+      (as_nat h0 m_q) (as_seq h0 private_key) (as_seq h0 nonce) in
+     (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 signature == Some?.v sgnt))))
+
+[@CInline]
+let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
+  push_frame ();
+  let rsdk_q = create 16ul (u64 0) in
+  let r_q = sub rsdk_q 0ul 4ul in
+  let s_q = sub rsdk_q 4ul 4ul in
+  let d_a = sub rsdk_q 8ul 4ul in
+  let k_q = sub rsdk_q 12ul 4ul in
+  ecdsa_sign_load d_a k_q private_key nonce;
+  ecdsa_sign_r r_q k_q;
+  ecdsa_sign_s s_q k_q r_q d_a m_q;
+  bn2_to_bytes_be4 signature r_q s_q;
+  let res = check_signature r_q s_q in
+  pop_frame ();
+  res
+
+
 inline_for_extraction noextract
 val ecdsa_signature:
     alg:S.hash_alg_ecdsa
@@ -192,17 +229,8 @@ val ecdsa_signature:
 
 let ecdsa_signature alg signature msg_len msg private_key nonce =
   push_frame ();
-  let rsdk_q = create 20ul (u64 0) in
-  let r_q = sub rsdk_q 0ul 4ul in
-  let s_q = sub rsdk_q 4ul 4ul in
-  let d_a = sub rsdk_q 8ul 4ul in
-  let k_q = sub rsdk_q 12ul 4ul in
-  let m_q = sub rsdk_q 16ul 4ul in
-  ecdsa_sign_load d_a k_q private_key nonce;
+  let m_q = create_felem () in
   msg_as_felem alg msg_len msg m_q;
-  ecdsa_sign_r r_q k_q;
-  ecdsa_sign_s s_q k_q r_q d_a m_q;
-  bn2_to_bytes_be4 signature r_q s_q;
-  let res = check_signature r_q s_q in
+  let res = ecdsa_sign_msg_as_qelem signature m_q private_key nonce in
   pop_frame ();
   res
