@@ -124,7 +124,17 @@ procedure LoadImm64(out dst:reg_opr, inline src:simm16)
     {:quick exportOnly}
     {:instruction Ins(S.LoadImm64(dst, src))}
     ensures
-        dst == old(int_to_nat64(src));
+        dst == old(src % pow2_64);
+{
+}
+
+// Load Immediate shifted left by 16 bits to general-purpose register
+procedure LoadImmShl64(out dst:reg_opr, inline src:simm16)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.LoadImmShl64(dst, src))}
+    ensures
+        dst == old(ishl64(src % pow2_64, 16));
 {
 }
 
@@ -184,7 +194,20 @@ procedure AddImmWrap(out dst:reg_opr, in src1:reg_opr, inline src2:simm16)
 {
 }
 
-// Add two general-purpose registers  plus carry with wrapping and store status of carry occurrence in XER register
+// Add two general-purpose registers with wrapping and store status of carry occurrence in XER register
+procedure AddCarry(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.AddCarry(dst, src1, src2))}
+    modifies
+        xer;
+    ensures
+        dst == old(add_wrap64(src1, src2));
+        xer_ca(xer) == old(src1 + src2) >= pow2_64;
+{
+}
+
+// Add two general-purpose registers plus carry with wrapping and store status of carry occurrence in XER register
 procedure AddExtended(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
     {:public}
     {:quick exportOnly}
@@ -228,7 +251,7 @@ procedure SubWrap(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
     {:quick exportOnly}
     {:instruction Ins(S.Sub(dst, src1, src2))}
     ensures
-        dst == old(src1 - src2) % pow2_64;
+        dst == old(sub_wrap64(src1, src2));
 {
 }
 
@@ -250,7 +273,7 @@ procedure SubImmWrap(out dst:reg_opr, in src1:reg_opr, inline src2:nsimm16)
     {:quick exportOnly}
     {:instruction Ins(S.SubImm(dst, src1, src2))}
     ensures
-        dst == old(src1 - int_to_nat64(src2)) % pow2_64;
+        dst == old(sub_wrap64(src1, int_to_nat64(src2)));
 {
 }
 
@@ -323,5 +346,25 @@ procedure Sl64Imm(out dst:reg_opr, in src1:reg_opr, inline src2:bits64)
     {:instruction Ins(S.Sl64Imm(dst, src1, src2))}
     ensures
         dst == old(ishl64(src1, src2));
+{
+}
+
+// Shift right general-purpose register
+procedure Sr64(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Sr64(dst, src1, src2))}
+    ensures
+        dst == old(ishr64(src1, src2 % 64));
+{
+}
+
+// Shift left general-purpose register
+procedure Sl64(out dst:reg_opr, in src1:reg_opr, in src2:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Sl64(dst, src1, src2))}
+    ensures
+        dst == old(ishl64(src1, src2 % 64));
 {
 }

@@ -1,0 +1,164 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include "Vale.AES.PPC64LE.AES128.vaf"
+include "Vale.AES.PPC64LE.AES256.vaf"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Vale.AES.AES_BE_s"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.Memory"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCodes"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Def.Opaque_s"
+
+module Vale.AES.PPC64LE.AES
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Types_s
+open FStar.Seq
+open Vale.Arch.HeapImpl
+open Vale.AES.AES_BE_s
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.Arch.Types
+open Vale.Def.Opaque_s
+open Vale.AES.PPC64LE.AES128
+open Vale.AES.PPC64LE.AES256
+#reset-options "--z3rlimit 20"
+#endverbatim
+
+///////////////////////////
+// KEY EXPANSION
+///////////////////////////
+
+procedure KeyExpansionStdcall(
+        inline alg:algorithm,
+        ghost input_key_b:buffer128,
+        ghost output_key_expansion_b:buffer128)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    reads
+        r3; r4; heap0;
+    modifies
+        heap1; memLayout; r10; v0; v1; v2; v3; v4; v5;
+    lets
+        in_key1 := reverse_bytes_quad32(buffer128_read(input_key_b, 0, mem));
+        in_key2 := reverse_bytes_quad32(buffer128_read(input_key_b, 1, mem));
+        key :=
+            if alg = AES_128 then be_quad32_to_seq(in_key1)
+            else make_AES256_key(in_key1, in_key2);
+    requires
+        is_initial_heap(memLayout, mem);
+        alg = AES_128 || alg = AES_256;
+        buffers_disjoint128(input_key_b, output_key_expansion_b);
+        validSrcAddrs128(mem, r4, input_key_b, if alg = AES_128 then 1 else 2, memLayout, Secret);
+        validDstAddrs128(mem, r3, output_key_expansion_b, nr(alg) + 1, memLayout, Secret);
+    ensures
+        modifies_buffer128(output_key_expansion_b, old(mem), mem);
+        forall(j) 0 <= j <= nr(alg) ==>
+            reverse_bytes_quad32(buffer128_read(output_key_expansion_b, j, mem)) == index(key_to_round_keys_word(alg, key), j);
+{
+    CreateHeaplets(list(
+        declare_buffer128(input_key_b, 0, Secret, Immutable),
+        declare_buffer128(output_key_expansion_b, 1, Secret, Mutable)));
+
+    inline if (alg = AES_128) {
+        KeyExpansion128Stdcall(input_key_b, output_key_expansion_b);
+    } else {
+        KeyExpansion256Stdcall(input_key_b, output_key_expansion_b);
+    }
+
+    DestroyHeaplets();
+}
+
+///////////////////////////
+// ENCRYPTION
+///////////////////////////
+
+procedure AESEncryptBlock(
+        inline alg:algorithm,
+        ghost input:quad32,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_buffer:buffer128)
+    {:public}
+    {:quick}
+    reads
+        r4; heap0; memLayout;
+    modifies
+        r10; v0; v2;
+    requires
+        alg = AES_128 || alg = AES_256;
+        is_aes_key_word(alg, key);
+        length(round_keys) == nr(alg) + 1;
+        round_keys == key_to_round_keys_word(alg, key);
+        v0 == input;
+        r4 == buffer_addr(keys_buffer, heap0);
+        validSrcAddrs128(heap0, r4, keys_buffer, nr(alg) + 1, memLayout, Secret);
+        forall(i:nat) i < nr(alg) + 1 ==> reverse_bytes_quad32(buffer128_read(keys_buffer, i, heap0)) == index(round_keys, i);
+    ensures
+        v0 == aes_encrypt_word(alg, key, input);
+{
+    inline if (alg = AES_128) {
+        AES128EncryptBlock(input, key, round_keys, keys_buffer);
+    } else {
+        AES256EncryptBlock(input, key, round_keys, keys_buffer);
+    }
+}
+
+procedure AESEncryptBlock_6way(
+        inline alg:algorithm,
+        ghost in1:quad32,
+        ghost in2:quad32,
+        ghost in3:quad32,
+        ghost in4:quad32,
+        ghost in5:quad32,
+        ghost in6:quad32,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_buffer:buffer128)
+    {:public}
+    {:quick}
+    reads
+        r4; heap0; memLayout;
+    modifies
+        r10; v0; v1; v2; v3; v4; v5; v6;
+    requires
+        alg = AES_128 || alg = AES_256;
+        is_aes_key_word(alg, key);
+        length(round_keys) == nr(alg) + 1;
+        round_keys == key_to_round_keys_word(alg, key);
+        v0 == in1;
+        v1 == in2;
+        v2 == in3;
+        v3 == in4;
+        v4 == in5;
+        v5 == in6;
+        r4 == buffer_addr(keys_buffer, heap0);
+        validSrcAddrs128(heap0, r4, keys_buffer, nr(alg) + 1, memLayout, Secret);
+        forall(i:nat) i < nr(alg) + 1 ==> reverse_bytes_quad32(buffer128_read(keys_buffer, i, heap0)) == index(round_keys, i);
+    ensures
+        v0 == aes_encrypt_word(alg, key, in1);
+        v1 == aes_encrypt_word(alg, key, in2);
+        v2 == aes_encrypt_word(alg, key, in3);
+        v3 == aes_encrypt_word(alg, key, in4);
+        v4 == aes_encrypt_word(alg, key, in5);
+        v5 == aes_encrypt_word(alg, key, in6);
+{
+    inline if (alg = AES_128) {
+        AES128EncryptBlock_6way(in1, in2, in3, in4, in5, in6, key, round_keys, keys_buffer);
+    } else {
+        AES256EncryptBlock_6way(in1, in2, in3, in4, in5, in6, key, round_keys, keys_buffer);
+    }
+}

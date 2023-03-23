@@ -117,3 +117,37 @@ procedure Load_stack128(out dst:vec_opr, inline offset:int)
 {
     lemma_valid_taint_stack128(old(r1 + offset), Secret, old(stackTaint));
 }
+
+procedure Store_stack64(in src:reg_opr, inline offset:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.StoreStack64(src, Secret, offset))}
+    reads
+        r1;
+    modifies
+        stack; stackTaint;
+    requires
+        valid_maddr_offset64(offset);
+        r1 + offset <= init_r1(stack) - 8;
+    ensures
+        stack == store_stack64(r1 + offset, old(src), old(stack));
+        stackTaint == store_taint_stack64(r1 + offset, Secret, old(stackTaint));
+{
+}
+
+procedure Load_stack64(out dst:reg_opr, inline offset:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.LoadStack64(dst, Secret, offset))}
+    reads
+        r1; stack; stackTaint;
+    requires
+        valid_maddr_offset64(offset);
+        r1 + offset + 8 <= init_r1(stack);
+        valid_src_stack64(r1 + offset, stack);
+        valid_taint_stack64(r1 + offset, Secret, stackTaint);
+    ensures
+        dst == old(load_stack64(r1 + offset, stack));
+{
+    lemma_valid_taint_stack64(old(r1 + offset), Secret, old(stackTaint));
+}
