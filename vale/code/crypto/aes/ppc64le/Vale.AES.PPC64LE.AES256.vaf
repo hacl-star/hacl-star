@@ -1,0 +1,410 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsMem.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include{:fstar}{:open} "Vale.Def.Opaque_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Vale.AES.AES_BE_s"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.Memory"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCodes"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.AES.AES256_helpers_BE"
+
+module Vale.AES.PPC64LE.AES256
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Opaque_s
+open Vale.Def.Types_s
+open FStar.Seq
+open Vale.AES.AES_BE_s
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.Arch.Types
+open Vale.AES.AES256_helpers_BE
+#reset-options "--z3rlimit 20"
+#endverbatim
+
+///////////////////////////
+// KEY EXPANSION
+///////////////////////////
+
+// Given round key for round, generate round key for round + 1
+procedure KeyExpansionRoundEven256(
+        inline round:nat8,
+        inline rcon:nat8,
+        ghost dst:buffer128,
+        ghost key:seq(nat32))
+    {:quick}
+    reads
+        r3; v3; memLayout;
+    modifies
+        heap1; r10; v0; v1; v2; v4; v5;
+    requires/ensures
+        validDstAddrs128(heap1, r3, dst, 15, memLayout, Secret);
+    requires
+        1 <= round < 14;
+        (round + 1) % 2 == 0;
+        rcon == aes_rcon((round + 1) / 2 - 1);
+        is_aes_key_word(AES_256, key);
+        v1 == expand_key_256(key, #nat(round - 1));
+        v3 == expand_key_256(key, round);
+    ensures
+        v1 == reverse_bytes_quad32(buffer128_read(dst, round + 1, heap1));
+        v1 == expand_key_256(key, round + 1);
+        modifies_buffer_specific128(dst, old(heap1), heap1, round + 1, round + 1);
+{
+    Vspltisw(v0, 0);
+    Vspltisw(v4, 8);
+    Vsbox(v2, v3);
+    LoadImmShl64(r10, rcon);
+    Mtvsrws(v5, r10);
+    Vxor(v2, v2, v5);
+    RotWord(v2, v2, v4);
+    Vspltw(v2, v2, 3);
+    Vsldoi(v4, v0, v1, 12);
+    Vxor(v1, v1, v4);
+    Vsldoi(v4, v0, v1, 12);
+    Vxor(v1, v1, v4);
+    Vsldoi(v4, v0, v1, 12);
+    Vxor(v1, v1, v4);
+    Vxor(v1, v1, v2);
+    LoadImm64(r10, 16 * (round + 1));
+    Store128_byte16_buffer_index(heap1, v1, r3, r10, Secret, dst, round + 1);
+
+    quad32_xor_reveal();
+    lemma_shl_rcon(rcon);
+    lemma_simd_round_key(old(v1), old(v3), rcon, round + 1);
+    expand_key_256_reveal();
+}
+
+// Given round key for round, generate round key for round + 1
+procedure KeyExpansionRoundOdd256(
+        inline round:nat8,
+        ghost dst:buffer128,
+        ghost key:seq(nat32))
+    {:quick}
+    reads
+        r3; v1; memLayout;
+    modifies
+        heap1; r10; v0; v2; v3; v4;
+    requires/ensures
+        validDstAddrs128(heap1, r3, dst, 15, memLayout, Secret);
+    requires
+        1 <= round < 14;
+        (round + 1) % 2 != 0;
+        is_aes_key_word(AES_256, key);
+        v3 == expand_key_256(key, #nat(round - 1));
+        v1 == expand_key_256(key, round);
+    ensures
+        v3 == reverse_bytes_quad32(buffer128_read(dst, round + 1, heap1));
+        v3 == expand_key_256(key, round + 1);
+        modifies_buffer_specific128(dst, old(heap1), heap1, round + 1, round + 1);
+{
+    Vspltisw(v0, 0);
+    Vsbox(v2, v1);
+    Vspltw(v2, v2, 3);
+    Vsldoi(v4, v0, v3, 12);
+    Vxor(v3, v3, v4);
+    Vsldoi(v4, v0, v3, 12);
+    Vxor(v3, v3, v4);
+    Vsldoi(v4, v0, v3, 12);
+    Vxor(v3, v3, v4);
+    Vxor(v3, v3, v2);
+    LoadImm64(r10, 16 * (round + 1));
+    Store128_byte16_buffer_index(heap1, v3, r3, r10, Secret, dst, round + 1);
+
+    quad32_xor_reveal();
+    lemma_simd_round_key(old(v3), old(v1), 0, round + 1);
+    lemma_round_key_256_rcon_odd(old(v3), old(v1), 0, round + 1);
+    expand_key_256_reveal();
+}
+
+procedure KeyExpansionRoundUnrolledRecursive256(
+        ghost key:seq(nat32),
+        ghost dst:buffer128,
+        inline n:int)
+    {:decrease n}
+    {:recursive}
+    {:quick exportOnly}
+    reads
+        r3; memLayout;
+    modifies
+        heap1; r10; v0; v1; v2; v3; v4; v5;
+    requires/ensures
+        validDstAddrs128(heap1, r3, dst, 15, memLayout, Secret);
+    requires
+        0 < n <= 14;
+        is_aes_key_word(AES_256, key);
+        v1 == expand_key_256(key, 0);
+        v3 == expand_key_256(key, 1);
+        v1 == reverse_bytes_quad32(buffer128_read(dst, 0, heap1));
+        v3 == reverse_bytes_quad32(buffer128_read(dst, 1, heap1));
+        r3 == buffer_addr(dst, heap1);
+    ensures
+        modifies_buffer128(dst, old(heap1), heap1);
+        reverse_bytes_quad32(buffer128_read(dst, n, heap1)) == (if (n % 2 = 0) then v1 else v3);
+        reverse_bytes_quad32(buffer128_read(dst, n - 1, heap1)) == (if ((n-1) % 2 = 0) then v1 else v3);
+        forall(j){reverse_bytes_quad32(buffer128_read(dst, j, heap1))} 0 <= j <= n ==>
+            reverse_bytes_quad32(buffer128_read(dst, j, heap1)) == expand_key_256(key, j);
+{
+    inline if (1 < n <= 14) {
+        KeyExpansionRoundUnrolledRecursive256(key, dst, n - 1);
+        let old_mem := heap1;
+        inline if (n % 2 = 0) {
+            KeyExpansionRoundEven256(#nat8(n - 1), #nat8(aes_rcon(n / 2 - 1)), dst, key);
+        }  else {
+            KeyExpansionRoundOdd256(#nat8(n - 1), dst, key);
+        }
+        assert forall(j){reverse_bytes_quad32(buffer128_read(dst, j, heap1))} 0 <= j < n ==>
+            reverse_bytes_quad32(buffer128_read(dst, j, heap1)) == reverse_bytes_quad32(buffer128_read(dst, j, old_mem));
+    }
+}
+
+procedure KeyExpansion256Stdcall(
+        ghost input_key_b:buffer128,
+        ghost output_key_expansion_b:buffer128)
+    {:public}
+    {:quick}
+    reads
+        r3; r4; heap0; memLayout;
+    modifies
+        heap1; r10; v0; v1; v2; v3; v4; v5;
+    lets
+        key := make_AES256_key(reverse_bytes_quad32(buffer128_read(input_key_b, 0, heap0)), reverse_bytes_quad32(buffer128_read(input_key_b, 1, heap0)));
+    requires/ensures
+        validSrcAddrs128(heap0, r4, input_key_b, 2, memLayout, Secret);
+        validDstAddrs128(heap1, r3, output_key_expansion_b, 15, memLayout, Secret);
+    ensures
+        modifies_buffer128(output_key_expansion_b, old(heap1), heap1);
+        forall(j:nat){reverse_bytes_quad32(buffer128_read(output_key_expansion_b, j, heap1))} j <= 14 ==>
+            reverse_bytes_quad32(buffer128_read(output_key_expansion_b, j, heap1)) == index(key_to_round_keys_word(AES_256, key), j);
+{
+    LoadImm64(r10, 16);
+    Load128_byte16_buffer(heap0, v1, r4, Secret, input_key_b, 0);
+    Load128_byte16_buffer_index(heap0, v3, r4, r10, Secret, input_key_b, 1);
+
+    Store128_byte16_buffer(heap1, v1, r3, Secret, output_key_expansion_b, 0);
+    Store128_byte16_buffer_index(heap1, v3, r3, r10, Secret, output_key_expansion_b, 1);
+
+    expand_key_256_reveal();
+    KeyExpansionRoundUnrolledRecursive256(key, output_key_expansion_b, 14);
+    lemma_expand_key_256(key, 15);
+    reveal key_to_round_keys_word;
+
+    // Clear secrets out of registers
+    Vxor(v1, v1, v1);
+    Vxor(v2, v2, v2);
+    Vxor(v3, v3, v3);
+    Vxor(v4, v4, v4);
+}
+
+///////////////////////////
+// ENCRYPTION
+///////////////////////////
+
+procedure AES256EncryptRound(
+        inline n:nat8,
+        ghost init:quad32,
+        ghost round_keys:seq(quad32),
+        ghost keys_buffer:buffer128)
+    {:quick}
+    reads
+        r4; heap0; memLayout;
+    modifies
+        r10; v0; v2;
+    requires
+        1 <= n < 14 <= length(round_keys);
+        v0 == eval_rounds_def(init, round_keys, #nat(n - 1));
+        r4 == buffer_addr(keys_buffer, heap0);
+        validSrcAddrs128(heap0, r4, keys_buffer, 15, memLayout, Secret);
+        reverse_bytes_quad32(buffer128_read(keys_buffer, n, heap0)) == index(round_keys, n);
+    ensures
+        v0 == eval_rounds_def(init, round_keys, n);
+{
+    LoadImm64(r10, 16 * n);
+    Load128_byte16_buffer_index(heap0, v2, r4, r10, Secret, keys_buffer, n);
+    Vcipher(v0, v0, v2);
+}
+
+procedure AES256EncryptBlock(
+        ghost input:quad32,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_buffer:buffer128)
+    {:public}
+    {:quick}
+    reads
+        r4; heap0; memLayout;
+    modifies
+        r10; v0; v2;
+    requires
+        is_aes_key_word(AES_256, key);
+        length(round_keys) == 15;
+        round_keys == key_to_round_keys_word(AES_256, key);
+        v0 == input;
+        r4 == buffer_addr(keys_buffer, heap0);
+        validSrcAddrs128(heap0, r4, keys_buffer, 15, memLayout, Secret);
+        forall(i:nat) i < 15 ==> reverse_bytes_quad32(buffer128_read(keys_buffer, i, heap0)) == index(round_keys, i);
+    ensures
+        v0 == aes_encrypt_word(AES_256, key, input);
+{
+    let init := quad32_xor(input, index(round_keys, 0));
+
+    LoadImm64(r10, 0);
+    Load128_byte16_buffer_index(heap0, v2, r4, r10, Secret, keys_buffer, 0);
+    Vxor(v0, v0, v2);
+    AES256EncryptRound(1, init, round_keys, keys_buffer);
+    AES256EncryptRound(2, init, round_keys, keys_buffer);
+    AES256EncryptRound(3, init, round_keys, keys_buffer);
+    AES256EncryptRound(4, init, round_keys, keys_buffer);
+    AES256EncryptRound(5, init, round_keys, keys_buffer);
+    AES256EncryptRound(6, init, round_keys, keys_buffer);
+    AES256EncryptRound(7, init, round_keys, keys_buffer);
+    AES256EncryptRound(8, init, round_keys, keys_buffer);
+    AES256EncryptRound(9, init, round_keys, keys_buffer);
+    AES256EncryptRound(10, init, round_keys, keys_buffer);
+    AES256EncryptRound(11, init, round_keys, keys_buffer);
+    AES256EncryptRound(12, init, round_keys, keys_buffer);
+    AES256EncryptRound(13, init, round_keys, keys_buffer);
+    LoadImm64(r10, 16 * 14);
+    Load128_byte16_buffer_index(heap0, v2, r4, r10, Secret, keys_buffer, 14);
+    Vcipherlast(v0, v0, v2);
+
+    // Clear secrets out of registers
+    Vxor(v2, v2, v2);
+    aes_encrypt_word_reveal();
+}
+
+procedure AES256EncryptRound_6way(
+        inline n:nat8,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32,
+        ghost init6:quad32,
+        ghost round_keys:seq(quad32),
+        ghost keys_buffer:buffer128)
+    {:quick}
+    reads
+        r4; heap0; memLayout;
+    modifies
+        r10; v0; v1; v2; v3; v4; v5; v6;
+    requires
+        1 <= n < 14 <= length(round_keys);
+        v0 == eval_rounds_def(init1, round_keys, #nat(n - 1));
+        v1 == eval_rounds_def(init2, round_keys, #nat(n - 1));
+        v2 == eval_rounds_def(init3, round_keys, #nat(n - 1));
+        v3 == eval_rounds_def(init4, round_keys, #nat(n - 1));
+        v4 == eval_rounds_def(init5, round_keys, #nat(n - 1));
+        v5 == eval_rounds_def(init6, round_keys, #nat(n - 1));
+        r4 == buffer_addr(keys_buffer, heap0);
+        validSrcAddrs128(heap0, r4, keys_buffer, 15, memLayout, Secret);
+        reverse_bytes_quad32(buffer128_read(keys_buffer, n, heap0)) == index(round_keys, n);
+    ensures
+        v0 == eval_rounds_def(init1, round_keys, n);
+        v1 == eval_rounds_def(init2, round_keys, n);
+        v2 == eval_rounds_def(init3, round_keys, n);
+        v3 == eval_rounds_def(init4, round_keys, n);
+        v4 == eval_rounds_def(init5, round_keys, n);
+        v5 == eval_rounds_def(init6, round_keys, n);
+{
+    LoadImm64(r10, 16 * n);
+    Load128_byte16_buffer_index(heap0, v6, r4, r10, Secret, keys_buffer, n);
+    Vcipher(v0, v0, v6);
+    Vcipher(v1, v1, v6);
+    Vcipher(v2, v2, v6);
+    Vcipher(v3, v3, v6);
+    Vcipher(v4, v4, v6);
+    Vcipher(v5, v5, v6);
+}
+
+procedure AES256EncryptBlock_6way(
+        ghost in1:quad32,
+        ghost in2:quad32,
+        ghost in3:quad32,
+        ghost in4:quad32,
+        ghost in5:quad32,
+        ghost in6:quad32,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_buffer:buffer128)
+    {:public}
+    {:quick}
+    reads
+        r4; heap0; memLayout;
+    modifies
+        r10; v0; v1; v2; v3; v4; v5; v6;
+    requires
+        is_aes_key_word(AES_256, key);
+        length(round_keys) == 15;
+        round_keys == key_to_round_keys_word(AES_256, key);
+        v0 == in1;
+        v1 == in2;
+        v2 == in3;
+        v3 == in4;
+        v4 == in5;
+        v5 == in6;
+        r4 == buffer_addr(keys_buffer, heap0);
+        validSrcAddrs128(heap0, r4, keys_buffer, 15, memLayout, Secret);
+        forall(i:nat) i < 15 ==> reverse_bytes_quad32(buffer128_read(keys_buffer, i, heap0)) == index(round_keys, i);
+    ensures
+        v0 == aes_encrypt_word(AES_256, key, in1);
+        v1 == aes_encrypt_word(AES_256, key, in2);
+        v2 == aes_encrypt_word(AES_256, key, in3);
+        v3 == aes_encrypt_word(AES_256, key, in4);
+        v4 == aes_encrypt_word(AES_256, key, in5);
+        v5 == aes_encrypt_word(AES_256, key, in6);
+{
+    let init1 := quad32_xor(in1, index(round_keys, 0));
+    let init2 := quad32_xor(in2, index(round_keys, 0));
+    let init3 := quad32_xor(in3, index(round_keys, 0));
+    let init4 := quad32_xor(in4, index(round_keys, 0));
+    let init5 := quad32_xor(in5, index(round_keys, 0));
+    let init6 := quad32_xor(in6, index(round_keys, 0));
+
+    LoadImm64(r10, 0);
+    Load128_byte16_buffer_index(heap0, v6, r4, r10, Secret, keys_buffer, 0);
+    Vxor(v0, v0, v6);
+    Vxor(v1, v1, v6);
+    Vxor(v2, v2, v6);
+    Vxor(v3, v3, v6);
+    Vxor(v4, v4, v6);
+    Vxor(v5, v5, v6);
+    AES256EncryptRound_6way(1, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(2, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(3, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(4, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(5, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(6, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(7, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(8, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(9, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(10, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(11, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(12, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    AES256EncryptRound_6way(13, init1, init2, init3, init4, init5, init6, round_keys, keys_buffer);
+    LoadImm64(r10, 16 * 14);
+    Load128_byte16_buffer_index(heap0, v6, r4, r10, Secret, keys_buffer, 14);
+    Vcipherlast(v0, v0, v6);
+    Vcipherlast(v1, v1, v6);
+    Vcipherlast(v2, v2, v6);
+    Vcipherlast(v3, v3, v6);
+    Vcipherlast(v4, v4, v6);
+    Vcipherlast(v5, v5, v6);
+
+    // Clear secrets out of registers
+    Vxor(v6, v6, v6);
+    aes_encrypt_word_reveal();
+}

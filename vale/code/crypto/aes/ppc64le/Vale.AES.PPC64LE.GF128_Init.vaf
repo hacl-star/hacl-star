@@ -1,0 +1,206 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsMem.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include "Vale.AES.PPC64LE.PolyOps.vaf"
+include "Vale.AES.PPC64LE.GF128_Mul.vaf"
+include "Vale.AES.PPC64LE.AES.vaf"
+include{:fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Math.Poly2_s"
+include{:fstar}{:open} "Vale.Math.Poly2"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits_s"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits"
+include{:fstar}{:open} "Vale.Math.Poly2.Words"
+include{:fstar}{:open} "Vale.Math.Poly2.Lemmas"
+include{:fstar}{:open} "Vale.AES.GF128_s"
+include{:fstar}{:open} "Vale.AES.GF128"
+include{:fstar}{:open} "Vale.AES.GHash_BE"
+include{:fstar}{:open} "Vale.AES.AES_BE_s"
+include{:fstar}{:open} "Vale.AES.AES256_helpers_BE"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCodes"
+include{:fstar}{:open} "Vale.AES.OptPublic_BE"
+
+module Vale.AES.PPC64LE.GF128_Init
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Words_s
+open Vale.Def.Words.Four_s
+open Vale.Def.Types_s
+open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
+open Vale.Math.Poly2_s
+open Vale.Math.Poly2
+open Vale.Math.Poly2.Bits_s
+open Vale.Math.Poly2.Bits
+open Vale.Math.Poly2.Lemmas
+open Vale.AES.GF128_s
+open Vale.AES.GF128
+open Vale.AES.GHash_BE
+open Vale.AES.AES_BE_s
+open Vale.AES.AES256_helpers_BE
+open Vale.AES.PPC64LE.AES
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.AES.PPC64LE.PolyOps
+open Vale.AES.PPC64LE.GF128_Mul
+open Vale.AES.OptPublic_BE
+#endverbatim
+
+procedure ShiftKey1_128(ghost f:poly)
+    {:quick}
+    lets
+        xh @= v3; xoffset @= v4; xhighbit @= v5;
+        h := of_quad32(xh);
+        h1 := shift(h, 1);
+        offset := of_quad32(xoffset);
+    reads
+        xoffset; xhighbit;
+    modifies
+        v1; v2; v3;
+    requires
+        of_quad32(xhighbit) == monomial(127);
+        offset == reverse(shift(add(monomial(128), f), (-1)), 127);
+    ensures
+        of_quad32(v1) == shift_key_1(128, f, h);
+{
+    Vmr(v1, xh);
+    ShiftLeft128_1(h);
+    lemma_of_to_quad32_mask(h1); // assert of_quad32(xmm1) == mask(h1, 128);
+    lemma_shift_define_i(h, 1, 128); // assert poly_index(h, 127) == poly_index(h1, 128);
+
+    VPolyAnd(xh, xh, xhighbit); // xh := (if h.[127] then xhighbit else zero)
+    Vcmpequw(xh, xh, xhighbit); // if h.[127], put ones into upper word
+    lemma_test_high_bit(h); // assert xh.hi3 == (if poly_index(h, 127) then 0xffffffff else 0);
+    Vspltw(xh, xh, 0); // copy upper word to all four words, so we have all ones or all zero
+    lemma_quad32_zero();
+    lemma_quad32_ones();
+    // assert of_quad32(xh) == (if poly_index(h, 127) then ones(128) else zero);
+
+    VPolyAnd(xh, xh, xoffset);
+    lemma_and_consts(); // assert of_quad32(xh) == (if poly_index(h, 127) then offset else zero);
+    VPolyAdd(v1, v1, xh);
+}
+
+procedure ShiftKey1_gf128_power(ghost h:poly, ghost n:nat)
+    {:quick}
+    lets
+        xh @= v3; xoffset @= v4; xhighbit @= v5;
+        hn := of_quad32(xh);
+    modifies
+        r10;
+        v1; v2; v3; v4; v5;
+    requires
+        hn == g_power(h, n);
+    ensures
+        of_quad32(v1) == gf128_power(h, n);
+{
+    Vspltisw(v1, 0);
+    Vspltisw(v2, 1);
+    LoadImmShl64(r10, (-15872));
+    lemma_ishl_64((-15872) % pow2_64, 16);
+    Mtvsrws(xoffset, r10); // 0xc2000000
+    LoadImmShl64(r10, (-32768));
+    lemma_ishl_64((-32768) % pow2_64, 16);
+    Mtvsrws(xhighbit, r10); // 0x80000000
+    Vsldoi(xoffset, xoffset, v1, 8);
+    Vsldoi(xhighbit, xhighbit, v1, 12);
+    Vsldoi(xoffset, xoffset, v2, 4);
+    lemma_gf128_high_bit();
+    lemma_gf128_low_shift_1();
+
+    ShiftKey1_128(gf128_modulus_low_terms);
+    lemma_gf128_power(h, n);
+}
+
+procedure Gf128_powers(ghost h:poly, ghost hkeys_b:buffer128)
+    {:quick}
+    reads
+        memLayout;
+        r3;
+    modifies
+        heap1;
+        r10;
+        v0; v1; v2; v3; v4; v5; v6;
+    requires
+        validDstAddrs128(heap1, r3, hkeys_b, 3, memLayout, Secret);
+        of_quad32(reverse_bytes_quad32(buffer128_read(hkeys_b, 2, heap1))) == h;
+    ensures
+        modifies_mem(loc_buffer(hkeys_b), old(heap1), heap1);
+        of_quad32(reverse_bytes_quad32(buffer128_read(hkeys_b, 0, heap1))) == gf128_power(h, 1);
+        of_quad32(reverse_bytes_quad32(buffer128_read(hkeys_b, 1, heap1))) == gf128_power(h, 2);
+        //of_quad32(reverse_bytes_quad32(buffer128_read(hkeys_b, 2, heap1))) == h;
+        buffer128_read(hkeys_b, 2, heap1) == old(buffer128_read(hkeys_b, 2, heap1));
+{
+    LoadImm64(r10, 0x20);
+    Load128_byte16_buffer_index(heap1, v1, r3, r10, Secret, hkeys_b, 2);
+    lemma_g_power_1(h); // assert of_quad32(v1) == g_power(h, 1);
+    Vmr(v6, v1);
+    Vmr(v3, v1);
+    ShiftKey1_gf128_power(h, 1);
+    Store128_byte16_buffer(heap1, v1, r3, Secret, hkeys_b, 0);
+
+    Vmr(v1, v6);
+    Vmr(v2, v6);
+    Gf128MulRev128();
+    lemma_g_power_n(h, 1); // assert of_quad32(v1) == g_power(h, 2);
+    Vmr(v3, v1);
+    ShiftKey1_gf128_power(h, 2);
+    LoadImm64(r10, 0x10);
+    Store128_byte16_buffer_index(heap1, v1, r3, r10, Secret, hkeys_b, 1);
+}
+
+procedure Keyhash_init(
+        inline alg:algorithm,
+        ghost key:seq(nat32),
+        ghost roundkeys_b:buffer128,
+        ghost hkeys_b:buffer128)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    reads
+        heap0;
+        r3; r4;
+    modifies
+        heap1; memLayout;
+        r10;
+        v0; v1; v2; v3; v4; v5; v6;
+    requires
+        is_initial_heap(memLayout, mem);
+        alg = AES_128 || alg = AES_256;
+        buffers_disjoint128(roundkeys_b, hkeys_b);
+        is_aes_key_word(alg, key);
+        reverse_bytes_quad32_seq(buffer128_as_seq(mem, roundkeys_b)) == key_to_round_keys_word(alg, key);
+        validSrcAddrs128(mem, r4, roundkeys_b, nr(alg) + 1, memLayout, Secret);
+        validDstAddrs128(mem, r3, hkeys_b, 3, memLayout, Secret);
+    ensures
+        modifies_buffer128(hkeys_b, old(mem), mem);
+        hkeys_reqs_pub(reverse_bytes_quad32_seq(s128(mem, hkeys_b)), aes_encrypt_word(alg, key, Mkfour(0, 0, 0, 0)));
+{
+    CreateHeaplets(list(
+        declare_buffer128(roundkeys_b, 0, Secret, Immutable),
+        declare_buffer128(hkeys_b, 1, Secret, Mutable)));
+
+    Vspltisw(v0, 0);
+    AESEncryptBlock(alg, v0, key, reverse_bytes_quad32_seq(buffer128_as_seq(heap0, roundkeys_b)), roundkeys_b); // h = v0 = aes_encrypt_word alg key (Mkfour 0 0 0 0) in
+    LoadImm64(r10, 0x20);
+    Store128_byte16_buffer_index(heap1, v0, r3, r10, Secret, hkeys_b, 2);
+
+    Gf128_powers(of_quad32(v0), hkeys_b);
+
+    lemma_hkeys_reqs_pub_priv(reverse_bytes_quad32_seq(s128(heap1, hkeys_b)), aes_encrypt_word(alg, key, Mkfour(0, 0, 0, 0)));
+
+    DestroyHeaplets();
+}

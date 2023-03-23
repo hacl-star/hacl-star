@@ -88,43 +88,14 @@ and other HACL* users have also developed bindings for other programming languag
 OCaml
 ^^^^^
 
-The KaRaMeL compiler auto-generates ``ocaml-ctypes`` bindings for HACL*. On top
-of these "raw" bindings, we add a high-level wrapper that uses functors, shares
-type signatures, performs run-time checks and offers a much more idiomatic API.
-
-They are both available as opam packages and can be installed using
-``opam install hacl-star`` or, to get the low-level bindings only,
-``opam install hacl-star-raw``.
-
-From source, the low-level bindings can be installed by running
-``make install-hacl-star-raw`` in ``dist/gcc-compatible``. Then, the high-level
-wrapper can be installed by running ``dune build && dune install`` in
-``bindings/ocaml``.
-
-Documentation for the high-level API is available `here
-<https://hacl-star.github.io/ocaml_doc/>`_.
+OCaml bindings were moved to the `cryspen/hacl-packages` repository.
+Documentation is available here: `<https://tech.cryspen.com/hacl-packages/hacl-ocaml/index.html>`.
 
 JavaScript
 ^^^^^^^^^^
 
-HACL* is compiled to WebAssembly via the WASM backend of KaRaMeL (see the
-Oakland'19 paper for details). We offer an idiomatic JavaScript API on top of
-HACL-WASM so that clients do not have to be aware of the KaRaMeL memory layout,
-calling convention, etc. This latter API is available as a
-`Node.js package <https://www.npmjs.com/package/hacl-wasm>`_.
-
-The `jsdoc` documentation of the package can be found `online
-<https://hacl-star.github.io/javascript_doc/>`_.  Please note that the API is
-asynchronous (it uses promises).
-
-Here is a small example of how to use the library (with Node.js) :
-
-.. code-block:: javascript
-
-  var hacl = require("hacl-wasm");
-  hacl.Curve25519.ecdh(new Uint8Array(32), new Uint8Array(32)).then(function (result) {
-    // Here result contains an Uint8Array of size 32 with the DH exchange result
-  });
+JS bindings were moved to the `cryspen/hacl-packages` repository.
+Documentation is available here: `<https://tech.cryspen.com/hacl-packages/hacl-js/index.html>`.
 
 Rust
 ^^^^

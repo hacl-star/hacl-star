@@ -1,10 +1,12 @@
 module Vale.PPC64LE.Semantics_s
 
 open FStar.Mul
+open FStar.Seq.Base
 open Vale.PPC64LE.Machine_s
 open Vale.Def.Words_s
 open Vale.Def.Words.Two_s
 open Vale.Def.Words.Four_s
+open Vale.Def.Words.Seq_s
 open Vale.Def.Types_s
 include Vale.Arch.MachineHeap_s
 open Vale.Arch.HeapTypes_s
@@ -21,9 +23,11 @@ type ins =
   | Load64       : dst:reg -> base:reg -> offset:int -> ins
   | Store64      : src:reg -> base:reg -> offset:int -> ins
   | LoadImm64    : dst:reg -> src:simm16 -> ins
+  | LoadImmShl64 : dst:reg -> src:simm16 -> ins
   | AddLa        : dst:reg -> src1:reg -> src2:simm16 -> ins
   | Add          : dst:reg -> src1:reg -> src2:reg -> ins
   | AddImm       : dst:reg -> src1:reg -> src2:simm16 -> ins
+  | AddCarry     : dst:reg -> src1:reg -> src2:reg -> ins
   | AddExtended  : dst:reg -> src1:reg -> src2:reg -> ins
   | AddExtendedOV: dst:reg -> src1:reg -> src2:reg -> ins
   | Sub          : dst:reg -> src1:reg -> src2:reg -> ins
@@ -34,18 +38,27 @@ type ins =
   | And          : dst:reg -> src1:reg -> src2:reg -> ins
   | Sr64Imm      : dst:reg -> src1:reg -> src2:bits64 -> ins
   | Sl64Imm      : dst:reg -> src1:reg -> src2:bits64 -> ins
+  | Sr64         : dst:reg -> src1:reg -> src2:reg -> ins
+  | Sl64         : dst:reg -> src1:reg -> src2:reg -> ins
+  | Vmr          : dst:vec -> src:vec -> ins
   | Mfvsrd       : dst:reg -> src:vec -> ins
   | Mfvsrld      : dst:reg -> src:vec -> ins
   | Mtvsrdd      : dst:vec -> src1:reg -> src2:reg -> ins
+  | Mtvsrws      : dst:vec -> src:reg -> ins
   | Vadduwm      : dst:vec -> src1:vec -> src2:vec -> ins
   | Vxor         : dst:vec -> src1:vec -> src2:vec -> ins
+  | Vand         : dst:vec -> src1:vec -> src2:vec -> ins
   | Vslw         : dst:vec -> src1:vec -> src2:vec -> ins
   | Vsrw         : dst:vec -> src1:vec -> src2:vec -> ins
+  | Vsl          : dst:vec -> src1:vec -> src2:vec -> ins
   | Vcmpequw     : dst:vec -> src1:vec -> src2:vec -> ins
   | Vsldoi       : dst:vec -> src1:vec -> src2:vec -> count:quad32bytes -> ins
   | Vmrghw       : dst:vec -> src1:vec -> src2:vec -> ins
   | Xxmrghd      : dst:vec -> src1:vec -> src2:vec -> ins
   | Vsel         : dst:vec -> src1:vec -> src2:vec -> sel:vec -> ins
+  | Vspltw       : dst:vec -> src:vec -> uim:nat2 -> ins
+  | Vspltisw     : dst:vec -> src:sim -> ins
+  | Vspltisb     : dst:vec -> src:sim -> ins
   | Load128      : dst:vec -> base:reg -> offset:reg -> ins
   | Store128     : src:vec -> base:reg -> offset:reg -> ins
   | Load128Word4 : dst:vec -> base:reg -> ins
@@ -60,10 +73,19 @@ type ins =
   | Vshasigmaw1  : dst:vec -> src:vec -> ins
   | Vshasigmaw2  : dst:vec -> src:vec -> ins
   | Vshasigmaw3  : dst:vec -> src:vec -> ins
+  | Vsbox        : dst:vec -> src:vec -> ins
+  | RotWord      : dst:vec -> src1:vec -> src2:vec -> ins
+  | Vcipher      : dst:vec -> src1:vec -> src2:vec -> ins
+  | Vcipherlast  : dst:vec -> src1:vec -> src2:vec -> ins
+  | Vncipher     : dst:vec -> src1:vec -> src2:vec -> ins
+  | Vncipherlast : dst:vec -> src1:vec -> src2:vec -> ins
+  | Vpmsumd      : dst:vec -> src1:vec -> src2:vec -> ins
   | Alloc        : n:nat64 -> ins
   | Dealloc      : n:nat64 -> ins
   | StoreStack128: src:vec -> t:taint -> offset:int -> ins
   | LoadStack128 : dst:vec -> t:taint -> offset:int -> ins
+  | StoreStack64 : src:reg -> t:taint -> offset:int -> ins
+  | LoadStack64  : dst:reg -> t:taint -> offset:int -> ins
   | Ghost        : (_:unit) -> ins
 
 type ocmp =
@@ -307,6 +329,9 @@ let free_stack' (start finish:int) (st:machine_stack) : machine_stack =
 let valid_mem (m:maddr) (s:state) : bool =
   valid_maddr_offset64 m.offset && valid_addr64 (eval_maddr m s) (heap_get s.ms_heap)
 
+let valid_mem64 (r:reg) (i:int) (s:state) : bool =
+  valid_addr64 (eval_reg r s + i) (heap_get s.ms_heap)
+
 let valid_mem128 (r:reg) (i:reg) (s:state) : bool =
   valid_addr128 (eval_reg r s + eval_reg i s) (heap_get s.ms_heap)
 
@@ -418,15 +443,20 @@ let eval_ins (ins:ins) : st unit =
     update_reg dst (eval_reg src s)
 
   | Load64 dst base offset ->
-    check (valid_mem ({ address=base; offset=offset }));*
+    check (fun s -> valid_maddr_offset64 offset);*
+    check (valid_mem64 base offset);*
     update_reg dst (eval_mem (eval_reg base s + offset) s)
 
   | Store64 src base offset ->
-    check (valid_mem ({ address=base; offset=offset }));*
+    check (fun s -> valid_maddr_offset64 offset);*
+    check (valid_mem64 base offset);*
     set (update_mem (eval_reg base s + offset) (eval_reg src s) s)
 
   | LoadImm64 dst src ->
-    update_reg dst (int_to_nat64 src)
+    update_reg dst (src % pow2_64)
+  
+  | LoadImmShl64 dst src ->
+    update_reg dst (ishl64 (src % pow2_64) 16)
 
   | AddLa dst src1 src2 ->
     update_reg dst ((eval_reg src1 s + src2) % pow2_64)
@@ -437,6 +467,12 @@ let eval_ins (ins:ins) : st unit =
   | AddImm dst src1 src2 ->
     update_reg dst ((eval_reg src1 s + int_to_nat64 src2) % pow2_64)
 
+  | AddCarry dst src1 src2 ->
+    let sum = (eval_reg src1 s) + (eval_reg src2 s) in
+    let new_carry = sum >= pow2_64 in
+    update_reg dst (sum % pow2_64);*
+    update_xer (update_xer_ca s.xer new_carry)
+  
   | AddExtended dst src1 src2 ->
     let old_carry = if xer_ca(s.xer) then 1 else 0 in
     let sum = (eval_reg src1 s) + (eval_reg src2 s) + old_carry in
@@ -474,6 +510,15 @@ let eval_ins (ins:ins) : st unit =
 
   | Sl64Imm dst src1 src2 ->
     update_reg dst (ishl (eval_reg src1 s) src2)
+  
+  | Sr64 dst src1 src2 ->
+    update_reg dst (ishr (eval_reg src1 s) ((eval_reg src2 s) % 64))
+  
+  | Sl64 dst src1 src2 ->
+    update_reg dst (ishl (eval_reg src1 s) ((eval_reg src2 s) % 64))
+
+  | Vmr dst src ->
+    update_vec dst (eval_vec src s)
 
   | Mfvsrd dst src ->
     let src_q = eval_vec src s in
@@ -495,12 +540,23 @@ let eval_ins (ins:ins) : st unit =
       (val_src2 / pow2_32)
       (val_src1 % pow2_32)
       (val_src1 / pow2_32))
+  
+  | Mtvsrws dst src ->
+    let val_src = eval_reg src s in
+    update_vec dst (Mkfour
+      (val_src % pow2_32)
+      (val_src % pow2_32)
+      (val_src % pow2_32)
+      (val_src % pow2_32))
 
   | Vadduwm dst src1 src2 ->
     update_vec dst (add_wrap_quad32 (eval_vec src1 s) (eval_vec src2 s))
 
   | Vxor dst src1 src2 ->
     update_vec dst (quad32_xor (eval_vec src1 s) (eval_vec src2 s))
+  
+  | Vand dst src1 src2 ->
+    update_vec dst (four_map2 (fun di si -> iand di si) (eval_vec src1 s) (eval_vec src2 s))
 
   | Vslw dst src1 src2 ->
     let src1_q = eval_vec src1 s in
@@ -519,6 +575,21 @@ let eval_ins (ins:ins) : st unit =
       (ishr src1_q.lo1 (src2_q.lo1 % 32))
       (ishr src1_q.hi2 (src2_q.hi2 % 32))
       (ishr src1_q.hi3 (src2_q.hi3 % 32)))
+
+  | Vsl dst src1 src2 ->
+    let src1_q = eval_vec src1 s in
+    let src2_q = eval_vec src2 s in
+    let sh = (index (nat32_to_be_bytes src2_q.lo0) 3) % 8 in
+    let chk (v:nat32) (sh:nat8):bool = (let bytes = nat32_to_be_bytes v in 
+      sh = (index bytes 3) % 8 && sh = (index bytes 2) % 8 && sh = (index bytes 1) % 8 && sh = (index bytes 0) % 8) in
+    check (fun s -> chk src2_q.lo0 sh);*
+    check (fun s -> chk src2_q.lo1 sh);*
+    check (fun s -> chk src2_q.hi2 sh);*
+    check (fun s -> chk src2_q.hi3 sh);*
+    let l = four_map (fun (i:nat32) -> ishl i sh) src1_q in
+    let r = four_map (fun (i:nat32) -> ishr i (32 - sh)) src1_q in
+    let Mkfour r0 r1 r2 r3 = r in
+    update_vec dst (quad32_xor l (Mkfour 0 r0 r1 r2))
 
   | Vcmpequw dst src1 src2 ->
     let src1_q = eval_vec src1 s in
@@ -561,6 +632,22 @@ let eval_ins (ins:ins) : st unit =
       (isel32 src2_q.hi2 src1_q.hi2 sel_q.hi2)
       (isel32 src2_q.hi3 src1_q.hi3 sel_q.hi3))
 
+  | Vspltw dst src uim ->
+    let src_q = eval_vec src s in
+    if uim = 0 then update_vec dst (Mkfour src_q.hi3 src_q.hi3 src_q.hi3 src_q.hi3)
+    else if uim = 1 then update_vec dst (Mkfour src_q.hi2 src_q.hi2 src_q.hi2 src_q.hi2)
+    else if uim = 2 then update_vec dst (Mkfour src_q.lo1 src_q.lo1 src_q.lo1 src_q.lo1)
+    else update_vec dst (Mkfour src_q.lo0 src_q.lo0 src_q.lo0 src_q.lo0)
+
+  | Vspltisw dst src ->
+    let src_nat32 = int_to_nat32 src in
+    update_vec dst (Mkfour src_nat32 src_nat32 src_nat32 src_nat32)
+
+  | Vspltisb dst src ->
+    let src_nat8 = int_to_nat8 src in
+    let src_nat32 = be_bytes_to_nat32 (four_to_seq_BE (Mkfour src_nat8 src_nat8 src_nat8 src_nat8)) in
+    update_vec dst (Mkfour src_nat32 src_nat32 src_nat32 src_nat32)
+  
   | Load128 dst base offset ->
     check (valid_mem128 base offset);*
     update_vec dst (eval_mem128 (eval_reg base s + eval_reg offset s) s)
@@ -641,6 +728,46 @@ let eval_ins (ins:ins) : st unit =
       (sigma256_1_1 src_q.hi2)
       (sigma256_1_1 src_q.hi3))
 
+  | Vsbox dst src ->
+    let src_q = eval_vec src s in
+    update_vec dst (Mkfour
+      (Vale.AES.AES_BE_s.sub_word src_q.lo0)
+      (Vale.AES.AES_BE_s.sub_word src_q.lo1)
+      (Vale.AES.AES_BE_s.sub_word src_q.hi2)
+      (Vale.AES.AES_BE_s.sub_word src_q.hi3))
+  
+  | RotWord dst src1 src2 ->
+    let src1_q = eval_vec src1 s in
+    let src2_q = eval_vec src2 s in
+    check (fun s -> (src2_q.lo0 = 8 && src2_q.lo1 = 8 && src2_q.hi2 = 8 && src2_q.hi3 = 8));*
+    update_vec dst (Mkfour
+      (Vale.AES.AES_BE_s.rot_word src1_q.lo0)
+      (Vale.AES.AES_BE_s.rot_word src1_q.lo1)
+      (Vale.AES.AES_BE_s.rot_word src1_q.hi2)
+      (Vale.AES.AES_BE_s.rot_word src1_q.hi3))
+
+  | Vcipher dst src1 src2 ->
+    update_vec dst (quad32_xor (Vale.AES.AES_BE_s.mix_columns (Vale.AES.AES_BE_s.shift_rows (Vale.AES.AES_BE_s.sub_bytes (eval_vec src1 s)))) (eval_vec src2 s))
+
+  | Vcipherlast dst src1 src2 ->
+    update_vec dst (quad32_xor (Vale.AES.AES_BE_s.shift_rows (Vale.AES.AES_BE_s.sub_bytes (eval_vec src1 s))) (eval_vec src2 s))
+  
+  | Vncipher dst src1 src2 ->
+    update_vec dst (Vale.AES.AES_BE_s.inv_mix_columns (quad32_xor (Vale.AES.AES_BE_s.inv_sub_bytes (Vale.AES.AES_BE_s.inv_shift_rows (eval_vec src1 s))) (eval_vec src2 s)))
+  
+  | Vncipherlast dst src1 src2 ->
+    update_vec dst (quad32_xor (Vale.AES.AES_BE_s.inv_sub_bytes (Vale.AES.AES_BE_s.inv_shift_rows (eval_vec src1 s))) (eval_vec src2 s))
+  
+  | Vpmsumd dst src1 src2 ->
+    let Mkfour a0 a1 a2 a3 = eval_vec src1 s in
+    let Mkfour b0 b1 b2 b3 = eval_vec src2 s in
+    let x0 = Vale.Math.Poly2.Bits_s.of_double32 (Mktwo a0 a1) in
+    let x1 = Vale.Math.Poly2.Bits_s.of_double32 (Mktwo a2 a3) in
+    let y0 = Vale.Math.Poly2.Bits_s.of_double32 (Mktwo b0 b1) in
+    let y1 = Vale.Math.Poly2.Bits_s.of_double32 (Mktwo b2 b3) in
+    let sum = Vale.Math.Poly2_s.add (Vale.Math.Poly2_s.mul x0 y0) (Vale.Math.Poly2_s.mul x1 y1) in
+    update_vec dst (Vale.Math.Poly2.Bits_s.to_quad32 sum)
+  
   | Alloc n ->
     check (fun s -> n % 16 = 0);*
     update_r1 (eval_reg 1 s - n)
@@ -664,6 +791,19 @@ let eval_ins (ins:ins) : st unit =
     check (fun s -> r1_pos + 16 <= s.ms_stack.initial_r1);*
     check (fun s -> valid_src_stack128_and_taint r1_pos s t);*
     update_vec dst (eval_stack128 r1_pos s.ms_stack)
+  
+  | StoreStack64 src t offset ->
+    check (fun s -> valid_maddr_offset64 offset);*
+    let r1_pos = eval_reg 1 s + offset in
+    check (fun s -> r1_pos <= s.ms_stack.initial_r1 - 8);*
+    set (update_stack_and_taint r1_pos (eval_reg src s) s t)
+
+  | LoadStack64 dst t offset ->
+    check (fun s -> valid_maddr_offset64 offset);*
+    let r1_pos = eval_reg 1 s + offset in
+    check (fun s -> r1_pos + 8 <= s.ms_stack.initial_r1);*
+    check (fun s -> valid_src_stack64_and_taint r1_pos s t);*
+    update_reg dst (eval_stack r1_pos s.ms_stack)
 
   | Ghost _ ->
     set s

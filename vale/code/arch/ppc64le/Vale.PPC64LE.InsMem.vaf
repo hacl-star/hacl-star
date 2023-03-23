@@ -175,7 +175,7 @@ procedure MemLoad64(in h:heaplet, out dst:reg_opr, in base:reg_opr, inline offse
     reads
         memLayout;
     requires
-        valid_addr_mem(@base, offset, this);
+        valid_maddr_offset64(offset);
         valid_src_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, false);
         valid_taint_buf64(b, h, memLayout.vl_taint, t);
@@ -196,7 +196,7 @@ procedure MemStore64(inout h:heaplet, in src:reg_opr, in base:reg_opr, inline of
     modifies
         mem;
     requires
-        valid_addr_mem(@base, offset, this);
+        valid_maddr_offset64(offset);
         valid_dst_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, true);
         valid_taint_buf64(b, h, memLayout.vl_taint, t);

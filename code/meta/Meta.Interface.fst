@@ -96,7 +96,8 @@ let is_implicit = function
   | Q_Implicit -> true
   | _ -> false
 
-let rec push_pre (inv_bv: bv) (t: term): Tac term =
+(* This function assumes that we end up with an effectful arrow that signals the end of the type. *)
+let rec push_pre (st: state) (inv_bv: bv) (t: term): Tac term =
   match inspect t with
   | Tv_Arrow bv c ->
       let c =
@@ -122,14 +123,15 @@ let rec push_pre (inv_bv: bv) (t: term): Tac term =
             else
               fail ("rewritten function has an unknown effect: " ^ string_of_name e)
         | C_Total t ->
-            C_Total (push_pre inv_bv t)
+            C_Total (push_pre st inv_bv t)
         | _ ->
             fail ("rewritten type is neither a Tot or a stateful arrow: " ^ term_to_string t)
       in
       let c = pack_comp c in
       pack (Tv_Arrow bv c)
   | _ ->
-      fail ("not just an arrow: " ^ term_to_string t)
+      print (st.indent ^ "  WARN: no effect found, are you using the specialize tactic on pure code?");
+      t
 
 let rec to_reduce t: Tac _ =
   match fst (collect_app t) with
@@ -148,19 +150,20 @@ let rec to_reduce t: Tac _ =
 let lambda_over_p (inv_bv: bv) (t: term): Tac term =
   pack (Tv_Abs (pack_binder inv_bv Q_Explicit []) t)
 
-let lambda_over_only_p (inv_bv: bv) (f_typ: term): Tac term =
+let lambda_over_only_p (st: state) (inv_bv: bv) (f_typ: term): Tac term =
   let fvs = to_reduce f_typ in
-  print ("Names to reduce in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
+  print ("  Names to reduce in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
   let f_typ = norm_term_env (top_env ()) [ delta_only (to_reduce f_typ) ] f_typ in
-  lambda_over_p inv_bv (push_pre inv_bv f_typ)
+  lambda_over_p inv_bv (push_pre st inv_bv f_typ)
 
 // transforms #i:i -> t i into fun #i:i -> t i
 let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv): Tac term =
   // this is a source of inefficiency... previously we could let this be a
   // user-defined abbreviation, such as cswap2_t
   let fvs = to_reduce f_typ in
-  print ("Names to reduce in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
+  print (st.indent ^ "Names to reduce in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
   let f_typ = norm_term_env (top_env ()) [ delta_only (to_reduce f_typ) ] f_typ in
+  print (st.indent ^ "After reduction in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
   match inspect f_typ with
   | Tv_Arrow bv c ->
       let bv, (qual, _attrs) = inspect_binder bv in
@@ -171,8 +174,9 @@ let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv
       let f_typ =
         match inspect_comp c with
         | C_Total t ->
+            print (st.indent ^ term_to_string t ^ "\n");
             // ... -> ... (requires p) ...
-            let t = push_pre inv_bv t in
+            let t = push_pre st inv_bv t in
             // fun p:Type. ... -> ... (requires p) ...
             let t = lambda_over_p inv_bv t in
             // fun #i:index -> fun p:Type. ... -> ... (requires p) ...
@@ -248,8 +252,10 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           | Tv_Abs binder f_body' ->
               let bv, qual = inspect_binder binder in
               let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
+              print (st.indent ^ "Found " ^ name ^ ", which is " ^
+                (if binder_is_legit f_name t_i binder then "" else "NOT ") ^
+                "an index of type " ^ term_to_string t);
               if binder_is_legit f_name t_i binder then begin
-                print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
                 Some bv, name, f_body'
               end else
                 // It can be convenient to specialize over a function without
@@ -290,7 +296,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
                 mk_tot_arr [ pack_binder inv_bv Q_Explicit [] ] (`Type0)),
               true
           | _ ->
-              lambda_over_only_p inv_bv f_typ,
+              lambda_over_only_p st inv_bv f_typ,
               mk_tot_arr [ pack_binder inv_bv Q_Explicit [] ] (`Type0),
               false
         in
@@ -404,15 +410,17 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             // Assuming that this is a val, but we can't inspect it. Let's work around this.
             let t = pack (Tv_FVar (pack_fv f_name)) in
             let f_typ = tc (top_env ()) t in
+            print (st.indent ^ "  Assuming " ^ string_of_name f_name ^ ": " ^
+              term_to_string f_typ ^ " is a val\n");
             let f_typ, has_index =
               match inspect f_typ with
               | Tv_Arrow bv _ ->
                   if binder_is_legit f_name t_i bv then
                     lambda_over_index_and_p st f_name f_typ inv_bv, true
                   else
-                    lambda_over_only_p inv_bv f_typ, false
+                    lambda_over_only_p st inv_bv f_typ, false
               | _ ->
-                  lambda_over_only_p inv_bv f_typ, false // fail (string_of_name f_name ^ " does not have an arrow type")
+                  lambda_over_only_p st inv_bv f_typ, false // fail (string_of_name f_name ^ " does not have an arrow type")
             in
             print (st.indent ^ "  Registering " ^ string_of_name f_name ^ " with type " ^
               term_to_string f_typ);
@@ -547,7 +555,7 @@ and visit_body (t_i: term)
           st, e, bvs, ses
       end
 
-  | Tv_Var _ | Tv_BVar _ | Tv_FVar _ | Tv_UInst _ _
+  | Tv_Var _ | Tv_BVar _ | Tv_UInst _ _ | Tv_FVar _
   | Tv_Const _ ->
       st, e, bvs, []
 

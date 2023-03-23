@@ -370,6 +370,7 @@ val load_point_vartime_noalloc:
     (let ps = S.load_point (as_seq h0 b) in
     (res <==> Some? ps) /\ (res ==> (point_inv h1 out /\ point_eval h1 out == Some?.v ps))))
 
+#push-options "--z3rlimit 100"
 let load_point_vartime_noalloc out px py b =
   let pxb = sub b 0ul 32ul in
   let pyb = sub b 32ul 32ul in
@@ -394,7 +395,7 @@ let load_point_vartime_noalloc out px py b =
     assert (inv_lazy_reduced2 h1 py);
     to_proj_point out px py end;
   res
-
+#pop-options
 
 let load_point_vartime out b =
   push_frame ();

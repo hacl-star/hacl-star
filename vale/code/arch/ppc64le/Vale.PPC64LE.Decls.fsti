@@ -364,6 +364,15 @@ unfold
 let buffer_disjoints128 (l:M.buffer128) (ls:list (M.buffer128)) : prop0 =
   norm [zeta; iota; delta_only [`%loc_locs_disjoint_rec128]] (loc_locs_disjoint_rec128 l ls)
 
+let rec loc_locs_disjoint_rec64_128 (l:M.buffer64) (ls:list (M.buffer128)) : prop0 =
+  match ls with
+  | [] -> True
+  | h::t -> locs_disjoint [loc_buffer l; loc_buffer h] /\ loc_locs_disjoint_rec64_128 l t
+
+unfold
+let buffer_disjoints64_128 (l:M.buffer64) (ls:list (M.buffer128)) : prop0 =
+  norm [zeta; iota; delta_only [`%loc_locs_disjoint_rec64_128]] (loc_locs_disjoint_rec64_128 l ls)
+
 unfold let buffers3_disjoint128 (b1 b2 b3:M.buffer128) =
     locs_disjoint [loc_buffer b1; loc_buffer b2; loc_buffer b3]
 
