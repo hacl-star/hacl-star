@@ -13,22 +13,16 @@ open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.PointMul
 
-open Hacl.Hash.SHA2
-open Spec.Hash.Definitions
-
-module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
-module PS = Hacl.Impl.P256.Sign
 module QI = Hacl.Impl.P256.Qinv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
-
 
 val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
   (requires fun h ->
@@ -174,27 +168,3 @@ let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
       begin pop_frame (); false end
       else
         begin let res = bn_is_eq_vartime4 x r_q in pop_frame (); res end end
-
-
-inline_for_extraction
-val ecdsa_verification:
-    alg:S.hash_alg_ecdsa
-  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
-  -> msg:lbuffer uint8 msg_len
-  -> public_key:lbuffer uint8 64ul
-  -> signature_r:lbuffer uint8 32ul
-  -> signature_s:lbuffer uint8 32ul ->
-  Stack bool
-  (requires fun h ->
-    live h public_key /\ live h signature_r /\ live h signature_s /\ live h msg)
-  (ensures fun h0 result h1 -> modifies0 h0 h1 /\
-    result == S.ecdsa_verification_agile alg (v msg_len) (as_seq h0 msg)
-      (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
-
-let ecdsa_verification alg msg_len msg public_key signature_r signature_s =
-  push_frame ();
-  let m_q = create_felem () in
-  PS.msg_as_felem alg msg_len msg m_q;
-  let res = ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s in
-  pop_frame ();
-  res

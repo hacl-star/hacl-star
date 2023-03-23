@@ -13,10 +13,6 @@ open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.PointMul
 
-open Spec.Hash.Definitions
-open Hacl.Hash.SHA2
-
-module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module S = Spec.P256
@@ -28,44 +24,6 @@ module BB = Hacl.Bignum.Base
 
 inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
-
-inline_for_extraction noextract
-val msg_as_felem:
-    alg:S.hash_alg_ecdsa
-  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
-  -> msg:lbytes msg_len
-  -> res:felem ->
-  Stack unit
-  (requires fun h ->
-    live h msg /\ live h res /\ disjoint msg res)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let hashM = S.hash_ecdsa alg (v msg_len) (as_seq h0 msg) in
-    as_nat h1 res = BSeq.nat_from_bytes_be (LSeq.sub hashM 0 32) % S.order))
-
-let msg_as_felem alg msg_len msg res =
-  push_frame ();
-
-  [@inline_let] let sz: size_t =
-    match alg with
-    | S.NoHash -> 32ul
-    | S.Hash a -> Hacl.Hash.Definitions.hash_len a in
-
-  let mHash = create sz (u8 0) in
-
-  begin
-  match alg with
-    | S.NoHash -> copy mHash (sub msg 0ul 32ul)
-    | S.Hash a -> match a with
-      | SHA2_256 -> hash_256 msg msg_len mHash
-      | SHA2_384 -> hash_384 msg msg_len mHash
-      | SHA2_512 -> hash_512 msg msg_len mHash
-  end;
-
-  let mHash32 = sub mHash 0ul 32ul in
-  bn_from_bytes_be4 res mHash32;
-  qmod_short res res;
-  pop_frame ()
-
 
 inline_for_extraction noextract
 val ecdsa_sign_r (r k:felem) : Stack unit
@@ -201,36 +159,5 @@ let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
   ecdsa_sign_s s_q k_q r_q d_a m_q;
   bn2_to_bytes_be4 signature r_q s_q;
   let res = check_signature r_q s_q in
-  pop_frame ();
-  res
-
-
-inline_for_extraction noextract
-val ecdsa_signature:
-    alg:S.hash_alg_ecdsa
-  -> signature:lbuffer uint8 64ul
-  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
-  -> msg:lbuffer uint8 msg_len
-  -> private_key:lbuffer uint8 32ul
-  -> nonce:lbuffer uint8 32ul ->
-  Stack bool
-  (requires fun h ->
-    live h signature /\ live h msg /\ live h private_key /\ live h nonce /\
-    disjoint signature msg /\ disjoint signature private_key /\ disjoint signature nonce /\
-
-    0 < BSeq.nat_from_bytes_be (as_seq h private_key) /\
-    BSeq.nat_from_bytes_be (as_seq h private_key) < S.order /\
-    0 < BSeq.nat_from_bytes_be (as_seq h nonce) /\
-    BSeq.nat_from_bytes_be (as_seq h nonce) < S.order)
-  (ensures fun h0 flag h1 -> modifies (loc signature) h0 h1 /\
-    (let sgnt = S.ecdsa_signature_agile alg (v msg_len)
-      (as_seq h0 msg) (as_seq h0 private_key) (as_seq h0 nonce) in
-     (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 signature == Some?.v sgnt))))
-
-let ecdsa_signature alg signature msg_len msg private_key nonce =
-  push_frame ();
-  let m_q = create_felem () in
-  msg_as_felem alg msg_len msg m_q;
-  let res = ecdsa_sign_msg_as_qelem signature m_q private_key nonce in
   pop_frame ();
   res
