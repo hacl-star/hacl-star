@@ -221,7 +221,7 @@ let scalarMultiplicationWithoutNorm p res scalar =
   make_point_at_inf q;
 
   let h0 = ST.get () in
-  point_to_mont p res;
+  point_to_mont res p;
   let h1 = ST.get () in
   lemma_point_to_domain h0 h1 p res;
 
@@ -236,7 +236,7 @@ let scalarMultiplicationWithoutNorm p res scalar =
 let point_mul res p scalar =
   push_frame ();
   let tmp = create_point () in
-  copy_point p tmp;
+  copy_point tmp p;
 
   let bytes_scalar = create 32ul (u8 0) in
   bn_to_bytes_be4 bytes_scalar scalar;
@@ -262,7 +262,7 @@ let point_mul_g res scalar =
   let buff = sub tmp 12ul 88ul in
   montgomery_ladder q g bytes_scalar buff;
   let h3 = ST.get () in
-  copy_point q res;
+  copy_point res q;
   //point_from_mont q res;
   pop_frame ()
 

@@ -10,13 +10,19 @@ open Lib.Buffer
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
-open Hacl.Impl.P256.Finv
 open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
+module FI = Hacl.Impl.P256.Finv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
+///  Create a point
+
+let create_aff_point () =
+  create 8ul (u64 0)
+
 
 let create_point () =
   create 12ul (u64 0)
@@ -42,14 +48,7 @@ let make_point_at_inf p =
   make_fzero z
 
 
-let copy_point p res = copy res p
-
-
-let create_aff_point () =
-  create 8ul (u64 0)
-
-
-///  check if a point is a point-at-infinity
+///  Check if a point is a point-at-infinity
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
 val lemma_mont_is_point_at_inf: p:S.jacob_point{let (_, _, z) = p in z < S.prime} ->
@@ -79,6 +78,12 @@ let is_point_at_inf_vartime p =
   bn_is_zero_vartime4 pz
 
 
+///  Create a copy of a point
+
+let copy_point res p =
+  copy res p
+
+
 [@CInline]
 let copy_point_conditional res p q_mask =
   let z = getz q_mask in
@@ -99,7 +104,7 @@ let copy_point_conditional res p q_mask =
 ///  Point conversion between Montgomery and Regular representations
 
 [@CInline]
-let point_to_mont p res =
+let point_to_mont res p =
   let open Hacl.Impl.P256.Core in
   let px = getx p in
   let py = gety p in
@@ -115,7 +120,7 @@ let point_to_mont p res =
 
 
 [@CInline]
-let point_from_mont p res =
+let point_from_mont res p =
   let px = getx p in
   let py = gety p in
   let pz = getz p in
@@ -132,7 +137,7 @@ let point_from_mont p res =
 ///  Point conversion between Jacobian and Affine coordinates representations
 
 inline_for_extraction noextract
-val norm_jacob_point_z: p:point -> res:felem -> Stack unit
+val norm_jacob_point_z: res:felem -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint p res /\
     point_inv h p)
@@ -140,7 +145,7 @@ val norm_jacob_point_z: p:point -> res:felem -> Stack unit
     (let _, _, rz = S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) in
     as_nat h1 res == rz))
 
-let norm_jacob_point_z p res =
+let norm_jacob_point_z res p =
   push_frame ();
   let zero = create_felem () in
   let bit = is_point_at_inf p in
@@ -151,7 +156,7 @@ let norm_jacob_point_z p res =
 
 
 [@CInline]
-let norm_jacob_point_x p res =
+let norm_jacob_point_x res p =
   let px = getx p in
   let pz = getz p in
 
@@ -159,7 +164,7 @@ let norm_jacob_point_x p res =
   fsqr res pz;       // rx = pz * pz
   let h1 = ST.get () in
   assert (fmont_as_nat h1 res == S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h0 pz));
-  finv res res;       // rx = finv rx
+  FI.finv res res;       // rx = finv rx
   let h2 = ST.get () in
   assert (fmont_as_nat h2 res == S.finv (fmont_as_nat h1 res));
   fmul res px res;    // rx = px * rx
@@ -172,7 +177,7 @@ let norm_jacob_point_x p res =
 
 // TODO: rm
 inline_for_extraction noextract
-val norm_jacob_point_y: p:point -> res:felem -> Stack unit
+val norm_jacob_point_y: res:felem -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint p res /\
     point_inv h p)
@@ -180,14 +185,14 @@ val norm_jacob_point_y: p:point -> res:felem -> Stack unit
     (let _, ry, _ = S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) in
     as_nat h1 res == ry))
 
-let norm_jacob_point_y p res =
+let norm_jacob_point_y res p =
   let py = gety p in
   let pz = getz p in
 
   let h0 = ST.get () in
   fcube res pz;       // ry = pz * pz * pz
   let h1 = ST.get () in
-  finv res res;       // ry = finv ry
+  FI.finv res res;       // ry = finv ry
   let h2 = ST.get () in
   assert (fmont_as_nat h2 res == S.finv (fmont_as_nat h1 res));
   fmul res py res;    // ry = px * ry
@@ -199,21 +204,21 @@ let norm_jacob_point_y p res =
 
 
 [@CInline]
-let norm_jacob_point p res =
+let norm_jacob_point res p =
   push_frame ();
   let tmp = create_point () in
   let tx = getx tmp in
   let ty = gety tmp in
   let tz = getz tmp in
-  norm_jacob_point_x p tx;
-  norm_jacob_point_y p ty;
-  norm_jacob_point_z p tz;
-  copy_point tmp res;
+  norm_jacob_point_x tx p;
+  norm_jacob_point_y ty p;
+  norm_jacob_point_z tz p;
+  copy_point res tmp;
   pop_frame ()
 
 
 [@CInline]
-let to_jacob_point p res =
+let to_jacob_point res p =
   let px = aff_getx p in
   let py = aff_gety p in
 
@@ -258,8 +263,8 @@ let is_point_eq_vartime p q =
   let p_norm = create_point () in
   let q_norm = create_point () in
 
-  norm_jacob_point p p_norm;
-  norm_jacob_point q q_norm;
+  norm_jacob_point p_norm p;
+  norm_jacob_point q_norm q;
   let is_pq_equal = is_point_strong_eq_vartime p_norm q_norm in
   pop_frame ();
   is_pq_equal
@@ -327,7 +332,7 @@ let is_point_on_curve_vartime p =
 ///  Point load and store functions
 
 [@CInline]
-let aff_store_point res p =
+let aff_point_store res p =
   let px = aff_getx p in
   let py = aff_gety p in
   bn2_to_bytes_be4 res px py
@@ -363,7 +368,7 @@ let load_point_vartime p b =
   let is_xy_valid = is_xy_valid_vartime point_aff in
   let res = if not is_xy_valid then false else is_point_on_curve_vartime point_aff in
   if res then
-    to_jacob_point point_aff p;
+    to_jacob_point p point_aff;
   pop_frame ();
   res
 
@@ -386,7 +391,7 @@ let recover_y_vartime_candidate y x =
   SM.lemma_to_from_mont_id (as_nat h0 x);
   Hacl.Impl.P256.Core.to_mont xM x;
   compute_rp_ec_equation xM y2M; // y2M = x *% x *% x +% S.a_coeff *% x +% S.b_coeff
-  fsqrt yM y2M; // yM = fsqrt y2M
+  FI.fsqrt yM y2M; // yM = fsqrt y2M
   let h1 = ST.get () in
   from_mont y yM;
   let is_y_valid = is_y_sqr_is_y2_vartime y2M yM in

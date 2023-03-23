@@ -129,6 +129,13 @@ let getz (p:point) : Stack felem
 ///  Create a point
 
 inline_for_extraction noextract
+val create_aff_point: unit -> StackInline aff_point
+  (requires fun h -> True)
+  (ensures  fun h0 f h1 ->
+    stack_allocated f h0 h1 (LSeq.create 8 (u64 0)))
+
+
+inline_for_extraction noextract
 val create_point: unit -> StackInline point
   (requires fun h -> True)
   (ensures  fun h0 f h1 ->
@@ -148,35 +155,29 @@ val make_point_at_inf: p:point -> Stack unit
     point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.point_at_inf)
 
 
-inline_for_extraction noextract
-val copy_point: p:point -> res:point -> Stack unit
-  (requires fun h -> live h p /\ live h res /\ disjoint p res)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == as_seq h0 p)
-
-
-inline_for_extraction noextract
-val create_aff_point: unit -> StackInline aff_point
-  (requires fun h -> True)
-  (ensures  fun h0 f h1 ->
-    stack_allocated f h0 h1 (LSeq.create 8 (u64 0)))
-
-
-///  check if a point is a point-at-infinity
+///  Check if a point is a point-at-infinity
 
 val is_point_at_inf: p:point -> Stack uint64
   (requires fun h -> live h p /\ point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if S.is_point_at_inf (from_mont_point (as_point_nat h0 p))
-     then v r = ones_v U64 else v r = 0) /\
-    (if S.is_point_at_inf (as_point_nat h0 p)
-     then v r = ones_v U64 else v r = 0))
+    (let pM = from_mont_point (as_point_nat h0 p) in
+    (if S.is_point_at_inf pM then v r = ones_v U64 else v r = 0) /\
+    (if S.is_point_at_inf (as_point_nat h0 p) then v r = ones_v U64 else v r = 0)))
 
 
 val is_point_at_inf_vartime: p:point -> Stack bool
   (requires fun h -> live h p /\ point_inv h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.is_point_at_inf (as_point_nat h0 p))
+
+
+///  Create a copy of a point
+
+inline_for_extraction noextract
+val copy_point: res:point -> p:point -> Stack unit
+  (requires fun h -> live h p /\ live h res /\ disjoint p res)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == as_seq h0 p)
 
 
 val copy_point_conditional: res:point -> p:point -> q_mask:point -> Stack unit
@@ -194,7 +195,7 @@ val copy_point_conditional: res:point -> p:point -> q_mask:point -> Stack unit
 
 ///  Point conversion between Montgomery and Regular representations
 
-val point_to_mont: p:point -> res:point -> Stack unit
+val point_to_mont: res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
@@ -202,27 +203,21 @@ val point_to_mont: p:point -> res:point -> Stack unit
     point_inv h1 res /\
    (let px, py, pz = as_point_nat h0 p in
     let rx, ry, rz = as_point_nat h1 res in
-    rx == SM.to_mont px /\
-    ry == SM.to_mont py /\
-    rz == SM.to_mont pz))
+    rx == SM.to_mont px /\ ry == SM.to_mont py /\ rz == SM.to_mont pz))
 
 
-val point_from_mont: p:point -> res:point-> Stack unit
+// not used?
+val point_from_mont: res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-   (let px, py, pz = as_point_nat h0 p in
-    let rx, ry, rz = as_point_nat h1 res in
-    rx == SM.from_mont px /\
-    ry == SM.from_mont py /\
-    rz == SM.from_mont pz))
+    point_inv h1 res /\ as_point_nat h1 res == from_mont_point (as_point_nat h0 p))
 
 
 ///  Point conversion between Jacobian and Affine coordinates representations
 
-val norm_jacob_point_x: p:point -> res:felem -> Stack unit
+val norm_jacob_point_x: res:felem -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
@@ -231,22 +226,20 @@ val norm_jacob_point_x: p:point -> res:felem -> Stack unit
     as_nat h1 res == rx))
 
 
-val norm_jacob_point: p:point -> res:point -> Stack unit
+val norm_jacob_point: res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_point_nat h1 res ==
-      S.norm_jacob_point (from_mont_point (as_point_nat h0 p)))
+    as_point_nat h1 res == S.norm_jacob_point (from_mont_point (as_point_nat h0 p)))
 
 
-val to_jacob_point: p:aff_point -> res:point -> Stack unit
+val to_jacob_point: res:point -> p:aff_point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ disjoint p res /\
     aff_point_inv h p)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_point_nat h1 res ==
-      S.to_jacob_point (aff_point_x_as_nat h0 p, aff_point_y_as_nat h0 p))
+    as_point_nat h1 res == S.to_jacob_point (as_aff_point_nat h0 p))
 
 
 ///  Point comparison
@@ -271,7 +264,7 @@ val is_point_on_curve_vartime: p:aff_point -> Stack bool
 
 ///  Point load and store functions
 
-val aff_store_point: res:lbuffer uint8 64ul -> p:aff_point -> Stack unit
+val aff_point_store: res:lbuffer uint8 64ul -> p:aff_point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint res p /\
     aff_point_inv h p)
@@ -279,13 +272,12 @@ val aff_store_point: res:lbuffer uint8 64ul -> p:aff_point -> Stack unit
     as_seq h1 res == S.aff_store_point (as_aff_point_nat h0 p))
 
 
-val load_point_vartime: p:point -> b:lbuffer uint8 64ul -> Stack bool
+val load_point_vartime: res:point -> b:lbuffer uint8 64ul -> Stack bool
   (requires fun h ->
-    live h p /\ live h b /\ disjoint p b)
-  (ensures  fun h0 res h1 -> modifies (loc p) h0 h1 /\
+    live h res /\ live h b /\ disjoint res b)
+  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
     (let ps = S.load_point (as_seq h0 b) in
-    (res <==> Some? ps) /\ (res ==> (point_inv h1 p /\
-      as_point_nat h1 p == Some?.v ps))))
+    (r <==> Some? ps) /\ (r ==> (point_inv h1 res /\ as_point_nat h1 res == Some?.v ps))))
 
 
 val aff_point_decompress_vartime (x y:felem) (s:lbuffer uint8 33ul) : Stack bool

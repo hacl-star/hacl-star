@@ -80,7 +80,7 @@ let ecdsa_sign_r r k =
   push_frame ();
   let p = create_point () in
   point_mul_g p k; // p = [k]G
-  norm_jacob_point_x p r;
+  norm_jacob_point_x r p;
   qmod_short r r;
   pop_frame ()
 

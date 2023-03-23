@@ -22,7 +22,7 @@ let ecp256dh_i public_key private_key =
   let pk = create_point () in
   point_mul_g_bytes pk private_key;
   let flag = is_point_at_inf pk in
-  aff_store_point public_key (sub pk 0ul 8ul);
+  aff_point_store public_key (sub pk 0ul 8ul);
   pop_frame ();
 
   Hacl.Bignum.Base.unsafe_bool_of_limb0 flag
@@ -63,7 +63,7 @@ let ecp256dh_r shared_secret their_pubkey private_key =
   let pk = create_point () in
   let is_pk_valid = load_point_vartime pk their_pubkey in
   let flag = ecp256dh_r_ is_pk_valid ss pk private_key in
-  aff_store_point shared_secret (sub ss 0ul 8ul);
+  aff_point_store shared_secret (sub ss 0ul 8ul);
   pop_frame ();
 
   Hacl.Bignum.Base.unsafe_bool_of_limb0 flag
