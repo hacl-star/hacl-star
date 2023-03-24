@@ -124,20 +124,20 @@ let poly1305_vale
     let h3 = ST.get () in
     assert (B.as_seq h3 dst `S.equal` Spec.Poly1305.poly1305_mac (B.as_seq h0 src) (B.as_seq h0 key))
 
-let poly1305 dst src len key =
+let mac output input input_len key =
   let h0 = ST.get () in
   let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
 
   if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then begin
-    Hacl.Poly1305_256.poly1305_mac dst len src key
+    Hacl.Poly1305_256.mac output input input_len key
 
   end else if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then begin
-    Hacl.Poly1305_128.poly1305_mac dst len src key
+    Hacl.Poly1305_128.mac output input input_len key
 
   end else if EverCrypt.TargetConfig.hacl_can_compile_vale then begin
-    poly1305_vale dst src len key
+    poly1305_vale output input input_len key
 
   end else begin
-    Hacl.Poly1305_32.poly1305_mac dst len src key
+    Hacl.Poly1305_32.mac output input input_len key
   end

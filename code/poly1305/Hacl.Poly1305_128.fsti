@@ -20,4 +20,4 @@ val poly1305_update: poly1305_update_st M128
 
 val poly1305_finish: poly1305_finish_st M128
 
-val poly1305_mac: poly1305_mac_st M128
+val mac: poly1305_mac_st M128

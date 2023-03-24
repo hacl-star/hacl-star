@@ -35,11 +35,11 @@ Found in ``EverCrypt_Poly1305.h``.
 
 .. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_Poly1305.h
     :language: c
-    :start-after: SNIPPET_START: EverCrypt_Poly1305_poly1305
-    :end-before: SNIPPET_END: EverCrypt_Poly1305_poly1305
+    :start-after: SNIPPET_START: EverCrypt_Poly1305_mac
+    :end-before: SNIPPET_END: EverCrypt_Poly1305_mac
 
-- ``dst`` must be at least 16 bytes
-- if ``len``, the length of ``src``, gets close to 4GB, you need to read the
+- ``output`` must be at least 16 bytes
+- if ``input_len``, the length of ``input``, gets close to 4GB, you need to read the
   precondition in ``EverCrypt.Poly1305.fsti``
 - ``key`` must be at least 32 bytes
 

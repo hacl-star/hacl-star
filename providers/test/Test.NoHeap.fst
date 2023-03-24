@@ -221,7 +221,7 @@ let test_one_poly1305 (v: Test.Vectors.Poly1305.vector): Stack unit (fun _ -> Tr
     B.recall key;
     B.recall tag;
     if key_len = 32ul then
-      EverCrypt.Poly1305.poly1305 dst input input_len key;
+      EverCrypt.Poly1305.mac dst input input_len key;
     B.recall tag;
     if tag_len = 16ul then
       TestLib.compare_and_print !$"Poly1305" tag dst 16ul
