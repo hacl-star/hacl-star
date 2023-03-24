@@ -285,25 +285,40 @@ EXPORTS
   Hacl_Ed25519_sign_expanded
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
-  Hacl_Poly1305_32_poly1305_init
-  Hacl_Poly1305_32_poly1305_update1
-  Hacl_Poly1305_32_poly1305_update
-  Hacl_Poly1305_32_poly1305_finish
-  Hacl_Poly1305_32_poly1305_mac
-  Hacl_Impl_Poly1305_Field32xN_128_load_acc2
-  Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize
-  Hacl_Poly1305_128_poly1305_init
-  Hacl_Poly1305_128_poly1305_update1
-  Hacl_Poly1305_128_poly1305_update
-  Hacl_Poly1305_128_poly1305_finish
-  Hacl_Poly1305_128_poly1305_mac
-  Hacl_Impl_Poly1305_Field32xN_256_load_acc4
-  Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize
-  Hacl_Poly1305_256_poly1305_init
-  Hacl_Poly1305_256_poly1305_update1
-  Hacl_Poly1305_256_poly1305_update
-  Hacl_Poly1305_256_poly1305_finish
-  Hacl_Poly1305_256_poly1305_mac
+  Hacl_MAC_Poly1305_poly1305_init
+  Hacl_MAC_Poly1305_poly1305_update1
+  Hacl_MAC_Poly1305_poly1305_update
+  Hacl_MAC_Poly1305_poly1305_finish
+  Hacl_MAC_Poly1305_mac
+  Hacl_MAC_Poly1305_malloc
+  Hacl_MAC_Poly1305_reset
+  Hacl_MAC_Poly1305_update
+  Hacl_MAC_Poly1305_digest
+  Hacl_MAC_Poly1305_free
+  Hacl_MAC_Poly1305_Simd128_load_acc2
+  Hacl_MAC_Poly1305_Simd128_fmul_r2_normalize
+  Hacl_MAC_Poly1305_Simd128_poly1305_init
+  Hacl_MAC_Poly1305_Simd128_poly1305_update1
+  Hacl_MAC_Poly1305_Simd128_poly1305_update
+  Hacl_MAC_Poly1305_Simd128_poly1305_finish
+  Hacl_MAC_Poly1305_Simd128_mac
+  Hacl_MAC_Poly1305_Simd128_malloc
+  Hacl_MAC_Poly1305_Simd128_reset
+  Hacl_MAC_Poly1305_Simd128_update
+  Hacl_MAC_Poly1305_Simd128_digest
+  Hacl_MAC_Poly1305_Simd128_free
+  Hacl_MAC_Poly1305_Simd256_load_acc4
+  Hacl_MAC_Poly1305_Simd256_fmul_r4_normalize
+  Hacl_MAC_Poly1305_Simd256_poly1305_init
+  Hacl_MAC_Poly1305_Simd256_poly1305_update1
+  Hacl_MAC_Poly1305_Simd256_poly1305_update
+  Hacl_MAC_Poly1305_Simd256_poly1305_finish
+  Hacl_MAC_Poly1305_Simd256_mac
+  Hacl_MAC_Poly1305_Simd256_malloc
+  Hacl_MAC_Poly1305_Simd256_reset
+  Hacl_MAC_Poly1305_Simd256_update
+  Hacl_MAC_Poly1305_Simd256_digest
+  Hacl_MAC_Poly1305_Simd256_free
   Hacl_NaCl_crypto_secretbox_detached
   Hacl_NaCl_crypto_secretbox_open_detached
   Hacl_NaCl_crypto_secretbox_easy
@@ -622,11 +637,6 @@ EXPORTS
   Hacl_GenericField64_exp_consttime
   Hacl_GenericField64_exp_vartime
   Hacl_GenericField64_inverse
-  Hacl_Streaming_Poly1305_256_malloc
-  Hacl_Streaming_Poly1305_256_reset
-  Hacl_Streaming_Poly1305_256_update
-  Hacl_Streaming_Poly1305_256_digest
-  Hacl_Streaming_Poly1305_256_free
   Hacl_Frodo1344_crypto_kem_keypair
   Hacl_Frodo1344_crypto_kem_enc
   Hacl_Frodo1344_crypto_kem_dec
@@ -634,11 +644,6 @@ EXPORTS
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
   Hacl_HPKE_Curve64_CP256_SHA512_openBase
-  Hacl_Streaming_Poly1305_128_malloc
-  Hacl_Streaming_Poly1305_128_reset
-  Hacl_Streaming_Poly1305_128_update
-  Hacl_Streaming_Poly1305_128_digest
-  Hacl_Streaming_Poly1305_128_free
   Hacl_Bignum32_add
   Hacl_Bignum32_sub
   Hacl_Bignum32_add_mod
@@ -703,12 +708,7 @@ EXPORTS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
-  EverCrypt_Poly1305_poly1305
-  Hacl_Streaming_Poly1305_32_malloc
-  Hacl_Streaming_Poly1305_32_reset
-  Hacl_Streaming_Poly1305_32_update
-  Hacl_Streaming_Poly1305_32_digest
-  Hacl_Streaming_Poly1305_32_free
+  EverCrypt_Poly1305_mac
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA512_sealBase

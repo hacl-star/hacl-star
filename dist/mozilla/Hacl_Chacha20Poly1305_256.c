@@ -25,7 +25,7 @@
 
 #include "Hacl_Chacha20Poly1305_256.h"
 
-#include "internal/Hacl_Poly1305_256.h"
+#include "internal/Hacl_MAC_Poly1305_Simd256.h"
 #include "internal/Hacl_Krmllib.h"
 #include "libintvector.h"
 
@@ -45,7 +45,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   {
     uint32_t bs = (uint32_t)64U;
     uint8_t *text0 = t00;
-    Hacl_Impl_Poly1305_Field32xN_256_load_acc4(acc0, text0);
+    Hacl_MAC_Poly1305_Simd256_load_acc4(acc0, text0);
     uint32_t len1 = len0 - bs;
     uint8_t *text1 = t00 + bs;
     uint32_t nb = len1 / bs;
@@ -268,7 +268,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
       acc0[3U] = o3;
       acc0[4U] = o4;
     }
-    Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize(acc0, pre0);
+    Hacl_MAC_Poly1305_Simd256_fmul_r4_normalize(acc0, pre0);
   }
   uint32_t len1 = n * (uint32_t)16U - len0;
   uint8_t *t10 = blocks + len0;
@@ -915,7 +915,7 @@ poly1305_do_256(
 {
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 ctx[25U] KRML_POST_ALIGN(32) = { 0U };
   uint8_t block[16U] = { 0U };
-  Hacl_Poly1305_256_poly1305_init(ctx, k);
+  Hacl_MAC_Poly1305_Simd256_poly1305_init(ctx, k);
   if (aadlen != (uint32_t)0U)
   {
     poly1305_padded_256(ctx, aadlen, aad);
@@ -1131,7 +1131,7 @@ poly1305_do_256(
   acc[2U] = o2;
   acc[3U] = o3;
   acc[4U] = o4;
-  Hacl_Poly1305_256_poly1305_finish(out, k, ctx);
+  Hacl_MAC_Poly1305_Simd256_poly1305_finish(out, k, ctx);
 }
 
 /**

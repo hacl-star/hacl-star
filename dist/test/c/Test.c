@@ -5022,7 +5022,7 @@ vectors1[35U] =
 static uint32_t vectors_len1 = (uint32_t)35U;
 
 extern void
-EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
+EverCrypt_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, uint8_t *key);
 
 static uint8_t
 hash_vectors_low0[16U] =
@@ -11114,7 +11114,7 @@ static void test_one_poly1305(vector1 v)
   {
     if (key_len == (uint32_t)32U)
     {
-      EverCrypt_Poly1305_poly1305(dst, input, input_len, key);
+      EverCrypt_Poly1305_mac(dst, input, input_len, key);
     }
     if (tag_len == (uint32_t)16U)
     {

@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Poly1305_32.h"
+#include "Hacl_MAC_Poly1305.h"
 #include "Hacl_Chacha20.h"
 
 /**

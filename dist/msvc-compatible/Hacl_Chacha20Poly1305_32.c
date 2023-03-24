@@ -417,7 +417,7 @@ poly1305_do_32(
 {
   uint64_t ctx[25U] = { 0U };
   uint8_t block[16U] = { 0U };
-  Hacl_Poly1305_32_poly1305_init(ctx, k);
+  Hacl_MAC_Poly1305_poly1305_init(ctx, k);
   if (aadlen != (uint32_t)0U)
   {
     poly1305_padded_32(ctx, aadlen, aad);
@@ -546,7 +546,7 @@ poly1305_do_32(
   acc[2U] = o2;
   acc[3U] = o3;
   acc[4U] = o4;
-  Hacl_Poly1305_32_poly1305_finish(out, k, ctx);
+  Hacl_MAC_Poly1305_poly1305_finish(out, k, ctx);
 }
 
 /**

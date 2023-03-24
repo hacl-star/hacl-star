@@ -70,7 +70,7 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
   uint8_t *c1 = c + mlen0;
   memcpy(c0, block0, mlen0 * sizeof (uint8_t));
   Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n1, (uint32_t)1U);
-  Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
+  Hacl_MAC_Poly1305_mac(tag, c, mlen, mkey);
 }
 
 static uint32_t
@@ -87,7 +87,7 @@ secretbox_open_detached(
   secretbox_init(xkeys, k, n);
   uint8_t *mkey = xkeys + (uint32_t)32U;
   uint8_t tag_[16U] = { 0U };
-  Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
+  Hacl_MAC_Poly1305_mac(tag_, c, mlen, mkey);
   uint8_t res = (uint8_t)255U;
   KRML_MAYBE_FOR16(i,
     (uint32_t)0U,

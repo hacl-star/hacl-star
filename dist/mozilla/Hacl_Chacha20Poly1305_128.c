@@ -25,7 +25,7 @@
 
 #include "Hacl_Chacha20Poly1305_128.h"
 
-#include "internal/Hacl_Poly1305_128.h"
+#include "internal/Hacl_MAC_Poly1305_Simd128.h"
 #include "internal/Hacl_Krmllib.h"
 #include "libintvector.h"
 
@@ -45,7 +45,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
   {
     uint32_t bs = (uint32_t)32U;
     uint8_t *text0 = t00;
-    Hacl_Impl_Poly1305_Field32xN_128_load_acc2(acc0, text0);
+    Hacl_MAC_Poly1305_Simd128_load_acc2(acc0, text0);
     uint32_t len1 = len0 - bs;
     uint8_t *text1 = t00 + bs;
     uint32_t nb = len1 / bs;
@@ -266,7 +266,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
       acc0[3U] = o3;
       acc0[4U] = o4;
     }
-    Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(acc0, pre0);
+    Hacl_MAC_Poly1305_Simd128_fmul_r2_normalize(acc0, pre0);
   }
   uint32_t len1 = n * (uint32_t)16U - len0;
   uint8_t *t10 = blocks + len0;
@@ -913,7 +913,7 @@ poly1305_do_128(
 {
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 ctx[25U] KRML_POST_ALIGN(16) = { 0U };
   uint8_t block[16U] = { 0U };
-  Hacl_Poly1305_128_poly1305_init(ctx, k);
+  Hacl_MAC_Poly1305_Simd128_poly1305_init(ctx, k);
   if (aadlen != (uint32_t)0U)
   {
     poly1305_padded_128(ctx, aadlen, aad);
@@ -1129,7 +1129,7 @@ poly1305_do_128(
   acc[2U] = o2;
   acc[3U] = o3;
   acc[4U] = o4;
-  Hacl_Poly1305_128_poly1305_finish(out, k, ctx);
+  Hacl_MAC_Poly1305_Simd128_poly1305_finish(out, k, ctx);
 }
 
 /**
