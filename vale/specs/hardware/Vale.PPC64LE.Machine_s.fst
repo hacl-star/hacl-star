@@ -3,11 +3,17 @@ open Vale.Arch.Heap
 include Vale.Arch.HeapTypes_s
 
 irreducible let va_qattr = ()
+unfold let pow2_8 = Vale.Def.Words_s.pow2_8
+unfold let pow2_32 = Vale.Def.Words_s.pow2_32
 unfold let pow2_64 = Vale.Def.Words_s.pow2_64
 
 unfold let nat8 = Vale.Def.Words_s.nat8
 unfold let nat16 = Vale.Def.Words_s.nat16
 unfold let nat32 = Vale.Def.Words_s.nat32
+let int_to_nat8 (i:int) : n:nat8{0 <= i && i < pow2_8 ==> i == n} =
+  Vale.Def.Words_s.int_to_natN pow2_8 i
+let int_to_nat32 (i:int) : n:nat32{0 <= i && i < pow2_32 ==> i == n} =
+  Vale.Def.Words_s.int_to_natN pow2_32 i
 unfold let nat64 = Vale.Def.Words_s.nat64
 let int_to_nat64 (i:int) : n:nat64{0 <= i && i < pow2_64 ==> i == n} =
   Vale.Def.Words_s.int_to_natN pow2_64 i
@@ -28,6 +34,8 @@ type bits64 = i:int{0 <= i && i < 64}
 type bits32 = i:int{0 <= i && i < 32}
 // Immediate operand of vector shift left double by octet
 type quad32bytes = i:int{0 <= i && i < 16}
+// Immediate operand of vector splat
+type sim = i:int{-16 <= i && i < 15}
 
 let regs_t = FStar.FunctionalExtensionality.restricted_t reg (fun _ -> nat64)
 let vecs_t = FStar.FunctionalExtensionality.restricted_t vec (fun _ -> quad32)

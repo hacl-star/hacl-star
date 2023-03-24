@@ -313,6 +313,12 @@ let le_bytes_to_seq_quad32_empty () :
   reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   ()
 
+let be_bytes_to_seq_quad32_empty () :
+  Lemma (forall s . {:pattern (length (be_bytes_to_seq_quad32 s)) } length s == 0 ==> length (be_bytes_to_seq_quad32 s) == 0)
+  =
+  reveal_opaque (`%be_bytes_to_seq_quad32) be_bytes_to_seq_quad32;
+  ()
+
 #reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let le_bytes_to_seq_quad32_to_bytes_one_quad b =
   calc (==) {
@@ -329,6 +335,25 @@ let le_bytes_to_seq_quad32_to_bytes_one_quad b =
     seq_to_seq_four_LE (four_to_seq_LE b);
     == {four_to_seq_LE_is_seq_four_to_seq_LE b}
     seq_to_seq_four_LE (seq_four_to_seq_LE (create 1 b));
+    == {}
+    create 1 b;
+  }
+
+let be_bytes_to_seq_quad32_to_bytes_one_quad b =
+  calc (==) {
+    be_bytes_to_seq_quad32 (be_quad32_to_bytes b);
+    == {reveal_opaque (`%be_bytes_to_seq_quad32) be_bytes_to_seq_quad32}
+    seq_to_seq_four_BE (seq_nat8_to_seq_nat32_BE (be_quad32_to_bytes b));
+    == {reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes}
+    seq_to_seq_four_BE (seq_nat8_to_seq_nat32_BE (seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE b))));
+    == {}
+    seq_to_seq_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE (seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE b)))));
+    == {seq_to_seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE b))}
+    seq_to_seq_four_BE (seq_map (four_to_nat 8) (seq_map (nat_to_four 8) (four_to_seq_BE b)));
+    == {seq_map_inverses (nat_to_four 8) (four_to_nat 8) (four_to_seq_BE b)}
+    seq_to_seq_four_BE (four_to_seq_BE b);
+    == {four_to_seq_BE_is_seq_four_to_seq_BE b}
+    seq_to_seq_four_BE (seq_four_to_seq_BE (create 1 b));
     == {}
     create 1 b;
   }
@@ -352,6 +377,15 @@ let le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
   seq_to_seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s));
   seq_map_inverses (nat_to_four 8) (four_to_nat 8) (seq_four_to_seq_LE s);
   seq_to_seq_four_to_seq_LE (s) ;
+  ()
+
+let be_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
+  Lemma (be_bytes_to_seq_quad32 (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) == s)
+  =
+  reveal_opaque (`%be_bytes_to_seq_quad32) be_bytes_to_seq_quad32;
+  seq_to_seq_four_to_seq_BE (seq_map (nat_to_four 8) (seq_four_to_seq_BE s));
+  seq_map_inverses (nat_to_four 8) (four_to_nat 8) (seq_four_to_seq_BE s);
+  seq_to_seq_four_to_seq_BE (s) ;
   ()
 
 let le_seq_quad32_to_bytes_to_seq_quad32 s =
@@ -388,12 +422,34 @@ let le_quad32_to_bytes_to_quad32 s =
     s;
   }
 
+let be_quad32_to_bytes_to_quad32 s =
+  calc (==) {
+    be_quad32_to_bytes (be_bytes_to_quad32 s);
+    == {be_bytes_to_quad32_reveal ()}
+    be_quad32_to_bytes (seq_to_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE s)));
+    == {reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes}
+    seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE (seq_to_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE s)))));
+    == {four_to_seq_to_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE s))}
+    seq_four_to_seq_BE (seq_map (nat_to_four 8) (seq_map (four_to_nat 8) (seq_to_seq_four_BE s)));
+    == {seq_map_inverses (four_to_nat 8) (nat_to_four 8) (seq_to_seq_four_BE s)}
+    seq_four_to_seq_BE (seq_to_seq_four_BE s);
+    == {}
+    s;
+  }
+
 let le_seq_quad32_to_bytes_of_singleton (q:quad32) :
   Lemma (le_quad32_to_bytes q == le_seq_quad32_to_bytes (create 1 q))
   =
   le_seq_quad32_to_bytes_reveal ();
   reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_seq_LE_is_seq_four_to_seq_LE q;
+  ()
+
+let be_seq_quad32_to_bytes_of_singleton (q:quad32) :
+  Lemma (be_quad32_to_bytes q == seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (create 1 q)))
+  =
+  reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
+  four_to_seq_BE_is_seq_four_to_seq_BE q;
   ()
 
 let le_quad32_to_bytes_injective ():
@@ -418,10 +474,37 @@ let le_quad32_to_bytes_injective ():
   in
   FStar.Classical.forall_intro_2 helper
 
+let be_quad32_to_bytes_injective ():
+  Lemma (forall b b' . be_quad32_to_bytes b == be_quad32_to_bytes b' ==> b == b')
+  =
+  reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
+  let helper (b b':quad32) : Lemma (be_quad32_to_bytes b == be_quad32_to_bytes b' ==> b == b') =
+    if be_quad32_to_bytes b = be_quad32_to_bytes b' then (
+      let b1  = seq_map (nat_to_four 8) (four_to_seq_BE b) in
+      let b1' = seq_map (nat_to_four 8) (four_to_seq_BE b') in
+      assert (be_quad32_to_bytes b == seq_four_to_seq_BE b1);
+      assert (be_quad32_to_bytes b' == seq_four_to_seq_BE b1');
+      seq_four_to_seq_BE_injective_specific b1 b1';
+      assert (b1 == b1');
+      nat_to_four_8_injective();
+      seq_map_injective (nat_to_four 8) (four_to_seq_BE b) (four_to_seq_BE b');
+      assert ((four_to_seq_BE b) == (four_to_seq_BE b'));
+      four_to_seq_BE_injective nat32;
+      ()
+    ) else
+    ()
+  in
+  FStar.Classical.forall_intro_2 helper
+
 let le_quad32_to_bytes_injective_specific (b b':quad32) :
   Lemma (le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b')
   =
   le_quad32_to_bytes_injective()
+
+let be_quad32_to_bytes_injective_specific (b b':quad32) :
+  Lemma (be_quad32_to_bytes b == be_quad32_to_bytes b' ==> b == b')
+  =
+  be_quad32_to_bytes_injective()
 
 let le_seq_quad32_to_bytes_injective (b b':seq quad32) =
   le_seq_quad32_to_bytes_reveal ();
@@ -438,6 +521,13 @@ let seq_to_four_LE_is_seq_to_seq_four_LE (#a:Type) (s:seq4 a) : Lemma
   assert (equal (create 1 (seq_to_four_LE s)) (seq_to_seq_four_LE s));
   ()
 
+let seq_to_four_BE_is_seq_to_seq_four_BE (#a:Type) (s:seq4 a) : Lemma
+  (create 1 (seq_to_four_BE s) == seq_to_seq_four_BE s)
+  =
+  reveal_opaque (`%seq_to_seq_four_BE) (seq_to_seq_four_BE #a);
+  assert (equal (create 1 (seq_to_four_BE s)) (seq_to_seq_four_BE s));
+  ()
+
 let le_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 }) : Lemma
   (requires q == le_bytes_to_quad32 b)
   (ensures create 1 q == le_bytes_to_seq_quad32 b)
@@ -451,6 +541,15 @@ let le_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 })
 
   //     == seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE b))
   // le_bytes_to_seq_quad32 b == seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE b)
+  ()
+
+let be_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 }) : Lemma
+  (requires q == be_bytes_to_quad32 b)
+  (ensures create 1 q == be_bytes_to_seq_quad32 b)
+  =
+  reveal_opaque (`%be_bytes_to_seq_quad32) be_bytes_to_seq_quad32;
+  be_bytes_to_quad32_reveal ();
+  seq_to_four_BE_is_seq_to_seq_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE b));
   ()
 
 let le_bytes_to_quad32_to_bytes (q:quad32) :
@@ -507,6 +606,11 @@ let lemma_le_seq_quad32_to_bytes_length (s:seq quad32) :
   =
   ()
 
+let lemma_be_seq_quad32_to_bytes_length (s:seq quad32) :
+  Lemma(length (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) == (length s) * 16)
+  =
+  ()
+
 let slice_commutes_seq_four_to_seq_LE (#a:Type) (s:seq (four a)) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
   Lemma(slice (seq_four_to_seq_LE s) (n * 4) (n' * 4) ==
         seq_four_to_seq_LE (slice s n n'))
@@ -514,6 +618,15 @@ let slice_commutes_seq_four_to_seq_LE (#a:Type) (s:seq (four a)) (n:nat{n <= len
   reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #a);
   assert (equal (slice (seq_four_to_seq_LE s) (n * 4) (n' * 4))
                 (seq_four_to_seq_LE (slice s n n')));
+  ()
+
+let slice_commutes_seq_four_to_seq_BE (#a:Type) (s:seq (four a)) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
+  Lemma(slice (seq_four_to_seq_BE s) (n * 4) (n' * 4) ==
+        seq_four_to_seq_BE (slice s n n'))
+  =
+  reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #a);
+  assert (equal (slice (seq_four_to_seq_BE s) (n * 4) (n' * 4))
+                (seq_four_to_seq_BE (slice s n n')));
   ()
 
 let slice_commutes_le_seq_quad32_to_bytes (s:seq quad32) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
@@ -536,11 +649,29 @@ let slice_commutes_le_seq_quad32_to_bytes (s:seq quad32) (n:nat{n <= length s}) 
   slice_commutes_seq_four_to_seq_LE s_inner (n * 4) (n' * 4);
   ()
 
+let slice_commutes_be_seq_quad32_to_bytes (s:seq quad32) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
+  Lemma(slice (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) (n * 16) (n' * 16) ==
+        seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (slice s n n')))
+  =
+  slice_commutes_seq_four_to_seq_BE s n n';
+  assert (slice (seq_four_to_seq_BE s) (n * 4) (n' * 4) == seq_four_to_seq_BE (slice s n n'));
+  slice_seq_map_commute (nat_to_four 8) (seq_four_to_seq_BE s) (n*4) (n'*4);
+
+  let s_inner = (seq_map (nat_to_four 8) (seq_four_to_seq_BE s)) in
+  slice_commutes_seq_four_to_seq_BE s_inner (n * 4) (n' * 4);
+  ()
+
 let slice_commutes_le_seq_quad32_to_bytes0 (s:seq quad32) (n:nat{n <= length s}) :
   Lemma(slice (le_seq_quad32_to_bytes s) 0 (n * 16) ==
         le_seq_quad32_to_bytes (slice s 0 n))
   =
   slice_commutes_le_seq_quad32_to_bytes s 0 n
+
+let slice_commutes_be_seq_quad32_to_bytes0 (s:seq quad32) (n:nat{n <= length s}) :
+  Lemma(slice (seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s)) 0 (n * 16) ==
+        seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (slice s 0 n)))
+  =
+  slice_commutes_be_seq_quad32_to_bytes s 0 n
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
@@ -562,6 +693,17 @@ let append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0
   // le_bytes_to_seq_quad32 (s1 @| s2)
   ()
 
+let append_distributes_be_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
+  Lemma(be_bytes_to_seq_quad32 (s1 @| s2) == (be_bytes_to_seq_quad32 s1) @| (be_bytes_to_seq_quad32 s2))
+  =
+  reveal_opaque (`%be_bytes_to_seq_quad32) be_bytes_to_seq_quad32;
+  let s1' = seq_nat8_to_seq_nat32_BE s1 in
+  let s2' = seq_nat8_to_seq_nat32_BE s2 in
+  append_distributes_seq_to_seq_four_BE s1' s2';
+  append_distributes_seq_map (four_to_nat 8) (seq_to_seq_four_BE s1) (seq_to_seq_four_BE s2);
+  append_distributes_seq_to_seq_four_BE s1 s2;
+  ()
+
 let append_distributes_le_seq_quad32_to_bytes s1 s2 =
   le_seq_quad32_to_bytes_reveal ();
   calc (==) {
@@ -581,4 +723,24 @@ let append_distributes_le_seq_quad32_to_bytes s1 s2 =
       seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s2));
     (==) { }
     le_seq_quad32_to_bytes s1 @| le_seq_quad32_to_bytes s2;
+  }
+
+let append_distributes_be_seq_quad32_to_bytes s1 s2 =
+  calc (==) {
+    seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (s1 @| s2));
+    (==) { }
+    seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE (s1 @| s2));
+    (==) { append_distributes_seq_four_to_seq_BE s1 s2 }
+    seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s1 @| seq_four_to_seq_BE s2);
+    (==) { append_distributes_seq_map (nat_to_four 8) (seq_four_to_seq_BE s1) (seq_four_to_seq_BE s2) }
+    seq_four_to_seq_BE (
+      seq_map (nat_to_four 8) (seq_four_to_seq_BE s1) @|
+      seq_map (nat_to_four 8) (seq_four_to_seq_BE s2));
+    (==) { append_distributes_seq_four_to_seq_BE
+         (seq_map (nat_to_four 8) (seq_four_to_seq_BE s1))
+         (seq_map (nat_to_four 8) (seq_four_to_seq_BE s2)) }
+      seq_four_to_seq_BE (seq_map (nat_to_four 8) (seq_four_to_seq_BE s1)) @|
+      seq_four_to_seq_BE (seq_map (nat_to_four 8) (seq_four_to_seq_BE s2));
+    (==) { }
+    seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s1) @| seq_nat32_to_seq_nat8_BE (seq_four_to_seq_BE s2);
   }

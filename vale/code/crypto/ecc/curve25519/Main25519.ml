@@ -1,5 +1,5 @@
 let _ =
-  CmdLineParser.parse_cmdline [
+  CmdLineParser.parse_cmdline_x64 [
     (*("mul", (fun win -> Vale_Curve25519_X64_FastMul.va_code_Fast_mul_stdcall win));*)
     (*("mul2", (fun win -> Vale_Curve25519_X64_FastMul.va_code_Fast_mul2_stdcall win));
       ("sqr",  (fun win -> Vale_Curve25519_X64_FastSqr.va_code_Fast_sqr_stdcall win));

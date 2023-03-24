@@ -14,6 +14,7 @@ open Vale.AES.AES_s
 open Vale.AES.GCTR_s
 open FStar.Math.Lemmas
 open Vale.Lib.Seqs
+open Vale.AES.Types_helpers
 
 let extra_bytes_helper (n:nat) : Lemma
   (requires n % 16 <> 0)
@@ -397,19 +398,6 @@ let lemma_64_32_hi2 (q':quad32) (hi hi':nat64) (n:nat) : Lemma
   assert_norm (pow2 (7 * 8) == 0x100000000000000);
   assert_norm (pow2 (8 * 8) == 0x10000000000000000);
   assert_norm (nat_to_two 32 hi' == nat_to_two_unfold 32 hi');
-  ()
-
-let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
-  (ensures (
-    let s = le_quad32_to_bytes q in
-    q.lo0 == four_to_nat 8 (seq_to_four_LE (slice s 0 4)) /\
-    q.lo1 == four_to_nat 8 (seq_to_four_LE (slice s 4 8)) /\
-    q.hi2 == four_to_nat 8 (seq_to_four_LE (slice s 8 12)) /\
-    q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
-  ))
-  =
-  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
-  reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
 let lemma_slices_le_bytes_to_quad32 (s:seq16 nat8) : Lemma
