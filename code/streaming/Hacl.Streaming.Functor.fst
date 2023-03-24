@@ -553,7 +553,7 @@ let alloca #index c i t t' k =
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let reset #index c i t t' key state =
+let reset #index c i t t' state key =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;

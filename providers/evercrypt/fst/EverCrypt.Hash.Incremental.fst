@@ -157,7 +157,7 @@ let malloc a = F.malloc evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit
 
 [@@ Comment
 "Reset an existing state to the initial hash state with empty data."]
-let reset (a: G.erased hash_alg) = F.reset evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
+let reset (a: G.erased hash_alg) = F.reset evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns

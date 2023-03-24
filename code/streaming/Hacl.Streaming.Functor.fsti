@@ -351,20 +351,20 @@ let reset_st
   (i:index)
   (t:Type0 { t == c.state.s i })
   (t':Type0 { t' == optional_key i c.km c.key }) =
-  k:c.key.s i ->
-  s:state c i t t' ->
+  state:state c i t t' ->
+  key:c.key.s i ->
   Stack unit
   (requires (fun h0 ->
-    c.key.invariant #i h0 k /\
-    B.loc_disjoint (c.key.footprint #i h0 k) (footprint c i h0 s) /\
-    invariant c i h0 s))
+    c.key.invariant #i h0 key /\
+    B.loc_disjoint (c.key.footprint #i h0 key) (footprint c i h0 state) /\
+    invariant c i h0 state))
   (ensures (fun h0 _ h1 ->
-    invariant c i h1 s /\
-    seen c i h1 s == S.empty /\
-    reveal_key c i h1 s == c.key.v i h0 k /\
-    footprint c i h0 s == footprint c i h1 s /\
-    B.(modifies (footprint c i h0 s) h0 h1) /\
-    preserves_freeable c i s h0 h1))
+    invariant c i h1 state /\
+    seen c i h1 state == S.empty /\
+    reveal_key c i h1 state == c.key.v i h0 key /\
+    footprint c i h0 state == footprint c i h1 state /\
+    B.(modifies (footprint c i h0 state) h0 h1) /\
+    preserves_freeable c i state h0 h1))
 
 inline_for_extraction noextract
 val reset:

@@ -38,14 +38,14 @@ main()
   ok &= compare_and_print(16, tag, v->tag);
 
   v++;
-  Hacl_MAC_Poly1305_reset(v->key, s);
+  Hacl_MAC_Poly1305_reset(s, v->key);
   assert(Hacl_MAC_Poly1305_update(s, NULL, 0) == 0);
   assert(Hacl_MAC_Poly1305_update(s, v->input, v->input_len) == 0);
   Hacl_MAC_Poly1305_digest(s, tag);
   ok &= compare_and_print(16, tag, v->tag);
 
   v++;
-  Hacl_MAC_Poly1305_reset(v->key, s);
+  Hacl_MAC_Poly1305_reset(s, v->key);
   assert(Hacl_MAC_Poly1305_update(s, NULL, 0) == 0);
   assert(Hacl_MAC_Poly1305_update(s, v->input, 8) == 0);
   assert(Hacl_MAC_Poly1305_update(s, v->input + 8, 8) == 0);
