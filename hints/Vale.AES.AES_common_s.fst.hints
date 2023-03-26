@@ -1,0 +1,55 @@
+[
+  "O\u0006\u0014¿¼\u0000›r°¶ÞˆY,X\u0016",
+  [
+    [
+      "Vale.AES.AES_common_s.nk",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.AES.AES_common_s.AES_128",
+        "disc_equation_Vale.AES.AES_common_s.AES_192",
+        "disc_equation_Vale.AES.AES_common_s.AES_256",
+        "fuel_guarded_inversion_Vale.AES.AES_common_s.algorithm",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "a2a6ba2d2369bae9db0b80c6573cd229"
+    ],
+    [
+      "Vale.AES.AES_common_s.nr",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.AES.AES_common_s.AES_128",
+        "disc_equation_Vale.AES.AES_common_s.AES_192",
+        "disc_equation_Vale.AES.AES_common_s.AES_256",
+        "fuel_guarded_inversion_Vale.AES.AES_common_s.algorithm",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "d4244ff22e6f89ad705adae8b81bd106"
+    ],
+    [
+      "Vale.AES.AES_common_s.aes_key",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Def.Words_s.natN", "function_token_typing_Prims.int",
+        "function_token_typing_Vale.Def.Words_s.nat8",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "lemma_FStar.Seq.Base.hasEq_lemma",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "90baaba323c0de3cdcaafad172a7fbfb"
+    ]
+  ]
+]
