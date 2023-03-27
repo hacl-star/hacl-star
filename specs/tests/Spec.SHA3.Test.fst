@@ -6,62 +6,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 2"
-
-let print_and_compare (len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =
-  let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result in
-  IO.print_string "\n\nResult:   ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  IO.print_string "\nExpected: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  res
-
-
-val test_sha3:
-    msg_len:size_nat
-  -> msg:lbytes msg_len
-  -> expected224:lbytes 28
-  -> expected256:lbytes 32
-  -> expected384:lbytes 48
-  -> expected512:lbytes 64 ->
-  FStar.All.ML bool
-
-let test_sha3 msg_len msg expected224 expected256 expected384 expected512 =
-  let test224 = Spec.SHA3.sha3_224 msg_len msg in
-  let test256 = Spec.SHA3.sha3_256 msg_len msg in
-  let test384 = Spec.SHA3.sha3_384 msg_len msg in
-  let test512 = Spec.SHA3.sha3_512 msg_len msg in
-
-  let r224 = print_and_compare 28 expected224 test224 in
-  let r256 = print_and_compare 32 expected256 test256 in
-  let r384 = print_and_compare 48 expected384 test384 in
-  let r512 = print_and_compare 64 expected512 test512 in
-  r224 && r256 && r384 && r512
-
-
-val test_shake128:
-    msg_len:size_nat
-  -> msg:lbytes msg_len
-  -> out_len:size_nat
-  -> expected:lbytes out_len ->
-  FStar.All.ML bool
-
-let test_shake128 msg_len msg out_len expected =
-  let test = Spec.SHA3.shake128 msg_len msg out_len in
-  print_and_compare out_len expected test
-
-
-val test_shake256:
-    msg_len:size_nat
-  -> msg:lbytes msg_len
-  -> out_len:size_nat
-  -> expected:lbytes out_len ->
-  FStar.All.ML bool
-
-let test_shake256 msg_len msg out_len expected =
-  let test = Spec.SHA3.shake256 msg_len msg out_len in
-  print_and_compare out_len expected test
-
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 ///  Test1_SHA3
 
@@ -502,61 +447,96 @@ let test12_expected_shake256 : lbytes 32 =
   of_list l
 
 
+type sha3_alg =
+  | SHA3_224
+  | SHA3_256
+  | SHA3_384
+  | SHA3_512
+
+type shake_alg =
+  | SHAKE128
+  | SHAKE256
+
+let sha3_length (a:sha3_alg) =
+  allow_inversion sha3_alg;
+  match a with
+  | SHA3_224 -> 28
+  | SHA3_256 -> 32
+  | SHA3_384 -> 48
+  | SHA3_512 -> 64
+
+
+noeq type vec =
+  | Vec :
+    a:sha3_alg
+    -> plain:bytes{length plain <= max_size_t}
+    -> hash:bytes{length hash = sha3_length a} -> vec
+  | Vec1 :
+    a:shake_alg
+    -> plain:bytes{length plain <= max_size_t}
+    -> hash:bytes{length hash <= max_size_t} -> vec
+
+
+let test_vectors : list vec = [
+  Vec SHA3_224 test1_plaintext test1_expected_sha3_224;
+  Vec SHA3_256 test1_plaintext test1_expected_sha3_256;
+  Vec SHA3_384 test1_plaintext test1_expected_sha3_384;
+  Vec SHA3_512 test1_plaintext test1_expected_sha3_512;
+
+  Vec SHA3_224 test2_plaintext test2_expected_sha3_224;
+  Vec SHA3_256 test2_plaintext test2_expected_sha3_256;
+  Vec SHA3_384 test2_plaintext test2_expected_sha3_384;
+  Vec SHA3_512 test2_plaintext test2_expected_sha3_512;
+
+  Vec SHA3_224 test3_plaintext test3_expected_sha3_224;
+  Vec SHA3_256 test3_plaintext test3_expected_sha3_256;
+  Vec SHA3_384 test3_plaintext test3_expected_sha3_384;
+  Vec SHA3_512 test3_plaintext test3_expected_sha3_512;
+
+  Vec SHA3_224 test4_plaintext test4_expected_sha3_224;
+  Vec SHA3_256 test4_plaintext test4_expected_sha3_256;
+  Vec SHA3_384 test4_plaintext test4_expected_sha3_384;
+  Vec SHA3_512 test4_plaintext test4_expected_sha3_512;
+
+  Vec1 SHAKE128 test5_plaintext_shake128 test5_expected_shake128;
+  Vec1 SHAKE128 test6_plaintext_shake128 test6_expected_shake128;
+  Vec1 SHAKE128 test7_plaintext_shake128 test7_expected_shake128;
+  Vec1 SHAKE128 test8_plaintext_shake128 test8_expected_shake128;
+
+  Vec1 SHAKE256 test9_plaintext_shake256 test9_expected_shake256;
+  Vec1 SHAKE256 test10_plaintext_shake256 test10_expected_shake256;
+  Vec1 SHAKE256 test11_plaintext_shake256 test11_expected_shake256;
+  Vec1 SHAKE256 test12_plaintext_shake256 test12_expected_shake256
+]
+
+
+#set-options "--ifuel 2"
+
+let print_and_compare (str1:string) (str2:string)
+  (test_expected:bytes{length test_expected <= max_size_t})
+  (test_result:bytes{length test_expected = length test_result})
+ =
+  IO.print_string str1;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
+  IO.print_string str2;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
+  lbytes_eq #(length test_expected) test_expected test_result
+
+
+let test_one (v:vec) =
+  let computed, expected =
+    match v with
+    | Vec SHA3_224 plain tag -> Spec.SHA3.sha3_224 (length plain) plain, tag
+    | Vec SHA3_256 plain tag -> Spec.SHA3.sha3_256 (length plain) plain, tag
+    | Vec SHA3_384 plain tag -> Spec.SHA3.sha3_384 (length plain) plain, tag
+    | Vec SHA3_512 plain tag -> Spec.SHA3.sha3_512 (length plain) plain, tag
+    | Vec1 SHAKE128 plain tag -> Spec.SHA3.shake128 (length plain) plain (length tag), tag
+    | Vec1 SHAKE256 plain tag -> Spec.SHA3.shake256 (length plain) plain (length tag), tag in
+
+  print_and_compare "\nExpected: " "\nComputed: " expected computed
+
+
 let test () =
-  IO.print_string "\nTest1 (SHA3)";
-  let res_sha3_1 =
-    test_sha3 0 test1_plaintext
-      test1_expected_sha3_224 test1_expected_sha3_256
-      test1_expected_sha3_384 test1_expected_sha3_512 in
-
-  IO.print_string "\n\nTest2 (SHA3)";
-  let res_sha3_2 =
-    test_sha3 3 test2_plaintext
-      test2_expected_sha3_224 test2_expected_sha3_256
-      test2_expected_sha3_384 test2_expected_sha3_512 in
-
-  IO.print_string "\n\nTest3 (SHA3)";
-  let res_sha3_3 =
-    test_sha3 56 test3_plaintext
-      test3_expected_sha3_224  test3_expected_sha3_256
-      test3_expected_sha3_384 test3_expected_sha3_512 in
-
-  IO.print_string "\n\nTest4 (SHA3)";
-  let res_sha3_4 =
-    test_sha3 112 test4_plaintext
-      test4_expected_sha3_224 test4_expected_sha3_256
-      test4_expected_sha3_384 test4_expected_sha3_512 in
-
-  let res_sha3 = res_sha3_1 && res_sha3_2 && res_sha3_3 && res_sha3_4 in
-
-  IO.print_string "\n\nTest5 (SHAKE128)";
-  let res_shake128_1 = test_shake128 0 test5_plaintext_shake128 16 test5_expected_shake128 in
-
-  IO.print_string "\n\nTest6 (SHAKE128)";
-  let res_shake128_2 = test_shake128 14 test6_plaintext_shake128 16 test6_expected_shake128 in
-
-  IO.print_string "\n\nTest7 (SHAKE128)";
-  let res_shake128_3 = test_shake128 34 test7_plaintext_shake128 16 test7_expected_shake128 in
-
-  IO.print_string "\n\nTest8 (SHAKE128)";
-  let res_shake128_4 = test_shake128 83 test8_plaintext_shake128 16 test8_expected_shake128 in
-
-  let res_shake128 = res_shake128_1 && res_shake128_2 && res_shake128_3 && res_shake128_4 in
-
-  IO.print_string "\n\nTest9 (SHAKE256)";
-  let res_shake256_1 = test_shake256 0 test9_plaintext_shake256 32 test9_expected_shake256 in
-
-  IO.print_string "\n\nTest10 (SHAKE256)";
-  let res_shake256_2 = test_shake256 17 test10_plaintext_shake256 32 test10_expected_shake256 in
-
-  IO.print_string "\n\nTest11 (SHAKE256)";
-  let res_shake256_3 = test_shake256 32 test11_plaintext_shake256 32 test11_expected_shake256 in
-
-  IO.print_string "\n\nTest12 (SHAKE256)";
-  let res_shake256_4 = test_shake256 78 test12_plaintext_shake256 32 test12_expected_shake256 in
-
-  let res_shake256 = res_shake256_1 && res_shake256_2 && res_shake256_3 && res_shake256_4 in
-
-  let result = res_sha3 && res_shake128 in
-  if result then begin IO.print_string "\n\nSHA3 : Success!\n"; true end
+  let res = List.for_all test_one test_vectors in
+  if res then begin IO.print_string "\n\nSHA3 : Success!\n"; true end
   else begin IO.print_string "\n\nSHA3: Failure :(\n"; false end
