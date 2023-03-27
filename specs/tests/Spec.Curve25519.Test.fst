@@ -5,6 +5,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Spec.Curve25519
+module PS = Lib.PrintSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -78,15 +79,6 @@ let expected2 : lbytes 32 =
   of_list l
 
 
-let print_and_compare (len:size_nat) (test_expected:lbytes len) (test_result:lbytes len) =
-  let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result in
-  IO.print_string "\n\nResult:   ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  IO.print_string "\nExpected: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  res
-
-
 val test_scalarmult:
     scalar:lbytes 32
   -> point:lbytes 32
@@ -95,7 +87,7 @@ val test_scalarmult:
 
 let test_scalarmult scalar point expected =
   let computed = scalarmult scalar point in
-  print_and_compare 32 expected computed
+  PS.print_compare true 32 expected computed
 
 
 let test () =

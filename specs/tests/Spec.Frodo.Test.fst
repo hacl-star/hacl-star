@@ -15,16 +15,9 @@ open Spec.Frodo.Params
 
 open FStar.All
 
+module PS = Lib.PrintSequence
+
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 1"
-
-let print_and_compare (#len: size_nat) (test_expected: lbytes len) (test_result: lbytes len)
-  : ML bool =
-  IO.print_string "\nResult:   ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  IO.print_string "\nExpected: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result
-
 
 let compare (#len: size_nat) (test_expected: lbytes len) (test_result: lbytes len) =
   for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result
@@ -52,8 +45,8 @@ let test_frodo
   let r_pk = compare pk_expected pk in
   let r_sk = compare sk_expected sk in
   let r_ct = compare ct_expected ct in
-  let r_ss = print_and_compare ss1 ss2 in
-  let r_ss1 = print_and_compare ss_expected ss2 in
+  let r_ss = PS.print_compare true (crypto_bytes a) ss1 ss2 in
+  let r_ss1 = PS.print_compare true (crypto_bytes a) ss_expected ss2 in
   r_pk && r_sk && r_ct && r_ss && r_ss1
 
 //

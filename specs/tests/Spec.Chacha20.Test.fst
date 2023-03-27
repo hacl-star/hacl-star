@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+module PS = Lib.PrintSequence
 
 open Spec.Chacha20
 
@@ -76,24 +77,9 @@ let test_nonce : lbytes 12 =
 let test_counter = 1
 
 
-let print_and_compare
-  (str1:string) (str2:string)
-  (len:size_nat) (test_expected:lbytes len) (test_result:lbytes len)
- =
-  let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result in
-  IO.print_string str1;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  IO.print_string str2;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  res
-
-
-
 let test () =
   let cipher = chacha20_encrypt_bytes test_key test_nonce test_counter test_plaintext in
-  let res =
-    print_and_compare "\nExpected cipher: " "\nComputed cipher: "
-      (length test_plaintext) test_ciphertext cipher in
+  let res = PS.print_compare true (length test_plaintext) test_ciphertext cipher in
 
   if res
   then begin IO.print_string "\n\nChacha20 : Success!\n"; true end

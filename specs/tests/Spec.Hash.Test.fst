@@ -2,6 +2,8 @@ module Spec.Hash.Test
 
 open FStar.Seq
 
+module PS = Lib.PrintSequence
+
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 ///  Test 1
@@ -1334,20 +1336,6 @@ let test_vectors: list vec =
   ]
 
 
-let print_and_compare (str1:string) (str2:string)
-  (len:Lib.IntTypes.size_nat)
-  (test_expected:Lib.ByteSequence.lbytes len)
-  (test_result:Lib.ByteSequence.lbytes len)
- =
-  IO.print_string str1;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a)))
-    (Lib.Sequence.to_list test_expected);
-  IO.print_string str2;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a)))
-    (Lib.Sequence.to_list test_result);
-  Lib.ByteSequence.lbytes_eq test_expected test_result
-
-
 let test_one (v:vec) =
   let Vec a plain tag = v in
   assert_norm (List.Tot.length tag = hash_length a);
@@ -1355,7 +1343,7 @@ let test_one (v:vec) =
 
   let expected = seq_of_list (List.Tot.map Lib.RawIntTypes.u8_from_UInt8 tag) in
   let computed = hash a (seq_of_list (List.Tot.map Lib.RawIntTypes.u8_from_UInt8 plain)) in
-  print_and_compare "\nExpected: " "\nComputed: " (hash_length a) expected computed
+  PS.print_compare true (hash_length a) expected computed
 
 
 let test () = List.for_all test_one test_vectors

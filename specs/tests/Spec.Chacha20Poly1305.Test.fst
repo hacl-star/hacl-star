@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+module PS = Lib.PrintSequence
 
 open Spec.Chacha20Poly1305
 
@@ -88,18 +89,6 @@ let test_mac : lbytes 16 =
   of_list l
 
 
-let print_and_compare
-  (str1:string) (str2:string)
-  (len:size_nat) (test_expected:lbytes len) (test_result:lbytes len)
- =
-  let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result in
-  IO.print_string str1;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  IO.print_string str2;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  res
-
-
 #set-options "--ifuel 2"
 
 val test_aead:
@@ -117,13 +106,13 @@ let test_aead k n m aad c_expected mac_expected =
   let cipher, mac = Seq.slice enc 0 mlen, Seq.slice enc mlen (mlen + 16) in
   let dec = aead_decrypt k n c_expected mac_expected aad in
 
-  let res_c =
-    print_and_compare "\nExpected cipher: " "\nComputed cipher: " mlen c_expected cipher in
-  let res_m =
-    print_and_compare "\nExpected mac: " "\nComputed mac: " 16 mac_expected mac in
+  IO.print_string "\ncipher:\n";
+  let res_c = PS.print_compare true mlen c_expected cipher in
+  IO.print_string "\nmac:\n";
+  let res_m = PS.print_compare true 16 mac_expected mac in
+  IO.print_string "\nplain::\n";
   let res_p =
-    if Some? dec then
-      print_and_compare "\nExpected plain: " "\nComputed plain: " mlen m (Some?.v dec)
+    if Some? dec then PS.print_compare true mlen m (Some?.v dec)
     else false in
 
   let res = res_c && res_m && res_p in
@@ -138,5 +127,5 @@ let test () =
       test_key test_nonce test_plaintext test_aad test_cipher test_mac in
 
   if res
-  then begin IO.print_string "\nComposite result: Success! \o/ \n"; true end
-  else begin IO.print_string "\nComposite result: Failure :(\n"; false end
+  then begin IO.print_string "\nChacha20Poly1305: Success! \o/ \n"; true end
+  else begin IO.print_string "\nChacha20Poly1305: Failure :(\n"; false end

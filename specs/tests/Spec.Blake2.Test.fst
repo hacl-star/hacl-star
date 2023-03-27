@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+module PS = Lib.PrintSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -845,17 +846,6 @@ let test_vectors : list vec = [
 
 #set-options "--ifuel 2"
 
-let print_and_compare (str1:string) (str2:string)
-  (test_expected:bytes{length test_expected <= max_size_t})
-  (test_result:bytes{length test_expected = length test_result})
- =
-  IO.print_string str1;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  IO.print_string str2;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  lbytes_eq #(length test_expected) test_expected test_result
-
-
 let test_one (v:vec) =
   let Vec a num plain key tag = v in
   let expected = tag in
@@ -865,7 +855,7 @@ let test_one (v:vec) =
     | BLAKE2B -> Spec.Blake2.blake2b plain (Seq.length key) key 64 in
 
   IO.print_string ("\n\nTEST Blake2 "^(string_of_int num)^":");
-  print_and_compare "\nExpected: " "\nComputed: " expected computed
+  PS.print_compare true (length expected) expected computed
 
 
 let test () =
