@@ -225,8 +225,8 @@ let rec run_testcase js =
                           | Some (comp_shared_secret, comp_enc2) ->
                               if not (comp_enc2 = enc) then Error "encap eph different" else
                               if not (comp_shared_secret = shared_secret) then (
-                                Lib_PrintSequence.print_label_lbytes true "comp_shared_secret" (Z.of_int 32) comp_shared_secret;
-                                Lib_PrintSequence.print_label_lbytes true "shared_secret" (Z.of_int 32) shared_secret;
+                                Lib_PrintSequence.print_label_lbytes true "comp_shared_secret" (Prims.of_int 32) comp_shared_secret;
+                                Lib_PrintSequence.print_label_lbytes true "shared_secret" (Prims.of_int 32) shared_secret;
                                 Error "shared_secret different")
                               else Error "encap seems fine. Error in key_schedule?"
                         end
