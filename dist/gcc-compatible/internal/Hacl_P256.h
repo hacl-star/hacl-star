@@ -35,26 +35,28 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "../Hacl_P256.h"
 #include "lib_intrinsics.h"
 
-void Hacl_Impl_P256_Bignum_bn_mul4(uint64_t *res, uint64_t *x, uint64_t *y);
+void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
 
-void Hacl_Impl_P256_Field_fmul(uint64_t *res, uint64_t *x, uint64_t *y);
+void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i);
 
-void Hacl_Impl_P256_SolinasReduction_solinas_reduction_impl(uint64_t *i, uint64_t *o);
+void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
 
-uint64_t Hacl_Impl_P256_Point_is_point_at_inf(uint64_t *p);
+uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p);
 
-void Hacl_Impl_P256_Point_aff_point_store(uint8_t *res, uint64_t *p);
+void
+Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
 
-bool Hacl_Impl_P256_Point_load_point_vartime(uint64_t *p, uint8_t *b);
-
-void Hacl_Impl_P256_PointMul_point_mul_bytes(uint64_t *res, uint64_t *p, uint8_t *scalar);
-
-void Hacl_Impl_P256_PointMul_point_mul_g_bytes(uint64_t *res, uint8_t *scalar);
+/**
+  The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
+*/
+uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
 
 #if defined(__cplusplus)
 }

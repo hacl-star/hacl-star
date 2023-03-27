@@ -2,33 +2,26 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_Impl_P256_Bignum_bn_mul4 =
-      foreign "Hacl_Impl_P256_Bignum_bn_mul4"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Impl_P256_Field_fmul =
-      foreign "Hacl_Impl_P256_Field_fmul"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Impl_P256_SolinasReduction_solinas_reduction_impl =
-      foreign "Hacl_Impl_P256_SolinasReduction_solinas_reduction_impl"
-        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
-    let hacl_Impl_P256_Point_is_point_at_inf =
-      foreign "Hacl_Impl_P256_Point_is_point_at_inf"
-        ((ptr uint64_t) @-> (returning uint64_t))
-    let hacl_Impl_P256_Point_aff_point_store =
-      foreign "Hacl_Impl_P256_Point_aff_point_store"
-        (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void)))
-    let hacl_Impl_P256_Point_load_point_vartime =
-      foreign "Hacl_Impl_P256_Point_load_point_vartime"
-        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning bool)))
-    let hacl_Impl_P256_PointMul_point_mul_bytes =
-      foreign "Hacl_Impl_P256_PointMul_point_mul_bytes"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void))))
-    let hacl_Impl_P256_PointMul_point_mul_g_bytes =
-      foreign "Hacl_Impl_P256_PointMul_point_mul_g_bytes"
+    let hacl_Impl_P256_LowLevel_toUint8 =
+      foreign "Hacl_Impl_P256_LowLevel_toUint8"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
+    let hacl_Impl_P256_LowLevel_changeEndian =
+      foreign "Hacl_Impl_P256_LowLevel_changeEndian"
+        ((ptr uint64_t) @-> (returning void))
+    let hacl_Impl_P256_LowLevel_toUint64ChangeEndian =
+      foreign "Hacl_Impl_P256_LowLevel_toUint64ChangeEndian"
+        (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void)))
+    let hacl_Impl_P256_Core_isPointAtInfinityPrivate =
+      foreign "Hacl_Impl_P256_Core_isPointAtInfinityPrivate"
+        ((ptr uint64_t) @-> (returning uint64_t))
+    let hacl_Impl_P256_Core_secretToPublic =
+      foreign "Hacl_Impl_P256_Core_secretToPublic"
+        ((ptr uint64_t) @->
+           (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_Impl_P256_DH__ecp256dh_r =
+      foreign "Hacl_Impl_P256_DH__ecp256dh_r"
+        ((ptr uint64_t) @->
+           ((ptr uint64_t) @-> (ocaml_bytes @-> (returning uint64_t))))
     let hacl_P256_ecdsa_sign_p256_sha2 =
       foreign "Hacl_P256_ecdsa_sign_p256_sha2"
         (ocaml_bytes @->
