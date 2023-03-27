@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_Hacl_P256_H
-#define __internal_Hacl_P256_H
+#ifndef __Hacl_P256_ModReduction_H
+#define __Hacl_P256_ModReduction_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,30 +35,13 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Bignum_Base.h"
-#include "../Hacl_P256.h"
-#include "lib_intrinsics.h"
+void Hacl_P256_ModReduction_mul_mod_solinas(uint64_t *x, uint64_t *y, uint64_t *res);
 
-void Hacl_Impl_P256_Bignum_bn_mul4(uint64_t *res, uint64_t *x, uint64_t *y);
-
-void Hacl_Impl_P256_Field_fmul(uint64_t *res, uint64_t *x, uint64_t *y);
-
-void Hacl_Impl_P256_SolinasReduction_solinas_reduction_impl(uint64_t *i, uint64_t *o);
-
-uint64_t Hacl_Impl_P256_Point_is_point_at_inf(uint64_t *p);
-
-void Hacl_Impl_P256_Point_aff_point_store(uint8_t *res, uint64_t *p);
-
-bool Hacl_Impl_P256_Point_load_point_vartime(uint64_t *p, uint8_t *b);
-
-void Hacl_Impl_P256_PointMul_point_mul_bytes(uint64_t *res, uint64_t *p, uint8_t *scalar);
-
-void Hacl_Impl_P256_PointMul_point_mul_g_bytes(uint64_t *res, uint8_t *scalar);
+void Hacl_P256_ModReduction_mul_mod_mont(uint64_t *x, uint64_t *y, uint64_t *res);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_P256_H_DEFINED
+#define __Hacl_P256_ModReduction_H_DEFINED
 #endif
