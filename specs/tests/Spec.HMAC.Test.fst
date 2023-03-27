@@ -5,7 +5,9 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+module PS = Lib.PrintSequence
 
+open Spec.Hash.Definitions
 module HMAC = Spec.Agile.HMAC
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -552,134 +554,63 @@ let test7_expected512 : lbytes 64 =
   of_list l
 
 
-let print_and_compare
-  (str1:string) (str2:string)
-  (len:size_nat) (test_expected:lbytes len) (test_result:lbytes len)
- =
-  let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result in
-  IO.print_string str1;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  IO.print_string str2;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  res
-
-
 let _: squash (pow2 32 < pow2 61 /\ pow2 32 < pow2 125) =
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32
 
 
-#set-options "--ifuel 2"
-
-val hmac_test:
-    key:bytes{length key + 128 <= max_size_t}
-  -> data:bytes{length data + 128 <= max_size_t}
-  -> expected224:lbytes 28
-  -> expected256:lbytes 32
-  -> expected384:lbytes 48
-  -> expected512:lbytes 64 ->
-  FStar.All.ML bool
-
-let hmac_test key data expected224 expected256 expected384 expected512 =
-  let test224 = HMAC.hmac Spec.Hash.Definitions.SHA2_224 key data in
-  let test256 = HMAC.hmac Spec.Hash.Definitions.SHA2_256 key data in
-  let test384 = HMAC.hmac Spec.Hash.Definitions.SHA2_384 key data in
-  let test512 = HMAC.hmac Spec.Hash.Definitions.SHA2_512 key data in
-
-  let r224 =
-    print_and_compare
-      "\nExpected HMAC SHA2 224: " "\nComputed HMAC SHA2 224: " 28 expected224 test224 in
-  let r256 =
-    print_and_compare
-      "\nExpected HMAC SHA2 256: " "\nComputed HMAC SHA2 256: " 32 expected256 test256 in
-  let r384 =
-    print_and_compare
-      "\nExpected HMAC SHA2 384: " "\nComputed HMAC SHA2 384: " 48 expected384 test384 in
-  let r512 =
-    print_and_compare
-      "\nExpected HMAC SHA2 512: " "\nComputed HMAC SHA2 512: " 64 expected512 test512 in
-
-  let res = r224 && r256 && r384 && r512 in
-  if res then IO.print_string "\nHMAC SHA2 ontime: Success!\n"
-  else IO.print_string "\nHMAC SHA2 ontime: Failure :(\n";
-  res
+noeq type vec =
+  | Vec :
+     a:hash_alg
+    -> key:bytes{HMAC.keysized a (Seq.length key)}
+    -> data:bytes{(Seq.length data + block_length a) `less_than_max_input_length` a}
+    -> expected:bytes{length expected <= hash_length a} -> vec
 
 
-val hmac_test_cut:
-    key:bytes{length key + 128 <= max_size_t}
-  -> data:bytes{length data + 128 <= max_size_t}
-  -> hash_len:size_nat{hash_len <= 28}
-  -> expected224:lbytes hash_len
-  -> expected256:lbytes hash_len
-  -> expected384:lbytes hash_len
-  -> expected512:lbytes hash_len ->
-  FStar.All.ML bool
+let test_vectors : list vec = [
+  Vec SHA2_224 test1_key test1_data test1_expected224;
+  Vec SHA2_256 test1_key test1_data test1_expected256;
+  Vec SHA2_384 test1_key test1_data test1_expected384;
+  Vec SHA2_512 test1_key test1_data test1_expected512;
 
-let hmac_test_cut key data hash_len expected224 expected256 expected384 expected512 =
-  let test224 = HMAC.hmac Spec.Hash.Definitions.SHA2_224 key data in
-  let test256 = HMAC.hmac Spec.Hash.Definitions.SHA2_256 key data in
-  let test384 = HMAC.hmac Spec.Hash.Definitions.SHA2_384 key data in
-  let test512 = HMAC.hmac Spec.Hash.Definitions.SHA2_512 key data in
-  let test224 = Seq.slice test224 0 hash_len in
-  let test256 = Seq.slice test256 0 hash_len in
-  let test384 = Seq.slice test384 0 hash_len in
-  let test512 = Seq.slice test512 0 hash_len in
+  Vec SHA2_224 test2_key test2_data test2_expected224;
+  Vec SHA2_256 test2_key test2_data test2_expected256;
+  Vec SHA2_384 test2_key test2_data test2_expected384;
+  Vec SHA2_512 test2_key test2_data test2_expected512;
 
-  let r224 =
-    print_and_compare
-      "\nExpected HMAC SHA2 224: " "\nComputed HMAC SHA2 224: " hash_len expected224 test224 in
-  let r256 =
-    print_and_compare
-      "\nExpected HMAC SHA2 256: " "\nComputed HMAC SHA2 256: " hash_len expected256 test256 in
-  let r384 =
-    print_and_compare
-      "\nExpected HMAC SHA2 384: " "\nComputed HMAC SHA2 384: " hash_len expected384 test384 in
-  let r512 =
-    print_and_compare
-      "\nExpected HMAC SHA2 512: " "\nComputed HMAC SHA2 512: " hash_len expected512 test512 in
+  Vec SHA2_224 test3_key test3_data test3_expected224;
+  Vec SHA2_256 test3_key test3_data test3_expected256;
+  Vec SHA2_384 test3_key test3_data test3_expected384;
+  Vec SHA2_512 test3_key test3_data test3_expected512;
 
-  let res = r224 && r256 && r384 && r512 in
-  if res then IO.print_string "\nHMAC SHA2 ontime: Success!\n"
-  else IO.print_string "\nHMAC SHA2 ontime: Failure :(\n";
-  res
+  Vec SHA2_224 test4_key test4_data test4_expected224;
+  Vec SHA2_256 test4_key test4_data test4_expected256;
+  Vec SHA2_384 test4_key test4_data test4_expected384;
+  Vec SHA2_512 test4_key test4_data test4_expected512;
+
+  Vec SHA2_224 test5_key test5_data test5_expected224;
+  Vec SHA2_256 test5_key test5_data test5_expected256;
+  Vec SHA2_384 test5_key test5_data test5_expected384;
+  Vec SHA2_512 test5_key test5_data test5_expected512;
+
+  Vec SHA2_224 test6_key test6_data test6_expected224;
+  Vec SHA2_256 test6_key test6_data test6_expected256;
+  Vec SHA2_384 test6_key test6_data test6_expected384;
+  Vec SHA2_512 test6_key test6_data test6_expected512;
+
+  Vec SHA2_224 test7_key test7_data test7_expected224;
+  Vec SHA2_256 test7_key test7_data test7_expected256;
+  Vec SHA2_384 test7_key test7_data test7_expected384;
+  Vec SHA2_512 test7_key test7_data test7_expected512 ]
+
+
+let test_one (v:vec) =
+  let Vec a key data expected = v in
+  let computed = Seq.slice (HMAC.hmac a key data) 0 (length expected) in
+  PS.print_compare true (length expected) expected computed
 
 
 let test () =
-  IO.print_string "\nTEST 1\n";
-  let result1 =
-    hmac_test test1_key test1_data
-      test1_expected224 test1_expected256 test1_expected384 test1_expected512 in
-
-  IO.print_string "\nTEST 2\n";
-  let result2 =
-    hmac_test test2_key test2_data
-      test2_expected224 test2_expected256 test2_expected384 test2_expected512 in
-
-  IO.print_string "\nTEST 3\n";
-  let result3 =
-    hmac_test test3_key test3_data
-      test3_expected224 test3_expected256 test3_expected384 test3_expected512 in
-
-  IO.print_string "\nTEST 4\n";
-  let result4 =
-    hmac_test test4_key test4_data
-      test4_expected224 test4_expected256 test4_expected384 test4_expected512 in
-
-  IO.print_string "\nTEST 5\n";
-  let result5 =
-    hmac_test_cut test5_key test5_data 16
-      test5_expected224 test5_expected256 test5_expected384 test5_expected512 in
-
-  IO.print_string "\nTEST 6\n";
-  let result6 =
-    hmac_test test6_key test6_data
-      test6_expected224 test6_expected256 test6_expected384 test6_expected512 in
-
-  IO.print_string "\nTEST 7\n";
-  let result7 =
-    hmac_test test7_key test7_data
-      test7_expected224 test7_expected256 test7_expected384 test7_expected512 in
-
-  if result1 && result2 && result3 && result4 && result5 && result6 && result7
-  then begin IO.print_string "\nComposite result: Success!\n"; true end
-  else begin IO.print_string "\nComposite result: Failure :(\n"; false end
+  let res = List.for_all test_one test_vectors in
+  if res then begin IO.print_string "\n\nHMAC: Success!\n"; true end
+  else begin IO.print_string "\n\nHMAC: Failure :(\n"; false end
