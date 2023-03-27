@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+module PS = Lib.PrintSequence
 
 open Spec.Ed25519
 
@@ -319,23 +320,24 @@ let test4_expected_sig : lbytes 64 =
   of_list l
 
 
-val test_ed25519:
+noeq type vec =
+  | Vec :
     sk:lbytes 32
   -> pk:lbytes 32
   -> msg:bytes{length msg <= max_size_t}
-  -> expected_sig:lbytes 64 ->
-  FStar.All.ML bool
+  -> expected_sig:lbytes 64 -> vec
 
-let test_ed25519 sk pk msg expected_sig =
+let test_vectors : list vec = [
+  Vec test1_sk test1_pk test1_msg test1_expected_sig;
+  Vec test2_sk test2_pk test2_msg test2_expected_sig;
+  Vec test3_sk test3_pk test3_msg test3_expected_sig;
+  Vec test4_sk test4_pk test4_msg test4_expected_sig ]
+
+let test_one (v:vec) =
+  let Vec sk pk msg expected_sig = v in
   let sig = Spec.Ed25519.sign sk msg in
   let verify = Spec.Ed25519.verify pk msg sig in
-  let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected_sig sig in
-
-  IO.print_string "\nExpected Ed25519 signature: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected_sig);
-
-  IO.print_string "\nComputed Ed25519 signature: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list sig);
+  let res = PS.print_compare true 64 expected_sig sig in
 
   if res then IO.print_string "\nTest signature: Success!\n"
   else IO.print_string "\nTest signature: Failure :(\n";
@@ -346,22 +348,8 @@ let test_ed25519 sk pk msg expected_sig =
   res && verify
 
 
-#set-options "--ifuel 2"
-
 val test: unit -> FStar.All.ML bool
 let test () =
-  IO.print_string "\nTEST 1\n";
-  let res1 = test_ed25519 test1_sk test1_pk test1_msg test1_expected_sig in
-
-  IO.print_string "\nTEST 2\n";
-  let res2 = test_ed25519 test2_sk test2_pk test2_msg test2_expected_sig in
-
-  IO.print_string "\nTEST 3\n";
-  let res3 = test_ed25519 test3_sk test3_pk test3_msg test3_expected_sig in
-
-  IO.print_string "\nTEST 4\n";
-  let res4 = test_ed25519 test4_sk test4_pk test4_msg test4_expected_sig in
-
-  if res1 && res2 && res3 && res4
-  then begin IO.print_string "\n\n Ed25519: Success!\n"; true end
-  else begin IO.print_string "\n\n Ed25519: Failure :(\n"; false end
+  let res = List.for_all test_one test_vectors in
+  if res then begin IO.print_string "\n\nEd25519 : Success!\n"; true end
+  else begin IO.print_string "\n\nEd25519: Failure :(\n"; false end
