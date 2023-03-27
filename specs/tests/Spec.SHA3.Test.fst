@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+module PS = Lib.PrintSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -510,18 +511,7 @@ let test_vectors : list vec = [
 ]
 
 
-#set-options "--ifuel 2"
-
-let print_and_compare (str1:string) (str2:string)
-  (test_expected:bytes{length test_expected <= max_size_t})
-  (test_result:bytes{length test_expected = length test_result})
- =
-  IO.print_string str1;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  IO.print_string str2;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  lbytes_eq #(length test_expected) test_expected test_result
-
+#set-options "--ifuel 1"
 
 let test_one (v:vec) =
   let computed, expected =
@@ -532,8 +522,8 @@ let test_one (v:vec) =
     | Vec SHA3_512 plain tag -> Spec.SHA3.sha3_512 (length plain) plain, tag
     | Vec1 SHAKE128 plain tag -> Spec.SHA3.shake128 (length plain) plain (length tag), tag
     | Vec1 SHAKE256 plain tag -> Spec.SHA3.shake256 (length plain) plain (length tag), tag in
-
-  print_and_compare "\nExpected: " "\nComputed: " expected computed
+  assert (length expected = length computed);
+  PS.print_compare true (length expected) expected computed
 
 
 let test () =
