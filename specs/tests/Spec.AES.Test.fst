@@ -324,98 +324,80 @@ let print_sbox () : FStar.All.ML unit =
   *)
 
 
-val test_ctr_encrypt_bytes:
+noeq type vec =
+  | Vec :
     v:variant
-  -> key:aes_key v
-  -> nonce:bytes{length nonce <= 16}
-  -> c:size_nat
-  -> msg:bytes{length msg / 16 + c <= max_size_t}
-  -> expected:bytes{length msg = length expected /\ length msg <= max_size_t} ->
-  FStar.All.ML bool
-
-let test_ctr_encrypt_bytes v key nonce counter plain expected =
-  let cip = aes_ctr_encrypt_bytes v key (length nonce) nonce counter plain in
-  PS.print_compare true (length plain) cip expected
-
-
-val test_ctr_encrypt_block:
+    -> key:aes_key v
+    -> nonce:bytes{length nonce <= 16}
+    -> c:size_nat
+    -> msg:bytes{length msg / 16 + c <= max_size_t}
+    -> expected:bytes{length msg = length expected /\ length msg <= max_size_t} -> vec
+  | Vec_block :
     v:variant
-  -> key:aes_key v
-  -> plain:block
-  -> expected:block ->
-  FStar.All.ML bool
-
-let test_ctr_encrypt_block v key plain expected =
-  let xkey = aes_key_expansion v key in
-  let cip = aes_encrypt_block v xkey plain in
-  PS.print_compare true (length plain) cip expected
+    -> key:aes_key v
+    -> plain:block
+    -> expected:block -> vec
 
 
-val test_ctr_decrypt_block:
-    v:variant
-  -> key:aes_key v
-  -> plain:block
-  -> expected:block ->
-  FStar.All.ML bool
+let test_vectors : list vec = [
+  Vec AES128 test_key test_nonce test_counter test_plaintext test_ciphertext;
+  Vec AES128 test_key1 test_nonce1 test_counter1 test_plaintext1 test_ciphertext1;
+  Vec AES128 test_key2 test_nonce2 test_counter2 test_plaintext2 test_ciphertext2;
 
-let test_ctr_decrypt_block v key cipher expected =
-  let xkey = aes_dec_key_expansion v key in
-  let inv = aes_decrypt_block v xkey cipher in
-  PS.print_compare true (length cipher) inv expected
+  Vec_block AES128 test1_key_block test1_plaintext_block test1_ciphertext_block;
+  Vec_block AES128 test2_key_block test2_plaintext_block test2_ciphertext_block;
+  Vec_block AES128 test3_key_block test2_plaintext_block test3_ciphertext_block;
+  Vec_block AES256 test2_input_key test2_input_plaintext test2_output_ciphertext;
+  Vec_block AES256 test3_input_key test3_input_plaintext test3_output_ciphertext;
+  Vec_block AES256 test4_input_key test4_input_plaintext test4_output_ciphertext
+]
 
 
-#set-options "--ifuel 2"
+#set-options "--ifuel 1"
+
+let test_one_encrypt (v:vec) =
+  let expected =
+    match v with
+    | Vec v key nonce counter plain expected -> expected
+    | Vec_block v key plain expected -> expected in
+
+  let computed =
+    match v with
+    | Vec v key nonce counter plain expected ->
+      aes_ctr_encrypt_bytes v key (length nonce) nonce counter plain
+    | Vec_block v key plain expected ->
+      aes_encrypt_block v (aes_key_expansion v key) plain in
+
+  PS.print_compare true (length expected) computed expected
+
+
+let test_one_decrypt (v:vec) =
+  let expected =
+    match v with
+    | Vec v key nonce counter plain expected -> plain
+    | Vec_block v key plain expected -> plain in
+
+  let computed =
+    match v with
+    | Vec v key nonce counter plain expected ->
+      aes_ctr_encrypt_bytes v key (length nonce) nonce counter expected
+    | Vec_block v key plain expected ->
+      aes_decrypt_block v (aes_dec_key_expansion v key) expected in
+
+  PS.print_compare true (length expected) computed expected
+
 
 let test() : FStar.All.ML bool =
   // print_sbox (); // TODO: rm?
 
-  let res =
-    test_ctr_encrypt_bytes AES128 test_key test_nonce test_counter
-      test_plaintext test_ciphertext in
-
-  let res1 =
-    test_ctr_encrypt_bytes AES128 test_key1 test_nonce1 test_counter1
-      test_plaintext1 test_ciphertext1 in
-
-  let res2 =
-    test_ctr_encrypt_bytes AES128 test_key2 test_nonce2 test_counter2
-      test_plaintext2 test_ciphertext2 in
-
-  let res3 =
-    test_ctr_encrypt_block AES128 test1_key_block
-      test1_plaintext_block test1_ciphertext_block in
-
-  let res4 =
-    test_ctr_encrypt_block AES128 test2_key_block
-      test2_plaintext_block test2_ciphertext_block in
-
-  let res5 =
-    test_ctr_encrypt_block AES128 test3_key_block
-      test2_plaintext_block test3_ciphertext_block in
-
+  IO.print_string "\n\nAES Encryption\n";
+  let res_enc = List.for_all (fun (v:vec) -> test_one_encrypt v) test_vectors in
+  IO.print_string "\n\nAES Decryption\n";
+  let res_dec = List.for_all (fun (v:vec) -> test_one_decrypt v) test_vectors in
+  IO.print_string "\n\nAES Key Expansion\n";
   let computed1 = aes_key_expansion AES256 test1_input_key1 in
-  let res6 = PS.print_compare true (length computed1) test1_output_expanded computed1 in
+  let res_key = PS.print_compare true (length computed1) test1_output_expanded computed1 in
 
-  let res7 = test_ctr_encrypt_block AES256 test2_input_key
-    test2_input_plaintext test2_output_ciphertext in
-
-  let res8 = test_ctr_decrypt_block AES256 test2_input_key
-    test2_output_ciphertext test2_input_plaintext in
-
-  let res9 = test_ctr_encrypt_block AES256 test3_input_key
-    test3_input_plaintext test3_output_ciphertext in
-
-  let res10 = test_ctr_decrypt_block AES256 test3_input_key
-    test3_output_ciphertext test3_input_plaintext in
-
-  let res11 = test_ctr_encrypt_block AES256 test4_input_key
-    test4_input_plaintext test4_output_ciphertext in
-
-  let res12 = test_ctr_decrypt_block AES256 test4_input_key
-    test4_output_ciphertext test4_input_plaintext in
-
-  let res = res1 && res2 && res3 && res4 && res5 && res6 && res7 &&
-    res8 && res9 && res10 && res11 && res12 in
-
+  let res = res_enc && res_dec && res_key in
   if res then begin IO.print_string "\n\nAES: Success!\n"; true end
   else begin IO.print_string "\n\nAES: Failure :(\n"; false end
