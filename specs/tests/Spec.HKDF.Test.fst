@@ -6,6 +6,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
+module PS = Lib.PrintSequence
 module HMAC = Spec.Agile.HMAC
 module HKDF = Spec.Agile.HKDF
 
@@ -204,16 +205,15 @@ let test3_expected_okm : lbytes 42 =
   of_list l
 
 
-let print_and_compare
-  (str1:string) (str2:string)
-  (len:size_nat) (test_expected:lbytes len) (test_result:lbytes len)
- =
-  let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test_expected test_result in
-  IO.print_string str1;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_expected);
-  IO.print_string str2;
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_result);
-  res
+noeq type vec =
+  | Vec :
+    a:Spec.Hash.Definitions.hash_alg
+  -> salt:bytes{HMAC.keysized a (length salt)}
+  -> ikm:bytes{HKDF.extract_ikm_length_pred a (length ikm)}
+  -> expected_prk:lbytes (Spec.Hash.Definitions.hash_length a)
+  -> info:bytes{HKDF.expand_info_length_pred a (length info)}
+  -> out_len:nat{HKDF.expand_output_length_pred a out_len}
+  -> expected_okm:lbytes out_len -> vec
 
 
 let _: squash (pow2 32 < pow2 61 /\ pow2 32 < pow2 125) =
@@ -221,28 +221,26 @@ let _: squash (pow2 32 < pow2 61 /\ pow2 32 < pow2 125) =
   Math.Lemmas.pow2_lt_compat 125 32
 
 
+let test_vectors: list vec = [
+  Vec test1_hash test1_salt test1_ikm
+      test1_expected_prk test1_info test1_len test1_expected_okm;
+  Vec test2_hash test2_salt test2_ikm
+      test2_expected_prk test2_info test2_len test2_expected_okm;
+  Vec test3_hash test3_salt test3_ikm
+      test3_expected_prk test3_info test3_len test3_expected_okm ]
+
+
 #set-options "--ifuel 2"
 
-val test_hkdf:
-    a:Spec.Hash.Definitions.hash_alg
-  -> salt:bytes{length salt + 256 <= max_size_t}
-  -> ikm:bytes{length ikm + 256 <= max_size_t}
-  -> expected_prk:lbytes (Spec.Hash.Definitions.hash_length a)
-  -> info:bytes{length info + 256 <= max_size_t}
-  -> out_len:size_nat{out_len <= 255}
-  -> expected_okm:lbytes out_len ->
-  FStar.All.ML bool
-
-let test_hkdf a salt ikm expected_prk info out_len expected_okm =
+let test_one (v:vec) =
+  let Vec a salt ikm expected_prk info out_len expected_okm = v in
   let test_prk = HKDF.extract a salt ikm in
   let test_okm = HKDF.expand a expected_prk info out_len in
 
-  let r_a =
-    print_and_compare
-      "\nExpected PRK: " "\nComputed PRK: " (length expected_prk) expected_prk test_prk in
-  let r_b =
-    print_and_compare
-      "\nExpected OKM: " "\nComputed OKM: " (length expected_okm) expected_okm test_okm in
+  IO.print_string "\nPRK:\n";
+  let r_a = PS.print_compare true (length expected_prk) expected_prk test_prk in
+  IO.print_string "\nOKM:\n";
+  let r_b = PS.print_compare true (length expected_okm) expected_okm test_okm in
 
   let res = r_a && r_b in
   if r_a then IO.print_string "\nHKDF Extract: Success!\n"
@@ -253,22 +251,6 @@ let test_hkdf a salt ikm expected_prk info out_len expected_okm =
 
 
 let test () =
-  IO.print_string "\nTEST 1\n";
-  let result1 =
-    test_hkdf test1_hash test1_salt test1_ikm
-      test1_expected_prk test1_info test1_len test1_expected_okm in
-
-  IO.print_string "\nTEST 2\n";
-  let result2 =
-    test_hkdf test2_hash test2_salt test2_ikm
-      test2_expected_prk test2_info test2_len test2_expected_okm in
-
-  IO.print_string "\nTEST 3\n";
-  let result3 =
-    test_hkdf test3_hash test3_salt test3_ikm
-      test3_expected_prk test3_info test3_len test3_expected_okm in
-
-  // Composite result
-  if result1 && result2 && result3
-  then begin IO.print_string "\nComposite result: Success!\n"; true end
-  else begin IO.print_string "\nComposite result: Failure :(\n"; false end
+  let res = List.for_all test_one test_vectors in
+  if res then begin IO.print_string "\n\nHKDF: Success!\n"; true end
+  else begin IO.print_string "\n\nHKDF: Failure :(\n"; false end
