@@ -148,7 +148,7 @@ let rec to_reduce t: Tac _ =
       []
 
 let lambda_over_p (inv_bv: bv) (t: term): Tac term =
-  pack (Tv_Abs (pack_binder inv_bv Q_Explicit []) t)
+  pack (Tv_Abs (pack_binder {binder_bv=inv_bv; binder_qual=Q_Explicit; binder_attrs=[]}) t)
 
 let lambda_over_only_p (st: state) (inv_bv: bv) (f_typ: term): Tac term =
   let fvs = to_reduce f_typ in
@@ -166,7 +166,7 @@ let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv
   print (st.indent ^ "After reduction in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
   match inspect f_typ with
   | Tv_Arrow bv c ->
-      let bv, (qual, _attrs) = inspect_binder bv in
+      let { binder_bv = bv; binder_qual = qual } = inspect_binder bv in
       if not (is_implicit qual) then
         fail ("The first parameter in the type of " ^ string_of_name f_name ^ " is not implicit");
       let { bv_sort = t } = inspect_bv bv in
@@ -180,7 +180,7 @@ let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv
             // fun p:Type. ... -> ... (requires p) ...
             let t = lambda_over_p inv_bv t in
             // fun #i:index -> fun p:Type. ... -> ... (requires p) ...
-            pack (Tv_Abs (pack_binder bv Q_Implicit []) t)
+            pack (Tv_Abs (pack_binder {binder_bv=bv; binder_qual=Q_Implicit; binder_attrs=[]}) t)
         | _ ->
             fail ("The first arrow of " ^ string_of_name f_name ^ " is impure")
       in
@@ -199,7 +199,7 @@ let tm_unit = `((()))
 /// -----------
 
 let binder_is_legit f_name t_i binder: Tac bool =
-  let bv, (qual, _attrs) = inspect_binder binder in
+  let { binder_bv = bv; binder_qual = qual } = inspect_binder binder in
   let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
   let implicit = is_implicit qual in
   let right_type = term_eq t_i t in
@@ -250,8 +250,9 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         let index_bv, index_name, f_body =
           match inspect f_body with
           | Tv_Abs binder f_body' ->
-              let bv, qual = inspect_binder binder in
+              let { binder_bv = bv } = inspect_binder binder in
               let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
+              let name = unseal name in
               print (st.indent ^ "Found " ^ name ^ ", which is " ^
                 (if binder_is_legit f_name t_i binder then "" else "NOT ") ^
                 "an index of type " ^ term_to_string t);
@@ -292,12 +293,12 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           match index_bv with
           | Some index_bv ->
               lambda_over_index_and_p st f_name f_typ inv_bv,
-              mk_tot_arr [ pack_binder index_bv Q_Implicit [] ] (
-                mk_tot_arr [ pack_binder inv_bv Q_Explicit [] ] (`Type0)),
+              mk_tot_arr [ pack_binder {binder_bv=index_bv; binder_qual=Q_Implicit; binder_attrs=[]} ] (
+                mk_tot_arr [ pack_binder {binder_bv=inv_bv; binder_qual=Q_Explicit; binder_attrs=[]} ] (`Type0)),
               true
           | _ ->
               lambda_over_only_p st inv_bv f_typ,
-              mk_tot_arr [ pack_binder inv_bv Q_Explicit [] ] (`Type0),
+              mk_tot_arr [ pack_binder {binder_bv=inv_bv; binder_qual=Q_Explicit; binder_attrs=[]} ] (`Type0),
               false
         in
         print (st.indent ^ "  let " ^ string_of_name f_typ_name ^ ": " ^
@@ -366,20 +367,20 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           // Declaration for the new resulting function. We need to construct
           // the actual type of ``f``.
           // BUG: without the eta-expansion around mk_binder, "tactic got stuck".
-          let new_body = pack (Tv_Abs (pack_binder inv_bv Q_Explicit []) new_body) in
+          let new_body = pack (Tv_Abs (pack_binder {binder_bv=inv_bv; binder_qual=Q_Explicit; binder_attrs=[]}) new_body) in
           let new_body =
             match index_bv with
-            | Some index_bv -> pack (Tv_Abs (pack_binder index_bv Q_Implicit []) new_body)
+            | Some index_bv -> pack (Tv_Abs (pack_binder {binder_bv=index_bv; binder_qual=Q_Implicit; binder_attrs=[]}) new_body)
             | _ -> new_body
           in
           let new_typ =
             let new_binders = List.Tot.map (fun x -> mk_binder x) new_bvs in
-            let new_binders = pack_binder inv_bv Q_Explicit [] :: new_binders in
+            let new_binders = pack_binder {binder_bv=inv_bv; binder_qual=Q_Explicit; binder_attrs=[]} :: new_binders in
             let app_inv (t: term): Tac term = pack (Tv_App t (pack (Tv_Var inv_bv), Q_Explicit)) in
             match index_bv with
             | Some index_bv ->
                 mk_tot_arr
-                  (pack_binder index_bv Q_Implicit [] :: new_binders)
+                  (pack_binder {binder_bv=index_bv; binder_qual=Q_Implicit; binder_attrs=[]} :: new_binders)
                   (app_inv (pack (Tv_App f_typ (pack (Tv_Var index_bv), Q_Implicit))))
             | _ ->
                 mk_tot_arr new_binders (app_inv f_typ)
