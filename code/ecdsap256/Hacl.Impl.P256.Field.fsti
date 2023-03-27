@@ -52,6 +52,7 @@ val feq_mask: a:felem -> b:felem -> Stack uint64
 
 ///  Field Arithmetic
 
+// not used?
 val fmod_short: res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res)
@@ -95,14 +96,6 @@ val fnegate_conditional_vartime: f:felem -> is_negate:bool -> Stack unit
     as_nat h1 f == (if is_negate then (S.prime - as_nat h0 f) % S.prime else as_nat h0 f))
 
 
-val from_mont: res:felem -> x:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ as_nat h x < S.prime)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res = (as_nat h0 x * SM.fmont_R_inv) % S.prime /\
-    as_nat h1 res = fmont_as_nat h0 x)
-
-
 val fmul: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
@@ -120,6 +113,22 @@ val fsqr: res:felem -> x:felem -> Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res = (as_nat h0 x * as_nat h0 x * SM.fmont_R_inv) % S.prime /\
     fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 x) (fmont_as_nat h0 x))
+
+
+val from_mont: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ as_nat h x < S.prime)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * SM.fmont_R_inv) % S.prime /\
+    as_nat h1 res = fmont_as_nat h0 x)
+
+
+val to_mont: res:felem -> f:felem -> Stack unit
+  (requires fun h ->
+    live h f /\ live h res /\ eq_or_disjoint f res /\
+    as_nat h f < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = SM.to_mont (as_nat h0 f))
 
 
 ///  Special cases of the above functions

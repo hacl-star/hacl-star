@@ -164,40 +164,6 @@ let bn_sqr4 res x =
   bn_v_is_as_nat (as_seq h0 x);
   bn_v_is_wide_as_nat (as_seq h1 res)
 
-
-///  pow2-operations
-
-val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
-    a * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    b * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    c * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
-    d * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 ==
-    (a + b * pow2 64 + c * pow2 64 * pow2 64 + d * pow2 64 * pow2 64 * pow2 64) * pow2 64 * pow2 64 * pow2 64 * pow2 64)
-
-let lemma_shift_256 a b c d = ()
-
-
-[@CInline]
-let bn_lshift256 res x =
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-
-  let h0 = ST.get () in
-  upd res 0ul (u64 0);
-  upd res 1ul (u64 0);
-  upd res 2ul (u64 0);
-  upd res 3ul (u64 0);
-  upd res 4ul x.(0ul);
-  upd res 5ul x.(1ul);
-  upd res 6ul x.(2ul);
-  upd res 7ul x.(3ul);
-
-  lemma_shift_256
-    (v (Lib.Sequence.index (as_seq h0 x) 0))
-    (v (Lib.Sequence.index (as_seq h0 x) 1))
-    (v (Lib.Sequence.index (as_seq h0 x) 2))
-    (v (Lib.Sequence.index (as_seq h0 x) 3))
-
-
 ///  Conversion between bignum and bytes representation
 
 [@CInline]

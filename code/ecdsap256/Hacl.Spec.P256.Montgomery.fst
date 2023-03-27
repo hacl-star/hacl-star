@@ -151,10 +151,6 @@ let lemma_mont_inv_gen n mont_R mont_R_inv k =
   M.lemma_pow_mod #n k (n - 2)
 
 
-val mont_cancel_lemma_gen (n:pos) (mont_R mont_R_inv a b:nat) : Lemma
-  (requires mont_R_inv * mont_R % n = 1)
-  (ensures (a * mont_R % n * b * mont_R_inv) % n = a * b % n)
-
 let mont_cancel_lemma_gen n mont_R mont_R_inv a b =
   calc (==) {
     (a * mont_R % n * b * mont_R_inv) % n;

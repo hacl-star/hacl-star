@@ -10,15 +10,12 @@ open Lib.Buffer
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
-open Hacl.Impl.P256.Core
-open Hacl.Impl.P256.SolinasReduction
-
-module LSeq = Lib.Sequence
 
 module M = Lib.NatMod
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
+module LSeq = Lib.Sequence
 
 module S = Spec.P256
 module SI = Hacl.Spec.P256.Finv

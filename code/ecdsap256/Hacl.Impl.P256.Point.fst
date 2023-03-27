@@ -105,7 +105,6 @@ let copy_point_conditional res p q_mask =
 
 [@CInline]
 let point_to_mont res p =
-  let open Hacl.Impl.P256.Core in
   let px = getx p in
   let py = gety p in
   let pz = getz p in
@@ -318,8 +317,8 @@ let is_point_on_curve_vartime p =
   let px = aff_getx p in
   let py = aff_gety p in
   let h0 = ST.get () in
-  Hacl.Impl.P256.Core.to_mont tx px;
-  Hacl.Impl.P256.Core.to_mont ty py;
+  to_mont tx px;
+  to_mont ty py;
 
   SM.lemma_to_from_mont_id (as_nat h0 px);
   SM.lemma_to_from_mont_id (as_nat h0 py);
@@ -389,7 +388,7 @@ let recover_y_vartime_candidate y x =
   let yM = create_felem () in
   let h0 = ST.get () in
   SM.lemma_to_from_mont_id (as_nat h0 x);
-  Hacl.Impl.P256.Core.to_mont xM x;
+  to_mont xM x;
   compute_rp_ec_equation xM y2M; // y2M = x *% x *% x +% S.a_coeff *% x +% S.b_coeff
   FI.fsqrt yM y2M; // yM = fsqrt y2M
   let h1 = ST.get () in

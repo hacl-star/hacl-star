@@ -168,16 +168,6 @@ val bn_sqr4: res:widefelem -> x:felem -> Stack unit
     wide_as_nat h1 res = as_nat h0 x * as_nat h0 x)
 
 
-///  pow2-operations
-
-// used in Hacl.Impl.P256.Core
-val bn_lshift256: res:widefelem -> f:felem -> Stack unit
-  (requires fun h ->
-    live h f /\ live h res /\ disjoint f res)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    wide_as_nat h1 res == as_nat h0 f * pow2 256)
-
-
 ///  Conversion between bignum and bytes representation
 
 val bn_to_bytes_be4: res:lbuffer uint8 32ul -> f:felem -> Stack unit

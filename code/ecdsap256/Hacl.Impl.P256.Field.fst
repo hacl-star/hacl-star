@@ -169,22 +169,6 @@ let mont_reduction res x =
 
 
 [@CInline]
-let from_mont res a =
-  push_frame ();
-  let tmp = create_widefelem () in
-  let t_low = sub tmp 0ul 4ul in
-  let t_high = sub tmp 4ul 4ul in
-
-  let h0 = ST.get () in
-  copy t_low a;
-  let h1 = ST.get () in
-  assert (wide_as_nat h0 tmp = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
-  assert_norm (S.prime < S.prime * S.prime);
-  mont_reduction res tmp;
-  pop_frame ()
-
-
-[@CInline]
 let fmul res x y =
   push_frame ();
   let tmp = create_widefelem () in
@@ -207,6 +191,46 @@ let fsqr res x =
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.prime;
   mont_reduction res tmp;
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
+  pop_frame ()
+
+
+[@CInline]
+let from_mont res a =
+  push_frame ();
+  let tmp = create_widefelem () in
+  let t_low = sub tmp 0ul 4ul in
+  let t_high = sub tmp 4ul 4ul in
+
+  let h0 = ST.get () in
+  copy t_low a;
+  let h1 = ST.get () in
+  assert (wide_as_nat h0 tmp = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
+  assert_norm (S.prime < S.prime * S.prime);
+  mont_reduction res tmp;
+  pop_frame ()
+
+
+[@CInline]
+let to_mont res a =
+  push_frame ();
+  let r2modn = create_felem () in
+  make_fmont_R2 r2modn;
+  let h0 = ST.get () in
+  assert (as_nat h0 r2modn == SM.fmont_R * SM.fmont_R % S.prime);
+  fmul res a r2modn;
+  let h1 = ST.get () in
+  assert (as_nat h1 res ==
+    (as_nat h0 a * (SM.fmont_R * SM.fmont_R % S.prime) * SM.fmont_R_inv) % S.prime);
+  assert_norm (SM.fmont_R_inv * SM.fmont_R % S.prime = 1);
+  calc (==) {
+    (as_nat h0 a * (SM.fmont_R * SM.fmont_R % S.prime) * SM.fmont_R_inv) % S.prime;
+    (==) { Math.Lemmas.swap_mul (as_nat h0 a) (SM.fmont_R * SM.fmont_R % S.prime) }
+    ((SM.fmont_R * SM.fmont_R % S.prime) * as_nat h0 a * SM.fmont_R_inv) % S.prime;
+    (==) { SM.mont_cancel_lemma_gen S.prime SM.fmont_R SM.fmont_R_inv SM.fmont_R (as_nat h0 a) }
+    SM.fmont_R * as_nat h0 a % S.prime;
+    (==) { Math.Lemmas.swap_mul SM.fmont_R (as_nat h0 a) }
+    as_nat h0 a * SM.fmont_R % S.prime;
+    };
   pop_frame ()
 
 

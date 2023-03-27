@@ -12,6 +12,11 @@ module SBM = Hacl.Spec.Bignum.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val mont_cancel_lemma_gen (n:pos) (mont_R mont_R_inv a b:nat) : Lemma
+  (requires mont_R_inv * mont_R % n = 1)
+  (ensures (a * mont_R % n * b * mont_R_inv) % n = a * b % n)
+
+
 ///  Montgomery arithmetic for a base field
 
 let fmont_R = pow2 256

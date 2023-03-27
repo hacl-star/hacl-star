@@ -127,3 +127,20 @@ let make_g_y n =
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.g_y);
   assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == S.g_y);
   bn_make_u64_4 n n0 n1 n2 n3
+
+
+val make_fmont_R2: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == SM.fmont_R * SM.fmont_R % S.prime)
+
+[@CInline]
+let make_fmont_R2 n =
+  // 0x4fffffffdfffffffffffffffefffffffbffffffff0000000000000003
+  [@inline_let] let n0 = u64 0x3 in
+  [@inline_let] let n1 = u64 0xfffffffbffffffff in
+  [@inline_let] let n2 = u64 0xfffffffffffffffe in
+  [@inline_let] let n3 = u64 0x4fffffffd in
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 ==
+    SM.fmont_R * SM.fmont_R % S.prime);
+  bn_make_u64_4 n n0 n1 n2 n3
