@@ -106,18 +106,18 @@ let test_aead k n m aad c_expected mac_expected =
   let cipher, mac = Seq.slice enc 0 mlen, Seq.slice enc mlen (mlen + 16) in
   let dec = aead_decrypt k n c_expected mac_expected aad in
 
-  IO.print_string "\ncipher:\n";
+  IO.print_string "\n cipher:";
   let res_c = PS.print_compare true mlen c_expected cipher in
-  IO.print_string "\nmac:\n";
+  IO.print_string "\n mac:";
   let res_m = PS.print_compare true 16 mac_expected mac in
-  IO.print_string "\nplain::\n";
+  IO.print_string "\n plain:";
   let res_p =
     if Some? dec then PS.print_compare true mlen m (Some?.v dec)
     else false in
 
   let res = res_c && res_m && res_p in
-  if res then IO.print_string "\nChacha20Poly1305 Test: Success!\n"
-  else IO.print_string "\nChacha20Poly1305 Test: Failure :(\n";
+  if res then IO.print_string "\n Chacha20Poly1305 Test: Success!\n"
+  else IO.print_string "\n Chacha20Poly1305 Test: Failure :(\n";
   res
 
 

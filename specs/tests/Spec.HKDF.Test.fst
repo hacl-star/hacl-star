@@ -237,9 +237,9 @@ let test_one (v:vec) =
   let test_prk = HKDF.extract a salt ikm in
   let test_okm = HKDF.expand a expected_prk info out_len in
 
-  IO.print_string "\nPRK:\n";
+  IO.print_string "\nPRK:";
   let r_a = PS.print_compare true (length expected_prk) expected_prk test_prk in
-  IO.print_string "\nOKM:\n";
+  IO.print_string "\nOKM:";
   let r_b = PS.print_compare true (length expected_okm) expected_okm test_okm in
 
   let res = r_a && r_b in

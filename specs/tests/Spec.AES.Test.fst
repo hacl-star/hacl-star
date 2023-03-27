@@ -367,7 +367,7 @@ let test_ctr_decrypt_block v key cipher expected =
 #set-options "--ifuel 2"
 
 let test() : FStar.All.ML bool =
-  print_sbox (); // TODO: rm?
+  // print_sbox (); // TODO: rm?
 
   let res =
     test_ctr_encrypt_bytes AES128 test_key test_nonce test_counter
@@ -414,5 +414,8 @@ let test() : FStar.All.ML bool =
   let res12 = test_ctr_decrypt_block AES256 test4_input_key
     test4_output_ciphertext test4_input_plaintext in
 
-  res1 && res2 && res3 && res4 && res5 && res6 && res7 &&
-  res8 && res9 && res10 && res11 && res12
+  let res = res1 && res2 && res3 && res4 && res5 && res6 && res7 &&
+    res8 && res9 && res10 && res11 && res12 in
+
+  if res then begin IO.print_string "\n\nAES: Success!\n"; true end
+  else begin IO.print_string "\n\nAES: Failure :(\n"; false end

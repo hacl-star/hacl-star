@@ -1346,4 +1346,7 @@ let test_one (v:vec) =
   PS.print_compare true (hash_length a) expected computed
 
 
-let test () = List.for_all test_one test_vectors
+let test () =
+  let res = List.for_all test_one test_vectors in
+  if res then begin IO.print_string "\n\nHash: Success!\n"; true end
+  else begin IO.print_string "\n\nHash: Failure :(\n"; false end
