@@ -32,12 +32,11 @@ let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
 unfold
 let linv (a:LSeq.lseq uint64 4) : Type0 =
-  let open Lib.Sequence in
   SB.felem_seq_as_nat a < S.prime
 
 unfold
 let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.felem =
-  SB.felem_seq_as_nat a
+  SM.from_mont (SB.felem_seq_as_nat a)
 
 
 inline_for_extraction noextract
@@ -49,66 +48,20 @@ let mk_to_p256_prime_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
   BE.refl = refl;
 }
 
-//------------------------
-// TODO: compare the performance of mod_solinas and mod_montgomery
-
-val mul_mod_solinas (x y res:felem) : Stack unit
-  (requires fun h ->
-    live h x /\ live h y /\ live h res /\
-    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
-    as_nat h x < S.prime /\ as_nat h y < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res == as_nat h0 x * as_nat h0 y % S.prime)
-
-[@CInline]
-let mul_mod_solinas x y res =
-  push_frame ();
-  let tmp = create 8ul (u64 0) in
-  let h0 = ST.get () in
-  bn_mul4 tmp x y;
-  let h1 = ST.get () in
-  assert (wide_as_nat h1 tmp == as_nat h0 x * as_nat h0 y);
-  solinas_reduction_impl tmp res;
-  let h2 = ST.get () in
-  assert (as_nat h2 res == wide_as_nat h1 tmp % S.prime);
-  pop_frame ()
-
-
-val sqr_mod_solinas (x res:felem) : Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ eq_or_disjoint x res /\
-    as_nat h x < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res == as_nat h0 x * as_nat h0 x % S.prime)
-
-[@CInline]
-let sqr_mod_solinas x res =
-  push_frame ();
-  let tmp = create 8ul (u64 0) in
-  let h0 = ST.get () in
-  bn_sqr4 tmp x;
-  let h1 = ST.get () in
-  assert (wide_as_nat h1 tmp == as_nat h0 x * as_nat h0 x);
-  solinas_reduction_impl tmp res;
-  let h2 = ST.get () in
-  assert (as_nat h2 res == wide_as_nat h1 tmp % S.prime);
-  pop_frame ()
-
-//------------------------
 
 inline_for_extraction noextract
 val one_mod : BE.lone_st U64 4ul 0ul mk_to_p256_prime_comm_monoid
-let one_mod ctx one = bn_set_one4 one
+let one_mod ctx one = make_fone one
 
 
 inline_for_extraction noextract
 val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_p256_prime_comm_monoid
-let mul_mod ctx x y xy = mul_mod_solinas x y xy
+let mul_mod ctx x y xy = fmul xy x y
 
 
 inline_for_extraction noextract
 val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_prime_comm_monoid
-let sqr_mod ctx x xx = sqr_mod_solinas x xx
+let sqr_mod ctx x xx = fsqr xx x
 
 
 inline_for_extraction noextract
@@ -125,13 +78,15 @@ val fsquare_times (out a:felem) (b:size_t) : Stack unit
     live h out /\ live h a /\ disjoint out a /\
     as_nat h a < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == SI.fsquare_times (as_nat h0 a) (v b))
+    fmont_as_nat h1 out == SI.fsquare_times (fmont_as_nat h0 a) (v b))
 
 [@CInline]
 let fsquare_times out a b =
   let h0 = ST.get () in
-  SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (as_nat h0 a) (v b);
-  BE.lexp_pow2 4ul 0ul mk_p256_prime_concrete_ops (null uint64) a b out
+  BE.lexp_pow2 4ul 0ul mk_p256_prime_concrete_ops (null uint64) a b out;
+  let h1 = ST.get () in
+  assert (fmont_as_nat h1 out == LE.exp_pow2 SI.nat_mod_comm_monoid (fmont_as_nat h0 a) (v b));
+  SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (fmont_as_nat h0 a) (v b)
 
 
 // TODO: rm
@@ -141,7 +96,8 @@ val fexp_vartime (out a b:felem) : Stack unit
     disjoint out a /\ disjoint out b /\
     as_nat h a < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == M.pow_mod #S.prime (as_nat h0 a) (as_nat h0 b))
+    as_nat h1 out < S.prime /\
+    fmont_as_nat h1 out == M.pow_mod #S.prime (fmont_as_nat h0 a) (as_nat h0 b))
 
 [@CInline]
 let fexp_vartime out a b =
@@ -152,12 +108,12 @@ let fexp_vartime out a b =
   BE.lexp_fw_vartime 4ul 0ul
     mk_p256_prime_concrete_ops 5ul (null uint64) a 4ul 256ul b out;
   let h1 = ST.get () in
-  SE.exp_fw_lemma SI.mk_nat_mod_concrete_ops (as_nat h0 a) 256 (as_nat h0 b) 5;
-  LE.exp_fw_lemma SI.nat_mod_comm_monoid (as_nat h0 a) 256 (as_nat h0 b) 5;
-  assert (as_nat h1 out == LE.pow SI.nat_mod_comm_monoid (as_nat h0 a) (as_nat h0 b));
-  M.lemma_pow_nat_mod_is_pow #S.prime (as_nat h0 a) (as_nat h0 b);
-  assert (as_nat h1 out == M.pow (as_nat h0 a) (as_nat h0 b) % S.prime);
-  M.lemma_pow_mod #S.prime (as_nat h0 a) (as_nat h0 b)
+  SE.exp_fw_lemma SI.mk_nat_mod_concrete_ops (fmont_as_nat h0 a) 256 (as_nat h0 b) 5;
+  LE.exp_fw_lemma SI.nat_mod_comm_monoid (fmont_as_nat h0 a) 256 (as_nat h0 b) 5;
+  assert (fmont_as_nat h1 out == LE.pow SI.nat_mod_comm_monoid (fmont_as_nat h0 a) (as_nat h0 b));
+  M.lemma_pow_nat_mod_is_pow #S.prime (fmont_as_nat h0 a) (as_nat h0 b);
+  assert (fmont_as_nat h1 out == M.pow (fmont_as_nat h0 a) (as_nat h0 b) % S.prime);
+  M.lemma_pow_mod #S.prime (fmont_as_nat h0 a) (as_nat h0 b)
 
 
 //--------------------------------
@@ -185,11 +141,8 @@ let finv res a =
   make_prime_minus_2 b;
 
   let tmp = create 4ul (u64 0) in
-  from_mont tmp a;
+  copy tmp a;
   fexp_vartime res tmp b;
-  let h = ST.get () in
-  to_mont res res;
-  SM.lemma_to_from_mont_id (as_nat h res);
   pop_frame ()
 
 
@@ -216,11 +169,6 @@ let fsqrt res a =
   make_prime_plus_1_div_4 b;
 
   let tmp = create 4ul (u64 0) in
-  from_mont tmp a;
+  copy tmp a;
   fexp_vartime res tmp b;
-  let h = ST.get () in
-  to_mont res res;
-  SM.lemma_to_from_mont_id (as_nat h res);
   pop_frame ()
-
-//-----------------------------------------------
