@@ -203,6 +203,13 @@ let finv_lemma f =
   assert_norm (S.prime - 2 = 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffd)
 
 
+val finv_is_finv_lemma: f:S.felem -> Lemma (finv f == S.finv f)
+let finv_is_finv_lemma f =
+  finv_lemma f;
+  assert (finv f == M.pow f (S.prime - 2) % S.prime);
+  M.lemma_pow_mod #S.prime f (S.prime - 2)
+
+
 // (prime + 1) / 4 = 0x3fffffffc0000000400000000000000000000000400000000000000000000000
 val fsqrt_lemma: f:S.felem -> Lemma (fsqrt f == M.pow f ((S.prime + 1) / 4) % S.prime)
 let fsqrt_lemma f =
@@ -256,3 +263,10 @@ let fsqrt_lemma f =
   assert (x254 == M.pow f 0x3fffffffc0000000400000000000000000000000400000000000000000000000 % S.prime);
 
   assert_norm ((S.prime + 1) / 4 = 0x3fffffffc0000000400000000000000000000000400000000000000000000000)
+
+
+val fsqrt_is_fsqrt_lemma: f:S.felem -> Lemma (fsqrt f == S.fsqrt f)
+let fsqrt_is_fsqrt_lemma f =
+  fsqrt_lemma f;
+  assert (fsqrt f == M.pow f ((S.prime + 1) / 4) % S.prime);
+  M.lemma_pow_mod #S.prime f ((S.prime + 1) / 4)
