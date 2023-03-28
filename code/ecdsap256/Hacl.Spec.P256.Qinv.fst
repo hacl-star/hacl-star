@@ -396,3 +396,10 @@ let qinv_lemma f =
   assert (x256 == M.pow f 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254f % S.order);
 
   assert_norm (S.order - 2 = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc63254f)
+
+
+val qinv_is_qinv_lemma: f:S.qelem -> Lemma (qinv f == S.qinv f)
+let qinv_is_qinv_lemma f =
+  qinv_lemma f;
+  assert (qinv f == M.pow f (S.order - 2) % S.order);
+  M.lemma_pow_mod #S.order f (S.order - 2)

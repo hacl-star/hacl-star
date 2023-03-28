@@ -11,8 +11,6 @@ open Lib.Buffer
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 
-module M = Lib.NatMod
-module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module LSeq = Lib.Sequence
