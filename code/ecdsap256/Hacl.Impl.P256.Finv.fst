@@ -70,6 +70,7 @@ let mk_p256_prime_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
 }
 
 
+inline_for_extraction noextract
 val fsquare_times_in_place (out:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ as_nat h out < S.prime)
@@ -77,13 +78,13 @@ val fsquare_times_in_place (out:felem) (b:size_t) : Stack unit
     as_nat h1 out < S.prime /\
     fmont_as_nat h1 out == SI.fsquare_times (fmont_as_nat h0 out) (v b))
 
-[@CInline]
 let fsquare_times_in_place out b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (fmont_as_nat h0 out) (v b);
   BE.lexp_pow2_in_place 4ul 0ul mk_p256_prime_concrete_ops (null uint64) out b
 
 
+inline_for_extraction noextract
 val fsquare_times (out a:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ live h a /\ disjoint out a /\
@@ -92,7 +93,6 @@ val fsquare_times (out a:felem) (b:size_t) : Stack unit
     as_nat h1 out < S.prime /\
     fmont_as_nat h1 out == SI.fsquare_times (fmont_as_nat h0 a) (v b))
 
-[@CInline]
 let fsquare_times out a b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (fmont_as_nat h0 a) (v b);
@@ -233,58 +233,83 @@ let finv res a =
   SI.finv_is_finv_lemma (fmont_as_nat h0 a);
   pop_frame ()
 
-//--------------------------------
-// TODO: rm
-val fexp_vartime (out a b:felem) : Stack unit
-  (requires fun h ->
-    live h out /\ live h a /\ live h b /\
-    disjoint out a /\ disjoint out b /\
-    as_nat h a < S.prime)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out < S.prime /\
-    fmont_as_nat h1 out == M.pow_mod #S.prime (fmont_as_nat h0 a) (as_nat h0 b))
 
-[@CInline]
-let fexp_vartime out a b =
-  let h0 = ST.get () in
-  assert_norm (pow2 5 = 32);
-  SB.as_nat_bound (as_seq h0 b);
-  SB.bn_v_is_as_nat (as_seq h0 b);
-  BE.lexp_fw_vartime 4ul 0ul
-    mk_p256_prime_concrete_ops 5ul (null uint64) a 4ul 256ul b out;
-  let h1 = ST.get () in
-  SE.exp_fw_lemma SI.mk_nat_mod_concrete_ops (fmont_as_nat h0 a) 256 (as_nat h0 b) 5;
-  LE.exp_fw_lemma SI.nat_mod_comm_monoid (fmont_as_nat h0 a) 256 (as_nat h0 b) 5;
-  assert (fmont_as_nat h1 out == LE.pow SI.nat_mod_comm_monoid (fmont_as_nat h0 a) (as_nat h0 b));
-  M.lemma_pow_nat_mod_is_pow #S.prime (fmont_as_nat h0 a) (as_nat h0 b);
-  assert (fmont_as_nat h1 out == M.pow (fmont_as_nat h0 a) (as_nat h0 b) % S.prime);
-  M.lemma_pow_mod #S.prime (fmont_as_nat h0 a) (as_nat h0 b)
-
-
-// TODO: use an addition chain from Hacl.Spec.P256.Finv
 inline_for_extraction noextract
-val make_prime_plus_1_div_4: b:felem -> Stack unit
-  (requires fun h -> live h b)
-  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-    as_nat h1 b == (S.prime + 1) / 4)
+val fsqrt_254 (tmp2 tmp1 a:felem) : Stack unit
+  (requires fun h ->
+    live h a /\ live h tmp1 /\ live h tmp2 /\
+    disjoint a tmp1 /\ disjoint a tmp2 /\ disjoint tmp1 tmp2 /\
+    as_nat h a < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc tmp1 |+| loc tmp2) h0 h1 /\
+    as_nat h1 tmp2 < S.prime /\
+    (let f = fmont_as_nat h0 a in
+    let x2 = S.fmul (SI.fsquare_times f 1) f in
+    let x4 = S.fmul (SI.fsquare_times x2 2) x2 in
+    let x8 = S.fmul (SI.fsquare_times x4 4) x4 in
+    let x16 = S.fmul (SI.fsquare_times x8 8) x8 in
+    let x32 = S.fmul (SI.fsquare_times x16 16) x16 in
+    let x64 = S.fmul (SI.fsquare_times x32 32) f in
+    let x160 = S.fmul (SI.fsquare_times x64 96) f in
+    let x254 = SI.fsquare_times x160 94 in
+    fmont_as_nat h1 tmp2 == x254))
 
-let make_prime_plus_1_div_4 b =
-  // 0x3fffffffc0000000400000000000000000000000400000000000000000000000
-  [@inline_let] let b0 = u64 0x0 in
-  [@inline_let] let b1 = u64 0x40000000 in
-  [@inline_let] let b2 = u64 0x4000000000000000 in
-  [@inline_let] let b3 = u64 0x3fffffffc0000000 in
-  assert_norm (v b0 + v b1 * pow2 64 + v b2 * pow2 128 + v b3 * pow2 192 = (S.prime + 1) / 4);
-  bn_make_u64_4 b b0 b1 b2 b3
+let fsqrt_254 tmp2 tmp1 a =
+  let h0 = ST.get () in
+  fsquare_times tmp1 a 1ul;
+  fmul tmp1 tmp1 a;
+  let h1 = ST.get () in
+  assert (fmont_as_nat h1 tmp1 == // x2
+    S.fmul (SI.fsquare_times (fmont_as_nat h0 a) 1) (fmont_as_nat h0 a));
+
+  fsquare_times tmp2 tmp1 2ul;
+  fmul tmp2 tmp2 tmp1;
+  let h2 = ST.get () in
+  assert (fmont_as_nat h2 tmp2 == // x4
+    S.fmul (SI.fsquare_times (fmont_as_nat h1 tmp1) 2) (fmont_as_nat h1 tmp1));
+
+  fsquare_times tmp1 tmp2 4ul;
+  fmul tmp1 tmp1 tmp2;
+  let h3 = ST.get () in
+  assert (fmont_as_nat h3 tmp1 == // x8
+    S.fmul (SI.fsquare_times (fmont_as_nat h2 tmp2) 4) (fmont_as_nat h2 tmp2));
+
+  fsquare_times tmp2 tmp1 8ul;
+  fmul tmp2 tmp2 tmp1;
+  let h4 = ST.get () in
+  assert (fmont_as_nat h4 tmp2 == // x16
+    S.fmul (SI.fsquare_times (fmont_as_nat h3 tmp1) 8) (fmont_as_nat h3 tmp1));
+
+  fsquare_times tmp1 tmp2 16ul;
+  fmul tmp1 tmp1 tmp2;
+  let h5 = ST.get () in
+  assert (fmont_as_nat h5 tmp1 == // x32
+    S.fmul (SI.fsquare_times (fmont_as_nat h4 tmp2) 16) (fmont_as_nat h4 tmp2));
+
+  fsquare_times tmp2 tmp1 32ul;
+  fmul tmp2 tmp2 a;
+  let h6 = ST.get () in
+  assert (fmont_as_nat h6 tmp2 == // x64
+    S.fmul (SI.fsquare_times (fmont_as_nat h5 tmp1) 32) (fmont_as_nat h0 a));
+
+  fsquare_times_in_place tmp2 96ul;
+  fmul tmp2 tmp2 a;
+  let h7 = ST.get () in
+  assert (fmont_as_nat h7 tmp2 == // x160
+    S.fmul (SI.fsquare_times (fmont_as_nat h6 tmp2) 96) (fmont_as_nat h0 a));
+
+  fsquare_times_in_place tmp2 94ul
 
 
 [@CInline]
 let fsqrt res a =
+  let h0 = ST.get () in
   push_frame ();
-  let b = create 4ul (u64 0) in
-  make_prime_plus_1_div_4 b;
-
-  let tmp = create 4ul (u64 0) in
-  copy tmp a;
-  fexp_vartime res tmp b;
+  let tmp  = create 8ul (u64 0) in
+  let tmp1 = sub tmp 0ul 4ul in
+  let tmp2 = sub tmp 4ul 4ul in
+  fsqrt_254 tmp2 tmp1 a;
+  copy res tmp2;
+  let h1 = ST.get () in
+  assert (fmont_as_nat h1 res == SI.fsqrt (fmont_as_nat h0 a));
+  SI.fsqrt_is_fsqrt_lemma (fmont_as_nat h0 a);
   pop_frame ()
