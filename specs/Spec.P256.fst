@@ -25,21 +25,21 @@ let ith_bit (k:scalar) (i:nat{i < 256}) : uint64 =
   to_u64 ((index k q >>. r) &. u8 1)
 
 
-val _ml_step0: p:jacob_point -> q:jacob_point -> tuple2 jacob_point jacob_point
+val _ml_step0: p:proj_point -> q:proj_point -> tuple2 proj_point proj_point
 let _ml_step0 r0 r1 =
   let r0 = point_add r1 r0 in
   let r1 = point_double r1 in
   (r0, r1)
 
 
-val _ml_step1: p: jacob_point -> q:jacob_point -> tuple2 jacob_point jacob_point
+val _ml_step1: p: proj_point -> q:proj_point -> tuple2 proj_point proj_point
 let _ml_step1 r0 r1 =
   let r1 = point_add r0 r1 in
   let r0 = point_double r0 in
   (r0, r1)
 
 
-val _ml_step: k:scalar -> i:nat{i < 256} -> tuple2 jacob_point jacob_point -> tuple2 jacob_point jacob_point
+val _ml_step: k:scalar -> i:nat{i < 256} -> tuple2 proj_point proj_point -> tuple2 proj_point proj_point
 let _ml_step k i (p, q) =
   let bit = 255 - i in
   let bit = ith_bit k bit in
@@ -50,7 +50,7 @@ let _ml_step k i (p, q) =
     _ml_step0 p q
 
 
-val montgomery_ladder_spec: k:scalar -> tuple2 jacob_point jacob_point -> tuple2 jacob_point jacob_point
+val montgomery_ladder_spec: k:scalar -> tuple2 proj_point proj_point -> tuple2 proj_point proj_point
 let montgomery_ladder_spec k pq =
   Lib.LoopCombinators.repeati 256 (_ml_step k) pq
 
@@ -60,74 +60,18 @@ let montgomery_ladder_spec k pq =
 let lbytes_as_nat = x:nat{x < pow2 256}
 
 // [a]P
-let point_mul (a:lbytes_as_nat) (p:jacob_point) : jacob_point =
+let point_mul (a:lbytes_as_nat) (p:proj_point) : proj_point =
   let a = nat_to_bytes_be 32 a in
   let q, f = montgomery_ladder_spec a (point_at_inf, p) in
   q
 
 // [a]G
-let point_mul_g (a:lbytes_as_nat) : jacob_point = point_mul a base_point
+let point_mul_g (a:lbytes_as_nat) : proj_point = point_mul a base_point
 
-
-// TODO: rm, once we use complete point addition and doubling
-(**
-  Important changed was done comparing to the previous version:
-  The point addition routine used in the code doesnot work correctly in case the points are equal to each other.
-  In this case the produced result is equal to 0.
-  To solve it, before the execution we check that points are equal and then call either point double,
-  if the points are identical, or point add.
-
-  Sage script:
-
-  prime = 2** 256 - 2**224 + 2**192 + 2**96 -1
-
-  def pointAdd(x1, y1, z1, x2, y2, z2):
-    z2z2 = z2 * z2
-    z1z1 = z1 * z1
-    u1 = x1 * z2 * z2
-    u2 = x2 * z1 * z1
-    s1 = y1 * z2 * z2 * z2
-    s2 = y2 * z1 * z1 * z1
-    h = u2 - u1
-    r = s2 - s1
-    rr = r * r
-    hh = h * h
-    hhh = h * h * h
-    x3 = (rr - hhh - 2 * u1 * hh) % prime
-    y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime
-    z3 = (h * z1 * z2) % prime
-    return x3, y3, z3
-
-    pointAdd(94616602910890750895476491097843493117917747793373442062816991926475923005642,
-    36020885031736900871498807428940761284168967909318796815085487081314546588335, 1,
-    94616602910890750895476491097843493117917747793373442062816991926475923005642,
-    36020885031736900871498807428940761284168967909318796815085487081314546588335, 1)
-
-    The result is (0, 0, 0)
-
-    The correct result:
-
-    prime = 2** 256 - 2**224 + 2**192 + 2**96 -1
-    p = Zmod(prime)
-    a = -3
-    b = 41058363725152142129326129780047268409114441015993725554835256314039467401291
-
-    c = EllipticCurve(p, [a, b])
-
-    point = c(94616602910890750895476491097843493117917747793373442062816991926475923005642, 36020885031736900871498807428940761284168967909318796815085487081314546588335)
-    doublePoint = point + point
-
-    (50269061329272915414642095420870671498020143477290467295126614723791645001065, 13163180605447792593340701861458269296763094398473012191314473475747756843689)
-
-**)
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1 a2:lbytes_as_nat) (p:jacob_point) : jacob_point =
-  let a1g = point_mul_g a1 in
-  let a2p = point_mul a2 p in
-  if norm_jacob_point a1g = norm_jacob_point a2p
-  then point_double a1g
-  else point_add a1g a2p
+let point_mul_double_g (a1 a2:lbytes_as_nat) (p:proj_point) : proj_point =
+  point_add (point_mul_g a1) (point_mul a2 p)
 
 
 ///  ECDSA over the P256 elliptic curve
@@ -166,7 +110,8 @@ let ecdsa_sign_msg_as_qelem (m:qelem) (private_key nonce:lbytes 32) : option (lb
 
   if not (is_privkey_valid && is_nonce_valid) then None
   else begin
-    let x, _, _ = norm_jacob_point (point_mul_g k_q) in
+    let _X, _Y, _Z = point_mul_g k_q in
+    let x = _X /% _Z in
     let r = x % order in
 
     let kinv = qinv k_q in
@@ -188,9 +133,20 @@ let ecdsa_verify_msg_as_qelem (m:qelem) (public_key:lbytes 64) (sign_r sign_s:lb
     let sinv = qinv s in
     let u1 = sinv *^ m in
     let u2 = sinv *^ r in
-    let x, y, z = norm_jacob_point (point_mul_double_g u1 u2 (Some?.v pk)) in
-    if is_point_at_inf (x, y, z) then false else x % order = r
+    let _X, _Y, _Z = point_mul_double_g u1 u2 (Some?.v pk) in
+    if is_point_at_inf (_X, _Y, _Z) then false
+    else begin
+      let x = _X /% _Z in
+      x % order = r end
   end
+
+(*
+   _Z <> 0
+   q < prime < 2 * q
+   let x = _X /% _Z in x % q = r <==>
+   1. x = r <==> _X = r *% _Z
+   2. x - q = r <==> _X = (r + q) *% _Z
+*)
 
 
 val ecdsa_signature_agile:
@@ -227,19 +183,19 @@ let ecdsa_verification_agile alg msg_len msg public_key signature_r signature_s 
 // Initiator
 let ecp256_dh_i (private_key:lbytes 32) : tuple2 (lbytes 64) bool =
   let sk = nat_from_bytes_be private_key in
-  let x, y, z = norm_jacob_point (point_mul_g sk) in
-  aff_point_store (x, y), not (is_point_at_inf (x, y, z))
+  let pk = point_mul_g sk in
+  point_store pk, not (is_point_at_inf pk)
 
 
 // Responder
 let ecp256_dh_r (their_public_key:lbytes 64) (private_key:lbytes 32) : tuple2 (lbytes 64) bool =
   let pk = load_point their_public_key in
+  let sk = nat_from_bytes_be private_key in
   if Some? pk then
-    let sk = nat_from_bytes_be private_key in
-    let x, y, z = norm_jacob_point (point_mul sk (Some?.v pk)) in
-    aff_point_store (x, y), not (is_point_at_inf (x, y, z))
+    let ss = point_mul sk (Some?.v pk) in
+    point_store ss, not (is_point_at_inf ss)
   else
-    aff_point_store (0, 0), false
+    aff_point_store aff_point_at_inf, false
 
 
 ///  Parsing and Serializing public keys

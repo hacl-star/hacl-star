@@ -31,7 +31,7 @@ let is_fodd (x:nat) : bool = x % 2 = 1
 let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
-
+let ( /% ) (x y:felem) = x *% finv y
 
 ///  Scalar field
 
@@ -52,10 +52,10 @@ let ( *^ ) = qmul
 ///  Elliptic curve `y^2 = x^3 + a * x + b`
 
 let aff_point = p:tuple2 nat nat{let (px, py) = p in px < prime /\ py < prime}
-let jacob_point = p:tuple3 nat nat nat{let (px, py, pz) = p in px < prime /\ py < prime /\ pz < prime}
+let proj_point = p:tuple3 nat nat nat{let (px, py, pz) = p in px < prime /\ py < prime /\ pz < prime}
 
 // let aff_point = felem & felem           // Affine point
-// let jacob_point = felem & felem & felem // Jacobian coordinates
+// let proj_point = felem & felem & felem  // Projective coordinates
 
 let a_coeff : felem = (-3) % prime
 let b_coeff : felem =
@@ -70,91 +70,132 @@ let g_y : felem =
   let y = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5 in
   assert_norm (y < prime); y
 
-let base_point : jacob_point = (g_x, g_y, one)
+let base_point : proj_point = (g_x, g_y, one)
 
 let is_point_on_curve (p:aff_point) : bool =
   let (x, y) = p in y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 
-let point_at_inf : jacob_point = (zero, zero, zero)
+let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
+let point_at_inf : proj_point = (zero, one, zero)
 
-let is_point_at_inf (p:jacob_point) =
+let is_point_at_inf (p:proj_point) =
   let (_, _, z) = p in z = 0
 
-let to_jacob_point (p:aff_point) : jacob_point =
+let to_proj_point (p:aff_point) : proj_point =
   let (x, y) = p in (x, y, one)
 
 
-// TODO: avoid computing finv twice
-let norm_jacob_point (p:jacob_point) : jacob_point =
+let to_aff_point (p:proj_point) : aff_point =
+  // if is_proj_point_at_inf p then aff_point_at_inf
+  let (px, py, pz) = p in
+  let zinv = finv pz in
+  let x = px *% zinv in
+  let y = py *% zinv in
+  (x, y)
+
+
+///  Point addition and doubling in projective coordinates
+
+// Alg 4 from https://eprint.iacr.org/2015/1060.pdf
+let point_add (p q:proj_point) : proj_point =
+  let x1, y1, z1 = p in
+  let x2, y2, z2 = q in
+  let t0 = x1 *% x2 in
+  let t1 = y1 *% y2 in
+  let t2 = z1 *% z2 in
+  let t3 = x1 +% y1 in
+  let t4 = x2 +% y2 in
+  let t3 = t3 *% t4 in
+  let t4 = t0 +% t1 in
+  let t3 = t3 -% t4 in
+  let t4 = y1 +% z1 in
+  let t5 = y2 +% z2 in
+  let t4 = t4 *% t5 in
+  let t5 = t1 +% t2 in
+  let t4 = t4 -% t5 in
+  let x3 = x1 +% z1 in
+  let y3 = x2 +% z2 in
+  let x3 = x3 *% y3 in
+  let y3 = t0 +% t2 in
+  let y3 = x3 -% y3 in
+  let z3 = b_coeff *% t2 in
+  let x3 = y3 -% z3 in
+  let z3 = x3 +% x3 in
+  let x3 = x3 +% z3 in
+  let z3 = t1 -% x3 in
+  let x3 = t1 +% x3 in
+  let y3 = b_coeff *% y3 in
+  let t1 = t2 +% t2 in
+  let t2 = t1 +% t2 in
+  let y3 = y3 -% t2 in
+  let y3 = y3 -% t0 in
+  let t1 = y3 +% y3 in
+  let y3 = t1 +% y3 in
+  let t1 = t0 +% t0 in
+  let t0 = t1 +% t0 in
+  let t0 = t0 -% t2 in
+  let t1 = t4 *% y3 in
+  let t2 = t0 *% y3 in
+  let y3 = x3 *% z3 in
+  let y3 = y3 +% t2 in
+  let x3 = t3 *% x3 in
+  let x3 = x3 -% t1 in
+  let z3 = t4 *% z3 in
+  let t1 = t3 *% t0 in
+  let z3 = z3 +% t1 in
+  (x3, y3, z3)
+
+
+// Alg 6 from https://eprint.iacr.org/2015/1060.pdf
+let point_double (p:proj_point) : proj_point =
   let (x, y, z) = p in
-  let z2 = z *% z in
-  let z3 = z2 *% z in
-  let z2i = finv z2 in
-  let z3i = finv z3 in
-  let x3 = z2i *% x in
-  let y3 = z3i *% y in
-  let z3 = if is_point_at_inf (x, y, z) then zero else one in
+  let t0 = x *% x in
+  let t1 = y *% y in
+  let t2 = z *% z in
+  let t3 = x *% y in
+  let t3 = t3 +% t3 in
+  let t4 = y *% z in
+  let z3 = x *% z in
+  let z3 = z3 +% z3 in
+  let y3 = b_coeff *% t2 in
+  let y3 = y3 -% z3 in
+  let x3 = y3 +% y3 in
+  let y3 = x3 +% y3 in
+  let x3 = t1 -% y3 in
+  let y3 = t1 +% y3 in
+  let y3 = x3 *% y3 in
+  let x3 = x3 *% t3 in
+  let t3 = t2 +% t2 in
+  let t2 = t2 +% t3 in
+  let z3 = b_coeff *% z3 in
+  let z3 = z3 -% t2 in
+  let z3 = z3 -% t0 in
+  let t3 = z3 +% z3 in
+  let z3 = z3 +% t3 in
+  let t3 = t0 +% t0 in
+  let t0 = t3 +% t0 in
+  let t0 = t0 -% t2 in
+  let t0 = t0 *% z3 in
+  let y3 = y3 +% t0 in
+  let t0 = t4 +% t4 in
+  let z3 = t0 *% z3 in
+  let x3 = x3 -% z3 in
+  let z3 = t0 *% t1 in
+  let z3 = z3 +% z3 in
+  let z3 = z3 +% z3 in
   (x3, y3, z3)
 
 
-///  Point addition and doubling in jacobian coordinates
-// TODO: use complete formulas
+///  Point conversion between affine, projective and bytes representation
 
-let point_double (p:jacob_point) : jacob_point =
-  let x, y, z = p in
-  let delta = z *% z in
-  let gamma = y *% y in
-  let beta = x *% gamma in
-  let alpha = 3 *% (x -% delta) *% (x +% delta) in
-  let x3 = alpha *% alpha -% 8 *% beta in
-  let y3 = alpha *% (4 *% beta -% x3) -% 8 *% gamma *% gamma in
-  let z3 = (y +% z) *% (y +% z) -% delta -% gamma in
-  (x3, y3, z3)
-
-
-let point_add_no_point_at_inf (p:jacob_point) (q:jacob_point) : jacob_point =
-  let (x1, y1, z1) = p in
-  let (x2, y2, z2) = q in
-
-  let z2z2 = z2 *% z2 in
-  let z1z1 = z1 *% z1 in
-
-  let u1 = x1 *% z2z2 in
-  let u2 = x2 *% z1z1 in
-
-  let s1 = y1 *% z2 *% z2z2 in
-  let s2 = y2 *% z1 *% z1z1 in
-
-  let h = u2 -% u1 in
-  let r = s2 -% s1 in
-
-  let rr = r *% r in
-  let hh = h *% h in
-  let hhh = hh *% h in
-
-  let x3 = rr -% hhh -% 2 *% (u1 *% hh) in
-  let y3 = r *% (u1 *% hh -% x3) -% s1 *% hhh in
-  let z3 = h *% z1 *% z2 in
-  (x3, y3, z3)
-
-let point_add (p:jacob_point) (q:jacob_point) : jacob_point =
-  let r = point_add_no_point_at_inf p q in
-  if is_point_at_inf q then p
-  else
-    if is_point_at_inf p then q
-    else r
-
-
-///  Point conversion between affine, jacobian and bytes representation
-
-let load_point (b:BSeq.lbytes 64) : option jacob_point =
+let load_point (b:BSeq.lbytes 64) : option proj_point =
   let pk_x = BSeq.nat_from_bytes_be (sub b 0 32) in
   let pk_y = BSeq.nat_from_bytes_be (sub b 32 32) in
   let is_x_valid = pk_x < prime in
   let is_y_valid = pk_y < prime in
   let is_xy_on_curve =
     if is_x_valid && is_y_valid then is_point_on_curve (pk_x, pk_y) else false in
-  if is_xy_on_curve then Some (to_jacob_point (pk_x, pk_y)) else None
+  if is_xy_on_curve then Some (to_proj_point (pk_x, pk_y)) else None
 
 
 let aff_point_store (p:aff_point) : BSeq.lbytes 64 =
@@ -162,6 +203,10 @@ let aff_point_store (p:aff_point) : BSeq.lbytes 64 =
   let pxb = BSeq.nat_to_bytes_be 32 px in
   let pxy = BSeq.nat_to_bytes_be 32 py in
   concat #uint8 #32 #32 pxb pxy
+
+
+let point_store (p:proj_point) : BSeq.lbytes 64 =
+  aff_point_store (to_aff_point p)
 
 
 let recover_y (x:felem) (is_odd:bool) : option felem =
