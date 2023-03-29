@@ -12,6 +12,31 @@ module PS = Lib.PrintSequence
 
 #set-options "--z3rlimit 50 --fuel 1 --ifuel 1"
 
+let test_pk_compressed (a:hash_alg_ecdsa) { msg; qx; qy; r; s; result } =
+  let msg_len   = String.strlen msg / 2 in
+  let pk_x_len  = String.strlen qx / 2 in
+  let pk_y_len  = String.strlen qy / 2 in
+  let sig_r_len = String.strlen r / 2 in
+  let sig_s_len = String.strlen s / 2 in
+  let is_valid  = result in
+
+  if not (msg_len <= max_size_t &&
+         min_input_length a <= msg_len &&
+         pk_x_len = 32 && pk_y_len = 32 &&
+         sig_r_len = 32 && sig_s_len = 32)
+  then false
+  else
+    let pk_x = from_hex qx in
+    let pk_y = from_hex qy in
+    let pk_raw = concat #_ #32 #32 pk_x pk_y in
+    let pk_c = pk_compressed_from_raw pk_raw in
+    let pk_raw_c = pk_compressed_to_raw pk_c in
+
+    match pk_raw_c with
+    | Some pk_raw_c -> PS.print_compare true 64 pk_raw pk_raw_c
+    | None -> false
+
+
 let test_sigver (a:hash_alg_ecdsa) { msg; qx; qy; r; s; result } =
   let msg_len   = String.strlen msg / 2 in
   let pk_x_len  = String.strlen qx / 2 in
@@ -106,6 +131,10 @@ let test () =
   let res6 = List.for_all (test_siggen (Hash SHA2_512)) siggen_vectors_sha2_512 in
   print_result res6;
 
-  let res = res1 && res2 && res3 && res4 && res5 && res6 in
+  IO.print_string "\n[P-256 compressed keys]\n";
+  let res7 = List.for_all (test_pk_compressed (Hash SHA2_256)) sigver_vectors_sha2_256 in
+  print_result res7;
+
+  let res = res1 && res2 && res3 && res4 && res5 && res6 && res7 in
   if res then begin IO.print_string "\n\n[P-256] PASS\n"; true end
   else begin IO.print_string "\n\n[P-256] FAIL\n"; false end
