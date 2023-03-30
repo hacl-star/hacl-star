@@ -171,7 +171,7 @@ let montgomery_ladder p q scalar tmp =
   let spec_ml h0 = S._ml_step (as_seq h0 scalar) in
 
   [@inline_let]
-  let acc (h:mem) : GTot (tuple2 S.jacob_point S.jacob_point) =
+  let acc (h:mem) : GTot (tuple2 S.proj_point S.proj_point) =
   (from_mont_point(as_point_nat h p), from_mont_point(as_point_nat h q))  in
 
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
@@ -271,20 +271,26 @@ let point_mul_g res scalar =
 let point_mul_bytes res p scalar =
   push_frame ();
   let s_q = create_felem () in
+  let res_proj = create_point () in
   bn_from_bytes_be4 s_q scalar;
-  point_mul res p s_q;
-  norm_jacob_point res res;
-  pop_frame ()
+  point_mul res_proj p s_q;
+  to_aff_point res res_proj;
+  let is_pai = is_point_at_inf res_proj in
+  pop_frame ();
+  is_pai
 
 
 [@CInline]
 let point_mul_g_bytes res scalar =
   push_frame ();
   let s_q = create_felem () in
+  let res_proj = create_point () in
   bn_from_bytes_be4 s_q scalar;
-  point_mul_g res s_q;
-  norm_jacob_point res res;
-  pop_frame ()
+  point_mul_g res_proj s_q;
+  to_aff_point res res_proj;
+  let is_pai = is_point_at_inf res_proj in
+  pop_frame ();
+  is_pai
 
 
 [@CInline]
@@ -292,7 +298,7 @@ let point_mul_double_g res scalar1 scalar2 p =
   push_frame ();
   let sg1 = create_point () in
   let sp2 = create_point () in
-  let tmp = create (size 88) (u64 0) in
+  let tmp = create (size 32) (u64 0) in
   let h0 = ST.get () in
   point_mul_g sg1 scalar1; // sg1 = [scalar1]G
   point_mul sp2 p scalar2; // sp2 = [scalar2]P
@@ -302,13 +308,5 @@ let point_mul_double_g res scalar1 scalar2 p =
   assert (from_mont_point (as_point_nat h1 sp2) ==
     S.point_mul (as_nat h0 scalar2) (as_point_nat h0 p));
 
-  let is_points_eq = is_point_eq_vartime sg1 sp2 in
-  assert (is_points_eq =
-    (S.norm_jacob_point (from_mont_point (as_point_nat h1 sg1)) =
-     S.norm_jacob_point (from_mont_point (as_point_nat h1 sp2))));
-
-  begin
-  if is_points_eq
-  then point_double sg1 res tmp
-  else point_add sg1 sp2 res tmp end;
+  point_add sg1 sp2 res tmp;
   pop_frame ()

@@ -234,6 +234,17 @@ let to_mont res a =
   pop_frame ()
 
 
+///  Special cases of the above functions
+
+[@CInline]
+let fmul_by_b_coeff res x =
+  push_frame ();
+  let b_coeff = create_felem () in
+  make_b_coeff b_coeff;
+  fmul res b_coeff x;
+  pop_frame ()
+
+
 [@CInline]
 let fcube res x =
   fsqr res x;

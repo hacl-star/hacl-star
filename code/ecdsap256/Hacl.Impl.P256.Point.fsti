@@ -18,7 +18,7 @@ module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-let from_mont_point (a:tuple3 nat nat nat) : S.jacob_point =
+let from_mont_point (a:tuple3 nat nat nat) : S.proj_point =
   let x, y, z = a in SM.from_mont x, SM.from_mont y, SM.from_mont z
 
 
@@ -68,7 +68,7 @@ let aff_gety (p:aff_point) : Stack felem
   = sub p 4ul 4ul
 
 
-///  Jacobian coordinates
+///  Projective coordinates
 
 inline_for_extraction noextract
 let point_seq = LSeq.lseq uint64 12
@@ -168,7 +168,8 @@ val is_point_at_inf: p:point -> Stack uint64
 val is_point_at_inf_vartime: p:point -> Stack bool
   (requires fun h -> live h p /\ point_inv h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.is_point_at_inf (as_point_nat h0 p))
+    r == S.is_point_at_inf (as_point_nat h0 p) /\
+    r == S.is_point_at_inf (from_mont_point (as_point_nat h0 p)))
 
 
 ///  Create a copy of a point
@@ -178,19 +179,6 @@ val copy_point: res:point -> p:point -> Stack unit
   (requires fun h -> live h p /\ live h res /\ disjoint p res)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == as_seq h0 p)
-
-
-val copy_point_conditional: res:point -> p:point -> q_mask:point -> Stack unit
-  (requires fun h ->
-    live h res /\ live h p /\ live h q_mask /\
-    eq_or_disjoint res p /\ eq_or_disjoint res q_mask /\ eq_or_disjoint p q_mask /\
-    point_inv h res /\ point_inv h p /\ point_inv h q_mask)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-    from_mont_point (as_point_nat h1 res) =
-   (if S.is_point_at_inf (from_mont_point (as_point_nat h0 q_mask))
-    then from_mont_point (as_point_nat h0 p)
-    else from_mont_point (as_point_nat h0 res)))
 
 
 ///  Point conversion between Montgomery and Regular representations
@@ -215,43 +203,30 @@ val point_from_mont: res:point -> p:point -> Stack unit
     point_inv h1 res /\ as_point_nat h1 res == from_mont_point (as_point_nat h0 p))
 
 
-///  Point conversion between Jacobian and Affine coordinates representations
+///  Point conversion between Projective and Affine coordinates representations
 
-val norm_jacob_point_x: res:felem -> p:point -> Stack unit
-  (requires fun h ->
-    live h p /\ live h res /\ eq_or_disjoint p res /\
-    point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1  /\
-   (let rx, _, _ = S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) in
-    as_nat h1 res == rx))
-
-
-val norm_jacob_point: res:point -> p:point -> Stack unit
+val to_aff_point: res:aff_point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_point_nat h1 res == S.norm_jacob_point (from_mont_point (as_point_nat h0 p)))
+    as_aff_point_nat h1 res == S.to_aff_point (from_mont_point (as_point_nat h0 p)))
 
 
-val to_jacob_point: res:point -> p:aff_point -> Stack unit
+val to_aff_point_x: res:felem -> p:point -> Stack unit
+  (requires fun h ->
+    live h p /\ live h res /\ eq_or_disjoint p res /\
+    point_inv h p)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == fst (S.to_aff_point (from_mont_point (as_point_nat h0 p))))
+
+
+val to_proj_point: res:point -> p:aff_point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ disjoint p res /\
     aff_point_inv h p)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_point_nat h1 res == S.to_jacob_point (as_aff_point_nat h0 p))
-
-
-///  Point comparison
-
-val is_point_eq_vartime: p:point -> q:point -> Stack bool
-  (requires fun h ->
-    live h p /\ live h q /\
-    point_inv h p /\ point_inv h q)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r =
-      (S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) =
-       S.norm_jacob_point (from_mont_point (as_point_nat h0 q))))
+    as_point_nat h1 res == S.to_proj_point (as_aff_point_nat h0 p))
 
 
 ///  Check if a point is on the curve

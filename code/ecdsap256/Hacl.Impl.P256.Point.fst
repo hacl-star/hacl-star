@@ -44,14 +44,14 @@ let make_point_at_inf p =
   let y = gety p in
   let z = getz p in
   make_fzero x;
-  make_fzero y;
+  make_fone y;
   make_fzero z
 
 
 ///  Check if a point is a point-at-infinity
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-val lemma_mont_is_point_at_inf: p:S.jacob_point{let (_, _, z) = p in z < S.prime} ->
+val lemma_mont_is_point_at_inf: p:S.proj_point{let (_, _, z) = p in z < S.prime} ->
   Lemma (S.is_point_at_inf p == S.is_point_at_inf (from_mont_point p))
 
 let lemma_mont_is_point_at_inf p =
@@ -74,6 +74,8 @@ let is_point_at_inf p =
 
 [@CInline]
 let is_point_at_inf_vartime p =
+  let h0 = ST.get () in
+  lemma_mont_is_point_at_inf (as_point_nat h0 p);
   let pz = getz p in
   bn_is_zero_vartime4 pz
 
@@ -82,23 +84,6 @@ let is_point_at_inf_vartime p =
 
 let copy_point res p =
   copy res p
-
-
-[@CInline]
-let copy_point_conditional res p q_mask =
-  let z = getz q_mask in
-  let mask = is_point_at_inf q_mask in
-  let px = getx p in
-  let py = gety p in
-  let pz = getz p in
-
-  let rx = getx res in
-  let ry = gety res in
-  let rz = getz res in
-
-  bn_copy_conditional4 rx mask rx px;
-  bn_copy_conditional4 ry mask ry py;
-  bn_copy_conditional4 rz mask rz pz
 
 
 ///  Point conversion between Montgomery and Regular representations
@@ -133,91 +118,42 @@ let point_from_mont res p =
   from_mont rz pz
 
 
-///  Point conversion between Jacobian and Affine coordinates representations
-
-inline_for_extraction noextract
-val norm_jacob_point_z: res:felem -> p:point -> Stack unit
-  (requires fun h ->
-    live h res /\ live h p /\ disjoint p res /\
-    point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let _, _, rz = S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) in
-    as_nat h1 res == rz))
-
-let norm_jacob_point_z res p =
-  push_frame ();
-  let zero = create_felem () in
-  let bit = is_point_at_inf p in
-
-  bn_set_one4 res;
-  bn_copy_conditional4 res bit res zero;
-  pop_frame ()
-
+///  Point conversion between Projective and Affine coordinates representations
 
 [@CInline]
-let norm_jacob_point_x res p =
+let to_aff_point res p =
+  push_frame ();
+  let zinv = create_felem () in
   let px = getx p in
-  let pz = getz p in
-
-  let h0 = ST.get () in
-  fsqr res pz;       // rx = pz * pz
-  let h1 = ST.get () in
-  assert (fmont_as_nat h1 res == S.fmul (fmont_as_nat h0 pz) (fmont_as_nat h0 pz));
-  FI.finv res res;       // rx = finv rx
-  let h2 = ST.get () in
-  assert (fmont_as_nat h2 res == S.finv (fmont_as_nat h1 res));
-  fmul res px res;    // rx = px * rx
-  let h3 = ST.get () in
-  assert (fmont_as_nat h3 res == S.fmul (fmont_as_nat h0 px) (fmont_as_nat h2 res));
-  from_mont res res;
-  let h4 = ST.get () in
-  assert (as_nat h4 res == fmont_as_nat h3 res)
-
-
-// TODO: rm
-inline_for_extraction noextract
-val norm_jacob_point_y: res:felem -> p:point -> Stack unit
-  (requires fun h ->
-    live h res /\ live h p /\ disjoint p res /\
-    point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let _, ry, _ = S.norm_jacob_point (from_mont_point (as_point_nat h0 p)) in
-    as_nat h1 res == ry))
-
-let norm_jacob_point_y res p =
   let py = gety p in
   let pz = getz p in
 
-  let h0 = ST.get () in
-  fcube res pz;       // ry = pz * pz * pz
-  let h1 = ST.get () in
-  FI.finv res res;       // ry = finv ry
-  let h2 = ST.get () in
-  assert (fmont_as_nat h2 res == S.finv (fmont_as_nat h1 res));
-  fmul res py res;    // ry = px * ry
-  let h3 = ST.get () in
-  assert (fmont_as_nat h3 res == S.fmul (fmont_as_nat h0 py) (fmont_as_nat h2 res));
-  from_mont res res;
-  let h4 = ST.get () in
-  assert (as_nat h4 res == fmont_as_nat h3 res)
+  let x = aff_getx res in
+  let y = aff_gety res in
 
-
-[@CInline]
-let norm_jacob_point res p =
-  push_frame ();
-  let tmp = create_point () in
-  let tx = getx tmp in
-  let ty = gety tmp in
-  let tz = getz tmp in
-  norm_jacob_point_x tx p;
-  norm_jacob_point_y ty p;
-  norm_jacob_point_z tz p;
-  copy_point res tmp;
+  FI.finv zinv pz;
+  fmul x px zinv;
+  fmul y py zinv;
+  from_mont x x;
+  from_mont y y;
   pop_frame ()
 
 
 [@CInline]
-let to_jacob_point res p =
+let to_aff_point_x res p =
+  push_frame ();
+  let zinv = create_felem () in
+  let px = getx p in
+  let pz = getz p in
+
+  FI.finv zinv pz;
+  fmul res px zinv;
+  from_mont res res;
+  pop_frame ()
+
+
+[@CInline]
+let to_proj_point res p =
   let px = aff_getx p in
   let py = aff_gety p in
 
@@ -227,46 +163,6 @@ let to_jacob_point res p =
   copy rx px;
   copy ry py;
   bn_set_one4 rz
-
-
-///  Point comparison
-
-inline_for_extraction noextract
-val is_point_strong_eq_vartime: p:point -> q:point -> Stack bool
-  (requires fun h -> live h p /\ live h q)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r ==
-     (point_x_as_nat h0 p = point_x_as_nat h0 q &&
-      point_y_as_nat h0 p = point_y_as_nat h0 q &&
-      point_z_as_nat h0 p = point_z_as_nat h0 q))
-
-let is_point_strong_eq_vartime p q =
-  let px = getx p in
-  let py = gety p in
-  let pz = getz p in
-
-  let qx = getx q in
-  let qy = gety q in
-  let qz = getz q in
-
-  let is_x_eq = bn_is_eq_vartime4 px qx in
-  let is_y_eq = bn_is_eq_vartime4 py qy in
-  let is_z_eq = bn_is_eq_vartime4 pz qz in
-  is_x_eq && is_y_eq && is_z_eq
-
-
-// TODO: avoid calling norm_jacob_point
-[@CInline]
-let is_point_eq_vartime p q =
-  push_frame ();
-  let p_norm = create_point () in
-  let q_norm = create_point () in
-
-  norm_jacob_point p_norm p;
-  norm_jacob_point q_norm q;
-  let is_pq_equal = is_point_strong_eq_vartime p_norm q_norm in
-  pop_frame ();
-  is_pq_equal
 
 
 ///  Check if a point is on the curve
@@ -367,7 +263,7 @@ let load_point_vartime p b =
   let is_xy_valid = is_xy_valid_vartime point_aff in
   let res = if not is_xy_valid then false else is_point_on_curve_vartime point_aff in
   if res then
-    to_jacob_point p point_aff;
+    to_proj_point p point_aff;
   pop_frame ();
   res
 

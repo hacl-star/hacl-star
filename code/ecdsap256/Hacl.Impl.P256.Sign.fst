@@ -31,14 +31,14 @@ val ecdsa_sign_r (r k:felem) : Stack unit
     live h r /\ live h k /\ disjoint r k /\
     as_nat h k < S.order)
   (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\
-   (let x, _, _ = S.norm_jacob_point (S.point_mul_g (as_nat h0 k)) in
+   (let x, _ = S.to_aff_point (S.point_mul_g (as_nat h0 k)) in
     as_nat h1 r == x % S.order))
 
 let ecdsa_sign_r r k =
   push_frame ();
   let p = create_point () in
   point_mul_g p k; // p = [k]G
-  norm_jacob_point_x r p;
+  to_aff_point_x r p;
   qmod_short r r;
   pop_frame ()
 
@@ -135,6 +135,7 @@ val ecdsa_sign_msg_as_qelem:
   (requires fun h ->
     live h signature /\ live h m_q /\ live h private_key /\ live h nonce /\
     disjoint signature m_q /\ disjoint signature private_key /\ disjoint signature nonce /\
+    disjoint m_q private_key /\ disjoint m_q nonce /\
     as_nat h m_q < S.order /\
 
     0 < BSeq.nat_from_bytes_be (as_seq h private_key) /\

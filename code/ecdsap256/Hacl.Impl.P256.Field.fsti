@@ -133,6 +133,16 @@ val to_mont: res:felem -> f:felem -> Stack unit
 
 ///  Special cases of the above functions
 
+val fmul_by_b_coeff: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < S.prime /\
+    fmont_as_nat h1 res =
+      S.fmul S.b_coeff (fmont_as_nat h0 x))
+
+
 val fcube: res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
