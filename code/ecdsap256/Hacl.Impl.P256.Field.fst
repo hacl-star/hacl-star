@@ -71,32 +71,6 @@ let feq_mask a b =
 
 ///  Field Arithmetic
 
-val fmod_short_lemma: a:nat{a < pow2 256} ->
-  Lemma (let r = if a >= S.prime then a - S.prime else a in r = a % S.prime)
-
-let fmod_short_lemma a =
-  let r = if a >= S.prime then a - S.prime else a in
-  if a >= S.prime then begin
-    Math.Lemmas.lemma_mod_sub a S.prime 1;
-    assert_norm (pow2 256 - S.prime < S.prime);
-    Math.Lemmas.small_mod r S.prime end
-  else
-   Math.Lemmas.small_mod r S.prime
-
-
-[@CInline]
-let fmod_short res x =
-  push_frame ();
-  let tmp = create_felem () in
-  make_prime tmp;
-  let h0 = ST.get () in
-  let c = bn_sub4 tmp x tmp in
-  bn_cmovznz4 res c tmp x;
-  SB.as_nat_bound (as_seq h0 x);
-  fmod_short_lemma (as_nat h0 x);
-  pop_frame ()
-
-
 [@CInline]
 let fadd res x y =
   let h0 = ST.get () in
@@ -249,35 +223,3 @@ let fmul_by_b_coeff res x =
 let fcube res x =
   fsqr res x;
   fmul res res x
-
-
-[@CInline]
-let fmul_by_3 res x =
-  let h0 = ST.get () in
-  fdouble res x;
-  let h1 = ST.get () in
-  fadd res res x;
-  let h2 = ST.get () in
-  assert (fmont_as_nat h1 res == (2 * fmont_as_nat h0 x) % S.prime);
-  assert (fmont_as_nat h2 res == (fmont_as_nat h0 x + fmont_as_nat h1 res) % S.prime);
-  Math.Lemmas.lemma_mod_plus_distr_r (fmont_as_nat h0 x) (2 * fmont_as_nat h0 x) S.prime
-
-
-[@CInline]
-let fmul_by_4 res x =
-  let h0 = ST.get () in
-  fdouble res x;
-  fdouble res res;
-  Math.Lemmas.modulo_distributivity (2 * fmont_as_nat h0 x) (2 * fmont_as_nat h0 x) S.prime
-
-
-[@CInline]
-let fmul_by_8 res x =
-  let h0 = ST.get () in
-  fmul_by_4 res x;
-  let h1 = ST.get () in
-  fdouble res res;
-  let h2 = ST.get () in
-  assert (fmont_as_nat h1 res == (4 * fmont_as_nat h0 x) % S.prime);
-  assert (fmont_as_nat h2 res == (2 * fmont_as_nat h1 res) % S.prime);
-  Math.Lemmas.lemma_mod_mul_distr_r 2 (4 * fmont_as_nat h0 x) S.prime

@@ -10,19 +10,15 @@ open Lib.Buffer
 
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Scalar
-open Hacl.Impl.P256.Constants
 
-module LSeq = Lib.Sequence
-
-module M = Lib.NatMod
-module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
+module LSeq = Lib.Sequence
 
 module S = Spec.P256
-module SM = Hacl.Spec.P256.Montgomery
-module SB = Hacl.Spec.P256.Bignum
 module SI = Hacl.Spec.P256.Qinv
+module SB = Hacl.Spec.P256.Bignum
+module SM = Hacl.Spec.P256.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

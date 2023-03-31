@@ -52,14 +52,6 @@ val feq_mask: a:felem -> b:felem -> Stack uint64
 
 ///  Field Arithmetic
 
-// not used?
-val fmod_short: res:felem -> x:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ eq_or_disjoint x res)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res == as_nat h0 x % S.prime)
-
-
 val fadd: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
@@ -151,30 +143,3 @@ val fcube: res:felem -> x:felem -> Stack unit
     as_nat h1 res < S.prime /\
     fmont_as_nat h1 res =
       S.fmul (S.fmul (fmont_as_nat h0 x) (fmont_as_nat h0 x)) (fmont_as_nat h0 x))
-
-
-val fmul_by_3: res:felem -> x:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ disjoint x res /\
-    as_nat h x < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res < S.prime /\
-    fmont_as_nat h1 res == (3 * fmont_as_nat h0 x) % S.prime)
-
-
-val fmul_by_4: res:felem -> x:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ eq_or_disjoint x res /\
-    as_nat h x < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res < S.prime /\
-    fmont_as_nat h1 res == (4 * fmont_as_nat h0 x) % S.prime)
-
-
-val fmul_by_8: res:felem -> x:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ eq_or_disjoint x res /\
-    as_nat h x < S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res < S.prime /\
-    fmont_as_nat h1 res == (8 * fmont_as_nat h0 x) % S.prime)

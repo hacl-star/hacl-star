@@ -93,11 +93,6 @@ let bn_is_odd4 f =
 ///  Conditional copy
 
 [@CInline]
-let bn_copy_conditional4 res mask x y =
-  Lib.ByteBuffer.buf_mask_select y x mask res
-
-
-[@CInline]
 let bn_cmovznz4 res cin x y =
   let mask = neq_mask cin (u64 0) in
   Lib.ByteBuffer.buf_mask_select y x mask res

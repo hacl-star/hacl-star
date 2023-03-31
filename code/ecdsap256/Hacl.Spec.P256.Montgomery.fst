@@ -5,7 +5,6 @@ open Lib.IntTypes
 
 module S = Spec.P256
 module M = Lib.NatMod
-module LSeq = Lib.Sequence
 
 module BD = Hacl.Spec.Bignum.Definitions
 module SBM = Hacl.Spec.Bignum.Montgomery

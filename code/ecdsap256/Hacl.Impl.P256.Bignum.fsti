@@ -103,15 +103,6 @@ val bn_is_odd4: f:felem -> Stack uint64
 
 ///  Conditional copy
 
-val bn_copy_conditional4: res:felem -> mask:uint64 -> x:felem -> y:felem -> Stack unit
-  (requires fun h ->
-    live h res /\ live h x /\ live h y /\
-    eq_or_disjoint res x /\ eq_or_disjoint res y /\ eq_or_disjoint x y /\
-    (v mask = 0 \/ v mask = ones_v U64))
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (if v mask = 0 then as_seq h1 res == as_seq h0 x else as_seq h1 res == as_seq h0 y))
-
-
 val bn_cmovznz4: res:felem -> cin:uint64 -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\

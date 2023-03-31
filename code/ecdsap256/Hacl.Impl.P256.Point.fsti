@@ -183,6 +183,7 @@ val copy_point: res:point -> p:point -> Stack unit
 
 ///  Point conversion between Montgomery and Regular representations
 
+// TODO: rm
 val point_to_mont: res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
@@ -194,7 +195,7 @@ val point_to_mont: res:point -> p:point -> Stack unit
     rx == SM.to_mont px /\ ry == SM.to_mont py /\ rz == SM.to_mont pz))
 
 
-// not used?
+// TODO: rm
 val point_from_mont: res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
@@ -205,6 +206,7 @@ val point_from_mont: res:point -> p:point -> Stack unit
 
 ///  Point conversion between Projective and Affine coordinates representations
 
+// to_aff_point = S.to_aff_point + from_mont
 val to_aff_point: res:aff_point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
@@ -213,6 +215,7 @@ val to_aff_point: res:aff_point -> p:point -> Stack unit
     as_aff_point_nat h1 res == S.to_aff_point (from_mont_point (as_point_nat h0 p)))
 
 
+// to_aff_point = S.to_aff_point + from_mont
 val to_aff_point_x: res:felem -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
@@ -221,6 +224,7 @@ val to_aff_point_x: res:felem -> p:point -> Stack unit
     as_nat h1 res == fst (S.to_aff_point (from_mont_point (as_point_nat h0 p))))
 
 
+// TODO: to_proj_point = S.to_proj_point + to_mont
 val to_proj_point: res:point -> p:aff_point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ disjoint p res /\

@@ -203,7 +203,7 @@ let is_y_sqr_is_y2_vartime y2 y =
   Hacl.Bignum.Base.unsafe_bool_of_limb r
 
 
-// y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
+// y *% y =?= x *% x *% x +% a_coeff *% x +% b_coeff
 [@CInline]
 let is_point_on_curve_vartime p =
   push_frame ();
