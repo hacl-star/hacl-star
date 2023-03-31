@@ -20,7 +20,9 @@ val mont_cancel_lemma_gen (n:pos) (mont_R mont_R_inv a b:nat) : Lemma
 ///  Montgomery arithmetic for a base field
 
 let fmont_R = pow2 256
-let fmont_R_inv = M.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)
+let fmont_R_inv = M.pow_mod #S.prime (pow2 256 % S.prime) (S.prime - 2)
+
+val mul_fmont_R_and_R_inv_is_one: unit -> Lemma (fmont_R * fmont_R_inv % S.prime = 1)
 
 let from_mont (a:int) : S.felem = a * fmont_R_inv % S.prime
 let to_mont   (a:int) : S.felem = a * fmont_R % S.prime
@@ -46,7 +48,9 @@ val fmont_sub_lemma: a:S.felem -> b:S.felem ->
 ///  Montgomery arithmetic for a scalar field
 
 let qmont_R = pow2 256
-let qmont_R_inv = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2)
+let qmont_R_inv = M.pow_mod #S.order (pow2 256 % S.order) (S.order - 2)
+
+val mul_qmont_R_and_R_inv_is_one: unit -> Lemma (qmont_R * qmont_R_inv % S.order = 1)
 
 let from_qmont (a:nat) : S.qelem = a * qmont_R_inv % S.order
 let to_qmont   (a:nat) : S.qelem = a * qmont_R % S.order

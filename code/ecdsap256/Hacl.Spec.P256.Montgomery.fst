@@ -171,6 +171,13 @@ let mont_cancel_lemma_gen n mont_R mont_R_inv a b =
   }
 
 
+let mul_fmont_R_and_R_inv_is_one () =
+  let fmont_R_inv' = M.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2) in
+  M.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
+  assert (fmont_R_inv = fmont_R_inv');
+  assert_norm (fmont_R * fmont_R_inv' % S.prime = 1)
+
+
 //--------------------------------------//
 // bn_mont_reduction is x * fmont_R_inv //
 //--------------------------------------//
@@ -200,7 +207,8 @@ let mont_R_inv_is_bn_mont_d () =
   SBML.mont_preconditions_d 64 4 S.prime;
   assert (d * pow2 256 % S.prime = 1);
 
-  assert_norm (fmont_R * fmont_R_inv % S.prime = 1);
+  mul_fmont_R_and_R_inv_is_one ();
+  assert (fmont_R * fmont_R_inv % S.prime = 1);
   Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) fmont_R_inv S.prime;
   assert (fmont_R_inv * pow2 256 % S.prime = 1);
 
@@ -248,7 +256,9 @@ val lemma_multiplication_not_mod_prime_left: a:S.felem -> Lemma
   (ensures a == 0)
 
 let lemma_multiplication_not_mod_prime_left a =
-  let b = fmont_R_inv in
+  let fmont_R_inv' = M.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2) in
+  M.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
+  let b = fmont_R_inv' in
   Math.Lemmas.lemma_mod_mul_distr_r a b S.prime;
   assert (a * b % S.prime == a * (b % S.prime) % S.prime);
   let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
@@ -266,12 +276,12 @@ let lemma_from_mont_zero a =
 
 
 let lemma_to_from_mont_id a =
-  assert_norm (fmont_R * fmont_R_inv % S.prime = 1);
+  mul_fmont_R_and_R_inv_is_one ();
   lemma_to_from_mont_id_gen S.prime fmont_R fmont_R_inv a
 
 
 let lemma_from_to_mont_id a =
-  assert_norm (fmont_R_inv * fmont_R % S.prime = 1);
+  mul_fmont_R_and_R_inv_is_one ();
   lemma_from_to_mont_id_gen S.prime fmont_R fmont_R_inv a
 
 
@@ -288,6 +298,12 @@ let fmont_sub_lemma a b =
 
 
 ///  Montgomery arithmetic for a scalar field
+
+let mul_qmont_R_and_R_inv_is_one () =
+  let qmont_R_inv' = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2) in
+  M.pow_mod_def #S.order (pow2 256 % S.order) (S.order - 2);
+  assert (qmont_R_inv = qmont_R_inv');
+  assert_norm (qmont_R * qmont_R_inv' % S.order = 1)
 
 //--------------------------------------//
 // bn_mont_reduction is x * qmont_R_inv //
@@ -318,7 +334,7 @@ let qmont_R_inv_is_bn_mont_d () =
   SBML.mont_preconditions_d 64 4 S.order;
   assert (d * pow2 256 % S.order = 1);
 
-  assert_norm (qmont_R * qmont_R_inv % S.order = 1);
+  mul_qmont_R_and_R_inv_is_one ();
   Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) qmont_R_inv S.order;
   assert (qmont_R_inv * pow2 256 % S.order = 1);
 
@@ -363,12 +379,13 @@ let bn_qmont_reduction_lemma x n =
 //--------------------------
 
 let lemma_to_from_qmont_id a =
-  assert_norm (qmont_R * qmont_R_inv % S.order = 1);
+  mul_qmont_R_and_R_inv_is_one ();
   lemma_to_from_mont_id_gen S.order qmont_R qmont_R_inv a
 
 
 let lemma_from_to_qmont_id a =
-  assert_norm (qmont_R_inv * qmont_R % S.order = 1);
+  mul_qmont_R_and_R_inv_is_one ();
+  Math.Lemmas.swap_mul qmont_R qmont_R_inv;
   lemma_from_to_mont_id_gen S.order qmont_R qmont_R_inv a
 
 
@@ -381,7 +398,9 @@ let qmont_mul_lemma a b =
 
 
 let qmont_inv_lemma k =
-  assert_norm (M.pow_mod_ #S.order qmont_R_inv (S.order - 2) == qmont_R % S.order);
+  let qmont_R_inv' = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2) in
+  M.pow_mod_def #S.order (pow2 256 % S.order) (S.order - 2);
+  assert_norm (M.pow_mod_ #S.order qmont_R_inv' (S.order - 2) == qmont_R % S.order);
   M.pow_mod_def #S.order qmont_R_inv (S.order - 2);
   assert (M.pow_mod #S.order qmont_R_inv (S.order - 2) == qmont_R % S.order);
   lemma_mont_inv_gen S.order qmont_R qmont_R_inv k
@@ -391,7 +410,7 @@ val qmont_cancel_lemma1: a:S.qelem -> b:S.qelem ->
   Lemma ((a * qmont_R % S.order * b * qmont_R_inv) % S.order = a * b % S.order)
 
 let qmont_cancel_lemma1 a b =
-  assert_norm (qmont_R_inv * qmont_R % S.order = 1);
+  mul_qmont_R_and_R_inv_is_one ();
   mont_cancel_lemma_gen S.order qmont_R qmont_R_inv a b
 
 

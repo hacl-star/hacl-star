@@ -33,13 +33,17 @@ let make_fzero n =
 
 [@CInline]
 let make_fone n =
+  let fmont_R_inv' =
+    Ghost.hide (Lib.NatMod.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)) in
+  Lib.NatMod.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
   // 0xfffffffeffffffffffffffffffffffff000000000000000000000001
   [@inline_let] let n0 = u64 0x1 in
   [@inline_let] let n1 = u64 0xffffffff00000000 in
   [@inline_let] let n2 = u64 0xffffffffffffffff in
   [@inline_let] let n3 = u64 0xfffffffe in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont 1);
-  assert_norm (SM.from_mont (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) == 1);
+  assert_norm (
+    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * fmont_R_inv' % S.prime = 1);
   bn_make_u64_4 n n0 n1 n2 n3
 
 
@@ -195,7 +199,8 @@ let to_mont res a =
   let h1 = ST.get () in
   assert (as_nat h1 res ==
     (as_nat h0 a * (SM.fmont_R * SM.fmont_R % S.prime) * SM.fmont_R_inv) % S.prime);
-  assert_norm (SM.fmont_R_inv * SM.fmont_R % S.prime = 1);
+  SM.mul_fmont_R_and_R_inv_is_one ();
+  assert (SM.fmont_R_inv * SM.fmont_R % S.prime = 1);
   calc (==) {
     (as_nat h0 a * (SM.fmont_R * SM.fmont_R % S.prime) * SM.fmont_R_inv) % S.prime;
     (==) { Math.Lemmas.swap_mul (as_nat h0 a) (SM.fmont_R * SM.fmont_R % S.prime) }
