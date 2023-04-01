@@ -88,38 +88,6 @@ let copy_point res p =
   copy res p
 
 
-///  Point conversion between Montgomery and Regular representations
-
-[@CInline]
-let point_to_mont res p =
-  let px = getx p in
-  let py = gety p in
-  let pz = getz p in
-
-  let rx = getx res in
-  let ry = gety res in
-  let rz = getz res in
-
-  to_mont rx px;
-  to_mont ry py;
-  to_mont rz pz
-
-
-[@CInline]
-let point_from_mont res p =
-  let px = getx p in
-  let py = gety p in
-  let pz = getz p in
-
-  let rx = getx res in
-  let ry = gety res in
-  let rz = getz res in
-
-  from_mont rx px;
-  from_mont ry py;
-  from_mont rz pz
-
-
 ///  Point conversion between Projective and Affine coordinates representations
 
 [@CInline]
@@ -162,9 +130,12 @@ let to_proj_point res p =
   let rx = getx res in
   let ry = gety res in
   let rz = getz res in
-  copy rx px;
-  copy ry py;
-  bn_set_one4 rz
+  let h0 = ST.get () in
+  SM.lemma_to_from_mont_id (as_nat h0 px);
+  SM.lemma_to_from_mont_id (as_nat h0 py);
+  to_mont rx px;
+  to_mont ry py;
+  make_fone rz
 
 
 ///  Check if a point is on the curve
@@ -262,19 +233,25 @@ let is_xy_valid_vartime p =
 
 
 [@CInline]
-let load_point_vartime p b =
-  push_frame ();
+let aff_point_load_vartime p b =
   let p_x = sub b 0ul 32ul in
   let p_y = sub b 32ul 32ul in
-  let point_aff = create_aff_point () in
-  let bn_p_x = aff_getx point_aff in
-  let bn_p_y = aff_gety point_aff in
+
+  let bn_p_x = aff_getx p in
+  let bn_p_y = aff_gety p in
   bn_from_bytes_be4 bn_p_x p_x;
   bn_from_bytes_be4 bn_p_y p_y;
-  let is_xy_valid = is_xy_valid_vartime point_aff in
-  let res = if not is_xy_valid then false else is_point_on_curve_vartime point_aff in
-  if res then
-    to_proj_point p point_aff;
+  let is_xy_valid = is_xy_valid_vartime p in
+  if not is_xy_valid then false
+  else is_point_on_curve_vartime p
+
+
+[@CInline]
+let load_point_vartime p b =
+  push_frame ();
+  let p_aff = create_aff_point () in
+  let res = aff_point_load_vartime p_aff b in
+  if res then to_proj_point p p_aff;
   pop_frame ();
   res
 

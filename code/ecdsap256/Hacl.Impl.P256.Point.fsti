@@ -181,29 +181,6 @@ val copy_point: res:point -> p:point -> Stack unit
     as_seq h1 res == as_seq h0 p)
 
 
-///  Point conversion between Montgomery and Regular representations
-
-// TODO: rm
-val point_to_mont: res:point -> p:point -> Stack unit
-  (requires fun h ->
-    live h p /\ live h res /\ eq_or_disjoint p res /\
-    point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-   (let px, py, pz = as_point_nat h0 p in
-    let rx, ry, rz = as_point_nat h1 res in
-    rx == SM.to_mont px /\ ry == SM.to_mont py /\ rz == SM.to_mont pz))
-
-
-// TODO: rm
-val point_from_mont: res:point -> p:point -> Stack unit
-  (requires fun h ->
-    live h p /\ live h res /\ eq_or_disjoint p res /\
-    point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\ as_point_nat h1 res == from_mont_point (as_point_nat h0 p))
-
-
 ///  Point conversion between Projective and Affine coordinates representations
 
 // to_aff_point = S.to_aff_point + from_mont
@@ -224,13 +201,14 @@ val to_aff_point_x: res:felem -> p:point -> Stack unit
     as_nat h1 res == fst (S.to_aff_point (from_mont_point (as_point_nat h0 p))))
 
 
-// TODO: to_proj_point = S.to_proj_point + to_mont
+// to_proj_point = S.to_proj_point + to_mont
 val to_proj_point: res:point -> p:aff_point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ disjoint p res /\
     aff_point_inv h p)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_point_nat h1 res == S.to_proj_point (as_aff_point_nat h0 p))
+    point_inv h1 res /\
+    from_mont_point (as_point_nat h1 res) == S.to_proj_point (as_aff_point_nat h0 p))
 
 
 ///  Check if a point is on the curve
@@ -259,12 +237,21 @@ val point_store: res:lbuffer uint8 64ul -> p:point -> Stack unit
     as_seq h1 res == S.point_store (from_mont_point (as_point_nat h0 p)))
 
 
+val aff_point_load_vartime: res:aff_point -> b:lbuffer uint8 64ul -> Stack bool
+  (requires fun h ->
+    live h res /\ live h b /\ disjoint res b)
+  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
+    (let ps = S.aff_point_load (as_seq h0 b) in
+    (r <==> Some? ps) /\ (r ==> (aff_point_inv h1 res /\ as_aff_point_nat h1 res == Some?.v ps))))
+
+
 val load_point_vartime: res:point -> b:lbuffer uint8 64ul -> Stack bool
   (requires fun h ->
     live h res /\ live h b /\ disjoint res b)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
     (let ps = S.load_point (as_seq h0 b) in
-    (r <==> Some? ps) /\ (r ==> (point_inv h1 res /\ as_point_nat h1 res == Some?.v ps))))
+    (r <==> Some? ps) /\ (r ==> (point_inv h1 res /\
+      from_mont_point (as_point_nat h1 res) == Some?.v ps))))
 
 
 val aff_point_decompress_vartime (x y:felem) (s:lbuffer uint8 33ul) : Stack bool

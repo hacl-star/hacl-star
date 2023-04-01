@@ -183,42 +183,24 @@ let montgomery_ladder p q scalar =
     )
 
 
-val lemma_point_to_domain: h0:mem -> h1:mem -> p:point -> res:point ->  Lemma
-  (requires
-    point_inv h0 p /\
-    point_x_as_nat h1 res == SM.to_mont (point_x_as_nat h0 p) /\
-    point_y_as_nat h1 res == SM.to_mont (point_y_as_nat h0 p) /\
-    point_z_as_nat h1 res == SM.to_mont (point_z_as_nat h0 p))
-  (ensures (from_mont_point (as_point_nat h1 res) == as_point_nat h0 p))
-
-let lemma_point_to_domain h0 h1 p res =
-  SM.lemma_to_from_mont_id (point_x_as_nat h0 p);
-  SM.lemma_to_from_mont_id (point_y_as_nat h0 p);
-  SM.lemma_to_from_mont_id (point_z_as_nat h0 p)
-
-
 val scalarMultiplicationWithoutNorm: p:point -> res:point -> scalar:lbuffer uint8 32ul ->
   Stack unit
   (requires fun h ->
     live h p /\ live h res /\ live h scalar /\
     disjoint p res /\ disjoint scalar res /\ disjoint p scalar /\
     point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc res) h0 h1 /\
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
     from_mont_point (as_point_nat h1 res) ==
-      fst (S.montgomery_ladder_spec (as_seq h0 scalar) (S.point_at_inf, as_point_nat h0 p)))
+      fst (S.montgomery_ladder_spec (as_seq h0 scalar)
+        (S.point_at_inf, from_mont_point (as_point_nat h0 p))))
 
 [@CInline]
 let scalarMultiplicationWithoutNorm p res scalar =
   push_frame ();
   let q = create_point () in
   make_point_at_inf q;
-
-  let h0 = ST.get () in
-  point_to_mont res p;
-  let h1 = ST.get () in
-  lemma_point_to_domain h0 h1 p res;
-
+  copy res p;
   montgomery_ladder q res scalar;
   let h3 = ST.get () in
   copy res q;
@@ -228,13 +210,10 @@ let scalarMultiplicationWithoutNorm p res scalar =
 [@CInline]
 let point_mul res p scalar =
   push_frame ();
-  let tmp = create_point () in
-  copy_point tmp p;
-
   let bytes_scalar = create 32ul (u8 0) in
   bn_to_bytes_be4 bytes_scalar scalar;
 
-  scalarMultiplicationWithoutNorm tmp res bytes_scalar;
+  scalarMultiplicationWithoutNorm p res bytes_scalar;
   pop_frame ()
 
 
@@ -293,7 +272,7 @@ let point_mul_double_g res scalar1 scalar2 p =
   assert (from_mont_point (as_point_nat h1 sg1) ==
     S.point_mul_g (as_nat h0 scalar1));
   assert (from_mont_point (as_point_nat h1 sp2) ==
-    S.point_mul (as_nat h0 scalar2) (as_point_nat h0 p));
+    S.point_mul (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 p)));
 
   point_add res sg1 sp2;
   pop_frame ()

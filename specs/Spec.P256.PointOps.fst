@@ -188,14 +188,20 @@ let point_double (p:proj_point) : proj_point =
 
 ///  Point conversion between affine, projective and bytes representation
 
-let load_point (b:BSeq.lbytes 64) : option proj_point =
+let aff_point_load (b:BSeq.lbytes 64) : option aff_point =
   let pk_x = BSeq.nat_from_bytes_be (sub b 0 32) in
   let pk_y = BSeq.nat_from_bytes_be (sub b 32 32) in
   let is_x_valid = pk_x < prime in
   let is_y_valid = pk_y < prime in
   let is_xy_on_curve =
     if is_x_valid && is_y_valid then is_point_on_curve (pk_x, pk_y) else false in
-  if is_xy_on_curve then Some (to_proj_point (pk_x, pk_y)) else None
+  if is_xy_on_curve then Some (pk_x, pk_y) else None
+
+
+let load_point (b:BSeq.lbytes 64) : option proj_point =
+  match (aff_point_load b) with
+  | Some p -> Some (to_proj_point p)
+  | None -> None
 
 
 let aff_point_store (p:aff_point) : BSeq.lbytes 64 =

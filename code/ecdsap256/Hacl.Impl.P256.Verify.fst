@@ -84,7 +84,8 @@ val ecdsa_verification_getx: x:felem -> pk:point -> u1:felem -> u2:felem -> Stac
     disjoint pk u1 /\ disjoint pk u2 /\
     point_inv h pk /\ as_nat h u1 < pow2 256 /\ as_nat h u2 < pow2 256)
   (ensures fun h0 b h1 -> modifies (loc x) h0 h1 /\
-   (let res_proj = S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (as_point_nat h0 pk) in
+   (let res_proj = 
+     S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (from_mont_point (as_point_nat h0 pk)) in
     let (rx, _) = S.to_aff_point res_proj in
     b == not (S.is_point_at_inf res_proj) /\ as_nat h1 x == rx % S.order))
 
@@ -95,7 +96,7 @@ let ecdsa_verification_getx x pk u1 u2 =
   point_mul_double_g res_proj u1 u2 pk;
   let h1 = ST.get () in
   assert (from_mont_point (as_point_nat h1 res_proj) ==
-    S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (as_point_nat h0 pk));
+    S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (from_mont_point (as_point_nat h0 pk)));
   let is_res_point_at_inf = is_point_at_inf_vartime res_proj in
   assert (is_res_point_at_inf == S.is_point_at_inf (from_mont_point (as_point_nat h1 res_proj)));
   to_aff_point_x x res_proj;
@@ -103,7 +104,7 @@ let ecdsa_verification_getx x pk u1 u2 =
   qmod_short x x;
   let h3 = ST.get () in
   assert (as_nat h2 x == fst (S.to_aff_point
-    (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (as_point_nat h0 pk))));
+    (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (from_mont_point (as_point_nat h0 pk)))));
   assert (as_nat h3 x == as_nat h2 x % S.order);
   pop_frame ();
   not is_res_point_at_inf

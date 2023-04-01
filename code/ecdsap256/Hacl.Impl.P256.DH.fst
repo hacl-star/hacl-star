@@ -40,9 +40,11 @@ val ecp256dh_r_:
   (ensures fun  h0 flag h1 -> modifies (loc ss) h0 h1 /\
     (let sk_nat = BSeq.nat_from_bytes_be (as_seq h0 private_key) in
     as_aff_point_nat h1 ss ==
-    (if is_pk_valid then S.to_aff_point (S.point_mul sk_nat (as_point_nat h0 pk)) else (0, 0)) /\
+    (if is_pk_valid then
+      S.to_aff_point (S.point_mul sk_nat (from_mont_point (as_point_nat h0 pk))) else (0, 0)) /\
     v flag ==
-    (if is_pk_valid then (if S.is_point_at_inf (S.point_mul sk_nat (as_point_nat h0 pk))
+    (if is_pk_valid then
+     (if S.is_point_at_inf (S.point_mul sk_nat (from_mont_point (as_point_nat h0 pk)))
      then ones_v U64 else 0) else ones_v U64)))
 
 let ecp256dh_r_ is_pk_valid ss pk private_key =
