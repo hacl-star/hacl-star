@@ -235,32 +235,6 @@ let point_mul_g res scalar =
 
 
 [@CInline]
-let point_mul_bytes res p scalar =
-  push_frame ();
-  let s_q = create_felem () in
-  let res_proj = create_point () in
-  bn_from_bytes_be4 s_q scalar;
-  point_mul res_proj p s_q;
-  to_aff_point res res_proj;
-  let is_pai = is_point_at_inf res_proj in
-  pop_frame ();
-  is_pai
-
-
-[@CInline]
-let point_mul_g_bytes res scalar =
-  push_frame ();
-  let s_q = create_felem () in
-  let res_proj = create_point () in
-  bn_from_bytes_be4 s_q scalar;
-  point_mul_g res_proj s_q;
-  to_aff_point res res_proj;
-  let is_pai = is_point_at_inf res_proj in
-  pop_frame ();
-  is_pai
-
-
-[@CInline]
 let point_mul_double_g res scalar1 scalar2 p =
   push_frame ();
   let sg1 = create_point () in

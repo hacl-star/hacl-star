@@ -47,21 +47,16 @@ let clamp a k =
 
 val dh: a:algorithm -> s:scalar a -> p:serialized_point a -> Tot (option (serialized_point a))
 let dh a s p =
-  let result, output : bool & serialized_point a =
-    match a with
-    | DH_Curve25519 ->
-        let output = Spec.Curve25519.scalarmult s p in
-        not (lbytes_eq (create (size_public a) (u8 0)) output), output
-    | DH_P256 ->
-        let xy, res = Spec.P256.ecp256_dh_r p s in
-        res, xy
-  in
-  if result then Some output else None
+  match a with
+  | DH_Curve25519 ->
+    let output = Spec.Curve25519.scalarmult s p in
+    let is_valid = not (lbytes_eq (create (size_public a) (u8 0)) output) in
+    if is_valid then Some output else None
+  | DH_P256 ->
+    Spec.P256.ecp256_dh_r p s
 
 val secret_to_public: a:algorithm -> scalar a -> Tot (option (serialized_point a))
 let secret_to_public a kpriv =
   match a with
   | DH_Curve25519 -> Some (Spec.Curve25519.secret_to_public kpriv)
-  | DH_P256 ->
-      let xy, res = Spec.P256.ecp256_dh_i kpriv in
-      if res then Some xy else None
+  | DH_P256 -> Spec.P256.ecp256_dh_i kpriv

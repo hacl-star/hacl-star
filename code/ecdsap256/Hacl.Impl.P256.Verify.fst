@@ -82,7 +82,7 @@ val ecdsa_verification_getx: x:felem -> pk:point -> u1:felem -> u2:felem -> Stac
     live h x /\ live h pk /\ live h u1 /\ live h u2 /\
     disjoint x u1 /\ disjoint x u2 /\ disjoint x pk /\
     disjoint pk u1 /\ disjoint pk u2 /\
-    point_inv h pk /\ as_nat h u1 < pow2 256 /\ as_nat h u2 < pow2 256)
+    point_inv h pk /\ as_nat h u1 < S.order /\ as_nat h u2 < S.order)
   (ensures fun h0 b h1 -> modifies (loc x) h0 h1 /\
    (let res_proj = 
      S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (from_mont_point (as_point_nat h0 pk)) in

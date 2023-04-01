@@ -56,21 +56,18 @@ let montgomery_ladder_spec k pq =
 
 //---------------------------
 
-// TODO: some functions don't check for `a < order`
-let lbytes_as_nat = x:nat{x < pow2 256}
-
 // [a]P
-let point_mul (a:lbytes_as_nat) (p:proj_point) : proj_point =
+let point_mul (a:qelem) (p:proj_point) : proj_point =
   let a = nat_to_bytes_be 32 a in
   let q, f = montgomery_ladder_spec a (point_at_inf, p) in
   q
 
 // [a]G
-let point_mul_g (a:lbytes_as_nat) : proj_point = point_mul a base_point
+let point_mul_g (a:qelem) : proj_point = point_mul a base_point
 
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1 a2:lbytes_as_nat) (p:proj_point) : proj_point =
+let point_mul_double_g (a1 a2:qelem) (p:proj_point) : proj_point =
   point_add (point_mul_g a1) (point_mul a2 p)
 
 
@@ -181,21 +178,24 @@ let ecdsa_verification_agile alg msg_len msg public_key signature_r signature_s 
 ///  ECDH over the P256 elliptic curve
 
 // Initiator
-let ecp256_dh_i (private_key:lbytes 32) : tuple2 (lbytes 64) bool =
+let ecp256_dh_i (private_key:lbytes 32) : option (lbytes 64) =
   let sk = nat_from_bytes_be private_key in
-  let pk = point_mul_g sk in
-  point_store pk, not (is_point_at_inf pk)
+  let is_sk_valid = 0 < sk && sk < order in
+  if is_sk_valid then
+    let pk = point_mul_g sk in
+    Some (point_store pk)
+  else None
 
 
 // Responder
-let ecp256_dh_r (their_public_key:lbytes 64) (private_key:lbytes 32) : tuple2 (lbytes 64) bool =
+let ecp256_dh_r (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 64) =
   let pk = load_point their_public_key in
   let sk = nat_from_bytes_be private_key in
-  if Some? pk then
+  let is_sk_valid = 0 < sk && sk < order in
+  if Some? pk && is_sk_valid then
     let ss = point_mul sk (Some?.v pk) in
-    point_store ss, not (is_point_at_inf ss)
-  else
-    aff_point_store aff_point_at_inf, false
+    Some (point_store ss)
+  else None
 
 
 ///  Parsing and Serializing public keys
