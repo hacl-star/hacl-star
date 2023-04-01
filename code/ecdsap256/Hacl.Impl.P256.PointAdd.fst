@@ -269,8 +269,19 @@ let point_add_7 x3 y3 z3 t0 t1 t2 t3 t4 =
   fadd z3 z3 t1
 
 
-[@CInline]
-let point_add p q res tmp =
+inline_for_extraction noextract
+val point_add_noalloc: tmp:lbuffer uint64 24ul -> res:point -> p:point -> q:point -> Stack unit
+  (requires fun h ->
+    live h p /\ live h q /\ live h res /\ live h tmp /\
+    eq_or_disjoint p q /\ disjoint q res /\ disjoint p res /\
+    disjoint tmp p /\ disjoint tmp q /\ disjoint tmp res /\
+    point_inv h p /\ point_inv h q)
+  (ensures fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
+    point_inv h1 res /\
+    from_mont_point (as_point_nat h1 res) ==
+    S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
+
+let point_add_noalloc tmp res p q =
   let x3, y3, z3 = getx res, gety res, getz res in
   let t0 = sub tmp 0ul 4ul in
   let t1 = sub tmp 4ul 4ul in
@@ -285,3 +296,14 @@ let point_add p q res tmp =
   point_add_5 x3 y3 z3 t0 t1 t2;
   point_add_6 x3 y3 z3 t0 t1 t2 t4;
   point_add_7 x3 y3 z3 t0 t1 t2 t3 t4
+
+
+[@CInline]
+let point_add res p q =
+  push_frame ();
+  let tmp = create 36ul (u64 0) in
+  let t0 = sub tmp 0ul 24ul in
+  let t1 = sub tmp 24ul 12ul in
+  point_add_noalloc t0 t1 p q;
+  copy res t1;
+  pop_frame ()

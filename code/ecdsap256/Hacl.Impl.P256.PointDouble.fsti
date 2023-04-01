@@ -14,13 +14,11 @@ module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-// |tmp| = 20ul
-val point_double: p:point -> res:point -> tmp:lbuffer uint64 32ul -> Stack unit
+val point_double: res:point -> p:point -> Stack unit
   (requires fun h ->
-    live h p /\ live h tmp /\ live h res /\
-    disjoint p tmp /\ disjoint res tmp /\ eq_or_disjoint p res /\
+    live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
-  (ensures fun h0 _ h1 -> modifies (loc tmp |+| loc res)  h0 h1 /\
+  (ensures fun h0 _ h1 -> modifies (loc res)  h0 h1 /\
     point_inv h1 res /\
     from_mont_point (as_point_nat h1 res) ==
       S.point_double (from_mont_point (as_point_nat h0 p)))
