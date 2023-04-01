@@ -1,7 +1,6 @@
 module Spec.P256.PointOps
 
 open FStar.Mul
-
 open Lib.IntTypes
 open Lib.Sequence
 
@@ -62,6 +61,7 @@ let b_coeff : felem =
   let b = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b in
   assert_norm (b < prime); b
 
+
 // Base point
 let g_x : felem =
   let x = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296 in
@@ -72,18 +72,23 @@ let g_y : felem =
 
 let base_point : proj_point = (g_x, g_y, one)
 
+
 let is_point_on_curve (p:aff_point) : bool =
   let (x, y) = p in y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
+
 
 let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
 let point_at_inf : proj_point = (zero, one, zero)
 
+let is_aff_point_at_inf (p:aff_point) : bool =
+  let (x, y) = p in x = zero && y = zero
+
 let is_point_at_inf (p:proj_point) =
   let (_, _, z) = p in z = 0
 
+
 let to_proj_point (p:aff_point) : proj_point =
   let (x, y) = p in (x, y, one)
-
 
 let to_aff_point (p:proj_point) : aff_point =
   // if is_proj_point_at_inf p then aff_point_at_inf
@@ -92,6 +97,40 @@ let to_aff_point (p:proj_point) : aff_point =
   let x = px *% zinv in
   let y = py *% zinv in
   (x, y)
+
+
+///  Point addition in affine coordinates
+
+let aff_point_double (p:aff_point) : aff_point =
+  let (px, py) = p in
+  if is_aff_point_at_inf p then p
+  else begin
+    if py = 0 then aff_point_at_inf
+    else begin
+      let lambda = (3 *% px *% px +% a_coeff) /% (2 *% py) in
+      let rx = lambda *% lambda -% px -% px in
+      let ry = lambda *% (px -% rx) -% py in
+      (rx, ry) end
+  end
+
+let aff_point_add (p:aff_point) (q:aff_point) : aff_point =
+  let (px, py) = p in let (qx, qy) = q in
+  if is_aff_point_at_inf p then q
+  else begin
+    if is_aff_point_at_inf q then p
+    else begin
+      if p = q then aff_point_double p
+      else begin
+        if qx = px then aff_point_at_inf
+        else begin
+          let lambda = (qy -% py) /% (qx -% px) in
+          let rx = lambda *% lambda -% px -% qx in
+          let ry = lambda *% (px -% rx) -% py in
+          (rx, ry)
+        end
+      end
+    end
+  end
 
 
 ///  Point addition and doubling in projective coordinates

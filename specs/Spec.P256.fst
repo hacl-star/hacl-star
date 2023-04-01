@@ -1,13 +1,15 @@
 module Spec.P256
 
 open FStar.Mul
-
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
 open Spec.Hash.Definitions
 module M = Lib.NatMod
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
+module PL = Spec.P256.Lemmas
 
 include Spec.P256.PointOps
 
@@ -16,58 +18,53 @@ include Spec.P256.PointOps
 (** https://eprint.iacr.org/2013/816.pdf *)
 
 ///  Elliptic curve scalar multiplication
-// TODO: use Lib.Exponentiation
 
-let scalar = lbytes 32
+let mk_p256_comm_monoid : LE.comm_monoid aff_point = {
+  LE.one = aff_point_at_inf;
+  LE.mul = aff_point_add;
+  LE.lemma_one = PL.aff_point_at_inf_lemma;
+  LE.lemma_mul_assoc = PL.aff_point_add_assoc_lemma;
+  LE.lemma_mul_comm = PL.aff_point_add_comm_lemma;
+}
 
-let ith_bit (k:scalar) (i:nat{i < 256}) : uint64 =
-  let q = 31 - i / 8 in let r = size (i % 8) in
-  to_u64 ((index k q >>. r) &. u8 1)
+let mk_to_p256_comm_monoid : SE.to_comm_monoid proj_point = {
+  SE.a_spec = aff_point;
+  SE.comm_monoid = mk_p256_comm_monoid;
+  SE.refl = to_aff_point;
+}
 
+val point_at_inf_c: SE.one_st proj_point mk_to_p256_comm_monoid
+let point_at_inf_c _ =
+  PL.to_aff_point_at_infinity_lemma ();
+  point_at_inf
 
-val _ml_step0: p:proj_point -> q:proj_point -> tuple2 proj_point proj_point
-let _ml_step0 r0 r1 =
-  let r0 = point_add r1 r0 in
-  let r1 = point_double r1 in
-  (r0, r1)
+val point_add_c : SE.mul_st proj_point mk_to_p256_comm_monoid
+let point_add_c p q =
+  PL.to_aff_point_add_lemma p q;
+  point_add p q
 
+val point_double_c : SE.sqr_st proj_point mk_to_p256_comm_monoid
+let point_double_c p =
+  PL.to_aff_point_double_lemma p;
+  point_double p
 
-val _ml_step1: p: proj_point -> q:proj_point -> tuple2 proj_point proj_point
-let _ml_step1 r0 r1 =
-  let r1 = point_add r0 r1 in
-  let r0 = point_double r0 in
-  (r0, r1)
-
-
-val _ml_step: k:scalar -> i:nat{i < 256} -> tuple2 proj_point proj_point -> tuple2 proj_point proj_point
-let _ml_step k i (p, q) =
-  let bit = 255 - i in
-  let bit = ith_bit k bit in
-  let open Lib.RawIntTypes in
-  if uint_to_nat bit = 0 then
-    _ml_step1 p q
-  else
-    _ml_step0 p q
-
-
-val montgomery_ladder_spec: k:scalar -> tuple2 proj_point proj_point -> tuple2 proj_point proj_point
-let montgomery_ladder_spec k pq =
-  Lib.LoopCombinators.repeati 256 (_ml_step k) pq
-
-//---------------------------
+let mk_p256_concrete_ops : SE.concrete_ops proj_point = {
+  SE.to = mk_to_p256_comm_monoid;
+  SE.one = point_at_inf_c;
+  SE.mul = point_add_c;
+  SE.sqr = point_double_c;
+}
 
 // [a]P
 let point_mul (a:qelem) (p:proj_point) : proj_point =
-  let a = nat_to_bytes_be 32 a in
-  let q, f = montgomery_ladder_spec a (point_at_inf, p) in
-  q
+  SE.exp_fw mk_p256_concrete_ops p 256 a 4
 
 // [a]G
 let point_mul_g (a:qelem) : proj_point = point_mul a base_point
 
-
 // [a1]G + [a2]P
 let point_mul_double_g (a1 a2:qelem) (p:proj_point) : proj_point =
+  //SE.exp_double_fw mk_p256_concrete_ops base_point 256 a1 p a2 5
   point_add (point_mul_g a1) (point_mul a2 p)
 
 
