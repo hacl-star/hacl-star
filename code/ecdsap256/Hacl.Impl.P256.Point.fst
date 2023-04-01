@@ -235,6 +235,15 @@ let aff_point_store res p =
   bn2_to_bytes_be4 res px py
 
 
+[@CInline]
+let point_store res p =
+  push_frame ();
+  let aff_p = create_aff_point () in
+  to_aff_point aff_p p;
+  aff_point_store res aff_p;
+  pop_frame ()
+
+
 inline_for_extraction noextract
 val is_xy_valid_vartime: p:aff_point -> Stack bool
   (requires fun h -> live h p)
