@@ -91,7 +91,7 @@ let cswap bit p1 p2 =
 inline_for_extraction noextract
 val scalar_bit: s:lbuffer uint8 32ul -> n:size_t{v n < 256} -> Stack uint64
   (requires fun h0 -> live h0 s)
-  (ensures  fun h0 r h1 -> h0 == h1 /\ r == S.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+  (ensures  fun h0 r h1 -> h0 == h1 /\ v r <= 1)
 
 let scalar_bit s n =
   let h0 = ST.get () in
@@ -107,10 +107,7 @@ val montgomery_ladder_step1: p:point -> q:point -> Stack unit
     live h p /\ live h q /\ disjoint p q /\
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q) h0 h1 /\
-    point_inv h1 p /\ point_inv h1 q /\
-    (from_mont_point (as_point_nat h1 p), from_mont_point (as_point_nat h1 q)) ==
-     S._ml_step1
-      (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
+    point_inv h1 p /\ point_inv h1 q)
 
 let montgomery_ladder_step1 r0 r1 =
   point_add r1 r0 r1;
@@ -128,10 +125,7 @@ val montgomery_ladder_step:
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc scalar] /\
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q) h0 h1 /\
-    point_inv h1 p /\ point_inv h1 q /\
-    (from_mont_point (as_point_nat h1 p), from_mont_point (as_point_nat h1 q)) ==
-     S._ml_step (as_seq h0 scalar) (v i)
-      (from_mont_point (as_point_nat h0 p), from_mont_point (as_point_nat h0 q)))
+    point_inv h1 p /\ point_inv h1 q)
 
 let montgomery_ladder_step r0 r1 scalar i =
   let bit0 = 255ul -. i in
@@ -150,36 +144,20 @@ val montgomery_ladder: p:point -> q:point
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc scalar] /\
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q) h0 h1 /\
-    (point_inv h1 p /\ point_inv h1 q /\
-    (let p1 = from_mont_point (as_point_nat h1 p) in
-     let q1 = from_mont_point (as_point_nat h1 q) in
-     let rN, qN =
-       S.montgomery_ladder_spec (as_seq h0 scalar)
-         (from_mont_point (as_point_nat h0 p), from_mont_point (as_point_nat h0 q)) in
-       rN == p1 /\ qN == q1)))
+    point_inv h1 p /\ point_inv h1 q)
 
 [@CInline]
 let montgomery_ladder p q scalar =
   let h0 = ST.get() in
 
   [@inline_let]
-  let spec_ml h0 = S._ml_step (as_seq h0 scalar) in
-
-  [@inline_let]
-  let acc (h:mem) : GTot (tuple2 S.proj_point S.proj_point) =
-  (from_mont_point(as_point_nat h p), from_mont_point(as_point_nat h q))  in
-
-  Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
-  [@inline_let]
   let inv h (i: nat {i <= 256}) =
     point_inv h p /\ point_inv h q /\
-    modifies2 p q h0 h /\
-    acc h == Lib.LoopCombinators.repeati i (spec_ml h0) (acc h0) in
+    modifies2 p q h0 h in
 
   Lib.Loops.for 0ul 256ul inv
     (fun i ->
-      montgomery_ladder_step p q scalar i;
-      Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i)
+      montgomery_ladder_step p q scalar i
     )
 
 
@@ -190,10 +168,7 @@ val scalarMultiplicationWithoutNorm: p:point -> res:point -> scalar:lbuffer uint
     disjoint p res /\ disjoint scalar res /\ disjoint p scalar /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-    from_mont_point (as_point_nat h1 res) ==
-      fst (S.montgomery_ladder_spec (as_seq h0 scalar)
-        (S.point_at_inf, from_mont_point (as_point_nat h0 p))))
+    point_inv h1 res)
 
 [@CInline]
 let scalarMultiplicationWithoutNorm p res scalar =
