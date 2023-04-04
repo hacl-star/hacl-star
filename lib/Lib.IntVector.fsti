@@ -15,6 +15,10 @@ let vec_v_t (t:v_inttype{unsigned t}) (w:width) = lseq (uint_t t SEC) w
 inline_for_extraction
 val vec_t: t:v_inttype -> w:width -> Type0
 
+val reveal_vec_1: t:v_inttype -> Lemma
+  (requires t <> U128)
+  (ensures vec_t t 1 == sec_int_t t)
+
 inline_for_extraction
 val vec_v: #t:v_inttype -> #w:width -> vec_t t w -> vec_v_t t w
 

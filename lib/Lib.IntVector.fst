@@ -20,6 +20,8 @@ let vec_t t w =
   | U64,4 -> vec256
   | _,_ -> admit()
 
+let reveal_vec_1 _ = ()
+
 let vec_v #t #w x = admit()
 
 let vecv_extensionality #t #w f1 f2 = admit()

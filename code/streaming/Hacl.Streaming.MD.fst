@@ -191,7 +191,28 @@ let eq_length_lib_state (a:alg { is_sha2 a }) (b:B.buffer Hacl.Spec.SHA2.Vec.(el
       (B.len b == D.impl_state_len (| a, () |))
       (B.length b == Lib.IntTypes.v 8ul)
 
-let lib_of_state (a: alg { is_sha2 a }) (s: (state_t a).s ()): Lemma
+let lib_of_buf (a: alg { is_sha2 a }): Lemma
+  (ensures (
+    b:B.buffer (word a) { B.len b == D.impl_state_len (| a, () |) } ==
+    Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul))
+=
+  let open Lib.Buffer in
+  assert (D.impl_state_len (| a, () |) == 8ul);
+  calc (==) {
+    b:B.buffer (word a) { B.len b == D.impl_state_len (| a, () |) };
+  // Somehow, having eq_word_element as a local definition leads to a tactic failure,
+  // where the lemma application cannot be typechecked in the current context because
+  // eq_word_element is not found in the context
+  (==) { _ by FStar.Tactics.(l_to_r [`eq_word_element]) }
+  // Same issue for eq_length_lib_state
+    b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.len b == D.impl_state_len (| a, () |) };
+  (==) { _ by FStar.Tactics.(l_to_r [`eq_length_lib_state]) }
+    b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.length b == Lib.IntTypes.v 8ul };
+  (==) { _ by FStar.Tactics.(norm [ zeta; iota; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ] ]; trefl ()) }
+    Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul;
+  }
+
+let lib_of_state (a: alg { is_sha2 a }): Lemma
   (ensures (state_t a).s () == Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul)
 =
   let open Lib.Buffer in
@@ -203,12 +224,7 @@ let lib_of_state (a: alg { is_sha2 a }) (s: (state_t a).s ()): Lemma
   // Somehow, having eq_word_element as a local definition leads to a tactic failure,
   // where the lemma application cannot be typechecked in the current context because
   // eq_word_element is not found in the context
-  (==) { _ by FStar.Tactics.(l_to_r [`eq_word_element]) }
-  // Same issue for eq_length_lib_state
-    b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.len b == D.impl_state_len (| a, () |) };
-  (==) { _ by FStar.Tactics.(l_to_r [`eq_length_lib_state]) }
-    b:B.buffer Hacl.Spec.SHA2.Vec.(element_t a M32) { B.length b == Lib.IntTypes.v 8ul };
-  (==) { _ by FStar.Tactics.(norm [ zeta; iota; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ] ]; trefl ()) }
+  (==) { lib_of_buf a }
     Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul;
   }
 
@@ -858,7 +874,7 @@ let hacl_md (a:alg)// : block unit =
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
         [@inline_let] let blocks_lib = lib_of_buffer #len blocks in
-        lib_of_state a s;
+        lib_of_state a;
         [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
         let h0 = ST.get () in
         live_multi_of_live h0 blocks_lib;
@@ -885,7 +901,7 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let last_lib = lib_of_buffer #last_len last in
-        lib_of_state a s;
+        lib_of_state a;
         [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
         let h0 = ST.get () in
         live_multi_of_live h0 last_lib;
@@ -917,7 +933,7 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
         [@inline_let] let dst_lib = lib_of_buffer #(Hacl.Hash.Definitions.hash_len a) dst in
-        lib_of_state a s;
+        lib_of_state a;
         [@inline_let] let state_lib = coerce #(Lib.Buffer.lbuffer Hacl.Spec.SHA2.Vec.(element_t a M32) 8ul) s in
         let h0 = ST.get () in
         live_multi_of_live h0 dst_lib;

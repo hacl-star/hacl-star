@@ -3,6 +3,8 @@ module Hacl.Hash.SHA2
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 
+module B = LowStar.Buffer
+
 open Hacl.Hash.Definitions
 open Spec.Hash.Definitions
 
@@ -18,9 +20,54 @@ friend Spec.SHA2
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+let mb_state_32 a = Hacl.Impl.SHA2.Core.state_t a Hacl.Spec.SHA2.Vec.M32
+
+#push-options "--ifuel 1"
+
+let eq_length_lib_state (a:sha2_alg) (b:B.buffer (word a) { B.length b == Lib.IntTypes.v 8ul })
+  : Lemma ((B.length b == Lib.IntTypes.v 8ul) == (B.len b == impl_state_len (| a, () |)))
+  = FStar.PropositionalExtensionality.apply
+      (B.len b == impl_state_len (| a, () |))
+      (B.length b == Lib.IntTypes.v 8ul)
+
+let mb_state_32_is_hash_state (a: sha2_alg): Lemma
+  (ensures mb_state_32 a == state (| a, () |))
+=
+  let open Hacl.Impl.SHA2.Core in
+  let open Hacl.Spec.SHA2.Vec in
+  let open Lib.Buffer in
+  let open Lib.IntVector in
+  calc (==) {
+    mb_state_32 a;
+  (==) { }
+    state_t a M32;
+  (==) { }
+    lbuffer (element_t a M32) 8ul;
+  (==) { }
+    lbuffer (vec_t (word_t a) 1) 8ul;
+  (==) { Lib.IntVector.reveal_vec_1 (word_t a) }
+    lbuffer (Lib.IntTypes.sec_int_t (word_t a)) 8ul;
+  (==) { }
+    lbuffer (word a) 8ul;
+  (==) { _ by FStar.Tactics.(
+    norm [ zeta; iota; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ] ]; trefl ()
+  ) }
+    b:B.buffer (word a) { B.length b == Lib.IntTypes.v 8ul };
+  (==) { (* _ by FStar.Tactics.(l_to_r [`eq_length_lib_state]); *) admit () }
+    b:B.buffer (word a) { B.len b == impl_state_len (| a, () |) };
+  };
+  admit ()
+
 let init_224 st =
+  let open Hacl.Spec.SHA2.Vec in
+  mb_state_32_is_hash_state SHA2_224;
+  let h0 = ST.get () in
+  let st: mb_state_32 SHA2_224 = st in
+  assume Lib.Buffer.(live h0 st);
   Hacl.SHA2.Scalar32.init #SHA2_224 st;
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Hacl.Spec.SHA2.Vec.M32 0
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Hacl.Spec.SHA2.Vec.M32 0;
+  let h1 = ST.get () in
+  assume LowStar.Buffer.(modifies (loc_buffer (st <: state (| SHA2_224, () |))) h0 h1)
 
 let init_256 st =
   Hacl.SHA2.Scalar32.init #SHA2_256 st;
