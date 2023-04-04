@@ -5,6 +5,7 @@ module Common = Hacl.Streaming.Blake2.Common
 module Core = Hacl.Impl.Blake2.Core
 module F = Hacl.Streaming.Functor
 module G = FStar.Ghost
+module Impl = Hacl.Impl.Blake2.Generic
 module Spec = Spec.Blake2
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -43,3 +44,15 @@ let digest =
 [@ (Comment "  Free state function when there is no key")]
 let free =
   F.free (blake2b_256 0) (G.hide ()) (Common.s Spec.Blake2B Core.M256) (Common.empty_key Spec.Blake2B)
+
+(* The one-shot hash *)
+[@@ Comment "Write the BLAKE2b digest of message `input` using key `key` into `output`.
+
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0."]
+let hash_with_key : Impl.blake2_st Spec.Blake2B Core.M256 =
+  Impl.blake2 #Spec.Blake2B #Core.M256 Blake2b256.init Blake2b256.update Blake2b256.finish

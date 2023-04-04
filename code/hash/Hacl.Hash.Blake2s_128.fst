@@ -37,4 +37,4 @@ let update_last s prev input input_len =
 
 let finish s dst = BlS128.finish (hash_len Blake2S) dst s
 
-let hash output input input_len = BlS128.hash_with_key output 32ul input input_len (null #MUT uint8) 0ul
+let hash output input input_len = Hacl.Streaming.Blake2s_128.hash_with_key output 32ul input input_len (null #MUT uint8) 0ul

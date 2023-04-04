@@ -27,24 +27,11 @@ let update_blocks : Impl.blake2_update_blocks_st Spec.Blake2S Core.M32 =
   Impl.blake2_update_blocks #Spec.Blake2S #Core.M32 update_multi update_last
 
 [@CInline]
-private
 let update : Impl.blake2_update_st Spec.Blake2S Core.M32 =
   Impl.blake2_update #Spec.Blake2S #Core.M32 update_key update_blocks
 
 let finish : Impl.blake2_finish_st Spec.Blake2S Core.M32 =
   Impl.blake2_finish #Spec.Blake2S #Core.M32
-
-(* The one-shot hash *)
-[@@ Comment "Write the BLAKE2s digest of message `input` using key `key` into `output`.
-
-@param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
-@param input Pointer to `input_len` bytes of memory where the input message is read from.
-@param input_len Length of the input message.
-@param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0."]
-let hash_with_key : Impl.blake2_st Spec.Blake2S Core.M32 =
-  Impl.blake2 #Spec.Blake2S #Core.M32 init update finish
 
 let malloc_with_key : Impl.blake2_malloc_st Spec.Blake2S Core.M32 =
   Impl.blake2_malloc Spec.Blake2S Core.M32
