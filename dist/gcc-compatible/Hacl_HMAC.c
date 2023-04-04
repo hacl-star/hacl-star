@@ -28,6 +28,8 @@
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 /**
 Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.

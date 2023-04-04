@@ -23,7 +23,7 @@
  */
 
 
-#include "Hacl_Hash_Blake2b_Simd256.h"
+#include "internal/Hacl_Hash_Blake2b_Simd256.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 
@@ -233,8 +233,8 @@ Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t k
   r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
 }
 
-void
-Hacl_Hash_Blake2b_Simd256_update_key(
+static void
+update_key(
   Lib_IntVector_Intrinsics_vec256 *wv,
   Lib_IntVector_Intrinsics_vec256 *hash,
   uint32_t kk,
@@ -342,7 +342,7 @@ update(
   FStar_UInt128_uint128 lb = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
   if (kk > (uint32_t)0U)
   {
-    Hacl_Hash_Blake2b_Simd256_update_key(wv, hash, kk, k, ll);
+    update_key(wv, hash, kk, k, ll);
     if (!(ll == (uint32_t)0U))
     {
       update_blocks(ll, wv, hash, lb, d);
@@ -373,35 +373,6 @@ Hacl_Hash_Blake2b_Simd256_finish(
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
   Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
-}
-
-/**
-Write the BLAKE2b digest of message `input` using key `key` into `output`.
-
-@param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
-@param input Pointer to `input_len` bytes of memory where the input message is read from.
-@param input_len Length of the input message.
-@param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0.
-*/
-void
-Hacl_Hash_Blake2b_Simd256_hash_with_key(
-  uint8_t *output,
-  uint32_t output_len,
-  uint8_t *input,
-  uint32_t input_len,
-  uint8_t *key,
-  uint32_t key_len
-)
-{
-  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
-  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b1[4U] KRML_POST_ALIGN(32) = { 0U };
-  Hacl_Hash_Blake2b_Simd256_init(b, key_len, output_len);
-  update(b1, b, key_len, key, input_len, input);
-  Hacl_Hash_Blake2b_Simd256_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, (uint32_t)4U * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, (uint32_t)4U * sizeof (b[0U]));
 }
 
 void
@@ -836,5 +807,34 @@ void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state)
   KRML_ALIGNED_FREE(b);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(state);
+}
+
+/**
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
+
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
+*/
+void
+Hacl_Hash_Blake2b_Simd256_hash_with_key(
+  uint8_t *output,
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
+)
+{
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
+  KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b1[4U] KRML_POST_ALIGN(32) = { 0U };
+  Hacl_Hash_Blake2b_Simd256_init(b, key_len, output_len);
+  update(b1, b, key_len, key, input_len, input);
+  Hacl_Hash_Blake2b_Simd256_finish(output_len, output, b);
+  Lib_Memzero0_memzero(b1, (uint32_t)4U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)4U * sizeof (b[0U]));
 }
 

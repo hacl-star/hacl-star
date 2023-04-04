@@ -25,6 +25,7 @@
 
 #include "Hacl_HMAC_Blake2s_128.h"
 
+#include "internal/Hacl_Hash_Blake2s_Simd128.h"
 #include "internal/Hacl_HMAC.h"
 
 /**

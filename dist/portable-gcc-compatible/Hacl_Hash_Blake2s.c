@@ -23,7 +23,7 @@
  */
 
 
-#include "Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2s.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 
@@ -513,16 +513,9 @@ void Hacl_Hash_Blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn)
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_init */
 
-/* SNIPPET_START: Hacl_Hash_Blake2s_update_key */
+/* SNIPPET_START: update_key */
 
-void
-Hacl_Hash_Blake2s_update_key(
-  uint32_t *wv,
-  uint32_t *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t ll
-)
+static void update_key(uint32_t *wv, uint32_t *hash, uint32_t kk, uint8_t *k, uint32_t ll)
 {
   uint64_t lb = (uint64_t)(uint32_t)64U;
   uint8_t b[64U] = { 0U };
@@ -538,7 +531,7 @@ Hacl_Hash_Blake2s_update_key(
   Lib_Memzero0_memzero(b, (uint32_t)64U * sizeof (b[0U]));
 }
 
-/* SNIPPET_END: Hacl_Hash_Blake2s_update_key */
+/* SNIPPET_END: update_key */
 
 /* SNIPPET_START: Hacl_Hash_Blake2s_update_multi */
 
@@ -623,7 +616,7 @@ update(uint32_t *wv, uint32_t *hash, uint32_t kk, uint8_t *k, uint32_t ll, uint8
   uint64_t lb = (uint64_t)(uint32_t)64U;
   if (kk > (uint32_t)0U)
   {
-    Hacl_Hash_Blake2s_update_key(wv, hash, kk, k, ll);
+    update_key(wv, hash, kk, k, ll);
     if (!(ll == (uint32_t)0U))
     {
       update_blocks(ll, wv, hash, lb, d);
@@ -664,49 +657,6 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_finish */
-
-/* SNIPPET_START: Hacl_Hash_Blake2s_hash_with_key */
-
-/**
-Write the BLAKE2s digest of message `input` using key `key` into `output`.
-
-@param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
-@param input Pointer to `input_len` bytes of memory where the input message is read from.
-@param input_len Length of the input message.
-@param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0.
-*/
-void
-Hacl_Hash_Blake2s_hash_with_key(
-  uint8_t *output,
-  uint32_t output_len,
-  uint8_t *input,
-  uint32_t input_len,
-  uint8_t *key,
-  uint32_t key_len
-)
-{
-  uint32_t b[16U] = { 0U };
-  uint32_t b1[16U] = { 0U };
-  Hacl_Hash_Blake2s_init(b, key_len, output_len);
-  update(b1, b, key_len, key, input_len, input);
-  Hacl_Hash_Blake2s_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
-}
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_hash_with_key */
-
-/* SNIPPET_START: Hacl_Hash_Blake2s_malloc_with_key */
-
-uint32_t *Hacl_Hash_Blake2s_malloc_with_key(void)
-{
-  uint32_t *buf = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
-  return buf;
-}
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_malloc_with_key */
 
 /* SNIPPET_START: Hacl_Hash_Blake2s_malloc */
 
@@ -1021,4 +971,37 @@ void Hacl_Hash_Blake2s_free(Hacl_Hash_Blake2s_state_t *state)
 }
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_free */
+
+/* SNIPPET_START: Hacl_Hash_Blake2s_hash_with_key */
+
+/**
+Write the BLAKE2s digest of message `input` using key `key` into `output`.
+
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
+*/
+void
+Hacl_Hash_Blake2s_hash_with_key(
+  uint8_t *output,
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
+)
+{
+  uint32_t b[16U] = { 0U };
+  uint32_t b1[16U] = { 0U };
+  Hacl_Hash_Blake2s_init(b, key_len, output_len);
+  update(b1, b, key_len, key, input_len, input);
+  Hacl_Hash_Blake2s_finish(output_len, output, b);
+  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
+}
+
+/* SNIPPET_END: Hacl_Hash_Blake2s_hash_with_key */
 

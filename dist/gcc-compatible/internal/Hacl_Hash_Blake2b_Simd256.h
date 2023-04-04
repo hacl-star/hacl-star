@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __internal_EverCrypt_Hash_H
-#define __internal_EverCrypt_Hash_H
+#ifndef __internal_Hacl_Hash_Blake2b_Simd256_H
+#define __internal_Hacl_Hash_Blake2b_Simd256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,44 +35,57 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "internal/Vale.h"
-#include "internal/Hacl_Hash_SHA3.h"
-#include "internal/Hacl_Hash_SHA2.h"
-#include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_MD5.h"
-#include "internal/Hacl_Hash_Blake2s_Simd128.h"
-#include "internal/Hacl_Hash_Blake2s.h"
-#include "internal/Hacl_Hash_Blake2b_Simd256.h"
-#include "internal/Hacl_Hash_Blake2b.h"
-#include "../EverCrypt_Hash.h"
-
-/* SNIPPET_START: EverCrypt_Hash_update_multi_256 */
-
-void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
-
-/* SNIPPET_END: EverCrypt_Hash_update_multi_256 */
-
-/* SNIPPET_START: EverCrypt_Hash_update_last_256 */
+#include "internal/Hacl_Impl_Blake2_Constants.h"
+#include "../Hacl_Hash_Blake2b_Simd256.h"
+#include "libintvector.h"
 
 void
-EverCrypt_Hash_update_last_256(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
+Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
+
+void
+Hacl_Hash_Blake2b_Simd256_update_multi(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  FStar_UInt128_uint128 prev,
+  uint8_t *blocks,
+  uint32_t nb
 );
 
-/* SNIPPET_END: EverCrypt_Hash_update_last_256 */
+void
+Hacl_Hash_Blake2b_Simd256_update_last(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  FStar_UInt128_uint128 prev,
+  uint32_t rem,
+  uint8_t *d
+);
 
-/* SNIPPET_START: EverCrypt_Hash_Incremental_hash_256 */
+void
+Hacl_Hash_Blake2b_Simd256_finish(
+  uint32_t nn,
+  uint8_t *output,
+  Lib_IntVector_Intrinsics_vec256 *hash
+);
 
-void EverCrypt_Hash_Incremental_hash_256(uint8_t *output, uint8_t *input, uint32_t input_len);
+void
+Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32(
+  Lib_IntVector_Intrinsics_vec256 *st,
+  uint64_t *st32
+);
 
-/* SNIPPET_END: EverCrypt_Hash_Incremental_hash_256 */
+void
+Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(
+  uint64_t *st32,
+  Lib_IntVector_Intrinsics_vec256 *st
+);
+
+Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_EverCrypt_Hash_H_DEFINED
+#define __internal_Hacl_Hash_Blake2b_Simd256_H_DEFINED
 #endif

@@ -40,6 +40,10 @@ extern "C" {
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
+#include "internal/Hacl_Hash_Blake2s_Simd128.h"
+#include "internal/Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2b_Simd256.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "../EverCrypt_Hash.h"
 
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);

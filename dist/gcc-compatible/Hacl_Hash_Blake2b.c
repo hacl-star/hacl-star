@@ -23,7 +23,7 @@
  */
 
 
-#include "Hacl_Hash_Blake2b.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 
@@ -505,14 +505,7 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
   r1[3U] = iv7;
 }
 
-void
-Hacl_Hash_Blake2b_update_key(
-  uint64_t *wv,
-  uint64_t *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t ll
-)
+static void update_key(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll)
 {
   FStar_UInt128_uint128 lb = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
   uint8_t b[128U] = { 0U };
@@ -607,7 +600,7 @@ update(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll, uint8
   FStar_UInt128_uint128 lb = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
   if (kk > (uint32_t)0U)
   {
-    Hacl_Hash_Blake2b_update_key(wv, hash, kk, k, ll);
+    update_key(wv, hash, kk, k, ll);
     if (!(ll == (uint32_t)0U))
     {
       update_blocks(ll, wv, hash, lb, d);
@@ -641,41 +634,6 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
   Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
-}
-
-/**
-Write the BLAKE2b digest of message `input` using key `key` into `output`.
-
-@param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
-@param input Pointer to `input_len` bytes of memory where the input message is read from.
-@param input_len Length of the input message.
-@param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0.
-*/
-void
-Hacl_Hash_Blake2b_hash_with_key(
-  uint8_t *output,
-  uint32_t output_len,
-  uint8_t *input,
-  uint32_t input_len,
-  uint8_t *key,
-  uint32_t key_len
-)
-{
-  uint64_t b[16U] = { 0U };
-  uint64_t b1[16U] = { 0U };
-  Hacl_Hash_Blake2b_init(b, key_len, output_len);
-  update(b1, b, key_len, key, input_len, input);
-  Hacl_Hash_Blake2b_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
-}
-
-uint64_t *Hacl_Hash_Blake2b_malloc_with_key(void)
-{
-  uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
-  return buf;
 }
 
 /**
@@ -1000,5 +958,34 @@ void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state)
   KRML_HOST_FREE(b);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(state);
+}
+
+/**
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
+
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
+*/
+void
+Hacl_Hash_Blake2b_hash_with_key(
+  uint8_t *output,
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
+)
+{
+  uint64_t b[16U] = { 0U };
+  uint64_t b1[16U] = { 0U };
+  Hacl_Hash_Blake2b_init(b, key_len, output_len);
+  update(b1, b, key_len, key, input_len, input);
+  Hacl_Hash_Blake2b_finish(output_len, output, b);
+  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
 }
 

@@ -28,6 +28,8 @@
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 /* SNIPPET_START: Hacl_HMAC_compute_sha1 */
 

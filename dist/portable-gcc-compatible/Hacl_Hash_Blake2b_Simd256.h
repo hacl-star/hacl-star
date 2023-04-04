@@ -39,115 +39,6 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "libintvector.h"
 
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_init */
-
-void
-Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_init */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_update_key */
-
-void
-Hacl_Hash_Blake2b_Simd256_update_key(
-  Lib_IntVector_Intrinsics_vec256 *wv,
-  Lib_IntVector_Intrinsics_vec256 *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t ll
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_update_key */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_update_multi */
-
-void
-Hacl_Hash_Blake2b_Simd256_update_multi(
-  uint32_t len,
-  Lib_IntVector_Intrinsics_vec256 *wv,
-  Lib_IntVector_Intrinsics_vec256 *hash,
-  FStar_UInt128_uint128 prev,
-  uint8_t *blocks,
-  uint32_t nb
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_update_multi */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_update_last */
-
-void
-Hacl_Hash_Blake2b_Simd256_update_last(
-  uint32_t len,
-  Lib_IntVector_Intrinsics_vec256 *wv,
-  Lib_IntVector_Intrinsics_vec256 *hash,
-  FStar_UInt128_uint128 prev,
-  uint32_t rem,
-  uint8_t *d
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_update_last */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_finish */
-
-void
-Hacl_Hash_Blake2b_Simd256_finish(
-  uint32_t nn,
-  uint8_t *output,
-  Lib_IntVector_Intrinsics_vec256 *hash
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_finish */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_hash_with_key */
-
-/**
-Write the BLAKE2b digest of message `input` using key `key` into `output`.
-
-@param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
-@param input Pointer to `input_len` bytes of memory where the input message is read from.
-@param input_len Length of the input message.
-@param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0.
-*/
-void
-Hacl_Hash_Blake2b_Simd256_hash_with_key(
-  uint8_t *output,
-  uint32_t output_len,
-  uint8_t *input,
-  uint32_t input_len,
-  uint8_t *key,
-  uint32_t key_len
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_hash_with_key */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32 */
-
-void
-Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32(
-  Lib_IntVector_Intrinsics_vec256 *st,
-  uint64_t *st32
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32 */
-
-void
-Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(
-  uint64_t *st32,
-  Lib_IntVector_Intrinsics_vec256 *st
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_malloc_with_key */
-
-Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_malloc_with_key */
-
 /* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_block_state_t */
 
 typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
@@ -221,6 +112,30 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
 void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state);
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_free */
+
+/* SNIPPET_START: Hacl_Hash_Blake2b_Simd256_hash_with_key */
+
+/**
+Write the BLAKE2b digest of message `input` using key `key` into `output`.
+
+@param output Pointer to `output_len` bytes of memory where the digest is written to.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
+@param input Pointer to `input_len` bytes of memory where the input message is read from.
+@param input_len Length of the input message.
+@param key Pointer to `key_len` bytes of memory where the key is read from.
+@param key_len Length of the key. Can be 0.
+*/
+void
+Hacl_Hash_Blake2b_Simd256_hash_with_key(
+  uint8_t *output,
+  uint32_t output_len,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key,
+  uint32_t key_len
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2b_Simd256_hash_with_key */
 
 #if defined(__cplusplus)
 }

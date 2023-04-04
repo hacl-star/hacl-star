@@ -30,6 +30,10 @@
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
+#include "internal/Hacl_Hash_Blake2s_Simd128.h"
+#include "internal/Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2b_Simd256.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "config.h"
 
 /* SNIPPET_START: state_s_tags */

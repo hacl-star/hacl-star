@@ -38,6 +38,8 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "../Hacl_HMAC.h"
 
 typedef struct K___uint32_t_uint32_t_s

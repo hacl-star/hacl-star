@@ -26,6 +26,7 @@
 #include "Hacl_HMAC_Blake2b_256.h"
 
 #include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Hash_Blake2b_Simd256.h"
 #include "internal/Hacl_HMAC.h"
 
 /* SNIPPET_START: Hacl_HMAC_Blake2b_256_compute_blake2b_256 */
