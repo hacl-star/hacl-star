@@ -2398,7 +2398,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9329fc7fdb22ccb8589249c5ac6e0380"
+      "3167a942ed93e727ab7006645dddbdcd"
     ],
     [
       "Spec.Agile.HPKE.id_aead",
@@ -4164,7 +4164,7 @@
         "typing_Spec.Agile.HPKE.size_kdf"
       ],
       0,
-      "b5feaf3d521a2fe13c5dbe015a99aee2"
+      "df2bdefcb0090b469b30c5ef56e99224"
     ],
     [
       "Spec.Agile.HPKE.context_export",
@@ -6129,7 +6129,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "566a1fd540daf8e85ab80f6f86fe2b6e"
+      "b97c9118f26ad1905a2ccb1fd53d8c3a"
     ],
     [
       "Spec.Agile.HPKE.sendExportPSK",
@@ -6471,6 +6471,7 @@
         "equation_Spec.Agile.HPKE.size_dh_public",
         "equation_Spec.Agile.HPKE.size_kdf",
         "equation_Spec.Chacha20.size_block", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.block_word_length",
         "fuel_guarded_inversion_FStar.Pervasives.Native.option",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple4",
         "fuel_guarded_inversion_Spec.Agile.AEAD.alg",
@@ -6692,11 +6693,12 @@
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.AES.AES128@tok",
         "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.AES.key_size", "equation_Spec.Agile.AEAD.ad",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.AES.key_size",
+        "equation_Spec.Agile.AEAD.ad",
         "equation_Spec.Agile.AEAD.cipher_alg_of_supported_alg",
         "equation_Spec.Agile.AEAD.decrypted",
         "equation_Spec.Agile.AEAD.is_supported_alg",
@@ -7403,7 +7405,6 @@
         "equation_Spec.Agile.HPKE.setupAuthPSKR",
         "equation_Spec.Agile.HPKE.size_aead_key",
         "equation_Spec.Agile.HPKE.size_aead_nonce",
-        "equation_Spec.Agile.HPKE.size_dh_key",
         "equation_Spec.Chacha20.size_block", "equation_Spec.Curve25519.one",
         "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.block_word_length",
@@ -7416,9 +7417,8 @@
         "kinding_FStar.Pervasives.Native.tuple2@tok",
         "kinding_FStar.Pervasives.Native.tuple4@tok",
         "lemma_FStar.Pervasives.invertOption",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -7433,7 +7433,6 @@
         "refinement_interpretation_Tm_refine_82d6066c0f45dbdc3c6f8a2fb221678c",
         "refinement_interpretation_Tm_refine_982fb3d3fec67274e50be352a80fb36e",
         "refinement_interpretation_Tm_refine_ab3ef179536b4f7f219bd183ef71a0fc",
-        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_ce5a1bd8437baa640019cd70bf466fc0",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_dd6b7c82943901495ce61ec2042328d2",
@@ -7459,7 +7458,6 @@
         "typing_Spec.Agile.HPKE.seq_aead_s",
         "typing_Spec.Agile.HPKE.seq_of_ctx",
         "typing_Spec.Agile.HPKE.setupAuthPSKR",
-        "typing_Spec.Agile.HPKE.size_dh_key",
         "typing_Spec.Chacha20.size_block",
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
