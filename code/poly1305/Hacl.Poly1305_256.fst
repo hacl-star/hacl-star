@@ -19,5 +19,3 @@ let poly1305_update1 = poly1305_update1 #M256
 let poly1305_update = poly1305_update #M256
 
 let poly1305_finish = poly1305_finish #M256
-
-let mac = poly1305_poly1305_mac_higher #M256 True poly1305_finish poly1305_update poly1305_init
