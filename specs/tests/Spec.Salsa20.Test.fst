@@ -5,16 +5,18 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+
 open Spec.Salsa20
 
-(* TESTS: https://cr.yp.to/snuffle/spec.pdf *)
+///  TESTS: https://cr.yp.to/snuffle/spec.pdf
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
-
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let test_quarter_round () =
-  let expected1_l = List.Tot.map u32_from_UInt32 [0ul; 0ul; 0ul; 0ul] in
-  let expected2_l = List.Tot.map u32_from_UInt32 [0x08008145ul; 0x80ul; 0x010200ul; 0x20500000ul] in
+  let expected1_l =
+    List.Tot.map u32_from_UInt32 [0ul; 0ul; 0ul; 0ul] in
+  let expected2_l =
+    List.Tot.map u32_from_UInt32 [0x08008145ul; 0x80ul; 0x010200ul; 0x20500000ul] in
   assert_norm (List.Tot.length expected1_l = 4);
   assert_norm (List.Tot.length expected2_l = 4);
   let expected1 : lseq uint32 4 = of_list expected1_l in
@@ -116,7 +118,8 @@ let test_salsa20_core () =
 
   let st = uints_from_bytes_le #U32 #SEC #16 inp in
   let st = salsa20_core 0 st in
-  for_all2 (fun a b -> uint_to_nat #U32 a = uint_to_nat #U32 b) st (uints_from_bytes_le #U32 #SEC #16 expected)
+  for_all2 (fun a b -> uint_to_nat #U32 a = uint_to_nat #U32 b)
+    st (uints_from_bytes_le #U32 #SEC #16 expected)
 
 
 let test () =
