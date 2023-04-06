@@ -71,7 +71,7 @@ let ecp256dh_r_ is_pk_valid ss pk sk =
   push_frame ();
   let ss_proj = create_point () in
   if is_pk_valid then begin
-    point_mul ss_proj pk sk;
+    point_mul ss_proj sk pk;
     point_store ss ss_proj end;
   pop_frame ()
 

@@ -10,7 +10,6 @@ open Lib.Buffer
 open Hacl.Impl.P256.Point
 
 module S = Spec.P256
-module SM = Hacl.Spec.P256.Montgomery
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
