@@ -46,6 +46,16 @@ Hacl_MAC_Poly1305_Simd256_fmul_r4_normalize(
   Lib_IntVector_Intrinsics_vec256 *p
 );
 
+void
+Hacl_MAC_Poly1305_Simd256_poly1305_init(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *key);
+
+void
+Hacl_MAC_Poly1305_Simd256_poly1305_finish(
+  uint8_t *tag,
+  uint8_t *key,
+  Lib_IntVector_Intrinsics_vec256 *ctx
+);
+
 #if defined(__cplusplus)
 }
 #endif

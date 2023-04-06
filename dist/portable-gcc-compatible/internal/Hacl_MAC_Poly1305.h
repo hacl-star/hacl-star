@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Hacl_MAC_Poly1305_H
-#define __Hacl_MAC_Poly1305_H
+#ifndef __internal_Hacl_MAC_Poly1305_H
+#define __internal_Hacl_MAC_Poly1305_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,36 +35,23 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Krmllib.h"
+#include "../Hacl_MAC_Poly1305.h"
 
-typedef struct Hacl_MAC_Poly1305_state_t_s
-{
-  uint64_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-  uint8_t *p_key;
-}
-Hacl_MAC_Poly1305_state_t;
+/* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_init */
 
-Hacl_MAC_Poly1305_state_t *Hacl_MAC_Poly1305_malloc(uint8_t *key);
+void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key);
 
-void Hacl_MAC_Poly1305_reset(Hacl_MAC_Poly1305_state_t *state, uint8_t *key);
+/* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_init */
 
-/**
-0 = success, 1 = max length exceeded
-*/
-uint32_t
-Hacl_MAC_Poly1305_update(Hacl_MAC_Poly1305_state_t *state, uint8_t *chunk, uint32_t chunk_len);
+/* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_finish */
 
-void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output);
+void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx);
 
-void Hacl_MAC_Poly1305_free(Hacl_MAC_Poly1305_state_t *state);
-
-void Hacl_MAC_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, uint8_t *key);
+/* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_finish */
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_MAC_Poly1305_H_DEFINED
+#define __internal_Hacl_MAC_Poly1305_H_DEFINED
 #endif

@@ -54,6 +54,24 @@ Hacl_MAC_Poly1305_Simd256_fmul_r4_normalize(
 
 /* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_fmul_r4_normalize */
 
+/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_poly1305_init */
+
+void
+Hacl_MAC_Poly1305_Simd256_poly1305_init(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *key);
+
+/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_init */
+
+/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_poly1305_finish */
+
+void
+Hacl_MAC_Poly1305_Simd256_poly1305_finish(
+  uint8_t *tag,
+  uint8_t *key,
+  Lib_IntVector_Intrinsics_vec256 *ctx
+);
+
+/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_finish */
+
 #if defined(__cplusplus)
 }
 #endif

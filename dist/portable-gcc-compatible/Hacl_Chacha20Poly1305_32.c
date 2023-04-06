@@ -25,6 +25,7 @@
 
 #include "Hacl_Chacha20Poly1305_32.h"
 
+#include "internal/Hacl_MAC_Poly1305.h"
 #include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: poly1305_padded_32 */

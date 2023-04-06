@@ -37,60 +37,6 @@ extern "C" {
 
 #include "libintvector.h"
 
-/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_poly1305_ctx */
-
-typedef Lib_IntVector_Intrinsics_vec256 *Hacl_MAC_Poly1305_Simd256_poly1305_ctx;
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_ctx */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_poly1305_init */
-
-void
-Hacl_MAC_Poly1305_Simd256_poly1305_init(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *key);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_init */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_poly1305_update1 */
-
-void
-Hacl_MAC_Poly1305_Simd256_poly1305_update1(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *text);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_update1 */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_poly1305_update */
-
-void
-Hacl_MAC_Poly1305_Simd256_poly1305_update(
-  Lib_IntVector_Intrinsics_vec256 *ctx,
-  uint32_t len,
-  uint8_t *text
-);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_update */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_poly1305_finish */
-
-void
-Hacl_MAC_Poly1305_Simd256_poly1305_finish(
-  uint8_t *tag,
-  uint8_t *key,
-  Lib_IntVector_Intrinsics_vec256 *ctx
-);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_poly1305_finish */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_mac */
-
-void
-Hacl_MAC_Poly1305_Simd256_mac(
-  uint8_t *output,
-  uint8_t *input,
-  uint32_t input_len,
-  uint8_t *key
-);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_mac */
-
 /* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_state_t */
 
 typedef struct Hacl_MAC_Poly1305_Simd256_state_t_s
@@ -142,6 +88,18 @@ Hacl_MAC_Poly1305_Simd256_digest(Hacl_MAC_Poly1305_Simd256_state_t *state, uint8
 void Hacl_MAC_Poly1305_Simd256_free(Hacl_MAC_Poly1305_Simd256_state_t *state);
 
 /* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_free */
+
+/* SNIPPET_START: Hacl_MAC_Poly1305_Simd256_mac */
+
+void
+Hacl_MAC_Poly1305_Simd256_mac(
+  uint8_t *output,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key
+);
+
+/* SNIPPET_END: Hacl_MAC_Poly1305_Simd256_mac */
 
 #if defined(__cplusplus)
 }

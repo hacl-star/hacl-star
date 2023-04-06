@@ -37,42 +37,6 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 
-/* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_ctx */
-
-typedef uint64_t *Hacl_MAC_Poly1305_poly1305_ctx;
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_ctx */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_init */
-
-void Hacl_MAC_Poly1305_poly1305_init(uint64_t *ctx, uint8_t *key);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_init */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_update1 */
-
-void Hacl_MAC_Poly1305_poly1305_update1(uint64_t *ctx, uint8_t *text);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_update1 */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_update */
-
-void Hacl_MAC_Poly1305_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_update */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_poly1305_finish */
-
-void Hacl_MAC_Poly1305_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_poly1305_finish */
-
-/* SNIPPET_START: Hacl_MAC_Poly1305_mac */
-
-void Hacl_MAC_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, uint8_t *key);
-
-/* SNIPPET_END: Hacl_MAC_Poly1305_mac */
-
 /* SNIPPET_START: Hacl_MAC_Poly1305_state_t */
 
 typedef struct Hacl_MAC_Poly1305_state_t_s
@@ -119,6 +83,12 @@ void Hacl_MAC_Poly1305_digest(Hacl_MAC_Poly1305_state_t *state, uint8_t *output)
 void Hacl_MAC_Poly1305_free(Hacl_MAC_Poly1305_state_t *state);
 
 /* SNIPPET_END: Hacl_MAC_Poly1305_free */
+
+/* SNIPPET_START: Hacl_MAC_Poly1305_mac */
+
+void Hacl_MAC_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, uint8_t *key);
+
+/* SNIPPET_END: Hacl_MAC_Poly1305_mac */
 
 #if defined(__cplusplus)
 }

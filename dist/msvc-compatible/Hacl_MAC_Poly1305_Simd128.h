@@ -37,36 +37,6 @@ extern "C" {
 
 #include "libintvector.h"
 
-typedef Lib_IntVector_Intrinsics_vec128 *Hacl_MAC_Poly1305_Simd128_poly1305_ctx;
-
-void
-Hacl_MAC_Poly1305_Simd128_poly1305_init(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *key);
-
-void
-Hacl_MAC_Poly1305_Simd128_poly1305_update1(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *text);
-
-void
-Hacl_MAC_Poly1305_Simd128_poly1305_update(
-  Lib_IntVector_Intrinsics_vec128 *ctx,
-  uint32_t len,
-  uint8_t *text
-);
-
-void
-Hacl_MAC_Poly1305_Simd128_poly1305_finish(
-  uint8_t *tag,
-  uint8_t *key,
-  Lib_IntVector_Intrinsics_vec128 *ctx
-);
-
-void
-Hacl_MAC_Poly1305_Simd128_mac(
-  uint8_t *output,
-  uint8_t *input,
-  uint32_t input_len,
-  uint8_t *key
-);
-
 typedef struct Hacl_MAC_Poly1305_Simd128_state_t_s
 {
   Lib_IntVector_Intrinsics_vec128 *block_state;
@@ -94,6 +64,14 @@ void
 Hacl_MAC_Poly1305_Simd128_digest(Hacl_MAC_Poly1305_Simd128_state_t *state, uint8_t *output);
 
 void Hacl_MAC_Poly1305_Simd128_free(Hacl_MAC_Poly1305_Simd128_state_t *state);
+
+void
+Hacl_MAC_Poly1305_Simd128_mac(
+  uint8_t *output,
+  uint8_t *input,
+  uint32_t input_len,
+  uint8_t *key
+);
 
 #if defined(__cplusplus)
 }
