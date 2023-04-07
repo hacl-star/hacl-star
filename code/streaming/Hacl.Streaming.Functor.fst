@@ -368,13 +368,13 @@ let malloc #index c i t t' key r =
 #pop-options
 
 #push-options "--z3rlimit 100"
-let copy #index c i t t' s0 r =
+let copy #index c i t t' state r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
 
   // All source state is suffixed by 0.
-  let State block_state0 buf0 total_len0 seen0 k0 = !*s0 in
+  let State block_state0 buf0 total_len0 seen0 k0 = !*state in
 
   (**) let h0 = ST.get () in
 
@@ -388,7 +388,7 @@ let copy #index c i t t' s0 r =
   (**) if c.km = Runtime then
   (**)   c.key.frame_invariant #i B.loc_none k0 h0 h1;
   (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
-  (**) assert (invariant c i h1 s0);
+  (**) assert (invariant c i h1 state);
 
   let block_state = c.state.create_in i r in
   (**) let h2 = ST.get () in
@@ -398,7 +398,7 @@ let copy #index c i t t' s0 r =
   (**) if c.km = Runtime then
   (**)   c.key.frame_invariant #i B.loc_none k0 h1 h2;
   (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
-  (**) assert (invariant c i h2 s0);
+  (**) assert (invariant c i h2 state);
 
   c.state.copy (G.hide i) block_state0 block_state;
   (**) let h2 = ST.get () in
