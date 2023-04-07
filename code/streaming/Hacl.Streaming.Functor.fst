@@ -1318,7 +1318,7 @@ val update_empty_or_full_buf:
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
-#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 300"
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 500"
 let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
