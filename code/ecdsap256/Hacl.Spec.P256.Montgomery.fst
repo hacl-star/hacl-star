@@ -171,12 +171,15 @@ let mont_cancel_lemma_gen n mont_R mont_R_inv a b =
   }
 
 
-let mul_fmont_R_and_R_inv_is_one () =
-  let fmont_R_inv' = M.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2) in
+let fmont_R_inv_value () =
+  let fmont_R_inv1 = M.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2) in
   M.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
-  assert (fmont_R_inv = fmont_R_inv');
-  assert_norm (fmont_R * fmont_R_inv' % S.prime = 1)
+  assert_norm (fmont_R_inv1 = fmont_R_inv')
 
+
+let mul_fmont_R_and_R_inv_is_one () =
+  assert_norm (fmont_R * fmont_R_inv' % S.prime = 1);
+  fmont_R_inv_value ()
 
 //--------------------------------------//
 // bn_mont_reduction is x * fmont_R_inv //
@@ -299,11 +302,15 @@ let fmont_sub_lemma a b =
 
 ///  Montgomery arithmetic for a scalar field
 
-let mul_qmont_R_and_R_inv_is_one () =
-  let qmont_R_inv' = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2) in
+let qmont_R_inv_value () =
+  let qmont_R_inv1 = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2) in
   M.pow_mod_def #S.order (pow2 256 % S.order) (S.order - 2);
-  assert (qmont_R_inv = qmont_R_inv');
-  assert_norm (qmont_R * qmont_R_inv' % S.order = 1)
+  assert_norm (qmont_R_inv1 = qmont_R_inv')
+
+
+let mul_qmont_R_and_R_inv_is_one () =
+  assert_norm (qmont_R * qmont_R_inv' % S.order = 1);
+  qmont_R_inv_value ()
 
 //--------------------------------------//
 // bn_mont_reduction is x * qmont_R_inv //
@@ -398,8 +405,7 @@ let qmont_mul_lemma a b =
 
 
 let qmont_inv_lemma k =
-  let qmont_R_inv' = M.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2) in
-  M.pow_mod_def #S.order (pow2 256 % S.order) (S.order - 2);
+  qmont_R_inv_value ();
   assert_norm (M.pow_mod_ #S.order qmont_R_inv' (S.order - 2) == qmont_R % S.order);
   M.pow_mod_def #S.order qmont_R_inv (S.order - 2);
   assert (M.pow_mod #S.order qmont_R_inv (S.order - 2) == qmont_R % S.order);

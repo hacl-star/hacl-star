@@ -56,9 +56,6 @@ val make_a_coeff: a:felem -> Stack unit
 
 [@CInline]
 let make_a_coeff a =
-  let fmont_R_inv' =
-    Ghost.hide (Lib.NatMod.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)) in
-  Lib.NatMod.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
   // a_coeff      = 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc
   // a_coeff_mont = 0xfffffffc00000004000000000000000000000003fffffffffffffffffffffffc
   [@inline_let] let n0 = u64 0xfffffffffffffffc in
@@ -68,7 +65,8 @@ let make_a_coeff a =
   assert_norm (
     v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.a_coeff);
   assert_norm (S.a_coeff ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * fmont_R_inv' % S.prime);
+    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
+  SM.fmont_R_inv_value ();
   bn_make_u64_4 a n0 n1 n2 n3
 
 
@@ -81,9 +79,6 @@ val make_b_coeff: b:felem -> Stack unit
 
 [@CInline]
 let make_b_coeff b =
-  let fmont_R_inv' =
-    Ghost.hide (Lib.NatMod.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)) in
-  Lib.NatMod.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
   // b_coeff      = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b
   // b_coeff_mont = 0xdc30061d04874834e5a220abf7212ed6acf005cd78843090d89cdf6229c4bddf
   [@inline_let] let n0 = u64 0xd89cdf6229c4bddf in
@@ -93,7 +88,8 @@ let make_b_coeff b =
   assert_norm (
     v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.b_coeff);
   assert_norm (S.b_coeff ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * fmont_R_inv' % S.prime);
+    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
+  SM.fmont_R_inv_value ();
   bn_make_u64_4 b n0 n1 n2 n3
 
 
@@ -105,9 +101,6 @@ val make_g_x: n:felem -> Stack unit
 
 [@CInline]
 let make_g_x n =
-  let fmont_R_inv' =
-    Ghost.hide (Lib.NatMod.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)) in
-  Lib.NatMod.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
   // g_x = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296
   // mont_g_x = 0x18905f76a53755c679fb732b7762251075ba95fc5fedb60179e730d418a9143c
   [@inline_let] let n0 = u64 0x79e730d418a9143c in
@@ -116,7 +109,8 @@ let make_g_x n =
   [@inline_let] let n3 = u64 0x18905f76a53755c6 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.g_x);
   assert_norm (S.g_x ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * fmont_R_inv' % S.prime);
+    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
+  SM.fmont_R_inv_value ();
   bn_make_u64_4 n n0 n1 n2 n3
 
 
@@ -128,9 +122,6 @@ val make_g_y: n:felem -> Stack unit
 
 [@CInline]
 let make_g_y n =
-  let fmont_R_inv' =
-    Ghost.hide (Lib.NatMod.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)) in
-  Lib.NatMod.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
   // g_y = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5
   // mont_g_x = 0x8571ff1825885d85d2e88688dd21f3258b4ab8e4ba19e45cddf25357ce95560a
   [@inline_let] let n0 = u64 0xddf25357ce95560a in
@@ -139,7 +130,8 @@ let make_g_y n =
   [@inline_let] let n3 = u64 0x8571ff1825885d85 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont S.g_y);
   assert_norm (S.g_y ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * fmont_R_inv' % S.prime);
+    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
+  SM.fmont_R_inv_value ();
   bn_make_u64_4 n n0 n1 n2 n3
 
 

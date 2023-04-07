@@ -33,9 +33,6 @@ let make_fzero n =
 
 [@CInline]
 let make_fone n =
-  let fmont_R_inv' =
-    Ghost.hide (Lib.NatMod.pow_mod_ #S.prime (pow2 256 % S.prime) (S.prime - 2)) in
-  Lib.NatMod.pow_mod_def #S.prime (pow2 256 % S.prime) (S.prime - 2);
   // 0xfffffffeffffffffffffffffffffffff000000000000000000000001
   [@inline_let] let n0 = u64 0x1 in
   [@inline_let] let n1 = u64 0xffffffff00000000 in
@@ -43,7 +40,8 @@ let make_fone n =
   [@inline_let] let n3 = u64 0xfffffffe in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont 1);
   assert_norm (
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * fmont_R_inv' % S.prime = 1);
+    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime = 1);
+  SM.fmont_R_inv_value ();
   bn_make_u64_4 n n0 n1 n2 n3
 
 

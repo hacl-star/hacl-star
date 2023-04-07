@@ -26,16 +26,14 @@ friend Hacl.Bignum256
 
 [@CInline]
 let make_qone f =
-  let qmont_R_inv' =
-    Ghost.hide (Lib.NatMod.pow_mod_ #S.order (pow2 256 % S.order) (S.order - 2)) in
-  Lib.NatMod.pow_mod_def #S.order (pow2 256 % S.order) (S.order - 2);
   [@inline_let] let f0 = u64 0xc46353d039cdaaf in
   [@inline_let] let f1 = u64 0x4319055258e8617b in
   [@inline_let] let f2 = u64 0x0 in
   [@inline_let] let f3 = u64 0xffffffff in
   assert_norm (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192 == SM.to_qmont 1);
   assert_norm (
-    (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192) * qmont_R_inv' % S.order == 1);
+    (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192) * SM.qmont_R_inv' % S.order == 1);
+  SM.qmont_R_inv_value ();
   bn_make_u64_4 f f0 f1 f2 f3
 
 
