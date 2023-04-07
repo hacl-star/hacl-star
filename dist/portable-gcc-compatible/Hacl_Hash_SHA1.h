@@ -79,7 +79,7 @@ void Hacl_Hash_SHA1_free(Hacl_Streaming_MD_state_32 *state);
 
 /* SNIPPET_START: Hacl_Hash_SHA1_copy */
 
-Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_copy(Hacl_Streaming_MD_state_32 *s0);
+Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA1_copy(Hacl_Streaming_MD_state_32 *state);
 
 /* SNIPPET_END: Hacl_Hash_SHA1_copy */
 

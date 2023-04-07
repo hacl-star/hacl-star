@@ -317,9 +317,9 @@ void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *state)
   KRML_HOST_FREE(state);
 }
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *s0)
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *state)
 {
-  Hacl_Streaming_MD_state_64 scrut = *s0;
+  Hacl_Streaming_MD_state_64 scrut = *state;
   uint64_t *block_state0 = scrut.block_state;
   uint8_t *buf0 = scrut.buf;
   uint64_t total_len0 = scrut.total_len;

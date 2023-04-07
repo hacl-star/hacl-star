@@ -1448,9 +1448,9 @@ void Hacl_Hash_MD5_free(Hacl_Streaming_MD_state_32 *state)
   KRML_HOST_FREE(state);
 }
 
-Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_copy(Hacl_Streaming_MD_state_32 *s0)
+Hacl_Streaming_MD_state_32 *Hacl_Hash_MD5_copy(Hacl_Streaming_MD_state_32 *state)
 {
-  Hacl_Streaming_MD_state_32 scrut = *s0;
+  Hacl_Streaming_MD_state_32 scrut = *state;
   uint32_t *block_state0 = scrut.block_state;
   uint8_t *buf0 = scrut.buf;
   uint64_t total_len0 = scrut.total_len;

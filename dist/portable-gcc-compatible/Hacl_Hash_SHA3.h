@@ -83,7 +83,7 @@ void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *state);
 
 /* SNIPPET_START: Hacl_Streaming_SHA3_copy_256 */
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *s0);
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *state);
 
 /* SNIPPET_END: Hacl_Streaming_SHA3_copy_256 */
 

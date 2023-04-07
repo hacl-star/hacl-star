@@ -80,7 +80,7 @@ The state is to be freed by calling `free_256`. Cloning the state this way is
 useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch.
 */
-Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_MD_state_32 *s0);
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_MD_state_32 *state);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_copy_256 */
 
@@ -206,7 +206,7 @@ The state is to be freed by calling `free_512`. Cloning the state this way is
 useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch.
 */
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_copy_512(Hacl_Streaming_MD_state_64 *s0);
+Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_copy_512(Hacl_Streaming_MD_state_64 *state);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_copy_512 */
 
