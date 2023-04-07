@@ -12,9 +12,10 @@ module BSeq = Lib.ByteSequence
 ///  Base field
 
 // 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
-let prime: (a:pos{8 < a && a < pow2 256}) =
+let prime: (a:pos{a = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff /\ a < pow2 256}) =
   let p = pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 in
-  assert_norm (8 < p); assert_norm (p < pow2 256); p
+  assert_norm (0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff = p);
+  assert_norm (p < pow2 256); p
 
 let felem = x:nat{x < prime}
 let zero : felem = 0
