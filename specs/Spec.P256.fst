@@ -64,8 +64,7 @@ let point_mul_g (a:qelem) : proj_point = point_mul a base_point
 
 // [a1]G + [a2]P
 let point_mul_double_g (a1 a2:qelem) (p:proj_point) : proj_point =
-  //SE.exp_double_fw mk_p256_concrete_ops base_point 256 a1 p a2 5
-  point_add (point_mul_g a1) (point_mul a2 p)
+  SE.exp_double_fw mk_p256_concrete_ops base_point 256 a1 p a2 5
 
 
 ///  ECDSA over the P256 elliptic curve

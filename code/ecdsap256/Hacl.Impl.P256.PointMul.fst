@@ -19,7 +19,7 @@ module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
-//module PT = Hacl.Impl.PrecompTable
+module PT = Hacl.Impl.PrecompTable
 module SPT256 = Hacl.Spec.PrecompBaseTable256
 module BD = Hacl.Spec.Bignum.Definitions
 
@@ -183,26 +183,77 @@ let point_mul_g res scalar =
   lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
 
+//-------------------------
+
+inline_for_extraction noextract
+val point_mul_g_double_vartime_noalloc:
+    out:point
+  -> scalar1:felem -> q1:point
+  -> scalar2:felem -> q2:point
+  -> table2:lbuffer uint64 (32ul *! 12ul) ->
+  Stack unit
+  (requires fun h ->
+    live h out /\ live h scalar1 /\ live h q1 /\
+    live h scalar2 /\ live h q2 /\ live h table2 /\
+
+    eq_or_disjoint q1 q2 /\ disjoint out q1 /\ disjoint out q2 /\
+    disjoint out scalar1 /\ disjoint out scalar2 /\ disjoint out table2 /\
+
+    as_nat h scalar1 < S.order /\ as_nat h scalar2 < S.order /\
+    point_inv h q1 /\ from_mont_point (as_point_nat h q1) == S.base_point /\
+    point_inv h q2 /\ table_inv_w5 (as_seq h q2) (as_seq h table2))
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    point_inv h1 out /\
+    refl (as_seq h1 out) ==
+    S.to_aff_point (S.point_mul_double_g
+      (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 q2))))
+
+let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
+  [@inline_let] let len = 12ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_p256_concrete_ops in
+  [@inline_let] let l = 5ul in
+  [@inline_let] let table_len = 32ul in
+  [@inline_let] let bLen = 4ul in
+  [@inline_let] let bBits = 256ul in
+  assert_norm (pow2 (v l) == v table_len);
+
+  let h0 = ST.get () in
+  recall_contents precomp_basepoint_table_w5 precomp_basepoint_table_lseq_w5;
+  let h1 = ST.get () in
+  precomp_basepoint_table_lemma_w5 ();
+  assert (table_inv_w5 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w5));
+  assert (table_inv_w5 (as_seq h1 q2) (as_seq h1 table2));
+
+  Hacl.Spec.P256.Bignum.bn_v_is_as_nat (as_seq h0 scalar1);
+  Hacl.Spec.P256.Bignum.bn_v_is_as_nat (as_seq h0 scalar2);
+  ME.mk_lexp_double_fw_tables len ctx_len k l table_len
+    table_inv_w5 table_inv_w5
+    (BE.lprecomp_get_vartime len ctx_len k l table_len)
+    (BE.lprecomp_get_vartime len ctx_len k l table_len)
+    (null uint64) q1 bLen bBits scalar1 q2 scalar2
+    (to_const precomp_basepoint_table_w5) (to_const table2) out;
+
+  SE.exp_double_fw_lemma S.mk_p256_concrete_ops
+    (from_mont_point (as_point_nat h0 q1)) 256 (as_nat h0 scalar1)
+    (from_mont_point (as_point_nat h0 q2)) (as_nat h0 scalar2) 5
+
 
 [@CInline]
-let point_mul_double_g res scalar1 scalar2 p =
+let point_mul_double_g res scalar1 scalar2 q2 =
   push_frame ();
-  let sg1 = create_point () in
-  let sp2 = create_point () in
-  let h0 = ST.get () in
-  point_mul_g sg1 scalar1; // sg1 = [scalar1]G
-  point_mul sp2 scalar2 p; // sp2 = [scalar2]P
-  let h1 = ST.get () in
-  assert (S.to_aff_point (from_mont_point (as_point_nat h1 sg1)) ==
-    S.to_aff_point (S.point_mul_g (as_nat h0 scalar1)));
-  assert (S.to_aff_point (from_mont_point (as_point_nat h1 sp2)) ==
-    S.to_aff_point (S.point_mul (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 p))));
+  [@inline_let] let len = 12ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_p256_concrete_ops in
+  [@inline_let] let table_len = 32ul in
+  assert_norm (pow2 5 == v table_len);
 
-  Hacl.Impl.P256.PointAdd.point_add res sg1 sp2;
-  let h2 = ST.get () in
-  SL.to_aff_point_add_lemma
-    (from_mont_point (as_point_nat h1 sg1)) (from_mont_point (as_point_nat h1 sp2));
-  SL.to_aff_point_add_lemma
-    (S.point_mul_g (as_nat h0 scalar1))
-    (S.point_mul (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 p)));
+  let q1 = create_point () in
+  make_base_point q1;
+
+  let table2 = create (table_len *! len) (u64 0) in
+  PT.lprecomp_table len ctx_len k (null uint64) q2 table_len table2;
+  let h = ST.get () in
+  assert (table_inv_w5 (as_seq h q2) (as_seq h table2));
+  point_mul_g_double_vartime_noalloc res scalar1 q1 scalar2 q2 table2;
   pop_frame ()
