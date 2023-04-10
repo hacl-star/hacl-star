@@ -561,7 +561,7 @@ let _: squash (pow2 32 < pow2 61 /\ pow2 32 < pow2 125) =
 
 noeq type vec =
   | Vec :
-     a:hash_alg
+     a:const_alg
     -> key:bytes{HMAC.keysized a (Seq.length key)}
     -> data:bytes{(Seq.length data + block_length a) `less_than_max_input_length` a}
     -> expected:bytes{length expected <= hash_length a} -> vec

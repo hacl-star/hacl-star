@@ -37,8 +37,8 @@ let update_last (a:hash_alg)
     Spec.Blake2.blake2_update_last (to_blake_alg a) prevlen (S.length input) input hash
   else if is_sha3 a then
     // VERY UNPLEASANT! Because of the lazy split for Blake2 we need to unroll...
-    let rateInBytes = 1088 / 8 in
-    let delimitedSuffix = byte 0x06 in
+    let rateInBytes = rate a / 8 in
+    let delimitedSuffix = if is_shake a then byte 0x1f else byte 0x06 in
     let s = hash in
     let l = S.length input in
     if l = block_length a then
@@ -62,11 +62,12 @@ let split_blocks (a:hash_alg) (input:bytes)
       S.append bs l == input) =
   UpdateMulti.split_at_last_lazy (block_length a) input
 
-let hash_incremental (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a}):
-  Tot (hash:bytes{S.length hash = (hash_length a)})
+let hash_incremental (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a})
+  (out_length: output_length a):
+  Tot (hash:bytes{S.length hash = (hash_length' a out_length)})
 =
   let s = init a in
   let bs, l = split_blocks a input in
   let s = update_multi a s (init_extra_state a) bs in
   let s = update_last a s (if is_sha3 a then () else S.length bs) l in
-  finish a s
+  finish a s out_length

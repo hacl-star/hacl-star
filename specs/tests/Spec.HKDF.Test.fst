@@ -207,7 +207,7 @@ let test3_expected_okm : lbytes 42 =
 
 noeq type vec =
   | Vec :
-    a:Spec.Hash.Definitions.hash_alg
+    a:Spec.Hash.Definitions.const_alg
   -> salt:bytes{HMAC.keysized a (length salt)}
   -> ikm:bytes{HKDF.extract_ikm_length_pred a (length ikm)}
   -> expected_prk:lbytes (Spec.Hash.Definitions.hash_length a)

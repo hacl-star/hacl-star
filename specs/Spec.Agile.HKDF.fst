@@ -34,12 +34,12 @@ open Lib.IntTypes
 /// See https://tools.ietf.org/html/rfc5869#section-2.3
 
 /// The type of T(i) is [a_spec a i]
-let a_spec (a:hash_alg) (i:nat) =
+let a_spec (a:const_alg) (i:nat) =
   Seq.lseq uint8 (if i = 0 then 0 else hash_length a)
 
 /// The main loop that computes T(i)
 val expand_loop:
-    a:hash_alg
+    a:const_alg
   -> prk:bytes
   -> info:bytes
   -> n:nat

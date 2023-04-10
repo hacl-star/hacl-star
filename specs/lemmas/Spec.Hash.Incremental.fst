@@ -18,12 +18,10 @@ let _sync_decl = unit
 
 
 
-let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input `less_than_max_input_length` a }):
-  Lemma (S.equal (hash a input) (hash_incremental a input))
-  =
+let hash_is_hash_incremental' (a: hash_alg) (input: bytes { S.length input `less_than_max_input_length` a }) l =
   if is_blake a then
     Spec.Blake2.Incremental.blake2_is_hash_incremental a input
   else if is_sha3 a then
-    Spec.SHA3.Incremental.sha3_is_incremental a input
+    Spec.SHA3.Incremental.sha3_is_incremental a input l
   else
     Spec.MD.Incremental.md_is_hash_incremental a input (init a)
