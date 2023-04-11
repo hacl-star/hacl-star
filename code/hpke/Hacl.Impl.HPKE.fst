@@ -460,6 +460,13 @@ let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen l
 
 #pop-options
 
+/// Specializing Lib.ByteSequence.uint_to_bytes_be to avoid the forall in the postcondition
+val index_uint_to_bytes_be_i: #t:inttype{unsigned t} -> #l:secrecy_level -> u:uint_t t l -> i:nat{i < numbytes t}
+  -> Lemma
+    (Seq.index (Lib.ByteSequence.uint_to_bytes_be #t #l u) (numbytes t - i - 1) == uint #U8 #l (v u / pow2 (8 * i) % pow2 8))
+
+let index_uint_to_bytes_be_i u i = Lib.ByteSequence.index_uint_to_bytes_be u
+
 noextract inline_for_extraction
 val nat_to_bytes_2 (l:size_t) (b:lbuffer uint8 2ul)
   : Stack unit
@@ -475,7 +482,7 @@ let nat_to_bytes_2 l tmp =
   let l16 = secret (FStar.Int.Cast.Full.uint32_to_uint16 (l `FStar.UInt32.div` 0x10000ul)) in
   assert (v l16 == (v l / pow2 16) % pow2 16);
   assert (v l16 == v l / pow2 16);
-  Lib.ByteBuffer.uint_to_bytes_be (sub tmp 0ul 2ul) l16;
+  Lib.ByteBuffer.uint_to_bytes_be tmp l16;
   let h1 = ST.get () in
 
   let open Lib.ByteSequence in
@@ -483,7 +490,7 @@ let nat_to_bytes_2 l tmp =
     Seq.index (as_seq h1 tmp) 0;
   (==) { }
     Seq.index (uint_to_bytes_be l16) 0;
-  (==) { Lib.ByteSequence.index_uint_to_bytes_be l16 }
+  (==) { index_uint_to_bytes_be_i l16 1 }
     uint #U8 (v l16 / pow2 (8 * 1) % pow2 8);
   (==) { }
     uint #U8 (v l / pow2 (8 * 2) / pow2 (8 * 1) % pow2 8);
@@ -493,7 +500,7 @@ let nat_to_bytes_2 l tmp =
     uint #U8 (v l / pow2 (8 * 3) % pow2 8);
   (==) { }
     uint #U8 (v (secret l) / pow2 (8 * 3) % pow2 8);
-  (==) { admit (); Lib.ByteSequence.index_uint_to_bytes_be #U32 #SEC (secret l) }
+  (==) { index_uint_to_bytes_be_i #U32 #SEC (secret l) 3 }
     Seq.index (uint_to_bytes_be (secret l)) 0;
   };
   admit ()
