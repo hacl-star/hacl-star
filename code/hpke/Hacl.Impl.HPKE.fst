@@ -503,9 +503,26 @@ let nat_to_bytes_2 l tmp =
   (==) { index_uint_to_bytes_be_i #U32 #SEC (secret l) 3 }
     Seq.index (uint_to_bytes_be (secret l)) 0;
   };
+  calc (==) {
+    Seq.index (as_seq h1 tmp) 1;
+  (==) { }
+    Seq.index (uint_to_bytes_be l16) 1;
+  (==) { index_uint_to_bytes_be_i l16 0 }
+    uint #U8 (v l16 / pow2 (8 * 0) % pow2 8);
+  (==) { }
+    uint #U8 (v l / pow2 (8 * 2) / pow2 (8 * 0) % pow2 8);
+  (==) { FStar.Math.Lemmas.division_multiplication_lemma (v l) (pow2 (8 * 2)) (pow2 (8 * 1));
+    assert_norm (pow2 (8 * 2) * pow2 (8 * 0) == pow2 (8 * 2))
+  }
+    uint #U8 (v l / pow2 (8 * 2) % pow2 8);
+  (==) { }
+    uint #U8 (v (secret l) / pow2 (8 * 2) % pow2 8);
+  (==) { index_uint_to_bytes_be_i #U32 #SEC (secret l) 2 }
+    Seq.index (uint_to_bytes_be (secret l)) 1;
+  };
+  assert (as_seq h1 tmp `Seq.equal` Seq.slice (Lib.ByteSequence.uint_to_bytes_be (secret l)) 0 2);
   admit ()
   ;
-  assert (as_seq h1 (gsub tmp 0ul 4ul) `Seq.equal` Lib.ByteSequence.uint_to_bytes_be (secret l));
 
   Lib.ByteSequence.lemma_uint_to_bytes_be_preserves_value (secret l);
   assert (Lib.ByteSequence.nat_from_bytes_be (as_seq h1 (gsub tmp 0ul 4ul)) == v l);
