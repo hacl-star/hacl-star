@@ -61,18 +61,6 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr everCrypt_Hash_Incremental_hash_state) @->
            (ocaml_bytes @->
               (uint32_t @-> (returning everCrypt_Error_error_code))))
-    let everCrypt_Hash_Incremental_finish_sha3_256 =
-      foreign "EverCrypt_Hash_Incremental_finish_sha3_256"
-        ((ptr everCrypt_Hash_Incremental_hash_state) @->
-           (ocaml_bytes @-> (returning void)))
-    let everCrypt_Hash_Incremental_finish_sha3_384 =
-      foreign "EverCrypt_Hash_Incremental_finish_sha3_384"
-        ((ptr everCrypt_Hash_Incremental_hash_state) @->
-           (ocaml_bytes @-> (returning void)))
-    let everCrypt_Hash_Incremental_finish_sha3_512 =
-      foreign "EverCrypt_Hash_Incremental_finish_sha3_512"
-        ((ptr everCrypt_Hash_Incremental_hash_state) @->
-           (ocaml_bytes @-> (returning void)))
     let everCrypt_Hash_Incremental_alg_of_state =
       foreign "EverCrypt_Hash_Incremental_alg_of_state"
         ((ptr everCrypt_Hash_Incremental_hash_state) @->

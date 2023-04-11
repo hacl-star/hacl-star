@@ -1923,11 +1923,7 @@ static void finish_sha3_224(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *d
   finish(&tmp_block_state, dst);
 }
 
-void
-EverCrypt_Hash_Incremental_finish_sha3_256(
-  EverCrypt_Hash_Incremental_hash_state *p,
-  uint8_t *dst
-)
+static void finish_sha3_256(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_hash_state scrut = *p;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
@@ -1971,11 +1967,7 @@ EverCrypt_Hash_Incremental_finish_sha3_256(
   finish(&tmp_block_state, dst);
 }
 
-void
-EverCrypt_Hash_Incremental_finish_sha3_384(
-  EverCrypt_Hash_Incremental_hash_state *p,
-  uint8_t *dst
-)
+static void finish_sha3_384(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_hash_state scrut = *p;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
@@ -2019,11 +2011,7 @@ EverCrypt_Hash_Incremental_finish_sha3_384(
   finish(&tmp_block_state, dst);
 }
 
-void
-EverCrypt_Hash_Incremental_finish_sha3_512(
-  EverCrypt_Hash_Incremental_hash_state *p,
-  uint8_t *dst
-)
+static void finish_sha3_512(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_hash_state scrut = *p;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
@@ -2334,17 +2322,17 @@ void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_hash_state *s,
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        EverCrypt_Hash_Incremental_finish_sha3_256(s, dst);
+        finish_sha3_256(s, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        EverCrypt_Hash_Incremental_finish_sha3_384(s, dst);
+        finish_sha3_384(s, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        EverCrypt_Hash_Incremental_finish_sha3_512(s, dst);
+        finish_sha3_512(s, dst);
         break;
       }
     case Spec_Hash_Definitions_Blake2S:

@@ -85,24 +85,6 @@ EverCrypt_Hash_Incremental_update(
   uint32_t len
 );
 
-void
-EverCrypt_Hash_Incremental_finish_sha3_256(
-  EverCrypt_Hash_Incremental_hash_state *p,
-  uint8_t *dst
-);
-
-void
-EverCrypt_Hash_Incremental_finish_sha3_384(
-  EverCrypt_Hash_Incremental_hash_state *p,
-  uint8_t *dst
-);
-
-void
-EverCrypt_Hash_Incremental_finish_sha3_512(
-  EverCrypt_Hash_Incremental_hash_state *p,
-  uint8_t *dst
-);
-
 /**
 Perform a run-time test to determine which algorithm was chosen for the given piece of state.
 */

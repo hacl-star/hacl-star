@@ -203,8 +203,11 @@ private
 let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
 private
 let finish_sha3_224: finish_st SHA3_224 = F.mk_finish evercrypt_hash SHA3_224 (EverCrypt.Hash.state SHA3_224) (G.erased unit)
+private
 let finish_sha3_256: finish_st SHA3_256 = F.mk_finish evercrypt_hash SHA3_256 (EverCrypt.Hash.state SHA3_256) (G.erased unit)
+private
 let finish_sha3_384: finish_st SHA3_384 = F.mk_finish evercrypt_hash SHA3_384 (EverCrypt.Hash.state SHA3_384) (G.erased unit)
+private
 let finish_sha3_512: finish_st SHA3_512 = F.mk_finish evercrypt_hash SHA3_512 (EverCrypt.Hash.state SHA3_512) (G.erased unit)
 private
 let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
