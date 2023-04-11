@@ -16,4 +16,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Definitions_hash_len =
       foreign "Hacl_Hash_Definitions_hash_len"
         (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
+    type hacl_Hash_Definitions_const_impl = spec_Hash_Definitions_hash_alg
+    let hacl_Hash_Definitions_const_impl =
+      typedef spec_Hash_Definitions_hash_alg
+        "Hacl_Hash_Definitions_const_impl"
   end

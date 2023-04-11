@@ -85,6 +85,24 @@ EverCrypt_Hash_Incremental_update(
   uint32_t len
 );
 
+void
+EverCrypt_Hash_Incremental_finish_sha3_256(
+  EverCrypt_Hash_Incremental_hash_state *p,
+  uint8_t *dst
+);
+
+void
+EverCrypt_Hash_Incremental_finish_sha3_384(
+  EverCrypt_Hash_Incremental_hash_state *p,
+  uint8_t *dst
+);
+
+void
+EverCrypt_Hash_Incremental_finish_sha3_512(
+  EverCrypt_Hash_Incremental_hash_state *p,
+  uint8_t *dst
+);
+
 /**
 Perform a run-time test to determine which algorithm was chosen for the given piece of state.
 */
@@ -133,7 +151,13 @@ EverCrypt_Hash_Incremental_hash(
 
 #define SHA2_512_HASH_LEN ((uint32_t)64U)
 
+#define SHA3_224_HASH_LEN ((uint32_t)28U)
+
 #define SHA3_256_HASH_LEN ((uint32_t)32U)
+
+#define SHA3_384_HASH_LEN ((uint32_t)48U)
+
+#define SHA3_512_HASH_LEN ((uint32_t)64U)
 
 #define BLAKE2S_HASH_LEN ((uint32_t)32U)
 
