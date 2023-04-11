@@ -36,8 +36,8 @@ type hash_alg =
   | MD5
   | Blake2S
   | Blake2B
-  | SHA3_224
   | SHA3_256
+  | SHA3_224
   | SHA3_384
   | SHA3_512
   | Shake128
@@ -49,7 +49,7 @@ let is_sha2 = function
   | _ -> false
 
 inline_for_extraction noextract
-let is_sha3 = function
+let is_keccak = function
   | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> true
   | _ -> false
 
@@ -69,7 +69,7 @@ let is_md = function
   | _ -> false
 
 let sha2_alg = a:hash_alg { is_sha2 a }
-let sha3_alg = a:hash_alg { is_sha3 a }
+let sha3_alg = a:hash_alg { is_keccak a }
 let blake_alg = a:hash_alg { is_blake a }
 let md_alg = a:hash_alg { is_md a }
 let const_alg = a:hash_alg { not (is_shake a) }

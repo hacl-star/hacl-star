@@ -86,7 +86,7 @@ inline_for_extraction noextract
 let prev_length_of_nat (a: hash_alg) (i: nat { i % U32.v (block_len a) = 0 }):
   Spec.Hash.Incremental.prev_length_t a
 =
-  if is_sha3 a then
+  if is_keccak a then
     ()
   else
     i

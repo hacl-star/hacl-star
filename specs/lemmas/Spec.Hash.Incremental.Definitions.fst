@@ -18,7 +18,7 @@ module UpdateMulti = Lib.UpdateMulti
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 let prev_length_t (a: hash_alg) =
-  if is_sha3 a then
+  if is_keccak a then
     unit
   else
     n:nat { n % block_length a = 0 }
@@ -29,13 +29,13 @@ let prev_length_t (a: hash_alg) =
 let update_last (a:hash_alg)
   (hash:words_state a)
   (prevlen:prev_length_t a)
-  (input:bytes{ (if is_sha3 a then True else (S.length input + prevlen) `less_than_max_input_length` a) /\
+  (input:bytes{ (if is_keccak a then True else (S.length input + prevlen) `less_than_max_input_length` a) /\
     S.length input <= block_length a }):
   Tot (words_state a)
 =
   if is_blake a then
     Spec.Blake2.blake2_update_last (to_blake_alg a) prevlen (S.length input) input hash
-  else if is_sha3 a then
+  else if is_keccak a then
     // VERY UNPLEASANT! Because of the lazy split for Blake2 we need to unroll...
     let rateInBytes = rate a / 8 in
     let delimitedSuffix = if is_shake a then byte 0x1f else byte 0x06 in
@@ -69,5 +69,5 @@ let hash_incremental (a:hash_alg) (input:bytes{S.length input `less_than_max_inp
   let s = init a in
   let bs, l = split_blocks a input in
   let s = update_multi a s (init_extra_state a) bs in
-  let s = update_last a s (if is_sha3 a then () else S.length bs) l in
+  let s = update_last a s (if is_keccak a then () else S.length bs) l in
   finish a s out_length

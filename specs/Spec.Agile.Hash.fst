@@ -71,7 +71,7 @@ let finish_sha3 (a: sha3_alg) (s: words_state a) (l: output_length a): Tot (byte
 let finish (a:hash_alg) (hashw:words_state a) (l: output_length a): Tot (bytes_hash' a l) =
   if is_blake a then
     finish_blake a hashw
-  else if is_sha3 a then
+  else if is_keccak a then
     finish_sha3 a hashw l
   else
     finish_md a hashw

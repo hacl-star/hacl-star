@@ -21,7 +21,7 @@ let key_and_data_fits (a:hash_alg) :
   assert_norm (pow2 61 < pow2 125)
 
 let hash_block_length_fits (a:hash_alg) :
-  Lemma (if is_sha3 a then True else hash_length a + pow2 32 + block_length a < Some?.v(max_input_length a))
+  Lemma (if is_keccak a then True else hash_length a + pow2 32 + block_length a < Some?.v(max_input_length a))
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);

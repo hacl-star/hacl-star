@@ -268,7 +268,7 @@ val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
 
 inline_for_extraction noextract
 let prev_len_of_uint64 a (prevlen: UInt64.t { UInt64.v prevlen % block_length a = 0 }): Spec.Hash.Incremental.prev_length_t a =
-  (if is_sha3 a then () else UInt64.v prevlen)
+  (if is_keccak a then () else UInt64.v prevlen)
 
 /// The ``update_last`` method with support for blake2
 // 18-03-05 note the *new* length-passing convention!

@@ -808,7 +808,7 @@ let hacl_md (a:alg)// : block unit =
         let open Hacl.Spec.SHA2 in
         let totlen: len_t a = mk_len_t a (prevlen + S.length input) in
         Hacl.Spec.SHA2.Vec.(update_last #a #M32 totlen (S.length input) (input <: multiseq 1 (S.length input)) acc)
-      else if is_sha3 a then
+      else if is_keccak a then
         Spec.Hash.Incremental.(update_last a acc () input)
       else
         Spec.Hash.Incremental.(update_last a acc prevlen input))

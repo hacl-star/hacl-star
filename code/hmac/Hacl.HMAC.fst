@@ -92,7 +92,7 @@ fun output key len ->
   end
 
 inline_for_extraction noextract
-let block_len_as_len (a: const_alg { not (is_sha3 a) }):
+let block_len_as_len (a: const_alg { not (is_keccak a) }):
   Tot (l:len_t a { len_v a l = block_length a })
 =
   let open FStar.Int.Cast.Full in
@@ -136,7 +136,7 @@ val part2:
 // TODO: move
 (* We can't directly introduce uint128 literals *)
 inline_for_extraction noextract
-let zero_to_len (a:hash_alg) : (if is_sha3 a then unit else (x:len_t a { len_v a x == 0 })) =
+let zero_to_len (a:hash_alg) : (if is_keccak a then unit else (x:len_t a { len_v a x == 0 })) =
   match a with
   | MD5 | SHA1
   | SHA2_224 | SHA2_256
@@ -170,7 +170,7 @@ val part2_update_empty:
       D.as_seq h1 s `Seq.equal`
         Spec.Hash.Incremental.Definitions.update_last a
           (Spec.Agile.Hash.update_multi a (D.as_seq h0 s) (init_extra_state a) bs)
-          (if is_sha3 a then () else S.length bs) l))
+          (if is_keccak a then () else S.length bs) l))
 
 let lemma_split_one_block (a:hash_alg) (s:bytes) : Lemma
   (requires S.length s == block_length a)
@@ -204,7 +204,7 @@ let uint32_to_ev (a:hash_alg) (n:UInt32.t{v n % block_length a == 0}) :
   | Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 (FStar.Int.Cast.uint32_to_uint64 n)
 
 noextract inline_for_extraction
-val len_add32 (a: hash_alg{not (is_sha3 a)})
+val len_add32 (a: hash_alg{not (is_keccak a)})
   (prev_len: len_t a)
   (input_len: UInt32.t { (UInt32.v input_len + len_v a prev_len) `less_than_max_input_length` a }):
   x:len_t a { len_v a x = len_v a prev_len + UInt32.v input_len }
@@ -244,7 +244,7 @@ val part2_update_nonempty:
       D.as_seq h1 s `Seq.equal`
         Spec.Hash.Incremental.Definitions.update_last a
           (Spec.Agile.Hash.update_multi a (D.as_seq h0 s) (init_extra_state a) bs)
-          (if is_sha3 a then () else S.length bs) l))
+          (if is_keccak a then () else S.length bs) l))
 
 open FStar.Mul
 
@@ -303,9 +303,9 @@ let part2_update_nonempty a m init update_multi update_last s key data len =
 
     [@inline_let]
     let prev_len: prev_len:D.prev_len_t a
-      { if is_sha3 a then True else len_v a prev_len % block_length a = 0 }
+      { if is_keccak a then True else len_v a prev_len % block_length a = 0 }
     =
-      if is_sha3 a then () else
+      if is_keccak a then () else
         len_add32 a (block_len_as_len a) full_blocks_len
     in
     update_last s prev_len rem rem_len

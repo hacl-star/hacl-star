@@ -218,7 +218,7 @@ let update_multi_st (i:impl) =
 
 noextract inline_for_extraction
 let prev_len_t (a: hash_alg) =
-  if is_sha3 a then
+  if is_keccak a then
     unit
   else
     prev_len:len_t a { len_v a prev_len % block_length a = 0 }
@@ -226,7 +226,7 @@ let prev_len_t (a: hash_alg) =
 noextract inline_for_extraction
 let prev_len_v #a (prev_len: prev_len_t a): Spec.Hash.Incremental.Definitions.prev_length_t a
 =
-  if is_sha3 a then
+  if is_keccak a then
     ()
   else
     len_v a prev_len
@@ -243,7 +243,7 @@ let update_last_st (i:impl) =
   s:state i ->
   prev_len:prev_len_t a ->
   input:B.buffer uint8 {
-    (if is_sha3 a then True else (B.length input + len_v a prev_len) `less_than_max_input_length` a) /\
+    (if is_keccak a then True else (B.length input + len_v a prev_len) `less_than_max_input_length` a) /\
     B.length input <= block_length a
   } ->
   input_len:size_t { B.length input = v input_len } ->
