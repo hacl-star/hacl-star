@@ -245,8 +245,8 @@ let finish_sha3 (a: sha3_alg { not (is_shake a) }): finish_st (| a, () |) = fun 
 
 noextract inline_for_extraction
 let finish i s dst =
-  [@inline_let] let a = dfst i in
-  [@inline_let] let m = dsnd i in
+  [@inline_let] let a = get_alg i in
+  [@inline_let] let m = get_spec i in
   match a with
   | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
   | Blake2S ->
