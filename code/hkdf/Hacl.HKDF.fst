@@ -29,10 +29,10 @@ module ST = FStar.HyperStack.ST
 let mk_extract a hmac prk salt saltlen ikm ikmlen =
   hmac prk salt saltlen ikm ikmlen
 
-val hmac_input_fits: a:const_alg -> Lemma
+val hmac_input_fits: a:fixed_len_alg -> Lemma
   ((pow2 32 + block_length a) `less_than_max_input_length` a)
 let hmac_input_fits a =
-  allow_inversion const_alg;
+  allow_inversion fixed_len_alg;
   match a with
   | MD5 ->
     assert_norm (pow2 32 + block_length MD5 <= Some?.v (max_input_length MD5))

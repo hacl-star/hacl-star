@@ -72,7 +72,7 @@ let sha2_alg = a:hash_alg { is_sha2 a }
 let sha3_alg = a:hash_alg { is_keccak a }
 let blake_alg = a:hash_alg { is_blake a }
 let md_alg = a:hash_alg { is_md a }
-let const_alg = a:hash_alg { not (is_shake a) }
+let fixed_len_alg = a:hash_alg { not (is_shake a) }
 
 inline_for_extraction
 let to_blake_alg (a:blake_alg) = match a with

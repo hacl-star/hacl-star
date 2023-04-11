@@ -63,7 +63,7 @@ let reseed #a st entropy_input additional_input =
   let k, v = update #a seed_material st.k st.v in
   State k v 1
 
-let a_spec (a:const_alg) (i:nat) = Lib.Sequence.lseq uint8 (hash_length a)
+let a_spec (a:fixed_len_alg) (i:nat) = Lib.Sequence.lseq uint8 (hash_length a)
 
 val generate_loop:
     a:supported_alg

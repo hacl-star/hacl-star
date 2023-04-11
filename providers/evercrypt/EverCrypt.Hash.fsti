@@ -21,7 +21,7 @@ open Hacl.Hash.Definitions
 ///
 /// ``hash_alg``, from Spec.Hash.Definitions, lists all supported algorithms
 unfold
-let alg = const_alg
+let alg = fixed_len_alg
 
 /// TODO: move this one to Hacl.Hash.Definitions
 val string_of_alg: alg -> C.String.t

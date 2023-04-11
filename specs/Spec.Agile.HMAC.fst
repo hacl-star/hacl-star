@@ -6,7 +6,7 @@ open Lib.IntTypes
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 let wrap
-  (a: const_alg)
+  (a: fixed_len_alg)
   (key: bytes{Seq.length key `less_than_max_input_length` a})
   : lbytes (block_length a)
 =

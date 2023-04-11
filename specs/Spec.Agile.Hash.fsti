@@ -89,5 +89,5 @@ val hash' (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` 
   Tot (Lib.ByteSequence.lbytes (Spec.Hash.Definitions.hash_length' a l))
 
 unfold
-let hash (a:const_alg) (input:bytes{S.length input `less_than_max_input_length` a}) =
+let hash (a:fixed_len_alg) (input:bytes{S.length input `less_than_max_input_length` a}) =
   hash' a input ()

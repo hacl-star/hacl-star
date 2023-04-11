@@ -123,7 +123,7 @@ let hash_word_len (a: md_alg): n:size_t { v n = hash_word_length a } =
   | SHA2_512 -> 8ul
 
 inline_for_extraction
-let hash_len (a: const_alg): n:size_t { v n = hash_length a } =
+let hash_len (a: fixed_len_alg): n:size_t { v n = hash_length a } =
   match a with
   | MD5 -> 16ul
   | SHA1 -> 20ul
@@ -142,7 +142,7 @@ noextract inline_for_extraction
 let blocks_t (a: hash_alg) =
   b:B.buffer uint8 { B.length b % block_length a = 0 }
 
-let hash_t (a: const_alg) = b:B.buffer uint8 { B.length b = hash_length a }
+let hash_t (a: fixed_len_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 
 (** The types of all stateful operations for a hash algorithm. *)
 
@@ -270,7 +270,7 @@ let finish_st (i:const_impl) =
     Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.finish (get_alg i) (as_seq h0 s) ())))
 
 noextract inline_for_extraction
-let hash_st (a: const_alg) =
+let hash_st (a: fixed_len_alg) =
   input:B.buffer uint8 ->
   input_len:size_t { B.length input = v input_len } ->
   dst:hash_t a->
