@@ -227,7 +227,7 @@ let pad_len a len =
 
 #set-options "--max_ifuel 1"
 inline_for_extraction
-let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
+let hash_word_len (a: md_alg): n:U32.t { U32.v n = hash_word_length a } =
   match a with
   | MD5 -> 4ul
   | SHA1 -> 5ul
@@ -235,31 +235,24 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
   | SHA2_256 -> 8ul
   | SHA2_384 -> 6ul
   | SHA2_512 -> 8ul
-  | SHA3_256 -> 4ul
-  | Blake2S | Blake2B -> 8ul
-
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 friend Spec.Agile.Hash
 
 noextract inline_for_extraction
-let finish_sha3: finish_st (| SHA3_256, () |) = fun s dst ->
-  assert_norm (1088/8 = 136);
-  let h0 = ST.get () in
-  Hacl.Impl.SHA3.squeeze s 136ul 32ul dst;
-  let h1 = ST.get () in
-  assert (B.as_seq h1 dst `S.equal` Spec.SHA3.squeeze (B.as_seq h0 s) 136 32)
+let finish_sha3 (a: sha3_alg { not (is_shake a) }): finish_st (| a, () |) = fun s dst ->
+  Hacl.Impl.SHA3.squeeze s (block_len a) (hash_len a) dst
 
 noextract inline_for_extraction
 let finish i s dst =
-  [@inline_let] let a = get_alg i in
-  [@inline_let] let m = get_spec i in
+  [@inline_let] let a = dfst i in
+  [@inline_let] let m = dsnd i in
   match a with
   | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
   | Blake2S ->
     Hacl.Impl.Blake2.Generic.blake2_finish #Spec.Blake2.Blake2S #m 32ul dst s
   | Blake2B ->
     Hacl.Impl.Blake2.Generic.blake2_finish #Spec.Blake2.Blake2B #m 64ul dst s
-  | SHA3_256 ->
-    finish_sha3 s dst
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 ->
+    finish_sha3 a s dst
   | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))

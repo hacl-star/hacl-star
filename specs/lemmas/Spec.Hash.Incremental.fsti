@@ -26,5 +26,6 @@ val hash_is_hash_incremental' (a: hash_alg) (input: bytes { S.length input `less
   (l: output_length a):
   Lemma (S.equal (hash' a input l) (hash_incremental a input l))
 
+unfold
 let hash_is_hash_incremental (a: const_alg) (input: bytes { S.length input `less_than_max_input_length` a }) =
   hash_is_hash_incremental' a input ()

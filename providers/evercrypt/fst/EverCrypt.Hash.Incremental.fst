@@ -30,7 +30,7 @@ open Spec.Hash.Lemmas
 // ---------------------------------------------------
 
 inline_for_extraction noextract
-let agile_state: stateful hash_alg =
+let agile_state: stateful Hash.alg =
   Stateful
     EverCrypt.Hash.state
 
@@ -63,7 +63,10 @@ let hash_len a: (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
   | SHA2_256 -> sha2_256_hash_len
   | SHA2_384 -> sha2_384_hash_len
   | SHA2_512 -> sha2_512_hash_len
+  | SHA3_224 -> sha3_224_hash_len
   | SHA3_256 -> sha3_256_hash_len
+  | SHA3_384 -> sha3_384_hash_len
+  | SHA3_512 -> sha3_512_hash_len
   | Blake2S -> blake2s_hash_len
   | Blake2B -> blake2b_hash_len
 
@@ -91,11 +94,11 @@ let prev_length_of_nat (a: hash_alg) (i: nat { i % U32.v (block_len a) = 0 }):
 #push-options "--z3rlimit 500"
 
 inline_for_extraction noextract
-let evercrypt_hash : block hash_alg =
+let evercrypt_hash : block Hash.alg =
   Block
     Erased
     agile_state
-    (stateful_unused hash_alg)
+    (stateful_unused Hash.alg)
 
     (* TODO: this general max length definition shouldn't be in the MD file! *)
     Hacl.Streaming.MD.max_input_len64
@@ -112,7 +115,7 @@ let evercrypt_hash : block hash_alg =
     (fun a s prevlen input ->
       let prevlen = prev_length_of_nat a prevlen in
       Spec.Hash.Incremental.update_last a s prevlen input)
-    (fun a _ s -> Spec.Agile.Hash.finish a s)
+    (fun a _ s -> Spec.Agile.Hash.finish a s ())
 
     (fun a _ -> Spec.Agile.Hash.hash a)
 
@@ -131,7 +134,7 @@ let evercrypt_hash : block hash_alg =
     (fun a _ input ->
         let input1 = S.append S.empty input in
         assert (S.equal input1 input);
-        Spec.Hash.Incremental.hash_is_hash_incremental a input)
+        Spec.Hash.Incremental.hash_is_hash_incremental' a input ())
 
     EverCrypt.Hash.alg_of_state
     (fun i _ _ -> EverCrypt.Hash.init #i)
@@ -157,7 +160,7 @@ let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erase
 
 [@@ Comment
 "Reset an existing state to the initial hash state with empty data."]
-let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
+let init (a: G.erased Hash.alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns
@@ -165,7 +168,7 @@ EverCrypt_Error_Success for success, or EverCrypt_Error_MaximumLengthExceeded if
 the combined length of all of the data passed to `update` (since the last call
 to `init`) exceeds 2^61-1 bytes or 2^64-1 bytes, depending on the choice of
 algorithm. Both limits are unlikely to be attained in practice."]
-let update (i: G.erased hash_alg)
+let update (i: G.erased Hash.alg)
   (s:F.state evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit))
   (data: B.buffer uint8)
   (len: UInt32.t):
@@ -199,7 +202,10 @@ let finish_sha224: finish_st SHA2_224 = F.mk_finish evercrypt_hash SHA2_224 (Eve
 private
 let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
 private
+let finish_sha3_224: finish_st SHA3_224 = F.mk_finish evercrypt_hash SHA3_224 (EverCrypt.Hash.state SHA3_224) (G.erased unit)
 let finish_sha3_256: finish_st SHA3_256 = F.mk_finish evercrypt_hash SHA3_256 (EverCrypt.Hash.state SHA3_256) (G.erased unit)
+let finish_sha3_384: finish_st SHA3_384 = F.mk_finish evercrypt_hash SHA3_384 (EverCrypt.Hash.state SHA3_384) (G.erased unit)
+let finish_sha3_512: finish_st SHA3_512 = F.mk_finish evercrypt_hash SHA3_512 (EverCrypt.Hash.state SHA3_512) (G.erased unit)
 private
 let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
 private
@@ -211,7 +217,7 @@ let finish_blake2b: finish_st Blake2B = F.mk_finish evercrypt_hash Blake2B (Ever
 
 [@@ Comment
 "Perform a run-time test to determine which algorithm was chosen for the given piece of state."]
-let alg_of_state (a: G.erased hash_alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
+let alg_of_state (a: G.erased Hash.alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 [@@ Comment
 "Write the resulting hash into `dst`, an array whose length is
@@ -220,7 +226,7 @@ allocate a destination buffer of the right length. The state remains valid after
 a call to `finish`, meaning the user may feed more data into the hash via
 `update`. (The finish function operates on an internal copy of the state and
 therefore does not invalidate the client-held state.)"]
-val finish: a:G.erased hash_alg -> finish_st a
+val finish: a:G.erased Hash.alg -> finish_st a
 let finish a s dst =
   let a = alg_of_state a s in
   match a with
@@ -230,13 +236,16 @@ let finish a s dst =
   | SHA2_256 -> finish_sha256 s dst
   | SHA2_384 -> finish_sha384 s dst
   | SHA2_512 -> finish_sha512 s dst
+  | SHA3_224 -> finish_sha3_224 s dst
   | SHA3_256 -> finish_sha3_256 s dst
+  | SHA3_384 -> finish_sha3_384 s dst
+  | SHA3_512 -> finish_sha3_512 s dst
   | Blake2S -> finish_blake2s s dst
   | Blake2B -> finish_blake2b s dst
 
 [@@ Comment
 "Free a state previously allocated with `create_in`."]
-let free (i: G.erased hash_alg) = F.free evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit)
+let free (i: G.erased Hash.alg) = F.free evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit)
 
 // Private API (one-shot, multiplexing)
 // ------------------------------------
@@ -276,7 +285,7 @@ earlier in this file to allocate a destination buffer of the right length. This
 API will automatically pick the most efficient implementation, provided you have
 called EverCrypt_AutoConfig2_init() before. "]
 val hash:
-  a:Spec.Agile.Hash.hash_alg ->
+  a:Hash.alg ->
   dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
   input:B.buffer Lib.IntTypes.uint8 ->
   len:FStar.UInt32.t {B.length input = FStar.UInt32.v len /\ FStar.UInt32.v len `less_than_max_input_length` a} ->
@@ -296,7 +305,10 @@ let hash a dst input len =
   | SHA2_256 -> hash_256 input len dst
   | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input len dst
   | SHA2_512 -> Hacl.Hash.SHA2.hash_512 input len dst
-  | SHA3_256 -> Hacl.Hash.SHA3.hash_256 input len dst
+  | SHA3_224 -> Hacl.Hash.SHA3.hash SHA3_224 input len dst
+  | SHA3_256 -> Hacl.Hash.SHA3.hash SHA3_256 input len dst
+  | SHA3_384 -> Hacl.Hash.SHA3.hash SHA3_384 input len dst
+  | SHA3_512 -> Hacl.Hash.SHA3.hash SHA3_512 input len dst
   | Blake2S ->
       let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
@@ -315,7 +327,7 @@ let hash a dst input len =
 
 /// Finally, a few helpers predicates to make things easier for clients...
 inline_for_extraction noextract
-let state (a: hash_alg) = F.state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
+let state (a: Hash.alg) = F.state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 inline_for_extraction noextract
 let hashed #a (h: HS.mem) (s: state a) =

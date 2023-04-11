@@ -23,14 +23,14 @@ let less_strict_than_max_input_length l a =
   | Some max -> l < max
   | None -> true
 
-let key_and_data_fits (a:hash_alg) :
+let key_and_data_fits (a:const_alg) :
   Lemma ((block_length a + pow2 32) `less_than_max_input_length` a)
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
-let hash_block_length_fits (a:hash_alg) :
+let hash_block_length_fits (a:const_alg) :
   Lemma ((hash_length a + pow2 32 + block_length a) `less_strict_than_max_input_length` a)
 =
   let open FStar.Mul in
@@ -38,7 +38,7 @@ let hash_block_length_fits (a:hash_alg) :
   assert_norm (pow2 61 < pow2 125)
 
 inline_for_extraction noextract
-let extract_st (a:hash_alg) =
+let extract_st (a:const_alg) =
   prk     : B.buffer uint8 ->
   salt    : B.buffer uint8 ->
   saltlen : pub_uint32 ->
@@ -59,7 +59,7 @@ let extract_st (a:hash_alg) =
     B.as_seq h1 prk == extract a (B.as_seq h0 salt) (B.as_seq h0 ikm))
 
 inline_for_extraction noextract
-let expand_st (a:hash_alg) =
+let expand_st (a:const_alg) =
   okm     : B.buffer uint8 ->
   prk     : B.buffer uint8 ->
   prklen  : pub_uint32 ->
@@ -84,13 +84,13 @@ let expand_st (a:hash_alg) =
 
 inline_for_extraction noextract
 val mk_extract:
-  a: hash_alg ->
+  a: const_alg ->
   hmac: Hacl.HMAC.compute_st a ->
   extract_st a
 
 inline_for_extraction noextract
 val mk_expand:
-  a: hash_alg ->
+  a: const_alg ->
   hmac: Hacl.HMAC.compute_st a ->
   expand_st a
 

@@ -23,15 +23,15 @@ inline_for_extraction noextract
 let less_than_max_input_length = Spec.Hash.Definitions.less_than_max_input_length
 
 inline_for_extraction noextract
-let salt_len_t (a:Hash.hash_alg) =
+let salt_len_t (a:Hash.const_alg) =
   saltLen:size_t{8 + Hash.hash_length a + v saltLen <= max_size_t /\ (8 + Hash.hash_length a + v saltLen) `less_than_max_input_length` a}
 
 inline_for_extraction noextract
-let msg_len_t (a:Hash.hash_alg) =
+let msg_len_t (a:Hash.const_alg) =
   msgLen:size_t{v msgLen `less_than_max_input_length` a}
 
 inline_for_extraction noextract
-let em_len_t (a:Hash.hash_alg) (saltLen:salt_len_t a) =
+let em_len_t (a:Hash.const_alg) (saltLen:salt_len_t a) =
   emBits:size_t{0 < v emBits /\ Hash.hash_length a + v saltLen + 2 <= S.blocks (v emBits) 8}
 
 

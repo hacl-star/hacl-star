@@ -21,7 +21,7 @@ open Hacl.Hash.Definitions
 ///
 /// ``hash_alg``, from Spec.Hash.Definitions, lists all supported algorithms
 unfold
-let alg = hash_alg
+let alg = const_alg
 
 /// TODO: move this one to Hacl.Hash.Definitions
 val string_of_alg: alg -> C.String.t
@@ -323,7 +323,7 @@ val finish:
     M.(modifies (loc_buffer dst `loc_union` footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     (* The 0UL value is dummy: it is actually useless *)
-    B.as_seq h1 dst == Spec.Agile.Hash.finish a (repr s h0) /\
+    B.as_seq h1 dst == Spec.Agile.Hash.finish a (repr s h0) () /\
     preserves_freeable s h0 h1))
 
 (** @type: true
