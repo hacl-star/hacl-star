@@ -479,9 +479,8 @@ val nat_to_bytes_2 (l:size_t) (b:lbuffer uint8 2ul)
 let nat_to_bytes_2 l tmp =
   assert_norm (UInt32.v 0x10000ul == pow2 16);
   [@inline_let]
-  let l16 = secret (FStar.Int.Cast.Full.uint32_to_uint16 (l `FStar.UInt32.div` 0x10000ul)) in
-  assert (v l16 == (v l / pow2 16) % pow2 16);
-  assert (v l16 == v l / pow2 16);
+  let l16 = secret (FStar.Int.Cast.Full.uint32_to_uint16 l) in
+  assert (v l16 == v l);
   Lib.ByteBuffer.uint_to_bytes_be tmp l16;
   let h1 = ST.get () in
 
@@ -491,49 +490,20 @@ let nat_to_bytes_2 l tmp =
   (==) { }
     Seq.index (uint_to_bytes_be l16) 0;
   (==) { index_uint_to_bytes_be_i l16 1 }
-    uint #U8 (v l16 / pow2 (8 * 1) % pow2 8);
-  (==) { }
-    uint #U8 (v l / pow2 (8 * 2) / pow2 (8 * 1) % pow2 8);
-  (==) { FStar.Math.Lemmas.division_multiplication_lemma (v l) (pow2 (8 * 2)) (pow2 (8 * 1));
-    assert_norm (pow2 (8 * 2) * pow2 (8 * 1) == pow2 (8 * 3))
-  }
-    uint #U8 (v l / pow2 (8 * 3) % pow2 8);
-  (==) { }
-    uint #U8 (v (secret l) / pow2 (8 * 3) % pow2 8);
-  (==) { index_uint_to_bytes_be_i #U32 #SEC (secret l) 3 }
-    Seq.index (uint_to_bytes_be (secret l)) 0;
-  };
+    uint #U8 (v l / pow2 (8 * 1) % pow2 8);
+  (==) { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 1 }
+    Seq.index (Lib.ByteSequence.nat_to_bytes_be 2 (v l)) 0;
+ };
+
   calc (==) {
     Seq.index (as_seq h1 tmp) 1;
   (==) { }
     Seq.index (uint_to_bytes_be l16) 1;
   (==) { index_uint_to_bytes_be_i l16 0 }
-    uint #U8 (v l16 / pow2 (8 * 0) % pow2 8);
-  (==) { }
-    uint #U8 (v l / pow2 (8 * 2) / pow2 (8 * 0) % pow2 8);
-  (==) { FStar.Math.Lemmas.division_multiplication_lemma (v l) (pow2 (8 * 2)) (pow2 (8 * 1));
-    assert_norm (pow2 (8 * 2) * pow2 (8 * 0) == pow2 (8 * 2))
-  }
-    uint #U8 (v l / pow2 (8 * 2) % pow2 8);
-  (==) { }
-    uint #U8 (v (secret l) / pow2 (8 * 2) % pow2 8);
-  (==) { index_uint_to_bytes_be_i #U32 #SEC (secret l) 2 }
-    Seq.index (uint_to_bytes_be (secret l)) 1;
-  };
-  assert (as_seq h1 tmp `Seq.equal` Seq.slice (Lib.ByteSequence.uint_to_bytes_be (secret l)) 0 2);
-  admit ()
-  ;
-
-  Lib.ByteSequence.lemma_uint_to_bytes_be_preserves_value (secret l);
-  assert (Lib.ByteSequence.nat_from_bytes_be (as_seq h1 (gsub tmp 0ul 4ul)) == v l);
-
-  Lib.ByteSequence.lemma_nat_from_to_bytes_be_preserves_value (as_seq h1 (gsub tmp 0ul 4ul)) 4;
-  assert (as_seq h1 (gsub tmp 0ul 4ul) == Lib.ByteSequence.nat_to_bytes_be 4 (v l));
-
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 0;
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 1;
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 4 (v l) 0;
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 4 (v l) 1
+    uint #U8 (v l / pow2 (8 * 0) % pow2 8);
+  (==) { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 0 }
+    Seq.index (Lib.ByteSequence.nat_to_bytes_be 2 (v l)) 1;
+ }
 #pop-options
 
 noextract inline_for_extraction
