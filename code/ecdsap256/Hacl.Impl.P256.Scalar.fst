@@ -67,6 +67,21 @@ let bn_is_lt_order_and_gt_zero_mask4 f =
   res
 
 
+let load_qelem_conditional res b =
+  push_frame ();
+  bn_from_bytes_be4 res b;
+  let is_b_valid = bn_is_lt_order_and_gt_zero_mask4 res in
+
+  let oneq = create_felem () in
+  bn_set_one4 oneq;
+  let h0 = ST.get () in
+  Lib.ByteBuffer.buf_mask_select res oneq is_b_valid res;
+  let h1 = ST.get () in
+  assert (as_seq h1 res == (if (v is_b_valid = 0) then as_seq h0 oneq else as_seq h0 res));
+  pop_frame ();
+  is_b_valid
+
+
 ///  Field Arithmetic
 
 val qmod_short_lemma: a:nat{a < pow2 256} ->

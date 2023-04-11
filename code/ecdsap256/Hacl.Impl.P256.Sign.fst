@@ -13,12 +13,12 @@ open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.PointMul
 
-module BSeq = Lib.ByteSequence
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
 module QI = Hacl.Impl.P256.Qinv
 module BB = Hacl.Bignum.Base
+module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
@@ -84,36 +84,39 @@ let ecdsa_sign_s s k r d_a m =
   pop_frame ()
 
 
-// TODO: add check for nonce and private_key
 inline_for_extraction noextract
-val ecdsa_sign_load (d_a k_q:felem) (private_key nonce:lbytes 32ul) : Stack unit
+val ecdsa_sign_load (d_a k_q:felem) (private_key nonce:lbytes 32ul) : Stack uint64
   (requires fun h ->
     live h private_key /\ live h nonce /\ live h d_a /\ live h k_q /\
     disjoint d_a k_q /\ disjoint d_a private_key /\ disjoint d_a nonce /\
-    disjoint k_q private_key /\ disjoint k_q nonce /\
-
-    0 < BSeq.nat_from_bytes_be (as_seq h private_key) /\
-    BSeq.nat_from_bytes_be (as_seq h private_key) < S.order /\
-    0 < BSeq.nat_from_bytes_be (as_seq h nonce) /\
-    BSeq.nat_from_bytes_be (as_seq h nonce) < S.order)
-  (ensures fun h0 _ h1 -> modifies (loc d_a |+| loc k_q) h0 h1 /\
+    disjoint k_q private_key /\ disjoint k_q nonce)
+  (ensures fun h0 m h1 -> modifies (loc d_a |+| loc k_q) h0 h1 /\
    (let d_a_nat = BSeq.nat_from_bytes_be (as_seq h0 private_key) in
     let k_nat = BSeq.nat_from_bytes_be (as_seq h0 nonce) in
-    as_nat h1 d_a = d_a_nat /\ as_nat h1 k_q = k_nat))
+    let is_sk_valid = 0 < d_a_nat && d_a_nat < S.order in
+    let is_nonce_valid = 0 < k_nat && k_nat < S.order in
+    (v m = ones_v U64 \/ v m = 0) /\
+    (v m = ones_v U64) = (is_sk_valid && is_nonce_valid) /\
+    as_nat h1 d_a == (if is_sk_valid then d_a_nat else 1) /\
+    as_nat h1 k_q == (if is_nonce_valid then k_nat else 1)))
 
 let ecdsa_sign_load d_a k_q private_key nonce =
-  bn_from_bytes_be4 d_a private_key;
-  bn_from_bytes_be4 k_q nonce
+  let is_sk_valid = load_qelem_conditional d_a private_key in
+  let is_nonce_valid = load_qelem_conditional k_q nonce in
+  let m = is_sk_valid &. is_nonce_valid in
+  logand_lemma is_sk_valid is_nonce_valid;
+  m
 
 
 inline_for_extraction noextract
-val check_signature: r_q:felem -> s_q:felem -> Stack bool
+val check_signature: are_sk_nonce_valid:uint64 -> r_q:felem -> s_q:felem -> Stack bool
   (requires fun h ->
-    live h r_q /\ live h s_q /\ disjoint r_q s_q)
+    live h r_q /\ live h s_q /\ disjoint r_q s_q /\
+    (v are_sk_nonce_valid = ones_v U64 \/ v are_sk_nonce_valid = 0))
   (ensures fun h0 res h1 -> modifies0 h0 h1 /\
-    res == ((0 < as_nat h0 r_q) && (0 < as_nat h0 s_q)))
+    res == ((v are_sk_nonce_valid = ones_v U64) && (0 < as_nat h0 r_q) && (0 < as_nat h0 s_q)))
 
-let check_signature r_q s_q =
+let check_signature are_sk_nonce_valid r_q s_q =
   let h0 = ST.get () in
   let is_r_zero = bn_is_zero_mask4 r_q in
   let is_s_zero = bn_is_zero_mask4 s_q in
@@ -123,7 +126,11 @@ let check_signature r_q s_q =
   lognot_lemma is_r_zero;
   lognot_lemma is_s_zero;
   logand_lemma m0 m1;
-  BB.unsafe_bool_of_limb m2
+  let m = are_sk_nonce_valid &. m2 in
+  logand_lemma are_sk_nonce_valid m2;
+  assert ((v m = ones_v U64) <==>
+    ((v are_sk_nonce_valid = ones_v U64) && (0 < as_nat h0 r_q) && (0 < as_nat h0 s_q)));
+  BB.unsafe_bool_of_limb m
 
 
 val ecdsa_sign_msg_as_qelem:
@@ -136,12 +143,7 @@ val ecdsa_sign_msg_as_qelem:
     live h signature /\ live h m_q /\ live h private_key /\ live h nonce /\
     disjoint signature m_q /\ disjoint signature private_key /\ disjoint signature nonce /\
     disjoint m_q private_key /\ disjoint m_q nonce /\
-    as_nat h m_q < S.order /\
-
-    0 < BSeq.nat_from_bytes_be (as_seq h private_key) /\
-    BSeq.nat_from_bytes_be (as_seq h private_key) < S.order /\
-    0 < BSeq.nat_from_bytes_be (as_seq h nonce) /\
-    BSeq.nat_from_bytes_be (as_seq h nonce) < S.order)
+    as_nat h m_q < S.order)
   (ensures fun h0 flag h1 -> modifies (loc signature |+| loc m_q) h0 h1 /\
     (let sgnt = S.ecdsa_sign_msg_as_qelem
       (as_nat h0 m_q) (as_seq h0 private_key) (as_seq h0 nonce) in
@@ -155,10 +157,10 @@ let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
   let s_q = sub rsdk_q 4ul 4ul in
   let d_a = sub rsdk_q 8ul 4ul in
   let k_q = sub rsdk_q 12ul 4ul in
-  ecdsa_sign_load d_a k_q private_key nonce;
+  let are_sk_nonce_valid = ecdsa_sign_load d_a k_q private_key nonce in
   ecdsa_sign_r r_q k_q;
   ecdsa_sign_s s_q k_q r_q d_a m_q;
   bn2_to_bytes_be4 signature r_q s_q;
-  let res = check_signature r_q s_q in
+  let res = check_signature are_sk_nonce_valid r_q s_q in
   pop_frame ();
   res

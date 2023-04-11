@@ -13,34 +13,8 @@ open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.PointMul
 
 module S = Spec.P256
-module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
-
-inline_for_extraction noextract
-val make_sk_as_qelem: res:felem -> sk:lbuffer uint8 32ul -> Stack uint64
-  (requires fun h ->
-    live h res /\ live h sk /\ disjoint res sk)
-  (ensures fun h0 m h1 -> modifies (loc res) h0 h1 /\
-   (let sk_nat = BSeq.nat_from_bytes_be (as_seq h0 sk) in
-    let is_sk_valid = 0 < sk_nat && sk_nat < S.order in
-    (v m = ones_v U64 \/ v m = 0) /\ (v m = ones_v U64) = is_sk_valid /\
-    as_nat h1 res == (if is_sk_valid then sk_nat else 1)))
-
-let make_sk_as_qelem res sk =
-  push_frame ();
-  bn_from_bytes_be4 res sk;
-  let is_sk_valid = bn_is_lt_order_and_gt_zero_mask4 res in
-
-  let oneq = create_felem () in
-  bn_set_one4 oneq;
-  let h0 = ST.get () in
-  Lib.ByteBuffer.buf_mask_select res oneq is_sk_valid res;
-  let h1 = ST.get () in
-  assert (as_seq h1 res == (if (v is_sk_valid = 0) then as_seq h0 oneq else as_seq h0 res));
-  pop_frame ();
-  is_sk_valid
-
 
 [@CInline]
 let ecp256dh_i public_key private_key =
@@ -49,7 +23,7 @@ let ecp256dh_i public_key private_key =
   let sk = sub tmp 0ul 4ul in
   let pk = sub tmp 4ul 12ul in
 
-  let is_sk_valid = make_sk_as_qelem sk private_key in
+  let is_sk_valid = load_qelem_conditional sk private_key in
   point_mul_g pk sk;
   point_store public_key pk;
   pop_frame ();
@@ -84,7 +58,7 @@ let ecp256dh_r shared_secret their_pubkey private_key =
   let pk = sub tmp 4ul 12ul in
 
   let is_pk_valid = load_point_vartime pk their_pubkey in
-  let is_sk_valid = make_sk_as_qelem sk private_key in
+  let is_sk_valid = load_qelem_conditional sk private_key in
   ecp256dh_r_ is_pk_valid shared_secret pk sk;
   pop_frame ();
   Hacl.Bignum.Base.unsafe_bool_of_limb is_sk_valid && is_pk_valid

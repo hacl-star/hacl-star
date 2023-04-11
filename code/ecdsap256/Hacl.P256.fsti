@@ -17,8 +17,6 @@ module BSeq = Lib.ByteSequence
 
 // TODO: clean up the documentation
 
-// TODO: add check for private_key and nonce (0 < && < q) in `ecdsa_sign`
-
 // TODO?: change API for `ecdsa_verify`, namely, take `signature` as an argument
 
 inline_for_extraction noextract
@@ -31,12 +29,7 @@ let ecdsa_sign_p256_st (alg:S.hash_alg_ecdsa) =
   Stack bool
   (requires fun h ->
     live h signature /\ live h msg /\ live h private_key /\ live h nonce /\
-    disjoint signature msg /\ disjoint signature private_key /\ disjoint signature nonce /\
-
-    0 < BSeq.nat_from_bytes_be (as_seq h private_key) /\
-    BSeq.nat_from_bytes_be (as_seq h private_key) < S.order /\
-    0 < BSeq.nat_from_bytes_be (as_seq h nonce) /\
-    BSeq.nat_from_bytes_be (as_seq h nonce) < S.order)
+    disjoint signature msg /\ disjoint signature private_key /\ disjoint signature nonce)
   (ensures fun h0 flag h1 -> modifies (loc signature) h0 h1 /\
     (let sgnt = S.ecdsa_signature_agile alg (v msg_len)
       (as_seq h0 msg) (as_seq h0 private_key) (as_seq h0 nonce) in

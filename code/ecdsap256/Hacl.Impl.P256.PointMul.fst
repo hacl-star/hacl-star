@@ -11,10 +11,7 @@ open Lib.Buffer
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 open Hacl.Impl.P256.Point
-open Hacl.Impl.P256.PointAdd
-open Hacl.Impl.P256.PointDouble
 
-//module LSeq = Lib.Sequence
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
@@ -25,7 +22,6 @@ module BD = Hacl.Spec.Bignum.Definitions
 
 module S = Spec.P256
 module SL = Spec.P256.Lemmas
-//module SM = Hacl.Spec.P256.Montgomery
 
 include Hacl.Impl.P256.Group
 include Hacl.P256.PrecompTable
@@ -155,7 +151,7 @@ val lemma_exp_four_fw_local: b:BD.lbignum U64 4{BD.bn_v b < S.order} ->
     S.to_aff_point (S.point_mul_g (BD.bn_v b)))
 
 let lemma_exp_four_fw_local b =
- let cm = S.mk_p256_comm_monoid in
+  let cm = S.mk_p256_comm_monoid in
   let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v b) in
   let res = LE.exp_four_fw cm g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 in
   assert (res == SPT256.exp_as_exp_four_nat256_precomp cm g_aff (BD.bn_v b));
