@@ -196,7 +196,7 @@ let invariant_s #index (c: block index) (i: index) h s =
   U64.v total_len <= U64.v (c.max_input_len i) /\
 
   // Note the double equals here, we now no longer know that this is a sequence.
-  c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) 0 blocks /\
+  c.state.v i h block_state == c.update_multi_s i key_v (c.init_s i key_v) 0 blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest
 #pop-options
 
@@ -340,7 +340,7 @@ let create_in #index c i t t' k r =
   (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
   (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
+  (**) c.update_multi_zero i (key c i h7 p) (c.state.v i h7 block_state) 0;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
   (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
 
@@ -457,7 +457,7 @@ let copy #index c i t t' s0 r =
   p
 #pop-options
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 let alloca #index c i t t' k =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -530,7 +530,7 @@ let alloca #index c i t t' k =
   (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
   (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
+  (**) c.update_multi_zero i (key c i h7 p) (c.state.v i h7 block_state) 0;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
   (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
 
@@ -552,10 +552,10 @@ let alloca #index c i t t' k =
   p
 #pop-options
 
-#push-options "--z3cliopt smt.arith.nl=false"
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit_factor 2"
 let init #index c i t t' k s =
-  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
+  (* [@inline_let] *) let _ = c.state.invariant_loc_in_footprint #i in
+  (* [@inline_let] *) let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
 
   let open LowStar.BufferOps in
@@ -572,7 +572,10 @@ let init #index c i t t' k s =
   (**) c.key.frame_invariant (B.loc_union (c.state.footprint #i h1 block_state) (B.loc_buffer buf)) k h1 h2;
   (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
   (**) assert(0 % UInt32.v (Block?.block_len c i) = 0);
-  (**) c.update_multi_zero i (c.state.v i h2 block_state) 0;
+  (**) assert (key c i h1 s == key c i h2 s);
+  (**) c.update_multi_zero i (key c i h2 s) (c.state.v i h2 block_state) 0;
+  (**) c.update_multi_zero i (c.key.v i h2 k) (c.state.v i h2 block_state) 0;
+  (**) c.update_multi_zero i (c.key.v i h1 k) (c.state.v i h2 block_state) 0;
 
   let k': optional_key i c.km c.key =
     match c.km with
@@ -595,6 +598,7 @@ let init #index c i t t' k s =
   B.upd s 0ul tmp;
   (**) let h3 = ST.get () in
   (**) c.state.frame_invariant B.(loc_buffer s) block_state h2 h3;
+  (**) c.key.frame_invariant B.(loc_buffer s) k h2 h3;
   (**) optional_frame #_ #i #c.km #c.key B.(loc_buffer s) k' h2 h3;
   (**) stateful_frame_preserves_freeable B.(loc_buffer s) block_state h2 h3;
   (**) assert(preserves_freeable c i s h2 h3);
@@ -683,6 +687,7 @@ let rest #index (c: block index) (i: index)
     r'
     end
 #pop-options
+
 
 /// The ``nblocks`` function below allows computing, given ``total_len`` stored in
 /// the state, the number of blocks of data which have been processed (the remaining
@@ -1018,9 +1023,10 @@ let invariant_s_funct #index c i t t' p data len h0 h1 =
   let blocks, rest = split_at_last_all_seen c i h1 p in
   let s = B.get h1 p 0 in
   let State block_state buf_ total_len seen key = s in
-  let init_s = c.init_s i (optional_reveal #index #i #c.km #c.key h0 key) in
+  let key_v = optional_reveal #index #i #c.km #c.key h0 key in
+  let init_s = c.init_s i key_v in
   (**) Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
-  c.state.v i h1 block_state == c.update_multi_s i init_s 0 blocks /\
+  c.state.v i h1 block_state == c.update_multi_s i key_v init_s 0 blocks /\
   S.equal (S.slice (B.as_seq h1 buf_) 0 (Seq.length rest)) rest
 
 
@@ -1100,7 +1106,7 @@ let update_small_functional_correctness #index c i t t' p data len h0 h1 =
 
   // The first problematic condition
   assert(blocks1 `S.equal` blocks0);
-  assert(c.state.v i h1 block_state == c.update_multi_s i (c.init_s i key_v1) 0 blocks1);
+  assert(c.state.v i h1 block_state == c.update_multi_s i key_v1 (c.init_s i key_v1) 0 blocks1);
 
   // The second problematic condition
   assert(S.equal (S.slice (B.as_seq h1 buf) 0 (Seq.length rest1)) rest1)
@@ -1248,7 +1254,8 @@ val update_empty_or_full_functional_correctness :
 
     let data1_v = B.as_seq h0 data1 in
     let data2_v = B.as_seq h0 data2 in
-    let init_s = c.init_s i (optional_reveal #index #i #c.km #c.key h0 key0) in
+    let key = optional_reveal #index #i #c.km #c.key h0 key0 in
+    let init_s = c.init_s i key in
     let all_seen_data1 = S.append all_seen0 data1_v in
 
     (**) Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
@@ -1256,7 +1263,7 @@ val update_empty_or_full_functional_correctness :
     S.length all_seen0 % U32.v (c.block_len i) = 0 /\ // TODO: should be proved automatically
     S.length all_seen_data1 % U32.v (c.block_len i) = 0 /\ // TODO: should be proved automatically
 
-    c.state.v i h1 block_state == c.update_multi_s i init_s 0 all_seen_data1 /\
+    c.state.v i h1 block_state == c.update_multi_s i key init_s 0 all_seen_data1 /\
     S.slice (B.as_seq h1 buf) 0 (Seq.length data2_v) `S.equal` data2_v /\
     True
     end /\
@@ -1320,9 +1327,10 @@ val update_empty_or_full_buf:
 
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
 let update_empty_or_full_buf #index c i t t' p data len =
-  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.update_multi_associative i in
+  (* [@inline_let] *) let _ = c.state.invariant_loc_in_footprint #i in
+  (* [@inline_let] *) let _ = c.key.invariant_loc_in_footprint #i in
+  (* [@inline_let] *) let _ = c.update_multi_associative i in
+  (* [@inline_let] *) let _ = allow_inversion key_management in
 
   let open LowStar.BufferOps in
   let s = !*p in
@@ -1336,16 +1344,15 @@ let update_empty_or_full_buf #index c i t t' p data len =
   Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
   assert(0 % U32.v (c.block_len i) = 0);
 
+  let init_key : Ghost.erased _ = optional_reveal h0 (k' <: optional_key i c.km c.key) in
+  let init_state : Ghost.erased _ = c.init_s i init_key in
+
   assert(
     let all_seen = all_seen c i h0 p in
     let blocks, rest = split_at_last c i all_seen in
     Seq.length rest = U32.v sz /\
     c.state.v i h0 block_state ==
-    c.update_multi_s i (c.init_s i (optional_reveal h0
-                       (k' <: optional_key i c.km c.key))) 0 blocks);
-
-  let init_state : Ghost.erased _ =
-    c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key)) in
+    c.update_multi_s i init_key init_state 0 blocks);
 
   (* Start by "flushing" the buffer: hash it so that all the data seen so far
    * has been processed and we can consider the buffer as empty *)
@@ -1353,33 +1360,35 @@ let update_empty_or_full_buf #index c i t t' p data len =
     begin
     assert(
       let all_seen = all_seen c i h0 p in
-      c.state.v i h0 block_state == c.update_multi_s i init_state 0 all_seen)
+      c.state.v i h0 block_state == c.update_multi_s i init_key init_state 0 all_seen)
     end
-  else
-    begin
+  else begin
     let prevlen = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 sz) in
-    c.update_multi (G.hide i) block_state prevlen buf (c.blocks_state_len i);
-      begin
+    c.update_multi (G.hide i) (k' <: optional_key i c.km c.key) block_state prevlen buf (c.blocks_state_len i);
+    begin
       let h1 = ST.get () in
       let all_seen = all_seen c i h0 p in
       let blocks, rest = split_at_last c i all_seen in
       assert(Seq.length blocks = U64.v prevlen);
-      assert(c.state.v i h0 block_state == c.update_multi_s i init_state 0 blocks);
+      assert(c.state.v i h0 block_state == c.update_multi_s i init_key init_state 0 blocks);
       assert(c.state.v i h1 block_state ==
-               c.update_multi_s i (c.update_multi_s i init_state 0 blocks) (U64.v prevlen) rest);
+               c.update_multi_s i init_key (c.update_multi_s i init_key init_state 0 blocks) (U64.v prevlen) rest);
       assert(all_seen `Seq.equal` Seq.append blocks rest);
       (* TODO: the pattern of ``update_multi_associative`` is not triggered *)
-      c.update_multi_associative i init_state 0 (U64.v prevlen) blocks rest;
-      assert(c.state.v i h1 block_state == c.update_multi_s i init_state 0 all_seen)
+      c.update_multi_associative i init_key init_state 0 (U64.v prevlen) blocks rest;
+      assert(c.state.v i h1 block_state == c.update_multi_s i init_key init_state 0 all_seen);
+      if c.km = Runtime then
+        c.key.frame_invariant #i (c.state.footprint #i h0 block_state) k' h0 h1
       end
-    end;
+  end;
 
   let h1 = ST.get () in
+  assert (optional_invariant #index #i #c.km #c.key h1 k');
 
   assert(
     let all_seen = all_seen c i h0 p in
     c.state.v i h1 block_state ==
-    c.update_multi_s i (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) 0 all_seen);
+    c.update_multi_s i init_key init_state 0 all_seen);
 
   split_at_last_blocks c i (all_seen c i h0 p) (B.as_seq h0 data); // TODO: remove?
 
@@ -1390,7 +1399,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
   let data2_len = len `U32.sub` data1_len in
   let data1 = B.sub data 0ul data1_len in
   let data2 = B.sub data data1_len data2_len in
-  c.update_multi (G.hide i) block_state total_len data1 data1_len;
+  c.update_multi (G.hide i) k' block_state total_len data1 data1_len;
   let h01 = ST.get () in
   optional_frame #_ #i #c.km #c.key (c.state.footprint h0 block_state) k' h0 h01;
   assert(preserves_freeable c i p h0 h01);
@@ -1398,8 +1407,8 @@ let update_empty_or_full_buf #index c i t t' p data len =
   begin
     let all_seen = all_seen c i h0 p in
     let data1_v = B.as_seq h01 data1 in
-    c.update_multi_associative i init_state 0 (Seq.length all_seen) all_seen data1_v;
-    assert(c.state.v i h01 block_state == c.update_multi_s i init_state 0 (Seq.append all_seen data1_v))
+    c.update_multi_associative i init_key init_state 0 (Seq.length all_seen) all_seen data1_v;
+    assert(c.state.v i h01 block_state == c.update_multi_s i init_key init_state 0 (Seq.append all_seen data1_v))
   end;
 
   let dst = B.sub buf 0ul data2_len in
@@ -1538,7 +1547,8 @@ val mk_finish_process_begin_functional_correctness :
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
   s:state c i t t' ->
-  dst:B.buffer uint8 { B.len dst == c.output_len i } ->
+  dst:B.buffer uint8 ->
+  l: c.output_length_t { B.len dst == c.output_len i l } ->
   h0: HS.mem ->
   h1: HS.mem ->
   tmp_block_state: t ->
@@ -1560,8 +1570,9 @@ val mk_finish_process_begin_functional_correctness :
     let r_multi = U32.(r -^ r_last) in
     let buf_multi = B.gsub buf_ 0ul r_multi in
     let prev_length = U64.v prev_len in
+    let k = optional_reveal #_ #i #c.km #c.key h0 key in
 
-    c.state.v i h1 tmp_block_state == c.update_multi_s i (c.state.v i h0 block_state) prev_length (B.as_seq h0 buf_multi)
+    c.state.v i h1 tmp_block_state == c.update_multi_s i k (c.state.v i h0 block_state) prev_length (B.as_seq h0 buf_multi)
     end))
   (ensures (
     let all_seen = all_seen c i h0 s in
@@ -1581,12 +1592,12 @@ val mk_finish_process_begin_functional_correctness :
     0 % block_length = 0 /\
     0 <= n * block_length /\ (n * block_length) % block_length = 0 /\
     c.state.v i h1 tmp_block_state ==
-      c.update_multi_s i init_state 0 (S.slice all_seen 0 (n * block_length)))
+      c.update_multi_s i k init_state 0 (S.slice all_seen 0 (n * block_length)))
   ))
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h1 tmp_block_state =
+let mk_finish_process_begin_functional_correctness #index c i t t' p dst l h0 h1 tmp_block_state =
   let h3 = h0 in
   let h4 = h1 in
   let s = B.get h0 p 0 in
@@ -1616,7 +1627,7 @@ let mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h1 t
   let buf_multi = B.gsub buf_ 0ul r_multi in
   assert(
     c.state.v i h4 tmp_block_state ==
-      c.update_multi_s i
+      c.update_multi_s i k
         (c.state.v i h0 block_state)
         prev_length (B.as_seq h3 buf_multi));
   assert(
@@ -1624,13 +1635,13 @@ let mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h1 t
     S.slice all_seen prev_length (prev_length + U32.v r_multi));
   assert(
     c.state.v i h4 tmp_block_state ==
-      c.update_multi_s i
-        (c.update_multi_s i init_state 0 (S.slice all_seen 0 prev_length))
+      c.update_multi_s i k
+        (c.update_multi_s i k init_state 0 (S.slice all_seen 0 prev_length))
         prev_length (S.slice all_seen prev_length (prev_length + U32.v r_multi)));
   assert(0 % block_length = 0);
   assert(S.length (S.slice all_seen 0 prev_length) % block_length = 0);
   assert(prev_length + U32.v r_multi <= S.length all_seen);
-  c.update_multi_associative i init_state 0 prev_length
+  c.update_multi_associative i k init_state 0 prev_length
                              (S.slice all_seen 0 prev_length)
                              (S.slice all_seen prev_length (prev_length + U32.v r_multi));
   assert(
@@ -1639,19 +1650,19 @@ let mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h1 t
             (S.slice all_seen 0 (prev_length + U32.v r_multi)));
   assert(
     c.state.v i h4 tmp_block_state ==
-    c.update_multi_s i init_state 0 (S.slice all_seen 0 (prev_length + U32.v r_multi)));
+    c.update_multi_s i k init_state 0 (S.slice all_seen 0 (prev_length + U32.v r_multi)));
   split_at_last_finish c i all_seen;
   Math.Lemmas.nat_times_nat_is_nat n block_length;
   assert(0 <= n * block_length);
   assert(n * block_length <= S.length all_seen);
   assert(
     c.state.v i h4 tmp_block_state ==
-    c.update_multi_s i init_state 0 (S.slice all_seen 0 (n * block_length)))
+    c.update_multi_s i k init_state 0 (S.slice all_seen 0 (n * block_length)))
 #pop-options
 
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
-let mk_finish #index c i t t' p dst =
+let mk_finish #index c i t t' p dst l =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.update_multi_associative i in
@@ -1709,12 +1720,13 @@ let mk_finish #index c i t t' p dst =
   [@inline_let] let r_multi = if state_is_block then 0ul else r_multi in
   [@inline_let] let r_last = if state_is_block then r else r_last in
 
-  c.update_multi (G.hide i) tmp_block_state prev_len buf_multi r_multi;
+  c.update_multi (G.hide i) k' tmp_block_state prev_len buf_multi r_multi;
 
   let h4 = get () in
+  optional_frame #_ #i #c.km #c.key (c.state.footprint #i h3 tmp_block_state) k' h3 h4;
 
   // Functional correctness
-  mk_finish_process_begin_functional_correctness #index c i t t' p dst h0 h4 tmp_block_state;
+  mk_finish_process_begin_functional_correctness #index c i t t' p dst l h0 h4 tmp_block_state;
   split_at_last_finish c i (all_seen c i h0 p);
 
   // Process the remaining data
@@ -1727,14 +1739,14 @@ let mk_finish #index c i t t' p dst =
   Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
   assert(U64.v prev_len_last % U32.v (c.block_len i) = 0)
   end;
-  c.update_last (G.hide i) tmp_block_state prev_len_last buf_last r_last;
+  c.update_last (G.hide i) k' tmp_block_state prev_len_last buf_last r_last;
 
   let h5 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h3 tmp_block_state) block_state h3 h5;
   stateful_frame_preserves_freeable #index #c.state #i (c.state.footprint h3 tmp_block_state) block_state h3 h5;
   optional_frame #_ #i #c.km #c.key (c.state.footprint h3 tmp_block_state) k' h3 h5;
 
-  c.finish (G.hide i) k' tmp_block_state dst;
+  c.finish (G.hide i) k' tmp_block_state dst l;
 
   let h6 = ST.get () in
   begin
@@ -1755,23 +1767,23 @@ let mk_finish #index c i t t' p dst =
     calc (S.equal) {
       B.as_seq h6 dst;
     (S.equal) { }
-      c.finish_s i k (c.state.v i h5 tmp_block_state);
+      c.finish_s i k (c.state.v i h5 tmp_block_state) l;
     (S.equal) { }
       c.finish_s i k (
-        c.update_last_s i (c.state.v i h4 tmp_block_state) (n * block_length)
-          (B.as_seq h4 buf_last));
+        c.update_last_s i k (c.state.v i h4 tmp_block_state) (n * block_length)
+          (B.as_seq h4 buf_last)) l;
     (S.equal) { }
       c.finish_s i k (
-        c.update_last_s i (c.state.v i h4 tmp_block_state) (n * block_length)
-          rest_);
+        c.update_last_s i k (c.state.v i h4 tmp_block_state) (n * block_length)
+          rest_) l;
     (S.equal) { }
       c.finish_s i k (
-        c.update_last_s i
-          (c.update_multi_s i (c.init_s i k) 0 (S.slice all_seen 0 (n * block_length)))
+        c.update_last_s i k
+          (c.update_multi_s i k (c.init_s i k) 0 (S.slice all_seen 0 (n * block_length)))
           (n * block_length)
-          rest_);
-    (S.equal) { c.spec_is_incremental i k seen }
-      c.spec_s i k seen;
+          rest_) l;
+    (S.equal) { c.spec_is_incremental i k seen l }
+      c.spec_s i k seen l;
     }
   end;
 

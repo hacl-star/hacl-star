@@ -450,7 +450,8 @@ let finish_st
   (t: Type0 { t == c.state.s i })
   (t':Type0 { t' == optional_key i c.km c.key }) =
   s:state c i t t' ->
-  dst:B.buffer uint8 { B.len dst == c.output_len i } ->
+  dst:B.buffer uint8 ->
+  l:c.output_length_t { B.len dst == c.output_len i l } ->
   Stack unit
     (requires fun h0 ->
       invariant c i h0 s /\
@@ -463,7 +464,7 @@ let finish_st
       footprint c i h0 s == footprint c i h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
       seen_bounded c i h0 s;
-      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))) /\
+      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
       preserves_freeable c i s h0 h1)
 
 /// A word of caution. Once partially applied to a type class, this function

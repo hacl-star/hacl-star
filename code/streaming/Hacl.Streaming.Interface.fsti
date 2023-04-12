@@ -55,7 +55,7 @@ type stateful (index: Type0) =
   freeable: (#i:index -> h:HS.mem -> p:s i -> Type) ->
   invariant: (#i:index -> h:HS.mem -> s:s i -> Type) ->
 
-  // A pure representation of a s
+  // A pure representation of an s
   t: (index -> Type0) ->
   v: (i:index -> h:HS.mem -> s:s i -> GTot (t i)) ->
 
@@ -238,6 +238,8 @@ let optional_t #index
 /// them rather than copy-paste big chunks of code (as what is done in Hacl.Streaming.Blake2).
 /// Note that a workaround is to partially instanciate the functor at definition time.
 
+#push-options "--z3rlimit 200"
+
 inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
@@ -247,9 +249,12 @@ type block (index: Type0) =
   state: stateful index ->
   key: stateful index ->
 
+  // Just a value type; useful for algorithms that have a variable output length.
+  output_length_t: Type0 ->
+
   // Introducing a notion of blocks and final result.
   max_input_len: (index -> x:U64.t { U64.v x > 0 }) ->
-  output_len: (index -> x:U32.t { U32.v x > 0 }) ->
+  output_len: (index -> output_length_t -> x:U32.t { U32.v x > 0 }) ->
   block_len: (index -> x:U32.t { U32.v x > 0 }) ->
   // The size of data to process at a time. Must be a multiple of block_len.
   // Controls the size of the internal buffer.
@@ -262,32 +267,39 @@ type block (index: Type0) =
   init_input_s: (i:index -> key.t i -> s:S.seq uint8 { S.length s = U32.v (init_input_len i) }) ->
   init_s: (i:index -> key.t i -> state.t i) ->
   update_multi_s: (i:index ->
+    key.t i ->
     state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
     s:S.seq uint8 { prevlen + S.length s <= U64.v (max_input_len i) /\ S.length s % U32.v (block_len i) = 0 } ->
     state.t i) ->
   update_last_s: (i:index ->
+    key.t i ->
     state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
     s:S.seq uint8 { S.length s + prevlen <= U64.v (max_input_len i) /\ S.length s <= U32.v (block_len i) } ->
     state.t i) ->
-  finish_s: (i:index -> key.t i -> state.t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
+  finish_s: (i:index -> key.t i -> state.t i -> l:output_length_t ->
+    s:S.seq uint8 { S.length s = U32.v (output_len i l) }) ->
 
   /// The specification in one shot.
-  spec_s: (i:index -> key.t i -> input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
-    output:S.seq uint8 { S.length output == U32.v (output_len i) }) ->
+  spec_s: (i:index -> key.t i ->
+    input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
+    l:output_length_t ->
+    output:S.seq uint8 { S.length output == U32.v (output_len i l) }) ->
 
   // Required lemmas... clients can enjoy them in their local contexts with the SMT pattern via a let-binding.
 
   update_multi_zero: (i:index ->
+    k:key.t i ->
     h:state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 /\ prevlen <= U64.v (max_input_len i) } ->
     Lemma
     (ensures (
       Math.Lemmas.modulo_lemma 0 (UInt32.v (block_len i));
-      update_multi_s i h prevlen S.empty == h))) ->
+      update_multi_s i k h prevlen S.empty == h))) ->
 
   update_multi_associative: (i:index ->
+    k:key.t i ->
     h:state.t i ->
     prevlen1:nat ->
     prevlen2:nat ->
@@ -304,25 +316,26 @@ type block (index: Type0) =
       let input = S.append input1 input2 in
       S.length input % U32.v (block_len i) = 0 /\
       prevlen2 % U32.v (block_len i) = 0 /\
-      update_multi_s i (update_multi_s i h prevlen1 input1) prevlen2 input2 ==
-        update_multi_s i h prevlen1 input))
-    [ SMTPat (update_multi_s i prevlen2 (update_multi_s i h prevlen1 input1) input2) ]) ->
+      update_multi_s i k (update_multi_s i k h prevlen1 input1) prevlen2 input2 ==
+        update_multi_s i k h prevlen1 input))
+    [ SMTPat (update_multi_s i k prevlen2 (update_multi_s i k h prevlen1 input1) input2) ]) ->
 
   (* TODO: it might be possible to factorize more the proofs between Lib.UpdateMulti
    * and Spec.Hash.Incremental *)
   spec_is_incremental: (i:index ->
     key: key.t i ->
     input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
+    l:output_length_t ->
     Lemma (
       let input1 = S.append (init_input_s i key) input in
-      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input1 in
+      let bs, rest = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input1 in
       (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len i));
       (* TODO: use update_full ? *)
       let hash0 = init_s i key in
-      let hash1 = update_multi_s i hash0 0 bs in
-      let hash2 = update_last_s i hash1 (S.length bs) l in
-      let hash3 = finish_s i key hash2 in
-      hash3 `S.equal` spec_s i key input)) ->
+      let hash1 = update_multi_s i key hash0 0 bs in
+      let hash2 = update_last_s i key hash1 (S.length bs) rest in
+      let hash3 = finish_s i key hash2 l in
+      hash3 `S.equal` spec_s i key input l)) ->
 
   // Stateful operations
   index_of_state: (i:G.erased index -> (
@@ -357,6 +370,7 @@ type block (index: Type0) =
 
   update_multi: (i:G.erased index -> (
     let i = G.reveal i in
+    k: optional_key i km key ->
     s:state.s i ->
     prevlen:U64.t { U64.v prevlen % U32.v (block_len i) = 0 } ->
     blocks:B.buffer uint8 { B.length blocks % U32.v (block_len i) = 0 } ->
@@ -364,19 +378,27 @@ type block (index: Type0) =
                  U64.v prevlen + U32.v len <= U64.v (max_input_len i) } ->
     Stack unit
     (requires fun h0 ->
+      allow_inversion key_management;
       state.invariant #i h0 s /\
       B.live h0 blocks /\
-      B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer blocks)))
+      B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer blocks)) /\ (
+      match km with
+      | Erased -> True
+      | Runtime ->
+          key.invariant #i h0 k /\
+          B.loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s) /\
+          B.(loc_disjoint (key.footprint #i h0 k) (loc_buffer blocks))))
     (ensures fun h0 _ h1 ->
       B.(modifies (state.footprint #i h0 s) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       state.invariant #i h1 s /\
-      state.v i h1 s == update_multi_s i (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 blocks) /\
+      state.v i h1 s == update_multi_s i (optional_t h0 k) (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 blocks) /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
   update_last: (
     i: G.erased index -> (
     let i = G.reveal i in
+    k: optional_key i km key ->
     s:state.s i ->
     prevlen:U64.t { U64.v prevlen % U32.v (block_len i) = 0 } ->
     last:B.buffer uint8 ->
@@ -386,12 +408,19 @@ type block (index: Type0) =
       U64.v prevlen + U32.v last_len <= U64.v (max_input_len i)} ->
     Stack unit
     (requires fun h0 ->
+      allow_inversion key_management;
       state.invariant #i h0 s /\
       B.live h0 last /\
-      B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer last)))
+      B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer last)) /\ (
+      match km with
+      | Erased -> True
+      | Runtime ->
+          key.invariant #i h0 k /\
+          B.loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s) /\
+          B.(loc_disjoint (key.footprint #i h0 k) (loc_buffer last))))
     (ensures fun h0 _ h1 ->
       state.invariant #i h1 s /\
-      state.v i h1 s == update_last_s i (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 last) /\
+      state.v i h1 s == update_last_s i (optional_t h0 k) (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 last) /\
       B.(modifies (state.footprint #i h0 s) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
@@ -401,7 +430,8 @@ type block (index: Type0) =
     let i = G.reveal i in
     k: optional_key i km key ->
     s:state.s i ->
-    dst:B.buffer uint8 { B.len dst = output_len i } ->
+    dst:B.buffer uint8 ->
+    l: output_length_t { B.len dst == output_len i l } ->
     Stack unit
     (requires fun h0 ->
       allow_inversion key_management;
@@ -418,7 +448,7 @@ type block (index: Type0) =
       state.invariant #i h1 s /\
       B.(modifies (loc_buffer dst `loc_union` (state.footprint #i h0 s)) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
-      B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) /\
+      B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) l /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
   block index
