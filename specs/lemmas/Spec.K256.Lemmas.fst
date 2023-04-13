@@ -11,75 +11,11 @@ module M = Lib.NatMod
 
 assume val prime_lemma: unit -> Lemma (Euclid.is_prime prime)
 
-
-val mul_zero_lemma: n:pos{Euclid.is_prime n} -> x:int -> y:int ->
-  Lemma (x * y % n == 0 <==> (x % n == 0 \/ y % n == 0))
-
-let mul_zero_lemma n x y =
-  assert (0 % n = 0);
-  if x % n = 0 then
-    Math.Lemmas.lemma_mod_mul_distr_l x y n
-  else
-    if y % n = 0 then
-      Math.Lemmas.lemma_mod_mul_distr_r x y n
-    else
-      if x * y % n = 0 then
-        Math.Fermat.mod_mult_congr n x 0 y
-      else ()
-
-
-val lemma_aff_is_point_at_inf1: p:proj_point -> Lemma
-  (requires is_proj_point_at_inf p)
-  (ensures  is_aff_point_at_inf (to_aff_point p))
-
-let lemma_aff_is_point_at_inf1 p =
-  let (px, py, pz) = p in
-  let zinv = finv pz in
-  Lib.NatMod.lemma_pow_mod #prime pz (prime - 2);
-  Lib.NatMod.lemma_pow_zero (prime - 2);
-  assert (zinv = 0)
-
-
-val finv_zero_is_zero: a:felem -> n:pos -> Lemma
-  (requires M.pow a n % prime = 0)
-  (ensures  a = 0)
-
-let rec finv_zero_is_zero a n =
-  if n = 1 then M.lemma_pow1 a
-  else begin
-    let r1 = M.pow a (n - 1) % prime in
-    M.lemma_pow_unfold a n;
-    assert (a * M.pow a (n - 1) % prime = 0);
-    Math.Lemmas.lemma_mod_mul_distr_r a (M.pow a (n - 1)) prime;
-    prime_lemma ();
-    mul_zero_lemma prime a r1;
-    assert (a = 0 \/ r1 = 0);
-    if a = 0 then () else finv_zero_is_zero a (n - 1) end
-
-
-val lemma_aff_is_point_at_inf2: p:proj_point -> Lemma
-  (requires is_aff_point_at_inf (to_aff_point p))
-  (ensures  (let px, py, pz = p in pz = 0 \/ (px = 0 /\ py = 0)))
-
-let lemma_aff_is_point_at_inf2 p =
-  let (px, py, pz) = p in
-  let zinv = finv pz in
-  let x = fmul px zinv in
-  let y = fmul py zinv in
-  assert (x == 0 /\ y == 0);
-  prime_lemma ();
-  mul_zero_lemma prime px zinv;
-  mul_zero_lemma prime py zinv;
-
-  if zinv = 0 then begin
-    Lib.NatMod.lemma_pow_mod #prime pz (prime - 2);
-    finv_zero_is_zero pz (prime - 2);
-    assert (pz = 0) end
-
-
 let lemma_aff_is_point_at_inf p =
-  Classical.move_requires lemma_aff_is_point_at_inf1 p;
-  Classical.move_requires lemma_aff_is_point_at_inf2 p
+  prime_lemma ();
+  let (px, py, pz) = p in
+  M.lemma_div_mod_prime_is_zero #prime px pz;
+  M.lemma_div_mod_prime_is_zero #prime py pz
 
 
 let lemma_proj_aff_id p =
