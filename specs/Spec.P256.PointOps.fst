@@ -74,7 +74,7 @@ let g_y : felem =
 let base_point : proj_point = (g_x, g_y, one)
 
 
-let is_point_on_curve (p:aff_point) : bool =
+let is_on_curve (p:aff_point) : bool =
   let (x, y) = p in y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 
 
@@ -234,7 +234,7 @@ let aff_point_load (b:BSeq.lbytes 64) : option aff_point =
   let is_x_valid = pk_x < prime in
   let is_y_valid = pk_y < prime in
   let is_xy_on_curve =
-    if is_x_valid && is_y_valid then is_point_on_curve (pk_x, pk_y) else false in
+    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
   if is_xy_on_curve then Some (pk_x, pk_y) else None
 
 

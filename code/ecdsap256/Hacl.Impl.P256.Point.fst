@@ -177,7 +177,7 @@ let is_y_sqr_is_y2_vartime y2 y =
 
 // y *% y =?= x *% x *% x +% a_coeff *% x +% b_coeff
 [@CInline]
-let is_point_on_curve_vartime p =
+let is_on_curve_vartime p =
   push_frame ();
   let rp = create_felem () in
   let tx = create_felem () in
@@ -242,7 +242,7 @@ let aff_point_load_vartime p b =
   bn_from_bytes_be4 bn_p_y p_y;
   let is_xy_valid = is_xy_valid_vartime p in
   if not is_xy_valid then false
-  else is_point_on_curve_vartime p
+  else is_on_curve_vartime p
 
 
 [@CInline]

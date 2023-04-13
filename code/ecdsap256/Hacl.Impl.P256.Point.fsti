@@ -211,10 +211,10 @@ val to_proj_point: res:point -> p:aff_point -> Stack unit
 
 ///  Check if a point is on the curve
 
-val is_point_on_curve_vartime: p:aff_point -> Stack bool
+val is_on_curve_vartime: p:aff_point -> Stack bool
   (requires fun h -> live h p /\ aff_point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.is_point_on_curve (as_aff_point_nat h0 p))
+    r == S.is_on_curve (as_aff_point_nat h0 p))
 
 
 ///  Point load and store functions
