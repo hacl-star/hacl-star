@@ -8,16 +8,9 @@ open Spec.Agile.HMAC
 open Spec.HMAC_DRBG
 open Spec.HMAC_DRBG.Test.Vectors
 
-#set-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
+module PS = Lib.PrintSequence
 
-let print_and_compare (len:size_nat) (test_expected test_result:lbytes len) : All.ML bool =
-  // Cheap alternative to friend Lib.IntTypes / Lib.RawIntTypes
-  assume (squash (uint8 == UInt8.t));
-  IO.print_string "\n\nResult:   ";
-  List.iter (fun a -> IO.print_uint8_hex_pad a) (seq_to_list test_result);
-  IO.print_string "\nExpected: ";
-  List.iter (fun a -> IO.print_uint8_hex_pad a) (seq_to_list test_expected);
-  Lib.ByteSequence.lbytes_eq #len test_expected test_result
+#set-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
 
 let test_vec
   {a; entropy_input; entropy_input_reseed; nonce; personalization_string;
@@ -59,7 +52,7 @@ let test_vec
     | Some (_, st) ->
       match generate st returned_bytes_len (from_hex additional_input_2) with
       | None -> false
-      | Some (out, st) -> print_and_compare returned_bytes_len (from_hex returned_bits) out
+      | Some (out, st) -> PS.print_compare true returned_bytes_len (from_hex returned_bits) out
 
 let test () =
   let result = List.for_all test_vec test_vectors in

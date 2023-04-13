@@ -1,5 +1,5 @@
 [
-  "í’Þ>ßÊ#—‡~ˆn¯ve\r",
+  "•\u0001¿`˜¤\u0013½\f\u000fƒwÏ\u0017œV",
   [
     [
       "Vale.PPC64LE.Print_s.cmp_not",
@@ -18,7 +18,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "d61c081b87a6d94128c5c0be4fdfd253"
+      "bd702b9b573a1bf228cf7b746bc45219"
     ],
     [
       "Vale.PPC64LE.Print_s.uu___78",
@@ -53,7 +53,7 @@
         "typing_Vale.PPC64LE.Print_s.cmp_not", "unit_typing"
       ],
       0,
-      "bf8e24eea2119ae3406533c639d1e7c9"
+      "e16fe1e5d12bf0fe7215fab3ad3079bb"
     ],
     [
       "Vale.PPC64LE.Print_s.print_ins",
@@ -63,6 +63,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Vale.PPC64LE.Semantics_s.Add",
+        "disc_equation_Vale.PPC64LE.Semantics_s.AddCarry",
         "disc_equation_Vale.PPC64LE.Semantics_s.AddExtended",
         "disc_equation_Vale.PPC64LE.Semantics_s.AddExtendedOV",
         "disc_equation_Vale.PPC64LE.Semantics_s.AddImm",
@@ -78,14 +79,20 @@
         "disc_equation_Vale.PPC64LE.Semantics_s.Load128Word4Index",
         "disc_equation_Vale.PPC64LE.Semantics_s.Load64",
         "disc_equation_Vale.PPC64LE.Semantics_s.LoadImm64",
+        "disc_equation_Vale.PPC64LE.Semantics_s.LoadImmShl64",
         "disc_equation_Vale.PPC64LE.Semantics_s.LoadStack128",
+        "disc_equation_Vale.PPC64LE.Semantics_s.LoadStack64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Mfvsrd",
         "disc_equation_Vale.PPC64LE.Semantics_s.Mfvsrld",
         "disc_equation_Vale.PPC64LE.Semantics_s.Move",
         "disc_equation_Vale.PPC64LE.Semantics_s.Mtvsrdd",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Mtvsrws",
         "disc_equation_Vale.PPC64LE.Semantics_s.MulHigh64U",
         "disc_equation_Vale.PPC64LE.Semantics_s.MulLow64",
+        "disc_equation_Vale.PPC64LE.Semantics_s.RotWord",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Sl64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Sl64Imm",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Sr64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Sr64Imm",
         "disc_equation_Vale.PPC64LE.Semantics_s.Store128",
         "disc_equation_Vale.PPC64LE.Semantics_s.Store128Byte16",
@@ -94,18 +101,31 @@
         "disc_equation_Vale.PPC64LE.Semantics_s.Store128Word4Index",
         "disc_equation_Vale.PPC64LE.Semantics_s.Store64",
         "disc_equation_Vale.PPC64LE.Semantics_s.StoreStack128",
+        "disc_equation_Vale.PPC64LE.Semantics_s.StoreStack64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Sub",
         "disc_equation_Vale.PPC64LE.Semantics_s.SubImm",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vadduwm",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vand",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vcipher",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vcipherlast",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vcmpequw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vmr",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vmrghw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vncipher",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vncipherlast",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vpmsumd",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vsbox",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vsel",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw0",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw1",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw2",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw3",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vsl",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vsldoi",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vslw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vspltisb",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vspltisw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vspltw",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vsrw",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vxor",
         "disc_equation_Vale.PPC64LE.Semantics_s.Xor",
@@ -114,7 +134,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "985aa7d01c2cd3bcf0be5bac523a9288"
+      "d7406c922375c9e1e08df5c6003c9b76"
     ],
     [
       "Vale.PPC64LE.Print_s.print_cmp",
@@ -136,7 +156,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "f763092fec089b057de6e4f7a2f04af3"
+      "884de2f9f82d4116f176851517342b0c"
     ],
     [
       "Vale.PPC64LE.Print_s.print_block",
@@ -153,7 +173,7 @@
         "projection_inverse_BoxBool_proj_0", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "9d2ef5c678771d79e9815e783c79535d"
+      "73782a69a4984f7005f792a21706f49e"
     ],
     [
       "Vale.PPC64LE.Print_s.print_block",
@@ -176,7 +196,7 @@
         "subterm_ordering_Vale.PPC64LE.Machine_s.While"
       ],
       0,
-      "9c7224b2cd86ef62bb8cf28fcab28367"
+      "e289d87a84adfe329f5cc22e7e153a1c"
     ]
   ]
 ]

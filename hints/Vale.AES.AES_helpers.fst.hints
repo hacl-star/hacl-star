@@ -10,9 +10,9 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
-        "constructor_distinct_Vale.AES.AES_s.AES_128", "eq2-interp",
-        "equality_tok_Vale.AES.AES_s.AES_128@tok", "equation_Prims.nat",
-        "equation_Prims.op_Equals_Equals_Equals",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_128", "eq2-interp",
+        "equality_tok_Vale.AES.AES_common_s.AES_128@tok",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.AES.AES_s.is_aes_key_LE",
         "equation_Vale.Def.Types_s.quad32",
         "function_token_typing_Prims.__cache_version_number__",
@@ -22,7 +22,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "a22308740b8e0711de013d7730dac4fb"
+      "70a72c96ee4ba25f059d259eea9da5d6"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_key_128_0",
@@ -30,11 +30,11 @@
       4,
       0,
       [
-        "@query", "equation_Vale.AES.AES_s.nb",
+        "@query", "equation_Vale.AES.AES_common_s.nb",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1ca45d8c7d897aa6cdab094256df3fb0"
+      "1a0d22fdef65608350962a425b716716"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_key_128_0",
@@ -44,13 +44,13 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
-        "@fuel_irrelevance_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "constructor_distinct_Vale.AES.AES_s.AES_128", "eq2-interp",
-        "equality_tok_Vale.AES.AES_s.AES_128@tok", "equation_Prims.nat",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_128", "eq2-interp",
+        "equality_tok_Vale.AES.AES_common_s.AES_128@tok",
+        "equation_Prims.nat", "equation_Vale.AES.AES_common_s.nb",
         "equation_Vale.AES.AES_s.aes_key_LE",
         "equation_Vale.AES.AES_s.is_aes_key_LE",
-        "equation_Vale.AES.AES_s.nb", "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.Def.Words_s.nat32",
         "equation_with_fuel_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AES.AES_s.expand_key",
@@ -66,7 +66,7 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_7e69eda982f72ce3ed022c485bb2fc82",
+        "refinement_interpretation_Tm_refine_760f8c1faa02b7e0a5e3490e13dadfa1",
         "refinement_interpretation_Tm_refine_7ecc9ff2104c1b3467333d052c1b37c3",
         "refinement_interpretation_Tm_refine_86c893bd73295cad27c95bea9e692abe",
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
@@ -76,10 +76,10 @@
         "token_correspondence_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.index",
         "typing_FStar.Seq.Base.length", "typing_Vale.AES.AES_s.expand_key",
-        "typing_tok_Vale.AES.AES_s.AES_128@tok"
+        "typing_tok_Vale.AES.AES_common_s.AES_128@tok"
       ],
       0,
-      "58372e9e424a69bc2fea3e55641b293e"
+      "67359f58cd59769a37eab90243d4d78e"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_key_128_i",
@@ -88,7 +88,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.AES.AES_s.nb", "int_inversion",
+        "equation_Vale.AES.AES_common_s.nb", "int_inversion",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_9560fd07e2bfe83f9e82b69195558f6e",
@@ -96,7 +96,7 @@
         "refinement_interpretation_Tm_refine_c1b1024e28776cd81d3423da5c72fdff"
       ],
       0,
-      "bd1e27e8f9eaa93a36ffcab77305d058"
+      "d9021ad3d0992396bdcb0ac2886fb013"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_key_128_i",
@@ -108,22 +108,21 @@
         "@fuel_correspondence_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "@fuel_irrelevance_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "constructor_distinct_Vale.AES.AES_s.AES_128",
-        "equality_tok_Vale.AES.AES_s.AES_128@tok", "equation_Prims.nat",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_128",
+        "equality_tok_Vale.AES.AES_common_s.AES_128@tok",
+        "equation_Prims.nat", "equation_Vale.AES.AES_common_s.aes_rcon",
+        "equation_Vale.AES.AES_common_s.nb",
         "equation_Vale.AES.AES_helpers.round_key_128",
         "equation_Vale.AES.AES_helpers.round_key_128_rcon",
-        "equation_Vale.AES.AES_s.aes_rcon", "equation_Vale.AES.AES_s.nb",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.natN",
         "equation_with_fuel_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AES.AES_s.expand_key",
         "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_create_len",
-        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_index_app1",
         "lemma_FStar.Seq.Base.lemma_index_app2",
         "lemma_FStar.Seq.Base.lemma_index_create",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "lemma_FStar.Seq.Base.lemma_len_append", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -135,10 +134,10 @@
         "projection_inverse_Vale.Def.Words_s.Mkfour_lo1",
         "refinement_interpretation_Tm_refine_3541a3cc1131de1e3a1aac5a3c02ea30",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_7e69eda982f72ce3ed022c485bb2fc82",
+        "refinement_interpretation_Tm_refine_760f8c1faa02b7e0a5e3490e13dadfa1",
         "refinement_interpretation_Tm_refine_86c893bd73295cad27c95bea9e692abe",
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
-        "refinement_interpretation_Tm_refine_bfb95b442a2d61084dc4f69f8ea505b8",
+        "refinement_interpretation_Tm_refine_b4c7e3186a5b82c5e7415d0f2320a04a",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "refinement_interpretation_Tm_refine_dd779be6e41e6ff5f3aa06cf49e7d775",
@@ -146,14 +145,15 @@
         "token_correspondence_Vale.AES.AES_s.expand_key_def",
         "token_correspondence_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.index",
-        "typing_FStar.Seq.Base.length", "typing_Vale.AES.AES_s.aes_rcon",
+        "typing_FStar.Seq.Base.length",
+        "typing_Vale.AES.AES_common_s.aes_rcon",
+        "typing_Vale.AES.AES_common_s.sub_word",
         "typing_Vale.AES.AES_s.expand_key",
-        "typing_Vale.AES.AES_s.rot_word_LE",
-        "typing_Vale.AES.AES_s.sub_word", "typing_Vale.Def.Types_s.ixor",
-        "typing_tok_Vale.AES.AES_s.AES_128@tok"
+        "typing_Vale.AES.AES_s.rot_word_LE", "typing_Vale.Def.Types_s.ixor",
+        "typing_tok_Vale.AES.AES_common_s.AES_128@tok"
       ],
       0,
-      "f8e94b546c9f85af9aa7c3f99a7b165b"
+      "be722fc28646c5f92c188e33f930d343"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_append",
@@ -162,7 +162,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.AES.AES_s.nb", "int_inversion",
+        "equation_Vale.AES.AES_common_s.nb", "int_inversion",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -171,7 +171,7 @@
         "refinement_interpretation_Tm_refine_ae2cae9fbcd5d831d729eacacb1b8bfc"
       ],
       0,
-      "0fbb91877fc77923fb8bc5209e917bab"
+      "a1605a60fb5e589ab27a9750d60f41bc"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_append",
@@ -180,17 +180,17 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.AES.AES_s.nb", "int_inversion",
+        "equation_Vale.AES.AES_common_s.nb", "int_inversion",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_20aaae00569a63cd3af2c2443d823806",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_86c893bd73295cad27c95bea9e692abe",
-        "refinement_interpretation_Tm_refine_ae2cae9fbcd5d831d729eacacb1b8bfc",
-        "refinement_interpretation_Tm_refine_ef417fce3de58e68c158c8eb2bde90b5"
+        "refinement_interpretation_Tm_refine_ae2cae9fbcd5d831d729eacacb1b8bfc"
       ],
       0,
-      "cdbe5b3b3aa63380439679c93062d101"
+      "2b5c8b66d414da300422b520a547b110"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_append",
@@ -202,15 +202,15 @@
         "@fuel_correspondence_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "@fuel_irrelevance_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "binder_x_3ad4f1b4033066bcad1c839860ed064e_0",
+        "binder_x_42ac984bd41fa0e6ed5da8c78c1c9972_0",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_2",
-        "constructor_distinct_Vale.AES.AES_s.AES_128", "eq2-interp",
-        "equality_tok_Prims.LexTop@tok",
-        "equality_tok_Vale.AES.AES_s.AES_128@tok", "equation_Prims.nat",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_128", "eq2-interp",
+        "equality_tok_Vale.AES.AES_common_s.AES_128@tok",
+        "equation_Prims.nat", "equation_Vale.AES.AES_common_s.nb",
         "equation_Vale.AES.AES_s.aes_key_LE",
         "equation_Vale.AES.AES_s.is_aes_key_LE",
-        "equation_Vale.AES.AES_s.nb", "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.Def.Words_s.nat32",
         "equation_with_fuel_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AES.AES_s.expand_key",
@@ -229,25 +229,26 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_7e69eda982f72ce3ed022c485bb2fc82",
+        "refinement_interpretation_Tm_refine_760f8c1faa02b7e0a5e3490e13dadfa1",
         "refinement_interpretation_Tm_refine_7ecc9ff2104c1b3467333d052c1b37c3",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_86c893bd73295cad27c95bea9e692abe",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
-        "refinement_interpretation_Tm_refine_f9e9df1e2c7eadb8ea2f909579f2cb45",
+        "refinement_interpretation_Tm_refine_f411471c0f20e821c19cca7649b1ada5",
         "token_correspondence_Vale.AES.AES_s.expand_key_def",
         "token_correspondence_Vale.AES.AES_s.expand_key_def.fuel_instrumented",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.index",
-        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
-        "typing_Vale.AES.AES_s.aes_rcon", "typing_Vale.AES.AES_s.expand_key",
-        "typing_Vale.AES.AES_s.rot_word_LE",
-        "typing_Vale.AES.AES_s.sub_word", "typing_Vale.Def.Types_s.ixor",
-        "typing_tok_Vale.AES.AES_s.AES_128@tok",
+        "typing_FStar.Seq.Base.slice",
+        "typing_Vale.AES.AES_common_s.aes_rcon",
+        "typing_Vale.AES.AES_common_s.sub_word",
+        "typing_Vale.AES.AES_s.expand_key",
+        "typing_Vale.AES.AES_s.rot_word_LE", "typing_Vale.Def.Types_s.ixor",
+        "typing_tok_Vale.AES.AES_common_s.AES_128@tok",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4e5691c17b34373452d77be49cd2734d"
+      "2e0147f08d87a68f51c996b3c6c30954"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_key_128",
@@ -256,15 +257,15 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.AES.AES_s.nb", "int_inversion",
+        "equation_Vale.AES.AES_common_s.nb", "int_inversion",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_6b9131a31b8a74e7093141d7985f063a",
         "refinement_interpretation_Tm_refine_9c2d74ae21ebe21dc37eb1ac96ddb62a",
-        "refinement_interpretation_Tm_refine_b5b9eee9c75794a063b10d2eb2a03466"
+        "refinement_interpretation_Tm_refine_b2653279990fcd566ae5ed5d42c839f3"
       ],
       0,
-      "865e4b6c338f2b93bf7e9981d9bd64ae"
+      "3249ee22bb6fc555a950d2c1d9bfc72d"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_key_128",
@@ -273,16 +274,16 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.AES.AES_s.nb", "int_inversion",
+        "equation_Vale.AES.AES_common_s.nb", "int_inversion",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1073a9de44f02d1d037669ad903e5870",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_6b9131a31b8a74e7093141d7985f063a",
         "refinement_interpretation_Tm_refine_9c2d74ae21ebe21dc37eb1ac96ddb62a",
-        "refinement_interpretation_Tm_refine_b5b9eee9c75794a063b10d2eb2a03466",
-        "refinement_interpretation_Tm_refine_d1b4e7ee86f9a2384f67e4ba8f299183"
+        "refinement_interpretation_Tm_refine_b2653279990fcd566ae5ed5d42c839f3"
       ],
       0,
-      "967f95e2fe7ead7f152354d849d9e325"
+      "771d6ec65fd65df5af25da0dbd155255"
     ],
     [
       "Vale.AES.AES_helpers.lemma_expand_key_128",
@@ -297,22 +298,21 @@
         "@fuel_irrelevance_Vale.AES.AES_s.key_schedule_to_round_keys.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
-        "constructor_distinct_Vale.AES.AES_s.AES_128",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_128",
         "data_typing_intro_Vale.Def.Words_s.Mkfour@tok", "eq2-interp",
-        "equality_tok_Vale.AES.AES_s.AES_128@tok", "equation_Prims.nat",
-        "equation_Prims.op_Equals_Equals_Equals",
+        "equality_tok_Vale.AES.AES_common_s.AES_128@tok",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
+        "equation_Vale.AES.AES_common_s.nb",
         "equation_Vale.AES.AES_s.aes_key_LE",
         "equation_Vale.AES.AES_s.is_aes_key_LE",
-        "equation_Vale.AES.AES_s.nb", "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32",
         "equation_with_fuel_Vale.AES.AES_helpers.expand_key_128_def.fuel_instrumented",
         "equation_with_fuel_Vale.AES.AES_s.key_schedule_to_round_keys.fuel_instrumented",
-        "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AES.AES_helpers.expand_key_128",
         "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
         "int_typing", "kinding_Vale.Def.Words_s.four@tok",
-        "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_index_app1",
         "lemma_FStar.Seq.Base.lemma_index_app2",
@@ -325,15 +325,10 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.Def.Words_s.Mkfour_hi2",
-        "projection_inverse_Vale.Def.Words_s.Mkfour_hi3",
-        "projection_inverse_Vale.Def.Words_s.Mkfour_lo0",
-        "projection_inverse_Vale.Def.Words_s.Mkfour_lo1",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_492bc8822bd3ab3615cbddc21f2b2327",
-        "refinement_interpretation_Tm_refine_507ed4c55777344d5e25694fb1d7ecf2",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_7e69eda982f72ce3ed022c485bb2fc82",
+        "refinement_interpretation_Tm_refine_760f8c1faa02b7e0a5e3490e13dadfa1",
         "refinement_interpretation_Tm_refine_7ecc9ff2104c1b3467333d052c1b37c3",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_86c893bd73295cad27c95bea9e692abe",
@@ -346,14 +341,13 @@
         "token_correspondence_Vale.AES.AES_s.key_schedule_to_round_keys.fuel_instrumented",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.index",
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
-        "typing_Vale.AES.AES_helpers.expand_key_128",
         "typing_Vale.AES.AES_s.expand_key",
         "typing_Vale.AES.AES_s.key_schedule_to_round_keys",
-        "typing_tok_Vale.AES.AES_s.AES_128@tok", "unit_inversion",
+        "typing_tok_Vale.AES.AES_common_s.AES_128@tok", "unit_inversion",
         "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "5e6c034bc3137549a59320e4961148c3"
+      "29a60bd4564dd0d113fddb94bbd05e11"
     ],
     [
       "Vale.AES.AES_helpers.lemma_simd_round_key",
@@ -380,14 +374,14 @@
         "projection_inverse_Vale.Def.Words_s.Mkfour_lo1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_Vale.Def.Types_s.quad32_xor_def",
+        "typing_Vale.AES.AES_common_s.sub_word",
         "typing_Vale.AES.AES_helpers.quad32_shl32",
         "typing_Vale.AES.AES_helpers.round_key_128_rcon",
-        "typing_Vale.AES.AES_s.rot_word_LE",
-        "typing_Vale.AES.AES_s.sub_word", "typing_Vale.Def.Types_s.ixor",
+        "typing_Vale.AES.AES_s.rot_word_LE", "typing_Vale.Def.Types_s.ixor",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi3"
       ],
       0,
-      "ace715d3c14ab55af2d4af18bfcfa96e"
+      "323d7dc3975539163d326ddbcb4e719b"
     ],
     [
       "Vale.AES.AES_helpers.init_rounds_opaque",
@@ -396,7 +390,7 @@
       0,
       [ "@query" ],
       0,
-      "02052a664e22ec6f53262081ec4b47d9"
+      "cc6b7613d7048c8b628120ec3fa50835"
     ],
     [
       "Vale.AES.AES_helpers.init_rounds_opaque",
@@ -419,7 +413,7 @@
         "token_correspondence_Vale.AES.AES_s.eval_rounds_def"
       ],
       0,
-      "a4ecc73fa735c0c67572b98e7a305158"
+      "131d63c102384dd568dcb059ceb5ae18"
     ],
     [
       "Vale.AES.AES_helpers.finish_cipher",
@@ -428,7 +422,7 @@
       2,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "032e8175eef4b271aa63af41cbaea289"
+      "054ded8f80f1cb10811eb45ed5429085"
     ],
     [
       "Vale.AES.AES_helpers.finish_cipher",
@@ -437,13 +431,13 @@
       2,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Vale.AES.AES_s.AES_128",
-        "constructor_distinct_Vale.AES.AES_s.AES_192",
-        "constructor_distinct_Vale.AES.AES_s.AES_256", "equation_Prims.nat",
-        "equation_Vale.AES.AES_s.eval_cipher_def",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_128",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_192",
+        "constructor_distinct_Vale.AES.AES_common_s.AES_256",
+        "equation_Prims.nat", "equation_Vale.AES.AES_s.eval_cipher_def",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32",
-        "fuel_guarded_inversion_Vale.AES.AES_s.algorithm",
+        "fuel_guarded_inversion_Vale.AES.AES_common_s.algorithm",
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "function_token_typing_Vale.AES.AES_s.eval_cipher",
         "function_token_typing_Vale.AES.AES_s.eval_rounds",
@@ -459,7 +453,7 @@
         "typing_Vale.Def.Types_s.quad32_xor"
       ],
       0,
-      "60e2d1fd1ccf73dd8e6dd8d9ee82577d"
+      "7f9d6b62f06071f0a415c5af1188425f"
     ],
     [
       "Vale.AES.AES_helpers.finish_cipher_opt",
@@ -471,10 +465,10 @@
         "equation_Vale.Def.Words_s.nat32",
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ad51f8f8f6389c50b1142aeab8e11f20"
+        "refinement_interpretation_Tm_refine_d290af59706bdf1e0dafe9e92b0eee04"
       ],
       0,
-      "ebc282f90809d0c49cd811be054d100a"
+      "8d58417da7b21cada61b94e2827d8900"
     ],
     [
       "Vale.AES.AES_helpers.finish_cipher_opt",
@@ -490,12 +484,12 @@
         "function_token_typing_Vale.AES.AES_s.eval_cipher",
         "function_token_typing_Vale.AES.AES_s.eval_rounds",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ad51f8f8f6389c50b1142aeab8e11f20",
+        "refinement_interpretation_Tm_refine_d290af59706bdf1e0dafe9e92b0eee04",
         "token_correspondence_Vale.AES.AES_s.eval_cipher_def",
         "token_correspondence_Vale.AES.AES_s.eval_rounds_def"
       ],
       0,
-      "d99ae1de6af59fd19c002bb3017c3d30"
+      "91b4842c88094be1e3673de9a818147e"
     ],
     [
       "Vale.AES.AES_helpers.lemma_add_0x1000000_reverse_mult",
@@ -559,7 +553,7 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "f7f252570b4f151cdb8a5f77e25241ca"
+      "1e5a9317bb21ff731a2e736760b0d222"
     ],
     [
       "Vale.AES.AES_helpers.lemma_incr_msb",
@@ -572,7 +566,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "39c1a1b9c8a19b3114b105652661f3ea"
+      "d04a755a95789c9c6443a5c3e896b2b3"
     ],
     [
       "Vale.AES.AES_helpers.lemma_incr_msb",
@@ -610,7 +604,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "8c60763fe00849ee8336286a9368aeae"
+      "f2f5550cbd3c9d1928248f26a8f48660"
     ],
     [
       "Vale.AES.AES_helpers.lemma_msb_in_bounds",
@@ -645,7 +639,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "933c231725d751d722a8e6e68945223c"
+      "a27318a7e6a6a29ce3c9b471e3be5983"
     ]
   ]
 ]

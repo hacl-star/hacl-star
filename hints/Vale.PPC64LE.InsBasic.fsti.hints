@@ -1,5 +1,5 @@
 [
-  "Á2·P÷ÞŸC`“\u0005UƒQÊ½",
+  "ACOŸ\t¾k®‚;\u0005I\u0014Áç&",
   [
     [
       "Vale.PPC64LE.InsBasic.va_quick_Move",
@@ -11,7 +11,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "579e61d487e18e3bd7ca5057cbb0facb"
+      "dd9d7926a36c903a609ea61e814ee3c8"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_LoadImm64",
@@ -23,7 +23,37 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "3cc8b1f60779fd6b6a1cc8508c762040"
+      "2822f9078e2800b7c8d8b3aaebf5247d"
+    ],
+    [
+      "Vale.PPC64LE.InsBasic.va_lemma_LoadImmShl64",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "c2d339607c20c8e94c2440c99612e24b"
+    ],
+    [
+      "Vale.PPC64LE.InsBasic.va_wp_LoadImmShl64",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "f2d85ae6b4fbba74201eb24fb2edb5be"
+    ],
+    [
+      "Vale.PPC64LE.InsBasic.va_quick_LoadImmShl64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "8985d89d1eedda60225aa2394a59c19b"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_AddLa",
@@ -35,7 +65,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "5d49bbc504b26383e076b5ad96683202"
+      "999b3ef1fe9d31a48aada0ea5885b74e"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_Add",
@@ -47,7 +77,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "25b7d614be157a6e49506f6a57578d2e"
+      "84cbaf0f5857a7c1c710acf393017437"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_AddWrap",
@@ -59,7 +89,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "797e0474d1f97b74340e165f6d3e73c3"
+      "7286e210833362904059eaeaef5d703a"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_AddImm",
@@ -71,7 +101,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "9cad7fdb88d37f8aa69833062325057e"
+      "7d4f13a30e3f15e63399c8137e7c2b43"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_AddImmWrap",
@@ -83,7 +113,19 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "fc273043f7cff3f09bfcf8eeccf65d26"
+      "cb444be6ebac7c15780ddc2f9c9a8eff"
+    ],
+    [
+      "Vale.PPC64LE.InsBasic.va_quick_AddCarry",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "37b95f21dd397d6dd7463567c3e881b5"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_wp_AddExtended",
@@ -103,7 +145,7 @@
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__xer"
       ],
       0,
-      "56acb3cb844d32ea71c4847285913fe5"
+      "cc0927f71c441da557b760437d57c229"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_AddExtended",
@@ -115,7 +157,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "8446f2f872e11ee087f00ca875cc5fd5"
+      "5174851e7cc95b2acf1222c710ced6fe"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_wp_AddExtendedOV",
@@ -135,7 +177,7 @@
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__xer"
       ],
       0,
-      "d09ed93adaf762802a6c389bd5c5eddf"
+      "2786ea320540459c2f352bb2bc778e7f"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_AddExtendedOV",
@@ -147,7 +189,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "ea7f5edb377833a77d5f260dac2385f3"
+      "fc7ee266c457fd5da637880b3a838661"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_Sub",
@@ -159,7 +201,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "157a9b847eab0bf484e5610819ec4fd5"
+      "0e02d5f1bae8347de5563d28d8675c82"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_SubWrap",
@@ -171,7 +213,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "3b131d7195a0ca467affd0d3339d01ea"
+      "5c6794971c11ecd46832ffdedcfe0e85"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_SubImm",
@@ -183,7 +225,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "63723861cd81a8c0a664ca4d68ecee4e"
+      "4075fd15a5b6d9c4d9d343e148b076c1"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_SubImmWrap",
@@ -195,7 +237,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "b461b1220584ddae4845c3dd0dd5c6a0"
+      "f54f401932f3981f7c2642ec54d68a74"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_MulLow64",
@@ -207,7 +249,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "7604f096252abafdbdfc507e5bf1d310"
+      "d9f9ed47f11f6d468ee3a80920d6eb49"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_MulLow64Wrap",
@@ -219,7 +261,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "ca7ec04204289f9b52a7c49c5984a559"
+      "6b35a723c214222d66b97224c58d67e2"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_MulHigh64U",
@@ -231,7 +273,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "fc825b84158fba1c26812a857423cf47"
+      "5da991a9de0db3a7cd5251f8578b1b01"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_Xor",
@@ -243,7 +285,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "f0a7545cb15506f11cca6374252f4a0d"
+      "eec496dd5014c6b11def650b5f659b3b"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_And",
@@ -255,7 +297,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "8387bf6dbe2b712a783d4eb72bff7804"
+      "57d1ee9d1f64c652943523316b2cf84e"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_Sr64Imm",
@@ -267,7 +309,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "af23e028dacf3fc031540e10507a5ab3"
+      "d15dc23edb55b496f97a430f2e6d9b0d"
     ],
     [
       "Vale.PPC64LE.InsBasic.va_quick_Sl64Imm",
@@ -279,7 +321,31 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "8918c1d642c6ae3d559e630e46e37e7b"
+      "2222cd59ef327b948cf37d029e2f3289"
+    ],
+    [
+      "Vale.PPC64LE.InsBasic.va_quick_Sr64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "b9ac0c71abee7d6bbd853d70a29ba7d0"
+    ],
+    [
+      "Vale.PPC64LE.InsBasic.va_quick_Sl64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "2e6ffa4478b8419e17c77a35da52561b"
     ]
   ]
 ]
