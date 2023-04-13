@@ -12,7 +12,8 @@ module PS = Lib.PrintSequence
 
 #set-options "--z3rlimit 50 --fuel 1 --ifuel 1"
 
-let test_pk_compressed (a:hash_alg_ecdsa) { msg; qx; qy; r; s; result } =
+let test_pk_compressed (a:hash_alg_ecdsa) (inp:vec_SigVer) : FStar.All.ML bool =
+  let { msg; qx; qy; r; s; result } = inp in
   let msg_len   = String.strlen msg / 2 in
   let pk_x_len  = String.strlen qx / 2 in
   let pk_y_len  = String.strlen qy / 2 in
@@ -37,7 +38,8 @@ let test_pk_compressed (a:hash_alg_ecdsa) { msg; qx; qy; r; s; result } =
     | None -> false
 
 
-let test_sigver (a:hash_alg_ecdsa) { msg; qx; qy; r; s; result } =
+let test_sigver (a:hash_alg_ecdsa) (inp:vec_SigVer) : FStar.All.ML bool =
+  let { msg; qx; qy; r; s; result } = inp in
   let msg_len   = String.strlen msg / 2 in
   let pk_x_len  = String.strlen qx / 2 in
   let pk_y_len  = String.strlen qy / 2 in
@@ -61,7 +63,8 @@ let test_sigver (a:hash_alg_ecdsa) { msg; qx; qy; r; s; result } =
     is_sig_valid = is_valid
 
 
-let test_siggen (a:hash_alg_ecdsa) { msg'; d; qx'; qy'; k; r'; s' } =
+let test_siggen (a:hash_alg_ecdsa) (inp:vec_SigGen) : FStar.All.ML bool =
+  let { msg'; d; qx'; qy'; k; r'; s' } = inp in
   let msg_len   = String.strlen msg' / 2 in
   let sk_len    = String.strlen d / 2 in
   let nonce_len = String.strlen k / 2 in
@@ -105,7 +108,7 @@ let print_result (b:bool) : FStar.All.ML unit =
   if b then IO.print_string "\nSuccess!\n" else IO.print_string "\nFailure!\n"
 
 
-let test () =
+let test () : FStar.All.ML bool =
   IO.print_string "\n[P-256 ECDSA-verify with SHA2-256]\n";
   let res1 = List.for_all (test_sigver (Hash SHA2_256)) sigver_vectors_sha2_256 in
   print_result res1;
@@ -135,6 +138,6 @@ let test () =
   let res7 = List.for_all (test_pk_compressed (Hash SHA2_256)) sigver_vectors_sha2_256 in
   print_result res7;
 
-  let res = res1 && res2 && res3 && res4 && res5 && res6 && res7 in
+  let res : bool = res1 && res2 && res3 && res4 && res5 && res6 && res7 in
   if res then begin IO.print_string "\n\n[P-256] PASS\n"; true end
   else begin IO.print_string "\n\n[P-256] FAIL\n"; false end
