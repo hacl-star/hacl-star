@@ -56,13 +56,7 @@ val lemma_mont_is_point_at_inf: p:S.proj_point{let (_, _, z) = p in z < S.prime}
 
 let lemma_mont_is_point_at_inf p =
   let px, py, pz = p in
-  assert (if S.is_point_at_inf p then pz == 0 else pz <> 0);
-  assert (SM.from_mont pz == pz * SM.fmont_R_inv % S.prime);
-  assert_norm (SM.fmont_R_inv' % S.prime <> 0);
-  assert_norm (0 * SM.fmont_R_inv' % S.prime == 0);
-  SM.lemma_from_mont_zero pz;
-  SM.fmont_R_inv_value ();
-  assert (if pz = 0 then SM.from_mont pz == 0 else SM.from_mont pz <> 0)
+  SM.lemma_from_mont_zero pz
 
 
 [@CInline]
