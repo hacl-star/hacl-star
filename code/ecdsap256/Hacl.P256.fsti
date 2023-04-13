@@ -15,8 +15,6 @@ module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-// TODO: clean up the documentation
-
 // TODO?: change API for `ecdsa_verify`, namely, take `signature` as an argument
 
 inline_for_extraction noextract
@@ -54,65 +52,65 @@ let ecdsa_verify_p256_st (alg:S.hash_alg_ecdsa) =
 [@@ CPrologue "
 /*******************************************************************************
 
-ECDSA and ECDH functions over the P-256 NIST curve.
+ Verified C library for ECDSA and ECDH functions over the P-256 NIST curve.
 
-This module implements signing and verification, key validation, conversions
-between various point representations, and ECDH key agreement.
+ This module implements signing and verification, key validation, conversions
+ between various point representations, and ECDH key agreement.
 
 *******************************************************************************/
 
-/**************/
-/* Signatures */
-/**************/
+/*****************/
+/* ECDSA signing */
+/*****************/
 
 /*
-  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  As per the standard, a hash function *shall* be used. Therefore, we recommend
   using one of the three combined hash-and-sign variants.
 */";
 
-Comment "Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
+Comment "Create an ECDSA signature using SHA2-256.
 
-  Input:
-  • signature: uint8 [64]
-  • msg: uint8 [msg_len]
-  • private_key: uint8 [32]
-  • nonce: uint8 [32]
-  Output: bool, where True stands for the correct signature generation.
-  False value means that an error has occurred.
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
-  The private key and the nonce are expected to be more than 0 and less than the curve order."]
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
 val ecdsa_sign_p256_sha2: ecdsa_sign_p256_st (S.Hash SHA2_256)
 
 
-[@@ Comment "Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
+[@@ Comment "Create an ECDSA signature using SHA2-384.
 
-  Input:
-  • signature: uint8 [64]
-  • msg: uint8 [msg_len]
-  • private_key: uint8 [32]
-  • nonce: uint8 [32]
-  Output: bool, where True stands for the correct signature generation.
-  False value means that an error has occurred.
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
-  The private key and the nonce are expected to be more than 0 and less than the curve order."]
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
 val ecdsa_sign_p256_sha384: ecdsa_sign_p256_st (S.Hash SHA2_384)
 
 
-[@@ Comment "Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
+[@@ Comment "Create an ECDSA signature using SHA2-512.
 
-  Input:
-  • signature: uint8 [64]
-  • msg: uint8 [msg_len]
-  • private_key: uint8 [32]
-  • nonce: uint8 [32]
-  Output: bool, where True stands for the correct signature generation.
-  False value means that an error has occurred.
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
-  The private key and the nonce are expected to be more than 0 and less than the curve order."]
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
 val ecdsa_sign_p256_sha512: ecdsa_sign_p256_st (S.Hash SHA2_512)
 
 
-[@@ Comment "P256 signature WITHOUT hashing first.
+[@@ Comment "Create an ECDSA signature WITHOUT hashing first.
 
   This function is intended to receive a hash of the input.
   For convenience, we recommend using one of the hash-and-sign combined functions above.
@@ -124,67 +122,73 @@ val ecdsa_sign_p256_sha512: ecdsa_sign_p256_st (S.Hash SHA2_512)
   reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
   need to perform the left-padding themselves.
 
-  Input:
-  • signature: uint8 [64]
-  • msg: uint8 [msg_len]
-  • private_key: uint8 [32]
-  • nonce: uint8 [32]
-  Output: bool, where True stands for the correct signature generation.
-  False value means that an error has occurred.
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
-  The private key and the nonce are expected to be more than 0 and less than the curve order.
-  The message msg is expected to be hashed by a strong hash function,
-  the lenght of the message is expected to be 32 bytes and more."]
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid values:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
 val ecdsa_sign_p256_without_hash: ecdsa_sign_p256_st (S.NoHash)
 
 
 [@@ CPrologue "
-/****************/
-/* Verification */
-/****************/
+/**********************/
+/* ECDSA verification */
+/**********************/";
 
-/*
-  Verify a message signature. These functions internally validate the public key using validate_public_key.
-*/";
+Comment "Verify an ECDSA signature using SHA2-256.
 
-Comment "
-  Input:
-  • msg: uint8 [msg_len]
-  • public_key: uint8 [64]
-  • signature_r: uint8 [32]
-  • signature_s: uint8 [32]
-  Output: bool, where true stands for the correct signature verification."]
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
 val ecdsa_verif_p256_sha2: ecdsa_verify_p256_st (S.Hash SHA2_256)
 
 
-[@@ Comment "
-  Input:
-  • msg: uint8 [msg_len]
-  • public_key: uint8 [64]
-  • signature_r: uint8 [32]
-  • signature_s: uint8 [32]
-  Output: bool, where true stands for the correct signature verification."]
+[@@ Comment "Verify an ECDSA signature using SHA2-384.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
 val ecdsa_verif_p256_sha384: ecdsa_verify_p256_st (S.Hash SHA2_384)
 
 
-[@@ Comment "
-  Input:
-  • msg: uint8 [msg_len]
-  • public_key: uint8 [64]
-  • signature_r: uint8 [32]
-  • signature_s: uint8 [32]
-  Output: bool, where true stands for the correct signature verification."]
+[@@ Comment "Verify an ECDSA signature using SHA2-512.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
 val ecdsa_verif_p256_sha512: ecdsa_verify_p256_st (S.Hash SHA2_512)
 
-[@@ Comment "
-  Input:
-  • msg: uint8 [msg_len]
-  • public_key: uint8 [64]
-  • signature_r: uint8 [32]
-  • signature_s: uint8 [32]
-  Output: bool, where true stands for the correct signature verification.
-  The message m is expected to be hashed by a strong hash function,
-  the lenght of the message is expected to be 32 bytes and more."]
+
+[@@ Comment "Verify an ECDSA signature WITHOUT hashing first.
+
+  This function is intended to receive a hash of the input.
+  For convenience, we recommend using one of the hash-and-verify combined functions above.
+
+  The argument `msg` MUST be at least 32 bytes (i.e. `msg_len >= 32`).
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
 val ecdsa_verif_without_hash: ecdsa_verify_p256_st S.NoHash
 
 
@@ -193,14 +197,17 @@ val ecdsa_verif_without_hash: ecdsa_verify_p256_st S.NoHash
 /* Key validation */
 /******************/";
 
-Comment "Validate a public key.
+Comment "Public key validation.
 
-  Input: public_key: uint8 [64].
-  Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:
-    • Verify that the public key is not the “point at infinity”, represented as O.
-    • Verify that the affine x and y coordinates of the point represented by the public key are
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `public_key` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid (with respect to SP 800-56A):
+    • the public key is not the “point at infinity”, represented as O.
+    • the affine x and y coordinates of the point represented by the public key are
       in the range [0, p – 1] where p is the prime defining the finite field.
-    • Verify that y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+    • y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
   The last extract is taken from: https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
 val validate_public_key: public_key:lbuffer uint8 64ul -> Stack bool
   (requires fun h -> live h public_key)
@@ -208,10 +215,14 @@ val validate_public_key: public_key:lbuffer uint8 64ul -> Stack bool
     r == S.validate_public_key (as_seq h0 public_key))
 
 
-[@@ Comment "Validate a private key, e.g. prior to signing.
+[@@ Comment "Private key validation.
 
-  Input: private_key: uint8 [32].
-  Output: bool, where true stands for the scalar to be more than 0 and less than order."]
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve"]
 val validate_private_key: private_key:lbuffer uint8 32ul -> Stack bool
   (requires fun h -> live h private_key)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
@@ -219,29 +230,27 @@ val validate_private_key: private_key:lbuffer uint8 32ul -> Stack bool
     r <==> (0 < s && s < S.order)))
 
 
-[@@ CPrologue "
-/*****************************************/
-/* Point representations and conversions */
-/*****************************************/
+[@@ CPrologue
+"/*******************************************************************************
+  Parsing and Serializing public keys.
 
-/*
-  Elliptic curve points have 2 32-byte coordinates (x, y) and can be represented in 3 ways:
+  A public key is a point (x, y) on the P-256 NIST curve.
 
-  - \"raw\" form (64 bytes): the concatenation of the 2 coordinates, also known as \"internal\"
-  - \"compressed\" form (33 bytes): first the sign byte of y (either 0x02 or 0x03), followed by x
-  - \"uncompressed\" form (65 bytes): first a constant byte (always 0x04), followed by the \"raw\" form
+  The point can be represented in the following three ways.
+    • raw          = [ x || y ], 64 bytes
+    • uncompressed = [ 0x04 || x || y ], 65 bytes
+    • compressed   = [ (0x02 for even `y` and 0x03 for odd `y`) || x ], 33 bytes
 
-  For all of the conversation functions below, the input and output MUST NOT overlap.
-*/";
+*******************************************************************************/\n";
 
-Comment "Convert 65-byte uncompressed to raw.
+ Comment "Convert a public key from uncompressed to its raw form.
 
-  The function errors out if the first byte is incorrect, or if the resulting point is invalid.
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
 
-  Input:
-  • pk: uint8 [65]
-  • pk_raw: uint8 [64]
-  Output: bool, where true stands for the correct decompression."]
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+
+  The function DOESN'T check whether (x, y) is a valid point."]
 val uncompressed_to_raw: pk:lbuffer uint8 65ul -> pk_raw:lbuffer uint8 64ul -> Stack bool
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
@@ -249,14 +258,14 @@ val uncompressed_to_raw: pk:lbuffer uint8 65ul -> pk_raw:lbuffer uint8 64ul -> S
     (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_uncompressed_to_raw (as_seq h0 pk)))))
 
 
-[@@ Comment "Convert 33-byte compressed to raw.
+[@@ Comment "Convert a public key from compressed to its raw form.
 
-  The function errors out if the first byte is incorrect, or if the resulting point is invalid.
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
 
-  Input:
-  • pk: uint8 [33]
-  • pk_raw: uint8 [64]
-  Output: bool, where true stands for the correct decompression."]
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+
+  The function also checks whether (x, y) is a valid point."]
 val compressed_to_raw: pk:lbuffer uint8 33ul -> pk_raw:lbuffer uint8 64ul -> Stack bool
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
@@ -264,23 +273,24 @@ val compressed_to_raw: pk:lbuffer uint8 33ul -> pk_raw:lbuffer uint8 64ul -> Sta
     (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_compressed_to_raw (as_seq h0 pk)))))
 
 
-[@@ Comment "Convert raw to 65-byte uncompressed.
+[@@ Comment "Convert a public key from raw to its uncompressed form.
 
-  This function effectively prepends a 0x04 byte.
+  The outparam `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
-  Input:
-  • pk_raw: uint8 [64]
-  • pk: uint8 [65]"]
+  The function DOESN'T check whether (x, y) is a valid point."]
 val raw_to_uncompressed: pk_raw:lbuffer uint8 64ul -> pk:lbuffer uint8 65ul -> Stack unit
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
     as_seq h1 pk == S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
 
 
-[@@ Comment "Convert raw to 33-byte compressed.
+[@@ Comment "Convert a public key from raw to its compressed form.
 
-  Input: pk_raw: uint8 [64]
-  Output: pk: uint8 [33]"]
+  The outparam `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is a valid point."]
 val raw_to_compressed: pk_raw:lbuffer uint8 64ul -> pk:lbuffer uint8 33ul -> Stack unit
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
@@ -292,17 +302,15 @@ val raw_to_compressed: pk_raw:lbuffer uint8 64ul -> pk:lbuffer uint8 33ul -> Sta
 /* ECDH agreement */
 /******************/";
 
-Comment "Convert a private key into a raw public key.
+Comment "Compute the public key from the private key.
 
-  This function performs no key validation.
+  The function returns `true` if a private key is valid and `false` otherwise.
 
-  Input: private_key: uint8 [32]
-  Output: public_key: uint8 [64]
-  Returns:
-  - `true`, for success, meaning the public key is not a point at infinity
-  - `false`, otherwise.
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
-  `scalar` and `result` MUST NOT overlap."]
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve."]
 val dh_initiator:
     public_key:lbuffer uint8 64ul
   -> private_key:lbuffer uint8 32ul ->
@@ -314,20 +322,16 @@ val dh_initiator:
     (r <==> Some? pk) /\ (r ==> (as_seq h1 public_key == Some?.v pk))))
 
 
-[@@ Comment "ECDH key agreement.
+[@@ Comment "Execute the diffie-hellmann key exchange.
 
-  This function takes a 32-byte secret key, another party's 64-byte raw public key,
-  and computeds the 64-byte ECDH shared key.
+  The function returns `true` for successful creation of an ECDH shared secret and
+  `false` otherwise.
 
-  This function ONLY validates the public key.
+  The outparam `shared_secret` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `their_pubkey` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
-  Input:
-  • their_public_key: uint8 [64]
-  • private_key: uint8 [32]
-  • shared_secret: uint8 [64]
-  Output: bool, where True stands for the correct key generation.
-  False value means that an error has occurred (possibly the provided public key was incorrect or
-  the result represents point at infinity)."]
+  The function also checks whether `private_key` and `their_pubkey` are valid."]
 val dh_responder:
     shared_secret:lbuffer uint8 64ul
   -> their_pubkey:lbuffer uint8 64ul
