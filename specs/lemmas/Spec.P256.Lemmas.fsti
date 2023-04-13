@@ -5,6 +5,9 @@ open Spec.P256.PointOps
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
+val prime_lemma: unit -> Lemma (FStar.Math.Euclid.is_prime prime)
+
+
 val aff_point_at_inf_lemma (p:aff_point) :
   Lemma (aff_point_add p aff_point_at_inf = p)
 
