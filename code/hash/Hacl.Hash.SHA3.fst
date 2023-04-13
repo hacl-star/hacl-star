@@ -54,3 +54,9 @@ let hash a input len dst =
   | SHA3_256 -> Hacl.SHA3.sha3_256 len input dst
   | SHA3_384 -> Hacl.SHA3.sha3_384 len input dst
   | SHA3_512 -> Hacl.SHA3.sha3_512 len input dst
+
+let finish_keccak (a: sha3_alg): finish_st a = fun s dst l ->
+  if is_shake a then
+    Hacl.Impl.SHA3.squeeze s (block_len a) l dst
+  else
+    Hacl.Impl.SHA3.squeeze s (block_len a) (hash_len a) dst

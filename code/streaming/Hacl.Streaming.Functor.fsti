@@ -451,7 +451,7 @@ let finish_st
   (t':Type0 { t' == optional_key i c.km c.key }) =
   s:state c i t t' ->
   dst:B.buffer uint8 ->
-  l:c.output_length_t { B.len dst == c.output_len i l } ->
+  l:c.output_length_t { B.length dst == c.output_length i l } ->
   Stack unit
     (requires fun h0 ->
       invariant c i h0 s /\

@@ -15,16 +15,49 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 inline_for_extraction noextract
-val init (a: sha3_alg { not (is_shake a) }): init_st (|a, ()|)
+val init (a: sha3_alg): init_st (|a, ()|)
 
 inline_for_extraction noextract
-val update_multi (a: sha3_alg { not (is_shake a) }): update_multi_st (|a, ()|)
+val update_multi (a: sha3_alg): update_multi_st (|a, ()|)
 
 inline_for_extraction noextract
-val update_last (a: sha3_alg { not (is_shake a) }): update_last_st (|a, ()|)
+val update_last (a: sha3_alg): update_last_st (|a, ()|)
 
 inline_for_extraction noextract
 val finish (a: sha3_alg { not (is_shake a) }): finish_st (| a, ()|)
 
 inline_for_extraction noextract
 val hash (a: sha3_alg { not (is_shake a) }): hash_st a
+
+/// A couple helpers specifically for the Keccak functor, which live here
+/// because this module has an fsti and therefore can friend specs.
+
+let v_len a (l: Lib.IntTypes.size_t): Spec.Hash.Definitions.output_length a =
+  let _ = allow_inversion hash_alg in
+  if is_shake a then
+    Lib.IntTypes.(v #U32 #PUB (l <: size_t))
+  else
+    ()
+
+module B = LowStar.Buffer
+module ST = FStar.HyperStack.ST
+
+/// This is a variant of Hacl.Hash.SHA3.finish that takes an optional output
+/// length. This is used in the Keccak streaming functor, wherein this signature
+/// eventually becomes exposed in the C API. As a result, we cannot have `l` be
+/// an indexed type (e.g. if is_shake then size_t else unit) because that would
+/// not be extractable to C. So, we contend with a suboptimal contract, which
+/// is: "if a is a shake algorithm, then the length is ignored".
+noextract inline_for_extraction
+let finish_st (a: sha3_alg) =
+  s:state (| a, () |) -> dst:B.buffer Lib.IntTypes.uint8 -> l:Lib.IntTypes.size_t {
+    B.length dst == (if is_shake a then Lib.IntTypes.(v (l <: size_t))  else Spec.Hash.Definitions.hash_length a)
+  } -> ST.Stack unit
+  (requires (fun h ->
+    B.live h s /\ B.live h dst /\ B.disjoint s dst))
+  (ensures (fun h0 _ h1 ->
+    B.(modifies (loc_buffer dst `loc_union` loc_buffer s) h0 h1) /\
+    Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.finish a (as_seq h0 s) (v_len a l))))
+
+noextract inline_for_extraction
+val finish_keccak (a: sha3_alg): finish_st a
