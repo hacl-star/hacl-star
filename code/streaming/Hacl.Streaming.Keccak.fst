@@ -190,8 +190,9 @@ let reset (a: G.erased alg) =
 let update (a: G.erased alg) =
   F.update (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit) 
 
-let finish_ (a: G.erased alg) =
-  F.mk_finish #alg (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
+private
+let finish_ (a: alg) =
+  F.mk_finish #alg (hacl_keccak a) a (sha3_state a) (G.erased unit)
 
 open Hacl.Streaming.Functor
 

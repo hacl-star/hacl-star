@@ -3375,8 +3375,9 @@ Hacl_Streaming_Keccak_update(
   return (uint32_t)0U;
 }
 
-void
-Hacl_Streaming_Keccak_finish_(
+static void
+finish_(
+  Spec_Hash_Definitions_hash_alg a,
   Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *p,
   uint8_t *dst,
   uint32_t l
@@ -3386,9 +3387,8 @@ Hacl_Streaming_Keccak_finish_(
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = scrut0.block_state;
   uint8_t *buf_ = scrut0.buf;
   uint64_t total_len = scrut0.total_len;
-  Spec_Hash_Definitions_hash_alg i = block_state.fst;
   uint32_t sw0;
-  switch (i)
+  switch (a)
   {
     case Spec_Hash_Definitions_MD5:
       {
@@ -3469,7 +3469,7 @@ Hacl_Streaming_Keccak_finish_(
   uint32_t r;
   if (total_len % (uint64_t)sw0 == (uint64_t)0U && total_len > (uint64_t)0U)
   {
-    switch (i)
+    switch (a)
     {
       case Spec_Hash_Definitions_MD5:
         {
@@ -3551,7 +3551,7 @@ Hacl_Streaming_Keccak_finish_(
   else
   {
     uint32_t sw;
-    switch (i)
+    switch (a)
     {
       case Spec_Hash_Definitions_MD5:
         {
@@ -3633,14 +3633,14 @@ Hacl_Streaming_Keccak_finish_(
   }
   uint8_t *buf_1 = buf_;
   uint64_t buf[25U] = { 0U };
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ tmp_block_state = { .fst = i, .snd = buf };
+  K___Spec_Hash_Definitions_hash_alg__uint64_t_ tmp_block_state = { .fst = a, .snd = buf };
   __K___Spec_Hash_Definitions_hash_alg__uint64_t__K___Spec_Hash_Definitions_hash_alg__uint64_t_
   scrut = { .fst = block_state, .snd = tmp_block_state };
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
   memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
   uint32_t sw1;
-  switch (i)
+  switch (a)
   {
     case Spec_Hash_Definitions_MD5:
       {
@@ -3721,7 +3721,7 @@ Hacl_Streaming_Keccak_finish_(
   uint32_t ite0;
   if (r % sw1 == (uint32_t)0U && r > (uint32_t)0U)
   {
-    switch (i)
+    switch (a)
     {
       case Spec_Hash_Definitions_MD5:
         {
@@ -3803,7 +3803,7 @@ Hacl_Streaming_Keccak_finish_(
   else
   {
     uint32_t sw;
-    switch (i)
+    switch (a)
     {
       case Spec_Hash_Definitions_MD5:
         {
@@ -4213,7 +4213,7 @@ Hacl_Streaming_Keccak_finish(
   {
     return (uint32_t)1U;
   }
-  Hacl_Streaming_Keccak_finish_(s, dst, l);
+  finish_(a1, s, dst, l);
   return (uint32_t)0U;
 }
 

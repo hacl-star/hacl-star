@@ -1664,7 +1664,6 @@ let mk_finish #index c i t t' p dst l =
   let open LowStar.BufferOps in
   let h0 = ST.get () in
   let State block_state buf_ total_len seen k' = !*p in
-  let i = c.index_of_state i block_state in
 
   push_frame ();
   let h1 = ST.get () in

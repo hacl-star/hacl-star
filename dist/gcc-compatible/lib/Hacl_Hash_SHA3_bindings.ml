@@ -87,11 +87,6 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr
             hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
            @-> (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
-    let hacl_Streaming_Keccak_finish_ =
-      foreign "Hacl_Streaming_Keccak_finish_"
-        ((ptr
-            hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
-           @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let hacl_Streaming_Keccak_finish =
       foreign "Hacl_Streaming_Keccak_finish"
         ((ptr

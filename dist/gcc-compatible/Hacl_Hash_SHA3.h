@@ -77,13 +77,6 @@ Hacl_Streaming_Keccak_update(
   uint32_t len
 );
 
-void
-Hacl_Streaming_Keccak_finish_(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *p,
-  uint8_t *dst,
-  uint32_t l
-);
-
 uint32_t
 Hacl_Streaming_Keccak_finish(
   Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s,

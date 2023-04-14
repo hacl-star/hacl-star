@@ -481,7 +481,7 @@ inline_for_extraction noextract
 val mk_finish:
   #index:Type0 ->
   c:block index ->
-  i:G.erased index ->
+  i:index ->
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
   finish_st c i t t'
