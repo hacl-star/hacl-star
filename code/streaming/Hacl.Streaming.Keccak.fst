@@ -125,8 +125,8 @@ let hacl_keccak (a: G.erased alg): block alg =
 
     (fun _ -> 0xffffffffUL) (* max_input_len *)
     (fun a l -> if is_shake a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) (* output_length *)
-    (fun a -> Hacl.Hash.SHA3.block_len a) (* block_len *)
-    (fun a -> Hacl.Hash.SHA3.block_len a) (* blocks_state_len *)
+    Hacl.Hash.SHA3.block_len (* block_len *)
+    Hacl.Hash.SHA3.block_len (* blocks_state_len *)
     (fun _ -> 0ul) (* init_input_len *)
 
     (* init_input_s *)
@@ -167,7 +167,7 @@ let hacl_keccak (a: G.erased alg): block alg =
 
     (* update_multi *)
     (fun _ (a, s) _ blocks len ->
-      Hacl.Hash.SHA3.update_multi a s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
+      Hacl.Hash.SHA3.update_multi a s () blocks (len `U32.div` Hacl.Hash.SHA3.(block_len a)))
 
     (* update_last *)
     (fun _ (a, s) _ last last_len ->
