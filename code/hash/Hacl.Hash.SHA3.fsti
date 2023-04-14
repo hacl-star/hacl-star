@@ -9,7 +9,13 @@ module Hacl.Hash.SHA3
 // implementation in code/sha3 does not export the "update_multi" version, since
 // it does everything in one go, so it's convenient to make this explicit here.)
 //
-// Final remark: this module is completely noextract, so it generates no code at run-time.
+// NOTE: unlike other modules, this one is not entirely noextract
+// inline_for_extraction. There are two reasons. First, because all Keccak
+// variants share the same state type, these functions do *NOT* need to be
+// inlined to fit in the Low* subset. Second, for this reason, they are not
+// always reduced at compile-time for a chosen value of `a`, meaning that we
+// need the code to look decent (and not have everything inlined aggressively
+// when there are no opportunities for reduction).
 
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions

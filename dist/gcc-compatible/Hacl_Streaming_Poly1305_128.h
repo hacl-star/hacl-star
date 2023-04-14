@@ -47,10 +47,13 @@ typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s
 Hacl_Streaming_Poly1305_128_poly1305_128_state;
 
 Hacl_Streaming_Poly1305_128_poly1305_128_state
-*Hacl_Streaming_Poly1305_128_create_in(uint8_t *k);
+*Hacl_Streaming_Poly1305_128_create_in(uint8_t *k1);
 
 void
-Hacl_Streaming_Poly1305_128_init(uint8_t *k, Hacl_Streaming_Poly1305_128_poly1305_128_state *s);
+Hacl_Streaming_Poly1305_128_init(
+  uint8_t *k1,
+  Hacl_Streaming_Poly1305_128_poly1305_128_state *s
+);
 
 /**
 0 = success, 1 = max length exceeded

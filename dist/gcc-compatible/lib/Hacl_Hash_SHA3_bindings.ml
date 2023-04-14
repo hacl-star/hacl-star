@@ -2,33 +2,101 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Streaming_Types_applied =
-      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
-    open Hacl_Streaming_Types_applied
-    type hacl_Streaming_SHA3_state_256 = hacl_Streaming_MD_state_64
-    let hacl_Streaming_SHA3_state_256 =
-      typedef hacl_Streaming_MD_state_64 "Hacl_Streaming_SHA3_state_256"
-    let hacl_Streaming_SHA3_create_in_256 =
-      foreign "Hacl_Streaming_SHA3_create_in_256"
-        (void @-> (returning (ptr hacl_Streaming_MD_state_64)))
-    let hacl_Streaming_SHA3_init_256 =
-      foreign "Hacl_Streaming_SHA3_init_256"
-        ((ptr hacl_Streaming_MD_state_64) @-> (returning void))
-    let hacl_Streaming_SHA3_update_256 =
-      foreign "Hacl_Streaming_SHA3_update_256"
-        ((ptr hacl_Streaming_MD_state_64) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
-    let hacl_Streaming_SHA3_finish_256 =
-      foreign "Hacl_Streaming_SHA3_finish_256"
-        ((ptr hacl_Streaming_MD_state_64) @->
-           (ocaml_bytes @-> (returning void)))
-    let hacl_Streaming_SHA3_free_256 =
-      foreign "Hacl_Streaming_SHA3_free_256"
-        ((ptr hacl_Streaming_MD_state_64) @-> (returning void))
-    let hacl_Streaming_SHA3_copy_256 =
-      foreign "Hacl_Streaming_SHA3_copy_256"
-        ((ptr hacl_Streaming_MD_state_64) @->
-           (returning (ptr hacl_Streaming_MD_state_64)))
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
+    let hacl_Hash_SHA3_update_multi_sha3 =
+      foreign "Hacl_Hash_SHA3_update_multi_sha3"
+        (spec_Hash_Definitions_hash_alg @->
+           ((ptr uint64_t) @->
+              (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+    let hacl_Hash_SHA3_update_last_sha3 =
+      foreign "Hacl_Hash_SHA3_update_last_sha3"
+        (spec_Hash_Definitions_hash_alg @->
+           ((ptr uint64_t) @->
+              (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+    type k___Spec_Hash_Definitions_hash_alg__uint64_t_ =
+      [ `k___Spec_Hash_Definitions_hash_alg__uint64_t_ ] structure
+    let (k___Spec_Hash_Definitions_hash_alg__uint64_t_ :
+      [ `k___Spec_Hash_Definitions_hash_alg__uint64_t_ ] structure typ) =
+      structure "K___Spec_Hash_Definitions_hash_alg__uint64_t__s"
+    let k___Spec_Hash_Definitions_hash_alg__uint64_t__fst =
+      field k___Spec_Hash_Definitions_hash_alg__uint64_t_ "fst"
+        spec_Hash_Definitions_hash_alg
+    let k___Spec_Hash_Definitions_hash_alg__uint64_t__snd =
+      field k___Spec_Hash_Definitions_hash_alg__uint64_t_ "snd"
+        (ptr uint64_t)
+    let _ = seal k___Spec_Hash_Definitions_hash_alg__uint64_t_
+    type hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ =
+      [
+        `hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+          ]
+        structure
+    let (hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+      :
+      [
+        `hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+          ]
+        structure typ)
+      =
+      structure
+        "Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t_____s"
+    let hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t_____block_state
+      =
+      field
+        hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+        "block_state" k___Spec_Hash_Definitions_hash_alg__uint64_t_
+    let hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t_____buf
+      =
+      field
+        hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+        "buf" (ptr uint8_t)
+    let hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t_____total_len
+      =
+      field
+        hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+        "total_len" uint64_t
+    let _ =
+      seal
+        hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+    let hacl_Streaming_Keccak_get_alg =
+      foreign "Hacl_Streaming_Keccak_get_alg"
+        ((ptr
+            hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
+           @-> (returning spec_Hash_Definitions_hash_alg))
+    let hacl_Streaming_Keccak_malloc =
+      foreign "Hacl_Streaming_Keccak_malloc"
+        (spec_Hash_Definitions_hash_alg @->
+           (returning
+              (ptr
+                 hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)))
+    let hacl_Streaming_Keccak_copy =
+      foreign "Hacl_Streaming_Keccak_copy"
+        ((ptr
+            hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
+           @->
+           (returning
+              (ptr
+                 hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)))
+    let hacl_Streaming_Keccak_reset =
+      foreign "Hacl_Streaming_Keccak_reset"
+        ((ptr
+            hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
+           @-> (returning void))
+    let hacl_Streaming_Keccak_update =
+      foreign "Hacl_Streaming_Keccak_update"
+        ((ptr
+            hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
+           @-> (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+    let hacl_Streaming_Keccak_finish_ =
+      foreign "Hacl_Streaming_Keccak_finish_"
+        ((ptr
+            hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
+           @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let hacl_Streaming_Keccak_finish =
+      foreign "Hacl_Streaming_Keccak_finish"
+        ((ptr
+            hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____)
+           @-> (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
     let hacl_SHA3_shake128_hacl =
       foreign "Hacl_SHA3_shake128_hacl"
         (uint32_t @->

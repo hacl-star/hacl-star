@@ -9,6 +9,7 @@ open Hacl.Streaming.Poly1305
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+inline_for_extraction noextract
 let k = poly1305_key
 
 /// Type abbreviation - makes KaRaMeL use pretty names in the generated code

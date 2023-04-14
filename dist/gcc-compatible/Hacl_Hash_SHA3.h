@@ -35,25 +35,61 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Streaming_Types.h"
+#include "Hacl_Spec.h"
 
-typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
+typedef struct K___Spec_Hash_Definitions_hash_alg__uint64_t__s
+{
+  Spec_Hash_Definitions_hash_alg fst;
+  uint64_t *snd;
+}
+K___Spec_Hash_Definitions_hash_alg__uint64_t_;
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_create_in_256(void);
+typedef struct Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t_____s
+{
+  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____;
 
-void Hacl_Streaming_SHA3_init_256(Hacl_Streaming_MD_state_64 *s);
+Spec_Hash_Definitions_hash_alg
+Hacl_Streaming_Keccak_get_alg(
+  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s
+);
 
-/**
-0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
-*/
+Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+*Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a);
+
+Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+*Hacl_Streaming_Keccak_copy(
+  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s0
+);
+
+void
+Hacl_Streaming_Keccak_reset(
+  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s
+);
+
 uint32_t
-Hacl_Streaming_SHA3_update_256(Hacl_Streaming_MD_state_64 *p, uint8_t *data, uint32_t len);
+Hacl_Streaming_Keccak_update(
+  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *p,
+  uint8_t *data,
+  uint32_t len
+);
 
-void Hacl_Streaming_SHA3_finish_256(Hacl_Streaming_MD_state_64 *p, uint8_t *dst);
+void
+Hacl_Streaming_Keccak_finish_(
+  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *p,
+  uint8_t *dst,
+  uint32_t l
+);
 
-void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *s);
-
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *s0);
+uint32_t
+Hacl_Streaming_Keccak_finish(
+  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s,
+  uint8_t *dst,
+  uint32_t l
+);
 
 void
 Hacl_SHA3_shake128_hacl(
