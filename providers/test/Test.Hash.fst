@@ -56,7 +56,7 @@ let test_incremental_api (): St unit =
   let dst = B.alloca (u8 0) 32ul in
   let h3 = ST.get () in
   // Auto-framing!
-  HI.finish (G.hide SHA2_256) st dst;
+  HI.finish (G.hide SHA2_256) st dst ();
 
   let h4 = ST.get () in
   assert (Seq.equal (B.as_seq h4 dst)

@@ -171,7 +171,6 @@ let hacl_keccak (a: G.erased alg): block alg =
     (* finish *)
     (fun _ _ (a, s) dst l ->
       Hacl.Hash.SHA3.finish_keccak a s dst (if is_shake a then l else D.hash_len a))
-#pop-options
 
 // For pretty names in C
 let sha3_state a = singleton a & b:B.buffer uint64 { B.len b == 25ul }
@@ -194,7 +193,7 @@ let update (a: G.erased alg) =
 let finish_ (a: G.erased alg) =
   F.mk_finish #alg (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 
-open F
+open Hacl.Streaming.Functor
 
 // Unfortunate copy-paste since we are returning an error code
 val finish:

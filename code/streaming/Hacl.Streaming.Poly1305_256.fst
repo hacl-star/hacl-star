@@ -9,6 +9,8 @@ open Hacl.Streaming.Poly1305
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+let k = poly1305_key
+
 /// Type abbreviation - makes KaRaMeL use pretty names in the generated code
 let poly1305_256_state = F.state_s (poly1305 M256) () (t M256) (k.I.s ())
 

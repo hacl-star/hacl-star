@@ -620,19 +620,28 @@ val labeled_expand_kem:
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
+  let h00 = ST.get () in
   push_frame ();
   let h0 = ST.get () in
   let len = 9ul +. suite_id_len +. labellen +. infolen in
   let tmp = create len (u8 0) in
 
   nat_to_bytes_2 l (sub tmp 0ul 2ul);
-  init_label_version (sub tmp 2ul 7ul);
-  copy (sub tmp 9ul suite_id_len) suite_id;
-  copy (sub tmp (9ul +. suite_id_len) labellen) label;
-  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info;
-
   let h1 = ST.get () in
-  assert (as_seq h1 tmp `Seq.equal` (
+  init_label_version (sub tmp 2ul 7ul);
+  let h2 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h1 (loc tmp) h2;
+  copy (sub tmp 9ul suite_id_len) suite_id;
+  let h3 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h2 (loc tmp) h3;
+  copy (sub tmp (9ul +. suite_id_len) labellen) label;
+  let h4 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h3 (loc tmp) h4;
+  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info;
+  let h5 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h4 (loc tmp) h5;
+
+  assert (as_seq h5 tmp `Seq.equal` (
     (((Lib.ByteSequence.nat_to_bytes_be 2 (v l)
       `Seq.append` S.label_version)
       `Seq.append` (as_seq h0 suite_id))
@@ -641,8 +650,14 @@ let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infol
       ));
 
   HKDF.hkdf_expand_kem #cs o_hash prk prklen tmp len l;
+  let h6 = ST.get () in
 
-  pop_frame ()
+  B.modifies_trans (loc tmp) h0 h5 (loc o_hash) h6;
+
+  pop_frame ();
+
+  let h7 = ST.get () in
+  B.modifies_fresh_frame_popped h00 h0 (loc o_hash) h6 h7
 
 #pop-options
 

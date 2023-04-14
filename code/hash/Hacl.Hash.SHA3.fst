@@ -19,7 +19,7 @@ let init a s =
 
 /// We name this function used in Lib.Sequence spec combinators to avoid Z3 reasoning on anonymous functions
 inline_for_extraction noextract
-let spec_l (a: sha3_alg { not (is_shake a) })
+let spec_l (a: sha3_alg)
   (len:size_nat{len < block_length a})
   (inp:Lib.Sequence.lseq uint8 len)
   (s:Lib.Sequence.lseq uint64 25) = s
@@ -40,11 +40,13 @@ let update_multi a s () blocks n_blocks =
 
 let update_last a s () input input_len =
   let open Lib.IntTypes in
+  [@inline_let]
+  let suffix = if is_shake a then byte 0x1f else byte 0x06 in
   if input_len = block_len a then begin
     Hacl.Impl.SHA3.absorb_inner (block_len a) input s;
-    Hacl.Impl.SHA3.absorb_last (byte 0x06) (block_len a) 0ul (B.sub input input_len 0ul) s
+    Hacl.Impl.SHA3.absorb_last suffix (block_len a) 0ul (B.sub input input_len 0ul) s
   end else
-    Hacl.Impl.SHA3.absorb_last (byte 0x06) (block_len a) input_len input s
+    Hacl.Impl.SHA3.absorb_last suffix (block_len a) input_len input s
 
 let finish a = Hacl.Hash.PadFinish.finish (| a, () |)
 
