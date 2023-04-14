@@ -56,6 +56,8 @@ Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Kecc
 
 Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a);
 
+void Hacl_Streaming_Keccak_free(Hacl_Streaming_Keccak_state *s);
+
 Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_state *s0);
 
 void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s);

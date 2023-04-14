@@ -188,6 +188,9 @@ let get_alg (a: G.erased alg) =
 let malloc (a: alg) =
   F.create_in (hacl_keccak a) a (sha3_state a) (G.erased unit)
 
+let free (a: G.erased alg) =
+  F.free (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
+
 let copy (a: G.erased alg) =
   F.copy (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 

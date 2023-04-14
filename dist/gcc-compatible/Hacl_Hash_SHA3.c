@@ -29,30 +29,6 @@ static uint32_t block_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
   {
-    case Spec_Hash_Definitions_MD5:
-      {
-        return (uint32_t)64U;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        return (uint32_t)64U;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        return (uint32_t)64U;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        return (uint32_t)64U;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        return (uint32_t)128U;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        return (uint32_t)128U;
-      }
     case Spec_Hash_Definitions_SHA3_224:
       {
         return (uint32_t)144U;
@@ -77,37 +53,10 @@ static uint32_t block_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)136U;
       }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        return (uint32_t)64U;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        return (uint32_t)128U;
-      }
     default:
       {
         KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static bool is_shake(Spec_Hash_Definitions_hash_alg uu___)
-{
-  switch (uu___)
-  {
-    case Spec_Hash_Definitions_Shake128:
-      {
-        return true;
-      }
-    case Spec_Hash_Definitions_Shake256:
-      {
-        return true;
-      }
-    default:
-      {
-        return false;
       }
   }
 }
@@ -146,7 +95,7 @@ Hacl_Hash_SHA3_update_last_sha3(
     memset(lastBlock, 0U, len * sizeof (uint8_t));
     memcpy(lastBlock, uu____0, (uint32_t)0U * sizeof (uint8_t));
     uint8_t ite;
-    if (is_shake(a))
+    if (a == Spec_Hash_Definitions_Shake128 || a == Spec_Hash_Definitions_Shake256)
     {
       ite = (uint8_t)0x1fU;
     }
@@ -157,7 +106,7 @@ Hacl_Hash_SHA3_update_last_sha3(
     lastBlock[0U] = ite;
     Hacl_Impl_SHA3_loadState(len, lastBlock, s);
     uint8_t ite0;
-    if (is_shake(a))
+    if (a == Spec_Hash_Definitions_Shake128 || a == Spec_Hash_Definitions_Shake256)
     {
       ite0 = (uint8_t)0x1fU;
     }
@@ -182,7 +131,7 @@ Hacl_Hash_SHA3_update_last_sha3(
   memset(lastBlock, 0U, len * sizeof (uint8_t));
   memcpy(lastBlock, input, input_len * sizeof (uint8_t));
   uint8_t ite;
-  if (is_shake(a))
+  if (a == Spec_Hash_Definitions_Shake128 || a == Spec_Hash_Definitions_Shake256)
   {
     ite = (uint8_t)0x1fU;
   }
@@ -193,7 +142,7 @@ Hacl_Hash_SHA3_update_last_sha3(
   lastBlock[input_len] = ite;
   Hacl_Impl_SHA3_loadState(len, lastBlock, s);
   uint8_t ite0;
-  if (is_shake(a))
+  if (a == Spec_Hash_Definitions_Shake128 || a == Spec_Hash_Definitions_Shake256)
   {
     ite0 = (uint8_t)0x1fU;
   }
@@ -321,6 +270,17 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_
   for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
     ((void **)s1)[_i] = (void *)(uint64_t)0U;
   return p;
+}
+
+void Hacl_Streaming_Keccak_free(Hacl_Streaming_Keccak_state *s)
+{
+  Hacl_Streaming_Keccak_state scrut = *s;
+  uint8_t *buf = scrut.buf;
+  Hacl_Streaming_Keccak_st block_state = scrut.block_state;
+  uint64_t *s1 = block_state.snd;
+  KRML_HOST_FREE(s1);
+  KRML_HOST_FREE(buf);
+  KRML_HOST_FREE(s);
 }
 
 Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_state *s0)
@@ -3896,7 +3856,7 @@ finish_(
   Hacl_Hash_SHA3_update_last_sha3(a10, s1, buf_last, r);
   Spec_Hash_Definitions_hash_alg a11 = tmp_block_state.fst;
   uint64_t *s = tmp_block_state.snd;
-  if (is_shake(a11))
+  if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
   {
     bool sw;
     switch (a11)
@@ -4070,47 +4030,19 @@ finish_(
 uint32_t Hacl_Streaming_Keccak_finish(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l)
 {
   Spec_Hash_Definitions_hash_alg a1 = Hacl_Streaming_Keccak_get_alg(s);
-  bool sw;
-  switch (a1)
-  {
-    case Spec_Hash_Definitions_Shake128:
-      {
-        sw = true;
-        break;
-      }
-    case Spec_Hash_Definitions_Shake256:
-      {
-        sw = true;
-        break;
-      }
-    default:
-      {
-        sw = false;
-      }
-  }
-  if (sw && l == (uint32_t)0U)
+  if
+  (
+    (a1 == Spec_Hash_Definitions_Shake128 || a1 == Spec_Hash_Definitions_Shake256)
+    && l == (uint32_t)0U
+  )
   {
     return (uint32_t)1U;
   }
-  bool sw0;
-  switch (a1)
-  {
-    case Spec_Hash_Definitions_Shake128:
-      {
-        sw0 = true;
-        break;
-      }
-    case Spec_Hash_Definitions_Shake256:
-      {
-        sw0 = true;
-        break;
-      }
-    default:
-      {
-        sw0 = false;
-      }
-  }
-  if (!sw0 && l != (uint32_t)0U)
+  if
+  (
+    !(a1 == Spec_Hash_Definitions_Shake128 || a1 == Spec_Hash_Definitions_Shake256)
+    && l != (uint32_t)0U
+  )
   {
     return (uint32_t)1U;
   }

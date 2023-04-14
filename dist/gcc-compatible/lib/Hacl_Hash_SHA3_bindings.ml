@@ -44,6 +44,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Streaming_Keccak_malloc"
         (spec_Hash_Definitions_hash_alg @->
            (returning (ptr hacl_Streaming_Keccak_state)))
+    let hacl_Streaming_Keccak_free =
+      foreign "Hacl_Streaming_Keccak_free"
+        ((ptr hacl_Streaming_Keccak_state) @-> (returning void))
     let hacl_Streaming_Keccak_copy =
       foreign "Hacl_Streaming_Keccak_copy"
         ((ptr hacl_Streaming_Keccak_state) @->
