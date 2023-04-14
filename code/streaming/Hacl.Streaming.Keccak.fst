@@ -46,7 +46,7 @@ let _: squash (inversion hash_alg) = allow_inversion hash_alg
 /// finish function.
 
 inline_for_extraction noextract
-let alg = sha3_alg
+let alg = keccak_alg
 
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 

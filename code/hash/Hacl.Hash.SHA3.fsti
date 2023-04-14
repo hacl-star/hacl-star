@@ -21,19 +21,19 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 inline_for_extraction noextract
-val init (a: sha3_alg): init_st (|a, ()|)
+val init (a: keccak_alg): init_st (|a, ()|)
 
 inline_for_extraction noextract
-val update_multi (a: sha3_alg): update_multi_st (|a, ()|)
+val update_multi (a: keccak_alg): update_multi_st (|a, ()|)
 
 inline_for_extraction noextract
-val update_last (a: sha3_alg): update_last_st (|a, ()|)
+val update_last (a: keccak_alg): update_last_st (|a, ()|)
 
 inline_for_extraction noextract
-val finish (a: sha3_alg { not (is_shake a) }): finish_st (| a, ()|)
+val finish (a: keccak_alg { not (is_shake a) }): finish_st (| a, ()|)
 
 inline_for_extraction noextract
-val hash (a: sha3_alg { not (is_shake a) }): hash_st a
+val hash (a: keccak_alg { not (is_shake a) }): hash_st a
 
 /// A couple helpers specifically for the Keccak functor, which live here
 /// because this module has an fsti and therefore can friend specs.
@@ -55,7 +55,7 @@ module ST = FStar.HyperStack.ST
 /// not be extractable to C. So, we contend with a suboptimal contract, which
 /// is: "if a is a shake algorithm, then the length is ignored".
 noextract inline_for_extraction
-let finish_st (a: sha3_alg) =
+let finish_st (a: keccak_alg) =
   s:state (| a, () |) -> dst:B.buffer Lib.IntTypes.uint8 -> l:Lib.IntTypes.size_t {
     B.length dst == (if is_shake a then Lib.IntTypes.(v (l <: size_t))  else Spec.Hash.Definitions.hash_length a)
   } -> ST.Stack unit
@@ -66,4 +66,4 @@ let finish_st (a: sha3_alg) =
     Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.finish a (as_seq h0 s) (v_len a l))))
 
 noextract inline_for_extraction
-val finish_keccak (a: sha3_alg): finish_st a
+val finish_keccak (a: keccak_alg): finish_st a

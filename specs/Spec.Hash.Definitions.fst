@@ -69,7 +69,7 @@ let is_md = function
   | _ -> false
 
 let sha2_alg = a:hash_alg { is_sha2 a }
-let sha3_alg = a:hash_alg { is_keccak a }
+let keccak_alg = a:hash_alg { is_keccak a }
 let blake_alg = a:hash_alg { is_blake a }
 let md_alg = a:hash_alg { is_md a }
 let fixed_len_alg = a:hash_alg { not (is_shake a) }
@@ -184,7 +184,7 @@ let word_length: hash_alg -> Tot nat = function
   | Blake2S -> 4
   | Blake2B -> 8
 
-let rate (a: sha3_alg): (rate: size_nat{0 < rate / 8 /\ rate / 8 <= 200}) =
+let rate (a: keccak_alg): (rate: size_nat{0 < rate / 8 /\ rate / 8 <= 200}) =
   match a with
   | SHA3_224 -> 1152
   | SHA3_256 -> 1088

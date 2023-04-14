@@ -20,7 +20,7 @@ let init a s =
 
 /// We name this function used in Lib.Sequence spec combinators to avoid Z3 reasoning on anonymous functions
 inline_for_extraction noextract
-let spec_l (a: sha3_alg)
+let spec_l (a: keccak_alg)
   (len:size_nat{len < block_length a})
   (inp:Lib.Sequence.lseq uint8 len)
   (s:Lib.Sequence.lseq uint64 25) = s
@@ -44,7 +44,7 @@ let block_len (a: hash_alg): n:size_t { v n = block_length a } =
   | Blake2B -> 128ul
 
 noextract inline_for_extraction
-let update_multi_sha3_st (a:sha3_alg) =
+let update_multi_sha3_st (a:keccak_alg) =
   s:B.buffer uint64 { B.length s = 25 } ->
   ev:unit ->
   blocks:blocks_t a ->
@@ -60,7 +60,7 @@ let update_multi_sha3_st (a:sha3_alg) =
 
 /// This function needs to be type-checked monomorphically (not with agile
 /// types) so as to extract to Low* as-is.
-let update_multi_sha3 (a: sha3_alg): update_multi_sha3_st a = fun s () blocks n_blocks ->
+let update_multi_sha3 (a: keccak_alg): update_multi_sha3_st a = fun s () blocks n_blocks ->
   [@inline_let]
   let spec_f = Spec.SHA3.absorb_inner (Spec.Hash.Definitions.rate a/8) in
   let h0 = ST.get () in
@@ -82,7 +82,7 @@ let update_multi_sha3 (a: sha3_alg): update_multi_sha3_st a = fun s () blocks n_
 let update_multi = update_multi_sha3
 
 noextract inline_for_extraction
-let update_last_st_sha3 (a: sha3_alg) =
+let update_last_st_sha3 (a: keccak_alg) =
   s:B.buffer uint64 { B.length s = 25 } ->
   prev_len:unit ->
   input:B.buffer uint8 {
@@ -101,7 +101,7 @@ let update_last_st_sha3 (a: sha3_alg) =
                                           (prev_len_v prev_len)
                                           (B.as_seq h0 input)))
 
-let update_last_sha3 (a: sha3_alg): update_last_st_sha3 a = fun s () input input_len ->
+let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input input_len ->
   let open Lib.IntTypes in
   [@inline_let]
   let suffix = if is_shake a then byte 0x1f else byte 0x06 in
@@ -123,7 +123,7 @@ let hash a input len dst =
   | SHA3_384 -> Hacl.SHA3.sha3_384 len input dst
   | SHA3_512 -> Hacl.SHA3.sha3_512 len input dst
 
-let finish_keccak (a: sha3_alg): finish_st a = fun s dst l ->
+let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
   if is_shake a then
     Hacl.Impl.SHA3.squeeze s (block_len a) l dst
   else
