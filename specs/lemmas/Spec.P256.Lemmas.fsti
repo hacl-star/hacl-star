@@ -7,6 +7,10 @@ open Spec.P256.PointOps
 
 val prime_lemma: unit -> Lemma (FStar.Math.Euclid.is_prime prime)
 
+val lemma_aff_is_point_at_inf: p:proj_point ->
+  Lemma (let px, py, pz = p in
+    is_aff_point_at_inf (to_aff_point p) == (pz = 0 || (px = 0 && py = 0)))
+
 
 val aff_point_at_inf_lemma (p:aff_point) :
   Lemma (aff_point_add p aff_point_at_inf = p)
