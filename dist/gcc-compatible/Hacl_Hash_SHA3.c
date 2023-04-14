@@ -266,18 +266,14 @@ Hacl_Hash_SHA3_update_last_sha3(
   Hacl_Impl_SHA3_state_permute(s);
 }
 
-Spec_Hash_Definitions_hash_alg
-Hacl_Streaming_Keccak_get_alg(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s
-)
+Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s)
 {
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ scrut = *s;
+  Hacl_Streaming_Keccak_state scrut = *s;
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = scrut.block_state;
   return block_state.fst;
 }
 
-Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-*Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a)
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a)
 {
   uint32_t sw;
   switch (a)
@@ -362,13 +358,10 @@ Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
   uint8_t *buf0 = (uint8_t *)KRML_HOST_CALLOC(sw, sizeof (uint8_t));
   uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = { .fst = a, .snd = buf };
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+  Hacl_Streaming_Keccak_state
   s = { .block_state = block_state, .buf = buf0, .total_len = (uint64_t)(uint32_t)0U };
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-  *p =
-    (Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *)KRML_HOST_MALLOC(sizeof (
-        Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-      ));
+  Hacl_Streaming_Keccak_state
+  *p = (Hacl_Streaming_Keccak_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Keccak_state));
   p[0U] = s;
   uint64_t *s1 = block_state.snd;
   for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
@@ -384,12 +377,9 @@ __K___Spec_Hash_Definitions_hash_alg__uint64_t__K___Spec_Hash_Definitions_hash_a
 }
 __K___Spec_Hash_Definitions_hash_alg__uint64_t__K___Spec_Hash_Definitions_hash_alg__uint64_t_;
 
-Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-*Hacl_Streaming_Keccak_copy(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s0
-)
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_state *s0)
 {
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ scrut0 = *s0;
+  Hacl_Streaming_Keccak_state scrut0 = *s0;
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state0 = scrut0.block_state;
   uint8_t *buf0 = scrut0.buf;
   uint64_t total_len0 = scrut0.total_len;
@@ -562,41 +552,31 @@ Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
   memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+  Hacl_Streaming_Keccak_state
   s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-  *p =
-    (Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *)KRML_HOST_MALLOC(sizeof (
-        Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-      ));
+  Hacl_Streaming_Keccak_state
+  *p = (Hacl_Streaming_Keccak_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Keccak_state));
   p[0U] = s;
   return p;
 }
 
-void
-Hacl_Streaming_Keccak_reset(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s
-)
+void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s)
 {
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ scrut = *s;
+  Hacl_Streaming_Keccak_state scrut = *s;
   uint8_t *buf = scrut.buf;
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = scrut.block_state;
   uint64_t *s1 = block_state.snd;
   for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
     ((void **)s1)[_i] = (void *)(uint64_t)0U;
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
+  Hacl_Streaming_Keccak_state
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   s[0U] = tmp;
 }
 
 uint32_t
-Hacl_Streaming_Keccak_update(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *p,
-  uint8_t *data,
-  uint32_t len
-)
+Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint32_t len)
 {
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ s = *p;
+  Hacl_Streaming_Keccak_state s = *p;
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = s.block_state;
   uint64_t total_len = s.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
@@ -929,7 +909,7 @@ Hacl_Streaming_Keccak_update(
   }
   if (len <= sw1 - sz)
   {
-    Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ s1 = *p;
+    Hacl_Streaming_Keccak_state s1 = *p;
     K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -1184,7 +1164,7 @@ Hacl_Streaming_Keccak_update(
     *p
     =
       (
-        (Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____){
+        (Hacl_Streaming_Keccak_state){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len2
@@ -1193,7 +1173,7 @@ Hacl_Streaming_Keccak_update(
   }
   else if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ s1 = *p;
+    Hacl_Streaming_Keccak_state s1 = *p;
     K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -2100,7 +2080,7 @@ Hacl_Streaming_Keccak_update(
     *p
     =
       (
-        (Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____){
+        (Hacl_Streaming_Keccak_state){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len1 + (uint64_t)len
@@ -2191,7 +2171,7 @@ Hacl_Streaming_Keccak_update(
     uint32_t diff = sw2 - sz;
     uint8_t *data1 = data;
     uint8_t *data2 = data + diff;
-    Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ s1 = *p;
+    Hacl_Streaming_Keccak_state s1 = *p;
     K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
@@ -2446,13 +2426,13 @@ Hacl_Streaming_Keccak_update(
     *p
     =
       (
-        (Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____){
+        (Hacl_Streaming_Keccak_state){
           .block_state = block_state10,
           .buf = buf0,
           .total_len = total_len2
         }
       );
-    Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ s10 = *p;
+    Hacl_Streaming_Keccak_state s10 = *p;
     K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
@@ -3365,7 +3345,7 @@ Hacl_Streaming_Keccak_update(
     *p
     =
       (
-        (Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____){
+        (Hacl_Streaming_Keccak_state){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len1 + (uint64_t)(len - diff)
@@ -3378,12 +3358,12 @@ Hacl_Streaming_Keccak_update(
 static void
 finish_(
   Spec_Hash_Definitions_hash_alg a,
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *p,
+  Hacl_Streaming_Keccak_state *p,
   uint8_t *dst,
   uint32_t l
 )
 {
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ scrut0 = *p;
+  Hacl_Streaming_Keccak_state scrut0 = *p;
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = scrut0.block_state;
   uint8_t *buf_ = scrut0.buf;
   uint64_t total_len = scrut0.total_len;
@@ -4161,12 +4141,7 @@ finish_(
   Hacl_Impl_SHA3_squeeze(s, block_len(a11), sw3, dst);
 }
 
-uint32_t
-Hacl_Streaming_Keccak_finish(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s,
-  uint8_t *dst,
-  uint32_t l
-)
+uint32_t Hacl_Streaming_Keccak_finish(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l)
 {
   Spec_Hash_Definitions_hash_alg a1 = Hacl_Streaming_Keccak_get_alg(s);
   bool sw;

@@ -175,6 +175,8 @@ let hacl_keccak (a: G.erased alg): block alg =
 // For pretty names in C
 let sha3_state a = singleton a & b:B.buffer uint64 { B.len b == 25ul }
 
+let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256
+
 let get_alg (a: G.erased alg) =
   F.index_of_state (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 

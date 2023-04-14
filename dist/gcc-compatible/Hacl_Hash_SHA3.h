@@ -44,45 +44,27 @@ typedef struct K___Spec_Hash_Definitions_hash_alg__uint64_t__s
 }
 K___Spec_Hash_Definitions_hash_alg__uint64_t_;
 
-typedef struct Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t_____s
+typedef struct Hacl_Streaming_Keccak_state_s
 {
   K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____;
+Hacl_Streaming_Keccak_state;
 
-Spec_Hash_Definitions_hash_alg
-Hacl_Streaming_Keccak_get_alg(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s
-);
+Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s);
 
-Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-*Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a);
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a);
 
-Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____
-*Hacl_Streaming_Keccak_copy(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s0
-);
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_state *s0);
 
-void
-Hacl_Streaming_Keccak_reset(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s
-);
+void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s);
 
 uint32_t
-Hacl_Streaming_Keccak_update(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *p,
-  uint8_t *data,
-  uint32_t len
-);
+Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint32_t len);
 
 uint32_t
-Hacl_Streaming_Keccak_finish(
-  Hacl_Streaming_Functor_state_s__Spec_Hash_Definitions_hash_alg____uint64_t____ *s,
-  uint8_t *dst,
-  uint32_t l
-);
+Hacl_Streaming_Keccak_finish(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l);
 
 void
 Hacl_SHA3_shake128_hacl(
