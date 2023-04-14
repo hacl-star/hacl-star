@@ -78,6 +78,7 @@ let update_multi_associative (a : alg) acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a acc input1 input2
 #pop-options
 
+inline_for_extraction noextract
 let singleton #t (x: t) = y:t { y == x }
 
 // Pretty C name
@@ -236,9 +237,9 @@ val finish:
 
 let finish a s dst l =
   let a = get_alg a s in
-  if is_shake a && l = 0ul then
+  if (a = Shake128 || a = Shake256) && l = 0ul then
     1ul
-  else if not (is_shake a) && l <> 0ul then
+  else if not (a = Shake128 || a = Shake256) && l <> 0ul then
     1ul
   else begin
     finish_ a s dst l;

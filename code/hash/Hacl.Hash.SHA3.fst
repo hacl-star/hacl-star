@@ -26,22 +26,21 @@ let spec_l (a: keccak_alg)
   (s:Lib.Sequence.lseq uint64 25) = s
 
 // TODO: for some reason, doing `let block_len = block_len` still results in excessive inlining.
-let block_len (a: hash_alg): n:size_t { v n = block_length a } =
+let block_len (a: keccak_alg): n:size_t { v n = block_length a } =
   let open Spec.Hash.Definitions in
   let open FStar.Mul in
   [@inline_let]
   let _ = allow_inversion hash_alg in
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 64ul
-  | SHA2_384 | SHA2_512 -> 128ul
   | SHA3_224 -> assert_norm (rate SHA3_224/8/8*8 = 144); 144ul
   | SHA3_256 -> assert_norm (rate SHA3_256/8/8*8 = 136); 136ul
   | SHA3_384 -> assert_norm (rate SHA3_384/8/8*8 = 104); 104ul
   | SHA3_512 -> assert_norm (rate SHA3_512/8/8*8 = 72); 72ul
   | Shake128 -> assert_norm (rate Shake128/8/8*8 = 168); 168ul
   | Shake256 -> assert_norm (rate Shake256/8/8*8 = 136); 136ul
-  | Blake2S -> 64ul
-  | Blake2B -> 128ul
+
+noextract inline_for_extraction
+let is_shake a = a = Shake128 || a = Shake256
 
 noextract inline_for_extraction
 let update_multi_sha3_st (a:keccak_alg) =

@@ -93,6 +93,25 @@ static uint32_t block_len(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
+static bool is_shake(Spec_Hash_Definitions_hash_alg uu___)
+{
+  switch (uu___)
+  {
+    case Spec_Hash_Definitions_Shake128:
+      {
+        return true;
+      }
+    case Spec_Hash_Definitions_Shake256:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
+
 void
 Hacl_Hash_SHA3_update_multi_sha3(
   Spec_Hash_Definitions_hash_alg a,
@@ -126,55 +145,8 @@ Hacl_Hash_SHA3_update_last_sha3(
     uint8_t lastBlock[len];
     memset(lastBlock, 0U, len * sizeof (uint8_t));
     memcpy(lastBlock, uu____0, (uint32_t)0U * sizeof (uint8_t));
-    bool sw;
-    switch (a)
-    {
-      case Spec_Hash_Definitions_Shake128:
-        {
-          sw = true;
-          break;
-        }
-      case Spec_Hash_Definitions_Shake256:
-        {
-          sw = true;
-          break;
-        }
-      default:
-        {
-          sw = false;
-        }
-    }
-    uint8_t ite0;
-    if (sw)
-    {
-      ite0 = (uint8_t)0x1fU;
-    }
-    else
-    {
-      ite0 = (uint8_t)0x06U;
-    }
-    lastBlock[0U] = ite0;
-    Hacl_Impl_SHA3_loadState(len, lastBlock, s);
-    bool sw0;
-    switch (a)
-    {
-      case Spec_Hash_Definitions_Shake128:
-        {
-          sw0 = true;
-          break;
-        }
-      case Spec_Hash_Definitions_Shake256:
-        {
-          sw0 = true;
-          break;
-        }
-      default:
-        {
-          sw0 = false;
-        }
-    }
     uint8_t ite;
-    if (sw0)
+    if (is_shake(a))
     {
       ite = (uint8_t)0x1fU;
     }
@@ -182,7 +154,18 @@ Hacl_Hash_SHA3_update_last_sha3(
     {
       ite = (uint8_t)0x06U;
     }
-    if (!((ite & (uint8_t)0x80U) == (uint8_t)0U) && (uint32_t)0U == len - (uint32_t)1U)
+    lastBlock[0U] = ite;
+    Hacl_Impl_SHA3_loadState(len, lastBlock, s);
+    uint8_t ite0;
+    if (is_shake(a))
+    {
+      ite0 = (uint8_t)0x1fU;
+    }
+    else
+    {
+      ite0 = (uint8_t)0x06U;
+    }
+    if (!((ite0 & (uint8_t)0x80U) == (uint8_t)0U) && (uint32_t)0U == len - (uint32_t)1U)
     {
       Hacl_Impl_SHA3_state_permute(s);
     }
@@ -198,55 +181,8 @@ Hacl_Hash_SHA3_update_last_sha3(
   uint8_t lastBlock[len];
   memset(lastBlock, 0U, len * sizeof (uint8_t));
   memcpy(lastBlock, input, input_len * sizeof (uint8_t));
-  bool sw;
-  switch (a)
-  {
-    case Spec_Hash_Definitions_Shake128:
-      {
-        sw = true;
-        break;
-      }
-    case Spec_Hash_Definitions_Shake256:
-      {
-        sw = true;
-        break;
-      }
-    default:
-      {
-        sw = false;
-      }
-  }
-  uint8_t ite0;
-  if (sw)
-  {
-    ite0 = (uint8_t)0x1fU;
-  }
-  else
-  {
-    ite0 = (uint8_t)0x06U;
-  }
-  lastBlock[input_len] = ite0;
-  Hacl_Impl_SHA3_loadState(len, lastBlock, s);
-  bool sw0;
-  switch (a)
-  {
-    case Spec_Hash_Definitions_Shake128:
-      {
-        sw0 = true;
-        break;
-      }
-    case Spec_Hash_Definitions_Shake256:
-      {
-        sw0 = true;
-        break;
-      }
-    default:
-      {
-        sw0 = false;
-      }
-  }
   uint8_t ite;
-  if (sw0)
+  if (is_shake(a))
   {
     ite = (uint8_t)0x1fU;
   }
@@ -254,7 +190,18 @@ Hacl_Hash_SHA3_update_last_sha3(
   {
     ite = (uint8_t)0x06U;
   }
-  if (!((ite & (uint8_t)0x80U) == (uint8_t)0U) && input_len == len - (uint32_t)1U)
+  lastBlock[input_len] = ite;
+  Hacl_Impl_SHA3_loadState(len, lastBlock, s);
+  uint8_t ite0;
+  if (is_shake(a))
+  {
+    ite0 = (uint8_t)0x1fU;
+  }
+  else
+  {
+    ite0 = (uint8_t)0x06U;
+  }
+  if (!((ite0 & (uint8_t)0x80U) == (uint8_t)0U) && input_len == len - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
@@ -3949,46 +3896,28 @@ finish_(
   Hacl_Hash_SHA3_update_last_sha3(a10, s1, buf_last, r);
   Spec_Hash_Definitions_hash_alg a11 = tmp_block_state.fst;
   uint64_t *s = tmp_block_state.snd;
-  bool sw;
-  switch (a11)
+  if (is_shake(a11))
   {
-    case Spec_Hash_Definitions_Shake128:
-      {
-        sw = true;
-        break;
-      }
-    case Spec_Hash_Definitions_Shake256:
-      {
-        sw = true;
-        break;
-      }
-    default:
-      {
-        sw = false;
-      }
-  }
-  if (sw)
-  {
-    bool sw3;
+    bool sw;
     switch (a11)
     {
       case Spec_Hash_Definitions_Shake128:
         {
-          sw3 = true;
+          sw = true;
           break;
         }
       case Spec_Hash_Definitions_Shake256:
         {
-          sw3 = true;
+          sw = true;
           break;
         }
       default:
         {
-          sw3 = false;
+          sw = false;
         }
     }
     uint32_t ite;
-    if (sw3)
+    if (sw)
     {
       ite = l;
     }
@@ -4066,67 +3995,67 @@ finish_(
     Hacl_Impl_SHA3_squeeze(s, block_len(a11), ite, dst);
     return;
   }
-  uint32_t sw3;
+  uint32_t sw;
   switch (a11)
   {
     case Spec_Hash_Definitions_MD5:
       {
-        sw3 = (uint32_t)16U;
+        sw = (uint32_t)16U;
         break;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        sw3 = (uint32_t)20U;
+        sw = (uint32_t)20U;
         break;
       }
     case Spec_Hash_Definitions_SHA2_224:
       {
-        sw3 = (uint32_t)28U;
+        sw = (uint32_t)28U;
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        sw3 = (uint32_t)32U;
+        sw = (uint32_t)32U;
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        sw3 = (uint32_t)48U;
+        sw = (uint32_t)48U;
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        sw3 = (uint32_t)64U;
+        sw = (uint32_t)64U;
         break;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
-        sw3 = (uint32_t)32U;
+        sw = (uint32_t)32U;
         break;
       }
     case Spec_Hash_Definitions_Blake2B:
       {
-        sw3 = (uint32_t)64U;
+        sw = (uint32_t)64U;
         break;
       }
     case Spec_Hash_Definitions_SHA3_224:
       {
-        sw3 = (uint32_t)28U;
+        sw = (uint32_t)28U;
         break;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        sw3 = (uint32_t)32U;
+        sw = (uint32_t)32U;
         break;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        sw3 = (uint32_t)48U;
+        sw = (uint32_t)48U;
         break;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        sw3 = (uint32_t)64U;
+        sw = (uint32_t)64U;
         break;
       }
     default:
@@ -4135,7 +4064,7 @@ finish_(
         KRML_HOST_EXIT(253U);
       }
   }
-  Hacl_Impl_SHA3_squeeze(s, block_len(a11), sw3, dst);
+  Hacl_Impl_SHA3_squeeze(s, block_len(a11), sw, dst);
 }
 
 uint32_t Hacl_Streaming_Keccak_finish(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l)

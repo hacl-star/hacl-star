@@ -53,7 +53,7 @@ module ST = FStar.HyperStack.ST
 /// eventually becomes exposed in the C API. As a result, we cannot have `l` be
 /// an indexed type (e.g. if is_shake then size_t else unit) because that would
 /// not be extractable to C. So, we contend with a suboptimal contract, which
-/// is: "if a is a shake algorithm, then the length is ignored".
+/// is: "unless a is a shake algorithm, the length is ignored".
 noextract inline_for_extraction
 let finish_st (a: keccak_alg) =
   s:state (| a, () |) -> dst:B.buffer Lib.IntTypes.uint8 -> l:Lib.IntTypes.size_t {
