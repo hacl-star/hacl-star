@@ -241,7 +241,7 @@ let hash_word_length: a:md_alg -> Tot nat = function
 
 (* Define the final hash length in bytes *)
 
-let hash_length (a: hash_alg { not (is_shake a) }) =
+let hash_length (a: hash_alg { not (is_shake a) }): Lib.IntTypes.(n:size_nat { n > 0 }) =
   let open FStar.Mul in
   if is_md a then
     word_length a * hash_word_length a

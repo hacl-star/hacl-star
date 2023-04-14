@@ -311,9 +311,9 @@ inline_for_extraction noextract
 val copy:
   #index: Type0 ->
   c:block index ->
-  i:index ->
+  i:G.erased index ->
   t:Type0 { t == c.state.s i } ->
-  t':Type0 { t' == optional_key i c.km c.key } ->
+  t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
   copy_st c i t t'
 
 inline_for_extraction noextract
@@ -349,9 +349,9 @@ inline_for_extraction noextract
 let init_st
   (#index: Type0)
   (c:block index)
-  (i:index)
+  (i:G.erased index)
   (t:Type0 { t == c.state.s i })
-  (t':Type0 { t' == optional_key i c.km c.key }) =
+  (t':Type0 { t' == optional_key (G.reveal i) c.km c.key }) =
   k:c.key.s i ->
   s:state c i t t' ->
   Stack unit
@@ -481,9 +481,9 @@ inline_for_extraction noextract
 val mk_finish:
   #index:Type0 ->
   c:block index ->
-  i:index ->
+  i:G.erased index ->
   t:Type0 { t == c.state.s i } ->
-  t':Type0 { t' == optional_key i c.km c.key } ->
+  t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
   finish_st c i t t'
 
 inline_for_extraction noextract

@@ -111,7 +111,7 @@ let stateful_keccak: stateful alg =
       B.blit s_src 0ul s_dst 0ul 25ul)
 
 inline_for_extraction noextract
-let hacl_keccak (a: alg) =
+let hacl_keccak (a: G.erased alg): block alg =
   Block
     Erased
     stateful_keccak (* state *)
@@ -172,3 +172,69 @@ let hacl_keccak (a: alg) =
     (fun _ _ (a, s) dst l ->
       Hacl.Hash.SHA3.finish_keccak a s dst (if is_shake a then l else D.hash_len a))
 #pop-options
+
+// For pretty names in C
+let sha3_state a = singleton a & b:B.buffer uint64 { B.len b == 25ul }
+
+let get_alg (a: G.erased alg) =
+  F.index_of_state (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
+
+let malloc (a: alg) =
+  F.create_in (hacl_keccak a) a (sha3_state a) (G.erased unit)
+
+let copy (a: G.erased alg) =
+  F.copy (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
+
+let reset (a: G.erased alg) =
+  F.init (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
+
+let update (a: G.erased alg) =
+  F.update (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit) 
+
+let finish_ (a: G.erased alg) =
+  F.mk_finish #alg (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
+
+open F
+
+// Unfortunate copy-paste since we are returning an error code
+val finish:
+  a:G.erased alg -> (
+  let c = hacl_keccak a in
+  let a = G.reveal a in
+  let i = a in
+  let t = sha3_state a in
+  let t' = G.erased unit in
+  s:state c i t t' ->
+  dst:B.buffer uint8 ->
+  l:Lib.IntTypes.(x:size_t { v x > 0 }) {
+    B.length dst == (if is_shake a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) } ->
+  Stack UInt32.t
+    (requires fun h0 ->
+      invariant c i h0 s /\
+      B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
+    (ensures fun h0 r h1 ->
+      if r = 0ul then
+        invariant c i h1 s /\
+        seen c i h0 s == seen c i h1 s /\
+        key c i h1 s == key c i h0 s /\
+        footprint c i h0 s == footprint c i h1 s /\
+        B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+        seen_bounded c i h0 s;
+        S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
+        preserves_freeable c i s h0 h1
+      else if r = 1ul then
+        not (is_shake i) /\ ~(l == 0ul) \/ is_shake i /\ l == 0ul
+      else
+        False))
+
+let finish a s dst l =
+  let a = get_alg a s in
+  if is_shake a && l = 0ul then
+    1ul
+  else if not (is_shake a) && l <> 0ul then
+    1ul
+  else begin
+    finish_ a s dst l;
+    0ul
+  end

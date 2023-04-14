@@ -375,6 +375,7 @@ let copy #index c i t t' s0 r =
 
   // All source state is suffixed by 0.
   let State block_state0 buf0 total_len0 seen0 k0 = !*s0 in
+  let i = c.index_of_state i block_state0 in
 
   (**) let h0 = ST.get () in
 
@@ -1663,6 +1664,7 @@ let mk_finish #index c i t t' p dst l =
   let open LowStar.BufferOps in
   let h0 = ST.get () in
   let State block_state buf_ total_len seen k' = !*p in
+  let i = c.index_of_state i block_state in
 
   push_frame ();
   let h1 = ST.get () in
