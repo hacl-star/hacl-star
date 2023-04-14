@@ -20,6 +20,8 @@ module Hacl.Hash.SHA3
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
+val block_len (a: keccak_alg): Lib.IntTypes.(n:size_t { v n = block_length a })
+
 inline_for_extraction noextract
 val init (a: keccak_alg): init_st (|a, ()|)
 

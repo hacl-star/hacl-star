@@ -13,9 +13,6 @@ module LB = Lib.Buffer
 
 friend Spec.Agile.Hash
 
-let init a s =
-  LowStar.Buffer.fill s (Lib.IntTypes.u64 0) 25ul
-
 #push-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
 /// We name this function used in Lib.Sequence spec combinators to avoid Z3 reasoning on anonymous functions
@@ -38,6 +35,9 @@ let block_len (a: keccak_alg): n:size_t { v n = block_length a } =
   | SHA3_512 -> assert_norm (rate SHA3_512/8/8*8 = 72); 72ul
   | Shake128 -> assert_norm (rate Shake128/8/8*8 = 168); 168ul
   | Shake256 -> assert_norm (rate Shake256/8/8*8 = 136); 136ul
+
+let init a s =
+  LowStar.Buffer.fill s (Lib.IntTypes.u64 0) 25ul
 
 noextract inline_for_extraction
 let is_shake a = a = Shake128 || a = Shake256
@@ -102,7 +102,6 @@ let update_last_st_sha3 (a: keccak_alg) =
 
 let update_last_sha3 (a: keccak_alg): update_last_st_sha3 a = fun s () input input_len ->
   let open Lib.IntTypes in
-  [@inline_let]
   let suffix = if is_shake a then byte 0x1f else byte 0x06 in
   let len = block_len a in
   if input_len = len then begin
