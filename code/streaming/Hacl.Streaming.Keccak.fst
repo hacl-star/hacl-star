@@ -80,6 +80,10 @@ let update_multi_associative (a : alg) acc (prevlen1 prevlen2 : nat)
 
 let singleton #t (x: t) = y:t { y == x }
 
+// Pretty C name
+let st = hash_alg & B.buffer uint64
+let st2 = st & st
+
 inline_for_extraction noextract
 let stateful_keccak: stateful alg =
   Stateful
@@ -173,9 +177,9 @@ let hacl_keccak (a: G.erased alg): block alg =
       Hacl.Hash.SHA3.finish_keccak a s dst (if is_shake a then l else D.hash_len a))
 
 // For pretty names in C
-let sha3_state a = singleton a & b:B.buffer uint64 { B.len b == 25ul }
-
 let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256
+
+let sha3_state a = singleton a & b:B.buffer uint64 { B.len b == 25ul }
 
 let get_alg (a: G.erased alg) =
   F.index_of_state (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)

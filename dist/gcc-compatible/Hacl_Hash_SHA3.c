@@ -266,10 +266,17 @@ Hacl_Hash_SHA3_update_last_sha3(
   Hacl_Impl_SHA3_state_permute(s);
 }
 
+typedef struct st2_s
+{
+  Hacl_Streaming_Keccak_st fst;
+  Hacl_Streaming_Keccak_st snd;
+}
+st2;
+
 Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s)
 {
   Hacl_Streaming_Keccak_state scrut = *s;
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = scrut.block_state;
+  Hacl_Streaming_Keccak_st block_state = scrut.block_state;
   return block_state.fst;
 }
 
@@ -357,7 +364,7 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_
   KRML_CHECK_SIZE(sizeof (uint8_t), sw);
   uint8_t *buf0 = (uint8_t *)KRML_HOST_CALLOC(sw, sizeof (uint8_t));
   uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = { .fst = a, .snd = buf };
+  Hacl_Streaming_Keccak_st block_state = { .fst = a, .snd = buf };
   Hacl_Streaming_Keccak_state
   s = { .block_state = block_state, .buf = buf0, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_Keccak_state
@@ -369,18 +376,10 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_
   return p;
 }
 
-typedef struct
-__K___Spec_Hash_Definitions_hash_alg__uint64_t__K___Spec_Hash_Definitions_hash_alg__uint64_t__s
-{
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ fst;
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ snd;
-}
-__K___Spec_Hash_Definitions_hash_alg__uint64_t__K___Spec_Hash_Definitions_hash_alg__uint64_t_;
-
 Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_state *s0)
 {
   Hacl_Streaming_Keccak_state scrut0 = *s0;
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state0 = scrut0.block_state;
+  Hacl_Streaming_Keccak_st block_state0 = scrut0.block_state;
   uint8_t *buf0 = scrut0.buf;
   uint64_t total_len0 = scrut0.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state0.fst;
@@ -546,9 +545,8 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_st
   }
   memcpy(buf, buf0, sw * sizeof (uint8_t));
   uint64_t *buf1 = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = { .fst = i, .snd = buf1 };
-  __K___Spec_Hash_Definitions_hash_alg__uint64_t__K___Spec_Hash_Definitions_hash_alg__uint64_t_
-  scrut = { .fst = block_state0, .snd = block_state };
+  Hacl_Streaming_Keccak_st block_state = { .fst = i, .snd = buf1 };
+  st2 scrut = { .fst = block_state0, .snd = block_state };
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
   memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
@@ -564,7 +562,7 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s)
 {
   Hacl_Streaming_Keccak_state scrut = *s;
   uint8_t *buf = scrut.buf;
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = scrut.block_state;
+  Hacl_Streaming_Keccak_st block_state = scrut.block_state;
   uint64_t *s1 = block_state.snd;
   for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
     ((void **)s1)[_i] = (void *)(uint64_t)0U;
@@ -577,7 +575,7 @@ uint32_t
 Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint32_t len)
 {
   Hacl_Streaming_Keccak_state s = *p;
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = s.block_state;
+  Hacl_Streaming_Keccak_st block_state = s.block_state;
   uint64_t total_len = s.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
   if ((uint64_t)len > (uint64_t)0xffffffffU - total_len)
@@ -910,7 +908,7 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
   if (len <= sw1 - sz)
   {
     Hacl_Streaming_Keccak_state s1 = *p;
-    K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state1 = s1.block_state;
+    Hacl_Streaming_Keccak_st block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     Spec_Hash_Definitions_hash_alg i1 = block_state1.fst;
@@ -1174,7 +1172,7 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
   else if (sz == (uint32_t)0U)
   {
     Hacl_Streaming_Keccak_state s1 = *p;
-    K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state1 = s1.block_state;
+    Hacl_Streaming_Keccak_st block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     Spec_Hash_Definitions_hash_alg i1 = block_state1.fst;
@@ -2172,7 +2170,7 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
     uint8_t *data1 = data;
     uint8_t *data2 = data + diff;
     Hacl_Streaming_Keccak_state s1 = *p;
-    K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state10 = s1.block_state;
+    Hacl_Streaming_Keccak_st block_state10 = s1.block_state;
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
     Spec_Hash_Definitions_hash_alg i10 = block_state10.fst;
@@ -2433,7 +2431,7 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
         }
       );
     Hacl_Streaming_Keccak_state s10 = *p;
-    K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state1 = s10.block_state;
+    Hacl_Streaming_Keccak_st block_state1 = s10.block_state;
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
     Spec_Hash_Definitions_hash_alg i1 = block_state1.fst;
@@ -3364,7 +3362,7 @@ finish_(
 )
 {
   Hacl_Streaming_Keccak_state scrut0 = *p;
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ block_state = scrut0.block_state;
+  Hacl_Streaming_Keccak_st block_state = scrut0.block_state;
   uint8_t *buf_ = scrut0.buf;
   uint64_t total_len = scrut0.total_len;
   uint32_t sw0;
@@ -3613,9 +3611,8 @@ finish_(
   }
   uint8_t *buf_1 = buf_;
   uint64_t buf[25U] = { 0U };
-  K___Spec_Hash_Definitions_hash_alg__uint64_t_ tmp_block_state = { .fst = a, .snd = buf };
-  __K___Spec_Hash_Definitions_hash_alg__uint64_t__K___Spec_Hash_Definitions_hash_alg__uint64_t_
-  scrut = { .fst = block_state, .snd = tmp_block_state };
+  Hacl_Streaming_Keccak_st tmp_block_state = { .fst = a, .snd = buf };
+  st2 scrut = { .fst = block_state, .snd = tmp_block_state };
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
   memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
