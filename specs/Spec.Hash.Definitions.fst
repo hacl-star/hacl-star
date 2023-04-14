@@ -26,7 +26,13 @@ open Lib.ByteSequence
  *   with the type, e.g. words_state or bytes_block
  *)
 
-(** Supported hash algorithms. *)
+(** Supported hash algorithms.
+
+  NOTE: this inductive is *append-only* because the constructors generate macro
+  definitions that various bindings (OCaml, Rust) have taken a dependency on.
+  So, in order to keep the numbering stable, we only append new cases, which is
+  why SHA3_224 comes after SHA3_256 (the former was added *after* the latter).
+  *)
 type hash_alg =
   | SHA2_224
   | SHA2_256
@@ -173,7 +179,10 @@ let row (a:blake_alg) = lseq (uint_t (word_t a) SEC) 4
 inline_for_extraction
 let word (a: hash_alg) = match a with
   | Blake2S | Blake2B -> row a
-  | _ -> uint_t (word_t a) SEC
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> uint_t (word_t a) SEC
 
 (* In bytes. Should be: bytes_of_int (word_t a) *)
 let word_length: hash_alg -> Tot nat = function
@@ -202,7 +211,11 @@ let block_word_length (a: hash_alg) =
   | SHA3_512 -> normalize_term (rate SHA3_512 / 8 / 8)
   | Shake128 -> normalize_term (rate Shake128 / 8 / 8)
   | Shake256 -> normalize_term (rate Shake256 / 8 / 8)
-  | _ -> 16
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | Blake2S
+  | Blake2B -> 16
 
 (* Define the size block in bytes *)
 
@@ -218,12 +231,16 @@ let state_word_length a =
   | SHA1 -> 5
   | Blake2S | Blake2B -> 4
   | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> 25
-  | _ -> 8
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512 -> 8
 
 inline_for_extraction
 let extra_state a = match a with
   | Blake2S | Blake2B -> n:nat { n % block_length a = 0 }
-  | _ -> unit
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> unit
 
 (* The working state *)
 inline_for_extraction
@@ -292,7 +309,12 @@ let bytes_blocks a =
 
 let output_length = function
   | Shake128 | Shake256 -> Lib.IntTypes.size_nat
-  | _ -> unit
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512
+  | Blake2S
+  | Blake2B -> unit
 
 let hash_length' a (l: output_length a): Lib.IntTypes.size_nat =
   if is_shake a then l else hash_length a

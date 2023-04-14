@@ -72,6 +72,7 @@ module Agile = Spec.Agile.Hash
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
+inline_for_extraction noextract
 let is_supported = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256
