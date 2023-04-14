@@ -83,7 +83,11 @@ val update_multi
     (requires update_multi_pre a prev blocks)
     (ensures fun _ -> True)
 
-val finish (a:hash_alg) (hashw:words_state a): Tot (bytes_hash a)
+val finish (a:hash_alg): Spec.Hash.Definitions.finish_t a
 
-val hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a}):
-  Tot (Lib.ByteSequence.lbytes (hash_length a))
+val hash' (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a}) (l: output_length a):
+  Tot (Lib.ByteSequence.lbytes (Spec.Hash.Definitions.hash_length' a l))
+
+unfold
+let hash (a:fixed_len_alg) (input:bytes{S.length input `less_than_max_input_length` a}) =
+  hash' a input ()

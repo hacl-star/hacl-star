@@ -174,7 +174,7 @@ open Spec.Hash.Definitions
 
 type vec =
   | Vec :
-    a:hash_alg ->
+    a:hash_alg { not (is_shake a) } ->
     plain:list UInt8.t {norm [delta; iota; zeta; primops]
       (List.Tot.length plain `less_than_max_input_length` a) == true} ->
     hash:list UInt8.t {norm [delta; iota; zeta; primops]

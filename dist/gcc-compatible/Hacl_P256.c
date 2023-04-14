@@ -1827,17 +1827,32 @@ ecdsa_verification_(
           sz = (uint32_t)64U;
           break;
         }
-      case Spec_Hash_Definitions_SHA3_256:
-        {
-          sz = (uint32_t)32U;
-          break;
-        }
       case Spec_Hash_Definitions_Blake2S:
         {
           sz = (uint32_t)32U;
           break;
         }
       case Spec_Hash_Definitions_Blake2B:
+        {
+          sz = (uint32_t)64U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_224:
+        {
+          sz = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_256:
+        {
+          sz = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_384:
+        {
+          sz = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_512:
         {
           sz = (uint32_t)64U;
           break;
@@ -2016,17 +2031,32 @@ ecdsa_signature_core(
           sz = (uint32_t)64U;
           break;
         }
-      case Spec_Hash_Definitions_SHA3_256:
-        {
-          sz = (uint32_t)32U;
-          break;
-        }
       case Spec_Hash_Definitions_Blake2S:
         {
           sz = (uint32_t)32U;
           break;
         }
       case Spec_Hash_Definitions_Blake2B:
+        {
+          sz = (uint32_t)64U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_224:
+        {
+          sz = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_256:
+        {
+          sz = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_384:
+        {
+          sz = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_512:
         {
           sz = (uint32_t)64U;
           break;

@@ -21,7 +21,7 @@ let key_and_data_fits (a:hash_alg) :
   assert_norm (pow2 61 < pow2 125)
 
 let hash_block_length_fits (a:hash_alg) :
-  Lemma (if is_sha3 a then True else hash_length a + pow2 32 + block_length a < Some?.v(max_input_length a))
+  Lemma (if is_keccak a then True else hash_length a + pow2 32 + block_length a < Some?.v(max_input_length a))
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);
@@ -31,7 +31,7 @@ let hash_block_length_fits (a:hash_alg) :
 /// Duplicated from Hacl.HKDF because we don't want clients to depend on Hacl.HKDF
 
 inline_for_extraction noextract
-let extract_st (a:hash_alg) =
+let extract_st (a:fixed_len_alg) =
   prk     : B.buffer uint8 ->
   salt    : B.buffer uint8 ->
   saltlen : pub_uint32 ->
@@ -52,7 +52,7 @@ let extract_st (a:hash_alg) =
     B.as_seq h1 prk == extract a (B.as_seq h0 salt) (B.as_seq h0 ikm))
 
 inline_for_extraction noextract
-let expand_st (a:hash_alg) =
+let expand_st (a:fixed_len_alg) =
   okm     : B.buffer uint8 ->
   prk     : B.buffer uint8 ->
   prklen  : pub_uint32 ->
