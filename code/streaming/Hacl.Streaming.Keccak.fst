@@ -30,8 +30,6 @@ open Spec.Hash.Definitions
 
 open Hacl.Streaming.Interface
 
-open Hacl.Hash.Definitions
-
 module D = Hacl.Hash.Definitions
 module Agile = Spec.Agile.Hash
 
@@ -115,6 +113,13 @@ let stateful_keccak: stateful alg =
     (* copy: *) (fun _ (a, s_src) (a', s_dst) ->
       B.blit s_src 0ul s_dst 0ul 25ul)
 
+let hash_len (a: keccak_alg { not (is_shake a) }): Lib.IntTypes.(n:size_t { v n = hash_length a }) =
+  match a with
+  | SHA3_224 -> 28ul
+  | SHA3_256 -> 32ul
+  | SHA3_384 -> 48ul
+  | SHA3_512 -> 64ul
+
 inline_for_extraction noextract
 let hacl_keccak (a: G.erased alg): block alg =
   Block
@@ -128,6 +133,7 @@ let hacl_keccak (a: G.erased alg): block alg =
     Hacl.Hash.SHA3.block_len (* block_len *)
     Hacl.Hash.SHA3.block_len (* blocks_state_len *)
     (fun _ -> 0ul) (* init_input_len *)
+
 
     (* init_input_s *)
     (fun _ _ -> S.empty)
@@ -175,7 +181,7 @@ let hacl_keccak (a: G.erased alg): block alg =
 
     (* finish *)
     (fun _ _ (a, s) dst l ->
-      Hacl.Hash.SHA3.finish_keccak a s dst (if is_shake a then l else D.hash_len a))
+      Hacl.Hash.SHA3.finish_keccak a s dst (if is_shake a then l else hash_len a))
 
 // For pretty names in C
 let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256

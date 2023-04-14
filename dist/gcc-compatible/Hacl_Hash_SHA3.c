@@ -142,6 +142,34 @@ typedef struct st2_s
 }
 st2;
 
+uint32_t Hacl_Streaming_Keccak_hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
+      {
+        return (uint32_t)64U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s)
 {
   Hacl_Streaming_Keccak_state scrut = *s;
@@ -477,74 +505,7 @@ finish_(
     }
     else
     {
-      switch (a11)
-      {
-        case Spec_Hash_Definitions_MD5:
-          {
-            ite = (uint32_t)16U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA1:
-          {
-            ite = (uint32_t)20U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_224:
-          {
-            ite = (uint32_t)28U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_256:
-          {
-            ite = (uint32_t)32U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_384:
-          {
-            ite = (uint32_t)48U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_512:
-          {
-            ite = (uint32_t)64U;
-            break;
-          }
-        case Spec_Hash_Definitions_Blake2S:
-          {
-            ite = (uint32_t)32U;
-            break;
-          }
-        case Spec_Hash_Definitions_Blake2B:
-          {
-            ite = (uint32_t)64U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA3_224:
-          {
-            ite = (uint32_t)28U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA3_256:
-          {
-            ite = (uint32_t)32U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA3_384:
-          {
-            ite = (uint32_t)48U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA3_512:
-          {
-            ite = (uint32_t)64U;
-            break;
-          }
-        default:
-          {
-            KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-            KRML_HOST_EXIT(253U);
-          }
-      }
+      ite = Hacl_Streaming_Keccak_hash_len(a11);
     }
     Hacl_Impl_SHA3_squeeze(s, block_len(a11), ite, dst);
     return;

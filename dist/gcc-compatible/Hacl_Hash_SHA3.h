@@ -44,6 +44,8 @@ typedef struct Hacl_Streaming_Keccak_st_s
 }
 Hacl_Streaming_Keccak_st;
 
+uint32_t Hacl_Streaming_Keccak_hash_len(Spec_Hash_Definitions_hash_alg a);
+
 typedef struct Hacl_Streaming_Keccak_state_s
 {
   Hacl_Streaming_Keccak_st block_state;

@@ -23,6 +23,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Keccak_st_snd =
       field hacl_Streaming_Keccak_st "snd" (ptr uint64_t)
     let _ = seal hacl_Streaming_Keccak_st
+    let hacl_Streaming_Keccak_hash_len =
+      foreign "Hacl_Streaming_Keccak_hash_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
     type hacl_Streaming_Keccak_state =
       [ `hacl_Streaming_Keccak_state ] structure
     let (hacl_Streaming_Keccak_state :
