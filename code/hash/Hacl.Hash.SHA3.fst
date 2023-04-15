@@ -36,6 +36,13 @@ let block_len (a: keccak_alg): n:size_t { v n = block_length a } =
   | Shake128 -> assert_norm (rate Shake128/8/8*8 = 168); 168ul
   | Shake256 -> assert_norm (rate Shake256/8/8*8 = 136); 136ul
 
+let hash_len (a: keccak_alg { not (is_shake a) }): Lib.IntTypes.(n:size_t { v n = hash_length a }) =
+  match a with
+  | SHA3_224 -> 28ul
+  | SHA3_256 -> 32ul
+  | SHA3_384 -> 48ul
+  | SHA3_512 -> 64ul
+
 let init a s =
   LowStar.Buffer.fill s (Lib.IntTypes.u64 0) 25ul
 

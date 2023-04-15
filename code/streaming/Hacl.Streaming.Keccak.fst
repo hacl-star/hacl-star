@@ -113,12 +113,8 @@ let stateful_keccak: stateful alg =
     (* copy: *) (fun _ (a, s_src) (a', s_dst) ->
       B.blit s_src 0ul s_dst 0ul 25ul)
 
-let hash_len (a: keccak_alg { not (is_shake a) }): Lib.IntTypes.(n:size_t { v n = hash_length a }) =
-  match a with
-  | SHA3_224 -> 28ul
-  | SHA3_256 -> 32ul
-  | SHA3_384 -> 48ul
-  | SHA3_512 -> 64ul
+noextract inline_for_extraction
+let is_shake a = a = Shake128 || a = Shake256
 
 inline_for_extraction noextract
 let hacl_keccak (a: G.erased alg): block alg =
@@ -181,7 +177,7 @@ let hacl_keccak (a: G.erased alg): block alg =
 
     (* finish *)
     (fun _ _ (a, s) dst l ->
-      Hacl.Hash.SHA3.finish_keccak a s dst (if is_shake a then l else hash_len a))
+      Hacl.Hash.SHA3.(finish_keccak a s dst (if is_shake a then l else hash_len a)))
 
 // For pretty names in C
 let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256

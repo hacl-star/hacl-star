@@ -61,6 +61,34 @@ static uint32_t block_len(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
+static uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
+      {
+        return (uint32_t)64U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 void
 Hacl_Hash_SHA3_update_multi_sha3(
   Spec_Hash_Definitions_hash_alg a,
@@ -141,34 +169,6 @@ typedef struct st2_s
   Hacl_Streaming_Keccak_st snd;
 }
 st2;
-
-uint32_t Hacl_Streaming_Keccak_hash_len(Spec_Hash_Definitions_hash_alg a)
-{
-  switch (a)
-  {
-    case Spec_Hash_Definitions_SHA3_224:
-      {
-        return (uint32_t)28U;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        return (uint32_t)32U;
-      }
-    case Spec_Hash_Definitions_SHA3_384:
-      {
-        return (uint32_t)48U;
-      }
-    case Spec_Hash_Definitions_SHA3_512:
-      {
-        return (uint32_t)64U;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
 
 Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s)
 {
@@ -480,106 +480,19 @@ finish_(
   uint64_t *s = tmp_block_state.snd;
   if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
   {
-    bool sw;
-    switch (a11)
-    {
-      case Spec_Hash_Definitions_Shake128:
-        {
-          sw = true;
-          break;
-        }
-      case Spec_Hash_Definitions_Shake256:
-        {
-          sw = true;
-          break;
-        }
-      default:
-        {
-          sw = false;
-        }
-    }
     uint32_t ite;
-    if (sw)
+    if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
     {
       ite = l;
     }
     else
     {
-      ite = Hacl_Streaming_Keccak_hash_len(a11);
+      ite = hash_len(a11);
     }
     Hacl_Impl_SHA3_squeeze(s, block_len(a11), ite, dst);
     return;
   }
-  uint32_t sw;
-  switch (a11)
-  {
-    case Spec_Hash_Definitions_MD5:
-      {
-        sw = (uint32_t)16U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        sw = (uint32_t)20U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        sw = (uint32_t)28U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        sw = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        sw = (uint32_t)48U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        sw = (uint32_t)64U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        sw = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        sw = (uint32_t)64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_224:
-      {
-        sw = (uint32_t)28U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        sw = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_384:
-      {
-        sw = (uint32_t)48U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_512:
-      {
-        sw = (uint32_t)64U;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  Hacl_Impl_SHA3_squeeze(s, block_len(a11), sw, dst);
+  Hacl_Impl_SHA3_squeeze(s, block_len(a11), hash_len(a11), dst);
 }
 
 uint32_t Hacl_Streaming_Keccak_finish(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l)

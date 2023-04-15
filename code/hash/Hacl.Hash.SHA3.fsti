@@ -21,6 +21,7 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 val block_len (a: keccak_alg): Lib.IntTypes.(n:size_t { v n = block_length a })
+val hash_len (a: keccak_alg { not (is_shake a) }): Lib.IntTypes.(n:size_t { v n = hash_length a })
 
 inline_for_extraction noextract
 val init (a: keccak_alg): init_st (|a, ()|)
