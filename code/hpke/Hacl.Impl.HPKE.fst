@@ -616,7 +616,13 @@ val labeled_expand_kem:
       as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-#push-options "--z3rlimit 500 --z3refresh"
+#push-options "--z3rlimit 500 --z3refresh --ifuel 0"
+
+let helper (cs: S.ciphersuite) (l: size_t): Lemma
+  (requires Spec.Agile.HKDF.expand_output_length_pred (S.kem_hash_of_cs cs) (v l))
+  (ensures (v l <= 255 * 128))
+=
+  ()
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
@@ -626,6 +632,7 @@ let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infol
   let len = 9ul +. suite_id_len +. labellen +. infolen in
   let tmp = create len (u8 0) in
 
+  helper cs l;
   nat_to_bytes_2 l (sub tmp 0ul 2ul);
   let h1 = ST.get () in
   init_label_version (sub tmp 2ul 7ul);
