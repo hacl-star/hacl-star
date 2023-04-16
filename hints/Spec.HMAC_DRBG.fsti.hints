@@ -18,7 +18,79 @@
         "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6"
       ],
       0,
-      "b2d067bd4b70960636243d2d4b282a97"
+      "e9b765b6cca89b0d8a4bc9649482b42c"
+    ],
+    [
+      "Spec.HMAC_DRBG.hmac_input_bound",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
+        "typing_Spec.Hash.Definitions.is_shake"
+      ],
+      0,
+      "f36c6562c7b0d65cf7524f170443efdd"
+    ],
+    [
+      "Spec.HMAC_DRBG.instantiate",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
+        "typing_Spec.Hash.Definitions.is_shake"
+      ],
+      0,
+      "b64b72d0dd2f8f653ba46c76a5811fc0"
+    ],
+    [
+      "Spec.HMAC_DRBG.reseed",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
+        "typing_Spec.Hash.Definitions.is_shake"
+      ],
+      0,
+      "b031bd165511ec6cb524123a252ce924"
+    ],
+    [
+      "Spec.HMAC_DRBG.generate",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
+        "typing_Spec.Hash.Definitions.is_shake"
+      ],
+      0,
+      "20078350e90787abf81498dd1e52cc94"
     ]
   ]
 ]

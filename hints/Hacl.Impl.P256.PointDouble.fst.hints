@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "42225f97f0949efca873e8a724b6915f"
+      "60f9d665780860b065b6bd427bad1d24"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_x3_0",
@@ -27,7 +27,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "abdae5288432bc496b83d3f17a2f6388"
+      "444bcaaa3d9d81521368641ae56d088d"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_x3_1",
@@ -41,7 +41,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "f3f1b033b854dbd4b1b93533c085f59d"
+      "470080f877e0571606515acfa6f1975f"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_x3_1",
@@ -58,7 +58,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "83a5639eceab548ccc166f7caf5686a7"
+      "ba912d8e43cc34e396bddd3442464ba1"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_x3",
@@ -72,7 +72,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "21495c0982842ae867f647a36c2ca3af"
+      "178b50012bfdd785ad1bcfc2ed3ce799"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_x3",
@@ -88,7 +88,7 @@
         "typing_Spec.P256.prime"
       ],
       0,
-      "930f0ae1738c44d2a4d64690bea298cd"
+      "cb0311ae9767d5647aba395e7f40bef4"
     ],
     [
       "Hacl.Impl.P256.PointDouble.y3_lemma_0",
@@ -102,7 +102,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "ad0948fc896c40db2d2ddb0f09637ab8"
+      "dd6f31efa58c284ce1caf86a37a529f0"
     ],
     [
       "Hacl.Impl.P256.PointDouble.y3_lemma_0",
@@ -110,14 +110,17 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "int_inversion",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.P256.Definitions.prime256",
+        "equation_Spec.P256.prime", "int_inversion",
         "primitive_Prims.op_GreaterThan", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "75ffa79302d1d004075ffac2da19044b"
+      "01d25c7a02f1ba2d9c316eb24e634c0c"
     ],
     [
       "Hacl.Impl.P256.PointDouble.y3_lemma_1",
@@ -131,7 +134,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "05a66794abee4ef2abdcd36f73a52d6a"
+      "8ce597abefe2b004539b682b8739a195"
     ],
     [
       "Hacl.Impl.P256.PointDouble.sym_decidable",
@@ -140,7 +143,7 @@
       0,
       [ "@query" ],
       0,
-      "7889f97f0e5411e95bf0610ab22339b7"
+      "e8b77ccac900dd87f6b7a228b665101d"
     ],
     [
       "Hacl.Impl.P256.PointDouble.y3_lemma_1",
@@ -160,7 +163,7 @@
         "true_interp"
       ],
       0,
-      "3a6d50c7a384de5959588e8095f6093f"
+      "a94329bc1dc0eaa48a31aad169c522ae"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_y3",
@@ -174,7 +177,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "5cf01cf10541a97386a6540af15e2a7f"
+      "9fa88a217db99c21ff9e40e2977d0283"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_y3",
@@ -191,7 +194,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "1fee2ae98b90019617a6e598a0427248"
+      "874825dbf231e66017faab00f73d6ac4"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_z3",
@@ -205,7 +208,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "4a6dcb2b7cbdd52f098b393643aa6612"
+      "83bff83fca7b9c4398ca49c107c5b3d1"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_z3",
@@ -221,7 +224,7 @@
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1"
       ],
       0,
-      "b93addbab5d9168559d84751515ece8c"
+      "ff5724183c8f3bac4323443fafb69f66"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_a_b_g",
@@ -251,7 +254,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7225907ab868c6f683c7dccf81ae02e9"
+      "3478461860c4f261ff2cc6acbddb3ab4"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_point_abd",
@@ -263,7 +266,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "16b8505fcd1e80ac3048062070560105"
+      "6a4c1ef5c05e70b7bc764e5ebe66b380"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_a_b_g",
@@ -281,7 +284,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "e7a2beff36753c42f09a8fb329fe4edc"
+      "ec49791cadd1e514cf2440b90b3f296b"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_a_b_g",
@@ -366,7 +369,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "acaaba56f6a8ef5aca3cb4cb9af4988e"
+      "993f6dcadd63f3f1b22e68fff7f5bcd6"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_x3",
@@ -384,7 +387,7 @@
         "typing_Spec.P256.Definitions.as_nat"
       ],
       0,
-      "4907aca3ee5c9c400b0b13fd2a134809"
+      "710d11ca896970d5dc416156b93c412e"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_x3",
@@ -460,7 +463,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8b15c4428dda38f547565042c950e21b"
+      "abd0b46da60bf31ff089aea61b5f7d7d"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_z3",
@@ -483,7 +486,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "902ea591f1878218bf34609cc8597672"
+      "310a6333e9228a5f735ca753b3c9a567"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_z3",
@@ -530,7 +533,7 @@
         "typing_Spec.P256.prime", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "709d0d8d54b01ab012593bb33e89ba59"
+      "dfec38a1c1d2d26425802de241f217d8"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_y3",
@@ -539,7 +542,7 @@
       0,
       [ "@query" ],
       0,
-      "25baf2a3b09e21ce6ee19b6c7be7c1e7"
+      "4f2e7bf1eb3a53ee97faccc0b539bd44"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double_y3",
@@ -594,7 +597,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "cf5d420cc0af2ac7d98daa8455f8d6a8"
+      "7026fc172c304a6c5d15e29064c0c32b"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_pd_to_spec",
@@ -621,7 +624,7 @@
         "typing_Spec.P256.MontgomeryMultiplication.fromDomain_"
       ],
       0,
-      "5256f10445a0a12bce52b9a60a7cc8bc"
+      "64a7856850cd8c6d5020f250d71aca27"
     ],
     [
       "Hacl.Impl.P256.PointDouble.lemma_pd_to_spec",
@@ -645,7 +648,7 @@
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1"
       ],
       0,
-      "9fe1357e8cfa984504dd0f29c4605dbf"
+      "735dc5d01a7e3fd7dd8d0133a535eda1"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double",
@@ -678,7 +681,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "efefbd016cddd3782fdfabc4779140ef"
+      "d0e261aeee904c30f442ce1b2a3ed3e8"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double",
@@ -697,7 +700,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "92c1b01494296ebbb4d7f2ff2bc6e29b"
+      "047c2dcdce5210c48b67898100bb7c28"
     ],
     [
       "Hacl.Impl.P256.PointDouble.point_double",
@@ -799,7 +802,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4b44d2b74026c4615540f643afe61979"
+      "d3142cd4dc519dcff4db4763883c63b2"
     ]
   ]
 ]
