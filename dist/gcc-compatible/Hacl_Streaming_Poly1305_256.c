@@ -26,7 +26,7 @@
 #include "Hacl_Streaming_Poly1305_256.h"
 
 Hacl_Streaming_Poly1305_256_poly1305_256_state
-*Hacl_Streaming_Poly1305_256_create_in(uint8_t *k1)
+*Hacl_Streaming_Poly1305_256_create_in(uint8_t *k)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
@@ -36,7 +36,7 @@ Hacl_Streaming_Poly1305_256_poly1305_256_state
   memset(r1, 0U, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *block_state = r1;
   uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-  memcpy(k_, k1, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_0 = k_;
   Hacl_Streaming_Poly1305_256_poly1305_256_state
   s =
@@ -47,22 +47,19 @@ Hacl_Streaming_Poly1305_256_poly1305_256_state
         Hacl_Streaming_Poly1305_256_poly1305_256_state
       ));
   p[0U] = s;
-  Hacl_Poly1305_256_poly1305_init(block_state, k1);
+  Hacl_Poly1305_256_poly1305_init(block_state, k);
   return p;
 }
 
 void
-Hacl_Streaming_Poly1305_256_init(
-  uint8_t *k1,
-  Hacl_Streaming_Poly1305_256_poly1305_256_state *s
-)
+Hacl_Streaming_Poly1305_256_init(uint8_t *k, Hacl_Streaming_Poly1305_256_poly1305_256_state *s)
 {
   Hacl_Streaming_Poly1305_256_poly1305_256_state scrut = *s;
   uint8_t *k_ = scrut.p_key;
   uint8_t *buf = scrut.buf;
   Lib_IntVector_Intrinsics_vec256 *block_state = scrut.block_state;
-  Hacl_Poly1305_256_poly1305_init(block_state, k1);
-  memcpy(k_, k1, (uint32_t)32U * sizeof (uint8_t));
+  Hacl_Poly1305_256_poly1305_init(block_state, k);
+  memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
   Hacl_Streaming_Poly1305_256_poly1305_256_state
   tmp =
