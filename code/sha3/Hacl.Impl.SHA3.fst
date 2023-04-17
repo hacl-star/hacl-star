@@ -364,7 +364,7 @@ let storeState rateInBytes s res =
   pop_frame()
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val absorb_next:
@@ -378,7 +378,10 @@ val absorb_next:
 let absorb_next s rateInBytes =
   push_frame();
   let h0 = ST.get() in
-  let nextBlock = create rateInBytes (u8 0) in
+  let nextBlock_ = create 200ul (u8 0) in
+  let nextBlock = sub nextBlock_ 0ul rateInBytes in
+  let h1 = ST.get () in
+  assert (as_seq h1 nextBlock `Seq.equal` Lib.Sequence.create (v rateInBytes) (u8 0));
   nextBlock.(rateInBytes -! 1ul) <- u8 0x80;
   loadState rateInBytes nextBlock s;
   state_permute s;
@@ -401,7 +404,10 @@ val absorb_last:
 let absorb_last delimitedSuffix rateInBytes rem input s =
   push_frame();
   let h0 = ST.get() in
-  let lastBlock = create rateInBytes (u8 0) in
+  let lastBlock_ = create 200ul (u8 0) in
+  let lastBlock = sub lastBlock_ 0ul rateInBytes in
+  let h1 = ST.get () in
+  assert (as_seq h1 lastBlock `Seq.equal` Lib.Sequence.create (v rateInBytes) (u8 0));
   let open Lib.RawIntTypes in
   update_sub lastBlock (size 0) rem input;
   lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
