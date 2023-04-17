@@ -9,10 +9,11 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "constructor_distinct_Lib.Buffer.CONST",
+        "b2t_def", "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.Some",
+        "constructor_distinct_Lib.Buffer.CONST",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U16",
@@ -24,7 +25,8 @@
         "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
-        "constructor_distinct_Tm_unit", "equality_tok_Lib.Buffer.CONST@tok",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "equality_tok_Lib.Buffer.CONST@tok",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -75,6 +77,7 @@
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.is_md",
         "equation_Spec.Hash.Definitions.less_than_max_input_length",
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.word_length",
@@ -110,17 +113,18 @@
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
+        "lemma_Spec.Hash.Definitions.md_alg_is_maxed",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Some_a",
         "projection_inverse_FStar.Pervasives.Native.Some_v",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -172,18 +176,15 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_Spec.Hash.Definitions.hash_length",
         "typing_Spec.Hash.Definitions.less_than_max_input_length",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U8@tok",
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok",
-        "typing_tok_Spec.Hash.Definitions.SHA2_256@tok",
-        "typing_tok_Spec.Hash.Definitions.SHA2_384@tok",
-        "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
+        "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "e233167518b19773d16e62a941bac02f"
+      "81ed8e4bd50d0aeee26bb955ab7c3602"
     ],
     [
       "Hacl.Test.SHA2.u8",
@@ -204,7 +205,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "de6422888d416808c49ac62e20d45f89"
+      "a14193f94fc6396b70c5ecd5cc8aac8a"
     ],
     [
       "Hacl.Test.SHA2.test1_plaintext",
@@ -236,7 +237,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "c892ed665efd52a4521233cc7e16a15e"
+      "1fe2d978d3dabf090d487f5a243e28da"
     ],
     [
       "Hacl.Test.SHA2.test1_expected_sha2_224",
@@ -269,7 +270,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "c8f73432e83de464180de6e4a0e73b52"
+      "8873ec6bee936112ddfd67ad2cc94094"
     ],
     [
       "Hacl.Test.SHA2.test1_expected_sha2_256",
@@ -302,7 +303,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "e5d93a7d79c054b6524ffe727cd118c2"
+      "9326a28a64710b2bfa235ae290c756bf"
     ],
     [
       "Hacl.Test.SHA2.test1_expected_sha2_384",
@@ -335,7 +336,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "bdeb528c37786241f0943e3fb5ffe3a0"
+      "ea923a30c6790a49f47ca090dc72862e"
     ],
     [
       "Hacl.Test.SHA2.test1_expected_sha2_512",
@@ -368,7 +369,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "32e8a46b07fba469d9766fcf3bb93c4d"
+      "47e8ae23da023f5603a6c0a1927a1dc7"
     ],
     [
       "Hacl.Test.SHA2.test2_plaintext",
@@ -400,7 +401,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "0aada2697993311823a9603526d47dce"
+      "b3c09e8e9785ea8f52d4d0be4fbdb195"
     ],
     [
       "Hacl.Test.SHA2.test2_expected_sha2_224",
@@ -433,7 +434,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "9775c44c9350bed64e2ff57248d850e7"
+      "f005f2b3577dbcc637e31ab39d07f07c"
     ],
     [
       "Hacl.Test.SHA2.test2_expected_sha2_256",
@@ -466,7 +467,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "ae4d7832246499fd9aeecc0d74eefab0"
+      "a76985f46b8801018a6235352c8da555"
     ],
     [
       "Hacl.Test.SHA2.test2_expected_sha2_384",
@@ -499,7 +500,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "b3e80960404c4b82ad413482b8c4c6c0"
+      "c82f4547ad35da56566abe13838cd691"
     ],
     [
       "Hacl.Test.SHA2.test2_expected_sha2_512",
@@ -532,7 +533,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "34fe89584512ca99516918403f7409d1"
+      "b9851c81eddd5e21cb326eb193e6a74e"
     ],
     [
       "Hacl.Test.SHA2.test3_plaintext",
@@ -565,7 +566,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "7285a058b2c5a888e71159a9f45f428d"
+      "b01b6a4da708a0b08360fd78175a2733"
     ],
     [
       "Hacl.Test.SHA2.test3_expected_sha2_224",
@@ -598,7 +599,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "1fa79fa0c43f7bb42e1b001832b0850e"
+      "9a95725e19c16a6cc785416b7a7cbefb"
     ],
     [
       "Hacl.Test.SHA2.test3_expected_sha2_256",
@@ -631,7 +632,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "8bd9798b3e25bb801a71ca6c886b02ba"
+      "37760ac625e714b4691b9007b31a012a"
     ],
     [
       "Hacl.Test.SHA2.test3_expected_sha2_384",
@@ -664,7 +665,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "5ed4d43c86dd0c4a6f09b519aa488f39"
+      "c205bac373aa74b4bb23f1240582430a"
     ],
     [
       "Hacl.Test.SHA2.test3_expected_sha2_512",
@@ -697,7 +698,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "3e093870fbf861e06940f459130aac56"
+      "95b34fb953728a80b4bf4394deb6d854"
     ],
     [
       "Hacl.Test.SHA2.test4_plaintext",
@@ -730,7 +731,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "778fe110291e573a1a83e7d3fb87f9cd"
+      "4b7e4d75ec71bae3a18268a94400129e"
     ],
     [
       "Hacl.Test.SHA2.test4_expected_sha2_224",
@@ -763,7 +764,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "fa0700d3e7a8c5c7750f3e592fdc1e57"
+      "d76717e2a774a8c805e3e61452e4f52a"
     ],
     [
       "Hacl.Test.SHA2.test4_expected_sha2_256",
@@ -796,7 +797,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "4ecaedf5ec11c5a6db9b5b75d9bb1f1f"
+      "4f44d111e45ccb31b44b05ee94fa491f"
     ],
     [
       "Hacl.Test.SHA2.test4_expected_sha2_384",
@@ -829,7 +830,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "d03919683f24c5ada8d9f8f772573ec4"
+      "8e120c608cd381fe083b822db93b9849"
     ],
     [
       "Hacl.Test.SHA2.test4_expected_sha2_512",
@@ -862,7 +863,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "2ab4171f3e1c603163a216088509a5a0"
+      "109cc708d78854c220b0926e8cae5f47"
     ],
     [
       "Hacl.Test.SHA2.main",
@@ -966,7 +967,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "4ed9693f18fd616925e9508b480e7261"
+      "b0eb43a8422eec2ab8e151e1864df45e"
     ]
   ]
 ]

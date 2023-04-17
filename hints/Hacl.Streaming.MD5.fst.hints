@@ -9,11 +9,11 @@
       [
         "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Spec.Hash.Definitions.is_blake",
+        "equation_Hacl.Streaming.MD.is_supported",
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "4b0f788938b7028078a0353f80a18514"
+      "5c7ea6d2549a1b2f09fd54486dfa3bf7"
     ],
     [
       "Hacl.Streaming.MD5.state_t_md5",
@@ -23,11 +23,11 @@
       [
         "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Spec.Hash.Definitions.is_blake",
+        "equation_Hacl.Streaming.MD.is_supported",
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "14950f6e7bf114b886f85226a69a0a13"
+      "0f4f2a0ef8cc6ba7a0af6b9b2de8d643"
     ],
     [
       "Hacl.Streaming.MD5.legacy_alloca",
@@ -55,7 +55,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "fe733d2f9581f0cb52621e78fcc77c03"
+      "d777ba16f7959a7242d5f734e556ea3b"
     ],
     [
       "Hacl.Streaming.MD5.legacy_create_in",
@@ -83,7 +83,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "a54c5277e8176b6c121a6e22729483bb"
+      "5ac626e487e8b412d768cc899ba6a727"
     ],
     [
       "Hacl.Streaming.MD5.legacy_init",
@@ -111,7 +111,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "fc1b9a8ac8e720fcdcf03fd289f0764b"
+      "fad99473c2fbd943f139a6fad01be85c"
     ],
     [
       "Hacl.Streaming.MD5.legacy_update",
@@ -139,7 +139,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "63c4d657599e6126ba81f0fe42543bef"
+      "51b7ec3ca412ed825143dad203fd9fd7"
     ],
     [
       "Hacl.Streaming.MD5.legacy_finish",
@@ -167,7 +167,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "c6bcdd84f932b956586c145aea206a10"
+      "3ce073ca6e0a1f11c20cf18bb91b5a13"
     ],
     [
       "Hacl.Streaming.MD5.legacy_free",
@@ -195,7 +195,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "904141d317e466b72b64b12534af49d1"
+      "ae51a1584ec29fbc2a1adde88506d334"
     ],
     [
       "Hacl.Streaming.MD5.legacy_copy",
@@ -223,16 +223,21 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "3267353fa21d3dc237e7def92c31fb8d"
+      "b787f8ed64a014caabdca101fa62c96a"
     ],
     [
       "Hacl.Streaming.MD5.legacy_hash",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
+        "equality_tok_Spec.Hash.Definitions.MD5@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "90f457de7664309f20ce861a043df287"
+      "174cd6466cb95c3f6126f8a95eeecd83"
     ]
   ]
 ]
