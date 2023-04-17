@@ -14,15 +14,17 @@ module Bindings(F:Cstubs.FOREIGN) =
         (spec_Hash_Definitions_hash_alg @->
            ((ptr uint64_t) @->
               (ocaml_bytes @-> (uint32_t @-> (returning void)))))
-    type hacl_Streaming_Keccak_st = [ `hacl_Streaming_Keccak_st ] structure
-    let (hacl_Streaming_Keccak_st :
-      [ `hacl_Streaming_Keccak_st ] structure typ) =
-      structure "Hacl_Streaming_Keccak_st_s"
-    let hacl_Streaming_Keccak_st_fst =
-      field hacl_Streaming_Keccak_st "fst" spec_Hash_Definitions_hash_alg
-    let hacl_Streaming_Keccak_st_snd =
-      field hacl_Streaming_Keccak_st "snd" (ptr uint64_t)
-    let _ = seal hacl_Streaming_Keccak_st
+    type hacl_Streaming_Keccak_hash_buf =
+      [ `hacl_Streaming_Keccak_hash_buf ] structure
+    let (hacl_Streaming_Keccak_hash_buf :
+      [ `hacl_Streaming_Keccak_hash_buf ] structure typ) =
+      structure "Hacl_Streaming_Keccak_hash_buf_s"
+    let hacl_Streaming_Keccak_hash_buf_fst =
+      field hacl_Streaming_Keccak_hash_buf "fst"
+        spec_Hash_Definitions_hash_alg
+    let hacl_Streaming_Keccak_hash_buf_snd =
+      field hacl_Streaming_Keccak_hash_buf "snd" (ptr uint64_t)
+    let _ = seal hacl_Streaming_Keccak_hash_buf
     type hacl_Streaming_Keccak_state =
       [ `hacl_Streaming_Keccak_state ] structure
     let (hacl_Streaming_Keccak_state :
@@ -30,7 +32,7 @@ module Bindings(F:Cstubs.FOREIGN) =
       structure "Hacl_Streaming_Keccak_state_s"
     let hacl_Streaming_Keccak_state_block_state =
       field hacl_Streaming_Keccak_state "block_state"
-        hacl_Streaming_Keccak_st
+        hacl_Streaming_Keccak_hash_buf
     let hacl_Streaming_Keccak_state_buf =
       field hacl_Streaming_Keccak_state "buf" (ptr uint8_t)
     let hacl_Streaming_Keccak_state_total_len =

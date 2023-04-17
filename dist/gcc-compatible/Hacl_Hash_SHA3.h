@@ -37,16 +37,16 @@ extern "C" {
 
 #include "Hacl_Spec.h"
 
-typedef struct Hacl_Streaming_Keccak_st_s
+typedef struct Hacl_Streaming_Keccak_hash_buf_s
 {
   Spec_Hash_Definitions_hash_alg fst;
   uint64_t *snd;
 }
-Hacl_Streaming_Keccak_st;
+Hacl_Streaming_Keccak_hash_buf;
 
 typedef struct Hacl_Streaming_Keccak_state_s
 {
-  Hacl_Streaming_Keccak_st block_state;
+  Hacl_Streaming_Keccak_hash_buf block_state;
   uint8_t *buf;
   uint64_t total_len;
 }

@@ -80,8 +80,8 @@ inline_for_extraction noextract
 let singleton #t (x: t) = y:t { y == x }
 
 // Pretty C name
-let st = hash_alg & B.buffer uint64
-let st2 = st & st
+let hash_buf = hash_alg & B.buffer uint64
+let hash_buf2 = hash_buf & hash_buf
 
 inline_for_extraction noextract
 let stateful_keccak: stateful alg =

@@ -796,8 +796,7 @@ inline_for_extraction noextract
 val update_small:
   #index:Type0 ->
   (c: block index) ->
-  i:G.erased index -> (
-  let i = G.reveal i in
+  i:index -> (
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
   s:state c i t t' ->
@@ -1124,7 +1123,6 @@ let update_small #index c i t t' p data len =
   let open LowStar.BufferOps in
   let s = !*p in
   let State block_state buf total_len seen_ k' = s in
-  let i = c.index_of_state i block_state in
   [@inline_let]
   let block_state: c.state.s i = block_state in
 
@@ -1307,8 +1305,7 @@ inline_for_extraction noextract
 val update_empty_or_full_buf:
   #index:Type0 ->
   c:block index ->
-  i:G.erased index -> (
-  let i = G.reveal i in
+  i:index -> (
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
   s:state c i t t' ->
@@ -1333,7 +1330,6 @@ let update_empty_or_full_buf #index c i t t' p data len =
   let open LowStar.BufferOps in
   let s = !*p in
   let State block_state buf total_len seen k' = s in
-  let i = c.index_of_state i block_state in
   [@inline_let]
   let block_state: c.state.s i = block_state in
   let sz = rest c i total_len in
@@ -1447,8 +1443,7 @@ inline_for_extraction noextract
 val update_round:
   #index:Type0 ->
   c:block index ->
-  i:G.erased index -> (
-  let i = G.reveal i in
+  i:index -> (
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
   s:state c i t t' ->
@@ -1505,17 +1500,17 @@ let update #index c i t t' p data len =
   else
     let sz = rest c i total_len in
     if len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
-      update_small c (G.hide i) t t' p data len
+      update_small c i t t' p data len
     else if sz = 0ul then
-      update_empty_or_full_buf c (G.hide i) t t' p data len
+      update_empty_or_full_buf c i t t' p data len
     else begin
       let h0 = ST.get () in
       let diff = c.blocks_state_len i `U32.sub` sz in
       let data1 = B.sub data 0ul diff in
       let data2 = B.sub data diff (len `U32.sub` diff) in
-      update_round c (G.hide i) t t' p data1 diff;
+      update_round c i t t' p data1 diff;
       let h1 = ST.get () in
-      update_empty_or_full_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
+      update_empty_or_full_buf c i t t' p data2 (len `U32.sub` diff);
       let h2 = ST.get () in
       (
         let seen = G.reveal seen in

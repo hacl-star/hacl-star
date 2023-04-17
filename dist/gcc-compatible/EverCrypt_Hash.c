@@ -1429,15 +1429,14 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state1 = s2.block_state;
       uint8_t *buf = s2.buf;
       uint64_t total_len1 = s2.total_len;
-      Spec_Hash_Definitions_hash_alg i2 = alg_of_state(block_state1);
       uint32_t sz1;
-      if (total_len1 % (uint64_t)block_len(i2) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+      if (total_len1 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len1 > (uint64_t)0U)
       {
-        sz1 = block_len(i2);
+        sz1 = block_len(i1);
       }
       else
       {
-        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i2));
+        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i1));
       }
       uint8_t *buf2 = buf + sz1;
       memcpy(buf2, data, len * sizeof (uint8_t));
@@ -1458,32 +1457,31 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state1 = s2.block_state;
       uint8_t *buf = s2.buf;
       uint64_t total_len1 = s2.total_len;
-      Spec_Hash_Definitions_hash_alg i2 = alg_of_state(block_state1);
       uint32_t sz1;
-      if (total_len1 % (uint64_t)block_len(i2) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+      if (total_len1 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len1 > (uint64_t)0U)
       {
-        sz1 = block_len(i2);
+        sz1 = block_len(i1);
       }
       else
       {
-        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i2));
+        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i1));
       }
       if (!(sz1 == (uint32_t)0U))
       {
         uint64_t prevlen = total_len1 - (uint64_t)sz1;
-        update_multi(block_state1, prevlen, buf, block_len(i2));
+        update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
-      if ((uint64_t)len % (uint64_t)block_len(i2) == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
+      if ((uint64_t)len % (uint64_t)block_len(i1) == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
       {
-        ite0 = block_len(i2);
+        ite0 = block_len(i1);
       }
       else
       {
-        ite0 = (uint32_t)((uint64_t)len % (uint64_t)block_len(i2));
+        ite0 = (uint32_t)((uint64_t)len % (uint64_t)block_len(i1));
       }
-      uint32_t n_blocks = (len - ite0) / block_len(i2);
-      uint32_t data1_len = n_blocks * block_len(i2);
+      uint32_t n_blocks = (len - ite0) / block_len(i1);
+      uint32_t data1_len = n_blocks * block_len(i1);
       uint32_t data2_len = len - data1_len;
       uint8_t *data1 = data;
       uint8_t *data2 = data + data1_len;
@@ -1509,15 +1507,14 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state10 = s2.block_state;
       uint8_t *buf0 = s2.buf;
       uint64_t total_len10 = s2.total_len;
-      Spec_Hash_Definitions_hash_alg i20 = alg_of_state(block_state10);
       uint32_t sz10;
-      if (total_len10 % (uint64_t)block_len(i20) == (uint64_t)0U && total_len10 > (uint64_t)0U)
+      if (total_len10 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len10 > (uint64_t)0U)
       {
-        sz10 = block_len(i20);
+        sz10 = block_len(i1);
       }
       else
       {
-        sz10 = (uint32_t)(total_len10 % (uint64_t)block_len(i20));
+        sz10 = (uint32_t)(total_len10 % (uint64_t)block_len(i1));
       }
       uint8_t *buf2 = buf0 + sz10;
       memcpy(buf2, data1, diff * sizeof (uint8_t));
@@ -1535,38 +1532,37 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state1 = s20.block_state;
       uint8_t *buf = s20.buf;
       uint64_t total_len1 = s20.total_len;
-      Spec_Hash_Definitions_hash_alg i2 = alg_of_state(block_state1);
       uint32_t sz1;
-      if (total_len1 % (uint64_t)block_len(i2) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+      if (total_len1 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len1 > (uint64_t)0U)
       {
-        sz1 = block_len(i2);
+        sz1 = block_len(i1);
       }
       else
       {
-        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i2));
+        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i1));
       }
       if (!(sz1 == (uint32_t)0U))
       {
         uint64_t prevlen = total_len1 - (uint64_t)sz1;
-        update_multi(block_state1, prevlen, buf, block_len(i2));
+        update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
       if
       (
         (uint64_t)(len - diff)
-        % (uint64_t)block_len(i2)
+        % (uint64_t)block_len(i1)
         == (uint64_t)0U
         && (uint64_t)(len - diff) > (uint64_t)0U
       )
       {
-        ite0 = block_len(i2);
+        ite0 = block_len(i1);
       }
       else
       {
-        ite0 = (uint32_t)((uint64_t)(len - diff) % (uint64_t)block_len(i2));
+        ite0 = (uint32_t)((uint64_t)(len - diff) % (uint64_t)block_len(i1));
       }
-      uint32_t n_blocks = (len - diff - ite0) / block_len(i2);
-      uint32_t data1_len = n_blocks * block_len(i2);
+      uint32_t n_blocks = (len - diff - ite0) / block_len(i1);
+      uint32_t data1_len = n_blocks * block_len(i1);
       uint32_t data2_len = len - diff - data1_len;
       uint8_t *data11 = data2;
       uint8_t *data21 = data2 + data1_len;
