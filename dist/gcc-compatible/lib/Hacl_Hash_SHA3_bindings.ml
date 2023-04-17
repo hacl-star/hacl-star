@@ -64,6 +64,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Streaming_Keccak_finish"
         ((ptr hacl_Streaming_Keccak_state) @->
            (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+    let hacl_Streaming_Keccak_hash_len =
+      foreign "Hacl_Streaming_Keccak_hash_len"
+        ((ptr hacl_Streaming_Keccak_state) @-> (returning uint32_t))
     let hacl_SHA3_shake128_hacl =
       foreign "Hacl_SHA3_shake128_hacl"
         (uint32_t @->

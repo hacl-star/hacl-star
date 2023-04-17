@@ -514,6 +514,12 @@ uint32_t Hacl_Streaming_Keccak_finish(Hacl_Streaming_Keccak_state *s, uint8_t *d
   return (uint32_t)0U;
 }
 
+uint32_t Hacl_Streaming_Keccak_hash_len(Hacl_Streaming_Keccak_state *s)
+{
+  Spec_Hash_Definitions_hash_alg a1 = Hacl_Streaming_Keccak_get_alg(s);
+  return hash_len(a1);
+}
+
 void
 Hacl_SHA3_shake128_hacl(
   uint32_t inputByteLen,
