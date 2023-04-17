@@ -251,6 +251,24 @@ let finish a s dst l =
     0ul
   end
 
+val block_len: a:G.erased alg -> (
+  let c = hacl_keccak a in
+  let a = G.reveal a in
+  let i = a in
+  let t = sha3_state a in
+  let t' = G.erased unit in
+  s:state c i t t' ->
+  Stack Lib.IntTypes.size_t
+    (requires fun h0 ->
+      invariant c i h0 s)
+    (ensures fun h0 r h1 ->
+      B.(modifies loc_none h0 h1) /\
+      Lib.IntTypes.v r == Spec.Hash.Definitions.block_length a))
+
+let block_len a s =
+  let a = get_alg a s in
+  Hacl.Hash.SHA3.block_len a
+
 val hash_len: a:G.erased alg -> (
   let c = hacl_keccak a in
   let a = G.reveal a in

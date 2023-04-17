@@ -68,6 +68,8 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
 uint32_t
 Hacl_Streaming_Keccak_finish(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l);
 
+uint32_t Hacl_Streaming_Keccak_block_len(Hacl_Streaming_Keccak_state *s);
+
 uint32_t Hacl_Streaming_Keccak_hash_len(Hacl_Streaming_Keccak_state *s);
 
 void
