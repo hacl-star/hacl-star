@@ -72,6 +72,8 @@ uint32_t Hacl_Streaming_Keccak_block_len(Hacl_Streaming_Keccak_state *s);
 
 uint32_t Hacl_Streaming_Keccak_hash_len(Hacl_Streaming_Keccak_state *s);
 
+bool Hacl_Streaming_Keccak_is_shake(Hacl_Streaming_Keccak_state *s);
+
 void
 Hacl_SHA3_shake128_hacl(
   uint32_t inputByteLen,

@@ -114,7 +114,7 @@ let stateful_keccak: stateful alg =
       B.blit s_src 0ul s_dst 0ul 25ul)
 
 noextract inline_for_extraction
-let is_shake a = a = Shake128 || a = Shake256
+let is_shake_ a = a = Shake128 || a = Shake256
 
 inline_for_extraction noextract
 let hacl_keccak (a: G.erased alg): block alg =
@@ -125,7 +125,7 @@ let hacl_keccak (a: G.erased alg): block alg =
     Lib.IntTypes.(x:size_t { v x > 0 }) (* output_length_t *)
 
     (fun _ -> 0xffffffffUL) (* max_input_len *)
-    (fun a l -> if is_shake a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) (* output_length *)
+    (fun a l -> if is_shake_ a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) (* output_length *)
     Hacl.Hash.SHA3.block_len (* block_len *)
     Hacl.Hash.SHA3.block_len (* blocks_state_len *)
     (fun _ -> 0ul) (* init_input_len *)
@@ -145,8 +145,8 @@ let hacl_keccak (a: G.erased alg): block alg =
     (fun a acc prevlen input -> Spec.Hash.Incremental.(update_last a acc () input))
 
     (* finish_s *)
-    (fun a _ acc l -> Spec.Agile.Hash.finish a acc (if is_shake a then (Lib.IntTypes.v l) else ()))
-    (fun a _ s l -> Spec.Agile.Hash.(hash' a s (if is_shake a then (Lib.IntTypes.v l) else ())))
+    (fun a _ acc l -> Spec.Agile.Hash.finish a acc (if is_shake_ a then (Lib.IntTypes.v l) else ()))
+    (fun a _ s l -> Spec.Agile.Hash.(hash' a s (if is_shake_ a then (Lib.IntTypes.v l) else ())))
 
     (* update_multi_zero *)
     (fun a h prevlen -> update_multi_zero a h prevlen)
@@ -159,7 +159,7 @@ let hacl_keccak (a: G.erased alg): block alg =
     (fun a _ input l ->
       let input1 = S.append S.empty input in
       assert (S.equal input1 input);
-      Spec.Hash.Incremental.hash_is_hash_incremental' a input (if is_shake a then (Lib.IntTypes.v l) else ()))
+      Spec.Hash.Incremental.hash_is_hash_incremental' a input (if is_shake_ a then (Lib.IntTypes.v l) else ()))
 
     (* index_of_state *)
     (fun _ (a, _) -> a)
@@ -177,7 +177,7 @@ let hacl_keccak (a: G.erased alg): block alg =
 
     (* finish *)
     (fun _ _ (a, s) dst l ->
-      Hacl.Hash.SHA3.(finish_keccak a s dst (if is_shake a then l else hash_len a)))
+      Hacl.Hash.SHA3.(finish_keccak a s dst (if is_shake_ a then l else hash_len a)))
 
 // For pretty names in C
 let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256
@@ -219,7 +219,7 @@ val finish:
   s:state c i t t' ->
   dst:B.buffer uint8 ->
   l:Lib.IntTypes.(x:size_t { v x > 0 }) {
-    B.length dst == (if is_shake a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) } ->
+    B.length dst == (if is_shake_ a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) } ->
   Stack UInt32.t
     (requires fun h0 ->
       invariant c i h0 s /\
@@ -236,7 +236,7 @@ val finish:
         S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
         preserves_freeable c i s h0 h1
       else if r = 1ul then
-        not (is_shake i) /\ ~(l == 0ul) \/ is_shake i /\ l == 0ul
+        not (is_shake_ i) /\ ~(l == 0ul) \/ is_shake_ i /\ l == 0ul
       else
         False))
 
@@ -263,7 +263,8 @@ val block_len: a:G.erased alg -> (
       invariant c i h0 s)
     (ensures fun h0 r h1 ->
       B.(modifies loc_none h0 h1) /\
-      Lib.IntTypes.v r == Spec.Hash.Definitions.block_length a))
+      Lib.IntTypes.v r == Spec.Hash.Definitions.block_length a /\
+      Lib.IntTypes.v r == Spec.Hash.Definitions.rate a / 8))
 
 let block_len a s =
   let a = get_alg a s in
@@ -278,7 +279,7 @@ val hash_len: a:G.erased alg -> (
   s:state c i t t' ->
   Stack Lib.IntTypes.size_t
     (requires fun h0 ->
-      not (is_shake a) /\
+      not (is_shake_ a) /\
       invariant c i h0 s)
     (ensures fun h0 r h1 ->
       B.(modifies loc_none h0 h1) /\
@@ -287,3 +288,20 @@ val hash_len: a:G.erased alg -> (
 let hash_len a s =
   let a = get_alg a s in
   Hacl.Hash.SHA3.hash_len a
+
+val is_shake: a:G.erased alg -> (
+  let c = hacl_keccak a in
+  let a = G.reveal a in
+  let i = a in
+  let t = sha3_state a in
+  let t' = G.erased unit in
+  s:state c i t t' ->
+  Stack bool
+    (requires fun h0 ->
+      invariant c i h0 s)
+    (ensures fun h0 r h1 ->
+      B.(modifies loc_none h0 h1) /\
+      r == is_shake_ a))
+
+let is_shake a s =
+  is_shake_ (get_alg a s)
