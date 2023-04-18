@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Spec.h"
+#include "Hacl_Streaming_Types.h"
 
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 
