@@ -8,4 +8,5 @@ open Spec.Hash.Incremental.Definitions
 
 val sha3_is_incremental
   (a: sha3_alg)
-  (input: bytes): Lemma (hash_incremental a input `S.equal` hash a input)
+  (input: bytes)
+  (l: output_length a): Lemma (hash_incremental a input l `S.equal` hash' a input l)

@@ -27,7 +27,7 @@ let key_and_data_fits (a: hash_alg): Lemma
   assert_norm (pow2 61 < pow2 125)
 
 inline_for_extraction noextract
-let compute_st (a: hash_alg) =
+let compute_st (a: fixed_len_alg) =
   tag: B.buffer uint8 {B.length tag == hash_length a} ->
   key: B.buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->
   keylen: UInt32.t{ UInt32.v keylen = B.length key } ->
@@ -42,7 +42,7 @@ let compute_st (a: hash_alg) =
 
 inline_for_extraction noextract
 val mk_compute:
-  i: D.impl ->
+  i: D.const_impl ->
   hash: D.hash_st (D.get_alg i) ->
   alloca: D.alloca_st i ->
   init: D.init_st i ->

@@ -1,5 +1,5 @@
 [
-  "z˝\tˇùR1\tBdò\u0018HaV",
+  "_°å€≤∂XÕg£5ÈYŒÖÊ",
   [
     [
       "Spec.Agile.Hash.init_extra_state",
@@ -35,7 +35,7 @@
         "unit_typing"
       ],
       0,
-      "b529ea457f179e24efa5028d75370593"
+      "c7c3e3c07cbcc9d5c3c78deb12cfaa25"
     ],
     [
       "Spec.Agile.Hash.update_multi_pre",
@@ -63,7 +63,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3909e09af62a514b2cb42320eb459342"
+      "3a837d867ca5b194cfe58ba952d6d91a"
     ],
     [
       "Spec.Agile.Hash.hash",
@@ -71,26 +71,23 @@
       2,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8", "equation_Prims.nat",
-        "equation_Spec.Hash.Definitions.hash_length",
-        "equation_Spec.Hash.Definitions.hash_word_length",
-        "equation_Spec.Hash.Definitions.word_length",
-        "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Lib.IntTypes.uint8", "equation_Prims.nat",
+        "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.fixed_len_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "equation_Spec.Hash.Definitions.less_than_max_input_length",
+        "equation_Spec.Hash.Definitions.output_length",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "refinement_interpretation_Tm_refine_042ec925769949f282ab80a26a462500",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_d58134fb55bef01eae6b023f162e2553",
+        "typing_FStar.Seq.Base.length",
+        "typing_Spec.Hash.Definitions.less_than_max_input_length",
+        "unit_typing"
       ],
       0,
-      "96c8071395d654fe90fb38fbab09e39a"
+      "d62de6c4eb91a3a810d23491b88bcca3"
     ]
   ]
 ]

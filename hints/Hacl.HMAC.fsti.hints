@@ -1,5 +1,5 @@
 [
-  "\u0007\u0015`ÑêÜ\u001bä∫˙íﬁSô?ò",
+  "K˝Û’Ÿ«l\u0011Î|úÀ˜)_\u0002",
   [
     [
       "Hacl.HMAC.key_and_data_fits",
@@ -51,7 +51,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "5763c107ca3b2e6741611c7291ab093d"
+      "08376330bb436f573c1222e86ddd296d"
     ],
     [
       "Hacl.HMAC.compute_st",
@@ -92,7 +92,110 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "b270858c01c57ab798536e87fd4dc8aa"
+      "9b186f4e072bca03522c32b5570beba9"
+    ],
+    [
+      "Hacl.HMAC.mk_compute",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Spec.Hash.Definitions_pretyping_332103d8b337802efb5758d608edf05f",
+        "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
+        "equation_FStar.Pervasives.dfst",
+        "equation_Hacl.Hash.Definitions.const_impl",
+        "equation_Hacl.Hash.Definitions.get_alg",
+        "proj_equation_Prims.Mkdtuple2__1",
+        "refinement_interpretation_Tm_refine_aede957858f058909034ff185e3b3e1b",
+        "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
+      ],
+      0,
+      "6ce06f22223b5376042311c3075222f2"
+    ],
+    [
+      "Hacl.HMAC.legacy_compute_sha1",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA1",
+        "equality_tok_Spec.Hash.Definitions.SHA1@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "b8d111ec4cbee911c5b1b64b9d10d59f"
+    ],
+    [
+      "Hacl.HMAC.compute_sha2_256",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "0604dbf2b1b40c756ac973f4a17d74b3"
+    ],
+    [
+      "Hacl.HMAC.compute_sha2_384",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
+        "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "41616fb4a3a741c45e7920f1e978bac8"
+    ],
+    [
+      "Hacl.HMAC.compute_sha2_512",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
+        "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "e2b050e64f521535ec3f9ecabf93e236"
+    ],
+    [
+      "Hacl.HMAC.compute_blake2s_32",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.Blake2S",
+        "equality_tok_Spec.Hash.Definitions.Blake2S@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "51ef9d52133e7473017e0be608b90bb1"
+    ],
+    [
+      "Hacl.HMAC.compute_blake2b_32",
+      1,
+      0,
+      0,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.Blake2B",
+        "equality_tok_Spec.Hash.Definitions.Blake2B@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "4ca85e398826f28fe680aadfecaffd60"
     ]
   ]
 ]

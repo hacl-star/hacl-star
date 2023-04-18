@@ -26,16 +26,16 @@ let test_many #a (label: C.String.t)
   in
   C.Loops.for 0ul len (fun _ _ -> True) f
 
-let hash_vector = H.alg & C.String.t & vec8 & UInt32.t
+let hash_vector = Spec.Hash.Definitions.hash_alg & C.String.t & vec8 & UInt32.t
 val test_hash: vs:L.lbuffer hash_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 
-let hmac_vector = H.alg & vec8 & vec8 & vec8
+let hmac_vector = Spec.Hash.Definitions.hash_alg & vec8 & vec8 & vec8
 val test_hmac: vs:L.lbuffer hmac_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 
-let hmac_drbg_vector = H.alg & vec8 & vec8 & vec8 & vec8 & vec8 & (vec8 & vec8) & vec8
+let hmac_drbg_vector = Spec.Hash.Definitions.hash_alg & vec8 & vec8 & vec8 & vec8 & vec8 & (vec8 & vec8) & vec8
 //val test_hmac_drbg: vs:L.lbuffer hmac_drbg_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 
-let hkdf_vector = H.alg & vec8 & vec8 & vec8 & vec8 & vec8
+let hkdf_vector = Spec.Hash.Definitions.hash_alg & vec8 & vec8 & vec8 & vec8 & vec8
 val test_hkdf: vs:L.lbuffer hkdf_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 
 let chacha20_vector = vec8 & vec8 & UInt32.t & vec8 & vec8

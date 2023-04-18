@@ -7,13 +7,24 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA3_256",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA3_256",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA3_256@tok",
-        "equation_Spec.Hash.Definitions.is_blake",
-        "projection_inverse_BoxBool_proj_0"
+        "equation_Hacl.Streaming.MD.is_supported",
+        "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e27f6d36332f787126fee91e910632f6"
+      "7d071a20790397f1d7677a3b8f0dc3d1"
     ],
     [
       "Hacl.Streaming.SHA3.state_t_256",
@@ -21,13 +32,24 @@
       0,
       0,
       [
-        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA3_256",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA3_256",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA3_256@tok",
-        "equation_Spec.Hash.Definitions.is_blake",
-        "projection_inverse_BoxBool_proj_0"
+        "equation_Hacl.Streaming.MD.is_supported",
+        "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "c19936fc0a7700ed6a360b293c1b7b5e"
+      "9badb67b14b3b8b7a4d77a796a0423e3"
     ],
     [
       "Hacl.Streaming.SHA3.alloca_256",
@@ -55,7 +77,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "229ab29c1a798607107a9cd2dbe86017"
+      "6b710854d070e6823427d274543a7fd0"
     ],
     [
       "Hacl.Streaming.SHA3.create_in_256",
@@ -83,7 +105,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "7178856a9f3e57d64079ad14faa2aaee"
+      "0bd4fcabe18512294b9bce2d46a07647"
     ],
     [
       "Hacl.Streaming.SHA3.init_256",
@@ -111,7 +133,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "2b105fa067c24b2198b300011ed12ea5"
+      "f3408e7e46e1f1254476942548ed740e"
     ],
     [
       "Hacl.Streaming.SHA3.update_256",
@@ -139,7 +161,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "d66712fb9a493ea59eb2762c42cca98a"
+      "f9bab2a7f62f8f225526b04af1884577"
     ],
     [
       "Hacl.Streaming.SHA3.finish_256",
@@ -167,7 +189,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "cfec9d7254988a158e352adea6054bf2"
+      "ef9b82cc4d45bfb865ed8c2fa2f6df86"
     ],
     [
       "Hacl.Streaming.SHA3.free_256",
@@ -195,7 +217,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "bd5896516f0617cf55ab2f3f9d8468de"
+      "7af19c5be6a1e981d02c189e80b870c7"
     ],
     [
       "Hacl.Streaming.SHA3.copy_256",
@@ -223,7 +245,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "dc4e41b856123663b853a07a1efd949f"
+      "61c577fb44310d66cb6beb48b0df18a9"
     ]
   ]
 ]

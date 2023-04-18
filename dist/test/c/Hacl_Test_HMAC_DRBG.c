@@ -34,6 +34,11 @@
 #define Blake2S 6
 #define Blake2B 7
 #define SHA3_256 8
+#define SHA3_224 9
+#define SHA3_384 10
+#define SHA3_512 11
+#define Shake128 12
+#define Shake256 13
 
 typedef uint8_t hash_alg;
 

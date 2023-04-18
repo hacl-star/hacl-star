@@ -19,9 +19,14 @@ let string_of_alg: Spec.Agile.Hash.hash_alg -> C.String.t =
   | SHA2_256 -> !$"SHA2_256"
   | SHA2_384 -> !$"SHA2_384"
   | SHA2_512 -> !$"SHA2_512"
+  | SHA3_224 -> !$"SHA3_224"
   | SHA3_256 -> !$"SHA3_256"
+  | SHA3_384 -> !$"SHA3_384"
+  | SHA3_512 -> !$"SHA3_512"
   | Blake2S -> !$"Blake2S"
   | Blake2B -> !$"Blake2B"
+  | Shake128 -> !$"Shake128"
+  | Shake256 -> !$"Shake256"
 
 /// A module that contains stack-only tests, suitable for both C and Wasm. Other
 /// tests that may make arbitrary use of the heap are in Test and Test.Hash.
@@ -46,39 +51,42 @@ let failwith = LowStar.Failure.failwith
 val test_one_hash: hash_vector -> Stack unit (fun _ -> true) (fun _ _ _ -> true)
 let test_one_hash vec =
   let a, input, (LB expected_len expected), repeat = vec in
-  let input_len = C.String.strlen input in
-  let tlen = Hacl.Hash.Definitions.hash_len a in
-  if expected_len <> tlen then
-    failwith "Wrong length of expected tag\n"
-  else if repeat = 0ul then
-    failwith "Repeat must be non-zero\n"
-  else if not (input_len <= (0xfffffffful - 1ul) / repeat) then
-    failwith "Repeated input is too large\n"
-  else begin
-    push_frame();
-    let computed = B.alloca 0uy tlen in
-    assert_norm (v 0xfffffffful = pow2 32 - 1);
-    assert (v input_len * v repeat + 1 < pow2 32);
-    let total_input_len = input_len * repeat in
-    let total_input = B.alloca 0uy (total_input_len + 1ul) in
-    let total_input = B.sub total_input 0ul total_input_len in
-    let h0 = get () in
-    C.Loops.for 0ul repeat
-    (fun h i -> B.live h total_input /\ B.modifies (B.loc_buffer total_input) h0 h)
-    (fun i ->
-      assert (v input_len * v i + v input_len <= v input_len * (v repeat - 1) + v input_len);
-      assert (v input_len * v i + v input_len <= v input_len * v repeat);
-      C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
-    );
-    EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
-    assert (v total_input_len `Spec.Hash.Definitions.less_than_max_input_length` a);
+  if Spec.Hash.Definitions.is_shake a then
+    failwith "unsupported shake algorithm"
+  else
+    let input_len = C.String.strlen input in
+    let tlen = Hacl.Hash.Definitions.hash_len a in
+    if expected_len <> tlen then
+      failwith "Wrong length of expected tag\n"
+    else if repeat = 0ul then
+      failwith "Repeat must be non-zero\n"
+    else if not (input_len <= (0xfffffffful - 1ul) / repeat) then
+      failwith "Repeated input is too large\n"
+    else begin
+      push_frame();
+      let computed = B.alloca 0uy tlen in
+      assert_norm (v 0xfffffffful = pow2 32 - 1);
+      assert (v input_len * v repeat + 1 < pow2 32);
+      let total_input_len = input_len * repeat in
+      let total_input = B.alloca 0uy (total_input_len + 1ul) in
+      let total_input = B.sub total_input 0ul total_input_len in
+      let h0 = get () in
+      C.Loops.for 0ul repeat
+      (fun h i -> B.live h total_input /\ B.modifies (B.loc_buffer total_input) h0 h)
+      (fun i ->
+        assert (v input_len * v i + v input_len <= v input_len * (v repeat - 1) + v input_len);
+        assert (v input_len * v i + v input_len <= v input_len * v repeat);
+        C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
+      );
+      EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
+      assert (v total_input_len `Spec.Hash.Definitions.less_than_max_input_length` a);
 
-    EverCrypt.Hash.Incremental.hash a computed total_input total_input_len;
+      EverCrypt.Hash.Incremental.hash a computed total_input total_input_len;
 
-    B.recall expected;
-    let str = string_of_alg a in
-    TestLib.compare_and_print str expected computed tlen;
-    pop_frame()
+      B.recall expected;
+      let str = string_of_alg a in
+      TestLib.compare_and_print str expected computed tlen;
+      pop_frame()
     end
 
 let test_hash = test_many !$"Hashes" test_one_hash
@@ -95,7 +103,9 @@ let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> Spec.Agile.HMAC.keysized
 val test_one_hmac: hmac_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_one_hmac vec =
   let ha, (LB keylen key), (LB datalen data), (LB expectedlen expected) = vec in
-  if expectedlen <> Hacl.Hash.Definitions.hash_len ha then
+  if Spec.Hash.Definitions.is_shake ha then
+    failwith "unsupported shake algorithm"
+  else if expectedlen <> Hacl.Hash.Definitions.hash_len ha then
     failwith "Wrong length of expected tag\n"
   else if not (keysized ha keylen) then
     failwith "Keysized predicate not satisfied\n"
@@ -127,7 +137,9 @@ val test_one_hkdf: hkdf_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_one_hkdf vec =
   let ha, (LB ikmlen ikm), (LB saltlen salt),
     (LB infolen info), (LB prklen expected_prk), (LB okmlen expected_okm) = vec in
-  if prklen <> Hacl.Hash.Definitions.hash_len ha then
+  if Spec.Hash.Definitions.is_shake ha then
+    failwith "unsupported shake algorithm"
+  else if prklen <> Hacl.Hash.Definitions.hash_len ha then
     failwith "Wrong length of expected PRK\n"
   else if okmlen > 255ul * Hacl.Hash.Definitions.hash_len ha then
     failwith "Wrong output length\n"

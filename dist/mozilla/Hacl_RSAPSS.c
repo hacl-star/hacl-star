@@ -57,15 +57,27 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)64U;
       }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        return (uint32_t)32U;
-      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)32U;
       }
     case Spec_Hash_Definitions_Blake2B:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
       {
         return (uint32_t)64U;
       }

@@ -19,7 +19,8 @@ let init a =
       Spec.SHA1.init
   | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32
   | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64
-  | SHA3_256 -> Lib.Sequence.create 25 (u64 0)
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
+      Lib.Sequence.create 25 (u64 0)
 
 // Intentionally restricting this one to MD hashes... we want clients to AVOID
 // juggling between mk_update_multi update vs. repeati for non-MD hashes.
@@ -40,9 +41,9 @@ let update_multi a hash prev blocks =
       let nb = S.length blocks / block_length a in
       let a' = to_blake_alg a in
       Lib.LoopCombinators.repeati #(words_state a) nb (Spec.Blake2.blake2_update1 a' prev blocks) hash
-  | SHA3_256 ->
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
       let open Spec.SHA3 in
-      let rateInBytes = 1088 / 8 in
+      let rateInBytes = rate a / 8 in
       Lib.Sequence.repeat_blocks_multi #_ #(words_state a) rateInBytes blocks (absorb_inner rateInBytes) hash
 
 (** Extracting the hash, which we call "finish" *)
@@ -56,18 +57,22 @@ let finish_blake (a:blake_alg) (hash:words_state a): Tot (bytes_hash a) =
   let alg = to_blake_alg a in
   Spec.Blake2.blake2_finish alg hash (Spec.Blake2.max_output alg)
 
-let finish_sha3 (a: sha3_alg) (s: words_state a): Tot (bytes_hash a) =
+let finish_sha3 (a: sha3_alg) (s: words_state a) (l: output_length a): Tot (bytes_hash' a l) =
+  let rateInBytes = rate a / 8 in
   match a with
-  | SHA3_256 ->
-      let rateInBytes = 1088 / 8 in
-      let outputByteLen = 32 in
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 ->
+      let rateInBytes = rate a / 8 in
+      let outputByteLen = hash_length a in
+      assert (not (is_shake a));
       Spec.SHA3.squeeze s rateInBytes outputByteLen
+  | Shake128 | Shake256 ->
+      Spec.SHA3.squeeze s rateInBytes l
 
-let finish (a:hash_alg) (hashw:words_state a): Tot (bytes_hash a) =
+let finish (a:hash_alg) (hashw:words_state a) (l: output_length a): Tot (bytes_hash' a l) =
   if is_blake a then
     finish_blake a hashw
-  else if is_sha3 a then
-    finish_sha3 a hashw
+  else if is_keccak a then
+    finish_sha3 a hashw l
   else
     finish_md a hashw
 
@@ -76,14 +81,17 @@ let finish (a:hash_alg) (hashw:words_state a): Tot (bytes_hash a) =
 // MD hashes are by definition the application of init / update_multi / pad / finish.
 // Blake2 does its own thing, and there is a slightly more involved proof that the hash is incremental.
 // Same deal with the SHA3 family.
-let hash (a:hash_alg) (input:bytes{S.length input `less_than_max_input_length` a})
-  =
+let hash' a input l =
   if is_blake a then
     Spec.Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))
-  else if is_sha3 a then
-    // TODO: refine for other SHAs here
-    Spec.SHA3.sha3_256 (Seq.length input) input
-  else
+  else if is_md a then
     (* As defined in the NIST standard; pad, then update, then finish. *)
     let padding = pad a (S.length input) in
-    finish a (update_multi a (init a) () S.(input @| padding))
+    finish_md a (update_multi a (init a) () S.(input @| padding))
+  else match a with
+    | SHA3_224 -> Spec.SHA3.sha3_224 (Seq.length input) input
+    | SHA3_256 -> Spec.SHA3.sha3_256 (Seq.length input) input
+    | SHA3_384 -> Spec.SHA3.sha3_384 (Seq.length input) input
+    | SHA3_512 -> Spec.SHA3.sha3_512 (Seq.length input) input
+    | Shake128 -> Spec.SHA3.shake128 (Seq.length input) input l
+    | Shake256 -> Spec.SHA3.shake256 (Seq.length input) input l
