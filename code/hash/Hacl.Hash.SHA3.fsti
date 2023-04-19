@@ -15,16 +15,16 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 inline_for_extraction noextract
-val init_256: init_st (|SHA3_256, ()|)
+val init (a: sha3_alg { not (is_shake a) }): init_st (|a, ()|)
 
 inline_for_extraction noextract
-val update_multi_256: update_multi_st (|SHA3_256, ()|)
+val update_multi (a: sha3_alg { not (is_shake a) }): update_multi_st (|a, ()|)
 
 inline_for_extraction noextract
-val update_last_256: update_last_st (|SHA3_256, ()|)
+val update_last (a: sha3_alg { not (is_shake a) }): update_last_st (|a, ()|)
 
 inline_for_extraction noextract
-val finish_256: finish_st (|SHA3_256, ()|)
+val finish (a: sha3_alg { not (is_shake a) }): finish_st (| a, ()|)
 
 inline_for_extraction noextract
-val hash_256: hash_st SHA3_256
+val hash (a: sha3_alg { not (is_shake a) }): hash_st a

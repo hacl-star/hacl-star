@@ -24,7 +24,7 @@ let key_and_data_fits (a: hash_alg): Lemma
 /// Duplicated from Hacl.HMAC because we don't want clients to depend on Hacl.HMAC
 
 inline_for_extraction noextract
-let compute_st (a: hash_alg) =
+let compute_st (a: fixed_len_alg) =
   tag: B.buffer uint8 {B.length tag == hash_length a} ->
   key: B.buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->
   keylen: UInt32.t{ UInt32.v keylen = B.length key } ->

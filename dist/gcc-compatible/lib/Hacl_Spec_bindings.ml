@@ -23,6 +23,16 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 7
     let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA3_256 =
       Unsigned.UInt8.of_int 8
+    let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA3_224 =
+      Unsigned.UInt8.of_int 9
+    let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA3_384 =
+      Unsigned.UInt8.of_int 10
+    let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA3_512 =
+      Unsigned.UInt8.of_int 11
+    let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_Shake128 =
+      Unsigned.UInt8.of_int 12
+    let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_Shake256 =
+      Unsigned.UInt8.of_int 13
     type spec_Frodo_Params_frodo_gen_a = Unsigned.UInt8.t
     let spec_Frodo_Params_frodo_gen_a =
       typedef uint8_t "Spec_Frodo_Params_frodo_gen_a"

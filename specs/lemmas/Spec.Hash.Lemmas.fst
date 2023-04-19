@@ -16,8 +16,8 @@ let update_multi_zero a h =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
     Lib.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a) h
-  | SHA3_256 ->
-    let rateInBytes = 1088/8 in
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
+    let rateInBytes = rate a / 8 in
     let f = Spec.SHA3.absorb_inner rateInBytes in
     Lib.Sequence.lemma_repeat_blocks_multi rateInBytes S.empty f h;
 
@@ -64,14 +64,13 @@ let update_multi_associative (a: hash_alg{not (is_blake a)})
   = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
     Lib.UpdateMulti.update_multi_associative (block_length a) (Spec.Agile.Hash.update a) h input1 input2
-  | SHA3_256 ->
-    let rateInBytes = 1088/8 in
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
+    let rateInBytes = rate a /8 in
     let f = Spec.SHA3.absorb_inner rateInBytes in
     let input = input1 `S.append` input2 in
     assert (input1 `S.equal` S.slice input 0 (S.length input1));
     assert (input2 `S.equal` S.slice input (S.length input1) (S.length input));
     Lib.Sequence.Lemmas.repeat_blocks_multi_split (block_length a) (S.length input1) input f h
-
 
 let lemma_blocki_aux1 (a:blake_alg) (s1 s2:bytes) (i:nat{i < S.length s1 / block_length a})
   : Lemma (Spec.Blake2.get_blocki (to_blake_alg a) s1 i == Spec.Blake2.get_blocki (to_blake_alg a) (S.append s1 s2) i)

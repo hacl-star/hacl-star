@@ -80,7 +80,7 @@ let rec destruct_list (e: term): Tac (option (list term)) =
 
 noextract
 let is_list e =
-  match inspect_ln (fst (collect_app e)) with
+  match inspect (fst (collect_app e)) with
   | Tv_UInst fv _
   | Tv_FVar fv ->
       inspect_fv fv = nil_qn || inspect_fv fv = cons_qn
@@ -94,7 +94,7 @@ let mktuple_qns =
 
 noextract
 let destruct_tuple (e: term): option (list term) =
-  let hd, args = collect_app e in
+  let hd, args = collect_app_ln e in
   match inspect_ln hd with
   | Tv_UInst fv _
   | Tv_FVar fv ->
@@ -111,7 +111,7 @@ let destruct_tuple (e: term): option (list term) =
 
 noextract
 let is_tuple (e: term) =
-  match inspect_ln (fst (collect_app e)) with
+  match inspect (fst (collect_app e)) with
   | Tv_UInst fv _
   | Tv_FVar fv ->
       List.Tot.contains (inspect_fv fv) mktuple_qns

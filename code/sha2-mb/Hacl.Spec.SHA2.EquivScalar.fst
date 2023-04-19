@@ -589,20 +589,20 @@ let update_lemma a block hash' =
   eq_intro #_ #8 (update a block hash') (Spec.update_pre a hash' block)
 
 
-val finish_lemma: a:sha2_alg -> st:words_state a -> Lemma (finish a st == Spec.Agile.Hash.finish a st)
+val finish_lemma: a:sha2_alg -> st:words_state a -> Lemma (finish a st == Spec.Agile.Hash.finish a st ())
 let finish_lemma a st' =
   let st = st' in
   let hash_final_w = sub #_ #8 st 0 (hash_word_length a) in
-  assert (Spec.Agile.Hash.finish a st' == BSeq.uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w);
+  assert (Spec.Agile.Hash.finish a st' () == BSeq.uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w);
   assert (finish a st' == sub (BSeq.uints_to_bytes_be #(word_t a) #SEC #8 st) 0 (hash_length a));
   assert (hash_length a == word_length a * hash_word_length a);
 
-  let aux (i:nat{i < hash_length a}) : Lemma ((finish a st').[i] == (Spec.Agile.Hash.finish a st').[i]) =
+  let aux (i:nat{i < hash_length a}) : Lemma ((finish a st').[i] == (Spec.Agile.Hash.finish a st' ()).[i]) =
     BSeq.index_uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w i;
     BSeq.index_uints_to_bytes_be #(word_t a) #SEC #8 st i in
 
   Classical.forall_intro aux;
-  eq_intro #uint8 #(hash_length a) (finish a st') (Spec.Agile.Hash.finish a st')
+  eq_intro #uint8 #(hash_length a) (finish a st') (Spec.Agile.Hash.finish a st' ())
 
 //TODO: move to Lib.Sequence.Lemmas
 
