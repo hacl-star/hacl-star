@@ -138,21 +138,20 @@ main()
 
   cycles a, b;
   clock_t t1, t2;
-  uint8_t plain[64];
-  memset(plain, 'P', 64);
+  uint8_t sgnt_comp[64] = { 0 };
 
   uint8_t pk[64];
   memcpy(pk, dh_public_key, 64);
 
   // Benchmarking ECDSA-P256-sign
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_P256_ecdsa_sign_p256_sha2(plain, 32, plain, private_key, nonce);
+    Hacl_P256_ecdsa_sign_p256_sha2(sgnt_comp, 128, msg, private_key, nonce);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_P256_ecdsa_sign_p256_sha2(plain, 32, plain, private_key, nonce);
+    Hacl_P256_ecdsa_sign_p256_sha2(sgnt_comp, 128, msg, private_key, nonce);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -189,6 +188,22 @@ main()
   clock_t tdiff3 = t2 - t1;
   cycles cdiff3 = b - a;
 
+
+  // Benchmarking S2P-P256
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_P256_dh_initiator(pk, private_key);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_P256_dh_initiator(pk, private_key);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff4 = t2 - t1;
+  cycles cdiff4 = b - a;
+
   uint64_t count = ROUNDS;
   printf("Hacl ECDSA-P256-sign PERF: \n");
   print_time(count, tdiff1, cdiff1);
@@ -198,4 +213,7 @@ main()
 
   printf("Hacl ECDH-P256 PERF: \n");
   print_time(count, tdiff3, cdiff3);
+
+  printf("Hacl secret-to-public-P256 PERF: \n");
+  print_time(count, tdiff4, cdiff4);
 }
