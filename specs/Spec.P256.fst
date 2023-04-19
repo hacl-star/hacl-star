@@ -173,8 +173,7 @@ let ecdsa_verification_agile alg msg_len msg public_key signature_r signature_s 
 
 ///  ECDH over the P256 elliptic curve
 
-// Initiator
-let ecp256_dh_i (private_key:lbytes 32) : option (lbytes 64) =
+let secret_to_public (private_key:lbytes 32) : option (lbytes 64) =
   let sk = nat_from_bytes_be private_key in
   let is_sk_valid = 0 < sk && sk < order in
   if is_sk_valid then
@@ -183,8 +182,7 @@ let ecp256_dh_i (private_key:lbytes 32) : option (lbytes 64) =
   else None
 
 
-// Responder
-let ecp256_dh_r (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 64) =
+let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 64) =
   let pk = load_point their_public_key in
   let sk = nat_from_bytes_be private_key in
   let is_sk_valid = 0 < sk && sk < order in
