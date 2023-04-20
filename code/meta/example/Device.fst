@@ -9,7 +9,7 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.ST
 open LowStar.BufferOps
 
-#set-options "--z3rlimit 100 --fuel 1 --ifuel 1 --__no_positivity --record_options --split_queries"
+#set-options "--z3rlimit 100 --fuel 1 --ifuel 1 --__no_positivity --record_options --split_queries always"
 
 (*** Linked lists *)
 noeq
