@@ -913,6 +913,32 @@ val loopi_blocks_nospec:
 open FStar.Mul
 
 inline_for_extraction
+val loop_blocks_multi:
+    #a:Type0
+  -> #b:Type0
+  -> #blen:size_t
+  -> blocksize:size_t{v blocksize > 0}
+  -> n_blocks:size_t { v n_blocks * v blocksize < pow2 32 }
+  -> inp:lbuffer a (blocksize *! n_blocks) {v n_blocks == length inp / v blocksize }
+  -> spec_f:(Seq.lseq a (v blocksize)
+              -> Seq.lseq b (v blen)
+              -> Seq.lseq b (v blen))
+  -> f:(inp:lbuffer a blocksize
+       -> w:lbuffer b blen -> Stack unit
+          (requires fun h ->
+            live h inp /\ live h w /\ disjoint inp w)
+          (ensures  fun h0 _ h1 ->
+            modifies1 w h0 h1 /\
+            as_seq h1 w == spec_f (as_seq h0 inp) (as_seq h0 w)))
+  -> write:lbuffer b blen ->
+  Stack unit
+    (requires fun h -> live h inp /\ live h write /\ disjoint inp write)
+    (ensures  fun h0 _ h1 ->
+      modifies1 write h0 h1 /\
+      as_seq h1 write ==
+      Seq.repeat_blocks_multi #a #(Seq.lseq b (v blen)) (v blocksize) (as_seq h0 inp) spec_f (as_seq h0 write))
+
+inline_for_extraction
 val loop_blocks:
     #a:Type0
   -> #b:Type0

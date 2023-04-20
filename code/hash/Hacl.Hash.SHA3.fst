@@ -70,15 +70,7 @@ let update_multi_sha3 (a: keccak_alg): update_multi_sha3_st a = fun s () blocks 
   [@inline_let]
   let spec_f = Spec.SHA3.absorb_inner (Spec.Hash.Definitions.rate a/8) in
   let h0 = ST.get () in
-  Lib.Buffer.loop_blocks (block_len a) n_blocks 0ul blocks spec_f (spec_l a) (Hacl.Impl.SHA3.absorb_inner (block_len a)) (fun _ _ _ -> ()) s;
-  let open Lib.Sequence in
-  calc (==) {
-    repeat_blocks (block_length a) (B.as_seq h0 blocks) spec_f (spec_l a) (B.as_seq h0 s);
-    (==) {   Lib.Sequence.Lemmas.lemma_repeat_blocks_via_multi (block_length a) (B.as_seq h0 blocks) spec_f (spec_l a) (B.as_seq h0 s) }
-    (spec_l a) 0 S.empty (repeat_blocks_multi (block_length a) (B.as_seq h0 blocks) spec_f (B.as_seq h0 s));
-    (==) { }
-    repeat_blocks_multi (block_length a) (B.as_seq h0 blocks) spec_f (B.as_seq h0 s);
-  }
+  Lib.Buffer.loop_blocks_multi (block_len a) n_blocks blocks spec_f (Hacl.Impl.SHA3.absorb_inner (block_len a)) s
 
 /// There is a proof going here, that if your algorithm is of the keccak family,
 /// then the monomorphic, Low*-compatible signature above, is a refinement of

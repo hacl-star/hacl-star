@@ -102,7 +102,6 @@ Hacl_Hash_SHA3_update_multi_sha3(
     uint8_t *block = blocks + i * block_len(a);
     Hacl_Impl_SHA3_absorb_inner(block_len(a), block, s);
   }
-  uint8_t *last = blocks + n_blocks * block_len(a);
 }
 
 void

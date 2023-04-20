@@ -160,7 +160,7 @@ BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
 # Note: Hacl_Hash_SHA2 is legacy SHA2 here, will eventually go away, there's a proper
 # bundle in STREAMING_BUNDLE, below
 HASH_BUNDLE= \
-  -bundle Hacl.Streaming.MD[rename=Hacl_Streaming_Types] \
+  -bundle Hacl.Streaming.MD,Spec.Hash.Definitions[rename=Hacl_Streaming_Types] \
   -bundle Hacl.Streaming.MD5=Hacl.Hash.MD5,Hacl.Hash.Core.MD5[rename=Hacl_Hash_MD5] \
   -bundle Hacl.Streaming.SHA1=Hacl.Hash.SHA1,Hacl.Hash.Core.SHA1[rename=Hacl_Hash_SHA1] \
   -bundle Hacl.Hash.SHA2=Hacl.Hash.Core.SHA2 \
