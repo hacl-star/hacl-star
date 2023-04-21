@@ -197,11 +197,29 @@ EverCrypt_Hash_Incremental_hash(
 
 /* SNIPPET_END: sha2_512_hash_len */
 
+/* SNIPPET_START: sha3_224_hash_len */
+
+#define SHA3_224_HASH_LEN ((uint32_t)28U)
+
+/* SNIPPET_END: sha3_224_hash_len */
+
 /* SNIPPET_START: sha3_256_hash_len */
 
 #define SHA3_256_HASH_LEN ((uint32_t)32U)
 
 /* SNIPPET_END: sha3_256_hash_len */
+
+/* SNIPPET_START: sha3_384_hash_len */
+
+#define SHA3_384_HASH_LEN ((uint32_t)48U)
+
+/* SNIPPET_END: sha3_384_hash_len */
+
+/* SNIPPET_START: sha3_512_hash_len */
+
+#define SHA3_512_HASH_LEN ((uint32_t)64U)
+
+/* SNIPPET_END: sha3_512_hash_len */
 
 /* SNIPPET_START: blake2s_hash_len */
 

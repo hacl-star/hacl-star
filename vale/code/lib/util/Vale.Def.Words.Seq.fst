@@ -42,6 +42,14 @@ let seq_four_to_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) :
   assert (equal (seq_four_to_seq_LE (seq_to_seq_four_LE x)) x);
   ()
 
+let seq_four_to_seq_to_seq_four_BE (#a:Type) (x:seq a{length x % 4 == 0}) :
+  Lemma (seq_four_to_seq_BE (seq_to_seq_four_BE x) == x)
+  =
+  reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #a);
+  reveal_opaque (`%seq_to_seq_four_BE) (seq_to_seq_four_BE #a);
+  assert (equal (seq_four_to_seq_BE (seq_to_seq_four_BE x)) x);
+  ()
+
 unfold let pow2_24 = 16777216 //normalize_term (pow2 24)
 
 #reset-options "--z3rlimit 200 --using_facts_from 'Prims Vale.Def.Words_s'"
@@ -126,10 +134,25 @@ let four_to_seq_LE_is_seq_four_to_seq_LE(#a:Type) (x:four a) :
   assert (equal s0 s1);
   ()
 
+let four_to_seq_BE_is_seq_four_to_seq_BE (x:four nat32) :
+  Lemma (four_to_seq_BE x == seq_four_to_seq_BE (create 1 x))
+  =
+  reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #nat32);
+  let s0 = four_to_seq_BE x  in
+  let s1 = seq_four_to_seq_BE (create 1 x) in
+  assert (equal s0 s1);
+  ()
+
 let seq_nat8_to_seq_nat32_to_seq_nat8_LE (x:seq nat32) :
   Lemma (seq_nat8_to_seq_nat32_LE (seq_nat32_to_seq_nat8_LE x) == x)
   =
   assert (equal (seq_nat8_to_seq_nat32_LE (seq_nat32_to_seq_nat8_LE x)) x);
+  ()
+
+let seq_nat8_to_seq_nat32_to_seq_nat8_BE (x:seq nat32) :
+  Lemma (seq_nat8_to_seq_nat32_BE (seq_nat32_to_seq_nat8_BE x) == x)
+  =
+  assert (equal (seq_nat8_to_seq_nat32_BE (seq_nat32_to_seq_nat8_BE x)) x);
   ()
 
 let seq_nat32_to_seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) :
@@ -158,15 +181,34 @@ let seq_four_to_seq_LE_injective (a:eqtype) :
   generic_injective_proof (seq_four_to_seq_LE_stronger) (seq_to_seq_four_LE #a) (seq_to_seq_four_to_seq_LE #a);
   ()
 
+let seq_four_to_seq_BE_injective (a:eqtype) :
+  Lemma (forall (x x': seq (four a)). seq_four_to_seq_BE #a x == seq_four_to_seq_BE #a x' ==> x == x')
+  =
+  let seq_four_to_seq_BE_stronger (#b:Type) (x:seq (four b)) : (s:seq b{length s % 4 == 0}) =
+    seq_four_to_seq_BE x
+  in
+  generic_injective_proof (seq_four_to_seq_BE_stronger) (seq_to_seq_four_BE #a) (seq_to_seq_four_to_seq_BE #a);
+  ()
+
 let seq_four_to_seq_LE_injective_specific (#a:eqtype) (x x':seq (four a)) :
   Lemma (seq_four_to_seq_LE x == seq_four_to_seq_LE x' ==> x == x')
   =
   seq_four_to_seq_LE_injective a
 
+let seq_four_to_seq_BE_injective_specific (#a:eqtype) (x x':seq (four a)) :
+  Lemma (seq_four_to_seq_BE x == seq_four_to_seq_BE x' ==> x == x')
+  =
+  seq_four_to_seq_BE_injective a
+
 let four_to_seq_LE_injective (a:eqtype) :
   Lemma (forall (x x': four a) . four_to_seq_LE x == four_to_seq_LE x' ==> x == x')
   =
   generic_injective_proof #(four a) #(seq4 a) (four_to_seq_LE #a) (seq_to_four_LE #a) (seq_to_four_to_seq_LE #a)
+
+let four_to_seq_BE_injective (a:eqtype) :
+  Lemma (forall (x x': four a) . four_to_seq_BE x == four_to_seq_BE x' ==> x == x')
+  =
+  generic_injective_proof #(four a) #(seq4 a) (four_to_seq_BE #a) (seq_to_four_BE #a) (seq_to_four_to_seq_BE #a)
 
 let four_to_nat_8_injective () :
   Lemma (forall (x x':four (natN (pow2_norm 8))) . four_to_nat 8 x == four_to_nat 8 x' ==> x == x')
@@ -192,6 +234,17 @@ let append_distributes_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0})
   assert (equal (seq_to_seq_four_LE (x @| y)) (seq_to_seq_four_LE x @| seq_to_seq_four_LE y));
   ()
 
+let append_distributes_seq_to_seq_four_BE (#a:Type) (x:seq a{length x % 4 == 0}) (y:seq a{length y % 4 == 0}) :
+  Lemma (seq_to_seq_four_BE (x @| y) == seq_to_seq_four_BE x @| seq_to_seq_four_BE y)
+  =
+  reveal_opaque (`%seq_to_seq_four_BE) (seq_to_seq_four_BE #a);
+  assert (equal (seq_to_seq_four_BE (x @| y)) (seq_to_seq_four_BE x @| seq_to_seq_four_BE y));
+  ()
+
 let append_distributes_seq_four_to_seq_LE #a x y =
   reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #a);
   assert (equal (seq_four_to_seq_LE (x @| y)) (seq_four_to_seq_LE x @| seq_four_to_seq_LE y))
+
+let append_distributes_seq_four_to_seq_BE #a x y =
+  reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #a);
+  assert (equal (seq_four_to_seq_BE (x @| y)) (seq_four_to_seq_BE x @| seq_four_to_seq_BE y))

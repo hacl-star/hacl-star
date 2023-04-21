@@ -1,5 +1,5 @@
 [
-  "]ä\u0016\u0006±Í˛%Ê≥ ∑¿\n&*",
+  "K…ﬂkÇÙè£\u0006NFO“íÜ\u0018",
   [
     [
       "Vale.PPC64LE.Semantics_s.ins",
@@ -10,12 +10,13 @@
         "@MaxIFuel_assumption", "@query",
         "assumption_Vale.Arch.HeapTypes_s.taint__uu___haseq",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Def.Words_s.nat2", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.natN",
         "equation_Vale.PPC64LE.Machine_s.bits64",
         "equation_Vale.PPC64LE.Machine_s.nsimm16",
         "equation_Vale.PPC64LE.Machine_s.quad32bytes",
         "equation_Vale.PPC64LE.Machine_s.reg",
+        "equation_Vale.PPC64LE.Machine_s.sim",
         "equation_Vale.PPC64LE.Machine_s.simm16",
         "equation_Vale.PPC64LE.Machine_s.vec",
         "function_token_typing_Prims.int",
@@ -25,11 +26,12 @@
         "haseqTm_refine_680208d0aebbbda4b5ad6e37c7c80e21",
         "haseqTm_refine_6c13db52302eeac8630d370005d58041",
         "haseqTm_refine_79ffb75bc993e35b4fe4df6596847b96",
+        "haseqTm_refine_b6b2b7f07b3c9081e108ca2e16fface6",
         "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b9dc0cd1133da243200e1576abe94d09"
+      "fa378281b1a2b7e6b95f5bcbc9761d0c"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Move__item__dst",
@@ -41,7 +43,7 @@
         "refinement_interpretation_Tm_refine_57c56cde068f03227414a876a123ccb5"
       ],
       0,
-      "e60fb625c9a31f25f19cc71143e15dab"
+      "17bbe5b7d08d6627f7e05616df1f7505"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Move__item__src",
@@ -53,7 +55,7 @@
         "refinement_interpretation_Tm_refine_57c56cde068f03227414a876a123ccb5"
       ],
       0,
-      "4509d65af7f25a9820a78e9157adf8f8"
+      "5778138811501df27e66428f613e9451"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load64__item__dst",
@@ -65,7 +67,7 @@
         "refinement_interpretation_Tm_refine_e59e11b45611fdf1c8b22063a52b9085"
       ],
       0,
-      "3e3d00338e235a041322a90d7d733afe"
+      "3fd1cbbbb10245a37f9ea730f960917b"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load64__item__base",
@@ -77,7 +79,7 @@
         "refinement_interpretation_Tm_refine_e59e11b45611fdf1c8b22063a52b9085"
       ],
       0,
-      "9c4df7c318f617db1edf21393321f6cb"
+      "cb9a956c951eabad087015b3098ab37f"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load64__item__offset",
@@ -89,7 +91,7 @@
         "refinement_interpretation_Tm_refine_e59e11b45611fdf1c8b22063a52b9085"
       ],
       0,
-      "43e6a01fd7977784d9ffa0792bb583ae"
+      "0e257b7dc96936450a9a351fa7624792"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store64__item__src",
@@ -101,7 +103,7 @@
         "refinement_interpretation_Tm_refine_72695dd7fb00207a03894f81094cbb2b"
       ],
       0,
-      "4cd4bc90828fa772ed7a9443040a1a82"
+      "fb3ab387712f25751cc2256c083bec52"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store64__item__base",
@@ -113,7 +115,7 @@
         "refinement_interpretation_Tm_refine_72695dd7fb00207a03894f81094cbb2b"
       ],
       0,
-      "d71d23c3d4201b55b707ccbf06f80d24"
+      "a49a925495d312928e072e1cb4def3fc"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store64__item__offset",
@@ -125,7 +127,7 @@
         "refinement_interpretation_Tm_refine_72695dd7fb00207a03894f81094cbb2b"
       ],
       0,
-      "2d65de2b43e19550915db888cfc4b8a0"
+      "e162cc75b2de3f2e81e0284b67857ef7"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__LoadImm64__item__dst",
@@ -137,7 +139,7 @@
         "refinement_interpretation_Tm_refine_181f047b616a457ccce561ef911877e3"
       ],
       0,
-      "c265861b061581b4a879d6f81284c321"
+      "e625dd5e21742f713de7641eff1c1ac6"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__LoadImm64__item__src",
@@ -149,7 +151,31 @@
         "refinement_interpretation_Tm_refine_181f047b616a457ccce561ef911877e3"
       ],
       0,
-      "bdb3a168e050cb522ffb0d1230e268d1"
+      "c611e759f7587c42a4b334d2ea87f82c"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__LoadImmShl64__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_d31fd430a50f4b592f9c7dcb1c7af14b"
+      ],
+      0,
+      "2b36af1a2bf863926f8283dfcb443c0b"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__LoadImmShl64__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_d31fd430a50f4b592f9c7dcb1c7af14b"
+      ],
+      0,
+      "44717557b73fb4e4c9251afd67f538d4"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddLa__item__dst",
@@ -161,7 +187,7 @@
         "refinement_interpretation_Tm_refine_c8fae16c30fab4599d0b3329cd72fea4"
       ],
       0,
-      "21440e7f229fa4aed4bd109de7f11f29"
+      "cf2aaaf9826ff6322639b4754404c0b0"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddLa__item__src1",
@@ -173,7 +199,7 @@
         "refinement_interpretation_Tm_refine_c8fae16c30fab4599d0b3329cd72fea4"
       ],
       0,
-      "01a0c218e48b43058d9d8e0d49c45726"
+      "c363d54c437d4fe29e601b0b89bcfceb"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddLa__item__src2",
@@ -185,7 +211,7 @@
         "refinement_interpretation_Tm_refine_c8fae16c30fab4599d0b3329cd72fea4"
       ],
       0,
-      "074bee22c5f1df736edf7fbd70d19523"
+      "05d7d477db8fa515bbf6688f70255a7d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Add__item__dst",
@@ -197,7 +223,7 @@
         "refinement_interpretation_Tm_refine_41fc9471dfc85ce6cb39beec76b0ea4f"
       ],
       0,
-      "04e5014b7f34d4fb2edf1a81ea815f82"
+      "ba6a9d19f8de29ca69c4d7f1e1cc5656"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Add__item__src1",
@@ -209,7 +235,7 @@
         "refinement_interpretation_Tm_refine_41fc9471dfc85ce6cb39beec76b0ea4f"
       ],
       0,
-      "30fdc750a678b0a20e1b6372e80403c0"
+      "e0371b410141daf5daf81505054e5c89"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Add__item__src2",
@@ -221,7 +247,7 @@
         "refinement_interpretation_Tm_refine_41fc9471dfc85ce6cb39beec76b0ea4f"
       ],
       0,
-      "3c5ba73ff94dd0f6291e3d821df47437"
+      "96986557c7c7a80d67f7741cb4086a2e"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddImm__item__dst",
@@ -233,7 +259,7 @@
         "refinement_interpretation_Tm_refine_eac97bb1735829fd16a104358f5df29c"
       ],
       0,
-      "5bc16d29cc5f67f51e47ffedca2d1d58"
+      "157d6b1f411f8a02218405b26a507322"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddImm__item__src1",
@@ -245,7 +271,7 @@
         "refinement_interpretation_Tm_refine_eac97bb1735829fd16a104358f5df29c"
       ],
       0,
-      "f3b715c8552990b2cdd2a422c264c9ce"
+      "2524680e3a692daf290297c7da79827c"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddImm__item__src2",
@@ -257,7 +283,43 @@
         "refinement_interpretation_Tm_refine_eac97bb1735829fd16a104358f5df29c"
       ],
       0,
-      "c6e0c2a716167e7675e9814e3fd524f2"
+      "79c1bd60dd834365ddbdf9a0e7ec2a0b"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__AddCarry__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_2a06b836d2f9184bfb4a6e583fece4a7"
+      ],
+      0,
+      "b9f020d67acfcab1a48405f247109905"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__AddCarry__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_2a06b836d2f9184bfb4a6e583fece4a7"
+      ],
+      0,
+      "59dec4cd59d13c5ebdadc267537eab7c"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__AddCarry__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_2a06b836d2f9184bfb4a6e583fece4a7"
+      ],
+      0,
+      "76f391d12c1609a17e330d2fb5976ff7"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddExtended__item__dst",
@@ -269,7 +331,7 @@
         "refinement_interpretation_Tm_refine_f15dc27fda4010cefa8196dd0c0e7b1c"
       ],
       0,
-      "a65a84b37a1457d6d7f753a3846d2d74"
+      "7893a07fe4431737475557d7045deb89"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddExtended__item__src1",
@@ -281,7 +343,7 @@
         "refinement_interpretation_Tm_refine_f15dc27fda4010cefa8196dd0c0e7b1c"
       ],
       0,
-      "1a2de3a2253f6af8bd8cb629798fcb4e"
+      "17eae19189fad5a4c5be15271da4a10b"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddExtended__item__src2",
@@ -293,7 +355,7 @@
         "refinement_interpretation_Tm_refine_f15dc27fda4010cefa8196dd0c0e7b1c"
       ],
       0,
-      "85b69ecfae84438d4676a55c9fd691b1"
+      "dd6d01368c5f98e69b5ad4f4834d6455"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddExtendedOV__item__dst",
@@ -305,7 +367,7 @@
         "refinement_interpretation_Tm_refine_d6e856e0b95db2fa0ea95f32771ae6c1"
       ],
       0,
-      "481ce57c3f5162f4c43447420126c0ea"
+      "d2eaf869abfc972c4964c79020fcd75e"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddExtendedOV__item__src1",
@@ -317,7 +379,7 @@
         "refinement_interpretation_Tm_refine_d6e856e0b95db2fa0ea95f32771ae6c1"
       ],
       0,
-      "752ed3b335cdd364fed8a583bc4bf687"
+      "ef0ab064d0883b444e5b18b20b8ace51"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__AddExtendedOV__item__src2",
@@ -329,7 +391,7 @@
         "refinement_interpretation_Tm_refine_d6e856e0b95db2fa0ea95f32771ae6c1"
       ],
       0,
-      "5c95e32c7db35a52391aef1c2a525281"
+      "15453822bfc53d856ed0b2d91fe5fd4a"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sub__item__dst",
@@ -341,7 +403,7 @@
         "refinement_interpretation_Tm_refine_334f02d32c139f9b3b277645b16d76a1"
       ],
       0,
-      "8cf252c9031e8341d3a56450aab7aad7"
+      "f7738d1b9e38fd4e2d4dd16b5a12ac70"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sub__item__src1",
@@ -353,7 +415,7 @@
         "refinement_interpretation_Tm_refine_334f02d32c139f9b3b277645b16d76a1"
       ],
       0,
-      "133513607c5b88a24df13cb130242e9d"
+      "9f3c04c806dbef6a3f2b8c780cd12cf8"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sub__item__src2",
@@ -365,7 +427,7 @@
         "refinement_interpretation_Tm_refine_334f02d32c139f9b3b277645b16d76a1"
       ],
       0,
-      "ba4b651d64aa978be809131e326343cc"
+      "4b2223ac12a24c495823e595da605809"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__SubImm__item__dst",
@@ -377,7 +439,7 @@
         "refinement_interpretation_Tm_refine_7cad43e2f2d2642b09b3ad520c8f1381"
       ],
       0,
-      "88199530e5ccc8e02d61164104ea67fd"
+      "0b3f23b36fced3724b806a5d5c604dfe"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__SubImm__item__src1",
@@ -389,7 +451,7 @@
         "refinement_interpretation_Tm_refine_7cad43e2f2d2642b09b3ad520c8f1381"
       ],
       0,
-      "d45ae60091726b8af909bab628ab23c6"
+      "53813c33dbb2ad3c5c591c6b7b25ef0b"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__SubImm__item__src2",
@@ -401,7 +463,7 @@
         "refinement_interpretation_Tm_refine_7cad43e2f2d2642b09b3ad520c8f1381"
       ],
       0,
-      "2a30af8c1f91fb31bdf41d80eca682ba"
+      "c0b0d1031bd738845cc5c0e7c58f3f47"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__MulLow64__item__dst",
@@ -413,7 +475,7 @@
         "refinement_interpretation_Tm_refine_889524467ecddd060f2467b375ef4972"
       ],
       0,
-      "0cc4cc56850fc4e6895f2750507ef082"
+      "962bf08a2b186186a759a6c0efa89500"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__MulLow64__item__src1",
@@ -425,7 +487,7 @@
         "refinement_interpretation_Tm_refine_889524467ecddd060f2467b375ef4972"
       ],
       0,
-      "db76a15773ceb32ded4bbbe5bf4e43c3"
+      "941036043596f013dbf13fa25a4c2f7d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__MulLow64__item__src2",
@@ -437,7 +499,7 @@
         "refinement_interpretation_Tm_refine_889524467ecddd060f2467b375ef4972"
       ],
       0,
-      "76b280dcc7d36935e6d029c3c7d8e442"
+      "adbf02751a0e21356ccdbb45818588af"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__MulHigh64U__item__dst",
@@ -449,7 +511,7 @@
         "refinement_interpretation_Tm_refine_091fe1a0cf869956cd65f75507084f33"
       ],
       0,
-      "1b333295d195d54b99d5dcbcec98f4c4"
+      "4b3a6430698cd5be7bc011276df3f373"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__MulHigh64U__item__src1",
@@ -461,7 +523,7 @@
         "refinement_interpretation_Tm_refine_091fe1a0cf869956cd65f75507084f33"
       ],
       0,
-      "8f11dc84a99534af174121577819d661"
+      "c633d1a94e76474abaf822131c1b2a73"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__MulHigh64U__item__src2",
@@ -473,7 +535,7 @@
         "refinement_interpretation_Tm_refine_091fe1a0cf869956cd65f75507084f33"
       ],
       0,
-      "bdfbde269aac867b767862e505036d44"
+      "3fa98a555e73ce488ed4dd1a0000cc76"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Xor__item__dst",
@@ -485,7 +547,7 @@
         "refinement_interpretation_Tm_refine_6a4b5dbd431eb5f46412671d6044f64e"
       ],
       0,
-      "da3564eab1fb5a6734be69766d325242"
+      "6d3ad3d6ccad2547453b77a2bf7eee17"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Xor__item__src1",
@@ -497,7 +559,7 @@
         "refinement_interpretation_Tm_refine_6a4b5dbd431eb5f46412671d6044f64e"
       ],
       0,
-      "992622d5670c2abdd483a2ac0c600ffc"
+      "fe4d7383e105ebf01424f092c74caab0"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Xor__item__src2",
@@ -509,7 +571,7 @@
         "refinement_interpretation_Tm_refine_6a4b5dbd431eb5f46412671d6044f64e"
       ],
       0,
-      "2416ace0b636bb8f9645e823c1045c5b"
+      "f459101e04eb9fbf8218fa76e79eb29d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__And__item__dst",
@@ -521,7 +583,7 @@
         "refinement_interpretation_Tm_refine_8e787b406a802012eb3dc9cdde783587"
       ],
       0,
-      "e2ed1bf14242764dbf3ee8511bcc1a1c"
+      "5812cd34dc540586846ca8559ceaa944"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__And__item__src1",
@@ -533,7 +595,7 @@
         "refinement_interpretation_Tm_refine_8e787b406a802012eb3dc9cdde783587"
       ],
       0,
-      "7a8a8de20273f140459cba946850c411"
+      "13787aa3a295c78ddace4691784a7175"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__And__item__src2",
@@ -545,7 +607,7 @@
         "refinement_interpretation_Tm_refine_8e787b406a802012eb3dc9cdde783587"
       ],
       0,
-      "2e6cd38dad407853c37e239d143c319a"
+      "dd7f75dd1446d76ec3c1cf3d7d4c441f"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sr64Imm__item__dst",
@@ -557,7 +619,7 @@
         "refinement_interpretation_Tm_refine_35f300762784803507628451ca4cab3e"
       ],
       0,
-      "27c2f0f85c56296edc2138e7bfde4a0b"
+      "a038f4a473157f91e2c00f63998cd37d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sr64Imm__item__src1",
@@ -569,7 +631,7 @@
         "refinement_interpretation_Tm_refine_35f300762784803507628451ca4cab3e"
       ],
       0,
-      "a43477e140621f3b602796b10d5f31e2"
+      "32800996774907ef5d89907fd0ac24d7"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sr64Imm__item__src2",
@@ -581,7 +643,7 @@
         "refinement_interpretation_Tm_refine_35f300762784803507628451ca4cab3e"
       ],
       0,
-      "ee9b229553740f14380dff983cd814a0"
+      "7466a2913ed741c56dcef443d271e14d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sl64Imm__item__dst",
@@ -593,7 +655,7 @@
         "refinement_interpretation_Tm_refine_4da0c6b3e1d19d3c1cc4dc9096b2ebc4"
       ],
       0,
-      "9a7218f1e0ac4713a4a5607eb1505e6d"
+      "b64ddf8f7fdd58799d847d3a2f4f1719"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sl64Imm__item__src1",
@@ -605,7 +667,7 @@
         "refinement_interpretation_Tm_refine_4da0c6b3e1d19d3c1cc4dc9096b2ebc4"
       ],
       0,
-      "8a01fde961cae70edee61ec1d6ebfac1"
+      "c92e45f71668fad25433c52097035e1d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Sl64Imm__item__src2",
@@ -617,7 +679,103 @@
         "refinement_interpretation_Tm_refine_4da0c6b3e1d19d3c1cc4dc9096b2ebc4"
       ],
       0,
-      "754868064e6ec8d37895dbdc988e91d8"
+      "1fa43165b91c3583ec8fb8b83d6a65ad"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Sr64__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_cadb1f9aa0884ff1b31ce23517ac4d2c"
+      ],
+      0,
+      "6b42fb60b8d49f8ef8f5da565a779270"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Sr64__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_cadb1f9aa0884ff1b31ce23517ac4d2c"
+      ],
+      0,
+      "777d45dc396edfee9e0d77c04b947c08"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Sr64__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_cadb1f9aa0884ff1b31ce23517ac4d2c"
+      ],
+      0,
+      "8b44db2d7b9b2a12c1838f53b82adedb"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Sl64__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_330bb53a47e5323fecdb1690b85ff3a2"
+      ],
+      0,
+      "7ab91fdea14d0c8f2cb5cfb7ce8c702a"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Sl64__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_330bb53a47e5323fecdb1690b85ff3a2"
+      ],
+      0,
+      "97b86d560e2786a4b7f199c3fcc5cb1e"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Sl64__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_330bb53a47e5323fecdb1690b85ff3a2"
+      ],
+      0,
+      "18cce00dc6e80ee05352dd6131d803af"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vmr__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_51623a702fc8afa1ad008c4a5cbca321"
+      ],
+      0,
+      "52e818bb5ff69153785e071d74ffaf01"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vmr__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_51623a702fc8afa1ad008c4a5cbca321"
+      ],
+      0,
+      "349f3caa3ff909dc765a0f943f27fcd4"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Mfvsrd__item__dst",
@@ -629,7 +787,7 @@
         "refinement_interpretation_Tm_refine_8cd874a6a72b9177b9f5ae2cebc7d70e"
       ],
       0,
-      "e7467301c9c5c52749817ada6ffc5a8d"
+      "35d4b609410968999baa4bbb30b9ab00"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Mfvsrd__item__src",
@@ -641,7 +799,7 @@
         "refinement_interpretation_Tm_refine_8cd874a6a72b9177b9f5ae2cebc7d70e"
       ],
       0,
-      "9023b7bb0f768c66b3ec78985b2f6e48"
+      "ed9f523cfc95f8c1f6813af2aba5625e"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Mfvsrld__item__dst",
@@ -653,7 +811,7 @@
         "refinement_interpretation_Tm_refine_d46f89d5da792fb1973f69b034a10fcf"
       ],
       0,
-      "d9718fa9add6ad7fa9a0c7ccc8376019"
+      "eb67eb88157cf852000d05edbc44a757"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Mfvsrld__item__src",
@@ -665,7 +823,7 @@
         "refinement_interpretation_Tm_refine_d46f89d5da792fb1973f69b034a10fcf"
       ],
       0,
-      "136dc9113ef9f0df1ad555a845b0fbdb"
+      "e2ad26252febc8f1c2961910561040c3"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Mtvsrdd__item__dst",
@@ -677,7 +835,7 @@
         "refinement_interpretation_Tm_refine_9998994f8e8b1b5d5eab2a0ec5db4edc"
       ],
       0,
-      "ce6cfcfdef4976b744dcff5421c70bc5"
+      "63b774e4a8aca8be31971001f5bbec87"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Mtvsrdd__item__src1",
@@ -689,7 +847,7 @@
         "refinement_interpretation_Tm_refine_9998994f8e8b1b5d5eab2a0ec5db4edc"
       ],
       0,
-      "865dd4c37b5f0efc0462af6454afac5b"
+      "493c053ff05a930bf1d950b243b71f6f"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Mtvsrdd__item__src2",
@@ -701,7 +859,31 @@
         "refinement_interpretation_Tm_refine_9998994f8e8b1b5d5eab2a0ec5db4edc"
       ],
       0,
-      "4068c3fb7b01784270a4313e4cf25afe"
+      "a350d3bb69e995bb12093ca73523c37e"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Mtvsrws__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_e8618619c5ecfffd82c92219b7b8c9e4"
+      ],
+      0,
+      "1dccf7db2da61bdc7619db6265c4367b"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Mtvsrws__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_e8618619c5ecfffd82c92219b7b8c9e4"
+      ],
+      0,
+      "9bcc2b6eb5133831b69d2d73f8b32cb1"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vadduwm__item__dst",
@@ -713,7 +895,7 @@
         "refinement_interpretation_Tm_refine_2638699dfa51508020cfe69f52025fb5"
       ],
       0,
-      "f724780684b7cb48639f5edaae162105"
+      "d529a005f55a8b583fe50582c13ad581"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vadduwm__item__src1",
@@ -725,7 +907,7 @@
         "refinement_interpretation_Tm_refine_2638699dfa51508020cfe69f52025fb5"
       ],
       0,
-      "7a24c39085114a153d39074c87b6f1eb"
+      "5abb5b56b5f38e8ba894adf8aa13d8b0"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vadduwm__item__src2",
@@ -737,7 +919,7 @@
         "refinement_interpretation_Tm_refine_2638699dfa51508020cfe69f52025fb5"
       ],
       0,
-      "02f821ec8e88b0847b5bfde7829e1ba1"
+      "65ea59e36c340f396e144e57616fa538"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vxor__item__dst",
@@ -749,7 +931,7 @@
         "refinement_interpretation_Tm_refine_4beb4fee8fd8d3df8e8e55f9ae783a61"
       ],
       0,
-      "f9d938424e23771ecab0cdf0337169c0"
+      "b5d897f69d246ffe7fbdee6fc8cc7be1"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vxor__item__src1",
@@ -761,7 +943,7 @@
         "refinement_interpretation_Tm_refine_4beb4fee8fd8d3df8e8e55f9ae783a61"
       ],
       0,
-      "ecc948f12bfabd0b8b363578b064fff2"
+      "f8879780b6a88611970fae7d81f2701f"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vxor__item__src2",
@@ -773,7 +955,43 @@
         "refinement_interpretation_Tm_refine_4beb4fee8fd8d3df8e8e55f9ae783a61"
       ],
       0,
-      "a3205e69f62d6e39222b439554855bf6"
+      "6d6aeaa94c4b2c98d6c3b0229ae3d755"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vand__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_37af42422f75b4c8019cd1b2473bb82c"
+      ],
+      0,
+      "6fe54583aeadb8d77d33d67dfec841b1"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vand__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_37af42422f75b4c8019cd1b2473bb82c"
+      ],
+      0,
+      "ca93ce74b585569e53322c746f2b0952"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vand__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_37af42422f75b4c8019cd1b2473bb82c"
+      ],
+      0,
+      "b38f35f25d07b1ea7f45c3fbdcd298af"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vslw__item__dst",
@@ -785,7 +1003,7 @@
         "refinement_interpretation_Tm_refine_4863b6c5d5b2e76d014c841a414d187b"
       ],
       0,
-      "bed6d89d3ea056d4391a8f1aa20b18f2"
+      "6e0fad6e47e86d1b19eb0fce660cbe08"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vslw__item__src1",
@@ -797,7 +1015,7 @@
         "refinement_interpretation_Tm_refine_4863b6c5d5b2e76d014c841a414d187b"
       ],
       0,
-      "368f67caa24dc2319c67c6ada980afbc"
+      "9a14f2a914be27e0dc54c58da1171ac4"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vslw__item__src2",
@@ -809,7 +1027,7 @@
         "refinement_interpretation_Tm_refine_4863b6c5d5b2e76d014c841a414d187b"
       ],
       0,
-      "bfc42b337ca1d33c78d185b92f7709e9"
+      "0df63d4ebfc7a920789b35797123b7b4"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsrw__item__dst",
@@ -821,7 +1039,7 @@
         "refinement_interpretation_Tm_refine_63f4a82739ab2f59a8548d91e3d4754b"
       ],
       0,
-      "58ad1e0f43aebd96e39d3ed1f92994c3"
+      "d0f4490f3a36136a402de2b5908a5ba4"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsrw__item__src1",
@@ -833,7 +1051,7 @@
         "refinement_interpretation_Tm_refine_63f4a82739ab2f59a8548d91e3d4754b"
       ],
       0,
-      "110f0b37b765a5f515fec7194e90910d"
+      "b15895a77addaae65fe4108ba4254c72"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsrw__item__src2",
@@ -845,7 +1063,43 @@
         "refinement_interpretation_Tm_refine_63f4a82739ab2f59a8548d91e3d4754b"
       ],
       0,
-      "6a362bde8e7d441e5d363cd1246062a4"
+      "d54978d549fb4f4b048b692475873f8e"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vsl__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_f0c552f518f27244e047aeeb4e07b72b"
+      ],
+      0,
+      "084fd0f57be4b08da705d8f3a25468b3"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vsl__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_f0c552f518f27244e047aeeb4e07b72b"
+      ],
+      0,
+      "86b3c60e89be8c8f315c19fbdc716299"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vsl__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_f0c552f518f27244e047aeeb4e07b72b"
+      ],
+      0,
+      "3fa5ec50e2eb33f9b90b35dba7869419"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vcmpequw__item__dst",
@@ -857,7 +1111,7 @@
         "refinement_interpretation_Tm_refine_97c9cf1f0b0e82d699a148aa3ea1467e"
       ],
       0,
-      "85d986d779cfe1c1e7590d175f5c2ec7"
+      "53331a7bae8be5e6fc69152216adc306"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vcmpequw__item__src1",
@@ -869,7 +1123,7 @@
         "refinement_interpretation_Tm_refine_97c9cf1f0b0e82d699a148aa3ea1467e"
       ],
       0,
-      "25fc722bce16b2084a7d4527c4c90a07"
+      "756f5c389fad0f263568930710571617"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vcmpequw__item__src2",
@@ -881,7 +1135,7 @@
         "refinement_interpretation_Tm_refine_97c9cf1f0b0e82d699a148aa3ea1467e"
       ],
       0,
-      "ed5d168d2841fb70482a4a1e7e314106"
+      "01e089753b7e9ddb779f560a39b7b6bf"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsldoi__item__dst",
@@ -893,7 +1147,7 @@
         "refinement_interpretation_Tm_refine_5623482c4b64e8c47bb6dd8eb21d427b"
       ],
       0,
-      "24878e4683341d690e9f60adb9a923d9"
+      "019170e9e77bf3c19a97656db9fee42a"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsldoi__item__src1",
@@ -905,7 +1159,7 @@
         "refinement_interpretation_Tm_refine_5623482c4b64e8c47bb6dd8eb21d427b"
       ],
       0,
-      "e5ec5257aac835856184e373313a34fe"
+      "c0b170285bba5bb4c081ad78a4171292"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsldoi__item__src2",
@@ -917,7 +1171,7 @@
         "refinement_interpretation_Tm_refine_5623482c4b64e8c47bb6dd8eb21d427b"
       ],
       0,
-      "48204fb9813413acfb7a7268dd541d63"
+      "3d691b4d4b2e8bfd04b998fcf3c9bc42"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsldoi__item__count",
@@ -929,7 +1183,7 @@
         "refinement_interpretation_Tm_refine_5623482c4b64e8c47bb6dd8eb21d427b"
       ],
       0,
-      "e81f4c5d34ea18f36d9ab223168ef9d5"
+      "a3e91d7c9130fcccff3fab975c6f3ea3"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vmrghw__item__dst",
@@ -941,7 +1195,7 @@
         "refinement_interpretation_Tm_refine_44fe94383a0fd6a82f290b8c515bf7cf"
       ],
       0,
-      "b210c0829ded7d342afec17018d09404"
+      "4317676f18d72e28e48b837a440b8cac"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vmrghw__item__src1",
@@ -953,7 +1207,7 @@
         "refinement_interpretation_Tm_refine_44fe94383a0fd6a82f290b8c515bf7cf"
       ],
       0,
-      "d554478ea9efaae830f7806cf7f16687"
+      "58de7e981e1a618c4c506d07c59db99f"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vmrghw__item__src2",
@@ -965,7 +1219,7 @@
         "refinement_interpretation_Tm_refine_44fe94383a0fd6a82f290b8c515bf7cf"
       ],
       0,
-      "e00d9aafc885cc19627eab2b26275818"
+      "5b568ddd14969cd3a9eca24f35321e87"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Xxmrghd__item__dst",
@@ -977,7 +1231,7 @@
         "refinement_interpretation_Tm_refine_bbd7d04dc7b375cc261b3958ad0a55ac"
       ],
       0,
-      "168af184f3e23d90b9eb307bc671166f"
+      "8c631b20ab3954236124cdeaecec0e9d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Xxmrghd__item__src1",
@@ -989,7 +1243,7 @@
         "refinement_interpretation_Tm_refine_bbd7d04dc7b375cc261b3958ad0a55ac"
       ],
       0,
-      "28012c2d75ffc2ad4d610b56205426f5"
+      "82711ed11fee07952530cee636e72ea1"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Xxmrghd__item__src2",
@@ -1001,7 +1255,7 @@
         "refinement_interpretation_Tm_refine_bbd7d04dc7b375cc261b3958ad0a55ac"
       ],
       0,
-      "67556ff8d2148e5e323c098721fbaee6"
+      "b4aa183760627952b9463b3c73d09153"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsel__item__dst",
@@ -1013,7 +1267,7 @@
         "refinement_interpretation_Tm_refine_0bd9d45bb16dfffbb57307e0a61587a1"
       ],
       0,
-      "735a97617d54de4646055e73b19887db"
+      "3d060edf93248c91e1f540753c5e78bf"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsel__item__src1",
@@ -1025,7 +1279,7 @@
         "refinement_interpretation_Tm_refine_0bd9d45bb16dfffbb57307e0a61587a1"
       ],
       0,
-      "73fc14b5e5791d3ed7014982135b8939"
+      "c4236ec383aefb8ca086dbab12af07f9"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsel__item__src2",
@@ -1037,7 +1291,7 @@
         "refinement_interpretation_Tm_refine_0bd9d45bb16dfffbb57307e0a61587a1"
       ],
       0,
-      "2462b76d6ec04400441cfe9b91d8e9c0"
+      "241fdc76c57f7c5ba74c9d0af389a31b"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vsel__item__sel",
@@ -1049,7 +1303,91 @@
         "refinement_interpretation_Tm_refine_0bd9d45bb16dfffbb57307e0a61587a1"
       ],
       0,
-      "bf24d9d7668530af64a14e9683eb1913"
+      "b01e13791715b58231d5f4d5345a35fc"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vspltw__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_bacce7d356fcd0a429c43ceb496d66b0"
+      ],
+      0,
+      "7e3cfd0e80b22d0a8f82af0ee878ef9d"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vspltw__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_bacce7d356fcd0a429c43ceb496d66b0"
+      ],
+      0,
+      "bed8f80665959bf20c3c3c6883fa5dcd"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vspltw__item__uim",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_bacce7d356fcd0a429c43ceb496d66b0"
+      ],
+      0,
+      "850e87fb8d38777ac82891aa58023ee0"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vspltisw__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_c5646e60e63c52825f2db7fe3b028a44"
+      ],
+      0,
+      "d2e385aebc3d5dcc1ac409d3b03358b6"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vspltisw__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_c5646e60e63c52825f2db7fe3b028a44"
+      ],
+      0,
+      "7934c2e06a7c66c37c5c3303fe7bb00c"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vspltisb__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_7e4a0c3969a179f17415e249a34aad21"
+      ],
+      0,
+      "af7de6c69d6db3cea235699764fd67d2"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vspltisb__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_7e4a0c3969a179f17415e249a34aad21"
+      ],
+      0,
+      "29b95f5b65f8a3491a4f731eb80999e8"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128__item__dst",
@@ -1061,7 +1399,7 @@
         "refinement_interpretation_Tm_refine_7e8d9ab79d281f92e001e20968f070af"
       ],
       0,
-      "7bac5671e516b25ba42ae94c4192f67e"
+      "e941dc55676f8ce7a1408d10ad34e4a1"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128__item__base",
@@ -1073,7 +1411,7 @@
         "refinement_interpretation_Tm_refine_7e8d9ab79d281f92e001e20968f070af"
       ],
       0,
-      "5eb9a670e595df8d68eae99456983c43"
+      "61d92c45f3262cd1cc82053b26df9574"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128__item__offset",
@@ -1085,7 +1423,7 @@
         "refinement_interpretation_Tm_refine_7e8d9ab79d281f92e001e20968f070af"
       ],
       0,
-      "76131b4d074537a4b2b3d77ee723475d"
+      "a16db9c2e0a84116cef586735f8c2b72"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128__item__src",
@@ -1097,7 +1435,7 @@
         "refinement_interpretation_Tm_refine_d30e64d0bf0b7455f3b86fee09f45254"
       ],
       0,
-      "ab7e1767309455f46fb6d51303da5251"
+      "60b177a0d081d084a1e59b0093fe9467"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128__item__base",
@@ -1109,7 +1447,7 @@
         "refinement_interpretation_Tm_refine_d30e64d0bf0b7455f3b86fee09f45254"
       ],
       0,
-      "f44de270d5b324b142d9f28eda607bfe"
+      "481a5ec86c5ff85fc5e8a4589dfab034"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128__item__offset",
@@ -1121,7 +1459,7 @@
         "refinement_interpretation_Tm_refine_d30e64d0bf0b7455f3b86fee09f45254"
       ],
       0,
-      "1b747e7d853313b2e2fc2b087defc1d6"
+      "2770bd1a6b543fb39972f723b1dc4095"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Word4__item__dst",
@@ -1133,7 +1471,7 @@
         "refinement_interpretation_Tm_refine_7ca788951c653b42e97a7ba3a4b1a474"
       ],
       0,
-      "4c43861f9aaead70cabb222a12231e01"
+      "ba0647e744485ba4e502ce9ae3ae58ad"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Word4__item__base",
@@ -1145,7 +1483,7 @@
         "refinement_interpretation_Tm_refine_7ca788951c653b42e97a7ba3a4b1a474"
       ],
       0,
-      "7bdee0d67f23f4ed24409d60f9d9054f"
+      "11c0c18b6eaa89eb4e475a8565331961"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Word4Index__item__dst",
@@ -1157,7 +1495,7 @@
         "refinement_interpretation_Tm_refine_6d6443ff872a7bf2b94ce9dacaea2a9a"
       ],
       0,
-      "8fc4c64d4f0ae4217a6a605e6fbb09b6"
+      "e92ffa185bcfe6ccd2696d0251005ec4"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Word4Index__item__base",
@@ -1169,7 +1507,7 @@
         "refinement_interpretation_Tm_refine_6d6443ff872a7bf2b94ce9dacaea2a9a"
       ],
       0,
-      "a00053dfee718f4d21464301784b6d8b"
+      "54d4c11efcb77418be4b536c9d33b6dc"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Word4Index__item__offset",
@@ -1181,7 +1519,7 @@
         "refinement_interpretation_Tm_refine_6d6443ff872a7bf2b94ce9dacaea2a9a"
       ],
       0,
-      "d401c7a91d8609553c87958085b0482c"
+      "67b3fbbac156169d6be27691ced4a15e"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Word4__item__src",
@@ -1193,7 +1531,7 @@
         "refinement_interpretation_Tm_refine_129f3dd9286b382d2b1e8f02044a8215"
       ],
       0,
-      "bc1a56a1645ec4cd4cf1840dbe770438"
+      "fe38511c21bf6efa85d5f0911681becf"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Word4__item__base",
@@ -1205,7 +1543,7 @@
         "refinement_interpretation_Tm_refine_129f3dd9286b382d2b1e8f02044a8215"
       ],
       0,
-      "b8c084e8826fa214fe5d60f34f110873"
+      "fbca6c7a7432e01d256245b6a8792ec6"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Word4Index__item__src",
@@ -1217,7 +1555,7 @@
         "refinement_interpretation_Tm_refine_7ceb5511e3f13734c2f1366c82ccb1ca"
       ],
       0,
-      "7a2c70c979e794ebae25529299d0989b"
+      "0da931a5ed7500811aa42db639779430"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Word4Index__item__base",
@@ -1229,7 +1567,7 @@
         "refinement_interpretation_Tm_refine_7ceb5511e3f13734c2f1366c82ccb1ca"
       ],
       0,
-      "8464872b0640186caad7015ca282b520"
+      "a70f2ba688d20722eb28065e0008ae1e"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Word4Index__item__offset",
@@ -1241,7 +1579,7 @@
         "refinement_interpretation_Tm_refine_7ceb5511e3f13734c2f1366c82ccb1ca"
       ],
       0,
-      "c5e313ce1bb6923c243e86fec1f614c8"
+      "3e63fbbba44bcee910e914d5a64737be"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Byte16__item__dst",
@@ -1253,7 +1591,7 @@
         "refinement_interpretation_Tm_refine_c8ce6614cd0ee9adbcafdf37251ec22c"
       ],
       0,
-      "8fb7a08354820cc01045381f027aba50"
+      "61620e285a8d7739be091ce66455987d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Byte16__item__base",
@@ -1265,7 +1603,7 @@
         "refinement_interpretation_Tm_refine_c8ce6614cd0ee9adbcafdf37251ec22c"
       ],
       0,
-      "112b323439406368b408f7655c2edfcb"
+      "2a1dd12959ca30ad3f0d87b20eb45e05"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Byte16Index__item__dst",
@@ -1277,7 +1615,7 @@
         "refinement_interpretation_Tm_refine_bd151029ba9345a8d32515ec829df66d"
       ],
       0,
-      "ab87f20a8cd4f1104aa5de8473aa3259"
+      "77231b079c7c2ff8a706b63b1e06da52"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Byte16Index__item__base",
@@ -1289,7 +1627,7 @@
         "refinement_interpretation_Tm_refine_bd151029ba9345a8d32515ec829df66d"
       ],
       0,
-      "5fffd23a4af41bf74e251035a3bc2d91"
+      "c3b7dc483566380e39279dc817f083c7"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Load128Byte16Index__item__offset",
@@ -1301,7 +1639,7 @@
         "refinement_interpretation_Tm_refine_bd151029ba9345a8d32515ec829df66d"
       ],
       0,
-      "47335516277e0328e12794b906ec6ec9"
+      "0f26adf9063243e9bbe226429c73d0a6"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Byte16__item__src",
@@ -1313,7 +1651,7 @@
         "refinement_interpretation_Tm_refine_c22a101b4cfee067973bac8dd40e512f"
       ],
       0,
-      "fdad38ea061bed60a62927a591bd885a"
+      "844e70deca8851df034845050cd9c1ba"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Byte16__item__base",
@@ -1325,7 +1663,7 @@
         "refinement_interpretation_Tm_refine_c22a101b4cfee067973bac8dd40e512f"
       ],
       0,
-      "3e3944649ac1e594588dd8540dddb878"
+      "33672deb65b77333a7e503dd82914a90"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Byte16Index__item__src",
@@ -1337,7 +1675,7 @@
         "refinement_interpretation_Tm_refine_0ee724a877bff2abcb96c87729e1a6e5"
       ],
       0,
-      "26bbeede389a57240e75f1fe82e4f05b"
+      "4fd4b687e9a26e64cee07fe27f076716"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Byte16Index__item__base",
@@ -1349,7 +1687,7 @@
         "refinement_interpretation_Tm_refine_0ee724a877bff2abcb96c87729e1a6e5"
       ],
       0,
-      "daa2118588b98b183872ae7245e43e0e"
+      "a8362c42ee444103cdf9ca13fb9b96be"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Store128Byte16Index__item__offset",
@@ -1361,7 +1699,7 @@
         "refinement_interpretation_Tm_refine_0ee724a877bff2abcb96c87729e1a6e5"
       ],
       0,
-      "42aed4f07df72a56227a88f4e5d7da82"
+      "cbf71c84a8a2373bcf66654a35295ff8"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw0__item__dst",
@@ -1373,7 +1711,7 @@
         "refinement_interpretation_Tm_refine_ba18f6df56a322427e5ab2ccfeb4df6c"
       ],
       0,
-      "981c0f6224255460b86e4f6664c4b075"
+      "8cdf0c93fe1814c06e07ac9dcdafe1f8"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw0__item__src",
@@ -1385,7 +1723,7 @@
         "refinement_interpretation_Tm_refine_ba18f6df56a322427e5ab2ccfeb4df6c"
       ],
       0,
-      "082c60a3550e2b0319bac86bf300eb0b"
+      "4bb850523569e1bf5ce3115bb91ca68d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw1__item__dst",
@@ -1397,7 +1735,7 @@
         "refinement_interpretation_Tm_refine_bce25b3b26822d6c29e778ee8748bda4"
       ],
       0,
-      "cd6dfea006db5e062d883f9cad844223"
+      "1505bb4730625fa55548317241fddd70"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw1__item__src",
@@ -1409,7 +1747,7 @@
         "refinement_interpretation_Tm_refine_bce25b3b26822d6c29e778ee8748bda4"
       ],
       0,
-      "f84a841afeeac1f31b587dcbb883ec3e"
+      "f67e8e7e1b77cdae8290301576e3c216"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw2__item__dst",
@@ -1421,7 +1759,7 @@
         "refinement_interpretation_Tm_refine_f6842a7a02af0324e11c25617fd74743"
       ],
       0,
-      "72b9d3bc0a6f7820b72c4d5035b8c249"
+      "371337a0bb85b9d4b7fb35122cef586e"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw2__item__src",
@@ -1433,7 +1771,7 @@
         "refinement_interpretation_Tm_refine_f6842a7a02af0324e11c25617fd74743"
       ],
       0,
-      "6cf587a4b096f917ff4a59af1972f1b6"
+      "1ae17e11c48604b8ce8cd9b843c3fa83"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw3__item__dst",
@@ -1445,7 +1783,7 @@
         "refinement_interpretation_Tm_refine_703aec21b3eaaeb1ad9ae34d89cfe078"
       ],
       0,
-      "89d63a1db4b136558ffcd2121453460a"
+      "f2ded59c0ea2b27036147291b33531ce"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Vshasigmaw3__item__src",
@@ -1457,7 +1795,247 @@
         "refinement_interpretation_Tm_refine_703aec21b3eaaeb1ad9ae34d89cfe078"
       ],
       0,
-      "240cbb2d5f51fc6b4cf74aeb3455deb9"
+      "a7d1ae51cad59a09c581c90b22f07d46"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vsbox__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_49d3b629874a8451a8d6f071bf1216ce"
+      ],
+      0,
+      "d05b50f2ae997c395c2f07c974dda024"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vsbox__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_49d3b629874a8451a8d6f071bf1216ce"
+      ],
+      0,
+      "3c0798ae03ce371b61f17aa4a7b46ac0"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__RotWord__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_4c9fd3d22ca418c95ae7fb38edda26a7"
+      ],
+      0,
+      "78f9cc6eaf836369770faa6f3f74d38b"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__RotWord__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_4c9fd3d22ca418c95ae7fb38edda26a7"
+      ],
+      0,
+      "c7f75aec2d10df43a10a8353fae68004"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__RotWord__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_4c9fd3d22ca418c95ae7fb38edda26a7"
+      ],
+      0,
+      "7ab6ad902d8160ae573d646af7ee9bdd"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vcipher__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_1b070f94af8d513010d9f0f0a7f2127e"
+      ],
+      0,
+      "19beb3c44cdf4758d3d12cf42e6d1c62"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vcipher__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_1b070f94af8d513010d9f0f0a7f2127e"
+      ],
+      0,
+      "36ba1b9a4cef734d52e26773a5f602b5"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vcipher__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_1b070f94af8d513010d9f0f0a7f2127e"
+      ],
+      0,
+      "47a771b0217d76dea3da385bb035db52"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vcipherlast__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_ccf8f8b64eadd95d191de30934aa1b15"
+      ],
+      0,
+      "4d59f78a9cdfc93e085f883133530f9b"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vcipherlast__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_ccf8f8b64eadd95d191de30934aa1b15"
+      ],
+      0,
+      "d77559adadb6cac7816cc8feaa197f5c"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vcipherlast__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_ccf8f8b64eadd95d191de30934aa1b15"
+      ],
+      0,
+      "a4434779283dcf918bf731fb9b27c213"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vncipher__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_0c1a7686ab7d77ebc7acd3e6081161b6"
+      ],
+      0,
+      "9f1a58c6ccdd69fa416a6950fce5409d"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vncipher__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_0c1a7686ab7d77ebc7acd3e6081161b6"
+      ],
+      0,
+      "bb3e846116caf0a0810b6ffc82b5da0a"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vncipher__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_0c1a7686ab7d77ebc7acd3e6081161b6"
+      ],
+      0,
+      "7b204a4e00ad53a996c17a814f6ede0d"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vncipherlast__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_8a10efd66828ee881d37d9605c099269"
+      ],
+      0,
+      "7c46ba7b206197066a0b74182d9435d8"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vncipherlast__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_8a10efd66828ee881d37d9605c099269"
+      ],
+      0,
+      "4a139fef8001c713fe0f96ecc8a23d0a"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vncipherlast__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_8a10efd66828ee881d37d9605c099269"
+      ],
+      0,
+      "22142843210b395ae68a382c657a692d"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vpmsumd__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_6609be7c0e7169107cd9a2d38c3cb3c5"
+      ],
+      0,
+      "adfca6e2c8ed6faf5355ad0b87355c33"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vpmsumd__item__src1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_6609be7c0e7169107cd9a2d38c3cb3c5"
+      ],
+      0,
+      "b6f5c087bcc74e6fdab7691e6465eb94"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__Vpmsumd__item__src2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_6609be7c0e7169107cd9a2d38c3cb3c5"
+      ],
+      0,
+      "97d6d28069132f903aba684102f0ed37"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Alloc__item__n",
@@ -1469,7 +2047,7 @@
         "refinement_interpretation_Tm_refine_148c524dec11d4fc51ff37a0a28f9fe8"
       ],
       0,
-      "6f18a7287fd59357374a7dc880750dd2"
+      "6aaa8115e6831efafa872496a8641fb7"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Dealloc__item__n",
@@ -1481,7 +2059,7 @@
         "refinement_interpretation_Tm_refine_d6ae57a25056220c493e89d6f1314a75"
       ],
       0,
-      "c4e9c3023e4646491d3a4657eca1bb63"
+      "913a371c4e25159448a3194c20753caa"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__StoreStack128__item__src",
@@ -1493,7 +2071,7 @@
         "refinement_interpretation_Tm_refine_9bbd23fecc438911ddb9940c87d5decc"
       ],
       0,
-      "120afb15fed26d4c79f05ce07554527b"
+      "43df250ed583464df27204d0e5d3edf8"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__StoreStack128__item__t",
@@ -1505,7 +2083,7 @@
         "refinement_interpretation_Tm_refine_9bbd23fecc438911ddb9940c87d5decc"
       ],
       0,
-      "08397ba788df58fd90ceee86f037441c"
+      "e3945833b9bfb4bcbb372802a371c76a"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__StoreStack128__item__offset",
@@ -1517,7 +2095,7 @@
         "refinement_interpretation_Tm_refine_9bbd23fecc438911ddb9940c87d5decc"
       ],
       0,
-      "dbc47792bc93537e7735e9609c629daf"
+      "e584d5fe76b4fb0fe8c6caabb68df8f3"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__LoadStack128__item__dst",
@@ -1529,7 +2107,7 @@
         "refinement_interpretation_Tm_refine_d70820b40fd039d79b90e407a18aa1db"
       ],
       0,
-      "9a71cbb4beccdc6b44935381684ebd21"
+      "8c8c6742688c7303907cb1a2df130e1f"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__LoadStack128__item__t",
@@ -1541,7 +2119,7 @@
         "refinement_interpretation_Tm_refine_d70820b40fd039d79b90e407a18aa1db"
       ],
       0,
-      "e84e1dd6835cb5ccbaac075fe3c41d8e"
+      "4d289b0d6298602f08ec794cb1c98041"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__LoadStack128__item__offset",
@@ -1553,7 +2131,79 @@
         "refinement_interpretation_Tm_refine_d70820b40fd039d79b90e407a18aa1db"
       ],
       0,
-      "429813263c87945c3c6b0bb5011dc3f0"
+      "de79ae014f16dc65dddab9c5562350d1"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__StoreStack64__item__src",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_dedfc77d9d39ac4afc84ad4fbd0d9e44"
+      ],
+      0,
+      "4c2c575ae028c82482030430237b9bf4"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__StoreStack64__item__t",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_dedfc77d9d39ac4afc84ad4fbd0d9e44"
+      ],
+      0,
+      "095109bdd9691745f962325d2c013ddb"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__StoreStack64__item__offset",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_dedfc77d9d39ac4afc84ad4fbd0d9e44"
+      ],
+      0,
+      "709de5842bc0d479e64fbfc1969d107a"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__LoadStack64__item__dst",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_433c575255f66191c23b9b0813b3c4d9"
+      ],
+      0,
+      "dcb1f28348b17a334ad27062c9f94279"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__LoadStack64__item__t",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_433c575255f66191c23b9b0813b3c4d9"
+      ],
+      0,
+      "7c2c42afa2aac7b1c3c3ddb04e7ef755"
+    ],
+    [
+      "Vale.PPC64LE.Semantics_s.__proj__LoadStack64__item__offset",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_433c575255f66191c23b9b0813b3c4d9"
+      ],
+      0,
+      "4d60ba2a1d8f145cfca3ef06871c63a2"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__Ghost__item__uu___0",
@@ -1565,7 +2215,7 @@
         "refinement_interpretation_Tm_refine_3093d9294f572932419237d6e84a8ef2"
       ],
       0,
-      "825148737f5b2ecc8f33f0b964fb1565"
+      "fbc926e4e5dba261da820aa8306daf9f"
     ],
     [
       "Vale.PPC64LE.Semantics_s.ocmp",
@@ -1574,7 +2224,7 @@
       0,
       [ "@query", "assumption_Vale.PPC64LE.Machine_s.cmp_opr__uu___haseq" ],
       0,
-      "8dddd5e2ba3f1e6fc5d59339a6fd99c7"
+      "bd95c0ae86fca6df10eeb49a7e96d6cf"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OEq__item__o1",
@@ -1586,7 +2236,7 @@
         "refinement_interpretation_Tm_refine_b4af85acc5d51c0b9ce6b14456575733"
       ],
       0,
-      "d4d33eb84db24beda914552f6bbd4c01"
+      "c842fc42a63694d75a23014352b195c5"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OEq__item__o2",
@@ -1598,7 +2248,7 @@
         "refinement_interpretation_Tm_refine_b4af85acc5d51c0b9ce6b14456575733"
       ],
       0,
-      "204e8d022fbc6557bec0ffc4b4edb05c"
+      "2a267a6077981a375b88e89d1a7ab5b7"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__ONe__item__o1",
@@ -1610,7 +2260,7 @@
         "refinement_interpretation_Tm_refine_4ac40ecec20adfebd710dbefec92d417"
       ],
       0,
-      "a67c9ffcdb17c09070e215e4f2f0ef64"
+      "0104c97daaea7cc488064d576a105f36"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__ONe__item__o2",
@@ -1622,7 +2272,7 @@
         "refinement_interpretation_Tm_refine_4ac40ecec20adfebd710dbefec92d417"
       ],
       0,
-      "e84b6435bebcd95bf6905981360e8b96"
+      "7d3fd11c5e983a7b407751234730e1d6"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OLe__item__o1",
@@ -1634,7 +2284,7 @@
         "refinement_interpretation_Tm_refine_31d2cf5f81d41bbb07ee920310a7a591"
       ],
       0,
-      "f262d154a120e22ebc779b3d309afd52"
+      "14acbe820695d1611b56574cc7da1f62"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OLe__item__o2",
@@ -1646,7 +2296,7 @@
         "refinement_interpretation_Tm_refine_31d2cf5f81d41bbb07ee920310a7a591"
       ],
       0,
-      "5153a490e19d55e8beb48209c343b0a5"
+      "6e39e5abaeac8fd522386221843af78a"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OGe__item__o1",
@@ -1658,7 +2308,7 @@
         "refinement_interpretation_Tm_refine_4ee5c7d80b75696e5a4e83bdcd51f186"
       ],
       0,
-      "482d34439db1b0bd1b6682dcfe6da6e4"
+      "8ea2601a5c2d74df07195555014e482d"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OGe__item__o2",
@@ -1670,7 +2320,7 @@
         "refinement_interpretation_Tm_refine_4ee5c7d80b75696e5a4e83bdcd51f186"
       ],
       0,
-      "2d10d21581ee744b5670f96af3ef1c23"
+      "caa7fccffa60bfd8c7430aa1944f06fa"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OLt__item__o1",
@@ -1682,7 +2332,7 @@
         "refinement_interpretation_Tm_refine_3329b064efe424fee2e85164ed48bfb6"
       ],
       0,
-      "d7c440b5789569bbf9104f6e362d89f7"
+      "de47fb4fd670a4e8e379efbd46923362"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OLt__item__o2",
@@ -1694,7 +2344,7 @@
         "refinement_interpretation_Tm_refine_3329b064efe424fee2e85164ed48bfb6"
       ],
       0,
-      "4ce6527c1e724d9ebfbaa5b27bf8aaac"
+      "b048e72a0a1767587f03ea906c863945"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OGt__item__o1",
@@ -1706,7 +2356,7 @@
         "refinement_interpretation_Tm_refine_d37b4e2090f35044397c1e84822674dc"
       ],
       0,
-      "d749362570c37c35ddba09b40ac6c79c"
+      "bdc6fb9531ac28eb07d5aeb9a16c4127"
     ],
     [
       "Vale.PPC64LE.Semantics_s.__proj__OGt__item__o2",
@@ -1718,7 +2368,7 @@
         "refinement_interpretation_Tm_refine_d37b4e2090f35044397c1e84822674dc"
       ],
       0,
-      "bac825117e46c2633ec8f80f123721d8"
+      "3d548082980f1d7484b2ecd4b0060600"
     ],
     [
       "Vale.PPC64LE.Semantics_s.match_n",
@@ -1743,7 +2393,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "f52032e30b99f24129a68abaa129f8ca"
+      "5d860876ed7a083835959a81ead64aa9"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_n",
@@ -1793,7 +2443,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "0028229ce3a0ffe661cbf345f1d3643e"
+      "e60001e95cf9c9ca83928bf098651121"
     ],
     [
       "Vale.PPC64LE.Semantics_s.lemma_is_machine_heap_update64",
@@ -1858,7 +2508,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "22466b03f49056993a341db414ba98e1"
+      "9f7b5545c42dbdee041e86f0f555c4ec"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_mem_and_taint",
@@ -1873,7 +2523,7 @@
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__ms_heap"
       ],
       0,
-      "a436f088e0063a10969911cc0353cf44"
+      "4a7947210c4a1b7efd11bc94617ffd64"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_mem",
@@ -1888,7 +2538,7 @@
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__ms_heap"
       ],
       0,
-      "7b5831943fb609eded7e331bfcebd51d"
+      "0264a997cddfedd9f34a788a4899dd16"
     ],
     [
       "Vale.PPC64LE.Semantics_s.lemma_is_machine_heap_update128",
@@ -1952,7 +2602,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "23a710799157a9fbd46940c0153a4b01"
+      "24f544320aba80c3a334885e64a9d779"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_mem128",
@@ -1967,7 +2617,7 @@
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__ms_heap"
       ],
       0,
-      "20eac7e5d6730a599e1a4e50b10d1768"
+      "6537cb83b209874ecbb6e31b0bf15b78"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_mem128_and_taint",
@@ -1982,7 +2632,7 @@
         "typing_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__ms_heap"
       ],
       0,
-      "4960d5a582b7b60aafb7981731d7663f"
+      "3fed4c8b9c4efbc749849f7c02eb73df"
     ],
     [
       "Vale.PPC64LE.Semantics_s.eval_cmp_opr",
@@ -1997,7 +2647,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "0456596a17eacdd298a6f22f168fece3"
+      "b1d7e9c1b65eedc8e632fe258604197b"
     ],
     [
       "Vale.PPC64LE.Semantics_s.eval_ocmp",
@@ -2022,7 +2672,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "fe3aac5e5227dd47660623145be5b1be"
+      "d8d1e497e98228ca0abcb7c4e0ea3479"
     ],
     [
       "Vale.PPC64LE.Semantics_s.eval_cmp_cr0",
@@ -2041,7 +2691,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "105091d83068da6377878cba3070281c"
+      "9538ccc2fbdf8d1ff56f284d2b9960b0"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_reg'",
@@ -2056,7 +2706,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ba0805a2ab3ee275cf834792a299371c"
+      "4b7184e9b044a2274d2156d003b2bfbc"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_vec'",
@@ -2071,7 +2721,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "62b1b35cc30037262526c52ffe700146"
+      "ba97af31951b8b91097184e10ae42641"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_r1'",
@@ -2089,7 +2739,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "a74bf7fdf38237387661ff711c57b959"
+      "3e8d47a2235b9b055bb58c135cc71be9"
     ],
     [
       "Vale.PPC64LE.Semantics_s.valid_ocmp",
@@ -2108,7 +2758,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "daf17995cce011aa4463413fbee88fcf"
+      "69a22f90243c99fb197611853331eeff"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_xer_ov",
@@ -2121,7 +2771,7 @@
         "projection_inverse_Vale.PPC64LE.Machine_s.Mkxer_t_ov"
       ],
       0,
-      "b5d06fe3dca88a8ec27f23a55d85cba7"
+      "1af237c81e671f413e89b9dd095f5c80"
     ],
     [
       "Vale.PPC64LE.Semantics_s.update_xer_ca",
@@ -2134,7 +2784,7 @@
         "projection_inverse_Vale.PPC64LE.Machine_s.Mkxer_t_ca"
       ],
       0,
-      "27408ff9d528e9fd37c0449cd29b05d9"
+      "992744ac4c1fafad403633b157cb5555"
     ],
     [
       "Vale.PPC64LE.Semantics_s.eval_ins",
@@ -2150,6 +2800,7 @@
         "constructor_distinct_Vale.PPC64LE.Semantics_s.MulHigh64U",
         "data_elim_Vale.PPC64LE.Machine_s.Mkstate",
         "disc_equation_Vale.PPC64LE.Semantics_s.Add",
+        "disc_equation_Vale.PPC64LE.Semantics_s.AddCarry",
         "disc_equation_Vale.PPC64LE.Semantics_s.AddExtended",
         "disc_equation_Vale.PPC64LE.Semantics_s.AddExtendedOV",
         "disc_equation_Vale.PPC64LE.Semantics_s.AddImm",
@@ -2165,14 +2816,20 @@
         "disc_equation_Vale.PPC64LE.Semantics_s.Load128Word4Index",
         "disc_equation_Vale.PPC64LE.Semantics_s.Load64",
         "disc_equation_Vale.PPC64LE.Semantics_s.LoadImm64",
+        "disc_equation_Vale.PPC64LE.Semantics_s.LoadImmShl64",
         "disc_equation_Vale.PPC64LE.Semantics_s.LoadStack128",
+        "disc_equation_Vale.PPC64LE.Semantics_s.LoadStack64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Mfvsrd",
         "disc_equation_Vale.PPC64LE.Semantics_s.Mfvsrld",
         "disc_equation_Vale.PPC64LE.Semantics_s.Move",
         "disc_equation_Vale.PPC64LE.Semantics_s.Mtvsrdd",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Mtvsrws",
         "disc_equation_Vale.PPC64LE.Semantics_s.MulHigh64U",
         "disc_equation_Vale.PPC64LE.Semantics_s.MulLow64",
+        "disc_equation_Vale.PPC64LE.Semantics_s.RotWord",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Sl64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Sl64Imm",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Sr64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Sr64Imm",
         "disc_equation_Vale.PPC64LE.Semantics_s.Store128",
         "disc_equation_Vale.PPC64LE.Semantics_s.Store128Byte16",
@@ -2181,18 +2838,31 @@
         "disc_equation_Vale.PPC64LE.Semantics_s.Store128Word4Index",
         "disc_equation_Vale.PPC64LE.Semantics_s.Store64",
         "disc_equation_Vale.PPC64LE.Semantics_s.StoreStack128",
+        "disc_equation_Vale.PPC64LE.Semantics_s.StoreStack64",
         "disc_equation_Vale.PPC64LE.Semantics_s.Sub",
         "disc_equation_Vale.PPC64LE.Semantics_s.SubImm",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vadduwm",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vand",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vcipher",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vcipherlast",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vcmpequw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vmr",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vmrghw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vncipher",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vncipherlast",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vpmsumd",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vsbox",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vsel",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw0",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw1",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw2",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vshasigmaw3",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vsl",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vsldoi",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vslw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vspltisb",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vspltisw",
+        "disc_equation_Vale.PPC64LE.Semantics_s.Vspltw",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vsrw",
         "disc_equation_Vale.PPC64LE.Semantics_s.Vxor",
         "disc_equation_Vale.PPC64LE.Semantics_s.Xor",
@@ -2201,21 +2871,32 @@
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_FStar.UInt.uint_t", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat32",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Prims.nat", "equation_Vale.Def.Types_s.nat32_to_be_bytes",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words.Seq_s.seq4",
+        "equation_Vale.Def.Words.Seq_s.seqn",
+        "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.nat8", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.PPC64LE.Machine_s.reg",
         "equation_Vale.PPC64LE.Machine_s.regs_t",
+        "equation_Vale.PPC64LE.Machine_s.vec",
+        "equation_Vale.PPC64LE.Machine_s.vecs_t",
         "equation_Vale.PPC64LE.Semantics_s.xer_ca",
         "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
         "fuel_guarded_inversion_Vale.PPC64LE.Semantics_s.ins",
         "function_token_typing_Prims.int",
+        "function_token_typing_Vale.Def.Words_s.nat32",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_typing",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
+        "int_typing",
         "interpretation_Tm_abs_13b257b5b211a4bb6190b81c006bd8dc",
+        "interpretation_Tm_abs_c70217d5c31785af9a11145ac9cd7ae9",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
+        "proj_equation_Vale.Def.Words_s.Mkfour_lo0",
         "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_regs",
+        "proj_equation_Vale.PPC64LE.Machine_s.Mkstate_vecs",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Vale.PPC64LE.Semantics_s.MulHigh64U_dst",
@@ -2224,13 +2905,18 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_7e4a6c5999db731b5d17d0418dfeea3e",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_fae547c0c57b476075b6de4468df2cfa",
         "token_correspondence_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__regs",
-        "typing_FStar.UInt.fits"
+        "token_correspondence_Vale.PPC64LE.Machine_s.__proj__Mkstate__item__vecs",
+        "typing_FStar.UInt.fits",
+        "typing_Vale.Def.Types_s.nat32_to_be_bytes",
+        "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo0"
       ],
       0,
-      "d411fafea986009f893f82b0b2c79cb6"
+      "3f29de48a7157f57c5f64cb3d8e3329b"
     ],
     [
       "Vale.PPC64LE.Semantics_s.eval_code",
@@ -2256,7 +2942,7 @@
         "subterm_ordering_Vale.PPC64LE.Machine_s.While"
       ],
       0,
-      "f08331a06bba00882cd8edceb42a0e02"
+      "329d765c6959ed5dc80c143dd3a04acf"
     ],
     [
       "Vale.PPC64LE.Semantics_s.eval_code",
@@ -2281,7 +2967,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "2f7298751077f6dcb6eeac76d94641a2"
+      "b6dd7aee2dc851d46b15331a0240274b"
     ],
     [
       "Vale.PPC64LE.Semantics_s.eval_code",
@@ -2299,7 +2985,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "496b08429bb5d8f3fc60450c4c46269d"
+      "8601cb443cafb4370f0daad79cf40013"
     ]
   ]
 ]

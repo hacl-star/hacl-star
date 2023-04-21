@@ -25,7 +25,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "ffc1fce11bf4b1527a9d0c8f5f47d595"
+      "afce2d0a737d935b0dafa3ce1bfcaf5e"
     ],
     [
       "Hacl.Hash.Core.SHA2.update_256",
@@ -50,7 +50,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b12d58d5ce15f5ad26bf24ce3bef9ac3"
+      "9cdf0853f19596c401d34e31b0b5db12"
     ],
     [
       "Hacl.Hash.Core.SHA2.update_384",
@@ -76,7 +76,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b91dbd9a4e22451772120f530398e006"
+      "5a74515e9cb64aa722039f1c5c211e0f"
     ],
     [
       "Hacl.Hash.Core.SHA2.update_512",
@@ -102,7 +102,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2e2bcef71a06600f349c77f1dd36af07"
+      "5e1a7b08710fefa5cf0464c6dac6af1a"
     ],
     [
       "Hacl.Hash.Core.SHA2.pad_224",
@@ -126,7 +126,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b2142b82e125e8f252c20ebda700baa9"
+      "38ca8bdf3758819ef78f7ac3c8a1bd1c"
     ],
     [
       "Hacl.Hash.Core.SHA2.pad_256",
@@ -149,7 +149,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "71b6404deb6cc5c97e66f2e8a1529589"
+      "5fe4c913a3617ecc1e7c223117eff807"
     ],
     [
       "Hacl.Hash.Core.SHA2.pad_384",
@@ -173,7 +173,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2140815ca3fdb6c937788366fc911b37"
+      "3f02d30b8ed8602fddff28d7bef4894b"
     ],
     [
       "Hacl.Hash.Core.SHA2.pad_512",
@@ -197,7 +197,75 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "91d0a0a9188f3c6b282f5167ecd71b84"
+      "d5addf1e5b388e709b6ed23e1c5e098a"
+    ],
+    [
+      "Hacl.Hash.Core.SHA2.finish_224",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
+        "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
+        "equation_FStar.Pervasives.dfst",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "proj_equation_Prims.Mkdtuple2__1",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Mkdtuple2__1"
+      ],
+      0,
+      "2bbc421d485db4399c338a90a4b66fe2"
+    ],
+    [
+      "Hacl.Hash.Core.SHA2.finish_256",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
+        "equation_FStar.Pervasives.dfst",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "proj_equation_Prims.Mkdtuple2__1",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Mkdtuple2__1"
+      ],
+      0,
+      "1b63fe4f455fc286215084b3fa6c237a"
+    ],
+    [
+      "Hacl.Hash.Core.SHA2.finish_384",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
+        "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
+        "equation_FStar.Pervasives.dfst",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "proj_equation_Prims.Mkdtuple2__1",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Mkdtuple2__1"
+      ],
+      0,
+      "a097a7e24fcf125ba71326b6befa467e"
+    ],
+    [
+      "Hacl.Hash.Core.SHA2.finish_512",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
+        "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
+        "equation_FStar.Pervasives.dfst",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "proj_equation_Prims.Mkdtuple2__1",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Mkdtuple2__1"
+      ],
+      0,
+      "078516cd39befd8ad5fb0d68f5e6d182"
     ]
   ]
 ]

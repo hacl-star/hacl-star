@@ -74,14 +74,26 @@ let print_ins (ins:ins) (p:printer) =
   let print_reg_vec (dst:reg) (src:vec) (vsr:bool) =
     print_pair (print_reg dst p) (print_vec src vsr p)
   in
+  let print_vec_reg (dst:vec) (src:reg) (vsr:bool) =
+    print_pair (print_vec dst vsr p) (print_reg src p)
+  in
   let print_vec_reg_pair (dst:vec) (src1 src2:reg) (vsr:bool) =
     print_triple (print_vec dst vsr p) (print_reg src1 p) (print_reg src2 p)
+  in
+  let print_vec_pair (dst src:vec) (vsr:bool) =
+    print_pair (print_vec dst vsr p) (print_vec src vsr p)
   in
   let print_vec_triple (dst src1 src2:vec) (vsr:bool) =
     print_triple (print_vec dst vsr p) (print_vec src1 vsr p) (print_vec src2 vsr p)
   in
   let print_vec_quadruple (dst src1 src2 src3:vec) (vsr:bool) =
     print_quadruple (print_vec dst vsr p) (print_vec src1 vsr p) (print_vec src2 vsr p) (print_vec src3 vsr p)
+  in
+  let print_vec_imm (dst:vec) (src:int) (vsr:bool) =
+    print_pair (print_vec dst vsr p) (p.const src)
+  in
+  let print_vec_pair_imm (dst src:vec) (imm:int) (vsr:bool) =
+    print_triple (print_vec dst vsr p) (print_vec src vsr p) (p.const imm)
   in
   let print_vec_triple_imm (dst src1 src2:vec) (count:int) (vsr:bool) =
     print_quadruple (print_vec dst vsr p) (print_vec src1 vsr p) (print_vec src2 vsr p) (p.const count)
@@ -97,9 +109,11 @@ let print_ins (ins:ins) (p:printer) =
   | Load64 dst base offset -> "  ld " ^ print_reg_mem dst ({ address = base; offset = offset })
   | Store64 src base offset -> "  std " ^ print_reg_mem src ({ address = base; offset = offset })
   | LoadImm64 dst src -> "  li " ^ print_reg_imm dst src
+  | LoadImmShl64 dst src -> "  lis " ^ print_reg_imm dst src
   | AddLa dst src1 src2 -> "  la " ^ print_reg_mem dst ({ address = src1; offset = src2 })
   | Add dst src1 src2 -> "  add " ^ print_reg_triple dst src1 src2
   | AddImm dst src1 src2 -> "  addi " ^ print_reg_pair_imm dst src1 src2
+  | AddCarry dst src1 src2 -> "  addc " ^ print_reg_triple dst src1 src2
   | AddExtended dst src1 src2 -> "  adde " ^ print_reg_triple dst src1 src2
   | AddExtendedOV dst src1 src2 -> "  addex " ^ print_reg_triple dst src1 src2
   | Sub dst src1 src2 -> "  sub " ^ print_reg_triple dst src1 src2
@@ -110,18 +124,27 @@ let print_ins (ins:ins) (p:printer) =
   | And dst src1 src2 -> "  and " ^ print_reg_triple dst src1 src2
   | Sr64Imm dst src1 src2 -> "  srdi " ^ print_reg_pair_imm dst src1 src2
   | Sl64Imm dst src1 src2 -> "  sldi " ^ print_reg_pair_imm dst src1 src2
+  | Sr64 dst src1 src2 -> "  srd " ^ print_reg_triple dst src1 src2
+  | Sl64 dst src1 src2 -> "  sld " ^ print_reg_triple dst src1 src2
+  | Vmr dst src -> "  vmr " ^ print_vec_pair dst src false
   | Mfvsrd dst src -> "  mfvsrd " ^ print_reg_vec dst src true
   | Mfvsrld dst src -> "  mfvsrld " ^ print_reg_vec dst src true
   | Mtvsrdd dst src1 src2 -> "  mtvsrdd " ^ print_vec_reg_pair dst src1 src2 true
+  | Mtvsrws dst src -> "  mtvsrws " ^ print_vec_reg dst src true
   | Vadduwm dst src1 src2 -> "  vadduwm " ^ print_vec_triple dst src1 src2 false
   | Vxor dst src1 src2 -> "  vxor " ^ print_vec_triple dst src1 src2 false
+  | Vand dst src1 src2 -> "  vand " ^ print_vec_triple dst src1 src2 false
   | Vslw dst src1 src2 -> "  vslw " ^ print_vec_triple dst src1 src2 false
   | Vsrw dst src1 src2 -> "  vsrw " ^ print_vec_triple dst src1 src2 false
+  | Vsl dst src1 src2 -> "  vsl " ^ print_vec_triple dst src1 src2 false
   | Vcmpequw dst src1 src2 -> "  vcmpequw " ^ print_vec_triple dst src1 src2 false
   | Vsldoi dst src1 src2 count -> "  vsldoi " ^ print_vec_triple_imm dst src1 src2 count false
   | Vmrghw dst src1 src2 -> "  vmrghw " ^ print_vec_triple dst src1 src2 false
   | Xxmrghd dst src1 src2 -> "  xxmrghd " ^ print_vec_triple dst src1 src2 true
   | Vsel dst src1 src2 sel -> "  vsel " ^ print_vec_quadruple dst src1 src2 sel false
+  | Vspltw dst src uim -> "  vspltw " ^ print_vec_pair_imm dst src uim false
+  | Vspltisw dst src -> "  vspltisw " ^ print_vec_imm dst src false
+  | Vspltisb dst src -> "  vspltisb " ^ print_vec_imm dst src false
   | Load128 dst base offset -> "  lvx " ^ print_vec_reg_pair dst offset base false
   | Store128 src base offset -> "  stvx " ^ print_vec_reg_pair src offset base false
   | Load128Word4 dst base -> "  lxvw4x " ^ print_vec_reg_pair dst 0 base true
@@ -136,10 +159,19 @@ let print_ins (ins:ins) (p:printer) =
   | Vshasigmaw1 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 0 15 false
   | Vshasigmaw2 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 1 0 false
   | Vshasigmaw3 dst src -> "  vshasigmaw " ^ print_vec_pair_imm_pair dst src 1 15 false
+  | Vsbox dst src -> "  vsbox " ^ print_vec_pair dst src false
+  | RotWord dst src1 src2 -> "  vrlw " ^ print_vec_triple dst src1 src2 false
+  | Vcipher dst src1 src2 -> "  vcipher " ^ print_vec_triple dst src1 src2 false
+  | Vcipherlast dst src1 src2 -> "  vcipherlast " ^ print_vec_triple dst src1 src2 false
+  | Vncipher dst src1 src2 -> "  vncipher " ^ print_vec_triple dst src1 src2 false
+  | Vncipherlast dst src1 src2 -> "  vncipherlast " ^ print_vec_triple dst src1 src2 false
+  | Vpmsumd dst src1 src2 -> "  vpmsumd " ^ print_vec_triple dst src1 src2 false
   | Alloc n -> "  subi " ^ print_reg_pair_imm 1 1 n
   | Dealloc n -> "  addi " ^ print_reg_pair_imm 1 1 n
   | StoreStack128 src t offset -> "  stxv " ^ print_vec_mem src ({ address = 1; offset = offset }) true
   | LoadStack128 dst t offset -> "  lxv " ^ print_vec_mem dst ({ address = 1; offset = offset }) true
+  | StoreStack64 src t offset -> "  std " ^ print_reg_mem src ({ address = 1; offset = offset })
+  | LoadStack64 dst t offset -> "  ld " ^ print_reg_mem dst ({ address = 1; offset = offset })
   | Ghost _ -> ""
 let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   let print_cmp_ops (o1:cmp_opr) (o2:cmp_opr) : string =

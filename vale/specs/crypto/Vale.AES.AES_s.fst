@@ -12,18 +12,15 @@ open Vale.Def.Words.Seq_s
 open Vale.Def.Types_s
 open FStar.Seq
 open FStar.Mul
+include Vale.AES.AES_common_s
 
-// substitution is endian-neutral;
-// others operations assume that the quad32 and nat32 values are little-endian interpretations
+// operations assume that the quad32 and nat32 values are little-endian interpretations
 // of 16-byte and 4-byte sequences
 assume val mix_columns_LE (q:quad32) : quad32
 assume val inv_mix_columns_LE (q:quad32) : quad32
-assume val sub_bytes (q:quad32) : quad32
-assume val inv_sub_bytes (q:quad32) : quad32
 assume val shift_rows_LE (q:quad32) : quad32
 assume val inv_shift_rows_LE (q:quad32) : quad32
 assume val rot_word_LE (w:nat32) : nat32
-assume val sub_word (w:nat32) : nat32
 
 assume val commute_sub_bytes_shift_rows (q:quad32) : Lemma
   (sub_bytes (shift_rows_LE q) == shift_rows_LE (sub_bytes q))
@@ -31,41 +28,8 @@ assume val commute_sub_bytes_shift_rows (q:quad32) : Lemma
 assume val commute_rot_word_sub_word (x:nat32) : Lemma
   (rot_word_LE (sub_word x) == sub_word (rot_word_LE x))
 
-type algorithm:eqtype = | AES_128 | AES_192 | AES_256
-
-let aes_rcon (i:int) : nat32 =
-  if i = 0 then 0x01 else
-  if i = 1 then 0x02 else
-  if i = 2 then 0x04 else
-  if i = 3 then 0x08 else
-  if i = 4 then 0x10 else
-  if i = 5 then 0x20 else
-  if i = 6 then 0x40 else
-  if i = 7 then 0x80 else
-  if i = 8 then 0x1b else
-  0x36
-
-// AES fixes Rijndael's block size at 4 32-bit words
-let nb = 4
-
-// Number of key words
-unfold let nk(alg:algorithm) =
-  match alg with
-  | AES_128 -> 4
-  | AES_192 -> 6
-  | AES_256 -> 8
-
-// Number of rounds
-unfold let nr(alg:algorithm) =
-  match alg with
-  | AES_128 -> 10
-  | AES_192 -> 12
-  | AES_256 -> 14
-
 let is_aes_key_LE (alg:algorithm) (s:seq nat32) : prop0 = length s == nk alg
 type aes_key_LE (alg:algorithm) : eqtype = s:(seq nat32){is_aes_key_LE alg s}
-let is_aes_key (alg:algorithm) (s:seq nat8) : prop0 = length s == 4 * nk alg
-type aes_key (alg:algorithm) : eqtype = s:(seq nat8){is_aes_key alg s}
 
 let eval_round (state round_key:quad32) =
   let s = sub_bytes state in

@@ -12,7 +12,7 @@ let keysized (a:hash_alg) (l:nat) =
   l + block_length a < pow2 32
 
 val hmac:
-  a: hash_alg ->
+  a: fixed_len_alg ->
   key: bytes ->
   data: bytes ->
   Pure (lbytes (hash_length a))

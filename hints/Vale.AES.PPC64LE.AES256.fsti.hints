@@ -1,0 +1,111 @@
+[
+  "‹\u0003∫¯å\u007fE‹Uãùé¿YOÒ",
+  [
+    [
+      "Vale.AES.PPC64LE.AES256.va_lemma_KeyExpansion256Stdcall",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "d2d0cc5cc65f455fed4f3ee945bfbbd4"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_wp_KeyExpansion256Stdcall",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "4b10bbcca68b4bac4e4aaf46a58f9d65"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_quick_KeyExpansion256Stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "a5066e3afb1badad85086c1173faf32b"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_lemma_AES256EncryptBlock",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.PPC64LE.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.Def.Words_s.four",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_6da85ed037315c514ce09feb263c5fdd"
+      ],
+      0,
+      "6e682e3f2b46e997b2ecdc25481633d2"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_wp_AES256EncryptBlock",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "ce5b6283bc35b2495c98676e08ca9c6e"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_quick_AES256EncryptBlock",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "8571f77a5cdbd9226ef6576baa5bb156"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_lemma_AES256EncryptBlock_6way",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.PPC64LE.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.Def.Words_s.four",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c08cd8713a5eafe80cd33a223c587cfd"
+      ],
+      0,
+      "d3345e22ec4883313bf216354cbcc9a0"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_wp_AES256EncryptBlock_6way",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "92b766d219f6d38aa4e0682ece5b54c8"
+    ],
+    [
+      "Vale.AES.PPC64LE.AES256.va_quick_AES256EncryptBlock_6way",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "5038c30dd2cb4bf191737badde350a35"
+    ]
+  ]
+]

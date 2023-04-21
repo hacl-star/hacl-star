@@ -43,7 +43,7 @@ let xor_bytes_inplace a b len =
 
 // we rely on the output being zero-initialized for the correctness of padding
 inline_for_extraction noextract
-let wrap_key_st (a: hash_alg) =
+let wrap_key_st (a: fixed_len_alg) =
   output: B.buffer uint8 { B.length output == block_length a } ->
   key: B.buffer uint8 {B.length key `less_than_max_input_length` a /\ B.disjoint output key} ->
   len: UInt32.t {v len = B.length key} ->
@@ -57,14 +57,14 @@ let wrap_key_st (a: hash_alg) =
 
 /// This one is only to avoid a warning about a pattern that is not encoding properly.
 inline_for_extraction
-let helper_smtpat (a: hash_alg) (len: uint32_t{ v len `less_than_max_input_length` a }):
+let helper_smtpat (a: fixed_len_alg) (len: uint32_t{ v len `less_than_max_input_length` a }):
   x:uint32_t { x `FStar.UInt32.lte` D.block_len a } =
   if len `FStar.UInt32.lte` D.block_len a then len else D.hash_len a
 
 #set-options "--z3rlimit 40"
 
 inline_for_extraction noextract
-let mk_wrap_key (a: hash_alg) (hash: D.hash_st a): wrap_key_st a =
+let mk_wrap_key (a: fixed_len_alg) (hash: D.hash_st a): wrap_key_st a =
 fun output key len ->
   //[@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = helper_smtpat a len in
@@ -92,7 +92,7 @@ fun output key len ->
   end
 
 inline_for_extraction noextract
-let block_len_as_len (a: hash_alg { not (is_sha3 a) }):
+let block_len_as_len (a: fixed_len_alg { not (is_keccak a) }):
   Tot (l:len_t a { len_v a l = block_length a })
 =
   let open FStar.Int.Cast.Full in
@@ -108,7 +108,7 @@ let block_len_as_len (a: hash_alg { not (is_sha3 a) }):
 /// necessarily disjoint).
 inline_for_extraction noextract
 val part2:
-  a: hash_alg ->
+  a: fixed_len_alg ->
   m : D.m_spec a ->
   init: D.init_st (|a, m|) ->
   update_multi: D.update_multi_st (|a, m|) ->
@@ -136,19 +136,19 @@ val part2:
 // TODO: move
 (* We can't directly introduce uint128 literals *)
 inline_for_extraction noextract
-let zero_to_len (a:hash_alg) : (if is_sha3 a then unit else (x:len_t a { len_v a x == 0 })) =
+let zero_to_len (a:hash_alg) : (if is_keccak a then unit else (x:len_t a { len_v a x == 0 })) =
   match a with
   | MD5 | SHA1
   | SHA2_224 | SHA2_256
   | Blake2S -> UInt64.uint_to_t 0
   | SHA2_384 | SHA2_512
   | Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 (UInt64.uint_to_t 0)
-  | SHA3_256 -> ()
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> ()
 
 
 inline_for_extraction noextract
 val part2_update_empty:
-  a: hash_alg ->
+  a: fixed_len_alg ->
   m : D.m_spec a ->
   init: D.init_st (|a, m|) ->
   update_multi: D.update_multi_st (|a, m|) ->
@@ -170,7 +170,7 @@ val part2_update_empty:
       D.as_seq h1 s `Seq.equal`
         Spec.Hash.Incremental.Definitions.update_last a
           (Spec.Agile.Hash.update_multi a (D.as_seq h0 s) (init_extra_state a) bs)
-          (if is_sha3 a then () else S.length bs) l))
+          (if is_keccak a then () else S.length bs) l))
 
 let lemma_split_one_block (a:hash_alg) (s:bytes) : Lemma
   (requires S.length s == block_length a)
@@ -199,12 +199,12 @@ let uint32_to_ev (a:hash_alg) (n:UInt32.t{v n % block_length a == 0}) :
   | MD5 | SHA1
   | SHA2_224 | SHA2_256
   | SHA2_384 | SHA2_512
-  | SHA3_256 -> ()
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> ()
   | Blake2S -> FStar.Int.Cast.uint32_to_uint64 n
   | Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 (FStar.Int.Cast.uint32_to_uint64 n)
 
 noextract inline_for_extraction
-val len_add32 (a: hash_alg{not (is_sha3 a)})
+val len_add32 (a: hash_alg{not (is_keccak a)})
   (prev_len: len_t a)
   (input_len: UInt32.t { (UInt32.v input_len + len_v a prev_len) `less_than_max_input_length` a }):
   x:len_t a { len_v a x = len_v a prev_len + UInt32.v input_len }
@@ -222,7 +222,7 @@ let len_add32 a prev_len input_len =
 
 inline_for_extraction noextract
 val part2_update_nonempty:
-  a: hash_alg ->
+  a: fixed_len_alg ->
   m : D.m_spec a ->
   init: D.init_st (|a, m|) ->
   update_multi: D.update_multi_st (|a, m|) ->
@@ -244,7 +244,7 @@ val part2_update_nonempty:
       D.as_seq h1 s `Seq.equal`
         Spec.Hash.Incremental.Definitions.update_last a
           (Spec.Agile.Hash.update_multi a (D.as_seq h0 s) (init_extra_state a) bs)
-          (if is_sha3 a then () else S.length bs) l))
+          (if is_keccak a then () else S.length bs) l))
 
 open FStar.Mul
 
@@ -303,9 +303,9 @@ let part2_update_nonempty a m init update_multi update_last s key data len =
 
     [@inline_let]
     let prev_len: prev_len:D.prev_len_t a
-      { if is_sha3 a then True else len_v a prev_len % block_length a = 0 }
+      { if is_keccak a then True else len_v a prev_len % block_length a = 0 }
     =
-      if is_sha3 a then () else
+      if is_keccak a then () else
         len_add32 a (block_len_as_len a) full_blocks_len
     in
     update_last s prev_len rem rem_len
@@ -336,8 +336,17 @@ let part2 a m init update_multi update_last finish s dst key data len =
   (**) let h4 = ST.get () in
   (**) B.(modifies_trans
       (loc_union (loc_buffer s) (loc_buffer dst)) h0 h3 (loc_union (loc_buffer s) (loc_buffer dst)) h4);
-  (**) assert (B.as_seq h4 dst == hash_incremental a key_data_v0);
-  (**) hash_is_hash_incremental a key_data_v0
+  (**) assert (B.as_seq h4 dst == hash_incremental a key_data_v0 ());
+  calc (Seq.equal) {
+    B.as_seq h4 dst;
+  (Seq.equal) { }
+    hash_incremental a key_data_v0 ();
+  (Seq.equal) { hash_is_hash_incremental' a key_data_v0 () }
+    hash' a key_data_v0 ();
+  (Seq.equal) { }
+    hash a key_data_v0;
+  }
+
 
 /// This implementation is optimized. First, it reuses an existing hash state
 /// ``s`` rather than allocating a new one. Second, it writes out the result of
@@ -345,7 +354,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
 /// output buffer.
 inline_for_extraction noextract
 val part1:
-  a: hash_alg ->
+  a: fixed_len_alg ->
   m : D.m_spec a ->
   init: D.init_st (|a, m|) ->
   update_multi: D.update_multi_st (|a, m|) ->
@@ -373,7 +382,7 @@ let part1 a m init update_multi update_last finish s key data len =
   part2 a m init update_multi update_last finish s dst key data len
 
 let block_len_positive (a: hash_alg): Lemma (D.block_len a `FStar.UInt32.gt` 0ul) = ()
-let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
+let hash_lt_block (a: fixed_len_alg): Lemma (hash_length a < block_length a) = ()
 
 #set-options "--z3rlimit 200"
 let mk_compute i hash alloca init update_multi update_last finish dst key key_len data data_len =

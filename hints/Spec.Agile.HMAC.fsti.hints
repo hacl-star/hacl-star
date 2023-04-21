@@ -1,5 +1,5 @@
 [
-  "\u0015:ñ¾½\u001fîÉ5\u001c—õ);Ì¶",
+  "°\u0011ËLŸ'\u0015\u001fÚ×½Ñ\u0000\"²ã",
   [
     [
       "Spec.Agile.HMAC.lbytes",
@@ -13,29 +13,30 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e3cfbc8e5026bf7699fe9bff9a1796ab"
+      "c7cadbe0755641522d11eec30cd3d4f2"
     ],
     [
       "Spec.Agile.HMAC.hmac",
       1,
-      2,
-      1,
+      0,
+      0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Tm_unit",
+        "equation_Spec.Hash.Definitions.fixed_len_alg",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
-        "equation_Spec.Hash.Definitions.word_length",
-        "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+        "equation_Spec.Hash.Definitions.is_md",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "equation_Spec.Hash.Definitions.word_length", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_042ec925769949f282ab80a26a462500",
+        "typing_Spec.Hash.Definitions.hash_length",
+        "typing_Spec.Hash.Definitions.is_shake"
       ],
       0,
-      "c18969cb95080b1b596eed9671aa85cc"
+      "cdaf91f3f2438912875b4894b21bf643"
     ]
   ]
 ]

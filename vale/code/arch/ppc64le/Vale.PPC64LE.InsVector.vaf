@@ -4,6 +4,7 @@ include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Words.Two_s"
 include{:fstar}{:open} "Vale.Def.Words.Four_s"
+include{:fstar}{:open} "Vale.Def.Words.Seq_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
 include{:fstar}{:open} "Vale.PPC64LE.State"
@@ -14,6 +15,10 @@ include{:fstar}{:open} "Vale.PPC64LE.Memory_Sems"
 include{:fstar}{:open} "Vale.Def.Sel"
 include{:fstar}{:open} "Spec.SHA2"
 include{:fstar}{:open} "Vale.SHA.PPC64LE.SHA_helpers"
+include{:fstar}{:open} "Vale.AES.AES_common_s"
+include{:fstar}{:open} "Vale.AES.AES_BE_s"
+include{:fstar}{:open} "Vale.Math.Poly2_s"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits_s"
 
 module Vale.PPC64LE.InsVector
 
@@ -35,6 +40,9 @@ open Vale.Def.Sel
 open Spec.SHA2
 open Spec.Hash.Definitions
 open Vale.SHA.PPC64LE.SHA_helpers
+open Vale.AES.AES_BE_s
+open Vale.Math.Poly2_s
+open Vale.Math.Poly2.Bits_s
 
 let buffer128_write (b:buffer128) (i:int) (v:quad32) (h:vale_heap) : Ghost vale_heap
   (requires buffer_readable h b /\ buffer_writeable b)
@@ -102,6 +110,18 @@ operand_type vec_opr:quad32 @ nat8 :=
 | inout v28 | inout v29 | inout v30 | inout v31
 ;
 
+type sim:Type(0) := int_range((-16), 15);
+
+// Move content of vector register to vector register
+procedure Vmr(out dst:vec_opr, in src:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vmr(dst, src))}
+    ensures
+        dst == src;
+{
+}
+
 // Move high 64-bit of vector register to general-purpose register
 procedure Mfvsrd(out dst:reg_opr, in src:vec_opr)
     {:public}
@@ -132,6 +152,22 @@ procedure Mtvsrdd(out dst:vec_opr, in src1:reg_opr, in src2:reg_opr)
     ensures
         pow2_32 * dst.hi3 + dst.hi2 == old(src1);
         pow2_32 * dst.lo1 + dst.lo0 == old(src2);
+        dst == old(two_two_to_four(Mktwo(
+            Mktwo(src2 % pow2_32, src2 / pow2_32), 
+            Mktwo(src1 % pow2_32, src1 / pow2_32))));
+{
+}
+
+// Move low-order 32-bit of general-purpose register to word elements of vector register
+procedure Mtvsrws(out dst:vec_opr, in src:reg_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Mtvsrws(dst, src))}
+    ensures
+        dst.lo0 == old(src) % pow2_32;
+        dst.lo1 == old(src) % pow2_32;
+        dst.hi2 == old(src) % pow2_32;
+        dst.hi3 == old(src) % pow2_32;
 {
 }
 
@@ -151,6 +187,16 @@ procedure Vxor(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
     {:instruction Ins(S.Vxor(dst, src1, src2))}
     ensures
         dst == old(quad32_xor(src1, src2));
+{
+}
+
+// AND operation of two vector registers
+procedure Vand(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vand(dst, src1, src2))}
+    ensures
+        dst == four_map2(fun(di:nat32, si:nat32) iand32(di, si), old(src1), old(src2));
 {
 }
 
@@ -179,6 +225,24 @@ procedure Vsrw(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
             ishr32(src1.lo1, src2.lo1 % 32),
             ishr32(src1.hi2, src2.hi2 % 32),
             ishr32(src1.hi3, src2.hi3 % 32)));
+{
+}
+
+// Shift left 128-bit content of vector register with specific bit value
+procedure Vsl(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vsl(dst, src1, src2))}
+    requires
+        let sh := index(#(seq(nat8))(nat32_to_be_bytes(src2.lo0)), 3) % 8 in
+        let chk := fun (v:nat32, sh:nat8) (let bytes := #(seq(nat8))(nat32_to_be_bytes(v)) in 
+            sh = index(bytes, 3) % 8 /\ sh = index(bytes, 2) % 8 /\ sh = index(bytes, 1) % 8 /\ sh = index(bytes, 0) % 8) in
+        chk(src2.lo0, sh) /\ chk(src2.lo1, sh) /\ chk(src2.hi2, sh) /\ chk(src2.hi3, sh);
+    ensures
+        let sh := old(index(#(seq(nat8))(nat32_to_be_bytes(src2.lo0)), 3) % 8) in
+        let l := old(four_map(fun (i:nat32) ishl32(i, sh), src1)) in
+        let r := old(four_map(fun (i:nat32) ishr32(i, 32 - sh), src1)) in
+        dst == quad32_xor(l, Mkfour(0, r.lo0, r.lo1, r.hi2));
 {
 }
 
@@ -237,6 +301,42 @@ procedure Vsel(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr, in sel:vec_opr
         dst.lo1 == old(isel32(src2.lo1, src1.lo1, sel.lo1));
         dst.hi2 == old(isel32(src2.hi2, src1.hi2, sel.hi2));
         dst.hi3 == old(isel32(src2.hi3, src1.hi3, sel.hi3));
+{
+}
+
+// Vector splat source word element across word elements of destination vector register
+procedure Vspltw(out dst:vec_opr, in src:vec_opr, inline uim:nat2)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vspltw(dst, src, uim))}
+    ensures
+        uim == 0 ==> dst == old(Mkfour(src.hi3, src.hi3, src.hi3, src.hi3));
+        uim == 1 ==> dst == old(Mkfour(src.hi2, src.hi2, src.hi2, src.hi2));
+        uim == 2 ==> dst == old(Mkfour(src.lo1, src.lo1, src.lo1, src.lo1));
+        uim == 3 ==> dst == old(Mkfour(src.lo0, src.lo0, src.lo0, src.lo0));
+{
+}
+
+// Vector splat signed word immediate across word elements of vector register
+procedure Vspltisw(out dst:vec_opr, inline src:sim)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vspltisw(dst, src))}
+    ensures
+        let src_nat32 := int_to_nat32(src) in
+        dst == Mkfour(src_nat32, src_nat32, src_nat32, src_nat32);
+{
+}
+
+// Vector splat signed byte immediate across word elements of vector register
+procedure Vspltisb(out dst:vec_opr, inline src:sim)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vspltisb(dst, src))}
+    ensures
+        let src_nat8 := int_to_nat8(src) in
+        let src_nat32 := be_bytes_to_nat32(four_to_seq_BE(Mkfour(src_nat8, src_nat8, src_nat8, src_nat8))) in
+        dst == Mkfour(src_nat32, src_nat32, src_nat32, src_nat32);
 {
 }
 
@@ -504,4 +604,79 @@ procedure SHA256_Sigma1(out dst:vec_opr, in src:vec_opr, ghost t:counter, ghost 
         dst.hi3 == sigma_1_1_partial(t, block, hash_orig);
 {
     lemma_sha256_sigma3(old(src), t, block, hash_orig);
+}
+
+procedure Vsbox(out dst:vec_opr, in src:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vsbox(dst, src))}
+    ensures
+        dst == old(Mkfour(
+            sub_word(src.lo0),
+            sub_word(src.lo1),
+            sub_word(src.hi2),
+            sub_word(src.hi3)));
+{
+}
+
+// Rotate left word elements of vector register 24 bits
+procedure RotWord(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.RotWord(dst, src1, src2))}
+    requires
+        src2.lo0 == 8 && src2.lo1 == 8 && src2.hi2 == 8 && src2.hi3 == 8;
+    ensures
+        dst == old(Mkfour(
+            rot_word(src1.lo0),
+            rot_word(src1.lo1),
+            rot_word(src1.hi2),
+            rot_word(src1.hi3)));
+{
+}
+
+procedure Vcipher(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vcipher(dst, src1, src2))}
+    ensures
+        dst == old(quad32_xor(mix_columns(shift_rows(sub_bytes(src1))), src2));
+{
+}
+
+procedure Vcipherlast(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vcipherlast(dst, src1, src2))}
+    ensures
+        dst == old(quad32_xor(shift_rows(sub_bytes(src1)), src2));
+{
+}
+
+procedure Vncipher(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vncipher(dst, src1, src2))}
+    ensures
+        dst == old(inv_mix_columns(quad32_xor(inv_sub_bytes(inv_shift_rows(src1)), src2)));
+{
+}
+
+procedure Vncipherlast(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vncipherlast(dst, src1, src2))}
+    ensures
+        dst == old(quad32_xor(inv_sub_bytes(inv_shift_rows(src1)), src2));
+{
+}
+
+procedure Vpmsumd(out dst:vec_opr, in src1:vec_opr, in src2:vec_opr)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(S.Vpmsumd(dst, src1, src2))}
+    ensures
+        dst == old(to_quad32(add(mul(of_double32(quad32_double_lo(src1)), of_double32(quad32_double_lo(src2))), 
+            mul(of_double32(quad32_double_hi(src1)), of_double32(quad32_double_hi(src2))))));
+{
 }

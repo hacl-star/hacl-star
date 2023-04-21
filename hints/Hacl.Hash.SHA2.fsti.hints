@@ -2,6 +2,62 @@
   "iN­Š%dqößaÒv~ E÷",
   [
     [
+      "Hacl.Hash.SHA2.hash_224",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
+        "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "cddc194615bc922f3216dc810f1e01ce"
+    ],
+    [
+      "Hacl.Hash.SHA2.hash_256",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "671131ba482d7f0ce07979bcc1846bb7"
+    ],
+    [
+      "Hacl.Hash.SHA2.hash_384",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
+        "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "a9832b6891424b44738170ff97ec1b0c"
+    ],
+    [
+      "Hacl.Hash.SHA2.hash_512",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
+        "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "0ae9914d73c36cde68341a7c1d6bd39a"
+    ],
+    [
       "Hacl.Hash.SHA2.hash_512_lib",
       1,
       2,
@@ -10,6 +66,7 @@
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
@@ -27,6 +84,7 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.is_shake",
         "equation_Spec.Hash.Definitions.less_than_max_input_length",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
@@ -54,7 +112,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "2af9a34781935a02c0b301cac641b684"
+      "797ee4d95af3a184a58ac56b68e0c7fc"
     ]
   ]
 ]

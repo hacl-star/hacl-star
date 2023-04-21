@@ -25,6 +25,8 @@
 
 #include "Hacl_Hash_Base.h"
 
+typedef Spec_Hash_Definitions_hash_alg impl;
+
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
@@ -50,18 +52,6 @@ uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
         return (uint32_t)8U;
       }
     case Spec_Hash_Definitions_SHA2_512:
-      {
-        return (uint32_t)8U;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        return (uint32_t)8U;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        return (uint32_t)4U;
-      }
-    case Spec_Hash_Definitions_Blake2B:
       {
         return (uint32_t)8U;
       }
@@ -101,7 +91,27 @@ uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)128U;
       }
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return (uint32_t)144U;
+      }
     case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)136U;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return (uint32_t)104U;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
+      {
+        return (uint32_t)72U;
+      }
+    case Spec_Hash_Definitions_Shake128:
+      {
+        return (uint32_t)168U;
+      }
+    case Spec_Hash_Definitions_Shake256:
       {
         return (uint32_t)136U;
       }
@@ -149,18 +159,6 @@ uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)8U;
       }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        return (uint32_t)4U;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        return (uint32_t)8U;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        return (uint32_t)8U;
-      }
     default:
       {
         KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -197,15 +195,27 @@ uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)64U;
       }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        return (uint32_t)32U;
-      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)32U;
       }
     case Spec_Hash_Definitions_Blake2B:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
       {
         return (uint32_t)64U;
       }

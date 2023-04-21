@@ -13,6 +13,7 @@ open Vale.AES.GCTR_s
 open Vale.AES.GCM_helpers
 open FStar.Math.Lemmas
 open Vale.Lib.Seqs
+open Vale.AES.Types_helpers
 
 #set-options "--z3rlimit 20 --max_fuel 1 --max_ifuel 0"
 
@@ -553,20 +554,6 @@ let nat32_xor_bytewise (k k' m:nat32) (s s' t t':seq4 nat8) (n:nat) : Lemma
   if n = 4 then nat32_xor_bytewise_4 k k' x x' m (seq_to_four_LE s) (seq_to_four_LE s') (seq_to_four_LE t) (seq_to_four_LE t');
   assert (equal (slice t 0 n) (slice t' 0 n));
   lemma_slice_orig_index t t' 0 n;
-  ()
-
-// REVIEW: should be shared with GCM_helpers
-let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
-  (ensures (
-    let s = le_quad32_to_bytes q in
-    q.lo0 == four_to_nat 8 (seq_to_four_LE (slice s 0 4)) /\
-    q.lo1 == four_to_nat 8 (seq_to_four_LE (slice s 4 8)) /\
-    q.hi2 == four_to_nat 8 (seq_to_four_LE (slice s 8 12)) /\
-    q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
-  ))
-  =
-  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
-  reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
 let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma
