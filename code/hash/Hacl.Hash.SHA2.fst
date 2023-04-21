@@ -26,39 +26,17 @@ let mb_state_32 a = Hacl.Impl.SHA2.Core.state_t a Hacl.Spec.SHA2.Vec.M32
 
 #push-options "--ifuel 1"
 
-let eq_length_lib_state (a:sha2_alg) (b:B.buffer (word a) { B.length b == Lib.IntTypes.v 8ul })
-  : Lemma ((B.length b == Lib.IntTypes.v 8ul) == (B.len b == impl_state_len (| a, () |)))
-  = FStar.PropositionalExtensionality.apply
-      (B.len b == impl_state_len (| a, () |))
-      (B.length b == Lib.IntTypes.v 8ul)
+#push-options "--print_implicits"
 
-let mb_state_32_is_hash_state (a: sha2_alg): Lemma
-  (ensures mb_state_32 a == state (| a, () |))
-=
-  let open Hacl.Impl.SHA2.Core in
-  let open Hacl.Spec.SHA2.Vec in
-  let open Lib.Buffer in
-  let open Lib.IntVector in
-  calc (==) {
-    mb_state_32 a;
-  (==) { }
-    state_t a M32;
-  (==) { }
-    lbuffer (element_t a M32) 8ul;
-  (==) { }
-    lbuffer (vec_t (word_t a) 1) 8ul;
-  (==) { Lib.IntVector.reveal_vec_1 (word_t a) }
-    lbuffer (Lib.IntTypes.sec_int_t (word_t a)) 8ul;
-  (==) { }
-    lbuffer (word a) 8ul;
-  (==) { _ by FStar.Tactics.(
-    norm [ zeta; iota; delta_only [ `%lbuffer; `%lbuffer_t; `%buffer_t ] ]; trefl ()
-  ) }
-    b:B.buffer (word a) { B.length b == Lib.IntTypes.v 8ul };
-  (==) { (* _ by FStar.Tactics.(l_to_r [`eq_length_lib_state]); *) admit () }
-    b:B.buffer (word a) { B.len b == impl_state_len (| a, () |) };
-  };
-  admit ()
+inline_for_extraction noextract
+let coerce_to_state (a:sha2_alg) (b:mb_state_32 a) : state (| a, () |)
+  = Lib.IntVector.reveal_vec_1 (word_t a);
+    b
+
+inline_for_extraction noextract
+let coerce_to_mb_state (a:sha2_alg) (b:state (| a, () |)) : mb_state_32 a
+  = Lib.IntVector.reveal_vec_1 (word_t a);
+    b
 
 assume
 val reveal_vec_v_1: #t:Lib.IntVector.v_inttype -> f:Lib.IntVector.vec_t t 1 -> Lemma
@@ -85,15 +63,13 @@ let state_spec_v_lemma a st =
   eq_intro #(word a) #8 (Vec.state_spec_v st).[0] st
 
 let init_224 st =
-  let open Hacl.Spec.SHA2.Vec in
-  mb_state_32_is_hash_state SHA2_224;
-  let h0 = ST.get () in
-  let st: mb_state_32 SHA2_224 = st in
+  [@inline_let]
+  let st: mb_state_32 SHA2_224 = coerce_to_mb_state SHA2_224 st in
 
   Lib.IntVector.reveal_vec_1 (word_t SHA2_224);
   Hacl.SHA2.Scalar32.init #SHA2_224 st;
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Hacl.Spec.SHA2.Vec.M32 0;
-  state_spec_v_lemma SHA2_224 (init SHA2_224 M32)
+  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Vec.M32 0;
+  state_spec_v_lemma SHA2_224 (Vec.init SHA2_224 Vec.M32)
 
 let init_256 st =
   Hacl.SHA2.Scalar32.init #SHA2_256 st;
