@@ -30,15 +30,6 @@
 #include "internal/Hacl_Bignum_Base.h"
 #include "lib_intrinsics.h"
 
-static inline bool bn_is_zero_vartime4(uint64_t *f)
-{
-  uint64_t f0 = f[0U];
-  uint64_t f1 = f[1U];
-  uint64_t f2 = f[2U];
-  uint64_t f3 = f[3U];
-  return f0 == (uint64_t)0U && f1 == (uint64_t)0U && f2 == (uint64_t)0U && f3 == (uint64_t)0U;
-}
-
 static inline uint64_t bn_is_zero_mask4(uint64_t *f)
 {
   uint64_t bn_zero[4U] = { 0U };
@@ -54,17 +45,10 @@ static inline uint64_t bn_is_zero_mask4(uint64_t *f)
   return res;
 }
 
-static inline bool bn_is_eq_vartime4(uint64_t *a, uint64_t *b)
+static inline bool bn_is_zero_vartime4(uint64_t *f)
 {
-  uint64_t a0 = a[0U];
-  uint64_t a1 = a[1U];
-  uint64_t a2 = a[2U];
-  uint64_t a3 = a[3U];
-  uint64_t b0 = b[0U];
-  uint64_t b1 = b[1U];
-  uint64_t b2 = b[2U];
-  uint64_t b3 = b[3U];
-  return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3;
+  uint64_t m = bn_is_zero_mask4(f);
+  return m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 static inline uint64_t bn_is_eq_mask4(uint64_t *a, uint64_t *b)
@@ -78,6 +62,12 @@ static inline uint64_t bn_is_eq_mask4(uint64_t *a, uint64_t *b)
     mask = uu____0 & mask;);
   uint64_t mask1 = mask;
   return mask1;
+}
+
+static inline bool bn_is_eq_vartime4(uint64_t *a, uint64_t *b)
+{
+  uint64_t m = bn_is_eq_mask4(a, b);
+  return m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 static inline void bn_cmovznz4(uint64_t *res, uint64_t cin, uint64_t *x, uint64_t *y)
@@ -518,8 +508,7 @@ static inline void fsqr0(uint64_t *res, uint64_t *x)
 static inline void from_mont(uint64_t *res, uint64_t *a)
 {
   uint64_t tmp[8U] = { 0U };
-  uint64_t *t_low = tmp;
-  memcpy(t_low, a, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(tmp, a, (uint32_t)4U * sizeof (uint64_t));
   mont_reduction(res, tmp);
 }
 
@@ -1342,8 +1331,7 @@ static inline void qmont_reduction(uint64_t *res, uint64_t *x)
 static inline void from_qmont(uint64_t *res, uint64_t *x)
 {
   uint64_t tmp[8U] = { 0U };
-  uint64_t *t_low = tmp;
-  memcpy(t_low, x, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(tmp, x, (uint32_t)4U * sizeof (uint64_t));
   qmont_reduction(res, tmp);
 }
 
