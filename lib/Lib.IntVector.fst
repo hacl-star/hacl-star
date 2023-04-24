@@ -26,6 +26,8 @@ let vec_v #t #w x = admit()
 
 let vecv_extensionality #t #w f1 f2 = admit()
 
+let reveal_vec_v_1 #t f = admit()
+
 let vec_zero (t:v_inttype) (w:width) =
   match t,w with
   | U128,1 -> vec128_zero

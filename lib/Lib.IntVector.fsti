@@ -26,6 +26,12 @@ val vecv_extensionality: #t:v_inttype -> #w:width -> f1:vec_t t w -> f2:vec_t t 
   (requires vec_v f1 == vec_v f2)
   (ensures f1 == f2)
 
+val reveal_vec_v_1: #t:v_inttype -> f:vec_t t 1 -> Lemma
+  (requires t <> U128)
+  (ensures (
+    reveal_vec_1 t;
+    f == index (vec_v f) 0))
+
 inline_for_extraction
 val vec_zero: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == create w (mk_int 0)}
 
