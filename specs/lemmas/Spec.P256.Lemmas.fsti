@@ -5,6 +5,13 @@ open Spec.P256.PointOps
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
+(** The point addition and doubling formulas are taken from
+    https://eprint.iacr.org/2015/1060.pdf. The correctness of
+    the formulas is shown in Appendix A of the paper. Their
+    verification in F* is left for the future. *)
+
+// TODO: add `point_inv p = is_on_curve p || is_point_at_inf p`
+
 val prime_lemma: unit -> Lemma (FStar.Math.Euclid.is_prime prime)
 
 val lemma_aff_is_point_at_inf: p:proj_point ->
