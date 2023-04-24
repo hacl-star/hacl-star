@@ -33,5 +33,23 @@ val hash_is_repeat_blocks:
     update_last a len' rem mb st ==
     Lib.Sequence.repeat_blocks (block_length a) b (update a) (update_last a len') st0)
 
+val update_last_is_repeat_blocks_multi:
+     a:sha2_alg
+  -> totlen:len_lt_max_a_t a
+  -> len: size_nat { len <= block_length a }
+  -> last:lseq uint8 len
+  -> st1:words_state a ->
+  Lemma
+  (requires
+   (let blocksize = block_length a in
+    len % blocksize == totlen % blocksize))
+  (ensures
+   (let totlen' : len_t a = mk_len_t a totlen in
+    let pad_s = Spec.Hash.MD.pad a totlen in
+    let blocksize = block_length a in
+    let blocks1 = Seq.append last pad_s in
+    update_last a totlen' len last st1 ==
+    repeat_blocks_multi blocksize blocks1 (update a) st1))
+
 val hash_agile_lemma: #a:sha2_alg -> len:len_lt_max_a_t a -> b:seq uint8{length b = len} ->
   Lemma (hash #a len b == Spec.Agile.Hash.hash a b)
