@@ -714,8 +714,26 @@ let load_last_lemma a totlen totlen_seq len b =
   append_pad_last_length_lemma a totlen;
   let rem = len in
   let fin = padded_blocks a rem * block_length a in
+  calc (==) {
+    pad0_length a len <: int;
+    (==) { }
+    (block_length a - (len + len_length a + 1)) % block_length a;
+    (==) {
+      FStar.Math.Lemmas.lemma_mod_sub_distr (block_length a) (len + len_length a + 1) (block_length a);
+      FStar.Math.Lemmas.lemma_mod_add_distr (len_length a + 1) len (block_length a)
+      }
+    (block_length a - (len % block_length a + len_length a + 1) % block_length a) % block_length a;
+    (==) { }
+    (block_length a - (totlen % block_length a + len_length a + 1) % block_length a) % block_length a;
+    (==) {
+      FStar.Math.Lemmas.lemma_mod_sub_distr (block_length a) (totlen + len_length a + 1) (block_length a);
+      FStar.Math.Lemmas.lemma_mod_add_distr (len_length a + 1) totlen (block_length a)
+    }
+    (block_length a - (totlen + len_length a + 1)) % block_length a;
+    (==) { }
+    pad0_length a totlen;
+  };
   assert (fin - len_length a == rem + 1 + pad0_length a totlen);
-
 
   let last = create (2 * block_length a) (u8 0) in
   let last1 = update_sub last 0 rem b in
