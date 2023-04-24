@@ -39,19 +39,7 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseS(
 {
   uint8_t o_shared[32U] = { 0U };
   uint8_t *o_pkE1 = o_pkE + (uint32_t)1U;
-  uint64_t tempBuffer[100U] = { 0U };
-  uint64_t resultBuffer[12U] = { 0U };
-  uint64_t *resultBufferX = resultBuffer;
-  uint64_t *resultBufferY = resultBuffer + (uint32_t)4U;
-  uint8_t *resultX0 = o_pkE1;
-  uint8_t *resultY0 = o_pkE1 + (uint32_t)32U;
-  Hacl_Impl_P256_Core_secretToPublic(resultBuffer, skE, tempBuffer);
-  uint64_t flag = Hacl_Impl_P256_Core_isPointAtInfinityPrivate(resultBuffer);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferX);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX0);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY0);
-  bool res0 = flag == (uint64_t)0U;
+  bool res0 = Hacl_Impl_P256_DH_ecp256dh_i(o_pkE1, skE);
   uint32_t res1;
   if (res0)
   {
@@ -61,33 +49,16 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseS(
   {
     res1 = (uint32_t)1U;
   }
-  uint32_t res;
+  uint32_t res3;
   if (res1 == (uint32_t)0U)
   {
     o_pkE[0U] = (uint8_t)4U;
     uint8_t o_dh[64U] = { 0U };
     uint8_t tmp0[64U] = { 0U };
-    uint64_t resultBufferFelem[12U] = { 0U };
-    uint64_t *resultBufferFelemX = resultBufferFelem;
-    uint64_t *resultBufferFelemY = resultBufferFelem + (uint32_t)4U;
-    uint8_t *resultX = tmp0;
-    uint8_t *resultY = tmp0 + (uint32_t)32U;
-    uint64_t publicKeyAsFelem[8U] = { 0U };
-    uint64_t *publicKeyFelemX = publicKeyAsFelem;
-    uint64_t *publicKeyFelemY = publicKeyAsFelem + (uint32_t)4U;
-    uint8_t *pubKeyX = pkR;
-    uint8_t *pubKeyY = pkR + (uint32_t)32U;
-    Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-    Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
-    uint64_t flag0 = Hacl_Impl_P256_DH__ecp256dh_r(resultBufferFelem, publicKeyAsFelem, skE);
-    Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemX);
-    Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemY);
-    Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX);
-    Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY);
-    bool res3 = flag0 == (uint64_t)0U;
+    bool res = Hacl_Impl_P256_DH_ecp256dh_r(tmp0, pkR, skE);
     memcpy(o_dh, tmp0, (uint32_t)64U * sizeof (uint8_t));
     uint32_t res2;
-    if (res3)
+    if (res)
     {
       res2 = (uint32_t)0U;
     }
@@ -160,18 +131,18 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseS(
       memcpy(tmp + (uint32_t)14U, label_shared_secret, (uint32_t)13U * sizeof (uint8_t));
       memcpy(tmp + (uint32_t)27U, o_kemcontext, (uint32_t)130U * sizeof (uint8_t));
       Hacl_HKDF_expand_sha2_256(o_shared, o_eae_prk, (uint32_t)32U, tmp, len, (uint32_t)32U);
-      res = (uint32_t)0U;
+      res3 = (uint32_t)0U;
     }
     else
     {
-      res = (uint32_t)1U;
+      res3 = (uint32_t)1U;
     }
   }
   else
   {
-    res = (uint32_t)1U;
+    res3 = (uint32_t)1U;
   }
-  if (res == (uint32_t)0U)
+  if (res3 == (uint32_t)0U)
   {
     uint8_t o_context[65U] = { 0U };
     uint8_t o_secret[32U] = { 0U };
@@ -328,9 +299,9 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseS(
     memcpy(tmp + (uint32_t)29U, o_context, (uint32_t)65U * sizeof (uint8_t));
     Hacl_HKDF_expand_sha2_256(o_ctx.ctx_nonce, o_secret, (uint32_t)32U, tmp, len, (uint32_t)12U);
     o_ctx.ctx_seq[0U] = (uint64_t)0U;
-    return res;
+    return res3;
   }
-  return res;
+  return res3;
 }
 
 uint32_t
@@ -343,21 +314,9 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseR(
 )
 {
   uint8_t pkR[64U] = { 0U };
-  uint64_t tempBuffer0[100U] = { 0U };
-  uint64_t resultBuffer0[12U] = { 0U };
-  uint64_t *resultBufferX0 = resultBuffer0;
-  uint64_t *resultBufferY0 = resultBuffer0 + (uint32_t)4U;
-  uint8_t *resultX0 = pkR;
-  uint8_t *resultY0 = pkR + (uint32_t)32U;
-  Hacl_Impl_P256_Core_secretToPublic(resultBuffer0, skR, tempBuffer0);
-  uint64_t flag0 = Hacl_Impl_P256_Core_isPointAtInfinityPrivate(resultBuffer0);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferX0);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY0);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferX0, resultX0);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferY0, resultY0);
-  bool res = flag0 == (uint64_t)0U;
+  bool res0 = Hacl_Impl_P256_DH_ecp256dh_i(pkR, skR);
   uint32_t res1;
-  if (res)
+  if (res0)
   {
     res1 = (uint32_t)0U;
   }
@@ -371,27 +330,10 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseR(
     uint8_t *pkE = enc + (uint32_t)1U;
     uint8_t dh[64U] = { 0U };
     uint8_t tmp0[64U] = { 0U };
-    uint64_t resultBufferFelem[12U] = { 0U };
-    uint64_t *resultBufferFelemX = resultBufferFelem;
-    uint64_t *resultBufferFelemY = resultBufferFelem + (uint32_t)4U;
-    uint8_t *resultX1 = tmp0;
-    uint8_t *resultY1 = tmp0 + (uint32_t)32U;
-    uint64_t publicKeyAsFelem[8U] = { 0U };
-    uint64_t *publicKeyFelemX = publicKeyAsFelem;
-    uint64_t *publicKeyFelemY = publicKeyAsFelem + (uint32_t)4U;
-    uint8_t *pubKeyX = pkE;
-    uint8_t *pubKeyY = pkE + (uint32_t)32U;
-    Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-    Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
-    uint64_t flag1 = Hacl_Impl_P256_DH__ecp256dh_r(resultBufferFelem, publicKeyAsFelem, skR);
-    Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemX);
-    Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemY);
-    Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX1);
-    Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY1);
-    bool res0 = flag1 == (uint64_t)0U;
+    bool res = Hacl_Impl_P256_DH_ecp256dh_r(tmp0, pkE, skR);
     memcpy(dh, tmp0, (uint32_t)64U * sizeof (uint8_t));
     uint32_t res11;
-    if (res0)
+    if (res)
     {
       res11 = (uint32_t)0U;
     }
@@ -405,19 +347,7 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseR(
     {
       uint8_t *pkRm = kemcontext + (uint32_t)65U;
       uint8_t *pkR1 = pkRm + (uint32_t)1U;
-      uint64_t tempBuffer[100U] = { 0U };
-      uint64_t resultBuffer[12U] = { 0U };
-      uint64_t *resultBufferX = resultBuffer;
-      uint64_t *resultBufferY = resultBuffer + (uint32_t)4U;
-      uint8_t *resultX = pkR1;
-      uint8_t *resultY = pkR1 + (uint32_t)32U;
-      Hacl_Impl_P256_Core_secretToPublic(resultBuffer, skR, tempBuffer);
-      uint64_t flag = Hacl_Impl_P256_Core_isPointAtInfinityPrivate(resultBuffer);
-      Hacl_Impl_P256_LowLevel_changeEndian(resultBufferX);
-      Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
-      Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX);
-      Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY);
-      bool res3 = flag == (uint64_t)0U;
+      bool res3 = Hacl_Impl_P256_DH_ecp256dh_i(pkR1, skR);
       uint32_t res2;
       if (res3)
       {
