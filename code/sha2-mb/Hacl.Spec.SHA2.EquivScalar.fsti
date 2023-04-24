@@ -48,6 +48,7 @@ val update_last_is_repeat_blocks_multi:
     let pad_s = Spec.Hash.MD.pad a totlen in
     let blocksize = block_length a in
     let blocks1 = Seq.append last pad_s in
+    Seq.length blocks1 % blocksize == 0 /\
     update_last a totlen' len last st1 ==
     repeat_blocks_multi blocksize blocks1 (update a) st1))
 

@@ -287,12 +287,188 @@ let update_last_224 st prev_len input input_len =
     }
   end
 
-let update_last_256 =
-  Hacl.Hash.MD.mk_update_last SHA2_256 update_multi_256 pad_256
-let update_last_384 =
-  Hacl.Hash.MD.mk_update_last SHA2_384 update_multi_384 pad_384
-let update_last_512 =
-  Hacl.Hash.MD.mk_update_last SHA2_512 update_multi_512 pad_512
+let update_last_256 st prev_len input input_len =
+  let h0 = ST.get () in
+  [@inline_let]
+  let st' = coerce_to_mb_state SHA2_256 st in
+  [@inline_let]
+  let input' = ntup1 #(Lib.Buffer.lbuffer Lib.IntTypes.uint8 input_len) #1 input in
+  Lib.IntVector.reveal_vec_1 (word_t SHA2_256);
+  [@inline_let]
+  let totlen = prev_len `Hacl.Hash.MD.len_add32 SHA2_256` input_len in
+  Hacl.SHA2.Scalar32.sha256_update_last totlen input_len input' st';
+  let h1 = ST.get () in
+  begin (* ghost *)
+    let input0_raw = B.as_seq h0 input in
+    let input0 = as_seq_multi h0 input' in
+
+    let st0 = as_seq h0 st in
+    let st0' = as_seq #(| SHA2_256, () |) h0 st' in
+    let vlen = Lib.IntTypes.v input_len in
+    let vprev_len = prev_len_v prev_len in
+    let vtotlen = Lib.IntTypes.v totlen in
+    let pad_s = Spec.Hash.MD.pad SHA2_256 vtotlen in
+    let blocks1 = Seq.append input0 pad_s in
+    let blocks1_raw = Seq.append input0_raw pad_s in
+
+    calc (==) {
+        as_seq h1 st;
+      (==) { }
+        Vec.update_last #SHA2_256 #Vec.M32 totlen vlen input0 st0';
+      (==) { state_spec_v_lemma SHA2_256 (Vec.update_last totlen vlen input0 st0') }
+        Lib.Sequence.index (Vec.state_spec_v #SHA2_256 #Vec.M32 (Vec.update_last totlen vlen input0 st0')) 0;
+      (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_256 #Vec.M32 totlen vlen input0 st0' 0 }
+        Hacl.Spec.SHA2.update_last SHA2_256 totlen vlen input0.(|0|)
+          (Lib.Sequence.index (Vec.state_spec_v #SHA2_256 #Vec.M32 st0') 0);
+      (==) { state_spec_v_lemma SHA2_256 st0' }
+        Hacl.Spec.SHA2.update_last SHA2_256 totlen vlen input0.(|0|) st0';
+      (==) { ntup1_lemma #_ #1 input0 }
+        Hacl.Spec.SHA2.update_last SHA2_256 totlen vlen input0 st0';
+      (==) {
+        Hacl.Spec.SHA2.EquivScalar.update_last_is_repeat_blocks_multi SHA2_256 vtotlen vlen input0 st0'
+      }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_256) blocks1 (Hacl.Spec.SHA2.update SHA2_256) st0';
+      (==) { assert (st0 `Seq.equal` st0');
+             ntup1_lemma #_ #1 input0; assert (blocks1 `Seq.equal` blocks1_raw) }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_256) blocks1_raw (Hacl.Spec.SHA2.update SHA2_256) st0;
+      (==) { Classical.forall_intro_2 (Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_256);
+             Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality (block_length SHA2_256)
+               blocks1_raw
+               (Hacl.Spec.SHA2.update SHA2_256)
+               (Lib.UpdateMulti.Lemmas.repeat_f (block_length SHA2_256) (Spec.Agile.Hash.update SHA2_256))
+               st0 }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_256) blocks1_raw
+          (Lib.UpdateMulti.Lemmas.repeat_f (block_length SHA2_256) (Spec.Agile.Hash.update SHA2_256))
+          st0;
+      (==) {
+        Lib.UpdateMulti.Lemmas.update_multi_is_repeat_blocks_multi (block_length SHA2_256) (Spec.Agile.Hash.update SHA2_256) st0 blocks1_raw }
+        Lib.UpdateMulti.mk_update_multi (block_length SHA2_256) (Spec.Agile.Hash.update SHA2_256) st0 blocks1_raw;
+      (==) { }
+        Spec.Hash.Incremental.update_last SHA2_256 st0 (prev_len_v prev_len) input0_raw;
+    }
+  end
+
+let update_last_384 st prev_len input input_len =
+  let h0 = ST.get () in
+  [@inline_let]
+  let st' = coerce_to_mb_state SHA2_384 st in
+  [@inline_let]
+  let input' = ntup1 #(Lib.Buffer.lbuffer Lib.IntTypes.uint8 input_len) #1 input in
+  Lib.IntVector.reveal_vec_1 (word_t SHA2_384);
+  [@inline_let]
+  let totlen = prev_len `Hacl.Hash.MD.len_add32 SHA2_384` input_len in
+  Hacl.SHA2.Scalar32.sha384_update_last totlen input_len input' st';
+  let h1 = ST.get () in
+  begin (* ghost *)
+    let input0_raw = B.as_seq h0 input in
+    let input0 = as_seq_multi h0 input' in
+
+    let st0 = as_seq h0 st in
+    let st0' = as_seq #(| SHA2_384, () |) h0 st' in
+    let vlen = Lib.IntTypes.v input_len in
+    let vprev_len = prev_len_v prev_len in
+    let vtotlen = Lib.IntTypes.v totlen in
+    let pad_s = Spec.Hash.MD.pad SHA2_384 vtotlen in
+    let blocks1 = Seq.append input0 pad_s in
+    let blocks1_raw = Seq.append input0_raw pad_s in
+
+    calc (==) {
+        as_seq h1 st;
+      (==) { }
+        Vec.update_last #SHA2_384 #Vec.M32 totlen vlen input0 st0';
+      (==) { state_spec_v_lemma SHA2_384 (Vec.update_last totlen vlen input0 st0') }
+        Lib.Sequence.index (Vec.state_spec_v #SHA2_384 #Vec.M32 (Vec.update_last totlen vlen input0 st0')) 0;
+      (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_384 #Vec.M32 totlen vlen input0 st0' 0 }
+        Hacl.Spec.SHA2.update_last SHA2_384 totlen vlen input0.(|0|)
+          (Lib.Sequence.index (Vec.state_spec_v #SHA2_384 #Vec.M32 st0') 0);
+      (==) { state_spec_v_lemma SHA2_384 st0' }
+        Hacl.Spec.SHA2.update_last SHA2_384 totlen vlen input0.(|0|) st0';
+      (==) { ntup1_lemma #_ #1 input0 }
+        Hacl.Spec.SHA2.update_last SHA2_384 totlen vlen input0 st0';
+      (==) {
+        Hacl.Spec.SHA2.EquivScalar.update_last_is_repeat_blocks_multi SHA2_384 vtotlen vlen input0 st0'
+      }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_384) blocks1 (Hacl.Spec.SHA2.update SHA2_384) st0';
+      (==) { assert (st0 `Seq.equal` st0');
+             ntup1_lemma #_ #1 input0; assert (blocks1 `Seq.equal` blocks1_raw) }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_384) blocks1_raw (Hacl.Spec.SHA2.update SHA2_384) st0;
+      (==) { Classical.forall_intro_2 (Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_384);
+             Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality (block_length SHA2_384)
+               blocks1_raw
+               (Hacl.Spec.SHA2.update SHA2_384)
+               (Lib.UpdateMulti.Lemmas.repeat_f (block_length SHA2_384) (Spec.Agile.Hash.update SHA2_384))
+               st0 }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_384) blocks1_raw
+          (Lib.UpdateMulti.Lemmas.repeat_f (block_length SHA2_384) (Spec.Agile.Hash.update SHA2_384))
+          st0;
+      (==) {
+        Lib.UpdateMulti.Lemmas.update_multi_is_repeat_blocks_multi (block_length SHA2_384) (Spec.Agile.Hash.update SHA2_384) st0 blocks1_raw }
+        Lib.UpdateMulti.mk_update_multi (block_length SHA2_384) (Spec.Agile.Hash.update SHA2_384) st0 blocks1_raw;
+      (==) { }
+        Spec.Hash.Incremental.update_last SHA2_384 st0 (prev_len_v prev_len) input0_raw;
+    }
+  end
+
+let update_last_512  st prev_len input input_len =
+  let h0 = ST.get () in
+  [@inline_let]
+  let st' = coerce_to_mb_state SHA2_512 st in
+  [@inline_let]
+  let input' = ntup1 #(Lib.Buffer.lbuffer Lib.IntTypes.uint8 input_len) #1 input in
+  Lib.IntVector.reveal_vec_1 (word_t SHA2_512);
+  [@inline_let]
+  let totlen = prev_len `Hacl.Hash.MD.len_add32 SHA2_512` input_len in
+  Hacl.SHA2.Scalar32.sha512_update_last totlen input_len input' st';
+  let h1 = ST.get () in
+  begin (* ghost *)
+    let input0_raw = B.as_seq h0 input in
+    let input0 = as_seq_multi h0 input' in
+
+    let st0 = as_seq h0 st in
+    let st0' = as_seq #(| SHA2_512, () |) h0 st' in
+    let vlen = Lib.IntTypes.v input_len in
+    let vprev_len = prev_len_v prev_len in
+    let vtotlen = Lib.IntTypes.v totlen in
+    let pad_s = Spec.Hash.MD.pad SHA2_512 vtotlen in
+    let blocks1 = Seq.append input0 pad_s in
+    let blocks1_raw = Seq.append input0_raw pad_s in
+
+    calc (==) {
+        as_seq h1 st;
+      (==) { }
+        Vec.update_last #SHA2_512 #Vec.M32 totlen vlen input0 st0';
+      (==) { state_spec_v_lemma SHA2_512 (Vec.update_last totlen vlen input0 st0') }
+        Lib.Sequence.index (Vec.state_spec_v #SHA2_512 #Vec.M32 (Vec.update_last totlen vlen input0 st0')) 0;
+      (==) { Hacl.Spec.SHA2.Equiv.update_last_lemma_l #SHA2_512 #Vec.M32 totlen vlen input0 st0' 0 }
+        Hacl.Spec.SHA2.update_last SHA2_512 totlen vlen input0.(|0|)
+          (Lib.Sequence.index (Vec.state_spec_v #SHA2_512 #Vec.M32 st0') 0);
+      (==) { state_spec_v_lemma SHA2_512 st0' }
+        Hacl.Spec.SHA2.update_last SHA2_512 totlen vlen input0.(|0|) st0';
+      (==) { ntup1_lemma #_ #1 input0 }
+        Hacl.Spec.SHA2.update_last SHA2_512 totlen vlen input0 st0';
+      (==) {
+        Hacl.Spec.SHA2.EquivScalar.update_last_is_repeat_blocks_multi SHA2_512 vtotlen vlen input0 st0'
+      }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_512) blocks1 (Hacl.Spec.SHA2.update SHA2_512) st0';
+      (==) { assert (st0 `Seq.equal` st0');
+             ntup1_lemma #_ #1 input0; assert (blocks1 `Seq.equal` blocks1_raw) }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_512) blocks1_raw (Hacl.Spec.SHA2.update SHA2_512) st0;
+      (==) { Classical.forall_intro_2 (Hacl.Spec.SHA2.EquivScalar.update_lemma SHA2_512);
+             Lib.Sequence.Lemmas.repeat_blocks_multi_extensionality (block_length SHA2_512)
+               blocks1_raw
+               (Hacl.Spec.SHA2.update SHA2_512)
+               (Lib.UpdateMulti.Lemmas.repeat_f (block_length SHA2_512) (Spec.Agile.Hash.update SHA2_512))
+               st0 }
+        Lib.Sequence.repeat_blocks_multi (block_length SHA2_512) blocks1_raw
+          (Lib.UpdateMulti.Lemmas.repeat_f (block_length SHA2_512) (Spec.Agile.Hash.update SHA2_512))
+          st0;
+      (==) {
+        Lib.UpdateMulti.Lemmas.update_multi_is_repeat_blocks_multi (block_length SHA2_512) (Spec.Agile.Hash.update SHA2_512) st0 blocks1_raw }
+        Lib.UpdateMulti.mk_update_multi (block_length SHA2_512) (Spec.Agile.Hash.update SHA2_512) st0 blocks1_raw;
+      (==) { }
+        Spec.Hash.Incremental.update_last SHA2_512 st0 (prev_len_v prev_len) input0_raw;
+    }
+  end
 
 let finish_224 = Hacl.Hash.PadFinish.finish (|SHA2_224, ()|)
 let finish_256 = Hacl.Hash.PadFinish.finish (|SHA2_256, ()|)
