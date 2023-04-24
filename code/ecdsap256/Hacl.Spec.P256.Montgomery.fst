@@ -240,7 +240,8 @@ let mul_qmont_R_and_R_inv_is_one () =
   let d, k = SBML.eea_pow2_odd 256 S.order in
   SBML.mont_preconditions_d 64 4 S.order;
   assert (d * pow2 256 % S.order = 1);
-  Math.Lemmas.lemma_mod_mul_distr_l d (pow2 256) S.order
+  Math.Lemmas.lemma_mod_mul_distr_l d (pow2 256) S.order;
+  assert (d % S.order * pow2 256 % S.order = 1)
 
 //--------------------------------------//
 // bn_mont_reduction is x * qmont_R_inv //
