@@ -62,9 +62,8 @@ let make_a_coeff a =
   [@inline_let] let n2 = u64 0x0 in
   [@inline_let] let n3 = u64 0xfffffffc00000004 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 < S.prime);
-  assert_norm (S.a_coeff ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
-  SM.fmont_R_inv_value ();
+  assert_norm (SM.to_mont S.a_coeff == v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192);
+  SM.lemma_to_from_mont_id S.a_coeff;
   bn_make_u64_4 a n0 n1 n2 n3
 
 
@@ -83,9 +82,8 @@ let make_b_coeff b =
   [@inline_let] let n2 = u64 0xe5a220abf7212ed6 in
   [@inline_let] let n3 = u64 0xdc30061d04874834 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 < S.prime);
-  assert_norm (S.b_coeff ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
-  SM.fmont_R_inv_value ();
+  assert_norm (SM.to_mont S.b_coeff == v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192);
+  SM.lemma_to_from_mont_id S.b_coeff;
   bn_make_u64_4 b n0 n1 n2 n3
 
 
@@ -104,9 +102,8 @@ let make_g_x n =
   [@inline_let] let n2 = u64 0x79fb732b77622510 in
   [@inline_let] let n3 = u64 0x18905f76a53755c6 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 < S.prime);
-  assert_norm (S.g_x ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
-  SM.fmont_R_inv_value ();
+  assert_norm (SM.to_mont S.g_x == v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192);
+  SM.lemma_to_from_mont_id S.g_x;
   bn_make_u64_4 n n0 n1 n2 n3
 
 
@@ -125,9 +122,8 @@ let make_g_y n =
   [@inline_let] let n2 = u64 0xd2e88688dd21f325 in
   [@inline_let] let n3 = u64 0x8571ff1825885d85 in
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 < S.prime);
-  assert_norm (S.g_y ==
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime);
-  SM.fmont_R_inv_value ();
+  assert_norm (SM.to_mont S.g_y == v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192);
+  SM.lemma_to_from_mont_id S.g_y;
   bn_make_u64_4 n n0 n1 n2 n3
 
 

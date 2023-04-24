@@ -23,14 +23,14 @@ let fmont_as_nat (h:mem) (a:felem) = SM.from_mont (as_nat h a)
 val make_fzero: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == SM.to_mont 0 /\
+    as_nat h1 n < S.prime /\
     fmont_as_nat h1 n == 0)
 
 
 val make_fone: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == SM.to_mont 1 /\
+    as_nat h1 n < S.prime /\
     fmont_as_nat h1 n == 1)
 
 

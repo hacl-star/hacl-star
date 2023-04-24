@@ -27,7 +27,7 @@ friend Hacl.Bignum256
 let make_fzero n =
   bn_set_zero4 n;
   assert_norm (SM.to_mont 0 = 0);
-  assert_norm (SM.from_mont 0 == 0)
+  SM.lemma_to_from_mont_id 0
 
 
 [@CInline]
@@ -37,10 +37,9 @@ let make_fone n =
   [@inline_let] let n1 = u64 0xffffffff00000000 in
   [@inline_let] let n2 = u64 0xffffffffffffffff in
   [@inline_let] let n3 = u64 0xfffffffe in
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 < S.prime);
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont 1);
-  assert_norm (
-    (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192) * SM.fmont_R_inv' % S.prime = 1);
-  SM.fmont_R_inv_value ();
+  SM.lemma_to_from_mont_id 1;
   bn_make_u64_4 n n0 n1 n2 n3
 
 

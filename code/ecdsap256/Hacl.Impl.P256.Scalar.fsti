@@ -23,7 +23,7 @@ let qmont_as_nat (h:mem) (a:felem) = SM.from_qmont (as_nat h a)
 val make_qone: f:felem -> Stack unit
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
-    as_nat h1 f == SM.to_qmont 1 /\
+    as_nat h1 f < S.order /\
     qmont_as_nat h1 f == 1)
 
 

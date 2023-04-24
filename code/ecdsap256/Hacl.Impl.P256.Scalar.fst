@@ -29,10 +29,9 @@ let make_qone f =
   [@inline_let] let f1 = u64 0x4319055258e8617b in
   [@inline_let] let f2 = u64 0x0 in
   [@inline_let] let f3 = u64 0xffffffff in
+  assert_norm (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192 < S.order);
   assert_norm (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192 == SM.to_qmont 1);
-  assert_norm (
-    (v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192) * SM.qmont_R_inv' % S.order == 1);
-  SM.qmont_R_inv_value ();
+  SM.lemma_to_from_qmont_id 1;
   bn_make_u64_4 f f0 f1 f2 f3
 
 
