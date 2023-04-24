@@ -475,11 +475,11 @@ let finish_256 = Hacl.Hash.PadFinish.finish (|SHA2_256, ()|)
 let finish_384 = Hacl.Hash.PadFinish.finish (|SHA2_384, ()|)
 let finish_512 = Hacl.Hash.PadFinish.finish (|SHA2_512, ()|)
 
-// let hash_224 input input_len dst =
-//   Hacl.Streaming.SHA2.sha224 input input_len dst
-// let hash_256 input input_len dst =
-//   Hacl.Streaming.SHA2.sha256 input input_len dst
-// let hash_384 input input_len dst =
-//   Hacl.Streaming.SHA2.sha384 input input_len dst
-// let hash_512 input input_len dst =
-//   Hacl.Streaming.SHA2.sha512 input input_len dst
+let hash_224 input input_len dst =
+  Hacl.Streaming.SHA2.sha224 input input_len dst
+let hash_256 input input_len dst =
+  Hacl.Streaming.SHA2.sha256 input input_len dst
+let hash_384 input input_len dst =
+  Hacl.Streaming.SHA2.sha384 input input_len dst
+let hash_512 input input_len dst =
+  Hacl.Streaming.SHA2.sha512 input input_len dst
