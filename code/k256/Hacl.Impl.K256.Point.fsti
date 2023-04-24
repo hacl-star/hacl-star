@@ -15,6 +15,50 @@ open Hacl.K256.Field
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
+let as_felem5_lseq (s:LSeq.lseq uint64 5) : felem5 =
+  let open Lib.Sequence in
+  (s.[0],s.[1],s.[2],s.[3],s.[4])
+
+
+///  Affine coordinates
+
+inline_for_extraction noextract
+let aff_point_seq = LSeq.lseq uint64 10
+
+let aff_point_inv_seq (p:aff_point_seq) =
+  inv_fully_reduced5 (as_felem5_lseq (LSeq.sub p 0 5)) /\
+  inv_fully_reduced5 (as_felem5_lseq (LSeq.sub p 5 5))
+
+let aff_point_eval_seq (p:aff_point_seq{aff_point_inv_seq p}) : S.aff_point =
+  as_nat5 (as_felem5_lseq (LSeq.sub p 0 5)),
+  as_nat5 (as_felem5_lseq (LSeq.sub p 5 5))
+
+inline_for_extraction noextract
+let aff_point = lbuffer uint64 10ul
+
+noextract
+let aff_point_inv (h:mem) (p:aff_point) =
+  aff_point_inv_seq (as_seq h p)
+
+noextract
+let aff_point_eval (h:mem) (p:aff_point{aff_point_inv h p}) : GTot S.aff_point =
+  aff_point_eval_seq (as_seq h p)
+
+
+inline_for_extraction noextract
+let aff_getx (p:aff_point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 0ul 5ul /\ h0 == h1)
+  = sub p 0ul 5ul
+
+inline_for_extraction noextract
+let aff_gety (p:aff_point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 5ul 5ul /\ h0 == h1)
+  = sub p 5ul 5ul
+
+
 ///  Projective coordinates
 
 // (_X, _Y, _Z)
@@ -41,12 +85,6 @@ let getz (p:point) : Stack felem
 
 
 inline_for_extraction noextract
-let as_felem5_lseq (s:LSeq.lseq uint64 5) : felem5 =
-  let open Lib.Sequence in
-  (s.[0],s.[1],s.[2],s.[3],s.[4])
-
-
-inline_for_extraction noextract
 let point_inv_lseq (p:LSeq.lseq uint64 15) =
   inv_lazy_reduced2_5 (as_felem5_lseq (LSeq.sub p 0 5)) /\
   inv_lazy_reduced2_5 (as_felem5_lseq (LSeq.sub p 5 5)) /\
@@ -61,18 +99,25 @@ let point_inv (h:mem) (p:point) =
 
 inline_for_extraction noextract
 let point_eval_lseq (p:LSeq.lseq uint64 15) : GTot S.proj_point =
- (feval5 (as_felem5_lseq (LSeq.sub p 0 5)),
+  feval5 (as_felem5_lseq (LSeq.sub p 0 5)),
   feval5 (as_felem5_lseq (LSeq.sub p 5 5)),
-  feval5 (as_felem5_lseq (LSeq.sub p 10 5)))
+  feval5 (as_felem5_lseq (LSeq.sub p 10 5))
 
 inline_for_extraction noextract
 let point_eval (h:mem) (p:point) : GTot S.proj_point =
- (feval h (gsub p 0ul 5ul),
+  feval h (gsub p 0ul 5ul),
   feval h (gsub p 5ul 5ul),
-  feval h (gsub p 10ul 5ul))
+  feval h (gsub p 10ul 5ul)
 
 
 ///  Create a point
+
+inline_for_extraction noextract
+val create_aff_point: unit -> StackInline aff_point
+  (requires fun h -> True)
+  (ensures  fun h0 f h1 ->
+    stack_allocated f h0 h1 (LSeq.create 10 (u64 0)))
+
 
 inline_for_extraction noextract
 val create_point: unit -> StackInline point
@@ -107,32 +152,39 @@ val copy_point (out p:point) : Stack unit
 ///  Conversion functions between affine and projective coordinates
 
 inline_for_extraction noextract
-val to_proj_point (p:point) (x y:felem) : Stack unit
+val to_proj_point (p:point) (p_aff:aff_point) : Stack unit
   (requires fun h ->
-    live h p /\ live h x /\ live h y /\ disjoint p x /\ disjoint p y /\
-    inv_lazy_reduced2 h x /\ inv_lazy_reduced2 h y)
+    live h p /\ live h p_aff /\ disjoint p p_aff /\
+    aff_point_inv h p_aff)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_inv h1 p /\
-    point_eval h1 p == S.to_proj_point (feval h0 x, feval h0 y))
+    point_eval h1 p == S.to_proj_point (aff_point_eval h0 p_aff))
 
 
-inline_for_extraction noextract
-val to_aff_point (x y:felem) (p:point) : Stack unit
+val to_aff_point (p_aff:aff_point) (p:point) : Stack unit
   (requires fun h ->
-    live h p /\ live h x /\ live h y /\
-    disjoint p x /\ disjoint p y /\ disjoint x y /\
+    live h p /\ live h p_aff /\ disjoint p p_aff /\
     point_inv h p)
-  (ensures  fun h0 _ h1 -> modifies (loc x |+| loc y) h0 h1 /\
-    inv_lazy_reduced2 h1 x /\ inv_lazy_reduced2 h1 y /\
-    (feval h1 x, feval h1 y) == S.to_aff_point (point_eval h0 p))
+  (ensures  fun h0 _ h1 -> modifies (loc p_aff) h0 h1 /\
+    aff_point_inv h1 p_aff /\
+    aff_point_eval h1 p_aff == S.to_aff_point (point_eval h0 p))
+
+
+val to_aff_point_x (x:felem) (p:point) : Stack unit
+  (requires fun h ->
+    live h p /\ live h x /\ disjoint p x /\
+    point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc x) h0 h1 /\
+    inv_fully_reduced h1 x /\
+    as_nat h1 x == fst (S.to_aff_point (point_eval h0 p)))
+
 
 ///  Is a point in affine coordinates on the curve
 
-inline_for_extraction noextract
-val is_on_curve_vartime (x y:felem) : Stack bool
-  (requires fun h -> live h x /\ live h y /\
-    inv_fully_reduced h x /\ inv_fully_reduced h y)
+val is_on_curve_vartime (p:aff_point) : Stack bool
+  (requires fun h ->
+    live h p /\ aff_point_inv h p)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
-    b == S.is_on_curve (as_nat h0 x, as_nat h0 y))
+    b == S.is_on_curve (aff_point_eval h0 p))
 
 
 inline_for_extraction noextract
@@ -141,6 +193,8 @@ val is_proj_point_at_inf_vartime: p:point -> Stack bool
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
     b = S.is_proj_point_at_inf (point_eval h0 p))
 
+
+///  Point negation
 
 val point_negate (out p:point) : Stack unit
   (requires fun h ->
@@ -158,62 +212,38 @@ val point_negate_conditional_vartime: p:point -> is_negate:bool -> Stack unit
       (if is_negate then S.point_negate (point_eval h0 p) else point_eval h0 p))
 
 
-val point_eq_vartime (p q:point) : Stack bool
+///  Point load and store functions
+
+val aff_point_store: res:lbuffer uint8 64ul -> p:aff_point -> Stack unit
   (requires fun h ->
-    live h p /\ live h q /\ eq_or_disjoint p q /\
-    point_inv h p /\ point_inv h q)
-  (ensures  fun h0 z h1 -> modifies0 h0 h1 /\
-    (z <==> S.point_equal (point_eval h0 p) (point_eval h0 q)))
+    live h res /\ live h p /\ disjoint res p /\
+    aff_point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.aff_point_store (aff_point_eval h0 p))
 
-///  Decompress / Compress
 
-val aff_point_decompress_vartime (x y:felem) (s:lbuffer uint8 33ul) : Stack bool
+val point_store: res:lbuffer uint8 64ul -> p:point -> Stack unit
   (requires fun h ->
-    live h x /\ live h y /\ live h s /\
-    disjoint x y /\ disjoint x s /\ disjoint y s)
-  (ensures fun h0 b h1 -> modifies (loc x |+| loc y) h0 h1 /\
-    (b <==> Some? (S.aff_point_decompress (as_seq h0 s))) /\
-    (b ==> (let (xa, ya) = Some?.v (S.aff_point_decompress (as_seq h0 s)) in
-    inv_fully_reduced h1 x /\ inv_fully_reduced h1 y /\ feval h1 x == xa /\ feval h1 y == ya)))
-
-
-inline_for_extraction noextract
-val point_decompress_vartime (p:point) (s:lbuffer uint8 33ul) : Stack bool
-  (requires fun h ->
-    live h p /\ live h s /\ disjoint p s)
-  (ensures fun h0 b h1 -> modifies (loc p) h0 h1 /\
-    (b <==> Some? (S.point_decompress (as_seq h0 s))) /\
-    (b ==> (let (px, py, pz) = Some?.v (S.point_decompress (as_seq h0 s)) in
-      inv_fully_reduced h1 (gsub p 0ul 5ul) /\ feval h1 (gsub p 0ul 5ul) == px /\
-      inv_fully_reduced h1 (gsub p 5ul 5ul) /\ feval h1 (gsub p 5ul 5ul) == py /\
-      inv_fully_reduced h1 (gsub p 10ul 5ul) /\ feval h1 (gsub p 10ul 5ul) == pz)))
-
-
-val aff_point_compress_vartime (s:lbuffer uint8 33ul) (x y:felem) : Stack unit
-  (requires fun h ->
-    live h x /\ live h y /\ live h s /\
-    disjoint x y /\ disjoint x s /\ disjoint y s /\
-    inv_lazy_reduced2 h x /\ inv_lazy_reduced2 h y)
-  (ensures fun h0 b h1 -> modifies (loc s |+| loc x |+| loc y) h0 h1 /\
-    as_seq h1 s == S.aff_point_compress (feval h0 x, feval h0 y))
-
-
-inline_for_extraction noextract
-val point_compress_vartime (s:lbuffer uint8 33ul) (p:point) : Stack unit
-  (requires fun h ->
-    live h p /\ live h s /\ disjoint p s /\
+    live h res /\ live h p /\ disjoint res p /\
     point_inv h p)
-  (ensures fun h0 b h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == S.point_compress (point_eval h0 p))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.point_store (point_eval h0 p))
 
 
-inline_for_extraction noextract
-val store_point: out:lbuffer uint8 64ul -> p:point -> Stack unit
+val aff_point_load_vartime: res:aff_point -> b:lbuffer uint8 64ul -> Stack bool
   (requires fun h ->
-    live h out /\ live h p /\ disjoint out p /\
-    point_inv h p)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_seq h1 out == S.store_point (point_eval h0 p))
+    live h res /\ live h b /\ disjoint res b)
+  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
+    (let ps = S.aff_point_load (as_seq h0 b) in
+    (r <==> Some? ps) /\ (r ==> (aff_point_inv h1 res /\ aff_point_eval h1 res == Some?.v ps))))
+
+
+val load_point_vartime: res:point -> b:lbuffer uint8 64ul -> Stack bool
+  (requires fun h ->
+    live h res /\ live h b /\ disjoint res b)
+  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
+    (let ps = S.load_point (as_seq h0 b) in
+    (r <==> Some? ps) /\ (r ==> (point_inv h1 res /\ point_eval h1 res == Some?.v ps))))
 
 
 inline_for_extraction noextract
@@ -226,10 +256,11 @@ val load_point_nocheck: out:point -> b:lbuffer uint8 64ul -> Stack unit
     point_eval h1 out == S.load_point_nocheck (as_seq h0 b))
 
 
-inline_for_extraction noextract
-val load_point_vartime: out:point -> b:lbuffer uint8 64ul -> Stack bool
+val aff_point_decompress_vartime (x y:felem) (s:lbuffer uint8 33ul) : Stack bool
   (requires fun h ->
-    live h out /\ live h b /\ disjoint out b)
-  (ensures  fun h0 res h1 -> modifies (loc out) h0 h1 /\
-    (let ps = S.load_point (as_seq h0 b) in
-    (res <==> Some? ps) /\ (res ==> (point_inv h1 out /\ point_eval h1 out == Some?.v ps))))
+    live h x /\ live h y /\ live h s /\
+    disjoint x y /\ disjoint x s /\ disjoint y s)
+  (ensures fun h0 b h1 -> modifies (loc x |+| loc y) h0 h1 /\
+    (b <==> Some? (S.aff_point_decompress (as_seq h0 s))) /\
+    (b ==> (let (xa, ya) = Some?.v (S.aff_point_decompress (as_seq h0 s)) in
+    inv_fully_reduced h1 x /\ inv_fully_reduced h1 y /\ feval h1 x == xa /\ feval h1 y == ya)))
