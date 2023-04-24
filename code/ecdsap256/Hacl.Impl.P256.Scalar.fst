@@ -12,7 +12,6 @@ open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Constants
 
 module S = Spec.P256
-module SB = Hacl.Spec.P256.Bignum
 module SM = Hacl.Spec.P256.Montgomery
 
 module BD = Hacl.Spec.Bignum.Definitions
@@ -105,7 +104,7 @@ let qmod_short res x =
   let h0 = ST.get () in
   let c = bn_sub4 tmp x tmp in
   bn_cmovznz4 res c tmp x;
-  SB.as_nat_bound (as_seq h0 x);
+  BD.bn_eval_bound (as_seq h0 x) 4;
   qmod_short_lemma (as_nat h0 x);
   pop_frame ()
 
@@ -138,15 +137,7 @@ let qmont_reduction res x =
 
   let h0 = ST.get () in
   BM.bn_mont_reduction Hacl.Bignum256.bn_inst n (u64 0xccd1c8aaee00bc4f) x res;
-  let h1 = ST.get () in
-  SB.bn_v_is_as_nat (as_seq h0 n);
-  SB.bn_v_is_wide_as_nat (as_seq h0 x);
-  assert (BD.bn_v (as_seq h0 n) == as_nat h0 n);
-  assert (BD.bn_v (as_seq h0 x) == wide_as_nat h0 x);
   SM.bn_qmont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
-  assert (BD.bn_v (as_seq h1 res) == BD.bn_v (as_seq h0 x) * SM.qmont_R_inv % S.order);
-  SB.bn_v_is_as_nat (as_seq h1 res);
-  assert (as_nat h1 res == wide_as_nat h0 x * SM.qmont_R_inv % S.order);
   pop_frame ()
 
 
@@ -154,13 +145,11 @@ let qmont_reduction res x =
 let from_qmont res x =
   push_frame ();
   let tmp = create_widefelem () in
-  let t_low = sub tmp 0ul 4ul in
-  let t_high = sub tmp 4ul 4ul in
-
   let h0 = ST.get () in
-  copy t_low x;
+  update_sub tmp 0ul 4ul x;
+  BD.bn_eval_update_sub 4 (as_seq h0 x) 8;
   let h1 = ST.get () in
-  assert (wide_as_nat h0 tmp = as_nat h0 t_low + as_nat h0 t_high * pow2 256);
+  assert (wide_as_nat h1 tmp = as_nat h0 x);
   assert_norm (S.order < S.order * S.order);
   qmont_reduction res tmp;
   pop_frame ()

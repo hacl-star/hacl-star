@@ -8,10 +8,9 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Bignum
-
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
+module BD = Hacl.Spec.Bignum.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -22,11 +21,15 @@ let widefelem = lbuffer uint64 (size 8)
 
 unfold
 let as_nat (h:mem) (e:felem) : GTot nat =
-  as_nat4 (as_felem4 (as_seq h e))
+  BD.bn_v (as_seq h e)
 
 unfold
 let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
-  wide_as_nat4 (as_felem8 (as_seq h e))
+  BD.bn_v (as_seq h e)
+
+val bn_v_is_as_nat: a:LSeq.lseq uint64 4 ->
+  Lemma (let (s0, s1, s2, s3) = LSeq.(a.[0], a.[1], a.[2], a.[3]) in
+    BD.bn_v a == v s0 + v s1 * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192)
 
 ///  Create a bignum
 
@@ -71,27 +74,27 @@ val bn_set_one4: f:felem -> Stack unit
 
 ///  Comparison
 
-val bn_is_zero_vartime4: f:felem -> Stack bool
-  (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 f = 0))
-
-
 val bn_is_zero_mask4: f:felem -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (if as_nat h0 f = 0 then v r == ones_v U64 else v r == 0))
 
 
-val bn_is_eq_vartime4: x:felem -> y:felem -> Stack bool
-  (requires fun h -> live h x /\ live h y)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == (as_nat h0 x = as_nat h0 y))
+val bn_is_zero_vartime4: f:felem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 f = 0))
 
 
 val bn_is_eq_mask4: x:felem -> y:felem -> Stack uint64
   (requires fun h -> live h x /\ live h y)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (if as_nat h0 x = as_nat h0 y then v r == ones_v U64 else v r = 0))
+
+
+val bn_is_eq_vartime4: x:felem -> y:felem -> Stack bool
+  (requires fun h -> live h x /\ live h y)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == (as_nat h0 x = as_nat h0 y))
 
 
 inline_for_extraction noextract

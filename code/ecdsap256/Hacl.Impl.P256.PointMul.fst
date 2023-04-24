@@ -52,7 +52,6 @@ let table_inv_w5 : BE.table_inv_t U64 12ul 32ul =
 [@CInline]
 let point_mul res scalar p =
   let h0 = ST.get () in
-  Hacl.Spec.P256.Bignum.bn_v_is_as_nat (as_seq h0 scalar);
   SE.exp_fw_lemma S.mk_p256_concrete_ops
     (from_mont_point (as_point_nat h0 p)) 256 (as_nat h0 scalar) 4;
   BE.lexp_fw_consttime 12ul 0ul mk_p256_concrete_ops 4ul (null uint64) p 4ul 256ul scalar res
@@ -128,7 +127,6 @@ let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
   let r2 = sub scalar 1ul 1ul in
   let r3 = sub scalar 2ul 1ul in
   let r4 = sub scalar 3ul 1ul in
-  Hacl.Spec.P256.Bignum.bn_v_is_as_nat (as_seq h0 scalar);
   SPT256.lemma_decompose_nat256_as_four_u64_lbignum (as_seq h0 scalar);
 
   ME.mk_lexp_four_fw_tables len ctx_len k l table_len
@@ -175,7 +173,6 @@ let point_mul_g res scalar =
   proj_g_pow2_128_lseq_lemma ();
   proj_g_pow2_192_lseq_lemma ();
   point_mul_g_noalloc res scalar q1 q2 q3 q4;
-  Hacl.Spec.P256.Bignum.bn_v_is_as_nat (as_seq h0 scalar);
   lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
 
@@ -221,8 +218,6 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   assert (table_inv_w5 (as_seq h1 q1) (as_seq h1 precomp_basepoint_table_w5));
   assert (table_inv_w5 (as_seq h1 q2) (as_seq h1 table2));
 
-  Hacl.Spec.P256.Bignum.bn_v_is_as_nat (as_seq h0 scalar1);
-  Hacl.Spec.P256.Bignum.bn_v_is_as_nat (as_seq h0 scalar2);
   ME.mk_lexp_double_fw_tables len ctx_len k l table_len
     table_inv_w5 table_inv_w5
     (BE.lprecomp_get_vartime len ctx_len k l table_len)

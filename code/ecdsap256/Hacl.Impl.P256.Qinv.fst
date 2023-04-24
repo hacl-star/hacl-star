@@ -13,11 +13,11 @@ open Hacl.Impl.P256.Scalar
 
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
+module BD = Hacl.Spec.Bignum.Definitions
 module LSeq = Lib.Sequence
 
 module S = Spec.P256
 module SI = Hacl.Spec.P256.Qinv
-module SB = Hacl.Spec.P256.Bignum
 module SM = Hacl.Spec.P256.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -27,11 +27,11 @@ let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
 unfold
 let linv (a:LSeq.lseq uint64 4) : Type0 =
-  SB.felem_seq_as_nat a < S.order
+  BD.bn_v a < S.order
 
 unfold
 let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.qelem =
-  SM.from_qmont (SB.felem_seq_as_nat a)
+  SM.from_qmont (BD.bn_v a)
 
 
 inline_for_extraction noextract

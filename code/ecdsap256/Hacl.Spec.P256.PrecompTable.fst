@@ -4,11 +4,11 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-open Hacl.Spec.P256.Bignum
 open Hacl.Impl.P256.Point
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
+module BD = Hacl.Spec.Bignum.Definitions
 module FL = FStar.List.Tot
 module SPT = Hacl.Spec.PrecompBaseTable
 
@@ -29,38 +29,23 @@ let create4_lemma x0 x1 x2 x3 =
 //-----------------------------------
 
 noextract
-let list_as_felem4 (f:felem_list) : felem4 =
-  let x = Seq.seq_of_list f <: lseq uint64 4 in
-  as_felem4 x
+let list_as_felem4 (f:felem_list) : lseq uint64 4 =
+  Seq.seq_of_list f <: lseq uint64 4
 
 
-val felem_to_list_index_lemma: x:S.felem ->
-  Lemma (let (f0, f1, f2, f3) = list_as_felem4 (felem_to_list x) in
-    let x0 = x % pow2 64 in
-    let x1 = x / pow2 64 % pow2 64 in
-    let x2 = x / pow2 128 % pow2 64 in
-    let x3 = x / pow2 192 % pow2 64 in
-    v f0 == x0 /\ v f1 == x1 /\ v f2 == x2 /\ v f3 == x3)
+val felem_to_list_lemma_eval: x:S.felem ->
+  Lemma (BD.bn_v (list_as_felem4 (felem_to_list x)) == x)
 
-let felem_to_list_index_lemma x =
+let felem_to_list_lemma_eval x =
   let x0 = x % pow2 64 in
   let x1 = x / pow2 64 % pow2 64 in
   let x2 = x / pow2 128 % pow2 64 in
   let x3 = x / pow2 192 % pow2 64 in
-  let f = felem_to_list x in
-
-  let (f0, f1, f2, f3) = list_as_felem4 f in
+  let bn_x = list_as_felem4 (felem_to_list x) in
   create4_lemma (u64 x0) (u64 x1) (u64 x2) (u64 x3);
-  assert (v f0 == x0 /\ v f1 == x1 /\ v f2 == x2 /\ v f3 == x3)
-
-
-val felem_to_list_lemma_eval: x:S.felem ->
-  Lemma (as_nat4 (list_as_felem4 (felem_to_list x)) == x)
-
-let felem_to_list_lemma_eval x =
-  felem_to_list_index_lemma x;
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert (v bn_x.[0] == x0 /\ v bn_x.[1] == x1 /\ v bn_x.[2] == x2 /\ v bn_x.[3] == x3);
+  Hacl.Impl.P256.Bignum.bn_v_is_as_nat bn_x;
+  assert (BD.bn_v bn_x = x0 + x1 * pow2 64 + x2 * pow2 128 + x3 * pow2 192);
   Hacl.Spec.PrecompBaseTable256.lemma_decompose_nat256_as_four_u64 x
 
 //--------------------------------------------
