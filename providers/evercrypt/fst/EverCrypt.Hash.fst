@@ -413,7 +413,7 @@ let update_multi #a s prevlen blocks len =
 // Re-using the higher-order stateful combinator to get an instance of
 // update_last that is capable of calling Vale under the hood
 let update_last_256 s prev_len input input_len =
-  Hacl.Hash.MD.mk_update_last SHA2_256 update_multi_256 Hacl.Hash.SHA2.pad_256 s prev_len input input_len
+  Hacl.Hash.SHA2.update_last_256 s prev_len input input_len
 
 let update_last_224 s prev_len input input_len =
   assert_norm (words_state SHA2_224 == words_state SHA2_256);

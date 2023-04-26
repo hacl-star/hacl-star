@@ -138,6 +138,43 @@ let hash_len (a: fixed_len_alg): n:size_t { v n = hash_length a } =
   | SHA3_384 -> 48ul
   | SHA3_512 -> 64ul
 
+/// Maximum input length, but fitting on a 64-bit integer (since the streaming
+/// module doesn't bother taking into account lengths that are greater than
+/// that). The comment previously was:
+///
+/// Note that we keep the total length at run-time, on 64 bits, but require that
+/// it abides by the size requirements for the smaller hashes -- we're not
+/// interested at this stage in having an agile type for lengths that would be
+/// up to 2^125 for SHA384/512.
+
+module U64 = FStar.UInt64
+
+inline_for_extraction noextract
+let max_input_len64 a: U64.(x:t { 0 < v x /\ v x `less_than_max_input_length` a }) =
+  let _ = allow_inversion hash_alg in
+  match a with
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 ->
+      assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64);
+      normalize_term_spec (pow2 61 - 1);
+      U64.uint_to_t (normalize_term (pow2 61 - 1))
+  | SHA2_384 | SHA2_512 ->
+      assert_norm (pow2 64 < pow2 125 - 1);
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
+  | Blake2S ->
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
+  | Blake2B ->
+      assert_norm (pow2 64 < pow2 128);
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
+      // TODO: relax this?
+      assert_norm (pow2 64 < pow2 128);
+      normalize_term_spec (pow2 64 - 1);
+      U64.uint_to_t (normalize_term (pow2 64 - 1))
+
 noextract inline_for_extraction
 let blocks_t (a: hash_alg) =
   b:B.buffer uint8 { B.length b % block_length a = 0 }
