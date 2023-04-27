@@ -251,6 +251,8 @@ let update_last_224 st prev_len input input_len =
     let pad_s = Spec.Hash.MD.pad SHA2_224 vtotlen in
     let blocks1 = Seq.append input0 pad_s in
     let blocks1_raw = Seq.append input0_raw pad_s in
+    assert (Seq.length blocks1 % block_length SHA2_224 == 0);
+    assert (Seq.length blocks1_raw % block_length SHA2_224 == 0);
 
     calc (==) {
         as_seq h1 st;
@@ -312,6 +314,9 @@ let update_last_256 st prev_len input input_len =
     let pad_s = Spec.Hash.MD.pad SHA2_256 vtotlen in
     let blocks1 = Seq.append input0 pad_s in
     let blocks1_raw = Seq.append input0_raw pad_s in
+    assert (Seq.length blocks1 % block_length SHA2_256 == 0);
+    assert (Seq.length blocks1_raw % block_length SHA2_256 == 0);
+
 
     calc (==) {
         as_seq h1 st;
@@ -373,6 +378,8 @@ let update_last_384 st prev_len input input_len =
     let pad_s = Spec.Hash.MD.pad SHA2_384 vtotlen in
     let blocks1 = Seq.append input0 pad_s in
     let blocks1_raw = Seq.append input0_raw pad_s in
+    assert (Seq.length blocks1 % block_length SHA2_384 == 0);
+    assert (Seq.length blocks1_raw % block_length SHA2_384 == 0);
 
     calc (==) {
         as_seq h1 st;
@@ -434,6 +441,8 @@ let update_last_512  st prev_len input input_len =
     let pad_s = Spec.Hash.MD.pad SHA2_512 vtotlen in
     let blocks1 = Seq.append input0 pad_s in
     let blocks1_raw = Seq.append input0_raw pad_s in
+    assert (Seq.length blocks1 % block_length SHA2_512 == 0);
+    assert (Seq.length blocks1_raw % block_length SHA2_512 == 0);
 
     calc (==) {
         as_seq h1 st;
