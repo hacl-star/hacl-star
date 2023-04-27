@@ -724,7 +724,7 @@ let load_last_lemma a totlen totlen_seq len b =
       FStar.Math.Lemmas.lemma_mod_add_distr (len_length a + 1) len (block_length a)
       }
     (block_length a - (len % block_length a + len_length a + 1) % block_length a) % block_length a;
-    (==) { }
+    (==) { assert (len % block_length a == totlen % block_length a) }
     (block_length a - (totlen % block_length a + len_length a + 1) % block_length a) % block_length a;
     (==) {
       FStar.Math.Lemmas.lemma_mod_sub_distr (block_length a) (totlen + len_length a + 1) (block_length a);
@@ -761,7 +761,6 @@ let load_last_lemma a totlen totlen_seq len b =
   Seq.lemma_eq_intro (Seq.slice last3 (rem + 1) (fin - len_length a)) zeros;
 
   Seq.lemma_eq_intro (Seq.slice last3 0 fin) (Seq.append b pad)
-
 
 val lemma_len_lt_max_a_mul_by_8: a:sha2_alg -> len:len_lt_max_a_t a ->
   Lemma (let len' : len_t a = mk_len_t a len in
