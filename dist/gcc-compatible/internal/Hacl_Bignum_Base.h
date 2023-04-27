@@ -39,6 +39,28 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
 
+static inline uint32_t
+Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out)
+{
+  uint32_t out0 = out[0U];
+  uint64_t res = (uint64_t)a * (uint64_t)b + (uint64_t)c_in + (uint64_t)out0;
+  out[0U] = (uint32_t)res;
+  return (uint32_t)(res >> (uint32_t)32U);
+}
+
+static inline uint64_t
+Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
+{
+  uint64_t out0 = out[0U];
+  FStar_UInt128_uint128
+  res =
+    FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(a, b),
+        FStar_UInt128_uint64_to_uint128(c_in)),
+      FStar_UInt128_uint64_to_uint128(out0));
+  out[0U] = FStar_UInt128_uint128_to_uint64(res);
+  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
+}
+
 static inline void
 Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res)
 {
@@ -70,28 +92,6 @@ Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *re
     store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
   }
   memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
-}
-
-static inline uint32_t
-Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out)
-{
-  uint32_t out0 = out[0U];
-  uint64_t res = (uint64_t)a * (uint64_t)b + (uint64_t)c_in + (uint64_t)out0;
-  out[0U] = (uint32_t)res;
-  return (uint32_t)(res >> (uint32_t)32U);
-}
-
-static inline uint64_t
-Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
-{
-  uint64_t out0 = out[0U];
-  FStar_UInt128_uint128
-  res =
-    FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(a, b),
-        FStar_UInt128_uint64_to_uint128(c_in)),
-      FStar_UInt128_uint64_to_uint128(out0));
-  out[0U] = FStar_UInt128_uint128_to_uint64(res);
-  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
 }
 
 static inline uint32_t Hacl_Bignum_Lib_bn_get_top_index_u32(uint32_t len, uint32_t *b)

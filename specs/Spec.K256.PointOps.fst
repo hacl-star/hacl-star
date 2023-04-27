@@ -1,7 +1,6 @@
 module Spec.K256.PointOps
 
 open FStar.Mul
-
 open Lib.IntTypes
 open Lib.Sequence
 
@@ -25,18 +24,14 @@ let one  : felem = 1
 let fadd (x y:felem) : felem = (x + y) % prime
 let fsub (x y:felem) : felem = (x - y) % prime
 let fmul (x y:felem) : felem = (x * y) % prime
+let finv (x:felem) : felem = M.pow_mod #prime x (prime - 2)
+let fsqrt (x:felem) : felem = M.pow_mod #prime x ((prime + 1) / 4)
+let is_fodd (x:nat) : bool = x % 2 = 1
 
 let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
-
-let finv (x:felem) : felem = M.pow_mod #prime x (prime - 2)
 let ( /% ) (x y:felem) = x *% finv y
-
-// for parsing and serializing public keys
-let fsqrt (x:felem) : felem = M.pow_mod #prime x ((prime + 1) / 4)
-let is_fodd (x:nat) : bool = x % 2 = 1
-
 
 ///  Scalar field
 
@@ -172,11 +167,20 @@ let point_negate (p:proj_point) : proj_point =
 
 ///  Point conversion between affine, projective and bytes representation
 
-let store_point (p:proj_point) : BSeq.lbytes 64 =
-  let px, py = to_aff_point p in
-  let pxb = BSeq.nat_to_bytes_be 32 px in
-  let pxy = BSeq.nat_to_bytes_be 32 py in
-  concat #uint8 #32 #32 pxb pxy
+let aff_point_load (b:BSeq.lbytes 64) : option aff_point =
+  let pk_x = BSeq.nat_from_bytes_be (sub b 0 32) in
+  let pk_y = BSeq.nat_from_bytes_be (sub b 32 32) in
+  let is_x_valid = pk_x < prime in
+  let is_y_valid = pk_y < prime in
+  let is_xy_on_curve =
+    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
+  if is_xy_on_curve then Some (pk_x, pk_y) else None
+
+let load_point (b:BSeq.lbytes 64) : option proj_point =
+  match (aff_point_load b) with
+  | Some p -> Some (to_proj_point p)
+  | None -> None
+
 
 let point_inv_bytes (b:BSeq.lbytes 64) =
   let px = BSeq.nat_from_bytes_be (sub b 0 32) in
@@ -188,17 +192,18 @@ let load_point_nocheck (b:BSeq.lbytes 64{point_inv_bytes b}) : proj_point =
   let py = BSeq.nat_from_bytes_be (sub b 32 32) in
   to_proj_point (px, py)
 
-let load_point (b:BSeq.lbytes 64) : option proj_point =
-  let pk_x = BSeq.nat_from_bytes_be (sub b 0 32) in
-  let pk_y = BSeq.nat_from_bytes_be (sub b 32 32) in
-  let is_x_valid = pk_x < prime in
-  let is_y_valid = pk_y < prime in
-  let is_xy_on_curve =
-    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
-  if is_xy_on_curve then Some (to_proj_point (pk_x, pk_y)) else None
+
+let aff_point_store (p:aff_point) : BSeq.lbytes 64 =
+  let (px, py) = p in
+  let pxb = BSeq.nat_to_bytes_be 32 px in
+  let pxy = BSeq.nat_to_bytes_be 32 py in
+  concat #uint8 #32 #32 pxb pxy
+
+let point_store (p:proj_point) : BSeq.lbytes 64 =
+  aff_point_store (to_aff_point p)
 
 
-let recover_y (x:felem{0 < x}) (is_odd:bool) : option felem =
+let recover_y (x:felem) (is_odd:bool) : option felem =
   let y2 = x *% x *% x +% b in
   let y = fsqrt y2 in
   if y *% y <> y2 then None
@@ -212,7 +217,7 @@ let aff_point_decompress (s:BSeq.lbytes 33) : option aff_point =
   if not (s0 = 0x02uy || s0 = 0x03uy) then None
   else begin
     let x = BSeq.nat_from_bytes_be (sub s 1 32) in
-    let is_x_valid = 0 < x && x < prime in
+    let is_x_valid = x < prime in
     let is_y_odd = s0 = 0x03uy in
 
     if not is_x_valid then None
@@ -220,28 +225,3 @@ let aff_point_decompress (s:BSeq.lbytes 33) : option aff_point =
       match (recover_y x is_y_odd) with
       | Some y -> Some (x, y)
       | None -> None end
-
-
-let aff_point_compress (p:aff_point) : BSeq.lbytes 33 =
-  let (x, y) = p in
-  let is_y_odd = y % 2 = 1 in
-  let s0 = if is_y_odd then u8 0x03 else u8 0x02 in
-  concat #_ #1 #32 (create 1 s0) (BSeq.nat_to_bytes_be 32 x)
-
-
-let point_decompress (s:BSeq.lbytes 33) : option proj_point =
-  match (aff_point_decompress s) with
-  | Some p -> Some (to_proj_point p)
-  | None -> None
-
-
-let point_compress (p:proj_point) : BSeq.lbytes 33 =
-  aff_point_compress (to_aff_point p)
-
-
-let point_equal (p:proj_point) (q:proj_point) : bool =
-  let px, py, pz = p in // x_p = px / pz /\ y_p = py / pz
-  let qx, qy, qz = q in // x_q = qx / qz /\ y_q = qy / qz
-  // p == q <==> x_p == x_q /\ y_p == y_q <==> px * qz == qx * pz /\ py * qz == qy * pz
-  if ((px *% qz) <> (qx *% pz)) then false
-  else ((py *% qz) = (qy *% pz))

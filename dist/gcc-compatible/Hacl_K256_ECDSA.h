@@ -62,9 +62,9 @@ Create an ECDSA signature.
 
   The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
 
-  The function also checks whether `private_key` and `nonce` are valid values:
-    • 0 < `private_key` and `private_key` < the order of the curve
-    • 0 < `nonce` and `nonce` < the order of the curve
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
@@ -75,7 +75,7 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
 );
 
 /**
-Create an ECDSA signature.
+Create an ECDSA signature using SHA2-256.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
@@ -106,16 +106,13 @@ Verify an ECDSA signature.
 
   The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
 
-  The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve
+  The function also checks whether `public key` is valid.
 */
 bool
 Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t *signature);
 
 /**
-Verify an ECDSA signature.
+Verify an ECDSA signature using SHA2-256.
 
   The function returns `true` if the signature is valid and `false` otherwise.
 
@@ -162,9 +159,9 @@ Create an ECDSA signature.
 
   The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
 
-  The function also checks whether `private_key` and `nonce` are valid values:
-    • 0 < `private_key` and `private_key` < the order of the curve
-    • 0 < `nonce` and `nonce` < the order of the curve
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 bool
 Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
@@ -175,7 +172,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
 );
 
 /**
-Create an ECDSA signature.
+Create an ECDSA signature using SHA2-256.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
@@ -206,10 +203,7 @@ Verify an ECDSA signature.
 
   The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
 
-  The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve
+  The function also checks whether `public_key` is valid
 */
 bool
 Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
@@ -219,7 +213,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
 );
 
 /**
-Verify an ECDSA signature.
+Verify an ECDSA signature using SHA2-256.
 
   The function returns `true` if the signature is valid and `false` otherwise.
 
@@ -295,19 +289,43 @@ Convert a public key from raw to its compressed form.
 */
 void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
 
+
+/******************/
+/* Key validation */
+/******************/
+
 /**
 Public key validation.
 
   The function returns `true` if a public key is valid and `false` otherwise.
 
-  The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `public_key` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
-  The public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve. 
+  The public key (x || y) is valid (with respect to SP 800-56A):
+    • the public key is not the “point at infinity”, represented as O.
+    • the affine x and y coordinates of the point represented by the public key are
+      in the range [0, p – 1] where p is the prime defining the finite field.
+    • y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from: https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
-bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *pk);
+bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *public_key);
+
+/**
+Private key validation.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve
+*/
+bool Hacl_K256_ECDSA_is_private_key_valid(uint8_t *private_key);
+
+
+/******************/
+/* ECDH agreement */
+/******************/
 
 /**
 Compute the public key from the private key.
@@ -318,9 +336,23 @@ Compute the public key from the private key.
   The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
   The private key is valid:
-    • 0 < `private_key` and `private_key` < the order of the curve.
+    • 0 < `private_key` < the order of the curve.
 */
 bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key);
+
+/**
+Execute the diffie-hellmann key exchange.
+
+  The function returns `true` for successful creation of an ECDH shared secret and
+  `false` otherwise.
+
+  The outparam `shared_secret` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `their_pubkey` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `their_pubkey` are valid.
+*/
+bool Hacl_K256_ECDSA_ecdh(uint8_t *shared_secret, uint8_t *their_pubkey, uint8_t *private_key);
 
 #if defined(__cplusplus)
 }

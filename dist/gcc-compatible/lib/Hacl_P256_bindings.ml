@@ -2,26 +2,12 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_Impl_P256_LowLevel_toUint8 =
-      foreign "Hacl_Impl_P256_LowLevel_toUint8"
-        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
-    let hacl_Impl_P256_LowLevel_changeEndian =
-      foreign "Hacl_Impl_P256_LowLevel_changeEndian"
-        ((ptr uint64_t) @-> (returning void))
-    let hacl_Impl_P256_LowLevel_toUint64ChangeEndian =
-      foreign "Hacl_Impl_P256_LowLevel_toUint64ChangeEndian"
-        (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void)))
-    let hacl_Impl_P256_Core_isPointAtInfinityPrivate =
-      foreign "Hacl_Impl_P256_Core_isPointAtInfinityPrivate"
-        ((ptr uint64_t) @-> (returning uint64_t))
-    let hacl_Impl_P256_Core_secretToPublic =
-      foreign "Hacl_Impl_P256_Core_secretToPublic"
-        ((ptr uint64_t) @->
-           (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Impl_P256_DH__ecp256dh_r =
-      foreign "Hacl_Impl_P256_DH__ecp256dh_r"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> (ocaml_bytes @-> (returning uint64_t))))
+    let hacl_Impl_P256_DH_ecp256dh_i =
+      foreign "Hacl_Impl_P256_DH_ecp256dh_i"
+        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
+    let hacl_Impl_P256_DH_ecp256dh_r =
+      foreign "Hacl_Impl_P256_DH_ecp256dh_r"
+        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
     let hacl_P256_ecdsa_sign_p256_sha2 =
       foreign "Hacl_P256_ecdsa_sign_p256_sha2"
         (ocaml_bytes @->
