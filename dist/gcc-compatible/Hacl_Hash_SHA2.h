@@ -35,47 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Krmllib.h"
-
-void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
-
-void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
-
-void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_blocks);
-
-void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_blocks);
-
-void
-Hacl_Hash_SHA2_update_last_224(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-void
-Hacl_Hash_SHA2_update_last_256(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-void
-Hacl_Hash_SHA2_update_last_384(
-  uint64_t *s,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-void
-Hacl_Hash_SHA2_update_last_512(
-  uint64_t *s,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
+#include "Hacl_Streaming_SHA2.h"
 
 void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
