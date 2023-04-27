@@ -20,7 +20,7 @@ noextract inline_for_extraction
 val mk_update_last: a:legacy_alg -> update_multi_st (|a, ()|) -> pad_st a -> update_last_st (|a, ()|)
 
 noextract inline_for_extraction
-val mk_hash: a:legacy_alg ->
+val mk_hash: a:md_alg ->
   alloca:alloca_st (|a, ()|) ->
   update_multi:update_multi_st (|a, ()|) ->
   update_last:update_last_st (|a, ()|) ->

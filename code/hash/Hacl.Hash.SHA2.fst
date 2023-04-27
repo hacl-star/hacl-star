@@ -226,7 +226,7 @@ let pad_256 = Hacl.Hash.PadFinish.pad SHA2_256
 let pad_384 = Hacl.Hash.PadFinish.pad SHA2_384
 let pad_512 = Hacl.Hash.PadFinish.pad SHA2_512
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 
 let update_last_224 st prev_len input input_len =
   let h0 = ST.get () in
