@@ -1,5 +1,5 @@
 [
-  "ÏÖ\u00104gãFÈ¿°î‰þ,`\u001f",
+  "\u0004d›ãºnêÔFËy‡9Á¹Ô",
   [
     [
       "EverCrypt.Poly1305.poly1305_vale",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "fa038056d245c06722b49a28e1b62b8c"
+      "a1b34199b44b23390d4f5b5e2573caf8"
     ],
     [
       "EverCrypt.Poly1305.poly1305_vale",
@@ -288,10 +288,10 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7a76eb9084467b3e3c9fcd876dbf1fdf"
+      "1a31b1efdf459ca0cf6947a99f291ba9"
     ],
     [
-      "EverCrypt.Poly1305.mac",
+      "EverCrypt.Poly1305.poly1305",
       1,
       1,
       0,
@@ -309,28 +309,29 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "43eac406856732aedc3b88464c5d650b"
+      "aa5f96bf9f37348290dee75906fd4ed2"
     ],
     [
-      "EverCrypt.Poly1305.mac",
+      "EverCrypt.Poly1305.poly1305",
       2,
       1,
       0,
       [ "@query" ],
       0,
-      "eb81ad143ca77d6ce45921acc15bb906"
+      "38676dd8b75c7191c07f338f449ce6e1"
     ],
     [
-      "EverCrypt.Poly1305.mac",
+      "EverCrypt.Poly1305.poly1305",
       3,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_FStar.Integers.Unsigned",
         "constructor_distinct_FStar.Integers.W16",
         "constructor_distinct_FStar.Integers.W32",
         "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_FStar.Integers.Winfinite",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.SEC",
@@ -339,6 +340,7 @@
         "equality_tok_FStar.Integers.W16@tok",
         "equality_tok_FStar.Integers.W32@tok",
         "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_FStar.Integers.Winfinite@tok",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -347,7 +349,6 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.Integers.int_t",
         "equation_FStar.Integers.uint_8",
         "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_Hacl.Streaming.Poly1305.uint8",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
@@ -355,26 +356,27 @@
         "equation_Lib.IntTypes.byte_t", "equation_Lib.IntTypes.int_t",
         "equation_Lib.IntTypes.mk_int", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.seq",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_LowStar.Monotonic.Buffer.length",
-        "equation_Prims.op_Equals_Equals_Equals", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Spec.AES.elem",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "function_token_typing_FStar.Integers.uint_8",
         "function_token_typing_Lib.IntTypes.byte_t",
-        "function_token_typing_Lib.IntTypes.uint8",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
-        "lemma_FStar.UInt32.uv_inv",
+        "lemma_FStar.UInt32.uv_inv", "lemma_Lib.IntTypes.v_injective",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
-        "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxBool_proj_0",
+        "primitive_Prims.op_AmpAmp", "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Integers.Signed__0",
         "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -397,10 +399,11 @@
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Vale.Arch.BufferFriend.of_bytes",
         "typing_Vale.Arch.BufferFriend.to_bytes",
-        "typing_tok_Lib.Buffer.MUT@tok", "unit_inversion", "unit_typing"
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "ebd0de2448244cc1d5346ae7b5c5ce20"
+      "e72e4aff3ae41fa253ed015c45042b54"
     ]
   ]
 ]
