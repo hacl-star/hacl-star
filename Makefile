@@ -659,14 +659,14 @@ TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
   \
-  -add-include 'Hacl_Chacha20Poly1305_128.c:"libintvector.h"' \
+  -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd128.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
   \
   -add-include 'Hacl_Hash_Blake2s_Simd128:"libintvector.h"' \
   -add-include 'Hacl_MAC_Poly1305_Simd128:"libintvector.h"' \
   \
-  -add-include 'Hacl_Chacha20Poly1305_256.c:"libintvector.h"' \
+  -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd256.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \

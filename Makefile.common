@@ -185,7 +185,10 @@ SHA2MB_BUNDLE= -bundle Hacl.Impl.SHA2.Types=[rename=Hacl_SHA2_Types] \
 SHA3_BUNDLE=-bundle Hacl.Streaming.Keccak+Hacl.SHA3+Hacl.Impl.SHA3=Hacl.Hash.SHA3[rename=Hacl_Hash_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
-CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
+CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305 \
+  -bundle Hacl.Chacha20Poly1305_32=[rename=Hacl_AEAD_Chacha20Poly1305,rename-prefix] \
+  -bundle Hacl.Chacha20Poly1305_128=[rename=Hacl_AEAD_Chacha20Poly1305_Simd128,rename-prefix] \
+  -bundle Hacl.Chacha20Poly1305_256=[rename=Hacl_AEAD_Chacha20Poly1305_Simd256,rename-prefix]
 ED_BUNDLE= \
   -bundle Hacl.Ed25519.PrecompTable -static-header Hacl.Ed25519.PrecompTable \
   -bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
