@@ -12,6 +12,9 @@ open Hacl.Spec.SHA2
 val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
   Lemma (update a block hash == Spec.Agile.Hash.update a hash block)
 
+val finish_lemma: a:sha2_alg -> st:words_state a ->
+  Lemma (finish a st == Spec.Agile.Hash.finish a st ())
+
 val update_nblocks_is_repeat_blocks_multi:
      a:sha2_alg
   -> len:len_lt_max_a_t a

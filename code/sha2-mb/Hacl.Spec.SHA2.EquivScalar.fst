@@ -589,7 +589,6 @@ let update_lemma a block hash' =
   eq_intro #_ #8 (update a block hash') (Spec.update_pre a hash' block)
 
 
-val finish_lemma: a:sha2_alg -> st:words_state a -> Lemma (finish a st == Spec.Agile.Hash.finish a st ())
 let finish_lemma a st' =
   let st = st' in
   let hash_final_w = sub #_ #8 st 0 (hash_word_length a) in

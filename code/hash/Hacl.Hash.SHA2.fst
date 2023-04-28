@@ -481,16 +481,46 @@ let update_last_512  st prev_len input input_len =
     }
   end
 
-let finish_224 = Hacl.Hash.PadFinish.finish (|SHA2_224, ()|)
+let finish_224 st dst =
+  let h0 = ST.get () in
+  [@inline_let]
+  let st' = coerce_to_mb_state SHA2_224 st in
+  [@inline_let]
+  let dst' = ntup1 #_ #1 dst in
+  Lib.IntVector.reveal_vec_1 (word_t SHA2_224);
+  Hacl.SHA2.Scalar32.sha224_finish st' dst';
+  let h1 = ST.get () in
+  begin
+    let hash1 = B.as_seq h1 dst in
+    let hash1_m = as_seq_multi h1 dst' in
+    let st0 = as_seq h0 st in
+
+    calc (==) {
+      B.as_seq h1 dst;
+      (==) { ntup1_lemma #_ #1 hash1_m }
+      as_seq_multi h1 dst';
+      (==) { }
+      Hacl.Spec.SHA2.Vec.finish #SHA2_224 #Vec.M32 st0;
+      (==) { ntup1_lemma #_ #1 (Hacl.Spec.SHA2.Vec.finish #SHA2_224 #Vec.M32 st0);
+             Hacl.Spec.SHA2.Equiv.finish_lemma_l #SHA2_224 #Vec.M32 st0 0 }
+     Hacl.Spec.SHA2.finish SHA2_224 (Lib.Sequence.index (Vec.state_spec_v #SHA2_224 #Vec.M32 st0) 0);
+     (==) { state_spec_v_lemma SHA2_224 st0 }
+     Hacl.Spec.SHA2.finish SHA2_224 st0;
+     (==) { Hacl.Spec.SHA2.EquivScalar.finish_lemma SHA2_224 st0 }
+     Spec.Agile.Hash.finish SHA2_224 st0 ();
+    }
+  end
+
+//Hacl.Hash.PadFinish.finish (|SHA2_224, ()|)
 let finish_256 = Hacl.Hash.PadFinish.finish (|SHA2_256, ()|)
 let finish_384 = Hacl.Hash.PadFinish.finish (|SHA2_384, ()|)
 let finish_512 = Hacl.Hash.PadFinish.finish (|SHA2_512, ()|)
 
-let hash_224 input input_len dst =
-  Hacl.Streaming.SHA2.sha224 input input_len dst
-let hash_256 input input_len dst =
-  Hacl.Streaming.SHA2.sha256 input input_len dst
-let hash_384 input input_len dst =
-  Hacl.Streaming.SHA2.sha384 input input_len dst
-let hash_512 input input_len dst =
-  Hacl.Streaming.SHA2.sha512 input input_len dst
+// let hash_224 input input_len dst =
+//   Hacl.Streaming.SHA2.sha224 input input_len dst
+// let hash_256 input input_len dst =
+//   Hacl.Streaming.SHA2.sha256 input input_len dst
+// let hash_384 input input_len dst =
+//   Hacl.Streaming.SHA2.sha384 input input_len dst
+// let hash_512 input input_len dst =
+//   Hacl.Streaming.SHA2.sha512 input input_len dst
