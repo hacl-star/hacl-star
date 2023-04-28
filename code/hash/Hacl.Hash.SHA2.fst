@@ -481,14 +481,23 @@ let update_last_512  st prev_len input input_len =
     }
   end
 
-let finish_224 st dst =
+inline_for_extraction noextract
+val mk_finish: a:sha2_alg -> finish_st (| a, () |)
+
+let mk_finish a st dst =
   let h0 = ST.get () in
   [@inline_let]
-  let st' = coerce_to_mb_state SHA2_224 st in
+  let st' = coerce_to_mb_state a st in
   [@inline_let]
-  let dst' = ntup1 #_ #1 dst in
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_224);
-  Hacl.SHA2.Scalar32.sha224_finish st' dst';
+  let dst' = ntup1 #(Lib.Buffer.lbuffer Lib.IntTypes.uint8 (hash_len a)) #1 dst in
+  Lib.IntVector.reveal_vec_1 (word_t a);
+  begin match a with
+  | SHA2_224 -> Hacl.SHA2.Scalar32.sha224_finish st' dst'
+  | SHA2_256 -> Hacl.SHA2.Scalar32.sha256_finish st' dst'
+  | SHA2_384 -> Hacl.SHA2.Scalar32.sha384_finish st' dst'
+  | SHA2_512 -> Hacl.SHA2.Scalar32.sha512_finish st' dst'
+  end;
+
   let h1 = ST.get () in
   begin
     let hash1 = B.as_seq h1 dst in
@@ -497,30 +506,27 @@ let finish_224 st dst =
 
     calc (==) {
       B.as_seq h1 dst;
-      (==) { ntup1_lemma #_ #1 hash1_m }
-      as_seq_multi h1 dst';
-      (==) { }
-      Hacl.Spec.SHA2.Vec.finish #SHA2_224 #Vec.M32 st0;
-      (==) { ntup1_lemma #_ #1 (Hacl.Spec.SHA2.Vec.finish #SHA2_224 #Vec.M32 st0);
-             Hacl.Spec.SHA2.Equiv.finish_lemma_l #SHA2_224 #Vec.M32 st0 0 }
-     Hacl.Spec.SHA2.finish SHA2_224 (Lib.Sequence.index (Vec.state_spec_v #SHA2_224 #Vec.M32 st0) 0);
-     (==) { state_spec_v_lemma SHA2_224 st0 }
-     Hacl.Spec.SHA2.finish SHA2_224 st0;
-     (==) { Hacl.Spec.SHA2.EquivScalar.finish_lemma SHA2_224 st0 }
-     Spec.Agile.Hash.finish SHA2_224 st0 ();
+      (==) { ntup1_lemma #_ #1 hash1_m;
+             ntup1_lemma #_ #1 (Hacl.Spec.SHA2.Vec.finish #a #Vec.M32 st0);
+             Hacl.Spec.SHA2.Equiv.finish_lemma_l #a #Vec.M32 st0 0 }
+     Hacl.Spec.SHA2.finish a (Lib.Sequence.index (Vec.state_spec_v #a #Vec.M32 st0) 0);
+     (==) { state_spec_v_lemma a st0 }
+     Hacl.Spec.SHA2.finish a st0;
+     (==) { Hacl.Spec.SHA2.EquivScalar.finish_lemma a st0 }
+     Spec.Agile.Hash.finish a st0 ();
     }
   end
 
-//Hacl.Hash.PadFinish.finish (|SHA2_224, ()|)
-let finish_256 = Hacl.Hash.PadFinish.finish (|SHA2_256, ()|)
-let finish_384 = Hacl.Hash.PadFinish.finish (|SHA2_384, ()|)
-let finish_512 = Hacl.Hash.PadFinish.finish (|SHA2_512, ()|)
+let finish_224 = mk_finish SHA2_224
+let finish_256 = mk_finish SHA2_256
+let finish_384 = mk_finish SHA2_384
+let finish_512 = mk_finish SHA2_512
 
-// let hash_224 input input_len dst =
-//   Hacl.Streaming.SHA2.sha224 input input_len dst
-// let hash_256 input input_len dst =
-//   Hacl.Streaming.SHA2.sha256 input input_len dst
-// let hash_384 input input_len dst =
-//   Hacl.Streaming.SHA2.sha384 input input_len dst
-// let hash_512 input input_len dst =
-//   Hacl.Streaming.SHA2.sha512 input input_len dst
+let hash_224 input input_len dst =
+  Hacl.Streaming.SHA2.sha224 input input_len dst
+let hash_256 input input_len dst =
+  Hacl.Streaming.SHA2.sha256 input input_len dst
+let hash_384 input input_len dst =
+  Hacl.Streaming.SHA2.sha384 input input_len dst
+let hash_512 input input_len dst =
+  Hacl.Streaming.SHA2.sha512 input input_len dst
