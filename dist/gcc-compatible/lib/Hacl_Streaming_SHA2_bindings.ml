@@ -16,21 +16,33 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint64_t @->
            (uint32_t @->
               (ocaml_bytes @-> ((ptr uint32_t) @-> (returning void)))))
+    let hacl_SHA2_Scalar32_sha256_finish =
+      foreign "Hacl_SHA2_Scalar32_sha256_finish"
+        ((ptr uint32_t) @-> (ocaml_bytes @-> (returning void)))
     let hacl_SHA2_Scalar32_sha224_init =
       foreign "Hacl_SHA2_Scalar32_sha224_init"
         ((ptr uint32_t) @-> (returning void))
+    let hacl_SHA2_Scalar32_sha224_finish =
+      foreign "Hacl_SHA2_Scalar32_sha224_finish"
+        ((ptr uint32_t) @-> (ocaml_bytes @-> (returning void)))
     let hacl_SHA2_Scalar32_sha512_init =
       foreign "Hacl_SHA2_Scalar32_sha512_init"
         ((ptr uint64_t) @-> (returning void))
     let hacl_SHA2_Scalar32_sha512_update_nblocks =
       foreign "Hacl_SHA2_Scalar32_sha512_update_nblocks"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_SHA2_Scalar32_sha512_finish =
+      foreign "Hacl_SHA2_Scalar32_sha512_finish"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
     let hacl_SHA2_Scalar32_sha384_init =
       foreign "Hacl_SHA2_Scalar32_sha384_init"
         ((ptr uint64_t) @-> (returning void))
     let hacl_SHA2_Scalar32_sha384_update_nblocks =
       foreign "Hacl_SHA2_Scalar32_sha384_update_nblocks"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_SHA2_Scalar32_sha384_finish =
+      foreign "Hacl_SHA2_Scalar32_sha384_finish"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
     type hacl_Streaming_SHA2_state_sha2_224 = hacl_Streaming_MD_state_32
     let hacl_Streaming_SHA2_state_sha2_224 =
       typedef hacl_Streaming_MD_state_32 "Hacl_Streaming_SHA2_state_sha2_224"

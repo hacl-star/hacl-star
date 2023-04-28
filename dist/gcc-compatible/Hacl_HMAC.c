@@ -256,11 +256,7 @@ Hacl_HMAC_compute_sha2_256(
       rem,
       s);
   }
-  KRML_MAYBE_FOR8(i,
-    (uint32_t)0U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    store32_be(dst1 + i * (uint32_t)4U, s[i]););
+  Hacl_SHA2_Scalar32_sha256_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_SHA2_Scalar32_sha256_init(s);
   uint32_t block_len = (uint32_t)64U;
@@ -290,11 +286,7 @@ Hacl_HMAC_compute_sha2_256(
     rem_len,
     rem,
     s);
-  KRML_MAYBE_FOR8(i,
-    (uint32_t)0U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    store32_be(dst + i * (uint32_t)4U, s[i]););
+  Hacl_SHA2_Scalar32_sha256_finish(s, dst);
 }
 
 /**
@@ -399,11 +391,7 @@ Hacl_HMAC_compute_sha2_384(
       rem,
       s);
   }
-  KRML_MAYBE_FOR6(i,
-    (uint32_t)0U,
-    (uint32_t)6U,
-    (uint32_t)1U,
-    store64_be(dst1 + i * (uint32_t)8U, s[i]););
+  Hacl_SHA2_Scalar32_sha384_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_SHA2_Scalar32_sha384_init(s);
   uint32_t block_len = (uint32_t)128U;
@@ -433,11 +421,7 @@ Hacl_HMAC_compute_sha2_384(
     rem_len,
     rem,
     s);
-  KRML_MAYBE_FOR6(i,
-    (uint32_t)0U,
-    (uint32_t)6U,
-    (uint32_t)1U,
-    store64_be(dst + i * (uint32_t)8U, s[i]););
+  Hacl_SHA2_Scalar32_sha384_finish(s, dst);
 }
 
 /**
@@ -542,11 +526,7 @@ Hacl_HMAC_compute_sha2_512(
       rem,
       s);
   }
-  KRML_MAYBE_FOR8(i,
-    (uint32_t)0U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    store64_be(dst1 + i * (uint32_t)8U, s[i]););
+  Hacl_SHA2_Scalar32_sha512_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_SHA2_Scalar32_sha512_init(s);
   uint32_t block_len = (uint32_t)128U;
@@ -576,11 +556,7 @@ Hacl_HMAC_compute_sha2_512(
     rem_len,
     rem,
     s);
-  KRML_MAYBE_FOR8(i,
-    (uint32_t)0U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    store64_be(dst + i * (uint32_t)8U, s[i]););
+  Hacl_SHA2_Scalar32_sha512_finish(s, dst);
 }
 
 /**

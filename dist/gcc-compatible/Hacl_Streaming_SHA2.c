@@ -212,7 +212,7 @@ Hacl_SHA2_Scalar32_sha256_update_last(
   }
 }
 
-static inline void sha256_finish(uint32_t *st, uint8_t *h)
+void Hacl_SHA2_Scalar32_sha256_finish(uint32_t *st, uint8_t *h)
 {
   uint8_t hbuf[32U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -244,7 +244,7 @@ static void sha224_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32
   Hacl_SHA2_Scalar32_sha256_update_last(totlen, len, b, st);
 }
 
-static inline void sha224_finish(uint32_t *st, uint8_t *h)
+void Hacl_SHA2_Scalar32_sha224_finish(uint32_t *st, uint8_t *h)
 {
   uint8_t hbuf[32U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -439,7 +439,7 @@ Hacl_SHA2_Scalar32_sha512_update_last(
   }
 }
 
-static inline void sha512_finish(uint64_t *st, uint8_t *h)
+void Hacl_SHA2_Scalar32_sha512_finish(uint64_t *st, uint8_t *h)
 {
   uint8_t hbuf[64U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -477,7 +477,7 @@ Hacl_SHA2_Scalar32_sha384_update_last(
   Hacl_SHA2_Scalar32_sha512_update_last(totlen, len, b, st);
 }
 
-static inline void sha384_finish(uint64_t *st, uint8_t *h)
+void Hacl_SHA2_Scalar32_sha384_finish(uint64_t *st, uint8_t *h)
 {
   uint8_t hbuf[64U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -776,7 +776,7 @@ void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_MD_state_32 *p, uint8_t *dst)
     r,
     buf_last,
     tmp_block_state);
-  sha256_finish(tmp_block_state, dst);
+  Hacl_SHA2_Scalar32_sha256_finish(tmp_block_state, dst);
 }
 
 /**
@@ -810,7 +810,7 @@ void Hacl_Streaming_SHA2_sha256(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint8_t *b0 = ib;
   uint8_t *lb = b0 + input_len - rem1;
   Hacl_SHA2_Scalar32_sha256_update_last(len_, rem, lb, st);
-  sha256_finish(st, rb);
+  Hacl_SHA2_Scalar32_sha256_finish(st, rb);
 }
 
 Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_create_in_224(void)
@@ -884,7 +884,7 @@ void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_MD_state_32 *p, uint8_t *dst)
   sha224_update_nblocks((uint32_t)0U, buf_multi, tmp_block_state);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   sha224_update_last(prev_len_last + (uint64_t)r, r, buf_last, tmp_block_state);
-  sha224_finish(tmp_block_state, dst);
+  Hacl_SHA2_Scalar32_sha224_finish(tmp_block_state, dst);
 }
 
 void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_MD_state_32 *p)
@@ -908,7 +908,7 @@ void Hacl_Streaming_SHA2_sha224(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint8_t *b0 = ib;
   uint8_t *lb = b0 + input_len - rem1;
   sha224_update_last(len_, rem, lb, st);
-  sha224_finish(st, rb);
+  Hacl_SHA2_Scalar32_sha224_finish(st, rb);
 }
 
 Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_create_in_512(void)
@@ -1193,7 +1193,7 @@ void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_MD_state_64 *p, uint8_t *dst)
     r,
     buf_last,
     tmp_block_state);
-  sha512_finish(tmp_block_state, dst);
+  Hacl_SHA2_Scalar32_sha512_finish(tmp_block_state, dst);
 }
 
 /**
@@ -1227,7 +1227,7 @@ void Hacl_Streaming_SHA2_sha512(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint8_t *b0 = ib;
   uint8_t *lb = b0 + input_len - rem1;
   Hacl_SHA2_Scalar32_sha512_update_last(len_, rem, lb, st);
-  sha512_finish(st, rb);
+  Hacl_SHA2_Scalar32_sha512_finish(st, rb);
 }
 
 Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_create_in_384(void)
@@ -1305,7 +1305,7 @@ void Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_MD_state_64 *p, uint8_t *dst)
     r,
     buf_last,
     tmp_block_state);
-  sha384_finish(tmp_block_state, dst);
+  Hacl_SHA2_Scalar32_sha384_finish(tmp_block_state, dst);
 }
 
 void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_MD_state_64 *p)
@@ -1329,6 +1329,6 @@ void Hacl_Streaming_SHA2_sha384(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint8_t *b0 = ib;
   uint8_t *lb = b0 + input_len - rem1;
   Hacl_SHA2_Scalar32_sha384_update_last(len_, rem, lb, st);
-  sha384_finish(st, rb);
+  Hacl_SHA2_Scalar32_sha384_finish(st, rb);
 }
 

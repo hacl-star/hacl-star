@@ -790,41 +790,25 @@ static void finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
   if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
-    KRML_MAYBE_FOR7(i,
-      (uint32_t)0U,
-      (uint32_t)7U,
-      (uint32_t)1U,
-      store32_be(dst + i * (uint32_t)4U, p1[i]););
+    Hacl_SHA2_Scalar32_sha224_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
-    KRML_MAYBE_FOR8(i,
-      (uint32_t)0U,
-      (uint32_t)8U,
-      (uint32_t)1U,
-      store32_be(dst + i * (uint32_t)4U, p1[i]););
+    Hacl_SHA2_Scalar32_sha256_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
-    KRML_MAYBE_FOR6(i,
-      (uint32_t)0U,
-      (uint32_t)6U,
-      (uint32_t)1U,
-      store64_be(dst + i * (uint32_t)8U, p1[i]););
+    Hacl_SHA2_Scalar32_sha384_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
-    KRML_MAYBE_FOR8(i,
-      (uint32_t)0U,
-      (uint32_t)8U,
-      (uint32_t)1U,
-      store64_be(dst + i * (uint32_t)8U, p1[i]););
+    Hacl_SHA2_Scalar32_sha512_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA3_224_s)
@@ -2403,11 +2387,7 @@ void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uin
   uint8_t *rest = rest0;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
   EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  KRML_MAYBE_FOR8(i,
-    (uint32_t)0U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    store32_be(dst + i * (uint32_t)4U, s[i]););
+  Hacl_SHA2_Scalar32_sha256_finish(s, dst);
 }
 
 static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
@@ -2442,11 +2422,7 @@ static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = rest0;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
   EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  KRML_MAYBE_FOR7(i,
-    (uint32_t)0U,
-    (uint32_t)7U,
-    (uint32_t)1U,
-    store32_be(dst + i * (uint32_t)4U, s[i]););
+  Hacl_SHA2_Scalar32_sha224_finish(s, dst);
 }
 
 /**
