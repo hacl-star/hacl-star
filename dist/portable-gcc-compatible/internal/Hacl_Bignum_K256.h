@@ -176,20 +176,6 @@ static inline bool Hacl_K256_Field_load_felem_lt_prime_vartime(uint64_t *f, uint
 
 /* SNIPPET_END: Hacl_K256_Field_load_felem_lt_prime_vartime */
 
-/* SNIPPET_START: Hacl_K256_Field_load_felem_vartime */
-
-static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
-{
-  bool is_lt_p = Hacl_K256_Field_load_felem_lt_prime_vartime(f, b);
-  if (!is_lt_p)
-  {
-    return false;
-  }
-  return !Hacl_K256_Field_is_felem_zero_vartime(f);
-}
-
-/* SNIPPET_END: Hacl_K256_Field_load_felem_vartime */
-
 /* SNIPPET_START: Hacl_K256_Field_store_felem */
 
 static inline void Hacl_K256_Field_store_felem(uint8_t *b, uint64_t *f)

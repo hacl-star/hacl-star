@@ -832,6 +832,66 @@ void Hacl_Impl_K256_Point_make_point_at_inf(uint64_t *p)
 
 /* SNIPPET_END: Hacl_Impl_K256_Point_make_point_at_inf */
 
+/* SNIPPET_START: to_aff_point */
+
+static inline void to_aff_point(uint64_t *p_aff, uint64_t *p)
+{
+  uint64_t *x = p_aff;
+  uint64_t *y = p_aff + (uint32_t)5U;
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + (uint32_t)5U;
+  uint64_t *z1 = p + (uint32_t)10U;
+  uint64_t zinv[5U] = { 0U };
+  Hacl_Impl_K256_Finv_finv(zinv, z1);
+  Hacl_K256_Field_fmul(x, x1, zinv);
+  Hacl_K256_Field_fmul(y, y1, zinv);
+  Hacl_K256_Field_fnormalize(x, x);
+  Hacl_K256_Field_fnormalize(y, y);
+}
+
+/* SNIPPET_END: to_aff_point */
+
+/* SNIPPET_START: to_aff_point_x */
+
+static inline void to_aff_point_x(uint64_t *x, uint64_t *p)
+{
+  uint64_t *x1 = p;
+  uint64_t *z1 = p + (uint32_t)10U;
+  uint64_t zinv[5U] = { 0U };
+  Hacl_Impl_K256_Finv_finv(zinv, z1);
+  Hacl_K256_Field_fmul(x, x1, zinv);
+  Hacl_K256_Field_fnormalize(x, x);
+}
+
+/* SNIPPET_END: to_aff_point_x */
+
+/* SNIPPET_START: is_on_curve_vartime */
+
+static inline bool is_on_curve_vartime(uint64_t *p)
+{
+  uint64_t y2_exp[5U] = { 0U };
+  uint64_t *x = p;
+  uint64_t *y = p + (uint32_t)5U;
+  uint64_t b[5U] = { 0U };
+  b[0U] = (uint64_t)0x7U;
+  b[1U] = (uint64_t)0U;
+  b[2U] = (uint64_t)0U;
+  b[3U] = (uint64_t)0U;
+  b[4U] = (uint64_t)0U;
+  Hacl_K256_Field_fsqr(y2_exp, x);
+  Hacl_K256_Field_fmul(y2_exp, y2_exp, x);
+  Hacl_K256_Field_fadd(y2_exp, y2_exp, b);
+  Hacl_K256_Field_fnormalize(y2_exp, y2_exp);
+  uint64_t y2_comp[5U] = { 0U };
+  Hacl_K256_Field_fsqr(y2_comp, y);
+  Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
+  bool res = Hacl_K256_Field_is_felem_eq_vartime(y2_exp, y2_comp);
+  bool res0 = res;
+  return res0;
+}
+
+/* SNIPPET_END: is_on_curve_vartime */
+
 /* SNIPPET_START: Hacl_Impl_K256_Point_point_negate */
 
 void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p)
@@ -890,54 +950,84 @@ static inline void point_negate_conditional_vartime(uint64_t *p, bool is_negate)
 
 /* SNIPPET_END: point_negate_conditional_vartime */
 
-/* SNIPPET_START: fmul_fmul_eq_vartime */
+/* SNIPPET_START: aff_point_store */
 
-static inline bool fmul_fmul_eq_vartime(uint64_t *a, uint64_t *bz, uint64_t *c, uint64_t *dz)
-{
-  uint64_t a_bz[5U] = { 0U };
-  uint64_t c_dz[5U] = { 0U };
-  Hacl_K256_Field_fmul(a_bz, a, bz);
-  Hacl_K256_Field_fmul(c_dz, c, dz);
-  Hacl_K256_Field_fnormalize(a_bz, a_bz);
-  Hacl_K256_Field_fnormalize(c_dz, c_dz);
-  bool z = Hacl_K256_Field_is_felem_eq_vartime(a_bz, c_dz);
-  return z;
-}
-
-/* SNIPPET_END: fmul_fmul_eq_vartime */
-
-/* SNIPPET_START: Hacl_Impl_K256_Point_point_eq_vartime */
-
-bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q)
+static inline void aff_point_store(uint8_t *out, uint64_t *p)
 {
   uint64_t *px = p;
   uint64_t *py = p + (uint32_t)5U;
-  uint64_t *pz = p + (uint32_t)10U;
-  uint64_t *qx = q;
-  uint64_t *qy = q + (uint32_t)5U;
-  uint64_t *qz = q + (uint32_t)10U;
-  bool z0 = fmul_fmul_eq_vartime(px, qz, qx, pz);
-  if (!z0)
-  {
-    return false;
-  }
-  return fmul_fmul_eq_vartime(py, qz, qy, pz);
+  Hacl_K256_Field_store_felem(out, px);
+  Hacl_K256_Field_store_felem(out + (uint32_t)32U, py);
 }
 
-/* SNIPPET_END: Hacl_Impl_K256_Point_point_eq_vartime */
+/* SNIPPET_END: aff_point_store */
 
-/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
+/* SNIPPET_START: Hacl_Impl_K256_Point_point_store */
 
-bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s)
+void Hacl_Impl_K256_Point_point_store(uint8_t *out, uint64_t *p)
+{
+  uint64_t p_aff[10U] = { 0U };
+  to_aff_point(p_aff, p);
+  aff_point_store(out, p_aff);
+}
+
+/* SNIPPET_END: Hacl_Impl_K256_Point_point_store */
+
+/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_load_vartime */
+
+bool Hacl_Impl_K256_Point_aff_point_load_vartime(uint64_t *p, uint8_t *b)
+{
+  uint8_t *px = b;
+  uint8_t *py = b + (uint32_t)32U;
+  uint64_t *bn_px = p;
+  uint64_t *bn_py = p + (uint32_t)5U;
+  bool is_x_valid = Hacl_K256_Field_load_felem_lt_prime_vartime(bn_px, px);
+  bool is_y_valid = Hacl_K256_Field_load_felem_lt_prime_vartime(bn_py, py);
+  if (is_x_valid && is_y_valid)
+  {
+    return is_on_curve_vartime(p);
+  }
+  return false;
+}
+
+/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_load_vartime */
+
+/* SNIPPET_START: load_point_vartime */
+
+static inline bool load_point_vartime(uint64_t *p, uint8_t *b)
+{
+  uint64_t p_aff[10U] = { 0U };
+  bool res = Hacl_Impl_K256_Point_aff_point_load_vartime(p_aff, b);
+  if (res)
+  {
+    uint64_t *x = p_aff;
+    uint64_t *y = p_aff + (uint32_t)5U;
+    uint64_t *x1 = p;
+    uint64_t *y1 = p + (uint32_t)5U;
+    uint64_t *z1 = p + (uint32_t)10U;
+    memcpy(x1, x, (uint32_t)5U * sizeof (uint64_t));
+    memcpy(y1, y, (uint32_t)5U * sizeof (uint64_t));
+    memset(z1, 0U, (uint32_t)5U * sizeof (uint64_t));
+    z1[0U] = (uint64_t)1U;
+  }
+  return res;
+}
+
+/* SNIPPET_END: load_point_vartime */
+
+/* SNIPPET_START: aff_point_decompress_vartime */
+
+static inline bool aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s)
 {
   uint8_t s0 = s[0U];
-  if (!(s0 == (uint8_t)0x02U || s0 == (uint8_t)0x03U))
+  uint8_t s01 = s0;
+  if (!(s01 == (uint8_t)0x02U || s01 == (uint8_t)0x03U))
   {
     return false;
   }
   uint8_t *xb = s + (uint32_t)1U;
-  bool is_x_valid = Hacl_K256_Field_load_felem_vartime(x, xb);
-  bool is_y_odd = s0 == (uint8_t)0x03U;
+  bool is_x_valid = Hacl_K256_Field_load_felem_lt_prime_vartime(x, xb);
+  bool is_y_odd = s01 == (uint8_t)0x03U;
   if (!is_x_valid)
   {
     return false;
@@ -960,7 +1050,8 @@ bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y,
   Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
   bool res = Hacl_K256_Field_is_felem_eq_vartime(y2, y2_comp);
   bool is_y_valid = res;
-  if (!is_y_valid)
+  bool is_y_valid0 = is_y_valid;
+  if (!is_y_valid0)
   {
     return false;
   }
@@ -970,30 +1061,7 @@ bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y,
   return true;
 }
 
-/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
-
-/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_compress_vartime */
-
-void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, uint64_t *y)
-{
-  Hacl_K256_Field_fnormalize(y, y);
-  Hacl_K256_Field_fnormalize(x, x);
-  uint64_t x0 = y[0U];
-  bool is_y_odd = (x0 & (uint64_t)1U) == (uint64_t)1U;
-  uint8_t ite;
-  if (is_y_odd)
-  {
-    ite = (uint8_t)0x03U;
-  }
-  else
-  {
-    ite = (uint8_t)0x02U;
-  }
-  s[0U] = ite;
-  Hacl_K256_Field_store_felem(s + (uint32_t)1U, x);
-}
-
-/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_compress_vartime */
+/* SNIPPET_END: aff_point_decompress_vartime */
 
 /* SNIPPET_START: Hacl_Impl_K256_PointDouble_point_double */
 
@@ -1903,39 +1971,6 @@ point_mul_g_double_split_lambda_vartime(
 
 /* SNIPPET_END: point_mul_g_double_split_lambda_vartime */
 
-/* SNIPPET_START: load_public_key */
-
-static inline bool load_public_key(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y)
-{
-  uint8_t *pk_x = pk;
-  uint8_t *pk_y = pk + (uint32_t)32U;
-  bool is_x_valid = Hacl_K256_Field_load_felem_vartime(fpk_x, pk_x);
-  bool is_y_valid = Hacl_K256_Field_load_felem_vartime(fpk_y, pk_y);
-  if (is_x_valid && is_y_valid)
-  {
-    uint64_t y2_exp[5U] = { 0U };
-    uint64_t b[5U] = { 0U };
-    b[0U] = (uint64_t)0x7U;
-    b[1U] = (uint64_t)0U;
-    b[2U] = (uint64_t)0U;
-    b[3U] = (uint64_t)0U;
-    b[4U] = (uint64_t)0U;
-    Hacl_K256_Field_fsqr(y2_exp, fpk_x);
-    Hacl_K256_Field_fmul(y2_exp, y2_exp, fpk_x);
-    Hacl_K256_Field_fadd(y2_exp, y2_exp, b);
-    Hacl_K256_Field_fnormalize(y2_exp, y2_exp);
-    uint64_t y2_comp[5U] = { 0U };
-    Hacl_K256_Field_fsqr(y2_comp, fpk_y);
-    Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
-    bool res = Hacl_K256_Field_is_felem_eq_vartime(y2_exp, y2_comp);
-    bool res0 = res;
-    return res0;
-  }
-  return false;
-}
-
-/* SNIPPET_END: load_public_key */
-
 /* SNIPPET_START: fmul_eq_vartime */
 
 static inline bool fmul_eq_vartime(uint64_t *r, uint64_t *z, uint64_t *x)
@@ -1974,9 +2009,9 @@ Create an ECDSA signature.
 
   The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
 
-  The function also checks whether `private_key` and `nonce` are valid values:
-    • 0 < `private_key` and `private_key` < the order of the curve
-    • 0 < `nonce` and `nonce` < the order of the curve
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
@@ -1992,42 +2027,42 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint64_t *s_q = rsdk_q + (uint32_t)4U;
   uint64_t *d_a = rsdk_q + (uint32_t)8U;
   uint64_t *k_q = rsdk_q + (uint32_t)12U;
-  uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
-  uint64_t is_nonce_valid = load_qelem_check(k_q, nonce);
-  uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;
+  uint64_t is_b_valid0 = load_qelem_check(d_a, private_key);
+  uint64_t oneq10[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = d_a;
-    uint64_t uu____0 = oneq[i];
-    uint64_t x = uu____0 ^ (are_sk_nonce_valid & (d_a[i] ^ uu____0));
+    uint64_t uu____0 = oneq10[i];
+    uint64_t x = uu____0 ^ (is_b_valid0 & (d_a[i] ^ uu____0));
     os[i] = x;);
+  uint64_t is_sk_valid = is_b_valid0;
+  uint64_t is_b_valid = load_qelem_check(k_q, nonce);
+  uint64_t oneq1[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
     uint64_t *os = k_q;
-    uint64_t uu____1 = oneq[i];
-    uint64_t x = uu____1 ^ (are_sk_nonce_valid & (k_q[i] ^ uu____1));
+    uint64_t uu____1 = oneq1[i];
+    uint64_t x = uu____1 ^ (is_b_valid & (k_q[i] ^ uu____1));
     os[i] = x;);
+  uint64_t is_nonce_valid = is_b_valid;
+  uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;
   uint64_t tmp[5U] = { 0U };
   uint8_t x_bytes[32U] = { 0U };
   uint64_t p[15U] = { 0U };
   point_mul_g(p, k_q);
-  uint64_t *x = p;
-  uint64_t *z = p + (uint32_t)10U;
-  Hacl_Impl_K256_Finv_finv(tmp, z);
-  Hacl_K256_Field_fmul(tmp, x, tmp);
-  Hacl_K256_Field_fnormalize(tmp, tmp);
+  to_aff_point_x(tmp, p);
   Hacl_K256_Field_store_felem(x_bytes, tmp);
   load_qelem_modq(r_q, x_bytes);
-  uint64_t z0[4U] = { 0U };
+  uint64_t z[4U] = { 0U };
   uint64_t kinv[4U] = { 0U };
-  load_qelem_modq(z0, msgHash);
+  load_qelem_modq(z, msgHash);
   qinv(kinv, k_q);
   qmul(s_q, r_q, d_a);
-  qadd(s_q, z0, s_q);
+  qadd(s_q, z, s_q);
   qmul(s_q, kinv, s_q);
   store_qelem(signature, r_q);
   store_qelem(signature + (uint32_t)32U, s_q);
@@ -2043,7 +2078,7 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
 /* SNIPPET_START: Hacl_K256_ECDSA_ecdsa_sign_sha256 */
 
 /**
-Create an ECDSA signature.
+Create an ECDSA signature using SHA2-256.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
@@ -2084,53 +2119,43 @@ Verify an ECDSA signature.
 
   The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
 
-  The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve
+  The function also checks whether `public key` is valid.
 */
 bool
 Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t *signature)
 {
-  uint64_t pk_x[5U] = { 0U };
-  uint64_t pk_y[5U] = { 0U };
-  uint64_t r_q[4U] = { 0U };
-  uint64_t s_q[4U] = { 0U };
-  uint64_t z[4U] = { 0U };
-  bool is_xy_on_curve = load_public_key(public_key, pk_x, pk_y);
+  uint64_t tmp[35U] = { 0U };
+  uint64_t *pk = tmp;
+  uint64_t *r_q = tmp + (uint32_t)15U;
+  uint64_t *s_q = tmp + (uint32_t)19U;
+  uint64_t *u1 = tmp + (uint32_t)23U;
+  uint64_t *u2 = tmp + (uint32_t)27U;
+  uint64_t *m_q = tmp + (uint32_t)31U;
+  bool is_pk_valid = load_point_vartime(pk, public_key);
   bool is_r_valid = load_qelem_vartime(r_q, signature);
   bool is_s_valid = load_qelem_vartime(s_q, signature + (uint32_t)32U);
-  load_qelem_modq(z, m);
-  if (!(is_xy_on_curve && is_r_valid && is_s_valid))
+  bool is_rs_valid = is_r_valid && is_s_valid;
+  load_qelem_modq(m_q, m);
+  if (!(is_pk_valid && is_rs_valid))
   {
     return false;
   }
-  uint64_t p[15U] = { 0U };
+  uint64_t sinv[4U] = { 0U };
+  qinv(sinv, s_q);
+  qmul(u1, m_q, sinv);
+  qmul(u2, r_q, sinv);
   uint64_t res[15U] = { 0U };
-  uint64_t *x1 = p;
-  uint64_t *y1 = p + (uint32_t)5U;
-  uint64_t *z10 = p + (uint32_t)10U;
-  memcpy(x1, pk_x, (uint32_t)5U * sizeof (uint64_t));
-  memcpy(y1, pk_y, (uint32_t)5U * sizeof (uint64_t));
-  memset(z10, 0U, (uint32_t)5U * sizeof (uint64_t));
-  z10[0U] = (uint64_t)1U;
-  uint64_t sinv1[4U] = { 0U };
-  uint64_t u11[4U] = { 0U };
-  uint64_t u21[4U] = { 0U };
-  qinv(sinv1, s_q);
-  qmul(u11, z, sinv1);
-  qmul(u21, r_q, sinv1);
-  point_mul_g_double_split_lambda_vartime(res, u11, u21, p);
-  uint64_t tmp[5U] = { 0U };
+  point_mul_g_double_split_lambda_vartime(res, u1, u2, pk);
+  uint64_t tmp1[5U] = { 0U };
   uint64_t *pz = res + (uint32_t)10U;
-  Hacl_K256_Field_fnormalize(tmp, pz);
-  bool b = Hacl_K256_Field_is_felem_zero_vartime(tmp);
+  Hacl_K256_Field_fnormalize(tmp1, pz);
+  bool b = Hacl_K256_Field_is_felem_zero_vartime(tmp1);
   if (b)
   {
     return false;
   }
   uint64_t *x = res;
-  uint64_t *z1 = res + (uint32_t)10U;
+  uint64_t *z = res + (uint32_t)10U;
   uint8_t r_bytes[32U] = { 0U };
   uint64_t r_fe[5U] = { 0U };
   uint64_t tmp_q[5U] = { 0U };
@@ -2138,7 +2163,7 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
   store_qelem(r_bytes, r_q);
   Hacl_K256_Field_load_felem(r_fe, r_bytes);
   Hacl_K256_Field_fnormalize(tmp_x, x);
-  bool is_rz_x = fmul_eq_vartime(r_fe, z1, tmp_x);
+  bool is_rz_x = fmul_eq_vartime(r_fe, z, tmp_x);
   if (!is_rz_x)
   {
     bool is_r_lt_p_m_q = Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(r_fe);
@@ -2150,7 +2175,7 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
       tmp_q[3U] = (uint64_t)0xfffffffffffffU;
       tmp_q[4U] = (uint64_t)0xffffffffffffU;
       Hacl_K256_Field_fadd(tmp_q, r_fe, tmp_q);
-      return fmul_eq_vartime(tmp_q, z1, tmp_x);
+      return fmul_eq_vartime(tmp_q, z, tmp_x);
     }
     return false;
   }
@@ -2162,7 +2187,7 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
 /* SNIPPET_START: Hacl_K256_ECDSA_ecdsa_verify_sha256 */
 
 /**
-Verify an ECDSA signature.
+Verify an ECDSA signature using SHA2-256.
 
   The function returns `true` if the signature is valid and `false` otherwise.
 
@@ -2247,9 +2272,9 @@ Create an ECDSA signature.
 
   The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
 
-  The function also checks whether `private_key` and `nonce` are valid values:
-    • 0 < `private_key` and `private_key` < the order of the curve
-    • 0 < `nonce` and `nonce` < the order of the curve
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 bool
 Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
@@ -2272,7 +2297,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256 */
 
 /**
-Create an ECDSA signature.
+Create an ECDSA signature using SHA2-256.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
@@ -2314,10 +2339,7 @@ Verify an ECDSA signature.
 
   The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
 
-  The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve
+  The function also checks whether `public_key` is valid
 */
 bool
 Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
@@ -2339,7 +2361,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
 /* SNIPPET_START: Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256 */
 
 /**
-Verify an ECDSA signature.
+Verify an ECDSA signature using SHA2-256.
 
   The function returns `true` if the signature is valid and `false` otherwise.
 
@@ -2439,7 +2461,7 @@ bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
   uint64_t xa[5U] = { 0U };
   uint64_t ya[5U] = { 0U };
   uint8_t *pk_xb = pk + (uint32_t)1U;
-  bool b = Hacl_Impl_K256_Point_aff_point_decompress_vartime(xa, ya, pk);
+  bool b = aff_point_decompress_vartime(xa, ya, pk);
   if (b)
   {
     memcpy(pk_raw, pk_xb, (uint32_t)32U * sizeof (uint8_t));
@@ -2483,29 +2505,61 @@ void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw
 
 /* SNIPPET_START: Hacl_K256_ECDSA_is_public_key_valid */
 
+
+/******************/
+/* Key validation */
+/******************/
+
 /**
 Public key validation.
 
   The function returns `true` if a public key is valid and `false` otherwise.
 
-  The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `public_key` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
-  The public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve. 
+  The public key (x || y) is valid (with respect to SP 800-56A):
+    • the public key is not the “point at infinity”, represented as O.
+    • the affine x and y coordinates of the point represented by the public key are
+      in the range [0, p – 1] where p is the prime defining the finite field.
+    • y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from: https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
-bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *pk)
+bool Hacl_K256_ECDSA_is_public_key_valid(uint8_t *public_key)
 {
-  uint64_t fpk_x[5U] = { 0U };
-  uint64_t fpk_y[5U] = { 0U };
-  bool is_pk_valid = load_public_key(pk, fpk_x, fpk_y);
+  uint64_t p[15U] = { 0U };
+  bool is_pk_valid = load_point_vartime(p, public_key);
   return is_pk_valid;
 }
 
 /* SNIPPET_END: Hacl_K256_ECDSA_is_public_key_valid */
 
+/* SNIPPET_START: Hacl_K256_ECDSA_is_private_key_valid */
+
+/**
+Private key validation.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve
+*/
+bool Hacl_K256_ECDSA_is_private_key_valid(uint8_t *private_key)
+{
+  uint64_t s_q[4U] = { 0U };
+  uint64_t res = load_qelem_check(s_q, private_key);
+  return res == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+}
+
+/* SNIPPET_END: Hacl_K256_ECDSA_is_private_key_valid */
+
 /* SNIPPET_START: Hacl_K256_ECDSA_secret_to_public */
+
+
+/******************/
+/* ECDH agreement */
+/******************/
 
 /**
 Compute the public key from the private key.
@@ -2516,38 +2570,70 @@ Compute the public key from the private key.
   The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
   The private key is valid:
-    • 0 < `private_key` and `private_key` < the order of the curve.
+    • 0 < `private_key` < the order of the curve.
 */
 bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key)
 {
-  uint64_t d_a[4U] = { 0U };
-  uint64_t p[15U] = { 0U };
-  uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
+  uint64_t tmp[19U] = { 0U };
+  uint64_t *pk = tmp;
+  uint64_t *sk = tmp + (uint32_t)15U;
+  uint64_t is_b_valid = load_qelem_check(sk, private_key);
   uint64_t oneq[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,
     (uint32_t)1U,
-    uint64_t *os = d_a;
+    uint64_t *os = sk;
     uint64_t uu____0 = oneq[i];
-    uint64_t x = uu____0 ^ (is_sk_valid & (d_a[i] ^ uu____0));
+    uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
     os[i] = x;);
-  point_mul_g(p, d_a);
-  uint64_t px[5U] = { 0U };
-  uint64_t py[5U] = { 0U };
-  uint64_t *x1 = p;
-  uint64_t *y1 = p + (uint32_t)5U;
-  uint64_t *z1 = p + (uint32_t)10U;
-  uint64_t zinv[5U] = { 0U };
-  Hacl_Impl_K256_Finv_finv(zinv, z1);
-  Hacl_K256_Field_fmul(px, x1, zinv);
-  Hacl_K256_Field_fmul(py, y1, zinv);
-  Hacl_K256_Field_fnormalize(px, px);
-  Hacl_K256_Field_fnormalize(py, py);
-  Hacl_K256_Field_store_felem(public_key, px);
-  Hacl_K256_Field_store_felem(public_key + (uint32_t)32U, py);
+  uint64_t is_sk_valid = is_b_valid;
+  point_mul_g(pk, sk);
+  Hacl_Impl_K256_Point_point_store(public_key, pk);
   return is_sk_valid == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 /* SNIPPET_END: Hacl_K256_ECDSA_secret_to_public */
+
+/* SNIPPET_START: Hacl_K256_ECDSA_ecdh */
+
+/**
+Execute the diffie-hellmann key exchange.
+
+  The function returns `true` for successful creation of an ECDH shared secret and
+  `false` otherwise.
+
+  The outparam `shared_secret` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `their_pubkey` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `their_pubkey` are valid.
+*/
+bool Hacl_K256_ECDSA_ecdh(uint8_t *shared_secret, uint8_t *their_pubkey, uint8_t *private_key)
+{
+  uint64_t tmp[34U] = { 0U };
+  uint64_t *pk = tmp;
+  uint64_t *ss = tmp + (uint32_t)15U;
+  uint64_t *sk = tmp + (uint32_t)30U;
+  bool is_pk_valid = load_point_vartime(pk, their_pubkey);
+  uint64_t is_b_valid = load_qelem_check(sk, private_key);
+  uint64_t oneq[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    uint64_t *os = sk;
+    uint64_t uu____0 = oneq[i];
+    uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
+    os[i] = x;);
+  uint64_t is_sk_valid = is_b_valid;
+  if (is_pk_valid)
+  {
+    Hacl_Impl_K256_PointMul_point_mul(ss, sk, pk);
+    Hacl_Impl_K256_Point_point_store(shared_secret, ss);
+  }
+  return is_sk_valid == (uint64_t)0xFFFFFFFFFFFFFFFFU && is_pk_valid;
+}
+
+/* SNIPPET_END: Hacl_K256_ECDSA_ecdh */
 
