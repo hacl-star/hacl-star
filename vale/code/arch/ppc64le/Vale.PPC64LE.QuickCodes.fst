@@ -1,5 +1,6 @@
 module Vale.PPC64LE.QuickCodes
 open FStar.Mul
+open FStar.Range
 open Vale.Arch.HeapImpl
 module Map16 = Vale.Lib.Map16
 friend Vale.PPC64LE.Stack_Sems
