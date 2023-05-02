@@ -594,7 +594,10 @@ and visit_body (t_i: term)
   | Tv_Type _
   | Tv_Uvar _ _
   | Tv_Refine _ _ _
-  | Tv_Unknown ->
+  | Tv_Unknown
+  (* Redundant underscore to catch for soon-to-come
+  addition of Tv_Unsupp *)
+  | _ ->
       // Looks like we ended up visiting a type argument of an application.
       st, e, bvs, []
 
