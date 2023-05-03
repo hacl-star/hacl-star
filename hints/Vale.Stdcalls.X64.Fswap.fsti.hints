@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "4d95610aaae77af187ef9c30f30bda59"
+      "467b8762f21c6a093d0aaf8e62a4ce6e"
     ],
     [
       "Vale.Stdcalls.X64.Fswap.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "ac997d30bc35202c9d264710c8ed2fc0"
+      "d1b34f9df697a4c2c42c30b7cce6567c"
     ],
     [
       "Vale.Stdcalls.X64.Fswap.cswap_dom",
@@ -29,7 +29,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "95dcff385f98b2acd7774522fad29c6b"
+      "ac864d5d51070a6f7f9d661a7469741d"
     ],
     [
       "Vale.Stdcalls.X64.Fswap.cswap_pre",
@@ -55,7 +55,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "0e561d8bb57a12c34e1426880b128e60"
+      "6b25122269c236655bc884c526be02a7"
     ],
     [
       "Vale.Stdcalls.X64.Fswap.cswap_post",
@@ -81,7 +81,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "bc6da732703c4b18f89d0dd7a7556ab2"
+      "6effc19bea796e88f6659987b6e1c50b"
     ],
     [
       "Vale.Stdcalls.X64.Fswap.cswap_lemma'",
@@ -93,19 +93,23 @@
         "Vale.Interop.X64_interpretation_Tm_arrow_972e4e2c724f700a5019205902fe83cf",
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt64",
-        "data_typing_intro_Vale.X64.Machine_s.Reg@tok", "eq2-interp",
+        "data_typing_intro_Vale.X64.Machine_s.Reg@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.Secret@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_Prims.eq2", "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Prims.squash", "equation_Vale.Arch.HeapImpl.vale_heaplets",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.AsLowStar.ValeSig.vale_calling_conventions",
         "equation_Vale.AsLowStar.ValeSig.vale_calling_conventions_stdcall",
         "equation_Vale.AsLowStar.ValeSig.vale_save_reg",
         "equation_Vale.AsLowStar.ValeSig.vale_save_xmm",
         "equation_Vale.Curve25519.X64.FastUtil.va_ens_Cswap2_stdcall",
         "equation_Vale.Curve25519.X64.FastUtil.va_req_Cswap2_stdcall",
+        "equation_Vale.Interop.Base.buf_t",
+        "equation_Vale.Interop.Types.base_typ_as_type",
         "equation_Vale.Interop.Types.view_n",
         "equation_Vale.Interop.X64.regs_modified_stdcall",
         "equation_Vale.Interop.X64.xmms_modified_stdcall",
@@ -182,21 +186,28 @@
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_regs",
         "refinement_interpretation_Tm_refine_0559236e7a05befcc7b6302f3642ad81",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_3254aec390832a8ce1caadbe6c5d7b85",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7d29e56e66c8277ffbad10980c3bdf4c",
+        "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
         "refinement_interpretation_Tm_refine_c365eb902b454950de62fba701d9049d",
+        "refinement_interpretation_Tm_refine_cd2eb7d005c01f12641f2fefd4fc4cb0",
         "refinement_interpretation_Tm_refine_d9979b96a3f2b18961b3dd63a2783b64",
         "refinement_interpretation_Tm_refine_ec538f56b4ccf7689822c796e80d576e",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "token_correspondence_Vale.Interop.X64.regs_modified_stdcall",
         "token_correspondence_Vale.Interop.X64.xmms_modified_stdcall",
-        "typing_FStar.UInt64.v",
+        "typing_FStar.UInt32.v", "typing_FStar.UInt64.v",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_heap",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_heaplets",
+        "typing_Vale.Curve25519.X64.FastUtil.va_code_Cswap2_stdcall",
         "typing_Vale.Curve25519.X64.FastUtil.va_lemma_Cswap2_stdcall",
         "typing_Vale.Interop.Assumptions.win",
+        "typing_Vale.Interop.Types.base_typ_as_type",
         "typing_Vale.Interop.Types.view_n", "typing_Vale.Lib.Map16.sel",
         "typing_Vale.Lib.Map16.upd", "typing_Vale.X64.Decls.va_upd_mem",
         "typing_Vale.X64.Decls.va_upd_ok",
@@ -217,7 +228,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "c1ce7ade87dc2b4ab4b0e3be14c7d77d"
+      "af2daf9557f6ca9d43439d9202f263bb"
     ],
     [
       "Vale.Stdcalls.X64.Fswap.cswap_lemma",
@@ -300,7 +311,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "b5d3faccb5320d45f39ec3d198e437e5"
+      "4996c4a3547cd1d52e78a4b496c366e7"
     ],
     [
       "Vale.Stdcalls.X64.Fswap.lowstar_cswap_t",
@@ -317,7 +328,7 @@
         "refinement_interpretation_Tm_refine_6c5f6bcb35bd47658893044895a75416"
       ],
       0,
-      "21395bdb5b50c2115755489d0da4a0e7"
+      "4c921eb015566b82cebe6e4783cb6f08"
     ]
   ]
 ]

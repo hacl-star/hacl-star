@@ -35,8 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Streaming_Types.h"
-
 #define Spec_FFDHE_FFDHE2048 0
 #define Spec_FFDHE_FFDHE3072 1
 #define Spec_FFDHE_FFDHE4096 2
