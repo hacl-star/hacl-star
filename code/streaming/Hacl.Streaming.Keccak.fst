@@ -208,6 +208,8 @@ let finish_ (a: alg) =
 
 open Hacl.Streaming.Functor
 
+// Also marks projectors as private, krml will mark type def as public.
+private
 type error_code =
   | Success
   | InvalidAlgorithm
