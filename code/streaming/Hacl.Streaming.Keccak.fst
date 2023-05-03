@@ -208,7 +208,12 @@ let finish_ (a: alg) =
 
 open Hacl.Streaming.Functor
 
-// Unfortunate copy-paste since we are returning an error code
+type error_code =
+  | Success
+  | InvalidAlgorithm
+  | InvalidLength
+
+// Unfortunate copy-paste since there are small variations (error code, output length)
 val finish:
   a:G.erased alg -> (
   let c = hacl_keccak a in
@@ -218,37 +223,83 @@ val finish:
   let t' = G.erased unit in
   s:state c i t t' ->
   dst:B.buffer uint8 ->
-  l:Lib.IntTypes.(x:size_t { v x > 0 }) {
-    B.length dst == (if is_shake_ a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) } ->
-  Stack UInt32.t
+  Stack error_code
     (requires fun h0 ->
+      (not (is_shake a) ==> B.length dst == Spec.Hash.Definitions.hash_length a) /\
       invariant c i h0 s /\
       B.live h0 dst /\
       B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
     (ensures fun h0 r h1 ->
-      if r = 0ul then
-        invariant c i h1 s /\
-        seen c i h0 s == seen c i h1 s /\
-        key c i h1 s == key c i h0 s /\
-        footprint c i h0 s == footprint c i h1 s /\
-        B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
-        seen_bounded c i h0 s;
-        S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
-        preserves_freeable c i s h0 h1
-      else if r = 1ul then
-        not (is_shake_ i) /\ ~(l == 0ul) \/ is_shake_ i /\ l == 0ul
-      else
-        False))
+      match r with
+      | Success ->
+          not (is_shake a) /\
+          invariant c i h1 s /\
+          seen c i h0 s == seen c i h1 s /\
+          key c i h1 s == key c i h0 s /\
+          footprint c i h0 s == footprint c i h1 s /\
+          B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+          seen_bounded c i h0 s;
+          S.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (seen c i h0 s)) /\
+          preserves_freeable c i s h0 h1)
+      | InvalidAlgorithm ->
+          is_shake a
+      | _ ->
+          False))
 
-let finish a s dst l =
+let finish a s dst =
   let a = get_alg a s in
-  if (a = Shake128 || a = Shake256) && l = 0ul then
-    1ul
-  else if not (a = Shake128 || a = Shake256) && l <> 0ul then
-    1ul
+  if (a = Shake128 || a = Shake256) then
+    InvalidAlgorithm
+  else begin
+    finish_ a s dst (Hacl.Hash.SHA3.hash_len a);
+    Success
+  end
+
+// Unfortunate copy-paste since we are returning an error code
+val squeeze:
+  a:G.erased alg -> (
+  let c = hacl_keccak a in
+  let a = G.reveal a in
+  let i = a in
+  let t = sha3_state a in
+  let t' = G.erased unit in
+  s:state c i t t' ->
+  dst:B.buffer uint8 ->
+  l:Lib.IntTypes.size_t ->
+  Stack error_code
+    (requires fun h0 ->
+      (is_shake a ==> B.length dst == Lib.IntTypes.v l) /\
+      invariant c i h0 s /\
+      B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
+    (ensures fun h0 r h1 ->
+      let _  = allow_inversion error_code in
+      match r with
+      | Success ->
+          is_shake a /\
+          l <> 0ul /\
+          invariant c i h1 s /\
+          seen c i h0 s == seen c i h1 s /\
+          key c i h1 s == key c i h0 s /\
+          footprint c i h0 s == footprint c i h1 s /\
+          B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+          seen_bounded c i h0 s;
+          S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
+          preserves_freeable c i s h0 h1
+      | InvalidAlgorithm ->
+         not (is_shake a)
+      | InvalidLength ->
+         l = 0ul))
+
+let squeeze a s dst l =
+  let a = get_alg a s in
+  if not (a = Shake128 || a = Shake256) then
+    InvalidAlgorithm
+  else if l = 0ul then
+    InvalidLength
   else begin
     finish_ a s dst l;
-    0ul
+    Success
   end
 
 val block_len: a:G.erased alg -> (

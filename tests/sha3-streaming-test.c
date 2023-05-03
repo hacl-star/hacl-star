@@ -14,7 +14,7 @@ main()
   Hacl_Streaming_Keccak_state* s = Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_SHA3_256);
   assert(Hacl_Streaming_Keccak_update(s, (uint8_t*)"hello world", 11) == 0);
   uint8_t hash[32] = { 0 };
-  Hacl_Streaming_Keccak_finish(s, hash, 0);
+  Hacl_Streaming_Keccak_finish(s, hash);
   Hacl_Streaming_Keccak_free(s);
   for (int i = 0; i < 32; ++i) {
     if (hash[i] != expected_hash[i]) {
