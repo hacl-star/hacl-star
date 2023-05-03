@@ -1,0 +1,197 @@
+[
+  "Å©§F€ÃA{P>Q‡\u001bñe\b",
+  [
+    [
+      "Hacl.Impl.P256.Field.feq_mask",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "8013f6419c6b492a2601f4c40c59bea4"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fadd",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_a3c93fef87c48de568ae3baabc639c41"
+      ],
+      0,
+      "5bf359d03bc756ea5d1bd001a66a3335"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fdouble",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.prime",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Spec.P256.PointOps.prime"
+      ],
+      0,
+      "fee5f83637c26173e427a00d9b4207fa"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fsub",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_96f8993c1f579094e193a513142c5856"
+      ],
+      0,
+      "0d6a8f0ba559885afa718672ed8d6b68"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fnegate_conditional_vartime",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "55be607fa622c4ec9c4f95b16ea2fb61"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fmul",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "ff142e6a011a0026042689b99cbb4567"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fsqr",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d69d5da183defa4d17835aaa523a736d"
+    ],
+    [
+      "Hacl.Impl.P256.Field.from_mont",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "6247098caaa1a5eb12abba567c211878"
+    ],
+    [
+      "Hacl.Impl.P256.Field.to_mont",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "6ebcb3bafb5113b21eeb855dc8b745dc"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fmul_by_b_coeff",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "ad1340e1d48826f3d3226102b2900378"
+    ],
+    [
+      "Hacl.Impl.P256.Field.fcube",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "c346490613c8e30e9a08795492750add"
+    ]
+  ]
+]

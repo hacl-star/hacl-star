@@ -155,6 +155,18 @@ let load_qelem_check f b =
   m
 
 
+let load_qelem_conditional res b =
+  push_frame ();
+  let is_b_valid = load_qelem_check res b in
+  let oneq = create_one () in
+  let h0 = ST.get () in
+  Lib.ByteBuffer.buf_mask_select res oneq is_b_valid res;
+  let h1 = ST.get () in
+  assert (as_seq h1 res == (if (v is_b_valid = 0) then as_seq h0 oneq else as_seq h0 res));
+  pop_frame ();
+  is_b_valid
+
+
 [@CInline]
 let load_qelem_vartime f b =
   load_qelem f b;

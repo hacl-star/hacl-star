@@ -333,28 +333,6 @@ let point_mul scalar p out =
   pop_frame ()
 
 
-[@@ Comment "Checks whether `p` is equal to `q` (point equality).
-
-  The function returns `true` if `p` is equal to `q` and `false` otherwise.
-
-  The arguments `p` and `q` are meant to be 15 limbs in size, i.e., uint64_t[15].
-
-  Before calling this function, the caller will need to ensure that the following
-  precondition is observed.
-  • `p` and `q` are either disjoint or equal.
-
-  This function is NOT constant-time."]
-val point_eq (p q:P.point) : Stack bool
-  (requires fun h ->
-    live h p /\ live h q /\ eq_or_disjoint p q /\
-    P.point_inv h p /\ P.point_inv h q)
-  (ensures  fun h0 z h1 -> modifies0 h0 h1 /\
-    (z <==> S.point_equal (P.point_eval h0 p) (P.point_eval h0 q)))
-
-let point_eq p q =
-  P.point_eq_vartime p q
-
-
 [@@ Comment "Convert a point from projective coordinates to its raw form.
 
   The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
@@ -371,10 +349,10 @@ val point_store: p:P.point -> out:lbuffer uint8 64ul -> Stack unit
     live h out /\ live h p /\ disjoint p out /\
     P.point_inv h p)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_seq h1 out == S.store_point (P.point_eval h0 p))
+    as_seq h1 out == S.point_store (P.point_eval h0 p))
 
 let point_store p out =
-  P.store_point out p
+  P.point_store out p
 
 
 [@@ Comment "Convert a point to projective coordinates from its raw form.
@@ -405,8 +383,7 @@ let point_load b out =
   The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
   The point (x || y) is valid:
-    • x < prime
-    • y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve.
 
   This function is NOT constant-time."]
@@ -417,67 +394,7 @@ val is_point_valid: b:lbuffer uint8 64ul -> Stack bool
 
 let is_point_valid b =
   push_frame ();
-  let px = F.create_felem () in
-  let py = F.create_felem () in
-  let pxb = sub b 0ul 32ul in
-  let pyb = sub b 32ul 32ul in
-  let is_x_valid = F.load_felem_lt_prime_vartime px pxb in
-  let is_y_valid = F.load_felem_lt_prime_vartime py pyb in
-  let h1 = ST.get () in
-
-  let res =
-    if is_x_valid && is_y_valid then begin
-      assert (F.inv_fully_reduced h1 px);
-      assert (F.inv_fully_reduced h1 py);
-      P.is_on_curve_vartime px py end
-    else false in
+  let p = P.create_aff_point () in
+  let res = P.aff_point_load_vartime p b in
   pop_frame ();
   res
-
-
-[@@ Comment "Compress a point in projective coordinates to its compressed form.
-
-  The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
-  The outparam `out` points to 33 bytes of valid memory, i.e., uint8_t[33].
-
-  The function first converts a given point `p` from projective to affine coordinates
-  and then writes [ 0x02 for even `y` and 0x03 for odd `y`; `x` ] in `out`.
-
-  Before calling this function, the caller will need to ensure that the following
-  precondition is observed.
-  • `p` and `out` are disjoint.
-
-  This function is NOT constant-time."]
-val point_compress: p:P.point -> out:lbuffer uint8 33ul -> Stack unit
-  (requires fun h ->
-    live h out /\ live h p /\ disjoint p out /\
-    P.point_inv h p)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_seq h1 out == S.point_compress (P.point_eval h0 p))
-
-let point_compress p out =
-  P.point_compress_vartime out p
-
-
-[@@ Comment "Decompress a point in projective coordinates from its compressed form.
-
-  The function returns `true` for successful decompression of a compressed point
-  and `false` otherwise.
-
-  The argument `s` points to 33 bytes of valid memory, i.e., uint8_t[33].
-  The outparam `out` points to a point of 15 limbs in size, i.e., uint64_t[15].
-
-  Before calling this function, the caller will need to ensure that the following
-  precondition is observed.
-  • `s` and `out` are disjoint.
-
-  This function is NOT constant-time."]
-val point_decompress: s:lbuffer uint8 33ul -> out:P.point -> Stack bool
-  (requires fun h ->
-    live h out /\ live h s /\ disjoint out s)
-  (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
-    (b <==> Some? (S.point_decompress (as_seq h0 s))) /\
-    (b ==> (P.point_inv h1 out /\ P.point_eval h1 out == Some?.v (S.point_decompress (as_seq h0 s)))))
-
-let point_decompress s out =
-  P.point_decompress_vartime out s

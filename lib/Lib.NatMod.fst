@@ -397,3 +397,66 @@ let lemma_div_mod_eq_mul_mod2 #m a b c =
 let lemma_div_mod_eq_mul_mod #m a b c =
   lemma_div_mod_eq_mul_mod1 a b c;
   lemma_div_mod_eq_mul_mod2 a b c
+
+
+val lemma_mul_mod_zero2: n:pos -> x:int -> y:int -> Lemma
+  (requires x % n == 0 \/ y % n == 0)
+  (ensures  x * y % n == 0)
+
+let lemma_mul_mod_zero2 n x y =
+  if x % n = 0 then
+    Math.Lemmas.lemma_mod_mul_distr_l x y n
+  else
+    Math.Lemmas.lemma_mod_mul_distr_r x y n
+
+
+let lemma_mul_mod_prime_zero #m a b =
+  Classical.move_requires_3 Euclid.euclid_prime m a b;
+  Classical.move_requires_3 lemma_mul_mod_zero2 m a b
+
+
+val lemma_pow_mod_prime_zero_: #m:prime -> a:nat_mod m -> b:pos -> Lemma
+  (requires pow a b % m = 0)
+  (ensures  a = 0)
+
+let rec lemma_pow_mod_prime_zero_ #m a b =
+  if b = 1 then lemma_pow1 a
+  else begin
+    let r1 = pow a (b - 1) % m in
+    lemma_pow_unfold a b;
+    assert (a * pow a (b - 1) % m = 0);
+    Math.Lemmas.lemma_mod_mul_distr_r a (pow a (b - 1)) m;
+    lemma_mul_mod_prime_zero #m a r1;
+    //assert (a = 0 \/ r1 = 0);
+    if a = 0 then () else lemma_pow_mod_prime_zero_ #m a (b - 1) end
+
+
+let lemma_pow_mod_prime_zero #m a b =
+  lemma_pow_mod #m a b;
+  Classical.move_requires_2 lemma_pow_mod_prime_zero_ a b;
+  Classical.move_requires lemma_pow_zero b
+
+
+val lemma_div_mod_is_zero1: #m:pos{2 < m} -> a:nat_mod m -> b:nat_mod m -> Lemma
+  (requires a = 0 || b = 0)
+  (ensures  div_mod a b = 0)
+
+let lemma_div_mod_is_zero1 #m a b =
+  if a = 0 then ()
+  else begin
+    lemma_pow_mod #m b (m - 2);
+    lemma_pow_zero (m - 2) end
+
+val lemma_div_mod_prime_is_zero2: #m:prime{2 < m} -> a:nat_mod m -> b:nat_mod m -> Lemma
+  (requires div_mod a b = 0)
+  (ensures  a = 0 || b = 0)
+
+let lemma_div_mod_prime_is_zero2 #m a b =
+  lemma_mul_mod_prime_zero a (inv_mod b);
+  assert (a = 0 || inv_mod b = 0);
+  lemma_pow_mod_prime_zero #m b (m - 2)
+
+
+let lemma_div_mod_prime_is_zero #m a b =
+  Classical.move_requires_2 lemma_div_mod_is_zero1 a b;
+  Classical.move_requires_2 lemma_div_mod_prime_is_zero2 a b

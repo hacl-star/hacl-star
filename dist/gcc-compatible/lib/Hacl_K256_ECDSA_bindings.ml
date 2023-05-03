@@ -8,17 +8,12 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Impl_K256_Point_point_negate =
       foreign "Hacl_Impl_K256_Point_point_negate"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
-    let hacl_Impl_K256_Point_point_eq_vartime =
-      foreign "Hacl_Impl_K256_Point_point_eq_vartime"
-        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool)))
-    let hacl_Impl_K256_Point_aff_point_decompress_vartime =
-      foreign "Hacl_Impl_K256_Point_aff_point_decompress_vartime"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> (ocaml_bytes @-> (returning bool))))
-    let hacl_Impl_K256_Point_aff_point_compress_vartime =
-      foreign "Hacl_Impl_K256_Point_aff_point_compress_vartime"
-        (ocaml_bytes @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_Impl_K256_Point_point_store =
+      foreign "Hacl_Impl_K256_Point_point_store"
+        (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void)))
+    let hacl_Impl_K256_Point_aff_point_load_vartime =
+      foreign "Hacl_Impl_K256_Point_aff_point_load_vartime"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning bool)))
     let hacl_Impl_K256_PointDouble_point_double =
       foreign "Hacl_Impl_K256_PointDouble_point_double"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
@@ -89,7 +84,13 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_K256_ECDSA_is_public_key_valid =
       foreign "Hacl_K256_ECDSA_is_public_key_valid"
         (ocaml_bytes @-> (returning bool))
+    let hacl_K256_ECDSA_is_private_key_valid =
+      foreign "Hacl_K256_ECDSA_is_private_key_valid"
+        (ocaml_bytes @-> (returning bool))
     let hacl_K256_ECDSA_secret_to_public =
       foreign "Hacl_K256_ECDSA_secret_to_public"
         (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
+    let hacl_K256_ECDSA_ecdh =
+      foreign "Hacl_K256_ECDSA_ecdh"
+        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
   end
