@@ -160,7 +160,7 @@ BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
 # Note: Hacl_Hash_SHA2 is legacy SHA2 here, will eventually go away, there's a proper
 # bundle in STREAMING_BUNDLE, below
 HASH_BUNDLE= \
-  -bundle Hacl.Streaming.MD[rename=Hacl_Streaming_Types] \
+  -bundle Hacl.Streaming.MD,Spec.Hash.Definitions[rename=Hacl_Streaming_Types] \
   -bundle Hacl.Streaming.MD5=Hacl.Hash.MD5,Hacl.Hash.Core.MD5[rename=Hacl_Hash_MD5] \
   -bundle Hacl.Streaming.SHA1=Hacl.Hash.SHA1,Hacl.Hash.Core.SHA1[rename=Hacl_Hash_SHA1] \
   -bundle Hacl.Hash.SHA2=Hacl.Hash.Core.SHA2 \
@@ -171,7 +171,7 @@ SHA2MB_BUNDLE= -bundle Hacl.Impl.SHA2.Types=[rename=Hacl_SHA2_Types] \
 # therefore Hacl.Impl.SHA3 cannot be put on the right-hand side of the bundle
 # (which would eliminate internal helpers not used otherwise, such as absorb or
 # squeeze)
-SHA3_BUNDLE=-bundle Hacl.Streaming.SHA3+Hacl.SHA3+Hacl.Impl.SHA3=Hacl.Hash.SHA3[rename=Hacl_Hash_SHA3]
+SHA3_BUNDLE=-bundle Hacl.Streaming.Keccak+Hacl.SHA3+Hacl.Impl.SHA3=Hacl.Hash.SHA3[rename=Hacl_Hash_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305

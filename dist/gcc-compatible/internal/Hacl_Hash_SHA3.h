@@ -37,6 +37,22 @@ extern "C" {
 
 #include "../Hacl_Hash_SHA3.h"
 
+void
+Hacl_Hash_SHA3_update_multi_sha3(
+  Spec_Hash_Definitions_hash_alg a,
+  uint64_t *s,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+void
+Hacl_Hash_SHA3_update_last_sha3(
+  Spec_Hash_Definitions_hash_alg a,
+  uint64_t *s,
+  uint8_t *input,
+  uint32_t input_len
+);
+
 void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
 void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);

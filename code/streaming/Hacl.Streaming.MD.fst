@@ -72,11 +72,11 @@ module Agile = Spec.Agile.Hash
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
+inline_for_extraction noextract
 let is_supported = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256
-  | SHA2_384 | SHA2_512
-  | SHA3_256 -> true
+  | SHA2_384 | SHA2_512 -> true
   | _ -> false
 
 // It would be better to define this as md_alg, but Hacl.Streaming.SHA3 uses hacl_md,
@@ -187,7 +187,7 @@ let buffer_of_lib #len (x: Lib.MultiBuffer.multibuf 1 len):
   coerce #(x:B.buffer uint8 { B.length x == Lib.IntTypes.v len }) #(Lib.MultiBuffer.multibuf 1 len) x
 
 inline_for_extraction noextract
-let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a)
+let state_t (a : alg) = stateful_buffer (word a) (D.impl_state_len (|a, ()|)) (init_elem a) unit
 
 let eq_word_element (a:alg { is_sha2 a }) : Lemma (word a == Hacl.Spec.SHA2.Vec.(element_t a M32))
   = ()
@@ -773,14 +773,15 @@ let disjoint_multi_of_disjoint #a #len #len' (b:Lib.MultiBuffer.multibuf 1 len)
 inline_for_extraction noextract
 let hacl_md (a:alg)// : block unit =
   =
-  assert_norm (word SHA3_256 == Lib.IntTypes.uint64);
   Block
     Erased
     (state_t a) (* state *)
     (stateful_unused unit) (* key *)
 
+    unit
+
     (fun () -> max_input_len64 a) (* max_input_len *)
-    (fun () -> Hacl.Hash.Definitions.hash_len a) (* output_len *)
+    (fun () () -> Spec.Hash.Definitions.hash_length a) (* output_len *)
     (fun () -> Hacl.Hash.Definitions.block_len a) (* block_len *)
     (fun () -> Hacl.Hash.Definitions.block_len a) (* blocks_state_len *)
     (fun () -> 0ul) (* init_input_len *)
@@ -814,15 +815,15 @@ let hacl_md (a:alg)// : block unit =
         Spec.Hash.Incremental.(update_last a acc prevlen input))
 
     (* finish_s *)
-    (fun () _ acc ->
+    (fun () _ acc () ->
       if is_sha2 a then
         let _ = multiseq_hash_is_hash a in
         agile_of_lib Hacl.Spec.SHA2.Vec.(finish #a #M32 acc)
       else
+        Spec.Agile.Hash.(finish a acc ()))
 
     (* spec_s *)
-        Spec.Agile.Hash.(finish a acc ()))
-    (fun () _ s -> Spec.Agile.Hash.(hash a s))
+    (fun () _ s () -> Spec.Agile.Hash.(hash a s))
 
     (* update_multi_zero *)
     (fun i h prevlen ->
@@ -840,7 +841,7 @@ let hacl_md (a:alg)// : block unit =
         update_multi_associative a i acc prevlen1 prevlen2 input1 input2)
 
     (* spec_is_incremental *)
-    (fun _ key input ->
+    (fun _ key input () ->
       let input1 = S.append S.empty input in
       assert (S.equal input1 input);
       if is_sha2 a then
@@ -858,10 +859,6 @@ let hacl_md (a:alg)// : block unit =
       | MD5 -> Hacl.Hash.MD5.legacy_init s
       | SHA1 -> Hacl.Hash.SHA1.legacy_init s
       | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> Hacl.SHA2.Scalar32.init #a s
-      | SHA3_224 -> Hacl.Hash.SHA3.init SHA3_224 s
-      | SHA3_256 -> Hacl.Hash.SHA3.init SHA3_256 s
-      | SHA3_384 -> Hacl.Hash.SHA3.init SHA3_384 s
-      | SHA3_512 -> Hacl.Hash.SHA3.init SHA3_512 s
     )
 
     (* update_multi *)
@@ -886,10 +883,6 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_update_multi
           | SHA1 -> Hacl.Hash.SHA1.legacy_update_multi
-          | SHA3_224 -> Hacl.Hash.SHA3.update_multi SHA3_224
-          | SHA3_256 -> Hacl.Hash.SHA3.update_multi SHA3_256
-          | SHA3_384 -> Hacl.Hash.SHA3.update_multi SHA3_384
-          | SHA3_512 -> Hacl.Hash.SHA3.update_multi SHA3_512
         in
         update_multi s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len a)))
 
@@ -915,24 +908,11 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_update_last
           | SHA1 -> Hacl.Hash.SHA1.legacy_update_last
-          | SHA3_224 -> Hacl.Hash.SHA3.update_last SHA3_224
-          | SHA3_256 -> Hacl.Hash.SHA3.update_last SHA3_256
-          | SHA3_384 -> Hacl.Hash.SHA3.update_last SHA3_384
-          | SHA3_512 -> Hacl.Hash.SHA3.update_last SHA3_512
-        in
-        [@inline_let]
-        let prevlen =
-          match a with
-          | MD5 | SHA1 -> prevlen
-          | SHA3_224 -> ()
-          | SHA3_256 -> ()
-          | SHA3_384 -> ()
-          | SHA3_512 -> ()
         in
         update_last s prevlen last last_len)
 
     (* finish *)
-    (fun _ _ s dst ->
+    (fun _ _ s dst _ ->
       if is_sha2 a then
         let open Hacl.Spec.SHA2.Vec in
         let open Hacl.Impl.SHA2.Generic in
@@ -954,10 +934,6 @@ let hacl_md (a:alg)// : block unit =
           match a with
           | MD5 -> Hacl.Hash.MD5.legacy_finish
           | SHA1 -> Hacl.Hash.SHA1.legacy_finish
-          | SHA3_224 -> Hacl.Hash.SHA3.finish SHA3_224
-          | SHA3_256 -> Hacl.Hash.SHA3.finish SHA3_256
-          | SHA3_384 -> Hacl.Hash.SHA3.finish SHA3_384
-          | SHA3_512 -> Hacl.Hash.SHA3.finish SHA3_512
         in
         finish s dst)
 #pop-options

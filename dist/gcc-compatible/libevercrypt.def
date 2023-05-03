@@ -33,14 +33,19 @@ EXPORTS
   Hacl_Blake2s_128_store_state128s_to_state32
   Hacl_Blake2s_128_load_state128s_from_state32
   Hacl_Blake2s_128_blake2s_malloc
-  Hacl_Streaming_SHA3_create_in_256
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
-  Hacl_Streaming_SHA3_init_256
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
-  Hacl_Streaming_SHA3_update_256
-  Hacl_Streaming_SHA3_finish_256
-  Hacl_Streaming_SHA3_free_256
-  Hacl_Streaming_SHA3_copy_256
+  Hacl_Hash_SHA3_update_multi_sha3
+  Hacl_Hash_SHA3_update_last_sha3
+  Hacl_Streaming_Keccak_get_alg
+  Hacl_Streaming_Keccak_malloc
+  Hacl_Streaming_Keccak_free
+  Hacl_Streaming_Keccak_copy
+  Hacl_Streaming_Keccak_reset
+  Hacl_Streaming_Keccak_update
+  Hacl_Streaming_Keccak_finish
+  Hacl_Streaming_Keccak_squeeze
+  Hacl_Streaming_Keccak_block_len
+  Hacl_Streaming_Keccak_hash_len
+  Hacl_Streaming_Keccak_is_shake
   Hacl_SHA3_shake128_hacl
   Hacl_SHA3_shake256_hacl
   Hacl_SHA3_sha3_224
@@ -488,13 +493,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod
@@ -659,11 +664,11 @@ EXPORTS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase
   Hacl_HPKE_Curve51_CP32_SHA256_openBase
+  EverCrypt_Poly1305_poly1305
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
-  EverCrypt_Poly1305_poly1305
   Hacl_Streaming_Poly1305_32_create_in
   Hacl_Streaming_Poly1305_32_init
   Hacl_Streaming_Poly1305_32_update

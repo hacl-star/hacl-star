@@ -45,7 +45,7 @@ let as_lib (#fs : field_spec) (x: t fs): P.poly1305_ctx fs =
   x
 
 inline_for_extraction noextract
-let k = I.stateful_buffer uint8 32ul (Lib.IntTypes.u8 0)
+let poly1305_key = I.stateful_buffer uint8 32ul (Lib.IntTypes.u8 0) unit
 
 inline_for_extraction noextract
 let as_lib_k (x: B.buffer uint8 { B.length x = 32 }): Lib.Buffer.lbuffer uint8 32ul =
@@ -406,10 +406,11 @@ let poly1305 (fs : field_spec) : I.block unit =
     I.Runtime
 
     (stateful_poly1305_ctx fs) (* state *)
-    k (* key *)
+    poly1305_key (* key *)
+    unit
 
     (fun () -> 0xffffffffUL) (* max_input_len *)
-    (fun () -> 16ul) (* output_len *)
+    (fun () () -> 16) (* output_len *)
     (fun () -> 16ul) (* block_len *)
 
     (* blocks_state_len *)
@@ -424,9 +425,9 @@ let poly1305 (fs : field_spec) : I.block unit =
     (fun () -> Spec.Poly1305.poly1305_init) (* init_s *)
     (fun () acc prevlen data -> update_multi acc data) (* update_multi_s *)
     (fun () x _ y -> update_last x y) (* update_last_s *)
-    (fun () -> finish_) (* finish_s *)
+    (fun () k s () -> finish_ k s) (* finish_s *)
 
-    (fun () -> spec) (* spec_s *)
+    (fun () k s () -> spec k s) (* spec_s *)
 
     (* update_multi_zero *)
     (fun () acc prevlen -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_ acc)
@@ -437,7 +438,7 @@ let poly1305 (fs : field_spec) : I.block unit =
                                                acc input1 input2)
 
     (* spec_is_incremental *)
-    (fun () key input ->
+    (fun () key input () ->
       let input1 = S.append S.empty input in
       assert (S.equal input1 input);
       poly_is_incremental_lazy key input)
@@ -477,7 +478,7 @@ let poly1305 (fs : field_spec) : I.block unit =
       | M256 -> Hacl.Poly1305_256.poly1305_update s last_len last)
 
     (* finish *)
-    (fun _ k s dst ->
+    (fun _ k s dst _ ->
       let h0 = ST.get () in
       ST.push_frame ();
       let h1 = ST.get () in

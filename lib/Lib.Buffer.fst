@@ -338,7 +338,16 @@ let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   let block = sub inp (i *! bs) bs in
   f block w
 
-#set-options "--z3rlimit 400 --max_fuel 1"
+#set-options "--z3rlimit 400 --fuel 1"
+
+let loop_blocks_multi #a #b #blen bs nb inp spec_f f w =
+  [@ inline_let]
+  let spec_fh h0 = Seq.repeat_blocks_f (v bs) (as_seq h0 inp) spec_f (v nb) in
+  let h0 = ST.get () in
+  loop1 #b #blen h0 nb w spec_fh
+    (fun i ->
+      Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
+      loop_blocks_f #a #b #blen bs (bs *! nb) inp spec_f f nb i w)
 
 let loop_blocks #a #b #blen bs nb rem inp spec_f spec_l f l w =
   [@ inline_let]
