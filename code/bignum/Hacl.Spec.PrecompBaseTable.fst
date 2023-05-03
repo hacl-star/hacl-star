@@ -159,7 +159,6 @@ val precomp_base_table_list_lemma_step
   (requires precomp_base_table_inv k g (n - 1) g_i_acc1)
   (ensures (let (g_i, acc_i) = precomp_base_table_f k g (n - 1) g_i_acc1 in
     precomp_base_table_inv k g n (g_i, acc_i)))
-#push-options "--z3rlimit_factor 2"
 let precomp_base_table_list_lemma_step #t #a_t #len #ctx_len k g n g_i_acc1 =
   let (g_i1, acc_i1) = g_i_acc1 in
   let (g_i, acc_i) = precomp_base_table_f k g (n - 1) g_i_acc1 in
@@ -186,12 +185,13 @@ let precomp_base_table_list_lemma_step #t #a_t #len #ctx_len k g n g_i_acc1 =
   assert (forall (i:nat{i < n}). precomp_base_table_acc_inv k g n acc_i1_lseq i);
   k.lemma_refl g_i1;
   assert (precomp_base_table_acc_inv k g (n + 1) acc_i_lseq n);
+  let aux (i:nat{i < n}) : Lemma (precomp_base_table_acc_inv k g (n + 1) acc_i_lseq i) = () in
+  Classical.forall_intro aux;
   assert (forall (i:nat{i < n}). precomp_base_table_acc_inv k g (n + 1) acc_i_lseq i);
 
   let aux (i:nat{i < n + 1}) : Lemma (precomp_base_table_acc_inv k g (n + 1) acc_i_lseq i) = () in
   Classical.forall_intro aux;
   assert (forall (i:nat{i < n + 1}). precomp_base_table_acc_inv k g (n + 1) acc_i_lseq i)
-#pop-options
 
 val precomp_base_table_list_lemma
   (#t:Type) (#a_t:BE.inttype_a) (#len:size_t{v len > 0}) (#ctx_len:size_t)
