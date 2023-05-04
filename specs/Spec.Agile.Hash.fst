@@ -57,7 +57,7 @@ let finish_blake (a:blake_alg) (hash:words_state a): Tot (bytes_hash a) =
   let alg = to_blake_alg a in
   Spec.Blake2.blake2_finish alg hash (Spec.Blake2.max_output alg)
 
-let finish_sha3 (a: sha3_alg) (s: words_state a) (l: output_length a): Tot (bytes_hash' a l) =
+let finish_sha3 (a: keccak_alg) (s: words_state a) (l: output_length a): Tot (bytes_hash' a l) =
   let rateInBytes = rate a / 8 in
   match a with
   | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 ->

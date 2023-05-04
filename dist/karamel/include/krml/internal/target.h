@@ -107,7 +107,7 @@
 #  include <time.h>
 
 /* Prims_nat not yet in scope */
-inline static int32_t krml_time() {
+inline static int32_t krml_time(void) {
   return (int32_t)time(NULL);
 }
 
