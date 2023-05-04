@@ -171,9 +171,8 @@ let bn_get_bits_limb #t len n ind =
 
 
 inline_for_extraction noextract
-val bn_get_bits:
-    #t:limb_t
-  -> len:size_t
+let bn_get_bits_st (t:limb_t) =
+    len:size_t
   -> b:lbignum t len
   -> i:size_t
   -> l:size_t{v l < bits t /\ v i / bits t < v len} ->
@@ -182,6 +181,22 @@ val bn_get_bits:
   (ensures  fun h0 r h1 -> h0 == h1 /\
     r == S.bn_get_bits (as_seq h0 b) (v i) (v l))
 
-let bn_get_bits #t len b i l =
-  let mask_l = (uint #t #SEC 1 <<. l) -. uint #t 1 in
+
+inline_for_extraction noextract
+val mk_bn_get_bits: #t:limb_t -> bn_get_bits_st t
+let mk_bn_get_bits #t len b i l =
+  [@inline_let] let mask_l = (uint #t #SEC 1 <<. l) -. uint #t 1 in
   bn_get_bits_limb len b i &. mask_l
+
+
+[@CInline]
+let bn_get_bits_u32: bn_get_bits_st U32 = mk_bn_get_bits
+[@CInline]
+let bn_get_bits_u64: bn_get_bits_st U64 = mk_bn_get_bits
+
+inline_for_extraction noextract
+val bn_get_bits: #t:_ -> bn_get_bits_st t
+let bn_get_bits #t =
+  match t with
+  | U32 -> bn_get_bits_u32
+  | U64 -> bn_get_bits_u64

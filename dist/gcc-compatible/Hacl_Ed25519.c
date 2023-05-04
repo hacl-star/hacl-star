@@ -29,6 +29,7 @@
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Ed25519_PrecompTable.h"
 #include "internal/Hacl_Curve25519_51.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum25519_51.h"
 
 static inline void fsum(uint64_t *out, uint64_t *a, uint64_t *b)
@@ -1344,28 +1345,15 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
       (uint32_t)4U,
       (uint32_t)1U,
       Hacl_Impl_Ed25519_PointDouble_point_double(out, out););
-    uint32_t bk = (uint32_t)256U;
-    uint64_t mask_l = (uint64_t)15U;
-    uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
-    uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p1 = bscalar[i1] >> j;
-    uint64_t ite;
-    if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
-    {
-      ite = p1 | bscalar[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
-    }
-    else
-    {
-      ite = p1;
-    }
-    uint64_t bits_l = ite & mask_l;
+    uint32_t k = (uint32_t)256U - (uint32_t)4U * i0 - (uint32_t)4U;
+    uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)4U, bscalar, k, (uint32_t)4U);
     memcpy(tmp0, (uint64_t *)table, (uint32_t)20U * sizeof (uint64_t));
-    KRML_MAYBE_FOR15(i2,
+    KRML_MAYBE_FOR15(i1,
       (uint32_t)0U,
       (uint32_t)15U,
       (uint32_t)1U,
-      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
-      const uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)20U;
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i1 + (uint32_t)1U));
+      const uint64_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)20U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)20U; i++)
       {
         uint64_t *os = tmp0;
@@ -1479,72 +1467,20 @@ static inline void point_mul_g(uint64_t *out, uint8_t *scalar)
       (uint32_t)4U,
       (uint32_t)1U,
       Hacl_Impl_Ed25519_PointDouble_point_double(out, out););
-    uint32_t bk = (uint32_t)64U;
-    uint64_t mask_l0 = (uint64_t)15U;
-    uint32_t i10 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-    uint32_t j0 = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p10 = r4[i10] >> j0;
-    uint64_t ite0;
-    if (i10 + (uint32_t)1U < (uint32_t)1U && (uint32_t)0U < j0)
-    {
-      ite0 = p10 | r4[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
-    }
-    else
-    {
-      ite0 = p10;
-    }
-    uint64_t bits_l = ite0 & mask_l0;
+    uint32_t k = (uint32_t)64U - (uint32_t)4U * i - (uint32_t)4U;
+    uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)1U, r4, k, (uint32_t)4U);
     precomp_get_consttime(Hacl_Ed25519_PrecompTable_precomp_g_pow2_192_table_w4, bits_l, tmp);
     Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp);
-    uint32_t bk0 = (uint32_t)64U;
-    uint64_t mask_l1 = (uint64_t)15U;
-    uint32_t i11 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-    uint32_t j1 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p11 = r3[i11] >> j1;
-    uint64_t ite1;
-    if (i11 + (uint32_t)1U < (uint32_t)1U && (uint32_t)0U < j1)
-    {
-      ite1 = p11 | r3[i11 + (uint32_t)1U] << ((uint32_t)64U - j1);
-    }
-    else
-    {
-      ite1 = p11;
-    }
-    uint64_t bits_l0 = ite1 & mask_l1;
+    uint32_t k0 = (uint32_t)64U - (uint32_t)4U * i - (uint32_t)4U;
+    uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)1U, r3, k0, (uint32_t)4U);
     precomp_get_consttime(Hacl_Ed25519_PrecompTable_precomp_g_pow2_128_table_w4, bits_l0, tmp);
     Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp);
-    uint32_t bk1 = (uint32_t)64U;
-    uint64_t mask_l2 = (uint64_t)15U;
-    uint32_t i12 = (bk1 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-    uint32_t j2 = (bk1 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p12 = r2[i12] >> j2;
-    uint64_t ite2;
-    if (i12 + (uint32_t)1U < (uint32_t)1U && (uint32_t)0U < j2)
-    {
-      ite2 = p12 | r2[i12 + (uint32_t)1U] << ((uint32_t)64U - j2);
-    }
-    else
-    {
-      ite2 = p12;
-    }
-    uint64_t bits_l1 = ite2 & mask_l2;
+    uint32_t k1 = (uint32_t)64U - (uint32_t)4U * i - (uint32_t)4U;
+    uint64_t bits_l1 = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)1U, r2, k1, (uint32_t)4U);
     precomp_get_consttime(Hacl_Ed25519_PrecompTable_precomp_g_pow2_64_table_w4, bits_l1, tmp);
     Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp);
-    uint32_t bk2 = (uint32_t)64U;
-    uint64_t mask_l = (uint64_t)15U;
-    uint32_t i1 = (bk2 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-    uint32_t j = (bk2 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p1 = r1[i1] >> j;
-    uint64_t ite;
-    if (i1 + (uint32_t)1U < (uint32_t)1U && (uint32_t)0U < j)
-    {
-      ite = p1 | r1[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
-    }
-    else
-    {
-      ite = p1;
-    }
-    uint64_t bits_l2 = ite & mask_l;
+    uint32_t k2 = (uint32_t)64U - (uint32_t)4U * i - (uint32_t)4U;
+    uint64_t bits_l2 = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)1U, r1, k2, (uint32_t)4U);
     precomp_get_consttime(Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w4, bits_l2, tmp);
     Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp););
 }
@@ -1621,39 +1557,15 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
       tmp1,
       (uint32_t)20U * sizeof (uint64_t)););
   uint64_t tmp10[20U] = { 0U };
-  uint64_t mask_l0 = (uint64_t)31U;
-  uint32_t i0 = (uint32_t)3U;
-  uint32_t j0 = (uint32_t)63U;
-  uint64_t p10 = bscalar1[i0] >> j0;
-  uint64_t ite0;
-  if (i0 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j0)
-  {
-    ite0 = p10 | bscalar1[i0 + (uint32_t)1U] << ((uint32_t)64U - j0);
-  }
-  else
-  {
-    ite0 = p10;
-  }
-  uint64_t bits_c = ite0 & mask_l0;
+  uint32_t i0 = (uint32_t)255U;
+  uint64_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)4U, bscalar1, i0, (uint32_t)5U);
   uint32_t bits_l32 = (uint32_t)bits_c;
   const
   uint64_t
   *a_bits_l = Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w5 + bits_l32 * (uint32_t)20U;
   memcpy(out, (uint64_t *)a_bits_l, (uint32_t)20U * sizeof (uint64_t));
-  uint64_t mask_l1 = (uint64_t)31U;
-  uint32_t i2 = (uint32_t)3U;
-  uint32_t j1 = (uint32_t)63U;
-  uint64_t p11 = bscalar2[i2] >> j1;
-  uint64_t ite1;
-  if (i2 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j1)
-  {
-    ite1 = p11 | bscalar2[i2 + (uint32_t)1U] << ((uint32_t)64U - j1);
-  }
-  else
-  {
-    ite1 = p11;
-  }
-  uint64_t bits_c0 = ite1 & mask_l1;
+  uint32_t i1 = (uint32_t)255U;
+  uint64_t bits_c0 = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)4U, bscalar2, i1, (uint32_t)5U);
   uint32_t bits_l320 = (uint32_t)bits_c0;
   const uint64_t *a_bits_l0 = table2 + bits_l320 * (uint32_t)20U;
   memcpy(tmp10, (uint64_t *)a_bits_l0, (uint32_t)20U * sizeof (uint64_t));
@@ -1661,45 +1573,19 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
   uint64_t tmp11[20U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
   {
-    KRML_MAYBE_FOR5(i1,
+    KRML_MAYBE_FOR5(i2,
       (uint32_t)0U,
       (uint32_t)5U,
       (uint32_t)1U,
       Hacl_Impl_Ed25519_PointDouble_point_double(out, out););
-    uint32_t bk = (uint32_t)255U;
-    uint64_t mask_l2 = (uint64_t)31U;
-    uint32_t i10 = (bk - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
-    uint32_t j2 = (bk - (uint32_t)5U * i - (uint32_t)5U) % (uint32_t)64U;
-    uint64_t p12 = bscalar2[i10] >> j2;
-    uint64_t ite2;
-    if (i10 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j2)
-    {
-      ite2 = p12 | bscalar2[i10 + (uint32_t)1U] << ((uint32_t)64U - j2);
-    }
-    else
-    {
-      ite2 = p12;
-    }
-    uint64_t bits_l = ite2 & mask_l2;
+    uint32_t k = (uint32_t)255U - (uint32_t)5U * i - (uint32_t)5U;
+    uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)4U, bscalar2, k, (uint32_t)5U);
     uint32_t bits_l321 = (uint32_t)bits_l;
     const uint64_t *a_bits_l1 = table2 + bits_l321 * (uint32_t)20U;
     memcpy(tmp11, (uint64_t *)a_bits_l1, (uint32_t)20U * sizeof (uint64_t));
     Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp11);
-    uint32_t bk0 = (uint32_t)255U;
-    uint64_t mask_l = (uint64_t)31U;
-    uint32_t i1 = (bk0 - (uint32_t)5U * i - (uint32_t)5U) / (uint32_t)64U;
-    uint32_t j = (bk0 - (uint32_t)5U * i - (uint32_t)5U) % (uint32_t)64U;
-    uint64_t p1 = bscalar1[i1] >> j;
-    uint64_t ite;
-    if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
-    {
-      ite = p1 | bscalar1[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
-    }
-    else
-    {
-      ite = p1;
-    }
-    uint64_t bits_l0 = ite & mask_l;
+    uint32_t k0 = (uint32_t)255U - (uint32_t)5U * i - (uint32_t)5U;
+    uint64_t bits_l0 = Hacl_Bignum_Lib_bn_get_bits_u64((uint32_t)4U, bscalar1, k0, (uint32_t)5U);
     uint32_t bits_l322 = (uint32_t)bits_l0;
     const
     uint64_t

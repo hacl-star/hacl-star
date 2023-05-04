@@ -39,6 +39,7 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Ed25519_PrecompTable.h"
 #include "internal/Hacl_Curve25519_51.h"
+#include "internal/Hacl_Bignum_Base.h"
 #include "internal/Hacl_Bignum25519_51.h"
 #include "../Hacl_Ed25519.h"
 

@@ -48,7 +48,7 @@ val bn_field_check_modulus: #t:limb_t -> #len:BN.bn_len t -> n:lbignum t len ->
 val bn_field_init: #t:limb_t -> #len:BN.bn_len t -> n:lbignum t len ->
   Pure (bn_mont_ctx t)
   (requires bn_mont_ctx_pre n)
-  (ensures  fun k -> bn_mont_ctx_inv k)
+  (ensures  fun k -> bn_mont_ctx_inv k /\ k.n == n /\ k.len == len)
 
 
 val bn_to_field: #t:limb_t -> k:bn_mont_ctx t{bn_mont_ctx_inv k} -> a:lbignum t k.len ->
