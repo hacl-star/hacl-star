@@ -129,3 +129,12 @@ val lemma_div_mod_prime_to_one_denominator:
 
 val lemma_div_mod_eq_mul_mod: #m:prime -> a:nat_mod m -> b:nat_mod m{b <> 0} -> c:nat_mod m ->
   Lemma ((div_mod a b = c) == (a = mul_mod c b))
+
+val lemma_mul_mod_prime_zero: #m:prime -> a:nat_mod m -> b:nat_mod m ->
+  Lemma (a * b % m == 0 <==> (a % m == 0 \/ b % m == 0))
+
+val lemma_pow_mod_prime_zero: #m:prime -> a:nat_mod m -> b:pos ->
+  Lemma (pow_mod #m a b = 0 <==> a = 0)
+
+val lemma_div_mod_prime_is_zero: #m:prime{2 < m} -> a:nat_mod m -> b:nat_mod m ->
+  Lemma ((div_mod a b = 0) <==> (a = 0 || b = 0))

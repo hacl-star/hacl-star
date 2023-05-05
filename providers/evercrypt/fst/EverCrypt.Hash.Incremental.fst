@@ -104,8 +104,9 @@ let evercrypt_hash : block Hash.alg =
     agile_state
     (stateful_unused Hash.alg)
 
+    unit
     Hacl.Hash.Definitions.max_input_len64
-    hash_len
+    (fun a () -> Spec.Hash.Definitions.hash_length a)
     block_len
     block_len // No vectorization
     (fun _ -> 0ul)
@@ -118,9 +119,9 @@ let evercrypt_hash : block Hash.alg =
     (fun a s prevlen input ->
       let prevlen = prev_length_of_nat a prevlen in
       Spec.Hash.Incremental.update_last a s prevlen input)
-    (fun a _ s -> Spec.Agile.Hash.finish a s ())
+    (fun a _ s () -> Spec.Agile.Hash.finish a s ())
 
-    (fun a _ -> Spec.Agile.Hash.hash a)
+    (fun a _ s () -> Spec.Agile.Hash.hash a s)
 
     (fun a s prevlen ->
       if is_blake a then
@@ -134,7 +135,7 @@ let evercrypt_hash : block Hash.alg =
        else
          Spec.Hash.Lemmas.update_multi_associative a s input1 input2)
     (* spec_is_incremental *)
-    (fun a _ input ->
+    (fun a _ input () ->
         let input1 = S.append S.empty input in
         assert (S.equal input1 input);
         Spec.Hash.Incremental.hash_is_hash_incremental' a input ())
@@ -144,7 +145,7 @@ let evercrypt_hash : block Hash.alg =
     (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->
        EverCrypt.Hash.update_last #i s prevlen last last_len)
-    (fun i _ -> EverCrypt.Hash.finish #i)
+    (fun i _ s dst _ -> EverCrypt.Hash.finish #i s dst)
 
 #pop-options
 
@@ -233,21 +234,21 @@ a call to `finish`, meaning the user may feed more data into the hash via
 `update`. (The finish function operates on an internal copy of the state and
 therefore does not invalidate the client-held state.)"]
 val finish: a:G.erased Hash.alg -> finish_st a
-let finish a s dst =
+let finish a s dst l =
   let a = alg_of_state a s in
   match a with
-  | MD5 -> finish_md5 s dst
-  | SHA1 -> finish_sha1 s dst
-  | SHA2_224 -> finish_sha224 s dst
-  | SHA2_256 -> finish_sha256 s dst
-  | SHA2_384 -> finish_sha384 s dst
-  | SHA2_512 -> finish_sha512 s dst
-  | SHA3_224 -> finish_sha3_224 s dst
-  | SHA3_256 -> finish_sha3_256 s dst
-  | SHA3_384 -> finish_sha3_384 s dst
-  | SHA3_512 -> finish_sha3_512 s dst
-  | Blake2S -> finish_blake2s s dst
-  | Blake2B -> finish_blake2b s dst
+  | MD5 -> finish_md5 s dst l
+  | SHA1 -> finish_sha1 s dst l
+  | SHA2_224 -> finish_sha224 s dst l
+  | SHA2_256 -> finish_sha256 s dst l
+  | SHA2_384 -> finish_sha384 s dst l
+  | SHA2_512 -> finish_sha512 s dst l
+  | SHA3_224 -> finish_sha3_224 s dst l
+  | SHA3_256 -> finish_sha3_256 s dst l
+  | SHA3_384 -> finish_sha3_384 s dst l
+  | SHA3_512 -> finish_sha3_512 s dst l
+  | Blake2S -> finish_blake2s s dst l
+  | Blake2B -> finish_blake2b s dst l
 
 [@@ Comment
 "Free a state previously allocated with `create_in`."]

@@ -66,10 +66,6 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
 let aff_point_mul (a:nat) (p:aff_point) : aff_point =
   LE.pow mk_k256_comm_monoid p a
 
-// [a1]P1 + [a2]P2
-let aff_point_mul_double (a1:qelem) (p1:aff_point) (a2:qelem) (p2:aff_point) : aff_point =
-  aff_point_add (aff_point_mul a1 p1) (aff_point_mul a2 p2)
-
 // [a]P
 let point_mul (a:qelem) (p:proj_point) : proj_point =
   SE.exp_fw mk_k256_concrete_ops p 256 a 4
@@ -86,14 +82,6 @@ let point_mul_double_g (a1:qelem) (a2:qelem) (p:proj_point) : proj_point =
   point_mul_double a1 g a2 p
 
 ///  ECDSA with a prehashed message
-
-let secret_to_public (private_key:lbytes 32) : option (lbytes 64) =
-  let d_a = nat_from_bytes_be private_key in
-  let is_privkey_valid = 0 < d_a && d_a < q in
-
-  if not is_privkey_valid then None
-  else Some (store_point (point_mul_g d_a))
-
 
 let ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes 64) =
   let k_q = nat_from_bytes_be nonce in
@@ -118,23 +106,8 @@ let ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes
     if r = 0 || s = 0 then None else Some (concat #_ #32 #32 rb sb) end
 
 
-let load_public_key (pk:lbytes 64) : tuple3 nat nat bool =
-  let pk_x = nat_from_bytes_be (sub pk 0 32) in
-  let pk_y = nat_from_bytes_be (sub pk 32 32) in
-  let is_x_valid = 0 < pk_x && pk_x < prime in
-  let is_y_valid = 0 < pk_y && pk_y < prime in
-  let is_xy_on_curve =
-    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
-  pk_x, pk_y, is_xy_on_curve
-
-
-let is_public_key_valid (pk:lbytes 64) : bool =
-  let _, _, is_pk_valid = load_public_key pk in
-  is_pk_valid
-
-
 let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
-  let pk_x, pk_y, is_xy_on_curve = load_public_key public_key in
+  let pk = load_point public_key in
   let r = nat_from_bytes_be (sub signature 0 32) in
   let s = nat_from_bytes_be (sub signature 32 32) in
   let z = nat_from_bytes_be msgHash % q in
@@ -142,13 +115,13 @@ let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64)
   let is_r_valid = 0 < r && r < q in
   let is_s_valid = 0 < s && s < q in
 
-  if not (is_xy_on_curve && is_r_valid && is_s_valid) then false
+  if not (Some? pk && is_r_valid && is_s_valid) then false
   else begin
     assert_norm (q < pow2 256);
     let sinv = qinv s in
     let u1 = z *^ sinv in
     let u2 = r *^ sinv in
-    let _X, _Y, _Z = point_mul_double_g u1 u2 (to_proj_point (pk_x, pk_y)) in
+    let _X, _Y, _Z = point_mul_double_g u1 u2 (Some?.v pk) in
 
     if is_proj_point_at_inf (_X, _Y, _Z) then false
     else begin
@@ -164,7 +137,7 @@ let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64)
    2. x - q = r <==> _X = (r + q) *% _Z
 *)
 
-///  ECDSA
+///  ECDSA using SHA2-256
 
 let _: squash(Some?.v (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256) > pow2 32) =
  assert_norm (Some?.v (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256) > pow2 32)
@@ -180,11 +153,35 @@ let ecdsa_verify_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (public_key sign
   ecdsa_verify_hashed_msg msgHash public_key signature
 
 
+///  ECDH over the secp256k1 elliptic curve
+
+let secret_to_public (private_key:lbytes 32) : option (lbytes 64) =
+  let sk = nat_from_bytes_be private_key in
+  let is_sk_valid = 0 < sk && sk < q in
+  if is_sk_valid then
+    let pk = point_mul_g sk in
+    Some (point_store pk)
+  else None
+
+
+let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 64) =
+  let pk = load_point their_public_key in
+  let sk = nat_from_bytes_be private_key in
+  let is_sk_valid = 0 < sk && sk < q in
+  if Some? pk && is_sk_valid then
+    let ss = point_mul sk (Some?.v pk) in
+    Some (point_store ss)
+  else None
+
+
 ///  Parsing and Serializing public keys
 
 // raw          = [ x; y ], 64 bytes
 // uncompressed = [ 0x04; x; y ], 65 bytes
 // compressed   = [ 0x02 for even `y` and 0x03 for odd `y`; x ], 33 bytes
+
+let validate_public_key (pk:lbytes 64) : bool =
+  Some? (load_point pk)
 
 let pk_uncompressed_to_raw (pk:lbytes 65) : option (lbytes 64) =
   if Lib.RawIntTypes.u8_to_UInt8 pk.[0] <> 0x04uy then None else Some (sub pk 1 64)

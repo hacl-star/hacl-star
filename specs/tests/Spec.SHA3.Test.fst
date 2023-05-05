@@ -448,7 +448,7 @@ let test12_expected_shake256 : lbytes 32 =
   of_list l
 
 
-type sha3_alg =
+type keccak_alg =
   | SHA3_224
   | SHA3_256
   | SHA3_384
@@ -458,8 +458,8 @@ type shake_alg =
   | SHAKE128
   | SHAKE256
 
-let sha3_length (a:sha3_alg) =
-  allow_inversion sha3_alg;
+let sha3_length (a:keccak_alg) =
+  allow_inversion keccak_alg;
   match a with
   | SHA3_224 -> 28
   | SHA3_256 -> 32
@@ -469,7 +469,7 @@ let sha3_length (a:sha3_alg) =
 
 noeq type vec =
   | Vec :
-    a:sha3_alg
+    a:keccak_alg
     -> plain:bytes{length plain <= max_size_t}
     -> hash:bytes{length hash = sha3_length a} -> vec
   | Vec1 :

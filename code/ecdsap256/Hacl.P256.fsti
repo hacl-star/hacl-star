@@ -1,442 +1,300 @@
 module Hacl.P256
 
+open FStar.Mul
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteSequence
 
-open FStar.Mul
-open Spec.P256
-open Spec.P256.Lemmas
-open Spec.P256.Definitions
 open Spec.Hash.Definitions
 
-open Spec.DH
-open Spec.ECDSAP256.Definition
-open Hacl.Impl.P256.Compression
-open Spec.P256.MontgomeryMultiplication
+module S = Spec.P256
+module BSeq = Lib.ByteSequence
+
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
+
+// TODO?: change API for `ecdsa_verify`, namely, take `signature` as an argument
+
+inline_for_extraction noextract
+let ecdsa_sign_p256_st (alg:S.hash_alg_ecdsa) =
+    signature:lbuffer uint8 64ul
+  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
+  -> msg:lbuffer uint8 msg_len
+  -> private_key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 32ul ->
+  Stack bool
+  (requires fun h ->
+    live h signature /\ live h msg /\ live h private_key /\ live h nonce /\
+    disjoint signature msg /\ disjoint signature private_key /\ disjoint signature nonce)
+  (ensures fun h0 flag h1 -> modifies (loc signature) h0 h1 /\
+    (let sgnt = S.ecdsa_signature_agile alg (v msg_len)
+      (as_seq h0 msg) (as_seq h0 private_key) (as_seq h0 nonce) in
+     (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 signature == Some?.v sgnt))))
+
+
+inline_for_extraction noextract
+let ecdsa_verify_p256_st (alg:S.hash_alg_ecdsa) =
+    msg_len:size_t{v msg_len >= S.min_input_length alg}
+  -> msg:lbuffer uint8 msg_len
+  -> public_key:lbuffer uint8 64ul
+  -> signature_r:lbuffer uint8 32ul
+  -> signature_s:lbuffer uint8 32ul ->
+  Stack bool
+  (requires fun h ->
+    live h public_key /\ live h signature_r /\ live h signature_s /\ live h msg)
+  (ensures fun h0 res h1 -> modifies0 h0 h1 /\
+    res == S.ecdsa_verification_agile alg (v msg_len) (as_seq h0 msg)
+      (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
+
 
 [@@ CPrologue "
 /*******************************************************************************
 
-ECDSA and ECDH functions over the P-256 NIST curve.
+ Verified C library for ECDSA and ECDH functions over the P-256 NIST curve.
 
-This module implements signing and verification, key validation, conversions
-between various point representations, and ECDH key agreement.
+ This module implements signing and verification, key validation, conversions
+ between various point representations, and ECDH key agreement.
 
 *******************************************************************************/
 
-/**************/
-/* Signatures */
-/**************/
+/*****************/
+/* ECDSA signing */
+/*****************/
 
 /*
-  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  As per the standard, a hash function *shall* be used. Therefore, we recommend
   using one of the three combined hash-and-sign variants.
 */";
 
-Comment "Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
+Comment "Create an ECDSA signature using SHA2-256.
 
-Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  \n The private key and the nonce are expected to be more than 0 and less than the curve order."]
-val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
-  -> mLen: size_t 
-  -> m: lbuffer uint8 mLen 
-  -> privKey: lbuffer uint8 (size 32) 
-  -> k: lbuffer uint8 (size 32) -> 
-  Stack bool
-  (requires fun h -> 
-    live h result /\ live h m /\ live h privKey /\ live h k /\
-    disjoint result m /\
-    disjoint result privKey /\
-    disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) > 0 /\
-    nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
-  )
-  (ensures fun h0 flag h1 -> 
-    modifies (loc result) h0 h1 /\
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in 
-      let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_256) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec 
-    )    
-  )
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
+val ecdsa_sign_p256_sha2: ecdsa_sign_p256_st (S.Hash SHA2_256)
 
 
-[@ (Comment "Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
+[@@ Comment "Create an ECDSA signature using SHA2-384.
 
-Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
-val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
-  privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
-  Stack bool
-  (requires fun h -> 
-    live h result /\ live h m /\ live h privKey /\ live h k /\
-    disjoint result m /\
-    disjoint result privKey /\
-    disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) > 0 /\
-    nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
-  )
-  (ensures fun h0 flag h1 -> 
-    modifies (loc result) h0 h1 /\
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in 
-      let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_384) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec 
-    )    
-  )
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
+val ecdsa_sign_p256_sha384: ecdsa_sign_p256_st (S.Hash SHA2_384)
 
 
-[@ (Comment "Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
+[@@ Comment "Create an ECDSA signature using SHA2-512.
 
-Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
-val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) 
-  -> mLen: size_t 
-  -> m: lbuffer uint8 mLen 
-  -> privKey: lbuffer uint8 (size 32) 
-  -> k: lbuffer uint8 (size 32) -> 
-  Stack bool
-  (requires fun h -> 
-    live h result /\ live h m /\ live h privKey /\ live h k /\
-    disjoint result m /\
-    disjoint result privKey /\
-    disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) > 0 /\
-    nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
-  )
-  (ensures fun h0 flag h1 -> 
-    modifies (loc result) h0 h1 /\
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in 
-      let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_512) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec 
-    )    
-  )
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
+val ecdsa_sign_p256_sha512: ecdsa_sign_p256_st (S.Hash SHA2_512)
 
 
-[@ (Comment "P256 signature WITHOUT hashing first.
+[@@ Comment "Create an ECDSA signature WITHOUT hashing first.
 
-This function is intended to receive a hash of the input. For convenience, we
-recommend using one of the hash-and-sign combined functions above.
+  This function is intended to receive a hash of the input.
+  For convenience, we recommend using one of the hash-and-sign combined functions above.
 
-The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
+  The argument `msg` MUST be at least 32 bytes (i.e. `msg_len >= 32`).
 
-NOTE: The equivalent functions in OpenSSL and Fiat-Crypto both accept inputs
-smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
-reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
-need to perform the left-padding themselves.
+  NOTE: The equivalent functions in OpenSSL and Fiat-Crypto both accept inputs
+  smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
+  reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
+  need to perform the left-padding themselves.
 
-Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  \n The private key and the nonce are expected to be more than 0 and less than the curve order.
-  \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) 
-  -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
-  -> m: lbuffer uint8 mLen
-  -> privKey: lbuffer uint8 (size 32) 
-  -> k: lbuffer uint8 (size 32) -> 
-  Stack bool
-  (requires fun h -> 
-    live h result /\ live h m /\ live h privKey /\ live h k /\
-    disjoint result m /\
-    disjoint result privKey /\
-    disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) > 0 /\
-    nat_from_bytes_be (as_seq h k) > 0 /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
-  )
-  (ensures fun h0 flag h1 -> 
-    modifies (loc result) h0 h1 /\
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in 
-      let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile Spec.ECDSA.NoHash (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in  
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec 
-    )    
-  )
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid values:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
+val ecdsa_sign_p256_without_hash: ecdsa_sign_p256_st (S.NoHash)
 
 
 [@@ CPrologue "
-/****************/
-/* Verification */
-/****************/
+/**********************/
+/* ECDSA verification */
+/**********************/";
 
-/*
-  Verify a message signature. These functions internally validate the public key using validate_public_key.
-*/
-";
+Comment "Verify an ECDSA signature using SHA2-256.
 
-(Comment " The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
-  \n Output: bool, where true stands for the correct signature verification. ")]
-val ecdsa_verif_p256_sha2:
-    mLen: size_t
-  -> m: lbuffer uint8 mLen
-  -> pubKey: lbuffer uint8 (size 64)
-  -> r: lbuffer uint8 (size 32)
-  -> s: lbuffer uint8 (size 32) ->
-   Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61); 
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-      let r = nat_from_bytes_be (as_seq h1 r) in
-      let s = nat_from_bytes_be (as_seq h1 s) in
-      modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
-    )
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
+val ecdsa_verif_p256_sha2: ecdsa_verify_p256_st (S.Hash SHA2_256)
 
 
-[@ (Comment "  The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
-  \n Output: bool, where true stands for the correct signature verification. ")]
-val ecdsa_verif_p256_sha384:
-    mLen: size_t
-  -> m: lbuffer uint8 mLen
-  -> pubKey: lbuffer uint8 (size 64)
-  -> r: lbuffer uint8 (size 32)
-  -> s: lbuffer uint8 (size 32) ->
-   Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61); 
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-      let r = nat_from_bytes_be (as_seq h1 r) in
-      let s = nat_from_bytes_be (as_seq h1 s) in
-      modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_384) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
-   )
+[@@ Comment "Verify an ECDSA signature using SHA2-384.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
+val ecdsa_verif_p256_sha384: ecdsa_verify_p256_st (S.Hash SHA2_384)
 
 
-[@ (Comment "  The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
-  \n Output: bool, where true stands for the correct signature verification. ")]
-val ecdsa_verif_p256_sha512:
-    mLen: size_t
-  -> m: lbuffer uint8 mLen
-  -> pubKey: lbuffer uint8 (size 64)
-  -> r: lbuffer uint8 (size 32)
-  -> s: lbuffer uint8 (size 32) ->
-   Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61); 
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-      let r = nat_from_bytes_be (as_seq h1 r) in
-      let s = nat_from_bytes_be (as_seq h1 s) in
-      modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
-   )
+[@@ Comment "Verify an ECDSA signature using SHA2-512.
 
-[@ (Comment " The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
-  \n Output: bool, where true stands for the correct signature verification.
-  \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-val ecdsa_verif_without_hash:
-  mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
-  -> m:lbuffer uint8 mLen
-  -> pubKey:lbuffer uint8 (size 64)
-  -> r:lbuffer uint8 (size 32)
-  -> s:lbuffer uint8 (size 32)
-  -> 
-  Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-      let r = nat_from_bytes_be (as_seq h1 r) in
-      let s = nat_from_bytes_be (as_seq h1 s) in
-      modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
-   )
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
+val ecdsa_verif_p256_sha512: ecdsa_verify_p256_st (S.Hash SHA2_512)
+
+
+[@@ Comment "Verify an ECDSA signature WITHOUT hashing first.
+
+  This function is intended to receive a hash of the input.
+  For convenience, we recommend using one of the hash-and-verify combined functions above.
+
+  The argument `msg` MUST be at least 32 bytes (i.e. `msg_len >= 32`).
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid"]
+val ecdsa_verif_without_hash: ecdsa_verify_p256_st S.NoHash
 
 
 [@@ CPrologue "
 /******************/
 /* Key validation */
-/******************/
-";
-Comment "Validate a public key.
-  
-  Input: pub(lic)Key: uint8[64].
-  Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:
-    • Verify that the public key is not the “point at infinity”, represented as O.
-    • Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field.
-    • Verify that y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
-  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
-val validate_public_key: 
-  pubKey: lbuffer uint8 (size 64) ->
-  Stack bool
-    (requires fun h -> live h pubKey)
-    (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-      (
-        let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
-        let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-        let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in 
-        r == Spec.ECDSA.verifyQValidCurvePointSpec pkJ
-      )
-    )
+/******************/";
 
-[@@ Comment "Validate a private key, e.g. prior to signing.
+Comment "Public key validation.
 
-Input: scalar: uint8[32].
-  \n Output: bool, where true stands for the scalar to be more than 0 and less than order."]
-val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
-  (requires fun h -> live h x)
+  The function returns `true` if a public key is valid and `false` otherwise.
+
+  The argument `public_key` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The public key (x || y) is valid (with respect to SP 800-56A):
+    • the public key is not the “point at infinity”, represented as O.
+    • the affine x and y coordinates of the point represented by the public key are
+      in the range [0, p – 1] where p is the prime defining the finite field.
+    • y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from: https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
+val validate_public_key: public_key:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h public_key)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    (
-      let scalar = nat_from_bytes_be (as_seq h0 x) in 
-      r <==> (scalar > 0 && scalar < prime_p256_order)
-    )
-  )
-
-[@@ CPrologue "
-/*****************************************/
-/* Point representations and conversions */
-/*****************************************/
-
-/*
-  Elliptic curve points have 2 32-byte coordinates (x, y) and can be represented in 3 ways:
-
-  - \"raw\" form (64 bytes): the concatenation of the 2 coordinates, also known as \"internal\"
-  - \"compressed\" form (33 bytes): first the sign byte of y (either 0x02 or 0x03), followed by x
-  - \"uncompressed\" form (65 bytes): first a constant byte (always 0x04), followed by the \"raw\" form
-
-  For all of the conversation functions below, the input and output MUST NOT overlap.
-*/
-";
- (Comment "Convert 65-byte uncompressed to raw.
-
-The function errors out if the first byte is incorrect, or if the resulting point is invalid.
-
-  \n \n Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
-  \n Output: bool, where true stands for the correct decompression.
- ")]
-val uncompressed_to_raw: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
-    (
-      let id = Lib.Sequence.index (as_seq h0 b) 0 in 
-      let x = Lib.Sequence.sub (as_seq h0 b) 1 32 in 
-      let xResult = Lib.Sequence.sub (as_seq h1 result) 0 32 in 
-      let y = Lib.Sequence.sub (as_seq h0 b) 33 32 in 
-      let yResult = Lib.Sequence.sub (as_seq h1 result) 32 32 in 
-      if uint_v id = 4 then 
-	r == true /\ x == xResult /\ y == yResult
-      else 
-	r == false
-    )
-)
+    r == S.validate_public_key (as_seq h0 public_key))
 
 
-[@ (Comment "Convert 33-byte compressed to raw.
+[@@ Comment "Private key validation.
 
-The function errors out if the first byte is incorrect, or if the resulting point is invalid.
+  The function returns `true` if a private key is valid and `false` otherwise.
 
-Input: a point in compressed form (uint8[33]), \n result: uint8[64] (internal point representation).
-  \n Output: bool, where true stands for the correct decompression.
- ")]
-val compressed_to_raw: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 r h1 -> 
-    (
-      let id = Lib.Sequence.index (as_seq h0 b) 0 in 
-      let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in 
-      let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in 
-      if uint_v id = 2 || uint_v id = 3 then
-        if x < prime256 then 
-          r == true /\ 
-        (
-          let y = 
-            let sq = sq_root_spec (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in 
-              if (uint_v id) % 2 = (sq % 2) then 
-                sq
-              else
-              (0 - sq) % prime256 
-          in 
-          as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
-          as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y)
-        else 
-          r == false
-      else 
-        r == false
-    ) /\
-    modifies (loc result) h0 h1
-  )
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve"]
+val validate_private_key: private_key:lbuffer uint8 32ul -> Stack bool
+  (requires fun h -> live h private_key)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (let s = BSeq.nat_from_bytes_be (as_seq h0 private_key) in
+    r <==> (0 < s && s < S.order)))
 
 
-[@ (Comment "Convert raw to 65-byte uncompressed.
+[@@ CPrologue
+"/*******************************************************************************
+  Parsing and Serializing public keys.
 
-This function effectively prepends a 0x04 byte.
+  A public key is a point (x, y) on the P-256 NIST curve.
 
-Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[65]).")]
-val raw_to_uncompressed: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
-  Stack unit 
-    (requires fun h -> live h b /\ live h result /\ disjoint b result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      (
-        let id = Lib.Sequence.index (as_seq h1 result) 0 in 
-        let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in 
-        let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in 
-        let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in 
-        let yResult = Lib.Sequence.sub (as_seq h1 result) 33 32 in 
-        uint_v id == 4 /\ xResult == x /\ yResult == y  
-      )
-    )
+  The point can be represented in the following three ways.
+    • raw          = [ x || y ], 64 bytes
+    • uncompressed = [ 0x04 || x || y ], 65 bytes
+    • compressed   = [ (0x02 for even `y` and 0x03 for odd `y`) || x ], 33 bytes
+
+*******************************************************************************/\n";
+
+ Comment "Convert a public key from uncompressed to its raw form.
+
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+
+  The function DOESN'T check whether (x, y) is a valid point."]
+val uncompressed_to_raw: pk:lbuffer uint8 65ul -> pk_raw:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
+    (b <==> Some? (S.pk_uncompressed_to_raw (as_seq h0 pk))) /\
+    (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_uncompressed_to_raw (as_seq h0 pk)))))
 
 
-[@ (Comment "Convert raw to 33-byte compressed.
+[@@ Comment "Convert a public key from compressed to its raw form.
 
-  Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
-  Output: `result`, a point in compressed form, of type `uint8[33]`
-")]
-val raw_to_compressed: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
-  Stack unit 
-    (requires fun h -> live h b /\ live h result /\ disjoint b result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      (
-        let identifier = Lib.Sequence.index (as_seq h1 result) 0 in 
-        let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in 
-        let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in 
-        let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in 
-        uint_v identifier == (Lib.ByteSequence.nat_from_intseq_be y % pow2 1)  + 2 /\
-        x == xResult  
-      )  
-  )
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+
+  The function also checks whether (x, y) is a valid point."]
+val compressed_to_raw: pk:lbuffer uint8 33ul -> pk_raw:lbuffer uint8 64ul -> Stack bool
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures  fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
+    (b <==> Some? (S.pk_compressed_to_raw (as_seq h0 pk))) /\
+    (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_compressed_to_raw (as_seq h0 pk)))))
+
+
+[@@ Comment "Convert a public key from raw to its uncompressed form.
+
+  The outparam `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is a valid point."]
+val raw_to_uncompressed: pk_raw:lbuffer uint8 64ul -> pk:lbuffer uint8 65ul -> Stack unit
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
+    as_seq h1 pk == S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
+
+
+[@@ Comment "Convert a public key from raw to its compressed form.
+
+  The outparam `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is a valid point."]
+val raw_to_compressed: pk_raw:lbuffer uint8 64ul -> pk:lbuffer uint8 33ul -> Stack unit
+  (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
+  (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
+    as_seq h1 pk == S.pk_compressed_from_raw (as_seq h0 pk_raw))
 
 
 [@@ CPrologue "
@@ -444,58 +302,44 @@ val raw_to_compressed: b: lbuffer uint8 (size 64) -> result: compressedForm ->
 /* ECDH agreement */
 /******************/";
 
-(Comment "Convert a private key into a raw public key.
+Comment "Compute the public key from the private key.
 
-This function performs no key validation.
+  The function returns `true` if a private key is valid and `false` otherwise.
 
-  Input: `scalar`, the private key, of type `uint8[32]`.
-  Output: `result`, the public key, of type `uint8[64]`.
-  Returns:
-  - `true`, for success, meaning the public key is not a point at infinity
-  - `false`, otherwise.
+  The outparam `public_key`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
-  `scalar` and `result` MUST NOT overlap.")]
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve."]
 val dh_initiator:
-    result:lbuffer uint8 (size 64)
-  -> scalar:lbuffer uint8 (size 32)
-  -> Stack bool
+    public_key:lbuffer uint8 64ul
+  -> private_key:lbuffer uint8 32ul ->
+  Stack bool
   (requires fun h ->
-    live h result /\ live h scalar /\ 
-    disjoint result scalar)
-  (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
-    r == flag /\
-    as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+    live h public_key /\ live h private_key /\ disjoint public_key private_key)
+  (ensures fun h0 r h1 -> modifies (loc public_key) h0 h1 /\
+    (let pk = S.secret_to_public (as_seq h0 private_key) in
+    (r <==> Some? pk) /\ (r ==> (as_seq h1 public_key == Some?.v pk))))
 
 
-[@ (Comment "ECDH key agreement.
+[@@ Comment "Execute the diffie-hellmann key exchange.
 
-This function takes a 32-byte secret key, another party's 64-byte raw public
-key, and computeds the 64-byte ECDH shared key.
+  The function returns `true` for successful creation of an ECDH shared secret and
+  `false` otherwise.
 
-This function ONLY validates the public key.
+  The outparam `shared_secret` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `their_pubkey` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
-   The pub(lic)_key input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over this variable.
-  \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
-  \n Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
-  ")]
+  The function also checks whether `private_key` and `their_pubkey` are valid."]
 val dh_responder:
-    result:lbuffer uint8 (size 64)
-  -> pubKey:lbuffer uint8 (size 64)
-  -> scalar:lbuffer uint8 (size 32)
-  -> Stack bool
-    (requires fun h ->
-      live h result /\ live h pubKey /\ live h scalar /\
-      disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
-      let pubKeyX = gsub pubKey (size 0) (size 32) in
-      let pubKeyY = gsub pubKey (size 32) (size 32) in
-      let pointX, pointY, flag =
-        ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
-      r == flag /\
-      modifies (loc result) h0 h1 /\
-      as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+    shared_secret:lbuffer uint8 64ul
+  -> their_pubkey:lbuffer uint8 64ul
+  -> private_key:lbuffer uint8 32ul ->
+  Stack bool
+  (requires fun h ->
+    live h shared_secret /\ live h their_pubkey /\ live h private_key /\
+    disjoint shared_secret their_pubkey /\ disjoint shared_secret private_key)
+  (ensures fun h0 r h1 -> modifies (loc shared_secret) h0 h1 /\
+    (let ss = S.ecdh (as_seq h0 their_pubkey) (as_seq h0 private_key) in
+    (r <==> Some? ss) /\ (r ==> (as_seq h1 shared_secret == Some?.v ss))))

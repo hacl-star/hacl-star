@@ -1,5 +1,5 @@
 [
-  "∏MXô√òê6GÕÅ\u0002VãWô",
+  "9ºWy◊√¬–⁄2‚\n\u001d{¡K",
   [
     [
       "Hacl.K256.ECDSA.ecdsa_sign_hashed_msg",
@@ -26,7 +26,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "c8f67386c3337126a1b251fbd8c9b284"
+      "2b69f687417d9e3c823cc7ed78dd153a"
     ],
     [
       "Hacl.K256.ECDSA.ecdsa_sign_sha256",
@@ -80,7 +80,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f8f6321a8575e5dea184cc49aa748469"
+      "3cbcc1394ca63bd248e3d823543d3e07"
     ],
     [
       "Hacl.K256.ECDSA.ecdsa_verify_sha256",
@@ -129,7 +129,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e7088831c3872e935f74d233df3a10e6"
+      "8d79dc7ed1c167b7769261de45aecf88"
     ],
     [
       "Hacl.K256.ECDSA.secp256k1_ecdsa_signature_normalize",
@@ -156,7 +156,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "5066ef5de2fb63aafdcfbeb72a51751f"
+      "92a2bb79d2b47039534c91c7da4d7281"
     ],
     [
       "Hacl.K256.ECDSA.secp256k1_ecdsa_sign_hashed_msg",
@@ -183,7 +183,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "0208ab8eedc296793a9b5669ada64505"
+      "6fe3116932434163d5a65766867c30f6"
     ],
     [
       "Hacl.K256.ECDSA.secp256k1_ecdsa_sign_sha256",
@@ -237,7 +237,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7f1c26390f042202a6dcc876039e506c"
+      "032c5cce014cf228e81d735e26348d34"
     ],
     [
       "Hacl.K256.ECDSA.secp256k1_ecdsa_verify_sha256",
@@ -286,7 +286,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0189a24a4ad02d000ad5a03f04fc31f9"
+      "bafc25829e2e227027cd1f66ee4881d1"
     ],
     [
       "Hacl.K256.ECDSA.public_key_uncompressed_to_raw",
@@ -313,7 +313,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "5e0ad466541a49c7fc29623df6600253"
+      "0c52ec5d8d4000c11d62a200fd04eff2"
     ],
     [
       "Hacl.K256.ECDSA.public_key_uncompressed_from_raw",
@@ -360,7 +360,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "37a5baa69f812b0771508a2bef7d67b7"
+      "35e61c86c0a9c1b54e0756646e20fdbc"
     ],
     [
       "Hacl.K256.ECDSA.public_key_compressed_to_raw",
@@ -387,7 +387,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "ab1aa53733ba2acc4db6e86b475adad5"
+      "42a4a5a74252c559b6b0878f3ffdecf1"
     ],
     [
       "Hacl.K256.ECDSA.public_key_compressed_from_raw",
@@ -434,7 +434,32 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "6cf845e217518f0133980f7071625e86"
+      "6c97460585e3b4b3aca535b9c2722869"
+    ],
+    [
+      "Hacl.K256.ECDSA.is_private_key_valid",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.Sequence.length", "equation_LowStar.Buffer.buffer",
+        "equation_Prims.nat", "function_token_typing_Lib.IntTypes.uint8",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "typing_Lib.Buffer.length", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "43f6a0336efeb772891f8a7d2d8de801"
     ],
     [
       "Hacl.K256.ECDSA.secret_to_public",
@@ -479,7 +504,42 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "5a232eabe44a05eeeaebf9f6c50969be"
+      "c7cf349f61c2705d143d7d8a394c63e7"
+    ],
+    [
+      "Hacl.K256.ECDSA.ecdh",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "equality_tok_Lib.Buffer.MUT@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.IntTypes.uint8", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.uint8", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v", "typing_Lib.Buffer.length",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "81ce9418bc3865d52f7a0a9a9916db38"
     ]
   ]
 ]

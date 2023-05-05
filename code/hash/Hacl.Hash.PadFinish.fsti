@@ -16,5 +16,5 @@ val pad_len: a:md_alg -> len:len_t a ->
   x:U32.t { U32.v x = pad_length a (len_v a len) }
 
 noextract inline_for_extraction
-val finish (i:const_impl) : finish_st i
+val finish (i:fixed_len_impl) : finish_st i
 

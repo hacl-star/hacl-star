@@ -1,6 +1,7 @@
 module Vale.PPC64LE.QuickCodes
 // Optimized weakest precondition generation for 'quick' procedures
 open FStar.Mul
+open FStar.Range
 open Vale.Def.Prop_s
 open Vale.Arch.HeapImpl
 open Vale.PPC64LE.Machine_s

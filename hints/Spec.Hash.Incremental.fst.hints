@@ -46,7 +46,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "6fbae77c144562af6dafd214ccd49bc5"
+      "22c7c6aa96efe27d8fc23eabf6f1dadc"
     ],
     [
       "Spec.Hash.Incremental.hash_is_hash_incremental",
@@ -54,12 +54,17 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "equation_Lib.IntTypes.uint8", "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query",
+        "FStar.Pervasives.Native_pretyping_b53dbd183c526bc5d0f20d7b966ae125",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.option",
+        "constructor_distinct_Prims.unit", "equation_Lib.IntTypes.uint8",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.fixed_len_alg",
         "equation_Spec.Hash.Definitions.is_shake",
         "equation_Spec.Hash.Definitions.less_than_max_input_length",
+        "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.output_length",
         "function_token_typing_Lib.IntTypes.uint8",
         "refinement_interpretation_Tm_refine_042ec925769949f282ab80a26a462500",
@@ -67,10 +72,10 @@
         "refinement_interpretation_Tm_refine_d58134fb55bef01eae6b023f162e2553",
         "typing_FStar.Seq.Base.length",
         "typing_Spec.Hash.Definitions.less_than_max_input_length",
-        "unit_typing"
+        "typing_Spec.Hash.Definitions.max_input_length", "unit_typing"
       ],
       0,
-      "c113dfed69b74dea2c2c319068016d7d"
+      "5e521f18de1d47bdf0c2bd8a7da7b4b8"
     ]
   ]
 ]

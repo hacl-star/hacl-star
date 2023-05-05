@@ -20,21 +20,30 @@ inline_for_extraction noextract
 let m_spec (a:hash_alg) : Type0 =
   match a with
   | Blake2S | Blake2B -> Blake2.m_spec
-  | _ -> unit
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> unit
 
 inline_for_extraction noextract
 let extra_state (a:hash_alg) : Type0 =
   match a with
   | Blake2S -> s:uint_t U64 PUB{ v s % block_length a = 0 }
   | Blake2B -> s:uint_t U128 PUB{ v s % block_length a = 0 }
-  | _ -> unit
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> unit
 
 inline_for_extraction noextract
 let ev_v (#a:hash_alg) (ev:extra_state a) : Spec.Hash.Definitions.extra_state a =
   match a with
   | Blake2S -> v #U64 #PUB ev
   | Blake2B -> v #U128 #PUB ev
-  | _ -> ()
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> ()
 
 inline_for_extraction
 type impl = a:hash_alg & m_spec a
@@ -55,14 +64,20 @@ let impl_word (i:impl) =
   [@inline_let] let a = get_alg i in
   match a with
   | Blake2S | Blake2B -> Blake2.element_t (to_blake_alg a) (get_spec i)
-  | _ -> word a
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> word a
 
 inline_for_extraction noextract
 let impl_state_length (i:impl) =
   [@inline_let] let a = get_alg i in
   match a with
   | Blake2S | Blake2B -> UInt32.v (4ul *. Blake2.row_len (to_blake_alg a) (get_spec i))
-  | _ -> state_word_length a
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> state_word_length a
 
 inline_for_extraction noextract
 let impl_state_len (i:impl) : s:size_t{size_v s == impl_state_length i} =
@@ -90,7 +105,10 @@ let as_seq (#i:impl) (h:HS.mem) (s:state i) : GTot (words_state (get_alg i)) =
   match get_alg i with
   | Blake2S -> Blake2.state_v #Spec.Blake2.Blake2S #(get_spec i) h s
   | Blake2B -> Blake2.state_v #Spec.Blake2.Blake2B #(get_spec i) h s
-  | _ -> B.as_seq h s
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> B.as_seq h s
 
 inline_for_extraction
 let word_len (a: md_alg) : n:size_t { v n = word_length a } =
@@ -295,10 +313,11 @@ let update_last_st (i:impl) =
                                           (prev_len_v prev_len)
                                           (B.as_seq h0 input)))
 
-let const_impl = i:impl { not (is_shake (dfst i)) }
+inline_for_extraction noextract
+let fixed_len_impl = i:impl { not (is_shake (dfst i)) }
 
 noextract inline_for_extraction
-let finish_st (i:const_impl) =
+let finish_st (i:fixed_len_impl) =
   s:state i -> dst:hash_t (get_alg i) -> ST.Stack unit
   (requires (fun h ->
     B.live h s /\ B.live h dst /\ B.disjoint s dst))

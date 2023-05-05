@@ -2,8 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
-    open Hacl_Spec_applied
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     type hacl_HMAC_DRBG_supported_alg = spec_Hash_Definitions_hash_alg
     let hacl_HMAC_DRBG_supported_alg =
       typedef spec_Hash_Definitions_hash_alg "Hacl_HMAC_DRBG_supported_alg"
