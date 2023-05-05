@@ -10,6 +10,7 @@ module M = Lib.NatMod
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module PL = Spec.P256.Lemmas
+module EC = Spec.ECC
 
 include Spec.P256.PointOps
 
@@ -19,17 +20,9 @@ include Spec.P256.PointOps
 
 ///  Elliptic curve scalar multiplication
 
-let mk_p256_comm_monoid : LE.comm_monoid aff_point = {
-  LE.one = aff_point_at_inf;
-  LE.mul = aff_point_add;
-  LE.lemma_one = PL.aff_point_at_inf_lemma;
-  LE.lemma_mul_assoc = PL.aff_point_add_assoc_lemma;
-  LE.lemma_mul_comm = PL.aff_point_add_comm_lemma;
-}
-
 let mk_to_p256_comm_monoid : SE.to_comm_monoid proj_point = {
-  SE.a_spec = aff_point;
-  SE.comm_monoid = mk_p256_comm_monoid;
+  SE.a_spec = EC.aff_point p256;
+  SE.comm_monoid = EC.mk_ec_comm_monoid p256;
   SE.refl = to_aff_point;
 }
 
@@ -56,15 +49,44 @@ let mk_p256_concrete_ops : SE.concrete_ops proj_point = {
 }
 
 // [a]P
-let point_mul (a:qelem) (p:proj_point) : proj_point =
+let point_mul (a:qelem) (p:proj_point)
+  : res:proj_point{to_aff_point res == EC.aff_point_mul p256 a (to_aff_point p) }
+ =
+  SE.exp_fw_lemma mk_p256_concrete_ops p 256 a 4;
+  LE.exp_fw_lemma (EC.mk_ec_comm_monoid p256) (to_aff_point p) 256 a 4;
   SE.exp_fw mk_p256_concrete_ops p 256 a 4
 
-// [a]G
-let point_mul_g (a:qelem) : proj_point = point_mul a base_point
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1 a2:qelem) (p:proj_point) : proj_point =
-  SE.exp_double_fw mk_p256_concrete_ops base_point 256 a1 p a2 5
+let point_mul_double_g (a1 a2:qelem) (p:proj_point)
+  : res:proj_point{to_aff_point res ==
+      EC.aff_point_add p256
+        (EC.aff_point_mul p256 a1 p256.base_point)
+        (EC.aff_point_mul p256 a2 (to_aff_point p)) }
+ =
+  PL.lemma_proj_aff_id (g_x, g_y);
+  SE.exp_double_fw_lemma mk_p256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5;
+  LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid p256) (g_x, g_y) 256 a1 (to_aff_point p) a2 5;
+  SE.exp_double_fw mk_p256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5
+
+
+let is_point_at_inf_c (p:proj_point)
+  : res:bool{res ==> EC.is_aff_point_at_inf p256 (to_aff_point p)}
+ =
+  PL.lemma_aff_is_point_at_inf p;
+  is_point_at_inf p
+
+
+let p256_concrete_ops : EC.ec_concrete_ops = {
+  EC.ec = p256;
+  EC.t = proj_point;
+  EC.to_point_t = to_proj_point;
+  EC.to_aff_point = to_aff_point;
+  EC.lemma_to_from_aff_point = PL.lemma_proj_aff_id;
+  EC.is_point_at_inf = is_point_at_inf_c;
+  EC.point_mul = point_mul;
+  EC.point_mul_double_g = point_mul_double_g;
+}
 
 
 ///  ECDSA over the P256 elliptic curve
@@ -95,53 +117,6 @@ let hash_ecdsa a msg_len msg =
   match a with | NoHash -> msg | Hash a -> Spec.Agile.Hash.hash a msg
 
 
-let ecdsa_sign_msg_as_qelem (m:qelem) (private_key nonce:lbytes 32) : option (lbytes 64) =
-  let k_q = nat_from_bytes_be nonce in
-  let d_a = nat_from_bytes_be private_key in
-  let is_privkey_valid = 0 < d_a && d_a < order in
-  let is_nonce_valid = 0 < k_q && k_q < order in
-
-  if not (is_privkey_valid && is_nonce_valid) then None
-  else begin
-    let _X, _Y, _Z = point_mul_g k_q in
-    let x = _X /% _Z in
-    let r = x % order in
-
-    let kinv = qinv k_q in
-    let s = kinv *^ (m +^ r *^ d_a) in
-    let rb = nat_to_bytes_be 32 r in
-    let sb = nat_to_bytes_be 32 s in
-    if r = 0 || s = 0 then None else Some (concat #_ #32 #32 rb sb) end
-
-
-let ecdsa_verify_msg_as_qelem (m:qelem) (public_key:lbytes 64) (sign_r sign_s:lbytes 32) : bool =
-  let pk = load_point public_key in
-  let r = nat_from_bytes_be sign_r in
-  let s = nat_from_bytes_be sign_s in
-  let is_r_valid = 0 < r && r < order in
-  let is_s_valid = 0 < s && s < order in
-
-  if not (Some? pk && is_r_valid && is_s_valid) then false
-  else begin
-    let sinv = qinv s in
-    let u1 = sinv *^ m in
-    let u2 = sinv *^ r in
-    let _X, _Y, _Z = point_mul_double_g u1 u2 (Some?.v pk) in
-    if is_point_at_inf (_X, _Y, _Z) then false
-    else begin
-      let x = _X /% _Z in
-      x % order = r end
-  end
-
-(*
-   _Z <> 0
-   q < prime < 2 * q
-   let x = _X /% _Z in x % q = r <==>
-   1. x = r <==> _X = r *% _Z
-   2. x - q = r <==> _X = (r + q) *% _Z
-*)
-
-
 val ecdsa_signature_agile:
     alg:hash_alg_ecdsa
   -> msg_len:size_nat{msg_len >= min_input_length alg}
@@ -153,7 +128,7 @@ val ecdsa_signature_agile:
 let ecdsa_signature_agile alg msg_len msg private_key nonce =
   let hashM = hash_ecdsa alg msg_len msg in
   let m_q = nat_from_bytes_be (sub hashM 0 32) % order in
-  ecdsa_sign_msg_as_qelem m_q private_key nonce
+  EC.ecdsa_sign_msg_as_qelem p256_concrete_ops m_q private_key nonce
 
 
 val ecdsa_verification_agile:
@@ -168,28 +143,17 @@ val ecdsa_verification_agile:
 let ecdsa_verification_agile alg msg_len msg public_key signature_r signature_s =
   let hashM = hash_ecdsa alg msg_len msg in
   let m_q = nat_from_bytes_be (sub hashM 0 32) % order in
-  ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s
+  EC.ecdsa_verify_msg_as_qelem p256_concrete_ops m_q public_key signature_r signature_s
 
+(** The following functions can be removed *)
 
 ///  ECDH over the P256 elliptic curve
 
 let secret_to_public (private_key:lbytes 32) : option (lbytes 64) =
-  let sk = nat_from_bytes_be private_key in
-  let is_sk_valid = 0 < sk && sk < order in
-  if is_sk_valid then
-    let pk = point_mul_g sk in
-    Some (point_store pk)
-  else None
-
+  EC.secret_to_public p256_concrete_ops private_key
 
 let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 64) =
-  let pk = load_point their_public_key in
-  let sk = nat_from_bytes_be private_key in
-  let is_sk_valid = 0 < sk && sk < order in
-  if Some? pk && is_sk_valid then
-    let ss = point_mul sk (Some?.v pk) in
-    Some (point_store ss)
-  else None
+  EC.ecdh p256_concrete_ops their_public_key private_key
 
 
 ///  Parsing and Serializing public keys
@@ -199,23 +163,16 @@ let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 6
 // compressed   = [ 0x02 for even `y` and 0x03 for odd `y`; x ], 33 bytes
 
 let validate_public_key (pk:lbytes 64) : bool =
-  Some? (load_point pk)
+  EC.validate_public_key p256_concrete_ops pk
 
 let pk_uncompressed_to_raw (pk:lbytes 65) : option (lbytes 64) =
-  if Lib.RawIntTypes.u8_to_UInt8 pk.[0] <> 0x04uy then None else Some (sub pk 1 64)
+  EC.pk_uncompressed_to_raw p256_concrete_ops pk
 
 let pk_uncompressed_from_raw (pk:lbytes 64) : lbytes 65 =
-  concat (create 1 (u8 0x04)) pk
+  EC.pk_uncompressed_from_raw p256_concrete_ops pk
 
 let pk_compressed_to_raw (pk:lbytes 33) : option (lbytes 64) =
-  let pk_x = sub pk 1 32 in
-  match (aff_point_decompress pk) with
-  | Some (x, y) -> Some (concat #_ #32 #32 pk_x (nat_to_bytes_be 32 y))
-  | None -> None
+  EC.pk_compressed_to_raw p256_concrete_ops pk
 
 let pk_compressed_from_raw (pk:lbytes 64) : lbytes 33 =
-  let pk_x = sub pk 0 32 in
-  let pk_y = sub pk 32 32 in
-  let is_pk_y_odd = nat_from_bytes_be pk_y % 2 = 1 in // <==> pk_y % 2 = 1
-  let pk0 = if is_pk_y_odd then u8 0x03 else u8 0x02 in
-  concat (create 1 pk0) pk_x
+  EC.pk_compressed_from_raw p256_concrete_ops pk
