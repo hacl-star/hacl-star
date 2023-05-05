@@ -4,45 +4,35 @@ open FStar.Mul
 
 open Spec.K256.PointOps
 
+module EC = Spec.EC
 module LM = Lib.NatMod
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
 val lemma_aff_is_point_at_inf: p:proj_point ->
   Lemma (let px, py, pz = p in
-    is_aff_point_at_inf (to_aff_point p) == (pz = 0 || (px = 0 && py = 0)))
+    EC.is_aff_point_at_inf k256 (to_aff_point p) == (pz = 0 || (px = 0 && py = 0)))
 
 
-val lemma_proj_aff_id (p:aff_point) :
+val lemma_proj_aff_id (p:EC.aff_point k256) :
   Lemma (to_aff_point (to_proj_point p) == p)
 
 
-val aff_point_at_inf_lemma (p:aff_point) :
-  Lemma (aff_point_add p aff_point_at_inf = p)
-
-
-val aff_point_add_assoc_lemma (p q s:aff_point) :
-  Lemma (aff_point_add (aff_point_add p q) s == aff_point_add p (aff_point_add q s))
-
-
-val aff_point_add_comm_lemma (p q:aff_point) :
-  Lemma (aff_point_add p q = aff_point_add q p)
-
-
-val aff_point_negate_lemma (p:aff_point) :
-  Lemma (aff_point_add (aff_point_negate p) p == aff_point_at_inf)
+// TODO: mv to Spec.EC
+val aff_point_negate_lemma (p:EC.aff_point k256) :
+  Lemma (EC.aff_point_add k256 (aff_point_negate p) p == EC.aff_point_at_inf k256)
 
 
 val to_aff_point_at_infinity_lemma: unit ->
-  Lemma (to_aff_point point_at_inf == aff_point_at_inf)
+  Lemma (to_aff_point point_at_inf == EC.aff_point_at_inf k256)
 
 
 val to_aff_point_add_lemma (p q:proj_point) :
-  Lemma (to_aff_point (point_add p q) == aff_point_add (to_aff_point p) (to_aff_point q))
+  Lemma (to_aff_point (point_add p q) == EC.aff_point_add k256 (to_aff_point p) (to_aff_point q))
 
 
 val to_aff_point_double_lemma (p:proj_point) :
-  Lemma (to_aff_point (point_double p) == aff_point_add (to_aff_point p) (to_aff_point p))
+  Lemma (to_aff_point (point_double p) == EC.aff_point_add k256 (to_aff_point p) (to_aff_point p))
 
 
 val to_aff_point_negate_lemma (p:proj_point) :

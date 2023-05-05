@@ -6,10 +6,9 @@ open Spec.K256.PointOps
 
 module Euclid = FStar.Math.Euclid
 module M = Lib.NatMod
+module EC = Spec.EC
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
-
-assume val prime_lemma: unit -> Lemma (Euclid.is_prime prime)
 
 let lemma_aff_is_point_at_inf p =
   prime_lemma ();
@@ -21,35 +20,30 @@ let lemma_aff_is_point_at_inf p =
 let lemma_proj_aff_id p =
   let (px, py) = p in
   let (pX, pY, pZ) = to_proj_point p in
-  assert (pX = px /\ pY = pY /\ pZ = one);
+  assert (pX = px /\ pY = pY /\ pZ = 1);
   let (rx, ry) = to_aff_point (pX, pY, pZ) in
   assert (rx = (pX /% pZ) /\ ry = (pY /% pZ));
   M.lemma_div_mod_prime_one #prime pX;
   M.lemma_div_mod_prime_one #prime pY;
   assert (rx = pX /\ ry = pY)
 
-let aff_point_at_inf_lemma p = ()
-
-let aff_point_add_assoc_lemma p q s = admit()
-
-let aff_point_add_comm_lemma p q = admit()
 
 let aff_point_negate_lemma p =
   let p_neg = aff_point_negate p in
   let px, py = p in
   let qx, qy = p_neg in
   assert (qx = px /\ qy = (-py) % prime);
-  assert (aff_point_add p_neg p == aff_point_at_inf)
+  assert (EC.aff_point_add k256 p_neg p == EC.aff_point_at_inf k256)
 
 
 let to_aff_point_at_infinity_lemma () =
   let px, py = to_aff_point point_at_inf in
-  assert (px == zero /% zero /\ py == one /% zero);
-  assert (px == zero *% M.pow_mod #prime zero (prime - 2));
-  M.lemma_pow_mod #prime zero (prime - 2);
-  assert (px == zero *% (M.pow zero (prime - 2) % prime));
+  assert (px == 0 /% 0 /\ py == 1 /% 0);
+  assert (px == 0 *% M.pow_mod #prime 0 (prime - 2));
+  M.lemma_pow_mod #prime 0 (prime - 2);
+  assert (px == 0 *% (M.pow 0 (prime - 2) % prime));
   M.lemma_pow_zero (prime - 2);
-  assert (px == zero /\ py == zero)
+  assert (px == 0 /\ py == 0)
 
 let to_aff_point_add_lemma p q = admit()
 
@@ -77,7 +71,7 @@ let to_aff_point_negate_lemma p =
 
 val lemma_div_mod_eq_mul_mod (a b c:felem) : Lemma
   (requires b <> 0)
-  (ensures  (a *% finv b = c) == (a = c *% b))
+  (ensures  (a *% EC.finv k256 b = c) == (a = c *% b))
 
 let lemma_div_mod_eq_mul_mod a b c =
   prime_lemma ();

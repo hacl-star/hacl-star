@@ -9,6 +9,7 @@ module M = Lib.NatMod
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module KL = Spec.K256.Lemmas
+module EC = Spec.ECC
 
 include Spec.K256.PointOps
 
@@ -20,23 +21,16 @@ include Spec.K256.PointOps
  https://www.hyperelliptic.org/EFD/g1p/auto-shortw.html
 *)
 
-let mk_k256_comm_monoid : LE.comm_monoid aff_point = {
-  LE.one = aff_point_at_inf;
-  LE.mul = aff_point_add;
-  LE.lemma_one = KL.aff_point_at_inf_lemma;
-  LE.lemma_mul_assoc = KL.aff_point_add_assoc_lemma;
-  LE.lemma_mul_comm = KL.aff_point_add_comm_lemma;
-}
-
-let mk_k256_abelian_group : LE.abelian_group aff_point = {
-  LE.cm = mk_k256_comm_monoid;
+// TODO: mv
+let mk_k256_abelian_group : LE.abelian_group (EC.aff_point k256) = {
+  LE.cm = EC.mk_ec_comm_monoid k256;
   LE.inverse = aff_point_negate;
   LE.lemma_inverse = KL.aff_point_negate_lemma;
 }
 
 let mk_to_k256_comm_monoid : SE.to_comm_monoid proj_point = {
-  SE.a_spec = aff_point;
-  SE.comm_monoid = mk_k256_comm_monoid;
+  SE.a_spec = EC.aff_point k256;
+  SE.comm_monoid = EC.mk_ec_comm_monoid k256;
   SE.refl = to_aff_point;
 }
 
@@ -62,80 +56,60 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
   SE.sqr = point_double_c;
 }
 
-// [a]P in affine coordinates
-let aff_point_mul (a:nat) (p:aff_point) : aff_point =
-  LE.pow mk_k256_comm_monoid p a
-
 // [a]P
-let point_mul (a:qelem) (p:proj_point) : proj_point =
+let point_mul (a:qelem) (p:proj_point)
+  : res:proj_point{to_aff_point res == EC.aff_point_mul k256 a (to_aff_point p) }
+ =
+  SE.exp_fw_lemma mk_k256_concrete_ops p 256 a 4;
+  LE.exp_fw_lemma (EC.mk_ec_comm_monoid k256) (to_aff_point p) 256 a 4;
   SE.exp_fw mk_k256_concrete_ops p 256 a 4
 
-// [a1]P1 + [a2]P2
-let point_mul_double (a1:qelem) (p1:proj_point) (a2:qelem) (p2:proj_point) : proj_point =
-  SE.exp_double_fw mk_k256_concrete_ops p1 256 a1 p2 a2 5
-
-// [a]G
-let point_mul_g (a:qelem) : proj_point = point_mul a g
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1:qelem) (a2:qelem) (p:proj_point) : proj_point =
-  point_mul_double a1 g a2 p
+let point_mul_double_g (a1 a2:qelem) (p:proj_point)
+  : res:proj_point{to_aff_point res ==
+      EC.aff_point_add k256
+        (EC.aff_point_mul k256 a1 k256.base_point)
+        (EC.aff_point_mul k256 a2 (to_aff_point p)) }
+ =
+  KL.lemma_proj_aff_id (g_x, g_y);
+  SE.exp_double_fw_lemma mk_k256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5;
+  LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k256) (g_x, g_y) 256 a1 (to_aff_point p) a2 5;
+  SE.exp_double_fw mk_k256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5
+
+
+let is_point_at_inf_c (p:proj_point)
+  : res:bool{res ==> EC.is_aff_point_at_inf k256 (to_aff_point p)}
+ =
+  KL.lemma_aff_is_point_at_inf p;
+  is_proj_point_at_inf p
+
+
+let k256_concrete_ops : EC.ec_concrete_ops = {
+  EC.ec = k256;
+  EC.t = proj_point;
+  EC.to_point_t = to_proj_point;
+  EC.to_aff_point = to_aff_point;
+  EC.lemma_to_from_aff_point = KL.lemma_proj_aff_id;
+  EC.is_point_at_inf = is_point_at_inf_c;
+  EC.point_mul = point_mul;
+  EC.point_mul_double_g = point_mul_double_g;
+}
+
 
 ///  ECDSA with a prehashed message
 
 let ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes 64) =
-  let k_q = nat_from_bytes_be nonce in
-  let d_a = nat_from_bytes_be private_key in
   let z = nat_from_bytes_be msgHash % q in
-
-  let is_privkey_valid = 0 < d_a && d_a < q in
-  let is_nonce_valid = 0 < k_q && k_q < q in
-
-  if not (is_privkey_valid && is_nonce_valid) then None
-  else begin
-    let _X, _Y, _Z = point_mul_g k_q in
-    let x = _X /% _Z in
-    let r = x % q in
-
-    let kinv = qinv k_q in
-    let s = kinv *^ (z +^ r *^ d_a) in
-
-    let rb = nat_to_bytes_be 32 r in
-    let sb = nat_to_bytes_be 32 s in
-
-    if r = 0 || s = 0 then None else Some (concat #_ #32 #32 rb sb) end
+  EC.ecdsa_sign_msg_as_qelem k256_concrete_ops z private_key nonce
 
 
 let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
-  let pk = load_point public_key in
-  let r = nat_from_bytes_be (sub signature 0 32) in
-  let s = nat_from_bytes_be (sub signature 32 32) in
   let z = nat_from_bytes_be msgHash % q in
+  let signature_r = sub signature 0 32 in
+  let signature_s = sub signature 32 32 in
+  EC.ecdsa_verify_msg_as_qelem k256_concrete_ops z public_key signature_r signature_s
 
-  let is_r_valid = 0 < r && r < q in
-  let is_s_valid = 0 < s && s < q in
-
-  if not (Some? pk && is_r_valid && is_s_valid) then false
-  else begin
-    assert_norm (q < pow2 256);
-    let sinv = qinv s in
-    let u1 = z *^ sinv in
-    let u2 = r *^ sinv in
-    let _X, _Y, _Z = point_mul_double_g u1 u2 (Some?.v pk) in
-
-    if is_proj_point_at_inf (_X, _Y, _Z) then false
-    else begin
-      let x = _X /% _Z in
-      x % q = r end
-  end
-
-(*
-   _Z <> 0
-   q < prime < 2 * q
-   let x = _X /% _Z in x % q = r <==>
-   1. x = r <==> _X = r *% _Z
-   2. x - q = r <==> _X = (r + q) *% _Z
-*)
 
 ///  ECDSA using SHA2-256
 
@@ -156,23 +130,11 @@ let ecdsa_verify_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (public_key sign
 ///  ECDH over the secp256k1 elliptic curve
 
 let secret_to_public (private_key:lbytes 32) : option (lbytes 64) =
-  let sk = nat_from_bytes_be private_key in
-  let is_sk_valid = 0 < sk && sk < q in
-  if is_sk_valid then
-    let pk = point_mul_g sk in
-    Some (point_store pk)
-  else None
+  EC.secret_to_public k256_concrete_ops private_key
 
 
 let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 64) =
-  let pk = load_point their_public_key in
-  let sk = nat_from_bytes_be private_key in
-  let is_sk_valid = 0 < sk && sk < q in
-  if Some? pk && is_sk_valid then
-    let ss = point_mul sk (Some?.v pk) in
-    Some (point_store ss)
-  else None
-
+  EC.ecdh k256_concrete_ops their_public_key private_key
 
 ///  Parsing and Serializing public keys
 
@@ -181,27 +143,19 @@ let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 6
 // compressed   = [ 0x02 for even `y` and 0x03 for odd `y`; x ], 33 bytes
 
 let validate_public_key (pk:lbytes 64) : bool =
-  Some? (load_point pk)
+  EC.validate_public_key k256_concrete_ops pk
 
 let pk_uncompressed_to_raw (pk:lbytes 65) : option (lbytes 64) =
-  if Lib.RawIntTypes.u8_to_UInt8 pk.[0] <> 0x04uy then None else Some (sub pk 1 64)
+  EC.pk_uncompressed_to_raw k256_concrete_ops pk
 
 let pk_uncompressed_from_raw (pk:lbytes 64) : lbytes 65 =
-  concat (create 1 (u8 0x04)) pk
+  EC.pk_uncompressed_from_raw k256_concrete_ops pk
 
 let pk_compressed_to_raw (pk:lbytes 33) : option (lbytes 64) =
-  let pk_x = sub pk 1 32 in
-  match (aff_point_decompress pk) with
-  | Some (x, y) -> Some (concat #_ #32 #32 pk_x (nat_to_bytes_be 32 y))
-  | None -> None
-
+  EC.pk_compressed_to_raw k256_concrete_ops pk
 
 let pk_compressed_from_raw (pk:lbytes 64) : lbytes 33 =
-  let pk_x = sub pk 0 32 in
-  let pk_y = sub pk 32 32 in
-  let is_pk_y_odd = nat_from_bytes_be pk_y % 2 = 1 in // <==> pk_y % 2 = 1
-  let pk0 = if is_pk_y_odd then u8 0x03 else u8 0x02 in
-  concat (create 1 pk0) pk_x
+  EC.pk_compressed_from_raw k256_concrete_ops pk
 
 
 ///  Low-S normalization
