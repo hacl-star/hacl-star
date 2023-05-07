@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Spec.h"
+#include "Hacl_Streaming_Types.h"
 
 /* SNIPPET_START: Hacl_Hash_Definitions_word_len */
 
@@ -66,12 +66,6 @@ uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
 typedef uint8_t *Hacl_Hash_Definitions_hash_t;
 
 /* SNIPPET_END: Hacl_Hash_Definitions_hash_t */
-
-/* SNIPPET_START: Hacl_Hash_Definitions_const_impl */
-
-typedef Spec_Hash_Definitions_hash_alg Hacl_Hash_Definitions_const_impl;
-
-/* SNIPPET_END: Hacl_Hash_Definitions_const_impl */
 
 #if defined(__cplusplus)
 }

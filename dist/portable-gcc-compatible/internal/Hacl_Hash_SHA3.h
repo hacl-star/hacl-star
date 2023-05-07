@@ -37,6 +37,30 @@ extern "C" {
 
 #include "../Hacl_Hash_SHA3.h"
 
+/* SNIPPET_START: Hacl_Hash_SHA3_update_multi_sha3 */
+
+void
+Hacl_Hash_SHA3_update_multi_sha3(
+  Spec_Hash_Definitions_hash_alg a,
+  uint64_t *s,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+/* SNIPPET_END: Hacl_Hash_SHA3_update_multi_sha3 */
+
+/* SNIPPET_START: Hacl_Hash_SHA3_update_last_sha3 */
+
+void
+Hacl_Hash_SHA3_update_last_sha3(
+  Spec_Hash_Definitions_hash_alg a,
+  uint64_t *s,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+/* SNIPPET_END: Hacl_Hash_SHA3_update_last_sha3 */
+
 /* SNIPPET_START: Hacl_Impl_SHA3_state_permute */
 
 void Hacl_Impl_SHA3_state_permute(uint64_t *s);

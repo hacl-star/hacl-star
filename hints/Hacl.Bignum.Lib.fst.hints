@@ -1,5 +1,5 @@
 [
-  "ˆ\u0001Æ±Yû\u001dxršÚÎdÙ)‹",
+  "<À\bÄFÑI\u001d¢EæÄ¾*N‚",
   [
     [
       "Hacl.Bignum.Lib.bn_get_ith_bit",
@@ -943,7 +943,7 @@
       "78ecdb3870270762ffcb698d6c368d96"
     ],
     [
-      "Hacl.Bignum.Lib.bn_get_bits",
+      "Hacl.Bignum.Lib.bn_get_bits_st",
       1,
       0,
       0,
@@ -978,11 +978,11 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "71645459a0b697106448d59f4b2ee288"
+      "1fea1faad53868bf31db0acf9abef182"
     ],
     [
-      "Hacl.Bignum.Lib.bn_get_bits",
-      2,
+      "Hacl.Bignum.Lib.mk_bn_get_bits",
+      1,
       0,
       0,
       [
@@ -997,11 +997,11 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e9a6cc7180f8e716a66338669cca5d41"
+      "0def8aab821d5427d903c56bfd198f19"
     ],
     [
-      "Hacl.Bignum.Lib.bn_get_bits",
-      3,
+      "Hacl.Bignum.Lib.mk_bn_get_bits",
+      2,
       0,
       0,
       [
@@ -1064,7 +1064,31 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "adb380bc30654a8914176ee1cea680df"
+      "048da4d1ee0f56c367e72e0d25d9d267"
+    ],
+    [
+      "Hacl.Bignum.Lib.bn_get_bits",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "disc_equation_Lib.IntTypes.U32", "disc_equation_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Hacl.Bignum.Definitions.limb_t",
+        "equation_Hacl.Spec.Bignum.Definitions.limb_t",
+        "equation_Lib.IntTypes.bits", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_aa0de69914a5fc7ba6ce4130e66bd8ed",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
+      ],
+      0,
+      "8ebddf4f1a540831904f39557cc8b89c"
     ]
   ]
 ]
