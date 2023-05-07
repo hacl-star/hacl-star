@@ -35,23 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#define Spec_Hash_Definitions_SHA2_224 0
-#define Spec_Hash_Definitions_SHA2_256 1
-#define Spec_Hash_Definitions_SHA2_384 2
-#define Spec_Hash_Definitions_SHA2_512 3
-#define Spec_Hash_Definitions_SHA1 4
-#define Spec_Hash_Definitions_MD5 5
-#define Spec_Hash_Definitions_Blake2S 6
-#define Spec_Hash_Definitions_Blake2B 7
-#define Spec_Hash_Definitions_SHA3_256 8
-#define Spec_Hash_Definitions_SHA3_224 9
-#define Spec_Hash_Definitions_SHA3_384 10
-#define Spec_Hash_Definitions_SHA3_512 11
-#define Spec_Hash_Definitions_Shake128 12
-#define Spec_Hash_Definitions_Shake256 13
-
-typedef uint8_t Spec_Hash_Definitions_hash_alg;
-
 #define Spec_FFDHE_FFDHE2048 0
 #define Spec_FFDHE_FFDHE3072 1
 #define Spec_FFDHE_FFDHE4096 2

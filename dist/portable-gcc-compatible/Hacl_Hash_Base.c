@@ -25,12 +25,6 @@
 
 #include "Hacl_Hash_Base.h"
 
-/* SNIPPET_START: impl */
-
-typedef Spec_Hash_Definitions_hash_alg impl;
-
-/* SNIPPET_END: impl */
-
 /* SNIPPET_START: Hacl_Hash_Definitions_word_len */
 
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
