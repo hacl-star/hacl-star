@@ -5,12 +5,11 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module M = Lib.NatMod
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
-module KL = Spec.K256.Lemmas
+
 module EC = Spec.ECC
-module EP = Spec.EC.Projective
+module EP = Spec.ECC.Projective
 module EPL = Spec.EC.Projective.Lemmas
 
 include Spec.K256.PointOps
@@ -23,42 +22,14 @@ include Spec.K256.PointOps
  https://www.hyperelliptic.org/EFD/g1p/auto-shortw.html
 *)
 
-let mk_to_k256_comm_monoid : SE.to_comm_monoid (EP.proj_point k256) = {
-  SE.a_spec = EC.aff_point k256;
-  SE.comm_monoid = EC.mk_ec_comm_monoid k256;
-  SE.refl = EP.to_aff_point k256;
-}
-
-val point_at_inf_c: SE.one_st (EP.proj_point k256) mk_to_k256_comm_monoid
-let point_at_inf_c _ =
-  EPL.to_aff_point_at_infinity_lemma k256;
-  EP.point_at_inf k256
-
-val point_add_c : SE.mul_st (EP.proj_point k256) mk_to_k256_comm_monoid
-let point_add_c p q =
-  KL.to_aff_point_add_lemma p q;
-  point_add p q
-
-val point_double_c : SE.sqr_st (EP.proj_point k256) mk_to_k256_comm_monoid
-let point_double_c p =
-  KL.to_aff_point_double_lemma p;
-  point_double p
-
-let mk_k256_concrete_ops : SE.concrete_ops (EP.proj_point k256) = {
-  SE.to = mk_to_k256_comm_monoid;
-  SE.one = point_at_inf_c;
-  SE.mul = point_add_c;
-  SE.sqr = point_double_c;
-}
-
 // [a]P
 let point_mul (a:qelem) (p:EP.proj_point k256)
   : res:EP.proj_point k256{EP.to_aff_point k256 res ==
     EC.aff_point_mul k256 a (EP.to_aff_point k256 p) }
  =
-  SE.exp_fw_lemma mk_k256_concrete_ops p 256 a 4;
+  SE.exp_fw_lemma (EP.mk_ec_concrete_ops_a0 k256) p 256 a 4;
   LE.exp_fw_lemma (EC.mk_ec_comm_monoid k256) (EP.to_aff_point k256 p) 256 a 4;
-  SE.exp_fw mk_k256_concrete_ops p 256 a 4
+  SE.exp_fw (EP.mk_ec_concrete_ops_a0 k256) p 256 a 4
 
 
 // [a1]G + [a2]P
@@ -69,17 +40,10 @@ let point_mul_double_g (a1 a2:qelem) (p:EP.proj_point k256)
         (EC.aff_point_mul k256 a2 (EP.to_aff_point k256 p)) }
  =
   EPL.lemma_proj_aff_id k256 (g_x, g_y);
-  SE.exp_double_fw_lemma mk_k256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5;
+  SE.exp_double_fw_lemma (EP.mk_ec_concrete_ops_a0 k256) (g_x, g_y, 1) 256 a1 p a2 5;
   LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k256)
     (g_x, g_y) 256 a1 (EP.to_aff_point k256 p) a2 5;
-  SE.exp_double_fw mk_k256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5
-
-
-let is_point_at_inf_c (p:EP.proj_point k256)
-  : res:bool{res ==> EC.is_aff_point_at_inf k256 (EP.to_aff_point k256 p)}
- =
-  EPL.lemma_aff_is_point_at_inf k256 p;
-  EP.is_point_at_inf k256 p
+  SE.exp_double_fw (EP.mk_ec_concrete_ops_a0 k256) (g_x, g_y, 1) 256 a1 p a2 5
 
 
 let k256_concrete_ops : EC.ec_concrete_ops = {
@@ -88,7 +52,7 @@ let k256_concrete_ops : EC.ec_concrete_ops = {
   EC.to_point_t = EP.to_proj_point k256;
   EC.to_aff_point = EP.to_aff_point k256;
   EC.lemma_to_from_aff_point = EPL.lemma_proj_aff_id k256;
-  EC.is_point_at_inf = is_point_at_inf_c;
+  EC.is_point_at_inf = EP.is_point_at_inf_c k256;
   EC.point_mul = point_mul;
   EC.point_mul_double_g = point_mul_double_g;
 }

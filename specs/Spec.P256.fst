@@ -5,12 +5,11 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-open Spec.Hash.Definitions
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
-module PL = Spec.P256.Lemmas
+
 module EC = Spec.ECC
-module EP = Spec.EC.Projective
+module EP = Spec.ECC.Projective
 module EPL = Spec.EC.Projective.Lemmas
 
 include Spec.P256.PointOps
@@ -19,44 +18,14 @@ include Spec.P256.PointOps
 
 (** https://eprint.iacr.org/2013/816.pdf *)
 
-///  Elliptic curve scalar multiplication
-
-let mk_to_p256_comm_monoid : SE.to_comm_monoid (EP.proj_point p256) = {
-  SE.a_spec = EC.aff_point p256;
-  SE.comm_monoid = EC.mk_ec_comm_monoid p256;
-  SE.refl = EP.to_aff_point p256;
-}
-
-val point_at_inf_c: SE.one_st (EP.proj_point p256) mk_to_p256_comm_monoid
-let point_at_inf_c _ =
-  EPL.to_aff_point_at_infinity_lemma p256;
-  EP.point_at_inf p256
-
-val point_add_c : SE.mul_st (EP.proj_point p256) mk_to_p256_comm_monoid
-let point_add_c p q =
-  PL.to_aff_point_add_lemma p q;
-  point_add p q
-
-val point_double_c : SE.sqr_st (EP.proj_point p256) mk_to_p256_comm_monoid
-let point_double_c p =
-  PL.to_aff_point_double_lemma p;
-  point_double p
-
-let mk_p256_concrete_ops : SE.concrete_ops (EP.proj_point p256) = {
-  SE.to = mk_to_p256_comm_monoid;
-  SE.one = point_at_inf_c;
-  SE.mul = point_add_c;
-  SE.sqr = point_double_c;
-}
-
 // [a]P
 let point_mul (a:qelem) (p:EP.proj_point p256)
   : res:EP.proj_point p256{EP.to_aff_point p256 res ==
     EC.aff_point_mul p256 a (EP.to_aff_point p256 p) }
  =
-  SE.exp_fw_lemma mk_p256_concrete_ops p 256 a 4;
+  SE.exp_fw_lemma (EP.mk_ec_concrete_ops_a3 p256) p 256 a 4;
   LE.exp_fw_lemma (EC.mk_ec_comm_monoid p256) (EP.to_aff_point p256 p) 256 a 4;
-  SE.exp_fw mk_p256_concrete_ops p 256 a 4
+  SE.exp_fw (EP.mk_ec_concrete_ops_a3 p256) p 256 a 4
 
 
 // [a1]G + [a2]P
@@ -67,17 +36,10 @@ let point_mul_double_g (a1 a2:qelem) (p:EP.proj_point p256)
         (EC.aff_point_mul p256 a2 (EP.to_aff_point p256 p)) }
  =
   EPL.lemma_proj_aff_id p256 (g_x, g_y);
-  SE.exp_double_fw_lemma mk_p256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5;
+  SE.exp_double_fw_lemma (EP.mk_ec_concrete_ops_a3 p256) (g_x, g_y, 1) 256 a1 p a2 5;
   LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid p256)
     (g_x, g_y) 256 a1 (EP.to_aff_point p256 p) a2 5;
-  SE.exp_double_fw mk_p256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5
-
-
-let is_point_at_inf_c (p:EP.proj_point p256)
-  : res:bool{res ==> EC.is_aff_point_at_inf p256 (EP.to_aff_point p256 p)}
- =
-  EPL.lemma_aff_is_point_at_inf p256 p;
-  EP.is_point_at_inf p256 p
+  SE.exp_double_fw (EP.mk_ec_concrete_ops_a3 p256) (g_x, g_y, 1) 256 a1 p a2 5
 
 
 let p256_concrete_ops : EC.ec_concrete_ops = {
@@ -86,13 +48,15 @@ let p256_concrete_ops : EC.ec_concrete_ops = {
   EC.to_point_t = EP.to_proj_point p256;
   EC.to_aff_point = EP.to_aff_point p256;
   EC.lemma_to_from_aff_point = EPL.lemma_proj_aff_id p256;
-  EC.is_point_at_inf = is_point_at_inf_c;
+  EC.is_point_at_inf = EP.is_point_at_inf_c p256;
   EC.point_mul = point_mul;
   EC.point_mul_double_g = point_mul_double_g;
 }
 
 
 ///  ECDSA over the P256 elliptic curve
+
+open Spec.Hash.Definitions
 
 type hash_alg_ecdsa =
   | NoHash
@@ -147,6 +111,7 @@ let ecdsa_verification_agile alg msg_len msg public_key signature_r signature_s 
   let hashM = hash_ecdsa alg msg_len msg in
   let m_q = nat_from_bytes_be (sub hashM 0 32) % order in
   EC.ecdsa_verify_msg_as_qelem p256_concrete_ops m_q public_key signature_r signature_s
+
 
 (** The following functions can be removed *)
 

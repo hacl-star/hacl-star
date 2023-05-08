@@ -55,6 +55,15 @@ let to_aff_point_negate_lemma k p =
   }
 
 
+let to_aff_point_add_lemma_a3 k p q = admit()
+
+let to_aff_point_double_lemma_a3 k p = admit()
+
+
+let to_aff_point_add_lemma_a0 k p q = admit()
+
+let to_aff_point_double_lemma_a0 k p = admit()
+
 //-------------------------------
 
 val lemma_div_mod_eq_mul_mod (k:curve) (a b c:felem k) : Lemma

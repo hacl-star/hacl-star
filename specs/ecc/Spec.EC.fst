@@ -15,7 +15,7 @@ let tuple2_lt_n (n:pos) =
 // cofactor = 1
 inline_for_extraction
 class curve = {
-  prime: x:nat{3 < x};
+  prime: x:nat{24 < x};
   coeff_a: M.nat_mod prime;
   coeff_b: x:M.nat_mod prime{0 < x}; // (0, 0) is not on the curve
 

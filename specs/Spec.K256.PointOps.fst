@@ -62,50 +62,6 @@ let k256: EC.curve = {
 }
 
 
-let ( +% ) = EC.fadd k256
-let ( -% ) = EC.fsub k256
-let ( *% ) = EC.fmul k256
-let ( /% ) (x y:felem) = EC.fmul k256 x (EC.finv k256 y)
-
-
-///  Point addition and doubling in projective coordinates
-
-let point_add (p:EC.proj_point k256) (q:EC.proj_point k256) : EC.proj_point k256 =
-  let x1, y1, z1 = p in
-  let x2, y2, z2 = q in
-  let xx = x1 *% x2 in
-  let yy = y1 *% y2 in
-  let zz = z1 *% z2 in
-  let xy_pairs = (x1 +% y1) *% (x2 +% y2) -% (xx +% yy) in
-  let yz_pairs = (y1 +% z1) *% (y2 +% z2) -% (yy +% zz) in
-  let xz_pairs = (x1 +% z1) *% (x2 +% z2) -% (xx +% zz) in
-  let bzz3 = 3 *% b *% zz in
-  let yy_m_bzz3 = yy -% bzz3 in
-  let yy_p_bzz3 = yy +% bzz3 in
-  let byz3 = 3 *% b *% yz_pairs in
-  let xx3 = 3 *% xx in
-  let bxx9 = 3 *% b *% xx3 in
-  let x3 = xy_pairs *% yy_m_bzz3 -% byz3 *% xz_pairs in
-  let y3 = yy_p_bzz3 *% yy_m_bzz3 +% bxx9 *% xz_pairs in
-  let z3 = yz_pairs *% yy_p_bzz3 +% xx3 *% xy_pairs in
-  x3, y3, z3
-
-let point_double (p:EC.proj_point k256) : EC.proj_point k256 =
-  let x, y, z = p in
-  let yy = y *% y in
-  let zz = z *% z in
-  let xy2 = 2 *% x *% y in
-  let bzz3 = 3 *% b *% zz in
-  let bzz9 = 3 *% bzz3 in
-  let yy_m_bzz9 = yy -% bzz9 in
-  let yy_p_bzz3 = yy +% bzz3 in
-  let yy_zz = yy *% zz in
-  let t = 24 *% b *% yy_zz in
-  let x3 = xy2 *% yy_m_bzz9 in
-  let y3 = yy_m_bzz9 *% yy_p_bzz3 +% t in
-  let z3 = yy *% y *% z *% 8 in
-  x3, y3, z3
-
 ///  Point conversion between affine, projective and bytes representation
 
 let point_inv_bytes (b:BSeq.lbytes 64) =
