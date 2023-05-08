@@ -4,13 +4,10 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-module M = Lib.NatMod
 module BSeq = Lib.ByteSequence
-module EC = Spec.EC
+module EC = Spec.EC.Projective
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
-
-///  Finite field
 
 let prime : (p:pos{p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F}) =
   assert_norm (24 < pow2 256 - 0x1000003D1);
@@ -27,8 +24,8 @@ let q : q:pos{q < pow2 256} =
 let felem = x:nat{x < prime}
 let qelem = x:nat{x < q}
 
-let a_coeff : felem = 0
-let b_coeff : felem = 7
+let a : felem = 0
+let b : felem = 7
 
 // Base point
 let g_x : felem = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
@@ -42,16 +39,16 @@ assume
 val order_lemma: unit -> Lemma (FStar.Math.Euclid.is_prime q)
 
 val weierstrass_curve: unit ->
-  Lemma ((4 * a_coeff * a_coeff * a_coeff + 27 * b_coeff * b_coeff) % prime <> 0)
+  Lemma ((4 * a * a * a + 27 * b * b) % prime <> 0)
 
 let weierstrass_curve () =
-  assert_norm ((4 * a_coeff * a_coeff * a_coeff + 27 * b_coeff * b_coeff) % prime <> 0)
+  assert_norm ((4 * a * a * a + 27 * b * b) % prime <> 0)
 
 
 let k256: EC.curve = {
   EC.prime = prime;
-  EC.coeff_a = a_coeff;
-  EC.coeff_b = b_coeff;
+  EC.coeff_a = a;
+  EC.coeff_b = b;
 
   EC.order = q;
   EC.base_point = (g_x, g_y);
@@ -70,28 +67,6 @@ let ( -% ) = EC.fsub k256
 let ( *% ) = EC.fmul k256
 let ( /% ) (x y:felem) = EC.fmul k256 x (EC.finv k256 y)
 
-let ( +^ ) = EC.qadd k256
-let ( *^ ) = EC.qmul k256
-
-
-let proj_point = felem & felem & felem // Projective coordinates
-
-let point_at_inf : proj_point = (0, 1, 0)
-
-let is_proj_point_at_inf (p:proj_point) : bool =
-  let (_, _, z) = p in z = 0
-
-let to_proj_point (p:EC.aff_point k256) : proj_point =
-  let (x, y) = p in (x, y, 1)
-
-let to_aff_point (p:proj_point) : EC.aff_point k256 =
-  // if is_proj_point_at_inf p then aff_point_at_inf
-  let (px, py, pz) = p in
-  let zinv = EC.finv k256 pz in
-  let x = px *% zinv in
-  let y = py *% zinv in
-  (x, y)
-
 
 ///  Point addition in affine coordinates
 
@@ -101,7 +76,7 @@ let aff_point_negate (p:EC.aff_point k256) : EC.aff_point k256 =
 
 ///  Point addition and doubling in projective coordinates
 
-let point_add (p:proj_point) (q:proj_point) : proj_point =
+let point_add (p:EC.proj_point k256) (q:EC.proj_point k256) : EC.proj_point k256 =
   let x1, y1, z1 = p in
   let x2, y2, z2 = q in
   let xx = x1 *% x2 in
@@ -110,34 +85,34 @@ let point_add (p:proj_point) (q:proj_point) : proj_point =
   let xy_pairs = (x1 +% y1) *% (x2 +% y2) -% (xx +% yy) in
   let yz_pairs = (y1 +% z1) *% (y2 +% z2) -% (yy +% zz) in
   let xz_pairs = (x1 +% z1) *% (x2 +% z2) -% (xx +% zz) in
-  let bzz3 = 3 *% b_coeff *% zz in
+  let bzz3 = 3 *% b *% zz in
   let yy_m_bzz3 = yy -% bzz3 in
   let yy_p_bzz3 = yy +% bzz3 in
-  let byz3 = 3 *% b_coeff *% yz_pairs in
+  let byz3 = 3 *% b *% yz_pairs in
   let xx3 = 3 *% xx in
-  let bxx9 = 3 *% b_coeff *% xx3 in
+  let bxx9 = 3 *% b *% xx3 in
   let x3 = xy_pairs *% yy_m_bzz3 -% byz3 *% xz_pairs in
   let y3 = yy_p_bzz3 *% yy_m_bzz3 +% bxx9 *% xz_pairs in
   let z3 = yz_pairs *% yy_p_bzz3 +% xx3 *% xy_pairs in
   x3, y3, z3
 
-let point_double (p:proj_point) : proj_point =
+let point_double (p:EC.proj_point k256) : EC.proj_point k256 =
   let x, y, z = p in
   let yy = y *% y in
   let zz = z *% z in
   let xy2 = 2 *% x *% y in
-  let bzz3 = 3 *% b_coeff *% zz in
+  let bzz3 = 3 *% b *% zz in
   let bzz9 = 3 *% bzz3 in
   let yy_m_bzz9 = yy -% bzz9 in
   let yy_p_bzz3 = yy +% bzz3 in
   let yy_zz = yy *% zz in
-  let t = 24 *% b_coeff *% yy_zz in
+  let t = 24 *% b *% yy_zz in
   let x3 = xy2 *% yy_m_bzz9 in
   let y3 = yy_m_bzz9 *% yy_p_bzz3 +% t in
   let z3 = yy *% y *% z *% 8 in
   x3, y3, z3
 
-let point_negate (p:proj_point) : proj_point =
+let point_negate (p:EC.proj_point k256) : EC.proj_point k256 =
   let x, y, z = p in
   x, (-y) % prime, z
 
@@ -148,7 +123,7 @@ let point_inv_bytes (b:BSeq.lbytes 64) =
   let py = BSeq.nat_from_bytes_be (sub b 32 32) in
   px < prime && py < prime && EC.is_on_curve k256 (px, py)
 
-let load_point_nocheck (b:BSeq.lbytes 64{point_inv_bytes b}) : proj_point =
+let load_point_nocheck (b:BSeq.lbytes 64{point_inv_bytes b}) : EC.proj_point k256 =
   let px = BSeq.nat_from_bytes_be (sub b 0 32) in
   let py = BSeq.nat_from_bytes_be (sub b 32 32) in
-  to_proj_point (px, py)
+  EC.to_proj_point k256 (px, py)

@@ -1,12 +1,8 @@
 module Spec.P256.PointOps
 
 open FStar.Mul
-open Lib.IntTypes
-open Lib.Sequence
 
-module M = Lib.NatMod
-module BSeq = Lib.ByteSequence
-module EC = Spec.EC
+module EC = Spec.EC.Projective
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -65,39 +61,14 @@ let p256: EC.curve = {
   EC.order_lemma;
 }
 
-
 let ( +% ) = EC.fadd p256
 let ( -% ) = EC.fsub p256
 let ( *% ) = EC.fmul p256
-let ( /% ) (x y:felem) = EC.fmul p256 x (EC.finv p256 y)
-
-let ( +^ ) = EC.qadd p256
-let ( *^ ) = EC.qmul p256
-
-
-let proj_point = p:tuple3 nat nat nat{let (px, py, pz) = p in px < prime /\ py < prime /\ pz < prime}
-
-let point_at_inf : proj_point = (0, 1, 0)
-
-let is_point_at_inf (p:proj_point) =
-  let (_, _, z) = p in z = 0
-
-let to_proj_point (p:EC.aff_point p256) : proj_point =
-  let (x, y) = p in (x, y, 1)
-
-let to_aff_point (p:proj_point) : EC.aff_point p256 =
-  // if is_proj_point_at_inf p then aff_point_at_inf
-  let (px, py, pz) = p in
-  let zinv = EC.finv p256 pz in
-  let x = px *% zinv in
-  let y = py *% zinv in
-  (x, y)
-
 
 ///  Point addition and doubling in projective coordinates
 
 // Alg 4 from https://eprint.iacr.org/2015/1060.pdf
-let point_add (p q:proj_point) : proj_point =
+let point_add (p q:EC.proj_point p256) : EC.proj_point p256 =
   let x1, y1, z1 = p in
   let x2, y2, z2 = q in
   let t0 = x1 *% x2 in
@@ -147,7 +118,7 @@ let point_add (p q:proj_point) : proj_point =
 
 
 // Alg 6 from https://eprint.iacr.org/2015/1060.pdf
-let point_double (p:proj_point) : proj_point =
+let point_double (p:EC.proj_point p256) : EC.proj_point p256 =
   let (x, y, z) = p in
   let t0 = x *% x in
   let t1 = y *% y in

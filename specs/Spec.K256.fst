@@ -10,6 +10,8 @@ module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module KL = Spec.K256.Lemmas
 module EC = Spec.ECC
+module EP = Spec.EC.Projective
+module EPL = Spec.EC.Projective.Lemmas
 
 include Spec.K256.PointOps
 
@@ -28,28 +30,28 @@ let mk_k256_abelian_group : LE.abelian_group (EC.aff_point k256) = {
   LE.lemma_inverse = KL.aff_point_negate_lemma;
 }
 
-let mk_to_k256_comm_monoid : SE.to_comm_monoid proj_point = {
+let mk_to_k256_comm_monoid : SE.to_comm_monoid (EP.proj_point k256) = {
   SE.a_spec = EC.aff_point k256;
   SE.comm_monoid = EC.mk_ec_comm_monoid k256;
-  SE.refl = to_aff_point;
+  SE.refl = EP.to_aff_point k256;
 }
 
-val point_at_inf_c: SE.one_st proj_point mk_to_k256_comm_monoid
+val point_at_inf_c: SE.one_st (EP.proj_point k256) mk_to_k256_comm_monoid
 let point_at_inf_c _ =
   KL.to_aff_point_at_infinity_lemma ();
-  point_at_inf
+  EP.point_at_inf k256
 
-val point_add_c : SE.mul_st proj_point mk_to_k256_comm_monoid
+val point_add_c : SE.mul_st (EP.proj_point k256) mk_to_k256_comm_monoid
 let point_add_c p q =
   KL.to_aff_point_add_lemma p q;
   point_add p q
 
-val point_double_c : SE.sqr_st proj_point mk_to_k256_comm_monoid
+val point_double_c : SE.sqr_st (EP.proj_point k256) mk_to_k256_comm_monoid
 let point_double_c p =
   KL.to_aff_point_double_lemma p;
   point_double p
 
-let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
+let mk_k256_concrete_ops : SE.concrete_ops (EP.proj_point k256) = {
   SE.to = mk_to_k256_comm_monoid;
   SE.one = point_at_inf_c;
   SE.mul = point_add_c;
@@ -57,40 +59,42 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
 }
 
 // [a]P
-let point_mul (a:qelem) (p:proj_point)
-  : res:proj_point{to_aff_point res == EC.aff_point_mul k256 a (to_aff_point p) }
+let point_mul (a:qelem) (p:EP.proj_point k256)
+  : res:EP.proj_point k256{EP.to_aff_point k256 res ==
+    EC.aff_point_mul k256 a (EP.to_aff_point k256 p) }
  =
   SE.exp_fw_lemma mk_k256_concrete_ops p 256 a 4;
-  LE.exp_fw_lemma (EC.mk_ec_comm_monoid k256) (to_aff_point p) 256 a 4;
+  LE.exp_fw_lemma (EC.mk_ec_comm_monoid k256) (EP.to_aff_point k256 p) 256 a 4;
   SE.exp_fw mk_k256_concrete_ops p 256 a 4
 
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1 a2:qelem) (p:proj_point)
-  : res:proj_point{to_aff_point res ==
+let point_mul_double_g (a1 a2:qelem) (p:EP.proj_point k256)
+  : res:EP.proj_point k256{EP.to_aff_point k256 res ==
       EC.aff_point_add k256
         (EC.aff_point_mul k256 a1 k256.base_point)
-        (EC.aff_point_mul k256 a2 (to_aff_point p)) }
+        (EC.aff_point_mul k256 a2 (EP.to_aff_point k256 p)) }
  =
-  KL.lemma_proj_aff_id (g_x, g_y);
+  EPL.lemma_proj_aff_id k256 (g_x, g_y);
   SE.exp_double_fw_lemma mk_k256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5;
-  LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k256) (g_x, g_y) 256 a1 (to_aff_point p) a2 5;
+  LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k256)
+    (g_x, g_y) 256 a1 (EP.to_aff_point k256 p) a2 5;
   SE.exp_double_fw mk_k256_concrete_ops (g_x, g_y, 1) 256 a1 p a2 5
 
 
-let is_point_at_inf_c (p:proj_point)
-  : res:bool{res ==> EC.is_aff_point_at_inf k256 (to_aff_point p)}
+let is_point_at_inf_c (p:EP.proj_point k256)
+  : res:bool{res ==> EC.is_aff_point_at_inf k256 (EP.to_aff_point k256 p)}
  =
-  KL.lemma_aff_is_point_at_inf p;
-  is_proj_point_at_inf p
+  EPL.lemma_aff_is_point_at_inf k256 p;
+  EP.is_point_at_inf k256 p
 
 
 let k256_concrete_ops : EC.ec_concrete_ops = {
   EC.ec = k256;
-  EC.t = proj_point;
-  EC.to_point_t = to_proj_point;
-  EC.to_aff_point = to_aff_point;
-  EC.lemma_to_from_aff_point = KL.lemma_proj_aff_id;
+  EC.t = EP.proj_point k256;
+  EC.to_point_t = EP.to_proj_point k256;
+  EC.to_aff_point = EP.to_aff_point k256;
+  EC.lemma_to_from_aff_point = EPL.lemma_proj_aff_id k256;
   EC.is_point_at_inf = is_point_at_inf_c;
   EC.point_mul = point_mul;
   EC.point_mul_double_g = point_mul_double_g;
@@ -131,7 +135,6 @@ let ecdsa_verify_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (public_key sign
 
 let secret_to_public (private_key:lbytes 32) : option (lbytes 64) =
   EC.secret_to_public k256_concrete_ops private_key
-
 
 let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 64) =
   EC.ecdh k256_concrete_ops their_public_key private_key

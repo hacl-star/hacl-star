@@ -6,27 +6,9 @@ open Spec.K256.PointOps
 
 module Euclid = FStar.Math.Euclid
 module M = Lib.NatMod
-module EC = Spec.EC
+module EC = Spec.EC.Projective
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
-
-let lemma_aff_is_point_at_inf p =
-  prime_lemma ();
-  let (px, py, pz) = p in
-  M.lemma_div_mod_prime_is_zero #prime px pz;
-  M.lemma_div_mod_prime_is_zero #prime py pz
-
-
-let lemma_proj_aff_id p =
-  let (px, py) = p in
-  let (pX, pY, pZ) = to_proj_point p in
-  assert (pX = px /\ pY = pY /\ pZ = 1);
-  let (rx, ry) = to_aff_point (pX, pY, pZ) in
-  assert (rx = (pX /% pZ) /\ ry = (pY /% pZ));
-  M.lemma_div_mod_prime_one #prime pX;
-  M.lemma_div_mod_prime_one #prime pY;
-  assert (rx = pX /\ ry = pY)
-
 
 let aff_point_negate_lemma p =
   let p_neg = aff_point_negate p in
@@ -37,7 +19,7 @@ let aff_point_negate_lemma p =
 
 
 let to_aff_point_at_infinity_lemma () =
-  let px, py = to_aff_point point_at_inf in
+  let px, py = EC.to_aff_point k256 (EC.point_at_inf k256) in
   assert (px == 0 /% 0 /\ py == 1 /% 0);
   assert (px == 0 *% M.pow_mod #prime 0 (prime - 2));
   M.lemma_pow_mod #prime 0 (prime - 2);
@@ -51,9 +33,9 @@ let to_aff_point_double_lemma p = admit()
 
 let to_aff_point_negate_lemma p =
   let px, py, pz = p in
-  let qx, qy = to_aff_point (point_negate p) in
+  let qx, qy = EC.to_aff_point k256 (point_negate p) in
   assert (qx == px /% pz /\ qy == (- py) % prime /% pz);
-  let ax, ay = aff_point_negate (to_aff_point p) in
+  let ax, ay = aff_point_negate (EC.to_aff_point k256 p) in
   assert (ax == px /% pz /\ ay == (- py /% pz) % prime);
   let pz_inv = M.pow_mod #prime pz (prime - 2) in
 
@@ -79,7 +61,7 @@ let lemma_div_mod_eq_mul_mod a b c =
 
 
 val ecdsa_verify_avoid_finv1:
-  p:proj_point{not (is_proj_point_at_inf p)} -> r:nat{0 < r /\ r < q} ->
+  p:EC.proj_point k256{not (EC.is_point_at_inf k256 p)} -> r:nat{0 < r /\ r < q} ->
   Lemma (let _X, _Y, _Z = p in
     (_X /% _Z % q = r) ==> ((r *% _Z = _X) || (r + q < prime && (r + q) *% _Z = _X)))
 
@@ -108,7 +90,7 @@ let ecdsa_verify_avoid_finv1 p r =
 
 
 val ecdsa_verify_avoid_finv2:
-  p:proj_point{not (is_proj_point_at_inf p)} -> r:nat{0 < r /\ r < q} ->
+  p:EC.proj_point k256{not (EC.is_point_at_inf k256 p)} -> r:nat{0 < r /\ r < q} ->
   Lemma (let _X, _Y, _Z = p in
     ((r *% _Z = _X) || (r + q < prime && (r + q) *% _Z = _X)) ==> (_X /% _Z % q = r))
 

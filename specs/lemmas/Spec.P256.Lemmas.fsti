@@ -2,7 +2,7 @@ module Spec.P256.Lemmas
 
 open FStar.Mul
 open Spec.P256.PointOps
-module EC = Spec.EC
+module EC = Spec.EC.Projective
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
@@ -13,24 +13,15 @@ module EC = Spec.EC
 
 // TODO: add `point_inv p = is_on_curve p || is_point_at_inf p`
 
-val lemma_proj_aff_id (p:EC.aff_point p256) :
-  Lemma (to_aff_point (to_proj_point p) == p)
-
-
-val lemma_aff_is_point_at_inf: p:proj_point ->
-  Lemma (let px, py, pz = p in
-    EC.is_aff_point_at_inf p256 (to_aff_point p) == (pz = 0 || (px = 0 && py = 0)))
-
-
 val to_aff_point_at_infinity_lemma: unit ->
-  Lemma (to_aff_point point_at_inf == EC.aff_point_at_inf p256)
+  Lemma (EC.to_aff_point p256 (EC.point_at_inf p256) == EC.aff_point_at_inf p256)
 
 
-val to_aff_point_add_lemma (p q:proj_point) :
-  Lemma (to_aff_point (point_add p q) ==
-    EC.aff_point_add p256 (to_aff_point p) (to_aff_point q))
+val to_aff_point_add_lemma (p q:EC.proj_point p256) :
+  Lemma (EC.to_aff_point p256 (point_add p q) ==
+    EC.aff_point_add p256 (EC.to_aff_point p256 p) (EC.to_aff_point p256 q))
 
 
-val to_aff_point_double_lemma (p:proj_point) :
-  Lemma (to_aff_point (point_double p) ==
-    EC.aff_point_add p256 (to_aff_point p) (to_aff_point p))
+val to_aff_point_double_lemma (p:EC.proj_point p256) :
+  Lemma (EC.to_aff_point p256 (point_double p) ==
+    EC.aff_point_add p256 (EC.to_aff_point p256 p) (EC.to_aff_point p256 p))
