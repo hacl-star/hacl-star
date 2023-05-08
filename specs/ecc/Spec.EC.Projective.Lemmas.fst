@@ -53,3 +53,80 @@ let to_aff_point_negate_lemma k p =
     (==) { Math.Lemmas.lemma_mod_sub_distr 0 (py * pz_inv) k.prime }
     (- (py * pz_inv) % k.prime) % k.prime; // (- py /% pz) % prime;
   }
+
+
+//-------------------------------
+
+val lemma_div_mod_eq_mul_mod (k:curve) (a b c:felem k) : Lemma
+  (requires b <> 0)
+  (ensures  (fmul k a (finv k b) = c) == (a = fmul k c b))
+
+let lemma_div_mod_eq_mul_mod k a b c =
+  prime_lemma ();
+  M.lemma_div_mod_eq_mul_mod #prime a b c
+
+
+val ecdsa_verify_avoid_finv1:
+    k:curve{k.order < k.prime /\ k.prime < 2 * k.order}
+  -> p:proj_point k{not (is_point_at_inf k p)}
+  -> r:nat{0 < r /\ r < k.order} ->
+  Lemma (let _X, _Y, _Z = p in
+    (fmul k _X (finv k _Z) % k.order = r) ==>
+    ((fmul k r _Z = _X) || (r + k.order < k.prime && fmul k (r + k.order) _Z = _X)))
+
+let ecdsa_verify_avoid_finv1 k p r =
+  let _X, _Y, _Z = p in
+  let x = fmul k _X (finv k _Z) in
+  assert (k.order < k.prime /\ k.prime < 2 * k.order);
+
+  if x < k.order then begin
+    Math.Lemmas.small_mod x k.order;
+    assert ((x % k.order = r) == (x = r));
+    assert (r < k.prime /\ _X < k.prime /\ _Z < k.prime /\ _Z <> 0);
+    lemma_div_mod_eq_mul_mod k _X _Z r;
+    assert ((x % k.order = r) == (fmul k r _Z = _X));
+    () end
+  else begin
+    assert (k.order <= x /\ x < k.prime);
+    Math.Lemmas.lemma_mod_sub x k.order 1;
+    assert ((x - k.order) % k.order = x % k.order);
+    Math.Lemmas.small_mod (x - k.order) k.order;
+    assert ((x - k.order) % k.order = x - k.order);
+    assert (x % k.order == x - k.order);
+    assert ((x % k.order = r) == (x = r + k.order));
+    if r + k.order < k.prime then begin
+      lemma_div_mod_eq_mul_mod k _X _Z (r + k.order);
+      assert ((x % k.order = r) == (r + k.order < k.prime && fmul k (r + k.order) _Z = _X)) end
+    else () end
+
+
+val ecdsa_verify_avoid_finv2:
+    k:curve{k.order < k.prime /\ k.prime < 2 * k.order}
+  -> p:proj_point k{not (is_point_at_inf k p)}
+  -> r:nat{0 < r /\ r < k.order} ->
+  Lemma (let _X, _Y, _Z = p in
+    ((fmul k r _Z = _X) || (r + k.order < k.prime && fmul k (r + k.order) _Z = _X)) ==>
+    (fmul k _X (finv k _Z) % k.order = r))
+
+let ecdsa_verify_avoid_finv2 k p r =
+  let _X, _Y, _Z = p in
+  let x = fmul k _X (finv k _Z) in
+  assert (k.order < k.prime /\ k.prime < 2 * k.order);
+
+  if fmul k r _Z = _X then begin
+    lemma_div_mod_eq_mul_mod k _X _Z r;
+    Math.Lemmas.small_mod x k.order;
+    assert (r = x % k.order) end
+  else begin
+    if r + k.order < k.prime && fmul k (r + k.order) _Z = _X then begin
+      lemma_div_mod_eq_mul_mod k _X _Z (r + k.order);
+      assert (r + k.order = x);
+      Math.Lemmas.small_mod (x - k.order) k.order;
+      Math.Lemmas.lemma_mod_sub x k.order 1;
+      assert (r = x % k.order) end
+    else () end
+
+
+let ecdsa_verify_avoid_finv k p r =
+  ecdsa_verify_avoid_finv1 k p r;
+  ecdsa_verify_avoid_finv2 k p r
