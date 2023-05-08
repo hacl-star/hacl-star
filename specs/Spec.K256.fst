@@ -5,12 +5,8 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
-
 module EC = Spec.ECC
 module EP = Spec.ECC.Projective
-module EPL = Spec.EC.Projective.Lemmas
 
 include Spec.K256.PointOps
 
@@ -22,41 +18,8 @@ include Spec.K256.PointOps
  https://www.hyperelliptic.org/EFD/g1p/auto-shortw.html
 *)
 
-// [a]P
-let point_mul (a:qelem) (p:EP.proj_point k256)
-  : res:EP.proj_point k256{EP.to_aff_point k256 res ==
-    EC.aff_point_mul k256 a (EP.to_aff_point k256 p) }
- =
-  SE.exp_fw_lemma (EP.mk_ec_concrete_ops_a0 k256) p 256 a 4;
-  LE.exp_fw_lemma (EC.mk_ec_comm_monoid k256) (EP.to_aff_point k256 p) 256 a 4;
-  SE.exp_fw (EP.mk_ec_concrete_ops_a0 k256) p 256 a 4
-
-
-// [a1]G + [a2]P
-let point_mul_double_g (a1 a2:qelem) (p:EP.proj_point k256)
-  : res:EP.proj_point k256{EP.to_aff_point k256 res ==
-      EC.aff_point_add k256
-        (EC.aff_point_mul k256 a1 k256.base_point)
-        (EC.aff_point_mul k256 a2 (EP.to_aff_point k256 p)) }
- =
-  EPL.lemma_proj_aff_id k256 (g_x, g_y);
-  SE.exp_double_fw_lemma (EP.mk_ec_concrete_ops_a0 k256) (g_x, g_y, 1) 256 a1 p a2 5;
-  LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k256)
-    (g_x, g_y) 256 a1 (EP.to_aff_point k256 p) a2 5;
-  SE.exp_double_fw (EP.mk_ec_concrete_ops_a0 k256) (g_x, g_y, 1) 256 a1 p a2 5
-
-
-let k256_concrete_ops : EC.ec_concrete_ops = {
-  EC.ec = k256;
-  EC.t = EP.proj_point k256;
-  EC.to_point_t = EP.to_proj_point k256;
-  EC.to_aff_point = EP.to_aff_point k256;
-  EC.lemma_to_from_aff_point = EPL.lemma_proj_aff_id k256;
-  EC.is_point_at_inf = EP.is_point_at_inf_c k256;
-  EC.point_mul = point_mul;
-  EC.point_mul_double_g = point_mul_double_g;
-}
-
+let k256_concrete_ops : EC.ec_concrete_ops =
+  EP.ec_concrete_ops_proj k256
 
 ///  ECDSA with a prehashed message
 

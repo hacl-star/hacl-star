@@ -5,12 +5,8 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
-
 module EC = Spec.ECC
 module EP = Spec.ECC.Projective
-module EPL = Spec.EC.Projective.Lemmas
 
 include Spec.P256.PointOps
 
@@ -18,41 +14,8 @@ include Spec.P256.PointOps
 
 (** https://eprint.iacr.org/2013/816.pdf *)
 
-// [a]P
-let point_mul (a:qelem) (p:EP.proj_point p256)
-  : res:EP.proj_point p256{EP.to_aff_point p256 res ==
-    EC.aff_point_mul p256 a (EP.to_aff_point p256 p) }
- =
-  SE.exp_fw_lemma (EP.mk_ec_concrete_ops_a3 p256) p 256 a 4;
-  LE.exp_fw_lemma (EC.mk_ec_comm_monoid p256) (EP.to_aff_point p256 p) 256 a 4;
-  SE.exp_fw (EP.mk_ec_concrete_ops_a3 p256) p 256 a 4
-
-
-// [a1]G + [a2]P
-let point_mul_double_g (a1 a2:qelem) (p:EP.proj_point p256)
-  : res:EP.proj_point p256{EP.to_aff_point p256 res ==
-      EC.aff_point_add p256
-        (EC.aff_point_mul p256 a1 p256.base_point)
-        (EC.aff_point_mul p256 a2 (EP.to_aff_point p256 p)) }
- =
-  EPL.lemma_proj_aff_id p256 (g_x, g_y);
-  SE.exp_double_fw_lemma (EP.mk_ec_concrete_ops_a3 p256) (g_x, g_y, 1) 256 a1 p a2 5;
-  LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid p256)
-    (g_x, g_y) 256 a1 (EP.to_aff_point p256 p) a2 5;
-  SE.exp_double_fw (EP.mk_ec_concrete_ops_a3 p256) (g_x, g_y, 1) 256 a1 p a2 5
-
-
-let p256_concrete_ops : EC.ec_concrete_ops = {
-  EC.ec = p256;
-  EC.t = EP.proj_point p256;
-  EC.to_point_t = EP.to_proj_point p256;
-  EC.to_aff_point = EP.to_aff_point p256;
-  EC.lemma_to_from_aff_point = EPL.lemma_proj_aff_id p256;
-  EC.is_point_at_inf = EP.is_point_at_inf_c p256;
-  EC.point_mul = point_mul;
-  EC.point_mul_double_g = point_mul_double_g;
-}
-
+let p256_concrete_ops : EC.ec_concrete_ops =
+  EP.ec_concrete_ops_proj p256
 
 ///  ECDSA over the P256 elliptic curve
 
