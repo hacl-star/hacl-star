@@ -70,6 +70,20 @@ let point_store (k:ec_concrete_ops) (p:k.t) : lbytes (2 * k.ec.prime_len_bytes) 
   aff_point_store k.ec (k.to_aff_point p)
 
 
+let point_inv_bytes (k:ec_concrete_ops) (b:lbytes (2 * k.ec.prime_len_bytes)) =
+  let len = k.ec.prime_len_bytes in
+  let px = nat_from_bytes_be (sub b 0 len) in
+  let py = nat_from_bytes_be (sub b len len) in
+  px < k.ec.prime && py < k.ec.prime && EC.is_on_curve k.ec (px, py)
+
+let load_point_nocheck (k:ec_concrete_ops)
+  (b:lbytes (2 * k.ec.prime_len_bytes){point_inv_bytes k b}) : k.t =
+  let len = k.ec.prime_len_bytes in
+  let px = nat_from_bytes_be (sub b 0 len) in
+  let py = nat_from_bytes_be (sub b len len) in
+  k.to_point_t (px, py)
+
+
 ///  ECDSA
 
 let ecdsa_sign_msg_as_qelem

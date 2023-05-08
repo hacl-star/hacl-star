@@ -109,18 +109,6 @@ let ecdh (their_public_key:lbytes 64) (private_key:lbytes 32) : option (lbytes 6
 
 ///  Parsing and Serializing public keys
 
-// TODO: mv to Spec.EC
-let point_inv_bytes (b:lbytes 64) =
-  let px = nat_from_bytes_be (sub b 0 32) in
-  let py = nat_from_bytes_be (sub b 32 32) in
-  px < prime && py < prime && EC.is_on_curve k256 (px, py)
-
-// TODO: mv to Spec.EC
-let load_point_nocheck (b:lbytes 64{point_inv_bytes b}) : EP.proj_point k256 =
-  let px = nat_from_bytes_be (sub b 0 32) in
-  let py = nat_from_bytes_be (sub b 32 32) in
-  EP.to_proj_point k256 (px, py)
-
 // raw          = [ x; y ], 64 bytes
 // uncompressed = [ 0x04; x; y ], 65 bytes
 // compressed   = [ 0x02 for even `y` and 0x03 for odd `y`; x ], 33 bytes
