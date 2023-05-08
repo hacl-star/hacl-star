@@ -23,9 +23,17 @@ let mk_ec_comm_monoid (k:curve) : LE.comm_monoid (aff_point k) = {
   LE.lemma_mul_comm = PL.aff_point_add_comm_lemma k;
 }
 
-// [a]P in affine coordinates
+let mk_ec_abelian_group (k:curve) : LE.abelian_group (aff_point k) = {
+  LE.cm = mk_ec_comm_monoid k;
+  LE.inverse = aff_point_negate k;
+  LE.lemma_inverse = PL.aff_point_negate_lemma k;
+}
+
+
+// [a]P inaffine coordinates
 let aff_point_mul (k:curve) (a:nat) (p:aff_point k) : aff_point k =
   LE.pow (mk_ec_comm_monoid k) p a
+
 
 // TODO: add point_inv
 inline_for_extraction
@@ -47,7 +55,7 @@ class ec_concrete_ops = {
 
 
 let point_mul_g (k:ec_concrete_ops) (a:M.nat_mod k.ec.order)
-  : res:k.t{to_aff_point res == aff_point_mul ec a k.ec.base_point}
+  : res:k.t{k.to_aff_point res == aff_point_mul ec a k.ec.base_point}
  =
   k.lemma_to_from_aff_point k.ec.base_point;
   k.point_mul a (to_point_t k.ec.base_point)

@@ -17,3 +17,7 @@ val aff_point_add_assoc_lemma (k:curve) (p q s:aff_point k) :
 
 val aff_point_add_comm_lemma (k:curve) (p q:aff_point k) :
   Lemma (aff_point_add k p q = aff_point_add k q p)
+
+
+val aff_point_negate_lemma (k:curve) (p:aff_point k) :
+  Lemma (aff_point_add k (aff_point_negate k p) p == aff_point_at_inf k)

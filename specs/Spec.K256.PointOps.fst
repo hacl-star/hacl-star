@@ -68,12 +68,6 @@ let ( *% ) = EC.fmul k256
 let ( /% ) (x y:felem) = EC.fmul k256 x (EC.finv k256 y)
 
 
-///  Point addition in affine coordinates
-
-let aff_point_negate (p:EC.aff_point k256) : EC.aff_point k256 =
-  let x, y = p in x, (-y) % prime
-
-
 ///  Point addition and doubling in projective coordinates
 
 let point_add (p:EC.proj_point k256) (q:EC.proj_point k256) : EC.proj_point k256 =

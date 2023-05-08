@@ -10,3 +10,5 @@ let aff_point_at_inf_lemma (k:curve) (p:aff_point k) = admit()
 let aff_point_add_assoc_lemma (k:curve) (p q s:aff_point k) = admit()
 
 let aff_point_add_comm_lemma (k:curve) (p q:aff_point k) = admit()
+
+let aff_point_negate_lemma (k:curve) (p:aff_point k) = admit()

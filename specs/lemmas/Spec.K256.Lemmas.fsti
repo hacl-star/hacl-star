@@ -9,11 +9,6 @@ module LM = Lib.NatMod
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
-// TODO: mv to Spec.EC
-val aff_point_negate_lemma (p:EC.aff_point k256) :
-  Lemma (EC.aff_point_add k256 (aff_point_negate p) p == EC.aff_point_at_inf k256)
-
-
 val to_aff_point_at_infinity_lemma: unit ->
   Lemma (EC.to_aff_point k256 (EC.point_at_inf k256) == EC.aff_point_at_inf k256)
 
@@ -29,7 +24,8 @@ val to_aff_point_double_lemma (p:EC.proj_point k256) :
 
 
 val to_aff_point_negate_lemma (p:EC.proj_point k256) :
-  Lemma (EC.to_aff_point k256 (point_negate p) == aff_point_negate (EC.to_aff_point k256 p))
+  Lemma (EC.to_aff_point k256 (point_negate p) ==
+    EC.aff_point_negate k256 (EC.to_aff_point k256 p))
 
 
 // works when q < prime /\ prime < 2 * q

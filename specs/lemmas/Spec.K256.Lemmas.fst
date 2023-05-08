@@ -10,14 +10,6 @@ module EC = Spec.EC.Projective
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
-let aff_point_negate_lemma p =
-  let p_neg = aff_point_negate p in
-  let px, py = p in
-  let qx, qy = p_neg in
-  assert (qx = px /\ qy = (-py) % prime);
-  assert (EC.aff_point_add k256 p_neg p == EC.aff_point_at_inf k256)
-
-
 let to_aff_point_at_infinity_lemma () =
   let px, py = EC.to_aff_point k256 (EC.point_at_inf k256) in
   assert (px == 0 /% 0 /\ py == 1 /% 0);
@@ -35,7 +27,7 @@ let to_aff_point_negate_lemma p =
   let px, py, pz = p in
   let qx, qy = EC.to_aff_point k256 (point_negate p) in
   assert (qx == px /% pz /\ qy == (- py) % prime /% pz);
-  let ax, ay = aff_point_negate (EC.to_aff_point k256 p) in
+  let ax, ay = EC.aff_point_negate k256 (EC.to_aff_point k256 p) in
   assert (ax == px /% pz /\ ay == (- py /% pz) % prime);
   let pz_inv = M.pow_mod #prime pz (prime - 2) in
 

@@ -108,6 +108,10 @@ let aff_point_add (k:curve) (p:aff_point k) (q:aff_point k) : aff_point k =
   end
 
 
+let aff_point_negate (k:curve) (p:aff_point k) : aff_point k =
+  let x, y = p in x, (-y) % prime
+
+
 ///  Point conversion between affine and bytes representation
 
 let aff_point_load (k:curve) (b:BSeq.lbytes (2 * k.prime_len_bytes)) : option (aff_point k) =

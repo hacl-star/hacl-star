@@ -23,13 +23,6 @@ include Spec.K256.PointOps
  https://www.hyperelliptic.org/EFD/g1p/auto-shortw.html
 *)
 
-// TODO: mv
-let mk_k256_abelian_group : LE.abelian_group (EC.aff_point k256) = {
-  LE.cm = EC.mk_ec_comm_monoid k256;
-  LE.inverse = aff_point_negate;
-  LE.lemma_inverse = KL.aff_point_negate_lemma;
-}
-
 let mk_to_k256_comm_monoid : SE.to_comm_monoid (EP.proj_point k256) = {
   SE.a_spec = EC.aff_point k256;
   SE.comm_monoid = EC.mk_ec_comm_monoid k256;
