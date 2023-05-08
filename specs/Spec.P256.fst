@@ -29,7 +29,7 @@ let mk_to_p256_comm_monoid : SE.to_comm_monoid (EP.proj_point p256) = {
 
 val point_at_inf_c: SE.one_st (EP.proj_point p256) mk_to_p256_comm_monoid
 let point_at_inf_c _ =
-  PL.to_aff_point_at_infinity_lemma ();
+  EPL.to_aff_point_at_infinity_lemma p256;
   EP.point_at_inf p256
 
 val point_add_c : SE.mul_st (EP.proj_point p256) mk_to_p256_comm_monoid

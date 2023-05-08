@@ -27,3 +27,8 @@ let to_aff_point (k:curve) (p:proj_point k) : aff_point k =
   let x = fmul k px zinv in
   let y = fmul k py zinv in
   (x, y)
+
+
+let point_negate (k:curve) (p:proj_point k) : proj_point k =
+  let x, y, z = p in
+  x, (-y) % prime, z

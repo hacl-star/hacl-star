@@ -106,10 +106,6 @@ let point_double (p:EC.proj_point k256) : EC.proj_point k256 =
   let z3 = yy *% y *% z *% 8 in
   x3, y3, z3
 
-let point_negate (p:EC.proj_point k256) : EC.proj_point k256 =
-  let x, y, z = p in
-  x, (-y) % prime, z
-
 ///  Point conversion between affine, projective and bytes representation
 
 let point_inv_bytes (b:BSeq.lbytes 64) =

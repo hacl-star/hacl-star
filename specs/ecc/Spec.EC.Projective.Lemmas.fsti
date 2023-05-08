@@ -12,3 +12,11 @@ val lemma_aff_is_point_at_inf: k:curve -> p:proj_point k ->
 
 val lemma_proj_aff_id (k:curve) (p:aff_point k) :
   Lemma (to_aff_point k (to_proj_point k p) == p)
+
+
+val to_aff_point_at_infinity_lemma: k:curve ->
+  Lemma (to_aff_point k (point_at_inf k) == aff_point_at_inf k)
+
+
+val to_aff_point_negate_lemma (k:curve) (p:proj_point k) :
+  Lemma (to_aff_point k (point_negate k p) == aff_point_negate k (to_aff_point k p))

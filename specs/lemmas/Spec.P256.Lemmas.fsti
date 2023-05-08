@@ -13,10 +13,6 @@ module EC = Spec.EC.Projective
 
 // TODO: add `point_inv p = is_on_curve p || is_point_at_inf p`
 
-val to_aff_point_at_infinity_lemma: unit ->
-  Lemma (EC.to_aff_point p256 (EC.point_at_inf p256) == EC.aff_point_at_inf p256)
-
-
 val to_aff_point_add_lemma (p q:EC.proj_point p256) :
   Lemma (EC.to_aff_point p256 (point_add p q) ==
     EC.aff_point_add p256 (EC.to_aff_point p256 p) (EC.to_aff_point p256 q))

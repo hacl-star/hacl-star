@@ -10,36 +10,9 @@ module EC = Spec.EC.Projective
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
-let to_aff_point_at_infinity_lemma () =
-  let px, py = EC.to_aff_point k256 (EC.point_at_inf k256) in
-  assert (px == 0 /% 0 /\ py == 1 /% 0);
-  assert (px == 0 *% M.pow_mod #prime 0 (prime - 2));
-  M.lemma_pow_mod #prime 0 (prime - 2);
-  assert (px == 0 *% (M.pow 0 (prime - 2) % prime));
-  M.lemma_pow_zero (prime - 2);
-  assert (px == 0 /\ py == 0)
-
 let to_aff_point_add_lemma p q = admit()
 
 let to_aff_point_double_lemma p = admit()
-
-let to_aff_point_negate_lemma p =
-  let px, py, pz = p in
-  let qx, qy = EC.to_aff_point k256 (point_negate p) in
-  assert (qx == px /% pz /\ qy == (- py) % prime /% pz);
-  let ax, ay = EC.aff_point_negate k256 (EC.to_aff_point k256 p) in
-  assert (ax == px /% pz /\ ay == (- py /% pz) % prime);
-  let pz_inv = M.pow_mod #prime pz (prime - 2) in
-
-  calc (==) { // (-py) % prime /% pz;
-    ((- py) % prime * pz_inv) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- py) pz_inv prime }
-    (- py * pz_inv) % prime;
-    (==) { Math.Lemmas.neg_mul_left py pz_inv }
-    (- (py * pz_inv)) % prime;
-    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (py * pz_inv) prime }
-    (- (py * pz_inv) % prime) % prime; // (- py /% pz) % prime;
-  }
 
 //----------------------------------
 
