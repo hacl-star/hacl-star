@@ -37,55 +37,111 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_state_256 */
+/* SNIPPET_START: Hacl_Streaming_Keccak_hash_buf */
 
-typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
+typedef struct Hacl_Streaming_Keccak_hash_buf_s
+{
+  Spec_Hash_Definitions_hash_alg fst;
+  uint64_t *snd;
+}
+Hacl_Streaming_Keccak_hash_buf;
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_state_256 */
+/* SNIPPET_END: Hacl_Streaming_Keccak_hash_buf */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_malloc_256 */
+/* SNIPPET_START: Hacl_Streaming_Keccak_state */
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_malloc_256(void);
+typedef struct Hacl_Streaming_Keccak_state_s
+{
+  Hacl_Streaming_Keccak_hash_buf block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_Keccak_state;
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_malloc_256 */
+/* SNIPPET_END: Hacl_Streaming_Keccak_state */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_reset_256 */
+/* SNIPPET_START: Hacl_Streaming_Keccak_get_alg */
 
-void Hacl_Streaming_SHA3_reset_256(Hacl_Streaming_MD_state_64 *state);
+Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s);
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_reset_256 */
+/* SNIPPET_END: Hacl_Streaming_Keccak_get_alg */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_update_256 */
+/* SNIPPET_START: Hacl_Streaming_Keccak_malloc */
 
-/**
-0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
-*/
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_malloc */
+
+/* SNIPPET_START: Hacl_Streaming_Keccak_free */
+
+void Hacl_Streaming_Keccak_free(Hacl_Streaming_Keccak_state *state1);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_free */
+
+/* SNIPPET_START: Hacl_Streaming_Keccak_copy */
+
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_state *state1);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_copy */
+
+/* SNIPPET_START: Hacl_Streaming_Keccak_reset */
+
+void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *state1);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_reset */
+
+/* SNIPPET_START: Hacl_Streaming_Keccak_update */
+
 uint32_t
-Hacl_Streaming_SHA3_update_256(
-  Hacl_Streaming_MD_state_64 *state,
+Hacl_Streaming_Keccak_update(
+  Hacl_Streaming_Keccak_state *state1,
   uint8_t *chunk,
   uint32_t chunk_len
 );
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_update_256 */
+/* SNIPPET_END: Hacl_Streaming_Keccak_update */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_digest_256 */
+/* SNIPPET_START: Hacl_Streaming_Keccak_error_code */
 
-void Hacl_Streaming_SHA3_digest_256(Hacl_Streaming_MD_state_64 *state, uint8_t *output);
+#define Hacl_Streaming_Keccak_Success 0
+#define Hacl_Streaming_Keccak_InvalidAlgorithm 1
+#define Hacl_Streaming_Keccak_InvalidLength 2
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_digest_256 */
+/* SNIPPET_END: Hacl_Streaming_Keccak_error_code */
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_free_256 */
+typedef uint8_t Hacl_Streaming_Keccak_error_code;
 
-void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *state);
+/* SNIPPET_START: Hacl_Streaming_Keccak_digest */
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_free_256 */
+Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Keccak_digest(Hacl_Streaming_Keccak_state *state1, uint8_t *output);
 
-/* SNIPPET_START: Hacl_Streaming_SHA3_copy_256 */
+/* SNIPPET_END: Hacl_Streaming_Keccak_digest */
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *state);
+/* SNIPPET_START: Hacl_Streaming_Keccak_squeeze */
 
-/* SNIPPET_END: Hacl_Streaming_SHA3_copy_256 */
+Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Keccak_squeeze(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_squeeze */
+
+/* SNIPPET_START: Hacl_Streaming_Keccak_block_len */
+
+uint32_t Hacl_Streaming_Keccak_block_len(Hacl_Streaming_Keccak_state *s);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_block_len */
+
+/* SNIPPET_START: Hacl_Streaming_Keccak_hash_len */
+
+uint32_t Hacl_Streaming_Keccak_hash_len(Hacl_Streaming_Keccak_state *s);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_hash_len */
+
+/* SNIPPET_START: Hacl_Streaming_Keccak_is_shake */
+
+bool Hacl_Streaming_Keccak_is_shake(Hacl_Streaming_Keccak_state *s);
+
+/* SNIPPET_END: Hacl_Streaming_Keccak_is_shake */
 
 /* SNIPPET_START: Hacl_SHA3_shake128_hacl */
 

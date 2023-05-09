@@ -55,7 +55,7 @@ type stateful (index: Type0) =
   freeable: (#i:index -> h:HS.mem -> p:s i -> Type) ->
   invariant: (#i:index -> h:HS.mem -> s:s i -> Type) ->
 
-  // A pure representation of a s
+  // A pure representation of an s
   t: (index -> Type0) ->
   v: (i:index -> h:HS.mem -> s:s i -> GTot (t i)) ->
 
@@ -137,7 +137,7 @@ type stateful (index: Type0) =
   stateful index
 
 inline_for_extraction noextract
-let stateful_buffer (a: Type) (l: UInt32.t { UInt32.v l > 0 }) (zero: a): stateful unit =
+let stateful_buffer (a: Type) (l: UInt32.t { UInt32.v l > 0 }) (zero: a) (t: Type0): stateful t =
   Stateful
     (fun _ -> b:B.buffer a { B.len b == l })
     (fun #_ h s -> B.loc_addr_of_buffer s)
@@ -148,8 +148,8 @@ let stateful_buffer (a: Type) (l: UInt32.t { UInt32.v l > 0 }) (zero: a): statef
     (fun #_ h s -> ())
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
-    (fun () -> B.alloca zero l)
-    (fun () r -> B.malloc r zero l)
+    (fun _ -> B.alloca zero l)
+    (fun _ r -> B.malloc r zero l)
     (fun _ s -> B.free s)
     (fun _ s_src s_dst -> B.blit s_src 0ul s_dst 0ul l)
 
@@ -238,6 +238,8 @@ let optional_t #index
 /// them rather than copy-paste big chunks of code (as what is done in Hacl.Streaming.Blake2).
 /// Note that a workaround is to partially instanciate the functor at definition time.
 
+#push-options "--z3rlimit 200"
+
 inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
@@ -247,9 +249,12 @@ type block (index: Type0) =
   state: stateful index ->
   key: stateful index ->
 
+  // Just a value type; useful for algorithms that have a variable output length.
+  output_length_t: Type0 ->
+
   // Introducing a notion of blocks and final result.
   max_input_len: (index -> x:U64.t { U64.v x > 0 }) ->
-  output_len: (index -> x:U32.t { U32.v x > 0 }) ->
+  output_length: (index -> output_length_t -> GTot Lib.IntTypes.(x:size_nat { x > 0 })) ->
   block_len: (index -> x:U32.t { U32.v x > 0 }) ->
   // The size of data to process at a time. Must be a multiple of block_len.
   // Controls the size of the internal buffer.
@@ -271,11 +276,14 @@ type block (index: Type0) =
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
     s:S.seq uint8 { S.length s + prevlen <= U64.v (max_input_len i) /\ S.length s <= U32.v (block_len i) } ->
     state.t i) ->
-  finish_s: (i:index -> key.t i -> state.t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
+  finish_s: (i:index -> key.t i -> state.t i -> l:output_length_t ->
+    s:S.seq uint8 { S.length s = output_length i l }) ->
 
   /// The specification in one shot.
-  spec_s: (i:index -> key.t i -> input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
-    output:S.seq uint8 { S.length output == U32.v (output_len i) }) ->
+  spec_s: (i:index -> key.t i ->
+    input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
+    l:output_length_t ->
+    output:S.seq uint8 { S.length output == output_length i l }) ->
 
   // Required lemmas... clients can enjoy them in their local contexts with the SMT pattern via a let-binding.
 
@@ -313,16 +321,17 @@ type block (index: Type0) =
   spec_is_incremental: (i:index ->
     key: key.t i ->
     input:S.seq uint8 { U32.v (init_input_len i) + S.length input <= U64.v (max_input_len i) } ->
+    l:output_length_t ->
     Lemma (
       let input1 = S.append (init_input_s i key) input in
-      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input1 in
+      let bs, rest = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input1 in
       (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len i));
       (* TODO: use update_full ? *)
       let hash0 = init_s i key in
       let hash1 = update_multi_s i hash0 0 bs in
-      let hash2 = update_last_s i hash1 (S.length bs) l in
-      let hash3 = finish_s i key hash2 in
-      hash3 `S.equal` spec_s i key input)) ->
+      let hash2 = update_last_s i hash1 (S.length bs) rest in
+      let hash3 = finish_s i key hash2 l in
+      hash3 `S.equal` spec_s i key input l)) ->
 
   // Stateful operations
   index_of_state: (i:G.erased index -> (
@@ -364,6 +373,7 @@ type block (index: Type0) =
                  U64.v prevlen + U32.v len <= U64.v (max_input_len i) } ->
     Stack unit
     (requires fun h0 ->
+      allow_inversion key_management;
       state.invariant #i h0 s /\
       B.live h0 blocks /\
       B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer blocks)))
@@ -386,6 +396,7 @@ type block (index: Type0) =
       U64.v prevlen + U32.v last_len <= U64.v (max_input_len i)} ->
     Stack unit
     (requires fun h0 ->
+      allow_inversion key_management;
       state.invariant #i h0 s /\
       B.live h0 last /\
       B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer last)))
@@ -401,7 +412,8 @@ type block (index: Type0) =
     let i = G.reveal i in
     k: optional_key i km key ->
     s:state.s i ->
-    dst:B.buffer uint8 { B.len dst = output_len i } ->
+    dst:B.buffer uint8 ->
+    l: output_length_t { B.length dst == output_length i l } ->
     Stack unit
     (requires fun h0 ->
       allow_inversion key_management;
@@ -418,7 +430,7 @@ type block (index: Type0) =
       state.invariant #i h1 s /\
       B.(modifies (loc_buffer dst `loc_union` (state.footprint #i h0 s)) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
-      B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) /\
+      B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) l /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
   block index

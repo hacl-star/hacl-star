@@ -457,44 +457,28 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
     uint32_t n = len / (uint32_t)144U;
-    for (uint32_t i = (uint32_t)0U; i < n; i++)
-    {
-      uint8_t *block = blocks + i * (uint32_t)144U;
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)144U, block, p1);
-    }
+    Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_224, p1, blocks, n);
     return;
   }
   if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
     uint32_t n = len / (uint32_t)136U;
-    for (uint32_t i = (uint32_t)0U; i < n; i++)
-    {
-      uint8_t *block = blocks + i * (uint32_t)136U;
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)136U, block, p1);
-    }
+    Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_256, p1, blocks, n);
     return;
   }
   if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
     uint32_t n = len / (uint32_t)104U;
-    for (uint32_t i = (uint32_t)0U; i < n; i++)
-    {
-      uint8_t *block = blocks + i * (uint32_t)104U;
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)104U, block, p1);
-    }
+    Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_384, p1, blocks, n);
     return;
   }
   if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
     uint32_t n = len / (uint32_t)72U;
-    for (uint32_t i = (uint32_t)0U; i < n; i++)
-    {
-      uint8_t *block = blocks + i * (uint32_t)72U;
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)72U, block, p1);
-    }
+    Hacl_Hash_SHA3_update_multi_sha3(Spec_Hash_Definitions_SHA3_512, p1, blocks, n);
     return;
   }
   if (scrut.tag == Blake2S_s)
@@ -629,109 +613,25 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
   if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
-    if (last_len == (uint32_t)144U)
-    {
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)144U, last, p1);
-      uint8_t *uu____0 = last + last_len;
-      uint8_t lastBlock[144U] = { 0U };
-      memcpy(lastBlock, uu____0, (uint32_t)0U * sizeof (uint8_t));
-      lastBlock[0U] = (uint8_t)0x06U;
-      Hacl_Impl_SHA3_loadState((uint32_t)144U, lastBlock, p1);
-      uint8_t nextBlock[144U] = { 0U };
-      nextBlock[143U] = (uint8_t)0x80U;
-      Hacl_Impl_SHA3_loadState((uint32_t)144U, nextBlock, p1);
-      Hacl_Impl_SHA3_state_permute(p1);
-      return;
-    }
-    uint8_t lastBlock[144U] = { 0U };
-    memcpy(lastBlock, last, last_len * sizeof (uint8_t));
-    lastBlock[last_len] = (uint8_t)0x06U;
-    Hacl_Impl_SHA3_loadState((uint32_t)144U, lastBlock, p1);
-    uint8_t nextBlock[144U] = { 0U };
-    nextBlock[143U] = (uint8_t)0x80U;
-    Hacl_Impl_SHA3_loadState((uint32_t)144U, nextBlock, p1);
-    Hacl_Impl_SHA3_state_permute(p1);
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_224, p1, last, last_len);
     return;
   }
   if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
-    if (last_len == (uint32_t)136U)
-    {
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)136U, last, p1);
-      uint8_t *uu____1 = last + last_len;
-      uint8_t lastBlock[136U] = { 0U };
-      memcpy(lastBlock, uu____1, (uint32_t)0U * sizeof (uint8_t));
-      lastBlock[0U] = (uint8_t)0x06U;
-      Hacl_Impl_SHA3_loadState((uint32_t)136U, lastBlock, p1);
-      uint8_t nextBlock[136U] = { 0U };
-      nextBlock[135U] = (uint8_t)0x80U;
-      Hacl_Impl_SHA3_loadState((uint32_t)136U, nextBlock, p1);
-      Hacl_Impl_SHA3_state_permute(p1);
-      return;
-    }
-    uint8_t lastBlock[136U] = { 0U };
-    memcpy(lastBlock, last, last_len * sizeof (uint8_t));
-    lastBlock[last_len] = (uint8_t)0x06U;
-    Hacl_Impl_SHA3_loadState((uint32_t)136U, lastBlock, p1);
-    uint8_t nextBlock[136U] = { 0U };
-    nextBlock[135U] = (uint8_t)0x80U;
-    Hacl_Impl_SHA3_loadState((uint32_t)136U, nextBlock, p1);
-    Hacl_Impl_SHA3_state_permute(p1);
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_256, p1, last, last_len);
     return;
   }
   if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
-    if (last_len == (uint32_t)104U)
-    {
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)104U, last, p1);
-      uint8_t *uu____2 = last + last_len;
-      uint8_t lastBlock[104U] = { 0U };
-      memcpy(lastBlock, uu____2, (uint32_t)0U * sizeof (uint8_t));
-      lastBlock[0U] = (uint8_t)0x06U;
-      Hacl_Impl_SHA3_loadState((uint32_t)104U, lastBlock, p1);
-      uint8_t nextBlock[104U] = { 0U };
-      nextBlock[103U] = (uint8_t)0x80U;
-      Hacl_Impl_SHA3_loadState((uint32_t)104U, nextBlock, p1);
-      Hacl_Impl_SHA3_state_permute(p1);
-      return;
-    }
-    uint8_t lastBlock[104U] = { 0U };
-    memcpy(lastBlock, last, last_len * sizeof (uint8_t));
-    lastBlock[last_len] = (uint8_t)0x06U;
-    Hacl_Impl_SHA3_loadState((uint32_t)104U, lastBlock, p1);
-    uint8_t nextBlock[104U] = { 0U };
-    nextBlock[103U] = (uint8_t)0x80U;
-    Hacl_Impl_SHA3_loadState((uint32_t)104U, nextBlock, p1);
-    Hacl_Impl_SHA3_state_permute(p1);
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_384, p1, last, last_len);
     return;
   }
   if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
-    if (last_len == (uint32_t)72U)
-    {
-      Hacl_Impl_SHA3_absorb_inner((uint32_t)72U, last, p1);
-      uint8_t *uu____3 = last + last_len;
-      uint8_t lastBlock[72U] = { 0U };
-      memcpy(lastBlock, uu____3, (uint32_t)0U * sizeof (uint8_t));
-      lastBlock[0U] = (uint8_t)0x06U;
-      Hacl_Impl_SHA3_loadState((uint32_t)72U, lastBlock, p1);
-      uint8_t nextBlock[72U] = { 0U };
-      nextBlock[71U] = (uint8_t)0x80U;
-      Hacl_Impl_SHA3_loadState((uint32_t)72U, nextBlock, p1);
-      Hacl_Impl_SHA3_state_permute(p1);
-      return;
-    }
-    uint8_t lastBlock[72U] = { 0U };
-    memcpy(lastBlock, last, last_len * sizeof (uint8_t));
-    lastBlock[last_len] = (uint8_t)0x06U;
-    Hacl_Impl_SHA3_loadState((uint32_t)72U, lastBlock, p1);
-    uint8_t nextBlock[72U] = { 0U };
-    nextBlock[71U] = (uint8_t)0x80U;
-    Hacl_Impl_SHA3_loadState((uint32_t)72U, nextBlock, p1);
-    Hacl_Impl_SHA3_state_permute(p1);
+    Hacl_Hash_SHA3_update_last_sha3(Spec_Hash_Definitions_SHA3_512, p1, last, last_len);
     return;
   }
   if (scrut.tag == Blake2S_s)
@@ -1533,15 +1433,14 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state1 = s1.block_state;
       uint8_t *buf = s1.buf;
       uint64_t total_len1 = s1.total_len;
-      Spec_Hash_Definitions_hash_alg i2 = alg_of_state(block_state1);
       uint32_t sz1;
-      if (total_len1 % (uint64_t)block_len(i2) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+      if (total_len1 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len1 > (uint64_t)0U)
       {
-        sz1 = block_len(i2);
+        sz1 = block_len(i1);
       }
       else
       {
-        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i2));
+        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i1));
       }
       uint8_t *buf2 = buf + sz1;
       memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
@@ -1562,38 +1461,37 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state1 = s1.block_state;
       uint8_t *buf = s1.buf;
       uint64_t total_len1 = s1.total_len;
-      Spec_Hash_Definitions_hash_alg i2 = alg_of_state(block_state1);
       uint32_t sz1;
-      if (total_len1 % (uint64_t)block_len(i2) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+      if (total_len1 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len1 > (uint64_t)0U)
       {
-        sz1 = block_len(i2);
+        sz1 = block_len(i1);
       }
       else
       {
-        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i2));
+        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i1));
       }
       if (!(sz1 == (uint32_t)0U))
       {
         uint64_t prevlen = total_len1 - (uint64_t)sz1;
-        update_multi(block_state1, prevlen, buf, block_len(i2));
+        update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
       if
       (
         (uint64_t)chunk_len
-        % (uint64_t)block_len(i2)
+        % (uint64_t)block_len(i1)
         == (uint64_t)0U
         && (uint64_t)chunk_len > (uint64_t)0U
       )
       {
-        ite0 = block_len(i2);
+        ite0 = block_len(i1);
       }
       else
       {
-        ite0 = (uint32_t)((uint64_t)chunk_len % (uint64_t)block_len(i2));
+        ite0 = (uint32_t)((uint64_t)chunk_len % (uint64_t)block_len(i1));
       }
-      uint32_t n_blocks = (chunk_len - ite0) / block_len(i2);
-      uint32_t data1_len = n_blocks * block_len(i2);
+      uint32_t n_blocks = (chunk_len - ite0) / block_len(i1);
+      uint32_t data1_len = n_blocks * block_len(i1);
       uint32_t data2_len = chunk_len - data1_len;
       uint8_t *data1 = chunk;
       uint8_t *data2 = chunk + data1_len;
@@ -1619,15 +1517,14 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state10 = s1.block_state;
       uint8_t *buf0 = s1.buf;
       uint64_t total_len10 = s1.total_len;
-      Spec_Hash_Definitions_hash_alg i20 = alg_of_state(block_state10);
       uint32_t sz10;
-      if (total_len10 % (uint64_t)block_len(i20) == (uint64_t)0U && total_len10 > (uint64_t)0U)
+      if (total_len10 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len10 > (uint64_t)0U)
       {
-        sz10 = block_len(i20);
+        sz10 = block_len(i1);
       }
       else
       {
-        sz10 = (uint32_t)(total_len10 % (uint64_t)block_len(i20));
+        sz10 = (uint32_t)(total_len10 % (uint64_t)block_len(i1));
       }
       uint8_t *buf2 = buf0 + sz10;
       memcpy(buf2, chunk1, diff * sizeof (uint8_t));
@@ -1645,38 +1542,37 @@ EverCrypt_Hash_Incremental_update(
       EverCrypt_Hash_state_s *block_state1 = s10.block_state;
       uint8_t *buf = s10.buf;
       uint64_t total_len1 = s10.total_len;
-      Spec_Hash_Definitions_hash_alg i2 = alg_of_state(block_state1);
       uint32_t sz1;
-      if (total_len1 % (uint64_t)block_len(i2) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+      if (total_len1 % (uint64_t)block_len(i1) == (uint64_t)0U && total_len1 > (uint64_t)0U)
       {
-        sz1 = block_len(i2);
+        sz1 = block_len(i1);
       }
       else
       {
-        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i2));
+        sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i1));
       }
       if (!(sz1 == (uint32_t)0U))
       {
         uint64_t prevlen = total_len1 - (uint64_t)sz1;
-        update_multi(block_state1, prevlen, buf, block_len(i2));
+        update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
       if
       (
         (uint64_t)(chunk_len - diff)
-        % (uint64_t)block_len(i2)
+        % (uint64_t)block_len(i1)
         == (uint64_t)0U
         && (uint64_t)(chunk_len - diff) > (uint64_t)0U
       )
       {
-        ite0 = block_len(i2);
+        ite0 = block_len(i1);
       }
       else
       {
-        ite0 = (uint32_t)((uint64_t)(chunk_len - diff) % (uint64_t)block_len(i2));
+        ite0 = (uint32_t)((uint64_t)(chunk_len - diff) % (uint64_t)block_len(i1));
       }
-      uint32_t n_blocks = (chunk_len - diff - ite0) / block_len(i2);
-      uint32_t data1_len = n_blocks * block_len(i2);
+      uint32_t n_blocks = (chunk_len - diff - ite0) / block_len(i1);
+      uint32_t data1_len = n_blocks * block_len(i1);
       uint32_t data2_len = chunk_len - diff - data1_len;
       uint8_t *data1 = chunk2;
       uint8_t *data2 = chunk2 + data1_len;

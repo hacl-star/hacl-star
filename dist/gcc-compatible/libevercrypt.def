@@ -94,14 +94,19 @@ EXPORTS
   Hacl_HMAC_compute_blake2b_32
   Hacl_HMAC_Blake2s_128_compute_blake2s_128
   Hacl_HMAC_Blake2b_256_compute_blake2b_256
-  Hacl_Streaming_SHA3_malloc_256
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint64_t____
-  Hacl_Streaming_SHA3_reset_256
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint64_t____
-  Hacl_Streaming_SHA3_update_256
-  Hacl_Streaming_SHA3_digest_256
-  Hacl_Streaming_SHA3_free_256
-  Hacl_Streaming_SHA3_copy_256
+  Hacl_Hash_SHA3_update_multi_sha3
+  Hacl_Hash_SHA3_update_last_sha3
+  Hacl_Streaming_Keccak_get_alg
+  Hacl_Streaming_Keccak_malloc
+  Hacl_Streaming_Keccak_free
+  Hacl_Streaming_Keccak_copy
+  Hacl_Streaming_Keccak_reset
+  Hacl_Streaming_Keccak_update
+  Hacl_Streaming_Keccak_digest
+  Hacl_Streaming_Keccak_squeeze
+  Hacl_Streaming_Keccak_block_len
+  Hacl_Streaming_Keccak_hash_len
+  Hacl_Streaming_Keccak_is_shake
   Hacl_SHA3_shake128_hacl
   Hacl_SHA3_shake256_hacl
   Hacl_SHA3_sha3_224
@@ -176,6 +181,8 @@ EXPORTS
   Hacl_Bignum_Convert_bn_to_bytes_be_uint64
   Hacl_Bignum_Lib_bn_get_top_index_u32
   Hacl_Bignum_Lib_bn_get_top_index_u64
+  Hacl_Bignum_Lib_bn_get_bits_u32
+  Hacl_Bignum_Lib_bn_get_bits_u64
   Hacl_Bignum_Addition_bn_sub_eq_len_u32
   Hacl_Bignum_Addition_bn_sub_eq_len_u64
   Hacl_Bignum_Addition_bn_add_eq_len_u32

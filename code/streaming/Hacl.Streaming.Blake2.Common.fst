@@ -562,8 +562,10 @@ let blake2 (a : alg)
     (stateful_blake2 a m) (* state *)
     (stateful_key a kk)   (* key *)
 
+    unit (* output_length_t *)
+
     (fun () -> max_input_len a) (* max_input_length *)
-    (fun () -> output_len a) (* output_len *)
+    (fun () () -> output_size a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
     (fun () -> block_len a) (* blocks_state_len *)
     (fun () -> if kk > 0 then block_len a else 0ul) (* init_input_len *)
@@ -573,8 +575,8 @@ let blake2 (a : alg)
 
     (fun () acc prevlen input -> update_multi_s acc prevlen input) (* update_multi_s *)
     (fun () acc prevlen input -> update_last_s acc prevlen input) (* update_last_s *)
-    (fun () _k acc -> finish_s #a acc) (* finish_s *)
-    (fun () -> spec_s a kk) (* spec_s *)
+    (fun () _k acc _ -> finish_s #a acc) (* finish_s *)
+    (fun () k input l -> spec_s a kk k input) (* spec_s *)
 
     (* update_multi_zero *)
     (fun () acc prevlen -> update_multi_zero #a acc prevlen)
@@ -582,7 +584,7 @@ let blake2 (a : alg)
     (* update_multi_associative *)
     (fun () acc prevlen1 prevlen2 input1 input2 ->
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
-    (fun () k input ->
+    (fun () k input _ ->
      spec_is_incremental a kk k input) (* spec_is_incremental *)
     (fun _ acc -> ()) (* index_of_state *)
 
@@ -605,7 +607,7 @@ let blake2 (a : alg)
       update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last)
 
     (* finish *)
-    (fun _ k acc dst ->
+    (fun _ k acc dst _ ->
       [@inline_let] let wv = get_wv acc in
       [@inline_let] let h = get_state_p acc in
       finish (output_len a) dst h)

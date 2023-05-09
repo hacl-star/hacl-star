@@ -100,9 +100,11 @@ let evercrypt_hash : block Hash.alg =
     agile_state
     (stateful_unused Hash.alg)
 
+    unit
+
     (* TODO: this general max length definition shouldn't be in the MD file! *)
     Hacl.Streaming.MD.max_input_len64
-    hash_len
+    (fun a () -> Spec.Hash.Definitions.hash_length a)
     block_len
     block_len // No vectorization
     (fun _ -> 0ul)
@@ -115,9 +117,9 @@ let evercrypt_hash : block Hash.alg =
     (fun a s prevlen input ->
       let prevlen = prev_length_of_nat a prevlen in
       Spec.Hash.Incremental.update_last a s prevlen input)
-    (fun a _ s -> Spec.Agile.Hash.finish a s ())
+    (fun a _ s () -> Spec.Agile.Hash.finish a s ())
 
-    (fun a _ -> Spec.Agile.Hash.hash a)
+    (fun a _ s () -> Spec.Agile.Hash.hash a s)
 
     (fun a s prevlen ->
       if is_blake a then
@@ -131,7 +133,7 @@ let evercrypt_hash : block Hash.alg =
        else
          Spec.Hash.Lemmas.update_multi_associative a s input1 input2)
     (* spec_is_incremental *)
-    (fun a _ input ->
+    (fun a _ input () ->
         let input1 = S.append S.empty input in
         assert (S.equal input1 input);
         Spec.Hash.Incremental.hash_is_hash_incremental' a input ())
@@ -141,7 +143,7 @@ let evercrypt_hash : block Hash.alg =
     (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->
        EverCrypt.Hash.update_last #i s prevlen last last_len)
-    (fun i _ -> EverCrypt.Hash.finish #i)
+    (fun i _ s dst _ -> EverCrypt.Hash.finish #i s dst)
 
 #pop-options
 
@@ -230,21 +232,21 @@ a call to `digest`, meaning the user may feed more data into the hash via
 `update`. (The finish function operates on an internal copy of the state and
 therefore does not invalidate the client-held state.)"]
 val digest: a:G.erased Hash.alg -> digest_st a
-let digest a state output =
+let digest a state output l =
   let a = alg_of_state a state in
   match a with
-  | MD5 -> digest_md5 state output
-  | SHA1 -> digest_sha1 state output
-  | SHA2_224 -> digest_sha224 state output
-  | SHA2_256 -> digest_sha256 state output
-  | SHA2_384 -> digest_sha384 state output
-  | SHA2_512 -> digest_sha512 state output
-  | SHA3_224 -> digest_sha3_224 state output
-  | SHA3_256 -> digest_sha3_256 state output
-  | SHA3_384 -> digest_sha3_384 state output
-  | SHA3_512 -> digest_sha3_512 state output
-  | Blake2S -> digest_blake2s state output
-  | Blake2B -> digest_blake2b state output
+  | MD5 -> digest_md5 state output l
+  | SHA1 -> digest_sha1 state output l
+  | SHA2_224 -> digest_sha224 state output l
+  | SHA2_256 -> digest_sha256 state output l
+  | SHA2_384 -> digest_sha384 state output l
+  | SHA2_512 -> digest_sha512 state output l
+  | SHA3_224 -> digest_sha3_224 state output l
+  | SHA3_256 -> digest_sha3_256 state output l
+  | SHA3_384 -> digest_sha3_384 state output l
+  | SHA3_512 -> digest_sha3_512 state output l
+  | Blake2S -> digest_blake2s state output l
+  | Blake2B -> digest_blake2b state output l
 
 [@@ Comment
 "Free a state previously allocated with `create_in`."]

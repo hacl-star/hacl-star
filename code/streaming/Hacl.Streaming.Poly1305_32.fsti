@@ -10,16 +10,16 @@ open Hacl.Streaming.Poly1305
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 /// Type abbreviation - makes KaRaMeL use pretty names in the generated code
-let state_t = F.state_s (poly1305 M32) () (t M32) (k.I.s ())
+let state_t = F.state_s (poly1305 M32) () (t M32) (poly1305_key.I.s ())
 
 noextract
-let alloca = F.alloca (poly1305 M32) () (t M32) (k.I.s ())
-let malloc = F.malloc (poly1305 M32) () (t M32) (k.I.s ())
-let reset = F.reset (poly1305 M32) (G.hide ()) (t M32) (k.I.s ())
+let alloca = F.alloca (poly1305 M32) () (t M32) (poly1305_key.I.s ())
+let malloc = F.malloc (poly1305 M32) () (t M32) (poly1305_key.I.s ())
+let reset = F.reset (poly1305 M32) (G.hide ()) (t M32) (poly1305_key.I.s ())
 [@@ Comment "0 = success, 1 = max length exceeded" ]
-let update = F.update (poly1305 M32) (G.hide ()) (t M32) (k.I.s ())
-let digest = F.digest (poly1305 M32) () (t M32) (k.I.s ())
-let free = F.free (poly1305 M32) (G.hide ()) (t M32) (k.I.s ())
+let update = F.update (poly1305 M32) (G.hide ()) (t M32) (poly1305_key.I.s ())
+let digest = F.digest (poly1305 M32) () (t M32) (poly1305_key.I.s ())
+let free = F.free (poly1305 M32) (G.hide ()) (t M32) (poly1305_key.I.s ())
 
 open Hacl.Impl.Poly1305
 

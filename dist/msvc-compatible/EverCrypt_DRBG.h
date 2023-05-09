@@ -37,7 +37,7 @@ extern "C" {
 
 #include "Lib_RandomBuffer_System.h"
 #include "Lib_Memzero0.h"
-#include "Hacl_Spec.h"
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_HMAC_DRBG.h"
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;

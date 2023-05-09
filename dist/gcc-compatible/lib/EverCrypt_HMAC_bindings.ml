@@ -2,8 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
-    open Hacl_Spec_applied
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     let everCrypt_HMAC_is_supported_alg =
       foreign "EverCrypt_HMAC_is_supported_alg"
         (spec_Hash_Definitions_hash_alg @-> (returning bool))

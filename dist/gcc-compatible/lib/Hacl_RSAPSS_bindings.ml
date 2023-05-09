@@ -2,8 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
-    open Hacl_Spec_applied
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     let hacl_RSAPSS_rsapss_sign =
       foreign "Hacl_RSAPSS_rsapss_sign"
         (spec_Hash_Definitions_hash_alg @->

@@ -37,27 +37,55 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 
-typedef Hacl_Streaming_MD_state_64 Hacl_Streaming_SHA3_state_256;
+typedef struct Hacl_Streaming_Keccak_hash_buf_s
+{
+  Spec_Hash_Definitions_hash_alg fst;
+  uint64_t *snd;
+}
+Hacl_Streaming_Keccak_hash_buf;
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_malloc_256(void);
+typedef struct Hacl_Streaming_Keccak_state_s
+{
+  Hacl_Streaming_Keccak_hash_buf block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_Keccak_state;
 
-void Hacl_Streaming_SHA3_reset_256(Hacl_Streaming_MD_state_64 *state);
+Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s);
 
-/**
-0 = success, 1 = max length exceeded. Due to internal limitations, there is currently an arbitrary limit of 2^64-1 bytes that can be hashed through this interface.
-*/
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_hash_alg a);
+
+void Hacl_Streaming_Keccak_free(Hacl_Streaming_Keccak_state *state1);
+
+Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_state *state1);
+
+void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *state1);
+
 uint32_t
-Hacl_Streaming_SHA3_update_256(
-  Hacl_Streaming_MD_state_64 *state,
+Hacl_Streaming_Keccak_update(
+  Hacl_Streaming_Keccak_state *state1,
   uint8_t *chunk,
   uint32_t chunk_len
 );
 
-void Hacl_Streaming_SHA3_digest_256(Hacl_Streaming_MD_state_64 *state, uint8_t *output);
+#define Hacl_Streaming_Keccak_Success 0
+#define Hacl_Streaming_Keccak_InvalidAlgorithm 1
+#define Hacl_Streaming_Keccak_InvalidLength 2
 
-void Hacl_Streaming_SHA3_free_256(Hacl_Streaming_MD_state_64 *state);
+typedef uint8_t Hacl_Streaming_Keccak_error_code;
 
-Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA3_copy_256(Hacl_Streaming_MD_state_64 *state);
+Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Keccak_digest(Hacl_Streaming_Keccak_state *state1, uint8_t *output);
+
+Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Keccak_squeeze(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l);
+
+uint32_t Hacl_Streaming_Keccak_block_len(Hacl_Streaming_Keccak_state *s);
+
+uint32_t Hacl_Streaming_Keccak_hash_len(Hacl_Streaming_Keccak_state *s);
+
+bool Hacl_Streaming_Keccak_is_shake(Hacl_Streaming_Keccak_state *s);
 
 void
 Hacl_SHA3_shake128_hacl(

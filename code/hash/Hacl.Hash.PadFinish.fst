@@ -240,7 +240,7 @@ let hash_word_len (a: md_alg): n:U32.t { U32.v n = hash_word_length a } =
 friend Spec.Agile.Hash
 
 noextract inline_for_extraction
-let finish_sha3 (a: sha3_alg { not (is_shake a) }): finish_st (| a, () |) = fun s dst ->
+let finish_sha3 (a: keccak_alg { not (is_shake a) }): finish_st (| a, () |) = fun s dst ->
   Hacl.Impl.SHA3.squeeze s (block_len a) (hash_len a) dst
 
 noextract inline_for_extraction

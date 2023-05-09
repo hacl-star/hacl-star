@@ -140,6 +140,50 @@ static inline uint64_t Hacl_Bignum_Lib_bn_get_top_index_u64(uint32_t len, uint64
 
 /* SNIPPET_END: Hacl_Bignum_Lib_bn_get_top_index_u64 */
 
+/* SNIPPET_START: Hacl_Bignum_Lib_bn_get_bits_u32 */
+
+static inline uint32_t
+Hacl_Bignum_Lib_bn_get_bits_u32(uint32_t len, uint32_t *b, uint32_t i, uint32_t l)
+{
+  uint32_t i1 = i / (uint32_t)32U;
+  uint32_t j = i % (uint32_t)32U;
+  uint32_t p1 = b[i1] >> j;
+  uint32_t ite;
+  if (i1 + (uint32_t)1U < len && (uint32_t)0U < j)
+  {
+    ite = p1 | b[i1 + (uint32_t)1U] << ((uint32_t)32U - j);
+  }
+  else
+  {
+    ite = p1;
+  }
+  return ite & (((uint32_t)1U << l) - (uint32_t)1U);
+}
+
+/* SNIPPET_END: Hacl_Bignum_Lib_bn_get_bits_u32 */
+
+/* SNIPPET_START: Hacl_Bignum_Lib_bn_get_bits_u64 */
+
+static inline uint64_t
+Hacl_Bignum_Lib_bn_get_bits_u64(uint32_t len, uint64_t *b, uint32_t i, uint32_t l)
+{
+  uint32_t i1 = i / (uint32_t)64U;
+  uint32_t j = i % (uint32_t)64U;
+  uint64_t p1 = b[i1] >> j;
+  uint64_t ite;
+  if (i1 + (uint32_t)1U < len && (uint32_t)0U < j)
+  {
+    ite = p1 | b[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+  }
+  else
+  {
+    ite = p1;
+  }
+  return ite & (((uint64_t)1U << l) - (uint64_t)1U);
+}
+
+/* SNIPPET_END: Hacl_Bignum_Lib_bn_get_bits_u64 */
+
 /* SNIPPET_START: Hacl_Bignum_Addition_bn_sub_eq_len_u32 */
 
 static inline uint32_t

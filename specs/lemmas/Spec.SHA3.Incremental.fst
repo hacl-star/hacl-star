@@ -17,7 +17,7 @@ open Lib.IntTypes
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
-let update_is_update_multi (a:sha3_alg) (inp:bytes{S.length inp == block_length a}) (s:words_state a)
+let update_is_update_multi (a:keccak_alg) (inp:bytes{S.length inp == block_length a}) (s:words_state a)
   : Lemma (Spec.SHA3.absorb_inner (rate a/8) inp s == update_multi a s () inp)
   = let rateInBytes = rate a/8 in
     let f = Spec.SHA3.absorb_inner rateInBytes in
@@ -40,10 +40,10 @@ let update_is_update_multi (a:sha3_alg) (inp:bytes{S.length inp == block_length 
       f inp s;
     }
 
-let suffix (a: sha3_alg) = if is_shake a then byte 0x1f else byte 0x06
+let suffix (a: keccak_alg) = if is_shake a then byte 0x1f else byte 0x06
 
 val sha3_is_incremental1
-  (a: sha3_alg)
+  (a: keccak_alg)
   (input: bytes) (out_length: output_length a): Lemma (hash_incremental a input out_length `S.equal` (
     let s = Lib.Sequence.create 25 (u64 0) in
     let rateInBytes = rate a / 8 in
@@ -171,7 +171,7 @@ let sha3_is_incremental1 a input out_length =
   }
 
 let sha3_is_incremental2
-  (a: sha3_alg)
+  (a: keccak_alg)
   (input: bytes) (out_length: output_length a): Lemma (hash' a input out_length `S.equal` (
     let s = Lib.Sequence.create 25 (u64 0) in
     let rateInBytes = rate a / 8 in
@@ -213,7 +213,7 @@ let sha3_is_incremental2
     }
 
 let sha3_is_incremental
-  (a: sha3_alg)
+  (a: keccak_alg)
   (input: bytes) (out_length: output_length a):
   Lemma (hash_incremental a input out_length `S.equal` hash' a input out_length)
 =

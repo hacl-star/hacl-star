@@ -42,7 +42,7 @@ let compute_st (a: fixed_len_alg) =
 
 inline_for_extraction noextract
 val mk_compute:
-  i: D.const_impl ->
+  i: D.fixed_len_impl ->
   hash: D.hash_st (D.get_alg i) ->
   alloca: D.alloca_st i ->
   init: D.init_st i ->
