@@ -76,19 +76,29 @@ let aff_point_c (k:curve) = p:aff_point k{aff_point_inv k p}
 ///  Point addition in affine coordinates
 
 let aff_point_double (k:curve) (p:aff_point k) : aff_point k =
+  let ( +% ) = fadd k in
+  let ( -% ) = fsub k in
+  let ( *% ) = fmul k in
+  let ( /% ) (x y:felem k) = x *% finv k y in
+
   let (px, py) = p in
   if is_aff_point_at_inf k p then p
   else begin
     if py = 0 then aff_point_at_inf k
     else begin
-      let lambda = fmul k (fadd k (fmul k (fmul k 3 px) px) k.coeff_a) (finv k (fmul k 2 py)) in
-      let rx = fsub k (fsub k (fmul k lambda lambda) px) px in
-      let ry = fsub k (fmul k lambda (fsub k px rx)) py in
+      let lambda = (3 *% px *% px +% k.coeff_a) /% (2 *% py) in
+      let rx = lambda *% lambda -% px -% px in
+      let ry = lambda *% (px -% rx) -% py in
       (rx, ry) end
   end
 
 
 let aff_point_add (k:curve) (p:aff_point k) (q:aff_point k) : aff_point k =
+  let ( +% ) = fadd k in
+  let ( -% ) = fsub k in
+  let ( *% ) = fmul k in
+  let ( /% ) (x y:felem k) = x *% finv k y in
+
   let (px, py) = p in let (qx, qy) = q in
   if is_aff_point_at_inf k p then q
   else begin
@@ -98,9 +108,9 @@ let aff_point_add (k:curve) (p:aff_point k) (q:aff_point k) : aff_point k =
       else begin
         if qx = px then aff_point_at_inf k
         else begin
-          let lambda = fmul k (fsub k qy py) (finv k (fsub k qx px)) in
-          let rx = fsub k (fsub k (fmul k lambda lambda) px) qx in
-          let ry = fsub k (fmul k lambda (fsub k px rx)) py in
+          let lambda = (qy -% py) /% (qx -% px) in
+          let rx = lambda *% lambda -% px -% qx in
+          let ry = lambda *% (px -% rx) -% py in
           (rx, ry)
         end
       end
