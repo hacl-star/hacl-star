@@ -54,23 +54,17 @@ void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p);
 
 /* SNIPPET_END: Hacl_Impl_K256_Point_point_negate */
 
-/* SNIPPET_START: Hacl_Impl_K256_Point_point_eq_vartime */
+/* SNIPPET_START: Hacl_Impl_K256_Point_point_store */
 
-bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q);
+void Hacl_Impl_K256_Point_point_store(uint8_t *out, uint64_t *p);
 
-/* SNIPPET_END: Hacl_Impl_K256_Point_point_eq_vartime */
+/* SNIPPET_END: Hacl_Impl_K256_Point_point_store */
 
-/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
+/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_load_vartime */
 
-bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s);
+bool Hacl_Impl_K256_Point_aff_point_load_vartime(uint64_t *p, uint8_t *b);
 
-/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
-
-/* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_compress_vartime */
-
-void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, uint64_t *y);
-
-/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_compress_vartime */
+/* SNIPPET_END: Hacl_Impl_K256_Point_aff_point_load_vartime */
 
 /* SNIPPET_START: Hacl_Impl_K256_PointDouble_point_double */
 

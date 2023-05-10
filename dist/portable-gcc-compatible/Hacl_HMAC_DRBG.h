@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Spec.h"
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_HMAC.h"
 
 /* SNIPPET_START: Hacl_HMAC_DRBG_supported_alg */

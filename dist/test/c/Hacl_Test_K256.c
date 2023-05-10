@@ -53,9 +53,9 @@ Create an ECDSA signature.
 
   The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
 
-  The function also checks whether `private_key` and `nonce` are valid values:
-    • 0 < `private_key` and `private_key` < the order of the curve
-    • 0 < `nonce` and `nonce` < the order of the curve
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 extern bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
@@ -75,16 +75,13 @@ Verify an ECDSA signature.
 
   The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
 
-  The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve
+  The function also checks whether `public key` is valid.
 */
 extern bool
 Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t *signature);
 
 /**
-Verify an ECDSA signature.
+Verify an ECDSA signature using SHA2-256.
 
   The function returns `true` if the signature is valid and `false` otherwise.
 
@@ -160,6 +157,11 @@ Convert a public key from raw to its compressed form.
 */
 extern void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
 
+
+/******************/
+/* ECDH agreement */
+/******************/
+
 /**
 Compute the public key from the private key.
 
@@ -169,7 +171,7 @@ Compute the public key from the private key.
   The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
   The private key is valid:
-    • 0 < `private_key` and `private_key` < the order of the curve.
+    • 0 < `private_key` < the order of the curve.
 */
 extern bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key);
 

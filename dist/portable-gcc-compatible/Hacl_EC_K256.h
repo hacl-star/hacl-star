@@ -268,25 +268,6 @@ void Hacl_EC_K256_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out);
 
 /* SNIPPET_END: Hacl_EC_K256_point_mul */
 
-/* SNIPPET_START: Hacl_EC_K256_point_eq */
-
-/**
-Checks whether `p` is equal to `q` (point equality).
-
-  The function returns `true` if `p` is equal to `q` and `false` otherwise.
-
-  The arguments `p` and `q` are meant to be 15 limbs in size, i.e., uint64_t[15].
-
-  Before calling this function, the caller will need to ensure that the following
-  precondition is observed.
-  • `p` and `q` are either disjoint or equal.
-
-  This function is NOT constant-time.
-*/
-bool Hacl_EC_K256_point_eq(uint64_t *p, uint64_t *q);
-
-/* SNIPPET_END: Hacl_EC_K256_point_eq */
-
 /* SNIPPET_START: Hacl_EC_K256_point_store */
 
 /**
@@ -333,8 +314,7 @@ Check whether a point is valid.
   The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
   The point (x || y) is valid:
-    • x < prime
-    • y < prime
+    • x < prime and y < prime
     • (x, y) is on the curve.
 
   This function is NOT constant-time.
@@ -342,48 +322,6 @@ Check whether a point is valid.
 bool Hacl_EC_K256_is_point_valid(uint8_t *b);
 
 /* SNIPPET_END: Hacl_EC_K256_is_point_valid */
-
-/* SNIPPET_START: Hacl_EC_K256_point_compress */
-
-/**
-Compress a point in projective coordinates to its compressed form.
-
-  The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
-  The outparam `out` points to 33 bytes of valid memory, i.e., uint8_t[33].
-
-  The function first converts a given point `p` from projective to affine coordinates
-  and then writes [ 0x02 for even `y` and 0x03 for odd `y`; `x` ] in `out`.
-
-  Before calling this function, the caller will need to ensure that the following
-  precondition is observed.
-  • `p` and `out` are disjoint.
-
-  This function is NOT constant-time.
-*/
-void Hacl_EC_K256_point_compress(uint64_t *p, uint8_t *out);
-
-/* SNIPPET_END: Hacl_EC_K256_point_compress */
-
-/* SNIPPET_START: Hacl_EC_K256_point_decompress */
-
-/**
-Decompress a point in projective coordinates from its compressed form.
-
-  The function returns `true` for successful decompression of a compressed point
-  and `false` otherwise.
-
-  The argument `s` points to 33 bytes of valid memory, i.e., uint8_t[33].
-  The outparam `out` points to a point of 15 limbs in size, i.e., uint64_t[15].
-
-  Before calling this function, the caller will need to ensure that the following
-  precondition is observed.
-  • `s` and `out` are disjoint.
-
-  This function is NOT constant-time.
-*/
-bool Hacl_EC_K256_point_decompress(uint8_t *s, uint64_t *out);
-
-/* SNIPPET_END: Hacl_EC_K256_point_decompress */
 
 #if defined(__cplusplus)
 }
