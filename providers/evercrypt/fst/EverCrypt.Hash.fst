@@ -410,8 +410,6 @@ let update_multi #a s prevlen blocks len =
 
 #pop-options
 
-// Re-using the higher-order stateful combinator to get an instance of
-// update_last that is capable of calling Vale under the hood
 let update_last_256 s prev_len input input_len =
   Hacl.Hash.SHA2.update_last_256 s prev_len input input_len
 
@@ -425,7 +423,7 @@ let update_last_224 s prev_len input input_len =
   =
     Spec.SHA2.Lemmas.update_multi_224_256 hash blocks
   in
-  update_last_256 s prev_len input input_len
+  Hacl.Hash.SHA2.update_last_256 s prev_len input input_len
 
 let update_last #a s prev_len last last_len =
   [@inline_let] let cast = FStar.Int.Cast.Full.uint64_to_uint128 in
