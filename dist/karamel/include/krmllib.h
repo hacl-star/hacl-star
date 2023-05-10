@@ -24,6 +24,5 @@
 
 #include "krml/lowstar_endianness.h"
 #include "krml/fstar_int.h"
-#include "krml/steel_base.h"
 
 #endif     /* __KRMLLIB_H */
