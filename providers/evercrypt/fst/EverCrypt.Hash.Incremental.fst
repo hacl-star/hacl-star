@@ -265,7 +265,7 @@ let hash_256 input input_len dst =
   let open EverCrypt.Hash in
   // TODO: This function now only exists for SHA1 and MD5
   Hacl.Hash.MD.mk_hash SHA2_256 Hacl.Hash.SHA2.alloca_256 update_multi_256
-    update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst
+    Hacl.Hash.SHA2.update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst
 
 private
 val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
@@ -273,7 +273,7 @@ val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
 let hash_224 input input_len dst =
   let open EverCrypt.Hash in
   Hacl.Hash.MD.mk_hash SHA2_224 Hacl.Hash.SHA2.alloca_224 update_multi_224
-    update_last_224 Hacl.Hash.SHA2.finish_224 input input_len dst
+    Hacl.Hash.SHA2.update_last_224 Hacl.Hash.SHA2.finish_224 input input_len dst
 
 // Public API (one-shot, agile and multiplexing)
 // ---------------------------------------------

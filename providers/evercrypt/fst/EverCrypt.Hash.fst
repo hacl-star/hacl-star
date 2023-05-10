@@ -410,21 +410,6 @@ let update_multi #a s prevlen blocks len =
 
 #pop-options
 
-let update_last_256 s prev_len input input_len =
-  Hacl.Hash.SHA2.update_last_256 s prev_len input input_len
-
-let update_last_224 s prev_len input input_len =
-  assert_norm (words_state SHA2_224 == words_state SHA2_256);
-  [@inline_let]
-  let l (hash:words_state SHA2_256) (blocks:bytes_blocks SHA2_256):
-    Lemma
-      (ensures (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks == Spec.Agile.Hash.update_multi SHA2_256 hash () blocks))
-    [ SMTPat (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks); SMTPat (Spec.Agile.Hash.update_multi SHA2_256 hash () blocks) ]
-  =
-    Spec.SHA2.Lemmas.update_multi_224_256 hash blocks
-  in
-  Hacl.Hash.SHA2.update_last_256 s prev_len input input_len
-
 let update_last #a s prev_len last last_len =
   [@inline_let] let cast = FStar.Int.Cast.Full.uint64_to_uint128 in
   match !*s with
@@ -433,9 +418,9 @@ let update_last #a s prev_len last last_len =
   | SHA1_s p ->
       Hacl.Hash.SHA1.legacy_update_last p prev_len last last_len
   | SHA2_224_s p ->
-      update_last_224 p prev_len last last_len
+      Hacl.Hash.SHA2.update_last_224 p prev_len last last_len
   | SHA2_256_s p ->
-      update_last_256 p prev_len last last_len
+      Hacl.Hash.SHA2.update_last_256 p prev_len last last_len
   | SHA2_384_s p ->
       Hacl.Hash.SHA2.update_last_384 p (cast prev_len) last last_len
   | SHA2_512_s p ->
