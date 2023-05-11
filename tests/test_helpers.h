@@ -4,7 +4,7 @@
 #pragma once
 
 static inline bool
-compare_and_print(size_t len, uint8_t* comp, uint8_t* exp)
+compare_and_print(size_t len, const uint8_t* comp, const uint8_t* exp)
 {
   printf("computed:");
   for (size_t i = 0; i < len; i++)
