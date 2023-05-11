@@ -12,6 +12,12 @@ module BSeq = Lib.ByteSequence
 let tuple2_lt_n (n:pos) =
   p:tuple2 nat nat{let (px, py) = p in px < n /\ py < n}
 
+let tuple2_on_curve (n:pos) (a b:M.nat_mod n) (g:tuple2_lt_n n) =
+  let ( +% ) = M.add_mod #n in
+  let ( *% ) = M.mul_mod #n in
+  let (x, y) = g in y *% y = x *% x *% x +% a *% x +% b
+
+
 // cofactor = 1
 inline_for_extraction
 class curve = {
@@ -20,7 +26,7 @@ class curve = {
   coeff_b: x:M.nat_mod prime{0 < x}; // (0, 0) is not on the curve
 
   order: x:pos{1 < x};
-  base_point: tuple2_lt_n prime;
+  base_point: x:tuple2_lt_n prime{tuple2_on_curve prime coeff_a coeff_b x};
 
   prime_len_bytes: x:nat{prime < pow2 (8 * x) /\ 2 * x <= max_size_t};
   order_len_bytes: x:nat{order < pow2 (8 * x) /\ 2 * x <= max_size_t};
@@ -58,8 +64,7 @@ let aff_point (k:curve) = tuple2_lt_n k.prime
 
 // y * y =?= x * x * x + a * x + b
 let is_on_curve (k:curve) (p:aff_point k) : bool =
-  let (x, y) = p in
-  fmul k y y = fadd k (fadd k (fmul k (fmul k x x) x) (fmul k k.coeff_a x)) k.coeff_b
+  tuple2_on_curve k.prime k.coeff_a k.coeff_b p
 
 let aff_point_at_inf (k:curve) : aff_point k = (zero k, zero k) // not on the curve!
 
@@ -124,7 +129,7 @@ let aff_point_negate (k:curve) (p:aff_point k) : aff_point k =
 
 ///  Point conversion between affine and bytes representation
 
-let aff_point_load (k:curve) (b:BSeq.lbytes (2 * k.prime_len_bytes)) : option (aff_point k) =
+let aff_point_load (k:curve) (b:BSeq.lbytes (2 * k.prime_len_bytes)) : option (aff_point_c k) =
   let len = k.prime_len_bytes in
   let pk_x = BSeq.nat_from_bytes_be (sub b 0 len) in
   let pk_y = BSeq.nat_from_bytes_be (sub b len len) in

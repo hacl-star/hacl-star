@@ -28,6 +28,12 @@ let to_aff_point (k:curve) (p:proj_point k) : aff_point k =
   let y = fmul k py zinv in
   (x, y)
 
+// is_on_curve k (to_aff_point k p) \/ is_point_at_inf k p
+let point_inv (k:curve) (p:proj_point k) =
+  aff_point_inv k (to_aff_point k p)
+
+let proj_point_c (k:curve) = p:proj_point k{point_inv k p}
+
 
 let point_negate (k:curve) (p:proj_point k) : proj_point k =
   let x, y, z = p in

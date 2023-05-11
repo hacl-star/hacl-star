@@ -36,6 +36,12 @@ let b : felem = 7
 let g_x : felem = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
 let g_y : felem = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
 
+let base_point : x:EC.tuple2_lt_n prime{EC.tuple2_on_curve prime a b x} =
+  let ( +% ) = Lib.NatMod.add_mod #prime in
+  let ( *% ) = Lib.NatMod.mul_mod #prime in
+  assert_norm (g_y *% g_y = g_x *% g_x *% g_x +% a *% g_x +% b);
+  (g_x, g_y)
+
 
 assume
 val prime_lemma: unit -> Lemma (FStar.Math.Euclid.is_prime prime)
@@ -51,12 +57,12 @@ let weierstrass_curve () =
 
 
 let k256: EC.curve = {
-  EC.prime = prime;
+  EC.prime;
   EC.coeff_a = a;
   EC.coeff_b = b;
 
   EC.order = q;
-  EC.base_point = (g_x, g_y);
+  EC.base_point;
 
   EC.prime_len_bytes = 32;
   EC.order_len_bytes = 32;

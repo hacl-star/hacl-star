@@ -15,23 +15,31 @@ include Spec.EC
 
 ///  Elliptic curve scalar multiplication
 
-let mk_ec_comm_monoid (k:curve) : LE.comm_monoid (aff_point k) = {
+let aff_point_add_c (k:curve) (p q:aff_point_c k) : aff_point_c k =
+  PL.aff_point_add_inv_lemma k p q;
+  aff_point_add k p q
+
+let aff_point_negate_c (k:curve) (p:aff_point_c k) : aff_point_c k =
+  PL.aff_point_negate_inv_lemma k p;
+  aff_point_negate k p
+
+let mk_ec_comm_monoid (k:curve) : LE.comm_monoid (aff_point_c k) = {
   LE.one = aff_point_at_inf k;
-  LE.mul = aff_point_add k;
+  LE.mul = aff_point_add_c k;
   LE.lemma_one = PL.aff_point_at_inf_lemma k;
   LE.lemma_mul_assoc = PL.aff_point_add_assoc_lemma k;
   LE.lemma_mul_comm = PL.aff_point_add_comm_lemma k;
 }
 
-let mk_ec_abelian_group (k:curve) : LE.abelian_group (aff_point k) = {
+let mk_ec_abelian_group (k:curve) : LE.abelian_group (aff_point_c k) = {
   LE.cm = mk_ec_comm_monoid k;
-  LE.inverse = aff_point_negate k;
+  LE.inverse = aff_point_negate_c k;
   LE.lemma_inverse = PL.aff_point_negate_lemma k;
 }
 
 
 // [a]P inaffine coordinates
-let aff_point_mul (k:curve) (a:nat) (p:aff_point k) : aff_point k =
+let aff_point_mul (k:curve) (a:nat) (p:aff_point_c k) : aff_point_c k =
   LE.pow (mk_ec_comm_monoid k) p a
 
 
@@ -40,9 +48,9 @@ inline_for_extraction
 class ec_concrete_ops = {
   ec: curve;
   t: Type; // projective or jacobian
-  to_point_t: aff_point ec -> t;
-  to_aff_point: t -> aff_point ec;
-  lemma_to_from_aff_point: p:aff_point ec -> Lemma (to_aff_point (to_point_t p) == p);
+  to_point_t: aff_point_c ec -> t;
+  to_aff_point: t -> aff_point_c ec;
+  lemma_to_from_aff_point: p:aff_point_c ec -> Lemma (to_aff_point (to_point_t p) == p);
   is_point_at_inf: p:t -> res:bool{res ==> is_aff_point_at_inf ec (to_aff_point p)};
   point_mul: a:M.nat_mod ec.order -> p:t -> res:t
     { to_aff_point res == aff_point_mul ec a (to_aff_point p) };
@@ -206,17 +214,24 @@ let fsqrt (k:curve{k.prime % 4 = 3}) (a:felem k) : felem k =
 
 let is_fodd (x:nat) : bool = x % 2 = 1
 
-let recover_y (k:curve{k.prime % 4 = 3}) (x:felem k) (is_odd:bool) : option (felem k) =
+let recover_y (k:curve{k.prime % 4 = 3}) (x:felem k) (is_odd:bool)
+  : y:option (felem k){Some? y ==> is_on_curve k (x, Some?.v y)}
+ =
   let y2 = fadd k (fadd k (fmul k (fmul k x x) x) (fmul k k.coeff_a x)) k.coeff_b in
   let y = fsqrt k y2 in
   if fmul k y y <> y2 then None
   else begin
-    let y = if is_fodd y <> is_odd then (k.prime - y) % k.prime else y in
-    Some y end
+    assert (is_on_curve k (x, y));
+    let y' = if is_fodd y <> is_odd then (k.prime - y) % k.prime else y in
+    Math.Lemmas.modulo_addition_lemma (-y) k.prime 1;
+    assert ((k.prime - y) % k.prime = (- y) % k.prime);
+    PL.aff_point_negate_on_curve_lemma k (x, y);
+    assert (is_on_curve k (x, y'));
+    Some y' end
 
 
 let aff_point_decompress (k:curve{k.prime % 4 = 3}) (s:lbytes (k.prime_len_bytes + 1))
-  : option (aff_point k)
+  : option (aff_point_c k)
  =
   let s0 = Lib.RawIntTypes.u8_to_UInt8 s.[0] in
   if not (s0 = 0x02uy || s0 = 0x03uy) then None
