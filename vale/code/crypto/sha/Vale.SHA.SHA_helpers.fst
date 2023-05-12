@@ -651,6 +651,7 @@ let update_block (hash:hash256) (block:block_w): Tot (hash256) =
   let open Lib.IntTypes in
   Spec.Loops.seq_map2 ( +. ) hash hash_1
 
+#push-options "--z3cliopt smt.arith.nl=true" (* FIXME: Seemingly needed after fix to #2894 in F*, but should not be *)
 let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_length}) :
   Lemma (update_block hash (words_of_bytes SHA2_256 #(block_word_length SHA2_256) block) == update SHA2_256 hash block)
   =
@@ -658,6 +659,7 @@ let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_le
   Pervasives.reveal_opaque (`%Spec.SHA2.shuffle) Spec.SHA2.shuffle;
   assert (equal (update_block hash (words_of_bytes SHA2_256 #(block_word_length SHA2_256) block)) (update SHA2_256 hash block));
   ()
+#pop-options
 
 let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   (requires (let hash_orig = make_hash h0 h1 in
