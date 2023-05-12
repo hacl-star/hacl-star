@@ -290,7 +290,7 @@ Hacl_Streaming_Keccak_update(
   Hacl_Streaming_Keccak_hash_buf block_state = s.block_state;
   uint64_t total_len = s.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
-  if ((uint64_t)chunk_len > (uint64_t)0xffffffffU - total_len)
+  if ((uint64_t)chunk_len > (uint64_t)0xffffffffffffffffU - total_len)
   {
     return (uint32_t)1U;
   }

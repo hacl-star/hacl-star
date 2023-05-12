@@ -124,7 +124,7 @@ let hacl_keccak (a: G.erased alg): block alg =
     (stateful_unused alg) (* key *)
     Lib.IntTypes.(x:size_t { v x > 0 }) (* output_length_t *)
 
-    (fun _ -> 0xffffffffUL) (* max_input_len *)
+    (fun _ -> 0xffffffffffffffffUL) (* max_input_len *)
     (fun a l -> if is_shake_ a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) (* output_length *)
     Hacl.Hash.SHA3.block_len (* block_len *)
     Hacl.Hash.SHA3.block_len (* blocks_state_len *)
