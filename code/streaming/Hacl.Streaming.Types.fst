@@ -5,4 +5,3 @@ type error_code =
   | InvalidAlgorithm
   | InvalidLength
   | MaximumLengthExceeded
-
