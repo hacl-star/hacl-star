@@ -38,7 +38,7 @@ val ecp256dh_r_: is_pk_valid:bool -> ss:lbuffer uint8 64ul -> pk:point -> sk:fel
     as_nat h sk < S.order /\ (is_pk_valid ==> point_inv h pk))
   (ensures fun  h0 _ h1 -> modifies (loc ss) h0 h1 /\
     as_seq h1 ss == (if is_pk_valid
-    then S.point_store (S.point_mul (as_nat h0 sk) (from_mont_point (as_point_nat h0 pk)))
+    then S.point_store (S.point_mul (as_nat h0 sk) (from_mont_point_c (as_point_nat h0 pk)))
     else as_seq h0 ss))
 
 let ecp256dh_r_ is_pk_valid ss pk sk =

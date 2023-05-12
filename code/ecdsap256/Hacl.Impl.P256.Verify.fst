@@ -16,7 +16,6 @@ open Hacl.Impl.P256.PointMul
 module BSeq = Lib.ByteSequence
 
 module S = Spec.P256
-module SL = Spec.P256.Lemmas
 module SM = Hacl.Spec.P256.Montgomery
 module QI = Hacl.Impl.P256.Qinv
 
@@ -107,7 +106,7 @@ val ecdsa_verification_cmpr: r:felem -> pk:point -> u1:felem -> u2:felem -> Stac
     0 < as_nat h r /\ as_nat h r < S.order)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     (let _X, _Y, _Z = S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2)
-      (from_mont_point (as_point_nat h0 pk)) in
+      (from_mont_point_c (as_point_nat h0 pk)) in
     b <==> (if S.is_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
@@ -121,8 +120,9 @@ let ecdsa_verification_cmpr r pk u1 u2 =
     S.to_aff_point (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2)
       (from_mont_point (as_point_nat h0 pk))));
 
-  SL.lemma_aff_is_point_at_inf (from_mont_point (as_point_nat h1 res));
-  SL.lemma_aff_is_point_at_inf
+  Spec.EC.Projective.Lemmas.lemma_aff_is_point_at_inf S.p256
+    (from_mont_point (as_point_nat h1 res));
+  Spec.EC.Projective.Lemmas.lemma_aff_is_point_at_inf S.p256
     (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2) (from_mont_point (as_point_nat h0 pk)));
 
   let b =

@@ -82,7 +82,7 @@ let proj_point_to_list_sub p =
   SPT.seq_of_list_append_lemma FL.(px_list @ py_list) pz_list
 
 
-val proj_point_to_list_fits: p:S.proj_point ->
+val proj_point_to_list_fits: p:S.proj_point_c ->
   Lemma (point_inv_list (proj_point_to_list p))
 
 let proj_point_to_list_fits p =
@@ -94,7 +94,11 @@ let proj_point_to_list_fits p =
   proj_point_to_list_sub p;
   felem_to_list_lemma_eval pxM;
   felem_to_list_lemma_eval pyM;
-  felem_to_list_lemma_eval pzM
+  felem_to_list_lemma_eval pzM;
+  SM.lemma_to_from_mont_id px;
+  SM.lemma_to_from_mont_id py;
+  SM.lemma_to_from_mont_id pz;
+  SM.mont_point_inv (pxM, pyM, pzM)
 
 
 val proj_point_to_list_eval: p:S.proj_point ->

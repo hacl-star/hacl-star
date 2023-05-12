@@ -21,7 +21,6 @@ module SPT256 = Hacl.Spec.PrecompBaseTable256
 module BD = Hacl.Spec.Bignum.Definitions
 
 module S = Spec.P256
-module SL = Spec.P256.Lemmas
 
 include Hacl.Impl.P256.Group
 include Hacl.P256.PrecompTable
@@ -52,9 +51,12 @@ let table_inv_w5 : BE.table_inv_t U64 12ul 32ul =
 [@CInline]
 let point_mul res scalar p =
   let h0 = ST.get () in
-  SE.exp_fw_lemma S.mk_p256_concrete_ops
-    (from_mont_point (as_point_nat h0 p)) 256 (as_nat h0 scalar) 4;
-  BE.lexp_fw_consttime 12ul 0ul mk_p256_concrete_ops 4ul (null uint64) p 4ul 256ul scalar res
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h0 p);
+  SE.exp_fw_lemma (Spec.ECC.Projective.mk_ec_concrete_ops_a3 S.p256)
+    (from_mont_point_c (as_point_nat h0 p)) 256 (as_nat h0 scalar) 4;
+  BE.lexp_fw_consttime 12ul 0ul mk_p256_concrete_ops 4ul (null uint64) p 4ul 256ul scalar res;
+  let h1 = ST.get () in
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h1 res)
 
 
 val precomp_get_consttime: BE.pow_a_to_small_b_st U64 12ul 0ul mk_p256_concrete_ops 4ul 16ul
@@ -90,8 +92,9 @@ val point_mul_g_noalloc: out:point -> scalar:felem
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
    (let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (as_nat h0 scalar) in
-    S.to_aff_point (from_mont_point (as_point_nat h1 out)) ==
-    LE.exp_four_fw S.mk_p256_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
+    S.to_aff_point (from_mont_point_c (as_point_nat h1 out)) ==
+    LE.exp_four_fw (Spec.ECC.mk_ec_comm_monoid S.p256)
+      g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
 let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
   [@inline_let] let len = 12ul in
@@ -140,30 +143,39 @@ let point_mul_g_noalloc out scalar q1 q2 q3 q4 =
     (to_const precomp_g_pow2_64_table_w4)
     (to_const precomp_g_pow2_128_table_w4)
     (to_const precomp_g_pow2_192_table_w4)
-    out
+    out;
+  let h1 = ST.get () in
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h0 q1);
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h0 q2);
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h0 q3);
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h0 q4);
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h1 out)
 
 
 val lemma_exp_four_fw_local: b:BD.lbignum U64 4{BD.bn_v b < S.order} ->
   Lemma (let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v b) in
-    LE.exp_four_fw S.mk_p256_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 ==
+    LE.exp_four_fw (Spec.ECC.mk_ec_comm_monoid S.p256)
+      g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 ==
     S.to_aff_point (S.point_mul_g (BD.bn_v b)))
 
 let lemma_exp_four_fw_local b =
-  let cm = S.mk_p256_comm_monoid in
+  let cm = Spec.ECC.mk_ec_comm_monoid S.p256 in
   let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v b) in
   let res = LE.exp_four_fw cm g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 in
   assert (res == SPT256.exp_as_exp_four_nat256_precomp cm g_aff (BD.bn_v b));
   SPT256.lemma_point_mul_base_precomp4 cm g_aff (BD.bn_v b);
   assert (res == LE.pow cm g_aff (BD.bn_v b));
-  SE.exp_fw_lemma S.mk_p256_concrete_ops S.base_point 256 (BD.bn_v b) 4;
+  SE.exp_fw_lemma (Spec.ECC.Projective.mk_ec_concrete_ops_a3 S.p256)
+    (S.to_proj_point S.base_point) 256 (BD.bn_v b) 4;
   LE.exp_fw_lemma cm g_aff 256 (BD.bn_v b) 4;
   assert (S.to_aff_point (S.point_mul_g (BD.bn_v b)) == LE.pow cm g_aff (BD.bn_v b))
 
 
 [@CInline]
 let point_mul_g res scalar =
-  push_frame ();
   let h0 = ST.get () in
+  push_frame ();
+  let h01 = ST.get () in
   let q1 = create_point () in
   make_base_point q1;
   let q2 = mk_proj_g_pow2_64 () in
@@ -172,9 +184,18 @@ let point_mul_g res scalar =
   proj_g_pow2_64_lseq_lemma ();
   proj_g_pow2_128_lseq_lemma ();
   proj_g_pow2_192_lseq_lemma ();
+  let h03 = ST.get () in
+  assert (modifies (loc q1 |+| loc q2 |+| loc q3 |+| loc q4) h01 h03);
   point_mul_g_noalloc res scalar q1 q2 q3 q4;
   lemma_exp_four_fw_local (as_seq h0 scalar);
-  pop_frame ()
+  let h02 = ST.get () in
+  assert (modifies (loc q1 |+| loc q2 |+| loc q3 |+| loc q4 |+| loc res) h01 h02);
+  pop_frame ();
+  let h1 = ST.get () in
+  assert (modifies (loc res) h0 h1);
+  assert (point_inv h1 res);
+  assert (S.to_aff_point (from_mont_point_c (as_point_nat h1 res)) ==
+    S.to_aff_point (S.point_mul_g (as_nat h0 scalar)))
 
 //-------------------------
 
@@ -193,13 +214,13 @@ val point_mul_g_double_vartime_noalloc:
     disjoint out scalar1 /\ disjoint out scalar2 /\ disjoint out table2 /\
 
     as_nat h scalar1 < S.order /\ as_nat h scalar2 < S.order /\
-    point_inv h q1 /\ from_mont_point (as_point_nat h q1) == S.base_point /\
+    point_inv h q1 /\ refl (as_seq h q1) == S.base_point /\
     point_inv h q2 /\ table_inv_w5 (as_seq h q2) (as_seq h table2))
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     refl (as_seq h1 out) ==
     S.to_aff_point (S.point_mul_double_g
-      (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 q2))))
+      (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point_c (as_point_nat h0 q2))))
 
 let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let len = 12ul in
@@ -225,9 +246,19 @@ let point_mul_g_double_vartime_noalloc out scalar1 q1 scalar2 q2 table2 =
     (null uint64) q1 bLen bBits scalar1 q2 scalar2
     (to_const precomp_basepoint_table_w5) (to_const table2) out;
 
-  SE.exp_double_fw_lemma S.mk_p256_concrete_ops
-    (from_mont_point (as_point_nat h0 q1)) 256 (as_nat h0 scalar1)
-    (from_mont_point (as_point_nat h0 q2)) (as_nat h0 scalar2) 5
+  SE.exp_double_fw_lemma (Spec.ECC.Projective.mk_ec_concrete_ops_a3 S.p256)
+    (from_mont_point_c (as_point_nat h0 q1)) 256 (as_nat h0 scalar1)
+    (from_mont_point_c (as_point_nat h0 q2)) (as_nat h0 scalar2) 5;
+  let h1 = ST.get () in
+  assert (refl (as_seq h1 out) ==
+    LE.exp_double_fw (Spec.ECC.mk_ec_comm_monoid S.p256)
+      S.base_point 256 (as_nat h0 scalar1)
+      (refl (as_seq h0 q2)) (as_nat h0 scalar2) 5);
+  LE.exp_double_fw_lemma (Spec.ECC.mk_ec_comm_monoid S.p256)
+    S.base_point 256 (as_nat h0 scalar1)
+    (refl (as_seq h0 q2)) (as_nat h0 scalar2) 5;
+  assert (refl (as_seq h1 out) == S.to_aff_point (S.point_mul_double_g
+    (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point_c (as_point_nat h0 q2))))
 
 
 [@CInline]

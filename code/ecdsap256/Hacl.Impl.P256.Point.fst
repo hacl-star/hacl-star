@@ -35,7 +35,12 @@ let make_base_point p =
   let z = getz p in
   make_g_x x;
   make_g_y y;
-  make_fone z
+  make_fone z;
+  let h1 = ST.get () in
+  assert (from_mont_point (as_point_nat h1 p) == S.to_proj_point S.base_point);
+  assert (S.point_inv (S.to_proj_point S.base_point));
+  SM.mont_point_inv (as_point_nat h1 p);
+  Spec.EC.Projective.Lemmas.lemma_proj_aff_id S.p256 S.base_point
 
 
 [@CInline]
@@ -45,7 +50,11 @@ let make_point_at_inf p =
   let z = getz p in
   make_fzero x;
   make_fone y;
-  make_fzero z
+  make_fzero z;
+  let h1 = ST.get () in
+  assert (from_mont_point (as_point_nat h1 p) == S.point_at_inf);
+  assert (S.point_inv S.point_at_inf);
+  SM.mont_point_inv (as_point_nat h1 p)
 
 
 ///  Check if a point is a point-at-infinity
@@ -85,6 +94,8 @@ let copy_point res p =
 
 [@CInline]
 let to_aff_point res p =
+  let h0 = ST.get () in
+  SM.mont_point_inv (as_point_nat h0 p);
   push_frame ();
   let zinv = create_felem () in
   let px = getx p in
@@ -128,7 +139,12 @@ let to_proj_point res p =
   SM.lemma_to_from_mont_id (as_nat h0 py);
   to_mont rx px;
   to_mont ry py;
-  make_fone rz
+  make_fone rz;
+  let h1 = ST.get () in
+  S.prime_lemma ();
+  Lib.NatMod.lemma_div_mod_prime_one #S.prime (as_nat h0 px);
+  Lib.NatMod.lemma_div_mod_prime_one #S.prime (as_nat h0 py);
+  SM.mont_point_inv (as_point_nat h1 res)
 
 
 ///  Check if a point is on the curve
@@ -204,6 +220,8 @@ let point_store res p =
   push_frame ();
   let aff_p = create_aff_point () in
   to_aff_point aff_p p;
+  let h1 = ST.get () in
+  SM.mont_point_inv (as_point_nat h1 p);
   aff_point_store res aff_p;
   pop_frame ()
 
@@ -255,7 +273,7 @@ val recover_y_vartime_candidate (y x:felem) : Stack bool
     live h x /\ live h y /\ disjoint x y /\ as_nat h x < S.prime)
   (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\ as_nat h1 y < S.prime /\
    (let x = as_nat h0 x in
-    let y2 = S.(x *% x *% x +% a_coeff *% x +% b_coeff) in
+    let y2 = S.(fadd (fadd (fmul (fmul x x) x) (fmul a_coeff x)) b_coeff) in
     as_nat h1 y == S.fsqrt y2 /\ (b <==> (S.fmul (as_nat h1 y) (as_nat h1 y) == y2))))
 
 let recover_y_vartime_candidate y x =

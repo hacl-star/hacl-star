@@ -204,7 +204,7 @@ let bn_mont_reduction_lemma x n =
 //---------------------------
 
 let lemma_from_mont_zero a =
-  Spec.P256.Lemmas.prime_lemma ();
+  S.prime_lemma ();
   Lib.NatMod.lemma_mul_mod_prime_zero #S.prime a fmont_R_inv
 
 
@@ -228,6 +228,22 @@ let fmont_add_lemma a b =
 
 let fmont_sub_lemma a b =
   mont_sub_lemma_gen S.prime fmont_R_inv a b
+
+
+let mont_point_inv p =
+  let px, py, pz = p in
+  let qx, qy, qz = from_mont px, from_mont py, from_mont pz in
+  assert (qx == px * fmont_R_inv % S.prime);
+  assert (qy == py * fmont_R_inv % S.prime);
+  assert (qz == pz * fmont_R_inv % S.prime);
+
+  S.prime_lemma ();
+  Lib.NatMod.lemma_div_mod_prime_cancel #S.prime px pz fmont_R_inv;
+  assert (S.fmul qx (S.finv qz) == S.fmul px (S.finv pz));
+  Lib.NatMod.lemma_div_mod_prime_cancel #S.prime py pz fmont_R_inv;
+  assert (S.fmul qy (S.finv qz) == S.fmul py (S.finv pz));
+
+  assert (S.to_aff_point p == S.to_aff_point (qx, qy, qz))
 
 
 ///  Montgomery arithmetic for a scalar field

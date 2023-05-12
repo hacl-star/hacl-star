@@ -44,9 +44,10 @@ let point_inv_list (p:point_list) =
   point_inv_seq x
 
 noextract
-let point_eval_list (p:point_list) =
+let point_eval_list (p:point_list) : S.proj_point =
   let x = Seq.seq_of_list p <: lseq uint64 12 in
-  from_mont_point (as_point_nat_seq x)
+  let px, py, pz = as_point_nat_seq x in
+  SM.from_mont px, SM.from_mont py, SM.from_mont pz
 
-val proj_point_to_list_lemma: p:S.proj_point ->
+val proj_point_to_list_lemma: p:S.proj_point_c ->
   Lemma (point_inv_list (proj_point_to_list p) /\ point_eval_list (proj_point_to_list p) == p)

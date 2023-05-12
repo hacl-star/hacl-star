@@ -20,7 +20,7 @@ val mont_cancel_lemma_gen (n:pos) (mont_R mont_R_inv a b:nat) : Lemma
 ///  Montgomery arithmetic for a base field
 
 let fmont_R = pow2 256
-val fmont_R_inv : pos
+val fmont_R_inv : x:S.felem{x <> 0}
 
 val mul_fmont_R_and_R_inv_is_one: unit -> Lemma (fmont_R * fmont_R_inv % S.prime = 1)
 
@@ -43,6 +43,10 @@ val fmont_add_lemma: a:S.felem -> b:S.felem ->
 
 val fmont_sub_lemma: a:S.felem -> b:S.felem ->
   Lemma (S.fsub (from_mont a) (from_mont b) = from_mont ((a - b) % S.prime))
+
+val mont_point_inv: p: S.proj_point ->
+  Lemma (let px, py, pz = p in
+    S.point_inv (from_mont px, from_mont py, from_mont pz) <==> S.point_inv p)
 
 
 ///  Montgomery arithmetic for a scalar field

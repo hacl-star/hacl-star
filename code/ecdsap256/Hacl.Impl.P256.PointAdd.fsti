@@ -20,5 +20,5 @@ val point_add: res:point -> p:point -> q:point -> Stack unit
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    from_mont_point (as_point_nat h1 res) ==
-    S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
+    from_mont_point_c (as_point_nat h1 res) ==
+    S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point_c (as_point_nat h0 q)))

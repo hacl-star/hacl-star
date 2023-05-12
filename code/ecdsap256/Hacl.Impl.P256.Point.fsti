@@ -16,8 +16,12 @@ module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-let from_mont_point (a:tuple3 nat nat nat) : S.proj_point =
+let from_mont_point (a:S.proj_point) : S.proj_point =
   let x, y, z = a in SM.from_mont x, SM.from_mont y, SM.from_mont z
+
+let from_mont_point_c (a:S.proj_point_c) : S.proj_point_c =
+  SM.mont_point_inv a;
+  from_mont_point a
 
 
 ///  Affine coordinates
@@ -29,9 +33,14 @@ let as_aff_point_nat_seq (p:aff_point_seq) =
   BD.bn_v (LSeq.sub p 0 4),
   BD.bn_v (LSeq.sub p 4 4)
 
-let aff_point_inv_seq (p:aff_point_seq) =
+let aff_point_lt_seq (p:aff_point_seq) =
   let x, y = as_aff_point_nat_seq p in
   x < S.prime /\ y < S.prime
+
+let aff_point_inv_seq (p:aff_point_seq) =
+  let x, y = as_aff_point_nat_seq p in
+  x < S.prime /\ y < S.prime /\
+  S.aff_point_inv (x, y)
 
 
 inline_for_extraction noextract
@@ -78,7 +87,8 @@ let as_point_nat_seq (p:point_seq) =
 
 let point_inv_seq (p:point_seq) =
   let x, y, z = as_point_nat_seq p in
-  x < S.prime /\ y < S.prime /\ z < S.prime
+  x < S.prime /\ y < S.prime /\ z < S.prime /\
+  S.point_inv (x, y, z)
 
 
 inline_for_extraction noextract
@@ -143,7 +153,7 @@ val create_point: unit -> StackInline point
 val make_base_point: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.base_point)
+    point_inv h1 p /\ S.to_aff_point (from_mont_point_c (as_point_nat h1 p)) == S.base_point)
 
 
 val make_point_at_inf: p:point -> Stack unit
@@ -186,6 +196,7 @@ val to_aff_point: res:aff_point -> p:point -> Stack unit
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    aff_point_inv h1 res /\
     as_aff_point_nat h1 res == S.to_aff_point (from_mont_point (as_point_nat h0 p)))
 
 
@@ -211,7 +222,7 @@ val to_proj_point: res:point -> p:aff_point -> Stack unit
 ///  Check if a point is on the curve
 
 val is_on_curve_vartime: p:aff_point -> Stack bool
-  (requires fun h -> live h p /\ aff_point_inv h p)
+  (requires fun h -> live h p /\ aff_point_lt_seq (as_seq h p))
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.is_on_curve (as_aff_point_nat h0 p))
 
@@ -231,7 +242,7 @@ val point_store: res:lbuffer uint8 64ul -> p:point -> Stack unit
     live h res /\ live h p /\ disjoint res p /\
     point_inv h p)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.point_store (from_mont_point (as_point_nat h0 p)))
+    as_seq h1 res == S.point_store (from_mont_point_c (as_point_nat h0 p)))
 
 
 val aff_point_load_vartime: res:aff_point -> b:lbuffer uint8 64ul -> Stack bool

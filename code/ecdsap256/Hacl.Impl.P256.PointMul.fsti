@@ -22,8 +22,8 @@ val point_mul: res:point -> scalar:felem -> p:point -> Stack unit
     point_inv h p /\ as_nat h scalar < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
-    S.to_aff_point (S.point_mul (as_nat h0 scalar) (from_mont_point (as_point_nat h0 p))))
+    S.to_aff_point (from_mont_point_c (as_point_nat h1 res)) ==
+    S.to_aff_point (S.point_mul (as_nat h0 scalar) (from_mont_point_c (as_point_nat h0 p))))
 
 
 val point_mul_g: res:point -> scalar:felem -> Stack unit
@@ -32,7 +32,7 @@ val point_mul_g: res:point -> scalar:felem -> Stack unit
     as_nat h scalar < S.order)
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
+    S.to_aff_point (from_mont_point_c (as_point_nat h1 res)) ==
     S.to_aff_point (S.point_mul_g (as_nat h0 scalar)))
 
 
@@ -44,6 +44,6 @@ val point_mul_double_g: res:point -> scalar1:felem -> scalar2:felem -> p:point -
     point_inv h p /\ as_nat h scalar1 < S.order /\ as_nat h scalar2 < S.order)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     point_inv h1 res /\
-    S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
+    S.to_aff_point (from_mont_point_c (as_point_nat h1 res)) ==
     S.to_aff_point (S.point_mul_double_g (as_nat h0 scalar1) (as_nat h0 scalar2)
-      (from_mont_point (as_point_nat h0 p))))
+      (from_mont_point_c (as_point_nat h0 p))))

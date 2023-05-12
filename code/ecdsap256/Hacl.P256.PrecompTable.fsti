@@ -24,42 +24,42 @@ include Hacl.Impl.P256.Group
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val proj_point_to_list: p:S.proj_point
+val proj_point_to_list: p:S.proj_point_c
   -> x:list uint64{FStar.List.Tot.length x = 12 /\
     mk_to_p256_comm_monoid.BE.linv (Seq.seq_of_list x)}
 
-val lemma_refl: x:S.proj_point ->
-  Lemma (S.mk_p256_concrete_ops.SE.to.SE.refl x ==
+val lemma_refl: x:S.proj_point_c ->
+  Lemma ((Spec.ECC.Projective.mk_ec_concrete_ops_a3 S.p256).SE.to.SE.refl x ==
     mk_to_p256_comm_monoid.BE.refl (Seq.seq_of_list (proj_point_to_list x)))
 
 inline_for_extraction noextract
-let mk_p256_precomp_base_table: SPT.mk_precomp_base_table S.proj_point U64 12ul 0ul = {
-  SPT.concr_ops = S.mk_p256_concrete_ops;
+let mk_p256_precomp_base_table: SPT.mk_precomp_base_table S.proj_point_c U64 12ul 0ul = {
+  SPT.concr_ops = Spec.ECC.Projective.mk_ec_concrete_ops_a3 S.p256;
   SPT.to_cm = mk_to_p256_comm_monoid;
   SPT.to_list = proj_point_to_list;
   SPT.lemma_refl = lemma_refl;
 }
 
 inline_for_extraction noextract
-let pow_point (k:nat) (p:S.aff_point) =
-  LE.pow S.mk_p256_comm_monoid p k
+let pow_point (k:nat) (p:S.aff_point_c) =
+  LE.pow (Spec.ECC.mk_ec_comm_monoid S.p256) p k
 
 //----------------
 
 noextract
-let g_aff : S.aff_point = S.to_aff_point S.base_point
+let g_aff : S.aff_point_c = S.base_point
 
 // [pow2 64]G
 noextract
-let g_pow2_64 : S.aff_point = pow_point (pow2 64) g_aff
+let g_pow2_64 : S.aff_point_c = pow_point (pow2 64) g_aff
 
 // [pow2 128]G
 noextract
-let g_pow2_128 : S.aff_point = pow_point (pow2 128) g_aff
+let g_pow2_128 : S.aff_point_c = pow_point (pow2 128) g_aff
 
 // [pow2 192]G
 noextract
-let g_pow2_192 : S.aff_point = pow_point (pow2 192) g_aff
+let g_pow2_192 : S.aff_point_c = pow_point (pow2 192) g_aff
 
 inline_for_extraction noextract
 val proj_g_pow2_64_lseq : LSeq.lseq uint64 12
@@ -101,7 +101,7 @@ val mk_proj_g_pow2_192: unit -> StackInline (lbuffer uint64 12ul)
 
 unfold
 let precomp_table_acc_inv
-  (p:S.aff_point)
+  (p:S.aff_point_c)
   (table_len:nat{table_len * 12 <= max_size_t})
   (table:LSeq.lseq uint64 (table_len * 12))
   (j:nat{j < table_len})

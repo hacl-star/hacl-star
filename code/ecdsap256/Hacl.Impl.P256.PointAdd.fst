@@ -277,10 +277,11 @@ val point_add_noalloc: tmp:lbuffer uint64 24ul -> res:point -> p:point -> q:poin
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
     point_inv h1 res /\
-    from_mont_point (as_point_nat h1 res) ==
-    S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
+    from_mont_point_c (as_point_nat h1 res) ==
+    S.point_add (from_mont_point_c (as_point_nat h0 p)) (from_mont_point_c (as_point_nat h0 q)))
 
 let point_add_noalloc tmp res p q =
+  let h0 = ST.get () in
   let x3, y3, z3 = getx res, gety res, getz res in
   let t0 = sub tmp 0ul 4ul in
   let t1 = sub tmp 4ul 4ul in
@@ -294,7 +295,16 @@ let point_add_noalloc tmp res p q =
   point_add_4 x3 y3 z3 t1 t2;
   point_add_5 x3 y3 z3 t0 t1 t2;
   point_add_6 x3 y3 z3 t0 t1 t2 t4;
-  point_add_7 x3 y3 z3 t0 t1 t2 t3 t4
+  point_add_7 x3 y3 z3 t0 t1 t2 t3 t4;
+  let h1 = ST.get () in
+  assert (from_mont_point (as_point_nat h1 res) ==
+    S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)));
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h0 p);
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h0 q);
+  Spec.EC.Projective.Lemmas.to_aff_point_add_lemma_a3
+    S.p256 (from_mont_point_c (as_point_nat h0 p)) (from_mont_point_c (as_point_nat h0 q));
+  assert (S.point_inv (from_mont_point (as_point_nat h1 res)));
+  Hacl.Spec.P256.Montgomery.mont_point_inv (as_point_nat h1 res)
 
 
 [@CInline]
