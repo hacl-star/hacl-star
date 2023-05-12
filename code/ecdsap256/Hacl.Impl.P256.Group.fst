@@ -12,7 +12,7 @@ module LSeq = Lib.Sequence
 
 module BE = Hacl.Impl.Exponentiation.Definitions
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 open Hacl.Impl.P256.Point
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"

@@ -12,7 +12,7 @@ open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 module P = Hacl.Impl.P256.Point
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 

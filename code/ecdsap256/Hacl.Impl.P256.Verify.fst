@@ -15,7 +15,7 @@ open Hacl.Impl.P256.PointMul
 
 module BSeq = Lib.ByteSequence
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
 module QI = Hacl.Impl.P256.Qinv
 

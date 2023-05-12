@@ -11,7 +11,7 @@ open Lib.Buffer
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Field
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

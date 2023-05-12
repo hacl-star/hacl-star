@@ -5,7 +5,7 @@ open FStar.Mul
 module SE = Spec.Exponentiation
 module LE = Lib.Exponentiation
 module M = Lib.NatMod
-module S = Spec.P256
+module S = Hacl.Spec.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

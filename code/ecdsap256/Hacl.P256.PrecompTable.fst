@@ -16,7 +16,7 @@ module SPT = Hacl.Spec.PrecompBaseTable
 module SPT256 = Hacl.Spec.PrecompBaseTable256
 module SPTK = Hacl.Spec.P256.PrecompTable
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 
 open Hacl.Impl.P256.Point
 include Hacl.Impl.P256.Group

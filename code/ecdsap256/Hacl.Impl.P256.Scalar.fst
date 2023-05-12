@@ -11,7 +11,7 @@ open Lib.Buffer
 open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Constants
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
 
 module BD = Hacl.Spec.Bignum.Definitions

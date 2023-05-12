@@ -16,7 +16,7 @@ module BE = Hacl.Impl.Exponentiation
 module BD = Hacl.Spec.Bignum.Definitions
 module LSeq = Lib.Sequence
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 module SI = Hacl.Spec.P256.Finv
 module SM = Hacl.Spec.P256.Montgomery
 

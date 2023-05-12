@@ -10,7 +10,7 @@ open Lib.Buffer
 
 open Hacl.Impl.P256.Bignum
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
 module BSeq = Lib.ByteSequence
 

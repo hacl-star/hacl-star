@@ -20,7 +20,7 @@ module PT = Hacl.Impl.PrecompTable
 module SPT256 = Hacl.Spec.PrecompBaseTable256
 module BD = Hacl.Spec.Bignum.Definitions
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 
 include Hacl.Impl.P256.Group
 include Hacl.P256.PrecompTable

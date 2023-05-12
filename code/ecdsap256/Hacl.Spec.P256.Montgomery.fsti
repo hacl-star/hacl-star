@@ -3,7 +3,7 @@ module Hacl.Spec.P256.Montgomery
 open FStar.Mul
 open Lib.IntTypes
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 module M = Lib.NatMod
 module LSeq = Lib.Sequence
 

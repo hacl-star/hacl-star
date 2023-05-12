@@ -15,7 +15,7 @@ module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation.Definitions
 module SPT = Hacl.Spec.PrecompBaseTable
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
 
 open Hacl.Impl.P256.Point

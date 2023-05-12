@@ -12,7 +12,7 @@ open Hacl.Impl.P256.Scalar
 open Hacl.Impl.P256.Point
 open Hacl.Impl.P256.PointMul
 
-module S = Spec.P256
+module S = Hacl.Spec.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
