@@ -1496,7 +1496,7 @@ let update #index c i t t' p data len =
   let i = c.index_of_state i block_state in
 
   if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 len >^ c.max_input_len i -^ total_len) then
-    1ul
+    Hacl.Streaming.Types.MaximumLengthExceeded
   else
     let sz = rest c i total_len in
     if len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
@@ -1525,7 +1525,7 @@ let update #index c i t t' p data len =
         ()
       )
     end;
-    0ul
+    Hacl.Streaming.Types.Success
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"

@@ -423,10 +423,10 @@ let update_st
     (requires fun h0 -> update_pre c i s data len h0)
     (ensures fun h0 s' h1 ->
       match s' with
-      | 0ul ->
+      | Hacl.Streaming.Types.Success ->
           U32.v (c.init_input_len i) + S.length (seen c i h0 s) + UInt32.v len <= U64.v (c.max_input_len i) /\
           update_post c i s data len h0 h1
-      | 1ul ->
+      | Hacl.Streaming.Types.MaximumLengthExceeded ->
           U32.v (c.init_input_len i) + S.length (seen c i h0 s) + UInt32.v len > U64.v (c.max_input_len i) /\
           h0 == h1
       | _ ->

@@ -16,6 +16,7 @@ module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
 open FStar.Mul
+open Hacl.Streaming.Types
 
 inline_for_extraction noextract
 let uint8 = Lib.IntTypes.uint8
@@ -124,7 +125,7 @@ let hacl_keccak (a: G.erased alg): block alg =
     (stateful_unused alg) (* key *)
     Lib.IntTypes.(x:size_t { v x > 0 }) (* output_length_t *)
 
-    (fun _ -> 0xffffffffUL) (* max_input_len *)
+    (fun _ -> 0xffffffffffffffffUL) (* max_input_len *)
     (fun a l -> if is_shake_ a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) (* output_length *)
     Hacl.Hash.SHA3.block_len (* block_len *)
     Hacl.Hash.SHA3.block_len (* blocks_state_len *)
@@ -207,13 +208,6 @@ let finish_ (a: alg) =
   F.mk_finish #alg (hacl_keccak a) a (sha3_state a) (G.erased unit)
 
 open Hacl.Streaming.Functor
-
-// Also marks projectors as private, krml will mark type def as public.
-private
-type error_code =
-  | Success
-  | InvalidAlgorithm
-  | InvalidLength
 
 // Unfortunate copy-paste since there are small variations (error code, output length)
 val finish:
