@@ -187,8 +187,8 @@ let update (i: G.erased Hash.alg)
       | _ -> False)
 =
   match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) s data len with
-  | 0ul -> EverCrypt.Error.Success
-  | 1ul -> EverCrypt.Error.MaximumLengthExceeded
+  | Hacl.Streaming.Types.Success -> EverCrypt.Error.Success
+  | Hacl.Streaming.Types.MaximumLengthExceeded -> EverCrypt.Error.MaximumLengthExceeded
 
 inline_for_extraction noextract
 let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
