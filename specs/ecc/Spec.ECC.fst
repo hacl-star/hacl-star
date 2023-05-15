@@ -43,7 +43,6 @@ let aff_point_mul (k:curve) (a:nat) (p:aff_point_c k) : aff_point_c k =
   LE.pow (mk_ec_comm_monoid k) p a
 
 
-// TODO: add point_inv
 inline_for_extraction
 class ec_concrete_ops = {
   ec: curve;
@@ -51,7 +50,7 @@ class ec_concrete_ops = {
   to_point_t: aff_point_c ec -> t;
   to_aff_point: t -> aff_point_c ec;
   lemma_to_from_aff_point: p:aff_point_c ec -> Lemma (to_aff_point (to_point_t p) == p);
-  is_point_at_inf: p:t -> res:bool{res ==> is_aff_point_at_inf ec (to_aff_point p)};
+  is_point_at_inf: p:t -> res:bool{res <==> is_aff_point_at_inf ec (to_aff_point p)};
   point_mul: a:M.nat_mod ec.order -> p:t -> res:t
     { to_aff_point res == aff_point_mul ec a (to_aff_point p) };
   point_mul_double_g: a1:M.nat_mod ec.order -> a2:M.nat_mod ec.order -> p:t -> res:t
@@ -63,10 +62,10 @@ class ec_concrete_ops = {
 
 
 let point_mul_g (k:ec_concrete_ops) (a:M.nat_mod k.ec.order)
-  : res:k.t{k.to_aff_point res == aff_point_mul ec a k.ec.base_point}
+  : res:k.t{k.to_aff_point res == aff_point_mul k.ec a k.ec.base_point}
  =
   k.lemma_to_from_aff_point k.ec.base_point;
-  k.point_mul a (to_point_t k.ec.base_point)
+  k.point_mul a (k.to_point_t k.ec.base_point)
 
 
 let load_point (k:ec_concrete_ops) (b:lbytes (2 * k.ec.prime_len_bytes)) : option k.t =

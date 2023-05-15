@@ -12,13 +12,12 @@ include Spec.EC.Projective
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-
 ///  Elliptic curve scalar multiplication
 
 let mk_to_ec_comm_monoid (k:curve) : SE.to_comm_monoid (proj_point_c k) = {
   SE.a_spec = aff_point_c k;
   SE.comm_monoid = EC.mk_ec_comm_monoid k;
-  SE.refl = (fun (x:proj_point_c k) -> to_aff_point k x);
+  SE.refl = to_aff_point_c k;
 }
 
 val point_at_inf_c: k:curve -> SE.one_st (proj_point_c k) (mk_to_ec_comm_monoid k)
@@ -28,18 +27,10 @@ let point_at_inf_c k _ =
 
 
 let is_point_at_inf_c (k:curve) (p:proj_point_c k)
-  : res:bool{res ==> EC.is_aff_point_at_inf k (to_aff_point k p)}
+  : res:bool{res <==> EC.is_aff_point_at_inf k (to_aff_point k p)}
  =
-  EPL.lemma_aff_is_point_at_inf k p;
+  EPL.lemma_aff_is_point_at_inf_c k p;
   is_point_at_inf k p
-
-
-let to_proj_point_c (k:curve) (p:aff_point_c k) : proj_point_c k =
-  let px, py = p in
-  k.prime_lemma ();
-  Lib.NatMod.lemma_div_mod_prime_one #k.prime px;
-  Lib.NatMod.lemma_div_mod_prime_one #k.prime py;
-  to_proj_point k p
 
 
 ///  for elliptic curve with coeff_a = (-3) % prime
@@ -98,25 +89,24 @@ let is_supported (k:curve) =
 
 // [a]P
 let point_mul (k:curve{is_supported k}) (a:qelem k) (p:proj_point_c k)
-  : res:proj_point_c k{to_aff_point k res == EC.aff_point_mul k a (to_aff_point k p) }
+  : res:proj_point_c k{to_aff_point_c k res == EC.aff_point_mul k a (to_aff_point_c k p) }
  =
   let aBits = 8 * k.order_len_bytes in // TODO: add order_bits to `curve`?
   let w = 4 in // TODO: use montgomery ladder for the spec?
-  if k.coeff_a = 0 then begin
-    SE.exp_fw_lemma (mk_ec_concrete_ops_a0 k) p aBits a w;
-    LE.exp_fw_lemma (EC.mk_ec_comm_monoid k) (to_aff_point k p) aBits a w;
-    SE.exp_fw (mk_ec_concrete_ops_a0 k) p aBits a w end
-  else begin
-    SE.exp_fw_lemma (mk_ec_concrete_ops_a3 k) p aBits a w;
-    LE.exp_fw_lemma (EC.mk_ec_comm_monoid k) (to_aff_point k p) aBits a w;
-    SE.exp_fw (mk_ec_concrete_ops_a3 k) p aBits a w end
+
+  let mk_ec_concrete_ops =
+    if k.coeff_a = 0 then mk_ec_concrete_ops_a0 k else mk_ec_concrete_ops_a3 k in
+
+  SE.exp_fw_lemma mk_ec_concrete_ops p aBits a w;
+  LE.exp_fw_lemma (EC.mk_ec_comm_monoid k) (to_aff_point k p) aBits a w;
+  SE.exp_fw mk_ec_concrete_ops p aBits a w
 
 
 // [a1]G + [a2]P
 let point_mul_double_g (k:curve{is_supported k}) (a1 a2:qelem k) (p:proj_point_c k)
-  : res:proj_point_c k{to_aff_point k res ==
+  : res:proj_point_c k{to_aff_point_c k res ==
       EC.aff_point_add k
-        (EC.aff_point_mul k a1 k.base_point) (EC.aff_point_mul k a2 (to_aff_point k p)) }
+        (EC.aff_point_mul k a1 k.base_point) (EC.aff_point_mul k a2 (to_aff_point_c k p)) }
  =
   let aBits = 8 * k.order_len_bytes in // TODO: add order_bits to `curve`?
   let w = 5 in // TODO: use montgomery ladder for the spec?
@@ -124,21 +114,19 @@ let point_mul_double_g (k:curve{is_supported k}) (a1 a2:qelem k) (p:proj_point_c
   EPL.lemma_proj_aff_id k k.base_point;
   let g_proj = to_proj_point k k.base_point in
 
-  if k.coeff_a = 0 then begin
-    SE.exp_double_fw_lemma (mk_ec_concrete_ops_a0 k) g_proj aBits a1 p a2 w;
-    LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k) k.base_point aBits a1 (to_aff_point k p) a2 w;
-    SE.exp_double_fw (mk_ec_concrete_ops_a0 k) g_proj aBits a1 p a2 w end
- else begin
-    SE.exp_double_fw_lemma (mk_ec_concrete_ops_a3 k) g_proj aBits a1 p a2 w;
-    LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k) k.base_point aBits a1 (to_aff_point k p) a2 w;
-    SE.exp_double_fw (mk_ec_concrete_ops_a3 k) g_proj aBits a1 p a2 w end
+  let mk_ec_concrete_ops =
+    if k.coeff_a = 0 then mk_ec_concrete_ops_a0 k else mk_ec_concrete_ops_a3 k in
+
+  SE.exp_double_fw_lemma mk_ec_concrete_ops g_proj aBits a1 p a2 w;
+  LE.exp_double_fw_lemma (EC.mk_ec_comm_monoid k) k.base_point aBits a1 (to_aff_point k p) a2 w;
+  SE.exp_double_fw mk_ec_concrete_ops g_proj aBits a1 p a2 w
 
 
 let ec_concrete_ops_proj (k:curve{is_supported k}) : EC.ec_concrete_ops = {
   EC.ec = k;
   EC.t = proj_point_c k;
   EC.to_point_t = to_proj_point_c k;
-  EC.to_aff_point = (fun (x:proj_point_c k) -> to_aff_point k x);
+  EC.to_aff_point = to_aff_point_c k;
   EC.lemma_to_from_aff_point = EPL.lemma_proj_aff_id k;
   EC.is_point_at_inf = is_point_at_inf_c k;
   EC.point_mul = point_mul k;

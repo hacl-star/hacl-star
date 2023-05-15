@@ -92,15 +92,8 @@ let lemma_aff_is_point_at_inf k p =
   M.lemma_div_mod_prime_is_zero #prime py pz
 
 
-let lemma_proj_aff_id k p =
-  let (px, py) = p in
-  let (pX, pY, pZ) = to_proj_point k p in
-  assert (pX = px /\ pY = pY /\ pZ = 1);
-  let (rx, ry) = to_aff_point k (pX, pY, pZ) in
-  assert (rx = fmul k pX (finv k pZ) /\ ry = fmul k pY (finv k pZ));
-  M.lemma_div_mod_prime_one #prime pX;
-  M.lemma_div_mod_prime_one #prime pY;
-  assert (rx = pX /\ ry = pY)
+let lemma_aff_is_point_at_inf_c k p =
+  lemma_aff_is_point_at_inf k p
 
 
 let to_aff_point_at_infinity_lemma k =
@@ -115,6 +108,21 @@ let to_aff_point_at_infinity_lemma k =
   M.lemma_pow_zero (prime - 2);
   assert (zinv == 0);
   assert (px == 0 /\ py == 0)
+
+
+let lemma_proj_aff_id k p =
+  let (px, py) = p in
+  let (pX, pY, pZ) = to_proj_point k p in
+  let (rx, ry) = to_aff_point k (pX, pY, pZ) in
+
+  if is_aff_point_at_inf k p then
+    to_aff_point_at_infinity_lemma k
+  else begin
+    assert (pX = px /\ pY = pY /\ pZ = 1);
+    assert (rx = fmul k pX (finv k pZ) /\ ry = fmul k pY (finv k pZ));
+    M.lemma_div_mod_prime_one #prime pX;
+    M.lemma_div_mod_prime_one #prime pY;
+    assert (rx = pX /\ ry = pY) end
 
 
 let to_aff_point_negate_lemma k p =
@@ -135,8 +143,10 @@ let to_aff_point_negate_lemma k p =
     (- (py * pz_inv) % k.prime) % k.prime; // (- py /% pz) % prime;
   };
   assert (to_aff_point k (point_negate k p) == aff_point_negate k (to_aff_point k p));
-  Spec.EC.Lemmas.aff_point_negate_inv_lemma k (to_aff_point k p);
-  assert (point_inv k (point_negate k p))
+  if is_point_at_inf k p then assert (pz = 0)
+  else begin
+    Spec.EC.Lemmas.aff_point_negate_on_curve_lemma k (to_aff_point_c k p);
+    assert (is_on_curve k (to_aff_point k (point_negate k p))) end
 
 
 let to_aff_point_add_lemma_a3 k p q = admit()

@@ -25,7 +25,7 @@ class curve = {
   coeff_a: M.nat_mod prime;
   coeff_b: x:M.nat_mod prime{0 < x}; // (0, 0) is not on the curve
 
-  order: x:pos{1 < x};
+  order: x:nat{1 < x};
   base_point: x:tuple2_lt_n prime{tuple2_on_curve prime coeff_a coeff_b x};
 
   prime_len_bytes: x:nat{prime < pow2 (8 * x) /\ 2 * x <= max_size_t};
@@ -70,6 +70,14 @@ let aff_point_at_inf (k:curve) : aff_point k = (zero k, zero k) // not on the cu
 
 let is_aff_point_at_inf (k:curve) (p:aff_point k) : bool =
   let (x, y) = p in x = zero k && y = zero k
+
+
+val aff_point_at_inf_inv: k:curve -> Lemma (not (is_on_curve k (aff_point_at_inf k)))
+let aff_point_at_inf_inv k =
+  let ( +% ) = fadd k in
+  let ( *% ) = fmul k in
+  let (x, y) = aff_point_at_inf k in
+  assert_norm (y *% y <> x *% x *% x +% k.coeff_a *% x +% k.coeff_b)
 
 
 let aff_point_inv (k:curve) (p:aff_point k) =
@@ -129,7 +137,8 @@ let aff_point_negate (k:curve) (p:aff_point k) : aff_point k =
 
 ///  Point conversion between affine and bytes representation
 
-let aff_point_load (k:curve) (b:BSeq.lbytes (2 * k.prime_len_bytes)) : option (aff_point_c k) =
+let aff_point_load (k:curve) (b:BSeq.lbytes (2 * k.prime_len_bytes))
+  : p:option (aff_point k){Some? p ==> is_on_curve k (Some?.v p)} =
   let len = k.prime_len_bytes in
   let pk_x = BSeq.nat_from_bytes_be (sub b 0 len) in
   let pk_y = BSeq.nat_from_bytes_be (sub b len len) in
