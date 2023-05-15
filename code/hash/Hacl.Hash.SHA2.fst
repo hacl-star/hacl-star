@@ -72,49 +72,24 @@ let init_256 = mk_init SHA2_256
 let init_384 = mk_init SHA2_384
 let init_512 = mk_init SHA2_512
 
-let alloca_224 () =
-  let h0 = ST.get () in
-  let st = Hacl.Impl.SHA2.Generic.alloc SHA2_224 Vec.M32 in
-  Hacl.Impl.SHA2.Generic.init st;
-  let h1 = ST.get () in
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Vec.M32 0;
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_224);
-  state_spec_v_lemma SHA2_224 (Vec.init SHA2_224 Vec.M32);
-  LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
-  coerce_to_state SHA2_224 st
+inline_for_extraction noextract
+val mk_alloca: a:sha2_alg -> alloca_st (| a, () |)
 
-let alloca_256 () =
+let mk_alloca a () =
   let h0 = ST.get () in
-  let st = Hacl.Impl.SHA2.Generic.alloc SHA2_256 Vec.M32 in
+  let st = Hacl.Impl.SHA2.Generic.alloc a Vec.M32 in
   Hacl.Impl.SHA2.Generic.init st;
   let h1 = ST.get () in
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_256 Vec.M32 0;
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_256);
-  state_spec_v_lemma SHA2_256 (Vec.init SHA2_256 Vec.M32);
+  Hacl.Spec.SHA2.Equiv.init_lemma_l a Vec.M32 0;
+  Lib.IntVector.reveal_vec_1 (word_t a);
+  state_spec_v_lemma a (Vec.init a Vec.M32);
   LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
-  coerce_to_state SHA2_256 st
+  coerce_to_state a st
 
-let alloca_384 () =
-  let h0 = ST.get () in
-  let st = Hacl.Impl.SHA2.Generic.alloc SHA2_384 Vec.M32 in
-  Hacl.Impl.SHA2.Generic.init st;
-  let h1 = ST.get () in
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_384 Vec.M32 0;
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_384);
-  state_spec_v_lemma SHA2_384 (Vec.init SHA2_384 Vec.M32);
-  LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
-  coerce_to_state SHA2_384 st
-
-let alloca_512 () =
-  let h0 = ST.get () in
-  let st = Hacl.Impl.SHA2.Generic.alloc SHA2_512 Vec.M32 in
-  Hacl.Impl.SHA2.Generic.init st;
-  let h1 = ST.get () in
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_512 Vec.M32 0;
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_512);
-  state_spec_v_lemma SHA2_512 (Vec.init SHA2_512 Vec.M32);
-  LowStar.Buffer.(modifies_only_not_unused_in loc_none h0 h1);
-  coerce_to_state SHA2_512 st
+let alloca_224 = mk_alloca SHA2_224
+let alloca_256 = mk_alloca SHA2_256
+let alloca_384 = mk_alloca SHA2_384
+let alloca_512 = mk_alloca SHA2_512
 
 inline_for_extraction noextract
 val mk_update_multi: a:sha2_alg -> update_multi_st (| a, () |)
