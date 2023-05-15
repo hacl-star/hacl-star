@@ -55,41 +55,22 @@ let state_spec_v_lemma a st =
   reveal_vec_1 (word_t a);
   eq_intro #(word a) #8 (Vec.state_spec_v st).[0] st
 
-let init_224 st =
+inline_for_extraction noextract
+val mk_init: a:sha2_alg -> init_st (| a, () |)
+
+let mk_init a st =
   [@inline_let]
-  let st: mb_state_32 SHA2_224 = coerce_to_mb_state SHA2_224 st in
+  let st: mb_state_32 a = coerce_to_mb_state a st in
 
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_224);
-  Hacl.SHA2.Scalar32.init #SHA2_224 st;
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_224 Vec.M32 0;
-  state_spec_v_lemma SHA2_224 (Vec.init SHA2_224 Vec.M32)
+  Lib.IntVector.reveal_vec_1 (word_t a);
+  Hacl.SHA2.Scalar32.init #a st;
+  Hacl.Spec.SHA2.Equiv.init_lemma_l a Vec.M32 0;
+  state_spec_v_lemma a (Vec.init a Vec.M32)
 
-let init_256 st =
-  [@inline_let]
-  let st: mb_state_32 SHA2_256 = coerce_to_mb_state SHA2_256 st in
-
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_256);
-  Hacl.SHA2.Scalar32.init #SHA2_256 st;
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_256 Vec.M32 0;
-  state_spec_v_lemma SHA2_256 (Vec.init SHA2_256 Vec.M32)
-
-let init_384 st =
-  [@inline_let]
-  let st: mb_state_32 SHA2_384 = coerce_to_mb_state SHA2_384 st in
-
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_384);
-  Hacl.SHA2.Scalar32.init #SHA2_384 st;
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_384 Vec.M32 0;
-  state_spec_v_lemma SHA2_384 (Vec.init SHA2_384 Vec.M32)
-
-let init_512 st =
-  [@inline_let]
-  let st: mb_state_32 SHA2_512 = coerce_to_mb_state SHA2_512 st in
-
-  Lib.IntVector.reveal_vec_1 (word_t SHA2_512);
-  Hacl.SHA2.Scalar32.init #SHA2_512 st;
-  Hacl.Spec.SHA2.Equiv.init_lemma_l SHA2_512 Vec.M32 0;
-  state_spec_v_lemma SHA2_512 (Vec.init SHA2_512 Vec.M32)
+let init_224 = mk_init SHA2_224
+let init_256 = mk_init SHA2_256
+let init_384 = mk_init SHA2_384
+let init_512 = mk_init SHA2_512
 
 let alloca_224 () =
   let h0 = ST.get () in
