@@ -14,6 +14,16 @@ include Spec.EC.Projective
 
 ///  Elliptic curve scalar multiplication
 
+let to_aff_point_c (k:curve) (p:proj_point_c k) : aff_point_c k =
+  EPL.lemma_to_aff_point_c k p;
+  to_aff_point k p
+
+
+let to_proj_point_c (k:curve) (p:aff_point_c k) : proj_point_c k =
+  EPL.lemma_to_proj_point_c k p;
+  to_proj_point k p
+
+
 let mk_to_ec_comm_monoid (k:curve) : SE.to_comm_monoid (proj_point_c k) = {
   SE.a_spec = aff_point_c k;
   SE.comm_monoid = EC.mk_ec_comm_monoid k;
@@ -112,7 +122,8 @@ let point_mul_double_g (k:curve{is_supported k}) (a1 a2:qelem k) (p:proj_point_c
   let w = 5 in // TODO: use montgomery ladder for the spec?
 
   EPL.lemma_proj_aff_id k k.base_point;
-  let g_proj = to_proj_point k k.base_point in
+  let g_proj = to_proj_point_c k k.base_point in
+  assert (to_aff_point_c k (to_proj_point_c k k.base_point) == k.base_point);
 
   let mk_ec_concrete_ops =
     if k.coeff_a = 0 then mk_ec_concrete_ops_a0 k else mk_ec_concrete_ops_a3 k in

@@ -28,28 +28,20 @@ let to_aff_point (k:curve) (p:proj_point k) : aff_point k =
   let y = fmul k py zinv in
   (x, y)
 
-// if aff_point_inv k (to_aff_point k p)
-// then is_point_at_inf (px, py, pz) = (pz = 0 \/ (px = 0 && py = 0))
-let point_inv (k:curve) (p:proj_point k) =
+// if `point_inv_to_aff` is defined as `aff_point_inv k (to_aff_point k p)`
+// then we need to fix the definition of `is_point_at_inf (px, py, pz)`
+// as `(pz = 0 \/ (px = 0 && py = 0))`
+let point_inv_to_aff (k:curve) (p:proj_point k) =
   is_on_curve k (to_aff_point k p) \/ is_point_at_inf k p
 
+
+let point_inv (k:curve) (p:proj_point k) =
+  let ( +% ) = fadd k in
+  let ( *% ) = fmul k in
+  let (x, y, z) = p in
+  y *% y *% z = x *% x *% x +% k.coeff_a *% x *% (z *% z) +% k.coeff_b *% (z *% z *% z)
+
 let proj_point_c (k:curve) = p:proj_point k{point_inv k p}
-
-
-let to_aff_point_c (k:curve) (p:proj_point_c k) : aff_point_c k =
-  let (px, py, pz) = p in
-  if is_point_at_inf k p then begin
-    Lib.NatMod.lemma_pow_mod #k.prime pz (k.prime - 2);
-    Lib.NatMod.lemma_pow_zero (k.prime - 2);
-    assert (to_aff_point k p == aff_point_at_inf k) end;
-  to_aff_point k p
-
-let to_proj_point_c (k:curve) (p:aff_point_c k) : proj_point_c k =
-  let px, py = p in
-  k.prime_lemma ();
-  Lib.NatMod.lemma_div_mod_prime_one #k.prime px;
-  Lib.NatMod.lemma_div_mod_prime_one #k.prime py;
-  to_proj_point k p
 
 
 let point_negate (k:curve) (p:proj_point k) : proj_point k =
