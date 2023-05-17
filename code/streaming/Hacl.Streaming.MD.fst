@@ -40,6 +40,7 @@ let _: squash (inversion hash_alg) = allow_inversion hash_alg
 inline_for_extraction noextract
 let alg = md_alg
 
+inline_for_extraction noextract
 let init_elem (a : alg) : word a =
   match a with
   | MD5 | SHA1 | SHA2_256 | SHA2_224 -> Lib.IntTypes.u32 0

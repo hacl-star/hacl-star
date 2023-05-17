@@ -1675,7 +1675,7 @@ Hacl_K256_ECDSA_ecdsa_sign_sha256(
 )
 {
   uint8_t msgHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
+  Hacl_Streaming_SHA2_hash_256(msg, msg_len, msgHash);
   bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
   return b;
 }
@@ -1774,7 +1774,7 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
 )
 {
   uint8_t mHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
+  Hacl_Streaming_SHA2_hash_256(msg, msg_len, mHash);
   bool b = Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(mHash, public_key, signature);
   return b;
 }
@@ -1870,7 +1870,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256(
 )
 {
   uint8_t msgHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
+  Hacl_Streaming_SHA2_hash_256(msg, msg_len, msgHash);
   bool
   b = Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
   return b;
@@ -1924,7 +1924,7 @@ Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256(
 )
 {
   uint8_t mHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
+  Hacl_Streaming_SHA2_hash_256(msg, msg_len, mHash);
   bool b = Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(mHash, public_key, signature);
   return b;
 }
