@@ -57,15 +57,9 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state;
 /**
   State allocation function when there is no key
 */
-/**
-  State allocation function when there is no key
-*/
 Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in(void);
 
-/**
-  (Re-)initialization function when there is no key
-*/
 /**
   (Re-)initialization function when there is no key
 */
@@ -74,9 +68,6 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
   Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 );
 
-/**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
-*/
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
@@ -90,18 +81,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
 /**
   Finish function when there is no key
 */
-/**
-  Finish function when there is no key
-*/
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
   Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *dst
 );
 
-/**
-  Free state function when there is no key
-*/
 /**
   Free state function when there is no key
 */

@@ -36,12 +36,6 @@ Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
 `dst` must point to 20 bytes of memory.
 */
-/**
-Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
-
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 byte.
-`dst` must point to 20 bytes of memory.
-*/
 void
 Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst,
@@ -166,12 +160,6 @@ Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
 `dst` must point to 32 bytes of memory.
 */
-/**
-Write the HMAC-SHA-2-256 MAC of a message (`data`) by using a key (`key`) into `dst`.
-
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
-`dst` must point to 32 bytes of memory.
-*/
 void
 Hacl_HMAC_compute_sha2_256(
   uint8_t *dst,
@@ -290,12 +278,6 @@ Hacl_HMAC_compute_sha2_256(
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
 }
 
-/**
-Write the HMAC-SHA-2-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
-
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
-`dst` must point to 48 bytes of memory.
-*/
 /**
 Write the HMAC-SHA-2-384 MAC of a message (`data`) by using a key (`key`) into `dst`.
 
@@ -432,12 +414,6 @@ Write the HMAC-SHA-2-512 MAC of a message (`data`) by using a key (`key`) into `
 The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
 `dst` must point to 64 bytes of memory.
 */
-/**
-Write the HMAC-SHA-2-512 MAC of a message (`data`) by using a key (`key`) into `dst`.
-
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
-`dst` must point to 64 bytes of memory.
-*/
 void
 Hacl_HMAC_compute_sha2_512(
   uint8_t *dst,
@@ -562,12 +538,6 @@ Hacl_HMAC_compute_sha2_512(
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
 }
 
-/**
-Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.
-
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 64 bytes.
-`dst` must point to 32 bytes of memory.
-*/
 /**
 Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.
 
@@ -710,12 +680,6 @@ Hacl_HMAC_compute_blake2s_32(
   Hacl_Blake2s_32_blake2s_finish((uint32_t)32U, dst, s0);
 }
 
-/**
-Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
-
-The key can be any length and will be hashed if it is longer and padded if it is shorter than 128 bytes.
-`dst` must point to 64 bytes of memory.
-*/
 /**
 Write the HMAC-BLAKE2b MAC of a message (`data`) by using a key (`key`) into `dst`.
 

@@ -28,9 +28,6 @@
 /**
   State allocation function when there is no key
 */
-/**
-  State allocation function when there is no key
-*/
 Hacl_Streaming_Blake2s_128_blake2s_128_state
 *Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in(void)
 {
@@ -61,9 +58,6 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
 /**
   (Re-)initialization function when there is no key
 */
-/**
-  (Re-)initialization function when there is no key
-*/
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
   Hacl_Streaming_Blake2s_128_blake2s_128_state *s
@@ -78,9 +72,6 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
   s[0U] = tmp;
 }
 
-/**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
-*/
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
@@ -280,9 +271,6 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
 /**
   Finish function when there is no key
 */
-/**
-  Finish function when there is no key
-*/
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
@@ -332,9 +320,6 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
 }
 
-/**
-  Free state function when there is no key
-*/
 /**
   Free state function when there is no key
 */

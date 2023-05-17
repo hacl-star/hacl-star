@@ -72,23 +72,14 @@ Hacl_Streaming_Blake2_blake2b_32_state;
 /**
   State allocation function when there is no key
 */
-/**
-  State allocation function when there is no key
-*/
 Hacl_Streaming_Blake2_blake2s_32_state
 *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in(void);
 
 /**
   (Re-)initialization function when there is no key
 */
-/**
-  (Re-)initialization function when there is no key
-*/
 void Hacl_Streaming_Blake2_blake2s_32_no_key_init(Hacl_Streaming_Blake2_blake2s_32_state *s1);
 
-/**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
-*/
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
@@ -102,9 +93,6 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_update(
 /**
   Finish function when there is no key
 */
-/**
-  Finish function when there is no key
-*/
 void
 Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
   Hacl_Streaming_Blake2_blake2s_32_state *p,
@@ -114,14 +102,8 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
 /**
   Free state function when there is no key
 */
-/**
-  Free state function when there is no key
-*/
 void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_32_state *s1);
 
-/**
-  State allocation function when there is no key
-*/
 /**
   State allocation function when there is no key
 */
@@ -131,14 +113,8 @@ Hacl_Streaming_Blake2_blake2b_32_state
 /**
   (Re)-initialization function when there is no key
 */
-/**
-  (Re)-initialization function when there is no key
-*/
 void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_32_state *s1);
 
-/**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
-*/
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
@@ -152,18 +128,12 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_update(
 /**
   Finish function when there is no key
 */
-/**
-  Finish function when there is no key
-*/
 void
 Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
   Hacl_Streaming_Blake2_blake2b_32_state *p,
   uint8_t *dst
 );
 
-/**
-  Free state function when there is no key
-*/
 /**
   Free state function when there is no key
 */

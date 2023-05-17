@@ -46,9 +46,6 @@ void Hacl_Streaming_SHA1_legacy_init(Hacl_Streaming_MD_state_32 *s);
 /**
 0 = success, 1 = max length exceeded
 */
-/**
-0 = success, 1 = max length exceeded
-*/
 Hacl_Streaming_Types_error_code
 Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, uint32_t len);
 

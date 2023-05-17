@@ -477,10 +477,6 @@ static inline void sha384_finish(uint64_t *st, uint8_t *h)
 Allocate initial state for the SHA2_256 hash. The state is to be freed by
 calling `free_256`.
 */
-/**
-Allocate initial state for the SHA2_256 hash. The state is to be freed by
-calling `free_256`.
-*/
 Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_create_in_256(void)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
@@ -494,12 +490,6 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_create_in_256(void)
   return p;
 }
 
-/**
-Copies the state passed as argument into a newly allocated state (deep copy).
-The state is to be freed by calling `free_256`. Cloning the state this way is
-useful, for instance, if your control-flow diverges and you need to feed
-more (different) data into the hash in each branch.
-*/
 /**
 Copies the state passed as argument into a newly allocated state (deep copy).
 The state is to be freed by calling `free_256`. Cloning the state this way is
@@ -524,9 +514,6 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_copy_256(Hacl_Streaming_MD_state
   return p;
 }
 
-/**
-Reset an existing state to the initial hash state with empty data.
-*/
 /**
 Reset an existing state to the initial hash state with empty data.
 */
@@ -723,13 +710,6 @@ success, or 1 if the combined length of all of the data passed to `update_256`
 
 This function is identical to the update function for SHA2_224.
 */
-/**
-Feed an arbitrary amount of data into the hash. This function returns 0 for
-success, or 1 if the combined length of all of the data passed to `update_256`
-(since the last call to `init_256`) exceeds 2^61-1 bytes.
-
-This function is identical to the update function for SHA2_224.
-*/
 Hacl_Streaming_Types_error_code
 Hacl_Streaming_SHA2_update_256(
   Hacl_Streaming_MD_state_32 *p,
@@ -740,12 +720,6 @@ Hacl_Streaming_SHA2_update_256(
   return update_224_256(p, input, input_len);
 }
 
-/**
-Write the resulting hash into `dst`, an array of 32 bytes. The state remains
-valid after a call to `finish_256`, meaning the user may feed more data into
-the hash via `update_256`. (The finish_256 function operates on an internal copy of
-the state and therefore does not invalidate the client-held state `p`.)
-*/
 /**
 Write the resulting hash into `dst`, an array of 32 bytes. The state remains
 valid after a call to `finish_256`, meaning the user may feed more data into
@@ -792,11 +766,6 @@ Free a state allocated with `create_in_256`.
 
 This function is identical to the free function for SHA2_224.
 */
-/**
-Free a state allocated with `create_in_256`.
-
-This function is identical to the free function for SHA2_224.
-*/
 void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_MD_state_32 *s)
 {
   Hacl_Streaming_MD_state_32 scrut = *s;
@@ -807,9 +776,6 @@ void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_MD_state_32 *s)
   KRML_HOST_FREE(s);
 }
 
-/**
-Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes.
-*/
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes.
 */
@@ -868,11 +834,6 @@ Write the resulting hash into `dst`, an array of 28 bytes. The state remains
 valid after a call to `finish_224`, meaning the user may feed more data into
 the hash via `update_224`.
 */
-/**
-Write the resulting hash into `dst`, an array of 28 bytes. The state remains
-valid after a call to `finish_224`, meaning the user may feed more data into
-the hash via `update_224`.
-*/
 void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_MD_state_32 *p, uint8_t *dst)
 {
   Hacl_Streaming_MD_state_32 scrut = *p;
@@ -916,9 +877,6 @@ void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_MD_state_32 *p)
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes.
 */
-/**
-Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes.
-*/
 void Hacl_Streaming_SHA2_sha224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint8_t *ib = input;
@@ -948,12 +906,6 @@ Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_create_in_512(void)
   return p;
 }
 
-/**
-Copies the state passed as argument into a newly allocated state (deep copy).
-The state is to be freed by calling `free_512`. Cloning the state this way is
-useful, for instance, if your control-flow diverges and you need to feed
-more (different) data into the hash in each branch.
-*/
 /**
 Copies the state passed as argument into a newly allocated state (deep copy).
 The state is to be freed by calling `free_512`. Cloning the state this way is
@@ -1171,13 +1123,6 @@ success, or 1 if the combined length of all of the data passed to `update_512`
 
 This function is identical to the update function for SHA2_384.
 */
-/**
-Feed an arbitrary amount of data into the hash. This function returns 0 for
-success, or 1 if the combined length of all of the data passed to `update_512`
-(since the last call to `init_512`) exceeds 2^125-1 bytes.
-
-This function is identical to the update function for SHA2_384.
-*/
 Hacl_Streaming_Types_error_code
 Hacl_Streaming_SHA2_update_512(
   Hacl_Streaming_MD_state_64 *p,
@@ -1188,12 +1133,6 @@ Hacl_Streaming_SHA2_update_512(
   return update_384_512(p, input, input_len);
 }
 
-/**
-Write the resulting hash into `dst`, an array of 64 bytes. The state remains
-valid after a call to `finish_512`, meaning the user may feed more data into
-the hash via `update_512`. (The finish_512 function operates on an internal copy of
-the state and therefore does not invalidate the client-held state `p`.)
-*/
 /**
 Write the resulting hash into `dst`, an array of 64 bytes. The state remains
 valid after a call to `finish_512`, meaning the user may feed more data into
@@ -1244,11 +1183,6 @@ Free a state allocated with `create_in_512`.
 
 This function is identical to the free function for SHA2_384.
 */
-/**
-Free a state allocated with `create_in_512`.
-
-This function is identical to the free function for SHA2_384.
-*/
 void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_MD_state_64 *s)
 {
   Hacl_Streaming_MD_state_64 scrut = *s;
@@ -1259,9 +1193,6 @@ void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_MD_state_64 *s)
   KRML_HOST_FREE(s);
 }
 
-/**
-Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes.
-*/
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes.
 */
@@ -1320,11 +1251,6 @@ Write the resulting hash into `dst`, an array of 48 bytes. The state remains
 valid after a call to `finish_384`, meaning the user may feed more data into
 the hash via `update_384`.
 */
-/**
-Write the resulting hash into `dst`, an array of 48 bytes. The state remains
-valid after a call to `finish_384`, meaning the user may feed more data into
-the hash via `update_384`.
-*/
 void Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_MD_state_64 *p, uint8_t *dst)
 {
   Hacl_Streaming_MD_state_64 scrut = *p;
@@ -1369,9 +1295,6 @@ void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_MD_state_64 *p)
   Hacl_Streaming_SHA2_free_512(p);
 }
 
-/**
-Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes.
-*/
 /**
 Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes.
 */

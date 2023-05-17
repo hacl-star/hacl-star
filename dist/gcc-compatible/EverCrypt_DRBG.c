@@ -225,17 +225,6 @@ Create a DRBG state.
 
 @return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`.
 */
-/**
-Create a DRBG state.
-
-@param a Hash algorithm to use. The possible instantiations are ...
-  * `Spec_Hash_Definitions_SHA2_256`,
-  * `Spec_Hash_Definitions_SHA2_384`,
-  * `Spec_Hash_Definitions_SHA2_512`, and
-  * `Spec_Hash_Definitions_SHA1`.
-
-@return DRBG state. Needs to be freed via `EverCrypt_DRBG_uninstantiate`.
-*/
 EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
 {
   return EverCrypt_DRBG_create_in(a);
@@ -1914,15 +1903,6 @@ Instantiate the DRBG.
 
 @return True if and only if instantiation was successful.
 */
-/**
-Instantiate the DRBG.
-
-@param st Pointer to DRBG state.
-@param personalization_string Pointer to `personalization_string_len` bytes of memory where personalization string is read from.
-@param personalization_string_len Length of personalization string.
-
-@return True if and only if instantiation was successful.
-*/
 bool
 EverCrypt_DRBG_instantiate(
   EverCrypt_DRBG_state_s *st,
@@ -1954,15 +1934,6 @@ EverCrypt_DRBG_instantiate(
   KRML_HOST_EXIT(255U);
 }
 
-/**
-Reseed the DRBG.
-
-@param st Pointer to DRBG state.
-@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
-@param additional_input_input_len Length of additional input.
-
-@return True if and only if reseed was successful.
-*/
 /**
 Reseed the DRBG.
 
@@ -2014,17 +1985,6 @@ Generate output.
 
 @return True if and only if generate was successful.
 */
-/**
-Generate output.
-
-@param output Pointer to `n` bytes of memory where random output is written to.
-@param st Pointer to DRBG state.
-@param n Length of desired output.
-@param additional_input_input Pointer to `additional_input_input_len` bytes of memory where additional input is read from.
-@param additional_input_input_len Length of additional input.
-
-@return True if and only if generate was successful.
-*/
 bool
 EverCrypt_DRBG_generate(
   uint8_t *output,
@@ -2058,11 +2018,6 @@ EverCrypt_DRBG_generate(
   KRML_HOST_EXIT(255U);
 }
 
-/**
-Uninstantiate and free the DRBG.
-
-@param st Pointer to DRBG state.
-*/
 /**
 Uninstantiate and free the DRBG.
 

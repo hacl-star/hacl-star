@@ -42,14 +42,6 @@ This computes a scalar multiplication of the secret/private key with the curve's
 @param pub Pointer to 32 bytes of memory where the resulting point is written to.
 @param priv Pointer to 32 bytes of memory where the secret/private key is read from.
 */
-/**
-Calculate a public point from a secret/private key.
-
-This computes a scalar multiplication of the secret/private key with the curve's basepoint.
-
-@param pub Pointer to 32 bytes of memory where the resulting point is written to.
-@param priv Pointer to 32 bytes of memory where the secret/private key is read from.
-*/
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   #if HACL_CAN_COMPILE_VALE
@@ -69,13 +61,6 @@ Compute the scalar multiple of a point.
 @param my_priv Pointer to 32 bytes of memory where the secret/private key is read from.
 @param their_pub Pointer to 32 bytes of memory where the public point is read from.
 */
-/**
-Compute the scalar multiple of a point.
-
-@param shared Pointer to 32 bytes of memory where the resulting point is written to.
-@param my_priv Pointer to 32 bytes of memory where the secret/private key is read from.
-@param their_pub Pointer to 32 bytes of memory where the public point is read from.
-*/
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
   #if HACL_CAN_COMPILE_VALE
@@ -88,13 +73,6 @@ void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t 
   Hacl_Curve25519_51_scalarmult(shared, my_priv, their_pub);
 }
 
-/**
-Execute the diffie-hellmann key exchange.
-
-@param shared Pointer to 32 bytes of memory where the resulting point is written to.
-@param my_priv Pointer to 32 bytes of memory where **our** secret/private key is read from.
-@param their_pub Pointer to 32 bytes of memory where **their** public point is read from.
-*/
 /**
 Execute the diffie-hellmann key exchange.
 

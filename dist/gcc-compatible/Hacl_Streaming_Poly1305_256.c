@@ -70,9 +70,6 @@ Hacl_Streaming_Poly1305_256_init(uint8_t *k, Hacl_Streaming_Poly1305_256_poly130
 /**
 0 = success, 1 = max length exceeded
 */
-/**
-0 = success, 1 = max length exceeded
-*/
 Hacl_Streaming_Types_error_code
 Hacl_Streaming_Poly1305_256_update(
   Hacl_Streaming_Poly1305_256_poly1305_256_state *p,
