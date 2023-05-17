@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2b_256.h"
 
@@ -56,9 +57,15 @@ Hacl_Streaming_Blake2b_256_blake2b_256_state;
 /**
   State allocation function when there is no key
 */
+/**
+  State allocation function when there is no key
+*/
 Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in(void);
 
+/**
+  (Re-)initialization function when there is no key
+*/
 /**
   (Re-)initialization function when there is no key
 */
@@ -70,7 +77,10 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-uint32_t
+/**
+  Update function when there is no key; 0 = success, 1 = max length exceeded
+*/
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
   Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *data,
@@ -80,12 +90,18 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
 /**
   Finish function when there is no key
 */
+/**
+  Finish function when there is no key
+*/
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
   Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *dst
 );
 
+/**
+  Free state function when there is no key
+*/
 /**
   Free state function when there is no key
 */

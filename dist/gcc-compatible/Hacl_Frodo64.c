@@ -33,6 +33,11 @@
  */
 
 
+/*
+ this variant is used only for testing purposes!
+ */
+
+
 uint32_t Hacl_Frodo64_crypto_bytes = (uint32_t)16U;
 
 uint32_t Hacl_Frodo64_crypto_publickeybytes = (uint32_t)976U;

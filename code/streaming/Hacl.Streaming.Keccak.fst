@@ -283,9 +283,11 @@ val squeeze:
           S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
           preserves_freeable c i s h0 h1
       | InvalidAlgorithm ->
-         not (is_shake a)
+          not (is_shake a)
       | InvalidLength ->
-         l = 0ul))
+          l = 0ul
+      | _ ->
+          False))
 
 let squeeze a s dst l =
   let a = get_alg a s in

@@ -65,11 +65,17 @@ extern void TestLib_print_clock_diff(clock_t uu___, clock_t uu___1);
 
 KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
+KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
+
 extern uint8_t *TestLib_uint8_p_null;
 
 KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
+KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
+
 extern uint32_t *TestLib_uint32_p_null;
+
+KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
 KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 

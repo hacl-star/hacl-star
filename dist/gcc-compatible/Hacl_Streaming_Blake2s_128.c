@@ -28,6 +28,9 @@
 /**
   State allocation function when there is no key
 */
+/**
+  State allocation function when there is no key
+*/
 Hacl_Streaming_Blake2s_128_blake2s_128_state
 *Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in(void)
 {
@@ -58,6 +61,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
 /**
   (Re-)initialization function when there is no key
 */
+/**
+  (Re-)initialization function when there is no key
+*/
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
   Hacl_Streaming_Blake2s_128_blake2s_128_state *s
@@ -75,7 +81,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-uint32_t
+/**
+  Update function when there is no key; 0 = success, 1 = max length exceeded
+*/
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *data,
@@ -86,7 +95,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   uint64_t total_len = s.total_len;
   if ((uint64_t)len > (uint64_t)0xffffffffffffffffU - total_len)
   {
-    return (uint32_t)1U;
+    return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   uint32_t sz;
   if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
@@ -265,9 +274,12 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
         }
       );
   }
-  return (uint32_t)0U;
+  return Hacl_Streaming_Types_Success;
 }
 
+/**
+  Finish function when there is no key
+*/
 /**
   Finish function when there is no key
 */
@@ -320,6 +332,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
   Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, tmp_block_state.snd);
 }
 
+/**
+  Free state function when there is no key
+*/
 /**
   Free state function when there is no key
 */

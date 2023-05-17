@@ -1277,6 +1277,12 @@ choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
 efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
 before. The state is to be freed by calling `free`.
 */
+/**
+Allocate initial state for the agile hash. The argument `a` stands for the
+choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
+efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
+before. The state is to be freed by calling `free`.
+*/
 EverCrypt_Hash_Incremental_hash_state
 *EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a)
 {
@@ -1298,6 +1304,9 @@ EverCrypt_Hash_Incremental_hash_state
 /**
 Reset an existing state to the initial hash state with empty data.
 */
+/**
+Reset an existing state to the initial hash state with empty data.
+*/
 void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_hash_state *s)
 {
   EverCrypt_Hash_Incremental_hash_state scrut = *s;
@@ -1310,6 +1319,13 @@ void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_hash_state *s)
   s[0U] = tmp;
 }
 
+/**
+Feed an arbitrary amount of data into the hash. This function returns
+EverCrypt_Error_Success for success, or EverCrypt_Error_MaximumLengthExceeded if
+the combined length of all of the data passed to `update` (since the last call
+to `init`) exceeds 2^61-1 bytes or 2^64-1 bytes, depending on the choice of
+algorithm. Both limits are unlikely to be attained in practice.
+*/
 /**
 Feed an arbitrary amount of data into the hash. This function returns
 EverCrypt_Error_Success for success, or EverCrypt_Error_MaximumLengthExceeded if
@@ -1407,10 +1423,10 @@ EverCrypt_Hash_Incremental_update(
         KRML_HOST_EXIT(253U);
       }
   }
-  uint32_t ite;
+  Hacl_Streaming_Types_error_code ite;
   if ((uint64_t)len > sw - total_len)
   {
-    ite = (uint32_t)1U;
+    ite = Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   else
   {
@@ -1579,15 +1595,15 @@ EverCrypt_Hash_Incremental_update(
           }
         );
     }
-    ite = (uint32_t)0U;
+    ite = Hacl_Streaming_Types_Success;
   }
   switch (ite)
   {
-    case 0U:
+    case Hacl_Streaming_Types_Success:
       {
         return EverCrypt_Error_Success;
       }
-    case 1U:
+    case Hacl_Streaming_Types_MaximumLengthExceeded:
       {
         return EverCrypt_Error_MaximumLengthExceeded;
       }
@@ -2160,6 +2176,9 @@ static void finish_blake2b(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *ds
 /**
 Perform a run-time test to determine which algorithm was chosen for the given piece of state.
 */
+/**
+Perform a run-time test to determine which algorithm was chosen for the given piece of state.
+*/
 Spec_Hash_Definitions_hash_alg
 EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_hash_state *s)
 {
@@ -2168,6 +2187,14 @@ EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_hash_state *s
   return alg_of_state(block_state);
 }
 
+/**
+Write the resulting hash into `dst`, an array whose length is
+algorithm-specific. You can use the macros defined earlier in this file to
+allocate a destination buffer of the right length. The state remains valid after
+a call to `finish`, meaning the user may feed more data into the hash via
+`update`. (The finish function operates on an internal copy of the state and
+therefore does not invalidate the client-held state.)
+*/
 /**
 Write the resulting hash into `dst`, an array whose length is
 algorithm-specific. You can use the macros defined earlier in this file to
@@ -2252,6 +2279,9 @@ void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_hash_state *s,
 /**
 Free a state previously allocated with `create_in`.
 */
+/**
+Free a state previously allocated with `create_in`.
+*/
 void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_hash_state *s)
 {
   EverCrypt_Hash_Incremental_hash_state scrut = *s;
@@ -2326,6 +2356,13 @@ static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   Hacl_Hash_Core_SHA2_finish_224(s, dst);
 }
 
+/**
+Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
+earlier in this file to allocate a destination buffer of the right length. This
+API will automatically pick the most efficient implementation, provided you have
+called EverCrypt_AutoConfig2_init() before. 
+*/
 /**
 Hash `input`, of len `len`, into `dst`, an array whose length is determined by
 your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined

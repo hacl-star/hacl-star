@@ -43,6 +43,19 @@ extern "C" {
 *******************************************************************************/
 
 
+/*******************************************************************************
+  Verified field arithmetic modulo p = 2^256 - 0x1000003D1.
+
+  This is a 64-bit optimized version, where a field element in radix-2^{52} is
+  represented as an array of five unsigned 64-bit integers, i.e., uint64_t[5].
+*******************************************************************************/
+
+
+/**
+Write the additive identity in `f`.
+
+  The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
+*/
 /**
 Write the additive identity in `f`.
 
@@ -55,8 +68,22 @@ Write the multiplicative identity in `f`.
 
   The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
 */
+/**
+Write the multiplicative identity in `f`.
+
+  The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
+*/
 void Hacl_EC_K256_mk_felem_one(uint64_t *f);
 
+/**
+Write `a + b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
 /**
 Write `a + b mod p` in `out`.
 
@@ -77,8 +104,26 @@ Write `a - b mod p` in `out`.
   precondition is observed.
   • `a`, `b`, and `out` are either pairwise disjoint or equal
 */
+/**
+Write `a - b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
 void Hacl_EC_K256_felem_sub(uint64_t *a, uint64_t *b, uint64_t *out);
 
+/**
+Write `a * b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
 /**
 Write `a * b mod p` in `out`.
 
@@ -99,8 +144,28 @@ Write `a * a mod p` in `out`.
   precondition is observed.
   • `a` and `out` are either disjoint or equal
 */
+/**
+Write `a * a mod p` in `out`.
+
+  The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are either disjoint or equal
+*/
 void Hacl_EC_K256_felem_sqr(uint64_t *a, uint64_t *out);
 
+/**
+Write `a ^ (p - 2) mod p` in `out`.
+
+  The function computes modular multiplicative inverse if `a` <> zero.
+
+  The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are disjoint
+*/
 /**
 Write `a ^ (p - 2) mod p` in `out`.
 
@@ -124,8 +189,28 @@ Load a bid-endian field element from memory.
   precondition is observed.
   • `b` and `out` are disjoint
 */
+/**
+Load a bid-endian field element from memory.
+
+  The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The outparam `out` points to a field element of 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` and `out` are disjoint
+*/
 void Hacl_EC_K256_felem_load(uint8_t *b, uint64_t *out);
 
+/**
+Serialize a field element into big-endian memory.
+
+  The argument `a` points to a field element of 5 limbs in size, i.e., uint64_t[5].
+  The outparam `out` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are disjoint
+*/
 /**
 Serialize a field element into big-endian memory.
 
@@ -146,6 +231,19 @@ void Hacl_EC_K256_felem_store(uint64_t *a, uint8_t *out);
 *******************************************************************************/
 
 
+/*******************************************************************************
+  Verified group operations for the secp256k1 curve of the form y^2 = x^3 + 7.
+
+  This is a 64-bit optimized version, where a group element in projective coordinates
+  is represented as an array of 15 unsigned 64-bit integers, i.e., uint64_t[15].
+*******************************************************************************/
+
+
+/**
+Write the point at infinity (additive identity) in `p`.
+
+  The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
+*/
 /**
 Write the point at infinity (additive identity) in `p`.
 
@@ -158,8 +256,22 @@ Write the base point (generator) in `p`.
 
   The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
 */
+/**
+Write the base point (generator) in `p`.
+
+  The outparam `p` is meant to be 15 limbs in size, i.e., uint64_t[15].
+*/
 void Hacl_EC_K256_mk_base_point(uint64_t *p);
 
+/**
+Write `-p` in `out` (point negation).
+
+  The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are either disjoint or equal
+*/
 /**
 Write `-p` in `out` (point negation).
 
@@ -180,6 +292,15 @@ Write `p + q` in `out` (point addition).
   precondition is observed.
   • `p`, `q`, and `out` are either pairwise disjoint or equal
 */
+/**
+Write `p + q` in `out` (point addition).
+
+  The arguments `p`, `q` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p`, `q`, and `out` are either pairwise disjoint or equal
+*/
 void Hacl_EC_K256_point_add(uint64_t *p, uint64_t *q, uint64_t *out);
 
 /**
@@ -191,8 +312,30 @@ Write `p + p` in `out` (point doubling).
   precondition is observed.
   • `p` and `out` are either disjoint or equal
 */
+/**
+Write `p + p` in `out` (point doubling).
+
+  The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are either disjoint or equal
+*/
 void Hacl_EC_K256_point_double(uint64_t *p, uint64_t *out);
 
+/**
+Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
+
+  The argument `p` and the outparam `out` are meant to be 15 limbs in size, i.e., uint64_t[15].
+  The argument `scalar` is meant to be 32 bytes in size, i.e., uint8_t[32].
+
+  The function first loads a bid-endian scalar element from `scalar` and
+  then computes a point multiplication.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `scalar`, `p`, and `out` are pairwise disjoint
+*/
 /**
 Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
 
@@ -221,6 +364,19 @@ Convert a point from projective coordinates to its raw form.
   precondition is observed.
   • `p` and `out` are disjoint.
 */
+/**
+Convert a point from projective coordinates to its raw form.
+
+  The argument `p` points to a point of 15 limbs in size, i.e., uint64_t[15].
+  The outparam `out` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first converts a given point `p` from projective to affine coordinates
+  and then writes [ `x`; `y` ] in `out`.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are disjoint.
+*/
 void Hacl_EC_K256_point_store(uint64_t *p, uint8_t *out);
 
 /**
@@ -234,8 +390,32 @@ Convert a point to projective coordinates from its raw form.
   • `b` is valid point, i.e., x < prime and y < prime and (x, y) is on the curve
   • `b` and `out` are disjoint.
 */
+/**
+Convert a point to projective coordinates from its raw form.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The outparam `out` points to a point of 15 limbs in size, i.e., uint64_t[15].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` is valid point, i.e., x < prime and y < prime and (x, y) is on the curve
+  • `b` and `out` are disjoint.
+*/
 void Hacl_EC_K256_point_load(uint8_t *b, uint64_t *out);
 
+/**
+Check whether a point is valid.
+
+  The function returns `true` if a point is valid and `false` otherwise.
+
+  The argument `b` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The point (x || y) is valid:
+    • x < prime and y < prime
+    • (x, y) is on the curve.
+
+  This function is NOT constant-time.
+*/
 /**
 Check whether a point is valid.
 

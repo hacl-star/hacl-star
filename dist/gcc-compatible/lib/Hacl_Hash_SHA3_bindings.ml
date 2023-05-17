@@ -60,25 +60,17 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Keccak_update =
       foreign "Hacl_Streaming_Keccak_update"
         ((ptr hacl_Streaming_Keccak_state) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
-    type hacl_Streaming_Keccak_error_code = Unsigned.UInt8.t
-    let hacl_Streaming_Keccak_error_code =
-      typedef uint8_t "Hacl_Streaming_Keccak_error_code"
-    let hacl_Streaming_Keccak_error_code_Hacl_Streaming_Keccak_Success =
-      Unsigned.UInt8.of_int 0
-    let hacl_Streaming_Keccak_error_code_Hacl_Streaming_Keccak_InvalidAlgorithm
-      = Unsigned.UInt8.of_int 1
-    let hacl_Streaming_Keccak_error_code_Hacl_Streaming_Keccak_InvalidLength
-      = Unsigned.UInt8.of_int 2
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Streaming_Keccak_finish =
       foreign "Hacl_Streaming_Keccak_finish"
         ((ptr hacl_Streaming_Keccak_state) @->
-           (ocaml_bytes @-> (returning hacl_Streaming_Keccak_error_code)))
+           (ocaml_bytes @-> (returning hacl_Streaming_Types_error_code)))
     let hacl_Streaming_Keccak_squeeze =
       foreign "Hacl_Streaming_Keccak_squeeze"
         ((ptr hacl_Streaming_Keccak_state) @->
            (ocaml_bytes @->
-              (uint32_t @-> (returning hacl_Streaming_Keccak_error_code))))
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Streaming_Keccak_block_len =
       foreign "Hacl_Streaming_Keccak_block_len"
         ((ptr hacl_Streaming_Keccak_state) @-> (returning uint32_t))

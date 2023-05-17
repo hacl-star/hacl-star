@@ -43,6 +43,11 @@ extern "C" {
  */
 
 
+/*
+ this variant is used only for testing purposes!
+ */
+
+
 extern uint32_t Hacl_Frodo64_crypto_bytes;
 
 extern uint32_t Hacl_Frodo64_crypto_publickeybytes;
