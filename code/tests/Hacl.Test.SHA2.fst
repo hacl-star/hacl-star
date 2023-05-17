@@ -6,6 +6,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.PrintBuffer
+open Hacl.Streaming.SHA2
 open Hacl.Hash.SHA2
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
