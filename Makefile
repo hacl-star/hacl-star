@@ -876,7 +876,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst _,.,$*) \
           -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
-	  -add-include '"internal/Hacl_SHA2_Generic.h"' \
+	  -add-include '"internal/Hacl_Hash_SHA2.h"' \
 	  -static-header Hacl.Impl.SHA2.Generic \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
