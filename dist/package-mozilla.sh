@@ -30,6 +30,7 @@ FILES=" \
   Hacl_RSAPSS \
   Hacl_SHA2_Types \
   Hacl_Spec \
+  Hacl_Streaming_SHA2 \
   Hacl_Streaming_Types \
   Lib_Memzero0 \
   TestLib \

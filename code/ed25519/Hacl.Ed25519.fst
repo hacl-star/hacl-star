@@ -21,7 +21,7 @@ val secret_expand: expanded:lbuffer uint8 64ul -> secret:lbuffer uint8 32ul -> S
 [@CInline]
 let secret_expand expanded secret =
   assert_norm (pow2 32 <= pow2 125 - 1);
-  Hacl.Hash.SHA2.hash_512_lib 32ul secret expanded;
+  Hacl.Hash.SHA2.hash_512 secret 32ul expanded;
   let h_low  = sub expanded 0ul 32ul in
   let h_low0  = h_low.( 0ul) in
   let h_low31 = h_low.(31ul) in

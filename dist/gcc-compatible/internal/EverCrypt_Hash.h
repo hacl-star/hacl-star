@@ -36,8 +36,10 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "internal/Vale.h"
+#include "internal/Hacl_Streaming_SHA2.h"
+#include "internal/Hacl_SHA2_Generic.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
-#include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
 #include "../EverCrypt_Hash.h"

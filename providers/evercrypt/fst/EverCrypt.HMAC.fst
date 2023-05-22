@@ -64,7 +64,7 @@ let compute_sha2_256 =
   let open Hacl.Hash.SHA2 in
   mk_compute (|SHA2_256, ()|) hash_256 alloca_256 init_256
              EverCrypt.Hash.update_multi_256
-             EverCrypt.Hash.update_last_256 finish_256
+             update_last_256 finish_256
 
 let compute_sha2_384 =
   let open Hacl.Hash.SHA2 in
