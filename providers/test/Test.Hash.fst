@@ -25,7 +25,7 @@ let main (): St unit =
   // expected to go through HI
   ()
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --fuel 1 --ifuel 1"
 let test_incremental_api (): St unit =
   // Note: this function cannot be in the Stack effect because it performs some
   // allocations (even though it frees them afterwards).
