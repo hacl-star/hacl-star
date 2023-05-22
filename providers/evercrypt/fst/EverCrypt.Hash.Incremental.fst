@@ -53,9 +53,11 @@ let agile_state: stateful Hash.alg =
 
 include EverCrypt.Hash.Incremental.Macros
 
+#push-options "--ifuel 1"
+
 (* Adding some non-inlined definitions to factorize code. This one is public
    because it's used by the WASM API, and is generally useful to callers. *)
-let hash_len a: (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
+let hash_len (a:Hash.alg) : (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
   match a with
   | MD5 -> md5_hash_len
   | SHA1 -> sha1_hash_len
@@ -69,6 +71,8 @@ let hash_len a: (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
   | SHA3_512 -> sha3_512_hash_len
   | Blake2S -> blake2s_hash_len
   | Blake2B -> blake2b_hash_len
+
+#pop-options
 
 private
 let block_len a = Hacl.Hash.Definitions.block_len a
@@ -101,9 +105,7 @@ let evercrypt_hash : block Hash.alg =
     (stateful_unused Hash.alg)
 
     unit
-
-    (* TODO: this general max length definition shouldn't be in the MD file! *)
-    Hacl.Streaming.MD.max_input_len64
+    Hacl.Hash.Definitions.max_input_len64
     (fun a () -> Spec.Hash.Definitions.hash_length a)
     block_len
     block_len // No vectorization
@@ -261,8 +263,9 @@ val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 // A full one-shot hash that relies on vale at each multiplexing point
 let hash_256 input input_len dst =
   let open EverCrypt.Hash in
+  // TODO: This function now only exists for SHA1 and MD5
   Hacl.Hash.MD.mk_hash SHA2_256 Hacl.Hash.SHA2.alloca_256 update_multi_256
-    update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst
+    Hacl.Hash.SHA2.update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst
 
 private
 val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
@@ -270,7 +273,7 @@ val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
 let hash_224 input input_len dst =
   let open EverCrypt.Hash in
   Hacl.Hash.MD.mk_hash SHA2_224 Hacl.Hash.SHA2.alloca_224 update_multi_224
-    update_last_224 Hacl.Hash.SHA2.finish_224 input input_len dst
+    Hacl.Hash.SHA2.update_last_224 Hacl.Hash.SHA2.finish_224 input input_len dst
 
 // Public API (one-shot, agile and multiplexing)
 // ---------------------------------------------

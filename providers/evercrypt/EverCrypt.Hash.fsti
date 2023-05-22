@@ -261,11 +261,6 @@ val update_multi:
       (ev_of_uint64 a prevlen) (B.as_seq h0 blocks) /\
     preserves_freeable s h0 h1))
 
-val update_last_256: Hacl.Hash.Definitions.update_last_st (|SHA2_256, ()|)
-
-inline_for_extraction noextract
-val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
-
 inline_for_extraction noextract
 let prev_len_of_uint64 a (prevlen: UInt64.t { UInt64.v prevlen % block_length a = 0 }): Spec.Hash.Incremental.prev_length_t a =
   (if is_keccak a then () else UInt64.v prevlen)

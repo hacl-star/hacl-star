@@ -19,14 +19,18 @@ lib/Hacl_Hash_Blake2s_128_bindings.cmx:
 lib/Hacl_Hash_Blake2s_128_bindings.cmo: 
 lib_gen/Hacl_Hash_Blake2s_128_gen.cmx: lib/Hacl_Hash_Blake2s_128_bindings.cmx
 lib_gen/Hacl_Hash_Blake2s_128_gen.exe: lib/Hacl_Hash_Blake2s_128_bindings.cmx lib_gen/Hacl_Hash_Blake2s_128_gen.cmx 
+lib/Hacl_Streaming_Types_bindings.cmx: 
+lib/Hacl_Streaming_Types_bindings.cmo: 
+lib_gen/Hacl_Streaming_Types_gen.cmx: lib/Hacl_Streaming_Types_bindings.cmx
+lib_gen/Hacl_Streaming_Types_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib_gen/Hacl_Streaming_Types_gen.cmx 
 lib/Hacl_Hash_SHA3_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
 lib/Hacl_Hash_SHA3_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
 lib_gen/Hacl_Hash_SHA3_gen.cmx: lib/Hacl_Hash_SHA3_bindings.cmx
 lib_gen/Hacl_Hash_SHA3_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_SHA3_bindings.cmx lib_gen/Hacl_Hash_SHA3_gen.cmx 
-lib/Hacl_Hash_Base_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/Hacl_Hash_Base_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib/Hacl_Hash_Base_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
+lib/Hacl_Hash_Base_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo 
 lib_gen/Hacl_Hash_Base_gen.cmx: lib/Hacl_Hash_Base_bindings.cmx
-lib_gen/Hacl_Hash_Base_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_Base_bindings.cmx lib_gen/Hacl_Hash_Base_gen.cmx 
+lib_gen/Hacl_Hash_Base_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/Hacl_Hash_Base_bindings.cmx lib_gen/Hacl_Hash_Base_gen.cmx 
 lib/Hacl_Hash_MD5_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
 lib/Hacl_Hash_MD5_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
 lib_gen/Hacl_Hash_MD5_gen.cmx: lib/Hacl_Hash_MD5_bindings.cmx
@@ -35,6 +39,10 @@ lib/Hacl_Hash_SHA1_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_
 lib/Hacl_Hash_SHA1_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
 lib_gen/Hacl_Hash_SHA1_gen.cmx: lib/Hacl_Hash_SHA1_bindings.cmx
 lib_gen/Hacl_Hash_SHA1_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Hash_SHA1_bindings.cmx lib_gen/Hacl_Hash_SHA1_gen.cmx 
+lib/Hacl_Streaming_SHA2_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
+lib/Hacl_Streaming_SHA2_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib_gen/Hacl_Streaming_SHA2_gen.cmx: lib/Hacl_Streaming_SHA2_bindings.cmx
+lib_gen/Hacl_Streaming_SHA2_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Streaming_SHA2_bindings.cmx lib_gen/Hacl_Streaming_SHA2_gen.cmx 
 lib/Hacl_Hash_SHA2_bindings.cmx: 
 lib/Hacl_Hash_SHA2_bindings.cmo: 
 lib_gen/Hacl_Hash_SHA2_gen.cmx: lib/Hacl_Hash_SHA2_bindings.cmx
@@ -47,10 +55,10 @@ lib/EverCrypt_AutoConfig2_bindings.cmx:
 lib/EverCrypt_AutoConfig2_bindings.cmo: 
 lib_gen/EverCrypt_AutoConfig2_gen.cmx: lib/EverCrypt_AutoConfig2_bindings.cmx
 lib_gen/EverCrypt_AutoConfig2_gen.exe: lib/EverCrypt_AutoConfig2_bindings.cmx lib_gen/EverCrypt_AutoConfig2_gen.cmx 
-lib/EverCrypt_Hash_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx 
-lib/EverCrypt_Hash_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo lib/EverCrypt_Error_bindings.cmo lib/EverCrypt_Error_stubs.cmo 
+lib/EverCrypt_Hash_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx 
+lib/EverCrypt_Hash_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo lib/EverCrypt_Error_bindings.cmo lib/EverCrypt_Error_stubs.cmo 
 lib_gen/EverCrypt_Hash_gen.cmx: lib/EverCrypt_Hash_bindings.cmx
-lib_gen/EverCrypt_Hash_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx lib/EverCrypt_Error_c_stubs.o lib/EverCrypt_Hash_bindings.cmx lib_gen/EverCrypt_Hash_gen.cmx 
+lib_gen/EverCrypt_Hash_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx lib/EverCrypt_Error_c_stubs.o lib/EverCrypt_Hash_bindings.cmx lib_gen/EverCrypt_Hash_gen.cmx 
 lib/Hacl_SHA2_Types_bindings.cmx: 
 lib/Hacl_SHA2_Types_bindings.cmo: 
 lib_gen/Hacl_SHA2_Types_gen.cmx: lib/Hacl_SHA2_Types_bindings.cmx
@@ -83,10 +91,6 @@ lib/Hacl_Curve25519_51_bindings.cmx:
 lib/Hacl_Curve25519_51_bindings.cmo: 
 lib_gen/Hacl_Curve25519_51_gen.cmx: lib/Hacl_Curve25519_51_bindings.cmx
 lib_gen/Hacl_Curve25519_51_gen.exe: lib/Hacl_Curve25519_51_bindings.cmx lib_gen/Hacl_Curve25519_51_gen.cmx 
-lib/Hacl_Streaming_SHA2_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/Hacl_Streaming_SHA2_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
-lib_gen/Hacl_Streaming_SHA2_gen.cmx: lib/Hacl_Streaming_SHA2_bindings.cmx
-lib_gen/Hacl_Streaming_SHA2_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_Streaming_SHA2_bindings.cmx lib_gen/Hacl_Streaming_SHA2_gen.cmx 
 lib/Hacl_Ed25519_bindings.cmx: 
 lib/Hacl_Ed25519_bindings.cmo: 
 lib_gen/Hacl_Ed25519_gen.cmx: lib/Hacl_Ed25519_bindings.cmx
@@ -135,10 +139,10 @@ lib/Hacl_IntTypes_Intrinsics_128_bindings.cmx:
 lib/Hacl_IntTypes_Intrinsics_128_bindings.cmo: 
 lib_gen/Hacl_IntTypes_Intrinsics_128_gen.cmx: lib/Hacl_IntTypes_Intrinsics_128_bindings.cmx
 lib_gen/Hacl_IntTypes_Intrinsics_128_gen.exe: lib/Hacl_IntTypes_Intrinsics_128_bindings.cmx lib_gen/Hacl_IntTypes_Intrinsics_128_gen.cmx 
-lib/Hacl_RSAPSS_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/Hacl_RSAPSS_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib/Hacl_RSAPSS_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
+lib/Hacl_RSAPSS_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo 
 lib_gen/Hacl_RSAPSS_gen.cmx: lib/Hacl_RSAPSS_bindings.cmx
-lib_gen/Hacl_RSAPSS_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_RSAPSS_bindings.cmx lib_gen/Hacl_RSAPSS_gen.cmx 
+lib_gen/Hacl_RSAPSS_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/Hacl_RSAPSS_bindings.cmx lib_gen/Hacl_RSAPSS_gen.cmx 
 lib/Hacl_FFDHE_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
 lib/Hacl_FFDHE_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo 
 lib_gen/Hacl_FFDHE_gen.cmx: lib/Hacl_FFDHE_bindings.cmx
@@ -175,6 +179,10 @@ lib/Hacl_GenericField32_bindings.cmx: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bign
 lib/Hacl_GenericField32_bindings.cmo: lib/Hacl_Bignum_bindings.cmo lib/Hacl_Bignum_stubs.cmo 
 lib_gen/Hacl_GenericField32_gen.cmx: lib/Hacl_GenericField32_bindings.cmx
 lib_gen/Hacl_GenericField32_gen.exe: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx lib/Hacl_Bignum_c_stubs.o lib/Hacl_GenericField32_bindings.cmx lib_gen/Hacl_GenericField32_gen.cmx 
+lib/Hacl_Bignum256_bindings.cmx: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx 
+lib/Hacl_Bignum256_bindings.cmo: lib/Hacl_Bignum_bindings.cmo lib/Hacl_Bignum_stubs.cmo 
+lib_gen/Hacl_Bignum256_gen.cmx: lib/Hacl_Bignum256_bindings.cmx
+lib_gen/Hacl_Bignum256_gen.exe: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx lib/Hacl_Bignum_c_stubs.o lib/Hacl_Bignum256_bindings.cmx lib_gen/Hacl_Bignum256_gen.cmx 
 lib/Hacl_SHA2_Vec256_bindings.cmx: 
 lib/Hacl_SHA2_Vec256_bindings.cmo: 
 lib_gen/Hacl_SHA2_Vec256_gen.cmx: lib/Hacl_SHA2_Vec256_bindings.cmx
@@ -187,30 +195,30 @@ lib/Hacl_Bignum4096_bindings.cmx: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_s
 lib/Hacl_Bignum4096_bindings.cmo: lib/Hacl_Bignum_bindings.cmo lib/Hacl_Bignum_stubs.cmo 
 lib_gen/Hacl_Bignum4096_gen.cmx: lib/Hacl_Bignum4096_bindings.cmx
 lib_gen/Hacl_Bignum4096_gen.exe: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx lib/Hacl_Bignum_c_stubs.o lib/Hacl_Bignum4096_bindings.cmx lib_gen/Hacl_Bignum4096_gen.cmx 
-lib/Hacl_Chacha20_Vec32_bindings.cmx: 
-lib/Hacl_Chacha20_Vec32_bindings.cmo: 
-lib_gen/Hacl_Chacha20_Vec32_gen.cmx: lib/Hacl_Chacha20_Vec32_bindings.cmx
-lib_gen/Hacl_Chacha20_Vec32_gen.exe: lib/Hacl_Chacha20_Vec32_bindings.cmx lib_gen/Hacl_Chacha20_Vec32_gen.cmx 
 lib/EverCrypt_Ed25519_bindings.cmx: 
 lib/EverCrypt_Ed25519_bindings.cmo: 
 lib_gen/EverCrypt_Ed25519_gen.cmx: lib/EverCrypt_Ed25519_bindings.cmx
 lib_gen/EverCrypt_Ed25519_gen.exe: lib/EverCrypt_Ed25519_bindings.cmx lib_gen/EverCrypt_Ed25519_gen.cmx 
+lib/Hacl_Chacha20_Vec32_bindings.cmx: 
+lib/Hacl_Chacha20_Vec32_bindings.cmo: 
+lib_gen/Hacl_Chacha20_Vec32_gen.cmx: lib/Hacl_Chacha20_Vec32_bindings.cmx
+lib_gen/Hacl_Chacha20_Vec32_gen.exe: lib/Hacl_Chacha20_Vec32_bindings.cmx lib_gen/Hacl_Chacha20_Vec32_gen.cmx 
 lib/Hacl_Bignum4096_32_bindings.cmx: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx 
 lib/Hacl_Bignum4096_32_bindings.cmo: lib/Hacl_Bignum_bindings.cmo lib/Hacl_Bignum_stubs.cmo 
 lib_gen/Hacl_Bignum4096_32_gen.cmx: lib/Hacl_Bignum4096_32_bindings.cmx
 lib_gen/Hacl_Bignum4096_32_gen.exe: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx lib/Hacl_Bignum_c_stubs.o lib/Hacl_Bignum4096_32_bindings.cmx lib_gen/Hacl_Bignum4096_32_gen.cmx 
-lib/EverCrypt_HMAC_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/EverCrypt_HMAC_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib/EverCrypt_HMAC_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
+lib/EverCrypt_HMAC_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo 
 lib_gen/EverCrypt_HMAC_gen.cmx: lib/EverCrypt_HMAC_bindings.cmx
-lib_gen/EverCrypt_HMAC_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/EverCrypt_HMAC_bindings.cmx lib_gen/EverCrypt_HMAC_gen.cmx 
-lib/Hacl_HMAC_DRBG_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/Hacl_HMAC_DRBG_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib_gen/EverCrypt_HMAC_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_HMAC_bindings.cmx lib_gen/EverCrypt_HMAC_gen.cmx 
+lib/Hacl_HMAC_DRBG_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
+lib/Hacl_HMAC_DRBG_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo 
 lib_gen/Hacl_HMAC_DRBG_gen.cmx: lib/Hacl_HMAC_DRBG_bindings.cmx
-lib_gen/Hacl_HMAC_DRBG_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/Hacl_HMAC_DRBG_bindings.cmx lib_gen/Hacl_HMAC_DRBG_gen.cmx 
-lib/EverCrypt_DRBG_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/EverCrypt_DRBG_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib_gen/Hacl_HMAC_DRBG_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/Hacl_HMAC_DRBG_bindings.cmx lib_gen/Hacl_HMAC_DRBG_gen.cmx 
+lib/EverCrypt_DRBG_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
+lib/EverCrypt_DRBG_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo 
 lib_gen/EverCrypt_DRBG_gen.cmx: lib/EverCrypt_DRBG_bindings.cmx
-lib_gen/EverCrypt_DRBG_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/EverCrypt_DRBG_bindings.cmx lib_gen/EverCrypt_DRBG_gen.cmx 
+lib_gen/EverCrypt_DRBG_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_DRBG_bindings.cmx lib_gen/EverCrypt_DRBG_gen.cmx 
 lib/Hacl_HPKE_Curve64_CP128_SHA512_bindings.cmx: lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_bindings.cmx lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_stubs.cmx 
 lib/Hacl_HPKE_Curve64_CP128_SHA512_bindings.cmo: lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_bindings.cmo lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_stubs.cmo 
 lib_gen/Hacl_HPKE_Curve64_CP128_SHA512_gen.cmx: lib/Hacl_HPKE_Curve64_CP128_SHA512_bindings.cmx
@@ -339,10 +347,10 @@ lib/Hacl_HPKE_Curve64_CP32_SHA512_bindings.cmx: lib/Hacl_HPKE_Interface_Hacl_Imp
 lib/Hacl_HPKE_Curve64_CP32_SHA512_bindings.cmo: lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_bindings.cmo lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_stubs.cmo 
 lib_gen/Hacl_HPKE_Curve64_CP32_SHA512_gen.cmx: lib/Hacl_HPKE_Curve64_CP32_SHA512_bindings.cmx
 lib_gen/Hacl_HPKE_Curve64_CP32_SHA512_gen.exe: lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_bindings.cmx lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_stubs.cmx lib/Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_c_stubs.o lib/Hacl_HPKE_Curve64_CP32_SHA512_bindings.cmx lib_gen/Hacl_HPKE_Curve64_CP32_SHA512_gen.cmx 
-lib/EverCrypt_HKDF_bindings.cmx: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx 
-lib/EverCrypt_HKDF_bindings.cmo: lib/Hacl_Streaming_Types_bindings.cmo lib/Hacl_Streaming_Types_stubs.cmo 
+lib/EverCrypt_HKDF_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
+lib/EverCrypt_HKDF_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo 
 lib_gen/EverCrypt_HKDF_gen.cmx: lib/EverCrypt_HKDF_bindings.cmx
-lib_gen/EverCrypt_HKDF_gen.exe: lib/Hacl_Streaming_Types_bindings.cmx lib/Hacl_Streaming_Types_stubs.cmx lib/Hacl_Streaming_Types_c_stubs.o lib/EverCrypt_HKDF_bindings.cmx lib_gen/EverCrypt_HKDF_gen.cmx 
+lib_gen/EverCrypt_HKDF_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_HKDF_bindings.cmx lib_gen/EverCrypt_HKDF_gen.cmx 
 lib/Hacl_EC_Ed25519_bindings.cmx: 
 lib/Hacl_EC_Ed25519_bindings.cmo: 
 lib_gen/Hacl_EC_Ed25519_gen.cmx: lib/Hacl_EC_Ed25519_bindings.cmx
@@ -359,7 +367,3 @@ lib/EverCrypt_AEAD_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.
 lib/EverCrypt_AEAD_bindings.cmo: lib/Hacl_Spec_bindings.cmo lib/Hacl_Spec_stubs.cmo lib/EverCrypt_Error_bindings.cmo lib/EverCrypt_Error_stubs.cmo 
 lib_gen/EverCrypt_AEAD_gen.cmx: lib/EverCrypt_AEAD_bindings.cmx
 lib_gen/EverCrypt_AEAD_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_Error_stubs.cmx lib/EverCrypt_Error_c_stubs.o lib/EverCrypt_AEAD_bindings.cmx lib_gen/EverCrypt_AEAD_gen.cmx 
-lib/Hacl_Bignum256_bindings.cmx: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx 
-lib/Hacl_Bignum256_bindings.cmo: lib/Hacl_Bignum_bindings.cmo lib/Hacl_Bignum_stubs.cmo 
-lib_gen/Hacl_Bignum256_gen.cmx: lib/Hacl_Bignum256_bindings.cmx
-lib_gen/Hacl_Bignum256_gen.exe: lib/Hacl_Bignum_bindings.cmx lib/Hacl_Bignum_stubs.cmx lib/Hacl_Bignum_c_stubs.o lib/Hacl_Bignum256_bindings.cmx lib_gen/Hacl_Bignum256_gen.cmx 

@@ -39,7 +39,51 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Streaming_SHA2.h"
 
+void Hacl_SHA2_Scalar32_sha256_init(uint32_t *hash);
+
+void Hacl_SHA2_Scalar32_sha256_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st);
+
+void
+Hacl_SHA2_Scalar32_sha256_update_last(
+  uint64_t totlen,
+  uint32_t len,
+  uint8_t *b,
+  uint32_t *hash
+);
+
+void Hacl_SHA2_Scalar32_sha256_finish(uint32_t *st, uint8_t *h);
+
+void Hacl_SHA2_Scalar32_sha224_init(uint32_t *hash);
+
+void Hacl_SHA2_Scalar32_sha224_finish(uint32_t *st, uint8_t *h);
+
 void Hacl_SHA2_Scalar32_sha512_init(uint64_t *hash);
+
+void Hacl_SHA2_Scalar32_sha512_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st);
+
+void
+Hacl_SHA2_Scalar32_sha512_update_last(
+  FStar_UInt128_uint128 totlen,
+  uint32_t len,
+  uint8_t *b,
+  uint64_t *hash
+);
+
+void Hacl_SHA2_Scalar32_sha512_finish(uint64_t *st, uint8_t *h);
+
+void Hacl_SHA2_Scalar32_sha384_init(uint64_t *hash);
+
+void Hacl_SHA2_Scalar32_sha384_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st);
+
+void
+Hacl_SHA2_Scalar32_sha384_update_last(
+  FStar_UInt128_uint128 totlen,
+  uint32_t len,
+  uint8_t *b,
+  uint64_t *st
+);
+
+void Hacl_SHA2_Scalar32_sha384_finish(uint64_t *st, uint8_t *h);
 
 #if defined(__cplusplus)
 }
