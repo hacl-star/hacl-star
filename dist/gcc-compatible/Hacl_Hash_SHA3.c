@@ -184,8 +184,7 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_
   *p = (Hacl_Streaming_Keccak_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Keccak_state));
   p[0U] = s;
   uint64_t *s1 = block_state.snd;
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    ((void **)s1)[_i] = (void *)(uint64_t)0U;
+  memset(s1, 0U, (uint32_t)25U * sizeof (uint64_t));
   return p;
 }
 
@@ -230,8 +229,7 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s)
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Keccak_hash_buf block_state = scrut.block_state;
   uint64_t *s1 = block_state.snd;
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    ((void **)s1)[_i] = (void *)(uint64_t)0U;
+  memset(s1, 0U, (uint32_t)25U * sizeof (uint64_t));
   Hacl_Streaming_Keccak_state
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   s[0U] = tmp;
