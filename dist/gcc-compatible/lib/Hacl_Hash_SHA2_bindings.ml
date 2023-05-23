@@ -73,7 +73,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA2_update_256 =
       foreign "Hacl_Streaming_SHA2_update_256"
         ((ptr hacl_Streaming_MD_state_32) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Streaming_SHA2_finish_256 =
       foreign "Hacl_Streaming_SHA2_finish_256"
         ((ptr hacl_Streaming_MD_state_32) @->
@@ -93,7 +94,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA2_update_224 =
       foreign "Hacl_Streaming_SHA2_update_224"
         ((ptr hacl_Streaming_MD_state_32) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Streaming_SHA2_finish_224 =
       foreign "Hacl_Streaming_SHA2_finish_224"
         ((ptr hacl_Streaming_MD_state_32) @->
@@ -117,7 +119,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA2_update_512 =
       foreign "Hacl_Streaming_SHA2_update_512"
         ((ptr hacl_Streaming_MD_state_64) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Streaming_SHA2_finish_512 =
       foreign "Hacl_Streaming_SHA2_finish_512"
         ((ptr hacl_Streaming_MD_state_64) @->
@@ -137,7 +140,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA2_update_384 =
       foreign "Hacl_Streaming_SHA2_update_384"
         ((ptr hacl_Streaming_MD_state_64) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Streaming_SHA2_finish_384 =
       foreign "Hacl_Streaming_SHA2_finish_384"
         ((ptr hacl_Streaming_MD_state_64) @->

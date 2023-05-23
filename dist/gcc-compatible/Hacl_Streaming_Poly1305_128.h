@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_Poly1305_128.h"
 
 typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s
@@ -55,7 +56,7 @@ Hacl_Streaming_Poly1305_128_init(uint8_t *k, Hacl_Streaming_Poly1305_128_poly130
 /**
 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Poly1305_128_update(
   Hacl_Streaming_Poly1305_128_poly1305_128_state *p,
   uint8_t *data,

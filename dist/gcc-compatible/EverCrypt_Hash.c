@@ -1384,10 +1384,10 @@ EverCrypt_Hash_Incremental_update(
         KRML_HOST_EXIT(253U);
       }
   }
-  uint32_t ite;
+  Hacl_Streaming_Types_error_code ite;
   if ((uint64_t)len > sw - total_len)
   {
-    ite = (uint32_t)1U;
+    ite = Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   else
   {
@@ -1556,15 +1556,15 @@ EverCrypt_Hash_Incremental_update(
           }
         );
     }
-    ite = (uint32_t)0U;
+    ite = Hacl_Streaming_Types_Success;
   }
   switch (ite)
   {
-    case 0U:
+    case Hacl_Streaming_Types_Success:
       {
         return EverCrypt_Error_Success;
       }
-    case 1U:
+    case Hacl_Streaming_Types_MaximumLengthExceeded:
       {
         return EverCrypt_Error_MaximumLengthExceeded;
       }

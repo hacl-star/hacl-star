@@ -15,6 +15,14 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 
 ## 2023-05-22
 
+- Change the return code of the Hacl_Streaming_XXX_update family of functions. These
+  functions previously returned uint32_t, with 0 to indicating success, and 1
+  indicating a maximum length exceeded error. These functions have now switched
+  to an error code shared with other streaming API functions, of type
+  uint8_t, wherein Hacl_Streaming_Types_Success indicates success, and
+  Hacl_Streaming_Types_MaximumLengthExceeded conveys the same error as before.
+  The Success case is defined as 0, meaning that clients that previously did
+  `if (!Hacl_Streaming_XXX_update(...))` do not need any change in their code.
 - Removal of Hacl_Streaming_SHA2.h -- all of the functions are now to be found
   in Hacl_Hash_SHA2.h, which brings SHA2 in alignment with other primitives.
 - Renamings: Hacl_Hash_SHA2_hash_XXX becomes Hacl_Streaming_SHA2_hash_XXX

@@ -27,7 +27,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "fe6f8e6a553a782a44d5bdef14cf2187"
+      "c4623d4acf3538c74990ba3f1c44a84c"
     ],
     [
       "Hacl.Hash.Core.MD5._t",
@@ -55,7 +55,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "6bd0d1f1a4fffad2e021888daaef4d97"
+      "6d4147b775053507ee930bb59b657b03"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_alloca",
@@ -119,7 +119,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_unused_in", "unit_typing"
       ],
       0,
-      "c2a03781edd51164b6f522018fa496d9"
+      "713c936eefb5defdfe94f6b63bc3c850"
     ],
     [
       "Hacl.Hash.Core.MD5.h0",
@@ -150,7 +150,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.init"
       ],
       0,
-      "1107fd974dc49faf811e400937410a81"
+      "e607857bc383a901891bdec47a2d6dc5"
     ],
     [
       "Hacl.Hash.Core.MD5.t",
@@ -173,7 +173,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.t"
       ],
       0,
-      "e3a3e6c57afac7dfecb178b7219317de"
+      "349c52ac462340720f5a3acbebf4d818"
     ],
     [
       "Hacl.Hash.Core.MD5.seq_index_upd",
@@ -205,7 +205,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3fd331871b6b513a8f042ad23f62f7ac"
+      "2f57896c405b619bc4e845764d6d6207"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_init",
@@ -313,7 +313,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok", "unit_typing"
       ],
       0,
-      "138dbd11ea5d6350b804974e10aed277"
+      "2843d47d72ccb9379fd2a09a2d231d8a"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -363,7 +363,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "6505e56084d7c58f3bbc0ff61d312df4"
+      "89611f630adffe44764fa5c9f65b42af"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -482,7 +482,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "ad24cbc7b78f1bd7a3646efe0d39adc2"
+      "87905f59947dd0e808b8d32ac2b6b1c8"
     ],
     [
       "Hacl.Hash.Core.MD5.round1",
@@ -676,6 +676,7 @@
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Blake2.Blake2S",
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
@@ -704,12 +705,12 @@
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.felem",
-        "equation_Spec.GaloisField.gf", "equation_Spec.MD5.abcd_t",
-        "equation_Spec.MD5.ia", "equation_Spec.MD5.ib",
-        "equation_Spec.MD5.ic", "equation_Spec.MD5.id",
-        "equation_Spec.MD5.rotate_idx", "equation_Spec.MD5.round3_aux",
-        "equation_Spec.MD5.round3_op",
+        "equation_Spec.AES.irred", "equation_Spec.Blake2.wt",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "equation_Spec.MD5.abcd_t", "equation_Spec.MD5.ia",
+        "equation_Spec.MD5.ib", "equation_Spec.MD5.ic",
+        "equation_Spec.MD5.id", "equation_Spec.MD5.rotate_idx",
+        "equation_Spec.MD5.round3_aux", "equation_Spec.MD5.round3_op",
         "function_token_typing_Lib.IntTypes.uint32",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Spec.AES.elem",
@@ -987,7 +988,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "b6b6d7c7433210a6ccedc5c4eae7c48e"
+      "55f39baebd6fdf262b6bdda72ee1e586"
     ],
     [
       "Hacl.Hash.Core.MD5.update'",
@@ -1004,11 +1005,11 @@
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2S",
         "constructor_distinct_Spec.Hash.Definitions.Blake2S",
         "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
@@ -1085,7 +1086,7 @@
         "projection_inverse_Prims.Mkdtuple2__1"
       ],
       0,
-      "7a97db4b3c5b07c3ab66eb0ce6c1cf01"
+      "df0820948c774a6b8b8d3e513c03c1cf"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_update",
@@ -1123,7 +1124,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "7d830f02f45c65f0d6c8f057772a72f9"
+      "ee4b03c34f4fd725e6ecc500c00a02bb"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_update",
@@ -1165,7 +1166,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "23d7fc13c36c6ee90772bf493379b970"
+      "79f4af5dba4a56d9a980bc1c8e182eb2"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_pad",
@@ -1179,7 +1180,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "9f88e257275c70846d82863bdcaecab6"
+      "c8516f15425f3dd71a65a388fbd52207"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_pad",
@@ -1202,7 +1203,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "34a31627fa530b6065887386bd575255"
+      "2d87ad6749f2f12af9a41dc91a34ce44"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_finish",
@@ -1219,7 +1220,7 @@
         "projection_inverse_Prims.Mkdtuple2__1"
       ],
       0,
-      "d62a5edf0fc8e8d89117e44369dd5b94"
+      "344667243b29cceeee774bb84106d58a"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_finish",
@@ -1251,7 +1252,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "e7c5bbd224a5d6f0d1c9e26b506e574c"
+      "a9588cbf864bef36da5716bda0e631d3"
     ]
   ]
 ]

@@ -16,6 +16,7 @@ module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
 open FStar.Mul
+open Hacl.Streaming.Types
 
 inline_for_extraction noextract
 let uint8 = Lib.IntTypes.uint8
@@ -212,13 +213,6 @@ let finish_ (a: alg) =
 
 open Hacl.Streaming.Functor
 
-// Also marks projectors as private, krml will mark type def as public.
-private
-type error_code =
-  | Success
-  | InvalidAlgorithm
-  | InvalidLength
-
 // Unfortunate copy-paste since there are small variations (error code, output length)
 val finish:
   a:G.erased alg -> (
@@ -293,9 +287,11 @@ val squeeze:
           S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
           preserves_freeable c i s h0 h1
       | InvalidAlgorithm ->
-         not (is_shake a)
+          not (is_shake a)
       | InvalidLength ->
-         l = 0ul))
+          l = 0ul
+      | _ ->
+          False))
 
 let squeeze a s dst l =
   let a = get_alg a s in
