@@ -25,9 +25,8 @@
 
 #include "Hacl_HMAC.h"
 
-#include "internal/Hacl_Streaming_SHA2.h"
-#include "internal/Hacl_SHA2_Generic.h"
 #include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_Blake2.h"
 
@@ -190,7 +189,7 @@ Hacl_HMAC_compute_sha2_256(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_256(key, key_len, nkey);
+    Hacl_Streaming_SHA2_hash_256(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -324,7 +323,7 @@ Hacl_HMAC_compute_sha2_384(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_384(key, key_len, nkey);
+    Hacl_Streaming_SHA2_hash_384(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -459,7 +458,7 @@ Hacl_HMAC_compute_sha2_512(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_512(key, key_len, nkey);
+    Hacl_Streaming_SHA2_hash_512(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];

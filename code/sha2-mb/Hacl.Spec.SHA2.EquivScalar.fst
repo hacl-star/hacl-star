@@ -686,7 +686,7 @@ let append_pad_last_length_lemma a len =
   assert (b_len == (blocksize - x) % blocksize + x)
   //if x < blocksize then b_len = blocksize else b_len = 2 * blocksize
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 val load_last_lemma:
      a:sha2_alg
   -> totlen:len_lt_max_a_t a

@@ -25,8 +25,8 @@
 
 #include "internal/Hacl_Ed25519.h"
 
-#include "internal/Hacl_Streaming_SHA2.h"
 #include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Ed25519_PrecompTable.h"
 #include "internal/Hacl_Curve25519_51.h"
 #include "internal/Hacl_Bignum_Base.h"
@@ -1781,7 +1781,7 @@ static inline void point_mul_g_compress(uint8_t *out, uint8_t *s)
 
 static inline void secret_expand(uint8_t *expanded, uint8_t *secret)
 {
-  Hacl_Hash_SHA2_hash_512(secret, (uint32_t)32U, expanded);
+  Hacl_Streaming_SHA2_hash_512(secret, (uint32_t)32U, expanded);
   uint8_t *h_low = expanded;
   uint8_t h_low0 = h_low[0U];
   uint8_t h_low31 = h_low[31U];

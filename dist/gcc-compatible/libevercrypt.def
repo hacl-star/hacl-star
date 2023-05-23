@@ -92,6 +92,7 @@ EXPORTS
   Hacl_SHA2_Scalar32_sha256_update_last
   Hacl_SHA2_Scalar32_sha256_finish
   Hacl_SHA2_Scalar32_sha224_init
+  Hacl_SHA2_Scalar32_sha224_update_last
   Hacl_SHA2_Scalar32_sha224_finish
   Hacl_SHA2_Scalar32_sha512_init
   Hacl_SHA2_Scalar32_sha512_update_nblocks
@@ -107,30 +108,26 @@ EXPORTS
   Hacl_Streaming_SHA2_update_256
   Hacl_Streaming_SHA2_finish_256
   Hacl_Streaming_SHA2_free_256
-  Hacl_Streaming_SHA2_sha256
+  Hacl_Streaming_SHA2_hash_256
   Hacl_Streaming_SHA2_create_in_224
   Hacl_Streaming_SHA2_init_224
   Hacl_Streaming_SHA2_update_224
   Hacl_Streaming_SHA2_finish_224
   Hacl_Streaming_SHA2_free_224
-  Hacl_Streaming_SHA2_sha224
+  Hacl_Streaming_SHA2_hash_224
   Hacl_Streaming_SHA2_create_in_512
   Hacl_Streaming_SHA2_copy_512
   Hacl_Streaming_SHA2_init_512
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
-  Hacl_Streaming_SHA2_sha512
+  Hacl_Streaming_SHA2_hash_512
   Hacl_Streaming_SHA2_create_in_384
   Hacl_Streaming_SHA2_init_384
   Hacl_Streaming_SHA2_update_384
   Hacl_Streaming_SHA2_finish_384
   Hacl_Streaming_SHA2_free_384
-  Hacl_Streaming_SHA2_sha384
-  Hacl_Hash_SHA2_hash_224
-  Hacl_Hash_SHA2_hash_256
-  Hacl_Hash_SHA2_hash_384
-  Hacl_Hash_SHA2_hash_512
+  Hacl_Streaming_SHA2_hash_384
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -158,7 +155,6 @@ EXPORTS
   EverCrypt_AutoConfig2_has_vec128
   EverCrypt_AutoConfig2_has_vec256
   EverCrypt_Hash_update_multi_256
-  EverCrypt_Hash_update_last_256
   EverCrypt_Hash_Incremental_hash_len
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
@@ -491,13 +487,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod

@@ -67,6 +67,8 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 
 # Dependency
 
+.PRECIOUS: %.d
+
 %.d: %.c
 	@set -e; rm -f $@; \
 	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \

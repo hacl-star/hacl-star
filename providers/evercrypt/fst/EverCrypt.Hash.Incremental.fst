@@ -311,8 +311,8 @@ let hash a dst input len =
   | SHA1 -> Hacl.Hash.SHA1.legacy_hash input len dst
   | SHA2_224 -> hash_224 input len dst
   | SHA2_256 -> hash_256 input len dst
-  | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input len dst
-  | SHA2_512 -> Hacl.Hash.SHA2.hash_512 input len dst
+  | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 input len dst
+  | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 input len dst
   | SHA3_224 -> Hacl.Hash.SHA3.hash SHA3_224 input len dst
   | SHA3_256 -> Hacl.Hash.SHA3.hash SHA3_256 input len dst
   | SHA3_384 -> Hacl.Hash.SHA3.hash SHA3_384 input len dst
