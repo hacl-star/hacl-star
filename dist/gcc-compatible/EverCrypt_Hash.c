@@ -26,10 +26,9 @@
 #include "internal/EverCrypt_Hash.h"
 
 #include "internal/Vale.h"
-#include "internal/Hacl_Streaming_SHA2.h"
-#include "internal/Hacl_SHA2_Generic.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA3.h"
+#include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
 #include "config.h"
@@ -536,17 +535,6 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
   KRML_HOST_EXIT(255U);
 }
 
-void
-EverCrypt_Hash_update_last_256(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-)
-{
-  Hacl_SHA2_Scalar32_sha256_update_last(prev_len + (uint64_t)input_len, input_len, input, s);
-}
-
 static void
 update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_t last_len)
 {
@@ -566,13 +554,13 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
   if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
-    EverCrypt_Hash_update_last_256(p1, prev_len, last, last_len);
+    Hacl_SHA2_Scalar32_sha224_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
     return;
   }
   if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
-    EverCrypt_Hash_update_last_256(p1, prev_len, last, last_len);
+    Hacl_SHA2_Scalar32_sha256_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
     return;
   }
   if (scrut.tag == SHA2_384_s)
@@ -2282,7 +2270,10 @@ void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uin
   uint32_t rest_len = rest_len0;
   uint8_t *rest = rest0;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
-  EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
+  Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)blocks_len + (uint64_t)rest_len,
+    rest_len,
+    rest,
+    s);
   Hacl_SHA2_Scalar32_sha256_finish(s, dst);
 }
 
@@ -2317,7 +2308,10 @@ static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint32_t rest_len = rest_len0;
   uint8_t *rest = rest0;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
-  EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
+  Hacl_SHA2_Scalar32_sha224_update_last((uint64_t)blocks_len + (uint64_t)rest_len,
+    rest_len,
+    rest,
+    s);
   Hacl_SHA2_Scalar32_sha224_finish(s, dst);
 }
 
@@ -2360,12 +2354,12 @@ EverCrypt_Hash_Incremental_hash(
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        Hacl_Hash_SHA2_hash_384(input, len, dst);
+        Hacl_Streaming_SHA2_hash_384(input, len, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        Hacl_Hash_SHA2_hash_512(input, len, dst);
+        Hacl_Streaming_SHA2_hash_512(input, len, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA3_224:

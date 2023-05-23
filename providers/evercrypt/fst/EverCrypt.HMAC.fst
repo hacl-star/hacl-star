@@ -67,11 +67,13 @@ let compute_sha2_256 =
              update_last_256 finish_256
 
 let compute_sha2_384 =
+  let open Hacl.Streaming.SHA2 in
   let open Hacl.Hash.SHA2 in
   mk_compute (|SHA2_384, ()|) hash_384 alloca_384 init_384 update_multi_384
              update_last_384 finish_384
 
 let compute_sha2_512 =
+  let open Hacl.Streaming.SHA2 in
   let open Hacl.Hash.SHA2 in
   mk_compute (|SHA2_512, ()|) hash_512 alloca_512 init_512 update_multi_512
              update_last_512 finish_512

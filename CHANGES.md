@@ -13,6 +13,14 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## 2023-05-22
+
+- Removal of Hacl_Streaming_SHA2.h -- all of the functions are now to be found
+  in Hacl_Hash_SHA2.h, which brings SHA2 in alignment with other primitives.
+- Renamings: Hacl_Hash_SHA2_hash_XXX becomes Hacl_Streaming_SHA2_hash_XXX
+  (subject to change in the very near future, see #789)
+- Renamings: Hacl_Streaming_SHA2_shaXXX becomes Hacl_Streaming_SHA2_hash_XXX
+  (subject to change in the very near future, see #789)
 
 ## 2023-02-20
 

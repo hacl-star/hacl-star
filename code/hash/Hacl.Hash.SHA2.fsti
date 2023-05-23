@@ -47,15 +47,3 @@ inline_for_extraction noextract
 val finish_384: finish_st (|SHA2_384, ()|)
 inline_for_extraction noextract
 val finish_512: finish_st (|SHA2_512, ()|)
-
-// Leaving these for backwards-compat, for now. TODO: investigate and see if we
-// can:
-// - mark these as inline_for_extraction
-// - rename the new-ish hash functions in Hacl_Streaming_SHA2
-// - rename Hacl_Streaming_SHA2 into Hacl_SHA2
-// - use krml's rename-prefix to obtain exactly the same function names (with
-//   identical argument orders)
-val hash_224: hash_st SHA2_224
-val hash_256: hash_st SHA2_256
-val hash_384: hash_st SHA2_384
-val hash_512: hash_st SHA2_512

@@ -25,9 +25,8 @@
 
 #include "internal/EverCrypt_HMAC.h"
 
-#include "internal/Hacl_Streaming_SHA2.h"
-#include "internal/Hacl_SHA2_Generic.h"
 #include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_Blake2.h"
 #include "internal/EverCrypt_Hash.h"
@@ -218,7 +217,7 @@ EverCrypt_HMAC_compute_sha2_256(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_256(key, key_len, nkey);
+    EverCrypt_HMAC_hash_256(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -250,7 +249,10 @@ EverCrypt_HMAC_compute_sha2_256(
   uint8_t *dst1 = ipad;
   if (data_len == (uint32_t)0U)
   {
-    EverCrypt_Hash_update_last_256(s, (uint64_t)0U, ipad, (uint32_t)64U);
+    Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)0U + (uint64_t)(uint32_t)64U,
+      (uint32_t)64U,
+      ipad,
+      s);
   }
   else
   {
@@ -274,10 +276,12 @@ EverCrypt_HMAC_compute_sha2_256(
     uint8_t *rem = data + full_blocks_len;
     EverCrypt_Hash_update_multi_256(s, ipad, (uint32_t)1U);
     EverCrypt_Hash_update_multi_256(s, full_blocks, n_blocks);
-    EverCrypt_Hash_update_last_256(s,
-      (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
+    Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)(uint32_t)64U
+      + (uint64_t)full_blocks_len
+      + (uint64_t)rem_len,
+      rem_len,
       rem,
-      rem_len);
+      s);
   }
   Hacl_SHA2_Scalar32_sha256_finish(s, dst1);
   uint8_t *hash1 = ipad;
@@ -303,10 +307,12 @@ EverCrypt_HMAC_compute_sha2_256(
   uint8_t *rem = hash1 + full_blocks_len;
   EverCrypt_Hash_update_multi_256(s, opad, (uint32_t)1U);
   EverCrypt_Hash_update_multi_256(s, full_blocks, n_blocks);
-  EverCrypt_Hash_update_last_256(s,
-    (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
+  Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)(uint32_t)64U
+    + (uint64_t)full_blocks_len
+    + (uint64_t)rem_len,
+    rem_len,
     rem,
-    rem_len);
+    s);
   Hacl_SHA2_Scalar32_sha256_finish(s, dst);
 }
 
@@ -339,7 +345,7 @@ EverCrypt_HMAC_compute_sha2_384(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_384(key, key_len, nkey);
+    Hacl_Streaming_SHA2_hash_384(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -468,7 +474,7 @@ EverCrypt_HMAC_compute_sha2_512(
   }
   else
   {
-    Hacl_Hash_SHA2_hash_512(key, key_len, nkey);
+    Hacl_Streaming_SHA2_hash_512(key, key_len, nkey);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
