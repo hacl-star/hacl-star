@@ -72,7 +72,7 @@ success, or 1 if the combined length of all of the data passed to `update_256`
 
 This function is identical to the update function for SHA2_224.
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_SHA2_update_256(
   Hacl_Streaming_MD_state_32 *p,
   uint8_t *input,
@@ -103,7 +103,7 @@ Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA2_create_in_224(void);
 
 void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_MD_state_32 *s);
 
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_SHA2_update_224(
   Hacl_Streaming_MD_state_32 *p,
   uint8_t *input,
@@ -143,7 +143,7 @@ success, or 1 if the combined length of all of the data passed to `update_512`
 
 This function is identical to the update function for SHA2_384.
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_SHA2_update_512(
   Hacl_Streaming_MD_state_64 *p,
   uint8_t *input,
@@ -174,7 +174,7 @@ Hacl_Streaming_MD_state_64 *Hacl_Streaming_SHA2_create_in_384(void);
 
 void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_MD_state_64 *s);
 
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_SHA2_update_384(
   Hacl_Streaming_MD_state_64 *p,
   uint8_t *input,
