@@ -26,7 +26,7 @@
 #include "Hacl_SHA2_Vec128.h"
 
 #include "internal/Hacl_SHA2_Types.h"
-#include "internal/Hacl_SHA2_Generic.h"
+#include "internal/Hacl_Hash_SHA2.h"
 #include "libintvector.h"
 
 /* SNIPPET_START: sha224_init4 */
