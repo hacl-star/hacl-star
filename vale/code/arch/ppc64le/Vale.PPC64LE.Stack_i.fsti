@@ -177,3 +177,20 @@ let modifies_stacktaint (lo_r1 hi_r1:nat) (h h':memtaint) : Vale.Def.Prop_s.prop
   forall addr t. {:pattern (valid_taint_stack64 addr t h') }
     (addr + 8 <= lo_r1 || addr >= hi_r1) ==>
       valid_taint_stack64 addr t h == valid_taint_stack64 addr t h'
+
+val lemma_store_stack_same_valid64_128 (ptr:int) (v:quad32) (h:vale_stack) (i:int) : Lemma
+  (requires valid_src_stack64 i h /\
+    (i >= ptr + 16 \/ i + 8 <= ptr))
+  (ensures valid_src_stack64 i (store_stack128 ptr v h))
+  [SMTPat (valid_src_stack64 i (store_stack128 ptr v h))]
+
+val lemma_frame_store_load_stack64_128 (ptr:int) (v:quad32) (h:vale_stack) (i:int) : Lemma
+  (requires valid_src_stack64 i h /\
+    (i >= ptr + 16 \/ i + 8 <= ptr))
+  (ensures (load_stack64 i (store_stack128 ptr v h) == load_stack64 i h))
+  [SMTPat (load_stack64 i (store_stack128 ptr v h))]
+
+val lemma_frame_store_load_taint_stack64_128 (ptr:int) (t:taint) (stackTaint:memtaint) (i:int) (t':taint) : Lemma
+  (requires i >= ptr + 16 \/ i + 8 <= ptr)
+  (ensures valid_taint_stack64 i t' stackTaint == valid_taint_stack64 i t' (store_taint_stack128 ptr t stackTaint))
+  [SMTPat (valid_taint_stack64 i t' (store_taint_stack128 ptr t stackTaint))]

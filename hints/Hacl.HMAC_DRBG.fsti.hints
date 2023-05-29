@@ -22,7 +22,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "a09b6cd5a071b975728f3821e25cb7e3"
+      "fab696192b565f2df26dca3776a3f5f1"
     ],
     [
       "Hacl.HMAC_DRBG.max_output_length",
@@ -45,7 +45,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "263903b7b5621ad1a31bfc74b58c7a7e"
+      "5003d6c9801a83f2adf3fd911a9fb90e"
     ],
     [
       "Hacl.HMAC_DRBG.max_length",
@@ -68,7 +68,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "0fc8c9cb42848c41423a7b5eda541eb6"
+      "a3b16bfecb18c9752b926f4ca030cd13"
     ],
     [
       "Hacl.HMAC_DRBG.max_personalization_string_length",
@@ -91,7 +91,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "a234c49debe38d9c0b210594fc2ee3c1"
+      "df07935aed723b6758018a0511cbd534"
     ],
     [
       "Hacl.HMAC_DRBG.max_additional_input_length",
@@ -114,7 +114,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "b84616411e12a9e4aaada471354e2d7a"
+      "d8014c1cf3e629e3a5ad4c49225c1dbb"
     ],
     [
       "Hacl.HMAC_DRBG.min_length",
@@ -171,7 +171,7 @@
         "typing_Spec.HMAC_DRBG.is_supported_alg"
       ],
       0,
-      "bcc401191411de0aef0584b45265b623"
+      "2dabd4aa88fc2bf84208cf858a0e1efd"
     ],
     [
       "Hacl.HMAC_DRBG.instantiate_st",
@@ -261,7 +261,25 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3193afb2a16d85e1478d5b367d4f04db"
+      "4b29afb419b01eb5cd671cdee19386d2"
+    ],
+    [
+      "Hacl.HMAC_DRBG.mk_instantiate",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
+        "typing_Spec.Hash.Definitions.is_shake"
+      ],
+      0,
+      "fd6a0b8b032021ce7c01d07bc46a65b5"
     ],
     [
       "Hacl.HMAC_DRBG.reseed_st",
@@ -349,7 +367,25 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "01a063fd0b100878303f28de7a925b35"
+      "0c9d4f8915e10e3b37b499291acf9fff"
+    ],
+    [
+      "Hacl.HMAC_DRBG.mk_reseed",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
+        "typing_Spec.Hash.Definitions.is_shake"
+      ],
+      0,
+      "cafc3685df97d49dec3b263632445ecc"
     ],
     [
       "Hacl.HMAC_DRBG.generate_st",
@@ -426,7 +462,25 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "20f47aecd87eae3b37bf960e6c529125"
+      "2deb9de4e88e8b271a7f99dac374bf2d"
+    ],
+    [
+      "Hacl.HMAC_DRBG.mk_generate",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_822d47def75b4fb1f118e901cb4a38d6",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
+        "typing_Spec.Hash.Definitions.is_shake"
+      ],
+      0,
+      "a31e42664f1c928913ded0a954f6cf33"
     ]
   ]
 ]

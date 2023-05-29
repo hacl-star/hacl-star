@@ -44,10 +44,10 @@ inline_for_extraction noextract
 let state_t_512 = state_t SHA2_512
 
 /// Type abbreviations - for pretty code generation
-let state_sha2_224 = F.state_s hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let state_sha2_256 = F.state_s hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
-let state_sha2_384 = F.state_s hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let state_sha2_512 = F.state_s hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+let state_sha2_224 = Hacl.Streaming.MD.state_32
+let state_sha2_256 = Hacl.Streaming.MD.state_32
+let state_sha2_384 = Hacl.Streaming.MD.state_64
+let state_sha2_512 = Hacl.Streaming.MD.state_64
 
 open Lib.Buffer
 open Lib.IntTypes
@@ -108,8 +108,8 @@ let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased uni
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes."]
-val sha256: Hacl.Hash.Definitions.hash_st SHA2_256
-let sha256 input input_len dst =
+val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
+let hash_256 input input_len dst =
   [@inline_let]
   let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_256) = dst in
   let ib = ntup1 input in
@@ -140,8 +140,8 @@ let free_224: F.free_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased u
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes."]
-val sha224: Hacl.Hash.Definitions.hash_st SHA2_224
-let sha224 input input_len dst =
+val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
+let hash_224 input input_len dst =
   [@inline_let]
   let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_224) = dst in
   let ib = ntup1 input in
@@ -159,6 +159,14 @@ let sha224 input input_len dst =
 inline_for_extraction noextract
 let alloca_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let create_in_512 = F.create_in hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+
+[@@ Comment
+"Copies the state passed as argument into a newly allocated state (deep copy).
+The state is to be freed by calling `free_512`. Cloning the state this way is
+useful, for instance, if your control-flow diverges and you need to feed
+more (different) data into the hash in each branch."]
+let copy_512 = F.copy hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+
 let init_512 = F.init hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 
 [@@ CInline ]
@@ -189,8 +197,8 @@ let free_512 = F.free hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased uni
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes."]
-val sha512: Hacl.Hash.Definitions.hash_st SHA2_512
-let sha512 input input_len dst =
+val hash_512: Hacl.Hash.Definitions.hash_st SHA2_512
+let hash_512 input input_len dst =
   [@inline_let]
   let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_512) = dst in
   let ib = ntup1 input in
@@ -221,8 +229,8 @@ let free_384: F.free_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased u
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes."]
-val sha384: Hacl.Hash.Definitions.hash_st SHA2_384
-let sha384 input input_len dst =
+val hash_384: Hacl.Hash.Definitions.hash_st SHA2_384
+let hash_384 input input_len dst =
   [@inline_let]
   let dst: lbuffer uint8 (Hacl.Hash.Definitions.hash_len SHA2_384) = dst in
   let ib = ntup1 input in

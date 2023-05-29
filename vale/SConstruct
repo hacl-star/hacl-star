@@ -120,7 +120,17 @@ else:
 if 'FSTAR_HOME' in os.environ:
   fstar_default_path = os.environ['FSTAR_HOME']
 else:
-  fstar_default_path = '../../FStar'
+  if sys.platform == 'win32':
+    find_fstar = FindFile('fstar.exe', os.environ['PATH'].split(';'))
+  else:
+    find_fstar = FindFile('fstar', os.environ['PATH'].split(':'))
+  if find_fstar == None:
+    # assume an Everest source tree
+    fstar_default_path = '../../FStar'
+  else
+    # assume F* is in some PATH directory ending with /bin
+    # (e.g. F* installed via opam)
+    fstar_default_path = find_fstar.path + '/..'
 
 def AddOptYesNo(name, dest, default, help):
   AddOption('--' + name, dest = dest, default = default, action = 'store_true', help = f'{help} (default {default})')
@@ -979,7 +989,7 @@ def process_files_in(env, directories):
 
 def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_file):
   # OCaml depends on many libraries and executables; we have to assume they are in the user's PATH:
-  ocaml_env.PrependENVPath('OCAMLPATH', fstar_path + '/bin')
+  ocaml_env.PrependENVPath('OCAMLPATH', fstar_path + '/lib')
   main_ml = ml_out_file(main_file, '.ml')
   main_cmx = ml_out_file(main_file, '.cmx')
   main_exe = ml_out_file(main_file, '.exe')
@@ -1010,7 +1020,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
     x_cmx = ml_out_file(x_ml, '.cmx')
     x_obj = ml_out_file(x_ml, '.o')
     cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
-      f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
+      f'ocamlfind ocamlopt -c -package fstar.lib -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
     cmxs.append(cmx[0])
     objs.append(x_obj)
     Depends(main_exe, cmx[0])
@@ -1029,7 +1039,7 @@ def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_f
   add_cmx(main_ml)
   cmxs_string = " ".join([str(cmx) for cmx in cmxs])
   ocaml_env.Command(main_exe, cmxs + objs,
-    f'ocamlfind ocamlopt -linkpkg -package fstarlib {cmxs_string} -o {main_exe}')
+    f'ocamlfind ocamlopt -linkpkg -package fstar.lib {cmxs_string} -o {main_exe}')
   # Run executable to generate assembly files:
   output_target_base = 'obj/' + output_base_name
   def generate_asm(suffix, assembler, os):

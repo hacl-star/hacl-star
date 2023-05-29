@@ -1,5 +1,5 @@
 let _ =
-  CmdLineParser.parse_cmdline [
+  CmdLineParser.parse_cmdline_x64 [
     ("check_aesni",  (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_aesni_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_aesni_stdcall win), 0, true);
     ("check_sha",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_sha_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_sha_stdcall win), 0, true);
     ("check_adx_bmi2",  (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_adx_bmi2_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_adx_bmi2_stdcall win), 0, true);

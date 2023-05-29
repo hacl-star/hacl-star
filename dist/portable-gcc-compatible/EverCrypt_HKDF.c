@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +25,12 @@
 
 #include "EverCrypt_HKDF.h"
 
+#include "internal/EverCrypt_HMAC.h"
 
+/* SNIPPET_START: expand_sha1 */
 
-/* SNIPPET_START: EverCrypt_HKDF_expand_sha1 */
-
-void
-EverCrypt_HKDF_expand_sha1(
+static void
+expand_sha1(
   uint8_t *okm,
   uint8_t *prk,
   uint32_t prklen,
@@ -77,28 +78,22 @@ EverCrypt_HKDF_expand_sha1(
   }
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_expand_sha1 */
+/* SNIPPET_END: expand_sha1 */
 
-/* SNIPPET_START: EverCrypt_HKDF_extract_sha1 */
+/* SNIPPET_START: extract_sha1 */
 
-void
-EverCrypt_HKDF_extract_sha1(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
+static void
+extract_sha1(uint8_t *prk, uint8_t *salt, uint32_t saltlen, uint8_t *ikm, uint32_t ikmlen)
 {
   EverCrypt_HMAC_compute_sha1(prk, salt, saltlen, ikm, ikmlen);
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_extract_sha1 */
+/* SNIPPET_END: extract_sha1 */
 
-/* SNIPPET_START: EverCrypt_HKDF_expand_sha2_256 */
+/* SNIPPET_START: expand_sha2_256 */
 
-void
-EverCrypt_HKDF_expand_sha2_256(
+static void
+expand_sha2_256(
   uint8_t *okm,
   uint8_t *prk,
   uint32_t prklen,
@@ -146,28 +141,22 @@ EverCrypt_HKDF_expand_sha2_256(
   }
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_expand_sha2_256 */
+/* SNIPPET_END: expand_sha2_256 */
 
-/* SNIPPET_START: EverCrypt_HKDF_extract_sha2_256 */
+/* SNIPPET_START: extract_sha2_256 */
 
-void
-EverCrypt_HKDF_extract_sha2_256(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
+static void
+extract_sha2_256(uint8_t *prk, uint8_t *salt, uint32_t saltlen, uint8_t *ikm, uint32_t ikmlen)
 {
   EverCrypt_HMAC_compute_sha2_256(prk, salt, saltlen, ikm, ikmlen);
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_extract_sha2_256 */
+/* SNIPPET_END: extract_sha2_256 */
 
-/* SNIPPET_START: EverCrypt_HKDF_expand_sha2_384 */
+/* SNIPPET_START: expand_sha2_384 */
 
-void
-EverCrypt_HKDF_expand_sha2_384(
+static void
+expand_sha2_384(
   uint8_t *okm,
   uint8_t *prk,
   uint32_t prklen,
@@ -215,28 +204,22 @@ EverCrypt_HKDF_expand_sha2_384(
   }
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_expand_sha2_384 */
+/* SNIPPET_END: expand_sha2_384 */
 
-/* SNIPPET_START: EverCrypt_HKDF_extract_sha2_384 */
+/* SNIPPET_START: extract_sha2_384 */
 
-void
-EverCrypt_HKDF_extract_sha2_384(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
+static void
+extract_sha2_384(uint8_t *prk, uint8_t *salt, uint32_t saltlen, uint8_t *ikm, uint32_t ikmlen)
 {
   EverCrypt_HMAC_compute_sha2_384(prk, salt, saltlen, ikm, ikmlen);
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_extract_sha2_384 */
+/* SNIPPET_END: extract_sha2_384 */
 
-/* SNIPPET_START: EverCrypt_HKDF_expand_sha2_512 */
+/* SNIPPET_START: expand_sha2_512 */
 
-void
-EverCrypt_HKDF_expand_sha2_512(
+static void
+expand_sha2_512(
   uint8_t *okm,
   uint8_t *prk,
   uint32_t prklen,
@@ -284,28 +267,22 @@ EverCrypt_HKDF_expand_sha2_512(
   }
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_expand_sha2_512 */
+/* SNIPPET_END: expand_sha2_512 */
 
-/* SNIPPET_START: EverCrypt_HKDF_extract_sha2_512 */
+/* SNIPPET_START: extract_sha2_512 */
 
-void
-EverCrypt_HKDF_extract_sha2_512(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
+static void
+extract_sha2_512(uint8_t *prk, uint8_t *salt, uint32_t saltlen, uint8_t *ikm, uint32_t ikmlen)
 {
   EverCrypt_HMAC_compute_sha2_512(prk, salt, saltlen, ikm, ikmlen);
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_extract_sha2_512 */
+/* SNIPPET_END: extract_sha2_512 */
 
-/* SNIPPET_START: EverCrypt_HKDF_expand_blake2s */
+/* SNIPPET_START: expand_blake2s */
 
-void
-EverCrypt_HKDF_expand_blake2s(
+static void
+expand_blake2s(
   uint8_t *okm,
   uint8_t *prk,
   uint32_t prklen,
@@ -353,28 +330,22 @@ EverCrypt_HKDF_expand_blake2s(
   }
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_expand_blake2s */
+/* SNIPPET_END: expand_blake2s */
 
-/* SNIPPET_START: EverCrypt_HKDF_extract_blake2s */
+/* SNIPPET_START: extract_blake2s */
 
-void
-EverCrypt_HKDF_extract_blake2s(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
+static void
+extract_blake2s(uint8_t *prk, uint8_t *salt, uint32_t saltlen, uint8_t *ikm, uint32_t ikmlen)
 {
   EverCrypt_HMAC_compute_blake2s(prk, salt, saltlen, ikm, ikmlen);
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_extract_blake2s */
+/* SNIPPET_END: extract_blake2s */
 
-/* SNIPPET_START: EverCrypt_HKDF_expand_blake2b */
+/* SNIPPET_START: expand_blake2b */
 
-void
-EverCrypt_HKDF_expand_blake2b(
+static void
+expand_blake2b(
   uint8_t *okm,
   uint8_t *prk,
   uint32_t prklen,
@@ -422,23 +393,17 @@ EverCrypt_HKDF_expand_blake2b(
   }
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_expand_blake2b */
+/* SNIPPET_END: expand_blake2b */
 
-/* SNIPPET_START: EverCrypt_HKDF_extract_blake2b */
+/* SNIPPET_START: extract_blake2b */
 
-void
-EverCrypt_HKDF_extract_blake2b(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
+static void
+extract_blake2b(uint8_t *prk, uint8_t *salt, uint32_t saltlen, uint8_t *ikm, uint32_t ikmlen)
 {
   EverCrypt_HMAC_compute_blake2b(prk, salt, saltlen, ikm, ikmlen);
 }
 
-/* SNIPPET_END: EverCrypt_HKDF_extract_blake2b */
+/* SNIPPET_END: extract_blake2b */
 
 /* SNIPPET_START: EverCrypt_HKDF_expand */
 
@@ -468,32 +433,32 @@ EverCrypt_HKDF_expand(
   {
     case Spec_Hash_Definitions_SHA1:
       {
-        EverCrypt_HKDF_expand_sha1(okm, prk, prklen, info, infolen, len);
+        expand_sha1(okm, prk, prklen, info, infolen, len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        EverCrypt_HKDF_expand_sha2_256(okm, prk, prklen, info, infolen, len);
+        expand_sha2_256(okm, prk, prklen, info, infolen, len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        EverCrypt_HKDF_expand_sha2_384(okm, prk, prklen, info, infolen, len);
+        expand_sha2_384(okm, prk, prklen, info, infolen, len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        EverCrypt_HKDF_expand_sha2_512(okm, prk, prklen, info, infolen, len);
+        expand_sha2_512(okm, prk, prklen, info, infolen, len);
         break;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
-        EverCrypt_HKDF_expand_blake2s(okm, prk, prklen, info, infolen, len);
+        expand_blake2s(okm, prk, prklen, info, infolen, len);
         break;
       }
     case Spec_Hash_Definitions_Blake2B:
       {
-        EverCrypt_HKDF_expand_blake2b(okm, prk, prklen, info, infolen, len);
+        expand_blake2b(okm, prk, prklen, info, infolen, len);
         break;
       }
     default:
@@ -539,32 +504,32 @@ EverCrypt_HKDF_extract(
   {
     case Spec_Hash_Definitions_SHA1:
       {
-        EverCrypt_HKDF_extract_sha1(prk, salt, saltlen, ikm, ikmlen);
+        extract_sha1(prk, salt, saltlen, ikm, ikmlen);
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        EverCrypt_HKDF_extract_sha2_256(prk, salt, saltlen, ikm, ikmlen);
+        extract_sha2_256(prk, salt, saltlen, ikm, ikmlen);
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        EverCrypt_HKDF_extract_sha2_384(prk, salt, saltlen, ikm, ikmlen);
+        extract_sha2_384(prk, salt, saltlen, ikm, ikmlen);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        EverCrypt_HKDF_extract_sha2_512(prk, salt, saltlen, ikm, ikmlen);
+        extract_sha2_512(prk, salt, saltlen, ikm, ikmlen);
         break;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
-        EverCrypt_HKDF_extract_blake2s(prk, salt, saltlen, ikm, ikmlen);
+        extract_blake2s(prk, salt, saltlen, ikm, ikmlen);
         break;
       }
     case Spec_Hash_Definitions_Blake2B:
       {
-        EverCrypt_HKDF_extract_blake2b(prk, salt, saltlen, ikm, ikmlen);
+        extract_blake2b(prk, salt, saltlen, ikm, ikmlen);
         break;
       }
     default:

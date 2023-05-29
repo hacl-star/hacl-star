@@ -1,0 +1,67 @@
+[
+  "„∏Vã™fù¨YñÙ≥r~¸K",
+  [
+    [
+      "Vale.AES.PPC64LE.GF128_Init.va_req_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.l_and",
+        "equation_Prims.squash", "equation_Prims.subtype_of",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "ec9ca1fedbf717a8b11870a47abdb559"
+    ],
+    [
+      "Vale.AES.PPC64LE.GF128_Init.va_ens_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.l_and",
+        "equation_Prims.squash", "equation_Prims.subtype_of",
+        "equation_Vale.AES.PPC64LE.GF128_Init.va_req_Keyhash_init",
+        "equation_Vale.PPC64LE.Decls.va_state_eq",
+        "fuel_guarded_inversion_Vale.PPC64LE.Machine_s.state",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "420fcc5be45783cda6d2dd8bdd84bc48"
+    ],
+    [
+      "Vale.AES.PPC64LE.GF128_Init.va_lemma_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_963b752db6c178d3991428c405a2a468"
+      ],
+      0,
+      "84ff2e817cacae7bc2a5cdeeed57ac26"
+    ],
+    [
+      "Vale.AES.PPC64LE.GF128_Init.va_wp_Keyhash_init",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "08a0caa0444af3cbc5fda017a1342f04"
+    ],
+    [
+      "Vale.AES.PPC64LE.GF128_Init.va_quick_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "0ed78dda918aff412a7be0fbd2719179"
+    ]
+  ]
+]

@@ -23,14 +23,14 @@ let less_strict_than_max_input_length l a =
   | Some max -> l < max
   | None -> true
 
-let key_and_data_fits (a:hash_alg) :
+let key_and_data_fits (a:fixed_len_alg) :
   Lemma ((block_length a + pow2 32) `less_than_max_input_length` a)
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
-let hash_block_length_fits (a:hash_alg) :
+let hash_block_length_fits (a:fixed_len_alg) :
   Lemma ((hash_length a + pow2 32 + block_length a) `less_strict_than_max_input_length` a)
 =
   let open FStar.Mul in
@@ -38,7 +38,7 @@ let hash_block_length_fits (a:hash_alg) :
   assert_norm (pow2 61 < pow2 125)
 
 inline_for_extraction noextract
-let extract_st (a:hash_alg) =
+let extract_st (a:fixed_len_alg) =
   prk     : B.buffer uint8 ->
   salt    : B.buffer uint8 ->
   saltlen : pub_uint32 ->
@@ -59,7 +59,7 @@ let extract_st (a:hash_alg) =
     B.as_seq h1 prk == extract a (B.as_seq h0 salt) (B.as_seq h0 ikm))
 
 inline_for_extraction noextract
-let expand_st (a:hash_alg) =
+let expand_st (a:fixed_len_alg) =
   okm     : B.buffer uint8 ->
   prk     : B.buffer uint8 ->
   prklen  : pub_uint32 ->
@@ -84,13 +84,13 @@ let expand_st (a:hash_alg) =
 
 inline_for_extraction noextract
 val mk_extract:
-  a: hash_alg ->
+  a: fixed_len_alg ->
   hmac: Hacl.HMAC.compute_st a ->
   extract_st a
 
 inline_for_extraction noextract
 val mk_expand:
-  a: hash_alg ->
+  a: fixed_len_alg ->
   hmac: Hacl.HMAC.compute_st a ->
   expand_st a
 
@@ -112,6 +112,25 @@ val expand_sha2_256: expand_st SHA2_256
 @param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
 @param ikmlen Length of input keying material."]
 val extract_sha2_256: extract_st SHA2_256
+
+[@@ Comment "Expand pseudorandom key to desired length.
+
+@param okm Pointer to `len` bytes of memory where output keying material is written to.
+@param prk Pointer to at least `HashLen` bytes of memory where pseudorandom key is read from. Usually, this points to the output from the extract step.
+@param prklen Length of pseudorandom key.
+@param info Pointer to `infolen` bytes of memory where context and application specific information is read from. Can be a zero-length string.
+@param infolen Length of context and application specific information.
+@param len Length of output keying material."]
+val expand_sha2_384: expand_st SHA2_384
+
+[@@ Comment "Extract a fixed-length pseudorandom key from input keying material.
+
+@param prk Pointer to `HashLen` bytes of memory where pseudorandom key is written to.
+@param salt Pointer to `saltlen` bytes of memory where salt value is read from.
+@param saltlen Length of salt value.
+@param ikm Pointer to `ikmlen` bytes of memory where input keying material is read from.
+@param ikmlen Length of input keying material."]
+val extract_sha2_384: extract_st SHA2_384
 
 [@@ Comment "Expand pseudorandom key to desired length.
 

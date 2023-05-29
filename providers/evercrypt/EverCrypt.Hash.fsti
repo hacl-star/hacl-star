@@ -21,7 +21,7 @@ open Hacl.Hash.Definitions
 ///
 /// ``hash_alg``, from Spec.Hash.Definitions, lists all supported algorithms
 unfold
-let alg = hash_alg
+let alg = fixed_len_alg
 
 /// TODO: move this one to Hacl.Hash.Definitions
 val string_of_alg: alg -> C.String.t
@@ -261,14 +261,9 @@ val update_multi:
       (ev_of_uint64 a prevlen) (B.as_seq h0 blocks) /\
     preserves_freeable s h0 h1))
 
-val update_last_256: Hacl.Hash.Definitions.update_last_st (|SHA2_256, ()|)
-
-inline_for_extraction noextract
-val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
-
 inline_for_extraction noextract
 let prev_len_of_uint64 a (prevlen: UInt64.t { UInt64.v prevlen % block_length a = 0 }): Spec.Hash.Incremental.prev_length_t a =
-  (if is_sha3 a then () else UInt64.v prevlen)
+  (if is_keccak a then () else UInt64.v prevlen)
 
 /// The ``update_last`` method with support for blake2
 // 18-03-05 note the *new* length-passing convention!
@@ -323,7 +318,7 @@ val finish:
     M.(modifies (loc_buffer dst `loc_union` footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     (* The 0UL value is dummy: it is actually useless *)
-    B.as_seq h1 dst == Spec.Agile.Hash.finish a (repr s h0) /\
+    B.as_seq h1 dst == Spec.Agile.Hash.finish a (repr s h0) () /\
     preserves_freeable s h0 h1))
 
 (** @type: true

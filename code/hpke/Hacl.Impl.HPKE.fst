@@ -460,30 +460,51 @@ let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen l
 
 #pop-options
 
+/// Specializing Lib.ByteSequence.uint_to_bytes_be to avoid the forall in the postcondition
+val index_uint_to_bytes_be_i: #t:inttype{unsigned t} -> #l:secrecy_level -> u:uint_t t l -> i:nat{i < numbytes t}
+  -> Lemma
+    (Seq.index (Lib.ByteSequence.uint_to_bytes_be #t #l u) (numbytes t - i - 1) == uint #U8 #l (v u / pow2 (8 * i) % pow2 8))
+
+let index_uint_to_bytes_be_i u i = Lib.ByteSequence.index_uint_to_bytes_be u
+
 noextract inline_for_extraction
-val nat_to_bytes_2 (l:size_t) (b:lbuffer uint8 4ul)
+val nat_to_bytes_2 (l:size_t) (b:lbuffer uint8 2ul)
   : Stack unit
      (requires fun h -> live h b /\ v l <= 255 * 128)
      (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-       as_seq h1 (gsub b 0ul 2ul) `Seq.equal` Lib.ByteSequence.nat_to_bytes_be 2 (v l)
+       as_seq h1 b `Seq.equal` Lib.ByteSequence.nat_to_bytes_be 2 (v l)
      )
 
+#push-options "--z3rlimit 100"
 let nat_to_bytes_2 l tmp =
-  Lib.ByteBuffer.uint_to_bytes_be (sub tmp 0ul 4ul) (secret l);
+  assert_norm (UInt32.v 0x10000ul == pow2 16);
+  [@inline_let]
+  let l16 = secret (FStar.Int.Cast.Full.uint32_to_uint16 l) in
+  assert (v l16 == v l);
+  Lib.ByteBuffer.uint_to_bytes_be tmp l16;
   let h1 = ST.get () in
-  assert (as_seq h1 (gsub tmp 0ul 4ul) `Seq.equal` Lib.ByteSequence.uint_to_bytes_be (secret l));
 
-  Lib.ByteSequence.lemma_uint_to_bytes_be_preserves_value (secret l);
-  assert (Lib.ByteSequence.nat_from_bytes_be (as_seq h1 (gsub tmp 0ul 4ul)) == v l);
+  let open Lib.ByteSequence in
+  calc (==) {
+    Seq.index (as_seq h1 tmp) 0;
+  (==) { }
+    Seq.index (uint_to_bytes_be l16) 0;
+  (==) { index_uint_to_bytes_be_i l16 1 }
+    uint #U8 (v l / pow2 (8 * 1) % pow2 8);
+  (==) { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 1 }
+    Seq.index (Lib.ByteSequence.nat_to_bytes_be 2 (v l)) 0;
+ };
 
-  Lib.ByteSequence.lemma_nat_from_to_bytes_be_preserves_value (as_seq h1 (gsub tmp 0ul 4ul)) 4;
-  assert (as_seq h1 (gsub tmp 0ul 4ul) == Lib.ByteSequence.nat_to_bytes_be 4 (v l));
-
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 0;
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 1;
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 4 (v l) 0;
-  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 4 (v l) 1;
-  copy (sub tmp 0ul 2ul) (sub tmp 2ul 2ul)
+  calc (==) {
+    Seq.index (as_seq h1 tmp) 1;
+  (==) { }
+    Seq.index (uint_to_bytes_be l16) 1;
+  (==) { index_uint_to_bytes_be_i l16 0 }
+    uint #U8 (v l / pow2 (8 * 0) % pow2 8);
+  (==) { Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 0 }
+    Seq.index (Lib.ByteSequence.nat_to_bytes_be 2 (v l)) 1;
+ }
+#pop-options
 
 noextract inline_for_extraction
 val labeled_expand_hash_pre:
@@ -518,7 +539,7 @@ val labeled_expand_hash_pre:
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_hash_pre #cs suite_id_len suite_id labellen label infolen info l tmplen tmp =
-  nat_to_bytes_2 l (sub tmp 0ul 4ul);
+  nat_to_bytes_2 l (sub tmp 0ul 2ul);
   init_label_version (sub tmp 2ul 7ul);
   copy (sub tmp 9ul suite_id_len) suite_id;
   copy (sub tmp (9ul +. suite_id_len) labellen) label;
@@ -595,23 +616,39 @@ val labeled_expand_kem:
       as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-#push-options "--z3rlimit 500 --z3refresh"
+#push-options "--z3rlimit 500 --z3refresh --ifuel 0"
+
+let helper (cs: S.ciphersuite) (l: size_t): Lemma
+  (requires Spec.Agile.HKDF.expand_output_length_pred (S.kem_hash_of_cs cs) (v l))
+  (ensures (v l <= 255 * 128))
+=
+  ()
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
+  let h00 = ST.get () in
   push_frame ();
   let h0 = ST.get () in
   let len = 9ul +. suite_id_len +. labellen +. infolen in
   let tmp = create len (u8 0) in
 
-  nat_to_bytes_2 l (sub tmp 0ul 4ul);
-  init_label_version (sub tmp 2ul 7ul);
-  copy (sub tmp 9ul suite_id_len) suite_id;
-  copy (sub tmp (9ul +. suite_id_len) labellen) label;
-  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info;
-
+  helper cs l;
+  nat_to_bytes_2 l (sub tmp 0ul 2ul);
   let h1 = ST.get () in
-  assert (as_seq h1 tmp `Seq.equal` (
+  init_label_version (sub tmp 2ul 7ul);
+  let h2 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h1 (loc tmp) h2;
+  copy (sub tmp 9ul suite_id_len) suite_id;
+  let h3 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h2 (loc tmp) h3;
+  copy (sub tmp (9ul +. suite_id_len) labellen) label;
+  let h4 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h3 (loc tmp) h4;
+  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info;
+  let h5 = ST.get () in
+  B.modifies_trans (loc tmp) h0 h4 (loc tmp) h5;
+
+  assert (as_seq h5 tmp `Seq.equal` (
     (((Lib.ByteSequence.nat_to_bytes_be 2 (v l)
       `Seq.append` S.label_version)
       `Seq.append` (as_seq h0 suite_id))
@@ -620,8 +657,14 @@ let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infol
       ));
 
   HKDF.hkdf_expand_kem #cs o_hash prk prklen tmp len l;
+  let h6 = ST.get () in
 
-  pop_frame ()
+  B.modifies_trans (loc tmp) h0 h5 (loc o_hash) h6;
+
+  pop_frame ();
+
+  let h7 = ST.get () in
+  B.modifies_fresh_frame_popped h00 h0 (loc o_hash) h6 h7
 
 #pop-options
 

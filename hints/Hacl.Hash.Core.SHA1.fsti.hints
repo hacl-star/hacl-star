@@ -24,7 +24,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6002a9ce3aeffa8c1c37141b8997c5c4"
+      "bdd93aa5b2610aae6edeeec8e52a8e5e"
     ],
     [
       "Hacl.Hash.Core.SHA1.legacy_pad",
@@ -47,7 +47,24 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "d8a65ed446dd94a1a11f36149d0bc4d1"
+      "3e3f3403a685277eff109d10ff0000f0"
+    ],
+    [
+      "Hacl.Hash.Core.SHA1.legacy_finish",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Hash.Definitions.SHA1",
+        "equality_tok_Spec.Hash.Definitions.SHA1@tok",
+        "equation_FStar.Pervasives.dfst",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "proj_equation_Prims.Mkdtuple2__1",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Mkdtuple2__1"
+      ],
+      0,
+      "18c4791763842cf3b88bea4342acf04b"
     ]
   ]
 ]

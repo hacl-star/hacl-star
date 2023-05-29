@@ -128,13 +128,6 @@ let load_felem_lt_prime_vartime f b =
 
 
 [@CInline]
-let load_felem_vartime f b =
-  let is_lt_p = load_felem_lt_prime_vartime f b in
-  if not is_lt_p then false
-  else not (is_felem_zero_vartime f)
-
-
-[@CInline]
 let store_felem b f =
   push_frame ();
   let tmp = create 4ul (u64 0) in

@@ -21,6 +21,12 @@ open Hacl.Impl.K256.Finv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+///  Create a point
+
+let create_aff_point () =
+  create 10ul (u64 0)
+
+
 let create_point () =
   create (3ul *! 5ul) (u64 0)
 
@@ -73,20 +79,45 @@ let copy_point out p =
 
 ///  Conversion functions between affine and projective coordinates
 
-let to_proj_point p x y =
+let to_proj_point p p_aff =
+  let x, y = aff_getx p_aff, aff_gety p_aff in
   let x1, y1, z1 = getx p, gety p, getz p in
   copy x1 x;
   copy y1 y;
   set_one z1
 
 
-let to_aff_point x y p =
+[@CInline]
+let to_aff_point p_aff p =
   push_frame ();
+  let x, y = aff_getx p_aff, aff_gety p_aff in
   let x1, y1, z1 = getx p, gety p, getz p in
   let zinv = create_felem () in
   finv zinv z1;
   fmul x x1 zinv;
   fmul y y1 zinv;
+  let h = ST.get () in
+  assert (inv_lazy_reduced2 h x);
+  assert (inv_lazy_reduced2 h y);
+
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h x);
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h y);
+  fnormalize x x;
+  fnormalize y y;
+  pop_frame ()
+
+
+[@CInline]
+let to_aff_point_x x p =
+  push_frame ();
+  let x1, z1 = getx p, getz p in
+  let zinv = create_felem () in
+  finv zinv z1;
+  fmul x x1 zinv;
+  let h = ST.get () in
+  assert (inv_lazy_reduced2 h x);
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h x);
+  fnormalize x x;
   pop_frame ()
 
 
@@ -148,9 +179,11 @@ let is_y_sqr_is_y2_vartime y2 y =
   res
 
 
-let is_on_curve_vartime x y =
+[@CInline]
+let is_on_curve_vartime p =
   push_frame ();
   let y2_exp = create_felem () in
+  let x, y = aff_getx p, aff_gety p in
   compute_expected_y2 y2_exp x;
   let res = is_y_sqr_is_y2_vartime y2_exp y in
   pop_frame ();
@@ -171,6 +204,9 @@ let is_proj_point_at_inf_vartime p =
   b
 
 
+///  Point negation
+
+[@CInline]
 let point_negate out p =
   let h0 = ST.get () in
   let px, py, pz = getx p, gety p, getz p in
@@ -199,130 +235,12 @@ let point_negate_conditional_vartime p is_negate =
   if is_negate then point_negate p p
 
 
-val fmul_fmul_eq_vartime (a bz c dz: felem) : Stack bool
-  (requires fun h ->
-    live h a /\ live h bz /\ live h c /\ live h dz /\
-    eq_or_disjoint a bz /\ eq_or_disjoint c dz /\
-    inv_lazy_reduced2 h a /\ inv_lazy_reduced2 h bz /\
-    inv_lazy_reduced2 h c /\ inv_lazy_reduced2 h dz)
-  (ensures  fun h0 z h1 -> modifies0 h0 h1 /\
-    z == (S.fmul (feval h0 a) (feval h0 bz) = S.fmul (feval h0 c) (feval h0 dz)))
+///  Point load and store functions
 
 [@CInline]
-let fmul_fmul_eq_vartime a bz c dz =
-  push_frame ();
-  let a_bz = create_felem () in
-  let c_dz = create_felem () in
-  fmul a_bz a bz;
-  fmul c_dz c dz;
-  let h1 = ST.get () in
-  fnormalize a_bz a_bz;
-  fnormalize c_dz c_dz;
-  let h2 = ST.get () in
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h1 a_bz);
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h1 c_dz);
-  let z = is_felem_eq_vartime a_bz c_dz in
-  pop_frame ();
-  z
-
-
-let point_eq_vartime p q =
-  let px, py, pz = getx p, gety p, getz p in
-  let qx, qy, qz = getx q, gety q, getz q in
-
-  let z0 = fmul_fmul_eq_vartime px qz qx pz in
-  if not z0 then false
-  else fmul_fmul_eq_vartime py qz qy pz
-
-
-inline_for_extraction noextract
-val recover_y_vartime (y x:felem) (is_odd:bool) : Stack bool
-  (requires fun h ->
-    live h x /\ live h y /\ disjoint x y /\
-    inv_fully_reduced h x /\ 0 < as_nat h x)
-  (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\
-    (b <==> Some? (S.recover_y (as_nat h0 x) is_odd)) /\
-    (b ==> (inv_fully_reduced h1 y /\
-      as_nat h1 y == Some?.v (S.recover_y (as_nat h0 x) is_odd))))
-
-let recover_y_vartime y x is_odd =
-  push_frame ();
-  let y2 = create_felem () in
-  compute_expected_y2 y2 x; //y2 = x *% x *% x +% b
-  fsqrt y y2;
-  let h = ST.get () in
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h y);
-  fnormalize y y;
-
-  let is_y_valid = is_y_sqr_is_y2_vartime y2 y in
-  let res =
-    if not is_y_valid then false
-    else begin
-      let is_y_odd = is_fodd_vartime y in
-      fnegate_conditional_vartime y (is_y_odd <> is_odd);
-      true end in
-  pop_frame ();
-  res
-
-
-let aff_point_decompress_vartime x y s =
-  let s0 = s.(0ul) in
-  if not (Lib.RawIntTypes.u8_to_UInt8 s0 = 0x02uy ||
-    Lib.RawIntTypes.u8_to_UInt8 s0 = 0x03uy) then false
-  else begin
-    let xb = sub s 1ul 32ul in
-    let is_x_valid = load_felem_vartime x xb in
-    let is_y_odd = Lib.RawIntTypes.u8_to_UInt8 s0 = 0x03uy in
-
-    if not is_x_valid then false
-    else recover_y_vartime y x is_y_odd end
-
-
-let point_decompress_vartime p s =
-  let px, py, pz = getx p, gety p, getz p in
-  let b = aff_point_decompress_vartime px py s in
-  set_one pz;
-  b
-
-
-let aff_point_compress_vartime s x y =
-  let h = ST.get () in
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h y);
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h x);
-  fnormalize y y;
-  fnormalize x x;
-
-  let is_y_odd = is_fodd_vartime y in
-  let h0 = ST.get () in
-  s.(0ul) <- if is_y_odd then u8 0x03 else u8 0x02;
-  let h1 = ST.get () in
-  update_sub_f h1 s 1ul 32ul
-    (fun h -> BSeq.nat_to_bytes_be 32 (feval h1 x))
-    (fun _ -> store_felem (sub s 1ul 32ul) x);
-  let h2 = ST.get () in
-  LSeq.eq_intro (as_seq h2 s) (S.aff_point_compress (feval h x, feval h y))
-
-
-let point_compress_vartime s p =
-  push_frame ();
-  let xa = create_felem () in
-  let ya = create_felem () in
-  to_aff_point xa ya p;
-  aff_point_compress_vartime s xa ya;
-  pop_frame ()
-
-
-let store_point out p =
-  push_frame ();
-  let px = create_felem () in
-  let py = create_felem () in
-  to_aff_point px py p;
-
-  let h0 = ST.get () in
-  fnormalize px px;
-  fnormalize py py;
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h0 px);
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h0 py);
+let aff_point_store out p =
+  let px = aff_getx p in
+  let py = aff_gety p in
 
   let h0 = ST.get () in
   update_sub_f h0 out 0ul 32ul
@@ -337,69 +255,114 @@ let store_point out p =
   let h2 = ST.get () in
   let px = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 px)) in
   let py = Ghost.hide (BSeq.nat_to_bytes_be 32 (as_nat h0 py)) in
-  LSeq.eq_intro (as_seq h2 out) (LSeq.concat #_ #32 #32 px py);
+  LSeq.eq_intro (as_seq h2 out) (LSeq.concat #_ #32 #32 px py)
+
+
+[@CInline]
+let point_store out p =
+  push_frame ();
+  let p_aff = create_aff_point () in
+  to_aff_point p_aff p;
+  aff_point_store out p_aff;
   pop_frame ()
+
+
+[@CInline]
+let aff_point_load_vartime p b =
+  let px = sub b 0ul 32ul in
+  let py = sub b 32ul 32ul in
+  let bn_px = aff_getx p in
+  let bn_py = aff_gety p in
+
+  let h0 = ST.get () in
+  let is_x_valid = load_felem_lt_prime_vartime bn_px px in
+  let is_y_valid = load_felem_lt_prime_vartime bn_py py in
+  let h1 = ST.get () in
+  assert (as_nat h1 bn_px == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 0ul 32ul)));
+  assert (as_nat h1 bn_py == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 32ul 32ul)));
+  assert (inv_lazy_reduced1 h1 bn_px);
+  assert (inv_lazy_reduced1 h1 bn_py);
+
+  if is_x_valid && is_y_valid then begin
+    assert (inv_fully_reduced h1 bn_px);
+    assert (inv_fully_reduced h1 bn_py);
+    is_on_curve_vartime p end
+  else false
+
+
+[@CInline]
+let load_point_vartime p b =
+  push_frame ();
+  let p_aff = create_aff_point () in
+  let res = aff_point_load_vartime p_aff b in
+  if res then to_proj_point p p_aff;
+  pop_frame ();
+  res
 
 
 let load_point_nocheck out b =
   push_frame ();
-  let px = create_felem () in
-  let py = create_felem () in
+  let p_aff = create_aff_point () in
+  let px, py = aff_getx p_aff, aff_gety p_aff in
   let pxb = sub b 0ul 32ul in
   let pyb = sub b 32ul 32ul in
   load_felem px pxb;
   load_felem py pyb;
-  let h = ST.get () in
-  assert (inv_lazy_reduced2 h px);
-  assert (inv_lazy_reduced2 h py);
-  to_proj_point out px py;
+  to_proj_point out p_aff;
   pop_frame ()
 
 
 inline_for_extraction noextract
-val load_point_vartime_noalloc:
-   out:point
-  -> px:felem
-  -> py:felem
-  -> b:lbuffer uint8 64ul -> Stack bool
+val recover_y_vartime_candidate (y x:felem) : Stack bool
   (requires fun h ->
-    live h out /\ live h b /\ live h px /\ live h py /\
-    disjoint out px /\ disjoint out py /\ disjoint out b /\
-    disjoint px py /\ disjoint px b /\ disjoint py b)
-  (ensures  fun h0 res h1 -> modifies (loc out |+| loc px |+| loc py) h0 h1 /\
-    (let ps = S.load_point (as_seq h0 b) in
-    (res <==> Some? ps) /\ (res ==> (point_inv h1 out /\ point_eval h1 out == Some?.v ps))))
+    live h x /\ live h y /\ disjoint x y /\
+    inv_fully_reduced h x)
+  (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\ inv_fully_reduced h1 y /\
+   (let x = as_nat h0 x in
+    let y2 = S.(x *% x *% x +% b) in
+    as_nat h1 y == S.fsqrt y2 /\ (b <==> (S.fmul (as_nat h1 y) (as_nat h1 y) == y2))))
 
-let load_point_vartime_noalloc out px py b =
-  let pxb = sub b 0ul 32ul in
-  let pyb = sub b 32ul 32ul in
-  let h0 = ST.get () in
-  let is_x_valid = load_felem_lt_prime_vartime px pxb in
-  let is_y_valid = load_felem_lt_prime_vartime py pyb in
-  let h1 = ST.get () in
-  assert (as_nat h1 px == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 0ul 32ul)));
-  assert (as_nat h1 py == BSeq.nat_from_bytes_be (as_seq h0 (gsub b 32ul 32ul)));
-  assert (inv_lazy_reduced1 h1 px);
-  assert (inv_lazy_reduced1 h1 py);
-
-  let res =
-    if is_x_valid && is_y_valid then begin
-      assert (inv_fully_reduced h1 px);
-      assert (inv_fully_reduced h1 py);
-      is_on_curve_vartime px py end
-    else false in
-
-  if res then begin
-    assert (inv_lazy_reduced2 h1 px);
-    assert (inv_lazy_reduced2 h1 py);
-    to_proj_point out px py end;
-  res
-
-
-let load_point_vartime out b =
+let recover_y_vartime_candidate y x =
   push_frame ();
-  let px = create_felem () in
-  let py = create_felem () in
-  let res = load_point_vartime_noalloc out px py b in
+  let y2 = create_felem () in
+  compute_expected_y2 y2 x; //y2 = x *% x *% x +% b
+  fsqrt y y2;
+  let h = ST.get () in
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h y);
+  fnormalize y y;
+
+  let is_y_valid = is_y_sqr_is_y2_vartime y2 y in
   pop_frame ();
-  res
+  is_y_valid
+
+
+inline_for_extraction noextract
+val recover_y_vartime (y x:felem) (is_odd:bool) : Stack bool
+  (requires fun h ->
+    live h x /\ live h y /\ disjoint x y /\
+    inv_fully_reduced h x)
+  (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\ inv_fully_reduced h1 y /\
+    (b <==> Some? (S.recover_y (as_nat h0 x) is_odd)) /\
+    (b ==> (as_nat h1 y == Some?.v (S.recover_y (as_nat h0 x) is_odd))))
+
+let recover_y_vartime y x is_odd =
+  let is_y_valid = recover_y_vartime_candidate y x in
+  if not is_y_valid then false
+  else begin
+    let is_y_odd = is_fodd_vartime y in
+    fnegate_conditional_vartime y (is_y_odd <> is_odd);
+    true end
+
+
+[@CInline]
+let aff_point_decompress_vartime x y s =
+  let s0 = s.(0ul) in
+  let s0 = Lib.RawIntTypes.u8_to_UInt8 s0 in
+  if not (s0 = 0x02uy || s0 = 0x03uy) then false
+  else begin
+    let xb = sub s 1ul 32ul in
+    let is_x_valid = load_felem_lt_prime_vartime x xb in
+    let is_y_odd = s0 = 0x03uy in
+
+    if not is_x_valid then false
+    else recover_y_vartime y x is_y_odd end

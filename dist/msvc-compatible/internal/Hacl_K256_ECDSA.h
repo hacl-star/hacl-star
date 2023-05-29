@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,22 +35,20 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_K256_PrecompTable.h"
 #include "internal/Hacl_Bignum_K256.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "../Hacl_K256_ECDSA.h"
 #include "lib_intrinsics.h"
+
 void Hacl_Impl_K256_Point_make_point_at_inf(uint64_t *p);
 
 void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p);
 
-bool Hacl_Impl_K256_Point_point_eq_vartime(uint64_t *p, uint64_t *q);
+void Hacl_Impl_K256_Point_point_store(uint8_t *out, uint64_t *p);
 
-bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s);
-
-void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, uint64_t *y);
+bool Hacl_Impl_K256_Point_aff_point_load_vartime(uint64_t *p, uint8_t *b);
 
 void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p);
 

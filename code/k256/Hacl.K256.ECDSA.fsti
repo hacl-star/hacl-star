@@ -8,6 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module S = Spec.K256
+module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -38,9 +39,9 @@ Comment "Create an ECDSA signature.
 
   The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
 
-  The function also checks whether `private_key` and `nonce` are valid values:
-    • 0 < `private_key` and `private_key` < the order of the curve
-    • 0 < `nonce` and `nonce` < the order of the curve"]
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
 val ecdsa_sign_hashed_msg (signature:lbytes 64ul)
   (msgHash private_key nonce:lbytes 32ul) : Stack bool
   (requires fun h ->
@@ -51,7 +52,7 @@ val ecdsa_sign_hashed_msg (signature:lbytes 64ul)
     (b <==> Some? sgnt) /\ (b ==> (as_seq h1 signature == Some?.v sgnt))))
 
 
-[@@ Comment "Create an ECDSA signature.
+[@@ Comment "Create an ECDSA signature using SHA2-256.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
@@ -81,10 +82,7 @@ val ecdsa_sign_sha256 (signature:lbytes 64ul)
 
   The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
 
-  The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve"]
+  The function also checks whether `public key` is valid."]
 val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
     live h msgHash /\ live h public_key /\ live h signature)
@@ -92,7 +90,7 @@ val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 6
     b == S.ecdsa_verify_hashed_msg (as_seq h0 msgHash) (as_seq h0 public_key) (as_seq h0 signature))
 
 
-[@@ Comment "Verify an ECDSA signature.
+[@@ Comment "Verify an ECDSA signature using SHA2-256.
 
   The function returns `true` if the signature is valid and `false` otherwise.
 
@@ -143,9 +141,9 @@ val secp256k1_ecdsa_is_signature_normalized: signature: lbytes 64ul -> Stack boo
 
   The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
 
-  The function also checks whether `private_key` and `nonce` are valid values:
-    • 0 < `private_key` and `private_key` < the order of the curve
-    • 0 < `nonce` and `nonce` < the order of the curve"]
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve"]
 val secp256k1_ecdsa_sign_hashed_msg (signature:lbytes 64ul)
   (msgHash private_key nonce:lbytes 32ul) : Stack bool
   (requires fun h ->
@@ -156,7 +154,7 @@ val secp256k1_ecdsa_sign_hashed_msg (signature:lbytes 64ul)
     (b <==> Some? sgnt) /\ (b ==> (as_seq h1 signature == Some?.v sgnt))))
 
 
-[@@ Comment "Create an ECDSA signature.
+[@@ Comment "Create an ECDSA signature using SHA2-256.
 
   The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
 
@@ -186,10 +184,7 @@ val secp256k1_ecdsa_sign_sha256 (signature:lbytes 64ul)
 
   The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
 
-  The function also checks whether a public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve"]
+  The function also checks whether `public_key` is valid"]
 val secp256k1_ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
     live h msgHash /\ live h public_key /\ live h signature)
@@ -197,7 +192,7 @@ val secp256k1_ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signatur
     b == S.secp256k1_ecdsa_verify_hashed_msg (as_seq h0 msgHash) (as_seq h0 public_key) (as_seq h0 signature))
 
 
-[@@ Comment "Verify an ECDSA signature.
+[@@ Comment "Verify an ECDSA signature using SHA2-256.
 
   The function returns `true` if the signature is valid and `false` otherwise.
 
@@ -281,23 +276,50 @@ val public_key_compressed_from_raw: pk:lbytes 33ul -> pk_raw:lbytes 64ul -> Stac
     as_seq h1 pk == S.pk_compressed_from_raw (as_seq h0 pk_raw))
 
 
-[@@ Comment "Public key validation.
+[@@ CPrologue "
+/******************/
+/* Key validation */
+/******************/";
+
+Comment "Public key validation.
 
   The function returns `true` if a public key is valid and `false` otherwise.
 
-  The argument `pk` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `public_key` points to 64 bytes of valid memory, i.e., uint8_t[64].
 
-  The public key (x || y) is valid:
-    • 0 < x and x < prime
-    • 0 < y and y < prime
-    • (x, y) is on the curve. "]
-val is_public_key_valid: pk:lbytes 64ul -> Stack bool
-  (requires fun h -> live h pk)
+  The public key (x || y) is valid (with respect to SP 800-56A):
+    • the public key is not the “point at infinity”, represented as O.
+    • the affine x and y coordinates of the point represented by the public key are
+      in the range [0, p – 1] where p is the prime defining the finite field.
+    • y^2 = x^3 + ax + b where a and b are the coefficients of the curve equation.
+  The last extract is taken from: https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
+val is_public_key_valid: public_key:lbytes 64ul -> Stack bool
+  (requires fun h -> live h public_key)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
-    b <==> S.is_public_key_valid (as_seq h0 pk))
+    b <==> S.validate_public_key (as_seq h0 public_key))
 
 
-[@@ Comment "Compute the public key from the private key.
+[@@ Comment "Private key validation.
+
+  The function returns `true` if a private key is valid and `false` otherwise.
+
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The private key is valid:
+    • 0 < `private_key` < the order of the curve"]
+val is_private_key_valid: private_key:lbuffer uint8 32ul -> Stack bool
+  (requires fun h -> live h private_key)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (let s = BSeq.nat_from_bytes_be (as_seq h0 private_key) in
+    r <==> (0 < s && s < S.q)))
+
+
+[@@ CPrologue "
+/******************/
+/* ECDH agreement */
+/******************/";
+
+Comment "Compute the public key from the private key.
 
   The function returns `true` if a private key is valid and `false` otherwise.
 
@@ -305,7 +327,7 @@ val is_public_key_valid: pk:lbytes 64ul -> Stack bool
   The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
 
   The private key is valid:
-    • 0 < `private_key` and `private_key` < the order of the curve."]
+    • 0 < `private_key` < the order of the curve."]
 val secret_to_public: public_key:lbytes 64ul -> private_key:lbytes 32ul -> Stack bool
   (requires fun h ->
     live h public_key /\ live h private_key /\
@@ -313,3 +335,26 @@ val secret_to_public: public_key:lbytes 64ul -> private_key:lbytes 32ul -> Stack
   (ensures fun h0 b h1 -> modifies (loc public_key) h0 h1 /\
     (let public_key_s = S.secret_to_public (as_seq h0 private_key) in
     (b <==> Some? public_key_s) /\ (b ==> (as_seq h1 public_key == Some?.v public_key_s))))
+
+
+[@@ Comment "Execute the diffie-hellmann key exchange.
+
+  The function returns `true` for successful creation of an ECDH shared secret and
+  `false` otherwise.
+
+  The outparam `shared_secret` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `their_pubkey` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `their_pubkey` are valid."]
+val ecdh:
+    shared_secret:lbuffer uint8 64ul
+  -> their_pubkey:lbuffer uint8 64ul
+  -> private_key:lbuffer uint8 32ul ->
+  Stack bool
+  (requires fun h ->
+    live h shared_secret /\ live h their_pubkey /\ live h private_key /\
+    disjoint shared_secret their_pubkey /\ disjoint shared_secret private_key)
+  (ensures fun h0 r h1 -> modifies (loc shared_secret) h0 h1 /\
+    (let ss = S.ecdh (as_seq h0 their_pubkey) (as_seq h0 private_key) in
+    (r <==> Some? ss) /\ (r ==> (as_seq h1 shared_secret == Some?.v ss))))

@@ -48,14 +48,7 @@ let ecdsa_sign_r r k =
   let p = create_point () in
   point_mul_g p k; // p = [k]G
   let x, y, z = getx p, gety p, getz p in
-
-  FI.finv tmp z; // tmp = zinv
-  fmul tmp x tmp; // tmp = aff_x = x *% zinv
-  let h1 = ST.get () in
-  //assert (inv_lazy_reduced2 h1 tmp);
-  fnormalize tmp tmp;
-  let h2 = ST.get () in
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h1 tmp);
+  to_aff_point_x tmp p;
 
   store_felem x_bytes tmp;
   load_qelem_modq r x_bytes; // r = aff_x % S.q
@@ -99,15 +92,18 @@ val ecdsa_sign_load (d_a k_q:qelem) (private_key nonce:lbytes 32ul) : Stack uint
     disjoint d_a k_q /\ disjoint d_a private_key /\ disjoint d_a nonce /\
     disjoint k_q private_key /\ disjoint k_q nonce)
   (ensures fun h0 m h1 -> modifies (loc d_a |+| loc k_q) h0 h1 /\
-   (let sk_nat = BSeq.nat_from_bytes_be (as_seq h0 private_key) in
+   (let d_a_nat = BSeq.nat_from_bytes_be (as_seq h0 private_key) in
     let k_nat = BSeq.nat_from_bytes_be (as_seq h0 nonce) in
-    qas_nat h1 d_a = sk_nat /\ qas_nat h1 k_q = k_nat /\
+    let is_sk_valid = 0 < d_a_nat && d_a_nat < S.q in
+    let is_nonce_valid = 0 < k_nat && k_nat < S.q in
     (v m = ones_v U64 \/ v m = 0) /\
-    (v m = ones_v U64) = (0 < sk_nat && sk_nat < S.q && 0 < k_nat && k_nat < S.q)))
+    (v m = ones_v U64) = (is_sk_valid && is_nonce_valid) /\
+    qas_nat h1 d_a == (if is_sk_valid then d_a_nat else 1) /\
+    qas_nat h1 k_q == (if is_nonce_valid then k_nat else 1)))
 
 let ecdsa_sign_load d_a k_q private_key nonce =
-  let is_sk_valid = load_qelem_check d_a private_key in
-  let is_nonce_valid = load_qelem_check k_q nonce in
+  let is_sk_valid = load_qelem_conditional d_a private_key in
+  let is_nonce_valid = load_qelem_conditional k_q nonce in
   let m = is_sk_valid &. is_nonce_valid in
   logand_lemma is_sk_valid is_nonce_valid;
   m
@@ -191,12 +187,6 @@ let ecdsa_sign_hashed_msg signature msgHash private_key nonce =
   let k_q = sub rsdk_q 12ul 4ul in
 
   let are_sk_nonce_valid = ecdsa_sign_load d_a k_q private_key nonce in
-  let h0 = ST.get () in
-  Lib.ByteBuffer.buf_mask_select d_a oneq are_sk_nonce_valid d_a;
-  Lib.ByteBuffer.buf_mask_select k_q oneq are_sk_nonce_valid k_q;
-  let h1 = ST.get () in
-  assert (as_seq h1 d_a == (if (v are_sk_nonce_valid = 0) then as_seq h0 oneq else as_seq h0 d_a));
-  assert (as_seq h1 k_q == (if (v are_sk_nonce_valid = 0) then as_seq h0 oneq else as_seq h0 k_q));
   ecdsa_sign_r r_q k_q;
   ecdsa_sign_s s_q k_q r_q d_a msgHash;
   ecdsa_sign_store signature r_q s_q;

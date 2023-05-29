@@ -67,6 +67,8 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 
 # Dependency
 
+.PRECIOUS: %.d
+
 %.d: %.c
 	@set -e; rm -f $@; \
 	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
@@ -95,6 +97,9 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 
 gen_uint128_intrinsics_vectors:
 	python3 gen_vectors/gen_uint128_intrinsics_vectors.py
+
+format:
+	clang-format --style=Mozilla *.c *.h -i
 
 clean:
 	rm -f *.exe

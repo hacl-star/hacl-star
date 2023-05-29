@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +26,11 @@
 #ifndef __Hacl_Test_K256_H
 #define __Hacl_Test_K256_H
 
-
-
-
+#include "internal/Hacl_Hash_SHA2.h"
 #include "krmllib.h"
 #include "libintvector.h"
 #include "lib_intrinsics.h"
+
 exit_code main(void);
 
 

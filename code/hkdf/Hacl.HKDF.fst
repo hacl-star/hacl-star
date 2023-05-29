@@ -29,10 +29,10 @@ module ST = FStar.HyperStack.ST
 let mk_extract a hmac prk salt saltlen ikm ikmlen =
   hmac prk salt saltlen ikm ikmlen
 
-val hmac_input_fits: a:hash_alg -> Lemma
+val hmac_input_fits: a:fixed_len_alg -> Lemma
   ((pow2 32 + block_length a) `less_than_max_input_length` a)
 let hmac_input_fits a =
-  allow_inversion hash_alg;
+  allow_inversion fixed_len_alg;
   match a with
   | MD5 ->
     assert_norm (pow2 32 + block_length MD5 <= Some?.v (max_input_length MD5))
@@ -50,7 +50,10 @@ let hmac_input_fits a =
     assert_norm (pow2 32 + block_length Blake2S <= Some?.v (max_input_length Blake2S))
   | Blake2B ->
     assert_norm (pow2 32 + block_length Blake2B <= Some?.v (max_input_length Blake2B))
+  | SHA3_224 -> ()
   | SHA3_256 -> ()
+  | SHA3_384 -> ()
+  | SHA3_512 -> ()
 
 #push-options "--z3rlimit 300"
 
@@ -170,6 +173,12 @@ let expand_sha2_256: expand_st SHA2_256 =
 
 let extract_sha2_256: extract_st SHA2_256 =
   mk_extract SHA2_256 Hacl.HMAC.compute_sha2_256
+
+let expand_sha2_384: expand_st SHA2_384 =
+  mk_expand SHA2_384 Hacl.HMAC.compute_sha2_384
+
+let extract_sha2_384: extract_st SHA2_384 =
+  mk_extract SHA2_384 Hacl.HMAC.compute_sha2_384
 
 let expand_sha2_512: expand_st SHA2_512 =
   mk_expand SHA2_512 Hacl.HMAC.compute_sha2_512

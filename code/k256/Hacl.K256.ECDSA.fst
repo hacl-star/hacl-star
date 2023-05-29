@@ -30,7 +30,7 @@ let ecdsa_sign_hashed_msg signature msgHash private_key nonce =
 let ecdsa_sign_sha256 signature msg_len msg private_key nonce =
   push_frame ();
   let msgHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 msg msg_len msgHash;
+  Hacl.Streaming.SHA2.hash_256 msg msg_len msgHash;
   let b = ecdsa_sign_hashed_msg signature msgHash private_key nonce in
   pop_frame ();
   b
@@ -43,7 +43,7 @@ let ecdsa_verify_hashed_msg m public_key signature =
 let ecdsa_verify_sha256 msg_len msg public_key signature =
   push_frame ();
   let mHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 msg msg_len mHash;
+  Hacl.Streaming.SHA2.hash_256 msg msg_len mHash;
   let b = ecdsa_verify_hashed_msg mHash public_key signature in
   pop_frame ();
   b
@@ -88,7 +88,7 @@ let secp256k1_ecdsa_sign_hashed_msg signature msgHash private_key nonce =
 let secp256k1_ecdsa_sign_sha256 signature msg_len msg private_key nonce =
   push_frame ();
   let msgHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 msg msg_len msgHash;
+  Hacl.Streaming.SHA2.hash_256 msg msg_len msgHash;
   let b = secp256k1_ecdsa_sign_hashed_msg signature msgHash private_key nonce in
   pop_frame ();
   b
@@ -103,7 +103,7 @@ let secp256k1_ecdsa_verify_hashed_msg msgHash public_key signature =
 let secp256k1_ecdsa_verify_sha256 msg_len msg public_key signature =
   push_frame ();
   let mHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 msg msg_len mHash;
+  Hacl.Streaming.SHA2.hash_256 msg msg_len mHash;
   let b = secp256k1_ecdsa_verify_hashed_msg mHash public_key signature in
   pop_frame ();
   b
@@ -178,29 +178,49 @@ let public_key_compressed_from_raw pk pk_raw =
   LSeq.eq_intro (as_seq h1 pk) (S.pk_compressed_from_raw (as_seq h0 pk_raw))
 
 
-let is_public_key_valid pk =
+let is_public_key_valid public_key =
   push_frame ();
-  let fpk_x = create_felem () in
-  let fpk_y = create_felem () in
-  let is_pk_valid = Hacl.Impl.K256.Verify.load_public_key pk fpk_x fpk_y in
+  let p = P.create_point () in
+  let is_pk_valid = P.load_point_vartime p public_key in
   pop_frame ();
   is_pk_valid
-
 
 module BB = Hacl.Bignum.Base
 module PM = Hacl.Impl.K256.PointMul
 
+let is_private_key_valid private_key =
+  push_frame ();
+  let s_q = create_qelem () in
+  let res = load_qelem_check s_q private_key in
+  pop_frame ();
+  BB.unsafe_bool_of_limb res
+
+
 let secret_to_public public_key private_key =
   push_frame ();
-  let d_a = create_qelem () in
-  let p = P.create_point () in
-  let is_sk_valid = load_qelem_check d_a private_key in
-  let oneq = create_one () in
-  let h0 = ST.get () in
-  Lib.ByteBuffer.buf_mask_select d_a oneq is_sk_valid d_a;
-  let h1 = ST.get () in
-  assert (as_seq h1 d_a == (if (v is_sk_valid = 0) then as_seq h0 oneq else as_seq h0 d_a));
-  PM.point_mul_g p d_a; // p = [d_a]G
-  P.store_point public_key p;
+  let tmp = create 19ul (u64 0) in
+  let pk = sub tmp 0ul 15ul in
+  let sk = sub tmp 15ul 4ul in
+
+  let is_sk_valid = load_qelem_conditional sk private_key in
+  PM.point_mul_g pk sk; // pk = [sk]G
+  P.point_store public_key pk;
   pop_frame ();
   BB.unsafe_bool_of_limb is_sk_valid
+
+
+let ecdh shared_secret their_pubkey private_key =
+  push_frame ();
+  let tmp = create 34ul (u64 0) in
+  let pk = sub tmp 0ul 15ul in
+  let ss = sub tmp 15ul 15ul in
+  let sk = sub tmp 30ul 4ul in
+
+  let is_pk_valid = P.load_point_vartime pk their_pubkey in
+  let is_sk_valid = load_qelem_conditional sk private_key in
+
+  if is_pk_valid then begin
+    PM.point_mul ss sk pk;
+    P.point_store shared_secret ss end;
+  pop_frame ();
+  BB.unsafe_bool_of_limb is_sk_valid && is_pk_valid

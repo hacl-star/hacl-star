@@ -26,7 +26,13 @@ open Lib.ByteSequence
  *   with the type, e.g. words_state or bytes_block
  *)
 
-(** Supported hash algorithms. *)
+(** Supported hash algorithms.
+
+  NOTE: this inductive is *append-only* because the constructors generate macro
+  definitions that various bindings (OCaml, Rust) have taken a dependency on.
+  So, in order to keep the numbering stable, we only append new cases, which is
+  why SHA3_224 comes after SHA3_256 (the former was added *after* the latter).
+  *)
 type hash_alg =
   | SHA2_224
   | SHA2_256
@@ -37,6 +43,11 @@ type hash_alg =
   | Blake2S
   | Blake2B
   | SHA3_256
+  | SHA3_224
+  | SHA3_384
+  | SHA3_512
+  | Shake128
+  | Shake256
 
 inline_for_extraction noextract
 let is_sha2 = function
@@ -44,8 +55,13 @@ let is_sha2 = function
   | _ -> false
 
 inline_for_extraction noextract
-let is_sha3 = function
-  | SHA3_256 -> true
+let is_keccak = function
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> true
+  | _ -> false
+
+inline_for_extraction noextract
+let is_shake = function
+  | Shake128 | Shake256 -> true
   | _ -> false
 
 inline_for_extraction noextract
@@ -59,9 +75,10 @@ let is_md = function
   | _ -> false
 
 let sha2_alg = a:hash_alg { is_sha2 a }
-let sha3_alg = a:hash_alg { is_sha3 a }
+let keccak_alg = a:hash_alg { is_keccak a }
 let blake_alg = a:hash_alg { is_blake a }
 let md_alg = a:hash_alg { is_md a }
+let fixed_len_alg = a:hash_alg { not (is_shake a) }
 
 inline_for_extraction
 let to_blake_alg (a:blake_alg) = match a with
@@ -85,7 +102,7 @@ let max_input_length: hash_alg -> option pos = function
   | SHA2_384 | SHA2_512 -> Some (pow2 125 - 1)
   | Blake2S -> Some (pow2 64 - 1)
   | Blake2B -> Some (pow2 128 - 1)
-  | SHA3_256 -> None
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> None
 
 let maxed_hash_alg = a:hash_alg { Some? (max_input_length a) }
 
@@ -115,7 +132,7 @@ let len_t: hash_alg -> Type = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pub_uint64
   | SHA2_384 | SHA2_512 -> pub_uint128
-  | SHA3_256 -> unit
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> unit
   | Blake2S -> pub_uint64
   | Blake2B -> pub_uint128
 
@@ -154,35 +171,55 @@ let word_t: hash_alg -> Tot inttype = function
   | SHA2_384 | SHA2_512 -> U64
   | Blake2S -> U32
   | Blake2B -> U64
-  | SHA3_256 -> U64
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> U64
 
 inline_for_extraction
 let row (a:blake_alg) = lseq (uint_t (word_t a) SEC) 4
 
 inline_for_extraction
 let word (a: hash_alg) = match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> uint_t (word_t a) SEC
   | Blake2S | Blake2B -> row a
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> uint_t (word_t a) SEC
 
-(* In bytes *)
+(* In bytes. Should be: bytes_of_int (word_t a) *)
 let word_length: hash_alg -> Tot nat = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> 4
   | SHA2_384 | SHA2_512 -> 8
-  | SHA3_256 -> 8
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> 8
   | Blake2S -> 4
   | Blake2B -> 8
 
-(* Number of words for a block size *)
+let rate (a: keccak_alg): (rate: size_nat{0 < rate / 8 /\ rate / 8 <= 200}) =
+  match a with
+  | SHA3_224 -> 1152
+  | SHA3_256 -> 1088
+  | SHA3_384 -> 832
+  | SHA3_512 -> 576
+  | Shake128 -> 1344
+  | Shake256 -> 1088
 
+(* Number of words for a block size *)
 let block_word_length (a: hash_alg) =
   match a with
-  | SHA3_256 -> normalize_term (1088 / 8 / 8) // 17
-  | _ -> 16
+  | SHA3_224 -> normalize_term (rate SHA3_224 / 8 / 8)
+  | SHA3_256 -> normalize_term (rate SHA3_256 / 8 / 8)
+  | SHA3_384 -> normalize_term (rate SHA3_384 / 8 / 8)
+  | SHA3_512 -> normalize_term (rate SHA3_512 / 8 / 8)
+  | Shake128 -> normalize_term (rate Shake128 / 8 / 8)
+  | Shake256 -> normalize_term (rate Shake256 / 8 / 8)
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | Blake2S
+  | Blake2B -> 16
 
 (* Define the size block in bytes *)
 
-let block_length a =
+let block_length a: nonzero =
   let open FStar.Mul in
   word_length a * block_word_length a
 
@@ -193,13 +230,17 @@ let state_word_length a =
   | MD5 -> 4
   | SHA1 -> 5
   | Blake2S | Blake2B -> 4
-  | SHA3_256 -> 25
-  | _ -> 8
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> 25
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512 -> 8
 
 inline_for_extraction
 let extra_state a = match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 | SHA3_256 -> unit
   | Blake2S | Blake2B -> n:nat { n % block_length a = 0 }
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 -> unit
 
 (* The working state *)
 inline_for_extraction
@@ -207,22 +248,28 @@ let words_state a = lseq (word a) (state_word_length a)
 
 (* Number of words for final hash *)
 inline_for_extraction
-let hash_word_length: hash_alg -> Tot nat = function
+let hash_word_length: a:md_alg -> Tot nat = function
   | MD5 -> 4
   | SHA1 -> 5
   | SHA2_224 -> 7
   | SHA2_256 -> 8
-  | SHA3_256 -> 4
   | SHA2_384 -> 6
   | SHA2_512 -> 8
-  | Blake2S | Blake2B -> 8
 
 (* Define the final hash length in bytes *)
 
-let hash_length a =
+let hash_length (a: hash_alg { not (is_shake a) }): Lib.IntTypes.(n:size_nat { n > 0 }) =
   let open FStar.Mul in
-  word_length a * hash_word_length a
-
+  if is_md a then
+    word_length a * hash_word_length a
+  else
+    match a with
+    | SHA3_224 -> 28
+    | SHA3_256 -> 32
+    | SHA3_384 -> 48
+    | SHA3_512 -> 64
+    | Blake2S -> 4 * 8
+    | Blake2B -> 8 * 8
 
 (** Padding *)
 
@@ -260,9 +307,24 @@ let bytes_block a =
 let bytes_blocks a =
   l:bytes { Seq.length l % block_length a = 0 }
 
+let output_length = function
+  | Shake128 | Shake256 -> Lib.IntTypes.size_nat
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | SHA2_384 | SHA2_512
+  | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512
+  | Blake2S
+  | Blake2B -> unit
+
+let hash_length' a (l: output_length a): Lib.IntTypes.size_nat =
+  if is_shake a then l else hash_length a
+
 (* Output data, i.e. the final hash (tag). *)
 let bytes_hash a =
   b:bytes { Seq.length b = hash_length a }
+
+let bytes_hash' a l =
+  b:bytes { Seq.length b = hash_length' a l }
 
 (** The types for the core functions *)
 
@@ -284,4 +346,5 @@ let pad_t (a: md_alg) =
 
 let finish_t (a: hash_alg) =
   h:words_state a ->
-  bytes_hash a
+  l: output_length a ->
+  bytes_hash' a l

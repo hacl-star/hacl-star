@@ -1,5 +1,6 @@
 module Hacl.Impl.SHA2.Types
 
+inline_for_extraction noextract
 let uint8_1p = LowStar.Buffer.buffer FStar.UInt8.t
 
 (* This allows generating pretty names for several types used in SHA2-MB,

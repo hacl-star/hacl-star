@@ -1,4 +1,4 @@
-#!/nix/store/dsd5gz46hdbdk2rfdimqddhq6m8m8fqs-bash-5.1-p16/bin/bash
+#!/usr/bin/env bash
 
 set -o pipefail
 set -e
@@ -227,7 +227,6 @@ show_help () {
   printf "                    * aarch64-apple-ios\n"
   printf "                    * x86_64-apple-ios-simulator\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
-  printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "    --enable-power9 Enable Power ISA v3.0 instruction set for PowerPC architecture\n"
   printf "\n"
 }
@@ -238,7 +237,6 @@ echo -n > Makefile.config
 echo -n > config.h
 
 # Default arguments
-disable_ocaml=0
 disable_bzero=0
 enable_power9=0
 cross_build=0
@@ -248,7 +246,6 @@ all_args=("$@")
 while [ $# -gt 0 ]; do
     case "$1" in
         -target) build_target="$2"; shift ;;
-        --disable-ocaml) disable_ocaml=1 ;;
         --disable-bzero) disable_bzero=1 ;;
         --enable-power9) enable_power9=1 ;;
         --help) show_help; exit 0 ;;
@@ -503,11 +500,6 @@ if ! detect_uint128; then
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
 else
   echo "#define HACL_CAN_COMPILE_UINT128 1" >> config.h
-fi
-
-if [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then
-  echo "OCaml bindings disabled"
-  echo "DISABLE_OCAML_BINDINGS=1" >> Makefile.config
 fi
 
 if [[ $target_sys == "Linux" ]]; then

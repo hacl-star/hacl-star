@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +28,7 @@
 #include "internal/Hacl_Poly1305_128.h"
 #include "internal/Hacl_Krmllib.h"
 #include "libintvector.h"
+
 /* SNIPPET_START: poly1305_padded_128 */
 
 static inline void

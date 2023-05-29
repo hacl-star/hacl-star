@@ -1,6 +1,34 @@
 [
-  "SÑæm“o\u0000DÂ€êãn6®\u001c",
+  "“”Ê’\u0004gJWÑ<b=sg¯ƒ",
   [
+    [
+      "Vale.PPC64LE.Machine_s.int_to_nat8",
+      1,
+      1,
+      0,
+      [
+        "@query", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "035083ac9ce9742f79085e375b2c39f0"
+    ],
+    [
+      "Vale.PPC64LE.Machine_s.int_to_nat32",
+      1,
+      1,
+      0,
+      [
+        "@query", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "e1927e67be48b4d7a725724846447819"
+    ],
     [
       "Vale.PPC64LE.Machine_s.int_to_nat64",
       1,
@@ -13,7 +41,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "5991f5c15d3ec904155f9f96a6b06c30"
+      "6e137ab1f9ecf6980ecfc87792dfbf02"
     ],
     [
       "Vale.PPC64LE.Machine_s.maddr",
@@ -28,7 +56,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "614a440a357f92c5d1c82fc559cb003a"
+      "f8632eb6b6bb18d00c9470f9bdb34da2"
     ],
     [
       "Vale.PPC64LE.Machine_s.tmaddr",
@@ -45,7 +73,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "8f6a009ae8478928a4c16005c8c51d1d"
+      "f72a8eb5b87c6485c07413495ceb7273"
     ],
     [
       "Vale.PPC64LE.Machine_s.cmp_opr",
@@ -62,7 +90,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "d9d3b56b1d7266d4c60d3c31382eed93"
+      "d7e00b2e0f211d386853d5d9f25072ab"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__CReg__item__r",
@@ -74,7 +102,7 @@
         "refinement_interpretation_Tm_refine_e66921a95852efa1c8da128e13ac5530"
       ],
       0,
-      "14115f126bb72426c80c4d0349375dbf"
+      "04bbb66e45783b30355598ea98bba3dd"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__CImm__item__n",
@@ -86,7 +114,7 @@
         "refinement_interpretation_Tm_refine_c09695218e6b65a697d4ce377baff360"
       ],
       0,
-      "95481f4e8b63340d5e954973769d31ea"
+      "aca8d0747b49b2f4c165dc4fbd45ac45"
     ],
     [
       "Vale.PPC64LE.Machine_s.precode",
@@ -98,7 +126,7 @@
         "kinding_Vale.PPC64LE.Machine_s.precode@tok"
       ],
       0,
-      "fabe4b5ce4498126a9cbb375ffc4b568"
+      "94102ebd35c22b494df4afe5692b0ec8"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__Ins__item__ins",
@@ -110,7 +138,7 @@
         "refinement_interpretation_Tm_refine_0ee83c7358815c4c8b06978ff845d269"
       ],
       0,
-      "9a7da44181049e44101af0b2b1f72c93"
+      "bedda4698021dd26c4272fc6753eb079"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__Block__item__block",
@@ -122,7 +150,7 @@
         "refinement_interpretation_Tm_refine_383022d16e1dbc9881877bcc47e782dc"
       ],
       0,
-      "8af98edcf1ce3168030b7a452fd5d63c"
+      "976d52dc9c2def666238be2529166d74"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__IfElse__item__ifCond",
@@ -134,7 +162,7 @@
         "refinement_interpretation_Tm_refine_7cedabe1131eb751ad7c7ddda2af5b76"
       ],
       0,
-      "f9bb569ea513e64e4d374802b7de60ab"
+      "1e06a9937491598288760d480cd23ba2"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__IfElse__item__ifTrue",
@@ -146,7 +174,7 @@
         "refinement_interpretation_Tm_refine_7cedabe1131eb751ad7c7ddda2af5b76"
       ],
       0,
-      "21189d2fd149c084ac058b15faf67416"
+      "57d2036d980dab53ebf079dc4bf75832"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__IfElse__item__ifFalse",
@@ -158,7 +186,7 @@
         "refinement_interpretation_Tm_refine_7cedabe1131eb751ad7c7ddda2af5b76"
       ],
       0,
-      "1d93325cd60047737d93998759b84a19"
+      "c07282679256ad2091757e2cdbfc782d"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__While__item__whileCond",
@@ -170,7 +198,7 @@
         "refinement_interpretation_Tm_refine_61ee713a66f5fd01c9105067657ba855"
       ],
       0,
-      "0b3abd18f057a5b19f609c4d66fb1f1c"
+      "e40a1965fe278f84a256c2ea00b9ec34"
     ],
     [
       "Vale.PPC64LE.Machine_s.__proj__While__item__whileBody",
@@ -182,7 +210,7 @@
         "refinement_interpretation_Tm_refine_61ee713a66f5fd01c9105067657ba855"
       ],
       0,
-      "5d18250114867126f6c92914e311ccb3"
+      "9c1d298594dfd51fc1dbbdfaefd92173"
     ]
   ]
 ]

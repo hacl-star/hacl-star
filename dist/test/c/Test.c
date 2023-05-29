@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +24,6 @@
 
 
 #include "internal/Test.h"
-
-
 
 extern void C_String_print(C_String_t uu___);
 
@@ -223,6 +222,13 @@ EverCrypt_AEAD_decrypt(
 
 extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
+/**
+Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
+earlier in this file to allocate a destination buffer of the right length. This
+API will automatically pick the most efficient implementation, provided you have
+called EverCrypt_AutoConfig2_init() before. 
+*/
 extern void
 EverCrypt_Hash_Incremental_hash(
   Spec_Hash_Definitions_hash_alg a,
@@ -10041,9 +10047,21 @@ static C_String_t string_of_alg(Spec_Hash_Definitions_hash_alg uu___)
       {
         return "SHA2_512";
       }
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return "SHA3_224";
+      }
     case Spec_Hash_Definitions_SHA3_256:
       {
         return "SHA3_256";
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return "SHA3_384";
+      }
+    case Spec_Hash_Definitions_SHA3_512:
+      {
+        return "SHA3_512";
       }
     case Spec_Hash_Definitions_Blake2S:
       {
@@ -10052,6 +10070,14 @@ static C_String_t string_of_alg(Spec_Hash_Definitions_hash_alg uu___)
     case Spec_Hash_Definitions_Blake2B:
       {
         return "Blake2B";
+      }
+    case Spec_Hash_Definitions_Shake128:
+      {
+        return "Shake128";
+      }
+    case Spec_Hash_Definitions_Shake256:
+      {
+        return "Shake256";
       }
     default:
       {
@@ -10071,102 +10097,146 @@ test_one_hash(
   uint32_t expected_len = vec.thd.len;
   C_String_t input = vec.snd;
   Spec_Hash_Definitions_hash_alg a = vec.fst;
-  uint32_t input_len = C_String_strlen(input);
-  uint32_t tlen;
+  bool sw;
   switch (a)
   {
-    case Spec_Hash_Definitions_MD5:
+    case Spec_Hash_Definitions_Shake128:
       {
-        tlen = (uint32_t)16U;
+        sw = true;
         break;
       }
-    case Spec_Hash_Definitions_SHA1:
+    case Spec_Hash_Definitions_Shake256:
       {
-        tlen = (uint32_t)20U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        tlen = (uint32_t)28U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        tlen = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        tlen = (uint32_t)48U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        tlen = (uint32_t)64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        tlen = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        tlen = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        tlen = (uint32_t)64U;
+        sw = true;
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = false;
       }
   }
-  if (expected_len != tlen)
+  if (sw)
   {
     KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
-      "Wrong length of expected tag\n");
-    KRML_HOST_EXIT(255U);
-  }
-  else if (repeat == (uint32_t)0U)
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "Repeat must be non-zero\n");
-    KRML_HOST_EXIT(255U);
-  }
-  else if (!(input_len <= (uint32_t)4294967294U / repeat))
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "Repeated input is too large\n");
+      "unsupported shake algorithm");
     KRML_HOST_EXIT(255U);
   }
   else
   {
-    KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
-    uint8_t computed[tlen];
-    memset(computed, 0U, tlen * sizeof (uint8_t));
-    uint32_t total_input_len = input_len * repeat;
-    KRML_CHECK_SIZE(sizeof (uint8_t), total_input_len + (uint32_t)1U);
-    uint8_t total_input[total_input_len + (uint32_t)1U];
-    memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (uint8_t));
-    uint8_t *total_input1 = total_input;
-    for (uint32_t i = (uint32_t)0U; i < repeat; i++)
+    uint32_t input_len = C_String_strlen(input);
+    uint32_t tlen;
+    switch (a)
     {
-      C_String_memcpy(total_input1 + input_len * i, input, input_len);
+      case Spec_Hash_Definitions_MD5:
+        {
+          tlen = (uint32_t)16U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA1:
+        {
+          tlen = (uint32_t)20U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_224:
+        {
+          tlen = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_256:
+        {
+          tlen = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_384:
+        {
+          tlen = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_512:
+        {
+          tlen = (uint32_t)64U;
+          break;
+        }
+      case Spec_Hash_Definitions_Blake2S:
+        {
+          tlen = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_Blake2B:
+        {
+          tlen = (uint32_t)64U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_224:
+        {
+          tlen = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_256:
+        {
+          tlen = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_384:
+        {
+          tlen = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_512:
+        {
+          tlen = (uint32_t)64U;
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
     }
-    EverCrypt_Hash_Incremental_hash(a, computed, total_input1, total_input_len);
-    C_String_t str = string_of_alg(a);
-    TestLib_compare_and_print(str, expected, computed, tlen);
+    if (expected_len != tlen)
+    {
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Wrong length of expected tag\n");
+      KRML_HOST_EXIT(255U);
+    }
+    else if (repeat == (uint32_t)0U)
+    {
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Repeat must be non-zero\n");
+      KRML_HOST_EXIT(255U);
+    }
+    else if (!(input_len <= (uint32_t)4294967294U / repeat))
+    {
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Repeated input is too large\n");
+      KRML_HOST_EXIT(255U);
+    }
+    else
+    {
+      KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
+      uint8_t computed[tlen];
+      memset(computed, 0U, tlen * sizeof (uint8_t));
+      uint32_t total_input_len = input_len * repeat;
+      KRML_CHECK_SIZE(sizeof (uint8_t), total_input_len + (uint32_t)1U);
+      uint8_t total_input[total_input_len + (uint32_t)1U];
+      memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (uint8_t));
+      uint8_t *total_input1 = total_input;
+      for (uint32_t i = (uint32_t)0U; i < repeat; i++)
+      {
+        C_String_memcpy(total_input1 + input_len * i, input, input_len);
+      }
+      EverCrypt_Hash_Incremental_hash(a, computed, total_input1, total_input_len);
+      C_String_t str = string_of_alg(a);
+      TestLib_compare_and_print(str, expected, computed, tlen);
+    }
   }
 }
 
@@ -10222,7 +10292,32 @@ static bool keysized(Spec_Hash_Definitions_hash_alg a, uint32_t l)
         sw = (uint32_t)128U;
         break;
       }
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        sw = (uint32_t)144U;
+        break;
+      }
     case Spec_Hash_Definitions_SHA3_256:
+      {
+        sw = (uint32_t)136U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        sw = (uint32_t)104U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
+      {
+        sw = (uint32_t)72U;
+        break;
+      }
+    case Spec_Hash_Definitions_Shake128:
+      {
+        sw = (uint32_t)168U;
+        break;
+      }
+    case Spec_Hash_Definitions_Shake256:
       {
         sw = (uint32_t)136U;
         break;
@@ -10259,74 +10354,30 @@ test_one_hmac(
   uint8_t *key = vec.snd.b;
   uint32_t keylen = vec.snd.len;
   Spec_Hash_Definitions_hash_alg ha = vec.fst;
-  uint32_t sw0;
+  bool sw0;
   switch (ha)
   {
-    case Spec_Hash_Definitions_MD5:
+    case Spec_Hash_Definitions_Shake128:
       {
-        sw0 = (uint32_t)16U;
+        sw0 = true;
         break;
       }
-    case Spec_Hash_Definitions_SHA1:
+    case Spec_Hash_Definitions_Shake256:
       {
-        sw0 = (uint32_t)20U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        sw0 = (uint32_t)28U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        sw0 = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        sw0 = (uint32_t)48U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        sw0 = (uint32_t)64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        sw0 = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        sw0 = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        sw0 = (uint32_t)64U;
+        sw0 = true;
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = false;
       }
   }
-  if (expectedlen != sw0)
+  if (sw0)
   {
     KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
-      "Wrong length of expected tag\n");
-    KRML_HOST_EXIT(255U);
-  }
-  else if (!keysized(ha, keylen))
-  {
-    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "Keysized predicate not satisfied\n");
+      "unsupported shake algorithm");
     KRML_HOST_EXIT(255U);
   }
   else
@@ -10336,47 +10387,62 @@ test_one_hmac(
     {
       case Spec_Hash_Definitions_MD5:
         {
-          sw1 = (uint32_t)64U;
+          sw1 = (uint32_t)16U;
           break;
         }
       case Spec_Hash_Definitions_SHA1:
         {
-          sw1 = (uint32_t)64U;
+          sw1 = (uint32_t)20U;
           break;
         }
       case Spec_Hash_Definitions_SHA2_224:
         {
-          sw1 = (uint32_t)64U;
+          sw1 = (uint32_t)28U;
           break;
         }
       case Spec_Hash_Definitions_SHA2_256:
         {
-          sw1 = (uint32_t)64U;
+          sw1 = (uint32_t)32U;
           break;
         }
       case Spec_Hash_Definitions_SHA2_384:
         {
-          sw1 = (uint32_t)128U;
+          sw1 = (uint32_t)48U;
           break;
         }
       case Spec_Hash_Definitions_SHA2_512:
         {
-          sw1 = (uint32_t)128U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA3_256:
-        {
-          sw1 = (uint32_t)136U;
+          sw1 = (uint32_t)64U;
           break;
         }
       case Spec_Hash_Definitions_Blake2S:
         {
-          sw1 = (uint32_t)64U;
+          sw1 = (uint32_t)32U;
           break;
         }
       case Spec_Hash_Definitions_Blake2B:
         {
-          sw1 = (uint32_t)128U;
+          sw1 = (uint32_t)64U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_224:
+        {
+          sw1 = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_256:
+        {
+          sw1 = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_384:
+        {
+          sw1 = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_512:
+        {
+          sw1 = (uint32_t)64U;
           break;
         }
       default:
@@ -10385,62 +10451,95 @@ test_one_hmac(
           KRML_HOST_EXIT(253U);
         }
     }
-    if (!(datalen <= (uint32_t)0xffffffffU - sw1))
+    if (expectedlen != sw1)
     {
       KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
-        "Datalen predicate not satisfied\n");
+        "Wrong length of expected tag\n");
       KRML_HOST_EXIT(255U);
     }
-    else if (EverCrypt_HMAC_is_supported_alg(ha))
+    else if (!keysized(ha, keylen))
+    {
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+        __FILE__,
+        __LINE__,
+        "Keysized predicate not satisfied\n");
+      KRML_HOST_EXIT(255U);
+    }
+    else
     {
       uint32_t sw2;
       switch (ha)
       {
         case Spec_Hash_Definitions_MD5:
           {
-            sw2 = (uint32_t)16U;
+            sw2 = (uint32_t)64U;
             break;
           }
         case Spec_Hash_Definitions_SHA1:
           {
-            sw2 = (uint32_t)20U;
+            sw2 = (uint32_t)64U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_224:
           {
-            sw2 = (uint32_t)28U;
+            sw2 = (uint32_t)64U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_256:
           {
-            sw2 = (uint32_t)32U;
+            sw2 = (uint32_t)64U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_384:
           {
-            sw2 = (uint32_t)48U;
+            sw2 = (uint32_t)128U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_512:
           {
-            sw2 = (uint32_t)64U;
+            sw2 = (uint32_t)128U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_224:
+          {
+            sw2 = (uint32_t)144U;
             break;
           }
         case Spec_Hash_Definitions_SHA3_256:
           {
-            sw2 = (uint32_t)32U;
+            sw2 = (uint32_t)136U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_384:
+          {
+            sw2 = (uint32_t)104U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_512:
+          {
+            sw2 = (uint32_t)72U;
+            break;
+          }
+        case Spec_Hash_Definitions_Shake128:
+          {
+            sw2 = (uint32_t)168U;
+            break;
+          }
+        case Spec_Hash_Definitions_Shake256:
+          {
+            sw2 = (uint32_t)136U;
             break;
           }
         case Spec_Hash_Definitions_Blake2S:
           {
-            sw2 = (uint32_t)32U;
+            sw2 = (uint32_t)64U;
             break;
           }
         case Spec_Hash_Definitions_Blake2B:
           {
-            sw2 = (uint32_t)64U;
+            sw2 = (uint32_t)128U;
             break;
           }
         default:
@@ -10449,66 +10548,161 @@ test_one_hmac(
             KRML_HOST_EXIT(253U);
           }
       }
-      KRML_CHECK_SIZE(sizeof (uint8_t), sw2);
-      uint8_t computed[sw2];
-      memset(computed, 0U, sw2 * sizeof (uint8_t));
-      EverCrypt_HMAC_compute(ha, computed, key, keylen, data, datalen);
-      C_String_t str = string_of_alg(ha);
-      uint32_t sw;
-      switch (ha)
+      if (!(datalen <= (uint32_t)0xffffffffU - sw2))
       {
-        case Spec_Hash_Definitions_MD5:
-          {
-            sw = (uint32_t)16U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA1:
-          {
-            sw = (uint32_t)20U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_224:
-          {
-            sw = (uint32_t)28U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_256:
-          {
-            sw = (uint32_t)32U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_384:
-          {
-            sw = (uint32_t)48U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA2_512:
-          {
-            sw = (uint32_t)64U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA3_256:
-          {
-            sw = (uint32_t)32U;
-            break;
-          }
-        case Spec_Hash_Definitions_Blake2S:
-          {
-            sw = (uint32_t)32U;
-            break;
-          }
-        case Spec_Hash_Definitions_Blake2B:
-          {
-            sw = (uint32_t)64U;
-            break;
-          }
-        default:
-          {
-            KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-            KRML_HOST_EXIT(253U);
-          }
+        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+          __FILE__,
+          __LINE__,
+          "Datalen predicate not satisfied\n");
+        KRML_HOST_EXIT(255U);
       }
-      TestLib_compare_and_print(str, expected, computed, sw);
+      else if (EverCrypt_HMAC_is_supported_alg(ha))
+      {
+        uint32_t sw3;
+        switch (ha)
+        {
+          case Spec_Hash_Definitions_MD5:
+            {
+              sw3 = (uint32_t)16U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA1:
+            {
+              sw3 = (uint32_t)20U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_224:
+            {
+              sw3 = (uint32_t)28U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_256:
+            {
+              sw3 = (uint32_t)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_384:
+            {
+              sw3 = (uint32_t)48U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_512:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_Blake2S:
+            {
+              sw3 = (uint32_t)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_Blake2B:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_224:
+            {
+              sw3 = (uint32_t)28U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_256:
+            {
+              sw3 = (uint32_t)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_384:
+            {
+              sw3 = (uint32_t)48U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_512:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+        KRML_CHECK_SIZE(sizeof (uint8_t), sw3);
+        uint8_t computed[sw3];
+        memset(computed, 0U, sw3 * sizeof (uint8_t));
+        EverCrypt_HMAC_compute(ha, computed, key, keylen, data, datalen);
+        C_String_t str = string_of_alg(ha);
+        uint32_t sw;
+        switch (ha)
+        {
+          case Spec_Hash_Definitions_MD5:
+            {
+              sw = (uint32_t)16U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA1:
+            {
+              sw = (uint32_t)20U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_224:
+            {
+              sw = (uint32_t)28U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_256:
+            {
+              sw = (uint32_t)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_384:
+            {
+              sw = (uint32_t)48U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_512:
+            {
+              sw = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_Blake2S:
+            {
+              sw = (uint32_t)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_Blake2B:
+            {
+              sw = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_224:
+            {
+              sw = (uint32_t)28U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_256:
+            {
+              sw = (uint32_t)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_384:
+            {
+              sw = (uint32_t)48U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_512:
+            {
+              sw = (uint32_t)64U;
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+        TestLib_compare_and_print(str, expected, computed, sw);
+      }
     }
   }
 }
@@ -10547,66 +10741,30 @@ test_one_hkdf(
   uint8_t *ikm = vec.snd.b;
   uint32_t ikmlen = vec.snd.len;
   Spec_Hash_Definitions_hash_alg ha = vec.fst;
-  uint32_t sw0;
+  bool sw0;
   switch (ha)
   {
-    case Spec_Hash_Definitions_MD5:
+    case Spec_Hash_Definitions_Shake128:
       {
-        sw0 = (uint32_t)16U;
+        sw0 = true;
         break;
       }
-    case Spec_Hash_Definitions_SHA1:
+    case Spec_Hash_Definitions_Shake256:
       {
-        sw0 = (uint32_t)20U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        sw0 = (uint32_t)28U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        sw0 = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        sw0 = (uint32_t)48U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        sw0 = (uint32_t)64U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        sw0 = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        sw0 = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        sw0 = (uint32_t)64U;
+        sw0 = true;
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = false;
       }
   }
-  if (prklen != sw0)
+  if (sw0)
   {
     KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
-      "Wrong length of expected PRK\n");
+      "unsupported shake algorithm");
     KRML_HOST_EXIT(255U);
   }
   else
@@ -10644,11 +10802,6 @@ test_one_hkdf(
           sw1 = (uint32_t)64U;
           break;
         }
-      case Spec_Hash_Definitions_SHA3_256:
-        {
-          sw1 = (uint32_t)32U;
-          break;
-        }
       case Spec_Hash_Definitions_Blake2S:
         {
           sw1 = (uint32_t)32U;
@@ -10659,34 +10812,38 @@ test_one_hkdf(
           sw1 = (uint32_t)64U;
           break;
         }
+      case Spec_Hash_Definitions_SHA3_224:
+        {
+          sw1 = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_256:
+        {
+          sw1 = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_384:
+        {
+          sw1 = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA3_512:
+        {
+          sw1 = (uint32_t)64U;
+          break;
+        }
       default:
         {
           KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
-    if (okmlen > (uint32_t)255U * sw1)
+    if (prklen != sw1)
     {
       KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
-        "Wrong output length\n");
-      KRML_HOST_EXIT(255U);
-    }
-    else if (!keysized(ha, saltlen))
-    {
-      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-        __FILE__,
-        __LINE__,
-        "Saltlen is not keysized\n");
-      KRML_HOST_EXIT(255U);
-    }
-    else if (!keysized(ha, prklen))
-    {
-      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
-        __FILE__,
-        __LINE__,
-        "Prklen is not keysized\n");
+        "Wrong length of expected PRK\n");
       KRML_HOST_EXIT(255U);
     }
     else
@@ -10696,47 +10853,62 @@ test_one_hkdf(
       {
         case Spec_Hash_Definitions_MD5:
           {
-            sw2 = (uint32_t)64U;
+            sw2 = (uint32_t)16U;
             break;
           }
         case Spec_Hash_Definitions_SHA1:
           {
-            sw2 = (uint32_t)64U;
+            sw2 = (uint32_t)20U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_224:
           {
-            sw2 = (uint32_t)64U;
+            sw2 = (uint32_t)28U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_256:
           {
-            sw2 = (uint32_t)64U;
+            sw2 = (uint32_t)32U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_384:
           {
-            sw2 = (uint32_t)128U;
+            sw2 = (uint32_t)48U;
             break;
           }
         case Spec_Hash_Definitions_SHA2_512:
           {
-            sw2 = (uint32_t)128U;
-            break;
-          }
-        case Spec_Hash_Definitions_SHA3_256:
-          {
-            sw2 = (uint32_t)136U;
+            sw2 = (uint32_t)64U;
             break;
           }
         case Spec_Hash_Definitions_Blake2S:
           {
-            sw2 = (uint32_t)64U;
+            sw2 = (uint32_t)32U;
             break;
           }
         case Spec_Hash_Definitions_Blake2B:
           {
-            sw2 = (uint32_t)128U;
+            sw2 = (uint32_t)64U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_224:
+          {
+            sw2 = (uint32_t)28U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_256:
+          {
+            sw2 = (uint32_t)32U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_384:
+          {
+            sw2 = (uint32_t)48U;
+            break;
+          }
+        case Spec_Hash_Definitions_SHA3_512:
+          {
+            sw2 = (uint32_t)64U;
             break;
           }
         default:
@@ -10745,12 +10917,28 @@ test_one_hkdf(
             KRML_HOST_EXIT(253U);
           }
       }
-      if (!(ikmlen <= (uint32_t)0xffffffffU - sw2))
+      if (okmlen > (uint32_t)255U * sw2)
       {
         KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
           __FILE__,
           __LINE__,
-          "ikmlen is too large\n");
+          "Wrong output length\n");
+        KRML_HOST_EXIT(255U);
+      }
+      else if (!keysized(ha, saltlen))
+      {
+        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+          __FILE__,
+          __LINE__,
+          "Saltlen is not keysized\n");
+        KRML_HOST_EXIT(255U);
+      }
+      else if (!keysized(ha, prklen))
+      {
+        KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+          __FILE__,
+          __LINE__,
+          "Prklen is not keysized\n");
         KRML_HOST_EXIT(255U);
       }
       else
@@ -10788,7 +10976,32 @@ test_one_hkdf(
               sw3 = (uint32_t)128U;
               break;
             }
+          case Spec_Hash_Definitions_SHA3_224:
+            {
+              sw3 = (uint32_t)144U;
+              break;
+            }
           case Spec_Hash_Definitions_SHA3_256:
+            {
+              sw3 = (uint32_t)136U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_384:
+            {
+              sw3 = (uint32_t)104U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA3_512:
+            {
+              sw3 = (uint32_t)72U;
+              break;
+            }
+          case Spec_Hash_Definitions_Shake128:
+            {
+              sw3 = (uint32_t)168U;
+              break;
+            }
+          case Spec_Hash_Definitions_Shake256:
             {
               sw3 = (uint32_t)136U;
               break;
@@ -10809,71 +11022,95 @@ test_one_hkdf(
               KRML_HOST_EXIT(253U);
             }
         }
-        uint32_t sw4;
-        switch (ha)
-        {
-          case Spec_Hash_Definitions_MD5:
-            {
-              sw4 = (uint32_t)16U;
-              break;
-            }
-          case Spec_Hash_Definitions_SHA1:
-            {
-              sw4 = (uint32_t)20U;
-              break;
-            }
-          case Spec_Hash_Definitions_SHA2_224:
-            {
-              sw4 = (uint32_t)28U;
-              break;
-            }
-          case Spec_Hash_Definitions_SHA2_256:
-            {
-              sw4 = (uint32_t)32U;
-              break;
-            }
-          case Spec_Hash_Definitions_SHA2_384:
-            {
-              sw4 = (uint32_t)48U;
-              break;
-            }
-          case Spec_Hash_Definitions_SHA2_512:
-            {
-              sw4 = (uint32_t)64U;
-              break;
-            }
-          case Spec_Hash_Definitions_SHA3_256:
-            {
-              sw4 = (uint32_t)32U;
-              break;
-            }
-          case Spec_Hash_Definitions_Blake2S:
-            {
-              sw4 = (uint32_t)32U;
-              break;
-            }
-          case Spec_Hash_Definitions_Blake2B:
-            {
-              sw4 = (uint32_t)64U;
-              break;
-            }
-          default:
-            {
-              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        if (!(infolen <= (uint32_t)0xffffffffU - (sw3 + sw4 + (uint32_t)1U)))
+        if (!(ikmlen <= (uint32_t)0xffffffffU - sw3))
         {
           KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
             __FILE__,
             __LINE__,
-            "infolen is too large\n");
+            "ikmlen is too large\n");
           KRML_HOST_EXIT(255U);
         }
-        else if (EverCrypt_HMAC_is_supported_alg(ha))
+        else
         {
-          C_String_t str = string_of_alg(ha);
+          uint32_t sw4;
+          switch (ha)
+          {
+            case Spec_Hash_Definitions_MD5:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA1:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_224:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_256:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_384:
+              {
+                sw4 = (uint32_t)128U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_512:
+              {
+                sw4 = (uint32_t)128U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA3_224:
+              {
+                sw4 = (uint32_t)144U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA3_256:
+              {
+                sw4 = (uint32_t)136U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA3_384:
+              {
+                sw4 = (uint32_t)104U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA3_512:
+              {
+                sw4 = (uint32_t)72U;
+                break;
+              }
+            case Spec_Hash_Definitions_Shake128:
+              {
+                sw4 = (uint32_t)168U;
+                break;
+              }
+            case Spec_Hash_Definitions_Shake256:
+              {
+                sw4 = (uint32_t)136U;
+                break;
+              }
+            case Spec_Hash_Definitions_Blake2S:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_Blake2B:
+              {
+                sw4 = (uint32_t)128U;
+                break;
+              }
+            default:
+              {
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EXIT(253U);
+              }
+          }
           uint32_t sw5;
           switch (ha)
           {
@@ -10907,11 +11144,6 @@ test_one_hkdf(
                 sw5 = (uint32_t)64U;
                 break;
               }
-            case Spec_Hash_Definitions_SHA3_256:
-              {
-                sw5 = (uint32_t)32U;
-                break;
-              }
             case Spec_Hash_Definitions_Blake2S:
               {
                 sw5 = (uint32_t)32U;
@@ -10922,62 +11154,24 @@ test_one_hkdf(
                 sw5 = (uint32_t)64U;
                 break;
               }
-            default:
+            case Spec_Hash_Definitions_SHA3_224:
               {
-                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-                KRML_HOST_EXIT(253U);
-              }
-          }
-          KRML_CHECK_SIZE(sizeof (uint8_t), sw5);
-          uint8_t computed_prk[sw5];
-          memset(computed_prk, 0U, sw5 * sizeof (uint8_t));
-          EverCrypt_HKDF_extract(ha, computed_prk, salt, saltlen, ikm, ikmlen);
-          uint32_t sw;
-          switch (ha)
-          {
-            case Spec_Hash_Definitions_MD5:
-              {
-                sw = (uint32_t)16U;
-                break;
-              }
-            case Spec_Hash_Definitions_SHA1:
-              {
-                sw = (uint32_t)20U;
-                break;
-              }
-            case Spec_Hash_Definitions_SHA2_224:
-              {
-                sw = (uint32_t)28U;
-                break;
-              }
-            case Spec_Hash_Definitions_SHA2_256:
-              {
-                sw = (uint32_t)32U;
-                break;
-              }
-            case Spec_Hash_Definitions_SHA2_384:
-              {
-                sw = (uint32_t)48U;
-                break;
-              }
-            case Spec_Hash_Definitions_SHA2_512:
-              {
-                sw = (uint32_t)64U;
+                sw5 = (uint32_t)28U;
                 break;
               }
             case Spec_Hash_Definitions_SHA3_256:
               {
-                sw = (uint32_t)32U;
+                sw5 = (uint32_t)32U;
                 break;
               }
-            case Spec_Hash_Definitions_Blake2S:
+            case Spec_Hash_Definitions_SHA3_384:
               {
-                sw = (uint32_t)32U;
+                sw5 = (uint32_t)48U;
                 break;
               }
-            case Spec_Hash_Definitions_Blake2B:
+            case Spec_Hash_Definitions_SHA3_512:
               {
-                sw = (uint32_t)64U;
+                sw5 = (uint32_t)64U;
                 break;
               }
             default:
@@ -10986,13 +11180,167 @@ test_one_hkdf(
                 KRML_HOST_EXIT(253U);
               }
           }
-          TestLib_compare_and_print(str, expected_prk, computed_prk, sw);
-          KRML_CHECK_SIZE(sizeof (uint8_t), okmlen + (uint32_t)1U);
-          uint8_t computed_okm[okmlen + (uint32_t)1U];
-          memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (uint8_t));
-          uint8_t *computed_okm1 = computed_okm;
-          EverCrypt_HKDF_expand(ha, computed_okm1, computed_prk, prklen, info, infolen, okmlen);
-          TestLib_compare_and_print(str, expected_okm, computed_okm1, okmlen);
+          if (!(infolen <= (uint32_t)0xffffffffU - (sw4 + sw5 + (uint32_t)1U)))
+          {
+            KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
+              __FILE__,
+              __LINE__,
+              "infolen is too large\n");
+            KRML_HOST_EXIT(255U);
+          }
+          else if (EverCrypt_HMAC_is_supported_alg(ha))
+          {
+            C_String_t str = string_of_alg(ha);
+            uint32_t sw6;
+            switch (ha)
+            {
+              case Spec_Hash_Definitions_MD5:
+                {
+                  sw6 = (uint32_t)16U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA1:
+                {
+                  sw6 = (uint32_t)20U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_224:
+                {
+                  sw6 = (uint32_t)28U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_256:
+                {
+                  sw6 = (uint32_t)32U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_384:
+                {
+                  sw6 = (uint32_t)48U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_512:
+                {
+                  sw6 = (uint32_t)64U;
+                  break;
+                }
+              case Spec_Hash_Definitions_Blake2S:
+                {
+                  sw6 = (uint32_t)32U;
+                  break;
+                }
+              case Spec_Hash_Definitions_Blake2B:
+                {
+                  sw6 = (uint32_t)64U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_224:
+                {
+                  sw6 = (uint32_t)28U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_256:
+                {
+                  sw6 = (uint32_t)32U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_384:
+                {
+                  sw6 = (uint32_t)48U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_512:
+                {
+                  sw6 = (uint32_t)64U;
+                  break;
+                }
+              default:
+                {
+                  KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+                  KRML_HOST_EXIT(253U);
+                }
+            }
+            KRML_CHECK_SIZE(sizeof (uint8_t), sw6);
+            uint8_t computed_prk[sw6];
+            memset(computed_prk, 0U, sw6 * sizeof (uint8_t));
+            EverCrypt_HKDF_extract(ha, computed_prk, salt, saltlen, ikm, ikmlen);
+            uint32_t sw;
+            switch (ha)
+            {
+              case Spec_Hash_Definitions_MD5:
+                {
+                  sw = (uint32_t)16U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA1:
+                {
+                  sw = (uint32_t)20U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_224:
+                {
+                  sw = (uint32_t)28U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_256:
+                {
+                  sw = (uint32_t)32U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_384:
+                {
+                  sw = (uint32_t)48U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA2_512:
+                {
+                  sw = (uint32_t)64U;
+                  break;
+                }
+              case Spec_Hash_Definitions_Blake2S:
+                {
+                  sw = (uint32_t)32U;
+                  break;
+                }
+              case Spec_Hash_Definitions_Blake2B:
+                {
+                  sw = (uint32_t)64U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_224:
+                {
+                  sw = (uint32_t)28U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_256:
+                {
+                  sw = (uint32_t)32U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_384:
+                {
+                  sw = (uint32_t)48U;
+                  break;
+                }
+              case Spec_Hash_Definitions_SHA3_512:
+                {
+                  sw = (uint32_t)64U;
+                  break;
+                }
+              default:
+                {
+                  KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+                  KRML_HOST_EXIT(253U);
+                }
+            }
+            TestLib_compare_and_print(str, expected_prk, computed_prk, sw);
+            KRML_CHECK_SIZE(sizeof (uint8_t), okmlen + (uint32_t)1U);
+            uint8_t computed_okm[okmlen + (uint32_t)1U];
+            memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (uint8_t));
+            uint8_t *computed_okm1 = computed_okm;
+            EverCrypt_HKDF_expand(ha, computed_okm1, computed_prk, prklen, info, infolen, okmlen);
+            TestLib_compare_and_print(str, expected_okm, computed_okm1, okmlen);
+          }
         }
       }
     }

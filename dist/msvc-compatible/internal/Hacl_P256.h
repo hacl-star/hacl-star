@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,28 +35,20 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
-#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_P256_PrecompTable.h"
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum_Base.h"
 #include "../Hacl_P256.h"
 #include "lib_intrinsics.h"
-void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
 
-void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i);
+bool Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *public_key, uint8_t *private_key);
 
-void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
-
-uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p);
-
-void
-Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
-
-/**
-  The pub(lic)_key input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over this variable.
-*/
-uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
+bool
+Hacl_Impl_P256_DH_ecp256dh_r(
+  uint8_t *shared_secret,
+  uint8_t *their_pubkey,
+  uint8_t *private_key
+);
 
 #if defined(__cplusplus)
 }

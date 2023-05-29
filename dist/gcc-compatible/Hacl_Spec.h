@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,21 +34,6 @@ extern "C" {
 #include "krml/internal/types.h"
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
-
-
-
-
-#define Spec_Hash_Definitions_SHA2_224 0
-#define Spec_Hash_Definitions_SHA2_256 1
-#define Spec_Hash_Definitions_SHA2_384 2
-#define Spec_Hash_Definitions_SHA2_512 3
-#define Spec_Hash_Definitions_SHA1 4
-#define Spec_Hash_Definitions_MD5 5
-#define Spec_Hash_Definitions_Blake2S 6
-#define Spec_Hash_Definitions_Blake2B 7
-#define Spec_Hash_Definitions_SHA3_256 8
-
-typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
 #define Spec_FFDHE_FFDHE2048 0
 #define Spec_FFDHE_FFDHE3072 1

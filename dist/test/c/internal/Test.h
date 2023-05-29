@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +25,14 @@
 
 #ifndef __internal_Test_H
 #define __internal_Test_H
+
 #include "krml/internal/compat.h"
 
-
 #include "../Test.h"
+#include "internal/Hacl_Hash_SHA2.h"
 #include "krmllib.h"
 #include "libintvector.h"
+
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -39,6 +42,11 @@
 #define Spec_Hash_Definitions_Blake2S 6
 #define Spec_Hash_Definitions_Blake2B 7
 #define Spec_Hash_Definitions_SHA3_256 8
+#define Spec_Hash_Definitions_SHA3_224 9
+#define Spec_Hash_Definitions_SHA3_384 10
+#define Spec_Hash_Definitions_SHA3_512 11
+#define Spec_Hash_Definitions_Shake128 12
+#define Spec_Hash_Definitions_Shake256 13
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 

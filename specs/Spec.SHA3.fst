@@ -16,23 +16,23 @@ type state = lseq uint64 25
 unfold
 type index = n:size_nat{n < 5}
 
-let readLane (s:state) (x:index) (y:index) : Tot uint64 =
+let get (s:state) (x:index) (y:index) : Tot uint64 =
   s.[x + 5 * y]
 
-let writeLane (s:state) (x:index) (y:index) (v:uint64) : Tot state =
+let set (s:state) (x:index) (y:index) (v:uint64) : Tot state =
   s.[x + 5 * y] <- v
 
 let rotl (a:uint64) (b:size_t{0 < uint_v b /\ uint_v b < 64}) : Tot uint64 =
   rotate_left a b
 
 let state_theta_inner_C (s:state) (i:size_nat{i < 5}) (_C:lseq uint64 5) : Tot (lseq uint64 5) =
-  _C.[i] <- readLane s i 0 ^. readLane s i 1 ^. readLane s i 2 ^. readLane s i 3 ^. readLane s i 4
+  _C.[i] <- get s i 0 ^. get s i 1 ^. get s i 2 ^. get s i 3 ^. get s i 4
 
 let state_theta0 (s:state) (_C:lseq uint64 5) =
   repeati 5 (state_theta_inner_C s) _C
 
 let state_theta_inner_s_inner (x:index) (_D:uint64) (y:index) (s:state) : Tot state =
-  writeLane s x y (readLane s x y ^. _D)
+  set s x y (get s x y ^. _D)
 
 let state_theta_inner_s (_C:lseq uint64 5) (x:index) (s:state) : Tot state =
   let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (size 1)) in
@@ -58,25 +58,26 @@ val state_pi_rho_s: i:size_nat{i <= 24} -> Type0
 let state_pi_rho_s i = uint64 & state
 
 let state_pi_rho (s_theta:state) : Tot state =
-  let current = readLane s_theta 1 0 in
+  let current = get s_theta 1 0 in
   let _, s_pi_rho = repeat_gen 24 state_pi_rho_s
     state_pi_rho_inner (current, s_theta) in
   s_pi_rho
 
-let state_chi_inner (s_pi_rho:state) (y:index) (x:index) (s:state) : Tot state =
-  writeLane s x y
-    (readLane s_pi_rho x y ^.
-     ((lognot (readLane s_pi_rho ((x + 1) % 5) y)) &.
-      readLane s_pi_rho ((x + 2) % 5) y))
+
+let state_chi_inner0 (s_pi_rho:state) (y:index) (x:index) (s:state) : Tot state =
+  set s x y
+    (get s_pi_rho x y ^.
+     ((lognot (get s_pi_rho ((x + 1) % 5) y)) &.
+      get s_pi_rho ((x + 2) % 5) y))
 
 let state_chi_inner1 (s_pi_rho:state) (y:index) (s:state) : Tot state =
-  repeati 5 (state_chi_inner s_pi_rho y) s
+  repeati 5 (state_chi_inner0 s_pi_rho y) s
 
 let state_chi (s_pi_rho:state) : Tot state  =
   repeati 5 (state_chi_inner1 s_pi_rho) s_pi_rho
 
 let state_iota (s:state) (round:size_nat{round < 24}) : Tot state =
-  writeLane s 0 0 (readLane s 0 0 ^. secret keccak_rndc.[round])
+  set s 0 0 (get s 0 0 ^. secret keccak_rndc.[round])
 
 let state_permute1 (round:size_nat{round < 24}) (s:state) : Tot state =
   let s_theta = state_theta s in
@@ -225,33 +226,3 @@ let sha3_384 (inputByteLen:nat) (input:bytes{length input == inputByteLen}) : lb
 
 let sha3_512 (inputByteLen:nat) (input:bytes{length input == inputByteLen}) : lbytes 64 =
   keccak 576 1024 inputByteLen input (byte 0x06) 64
-
-
-val cshake128_frodo:
-    input_len:nat
-  -> input:bytes{length input == input_len}
-  -> cstm:uint16
-  -> output_len:size_nat ->
-  Tot (lbytes output_len)
-
-let cshake128_frodo input_len input cstm output_len =
-  let s = create 25 (u64 0) in
-  let s = s.[0] <- u64 0x10010001a801 |. shift_left (to_u64 cstm) (size 48) in
-  let s = state_permute s in
-  let s = absorb s 168 input_len input (byte 0x04) in
-  squeeze s 168 output_len
-
-
-val cshake256_frodo:
-    input_len:nat
-  -> input:bytes{length input == input_len}
-  -> cstm:uint16
-  -> output_len:size_nat ->
-  Tot (lbytes output_len)
-
-let cshake256_frodo input_len input cstm output_len =
-  let s = create 25 (u64 0) in
-  let s = s.[0] <- u64 0x100100018801 |. shift_left (to_u64 cstm) (size 48) in
-  let s = state_permute s in
-  let s = absorb s 136 input_len input (byte 0x04) in
-  squeeze s 136 output_len

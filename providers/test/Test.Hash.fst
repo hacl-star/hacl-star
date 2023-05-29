@@ -25,7 +25,7 @@ let main (): St unit =
   // expected to go through HI
   ()
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --fuel 1 --ifuel 1"
 let test_incremental_api (): St unit =
   // Note: this function cannot be in the Stack effect because it performs some
   // allocations (even though it frees them afterwards).
@@ -56,7 +56,7 @@ let test_incremental_api (): St unit =
   let dst = B.alloca (u8 0) 32ul in
   let h3 = ST.get () in
   // Auto-framing!
-  HI.finish (G.hide SHA2_256) st dst;
+  HI.finish (G.hide SHA2_256) st dst ();
 
   let h4 = ST.get () in
   assert (Seq.equal (B.as_seq h4 dst)

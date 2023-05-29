@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,160 +25,156 @@
 
 #include "Hacl_Test_ECDSA.h"
 
-
-
 extern void C_String_print(C_String_t uu___);
 
 
 /*******************************************************************************
 
-ECDSA and ECDH functions over the P-256 NIST curve.
+ Verified C library for ECDSA and ECDH functions over the P-256 NIST curve.
 
-This module implements signing and verification, key validation, conversions
-between various point representations, and ECDH key agreement.
+ This module implements signing and verification, key validation, conversions
+ between various point representations, and ECDH key agreement.
 
 *******************************************************************************/
 
-/**************/
-/* Signatures */
-/**************/
+/*****************/
+/* ECDSA signing */
+/*****************/
 
 /*
-  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  As per the standard, a hash function *shall* be used. Therefore, we recommend
   using one of the three combined hash-and-sign variants.
 */
 
 /**
-Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
+Create an ECDSA signature using SHA2-256.
 
-Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
- The private key and the nonce are expected to be more than 0 and less than the curve order.
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 extern bool
 Hacl_P256_ecdsa_sign_p256_sha2(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
+  uint8_t *signature,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *private_key,
+  uint8_t *nonce
 );
 
 /**
-Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
+Create an ECDSA signature using SHA2-384.
 
-Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
- The private key and the nonce are expected to be more than 0 and less than the curve order.
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 extern bool
 Hacl_P256_ecdsa_sign_p256_sha384(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
+  uint8_t *signature,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *private_key,
+  uint8_t *nonce
 );
 
 /**
-Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
+Create an ECDSA signature using SHA2-512.
 
-Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
- The private key and the nonce are expected to be more than 0 and less than the curve order.
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `private_key` and `nonce` are valid:
+    • 0 < `private_key` < the order of the curve
+    • 0 < `nonce` < the order of the curve
 */
 extern bool
 Hacl_P256_ecdsa_sign_p256_sha512(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
+  uint8_t *signature,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *private_key,
+  uint8_t *nonce
 );
 
 
-/****************/
-/* Verification */
-/****************/
-
-/*
-  Verify a message signature. These functions internally validate the public key using validate_public_key.
-*/
-
+/**********************/
+/* ECDSA verification */
+/**********************/
 
 /**
- The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
+Verify an ECDSA signature using SHA2-256.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid
 */
 extern bool
 Hacl_P256_ecdsa_verif_p256_sha2(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *public_key,
+  uint8_t *signature_r,
+  uint8_t *signature_s
 );
 
 /**
-  The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
+Verify an ECDSA signature using SHA2-384.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid
 */
 extern bool
 Hacl_P256_ecdsa_verif_p256_sha384(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *public_key,
+  uint8_t *signature_r,
+  uint8_t *signature_s
 );
 
 /**
-  The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
+Verify an ECDSA signature using SHA2-512.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `public_key` (x || y) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `signature_r` and `signature_s` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function also checks whether `public_key` is valid
 */
 extern bool
 Hacl_P256_ecdsa_verif_p256_sha512(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *public_key,
+  uint8_t *signature_r,
+  uint8_t *signature_s
 );
 
 extern void LowStar_Printf_print_string(Prims_string uu___);

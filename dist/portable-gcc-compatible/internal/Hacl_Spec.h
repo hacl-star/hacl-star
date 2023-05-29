@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,28 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "../Hacl_Spec.h"
-
-/* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa_tags */
-
-#define Spec_ECDSA_NoHash 0
-#define Spec_ECDSA_Hash 1
-
-/* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa_tags */
-
-typedef uint8_t Spec_ECDSA_hash_alg_ecdsa_tags;
-
-/* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa */
-
-typedef struct Spec_ECDSA_hash_alg_ecdsa_s
-{
-  Spec_ECDSA_hash_alg_ecdsa_tags tag;
-  Spec_Hash_Definitions_hash_alg _0;
-}
-Spec_ECDSA_hash_alg_ecdsa;
-
-/* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa */
 
 /* SNIPPET_START: Spec_Cipher_Expansion_impl */
 

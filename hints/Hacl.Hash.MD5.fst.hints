@@ -2,34 +2,6 @@
   "Rejt þp\f–7™\u0000Êˆ$Ï",
   [
     [
-      "Hacl.Hash.MD5.legacy_update_multi",
-      1,
-      2,
-      1,
-      [
-        "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
-        "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Spec.Hash.Definitions.is_md",
-        "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "b8808288e8764ef8fe248dd77d22bf02"
-    ],
-    [
-      "Hacl.Hash.MD5.legacy_update_last",
-      1,
-      2,
-      1,
-      [
-        "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
-        "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Spec.Hash.Definitions.is_md",
-        "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "61c945ffd8bfb1d53d5219ff57b97edc"
-    ],
-    [
       "Hacl.Hash.MD5.legacy_hash",
       1,
       2,
@@ -37,11 +9,36 @@
       [
         "@query", "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Spec.Hash.Definitions.is_md",
+        "equation_Spec.Hash.Definitions.is_shake",
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "a2009742c97536cc68eb886ee5c1170b"
+      "ddeeaab93bf0d99d3c5aed59133a3f39"
+    ],
+    [
+      "Hacl.Hash.MD5.legacy_hash",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.MD5",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.Hash.Definitions.MD5@tok",
+        "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.is_md",
+        "equation_Spec.Hash.Definitions.is_shake",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+      ],
+      0,
+      "c4f3c0229a2f9c6a4a5542f64a10ceb0"
     ]
   ]
 ]

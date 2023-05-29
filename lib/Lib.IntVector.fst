@@ -20,9 +20,13 @@ let vec_t t w =
   | U64,4 -> vec256
   | _,_ -> admit()
 
+let reveal_vec_1 _ = ()
+
 let vec_v #t #w x = admit()
 
 let vecv_extensionality #t #w f1 f2 = admit()
+
+let reveal_vec_v_1 #t f = admit()
 
 let vec_zero (t:v_inttype) (w:width) =
   match t,w with

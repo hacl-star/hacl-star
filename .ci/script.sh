@@ -27,7 +27,7 @@ fi
 if [ ! -z "$CROSS_CI" ]; then
   pushd dist/gcc-compatible
   rm -rf *.o *.d libevercrypt.a
-  ./configure -target $CROSS_CI --disable-ocaml
+  ./configure -target $CROSS_CI
   make -j libevercrypt.a
   popd
   exit 0
@@ -63,12 +63,3 @@ export KRML_HOME=$(pwd)/karamel
 make -C karamel/krmllib/dist/generic -f Makefile.basic -j
 make -j -k
 popd
-
-if which opam; then
-  make -C dist/gcc-compatible install-hacl-star-raw
-  pushd bindings/ocaml
-  dune build
-  dune runtest
-  dune install
-  popd
-fi

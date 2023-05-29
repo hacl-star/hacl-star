@@ -1,0 +1,254 @@
+[
+  "un†ÍH—Œ<ÛùVş©ı",
+  [
+    [
+      "Hacl.Spec.P256.Montgomery.mont_cancel_lemma_gen",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "212d31c0ac27ae64ec3ef8b4d669ec20"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.mul_fmont_R_and_R_inv_is_one",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "458f32bb49db9543e29ac6a6c7af73c0"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.from_mont",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688"
+      ],
+      0,
+      "148fc897c09385d732a86431cc8ab30b"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.to_mont",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688"
+      ],
+      0,
+      "470210f7fbe40dbfb5de6c284a51e14d"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.bn_mont_reduction_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.prime",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_Spec.P256.PointOps.prime",
+        "typing_tok_Lib.IntTypes.U64@tok"
+      ],
+      0,
+      "cead2487caf30e06c509f5bef07e6461"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.fmont_mul_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "a15d79db8482922c965e5d9a1cacc1a7"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.fmont_add_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "cf1d525878ad2f5cddf018d2310acec5"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.fmont_sub_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "5d32ea66927e12410e5a90a5c3ff5d2a"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.mul_qmont_R_and_R_inv_is_one",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "53cde5cf1447303565e362cb170de6c8"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.from_qmont",
+      1,
+      0,
+      0,
+      [
+        "@query", "equation_Spec.P256.PointOps.order",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "34bd8385bd7e4de000703c4a96c29bd4"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.to_qmont",
+      1,
+      0,
+      0,
+      [
+        "@query", "equation_Spec.P256.PointOps.order",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "4baf305bf0972f71c0b7b8d1020207c0"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.bn_qmont_reduction_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U64@tok"
+      ],
+      0,
+      "7662683626b8ef72c3b98583efff9f1e"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.qmont_add_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
+        "equation_Spec.P256.PointOps.qelem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "ddd3595a25bcb92d08f36764b93619cb"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.qmont_mul_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
+        "equation_Spec.P256.PointOps.qelem",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "a8e3739a65d04f9ec1c8d005252bde0d"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.qmont_inv_mul_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.P256.Montgomery.from_qmont",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.order",
+        "equation_Spec.P256.PointOps.qelem", "int_inversion",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d04734b4decc495be32e25eb4e2d5352"
+    ],
+    [
+      "Hacl.Spec.P256.Montgomery.lemma_ecdsa_sign_s",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.order",
+        "equation_Spec.P256.PointOps.qelem", "int_inversion",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1784cc7a038eaccf15977ed76dfcdb5e",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "ccf53124060d8b55f8b03a5c927bc2cb"
+    ]
+  ]
+]

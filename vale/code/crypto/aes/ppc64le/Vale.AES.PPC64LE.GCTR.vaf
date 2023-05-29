@@ -1,0 +1,637 @@
+include "../../../arch/ppc64le/Vale.PPC64LE.InsBasic.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsMem.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsVector.vaf"
+include "../../../arch/ppc64le/Vale.PPC64LE.InsStack.vaf"
+include "../../../lib/util/Vale.Lib.Basic.vaf"
+include "Vale.AES.PPC64LE.AES.vaf"
+include{:fstar}{:open} "Vale.Def.Prop_s"
+include{:fstar}{:open} "Vale.Def.Opaque_s"
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Vale.AES.AES_BE_s"
+include{:fstar}{:open} "Vale.AES.GCTR_BE_s"
+include{:fstar}{:open} "Vale.AES.GCTR_BE"
+include{:fstar}{:open} "Vale.AES.GCM_helpers_BE"
+include{:fstar}{:open} "Vale.Poly1305.Math"
+include{:fstar}{:open} "Vale.Def.Words.Two_s"
+include{:fstar}{:open} "Vale.PPC64LE.Machine_s"
+include{:fstar}{:open} "Vale.PPC64LE.Memory"
+include{:fstar}{:open} "Vale.PPC64LE.State"
+include{:fstar}{:open} "Vale.PPC64LE.Decls"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCode"
+include{:fstar}{:open} "Vale.PPC64LE.QuickCodes"
+include{:fstar}{:open} "Vale.AES.Types_helpers"
+
+module Vale.AES.PPC64LE.GCTR
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Prop_s
+open Vale.Def.Opaque_s
+open Vale.Def.Words_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
+open FStar.Seq
+open Vale.AES.AES_BE_s
+open Vale.AES.PPC64LE.AES
+open Vale.AES.GCTR_BE_s
+open Vale.AES.GCTR_BE
+open Vale.AES.GCM_helpers_BE
+open Vale.Poly1305.Math
+open Vale.Def.Words.Two_s
+open Vale.PPC64LE.Machine_s
+open Vale.PPC64LE.Memory
+open Vale.PPC64LE.State
+open Vale.PPC64LE.Decls
+open Vale.PPC64LE.InsBasic
+open Vale.PPC64LE.InsMem
+open Vale.PPC64LE.InsVector
+open Vale.PPC64LE.InsStack
+open Vale.PPC64LE.QuickCode
+open Vale.PPC64LE.QuickCodes
+open Vale.AES.Types_helpers
+#reset-options "--z3rlimit 30"
+#endverbatim
+
+#verbatim{:interface}
+let aes_reqs
+  (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
+  (key_ptr:int) (heap0:vale_heap) (layout:vale_heap_layout) : prop0
+  =
+  (alg = AES_128 \/ alg = AES_256) /\
+  is_aes_key_word alg key /\
+  length(round_keys) == nr(alg) + 1 /\
+  round_keys == key_to_round_keys_word alg key /\
+  validSrcAddrs128 heap0 key_ptr keys_b (nr alg + 1) layout Secret /\
+  reverse_bytes_quad32_seq (s128 heap0 keys_b) == round_keys
+#endverbatim
+
+#verbatim
+open Vale.Lib.Basic
+#reset-options "--z3rlimit 20"
+#endverbatim
+
+function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
+    key_ptr:int, heap0:vale_heap, layout:vale_heap_layout) : prop extern;
+
+// GCTR encrypt one block
+procedure Gctr_register(
+        inline alg:algorithm,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
+    {:public}
+    lets keys_ptr @= r4;
+    io @= v1; icb @= v7;
+    reads
+        keys_ptr; icb; memLayout; heap0;
+    modifies
+        r10; v0; io; v2;
+    requires
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+    ensures
+        seq_nat32_to_seq_nat8_BE(seq_four_to_seq_BE(create(1, io))) == gctr_encrypt(icb, #(seq(nat8))(be_quad32_to_bytes(old(io))), alg, key);
+        io == gctr_encrypt_block(icb, old(io), alg, key, 0);
+{
+    assert inc32(icb, 0) == icb;
+    Vmr(v0, icb);
+    AESEncryptBlock(alg, icb, key, round_keys, keys_b);
+    assert v0 == aes_encrypt_word(alg, key, icb);
+
+    Vxor(io, io, v0);
+
+    // Call a helpful lemma
+    gctr_encrypt_one_block(icb, old(io), alg, key);
+}
+
+procedure Gctr_blocks128_body_1way(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost count:nat,
+        ghost old_icb:quad32,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+        ghost plain_quads:seq(quad32))
+    {:quick}
+    lets in_ptr @= r3; out_ptr @= r7; len @= r26; ctr_index @= r6; keys_ptr @= r4;
+    ptr_index @= r9;
+    icb @= v7;
+
+    reads
+        in_ptr; out_ptr; len; ctr_index; keys_ptr; ptr_index; icb; memLayout; heap0;
+
+    modifies
+        r10; v0; v2; heap1;
+
+    requires
+        0 <= count < len;
+        ptr_index == count * 16;
+        // GCTR reqs
+        validSrcAddrsOffset128(heap1,  in_ptr,  in_b, ctr_index, len, memLayout, Secret);
+        validDstAddrsOffset128(heap1, out_ptr, out_b, ctr_index, len, memLayout, Secret);
+
+        // GCTR
+        buffers_disjoint128(in_b, out_b) || in_b == out_b;
+        partial_seq_agreement(plain_quads, reverse_bytes_quad32_seq(s128(heap1, in_b)), ctr_index + count, buffer_length(in_b));
+        gctr_partial_def(alg, ctr_index + count, plain_quads, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old_icb);
+        ctr_index + len < pow2_32;
+        icb == inc32lite(old_icb, ctr_index + count);
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+    ensures
+        modifies_buffer128(out_b, old(heap1), heap1);
+        partial_seq_agreement(plain_quads, reverse_bytes_quad32_seq(s128(heap1, in_b)), ctr_index + count + 1, buffer_length(in_b));
+        gctr_partial_def(alg, ctr_index + count + 1, plain_quads, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old_icb);
+{
+    let ctr_enc := quad32_xor(reverse_bytes_quad32(buffer128_read(in_b, ctr_index + count, heap1)), aes_encrypt_word(alg, key, inc32(old_icb, ctr_index + count)));
+    
+    Vmr(v0, icb);
+    AESEncryptBlock(alg, icb, key, round_keys, keys_b);
+
+    Load128_byte16_buffer_index(heap1, v2, in_ptr, ptr_index, Secret, in_b, ctr_index + count);
+    Vxor(v2, v2, v0);
+    Store128_byte16_buffer_index(heap1, v2, out_ptr, ptr_index, Secret, out_b, ctr_index + count);
+    assert reverse_bytes_quad32(buffer128_read(out_b, ctr_index + count, heap1)) == ctr_enc;
+
+    lemma_eq_reverse_bytes_quad32_seq(reverse_bytes_quad32_seq(s128(heap1, out_b)), old(reverse_bytes_quad32_seq(s128(heap1, out_b))), plain_quads, ctr_index + count, old_icb, alg, key);
+}
+
+procedure Mod_cr0()
+    {:quick}
+    modifies
+        cr0;
+{}
+
+procedure Gctr_blocks128_1way(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost old_icb:quad32,
+        ghost old_plain:seq(quad32),
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
+    {:options z3rlimit(30)}
+    lets in_ptr @= r3; out_ptr @= r7; len @= r26; ctr_index @= r6; keys_ptr @= r4;
+    ctr @= r8; ptr_index @= r9;
+    one @= v3; icb @= v7;
+
+    reads
+        in_ptr; out_ptr; len; ctr_index; keys_ptr; memLayout; heap0;
+
+    modifies
+        ctr; ptr_index; r10; v0; v2; v3; v4; icb; cr0; heap1;
+
+    requires
+        // GCTR reqs
+        buffers_disjoint128(in_b, out_b) || in_b == out_b;
+        validSrcAddrsOffset128(heap1,  in_ptr,  in_b, ctr_index, len, memLayout, Secret);
+        validDstAddrsOffset128(heap1, out_ptr, out_b, ctr_index, len, memLayout, Secret);
+        in_ptr  + 16 * len < pow2_64;
+        out_ptr + 16 * len < pow2_64;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) < pow2_32;
+        ctr_index + len == buffer_length(in_b);
+        ctr_index + len < pow2_32;
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+
+        partial_seq_agreement(old_plain, reverse_bytes_quad32_seq(s128(heap1, in_b)), ctr_index, buffer_length(in_b));
+
+        icb == inc32lite(old_icb, ctr_index);
+
+        gctr_partial_def(alg, ctr_index, old_plain, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old_icb);
+    ensures
+        modifies_buffer128(out_b, old(heap1), heap1);
+
+        // GCTR
+        gctr_partial_def(alg, ctr_index + len, old_plain, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old_icb);
+        icb == inc32lite(old_icb, ctr_index + len);
+        ctr_index + len == 0 ==> s128(heap1, out_b) == old(s128(heap1, out_b));
+{
+    Vspltisw(one, 1);
+    Vspltisw(v4, 0);
+    Vsldoi(one, v4, one, 4);
+    
+    LoadImm64(ctr, 0);
+    LoadImm64(ptr_index, 0);
+
+    while (ctr != len)
+        invariant
+            //////////////////// Basic indexing //////////////////////
+            0 <= ctr <= len;
+            ptr_index == 16 * ctr;
+            icb == inc32lite(old_icb, ctr_index + ctr);
+
+            //////////////////// From requires //////////////////////
+            // GCTR reqs
+            buffers_disjoint128(in_b, out_b) || in_b == out_b;
+            validSrcAddrsOffset128(heap1,  in_ptr,  in_b, ctr_index, len, memLayout, Secret);
+            validDstAddrsOffset128(heap1, out_ptr, out_b, ctr_index, len, memLayout, Secret);
+            in_ptr  + 16 * len < pow2_64;
+            out_ptr + 16 * len < pow2_64;
+            buffer_length(in_b) == buffer_length(out_b);
+            ctr != len ==> partial_seq_agreement(old_plain, reverse_bytes_quad32_seq(s128(heap1, in_b)), ctr_index + ctr, buffer_length(in_b));
+            ctr_index + len < pow2_32;
+
+            // AES reqs
+            aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+
+            //////////////////// GCTR invariants //////////////////////
+            one == Mkfour(1, 0, 0, 0);
+
+            //////////////////// Postcondition goals //////////////////////
+            modifies_buffer128(out_b, old(heap1), heap1);
+            gctr_partial_def(alg, ctr_index + ctr, old_plain, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old_icb);
+            ctr_index + len == 0 ==> s128(heap1, out_b) == old(s128(heap1, out_b));
+        decreases
+            len - ctr;
+    {
+        Mod_cr0();
+
+        Gctr_blocks128_body_1way(alg, in_b, out_b, ctr, old_icb, key, round_keys, keys_b, old_plain);
+        
+        AddImm(ctr, ctr, 1);
+        AddImm(ptr_index, ptr_index, 16);
+        Vadduwm(icb, icb, one);
+    }
+}
+
+procedure Store_3blocks128_1(ghost out_b:buffer128)
+    {:quick}
+    lets
+        len @= r6; out_ptr @= r7; ctr @= r8;
+    reads
+        len; out_ptr; ctr; r27; r28;
+        v0; v1; v2; memLayout;
+    modifies
+        heap1;
+    requires
+        (ctr + 5) < len;
+        validDstAddrsOffset128(heap1, out_ptr, out_b, ctr, len - ctr, memLayout, Secret);
+        r27 == 1*16;
+        r28 == 2*16;
+    ensures
+        modifies_buffer_specific128(out_b, old(heap1), heap1, ctr, ctr + 2);
+        buffer128_read(out_b, ctr, heap1) == reverse_bytes_quad32(v0);
+        buffer128_read(out_b, ctr + 1, heap1) == reverse_bytes_quad32(v1);
+        buffer128_read(out_b, ctr + 2, heap1) == reverse_bytes_quad32(v2);
+{
+    Store128_byte16_buffer(heap1, v0, out_ptr, Secret, out_b, ctr);
+    Store128_byte16_buffer_index(heap1, v1, out_ptr, r27, Secret, out_b, ctr + 1);
+    Store128_byte16_buffer_index(heap1, v2, out_ptr, r28, Secret, out_b, ctr + 2);
+}
+
+procedure Store_3blocks128_2(ghost out_b:buffer128)
+    {:quick}
+    lets
+        len @= r6; out_ptr @= r7; ctr @= r8;
+    reads
+        len; out_ptr; ctr; r29; r30; r31;
+        v3; v4; v5; memLayout;
+    modifies
+        heap1;
+    requires
+        (ctr + 5) < len;
+        validDstAddrsOffset128(heap1, out_ptr, out_b, ctr, len - ctr, memLayout, Secret);
+        r29 == 3*16;
+        r30 == 4*16;
+        r31 == 5*16;
+    ensures
+        modifies_buffer_specific128(out_b, old(heap1), heap1, ctr + 3, ctr + 5);
+        buffer128_read(out_b, ctr + 3, heap1) == reverse_bytes_quad32(v3);
+        buffer128_read(out_b, ctr + 4, heap1) == reverse_bytes_quad32(v4);
+        buffer128_read(out_b, ctr + 5, heap1) == reverse_bytes_quad32(v5);
+{
+    Store128_byte16_buffer_index(heap1, v3, out_ptr, r29, Secret, out_b, ctr + 3);
+    Store128_byte16_buffer_index(heap1, v4, out_ptr, r30, Secret, out_b, ctr + 4);
+    Store128_byte16_buffer_index(heap1, v5, out_ptr, r31, Secret, out_b, ctr + 5);
+}
+
+procedure Gctr_blocks128_6way_body(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost old_icb:quad32,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+        ghost plain_quads:seq(quad32))
+    {:quick}
+    lets in_ptr @= r3; out_ptr @= r7; len @= r6; keys_ptr @= r4;
+    ctr @= r8;
+    icb @= v7;
+    one @= v8; two @= v9; three @= v10; four @= v11;
+    five @= v12; six @= v13;
+    reads
+        len; keys_ptr;
+        r27; r28; r29; r30; r31; 
+        one; two; three; four; five; six; memLayout; heap0;
+    modifies
+        in_ptr; out_ptr; ctr; r10;
+        v0; v1; v2; v3; v4; v5; v6; icb;
+        v14; v15; v16; v17; v18; v19; heap1;
+
+    requires
+        (ctr + 5) < len;
+        // GCTR reqs
+        validSrcAddrsOffset128(heap1,  in_ptr,  in_b, ctr, len - ctr, memLayout, Secret);
+        validDstAddrsOffset128(heap1, out_ptr, out_b, ctr, len - ctr, memLayout, Secret);
+
+        in_ptr + 6*16 < pow2_64;
+        out_ptr + 6*16 < pow2_64;
+
+        // GCTR
+        buffers_disjoint128(in_b, out_b) || in_b == out_b;
+        partial_seq_agreement(plain_quads, reverse_bytes_quad32_seq(s128(heap1, in_b)), ctr, buffer_length(in_b));
+        gctr_partial_def(alg, ctr, plain_quads, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old_icb);
+        len < pow2_32;
+        icb == inc32lite(old_icb, ctr);
+
+        one == Mkfour(1, 0, 0, 0);
+        two == Mkfour(2, 0, 0, 0);
+        three == Mkfour(3, 0, 0, 0);
+        four == Mkfour(4, 0, 0, 0);
+        five == Mkfour(5, 0, 0, 0);
+        six == Mkfour(6, 0, 0, 0);
+
+        r27 == 1*16;
+        r28 == 2*16;
+        r29 == 3*16;
+        r30 == 4*16;
+        r31 == 5*16;
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+    ensures
+        modifies_buffer128(out_b, old(heap1), heap1);
+        partial_seq_agreement(plain_quads, reverse_bytes_quad32_seq(s128(heap1, in_b)), ctr, buffer_length(in_b));
+        gctr_partial_def(alg, ctr, plain_quads, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old_icb);
+
+        ctr == old(ctr) + 6;
+        in_ptr == old(in_ptr) + 16*6;
+        out_ptr == old(out_ptr) + 16*6;
+        icb == inc32lite(old_icb, ctr);
+{
+    let ctr_enc_0 := quad32_xor(reverse_bytes_quad32(buffer128_read(in_b, ctr, heap1)), aes_encrypt_word(alg, key, inc32(old_icb, ctr)));
+    let ctr_enc_1 := quad32_xor(reverse_bytes_quad32(buffer128_read(in_b, ctr + 1, heap1)), aes_encrypt_word(alg, key, inc32(old_icb, ctr + 1)));
+    let ctr_enc_2 := quad32_xor(reverse_bytes_quad32(buffer128_read(in_b, ctr + 2, heap1)), aes_encrypt_word(alg, key, inc32(old_icb, ctr + 2)));
+    let ctr_enc_3 := quad32_xor(reverse_bytes_quad32(buffer128_read(in_b, ctr + 3, heap1)), aes_encrypt_word(alg, key, inc32(old_icb, ctr + 3)));
+    let ctr_enc_4 := quad32_xor(reverse_bytes_quad32(buffer128_read(in_b, ctr + 4, heap1)), aes_encrypt_word(alg, key, inc32(old_icb, ctr + 4)));
+    let ctr_enc_5 := quad32_xor(reverse_bytes_quad32(buffer128_read(in_b, ctr + 5, heap1)), aes_encrypt_word(alg, key, inc32(old_icb, ctr + 5)));
+    
+    Vmr(v0, icb);
+    Vadduwm(v1, icb, one);
+    Vadduwm(v2, icb, two);
+    Vadduwm(v3, icb, three);
+    Vadduwm(v4, icb, four);
+    Vadduwm(v5, icb, five);
+
+    AESEncryptBlock_6way(alg, icb, inc32lite(icb, 1), inc32lite(icb, 2), inc32lite(icb, 3), inc32lite(icb, 4), inc32lite(icb, 5), key, round_keys, keys_b);
+    
+    Load128_byte16_buffer(heap1, v14, in_ptr, Secret, in_b, ctr);
+    Load128_byte16_buffer_index(heap1, v15, in_ptr, r27, Secret, in_b, ctr + 1);
+    Load128_byte16_buffer_index(heap1, v16, in_ptr, r28, Secret, in_b, ctr + 2);
+    Load128_byte16_buffer_index(heap1, v17, in_ptr, r29, Secret, in_b, ctr + 3);
+    Load128_byte16_buffer_index(heap1, v18, in_ptr, r30, Secret, in_b, ctr + 4);
+    Load128_byte16_buffer_index(heap1, v19, in_ptr, r31, Secret, in_b, ctr + 5);
+
+    Vxor(v0, v14, v0);
+    Vxor(v1, v15, v1);
+    Vxor(v2, v16, v2);
+    Vxor(v3, v17, v3);
+    Vxor(v4, v18, v4);
+    Vxor(v5, v19, v5);
+
+    Store_3blocks128_1(out_b);
+    Store_3blocks128_2(out_b);
+    assert reverse_bytes_quad32(buffer128_read(out_b, ctr, heap1)) == ctr_enc_0;
+    assert reverse_bytes_quad32(buffer128_read(out_b, ctr + 1, heap1)) == ctr_enc_1;
+    assert reverse_bytes_quad32(buffer128_read(out_b, ctr + 2, heap1)) == ctr_enc_2;
+    assert reverse_bytes_quad32(buffer128_read(out_b, ctr + 3, heap1)) == ctr_enc_3;
+    assert reverse_bytes_quad32(buffer128_read(out_b, ctr + 4, heap1)) == ctr_enc_4;
+    assert reverse_bytes_quad32(buffer128_read(out_b, ctr + 5, heap1)) == ctr_enc_5;
+
+    lemma_eq_reverse_bytes_quad32_seq(reverse_bytes_quad32_seq(s128(heap1, out_b)), old(reverse_bytes_quad32_seq(s128(heap1, out_b))), plain_quads, ctr, old_icb, alg, key);
+
+    AddImm(ctr, ctr, 6);
+    AddImm(in_ptr, in_ptr, 6*16);
+    AddImm(out_ptr, out_ptr, 6*16);
+    Vadduwm(icb, icb, six);
+}
+
+procedure Gctr_blocks128_6way(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
+    {:options z3rlimit(30)}
+    lets in_ptr @= r3; out_ptr @= r7; len @= r6; keys_ptr @= r4;
+    ctr @= r8;
+    icb @= v7;
+    one @= v8; two @= v9; three @= v10; four @= v11;
+    five @= v12; six @= v13;
+    reads
+        len; keys_ptr; memLayout; heap0;
+    modifies
+        in_ptr; out_ptr; ctr; r10; r27; r28; r29; r30; r31;
+        v0; v1; v2; v3; v4; v5; v6; icb;
+        one; two; three; four; five; six;
+        v14; v15; v16; v17; v18; v19;
+        cr0; heap1;
+    requires
+        // GCTR reqs
+        len % 6 == 0;
+        buffers_disjoint128(in_b, out_b) || in_b == out_b;
+        validSrcAddrs128(heap1,  in_ptr,  in_b, len, memLayout, Secret);
+        validDstAddrs128(heap1, out_ptr, out_b, len, memLayout, Secret);
+        in_ptr  + 16 * len < pow2_64;
+        out_ptr + 16 * len < pow2_64;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) < pow2_32;
+        len <= buffer_length(in_b);
+        len < pow2_32;
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+    ensures
+        modifies_buffer128(out_b, old(heap1), heap1);
+
+        partial_seq_agreement(old(reverse_bytes_quad32_seq(s128(heap1, in_b))), reverse_bytes_quad32_seq(s128(heap1, in_b)), len, buffer_length(in_b));
+
+        // GCTR
+        gctr_partial_def(alg, len, old(reverse_bytes_quad32_seq(s128(heap1, in_b))), reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old(icb));
+        icb == inc32lite(old(icb), old(len));
+        len == 0 ==> s128(heap1, out_b) == old(s128(heap1, out_b));
+
+        in_ptr == old(in_ptr) + 16*len;
+        out_ptr == old(out_ptr) + 16*len;
+{
+    Vspltisw(one, 1);
+    Vspltisw(two, 2);
+    Vspltisw(three, 3);
+    Vspltisw(four, 4);
+    Vspltisw(five, 5);
+    Vspltisw(six, 6);
+    Vspltisw(v14, 0);
+    Vsldoi(one, v14, one, 4);
+    Vsldoi(two, v14, two, 4);
+    Vsldoi(three, v14, three, 4);
+    Vsldoi(four, v14, four, 4);
+    Vsldoi(five, v14, five, 4);
+    Vsldoi(six, v14, six, 4);
+
+    LoadImm64(r27, 1*16);
+    LoadImm64(r28, 2*16);
+    LoadImm64(r29, 3*16);
+    LoadImm64(r30, 4*16);
+    LoadImm64(r31, 5*16);
+    
+    LoadImm64(ctr, 0);
+
+    let plain_quads:seq(quad32) := reverse_bytes_quad32_seq(s128(heap1, in_b));
+
+    while (ctr != len)
+        invariant
+            //////////////////// Basic indexing //////////////////////
+            (len - ctr) % 6 == 0;
+            0 <= ctr <= len;
+            icb == inc32lite(old(icb), ctr);
+
+            //////////////////// From requires //////////////////////
+            // GCTR reqs
+            buffers_disjoint128(in_b, out_b) || in_b == out_b;
+            validSrcAddrsOffset128(heap1,  in_ptr,  in_b, ctr, len - ctr, memLayout, Secret);
+            validDstAddrsOffset128(heap1, out_ptr, out_b, ctr, len - ctr, memLayout, Secret);
+            in_ptr  + 16 * (len - ctr) < pow2_64;
+            out_ptr + 16 * (len - ctr) < pow2_64;
+            buffer_length(in_b) == buffer_length(out_b);
+            partial_seq_agreement(plain_quads, reverse_bytes_quad32_seq(s128(heap1, in_b)), ctr, buffer_length(in_b));
+            len < pow2_32;
+
+            // AES reqs
+            aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+
+            //////////////////// GCTR invariants //////////////////////
+            one == Mkfour(1, 0, 0, 0);
+            two == Mkfour(2, 0, 0, 0);
+            three == Mkfour(3, 0, 0, 0);
+            four == Mkfour(4, 0, 0, 0);
+            five == Mkfour(5, 0, 0, 0);
+            six == Mkfour(6, 0, 0, 0);
+
+            r27 == 1*16;
+            r28 == 2*16;
+            r29 == 3*16;
+            r30 == 4*16;
+            r31 == 5*16;
+
+            //////////////////// Postcondition goals //////////////////////
+            modifies_buffer128(out_b, old(heap1), heap1);
+            gctr_partial_def(alg, ctr, plain_quads, reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old(icb));
+            len == 0 ==> s128(heap1, out_b) == old(s128(heap1, out_b));
+
+            in_ptr == old(in_ptr) + 16*ctr;
+            out_ptr == old(out_ptr) + 16*ctr;
+        decreases
+            len - ctr;
+    {
+        Mod_cr0();
+
+        Gctr_blocks128_6way_body(alg, in_b, out_b, old(icb), key, round_keys, keys_b, plain_quads);
+    }
+}
+
+procedure mod_6()
+    {:quick}
+    lets
+        result @= r26; src @= r6; tmp @= r10;
+    reads
+        src;
+    modifies
+        result; tmp; 
+    ensures 
+        result == src % 6;
+{
+    LoadImmShl64(result, 0x5555);
+    lemma_ishl_64(0x5555, 16);
+    AddImm(result, result, 0x5555);
+    Sl64Imm(tmp, result, 32);
+    lemma_ishl_64(0x55555555, 32);
+    Add(result, result, tmp);
+    LoadImm64(tmp, (-1));
+    Sub(result, tmp, result);
+    AddImm(result, result, 1);
+    assert result == 0xaaaaaaaaaaaaaaab;
+    MulHigh64U(tmp, src, result);
+    lemma_ishr_64(tmp, 2);
+    Sr64Imm(tmp, tmp, 2);
+    AddWrap(result, tmp, tmp);
+    AddWrap(result, result, tmp);
+    AddWrap(result, result, result);
+    SubWrap(result, src, result);
+    assert_normalize(src % 6 == src - (6 * (((src * 0xaaaaaaaaaaaaaaab) / pow2_64) / 4)));
+}
+
+procedure Gctr_blocks128(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:public}
+    {:quick}
+    {:options z3rlimit(30)}
+    lets in_ptr @= r3; out_ptr @= r7; len @= r6; keys_ptr @= r4; icb @= v7;
+    reads
+        keys_ptr; memLayout; heap0;
+    modifies
+        in_ptr; out_ptr; len; r8; r9; r10; r26; r27; r28; r29; r30; r31;
+        v0; v1; v2; v3; v4; v5; v6; icb;
+        v8; v9; v10; v11; v12; v13;
+        v14; v15; v16; v17; v18; v19;
+        cr0; heap1;
+    requires
+        // GCTR reqs
+        buffers_disjoint128(in_b, out_b) || in_b == out_b;
+        validSrcAddrs128(heap1,  in_ptr,  in_b, len, memLayout, Secret);
+        validDstAddrs128(heap1, out_ptr, out_b, len, memLayout, Secret);
+        in_ptr  + 16 * len < pow2_64;
+        out_ptr + 16 * len < pow2_64;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) < pow2_32;
+        len == buffer_length(in_b);
+        len < pow2_32;
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
+    ensures
+        modifies_buffer128(out_b, old(heap1), heap1);
+
+        // GCTR
+        gctr_partial(alg, old(len), old(reverse_bytes_quad32_seq(s128(heap1, in_b))), reverse_bytes_quad32_seq(s128(heap1, out_b)), key, old(icb));
+        icb == inc32lite(old(icb), old(len));
+        old(len) == 0 ==> s128(heap1, out_b) == old(s128(heap1, out_b));
+
+        in_ptr == old(in_ptr) /\ out_ptr == old(out_ptr) /\ len == old(len);
+{
+    mod_6();
+    Sub(len, len, r26);
+    Gctr_blocks128_6way(alg, in_b, out_b, key, round_keys, keys_b);
+    Gctr_blocks128_1way(alg, in_b, out_b, old(icb), old(reverse_bytes_quad32_seq(s128(heap1, in_b))), key, round_keys, keys_b);
+    gctr_partial_reveal();
+    lemma_ishl_64(len, 4);
+    Sl64Imm(r10, len, 4);
+    Sub(in_ptr, in_ptr, r10);
+    Sub(out_ptr, out_ptr, r10);
+    Add(len, len, r26);
+}

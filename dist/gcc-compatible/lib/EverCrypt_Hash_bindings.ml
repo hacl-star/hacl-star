@@ -2,8 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
-    open Hacl_Spec_applied
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     module EverCrypt_Error_applied =
       (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
     open EverCrypt_Error_applied
@@ -15,21 +16,20 @@ module Bindings(F:Cstubs.FOREIGN) =
     let state_s_tags_SHA2_256_s = Unsigned.UInt8.of_int 3
     let state_s_tags_SHA2_384_s = Unsigned.UInt8.of_int 4
     let state_s_tags_SHA2_512_s = Unsigned.UInt8.of_int 5
-    let state_s_tags_SHA3_256_s = Unsigned.UInt8.of_int 6
-    let state_s_tags_Blake2S_s = Unsigned.UInt8.of_int 7
-    let state_s_tags_Blake2S_128_s = Unsigned.UInt8.of_int 8
-    let state_s_tags_Blake2B_s = Unsigned.UInt8.of_int 9
-    let state_s_tags_Blake2B_256_s = Unsigned.UInt8.of_int 10
+    let state_s_tags_SHA3_224_s = Unsigned.UInt8.of_int 6
+    let state_s_tags_SHA3_256_s = Unsigned.UInt8.of_int 7
+    let state_s_tags_SHA3_384_s = Unsigned.UInt8.of_int 8
+    let state_s_tags_SHA3_512_s = Unsigned.UInt8.of_int 9
+    let state_s_tags_Blake2S_s = Unsigned.UInt8.of_int 10
+    let state_s_tags_Blake2S_128_s = Unsigned.UInt8.of_int 11
+    let state_s_tags_Blake2B_s = Unsigned.UInt8.of_int 12
+    let state_s_tags_Blake2B_256_s = Unsigned.UInt8.of_int 13
     type everCrypt_Hash_state_s = [ `everCrypt_Hash_state_s ] structure
     let (everCrypt_Hash_state_s : [ `everCrypt_Hash_state_s ] structure typ)
       = structure "EverCrypt_Hash_state_s_s"
     let everCrypt_Hash_update_multi_256 =
       foreign "EverCrypt_Hash_update_multi_256"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
-    let everCrypt_Hash_update_last_256 =
-      foreign "EverCrypt_Hash_update_last_256"
-        ((ptr uint32_t) @->
-           (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let everCrypt_Hash_Incremental_hash_len =
       foreign "EverCrypt_Hash_Incremental_hash_len"
         (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))

@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +24,6 @@
 
 
 #include "Hacl_Streaming_Blake2s_128.h"
-
-
 
 /**
   State allocation function when there is no key
@@ -76,7 +75,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *data,
@@ -87,7 +86,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   uint64_t total_len = s.total_len;
   if ((uint64_t)len > (uint64_t)0xffffffffffffffffU - total_len)
   {
-    return (uint32_t)1U;
+    return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   uint32_t sz;
   if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
@@ -266,7 +265,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
         }
       );
   }
-  return (uint32_t)0U;
+  return Hacl_Streaming_Types_Success;
 }
 
 /**

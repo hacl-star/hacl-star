@@ -53,6 +53,10 @@
 #  define KRML_HOST_FREE free
 #endif
 
+#ifndef KRML_HOST_IGNORE
+#  define KRML_HOST_IGNORE(x) (void)(x)
+#endif
+
 #ifndef KRML_PRE_ALIGN
 #  ifdef _MSC_VER
 #    define KRML_PRE_ALIGN(X) __declspec(align(X))
@@ -103,7 +107,7 @@
 #  include <time.h>
 
 /* Prims_nat not yet in scope */
-inline static int32_t krml_time() {
+inline static int32_t krml_time(void) {
   return (int32_t)time(NULL);
 }
 

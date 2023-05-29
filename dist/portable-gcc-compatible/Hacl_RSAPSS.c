@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,15 +59,27 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)64U;
       }
-    case Spec_Hash_Definitions_SHA3_256:
-      {
-        return (uint32_t)32U;
-      }
     case Spec_Hash_Definitions_Blake2S:
       {
         return (uint32_t)32U;
       }
     case Spec_Hash_Definitions_Blake2B:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA3_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA3_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA3_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA3_512:
       {
         return (uint32_t)64U;
       }
@@ -89,17 +102,17 @@ hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t 
   {
     case Spec_Hash_Definitions_SHA2_256:
       {
-        Hacl_Hash_SHA2_hash_256(msg, msgLen, mHash);
+        Hacl_Streaming_SHA2_hash_256(msg, msgLen, mHash);
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        Hacl_Hash_SHA2_hash_384(msg, msgLen, mHash);
+        Hacl_Streaming_SHA2_hash_384(msg, msgLen, mHash);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        Hacl_Hash_SHA2_hash_512(msg, msgLen, mHash);
+        Hacl_Streaming_SHA2_hash_512(msg, msgLen, mHash);
         break;
       }
     default:

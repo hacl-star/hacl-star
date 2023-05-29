@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,20 +35,27 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 
+typedef Hacl_Streaming_MD_state_32 Hacl_Streaming_SHA1_state;
 
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_create_in(void);
 
-void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
+void Hacl_Streaming_SHA1_legacy_init(Hacl_Streaming_MD_state_32 *s);
 
-void
-Hacl_Hash_SHA1_legacy_update_last(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
+/**
+0 = success, 1 = max length exceeded
+*/
+Hacl_Streaming_Types_error_code
+Hacl_Streaming_SHA1_legacy_update(Hacl_Streaming_MD_state_32 *p, uint8_t *data, uint32_t len);
 
-void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
+void Hacl_Streaming_SHA1_legacy_finish(Hacl_Streaming_MD_state_32 *p, uint8_t *dst);
+
+void Hacl_Streaming_SHA1_legacy_free(Hacl_Streaming_MD_state_32 *s);
+
+Hacl_Streaming_MD_state_32 *Hacl_Streaming_SHA1_legacy_copy(Hacl_Streaming_MD_state_32 *s0);
+
+void Hacl_Streaming_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }

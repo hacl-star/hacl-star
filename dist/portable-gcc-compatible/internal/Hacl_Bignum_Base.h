@@ -1,6 +1,7 @@
 /* MIT License
  *
- * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2016-2022 INRIA, CMU and Microsoft Corporation
+ * Copyright (c) 2022-2023 HACL* Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,10 +35,40 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-
 #include "internal/Hacl_Krmllib.h"
 #include "Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
+
+/* SNIPPET_START: Hacl_Bignum_Base_mul_wide_add2_u32 */
+
+static inline uint32_t
+Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out)
+{
+  uint32_t out0 = out[0U];
+  uint64_t res = (uint64_t)a * (uint64_t)b + (uint64_t)c_in + (uint64_t)out0;
+  out[0U] = (uint32_t)res;
+  return (uint32_t)(res >> (uint32_t)32U);
+}
+
+/* SNIPPET_END: Hacl_Bignum_Base_mul_wide_add2_u32 */
+
+/* SNIPPET_START: Hacl_Bignum_Base_mul_wide_add2_u64 */
+
+static inline uint64_t
+Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
+{
+  uint64_t out0 = out[0U];
+  FStar_UInt128_uint128
+  res =
+    FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(a, b),
+        FStar_UInt128_uint64_to_uint128(c_in)),
+      FStar_UInt128_uint64_to_uint128(out0));
+  out[0U] = FStar_UInt128_uint128_to_uint64(res);
+  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
+}
+
+/* SNIPPET_END: Hacl_Bignum_Base_mul_wide_add2_u64 */
+
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
 
 static inline void
@@ -79,36 +110,6 @@ Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *re
 
 /* SNIPPET_END: Hacl_Bignum_Convert_bn_to_bytes_be_uint64 */
 
-/* SNIPPET_START: Hacl_Bignum_Base_mul_wide_add2_u32 */
-
-static inline uint32_t
-Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out)
-{
-  uint32_t out0 = out[0U];
-  uint64_t res = (uint64_t)a * (uint64_t)b + (uint64_t)c_in + (uint64_t)out0;
-  out[0U] = (uint32_t)res;
-  return (uint32_t)(res >> (uint32_t)32U);
-}
-
-/* SNIPPET_END: Hacl_Bignum_Base_mul_wide_add2_u32 */
-
-/* SNIPPET_START: Hacl_Bignum_Base_mul_wide_add2_u64 */
-
-static inline uint64_t
-Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
-{
-  uint64_t out0 = out[0U];
-  FStar_UInt128_uint128
-  res =
-    FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(a, b),
-        FStar_UInt128_uint64_to_uint128(c_in)),
-      FStar_UInt128_uint64_to_uint128(out0));
-  out[0U] = FStar_UInt128_uint128_to_uint64(res);
-  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
-}
-
-/* SNIPPET_END: Hacl_Bignum_Base_mul_wide_add2_u64 */
-
 /* SNIPPET_START: Hacl_Bignum_Lib_bn_get_top_index_u32 */
 
 static inline uint32_t Hacl_Bignum_Lib_bn_get_top_index_u32(uint32_t len, uint32_t *b)
@@ -138,6 +139,50 @@ static inline uint64_t Hacl_Bignum_Lib_bn_get_top_index_u64(uint32_t len, uint64
 }
 
 /* SNIPPET_END: Hacl_Bignum_Lib_bn_get_top_index_u64 */
+
+/* SNIPPET_START: Hacl_Bignum_Lib_bn_get_bits_u32 */
+
+static inline uint32_t
+Hacl_Bignum_Lib_bn_get_bits_u32(uint32_t len, uint32_t *b, uint32_t i, uint32_t l)
+{
+  uint32_t i1 = i / (uint32_t)32U;
+  uint32_t j = i % (uint32_t)32U;
+  uint32_t p1 = b[i1] >> j;
+  uint32_t ite;
+  if (i1 + (uint32_t)1U < len && (uint32_t)0U < j)
+  {
+    ite = p1 | b[i1 + (uint32_t)1U] << ((uint32_t)32U - j);
+  }
+  else
+  {
+    ite = p1;
+  }
+  return ite & (((uint32_t)1U << l) - (uint32_t)1U);
+}
+
+/* SNIPPET_END: Hacl_Bignum_Lib_bn_get_bits_u32 */
+
+/* SNIPPET_START: Hacl_Bignum_Lib_bn_get_bits_u64 */
+
+static inline uint64_t
+Hacl_Bignum_Lib_bn_get_bits_u64(uint32_t len, uint64_t *b, uint32_t i, uint32_t l)
+{
+  uint32_t i1 = i / (uint32_t)64U;
+  uint32_t j = i % (uint32_t)64U;
+  uint64_t p1 = b[i1] >> j;
+  uint64_t ite;
+  if (i1 + (uint32_t)1U < len && (uint32_t)0U < j)
+  {
+    ite = p1 | b[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+  }
+  else
+  {
+    ite = p1;
+  }
+  return ite & (((uint64_t)1U << l) - (uint64_t)1U);
+}
+
+/* SNIPPET_END: Hacl_Bignum_Lib_bn_get_bits_u64 */
 
 /* SNIPPET_START: Hacl_Bignum_Addition_bn_sub_eq_len_u32 */
 

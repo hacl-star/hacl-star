@@ -1,6 +1,7 @@
 module Vale.X64.QuickCodes
 open FStar.Mul
 open Vale.Arch.HeapImpl
+open FStar.Range
 module Map16 = Vale.Lib.Map16
 
 #reset-options "--initial_ifuel 1 --z3rlimit 30"

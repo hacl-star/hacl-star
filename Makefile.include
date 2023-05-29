@@ -8,7 +8,7 @@ VALE_BUNDLES=\
 
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
-SPECS_DIR 	= $(HACL_HOME)/specs $(addprefix $(HACL_HOME)/specs/,lemmas tests drbg ecdsap256 frodo)
+SPECS_DIR 	= $(HACL_HOME)/specs $(addprefix $(HACL_HOME)/specs/,lemmas tests drbg frodo tests/p256)
 CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac hkdf drbg hpke sha3 sha2-mb ecdsap256 poly1305 streaming \
   blake2 chacha20 chacha20poly1305 curve25519 tests ed25519 salsa20 nacl-box meta frodo fallback bignum rsapss ffdhe k256 \
   gf128 aes aes-gcm)
@@ -22,6 +22,7 @@ VALE_DIRS	= \
   $(HACL_HOME)/vale/code/arch/ppc64le \
   $(HACL_HOME)/vale/code/crypto/aes \
   $(HACL_HOME)/vale/code/crypto/aes/x64 \
+  $(HACL_HOME)/vale/code/crypto/aes/ppc64le \
   $(HACL_HOME)/vale/code/crypto/bignum \
   $(HACL_HOME)/vale/code/crypto/ecc/curve25519 \
   $(HACL_HOME)/vale/code/crypto/poly1305 \
