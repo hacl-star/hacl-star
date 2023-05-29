@@ -17,7 +17,8 @@ module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 
-open Hacl.Streaming.Interface
+open Hacl.Streaming.Block
+
 open FStar.HyperStack.ST
 open LowStar.BufferOps
 open FStar.Mul
