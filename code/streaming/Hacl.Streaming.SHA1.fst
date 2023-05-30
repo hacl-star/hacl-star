@@ -13,7 +13,7 @@ module G = FStar.Ghost
 module F = Hacl.Streaming.Functor
 
 open Spec.Hash.Definitions
-open Hacl.Streaming.Interface
+open Hacl.Streaming.Block
 open Hacl.Streaming.MD
 
 /// Instantiations of the streaming functor for SHA1
@@ -24,7 +24,7 @@ open Hacl.Streaming.MD
 ///   clients like miTLS go through EverCrypt.Hash.Incremental
 
 inline_for_extraction noextract
-let hacl_sha1 = hacl_md SHA1
+let hacl_sha1 = hacl_md_index SHA1
 
 inline_for_extraction noextract
 let state_t_sha1 = state_t SHA1
@@ -33,14 +33,16 @@ let state_t_sha1 = state_t SHA1
 let state = Hacl.Streaming.MD.state_32
 
 noextract
-let legacy_alloca = F.alloca hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
-let legacy_create_in = F.create_in hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
-let legacy_init = F.init hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
+let legacy_alloca : F.alloca_st hacl_sha1 = mk_alloca SHA1
+let legacy_create_in : F.create_in_st hacl_sha1 = mk_create_in SHA1
+let legacy_init : F.init_st hacl_sha1 = mk_init SHA1
+
 [@@ Comment "0 = success, 1 = max length exceeded" ]
-let legacy_update = F.update hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
-let legacy_finish = F.mk_finish hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
-let legacy_free = F.free hacl_sha1 (G.hide ()) (state_t_sha1.s ()) (G.erased unit)
+let legacy_update : F.update_st hacl_sha1 = mk_update SHA1
 
-let legacy_copy = F.copy hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+let legacy_finish : F.finish_st hacl_sha1 = mk_finish SHA1
+let legacy_free : F.free_st hacl_sha1 = mk_free SHA1
+let legacy_copy : F.copy_st hacl_sha1 = mk_copy SHA1
 
-let legacy_hash: Hacl.Hash.Definitions.hash_st SHA1 = fun input input_len dst -> Hacl.Hash.SHA1.legacy_hash input input_len dst
+let legacy_hash: Hacl.Hash.Definitions.hash_st SHA1 =
+  fun input input_len dst -> Hacl.Hash.SHA1.legacy_hash input input_len dst

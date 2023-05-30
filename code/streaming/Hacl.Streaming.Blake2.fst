@@ -605,13 +605,6 @@ let blake2_index (a : alg) (m : valid_m_spec a) (kk : key_size a) :
 }
 #pop-options
 
-(* TODO: remove? *)
-inline_for_extraction noextract
-let blake2_index_of_state a m kk :
-  Block.index_of_state_st (blake2_index a m kk) =
-  fun acc -> blake2_index a m kk
-
-(* TODO: remove? *)
 #push-options "--ifuel 1"
 inline_for_extraction noextract
 let blake2_init (a : alg) (m : valid_m_spec a) (kk : key_size a)
@@ -623,7 +616,6 @@ let blake2_init (a : alg) (m : valid_m_spec a) (kk : key_size a)
   init h (Lib.IntTypes.size kk) (output_len a)
 #pop-options
 
-(* TODO: remove? *)
 inline_for_extraction noextract
 let blake2_update_multi
   (a : alg) (m : valid_m_spec a) (kk : key_size a)
@@ -633,7 +625,6 @@ let blake2_update_multi
   let nb = len `U32.div` Core.size_block a in
   update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb
 
-(* TODO: remove? *)
 inline_for_extraction noextract
 let blake2_update_last
   (a : alg) (m : valid_m_spec a) (kk : key_size a)
@@ -642,7 +633,6 @@ let blake2_update_last
   let wv, hash = acc in
   update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last
 
-(* TODO: remove? *)
 #push-options "--ifuel 1"
 inline_for_extraction noextract
 let blake2_finish
