@@ -235,13 +235,10 @@ val seen_length:
   (fun h0 l h1 -> h0 == h1 /\ U64.v l == U32.v c.init_input_len +  S.length (seen c h0 s))
 
 inline_for_extraction noextract
-let create_in_st
-  (c:index)
-  (t:Type0 { t == c.state.s })
-  (t':Type0 { t' == optional_key c }) =
+let create_in_st (c:index) =
   k:c.key.s ->
   r: HS.rid ->
-  ST (state c t t')
+  ST (state' c)
   (requires (fun h0 ->
     c.key.invariant h0 k /\
     HyperStack.ST.is_eternal_region r))
@@ -255,20 +252,13 @@ let create_in_st
     B.(loc_includes (loc_region_only true r) (footprint c h1 s))))
 
 inline_for_extraction noextract
-val create_in:
-  c:index ->
-  t:Type0 { t == c.state.s } ->
-  t':Type0 { t' == optional_key c } ->
-  create_in_st c t t'
+val create_in: #c:index -> create_in_st c
 
 inline_for_extraction noextract
-let copy_st
-  (c:index)
-  (t:Type0 { t == c.state.s })
-  (t':Type0 { t' == optional_key c }) =
-  s0:state c t t' ->
+let copy_st (c:index) =
+  s0:state' c ->
   r: HS.rid ->
-  ST (state c t t')
+  ST (state' c)
   (requires (fun h0 ->
     invariant c h0 s0 /\
     HyperStack.ST.is_eternal_region r))
@@ -282,11 +272,7 @@ let copy_st
     B.(loc_includes (loc_region_only true r) (footprint c h1 s))))
 
 inline_for_extraction noextract
-val copy:
-  c:G.erased index ->
-  t:Type0 { t == c.state.s } ->
-  t':Type0 { t' == optional_key c } ->
-  copy_st c t t'
+val copy: #c:index -> copy_st c
 
 inline_for_extraction noextract
 let alloca_st
@@ -307,7 +293,7 @@ let alloca_st
 
 inline_for_extraction noextract
 val alloca:
-  c:index ->
+  #c:index ->
   t:Type0 { t == c.state.s } ->
   t':Type0 { t' == optional_key c } ->
   alloca_st c t t'
@@ -315,7 +301,7 @@ val alloca:
 /// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
 let init_st
-  (c:G.erased index)
+  (c:index)
   (t:Type0 { t == c.state.s })
   (t':Type0 { t' == optional_key c }) =
   k:c.key.s ->
@@ -335,7 +321,7 @@ let init_st
 
 inline_for_extraction noextract
 val init:
-  c:G.erased index ->
+  #c:index ->
   t:Type0 { t == c.state.s } ->
   t':Type0 { t' == optional_key c } ->
   init_st c t t'
@@ -392,7 +378,7 @@ let update_st
 
 inline_for_extraction noextract
 val update:
-  c:G.erased index ->
+  #c:index ->
   t:Type0 { t == c.state.s } ->
   t':Type0 { t' == optional_key c } ->
   update_st c t t'
@@ -433,7 +419,7 @@ let finish_st
 /// and does not need to be specialized.
 inline_for_extraction noextract
 val mk_finish:
-  c:index ->
+  #c:index ->
   t:Type0 { t == c.state.s } ->
   t':Type0 { t' == optional_key c } ->
   finish_st c t t'
@@ -453,7 +439,7 @@ let free_st
 
 inline_for_extraction noextract
 val free:
-  c:index ->
+  #c:index ->
   t:Type0 { t == c.state.s } ->
   t':Type0 { t' == optional_key c } ->
   free_st c t t'

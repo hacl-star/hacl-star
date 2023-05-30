@@ -190,13 +190,16 @@ let optional_t
   | Runtime -> i.key.v h k
 
 // Stateful operations
+inline_for_extraction noextract
 let index_of_state_st (i: index) =
   s: i.state.s -> Stack index
   (fun h0 -> i.state.invariant h0 s)
   (fun h0 i' h1 -> h0 == h1 /\ i' == i)
 
+[@ Meta.Attribute.specialize ]
 val index_of_state: i:G.erased index -> index_of_state_st i
 
+inline_for_extraction noextract
 let init_st (i: index) =
   k: i.key.s ->
   buf_: B.buffer uint8 { B.length buf_ = U32.v i.blocks_state_len } ->
@@ -218,8 +221,10 @@ let init_st (i: index) =
     i.state.footprint h0 s == i.state.footprint h1 s /\
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
+[@ Meta.Attribute.specialize ]
 val init: i:G.erased index -> init_st i
 
+inline_for_extraction noextract
 let update_multi_st (i: index) =
   s:i.state.s ->
   prevlen:U64.t { U64.v prevlen % U32.v i.block_len = 0 } ->
@@ -239,8 +244,10 @@ let update_multi_st (i: index) =
     i.state.v h1 s == i.update_multi_s (i.state.v h0 s) (U64.v prevlen) (B.as_seq h0 blocks) /\
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
+[@ Meta.Attribute.specialize ]
 val update_multi: i:G.erased index -> update_multi_st i
 
+inline_for_extraction noextract
 let update_last_st (i: index) =
   s:i.state.s ->
   prevlen:U64.t { U64.v prevlen % U32.v i.block_len = 0 } ->
@@ -262,8 +269,10 @@ let update_last_st (i: index) =
     i.state.footprint h0 s == i.state.footprint h1 s /\
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
+[@ Meta.Attribute.specialize ]
 val update_last: i:G.erased index -> update_last_st i
 
+inline_for_extraction noextract
 let finish_st (i: index) =
   k: optional_key i ->
   s:i.state.s ->
@@ -288,4 +297,23 @@ let finish_st (i: index) =
     B.as_seq h1 dst == i.finish_s (optional_t h0 k) (i.state.v h0 s) l /\
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
+[@ Meta.Attribute.specialize ]
 val finish: i:G.erased index -> finish_st i
+
+[@ Meta.Attribute.specialize ]
+val key_alloca: (#i: index) -> Stateful.alloca_st i.key
+[@ Meta.Attribute.specialize ]
+val key_create_in: (#i: index) -> Stateful.create_in_st i.key
+[@ Meta.Attribute.specialize ]
+val key_free: (#i: index) -> Stateful.free_st i.key
+[@ Meta.Attribute.specialize ]
+val key_copy: (#i: index) -> Stateful.copy_st i.key
+
+[@ Meta.Attribute.specialize ]
+val state_alloca: (#i: index) -> Stateful.alloca_st i.state
+[@ Meta.Attribute.specialize ]
+val state_create_in: (#i: index) -> Stateful.create_in_st i.state
+[@ Meta.Attribute.specialize ]
+val state_free: (#i: index) -> Stateful.free_st i.state
+[@ Meta.Attribute.specialize ]
+val state_copy: (#i: index) -> Stateful.copy_st i.state

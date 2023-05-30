@@ -103,7 +103,9 @@ let rec push_pre (st: state) (inv_bv: bv) (t: term): Tac term =
       let c =
         match inspect_comp c with
         | C_Eff us e a args decrs ->
-            if string_of_name e = "FStar_HyperStack_ST_Stack" then
+            if e = ["FStar";"HyperStack";"ST";"Stack"] ||
+              e = ["FStar";"HyperStack";"ST";"ST"]
+            then
               let args =
                 match args with
                 | (pre, qual) :: rest ->

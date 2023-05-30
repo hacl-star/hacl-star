@@ -31,83 +31,73 @@ open Hacl.Streaming.Spec
 /// something at Type0, not Type0 -> Type0 -- otherwise it wouldn't monomorphize
 /// in KaRaMeL.
 noeq
-type state_s #index (c: block index) (i: index)
-  (t: Type0 { t == c.state.s i })
-  (t': Type0 { t' == optional_key i c.km c.key })
+type state_s (c: index)
+  (t: Type0 { t == c.state.s })
+  (t': Type0 { t' == optional_key c })
 =
 | State:
     block_state: t ->
-    buf: B.buffer Lib.IntTypes.uint8 { B.len buf = c.blocks_state_len i } ->
+    buf: B.buffer Lib.IntTypes.uint8 { B.len buf = c.blocks_state_len } ->
     total_len: UInt64.t ->
     seen: G.erased (S.seq uint8) ->
     // Stupid name conflict on overloaded projectors leads to inscrutable
     // interleaving errors. Need a field name that does not conflict with the
     // one in Hacl.Streaming.Interface. Sigh!!
     p_key: t' ->
-    state_s #index c i t t'
+    state_s c t t'
 
 /// Defining a series of helpers to deal with the indexed type of the key. This
 /// makes proofs easier.
 
-let optional_freeable #index
+let optional_freeable
   (#i: index)
-  (#km: key_management)
-  (#key: stateful index)
   (h: HS.mem)
-  (k: optional_key i km key)
+  (k: optional_key i)
 =
   allow_inversion key_management;
-  match km with
+  match i.km with
   | Erased -> True
-  | Runtime -> key.freeable #i h k
+  | Runtime -> i.key.freeable h k
 
-let optional_invariant #index
+let optional_invariant
   (#i: index)
-  (#km: key_management)
-  (#key: stateful index)
   (h: HS.mem)
-  (k: optional_key i km key)
+  (k: optional_key i)
 =
   allow_inversion key_management;
-  match km with
+  match i.km with
   | Erased -> True
-  | Runtime -> key.invariant #i h k
+  | Runtime -> i.key.invariant h k
 
-let optional_footprint #index
+let optional_footprint
   (#i: index)
-  (#km: key_management)
-  (#key: stateful index)
   (h: HS.mem)
-  (k: optional_key i km key)
+  (k: optional_key i)
 =
   allow_inversion key_management;
-  match km with
+  match i.km with
   | Erased -> B.loc_none
-  | Runtime -> key.footprint #i h k
+  | Runtime -> i.key.footprint h k
 
-let optional_reveal #index
+let optional_reveal
   (#i: index)
-  (#km: key_management)
-  (#key: stateful index)
   (h: HS.mem)
-  (k: optional_key i km key)
+  (k: optional_key i)
 =
   allow_inversion key_management;
-  match km with
+  match i.km with
   | Erased -> G.reveal k
-  | Runtime -> key.v i h k
+  | Runtime -> i.key.v h k
 
-let optional_hide #index
+let optional_hide
   (#i: index)
-  (#km: key_management)
-  (#key: stateful index)
   (h: HS.mem)
-  (k: key.s i):
-  optional_key i km key
+  (k: i.key.s):
+  optional_key i
 =
   allow_inversion key_management;
-  match km with
-  | Erased -> G.hide (key.v i h k)
+  match i.km with
+  | Erased -> G.hide (i.key.v h k)
   | Runtime -> k
 
 
@@ -115,37 +105,35 @@ let optional_hide #index
 /// lemma, written with freeable in its precondition, into a lemma of the form:
 /// [> freeable h0 s => freeable h1 s
 val stateful_frame_preserves_freeable:
-  #index:Type0 -> #sc:stateful index -> #i:index -> l:B.loc -> s:sc.s i -> h0:HS.mem -> h1:HS.mem ->
+  #i:Stateful.index -> l:B.loc -> s:i.s -> h0:HS.mem -> h1:HS.mem ->
   Lemma
   (requires (
-    sc.invariant h0 s /\
-    B.loc_disjoint l (sc.footprint h0 s) /\
+    i.invariant h0 s /\
+    B.loc_disjoint l (i.footprint h0 s) /\
     B.modifies l h0 h1))
   (ensures (
-    sc.freeable h0 s ==> sc.freeable h1 s))
+    i.freeable h0 s ==> i.freeable h1 s))
 
-let stateful_frame_preserves_freeable #index #sc #i l s h0 h1 =
+let stateful_frame_preserves_freeable #i l s h0 h1 =
   let lem h0 h1 :
     Lemma
     (requires (
-      sc.invariant h0 s /\
-      B.loc_disjoint l (sc.footprint h0 s) /\
+      i.invariant h0 s /\
+      B.loc_disjoint l (i.footprint h0 s) /\
       B.modifies l h0 h1 /\
-      sc.freeable h0 s))
+      i.freeable h0 s))
     (ensures (
-       sc.freeable h1 s))
-    [SMTPat (sc.freeable h0 s);
-     SMTPat (sc.freeable h1 s)] =
-     sc.frame_freeable l s h0 h1
+       i.freeable h1 s))
+    [SMTPat (i.freeable h0 s);
+     SMTPat (i.freeable h1 s)] =
+     i.frame_freeable l s h0 h1
   in
   ()
 
-let optional_frame #index
+let optional_frame
   (#i: index)
-  (#km: key_management)
-  (#key: stateful index)
   (l: B.loc)
-  (s: optional_key i km key)
+  (s: optional_key i)
   (h0 h1: HS.mem):
   Lemma
     (requires (
@@ -159,13 +147,13 @@ let optional_frame #index
       (optional_freeable h0 s ==> optional_freeable h1 s)))
 =
   allow_inversion key_management;
-  match km with
+  match i.km with
   | Erased -> ()
   | Runtime ->
-      key.frame_invariant #i l s h0 h1;
-      stateful_frame_preserves_freeable #index #key #i l s h0 h1
+      i.key.frame_invariant l s h0 h1;
+      stateful_frame_preserves_freeable #i.key l s h0 h1
 
-let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
+let footprint_s (c: index) (h: HS.mem) s =
   let State block_state buf_ _ _ p_key = s in
   B.(loc_addr_of_buffer buf_ `loc_union` c.state.footprint h block_state `loc_union` optional_footprint h p_key)
 
@@ -174,90 +162,85 @@ let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
 
 #push-options "--z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
-let invariant_s #index (c: block index) (i: index) h s =
+let invariant_s (c: index) h s =
   let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
   let key_v = optional_reveal h key in
-  let all_seen = S.append (c.init_input_s i key_v) seen in
-  let blocks, rest = split_at_last c i all_seen in
-  (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
-  (**) assert(0 % U32.v (Block?.block_len c i) = 0);
-  (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.blocks_state_len c i));
-  (**) assert(0 % U32.v (Block?.blocks_state_len c i) = 0);
+  let all_seen = S.append (c.init_input_s key_v) seen in
+  let blocks, rest = split_at_last c all_seen in
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v c.block_len);
+  (**) assert(0 % U32.v c.block_len = 0);
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v c.blocks_state_len);
+  (**) assert(0 % U32.v c.blocks_state_len = 0);
 
   // Liveness and disjointness (administrative)
-  B.live h buf_ /\ c.state.invariant #i h block_state /\ optional_invariant h key /\
+  B.live h buf_ /\ c.state.invariant h block_state /\ optional_invariant h key /\
   B.(loc_disjoint (loc_buffer buf_) (c.state.footprint h block_state)) /\
   B.(loc_disjoint (loc_buffer buf_) (optional_footprint h key)) /\
   B.(loc_disjoint (optional_footprint h key) (c.state.footprint h block_state)) /\
 
   // Formerly, the "hashes" predicate
   S.length blocks + S.length rest = U64.v total_len /\
-  U32.v (c.init_input_len i) + S.length seen = U64.v total_len /\
-  U64.v total_len <= U64.v (c.max_input_len i) /\
+  U32.v c.init_input_len + S.length seen = U64.v total_len /\
+  U64.v total_len <= U64.v c.max_input_len /\
 
   // Note the double equals here, we now no longer know that this is a sequence.
-  c.state.v i h block_state == c.update_multi_s i (c.init_s i key_v) 0 blocks /\
+  c.state.v h block_state == c.update_multi_s (c.init_s key_v) 0 blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest
 #pop-options
 
 inline_for_extraction noextract
-let freeable_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0 =
+let freeable_s (c: index) (h: HS.mem) (s: state_s' c): Type0 =
   let State block_state buf_ total_len seen key = s in
   B.freeable buf_ /\ c.state.freeable h block_state /\ optional_freeable h key
 
-let freeable (#index : Type0) (c: block index) (i: index) (h: HS.mem) (s: state' c i) =
-  freeable_s c i h (B.get h s 0) /\
+let freeable (c: index) (h: HS.mem) (s: state' c) =
+  freeable_s c h (B.get h s 0) /\
   B.freeable s
 
 #push-options "--max_ifuel 1"
-let invariant_loc_in_footprint #index c i s m =
+let invariant_loc_in_footprint c s m =
   [@inline_let]
-  let _ = c.state.invariant_loc_in_footprint #i in
+  let _ = c.state.invariant_loc_in_footprint in
   [@inline_let]
-  let _ = c.key.invariant_loc_in_footprint #i in
+  let _ = c.key.invariant_loc_in_footprint in
   ()
 #pop-options
 
-let seen #index c i h s =
+let seen c h s =
   G.reveal (State?.seen (B.deref h s))
 
-let seen_bounded #index c i h s =
+let seen_bounded c h s =
   ()
 
-let key #index c i h s =
+let key c h s =
   optional_reveal h (State?.p_key (B.deref h s))
 
-let init_input (#index:Type0) (c:block index) (i:index) (h:HS.mem) (s:state' c i) : GTot bytes =
-  c.init_input_s i (key c i h s)
+let init_input (c:index) (h:HS.mem) (s:state' c) : GTot bytes =
+  c.init_input_s (key c h s)
 
-let all_seen (#index:Type0) (c:block index) (i:index) (h:HS.mem) (s:state' c i) : GTot bytes =
-  S.append (init_input c i h s) (seen c i h s)
+let all_seen (c:index) (h:HS.mem) (s:state' c) : GTot bytes =
+  S.append (init_input c h s) (seen c h s)
 
-let frame_invariant #index c i l s h0 h1 =
+let frame_invariant c l s h0 h1 =
   let state_t = B.deref h0 s in
   let State block_state _ _ _ p_key = state_t in
-  c.state.frame_invariant #i l block_state h0 h1;
-  stateful_frame_preserves_freeable #index #c.state #i l block_state h0 h1;
+  c.state.frame_invariant l block_state h0 h1;
+  stateful_frame_preserves_freeable #c.state l block_state h0 h1;
   allow_inversion key_management;
   match c.km with
   | Erased -> ()
   | Runtime ->
-      stateful_frame_preserves_freeable #index #c.key #i l p_key h0 h1;
-      c.key.frame_invariant #i l p_key h0 h1
+      stateful_frame_preserves_freeable #c.key l p_key h0 h1;
+      c.key.frame_invariant l p_key h0 h1
 
-let frame_seen #_ _ _ _ _ _ _ =
+let frame_seen _ _ _ _ _ =
   ()
 
 /// Stateful API
 /// ============
 
-let index_of_state #index c i t t' s =
-  let open LowStar.BufferOps in
-  let State block_state _ _ _ _ = !*s in
-  c.index_of_state i block_state
-
-let seen_length #index c i t t' s =
+let seen_length c t t' s =
   let open LowStar.BufferOps in
   let State _ _ total_len _ _ = !*s in
   total_len
@@ -265,63 +248,64 @@ let seen_length #index c i t t' s =
 (* TODO: create_in and alloca have big portions of proofs in common, so it may
  * be possible to factorize them, but it is not clear how *)
 #restart-solver
-#push-options "--z3rlimit 100"
-let create_in #index c i t t' k r =
-  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
+#push-options "--z3rlimit 300"
+[@ Meta.Attribute.specialize ]
+let create_in #c k r =
+  [@inline_let] let _ = c.state.invariant_loc_in_footprint in
+  [@inline_let] let _ = c.key.invariant_loc_in_footprint in
   allow_inversion key_management;
 
   (**) let h0 = ST.get () in
 
   (**) B.loc_unused_in_not_unused_in_disjoint h0;
-  let buf = B.malloc r (Lib.IntTypes.u8 0) (c.blocks_state_len i) in
+  let buf = B.malloc r (Lib.IntTypes.u8 0) c.blocks_state_len in
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
   (**) B.(modifies_only_not_unused_in loc_none h0 h1);
   (**) c.key.frame_invariant B.loc_none k h0 h1;
 
-  let block_state = c.state.create_in i r in
+  let block_state = state_create_in #c r in
   (**) let h2 = ST.get () in
-  (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
+  (**) assert (B.fresh_loc (c.state.footprint h2 block_state) h0 h2);
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
   (**) c.key.frame_invariant B.loc_none k h1 h2;
 
-  let k': optional_key i c.km c.key =
+  let k': optional_key c =
     match c.km with
     | Runtime ->
-        let k' = c.key.create_in i r in
+        let k' = key_create_in #c r in
         (**) let h3 = ST.get () in
         (**) B.loc_unused_in_not_unused_in_disjoint h3;
         (**) B.(modifies_only_not_unused_in loc_none h2 h3);
         (**) c.key.frame_invariant B.loc_none k h2 h3;
         (**) c.state.frame_invariant B.loc_none block_state h2 h3;
         (**) c.state.frame_freeable B.loc_none block_state h2 h3;
-        (**) assert (B.fresh_loc (c.key.footprint #i h3 k') h0 h3);
-        (**) assert (c.key.invariant #i h3 k');
-        (**) assert (c.key.invariant #i h3 k);
-        (**) assert B.(loc_disjoint (c.key.footprint #i h3 k) (c.key.footprint #i h3 k'));
-        c.key.copy i k k';
+        (**) assert (B.fresh_loc (c.key.footprint h3 k') h0 h3);
+        (**) assert (c.key.invariant h3 k');
+        (**) assert (c.key.invariant h3 k);
+        (**) assert B.(loc_disjoint (c.key.footprint h3 k) (c.key.footprint h3 k'));
+        key_copy #c k k';
         (**) let h4 = ST.get () in
-        (**) assert (B.fresh_loc (c.key.footprint #i h4 k') h0 h4);
+        (**) assert (B.fresh_loc (c.key.footprint h4 k') h0 h4);
         (**) B.loc_unused_in_not_unused_in_disjoint h4;
         (**) B.(modifies_only_not_unused_in loc_none h2 h4);
-        (**) assert (c.key.invariant #i h4 k');
-        (**) c.key.frame_invariant (c.key.footprint #i h3 k') k h3 h4;
-        (**) c.state.frame_invariant (c.key.footprint #i h3 k') block_state h3 h4;
-        (**) c.state.frame_freeable (c.key.footprint #i h3 k') block_state h3 h4;
+        (**) assert (c.key.invariant h4 k');
+        (**) c.key.frame_invariant (c.key.footprint h3 k') k h3 h4;
+        (**) c.state.frame_invariant (c.key.footprint h3 k') block_state h3 h4;
+        (**) c.state.frame_freeable (c.key.footprint h3 k') block_state h3 h4;
         k'
     | Erased ->
-        G.hide (c.key.v i h0 k)
+        G.hide (c.key.v h0 k)
   in
   (**) let h5 = ST.get () in
   (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
-  (**) assert (B.fresh_loc (c.state.footprint #i h5 block_state) h0 h5);
+  (**) assert (B.fresh_loc (c.state.footprint h5 block_state) h0 h5);
 
-  [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
+  [@inline_let] let total_len = Int.Cast.uint32_to_uint64 c.init_input_len in
   let s = State block_state buf total_len (G.hide S.empty) k' in
-  (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
+  (**) assert (B.fresh_loc (footprint_s c h5 s) h0 h5);
 
   (**) B.loc_unused_in_not_unused_in_disjoint h5;
   let p = B.malloc r s 1ul in
@@ -332,35 +316,35 @@ let create_in #index c i t t' k r =
   (**) c.state.frame_invariant B.loc_none block_state h5 h6;
   (**) optional_frame B.loc_none k' h5 h6;
   (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
-  (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
+  (**) assert (B.fresh_loc (footprint_s c h6 s) h0 h6);
   (**) c.state.frame_freeable B.loc_none block_state h5 h6;
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
-  c.init (G.hide i) k buf block_state;
+  Block.init (G.hide c) k buf block_state;
   (**) let h7 = ST.get () in
-  (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
+  (**) assert (B.fresh_loc (c.state.footprint h7 block_state) h0 h7);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
-  (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
+  (**) optional_frame (B.loc_union (c.state.footprint h7 block_state) (B.loc_buffer buf)) k' h6 h7;
+  (**) c.update_multi_zero (c.state.v h7 block_state) 0;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
-  (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
+  (**) assert (c.state.v h7 block_state == c.init_s (optional_reveal h6 k'));
 
   (**) let h8 = ST.get () in
-  (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
+  (**) assert (U64.v total_len <= U64.v c.max_input_len);
 
   (**) begin
   (**) let s = B.get h8 p 0 in
-  (**) let key_v = key c i h8 p in
-  (**) let init_input = c.init_input_s i key_v in
-  (**) split_at_last_init c i init_input;
-  (**) assert(invariant_s c i h8 s)
+  (**) let key_v = key c h8 p in
+  (**) let init_input = c.init_input_s key_v in
+  (**) split_at_last_init c init_input;
+  (**) assert(invariant_s c h8 s)
   (**) end;
-  (**) assert (invariant c i h8 p);
+  (**) assert (invariant c h8 p);
 
-  (**) assert (seen c i h8 p == S.empty);
+  (**) assert (seen c h8 p == S.empty);
   (**) assert B.(modifies loc_none h0 h8);
-  (**) assert (B.fresh_loc (footprint c i h8 p) h0 h8);
-  (**) assert B.(loc_includes (loc_region_only true r) (footprint c i h8 p));
+  (**) assert (B.fresh_loc (footprint c h8 p) h0 h8);
+  (**) assert B.(loc_includes (loc_region_only true r) (footprint c h8 p));
 
   (**) assert (ST.equal_stack_domains h1 h8);
   (**) assert (ST.equal_stack_domains h0 h1);
@@ -369,78 +353,78 @@ let create_in #index c i t t' k r =
 #pop-options
 
 #push-options "--z3rlimit 100"
-let copy #index c i t t' s0 r =
-  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
+[@ Meta.Attribute.specialize ]
+let copy #c s0 r =
+  [@inline_let] let _ = c.state.invariant_loc_in_footprint in
+  [@inline_let] let _ = c.key.invariant_loc_in_footprint in
   allow_inversion key_management;
 
   // All source state is suffixed by 0.
   let State block_state0 buf0 total_len0 seen0 k0 = !*s0 in
-  let i = c.index_of_state i block_state0 in
 
   (**) let h0 = ST.get () in
 
   (**) B.loc_unused_in_not_unused_in_disjoint h0;
-  let buf = B.malloc r (Lib.IntTypes.u8 0) (c.blocks_state_len i) in
-  B.blit buf0 0ul buf 0ul (c.blocks_state_len i);
+  let buf = B.malloc r (Lib.IntTypes.u8 0) c.blocks_state_len in
+  B.blit buf0 0ul buf 0ul c.blocks_state_len;
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
   (**) B.(modifies_only_not_unused_in loc_none h0 h1);
   (**) if c.km = Runtime then
-  (**)   c.key.frame_invariant #i B.loc_none k0 h0 h1;
-  (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
-  (**) assert (invariant c i h1 s0);
+  (**)   c.key.frame_invariant B.loc_none k0 h0 h1;
+  (**) c.state.frame_invariant B.loc_none block_state0 h0 h1;
+  (**) assert (invariant c h1 s0);
 
-  let block_state = c.state.create_in i r in
+  let block_state = state_create_in r in
   (**) let h2 = ST.get () in
-  (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
+  (**) assert (B.fresh_loc (c.state.footprint h2 block_state) h0 h2);
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
   (**) if c.km = Runtime then
-  (**)   c.key.frame_invariant #i B.loc_none k0 h1 h2;
-  (**) c.state.frame_invariant #i B.loc_none block_state0 h0 h1;
-  (**) assert (invariant c i h2 s0);
+  (**)   c.key.frame_invariant B.loc_none k0 h1 h2;
+  (**) c.state.frame_invariant B.loc_none block_state0 h0 h1;
+  (**) assert (invariant c h2 s0);
 
-  c.state.copy (G.hide i) block_state0 block_state;
+  state_copy #c block_state0 block_state;
   (**) let h2 = ST.get () in
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
   (**) if c.km = Runtime then
-  (**)   c.key.frame_invariant #i (c.state.footprint #i h2 block_state) k0 h1 h2;
+  (**)   c.key.frame_invariant (c.state.footprint h2 block_state) k0 h1 h2;
 
-  let k': optional_key i c.km c.key =
+  let k': optional_key c =
     match c.km with
     | Runtime ->
-        let k' = c.key.create_in i r in
+        let k' = key_create_in #c r in
         (**) let h3 = ST.get () in
         (**) B.loc_unused_in_not_unused_in_disjoint h3;
         (**) B.(modifies_only_not_unused_in loc_none h2 h3);
-        (**) c.key.frame_invariant #i B.loc_none k0 h2 h3;
-        (**) c.state.frame_invariant #i B.loc_none block_state h2 h3;
-        (**) c.state.frame_freeable #i B.loc_none block_state h2 h3;
-        (**) assert (B.fresh_loc (c.key.footprint #i h3 k') h0 h3);
-        (**) assert (c.key.invariant #i h3 k');
-        (**) assert (c.key.invariant #i h3 k0);
-        (**) assert B.(loc_disjoint (c.key.footprint #i h3 k0) (c.key.footprint #i h3 k'));
-        c.key.copy i k0 k';
+        (**) c.key.frame_invariant B.loc_none k0 h2 h3;
+        (**) c.state.frame_invariant B.loc_none block_state h2 h3;
+        (**) c.state.frame_freeable B.loc_none block_state h2 h3;
+        (**) assert (B.fresh_loc (c.key.footprint h3 k') h0 h3);
+        (**) assert (c.key.invariant h3 k');
+        (**) assert (c.key.invariant h3 k0);
+        (**) assert B.(loc_disjoint (c.key.footprint h3 k0) (c.key.footprint h3 k'));
+        key_copy #c k0 k';
         (**) let h4 = ST.get () in
-        (**) assert (B.fresh_loc (c.key.footprint #i h4 k') h0 h4);
+        (**) assert (B.fresh_loc (c.key.footprint h4 k') h0 h4);
         (**) B.loc_unused_in_not_unused_in_disjoint h4;
         (**) B.(modifies_only_not_unused_in loc_none h2 h4);
-        (**) assert (c.key.invariant #i h4 k');
-        (**) c.key.frame_invariant #i (c.key.footprint #i h3 k') k0 h3 h4;
-        (**) c.state.frame_invariant #i (c.key.footprint #i h3 k') block_state h3 h4;
-        (**) c.state.frame_freeable #i (c.key.footprint #i h3 k') block_state h3 h4;
+        (**) assert (c.key.invariant h4 k');
+        (**) c.key.frame_invariant (c.key.footprint h3 k') k0 h3 h4;
+        (**) c.state.frame_invariant (c.key.footprint h3 k') block_state h3 h4;
+        (**) c.state.frame_freeable (c.key.footprint h3 k') block_state h3 h4;
         k'
     | Erased -> k0
   in
   (**) let h5 = ST.get () in
   (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
-  (**) assert (B.fresh_loc (c.state.footprint #i h5 block_state) h0 h5);
+  (**) assert (B.fresh_loc (c.state.footprint h5 block_state) h0 h5);
 
   let s = State block_state buf total_len0 seen0 k' in
-  (**) assert (B.fresh_loc (footprint_s c i h5 s) h0 h5);
+  (**) assert (B.fresh_loc (footprint_s c h5 s) h0 h5);
 
   (**) B.loc_unused_in_not_unused_in_disjoint h5;
   let p = B.malloc r s 1ul in
@@ -448,16 +432,322 @@ let copy #index c i t t' s0 r =
   (**) B.(modifies_only_not_unused_in loc_none h5 h6);
   (**) B.(modifies_only_not_unused_in loc_none h0 h6);
   (**) if c.km = Runtime then
-  (**)   c.key.frame_invariant #i B.loc_none k0 h5 h6;
-  (**) c.state.frame_invariant #i B.loc_none block_state h5 h6;
+  (**)   c.key.frame_invariant B.loc_none k0 h5 h6;
+  (**) c.state.frame_invariant B.loc_none block_state h5 h6;
   (**) optional_frame B.loc_none k' h5 h6;
   (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
-  (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
+  (**) assert (B.fresh_loc (footprint_s c h6 s) h0 h6);
   (**) c.state.frame_freeable B.loc_none block_state h5 h6;
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
   p
 #pop-options
+
+#set-options "--print_implicits --print_effect_args --print_universes"
+
+let _ = ()
+
+#push-options "--z3rlimit_factor 16"
+%splice[
+] (Meta.Interface.specialize (`index) [
+  `create_in;
+  `copy
+])
+
+let alloca _ = admit ()
+let init _ = admit ()
+let update _ = admit ()
+let mk_finish _ = admit ()
+let free _ = admit ()
+
+(*
+let create_in_higher:
+
+    p: Type0 ->
+    arg_Hacl_Streaming_Block_init:
+      (fun p ->
+
+              i: FStar.Ghost.erased Hacl.Streaming.Block.index ->
+              k: Mkindex?.s (Mkindex?.key (FStar.Ghost.reveal i)) ->
+              buf_:
+                LowStar.Buffer.buffer Hacl.Streaming.Block.uint8
+                  { LowStar.Monotonic.Buffer.length buf_ =
+                    FStar.UInt32.v (Mkindex?.blocks_state_len (FStar.Ghost.reveal i)) } ->
+              s: Mkindex?.s (Mkindex?.state (FStar.Ghost.reveal i))
+            -> FStar.HyperStack.ST.Stack Prims.unit) p ->
+    arg_Hacl_Streaming_Block_key_copy:
+      (fun p ->
+          s_src: Mkindex?.s (Mkindex?.key i) -> s_dst: Mkindex?.s (Mkindex?.key i)
+            -> FStar.HyperStack.ST.Stack Prims.unit) p ->
+    arg_Hacl_Streaming_Block_key_create_in:
+      (fun p ->
+          r: FStar.Monotonic.HyperHeap.rid -> FStar.HyperStack.ST.ST (Mkindex?.s (Mkindex?.key i))) p
+       ->
+    arg_Hacl_Streaming_Block_state_create_in:
+      (fun p ->
+          r: FStar.Monotonic.HyperHeap.rid -> FStar.HyperStack.ST.ST (Mkindex?.s (Mkindex?.state i))
+      ) p
+  -> Hacl.Streaming.Functor.functor_create_in_higher_t p
+=
+fun
+  _
+  arg_Hacl_Streaming_Block_init
+  arg_Hacl_Streaming_Block_key_copy
+  arg_Hacl_Streaming_Block_key_create_in
+  arg_Hacl_Streaming_Block_state_create_in
+  _
+  _
+  k
+  r
+  ->
+  let _ = Mkindex?.invariant_loc_in_footprint (Mkindex?.state c) in
+  let _ = Mkindex?.invariant_loc_in_footprint (Mkindex?.key c) in
+  let _ =
+    FStar.Pervasives.allow_inversion Hacl.Streaming.Block.key_management
+  in
+  let h0 = FStar.HyperStack.ST.get () in
+  let _ =
+    LowStar.Monotonic.Buffer.loc_unused_in_not_unused_in_disjoint h0
+  in
+  let buf = LowStar.Buffer.malloc r (Lib.IntTypes.u8 0) (Mkindex?.blocks_state_len c) in
+  let h1 = FStar.HyperStack.ST.get () in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (LowStar.Monotonic.Buffer.loc_buffer buf) h0 h1)
+  in
+  let _ =
+    LowStar.Monotonic.Buffer.loc_unused_in_not_unused_in_disjoint h1
+  in
+  let _ =
+    LowStar.Monotonic.Buffer.modifies_only_not_unused_in LowStar.Monotonic.Buffer.loc_none h0 h1
+  in
+  let _ =
+    Mkindex?.frame_invariant (Mkindex?.key c) LowStar.Monotonic.Buffer.loc_none k h0 h1
+  in
+  let block_state = arg_Hacl_Streaming_Block_state_create_in r in
+  let h2 = FStar.HyperStack.ST.get () in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (Mkindex?.footprint (Mkindex?.state c) h2 block_state
+          )
+          h0
+          h2)
+  in
+  let _ =
+    LowStar.Monotonic.Buffer.loc_unused_in_not_unused_in_disjoint h2
+  in
+  let _ =
+    LowStar.Monotonic.Buffer.modifies_only_not_unused_in LowStar.Monotonic.Buffer.loc_none h1 h2
+  in
+  let _ =
+    Mkindex?.frame_invariant (Mkindex?.key c) LowStar.Monotonic.Buffer.loc_none k h1 h2
+  in
+  let k' =
+    (match Mkindex?.km c with
+      | Hacl.Streaming.Block.Runtime ->
+        let k' = arg_Hacl_Streaming_Block_key_create_in r in
+        let h3 = FStar.HyperStack.ST.get () in
+        let _ =
+          LowStar.Monotonic.Buffer.loc_unused_in_not_unused_in_disjoint h3
+        in
+        let _ =
+          LowStar.Monotonic.Buffer.modifies_only_not_unused_in LowStar.Monotonic.Buffer.loc_none
+            h2
+            h3
+        in
+        let _ =
+          Mkindex?.frame_invariant (Mkindex?.key c) LowStar.Monotonic.Buffer.loc_none k h2 h3
+        in
+        let _ =
+          Mkindex?.frame_invariant (Mkindex?.state c)
+            LowStar.Monotonic.Buffer.loc_none
+            block_state
+            h2
+            h3
+        in
+        let _ =
+          Mkindex?.frame_freeable (Mkindex?.state c)
+            LowStar.Monotonic.Buffer.loc_none
+            block_state
+            h2
+            h3
+        in
+        let _ =
+          assert (LowStar.Monotonic.Buffer.fresh_loc (Mkindex?.footprint (Mkindex?.key c) h3 k')
+                h0
+                h3)
+        in
+        let _ =
+          assert (Mkindex?.invariant (Mkindex?.key c) h3 k')
+        in
+        let _ =
+          assert (Mkindex?.invariant (Mkindex?.key c) h3 k)
+        in
+        let _ =
+          assert (LowStar.Monotonic.Buffer.loc_disjoint (Mkindex?.footprint (Mkindex?.key c) h3 k)
+                (Mkindex?.footprint (Mkindex?.key c) h3 k'))
+        in
+        let _ = arg_Hacl_Streaming_Block_key_copy k k' in
+        let h4 = FStar.HyperStack.ST.get () in
+        let _ =
+          assert (LowStar.Monotonic.Buffer.fresh_loc (Mkindex?.footprint (Mkindex?.key c) h4 k')
+                h0
+                h4)
+        in
+        let _ =
+          LowStar.Monotonic.Buffer.loc_unused_in_not_unused_in_disjoint h4
+        in
+        let _ =
+          LowStar.Monotonic.Buffer.modifies_only_not_unused_in LowStar.Monotonic.Buffer.loc_none
+            h2
+            h4
+        in
+        let _ =
+          assert (Mkindex?.invariant (Mkindex?.key c) h4 k')
+        in
+        let _ =
+          Mkindex?.frame_invariant (Mkindex?.key c)
+            (Mkindex?.footprint (Mkindex?.key c) h3 k')
+            k
+            h3
+            h4
+        in
+        let _ =
+          Mkindex?.frame_invariant (Mkindex?.state c)
+            (Mkindex?.footprint (Mkindex?.key c) h3 k')
+            block_state
+            h3
+            h4
+        in
+        let _ =
+          Mkindex?.frame_freeable (Mkindex?.state c)
+            (Mkindex?.footprint (Mkindex?.key c) h3 k')
+            block_state
+            h3
+            h4
+        in
+        k'
+      | Hacl.Streaming.Block.Erased -> FStar.Ghost.hide (Mkindex?.v (Mkindex?.key c) h0 k))
+    <:
+    Hacl.Streaming.Block.optional_key c
+  in
+  let h5 = FStar.HyperStack.ST.get () in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (Hacl.Streaming.Functor.optional_footprint h5 k')
+          h0
+          h5)
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (Mkindex?.footprint (Mkindex?.state c) h5 block_state
+          )
+          h0
+          h5)
+  in
+  let total_len =
+    FStar.Int.Cast.uint32_to_uint64 (Mkindex?.init_input_len c)
+  in
+  let s =
+    Hacl.Streaming.Functor.State block_state
+      buf
+      total_len
+      (FStar.Ghost.hide FStar.Seq.Base.empty)
+      k'
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (Hacl.Streaming.Functor.footprint_s c h5 s) h0 h5)
+  in
+  let _ =
+    LowStar.Monotonic.Buffer.loc_unused_in_not_unused_in_disjoint h5
+  in
+  let p = LowStar.Buffer.malloc r s 1ul in
+  let h6 = FStar.HyperStack.ST.get () in
+  let _ =
+    LowStar.Monotonic.Buffer.modifies_only_not_unused_in LowStar.Monotonic.Buffer.loc_none h5 h6
+  in
+  let _ =
+    LowStar.Monotonic.Buffer.modifies_only_not_unused_in LowStar.Monotonic.Buffer.loc_none h0 h6
+  in
+  let _ =
+    Mkindex?.frame_invariant (Mkindex?.key c) LowStar.Monotonic.Buffer.loc_none k h5 h6
+  in
+  let _ =
+    Mkindex?.frame_invariant (Mkindex?.state c) LowStar.Monotonic.Buffer.loc_none block_state h5 h6
+  in
+  let _ =
+    Hacl.Streaming.Functor.optional_frame LowStar.Monotonic.Buffer.loc_none k' h5 h6
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (LowStar.Monotonic.Buffer.loc_addr_of_buffer p) h0 h6
+      )
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (Hacl.Streaming.Functor.footprint_s c h6 s) h0 h6)
+  in
+  let _ =
+    Mkindex?.frame_freeable (Mkindex?.state c) LowStar.Monotonic.Buffer.loc_none block_state h5 h6
+  in
+  let _ =
+    assert (Prims.eq2 (Hacl.Streaming.Functor.optional_reveal h5 k')
+          (Hacl.Streaming.Functor.optional_reveal h6 k'))
+  in
+  let _ = arg_Hacl_Streaming_Block_init (FStar.Ghost.hide c) k buf block_state in
+  let h7 = FStar.HyperStack.ST.get () in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (Mkindex?.footprint (Mkindex?.state c) h7 block_state
+          )
+          h0
+          h7)
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (LowStar.Monotonic.Buffer.loc_buffer buf) h0 h7)
+  in
+  let _ =
+    Hacl.Streaming.Functor.optional_frame (LowStar.Monotonic.Buffer.loc_union (Mkindex?.footprint (Mkindex?.state
+                  c)
+              h7
+              block_state)
+          (LowStar.Monotonic.Buffer.loc_buffer buf))
+      k'
+      h6
+      h7
+  in
+  let _ =
+    Mkindex?.update_multi_zero c (Mkindex?.v (Mkindex?.state c) h7 block_state) 0
+  in
+  let _ =
+    LowStar.Monotonic.Buffer.modifies_only_not_unused_in LowStar.Monotonic.Buffer.loc_none h0 h7
+  in
+  let _ =
+    assert (Prims.eq2 (Mkindex?.v (Mkindex?.state c) h7 block_state)
+          (Mkindex?.init_s c (Hacl.Streaming.Functor.optional_reveal h6 k')))
+  in
+  let h8 = FStar.HyperStack.ST.get () in
+  let _ =
+    assert (Prims.op_LessThanOrEqual (FStar.UInt64.v total_len)
+          (FStar.UInt64.v (Mkindex?.max_input_len c)))
+  in
+  let _ =
+    let s = LowStar.Monotonic.Buffer.get h8 p 0 in
+    let key_v = Hacl.Streaming.Functor.key c h8 p in
+    let init_input = Mkindex?.init_input_s c key_v in
+    let _ = Hacl.Streaming.Spec.split_at_last_init c init_input in
+    assert (Hacl.Streaming.Functor.invariant_s c h8 s)
+  in
+  let _ = assert (Hacl.Streaming.Functor.invariant c h8 p) in
+  let _ =
+    assert (Prims.eq2 (Hacl.Streaming.Functor.seen c h8 p) FStar.Seq.Base.empty)
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.modifies LowStar.Monotonic.Buffer.loc_none h0 h8)
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.fresh_loc (Hacl.Streaming.Functor.footprint c h8 p) h0 h8)
+  in
+  let _ =
+    assert (LowStar.Monotonic.Buffer.loc_includes (LowStar.Monotonic.Buffer.loc_region_only true r)
+          (Hacl.Streaming.Functor.footprint c h8 p))
+  in
+  let _ = assert (FStar.HyperStack.ST.equal_stack_domains h1 h8) in
+  let _ = assert (FStar.HyperStack.ST.equal_stack_domains h0 h1) in
+  p
 
 #push-options "--z3rlimit 200"
 let alloca #index c i t t' k =
@@ -1812,3 +2102,5 @@ let free #index c i t t' s =
   c.state.free i block_state;
   B.free buf;
   B.free s
+
+*)
