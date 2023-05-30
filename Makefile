@@ -462,6 +462,12 @@ obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
 obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
 	$(OCAMLSHARED) $< -o $@
 
+obj/Meta_InterfaceLight.ml: CODEGEN = Plugin
+obj/Meta_InterfaceLight.ml: obj/Meta.InterfaceLight.fst.checked
+
+obj/Meta_InterfaceLight.cmxs: obj/Meta_InterfaceLight.ml
+	$(OCAMLSHARED) $< -o $@
+
 obj/Test_Lowstarize.ml: CODEGEN = Plugin
 obj/Test_Lowstarize.ml: obj/Test.Lowstarize.fst.checked
 
@@ -477,8 +483,8 @@ obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
 obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
 $(filter obj/Hacl.Meta.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
 
-obj/Hacl.Streaming.Functor.fst.checked: FSTAR_FLAGS += --load Meta.Interface
-$(filter obj/Hacl.Streaming.Functor.fst.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
+obj/Hacl.Streaming.Functor.fst.checked: FSTAR_FLAGS += --load Meta.InterfaceLight
+$(filter obj/Hacl.Streaming.Functor.fst.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_InterfaceLight.cmxs
 
 obj/Hacl.Test.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
 $(filter obj/Hacl.Test.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
