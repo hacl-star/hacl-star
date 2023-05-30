@@ -659,13 +659,9 @@ let blake2_finish
 
 inline_for_extraction noextract
 let blake2s_32 kk = blake2_index Spec.Blake2S Core.M32 kk
-(*Blake2s32.blake2s_init Blake2s32.blake2s_update_multi
-         Blake2s32.blake2s_update_last Blake2s32.blake2s_finish*)
 
 inline_for_extraction noextract
 let blake2b_32 kk = blake2_index Spec.Blake2B Core.M32 kk
-(*Blake2b32.blake2b_init Blake2b32.blake2b_update_multi
-         Blake2b32.blake2b_update_last Blake2b32.blake2b_finish*)
 
 inline_for_extraction noextract
 let empty_key (a : alg) : Type0 =
@@ -684,6 +680,7 @@ let blake2b_32_state = F.state_s (blake2b_32 0) (s Spec.Blake2B Core.M32) (empty
 
 /// All those implementations are for non-keyed hash.
 
+/// Blake 2S 32
 inline_for_extraction noextract
 let blake2s_32_no_key_alloca : F.alloca_st (blake2s_32 0) =
   F.mk_alloca #(blake2s_32 0)
@@ -734,6 +731,7 @@ let blake2s_32_no_key_free : F.free_st (blake2s_32 0) =
     (state_free Spec.Blake2S Core.M32)
     (key_free Spec.Blake2S 0)
 
+/// Blake 2B 32
 inline_for_extraction noextract
 let blake2b_32_no_key_alloca : F.alloca_st (blake2b_32 0) =
   F.mk_alloca #(blake2b_32 0)
