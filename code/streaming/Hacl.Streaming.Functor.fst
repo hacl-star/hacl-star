@@ -1770,7 +1770,7 @@ let _ = allow_inversion key_management
   functor_update_higher;
   functor_mk_finish_higher;
   functor_free_higher
-] (Meta.Interface.specialize (`index) [
+] (Meta.InterfaceLight.specialize (`index) [
   `create_in;
   `copy;
   `alloca;
