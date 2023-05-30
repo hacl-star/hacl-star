@@ -222,7 +222,7 @@ let init_st (i: index) =
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
 [@ Meta.Attribute.specialize ]
-val init: i:G.erased index -> init_st i
+val init: #i:index -> init_st i
 
 inline_for_extraction noextract
 let update_multi_st (i: index) =
@@ -245,7 +245,7 @@ let update_multi_st (i: index) =
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
 [@ Meta.Attribute.specialize ]
-val update_multi: i:G.erased index -> update_multi_st i
+val update_multi: #i:index -> update_multi_st i
 
 inline_for_extraction noextract
 let update_last_st (i: index) =
@@ -270,7 +270,7 @@ let update_last_st (i: index) =
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
 [@ Meta.Attribute.specialize ]
-val update_last: i:G.erased index -> update_last_st i
+val update_last: #i:index -> update_last_st i
 
 inline_for_extraction noextract
 let finish_st_pre (i: index)
@@ -308,7 +308,7 @@ let finish_st (i: index) =
     (i.state.freeable h0 s ==> i.state.freeable h1 s))
 
 [@ Meta.Attribute.specialize ]
-val finish: i:G.erased index -> finish_st i
+val finish: #i:index -> finish_st i
 
 [@ Meta.Attribute.specialize ]
 val key_alloca: (#i: index) -> Stateful.alloca_st i.key

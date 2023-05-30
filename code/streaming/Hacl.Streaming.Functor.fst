@@ -321,7 +321,7 @@ let create_in #c k r =
   (**) c.state.frame_freeable B.loc_none block_state h5 h6;
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
-  Block.init (G.hide c) k buf block_state;
+  Block.init #c k buf block_state;
   (**) let h7 = ST.get () in
   (**) assert (B.fresh_loc (c.state.footprint h7 block_state) h0 h7);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
@@ -513,7 +513,7 @@ let alloca #c k =
   (**) assert (B.fresh_loc (footprint_s c h6 s) h0 h6);
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
 
-  init c k buf block_state;
+  init #c k buf block_state;
   (**) let h7 = ST.get () in
   (**) assert (B.fresh_loc (c.state.footprint h7 block_state) h0 h7);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
@@ -553,7 +553,7 @@ let init #c k s =
   [@inline_let]
   let block_state: c.state.s = block_state in
 
-  init c k buf block_state;
+  init #c k buf block_state;
 
   (**) let h2 = ST.get () in
   (**) optional_frame #c (B.loc_union (c.state.footprint h1 block_state) (B.loc_buffer buf)) k' h1 h2;
@@ -780,7 +780,7 @@ let split_at_last_all_seen (c: index) h (p: state' c) =
   blocks, rest
 
 inline_for_extraction noextract
-[@ Meta.Attribute.specialize ]
+[@ Meta.Attribute.inline_ ]
 val update_small:
   #c:index -> (
   s:state' c ->
@@ -1256,7 +1256,7 @@ let update_empty_or_full_functional_correctness c p data len h0 h1 =
 #pop-options
 
 inline_for_extraction noextract
-[@ Meta.Attribute.specialize ]
+[@ Meta.Attribute.inline_ ]
 val update_empty_or_full_buf:
   #c:index ->
   s:state' c ->
@@ -1309,7 +1309,7 @@ let update_empty_or_full_buf #c p data len =
     end
   else begin
     let prevlen = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 sz) in
-    update_multi c block_state prevlen buf (c.blocks_state_len);
+    update_multi #c block_state prevlen buf (c.blocks_state_len);
     begin
       let h1 = ST.get () in
       let all_seen = all_seen c h0 p in
@@ -1341,7 +1341,7 @@ let update_empty_or_full_buf #c p data len =
   let data2_len = len `U32.sub` data1_len in
   let data1 = B.sub data 0ul data1_len in
   let data2 = B.sub data data1_len data2_len in
-  update_multi c block_state total_len data1 data1_len;
+  update_multi #c block_state total_len data1 data1_len;
   let h01 = ST.get () in
   optional_frame #c (c.state.footprint h0 block_state) k' h0 h01;
   assert(preserves_freeable c p h0 h01);
@@ -1391,7 +1391,7 @@ let update_empty_or_full_buf #c p data len =
 /// conditions.
 
 inline_for_extraction noextract
-[@ Meta.Attribute.specialize ]
+[@ Meta.Attribute.inline_ ]
 val update_round:
   #c:index -> (
   s:state' c ->
@@ -1477,7 +1477,7 @@ let update #c p data len =
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-val mk_finish_process_begin_functional_correctness :
+val finish_process_begin_functional_correctness :
   c:index ->
   s:state' c ->
   dst:B.buffer uint8 ->
@@ -1487,7 +1487,7 @@ val mk_finish_process_begin_functional_correctness :
   tmp_block_state: c.state.s ->
   Lemma
   (requires (
-    // The precondition of [mk_finish]
+    // The precondition of [finish]
     invariant c h0 s /\
     c.state.invariant h1 tmp_block_state /\
 
@@ -1530,7 +1530,7 @@ val mk_finish_process_begin_functional_correctness :
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let mk_finish_process_begin_functional_correctness c p dst l h0 h1 tmp_block_state =
+let finish_process_begin_functional_correctness c p dst l h0 h1 tmp_block_state =
   let h3 = h0 in
   let h4 = h1 in
   let s = B.get h0 p 0 in
@@ -1593,7 +1593,7 @@ let mk_finish_process_begin_functional_correctness c p dst l h0 h1 tmp_block_sta
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
 [@ Meta.Attribute.specialize ]
-let mk_finish #c p dst l =
+let finish #c p dst l =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint in
   [@inline_let] let _ = c.update_multi_associative in
@@ -1651,13 +1651,13 @@ let mk_finish #c p dst l =
   [@inline_let] let r_multi = if state_is_block then 0ul else r_multi in
   [@inline_let] let r_last = if state_is_block then r else r_last in
 
-  update_multi c tmp_block_state prev_len buf_multi r_multi;
+  update_multi #c tmp_block_state prev_len buf_multi r_multi;
 
   let h4 = get () in
   optional_frame #c (c.state.footprint h3 tmp_block_state) k' h3 h4;
 
   // Functional correctness
-  mk_finish_process_begin_functional_correctness c p dst l h0 h4 tmp_block_state;
+  finish_process_begin_functional_correctness c p dst l h0 h4 tmp_block_state;
   split_at_last_finish c (all_seen c h0 p);
 
   // Process the remaining data
@@ -1670,14 +1670,14 @@ let mk_finish #c p dst l =
   Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len));
   assert(U64.v prev_len_last % U32.v (c.block_len) = 0)
   end;
-  update_last c tmp_block_state prev_len_last buf_last r_last;
+  update_last #c tmp_block_state prev_len_last buf_last r_last;
 
   let h5 = ST.get () in
   c.state.frame_invariant (c.state.footprint h3 tmp_block_state) block_state h3 h5;
   stateful_frame_preserves_freeable #c.state (c.state.footprint h3 tmp_block_state) block_state h3 h5;
   optional_frame #c (c.state.footprint h3 tmp_block_state) k' h3 h5;
 
-  finish c k' tmp_block_state dst l;
+  finish #c k' tmp_block_state dst l;
 
   let h6 = ST.get () in
   begin
@@ -1764,11 +1764,8 @@ let _ = allow_inversion key_management
   functor_copy_higher;
   functor_alloca_higher;
   functor_init_higher;
-  functor_update_small_higher;
-  functor_update_empty_or_full_buf_higher;
-  functor_update_round_higher;
   functor_update_higher;
-  functor_mk_finish_higher;
+  functor_finish_higher;
   functor_free_higher
 ] (Meta.InterfaceLight.specialize (`index) [
   `create_in;
@@ -1776,6 +1773,20 @@ let _ = allow_inversion key_management
   `alloca;
   `init;
   `update;
-  `mk_finish;
+  `finish;
   `free
 ])
+
+(* We have to define those functions in two steps because otherwise:
+   - we can't choose the names
+   - F* actually fails when typechecking the .fsti, because it can't find
+     definitions for the functions like [mk_create_in] (it ignores the
+     output of splice)
+ *)
+let mk_create_in #c = functor_create_in_higher #c
+let mk_copy #c = functor_copy_higher #c
+let mk_alloca #c = functor_alloca_higher #c
+let mk_init #c = functor_init_higher #c
+let mk_update #c = functor_update_higher #c
+let mk_finish #c = functor_finish_higher #c
+let mk_free #c = functor_free_higher #c

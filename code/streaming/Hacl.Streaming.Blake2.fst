@@ -9,7 +9,9 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U128 = FStar.UInt128
 module F = Hacl.Streaming.Functor
-module I = Hacl.Streaming.Interface
+module T = Hacl.Streaming.Types
+module Stateful = Hacl.Streaming.Stateful
+module Block = Hacl.Streaming.Block
 module ST = FStar.HyperStack.ST
 
 open FStar.Mul
@@ -90,52 +92,66 @@ let state_to_lbuffer (#a : alg) (#m : m_spec) (s : Core.state_p a m) :
   s
 
 inline_for_extraction noextract
-let stateful_blake2 (a : alg) (m : m_spec) : I.stateful unit =
-  I.Stateful
-    (fun () -> s a m) (* s *)
-    (* footprint *)
-    (fun #_ _ acc ->
+let stateful_blake2 (a : alg) (m : m_spec) : Stateful.index = {
+  s = s a m;
+
+  footprint =
+    (fun _ acc ->
       let wv, b = acc in
       B.loc_union
        (B.loc_addr_of_buffer (state_to_lbuffer wv))
-       (B.loc_addr_of_buffer (state_to_lbuffer b)))
-    (* freeable *)
-    (fun #_ _ acc ->
+       (B.loc_addr_of_buffer (state_to_lbuffer b)));
+
+  freeable =
+    (fun _ acc ->
       let wv, b = acc in
       B.freeable (state_to_lbuffer wv) /\
-      B.freeable (state_to_lbuffer b))
-    (* invariant *)
-    (fun #_ h acc ->
+      B.freeable (state_to_lbuffer b));
+
+  invariant =
+    (fun h acc ->
       let wv, b = acc in
       B.live h (state_to_lbuffer wv) /\
       B.live h (state_to_lbuffer b) /\
-      B.disjoint (state_to_lbuffer wv) (state_to_lbuffer b))
-    (fun () -> t a) (* t *)
-    (fun () h acc -> s_v h acc) (* v *)
-    (fun #_ h acc -> let wv, b = acc in ()) (* invariant_loc_in_footprint *)
-    (fun #_ l acc h0 h1 -> let wv, b = acc in ()) (* frame_invariant *)
-    (fun #_ _ _ _ _ -> ()) (* frame_freeable *)
-    (* alloca *)
-    (fun () ->
-      let wv = Core.alloc_state a m in
-      let b = Core.alloc_state a m in
-      wv, b)
-    (* create_in *)
-    (fun () r ->
-      let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      wv, b)
-    (* free *)
-    (fun _ acc ->
-      match acc with wv, b ->
-      B.free (state_to_lbuffer wv);
-      B.free (state_to_lbuffer b))
-    (* copy *)
-    (fun _ src dst ->
-      match src with src_wv, src_b ->
-      match dst with src_wv, dst_b ->
-      B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
-             U32.(4ul *^ Core.row_len a m))
+      B.disjoint (state_to_lbuffer wv) (state_to_lbuffer b));
+
+  t = t a;
+  v =  (fun h acc -> s_v h acc);
+
+  invariant_loc_in_footprint =
+    (fun h acc -> let wv, b = acc in ());
+
+  frame_invariant =
+    (fun l acc h0 h1 -> let wv, b = acc in ());
+
+  frame_freeable =
+    (fun _ _ _ _ -> ());
+}
+
+inline_for_extraction noextract
+let state_alloca a m : Stateful.alloca_st (stateful_blake2 a m) = fun () ->
+  let wv = Core.alloc_state a m in
+  let b = Core.alloc_state a m in
+  (wv, b)
+
+inline_for_extraction noextract
+let state_create_in a m : Stateful.create_in_st (stateful_blake2 a m) = fun r ->
+  let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
+  let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
+  (wv, b)
+
+inline_for_extraction noextract
+let state_free a m : Stateful.free_st (stateful_blake2 a m) = fun acc ->
+  match acc with wv, b ->
+  B.free (state_to_lbuffer wv);
+  B.free (state_to_lbuffer b)
+
+inline_for_extraction noextract
+let state_copy a m : Stateful.copy_st (stateful_blake2 a m) = fun src dst ->
+  match src with src_wv, src_b ->
+  match dst with src_wv, dst_b ->
+  B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
+         U32.(4ul *^ Core.row_len a m)
 
 /// Stateful key
 /// ============
@@ -169,45 +185,51 @@ let unit_to_stateful_key_t (a : alg) :
 /// the case the length is zero. Note that rather than being unit, the type could
 /// be buffer too (and we would use null whenever needed).
 inline_for_extraction noextract
-let stateful_key (a : alg) (kk : key_size a) :
-  I.stateful unit =
-  I.Stateful
-    (fun _ -> stateful_key_t a kk)
-    (* footprint *)
-    (fun #_ h s -> if kk = 0 then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
-    (* freeable *)
-    (fun #_ h s -> if kk = 0 then True else B.freeable (s <: B.buffer uint8))
-    (* invariant *)
-    (fun #_ h s ->
+let stateful_key (a : alg) (kk : key_size a) : Stateful.index = {
+  s = stateful_key_t a kk;
+
+  footprint =
+    (fun h s -> if kk = 0 then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8));
+
+  freeable =
+    (fun h s -> if kk = 0 then True else B.freeable (s <: B.buffer uint8));
+
+  invariant =
+    (fun h s ->
       if kk = 0 then True
-      else B.live h (s <: B.buffer uint8))
-    (fun _ -> s:S.seq uint8 { S.length s == kk })
-    (fun _ h s -> if kk = 0 then Seq.empty else B.as_seq h (s <: B.buffer uint8))
-    (fun #_ h s -> ()) (* invariant_loc_in_footprint *)
-    (fun #_ l s h0 h1 -> ()) (* frame_invariant *)
-    (fun #_ l s h0 h1 -> ()) (* frame_freeable *)
+      else B.live h (s <: B.buffer uint8));
 
-    (* alloca *)
-    (fun () ->
-       if kk > 0 then
-         buffer_to_stateful_key_t a kk (B.alloca (Lib.IntTypes.u8 0) (U32.uint_to_t kk))
-       else unit_to_stateful_key_t a)
+  t = s:S.seq uint8 { S.length s == kk };
+  v = (fun h s -> if kk = 0 then Seq.empty else B.as_seq h (s <: B.buffer uint8));
 
-    (* create_in *)
-    (fun () r ->
-       if kk > 0 then
-         buffer_to_stateful_key_t a kk (B.malloc r (Lib.IntTypes.u8 0) (U32.uint_to_t kk))
-       else unit_to_stateful_key_t a)
+  invariant_loc_in_footprint = (fun h s -> ());
 
-    (* free *)
-    (fun _ s -> if kk > 0 then B.free (s <: B.buffer uint8) else ())
+  frame_invariant = (fun l s h0 h1 -> ());
+  frame_freeable = (fun l s h0 h1 -> ());
+}
 
-    (* copy *)
-    (fun _ s_src s_dst ->
-      if kk > 0 then
-        B.blit (s_src <: B.buffer uint8) 0ul
-               (s_dst <: B.buffer uint8) 0ul (U32.uint_to_t kk)
-      else ())
+inline_for_extraction noextract
+let key_alloca a kk : Stateful.alloca_st (stateful_key a kk) = fun () ->
+ if kk > 0 then
+   buffer_to_stateful_key_t a kk (B.alloca (Lib.IntTypes.u8 0) (U32.uint_to_t kk))
+ else unit_to_stateful_key_t a
+
+inline_for_extraction noextract
+let key_create_in a kk : Stateful.create_in_st (stateful_key a kk) = fun r ->
+  if kk > 0 then
+    buffer_to_stateful_key_t a kk (B.malloc r (Lib.IntTypes.u8 0) (U32.uint_to_t kk))
+  else unit_to_stateful_key_t a
+
+inline_for_extraction noextract
+let key_free a kk : Stateful.free_st (stateful_key a kk) = fun s ->
+  if kk > 0 then B.free (s <: B.buffer uint8) else ()
+
+inline_for_extraction noextract
+let key_copy a kk : Stateful.copy_st (stateful_key a kk) = fun s_src s_dst ->
+  if kk > 0 then
+    B.blit (s_src <: B.buffer uint8) 0ul
+           (s_dst <: B.buffer uint8) 0ul (U32.uint_to_t kk)
+  else ()
 
 inline_for_extraction noextract
 let stateful_key_to_buffer (#a : alg) (#kk : key_size a)
@@ -497,7 +519,7 @@ val init_key_block (a : alg) (kk : key_size a) (k : stateful_key_t a kk)
   (ensures fun h0 _ h1 ->
     B.(modifies (loc_buffer buf_) h0 h1) /\
     begin
-    let k = (stateful_key a kk).v () h0 k in
+    let k = (stateful_key a kk).v h0 k in
     let input_length = if kk > 0 then Spec.size_block a else 0 in
     let input = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
     S.equal (S.slice (B.as_seq h1 buf_) 0 input_length) input
@@ -521,7 +543,7 @@ let init_key_block a kk k buf_ =
       buf_ 0ul (U32.uint_to_t kk) (stateful_key_to_buffer k);
     (**) let h2 = ST.get () in
     (**) begin
-    (**) let k : LS.lseq uint8 kk = (stateful_key a kk).v () h0 k in
+    (**) let k : LS.lseq uint8 kk = (stateful_key a kk).v h0 k in
     (**) let buf_v1 : LS.lseq uint8 (Spec.size_block a) = B.as_seq h1 buf_ in
     (**) let buf_v2 : LS.lseq uint8 (Spec.size_block a) = B.as_seq h2 buf_ in
 
@@ -552,92 +574,110 @@ let init_key_block a kk k buf_ =
 
 #push-options "--ifuel 1"// --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
-let blake2 (a : alg)
-           (m : valid_m_spec a)
-           (kk : key_size a)
-           (init : blake2_init_st a m)
-           (update_multi : blake2_update_multi_st a m)
-           (update_last : blake2_update_last_st a m)
-           (finish : blake2_finish_st a m) :
-  I.block unit =
-  I.Block
-    I.Erased (* key management *)
+let blake2_index (a : alg) (m : valid_m_spec a) (kk : key_size a) :
+  Block.index = {
+  km = Block.Erased;
 
-    (stateful_blake2 a m) (* state *)
-    (stateful_key a kk)   (* key *)
+  state = stateful_blake2 a m;
+  key = stateful_key a kk;
 
-    unit (* output_length_t *)
+  output_length_t = unit;
 
-    (fun () -> max_input_len a) (* max_input_length *)
-    (fun () () -> output_size a) (* output_len *)
-    (fun () -> block_len a) (* block_len *)
-    (fun () -> block_len a) (* blocks_state_len *)
-    (fun () -> if kk > 0 then block_len a else 0ul) (* init_input_len *)
+  max_input_len = max_input_len a;
+  output_length = (fun () -> output_size a);
+  block_len = block_len a;
+  blocks_state_len = block_len a;
+  init_input_len = if kk > 0 then block_len a else 0ul;
 
-    (fun () k -> if kk > 0 then Spec.blake2_key_block a kk k else S.empty)
-    (fun () _k -> init_s a kk) (* init_s *)
+  init_input_s = (fun k -> if kk > 0 then Spec.blake2_key_block a kk k else S.empty);
+  init_s = (fun _k -> init_s a kk);
 
-    (fun () acc prevlen input -> update_multi_s acc prevlen input) (* update_multi_s *)
-    (fun () acc prevlen input -> update_last_s acc prevlen input) (* update_last_s *)
-    (fun () _k acc _ -> finish_s #a acc) (* finish_s *)
-    (fun () k input l -> spec_s a kk k input) (* spec_s *)
+  update_multi_s = (fun acc prevlen input -> update_multi_s acc prevlen input);
+  update_last_s = (fun acc prevlen input -> update_last_s acc prevlen input);
+  finish_s = (fun _k acc _ -> finish_s #a acc);
+  spec_s = (fun k input l -> spec_s a kk k input);
 
-    (* update_multi_zero *)
-    (fun () acc prevlen -> update_multi_zero #a acc prevlen)
-
-    (* update_multi_associative *)
-    (fun () acc prevlen1 prevlen2 input1 input2 ->
-      update_multi_associative acc prevlen1 prevlen2 input1 input2)
-    (fun () k input _ ->
-     spec_is_incremental a kk k input) (* spec_is_incremental *)
-    (fun _ acc -> ()) (* index_of_state *)
-
-    (* init *)
-    (fun _ key buf_ acc ->
-      [@inline_let] let wv = get_wv acc in
-      [@inline_let] let h = get_state_p acc in
-      init_key_block a kk key buf_;
-      init h (Lib.IntTypes.size kk) (output_len a))
-
-    (* update_multi *)
-    (fun _ acc prevlen blocks len ->
-      let wv, hash = acc in
-      let nb = len `U32.div` Core.size_block a in
-      update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb)
-
-    (* update_last *)
-    (fun _ acc prevlen last last_len ->
-      let wv, hash = acc in
-      update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last)
-
-    (* finish *)
-    (fun _ k acc dst _ ->
-      [@inline_let] let wv = get_wv acc in
-      [@inline_let] let h = get_state_p acc in
-      finish (output_len a) dst h)
+  update_multi_zero = (fun acc prevlen -> update_multi_zero #a acc prevlen);
+  update_multi_associative = (fun acc prevlen1 prevlen2 input1 input2 ->
+    update_multi_associative acc prevlen1 prevlen2 input1 input2);
+  spec_is_incremental = (fun k input _ ->
+   spec_is_incremental a kk k input);
+}
 #pop-options
+
+(* TODO: remove? *)
+inline_for_extraction noextract
+let blake2_index_of_state a m kk :
+  Block.index_of_state_st (blake2_index a m kk) =
+  fun acc -> blake2_index a m kk
+
+(* TODO: remove? *)
+#push-options "--ifuel 1"
+inline_for_extraction noextract
+let blake2_init (a : alg) (m : valid_m_spec a) (kk : key_size a)
+                (init : blake2_init_st a m) :
+  Block.init_st (blake2_index a m kk) = fun key buf_ acc ->
+  [@inline_let] let wv = get_wv acc in
+  [@inline_let] let h = get_state_p acc in
+  init_key_block a kk key buf_;
+  init h (Lib.IntTypes.size kk) (output_len a)
+#pop-options
+
+(* TODO: remove? *)
+inline_for_extraction noextract
+let blake2_update_multi
+  (a : alg) (m : valid_m_spec a) (kk : key_size a)
+  (update_multi : blake2_update_multi_st a m) :
+  Block.update_multi_st (blake2_index a m kk) = fun acc prevlen blocks len ->
+  let wv, hash = acc in
+  let nb = len `U32.div` Core.size_block a in
+  update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb
+
+(* TODO: remove? *)
+inline_for_extraction noextract
+let blake2_update_last
+  (a : alg) (m : valid_m_spec a) (kk : key_size a)
+  (update_last : blake2_update_last_st a m) :
+  Block.update_last_st (blake2_index a m kk) = fun acc prevlen last last_len ->
+  let wv, hash = acc in
+  update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last
+
+(* TODO: remove? *)
+#push-options "--ifuel 1"
+inline_for_extraction noextract
+let blake2_finish
+  (a : alg) (m : valid_m_spec a) (kk : key_size a)
+  (finish : blake2_finish_st a m) :
+  Block.finish_st (blake2_index a m kk) = fun k acc dst _ ->
+  [@inline_let] let wv = get_wv acc in
+  [@inline_let] let h = get_state_p acc in
+  finish (output_len a) dst h
+#pop-options
+
 
 /// Introducing intermediate definitions for the instantiation
 
 inline_for_extraction noextract
-let blake2s_32 kk =
-  blake2 Spec.Blake2S Core.M32 kk Blake2s32.blake2s_init Blake2s32.blake2s_update_multi
-         Blake2s32.blake2s_update_last Blake2s32.blake2s_finish
+let blake2s_32 kk = blake2_index Spec.Blake2S Core.M32 kk
+(*Blake2s32.blake2s_init Blake2s32.blake2s_update_multi
+         Blake2s32.blake2s_update_last Blake2s32.blake2s_finish*)
 
 inline_for_extraction noextract
-let blake2b_32 kk =
-  blake2 Spec.Blake2B Core.M32 kk Blake2b32.blake2b_init Blake2b32.blake2b_update_multi
-         Blake2b32.blake2b_update_last Blake2b32.blake2b_finish
+let blake2b_32 kk = blake2_index Spec.Blake2B Core.M32 kk
+(*Blake2b32.blake2b_init Blake2b32.blake2b_update_multi
+         Blake2b32.blake2b_update_last Blake2b32.blake2b_finish*)
 
 inline_for_extraction noextract
-let empty_key a = I.optional_key () I.Erased (stateful_key a 0)
+let empty_key (a : alg) : Type0 =
+  allow_inversion Block.key_management;
+  G.erased (stateful_key a 0).t
 
 /// Type abbreviations - makes KaRaMeL use pretty names in the generated code
 
 let blake2s_32_block_state = s Spec.Blake2S Core.M32
 let blake2b_32_block_state = s Spec.Blake2B Core.M32
-let blake2s_32_state = F.state_s (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
-let blake2b_32_state = F.state_s (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2B)
+let blake2s_32_state = F.state_s (blake2s_32 0) (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2b_32_state = F.state_s (blake2b_32 0) (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2B)
 
 /// The incremental hash functions instantiations. Note that we can't write a
 /// generic one, because the normalization then performed by KaRaMeL explodes.
@@ -645,50 +685,101 @@ let blake2b_32_state = F.state_s (blake2b_32 0) () (s Spec.Blake2B Core.M32) (em
 /// All those implementations are for non-keyed hash.
 
 inline_for_extraction noextract
-let blake2s_32_no_key_alloca =
-  F.alloca (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_alloca : F.alloca_st (blake2s_32 0) =
+  F.mk_alloca #(blake2s_32 0)
+    (blake2_init Spec.Blake2S Core.M32 0 Blake2s32.blake2s_init)
+    (key_copy Spec.Blake2S 0)
+    (key_alloca Spec.Blake2S 0)
+    (state_alloca Spec.Blake2S Core.M32)
+
+[@ (Comment "  Copy function when there is no key")]
+let blake2s_32_no_key_copy : F.copy_st (blake2s_32 0) =
+  F.mk_copy #(blake2s_32 0)
+    (key_copy Spec.Blake2S 0)
+    (key_create_in Spec.Blake2S 0)
+    (state_copy Spec.Blake2S Core.M32)
+    (state_create_in Spec.Blake2S Core.M32)
 
 [@ (Comment "  State allocation function when there is no key")]
-let blake2s_32_no_key_create_in =
-  F.create_in (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_create_in : F.create_in_st (blake2s_32 0) =
+  F.mk_create_in #(blake2s_32 0)
+    (blake2_init Spec.Blake2S Core.M32 0 Blake2s32.blake2s_init)
+    (key_copy Spec.Blake2S 0)
+    (key_create_in Spec.Blake2S 0)
+    (state_create_in Spec.Blake2S Core.M32)
 
 [@ (Comment "  (Re-)initialization function when there is no key")]
-let blake2s_32_no_key_init =
-  F.init (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_init : F.init_st (blake2s_32 0) =
+  F.mk_init #(blake2s_32 0)
+    (key_copy Spec.Blake2S 0)
+    (blake2_init Spec.Blake2S Core.M32 0 Blake2s32.blake2s_init)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
-let blake2s_32_no_key_update =
-  F.update (blake2s_32 0) (G.hide ()) (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_update : F.update_st (blake2s_32 0) =
+  F.mk_update #(blake2s_32 0)
+    (blake2_update_multi Spec.Blake2S Core.M32 0 Blake2s32.blake2s_update_multi)
 
 [@ (Comment "  Finish function when there is no key")]
-let blake2s_32_no_key_finish =
-  F.mk_finish (blake2s_32 0) () (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_finish : F.finish_st (blake2s_32 0) =
+  F.mk_finish #(blake2s_32 0)
+    (blake2_finish Spec.Blake2S Core.M32 0 Blake2s32.blake2s_finish)
+    (blake2_update_last Spec.Blake2S Core.M32 0 Blake2s32.blake2s_update_last)
+    (blake2_update_multi Spec.Blake2S Core.M32 0 Blake2s32.blake2s_update_multi)
+    (state_copy Spec.Blake2S Core.M32)
+    (state_alloca Spec.Blake2S Core.M32)
 
 [@ (Comment "  Free state function when there is no key")]
-let blake2s_32_no_key_free =
-  F.free (blake2s_32 0) (G.hide ()) (s Spec.Blake2S Core.M32) (empty_key Spec.Blake2S)
+let blake2s_32_no_key_free : F.free_st (blake2s_32 0) =
+  F.mk_free #(blake2s_32 0)
+    (state_free Spec.Blake2S Core.M32)
+    (key_free Spec.Blake2S 0)
 
 inline_for_extraction noextract
-[@ (Comment "  State allocation function when there is no key")]
-let blake2b_32_no_key_alloca =
-  F.alloca (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2B)
+let blake2b_32_no_key_alloca : F.alloca_st (blake2b_32 0) =
+  F.mk_alloca #(blake2b_32 0)
+    (blake2_init Spec.Blake2B Core.M32 0 Blake2b32.blake2b_init)
+    (key_copy Spec.Blake2B 0)
+    (key_alloca Spec.Blake2B 0)
+    (state_alloca Spec.Blake2B Core.M32)
+
+[@ (Comment "  Copy function when there is no key")]
+let blake2b_32_no_key_copy : F.copy_st (blake2b_32 0) =
+  F.mk_copy #(blake2b_32 0)
+    (key_copy Spec.Blake2B 0)
+    (key_create_in Spec.Blake2B 0)
+    (state_copy Spec.Blake2B Core.M32)
+    (state_create_in Spec.Blake2B Core.M32)
 
 [@ (Comment "  State allocation function when there is no key")]
-let blake2b_32_no_key_create_in =
-  F.create_in (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+let blake2b_32_no_key_create_in : F.create_in_st (blake2b_32 0) =
+  F.mk_create_in #(blake2b_32 0)
+    (blake2_init Spec.Blake2B Core.M32 0 Blake2b32.blake2b_init)
+    (key_copy Spec.Blake2B 0)
+    (key_create_in Spec.Blake2B 0)
+    (state_create_in Spec.Blake2B Core.M32)
 
-[@ (Comment "  (Re)-initialization function when there is no key")]
-let blake2b_32_no_key_init =
-  F.init (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+[@ (Comment "  (Re-)initialization function when there is no key")]
+let blake2b_32_no_key_init : F.init_st (blake2b_32 0) =
+  F.mk_init #(blake2b_32 0)
+    (key_copy Spec.Blake2B 0)
+    (blake2_init Spec.Blake2B Core.M32 0 Blake2b32.blake2b_init)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
-let blake2b_32_no_key_update =
-  F.update (blake2b_32 0) (G.hide ()) (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+let blake2b_32_no_key_update : F.update_st (blake2b_32 0) =
+  F.mk_update #(blake2b_32 0)
+    (blake2_update_multi Spec.Blake2B Core.M32 0 Blake2b32.blake2b_update_multi)
 
 [@ (Comment "  Finish function when there is no key")]
-let blake2b_32_no_key_finish =
-  F.mk_finish (blake2b_32 0) () (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+let blake2b_32_no_key_finish : F.finish_st (blake2b_32 0) =
+  F.mk_finish #(blake2b_32 0)
+    (blake2_finish Spec.Blake2B Core.M32 0 Blake2b32.blake2b_finish)
+    (blake2_update_last Spec.Blake2B Core.M32 0 Blake2b32.blake2b_update_last)
+    (blake2_update_multi Spec.Blake2B Core.M32 0 Blake2b32.blake2b_update_multi)
+    (state_copy Spec.Blake2B Core.M32)
+    (state_alloca Spec.Blake2B Core.M32)
 
 [@ (Comment "  Free state function when there is no key")]
-let blake2b_32_no_key_free =
-  F.free (blake2b_32 0) (G.hide ()) (s Spec.Blake2B Core.M32) (empty_key Spec.Blake2S)
+let blake2b_32_no_key_free : F.free_st (blake2b_32 0) =
+  F.mk_free #(blake2b_32 0)
+    (state_free Spec.Blake2B Core.M32)
+    (key_free Spec.Blake2B 0)
