@@ -7,7 +7,8 @@ module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module F = Hacl.Streaming.Functor
-module I = Hacl.Streaming.Interface
+open Hacl.Streaming.Block
+module Block = Hacl.Streaming.Block
 module P = Hacl.Impl.Poly1305
 module F32xN = Hacl.Spec.Poly1305.Field32xN
 module ST = FStar.HyperStack.ST
@@ -45,7 +46,7 @@ let as_lib (#fs : field_spec) (x: t fs): P.poly1305_ctx fs =
   x
 
 inline_for_extraction noextract
-let poly1305_key = I.stateful_buffer uint8 32ul (Lib.IntTypes.u8 0) unit
+let poly1305_key = Stateful.index_buffer uint8 32ul
 
 inline_for_extraction noextract
 let as_lib_k (x: B.buffer uint8 { B.length x = 32 }): Lib.Buffer.lbuffer uint8 32ul =
@@ -59,40 +60,49 @@ let num_lanes (fs : field_spec) : F32xN.lanes =
   | M256 -> 4
 
 inline_for_extraction noextract
-let stateful_poly1305_ctx (fs : field_spec) : I.stateful unit =
-  I.Stateful
-    (fun () -> t fs)
-    (fun #_ _ s -> B.loc_addr_of_buffer (as_raw s))
-    (fun #_ _ s -> B.freeable (as_raw s))
-    (fun #_ h s -> B.live h (as_raw s) /\ P.state_inv_t h (as_lib s))
-    (fun () -> Spec.Poly1305.felem & Spec.Poly1305.felem)
-    (fun () h s -> P.as_get_acc h (as_lib s), P.as_get_r h (as_lib s))
-    (fun #_ _ _ -> ())
-    (fun #_ l s h0 h1 ->
-      P.reveal_ctx_inv (as_lib s) h0 h1;
-      B.modifies_buffer_elim (as_raw s) l h0 h1)
-    (fun #_ _ _ _ _ -> ())
+let stateful_poly1305_ctx (fs : field_spec) : Stateful.index = {
+  s = t fs;
+  footprint = (fun _ s -> B.loc_addr_of_buffer (as_raw s));
+  freeable = (fun _ s -> B.freeable (as_raw s));
+  invariant = (fun h s -> B.live h (as_raw s) /\ P.state_inv_t h (as_lib s));
+  t = Spec.Poly1305.felem & Spec.Poly1305.felem;
+  v = (fun h s -> P.as_get_acc h (as_lib s), P.as_get_r h (as_lib s));
+  invariant_loc_in_footprint = (fun _ _ -> ());
+  frame_invariant = (fun l s h0 h1 ->
+    P.reveal_ctx_inv (as_lib s) h0 h1;
+    B.modifies_buffer_elim (as_raw s) l h0 h1);
+  frame_freeable = (fun _ _ _ _ -> ());
+}
 
-    (fun () ->
-      [@inline_let]
-      let n = num_lanes fs in
-      let r = B.alloca (F32xN.zero n) 25ul in
-      let h1 = ST.get () in
-      P.ctx_inv_zeros #fs r h1;
-      r)
-    (fun () r ->
-      [@inline_let]
-      let n = num_lanes fs in
-      let r = B.malloc r (F32xN.zero n) 25ul in
-      let h1 = ST.get () in
-      P.ctx_inv_zeros #fs r h1;
-      r)
-    (fun _ s -> B.free s)
-    (fun _ src dst ->
-      let h0 = ST.get () in
-      B.blit src 0ul dst 0ul 25ul;
-      let h1 = ST.get () in
-      P.reveal_ctx_inv' (as_lib src) (as_lib dst) h0 h1)
+inline_for_extraction noextract
+let init_elem (fs : field_spec) = F32xN.zero (num_lanes fs)
+
+inline_for_extraction noextract
+let alloca_poly1305_ctx (fs : field_spec) : Stateful.alloca_st (stateful_poly1305_ctx fs) = fun () ->
+  let r = B.alloca (init_elem fs) 25ul in
+  let h1 = ST.get () in
+  P.ctx_inv_zeros #fs r h1;
+  r
+
+inline_for_extraction noextract
+let create_in_poly1305_ctx (fs : field_spec) : Stateful.create_in_st (stateful_poly1305_ctx fs) = fun r ->
+  [@inline_let]
+  let n = num_lanes fs in
+  let r = B.malloc r (F32xN.zero n) 25ul in
+  let h1 = ST.get () in
+  P.ctx_inv_zeros #fs r h1;
+  r
+
+inline_for_extraction noextract
+let free_poly1305_ctx (fs : field_spec) : Stateful.free_st (stateful_poly1305_ctx fs) = fun s ->
+  B.free s
+
+inline_for_extraction noextract
+let copy_poly1305_ctx (fs : field_spec) : Stateful.copy_st (stateful_poly1305_ctx fs) = fun src dst ->
+  let h0 = ST.get () in
+  B.blit src 0ul dst 0ul 25ul;
+  let h1 = ST.get () in
+  P.reveal_ctx_inv' (as_lib src) (as_lib dst) h0 h1
 
 /// Interlude for spec equivalence proofs
 /// =====================================
@@ -401,106 +411,154 @@ let poly_is_incremental_lazy key input =
 
 #push-options "--z3rlimit 300"
 inline_for_extraction noextract
-let poly1305 (fs : field_spec) : I.block unit =
-  I.Block
-    I.Runtime
+let poly1305_index (fs : field_spec) : Block.index = {
+  km = Block.Runtime;
 
-    (stateful_poly1305_ctx fs) (* state *)
-    poly1305_key (* key *)
-    unit
+  state = stateful_poly1305_ctx fs;
+  key = poly1305_key;
+  output_length_t = unit;
 
-    (fun () -> 0xffffffffUL) (* max_input_len *)
-    (fun () () -> 16) (* output_len *)
-    (fun () -> 16ul) (* block_len *)
+  max_input_len = 0xffffffffUL;
+  output_length = (fun () -> 16);
+  block_len = 16ul;
 
-    (* blocks_state_len *)
-    (fun () ->
-      match fs with
-      | M32 -> 16ul // block_length
-      | M128 -> 32ul // 2 * block_length
-      | M256 -> 64ul) // 4 * block_length
-    (fun () -> 0ul) (* init_input_len *)
+  blocks_state_len =
+    (match fs with
+     | M32 -> 16ul // block_length
+     | M128 -> 32ul // 2 * block_length
+     | M256 -> 64ul); // 4 * block_length
 
-    (fun () _k -> S.empty) (* init_input_s *)
-    (fun () -> Spec.Poly1305.poly1305_init) (* init_s *)
-    (fun () acc prevlen data -> update_multi acc data) (* update_multi_s *)
-    (fun () x _ y -> update_last x y) (* update_last_s *)
-    (fun () k s () -> finish_ k s) (* finish_s *)
+  init_input_len = 0ul;
 
-    (fun () k s () -> spec k s) (* spec_s *)
+  init_input_s = (fun _k -> S.empty);
+  init_s = (fun k -> Spec.Poly1305.poly1305_init k);
+  update_multi_s = (fun acc prevlen data -> update_multi acc data);
+  update_last_s = (fun x _ y -> update_last x y);
+  finish_s = (fun k s () -> finish_ k s);
+  spec_s = (fun k s () -> spec k s);
 
-    (* update_multi_zero *)
-    (fun () acc prevlen -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_ acc)
+  update_multi_zero =
+    (fun acc prevlen -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_ acc);
 
-    (* update_multi_associative *)
-    (fun () acc prevlen1 prevlen2 input1 input2 ->
+  update_multi_associative =
+    (fun acc prevlen1 prevlen2 input1 input2 ->
       Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_
-                                               acc input1 input2)
+                                               acc input1 input2);
 
-    (* spec_is_incremental *)
-    (fun () key input () ->
+  spec_is_incremental =
+    (fun key input () ->
       let input1 = S.append S.empty input in
       assert (S.equal input1 input);
-      poly_is_incremental_lazy key input)
-
-    (* index_of_state *)
-    (fun _ _ -> ())
-
-    (* init *)
-    (fun _ k _ s ->
-      match fs with
-      | M32 -> Hacl.Poly1305_32.poly1305_init s k
-      | M128 -> Hacl.Poly1305_128.poly1305_init s k
-      | M256 -> Hacl.Poly1305_256.poly1305_init s k)
-
-    (* update_multi *)
-    (fun _ s prevlen blocks len ->
-      let h0 = ST.get () in
-      begin
-        let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
-        update_multi_is_update (B.as_seq h0 blocks) acc r
-      end;
-      match fs with
-      | M32 -> Hacl.Poly1305_32.poly1305_update s len blocks
-      | M128 -> Hacl.Poly1305_128.poly1305_update s len blocks
-      | M256 -> Hacl.Poly1305_256.poly1305_update s len blocks)
-
-    (* update_last *)
-    (fun _ s prev_len last last_len ->
-      let h0 = ST.get () in
-      begin
-        let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
-        update_last_is_update (B.as_seq h0 last) acc r
-      end;
-      match fs with
-      | M32 -> Hacl.Poly1305_32.poly1305_update s last_len last
-      | M128 -> Hacl.Poly1305_128.poly1305_update s last_len last
-      | M256 -> Hacl.Poly1305_256.poly1305_update s last_len last)
-
-    (* finish *)
-    (fun _ k s dst _ ->
-      let h0 = ST.get () in
-      ST.push_frame ();
-      let h1 = ST.get () in
-      [@inline_let] let nl = num_lanes fs in
-      let tmp = B.alloca (F32xN.zero nl) 25ul in
-      let h2 = ST.get () in
-      B.modifies_only_not_unused_in B.loc_none h1 h2;
-      B.blit s 0ul tmp 0ul 25ul;
-      let h3 = ST.get () in
-      B.modifies_only_not_unused_in B.loc_none h1 h3;
-      P.reveal_ctx_inv' (as_lib s) (as_lib tmp) h0 h3;
-      begin match fs with
-      | M32 -> Hacl.Poly1305_32.poly1305_finish dst k tmp
-      | M128 -> Hacl.Poly1305_128.poly1305_finish dst k tmp
-      | M256 -> Hacl.Poly1305_256.poly1305_finish dst k tmp
-      end;
-      let h4 = ST.get () in
-      ST.pop_frame ();
-      let h5 = ST.get () in
-      B.modifies_only_not_unused_in B.(loc_buffer dst) h1 h4;
-      B.modifies_fresh_frame_popped h0 h1 B.(loc_buffer dst) h4 h5;
-      assert B.(loc_disjoint (loc_buffer s) (loc_buffer dst));
-      P.reveal_ctx_inv (as_lib s) h0 h5
-    )
+      poly_is_incremental_lazy key input);
+}
 #pop-options
+
+inline_for_extraction noextract
+let poly1305_init (fs : field_spec) : Block.init_st (poly1305_index fs) = fun k _ s ->
+  match fs with
+  | M32 -> Hacl.Poly1305_32.poly1305_init s k
+  | M128 -> Hacl.Poly1305_128.poly1305_init s k
+  | M256 -> Hacl.Poly1305_256.poly1305_init s k
+
+inline_for_extraction noextract
+let poly1305_update_multi (fs : field_spec) : Block.update_multi_st (poly1305_index fs) =
+  fun s prevlen blocks len ->
+  let h0 = ST.get () in
+  begin
+    let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
+    update_multi_is_update (B.as_seq h0 blocks) acc r
+  end;
+  match fs with
+  | M32 -> Hacl.Poly1305_32.poly1305_update s len blocks
+  | M128 -> Hacl.Poly1305_128.poly1305_update s len blocks
+  | M256 -> Hacl.Poly1305_256.poly1305_update s len blocks
+
+inline_for_extraction noextract
+let poly1305_update_last (fs : field_spec) : Block.update_last_st (poly1305_index fs) =
+  fun s prev_len last last_len ->
+  let h0 = ST.get () in
+  begin
+    let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
+    update_last_is_update (B.as_seq h0 last) acc r
+  end;
+  match fs with
+  | M32 -> Hacl.Poly1305_32.poly1305_update s last_len last
+  | M128 -> Hacl.Poly1305_128.poly1305_update s last_len last
+  | M256 -> Hacl.Poly1305_256.poly1305_update s last_len last
+
+inline_for_extraction noextract
+let poly1305_finish (fs : field_spec) : Block.finish_st (poly1305_index fs) =
+  fun k s dst _ ->
+  let h0 = ST.get () in
+  ST.push_frame ();
+  let h1 = ST.get () in
+  [@inline_let] let nl = num_lanes fs in
+  let tmp = B.alloca (F32xN.zero nl) 25ul in
+  let h2 = ST.get () in
+  B.modifies_only_not_unused_in B.loc_none h1 h2;
+  B.blit s 0ul tmp 0ul 25ul;
+  let h3 = ST.get () in
+  B.modifies_only_not_unused_in B.loc_none h1 h3;
+  P.reveal_ctx_inv' (as_lib s) (as_lib tmp) h0 h3;
+  begin match fs with
+  | M32 -> Hacl.Poly1305_32.poly1305_finish dst k tmp
+  | M128 -> Hacl.Poly1305_128.poly1305_finish dst k tmp
+  | M256 -> Hacl.Poly1305_256.poly1305_finish dst k tmp
+  end;
+  let h4 = ST.get () in
+  ST.pop_frame ();
+  let h5 = ST.get () in
+  B.modifies_only_not_unused_in B.(loc_buffer dst) h1 h4;
+  B.modifies_fresh_frame_popped h0 h1 B.(loc_buffer dst) h4 h5;
+  assert B.(loc_disjoint (loc_buffer s) (loc_buffer dst));
+  P.reveal_ctx_inv (as_lib s) h0 h5
+
+inline_for_extraction noextract
+let mk_alloca (fs : field_spec) : F.alloca_st (poly1305_index fs) =
+  F.mk_alloca #(poly1305_index fs)
+    (poly1305_init fs)
+    (Stateful.copy_buffer #uint8 #32ul)
+    (Stateful.alloca_buffer #uint8 #32ul #(Lib.IntTypes.u8 0))
+    (alloca_poly1305_ctx fs)
+
+inline_for_extraction noextract
+let mk_copy (fs : field_spec) : F.copy_st (poly1305_index fs) =
+  F.mk_copy #(poly1305_index fs)
+    (Stateful.copy_buffer #uint8 #32ul)
+    (Stateful.create_in_buffer #uint8 #32ul #(Lib.IntTypes.u8 0))
+    (copy_poly1305_ctx fs)
+    (create_in_poly1305_ctx fs)
+
+inline_for_extraction noextract
+let mk_create_in (fs : field_spec) : F.create_in_st (poly1305_index fs) =
+  F.mk_create_in #(poly1305_index fs)
+    (poly1305_init fs)
+    (Stateful.copy_buffer #uint8 #32ul)
+    (Stateful.create_in_buffer #uint8 #32ul #(Lib.IntTypes.u8 0))
+    (create_in_poly1305_ctx fs)
+
+inline_for_extraction noextract
+let mk_init (fs : field_spec) : F.init_st (poly1305_index fs) =
+  F.mk_init #(poly1305_index fs)
+    (Stateful.copy_buffer #uint8 #32ul)
+    (poly1305_init fs)
+
+inline_for_extraction noextract
+let mk_update (fs : field_spec) : F.update_st (poly1305_index fs) =
+  F.mk_update #(poly1305_index fs)
+    (poly1305_update_multi fs)
+
+inline_for_extraction noextract
+let mk_finish (fs : field_spec) : F.finish_st (poly1305_index fs) =
+  F.mk_finish #(poly1305_index fs)
+    (poly1305_finish fs)
+    (poly1305_update_last fs)
+    (poly1305_update_multi fs)
+    (copy_poly1305_ctx fs)
+    (alloca_poly1305_ctx fs)
+
+inline_for_extraction noextract
+let mk_free (fs : field_spec) : F.free_st (poly1305_index fs) =
+  F.mk_free #(poly1305_index fs)
+    (free_poly1305_ctx fs)
+    (Stateful.free_buffer #uint8 #32ul)
