@@ -273,6 +273,22 @@ let update_last_st (i: index) =
 val update_last: i:G.erased index -> update_last_st i
 
 inline_for_extraction noextract
+let finish_st_pre (i: index)
+  (k: optional_key i)
+  (s:i.state.s)
+  (dst:B.buffer uint8)
+  (l: i.output_length_t { B.length dst == i.output_length l })
+  h0
+=
+  allow_inversion key_management;
+  match i.km with
+  | Erased -> True
+  | Runtime ->
+      i.key.invariant h0 k /\
+      B.(loc_disjoint (i.key.footprint h0 k) (loc_buffer dst)) /\
+      B.(loc_disjoint (i.key.footprint h0 k) (i.state.footprint h0 s))
+
+inline_for_extraction noextract
 let finish_st (i: index) =
   k: optional_key i ->
   s:i.state.s ->
@@ -280,16 +296,10 @@ let finish_st (i: index) =
   l: i.output_length_t { B.length dst == i.output_length l } ->
   Stack unit
   (requires fun h0 ->
-    allow_inversion key_management;
     i.state.invariant h0 s /\
     B.live h0 dst /\
-    B.(loc_disjoint (i.state.footprint h0 s) (loc_buffer dst)) /\ (
-    match i.km with
-    | Erased -> True
-    | Runtime ->
-        i.key.invariant h0 k /\
-        B.(loc_disjoint (i.key.footprint h0 k) (loc_buffer dst)) /\
-        B.(loc_disjoint (i.key.footprint h0 k) (i.state.footprint h0 s))))
+    B.(loc_disjoint (i.state.footprint h0 s) (loc_buffer dst)) /\
+    finish_st_pre i k s dst l h0)
   (ensures fun h0 _ h1 ->
     i.state.invariant h1 s /\
     B.(modifies (loc_buffer dst `loc_union` (i.state.footprint h0 s)) h0 h1) /\

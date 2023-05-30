@@ -275,12 +275,9 @@ inline_for_extraction noextract
 val copy: #c:index -> copy_st c
 
 inline_for_extraction noextract
-let alloca_st
-  (c:index)
-  (t:Type0 { t == c.state.s })
-  (t':Type0 { t' == optional_key c }) =
+let alloca_st (c:index) =
   k:c.key.s ->
-  StackInline (state c t t')
+  StackInline (state' c)
   (requires (fun h0 ->
     c.key.invariant h0 k))
   (ensures (fun h0 s h1 ->
@@ -292,20 +289,13 @@ let alloca_st
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint c h1 s))))
 
 inline_for_extraction noextract
-val alloca:
-  #c:index ->
-  t:Type0 { t == c.state.s } ->
-  t':Type0 { t' == optional_key c } ->
-  alloca_st c t t'
+val alloca: #c:index -> alloca_st c
 
 /// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
-let init_st
-  (c:index)
-  (t:Type0 { t == c.state.s })
-  (t':Type0 { t' == optional_key c }) =
+let init_st (c:index) =
   k:c.key.s ->
-  s:state c t t' ->
+  s:state' c ->
   Stack unit
   (requires (fun h0 ->
     c.key.invariant h0 k /\
@@ -320,11 +310,7 @@ let init_st
     preserves_freeable c s h0 h1))
 
 inline_for_extraction noextract
-val init:
-  #c:index ->
-  t:Type0 { t == c.state.s } ->
-  t':Type0 { t' == optional_key c } ->
-  init_st c t t'
+val init: #c:index -> init_st c
 
 unfold noextract
 let update_pre
@@ -355,11 +341,8 @@ let update_post
   preserves_freeable c s h0 h1
 
 inline_for_extraction noextract
-let update_st
-  (c:index)
-  (t:Type0 { t == c.state.s })
-  (t':Type0 { t' == optional_key c }) =
-  s:state c t t' ->
+let update_st (c:index) =
+  s:state' c ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
   Stack Hacl.Streaming.Types.error_code
@@ -377,19 +360,12 @@ let update_st
           False)
 
 inline_for_extraction noextract
-val update:
-  #c:index ->
-  t:Type0 { t == c.state.s } ->
-  t':Type0 { t' == optional_key c } ->
-  update_st c t t'
+val update: #c:index -> update_st c
 
 
 inline_for_extraction noextract
-let finish_st
-  (c: index)
-  (t: Type0 { t == c.state.s })
-  (t':Type0 { t' == optional_key c }) =
-  s:state c t t' ->
+let finish_st (c: index) =
+  s:state' c ->
   dst:B.buffer uint8 ->
   l:c.output_length_t { B.length dst == c.output_length l } ->
   Stack unit
@@ -418,18 +394,12 @@ let finish_st
 /// could provide a finish that relies on a heap allocation of abstract state
 /// and does not need to be specialized.
 inline_for_extraction noextract
-val mk_finish:
-  #c:index ->
-  t:Type0 { t == c.state.s } ->
-  t':Type0 { t' == optional_key c } ->
-  finish_st c t t'
+val mk_finish: #c:index -> finish_st c
 
 inline_for_extraction noextract
 let free_st
-  (c:index)
-  (t:Type0 { t == c.state.s })
-  (t':Type0 { t' == optional_key c }) =
-  s:state c t t' ->
+  (c:index) =
+  s:state' c ->
   ST unit
   (requires fun h0 ->
     invariant c h0 s /\
@@ -438,8 +408,4 @@ let free_st
     B.modifies (footprint c h0 s) h0 h1)
 
 inline_for_extraction noextract
-val free:
-  #c:index ->
-  t:Type0 { t == c.state.s } ->
-  t':Type0 { t' == optional_key c } ->
-  free_st c t t'
+val free: #c:index -> free_st c

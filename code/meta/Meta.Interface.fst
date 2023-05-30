@@ -104,7 +104,8 @@ let rec push_pre (st: state) (inv_bv: bv) (t: term): Tac term =
         match inspect_comp c with
         | C_Eff us e a args decrs ->
             if e = ["FStar";"HyperStack";"ST";"Stack"] ||
-              e = ["FStar";"HyperStack";"ST";"ST"]
+              e = ["FStar";"HyperStack";"ST";"ST"] ||
+              e = ["FStar";"HyperStack";"ST";"StackInline"]
             then
               let args =
                 match args with
