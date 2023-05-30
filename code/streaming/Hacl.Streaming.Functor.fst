@@ -1422,7 +1422,7 @@ let update_round #c p data len =
 
   let open LowStar.BufferOps in
   (**) let h0 = ST.get() in
-  update_small c p data len;
+  update_small #c p data len;
   (**) let h1 = ST.get() in
   (**) split_at_last_small c (all_seen c h0 p) (B.as_seq h0 data);
   (**) begin // For some reason, the proof fails if we don't call those
@@ -1760,6 +1760,16 @@ let _ = allow_inversion key_management
 
 #push-options "--print_implicits --print_effect_args --print_universes --z3rlimit_factor 4"
 %splice[
+  functor_create_in_higher;
+  functor_copy_higher;
+  functor_alloca_higher;
+  functor_init_higher;
+  functor_update_small_higher;
+  functor_update_empty_or_full_buf_higher;
+  functor_update_round_higher;
+  functor_update_higher;
+  functor_mk_finish_higher;
+  functor_free_higher
 ] (Meta.Interface.specialize (`index) [
   `create_in;
   `copy;

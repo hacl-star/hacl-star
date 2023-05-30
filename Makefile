@@ -477,11 +477,14 @@ obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
 obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
 $(filter obj/Hacl.Meta.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
 
+obj/Hacl.Streaming.Functor.fst.checked: FSTAR_FLAGS += --load Meta.Interface
+$(filter obj/Hacl.Streaming.Functor.fst.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
+
 obj/Hacl.Test.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
 $(filter obj/Hacl.Test.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
 
-obj/Test.Vectors.checked: FSTAR_FLAGS += --load Test.Lowstarize
-obj/Test.Vectors.checked: obj/Test_Lowstarize.cmxs
+obj/Test.Vectors.fst.checked: FSTAR_FLAGS += --load Test.Lowstarize
+obj/Test.Vectors.fst.checked: obj/Test_Lowstarize.cmxs
 
 obj/Test.Vectors.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
 $(filter obj/Test.Vectors.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
