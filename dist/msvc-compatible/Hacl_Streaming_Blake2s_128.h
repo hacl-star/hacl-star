@@ -35,6 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
+#include "Hacl_Streaming_Types.h"
 #include "Hacl_Hash_Blake2s_128.h"
 
 typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_block_state_s
@@ -69,7 +70,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
   Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *data,

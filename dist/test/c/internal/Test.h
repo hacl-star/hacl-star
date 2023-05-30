@@ -29,6 +29,7 @@
 #include "krml/internal/compat.h"
 
 #include "../Test.h"
+#include "internal/Hacl_Hash_SHA2.h"
 #include "krmllib.h"
 #include "libintvector.h"
 
