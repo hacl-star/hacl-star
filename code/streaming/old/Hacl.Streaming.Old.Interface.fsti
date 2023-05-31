@@ -225,7 +225,7 @@ let optional_t #index
 /// free to ignore superfluous arguments, and the shape of the API does not
 /// matter.
 
-/// SH: TODO: Maybe we should cut the functor in pieces (we could have a functional specifications
+///  TODO: Maybe we should cut the functor in pieces (we could have a functional specifications
 /// functor, containing only the functional specification definitions, and an
 /// implementation and properties functor, which would be parameterized by a spec functor
 /// and would contain all the lemmas and implementations).

@@ -237,7 +237,7 @@ let update_last_block_is_update input acc r =
   assert(input `S.equal` S.append input S.empty);
   let acc1 = update' r acc input in
   let acc1' = update_multi' r acc input in
-  // SH: fun fact: this lemma call and the following assert should be the
+  //  fun fact: this lemma call and the following assert should be the
   // last part of the below calc. However, if put below/inside the calc,
   // the proof loops.
   Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input

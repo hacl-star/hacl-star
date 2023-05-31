@@ -74,7 +74,7 @@ let len_mod_32 (a: md_alg) (len: len_t a):
       Math.modulo_lemma (U64.v len % U32.v (block_len a)) (pow2 32);
       Cast.uint64_to_uint32 (U64.(len %^ Cast.uint32_to_uint64 (block_len a)))
 
-// JP: this proof works instantly in interactive mode, not in batch mode unless
+//  this proof works instantly in interactive mode, not in batch mode unless
 // there's a high rlimit
 #push-options "--z3rlimit 200"
 inline_for_extraction

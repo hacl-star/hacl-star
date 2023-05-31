@@ -142,7 +142,7 @@ let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 (** Generalized modification clause for Buffer locations *)
 let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2
 
-(* JP: redefining is generally dangerous; someone may inadvertently write a pattern
+(*  redefining is generally dangerous; someone may inadvertently write a pattern
    for the disjoint predicate below, which does not enjoy transitivity, etc. and run
    into strange behavior. This explains why the SMTPat on mut_immut_disjoint
    operates over B.loc_disjoint, not disjoint. *)
@@ -229,7 +229,7 @@ let gsub (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
     assert (CB.length b == v n);
     (b <: clbuffer a n)
 
-(** JP: are these not covered already by standard SMT patterns? is this to avoid
+(**  are these not covered already by standard SMT patterns? is this to avoid
     having to invert on `buftype`? *)
 val live_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
   -> start:size_t -> n:size_t{v start + v n <= v len} -> h:mem

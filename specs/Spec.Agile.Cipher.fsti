@@ -70,7 +70,7 @@ val ctr_block (a: cipher_alg) (k: key a) (iv: nonce a) (c: ctr): block a
 let ctr_stream (a: cipher_alg) (k: key a) (iv: nonce a) (len: size_nat):
   b:bytes { length b = len }
 =
-  // JP: useful? be overconservative and always do + 1? would necessitate a
+  //  useful? be overconservative and always do + 1? would necessitate a
   // little bit of reasoning on the implementation side, perhaps better to have
   // a tighter bound here
   let n_blocks: n:nat { n * block_length a >= len } =

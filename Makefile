@@ -993,7 +993,7 @@ test-ml-%: dist/test/ml/%.exe
 # against HACL*-extracted-to-ML
 
 obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_FILES))
-	# JP: doesn't work because a PPX is prepended for some reason
+	#  doesn't work because a PPX is prepended for some reason
 	#ocamlfind mklib -o haclml -package fstar.lib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
 	ocamlfind opt -a -o $@ -package fstar.lib -g -I $(HACL_HOME)/obj $^
 

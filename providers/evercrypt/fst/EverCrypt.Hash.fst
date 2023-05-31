@@ -95,7 +95,7 @@ let blake2b_256: impl = (| Blake2B, Hacl.Impl.Blake2.Core.M256 |)
 inline_for_extraction noextract
 let alg_of_impl (i: impl { is_valid_impl i }): alg = dfst i
 
-// JP: This is a slightly more complicated case than for AEAD... for AEAD,
+//  This is a slightly more complicated case than for AEAD... for AEAD,
 //   `state_s a = i & kv a & buffer uint8`
 // because no matter the /implementation/, the resulting C type for the key is
 // always a pointer to bytes. Here, that's no longer true because of Blake2, so
@@ -330,7 +330,7 @@ let k224_256 =
 
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 // NOTE: this is an old-style switch where the CPU check is done on every call
-// to update_multi... this is SUBOPTIMAL. I (JP) ported this module to use a
+// to update_multi... this is SUBOPTIMAL. I () ported this module to use a
 // proper concept of /implementation/, and for the Blake2 optimized variants,
 // the state is now capable of keeping a squashed proof that the CPU supports
 // what is needed...

@@ -111,7 +111,7 @@ let footprint #a st =
 
 let invariant #a st h =
   live h st.k /\ live h st.v /\ live h st.reseed_counter /\ (
-  // JP: the disjoint predicate from lib hardcodes loc_buffer instead of
+  //  the disjoint predicate from lib hardcodes loc_buffer instead of
   // loc_addr_of_buffer, which prevents us from writing a proper free function
   // (probably why it wasn't written here in the first place)... we add on top
   // of the lib-style predicate a non-lib-style predicate which allows writing

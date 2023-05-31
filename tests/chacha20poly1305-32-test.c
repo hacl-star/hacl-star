@@ -128,7 +128,7 @@ main()
   clock_t tdiff4 = t2 - t1;
   cycles cdiff4 = b - a;
 
-  // JP: I don't understand what this does since this variable is almost always
+  //  I don't understand what this does since this variable is almost always
   // zeroed-out.
   printf("\n res1: %i \n", res1);
 

@@ -120,7 +120,7 @@ let repeat_gen_blocks_slice_k #inp_t w blocksize n hi_f inp a f i k acc =
     (i * w + (k + (- w * i))) * blocksize;
     (==) { Math.Lemmas.paren_add_right (i * w) k (- w * i) }
     (i * w + k + (- w * i)) * blocksize;
-    (==) { Math.Lemmas.swap_mul i w } // JP: this was the important one that made the proof brittle
+    (==) { Math.Lemmas.swap_mul i w } //  this was the important one that made the proof brittle
     k * blocksize;
     };
 

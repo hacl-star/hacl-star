@@ -280,7 +280,7 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   (**) assert(input_v0 `S.equal` S.append blocks_v0 rest_v0);
   update_multi s () blocks blocks_n;
 
-  // AF: Most of these assertions are not needed, but they are good to document
+  //  Most of these assertions are not needed, but they are good to document
   // the current state of the proof
   (**) let h01 = ST.get () in
   (**) assert (as_seq h01 s == Spec.Agile.Hash.(update_multi a (init a) () blocks_v0));

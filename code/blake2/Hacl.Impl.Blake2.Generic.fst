@@ -337,7 +337,7 @@ let blake2_compress1 #al #m wv s_iv offset flag =
   let wv_12 = Spec.limb_to_word al offset in
   [@inline_let]
   let wv_13 = Spec.limb_to_word al (offset >>. (size (bits (Spec.wt al)))) in
-  // SH: TODO: for some reason, ``ones`` below doesn't get inlined by KaRaMeL,
+  //  TODO: for some reason, ``ones`` below doesn't get inlined by KaRaMeL,
   // causing an extraction problem. The 3 lines below are a hack to fix
   // extraction for the time being:
   // [> let wv_14 = if flag then (ones (Spec.wt al) SEC) else (Spec.zero al) in

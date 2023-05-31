@@ -165,7 +165,7 @@ let upd5
   B.upd b 2ul x2;
   B.upd b 3ul x3;
   B.upd b 4ul x4;
-  // JP: why define this helper instead of letting callers call intro_of_list?
+  //  why define this helper instead of letting callers call intro_of_list?
   let h = FStar.HyperStack.ST.get () in
   [@inline_let]
   let l = [ x0; x1; x2; x3; x4 ] in

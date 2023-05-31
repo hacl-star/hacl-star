@@ -122,7 +122,7 @@ val bn_eval_split_i: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:nat{i <=
   (ensures bn_v b == bn_v (slice b 0 i) + pow2 (bits t * i) * bn_v (slice b i len))
   (decreases (len - i))
 
-// 20220513 JP: this proof broke somewhere in the calc, but even with --quake
+// 20220513  this proof broke somewhere in the calc, but even with --quake
 // 3/3 it goes through. Solver inconsistency? The restart solver above fixes it.
 let rec bn_eval_split_i #t #len b i =
   let pbits = bits t in

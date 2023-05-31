@@ -19,7 +19,7 @@
 #  error This file only works with the MSVC compiler
 #endif
 
-/* JP: need to rip out HAS_OPTIMIZED since the header guards in types.h are now
+/*  need to rip out HAS_OPTIMIZED since the header guards in types.h are now
  * done properly and only include this file when we know for sure we are on
  * 64-bit MSVC. */
 

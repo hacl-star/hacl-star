@@ -777,7 +777,7 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post c s data len h0 h1))
 
-/// SH: The proof obligations for update_small have problem succeeding in command
+///  The proof obligations for update_small have problem succeeding in command
 /// line mode: hence the restart-solver instruction, the crazy rlimit and the
 /// intermediate lemma. Interestingly (and frustratingly), the proof succeeds
 /// quite quickly locally on command-line with this rlimit, but fails with a lower
@@ -1712,7 +1712,7 @@ let finish #c p dst l =
   optional_frame #c B.(loc_region_only false (HS.get_tip h6)) k' h6 h7;
   assert (seen_h c h7 p `S.equal` (G.reveal seen));
 
-  // JP: this is not the right way to prove do this proof. Need to use
+  //  this is not the right way to prove do this proof. Need to use
   // modifies_fresh_frame_popped instead, see e.g.
   // https://github.com/project-everest/everquic-crypto/blob/d812be94e9b1a77261f001c9accb2040b80b7c39/src/QUIC.Impl.fst#L1111
   // for an example

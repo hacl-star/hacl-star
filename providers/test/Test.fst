@@ -38,7 +38,7 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 module HST = FStar.HyperStack.ST
 
-// JP: disabling legacy tests
+//  disabling legacy tests
 (*
 val test_one_aes_ecb : block_cipher -> block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_one_aes_ecb block0 v =

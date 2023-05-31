@@ -25,7 +25,7 @@ friend Spec.Agile.Hash
 //   S.lemma_eq_intro (S.slice last (S.length last - l_last) (S.length last)) last
 
 
-/// AF: While this proof should be conceptually simple, and very similar to the proof in Hacl.Streaming.Blake2,
+///  While this proof should be conceptually simple, and very similar to the proof in Hacl.Streaming.Blake2,
 /// F* struggles heavily with the dependent pairs for the state and slighty type mismatches...
 /// In particular, even proving that update_multi is equal to its definition can be challenging.
 /// The workaround is to do the proof duplication below. Providing a concrete value for the algorithm allows F*

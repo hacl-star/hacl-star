@@ -69,7 +69,7 @@ let createL_mglobal #a init =
 let recall_contents #a #len b s =
   B.recall_p (CB.to_ibuffer b) (cpred s)
 
-(* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
+(*  why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
 let copy #t #a #len o i =
   match t with
   | MUT ->
