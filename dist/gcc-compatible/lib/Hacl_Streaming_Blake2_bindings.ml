@@ -51,6 +51,10 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Blake2_blake2b_32_state_total_len =
       field hacl_Streaming_Blake2_blake2b_32_state "total_len" uint64_t
     let _ = seal hacl_Streaming_Blake2_blake2b_32_state
+    let hacl_Streaming_Blake2_blake2s_32_no_key_copy =
+      foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_copy"
+        ((ptr hacl_Streaming_Blake2_blake2s_32_state) @->
+           (returning (ptr hacl_Streaming_Blake2_blake2s_32_state)))
     let hacl_Streaming_Blake2_blake2s_32_no_key_create_in =
       foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_create_in"
         (void @-> (returning (ptr hacl_Streaming_Blake2_blake2s_32_state)))
@@ -69,6 +73,10 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_Blake2_blake2s_32_no_key_free =
       foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_free"
         ((ptr hacl_Streaming_Blake2_blake2s_32_state) @-> (returning void))
+    let hacl_Streaming_Blake2_blake2b_32_no_key_copy =
+      foreign "Hacl_Streaming_Blake2_blake2b_32_no_key_copy"
+        ((ptr hacl_Streaming_Blake2_blake2b_32_state) @->
+           (returning (ptr hacl_Streaming_Blake2_blake2b_32_state)))
     let hacl_Streaming_Blake2_blake2b_32_no_key_create_in =
       foreign "Hacl_Streaming_Blake2_blake2b_32_no_key_create_in"
         (void @-> (returning (ptr hacl_Streaming_Blake2_blake2b_32_state)))

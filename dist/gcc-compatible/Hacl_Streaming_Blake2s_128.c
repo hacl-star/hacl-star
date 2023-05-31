@@ -26,6 +26,45 @@
 #include "Hacl_Streaming_Blake2s_128.h"
 
 /**
+  Copy function when there is no key
+*/
+Hacl_Streaming_Blake2s_128_blake2s_128_state
+*Hacl_Streaming_Blake2s_128_blake2s_128_no_key_copy(
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *s0
+)
+{
+  Hacl_Streaming_Blake2s_128_blake2s_128_state scrut = *s0;
+  Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state0 = scrut.block_state;
+  uint8_t *buf0 = scrut.buf;
+  uint64_t total_len0 = scrut.total_len;
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  memcpy(buf, buf0, (uint32_t)64U * sizeof (uint8_t));
+  Lib_IntVector_Intrinsics_vec128
+  *wv =
+    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+      sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+  memset(wv, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  Lib_IntVector_Intrinsics_vec128
+  *b =
+    (Lib_IntVector_Intrinsics_vec128 *)KRML_ALIGNED_MALLOC(16,
+      sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+  memset(b, 0U, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state = { .fst = wv, .snd = b };
+  Lib_IntVector_Intrinsics_vec128 *src_b = block_state0.snd;
+  Lib_IntVector_Intrinsics_vec128 *dst_b = block_state.snd;
+  memcpy(dst_b, src_b, (uint32_t)4U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  Hacl_Streaming_Blake2s_128_blake2s_128_state
+  s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
+  Hacl_Streaming_Blake2s_128_blake2s_128_state
+  *p =
+    (Hacl_Streaming_Blake2s_128_blake2s_128_state *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_Blake2s_128_blake2s_128_state
+      ));
+  p[0U] = s;
+  return p;
+}
+
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2s_128_blake2s_128_state
