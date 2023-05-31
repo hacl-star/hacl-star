@@ -1005,11 +1005,3 @@ obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_F
 %/Makefile:
 	echo "HACL_HOME=$(shell realpath . --relative-to $(dir $@))" > $@
 	echo "include \$$(HACL_HOME)/Makefile.common" >> $@
-
-########
-# Nix  #
-########
-
-.PHONY: nix
-nix:
-	nix build .#packages.x86_64-linux.hacl
