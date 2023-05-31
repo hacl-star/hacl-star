@@ -17,7 +17,7 @@ module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Definitions
-open Hacl.Streaming.Interface
+open Hacl.Streaming.Old.Interface
 
 include Spec.Hash.Definitions
 include Hacl.Hash.Definitions

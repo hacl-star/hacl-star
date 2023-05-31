@@ -159,18 +159,18 @@ let hash_224 input input_len dst =
 // --------
 
 inline_for_extraction noextract
-let alloca_512 : F.alloca_st hacl_sha2_224 = mk_alloca SHA2_224
+let alloca_512 : F.alloca_st hacl_sha2_512 = mk_alloca SHA2_512
 
-let create_in_512 : F.create_in_st hacl_sha2_224 = mk_create_in SHA2_224
+let create_in_512 : F.create_in_st hacl_sha2_512 = mk_create_in SHA2_512
 
 [@@ Comment
 "Copies the state passed as argument into a newly allocated state (deep copy).
 The state is to be freed by calling `free_512`. Cloning the state this way is
 useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch."]
-let copy_512 : F.copy_st hacl_sha2_224 = mk_copy SHA2_224
+let copy_512 : F.copy_st hacl_sha2_512 = mk_copy SHA2_512
 
-let init_512 : F.init_st hacl_sha2_224 = mk_init SHA2_224
+let init_512 : F.init_st hacl_sha2_512 = mk_init SHA2_512
 
 [@@ CInline ]
 private
