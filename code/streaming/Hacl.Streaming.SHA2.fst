@@ -138,7 +138,7 @@ valid after a call to `finish_224`, meaning the user may feed more data into
 the hash via `update_224`."]
 let finish_224 : F.finish_st hacl_sha2_224 = mk_finish SHA2_224
 
-let free_224 : F.free_st hacl_sha2_224 = mk_free SHA2_224
+let free_224 : F.free_st hacl_sha2_256 = fun p -> free_256 p
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes."]

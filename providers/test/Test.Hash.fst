@@ -1,7 +1,7 @@
 module Test.Hash
 
 module HI = EverCrypt.Hash.Incremental
-module S = Hacl.Streaming.Functor
+module S = Hacl.Streaming.Old.Functor
 
 module ST = FStar.HyperStack.ST
 module M = LowStar.Modifies
