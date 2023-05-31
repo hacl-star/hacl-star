@@ -10,7 +10,7 @@ module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module F = Hacl.Streaming.Functor
+module F = Hacl.Streaming.Old.Functor
 
 module ST = FStar.HyperStack.ST
 
@@ -29,7 +29,7 @@ let uint64 = Lib.IntTypes.uint64
 
 open Spec.Hash.Definitions
 
-open Hacl.Streaming.Interface
+open Hacl.Streaming.Old.Interface
 
 module D = Hacl.Hash.Definitions
 module Agile = Spec.Agile.Hash
@@ -211,7 +211,7 @@ private
 let finish_ (a: alg) =
   F.mk_finish #alg (hacl_keccak a) a (sha3_state a) (G.erased unit)
 
-open Hacl.Streaming.Functor
+open Hacl.Streaming.Old.Functor
 
 // Unfortunate copy-paste since there are small variations (error code, output length)
 val finish:

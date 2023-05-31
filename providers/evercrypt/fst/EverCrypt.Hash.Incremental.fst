@@ -11,7 +11,7 @@ module HS = FStar.HyperStack
 module G = FStar.Ghost
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module F = Hacl.Streaming.Functor
+module F = Hacl.Streaming.Old.Functor
 
 module Hash = EverCrypt.Hash
 

@@ -489,9 +489,6 @@ $(filter obj/Hacl.Streaming.Functor.fst.checked,$(call to-obj-dir,$(ALL_CHECKED_
 obj/Hacl.Test.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
 $(filter obj/Hacl.Test.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
 
-obj/Test.Vectors.fst.checked: FSTAR_FLAGS += --load Test.Lowstarize
-obj/Test.Vectors.fst.checked: obj/Test_Lowstarize.cmxs
-
 obj/Test.Vectors.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
 $(filter obj/Test.Vectors.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
 
