@@ -55,6 +55,14 @@ typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s
 Hacl_Streaming_Blake2b_256_blake2b_256_state;
 
 /**
+  Copy function when there is no key
+*/
+Hacl_Streaming_Blake2b_256_blake2b_256_state
+*Hacl_Streaming_Blake2b_256_blake2b_256_no_key_copy(
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s0
+);
+
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2b_256_blake2b_256_state

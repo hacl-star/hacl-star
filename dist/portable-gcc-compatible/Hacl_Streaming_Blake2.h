@@ -85,6 +85,16 @@ Hacl_Streaming_Blake2_blake2b_32_state;
 
 /* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_state */
 
+/* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_copy */
+
+/**
+  Copy function when there is no key
+*/
+Hacl_Streaming_Blake2_blake2s_32_state
+*Hacl_Streaming_Blake2_blake2s_32_no_key_copy(Hacl_Streaming_Blake2_blake2s_32_state *s0);
+
+/* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_no_key_copy */
+
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_create_in */
 
 /**
@@ -140,6 +150,16 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_
 
 /* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_no_key_free */
 
+/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_copy */
+
+/**
+  Copy function when there is no key
+*/
+Hacl_Streaming_Blake2_blake2b_32_state
+*Hacl_Streaming_Blake2_blake2b_32_no_key_copy(Hacl_Streaming_Blake2_blake2b_32_state *s0);
+
+/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_no_key_copy */
+
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_create_in */
 
 /**
@@ -153,7 +173,7 @@ Hacl_Streaming_Blake2_blake2b_32_state
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_init */
 
 /**
-  (Re)-initialization function when there is no key
+  (Re-)initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_32_state *s1);
 

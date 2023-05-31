@@ -26,6 +26,35 @@
 #include "Hacl_Streaming_Blake2.h"
 
 /**
+  Copy function when there is no key
+*/
+Hacl_Streaming_Blake2_blake2s_32_state
+*Hacl_Streaming_Blake2_blake2s_32_no_key_copy(Hacl_Streaming_Blake2_blake2s_32_state *s0)
+{
+  Hacl_Streaming_Blake2_blake2s_32_state scrut = *s0;
+  Hacl_Streaming_Blake2_blake2s_32_block_state block_state0 = scrut.block_state;
+  uint8_t *buf0 = scrut.buf;
+  uint64_t total_len0 = scrut.total_len;
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  memcpy(buf, buf0, (uint32_t)64U * sizeof (uint8_t));
+  uint32_t *wv = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
+  uint32_t *b = (uint32_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint32_t));
+  Hacl_Streaming_Blake2_blake2s_32_block_state block_state = { .fst = wv, .snd = b };
+  uint32_t *src_b = block_state0.snd;
+  uint32_t *dst_b = block_state.snd;
+  memcpy(dst_b, src_b, (uint32_t)16U * sizeof (uint32_t));
+  Hacl_Streaming_Blake2_blake2s_32_state
+  s1 = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
+  Hacl_Streaming_Blake2_blake2s_32_state
+  *p =
+    (Hacl_Streaming_Blake2_blake2s_32_state *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_Blake2_blake2s_32_state
+      ));
+  p[0U] = s1;
+  return p;
+}
+
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2s_32_state *Hacl_Streaming_Blake2_blake2s_32_no_key_create_in(void)
@@ -325,6 +354,35 @@ void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_
 }
 
 /**
+  Copy function when there is no key
+*/
+Hacl_Streaming_Blake2_blake2b_32_state
+*Hacl_Streaming_Blake2_blake2b_32_no_key_copy(Hacl_Streaming_Blake2_blake2b_32_state *s0)
+{
+  Hacl_Streaming_Blake2_blake2b_32_state scrut = *s0;
+  Hacl_Streaming_Blake2_blake2b_32_block_state block_state0 = scrut.block_state;
+  uint8_t *buf0 = scrut.buf;
+  uint64_t total_len0 = scrut.total_len;
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
+  memcpy(buf, buf0, (uint32_t)128U * sizeof (uint8_t));
+  uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
+  uint64_t *b = (uint64_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint64_t));
+  Hacl_Streaming_Blake2_blake2b_32_block_state block_state = { .fst = wv, .snd = b };
+  uint64_t *src_b = block_state0.snd;
+  uint64_t *dst_b = block_state.snd;
+  memcpy(dst_b, src_b, (uint32_t)16U * sizeof (uint64_t));
+  Hacl_Streaming_Blake2_blake2b_32_state
+  s1 = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
+  Hacl_Streaming_Blake2_blake2b_32_state
+  *p =
+    (Hacl_Streaming_Blake2_blake2b_32_state *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Streaming_Blake2_blake2b_32_state
+      ));
+  p[0U] = s1;
+  return p;
+}
+
+/**
   State allocation function when there is no key
 */
 Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_create_in(void)
@@ -346,7 +404,7 @@ Hacl_Streaming_Blake2_blake2b_32_state *Hacl_Streaming_Blake2_blake2b_32_no_key_
 }
 
 /**
-  (Re)-initialization function when there is no key
+  (Re-)initialization function when there is no key
 */
 void Hacl_Streaming_Blake2_blake2b_32_no_key_init(Hacl_Streaming_Blake2_blake2b_32_state *s1)
 {
