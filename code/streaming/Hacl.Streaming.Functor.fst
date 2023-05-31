@@ -80,27 +80,7 @@ let optional_footprint
   | Erased -> B.loc_none
   | Runtime -> i.key.footprint h k
 
-let optional_reveal
-  (#i: index)
-  (h: HS.mem)
-  (k: optional_key i)
-=
-  allow_inversion key_management;
-  match i.km with
-  | Erased -> G.reveal k
-  | Runtime -> i.key.v h k
-
-let optional_hide
-  (#i: index)
-  (h: HS.mem)
-  (k: i.key.s):
-  optional_key i
-=
-  allow_inversion key_management;
-  match i.km with
-  | Erased -> G.hide (i.key.v h k)
-  | Runtime -> k
-
+let optional_reveal #i = Block.optional_t #i
 
 /// This lemma is used to convert the Hacl.Streaming.Interface.stateful.frame_freeable
 /// lemma, written with freeable in its precondition, into a lemma of the form:
@@ -298,7 +278,7 @@ let create_in #c k r =
         (**) c.state.frame_freeable (c.key.footprint h3 k') block_state h3 h4;
         k'
     | Erased ->
-        G.hide (c.key.v h0 k)
+        Block.coerce #_ #(optional_key c) (G.hide (c.key.v h0 k)) _
   in
   (**) let h5 = ST.get () in
   (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
@@ -491,7 +471,7 @@ let alloca #c k =
         (**) c.state.frame_invariant (c.key.footprint h3 k') block_state h3 h4;
         k'
     | Erased ->
-        G.hide (c.key.v h0 k)
+        Block.coerce #_ #(optional_key c) (G.hide (c.key.v h0 k)) _
   in
   (**) let h5 = ST.get () in
   (**) assert (B.fresh_loc (optional_footprint h5 k') h0 h5);
@@ -574,7 +554,7 @@ let init #c k s =
         (**) stateful_frame_preserves_freeable (c.key.footprint h2 k') block_state h2 h4;
         k'
     | Erased ->
-        G.hide (c.key.v h1 k)
+        Block.coerce #_ #(optional_key c) (G.hide (c.key.v h1 k)) _
   in
   (**) let h2 = ST.get () in
   (**) assert(preserves_freeable c s h1 h2);

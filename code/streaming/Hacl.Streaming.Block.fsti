@@ -74,7 +74,7 @@ type key_management =
   | Erased
   | Runtime
 
-noeq
+noeq inline_for_extraction
 type index = {
   km: key_management;
 
@@ -171,11 +171,15 @@ type index = {
 }
 
 inline_for_extraction noextract
-let optional_key (i: index) =
+let optional_key (i: index): Type0 =
   allow_inversion key_management;
   match i.km with
   | Erased -> G.erased i.key.t
   | Runtime -> i.key.s
+
+unfold noextract
+let coerce #t #u (x: t) (h: squash (t == u)): y:u { x == y } =
+  x
 
 inline_for_extraction noextract
 let optional_t
@@ -186,7 +190,8 @@ let optional_t
 =
   allow_inversion key_management;
   match i.km with
-  | Erased -> G.reveal k
+  | Erased ->
+      coerce #_ #(G.erased i.key.t) k _
   | Runtime -> i.key.v h k
 
 // Stateful operations

@@ -44,7 +44,7 @@ let uint32 = Lib.IntTypes.uint32
 /// This may seem like a lot but actually most low-level representations satisfy
 /// these principles!
 
-noeq
+noeq inline_for_extraction
 type index = {
   s: Type0;
 
