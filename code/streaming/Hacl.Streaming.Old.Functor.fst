@@ -1269,6 +1269,7 @@ val update_empty_or_full_functional_correctness :
   (ensures (invariant_s_funct c i t t' s data len h0 h1)))
 #pop-options
 
+#restart-solver
 #push-options "--z3cliopt smt.arith.nl=false"
 let update_empty_or_full_functional_correctness #index c i t t' p data len h0 h1 =
   let s = B.get h0 p 0 in
