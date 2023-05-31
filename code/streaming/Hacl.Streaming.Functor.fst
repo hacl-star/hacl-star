@@ -424,6 +424,7 @@ let copy #c s0 r =
   p
 #pop-options
 
+#restart-solver
 #push-options "--z3rlimit 400"
 [@ Meta.Attribute.specialize ]
 let alloca #c k =
@@ -498,6 +499,8 @@ let alloca #c k =
   (**) assert (B.fresh_loc (c.state.footprint h7 block_state) h0 h7);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
   (**) optional_frame (B.loc_union (c.state.footprint h7 block_state) (B.loc_buffer buf)) k' h6 h7;
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v c.block_len);
+  (**) assert (0 % U32.v c.block_len = 0);
   (**) c.update_multi_zero (c.state.v h7 block_state) 0;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
   (**) assert (c.state.v h7 block_state == c.init_s (optional_reveal h6 k'));
