@@ -333,7 +333,7 @@ noextract unfold let rcon_l : list uint8 = [
     u8(0x80); u8(0x1b); u8(0x36)
   ]
 
-let rcon : b:glbuffer uint8 11ul =
+let rcon : glbuffer uint8 11ul =
   assert_norm (List.Tot.length rcon_l == 11);
   createL_global rcon_l
 
