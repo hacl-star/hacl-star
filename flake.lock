@@ -1,12 +1,15 @@
 {
   "nodes": {
     "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
       "locked": {
-        "lastModified": 1667395993,
-        "narHash": "sha256-nuEHfE/LcWyuSWnS8t12N1wc105Qtau+/OdUAjtQ0rA=",
+        "lastModified": 1681202837,
+        "narHash": "sha256-H+Rh19JDwRtpVPAWp64F+rlEtxUWBAQW28eAi3SRSzg=",
         "owner": "numtide",
         "repo": "flake-utils",
-        "rev": "5aed5285a952e0b949eb3ba02c12fa4fcfef535f",
+        "rev": "cfacdce06f30d2b68473a46042957675eebb3401",
         "type": "github"
       },
       "original": {
@@ -14,14 +17,17 @@
         "type": "indirect"
       }
     },
-    "fstar-src": {
-      "flake": false,
+    "fstar": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs"
+      },
       "locked": {
-        "lastModified": 1673531198,
-        "narHash": "sha256-uab54BhUHRuxt4k5LsxjGaIR0yaLowh4BowLdz8/YuY=",
+        "lastModified": 1686084488,
+        "narHash": "sha256-KySF5oVhcS7JqXJHrH4Rfib4dzwA7XSy5PyJb3vFbP8=",
         "owner": "fstarlang",
         "repo": "fstar",
-        "rev": "5da0c16bcef41bcd8386006c2e49106b3f9c5510",
+        "rev": "17f2353235e3ce183d3dd59793a323b057233385",
         "type": "github"
       },
       "original": {
@@ -30,76 +36,24 @@
         "type": "github"
       }
     },
-    "hacl": {
+    "karamel": {
       "inputs": {
         "flake-utils": [
-          "hacl-nix",
           "flake-utils"
         ],
-        "fstar-src": [
-          "hacl-nix",
-          "fstar-src"
-        ],
-        "hacl-nix": [
-          "hacl-nix"
-        ],
-        "karamel-src": [
-          "hacl-nix",
-          "karamel-src"
+        "fstar": [
+          "fstar"
         ],
         "nixpkgs": [
-          "hacl-nix",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1673388111,
-        "narHash": "sha256-RZswi7Cs/LD2z08Fyv7R9XqtVhZgmXWl64+SYhreQ9Q=",
-        "owner": "hacl-star",
-        "repo": "hacl-star",
-        "rev": "1aedd3914b94c1fa2bd66fdd9e82b7a6c3b77739",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hacl-star",
-        "repo": "hacl-star",
-        "type": "github"
-      }
-    },
-    "hacl-nix": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "fstar-src": [
-          "fstar-src"
-        ],
-        "hacl": "hacl",
-        "karamel-src": [
-          "karamel-src"
-        ],
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1673396982,
-        "narHash": "sha256-FXUJhJLPagDlJ/5R1XA0GyZRGnwaD2pQJBQeQ0saJEs=",
-        "owner": "hacl-star",
-        "repo": "hacl-nix",
-        "rev": "aad08bcf58aee181ea5acc6d7e21ca14b85b9923",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hacl-star",
-        "repo": "hacl-nix",
-        "type": "github"
-      }
-    },
-    "karamel-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1672266237,
-        "narHash": "sha256-14ocqeeE3wUxwEiBIRyzvj4WDrUrClMQaquqTMStKb0=",
+        "lastModified": 1684957418,
+        "narHash": "sha256-opm3T3Pn2ts4wtZ8Jciof18bzZorfsqJQw6nj+vdp8w=",
         "owner": "fstarlang",
         "repo": "karamel",
-        "rev": "6e4dc86ea0ab981dff6da3725b560bccb0b311fe",
+        "rev": "2cf2974007f4103dba5619e4eb9e3eaeefad533b",
         "type": "github"
       },
       "original": {
@@ -110,11 +64,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1669140675,
-        "narHash": "sha256-npzfyfLECsJWgzK/M4gWhykP2DNAJTYjgY2BWkz/oEQ=",
+        "lastModified": 1684385584,
+        "narHash": "sha256-O7y0gK8OLIDqz+LaHJJyeu09IGiXlZIS3+JgEzGmmJA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2788904d26dda6cfa1921c5abb7a2466ffe3cb8c",
+        "rev": "48a0fb7aab511df92a17cf239c37f2bd2ec9ae3a",
         "type": "github"
       },
       "original": {
@@ -126,16 +80,30 @@
     "root": {
       "inputs": {
         "flake-utils": [
-          "hacl-nix",
+          "fstar",
           "flake-utils"
         ],
-        "fstar-src": "fstar-src",
-        "hacl-nix": "hacl-nix",
-        "karamel-src": "karamel-src",
+        "fstar": "fstar",
+        "karamel": "karamel",
         "nixpkgs": [
-          "hacl-nix",
+          "fstar",
           "nixpkgs"
         ]
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
       }
     }
   },
