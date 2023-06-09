@@ -448,16 +448,16 @@ finish_(
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
   memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
-  uint32_t ite0;
+  uint32_t ite;
   if (r % block_len(a) == (uint32_t)0U && r > (uint32_t)0U)
   {
-    ite0 = block_len(a);
+    ite = block_len(a);
   }
   else
   {
-    ite0 = r % block_len(a);
+    ite = r % block_len(a);
   }
-  uint8_t *buf_last = buf_1 + r - ite0;
+  uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
   Spec_Hash_Definitions_hash_alg a1 = tmp_block_state.fst;
   uint64_t *s0 = tmp_block_state.snd;
@@ -469,16 +469,7 @@ finish_(
   uint64_t *s = tmp_block_state.snd;
   if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
   {
-    uint32_t ite;
-    if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
-    {
-      ite = l;
-    }
-    else
-    {
-      ite = hash_len(a11);
-    }
-    Hacl_Impl_SHA3_squeeze(s, block_len(a11), ite, dst);
+    Hacl_Impl_SHA3_squeeze(s, block_len(a11), l, dst);
     return;
   }
   Hacl_Impl_SHA3_squeeze(s, block_len(a11), hash_len(a11), dst);
