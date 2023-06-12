@@ -131,6 +131,7 @@ let invert_state_s (a: alg): Lemma
 =
   allow_inversion (state_s a)
 
+[@@strict_on_arguments [1]]
 inline_for_extraction
 let impl_of_state #a (s: state_s a): i:impl { alg_of_impl i == a } =
   match s with
@@ -155,6 +156,7 @@ let impl_of_state #a (s: state_s a): i:impl { alg_of_impl i == a } =
 //   ...) so as not to repeat redundant information at run-time
 // - hope that we can get away with returning dependent pairs only when needed.
 // We're going for a third one in this module, which is more lightweight.
+[@@strict_on_arguments [1]]
 inline_for_extraction
 let p #a (s: state_s a): Hacl.Hash.Definitions.state (impl_of_state s) =
   match s with
@@ -215,6 +217,7 @@ let frame_invariant #a l s h0 h1 =
   assert (repr_eq (repr s h0) (repr s h1))
 
 inline_for_extraction noextract
+[@@strict_on_arguments [0]]
 let alloca a =
   let s: state_s a =
     match a with
@@ -253,6 +256,7 @@ let alloca a =
   in
   B.alloca s 1ul
 
+[@@strict_on_arguments [0]]
 let create_in a r =
   let h0 = ST.get () in
   let s: state_s a =
