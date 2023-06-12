@@ -121,10 +121,16 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_load64_le(x0) \
   (_mm_loadu_si128((__m128i*)(x0)))
 
+#define Lib_IntVector_Intrinsics_vec128_load128_le(x0) \
+  (_mm_loadu_si128((__m128i*)(x0)))
+
 #define Lib_IntVector_Intrinsics_vec128_store32_le(x0, x1) \
   (_mm_storeu_si128((__m128i*)(x0), x1))
 
 #define Lib_IntVector_Intrinsics_vec128_store64_le(x0, x1) \
+  (_mm_storeu_si128((__m128i*)(x0), x1))
+
+#define Lib_IntVector_Intrinsics_vec128_store128_le(x0, x1) \
   (_mm_storeu_si128((__m128i*)(x0), x1))
 
 #define Lib_IntVector_Intrinsics_vec128_load_be(x0)		\

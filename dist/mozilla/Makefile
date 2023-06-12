@@ -49,6 +49,11 @@ include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
 
+CFLAGS_AES_NI = -maes -mpclmul -msse4.1
+Hacl_AES_128_NI.o Hacl_AES_256_NI.o: CFLAGS += $(CFLAGS_AES_NI)
+Hacl_Gf128_NI.o Hacl_Impl_Gf128_FieldNI.o: CFLAGS += $(CFLAGS_AES_NI)
+Hacl_AES_128_GCM_NI.o Hacl_AES_256_GCM_NI.o: CFLAGS += $(CFLAGS_AES_NI)
+
 Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_Hash_Blake2s_128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_Streaming_Blake2s_128.o Hacl_SHA2_Vec128.o: CFLAGS += $(CFLAGS_128)
 Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Hash_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o Hacl_SHA2_Vec256.o: CFLAGS += $(CFLAGS_256)
 
