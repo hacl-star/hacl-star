@@ -15,6 +15,9 @@ EXPORTS
   Hacl_Blake2s_32_blake2s_finish
   Hacl_Blake2s_32_blake2s
   Hacl_Blake2s_32_blake2s_malloc
+  Lib_Transposition64x8_transpose_bits64
+  Lib_Transposition64x8_transpose_bits64x8
+  Lib_Transposition64x8_transpose_bits64x8_inv
   Hacl_Blake2b_256_blake2b_init
   Hacl_Blake2b_256_blake2b_update_key
   Hacl_Blake2b_256_blake2b_update_multi
@@ -389,6 +392,47 @@ EXPORTS
   Hacl_FFDHE_ffdhe_secret_to_public
   Hacl_FFDHE_ffdhe_shared_secret_precomp
   Hacl_FFDHE_ffdhe_shared_secret
+  Hacl_Impl_AES_CoreBitSlice_store_block0
+  Hacl_Impl_AES_CoreBitSlice_load_key1
+  Hacl_Impl_AES_CoreBitSlice_load_nonce
+  Hacl_Impl_AES_CoreBitSlice_load_state
+  Hacl_Impl_AES_CoreBitSlice_xor_state_key1
+  Hacl_Impl_AES_CoreBitSlice_aes_enc
+  Hacl_Impl_AES_CoreBitSlice_aes_enc_last
+  Hacl_Impl_AES_CoreBitSlice_aes_keygen_assist
+  Hacl_Impl_AES_CoreBitSlice_key_expansion_step
+  Hacl_Impl_AES_Generic_aes128_ctr_bitslice
+  Hacl_Impl_AES_Generic_aes256_ctr_bitslice
+  Hacl_AES_128_BitSlice_aes128_init
+  Hacl_AES_128_BitSlice_aes128_set_nonce
+  Hacl_AES_128_BitSlice_aes128_key_block
+  Hacl_AES_128_BitSlice_aes128_ctr_encrypt
+  Hacl_AES_128_BitSlice_aes128_ctr_decrypt
+  Hacl_AES_128_NI_aes128_init
+  Hacl_AES_128_NI_aes128_set_nonce
+  Hacl_AES_128_NI_aes128_key_block
+  Hacl_AES_128_NI_aes128_ctr_encrypt
+  Hacl_AES_128_NI_aes128_ctr_decrypt
+  Hacl_AES_256_BitSlice_aes256_init
+  Hacl_AES_256_BitSlice_aes256_set_nonce
+  Hacl_AES_256_BitSlice_aes256_key_block
+  Hacl_AES_256_BitSlice_aes256_ctr
+  Hacl_AES_256_BitSlice_aes256_ctr_encrypt
+  Hacl_AES_256_BitSlice_aes256_ctr_decrypt
+  Hacl_AES_256_NI_aes256_init
+  Hacl_AES_256_NI_aes256_set_nonce
+  Hacl_AES_256_NI_aes256_key_block
+  Hacl_AES_256_NI_aes256_ctr
+  Hacl_AES_256_NI_aes256_ctr_encrypt
+  Hacl_AES_256_NI_aes256_ctr_decrypt
+  Hacl_Impl_Gf128_FieldPreComp_fmul
+  Hacl_Impl_Gf128_FieldPreComp_load_precompute_r
+  Hacl_Impl_Gf128_FieldPreComp_fmul_r4
+  Hacl_Impl_Gf128_FieldPreComp_normalize4
+  Hacl_Gf128_NI_gcm_init
+  Hacl_Gf128_NI_gcm_update_blocks
+  Hacl_Gf128_NI_gcm_emit
+  Hacl_Gf128_NI_ghash
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
@@ -442,6 +486,9 @@ EXPORTS
   Hacl_GenericField32_exp_consttime
   Hacl_GenericField32_exp_vartime
   Hacl_GenericField32_inverse
+  Hacl_AES_128_GCM_NI_aes128_gcm_init
+  Hacl_AES_128_GCM_NI_aes128_gcm_encrypt
+  Hacl_AES_128_GCM_NI_aes128_gcm_decrypt
   Hacl_SHA2_Vec256_sha224_8
   Hacl_SHA2_Vec256_sha256_8
   Hacl_SHA2_Vec256_sha384_4
@@ -487,13 +534,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod
@@ -586,6 +633,13 @@ EXPORTS
   Hacl_Streaming_Poly1305_256_update
   Hacl_Streaming_Poly1305_256_finish
   Hacl_Streaming_Poly1305_256_free
+  Hacl_Gf128_PreComp_gcm_init
+  Hacl_Gf128_PreComp_gcm_update_blocks
+  Hacl_Gf128_PreComp_gcm_emit
+  Hacl_Gf128_PreComp_ghash
+  Hacl_AES_128_GCM_M32_aes128_gcm_init
+  Hacl_AES_128_GCM_M32_aes128_gcm_encrypt
+  Hacl_AES_128_GCM_M32_aes128_gcm_decrypt
   Hacl_Frodo1344_crypto_kem_keypair
   Hacl_Frodo1344_crypto_kem_enc
   Hacl_Frodo1344_crypto_kem_dec
@@ -620,6 +674,9 @@ EXPORTS
   Hacl_Bignum32_bn_to_bytes_le
   Hacl_Bignum32_lt_mask
   Hacl_Bignum32_eq_mask
+  Hacl_AES_256_GCM_NI_aes256_gcm_init
+  Hacl_AES_256_GCM_NI_aes256_gcm_encrypt
+  Hacl_AES_256_GCM_NI_aes256_gcm_decrypt
   Hacl_HPKE_Curve51_CP128_SHA256_setupBaseS
   Hacl_HPKE_Curve51_CP128_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP128_SHA256_sealBase
@@ -663,6 +720,9 @@ EXPORTS
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
   EverCrypt_Poly1305_poly1305
+  Hacl_AES_256_GCM_M32_aes256_gcm_init
+  Hacl_AES_256_GCM_M32_aes256_gcm_encrypt
+  Hacl_AES_256_GCM_M32_aes256_gcm_decrypt
   Hacl_Streaming_Poly1305_32_create_in
   Hacl_Streaming_Poly1305_32_init
   Hacl_Streaming_Poly1305_32_update
