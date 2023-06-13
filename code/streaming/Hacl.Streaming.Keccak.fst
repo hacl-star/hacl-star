@@ -185,7 +185,7 @@ let hacl_keccak (a: G.erased alg): block alg =
       Hacl.Hash.SHA3.(finish_keccak a s dst l))
 
 // For pretty names in C
-let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256
+let state_t = F.state_s' (hacl_keccak SHA3_256) SHA3_256
 
 let sha3_state a = singleton a & b:B.buffer uint64 { B.len b == 25ul }
 
