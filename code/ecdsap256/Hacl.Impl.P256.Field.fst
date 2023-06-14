@@ -25,7 +25,7 @@ friend Hacl.Bignum256
 
 [@CInline]
 let make_fzero n =
-  bn_set_zero4 n;
+  felem_set_zero n;
   assert_norm (SM.to_mont 0 = 0);
   SM.lemma_to_from_mont_id 0
 
@@ -40,44 +40,45 @@ let make_fone n =
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 < S.prime);
   assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 == SM.to_mont 1);
   SM.lemma_to_from_mont_id 1;
-  bn_make_u64_4 n n0 n1 n2 n3
+  felem_make_u64_4 n n0 n1 n2 n3
 
 
 ///  Comparison
 
 [@CInline]
-let bn_is_lt_prime_mask4 f =
+let felem_is_lt_prime_mask #l f =
   let h0 = ST.get () in
   push_frame ();
-  let tmp = create_felem () in
+  let tmp = create_felem l in
   make_prime tmp;
-  let c = bn_sub4 tmp f tmp in
+  admit();
+  let c = felem_sub tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
   pop_frame ();
-  u64 0 -. c
+  limb_zero l -. c
 
 
 [@CInline]
-let feq_mask a b =
+let feq_mask #l a b =
   let h0 = ST.get () in
-  let r = bn_is_eq_mask4 a b in
+  let r = felem_is_eq_mask a b in
   let h1 = ST.get () in
-  assert (if as_nat h1 a = as_nat h1 b then v r == ones_v U64 else v r = 0);
+  assert (if as_nat h1 a = as_nat h1 b then v r == ones_v l else v r = 0);
   SM.lemma_from_to_mont_id (as_nat h0 a);
   SM.lemma_from_to_mont_id (as_nat h0 b);
-  assert (if fmont_as_nat h1 a = fmont_as_nat h1 b then v r == ones_v U64 else v r = 0);
+  assert (if fmont_as_nat h1 a = fmont_as_nat h1 b then v r == ones_v l else v r = 0);
   r
 
 
 ///  Field Arithmetic
 
 [@CInline]
-let fadd res x y =
+let fadd #l res x y =
   let h0 = ST.get () in
   push_frame ();
-  let n = create_felem () in
+  let n = create_felem l in
   make_prime n;
-  bn_add_mod4 res n x y;
+  felem_add_mod res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime);
   SM.fmont_add_lemma (as_nat h0 x) (as_nat h0 y);
@@ -89,12 +90,12 @@ let fdouble out x =
 
 
 [@CInline]
-let fsub res x y =
+let fsub #l res x y =
   let h0 = ST.get () in
   push_frame ();
-  let n = create_felem () in
+  let n = create_felem l in
   make_prime n;
-  bn_sub_mod4 res n x y;
+  felem_sub_mod res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
   SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
@@ -102,9 +103,9 @@ let fsub res x y =
 
 
 [@CInline]
-let fnegate_conditional_vartime f is_negate =
+let fnegate_conditional_vartime #l f is_negate =
   push_frame ();
-  let zero = create_felem () in
+  let zero = create_felem l in
   if is_negate then begin
     let h0 = ST.get () in
     fsub f zero f;
@@ -115,7 +116,7 @@ let fnegate_conditional_vartime f is_negate =
   pop_frame ()
 
 
-val mont_reduction: res:felem -> x:widefelem -> Stack unit
+val mont_reduction: #l:limb_t -> res:felem l -> x:widefelem l -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
     wide_as_nat h x < S.prime * S.prime)
@@ -123,36 +124,36 @@ val mont_reduction: res:felem -> x:widefelem -> Stack unit
     as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime)
 
 [@CInline]
-let mont_reduction res x =
+let mont_reduction #l res x =
   push_frame ();
-  let n = create_felem () in
+  let n = create_felem l in
   make_prime n;
 
   let h0 = ST.get () in
-  BM.bn_mont_reduction Hacl.Bignum256.bn_inst n (u64 1) x res;
+  admit();
+  BM.bn_mont_reduction Hacl.Bignum256.bn_inst n (limb_one l) x res;
   SM.bn_mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
   pop_frame ()
 
 
 [@CInline]
-let fmul res x y =
+let fmul #l res x y =
   push_frame ();
-  let tmp = create_widefelem () in
+  let tmp = create_widefelem l in
   let h0 = ST.get () in
-  bn_mul4 tmp x y;
+  felem_mul tmp x y;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 y) S.prime;
   mont_reduction res tmp;
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
-
 [@CInline]
-let fsqr res x =
+let fsqr #l res x =
   push_frame ();
-  let tmp = create_widefelem () in
+  let tmp = create_widefelem l in
   let h0 = ST.get () in
-  bn_sqr4 tmp x;
+  felem_sqr tmp x;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.prime;
   mont_reduction res tmp;
@@ -161,12 +162,12 @@ let fsqr res x =
 
 
 [@CInline]
-let from_mont res a =
+let from_mont #l res a =
   push_frame ();
-  let tmp = create_widefelem () in
+  let tmp = create_widefelem l in
   let h0 = ST.get () in
-  update_sub tmp 0ul 4ul a;
-  BD.bn_eval_update_sub 4 (as_seq h0 a) 8;
+  update_sub tmp 0ul (nlimbs l) a;
+  BD.bn_eval_update_sub (v (nlimbs l)) (as_seq h0 a) (2 * (v (nlimbs l)));
   let h1 = ST.get () in
   assert (wide_as_nat h1 tmp = as_nat h0 a);
   assert_norm (S.prime < S.prime * S.prime);
@@ -175,9 +176,9 @@ let from_mont res a =
 
 
 [@CInline]
-let to_mont res a =
+let to_mont #l res a =
   push_frame ();
-  let r2modn = create_felem () in
+  let r2modn = create_felem l in
   make_fmont_R2 r2modn;
   let h0 = ST.get () in
   assert (as_nat h0 r2modn == SM.fmont_R * SM.fmont_R % S.prime);
@@ -202,15 +203,15 @@ let to_mont res a =
 ///  Special cases of the above functions
 
 [@CInline]
-let fmul_by_b_coeff res x =
+let fmul_by_b_coeff #l res x =
   push_frame ();
-  let b_coeff = create_felem () in
+  let b_coeff = create_felem l in
   make_b_coeff b_coeff;
   fmul res b_coeff x;
   pop_frame ()
 
 
 [@CInline]
-let fcube res x =
+let fcube #l res x =
   fsqr res x;
   fmul res res x

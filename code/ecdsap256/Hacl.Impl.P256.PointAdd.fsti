@@ -1,3 +1,4 @@
+
 module Hacl.Impl.P256.PointAdd
 
 open FStar.HyperStack.All
@@ -7,13 +8,14 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Impl.P256.Bignum
 open Hacl.Impl.P256.Point
 
 module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val point_add: res:point -> p:point -> q:point -> Stack unit
+val point_add: #l:limb_t -> res:point l -> p:point l -> q:point l -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h res /\
     eq_or_disjoint p q /\ eq_or_disjoint q res /\ eq_or_disjoint p res /\
