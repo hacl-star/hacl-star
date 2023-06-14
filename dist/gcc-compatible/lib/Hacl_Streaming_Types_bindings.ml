@@ -2,6 +2,17 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    type hacl_Streaming_Types_error_code = Unsigned.UInt8.t
+    let hacl_Streaming_Types_error_code =
+      typedef uint8_t "Hacl_Streaming_Types_error_code"
+    let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_Success =
+      Unsigned.UInt8.of_int 0
+    let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_InvalidAlgorithm
+      = Unsigned.UInt8.of_int 1
+    let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_InvalidLength =
+      Unsigned.UInt8.of_int 2
+    let hacl_Streaming_Types_error_code_Hacl_Streaming_Types_MaximumLengthExceeded
+      = Unsigned.UInt8.of_int 3
     type hacl_Streaming_MD_state_32 =
       [ `hacl_Streaming_MD_state_32 ] structure
     let (hacl_Streaming_MD_state_32 :

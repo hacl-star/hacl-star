@@ -42,9 +42,9 @@ val hash:
 [@CInline]
 let hash a mHash msgLen msg =
   match a with
-  | Hash.SHA2_256 -> Hacl.Hash.SHA2.hash_256 mHash msg msgLen
-  | Hash.SHA2_384 -> Hacl.Hash.SHA2.hash_384 mHash msg msgLen
-  | Hash.SHA2_512 -> Hacl.Hash.SHA2.hash_512 mHash msg msgLen
+  | Hash.SHA2_256 -> Hacl.Streaming.SHA2.hash_256 mHash msg msgLen
+  | Hash.SHA2_384 -> Hacl.Streaming.SHA2.hash_384 mHash msg msgLen
+  | Hash.SHA2_512 -> Hacl.Streaming.SHA2.hash_512 mHash msg msgLen
 
 
 (* Mask Generation Function *)

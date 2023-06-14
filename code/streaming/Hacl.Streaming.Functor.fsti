@@ -418,14 +418,15 @@ let update_st
   s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
-  Stack UInt32.t
+  Stack Hacl.Streaming.Types.error_code
     (requires fun h0 -> update_pre c i s data len h0)
     (ensures fun h0 s' h1 ->
+      let open Hacl.Streaming.Types in
       match s' with
-      | 0ul ->
+      | Success ->
           U32.v (c.init_input_len i) + S.length (seen c i h0 s) + UInt32.v len <= U64.v (c.max_input_len i) /\
           update_post c i s data len h0 h1
-      | 1ul ->
+      | MaximumLengthExceeded ->
           U32.v (c.init_input_len i) + S.length (seen c i h0 s) + UInt32.v len > U64.v (c.max_input_len i) /\
           h0 == h1
       | _ ->

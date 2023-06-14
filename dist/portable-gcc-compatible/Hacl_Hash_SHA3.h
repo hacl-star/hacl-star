@@ -92,7 +92,7 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *state1);
 
 /* SNIPPET_START: Hacl_Streaming_Keccak_update */
 
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_update(
   Hacl_Streaming_Keccak_state *state1,
   uint8_t *chunk,
@@ -101,26 +101,16 @@ Hacl_Streaming_Keccak_update(
 
 /* SNIPPET_END: Hacl_Streaming_Keccak_update */
 
-/* SNIPPET_START: Hacl_Streaming_Keccak_error_code */
-
-#define Hacl_Streaming_Keccak_Success 0
-#define Hacl_Streaming_Keccak_InvalidAlgorithm 1
-#define Hacl_Streaming_Keccak_InvalidLength 2
-
-/* SNIPPET_END: Hacl_Streaming_Keccak_error_code */
-
-typedef uint8_t Hacl_Streaming_Keccak_error_code;
-
 /* SNIPPET_START: Hacl_Streaming_Keccak_digest */
 
-Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_digest(Hacl_Streaming_Keccak_state *state1, uint8_t *output);
 
 /* SNIPPET_END: Hacl_Streaming_Keccak_digest */
 
 /* SNIPPET_START: Hacl_Streaming_Keccak_squeeze */
 
-Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_squeeze(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l);
 
 /* SNIPPET_END: Hacl_Streaming_Keccak_squeeze */

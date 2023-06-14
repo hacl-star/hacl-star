@@ -672,6 +672,7 @@ val blake2_finish:#al:Spec.alg -> #ms:m_spec -> blake2_finish_st al ms
 
 let blake2_finish #al #ms nn output hash =
   let h0 = ST.get () in
+  [@inline_let]
   let double_row = 2ul *. size_row al in
   [@inline_let]
   let spec _ h1 = h1.[|output|] == Spec.blake2_finish al (state_v h0 hash) (v nn) in

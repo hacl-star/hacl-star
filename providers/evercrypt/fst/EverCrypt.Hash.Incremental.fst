@@ -53,9 +53,11 @@ let agile_state: stateful Hash.alg =
 
 include EverCrypt.Hash.Incremental.Macros
 
+#push-options "--ifuel 1"
+
 (* Adding some non-inlined definitions to factorize code. This one is public
    because it's used by the WASM API, and is generally useful to callers. *)
-let hash_len a: (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
+let hash_len (a:Hash.alg) : (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
   match a with
   | MD5 -> md5_hash_len
   | SHA1 -> sha1_hash_len
@@ -69,6 +71,8 @@ let hash_len a: (x:UInt32.t { UInt32.v x == Spec.Agile.Hash.hash_length a }) =
   | SHA3_512 -> sha3_512_hash_len
   | Blake2S -> blake2s_hash_len
   | Blake2B -> blake2b_hash_len
+
+#pop-options
 
 private
 let block_len a = Hacl.Hash.Definitions.block_len a
@@ -101,9 +105,7 @@ let evercrypt_hash : block Hash.alg =
     (stateful_unused Hash.alg)
 
     unit
-
-    (* TODO: this general max length definition shouldn't be in the MD file! *)
-    Hacl.Streaming.MD.max_input_len64
+    Hacl.Hash.Definitions.max_input_len64
     (fun a () -> Spec.Hash.Definitions.hash_length a)
     block_len
     block_len // No vectorization
@@ -187,8 +189,8 @@ let update (i: G.erased Hash.alg)
       | _ -> False)
 =
   match F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit) state chunk chunk_len with
-  | 0ul -> EverCrypt.Error.Success
-  | 1ul -> EverCrypt.Error.MaximumLengthExceeded
+  | Hacl.Streaming.Types.Success -> EverCrypt.Error.Success
+  | Hacl.Streaming.Types.MaximumLengthExceeded -> EverCrypt.Error.MaximumLengthExceeded
 
 inline_for_extraction noextract
 let digest_st a = F.digest_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
@@ -261,8 +263,9 @@ val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 // A full one-shot hash that relies on vale at each multiplexing point
 let hash_256 output input input_len =
   let open EverCrypt.Hash in
+  // TODO: This function now only exists for SHA1 and MD5
   Hacl.Hash.MD.mk_hash SHA2_256 Hacl.Hash.SHA2.alloca_256 update_multi_256
-    update_last_256 Hacl.Hash.SHA2.finish_256 output input input_len
+    Hacl.Hash.SHA2.update_last_256 Hacl.Hash.SHA2.finish_256 output input input_len
 
 private
 val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
@@ -270,7 +273,7 @@ val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
 let hash_224 output input input_len =
   let open EverCrypt.Hash in
   Hacl.Hash.MD.mk_hash SHA2_224 Hacl.Hash.SHA2.alloca_224 update_multi_224
-    update_last_224 Hacl.Hash.SHA2.finish_224 output input input_len
+    Hacl.Hash.SHA2.update_last_224 Hacl.Hash.SHA2.finish_224 output input input_len
 
 // Public API (one-shot, agile and multiplexing)
 // ---------------------------------------------
@@ -308,8 +311,8 @@ let hash a output input input_len =
   | SHA1 -> Hacl.Hash.SHA1.hash_oneshot output input input_len
   | SHA2_224 -> hash_224 output input input_len
   | SHA2_256 -> hash_256 output input input_len
-  | SHA2_384 -> Hacl.Hash.SHA2.hash_384 output input input_len
-  | SHA2_512 -> Hacl.Hash.SHA2.hash_512 output input input_len
+  | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 output input input_len
+  | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 output input input_len
   | SHA3_224 -> Hacl.Hash.SHA3.hash SHA3_224 output input input_len
   | SHA3_256 -> Hacl.Hash.SHA3.hash SHA3_256 output input input_len
   | SHA3_384 -> Hacl.Hash.SHA3.hash SHA3_384 output input input_len

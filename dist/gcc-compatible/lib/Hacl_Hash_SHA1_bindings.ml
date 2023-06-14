@@ -32,7 +32,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_SHA1_update =
       foreign "Hacl_Hash_SHA1_update"
         ((ptr hacl_Streaming_MD_state_32) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Hash_SHA1_digest =
       foreign "Hacl_Hash_SHA1_digest"
         ((ptr hacl_Streaming_MD_state_32) @->

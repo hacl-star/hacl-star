@@ -210,8 +210,7 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_
   *p = (Hacl_Streaming_Keccak_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Keccak_state));
   p[0U] = s;
   uint64_t *s1 = block_state.snd;
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    ((void **)s1)[_i] = (void *)(uint64_t)0U;
+  memset(s1, 0U, (uint32_t)25U * sizeof (uint64_t));
   return p;
 }
 
@@ -268,8 +267,7 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *state1)
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Keccak_hash_buf block_state = scrut.block_state;
   uint64_t *s = block_state.snd;
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    ((void **)s)[_i] = (void *)(uint64_t)0U;
+  memset(s, 0U, (uint32_t)25U * sizeof (uint64_t));
   Hacl_Streaming_Keccak_state
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   state1[0U] = tmp;
@@ -279,7 +277,7 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *state1)
 
 /* SNIPPET_START: Hacl_Streaming_Keccak_update */
 
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_update(
   Hacl_Streaming_Keccak_state *state1,
   uint8_t *chunk,
@@ -290,9 +288,9 @@ Hacl_Streaming_Keccak_update(
   Hacl_Streaming_Keccak_hash_buf block_state = s.block_state;
   uint64_t total_len = s.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
-  if ((uint64_t)chunk_len > (uint64_t)0xffffffffffffffffU - total_len)
+  if ((uint64_t)chunk_len > (uint64_t)0xFFFFFFFFFFFFFFFFU - total_len)
   {
-    return (uint32_t)1U;
+    return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   uint32_t sz;
   if (total_len % (uint64_t)block_len(i) == (uint64_t)0U && total_len > (uint64_t)0U)
@@ -471,7 +469,7 @@ Hacl_Streaming_Keccak_update(
         }
       );
   }
-  return (uint32_t)0U;
+  return Hacl_Streaming_Types_Success;
 }
 
 /* SNIPPET_END: Hacl_Streaming_Keccak_update */
@@ -506,16 +504,16 @@ digest_(
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
   memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
-  uint32_t ite0;
+  uint32_t ite;
   if (r % block_len(a) == (uint32_t)0U && r > (uint32_t)0U)
   {
-    ite0 = block_len(a);
+    ite = block_len(a);
   }
   else
   {
-    ite0 = r % block_len(a);
+    ite = r % block_len(a);
   }
-  uint8_t *buf_last = buf_1 + r - ite0;
+  uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
   Spec_Hash_Definitions_hash_alg a1 = tmp_block_state.fst;
   uint64_t *s0 = tmp_block_state.snd;
@@ -527,16 +525,7 @@ digest_(
   uint64_t *s = tmp_block_state.snd;
   if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
   {
-    uint32_t ite;
-    if (a11 == Spec_Hash_Definitions_Shake128 || a11 == Spec_Hash_Definitions_Shake256)
-    {
-      ite = l;
-    }
-    else
-    {
-      ite = hash_len(a11);
-    }
-    Hacl_Impl_SHA3_squeeze(s, block_len(a11), ite, output);
+    Hacl_Impl_SHA3_squeeze(s, block_len(a11), l, output);
     return;
   }
   Hacl_Impl_SHA3_squeeze(s, block_len(a11), hash_len(a11), output);
@@ -546,36 +535,36 @@ digest_(
 
 /* SNIPPET_START: Hacl_Streaming_Keccak_digest */
 
-Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_digest(Hacl_Streaming_Keccak_state *state1, uint8_t *output)
 {
   Spec_Hash_Definitions_hash_alg a1 = Hacl_Streaming_Keccak_get_alg(state1);
   if (a1 == Spec_Hash_Definitions_Shake128 || a1 == Spec_Hash_Definitions_Shake256)
   {
-    return Hacl_Streaming_Keccak_InvalidAlgorithm;
+    return Hacl_Streaming_Types_InvalidAlgorithm;
   }
   digest_(a1, state1, output, hash_len(a1));
-  return Hacl_Streaming_Keccak_Success;
+  return Hacl_Streaming_Types_Success;
 }
 
 /* SNIPPET_END: Hacl_Streaming_Keccak_digest */
 
 /* SNIPPET_START: Hacl_Streaming_Keccak_squeeze */
 
-Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_squeeze(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l)
 {
   Spec_Hash_Definitions_hash_alg a1 = Hacl_Streaming_Keccak_get_alg(s);
   if (!(a1 == Spec_Hash_Definitions_Shake128 || a1 == Spec_Hash_Definitions_Shake256))
   {
-    return Hacl_Streaming_Keccak_InvalidAlgorithm;
+    return Hacl_Streaming_Types_InvalidAlgorithm;
   }
   if (l == (uint32_t)0U)
   {
-    return Hacl_Streaming_Keccak_InvalidLength;
+    return Hacl_Streaming_Types_InvalidLength;
   }
   digest_(a1, s, dst, l);
-  return Hacl_Streaming_Keccak_Success;
+  return Hacl_Streaming_Types_Success;
 }
 
 /* SNIPPET_END: Hacl_Streaming_Keccak_squeeze */

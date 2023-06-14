@@ -1466,7 +1466,7 @@ void Hacl_MAC_Poly1305_Simd128_reset(Hacl_MAC_Poly1305_Simd128_state_t *state, u
 /**
 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_MAC_Poly1305_Simd128_update(
   Hacl_MAC_Poly1305_Simd128_state_t *state,
   uint8_t *chunk,
@@ -1477,7 +1477,7 @@ Hacl_MAC_Poly1305_Simd128_update(
   uint64_t total_len = s.total_len;
   if ((uint64_t)chunk_len > (uint64_t)0xffffffffU - total_len)
   {
-    return (uint32_t)1U;
+    return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   uint32_t sz;
   if (total_len % (uint64_t)(uint32_t)32U == (uint64_t)0U && total_len > (uint64_t)0U)
@@ -1656,7 +1656,7 @@ Hacl_MAC_Poly1305_Simd128_update(
         }
       );
   }
-  return (uint32_t)0U;
+  return Hacl_Streaming_Types_Success;
 }
 
 /* SNIPPET_END: Hacl_MAC_Poly1305_Simd128_update */

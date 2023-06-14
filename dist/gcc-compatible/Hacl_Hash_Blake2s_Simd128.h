@@ -36,6 +36,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Lib_Memzero0.h"
+#include "Hacl_Streaming_Types.h"
 #include "libintvector.h"
 
 typedef struct Hacl_Hash_Blake2s_Simd128_block_state_t_s
@@ -66,7 +67,7 @@ void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state);
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2s_Simd128_update(
   Hacl_Hash_Blake2s_Simd128_state_t *state,
   uint8_t *chunk,

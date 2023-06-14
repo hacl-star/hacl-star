@@ -46,18 +46,18 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
-    Hacl_Chacha20Poly1305_256_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+    Hacl_AEAD_Chacha20Poly1305_Simd256_encrypt(cipher, tag, m, mlen, aad, aadlen, k, n);
     return;
   }
   #endif
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
-    Hacl_Chacha20Poly1305_128_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+    Hacl_AEAD_Chacha20Poly1305_Simd128_encrypt(cipher, tag, m, mlen, aad, aadlen, k, n);
     return;
   }
   #endif
-  Hacl_Chacha20Poly1305_32_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+  Hacl_AEAD_Chacha20Poly1305_encrypt(cipher, tag, m, mlen, aad, aadlen, k, n);
 }
 
 uint32_t
@@ -79,15 +79,15 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
-    return Hacl_Chacha20Poly1305_256_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+    return Hacl_AEAD_Chacha20Poly1305_Simd256_decrypt(m, cipher, mlen, aad, aadlen, k, n, tag);
   }
   #endif
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
-    return Hacl_Chacha20Poly1305_128_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+    return Hacl_AEAD_Chacha20Poly1305_Simd128_decrypt(m, cipher, mlen, aad, aadlen, k, n, tag);
   }
   #endif
-  return Hacl_Chacha20Poly1305_32_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+  return Hacl_AEAD_Chacha20Poly1305_decrypt(m, cipher, mlen, aad, aadlen, k, n, tag);
 }
 

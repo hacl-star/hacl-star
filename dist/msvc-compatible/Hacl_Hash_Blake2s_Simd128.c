@@ -356,10 +356,7 @@ Hacl_Hash_Blake2s_Simd128_finish(
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
-  uint32_t double_row = (uint32_t)32U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t *b = (uint8_t *)alloca(double_row * sizeof (uint8_t));
-  memset(b, 0U, double_row * sizeof (uint8_t));
+  uint8_t b[32U] = { 0U };
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)16U;
   Lib_IntVector_Intrinsics_vec128 *row0 = hash;
@@ -368,7 +365,7 @@ Hacl_Hash_Blake2s_Simd128_finish(
   Lib_IntVector_Intrinsics_vec128_store32_le(second, row1[0U]);
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)32U * sizeof (b[0U]));
 }
 
 void
@@ -511,7 +508,7 @@ void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state)
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2s_Simd128_update(
   Hacl_Hash_Blake2s_Simd128_state_t *state,
   uint8_t *chunk,
@@ -522,7 +519,7 @@ Hacl_Hash_Blake2s_Simd128_update(
   uint64_t total_len = s.total_len;
   if ((uint64_t)chunk_len > (uint64_t)0xffffffffffffffffU - total_len)
   {
-    return (uint32_t)1U;
+    return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   uint32_t sz;
   if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
@@ -707,7 +704,7 @@ Hacl_Hash_Blake2s_Simd128_update(
         }
       );
   }
-  return (uint32_t)0U;
+  return Hacl_Streaming_Types_Success;
 }
 
 /**

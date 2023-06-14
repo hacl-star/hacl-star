@@ -26,6 +26,7 @@
 #ifndef __Hacl_Test_HMAC_DRBG_H
 #define __Hacl_Test_HMAC_DRBG_H
 
+#include "internal/Hacl_Hash_SHA2.h"
 #include "krmllib.h"
 #include "libintvector.h"
 

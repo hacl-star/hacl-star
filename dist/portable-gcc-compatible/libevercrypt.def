@@ -65,27 +65,47 @@ EXPORTS
   Hacl_Hash_SHA1_free
   Hacl_Hash_SHA1_copy
   Hacl_Hash_SHA1_hash
-  Hacl_Hash_Core_SHA2_init_224
-  Hacl_Hash_Core_SHA2_init_256
-  Hacl_Hash_Core_SHA2_init_384
-  Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_pad_256
-  Hacl_Hash_Core_SHA2_finish_224
-  Hacl_Hash_Core_SHA2_finish_256
-  Hacl_Hash_Core_SHA2_finish_384
-  Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_SHA2_update_multi_224
-  Hacl_Hash_SHA2_update_multi_256
-  Hacl_Hash_SHA2_update_multi_384
-  Hacl_Hash_SHA2_update_multi_512
-  Hacl_Hash_SHA2_update_last_224
-  Hacl_Hash_SHA2_update_last_256
-  Hacl_Hash_SHA2_update_last_384
-  Hacl_Hash_SHA2_update_last_512
-  Hacl_Hash_SHA2_hash_224
-  Hacl_Hash_SHA2_hash_256
-  Hacl_Hash_SHA2_hash_384
-  Hacl_Hash_SHA2_hash_512
+  Hacl_SHA2_Scalar32_sha256_init
+  Hacl_SHA2_Scalar32_sha256_update_nblocks
+  Hacl_SHA2_Scalar32_sha256_update_last
+  Hacl_SHA2_Scalar32_sha256_finish
+  Hacl_SHA2_Scalar32_sha224_init
+  Hacl_SHA2_Scalar32_sha224_update_last
+  Hacl_SHA2_Scalar32_sha224_finish
+  Hacl_SHA2_Scalar32_sha512_init
+  Hacl_SHA2_Scalar32_sha512_update_nblocks
+  Hacl_SHA2_Scalar32_sha512_update_last
+  Hacl_SHA2_Scalar32_sha512_finish
+  Hacl_SHA2_Scalar32_sha384_init
+  Hacl_SHA2_Scalar32_sha384_update_nblocks
+  Hacl_SHA2_Scalar32_sha384_update_last
+  Hacl_SHA2_Scalar32_sha384_finish
+  Hacl_Streaming_SHA2_malloc_256
+  Hacl_Streaming_SHA2_copy_256
+  Hacl_Streaming_SHA2_reset_256
+  Hacl_Streaming_SHA2_update_256
+  Hacl_Streaming_SHA2_digest_256
+  Hacl_Streaming_SHA2_free_256
+  Hacl_Streaming_SHA2_hash_256
+  Hacl_Streaming_SHA2_malloc_224
+  Hacl_Streaming_SHA2_reset_224
+  Hacl_Streaming_SHA2_update_224
+  Hacl_Streaming_SHA2_digest_224
+  Hacl_Streaming_SHA2_free_224
+  Hacl_Streaming_SHA2_hash_224
+  Hacl_Streaming_SHA2_malloc_512
+  Hacl_Streaming_SHA2_copy_512
+  Hacl_Streaming_SHA2_reset_512
+  Hacl_Streaming_SHA2_update_512
+  Hacl_Streaming_SHA2_digest_512
+  Hacl_Streaming_SHA2_free_512
+  Hacl_Streaming_SHA2_hash_512
+  Hacl_Streaming_SHA2_malloc_384
+  Hacl_Streaming_SHA2_reset_384
+  Hacl_Streaming_SHA2_update_384
+  Hacl_Streaming_SHA2_digest_384
+  Hacl_Streaming_SHA2_free_384
+  Hacl_Streaming_SHA2_hash_384
   Hacl_HMAC_compute_sha1
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
@@ -157,7 +177,6 @@ EXPORTS
   EverCrypt_AutoConfig2_has_vec128
   EverCrypt_AutoConfig2_has_vec256
   EverCrypt_Hash_update_multi_256
-  EverCrypt_Hash_update_last_256
   EverCrypt_Hash_Incremental_hash_len
   EverCrypt_Hash_Incremental_malloc
   EverCrypt_Hash_Incremental_reset
@@ -242,33 +261,44 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_SHA2_Scalar32_sha512_init
-  Hacl_Streaming_SHA2_malloc_256
-  Hacl_Streaming_SHA2_copy_256
-  Hacl_Streaming_SHA2_reset_256
-  Hacl_Streaming_SHA2_update_256
-  Hacl_Streaming_SHA2_digest_256
-  Hacl_Streaming_SHA2_free_256
-  Hacl_Streaming_SHA2_sha256
-  Hacl_Streaming_SHA2_malloc_224
-  Hacl_Streaming_SHA2_reset_224
-  Hacl_Streaming_SHA2_update_224
-  Hacl_Streaming_SHA2_digest_224
-  Hacl_Streaming_SHA2_free_224
-  Hacl_Streaming_SHA2_sha224
-  Hacl_Streaming_SHA2_malloc_512
-  Hacl_Streaming_SHA2_copy_512
-  Hacl_Streaming_SHA2_reset_512
-  Hacl_Streaming_SHA2_update_512
-  Hacl_Streaming_SHA2_digest_512
-  Hacl_Streaming_SHA2_free_512
-  Hacl_Streaming_SHA2_sha512
-  Hacl_Streaming_SHA2_malloc_384
-  Hacl_Streaming_SHA2_reset_384
-  Hacl_Streaming_SHA2_update_384
-  Hacl_Streaming_SHA2_digest_384
-  Hacl_Streaming_SHA2_free_384
-  Hacl_Streaming_SHA2_sha384
+  Hacl_MAC_Poly1305_poly1305_init
+  Hacl_MAC_Poly1305_poly1305_finish
+  Hacl_MAC_Poly1305_malloc
+  Hacl_MAC_Poly1305_reset
+  Hacl_MAC_Poly1305_update
+  Hacl_MAC_Poly1305_digest
+  Hacl_MAC_Poly1305_free
+  Hacl_MAC_Poly1305_mac
+  Hacl_AEAD_Chacha20Poly1305_encrypt
+  Hacl_AEAD_Chacha20Poly1305_decrypt
+  Hacl_MAC_Poly1305_Simd128_load_acc2
+  Hacl_MAC_Poly1305_Simd128_fmul_r2_normalize
+  Hacl_MAC_Poly1305_Simd128_poly1305_init
+  Hacl_MAC_Poly1305_Simd128_poly1305_finish
+  Hacl_MAC_Poly1305_Simd128_malloc
+  Hacl_MAC_Poly1305_Simd128_reset
+  Hacl_MAC_Poly1305_Simd128_update
+  Hacl_MAC_Poly1305_Simd128_digest
+  Hacl_MAC_Poly1305_Simd128_free
+  Hacl_MAC_Poly1305_Simd128_mac
+  Hacl_Chacha20_Vec128_chacha20_encrypt_128
+  Hacl_Chacha20_Vec128_chacha20_decrypt_128
+  Hacl_AEAD_Chacha20Poly1305_Simd128_encrypt
+  Hacl_AEAD_Chacha20Poly1305_Simd128_decrypt
+  Hacl_MAC_Poly1305_Simd256_load_acc4
+  Hacl_MAC_Poly1305_Simd256_fmul_r4_normalize
+  Hacl_MAC_Poly1305_Simd256_poly1305_init
+  Hacl_MAC_Poly1305_Simd256_poly1305_finish
+  Hacl_MAC_Poly1305_Simd256_malloc
+  Hacl_MAC_Poly1305_Simd256_reset
+  Hacl_MAC_Poly1305_Simd256_update
+  Hacl_MAC_Poly1305_Simd256_digest
+  Hacl_MAC_Poly1305_Simd256_free
+  Hacl_MAC_Poly1305_Simd256_mac
+  Hacl_Chacha20_Vec256_chacha20_encrypt_256
+  Hacl_Chacha20_Vec256_chacha20_decrypt_256
+  Hacl_AEAD_Chacha20Poly1305_Simd256_encrypt
+  Hacl_AEAD_Chacha20Poly1305_Simd256_decrypt
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -286,34 +316,6 @@ EXPORTS
   Hacl_Ed25519_sign_expanded
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
-  Hacl_MAC_Poly1305_poly1305_init
-  Hacl_MAC_Poly1305_poly1305_finish
-  Hacl_MAC_Poly1305_malloc
-  Hacl_MAC_Poly1305_reset
-  Hacl_MAC_Poly1305_update
-  Hacl_MAC_Poly1305_digest
-  Hacl_MAC_Poly1305_free
-  Hacl_MAC_Poly1305_mac
-  Hacl_MAC_Poly1305_Simd128_load_acc2
-  Hacl_MAC_Poly1305_Simd128_fmul_r2_normalize
-  Hacl_MAC_Poly1305_Simd128_poly1305_init
-  Hacl_MAC_Poly1305_Simd128_poly1305_finish
-  Hacl_MAC_Poly1305_Simd128_malloc
-  Hacl_MAC_Poly1305_Simd128_reset
-  Hacl_MAC_Poly1305_Simd128_update
-  Hacl_MAC_Poly1305_Simd128_digest
-  Hacl_MAC_Poly1305_Simd128_free
-  Hacl_MAC_Poly1305_Simd128_mac
-  Hacl_MAC_Poly1305_Simd256_load_acc4
-  Hacl_MAC_Poly1305_Simd256_fmul_r4_normalize
-  Hacl_MAC_Poly1305_Simd256_poly1305_init
-  Hacl_MAC_Poly1305_Simd256_poly1305_finish
-  Hacl_MAC_Poly1305_Simd256_malloc
-  Hacl_MAC_Poly1305_Simd256_reset
-  Hacl_MAC_Poly1305_Simd256_update
-  Hacl_MAC_Poly1305_Simd256_digest
-  Hacl_MAC_Poly1305_Simd256_free
-  Hacl_MAC_Poly1305_Simd256_mac
   Hacl_NaCl_crypto_secretbox_detached
   Hacl_NaCl_crypto_secretbox_open_detached
   Hacl_NaCl_crypto_secretbox_easy
@@ -431,10 +433,6 @@ EXPORTS
   Hacl_Frodo640_crypto_kem_keypair
   Hacl_Frodo640_crypto_kem_enc
   Hacl_Frodo640_crypto_kem_dec
-  Hacl_Chacha20_Vec128_chacha20_encrypt_128
-  Hacl_Chacha20_Vec128_chacha20_decrypt_128
-  Hacl_Chacha20Poly1305_128_aead_encrypt
-  Hacl_Chacha20Poly1305_128_aead_decrypt
   Hacl_HKDF_expand_sha2_256
   Hacl_HKDF_extract_sha2_256
   Hacl_HKDF_expand_sha2_384
@@ -576,10 +574,6 @@ EXPORTS
   EverCrypt_Curve25519_secret_to_public
   EverCrypt_Curve25519_scalarmult
   EverCrypt_Curve25519_ecdh
-  Hacl_Chacha20_Vec256_chacha20_encrypt_256
-  Hacl_Chacha20_Vec256_chacha20_decrypt_256
-  Hacl_Chacha20Poly1305_256_aead_encrypt
-  Hacl_Chacha20Poly1305_256_aead_decrypt
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseS
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA512_sealBase
@@ -664,8 +658,6 @@ EXPORTS
   Hacl_Bignum256_32_eq_mask
   Hacl_SHA2_Vec128_sha224_4
   Hacl_SHA2_Vec128_sha256_4
-  Hacl_Chacha20Poly1305_32_aead_encrypt
-  Hacl_Chacha20Poly1305_32_aead_decrypt
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseS
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA256_sealBase

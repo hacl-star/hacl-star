@@ -10,7 +10,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "Hacl_Streaming_SHA2.h"
+#include "Hacl_Hash_SHA2.h"
 
 #include "sha2_vectors.h"
 #include "test_helpers.h"

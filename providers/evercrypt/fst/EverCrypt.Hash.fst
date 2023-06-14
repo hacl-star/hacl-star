@@ -131,6 +131,7 @@ let invert_state_s (a: alg): Lemma
 =
   allow_inversion (state_s a)
 
+[@@strict_on_arguments [1]]
 inline_for_extraction
 let impl_of_state #a (s: state_s a): i:impl { alg_of_impl i == a } =
   match s with
@@ -155,6 +156,7 @@ let impl_of_state #a (s: state_s a): i:impl { alg_of_impl i == a } =
 //   ...) so as not to repeat redundant information at run-time
 // - hope that we can get away with returning dependent pairs only when needed.
 // We're going for a third one in this module, which is more lightweight.
+[@@strict_on_arguments [1]]
 inline_for_extraction
 let p #a (s: state_s a): Hacl.Hash.Definitions.state (impl_of_state s) =
   match s with
@@ -215,6 +217,7 @@ let frame_invariant #a l s h0 h1 =
   assert (repr_eq (repr s h0) (repr s h1))
 
 inline_for_extraction noextract
+[@@strict_on_arguments [0]]
 let alloca a =
   let s: state_s a =
     match a with
@@ -253,6 +256,7 @@ let alloca a =
   in
   B.alloca s 1ul
 
+[@@strict_on_arguments [0]]
 let create_in a r =
   let h0 = ST.get () in
   let s: state_s a =
@@ -410,23 +414,6 @@ let update_multi #a s prevlen blocks len =
 
 #pop-options
 
-// Re-using the higher-order stateful combinator to get an instance of
-// update_last that is capable of calling Vale under the hood
-let update_last_256 s prev_len input input_len =
-  Hacl.Hash.MD.mk_update_last SHA2_256 update_multi_256 Hacl.Hash.SHA2.pad_256 s prev_len input input_len
-
-let update_last_224 s prev_len input input_len =
-  assert_norm (words_state SHA2_224 == words_state SHA2_256);
-  [@inline_let]
-  let l (hash:words_state SHA2_256) (blocks:bytes_blocks SHA2_256):
-    Lemma
-      (ensures (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks == Spec.Agile.Hash.update_multi SHA2_256 hash () blocks))
-    [ SMTPat (Spec.Agile.Hash.update_multi SHA2_224 hash () blocks); SMTPat (Spec.Agile.Hash.update_multi SHA2_256 hash () blocks) ]
-  =
-    Spec.SHA2.Lemmas.update_multi_224_256 hash blocks
-  in
-  update_last_256 s prev_len input input_len
-
 let update_last #a s prev_len last last_len =
   [@inline_let] let cast = FStar.Int.Cast.Full.uint64_to_uint128 in
   match !*s with
@@ -435,9 +422,9 @@ let update_last #a s prev_len last last_len =
   | SHA1_s p ->
       Hacl.Hash.SHA1.update_last p prev_len last last_len
   | SHA2_224_s p ->
-      update_last_224 p prev_len last last_len
+      Hacl.Hash.SHA2.update_last_224 p prev_len last last_len
   | SHA2_256_s p ->
-      update_last_256 p prev_len last last_len
+      Hacl.Hash.SHA2.update_last_256 p prev_len last last_len
   | SHA2_384_s p ->
       Hacl.Hash.SHA2.update_last_384 p (cast prev_len) last last_len
   | SHA2_512_s p ->

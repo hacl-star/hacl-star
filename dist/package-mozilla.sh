@@ -47,12 +47,6 @@ FILES=" \
 
 mkdir -p mozilla/internal
 
-# For these, we want just the header
-cp gcc-compatible/internal/Hacl_Streaming_SHA2.h mozilla/internal/
-cp gcc-compatible/Hacl_Streaming_SHA2.h mozilla/
-cp gcc-compatible/Hacl_Hash_SHA2.h mozilla/
-cp gcc-compatible/internal/Hacl_SHA2_Generic.h mozilla/internal/
-
 for f in $FILES; do
   for ext in h c asm S; do
     [ -f gcc-compatible/$f.$ext ] && cp gcc-compatible/$f.$ext mozilla/ || true

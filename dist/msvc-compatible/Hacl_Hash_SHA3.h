@@ -62,23 +62,17 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_st
 
 void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *state1);
 
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_update(
   Hacl_Streaming_Keccak_state *state1,
   uint8_t *chunk,
   uint32_t chunk_len
 );
 
-#define Hacl_Streaming_Keccak_Success 0
-#define Hacl_Streaming_Keccak_InvalidAlgorithm 1
-#define Hacl_Streaming_Keccak_InvalidLength 2
-
-typedef uint8_t Hacl_Streaming_Keccak_error_code;
-
-Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_digest(Hacl_Streaming_Keccak_state *state1, uint8_t *output);
 
-Hacl_Streaming_Keccak_error_code
+Hacl_Streaming_Types_error_code
 Hacl_Streaming_Keccak_squeeze(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint32_t l);
 
 uint32_t Hacl_Streaming_Keccak_block_len(Hacl_Streaming_Keccak_state *s);

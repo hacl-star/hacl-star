@@ -46,7 +46,7 @@ void Hacl_Hash_MD5_reset(Hacl_Streaming_MD_state_32 *state);
 /**
 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Hash_MD5_update(Hacl_Streaming_MD_state_32 *state, uint8_t *chunk, uint32_t chunk_len);
 
 void Hacl_Hash_MD5_digest(Hacl_Streaming_MD_state_32 *state, uint8_t *output);

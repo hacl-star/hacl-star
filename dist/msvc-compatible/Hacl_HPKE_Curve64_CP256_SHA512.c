@@ -621,14 +621,16 @@ Hacl_HPKE_Curve64_CP256_SHA512_sealBase(
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
       nonce[i] = xi ^ yi;);
-    Hacl_Chacha20Poly1305_256_aead_encrypt(o_ctx.ctx_key,
-      nonce,
-      aadlen,
-      aad,
-      plainlen,
+    uint8_t *cipher = o_ct;
+    uint8_t *tag = o_ct + plainlen;
+    Hacl_AEAD_Chacha20Poly1305_Simd256_encrypt(cipher,
+      tag,
       plain,
-      o_ct,
-      o_ct + plainlen);
+      plainlen,
+      aad,
+      aadlen,
+      o_ctx.ctx_key,
+      nonce);
     uint64_t s1 = o_ctx.ctx_seq[0U];
     uint32_t res1;
     if (s1 == (uint64_t)18446744073709551615U)
@@ -686,16 +688,18 @@ Hacl_HPKE_Curve64_CP256_SHA512_openBase(
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
       nonce[i] = xi ^ yi;);
+    uint8_t *cipher = ct;
+    uint8_t *tag = ct + ctlen - (uint32_t)16U;
     uint32_t
     res1 =
-      Hacl_Chacha20Poly1305_256_aead_decrypt(o_ctx.ctx_key,
-        nonce,
-        aadlen,
-        aad,
+      Hacl_AEAD_Chacha20Poly1305_Simd256_decrypt(o_pt,
+        cipher,
         ctlen - (uint32_t)16U,
-        o_pt,
-        ct,
-        ct + ctlen - (uint32_t)16U);
+        aad,
+        aadlen,
+        o_ctx.ctx_key,
+        nonce,
+        tag);
     if (res1 == (uint32_t)0U)
     {
       uint64_t s1 = o_ctx.ctx_seq[0U];

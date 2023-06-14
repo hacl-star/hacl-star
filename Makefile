@@ -866,6 +866,9 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 # times, for multiple KaRaMeL invocations in the test/ directory -- this may
 # cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
 # In the meanwhile, we at least try to copy the header for intrinsics just once.
+#
+# NOTE: can't use -library Hacl.* because that would cover the test, too... so
+# the C file for the test still contains too much stuff, perhaps
 
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
@@ -873,7 +876,9 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
+          -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
+	  -add-include '"internal/Hacl_Hash_SHA2.h"' \
+	  -static-header Hacl.Impl.SHA2.Generic \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
 	  -add-include '"libintvector.h"' \

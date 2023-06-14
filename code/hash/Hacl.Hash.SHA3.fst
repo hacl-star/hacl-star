@@ -44,6 +44,7 @@ let hash_len (a: keccak_alg { not (is_shake a) }): Lib.IntTypes.(n:size_t { v n 
   | SHA3_512 -> 64ul
 
 let init a s =
+  [@inline_let] let s: s:B.buffer uint64 { B.length s = 25 } = s in
   LowStar.Buffer.fill s (Lib.IntTypes.u64 0) 25ul
 
 noextract inline_for_extraction

@@ -16,6 +16,7 @@ module ST = FStar.HyperStack.ST
 
 open LowStar.BufferOps
 open FStar.Mul
+open Hacl.Streaming.Types
 
 inline_for_extraction noextract
 let uint8 = Lib.IntTypes.uint8
@@ -124,7 +125,11 @@ let hacl_keccak (a: G.erased alg): block alg =
     (stateful_unused alg) (* key *)
     Lib.IntTypes.(x:size_t { v x > 0 }) (* output_length_t *)
 
-    (fun _ -> 0xffffffffffffffffUL) (* max_input_len *)
+    (fun _ ->
+      [@inline_let]
+      let max = Lib.IntTypes.(ones U64 PUB) in
+      assert (forall (a: alg). Hacl.Hash.Definitions.max_input_len64 a == max);
+      max) (* max_input_len *)
     (fun a l -> if is_shake_ a then Lib.IntTypes.v l else Spec.Hash.Definitions.hash_length a) (* output_length *)
     Hacl.Hash.SHA3.block_len (* block_len *)
     Hacl.Hash.SHA3.block_len (* blocks_state_len *)
@@ -177,7 +182,7 @@ let hacl_keccak (a: G.erased alg): block alg =
 
     (* finish *)
     (fun _ _ (a, s) dst l ->
-      Hacl.Hash.SHA3.(finish_keccak a s dst (if is_shake_ a then l else hash_len a)))
+      Hacl.Hash.SHA3.(finish_keccak a s dst l))
 
 // For pretty names in C
 let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256
@@ -207,13 +212,6 @@ let digest_ (a: alg) =
   F.digest #alg (hacl_keccak a) a (sha3_state a) (G.erased unit)
 
 open Hacl.Streaming.Functor
-
-// Also marks projectors as private, krml will mark type def as public.
-private
-type error_code =
-  | Success
-  | InvalidAlgorithm
-  | InvalidLength
 
 // Unfortunate copy-paste since there are small variations (error code, output length)
 val digest:
@@ -289,9 +287,11 @@ val squeeze:
           S.equal (B.as_seq h1 dst) (c.spec_s i (reveal_key c i h0 s) (seen c i h0 s) l)) /\
           preserves_freeable c i s h0 h1
       | InvalidAlgorithm ->
-         not (is_shake a)
+          not (is_shake a)
       | InvalidLength ->
-         l = 0ul))
+          l = 0ul
+      | _ ->
+          False))
 
 let squeeze a s dst l =
   let a = get_alg a s in

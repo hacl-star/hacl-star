@@ -2,6 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     let hacl_MAC_Poly1305_poly1305_init =
       foreign "Hacl_MAC_Poly1305_poly1305_init"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
@@ -32,7 +35,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_MAC_Poly1305_update =
       foreign "Hacl_MAC_Poly1305_update"
         ((ptr hacl_MAC_Poly1305_state_t) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_MAC_Poly1305_digest =
       foreign "Hacl_MAC_Poly1305_digest"
         ((ptr hacl_MAC_Poly1305_state_t) @->

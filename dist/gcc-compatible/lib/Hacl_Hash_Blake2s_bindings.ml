@@ -2,6 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    module Hacl_Streaming_Types_applied =
+      (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
+    open Hacl_Streaming_Types_applied
     let hacl_Hash_Blake2s_init =
       foreign "Hacl_Hash_Blake2s_init"
         ((ptr uint32_t) @-> (uint32_t @-> (uint32_t @-> (returning void))))
@@ -53,7 +56,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_update =
       foreign "Hacl_Hash_Blake2s_update"
         ((ptr hacl_Hash_Blake2s_state_t) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning uint32_t))))
+           (ocaml_bytes @->
+              (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
     let hacl_Hash_Blake2s_digest =
       foreign "Hacl_Hash_Blake2s_digest"
         ((ptr hacl_Hash_Blake2s_state_t) @->

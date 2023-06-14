@@ -603,10 +603,7 @@ update(uint32_t *wv, uint32_t *hash, uint32_t kk, uint8_t *k, uint32_t ll, uint8
 
 void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
 {
-  uint32_t double_row = (uint32_t)32U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t b[double_row];
-  memset(b, 0U, double_row * sizeof (uint8_t));
+  uint8_t b[32U] = { 0U };
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)16U;
   uint32_t *row0 = hash;
@@ -623,7 +620,7 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
     store32_le(second + i * (uint32_t)4U, row1[i]););
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)32U * sizeof (b[0U]));
 }
 
 /**
@@ -661,14 +658,14 @@ void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *state)
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
 */
-uint32_t
+Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
   Hacl_Hash_Blake2s_state_t s = *state;
   uint64_t total_len = s.total_len;
   if ((uint64_t)chunk_len > (uint64_t)0xffffffffffffffffU - total_len)
   {
-    return (uint32_t)1U;
+    return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   uint32_t sz;
   if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
@@ -853,7 +850,7 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
         }
       );
   }
-  return (uint32_t)0U;
+  return Hacl_Streaming_Types_Success;
 }
 
 /**

@@ -47,11 +47,11 @@ print_test(uint8_t* in,
 {
   uint8_t comp[64] = { 0 };
 
-  Hacl_Hash_SHA2_hash_224(comp, in, in_len);
+  Hacl_Streaming_SHA2_hash_224(comp, in, in_len);
   printf("SHA2-224 (32-bit) Result:\n");
   bool ok = print_result(comp, exp224, 28);
 
-  Hacl_Hash_SHA2_hash_256(comp, in, in_len);
+  Hacl_Streaming_SHA2_hash_256(comp, in, in_len);
   printf("SHA2-256 (32-bit) Result:\n");
   ok = print_result(comp, exp256, 32) && ok;
 
@@ -59,11 +59,11 @@ print_test(uint8_t* in,
   printf("OpenSSL SHA2-256 (32-bit) Result:\n");
   ok = print_result(comp, exp256, 32) && ok;
 
-  Hacl_Hash_SHA2_hash_384(comp, in, in_len);
+  Hacl_Streaming_SHA2_hash_384(comp, in, in_len);
   printf("SHA2-384 (32-bit) Result:\n");
   ok = print_result(comp, exp384, 48) && ok;
 
-  Hacl_Hash_SHA2_hash_512(comp, in, in_len);
+  Hacl_Streaming_SHA2_hash_512(comp, in, in_len);
   printf("SHA2-512 (32-bit) Result:\n");
   ok = print_result(comp, exp512, 64) && ok;
 
@@ -91,12 +91,12 @@ main()
   memset(plain, 'P', SIZE);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_224(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_224(plain, plain, SIZE);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_224(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_224(plain, plain, SIZE);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -104,12 +104,12 @@ main()
   double tdiff1 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_256(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_256(plain, plain, SIZE);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_256(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_256(plain, plain, SIZE);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -130,12 +130,12 @@ main()
   double tdiff2a = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_384(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_384(plain, plain, SIZE);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_384(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_384(plain, plain, SIZE);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -143,12 +143,12 @@ main()
   double tdiff3 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_512(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_512(plain, plain, SIZE);
   }
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Hash_SHA2_hash_512(plain, plain, SIZE);
+    Hacl_Streaming_SHA2_hash_512(plain, plain, SIZE);
   }
   b = cpucycles_end();
   t2 = clock();

@@ -30,7 +30,7 @@ let ecdsa_sign_hashed_msg signature msgHash private_key nonce =
 let ecdsa_sign_sha256 signature msg_len msg private_key nonce =
   push_frame ();
   let msgHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 msgHash msg msg_len;
+  Hacl.Streaming.SHA2.hash_256 msgHash msg msg_len;
   let b = ecdsa_sign_hashed_msg signature msgHash private_key nonce in
   pop_frame ();
   b
@@ -43,7 +43,7 @@ let ecdsa_verify_hashed_msg m public_key signature =
 let ecdsa_verify_sha256 msg_len msg public_key signature =
   push_frame ();
   let mHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 mHash msg msg_len;
+  Hacl.Streaming.SHA2.hash_256 mHash msg msg_len;
   let b = ecdsa_verify_hashed_msg mHash public_key signature in
   pop_frame ();
   b
@@ -88,7 +88,7 @@ let secp256k1_ecdsa_sign_hashed_msg signature msgHash private_key nonce =
 let secp256k1_ecdsa_sign_sha256 signature msg_len msg private_key nonce =
   push_frame ();
   let msgHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 msgHash msg msg_len;
+  Hacl.Streaming.SHA2.hash_256 msgHash msg msg_len;
   let b = secp256k1_ecdsa_sign_hashed_msg signature msgHash private_key nonce in
   pop_frame ();
   b
@@ -103,7 +103,7 @@ let secp256k1_ecdsa_verify_hashed_msg msgHash public_key signature =
 let secp256k1_ecdsa_verify_sha256 msg_len msg public_key signature =
   push_frame ();
   let mHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 mHash msg msg_len;
+  Hacl.Streaming.SHA2.hash_256 mHash msg msg_len;
   let b = secp256k1_ecdsa_verify_hashed_msg mHash public_key signature in
   pop_frame ();
   b
