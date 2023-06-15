@@ -147,11 +147,13 @@ let exp_double_fw_acc0 (#t:Type) (k:comm_monoid t)
   let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
   mul acc_a1 acc_a2
 
+#push-options "--z3rlimit 20"
 let exp_double_fw (#t:Type) (k:comm_monoid t)
   (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
   (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t =
   let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
   Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0
+#pop-options
 
 val exp_double_fw_lemma: #t:Type -> k:comm_monoid t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
