@@ -61,17 +61,17 @@ Hacl_Hash_SHA3_update_last_sha3(
 
 /* SNIPPET_END: Hacl_Hash_SHA3_update_last_sha3 */
 
-/* SNIPPET_START: Hacl_Impl_SHA3_state_permute */
+/* SNIPPET_START: Hacl_Hash_SHA3_state_permute */
 
-void Hacl_Impl_SHA3_state_permute(uint64_t *s);
+void Hacl_Hash_SHA3_state_permute(uint64_t *s);
 
-/* SNIPPET_END: Hacl_Impl_SHA3_state_permute */
+/* SNIPPET_END: Hacl_Hash_SHA3_state_permute */
 
-/* SNIPPET_START: Hacl_Impl_SHA3_loadState */
+/* SNIPPET_START: Hacl_Hash_SHA3_loadState */
 
-void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
+void Hacl_Hash_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
 
-/* SNIPPET_END: Hacl_Impl_SHA3_loadState */
+/* SNIPPET_END: Hacl_Hash_SHA3_loadState */
 
 #if defined(__cplusplus)
 }

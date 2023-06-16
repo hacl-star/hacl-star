@@ -1714,12 +1714,11 @@ static inline void sha512_pre_msg(uint8_t *hash, uint8_t *prefix, uint32_t len, 
   Hacl_Streaming_MD_state_64
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_MD_state_64 p = s;
-  Hacl_SHA2_Scalar32_sha512_init(block_state);
+  Hacl_Hash_SHA2_sha512_init(block_state);
   Hacl_Streaming_MD_state_64 *st = &p;
-  Hacl_Streaming_Types_error_code
-  uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
-  Hacl_Streaming_Types_error_code uu____1 = Hacl_Streaming_SHA2_update_512(st, input, len);
-  Hacl_Streaming_SHA2_digest_512(st, hash);
+  Hacl_Streaming_Types_error_code uu____0 = Hacl_Hash_SHA2_update_512(st, prefix, (uint32_t)32U);
+  Hacl_Streaming_Types_error_code uu____1 = Hacl_Hash_SHA2_update_512(st, input, len);
+  Hacl_Hash_SHA2_digest_512(st, hash);
 }
 
 static inline void
@@ -1736,14 +1735,13 @@ sha512_pre_pre2_msg(
   Hacl_Streaming_MD_state_64
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
   Hacl_Streaming_MD_state_64 p = s;
-  Hacl_SHA2_Scalar32_sha512_init(block_state);
+  Hacl_Hash_SHA2_sha512_init(block_state);
   Hacl_Streaming_MD_state_64 *st = &p;
+  Hacl_Streaming_Types_error_code uu____0 = Hacl_Hash_SHA2_update_512(st, prefix, (uint32_t)32U);
   Hacl_Streaming_Types_error_code
-  uu____0 = Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
-  Hacl_Streaming_Types_error_code
-  uu____1 = Hacl_Streaming_SHA2_update_512(st, prefix2, (uint32_t)32U);
-  Hacl_Streaming_Types_error_code uu____2 = Hacl_Streaming_SHA2_update_512(st, input, len);
-  Hacl_Streaming_SHA2_digest_512(st, hash);
+  uu____1 = Hacl_Hash_SHA2_update_512(st, prefix2, (uint32_t)32U);
+  Hacl_Streaming_Types_error_code uu____2 = Hacl_Hash_SHA2_update_512(st, input, len);
+  Hacl_Hash_SHA2_digest_512(st, hash);
 }
 
 static inline void
@@ -1781,7 +1779,7 @@ static inline void point_mul_g_compress(uint8_t *out, uint8_t *s)
 
 static inline void secret_expand(uint8_t *expanded, uint8_t *secret)
 {
-  Hacl_Streaming_SHA2_hash_512(expanded, secret, (uint32_t)32U);
+  Hacl_Hash_SHA2_hash_512(expanded, secret, (uint32_t)32U);
   uint8_t *h_low = expanded;
   uint8_t h_low0 = h_low[0U];
   uint8_t h_low31 = h_low[31U];

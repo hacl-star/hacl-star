@@ -65,47 +65,47 @@ EXPORTS
   Hacl_Hash_SHA1_free
   Hacl_Hash_SHA1_copy
   Hacl_Hash_SHA1_hash
-  Hacl_SHA2_Scalar32_sha256_init
-  Hacl_SHA2_Scalar32_sha256_update_nblocks
-  Hacl_SHA2_Scalar32_sha256_update_last
-  Hacl_SHA2_Scalar32_sha256_finish
-  Hacl_SHA2_Scalar32_sha224_init
-  Hacl_SHA2_Scalar32_sha224_update_last
-  Hacl_SHA2_Scalar32_sha224_finish
-  Hacl_SHA2_Scalar32_sha512_init
-  Hacl_SHA2_Scalar32_sha512_update_nblocks
-  Hacl_SHA2_Scalar32_sha512_update_last
-  Hacl_SHA2_Scalar32_sha512_finish
-  Hacl_SHA2_Scalar32_sha384_init
-  Hacl_SHA2_Scalar32_sha384_update_nblocks
-  Hacl_SHA2_Scalar32_sha384_update_last
-  Hacl_SHA2_Scalar32_sha384_finish
-  Hacl_Streaming_SHA2_malloc_256
-  Hacl_Streaming_SHA2_copy_256
-  Hacl_Streaming_SHA2_reset_256
-  Hacl_Streaming_SHA2_update_256
-  Hacl_Streaming_SHA2_digest_256
-  Hacl_Streaming_SHA2_free_256
-  Hacl_Streaming_SHA2_hash_256
-  Hacl_Streaming_SHA2_malloc_224
-  Hacl_Streaming_SHA2_reset_224
-  Hacl_Streaming_SHA2_update_224
-  Hacl_Streaming_SHA2_digest_224
-  Hacl_Streaming_SHA2_free_224
-  Hacl_Streaming_SHA2_hash_224
-  Hacl_Streaming_SHA2_malloc_512
-  Hacl_Streaming_SHA2_copy_512
-  Hacl_Streaming_SHA2_reset_512
-  Hacl_Streaming_SHA2_update_512
-  Hacl_Streaming_SHA2_digest_512
-  Hacl_Streaming_SHA2_free_512
-  Hacl_Streaming_SHA2_hash_512
-  Hacl_Streaming_SHA2_malloc_384
-  Hacl_Streaming_SHA2_reset_384
-  Hacl_Streaming_SHA2_update_384
-  Hacl_Streaming_SHA2_digest_384
-  Hacl_Streaming_SHA2_free_384
-  Hacl_Streaming_SHA2_hash_384
+  Hacl_Hash_SHA2_sha256_init
+  Hacl_Hash_SHA2_sha256_update_nblocks
+  Hacl_Hash_SHA2_sha256_update_last
+  Hacl_Hash_SHA2_sha256_finish
+  Hacl_Hash_SHA2_sha224_init
+  Hacl_Hash_SHA2_sha224_update_last
+  Hacl_Hash_SHA2_sha224_finish
+  Hacl_Hash_SHA2_sha512_init
+  Hacl_Hash_SHA2_sha512_update_nblocks
+  Hacl_Hash_SHA2_sha512_update_last
+  Hacl_Hash_SHA2_sha512_finish
+  Hacl_Hash_SHA2_sha384_init
+  Hacl_Hash_SHA2_sha384_update_nblocks
+  Hacl_Hash_SHA2_sha384_update_last
+  Hacl_Hash_SHA2_sha384_finish
+  Hacl_Hash_SHA2_malloc_256
+  Hacl_Hash_SHA2_copy_256
+  Hacl_Hash_SHA2_reset_256
+  Hacl_Hash_SHA2_update_256
+  Hacl_Hash_SHA2_digest_256
+  Hacl_Hash_SHA2_free_256
+  Hacl_Hash_SHA2_hash_256
+  Hacl_Hash_SHA2_malloc_224
+  Hacl_Hash_SHA2_reset_224
+  Hacl_Hash_SHA2_update_224
+  Hacl_Hash_SHA2_digest_224
+  Hacl_Hash_SHA2_free_224
+  Hacl_Hash_SHA2_hash_224
+  Hacl_Hash_SHA2_malloc_512
+  Hacl_Hash_SHA2_copy_512
+  Hacl_Hash_SHA2_reset_512
+  Hacl_Hash_SHA2_update_512
+  Hacl_Hash_SHA2_digest_512
+  Hacl_Hash_SHA2_free_512
+  Hacl_Hash_SHA2_hash_512
+  Hacl_Hash_SHA2_malloc_384
+  Hacl_Hash_SHA2_reset_384
+  Hacl_Hash_SHA2_update_384
+  Hacl_Hash_SHA2_digest_384
+  Hacl_Hash_SHA2_free_384
+  Hacl_Hash_SHA2_hash_384
   Hacl_HMAC_compute_sha1
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
@@ -116,28 +116,28 @@ EXPORTS
   Hacl_HMAC_Blake2b_256_compute_blake2b_256
   Hacl_Hash_SHA3_update_multi_sha3
   Hacl_Hash_SHA3_update_last_sha3
-  Hacl_Streaming_Keccak_get_alg
-  Hacl_Streaming_Keccak_malloc
-  Hacl_Streaming_Keccak_free
-  Hacl_Streaming_Keccak_copy
-  Hacl_Streaming_Keccak_reset
-  Hacl_Streaming_Keccak_update
-  Hacl_Streaming_Keccak_digest
-  Hacl_Streaming_Keccak_squeeze
-  Hacl_Streaming_Keccak_block_len
-  Hacl_Streaming_Keccak_hash_len
-  Hacl_Streaming_Keccak_is_shake
-  Hacl_SHA3_shake128_hacl
-  Hacl_SHA3_shake256_hacl
-  Hacl_SHA3_sha3_224
-  Hacl_SHA3_sha3_256
-  Hacl_SHA3_sha3_384
-  Hacl_SHA3_sha3_512
-  Hacl_Impl_SHA3_state_permute
-  Hacl_Impl_SHA3_loadState
-  Hacl_Impl_SHA3_absorb_inner
-  Hacl_Impl_SHA3_squeeze
-  Hacl_Impl_SHA3_keccak
+  Hacl_Hash_SHA3_get_alg
+  Hacl_Hash_SHA3_malloc
+  Hacl_Hash_SHA3_free
+  Hacl_Hash_SHA3_copy
+  Hacl_Hash_SHA3_reset
+  Hacl_Hash_SHA3_update
+  Hacl_Hash_SHA3_digest
+  Hacl_Hash_SHA3_squeeze
+  Hacl_Hash_SHA3_block_len
+  Hacl_Hash_SHA3_hash_len
+  Hacl_Hash_SHA3_is_shake
+  Hacl_Hash_SHA3_shake128_hacl
+  Hacl_Hash_SHA3_shake256_hacl
+  Hacl_Hash_SHA3_sha3_224
+  Hacl_Hash_SHA3_sha3_256
+  Hacl_Hash_SHA3_sha3_384
+  Hacl_Hash_SHA3_sha3_512
+  Hacl_Hash_SHA3_state_permute
+  Hacl_Hash_SHA3_loadState
+  Hacl_Hash_SHA3_absorb_inner
+  Hacl_Hash_SHA3_squeeze0
+  Hacl_Hash_SHA3_keccak
   Hacl_Hash_MD5_init
   Hacl_Hash_MD5_finish
   Hacl_Hash_MD5_update_multi

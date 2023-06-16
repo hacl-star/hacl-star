@@ -245,13 +245,13 @@ EverCrypt_HMAC_compute_sha2_256(
     (uint32_t)8U,
     (uint32_t)1U,
     uint32_t *os = st;
-    uint32_t x = Hacl_Impl_SHA2_Generic_h256[i];
+    uint32_t x = Hacl_Hash_SHA2_h256[i];
     os[i] = x;);
   uint32_t *s = st;
   uint8_t *dst1 = ipad;
   if (data_len == (uint32_t)0U)
   {
-    Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)0U + (uint64_t)(uint32_t)64U,
+    Hacl_Hash_SHA2_sha256_update_last((uint64_t)0U + (uint64_t)(uint32_t)64U,
       (uint32_t)64U,
       ipad,
       s);
@@ -278,16 +278,16 @@ EverCrypt_HMAC_compute_sha2_256(
     uint8_t *rem = data + full_blocks_len;
     EverCrypt_Hash_update_multi_256(s, ipad, (uint32_t)1U);
     EverCrypt_Hash_update_multi_256(s, full_blocks, n_blocks);
-    Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)(uint32_t)64U
+    Hacl_Hash_SHA2_sha256_update_last((uint64_t)(uint32_t)64U
       + (uint64_t)full_blocks_len
       + (uint64_t)rem_len,
       rem_len,
       rem,
       s);
   }
-  Hacl_SHA2_Scalar32_sha256_finish(s, dst1);
+  Hacl_Hash_SHA2_sha256_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_SHA2_Scalar32_sha256_init(s);
+  Hacl_Hash_SHA2_sha256_init(s);
   uint32_t block_len = (uint32_t)64U;
   uint32_t n_blocks0 = (uint32_t)32U / block_len;
   uint32_t rem0 = (uint32_t)32U % block_len;
@@ -309,13 +309,13 @@ EverCrypt_HMAC_compute_sha2_256(
   uint8_t *rem = hash1 + full_blocks_len;
   EverCrypt_Hash_update_multi_256(s, opad, (uint32_t)1U);
   EverCrypt_Hash_update_multi_256(s, full_blocks, n_blocks);
-  Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)(uint32_t)64U
+  Hacl_Hash_SHA2_sha256_update_last((uint64_t)(uint32_t)64U
     + (uint64_t)full_blocks_len
     + (uint64_t)rem_len,
     rem_len,
     rem,
     s);
-  Hacl_SHA2_Scalar32_sha256_finish(s, dst);
+  Hacl_Hash_SHA2_sha256_finish(s, dst);
 }
 
 void
@@ -347,7 +347,7 @@ EverCrypt_HMAC_compute_sha2_384(
   }
   else
   {
-    Hacl_Streaming_SHA2_hash_384(nkey, key, key_len);
+    Hacl_Hash_SHA2_hash_384(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -373,13 +373,13 @@ EverCrypt_HMAC_compute_sha2_384(
     (uint32_t)8U,
     (uint32_t)1U,
     uint64_t *os = st;
-    uint64_t x = Hacl_Impl_SHA2_Generic_h384[i];
+    uint64_t x = Hacl_Hash_SHA2_h384[i];
     os[i] = x;);
   uint64_t *s = st;
   uint8_t *dst1 = ipad;
   if (data_len == (uint32_t)0U)
   {
-    Hacl_SHA2_Scalar32_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)0U),
+    Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)0U),
         FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U)),
       (uint32_t)128U,
       ipad,
@@ -405,18 +405,18 @@ EverCrypt_HMAC_compute_sha2_384(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    Hacl_SHA2_Scalar32_sha384_update_nblocks((uint32_t)128U, ipad, s);
-    Hacl_SHA2_Scalar32_sha384_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
-    Hacl_SHA2_Scalar32_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+    Hacl_Hash_SHA2_sha384_update_nblocks((uint32_t)128U, ipad, s);
+    Hacl_Hash_SHA2_sha384_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
+    Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
           FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
         FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
       rem_len,
       rem,
       s);
   }
-  Hacl_SHA2_Scalar32_sha384_finish(s, dst1);
+  Hacl_Hash_SHA2_sha384_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_SHA2_Scalar32_sha384_init(s);
+  Hacl_Hash_SHA2_sha384_init(s);
   uint32_t block_len = (uint32_t)128U;
   uint32_t n_blocks0 = (uint32_t)48U / block_len;
   uint32_t rem0 = (uint32_t)48U % block_len;
@@ -436,15 +436,15 @@ EverCrypt_HMAC_compute_sha2_384(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  Hacl_SHA2_Scalar32_sha384_update_nblocks((uint32_t)128U, opad, s);
-  Hacl_SHA2_Scalar32_sha384_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
-  Hacl_SHA2_Scalar32_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+  Hacl_Hash_SHA2_sha384_update_nblocks((uint32_t)128U, opad, s);
+  Hacl_Hash_SHA2_sha384_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
+  Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
         FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
       FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
     rem_len,
     rem,
     s);
-  Hacl_SHA2_Scalar32_sha384_finish(s, dst);
+  Hacl_Hash_SHA2_sha384_finish(s, dst);
 }
 
 void
@@ -476,7 +476,7 @@ EverCrypt_HMAC_compute_sha2_512(
   }
   else
   {
-    Hacl_Streaming_SHA2_hash_512(nkey, key, key_len);
+    Hacl_Hash_SHA2_hash_512(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -502,13 +502,13 @@ EverCrypt_HMAC_compute_sha2_512(
     (uint32_t)8U,
     (uint32_t)1U,
     uint64_t *os = st;
-    uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
+    uint64_t x = Hacl_Hash_SHA2_h512[i];
     os[i] = x;);
   uint64_t *s = st;
   uint8_t *dst1 = ipad;
   if (data_len == (uint32_t)0U)
   {
-    Hacl_SHA2_Scalar32_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)0U),
+    Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)0U),
         FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U)),
       (uint32_t)128U,
       ipad,
@@ -534,18 +534,18 @@ EverCrypt_HMAC_compute_sha2_512(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    Hacl_SHA2_Scalar32_sha512_update_nblocks((uint32_t)128U, ipad, s);
-    Hacl_SHA2_Scalar32_sha512_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
-    Hacl_SHA2_Scalar32_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+    Hacl_Hash_SHA2_sha512_update_nblocks((uint32_t)128U, ipad, s);
+    Hacl_Hash_SHA2_sha512_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
+    Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
           FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
         FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
       rem_len,
       rem,
       s);
   }
-  Hacl_SHA2_Scalar32_sha512_finish(s, dst1);
+  Hacl_Hash_SHA2_sha512_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_SHA2_Scalar32_sha512_init(s);
+  Hacl_Hash_SHA2_sha512_init(s);
   uint32_t block_len = (uint32_t)128U;
   uint32_t n_blocks0 = (uint32_t)64U / block_len;
   uint32_t rem0 = (uint32_t)64U % block_len;
@@ -565,15 +565,15 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  Hacl_SHA2_Scalar32_sha512_update_nblocks((uint32_t)128U, opad, s);
-  Hacl_SHA2_Scalar32_sha512_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
-  Hacl_SHA2_Scalar32_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+  Hacl_Hash_SHA2_sha512_update_nblocks((uint32_t)128U, opad, s);
+  Hacl_Hash_SHA2_sha512_update_nblocks(n_blocks * (uint32_t)128U, full_blocks, s);
+  Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
         FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
       FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
     rem_len,
     rem,
     s);
-  Hacl_SHA2_Scalar32_sha512_finish(s, dst);
+  Hacl_Hash_SHA2_sha512_finish(s, dst);
 }
 
 void
