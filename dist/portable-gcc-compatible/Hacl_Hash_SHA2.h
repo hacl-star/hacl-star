@@ -103,7 +103,11 @@ success, or 1 if the combined length of all of the data passed to `update_256`
 This function is identical to the update function for SHA2_224.
 */
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_256(Hacl_Streaming_MD_state_32 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_256(
+  Hacl_Streaming_MD_state_32 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /* SNIPPET_END: Hacl_Hash_SHA2_update_256 */
 
@@ -154,7 +158,11 @@ void Hacl_Hash_SHA2_reset_224(Hacl_Streaming_MD_state_32 *state);
 /* SNIPPET_START: Hacl_Hash_SHA2_update_224 */
 
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_224(Hacl_Streaming_MD_state_32 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_224(
+  Hacl_Streaming_MD_state_32 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /* SNIPPET_END: Hacl_Hash_SHA2_update_224 */
 
@@ -171,7 +179,7 @@ void Hacl_Hash_SHA2_digest_224(Hacl_Streaming_MD_state_32 *state, uint8_t *outpu
 
 /* SNIPPET_START: Hacl_Hash_SHA2_free_224 */
 
-void Hacl_Hash_SHA2_free_224(Hacl_Streaming_MD_state_32 *p);
+void Hacl_Hash_SHA2_free_224(Hacl_Streaming_MD_state_32 *state);
 
 /* SNIPPET_END: Hacl_Hash_SHA2_free_224 */
 
@@ -218,7 +226,11 @@ success, or 1 if the combined length of all of the data passed to `update_512`
 This function is identical to the update function for SHA2_384.
 */
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_512(Hacl_Streaming_MD_state_64 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_512(
+  Hacl_Streaming_MD_state_64 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /* SNIPPET_END: Hacl_Hash_SHA2_update_512 */
 
@@ -269,7 +281,11 @@ void Hacl_Hash_SHA2_reset_384(Hacl_Streaming_MD_state_64 *state);
 /* SNIPPET_START: Hacl_Hash_SHA2_update_384 */
 
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_384(Hacl_Streaming_MD_state_64 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_384(
+  Hacl_Streaming_MD_state_64 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /* SNIPPET_END: Hacl_Hash_SHA2_update_384 */
 
@@ -286,7 +302,7 @@ void Hacl_Hash_SHA2_digest_384(Hacl_Streaming_MD_state_64 *state, uint8_t *outpu
 
 /* SNIPPET_START: Hacl_Hash_SHA2_free_384 */
 
-void Hacl_Hash_SHA2_free_384(Hacl_Streaming_MD_state_64 *p);
+void Hacl_Hash_SHA2_free_384(Hacl_Streaming_MD_state_64 *state);
 
 /* SNIPPET_END: Hacl_Hash_SHA2_free_384 */
 

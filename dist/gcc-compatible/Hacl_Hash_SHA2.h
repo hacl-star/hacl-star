@@ -73,7 +73,11 @@ success, or 1 if the combined length of all of the data passed to `update_256`
 This function is identical to the update function for SHA2_224.
 */
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_256(Hacl_Streaming_MD_state_32 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_256(
+  Hacl_Streaming_MD_state_32 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /**
 Write the resulting hash into `output`, an array of 32 bytes. The state remains
@@ -100,7 +104,11 @@ Hacl_Streaming_MD_state_32 *Hacl_Hash_SHA2_malloc_224(void);
 void Hacl_Hash_SHA2_reset_224(Hacl_Streaming_MD_state_32 *state);
 
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_224(Hacl_Streaming_MD_state_32 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_224(
+  Hacl_Streaming_MD_state_32 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /**
 Write the resulting hash into `output`, an array of 28 bytes. The state remains
@@ -109,7 +117,7 @@ the hash via `update_224`.
 */
 void Hacl_Hash_SHA2_digest_224(Hacl_Streaming_MD_state_32 *state, uint8_t *output);
 
-void Hacl_Hash_SHA2_free_224(Hacl_Streaming_MD_state_32 *p);
+void Hacl_Hash_SHA2_free_224(Hacl_Streaming_MD_state_32 *state);
 
 /**
 Hash `input`, of len `input_len`, into `output`, an array of 28 bytes.
@@ -136,7 +144,11 @@ success, or 1 if the combined length of all of the data passed to `update_512`
 This function is identical to the update function for SHA2_384.
 */
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_512(Hacl_Streaming_MD_state_64 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_512(
+  Hacl_Streaming_MD_state_64 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /**
 Write the resulting hash into `output`, an array of 64 bytes. The state remains
@@ -163,7 +175,11 @@ Hacl_Streaming_MD_state_64 *Hacl_Hash_SHA2_malloc_384(void);
 void Hacl_Hash_SHA2_reset_384(Hacl_Streaming_MD_state_64 *state);
 
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_384(Hacl_Streaming_MD_state_64 *p, uint8_t *input, uint32_t input_len);
+Hacl_Hash_SHA2_update_384(
+  Hacl_Streaming_MD_state_64 *state,
+  uint8_t *input,
+  uint32_t input_len
+);
 
 /**
 Write the resulting hash into `output`, an array of 48 bytes. The state remains
@@ -172,7 +188,7 @@ the hash via `update_384`.
 */
 void Hacl_Hash_SHA2_digest_384(Hacl_Streaming_MD_state_64 *state, uint8_t *output);
 
-void Hacl_Hash_SHA2_free_384(Hacl_Streaming_MD_state_64 *p);
+void Hacl_Hash_SHA2_free_384(Hacl_Streaming_MD_state_64 *state);
 
 /**
 Hash `input`, of len `input_len`, into `output`, an array of 48 bytes.

@@ -730,9 +730,13 @@ success, or 1 if the combined length of all of the data passed to `update_256`
 This function is identical to the update function for SHA2_224.
 */
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_256(Hacl_Streaming_MD_state_32 *p, uint8_t *input, uint32_t input_len)
+Hacl_Hash_SHA2_update_256(
+  Hacl_Streaming_MD_state_32 *state,
+  uint8_t *input,
+  uint32_t input_len
+)
 {
-  return update_224_256(p, input, input_len);
+  return update_224_256(state, input, input_len);
 }
 
 /**
@@ -835,9 +839,13 @@ void Hacl_Hash_SHA2_reset_224(Hacl_Streaming_MD_state_32 *state)
 }
 
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_224(Hacl_Streaming_MD_state_32 *p, uint8_t *input, uint32_t input_len)
+Hacl_Hash_SHA2_update_224(
+  Hacl_Streaming_MD_state_32 *state,
+  uint8_t *input,
+  uint32_t input_len
+)
 {
-  return update_224_256(p, input, input_len);
+  return update_224_256(state, input, input_len);
 }
 
 /**
@@ -880,9 +888,9 @@ void Hacl_Hash_SHA2_digest_224(Hacl_Streaming_MD_state_32 *state, uint8_t *outpu
   Hacl_Hash_SHA2_sha224_finish(tmp_block_state, output);
 }
 
-void Hacl_Hash_SHA2_free_224(Hacl_Streaming_MD_state_32 *p)
+void Hacl_Hash_SHA2_free_224(Hacl_Streaming_MD_state_32 *state)
 {
-  Hacl_Hash_SHA2_free_256(p);
+  Hacl_Hash_SHA2_free_256(state);
 }
 
 /**
@@ -1145,9 +1153,13 @@ success, or 1 if the combined length of all of the data passed to `update_512`
 This function is identical to the update function for SHA2_384.
 */
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_512(Hacl_Streaming_MD_state_64 *p, uint8_t *input, uint32_t input_len)
+Hacl_Hash_SHA2_update_512(
+  Hacl_Streaming_MD_state_64 *state,
+  uint8_t *input,
+  uint32_t input_len
+)
 {
-  return update_384_512(p, input, input_len);
+  return update_384_512(state, input, input_len);
 }
 
 /**
@@ -1254,9 +1266,13 @@ void Hacl_Hash_SHA2_reset_384(Hacl_Streaming_MD_state_64 *state)
 }
 
 Hacl_Streaming_Types_error_code
-Hacl_Hash_SHA2_update_384(Hacl_Streaming_MD_state_64 *p, uint8_t *input, uint32_t input_len)
+Hacl_Hash_SHA2_update_384(
+  Hacl_Streaming_MD_state_64 *state,
+  uint8_t *input,
+  uint32_t input_len
+)
 {
-  return update_384_512(p, input, input_len);
+  return update_384_512(state, input, input_len);
 }
 
 /**
@@ -1303,9 +1319,9 @@ void Hacl_Hash_SHA2_digest_384(Hacl_Streaming_MD_state_64 *state, uint8_t *outpu
   Hacl_Hash_SHA2_sha384_finish(tmp_block_state, output);
 }
 
-void Hacl_Hash_SHA2_free_384(Hacl_Streaming_MD_state_64 *p)
+void Hacl_Hash_SHA2_free_384(Hacl_Streaming_MD_state_64 *state)
 {
-  Hacl_Hash_SHA2_free_512(p);
+  Hacl_Hash_SHA2_free_512(state);
 }
 
 /**
