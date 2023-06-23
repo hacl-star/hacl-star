@@ -182,7 +182,7 @@ let hacl_keccak (a: G.erased alg): block alg =
 
     (* finish *)
     (fun _ _ (a, s) dst l ->
-      Hacl.Hash.SHA3.(finish_keccak a s dst (if is_shake_ a then l else hash_len a)))
+      Hacl.Hash.SHA3.(finish_keccak a s dst l))
 
 // For pretty names in C
 let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256
@@ -205,7 +205,7 @@ let reset (a: G.erased alg) =
   F.init (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 
 let update (a: G.erased alg) =
-  F.update (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit) 
+  F.update (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 
 private
 let finish_ (a: alg) =

@@ -352,10 +352,7 @@ Hacl_Blake2s_128_blake2s_finish(
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
-  uint32_t double_row = (uint32_t)32U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-  uint8_t b[double_row];
-  memset(b, 0U, double_row * sizeof (uint8_t));
+  uint8_t b[32U] = { 0U };
   uint8_t *first = b;
   uint8_t *second = b + (uint32_t)16U;
   Lib_IntVector_Intrinsics_vec128 *row0 = hash;
@@ -364,7 +361,7 @@ Hacl_Blake2s_128_blake2s_finish(
   Lib_IntVector_Intrinsics_vec128_store32_le(second, row1[0U]);
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)32U * sizeof (b[0U]));
 }
 
 /**
