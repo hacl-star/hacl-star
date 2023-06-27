@@ -624,7 +624,7 @@ REQUIRED_BUNDLES = \
   -bundle EverCrypt.Error
 
 REQUIRED_DROP = \
-  -drop EverCrypt.TargetConfig
+  -library EverCrypt.TargetConfig
 
 REQUIRED_FLAGS	= \
   $(REQUIRED_BUNDLES) \
