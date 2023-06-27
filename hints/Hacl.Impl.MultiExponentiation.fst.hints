@@ -69,7 +69,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c8a1acbcf17bcd52baf08a66da58639c"
+      "2ab4e62175d46573f22fb70097a4f46c"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_f_st",
@@ -109,7 +109,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d0db3c677e9071bc2456931b71f11361"
+      "305e645c03e23ea0abeb059f06709083"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_f",
@@ -146,7 +146,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "10c0201df1498f623e20bd95d9efead7"
+      "08fa15eeff5b21bb0cccf392f09cdeb1"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_f",
@@ -214,7 +214,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "4b3dd9aa8652b5bcc1a105637e775dab"
+      "4bd53dea3eb45fa4cc4fbaf67ca7c87a"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_acc0_st",
@@ -263,7 +263,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8ab4c0254f331fa883bcf42f72889896"
+      "9e78ff77b2c4bcc2bbdfebb221034e59"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_acc0",
@@ -308,7 +308,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b1396f832d0257eaef0f3d7896a14d78"
+      "f9cabbfc44ed5274b8ad17527e8bfc54"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_acc0",
@@ -381,7 +381,7 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "interpretation_Tm_abs_c95910fed43d6f86affe4d87e5d85797",
+        "interpretation_Tm_abs_2adc8a407a94c2d6b32710f342083b63",
         "kinding_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid@tok",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
@@ -434,6 +434,7 @@
         "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_a_spec",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_comm_monoid",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -488,7 +489,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "302487414d8013b83415a20d397e6df9"
+      "4010097b5d1cac9d2fdad6729dd037b6"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_loop_st",
@@ -528,7 +529,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0d534ff4677dfc661693d851a7e91983"
+      "f8939f12cf26f86bc1ac2053bdc26034"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_loop",
@@ -565,7 +566,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "41830454c5a6fa005d6f8bc084033a6b"
+      "8d717510593be78a3683808f43590c73"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_loop",
@@ -759,7 +760,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d6d8d0de966b6b031301a793546b5eae"
+      "07d07ad6548a7b11493f1b3a0887d2d3"
     ],
     [
       "Hacl.Impl.MultiExponentiation.mk_lexp_double_fw_tables",
@@ -803,7 +804,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e466ab7d56bef6faae058b2d2b9e0004"
+      "9312fb9d26b73e1df13a7c0fcbb52162"
     ],
     [
       "Hacl.Impl.MultiExponentiation.mk_lexp_double_fw_tables",
@@ -820,7 +821,11 @@
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S64",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Lib.IntTypes.S128", "disc_equation_Lib.IntTypes.U128",
         "equality_tok_Lib.Buffer.CONST@tok",
@@ -828,6 +833,7 @@
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
@@ -836,11 +842,14 @@
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.mod",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Hacl.Bignum.Definitions.bn_v",
+        "equation_Hacl.Bignum.Definitions.lbignum",
         "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.Definitions.limb_t",
         "equation_Hacl.Impl.Exponentiation.Definitions.inttype_a",
         "equation_Hacl.Impl.Exponentiation.size_window_t",
         "equation_Hacl.Impl.Exponentiation.table_len_t",
         "equation_Hacl.Spec.Bignum.Definitions.limb",
+        "equation_Hacl.Spec.Bignum.Definitions.limb_t",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
@@ -866,25 +875,28 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
-        "interpretation_Tm_abs_5856999f765083806fadfe8f689df685",
+        "interpretation_Tm_abs_4f0ae44e673f7fd9e9cd407751a167a8",
         "kinding_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid@tok",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.IntTypes.mod_lemma", "lemma_Lib.IntTypes.v_injective",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "primitive_Prims.op_disEquality",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_disEquality",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_a_spec",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_comm_monoid",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_one",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -914,11 +926,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_Hacl.Bignum.Definitions.bn_v",
         "typing_Hacl.Impl.Exponentiation.Definitions.__proj__Mkconcrete_ops__item__to",
-        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.int_t", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.mul", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.int_t",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mul",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.ConstBuffer.as_mbuf",
         "typing_LowStar.ConstBuffer.as_qbuf",
         "typing_LowStar.ConstBuffer.qbuf_pre",
@@ -928,7 +940,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3e6929e856863da8b34e01e00b6825d9"
+      "c91631395ce3f6368f416a8fd6ae263f"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_st",
@@ -960,7 +972,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5832820cfa0ea69b928081b73d13a667"
+      "03ffa2d1ee8300ab417b1cfc04359f26"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_gen",
@@ -997,7 +1009,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ea399b3f61ce33aee7ea93f69b9a33e7"
+      "807695b81a76fbd8e08d28fad7b12c1d"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_gen",
@@ -1184,7 +1196,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9d7e7254ac20f267517da20905b68b58"
+      "61d4561512fe287f2ad985bdc54f3e4c"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_gen",
@@ -1367,7 +1379,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3e39bd33d682a491ffedd2351b11bbee"
+      "8218807bbdf702945e80cb593df10993"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_vartime",
@@ -1404,7 +1416,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4152afbb0664a2302e86fe3f9e4ab358"
+      "ff711ea4d15de969ed449f15e448852e"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_vartime",
@@ -1479,7 +1491,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c96062ca17c2b9c79104d5aa54572aa0"
+      "35305b12cf6ca1090fe93b66313611a6"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_consttime",
@@ -1516,7 +1528,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "14cd309a9627180ceb850fd70291abaf"
+      "db8ab8803e90cf69d0dd9f917a8b9623"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_double_fw_consttime",
@@ -1591,7 +1603,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0dde84b4733ca3589cbbdc82b66e5674"
+      "04ddb44ab114dbb28bf2cdc65640bc14"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_tables_st",
@@ -1630,7 +1642,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5007fafc15c7c08431ac6816abc1cbf2"
+      "17099d769412f652359568eaafc60827"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_f_st",
@@ -1670,7 +1682,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7d744a8e05f91035fe4c0a722f2b46a0"
+      "3bd9060666231450d0381bc9cc19f0af"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_f",
@@ -1707,7 +1719,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d592d0edd4ae6ea70b785078ae273833"
+      "65cd2a4f0be3a96fe19f51b01a7d668e"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_f",
@@ -1779,7 +1791,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "162398d3d867e9e22c75065627e57019"
+      "97eff02e2bf6e50107d59829b29f4521"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_acc0_st",
@@ -1825,7 +1837,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5af787709aecb23fd7218745b15c7186"
+      "6cf0702e36adad7975dd564b32211290"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_acc0",
@@ -1869,7 +1881,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d4b8677c682036d43ee282dc55115c72"
+      "cdd06c2ab411a5e8c54508deda734b31"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_acc0",
@@ -1939,10 +1951,9 @@
         "fuel_guarded_inversion_Hacl.Impl.Exponentiation.Definitions.concrete_ops",
         "fuel_guarded_inversion_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "interpretation_Tm_abs_c95910fed43d6f86affe4d87e5d85797",
+        "interpretation_Tm_abs_2adc8a407a94c2d6b32710f342083b63",
         "kinding_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid@tok",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
@@ -1992,6 +2003,7 @@
         "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_a_spec",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_comm_monoid",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -2010,6 +2022,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "token_correspondence_Lib.Exponentiation.Definition.__proj__Mkcomm_monoid__item__mul",
         "token_correspondence_Lib.Exponentiation.Definition.mul",
         "typing_FStar.Ghost.reveal", "typing_FStar.Map.contains",
         "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
@@ -2043,7 +2056,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1c4bcf2d338cdda1caced8a10448e1ae"
+      "fc0c246c7389e1ae077abac5bd5075c8"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_loop_st",
@@ -2083,7 +2096,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dc6efa972ce644216a53a2f83396ccf8"
+      "79b571be7f0c9d37882a92ad9eb3e688"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_loop",
@@ -2133,7 +2146,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ae620d5584e9aac1cda8507e56631ce8"
+      "684cc7f683da89182751ce8e2745b42f"
     ],
     [
       "Hacl.Impl.MultiExponentiation.lexp_four_fw_loop",
@@ -2326,7 +2339,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "08841a1170e158da5148a64881194aaa"
+      "da81a8fe69ceec01ddba6f9f0bcf5f09"
     ],
     [
       "Hacl.Impl.MultiExponentiation.mk_lexp_four_fw_tables",
@@ -2363,7 +2376,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6fc40cc1b8bd65535923f9651bf8c3d1"
+      "1660f04e514efbde362e54bcb257c81a"
     ],
     [
       "Hacl.Impl.MultiExponentiation.mk_lexp_four_fw_tables",
@@ -2429,7 +2442,7 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
-        "interpretation_Tm_abs_5856999f765083806fadfe8f689df685",
+        "interpretation_Tm_abs_4f0ae44e673f7fd9e9cd407751a167a8",
         "kinding_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid@tok",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
@@ -2448,6 +2461,7 @@
         "primitive_Prims.op_Subtraction", "primitive_Prims.op_disEquality",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_a_spec",
         "proj_equation_Hacl.Impl.Exponentiation.Definitions.Mkto_comm_monoid_comm_monoid",
+        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_one",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -2492,7 +2506,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6bed7ad8dc5417e3fa8337272833a6fc"
+      "17e2a24a64ae928ee275755929a644ac"
     ]
   ]
 ]

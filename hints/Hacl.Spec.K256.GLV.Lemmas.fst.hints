@@ -29,7 +29,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ba3618ecfc929cae4262d8c53d515e7a"
+      "22093a789aa0cd9860068bed41db5114"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.lemma_scalar_split_lambda_eval",
@@ -60,7 +60,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3f2fa112795f3b48511801d97024ffc8"
+      "fe09c61d01c2425e49869ecbeff4e962"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.lemma_aff_point_mul_split_lambda",
@@ -104,7 +104,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "a0e6d68b31112cfa926f7d9637e5b2de"
+      "5a6e38c6f04ef354fc79e1d0ff3cc6e8"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.lemma_aff_point_mul_endo_split",
@@ -140,7 +140,7 @@
         "unit_typing"
       ],
       0,
-      "a1e0ba68b1228cf8c013ac3dab89bd19"
+      "52b67eadf73d8955ad66a6f4ecafbf72"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.lemma_ecmult_endo_split_to_aff",
@@ -175,7 +175,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "fcbcc36f4ed711e8395a27892c8fdd9d"
+      "e8c078ca48ab23d81c959c6353b623b7"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.aff_proj_point_mul_double_split_lambda",
@@ -187,7 +187,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "58affab0cd6c4e6e8c30079099cf0ed8"
+      "4e58d44d97b159c4166d3c1903d4d66c"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.lemma_aff_proj_point_mul_double_split_lambda",
@@ -195,7 +195,9 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Lib.Exponentiation.Definition.pow.fuel_instrumented",
+        "@query", "bool_inversion", "bool_typing",
         "equation_Hacl.Spec.K256.GLV.Lemmas.aff_proj_point_mul_double_split_lambda",
         "equation_Hacl.Spec.K256.GLV.aff_point_mul",
         "equation_Hacl.Spec.K256.GLV.aff_point_mul_endo_split",
@@ -214,9 +216,8 @@
         "function_token_typing_Spec.K256.PointOps.aff_point_add",
         "function_token_typing_Spec.K256.PointOps.to_aff_point",
         "int_inversion",
-        "interpretation_Tm_abs_c95910fed43d6f86affe4d87e5d85797",
+        "interpretation_Tm_abs_2adc8a407a94c2d6b32710f342083b63",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
-        "proj_equation_Lib.Exponentiation.Definition.Mkcomm_monoid_mul",
         "proj_equation_Spec.Exponentiation.Mkconcrete_ops_to",
         "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_a_spec",
         "proj_equation_Spec.Exponentiation.Mkto_comm_monoid_comm_monoid",
@@ -236,11 +237,12 @@
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
         "token_correspondence_Lib.Exponentiation.Definition.mul",
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl",
+        "token_correspondence_Spec.K256.PointOps.aff_point_add",
         "token_correspondence_Spec.K256.PointOps.to_aff_point",
         "typing_Spec.K256.PointOps.q"
       ],
       0,
-      "bb36e90fe4e18ac67c2bf5952eef96f2"
+      "04be5cc3f5939fe4066dac830ea24a3a"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.aff_point_negate_cond_pow_lemma",
@@ -275,7 +277,7 @@
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl"
       ],
       0,
-      "9e145008674bb40f492cf2ec2865ac4a"
+      "a8bed9542a87e8d531cd79e0eb09c431"
     ],
     [
       "Hacl.Spec.K256.GLV.Lemmas.aff_point_negate_cond_lambda_pow_lemma",
@@ -311,7 +313,7 @@
         "token_correspondence_Spec.Exponentiation.__proj__Mkto_comm_monoid__item__refl"
       ],
       0,
-      "353d653502d26de143dd9b996469cb20"
+      "b5f1cc196e3e807622a78b8aded72f67"
     ]
   ]
 ]
