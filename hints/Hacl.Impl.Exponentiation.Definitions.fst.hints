@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "7ad07faed67e6dca5cccc13787d40f08"
+      "6bff06c9fd037c6a358f135fad69922f"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.to_comm_monoid",
@@ -41,7 +41,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "303725a729eb700e21044bd52a0e7356"
+      "a24aaf23c06ee3c497c604f7d9158829"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__linv_ctx",
@@ -74,7 +74,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "d1ed0ce2bb55016b8bd55a1422321884"
+      "d1157feeb45b5eede7ca51dcbac8e8d9"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__linv_ctx",
@@ -106,7 +106,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "142e6f10ff13ffe79f1204f05fa926b0"
+      "9690cc3d2a2d6fb33e560c5a11036da4"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__linv",
@@ -139,7 +139,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "15e69a41d69f3a961d1d2767ccdab234"
+      "77439f5d65f84028ef0279ba21b164be"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__linv",
@@ -169,7 +169,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "5b33e21d0fd455b7f920aa316339002d"
+      "40a5c8df4de25db0b37d677b0ba88a57"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__refl",
@@ -202,7 +202,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "df92995a5778454a2aaf8cca2ca2624d"
+      "7e74f2edd3374095ae371629aba50aa8"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.__proj__Mkto_comm_monoid__item__refl",
@@ -232,7 +232,99 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "8fa6c2e4748135131fc1c8c7225ea5ab"
+      "c94f02c9d53cd60383e5dc46bcedc6f7"
+    ],
+    [
+      "Hacl.Impl.Exponentiation.Definitions.linv_ctx",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Impl.Exponentiation.Definitions.inttype_a",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v",
+        "fuel_guarded_inversion_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "be338783fa15801ec95f4bf8cee148ac"
+    ],
+    [
+      "Hacl.Impl.Exponentiation.Definitions.linv",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Impl.Exponentiation.Definitions.inttype_a",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v",
+        "fuel_guarded_inversion_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "54088ac5d31cea491292f18897e88048"
+    ],
+    [
+      "Hacl.Impl.Exponentiation.Definitions.refl",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Impl.Exponentiation.Definitions.inttype_a",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v",
+        "fuel_guarded_inversion_Hacl.Impl.Exponentiation.Definitions.to_comm_monoid",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "6acf9f3282f6b9cb429c283ac8a700b3"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.lone_st",
@@ -255,7 +347,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "ea124664e43137bfbcc8051f94da290a"
+      "3d968cb0f0b9d8258827994db92a9dc8"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.lmul_st",
@@ -279,7 +371,7 @@
         "refinement_interpretation_Tm_refine_f9c3fa0ddf8de7ae721787d684116564"
       ],
       0,
-      "e4d55173ac7f78a34eb78312b6132692"
+      "878f21abfa8a7e09bd31c7671aa0599d"
     ],
     [
       "Hacl.Impl.Exponentiation.Definitions.lsqr_st",
@@ -303,7 +395,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "8abdd8944eb461e30a414766317f4354"
+      "49a03731dbb9d01d0a58c53de8ce3b35"
     ]
   ]
 ]

@@ -286,7 +286,7 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract 'krml:*' \
+	    --extract 'krml:* -FStar.Tactics -FStar.Reflection -FStar.Stubs' \
 	    --extract 'OCaml:-* +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.SHA2.Wrapper +Vale.SHA.PPC64LE.SHA_helpers +Vale.PPC64LE +Vale.SHA.PPC64LE +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@.tmp && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/\.\./!/!g' $@.tmp && mv $@.tmp $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
@@ -411,8 +411,9 @@ hints:
 %.checked: FSTAR_FLAGS=
 %.checked: | hints
 	$(call run-with-log,\
-	  $(FSTAR) $< $(FSTAR_FLAGS) \
+	  $(FSTAR) $(FSTAR_FLAGS) \
 	    --hint_file hints/$(notdir $*).hints \
+	    $< \
 	    && \
 	    touch -c $@ \
 	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
@@ -575,7 +576,7 @@ obj/%.krml:
 	  $(FSTAR) --codegen krml \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	    $(notdir $(subst .checked,,$<)) && \
-	  touch $@ \
+	  touch -c $@ \
 	  ,[EXTRACT-KRML] $*,$@)
 
 ########################################
@@ -623,7 +624,7 @@ REQUIRED_BUNDLES = \
   -bundle EverCrypt.Error
 
 REQUIRED_DROP = \
-  -drop EverCrypt.TargetConfig
+  -library EverCrypt.TargetConfig
 
 REQUIRED_FLAGS	= \
   $(REQUIRED_BUNDLES) \
