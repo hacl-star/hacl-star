@@ -27,6 +27,7 @@
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "internal/Hacl_Hash_Blake2.h"
+#include "libmemzero0.h"
 
 static inline void
 blake2s_update_block(
@@ -254,7 +255,7 @@ Hacl_Blake2s_128_blake2s_update_key(
   {
     blake2s_update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, (uint32_t)64U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)64U, uint8_t);
 }
 
 void
@@ -290,7 +291,7 @@ Hacl_Blake2s_128_blake2s_update_last(
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
   blake2s_update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, (uint32_t)64U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)64U, uint8_t);
 }
 
 static inline void
@@ -361,7 +362,7 @@ Hacl_Blake2s_128_blake2s_finish(
   Lib_IntVector_Intrinsics_vec128_store32_le(second, row1[0U]);
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, (uint32_t)32U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)32U, uint8_t);
 }
 
 /**
@@ -389,8 +390,8 @@ Hacl_Blake2s_128_blake2s(
   Hacl_Blake2s_128_blake2s_init(b, kk, nn);
   blake2s_update(b1, b, kk, k, ll, d);
   Hacl_Blake2s_128_blake2s_finish(nn, output, b);
-  Lib_Memzero0_memzero(b1, (uint32_t)4U * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, (uint32_t)4U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)4U, Lib_IntVector_Intrinsics_vec128);
+  Lib_Memzero0_memzero(b, (uint32_t)4U, Lib_IntVector_Intrinsics_vec128);
 }
 
 void
