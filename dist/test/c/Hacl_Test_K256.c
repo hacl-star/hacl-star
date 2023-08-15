@@ -25,7 +25,7 @@
 
 #include "Hacl_Test_K256.h"
 
-extern void C_String_print(C_String_t uu___);
+extern void C_String_print(Prims_string uu___);
 
 extern bool
 Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
