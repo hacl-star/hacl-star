@@ -752,7 +752,7 @@ DEFAULT_FLAGS = \
 
 # TODO: the way externals are handled in Wasm is nuts and they should be in a
 # single module rather than require clients to do their surgical bundling.
-WASM_STANDALONE=Prims LowStar.Ignore LowStar.Endianness C.Endianness C.String TestLib
+WASM_STANDALONE=Prims LowStar.Endianness C.Endianness C.String TestLib
 
 WASM_FLAGS	=\
   $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
