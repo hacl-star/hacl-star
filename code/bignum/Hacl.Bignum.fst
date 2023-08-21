@@ -39,6 +39,7 @@ let bn_sub_mod_n #t len n a b res =
   let c0 = bn_sub_eq_len len a b res in
   let tmp = create len (uint #t 0) in
   let c1 = bn_add_eq_len len res n tmp in
+  LowStar.Ignore.ignore c1;
   let c = uint #t 0 -. c0 in
   map2T len res (mask_select c) tmp res;
   pop_frame ()

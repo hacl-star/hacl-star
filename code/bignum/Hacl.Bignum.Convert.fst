@@ -182,7 +182,6 @@ let bn_to_bytes_be_st (t:limb_t) (len:size_t{0 < v len /\ numbytes t * v (blocks
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_to_bytes_be (v len) (as_seq h0 b))
 
-
 inline_for_extraction noextract
 val mk_bn_to_bytes_be:
     #t:limb_t
@@ -197,8 +196,9 @@ let mk_bn_to_bytes_be #t is_known_len len b res =
     [@inline_let] let bnLen = blocks len numb in
     [@inline_let] let tmpLen = numb *! bnLen in
     let tmp = create tmpLen (u8 0) in
-    if tmpLen =. len then
-      bn_to_bytes_be_ bnLen b res
+    if tmpLen =. len then begin
+      LowStar.Ignore.ignore tmp;
+      bn_to_bytes_be_ bnLen b res end
     else begin
       bn_to_bytes_be_ bnLen b tmp;
       copy res (sub tmp (tmpLen -! len) len) end end
