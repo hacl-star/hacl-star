@@ -25,11 +25,11 @@
 
 #include "internal/Test.h"
 
-extern void C_String_print(C_String_t uu___);
+extern void C_String_print(Prims_string uu___);
 
-extern uint32_t C_String_strlen(C_String_t uu___);
+extern uint32_t C_String_strlen(Prims_string uu___);
 
-extern void C_String_memcpy(uint8_t *uu___, C_String_t uu___1, uint32_t uu___2);
+extern void C_String_memcpy(uint8_t *uu___, Prims_string uu___1, uint32_t uu___2);
 
 extern bool EverCrypt_AutoConfig2_has_shaext(void);
 
@@ -220,7 +220,8 @@ EverCrypt_AEAD_decrypt(
   uint8_t *dst
 );
 
-extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
+extern void
+TestLib_compare_and_print(Prims_string uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 /**
 Hash `input`, of len `len`, into `dst`, an array whose length is determined by
@@ -5288,16 +5289,16 @@ hash_vectors_low23[64U] =
   };
 
 typedef struct
-__Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t_s
+__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t_s
 {
   Spec_Hash_Definitions_hash_alg fst;
-  C_String_t snd;
+  Prims_string snd;
   Test_Lowstarize_lbuffer__uint8_t thd;
   uint32_t f3;
 }
-__Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t;
+__Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t;
 
-static __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t
+static __Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t
 hash_vectors_low24[24U] =
   {
     {
@@ -5447,14 +5448,14 @@ hash_vectors_low24[24U] =
   };
 
 typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t_s
+lbuffer__K___Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t *b;
+  __Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t;
+lbuffer__K___Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t
+static lbuffer__K___Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t
 hash_vectors_low = { .len = (uint32_t)24U, .b = hash_vectors_low24 };
 
 static uint8_t
@@ -10019,7 +10020,7 @@ EverCrypt_Cipher_chacha20(
   uint32_t ctr
 );
 
-static C_String_t string_of_alg(Spec_Hash_Definitions_hash_alg uu___)
+static Prims_string string_of_alg(Spec_Hash_Definitions_hash_alg uu___)
 {
   switch (uu___)
   {
@@ -10089,13 +10090,13 @@ static C_String_t string_of_alg(Spec_Hash_Definitions_hash_alg uu___)
 
 static void
 test_one_hash(
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t vec
+  __Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t vec
 )
 {
   uint32_t repeat = vec.f3;
   uint8_t *expected = vec.thd.b;
   uint32_t expected_len = vec.thd.len;
-  C_String_t input = vec.snd;
+  Prims_string input = vec.snd;
   Spec_Hash_Definitions_hash_alg a = vec.fst;
   bool sw;
   switch (a)
@@ -10234,7 +10235,7 @@ test_one_hash(
         C_String_memcpy(total_input1 + input_len * i, input, input_len);
       }
       EverCrypt_Hash_Incremental_hash(a, computed, total_input1, total_input_len);
-      C_String_t str = string_of_alg(a);
+      Prims_string str = string_of_alg(a);
       TestLib_compare_and_print(str, expected, computed, tlen);
     }
   }
@@ -10242,14 +10243,14 @@ test_one_hash(
 
 static void
 test_hash(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t
+  lbuffer__K___Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t
   vec
 )
 {
   C_String_print("Hashes");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer_uint8_t_uint32_t
+  __Spec_Hash_Definitions_hash_alg_Prims_string_Test_Lowstarize_lbuffer_uint8_t_uint32_t
   *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
@@ -10631,7 +10632,7 @@ test_one_hmac(
         uint8_t computed[sw3];
         memset(computed, 0U, sw3 * sizeof (uint8_t));
         EverCrypt_HMAC_compute(ha, computed, key, keylen, data, datalen);
-        C_String_t str = string_of_alg(ha);
+        Prims_string str = string_of_alg(ha);
         uint32_t sw;
         switch (ha)
         {
@@ -11190,7 +11191,7 @@ test_one_hkdf(
           }
           else if (EverCrypt_HMAC_is_supported_alg(ha))
           {
-            C_String_t str = string_of_alg(ha);
+            Prims_string str = string_of_alg(ha);
             uint32_t sw6;
             switch (ha)
             {

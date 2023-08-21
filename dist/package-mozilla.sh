@@ -40,6 +40,7 @@ FILES=" \
   curve25519-x86_64-mingw \
   curve25519-x86_64-msvc \
   libintvector \
+  libmemzero0 \
   lib_intrinsics \
   configure \
   Makefile \

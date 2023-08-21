@@ -646,6 +646,14 @@ REQUIRED_FLAGS	= \
   -library EverCrypt.AutoConfig \
   -static-header 'EverCrypt.TargetConfig' \
   -no-prefix 'EverCrypt.TargetConfig' \
+  -add-include 'EverCrypt_DRBG.c:"libmemzero0.h"' \
+  -add-include 'Hacl_Frodo1344.c:"libmemzero0.h"' \
+  -add-include 'Hacl_Frodo64.c:"libmemzero0.h"' \
+  -add-include 'Hacl_Frodo640.c:"libmemzero0.h"' \
+  -add-include 'Hacl_Frodo976.c:"libmemzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2.c:"libmemzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2b_256.c:"libmemzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2s_128.c:"libmemzero0.h"' \
   $(BASE_FLAGS)
 
 TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
