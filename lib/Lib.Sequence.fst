@@ -266,7 +266,7 @@ let mod_prop n a b =
   Math.Lemmas.modulo_lemma (b - a * n) n;
   Math.Lemmas.lemma_mod_sub b n a
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --retry 5"
 
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in

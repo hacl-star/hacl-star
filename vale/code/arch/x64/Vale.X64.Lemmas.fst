@@ -71,8 +71,6 @@ let rec lemma_eq_instr_apply_eval_inouts
       | Some v -> lemma_eq_instr_apply_eval_inouts outs inouts args (f v) oprs s1 s2
     )
 
-#restart-solver
-#push-options "--z3rlimit_factor 2"
 let rec lemma_eq_instr_write_outputs
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s1_orig s1 s2_orig s2:machine_state)
@@ -102,15 +100,24 @@ let rec lemma_eq_instr_write_outputs
         let oprs = coerce oprs in
         let s1 = instr_write_output_explicit i v (fst oprs) s1_orig s1 in
         let s2 = instr_write_output_explicit i v (fst oprs) s2_orig s2 in
-        lemma_eq_instr_write_outputs outs args vs (snd oprs) s1_orig s1 s2_orig s2
+        assert (state_eq_S true s1_orig s2_orig /\ state_eq_S true s1 s2)
+            by (let open FStar.Tactics in
+                set_rlimit 100;
+                ());
+        lemma_eq_instr_write_outputs outs args vs (snd oprs) s1_orig s1 s2_orig s2;
+        ()
       | IOpIm i ->
         let s1 = instr_write_output_implicit i v s1_orig s1 in
         let s2 = instr_write_output_implicit i v s2_orig s2 in
         allow_inversion operand64;
         allow_inversion operand128;
-        lemma_eq_instr_write_outputs outs args vs (coerce oprs) s1_orig s1 s2_orig s2
+        assert (state_eq_S true s1_orig s2_orig /\ state_eq_S true s1 s2)
+            by (let open FStar.Tactics in
+                set_rlimit 100;
+                ());
+        lemma_eq_instr_write_outputs outs args vs (coerce oprs) s1_orig s1 s2_orig s2;
+        ()
     )
-#pop-options
 
 #restart-solver
 let eval_ins_eq_instr (inst:BS.ins) (s1 s2:machine_state) : Lemma

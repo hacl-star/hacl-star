@@ -129,7 +129,8 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 
 // NOTE: this proof is fragile but could be greatly simplified by using the
 // (more robust) proof immediately below.
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 300 --split_queries no --retry 5"
+// ^ splitting this would take hours
 let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
   // Lib.UpdateMulti side
   let n_blocks = S.length input / block_length in

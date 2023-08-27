@@ -264,7 +264,9 @@ let seen_length #index c i t t' s =
 (* TODO: create_in and alloca have big portions of proofs in common, so it may
  * be possible to factorize them, but it is not clear how *)
 #restart-solver
-#push-options "--z3rlimit 100"
+
+(* This proof can sporadically fail *)
+#push-options "--z3rlimit 100 --retry 5"
 let create_in #index c i t t' k r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in

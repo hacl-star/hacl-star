@@ -2,6 +2,8 @@ module Hacl.Meta.HPKE
 
 friend Hacl.Impl.HPKE
 
+#push-options "--z3rlimit 20"
+
 %splice[
   hpke_setupBaseS_higher;
   hpke_setupBaseR_higher;
