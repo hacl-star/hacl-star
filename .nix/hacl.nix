@@ -81,6 +81,7 @@ let
         menhirLib
         process
         sedlex
+        memtrace
       ]);
 
     buildInputs = [ openssl.dev ];
