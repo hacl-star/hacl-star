@@ -10,9 +10,6 @@ open Vale.Lib.Tactics
 open Vale.Lib.Bv_s
 open Vale.Math.Bits
 
-// tweak options?
-#reset-options "--smtencoding.elim_box true"
-
 //NOTE: Using the split tactic seems to slowdown execution by a lot.
 
 let lemma_shr2 x =
@@ -21,20 +18,20 @@ let lemma_shr2 x =
 let lemma_shr4 x =
   assert_by_tactic (shift_right #64 x 4 == udiv #64 x 16) bv_tac
 
+#push-options "--z3rlimit 25"
 let lemma_and_mod_n x =
   assert_by_tactic (logand #64 x 3 == mod #64 x 4) (bv_tac);
   assert_by_tactic (logand #64 x 15 == mod #64 x 16) (bv_tac)
+#pop-options
 
 let lemma_clear_lower_2 x =
   assert_by_tactic
   (logand #64 x 0xfffffffffffffffc == mul_mod #64 (udiv #64 x 4) 4)
   bv_tac
 
-
 let lemma_and_constants x =
  assert_by_tactic (logand #64 x 0 == (0 <: uint_t 64)) bv_tac;
  assert_by_tactic (logand #64 x 0xffffffffffffffff == x) bv_tac
-
 
 let lemma_poly_constants x =
  // using split in this seems to hang execution.
@@ -76,10 +73,12 @@ let lemma_bv128_64_64_and_helper x x0 x1 y y0 y1 z z0 z1 =
 
 let bv128_64_64 x0 x1 = bvor (bvshl (bv_uext #64 #64 x1) 64) (bv_uext #64 #64 x0)
 
+#push-options "--z3rlimit 20"
 unfold let uint_to_nat (#n:nat) (x:uint_t n) : r:nat{r = x} =
  assert (x < pow2 n);
  modulo_lemma x (pow2 n);
  x
+#pop-options
 
 let uint_ext (#n : nat) (#m : nat{n <= m}) (x : uint_t n) : r:(uint_t m){uint_to_nat r = uint_to_nat x} =
   assert_norm(fits x n);
@@ -88,7 +87,7 @@ let uint_ext (#n : nat) (#m : nat{n <= m}) (x : uint_t n) : r:(uint_t m){uint_to
   modulo_lemma x (pow2 m);
   to_uint_t m x
 
-#reset-options "--smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap"
+#push-options "--smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap"
 let mul_bvshl (u:uint_t 64) :
   Lemma (0x10000000000000000 * u < pow2 128 /\
          (int2bv #128 (0x10000000000000000 * u) ==
@@ -99,11 +98,10 @@ let mul_bvshl (u:uint_t 64) :
     (int2bv #128 (mul_mod #128 0x10000000000000000 (uint_ext #64 #128 u)) ==
     bvmul #128 (int2bv #128 0x10000000000000000) (uint_ext #64 #128 u))
     (fun () -> mapply (`trans); arith_to_bv_tac (); trefl ())
+#pop-options
 
-#reset-options "--smtencoding.elim_box true"
 let plus_bvor (u h:bv_t 128) :
   Lemma (bvand u h = bv_zero ==> bvadd u h == bvor u h) = ()
-
 
 let lemma_bv128_64_64_and x x0 x1 y y0 y1 z z0 z1 =
   assert_by_tactic (z == bvand #128 x y)
@@ -111,7 +109,7 @@ let lemma_bv128_64_64_and x x0 x1 y y0 y1 z z0 z1 =
                            rewrite_eqs_from_context ();
                            norm[delta])
 
-#reset-options "--smtencoding.elim_box true --z3refresh --z3rlimit 20 --max_ifuel 1 --max_fuel 1"
+#push-options "--smtencoding.elim_box true --z3refresh --z3rlimit 20 --max_ifuel 1 --max_fuel 1"
 let int2bv_uext_64_128 (x1 : nat) :
   Lemma  (requires (FStar.UInt.size x1 64))
          (ensures (bv_uext #64 #64 (int2bv #64 x1) == int2bv #128 x1)) =
@@ -120,23 +118,21 @@ let int2bv_uext_64_128 (x1 : nat) :
    assert (x1 < pow2 128);
    modulo_lemma x1 (pow2 128); // x1 % pow2 128 = x1
    assert (FStar.UInt.size x1 128);
-   assert_by_tactic (bv_uext #64 #64 (int2bv #64 x1) == int2bv #128 x1)
-                (fun () -> dump "..";
-                norm[delta_only [`%uint_ext; `%FStar.UInt.to_uint_t]];
-                 // grewrite (quote (x1 % pow2 128)) (quote x1);
-                dump "After norm"; smt ())
+   assert (bv_uext #64 #64 (int2bv #64 x1) == int2bv #128 x1)
+       by (dump "..";
+           norm[delta_only [`%uint_ext; `%FStar.UInt.to_uint_t]];
+            // grewrite (quote (x1 % pow2 128)) (quote x1);
+           dump "After norm"; smt ())
+#pop-options
 
-
-#reset-options "--smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --smtencoding.elim_box true --z3cliopt smt.arith.nl=false --max_fuel 1 --max_ifuel 0"
-
-let lowerUpper128m (l:uint_t 64) (u:uint_t 64) : uint_t 128 =
+let lowerUpper128m (l:uint_t 64) (u:uint_t 64) : r:(uint_t 128){r == lowerUpper128u l u} =
+  assert_norm (lowerUpper128u l u == u * 0x10000000000000000 + l);
   add_hide #128 (mul_hide #128 (uext #64 #64 u) 0x10000000000000000) (uext #64 #64 l)
 
 let lowerUpper128b (l:bv_t 64) (u:bv_t 64) : bv_t 128 =
   b_add #128 (b_mul #128 (b_uext #64 #64 u) 0x10000000000000000) (b_uext #64 #64 l)
 
-//this was so flaky, new options helped.
-#reset-options "--smtencoding.elim_box true --z3refresh --z3rlimit 12 --max_ifuel 1 --max_fuel 1"
+#push-options"--smtencoding.elim_box true --z3refresh --z3rlimit 24 --max_ifuel 1 --max_fuel 1 --retry 5"
 let lemma_lowerUpper128_andu
     (x:uint_t 128) (x0:uint_t 64) (x1:uint_t 64) (y:uint_t 128)
     (y0:uint_t 64) (y1:uint_t 64) (z:uint_t 128) (z0:uint_t 64) (z1:uint_t 64) :
@@ -159,12 +155,10 @@ let lemma_lowerUpper128_andu
   lemma_i2b_equal
     (lowerUpper128m (logand x0 y0) (logand x1 y1))
     (logand (lowerUpper128m x0 x1) (lowerUpper128m y0 y1));
-  assert_norm (lowerUpper128m x0 x1 == lowerUpper128u x0 x1);
-  assert_norm (lowerUpper128m y0 y1 == lowerUpper128u y0 y1);
-  assert_norm (lowerUpper128m z0 z1 == lowerUpper128u z0 z1);
   ()
+#pop-options
 
-#reset-options "--smtencoding.elim_box true --z3cliopt smt.case_split=3"
+#push-options "--smtencoding.elim_box true --z3cliopt smt.case_split=3 --z3rlimit 25"
 let lemma_bytes_shift_constants0 x =
   assert_by_tactic (shift_left #64 0 3 == (0 <: uint_t 64)) bv_tac;
   assert_by_tactic (shift_left #64 1 0 == (0x1 <: uint_t 64)) bv_tac
@@ -189,6 +183,7 @@ let lemma_bytes_shift_constants6 x =
 let lemma_bytes_shift_constants7 x =
   assert_by_tactic (shift_left #64 7 3 == (56 <: uint_t 64)) bv_tac;
   assert_by_tactic (shift_left #64 1 56 == (0x100000000000000 <: uint_t 64)) bv_tac
+#pop-options
 
 let lemma_bytes_and_mod0 x =
   assert_by_tactic (logand #64 x (0x1 - 1) == mod #64 x 0x1) bv_tac
