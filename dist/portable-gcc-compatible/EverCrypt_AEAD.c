@@ -46,6 +46,10 @@ EverCrypt_AEAD_state_s;
 
 /* SNIPPET_START: EverCrypt_AEAD_uu___is_Ek */
 
+/**
+Both encryption and decryption require a state that holds the key.
+The state may be reused as many times as desired.
+*/
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
 {
   return true;

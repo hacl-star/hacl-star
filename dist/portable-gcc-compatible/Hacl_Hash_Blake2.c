@@ -26,6 +26,7 @@
 #include "internal/Hacl_Hash_Blake2.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
+#include "libmemzero0.h"
 
 /* SNIPPET_START: blake2b_update_block */
 
@@ -541,7 +542,7 @@ Hacl_Blake2b_32_blake2b_update_key(
   {
     blake2b_update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, (uint32_t)128U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)128U, uint8_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_key */
@@ -589,7 +590,7 @@ Hacl_Blake2b_32_blake2b_update_last(
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));
   blake2b_update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, (uint32_t)128U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)128U, uint8_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_last */
@@ -672,7 +673,7 @@ void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash
     store64_le(second + i * (uint32_t)8U, row1[i]););
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, (uint32_t)64U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)64U, uint8_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2b_32_blake2b_finish */
@@ -704,8 +705,8 @@ Hacl_Blake2b_32_blake2b(
   Hacl_Blake2b_32_blake2b_init(b, kk, nn);
   blake2b_update(b1, b, kk, k, ll, d);
   Hacl_Blake2b_32_blake2b_finish(nn, output, b);
-  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)16U, uint64_t);
+  Lib_Memzero0_memzero(b, (uint32_t)16U, uint64_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2b_32_blake2b */
@@ -1228,7 +1229,7 @@ Hacl_Blake2s_32_blake2s_update_key(
   {
     blake2s_update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, (uint32_t)64U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)64U, uint8_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2s_32_blake2s_update_key */
@@ -1272,7 +1273,7 @@ Hacl_Blake2s_32_blake2s_update_last(
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
   blake2s_update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, (uint32_t)64U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)64U, uint8_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2s_32_blake2s_update_last */
@@ -1351,7 +1352,7 @@ void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash
     store32_le(second + i * (uint32_t)4U, row1[i]););
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, (uint32_t)32U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)32U, uint8_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2s_32_blake2s_finish */
@@ -1383,8 +1384,8 @@ Hacl_Blake2s_32_blake2s(
   Hacl_Blake2s_32_blake2s_init(b, kk, nn);
   blake2s_update(b1, b, kk, k, ll, d);
   Hacl_Blake2s_32_blake2s_finish(nn, output, b);
-  Lib_Memzero0_memzero(b1, (uint32_t)16U * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, (uint32_t)16U * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)16U, uint32_t);
+  Lib_Memzero0_memzero(b, (uint32_t)16U, uint32_t);
 }
 
 /* SNIPPET_END: Hacl_Blake2s_32_blake2s */

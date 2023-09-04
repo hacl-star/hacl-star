@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Lib_Memzero0.h"
 #include "Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b_init */
