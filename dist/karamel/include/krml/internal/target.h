@@ -72,7 +72,7 @@
 #    define KRML_NOINLINE_END \
       _Pragma("GCC diagnostic pop")
 #  else
-#    define KRML_NOINLINE_START
+#    define KRML_NOINLINE_END
 #  endif
 #endif
 
