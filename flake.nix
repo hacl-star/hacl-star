@@ -31,13 +31,5 @@
           inherit hacl;
           default = hacl;
         };
-        hydraJobs = {
-          inherit hacl;
-          hacl-build-products = hacl.passthru.build-products;
-          hacl-stats = hacl.passthru.stats;
-          hacl-dist-compare = hacl.passthru.dist-compare;
-          hacl-dist-list = hacl.passthru.dist-list;
-          hacl-resource-monitor = hacl.passthru.resource-monitor;
-        };
       });
 }
