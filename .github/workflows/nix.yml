@@ -1,0 +1,22 @@
+name: Nix
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  nix:
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: build hacl
+        run: |
+          nix build .#hacl
+      - name: resource monitor
+        run: |
+          nix build .#hacl.passthru.resource-monitor
+          cat result/resources.txt
