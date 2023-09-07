@@ -26,6 +26,7 @@
 #include "EverCrypt_DRBG.h"
 
 #include "internal/EverCrypt_HMAC.h"
+#include "libmemzero0.h"
 
 /* SNIPPET_START: EverCrypt_DRBG_reseed_interval */
 
@@ -692,20 +693,18 @@ reseed_sha1(
   memcpy(seed_material + entropy_input_len,
     additional_input,
     additional_input_len * sizeof (uint8_t));
-  Hacl_HMAC_DRBG_state uu____0;
+  Hacl_HMAC_DRBG_state scrut;
   if (st_s.tag == SHA1_s)
   {
-    uu____0 = st_s.case_SHA1_s;
+    scrut = st_s.case_SHA1_s;
   }
   else
   {
-    uu____0 =
-      KRML_EABORT(Hacl_HMAC_DRBG_state,
-        "unreachable (pattern matches are exhaustive in F*)");
+    scrut = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  uint8_t *k = uu____0.k;
-  uint8_t *v = uu____0.v;
-  uint32_t *ctr = uu____0.reseed_counter;
+  uint8_t *k = scrut.k;
+  uint8_t *v = scrut.v;
+  uint32_t *ctr = scrut.reseed_counter;
   uint32_t input_len = (uint32_t)21U + entropy_input_len + additional_input_len;
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
@@ -777,20 +776,18 @@ reseed_sha2_256(
   memcpy(seed_material + entropy_input_len,
     additional_input,
     additional_input_len * sizeof (uint8_t));
-  Hacl_HMAC_DRBG_state uu____0;
+  Hacl_HMAC_DRBG_state scrut;
   if (st_s.tag == SHA2_256_s)
   {
-    uu____0 = st_s.case_SHA2_256_s;
+    scrut = st_s.case_SHA2_256_s;
   }
   else
   {
-    uu____0 =
-      KRML_EABORT(Hacl_HMAC_DRBG_state,
-        "unreachable (pattern matches are exhaustive in F*)");
+    scrut = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  uint8_t *k = uu____0.k;
-  uint8_t *v = uu____0.v;
-  uint32_t *ctr = uu____0.reseed_counter;
+  uint8_t *k = scrut.k;
+  uint8_t *v = scrut.v;
+  uint32_t *ctr = scrut.reseed_counter;
   uint32_t input_len = (uint32_t)33U + entropy_input_len + additional_input_len;
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
@@ -862,20 +859,18 @@ reseed_sha2_384(
   memcpy(seed_material + entropy_input_len,
     additional_input,
     additional_input_len * sizeof (uint8_t));
-  Hacl_HMAC_DRBG_state uu____0;
+  Hacl_HMAC_DRBG_state scrut;
   if (st_s.tag == SHA2_384_s)
   {
-    uu____0 = st_s.case_SHA2_384_s;
+    scrut = st_s.case_SHA2_384_s;
   }
   else
   {
-    uu____0 =
-      KRML_EABORT(Hacl_HMAC_DRBG_state,
-        "unreachable (pattern matches are exhaustive in F*)");
+    scrut = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  uint8_t *k = uu____0.k;
-  uint8_t *v = uu____0.v;
-  uint32_t *ctr = uu____0.reseed_counter;
+  uint8_t *k = scrut.k;
+  uint8_t *v = scrut.v;
+  uint32_t *ctr = scrut.reseed_counter;
   uint32_t input_len = (uint32_t)49U + entropy_input_len + additional_input_len;
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
@@ -947,20 +942,18 @@ reseed_sha2_512(
   memcpy(seed_material + entropy_input_len,
     additional_input,
     additional_input_len * sizeof (uint8_t));
-  Hacl_HMAC_DRBG_state uu____0;
+  Hacl_HMAC_DRBG_state scrut;
   if (st_s.tag == SHA2_512_s)
   {
-    uu____0 = st_s.case_SHA2_512_s;
+    scrut = st_s.case_SHA2_512_s;
   }
   else
   {
-    uu____0 =
-      KRML_EABORT(Hacl_HMAC_DRBG_state,
-        "unreachable (pattern matches are exhaustive in F*)");
+    scrut = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  uint8_t *k = uu____0.k;
-  uint8_t *v = uu____0.v;
-  uint32_t *ctr = uu____0.reseed_counter;
+  uint8_t *k = scrut.k;
+  uint8_t *v = scrut.v;
+  uint32_t *ctr = scrut.reseed_counter;
   uint32_t input_len = (uint32_t)65U + entropy_input_len + additional_input_len;
   KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
   uint8_t input0[input_len];
@@ -1050,20 +1043,20 @@ generate_sha1(
       memcpy(seed_material + entropy_input_len1,
         additional_input,
         additional_input_len * sizeof (uint8_t));
-      Hacl_HMAC_DRBG_state uu____0;
+      Hacl_HMAC_DRBG_state scrut;
       if (st_s.tag == SHA1_s)
       {
-        uu____0 = st_s.case_SHA1_s;
+        scrut = st_s.case_SHA1_s;
       }
       else
       {
-        uu____0 =
+        scrut =
           KRML_EABORT(Hacl_HMAC_DRBG_state,
             "unreachable (pattern matches are exhaustive in F*)");
       }
-      uint8_t *k = uu____0.k;
-      uint8_t *v = uu____0.v;
-      uint32_t *ctr = uu____0.reseed_counter;
+      uint8_t *k = scrut.k;
+      uint8_t *v = scrut.v;
+      uint32_t *ctr = scrut.reseed_counter;
       uint32_t input_len = (uint32_t)21U + entropy_input_len1 + additional_input_len;
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
@@ -1275,20 +1268,20 @@ generate_sha2_256(
       memcpy(seed_material + entropy_input_len1,
         additional_input,
         additional_input_len * sizeof (uint8_t));
-      Hacl_HMAC_DRBG_state uu____0;
+      Hacl_HMAC_DRBG_state scrut;
       if (st_s.tag == SHA2_256_s)
       {
-        uu____0 = st_s.case_SHA2_256_s;
+        scrut = st_s.case_SHA2_256_s;
       }
       else
       {
-        uu____0 =
+        scrut =
           KRML_EABORT(Hacl_HMAC_DRBG_state,
             "unreachable (pattern matches are exhaustive in F*)");
       }
-      uint8_t *k = uu____0.k;
-      uint8_t *v = uu____0.v;
-      uint32_t *ctr = uu____0.reseed_counter;
+      uint8_t *k = scrut.k;
+      uint8_t *v = scrut.v;
+      uint32_t *ctr = scrut.reseed_counter;
       uint32_t input_len = (uint32_t)33U + entropy_input_len1 + additional_input_len;
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
@@ -1500,20 +1493,20 @@ generate_sha2_384(
       memcpy(seed_material + entropy_input_len1,
         additional_input,
         additional_input_len * sizeof (uint8_t));
-      Hacl_HMAC_DRBG_state uu____0;
+      Hacl_HMAC_DRBG_state scrut;
       if (st_s.tag == SHA2_384_s)
       {
-        uu____0 = st_s.case_SHA2_384_s;
+        scrut = st_s.case_SHA2_384_s;
       }
       else
       {
-        uu____0 =
+        scrut =
           KRML_EABORT(Hacl_HMAC_DRBG_state,
             "unreachable (pattern matches are exhaustive in F*)");
       }
-      uint8_t *k = uu____0.k;
-      uint8_t *v = uu____0.v;
-      uint32_t *ctr = uu____0.reseed_counter;
+      uint8_t *k = scrut.k;
+      uint8_t *v = scrut.v;
+      uint32_t *ctr = scrut.reseed_counter;
       uint32_t input_len = (uint32_t)49U + entropy_input_len1 + additional_input_len;
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
@@ -1725,20 +1718,20 @@ generate_sha2_512(
       memcpy(seed_material + entropy_input_len1,
         additional_input,
         additional_input_len * sizeof (uint8_t));
-      Hacl_HMAC_DRBG_state uu____0;
+      Hacl_HMAC_DRBG_state scrut;
       if (st_s.tag == SHA2_512_s)
       {
-        uu____0 = st_s.case_SHA2_512_s;
+        scrut = st_s.case_SHA2_512_s;
       }
       else
       {
-        uu____0 =
+        scrut =
           KRML_EABORT(Hacl_HMAC_DRBG_state,
             "unreachable (pattern matches are exhaustive in F*)");
       }
-      uint8_t *k = uu____0.k;
-      uint8_t *v = uu____0.v;
-      uint32_t *ctr = uu____0.reseed_counter;
+      uint8_t *k = scrut.k;
+      uint8_t *v = scrut.v;
+      uint32_t *ctr = scrut.reseed_counter;
       uint32_t input_len = (uint32_t)65U + entropy_input_len1 + additional_input_len;
       KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
       uint8_t input0[input_len];
@@ -1919,8 +1912,8 @@ static void uninstantiate_sha1(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero0_memzero(k, (uint32_t)20U * sizeof (k[0U]));
-  Lib_Memzero0_memzero(v, (uint32_t)20U * sizeof (v[0U]));
+  Lib_Memzero0_memzero(k, (uint32_t)20U, uint8_t);
+  Lib_Memzero0_memzero(v, (uint32_t)20U, uint8_t);
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);
@@ -1947,8 +1940,8 @@ static void uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero0_memzero(k, (uint32_t)32U * sizeof (k[0U]));
-  Lib_Memzero0_memzero(v, (uint32_t)32U * sizeof (v[0U]));
+  Lib_Memzero0_memzero(k, (uint32_t)32U, uint8_t);
+  Lib_Memzero0_memzero(v, (uint32_t)32U, uint8_t);
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);
@@ -1975,8 +1968,8 @@ static void uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero0_memzero(k, (uint32_t)48U * sizeof (k[0U]));
-  Lib_Memzero0_memzero(v, (uint32_t)48U * sizeof (v[0U]));
+  Lib_Memzero0_memzero(k, (uint32_t)48U, uint8_t);
+  Lib_Memzero0_memzero(v, (uint32_t)48U, uint8_t);
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);
@@ -2003,8 +1996,8 @@ static void uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero0_memzero(k, (uint32_t)64U * sizeof (k[0U]));
-  Lib_Memzero0_memzero(v, (uint32_t)64U * sizeof (v[0U]));
+  Lib_Memzero0_memzero(k, (uint32_t)64U, uint8_t);
+  Lib_Memzero0_memzero(v, (uint32_t)64U, uint8_t);
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);

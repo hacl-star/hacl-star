@@ -49,10 +49,10 @@ main()
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
-  uint8_t key[16];
+  uint8_t key[32];
   uint8_t nonce[12];
   memset(plain, 'P', SIZE);
-  memset(key, 'K', 16);
+  memset(key, 'K', 32);
   memset(nonce, 'N', 12);
 
   for (int j = 0; j < ROUNDS; j++) {

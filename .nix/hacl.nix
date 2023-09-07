@@ -175,18 +175,15 @@ let
           git archive HEAD dist/* > dist.tar
         '';
         installPhase = ''
-          mkdir -p $out/nix-support
+          mkdir -p $out
           cp hints.tar dist.tar $out
-          echo "file hints $out/hints.tar" >> $out/nix-support/hydra-build-products
-          echo "file dist $out/dist.tar" >> $out/nix-support/hydra-build-products
         '';
       };
       stats = stdenv.mkDerivation {
         name = "hacl-stats";
         phases = [ "installPhase" ];
         installPhase = ''
-          mkdir -p $out/nix-support
-          echo "file stats $out/stats.txt" >> $out/nix-support/hydra-build-products
+          mkdir -p $out
           cat ${hacl}/log.txt \
               | grep "^\[VERIFY\]" \
               | sed 's/\[VERIFY\] \(.*\), \(.*\)/\2 \1/' \
@@ -198,9 +195,8 @@ let
         src = hacl;
         dontBuild = true;
         installPhase = ''
-          mkdir -p $out/nix-support
+          mkdir -p $out
           bash ${fstar-scripts}/res_summary.sh > $out/resources.txt
-          echo "file resources $out/resources.txt" >> $out/nix-support/hydra-build-products
         '';
       };
     };
