@@ -16,6 +16,9 @@ jobs:
       - name: build hacl
         run: |
           nix build -L .#hacl
+      - name: build logs
+        run: |
+          nix log .#hacl
       - name: resource monitor
         run: |
           nix build .#hacl.passthru.resource-monitor
