@@ -14,8 +14,11 @@ jobs:
 
       - name: regenerate hints and dist
         run: |
+          # build the new artifacts (in ./result)
           nix build .#hacl.passthru.build-products
+          # delete the old ones
           git rm -r hints dist/*/*
+          # copy the new artifacts
           tar -xvf result/hints.tar
           tar -xvf result/dist.tar
 
