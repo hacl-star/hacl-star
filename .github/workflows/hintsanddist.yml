@@ -14,8 +14,8 @@ jobs:
 
       - name: regenerate hints and dist
         run: |
-          git rm -r hints dist/*/*
           nix build .#hacl.passthru.build-products
+          git rm -r hints dist/*/*
           tar -xvf result/hints.tar
           tar -xvf result/dist.tar
 
