@@ -66,6 +66,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
   Hacl_Streaming_Blake2b_256_blake2b_256_state scrut = *s;
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
+  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_Blake2b_256_blake2b_init(block_state.snd, (uint32_t)0U, (uint32_t)64U);
   Hacl_Streaming_Blake2b_256_blake2b_256_state
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };

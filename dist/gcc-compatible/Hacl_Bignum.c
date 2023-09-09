@@ -696,6 +696,7 @@ Hacl_Bignum_bn_sub_mod_n_u32(
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, t2, res_i);
   }
   uint32_t c1 = c;
+  KRML_HOST_IGNORE(c1);
   uint32_t c2 = (uint32_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < len1; i++)
   {
@@ -773,6 +774,7 @@ Hacl_Bignum_bn_sub_mod_n_u64(
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
   uint64_t c1 = c;
+  KRML_HOST_IGNORE(c1);
   uint64_t c2 = (uint64_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < len1; i++)
   {

@@ -215,6 +215,7 @@ static void sub_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
   }
   uint64_t c1 = c;
+  KRML_HOST_IGNORE(c1);
   uint64_t c2 = (uint64_t)0U - c00;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -288,6 +289,7 @@ static void sqr4(uint64_t *a, uint64_t *res)
     uint64_t r = c;
     res[i0 + i0] = r;);
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
+  KRML_HOST_IGNORE(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -299,6 +301,7 @@ static void sqr4(uint64_t *a, uint64_t *res)
     tmp[(uint32_t)2U * i] = lo;
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;);
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
+  KRML_HOST_IGNORE(c1);
 }
 
 static inline uint64_t is_qelem_zero(uint64_t *f)
@@ -432,6 +435,7 @@ static inline void load_qelem_modq(uint64_t *f, uint8_t *b)
 static inline void store_qelem(uint8_t *b, uint64_t *f)
 {
   uint8_t tmp[32U] = { 0U };
+  KRML_HOST_IGNORE(tmp);
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,

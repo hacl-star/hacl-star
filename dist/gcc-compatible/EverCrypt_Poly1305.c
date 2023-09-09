@@ -60,6 +60,7 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
+    KRML_HOST_IGNORE(vec128);
     Hacl_Poly1305_256_poly1305_mac(dst, len, src, key);
     return;
   }
@@ -67,13 +68,17 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
+    KRML_HOST_IGNORE(vec256);
     Hacl_Poly1305_128_poly1305_mac(dst, len, src, key);
     return;
   }
   #endif
+  KRML_HOST_IGNORE(vec256);
+  KRML_HOST_IGNORE(vec128);
   #if HACL_CAN_COMPILE_VALE
   poly1305_vale(dst, src, len, key);
   #else
+  KRML_HOST_IGNORE(poly1305_vale);
   Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
   #endif
 }

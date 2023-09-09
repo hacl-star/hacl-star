@@ -229,6 +229,7 @@ void Hacl_Bignum256_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
   }
   uint64_t c1 = c;
+  KRML_HOST_IGNORE(c1);
   uint64_t c2 = (uint64_t)0U - c00;
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -314,6 +315,7 @@ void Hacl_Bignum256_sqr(uint64_t *a, uint64_t *res)
     uint64_t r = c;
     res[i0 + i0] = r;);
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
+  KRML_HOST_IGNORE(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -325,6 +327,7 @@ void Hacl_Bignum256_sqr(uint64_t *a, uint64_t *res)
     tmp[(uint32_t)2U * i] = lo;
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;);
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
+  KRML_HOST_IGNORE(c1);
 }
 
 static inline void precompr2(uint32_t nBits, uint64_t *n, uint64_t *res)
@@ -518,6 +521,7 @@ static inline void amont_sqr(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint6
     uint64_t r = c1;
     c[i0 + i0] = r;);
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, c, c, c);
+  KRML_HOST_IGNORE(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
@@ -529,6 +533,7 @@ static inline void amont_sqr(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint6
     tmp[(uint32_t)2U * i] = lo;
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;);
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, c, tmp, c);
+  KRML_HOST_IGNORE(c1);
   areduction(n, nInv_u64, c, resM);
 }
 
@@ -1453,6 +1458,7 @@ Serialize a bignum into big-endian memory.
 void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res)
 {
   uint8_t tmp[32U] = { 0U };
+  KRML_HOST_IGNORE(tmp);
   KRML_MAYBE_FOR4(i,
     (uint32_t)0U,
     (uint32_t)4U,

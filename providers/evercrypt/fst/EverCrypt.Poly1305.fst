@@ -130,14 +130,19 @@ let poly1305 dst src len key =
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
 
   if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then begin
+    LowStar.Ignore.ignore vec128;
     Hacl.Poly1305_256.poly1305_mac dst len src key
 
   end else if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then begin
+    LowStar.Ignore.ignore vec256;
     Hacl.Poly1305_128.poly1305_mac dst len src key
 
-  end else if EverCrypt.TargetConfig.hacl_can_compile_vale then begin
-    poly1305_vale dst src len key
-
   end else begin
-    Hacl.Poly1305_32.poly1305_mac dst len src key
+    LowStar.Ignore.ignore vec256;
+    LowStar.Ignore.ignore vec128;
+    if EverCrypt.TargetConfig.hacl_can_compile_vale then
+      poly1305_vale dst src len key
+    else (
+      LowStar.Ignore.ignore poly1305_vale;
+      Hacl.Poly1305_32.poly1305_mac dst len src key)
   end

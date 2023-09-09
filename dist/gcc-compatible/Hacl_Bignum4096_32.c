@@ -238,6 +238,7 @@ void Hacl_Bignum4096_32_sub_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t 
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t12, t2, res_i);
   }
   uint32_t c1 = c;
+  KRML_HOST_IGNORE(c1);
   uint32_t c2 = (uint32_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
@@ -1346,6 +1347,7 @@ Serialize a bignum into big-endian memory.
 void Hacl_Bignum4096_32_bn_to_bytes_be(uint32_t *b, uint8_t *res)
 {
   uint8_t tmp[512U] = { 0U };
+  KRML_HOST_IGNORE(tmp);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
     store32_be(res + i * (uint32_t)4U, b[(uint32_t)128U - i - (uint32_t)1U]);
