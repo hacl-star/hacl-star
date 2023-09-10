@@ -464,6 +464,7 @@ static inline void areduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t 
   uint32_t c00 = c0;
   uint32_t tmp[8U] = { 0U };
   uint32_t c1 = Hacl_Bignum256_32_sub(res, n, tmp);
+  KRML_HOST_IGNORE(c1);
   uint32_t m = (uint32_t)0U - c00;
   KRML_MAYBE_FOR8(i,
     (uint32_t)0U,
@@ -598,6 +599,7 @@ bn_slow_precomp(uint32_t *n, uint32_t mu, uint32_t *r2, uint32_t *a, uint32_t *r
   uint32_t c00 = c0;
   uint32_t tmp[8U] = { 0U };
   uint32_t c1 = Hacl_Bignum256_32_sub(a_mod, n, tmp);
+  KRML_HOST_IGNORE(c1);
   uint32_t m = (uint32_t)0U - c00;
   KRML_MAYBE_FOR8(i,
     (uint32_t)0U,
@@ -1193,6 +1195,7 @@ bool Hacl_Bignum256_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t 
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i););
     uint32_t c1 = c;
     uint32_t c2 = c1;
+    KRML_HOST_IGNORE(c2);
     exp_vartime(nBits, n, a, (uint32_t)256U, n2, res);
   }
   else
@@ -1387,6 +1390,7 @@ Hacl_Bignum256_32_mod_inv_prime_vartime_precomp(
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i););
   uint32_t c1 = c;
   uint32_t c2 = c1;
+  KRML_HOST_IGNORE(c2);
   exp_vartime_precomp(k1.n, k1.mu, k1.r2, a, (uint32_t)256U, n2, res);
 }
 
@@ -1522,6 +1526,7 @@ Serialize a bignum into little-endian memory.
 void Hacl_Bignum256_32_bn_to_bytes_le(uint32_t *b, uint8_t *res)
 {
   uint8_t tmp[32U] = { 0U };
+  KRML_HOST_IGNORE(tmp);
   KRML_MAYBE_FOR8(i,
     (uint32_t)0U,
     (uint32_t)8U,

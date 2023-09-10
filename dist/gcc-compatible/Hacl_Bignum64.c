@@ -180,6 +180,7 @@ bn_slow_precomp(
   uint64_t tmp0[len];
   memset(tmp0, 0U, len * sizeof (uint64_t));
   uint64_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u64(len, a_mod, n, tmp0);
+  KRML_HOST_IGNORE(c1);
   uint64_t m = (uint64_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
@@ -430,6 +431,7 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
     {
       c1 = c0;
     }
+    KRML_HOST_IGNORE(c1);
     Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u64(len,
       nBits,
       n,
@@ -669,6 +671,7 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
   {
     c1 = c0;
   }
+  KRML_HOST_IGNORE(c1);
   Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(len1,
     k1.n,
     k1.mu,
