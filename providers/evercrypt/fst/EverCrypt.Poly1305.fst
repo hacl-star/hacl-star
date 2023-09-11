@@ -50,7 +50,8 @@ let poly1305_vale
       assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
         Seq.index (Seq.slice (B.as_seq h1 ctx) 0 24) i == 0uy);
       Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
-      Vale.Wrapper.X64.Poly.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL;
+      let res = Vale.Wrapper.X64.Poly.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL in
+      LowStar.Ignore.ignore res;
       let h2 = ST.get () in
       assert (B.length src == 8 * Vale.Poly1305.Util.readable_words (Seq.length (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))));
       Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h2 ctx src
@@ -75,7 +76,8 @@ let poly1305_vale
       assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
         Seq.index (Seq.slice (B.as_seq h1 ctx) 0 24) i == 0uy);
       Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
-      Vale.Wrapper.X64.Poly.x64_poly1305 ctx src16 (FStar.Int.Cast.Full.uint32_to_uint64 len16) 0UL;
+      let res = Vale.Wrapper.X64.Poly.x64_poly1305 ctx src16 (FStar.Int.Cast.Full.uint32_to_uint64 len16) 0UL in
+      LowStar.Ignore.ignore res;
       let h1' = ST.get () in
       Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h1' ctx src16
         (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src16))
@@ -87,7 +89,8 @@ let poly1305_vale
         Seq.index (Seq.slice (B.as_seq h1'' ctx) 0 24) i ==
         Seq.index (Seq.slice (B.as_seq h1' ctx) 0 24) i);
       Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1' h1'' ctx false;
-      Vale.Wrapper.X64.Poly.x64_poly1305 ctx tmp (FStar.Int.Cast.Full.uint32_to_uint64 n_extra) 1UL;
+      let res = Vale.Wrapper.X64.Poly.x64_poly1305 ctx tmp (FStar.Int.Cast.Full.uint32_to_uint64 n_extra) 1UL in
+      LowStar.Ignore.ignore res;
       let h2 = ST.get () in
       let proof : squash (S.slice (B.as_seq h2 ctx) 0 16 `S.equal` Spec.Poly1305.poly1305_mac (B.as_seq h1 src) (B.as_seq h1 key)) =
         let open FStar.Seq.Base in

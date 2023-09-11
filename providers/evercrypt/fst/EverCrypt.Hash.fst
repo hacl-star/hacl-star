@@ -354,7 +354,8 @@ let update_multi_256 s ev blocks n =
       IB.buffer_immutable_buffer_disjoint s k224_256 h1;
       let h2 = ST.get () in
       IB.buffer_immutable_buffer_disjoint blocks k224_256 h2;
-      Vale.Wrapper.X64.Sha.sha256_update s blocks n k224_256
+      let res = Vale.Wrapper.X64.Sha.sha256_update s blocks n k224_256 in
+      res
     end else
       Hacl.Hash.SHA2.update_multi_256 s () blocks n
   end else (

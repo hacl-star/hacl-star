@@ -53,6 +53,7 @@ Hacl_Streaming_Poly1305_32_init(uint8_t *k, Hacl_Streaming_Poly1305_32_poly1305_
   uint8_t *k_ = scrut.p_key;
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
+  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_Poly1305_32_poly1305_init(block_state, k);
   memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;

@@ -254,6 +254,7 @@ void Hacl_Streaming_SHA1_legacy_init(Hacl_Streaming_MD_state_32 *s)
   Hacl_Streaming_MD_state_32 scrut = *s;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
+  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_Hash_Core_SHA1_legacy_init(block_state);
   Hacl_Streaming_MD_state_32
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
