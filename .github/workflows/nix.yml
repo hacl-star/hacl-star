@@ -28,9 +28,9 @@ jobs:
           nix build .#hacl.passthru.build-products
       - uses: actions/upload-artifact@v3
         with:
-          name: hints.tar
-          path: result/hints.tar
+          name: hints.tar.gz
+          path: result/hints.tar.gz
       - uses: actions/upload-artifact@v3
         with:
-          name: dist.tar
-          path: result/dist.tar
+          name: dist.tar.gz
+          path: result/dist.tar.gz
