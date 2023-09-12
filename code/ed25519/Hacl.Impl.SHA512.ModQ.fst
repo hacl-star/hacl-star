@@ -35,8 +35,8 @@ let sha512_pre_msg hash prefix len input =
   let st = Hash.alloca_512 () in
   let err0 = Hash.update_512 st prefix 32ul in
   let err1 = Hash.update_512 st input len in
-  LowStar.Ignore.ignore err0; // Why do we ignore this error?
-  LowStar.Ignore.ignore err1; // Why do we ignore this error?
+  LowStar.Ignore.ignore err0;
+  LowStar.Ignore.ignore err1;
   Hash.finish_512 st hash ();
   let h1 = ST.get () in
   assert (as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
@@ -67,9 +67,9 @@ let sha512_pre_pre2_msg hash prefix prefix2 len input =
   let err0 = Hash.update_512 st prefix 32ul in
   let err1 = Hash.update_512 st prefix2 32ul in
   let err2 = Hash.update_512 st input len in
-  LowStar.Ignore.ignore err0; // Why do we ignore this error?
-  LowStar.Ignore.ignore err1; // Why do we ignore this error?
-  LowStar.Ignore.ignore err2; // Why do we ignore this error?
+  LowStar.Ignore.ignore err0;
+  LowStar.Ignore.ignore err1;
+  LowStar.Ignore.ignore err2;
   Hash.finish_512 st hash ();
   Seq.append_empty_l (as_seq h0 prefix);
   pop_frame ()
