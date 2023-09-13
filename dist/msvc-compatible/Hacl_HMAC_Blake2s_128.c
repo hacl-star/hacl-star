@@ -46,16 +46,18 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)64U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)32U;
+    ite = (uint32_t)32U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)64U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));

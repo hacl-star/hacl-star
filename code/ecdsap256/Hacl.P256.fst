@@ -54,7 +54,7 @@ let msg_as_felem alg msg_len msg res =
       | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 msg msg_len mHash
       | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 msg msg_len mHash
   end;
-
+  LowStar.Ignore.ignore msg_len;
   let mHash32 = sub mHash 0ul 32ul in
   BN.bn_from_bytes_be4 res mHash32;
   Hacl.Impl.P256.Scalar.qmod_short res res;

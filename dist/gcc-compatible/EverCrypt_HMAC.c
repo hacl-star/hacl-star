@@ -83,16 +83,18 @@ EverCrypt_HMAC_compute_sha1(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)64U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)20U;
+    ite = (uint32_t)20U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)64U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -201,16 +203,18 @@ EverCrypt_HMAC_compute_sha2_256(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)64U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)32U;
+    ite = (uint32_t)32U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)64U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -329,16 +333,18 @@ EverCrypt_HMAC_compute_sha2_384(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)128U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)48U;
+    ite = (uint32_t)48U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)128U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -458,16 +464,18 @@ EverCrypt_HMAC_compute_sha2_512(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)128U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)64U;
+    ite = (uint32_t)64U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)128U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -587,16 +595,18 @@ EverCrypt_HMAC_compute_blake2s(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)64U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)32U;
+    ite = (uint32_t)32U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)64U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -723,16 +733,18 @@ EverCrypt_HMAC_compute_blake2b(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)128U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)64U;
+    ite = (uint32_t)64U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)128U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));

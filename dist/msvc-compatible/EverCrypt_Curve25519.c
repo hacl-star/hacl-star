@@ -27,13 +27,6 @@
 
 #include "config.h"
 
-static inline bool has_adx_bmi2(void)
-{
-  bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();
-  bool has_adx = EverCrypt_AutoConfig2_has_adx();
-  return has_bmi2 && has_adx;
-}
-
 /**
 Calculate a public point from a secret/private key.
 
@@ -45,13 +38,17 @@ This computes a scalar multiplication of the secret/private key with the curve's
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   #if HACL_CAN_COMPILE_VALE
-  if (has_adx_bmi2())
+  bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();
+  bool has_adx = EverCrypt_AutoConfig2_has_adx();
+  if (has_bmi2 && has_adx)
   {
     Hacl_Curve25519_64_secret_to_public(pub, priv);
     return;
   }
-  #endif
   Hacl_Curve25519_51_secret_to_public(pub, priv);
+  #else
+  Hacl_Curve25519_51_secret_to_public(pub, priv);
+  #endif
 }
 
 /**
@@ -64,13 +61,17 @@ Compute the scalar multiple of a point.
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
   #if HACL_CAN_COMPILE_VALE
-  if (has_adx_bmi2())
+  bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();
+  bool has_adx = EverCrypt_AutoConfig2_has_adx();
+  if (has_bmi2 && has_adx)
   {
     Hacl_Curve25519_64_scalarmult(shared, my_priv, their_pub);
     return;
   }
-  #endif
   Hacl_Curve25519_51_scalarmult(shared, my_priv, their_pub);
+  #else
+  Hacl_Curve25519_51_scalarmult(shared, my_priv, their_pub);
+  #endif
 }
 
 /**
@@ -83,11 +84,15 @@ Execute the diffie-hellmann key exchange.
 bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
   #if HACL_CAN_COMPILE_VALE
-  if (has_adx_bmi2())
+  bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();
+  bool has_adx = EverCrypt_AutoConfig2_has_adx();
+  if (has_bmi2 && has_adx)
   {
     return Hacl_Curve25519_64_ecdh(shared, my_priv, their_pub);
   }
-  #endif
   return Hacl_Curve25519_51_ecdh(shared, my_priv, their_pub);
+  #else
+  return Hacl_Curve25519_51_ecdh(shared, my_priv, their_pub);
+  #endif
 }
 

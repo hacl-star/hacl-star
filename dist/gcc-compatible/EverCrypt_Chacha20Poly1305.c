@@ -39,13 +39,12 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *tag
 )
 {
-  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
+    KRML_HOST_IGNORE(vec128);
     Hacl_Chacha20Poly1305_256_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
     return;
   }
@@ -53,10 +52,13 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
+    KRML_HOST_IGNORE(vec256);
     Hacl_Chacha20Poly1305_128_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
     return;
   }
   #endif
+  KRML_HOST_IGNORE(vec128);
+  KRML_HOST_IGNORE(vec256);
   Hacl_Chacha20Poly1305_32_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
 }
 
@@ -72,22 +74,24 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *tag
 )
 {
-  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
+    KRML_HOST_IGNORE(vec128);
     return Hacl_Chacha20Poly1305_256_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
   }
   #endif
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
+    KRML_HOST_IGNORE(vec256);
     return Hacl_Chacha20Poly1305_128_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
   }
   #endif
+  KRML_HOST_IGNORE(vec128);
+  KRML_HOST_IGNORE(vec256);
   return Hacl_Chacha20Poly1305_32_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
 }
 

@@ -173,6 +173,10 @@ let point_mul_g res scalar =
   proj_g_pow2_128_lseq_lemma ();
   proj_g_pow2_192_lseq_lemma ();
   point_mul_g_noalloc res scalar q1 q2 q3 q4;
+  LowStar.Ignore.ignore q1;
+  LowStar.Ignore.ignore q2;
+  LowStar.Ignore.ignore q3;
+  LowStar.Ignore.ignore q4;
   lemma_exp_four_fw_local (as_seq h0 scalar);
   pop_frame ()
 
