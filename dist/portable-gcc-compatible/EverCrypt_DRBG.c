@@ -26,7 +26,7 @@
 #include "EverCrypt_DRBG.h"
 
 #include "internal/EverCrypt_HMAC.h"
-#include "libmemzero0.h"
+#include "lib_memzero0.h"
 
 /* SNIPPET_START: EverCrypt_DRBG_reseed_interval */
 
