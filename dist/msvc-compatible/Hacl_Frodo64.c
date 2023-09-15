@@ -27,7 +27,7 @@
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
-#include "libmemzero0.h"
+#include "lib_memzero0.h"
 
 /*
  this variant is used only for testing purposes!

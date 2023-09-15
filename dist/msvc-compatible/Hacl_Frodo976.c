@@ -27,7 +27,7 @@
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
-#include "libmemzero0.h"
+#include "lib_memzero0.h"
 
 uint32_t Hacl_Frodo976_crypto_bytes = (uint32_t)24U;
 

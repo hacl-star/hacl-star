@@ -22,7 +22,8 @@
 #include <limits.h>
 #include <inttypes.h>
 
-#include "libmemzero0.h"
+/* This is now a hand-written header */
+#include "lib_memzero0.h"
 #include "krml/internal/target.h"
 
 /* The F* formalization talks about the number of elements in the array. The C

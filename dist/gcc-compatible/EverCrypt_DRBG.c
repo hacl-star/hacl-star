@@ -26,7 +26,7 @@
 #include "EverCrypt_DRBG.h"
 
 #include "internal/EverCrypt_HMAC.h"
-#include "libmemzero0.h"
+#include "lib_memzero0.h"
 
 uint32_t EverCrypt_DRBG_reseed_interval = (uint32_t)1024U;
 
