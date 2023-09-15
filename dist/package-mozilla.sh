@@ -94,6 +94,9 @@ $sed -i -z 's/\n#include "Hacl_Hash_SHA2.h"\n/\n/g' mozilla/Hacl_P256.h
 # Remove the "should-hash" recommendation
 $sed -i -z 's/\n\n\/\*\n  As per[^/]*\*\///g' mozilla/Hacl_P256.h
 
+# Remove the "should-hash" recommendation
+$sed -i -z 's/\n\n\/\*\n  As per[^/]*\*\///g' mozilla/Hacl_P256.c
+
 
 
 
