@@ -1,0 +1,177 @@
+In file included from Hacl_P256.c:26:
+In file included from ./internal/Hacl_P256.h:40:
+./internal/Hacl_Bignum_Base.h:403:12: warning: unused variable 'c0' [-Wunused-variable]
+  uint32_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, res, res);
+           ^
+./internal/Hacl_Bignum_Base.h:415:12: warning: unused variable 'c1' [-Wunused-variable]
+  uint32_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, tmp, res);
+           ^
+./internal/Hacl_Bignum_Base.h:452:12: warning: unused variable 'c0' [-Wunused-variable]
+  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, res, res);
+           ^
+./internal/Hacl_Bignum_Base.h:464:12: warning: unused variable 'c1' [-Wunused-variable]
+  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, tmp, res);
+           ^
+Hacl_P256.c:206:12: warning: unused variable 'c1' [-Wunused-variable]
+  uint64_t c1 = c;
+           ^
+Hacl_P256.c:279:12: warning: unused variable 'c0' [-Wunused-variable]
+  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
+           ^
+Hacl_P256.c:290:12: warning: unused variable 'c1' [-Wunused-variable]
+  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
+           ^
+Hacl_P256.c:295:11: warning: unused variable 'tmp' [-Wunused-variable]
+  uint8_t tmp[32U] = { 0U };
+          ^
+Hacl_P256.c:553:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, fsqr0(tmp1, tmp1););
+                  ^
+Hacl_P256.c:556:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, fsqr0(tmp2, tmp2););
+                  ^
+Hacl_P256.c:559:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, fsqr0(tmp1, tmp1););
+                  ^
+Hacl_P256.c:562:20: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR15(i, (uint32_t)0U, (uint32_t)15U, (uint32_t)1U, fsqr0(x30, x30););
+                   ^
+Hacl_P256.c:565:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, fsqr0(tmp1, tmp1););
+                  ^
+Hacl_P256.c:588:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, fsqr0(x2, x2););
+                  ^
+Hacl_P256.c:604:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, fsqr0(tmp2, tmp2););
+                  ^
+Hacl_P256.c:607:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, fsqr0(tmp1, tmp1););
+                  ^
+Hacl_P256.c:610:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR8(i, (uint32_t)0U, (uint32_t)8U, (uint32_t)1U, fsqr0(tmp2, tmp2););
+                  ^
+Hacl_P256.c:613:20: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR16(i, (uint32_t)0U, (uint32_t)16U, (uint32_t)1U, fsqr0(tmp1, tmp1););
+                   ^
+Hacl_P256.c:960:21: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+    KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, point_double(res, res););
+                    ^
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+    KRML_MAYBE_FOR4(i0, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, point_double(res, res););
+                    ^
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1043:21: warning: variable 'i0' set but not used [-Wunused-but-set-variable]
+Hacl_P256.c:1004:3: warning: unused variable 'q2' [-Wunused-variable]
+  q2[12U] =
+  ^
+Hacl_P256.c:1014:3: warning: unused variable 'q3' [-Wunused-variable]
+  q3[12U] =
+  ^
+Hacl_P256.c:1024:3: warning: unused variable 'q4' [-Wunused-variable]
+  q4[12U] =
+  ^
+Hacl_P256.c:1104:21: warning: variable 'i2' set but not used [-Wunused-but-set-variable]
+    KRML_MAYBE_FOR5(i2, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, point_double(res, res););
+                    ^
+Hacl_P256.c:1332:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, qsqr(x6, x6););
+                  ^
+Hacl_P256.c:1335:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR8(i, (uint32_t)0U, (uint32_t)8U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1338:20: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR16(i, (uint32_t)0U, (uint32_t)16U, (uint32_t)1U, qsqr(x6, x6););
+                   ^
+Hacl_P256.c:1351:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1353:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1355:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1357:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1359:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1361:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1363:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1365:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1367:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1369:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR9(i, (uint32_t)0U, (uint32_t)9U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1371:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1373:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1375:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1377:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1379:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1381:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1383:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1385:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1387:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1389:20: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR10(i, (uint32_t)0U, (uint32_t)10U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                   ^
+Hacl_P256.c:1391:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR2(i, (uint32_t)0U, (uint32_t)2U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1393:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1395:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR5(i, (uint32_t)0U, (uint32_t)5U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1397:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR3(i, (uint32_t)0U, (uint32_t)3U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1399:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR7(i, (uint32_t)0U, (uint32_t)7U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+Hacl_P256.c:1401:19: warning: variable 'i' set but not used [-Wunused-but-set-variable]
+  KRML_MAYBE_FOR6(i, (uint32_t)0U, (uint32_t)6U, (uint32_t)1U, qsqr(tmp1, tmp1););
+                  ^
+68 warnings generated.
