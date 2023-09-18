@@ -318,15 +318,21 @@ let hash a dst input len =
   | SHA3_384 -> Hacl.Hash.SHA3.hash SHA3_384 input len dst
   | SHA3_512 -> Hacl.Hash.SHA3.hash SHA3_512 input len dst
   | Blake2S ->
-      let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
-      if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
-        Hacl.Hash.Blake2.hash_blake2s_128 input len dst
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
+        if vec128 then
+          Hacl.Hash.Blake2.hash_blake2s_128 input len dst
+        else
+          Hacl.Hash.Blake2.hash_blake2s_32 input len dst
       else
         Hacl.Hash.Blake2.hash_blake2s_32 input len dst
   | Blake2B ->
-      let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
-      if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then
-        Hacl.Hash.Blake2.hash_blake2b_256 input len dst
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
+        if vec256 then
+          Hacl.Hash.Blake2.hash_blake2b_256 input len dst
+        else
+          Hacl.Hash.Blake2.hash_blake2b_32 input len dst
       else
         Hacl.Hash.Blake2.hash_blake2b_32 input len dst
 

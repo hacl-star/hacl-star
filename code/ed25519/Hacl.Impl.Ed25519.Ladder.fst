@@ -180,7 +180,12 @@ let point_mul_g_noalloc out bscalar q1 q2 q3 q4 =
     (to_const precomp_g_pow2_64_table_w4)
     (to_const precomp_g_pow2_128_table_w4)
     (to_const precomp_g_pow2_192_table_w4)
-    out
+    out;
+
+  LowStar.Ignore.ignore q2; // q2, q3, q4 are unused variables
+  LowStar.Ignore.ignore q3;
+  LowStar.Ignore.ignore q4
+  
 
 
 inline_for_extraction noextract

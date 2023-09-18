@@ -228,6 +228,8 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s)
   Hacl_Streaming_Keccak_state scrut = *s;
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Keccak_hash_buf block_state = scrut.block_state;
+  Spec_Hash_Definitions_hash_alg i = block_state.fst;
+  KRML_HOST_IGNORE(i);
   uint64_t *s1 = block_state.snd;
   memset(s1, 0U, (uint32_t)25U * sizeof (uint64_t));
   Hacl_Streaming_Keccak_state

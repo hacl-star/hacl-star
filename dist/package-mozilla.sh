@@ -3,6 +3,19 @@
 set -o pipefail
 set -e
 
+if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
+  echo "A bash version >= 4 required. Got: $BASH_VERSION" >&2
+  exit 1
+fi
+
+if [[ $(uname) == "Darwin" ]]; then
+  # You're already running with homebrew or macports to satisfy the
+  # bash>=4 requirement, so requiring GNU sed is entirely reasonable.
+  sed=gsed
+else
+  sed=sed
+fi
+
 # If FOO appears in FILES, then FOO.h, FOO.c, internal/FOO.h, FOO.asm, FOO.S and
 # FOO all get copied unconditionally to dist/mozilla (as long as they exist)
 FILES=" \
@@ -27,6 +40,8 @@ FILES=" \
   Hacl_Poly1305_128 \
   Hacl_Poly1305_256 \
   Hacl_Poly1305_32 \
+  Hacl_P256 \
+  Hacl_P256_PrecompTable \
   Hacl_RSAPSS \
   Hacl_SHA2_Types \
   Hacl_Spec \
@@ -40,7 +55,7 @@ FILES=" \
   curve25519-x86_64-mingw \
   curve25519-x86_64-msvc \
   libintvector \
-  libmemzero0 \
+  lib_memzero0 \
   lib_intrinsics \
   configure \
   Makefile \
@@ -56,6 +71,34 @@ for f in $FILES; do
   # Makefile, etc.
   [ -f gcc-compatible/$f ] && cp gcc-compatible/$f mozilla || true
 done
+
+# The P256 file contains variants of ECDSA that sign the message.
+# We strip these functions.
+# This regexp matches a separator (two new lines), followed by:
+#
+# <non-empty-line>*
+# ... _p256_sha ... {
+#   <indented-line>*
+# }
+#
+# The first non-empty lines are the comment block. The second ... may spill over
+# the next following lines if the arguments are printed in one-per-line mode.
+$sed -i -z 's/\n\n\/\*\*[^*]*\*\/\n\([^\n]\+\n\)*[^\n]*_p256_sha[^{]*{\n\?\(  [^\n]*\n\)*}//g' mozilla/Hacl_P256.c
+
+# Same thing with function prototypes
+$sed -i -z 's/\n\n\/\*\*[^*]*\*\/\n\([^\n]\+\n\)*[^\n]*_p256_sha[^;]*;//g' mozilla/Hacl_P256.h
+
+# Remove the SHA2 header from P256
+$sed -i -z 's/\n#include "Hacl_Hash_SHA2.h"\n/\n/g' mozilla/Hacl_P256.h
+
+# Remove the "should-hash" recommendation
+$sed -i -z 's/\n\n\/\*\n  As per[^/]*\*\///g' mozilla/Hacl_P256.h
+
+# Remove the "should-hash" recommendation
+$sed -i -z 's/\n\n\/\*\n  As per[^/]*\*\///g' mozilla/Hacl_P256.c
+
+
+
 
 cat <<EOF > mozilla/Makefile.include
 USER_TARGET=libevercrypt.a

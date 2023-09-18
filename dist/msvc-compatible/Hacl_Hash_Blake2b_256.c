@@ -27,7 +27,7 @@
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "internal/Hacl_Hash_Blake2.h"
-#include "libmemzero0.h"
+#include "lib_memzero0.h"
 
 static inline void
 blake2b_update_block(

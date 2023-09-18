@@ -27,7 +27,7 @@
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Frodo_KEM.h"
-#include "libmemzero0.h"
+#include "lib_memzero0.h"
 
 /* SNIPPET_START: Hacl_Frodo1344_crypto_bytes */
 

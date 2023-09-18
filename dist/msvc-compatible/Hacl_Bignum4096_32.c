@@ -238,6 +238,7 @@ void Hacl_Bignum4096_32_sub_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t 
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t12, t2, res_i);
   }
   uint32_t c1 = c;
+  KRML_HOST_IGNORE(c1);
   uint32_t c2 = (uint32_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
@@ -385,6 +386,7 @@ static inline void areduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t 
   uint32_t c00 = c0;
   uint32_t tmp[128U] = { 0U };
   uint32_t c1 = Hacl_Bignum4096_32_sub(res, n, tmp);
+  KRML_HOST_IGNORE(c1);
   uint32_t m = (uint32_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
@@ -448,6 +450,7 @@ bn_slow_precomp(uint32_t *n, uint32_t mu, uint32_t *r2, uint32_t *a, uint32_t *r
   uint32_t c00 = c0;
   uint32_t tmp[128U] = { 0U };
   uint32_t c1 = Hacl_Bignum4096_32_sub(a_mod, n, tmp);
+  KRML_HOST_IGNORE(c1);
   uint32_t m = (uint32_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
@@ -1033,6 +1036,7 @@ bool Hacl_Bignum4096_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i););
     uint32_t c1 = c;
     uint32_t c2 = c1;
+    KRML_HOST_IGNORE(c2);
     exp_vartime(nBits, n, a, (uint32_t)4096U, n2, res);
   }
   else
@@ -1228,6 +1232,7 @@ Hacl_Bignum4096_32_mod_inv_prime_vartime_precomp(
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i););
   uint32_t c1 = c;
   uint32_t c2 = c1;
+  KRML_HOST_IGNORE(c2);
   exp_vartime_precomp(k1.n, k1.mu, k1.r2, a, (uint32_t)4096U, n2, res);
 }
 
@@ -1346,6 +1351,7 @@ Serialize a bignum into big-endian memory.
 void Hacl_Bignum4096_32_bn_to_bytes_be(uint32_t *b, uint8_t *res)
 {
   uint8_t tmp[512U] = { 0U };
+  KRML_HOST_IGNORE(tmp);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
     store32_be(res + i * (uint32_t)4U, b[(uint32_t)128U - i - (uint32_t)1U]);
@@ -1361,6 +1367,7 @@ Serialize a bignum into little-endian memory.
 void Hacl_Bignum4096_32_bn_to_bytes_le(uint32_t *b, uint8_t *res)
 {
   uint8_t tmp[512U] = { 0U };
+  KRML_HOST_IGNORE(tmp);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
     store32_le(res + i * (uint32_t)4U, b[i]);
