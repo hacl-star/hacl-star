@@ -887,7 +887,7 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
 
 
 #restart-solver
-#reset-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --fuel 0 --ifuel 0 --split_queries always --query_stats"
 
 let lemma_barrett_reduce' x =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
@@ -932,8 +932,8 @@ let lemma_barrett_reduce' x =
   let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
   let u = if r < qml then pow2 264 + r - qml else r - qml in
   let z = if u < l then u else u - l in
-
   assert (u < 2 * l);
   Math.Lemmas.modulo_lemma u (pow2 264);
   assert (u == x - q * l);
-  lemma_barrett_reduce'' u z x q
+  lemma_barrett_reduce'' u z x q;
+  assert (z == x % S.q)
