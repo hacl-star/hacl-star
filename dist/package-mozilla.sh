@@ -65,11 +65,11 @@ mkdir -p mozilla/internal
 
 for f in $FILES; do
   for ext in h c asm S; do
-    [ -f gcc-compatible/$f.$ext ] && cp gcc-compatible/$f.$ext mozilla/ || true
+    [ -f msvc-compatible/$f.$ext ] && cp msvc-compatible/$f.$ext mozilla/ || true
   done
-  [ -f gcc-compatible/internal/$f.h ] && cp gcc-compatible/internal/$f.h mozilla/internal || true
+  [ -f msvc-compatible/internal/$f.h ] && cp msvc-compatible/internal/$f.h mozilla/internal || true
   # Makefile, etc.
-  [ -f gcc-compatible/$f ] && cp gcc-compatible/$f mozilla || true
+  [ -f msvc-compatible/$f ] && cp msvc-compatible/$f mozilla || true
 done
 
 # The P256 file contains variants of ECDSA that sign the message.
