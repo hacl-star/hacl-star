@@ -2,9 +2,8 @@ name: Nix
 
 on:
   push:
-    branches: [ main ]
+    branches-ignore: [ '_**' ]
   pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -23,3 +22,14 @@ jobs:
         run: |
           nix build .#hacl.passthru.resource-monitor
           cat result/resources.txt
+      - name: generate artifacts
+        run: |
+          nix build .#hacl.passthru.build-products
+      - uses: actions/upload-artifact@v3
+        with:
+          name: hints.tar.gz
+          path: result/hints.tar.gz
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist.tar.gz
+          path: result/dist.tar.gz
