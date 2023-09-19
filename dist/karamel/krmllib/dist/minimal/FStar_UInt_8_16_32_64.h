@@ -32,8 +32,6 @@ extern uint64_t FStar_UInt64_minus(uint64_t a);
 
 extern uint32_t FStar_UInt64_n_minus_one;
 
-KRML_NOINLINE_START
-
 static KRML_NOINLINE uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b)
 {
   uint64_t x = a ^ b;
@@ -42,10 +40,6 @@ static KRML_NOINLINE uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b)
   uint64_t xnx = x_or_minus_x >> (uint32_t)63U;
   return xnx - (uint64_t)1U;
 }
-
-KRML_NOINLINE_END
-
-KRML_NOINLINE_START
 
 static KRML_NOINLINE uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b)
 {
@@ -59,8 +53,6 @@ static KRML_NOINLINE uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b)
   uint64_t x_xor_q_ = x_xor_q >> (uint32_t)63U;
   return x_xor_q_ - (uint64_t)1U;
 }
-
-KRML_NOINLINE_END
 
 extern Prims_string FStar_UInt64_to_string(uint64_t uu___);
 
@@ -88,8 +80,6 @@ extern uint32_t FStar_UInt32_minus(uint32_t a);
 
 extern uint32_t FStar_UInt32_n_minus_one;
 
-KRML_NOINLINE_START
-
 static KRML_NOINLINE uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b)
 {
   uint32_t x = a ^ b;
@@ -98,10 +88,6 @@ static KRML_NOINLINE uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b)
   uint32_t xnx = x_or_minus_x >> (uint32_t)31U;
   return xnx - (uint32_t)1U;
 }
-
-KRML_NOINLINE_END
-
-KRML_NOINLINE_START
 
 static KRML_NOINLINE uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b)
 {
@@ -115,8 +101,6 @@ static KRML_NOINLINE uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b)
   uint32_t x_xor_q_ = x_xor_q >> (uint32_t)31U;
   return x_xor_q_ - (uint32_t)1U;
 }
-
-KRML_NOINLINE_END
 
 extern Prims_string FStar_UInt32_to_string(uint32_t uu___);
 
@@ -144,8 +128,6 @@ extern uint16_t FStar_UInt16_minus(uint16_t a);
 
 extern uint32_t FStar_UInt16_n_minus_one;
 
-KRML_NOINLINE_START
-
 static KRML_NOINLINE uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b)
 {
   uint16_t x = a ^ b;
@@ -154,10 +136,6 @@ static KRML_NOINLINE uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b)
   uint16_t xnx = x_or_minus_x >> (uint32_t)15U;
   return xnx - (uint16_t)1U;
 }
-
-KRML_NOINLINE_END
-
-KRML_NOINLINE_START
 
 static KRML_NOINLINE uint16_t FStar_UInt16_gte_mask(uint16_t a, uint16_t b)
 {
@@ -171,8 +149,6 @@ static KRML_NOINLINE uint16_t FStar_UInt16_gte_mask(uint16_t a, uint16_t b)
   uint16_t x_xor_q_ = x_xor_q >> (uint32_t)15U;
   return x_xor_q_ - (uint16_t)1U;
 }
-
-KRML_NOINLINE_END
 
 extern Prims_string FStar_UInt16_to_string(uint16_t uu___);
 
@@ -200,8 +176,6 @@ extern uint8_t FStar_UInt8_minus(uint8_t a);
 
 extern uint32_t FStar_UInt8_n_minus_one;
 
-KRML_NOINLINE_START
-
 static KRML_NOINLINE uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b)
 {
   uint8_t x = a ^ b;
@@ -210,10 +184,6 @@ static KRML_NOINLINE uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b)
   uint8_t xnx = x_or_minus_x >> (uint32_t)7U;
   return xnx - (uint8_t)1U;
 }
-
-KRML_NOINLINE_END
-
-KRML_NOINLINE_START
 
 static KRML_NOINLINE uint8_t FStar_UInt8_gte_mask(uint8_t a, uint8_t b)
 {
@@ -227,8 +197,6 @@ static KRML_NOINLINE uint8_t FStar_UInt8_gte_mask(uint8_t a, uint8_t b)
   uint8_t x_xor_q_ = x_xor_q >> (uint32_t)7U;
   return x_xor_q_ - (uint8_t)1U;
 }
-
-KRML_NOINLINE_END
 
 extern Prims_string FStar_UInt8_to_string(uint8_t uu___);
 

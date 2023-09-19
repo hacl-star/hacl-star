@@ -57,30 +57,11 @@
 #  define KRML_HOST_IGNORE(x) (void)(x)
 #endif
 
-#ifndef KRML_NOINLINE_START
-#  if defined (__GNUC__)
-#    define KRML_NOINLINE_START \
-       _Pragma("GCC diagnostic push") \
-       _Pragma("GCC diagnostic ignored \"-Wunused-function\"")
-#  else
-#    define KRML_NOINLINE_START
-#  endif
-#endif
-
-#ifndef KRML_NOINLINE_END
-#  if defined (__GNUC__)
-#    define KRML_NOINLINE_END \
-      _Pragma("GCC diagnostic pop")
-#  else
-#    define KRML_NOINLINE_END
-#  endif
-#endif
-
 #ifndef KRML_NOINLINE
 #  if defined(_MSC_VER)
 #    define KRML_NOINLINE __declspec(noinline)
 #  elif defined (__GNUC__)
-#    define KRML_NOINLINE __attribute__((noinline))
+#    define KRML_NOINLINE __attribute__((noinline,unused))
 #  else
 #    define KRML_NOINLINE
 #    warning "The KRML_NOINLINE macro is not defined for this toolchain!"
