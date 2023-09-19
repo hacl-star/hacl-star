@@ -283,6 +283,7 @@ ifndef MAKE_RESTARTS
 # that `sed` invocation below
 
 .fstar-depend-%: .FORCE
+	@if ! [ -f .didhelp ]; then echo "ℹ️  This is F* version $(shell $(FSTAR_NO_FLAGS) --version)"; touch .didhelp; fi
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
