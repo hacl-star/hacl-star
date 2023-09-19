@@ -115,7 +115,7 @@ let
       };
       dist-compare = stdenv.mkDerivation {
         name = "hacl-diff-compare";
-        src = "${hacl.build-products}/dist.tar";
+        src = "${hacl.build-products}/dist.tar.gz";
         phases = [ "unpackPhase" "buildPhase" "installPhase" ];
         buildPhase = ''
           for file in ./*/*.c ./*/*.h
@@ -133,7 +133,7 @@ let
       };
       dist-list = stdenv.mkDerivation {
         name = "hacl-diff-list";
-        src = "${hacl.build-products}/dist.tar";
+        src = "${hacl.build-products}/dist.tar.gz";
         phases = [ "unpackPhase" "buildPhase" "installPhase" ];
         buildPhase = ''
           diff -rq . ${../dist} 2>&1 \
@@ -171,12 +171,12 @@ let
           git add *
           git commit -m "initial commit"
 
-          git archive HEAD hints > hints.tar
-          git archive HEAD dist/* > dist.tar
+          git archive HEAD hints -o hints.tar.gz
+          git archive HEAD dist/* -o dist.tar.gz
         '';
         installPhase = ''
           mkdir -p $out
-          cp hints.tar dist.tar $out
+          cp hints.tar.gz dist.tar.gz $out
         '';
       };
       stats = stdenv.mkDerivation {
