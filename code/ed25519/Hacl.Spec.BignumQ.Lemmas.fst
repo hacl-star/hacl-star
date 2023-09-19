@@ -11,7 +11,6 @@ include Hacl.Spec.BignumQ.Definitions
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-#push-options "--admit_smt_queries true"
 let feq (#a #b:Type) (f:(a -> b)) (x y:a) :
   Lemma (requires x == y) (ensures f x == f y) = ()
 
@@ -885,7 +884,6 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
     x % S.q;
     }
   )
-#pop-options
 
 #restart-solver
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0 --split_queries always"
