@@ -887,7 +887,7 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
 
 
 #restart-solver
-#reset-options "--z3rlimit 20 --fuel 0 --ifuel 0 --split_queries always --query_stats"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0 --split_queries always --query_stats"
 
 let lemma_barrett_reduce' x =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
