@@ -45,7 +45,7 @@ jobs:
             The code in `dist/gcc-compatible`, `dist/msvc-compatible`, and `dist/wasm`
             is tested on [cryspen/hacl-packages](https://github.com/cryspen/hacl-packages).
             `dist` is not automatically re-generated, be sure to do it manually.
-            (A fresh snapshot can also be downloaded from [CI](https://everest-ci.paris.inria.fr/jobset/hacl-star/branch-${{ github.head_ref }}).)
+            (A fresh snapshot can also be downloaded from [CI](https://github.com/hacl-star/hacl-star/actions/workflows/nix.yml) by going to the "artifacts" section of your run.)
             Then check the following tests before merging this PR.
             Always check the latest run, it corresponds to the most recent version of this branch.
             All jobs are expected to be successful.
