@@ -32,6 +32,7 @@ extern "C" {
 
 #include <string.h>
 #include "krml/internal/types.h"
+#include "krml/internal/builtin.h"
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
