@@ -1,6 +1,6 @@
-{ dotnet-runtime, fetchFromGitHub, fstar, fstar-scripts, git, karamel, lib
-, ocamlPackages, openssl, python3, stdenv, time, vale, which, writeTextFile, z3
-}:
+{ bash, dotnet-runtime, fetchFromGitHub, fstar, fstar-scripts, git, karamel, lib
+, ocamlPackages, openssl, python3, sd, stdenv, time, vale, which, writeTextFile
+, z3 }:
 
 let
 
@@ -151,13 +151,13 @@ let
       build-products = stdenv.mkDerivation {
         name = "hacl-build-products";
         src = hacl;
-        buildInputs = [ git ];
+        buildInputs = [ git sd ];
         buildPhase = ''
-          sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/configure
-          sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/package-mozilla.sh
-          for target in gcc-compatible msvc-compatible portable-gcc-compatible
+          sd '${bash}/bin/bash' '/usr/bin/env bash' dist/configure
+          sd '${bash}/bin/bash' '/usr/bin/env bash' dist/package-mozilla.sh
+          for target in gcc-compatible msvc-compatible portable-gcc-compatible mozilla
           do
-            sed -i 's/\#\!.*/\#\!\/usr\/bin\/env bash/' dist/$target/configure
+            sd '${bash}/bin/bash' '/usr/bin/env bash' dist/$target/configure
           done
 
           for target in gcc-compatible mozilla msvc-compatible portable-gcc-compatible wasm
