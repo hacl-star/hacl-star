@@ -41,9 +41,9 @@ let load_skey (modBits:modBits_t) : RK.rsapss_load_skey_st t_limbs (ke modBits) 
 [@@ Comment "Sign a message `msg` and write the signature to `sgnt`.
 
 @param a Hash algorithm to use. Allowed values for `a` are ...
-  * Spec_Hash_Definitions_SHA2_256,
-  * Spec_Hash_Definitions_SHA2_384, and
-  * Spec_Hash_Definitions_SHA2_512.
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
 @param modBits Count of bits in the modulus (`n`).
 @param eBits Count of bits in `e` value.
 @param dBits Count of bits in `d` value.
@@ -66,7 +66,10 @@ let rsapss_sign a modBits eBits dBits skey saltLen salt msgLen msg sgnt =
 
 [@@ Comment "Verify the signature `sgnt` of a message `msg`.
 
-@param a Hash algorithm to use.
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
 @param modBits Count of bits in the modulus (`n`).
 @param eBits Count of bits in `e` value.
 @param pkey Pointer to public key created by `Hacl_RSAPSS_new_rsapss_load_pkey`.
@@ -90,10 +93,10 @@ let rsapss_verify a modBits eBits pkey saltLen sgntLen sgnt msgLen msg =
 
 @param modBits Count of bits in modulus (`n`).
 @param eBits Count of bits in `e` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
 
-@return Returns an allocated public key. Note: caller must take care to `free()` the created key."]
+@return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key."]
 val new_rsapss_load_pkey: modBits:modBits_t -> RK.new_rsapss_load_pkey_st t_limbs (ke modBits) modBits
 let new_rsapss_load_pkey modBits r eBits nb eb =
   RK.new_rsapss_load_pkey (ke modBits) modBits RK.mk_runtime_rsapss_checks r eBits nb eb
@@ -104,11 +107,11 @@ let new_rsapss_load_pkey modBits r eBits nb eb =
 @param modBits Count of bits in modulus (`n`).
 @param eBits Count of bits in `e` value.
 @param dBits Count of bits in `d` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
-@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value is read from.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
 
-@return Returns an allocated secret key. Note: caller must take care to `free()` the created key."]
+@return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key."]
 val new_rsapss_load_skey: modBits:modBits_t -> RK.new_rsapss_load_skey_st t_limbs (ke modBits) modBits
 let new_rsapss_load_skey modBits r eBits dBits nb eb db =
   RK.new_rsapss_load_skey (ke modBits) modBits RK.mk_runtime_rsapss_checks r eBits dBits nb eb db
@@ -116,13 +119,16 @@ let new_rsapss_load_skey modBits r eBits dBits nb eb db =
 
 [@@ Comment "Sign a message `msg` and write the signature to `sgnt`.
 
-@param a Hash algorithm to use.
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
 @param modBits Count of bits in the modulus (`n`).
 @param eBits Count of bits in `e` value.
 @param dBits Count of bits in `d` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
-@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value is read from.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
+@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
 @param saltLen Length of salt.
 @param salt Pointer to `saltLen` bytes where the salt is read from.
 @param msgLen Length of message.
@@ -142,11 +148,14 @@ let rsapss_skey_sign a modBits eBits dBits nb eb db saltLen salt msgLen msg sgnt
 
 [@@ Comment "Verify the signature `sgnt` of a message `msg`.
 
-@param a Hash algorithm to use.
+@param a Hash algorithm to use. Allowed values for `a` are ...
+  - Spec_Hash_Definitions_SHA2_256,
+  - Spec_Hash_Definitions_SHA2_384, and
+  - Spec_Hash_Definitions_SHA2_512.
 @param modBits Count of bits in the modulus (`n`).
 @param eBits Count of bits in `e` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`) is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value is read from.
+@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
+@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
 @param saltLen Length of salt.
 @param sgntLen Length of signature.
 @param sgnt Pointer to `sgntLen` bytes where the signature is read from.
