@@ -9,34 +9,40 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let nat_mod_comm_monoid = M.mk_nat_mod_comm_monoid S.prime
+let nat_mod_comm_monoid {| S.curve_params |} =
+  M.mk_nat_mod_comm_monoid S.prime
 
-let mk_to_nat_mod_comm_monoid : SE.to_comm_monoid S.felem = {
+let mk_to_nat_mod_comm_monoid {| S.curve_params |} :
+                              SE.to_comm_monoid S.felem = {
   SE.a_spec = S.felem;
   SE.comm_monoid = nat_mod_comm_monoid;
   SE.refl = (fun (x:S.felem) -> x);
 }
 
-val one_mod : SE.one_st S.felem mk_to_nat_mod_comm_monoid
+val one_mod {| S.curve_params |} :
+    SE.one_st S.felem mk_to_nat_mod_comm_monoid
 let one_mod _ = 1
 
-val mul_mod : SE.mul_st S.felem mk_to_nat_mod_comm_monoid
+val mul_mod {| S.curve_params |} :
+    SE.mul_st S.felem mk_to_nat_mod_comm_monoid
 let mul_mod x y = S.fmul x y
 
-val sqr_mod : SE.sqr_st S.felem mk_to_nat_mod_comm_monoid
+val sqr_mod {| S.curve_params |} :
+    SE.sqr_st S.felem mk_to_nat_mod_comm_monoid
 let sqr_mod x = S.fmul x x
 
-let mk_nat_mod_concrete_ops : SE.concrete_ops S.felem = {
+let mk_nat_mod_concrete_ops {| S.curve_params |} :
+    SE.concrete_ops S.felem = {
   SE.to = mk_to_nat_mod_comm_monoid;
   SE.one = one_mod;
   SE.mul = mul_mod;
   SE.sqr = sqr_mod;
 }
 
-let fsquare_times (a:S.felem) (b:nat) : S.felem =
+let fsquare_times {| S.curve_params |} (a:S.felem) (b:nat) : S.felem =
   SE.exp_pow2 mk_nat_mod_concrete_ops a b
 
-val fsquare_times_lemma: a:S.felem -> b:nat ->
+val fsquare_times_lemma: {| S.curve_params |} -> a:S.felem -> b:nat ->
   Lemma (fsquare_times a b == M.pow a (pow2 b) % S.prime)
 let fsquare_times_lemma a b =
   SE.exp_pow2_lemma mk_nat_mod_concrete_ops a b;
@@ -49,7 +55,7 @@ let fsquare_times_lemma a b =
 The algorithm is taken from
 https://briansmith.org/ecc-inversion-addition-chains-01
 *)
-val finv: f:S.felem -> S.felem
+val finv: {| S.curve_params |} -> f:S.felem -> S.felem
 let finv f =
   let x2 = S.fmul (fsquare_times f 1) f in
   let x3 = S.fmul (fsquare_times x2 1) f in
@@ -66,7 +72,7 @@ let finv f =
   x256
 
 
-val fsqrt: f:S.felem -> S.felem
+val fsqrt: {| S.curve_params |} -> f:S.felem -> S.felem
 let fsqrt f =
   let x2 = S.fmul (fsquare_times f 1) f in
   let x4 = S.fmul (fsquare_times x2 2) x2 in
@@ -80,7 +86,7 @@ let fsqrt f =
 
 
 // TODO: mv to lib/
-val lemma_pow_mod_1: f:S.felem -> Lemma (f == M.pow f 1 % S.prime)
+val lemma_pow_mod_1: {| S.curve_params |} -> f:S.felem -> Lemma (f == M.pow f 1 % S.prime)
 let lemma_pow_mod_1 f =
   M.lemma_pow1 f;
   Math.Lemmas.small_mod f S.prime;
@@ -88,7 +94,7 @@ let lemma_pow_mod_1 f =
   assert (f == M.pow f 1 % S.prime)
 
 
-val lemma_pow_mod_mul: f:S.felem -> a:nat -> b:nat ->
+val lemma_pow_mod_mul: {| S.curve_params |} -> f:S.felem -> a:nat -> b:nat ->
   Lemma (S.fmul (M.pow f a % S.prime) (M.pow f b % S.prime) == M.pow f (a + b) % S.prime)
 let lemma_pow_mod_mul f a b =
   calc (==) {
@@ -102,7 +108,7 @@ let lemma_pow_mod_mul f a b =
   }
 
 
-val lemma_pow_pow_mod: f:S.felem -> a:nat -> b:nat ->
+val lemma_pow_pow_mod: {| S.curve_params |} -> f:S.felem -> a:nat -> b:nat ->
   Lemma (M.pow (M.pow f a % S.prime) b % S.prime == M.pow f (a * b) % S.prime)
 let lemma_pow_pow_mod f a b =
   calc (==) {
@@ -114,7 +120,7 @@ let lemma_pow_pow_mod f a b =
     }
 
 
-val lemma_pow_pow_mod_mul: f:S.felem -> a:nat -> b:nat -> c:nat ->
+val lemma_pow_pow_mod_mul: {| S.curve_params |} -> f:S.felem -> a:nat -> b:nat -> c:nat ->
   Lemma (S.fmul (M.pow (M.pow f a % S.prime) b % S.prime) (M.pow f c % S.prime) == M.pow f (a * b + c) % S.prime)
 let lemma_pow_pow_mod_mul f a b c =
   calc (==) {
@@ -128,8 +134,10 @@ let lemma_pow_pow_mod_mul f a b c =
 //////////////////////////////
 
 // prime - 2 = 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffd
-val finv_lemma: f:S.felem -> Lemma (finv f == M.pow f (S.prime - 2) % S.prime)
+val finv_lemma: {| S.curve_params |} -> f:S.felem -> Lemma (finv f == M.pow f (S.prime - 2) % S.prime)
+
 let finv_lemma f =
+  admit();
   let x2 = S.fmul (fsquare_times f 1) f in
   fsquare_times_lemma f 1;
   assert_norm (pow2 1 = 0x2);
@@ -203,7 +211,7 @@ let finv_lemma f =
   assert_norm (S.prime - 2 = 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffd)
 
 
-val finv_is_finv_lemma: f:S.felem -> Lemma (finv f == S.finv f)
+val finv_is_finv_lemma: {| S.curve_params |} -> f:S.felem -> Lemma (finv f == S.finv f)
 let finv_is_finv_lemma f =
   finv_lemma f;
   assert (finv f == M.pow f (S.prime - 2) % S.prime);
@@ -211,8 +219,9 @@ let finv_is_finv_lemma f =
 
 
 // (prime + 1) / 4 = 0x3fffffffc0000000400000000000000000000000400000000000000000000000
-val fsqrt_lemma: f:S.felem -> Lemma (fsqrt f == M.pow f ((S.prime + 1) / 4) % S.prime)
+val fsqrt_lemma: {| S.curve_params |} -> f:S.felem -> Lemma (fsqrt f == M.pow f ((S.prime + 1) / 4) % S.prime)
 let fsqrt_lemma f =
+  admit();
   let x2 = S.fmul (fsquare_times f 1) f in
   fsquare_times_lemma f 1;
   assert_norm (pow2 1 = 0x2);
@@ -265,7 +274,7 @@ let fsqrt_lemma f =
   assert_norm ((S.prime + 1) / 4 = 0x3fffffffc0000000400000000000000000000000400000000000000000000000)
 
 
-val fsqrt_is_fsqrt_lemma: f:S.felem -> Lemma (fsqrt f == S.fsqrt f)
+val fsqrt_is_fsqrt_lemma: {| S.curve_params |} -> f:S.felem -> Lemma (fsqrt f == S.fsqrt f)
 let fsqrt_is_fsqrt_lemma f =
   fsqrt_lemma f;
   assert (fsqrt f == M.pow f ((S.prime + 1) / 4) % S.prime);

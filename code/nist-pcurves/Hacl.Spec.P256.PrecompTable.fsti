@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
-open Hacl.Impl.P256.Point
+//open Hacl.Impl.P256.Point
 
 module S = Spec.P256
 module SM = Hacl.Spec.P256.Montgomery
@@ -21,7 +21,7 @@ inline_for_extraction noextract
 let point_list = x:list uint64{FL.length x == 12}
 
 inline_for_extraction noextract
-let felem_to_list (x:S.felem) : felem_list =
+let felem_to_list {| S.curve_params |} (x:S.felem) : felem_list =
   [@inline_let] let x0 = x % pow2 64 in
   [@inline_let] let x1 = x / pow2 64 % pow2 64 in
   [@inline_let] let x2 = x / pow2 128 % pow2 64 in
@@ -31,7 +31,7 @@ let felem_to_list (x:S.felem) : felem_list =
   r
 
 inline_for_extraction noextract
-let proj_point_to_list (p:S.proj_point) : point_list =
+let proj_point_to_list {| S.curve_params |} (p:S.proj_point) : point_list =
   [@inline_let] let (px, py, pz) = p in
   [@inline_let] let pxM = SM.to_mont px in
   [@inline_let] let pyM = SM.to_mont py in
@@ -39,7 +39,7 @@ let proj_point_to_list (p:S.proj_point) : point_list =
   FL.(felem_to_list pxM @ felem_to_list pyM @ felem_to_list pzM)
 
 inline_for_extraction noextract
-let point_inv_list (p:point_list) =
+let point_inv_list {| S.curve_params |} (p:point_list) =
   let x = Seq.seq_of_list p <: lseq uint64 12 in
   point_inv_seq x
 

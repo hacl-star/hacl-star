@@ -18,7 +18,7 @@ module SM = Hacl.Spec.P256.Montgomery
 val make_prime: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == S.prime)
+    as_nat h1 n == S.p256_prime)
 
 [@CInline]
 let make_prime n =
@@ -27,14 +27,14 @@ let make_prime n =
   [@inline_let] let n1 = u64 0xffffffff in
   [@inline_let] let n2 = u64 0x0 in
   [@inline_let] let n3 = u64 0xffffffff00000001 in
-  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.prime);
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.p256_prime);
   bn_make_u64_4 n n0 n1 n2 n3
 
 
 val make_order: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == S.order)
+    as_nat h1 n == S.p256_order)
 
 [@CInline]
 let make_order n =
@@ -43,14 +43,14 @@ let make_order n =
   [@inline_let] let n1 = u64 0xbce6faada7179e84 in
   [@inline_let] let n2 = u64 0xffffffffffffffff in
   [@inline_let] let n3 = u64 0xffffffff00000000 in
-  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.order);
+  assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = S.p256_order);
   bn_make_u64_4 n n0 n1 n2 n3
 
 
 val make_a_coeff: a:felem -> Stack unit
   (requires fun h -> live h a)
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-    as_nat h1 a < S.prime /\
+    as_nat h1 a < S.p256_prime /\
     SM.from_mont (as_nat h1 a) == S.a_coeff)
 
 [@CInline]

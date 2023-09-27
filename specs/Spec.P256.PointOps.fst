@@ -9,89 +9,79 @@ module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-///  Base field
+///  Curve Parameters
 
-// 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
-let prime: (a:pos{a = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff /\ a < pow2 256}) =
-  let p = pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 in
-  assert_norm (0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff = p);
-  assert_norm (p < pow2 256); p
-
-let felem = x:nat{x < prime}
-let zero : felem = 0
-let one  : felem = 1
-
-let fadd (x y:felem) : felem = (x + y) % prime
-let fsub (x y:felem) : felem = (x - y) % prime
-let fmul (x y:felem) : felem = (x * y) % prime
-let finv (a:felem) : felem = M.pow_mod #prime a (prime - 2)
-let fsqrt (a:felem) : felem = M.pow_mod #prime a ((prime + 1) / 4)
 let is_fodd (x:nat) : bool = x % 2 = 1
 
-let ( +% ) = fadd
-let ( -% ) = fsub
-let ( *% ) = fmul
-let ( /% ) (x y:felem) = x *% finv y
+class curve_params = {
+  bits: pos;
+  bytes: x:pos{bits <= 8 * x /\ 3 * x < pow2 32}; 
+    // length restriction to allow for serializing affine and projective points
+  prime: x:pos{x > 3 /\ x < pow2 bits /\ is_fodd x};
+  order: x:pos{x > 1 /\ x < pow2 bits /\ is_fodd x};
+  basepoint_x: x:nat{x < prime};
+  basepoint_y: x:nat{x < prime};
+  a_coeff: x:nat{x < prime};
+  b_coeff: x:nat{x < prime};
+  mont_mu: x:uint64{(1 + prime * v x) % pow2 64 == 0};
+  mont_q_mu: x:uint64{(1 + order * v x) % pow2 64 == 0};
+  bn_limbs: x:size_t{v x == (bytes + 7) / 8 /\ v x * 8 >= bytes}
+  // also add co-factor?
+}
 
-///  Scalar field
+///  Base Field Arithmetic
 
-// Group order
-let order: (a:pos{a < pow2 256}) =
-  let o = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551 in
-  assert_norm (o < pow2 256); o
+let felem {| curve_params |} = x:nat{x < prime}
+let zero  {| curve_params |} : felem = 0
+let one   {| curve_params |} : felem = 1
 
-let qelem = x:nat{x < order}
-let qadd (x y:qelem) : qelem = (x + y) % order
-let qmul (x y:qelem) : qelem = (x * y) % order
-let qinv (x:qelem) : qelem = M.pow_mod #order x (order - 2)
+let fadd {| curve_params |} (x y:felem) : felem = (x + y) % prime
+let fsub {| curve_params |} (x y:felem) : felem = (x - y) % prime
+let fmul {| curve_params |} (x y:felem) : felem = (x * y) % prime
+let finv {| curve_params |} (a:felem) : felem = M.pow_mod #prime a (prime - 2)
+let fsqrt {| curve_params |} (a:felem) : felem = M.pow_mod #prime a ((prime + 1) / 4)
 
-let ( +^ ) = qadd
-let ( *^ ) = qmul
+let ( +% ) {| curve_params |} = fadd
+let ( -% ) {| curve_params |} = fsub
+let ( *% ) {| curve_params |} = fmul
+let ( /% ) {| curve_params |} (x y:felem) = x *% finv y
 
+///  Scalar Field Arithmetic
+
+let qelem {| c:curve_params |} = x:nat{x < c.order}
+let qadd {| c:curve_params |} (x y:qelem) : qelem = (x + y) % c.order
+let qmul {| c:curve_params |} (x y:qelem) : qelem = (x * y) % c.order
+let qinv {| c:curve_params |} (x:qelem) : qelem = M.pow_mod #c.order x (c.order - 2)
+
+let ( +^ ) {| c:curve_params |} = qadd
+let ( *^ ) {| c:curve_params |} = qmul 
 
 ///  Elliptic curve `y^2 = x^3 + a * x + b`
 
-let aff_point = p:tuple2 nat nat{let (px, py) = p in px < prime /\ py < prime}
-let proj_point = p:tuple3 nat nat nat{let (px, py, pz) = p in px < prime /\ py < prime /\ pz < prime}
+//let aff_point (c:curve_params) = p:tuple2 nat nat{let (px, py) = p in px < c.prime /\ py < c.prime}
+//let proj_point (c:curve_params) = p:tuple3 nat nat nat{let (px, py, pz) = p in px < c.prime /\ py < c.prime /\ pz < c.prime}
+let aff_point {| curve_params |} = felem & felem
+let proj_point {| curve_params |} = felem & felem & felem
 
-// let aff_point = felem & felem           // Affine point
-// let proj_point = felem & felem & felem  // Projective coordinates
+let base_point {| curve_params |} : proj_point = (basepoint_x, basepoint_y, one)
 
-let a_coeff : felem = (-3) % prime
-let b_coeff : felem =
-  let b = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b in
-  assert_norm (b < prime); b
-
-
-// Base point
-let g_x : felem =
-  let x = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296 in
-  assert_norm (x < prime); x
-let g_y : felem =
-  let y = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5 in
-  assert_norm (y < prime); y
-
-let base_point : proj_point = (g_x, g_y, one)
-
-
-let is_on_curve (p:aff_point) : bool =
+let is_on_curve {| curve_params |} (p:aff_point) : bool =
   let (x, y) = p in y *% y = x *% x *% x +% a_coeff *% x +% b_coeff
 
+let aff_point_at_inf {| curve_params |} : aff_point = (zero, zero) // not on the curve!
+let point_at_inf {| curve_params |} : proj_point = (zero, one, zero)
 
-let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
-let point_at_inf : proj_point = (zero, one, zero)
-
-let is_aff_point_at_inf (p:aff_point) : bool =
+let is_aff_point_at_inf {| curve_params |} (p:aff_point) : bool =
   let (x, y) = p in x = zero && y = zero
 
-let is_point_at_inf (p:proj_point) =
+let is_point_at_inf {| curve_params |} (p:proj_point) =
   let (_, _, z) = p in z = 0
 
 
-let to_proj_point (p:aff_point) : proj_point =
+let to_proj_point {| curve_params |} (p:aff_point) : proj_point =
   let (x, y) = p in (x, y, one)
 
-let to_aff_point (p:proj_point) : aff_point =
+let to_aff_point {| curve_params |} (p:proj_point) : aff_point =
   // if is_proj_point_at_inf p then aff_point_at_inf
   let (px, py, pz) = p in
   let zinv = finv pz in
@@ -102,7 +92,7 @@ let to_aff_point (p:proj_point) : aff_point =
 
 ///  Point addition in affine coordinates
 
-let aff_point_double (p:aff_point) : aff_point =
+let aff_point_double {| curve_params |} (p:aff_point) : aff_point =
   let (px, py) = p in
   if is_aff_point_at_inf p then p
   else begin
@@ -114,7 +104,7 @@ let aff_point_double (p:aff_point) : aff_point =
       (rx, ry) end
   end
 
-let aff_point_add (p:aff_point) (q:aff_point) : aff_point =
+let aff_point_add {| curve_params |} (p:aff_point) (q:aff_point) : aff_point =
   let (px, py) = p in let (qx, qy) = q in
   if is_aff_point_at_inf p then q
   else begin
@@ -137,7 +127,7 @@ let aff_point_add (p:aff_point) (q:aff_point) : aff_point =
 ///  Point addition and doubling in projective coordinates
 
 // Alg 4 from https://eprint.iacr.org/2015/1060.pdf
-let point_add (p q:proj_point) : proj_point =
+let point_add {| curve_params |} (p q:proj_point) : proj_point =
   let x1, y1, z1 = p in
   let x2, y2, z2 = q in
   let t0 = x1 *% x2 in
@@ -187,7 +177,7 @@ let point_add (p q:proj_point) : proj_point =
 
 
 // Alg 6 from https://eprint.iacr.org/2015/1060.pdf
-let point_double (p:proj_point) : proj_point =
+let point_double {| curve_params |} (p:proj_point) : proj_point =
   let (x, y, z) = p in
   let t0 = x *% x in
   let t1 = y *% y in
@@ -228,34 +218,35 @@ let point_double (p:proj_point) : proj_point =
 
 ///  Point conversion between affine, projective and bytes representation
 
-let aff_point_load (b:BSeq.lbytes 64) : option aff_point =
-  let pk_x = BSeq.nat_from_bytes_be (sub b 0 32) in
-  let pk_y = BSeq.nat_from_bytes_be (sub b 32 32) in
-  let is_x_valid = pk_x < prime in
-  let is_y_valid = pk_y < prime in
+let aff_point_load {| c:curve_params |} (b:BSeq.lbytes (2*c.bytes)) : option (aff_point) =
+  let pk_x = BSeq.nat_from_bytes_be (sub b 0 c.bytes) in
+  let pk_y = BSeq.nat_from_bytes_be (sub b c.bytes c.bytes) in
+  let is_x_valid = pk_x < c.prime in
+  let is_y_valid = pk_y < c.prime in
   let is_xy_on_curve =
-    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
+    if is_x_valid && is_y_valid then is_on_curve #c (pk_x, pk_y) else false in
   if is_xy_on_curve then Some (pk_x, pk_y) else None
 
 
-let load_point (b:BSeq.lbytes 64) : option proj_point =
+let load_point {| c:curve_params |} (b:BSeq.lbytes (2*c.bytes)) : option (proj_point) =
   match (aff_point_load b) with
   | Some p -> Some (to_proj_point p)
   | None -> None
 
 
-let aff_point_store (p:aff_point) : BSeq.lbytes 64 =
+let aff_point_store {| c:curve_params |} (p:aff_point) : BSeq.lbytes (2*c.bytes) =
   let (px, py) = p in
-  let pxb = BSeq.nat_to_bytes_be 32 px in
-  let pxy = BSeq.nat_to_bytes_be 32 py in
-  concat #uint8 #32 #32 pxb pxy
+  FStar.Math.Lemmas.pow2_le_compat (8*c.bytes) c.bits;
+  let pxb = BSeq.nat_to_bytes_be c.bytes px in
+  let pxy = BSeq.nat_to_bytes_be c.bytes py in
+  concat #uint8 #c.bytes #c.bytes pxb pxy
 
 
-let point_store (p:proj_point) : BSeq.lbytes 64 =
+let point_store {| c:curve_params |} (p:proj_point) : BSeq.lbytes (2*c.bytes) =
   aff_point_store (to_aff_point p)
 
 
-let recover_y (x:felem) (is_odd:bool) : option felem =
+let recover_y {| curve_params |} (x:felem) (is_odd:bool) : option (felem) =
   let y2 = x *% x *% x +% a_coeff *% x +% b_coeff in
   let y = fsqrt y2 in
   if y *% y <> y2 then None
@@ -263,13 +254,12 @@ let recover_y (x:felem) (is_odd:bool) : option felem =
     let y = if is_fodd y <> is_odd then (prime - y) % prime else y in
     Some y end
 
-
-let aff_point_decompress (s:BSeq.lbytes 33) : option aff_point =
+let aff_point_decompress {| c:curve_params |} (s:BSeq.lbytes (c.bytes+1)) : option (aff_point) =
   let s0 = Lib.RawIntTypes.u8_to_UInt8 s.[0] in
   if not (s0 = 0x02uy || s0 = 0x03uy) then None
   else begin
-    let x = BSeq.nat_from_bytes_be (sub s 1 32) in
-    let is_x_valid = x < prime in
+    let x = BSeq.nat_from_bytes_be (sub s 1 c.bytes) in
+    let is_x_valid = x < c.prime in
     let is_y_odd = s0 = 0x03uy in
 
     if not is_x_valid then None
@@ -277,3 +267,4 @@ let aff_point_decompress (s:BSeq.lbytes 33) : option aff_point =
       match (recover_y x is_y_odd) with
       | Some y -> Some (x, y)
       | None -> None end
+

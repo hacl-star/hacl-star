@@ -16,7 +16,7 @@ module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-let from_mont_point (a:tuple3 nat nat nat) : S.proj_point =
+let from_mont_point {| S.curve_params |} (a:tuple3 nat nat nat) : S.proj_point =
   let x, y, z = a in SM.from_mont x, SM.from_mont y, SM.from_mont z
 
 
@@ -29,7 +29,7 @@ let as_aff_point_nat_seq (p:aff_point_seq) =
   BD.bn_v (LSeq.sub p 0 4),
   BD.bn_v (LSeq.sub p 4 4)
 
-let aff_point_inv_seq (p:aff_point_seq) =
+let aff_point_inv_seq {| S.curve_params |} (p:aff_point_seq) =
   let x, y = as_aff_point_nat_seq p in
   x < S.prime /\ y < S.prime
 
@@ -42,7 +42,7 @@ let as_aff_point_nat (h:mem) (p:aff_point) =
   as_aff_point_nat_seq (as_seq h p)
 
 noextract
-let aff_point_inv (h:mem) (p:aff_point) =
+let aff_point_inv {| S.curve_params |} (h:mem) (p:aff_point) =
   aff_point_inv_seq (as_seq h p)
 
 noextract
@@ -76,7 +76,7 @@ let as_point_nat_seq (p:point_seq) =
   BD.bn_v (LSeq.sub p 4 4),
   BD.bn_v (LSeq.sub p 8 4)
 
-let point_inv_seq (p:point_seq) =
+let point_inv_seq {| S.curve_params |} (p:point_seq) =
   let x, y, z = as_point_nat_seq p in
   x < S.prime /\ y < S.prime /\ z < S.prime
 
@@ -89,7 +89,7 @@ let as_point_nat (h:mem) (p:point) =
   as_point_nat_seq (as_seq h p)
 
 noextract
-let point_inv (h:mem) (p:point) =
+let point_inv {| S.curve_params |} (h:mem) (p:point) =
   point_inv_seq (as_seq h p)
 
 noextract
@@ -140,13 +140,13 @@ val create_point: unit -> StackInline point
     stack_allocated f h0 h1 (LSeq.create 12 (u64 0)))
 
 
-val make_base_point: p:point -> Stack unit
+val make_base_point: {| S.curve_params |} -> p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.base_point)
 
 
-val make_point_at_inf: p:point -> Stack unit
+val make_point_at_inf: {| S.curve_params |} -> p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.point_at_inf)
@@ -154,7 +154,7 @@ val make_point_at_inf: p:point -> Stack unit
 
 ///  Check if a point is a point-at-infinity
 
-val is_point_at_inf: p:point -> Stack uint64
+val is_point_at_inf: {| S.curve_params |} -> p:point -> Stack uint64
   (requires fun h -> live h p /\ point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (let pM = from_mont_point (as_point_nat h0 p) in

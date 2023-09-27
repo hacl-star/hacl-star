@@ -14,6 +14,10 @@ module BD = Hacl.Spec.Bignum.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+type curve_t =
+  | P256
+  | P384
+  | P512 
 inline_for_extraction
 let felem = lbuffer uint64 (size 4)
 inline_for_extraction
