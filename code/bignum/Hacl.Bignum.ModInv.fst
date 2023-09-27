@@ -52,6 +52,7 @@ val bn_mod_inv_prime_n2:
 
 let bn_mod_inv_prime_n2 #t len n res =
   let c = BN.bn_sub1 len n (uint #t #SEC 2) res in
+  LowStar.Ignore.ignore c;
   ()
 
 

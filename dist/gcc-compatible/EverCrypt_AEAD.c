@@ -40,6 +40,10 @@ typedef struct EverCrypt_AEAD_state_s_s
 }
 EverCrypt_AEAD_state_s;
 
+/**
+Both encryption and decryption require a state that holds the key.
+The state may be reused as many times as desired.
+*/
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
 {
   return true;
@@ -93,12 +97,12 @@ create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 static EverCrypt_Error_error_code
 create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
+  #if HACL_CAN_COMPILE_VALE
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
-  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
@@ -112,19 +116,21 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     *dst = p;
     return EverCrypt_Error_Success;
   }
-  #endif
   return EverCrypt_Error_UnsupportedAlgorithm;
+  #else
+  return EverCrypt_Error_UnsupportedAlgorithm;
+  #endif
 }
 
 static EverCrypt_Error_error_code
 create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
+  #if HACL_CAN_COMPILE_VALE
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
-  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
@@ -138,8 +144,10 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     *dst = p;
     return EverCrypt_Error_Success;
   }
-  #endif
   return EverCrypt_Error_UnsupportedAlgorithm;
+  #else
+  return EverCrypt_Error_UnsupportedAlgorithm;
+  #endif
 }
 
 /**
@@ -797,12 +805,12 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *tag
 )
 {
+  #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[480U] = { 0U };
@@ -919,8 +927,10 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
     }
     return EverCrypt_Error_Success;
   }
-  #endif
   return EverCrypt_Error_UnsupportedAlgorithm;
+  #else
+  return EverCrypt_Error_UnsupportedAlgorithm;
+  #endif
 }
 
 EverCrypt_Error_error_code
@@ -936,12 +946,12 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   uint8_t *tag
 )
 {
+  #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[544U] = { 0U };
@@ -1058,8 +1068,10 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
     }
     return EverCrypt_Error_Success;
   }
-  #endif
   return EverCrypt_Error_UnsupportedAlgorithm;
+  #else
+  return EverCrypt_Error_UnsupportedAlgorithm;
+  #endif
 }
 
 EverCrypt_Error_error_code
@@ -1831,12 +1843,12 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
   uint8_t *dst
 )
 {
+  #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[480U] = { 0U };
@@ -1850,122 +1862,118 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
     {
       return EverCrypt_Error_InvalidKey;
     }
-    else if (iv_len == (uint32_t)0U)
+    if (iv_len == (uint32_t)0U)
     {
       return EverCrypt_Error_InvalidIVLength;
     }
+    EverCrypt_AEAD_state_s scrut1 = *s;
+    uint8_t *ek0 = scrut1.ek;
+    uint8_t *scratch_b = ek0 + (uint32_t)304U;
+    uint8_t *ek1 = ek0;
+    uint8_t *keys_b = ek1;
+    uint8_t *hkeys_b = ek1 + (uint32_t)176U;
+    uint8_t tmp_iv[16U] = { 0U };
+    uint32_t len = iv_len / (uint32_t)16U;
+    uint32_t bytes_len = len * (uint32_t)16U;
+    uint8_t *iv_b = iv;
+    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
+    uint64_t
+    uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
+    uint8_t *inout_b = scratch_b;
+    uint8_t *abytes_b = scratch_b + (uint32_t)16U;
+    uint8_t *scratch_b1 = scratch_b + (uint32_t)32U;
+    uint32_t cipher_len_ = (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U;
+    uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
+    uint8_t *cipher_b_ = cipher;
+    uint8_t *out_b_ = dst;
+    uint8_t *auth_b_ = ad;
+    memcpy(inout_b,
+      cipher + cipher_len_,
+      (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
+    memcpy(abytes_b,
+      ad + auth_len_,
+      (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
+    uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
+    uint64_t c;
+    if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
+    {
+      uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U - len128x6;
+      uint8_t *in128x6_b = cipher_b_;
+      uint8_t *out128x6_b = out_b_;
+      uint8_t *in128_b = cipher_b_ + (uint32_t)len128x6;
+      uint8_t *out128_b = out_b_ + (uint32_t)len128x6;
+      uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+      uint64_t len128x6_ = len128x6 / (uint64_t)16U;
+      uint64_t len128_num_ = len128_num / (uint64_t)16U;
+      uint64_t
+      scrut2 =
+        gcm128_decrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)cipher_len,
+          scratch_b1,
+          tag);
+      uint64_t c0 = scrut2;
+      c = c0;
+    }
     else
     {
-      EverCrypt_AEAD_state_s scrut1 = *s;
-      uint8_t *ek0 = scrut1.ek;
-      uint8_t *scratch_b = ek0 + (uint32_t)304U;
-      uint8_t *ek1 = ek0;
-      uint8_t *keys_b = ek1;
-      uint8_t *hkeys_b = ek1 + (uint32_t)176U;
-      uint8_t tmp_iv[16U] = { 0U };
-      uint32_t len = iv_len / (uint32_t)16U;
-      uint32_t bytes_len = len * (uint32_t)16U;
-      uint8_t *iv_b = iv;
-      memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
+      uint32_t len128x61 = (uint32_t)0U;
+      uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U;
+      uint8_t *in128x6_b = cipher_b_;
+      uint8_t *out128x6_b = out_b_;
+      uint8_t *in128_b = cipher_b_ + len128x61;
+      uint8_t *out128_b = out_b_ + len128x61;
+      uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+      uint64_t len128_num_ = len128_num / (uint64_t)16U;
+      uint64_t len128x6_ = (uint64_t)0U;
       uint64_t
-      uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
-      uint8_t *inout_b = scratch_b;
-      uint8_t *abytes_b = scratch_b + (uint32_t)16U;
-      uint8_t *scratch_b1 = scratch_b + (uint32_t)32U;
-      uint32_t cipher_len_ = (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U;
-      uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-      uint8_t *cipher_b_ = cipher;
-      uint8_t *out_b_ = dst;
-      uint8_t *auth_b_ = ad;
-      memcpy(inout_b,
-        cipher + cipher_len_,
-        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
-      memcpy(abytes_b,
-        ad + auth_len_,
-        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
-      uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
-      uint64_t c;
-      if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
-      {
-        uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U - len128x6;
-        uint8_t *in128x6_b = cipher_b_;
-        uint8_t *out128x6_b = out_b_;
-        uint8_t *in128_b = cipher_b_ + (uint32_t)len128x6;
-        uint8_t *out128_b = out_b_ + (uint32_t)len128x6;
-        uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
-        uint64_t len128x6_ = len128x6 / (uint64_t)16U;
-        uint64_t len128_num_ = len128_num / (uint64_t)16U;
-        uint64_t
-        scrut2 =
-          gcm128_decrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)cipher_len,
-            scratch_b1,
-            tag);
-        uint64_t c0 = scrut2;
-        c = c0;
-      }
-      else
-      {
-        uint32_t len128x61 = (uint32_t)0U;
-        uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U;
-        uint8_t *in128x6_b = cipher_b_;
-        uint8_t *out128x6_b = out_b_;
-        uint8_t *in128_b = cipher_b_ + len128x61;
-        uint8_t *out128_b = out_b_ + len128x61;
-        uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
-        uint64_t len128_num_ = len128_num / (uint64_t)16U;
-        uint64_t len128x6_ = (uint64_t)0U;
-        uint64_t
-        scrut2 =
-          gcm128_decrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)cipher_len,
-            scratch_b1,
-            tag);
-        uint64_t c0 = scrut2;
-        c = c0;
-      }
-      memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
-        inout_b,
-        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
-      uint64_t r = c;
-      if (r == (uint64_t)0U)
-      {
-        return EverCrypt_Error_Success;
-      }
-      else
-      {
-        return EverCrypt_Error_AuthenticationFailure;
-      }
+      scrut2 =
+        gcm128_decrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)cipher_len,
+          scratch_b1,
+          tag);
+      uint64_t c0 = scrut2;
+      c = c0;
     }
+    memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
+      inout_b,
+      (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
+    uint64_t r = c;
+    if (r == (uint64_t)0U)
+    {
+      return EverCrypt_Error_Success;
+    }
+    return EverCrypt_Error_AuthenticationFailure;
   }
-  #endif
   return EverCrypt_Error_UnsupportedAlgorithm;
+  #else
+  return EverCrypt_Error_UnsupportedAlgorithm;
+  #endif
 }
 
 EverCrypt_Error_error_code
@@ -1981,12 +1989,12 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
   uint8_t *dst
 )
 {
+  #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[544U] = { 0U };
@@ -2000,122 +2008,118 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
     {
       return EverCrypt_Error_InvalidKey;
     }
-    else if (iv_len == (uint32_t)0U)
+    if (iv_len == (uint32_t)0U)
     {
       return EverCrypt_Error_InvalidIVLength;
     }
+    EverCrypt_AEAD_state_s scrut1 = *s;
+    uint8_t *ek0 = scrut1.ek;
+    uint8_t *scratch_b = ek0 + (uint32_t)368U;
+    uint8_t *ek1 = ek0;
+    uint8_t *keys_b = ek1;
+    uint8_t *hkeys_b = ek1 + (uint32_t)240U;
+    uint8_t tmp_iv[16U] = { 0U };
+    uint32_t len = iv_len / (uint32_t)16U;
+    uint32_t bytes_len = len * (uint32_t)16U;
+    uint8_t *iv_b = iv;
+    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
+    uint64_t
+    uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
+    uint8_t *inout_b = scratch_b;
+    uint8_t *abytes_b = scratch_b + (uint32_t)16U;
+    uint8_t *scratch_b1 = scratch_b + (uint32_t)32U;
+    uint32_t cipher_len_ = (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U;
+    uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
+    uint8_t *cipher_b_ = cipher;
+    uint8_t *out_b_ = dst;
+    uint8_t *auth_b_ = ad;
+    memcpy(inout_b,
+      cipher + cipher_len_,
+      (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
+    memcpy(abytes_b,
+      ad + auth_len_,
+      (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
+    uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
+    uint64_t c;
+    if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
+    {
+      uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U - len128x6;
+      uint8_t *in128x6_b = cipher_b_;
+      uint8_t *out128x6_b = out_b_;
+      uint8_t *in128_b = cipher_b_ + (uint32_t)len128x6;
+      uint8_t *out128_b = out_b_ + (uint32_t)len128x6;
+      uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+      uint64_t len128x6_ = len128x6 / (uint64_t)16U;
+      uint64_t len128_num_ = len128_num / (uint64_t)16U;
+      uint64_t
+      scrut2 =
+        gcm256_decrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)cipher_len,
+          scratch_b1,
+          tag);
+      uint64_t c0 = scrut2;
+      c = c0;
+    }
     else
     {
-      EverCrypt_AEAD_state_s scrut1 = *s;
-      uint8_t *ek0 = scrut1.ek;
-      uint8_t *scratch_b = ek0 + (uint32_t)368U;
-      uint8_t *ek1 = ek0;
-      uint8_t *keys_b = ek1;
-      uint8_t *hkeys_b = ek1 + (uint32_t)240U;
-      uint8_t tmp_iv[16U] = { 0U };
-      uint32_t len = iv_len / (uint32_t)16U;
-      uint32_t bytes_len = len * (uint32_t)16U;
-      uint8_t *iv_b = iv;
-      memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
+      uint32_t len128x61 = (uint32_t)0U;
+      uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U;
+      uint8_t *in128x6_b = cipher_b_;
+      uint8_t *out128x6_b = out_b_;
+      uint8_t *in128_b = cipher_b_ + len128x61;
+      uint8_t *out128_b = out_b_ + len128x61;
+      uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+      uint64_t len128_num_ = len128_num / (uint64_t)16U;
+      uint64_t len128x6_ = (uint64_t)0U;
       uint64_t
-      uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
-      uint8_t *inout_b = scratch_b;
-      uint8_t *abytes_b = scratch_b + (uint32_t)16U;
-      uint8_t *scratch_b1 = scratch_b + (uint32_t)32U;
-      uint32_t cipher_len_ = (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U;
-      uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-      uint8_t *cipher_b_ = cipher;
-      uint8_t *out_b_ = dst;
-      uint8_t *auth_b_ = ad;
-      memcpy(inout_b,
-        cipher + cipher_len_,
-        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
-      memcpy(abytes_b,
-        ad + auth_len_,
-        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
-      uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
-      uint64_t c;
-      if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
-      {
-        uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U - len128x6;
-        uint8_t *in128x6_b = cipher_b_;
-        uint8_t *out128x6_b = out_b_;
-        uint8_t *in128_b = cipher_b_ + (uint32_t)len128x6;
-        uint8_t *out128_b = out_b_ + (uint32_t)len128x6;
-        uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
-        uint64_t len128x6_ = len128x6 / (uint64_t)16U;
-        uint64_t len128_num_ = len128_num / (uint64_t)16U;
-        uint64_t
-        scrut2 =
-          gcm256_decrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)cipher_len,
-            scratch_b1,
-            tag);
-        uint64_t c0 = scrut2;
-        c = c0;
-      }
-      else
-      {
-        uint32_t len128x61 = (uint32_t)0U;
-        uint64_t len128_num = (uint64_t)cipher_len / (uint64_t)16U * (uint64_t)16U;
-        uint8_t *in128x6_b = cipher_b_;
-        uint8_t *out128x6_b = out_b_;
-        uint8_t *in128_b = cipher_b_ + len128x61;
-        uint8_t *out128_b = out_b_ + len128x61;
-        uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
-        uint64_t len128_num_ = len128_num / (uint64_t)16U;
-        uint64_t len128x6_ = (uint64_t)0U;
-        uint64_t
-        scrut2 =
-          gcm256_decrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)cipher_len,
-            scratch_b1,
-            tag);
-        uint64_t c0 = scrut2;
-        c = c0;
-      }
-      memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
-        inout_b,
-        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
-      uint64_t r = c;
-      if (r == (uint64_t)0U)
-      {
-        return EverCrypt_Error_Success;
-      }
-      else
-      {
-        return EverCrypt_Error_AuthenticationFailure;
-      }
+      scrut2 =
+        gcm256_decrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)cipher_len,
+          scratch_b1,
+          tag);
+      uint64_t c0 = scrut2;
+      c = c0;
     }
+    memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
+      inout_b,
+      (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
+    uint64_t r = c;
+    if (r == (uint64_t)0U)
+    {
+      return EverCrypt_Error_Success;
+    }
+    return EverCrypt_Error_AuthenticationFailure;
   }
-  #endif
   return EverCrypt_Error_UnsupportedAlgorithm;
+  #else
+  return EverCrypt_Error_UnsupportedAlgorithm;
+  #endif
 }
 
 EverCrypt_Error_error_code

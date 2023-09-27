@@ -32,6 +32,7 @@ extern "C" {
 
 #include <string.h>
 #include "krml/internal/types.h"
+#include "krml/internal/builtin.h"
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
@@ -67,7 +68,7 @@ Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *
   uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
-  uint8_t tmp[tmpLen];
+  uint8_t *tmp = (uint8_t *)alloca(tmpLen * sizeof (uint8_t));
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
   memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
@@ -85,7 +86,7 @@ Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *re
   uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
-  uint8_t tmp[tmpLen];
+  uint8_t *tmp = (uint8_t *)alloca(tmpLen * sizeof (uint8_t));
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
@@ -401,8 +402,9 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
     res[i0 + i0] = r;
   }
   uint32_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, res, res);
+  KRML_HOST_IGNORE(c0);
   KRML_CHECK_SIZE(sizeof (uint32_t), aLen + aLen);
-  uint32_t tmp[aLen + aLen];
+  uint32_t *tmp = (uint32_t *)alloca((aLen + aLen) * sizeof (uint32_t));
   memset(tmp, 0U, (aLen + aLen) * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < aLen; i++)
   {
@@ -413,6 +415,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
   }
   uint32_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, tmp, res);
+  KRML_HOST_IGNORE(c1);
 }
 
 static inline void
@@ -450,8 +453,9 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
     res[i0 + i0] = r;
   }
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, res, res);
+  KRML_HOST_IGNORE(c0);
   KRML_CHECK_SIZE(sizeof (uint64_t), aLen + aLen);
-  uint64_t tmp[aLen + aLen];
+  uint64_t *tmp = (uint64_t *)alloca((aLen + aLen) * sizeof (uint64_t));
   memset(tmp, 0U, (aLen + aLen) * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < aLen; i++)
   {
@@ -462,6 +466,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
   }
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, tmp, res);
+  KRML_HOST_IGNORE(c1);
 }
 
 #if defined(__cplusplus)

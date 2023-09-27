@@ -97,7 +97,8 @@ extern void TestLib_checku64(uint64_t uu___, uint64_t uu___1);
 
 /* SNIPPET_START: TestLib_compare_and_print */
 
-extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
+extern void
+TestLib_compare_and_print(Prims_string uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 /* SNIPPET_END: TestLib_compare_and_print */
 

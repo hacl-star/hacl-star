@@ -704,7 +704,7 @@ static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
   sha384_finish(st, rb);
 }
 
-extern void C_String_print(C_String_t uu___);
+extern void C_String_print(Prims_string uu___);
 
 typedef struct __uint32_t_uint32_t_s
 {
@@ -732,16 +732,18 @@ legacy_compute_sha1(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)64U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)20U;
+    ite = (uint32_t)20U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)64U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -850,16 +852,18 @@ compute_sha2_256(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)64U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)32U;
+    ite = (uint32_t)32U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)64U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -976,16 +980,18 @@ compute_sha2_384(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)128U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)48U;
+    ite = (uint32_t)48U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)128U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -1110,16 +1116,18 @@ compute_sha2_512(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
+  uint8_t *nkey = key_block;
+  uint32_t ite;
   if (key_len <= (uint32_t)128U)
   {
-    i0 = key_len;
+    ite = key_len;
   }
   else
   {
-    i0 = (uint32_t)64U;
+    ite = (uint32_t)64U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *zeroes = key_block + ite;
+  KRML_HOST_IGNORE(zeroes);
   if (key_len <= (uint32_t)128U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
@@ -1608,10 +1616,9 @@ reseed(
         memcpy(seed_material + entropy_input_len,
           additional_input_input,
           additional_input_input_len * sizeof (uint8_t));
-        state uu____0 = st;
-        uint8_t *k = uu____0.k;
-        uint8_t *v = uu____0.v;
-        uint32_t *ctr = uu____0.reseed_counter;
+        uint8_t *k = st.k;
+        uint8_t *v = st.v;
+        uint32_t *ctr = st.reseed_counter;
         uint32_t input_len = (uint32_t)21U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
@@ -1661,10 +1668,9 @@ reseed(
         memcpy(seed_material + entropy_input_len,
           additional_input_input,
           additional_input_input_len * sizeof (uint8_t));
-        state uu____1 = st;
-        uint8_t *k = uu____1.k;
-        uint8_t *v = uu____1.v;
-        uint32_t *ctr = uu____1.reseed_counter;
+        uint8_t *k = st.k;
+        uint8_t *v = st.v;
+        uint32_t *ctr = st.reseed_counter;
         uint32_t input_len = (uint32_t)33U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
@@ -1714,10 +1720,9 @@ reseed(
         memcpy(seed_material + entropy_input_len,
           additional_input_input,
           additional_input_input_len * sizeof (uint8_t));
-        state uu____2 = st;
-        uint8_t *k = uu____2.k;
-        uint8_t *v = uu____2.v;
-        uint32_t *ctr = uu____2.reseed_counter;
+        uint8_t *k = st.k;
+        uint8_t *v = st.v;
+        uint32_t *ctr = st.reseed_counter;
         uint32_t input_len = (uint32_t)49U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
@@ -1767,10 +1772,9 @@ reseed(
         memcpy(seed_material + entropy_input_len,
           additional_input_input,
           additional_input_input_len * sizeof (uint8_t));
-        state uu____3 = st;
-        uint8_t *k = uu____3.k;
-        uint8_t *v = uu____3.v;
-        uint32_t *ctr = uu____3.reseed_counter;
+        uint8_t *k = st.k;
+        uint8_t *v = st.v;
+        uint32_t *ctr = st.reseed_counter;
         uint32_t input_len = (uint32_t)65U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];

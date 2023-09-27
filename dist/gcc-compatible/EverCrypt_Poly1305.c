@@ -39,6 +39,7 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
   if (n_extra == (uint32_t)0U)
   {
     uint64_t scrut = x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U);
+    KRML_HOST_IGNORE((void *)(uint8_t)0U);
   }
   else
   {
@@ -46,8 +47,10 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
     uint8_t *src16 = src;
     memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
     uint64_t scrut = x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
+    KRML_HOST_IGNORE((void *)(uint8_t)0U);
     memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
     uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
+    KRML_HOST_IGNORE((void *)(uint8_t)0U);
   }
   memcpy(dst, ctx, (uint32_t)16U * sizeof (uint8_t));
   #endif
@@ -60,6 +63,7 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
+    KRML_HOST_IGNORE(vec128);
     Hacl_Poly1305_256_poly1305_mac(dst, len, src, key);
     return;
   }
@@ -67,13 +71,17 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
+    KRML_HOST_IGNORE(vec256);
     Hacl_Poly1305_128_poly1305_mac(dst, len, src, key);
     return;
   }
   #endif
+  KRML_HOST_IGNORE(vec256);
+  KRML_HOST_IGNORE(vec128);
   #if HACL_CAN_COMPILE_VALE
   poly1305_vale(dst, src, len, key);
   #else
+  KRML_HOST_IGNORE(poly1305_vale);
   Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
   #endif
 }

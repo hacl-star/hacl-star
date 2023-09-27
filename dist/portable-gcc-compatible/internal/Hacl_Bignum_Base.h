@@ -459,6 +459,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
     res[i0 + i0] = r;
   }
   uint32_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, res, res);
+  KRML_HOST_IGNORE(c0);
   KRML_CHECK_SIZE(sizeof (uint32_t), aLen + aLen);
   uint32_t tmp[aLen + aLen];
   memset(tmp, 0U, (aLen + aLen) * sizeof (uint32_t));
@@ -471,6 +472,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
   }
   uint32_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u32(aLen + aLen, res, tmp, res);
+  KRML_HOST_IGNORE(c1);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Multiplication_bn_sqr_u32 */
@@ -512,6 +514,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
     res[i0 + i0] = r;
   }
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, res, res);
+  KRML_HOST_IGNORE(c0);
   KRML_CHECK_SIZE(sizeof (uint64_t), aLen + aLen);
   uint64_t tmp[aLen + aLen];
   memset(tmp, 0U, (aLen + aLen) * sizeof (uint64_t));
@@ -524,6 +527,7 @@ Hacl_Bignum_Multiplication_bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
   }
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(aLen + aLen, res, tmp, res);
+  KRML_HOST_IGNORE(c1);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Multiplication_bn_sqr_u64 */

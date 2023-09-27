@@ -115,7 +115,7 @@ let
       };
       dist-compare = stdenv.mkDerivation {
         name = "hacl-diff-compare";
-        src = "${hacl.build-products}/dist.tar";
+        src = "${hacl.build-products}/dist.tar.gz";
         phases = [ "unpackPhase" "buildPhase" "installPhase" ];
         buildPhase = ''
           for file in ./*/*.c ./*/*.h
@@ -133,7 +133,7 @@ let
       };
       dist-list = stdenv.mkDerivation {
         name = "hacl-diff-list";
-        src = "${hacl.build-products}/dist.tar";
+        src = "${hacl.build-products}/dist.tar.gz";
         phases = [ "unpackPhase" "buildPhase" "installPhase" ];
         buildPhase = ''
           diff -rq . ${../dist} 2>&1 \
@@ -171,22 +171,19 @@ let
           git add *
           git commit -m "initial commit"
 
-          git archive HEAD hints > hints.tar
-          git archive HEAD dist/* > dist.tar
+          git archive HEAD hints -o hints.tar.gz
+          git archive HEAD dist/* -o dist.tar.gz
         '';
         installPhase = ''
-          mkdir -p $out/nix-support
-          cp hints.tar dist.tar $out
-          echo "file hints $out/hints.tar" >> $out/nix-support/hydra-build-products
-          echo "file dist $out/dist.tar" >> $out/nix-support/hydra-build-products
+          mkdir -p $out
+          cp hints.tar.gz dist.tar.gz $out
         '';
       };
       stats = stdenv.mkDerivation {
         name = "hacl-stats";
         phases = [ "installPhase" ];
         installPhase = ''
-          mkdir -p $out/nix-support
-          echo "file stats $out/stats.txt" >> $out/nix-support/hydra-build-products
+          mkdir -p $out
           cat ${hacl}/log.txt \
               | grep "^\[VERIFY\]" \
               | sed 's/\[VERIFY\] \(.*\), \(.*\)/\2 \1/' \
@@ -198,9 +195,8 @@ let
         src = hacl;
         dontBuild = true;
         installPhase = ''
-          mkdir -p $out/nix-support
+          mkdir -p $out
           bash ${fstar-scripts}/res_summary.sh > $out/resources.txt
-          echo "file resources $out/resources.txt" >> $out/nix-support/hydra-build-products
         '';
       };
     };
