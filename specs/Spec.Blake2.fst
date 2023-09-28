@@ -79,6 +79,103 @@ let create_row (#a:alg) x0 x1 x2 x3 : row a =
 inline_for_extraction
 unfold let state (a:alg) = lseq (row a) 4
 
+noeq
+type blake2s_params = {
+  digest_length: uint8;
+  key_length: uint8;
+  fanout: uint8;
+  depth: uint8;
+  leaf_length: uint32;
+  node_offset: uint32;
+  xof_length: uint16;
+  node_depth: uint8;
+  inner_length: uint8;
+  salt: lseq uint8 8;
+  personal: lseq uint8 8;
+}
+
+noeq
+type blake2b_params = {
+  digest_length: uint8;
+  key_length: uint8;
+  fanout: uint8;
+  depth: uint8;
+  leaf_length: uint32;
+  node_offset: uint32;
+  xof_length: uint32;
+  node_depth: uint8;
+  inner_length: uint8;
+  // Blake2b also contains 14 reserved bytes here,
+  // but they seem unused and to only contain zeros
+  salt: lseq uint8 16;
+  personal: lseq uint8 16;
+}
+
+inline_for_extraction
+let blake_params (a: alg) =
+  match a with
+  | Blake2S -> blake2s_params
+  | Blake2B -> blake2b_params
+
+/// Serialize blake2s parameters to be xor'ed with the state during initialization
+/// As the state is represented using uint32, we need to serialize to uint32 instead
+/// of the more standard bytes representation
+let serialize_blake2s_params (p: blake2s_params) : lseq uint32 8 =
+  let s0 = (u32 (v p.digest_length)) ^.
+           (u32 (v p.key_length) <<. (size 8)) ^.
+           (u32 (v p.fanout) <<. (size 16)) ^.
+           (u32 (v p.depth) <<. (size 24)) in
+  let s1 = p.leaf_length in
+  let s2 = p.node_offset in
+  let s3 = (u32 (v p.xof_length)) ^.
+           (u32 (v p.node_depth) <<. (size 16)) ^.
+           (u32 (v p.inner_length) <<. (size 24)) in
+  let salt_u32: lseq uint32 2 = uints_from_bytes_le p.salt in
+  let s4 = salt_u32.[0] in
+  let s5 = salt_u32.[1] in
+  let personal_u32: lseq uint32 2 = uints_from_bytes_le p.personal in
+  let s6 = personal_u32.[0] in
+  let s7 = personal_u32.[1] in
+  [@inline_let]
+  let l = [s0; s1; s2; s3; s4; s5; s6; s7] in
+  assert_norm (List.Tot.length l == 8);
+  createL l
+
+/// Serialize blake2b parameters to be xor'ed with the state during initialization
+/// As the state is represented using uint64, we need to serialize to uint64 instead
+/// of the more standard bytes representation
+let serialize_blake2b_params (p: blake2b_params) : lseq uint64 8 =
+  let s0 = (u64 (v p.digest_length)) ^.
+           (u64 (v p.key_length) <<. (size 8)) ^.
+           (u64 (v p.fanout) <<. (size 16)) ^.
+           (u64 (v p.depth) <<. (size 24)) ^.
+           (u64 (v p.leaf_length) <<. (size 32)) in
+  let s1 = (u64 (v p.node_offset)) ^.
+           (u64 (v p.xof_length) <<. (size 32)) in
+  // The serialization corresponding to s2 contains node_depth and inner_length,
+  // followed by the 14 reserved bytes which always seem to be zeros, and can hence
+  // be ignored when building the corresponding uint64 using xor's
+  let s2 = (u64 (v p.node_depth)) ^.
+           (u64 (v p.inner_length) <<. (size 8)) in
+  // s3 corresponds to the remaining of the reserved bytes
+  let s3 = u64 0 in
+  let salt_u64: lseq uint64 2 = uints_from_bytes_le p.salt in
+  let s4 = salt_u64.[0] in
+  let s5 = salt_u64.[1] in
+  let personal_u64: lseq uint64 2 = uints_from_bytes_le p.personal in
+  let s6 = personal_u64.[0] in
+  let s7 = personal_u64.[1] in
+  [@inline_let]
+  let l = [s0; s1; s2; s3; s4; s5; s6; s7] in
+  assert_norm (List.Tot.length l == 8);
+  createL l
+
+inline_for_extraction
+let serialize_blake_params (a: alg) (p: blake_params a): lseq (word_t a) 8 =
+  match a with
+  | Blake2S -> serialize_blake2s_params p
+  | Blake2B -> serialize_blake2b_params p
+
 inline_for_extraction
 type pub_word_t (a:alg) = uint_t (wt a) PUB
 
