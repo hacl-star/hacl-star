@@ -79,6 +79,18 @@ let create_row (#a:alg) x0 x1 x2 x3 : row a =
 inline_for_extraction
 unfold let state (a:alg) = lseq (row a) 4
 
+inline_for_extraction
+let salt_length (a:alg) : size_nat =
+  match a with
+  | Blake2S -> 8
+  | Blake2B -> 16
+
+inline_for_extraction
+let personal_length (a:alg) : size_nat =
+  match a with
+  | Blake2S -> 8
+  | Blake2B -> 16
+
 noeq
 type blake2s_params = {
   digest_length: uint8;
@@ -90,11 +102,11 @@ type blake2s_params = {
   xof_length: uint16;
   node_depth: uint8;
   inner_length: uint8;
-  salt: lseq uint8 8;
-  personal: lseq uint8 8;
+  salt: lseq uint8 (salt_length Blake2S);
+  personal: lseq uint8 (personal_length Blake2S);
 }
 
-(* Need these two helpers to cleanly work around field shadowing *)
+(* Need these helpers to cleanly work around field shadowing *)
 
 inline_for_extraction
 let set_blake2s_digest_length
@@ -110,6 +122,12 @@ let set_blake2s_key_length
   : blake2s_params =
   {p with key_length = u8 kk}
 
+inline_for_extraction
+let get_blake2s_salt (p:blake2s_params) = p.salt
+
+inline_for_extraction
+let get_blake2s_personal (p:blake2s_params) = p.personal
+
 noeq
 type blake2b_params = {
   digest_length: uint8;
@@ -123,8 +141,8 @@ type blake2b_params = {
   inner_length: uint8;
   // Blake2b also contains 14 reserved bytes here, but they seem
   // unused and to only contain zeros, hence we do not expose them
-  salt: lseq uint8 16;
-  personal: lseq uint8 16;
+  salt: lseq uint8 (salt_length Blake2B);
+  personal: lseq uint8 (personal_length Blake2B);
 }
 
 inline_for_extraction
@@ -150,6 +168,18 @@ let set_key_length (#a: alg)
   match a with
   | Blake2S -> set_blake2s_key_length p kk
   | Blake2B -> {p with key_length = u8 kk}
+
+inline_for_extraction
+let get_salt (#a: alg) (p: blake2_params a) : lseq uint8 (salt_length a) =
+  match a with
+  | Blake2S -> get_blake2s_salt p
+  | Blake2B -> p.salt
+
+inline_for_extraction
+let get_personal (#a: alg) (p: blake2_params a) : lseq uint8 (personal_length a) =
+  match a with
+  | Blake2S -> get_blake2s_personal p
+  | Blake2B -> p.personal
 
 let blake2s_default_params: blake2s_params =
   { digest_length = u8 32;
@@ -634,7 +664,7 @@ let blake2_init_hash a p kk nn =
   let iv7' = iv7 ^. s.[7] in
   let r0' = create_row #a iv0' iv1' iv2' iv3' in
   let r1' = create_row #a iv4' iv5' iv6' iv7' in
-  let s_iv = createL [r0';r1;r0;r1] in
+  let s_iv = createL [r0';r1';r0;r1] in
   s_iv
 
 val blake2_key_block:
