@@ -94,6 +94,22 @@ type blake2s_params = {
   personal: lseq uint8 8;
 }
 
+(* Need these two helpers to cleanly work around field shadowing *)
+
+inline_for_extraction
+let set_blake2s_digest_length
+  (p: blake2s_params)
+  (nn: size_nat{1 <= nn /\ nn <= max_output Blake2S})
+  : blake2s_params =
+  {p with digest_length = u8 nn}
+
+inline_for_extraction
+let set_blake2s_key_length
+  (p: blake2s_params)
+  (kk: size_nat{kk <= max_key Blake2S})
+  : blake2s_params =
+  {p with key_length = u8 kk}
+
 noeq
 type blake2b_params = {
   digest_length: uint8;
@@ -105,17 +121,69 @@ type blake2b_params = {
   xof_length: uint32;
   node_depth: uint8;
   inner_length: uint8;
-  // Blake2b also contains 14 reserved bytes here,
-  // but they seem unused and to only contain zeros
+  // Blake2b also contains 14 reserved bytes here, but they seem
+  // unused and to only contain zeros, hence we do not expose them
   salt: lseq uint8 16;
   personal: lseq uint8 16;
 }
 
 inline_for_extraction
-let blake_params (a: alg) =
+let blake2_params (a: alg) =
   match a with
   | Blake2S -> blake2s_params
   | Blake2B -> blake2b_params
+
+inline_for_extraction
+let set_digest_length (#a: alg)
+  (p: blake2_params a)
+  (nn: size_nat{1 <= nn /\ nn <= max_output a})
+  : blake2_params a =
+  match a with
+  | Blake2S -> set_blake2s_digest_length p nn
+  | Blake2B -> {p with digest_length = u8 nn}
+
+inline_for_extraction
+let set_key_length (#a: alg)
+  (p: blake2_params a)
+  (kk: size_nat{kk <= max_key a})
+  : blake2_params a =
+  match a with
+  | Blake2S -> set_blake2s_key_length p kk
+  | Blake2B -> {p with key_length = u8 kk}
+
+let blake2s_default_params: blake2s_params =
+  { digest_length = u8 32;
+    key_length = u8 0;
+    fanout = u8 1;
+    depth = u8 1;
+    leaf_length = u32 0;
+    node_offset = u32 0;
+    xof_length = u16 0;
+    node_depth = u8 0;
+    inner_length = u8 0;
+    salt = create 8 (u8 0);
+    personal = create 8 (u8 0);
+  }
+
+let blake2b_default_params: blake2b_params =
+  { digest_length = u8 64;
+    key_length = u8 0;
+    fanout = u8 1;
+    depth = u8 1;
+    leaf_length = u32 0;
+    node_offset = u32 0;
+    xof_length = u32 0;
+    node_depth = u8 0;
+    inner_length = u8 0;
+    salt = create 16 (u8 0);
+    personal = create 16 (u8 0);
+  }
+
+inline_for_extraction
+let blake2_default_params (a: alg) : blake2_params a =
+  match a with
+  | Blake2S -> blake2s_default_params
+  | Blake2B -> blake2b_default_params
 
 /// Serialize blake2s parameters to be xor'ed with the state during initialization
 /// As the state is represented using uint32, we need to serialize to uint32 instead
@@ -171,7 +239,7 @@ let serialize_blake2b_params (p: blake2b_params) : lseq uint64 8 =
   createL l
 
 inline_for_extraction
-let serialize_blake_params (a: alg) (p: blake_params a): lseq (word_t a) 8 =
+let serialize_blake_params (#a: alg) (p: blake2_params a): lseq (word_t a) 8 =
   match a with
   | Blake2S -> serialize_blake2s_params p
   | Blake2B -> serialize_blake2b_params p
@@ -536,11 +604,12 @@ let blake2_update_blocks a prev m s =
 
 val blake2_init_hash:
     a:alg
+  -> p:blake2_params a
   -> kk:size_nat{kk <= max_key a}
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (state a)
 
-let blake2_init_hash a kk nn =
+let blake2_init_hash a p kk nn =
   let iv0 = secret (ivTable a).[0] in
   let iv1 = secret (ivTable a).[1] in
   let iv2 = secret (ivTable a).[2] in
@@ -551,9 +620,20 @@ let blake2_init_hash a kk nn =
   let iv7 = secret (ivTable a).[7] in
   let r0 = create_row #a iv0 iv1 iv2 iv3 in
   let r1 = create_row #a iv4 iv5 iv6 iv7 in
-  let s0' = (nat_to_word a 0x01010000) ^. ((nat_to_word a kk) <<. (size 8)) ^. (nat_to_word a nn) in
-  let iv0' = iv0 ^. s0' in
-  let r0' = create_row #a iv0' iv1 iv2 iv3 in
+  let p: blake2_params a =
+    set_key_length (set_digest_length p nn) kk
+  in
+  let s = serialize_blake_params p in
+  let iv0' = iv0 ^. s.[0] in
+  let iv1' = iv1 ^. s.[1] in
+  let iv2' = iv2 ^. s.[2] in
+  let iv3' = iv3 ^. s.[3] in
+  let iv4' = iv4 ^. s.[4] in
+  let iv5' = iv5 ^. s.[5] in
+  let iv6' = iv6 ^. s.[6] in
+  let iv7' = iv7 ^. s.[7] in
+  let r0' = create_row #a iv0' iv1' iv2' iv3' in
+  let r1' = create_row #a iv4' iv5' iv6' iv7' in
   let s_iv = createL [r0';r1;r0;r1] in
   s_iv
 
@@ -610,15 +690,18 @@ let blake2_finish a s nn =
 val blake2:
     a:alg
   -> d:bytes
+  -> p:blake2_params a
   -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
-let blake2 a d kk k nn =
-  let s = blake2_init_hash a kk nn in
+let blake2 a d p kk k nn =
+  let s = blake2_init_hash a p kk nn in
   let s = blake2_update a kk k d s in
   blake2_finish a s nn
+
+(* TODO: Add blake2_params arguments to both functions below *)
 
 val blake2s:
     d:bytes
@@ -627,8 +710,7 @@ val blake2s:
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
-let blake2s d kk k n = blake2 Blake2S d kk k n
-
+let blake2s d kk k n = blake2 Blake2S d blake2s_default_params kk k n
 
 val blake2b:
     d:bytes
@@ -637,4 +719,4 @@ val blake2b:
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
 
-let blake2b d kk k n = blake2 Blake2B d kk k n
+let blake2b d kk k n = blake2 Blake2B d blake2b_default_params kk k n
