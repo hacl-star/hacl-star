@@ -54,6 +54,114 @@ val row_v_lemma: #a:Spec.alg -> #m:m_spec -> h0:mem -> h1:mem -> r1:row_p a m ->
 	[SMTPat (row_v h0 r1); SMTPat (row_v h1 r2)]
 
 noextract inline_for_extraction
+let salt_len (a:Spec.alg) : size_t =
+  match a with
+  | Spec.Blake2S -> 8ul
+  | Spec.Blake2B -> 16ul
+
+noextract inline_for_extraction
+let personal_len (a:Spec.alg) : size_t =
+  match a with
+  | Spec.Blake2S -> 8ul
+  | Spec.Blake2B -> 16ul
+
+noeq
+type blake2s_params = {
+  digest_length: uint8;
+  key_length: uint8;
+  fanout: uint8;
+  depth: uint8;
+  leaf_length: uint32;
+  node_offset: uint32;
+  xof_length: uint16;
+  node_depth: uint8;
+  inner_length: uint8;
+  salt: lbuffer uint8 8ul;
+  personal: lbuffer uint8 8ul;
+}
+
+let blake2s_params_inv (h: mem) (p: blake2s_params): GTot prop =
+  live h p.salt /\ live h p.personal
+
+let blake2s_params_loc (p: blake2s_params) =
+  loc p.salt `union` loc p.personal
+
+let blake2s_params_v (h: mem) (p: blake2s_params): GTot Spec.blake2s_params =
+  Spec.Mkblake2s_params
+    p.digest_length
+    p.key_length
+    p.fanout
+    p.depth
+    p.leaf_length
+    p.node_offset
+    p.xof_length
+    p.node_depth
+    p.inner_length
+    (as_seq h p.salt)
+    (as_seq h p.personal)
+
+noeq
+type blake2b_params = {
+  digest_length: uint8;
+  key_length: uint8;
+  fanout: uint8;
+  depth: uint8;
+  leaf_length: uint32;
+  node_offset: uint32;
+  xof_length: uint32;
+  node_depth: uint8;
+  inner_length: uint8;
+  // Blake2b also contains 14 reserved bytes here, but they seem
+  // unused and to only contain zeros, hence we do not expose them
+  salt: lbuffer uint8 16ul;
+  personal: lbuffer uint8 16ul;
+}
+
+let blake2b_params_inv (h: mem) (p: blake2b_params): GTot prop =
+  live h p.salt /\ live h p.personal
+
+let blake2b_params_loc (p: blake2b_params) =
+  loc p.salt `union` loc p.personal
+
+let blake2b_params_v (h: mem) (p: blake2b_params): GTot Spec.blake2b_params =
+  Spec.Mkblake2b_params
+    p.digest_length
+    p.key_length
+    p.fanout
+    p.depth
+    p.leaf_length
+    p.node_offset
+    p.xof_length
+    p.node_depth
+    p.inner_length
+    (as_seq h p.salt)
+    (as_seq h p.personal)
+
+noextract inline_for_extraction
+let blake2_params (a:Spec.alg) =
+  match a with
+  | Spec.Blake2S -> blake2s_params
+  | Spec.Blake2B -> blake2b_params
+
+noextract inline_for_extraction
+let blake2_params_inv (a:Spec.alg) (h: mem) (p: blake2_params a) =
+  match a with
+  | Spec.Blake2S -> blake2s_params_inv h p
+  | Spec.Blake2B -> blake2b_params_inv h p
+
+noextract inline_for_extraction
+let blake2_params_loc (a:Spec.alg) (p: blake2_params a) =
+  match a with
+  | Spec.Blake2S -> blake2s_params_loc p
+  | Spec.Blake2B -> blake2b_params_loc p
+
+noextract inline_for_extraction
+let blake2_params_v (a:Spec.alg) (h: mem) (p: blake2_params a) : GTot (Spec.blake2_params a) =
+  match a with
+  | Spec.Blake2S -> blake2s_params_v h p
+  | Spec.Blake2B -> blake2b_params_v h p
+
+noextract inline_for_extraction
 unfold let state_p (a:Spec.alg) (m:m_spec) =
   lbuffer (element_t a m) (4ul *. row_len a m)
 
