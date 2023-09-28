@@ -239,7 +239,7 @@ let serialize_blake2b_params (p: blake2b_params) : lseq uint64 8 =
   createL l
 
 inline_for_extraction
-let serialize_blake_params (#a: alg) (p: blake2_params a): lseq (word_t a) 8 =
+let serialize_blake2_params (#a: alg) (p: blake2_params a): lseq (word_t a) 8 =
   match a with
   | Blake2S -> serialize_blake2s_params p
   | Blake2B -> serialize_blake2b_params p
@@ -623,7 +623,7 @@ let blake2_init_hash a p kk nn =
   let p: blake2_params a =
     set_key_length (set_digest_length p nn) kk
   in
-  let s = serialize_blake_params p in
+  let s = serialize_blake2_params p in
   let iv0' = iv0 ^. s.[0] in
   let iv1' = iv1 ^. s.[1] in
   let iv2' = iv2 ^. s.[2] in

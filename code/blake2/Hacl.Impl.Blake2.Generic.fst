@@ -557,7 +557,7 @@ val lemma_serialize_default_params (al:Spec.alg)
   : Lemma (
       let open Spec in
       let p = set_key_length (set_digest_length (blake2_default_params al) (v nn)) (v kk) in
-      let s = serialize_blake_params p in
+      let s = serialize_blake2_params p in
       let kk_shift_8 = shift_left (size_to_word al kk) (size 8) in
       Seq.index s 0 == (Spec.nat_to_word al 0x01010000) ^. kk_shift_8 ^. (size_to_word al nn) /\
       (forall (i:nat{i >= 1 /\ i < 8}). Seq.index s i == Spec.nat_to_word al 0)
@@ -569,7 +569,7 @@ let lemma_serialize_default2s_params
   : Lemma (
       let open Spec in
       let p = set_key_length (set_digest_length (blake2s_default_params) (v nn)) (v kk) in
-      let s = serialize_blake_params p in
+      let s = serialize_blake2s_params p in
       let kk_shift_8 = shift_left (size_to_word Spec.Blake2S kk) (size 8) in
       Seq.index s 0 == (u32 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2S nn) /\
       (forall (i:nat{i >= 1 /\ i < 8}). Seq.index s i == u32 0)
@@ -577,7 +577,7 @@ let lemma_serialize_default2s_params
   =
   let open Spec in
   let p = set_key_length (set_digest_length (blake2s_default_params) (v nn)) (v kk) in
-  let s = serialize_blake_params p in
+  let s = serialize_blake2s_params p in
   let kk_shift_8 = shift_left (size_to_word Spec.Blake2S kk) (size 8) in
   let aux () : Lemma (Seq.index s 0 == (u32 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2S nn)) =
     admit()
@@ -588,13 +588,14 @@ let lemma_serialize_default2s_params
   aux ();
   Classical.forall_intro aux_zero
 
+
 let lemma_serialize_default2b_params
   (kk:size_t{v kk <= Spec.max_key Spec.Blake2B})
   (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2B})
   : Lemma (
       let open Spec in
       let p = set_key_length (set_digest_length (blake2b_default_params) (v nn)) (v kk) in
-      let s = serialize_blake_params p in
+      let s = serialize_blake2b_params p in
       let kk_shift_8 = shift_left (size_to_word Spec.Blake2B kk) (size 8) in
       Seq.index s 0 == (u64 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2B nn) /\
       (forall (i:nat{i >= 1 /\ i < 8}). Seq.index s i == u64 0)
@@ -602,7 +603,7 @@ let lemma_serialize_default2b_params
   =
   let open Spec in
   let p = set_key_length (set_digest_length (blake2b_default_params) (v nn)) (v kk) in
-  let s = serialize_blake_params p in
+  let s = serialize_blake2b_params p in
   let kk_shift_8 = shift_left (size_to_word Spec.Blake2B kk) (size 8) in
   let aux () : Lemma (Seq.index s 0 == (u64 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2B nn)) =
     admit()
