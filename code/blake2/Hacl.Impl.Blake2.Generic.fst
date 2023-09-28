@@ -549,7 +549,74 @@ let blake2_init_st  (al:Spec.alg) (ms:m_spec) =
   Stack unit
     (requires (fun h -> live h hash))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-			   state_v h1 hash == Spec.blake2_init_hash al (v kk) (v nn)))
+			   state_v h1 hash == Spec.blake2_init_hash al (Spec.blake2_default_params al) (v kk) (v nn)))
+
+val lemma_serialize_default_params (al:Spec.alg)
+  (kk:size_t{v kk <= Spec.max_key al})
+  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al})
+  : Lemma (
+      let open Spec in
+      let p = set_key_length (set_digest_length (blake2_default_params al) (v nn)) (v kk) in
+      let s = serialize_blake_params p in
+      let kk_shift_8 = shift_left (size_to_word al kk) (size 8) in
+      Seq.index s 0 == (Spec.nat_to_word al 0x01010000) ^. kk_shift_8 ^. (size_to_word al nn) /\
+      (forall (i:nat{i >= 1 /\ i < 8}). Seq.index s i == Spec.nat_to_word al 0)
+    )
+
+let lemma_serialize_default2s_params
+  (kk:size_t{v kk <= Spec.max_key Spec.Blake2S})
+  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2S})
+  : Lemma (
+      let open Spec in
+      let p = set_key_length (set_digest_length (blake2s_default_params) (v nn)) (v kk) in
+      let s = serialize_blake_params p in
+      let kk_shift_8 = shift_left (size_to_word Spec.Blake2S kk) (size 8) in
+      Seq.index s 0 == (u32 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2S nn) /\
+      (forall (i:nat{i >= 1 /\ i < 8}). Seq.index s i == u32 0)
+    )
+  =
+  let open Spec in
+  let p = set_key_length (set_digest_length (blake2s_default_params) (v nn)) (v kk) in
+  let s = serialize_blake_params p in
+  let kk_shift_8 = shift_left (size_to_word Spec.Blake2S kk) (size 8) in
+  let aux () : Lemma (Seq.index s 0 == (u32 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2S nn)) =
+    admit()
+  in
+  let aux_zero (i:nat{i >= 1 /\ i < 8}) : Lemma (Seq.index s i == u32 0) =
+    admit()
+  in
+  aux ();
+  Classical.forall_intro aux_zero
+
+let lemma_serialize_default2b_params
+  (kk:size_t{v kk <= Spec.max_key Spec.Blake2B})
+  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2B})
+  : Lemma (
+      let open Spec in
+      let p = set_key_length (set_digest_length (blake2b_default_params) (v nn)) (v kk) in
+      let s = serialize_blake_params p in
+      let kk_shift_8 = shift_left (size_to_word Spec.Blake2B kk) (size 8) in
+      Seq.index s 0 == (u64 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2B nn) /\
+      (forall (i:nat{i >= 1 /\ i < 8}). Seq.index s i == u64 0)
+    )
+  =
+  let open Spec in
+  let p = set_key_length (set_digest_length (blake2b_default_params) (v nn)) (v kk) in
+  let s = serialize_blake_params p in
+  let kk_shift_8 = shift_left (size_to_word Spec.Blake2B kk) (size 8) in
+  let aux () : Lemma (Seq.index s 0 == (u64 0x01010000) ^. kk_shift_8 ^. (size_to_word Spec.Blake2B nn)) =
+    admit()
+  in
+  let aux_zero (i:nat{i >= 1 /\ i < 8}) : Lemma (Seq.index s i == u64 0) =
+    admit()
+  in
+  aux ();
+  Classical.forall_intro aux_zero
+
+let lemma_serialize_default_params al kk nn =
+  match al with
+  | Spec.Blake2S -> lemma_serialize_default2s_params kk nn
+  | Spec.Blake2B -> lemma_serialize_default2b_params kk nn
 
 inline_for_extraction noextract
 val blake2_init:
@@ -575,11 +642,19 @@ let blake2_init #al #ms hash kk nn =
   create_row #al #ms r3 iv4 iv5 iv6 iv7;
   let kk_shift_8 = shift_left (size_to_word al kk) (size 8) in
   let iv0' = iv0 ^. (Spec.nat_to_word al 0x01010000) ^. kk_shift_8 ^. (size_to_word al nn) in
+  (**) logxor_lemma iv1 (Spec.nat_to_word al 0);
+  (**) logxor_lemma iv2 (Spec.nat_to_word al 0);
+  (**) logxor_lemma iv3 (Spec.nat_to_word al 0);
+  (**) logxor_lemma iv4 (Spec.nat_to_word al 0);
+  (**) logxor_lemma iv5 (Spec.nat_to_word al 0);
+  (**) logxor_lemma iv6 (Spec.nat_to_word al 0);
+  (**) logxor_lemma iv7 (Spec.nat_to_word al 0);
   create_row #al #ms r0 iv0' iv1 iv2 iv3;
   create_row #al #ms r1 iv4 iv5 iv6 iv7;
   let h1 = ST.get() in
   assert(modifies (loc hash) h0 h1);
-  Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al (v kk) (v nn))
+  (**) lemma_serialize_default_params al kk nn;
+  Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al (Spec.blake2_default_params al) (v kk) (v nn))
 
 #push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let _ : squash (inversion Spec.alg) = allow_inversion Spec.alg
@@ -778,7 +853,7 @@ let blake2_st (al:Spec.alg) (ms:m_spec) =
     (requires (fun h -> live h output /\ live h d /\ live h k
                    /\ disjoint output d /\ disjoint output k /\ disjoint d k))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
-                         /\ h1.[|output|] == Spec.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn)))
+                         /\ h1.[|output|] == Spec.blake2 al h0.[|d|] (Spec.blake2_default_params al) (v kk) h0.[|k|] (v nn)))
 
 inline_for_extraction noextract
 val blake2:
@@ -797,7 +872,7 @@ let blake2 #al #ms blake2_init blake2_update blake2_finish nn output ll d kk k =
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]
-  let spec _ h1 = h1.[|output|] == Spec.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn) in
+  let spec _ h1 = h1.[|output|] == Spec.blake2 al h0.[|d|] (Spec.blake2_default_params al) (v kk) h0.[|k|] (v nn) in
   salloc1 h0 stlen stzero (Ghost.hide (loc output)) spec
   (fun h ->
     assert (max_size_t <= Spec.max_limb al);
