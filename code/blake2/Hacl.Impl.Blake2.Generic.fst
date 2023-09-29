@@ -555,39 +555,37 @@ inline_for_extraction noextract
 val serialize_params (al:Spec.alg)
   (kk:size_t{v kk <= Spec.max_key al})
   (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al})
-  (p: Spec.blake2_params al)
+  (p: blake2_params al)
   (b: lbuffer (word_t al) 8ul)
   : Stack unit
     (requires fun h ->
       live h b /\
-      as_seq h b == Seq.create 8 (Spec.nat_to_word al 0) /\
-      // TODO: Should be removed, and should take a Low* blake2_params as arguments.
-      Spec.get_salt p == Seq.create (Spec.salt_length al) (u8 0) /\
-      Spec.get_personal p == Seq.create (Spec.personal_length al) (u8 0)
+      LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
+      as_seq h b == Seq.create 8 (Spec.nat_to_word al 0)
     )
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-        (Spec.set_key_length (Spec.set_digest_length p (v nn)) (v kk)))
+        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk)))
 
 #push-options "--z3rlimit 100 --fuel 0"
 inline_for_extraction noextract
 let serialize_params_blake2s
   (kk:size_t{v kk <= Spec.max_key Spec.Blake2S})
   (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2S})
-  (p: Spec.blake2_params Spec.Blake2S)
+  (p: blake2_params Spec.Blake2S)
   (b: lbuffer (word_t Spec.Blake2S) 8ul)
   : Stack unit
     (requires fun h -> live h b /\
-      as_seq h b == Seq.create 8 (u32 0) /\
-      Spec.get_salt p == Seq.create 8 (u8 0) /\
-      Spec.get_personal p == Seq.create 8 (u8 0)
+      LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
+      as_seq h b == Seq.create 8 (u32 0)
     )
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-        (Spec.set_key_length (Spec.set_digest_length p (v nn)) (v kk)))
-  = [@inline_let]
+        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk)))
+  = let h0 = ST.get () in
+    [@inline_let]
     let kk_shift_8 = shift_left (to_u32 kk) (size 8) in
     [@inline_let]
     let fanout_shift_16 = shift_left (to_u32 p.fanout) (size 16) in
@@ -614,7 +612,7 @@ let serialize_params_blake2s
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2s_params
-        (Spec.set_key_length (Spec.set_digest_length p (v nn)) (v kk))) =
+        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk))) =
       let open Lib.Sequence in
       let open Lib.ByteSequence in
       let s0 = (u32 (v nn)) ^.
@@ -626,10 +624,10 @@ let serialize_params_blake2s
       let s3 = (u32 (v p.xof_length)) ^.
                (u32 (v p.node_depth) <<. (size 16)) ^.
                (u32 (v p.inner_length) <<. (size 24)) in
-      let salt_u32: lseq uint32 2 = uints_from_bytes_le p.salt in
+      let salt_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 (get_salt p)) in
       let s4 = salt_u32.[0] in
       let s5 = salt_u32.[1] in
-      let personal_u32: lseq uint32 2 = uints_from_bytes_le p.personal in
+      let personal_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 (get_personal p)) in
       let s6 = personal_u32.[0] in
       let s7 = personal_u32.[1] in
       [@inline_let]
@@ -639,6 +637,12 @@ let serialize_params_blake2s
       // There seems to be something not triggering with createL, requiring the
       // following lemma calls, and assert_norms to relate List.index to the
       // actual elements
+
+      let s = as_seq h1 b in
+      assume (Seq.index s 4 == s4);
+      assume (Seq.index s 5 == s5);
+      assume (Seq.index s 6 == s6);
+      assume (Seq.index s 7 == s7);
 
       assert_norm (List.Tot.index l 0 == s0);
       assert_norm (List.Tot.index l 1 == s1);
@@ -663,19 +667,19 @@ inline_for_extraction noextract
 let serialize_params_blake2b
   (kk:size_t{v kk <= Spec.max_key Spec.Blake2B})
   (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2B})
-  (p: Spec.blake2_params Spec.Blake2B)
+  (p: blake2_params Spec.Blake2B)
   (b: lbuffer (word_t Spec.Blake2B) 8ul)
   : Stack unit
     (requires fun h -> live h b /\
-      as_seq h b == Seq.create 8 (u64 0) /\
-      Spec.get_salt p == Seq.create 16 (u8 0) /\
-      Spec.get_personal p == Seq.create 16 (u8 0)
+      LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
+      as_seq h b == Seq.create 8 (u64 0)
     )
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-        (Spec.set_key_length (Spec.set_digest_length p (v nn)) (v kk)))
-  = [@inline_let]
+        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk)))
+  = let h0 = ST.get () in
+    [@inline_let]
     let kk_shift_8 = shift_left (to_u64 kk) (size 8) in
     [@inline_let]
     let fanout_shift_16 = shift_left (to_u64 p.fanout) (size 16) in
@@ -701,7 +705,7 @@ let serialize_params_blake2b
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2b_params
-        (Spec.set_key_length (Spec.set_digest_length p (v nn)) (v kk))) =
+        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk))) =
       let open Lib.Sequence in
       let open Lib.ByteSequence in
       let s0 = (u64 (v nn)) ^.
@@ -718,10 +722,10 @@ let serialize_params_blake2b
                (u64 (v p.inner_length) <<. (size 8)) in
       // s3 corresponds to the remaining of the reserved bytes
       let s3 = u64 0 in
-      let salt_u64: lseq uint64 2 = uints_from_bytes_le p.salt in
+      let salt_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 (get_salt p)) in
       let s4 = salt_u64.[0] in
       let s5 = salt_u64.[1] in
-      let personal_u64: lseq uint64 2 = uints_from_bytes_le p.personal in
+      let personal_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 (get_personal p)) in
       let s6 = personal_u64.[0] in
       let s7 = personal_u64.[1] in
       [@inline_let]
@@ -731,6 +735,12 @@ let serialize_params_blake2b
       // There seems to be something not triggering with createL, requiring the
       // following lemma calls, and assert_norms to relate List.index to the
       // actual elements
+
+      let s = as_seq h1 b in
+      assume (Seq.index s 4 == s4);
+      assume (Seq.index s 5 == s5);
+      assume (Seq.index s 6 == s6);
+      assume (Seq.index s 7 == s7);
 
       assert_norm (List.Tot.index l 0 == s0);
       assert_norm (List.Tot.index l 1 == s1);
@@ -780,7 +790,8 @@ let blake2_init #al #ms hash kk nn =
   let iv7 = get_iv al 7ul in
   create_row #al #ms r2 iv0 iv1 iv2 iv3;
   create_row #al #ms r3 iv4 iv5 iv6 iv7;
-  serialize_params al kk nn (Spec.blake2_default_params al) tmp;
+  let p = alloc_default_params al in
+  serialize_params al kk nn p tmp;
   let tmp0 = tmp.(0ul) in
   let tmp1 = tmp.(1ul) in
   let tmp2 = tmp.(2ul) in
@@ -801,7 +812,7 @@ let blake2_init #al #ms hash kk nn =
   create_row #al #ms r1 iv4' iv5' iv6' iv7';
   let h1 = ST.get() in
   assert (disjoint hash tmp);
-  assert(modifies (loc hash `union` loc tmp) h0 h1);
+  assert (modifies (loc hash `union` loc tmp) h0 h1);
   Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al (Spec.blake2_default_params al) (v kk) (v nn));
   pop_frame ()
 
