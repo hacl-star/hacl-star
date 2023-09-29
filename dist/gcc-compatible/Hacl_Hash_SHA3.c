@@ -809,6 +809,7 @@ Hacl_Impl_SHA3_keccak(
   uint8_t *output
 )
 {
+  KRML_HOST_IGNORE(capacity);
   uint32_t rateInBytes = rate / (uint32_t)8U;
   uint64_t s[25U] = { 0U };
   absorb(s, rateInBytes, inputByteLen, input, delimitedSuffix);
