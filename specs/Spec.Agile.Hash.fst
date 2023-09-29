@@ -17,8 +17,8 @@ let init a =
       Spec.MD5.init
   | SHA1 ->
       Spec.SHA1.init
-  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32
-  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64
+  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S Spec.Blake2.blake2s_default_params 0 32
+  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B Spec.Blake2.blake2b_default_params 0 64
   | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
       Lib.Sequence.create 25 (u64 0)
 
@@ -83,7 +83,7 @@ let finish (a:hash_alg) (hashw:words_state a) (l: output_length a): Tot (bytes_h
 // Same deal with the SHA3 family.
 let hash' a input l =
   if is_blake a then
-    Spec.Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))
+    Spec.Blake2.blake2 (to_blake_alg a) input (Spec.Blake2.blake2_default_params (to_blake_alg a)) 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))
   else if is_md a then
     (* As defined in the NIST standard; pad, then update, then finish. *)
     let padding = pad a (S.length input) in
