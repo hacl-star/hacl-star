@@ -221,6 +221,7 @@ blake2b_update_block(
 void
 Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn)
 {
+  uint64_t tmp[8U] = { 0U };
   Lib_IntVector_Intrinsics_vec256 *r0 = hash;
   Lib_IntVector_Intrinsics_vec256 *r1 = hash + (uint32_t)1U;
   Lib_IntVector_Intrinsics_vec256 *r2 = hash + (uint32_t)2U;
@@ -235,10 +236,66 @@ Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk
   uint64_t iv7 = Hacl_Impl_Blake2_Constants_ivTable_B[7U];
   r2[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0, iv1, iv2, iv3);
   r3[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
-  uint64_t kk_shift_8 = (uint64_t)kk << (uint32_t)8U;
-  uint64_t iv0_ = iv0 ^ ((uint64_t)0x01010000U ^ (kk_shift_8 ^ (uint64_t)nn));
-  r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv1, iv2, iv3);
-  r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
+  uint8_t salt[16U] = { 0U };
+  uint8_t personal[16U] = { 0U };
+  Hacl_Impl_Blake2_Core_blake2b_params
+  p =
+    {
+      .digest_length1 = (uint8_t)64U, .key_length1 = (uint8_t)0U, .fanout1 = (uint8_t)1U,
+      .depth1 = (uint8_t)1U, .leaf_length1 = (uint32_t)0U, .node_offset1 = (uint32_t)0U,
+      .xof_length1 = (uint32_t)0U, .node_depth1 = (uint8_t)0U, .inner_length1 = (uint8_t)0U,
+      .salt1 = salt, .personal1 = personal
+    };
+  KRML_MAYBE_FOR2(i,
+    (uint32_t)0U,
+    (uint32_t)2U,
+    (uint32_t)1U,
+    uint64_t *os = tmp + (uint32_t)4U;
+    uint8_t *bj = p.salt1 + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;);
+  KRML_MAYBE_FOR2(i,
+    (uint32_t)0U,
+    (uint32_t)2U,
+    (uint32_t)1U,
+    uint64_t *os = tmp + (uint32_t)6U;
+    uint8_t *bj = p.personal1 + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;);
+  tmp[0U] =
+    (uint64_t)nn
+    ^
+      ((uint64_t)kk
+      << (uint32_t)8U
+      ^
+        ((uint64_t)p.fanout1
+        << (uint32_t)16U
+        ^ ((uint64_t)p.depth1 << (uint32_t)24U ^ (uint64_t)p.leaf_length1 << (uint32_t)32U)));
+  tmp[1U] = (uint64_t)p.node_offset1 ^ (uint64_t)p.xof_length1 << (uint32_t)32U;
+  tmp[2U] = (uint64_t)p.node_depth1 ^ (uint64_t)p.inner_length1 << (uint32_t)8U;
+  tmp[3U] = (uint64_t)0U;
+  uint64_t tmp0 = tmp[0U];
+  uint64_t tmp1 = tmp[1U];
+  uint64_t tmp2 = tmp[2U];
+  uint64_t tmp3 = tmp[3U];
+  uint64_t tmp4 = tmp[4U];
+  uint64_t tmp5 = tmp[5U];
+  uint64_t tmp6 = tmp[6U];
+  uint64_t tmp7 = tmp[7U];
+  uint64_t iv0_ = iv0 ^ tmp0;
+  uint64_t iv1_ = iv1 ^ tmp1;
+  uint64_t iv2_ = iv2 ^ tmp2;
+  uint64_t iv3_ = iv3 ^ tmp3;
+  uint64_t iv4_ = iv4 ^ tmp4;
+  uint64_t iv5_ = iv5 ^ tmp5;
+  uint64_t iv6_ = iv6 ^ tmp6;
+  uint64_t iv7_ = iv7 ^ tmp7;
+  r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv1_, iv2_, iv3_);
+  r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4_, iv5_, iv6_, iv7_);
 }
 
 /* SNIPPET_END: Hacl_Blake2b_256_blake2b_init */
