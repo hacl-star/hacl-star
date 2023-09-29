@@ -560,6 +560,7 @@ val serialize_params (al:Spec.alg)
   : Stack unit
     (requires fun h ->
       live h b /\
+      blake2_params_inv h p /\
       LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
       as_seq h b == Seq.create 8 (Spec.nat_to_word al 0)
     )
@@ -577,6 +578,7 @@ let serialize_params_blake2s
   (b: lbuffer (word_t Spec.Blake2S) 8ul)
   : Stack unit
     (requires fun h -> live h b /\
+      blake2_params_inv h p /\
       LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
       as_seq h b == Seq.create 8 (u32 0)
     )
@@ -603,12 +605,16 @@ let serialize_params_blake2s
     let inner_length_shift_16 = shift_left (to_u32 p.inner_length) (size 24) in
     [@inline_let]
     let v3 = (to_u32 p.xof_length) ^. node_depth_shift_16 ^. inner_length_shift_16 in
+
+    uints_from_bytes_le (sub b 4ul 2ul) p.salt;
+    uints_from_bytes_le (sub b 6ul 2ul) p.personal;
+
+    // AF: Putting these writes *after* modifications on a subbuffer of b helps with modifies-reasoning:
+    // By putting them before, F* struggles with proving that b[0..3] is not modified by uints_from_bytes_le
     b.(0ul) <- v0;
     b.(1ul) <- v1;
     b.(2ul) <- v2;
     b.(3ul) <- v3;
-
-    assume (Lib.ByteSequence.uints_from_bytes_le #U32 #SEC #2 (Seq.create 8 (u8 0)) == Seq.create 2 (u32 0));
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2s_params
@@ -638,12 +644,6 @@ let serialize_params_blake2s
       // following lemma calls, and assert_norms to relate List.index to the
       // actual elements
 
-      let s = as_seq h1 b in
-      assume (Seq.index s 4 == s4);
-      assume (Seq.index s 5 == s5);
-      assume (Seq.index s 6 == s6);
-      assume (Seq.index s 7 == s7);
-
       assert_norm (List.Tot.index l 0 == s0);
       assert_norm (List.Tot.index l 1 == s1);
       assert_norm (List.Tot.index l 2 == s2);
@@ -671,6 +671,7 @@ let serialize_params_blake2b
   (b: lbuffer (word_t Spec.Blake2B) 8ul)
   : Stack unit
     (requires fun h -> live h b /\
+      blake2_params_inv #Spec.Blake2B h p /\
       LowStar.Buffer.loc_disjoint (loc b) (blake2_params_loc p) /\
       as_seq h b == Seq.create 8 (u64 0)
     )
@@ -697,11 +698,14 @@ let serialize_params_blake2b
     let inner_length_shift_8 = shift_left (to_u64 p.inner_length) (size 8) in
     [@inline_let]
     let v2 = (to_u64 p.node_depth) ^. inner_length_shift_8 in
+
+    uints_from_bytes_le (sub b 4ul 2ul) p.salt;
+    uints_from_bytes_le (sub b 6ul 2ul) p.personal;
+
     b.(0ul) <- v0;
     b.(1ul) <- v1;
     b.(2ul) <- v2;
-
-    assume (Lib.ByteSequence.uints_from_bytes_le #U64 #SEC #2 (Seq.create 16 (u8 0)) == Seq.create 2 (u64 0));
+    b.(3ul) <- (u64 0);
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2b_params
@@ -736,12 +740,6 @@ let serialize_params_blake2b
       // following lemma calls, and assert_norms to relate List.index to the
       // actual elements
 
-      let s = as_seq h1 b in
-      assume (Seq.index s 4 == s4);
-      assume (Seq.index s 5 == s5);
-      assume (Seq.index s 6 == s6);
-      assume (Seq.index s 7 == s7);
-
       assert_norm (List.Tot.index l 0 == s0);
       assert_norm (List.Tot.index l 1 == s1);
       assert_norm (List.Tot.index l 2 == s2);
@@ -760,6 +758,7 @@ let serialize_params_blake2b
       of_list_index l 7
     in
     aux()
+#pop-options
 
 let serialize_params al kk nn p b =
   match al with
@@ -790,7 +789,9 @@ let blake2_init #al #ms hash kk nn =
   let iv7 = get_iv al 7ul in
   create_row #al #ms r2 iv0 iv1 iv2 iv3;
   create_row #al #ms r3 iv4 iv5 iv6 iv7;
-  let p = alloc_default_params al in
+  let salt = create (salt_len al) (u8 0) in
+  let personal = create (personal_len al) (u8 0) in
+  let p = create_default_params al salt personal in
   serialize_params al kk nn p tmp;
   let tmp0 = tmp.(0ul) in
   let tmp1 = tmp.(1ul) in

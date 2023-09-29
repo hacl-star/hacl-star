@@ -31,6 +31,34 @@ let row_v #a #m h r =
 
 let row_v_lemma #a #m h0 h1 r1 r2 = ()
 
+let create_default_params a salt personal =
+  match a with
+  | Spec.Blake2S ->
+    Mkblake2s_params
+      (u8 32)
+      (u8 0)
+      (u8 1)
+      (u8 1)
+      (u32 0)
+      (u32 0)
+      (u16 0)
+      (u8 0)
+      (u8 0)
+      salt
+      personal
+  | Spec.Blake2B ->
+    Mkblake2b_params
+      (u8 64)
+      (u8 0)
+      (u8 1)
+      (u8 1)
+      (u32 0)
+      (u32 0)
+      (u32 0)
+      (u8 0)
+      (u8 0)
+      salt
+      personal
 
 #push-options "--z3rlimit 50"
 let g_rowi_disjoint #a #m st idx1 idx2 =
