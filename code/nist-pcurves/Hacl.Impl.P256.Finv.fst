@@ -26,16 +26,16 @@ unfold
 let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
 unfold
-let linv (a:LSeq.lseq uint64 4) : Type0 =
+let linv {| cp:S.curve_params |} (a:LSeq.lseq uint64 (v cp.bn_limbs)) : Type0 =
   BD.bn_v a < S.prime
 
 unfold
-let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.felem =
+let refl {| cp:S.curve_params |} (a:LSeq.lseq uint64 (v cp.bn_limbs){linv a}) : GTot S.felem =
   SM.from_mont (BD.bn_v a)
 
 
 inline_for_extraction noextract
-let mk_to_p256_prime_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
+let mk_to_p256_prime_comm_monoid {| cp:S.curve_params |} : BE.to_comm_monoid U64 cp.bn_limbs 0ul = {
   BE.a_spec = S.felem;
   BE.comm_monoid = SI.nat_mod_comm_monoid;
   BE.linv_ctx = linv_ctx;
@@ -45,22 +45,22 @@ let mk_to_p256_prime_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
 
 
 inline_for_extraction noextract
-val one_mod : BE.lone_st U64 4ul 0ul mk_to_p256_prime_comm_monoid
-let one_mod ctx one = make_fone one
+val one_mod {| cp:S.curve_params |} : BE.lone_st U64 cp.bn_limbs 0ul mk_to_p256_prime_comm_monoid
+let one_mod {| cp:S.curve_params |} ctx one = make_fone one
 
 
 inline_for_extraction noextract
-val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_p256_prime_comm_monoid
-let mul_mod ctx x y xy = fmul xy x y
+val mul_mod {| cp:S.curve_params |} : BE.lmul_st U64 cp.bn_limbs 0ul mk_to_p256_prime_comm_monoid
+let mul_mod {| cp:S.curve_params |} ctx x y xy = fmul xy x y
 
 
 inline_for_extraction noextract
-val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_prime_comm_monoid
-let sqr_mod ctx x xx = fsqr xx x
+val sqr_mod {| cp:S.curve_params |} : BE.lsqr_st U64 cp.bn_limbs 0ul mk_to_p256_prime_comm_monoid
+let sqr_mod {| cp:S.curve_params |} ctx x xx = fsqr xx x
 
 
 inline_for_extraction noextract
-let mk_p256_prime_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
+let mk_p256_prime_concrete_ops {| cp:S.curve_params |} : BE.concrete_ops U64 cp.bn_limbs 0ul = {
   BE.to = mk_to_p256_prime_comm_monoid;
   BE.lone = one_mod;
   BE.lmul = mul_mod;
@@ -69,21 +69,21 @@ let mk_p256_prime_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
 
 
 inline_for_extraction noextract
-val fsquare_times_in_place (out:felem) (b:size_t) : Stack unit
+val fsquare_times_in_place {| cp:S.curve_params |} (out:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ as_nat h out < S.prime)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out < S.prime /\
     fmont_as_nat h1 out == SI.fsquare_times (fmont_as_nat h0 out) (v b))
 
-let fsquare_times_in_place out b =
+let fsquare_times_in_place {| cp:S.curve_params |} out b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (fmont_as_nat h0 out) (v b);
-  BE.lexp_pow2_in_place 4ul 0ul mk_p256_prime_concrete_ops (null uint64) out b
+  BE.lexp_pow2_in_place cp.bn_limbs 0ul mk_p256_prime_concrete_ops (null uint64) out b
 
 
 inline_for_extraction noextract
-val fsquare_times (out a:felem) (b:size_t) : Stack unit
+val fsquare_times {| cp:S.curve_params |} (out a:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ live h a /\ disjoint out a /\
     as_nat h a < S.prime)
@@ -91,14 +91,14 @@ val fsquare_times (out a:felem) (b:size_t) : Stack unit
     as_nat h1 out < S.prime /\
     fmont_as_nat h1 out == SI.fsquare_times (fmont_as_nat h0 a) (v b))
 
-let fsquare_times out a b =
+let fsquare_times {| cp:S.curve_params |}  out a b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (fmont_as_nat h0 a) (v b);
-  BE.lexp_pow2 4ul 0ul mk_p256_prime_concrete_ops (null uint64) a b out
+  BE.lexp_pow2 cp.bn_limbs 0ul mk_p256_prime_concrete_ops (null uint64) a b out
 
 
 inline_for_extraction noextract
-val finv_30 (x30 x2 tmp1 tmp2 a:felem) : Stack unit
+val finv_30 {| cp:S.curve_params |} (x30 x2 tmp1 tmp2 a:felem) : Stack unit
   (requires fun h ->
     live h a /\ live h x30 /\ live h x2 /\ live h tmp1 /\ live h tmp2 /\
     disjoint a x30 /\ disjoint a x2 /\ disjoint a tmp1 /\ disjoint a tmp2 /\
@@ -116,7 +116,7 @@ val finv_30 (x30 x2 tmp1 tmp2 a:felem) : Stack unit
     let x30_s = S.fmul (SI.fsquare_times x15_s 15) x15_s in
     fmont_as_nat h1 x30 = x30_s /\ fmont_as_nat h1 x2 = x2_s))
 
-let finv_30 x30 x2 tmp1 tmp2 a =
+let finv_30 {| cp:S.curve_params |} x30 x2 tmp1 tmp2 a =
   let h0 = ST.get () in
   fsquare_times x2 a 1ul;
   fmul x2 x2 a;
@@ -156,7 +156,7 @@ let finv_30 x30 x2 tmp1 tmp2 a =
 
 
 inline_for_extraction noextract
-val finv_256 (x256 x2 x30 a:felem) : Stack unit
+val finv_256 {| cp:S.curve_params |}  (x256 x2 x30 a:felem) : Stack unit
   (requires fun h ->
     live h a /\ live h x30 /\ live h x2 /\ live h x256 /\
     disjoint a x30 /\ disjoint a x2 /\ disjoint a x256 /\
@@ -175,7 +175,7 @@ val finv_256 (x256 x2 x30 a:felem) : Stack unit
     let x256_s = S.fmul (SI.fsquare_times x254_s 2) f in
     fmont_as_nat h1 x256 = x256_s))
 
-let finv_256 x256 x2 x30 a =
+let finv_256 {| cp:S.curve_params |}  x256 x2 x30 a =
   let h0 = ST.get () in
   fsquare_times x256 x30 2ul;
   fmul x256 x256 x2;
@@ -215,7 +215,8 @@ let finv_256 x256 x2 x30 a =
 
 
 [@CInline]
-let finv res a =
+let finv {| cp:S.curve_params |} res a =
+  admit();
   let h0 = ST.get () in
   push_frame ();
   let tmp  = create 16ul (u64 0) in
@@ -233,7 +234,7 @@ let finv res a =
 
 
 inline_for_extraction noextract
-val fsqrt_254 (tmp2 tmp1 a:felem) : Stack unit
+val fsqrt_254 {| cp:S.curve_params |} (tmp2 tmp1 a:felem) : Stack unit
   (requires fun h ->
     live h a /\ live h tmp1 /\ live h tmp2 /\
     disjoint a tmp1 /\ disjoint a tmp2 /\ disjoint tmp1 tmp2 /\
@@ -251,7 +252,7 @@ val fsqrt_254 (tmp2 tmp1 a:felem) : Stack unit
     let x254 = SI.fsquare_times x160 94 in
     fmont_as_nat h1 tmp2 == x254))
 
-let fsqrt_254 tmp2 tmp1 a =
+let fsqrt_254 {| cp:S.curve_params |} tmp2 tmp1 a =
   let h0 = ST.get () in
   fsquare_times tmp1 a 1ul;
   fmul tmp1 tmp1 a;
@@ -299,7 +300,8 @@ let fsqrt_254 tmp2 tmp1 a =
 
 
 [@CInline]
-let fsqrt res a =
+let fsqrt {| cp:S.curve_params |} res a =
+  admit();
   let h0 = ST.get () in
   push_frame ();
   let tmp  = create 8ul (u64 0) in

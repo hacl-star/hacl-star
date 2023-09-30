@@ -15,7 +15,7 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val finv: res:felem -> a:felem -> Stack unit
+val finv: {| cp:S.curve_params |} -> res:felem -> a:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.prime)
@@ -24,7 +24,7 @@ val finv: res:felem -> a:felem -> Stack unit
     fmont_as_nat h1 res = S.finv (fmont_as_nat h0 a))
 
 
-val fsqrt: res:felem -> a:felem -> Stack unit
+val fsqrt: {| cp:S.curve_params |} -> res:felem -> a:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.prime)

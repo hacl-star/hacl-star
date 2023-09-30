@@ -11,7 +11,7 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val ecp256dh_i:
+val ecp256dh_i :
     public_key:lbuffer uint8 64ul
   -> private_key:lbuffer uint8 32ul ->
   Stack bool
