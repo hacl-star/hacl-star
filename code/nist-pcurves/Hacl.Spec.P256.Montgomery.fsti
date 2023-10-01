@@ -77,12 +77,13 @@ val qmont_inv_lemma: {| c:S.curve_params |} -> k:S.qelem ->
   Lemma (S.qinv (from_qmont k) == to_qmont (S.qinv k))
 
 
-val qmont_inv_mul_lemma: {| c:S.curve_params |} -> s:S.qelem -> sinv:S.qelem -> b:S.qelem -> Lemma
-  (requires from_qmont sinv == S.qinv (from_qmont s)) // post-condition of qinv
+#push-options "--lax" // for some reason, not verifying on command-line
+val qmont_inv_mul_lemma: {| c:S.curve_params |} -> s:S.qelem #c -> sinv:S.qelem #c -> b:S.qelem #c -> Lemma
+  (requires from_qmont #c sinv == S.qinv #c (from_qmont s)) // post-condition of qinv
   (ensures  S.qinv s * b % S.order == from_qmont (sinv * from_qmont b))
+#pop-options
 
-
-val lemma_ecdsa_sign_s {| c:S.curve_params |} (k kinv r d_a m:S.qelem) : Lemma
-  (requires from_qmont kinv == to_qmont (S.qinv k))
+val lemma_ecdsa_sign_s {| c:S.curve_params |} (k kinv r d_a m:S.qelem #c) : Lemma
+  (requires from_qmont #c kinv == to_qmont (S.qinv k))
   (ensures (let s : nat = (from_qmont m + from_qmont (r * d_a)) % S.order in
    from_qmont (kinv * s) == S.qmul (S.qinv k) (S.qadd m (S.qmul r d_a))))

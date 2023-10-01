@@ -163,8 +163,8 @@ val precomp_g_pow2_192_table_w4 {| cp:S.curve_params |}:
 inline_for_extraction noextract
 val precomp_basepoint_table_lseq_w5 {| cp:S.curve_params |} : LSeq.lseq uint64 (96 * v cp.bn_limbs)
 
-val precomp_basepoint_table_lemma_w5: unit ->
+val precomp_basepoint_table_lemma_w5: {| cp:S.curve_params |} ->
   Lemma (forall (i:nat{i < 32}). precomp_table_acc_inv g_aff 32 precomp_basepoint_table_lseq_w5 i)
 
-val precomp_basepoint_table_w5:
-  x:glbuffer uint64 384ul{witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x}
+val precomp_basepoint_table_w5 {| cp:S.curve_params |}:
+  x:glbuffer uint64 (96ul *. cp.bn_limbs){witnessed x precomp_basepoint_table_lseq_w5 /\ recallable x}

@@ -11,9 +11,9 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val ecp256dh_i:
-    public_key:lbuffer uint8 64ul
-  -> private_key:lbuffer uint8 32ul ->
+val ecp256dh_i {| cp:S.curve_params |} :
+    public_key:lbuffer uint8 (2ul *. size cp.bytes)
+  -> private_key:lbuffer uint8 (size cp.bytes) ->
   Stack bool
   (requires fun h ->
     live h public_key /\ live h private_key /\ disjoint public_key private_key)
@@ -22,10 +22,10 @@ val ecp256dh_i:
     (r <==> Some? pk) /\ (r ==> (as_seq h1 public_key == Some?.v pk))))
 
 
-val ecp256dh_r:
-    shared_secret:lbuffer uint8 64ul
-  -> their_pubkey:lbuffer uint8 64ul
-  -> private_key:lbuffer uint8 32ul ->
+val ecp256dh_r {| cp:S.curve_params |} :
+    shared_secret:lbuffer uint8 (2ul *. size cp.bytes)
+  -> their_pubkey:lbuffer uint8 (2ul *. size cp.bytes)
+  -> private_key:lbuffer uint8 (size cp.bytes) ->
   Stack bool
   (requires fun h ->
     live h shared_secret /\ live h their_pubkey /\ live h private_key /\

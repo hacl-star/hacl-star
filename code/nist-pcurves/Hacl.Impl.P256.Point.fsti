@@ -229,7 +229,7 @@ val is_on_curve_vartime: {| S.curve_params |} -> p:aff_point -> Stack bool
 
 ///  Point load and store functions
 
-val aff_point_store: {| S.curve_params |} -> res:lbuffer uint8 64ul -> p:aff_point -> Stack unit
+val aff_point_store: {| cp:S.curve_params |} -> res:lbuffer uint8 (2ul *. size cp.bytes) -> p:aff_point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint res p /\
     aff_point_inv h p)
@@ -237,7 +237,7 @@ val aff_point_store: {| S.curve_params |} -> res:lbuffer uint8 64ul -> p:aff_poi
     as_seq h1 res == S.aff_point_store (as_aff_point_nat_inv h0 p))
 
 
-val point_store: {| S.curve_params |} -> res:lbuffer uint8 64ul -> p:point -> Stack unit
+val point_store: {| cp:S.curve_params |} -> res:lbuffer uint8 (2ul *. size cp.bytes) -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint res p /\
     point_inv h p)

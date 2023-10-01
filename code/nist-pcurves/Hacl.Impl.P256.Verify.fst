@@ -25,7 +25,7 @@ module QI = Hacl.Impl.P256.Qinv
 inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
 
-val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
+val qmul_mont: {| c:S.curve_params |} -> sinv:felem -> b:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h sinv /\ live h b /\ live h res /\
     disjoint sinv res /\ disjoint b res /\
@@ -35,10 +35,10 @@ val qmul_mont: sinv:felem -> b:felem -> res:felem -> Stack unit
     as_nat h1 res = (as_nat h0 sinv * SM.from_qmont (as_nat h0 b) * SM.qmont_R_inv) % S.order)
 
 [@CInline]
-let qmul_mont sinv b res =
+let qmul_mont {| cp:S.curve_params |} sinv b res =
   let h0 = ST.get () in
   push_frame ();
-  let tmp = create_felem () in
+  let tmp = create_felem #cp in
   from_qmont tmp b;
   let h1 = ST.get () in
   assert (as_nat h1 tmp == SM.from_qmont (as_nat h0 b));
@@ -49,7 +49,7 @@ let qmul_mont sinv b res =
 
 
 inline_for_extraction noextract
-val ecdsa_verification_get_u12: u1:felem -> u2:felem -> r:felem -> s:felem -> z:felem -> Stack unit
+val ecdsa_verification_get_u12: {| c:S.curve_params |} -> u1:felem -> u2:felem -> r:felem -> s:felem -> z:felem -> Stack unit
   (requires fun h ->
     live h r /\ live h s /\ live h z /\ live h u1 /\ live h u2 /\
     disjoint u1 u2 /\ disjoint u1 z /\ disjoint u1 r /\ disjoint u1 s /\
@@ -60,10 +60,10 @@ val ecdsa_verification_get_u12: u1:felem -> u2:felem -> r:felem -> s:felem -> z:
     as_nat h1 u1 == sinv * as_nat h0 z % S.order /\
     as_nat h1 u2 == sinv * as_nat h0 r % S.order))
 
-let ecdsa_verification_get_u12 u1 u2 r s z =
+let ecdsa_verification_get_u12 {| cp:S.curve_params |} u1 u2 r s z =
   push_frame ();
   let h0 = ST.get () in
-  let sinv = create_felem () in
+  let sinv = create_felem #cp in
   QI.qinv sinv s;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 sinv == S.qinv (qmont_as_nat h0 s));
@@ -78,7 +78,7 @@ let ecdsa_verification_get_u12 u1 u2 r s z =
 
 
 inline_for_extraction noextract
-val ecdsa_verify_finv: p:point -> r:felem -> Stack bool
+val ecdsa_verify_finv: {| cp:S.curve_params |} -> p:point -> r:felem -> Stack bool
   (requires fun h ->
     live h p /\ live h r /\ disjoint p r /\
     point_inv h p /\ 0 < as_nat h r /\ as_nat h r < S.order)
@@ -87,18 +87,18 @@ val ecdsa_verify_finv: p:point -> r:felem -> Stack bool
     (let (_X, _Y, _Z) = from_mont_point (as_point_nat h0 p) in
      b <==> (S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
-let ecdsa_verify_finv p r_q =
+let ecdsa_verify_finv {| cp:S.curve_params |} p r_q =
   push_frame ();
-  let x = create_felem () in
+  let x = create_felem #cp in
   to_aff_point_x x p;
   qmod_short x x;
-  let res = bn_is_eq_vartime4 x r_q in
+  let res = bn_is_eq_vartime x r_q in
   pop_frame ();
   res
 
 
 inline_for_extraction noextract
-val ecdsa_verification_cmpr: r:felem -> pk:point -> u1:felem -> u2:felem -> Stack bool
+val ecdsa_verification_cmpr: {| cp:S.curve_params |} -> r:felem -> pk:point -> u1:felem -> u2:felem -> Stack bool
   (requires fun h ->
     live h r /\ live h pk /\ live h u1 /\ live h u2 /\
     disjoint r u1 /\ disjoint r u2 /\ disjoint r pk /\
@@ -111,9 +111,9 @@ val ecdsa_verification_cmpr: r:felem -> pk:point -> u1:felem -> u2:felem -> Stac
     b <==> (if S.is_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
-let ecdsa_verification_cmpr r pk u1 u2 =
+let ecdsa_verification_cmpr {| cp:S.curve_params |} r pk u1 u2 =
   push_frame ();
-  let res = create_point () in
+  let res = create_point #cp in
   let h0 = ST.get () in
   point_mul_double_g res u1 u2 pk;
   let h1 = ST.get () in
@@ -129,11 +129,12 @@ let ecdsa_verification_cmpr r pk u1 u2 =
     if is_point_at_inf_vartime res then false
     else ecdsa_verify_finv res r in
   pop_frame ();
+  admit();
   b
 
 
 inline_for_extraction noextract
-val load_signature (r_q s_q:felem) (sign_r sign_s:lbytes 32ul) : Stack bool
+val load_signature {| cp:S.curve_params |} (r_q s_q:felem) (sign_r sign_s:lbytes (size cp.bytes)) : Stack bool
   (requires fun h ->
     live h sign_r /\ live h sign_s /\ live h r_q /\ live h s_q /\
     disjoint r_q s_q /\ disjoint r_q sign_r /\ disjoint r_q sign_s /\
@@ -144,20 +145,20 @@ val load_signature (r_q s_q:felem) (sign_r sign_s:lbytes 32ul) : Stack bool
     as_nat h1 r_q = r_q_nat /\ as_nat h1 s_q = s_q_nat /\
     res == (0 < r_q_nat && r_q_nat < S.order && 0 < s_q_nat && s_q_nat < S.order)))
 
-let load_signature r_q s_q sign_r sign_s =
-  bn_from_bytes_be4 r_q sign_r;
-  bn_from_bytes_be4 s_q sign_s;
-  let is_r_valid = bn_is_lt_order_and_gt_zero_mask4 r_q in
-  let is_s_valid = bn_is_lt_order_and_gt_zero_mask4 s_q in
+let load_signature {| cp:S.curve_params |} r_q s_q sign_r sign_s =
+  bn_from_bytes_be r_q sign_r;
+  bn_from_bytes_be s_q sign_s;
+  let is_r_valid = bn_is_lt_order_and_gt_zero_mask r_q in
+  let is_s_valid = bn_is_lt_order_and_gt_zero_mask s_q in
   Hacl.Bignum.Base.unsafe_bool_of_limb is_r_valid &&
   Hacl.Bignum.Base.unsafe_bool_of_limb is_s_valid
 
 
-val ecdsa_verify_msg_as_qelem:
+val ecdsa_verify_msg_as_qelem {| cp:S.curve_params |}:
     m_q:felem
-  -> public_key:lbuffer uint8 64ul
-  -> signature_r:lbuffer uint8 32ul
-  -> signature_s:lbuffer uint8 32ul ->
+  -> public_key:lbuffer uint8 (2ul *. size cp.bytes)
+  -> signature_r:lbuffer uint8 (size cp.bytes)
+  -> signature_s:lbuffer uint8 (size cp.bytes) ->
   Stack bool
   (requires fun h ->
     live h public_key /\ live h signature_r /\ live h signature_s /\ live h m_q /\
@@ -167,14 +168,19 @@ val ecdsa_verify_msg_as_qelem:
       (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
 
 [@CInline]
-let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
+let ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} m_q public_key signature_r signature_s =
   push_frame ();
-  let tmp = create 28ul (u64 0) in
-  let pk  = sub tmp 0ul 12ul in
-  let r_q = sub tmp 12ul 4ul in
-  let s_q = sub tmp 16ul 4ul in
-  let u1  = sub tmp 20ul 4ul in
-  let u2  = sub tmp 24ul 4ul in
+  assert (v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs);
+  assert (v (4ul *. cp.bn_limbs) == 4 * v cp.bn_limbs);
+  assert (v (5ul *. cp.bn_limbs) == 5 * v cp.bn_limbs);
+  assert (v (6ul *. cp.bn_limbs) == 6 * v cp.bn_limbs);
+  assert (v (7ul *. cp.bn_limbs) == 7 * v cp.bn_limbs);
+  let tmp = create (7ul *. cp.bn_limbs) (u64 0) in
+  let pk  = sub tmp 0ul (3ul *. cp.bn_limbs) in
+  let r_q = sub tmp (3ul *. cp.bn_limbs) cp.bn_limbs in
+  let s_q = sub tmp (4ul *. cp.bn_limbs) cp.bn_limbs in
+  let u1  = sub tmp (5ul *. cp.bn_limbs) cp.bn_limbs in
+  let u2  = sub tmp (6ul *. cp.bn_limbs) cp.bn_limbs in
 
   let is_pk_valid = load_point_vartime pk public_key in
   let is_rs_valid = load_signature r_q s_q signature_r signature_s in

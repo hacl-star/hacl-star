@@ -26,7 +26,7 @@ inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
 
 inline_for_extraction noextract
-val ecdsa_sign_r (r k:felem) : Stack unit
+val ecdsa_sign_r  {| cp:S.curve_params |} (r k:felem) : Stack unit
   (requires fun h ->
     live h r /\ live h k /\ disjoint r k /\
     as_nat h k < S.order)
@@ -34,9 +34,9 @@ val ecdsa_sign_r (r k:felem) : Stack unit
    (let x, _ = S.to_aff_point (S.point_mul_g (as_nat h0 k)) in
     as_nat h1 r == x % S.order))
 
-let ecdsa_sign_r r k =
+let ecdsa_sign_r {| cp:S.curve_params |} r k =
   push_frame ();
-  let p = create_point () in
+  let p = create_point #cp in
   point_mul_g p k; // p = [k]G
   to_aff_point_x r p;
   qmod_short r r;
@@ -44,7 +44,7 @@ let ecdsa_sign_r r k =
 
 
 inline_for_extraction noextract
-val ecdsa_sign_s (s k r d_a m:felem) : Stack unit
+val ecdsa_sign_s {| cp:S.curve_params |} (s k r d_a m:felem) : Stack unit
   (requires fun h ->
     live h s /\ live h m /\ live h d_a /\ live h k /\ live h r /\
     disjoint s r /\ disjoint s k /\ disjoint r k /\
@@ -57,10 +57,10 @@ val ecdsa_sign_s (s k r d_a m:felem) : Stack unit
    (let kinv = S.qinv (as_nat h0 k) in
     as_nat h1 s == S.qmul kinv (S.qadd (as_nat h0 m) (S.qmul (as_nat h0 r) (as_nat h0 d_a)))))
 
-let ecdsa_sign_s s k r d_a m =
+let ecdsa_sign_s {| cp:S.curve_params |} s k r d_a m =
   push_frame ();
   let h0 = ST.get () in
-  let kinv = create_felem () in
+  let kinv = create_felem #cp in
   QI.qinv kinv k;
   let h1 = ST.get () in
   assert (qmont_as_nat h1 kinv == S.qinv (qmont_as_nat h0 k));
@@ -85,7 +85,7 @@ let ecdsa_sign_s s k r d_a m =
 
 
 inline_for_extraction noextract
-val ecdsa_sign_load (d_a k_q:felem) (private_key nonce:lbytes 32ul) : Stack uint64
+val ecdsa_sign_load {| cp:S.curve_params |} (d_a k_q:felem) (private_key nonce:lbytes (size cp.bytes)) : Stack uint64
   (requires fun h ->
     live h private_key /\ live h nonce /\ live h d_a /\ live h k_q /\
     disjoint d_a k_q /\ disjoint d_a private_key /\ disjoint d_a nonce /\
@@ -100,7 +100,7 @@ val ecdsa_sign_load (d_a k_q:felem) (private_key nonce:lbytes 32ul) : Stack uint
     as_nat h1 d_a == (if is_sk_valid then d_a_nat else 1) /\
     as_nat h1 k_q == (if is_nonce_valid then k_nat else 1)))
 
-let ecdsa_sign_load d_a k_q private_key nonce =
+let ecdsa_sign_load {| cp:S.curve_params |} d_a k_q private_key nonce =
   let is_sk_valid = load_qelem_conditional d_a private_key in
   let is_nonce_valid = load_qelem_conditional k_q nonce in
   let m = is_sk_valid &. is_nonce_valid in
@@ -109,17 +109,17 @@ let ecdsa_sign_load d_a k_q private_key nonce =
 
 
 inline_for_extraction noextract
-val check_signature: are_sk_nonce_valid:uint64 -> r_q:felem -> s_q:felem -> Stack bool
+val check_signature: {| cp:S.curve_params |} -> are_sk_nonce_valid:uint64 -> r_q:felem -> s_q:felem -> Stack bool
   (requires fun h ->
     live h r_q /\ live h s_q /\ disjoint r_q s_q /\
     (v are_sk_nonce_valid = ones_v U64 \/ v are_sk_nonce_valid = 0))
   (ensures fun h0 res h1 -> modifies0 h0 h1 /\
     res == ((v are_sk_nonce_valid = ones_v U64) && (0 < as_nat h0 r_q) && (0 < as_nat h0 s_q)))
 
-let check_signature are_sk_nonce_valid r_q s_q =
+let check_signature {| cp:S.curve_params |} are_sk_nonce_valid r_q s_q =
   let h0 = ST.get () in
-  let is_r_zero = bn_is_zero_mask4 r_q in
-  let is_s_zero = bn_is_zero_mask4 s_q in
+  let is_r_zero = bn_is_zero_mask r_q in
+  let is_s_zero = bn_is_zero_mask s_q in
   [@inline_let] let m0 = lognot is_r_zero in
   [@inline_let] let m1 = lognot is_s_zero in
   [@inline_let] let m2 = m0 &. m1 in
@@ -134,10 +134,11 @@ let check_signature are_sk_nonce_valid r_q s_q =
 
 
 val ecdsa_sign_msg_as_qelem:
-    signature:lbuffer uint8 64ul
+    {| cp:S.curve_params |}
+  -> signature:lbuffer uint8 (2ul *. size cp.bytes)
   -> m_q:felem
-  -> private_key:lbuffer uint8 32ul
-  -> nonce:lbuffer uint8 32ul ->
+  -> private_key:lbuffer uint8 (size cp.bytes)
+  -> nonce:lbuffer uint8 (size cp.bytes) ->
   Stack bool
   (requires fun h ->
     live h signature /\ live h m_q /\ live h private_key /\ live h nonce /\
@@ -150,17 +151,23 @@ val ecdsa_sign_msg_as_qelem:
      (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 signature == Some?.v sgnt))))
 
 [@CInline]
-let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
+let ecdsa_sign_msg_as_qelem {| cp:S.curve_params |} signature m_q private_key nonce =
   push_frame ();
-  let rsdk_q = create 16ul (u64 0) in
-  let r_q = sub rsdk_q 0ul 4ul in
-  let s_q = sub rsdk_q 4ul 4ul in
-  let d_a = sub rsdk_q 8ul 4ul in
-  let k_q = sub rsdk_q 12ul 4ul in
+  let rsdk_q = create (4ul *. cp.bn_limbs) (u64 0) in
+  let r_q = sub rsdk_q 0ul cp.bn_limbs in
+  let s_q = sub rsdk_q cp.bn_limbs cp.bn_limbs in
+  assert (v (2ul *. cp.bn_limbs) == 2 * v cp.bn_limbs);
+  assert (v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs);
+  let d_a = sub rsdk_q (2ul *. cp.bn_limbs) cp.bn_limbs in
+  let k_q = sub rsdk_q (3ul *. cp.bn_limbs) cp.bn_limbs in
   let are_sk_nonce_valid = ecdsa_sign_load d_a k_q private_key nonce in
   ecdsa_sign_r r_q k_q;
   ecdsa_sign_s s_q k_q r_q d_a m_q;
-  bn2_to_bytes_be4 signature r_q s_q;
+  assert (cp.bits <= 8 * cp.bytes);
+  FStar.Math.Lemmas.pow2_le_compat (8*cp.bytes) cp.bits;
+  assert (pow2 cp.bits <= pow2 (8 * cp.bytes));
+  bn2_to_bytes_be signature r_q s_q;
   let res = check_signature are_sk_nonce_valid r_q s_q in
   pop_frame ();
   res
+

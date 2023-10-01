@@ -17,11 +17,11 @@ module S = Spec.P256
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 [@CInline]
-let ecp256dh_i public_key private_key =
+let ecp256dh_i {| cp:S.curve_params |} public_key private_key =
   push_frame ();
-  let tmp = create 16ul (u64 0) in
-  let sk = sub tmp 0ul 4ul in
-  let pk = sub tmp 4ul 12ul in
+  let tmp = create (4ul *. cp.bn_limbs) (u64 0) in
+  let sk = sub tmp 0ul cp.bn_limbs in
+  let pk = sub tmp cp.bn_limbs (3ul *. cp.bn_limbs) in
 
   let is_sk_valid = load_qelem_conditional sk private_key in
   point_mul_g pk sk;
@@ -31,7 +31,7 @@ let ecp256dh_i public_key private_key =
 
 
 inline_for_extraction noextract
-val ecp256dh_r_: is_pk_valid:bool -> ss:lbuffer uint8 64ul -> pk:point -> sk:felem -> Stack unit
+val ecp256dh_r_: {| cp:S.curve_params |} -> is_pk_valid:bool -> ss:lbuffer uint8 (2ul *. size cp.bytes) -> pk:point -> sk:felem -> Stack unit
   (requires fun h ->
     live h ss /\ live h pk /\ live h sk /\
     disjoint ss pk /\ disjoint ss sk /\ disjoint pk sk /\
@@ -41,9 +41,9 @@ val ecp256dh_r_: is_pk_valid:bool -> ss:lbuffer uint8 64ul -> pk:point -> sk:fel
     then S.point_store (S.point_mul (as_nat h0 sk) (from_mont_point (as_point_nat h0 pk)))
     else as_seq h0 ss))
 
-let ecp256dh_r_ is_pk_valid ss pk sk =
+let ecp256dh_r_ {| cp:S.curve_params |} is_pk_valid ss pk sk =
   push_frame ();
-  let ss_proj = create_point () in
+  let ss_proj = create_point #cp in
   if is_pk_valid then begin
     point_mul ss_proj sk pk;
     point_store ss ss_proj end;
@@ -51,11 +51,13 @@ let ecp256dh_r_ is_pk_valid ss pk sk =
 
 
 [@CInline]
-let ecp256dh_r shared_secret their_pubkey private_key =
+let ecp256dh_r {| cp:S.curve_params |} shared_secret their_pubkey private_key =
   push_frame ();
-  let tmp = create 16ul (u64 0) in
-  let sk = sub tmp 0ul 4ul in
-  let pk = sub tmp 4ul 12ul in
+  let open FStar.Mul in
+  assume (4 * cp.bytes < max_size_t);
+  let tmp = create (4ul *. size cp.bytes) (u64 0) in
+  let sk = sub tmp 0ul cp.bn_limbs in
+  let pk = sub tmp cp.bn_limbs (3ul *. cp.bn_limbs) in
 
   let is_pk_valid = load_point_vartime pk their_pubkey in
   let is_sk_valid = load_qelem_conditional sk private_key in

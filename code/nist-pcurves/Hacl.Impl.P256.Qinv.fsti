@@ -15,7 +15,7 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val qinv: res:felem -> a:felem -> Stack unit
+val qinv: {| cp:S.curve_params |} -> res:felem -> a:felem -> Stack unit
   (requires fun h ->
     live h a /\ live h res /\ eq_or_disjoint a res /\
     as_nat h a < S.order)

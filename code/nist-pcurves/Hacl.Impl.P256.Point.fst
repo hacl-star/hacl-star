@@ -200,7 +200,6 @@ let aff_point_store {| cp:S.curve_params |} res p =
   let py = aff_gety p in
   bn2_to_bytes_be res px py
 
-
 [@CInline]
 let point_store {| cp:S.curve_params |} res p =
   push_frame ();

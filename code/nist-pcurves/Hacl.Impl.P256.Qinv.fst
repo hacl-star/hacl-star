@@ -26,16 +26,16 @@ unfold
 let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
 unfold
-let linv (a:LSeq.lseq uint64 4) : Type0 =
+let linv {| cp:S.curve_params |} (a:LSeq.lseq uint64 (v cp.bn_limbs)) : Type0 =
   BD.bn_v a < S.order
 
 unfold
-let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.qelem =
+let refl  {| cp:S.curve_params |} (a:LSeq.lseq uint64 (v cp.bn_limbs){linv a}) : GTot S.qelem =
   SM.from_qmont (BD.bn_v a)
 
 
 inline_for_extraction noextract
-let mk_to_p256_order_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
+let mk_to_p256_order_comm_monoid  {| cp:S.curve_params |} : BE.to_comm_monoid U64 cp.bn_limbs 0ul = {
   BE.a_spec = S.qelem;
   BE.comm_monoid = SI.nat_mod_comm_monoid;
   BE.linv_ctx = linv_ctx;
@@ -44,22 +44,22 @@ let mk_to_p256_order_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
 }
 
 inline_for_extraction noextract
-val one_mod : BE.lone_st U64 4ul 0ul mk_to_p256_order_comm_monoid
+val one_mod {| cp:S.curve_params |}: BE.lone_st U64 cp.bn_limbs 0ul mk_to_p256_order_comm_monoid
 let one_mod ctx one = make_qone one
 
 
 inline_for_extraction noextract
-val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_p256_order_comm_monoid
+val mul_mod  {| cp:S.curve_params |}: BE.lmul_st U64 cp.bn_limbs 0ul mk_to_p256_order_comm_monoid
 let mul_mod ctx x y xy = qmul xy x y
 
 
 inline_for_extraction noextract
-val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_p256_order_comm_monoid
+val sqr_mod  {| cp:S.curve_params |}: BE.lsqr_st U64 cp.bn_limbs 0ul mk_to_p256_order_comm_monoid
 let sqr_mod ctx x xx = qsqr xx x
 
 
 inline_for_extraction noextract
-let mk_p256_order_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
+let mk_p256_order_concrete_ops {| cp:S.curve_params |}: BE.concrete_ops U64 cp.bn_limbs 0ul = {
   BE.to = mk_to_p256_order_comm_monoid;
   BE.lone = one_mod;
   BE.lmul = mul_mod;
@@ -68,21 +68,21 @@ let mk_p256_order_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
 
 
 inline_for_extraction noextract
-val qsquare_times_in_place (out:felem) (b:size_t) : Stack unit
+val qsquare_times_in_place {| cp:S.curve_params |} (out:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ as_nat h out < S.order)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out < S.order /\
     qmont_as_nat h1 out == SI.qsquare_times (qmont_as_nat h0 out) (v b))
 
-let qsquare_times_in_place out b =
+let qsquare_times_in_place {| cp:S.curve_params |} out b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qmont_as_nat h0 out) (v b);
-  BE.lexp_pow2_in_place 4ul 0ul mk_p256_order_concrete_ops (null uint64) out b
+  BE.lexp_pow2_in_place cp.bn_limbs 0ul mk_p256_order_concrete_ops (null uint64) out b
 
 
 inline_for_extraction noextract
-val qsquare_times (out a:felem) (b:size_t) : Stack unit
+val qsquare_times {| cp:S.curve_params |} (out a:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ live h a /\ disjoint out a /\
     as_nat h a < S.order)
@@ -90,16 +90,16 @@ val qsquare_times (out a:felem) (b:size_t) : Stack unit
     as_nat h1 out < S.order /\
     qmont_as_nat h1 out == SI.qsquare_times (qmont_as_nat h0 a) (v b))
 
-let qsquare_times out a b =
+let qsquare_times {| cp:S.curve_params |} out a b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qmont_as_nat h0 a) (v b);
-  BE.lexp_pow2 4ul 0ul mk_p256_order_concrete_ops (null uint64) a b out
+  BE.lexp_pow2 cp.bn_limbs 0ul mk_p256_order_concrete_ops (null uint64) a b out
 
 
 // x6 can be modified
 // x_11 cannot be modified
 inline_for_extraction noextract
-val qinv_x8_x128 (x128 x6 x_11:felem) : Stack unit
+val qinv_x8_x128 {| cp:S.curve_params |} (x128 x6 x_11:felem) : Stack unit
   (requires fun h ->
     live h x128 /\ live h x6 /\ live h x_11 /\
     disjoint x128 x6 /\ disjoint x128 x_11 /\ disjoint x6 x_11 /\
@@ -108,7 +108,7 @@ val qinv_x8_x128 (x128 x6 x_11:felem) : Stack unit
     as_nat h1 x128 < S.order /\
     qmont_as_nat h1 x128 = SI.qinv_x8_x128 (qmont_as_nat h0 x6) (qmont_as_nat h0 x_11))
 
-let qinv_x8_x128 x128 x6 x_11 =
+let qinv_x8_x128 {| cp:S.curve_params |} x128 x6 x_11 =
   let h0 = ST.get () in
   qsquare_times_in_place x6 2ul;
   qmul x6 x6 x_11;
@@ -143,7 +143,7 @@ let qinv_x8_x128 x128 x6 x_11 =
 
 // x128 can be modified
 inline_for_extraction noextract
-val qinv_x134_x153 (x128 x_11 x_111 x_1111 x_10101 x_101111:felem) : Stack unit
+val qinv_x134_x153 {| cp:S.curve_params |} (x128 x_11 x_111 x_1111 x_10101 x_101111:felem) : Stack unit
   (requires fun h ->
     live h x128 /\ live h x_11 /\ live h x_111 /\
     live h x_1111 /\ live h x_10101 /\ live h x_101111 /\
@@ -158,7 +158,7 @@ val qinv_x134_x153 (x128 x_11 x_111 x_1111 x_10101 x_101111:felem) : Stack unit
       (qmont_as_nat h0 x128) (qmont_as_nat h0 x_11) (qmont_as_nat h0 x_111)
         (qmont_as_nat h0 x_1111) (qmont_as_nat h0 x_10101) (qmont_as_nat h0 x_101111))
 
-let qinv_x134_x153 x128 x_11 x_111 x_1111 x_10101 x_101111 =
+let qinv_x134_x153 {| cp:S.curve_params |} x128 x_11 x_111 x_1111 x_10101 x_101111 =
   let h0 = ST.get () in
   qsquare_times_in_place x128 6ul;
   qmul x128 x128 x_101111;
@@ -193,7 +193,7 @@ let qinv_x134_x153 x128 x_11 x_111 x_1111 x_10101 x_101111 =
 
 // x153 can be modified
 inline_for_extraction noextract
-val qinv_x153_x177 (x153 x_101 x_111 x_101111:felem) : Stack unit
+val qinv_x153_x177 {| cp:S.curve_params |} (x153 x_101 x_111 x_101111:felem) : Stack unit
   (requires fun h ->
     live h x153 /\ live h x_101 /\ live h x_111 /\ live h x_101111 /\
     disjoint x153 x_101 /\ disjoint x153 x_111 /\ disjoint x153 x_101111 /\
@@ -204,7 +204,7 @@ val qinv_x153_x177 (x153 x_101 x_111 x_101111:felem) : Stack unit
     qmont_as_nat h1 x153 = SI.qinv_x153_x177 (qmont_as_nat h0 x153)
       (qmont_as_nat h0 x_101) (qmont_as_nat h0 x_111) (qmont_as_nat h0 x_101111))
 
-let qinv_x153_x177 x153 x_101 x_111 x_101111 =
+let qinv_x153_x177 {| cp:S.curve_params |} x153 x_101 x_111 x_101111 =
   let h0 = ST.get () in
   qsquare_times_in_place x153 4ul;
   qmul x153 x153 x_101;
@@ -239,7 +239,7 @@ let qinv_x153_x177 x153 x_101 x_111 x_101111 =
 
 // x153 can be modified
 inline_for_extraction noextract
-val qinv_x177_x210 (x177 x_111 x_1111 a:felem) : Stack unit
+val qinv_x177_x210 {| cp:S.curve_params |} (x177 x_111 x_1111 a:felem) : Stack unit
   (requires fun h ->
     live h x177 /\ live h x_111 /\ live h x_1111 /\ live h a /\
     disjoint x177 x_111 /\ disjoint x177 x_1111 /\ disjoint x177 a /\
@@ -250,7 +250,7 @@ val qinv_x177_x210 (x177 x_111 x_1111 a:felem) : Stack unit
     qmont_as_nat h1 x177 = SI.qinv_x177_x210 (qmont_as_nat h0 a)
       (qmont_as_nat h0 x177) (qmont_as_nat h0 x_111) (qmont_as_nat h0 x_1111))
 
-let qinv_x177_x210 x177 x_111 x_1111 a =
+let qinv_x177_x210 {| cp:S.curve_params |} x177 x_111 x_1111 a =
   let h0 = ST.get () in
   qsquare_times_in_place x177 6ul;
   qmul x177 x177 x_1111;
@@ -296,7 +296,7 @@ let qinv_x177_x210 x177 x_111 x_1111 a =
 
 
 inline_for_extraction noextract
-val qinv_x210_x240 (x210 x_11 x_101 x_101111:felem) : Stack unit
+val qinv_x210_x240 {| cp:S.curve_params |} (x210 x_11 x_101 x_101111:felem) : Stack unit
   (requires fun h ->
     live h x210 /\ live h x_11 /\ live h x_101 /\ live h x_101111 /\
     disjoint x210 x_11 /\ disjoint x210 x_101 /\ disjoint x210 x_101111 /\
@@ -307,7 +307,7 @@ val qinv_x210_x240 (x210 x_11 x_101 x_101111:felem) : Stack unit
     qmont_as_nat h1 x210 = SI.qinv_x210_x240 (qmont_as_nat h0 x210)
       (qmont_as_nat h0 x_11) (qmont_as_nat h0 x_101) (qmont_as_nat h0 x_101111))
 
-let qinv_x210_x240 x210 x_11 x_101 x_101111 =
+let qinv_x210_x240 {| cp:S.curve_params |} x210 x_11 x_101 x_101111 =
   let h0 = ST.get () in
   qsquare_times_in_place x210 5ul;
   qmul x210 x210 x_101;
@@ -347,7 +347,7 @@ let qinv_x210_x240 x210 x_11 x_101 x_101111 =
 
 
 inline_for_extraction noextract
-val qinv_x240_x256 (x240 x_1111 x_10101 a:felem) : Stack unit
+val qinv_x240_x256 {| cp:S.curve_params |} (x240 x_1111 x_10101 a:felem) : Stack unit
   (requires fun h ->
     live h x240 /\ live h x_1111 /\ live h x_10101 /\ live h a /\
     disjoint x240 x_1111 /\ disjoint x240 x_10101 /\ disjoint x240 a /\
@@ -358,7 +358,7 @@ val qinv_x240_x256 (x240 x_1111 x_10101 a:felem) : Stack unit
     qmont_as_nat h1 x240 = SI.qinv_x240_x256 (qmont_as_nat h0 a)
       (qmont_as_nat h0 x240) (qmont_as_nat h0 x_1111) (qmont_as_nat h0 x_10101))
 
-let qinv_x240_x256 x240 x_1111 x_10101 a =
+let qinv_x240_x256 {| cp:S.curve_params |} x240 x_1111 x_10101 a =
   let h0 = ST.get () in
   qsquare_times_in_place x240 3ul;
   qmul x240 x240 a;
@@ -381,7 +381,7 @@ let qinv_x240_x256 x240 x_1111 x_10101 a =
 
 // x128 can be modified
 inline_for_extraction noextract
-val qinv_x8_x256 (x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a:felem) : Stack unit
+val qinv_x8_x256 {| cp:S.curve_params |} (x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a:felem) : Stack unit
   (requires fun h ->
     live h x6 /\ live h x_11 /\ live h x_101 /\ live h x_111 /\
     live h x_1111 /\ live h x_10101 /\ live h x_101111 /\ live h a /\
@@ -398,9 +398,9 @@ val qinv_x8_x256 (x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a:felem) : Stack u
         (qmont_as_nat h0 x_101) (qmont_as_nat h0 x_111) (qmont_as_nat h0 x_1111)
           (qmont_as_nat h0 x_10101) (qmont_as_nat h0 x_101111))
 
-let qinv_x8_x256 x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
+let qinv_x8_x256 {| cp:S.curve_params |} x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
   push_frame ();
-  let tmp = create_felem () in
+  let tmp = create_felem #cp in
   qinv_x8_x128 tmp x6 x_11;
   qinv_x134_x153 tmp x_11 x_111 x_1111 x_10101 x_101111;
   qinv_x153_x177 tmp x_101 x_111 x_101111;
@@ -413,7 +413,7 @@ let qinv_x8_x256 x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
 
 // x128 can be modified
 inline_for_extraction noextract
-val qinv_make_x (x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a:felem) : Stack unit
+val qinv_make_x {| cp:S.curve_params |} (x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a:felem) : Stack unit
   (requires fun h ->
     live h x6 /\ live h x_11 /\ live h x_101 /\ live h x_111 /\
     live h x_1111 /\ live h x_10101 /\ live h x_101111 /\ live h a /\
@@ -445,7 +445,7 @@ val qinv_make_x (x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a:felem) : Stack un
     qmont_as_nat h1 x_1111 = x_1111_s /\ qmont_as_nat h1 x_10101 = x_10101_s /\
     qmont_as_nat h1 x_101111 = x_101111_s))
 
-let qinv_make_x x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
+let qinv_make_x {| cp:S.curve_params |} x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
   qsquare_times x6 a 1ul; // x_10
   qmul x_11 x6 a;
   qmul x_101 x6 x_11;
@@ -462,7 +462,8 @@ let qinv_make_x x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
 
 
 [@CInline]
-let qinv res r =
+let qinv {| cp:S.curve_params |} res r =
+  admit();
   let h0 = ST.get () in
   push_frame ();
   let tmp = create 28ul (u64 0) in

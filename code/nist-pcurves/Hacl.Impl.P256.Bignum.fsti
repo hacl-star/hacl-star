@@ -183,7 +183,8 @@ val bn2_to_bytes_be: {| c:S.curve_params |} -> res:lbuffer uint8 (2ul *. size c.
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
     disjoint x res /\ disjoint y res /\
-    as_nat h x < pow2 (8*c.bytes) /\ as_nat h y < pow2 (8*c.bytes))
+    as_nat h x < pow2 (8*c.bytes) /\
+    as_nat h y < pow2 (8*c.bytes))
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == LSeq.concat #uint8 #c.bytes #c.bytes
       (BSeq.nat_to_bytes_be c.bytes (as_nat h0 x)) (BSeq.nat_to_bytes_be c.bytes (as_nat h0 y)))

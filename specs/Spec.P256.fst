@@ -246,6 +246,7 @@ let p256_basepoint_y : (x:pos{x < p256_prime}) =
   let y = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5 in
   assert_norm (y < p256_prime); y
 
+let p256_basepoint = (p256_basepoint_x, p256_basepoint_y, 1) 
 let p256_mont_mu: (x:uint64{(1 + p256_prime * v x) % pow2 64 == 0}) =
   assert_norm((1 + p256_prime) % pow2 64 == 0);
   u64 1

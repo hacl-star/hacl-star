@@ -20,7 +20,7 @@ module BSeq = Lib.ByteSequence
 inline_for_extraction noextract
 let ecdsa_sign_p256_st (alg:S.hash_alg_ecdsa) =
     signature:lbuffer uint8 64ul
-  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
+  -> msg_len:size_t{S.min_input_length alg (v msg_len)}
   -> msg:lbuffer uint8 msg_len
   -> private_key:lbuffer uint8 32ul
   -> nonce:lbuffer uint8 32ul ->
