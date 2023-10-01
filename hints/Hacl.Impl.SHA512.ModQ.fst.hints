@@ -94,7 +94,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "90c71640060fcdafa733ebf7faea36a4"
+      "1a611a831da0ffad23c33bf3a67bd1a4"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_pre_msg",
@@ -170,7 +170,6 @@
         "equation_Hacl.Streaming.Interface.optional_key",
         "equation_Hacl.Streaming.Interface.stateful_buffer",
         "equation_Hacl.Streaming.Interface.stateful_unused",
-        "equation_Hacl.Streaming.Interface.uint8",
         "equation_Hacl.Streaming.MD.hacl_md",
         "equation_Hacl.Streaming.MD.hacl_sha2_512",
         "equation_Hacl.Streaming.MD.state_64",
@@ -192,7 +191,9 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Ed25519.max_input_length_sha512",
         "equation_Spec.Ed25519.uu___2", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_length_",
         "equation_Spec.Hash.Definitions.hash_word_length",
@@ -311,7 +312,6 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_4879b3ae97fc9ab9e442503feaa32563",
         "refinement_interpretation_Tm_refine_49d93a0cb246c536781f6c5dba1a6214",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e",
@@ -348,7 +348,6 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt.max_int",
         "typing_FStar.UInt32.v",
         "typing_Hacl.Hash.Definitions.impl_state_len",
-        "typing_Hacl.Hash.Definitions.max_input_len64",
         "typing_Hacl.Streaming.Functor.footprint",
         "typing_Hacl.Streaming.Functor.seen",
         "typing_Hacl.Streaming.MD.hacl_sha2_512", "typing_Lib.Buffer.as_seq",
@@ -374,7 +373,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok", "unit_typing"
       ],
       0,
-      "996c699eab1955d2a6405160ca60409f"
+      "27ea460687138686bbe59adc9dd7dd91"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_pre_pre2_msg",
@@ -495,7 +494,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok", "unit_typing"
       ],
       0,
-      "c9e9f8133ca8b7a66b142048545ae062"
+      "326b25213d48a7bf7b72c80635235af1"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_pre_pre2_msg",
@@ -872,7 +871,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a76f671e6df2d620233e6e0257d70d70"
+      "14cb6eb414298bd39172e1a57ca44c0d"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_modq_pre",
@@ -1082,7 +1081,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "6985823472cb1c69d2152202cfc261a1"
+      "1f8931b6c2c0a8619b29a86fffa25225"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2",
@@ -1179,7 +1178,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "66d198803a8b3e047fb4fb99182af4e3"
+      "46e654eae62df1868d925428d1ba5668"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2",
@@ -1389,7 +1388,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "900fe9eedd4d20fd33e99f4da31e6fcf"
+      "05e5208beaabea6027f1ef292f8fe910"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.store_sha512_modq_pre",
@@ -1494,7 +1493,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c1c3867499ad82c29e445551399eadba"
+      "c72d2b601dabf0413f34192a07a970db"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.store_sha512_modq_pre",
@@ -1651,7 +1650,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok", "unit_typing"
       ],
       0,
-      "586b5a01a0e9a3c55c11c01102ca2290"
+      "053f56b163f93e3b2b6889d2d22394c6"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.store_sha512_modq_pre_pre2",
@@ -1748,7 +1747,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "b6ac1696d43932aa356c65298552f13a"
+      "5c3c1954b09d0a3a44588204e642f689"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.store_sha512_modq_pre_pre2",
