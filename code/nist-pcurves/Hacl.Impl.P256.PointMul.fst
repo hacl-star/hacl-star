@@ -50,7 +50,7 @@ let table_inv_w5 : BE.table_inv_t U64 12ul 32ul =
 
 
 [@CInline]
-let point_mul res scalar p =
+let point_mul {| cp:S.curve_params |} res scalar p =
   let h0 = ST.get () in
   SE.exp_fw_lemma S.mk_p256_concrete_ops
     (from_mont_point (as_point_nat h0 p)) 256 (as_nat h0 scalar) 4;

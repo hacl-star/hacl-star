@@ -16,7 +16,7 @@ module S = Spec.P256
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
 inline_for_extraction noextract
-val point_double_1 (t0 t1 t2 t3 t4:felem) (p:point) : Stack unit
+val point_double_1 {| cp:S.curve_params |}  (t0 t1 t2 t3 t4:felem) (p:point) : Stack unit
   (requires fun h ->
     live h t0 /\ live h t1 /\ live h t2 /\
     live h t3 /\ live h t4 /\ live h p /\
@@ -38,7 +38,7 @@ val point_double_1 (t0 t1 t2 t3 t4:felem) (p:point) : Stack unit
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 t3 == t3_s /\
     fmont_as_nat h1 t4 == t4_s))
 
-let point_double_1 t0 t1 t2 t3 t4 p =
+let point_double_1 {| cp:S.curve_params |} t0 t1 t2 t3 t4 p =
   let x, y, z = getx p, gety p, getz p in
   fsqr t0 x;
   fsqr t1 y;
@@ -49,7 +49,7 @@ let point_double_1 t0 t1 t2 t3 t4 p =
 
 
 inline_for_extraction noextract
-val point_double_2 (x3 y3 z3 t2:felem) : Stack unit
+val point_double_2 {| cp:S.curve_params |} (x3 y3 z3 t2:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h z3 /\ live h t2 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc x3; loc y3; loc z3; loc t2 ] /\
@@ -66,7 +66,7 @@ val point_double_2 (x3 y3 z3 t2:felem) : Stack unit
     fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 y3 == y3_s /\
     fmont_as_nat h1 z3 == z3_s))
 
-let point_double_2 x3 y3 z3 t2 =
+let point_double_2 {| cp:S.curve_params |} x3 y3 z3 t2 =
   fdouble z3 z3;
   fmul_by_b_coeff y3 t2;
   fsub y3 y3 z3;
@@ -75,7 +75,7 @@ let point_double_2 x3 y3 z3 t2 =
 
 
 inline_for_extraction noextract
-val point_double_3 (x3 y3 t1 t2 t3:felem) : Stack unit
+val point_double_3 {| cp:S.curve_params |} (x3 y3 t1 t2 t3:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h t1 /\ live h t2 /\ live h t3 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc x3; loc y3; loc t1; loc t2; loc t3 ] /\
@@ -98,7 +98,7 @@ val point_double_3 (x3 y3 t1 t2 t3:felem) : Stack unit
     fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 y3 == y3_s /\
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 t3 == t3_s))
 
-let point_double_3 x3 y3 t1 t2 t3 =
+let point_double_3 {| cp:S.curve_params |} x3 y3 t1 t2 t3 =
   fsub x3 t1 y3;
   fadd y3 t1 y3;
   fmul y3 x3 y3;
@@ -108,7 +108,7 @@ let point_double_3 x3 y3 t1 t2 t3 =
 
 
 inline_for_extraction noextract
-val point_double_4 (z3 t0 t2 t3:felem) : Stack unit
+val point_double_4 {| cp:S.curve_params |} (z3 t0 t2 t3:felem) : Stack unit
   (requires fun h ->
     live h z3 /\ live h t0 /\ live h t2 /\ live h t3 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc z3; loc t0; loc t2; loc t3 ] /\
@@ -125,7 +125,7 @@ val point_double_4 (z3 t0 t2 t3:felem) : Stack unit
     let z3_s = S.fadd z3_s t3_s in
     fmont_as_nat h1 z3 == z3_s /\ fmont_as_nat h1 t3 == t3_s))
 
-let point_double_4 z3 t0 t2 t3 =
+let point_double_4 {| cp:S.curve_params |} z3 t0 t2 t3 =
   fmul_by_b_coeff z3 z3;
   fsub z3 z3 t2;
   fsub z3 z3 t0;
@@ -134,7 +134,7 @@ let point_double_4 z3 t0 t2 t3 =
 
 
 inline_for_extraction noextract
-val point_double_5 (y3 z3 t0 t2 t3:felem) : Stack unit
+val point_double_5 {| cp:S.curve_params |} (y3 z3 t0 t2 t3:felem) : Stack unit
   (requires fun h ->
     live h y3 /\ live h z3 /\ live h t0 /\ live h t2 /\ live h t3 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc y3; loc z3; loc t0; loc t2; loc t3 ] /\
@@ -153,7 +153,7 @@ val point_double_5 (y3 z3 t0 t2 t3:felem) : Stack unit
     let y3_s = S.fadd y3_s t0_s in
     fmont_as_nat h1 y3 == y3_s /\ fmont_as_nat h1 t0 == t0_s /\ fmont_as_nat h1 t3 == t3_s))
 
-let point_double_5 y3 z3 t0 t2 t3 =
+let point_double_5 {| cp:S.curve_params |} y3 z3 t0 t2 t3 =
   fdouble t3 t0;
   fadd t0 t3 t0;
   fsub t0 t0 t2;
@@ -162,7 +162,7 @@ let point_double_5 y3 z3 t0 t2 t3 =
 
 
 inline_for_extraction noextract
-val point_double_6 (x3 z3 t0 t1 t4:felem) : Stack unit
+val point_double_6 {| cp:S.curve_params |} (x3 z3 t0 t1 t4:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h z3 /\ live h t0 /\ live h t1 /\ live h t4 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc x3; loc z3; loc t0; loc t1; loc t4 ] /\
@@ -182,7 +182,7 @@ val point_double_6 (x3 z3 t0 t1 t4:felem) : Stack unit
     let z3_s = S.fadd z3_s z3_s in
     fmont_as_nat h1 z3 == z3_s /\ fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 t0 == t0_s))
 
-let point_double_6 x3 z3 t0 t1 t4 =
+let point_double_6 {| cp:S.curve_params |} x3 z3 t0 t1 t4 =
   fdouble t0 t4;
   fmul z3 t0 z3;
   fsub x3 x3 z3;
@@ -192,7 +192,7 @@ let point_double_6 x3 z3 t0 t1 t4 =
 
 
 inline_for_extraction noextract
-val point_double_noalloc: tmp:lbuffer uint64 20ul -> res:point -> p:point -> Stack unit
+val point_double_noalloc: {| cp:S.curve_params |} -> tmp:lbuffer uint64 (5ul *. cp.bn_limbs) -> res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ live h tmp /\
     eq_or_disjoint p res /\ disjoint tmp res /\ disjoint tmp p /\
@@ -202,14 +202,17 @@ val point_double_noalloc: tmp:lbuffer uint64 20ul -> res:point -> p:point -> Sta
     from_mont_point (as_point_nat h1 res) ==
       S.point_double (from_mont_point (as_point_nat h0 p)))
 
-let point_double_noalloc tmp res p =
+let point_double_noalloc {| cp:S.curve_params |} tmp res p =
   let x, z = getx p, getz p in
   let x3, y3, z3 = getx res, gety res, getz res in
-  let t0 = sub tmp 0ul 4ul in
-  let t1 = sub tmp 4ul 4ul in
-  let t2 = sub tmp 8ul 4ul in
-  let t3 = sub tmp 12ul 4ul in
-  let t4 = sub tmp 16ul 4ul in
+  let t0 = sub tmp 0ul cp.bn_limbs in
+  let t1 = sub tmp cp.bn_limbs cp.bn_limbs in
+  assert (v (2ul *. cp.bn_limbs) = 2 * v cp.bn_limbs);
+  assert (v (3ul *. cp.bn_limbs) = 3 * v cp.bn_limbs);
+  assert (v (4ul *. cp.bn_limbs) = 4 * v cp.bn_limbs);
+  let t2 = sub tmp (2ul *. cp.bn_limbs) cp.bn_limbs in
+  let t3 = sub tmp (3ul *. cp.bn_limbs) cp.bn_limbs in
+  let t4 = sub tmp (4ul *. cp.bn_limbs) cp.bn_limbs in
   point_double_1 t0 t1 t2 t3 t4 p;
   fmul z3 x z;
   point_double_2 x3 y3 z3 t2;
@@ -220,8 +223,8 @@ let point_double_noalloc tmp res p =
 
 
 [@CInline]
-let point_double res p =
+let point_double {| cp:S.curve_params |} res p =
   push_frame ();
-  let tmp = create 20ul (u64 0) in
+  let tmp = create (5ul *. cp.bn_limbs) (u64 0) in
   point_double_noalloc tmp res p;
   pop_frame ()

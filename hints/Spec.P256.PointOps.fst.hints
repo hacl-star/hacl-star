@@ -1,6 +1,102 @@
 [
-  "M\u0005®!K\u0000∆(Ì;ä\u0005äá\u001dÄ",
+  "‰¡÷Ê\u0016\u0011…®»ê\u0016n\n€3„",
   [
+    [
+      "Spec.P256.PointOps.curve_params",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "877970f32fdd15d829a05cfe4e7f58d7"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__prime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "b6d759f1cd665c85f684100eb7b47bc0"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__prime",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "3d661c2ad893f4429f1232ecfb2e0581"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__order",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "f2fee0c7836420af3248f7c27bc923bb"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__order",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "16a948a917263662fecbc9486bf64f5a"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__mont_mu",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "2e0ddacb73280a274ae2b1ee883dc5e4"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__mont_mu",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "6622d8a92895555946273fdb7eedefde"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__mont_q_mu",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "1b9e2ac9b352e66fcd6e6eed49f8d221"
+    ],
+    [
+      "Spec.P256.PointOps.__proj__Mkcurve_params__item__mont_q_mu",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "b66cf4be93a821c0d1f7d5827305962a"
+    ],
     [
       "Spec.P256.PointOps.prime",
       1,
@@ -8,7 +104,34 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "2dd8ab256c537d76b952d9906c914847"
+      "822b818e27b886baf0b820f50547cbfc"
+    ],
+    [
+      "Spec.P256.PointOps.order",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "5c6321fa460c72a96fd5febb88ea8705"
+    ],
+    [
+      "Spec.P256.PointOps.mont_mu",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "51f775f1c2b5e3f146153398925c40c1"
+    ],
+    [
+      "Spec.P256.PointOps.mont_q_mu",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "3e388c2d921cc3331cd75916445c2606"
     ],
     [
       "Spec.P256.PointOps.zero",
@@ -19,11 +142,11 @@
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.P256.PointOps.prime",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "457d6c25eb25188c30a563149a2fa8bd"
+      "56cc8ae0c4cbcddfd9646eb124771ee0"
     ],
     [
       "Spec.P256.PointOps.one",
@@ -34,11 +157,11 @@
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.P256.PointOps.prime",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "d4bab2cae94209755f0116cf3da3ebc1"
+      "2f5beb14f0c8795dc5df8f6e7c84148d"
     ],
     [
       "Spec.P256.PointOps.fadd",
@@ -46,14 +169,18 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.prime", "primitive_Prims.op_Modulus",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.felem",
+        "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_569f2949dec184ab1b313e670f9509e3",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "32a381af924720e59ae913b1e05bd15a"
+      "33f4452d30b055f060a22162591ac48b"
     ],
     [
       "Spec.P256.PointOps.fsub",
@@ -61,14 +188,18 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.prime", "primitive_Prims.op_Modulus",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.felem",
+        "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_569f2949dec184ab1b313e670f9509e3",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "8d326409699be0bc7e3865a2ed0468ad"
+      "2a91df4d9e9e7bf1620a1a7f1e10fddd"
     ],
     [
       "Spec.P256.PointOps.fmul",
@@ -76,14 +207,18 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.prime", "primitive_Prims.op_Modulus",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.felem",
+        "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_569f2949dec184ab1b313e670f9509e3",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "538e176cf5ba4148c7591df72e36afad"
+      "f10c0b4723433dfa1acc5010221bd107"
     ],
     [
       "Spec.P256.PointOps.finv",
@@ -93,12 +228,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "9634f1116d0b4f061c9c699446a4ca66"
+      "9e0b5d0e0ec1c4c95c1e17d41f3f7c5a"
     ],
     [
       "Spec.P256.PointOps.fsqrt",
@@ -107,22 +243,15 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.prime", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "a491b6ab25e61df91678d1d462382db8"
-    ],
-    [
-      "Spec.P256.PointOps.order",
-      1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "a11f8abaf2e10dca7e670b1d8a803861"
+      "293a896a74faa84e7ebb2f3347233239"
     ],
     [
       "Spec.P256.PointOps.qadd",
@@ -130,11 +259,19 @@
       0,
       0,
       [
-        "@query", "equation_Spec.P256.PointOps.order",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.qelem",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Modulus",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_order",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_68de04f7fb9adbe6bb0e976688345b6a",
+        "refinement_interpretation_Tm_refine_a7edd325dcd15cb30ea815b00bc38f73",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__order"
       ],
       0,
-      "c43e1a6d3de5a7377883eb42ee33a1fe"
+      "d2a277457befb7a73781d33c98dd5a04"
     ],
     [
       "Spec.P256.PointOps.qmul",
@@ -142,11 +279,19 @@
       0,
       0,
       [
-        "@query", "equation_Spec.P256.PointOps.order",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.PointOps.qelem",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Modulus",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_order",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_68de04f7fb9adbe6bb0e976688345b6a",
+        "refinement_interpretation_Tm_refine_a7edd325dcd15cb30ea815b00bc38f73",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__order"
       ],
       0,
-      "dbbb19825ad40950b961d2fb495fa8fa"
+      "811c41fb9d53b1ebf909c2859b37dfae"
     ],
     [
       "Spec.P256.PointOps.qinv",
@@ -154,51 +299,12 @@
       0,
       0,
       [
-        "@query", "equation_Spec.P256.PointOps.order",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "983cff858fd5d6f5d06258dd9e5f6f2e"
-    ],
-    [
-      "Spec.P256.PointOps.a_coeff",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Modulus",
+        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688"
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb"
       ],
       0,
-      "52a9db6410d390f95f7b88704e858888"
-    ],
-    [
-      "Spec.P256.PointOps.b_coeff",
-      1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "73ba8986b06c8ce87813264dce655dcc"
-    ],
-    [
-      "Spec.P256.PointOps.g_x",
-      1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "87c803fe73d22b02107e98ae06a77dc9"
-    ],
-    [
-      "Spec.P256.PointOps.g_y",
-      1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "c37df0d91ab4d6fc43561e033476c784"
+      "ba15a0b5704445f8c2334f77c8d17366"
     ],
     [
       "Spec.P256.PointOps.base_point",
@@ -207,17 +313,12 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.felem",
-        "equation_Spec.P256.PointOps.g_x", "equation_Spec.P256.PointOps.g_y",
-        "equation_Spec.P256.PointOps.one",
         "equation_Spec.P256.PointOps.prime",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
-        "typing_Spec.P256.PointOps.g_x", "typing_Spec.P256.PointOps.prime"
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime"
       ],
       0,
-      "0a78aa3561fda07d110ac28d1331a88d"
+      "1daa86160d038a1f1294635859f86b26"
     ],
     [
       "Spec.P256.PointOps.is_on_curve",
@@ -226,49 +327,17 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.P256.PointOps.aff_point",
-        "equation_Spec.P256.PointOps.felem",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_4fc245c235ca9463e44799dcc9bb0f7d"
+        "haseqTm_refine_569f2949dec184ab1b313e670f9509e3",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "3a9b4a58790de72aa043d3774dee4ec5"
-    ],
-    [
-      "Spec.P256.PointOps.aff_point_at_inf",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.felem",
-        "equation_Spec.P256.PointOps.zero",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "typing_Spec.P256.PointOps.zero"
-      ],
-      0,
-      "82d7ef58a3b738dc4089312b519813ea"
-    ],
-    [
-      "Spec.P256.PointOps.point_at_inf",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Spec.P256.PointOps.felem",
-        "equation_Spec.P256.PointOps.one",
-        "equation_Spec.P256.PointOps.zero",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "typing_Spec.P256.PointOps.one", "typing_Spec.P256.PointOps.zero"
-      ],
-      0,
-      "acd4c932a23ca677264cc63a257a0309"
+      "00474bbe42d23f77fc43872045ac48d0"
     ],
     [
       "Spec.P256.PointOps.is_aff_point_at_inf",
@@ -277,49 +346,15 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_569f2949dec184ab1b313e670f9509e3",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "350a41035215c813867d2f9664893421"
-    ],
-    [
-      "Spec.P256.PointOps.to_proj_point",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Spec.P256.PointOps.aff_point",
-        "equation_Spec.P256.PointOps.felem",
-        "equation_Spec.P256.PointOps.one",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "refinement_interpretation_Tm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
-        "typing_Spec.P256.PointOps.one"
-      ],
-      0,
-      "6e6c32eccc7ba5cf2f229215d1b033e6"
-    ],
-    [
-      "Spec.P256.PointOps.to_aff_point",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Spec.P256.PointOps.felem",
-        "equation_Spec.P256.PointOps.proj_point",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "refinement_interpretation_Tm_refine_2e73322637e0a33429fbb07fca4156f6"
-      ],
-      0,
-      "f468ac9cf4c83805d60a189210bb89ef"
+      "165f6233c1495128df6c44040a5144a8"
     ],
     [
       "Spec.P256.PointOps.aff_point_double",
@@ -327,20 +362,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Spec.P256.PointOps.aff_point",
-        "equation_Spec.P256.PointOps.felem",
+        "@MaxIFuel_assumption", "@query",
         "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
-        "refinement_interpretation_Tm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "70da5c829c3d122115b044ef111bd1b8"
+      "340bc6374491c25ab949d6a9587cc2df"
     ],
     [
       "Spec.P256.PointOps.aff_point_add",
@@ -353,18 +384,15 @@
         "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Spec.P256.PointOps.aff_point",
         "equation_Spec.P256.PointOps.felem",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
+        "haseqTm_refine_569f2949dec184ab1b313e670f9509e3",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
-        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "typing_Spec.P256.PointOps.felem"
       ],
       0,
-      "8c3eb08f1a337d07bb77701c3e738de2"
+      "66c074b7278c2842e1659c955ee96616"
     ],
     [
       "Spec.P256.PointOps.point_add",
@@ -372,24 +400,15 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Spec.P256.PointOps.fadd",
-        "equation_Spec.P256.PointOps.fsub",
-        "equation_Spec.P256.PointOps.op_Plus_Percent",
-        "equation_Spec.P256.PointOps.op_Star_Percent",
-        "equation_Spec.P256.PointOps.op_Subtraction_Percent",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.P256.PointOps.felem",
         "equation_Spec.P256.PointOps.prime",
-        "equation_Spec.P256.PointOps.proj_point",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
-        "refinement_interpretation_Tm_refine_2e73322637e0a33429fbb07fca4156f6",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
-        "typing_Spec.P256.PointOps.prime"
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime",
+        "refinement_interpretation_Tm_refine_569f2949dec184ab1b313e670f9509e3"
       ],
       0,
-      "eef5eb45247cc91abc80832d3068ca86"
+      "901a9b06417e64694f5f5c8a3e15ab3f"
     ],
     [
       "Spec.P256.PointOps.point_double",
@@ -397,28 +416,15 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Spec.P256.PointOps.fadd",
+        "@MaxIFuel_assumption", "@query",
         "equation_Spec.P256.PointOps.felem",
-        "equation_Spec.P256.PointOps.fsub",
-        "equation_Spec.P256.PointOps.op_Plus_Percent",
-        "equation_Spec.P256.PointOps.op_Star_Percent",
-        "equation_Spec.P256.PointOps.op_Subtraction_Percent",
         "equation_Spec.P256.PointOps.prime",
-        "equation_Spec.P256.PointOps.proj_point",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "refinement_interpretation_Tm_refine_2e73322637e0a33429fbb07fca4156f6",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
-        "typing_Spec.P256.PointOps.op_Plus_Percent",
-        "typing_Spec.P256.PointOps.op_Star_Percent",
-        "typing_Spec.P256.PointOps.prime"
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime",
+        "refinement_interpretation_Tm_refine_569f2949dec184ab1b313e670f9509e3"
       ],
       0,
-      "ea6d7b815517237a5c5411c2713e0134"
+      "1623b8a9861829598d9c5f86d28312ac"
     ],
     [
       "Spec.P256.PointOps.aff_point_load",
@@ -426,14 +432,17 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "9270c72837c6a248d7de419b6963c601"
+      "05f4b532137f22e9073d9a0cff398525"
     ],
     [
       "Spec.P256.PointOps.aff_point_load",
@@ -441,17 +450,25 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "195cc362321fac7e93adef691ccb08a6"
+      "41ce80937b9d245884c71eed381e6b3b"
     ],
     [
       "Spec.P256.PointOps.load_point",
@@ -459,14 +476,17 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "4d5affa69adb15a99136b9db6c7f12df"
+      "0e1272d9be923d0db6f5a11018df19d7"
     ],
     [
       "Spec.P256.PointOps.load_point",
@@ -474,16 +494,19 @@
       0,
       0,
       [
-        "@query", "disc_equation_FStar.Pervasives.Native.None",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
         "equation_Spec.P256.PointOps.aff_point",
         "equation_Spec.P256.PointOps.aff_point_load",
         "lemma_FStar.Pervasives.invertOption",
-        "refinement_kinding_Tm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some",
+        "typing_Spec.P256.PointOps.aff_point",
         "typing_Spec.P256.PointOps.aff_point_load"
       ],
       0,
-      "5f76a6c5daf3ac116cb0f00ab8576fdb"
+      "894b5c2b8fbccbda022565bbc947e5e6"
     ],
     [
       "Spec.P256.PointOps.aff_point_store",
@@ -491,23 +514,26 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Lib.Sequence.length", "equation_Prims.nat",
-        "equation_Spec.P256.PointOps.aff_point",
-        "equation_Spec.P256.PointOps.prime", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
-        "refinement_interpretation_Tm_refine_4fc245c235ca9463e44799dcc9bb0f7d",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_e0ed9c2fd72a7d4a31870e1e94e9f599",
+        "equation_Lib.Sequence.length", "equation_Prims.pos",
+        "equation_Spec.P256.PointOps.felem",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
+        "refinement_interpretation_Tm_refine_20ca56edbab1d00388999cc9987f35d2",
+        "refinement_interpretation_Tm_refine_569f2949dec184ab1b313e670f9509e3",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bits",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "5009ddc03f113c5e070d0fc1c74408b5"
+      "fe9d3dcda021b45d470fc5d8c12a9b5b"
     ],
     [
       "Spec.P256.PointOps.point_store",
@@ -515,14 +541,17 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "b118f29a2c8461aa8287ae07029ba2a1"
+      "b3ec657f5ad97e1dba15c92dfe2ad5f6"
     ],
     [
       "Spec.P256.PointOps.recover_y",
@@ -533,16 +562,21 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
         "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_0cf5133af1b6c35f069d9573d9abce08",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_339de2fcdb9802d3fb9b316974632688",
+        "haseqTm_refine_569f2949dec184ab1b313e670f9509e3",
+        "primitive_Prims.op_Modulus",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_204ae74b233456ebf4c8eda734ab7bfd",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_569f2949dec184ab1b313e670f9509e3",
         "typing_Spec.P256.PointOps.prime"
       ],
       0,
-      "51467fb867f8551686048e3bda38b782"
+      "146f3cf6bbb7dd301071cda3c6e8cdba"
     ],
     [
       "Spec.P256.PointOps.aff_point_decompress",
@@ -550,14 +584,18 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes"
       ],
       0,
-      "2502e9bf68fab66a18e616d4bd3e2c75"
+      "1f85e4f3a6158904ac5ab1bfe8399093"
     ],
     [
       "Spec.P256.PointOps.aff_point_decompress",
@@ -565,25 +603,27 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.P256.PointOps.felem",
-        "int_typing", "lemma_FStar.Pervasives.invertOption",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
-        "primitive_Prims.op_Subtraction",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.P256.PointOps.prime",
+        "fuel_guarded_inversion_Spec.P256.PointOps.curve_params",
+        "lemma_FStar.Pervasives.invertOption", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_bytes",
+        "proj_equation_Spec.P256.PointOps.Mkcurve_params_prime",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0cf5133af1b6c35f069d9573d9abce08",
-        "refinement_interpretation_Tm_refine_22640ed9c0ab44235cb82f965e40c9c4",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_kinding_Tm_refine_0cf5133af1b6c35f069d9573d9abce08"
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_cc6c554249a6b41f396782ffe283379a",
+        "typing_Spec.P256.PointOps.__proj__Mkcurve_params__item__bytes",
+        "typing_Spec.P256.PointOps.felem"
       ],
       0,
-      "ac109d52ddf2215b3147bc74f3d87c0d"
+      "bb309109afaf22568bb5a32e26edd913"
     ]
   ]
 ]

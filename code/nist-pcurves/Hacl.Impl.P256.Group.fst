@@ -23,11 +23,11 @@ unfold
 let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
 unfold
-let refl (p:LSeq.lseq uint64 12{point_inv_seq p}) : GTot S.aff_point =
+let refl {| cp:S.curve_params |} (p:LSeq.lseq uint64 (3*v cp.bn_limbs){point_inv_seq p}) : GTot S.aff_point =
   S.to_aff_point (from_mont_point (as_point_nat_seq p))
 
 inline_for_extraction noextract
-let mk_to_p256_comm_monoid : BE.to_comm_monoid U64 12ul 0ul = {
+let mk_to_p256_comm_monoid {| cp:S.curve_params |} : BE.to_comm_monoid U64 (3ul *. cp.bn_limbs) 0ul = {
   BE.a_spec = S.aff_point;
   BE.comm_monoid = S.mk_p256_comm_monoid;
   BE.linv_ctx = linv_ctx;
@@ -37,7 +37,7 @@ let mk_to_p256_comm_monoid : BE.to_comm_monoid U64 12ul 0ul = {
 
 
 inline_for_extraction noextract
-val point_add : BE.lmul_st U64 12ul 0ul mk_to_p256_comm_monoid
+val point_add {| cp:S.curve_params |} : BE.lmul_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_p256_comm_monoid
 let point_add ctx x y xy =
   let h0 = ST.get () in
   SL.to_aff_point_add_lemma
@@ -46,7 +46,7 @@ let point_add ctx x y xy =
 
 
 inline_for_extraction noextract
-val point_double : BE.lsqr_st U64 12ul 0ul mk_to_p256_comm_monoid
+val point_double {| cp:S.curve_params |} : BE.lsqr_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_p256_comm_monoid
 let point_double ctx x xx =
   let h0 = ST.get () in
   SL.to_aff_point_double_lemma (from_mont_point (as_point_nat h0 x));
@@ -54,15 +54,15 @@ let point_double ctx x xx =
 
 
 inline_for_extraction noextract
-val point_zero : BE.lone_st U64 12ul 0ul mk_to_p256_comm_monoid
-let point_zero ctx one =
+val point_zero {| cp:S.curve_params |} : BE.lone_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_p256_comm_monoid
+let point_zero {| cp:S.curve_params |} ctx one =
   let h0 = ST.get () in
-  SL.to_aff_point_at_infinity_lemma ();
+  SL.to_aff_point_at_infinity_lemma #cp;
   make_point_at_inf one
 
 
 inline_for_extraction noextract
-let mk_p256_concrete_ops : BE.concrete_ops U64 12ul 0ul = {
+let mk_p256_concrete_ops {| cp:S.curve_params |} : BE.concrete_ops U64 (3ul *. cp.bn_limbs) 0ul = {
   BE.to = mk_to_p256_comm_monoid;
   BE.lone = point_zero;
   BE.lmul = point_add;

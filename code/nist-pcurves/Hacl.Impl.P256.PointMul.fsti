@@ -15,7 +15,7 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val point_mul: res:point -> scalar:felem -> p:point -> Stack unit
+val point_mul: {| cp:S.curve_params |} -> res:point -> scalar:felem -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ live h scalar /\
     disjoint p res /\ disjoint scalar res /\ disjoint p scalar /\
@@ -26,7 +26,7 @@ val point_mul: res:point -> scalar:felem -> p:point -> Stack unit
     S.to_aff_point (S.point_mul (as_nat h0 scalar) (from_mont_point (as_point_nat h0 p))))
 
 
-val point_mul_g: res:point -> scalar:felem -> Stack unit
+val point_mul_g: {| cp:S.curve_params |} -> res:point -> scalar:felem -> Stack unit
   (requires fun h ->
     live h res /\ live h scalar /\ disjoint res scalar /\
     as_nat h scalar < S.order)
@@ -36,7 +36,7 @@ val point_mul_g: res:point -> scalar:felem -> Stack unit
     S.to_aff_point (S.point_mul_g (as_nat h0 scalar)))
 
 
-val point_mul_double_g: res:point -> scalar1:felem -> scalar2:felem -> p:point -> Stack unit
+val point_mul_double_g: {| cp:S.curve_params |} -> res:point -> scalar1:felem -> scalar2:felem -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h scalar1 /\ live h scalar2 /\ live h p /\
     disjoint res scalar1 /\ disjoint res scalar2 /\ disjoint res p /\

@@ -13,7 +13,7 @@ module S = Spec.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val point_add: res:point -> p:point -> q:point -> Stack unit
+val point_add: {| cp:S.curve_params |} -> res:point -> p:point -> q:point -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h res /\
     eq_or_disjoint p q /\ eq_or_disjoint q res /\ eq_or_disjoint p res /\
