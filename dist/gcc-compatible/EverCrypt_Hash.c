@@ -2156,8 +2156,7 @@ Perform a run-time test to determine which algorithm was chosen for the given pi
 Spec_Hash_Definitions_hash_alg
 EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_hash_state *s)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *s;
-  EverCrypt_Hash_state_s *block_state = scrut.block_state;
+  EverCrypt_Hash_state_s *block_state = (*s).block_state;
   return alg_of_state(block_state);
 }
 
