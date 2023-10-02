@@ -1,7 +1,7 @@
-module Spec.P256.Lemmas
+module Spec.PCurves.Lemmas
 
 open FStar.Mul
-open Spec.P256.PointOps
+open Spec.PCurves.PointOps
 
 module M = Lib.NatMod
 

@@ -1,7 +1,7 @@
-module Spec.P256.Lemmas
+module Spec.PCurves.Lemmas
 
 open FStar.Mul
-open Spec.P256.PointOps
+open Spec.PCurves.PointOps
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 

@@ -1,4 +1,9 @@
-module Spec.P256.PointOps
+module Spec.PCurves.PointOps
+(* This module specifies the Elliptic Curve Operations for
+   prime-order short Weierstrass curve defined over a field
+   k with char(k) <> 2, 3.
+   
+   In particular, this includes the NIST P-Curves and the Bitcoin curve*)
 
 open FStar.Mul
 open Lib.IntTypes
@@ -12,7 +17,7 @@ module BSeq = Lib.ByteSequence
 ///  Curve Parameters
 
 let is_fodd (x:nat) : bool = x % 2 = 1
-
+ 
 class curve_params = {
   bits: pos;
   bytes: x:pos{bits <= 8 * x /\ 3 * x < pow2 32}; 
@@ -124,6 +129,8 @@ let aff_point_add {| curve_params |} (p:aff_point) (q:aff_point) : aff_point =
     end
   end
 
+let aff_point_negate {| curve_params |} (p:aff_point) : aff_point =
+  let x, y = p in x, (-y) % prime
 
 ///  Point addition and doubling in projective coordinates
 
@@ -216,6 +223,9 @@ let point_double {| curve_params |} (p:proj_point) : proj_point =
   let z3 = z3 +% z3 in
   (x3, y3, z3)
 
+let point_negate {| curve_params |} (p:proj_point) : proj_point =
+  let x, y, z = p in
+  x, (-y) % prime, z
 
 ///  Point conversion between affine, projective and bytes representation
 

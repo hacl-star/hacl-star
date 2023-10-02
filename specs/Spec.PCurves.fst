@@ -1,4 +1,4 @@
-module Spec.P256
+module Spec.PCurves
 
 open FStar.Mul
 open Lib.IntTypes
@@ -9,13 +9,13 @@ open Spec.Hash.Definitions
 module M = Lib.NatMod
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
-module PL = Spec.P256.Lemmas
+module PL = Spec.PCurves.Lemmas
 
-include Spec.P256.PointOps
+include Spec.PCurves.PointOps
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let mk_p256_comm_monoid {| curve_params |} : LE.comm_monoid (aff_point) = {
+let mk_pcurve_comm_monoid {| curve_params |} : LE.comm_monoid (aff_point) = {
   LE.one = aff_point_at_inf;
   LE.mul = aff_point_add;
   LE.lemma_one = PL.aff_point_at_inf_lemma;
@@ -23,29 +23,29 @@ let mk_p256_comm_monoid {| curve_params |} : LE.comm_monoid (aff_point) = {
   LE.lemma_mul_comm = PL.aff_point_add_comm_lemma;
 }
 
-let mk_to_p256_comm_monoid {| curve_params |} : SE.to_comm_monoid (proj_point) = {
+let mk_to_pcurve_comm_monoid {| curve_params |} : SE.to_comm_monoid (proj_point) = {
   SE.a_spec = aff_point;
-  SE.comm_monoid = mk_p256_comm_monoid;
+  SE.comm_monoid = mk_pcurve_comm_monoid;
   SE.refl = to_aff_point;
 }
 
-val point_at_inf_c {| curve_params |} : SE.one_st proj_point mk_to_p256_comm_monoid
-let point_at_inf_c  #c _ =
+val point_at_inf_c {| curve_params |} : SE.one_st proj_point mk_to_pcurve_comm_monoid
+let point_at_inf_c {| c:curve_params |} _ =
   PL.to_aff_point_at_infinity_lemma #c;
   point_at_inf
 
-val point_add_c {| curve_params |} : SE.mul_st proj_point mk_to_p256_comm_monoid
+val point_add_c {| curve_params |} : SE.mul_st proj_point mk_to_pcurve_comm_monoid
 let point_add_c p q =
   PL.to_aff_point_add_lemma p q;
   point_add p q
 
-val point_double_c {| curve_params |} : SE.sqr_st proj_point mk_to_p256_comm_monoid
+val point_double_c {| curve_params |} : SE.sqr_st proj_point mk_to_pcurve_comm_monoid
 let point_double_c p =
   PL.to_aff_point_double_lemma p;
   point_double p
 
-let mk_p256_concrete_ops {| curve_params |} : SE.concrete_ops proj_point = {
-  SE.to = mk_to_p256_comm_monoid;
+let mk_pcurve_concrete_ops {| curve_params |} : SE.concrete_ops proj_point = {
+  SE.to = mk_to_pcurve_comm_monoid;
   SE.one = point_at_inf_c;
   SE.mul = point_add_c;
   SE.sqr = point_double_c;
@@ -53,17 +53,17 @@ let mk_p256_concrete_ops {| curve_params |} : SE.concrete_ops proj_point = {
 
 // [a]P
 let point_mul {| c:curve_params |} (a:qelem) (p:proj_point) : proj_point =
-  SE.exp_fw mk_p256_concrete_ops p c.bits a 4
+  SE.exp_fw mk_pcurve_concrete_ops p c.bits a 4
 
 // [a]G
 let point_mul_g {| c:curve_params |} (a:qelem) : proj_point = point_mul a base_point
 
 // [a1]G + [a2]P
 let point_mul_double_g {| c:curve_params |} (a1 a2:qelem) (p:proj_point) : proj_point =
-  SE.exp_double_fw mk_p256_concrete_ops base_point c.bits a1 p a2 5
+  SE.exp_double_fw mk_pcurve_concrete_ops base_point c.bits a1 p a2 5
 
 
-///  ECDSA over the P256 elliptic curve
+///  ECDSA
 
 type hash_alg_ecdsa =
   | NoHash
@@ -169,7 +169,7 @@ let ecdsa_verification_agile #c alg msg_len msg public_key signature_r signature
   ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s
 
 
-///  ECDH over the P256 elliptic curve
+///  ECDH
 
 let secret_to_public {| c:curve_params |} (private_key:lbytes c.bytes) : option (lbytes (2*c.bytes)) =
   let sk = nat_from_bytes_be private_key in
@@ -190,7 +190,7 @@ let ecdh {| c:curve_params |} (their_public_key:lbytes (2*c.bytes)) (private_key
   else None
 
 
-///  Parsing and Serializing public keys
+///  Parsing and Serializing ECDSA public keys
 
 // raw          = [ x; y ], 64 bytes
 // uncompressed = [ 0x04; x; y ], 65 bytes
@@ -218,59 +218,3 @@ let pk_compressed_from_raw {| c:curve_params |} (pk:lbytes (2*c.bytes)) : lbytes
   let is_pk_y_odd = nat_from_bytes_be pk_y % 2 = 1 in // <==> pk_y % 2 = 1
   let pk0 = if is_pk_y_odd then u8 0x03 else u8 0x02 in
   concat (create 1 pk0) pk_x
-
-///  P-256 Curve Parameters
-
-let p256_bits = 256
-
-let p256_bytes : (x:nat{8 * x >= p256_bits}) = 32
-
-let p256_prime: (a:pos{a = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff /\ a < pow2 256}) =
-  let p = pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1 in
-  assert_norm (0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff = p);
-  assert_norm (p < pow2 256); p
-
-let p256_order: (a:pos{a < pow2 256}) =
-  let o = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551 in
-  assert_norm (o < pow2 256); o
-
-let p256_a_coeff : (x:pos{x < p256_prime}) = (-3) % p256_prime
-let p256_b_coeff : (x:pos{x < p256_prime}) =
-  let b = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604b in
-  assert_norm (b < p256_prime); b
-
-let p256_basepoint_x : (x:pos{x < p256_prime}) =
-  let x = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296 in
-  assert_norm (x < p256_prime); x
-let p256_basepoint_y : (x:pos{x < p256_prime}) =
-  let y = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5 in
-  assert_norm (y < p256_prime); y
-
-let p256_basepoint = (p256_basepoint_x, p256_basepoint_y, 1) 
-let p256_mont_mu: (x:uint64{(1 + p256_prime * v x) % pow2 64 == 0}) =
-  assert_norm((1 + p256_prime) % pow2 64 == 0);
-  u64 1
-
-let p256_mont_q_mu: (x:uint64{(1 + p256_order * v x) % pow2 64 == 0}) =
-  assert_norm((1 + p256_order * 0xccd1c8aaee00bc4f) % pow2 64 == 0);
-  u64 0xccd1c8aaee00bc4f
-
-let p256_bn_limbs: (x:size_t{v x = (p256_bytes + 7) / 8}) =
-  assert_norm(4 == (p256_bytes + 7) / 8);
-  size 4
-  
-(*
-instance p256_params : curve_params = {
-  bits = p256_bits;
-  bytes = p256_bytes;
-  prime = p256_prime;
-  order = p256_order;
-  basepoint_x = p256_basepoint_x;
-  basepoint_y = p256_basepoint_y;
-  a_coeff = p256_a_coeff;
-  b_coeff = p256_b_coeff;
-  mont_mu = p256_mont_mu;
-  mont_q_mu = p256_mont_mu;
-  bn_limbs = p256_bn_limbs
-}
-*)

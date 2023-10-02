@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Bignum
+module Hacl.Impl.PCurves.Bignum
 
 open FStar.Mul
 open FStar.HyperStack.All
@@ -8,7 +8,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-module S = Spec.P256
+module S = Spec.PCurves
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 module BD = Hacl.Spec.Bignum.Definitions

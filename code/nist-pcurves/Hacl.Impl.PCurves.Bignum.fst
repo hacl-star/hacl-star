@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Bignum
+module Hacl.Impl.PCurves.Bignum
 
 open FStar.Mul
 open FStar.HyperStack.All
