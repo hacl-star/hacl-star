@@ -537,7 +537,6 @@ void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_MD_state_32 *s)
   Hacl_Streaming_MD_state_32 scrut = *s;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
-  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_SHA2_Scalar32_sha256_init(block_state);
   Hacl_Streaming_MD_state_32
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
@@ -836,7 +835,6 @@ void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_MD_state_32 *s)
   Hacl_Streaming_MD_state_32 scrut = *s;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
-  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_SHA2_Scalar32_sha224_init(block_state);
   Hacl_Streaming_MD_state_32
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
@@ -962,7 +960,6 @@ void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_MD_state_64 *s)
   Hacl_Streaming_MD_state_64 scrut = *s;
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
-  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_SHA2_Scalar32_sha512_init(block_state);
   Hacl_Streaming_MD_state_64
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
@@ -1262,7 +1259,6 @@ void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_MD_state_64 *s)
   Hacl_Streaming_MD_state_64 scrut = *s;
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
-  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_SHA2_Scalar32_sha384_init(block_state);
   Hacl_Streaming_MD_state_64
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
