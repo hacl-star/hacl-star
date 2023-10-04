@@ -711,18 +711,12 @@ static inline void barrett_reduction(uint64_t *z, uint64_t *t)
   FStar_UInt128_uint128 c00 = carry0;
   FStar_UInt128_uint128
   carry1 = FStar_UInt128_shift_right(FStar_UInt128_add_mod(z11, c00), (uint32_t)56U);
-  KRML_HOST_IGNORE(FStar_UInt128_uint128_to_uint64(FStar_UInt128_add_mod(z11, c00))
-    & (uint64_t)0xffffffffffffffU);
   FStar_UInt128_uint128 c10 = carry1;
   FStar_UInt128_uint128
   carry2 = FStar_UInt128_shift_right(FStar_UInt128_add_mod(z21, c10), (uint32_t)56U);
-  KRML_HOST_IGNORE(FStar_UInt128_uint128_to_uint64(FStar_UInt128_add_mod(z21, c10))
-    & (uint64_t)0xffffffffffffffU);
   FStar_UInt128_uint128 c20 = carry2;
   FStar_UInt128_uint128
   carry3 = FStar_UInt128_shift_right(FStar_UInt128_add_mod(z31, c20), (uint32_t)56U);
-  KRML_HOST_IGNORE(FStar_UInt128_uint128_to_uint64(FStar_UInt128_add_mod(z31, c20))
-    & (uint64_t)0xffffffffffffffU);
   FStar_UInt128_uint128 c30 = carry3;
   FStar_UInt128_uint128
   carry4 = FStar_UInt128_shift_right(FStar_UInt128_add_mod(z41, c30), (uint32_t)56U);

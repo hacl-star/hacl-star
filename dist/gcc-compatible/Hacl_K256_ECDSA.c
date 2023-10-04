@@ -1223,7 +1223,7 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
   memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
   gz[0U] = (uint64_t)1U;
   uint64_t
-  q2[15U] =
+  buf[15U] =
     {
       (uint64_t)4496295042185355U, (uint64_t)3125448202219451U, (uint64_t)1239608518490046U,
       (uint64_t)2687445637493112U, (uint64_t)77979604880139U, (uint64_t)3360310474215011U,
@@ -1231,9 +1231,9 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
       (uint64_t)118285133003718U, (uint64_t)434519962075150U, (uint64_t)1114612377498854U,
       (uint64_t)3488596944003813U, (uint64_t)450716531072892U, (uint64_t)66044973203836U
     };
-  KRML_HOST_IGNORE(q2);
+  KRML_HOST_IGNORE(buf);
   uint64_t
-  q3[15U] =
+  buf0[15U] =
     {
       (uint64_t)1277614565900951U, (uint64_t)378671684419493U, (uint64_t)3176260448102880U,
       (uint64_t)1575691435565077U, (uint64_t)167304528382180U, (uint64_t)2600787765776588U,
@@ -1241,9 +1241,9 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
       (uint64_t)265969268774814U, (uint64_t)1913228635640715U, (uint64_t)2831959046949342U,
       (uint64_t)888030405442963U, (uint64_t)1817092932985033U, (uint64_t)101515844997121U
     };
-  KRML_HOST_IGNORE(q3);
+  KRML_HOST_IGNORE(buf0);
   uint64_t
-  q4[15U] =
+  buf1[15U] =
     {
       (uint64_t)34056422761564U, (uint64_t)3315864838337811U, (uint64_t)3797032336888745U,
       (uint64_t)2580641850480806U, (uint64_t)208048944042500U, (uint64_t)1233795288689421U,
@@ -1251,7 +1251,7 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
       (uint64_t)12245672982162U, (uint64_t)2119364213800870U, (uint64_t)2034960311715107U,
       (uint64_t)3172697815804487U, (uint64_t)4185144850224160U, (uint64_t)2792055915674U
     };
-  KRML_HOST_IGNORE(q4);
+  KRML_HOST_IGNORE(buf1);
   uint64_t *r1 = scalar;
   uint64_t *r2 = scalar + (uint32_t)1U;
   uint64_t *r3 = scalar + (uint32_t)2U;
@@ -1615,8 +1615,8 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint8_t *nonce
 )
 {
-  uint64_t oneq[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
-  KRML_HOST_IGNORE(oneq);
+  uint64_t buf[4U] = { (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U };
+  KRML_HOST_IGNORE(buf);
   uint64_t rsdk_q[16U] = { 0U };
   uint64_t *r_q = rsdk_q;
   uint64_t *s_q = rsdk_q + (uint32_t)4U;
