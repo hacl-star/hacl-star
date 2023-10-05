@@ -57,6 +57,12 @@
 #  define KRML_HOST_IGNORE(x) (void)(x)
 #endif
 
+#ifndef KRML_MAYBE_UNUSED
+#  if defined(__GNUC__)
+#    define KRML_MAYBE_UNUSED __attribute__((unused))
+#  endif
+#endif
+
 #ifndef KRML_NOINLINE
 #  if defined(_MSC_VER)
 #    define KRML_NOINLINE __declspec(noinline)
