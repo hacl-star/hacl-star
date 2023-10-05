@@ -229,9 +229,8 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
   if (rem1 > (uint32_t)0U)
   {
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
-    uint8_t *uu____3 = text + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem * sizeof (uint8_t));
+    memcpy(plain, text + nb * (uint32_t)64U, rem * sizeof (uint8_t));
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, nb);
     KRML_MAYBE_FOR16(i,
@@ -279,9 +278,8 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
   if (rem1 > (uint32_t)0U)
   {
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
-    uint8_t *uu____3 = cipher + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem * sizeof (uint8_t));
+    memcpy(plain, cipher + nb * (uint32_t)64U, rem * sizeof (uint8_t));
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, nb);
     KRML_MAYBE_FOR16(i,
