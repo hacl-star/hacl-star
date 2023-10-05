@@ -885,6 +885,21 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
     }
   )
 
+val lemma_barrett_reduce''':
+  x:nat{x < pow2 512} ->
+  (r:nat) ->
+  (qml:nat) ->
+  (u:nat) ->
+  (z:nat) ->
+  Lemma
+    (requires
+      r == x % pow2 264 /\
+      qml = (((((x / pow2 248) * (pow2 512 / S.q)) / pow2 264) * S.q) % pow2 264) /\
+      u == (if r < qml then pow2 264 + r - qml else r - qml) /\
+      z == (if u < S.q then u else u - S.q))
+    (ensures z = x % S.q)
+
+
 #restart-solver
 #reset-options "--z3rlimit 60 --fuel 0 --ifuel 0 --split_queries always"
 
@@ -892,7 +907,7 @@ let aux (a b c:int)
   : Lemma (requires 0 <= b /\ c < a)
           (ensures 0 <= a + b -c) = ()
 
-let lemma_barrett_reduce' x =
+let lemma_barrett_reduce''' x r qml u z =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512);
   assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
@@ -903,6 +918,7 @@ let lemma_barrett_reduce' x =
 
   assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
   let q:nat = ((x / pow2 248) * m) / pow2 264 in
+
   let a' = (x % pow2 264) - (q * l) % pow2 264 in
   assert_norm (2 * l < pow2 264);
   calc (<) {
@@ -931,27 +947,26 @@ let lemma_barrett_reduce' x =
   Math.Lemmas.modulo_lemma (x - ((x * m) / pow2 512) * l) (pow2 264);
   Math.Lemmas.lemma_mod_sub x l ((x*m)/pow2 512);
   lemma_1 x (q*l) (pow2 264);
-  let r = x % pow2 264 in
   FStar.Math.Lemmas.modulo_range_lemma x (pow2 264);
   assert (0 <= r);
-  let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
   FStar.Math.Lemmas.modulo_range_lemma
     ((((x / pow2 248) * m) / pow2 264) * l)
     (pow2 264);
   assert (qml < pow2 264);
-  let u : nat =
-    if r < qml
-    then let s = pow2 264 + r - qml in
-         aux (pow2 264) r qml;
-         assert (0 <= s);
-         s
-    else let _ = assert (r >= qml) in
-         let s = r - qml in
-         assert (s >= 0);
-         s in
-  let z : nat = if u < l then u else u - l in
   assert (u < 2 * l);
   Math.Lemmas.modulo_lemma u (pow2 264);
   assert (u == x - q * l);
   lemma_barrett_reduce'' u z x q;
   assert (z == x % S.q)
+
+let lemma_barrett_reduce' x =
+  let m = pow2 512 / S.q in
+  let l = S.q in
+  let r = x % pow2 264 in
+  let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
+  let u : nat =
+    if r < qml
+    then pow2 264 + r - qml
+    else r - qml in
+  let z : nat = if u < l then u else u - l in
+  lemma_barrett_reduce''' x r qml u z
