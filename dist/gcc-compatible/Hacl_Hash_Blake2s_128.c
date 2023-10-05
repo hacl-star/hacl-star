@@ -268,7 +268,6 @@ Hacl_Blake2s_128_blake2s_update_multi(
   uint32_t nb
 )
 {
-  KRML_HOST_IGNORE(len);
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint64_t totlen = prev + (uint64_t)((i + (uint32_t)1U) * (uint32_t)64U);

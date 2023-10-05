@@ -92,7 +92,6 @@ EverCrypt_DRBG_uu___is_SHA1_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
   if (projectee.tag == SHA1_s)
   {
     return true;
@@ -106,7 +105,6 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
   if (projectee.tag == SHA2_256_s)
   {
     return true;
@@ -120,7 +118,6 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
   if (projectee.tag == SHA2_384_s)
   {
     return true;
@@ -134,7 +131,6 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
   if (projectee.tag == SHA2_512_s)
   {
     return true;

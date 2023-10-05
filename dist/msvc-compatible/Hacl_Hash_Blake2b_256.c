@@ -268,7 +268,6 @@ Hacl_Blake2b_256_blake2b_update_multi(
   uint32_t nb
 )
 {
-  KRML_HOST_IGNORE(len);
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     FStar_UInt128_uint128

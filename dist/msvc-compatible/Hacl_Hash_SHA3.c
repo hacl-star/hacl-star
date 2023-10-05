@@ -125,9 +125,10 @@ Hacl_Hash_SHA3_update_last_sha3(
   if (input_len == len)
   {
     Hacl_Impl_SHA3_absorb_inner(len, input, s);
+    uint8_t *uu____0 = input + input_len;
     uint8_t lastBlock_[200U] = { 0U };
     uint8_t *lastBlock = lastBlock_;
-    memcpy(lastBlock, input + input_len, (uint32_t)0U * sizeof (uint8_t));
+    memcpy(lastBlock, uu____0, (uint32_t)0U * sizeof (uint8_t));
     lastBlock[0U] = suffix;
     Hacl_Impl_SHA3_loadState(len, lastBlock, s);
     if (!((suffix & (uint8_t)0x80U) == (uint8_t)0U) && (uint32_t)0U == len - (uint32_t)1U)
@@ -166,7 +167,8 @@ hash_buf2;
 
 Spec_Hash_Definitions_hash_alg Hacl_Streaming_Keccak_get_alg(Hacl_Streaming_Keccak_state *s)
 {
-  Hacl_Streaming_Keccak_hash_buf block_state = (*s).block_state;
+  Hacl_Streaming_Keccak_state scrut = *s;
+  Hacl_Streaming_Keccak_hash_buf block_state = scrut.block_state;
   return block_state.fst;
 }
 
@@ -807,7 +809,6 @@ Hacl_Impl_SHA3_keccak(
   uint8_t *output
 )
 {
-  KRML_HOST_IGNORE(capacity);
   uint32_t rateInBytes = rate / (uint32_t)8U;
   uint64_t s[25U] = { 0U };
   absorb(s, rateInBytes, inputByteLen, input, delimitedSuffix);

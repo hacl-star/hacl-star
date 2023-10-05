@@ -181,7 +181,6 @@ salsa20_encrypt(
   memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
   uint32_t k[16U] = { 0U };
-  KRML_HOST_IGNORE(k);
   uint32_t rem = len % (uint32_t)64U;
   uint32_t nb = len / (uint32_t)64U;
   uint32_t rem1 = len % (uint32_t)64U;
@@ -218,8 +217,9 @@ salsa20_encrypt(
   if (rem1 > (uint32_t)0U)
   {
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
+    uint8_t *uu____3 = text + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, text + nb * (uint32_t)64U, rem * sizeof (uint8_t));
+    memcpy(plain, uu____3, rem * sizeof (uint8_t));
     uint32_t k1[16U] = { 0U };
     salsa20_core(k1, ctx, nb);
     uint32_t bl[16U] = { 0U };
@@ -294,7 +294,6 @@ salsa20_decrypt(
   memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
   uint32_t k[16U] = { 0U };
-  KRML_HOST_IGNORE(k);
   uint32_t rem = len % (uint32_t)64U;
   uint32_t nb = len / (uint32_t)64U;
   uint32_t rem1 = len % (uint32_t)64U;
@@ -331,8 +330,9 @@ salsa20_decrypt(
   if (rem1 > (uint32_t)0U)
   {
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
+    uint8_t *uu____3 = cipher + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, cipher + nb * (uint32_t)64U, rem * sizeof (uint8_t));
+    memcpy(plain, uu____3, rem * sizeof (uint8_t));
     uint32_t k1[16U] = { 0U };
     salsa20_core(k1, ctx, nb);
     uint32_t bl[16U] = { 0U };
