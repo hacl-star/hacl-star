@@ -71,6 +71,8 @@ uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
 bool
 Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_state projectee)
 {
+  KRML_HOST_IGNORE(a);
+  KRML_HOST_IGNORE(projectee);
   return true;
 }
 
@@ -1084,6 +1086,7 @@ Hacl_HMAC_DRBG_generate(
 
 void Hacl_HMAC_DRBG_free(Spec_Hash_Definitions_hash_alg uu___, Hacl_HMAC_DRBG_state s)
 {
+  KRML_HOST_IGNORE(uu___);
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
