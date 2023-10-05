@@ -731,22 +731,22 @@ let blake2 a d p kk k nn =
   let s = blake2_update a kk k d s in
   blake2_finish a s nn
 
-(* TODO: Add blake2_params arguments to both functions below *)
-
 val blake2s:
     d:bytes
+  -> p:blake2_params Blake2S
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 64 else length d + 64 < pow2 64)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
   Tot (lbytes nn)
 
-let blake2s d kk k n = blake2 Blake2S d blake2s_default_params kk k n
+let blake2s d p kk k n = blake2 Blake2S d p kk k n
 
 val blake2b:
     d:bytes
+  -> p:blake2_params Blake2B
   -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 64)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
 
-let blake2b d kk k n = blake2 Blake2B d blake2b_default_params kk k n
+let blake2b d p kk k n = blake2 Blake2B d p kk k n

@@ -851,8 +851,8 @@ let test_one (v:vec) =
   let expected = tag in
   let computed =
     match a with
-    | BLAKE2S -> Spec.Blake2.blake2s plain (Seq.length key) key 32
-    | BLAKE2B -> Spec.Blake2.blake2b plain (Seq.length key) key 64 in
+    | BLAKE2S -> Spec.Blake2.blake2s plain Spec.Blake2.blake2s_default_params (Seq.length key) key 32
+    | BLAKE2B -> Spec.Blake2.blake2b plain Spec.Blake2.blake2b_default_params (Seq.length key) key 64 in
 
   IO.print_string ("\n\nTEST Blake2 "^(string_of_int num)^":");
   PS.print_compare true (length expected) expected computed
