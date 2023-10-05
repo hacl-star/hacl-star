@@ -60,6 +60,8 @@
 #ifndef KRML_MAYBE_UNUSED
 #  if defined(__GNUC__)
 #    define KRML_MAYBE_UNUSED __attribute__((unused))
+#  else
+#    define KRML_MAYBE_UNUSED
 #  endif
 #endif
 
