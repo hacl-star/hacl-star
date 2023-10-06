@@ -33,32 +33,28 @@ let row_v_lemma #a #m h0 h1 r1 r2 = ()
 
 let create_default_params a salt personal =
   match a with
-  | Spec.Blake2S ->
-    Mkblake2s_params
-      (u8 32)
-      (u8 0)
-      (u8 1)
-      (u8 1)
-      (u32 0)
-      (u32 0)
-      (u16 0)
-      (u8 0)
-      (u8 0)
-      salt
-      personal
-  | Spec.Blake2B ->
-    Mkblake2b_params
-      (u8 64)
-      (u8 0)
-      (u8 1)
-      (u8 1)
-      (u32 0)
-      (u32 0)
-      (u32 0)
-      (u8 0)
-      (u8 0)
-      salt
-      personal
+  | Spec.Blake2S -> {
+      digest_length = u8 32;
+      key_length = u8 0;
+      fanout = u8 1;
+      depth = u8 1;
+      leaf_length = u32 0;
+      node_offset = u32 0;
+      xof_length = u16 0;
+      node_depth = u8 0;
+      inner_length = u8 0;
+      salt; personal } <: blake2s_params
+  | Spec.Blake2B -> {
+      digest_length = u8 64;
+      key_length = u8 0;
+      fanout = u8 1;
+      depth = u8 1;
+      leaf_length = u32 0;
+      node_offset = u32 0;
+      xof_length = u32 0;
+      node_depth = u8 0;
+      inner_length = u8 0;
+      salt; personal }
 
 #push-options "--z3rlimit 50"
 let g_rowi_disjoint #a #m st idx1 idx2 =
