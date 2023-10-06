@@ -10,12 +10,12 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: regenerate hints and dist
         run: |
           # build the new artifacts (in ./result)
-          nix build .#hacl.passthru.build-products
+          nix build --no-write-lock-file .#hacl.passthru.build-products
           # delete the old ones
           git rm -r hints dist/*/*
           # copy the new artifacts
@@ -33,8 +33,13 @@ jobs:
         run: |
           [[ 1 -lt $(git diff --compact-summary HEAD~.. | grep -v INFO.txt | wc -l) ]]
 
+      - name: leave no uncommitted changes
+        run: |
+          git restore .
+          git clean -xfd
+
       - name: create pull request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.HACL_BOT }}
           branch: "hints-and-dist-main"
