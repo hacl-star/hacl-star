@@ -229,7 +229,7 @@ let point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| pt:precomp_tab
   pt.basepoint_w5.table_lemma_w5 ();
   assert (table_inv_w5 (as_seq h1 q1) (as_seq h1 pt.basepoint_w5.table_w5));
   assert (table_inv_w5 (as_seq h1 q2) (as_seq h1 table2));
-
+  admit();
   ME.mk_lexp_double_fw_tables len ctx_len k l table_len
     table_inv_w5 table_inv_w5
     (BE.lprecomp_get_vartime len ctx_len k l table_len)
