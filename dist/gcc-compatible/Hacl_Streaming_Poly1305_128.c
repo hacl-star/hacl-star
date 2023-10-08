@@ -58,7 +58,6 @@ Hacl_Streaming_Poly1305_128_init(uint8_t *k, Hacl_Streaming_Poly1305_128_poly130
   uint8_t *k_ = scrut.p_key;
   uint8_t *buf = scrut.buf;
   Lib_IntVector_Intrinsics_vec128 *block_state = scrut.block_state;
-  KRML_HOST_IGNORE((void *)(uint8_t)0U);
   Hacl_Poly1305_128_poly1305_init(block_state, k);
   memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
@@ -312,7 +311,7 @@ Hacl_Streaming_Poly1305_128_finish(
   {
     ite1 = r % (uint32_t)16U;
   }
-  uint64_t prev_len_last = total_len - (uint64_t)ite1;
+  KRML_HOST_IGNORE(total_len - (uint64_t)ite1);
   uint32_t ite2;
   if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
   {
