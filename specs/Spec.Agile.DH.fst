@@ -28,7 +28,7 @@ inline_for_extraction
 let prime (a:algorithm) =
   match a with
   | DH_Curve25519 -> Spec.Curve25519.prime
-  | DH_P256 -> Spec.P256.prime
+  | DH_P256 -> Spec.P256.p256_prime
 
 /// Types
 
@@ -53,10 +53,10 @@ let dh a s p =
     let is_valid = not (lbytes_eq (create (size_public a) (u8 0)) output) in
     if is_valid then Some output else None
   | DH_P256 ->
-    Spec.P256.ecdh p s
+    Spec.PCurves.ecdh p s
 
 val secret_to_public: a:algorithm -> scalar a -> Tot (option (serialized_point a))
 let secret_to_public a kpriv =
   match a with
   | DH_Curve25519 -> Some (Spec.Curve25519.secret_to_public kpriv)
-  | DH_P256 -> Spec.P256.secret_to_public kpriv
+  | DH_P256 -> Spec.PCurves.secret_to_public kpriv
