@@ -1,4 +1,4 @@
-module Hacl.PCurves
+module Hacl.P256
 
 open FStar.Mul
 open FStar.HyperStack.All
@@ -21,12 +21,14 @@ module S = Spec.PCurves
 module BN = Hacl.Impl.PCurves.Bignum
 module P = Hacl.Impl.PCurves.Point
 
+open Hacl.PCurves.PrecompTable.P256
+
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val msg_as_felem:
     alg:S.hash_alg_ecdsa
-  -> msg_len:size_t{v msg_len >= S.min_input_length alg}
+  -> msg_len:size_t{S.min_input_length alg (v msg_len)}
   -> msg:lbytes msg_len
   -> res:BN.felem ->
   Stack unit
@@ -56,7 +58,7 @@ let msg_as_felem alg msg_len msg res =
   end;
   LowStar.Ignore.ignore msg_len;
   let mHash32 = sub mHash 0ul 32ul in
-  BN.bn_from_bytes_be4 res mHash32;
+  BN.bn_from_bytes_be res mHash32;
   Hacl.Impl.PCurves.Scalar.qmod_short res res;
   pop_frame ()
 
@@ -65,7 +67,7 @@ inline_for_extraction noextract
 val ecdsa_signature: alg:S.hash_alg_ecdsa -> ecdsa_sign_p256_st alg
 let ecdsa_signature alg signature msg_len msg private_key nonce =
   push_frame ();
-  let m_q = BN.create_felem () in
+  let m_q = BN.create_felem #p256_params in
   msg_as_felem alg msg_len msg m_q;
   let res = ecdsa_sign_msg_as_qelem signature m_q private_key nonce in
   pop_frame ();
@@ -76,7 +78,7 @@ inline_for_extraction noextract
 val ecdsa_verification: alg:S.hash_alg_ecdsa -> ecdsa_verify_p256_st alg
 let ecdsa_verification alg msg_len msg public_key signature_r signature_s =
   push_frame ();
-  let m_q = BN.create_felem () in
+  let m_q = BN.create_felem #p256_params in
   msg_as_felem alg msg_len msg m_q;
   let res = ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s in
   pop_frame ();
@@ -111,7 +113,7 @@ let ecdsa_verif_without_hash msg_len msg public_key signature_r signature_s =
 
 let validate_public_key public_key =
   push_frame ();
-  let point_jac = P.create_point () in
+  let point_jac = P.create_point #p256_params in
   let res = P.load_point_vartime point_jac public_key in
   pop_frame ();
   res
@@ -119,9 +121,9 @@ let validate_public_key public_key =
 
 let validate_private_key private_key =
   push_frame ();
-  let bn_sk = BN.create_felem () in
-  BN.bn_from_bytes_be4 bn_sk private_key;
-  let res = Hacl.Impl.PCurves.Scalar.bn_is_lt_order_and_gt_zero_mask4 bn_sk in
+  let bn_sk = BN.create_felem #p256_params in
+  BN.bn_from_bytes_be bn_sk private_key;
+  let res = Hacl.Impl.PCurves.Scalar.bn_is_lt_order_and_gt_zero_mask bn_sk in
   pop_frame ();
   Hacl.Bignum.Base.unsafe_bool_of_limb res
 

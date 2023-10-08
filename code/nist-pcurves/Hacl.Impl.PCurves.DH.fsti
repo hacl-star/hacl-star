@@ -8,10 +8,11 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module S = Spec.PCurves
+module PP = Hacl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val ecp256dh_i {| cp:S.curve_params |} :
+val ecp256dh_i {| cp:S.curve_params |} {| PP.precomp_tables |} :
     public_key:lbuffer uint8 (2ul *. size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->
   Stack bool
@@ -22,7 +23,7 @@ val ecp256dh_i {| cp:S.curve_params |} :
     (r <==> Some? pk) /\ (r ==> (as_seq h1 public_key == Some?.v pk))))
 
 
-val ecp256dh_r {| cp:S.curve_params |} :
+val ecp256dh_r {| cp:S.curve_params |} {| PP.precomp_tables |} :
     shared_secret:lbuffer uint8 (2ul *. size cp.bytes)
   -> their_pubkey:lbuffer uint8 (2ul *. size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->

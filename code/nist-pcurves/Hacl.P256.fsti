@@ -1,4 +1,4 @@
-module Hacl.PCurves
+module Hacl.P256
 
 open FStar.Mul
 open FStar.HyperStack.All

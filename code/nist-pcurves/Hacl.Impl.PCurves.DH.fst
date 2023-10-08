@@ -13,11 +13,12 @@ open Hacl.Impl.PCurves.Point
 open Hacl.Impl.PCurves.PointMul
 
 module S = Spec.PCurves
+module PP = Hacl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 [@CInline]
-let ecp256dh_i {| cp:S.curve_params |} public_key private_key =
+let ecp256dh_i {| cp:S.curve_params |} {| PP.precomp_tables |} public_key private_key =
   push_frame ();
   let tmp = create (4ul *. cp.bn_limbs) (u64 0) in
   let sk = sub tmp 0ul cp.bn_limbs in
@@ -31,7 +32,7 @@ let ecp256dh_i {| cp:S.curve_params |} public_key private_key =
 
 
 inline_for_extraction noextract
-val ecp256dh_r_: {| cp:S.curve_params |} -> is_pk_valid:bool -> ss:lbuffer uint8 (2ul *. size cp.bytes) -> pk:point -> sk:felem -> Stack unit
+val ecp256dh_r_: {| cp:S.curve_params |} -> {| PP.precomp_tables |} -> is_pk_valid:bool -> ss:lbuffer uint8 (2ul *. size cp.bytes) -> pk:point -> sk:felem -> Stack unit
   (requires fun h ->
     live h ss /\ live h pk /\ live h sk /\
     disjoint ss pk /\ disjoint ss sk /\ disjoint pk sk /\
@@ -41,7 +42,7 @@ val ecp256dh_r_: {| cp:S.curve_params |} -> is_pk_valid:bool -> ss:lbuffer uint8
     then S.point_store (S.point_mul (as_nat h0 sk) (from_mont_point (as_point_nat h0 pk)))
     else as_seq h0 ss))
 
-let ecp256dh_r_ {| cp:S.curve_params |} is_pk_valid ss pk sk =
+let ecp256dh_r_ {| cp:S.curve_params |} {| PP.precomp_tables |} is_pk_valid ss pk sk =
   push_frame ();
   let ss_proj = create_point #cp in
   if is_pk_valid then begin
@@ -51,7 +52,7 @@ let ecp256dh_r_ {| cp:S.curve_params |} is_pk_valid ss pk sk =
 
 
 [@CInline]
-let ecp256dh_r {| cp:S.curve_params |} shared_secret their_pubkey private_key =
+let ecp256dh_r {| cp:S.curve_params |} {| PP.precomp_tables |} shared_secret their_pubkey private_key =
   push_frame ();
   let open FStar.Mul in
   assume (4 * cp.bytes < max_size_t);

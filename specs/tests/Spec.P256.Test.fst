@@ -4,6 +4,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.Meta
 
+open Spec.PCurves
 open Spec.P256
 open Spec.ECDSA.Test.Vectors
 open Spec.Hash.Definitions
