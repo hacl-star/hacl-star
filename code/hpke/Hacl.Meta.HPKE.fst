@@ -1,6 +1,7 @@
 module Hacl.Meta.HPKE
 
 friend Hacl.Impl.HPKE
+#set-options "--z3rlimit 200 --query_stats --ifuel 2 --fuel 2"
 
 %splice[
   hpke_setupBaseS_higher;

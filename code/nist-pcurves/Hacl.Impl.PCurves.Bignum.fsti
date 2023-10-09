@@ -132,7 +132,7 @@ val bn_sub: {| cp:S.curve_params |} -> res:felem -> x:felem -> y:felem -> Stack 
     live h x /\ live h y /\ live h res /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res)
   (ensures fun h0 c h1 -> modifies (loc res) h0 h1 /\ v c <= 1 /\
-    as_nat h1 res - v c * pow2 cp.bits == as_nat h0 x - as_nat h0 y /\
+    as_nat h1 res - v c * pow2 (64 * v cp.bn_limbs) == as_nat h0 x - as_nat h0 y /\
     (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
 
 

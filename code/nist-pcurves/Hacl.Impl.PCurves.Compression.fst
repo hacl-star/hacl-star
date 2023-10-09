@@ -25,18 +25,19 @@ let uncompressed_to_raw {| cp:S.curve_params |} pk pk_raw =
     copy pk_raw (sub pk 1ul (2ul *. size cp.bytes));
     true end
 
-
+#push-options "--split_queries always"
 let compressed_to_raw {| cp:S.curve_params |} pk pk_raw =
   push_frame ();
   let xa = create_felem #cp in
   let ya = create_felem #cp in
   let pk_xb = sub pk 1ul (size cp.bytes) in
   let b = P.aff_point_decompress_vartime xa ya pk in
-  admit();
   if b then begin
     let h0 = ST.get () in
     update_sub pk_raw 0ul (size cp.bytes) pk_xb;
     let h1 = ST.get () in
+    FStar.Math.Lemmas.pow2_le_compat (8 * cp.bytes) (cp.bits);
+    assert (as_nat h1 ya < pow2 (8 * cp.bytes));
     update_sub_f h1 pk_raw (size cp.bytes) (size cp.bytes)
       (fun h -> BSeq.nat_to_bytes_be cp.bytes (as_nat h1 ya))
       (fun _ -> bn_to_bytes_be (sub pk_raw (size cp.bytes) (size cp.bytes)) ya);
@@ -45,7 +46,7 @@ let compressed_to_raw {| cp:S.curve_params |} pk pk_raw =
       (LSeq.concat #_ #cp.bytes #cp.bytes (as_seq h0 pk_xb) (BSeq.nat_to_bytes_be cp.bytes (as_nat h0 ya))) end;
   pop_frame ();
   b
-
+#pop-options
 
 let raw_to_uncompressed {| cp:S.curve_params |} pk_raw pk =
   let h0 = ST.get () in

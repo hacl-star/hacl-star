@@ -11,6 +11,7 @@ open Lib.Buffer
 module BN = Hacl.Bignum
 module SN = Hacl.Spec.Bignum
 module BD = Hacl.Spec.Bignum.Definitions
+module BC = Hacl.Bignum.Convert
 module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -70,14 +71,18 @@ let bn_make_u64_4 res a0 a1 a2 a3 =
 let bn_set_zero {| c:S.curve_params |} f =
   if c.bn_limbs = 4ul then 
     bn_make_u64_4 f (u64 0) (u64 0) (u64 0) (u64 0)
-  else admit()
-
+  else (
+    Hacl.Bignum.Convert.bn_from_uint c.bn_limbs (u64 0) f;
+    Hacl.Spec.Bignum.Convert.bn_from_uint_lemma (v c.bn_limbs) (u64 0)
+  )
 
 let bn_set_one {| c:S.curve_params |} f =
   if c.bn_limbs = 4ul then 
     bn_make_u64_4 f (u64 1) (u64 0) (u64 0) (u64 0)
-  else admit()
-
+  else (
+    Hacl.Bignum.Convert.bn_from_uint c.bn_limbs (u64 1) f;
+    Hacl.Spec.Bignum.Convert.bn_from_uint_lemma (v c.bn_limbs) (u64 1)
+  )
 
 ///  Comparison
 
@@ -129,19 +134,17 @@ let bn_add_mod {| c:S.curve_params |} res n x y =
   SN.bn_add_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
   BN.bn_add_mod_n c.bn_limbs n x y res
 
-
 [@CInline]
 let bn_sub {| cp:S.curve_params |} res x y =
   let h0 = ST.get () in
-  SN.bn_sub_lemma (as_seq h0 x) (as_seq h0 y);
   let c = BN.bn_sub_eq_len cp.bn_limbs x y res in
   let h1 = ST.get () in
-  admit();
-//  assert (as_nat h1 res - v c * pow2 (256) = as_nat h0 x - as_nat h0 y);
-//  BD.bn_eval_bound (as_seq h1 res) 4;
-//  BD.bn_eval_bound (as_seq h0 x) 4;
-//  BD.bn_eval_bound (as_seq h0 y) 4;
-//  assert (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y);
+  SN.bn_sub_lemma (as_seq h0 x) (as_seq h0 y);
+  assert (as_nat h1 res - v c * pow2 (64 * v cp.bn_limbs) = as_nat h0 x - as_nat h0 y);
+  BD.bn_eval_bound (as_seq h1 res) (v cp.bn_limbs);
+  BD.bn_eval_bound (as_seq h0 x) (v cp.bn_limbs);
+  BD.bn_eval_bound (as_seq h0 y) (v cp.bn_limbs);
+  assert (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y);
   c
 
 
