@@ -18,6 +18,7 @@ module LSeq = Lib.Sequence
 
 module S = Spec.PCurves
 module SI = Hacl.Spec.PCurves.Finv
+module SI256 = Hacl.Spec.PCurves.Finv.P256
 module FI = Hacl.Impl.PCurves.Finv
 module SM = Hacl.Spec.PCurves.Montgomery
 
@@ -25,6 +26,8 @@ open Hacl.Impl.PCurves.InvSqrt
 open Spec.P256
 open Hacl.Impl.PCurves.Constants
 open Hacl.Impl.PCurves.Constants.P256
+
+module M = Lib.NatMod
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -166,8 +169,8 @@ let p256_finv res a =
   finv_256 tmp1 x2 x30 a;
   copy res tmp1;
   let h1 = ST.get () in
-  assert (fmont_as_nat h1 res == SI.finv (fmont_as_nat h0 a));
-  SI.finv_is_finv_lemma (fmont_as_nat h0 a);
+  assert (fmont_as_nat h1 res == SI256.finv (fmont_as_nat h0 a));
+  SI256.finv_is_finv_lemma (fmont_as_nat h0 a);
   pop_frame ()
 
 
@@ -254,7 +257,7 @@ let p256_fsqrt res a =
   fsqrt_254 tmp2 tmp1 a;
   copy res tmp2;
   let h1 = ST.get () in
-  assert (fmont_as_nat h1 res == SI.fsqrt (fmont_as_nat h0 a));
-  SI.fsqrt_is_fsqrt_lemma (fmont_as_nat h0 a);
+  assert (fmont_as_nat h1 res == SI256.fsqrt (fmont_as_nat h0 a));
+  SI256.fsqrt_is_fsqrt_lemma (fmont_as_nat h0 a);
   pop_frame ()
 

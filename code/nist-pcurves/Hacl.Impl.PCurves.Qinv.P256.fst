@@ -19,6 +19,7 @@ module LSeq = Lib.Sequence
 
 module S = Spec.PCurves
 module SI = Hacl.Spec.PCurves.Qinv
+module SI256 = Hacl.Spec.PCurves.Qinv.P256
 module QI = Hacl.Impl.PCurves.Qinv
 module SM = Hacl.Spec.PCurves.Montgomery
 
@@ -40,7 +41,7 @@ val qinv_x8_x128 (x128 x6 x_11:felem) : Stack unit
     as_nat h x6 < S.order /\ as_nat h x_11 < S.order)
   (ensures fun h0 _ h1 -> modifies (loc x128 |+| loc x6) h0 h1 /\
     as_nat h1 x128 < S.order /\
-    qmont_as_nat h1 x128 = SI.qinv_x8_x128 (qmont_as_nat h0 x6) (qmont_as_nat h0 x_11))
+    qmont_as_nat h1 x128 = SI256.qinv_x8_x128 (qmont_as_nat h0 x6) (qmont_as_nat h0 x_11))
 
 let qinv_x8_x128 x128 x6 x_11 =
   let h0 = ST.get () in
@@ -88,7 +89,7 @@ val qinv_x134_x153 (x128 x_11 x_111 x_1111 x_10101 x_101111:felem) : Stack unit
     as_nat h x_10101 < S.order /\ as_nat h x_101111 < S.order)
   (ensures fun h0 _ h1 -> modifies (loc x128) h0 h1 /\
     as_nat h1 x128 < S.order /\
-    qmont_as_nat h1 x128 = SI.qinv_x134_x153
+    qmont_as_nat h1 x128 = SI256.qinv_x134_x153
       (qmont_as_nat h0 x128) (qmont_as_nat h0 x_11) (qmont_as_nat h0 x_111)
         (qmont_as_nat h0 x_1111) (qmont_as_nat h0 x_10101) (qmont_as_nat h0 x_101111))
 
@@ -135,7 +136,7 @@ val qinv_x153_x177 (x153 x_101 x_111 x_101111:felem) : Stack unit
     as_nat h x_111 < S.order /\ as_nat h x_101111 < S.order)
   (ensures fun h0 _ h1 -> modifies (loc x153) h0 h1 /\
     as_nat h1 x153 < S.order /\
-    qmont_as_nat h1 x153 = SI.qinv_x153_x177 (qmont_as_nat h0 x153)
+    qmont_as_nat h1 x153 = SI256.qinv_x153_x177 (qmont_as_nat h0 x153)
       (qmont_as_nat h0 x_101) (qmont_as_nat h0 x_111) (qmont_as_nat h0 x_101111))
 
 let qinv_x153_x177  x153 x_101 x_111 x_101111 =
@@ -181,7 +182,7 @@ val qinv_x177_x210  (x177 x_111 x_1111 a:felem) : Stack unit
     as_nat h x_1111 < S.order /\ as_nat h a < S.order)
   (ensures fun h0 _ h1 -> modifies (loc x177) h0 h1 /\
     as_nat h1 x177 < S.order /\
-    qmont_as_nat h1 x177 = SI.qinv_x177_x210 (qmont_as_nat h0 a)
+    qmont_as_nat h1 x177 = SI256.qinv_x177_x210 (qmont_as_nat h0 a)
       (qmont_as_nat h0 x177) (qmont_as_nat h0 x_111) (qmont_as_nat h0 x_1111))
 
 let qinv_x177_x210  x177 x_111 x_1111 a =
@@ -238,7 +239,7 @@ val qinv_x210_x240  (x210 x_11 x_101 x_101111:felem) : Stack unit
     as_nat h x_101 < S.order /\ as_nat h x_101111 < S.order)
   (ensures fun h0 _ h1 -> modifies (loc x210) h0 h1 /\
     as_nat h1 x210 < S.order /\
-    qmont_as_nat h1 x210 = SI.qinv_x210_x240 (qmont_as_nat h0 x210)
+    qmont_as_nat h1 x210 = SI256.qinv_x210_x240 (qmont_as_nat h0 x210)
       (qmont_as_nat h0 x_11) (qmont_as_nat h0 x_101) (qmont_as_nat h0 x_101111))
 
 let qinv_x210_x240  x210 x_11 x_101 x_101111 =
@@ -289,7 +290,7 @@ val qinv_x240_x256  (x240 x_1111 x_10101 a:felem) : Stack unit
     as_nat h x_10101 < S.order /\ as_nat h a < S.order)
   (ensures fun h0 _ h1 -> modifies (loc x240) h0 h1 /\
     as_nat h1 x240 < S.order /\
-    qmont_as_nat h1 x240 = SI.qinv_x240_x256 (qmont_as_nat h0 a)
+    qmont_as_nat h1 x240 = SI256.qinv_x240_x256 (qmont_as_nat h0 a)
       (qmont_as_nat h0 x240) (qmont_as_nat h0 x_1111) (qmont_as_nat h0 x_10101))
 
 let qinv_x240_x256  x240 x_1111 x_10101 a =
@@ -327,7 +328,7 @@ val qinv_x8_x256  (x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a:felem) : Stack 
     as_nat h x_101111 < S.order /\ as_nat h a < S.order)
   (ensures fun h0 _ h1 -> modifies (loc x6) h0 h1 /\
     as_nat h1 x6 < S.order /\
-    qmont_as_nat h1 x6 = SI.qinv_x8_x256
+    qmont_as_nat h1 x6 = SI256.qinv_x8_x256
       (qmont_as_nat h0 a) (qmont_as_nat h0 x6) (qmont_as_nat h0 x_11)
         (qmont_as_nat h0 x_101) (qmont_as_nat h0 x_111) (qmont_as_nat h0 x_1111)
           (qmont_as_nat h0 x_10101) (qmont_as_nat h0 x_101111))
@@ -418,8 +419,8 @@ let p256_qinv res r =
   qinv_x8_x256 x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 r;
   copy res x6;
   let h1 = ST.get () in
-  assert (qmont_as_nat h1 res == SI.qinv (qmont_as_nat h0 r));
-  SI.qinv_is_qinv_lemma (qmont_as_nat h0 r);
+  assert (qmont_as_nat h1 res == SI256.qinv (qmont_as_nat h0 r));
+  SI256.qinv_is_qinv_lemma (qmont_as_nat h0 r);
   pop_frame ()
 
 instance p256_inv_sqrt : curve_inv_sqrt = {

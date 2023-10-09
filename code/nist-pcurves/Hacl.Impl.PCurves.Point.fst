@@ -128,8 +128,7 @@ let to_proj_point {| cp:S.curve_params |} {| curve_constants |} res p =
   SM.lemma_to_from_mont_id (as_nat h0 py);
   to_mont rx px;
   to_mont ry py;
-  make_fone rz;
-  admit()
+  make_fone rz
 
 
 ///  Check if a point is on the curve
@@ -197,7 +196,7 @@ let is_on_curve_vartime {| cp:S.curve_params |} {| curve_constants |} p =
 let aff_point_store {| cp:S.curve_params |} res p =
   let px = aff_getx p in
   let py = aff_gety p in
-  admit();
+  Math.Lemmas.pow2_le_compat (8*cp.bytes) (cp.bits);
   bn2_to_bytes_be res px py
 
 [@CInline]
