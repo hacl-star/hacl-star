@@ -13,6 +13,8 @@ module S = Spec.PCurves
 module SM = Hacl.Spec.PCurves.Montgomery
 module BD = Hacl.Spec.Bignum.Definitions
 module LSeq = Lib.Sequence
+module CC = Hacl.Impl.PCurves.Constants
+module FI = Hacl.Impl.PCurves.InvSqrt
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
@@ -127,14 +129,13 @@ let gety {| cp:S.curve_params |} (p:point) : Stack felem
   (ensures fun h0 f h1 -> f == gsub p cp.bn_limbs cp.bn_limbs /\ h0 == h1)
   = sub p cp.bn_limbs cp.bn_limbs
 
-#push-options "--z3rlimit 700"
 inline_for_extraction noextract
 let getz {| cp:S.curve_params |} (p:point) : Stack felem
   (requires fun h -> live h p)
-  (ensures fun h0 f h1 -> f == gsub p (2ul *. cp.bn_limbs) (cp.bn_limbs) /\ h0 == h1)
+  (ensures fun h0 f h1 -> v (2ul *. cp.bn_limbs) == 2 * v cp.bn_limbs /\
+                       f == gsub p (2ul *. cp.bn_limbs) (cp.bn_limbs) /\ h0 == h1)
   = assert (v (2ul *. cp.bn_limbs) == 2 * v cp.bn_limbs);
     sub p (2ul *. cp.bn_limbs) (cp.bn_limbs)
-#pop-options
 
 ///  Create a point
 
@@ -152,13 +153,13 @@ val create_point: {| cp:S.curve_params |} -> StackInline point
     stack_allocated f h0 h1 (LSeq.create (3 * v cp.bn_limbs) (u64 0)))
 
 
-val make_base_point: {| S.curve_params |} -> p:point -> Stack unit
+val make_base_point: {| S.curve_params |} -> {| CC.curve_constants |} -> p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.base_point)
 
 
-val make_point_at_inf: {| S.curve_params |} -> p:point -> Stack unit
+val make_point_at_inf: {| S.curve_params |} -> {| CC.curve_constants |} -> p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.point_at_inf)
@@ -193,7 +194,8 @@ val copy_point: {| S.curve_params |} -> res:point -> p:point -> Stack unit
 ///  Point conversion between Projective and Affine coordinates representations
 
 // to_aff_point = S.to_aff_point + from_mont
-val to_aff_point: {| S.curve_params |} -> res:aff_point -> p:point -> Stack unit
+val to_aff_point {| S.curve_params |} {| CC.curve_constants |} {| FI.curve_inv_sqrt|}:
+  res:aff_point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
@@ -203,7 +205,8 @@ val to_aff_point: {| S.curve_params |} -> res:aff_point -> p:point -> Stack unit
 
 
 // to_aff_point = S.to_aff_point + from_mont
-val to_aff_point_x: {| S.curve_params |} -> res:felem -> p:point -> Stack unit
+val to_aff_point_x {| S.curve_params |} {| CC.curve_constants |} {| FI.curve_inv_sqrt|}:
+  res:felem -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)
@@ -212,7 +215,8 @@ val to_aff_point_x: {| S.curve_params |} -> res:felem -> p:point -> Stack unit
 
 
 // to_proj_point = S.to_proj_point + to_mont
-val to_proj_point: {| S.curve_params |} -> res:point -> p:aff_point -> Stack unit
+val to_proj_point {| S.curve_params |} {| CC.curve_constants |}:
+  res:point -> p:aff_point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ disjoint p res /\
     aff_point_inv h p)
@@ -223,7 +227,7 @@ val to_proj_point: {| S.curve_params |} -> res:point -> p:aff_point -> Stack uni
 
 ///  Check if a point is on the curve
 
-val is_on_curve_vartime: {| S.curve_params |} -> p:aff_point -> Stack bool
+val is_on_curve_vartime: {| S.curve_params |} -> {| CC.curve_constants |} -> p:aff_point -> Stack bool
   (requires fun h -> live h p /\ aff_point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.is_on_curve (as_aff_point_nat_inv h0 p))
@@ -239,7 +243,8 @@ val aff_point_store: {| cp:S.curve_params |} -> res:lbuffer uint8 (2ul *. size c
     as_seq h1 res == S.aff_point_store (as_aff_point_nat_inv h0 p))
 
 
-val point_store: {| cp:S.curve_params |} -> res:lbuffer uint8 (2ul *. size cp.bytes) -> p:point -> Stack unit
+val point_store {| cp:S.curve_params |} {| CC.curve_constants |} {| FI.curve_inv_sqrt|}:
+  res:lbuffer uint8 (2ul *. size cp.bytes) -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint res p /\
     point_inv h p)
@@ -247,7 +252,8 @@ val point_store: {| cp:S.curve_params |} -> res:lbuffer uint8 (2ul *. size cp.by
     as_seq h1 res == S.point_store (from_mont_point (as_point_nat h0 p)))
 
 
-val aff_point_load_vartime: {| cp:S.curve_params |} -> res:aff_point -> b:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
+val aff_point_load_vartime: {| cp:S.curve_params |} -> {| CC.curve_constants |} ->
+  res:aff_point -> b:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
   (requires fun h ->
     live h res /\ live h b /\ disjoint res b)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
@@ -255,7 +261,8 @@ val aff_point_load_vartime: {| cp:S.curve_params |} -> res:aff_point -> b:lbuffe
     (r <==> Some? ps) /\ (r ==> (aff_point_inv h1 res /\ as_aff_point_nat_inv h1 res == Some?.v ps))))
 
 
-val load_point_vartime: {| cp:S.curve_params |} -> res:point -> b:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
+val load_point_vartime: {| cp:S.curve_params |} -> {| CC.curve_constants |} ->
+  res:point -> b:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
   (requires fun h ->
     live h res /\ live h b /\ disjoint res b)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
@@ -264,7 +271,8 @@ val load_point_vartime: {| cp:S.curve_params |} -> res:point -> b:lbuffer uint8 
       from_mont_point (as_point_nat h1 res) == Some?.v ps))))
 
 
-val aff_point_decompress_vartime {| S.curve_params |} (x y:felem) (s:lbuffer uint8 (1ul +. (size S.bytes))) : Stack bool
+val aff_point_decompress_vartime {| S.curve_params |} {| CC.curve_constants |} {| FI.curve_inv_sqrt |}
+  (x y:felem) (s:lbuffer uint8 (1ul +. (size S.bytes))) : Stack bool
   (requires fun h ->
     live h x /\ live h y /\ live h s /\
     disjoint x y /\ disjoint x s /\ disjoint y s)

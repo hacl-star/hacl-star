@@ -15,6 +15,19 @@ module BD = Hacl.Spec.Bignum.Definitions
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+module BN = Hacl.Bignum
+
+inline_for_extraction noextract
+instance bn_inst {| cp:S.curve_params |} : BN.bn U64 = {
+  BN.len = cp.bn_limbs;
+  BN.add = BN.bn_add_eq_len cp.bn_limbs;
+  BN.sub = BN.bn_sub_eq_len cp.bn_limbs;
+  BN.add_mod_n = BN.bn_add_mod_n cp.bn_limbs;
+  BN.sub_mod_n = BN.bn_sub_mod_n cp.bn_limbs;
+  BN.mul = BN.bn_mul cp.bn_limbs cp.bn_limbs ;
+  BN.sqr = BN.bn_sqr cp.bn_limbs
+}
+
 inline_for_extraction
 let felem {| cp:S.curve_params |} = lbuffer uint64 cp.bn_limbs
 inline_for_extraction

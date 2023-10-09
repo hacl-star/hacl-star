@@ -14,7 +14,7 @@ open Hacl.Impl.PCurves.Constants
 
 module S = Spec.PCurves
 module SM = Hacl.Spec.PCurves.Montgomery
-module FI = Hacl.Impl.PCurves.Finv
+module FI = Hacl.Impl.PCurves.InvSqrt
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -29,7 +29,7 @@ let create_point {| cp:S.curve_params |}  =
 
 
 [@CInline]
-let make_base_point {| cp:S.curve_params |} p =
+let make_base_point {| cp:S.curve_params |} {| curve_constants |} p =
   let x = getx p in
   let y = gety p in
   let z = getz p in
@@ -39,7 +39,7 @@ let make_base_point {| cp:S.curve_params |} p =
 
 
 [@CInline]
-let make_point_at_inf {| cp:S.curve_params |} p =
+let make_point_at_inf {| cp:S.curve_params |} {| curve_constants |} p =
   let x = getx p in
   let y = gety p in
   let z = getz p in
@@ -61,7 +61,6 @@ let lemma_mont_is_point_at_inf p =
 
 [@CInline]
 let is_point_at_inf {| cp:S.curve_params |} p =
-  admit();
   let h0 = ST.get () in
   lemma_mont_is_point_at_inf (as_point_nat_inv h0 p);
   let pz = getz p in
@@ -70,7 +69,6 @@ let is_point_at_inf {| cp:S.curve_params |} p =
 
 [@CInline]
 let is_point_at_inf_vartime {| cp:S.curve_params |} p =
-  admit();
   let h0 = ST.get () in
   lemma_mont_is_point_at_inf (as_point_nat_inv h0 p);
   let pz = getz p in
@@ -86,7 +84,7 @@ let copy_point res p =
 ///  Point conversion between Projective and Affine coordinates representations
 
 [@CInline]
-let to_aff_point {| cp:S.curve_params |} res p =
+let to_aff_point {| cp:S.curve_params |} {| curve_constants |} {| FI.curve_inv_sqrt|} res p =
   push_frame ();
   let zinv = create_felem #cp in
   let px = getx p in
@@ -105,7 +103,7 @@ let to_aff_point {| cp:S.curve_params |} res p =
 
 
 [@CInline]
-let to_aff_point_x {| cp:S.curve_params |} res p =
+let to_aff_point_x {| cp:S.curve_params |} {| curve_constants |} {| FI.curve_inv_sqrt|} res p =
   push_frame ();
   let zinv = create_felem #cp in
   let px = getx p in
@@ -118,7 +116,7 @@ let to_aff_point_x {| cp:S.curve_params |} res p =
 
 
 [@CInline]
-let to_proj_point {| cp:S.curve_params |} res p =
+let to_proj_point {| cp:S.curve_params |} {| curve_constants |} res p =
   let px = aff_getx p in
   let py = aff_gety p in
 
@@ -130,13 +128,14 @@ let to_proj_point {| cp:S.curve_params |} res p =
   SM.lemma_to_from_mont_id (as_nat h0 py);
   to_mont rx px;
   to_mont ry py;
-  make_fone rz
+  make_fone rz;
+  admit()
 
 
 ///  Check if a point is on the curve
 
 inline_for_extraction noextract
-val compute_rp_ec_equation: {| cp:S.curve_params |} -> x:felem -> res:felem -> Stack unit
+val compute_rp_ec_equation: {| cp:S.curve_params |} -> {| curve_constants |} -> x:felem -> res:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
     as_nat h x < S.prime)
@@ -145,7 +144,7 @@ val compute_rp_ec_equation: {| cp:S.curve_params |} -> x:felem -> res:felem -> S
     fmont_as_nat h1 res ==
       S.fadd (S.fadd (S.fmul (S.fmul x x) x) (S.fmul S.a_coeff x)) S.b_coeff))
 
-let compute_rp_ec_equation {| cp:S.curve_params |} x res =
+let compute_rp_ec_equation {| cp:S.curve_params |} {| curve_constants |} x res =
   push_frame ();
   let tmp = create_felem #cp in
   fcube res x;
@@ -158,14 +157,14 @@ let compute_rp_ec_equation {| cp:S.curve_params |} x res =
 
 
 inline_for_extraction noextract
-val is_y_sqr_is_y2_vartime {| cp:S.curve_params |} (y2 y:felem) : Stack bool
+val is_y_sqr_is_y2_vartime {| cp:S.curve_params |} {| curve_constants |} (y2 y:felem) : Stack bool
   (requires fun h ->
     live h y /\ live h y2 /\ disjoint y y2 /\
     as_nat h y2 < S.prime /\ as_nat h y < S.prime)
   (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\
     b == (fmont_as_nat h0 y2 = S.fmul (fmont_as_nat h0 y) (fmont_as_nat h0 y)))
 
-let is_y_sqr_is_y2_vartime y2 y =
+let is_y_sqr_is_y2_vartime {| cp:S.curve_params |} {| curve_constants |} y2 y =
   fsqr y y; // y = y * y
   let r = feq_mask y y2 in
   Hacl.Bignum.Base.unsafe_bool_of_limb r
@@ -173,7 +172,7 @@ let is_y_sqr_is_y2_vartime y2 y =
 
 // y *% y =?= x *% x *% x +% a_coeff *% x +% b_coeff
 [@CInline]
-let is_on_curve_vartime {| cp:S.curve_params |} p =
+let is_on_curve_vartime {| cp:S.curve_params |} {| curve_constants |} p =
   push_frame ();
   let rp = create_felem #cp in
   let tx = create_felem #cp in
@@ -196,13 +195,13 @@ let is_on_curve_vartime {| cp:S.curve_params |} p =
 
 [@CInline]
 let aff_point_store {| cp:S.curve_params |} res p =
-  admit();
   let px = aff_getx p in
   let py = aff_gety p in
+  admit();
   bn2_to_bytes_be res px py
 
 [@CInline]
-let point_store {| cp:S.curve_params |} res p =
+let point_store {| cp:S.curve_params |} {| CC.curve_constants |} {| FI.curve_inv_sqrt|} res p =
   push_frame ();
   let aff_p = create_aff_point #cp in
   to_aff_point aff_p p;
@@ -211,13 +210,14 @@ let point_store {| cp:S.curve_params |} res p =
 
 
 inline_for_extraction noextract
-val is_xy_valid_vartime: {| cp:S.curve_params |} -> p:aff_point -> Stack bool
+val is_xy_valid_vartime: {| cp:S.curve_params |} -> {| curve_constants |} ->
+  p:aff_point -> Stack bool
   (requires fun h -> live h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     r == (aff_point_x_as_nat h0 p < S.prime &&
           aff_point_y_as_nat h0 p < S.prime))
 
-let is_xy_valid_vartime {| cp:S.curve_params |} p =
+let is_xy_valid_vartime {| cp:S.curve_params |} {| curve_constants |} p =
   let px = aff_getx p in
   let py = aff_gety p in
   let lessX = bn_is_lt_prime_mask px in
@@ -228,7 +228,7 @@ let is_xy_valid_vartime {| cp:S.curve_params |} p =
 
 
 [@CInline]
-let aff_point_load_vartime {| cp:S.curve_params |} p b =
+let aff_point_load_vartime {| cp:S.curve_params |} {| curve_constants |} p b =
   let p_x = sub b 0ul (size cp.bytes) in
   let p_y = sub b (size cp.bytes) (size cp.bytes) in
 
@@ -242,7 +242,7 @@ let aff_point_load_vartime {| cp:S.curve_params |} p b =
 
 
 [@CInline]
-let load_point_vartime {| cp:S.curve_params |} p b =
+let load_point_vartime {| cp:S.curve_params |} {| curve_constants |} p b =
   push_frame ();
   let p_aff = create_aff_point #cp in
   let res = aff_point_load_vartime p_aff b in
@@ -252,7 +252,7 @@ let load_point_vartime {| cp:S.curve_params |} p b =
 
 
 inline_for_extraction noextract
-val recover_y_vartime_candidate {| cp:S.curve_params |} (y x:felem) : Stack bool
+val recover_y_vartime_candidate {| cp:S.curve_params |} {| curve_constants |} {| FI.curve_inv_sqrt |} (y x:felem) : Stack bool
   (requires fun h ->
     live h x /\ live h y /\ disjoint x y /\ as_nat h x < S.prime)
   (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\ as_nat h1 y < S.prime /\
@@ -260,7 +260,7 @@ val recover_y_vartime_candidate {| cp:S.curve_params |} (y x:felem) : Stack bool
     let y2 = S.(x *% x *% x +% a_coeff *% x +% b_coeff) in
     as_nat h1 y == S.fsqrt y2 /\ (b <==> (S.fmul (as_nat h1 y) (as_nat h1 y) == y2))))
 
-let recover_y_vartime_candidate {| cp:S.curve_params |} y x =
+let recover_y_vartime_candidate {| cp:S.curve_params |} {| curve_constants |} {| FI.curve_inv_sqrt |} y x =
   push_frame ();
   let y2M = create_felem #cp in
   let xM = create_felem #cp in
@@ -278,7 +278,7 @@ let recover_y_vartime_candidate {| cp:S.curve_params |} y x =
 
 
 inline_for_extraction noextract
-val recover_y_vartime {| cp:S.curve_params |} (y x:felem) (is_odd:bool) : Stack bool
+val recover_y_vartime {| cp:S.curve_params |} {| curve_constants |} {| FI.curve_inv_sqrt |} (y x:felem) (is_odd:bool) : Stack bool
   (requires fun h ->
     live h x /\ live h y /\ disjoint x y /\ as_nat h x < S.prime)
   (ensures fun h0 b h1 -> modifies (loc y) h0 h1 /\
@@ -286,7 +286,7 @@ val recover_y_vartime {| cp:S.curve_params |} (y x:felem) (is_odd:bool) : Stack 
     (b ==> (as_nat h1 y < S.prime/\
       as_nat h1 y == Some?.v (S.recover_y (as_nat h0 x) is_odd))))
 
-let recover_y_vartime {| cp:S.curve_params |} y x is_odd =
+let recover_y_vartime {| cp:S.curve_params |} {| curve_constants |} {| FI.curve_inv_sqrt |} y x is_odd =
   let is_y_valid = recover_y_vartime_candidate y x in
   if not is_y_valid then false
   else begin
@@ -297,7 +297,7 @@ let recover_y_vartime {| cp:S.curve_params |} y x is_odd =
 
 
 [@CInline]
-let aff_point_decompress_vartime {| cp:S.curve_params |} x y s =
+let aff_point_decompress_vartime {| cp:S.curve_params |} {| curve_constants |} {| FI.curve_inv_sqrt |} x y s =
   let s0 = s.(0ul) in
   let s0 = Lib.RawIntTypes.u8_to_UInt8 s0 in
   if not (s0 = 0x02uy || s0 = 0x03uy) then false

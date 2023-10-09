@@ -25,8 +25,8 @@ let uncompressed_to_raw {| cp:S.curve_params |} pk pk_raw =
     copy pk_raw (sub pk 1ul (2ul *. size cp.bytes));
     true end
 
-#push-options "--split_queries always"
-let compressed_to_raw {| cp:S.curve_params |} pk pk_raw =
+#push-options "--z3rlimit 200 --split_queries always"
+let compressed_to_raw {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} pk pk_raw =
   push_frame ();
   let xa = create_felem #cp in
   let ya = create_felem #cp in
@@ -48,7 +48,7 @@ let compressed_to_raw {| cp:S.curve_params |} pk pk_raw =
   b
 #pop-options
 
-let raw_to_uncompressed {| cp:S.curve_params |} pk_raw pk =
+let raw_to_uncompressed {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} pk_raw pk =
   let h0 = ST.get () in
   pk.(0ul) <- u8 0x04;
   update_sub pk 1ul (2ul *. size cp.bytes) pk_raw;
@@ -57,12 +57,12 @@ let raw_to_uncompressed {| cp:S.curve_params |} pk_raw pk =
 
 
 inline_for_extraction noextract
-val raw_to_compressed_get_pk0 {| cp:S.curve_params |} : f:lbuffer uint8 (size cp.bytes) -> Stack uint8
+val raw_to_compressed_get_pk0 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|}: f:lbuffer uint8 (size cp.bytes) -> Stack uint8
   (requires fun h -> live h f)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
     v b == (if (BSeq.nat_from_bytes_be (as_seq h0 f) % 2 = 1) then 0x03 else 0x02))
 
-let raw_to_compressed_get_pk0 {| cp:S.curve_params |} f =
+let raw_to_compressed_get_pk0 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} f =
   push_frame ();
   let bn_f = create_felem #cp in
   bn_from_bytes_be bn_f f;
@@ -71,7 +71,7 @@ let raw_to_compressed_get_pk0 {| cp:S.curve_params |} f =
   to_u8 is_odd_f +! u8 0x02
 
 
-let raw_to_compressed {| cp:S.curve_params |} pk_raw pk =
+let raw_to_compressed {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} pk_raw pk =
   let h0 = ST.get () in
   let pk_x = sub pk_raw 0ul (size cp.bytes) in
   let pk_y = sub pk_raw (size cp.bytes) (size cp.bytes) in

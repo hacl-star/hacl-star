@@ -15,6 +15,8 @@ module BE = Hacl.Impl.Exponentiation.Definitions
 module S = Spec.PCurves
 module SL = Spec.PCurves.Lemmas
 
+open Hacl.Impl.PCurves.Constants
+open Hacl.Impl.PCurves.InvSqrt
 open Hacl.Impl.PCurves.Point
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -37,7 +39,7 @@ let mk_to_pcurve_comm_monoid {| cp:S.curve_params |} : BE.to_comm_monoid U64 (3u
 
 
 inline_for_extraction noextract
-val point_add {| cp:S.curve_params |} : BE.lmul_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_pcurve_comm_monoid
+val point_add {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|}: BE.lmul_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_pcurve_comm_monoid
 let point_add ctx x y xy =
   let h0 = ST.get () in
   SL.to_aff_point_add_lemma
@@ -46,7 +48,7 @@ let point_add ctx x y xy =
 
 
 inline_for_extraction noextract
-val point_double {| cp:S.curve_params |} : BE.lsqr_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_pcurve_comm_monoid
+val point_double {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|}: BE.lsqr_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_pcurve_comm_monoid
 let point_double ctx x xx =
   let h0 = ST.get () in
   SL.to_aff_point_double_lemma (from_mont_point (as_point_nat h0 x));
@@ -54,7 +56,7 @@ let point_double ctx x xx =
 
 
 inline_for_extraction noextract
-val point_zero {| cp:S.curve_params |} : BE.lone_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_pcurve_comm_monoid
+val point_zero {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|}: BE.lone_st U64 (3ul *. cp.bn_limbs) 0ul mk_to_pcurve_comm_monoid
 let point_zero {| cp:S.curve_params |} ctx one =
   let h0 = ST.get () in
   SL.to_aff_point_at_infinity_lemma #cp;
@@ -62,7 +64,7 @@ let point_zero {| cp:S.curve_params |} ctx one =
 
 
 inline_for_extraction noextract
-let mk_pcurve_concrete_ops {| cp:S.curve_params |} : BE.concrete_ops U64 (3ul *. cp.bn_limbs) 0ul = {
+let mk_pcurve_concrete_ops {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|}: BE.concrete_ops U64 (3ul *. cp.bn_limbs) 0ul = {
   BE.to = mk_to_pcurve_comm_monoid;
   BE.lone = point_zero;
   BE.lmul = point_add;

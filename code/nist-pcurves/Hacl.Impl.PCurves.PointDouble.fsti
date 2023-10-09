@@ -6,14 +6,16 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-
+open Hacl.Impl.PCurves.Constants
+open Hacl.Impl.PCurves.InvSqrt
 open Hacl.Impl.PCurves.Point
 
 module S = Spec.PCurves
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val point_double: {| cp:S.curve_params |} -> res:point -> p:point -> Stack unit
+val point_double {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|}:
+  res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
     point_inv h p)

@@ -21,6 +21,9 @@ module S = Spec.PCurves
 module BN = Hacl.Impl.PCurves.Bignum
 module P = Hacl.Impl.PCurves.Point
 
+open Hacl.Impl.PCurves.Constants.P256
+open Hacl.Impl.PCurves.Finv.P256
+open Hacl.Impl.PCurves.Qinv.P256
 open Hacl.PCurves.PrecompTable.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"

@@ -6,13 +6,15 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
+open Hacl.Impl.PCurves.Constants
+open Hacl.Impl.PCurves.InvSqrt
 
 module S = Spec.PCurves
 module PP = Hacl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val ecp256dh_i {| cp:S.curve_params |} {| PP.precomp_tables |} :
+val ecp256dh_i {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt |} {| PP.precomp_tables |} :
     public_key:lbuffer uint8 (2ul *. size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->
   Stack bool
@@ -23,7 +25,7 @@ val ecp256dh_i {| cp:S.curve_params |} {| PP.precomp_tables |} :
     (r <==> Some? pk) /\ (r ==> (as_seq h1 public_key == Some?.v pk))))
 
 
-val ecp256dh_r {| cp:S.curve_params |} {| PP.precomp_tables |} :
+val ecp256dh_r {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt |} {| PP.precomp_tables |} :
     shared_secret:lbuffer uint8 (2ul *. size cp.bytes)
   -> their_pubkey:lbuffer uint8 (2ul *. size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->
