@@ -399,7 +399,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
   if (has_shaext && has_sse)
   {
     uint64_t n1 = (uint64_t)n;
-    uint64_t scrut = sha256_update(s, blocks, n1, k224_256);
+    KRML_HOST_IGNORE(sha256_update(s, blocks, n1, k224_256));
     return;
   }
   Hacl_SHA2_Scalar32_sha256_update_nblocks(n * (uint32_t)64U, blocks, s);
@@ -2156,8 +2156,7 @@ Perform a run-time test to determine which algorithm was chosen for the given pi
 Spec_Hash_Definitions_hash_alg
 EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_hash_state *s)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *s;
-  EverCrypt_Hash_state_s *block_state = scrut.block_state;
+  EverCrypt_Hash_state_s *block_state = (*s).block_state;
   return alg_of_state(block_state);
 }
 

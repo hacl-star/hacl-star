@@ -329,7 +329,7 @@ static void
 test_sign_hashed(uint8_t *msgHash, uint8_t *sk, uint8_t *nonce, uint8_t *expected_sgnt)
 {
   uint8_t sgnt[64U] = { 0U };
-  bool uu____0 = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(sgnt, msgHash, sk, nonce);
+  KRML_HOST_IGNORE(Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(sgnt, msgHash, sk, nonce));
   C_String_print("\n Test K256 ecdsa signing:\n");
   if (!Lib_PrintBuffer_result_compare_display((uint32_t)64U, sgnt, expected_sgnt))
   {
