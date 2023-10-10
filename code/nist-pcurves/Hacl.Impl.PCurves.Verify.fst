@@ -118,6 +118,7 @@ val ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| cur
     b <==> (if S.is_point_at_inf (_X, _Y, _Z) then false
       else S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
+#push-options "--z3rlimit 1000 --split_queries always" 
 let ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} {| PP.precomp_tables |} r pk u1 u2 =
   push_frame ();
   let res = create_point #cp in
@@ -138,7 +139,7 @@ let ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| cur
   pop_frame ();
   admit();
   b
-
+#pop-options
 
 inline_for_extraction noextract
 val load_signature {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (r_q s_q:felem) (sign_r sign_s:lbytes (size cp.bytes)) : Stack bool
