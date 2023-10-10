@@ -99,6 +99,7 @@ $sed -i -z 's/\n\n\/\*\n  As per[^/]*\*\///g' mozilla/Hacl_P256.c
 
 # Add an include for "builtin.h" to Hacl_Bignum_Base.h
 sed -i -z 's!\(#include.*types.h"\)!\1\n#include "krml/internal/builtin.h"!g' mozilla/internal/Hacl_Bignum_Base.h
+sed -i -z 's!\(#include<string.h>\)!\1\n#include <alloca.h>!g' mozilla/internal/Hacl_Bignum_Base.h
 
 
 cat <<EOF > mozilla/Makefile.include
