@@ -51,7 +51,7 @@ Hacl_HPKE_Curve64_CP256_SHA256_setupBaseS(
     for (uint32_t i = 0U; i < 32U; i++)
     {
       uint8_t uu____0 = FStar_UInt8_eq_mask(o_dh[i], zeros[i]);
-      res2 = uu____0 & res2;
+      res2 = (uint32_t)uu____0 & (uint32_t)res2;
     }
     uint8_t z = res2;
     uint32_t res;
@@ -296,7 +296,7 @@ Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR(
     for (uint32_t i = 0U; i < 32U; i++)
     {
       uint8_t uu____0 = FStar_UInt8_eq_mask(dh[i], zeros[i]);
-      res0 = uu____0 & res0;
+      res0 = (uint32_t)uu____0 & (uint32_t)res0;
     }
     uint8_t z = res0;
     uint32_t res;
@@ -565,7 +565,7 @@ Hacl_HPKE_Curve64_CP256_SHA256_sealBase(
       1U,
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;);
+      nonce[i] = (uint32_t)xi ^ (uint32_t)yi;);
     Hacl_Chacha20Poly1305_256_aead_encrypt(o_ctx.ctx_key,
       nonce,
       aadlen,
@@ -630,7 +630,7 @@ Hacl_HPKE_Curve64_CP256_SHA256_openBase(
       1U,
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;);
+      nonce[i] = (uint32_t)xi ^ (uint32_t)yi;);
     uint32_t
     res1 =
       Hacl_Chacha20Poly1305_256_aead_decrypt(o_ctx.ctx_key,

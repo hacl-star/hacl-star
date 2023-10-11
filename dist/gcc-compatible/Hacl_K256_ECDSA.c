@@ -1979,7 +1979,7 @@ void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw
   uint8_t *pk_x = pk_raw;
   uint8_t *pk_y = pk_raw + 32U;
   uint8_t x0 = pk_y[31U];
-  bool is_pk_y_odd = (x0 & 1U) == 1U;
+  bool is_pk_y_odd = ((uint32_t)x0 & 1U) == 1U;
   uint8_t ite;
   if (is_pk_y_odd)
   {

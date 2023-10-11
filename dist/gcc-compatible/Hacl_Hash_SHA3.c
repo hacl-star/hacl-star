@@ -130,7 +130,7 @@ Hacl_Hash_SHA3_update_last_sha3(
     memcpy(lastBlock, input + input_len, 0U * sizeof (uint8_t));
     lastBlock[0U] = suffix;
     Hacl_Impl_SHA3_loadState(len, lastBlock, s);
-    if (!((suffix & 0x80U) == 0U) && 0U == len - 1U)
+    if (!(((uint32_t)suffix & 0x80U) == 0U) && 0U == len - 1U)
     {
       Hacl_Impl_SHA3_state_permute(s);
     }
@@ -146,7 +146,7 @@ Hacl_Hash_SHA3_update_last_sha3(
   memcpy(lastBlock, input, input_len * sizeof (uint8_t));
   lastBlock[input_len] = suffix;
   Hacl_Impl_SHA3_loadState(len, lastBlock, s);
-  if (!((suffix & 0x80U) == 0U) && input_len == len - 1U)
+  if (!(((uint32_t)suffix & 0x80U) == 0U) && input_len == len - 1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
@@ -683,7 +683,7 @@ absorb(
   memcpy(lastBlock, last, rem * sizeof (uint8_t));
   lastBlock[rem] = delimitedSuffix;
   Hacl_Impl_SHA3_loadState(rateInBytes, lastBlock, s);
-  if (!((delimitedSuffix & 0x80U) == 0U) && rem == rateInBytes - 1U)
+  if (!(((uint32_t)delimitedSuffix & 0x80U) == 0U) && rem == rateInBytes - 1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }

@@ -577,7 +577,7 @@ Hacl_HPKE_P256_CP32_SHA256_sealBase(
       1U,
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;);
+      nonce[i] = (uint32_t)xi ^ (uint32_t)yi;);
     Hacl_Chacha20Poly1305_32_aead_encrypt(o_ctx.ctx_key,
       nonce,
       aadlen,
@@ -642,7 +642,7 @@ Hacl_HPKE_P256_CP32_SHA256_openBase(
       1U,
       uint8_t xi = enc[i];
       uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;);
+      nonce[i] = (uint32_t)xi ^ (uint32_t)yi;);
     uint32_t
     res1 =
       Hacl_Chacha20Poly1305_32_aead_decrypt(o_ctx.ctx_key,

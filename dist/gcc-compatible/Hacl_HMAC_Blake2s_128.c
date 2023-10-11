@@ -73,7 +73,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t opad[l];
@@ -82,7 +82,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 s[4U] KRML_POST_ALIGN(16) = { 0U };
   Hacl_Blake2s_128_blake2s_init(s, 0U, 32U);

@@ -1930,7 +1930,7 @@ void Hacl_P256_raw_to_compressed(uint8_t *pk_raw, uint8_t *pk)
   uint64_t bn_f[4U] = { 0U };
   bn_from_bytes_be4(bn_f, pk_y);
   uint64_t is_odd_f = bn_f[0U] & 1ULL;
-  pk[0U] = (uint8_t)is_odd_f + 0x02U;
+  pk[0U] = (uint32_t)(uint8_t)is_odd_f + 0x02U;
   memcpy(pk + 1U, pk_x, 32U * sizeof (uint8_t));
 }
 

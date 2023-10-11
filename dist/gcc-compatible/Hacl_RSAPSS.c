@@ -253,13 +253,13 @@ pss_encode(
   for (uint32_t i = 0U; i < dbLen; i++)
   {
     uint8_t *os = db;
-    uint8_t x = db[i] ^ dbMask[i];
+    uint8_t x = (uint32_t)db[i] ^ (uint32_t)dbMask[i];
     os[i] = x;
   }
   uint32_t msBits = emBits % 8U;
   if (msBits > 0U)
   {
-    db[0U] = db[0U] & 0xffU >> (8U - msBits);
+    db[0U] = (uint32_t)db[0U] & 0xffU >> (8U - msBits);
   }
   memcpy(em, db, dbLen * sizeof (uint8_t));
   memcpy(em + dbLen, m1Hash, hLen * sizeof (uint8_t));
@@ -281,7 +281,7 @@ pss_verify(
   uint8_t em_0;
   if (msBits > 0U)
   {
-    em_0 = em[0U] & 0xffU << msBits;
+    em_0 = (uint32_t)em[0U] & 0xffU << msBits;
   }
   else
   {
@@ -311,13 +311,13 @@ pss_verify(
   for (uint32_t i = 0U; i < dbLen; i++)
   {
     uint8_t *os = dbMask;
-    uint8_t x = dbMask[i] ^ maskedDB[i];
+    uint8_t x = (uint32_t)dbMask[i] ^ (uint32_t)maskedDB[i];
     os[i] = x;
   }
   uint32_t msBits1 = emBits % 8U;
   if (msBits1 > 0U)
   {
-    dbMask[0U] = dbMask[0U] & 0xffU >> (8U - msBits1);
+    dbMask[0U] = (uint32_t)dbMask[0U] & 0xffU >> (8U - msBits1);
   }
   uint32_t padLen = emLen1 - saltLen - hLen - 1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), padLen);
@@ -330,7 +330,7 @@ pss_verify(
   for (uint32_t i = 0U; i < padLen; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(pad[i], pad2[i]);
-    res = uu____0 & res;
+    res = (uint32_t)uu____0 & (uint32_t)res;
   }
   uint8_t z = res;
   if (!(z == 255U))
@@ -348,7 +348,7 @@ pss_verify(
   for (uint32_t i = 0U; i < hLen; i++)
   {
     uint8_t uu____1 = FStar_UInt8_eq_mask(m1Hash0[i], m1Hash[i]);
-    res0 = uu____1 & res0;
+    res0 = (uint32_t)uu____1 & (uint32_t)res0;
   }
   uint8_t z0 = res0;
   return z0 == 255U;

@@ -110,7 +110,7 @@ EverCrypt_HMAC_compute_sha1(
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t opad[l];
@@ -119,7 +119,7 @@ EverCrypt_HMAC_compute_sha1(
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint32_t s[5U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U, 0xc3d2e1f0U };
   uint8_t *dst1 = ipad;
@@ -218,7 +218,7 @@ EverCrypt_HMAC_compute_sha2_256(
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t opad[l];
@@ -227,7 +227,7 @@ EverCrypt_HMAC_compute_sha2_256(
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint32_t st[8U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -344,7 +344,7 @@ EverCrypt_HMAC_compute_sha2_384(
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t opad[l];
@@ -353,7 +353,7 @@ EverCrypt_HMAC_compute_sha2_384(
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t st[8U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -474,7 +474,7 @@ EverCrypt_HMAC_compute_sha2_512(
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t opad[l];
@@ -483,7 +483,7 @@ EverCrypt_HMAC_compute_sha2_512(
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t st[8U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -604,7 +604,7 @@ EverCrypt_HMAC_compute_blake2s(
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t opad[l];
@@ -613,7 +613,7 @@ EverCrypt_HMAC_compute_blake2s(
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint32_t s[16U] = { 0U };
   Hacl_Blake2s_32_blake2s_init(s, 0U, 32U);
@@ -741,7 +741,7 @@ EverCrypt_HMAC_compute_blake2b(
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t opad[l];
@@ -750,7 +750,7 @@ EverCrypt_HMAC_compute_blake2b(
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t s[16U] = { 0U };
   Hacl_Blake2b_32_blake2b_init(s, 0U, 64U);

@@ -546,7 +546,7 @@ bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *
   uint64_t *y = tmp;
   uint64_t *x = tmp + 5U;
   uint8_t s31 = s[31U];
-  uint8_t z = s31 >> 7U;
+  uint8_t z = (uint32_t)s31 >> 7U;
   uint64_t sign = (uint64_t)z;
   Hacl_Bignum25519_load_51(y, s);
   bool z0 = recover_x(x, y, sign);
@@ -596,7 +596,7 @@ void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p)
   Hacl_Bignum25519_store_51(z, out);
   uint8_t xbyte = (uint8_t)b;
   uint8_t o31 = z[31U];
-  z[31U] = o31 + (xbyte << 7U);
+  z[31U] = (uint32_t)o31 + ((uint32_t)xbyte << 7U);
 }
 
 static inline void barrett_reduction(uint64_t *z, uint64_t *t)
@@ -1700,8 +1700,8 @@ static inline void secret_expand(uint8_t *expanded, uint8_t *secret)
   uint8_t *h_low = expanded;
   uint8_t h_low0 = h_low[0U];
   uint8_t h_low31 = h_low[31U];
-  h_low[0U] = h_low0 & 0xf8U;
-  h_low[31U] = (h_low31 & 127U) | 64U;
+  h_low[0U] = (uint32_t)h_low0 & 0xf8U;
+  h_low[31U] = ((uint32_t)h_low31 & 127U) | 64U;
 }
 
 /********************************************************************************

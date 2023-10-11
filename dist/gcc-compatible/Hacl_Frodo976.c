@@ -205,14 +205,15 @@ uint32_t Hacl_Frodo976_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   Lib_Memzero0_memzero(epp_matrix, 64U, uint16_t);
   uint16_t b1 = Hacl_Impl_Matrix_matrix_eq(8U, 976U, bp_matrix, bpp_matrix);
   uint16_t b2 = Hacl_Impl_Matrix_matrix_eq(8U, 8U, c_matrix, cp_matrix);
-  uint16_t mask = b1 & b2;
+  uint16_t mask = (uint32_t)b1 & (uint32_t)b2;
   uint16_t mask0 = mask;
   uint8_t kp_s[24U] = { 0U };
   for (uint32_t i = 0U; i < 24U; i++)
   {
     uint8_t *os = kp_s;
     uint8_t uu____0 = s[i];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[i] ^ uu____0));
+    uint8_t
+    x = (uint32_t)uu____0 ^ ((uint32_t)(uint8_t)mask0 & ((uint32_t)kp[i] ^ (uint32_t)uu____0));
     os[i] = x;
   }
   uint32_t ss_init_len = 15768U;

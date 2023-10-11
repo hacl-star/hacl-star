@@ -1146,7 +1146,7 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
     16U,
     1U,
     uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
-    res = uu____0 & res;);
+    res = (uint32_t)uu____0 & (uint32_t)res;);
   uint8_t z = res;
   if (z == 255U)
   {

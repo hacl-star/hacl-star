@@ -70,7 +70,7 @@ Hacl_Impl_Matrix_mod_pow2(uint32_t n1, uint32_t n2, uint32_t logq, uint16_t *a)
     {
       for (uint32_t i = 0U; i < n2; i++)
       {
-        a[i0 * n2 + i] = a[i0 * n2 + i] & ((1U << logq) - 1U);
+        a[i0 * n2 + i] = (uint32_t)a[i0 * n2 + i] & ((1U << logq) - 1U);
       }
     }
     return;
@@ -84,7 +84,7 @@ Hacl_Impl_Matrix_matrix_add(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
   {
     for (uint32_t i = 0U; i < n2; i++)
     {
-      a[i0 * n2 + i] = a[i0 * n2 + i] + b[i0 * n2 + i];
+      a[i0 * n2 + i] = (uint32_t)a[i0 * n2 + i] + (uint32_t)b[i0 * n2 + i];
     }
   }
 }
@@ -96,7 +96,7 @@ Hacl_Impl_Matrix_matrix_sub(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
   {
     for (uint32_t i = 0U; i < n2; i++)
     {
-      b[i0 * n2 + i] = a[i0 * n2 + i] - b[i0 * n2 + i];
+      b[i0 * n2 + i] = (uint32_t)a[i0 * n2 + i] - (uint32_t)b[i0 * n2 + i];
     }
   }
 }
@@ -121,7 +121,7 @@ Hacl_Impl_Matrix_matrix_mul(
         uint16_t aij = a[i0 * n2 + i];
         uint16_t bjk = b[i * n3 + i1];
         uint16_t res0 = res;
-        res = res0 + aij * bjk;
+        res = (uint32_t)res0 + (uint32_t)aij * (uint32_t)bjk;
       }
       c[i0 * n3 + i1] = res;
     }
@@ -148,7 +148,7 @@ Hacl_Impl_Matrix_matrix_mul_s(
         uint16_t aij = a[i0 * n2 + i];
         uint16_t bjk = b[i1 * n2 + i];
         uint16_t res0 = res;
-        res = res0 + aij * bjk;
+        res = (uint32_t)res0 + (uint32_t)aij * (uint32_t)bjk;
       }
       c[i0 * n3 + i1] = res;
     }
@@ -162,7 +162,7 @@ Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
   for (uint32_t i = 0U; i < n1 * n2; i++)
   {
     uint16_t uu____0 = FStar_UInt16_eq_mask(a[i], b[i]);
-    res = uu____0 & res;
+    res = (uint32_t)uu____0 & (uint32_t)res;
   }
   uint16_t r = res;
   return r;
@@ -300,19 +300,19 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix64(
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
       uint16_t u = load16_le(resij);
       uint16_t uu____0 = u;
-      uint16_t prnd = uu____0 >> 1U;
-      uint16_t sign = uu____0 & 1U;
+      uint16_t prnd = (uint32_t)uu____0 >> 1U;
+      uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
       uint32_t bound = 12U;
       for (uint32_t i = 0U; i < bound; i++)
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table640[i];
-        uint16_t samplei = (uint16_t)(uint32_t)(ti - prnd) >> 15U;
-        sample = samplei + sample0;
+        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = ((~sign + 1U) ^ sample0) + sign;
+      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -333,19 +333,19 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix640(
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
       uint16_t u = load16_le(resij);
       uint16_t uu____0 = u;
-      uint16_t prnd = uu____0 >> 1U;
-      uint16_t sign = uu____0 & 1U;
+      uint16_t prnd = (uint32_t)uu____0 >> 1U;
+      uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
       uint32_t bound = 12U;
       for (uint32_t i = 0U; i < bound; i++)
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table640[i];
-        uint16_t samplei = (uint16_t)(uint32_t)(ti - prnd) >> 15U;
-        sample = samplei + sample0;
+        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = ((~sign + 1U) ^ sample0) + sign;
+      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -366,19 +366,19 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix976(
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
       uint16_t u = load16_le(resij);
       uint16_t uu____0 = u;
-      uint16_t prnd = uu____0 >> 1U;
-      uint16_t sign = uu____0 & 1U;
+      uint16_t prnd = (uint32_t)uu____0 >> 1U;
+      uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
       uint32_t bound = 10U;
       for (uint32_t i = 0U; i < bound; i++)
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table976[i];
-        uint16_t samplei = (uint16_t)(uint32_t)(ti - prnd) >> 15U;
-        sample = samplei + sample0;
+        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = ((~sign + 1U) ^ sample0) + sign;
+      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -399,19 +399,19 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344(
       uint8_t *resij = r + 2U * (n2 * i0 + i1);
       uint16_t u = load16_le(resij);
       uint16_t uu____0 = u;
-      uint16_t prnd = uu____0 >> 1U;
-      uint16_t sign = uu____0 & 1U;
+      uint16_t prnd = (uint32_t)uu____0 >> 1U;
+      uint16_t sign = (uint32_t)uu____0 & 1U;
       uint16_t sample = 0U;
       uint32_t bound = 6U;
       for (uint32_t i = 0U; i < bound; i++)
       {
         uint16_t sample0 = sample;
         uint16_t ti = Hacl_Impl_Frodo_Params_cdf_table1344[i];
-        uint16_t samplei = (uint16_t)(uint32_t)(ti - prnd) >> 15U;
-        sample = samplei + sample0;
+        uint16_t samplei = (uint32_t)(uint16_t)(uint32_t)((uint32_t)ti - (uint32_t)prnd) >> 15U;
+        sample = (uint32_t)samplei + (uint32_t)sample0;
       }
       uint16_t sample0 = sample;
-      res[i0 * n2 + i1] = ((~sign + 1U) ^ sample0) + sign;
+      res[i0 * n2 + i1] = (((uint32_t)~sign + 1U) ^ (uint32_t)sample0) + (uint32_t)sign;
     }
   }
 }
@@ -432,16 +432,16 @@ Hacl_Impl_Frodo_Pack_frodo_pack(
   {
     uint16_t *a1 = a + 8U * i;
     uint8_t *r = res + d * i;
-    uint16_t maskd = (uint16_t)(1U << d) - 1U;
+    uint16_t maskd = (uint32_t)(uint16_t)(1U << d) - 1U;
     uint8_t v16[16U] = { 0U };
-    uint16_t a0 = a1[0U] & maskd;
-    uint16_t a11 = a1[1U] & maskd;
-    uint16_t a2 = a1[2U] & maskd;
-    uint16_t a3 = a1[3U] & maskd;
-    uint16_t a4 = a1[4U] & maskd;
-    uint16_t a5 = a1[5U] & maskd;
-    uint16_t a6 = a1[6U] & maskd;
-    uint16_t a7 = a1[7U] & maskd;
+    uint16_t a0 = (uint32_t)a1[0U] & (uint32_t)maskd;
+    uint16_t a11 = (uint32_t)a1[1U] & (uint32_t)maskd;
+    uint16_t a2 = (uint32_t)a1[2U] & (uint32_t)maskd;
+    uint16_t a3 = (uint32_t)a1[3U] & (uint32_t)maskd;
+    uint16_t a4 = (uint32_t)a1[4U] & (uint32_t)maskd;
+    uint16_t a5 = (uint32_t)a1[5U] & (uint32_t)maskd;
+    uint16_t a6 = (uint32_t)a1[6U] & (uint32_t)maskd;
+    uint16_t a7 = (uint32_t)a1[7U] & (uint32_t)maskd;
     FStar_UInt128_uint128
     templong =
       FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a0),
@@ -473,35 +473,43 @@ Hacl_Impl_Frodo_Pack_frodo_unpack(
   {
     uint8_t *b1 = b + d * i;
     uint16_t *r = res + 8U * i;
-    uint16_t maskd = (uint16_t)(1U << d) - 1U;
+    uint16_t maskd = (uint32_t)(uint16_t)(1U << d) - 1U;
     uint8_t src[16U] = { 0U };
     memcpy(src + 16U - d, b1, d * sizeof (uint8_t));
     FStar_UInt128_uint128 u = load128_be(src);
     FStar_UInt128_uint128 templong = u;
     r[0U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 7U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          7U * d))
+      & (uint32_t)maskd;
     r[1U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 6U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          6U * d))
+      & (uint32_t)maskd;
     r[2U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 5U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          5U * d))
+      & (uint32_t)maskd;
     r[3U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 4U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          4U * d))
+      & (uint32_t)maskd;
     r[4U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 3U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          3U * d))
+      & (uint32_t)maskd;
     r[5U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 2U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          2U * d))
+      & (uint32_t)maskd;
     r[6U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 1U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          1U * d))
+      & (uint32_t)maskd;
     r[7U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong, 0U * d))
-      & maskd;
+      (uint32_t)(uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+          0U * d))
+      & (uint32_t)maskd;
   }
 }
 
@@ -527,7 +535,7 @@ Hacl_Impl_Frodo_Encode_frodo_key_encode(
       8U,
       1U,
       uint64_t rk = x0 >> b * i & ((1ULL << b) - 1ULL);
-      res[i0 * n + i] = (uint16_t)rk << (logq - b););
+      res[i0 * n + i] = (uint32_t)(uint16_t)rk << (logq - b););
   }
 }
 
@@ -548,8 +556,8 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(
       8U,
       1U,
       uint16_t aik = a[i0 * n + i];
-      uint16_t res1 = ((aik + (1U << (logq - b - 1U))) & 0xFFFFU) >> (logq - b);
-      templong = templong | (uint64_t)(res1 & ((1U << b) - 1U)) << b * i;);
+      uint16_t res1 = (((uint32_t)aik + (1U << (logq - b - 1U))) & 0xFFFFU) >> (logq - b);
+      templong = templong | (uint64_t)((uint32_t)res1 & ((1U << b) - 1U)) << b * i;);
     uint64_t templong0 = templong;
     uint8_t v8[8U] = { 0U };
     store64_le(v8, templong0);
