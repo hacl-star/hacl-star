@@ -116,6 +116,8 @@ create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 static EverCrypt_Error_error_code
 create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
+  KRML_HOST_IGNORE(dst);
+  KRML_HOST_IGNORE(k);
   #if HACL_CAN_COMPILE_VALE
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
@@ -148,6 +150,8 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 static EverCrypt_Error_error_code
 create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
+  KRML_HOST_IGNORE(dst);
+  KRML_HOST_IGNORE(k);
   #if HACL_CAN_COMPILE_VALE
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
@@ -234,6 +238,15 @@ encrypt_aes128_gcm(
   uint8_t *tag
 )
 {
+  KRML_HOST_IGNORE(s);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(plain);
+  KRML_HOST_IGNORE(plain_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(tag);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -361,6 +374,15 @@ encrypt_aes256_gcm(
   uint8_t *tag
 )
 {
+  KRML_HOST_IGNORE(s);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(plain);
+  KRML_HOST_IGNORE(plain_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(tag);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -566,6 +588,15 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   uint8_t *tag
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(plain);
+  KRML_HOST_IGNORE(plain_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(tag);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[480U] = { 0U };
   uint8_t *keys_b0 = ek;
@@ -712,6 +743,15 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
   uint8_t *tag
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(plain);
+  KRML_HOST_IGNORE(plain_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(tag);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[544U] = { 0U };
   uint8_t *keys_b0 = ek;
@@ -850,6 +890,15 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *tag
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(plain);
+  KRML_HOST_IGNORE(plain_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(tag);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
@@ -993,6 +1042,15 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   uint8_t *tag
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(plain);
+  KRML_HOST_IGNORE(plain_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(tag);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
@@ -1230,6 +1288,15 @@ decrypt_aes128_gcm(
   uint8_t *dst
 )
 {
+  KRML_HOST_IGNORE(s);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(cipher_len);
+  KRML_HOST_IGNORE(tag);
+  KRML_HOST_IGNORE(dst);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -1369,6 +1436,15 @@ decrypt_aes256_gcm(
   uint8_t *dst
 )
 {
+  KRML_HOST_IGNORE(s);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(cipher_len);
+  KRML_HOST_IGNORE(tag);
+  KRML_HOST_IGNORE(dst);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -1626,6 +1702,15 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   uint8_t *dst
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(cipher_len);
+  KRML_HOST_IGNORE(tag);
+  KRML_HOST_IGNORE(dst);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[480U] = { 0U };
   uint8_t *keys_b0 = ek;
@@ -1780,6 +1865,15 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
   uint8_t *dst
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(cipher_len);
+  KRML_HOST_IGNORE(tag);
+  KRML_HOST_IGNORE(dst);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[544U] = { 0U };
   uint8_t *keys_b0 = ek;
@@ -1926,6 +2020,15 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
   uint8_t *dst
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(cipher_len);
+  KRML_HOST_IGNORE(tag);
+  KRML_HOST_IGNORE(dst);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
@@ -2077,6 +2180,15 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
   uint8_t *dst
 )
 {
+  KRML_HOST_IGNORE(k);
+  KRML_HOST_IGNORE(iv);
+  KRML_HOST_IGNORE(iv_len);
+  KRML_HOST_IGNORE(ad);
+  KRML_HOST_IGNORE(ad_len);
+  KRML_HOST_IGNORE(cipher);
+  KRML_HOST_IGNORE(cipher_len);
+  KRML_HOST_IGNORE(tag);
+  KRML_HOST_IGNORE(dst);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();

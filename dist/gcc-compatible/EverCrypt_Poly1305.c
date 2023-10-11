@@ -28,8 +28,13 @@
 #include "internal/Vale.h"
 #include "config.h"
 
-static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
+KRML_MAYBE_UNUSED static void
+poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
+  KRML_HOST_IGNORE(dst);
+  KRML_HOST_IGNORE(src);
+  KRML_HOST_IGNORE(len);
+  KRML_HOST_IGNORE(key);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ctx[192U] = { 0U };
   memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
