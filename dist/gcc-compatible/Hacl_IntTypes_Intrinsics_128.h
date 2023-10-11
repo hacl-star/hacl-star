@@ -45,7 +45,7 @@ Hacl_IntTypes_Intrinsics_128_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y,
     FStar_UInt128_add_mod(FStar_UInt128_add_mod(FStar_UInt128_uint64_to_uint128(x),
         FStar_UInt128_uint64_to_uint128(cin)),
       FStar_UInt128_uint64_to_uint128(y));
-  uint64_t c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
+  uint64_t c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, 64U));
   r[0U] = FStar_UInt128_uint128_to_uint64(res);
   return c;
 }
@@ -58,10 +58,7 @@ Hacl_IntTypes_Intrinsics_128_sub_borrow_u64(uint64_t cin, uint64_t x, uint64_t y
     FStar_UInt128_sub_mod(FStar_UInt128_sub_mod(FStar_UInt128_uint64_to_uint128(x),
         FStar_UInt128_uint64_to_uint128(y)),
       FStar_UInt128_uint64_to_uint128(cin));
-  uint64_t
-  c =
-    FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U))
-    & (uint64_t)1U;
+  uint64_t c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, 64U)) & 1ULL;
   r[0U] = FStar_UInt128_uint128_to_uint64(res);
   return c;
 }
