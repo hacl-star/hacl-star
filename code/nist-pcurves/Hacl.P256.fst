@@ -21,14 +21,18 @@ module S = Spec.PCurves
 module BN = Hacl.Impl.PCurves.Bignum
 module P = Hacl.Impl.PCurves.Point
 
+open Hacl.Impl.PCurves.Bignum.P256
 open Hacl.Impl.PCurves.Constants.P256
+open Hacl.Impl.PCurves.Field.P256
+open Hacl.Impl.PCurves.Scalar.P256
 open Hacl.Impl.PCurves.Finv.P256
 open Hacl.Impl.PCurves.Qinv.P256
+open Hacl.Impl.PCurves.Group.P256
 open Hacl.PCurves.PrecompTable.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-inline_for_extraction noextract
+[@ CInline ]
 val msg_as_felem:
     alg:S.hash_alg_ecdsa
   -> msg_len:size_t{S.min_input_length alg (v msg_len)}
@@ -41,6 +45,7 @@ val msg_as_felem:
     (let hashM = S.hash_ecdsa alg (v msg_len) (as_seq h0 msg) in
     BN.as_nat h1 res = BSeq.nat_from_bytes_be (LSeq.sub hashM 0 32) % S.order))
 
+[@ CInline ]
 let msg_as_felem alg msg_len msg res =
   push_frame ();
 
@@ -62,9 +67,45 @@ let msg_as_felem alg msg_len msg res =
   LowStar.Ignore.ignore msg_len;
   let mHash32 = sub mHash 0ul 32ul in
   BN.bn_from_bytes_be res mHash32;
-  Hacl.Impl.PCurves.Scalar.qmod_short res res;
+  qmod_short res res;
   pop_frame ()
 
+[@ CInline ]
+val ecdsa_sign_msg_as_qelem:
+    signature:lbuffer uint8 (2ul *. 32ul)
+  -> m_q:BN.felem
+  -> private_key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 32ul ->
+  Stack bool
+  (requires fun h ->
+    live h signature /\ live h m_q /\ live h private_key /\ live h nonce /\
+    disjoint signature m_q /\ disjoint signature private_key /\ disjoint signature nonce /\
+    disjoint m_q private_key /\ disjoint m_q nonce /\
+    BN.as_nat h m_q < S.order)
+  (ensures fun h0 flag h1 -> modifies (loc signature |+| loc m_q) h0 h1 /\
+    (let sgnt = S.ecdsa_sign_msg_as_qelem
+      (BN.as_nat h0 m_q) (as_seq h0 private_key) (as_seq h0 nonce) in
+     (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 signature == Some?.v sgnt))))
+
+let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
+  ecdsa_sign_msg_as_qelem signature m_q private_key nonce
+
+[@ CInline ]
+val ecdsa_verify_msg_as_qelem:
+    m_q:BN.felem
+  -> public_key:lbuffer uint8 (2ul *. 32ul)
+  -> signature_r:lbuffer uint8 32ul
+  -> signature_s:lbuffer uint8 32ul ->
+  Stack bool
+  (requires fun h ->
+    live h public_key /\ live h signature_r /\ live h signature_s /\ live h m_q /\
+    BN.as_nat h m_q < S.order)
+  (ensures fun h0 result h1 -> modifies0 h0 h1 /\
+    result == S.ecdsa_verify_msg_as_qelem (BN.as_nat h0 m_q)
+      (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
+
+let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
+  ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s
 
 inline_for_extraction noextract
 val ecdsa_signature: alg:S.hash_alg_ecdsa -> ecdsa_sign_p256_st alg

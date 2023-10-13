@@ -16,7 +16,7 @@ module S = Spec.PCurves
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val point_add_1 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (t0 t1 t2 t3 t4:felem) (p q:point) : Stack unit
+val point_add_1 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (t0 t1 t2 t3 t4:felem) (p q:point) : Stack unit
   (requires fun h ->
     live h t0 /\ live h t1 /\ live h t2 /\
     live h t3 /\ live h t4 /\ live h p /\ live h q /\
@@ -45,20 +45,20 @@ val point_add_1 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 t3 == t3_s /\
     fmont_as_nat h1 t4 == t4_s))
 
-let point_add_1 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} t0 t1 t2 t3 t4 p q =
+let point_add_1 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} t0 t1 t2 t3 t4 p q =
   let x1, y1, z1 = getx p, gety p, getz p in
   let x2, y2, z2 = getx q, gety q, getz q in
-  fmul t0 x1 x2;
-  fmul t1 y1 y2;
-  fmul t2 z1 z2;
-  fadd t3 x1 y1;
-  fadd t4 x2 y2;
-  fmul t3 t3 t4;
-  fadd t4 t0 t1
+  f.fmul t0 x1 x2;
+  f.fmul t1 y1 y2;
+  f.fmul t2 z1 z2;
+  f.fadd t3 x1 y1;
+  f.fadd t4 x2 y2;
+  f.fmul t3 t3 t4;
+  f.fadd t4 t0 t1
 
 
 inline_for_extraction noextract
-val point_add_2 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (t1 t2 t3 t4 t5:felem) (p q:point) : Stack unit
+val point_add_2 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (t1 t2 t3 t4 t5:felem) (p q:point) : Stack unit
   (requires fun h ->
     live h t1 /\ live h t2 /\ live h t3 /\ live h t4 /\ live h t5 /\
     live h p /\ live h q /\
@@ -88,19 +88,19 @@ val point_add_2 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     fmont_as_nat h1 t3 == t3_s /\ fmont_as_nat h1 t4 == t4_s /\
     fmont_as_nat h1 t5 == t5_s))
 
-let point_add_2 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} t1 t2 t3 t4 t5 p q =
+let point_add_2 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} t1 t2 t3 t4 t5 p q =
   let y1, z1 = gety p, getz p in
   let y2, z2 = gety q, getz q in
-  fsub t3 t3 t4;
-  fadd t4 y1 z1;
-  fadd t5 y2 z2;
-  fmul t4 t4 t5;
-  fadd t5 t1 t2;
-  fsub t4 t4 t5
+  f.fsub t3 t3 t4;
+  f.fadd t4 y1 z1;
+  f.fadd t5 y2 z2;
+  f.fmul t4 t4 t5;
+  f.fadd t5 t1 t2;
+  f.fsub t4 t4 t5
 
 
 inline_for_extraction noextract
-val point_add_3 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (x3 y3 t0 t2:felem) (p q:point) : Stack unit
+val point_add_3 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 t0 t2:felem) (p q:point) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h t0 /\ live h t2 /\
     live h p /\ live h q /\
@@ -123,18 +123,18 @@ val point_add_3 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     let y3_s = S.fsub x3_s y3_s in
     fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 y3 == y3_s))
 
-let point_add_3 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} x3 y3 t0 t2 p q =
+let point_add_3 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 t0 t2 p q =
   let x1, z1 = getx p, getz p in
   let x2, z2 = getx q, getz q in
-  fadd x3 x1 z1;
-  fadd y3 x2 z2;
-  fmul x3 x3 y3;
-  fadd y3 t0 t2;
-  fsub y3 x3 y3
+  f.fadd x3 x1 z1;
+  f.fadd y3 x2 z2;
+  f.fmul x3 x3 y3;
+  f.fadd y3 t0 t2;
+  f.fsub y3 x3 y3
 
 
 inline_for_extraction noextract
-val point_add_4 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (x3 y3 z3 t1 t2:felem) : Stack unit
+val point_add_4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 z3 t1 t2:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h z3 /\ live h t1 /\ live h t2 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc x3; loc y3; loc z3; loc t1; loc t2 ] /\
@@ -153,18 +153,18 @@ val point_add_4 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     let y3_s = S.fmul S.b_coeff y3_s in
     fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 y3 == y3_s /\ fmont_as_nat h1 z3 == z3_s))
 
-let point_add_4 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} x3 y3 z3 t1 t2 =
+let point_add_4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 z3 t1 t2 =
   fmul_by_b_coeff z3 t2;
-  fsub x3 y3 z3;
+  f.fsub x3 y3 z3;
   fdouble z3 x3;
-  fadd x3 x3 z3;
-  fsub z3 t1 x3;
-  fadd x3 t1 x3;
+  f.fadd x3 x3 z3;
+  f.fsub z3 t1 x3;
+  f.fadd x3 t1 x3;
   fmul_by_b_coeff y3 y3
 
 
 inline_for_extraction noextract
-val point_add_5 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (x3 y3 z3 t0 t1 t2:felem) : Stack unit
+val point_add_5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 z3 t0 t1 t2:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h z3 /\
     live h t0 /\ live h t1 /\ live h t2 /\
@@ -184,16 +184,16 @@ val point_add_5 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     let t1_s = S.fadd y3_s y3_s in
     fmont_as_nat h1 t1 == t1_s /\ fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 y3 == y3_s))
 
-let point_add_5 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} x3 y3 z3 t0 t1 t2 =
+let point_add_5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 z3 t0 t1 t2 =
   fdouble t1 t2;
-  fadd t2 t1 t2;
-  fsub y3 y3 t2;
-  fsub y3 y3 t0;
+  f.fadd t2 t1 t2;
+  f.fsub y3 y3 t2;
+  f.fsub y3 y3 t0;
   fdouble t1 y3
 
 
 inline_for_extraction noextract
-val point_add_6 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (x3 y3 z3 t0 t1 t2 t4:felem) : Stack unit
+val point_add_6 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 z3 t0 t1 t2 t4:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h z3 /\
     live h t0 /\ live h t1 /\ live h t2 /\ live h t4 /\
@@ -219,17 +219,17 @@ val point_add_6 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     fmont_as_nat h1 t0 == t0_s /\ fmont_as_nat h1 t1 == t1_s /\
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 y3 == y3_s))
 
-let point_add_6 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} x3 y3 z3 t0 t1 t2 t4 =
-  fadd y3 t1 y3;
+let point_add_6 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 z3 t0 t1 t2 t4 =
+  f.fadd y3 t1 y3;
   fdouble t1 t0;
-  fadd t0 t1 t0;
-  fsub t0 t0 t2;
-  fmul t1 t4 y3;
-  fmul t2 t0 y3
+  f.fadd t0 t1 t0;
+  f.fsub t0 t0 t2;
+  f.fmul t1 t4 y3;
+  f.fmul t2 t0 y3
 
 
 inline_for_extraction noextract
-val point_add_7 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} (x3 y3 z3 t0 t1 t2 t3 t4:felem) : Stack unit
+val point_add_7 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 z3 t0 t1 t2 t3 t4:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h z3 /\
     live h t0 /\ live h t1 /\ live h t2 /\ live h t3 /\ live h t4 /\
@@ -258,18 +258,18 @@ val point_add_7 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 y3 == y3_s /\
     fmont_as_nat h1 z3 == z3_s /\ fmont_as_nat h1 t1 == t1_s))
 
-let point_add_7 {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} x3 y3 z3 t0 t1 t2 t3 t4 =
-  fmul y3 x3 z3;
-  fadd y3 y3 t2;
-  fmul x3 t3 x3;
-  fsub x3 x3 t1;
-  fmul z3 t4 z3;
-  fmul t1 t3 t0;
-  fadd z3 z3 t1
+let point_add_7 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 z3 t0 t1 t2 t3 t4 =
+  f.fmul y3 x3 z3;
+  f.fadd y3 y3 t2;
+  f.fmul x3 t3 x3;
+  f.fsub x3 x3 t1;
+  f.fmul z3 t4 z3;
+  f.fmul t1 t3 t0;
+  f.fadd z3 z3 t1
 
 
 inline_for_extraction noextract
-val point_add_noalloc {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} :
+val point_add_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} :
   tmp:lbuffer uint64 (6ul *. cp.bn_limbs) -> res:point -> p:point -> q:point -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h res /\ live h tmp /\
@@ -282,7 +282,7 @@ val point_add_noalloc {| cp:S.curve_params |} {| curve_constants |} {| curve_inv
     S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
 
 #push-options "--split_queries always"
-let point_add_noalloc {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} tmp res p q =
+let point_add_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} tmp res p q =
   let x3, y3, z3 = getx res, gety res, getz res in
   let t0 = sub tmp 0ul cp.bn_limbs in
   let t1 = sub tmp cp.bn_limbs cp.bn_limbs in
@@ -304,9 +304,7 @@ let point_add_noalloc {| cp:S.curve_params |} {| curve_constants |} {| curve_inv
   point_add_7 x3 y3 z3 t0 t1 t2 t3 t4
 #pop-options
 
-
-[@CInline]
-let point_add {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} res p q =
+let point_add {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} res p q =
   push_frame ();
   let tmp = create (9ul *. cp.bn_limbs) (u64 0) in
   let t0 = sub tmp 0ul (6ul *. cp.bn_limbs) in

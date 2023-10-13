@@ -86,29 +86,26 @@ let bn_set_one {| c:S.curve_params |} f =
 
 ///  Comparison
 
-[@CInline]
-let bn_is_zero_mask {| c:S.curve_params |} f =
-  let h0 = ST.get () in
-  SN.bn_is_zero_mask_lemma (as_seq h0 f);
-  BN.bn_is_zero_mask #U64 c.bn_limbs f
-
-
-[@CInline]
-let bn_is_zero_vartime {| c:S.curve_params |} f =
-  let m = bn_is_zero_mask f in
-  Hacl.Bignum.Base.unsafe_bool_of_limb m
-
-
-[@CInline]
-let bn_is_eq_mask {| c:S.curve_params |} a b =
+let bn_is_eq_mask_g {| c:S.curve_params |} a b =
   let h0 = ST.get () in
   SN.bn_eq_mask_lemma (as_seq h0 a) (as_seq h0 b);
   BN.bn_eq_mask #U64 c.bn_limbs a b
 
 
-[@CInline]
+let bn_is_zero_mask {| c:S.curve_params |} f =
+  push_frame ();
+  let bn_zero = create_felem #c in
+  let res = bn_is_eq_mask_g f bn_zero in
+  pop_frame ();
+  res
+
+let bn_is_zero_vartime {| c:S.curve_params |} f =
+  let m = bn_is_zero_mask f in
+  Hacl.Bignum.Base.unsafe_bool_of_limb m
+
+
 let bn_is_eq_vartime {| c:S.curve_params |}  a b =
-  let m = bn_is_eq_mask a b in
+  let m = bn_is_eq_mask_g a b in
   Hacl.Bignum.Base.unsafe_bool_of_limb m
 
 
@@ -120,22 +117,19 @@ let bn_is_odd {| c:S.curve_params |} f =
 
 ///  Conditional copy
 
-[@CInline]
-let bn_cmovznz {| c:S.curve_params |} res cin x y =
+let bn_cmovznz_g {| c:S.curve_params |} res cin x y =
   let mask = neq_mask cin (u64 0) in
   Lib.ByteBuffer.buf_mask_select y x mask res
 
 
 ///  Addition and subtraction
 
-[@CInline]
-let bn_add_mod {| c:S.curve_params |} res n x y =
+let bn_add_mod_g {| c:S.curve_params |} res n x y =
   let h0 = ST.get () in
   SN.bn_add_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
   BN.bn_add_mod_n c.bn_limbs n x y res
 
-[@CInline]
-let bn_sub {| cp:S.curve_params |} res x y =
+let bn_sub_g {| cp:S.curve_params |} res x y =
   let h0 = ST.get () in
   let c = BN.bn_sub_eq_len cp.bn_limbs x y res in
   let h1 = ST.get () in
@@ -147,9 +141,7 @@ let bn_sub {| cp:S.curve_params |} res x y =
   assert (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y);
   c
 
-
-[@CInline]
-let bn_sub_mod {| c:S.curve_params |} res n x y =
+let bn_sub_mod_g {| c:S.curve_params |} res n x y =
   let h0 = ST.get () in
   SN.bn_sub_mod_n_lemma (as_seq h0 n) (as_seq h0 x) (as_seq h0 y);
   BN.bn_sub_mod_n c.bn_limbs n x y res
@@ -157,15 +149,13 @@ let bn_sub_mod {| c:S.curve_params |} res n x y =
 
 ///  Multiplication
 
-[@CInline]
-let bn_mul {| c:S.curve_params |} res x y =
+
+let bn_mul_g {| c:S.curve_params |} res x y =
   let h0 = ST.get () in
   SN.bn_mul_lemma (as_seq h0 x) (as_seq h0 y);
   BN.bn_mul #U64 c.bn_limbs c.bn_limbs x y res
 
-
-[@CInline]
-let bn_sqr {| c:S.curve_params |} res x =
+let bn_sqr_g {| c:S.curve_params |} res x =
   let h0 = ST.get () in
   SN.bn_sqr_lemma (as_seq h0 x);
   BN.bn_sqr #U64 c.bn_limbs x res
@@ -173,34 +163,46 @@ let bn_sqr {| c:S.curve_params |} res x =
 
 ///  Conversion between bignum and bytes representation
 
-[@CInline]
-let bn_to_bytes_be {| c:S.curve_params |} res f =
+let bn_to_bytes_be_g {| c:S.curve_params |} res f =
   let h0 = ST.get () in
   Hacl.Spec.Bignum.Convert.bn_to_bytes_be_lemma #U64 c.bytes (as_seq h0 f);
   Hacl.Bignum.Convert.mk_bn_to_bytes_be true (size c.bytes) f res
 
 
-[@CInline]
-let bn_from_bytes_be {| c:S.curve_params |} res b =
+let bn_from_bytes_be_g {| c:S.curve_params |} res b =
   let h0 = ST.get () in
   Hacl.Spec.Bignum.Convert.bn_from_bytes_be_lemma #U64 c.bytes (as_seq h0 b);
   Hacl.Bignum.Convert.mk_bn_from_bytes_be true (size c.bytes) b res
 
 
-[@CInline]
 let bn2_to_bytes_be {| c:S.curve_params |} res x y =
   let h0 = ST.get () in
   update_sub_f h0 res 0ul (size c.bytes)
     (fun h -> BSeq.nat_to_bytes_be c.bytes (as_nat h0 x))
-    (fun _ -> bn_to_bytes_be (sub res 0ul (size c.bytes)) x);
+    (fun _ -> bn_to_bytes_be_g (sub res 0ul (size c.bytes)) x);
 
   let h1 = ST.get () in
   update_sub_f h1 res (size c.bytes) (size c.bytes)
     (fun h -> BSeq.nat_to_bytes_be c.bytes (as_nat h1 y))
-    (fun _ -> bn_to_bytes_be (sub res (size c.bytes) (size c.bytes)) y);
+    (fun _ -> bn_to_bytes_be_g (sub res (size c.bytes) (size c.bytes)) y);
 
   let h2 = ST.get () in
   let x = Ghost.hide (BSeq.nat_to_bytes_be c.bytes (as_nat h0 x)) in
   let y = Ghost.hide (BSeq.nat_to_bytes_be c.bytes (as_nat h0 y)) in
   LSeq.eq_intro (as_seq h2 res) (LSeq.concat #_ #c.bytes #c.bytes x y)
+
+instance bn_inst {| cp:S.curve_params |} : BN.bn U64 = {
+  BN.len = cp.bn_limbs;
+  BN.add = BN.bn_add_eq_len cp.bn_limbs;
+  BN.sub = BN.bn_sub_eq_len cp.bn_limbs;
+  BN.add_mod_n = BN.bn_add_mod_n cp.bn_limbs;
+  BN.sub_mod_n = BN.bn_sub_mod_n cp.bn_limbs;
+  BN.mul = BN.bn_mul cp.bn_limbs cp.bn_limbs ;
+  BN.sqr = BN.bn_sqr cp.bn_limbs
+}
+
+let bn_mont_reduction_g {| cp:S.curve_params |} mont_mu res x n =
+  BM.bn_mont_reduction bn_inst n mont_mu x res
+
+
 

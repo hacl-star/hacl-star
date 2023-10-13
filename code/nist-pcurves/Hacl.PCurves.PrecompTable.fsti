@@ -84,25 +84,31 @@ val proj_g_pow2_128_lseq {| cp:S.curve_params |} {| precomp_g_points |} : LSeq.l
 inline_for_extraction noextract
 val proj_g_pow2_192_lseq{| cp:S.curve_params |}  {| precomp_g_points |} : LSeq.lseq uint64 (3 * v cp.bn_limbs)
 
+noextract
 val proj_g_pow2_64_lemma {| cp:S.curve_params |} {| p:precomp_g_points |} : unit ->
   Lemma (S.to_aff_point proj_g_pow2_64 == pow_point (pow2 64) g_aff)
 
+noextract
 val proj_g_pow2_128_lemma {| cp:S.curve_params |} {| p:precomp_g_points |} : unit ->
   Lemma (S.to_aff_point proj_g_pow2_128 == pow_point (pow2 128) g_aff)
 
 
+noextract
 val proj_g_pow2_192_lemma {| cp:S.curve_params |} {| p:precomp_g_points |} : unit ->
   Lemma (S.to_aff_point proj_g_pow2_192 == pow_point (pow2 192) g_aff)
 
 
+noextract
 val proj_g_pow2_64_lseq_lemma {| cp:S.curve_params |} {| precomp_g_points |}: unit ->
   Lemma (point_inv_seq proj_g_pow2_64_lseq /\
     S.to_aff_point (from_mont_point (as_point_nat_seq proj_g_pow2_64_lseq)) == g_pow2_64)
 
+noextract
 val proj_g_pow2_128_lseq_lemma {| cp:S.curve_params |} {| precomp_g_points |}: unit ->
   Lemma (point_inv_seq proj_g_pow2_128_lseq /\
     S.to_aff_point (from_mont_point (as_point_nat_seq proj_g_pow2_128_lseq)) == g_pow2_128)
 
+noextract
 val proj_g_pow2_192_lseq_lemma {| cp:S.curve_params |} {| precomp_g_points |}: unit ->
   Lemma (point_inv_seq proj_g_pow2_192_lseq /\
     S.to_aff_point (from_mont_point (as_point_nat_seq proj_g_pow2_192_lseq)) == g_pow2_192)

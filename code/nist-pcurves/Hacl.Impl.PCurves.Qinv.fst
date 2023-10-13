@@ -50,17 +50,17 @@ let one_mod ctx one = make_qone one
 
 
 inline_for_extraction noextract
-val mul_mod  {| cp:S.curve_params |} {| curve_constants |} : BE.lmul_st U64 cp.bn_limbs 0ul mk_to_pcurve_order_comm_monoid
-let mul_mod ctx x y xy = qmul xy x y
+val mul_mod  {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |} : BE.lmul_st U64 cp.bn_limbs 0ul mk_to_pcurve_order_comm_monoid
+let mul_mod {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |} ctx x y xy = f.qmul xy x y
 
 
 inline_for_extraction noextract
-val sqr_mod  {| cp:S.curve_params |} {| curve_constants |} : BE.lsqr_st U64 cp.bn_limbs 0ul mk_to_pcurve_order_comm_monoid
-let sqr_mod ctx x xx = qsqr xx x
+val sqr_mod  {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |}: BE.lsqr_st U64 cp.bn_limbs 0ul mk_to_pcurve_order_comm_monoid
+let sqr_mod {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |} ctx x xx = f.qsqr xx x
 
 
 inline_for_extraction noextract
-let mk_pcurve_order_concrete_ops {| cp:S.curve_params |} {| curve_constants |} : BE.concrete_ops U64 cp.bn_limbs 0ul = {
+let mk_pcurve_order_concrete_ops {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |}: BE.concrete_ops U64 cp.bn_limbs 0ul = {
   BE.to = mk_to_pcurve_order_comm_monoid;
   BE.lone = one_mod;
   BE.lmul = mul_mod;
@@ -69,21 +69,21 @@ let mk_pcurve_order_concrete_ops {| cp:S.curve_params |} {| curve_constants |} :
 
 
 inline_for_extraction noextract
-val qsquare_times_in_place {| cp:S.curve_params |} {| curve_constants |} (out:felem) (b:size_t) : Stack unit
+val qsquare_times_in_place {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |} (out:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ as_nat h out < S.order)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out < S.order /\
     qmont_as_nat h1 out == SI.qsquare_times (qmont_as_nat h0 out) (v b))
 
-let qsquare_times_in_place {| cp:S.curve_params |} {| curve_constants |} out b =
+let qsquare_times_in_place {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |} out b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qmont_as_nat h0 out) (v b);
   BE.lexp_pow2_in_place cp.bn_limbs 0ul mk_pcurve_order_concrete_ops (null uint64) out b
 
 
 inline_for_extraction noextract
-val qsquare_times {| cp:S.curve_params |} {| curve_constants |} (out a:felem) (b:size_t) : Stack unit
+val qsquare_times {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |} (out a:felem) (b:size_t) : Stack unit
   (requires fun h ->
     live h out /\ live h a /\ disjoint out a /\
     as_nat h a < S.order)
@@ -91,7 +91,7 @@ val qsquare_times {| cp:S.curve_params |} {| curve_constants |} (out a:felem) (b
     as_nat h1 out < S.order /\
     qmont_as_nat h1 out == SI.qsquare_times (qmont_as_nat h0 a) (v b))
 
-let qsquare_times {| cp:S.curve_params |} {| curve_constants |} out a b =
+let qsquare_times {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:order_ops |} out a b =
   let h0 = ST.get () in
   SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qmont_as_nat h0 a) (v b);
   BE.lexp_pow2 cp.bn_limbs 0ul mk_pcurve_order_concrete_ops (null uint64) a b out

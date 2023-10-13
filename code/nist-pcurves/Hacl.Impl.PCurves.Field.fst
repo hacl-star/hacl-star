@@ -8,22 +8,18 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.PCurves.Bignum
 open Hacl.Impl.PCurves.Constants
+open Hacl.Impl.PCurves.Bignum
 
 module S = Spec.PCurves
-module SM = Hacl.Spec.PCurves.Montgomery
-
 module BD = Hacl.Spec.Bignum.Definitions
-module BM = Hacl.Bignum.Montgomery
 
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 ///  Comparison
 
-[@CInline]
-let bn_is_lt_prime_mask {| cp:S.curve_params |} {| CC.curve_constants |} f =
+let bn_is_lt_prime_mask_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} f =
   let h0 = ST.get () in
   push_frame ();
   let tmp = create_felem #cp in
@@ -33,9 +29,7 @@ let bn_is_lt_prime_mask {| cp:S.curve_params |} {| CC.curve_constants |} f =
   pop_frame ();
   u64 0 -. c
 
-
-[@CInline]
-let feq_mask {| cp:S.curve_params |} a b =
+let feq_mask {| cp:S.curve_params |} {| bn_ops |} a b =
   let h0 = ST.get () in
   let r = bn_is_eq_mask a b in
   let h1 = ST.get () in
@@ -48,8 +42,8 @@ let feq_mask {| cp:S.curve_params |} a b =
 
 ///  Field Arithmetic
 
-[@CInline]
-let fadd {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
+
+let fadd_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
   let h0 = ST.get () in
   push_frame ();
   let n = create_felem #cp in
@@ -61,12 +55,12 @@ let fadd {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
   pop_frame ()
 
 
-let fdouble {| cp:S.curve_params |} {| CC.curve_constants |} out x =
-  fadd out x x
+let fdouble {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} out x =
+  fadd_g out x x
 
 
-[@CInline]
-let fsub {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
+
+let fsub_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
   let h0 = ST.get () in
   push_frame ();
   let n = create_felem #cp in
@@ -78,41 +72,41 @@ let fsub {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
   pop_frame ()
 
 
-[@CInline]
-let fnegate_conditional_vartime {| cp:S.curve_params |} {| CC.curve_constants |} f is_negate =
+
+let fnegate_conditional_vartime_g {| cp:S.curve_params |} {| CC.curve_constants |} f is_negate =
   push_frame ();
   let zero = create_felem #cp in
   if is_negate then begin
     let h0 = ST.get () in
-    fsub f zero f;
+    fsub_g f zero f;
     let h1 = ST.get () in
     assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
     Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
     assert (as_nat h1 f == (S.prime - as_nat h0 f) % S.prime) end;
   pop_frame ()
 
-
-val mont_reduction: {| cp:S.curve_params |} -> {| CC.curve_constants |}  
-  -> res:felem -> x:widefelem -> Stack unit
+inline_for_extraction noextract
+val mont_reduction {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} :
+  res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
     wide_as_nat h x < S.prime * S.prime)
   (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
     as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime)
 
-[@CInline]
-let mont_reduction {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+
+let mont_reduction {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x =
   push_frame ();
   let n = create_felem #cp in
   make_prime n;
   let h0 = ST.get () in
-  BM.bn_mont_reduction bn_inst n cp.mont_mu x res;
+  bn_mont_reduction cp.mont_mu res x n;
   SM.bn_mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
   pop_frame ()
 
 
-[@CInline]
-let fmul {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
+
+let fmul_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
@@ -124,8 +118,8 @@ let fmul {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
   pop_frame ()
 
 
-[@CInline]
-let fsqr {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+
+let fsqr_g {| cp:S.curve_params |} {| CC.curve_constants |} res x =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
@@ -137,8 +131,8 @@ let fsqr {| cp:S.curve_params |} {| CC.curve_constants |} res x =
   pop_frame ()
 
 
-[@CInline]
-let from_mont {| cp:S.curve_params |} {| CC.curve_constants |} res a =
+
+let from_mont_g {| cp:S.curve_params |} {| CC.curve_constants |} res a =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
@@ -151,14 +145,14 @@ let from_mont {| cp:S.curve_params |} {| CC.curve_constants |} res a =
   pop_frame ()
 
 
-[@CInline]
-let to_mont {| cp:S.curve_params |} {| CC.curve_constants |} res a =
+
+let to_mont_g {| cp:S.curve_params |} {| CC.curve_constants |} res a =
   push_frame ();
   let r2modn = create_felem #cp in
   make_fmont_R2 r2modn;
   let h0 = ST.get () in
   assert (as_nat h0 r2modn == SM.fmont_R * SM.fmont_R % S.prime);
-  fmul res a r2modn;
+  fmul_g res a r2modn;
   let h1 = ST.get () in
   assert (as_nat h1 res ==
     (as_nat h0 a * (SM.fmont_R * SM.fmont_R % S.prime) * SM.fmont_R_inv) % S.prime);
@@ -178,16 +172,16 @@ let to_mont {| cp:S.curve_params |} {| CC.curve_constants |} res a =
 
 ///  Special cases of the above functions
 
-[@CInline]
+
 let fmul_by_b_coeff {| cp:S.curve_params |} {| CC.curve_constants |} res x =
   push_frame ();
   let b_coeff = create_felem #cp in
   make_b_coeff b_coeff;
-  fmul res b_coeff x;
+  fmul_g res b_coeff x;
   pop_frame ()
 
 
-[@CInline]
+
 let fcube {| cp:S.curve_params |} {| CC.curve_constants |} res x =
-  fsqr res x;
-  fmul res res x
+  fsqr_g res x;
+  fmul_g res res x

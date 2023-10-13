@@ -9,6 +9,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.PCurves.Bignum
+open Hacl.Impl.PCurves.Field
 open Hacl.Impl.PCurves.Constants
 open Hacl.Impl.PCurves.InvSqrt
 open Hacl.Impl.PCurves.Point
@@ -20,8 +21,8 @@ include Hacl.PCurves.PrecompTable
 
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
-
-val point_mul {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} {| pt:precomp_tables |}:
+noextract inline_for_extraction
+val point_mul {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}:
   res:point -> scalar:felem -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ live h scalar /\
@@ -33,7 +34,8 @@ val point_mul {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} 
     S.to_aff_point (S.point_mul (as_nat h0 scalar) (from_mont_point (as_point_nat h0 p))))
 
 
-val point_mul_g {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} {| pt:precomp_tables |}:
+noextract inline_for_extraction
+val point_mul_g {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}:
   res:point -> scalar:felem -> Stack unit
   (requires fun h ->
     live h res /\ live h scalar /\ disjoint res scalar /\
@@ -44,7 +46,8 @@ val point_mul_g {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|
     S.to_aff_point (S.point_mul_g (as_nat h0 scalar)))
 
 
-val point_mul_double_g {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|} {| pt:precomp_tables |}:
+noextract inline_for_extraction
+val point_mul_double_g {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}:
   res:point -> scalar1:felem -> scalar2:felem -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h scalar1 /\ live h scalar2 /\ live h p /\

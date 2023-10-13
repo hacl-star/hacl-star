@@ -7,6 +7,8 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Impl.PCurves.Bignum
+open Hacl.Impl.PCurves.Field
 open Hacl.Impl.PCurves.Constants
 open Hacl.Impl.PCurves.InvSqrt
 open Hacl.Impl.PCurves.Point
@@ -15,7 +17,8 @@ module S = Spec.PCurves
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val point_add {| cp:S.curve_params |} {| curve_constants |} {| curve_inv_sqrt|}:
+noextract inline_for_extraction
+val point_add {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|}:
   res:point -> p:point -> q:point -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h res /\

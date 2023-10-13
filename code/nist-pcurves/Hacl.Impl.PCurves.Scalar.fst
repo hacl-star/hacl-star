@@ -21,8 +21,8 @@ module BM = Hacl.Bignum.Montgomery
 
 ///  Comparison
 
-[@CInline]
-let bn_is_lt_order_mask {| cp:S.curve_params |} {| CC.curve_constants |} f =
+
+let bn_is_lt_order_mask_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} f =
   let h0 = ST.get () in
   push_frame ();
   let tmp = create_felem #cp in
@@ -33,10 +33,10 @@ let bn_is_lt_order_mask {| cp:S.curve_params |} {| CC.curve_constants |} f =
   u64 0 -. c
 
 
-[@CInline]
-let bn_is_lt_order_and_gt_zero_mask {| cp:S.curve_params |} {| CC.curve_constants |} f =
+
+let bn_is_lt_order_and_gt_zero_mask {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} f =
   let h0 = ST.get () in
-  let is_lt_order = bn_is_lt_order_mask f in
+  let is_lt_order = bn_is_lt_order_mask_g f in
   assert (v is_lt_order = (if as_nat h0 f < S.order then ones_v U64 else 0));
   let is_eq_zero = bn_is_zero_mask f in
   assert (v is_eq_zero = (if as_nat h0 f = 0 then ones_v U64 else 0));
@@ -49,7 +49,7 @@ let bn_is_lt_order_and_gt_zero_mask {| cp:S.curve_params |} {| CC.curve_constant
   res
 
 
-let load_qelem_conditional {| cp:S.curve_params |} {| CC.curve_constants |} res b =
+let load_qelem_conditional_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res b =
   push_frame ();
   bn_from_bytes_be res b;
   let is_b_valid = bn_is_lt_order_and_gt_zero_mask res in
@@ -66,10 +66,10 @@ let load_qelem_conditional {| cp:S.curve_params |} {| CC.curve_constants |} res 
 
 ///  Field Arithmetic
 
-val qmod_short_lemma: {| cp:S.curve_params |} -> {| CC.curve_constants |}  -> a:nat{a < pow2 (64 * v S.bn_limbs)} ->
+val qmod_short_lemma: {| cp:S.curve_params |} -> {| CC.curve_constants |}  -> {| bn_ops |} -> a:nat{a < pow2 (64 * v S.bn_limbs)} ->
   Lemma (let r = if a >= S.order then a - S.order else a in r = a % S.order)
 
-let qmod_short_lemma {| cp:S.curve_params |} {| CC.curve_constants |} a =
+let qmod_short_lemma {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} a =
   let r = if a >= S.order then a - S.order else a in
   if a >= S.order then begin
     Math.Lemmas.lemma_mod_sub a S.order 1;
@@ -81,8 +81,8 @@ let qmod_short_lemma {| cp:S.curve_params |} {| CC.curve_constants |} a =
    Math.Lemmas.small_mod r S.order
 
 
-[@CInline]
-let qmod_short {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+
+let qmod_short_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x =
   push_frame ();
   let tmp = create_felem #cp in
   make_order tmp;
@@ -94,8 +94,8 @@ let qmod_short {| cp:S.curve_params |} {| CC.curve_constants |} res x =
   pop_frame ()
 
 
-[@CInline]
-let qadd {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
+
+let qadd_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
   let h0 = ST.get () in
   push_frame ();
   let n = create_felem #cp in
@@ -106,27 +106,27 @@ let qadd {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
   SM.qmont_add_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
-val qmont_reduction: {| cp:S.curve_params |} -> {| CC.curve_constants |}  -> res:felem -> x:widefelem -> Stack unit
+val qmont_reduction: {| cp:S.curve_params |} -> {| CC.curve_constants |}  -> {| bn_ops |} -> res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
     wide_as_nat h x < S.order * S.order)
   (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
     as_nat h1 res == wide_as_nat h0 x * SM.qmont_R_inv % S.order)
 
-[@CInline]
-let qmont_reduction {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+
+let qmont_reduction {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x =
   push_frame ();
   let n = create_felem #cp in
   make_order n;
 
   let h0 = ST.get () in
-  BM.bn_mont_reduction bn_inst n cp.mont_q_mu x res;
+  bn_mont_reduction cp.mont_q_mu res x n;
   SM.bn_qmont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
   pop_frame ()
 
 
-[@CInline]
-let from_qmont {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+
+let from_qmont_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
@@ -139,8 +139,8 @@ let from_qmont {| cp:S.curve_params |} {| CC.curve_constants |} res x =
   pop_frame ()
 
 
-[@CInline]
-let qmul {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
+
+let qmul_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
@@ -152,8 +152,8 @@ let qmul {| cp:S.curve_params |} {| CC.curve_constants |} res x y =
   pop_frame ()
 
 
-[@CInline]
-let qsqr {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+
+let qsqr_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in

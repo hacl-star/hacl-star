@@ -26,6 +26,8 @@ open Hacl.Impl.PCurves.InvSqrt
 open Spec.P256
 open Hacl.Impl.PCurves.Constants
 open Hacl.Impl.PCurves.Constants.P256
+open Hacl.Impl.PCurves.Bignum.P256
+open Hacl.Impl.PCurves.Field.P256
 
 module M = Lib.NatMod
 
@@ -148,6 +150,7 @@ let finv_256  x256 x2 x30 a =
   assert (fmont_as_nat h6 x256 == // x256
     S.fmul (SI.fsquare_times (fmont_as_nat h5 x2) 2) (fmont_as_nat h0 a))
 
+[@CInline]
 val p256_finv: res:felem -> a:felem -> Stack unit
     (requires fun h ->
       live h a /\ live h res /\ eq_or_disjoint a res /\
@@ -239,6 +242,7 @@ let fsqrt_254 tmp2 tmp1 a =
 
   FI.fsquare_times_in_place tmp2 94ul
 
+[@CInline]
 val p256_fsqrt: res:felem -> a:felem -> Stack unit
     (requires fun h ->
       live h a /\ live h res /\ eq_or_disjoint a res /\

@@ -8,10 +8,6 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.PCurves.Bignum
-open Hacl.Impl.PCurves.Field
-open Hacl.Impl.PCurves.Scalar
-
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module BD = Hacl.Spec.Bignum.Definitions
@@ -23,10 +19,16 @@ module SI256 = Hacl.Spec.PCurves.Qinv.P256
 module QI = Hacl.Impl.PCurves.Qinv
 module SM = Hacl.Spec.PCurves.Montgomery
 
-open Hacl.Impl.PCurves.InvSqrt
 open Spec.P256
+open Hacl.Impl.PCurves.Bignum
+open Hacl.Impl.PCurves.Bignum.P256
 open Hacl.Impl.PCurves.Constants
 open Hacl.Impl.PCurves.Constants.P256
+open Hacl.Impl.PCurves.Field
+open Hacl.Impl.PCurves.Field.P256
+open Hacl.Impl.PCurves.Scalar
+open Hacl.Impl.PCurves.Scalar.P256
+open Hacl.Impl.PCurves.InvSqrt
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -395,6 +397,7 @@ let qinv_make_x  x6 x_11 x_101 x_111 x_1111 x_10101 x_101111 a =
   qmul x_101111 x_101 x6;
   qmul x6 x_10101 x6
 
+[@CInline]
 val p256_qinv: res:felem -> a:felem -> Stack unit
    (requires fun h ->
      live h a /\ live h res /\ eq_or_disjoint a res /\
