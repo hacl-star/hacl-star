@@ -24,6 +24,7 @@ let is_fodd (x:nat) : bool = x % 2 = 1
 class curve_params = {
   bits: pos;
   bytes: x:pos{bits <= 8 * x /\ 3 * x < pow2 32}; 
+  size_bytes: x:size_t{v x == bytes};
     // length restriction to allow for serializing affine and projective points
   prime: x:pos{x > 3 /\ x < pow2 bits /\ is_fodd x};
   order: x:pos{x > 1 /\ x < pow2 bits /\ is_fodd x};

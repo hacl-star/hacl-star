@@ -41,6 +41,7 @@ let point_double = point_double_g
 val point_zero: point_zero_t
 let point_zero = point_zero_g
 
+inline_for_extraction
 instance p256_point_ops : point_ops = {
   point_add;
   point_double;

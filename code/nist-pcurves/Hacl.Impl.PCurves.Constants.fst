@@ -15,8 +15,10 @@ module SM = Hacl.Spec.PCurves.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction
 let fmont_as_nat {| S.curve_params |} (h:mem) (a:felem) = SM.from_mont (as_nat h a)
 
+inline_for_extraction
 let qmont_as_nat {| c:S.curve_params |} (h:mem) (a:felem) = SM.from_qmont (as_nat h a)
 
 

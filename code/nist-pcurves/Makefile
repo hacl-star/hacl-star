@@ -7,7 +7,7 @@ all: dist/Makefile.basic
 # Defines rules for producing .checked, .krml, .depend, etc.
 include $(HACL_HOME)/Makefile.local
 
-FSTAR_ROOTS += $(HACL_HOME)/code/tests/Hacl.Test.ECDSA.fst
+FSTAR_ROOTS = Hacl.P256.fst
 
 CFLAGS += -I$(HACL_HOME)/lib/c -march=native -mtune=native -O3
 export CFLAGS

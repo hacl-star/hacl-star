@@ -39,9 +39,11 @@ let p256_proj_g_pow2_64 : S.proj_point =
   let rZ : S.felem = 0x02626dc2dd5e06cd19de5e6afb6c5dbdd3e41dc1472e7b8ef11eb0662e41c44b in
   (rX, rY, rZ)
 
+noextract
 val lemma_p256_proj_g_pow2_64_eval : unit ->
   Lemma (SE.exp_pow2 S.mk_pcurve_concrete_ops S.base_point 64 == p256_proj_g_pow2_64)
 
+noextract
 let lemma_p256_proj_g_pow2_64_eval () =
   SPT256.exp_pow2_rec_is_exp_pow2 S.mk_pcurve_concrete_ops S.base_point 64;
   let qX, qY, qZ = normalize_term (SPT256.exp_pow2_rec S.mk_pcurve_concrete_ops S.base_point 64) in
@@ -62,9 +64,11 @@ let p256_proj_g_pow2_128 : S.proj_point =
   let rZ : S.felem = 0x80119ced9a5ce83c4e31f8de1a38f89d5f9ff9f637dca86d116a4217f83e55d2 in
   (rX, rY, rZ)
 
+noextract
 val lemma_p256_proj_g_pow2_128_eval: unit ->
   Lemma (SE.exp_pow2 S.mk_pcurve_concrete_ops p256_proj_g_pow2_64 64 == p256_proj_g_pow2_128)
 
+noextract
 let lemma_p256_proj_g_pow2_128_eval () =
   SPT256.exp_pow2_rec_is_exp_pow2 S.mk_pcurve_concrete_ops p256_proj_g_pow2_64 64;
   let qX, qY, qZ = normalize_term (SPT256.exp_pow2_rec S.mk_pcurve_concrete_ops p256_proj_g_pow2_64 64) in
@@ -84,9 +88,11 @@ let p256_proj_g_pow2_192 : S.proj_point =
   let rZ : S.felem = 0xcb433ab3f67815707e398dc7910cc4ec6ea115360060fc73c35b53dce02e2c72 in
   (rX, rY, rZ)
 
+noextract
 val lemma_p256_proj_g_pow2_192_eval : unit ->
   Lemma (SE.exp_pow2 S.mk_pcurve_concrete_ops p256_proj_g_pow2_128 64 == p256_proj_g_pow2_192)
 
+noextract
 let lemma_p256_proj_g_pow2_192_eval () =
   SPT256.exp_pow2_rec_is_exp_pow2 S.mk_pcurve_concrete_ops p256_proj_g_pow2_128 64;
   let qX, qY, qZ = normalize_term (SPT256.exp_pow2_rec S.mk_pcurve_concrete_ops p256_proj_g_pow2_128 64) in
@@ -96,6 +102,7 @@ let lemma_p256_proj_g_pow2_192_eval () =
   let rZ : S.felem = 0xcb433ab3f67815707e398dc7910cc4ec6ea115360060fc73c35b53dce02e2c72 in
   assert_norm (qX == rX /\ qY == rY /\ qZ == rZ)
 
+inline_for_extraction noextract
 instance p256_precomp_g_points: precomp_g_points = {
   proj_g_pow2_64 = p256_proj_g_pow2_64;
   lemma_proj_g_pow2_64_eval = lemma_p256_proj_g_pow2_64_eval;
@@ -113,14 +120,17 @@ let p256_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table p256_basepoint 15)
  
 
+noextract
 let p256_basepoint_table_lseq_w4 : LSeq.lseq uint64 (192) =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 15);
   Seq.seq_of_list p256_basepoint_table_list_w4
 
+noextract
 val p256_basepoint_table_lemma_w4: unit ->
   Lemma ((forall (i:nat{i < 16}). precomp_table_acc_inv g_aff 16
          p256_basepoint_table_lseq_w4 i))
 
+noextract
 let p256_basepoint_table_lemma_w4 () =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 15);
   SPT.precomp_base_table_lemma #_ #_ #(3ul*.4ul) mk_pcurve_precomp_base_table S.base_point 16 p256_basepoint_table_lseq_w4
@@ -134,6 +144,7 @@ let p256_basepoint_table_w4:
   createL_global p256_basepoint_table_list_w4
 #pop-options
 
+inline_for_extraction noextract
 let p256_precomp_basepoint_table_w4 : precomp_table_w4 g_aff = {
   table_lseq_w4 = p256_basepoint_table_lseq_w4;
   table_lemma_w4 = p256_basepoint_table_lemma_w4;
@@ -147,13 +158,16 @@ inline_for_extraction noextract
 let p256_g_pow2_64_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_64 15)
 
+noextract
 let p256_g_pow2_64_table_lseq_w4 : LSeq.lseq uint64 192 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_64 15);
   Seq.seq_of_list p256_g_pow2_64_table_list_w4
 
+noextract
 val p256_g_pow2_64_table_lemma_w4: unit ->
   Lemma (forall (i:nat{i < 16}). precomp_table_acc_inv g_pow2_64 16 p256_g_pow2_64_table_lseq_w4 i)
 
+noextract
 let p256_g_pow2_64_table_lemma_w4 () =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_64 15);
   SPT.precomp_base_table_lemma mk_pcurve_precomp_base_table
@@ -170,6 +184,7 @@ let p256_g_pow2_64_table_w4 :
   createL_global p256_g_pow2_64_table_list_w4
 #pop-options
 
+inline_for_extraction noextract
 let p256_precomp_g_pow2_64_table_w4 : precomp_table_w4 g_pow2_64 = {
   table_lseq_w4 = p256_g_pow2_64_table_lseq_w4;
   table_lemma_w4 = p256_g_pow2_64_table_lemma_w4;
@@ -184,13 +199,16 @@ inline_for_extraction noextract
 let p256_g_pow2_128_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_128 15)
 
+noextract
 let p256_g_pow2_128_table_lseq_w4 : LSeq.lseq uint64 192 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_128 15);
   Seq.seq_of_list p256_g_pow2_128_table_list_w4
 
+noextract
 val p256_g_pow2_128_table_lemma_w4: unit ->
   Lemma (forall (i:nat{i < 16}). precomp_table_acc_inv g_pow2_128 16 p256_g_pow2_128_table_lseq_w4 i)
 
+noextract
 let p256_g_pow2_128_table_lemma_w4 () =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_128 15);
   SPT.precomp_base_table_lemma mk_pcurve_precomp_base_table
@@ -207,6 +225,7 @@ let p256_g_pow2_128_table_w4 :
   createL_global p256_g_pow2_128_table_list_w4
 #pop-options
 
+inline_for_extraction noextract
 let p256_precomp_g_pow2_128_table_w4 : precomp_table_w4 g_pow2_128 = {
   table_lseq_w4 = p256_g_pow2_128_table_lseq_w4;
   table_lemma_w4 = p256_g_pow2_128_table_lemma_w4;
@@ -219,14 +238,17 @@ let p256_precomp_g_pow2_128_table_w4 : precomp_table_w4 g_pow2_128 = {
 inline_for_extraction noextract
 let p256_g_pow2_192_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_192 15)
-
+  
+noextract
 let p256_g_pow2_192_table_lseq_w4 : LSeq.lseq uint64 192 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_192 15);
   Seq.seq_of_list p256_g_pow2_192_table_list_w4
 
+noextract
 val p256_g_pow2_192_table_lemma_w4: unit ->
   Lemma (forall (i:nat{i < 16}). precomp_table_acc_inv g_pow2_192 16 p256_g_pow2_192_table_lseq_w4 i)
 
+noextract
 let p256_g_pow2_192_table_lemma_w4 () =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_192 15);
   SPT.precomp_base_table_lemma mk_pcurve_precomp_base_table
@@ -243,6 +265,7 @@ let p256_g_pow2_192_table_w4 :
   createL_global p256_g_pow2_192_table_list_w4
 #pop-options
 
+inline_for_extraction noextract
 let p256_precomp_g_pow2_192_table_w4 : precomp_table_w4 g_pow2_192 = {
   table_lseq_w4 = p256_g_pow2_192_table_lseq_w4;
   table_lemma_w4 = p256_g_pow2_192_table_lemma_w4;
@@ -257,10 +280,12 @@ let p256_basepoint_table_list_w5 :
     x:list uint64{FStar.List.Tot.length x = 384} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 31)
 
+noextract
 let p256_basepoint_table_lseq_w5 : LSeq.lseq uint64 384 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 31);
   Seq.seq_of_list p256_basepoint_table_list_w5
 
+noextract
 val p256_basepoint_table_lemma_w5: unit ->
   Lemma ((forall (i:nat{i < 32}). precomp_table_acc_inv g_aff 32
          p256_basepoint_table_lseq_w5 i))
@@ -278,6 +303,7 @@ let p256_basepoint_table_w5:
   createL_global p256_basepoint_table_list_w5
 #pop-options
 
+noextract
 let p256_precomp_basepoint_table_w5 : precomp_table_w5 g_aff = {
   table_lseq_w5 = p256_basepoint_table_lseq_w5;
   table_lemma_w5 = p256_basepoint_table_lemma_w5;
@@ -287,6 +313,7 @@ let p256_precomp_basepoint_table_w5 : precomp_table_w5 g_aff = {
 
 ///////////////////////////////////
 
+inline_for_extraction noextract
 instance p256_precomp_tables: precomp_tables = {
   g_points = p256_precomp_g_points;
   basepoint_w4 = p256_precomp_basepoint_table_w4;

@@ -49,6 +49,7 @@ let qmul a b c = qmul_g a b c
 val qsqr: qsqr_t
 let qsqr a b = qsqr_g a b
 
+inline_for_extraction
 instance p256_order_ops : order_ops = {
   bn_is_lt_order_mask;
   load_qelem_conditional;

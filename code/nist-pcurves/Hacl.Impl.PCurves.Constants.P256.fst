@@ -18,6 +18,7 @@ module CC = Hacl.Impl.PCurves.Constants
 open Spec.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+[@CInline]
 val p256_make_prime: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -33,6 +34,7 @@ let p256_make_prime n =
     assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = Spec.P256.p256_prime);
     bn_make_u64_4 n n0 n1 n2 n3
 
+[@CInline]
 val p256_make_order: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -48,6 +50,7 @@ let p256_make_order n =
     assert_norm (v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192 = Spec.P256.p256_order);
     bn_make_u64_4 n n0 n1 n2 n3
 
+[@CInline]
 val p256_make_a_coeff: a:felem -> Stack unit
   (requires fun h -> live h a)
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\
@@ -68,6 +71,7 @@ let p256_make_a_coeff a =
     SM.lemma_to_from_mont_id S.a_coeff;
     bn_make_u64_4 a n0 n1 n2 n3
 
+[@CInline]
 val p256_make_b_coeff: b:felem -> Stack unit
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
@@ -89,6 +93,7 @@ let p256_make_b_coeff b =
     bn_make_u64_4 b n0 n1 n2 n3
 
 
+[@CInline]
 val p256_make_g_x: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -109,6 +114,7 @@ let p256_make_g_x n =
     SM.lemma_to_from_mont_id S.basepoint_x;
     bn_make_u64_4 n n0 n1 n2 n3
 
+[@CInline]
 val p256_make_g_y: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -129,6 +135,7 @@ let p256_make_g_y n =
     SM.lemma_to_from_mont_id S.basepoint_y;
     bn_make_u64_4 n n0 n1 n2 n3
 
+[@CInline]
 val p256_make_fmont_R2: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -145,6 +152,7 @@ let p256_make_fmont_R2 n =
     assert_norm (pow2 (64 * 4) * pow2 (64 * 4) % p256_prime == v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192);
     bn_make_u64_4 n n0 n1 n2 n3
 
+[@CInline]
 val p256_make_fzero: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -158,6 +166,7 @@ let p256_make_fzero n =
   SM.lemma_to_from_mont_id 0
 
 
+[@CInline]
 val p256_make_fone: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -177,6 +186,7 @@ let p256_make_fone n =
     bn_make_u64_4 n n0 n1 n2 n3
 
 
+[@CInline]
 val p256_make_qone: f:felem -> Stack unit
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
@@ -196,6 +206,7 @@ let p256_make_qone f =
     bn_make_u64_4 f f0 f1 f2 f3
 
 
+inline_for_extraction
 instance p256_curve_constants : CC.curve_constants = {
   make_prime = p256_make_prime;
   make_order = p256_make_order;

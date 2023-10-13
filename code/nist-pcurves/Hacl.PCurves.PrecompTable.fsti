@@ -144,14 +144,14 @@ let precomp_table_acc_inv {| cp:S.curve_params |}
   S.to_aff_point (from_mont_point (as_point_nat_seq bj)) == pow_point j p
 
 noeq type precomp_table_w4 {| cp:S.curve_params |} (p:S.aff_point #cp) = {
-  table_lseq_w4: LSeq.lseq uint64 (48 * v cp.bn_limbs);
+  table_lseq_w4: (LSeq.lseq uint64 (48 * v cp.bn_limbs));
   table_lemma_w4: unit ->
   Lemma ((forall (i:nat{i < 16}). precomp_table_acc_inv p 16 table_lseq_w4 i));
   table_w4: x:glbuffer uint64 (48ul *. cp.bn_limbs){witnessed x table_lseq_w4 /\ recallable x}
 }
 
 noeq type precomp_table_w5 {| cp:S.curve_params |} (p:S.aff_point #cp) = {
-  table_lseq_w5: LSeq.lseq uint64 (96 * v cp.bn_limbs);
+  table_lseq_w5: (LSeq.lseq uint64 (96 * v cp.bn_limbs));
   table_lemma_w5: unit ->
   Lemma ((forall (i:nat{i < 32}). precomp_table_acc_inv p 32 table_lseq_w5 i));
   table_w5: x:glbuffer uint64 (96ul *. cp.bn_limbs){witnessed x table_lseq_w5 /\ recallable x}

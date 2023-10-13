@@ -426,6 +426,7 @@ let p256_qinv res r =
   SI256.qinv_is_qinv_lemma (qmont_as_nat h0 r);
   pop_frame ()
 
+inline_for_extraction
 instance p256_inv_sqrt : curve_inv_sqrt = {
   finv = Hacl.Impl.PCurves.Finv.P256.p256_finv;
   qinv = p256_qinv;

@@ -50,6 +50,7 @@ let from_mont a b = from_mont_g a b
 val to_mont: to_mont_t
 let to_mont a b = to_mont_g a b
 
+inline_for_extraction
 instance p256_field_ops: field_ops = {
   bn_is_lt_prime_mask;
   fadd;
