@@ -16,6 +16,7 @@ module S = Spec.PCurves
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
+[@(strict_on_arguments [0;1;2;3;4])]
 noextract inline_for_extraction
 val point_double {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|}:
   res:point -> p:point -> Stack unit

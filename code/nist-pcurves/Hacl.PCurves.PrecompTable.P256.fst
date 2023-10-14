@@ -120,7 +120,7 @@ let p256_basepoint_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table p256_basepoint 15)
  
 
-noextract
+inline_for_extraction noextract
 let p256_basepoint_table_lseq_w4 : LSeq.lseq uint64 (192) =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 15);
   Seq.seq_of_list p256_basepoint_table_list_w4
@@ -158,7 +158,7 @@ inline_for_extraction noextract
 let p256_g_pow2_64_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_64 15)
 
-noextract
+inline_for_extraction noextract
 let p256_g_pow2_64_table_lseq_w4 : LSeq.lseq uint64 192 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_64 15);
   Seq.seq_of_list p256_g_pow2_64_table_list_w4
@@ -199,7 +199,7 @@ inline_for_extraction noextract
 let p256_g_pow2_128_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_128 15)
 
-noextract
+inline_for_extraction noextract
 let p256_g_pow2_128_table_lseq_w4 : LSeq.lseq uint64 192 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_128 15);
   Seq.seq_of_list p256_g_pow2_128_table_list_w4
@@ -239,7 +239,7 @@ inline_for_extraction noextract
 let p256_g_pow2_192_table_list_w4: x:list uint64{FStar.List.Tot.length x = 192} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_192 15)
   
-noextract
+inline_for_extraction noextract
 let p256_g_pow2_192_table_lseq_w4 : LSeq.lseq uint64 192 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table proj_g_pow2_192 15);
   Seq.seq_of_list p256_g_pow2_192_table_list_w4
@@ -280,7 +280,7 @@ let p256_basepoint_table_list_w5 :
     x:list uint64{FStar.List.Tot.length x = 384} =
   normalize_term (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 31)
 
-noextract
+inline_for_extraction noextract
 let p256_basepoint_table_lseq_w5 : LSeq.lseq uint64 384 =
   normalize_term_spec (SPT.precomp_base_table_list mk_pcurve_precomp_base_table S.base_point 31);
   Seq.seq_of_list p256_basepoint_table_list_w5
@@ -303,7 +303,7 @@ let p256_basepoint_table_w5:
   createL_global p256_basepoint_table_list_w5
 #pop-options
 
-noextract
+inline_for_extraction noextract
 let p256_precomp_basepoint_table_w5 : precomp_table_w5 g_aff = {
   table_lseq_w5 = p256_basepoint_table_lseq_w5;
   table_lemma_w5 = p256_basepoint_table_lemma_w5;

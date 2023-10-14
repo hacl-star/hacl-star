@@ -21,6 +21,7 @@ let is_fodd (x:nat) : bool = x % 2 = 1
 (* We only consider a limb size of 64-bits. 
    On 32-bit platforms, 64-bit arithmetic is simulated by compiler. *)
    
+inline_for_extraction
 class curve_params = {
   bits: pos;
   bytes: x:pos{bits <= 8 * x /\ 3 * x < pow2 32}; 

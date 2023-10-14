@@ -27,10 +27,12 @@ let bn_is_lt_order_mask_t {| S.curve_params |} {| CC.curve_constants |} {| bn_op
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (if as_nat h0 f < S.order then v r = ones_v U64 else v r = 0))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val bn_is_lt_order_mask_g {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
     bn_is_lt_order_mask_t
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val bn_is_lt_order_and_gt_zero_mask {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
   f:felem -> Stack uint64
@@ -49,6 +51,7 @@ let load_qelem_conditional_t {| cp:S.curve_params |} {| CC.curve_constants |} {|
     (v m = ones_v U64 \/ v m = 0) /\ (v m = ones_v U64) = is_b_valid /\
     as_nat h1 res == (if is_b_valid then b_nat else 1)))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val load_qelem_conditional_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}: load_qelem_conditional_t
 
@@ -63,6 +66,7 @@ let qmod_short_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == as_nat h0 x % S.order)
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val qmod_short_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
     qmod_short_t
@@ -79,6 +83,7 @@ let qadd_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
     as_nat h1 res == S.qadd (as_nat h0 x) (as_nat h0 y) /\
     qmont_as_nat h1 res == S.qadd (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val qadd_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} :
   qadd_t
@@ -93,6 +98,7 @@ let from_qmont_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
     as_nat h1 res < S.order /\
     as_nat h1 res == qmont_as_nat h0 x)
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val from_qmont_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
     from_qmont_t
@@ -108,6 +114,7 @@ let qmul_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
     as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.qmont_R_inv) % S.order /\
     qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val qmul_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
     qmul_t
@@ -122,10 +129,13 @@ let qsqr_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
     as_nat h1 res = (as_nat h0 x * as_nat h0 x * SM.qmont_R_inv) % S.order /\
     qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 x))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val qsqr_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
   qsqr_t
 
+[@(strict_on_arguments [0;1;2])]
+inline_for_extraction
 class order_ops {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} = {
   bn_is_lt_order_mask: bn_is_lt_order_mask_t;
   load_qelem_conditional: load_qelem_conditional_t;

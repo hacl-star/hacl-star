@@ -32,7 +32,7 @@ open Hacl.PCurves.PrecompTable.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-[@ CInline ]
+inline_for_extraction noextract
 val msg_as_felem:
     alg:S.hash_alg_ecdsa
   -> msg_len:size_t{S.min_input_length alg (v msg_len)}
@@ -45,7 +45,7 @@ val msg_as_felem:
     (let hashM = S.hash_ecdsa alg (v msg_len) (as_seq h0 msg) in
     BN.as_nat h1 res = BSeq.nat_from_bytes_be (LSeq.sub hashM 0 32) % S.order))
 
-[@ CInline ]
+inline_for_extraction noextract
 let msg_as_felem alg msg_len msg res =
   push_frame ();
 
@@ -88,8 +88,17 @@ val ecdsa_sign_msg_as_qelem:
      (flag <==> Some? sgnt) /\ (flag ==> (as_seq h1 signature == Some?.v sgnt))))
 
 let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
-  ecdsa_sign_msg_as_qelem signature m_q private_key nonce
-
+  ecdsa_sign_msg_as_qelem
+  #p256_params
+  #p256_curve_constants
+  #p256_bn_ops
+  #p256_field_ops
+  #p256_order_ops
+  #p256_inv_sqrt
+  #p256_point_ops
+  #p256_precomp_tables
+  signature m_q private_key nonce
+ 
 [@ CInline ]
 val ecdsa_verify_msg_as_qelem:
     m_q:BN.felem
@@ -105,7 +114,16 @@ val ecdsa_verify_msg_as_qelem:
       (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
 
 let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
-  ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s
+  ecdsa_verify_msg_as_qelem
+  #p256_params
+  #p256_curve_constants
+  #p256_bn_ops
+  #p256_field_ops
+  #p256_order_ops
+  #p256_inv_sqrt
+  #p256_point_ops
+  #p256_precomp_tables
+  m_q public_key signature_r signature_s
 
 inline_for_extraction noextract
 val ecdsa_signature: alg:S.hash_alg_ecdsa -> ecdsa_sign_p256_st alg
@@ -186,7 +204,25 @@ let raw_to_compressed pk_raw pk =
 
 
 let dh_initiator public_key private_key =
-  Hacl.Impl.PCurves.DH.ecp256dh_i public_key private_key
+  Hacl.Impl.PCurves.DH.ecp256dh_i
+  #p256_params
+  #p256_curve_constants
+  #p256_bn_ops
+  #p256_field_ops
+  #p256_order_ops
+  #p256_inv_sqrt
+  #p256_point_ops
+  #p256_precomp_tables
+  public_key private_key
 
 let dh_responder shared_secret their_pubkey private_key =
-  Hacl.Impl.PCurves.DH.ecp256dh_r shared_secret their_pubkey private_key
+  Hacl.Impl.PCurves.DH.ecp256dh_r
+  #p256_params
+  #p256_curve_constants
+  #p256_bn_ops
+  #p256_field_ops
+  #p256_order_ops
+  #p256_inv_sqrt
+  #p256_point_ops
+  #p256_precomp_tables
+  shared_secret their_pubkey private_key

@@ -183,7 +183,7 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 P256_BUNDLE= \
-  -bundle Hacl.P256.PrecompTable.256 -static-header Hacl.P256.PrecompTable.P256 \
+  -bundle Hacl.PCurves.PrecompTable.P256 -static-header Hacl.PCurves.PrecompTable.P256 \
   -bundle Hacl.P256=Hacl.Impl.PCurves.*,Hacl.PCurves.*,Hacl.Spec.PCurves.*[rename=Hacl_P256]
 K256_BUNDLE= \
   -bundle Hacl.K256.Field,Hacl.Impl.K256.Finv[rename=Hacl_Bignum_K256] -static-header Hacl.K256.Field,Hacl.Impl.K256.Finv \

@@ -70,7 +70,7 @@ let precomp_get_consttime {| cp:S.curve_params |} {| curve_constants |} {| bn_op
 
   BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
 
-
+[@(strict_on_arguments [0;1;2;3;4;5;6])]
 inline_for_extraction noextract
 val point_mul_g_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |}
   : out:point -> scalar:felem

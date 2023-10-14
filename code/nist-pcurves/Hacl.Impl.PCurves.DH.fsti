@@ -17,8 +17,10 @@ module S = Spec.PCurves
 module PP = Hacl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
+[@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
-val ecp256dh_i {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} :
+val ecp256dh_i {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |}
+               {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} :
     public_key:lbuffer uint8 (2ul *. size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->
   Stack bool
@@ -29,8 +31,10 @@ val ecp256dh_i {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| fie
     (r <==> Some? pk) /\ (r ==> (as_seq h1 public_key == Some?.v pk))))
 
 
+[@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
-val ecp256dh_r {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} :
+val ecp256dh_r {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} 
+               {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} :
     shared_secret:lbuffer uint8 (2ul *. size cp.bytes)
   -> their_pubkey:lbuffer uint8 (2ul *. size cp.bytes)
   -> private_key:lbuffer uint8 (size cp.bytes) ->

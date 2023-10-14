@@ -18,6 +18,7 @@ module CC = Hacl.Impl.PCurves.Constants
 
 ///  Comparison
 
+
 inline_for_extraction noextract
 let bn_is_lt_prime_mask_t  {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} =
     f:felem -> Stack uint64
@@ -25,9 +26,11 @@ let bn_is_lt_prime_mask_t  {| S.curve_params |} {| CC.curve_constants |} {| bn:b
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (if as_nat h0 f < S.prime then v r = ones_v U64 else v r = 0))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val bn_is_lt_prime_mask_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}: bn_is_lt_prime_mask_t
 
+[@(strict_on_arguments [0;1])]
 inline_for_extraction noextract
 val feq_mask {| S.curve_params |} {| bn:bn_ops |}:
   a:felem -> b:felem -> Stack uint64
@@ -51,10 +54,12 @@ let fadd_t {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} =
     as_nat h1 res == S.fadd (as_nat h0 x) (as_nat h0 y) /\
     CC.fmont_as_nat h1 res == S.fadd (CC.fmont_as_nat h0 x) (CC.fmont_as_nat h0 y))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fadd_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
   fadd_t
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fdouble {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
   res:felem -> x:felem -> Stack unit
@@ -76,6 +81,7 @@ let fsub_t {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} =
     as_nat h1 res == S.fsub (as_nat h0 x) (as_nat h0 y) /\
     CC.fmont_as_nat h1 res == S.fsub (CC.fmont_as_nat h0 x) (CC.fmont_as_nat h0 y))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fsub_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
   fsub_t
@@ -87,6 +93,7 @@ let fnegate_conditional_vartime_t {| S.curve_params |} {| CC.curve_constants |} 
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\ as_nat h1 f < S.prime /\
     as_nat h1 f == (if is_negate then (S.prime - as_nat h0 f) % S.prime else as_nat h0 f))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fnegate_conditional_vartime_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}: fnegate_conditional_vartime_t
 
@@ -101,6 +108,7 @@ let fmul_t {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} =
     as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.fmont_R_inv) % S.prime /\
     CC.fmont_as_nat h1 res = S.fmul (CC.fmont_as_nat h0 x) (CC.fmont_as_nat h0 y))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fmul_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
   fmul_t
@@ -115,6 +123,7 @@ let fsqr_t {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} =
     as_nat h1 res = (as_nat h0 x * as_nat h0 x * SM.fmont_R_inv) % S.prime /\
     CC.fmont_as_nat h1 res = S.fmul (CC.fmont_as_nat h0 x) (CC.fmont_as_nat h0 x))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fsqr_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
     fsqr_t
@@ -128,6 +137,7 @@ let from_mont_t {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} =
     as_nat h1 res = (as_nat h0 x * SM.fmont_R_inv) % S.prime /\
     as_nat h1 res = CC.fmont_as_nat h0 x)
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val from_mont_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
   from_mont_t
@@ -141,12 +151,14 @@ let to_mont_t {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} =
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res = SM.to_mont (as_nat h0 f))
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val to_mont_g {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
     to_mont_t
 
 ///  Special cases of the above functions
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fmul_by_b_coeff {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
   res:felem -> x:felem -> Stack unit
@@ -159,6 +171,7 @@ val fmul_by_b_coeff {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |
       S.fmul S.b_coeff (CC.fmont_as_nat h0 x))
 
 
+[@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
 val fcube {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
   res:felem -> x:felem -> Stack unit
@@ -170,6 +183,8 @@ val fcube {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |}:
     CC.fmont_as_nat h1 res =
       S.fmul (S.fmul (CC.fmont_as_nat h0 x) (CC.fmont_as_nat h0 x)) (CC.fmont_as_nat h0 x))
 
+[@(strict_on_arguments [0;1;2])]
+inline_for_extraction
 class field_ops {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} = {
   bn_is_lt_prime_mask: bn_is_lt_prime_mask_t;
   fadd:fadd_t;

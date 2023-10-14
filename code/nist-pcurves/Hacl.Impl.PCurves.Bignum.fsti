@@ -22,6 +22,7 @@ module BN = Hacl.Bignum
 
 inline_for_extraction
 let felem {| cp:S.curve_params |} = lbuffer uint64 cp.bn_limbs
+
 inline_for_extraction
 let widefelem {| cp:S.curve_params |} = lbuffer uint64 (2ul *. cp.bn_limbs)
 
@@ -40,6 +41,7 @@ val bn_v_is_as_nat4: a:LSeq.lseq uint64 4 ->
 
 ///  Create a bignum
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val create_felem: {| c:S.curve_params |} -> StackInline felem
   (requires fun h -> True)
@@ -47,6 +49,7 @@ val create_felem: {| c:S.curve_params |} -> StackInline felem
     stack_allocated f h0 h1 (LSeq.create (v c.bn_limbs) (u64 0)) /\
     as_nat h1 f == 0)
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val create_widefelem: {| c:S.curve_params |} -> StackInline widefelem
   (requires fun h -> True)
@@ -55,6 +58,7 @@ val create_widefelem: {| c:S.curve_params |} -> StackInline widefelem
     wide_as_nat h1 f == 0)
 
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_make_u64_4: {| c:S.curve_params |} -> res:felem -> a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64{c.bn_limbs == 4ul} -> Stack unit
   (requires fun h -> live h res)
@@ -64,6 +68,7 @@ val bn_make_u64_4: {| c:S.curve_params |} -> res:felem -> a0:uint64 -> a1:uint64
 
 ///  Create zero and one
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_set_zero: {| c:S.curve_params |} -> f:felem -> Stack unit
   (requires fun h -> live h f)
@@ -71,6 +76,7 @@ val bn_set_zero: {| c:S.curve_params |} -> f:felem -> Stack unit
     as_nat h1 f == 0)
 
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_set_one: {| c:S.curve_params |} -> f:felem -> Stack unit
   (requires fun h -> live h f)
@@ -87,10 +93,12 @@ let bn_is_eq_mask_t {| c:S.curve_params |} = x:felem -> y:felem -> Stack uint64
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (if as_nat h0 x = as_nat h0 y then v r == ones_v U64 else v r = 0))
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_is_eq_mask_g: {| c:S.curve_params |} -> bn_is_eq_mask_t
 
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_is_zero_mask: {| c:S.curve_params |} ->  f:felem -> Stack uint64
   (requires fun h -> live h f)
@@ -98,11 +106,13 @@ val bn_is_zero_mask: {| c:S.curve_params |} ->  f:felem -> Stack uint64
     (if as_nat h0 f = 0 then v r == ones_v U64 else v r == 0))
 
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_is_zero_vartime: {| c:S.curve_params |} -> f:felem -> Stack bool
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 f = 0))
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_is_eq_vartime: {| c:S.curve_params |} -> x:felem -> y:felem -> Stack bool
   (requires fun h -> live h x /\ live h y)
@@ -110,6 +120,7 @@ val bn_is_eq_vartime: {| c:S.curve_params |} -> x:felem -> y:felem -> Stack bool
     r == (as_nat h0 x = as_nat h0 y))
 
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_is_odd: {| c:S.curve_params |} -> f:felem -> Stack uint64
   (requires fun h -> live h f)
@@ -127,6 +138,7 @@ let bn_cmovznz_t {| c:S.curve_params |} = res:felem -> cin:uint64 -> x:felem -> 
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     (if v cin = 0 then as_nat h1 res == as_nat h0 x else as_nat h1 res == as_nat h0 y))
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_cmovznz_g: {| c:S.curve_params |} -> bn_cmovznz_t
 
@@ -143,6 +155,7 @@ let bn_add_mod_t {| c:S.curve_params |} = res:felem -> n:felem -> x:felem -> y:f
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == (as_nat h0 x + as_nat h0 y) % as_nat h0 n)
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_add_mod_g: {| c:S.curve_params |} -> bn_add_mod_t
 
@@ -155,6 +168,7 @@ let bn_sub_t {| cp:S.curve_params |} = res:felem -> x:felem -> y:felem -> Stack 
     as_nat h1 res - v c * pow2 (64 * v cp.bn_limbs) == as_nat h0 x - as_nat h0 y /\
     (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_sub_g: {| cp:S.curve_params |} -> bn_sub_t
 
@@ -168,10 +182,12 @@ let bn_sub_mod_t {| c:S.curve_params |} = res:felem -> n:felem -> x:felem -> y:f
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == (as_nat h0 x - as_nat h0 y) % as_nat h0 n)
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_sub_mod_g: {| c:S.curve_params |} -> bn_sub_mod_t
 
 ///  Multiplication
+
 
 inline_for_extraction noextract
 let bn_mul_t {| c:S.curve_params |} = res:widefelem -> x:felem -> y:felem -> Stack unit
@@ -181,6 +197,7 @@ let bn_mul_t {| c:S.curve_params |} = res:widefelem -> x:felem -> y:felem -> Sta
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     wide_as_nat h1 res = as_nat h0 x * as_nat h0 y)
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_mul_g: {| c:S.curve_params |} -> bn_mul_t
 
@@ -191,6 +208,7 @@ let bn_sqr_t {| c:S.curve_params |} = res:widefelem -> x:felem -> Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     wide_as_nat h1 res = as_nat h0 x * as_nat h0 x)
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_sqr_g: {| c:S.curve_params |} -> bn_sqr_t
 
@@ -204,6 +222,7 @@ let bn_to_bytes_be_t {| c:S.curve_params |} = res:lbuffer uint8 (size c.bytes) -
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == BSeq.nat_to_bytes_be c.bytes (as_nat h0 f))
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_to_bytes_be_g: {| c:S.curve_params |} -> bn_to_bytes_be_t
 
@@ -213,9 +232,11 @@ let bn_from_bytes_be_t {| c:S.curve_params |} = res:felem -> b:lbuffer uint8 (si
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res == BSeq.nat_from_bytes_be (as_seq h0 b))
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_from_bytes_be_g: {| c:S.curve_params |} -> bn_from_bytes_be_t
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn2_to_bytes_be: {| c:S.curve_params |} -> res:lbuffer uint8 (2ul *. size c.bytes) -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
@@ -226,7 +247,6 @@ val bn2_to_bytes_be: {| c:S.curve_params |} -> res:lbuffer uint8 (2ul *. size c.
   (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == LSeq.concat #uint8 #c.bytes #c.bytes
       (BSeq.nat_to_bytes_be c.bytes (as_nat h0 x)) (BSeq.nat_to_bytes_be c.bytes (as_nat h0 y)))
-
 
 inline_for_extraction noextract
 let bn_mont_reduction_t {| cp:S.curve_params |} =
@@ -239,6 +259,7 @@ let bn_mont_reduction_t {| cp:S.curve_params |} =
     as_seq h1 res == 
     SM.bn_mont_reduction (as_seq h0 n) mont_mu (as_seq h0 x))
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 val bn_mont_reduction_g {| cp:S.curve_params |} : bn_mont_reduction_t
 
@@ -247,6 +268,8 @@ let unsafe_bool_of_limb (m:uint64) : b:bool{b <==> v m = v (ones U64 SEC)} =
   let open Lib.RawIntTypes in
   FStar.UInt64.(u64_to_UInt64 m =^ u64_to_UInt64 (ones U64 SEC))
 
+[@(strict_on_arguments [0])]
+inline_for_extraction noextract
 class bn_ops {| S.curve_params |} = {
   bn_is_eq_mask: bn_is_eq_mask_t;
   bn_cmovznz: bn_cmovznz_t;

@@ -29,6 +29,7 @@ val proj_point_to_list: {| cp:S.curve_params |} -> p:S.proj_point
   -> x:list uint64{FStar.List.Tot.length x = 3 * v cp.bn_limbs /\
     mk_to_pcurve_comm_monoid.BE.linv (Seq.seq_of_list x)}
 
+inline_for_extraction noextract
 val lemma_refl: {| cp:S.curve_params |} -> x:S.proj_point ->
   Lemma (S.mk_pcurve_concrete_ops.SE.to.SE.refl x ==
     mk_to_pcurve_comm_monoid.BE.refl (Seq.seq_of_list (proj_point_to_list x)))
@@ -47,21 +48,22 @@ let pow_point {| cp:S.curve_params |} (k:nat) (p:S.aff_point) =
 
 //----------------
 
-noextract
+inline_for_extraction noextract
 let g_aff {| cp:S.curve_params |} : S.aff_point = S.to_aff_point S.base_point
 
 // [pow2 64]G
-noextract
+inline_for_extraction noextract
 let g_pow2_64 {| cp:S.curve_params |} : S.aff_point = pow_point (pow2 64) g_aff
 
 // [pow2 128]G
-noextract
+inline_for_extraction noextract
 let g_pow2_128 {| cp:S.curve_params |} : S.aff_point = pow_point (pow2 128) g_aff
 
 // [pow2 192]G
-noextract
+inline_for_extraction noextract
 let g_pow2_192 {| cp:S.curve_params |} : S.aff_point = pow_point (pow2 192) g_aff
 
+inline_for_extraction
 class precomp_g_points {| cp:S.curve_params |} = {
   proj_g_pow2_64: S.proj_point;
   lemma_proj_g_pow2_64_eval : unit ->
@@ -143,6 +145,7 @@ let precomp_table_acc_inv {| cp:S.curve_params |}
   point_inv_seq bj /\
   S.to_aff_point (from_mont_point (as_point_nat_seq bj)) == pow_point j p
 
+noextract inline_for_extraction
 noeq type precomp_table_w4 {| cp:S.curve_params |} (p:S.aff_point #cp) = {
   table_lseq_w4: (LSeq.lseq uint64 (48 * v cp.bn_limbs));
   table_lemma_w4: unit ->
@@ -150,6 +153,7 @@ noeq type precomp_table_w4 {| cp:S.curve_params |} (p:S.aff_point #cp) = {
   table_w4: x:glbuffer uint64 (48ul *. cp.bn_limbs){witnessed x table_lseq_w4 /\ recallable x}
 }
 
+noextract inline_for_extraction
 noeq type precomp_table_w5 {| cp:S.curve_params |} (p:S.aff_point #cp) = {
   table_lseq_w5: (LSeq.lseq uint64 (96 * v cp.bn_limbs));
   table_lemma_w5: unit ->
@@ -157,6 +161,7 @@ noeq type precomp_table_w5 {| cp:S.curve_params |} (p:S.aff_point #cp) = {
   table_w5: x:glbuffer uint64 (96ul *. cp.bn_limbs){witnessed x table_lseq_w5 /\ recallable x}
 }
 
+inline_for_extraction
 class precomp_tables {| S.curve_params |} = {
   g_points : precomp_g_points;
   basepoint_w4: precomp_table_w4 g_aff;

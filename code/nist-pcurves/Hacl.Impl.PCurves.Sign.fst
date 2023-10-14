@@ -30,6 +30,7 @@ module PP = Hacl.PCurves.PrecompTable
 inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
 
+[@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
 val ecdsa_sign_r  {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} (r k:felem) : Stack unit
   (requires fun h ->
@@ -48,6 +49,7 @@ let ecdsa_sign_r {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f
   pop_frame ()
 
 
+[@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
 val ecdsa_sign_s {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} (s k r d_a m:felem) : Stack unit
   (requires fun h ->
@@ -89,6 +91,7 @@ let ecdsa_sign_s {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f
   pop_frame ()
 
 
+[@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
 val ecdsa_sign_load {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |} (d_a k_q:felem) (private_key nonce:lbytes (size cp.bytes)) : Stack uint64
   (requires fun h ->
@@ -113,6 +116,7 @@ let ecdsa_sign_load {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {
   m
 
 
+[@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
 val check_signature {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |}:
   are_sk_nonce_valid:uint64 -> r_q:felem -> s_q:felem -> Stack bool
@@ -138,6 +142,7 @@ let check_signature {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {
     ((v are_sk_nonce_valid = ones_v U64) && (0 < as_nat h0 r_q) && (0 < as_nat h0 s_q)));
   BB.unsafe_bool_of_limb m
 
+[@(strict_on_arguments [0;1;2;3;4;5;6;7])]
 inline_for_extraction noextract
 val ecdsa_sign_msg_as_qelem {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt |} {| point_ops |} {| PP.precomp_tables |}:
     signature:lbuffer uint8 (2ul *. size cp.bytes)

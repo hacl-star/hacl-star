@@ -15,13 +15,16 @@ module SM = Hacl.Spec.PCurves.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+[@(strict_on_arguments [0])]
 inline_for_extraction
 let fmont_as_nat {| S.curve_params |} (h:mem) (a:felem) = SM.from_mont (as_nat h a)
 
+[@(strict_on_arguments [0])]
 inline_for_extraction
 let qmont_as_nat {| c:S.curve_params |} (h:mem) (a:felem) = SM.from_qmont (as_nat h a)
 
-
+[@(strict_on_arguments [0])]
+inline_for_extraction
 class curve_constants {| cp:S.curve_params |} = {
   make_prime : n:felem -> Stack unit
   (requires fun h -> live h n)

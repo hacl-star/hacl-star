@@ -14,6 +14,8 @@ open Hacl.Impl.PCurves.Field
 module S = Spec.PCurves
 module CC = Hacl.Impl.PCurves.Constants
 
+[@(strict_on_arguments [0])]
+inline_for_extraction
 class curve_inv_sqrt {| S.curve_params |} = {
   finv: res:felem -> a:felem -> Stack unit
     (requires fun h ->

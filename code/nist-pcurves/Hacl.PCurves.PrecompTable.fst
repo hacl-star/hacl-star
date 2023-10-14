@@ -33,15 +33,12 @@ let lemma_refl {| cp:S.curve_params |} x =
 
 //-----------------
 
-inline_for_extraction noextract
 let proj_g_pow2_64_list {| S.curve_params |} {| precomp_g_points |} : SPTK.point_list =
   normalize_term (SPTK.proj_point_to_list proj_g_pow2_64)
 
-inline_for_extraction noextract
 let proj_g_pow2_128_list {| S.curve_params |} {| precomp_g_points |} : SPTK.point_list =
   normalize_term (SPTK.proj_point_to_list proj_g_pow2_128)
 
-inline_for_extraction noextract
 let proj_g_pow2_192_list {| S.curve_params |} {| precomp_g_points |} : SPTK.point_list =
   normalize_term (SPTK.proj_point_to_list proj_g_pow2_192)
 

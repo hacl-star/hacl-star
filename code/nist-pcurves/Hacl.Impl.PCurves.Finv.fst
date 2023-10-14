@@ -23,15 +23,18 @@ module CC = Hacl.Impl.PCurves.Constants
 unfold
 let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
+[@(strict_on_arguments [0])]
 unfold
 let f_linv {| cp:S.curve_params |} (a:LSeq.lseq uint64 (v cp.bn_limbs)) : Type0 =
   BD.bn_v a < S.prime
 
+[@(strict_on_arguments [0])]
 unfold
 let f_refl {| cp:S.curve_params |} (a:LSeq.lseq uint64 (v cp.bn_limbs){f_linv a}) : GTot S.felem =
   SM.from_mont (BD.bn_v a)
 
 
+[@(strict_on_arguments [0])]
 inline_for_extraction noextract
 let mk_to_pcurve_prime_comm_monoid {| cp:S.curve_params |} : BE.to_comm_monoid U64 cp.bn_limbs 0ul = {
   BE.a_spec = S.felem;
@@ -43,21 +46,26 @@ let mk_to_pcurve_prime_comm_monoid {| cp:S.curve_params |} : BE.to_comm_monoid U
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+[@(strict_on_arguments [0;1])]
 inline_for_extraction noextract
 val one_mod {| cp:S.curve_params |} {| CC.curve_constants |} : BE.lone_st U64 cp.bn_limbs 0ul mk_to_pcurve_prime_comm_monoid
+
 let one_mod {| cp:S.curve_params |} {| cc:CC.curve_constants |} ctx one = cc.make_fone one
 
 
+[@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
 val mul_mod {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} : BE.lmul_st U64 cp.bn_limbs 0ul mk_to_pcurve_prime_comm_monoid
 let mul_mod {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} ctx x y xy = f.fmul xy x y
 
 
+[@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
 val sqr_mod {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} : BE.lsqr_st U64 cp.bn_limbs 0ul mk_to_pcurve_prime_comm_monoid
 let sqr_mod {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} ctx x xx = f.fsqr xx x
 
 
+[@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
 let mk_pcurve_prime_concrete_ops {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} : BE.concrete_ops U64 cp.bn_limbs 0ul = {
   BE.to = mk_to_pcurve_prime_comm_monoid;
@@ -67,6 +75,7 @@ let mk_pcurve_prime_concrete_ops {| cp:S.curve_params |} {| CC.curve_constants |
 }
 
 
+[@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
 val fsquare_times_in_place {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} (out:felem) (b:size_t) : Stack unit
   (requires fun h ->
@@ -81,6 +90,7 @@ let fsquare_times_in_place {| cp:S.curve_params |} {| CC.curve_constants |} {| b
   BE.lexp_pow2_in_place cp.bn_limbs 0ul mk_pcurve_prime_concrete_ops (null uint64) out b
 
 
+[@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
 val fsquare_times {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} (out a:felem) (b:size_t) : Stack unit
   (requires fun h ->

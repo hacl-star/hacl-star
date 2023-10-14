@@ -106,6 +106,7 @@ let qadd_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y
   SM.qmont_add_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
+inline_for_extraction noextract
 val qmont_reduction: {| cp:S.curve_params |} -> {| CC.curve_constants |}  -> {| bn_ops |} -> res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\
