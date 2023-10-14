@@ -23,7 +23,7 @@ module BD = Hacl.Spec.Bignum.Definitions
 module S = Spec.PCurves
 module SL = Spec.PCurves.Lemmas
 
-module PP = Hacl.PCurves.PrecompTable
+module PP = Hacl.Impl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -48,7 +48,7 @@ let table_inv_w5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f
   BE.table_inv_precomp len ctx_len k l table_len
 
 
-let point_mul {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} res scalar p =
+let point_mul_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} res scalar p =
   let h0 = ST.get () in
   SE.exp_fw_lemma S.mk_pcurve_concrete_ops
     (from_mont_point (as_point_nat h0 p)) cp.bits (as_nat h0 scalar) (v cp.bn_limbs);
@@ -166,7 +166,7 @@ let lemma_exp_four_fw_local {| cp:S.curve_params |} {| curve_constants |} {| bn_
   LE.exp_fw_lemma cm g_aff 256 (BD.bn_v b) 4;
   assert (S.to_aff_point (S.point_mul_g (BD.bn_v b)) == LE.pow cm g_aff (BD.bn_v b))
 
-let point_mul_g {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |}  res scalar =
+let point_mul_g_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |}  res scalar =
   push_frame ();
   let h0 = ST.get () in
   let q1 = create_point #cp in
@@ -221,13 +221,13 @@ let point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| curve_constant
   [@inline_let] let bBits = size cp.bits in
   assert_norm (pow2 (v l) == v table_len);
 
+  admit();
   let h0 = ST.get () in
+  pt.basepoint_w5.table_lemma_w5 ();
   recall_contents pt.basepoint_w5.table_w5 pt.basepoint_w5.table_lseq_w5;
   let h1 = ST.get () in
-  pt.basepoint_w5.table_lemma_w5 ();
   assert (table_inv_w5 (as_seq h1 q1) (as_seq h1 pt.basepoint_w5.table_w5));
   assert (table_inv_w5 (as_seq h1 q2) (as_seq h1 table2));
-  admit();
   ME.mk_lexp_double_fw_tables len ctx_len k l table_len
     table_inv_w5 table_inv_w5
     (BE.lprecomp_get_vartime len ctx_len k l table_len)
@@ -240,7 +240,7 @@ let point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| curve_constant
     (from_mont_point (as_point_nat h0 q2)) (as_nat h0 scalar2) 5
 
 
-let point_mul_double_g {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} res scalar1 scalar2 q2 =
+let point_mul_double_g_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} res scalar1 scalar2 q2 =
   push_frame ();
   [@inline_let] let len = 3ul *. cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in

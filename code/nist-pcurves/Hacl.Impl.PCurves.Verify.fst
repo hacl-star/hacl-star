@@ -22,7 +22,7 @@ module S = Spec.PCurves
 module SL = Spec.PCurves.Lemmas
 module SM = Hacl.Spec.PCurves.Montgomery
 module QI = Hacl.Impl.PCurves.Qinv
-module PP = Hacl.PCurves.PrecompTable
+module PP = Hacl.Impl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -106,7 +106,7 @@ let ecdsa_verify_finv {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |}
 
 
 inline_for_extraction noextract
-val ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |}:
+val ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |}:
   r:felem -> pk:point -> u1:felem -> u2:felem -> Stack bool
   (requires fun h ->
     live h r /\ live h pk /\ live h u1 /\ live h u2 /\
@@ -121,11 +121,11 @@ val ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| bn_
       else S.fmul _X (S.finv _Z) % S.order = as_nat h0 r)))
 
 #push-options "--z3rlimit 1000 --split_queries always" 
-let ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} r pk u1 u2 =
+let ecdsa_verification_cmpr {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} r pk u1 u2 =
   push_frame ();
   let res = create_point #cp in
   let h0 = ST.get () in
-  point_mul_double_g res u1 u2 pk;
+  pm.point_mul_double_g res u1 u2 pk;
   let h1 = ST.get () in
   assert (S.to_aff_point (from_mont_point (as_point_nat h1 res)) ==
     S.to_aff_point (S.point_mul_double_g (as_nat h0 u1) (as_nat h0 u2)
@@ -165,7 +165,7 @@ let load_signature {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
 
 
 inline_for_extraction noextract
-val ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} :
+val ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} :
     m_q:felem
   -> public_key:lbuffer uint8 (2ul *. size cp.bytes)
   -> signature_r:lbuffer uint8 (size cp.bytes)
@@ -178,7 +178,7 @@ val ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| curve_constants |} {| b
     result == S.ecdsa_verify_msg_as_qelem (as_nat h0 m_q)
       (as_seq h0 public_key) (as_seq h0 signature_r) (as_seq h0 signature_s))
 
-let ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} m_q public_key signature_r signature_s =
+let ecdsa_verify_msg_as_qelem {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} m_q public_key signature_r signature_s =
   push_frame ();
   assert (v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs);
   assert (v (4ul *. cp.bn_limbs) == 4 * v cp.bn_limbs);

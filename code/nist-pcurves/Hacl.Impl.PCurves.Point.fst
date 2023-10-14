@@ -1,3 +1,4 @@
+
 module Hacl.Impl.PCurves.Point
 
 open FStar.Mul
@@ -59,14 +60,14 @@ let lemma_mont_is_point_at_inf p =
   SM.lemma_from_mont_zero pz
 
 inline_for_extraction noextract
-let is_point_at_inf {| cp:S.curve_params |} p =
+let is_point_at_inf {| cp:S.curve_params |} {| bn_ops |} p =
   let h0 = ST.get () in
   lemma_mont_is_point_at_inf (as_point_nat_inv h0 p);
   let pz = getz p in
   bn_is_zero_mask pz
 
 
-let is_point_at_inf_vartime {| cp:S.curve_params |} p =
+let is_point_at_inf_vartime {| cp:S.curve_params |} {| bn_ops |} p =
   let h0 = ST.get () in
   lemma_mont_is_point_at_inf (as_point_nat_inv h0 p);
   let pz = getz p in

@@ -92,28 +92,6 @@ let bn_is_eq_mask_g {| c:S.curve_params |} a b =
   BN.bn_eq_mask #U64 (normalize_term c.bn_limbs) a b
 
 
-let bn_is_zero_mask {| c:S.curve_params |} f =
-  push_frame ();
-  let bn_zero = create_felem #c in
-  let res = bn_is_eq_mask_g f bn_zero in
-  pop_frame ();
-  res
-
-let bn_is_zero_vartime {| c:S.curve_params |} f =
-  let m = bn_is_zero_mask f in
-  Hacl.Bignum.Base.unsafe_bool_of_limb m
-
-
-let bn_is_eq_vartime {| c:S.curve_params |}  a b =
-  let m = bn_is_eq_mask_g a b in
-  Hacl.Bignum.Base.unsafe_bool_of_limb m
-
-
-let bn_is_odd {| c:S.curve_params |} f =
-  let h0 = ST.get () in
-  SN.bn_is_odd_lemma (as_seq h0 f);
-  BN.bn_is_odd (normalize_term c.bn_limbs) f
-
 
 ///  Conditional copy
 
@@ -175,22 +153,6 @@ let bn_from_bytes_be_g {| c:S.curve_params |} res b =
   Hacl.Bignum.Convert.mk_bn_from_bytes_be true (normalize_term c.size_bytes) b res
 
 
-let bn2_to_bytes_be {| c:S.curve_params |} res x y =
-  let h0 = ST.get () in
-  update_sub_f h0 res 0ul (normalize_term c.size_bytes)
-    (fun h -> BSeq.nat_to_bytes_be c.bytes (as_nat h0 x))
-    (fun _ -> bn_to_bytes_be_g (sub res 0ul (normalize_term c.size_bytes)) x);
-
-  let h1 = ST.get () in
-  update_sub_f h1 res (normalize_term c.size_bytes) (normalize_term c.size_bytes)
-    (fun h -> BSeq.nat_to_bytes_be c.bytes (as_nat h1 y))
-    (fun _ -> bn_to_bytes_be_g (sub res (normalize_term c.size_bytes) (normalize_term c.size_bytes)) y);
-
-  let h2 = ST.get () in
-  let x = Ghost.hide (BSeq.nat_to_bytes_be c.bytes (as_nat h0 x)) in
-  let y = Ghost.hide (BSeq.nat_to_bytes_be c.bytes (as_nat h0 y)) in
-  LSeq.eq_intro (as_seq h2 res) (LSeq.concat #_ #c.bytes #c.bytes x y)
-
 inline_for_extraction noextract
 instance bn_inst {| cp:S.curve_params |} : BN.bn U64 = {
   BN.len = cp.bn_limbs;
@@ -202,8 +164,49 @@ instance bn_inst {| cp:S.curve_params |} : BN.bn U64 = {
   BN.sqr = BN.bn_sqr cp.bn_limbs
 }
 
+
 let bn_mont_reduction_g {| cp:S.curve_params |} mont_mu res x n =
   BM.bn_mont_reduction bn_inst n mont_mu x res
 
+///---
+
+let bn_is_zero_mask {| c:S.curve_params |} {| bn_ops |} f =
+  push_frame ();
+  let bn_zero = create_felem #c in
+  let res = bn_is_eq_mask f bn_zero in
+  pop_frame ();
+  res
+
+let bn_is_zero_vartime {| c:S.curve_params |} {| bn_ops |} f =
+  let m = bn_is_zero_mask f in
+  unsafe_bool_of_limb m
+
+
+let bn_is_eq_vartime {| c:S.curve_params |}  {| bn_ops |} a b =
+  let m = bn_is_eq_mask_g a b in
+  unsafe_bool_of_limb m
+
+
+let bn_is_odd {| c:S.curve_params |} {| bn_ops |} f =
+  let h0 = ST.get () in
+  SN.bn_is_odd_lemma (as_seq h0 f);
+  BN.bn_is_odd (normalize_term c.bn_limbs) f
+
+
+let bn2_to_bytes_be {| c:S.curve_params |} {| bn_ops |} res x y =
+  let h0 = ST.get () in
+  update_sub_f h0 res 0ul (normalize_term c.size_bytes)
+    (fun h -> BSeq.nat_to_bytes_be c.bytes (as_nat h0 x))
+    (fun _ -> bn_to_bytes_be (sub res 0ul (normalize_term c.size_bytes)) x);
+
+  let h1 = ST.get () in
+  update_sub_f h1 res (normalize_term c.size_bytes) (normalize_term c.size_bytes)
+    (fun h -> BSeq.nat_to_bytes_be c.bytes (as_nat h1 y))
+    (fun _ -> bn_to_bytes_be (sub res (normalize_term c.size_bytes) (normalize_term c.size_bytes)) y);
+
+  let h2 = ST.get () in
+  let x = Ghost.hide (BSeq.nat_to_bytes_be c.bytes (as_nat h0 x)) in
+  let y = Ghost.hide (BSeq.nat_to_bytes_be c.bytes (as_nat h0 y)) in
+  LSeq.eq_intro (as_seq h2 res) (LSeq.concat #_ #c.bytes #c.bytes x y)
 
 

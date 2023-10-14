@@ -28,7 +28,8 @@ open Hacl.Impl.PCurves.Scalar.P256
 open Hacl.Impl.PCurves.Finv.P256
 open Hacl.Impl.PCurves.Qinv.P256
 open Hacl.Impl.PCurves.Group.P256
-open Hacl.PCurves.PrecompTable.P256
+open Hacl.Impl.PCurves.PrecompTable.P256
+open Hacl.Impl.PCurves.PointMul.P256
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
@@ -97,6 +98,7 @@ let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
   #p256_inv_sqrt
   #p256_point_ops
   #p256_precomp_tables
+  #p256_point_mul_ops
   signature m_q private_key nonce
  
 [@ CInline ]
@@ -123,6 +125,7 @@ let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
   #p256_inv_sqrt
   #p256_point_ops
   #p256_precomp_tables
+  #p256_point_mul_ops
   m_q public_key signature_r signature_s
 
 inline_for_extraction noextract
@@ -213,6 +216,7 @@ let dh_initiator public_key private_key =
   #p256_inv_sqrt
   #p256_point_ops
   #p256_precomp_tables
+  #p256_point_mul_ops
   public_key private_key
 
 let dh_responder shared_secret their_pubkey private_key =
@@ -225,4 +229,5 @@ let dh_responder shared_secret their_pubkey private_key =
   #p256_inv_sqrt
   #p256_point_ops
   #p256_precomp_tables
+  #p256_point_mul_ops
   shared_secret their_pubkey private_key

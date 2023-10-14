@@ -1,4 +1,4 @@
-module Hacl.PCurves.PrecompTable.P256
+module Hacl.Impl.PCurves.PrecompTable.P256
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -22,8 +22,8 @@ module SL = Spec.PCurves.Lemmas
 open Hacl.Impl.PCurves.Point
 include Hacl.Impl.PCurves.Group
 
-module PP = Hacl.PCurves.PrecompPoints.P256
-open Hacl.PCurves.PrecompTable
+module PP = Hacl.Impl.PCurves.PrecompPoints.P256
+open Hacl.Impl.PCurves.PrecompTable
 open Spec.P256
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"

@@ -98,35 +98,6 @@ inline_for_extraction noextract
 val bn_is_eq_mask_g: {| c:S.curve_params |} -> bn_is_eq_mask_t
 
 
-[@(strict_on_arguments [0])]
-inline_for_extraction noextract
-val bn_is_zero_mask: {| c:S.curve_params |} ->  f:felem -> Stack uint64
-  (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if as_nat h0 f = 0 then v r == ones_v U64 else v r == 0))
-
-
-[@(strict_on_arguments [0])]
-inline_for_extraction noextract
-val bn_is_zero_vartime: {| c:S.curve_params |} -> f:felem -> Stack bool
-  (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 f = 0))
-
-[@(strict_on_arguments [0])]
-inline_for_extraction noextract
-val bn_is_eq_vartime: {| c:S.curve_params |} -> x:felem -> y:felem -> Stack bool
-  (requires fun h -> live h x /\ live h y)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == (as_nat h0 x = as_nat h0 y))
-
-
-[@(strict_on_arguments [0])]
-inline_for_extraction noextract
-val bn_is_odd: {| c:S.curve_params |} -> f:felem -> Stack uint64
-  (requires fun h -> live h f)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    v r = (as_nat h0 f % 2))
-
 
 ///  Conditional copy
 
@@ -236,18 +207,6 @@ let bn_from_bytes_be_t {| c:S.curve_params |} = res:felem -> b:lbuffer uint8 (si
 inline_for_extraction noextract
 val bn_from_bytes_be_g: {| c:S.curve_params |} -> bn_from_bytes_be_t
 
-[@(strict_on_arguments [0])]
-inline_for_extraction noextract
-val bn2_to_bytes_be: {| c:S.curve_params |} -> res:lbuffer uint8 (2ul *. size c.bytes) -> x:felem -> y:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h y /\ live h res /\
-    disjoint x res /\ disjoint y res /\
-    as_nat h x < pow2 (8*c.bytes) /\
-    as_nat h y < pow2 (8*c.bytes))
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == LSeq.concat #uint8 #c.bytes #c.bytes
-      (BSeq.nat_to_bytes_be c.bytes (as_nat h0 x)) (BSeq.nat_to_bytes_be c.bytes (as_nat h0 y)))
-
 inline_for_extraction noextract
 let bn_mont_reduction_t {| cp:S.curve_params |} =
   mont_mu:uint64 -> res:felem -> x:widefelem -> n:felem -> Stack unit
@@ -283,3 +242,48 @@ class bn_ops {| S.curve_params |} = {
   bn_mont_reduction: bn_mont_reduction_t
 }
 
+[@(strict_on_arguments [0;1])]
+inline_for_extraction noextract
+val bn_is_zero_mask {| c:S.curve_params |} {| bn_ops |}:
+  f:felem -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
+    (if as_nat h0 f = 0 then v r == ones_v U64 else v r == 0))
+
+
+[@(strict_on_arguments [0;1])]
+inline_for_extraction noextract
+val bn_is_zero_vartime {| c:S.curve_params |} {| bn_ops |}:
+  f:felem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 f = 0))
+
+[@(strict_on_arguments [0;1])]
+inline_for_extraction noextract
+val bn_is_eq_vartime {| c:S.curve_params |} {| bn_ops |}:
+  x:felem -> y:felem -> Stack bool
+  (requires fun h -> live h x /\ live h y)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == (as_nat h0 x = as_nat h0 y))
+
+
+[@(strict_on_arguments [0;1])]
+inline_for_extraction noextract
+val bn_is_odd {| c:S.curve_params |} {| bn_ops |}:
+  f:felem -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r = (as_nat h0 f % 2))
+
+[@(strict_on_arguments [0;1])]
+inline_for_extraction noextract
+val bn2_to_bytes_be {| c:S.curve_params |} {| bn_ops |}:
+  res:lbuffer uint8 (2ul *. size c.bytes) -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    disjoint x res /\ disjoint y res /\
+    as_nat h x < pow2 (8*c.bytes) /\
+    as_nat h y < pow2 (8*c.bytes))
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == LSeq.concat #uint8 #c.bytes #c.bytes
+      (BSeq.nat_to_bytes_be c.bytes (as_nat h0 x)) (BSeq.nat_to_bytes_be c.bytes (as_nat h0 y)))

@@ -184,7 +184,8 @@ val make_point_at_inf: {| S.curve_params |} -> {| CC.curve_constants |} -> p:poi
 
 [@(strict_on_arguments [0])]
 inline_for_extraction noextract
-val is_point_at_inf: {| S.curve_params |} -> p:point -> Stack uint64
+val is_point_at_inf {| S.curve_params |} {| bn_ops |}:
+  p:point -> Stack uint64
   (requires fun h -> live h p /\ point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (let pM = from_mont_point (as_point_nat h0 p) in
@@ -194,7 +195,8 @@ val is_point_at_inf: {| S.curve_params |} -> p:point -> Stack uint64
 
 [@(strict_on_arguments [0])]
 inline_for_extraction noextract
-val is_point_at_inf_vartime: {| S.curve_params |} -> p:point -> Stack bool
+val is_point_at_inf_vartime {| S.curve_params |} {| bn_ops |}:
+  p:point -> Stack bool
   (requires fun h -> live h p /\ point_inv h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.is_point_at_inf (as_point_nat_inv h0 p) /\

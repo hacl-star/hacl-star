@@ -14,26 +14,26 @@ open Hacl.Impl.PCurves.Point
 open Hacl.Impl.PCurves.PointMul
 
 module S = Spec.PCurves
-module PP = Hacl.PCurves.PrecompTable
+module PP = Hacl.Impl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 [@CInline]
-let ecp256dh_i {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} public_key private_key =
+let ecp256dh_i {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} public_key private_key =
   push_frame ();
   let tmp = create (4ul *. cp.bn_limbs) (u64 0) in
   let sk = sub tmp 0ul cp.bn_limbs in
   let pk = sub tmp cp.bn_limbs (3ul *. cp.bn_limbs) in
 
   let is_sk_valid = o.load_qelem_conditional sk private_key in
-  point_mul_g pk sk;
+  pm.point_mul_g pk sk;
   point_store public_key pk;
   pop_frame ();
   Hacl.Bignum.Base.unsafe_bool_of_limb is_sk_valid
 
 
 inline_for_extraction noextract
-val ecp256dh_r_ {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|}  {| point_ops |} {| PP.precomp_tables |}:
+val ecp256dh_r_ {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|}  {| point_ops |} {| PP.precomp_tables |} {| point_mul_ops |}:
   is_pk_valid:bool -> ss:lbuffer uint8 (2ul *. size cp.bytes) -> pk:point -> sk:felem -> Stack unit
   (requires fun h ->
     live h ss /\ live h pk /\ live h sk /\
@@ -44,17 +44,17 @@ val ecp256dh_r_ {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| fi
     then S.point_store (S.point_mul (as_nat h0 sk) (from_mont_point (as_point_nat h0 pk)))
     else as_seq h0 ss))
 
-let ecp256dh_r_ {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} is_pk_valid ss pk sk =
+let ecp256dh_r_ {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| pm:point_mul_ops |} is_pk_valid ss pk sk =
   push_frame ();
   let ss_proj = create_point #cp in
   if is_pk_valid then begin
-    point_mul ss_proj sk pk;
+    pm.point_mul ss_proj sk pk;
     point_store ss ss_proj end;
   pop_frame ()
 
 
 [@CInline]
-let ecp256dh_r {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} shared_secret their_pubkey private_key =
+let ecp256dh_r {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| field_ops |} {| o:order_ops |} {| curve_inv_sqrt|} {| point_ops |} {| PP.precomp_tables |} {| point_mul_ops |} shared_secret their_pubkey private_key =
   push_frame ();
   let open FStar.Mul in
   assume (4 * cp.bytes < max_size_t);

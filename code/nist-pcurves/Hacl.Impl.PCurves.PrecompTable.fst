@@ -1,4 +1,4 @@
-module Hacl.PCurves.PrecompTable
+module Hacl.Impl.PCurves.PrecompTable
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
