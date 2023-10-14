@@ -171,12 +171,12 @@ let point_mul_g {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:
   let h0 = ST.get () in
   let q1 = create_point #cp in
   make_base_point q1;
-  let q2 = mk_proj_g_pow2_64 #cp #pt.g_points in
-  let q3 = mk_proj_g_pow2_128 #cp #pt.g_points in
-  let q4 = mk_proj_g_pow2_192 #cp #pt.g_points in
-  PP.proj_g_pow2_64_lseq_lemma #cp #pt.g_points ();
-  PP.proj_g_pow2_128_lseq_lemma #cp #pt.g_points ();
-  PP.proj_g_pow2_192_lseq_lemma #cp #pt.g_points ();
+  let q2 = pt.mk_proj_g_pow2_64.mk_proj_g_pow2 () in
+  let q3 = pt.mk_proj_g_pow2_128.mk_proj_g_pow2 () in
+  let q4 = pt.mk_proj_g_pow2_192.mk_proj_g_pow2 () in
+  pt.mk_proj_g_pow2_64.proj_g_pow2_lseq_lemma ();
+  pt.mk_proj_g_pow2_128.proj_g_pow2_lseq_lemma ();
+  pt.mk_proj_g_pow2_192.proj_g_pow2_lseq_lemma ();
   admit();
   point_mul_g_noalloc res scalar q1 q2 q3 q4;
   LowStar.Ignore.ignore q1;
