@@ -166,7 +166,8 @@ val create_point: {| cp:S.curve_params |} -> StackInline point
 
 [@(strict_on_arguments [0;1])]
 inline_for_extraction noextract
-val make_base_point: {| S.curve_params |} -> {| CC.curve_constants |} -> p:point -> Stack unit
+val make_base_point {| S.curve_params |} {| bn_ops |} {| CC.curve_constants |}:
+  p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.base_point)
@@ -174,7 +175,8 @@ val make_base_point: {| S.curve_params |} -> {| CC.curve_constants |} -> p:point
 
 [@(strict_on_arguments [0;1])]
 inline_for_extraction noextract
-val make_point_at_inf: {| S.curve_params |} -> {| CC.curve_constants |} -> p:point -> Stack unit
+val make_point_at_inf {| S.curve_params |} {| bn_ops |} {| CC.curve_constants |}:
+  p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     point_inv h1 p /\ from_mont_point (as_point_nat h1 p) == S.point_at_inf)
@@ -219,7 +221,7 @@ val copy_point: {| S.curve_params |} -> res:point -> p:point -> Stack unit
 
 [@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
-val to_aff_point {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| field_ops |} {| FI.curve_inv_sqrt|}:
+val to_aff_point {| S.curve_params |} {| bn_ops |} {| CC.curve_constants |} {| field_ops |} {| FI.curve_inv_sqrt|}:
   res:aff_point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
@@ -232,7 +234,7 @@ val to_aff_point {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f
 // to_aff_point = S.to_aff_point + from_mont
 [@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
-val to_aff_point_x {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| field_ops |} {| FI.curve_inv_sqrt|}:
+val to_aff_point_x {| S.curve_params |} {| bn_ops |} {| CC.curve_constants |} {| field_ops |} {| FI.curve_inv_sqrt|}:
   res:felem -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ eq_or_disjoint p res /\
@@ -244,7 +246,7 @@ val to_aff_point_x {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {|
 // to_proj_point = S.to_proj_point + to_mont
 [@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
-val to_proj_point {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| field_ops |} :
+val to_proj_point {| S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| field_ops |} :
   res:point -> p:aff_point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ disjoint p res /\
@@ -258,7 +260,7 @@ val to_proj_point {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| 
 
 [@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
-val is_on_curve_vartime {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |}:
+val is_on_curve_vartime {| S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| f:field_ops |}:
   p:aff_point -> Stack bool
   (requires fun h -> live h p /\ aff_point_inv h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
@@ -269,7 +271,7 @@ val is_on_curve_vartime {| S.curve_params |} {| CC.curve_constants |} {| bn_ops 
 
 [@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
-val aff_point_store {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |}:
+val aff_point_store {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| f:field_ops |}:
   res:lbuffer uint8 (2ul *. size cp.bytes) -> p:aff_point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint res p /\
@@ -280,7 +282,7 @@ val aff_point_store {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |
 
 [@(strict_on_arguments [0;1;2;3;4])]
 inline_for_extraction noextract
-val point_store {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} {| FI.curve_inv_sqrt|}:
+val point_store {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| f:field_ops |} {| FI.curve_inv_sqrt|}:
   res:lbuffer uint8 (2ul *. size cp.bytes) -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ disjoint res p /\
@@ -291,7 +293,7 @@ val point_store {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {|
 
 [@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
-val aff_point_load_vartime {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |}:
+val aff_point_load_vartime {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| f:field_ops |}:
   res:aff_point -> b:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
   (requires fun h ->
     live h res /\ live h b /\ disjoint res b)
@@ -302,7 +304,7 @@ val aff_point_load_vartime {| cp:S.curve_params |} {| CC.curve_constants |} {| b
 
 [@(strict_on_arguments [0;1;2;3])]
 inline_for_extraction noextract
-val load_point_vartime {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |}:
+val load_point_vartime {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| f:field_ops |}:
   res:point -> b:lbuffer uint8 (2ul *. size cp.bytes) -> Stack bool
   (requires fun h ->
     live h res /\ live h b /\ disjoint res b)
@@ -314,7 +316,7 @@ val load_point_vartime {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_op
 
 [@(strict_on_arguments [0;1;2;3;4])]
 inline_for_extraction noextract
-val aff_point_decompress_vartime {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} {| f:field_ops |} {| FI.curve_inv_sqrt |}
+val aff_point_decompress_vartime {| S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| f:field_ops |} {| FI.curve_inv_sqrt |}
   (x y:felem) (s:lbuffer uint8 (1ul +. (size S.bytes))) : Stack bool
   (requires fun h ->
     live h x /\ live h y /\ live h s /\

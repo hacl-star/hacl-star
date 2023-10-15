@@ -228,6 +228,16 @@ let p256_precomp_basepoint_table_w5 : precomp_table_w5 g_aff = {
   table_w5 = p256_basepoint_table_w5
 }
 
+open Hacl.Impl.PCurves.Constants.P256
+open Hacl.Impl.PCurves.Bignum.P256
+open Hacl.Impl.PCurves.Field.P256
+open Hacl.Impl.PCurves.Finv.P256
+open Hacl.Impl.PCurves.Qinv.P256
+open Hacl.Impl.PCurves.Group.P256
+
+[@CInline]
+val precomp_get_consttime: precomp_get_consttime_t
+let precomp_get_consttime = precomp_get_consttime_gen
 
 ///////////////////////////////////
 
@@ -241,6 +251,7 @@ instance p256_precomp_tables: precomp_tables = {
   g_pow2_128_w4 = p256_precomp_g_pow2_128_table_w4;
   g_pow2_192_w4 = p256_precomp_g_pow2_192_table_w4;
   basepoint_w5 = p256_precomp_basepoint_table_w5;
+  precomp_get_consttime
 }
 
 

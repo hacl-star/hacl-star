@@ -21,7 +21,7 @@ module CC = Hacl.Impl.PCurves.Constants
 ///  Comparison
 
 inline_for_extraction noextract
-let bn_is_lt_order_mask_t {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
+let bn_is_lt_order_mask_t {| S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   f:felem -> Stack uint64
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
@@ -29,19 +29,19 @@ let bn_is_lt_order_mask_t {| S.curve_params |} {| CC.curve_constants |} {| bn_op
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val bn_is_lt_order_mask_g {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
+val bn_is_lt_order_mask_g {| S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
     bn_is_lt_order_mask_t
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val bn_is_lt_order_and_gt_zero_mask {| S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
+val bn_is_lt_order_and_gt_zero_mask {| S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
   f:felem -> Stack uint64
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (if 0 < as_nat h0 f && as_nat h0 f < S.order then v r = ones_v U64 else v r = 0))
 
 inline_for_extraction noextract
-let load_qelem_conditional_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
+let load_qelem_conditional_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> b:lbuffer uint8 (size cp.bytes) -> Stack uint64
   (requires fun h ->
     live h res /\ live h b /\ disjoint res b)
@@ -53,13 +53,13 @@ let load_qelem_conditional_t {| cp:S.curve_params |} {| CC.curve_constants |} {|
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val load_qelem_conditional_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}: load_qelem_conditional_t
+val load_qelem_conditional_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}: load_qelem_conditional_t
 
 
 ///  Field Arithmetic
 
 inline_for_extraction noextract
-let qmod_short_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
+let qmod_short_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res)
@@ -68,12 +68,12 @@ let qmod_short_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val qmod_short_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
+val qmod_short_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
     qmod_short_t
 
 
 inline_for_extraction noextract
-let qadd_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
+let qadd_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
@@ -85,11 +85,11 @@ let qadd_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val qadd_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} :
+val qadd_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} :
   qadd_t
 
 inline_for_extraction noextract
-let from_qmont_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
+let from_qmont_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res /\
@@ -100,11 +100,11 @@ let from_qmont_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val from_qmont_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
+val from_qmont_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
     from_qmont_t
 
 inline_for_extraction noextract
-let qmul_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
+let qmul_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
@@ -116,11 +116,11 @@ let qmul_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val qmul_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
+val qmul_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
     qmul_t
 
 inline_for_extraction noextract
-let qsqr_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
+let qsqr_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res /\
@@ -131,12 +131,12 @@ let qsqr_t {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} =
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction noextract
-val qsqr_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |}:
+val qsqr_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
   qsqr_t
 
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction
-class order_ops {| S.curve_params |} {| CC.curve_constants |} {| bn:bn_ops |} = {
+class order_ops {| S.curve_params |} {| bn:bn_ops |} {| CC.curve_constants |} = {
   bn_is_lt_order_mask: bn_is_lt_order_mask_t;
   load_qelem_conditional: load_qelem_conditional_t;
   qmod_short: qmod_short_t;

@@ -12,13 +12,16 @@ module LSeq = Lib.Sequence
 
 module LE = Lib.Exponentiation.Definition
 module SE = Spec.Exponentiation
-module BE = Hacl.Impl.Exponentiation.Definitions
+module BED = Hacl.Impl.Exponentiation.Definitions
+module BE = Hacl.Impl.Exponentiation
 module SPT = Hacl.Spec.PrecompBaseTable
 module SPTK = Hacl.Spec.PCurves.PrecompTable
 
 module S = Spec.PCurves
 module SM = Hacl.Spec.PCurves.Montgomery
 
+open Hacl.Impl.PCurves.Bignum
+open Hacl.Impl.PCurves.Constants
 open Hacl.Impl.PCurves.Point
 include Hacl.Impl.PCurves.Group
 
@@ -114,8 +117,28 @@ noeq type precomp_table_w5 {| cp:S.curve_params |} (p:S.aff_point #cp) = {
   table_w5: x:glbuffer uint64 (96ul *. cp.bn_limbs){witnessed x table_lseq_w5 /\ recallable x}
 }
 
+open Hacl.Impl.PCurves.Field
+open Hacl.Impl.PCurves.InvSqrt
+open Hacl.Impl.PCurves.Group
+
+inline_for_extraction noextract
+let precomp_get_consttime_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} {| p:point_ops |} = BE.pow_a_to_small_b_st U64 (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops 4ul 16ul
+    (BE.table_inv_precomp (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops 4ul 16ul)
+
+inline_for_extraction noextract
+val precomp_get_consttime_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: precomp_get_consttime_t
+
+let precomp_get_consttime_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} ctx a table bits_l tmp =
+  [@inline_let] let len = 3ul *. cp.bn_limbs in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let k = mk_pcurve_concrete_ops in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let table_len = 16ul in
+
+  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
+
 inline_for_extraction
-class precomp_tables {| S.curve_params |} = {
+class precomp_tables {| S.curve_params |} {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} = {
   mk_proj_g_pow2_64: proj_g_pow2 g_pow2_64;
   mk_proj_g_pow2_128: proj_g_pow2 g_pow2_128;
   mk_proj_g_pow2_192: proj_g_pow2 g_pow2_192;
@@ -124,6 +147,7 @@ class precomp_tables {| S.curve_params |} = {
   g_pow2_128_w4: precomp_table_w4 g_pow2_128;  
   g_pow2_192_w4: precomp_table_w4 g_pow2_192;  
   basepoint_w5: precomp_table_w5 g_aff;
+  precomp_get_consttime: precomp_get_consttime_t
 }
 
 

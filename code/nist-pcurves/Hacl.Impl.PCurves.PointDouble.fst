@@ -16,7 +16,7 @@ module S = Spec.PCurves
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
 inline_for_extraction noextract
-val point_double_1 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (t0 t1 t2 t3 t4:felem) (p:point) : Stack unit
+val point_double_1 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} (t0 t1 t2 t3 t4:felem) (p:point) : Stack unit
   (requires fun h ->
     live h t0 /\ live h t1 /\ live h t2 /\
     live h t3 /\ live h t4 /\ live h p /\
@@ -38,7 +38,7 @@ val point_double_1 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 t3 == t3_s /\
     fmont_as_nat h1 t4 == t4_s))
 
-let point_double_1 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} t0 t1 t2 t3 t4 p =
+let point_double_1 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} t0 t1 t2 t3 t4 p =
   let x, y, z = getx p, gety p, getz p in
   f.fsqr t0 x;
   f.fsqr t1 y;
@@ -49,7 +49,7 @@ let point_double_1 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
 
 
 inline_for_extraction noextract
-val point_double_2 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 z3 t2:felem) : Stack unit
+val point_double_2 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 z3 t2:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h z3 /\ live h t2 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc x3; loc y3; loc z3; loc t2 ] /\
@@ -66,7 +66,7 @@ val point_double_2 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
     fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 y3 == y3_s /\
     fmont_as_nat h1 z3 == z3_s))
 
-let point_double_2 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 z3 t2 =
+let point_double_2 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 z3 t2 =
   fdouble z3 z3;
   fmul_by_b_coeff y3 t2;
   f.fsub y3 y3 z3;
@@ -75,7 +75,7 @@ let point_double_2 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
 
 
 inline_for_extraction noextract
-val point_double_3 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 t1 t2 t3:felem) : Stack unit
+val point_double_3 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 y3 t1 t2 t3:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h y3 /\ live h t1 /\ live h t2 /\ live h t3 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc x3; loc y3; loc t1; loc t2; loc t3 ] /\
@@ -98,7 +98,7 @@ val point_double_3 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
     fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 y3 == y3_s /\
     fmont_as_nat h1 t2 == t2_s /\ fmont_as_nat h1 t3 == t3_s))
 
-let point_double_3 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 t1 t2 t3 =
+let point_double_3 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} x3 y3 t1 t2 t3 =
   f.fsub x3 t1 y3;
   f.fadd y3 t1 y3;
   f.fmul y3 x3 y3;
@@ -108,7 +108,7 @@ let point_double_3 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
 
 
 inline_for_extraction noextract
-val point_double_4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (z3 t0 t2 t3:felem) : Stack unit
+val point_double_4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} (z3 t0 t2 t3:felem) : Stack unit
   (requires fun h ->
     live h z3 /\ live h t0 /\ live h t2 /\ live h t3 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc z3; loc t0; loc t2; loc t3 ] /\
@@ -125,7 +125,7 @@ val point_double_4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
     let z3_s = S.fadd z3_s t3_s in
     fmont_as_nat h1 z3 == z3_s /\ fmont_as_nat h1 t3 == t3_s))
 
-let point_double_4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} z3 t0 t2 t3 =
+let point_double_4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} z3 t0 t2 t3 =
   fmul_by_b_coeff z3 z3;
   f.fsub z3 z3 t2;
   f.fsub z3 z3 t0;
@@ -134,7 +134,7 @@ let point_double_4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
 
 
 inline_for_extraction noextract
-val point_double_5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (y3 z3 t0 t2 t3:felem) : Stack unit
+val point_double_5 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} (y3 z3 t0 t2 t3:felem) : Stack unit
   (requires fun h ->
     live h y3 /\ live h z3 /\ live h t0 /\ live h t2 /\ live h t3 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc y3; loc z3; loc t0; loc t2; loc t3 ] /\
@@ -153,7 +153,7 @@ val point_double_5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
     let y3_s = S.fadd y3_s t0_s in
     fmont_as_nat h1 y3 == y3_s /\ fmont_as_nat h1 t0 == t0_s /\ fmont_as_nat h1 t3 == t3_s))
 
-let point_double_5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} y3 z3 t0 t2 t3 =
+let point_double_5 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} y3 z3 t0 t2 t3 =
   fdouble t3 t0;
   f.fadd t0 t3 t0;
   f.fsub t0 t0 t2;
@@ -162,7 +162,7 @@ let point_double_5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
 
 
 inline_for_extraction noextract
-val point_double_6 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 z3 t0 t1 t4:felem) : Stack unit
+val point_double_6 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} (x3 z3 t0 t1 t4:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h z3 /\ live h t0 /\ live h t1 /\ live h t4 /\
     LowStar.Monotonic.Buffer.all_disjoint [ loc x3; loc z3; loc t0; loc t1; loc t4 ] /\
@@ -182,7 +182,7 @@ val point_double_6 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
     let z3_s = S.fadd z3_s z3_s in
     fmont_as_nat h1 z3 == z3_s /\ fmont_as_nat h1 x3 == x3_s /\ fmont_as_nat h1 t0 == t0_s))
 
-let point_double_6 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} x3 z3 t0 t1 t4 =
+let point_double_6 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} x3 z3 t0 t1 t4 =
   fdouble t0 t4;
   f.fmul z3 t0 z3;
   f.fsub x3 x3 z3;
@@ -192,7 +192,7 @@ let point_double_6 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {|
 
 
 inline_for_extraction noextract
-val point_double_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|}:
+val point_double_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|}:
   tmp:lbuffer uint64 (5ul *. cp.bn_limbs) -> res:point -> p:point -> Stack unit
   (requires fun h ->
     live h p /\ live h res /\ live h tmp /\
@@ -203,7 +203,7 @@ val point_double_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops
     from_mont_point (as_point_nat h1 res) ==
       S.point_double (from_mont_point (as_point_nat h0 p)))
 
-let point_double_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} tmp res p =
+let point_double_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} tmp res p =
   let x, z = getx p, getz p in
   let x3, y3, z3 = getx res, gety res, getz res in
   let t0 = sub tmp 0ul cp.bn_limbs in
@@ -223,7 +223,7 @@ let point_double_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops
   point_double_6 x3 z3 t0 t1 t4
 
 
-let point_double {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|} res p =
+let point_double {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|} res p =
   push_frame ();
   let tmp = create (5ul *. cp.bn_limbs) (u64 0) in
   point_double_noalloc tmp res p;

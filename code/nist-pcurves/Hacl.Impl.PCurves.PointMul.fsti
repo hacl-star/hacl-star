@@ -22,7 +22,7 @@ include Hacl.Impl.PCurves.PrecompTable
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 noextract inline_for_extraction
-let point_mul_t {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |}
+let point_mul_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
               {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |} =
   res:point -> scalar:felem -> p:point -> Stack unit
   (requires fun h ->
@@ -36,12 +36,12 @@ let point_mul_t {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:
 
 [@(strict_on_arguments [0;1;2;3;4;5;6])]
 noextract inline_for_extraction
-val point_mul_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |}
+val point_mul_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
               {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}: point_mul_t
 
 
 noextract inline_for_extraction
-let point_mul_g_t {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |}
+let point_mul_g_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
                 {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |} =
   res:point -> scalar:felem -> Stack unit
   (requires fun h ->
@@ -54,11 +54,11 @@ let point_mul_g_t {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| 
 
 [@(strict_on_arguments [0;1;2;3;4;5;6])]
 noextract inline_for_extraction
-val point_mul_g_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |}
+val point_mul_g_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
                 {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}: point_mul_g_t
 
 noextract inline_for_extraction
-let point_mul_double_g_t {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |}
+let point_mul_double_g_t {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
                        {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |} = 
   res:point -> scalar1:felem -> scalar2:felem -> p:point -> Stack unit
   (requires fun h ->
@@ -74,12 +74,12 @@ let point_mul_double_g_t {| cp:S.curve_params |} {| curve_constants |} {| bn_ops
 
 [@(strict_on_arguments [0;1;2;3;4;5;6])]
 noextract inline_for_extraction
-val point_mul_double_g_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |}
+val point_mul_double_g_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
                        {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |}: point_mul_double_g_t
 
 
 inline_for_extraction
-class point_mul_ops {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |}
+class point_mul_ops {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |}
                     {| curve_inv_sqrt|} {| point_ops |} {| pt:precomp_tables |} = {
       point_mul: point_mul_t;
       point_mul_g: point_mul_g_t;

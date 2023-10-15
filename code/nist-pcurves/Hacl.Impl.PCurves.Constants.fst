@@ -8,10 +8,10 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.PCurves.Bignum
-
 module S = Spec.PCurves
 module SM = Hacl.Spec.PCurves.Montgomery
+
+open Hacl.Impl.PCurves.Bignum
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -23,13 +23,13 @@ let fmont_as_nat {| S.curve_params |} (h:mem) (a:felem) = SM.from_mont (as_nat h
 inline_for_extraction
 let qmont_as_nat {| c:S.curve_params |} (h:mem) (a:felem) = SM.from_qmont (as_nat h a)
 
-[@(strict_on_arguments [0])]
-inline_for_extraction
-class curve_constants {| cp:S.curve_params |} = {
+[@(strict_on_arguments [0;1])]
+inline_for_extraction noextract
+class curve_constants {| c:S.curve_params |} {| b:bn_ops #c |} = {
   make_prime : n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
-    as_nat h1 n == cp.prime);
+    as_nat h1 n == S.prime);
   make_order: n:felem -> Stack unit
   (requires fun h -> live h n)
   (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
@@ -72,6 +72,18 @@ class curve_constants {| cp:S.curve_params |} = {
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
     as_nat h1 f < S.order /\
-    qmont_as_nat h1 f == 1)
+    qmont_as_nat h1 f == 1);
+  fmont_reduction: res:felem -> x:widefelem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ disjoint x res /\
+    wide_as_nat h x < S.prime * S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
+    as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime);
+  qmont_reduction: res:felem -> x:widefelem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ disjoint x res /\
+    wide_as_nat h x < S.order * S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
+    as_nat h1 res == wide_as_nat h0 x * SM.qmont_R_inv % S.order)
 }
   

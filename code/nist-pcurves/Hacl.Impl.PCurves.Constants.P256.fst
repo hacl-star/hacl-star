@@ -16,6 +16,7 @@ module CC = Hacl.Impl.PCurves.Constants
 
 
 open Spec.P256
+open Hacl.Impl.PCurves.Bignum.P256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 [@CInline]
@@ -205,6 +206,41 @@ let p256_make_qone f =
     SM.lemma_to_from_qmont_id 1;
     bn_make_u64_4 f f0 f1 f2 f3
 
+[@CInline]
+val fmont_reduction:
+  res:felem -> x:widefelem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ disjoint x res /\
+    wide_as_nat h x < S.prime * S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
+    as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime)
+let fmont_reduction res x =
+  push_frame ();
+  let n = create_felem #p256_params in
+  p256_make_prime n;
+  let h0 = ST.get () in
+  bn_mont_reduction p256_mont_mu res x n;
+  SM.bn_mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
+  pop_frame ()
+
+[@CInline]
+val qmont_reduction:
+  res:felem -> x:widefelem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ disjoint x res /\
+    wide_as_nat h x < S.order * S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
+    as_nat h1 res == wide_as_nat h0 x * SM.qmont_R_inv % S.order)
+let qmont_reduction res x =
+  push_frame ();
+  let n = create_felem #p256_params in
+  p256_make_order n;
+  let h0 = ST.get () in
+  bn_mont_reduction p256_mont_q_mu res x n;
+  SM.bn_qmont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
+  pop_frame ()
+
+
 
 inline_for_extraction
 instance p256_curve_constants : CC.curve_constants = {
@@ -217,6 +253,8 @@ instance p256_curve_constants : CC.curve_constants = {
   make_fmont_R2 = p256_make_fmont_R2;
   make_fzero = p256_make_fzero;
   make_fone = p256_make_fone;
-  make_qone = p256_make_qone
+  make_qone = p256_make_qone;
+  fmont_reduction;
+  qmont_reduction
 }
 

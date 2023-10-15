@@ -183,7 +183,7 @@ let bn_is_zero_vartime {| c:S.curve_params |} {| bn_ops |} f =
 
 
 let bn_is_eq_vartime {| c:S.curve_params |}  {| bn_ops |} a b =
-  let m = bn_is_eq_mask_g a b in
+  let m = bn_is_eq_mask a b in
   unsafe_bool_of_limb m
 
 

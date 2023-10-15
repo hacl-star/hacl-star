@@ -91,8 +91,8 @@ val ecdsa_sign_msg_as_qelem:
 let ecdsa_sign_msg_as_qelem signature m_q private_key nonce =
   ecdsa_sign_msg_as_qelem
   #p256_params
-  #p256_curve_constants
   #p256_bn_ops
+  #p256_curve_constants
   #p256_field_ops
   #p256_order_ops
   #p256_inv_sqrt
@@ -118,8 +118,8 @@ val ecdsa_verify_msg_as_qelem:
 let ecdsa_verify_msg_as_qelem m_q public_key signature_r signature_s =
   ecdsa_verify_msg_as_qelem
   #p256_params
-  #p256_curve_constants
   #p256_bn_ops
+  #p256_curve_constants
   #p256_field_ops
   #p256_order_ops
   #p256_inv_sqrt
@@ -209,8 +209,8 @@ let raw_to_compressed pk_raw pk =
 let dh_initiator public_key private_key =
   Hacl.Impl.PCurves.DH.ecp256dh_i
   #p256_params
-  #p256_curve_constants
   #p256_bn_ops
+  #p256_curve_constants
   #p256_field_ops
   #p256_order_ops
   #p256_inv_sqrt
@@ -222,8 +222,8 @@ let dh_initiator public_key private_key =
 let dh_responder shared_secret their_pubkey private_key =
   Hacl.Impl.PCurves.DH.ecp256dh_r
   #p256_params
-  #p256_curve_constants
   #p256_bn_ops
+  #p256_curve_constants
   #p256_field_ops
   #p256_order_ops
   #p256_inv_sqrt

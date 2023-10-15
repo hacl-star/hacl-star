@@ -1,3 +1,4 @@
+
 module Hacl.Impl.PCurves.PointAdd
 
 open FStar.HyperStack.All
@@ -19,7 +20,7 @@ module S = Spec.PCurves
 
 [@(strict_on_arguments [0;1;2;3;4])]
 noextract inline_for_extraction
-val point_add {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt|}:
+val point_add {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt|}:
   res:point -> p:point -> q:point -> Stack unit
   (requires fun h ->
     live h p /\ live h q /\ live h res /\
@@ -29,3 +30,4 @@ val point_add {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:fi
     point_inv h1 res /\
     from_mont_point (as_point_nat h1 res) ==
     S.point_add (from_mont_point (as_point_nat h0 p)) (from_mont_point (as_point_nat h0 q)))
+  

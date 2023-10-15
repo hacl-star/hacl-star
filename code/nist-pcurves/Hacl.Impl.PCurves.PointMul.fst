@@ -28,7 +28,7 @@ module PP = Hacl.Impl.PCurves.PrecompTable
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let table_inv_w4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 16ul =
+let table_inv_w4 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 16ul =
   [@inline_let] let len = 3ul *. cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
@@ -38,7 +38,7 @@ let table_inv_w4 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f
 
 
 inline_for_extraction noextract
-let table_inv_w5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 32ul =
+let table_inv_w5 {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: BE.table_inv_t U64 (3ul *. cp.bn_limbs) 32ul =
   [@inline_let] let len = 3ul *. cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
@@ -48,7 +48,7 @@ let table_inv_w5 {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f
   BE.table_inv_precomp len ctx_len k l table_len
 
 
-let point_mul_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} res scalar p =
+let point_mul_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} res scalar p =
   let h0 = ST.get () in
   SE.exp_fw_lemma S.mk_pcurve_concrete_ops
     (from_mont_point (as_point_nat h0 p)) cp.bits (as_nat h0 scalar) (v cp.bn_limbs);
@@ -56,23 +56,9 @@ let point_mul_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| 
   admit();
   BE.lexp_fw_consttime (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops (cp.bn_limbs) (null uint64) p cp.bn_limbs (size cp.bits) scalar res
 
-
-inline_for_extraction noextract
-val precomp_get_consttime {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} : BE.pow_a_to_small_b_st U64 (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops 4ul 16ul
-    (BE.table_inv_precomp (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops 4ul 16ul)
-
-let precomp_get_consttime {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} ctx a table bits_l tmp =
-  [@inline_let] let len = 3ul *. cp.bn_limbs in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = mk_pcurve_concrete_ops in
-  [@inline_let] let l = 4ul in
-  [@inline_let] let table_len = 16ul in
-
-  BE.lprecomp_get_consttime len ctx_len k l table_len ctx a table bits_l tmp
-
 [@(strict_on_arguments [0;1;2;3;4;5;6])]
 inline_for_extraction noextract
-val point_mul_g_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |}
+val point_mul_g_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |}
   : out:point -> scalar:felem
   -> q1:point -> q2:point
   -> q3:point -> q4:point ->
@@ -96,14 +82,17 @@ val point_mul_g_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops 
     S.to_aff_point (from_mont_point (as_point_nat h1 out)) ==
     LE.exp_four_fw S.mk_pcurve_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4))
 
-let point_mul_g_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} out scalar q1 q2 q3 q4 =
+let point_mul_g_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} out scalar q1 q2 q3 q4 =
   [@inline_let] let len = 3ul *. cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 4ul in
   [@inline_let] let table_len = 16ul in
-  [@inline_let] let bBits = size cp.bits in
-  [@inline_let] let bLen = (bBits +. cp.bn_limbs -. 1ul) /. cp.bn_limbs in
+
+  admit();
+  
+  [@inline_let] let bBits = 64ul in
+  [@inline_let] let bLen = 1ul in
 
   let h0 = ST.get () in
   recall_contents pt.basepoint_w4.table_w4 pt.basepoint_w4.table_lseq_w4;
@@ -126,8 +115,6 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops 
   pt.g_pow2_192_w4.table_lemma_w4 ();
   assert (table_inv_w4 (as_seq h1 q4) (as_seq h1 pt.g_pow2_192_w4.table_w4));
 
-  admit();
-
   let r1 = sub scalar 0ul bLen in
   let r2 = sub scalar bLen bLen in
   let r3 = sub scalar (2ul*.bLen) bLen in
@@ -136,10 +123,10 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops 
 
   ME.mk_lexp_four_fw_tables len ctx_len k l table_len
     table_inv_w4 table_inv_w4 table_inv_w4 table_inv_w4
-    precomp_get_consttime
-    precomp_get_consttime
-    precomp_get_consttime
-    precomp_get_consttime
+    pt.precomp_get_consttime
+    pt.precomp_get_consttime
+    pt.precomp_get_consttime
+    pt.precomp_get_consttime
     (null uint64) q1 bLen bBits r1 q2 r2 q3 r3 q4 r4
     (to_const pt.basepoint_w4.table_w4)
     (to_const pt.g_pow2_64_w4.table_w4)
@@ -148,13 +135,13 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops 
     out
 
 noextract
-val lemma_exp_four_fw_local {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: b:BD.lbignum U64 4{BD.bn_v b < S.order} ->
+val lemma_exp_four_fw_local {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |}: b:BD.lbignum U64 4{BD.bn_v b < S.order} ->
   Lemma (cp.bits == 256 ==> (
     let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v b) in
     LE.exp_four_fw S.mk_pcurve_comm_monoid g_aff 64 b0 g_pow2_64 b1 g_pow2_128 b2 g_pow2_192 b3 4 ==
     S.to_aff_point (S.point_mul_g (BD.bn_v b))))
 
-let lemma_exp_four_fw_local {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} b =
+let lemma_exp_four_fw_local {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} b =
   let cm = S.mk_pcurve_comm_monoid in
   admit();
   let (b0, b1, b2, b3) = SPT256.decompose_nat256_as_four_u64 (BD.bn_v b) in
@@ -166,7 +153,7 @@ let lemma_exp_four_fw_local {| cp:S.curve_params |} {| curve_constants |} {| bn_
   LE.exp_fw_lemma cm g_aff 256 (BD.bn_v b) 4;
   assert (S.to_aff_point (S.point_mul_g (BD.bn_v b)) == LE.pow cm g_aff (BD.bn_v b))
 
-let point_mul_g_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |}  res scalar =
+let point_mul_g_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |}  res scalar =
   push_frame ();
   let h0 = ST.get () in
   let q1 = create_point #cp in
@@ -189,7 +176,7 @@ let point_mul_g_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {
 //-------------------------
 
 inline_for_extraction noextract
-val point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} :
+val point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} :
     out:point
   -> scalar1:felem -> q1:point
   -> scalar2:felem -> q2:point
@@ -211,7 +198,7 @@ val point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| curve_constant
     S.to_aff_point (S.point_mul_double_g
       (as_nat h0 scalar1) (as_nat h0 scalar2) (from_mont_point (as_point_nat h0 q2))))
 
-let point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} out scalar1 q1 scalar2 q2 table2 =
+let point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} out scalar1 q1 scalar2 q2 table2 =
   [@inline_let] let len = 3ul *. cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in
   [@inline_let] let k = mk_pcurve_concrete_ops in
@@ -240,7 +227,7 @@ let point_mul_g_double_vartime_noalloc {| cp:S.curve_params |} {| curve_constant
     (from_mont_point (as_point_nat h0 q2)) (as_nat h0 scalar2) 5
 
 
-let point_mul_double_g_gen {| cp:S.curve_params |} {| curve_constants |} {| bn_ops |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} res scalar1 scalar2 q2 =
+let point_mul_double_g_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| f:field_ops |} {| curve_inv_sqrt |} {| point_ops |} {| pt:precomp_tables |} res scalar1 scalar2 q2 =
   push_frame ();
   [@inline_let] let len = 3ul *. cp.bn_limbs in
   [@inline_let] let ctx_len = 0ul in

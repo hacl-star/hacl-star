@@ -31,10 +31,6 @@ val fsub: fsub_t
 let fsub a b c = fsub_g a b c
 
 [@CInline]
-val fnegate_conditional_vartime: fnegate_conditional_vartime_t
-let fnegate_conditional_vartime a b = fnegate_conditional_vartime_g a b
-
-[@CInline]
 val fmul: fmul_t
 let fmul a b c = fmul_g a b c
 
@@ -55,7 +51,6 @@ instance p256_field_ops: field_ops = {
   bn_is_lt_prime_mask;
   fadd;
   fsub;
-  fnegate_conditional_vartime;
   fmul;
   fsqr;
   from_mont;

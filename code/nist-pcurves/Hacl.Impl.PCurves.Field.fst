@@ -19,11 +19,11 @@ module BD = Hacl.Spec.Bignum.Definitions
 
 ///  Comparison
 
-let bn_is_lt_prime_mask_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} f =
+let bn_is_lt_prime_mask_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} f =
   let h0 = ST.get () in
   push_frame ();
   let tmp = create_felem #cp in
-  make_prime tmp;
+  cc.make_prime tmp;
   let c = bn_sub tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
   pop_frame ();
@@ -43,11 +43,11 @@ let feq_mask {| cp:S.curve_params |} {| bn_ops |} a b =
 ///  Field Arithmetic
 
 
-let fadd_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
+let fadd_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res x y =
   let h0 = ST.get () in
   push_frame ();
   let n = create_felem #cp in
-  make_prime n;
+  cc.make_prime n;
   bn_add_mod res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x + as_nat h0 y) % S.prime);
@@ -55,84 +55,44 @@ let fadd_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y
   pop_frame ()
 
 
-let fdouble {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} out x =
-  fadd_g out x x
-
-
-
-let fsub_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
+let fsub_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res x y =
   let h0 = ST.get () in
   push_frame ();
   let n = create_felem #cp in
-  make_prime n;
+  cc.make_prime n;
   bn_sub_mod res n x y;
   let h1 = ST.get () in
   assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
   SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
-
-
-let fnegate_conditional_vartime_g {| cp:S.curve_params |} {| CC.curve_constants |} f is_negate =
-  push_frame ();
-  let zero = create_felem #cp in
-  if is_negate then begin
-    let h0 = ST.get () in
-    fsub_g f zero f;
-    let h1 = ST.get () in
-    assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
-    Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
-    assert (as_nat h1 f == (S.prime - as_nat h0 f) % S.prime) end;
-  pop_frame ()
-
-inline_for_extraction noextract
-val mont_reduction {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} :
-  res:felem -> x:widefelem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ disjoint x res /\
-    wide_as_nat h x < S.prime * S.prime)
-  (ensures fun h0 _ h1 -> modifies (loc res |+| loc x) h0 h1 /\
-    as_nat h1 res == wide_as_nat h0 x * SM.fmont_R_inv % S.prime)
-
-
-let mont_reduction {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x =
-  push_frame ();
-  let n = create_felem #cp in
-  make_prime n;
-  let h0 = ST.get () in
-  bn_mont_reduction cp.mont_mu res x n;
-  SM.bn_mont_reduction_lemma (as_seq h0 x) (as_seq h0 n);
-  pop_frame ()
-
-
-
-let fmul_g {| cp:S.curve_params |} {| CC.curve_constants |} {| bn_ops |} res x y =
+let fmul_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res x y =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
   bn_mul tmp x y;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 y) S.prime;
-  mont_reduction res tmp;
+  cc.fmont_reduction res tmp;
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
 
 
-let fsqr_g {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+let fsqr_g {| cp:S.curve_params |} {| bn_ops |} {| cc:CC.curve_constants |} res x =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
   bn_sqr tmp x;
   let h1 = ST.get () in
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.prime;
-  mont_reduction res tmp;
+  cc.fmont_reduction res tmp;
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()
 
 
 
-let from_mont_g {| cp:S.curve_params |} {| CC.curve_constants |} res a =
+let from_mont_g {| cp:S.curve_params |} {| bn_ops |} {| cc:CC.curve_constants |} res a =
   push_frame ();
   let tmp = create_widefelem #cp in
   let h0 = ST.get () in
@@ -141,15 +101,14 @@ let from_mont_g {| cp:S.curve_params |} {| CC.curve_constants |} res a =
   let h1 = ST.get () in
   assert (wide_as_nat h1 tmp = as_nat h0 a);
   assert_norm (S.prime < S.prime * S.prime);
-  mont_reduction res tmp;
+  cc.fmont_reduction res tmp;
   pop_frame ()
 
 
-
-let to_mont_g {| cp:S.curve_params |} {| CC.curve_constants |} res a =
+let to_mont_g {| cp:S.curve_params |} {| bn_ops |} {| cc:CC.curve_constants |} res a =
   push_frame ();
   let r2modn = create_felem #cp in
-  make_fmont_R2 r2modn;
+  cc.make_fmont_R2 r2modn;
   let h0 = ST.get () in
   assert (as_nat h0 r2modn == SM.fmont_R * SM.fmont_R % S.prime);
   fmul_g res a r2modn;
@@ -173,15 +132,29 @@ let to_mont_g {| cp:S.curve_params |} {| CC.curve_constants |} res a =
 ///  Special cases of the above functions
 
 
-let fmul_by_b_coeff {| cp:S.curve_params |} {| CC.curve_constants |} res x =
+let fnegate_conditional_vartime {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| op:field_ops |} f is_negate =
   push_frame ();
-  let b_coeff = create_felem #cp in
-  make_b_coeff b_coeff;
-  fmul_g res b_coeff x;
+  let zero = create_felem #cp in
+  if is_negate then begin
+    let h0 = ST.get () in
+    op.fsub f zero f;
+    let h1 = ST.get () in
+    assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
+    Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
+    assert (as_nat h1 f == (S.prime - as_nat h0 f) % S.prime) end;
   pop_frame ()
 
 
+let fdouble {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} {| op:field_ops |} out x =
+  op.fadd out x x
 
-let fcube {| cp:S.curve_params |} {| CC.curve_constants |} res x =
-  fsqr_g res x;
-  fmul_g res res x
+let fmul_by_b_coeff {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} {| op:field_ops |} res x =
+  push_frame ();
+  let b_coeff = create_felem #cp in
+  cc.make_b_coeff b_coeff;
+  op.fmul res b_coeff x;
+  pop_frame ()
+
+let fcube {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} {| op:field_ops |} res x =
+  op.fsqr res x;
+  op.fmul res res x

@@ -58,7 +58,7 @@ let bn_to_bytes_be a b =  (bn_to_bytes_be_g a b)
 val bn_from_bytes_be: bn_from_bytes_be_t
 let bn_from_bytes_be a b =  (bn_from_bytes_be_g a b)
 
-[@CInline]
+inline_for_extraction noextract
 val bn_mont_reduction: bn_mont_reduction_t
 let bn_mont_reduction a b c d =  (bn_mont_reduction_g a b c d)
 
