@@ -113,59 +113,59 @@ void EverCrypt_AutoConfig2_recall(void)
 void EverCrypt_AutoConfig2_init(void)
 {
   #if HACL_CAN_COMPILE_VALE
-  if (check_aesni() != (uint64_t)0U)
+  if (check_aesni() != 0ULL)
   {
     cpu_has_aesni[0U] = true;
     cpu_has_pclmulqdq[0U] = true;
   }
-  if (check_sha() != (uint64_t)0U)
+  if (check_sha() != 0ULL)
   {
     cpu_has_shaext[0U] = true;
   }
-  if (check_adx_bmi2() != (uint64_t)0U)
+  if (check_adx_bmi2() != 0ULL)
   {
     cpu_has_bmi2[0U] = true;
     cpu_has_adx[0U] = true;
   }
-  if (check_avx() != (uint64_t)0U)
+  if (check_avx() != 0ULL)
   {
-    if (check_osxsave() != (uint64_t)0U)
+    if (check_osxsave() != 0ULL)
     {
-      if (check_avx_xcr0() != (uint64_t)0U)
+      if (check_avx_xcr0() != 0ULL)
       {
         cpu_has_avx[0U] = true;
       }
     }
   }
-  if (check_avx2() != (uint64_t)0U)
+  if (check_avx2() != 0ULL)
   {
-    if (check_osxsave() != (uint64_t)0U)
+    if (check_osxsave() != 0ULL)
     {
-      if (check_avx_xcr0() != (uint64_t)0U)
+      if (check_avx_xcr0() != 0ULL)
       {
         cpu_has_avx2[0U] = true;
       }
     }
   }
-  if (check_sse() != (uint64_t)0U)
+  if (check_sse() != 0ULL)
   {
     cpu_has_sse[0U] = true;
   }
-  if (check_movbe() != (uint64_t)0U)
+  if (check_movbe() != 0ULL)
   {
     cpu_has_movbe[0U] = true;
   }
-  if (check_rdrand() != (uint64_t)0U)
+  if (check_rdrand() != 0ULL)
   {
     cpu_has_rdrand[0U] = true;
   }
-  if (check_avx512() != (uint64_t)0U)
+  if (check_avx512() != 0ULL)
   {
-    if (check_osxsave() != (uint64_t)0U)
+    if (check_osxsave() != 0ULL)
     {
-      if (check_avx_xcr0() != (uint64_t)0U)
+      if (check_avx_xcr0() != 0ULL)
       {
-        if (check_avx512_xcr0() != (uint64_t)0U)
+        if (check_avx512_xcr0() != 0ULL)
         {
           cpu_has_avx512[0U] = true;
           return;

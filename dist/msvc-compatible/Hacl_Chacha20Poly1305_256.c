@@ -32,58 +32,52 @@
 static inline void
 poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t *text)
 {
-  uint32_t n = len / (uint32_t)16U;
-  uint32_t r = len % (uint32_t)16U;
+  uint32_t n = len / 16U;
+  uint32_t r = len % 16U;
   uint8_t *blocks = text;
-  uint8_t *rem = text + n * (uint32_t)16U;
-  Lib_IntVector_Intrinsics_vec256 *pre0 = ctx + (uint32_t)5U;
+  uint8_t *rem = text + n * 16U;
+  Lib_IntVector_Intrinsics_vec256 *pre0 = ctx + 5U;
   Lib_IntVector_Intrinsics_vec256 *acc0 = ctx;
-  uint32_t sz_block = (uint32_t)64U;
-  uint32_t len0 = n * (uint32_t)16U / sz_block * sz_block;
+  uint32_t sz_block = 64U;
+  uint32_t len0 = n * 16U / sz_block * sz_block;
   uint8_t *t00 = blocks;
-  if (len0 > (uint32_t)0U)
+  if (len0 > 0U)
   {
-    uint32_t bs = (uint32_t)64U;
+    uint32_t bs = 64U;
     uint8_t *text0 = t00;
     Hacl_Impl_Poly1305_Field32xN_256_load_acc4(acc0, text0);
     uint32_t len1 = len0 - bs;
     uint8_t *text1 = t00 + bs;
     uint32_t nb = len1 / bs;
-    for (uint32_t i = (uint32_t)0U; i < nb; i++)
+    for (uint32_t i = 0U; i < nb; i++)
     {
       uint8_t *block = text1 + i * bs;
       KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
       Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load64_le(block);
+      Lib_IntVector_Intrinsics_vec256 hi = Lib_IntVector_Intrinsics_vec256_load64_le(block + 32U);
       Lib_IntVector_Intrinsics_vec256
-      hi = Lib_IntVector_Intrinsics_vec256_load64_le(block + (uint32_t)32U);
-      Lib_IntVector_Intrinsics_vec256
-      mask260 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
+      mask260 = Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL);
       Lib_IntVector_Intrinsics_vec256
       m0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(lo, hi);
       Lib_IntVector_Intrinsics_vec256
       m1 = Lib_IntVector_Intrinsics_vec256_interleave_high128(lo, hi);
-      Lib_IntVector_Intrinsics_vec256
-      m2 = Lib_IntVector_Intrinsics_vec256_shift_right(m0, (uint32_t)48U);
-      Lib_IntVector_Intrinsics_vec256
-      m3 = Lib_IntVector_Intrinsics_vec256_shift_right(m1, (uint32_t)48U);
+      Lib_IntVector_Intrinsics_vec256 m2 = Lib_IntVector_Intrinsics_vec256_shift_right(m0, 48U);
+      Lib_IntVector_Intrinsics_vec256 m3 = Lib_IntVector_Intrinsics_vec256_shift_right(m1, 48U);
       Lib_IntVector_Intrinsics_vec256
       m4 = Lib_IntVector_Intrinsics_vec256_interleave_high64(m0, m1);
       Lib_IntVector_Intrinsics_vec256
       t010 = Lib_IntVector_Intrinsics_vec256_interleave_low64(m0, m1);
       Lib_IntVector_Intrinsics_vec256
       t30 = Lib_IntVector_Intrinsics_vec256_interleave_low64(m2, m3);
-      Lib_IntVector_Intrinsics_vec256
-      t20 = Lib_IntVector_Intrinsics_vec256_shift_right64(t30, (uint32_t)4U);
+      Lib_IntVector_Intrinsics_vec256 t20 = Lib_IntVector_Intrinsics_vec256_shift_right64(t30, 4U);
       Lib_IntVector_Intrinsics_vec256 o20 = Lib_IntVector_Intrinsics_vec256_and(t20, mask260);
       Lib_IntVector_Intrinsics_vec256
-      t10 = Lib_IntVector_Intrinsics_vec256_shift_right64(t010, (uint32_t)26U);
+      t10 = Lib_IntVector_Intrinsics_vec256_shift_right64(t010, 26U);
       Lib_IntVector_Intrinsics_vec256 o10 = Lib_IntVector_Intrinsics_vec256_and(t10, mask260);
       Lib_IntVector_Intrinsics_vec256 o5 = Lib_IntVector_Intrinsics_vec256_and(t010, mask260);
-      Lib_IntVector_Intrinsics_vec256
-      t31 = Lib_IntVector_Intrinsics_vec256_shift_right64(t30, (uint32_t)30U);
+      Lib_IntVector_Intrinsics_vec256 t31 = Lib_IntVector_Intrinsics_vec256_shift_right64(t30, 30U);
       Lib_IntVector_Intrinsics_vec256 o30 = Lib_IntVector_Intrinsics_vec256_and(t31, mask260);
-      Lib_IntVector_Intrinsics_vec256
-      o40 = Lib_IntVector_Intrinsics_vec256_shift_right64(m4, (uint32_t)40U);
+      Lib_IntVector_Intrinsics_vec256 o40 = Lib_IntVector_Intrinsics_vec256_shift_right64(m4, 40U);
       Lib_IntVector_Intrinsics_vec256 o00 = o5;
       Lib_IntVector_Intrinsics_vec256 o11 = o10;
       Lib_IntVector_Intrinsics_vec256 o21 = o20;
@@ -94,12 +88,12 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
       e[2U] = o21;
       e[3U] = o31;
       e[4U] = o41;
-      uint64_t b = (uint64_t)0x1000000U;
+      uint64_t b = 0x1000000ULL;
       Lib_IntVector_Intrinsics_vec256 mask = Lib_IntVector_Intrinsics_vec256_load64(b);
       Lib_IntVector_Intrinsics_vec256 f4 = e[4U];
       e[4U] = Lib_IntVector_Intrinsics_vec256_or(f4, mask);
-      Lib_IntVector_Intrinsics_vec256 *rn = pre0 + (uint32_t)10U;
-      Lib_IntVector_Intrinsics_vec256 *rn5 = pre0 + (uint32_t)15U;
+      Lib_IntVector_Intrinsics_vec256 *rn = pre0 + 10U;
+      Lib_IntVector_Intrinsics_vec256 *rn5 = pre0 + 15U;
       Lib_IntVector_Intrinsics_vec256 r0 = rn[0U];
       Lib_IntVector_Intrinsics_vec256 r1 = rn[1U];
       Lib_IntVector_Intrinsics_vec256 r2 = rn[2U];
@@ -204,37 +198,28 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
       Lib_IntVector_Intrinsics_vec256 t2 = a24;
       Lib_IntVector_Intrinsics_vec256 t3 = a34;
       Lib_IntVector_Intrinsics_vec256 t4 = a44;
-      Lib_IntVector_Intrinsics_vec256
-      mask26 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
-      Lib_IntVector_Intrinsics_vec256
-      z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t01, (uint32_t)26U);
-      Lib_IntVector_Intrinsics_vec256
-      z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, (uint32_t)26U);
+      Lib_IntVector_Intrinsics_vec256 mask26 = Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL);
+      Lib_IntVector_Intrinsics_vec256 z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t01, 26U);
+      Lib_IntVector_Intrinsics_vec256 z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, 26U);
       Lib_IntVector_Intrinsics_vec256 x0 = Lib_IntVector_Intrinsics_vec256_and(t01, mask26);
       Lib_IntVector_Intrinsics_vec256 x3 = Lib_IntVector_Intrinsics_vec256_and(t3, mask26);
       Lib_IntVector_Intrinsics_vec256 x1 = Lib_IntVector_Intrinsics_vec256_add64(t1, z0);
       Lib_IntVector_Intrinsics_vec256 x4 = Lib_IntVector_Intrinsics_vec256_add64(t4, z1);
-      Lib_IntVector_Intrinsics_vec256
-      z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, (uint32_t)26U);
-      Lib_IntVector_Intrinsics_vec256
-      z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, (uint32_t)26U);
-      Lib_IntVector_Intrinsics_vec256
-      t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, (uint32_t)2U);
+      Lib_IntVector_Intrinsics_vec256 z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, 26U);
+      Lib_IntVector_Intrinsics_vec256 z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, 26U);
+      Lib_IntVector_Intrinsics_vec256 t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, 2U);
       Lib_IntVector_Intrinsics_vec256 z12 = Lib_IntVector_Intrinsics_vec256_add64(z11, t);
       Lib_IntVector_Intrinsics_vec256 x11 = Lib_IntVector_Intrinsics_vec256_and(x1, mask26);
       Lib_IntVector_Intrinsics_vec256 x41 = Lib_IntVector_Intrinsics_vec256_and(x4, mask26);
       Lib_IntVector_Intrinsics_vec256 x2 = Lib_IntVector_Intrinsics_vec256_add64(t2, z01);
       Lib_IntVector_Intrinsics_vec256 x01 = Lib_IntVector_Intrinsics_vec256_add64(x0, z12);
-      Lib_IntVector_Intrinsics_vec256
-      z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, (uint32_t)26U);
-      Lib_IntVector_Intrinsics_vec256
-      z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, (uint32_t)26U);
+      Lib_IntVector_Intrinsics_vec256 z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, 26U);
+      Lib_IntVector_Intrinsics_vec256 z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, 26U);
       Lib_IntVector_Intrinsics_vec256 x21 = Lib_IntVector_Intrinsics_vec256_and(x2, mask26);
       Lib_IntVector_Intrinsics_vec256 x02 = Lib_IntVector_Intrinsics_vec256_and(x01, mask26);
       Lib_IntVector_Intrinsics_vec256 x31 = Lib_IntVector_Intrinsics_vec256_add64(x3, z02);
       Lib_IntVector_Intrinsics_vec256 x12 = Lib_IntVector_Intrinsics_vec256_add64(x11, z13);
-      Lib_IntVector_Intrinsics_vec256
-      z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, (uint32_t)26U);
+      Lib_IntVector_Intrinsics_vec256 z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, 26U);
       Lib_IntVector_Intrinsics_vec256 x32 = Lib_IntVector_Intrinsics_vec256_and(x31, mask26);
       Lib_IntVector_Intrinsics_vec256 x42 = Lib_IntVector_Intrinsics_vec256_add64(x41, z03);
       Lib_IntVector_Intrinsics_vec256 o01 = x02;
@@ -270,43 +255,39 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     }
     Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize(acc0, pre0);
   }
-  uint32_t len1 = n * (uint32_t)16U - len0;
+  uint32_t len1 = n * 16U - len0;
   uint8_t *t10 = blocks + len0;
-  uint32_t nb = len1 / (uint32_t)16U;
-  uint32_t rem1 = len1 % (uint32_t)16U;
-  for (uint32_t i = (uint32_t)0U; i < nb; i++)
+  uint32_t nb = len1 / 16U;
+  uint32_t rem1 = len1 % 16U;
+  for (uint32_t i = 0U; i < nb; i++)
   {
-    uint8_t *block = t10 + i * (uint32_t)16U;
+    uint8_t *block = t10 + i * 16U;
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
     uint64_t u0 = load64_le(block);
     uint64_t lo = u0;
-    uint64_t u = load64_le(block + (uint32_t)8U);
+    uint64_t u = load64_le(block + 8U);
     uint64_t hi = u;
     Lib_IntVector_Intrinsics_vec256 f0 = Lib_IntVector_Intrinsics_vec256_load64(lo);
     Lib_IntVector_Intrinsics_vec256 f1 = Lib_IntVector_Intrinsics_vec256_load64(hi);
     Lib_IntVector_Intrinsics_vec256
     f010 =
       Lib_IntVector_Intrinsics_vec256_and(f0,
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
     Lib_IntVector_Intrinsics_vec256
     f110 =
-      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-          (uint32_t)26U),
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 26U),
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
     Lib_IntVector_Intrinsics_vec256
     f20 =
-      Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-          (uint32_t)52U),
+      Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 52U),
         Lib_IntVector_Intrinsics_vec256_shift_left64(Lib_IntVector_Intrinsics_vec256_and(f1,
-            Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3fffU)),
-          (uint32_t)12U));
+            Lib_IntVector_Intrinsics_vec256_load64(0x3fffULL)),
+          12U));
     Lib_IntVector_Intrinsics_vec256
     f30 =
-      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1,
-          (uint32_t)14U),
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
-    Lib_IntVector_Intrinsics_vec256
-    f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, (uint32_t)40U);
+      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 14U),
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
+    Lib_IntVector_Intrinsics_vec256 f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 40U);
     Lib_IntVector_Intrinsics_vec256 f01 = f010;
     Lib_IntVector_Intrinsics_vec256 f111 = f110;
     Lib_IntVector_Intrinsics_vec256 f2 = f20;
@@ -317,12 +298,12 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     e[2U] = f2;
     e[3U] = f3;
     e[4U] = f41;
-    uint64_t b = (uint64_t)0x1000000U;
+    uint64_t b = 0x1000000ULL;
     Lib_IntVector_Intrinsics_vec256 mask = Lib_IntVector_Intrinsics_vec256_load64(b);
     Lib_IntVector_Intrinsics_vec256 f4 = e[4U];
     e[4U] = Lib_IntVector_Intrinsics_vec256_or(f4, mask);
     Lib_IntVector_Intrinsics_vec256 *r1 = pre0;
-    Lib_IntVector_Intrinsics_vec256 *r5 = pre0 + (uint32_t)5U;
+    Lib_IntVector_Intrinsics_vec256 *r5 = pre0 + 5U;
     Lib_IntVector_Intrinsics_vec256 r0 = r1[0U];
     Lib_IntVector_Intrinsics_vec256 r11 = r1[1U];
     Lib_IntVector_Intrinsics_vec256 r2 = r1[2U];
@@ -437,37 +418,28 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec256 t2 = a26;
     Lib_IntVector_Intrinsics_vec256 t3 = a36;
     Lib_IntVector_Intrinsics_vec256 t4 = a46;
-    Lib_IntVector_Intrinsics_vec256
-    mask26 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
-    Lib_IntVector_Intrinsics_vec256
-    z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t01, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 mask26 = Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL);
+    Lib_IntVector_Intrinsics_vec256 z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t01, 26U);
+    Lib_IntVector_Intrinsics_vec256 z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, 26U);
     Lib_IntVector_Intrinsics_vec256 x0 = Lib_IntVector_Intrinsics_vec256_and(t01, mask26);
     Lib_IntVector_Intrinsics_vec256 x3 = Lib_IntVector_Intrinsics_vec256_and(t3, mask26);
     Lib_IntVector_Intrinsics_vec256 x1 = Lib_IntVector_Intrinsics_vec256_add64(t11, z0);
     Lib_IntVector_Intrinsics_vec256 x4 = Lib_IntVector_Intrinsics_vec256_add64(t4, z1);
-    Lib_IntVector_Intrinsics_vec256
-    z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, (uint32_t)2U);
+    Lib_IntVector_Intrinsics_vec256 z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, 26U);
+    Lib_IntVector_Intrinsics_vec256 z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, 26U);
+    Lib_IntVector_Intrinsics_vec256 t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, 2U);
     Lib_IntVector_Intrinsics_vec256 z12 = Lib_IntVector_Intrinsics_vec256_add64(z11, t);
     Lib_IntVector_Intrinsics_vec256 x11 = Lib_IntVector_Intrinsics_vec256_and(x1, mask26);
     Lib_IntVector_Intrinsics_vec256 x41 = Lib_IntVector_Intrinsics_vec256_and(x4, mask26);
     Lib_IntVector_Intrinsics_vec256 x2 = Lib_IntVector_Intrinsics_vec256_add64(t2, z01);
     Lib_IntVector_Intrinsics_vec256 x01 = Lib_IntVector_Intrinsics_vec256_add64(x0, z12);
-    Lib_IntVector_Intrinsics_vec256
-    z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, 26U);
+    Lib_IntVector_Intrinsics_vec256 z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, 26U);
     Lib_IntVector_Intrinsics_vec256 x21 = Lib_IntVector_Intrinsics_vec256_and(x2, mask26);
     Lib_IntVector_Intrinsics_vec256 x02 = Lib_IntVector_Intrinsics_vec256_and(x01, mask26);
     Lib_IntVector_Intrinsics_vec256 x31 = Lib_IntVector_Intrinsics_vec256_add64(x3, z02);
     Lib_IntVector_Intrinsics_vec256 x12 = Lib_IntVector_Intrinsics_vec256_add64(x11, z13);
-    Lib_IntVector_Intrinsics_vec256
-    z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, 26U);
     Lib_IntVector_Intrinsics_vec256 x32 = Lib_IntVector_Intrinsics_vec256_and(x31, mask26);
     Lib_IntVector_Intrinsics_vec256 x42 = Lib_IntVector_Intrinsics_vec256_add64(x41, z03);
     Lib_IntVector_Intrinsics_vec256 o0 = x02;
@@ -481,41 +453,37 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     acc0[3U] = o3;
     acc0[4U] = o4;
   }
-  if (rem1 > (uint32_t)0U)
+  if (rem1 > 0U)
   {
-    uint8_t *last = t10 + nb * (uint32_t)16U;
+    uint8_t *last = t10 + nb * 16U;
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
     uint8_t tmp[16U] = { 0U };
     memcpy(tmp, last, rem1 * sizeof (uint8_t));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
-    uint64_t u = load64_le(tmp + (uint32_t)8U);
+    uint64_t u = load64_le(tmp + 8U);
     uint64_t hi = u;
     Lib_IntVector_Intrinsics_vec256 f0 = Lib_IntVector_Intrinsics_vec256_load64(lo);
     Lib_IntVector_Intrinsics_vec256 f1 = Lib_IntVector_Intrinsics_vec256_load64(hi);
     Lib_IntVector_Intrinsics_vec256
     f010 =
       Lib_IntVector_Intrinsics_vec256_and(f0,
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
     Lib_IntVector_Intrinsics_vec256
     f110 =
-      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-          (uint32_t)26U),
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 26U),
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
     Lib_IntVector_Intrinsics_vec256
     f20 =
-      Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-          (uint32_t)52U),
+      Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 52U),
         Lib_IntVector_Intrinsics_vec256_shift_left64(Lib_IntVector_Intrinsics_vec256_and(f1,
-            Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3fffU)),
-          (uint32_t)12U));
+            Lib_IntVector_Intrinsics_vec256_load64(0x3fffULL)),
+          12U));
     Lib_IntVector_Intrinsics_vec256
     f30 =
-      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1,
-          (uint32_t)14U),
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
-    Lib_IntVector_Intrinsics_vec256
-    f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, (uint32_t)40U);
+      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 14U),
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
+    Lib_IntVector_Intrinsics_vec256 f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 40U);
     Lib_IntVector_Intrinsics_vec256 f01 = f010;
     Lib_IntVector_Intrinsics_vec256 f111 = f110;
     Lib_IntVector_Intrinsics_vec256 f2 = f20;
@@ -526,12 +494,12 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     e[2U] = f2;
     e[3U] = f3;
     e[4U] = f4;
-    uint64_t b = (uint64_t)1U << rem1 * (uint32_t)8U % (uint32_t)26U;
+    uint64_t b = 1ULL << rem1 * 8U % 26U;
     Lib_IntVector_Intrinsics_vec256 mask = Lib_IntVector_Intrinsics_vec256_load64(b);
-    Lib_IntVector_Intrinsics_vec256 fi = e[rem1 * (uint32_t)8U / (uint32_t)26U];
-    e[rem1 * (uint32_t)8U / (uint32_t)26U] = Lib_IntVector_Intrinsics_vec256_or(fi, mask);
+    Lib_IntVector_Intrinsics_vec256 fi = e[rem1 * 8U / 26U];
+    e[rem1 * 8U / 26U] = Lib_IntVector_Intrinsics_vec256_or(fi, mask);
     Lib_IntVector_Intrinsics_vec256 *r1 = pre0;
-    Lib_IntVector_Intrinsics_vec256 *r5 = pre0 + (uint32_t)5U;
+    Lib_IntVector_Intrinsics_vec256 *r5 = pre0 + 5U;
     Lib_IntVector_Intrinsics_vec256 r0 = r1[0U];
     Lib_IntVector_Intrinsics_vec256 r11 = r1[1U];
     Lib_IntVector_Intrinsics_vec256 r2 = r1[2U];
@@ -646,37 +614,28 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec256 t2 = a26;
     Lib_IntVector_Intrinsics_vec256 t3 = a36;
     Lib_IntVector_Intrinsics_vec256 t4 = a46;
-    Lib_IntVector_Intrinsics_vec256
-    mask26 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
-    Lib_IntVector_Intrinsics_vec256
-    z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t01, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 mask26 = Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL);
+    Lib_IntVector_Intrinsics_vec256 z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t01, 26U);
+    Lib_IntVector_Intrinsics_vec256 z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, 26U);
     Lib_IntVector_Intrinsics_vec256 x0 = Lib_IntVector_Intrinsics_vec256_and(t01, mask26);
     Lib_IntVector_Intrinsics_vec256 x3 = Lib_IntVector_Intrinsics_vec256_and(t3, mask26);
     Lib_IntVector_Intrinsics_vec256 x1 = Lib_IntVector_Intrinsics_vec256_add64(t11, z0);
     Lib_IntVector_Intrinsics_vec256 x4 = Lib_IntVector_Intrinsics_vec256_add64(t4, z1);
-    Lib_IntVector_Intrinsics_vec256
-    z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, (uint32_t)2U);
+    Lib_IntVector_Intrinsics_vec256 z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, 26U);
+    Lib_IntVector_Intrinsics_vec256 z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, 26U);
+    Lib_IntVector_Intrinsics_vec256 t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, 2U);
     Lib_IntVector_Intrinsics_vec256 z12 = Lib_IntVector_Intrinsics_vec256_add64(z11, t);
     Lib_IntVector_Intrinsics_vec256 x11 = Lib_IntVector_Intrinsics_vec256_and(x1, mask26);
     Lib_IntVector_Intrinsics_vec256 x41 = Lib_IntVector_Intrinsics_vec256_and(x4, mask26);
     Lib_IntVector_Intrinsics_vec256 x2 = Lib_IntVector_Intrinsics_vec256_add64(t2, z01);
     Lib_IntVector_Intrinsics_vec256 x01 = Lib_IntVector_Intrinsics_vec256_add64(x0, z12);
-    Lib_IntVector_Intrinsics_vec256
-    z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, 26U);
+    Lib_IntVector_Intrinsics_vec256 z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, 26U);
     Lib_IntVector_Intrinsics_vec256 x21 = Lib_IntVector_Intrinsics_vec256_and(x2, mask26);
     Lib_IntVector_Intrinsics_vec256 x02 = Lib_IntVector_Intrinsics_vec256_and(x01, mask26);
     Lib_IntVector_Intrinsics_vec256 x31 = Lib_IntVector_Intrinsics_vec256_add64(x3, z02);
     Lib_IntVector_Intrinsics_vec256 x12 = Lib_IntVector_Intrinsics_vec256_add64(x11, z13);
-    Lib_IntVector_Intrinsics_vec256
-    z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, 26U);
     Lib_IntVector_Intrinsics_vec256 x32 = Lib_IntVector_Intrinsics_vec256_and(x31, mask26);
     Lib_IntVector_Intrinsics_vec256 x42 = Lib_IntVector_Intrinsics_vec256_add64(x41, z03);
     Lib_IntVector_Intrinsics_vec256 o0 = x02;
@@ -692,40 +651,36 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   }
   uint8_t tmp[16U] = { 0U };
   memcpy(tmp, rem, r * sizeof (uint8_t));
-  if (r > (uint32_t)0U)
+  if (r > 0U)
   {
-    Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
+    Lib_IntVector_Intrinsics_vec256 *pre = ctx + 5U;
     Lib_IntVector_Intrinsics_vec256 *acc = ctx;
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
-    uint64_t u = load64_le(tmp + (uint32_t)8U);
+    uint64_t u = load64_le(tmp + 8U);
     uint64_t hi = u;
     Lib_IntVector_Intrinsics_vec256 f0 = Lib_IntVector_Intrinsics_vec256_load64(lo);
     Lib_IntVector_Intrinsics_vec256 f1 = Lib_IntVector_Intrinsics_vec256_load64(hi);
     Lib_IntVector_Intrinsics_vec256
     f010 =
       Lib_IntVector_Intrinsics_vec256_and(f0,
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
     Lib_IntVector_Intrinsics_vec256
     f110 =
-      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-          (uint32_t)26U),
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 26U),
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
     Lib_IntVector_Intrinsics_vec256
     f20 =
-      Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-          (uint32_t)52U),
+      Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 52U),
         Lib_IntVector_Intrinsics_vec256_shift_left64(Lib_IntVector_Intrinsics_vec256_and(f1,
-            Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3fffU)),
-          (uint32_t)12U));
+            Lib_IntVector_Intrinsics_vec256_load64(0x3fffULL)),
+          12U));
     Lib_IntVector_Intrinsics_vec256
     f30 =
-      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1,
-          (uint32_t)14U),
-        Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
-    Lib_IntVector_Intrinsics_vec256
-    f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, (uint32_t)40U);
+      Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 14U),
+        Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
+    Lib_IntVector_Intrinsics_vec256 f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 40U);
     Lib_IntVector_Intrinsics_vec256 f01 = f010;
     Lib_IntVector_Intrinsics_vec256 f111 = f110;
     Lib_IntVector_Intrinsics_vec256 f2 = f20;
@@ -736,12 +691,12 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     e[2U] = f2;
     e[3U] = f3;
     e[4U] = f41;
-    uint64_t b = (uint64_t)0x1000000U;
+    uint64_t b = 0x1000000ULL;
     Lib_IntVector_Intrinsics_vec256 mask = Lib_IntVector_Intrinsics_vec256_load64(b);
     Lib_IntVector_Intrinsics_vec256 f4 = e[4U];
     e[4U] = Lib_IntVector_Intrinsics_vec256_or(f4, mask);
     Lib_IntVector_Intrinsics_vec256 *r1 = pre;
-    Lib_IntVector_Intrinsics_vec256 *r5 = pre + (uint32_t)5U;
+    Lib_IntVector_Intrinsics_vec256 *r5 = pre + 5U;
     Lib_IntVector_Intrinsics_vec256 r0 = r1[0U];
     Lib_IntVector_Intrinsics_vec256 r11 = r1[1U];
     Lib_IntVector_Intrinsics_vec256 r2 = r1[2U];
@@ -856,37 +811,28 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec256 t2 = a26;
     Lib_IntVector_Intrinsics_vec256 t3 = a36;
     Lib_IntVector_Intrinsics_vec256 t4 = a46;
-    Lib_IntVector_Intrinsics_vec256
-    mask26 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
-    Lib_IntVector_Intrinsics_vec256
-    z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t0, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 mask26 = Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL);
+    Lib_IntVector_Intrinsics_vec256 z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t0, 26U);
+    Lib_IntVector_Intrinsics_vec256 z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, 26U);
     Lib_IntVector_Intrinsics_vec256 x0 = Lib_IntVector_Intrinsics_vec256_and(t0, mask26);
     Lib_IntVector_Intrinsics_vec256 x3 = Lib_IntVector_Intrinsics_vec256_and(t3, mask26);
     Lib_IntVector_Intrinsics_vec256 x1 = Lib_IntVector_Intrinsics_vec256_add64(t1, z0);
     Lib_IntVector_Intrinsics_vec256 x4 = Lib_IntVector_Intrinsics_vec256_add64(t4, z1);
-    Lib_IntVector_Intrinsics_vec256
-    z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, (uint32_t)2U);
+    Lib_IntVector_Intrinsics_vec256 z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, 26U);
+    Lib_IntVector_Intrinsics_vec256 z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, 26U);
+    Lib_IntVector_Intrinsics_vec256 t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, 2U);
     Lib_IntVector_Intrinsics_vec256 z12 = Lib_IntVector_Intrinsics_vec256_add64(z11, t);
     Lib_IntVector_Intrinsics_vec256 x11 = Lib_IntVector_Intrinsics_vec256_and(x1, mask26);
     Lib_IntVector_Intrinsics_vec256 x41 = Lib_IntVector_Intrinsics_vec256_and(x4, mask26);
     Lib_IntVector_Intrinsics_vec256 x2 = Lib_IntVector_Intrinsics_vec256_add64(t2, z01);
     Lib_IntVector_Intrinsics_vec256 x01 = Lib_IntVector_Intrinsics_vec256_add64(x0, z12);
-    Lib_IntVector_Intrinsics_vec256
-    z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec256
-    z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, 26U);
+    Lib_IntVector_Intrinsics_vec256 z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, 26U);
     Lib_IntVector_Intrinsics_vec256 x21 = Lib_IntVector_Intrinsics_vec256_and(x2, mask26);
     Lib_IntVector_Intrinsics_vec256 x02 = Lib_IntVector_Intrinsics_vec256_and(x01, mask26);
     Lib_IntVector_Intrinsics_vec256 x31 = Lib_IntVector_Intrinsics_vec256_add64(x3, z02);
     Lib_IntVector_Intrinsics_vec256 x12 = Lib_IntVector_Intrinsics_vec256_add64(x11, z13);
-    Lib_IntVector_Intrinsics_vec256
-    z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, (uint32_t)26U);
+    Lib_IntVector_Intrinsics_vec256 z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, 26U);
     Lib_IntVector_Intrinsics_vec256 x32 = Lib_IntVector_Intrinsics_vec256_and(x31, mask26);
     Lib_IntVector_Intrinsics_vec256 x42 = Lib_IntVector_Intrinsics_vec256_add64(x41, z03);
     Lib_IntVector_Intrinsics_vec256 o0 = x02;
@@ -916,48 +862,44 @@ poly1305_do_256(
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 ctx[25U] KRML_POST_ALIGN(32) = { 0U };
   uint8_t block[16U] = { 0U };
   Hacl_Poly1305_256_poly1305_init(ctx, k);
-  if (aadlen != (uint32_t)0U)
+  if (aadlen != 0U)
   {
     poly1305_padded_256(ctx, aadlen, aad);
   }
-  if (mlen != (uint32_t)0U)
+  if (mlen != 0U)
   {
     poly1305_padded_256(ctx, mlen, m);
   }
   store64_le(block, (uint64_t)aadlen);
-  store64_le(block + (uint32_t)8U, (uint64_t)mlen);
-  Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
+  store64_le(block + 8U, (uint64_t)mlen);
+  Lib_IntVector_Intrinsics_vec256 *pre = ctx + 5U;
   Lib_IntVector_Intrinsics_vec256 *acc = ctx;
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 e[5U] KRML_POST_ALIGN(32) = { 0U };
   uint64_t u0 = load64_le(block);
   uint64_t lo = u0;
-  uint64_t u = load64_le(block + (uint32_t)8U);
+  uint64_t u = load64_le(block + 8U);
   uint64_t hi = u;
   Lib_IntVector_Intrinsics_vec256 f0 = Lib_IntVector_Intrinsics_vec256_load64(lo);
   Lib_IntVector_Intrinsics_vec256 f1 = Lib_IntVector_Intrinsics_vec256_load64(hi);
   Lib_IntVector_Intrinsics_vec256
   f010 =
     Lib_IntVector_Intrinsics_vec256_and(f0,
-      Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+      Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
   Lib_IntVector_Intrinsics_vec256
   f110 =
-    Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-        (uint32_t)26U),
-      Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
+    Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 26U),
+      Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
   Lib_IntVector_Intrinsics_vec256
   f20 =
-    Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0,
-        (uint32_t)52U),
+    Lib_IntVector_Intrinsics_vec256_or(Lib_IntVector_Intrinsics_vec256_shift_right64(f0, 52U),
       Lib_IntVector_Intrinsics_vec256_shift_left64(Lib_IntVector_Intrinsics_vec256_and(f1,
-          Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3fffU)),
-        (uint32_t)12U));
+          Lib_IntVector_Intrinsics_vec256_load64(0x3fffULL)),
+        12U));
   Lib_IntVector_Intrinsics_vec256
   f30 =
-    Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1,
-        (uint32_t)14U),
-      Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU));
-  Lib_IntVector_Intrinsics_vec256
-  f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, (uint32_t)40U);
+    Lib_IntVector_Intrinsics_vec256_and(Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 14U),
+      Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL));
+  Lib_IntVector_Intrinsics_vec256 f40 = Lib_IntVector_Intrinsics_vec256_shift_right64(f1, 40U);
   Lib_IntVector_Intrinsics_vec256 f01 = f010;
   Lib_IntVector_Intrinsics_vec256 f111 = f110;
   Lib_IntVector_Intrinsics_vec256 f2 = f20;
@@ -968,12 +910,12 @@ poly1305_do_256(
   e[2U] = f2;
   e[3U] = f3;
   e[4U] = f41;
-  uint64_t b = (uint64_t)0x1000000U;
+  uint64_t b = 0x1000000ULL;
   Lib_IntVector_Intrinsics_vec256 mask = Lib_IntVector_Intrinsics_vec256_load64(b);
   Lib_IntVector_Intrinsics_vec256 f4 = e[4U];
   e[4U] = Lib_IntVector_Intrinsics_vec256_or(f4, mask);
   Lib_IntVector_Intrinsics_vec256 *r = pre;
-  Lib_IntVector_Intrinsics_vec256 *r5 = pre + (uint32_t)5U;
+  Lib_IntVector_Intrinsics_vec256 *r5 = pre + 5U;
   Lib_IntVector_Intrinsics_vec256 r0 = r[0U];
   Lib_IntVector_Intrinsics_vec256 r1 = r[1U];
   Lib_IntVector_Intrinsics_vec256 r2 = r[2U];
@@ -1088,37 +1030,28 @@ poly1305_do_256(
   Lib_IntVector_Intrinsics_vec256 t2 = a26;
   Lib_IntVector_Intrinsics_vec256 t3 = a36;
   Lib_IntVector_Intrinsics_vec256 t4 = a46;
-  Lib_IntVector_Intrinsics_vec256
-  mask26 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
-  Lib_IntVector_Intrinsics_vec256
-  z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t0, (uint32_t)26U);
-  Lib_IntVector_Intrinsics_vec256
-  z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, (uint32_t)26U);
+  Lib_IntVector_Intrinsics_vec256 mask26 = Lib_IntVector_Intrinsics_vec256_load64(0x3ffffffULL);
+  Lib_IntVector_Intrinsics_vec256 z0 = Lib_IntVector_Intrinsics_vec256_shift_right64(t0, 26U);
+  Lib_IntVector_Intrinsics_vec256 z1 = Lib_IntVector_Intrinsics_vec256_shift_right64(t3, 26U);
   Lib_IntVector_Intrinsics_vec256 x0 = Lib_IntVector_Intrinsics_vec256_and(t0, mask26);
   Lib_IntVector_Intrinsics_vec256 x3 = Lib_IntVector_Intrinsics_vec256_and(t3, mask26);
   Lib_IntVector_Intrinsics_vec256 x1 = Lib_IntVector_Intrinsics_vec256_add64(t1, z0);
   Lib_IntVector_Intrinsics_vec256 x4 = Lib_IntVector_Intrinsics_vec256_add64(t4, z1);
-  Lib_IntVector_Intrinsics_vec256
-  z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, (uint32_t)26U);
-  Lib_IntVector_Intrinsics_vec256
-  z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, (uint32_t)26U);
-  Lib_IntVector_Intrinsics_vec256
-  t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, (uint32_t)2U);
+  Lib_IntVector_Intrinsics_vec256 z01 = Lib_IntVector_Intrinsics_vec256_shift_right64(x1, 26U);
+  Lib_IntVector_Intrinsics_vec256 z11 = Lib_IntVector_Intrinsics_vec256_shift_right64(x4, 26U);
+  Lib_IntVector_Intrinsics_vec256 t = Lib_IntVector_Intrinsics_vec256_shift_left64(z11, 2U);
   Lib_IntVector_Intrinsics_vec256 z12 = Lib_IntVector_Intrinsics_vec256_add64(z11, t);
   Lib_IntVector_Intrinsics_vec256 x11 = Lib_IntVector_Intrinsics_vec256_and(x1, mask26);
   Lib_IntVector_Intrinsics_vec256 x41 = Lib_IntVector_Intrinsics_vec256_and(x4, mask26);
   Lib_IntVector_Intrinsics_vec256 x2 = Lib_IntVector_Intrinsics_vec256_add64(t2, z01);
   Lib_IntVector_Intrinsics_vec256 x01 = Lib_IntVector_Intrinsics_vec256_add64(x0, z12);
-  Lib_IntVector_Intrinsics_vec256
-  z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, (uint32_t)26U);
-  Lib_IntVector_Intrinsics_vec256
-  z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, (uint32_t)26U);
+  Lib_IntVector_Intrinsics_vec256 z02 = Lib_IntVector_Intrinsics_vec256_shift_right64(x2, 26U);
+  Lib_IntVector_Intrinsics_vec256 z13 = Lib_IntVector_Intrinsics_vec256_shift_right64(x01, 26U);
   Lib_IntVector_Intrinsics_vec256 x21 = Lib_IntVector_Intrinsics_vec256_and(x2, mask26);
   Lib_IntVector_Intrinsics_vec256 x02 = Lib_IntVector_Intrinsics_vec256_and(x01, mask26);
   Lib_IntVector_Intrinsics_vec256 x31 = Lib_IntVector_Intrinsics_vec256_add64(x3, z02);
   Lib_IntVector_Intrinsics_vec256 x12 = Lib_IntVector_Intrinsics_vec256_add64(x11, z13);
-  Lib_IntVector_Intrinsics_vec256
-  z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, (uint32_t)26U);
+  Lib_IntVector_Intrinsics_vec256 z03 = Lib_IntVector_Intrinsics_vec256_shift_right64(x31, 26U);
   Lib_IntVector_Intrinsics_vec256 x32 = Lib_IntVector_Intrinsics_vec256_and(x31, mask26);
   Lib_IntVector_Intrinsics_vec256 x42 = Lib_IntVector_Intrinsics_vec256_add64(x41, z03);
   Lib_IntVector_Intrinsics_vec256 o0 = x02;
@@ -1162,9 +1095,9 @@ Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t *mac
 )
 {
-  Hacl_Chacha20_Vec256_chacha20_encrypt_256(mlen, cipher, m, k, n, (uint32_t)1U);
+  Hacl_Chacha20_Vec256_chacha20_encrypt_256(mlen, cipher, m, k, n, 1U);
   uint8_t tmp[64U] = { 0U };
-  Hacl_Chacha20_Vec256_chacha20_encrypt_256((uint32_t)64U, tmp, tmp, k, n, (uint32_t)0U);
+  Hacl_Chacha20_Vec256_chacha20_encrypt_256(64U, tmp, tmp, k, n, 0U);
   uint8_t *key = tmp;
   poly1305_do_256(key, aadlen, aad, mlen, cipher, mac);
 }
@@ -1204,22 +1137,22 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
 {
   uint8_t computed_mac[16U] = { 0U };
   uint8_t tmp[64U] = { 0U };
-  Hacl_Chacha20_Vec256_chacha20_encrypt_256((uint32_t)64U, tmp, tmp, k, n, (uint32_t)0U);
+  Hacl_Chacha20_Vec256_chacha20_encrypt_256(64U, tmp, tmp, k, n, 0U);
   uint8_t *key = tmp;
   poly1305_do_256(key, aadlen, aad, mlen, cipher, computed_mac);
-  uint8_t res = (uint8_t)255U;
+  uint8_t res = 255U;
   KRML_MAYBE_FOR16(i,
-    (uint32_t)0U,
-    (uint32_t)16U,
-    (uint32_t)1U,
+    0U,
+    16U,
+    1U,
     uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
-    res = uu____0 & res;);
+    res = (uint32_t)uu____0 & (uint32_t)res;);
   uint8_t z = res;
-  if (z == (uint8_t)255U)
+  if (z == 255U)
   {
-    Hacl_Chacha20_Vec256_chacha20_encrypt_256(mlen, m, cipher, k, n, (uint32_t)1U);
-    return (uint32_t)0U;
+    Hacl_Chacha20_Vec256_chacha20_encrypt_256(mlen, m, cipher, k, n, 1U);
+    return 0U;
   }
-  return (uint32_t)1U;
+  return 1U;
 }
 

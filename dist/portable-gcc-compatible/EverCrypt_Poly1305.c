@@ -39,24 +39,24 @@ poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
   KRML_HOST_IGNORE(key);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ctx[192U] = { 0U };
-  memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-  uint32_t n_blocks = len / (uint32_t)16U;
-  uint32_t n_extra = len % (uint32_t)16U;
+  memcpy(ctx + 24U, key, 32U * sizeof (uint8_t));
+  uint32_t n_blocks = len / 16U;
+  uint32_t n_extra = len % 16U;
   uint8_t tmp[16U] = { 0U };
-  if (n_extra == (uint32_t)0U)
+  if (n_extra == 0U)
   {
-    KRML_HOST_IGNORE(x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U));
+    KRML_HOST_IGNORE(x64_poly1305(ctx, src, (uint64_t)len, 1ULL));
   }
   else
   {
-    uint32_t len16 = n_blocks * (uint32_t)16U;
+    uint32_t len16 = n_blocks * 16U;
     uint8_t *src16 = src;
     memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
-    KRML_HOST_IGNORE(x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U));
-    memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U));
+    KRML_HOST_IGNORE(x64_poly1305(ctx, src16, (uint64_t)len16, 0ULL));
+    memcpy(ctx + 24U, key, 32U * sizeof (uint8_t));
+    KRML_HOST_IGNORE(x64_poly1305(ctx, tmp, (uint64_t)n_extra, 1ULL));
   }
-  memcpy(dst, ctx, (uint32_t)16U * sizeof (uint8_t));
+  memcpy(dst, ctx, 16U * sizeof (uint8_t));
   #endif
 }
 

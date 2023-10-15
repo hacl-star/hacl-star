@@ -163,73 +163,73 @@ EverCrypt_Hash_Incremental_hash(
 
 /* SNIPPET_START: md5_hash_len */
 
-#define MD5_HASH_LEN ((uint32_t)16U)
+#define MD5_HASH_LEN (16U)
 
 /* SNIPPET_END: md5_hash_len */
 
 /* SNIPPET_START: sha1_hash_len */
 
-#define SHA1_HASH_LEN ((uint32_t)20U)
+#define SHA1_HASH_LEN (20U)
 
 /* SNIPPET_END: sha1_hash_len */
 
 /* SNIPPET_START: sha2_224_hash_len */
 
-#define SHA2_224_HASH_LEN ((uint32_t)28U)
+#define SHA2_224_HASH_LEN (28U)
 
 /* SNIPPET_END: sha2_224_hash_len */
 
 /* SNIPPET_START: sha2_256_hash_len */
 
-#define SHA2_256_HASH_LEN ((uint32_t)32U)
+#define SHA2_256_HASH_LEN (32U)
 
 /* SNIPPET_END: sha2_256_hash_len */
 
 /* SNIPPET_START: sha2_384_hash_len */
 
-#define SHA2_384_HASH_LEN ((uint32_t)48U)
+#define SHA2_384_HASH_LEN (48U)
 
 /* SNIPPET_END: sha2_384_hash_len */
 
 /* SNIPPET_START: sha2_512_hash_len */
 
-#define SHA2_512_HASH_LEN ((uint32_t)64U)
+#define SHA2_512_HASH_LEN (64U)
 
 /* SNIPPET_END: sha2_512_hash_len */
 
 /* SNIPPET_START: sha3_224_hash_len */
 
-#define SHA3_224_HASH_LEN ((uint32_t)28U)
+#define SHA3_224_HASH_LEN (28U)
 
 /* SNIPPET_END: sha3_224_hash_len */
 
 /* SNIPPET_START: sha3_256_hash_len */
 
-#define SHA3_256_HASH_LEN ((uint32_t)32U)
+#define SHA3_256_HASH_LEN (32U)
 
 /* SNIPPET_END: sha3_256_hash_len */
 
 /* SNIPPET_START: sha3_384_hash_len */
 
-#define SHA3_384_HASH_LEN ((uint32_t)48U)
+#define SHA3_384_HASH_LEN (48U)
 
 /* SNIPPET_END: sha3_384_hash_len */
 
 /* SNIPPET_START: sha3_512_hash_len */
 
-#define SHA3_512_HASH_LEN ((uint32_t)64U)
+#define SHA3_512_HASH_LEN (64U)
 
 /* SNIPPET_END: sha3_512_hash_len */
 
 /* SNIPPET_START: blake2s_hash_len */
 
-#define BLAKE2S_HASH_LEN ((uint32_t)32U)
+#define BLAKE2S_HASH_LEN (32U)
 
 /* SNIPPET_END: blake2s_hash_len */
 
 /* SNIPPET_START: blake2b_hash_len */
 
-#define BLAKE2B_HASH_LEN ((uint32_t)64U)
+#define BLAKE2B_HASH_LEN (64U)
 
 /* SNIPPET_END: blake2b_hash_len */
 

@@ -39,50 +39,30 @@ static const
 uint32_t
 Hacl_Impl_Blake2_Constants_sigmaTable[160U] =
   {
-    (uint32_t)0U, (uint32_t)1U, (uint32_t)2U, (uint32_t)3U, (uint32_t)4U, (uint32_t)5U,
-    (uint32_t)6U, (uint32_t)7U, (uint32_t)8U, (uint32_t)9U, (uint32_t)10U, (uint32_t)11U,
-    (uint32_t)12U, (uint32_t)13U, (uint32_t)14U, (uint32_t)15U, (uint32_t)14U, (uint32_t)10U,
-    (uint32_t)4U, (uint32_t)8U, (uint32_t)9U, (uint32_t)15U, (uint32_t)13U, (uint32_t)6U,
-    (uint32_t)1U, (uint32_t)12U, (uint32_t)0U, (uint32_t)2U, (uint32_t)11U, (uint32_t)7U,
-    (uint32_t)5U, (uint32_t)3U, (uint32_t)11U, (uint32_t)8U, (uint32_t)12U, (uint32_t)0U,
-    (uint32_t)5U, (uint32_t)2U, (uint32_t)15U, (uint32_t)13U, (uint32_t)10U, (uint32_t)14U,
-    (uint32_t)3U, (uint32_t)6U, (uint32_t)7U, (uint32_t)1U, (uint32_t)9U, (uint32_t)4U,
-    (uint32_t)7U, (uint32_t)9U, (uint32_t)3U, (uint32_t)1U, (uint32_t)13U, (uint32_t)12U,
-    (uint32_t)11U, (uint32_t)14U, (uint32_t)2U, (uint32_t)6U, (uint32_t)5U, (uint32_t)10U,
-    (uint32_t)4U, (uint32_t)0U, (uint32_t)15U, (uint32_t)8U, (uint32_t)9U, (uint32_t)0U,
-    (uint32_t)5U, (uint32_t)7U, (uint32_t)2U, (uint32_t)4U, (uint32_t)10U, (uint32_t)15U,
-    (uint32_t)14U, (uint32_t)1U, (uint32_t)11U, (uint32_t)12U, (uint32_t)6U, (uint32_t)8U,
-    (uint32_t)3U, (uint32_t)13U, (uint32_t)2U, (uint32_t)12U, (uint32_t)6U, (uint32_t)10U,
-    (uint32_t)0U, (uint32_t)11U, (uint32_t)8U, (uint32_t)3U, (uint32_t)4U, (uint32_t)13U,
-    (uint32_t)7U, (uint32_t)5U, (uint32_t)15U, (uint32_t)14U, (uint32_t)1U, (uint32_t)9U,
-    (uint32_t)12U, (uint32_t)5U, (uint32_t)1U, (uint32_t)15U, (uint32_t)14U, (uint32_t)13U,
-    (uint32_t)4U, (uint32_t)10U, (uint32_t)0U, (uint32_t)7U, (uint32_t)6U, (uint32_t)3U,
-    (uint32_t)9U, (uint32_t)2U, (uint32_t)8U, (uint32_t)11U, (uint32_t)13U, (uint32_t)11U,
-    (uint32_t)7U, (uint32_t)14U, (uint32_t)12U, (uint32_t)1U, (uint32_t)3U, (uint32_t)9U,
-    (uint32_t)5U, (uint32_t)0U, (uint32_t)15U, (uint32_t)4U, (uint32_t)8U, (uint32_t)6U,
-    (uint32_t)2U, (uint32_t)10U, (uint32_t)6U, (uint32_t)15U, (uint32_t)14U, (uint32_t)9U,
-    (uint32_t)11U, (uint32_t)3U, (uint32_t)0U, (uint32_t)8U, (uint32_t)12U, (uint32_t)2U,
-    (uint32_t)13U, (uint32_t)7U, (uint32_t)1U, (uint32_t)4U, (uint32_t)10U, (uint32_t)5U,
-    (uint32_t)10U, (uint32_t)2U, (uint32_t)8U, (uint32_t)4U, (uint32_t)7U, (uint32_t)6U,
-    (uint32_t)1U, (uint32_t)5U, (uint32_t)15U, (uint32_t)11U, (uint32_t)9U, (uint32_t)14U,
-    (uint32_t)3U, (uint32_t)12U, (uint32_t)13U
+    0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 14U, 10U, 4U, 8U, 9U, 15U,
+    13U, 6U, 1U, 12U, 0U, 2U, 11U, 7U, 5U, 3U, 11U, 8U, 12U, 0U, 5U, 2U, 15U, 13U, 10U, 14U, 3U, 6U,
+    7U, 1U, 9U, 4U, 7U, 9U, 3U, 1U, 13U, 12U, 11U, 14U, 2U, 6U, 5U, 10U, 4U, 0U, 15U, 8U, 9U, 0U,
+    5U, 7U, 2U, 4U, 10U, 15U, 14U, 1U, 11U, 12U, 6U, 8U, 3U, 13U, 2U, 12U, 6U, 10U, 0U, 11U, 8U, 3U,
+    4U, 13U, 7U, 5U, 15U, 14U, 1U, 9U, 12U, 5U, 1U, 15U, 14U, 13U, 4U, 10U, 0U, 7U, 6U, 3U, 9U, 2U,
+    8U, 11U, 13U, 11U, 7U, 14U, 12U, 1U, 3U, 9U, 5U, 0U, 15U, 4U, 8U, 6U, 2U, 10U, 6U, 15U, 14U, 9U,
+    11U, 3U, 0U, 8U, 12U, 2U, 13U, 7U, 1U, 4U, 10U, 5U, 10U, 2U, 8U, 4U, 7U, 6U, 1U, 5U, 15U, 11U,
+    9U, 14U, 3U, 12U, 13U
   };
 
 static const
 uint32_t
 Hacl_Impl_Blake2_Constants_ivTable_S[8U] =
   {
-    (uint32_t)0x6A09E667U, (uint32_t)0xBB67AE85U, (uint32_t)0x3C6EF372U, (uint32_t)0xA54FF53AU,
-    (uint32_t)0x510E527FU, (uint32_t)0x9B05688CU, (uint32_t)0x1F83D9ABU, (uint32_t)0x5BE0CD19U
+    0x6A09E667U, 0xBB67AE85U, 0x3C6EF372U, 0xA54FF53AU, 0x510E527FU, 0x9B05688CU, 0x1F83D9ABU,
+    0x5BE0CD19U
   };
 
 static const
 uint64_t
 Hacl_Impl_Blake2_Constants_ivTable_B[8U] =
   {
-    (uint64_t)0x6A09E667F3BCC908U, (uint64_t)0xBB67AE8584CAA73BU, (uint64_t)0x3C6EF372FE94F82BU,
-    (uint64_t)0xA54FF53A5F1D36F1U, (uint64_t)0x510E527FADE682D1U, (uint64_t)0x9B05688C2B3E6C1FU,
-    (uint64_t)0x1F83D9ABFB41BD6BU, (uint64_t)0x5BE0CD19137E2179U
+    0x6A09E667F3BCC908ULL, 0xBB67AE8584CAA73BULL, 0x3C6EF372FE94F82BULL, 0xA54FF53A5F1D36F1ULL,
+    0x510E527FADE682D1ULL, 0x9B05688C2B3E6C1FULL, 0x1F83D9ABFB41BD6BULL, 0x5BE0CD19137E2179ULL
   };
 
 #if defined(__cplusplus)
