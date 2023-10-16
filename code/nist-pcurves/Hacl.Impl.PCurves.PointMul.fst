@@ -54,7 +54,8 @@ let point_mul_gen {| cp:S.curve_params |} {| bn_ops |} {| curve_constants |} {| 
     (from_mont_point (as_point_nat h0 p)) cp.bits (as_nat h0 scalar) (v cp.bn_limbs);
   assert (v (3ul *. cp.bn_limbs) == 3 * v cp.bn_limbs);
   admit();
-  BE.lexp_fw_consttime (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops (cp.bn_limbs) (null uint64) p cp.bn_limbs (size cp.bits) scalar res
+//  BE.lexp_mont_ladder_swap_consttime (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops (null uint64) p cp.bn_limbs (size cp.bits) scalar res
+  BE.lexp_fw_consttime (3ul *. cp.bn_limbs) 0ul mk_pcurve_concrete_ops 4ul (null uint64) p cp.bn_limbs (size cp.bits) scalar res
 
 [@(strict_on_arguments [0;1;2;3;4;5;6])]
 inline_for_extraction noextract
@@ -88,12 +89,11 @@ let point_mul_g_noalloc {| cp:S.curve_params |} {| bn_ops |} {| curve_constants 
   [@inline_let] let k = mk_pcurve_concrete_ops in
   [@inline_let] let l = 4ul in
   [@inline_let] let table_len = 16ul in
-
   admit();
+  //TODO Generalize. Currently only P-256
+  [@inline_let] let bBits = 64ul in 
+  [@inline_let] let bLen = 1ul in   
   
-  [@inline_let] let bBits = 64ul in
-  [@inline_let] let bLen = 1ul in
-
   let h0 = ST.get () in
   recall_contents pt.basepoint_w4.table_w4 pt.basepoint_w4.table_lseq_w4;
   let h1 = ST.get () in

@@ -207,6 +207,23 @@ let p256_make_qone f =
     bn_make_u64_4 f f0 f1 f2 f3
 
 [@CInline]
+val p256_make_qmont_R2: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == SM.qmont_R * SM.qmont_R % S.order)
+
+[@CInline]
+let p256_make_qmont_R2 n = admit(); // The following code needs to be fixed, it is incorrect
+    // 0x4fffffffdfffffffffffffffefffffffbffffffff0000000000000003
+    [@inline_let] let n0 = u64 0x3 in
+    [@inline_let] let n1 = u64 0xfffffffbffffffff in
+    [@inline_let] let n2 = u64 0xfffffffffffffffe in
+    [@inline_let] let n3 = u64 0x4fffffffd in
+    assert (SM.fmont_R * SM.fmont_R % S.prime == pow2 (64 * 4) * pow2 (64 * 4)  % p256_prime);
+    assert_norm (pow2 (64 * 4) * pow2 (64 * 4) % p256_prime == v n0 + v n1 * pow2 64 + v n2 * pow2 128 + v n3 * pow2 192);
+    bn_make_u64_4 n n0 n1 n2 n3
+
+[@CInline]
 val fmont_reduction:
   res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
@@ -254,6 +271,7 @@ instance p256_curve_constants : CC.curve_constants = {
   make_fzero = p256_make_fzero;
   make_fone = p256_make_fone;
   make_qone = p256_make_qone;
+  make_qmont_R2 = p256_make_qmont_R2;
   fmont_reduction;
   qmont_reduction
 }

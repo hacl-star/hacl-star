@@ -108,20 +108,6 @@ let qadd_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res
   pop_frame ()
 
 
-let from_qmont_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res x =
-  push_frame ();
-  let tmp = create_widefelem #cp in
-  let h0 = ST.get () in
-  update_sub tmp 0ul cp.bn_limbs x;
-  BD.bn_eval_update_sub (v cp.bn_limbs) (as_seq h0 x) (2 * v cp.bn_limbs);
-  let h1 = ST.get () in
-  assert (wide_as_nat h1 tmp = as_nat h0 x);
-  assert_norm (S.order < S.order * S.order);
-  cc.qmont_reduction res tmp;
-  pop_frame ()
-
-
-
 let qmul_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res x y =
   push_frame ();
   let tmp = create_widefelem #cp in
@@ -144,4 +130,40 @@ let qsqr_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res
   Math.Lemmas.lemma_mult_lt_sqr (as_nat h0 x) (as_nat h0 x) S.order;
   cc.qmont_reduction res tmp;
   SM.qmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
+  pop_frame ()
+
+let from_qmont_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res x =
+  push_frame ();
+  let tmp = create_widefelem #cp in
+  let h0 = ST.get () in
+  update_sub tmp 0ul cp.bn_limbs x;
+  BD.bn_eval_update_sub (v cp.bn_limbs) (as_seq h0 x) (2 * v cp.bn_limbs);
+  let h1 = ST.get () in
+  assert (wide_as_nat h1 tmp = as_nat h0 x);
+  assert_norm (S.order < S.order * S.order);
+  cc.qmont_reduction res tmp;
+  pop_frame ()
+
+
+let to_qmont_g {| cp:S.curve_params |}  {| bn_ops |} {| cc:CC.curve_constants |} res a =
+  push_frame ();
+  let r2modn = create_felem #cp in
+  cc.make_qmont_R2 r2modn;
+  let h0 = ST.get () in
+  assert (as_nat h0 r2modn == SM.fmont_R * SM.fmont_R % S.order);
+  qmul_g res a r2modn;
+  let h1 = ST.get () in
+  assert (as_nat h1 res ==
+    (as_nat h0 a * (SM.qmont_R * SM.qmont_R % S.order) * SM.qmont_R_inv) % S.order);
+  SM.mul_qmont_R_and_R_inv_is_one #cp;
+  assert (SM.qmont_R_inv * SM.qmont_R % S.order = 1);
+  calc (==) {
+    (as_nat h0 a * (SM.qmont_R * SM.qmont_R % S.order) * SM.qmont_R_inv) % S.order;
+    (==) { Math.Lemmas.swap_mul (as_nat h0 a) (SM.qmont_R * SM.qmont_R % S.order) }
+    ((SM.qmont_R * SM.qmont_R % S.order) * as_nat h0 a * SM.qmont_R_inv) % S.order;
+    (==) { SM.mont_cancel_lemma_gen S.order SM.qmont_R SM.qmont_R_inv SM.qmont_R (as_nat h0 a) }
+    SM.qmont_R * as_nat h0 a % S.order;
+    (==) { Math.Lemmas.swap_mul SM.qmont_R (as_nat h0 a) }
+    as_nat h0 a * SM.qmont_R % S.order;
+    };
   pop_frame ()

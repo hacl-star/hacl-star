@@ -48,7 +48,7 @@ inline_for_extraction noextract
 let mk_pcurve_precomp_base_table {| cp:S.curve_params |} : SPT.mk_precomp_base_table S.proj_point U64 (3ul *. cp.bn_limbs) 0ul = {
   SPT.concr_ops = S.mk_pcurve_concrete_ops;
   SPT.to_cm = mk_to_pcurve_comm_monoid;
-    SPT.to_list = proj_point_to_list;
+  SPT.to_list = proj_point_to_list;
   SPT.lemma_refl = lemma_refl;
 }
 

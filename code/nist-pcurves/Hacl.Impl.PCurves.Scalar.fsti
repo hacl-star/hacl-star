@@ -89,21 +89,6 @@ val qadd_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} :
   qadd_t
 
 inline_for_extraction noextract
-let from_qmont_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
-  res:felem -> x:felem -> Stack unit
-  (requires fun h ->
-    live h x /\ live h res /\ eq_or_disjoint x res /\
-    as_nat h x < S.order)
-  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_nat h1 res < S.order /\
-    as_nat h1 res == qmont_as_nat h0 x)
-
-[@(strict_on_arguments [0;1;2])]
-inline_for_extraction noextract
-val from_qmont_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
-    from_qmont_t
-
-inline_for_extraction noextract
 let qmul_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
   res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
@@ -134,6 +119,36 @@ inline_for_extraction noextract
 val qsqr_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
   qsqr_t
 
+inline_for_extraction noextract
+let from_qmont_t {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |} =
+  res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < S.order /\
+    as_nat h1 res == qmont_as_nat h0 x)
+
+[@(strict_on_arguments [0;1;2])]
+inline_for_extraction noextract
+val from_qmont_g {| cp:S.curve_params |}  {| bn_ops |} {| CC.curve_constants |}:
+    from_qmont_t
+
+
+inline_for_extraction noextract
+let to_qmont_t {| S.curve_params |}  {| bn:bn_ops |} {| CC.curve_constants |} =
+  res:felem -> f:felem -> Stack unit
+  (requires fun h ->
+    live h f /\ live h res /\ eq_or_disjoint f res /\
+    as_nat h f < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = SM.to_qmont (as_nat h0 f))
+
+[@(strict_on_arguments [0;1;2])]
+inline_for_extraction noextract
+val to_qmont_g {| S.curve_params |}  {| bn:bn_ops |} {| CC.curve_constants |}:
+    to_qmont_t
+
 [@(strict_on_arguments [0;1;2])]
 inline_for_extraction
 class order_ops {| S.curve_params |} {| bn:bn_ops |} {| CC.curve_constants |} = {
@@ -144,4 +159,5 @@ class order_ops {| S.curve_params |} {| bn:bn_ops |} {| CC.curve_constants |} = 
   qmul:qmul_t;
   qsqr:qsqr_t;
   from_qmont: from_qmont_t;
+  to_qmont: to_qmont_t
 }

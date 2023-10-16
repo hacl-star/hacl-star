@@ -33,7 +33,6 @@ module M = Lib.NatMod
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-
 inline_for_extraction noextract
 val finv_30 (x30 x2 tmp1 tmp2 a:felem) : Stack unit
   (requires fun h ->

@@ -39,6 +39,14 @@ val bn_v_is_as_nat4: a:LSeq.lseq uint64 4 ->
   Lemma (let (s0, s1, s2, s3) = LSeq.(a.[0], a.[1], a.[2], a.[3]) in
     BD.bn_v a == v s0 + v s1 * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192)
 
+noextract
+val bn_v_is_as_nat6: a:Lib.Sequence.lseq uint64 6 ->
+  Lemma (let (s0, s1, s2, s3, s4, s5) =
+  Lib.Sequence.(a.[0], a.[1], a.[2], a.[3], a.[4], a.[5]) in
+    BD.bn_v a == v s0 + v s1 * pow2 64 + v s2 * pow2 128 +
+                 v s3 * pow2 192 + v s4 * pow2 256 + v s5 * pow2 320)
+
+
 ///  Create a bignum
 
 [@(strict_on_arguments [0])]
@@ -64,6 +72,14 @@ val bn_make_u64_4: {| c:S.curve_params |} -> res:felem -> a0:uint64 -> a1:uint64
   (requires fun h -> live h res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_nat h1 res = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192)
+
+[@(strict_on_arguments [0])]
+inline_for_extraction noextract
+val bn_make_u64_6: {| c:S.curve_params |} -> res:felem -> a0:uint64 -> a1:uint64 -> a2:uint64 -> a3:uint64 -> a4:uint64 -> a5:uint64{c.bn_limbs == 6ul} -> Stack unit
+  (requires fun h -> live h res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192 + v a4 * pow2 256 + v a5 * pow2 320)
+
 
 
 ///  Create zero and one

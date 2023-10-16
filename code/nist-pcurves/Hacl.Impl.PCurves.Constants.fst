@@ -73,6 +73,10 @@ class curve_constants {| c:S.curve_params |} {| b:bn_ops #c |} = {
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
     as_nat h1 f < S.order /\
     qmont_as_nat h1 f == 1);
+  make_qmont_R2: n:felem -> Stack unit
+  (requires fun h -> live h n)
+  (ensures  fun h0 _ h1 -> modifies (loc n) h0 h1 /\
+    as_nat h1 n == SM.qmont_R * SM.qmont_R % S.order);
   fmont_reduction: res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\

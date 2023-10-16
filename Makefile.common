@@ -184,7 +184,10 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 P256_BUNDLE= \
   -bundle Hacl.Impl.PCurves.PrecompTable.P256 -static-header Hacl.Impl.PCurves.PrecompTable.P256 \
-  -bundle Hacl.P256=Hacl.Impl.PCurves.*,Hacl.PCurves.*,Hacl.Spec.PCurves.*[rename=Hacl_P256]
+  -bundle 'Hacl.P256=Hacl.Impl.PCurves.Bignum,Hacl.Impl.PCurves.Constants,Hacl.Impl.PCurves.Field,Hacl.Impl.PCurves.Scalar,Hacl.Impl.PCurves.InvSqrt,Hacl.Impl.PCurves.Finv,Hacl.Impl.PCurves.Qinv,Hacl.Impl.PCurves.Point,Hacl.Impl.PCurves.Group,Hacl.Impl.PCurves.Compression,Hacl.Impl.PCurves.PointAdd,Hacl.Impl.PCurves.PointDouble,Hacl.Impl.PCurves.PrecompTable,Hacl.Impl.PCurves.PointMul,Hacl.Impl.PCurves.DH,Hacl.Impl.PCurves.Sign,Hacl.Impl.PCurves.Verify,Hacl.Impl.PCurves.Bignum.P256,Hacl.Impl.PCurves.Constants.P256,Hacl.Impl.PCurves.Field.P256,Hacl.Impl.PCurves.Scalar.P256,Hacl.Impl.PCurves.Finv.P256,Hacl.Impl.PCurves.Qinv.P256,Hacl.Impl.PCurves.Group.P256,Hacl.Impl.PCurves.PrecompTable.P256,Hacl.Impl.PCurves.PointMul.P256,Hacl.Spec.PCurves.*[rename=Hacl_P256]'
+P384_BUNDLE= \
+  -bundle Hacl.Impl.PCurves.PrecompTable.P384 -static-header Hacl.Impl.PCurves.PrecompTable.P384 \
+  -bundle 'Hacl.P384=Hacl.Impl.PCurves.Bignum,Hacl.Impl.PCurves.Constants,Hacl.Impl.PCurves.Field,Hacl.Impl.PCurves.Scalar,Hacl.Impl.PCurves.InvSqrt,Hacl.Impl.PCurves.Finv,Hacl.Impl.PCurves.Qinv,Hacl.Impl.PCurves.Point,Hacl.Impl.PCurves.Group,Hacl.Impl.PCurves.Compression,Hacl.Impl.PCurves.PointAdd,Hacl.Impl.PCurves.PointDouble,Hacl.Impl.PCurves.PrecompTable,Hacl.Impl.PCurves.PointMul,Hacl.Impl.PCurves.DH,Hacl.Impl.PCurves.Sign,Hacl.Impl.PCurves.Verify,Hacl.Impl.PCurves.Bignum.P384,Hacl.Impl.PCurves.Constants.P384,Hacl.Impl.PCurves.Field.P384,Hacl.Impl.PCurves.Scalar.P384,Hacl.Impl.PCurves.Finv.P384,Hacl.Impl.PCurves.Qinv.P384,Hacl.Impl.PCurves.Group.P384,Hacl.Impl.PCurves.PrecompTable.P384,Hacl.Impl.PCurves.PointMul.P384,Hacl.Spec.PCurves.*[rename=Hacl_P384]'
 K256_BUNDLE= \
   -bundle Hacl.K256.Field,Hacl.Impl.K256.Finv[rename=Hacl_Bignum_K256] -static-header Hacl.K256.Field,Hacl.Impl.K256.Finv \
   -bundle Hacl.K256.PrecompTable -static-header Hacl.K256.PrecompTable \

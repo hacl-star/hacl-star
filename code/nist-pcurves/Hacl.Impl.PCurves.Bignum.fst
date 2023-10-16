@@ -36,6 +36,14 @@ let bn_v_is_as_nat4 a =
     + pow2 64 * pow2 64 * pow2 64 * v a.[3];
   }
 
+let bn_v_is_as_nat6 a =
+  let open Lib.Sequence in
+  let open Hacl.Spec.Bignum.Definitions in
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320);
+  admit()
 
 ///  Create a bignum
 
@@ -64,6 +72,29 @@ let bn_make_u64_4 res a0 a1 a2 a3 =
   BD.bn_upd_eval (as_seq h2 res) a2 2;
   BD.bn_upd_eval (as_seq h3 res) a3 3;
   bn_v_is_as_nat4 (as_seq h0 res)
+
+
+let bn_make_u64_6 res a0 a1 a2 a3 a4 a5 =
+  let h0 = ST.get () in
+  upd res 0ul a0;
+  let h1 = ST.get () in
+  upd res 1ul a1;
+  let h2 = ST.get () in
+  upd res 2ul a2;
+  let h3 = ST.get () in
+  upd res 3ul a3;
+  let h4 = ST.get () in
+  upd res 4ul a4;
+  let h5 = ST.get () in
+  upd res 5ul a5;
+  let h6 = ST.get () in
+  BD.bn_upd_eval (as_seq h0 res) a0 0;
+  BD.bn_upd_eval (as_seq h1 res) a1 1;
+  BD.bn_upd_eval (as_seq h2 res) a2 2;
+  BD.bn_upd_eval (as_seq h3 res) a3 3;
+  BD.bn_upd_eval (as_seq h4 res) a4 4;
+  BD.bn_upd_eval (as_seq h5 res) a5 5;
+  bn_v_is_as_nat6 (as_seq h0 res)
 
 
 ///  Create zero and one

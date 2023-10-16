@@ -1,4 +1,4 @@
-module Hacl.Impl.PCurves.Scalar.P256
+module Hacl.Impl.PCurves.Scalar.P384
 
 open FStar.Mul
 open FStar.HyperStack.All
@@ -16,9 +16,9 @@ module SM = Hacl.Spec.PCurves.Montgomery
 module BSeq = Lib.ByteSequence
 module CC = Hacl.Impl.PCurves.Constants
 
-open Spec.P256
-open Hacl.Impl.PCurves.Bignum.P256
-open Hacl.Impl.PCurves.Constants.P256
+open Spec.P384
+open Hacl.Impl.PCurves.Bignum.P384
+open Hacl.Impl.PCurves.Constants.P384
 open Hacl.Impl.PCurves.Scalar
 
 [@CInline]
@@ -52,9 +52,10 @@ let from_qmont a b = from_qmont_g a b
 [@CInline]
 val to_qmont: to_qmont_t
 let to_qmont a b = to_qmont_g a b
+  
 
 inline_for_extraction
-instance p256_order_ops : order_ops = {
+instance p384_order_ops : order_ops = {
   bn_is_lt_order_mask;
   load_qelem_conditional;
   qmod_short;
