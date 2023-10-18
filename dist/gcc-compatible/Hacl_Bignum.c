@@ -58,7 +58,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(
     uint32_t x = ((0U - c0) & t0[i]) | (~(0U - c0) & tmp_[i]);
     os[i] = x;
   }
-  KRML_HOST_IGNORE(c10);
+  KRML_MAYBE_UNUSED_VAR(c10);
   uint32_t c00 = c0;
   uint32_t c010 = Hacl_Bignum_Addition_bn_sub_eq_len_u32(len2, b0, b1, tmp_);
   uint32_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u32(len2, b1, b0, t1);
@@ -68,7 +68,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(
     uint32_t x = ((0U - c010) & t1[i]) | (~(0U - c010) & tmp_[i]);
     os[i] = x;
   }
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint32_t c11 = c010;
   uint32_t *t23 = tmp + aLen;
   uint32_t *tmp1 = tmp + aLen + aLen;
@@ -147,7 +147,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(
   uint32_t c8 = r1;
   uint32_t c = c8;
   uint32_t c9 = c;
-  KRML_HOST_IGNORE(c9);
+  KRML_MAYBE_UNUSED_VAR(c9);
 }
 
 void
@@ -180,7 +180,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
     uint64_t x = ((0ULL - c0) & t0[i]) | (~(0ULL - c0) & tmp_[i]);
     os[i] = x;
   }
-  KRML_HOST_IGNORE(c10);
+  KRML_MAYBE_UNUSED_VAR(c10);
   uint64_t c00 = c0;
   uint64_t c010 = Hacl_Bignum_Addition_bn_sub_eq_len_u64(len2, b0, b1, tmp_);
   uint64_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u64(len2, b1, b0, t1);
@@ -190,7 +190,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
     uint64_t x = ((0ULL - c010) & t1[i]) | (~(0ULL - c010) & tmp_[i]);
     os[i] = x;
   }
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint64_t c11 = c010;
   uint64_t *t23 = tmp + aLen;
   uint64_t *tmp1 = tmp + aLen + aLen;
@@ -269,7 +269,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint64_t c8 = r1;
   uint64_t c = c8;
   uint64_t c9 = c;
-  KRML_HOST_IGNORE(c9);
+  KRML_MAYBE_UNUSED_VAR(c9);
 }
 
 void
@@ -298,9 +298,9 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(
     uint32_t x = ((0U - c0) & t0[i]) | (~(0U - c0) & tmp_[i]);
     os[i] = x;
   }
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint32_t c00 = c0;
-  KRML_HOST_IGNORE(c00);
+  KRML_MAYBE_UNUSED_VAR(c00);
   uint32_t *t23 = tmp + aLen;
   uint32_t *tmp1 = tmp + aLen + aLen;
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(len2, t0, tmp1, t23);
@@ -366,7 +366,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(
   uint32_t c8 = r1;
   uint32_t c = c8;
   uint32_t c9 = c;
-  KRML_HOST_IGNORE(c9);
+  KRML_MAYBE_UNUSED_VAR(c9);
 }
 
 void
@@ -395,9 +395,9 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
     uint64_t x = ((0ULL - c0) & t0[i]) | (~(0ULL - c0) & tmp_[i]);
     os[i] = x;
   }
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint64_t c00 = c0;
-  KRML_HOST_IGNORE(c00);
+  KRML_MAYBE_UNUSED_VAR(c00);
   uint64_t *t23 = tmp + aLen;
   uint64_t *tmp1 = tmp + aLen + aLen;
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(len2, t0, tmp1, t23);
@@ -463,7 +463,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint64_t c8 = r1;
   uint64_t c = c8;
   uint64_t c9 = c;
-  KRML_HOST_IGNORE(c9);
+  KRML_MAYBE_UNUSED_VAR(c9);
 }
 
 void
@@ -688,7 +688,7 @@ Hacl_Bignum_bn_sub_mod_n_u32(
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, t2, res_i);
   }
   uint32_t c1 = c;
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint32_t c2 = 0U - c00;
   for (uint32_t i = 0U; i < len1; i++)
   {
@@ -766,7 +766,7 @@ Hacl_Bignum_bn_sub_mod_n_u64(
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
   uint64_t c1 = c;
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint64_t c2 = 0ULL - c00;
   for (uint32_t i = 0U; i < len1; i++)
   {
@@ -1260,7 +1260,7 @@ bn_almost_mont_reduction_u32(
   uint32_t tmp[len];
   memset(tmp, 0U, len * sizeof (uint32_t));
   uint32_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u32(len, res, n, tmp);
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint32_t m = 0U - c00;
   for (uint32_t i = 0U; i < len; i++)
   {
@@ -1357,7 +1357,7 @@ bn_almost_mont_reduction_u64(
   uint64_t tmp[len];
   memset(tmp, 0U, len * sizeof (uint64_t));
   uint64_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u64(len, res, n, tmp);
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint64_t m = 0ULL - c00;
   for (uint32_t i = 0U; i < len; i++)
   {

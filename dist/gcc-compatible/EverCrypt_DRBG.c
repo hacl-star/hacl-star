@@ -92,7 +92,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   if (projectee.tag == SHA1_s)
   {
     return true;
@@ -106,7 +106,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   if (projectee.tag == SHA2_256_s)
   {
     return true;
@@ -120,7 +120,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   if (projectee.tag == SHA2_384_s)
   {
     return true;
@@ -134,7 +134,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
   EverCrypt_DRBG_state_s projectee
 )
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   if (projectee.tag == SHA2_512_s)
   {
     return true;
@@ -1007,16 +1007,16 @@ generate_sha1(
     return false;
   }
   EverCrypt_DRBG_state_s st_s = *st;
-  Hacl_HMAC_DRBG_state x1;
+  Hacl_HMAC_DRBG_state ite;
   if (st_s.tag == SHA1_s)
   {
-    x1 = st_s.case_SHA1_s;
+    ite = st_s.case_SHA1_s;
   }
   else
   {
-    x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
+    ite = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
+  if (ite.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
     return false;
   }
@@ -1220,16 +1220,16 @@ generate_sha2_256(
     return false;
   }
   EverCrypt_DRBG_state_s st_s = *st;
-  Hacl_HMAC_DRBG_state x1;
+  Hacl_HMAC_DRBG_state ite;
   if (st_s.tag == SHA2_256_s)
   {
-    x1 = st_s.case_SHA2_256_s;
+    ite = st_s.case_SHA2_256_s;
   }
   else
   {
-    x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
+    ite = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
+  if (ite.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
     return false;
   }
@@ -1433,16 +1433,16 @@ generate_sha2_384(
     return false;
   }
   EverCrypt_DRBG_state_s st_s = *st;
-  Hacl_HMAC_DRBG_state x1;
+  Hacl_HMAC_DRBG_state ite;
   if (st_s.tag == SHA2_384_s)
   {
-    x1 = st_s.case_SHA2_384_s;
+    ite = st_s.case_SHA2_384_s;
   }
   else
   {
-    x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
+    ite = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
+  if (ite.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
     return false;
   }
@@ -1646,16 +1646,16 @@ generate_sha2_512(
     return false;
   }
   EverCrypt_DRBG_state_s st_s = *st;
-  Hacl_HMAC_DRBG_state x1;
+  Hacl_HMAC_DRBG_state ite;
   if (st_s.tag == SHA2_512_s)
   {
-    x1 = st_s.case_SHA2_512_s;
+    ite = st_s.case_SHA2_512_s;
   }
   else
   {
-    x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
+    ite = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
+  if (ite.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
     return false;
   }

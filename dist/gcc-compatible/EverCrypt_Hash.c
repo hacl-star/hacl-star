@@ -342,7 +342,7 @@ static void init(EverCrypt_Hash_state_s *s)
     Hacl_Blake2s_128_blake2s_init(p1, 0U, 32U);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -359,7 +359,7 @@ static void init(EverCrypt_Hash_state_s *s)
     Hacl_Blake2b_256_blake2b_init(p1, 0U, 64U);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -393,7 +393,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
   if (has_shaext && has_sse)
   {
     uint64_t n1 = (uint64_t)n;
-    KRML_HOST_IGNORE(sha256_update(s, blocks, n1, k224_256));
+    sha256_update(s, blocks, n1, k224_256);
     return;
   }
   Hacl_SHA2_Scalar32_sha256_update_nblocks(n * 64U, blocks, s);
@@ -494,7 +494,7 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
     Hacl_Blake2s_128_blake2s_update_multi(n * 64U, wv, p1, prevlen, blocks, n);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -525,7 +525,7 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
       n);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -623,7 +623,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
     Hacl_Blake2s_128_blake2s_update_last(last_len, wv, p1, prev_len, last_len, last);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -652,7 +652,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
       last);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -739,7 +739,7 @@ static void finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
     Hacl_Blake2s_128_blake2s_finish(32U, dst, p1);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -756,7 +756,7 @@ static void finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
     Hacl_Blake2b_256_blake2b_finish(64U, dst, p1);
     return;
     #else
-    KRML_HOST_IGNORE(p1);
+    KRML_MAYBE_UNUSED_VAR(p1);
     return;
     #endif
   }
@@ -1031,7 +1031,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
       Hacl_Blake2s_128_load_state128s_from_state32(p_dst, p_src);
       return;
       #else
-      KRML_HOST_IGNORE(p_dst);
+      KRML_MAYBE_UNUSED_VAR(p_dst);
       return;
       #endif
     }
@@ -1058,7 +1058,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
       Hacl_Blake2b_256_load_state256b_from_state32(p_dst, p_src);
       return;
       #else
-      KRML_HOST_IGNORE(p_dst);
+      KRML_MAYBE_UNUSED_VAR(p_dst);
       return;
       #endif
     }
@@ -1085,7 +1085,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
       Hacl_Blake2s_128_store_state128s_to_state32(p_dst, p_src);
       return;
       #else
-      KRML_HOST_IGNORE(p_dst);
+      KRML_MAYBE_UNUSED_VAR(p_dst);
       return;
       #endif
     }
@@ -1112,7 +1112,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
       Hacl_Blake2b_256_store_state256b_to_state32(p_dst, p_src);
       return;
       #else
-      KRML_HOST_IGNORE(p_dst);
+      KRML_MAYBE_UNUSED_VAR(p_dst);
       return;
       #endif
     }
@@ -1290,7 +1290,7 @@ void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_hash_state *s)
   uint8_t *buf = scrut.buf;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   Spec_Hash_Definitions_hash_alg i = alg_of_state(block_state);
-  KRML_HOST_IGNORE(i);
+  KRML_MAYBE_UNUSED_VAR(i);
   init(block_state);
   EverCrypt_Hash_Incremental_hash_state
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };

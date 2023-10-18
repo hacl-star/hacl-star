@@ -229,7 +229,7 @@ static void sub_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
   }
   uint64_t c1 = c;
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint64_t c2 = 0ULL - c00;
   KRML_MAYBE_FOR4(i,
     0U,
@@ -311,7 +311,7 @@ static void sqr4(uint64_t *a, uint64_t *res)
     uint64_t r = c;
     res[i0 + i0] = r;);
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, res, res);
-  KRML_HOST_IGNORE(c0);
+  KRML_MAYBE_UNUSED_VAR(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
     0U,
@@ -323,7 +323,7 @@ static void sqr4(uint64_t *a, uint64_t *res)
     tmp[2U * i] = lo;
     tmp[2U * i + 1U] = hi;);
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, tmp, res);
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
 }
 
 /* SNIPPET_END: sqr4 */
@@ -485,7 +485,7 @@ static inline void load_qelem_modq(uint64_t *f, uint8_t *b)
 static inline void store_qelem(uint8_t *b, uint64_t *f)
 {
   uint8_t tmp[32U] = { 0U };
-  KRML_HOST_IGNORE(tmp);
+  KRML_MAYBE_UNUSED_VAR(tmp);
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store64_be(b + i * 8U, f[4U - i - 1U]););
 }
 
@@ -552,7 +552,7 @@ mul_pow2_256_minus_q_add(
     uint64_t r = c;
     tmp[len + i0] = r;);
   memcpy(res + 2U, a, len * sizeof (uint64_t));
-  KRML_HOST_IGNORE(bn_add(resLen, res, len + 2U, tmp, res));
+  bn_add(resLen, res, len + 2U, tmp, res);
   uint64_t c = bn_add(resLen, res, 4U, e, res);
   return c;
 }
@@ -572,8 +572,8 @@ static inline void modq(uint64_t *out, uint64_t *a)
   uint64_t *t01 = tmp;
   uint64_t m[7U] = { 0U };
   uint64_t p[5U] = { 0U };
-  KRML_HOST_IGNORE(mul_pow2_256_minus_q_add(4U, 7U, t01, a + 4U, a, m));
-  KRML_HOST_IGNORE(mul_pow2_256_minus_q_add(3U, 5U, t01, m + 4U, m, p));
+  mul_pow2_256_minus_q_add(4U, 7U, t01, a + 4U, a, m);
+  mul_pow2_256_minus_q_add(3U, 5U, t01, m + 4U, m, p);
   uint64_t c2 = mul_pow2_256_minus_q_add(1U, 4U, t01, p + 4U, p, r);
   uint64_t c0 = c2;
   uint64_t c1 = add4(r, tmp, out);
@@ -686,7 +686,7 @@ static inline void qmul_shift_384(uint64_t *res, uint64_t *a, uint64_t *b)
     uint64_t *res_i = res1 + i;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, 0ULL, res_i););
   uint64_t c1 = c;
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint64_t flag = l[5U] >> 63U;
   uint64_t mask = 0ULL - flag;
   KRML_MAYBE_FOR4(i,
@@ -1384,7 +1384,7 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
       3209978938104985ULL, 118285133003718ULL, 434519962075150ULL, 1114612377498854ULL,
       3488596944003813ULL, 450716531072892ULL, 66044973203836ULL
     };
-  KRML_HOST_IGNORE(q2);
+  KRML_MAYBE_UNUSED_VAR(q2);
   uint64_t
   q3[15U] =
     {
@@ -1393,7 +1393,7 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
       2200235265236628ULL, 265969268774814ULL, 1913228635640715ULL, 2831959046949342ULL,
       888030405442963ULL, 1817092932985033ULL, 101515844997121ULL
     };
-  KRML_HOST_IGNORE(q3);
+  KRML_MAYBE_UNUSED_VAR(q3);
   uint64_t
   q4[15U] =
     {
@@ -1402,7 +1402,7 @@ static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
       1816025742137285ULL, 12245672982162ULL, 2119364213800870ULL, 2034960311715107ULL,
       3172697815804487ULL, 4185144850224160ULL, 2792055915674ULL
     };
-  KRML_HOST_IGNORE(q4);
+  KRML_MAYBE_UNUSED_VAR(q4);
   uint64_t *r1 = scalar;
   uint64_t *r2 = scalar + 1U;
   uint64_t *r3 = scalar + 2U;
@@ -1771,7 +1771,7 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
 )
 {
   uint64_t oneq[4U] = { 0x1ULL, 0x0ULL, 0x0ULL, 0x0ULL };
-  KRML_HOST_IGNORE(oneq);
+  KRML_MAYBE_UNUSED_VAR(oneq);
   uint64_t rsdk_q[16U] = { 0U };
   uint64_t *r_q = rsdk_q;
   uint64_t *s_q = rsdk_q + 4U;

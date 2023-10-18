@@ -177,7 +177,7 @@ salsa20_encrypt(
   memcpy(ctx + 11U, k10, 4U * sizeof (uint32_t));
   ctx[15U] = 0x6b206574U;
   uint32_t k[16U] = { 0U };
-  KRML_HOST_IGNORE(k);
+  KRML_MAYBE_UNUSED_VAR(k);
   uint32_t rem = len % 64U;
   uint32_t nb = len / 64U;
   uint32_t rem1 = len % 64U;
@@ -282,7 +282,7 @@ salsa20_decrypt(
   memcpy(ctx + 11U, k10, 4U * sizeof (uint32_t));
   ctx[15U] = 0x6b206574U;
   uint32_t k[16U] = { 0U };
-  KRML_HOST_IGNORE(k);
+  KRML_MAYBE_UNUSED_VAR(k);
   uint32_t rem = len % 64U;
   uint32_t nb = len / 64U;
   uint32_t rem1 = len % 64U;

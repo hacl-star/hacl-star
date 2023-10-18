@@ -609,7 +609,7 @@ Hacl_GenericField32_inverse(
   {
     c1 = c0;
   }
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   Hacl_GenericField32_exp_vartime(k, aM, k1.len * 32U, n2, aInvM);
 }
 

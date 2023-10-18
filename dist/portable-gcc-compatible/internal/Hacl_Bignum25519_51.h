@@ -94,7 +94,7 @@ Hacl_Impl_Curve25519_Field51_fmul(
   FStar_UInt128_uint128 *uu___
 )
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   uint64_t f10 = f1[0U];
   uint64_t f11 = f1[1U];
   uint64_t f12 = f1[2U];
@@ -181,7 +181,7 @@ Hacl_Impl_Curve25519_Field51_fmul2(
   FStar_UInt128_uint128 *uu___
 )
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   uint64_t f10 = f1[0U];
   uint64_t f11 = f1[1U];
   uint64_t f12 = f1[2U];
@@ -391,7 +391,7 @@ static inline void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f
 static inline void
 Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, FStar_UInt128_uint128 *uu___)
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   uint64_t f0 = f[0U];
   uint64_t f1 = f[1U];
   uint64_t f2 = f[2U];
@@ -470,7 +470,7 @@ Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, FStar_UInt128_uint
 static inline void
 Hacl_Impl_Curve25519_Field51_fsqr2(uint64_t *out, uint64_t *f, FStar_UInt128_uint128 *uu___)
 {
-  KRML_HOST_IGNORE(uu___);
+  KRML_MAYBE_UNUSED_VAR(uu___);
   uint64_t f10 = f[0U];
   uint64_t f11 = f[1U];
   uint64_t f12 = f[2U];
