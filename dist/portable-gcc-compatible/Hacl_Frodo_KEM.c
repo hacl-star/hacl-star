@@ -32,7 +32,7 @@
 
 void randombytes_(uint32_t len, uint8_t *res)
 {
-  KRML_HOST_IGNORE(Lib_RandomBuffer_System_randombytes(res, len));
+  Lib_RandomBuffer_System_randombytes(res, len);
 }
 
 /* SNIPPET_END: randombytes_ */

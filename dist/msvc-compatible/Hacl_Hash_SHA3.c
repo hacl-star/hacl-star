@@ -31,27 +31,27 @@ static uint32_t block_len(Spec_Hash_Definitions_hash_alg a)
   {
     case Spec_Hash_Definitions_SHA3_224:
       {
-        return (uint32_t)144U;
+        return 144U;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        return (uint32_t)136U;
+        return 136U;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        return (uint32_t)104U;
+        return 104U;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        return (uint32_t)72U;
+        return 72U;
       }
     case Spec_Hash_Definitions_Shake128:
       {
-        return (uint32_t)168U;
+        return 168U;
       }
     case Spec_Hash_Definitions_Shake256:
       {
-        return (uint32_t)136U;
+        return 136U;
       }
     default:
       {
@@ -67,19 +67,19 @@ static uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
   {
     case Spec_Hash_Definitions_SHA3_224:
       {
-        return (uint32_t)28U;
+        return 28U;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        return (uint32_t)32U;
+        return 32U;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        return (uint32_t)48U;
+        return 48U;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        return (uint32_t)64U;
+        return 64U;
       }
     default:
       {
@@ -97,7 +97,7 @@ Hacl_Hash_SHA3_update_multi_sha3(
   uint32_t n_blocks
 )
 {
-  for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
+  for (uint32_t i = 0U; i < n_blocks; i++)
   {
     uint8_t *block = blocks + i * block_len(a);
     Hacl_Impl_SHA3_absorb_inner(block_len(a), block, s);
@@ -115,11 +115,11 @@ Hacl_Hash_SHA3_update_last_sha3(
   uint8_t suffix;
   if (a == Spec_Hash_Definitions_Shake128 || a == Spec_Hash_Definitions_Shake256)
   {
-    suffix = (uint8_t)0x1fU;
+    suffix = 0x1fU;
   }
   else
   {
-    suffix = (uint8_t)0x06U;
+    suffix = 0x06U;
   }
   uint32_t len = block_len(a);
   if (input_len == len)
@@ -127,16 +127,16 @@ Hacl_Hash_SHA3_update_last_sha3(
     Hacl_Impl_SHA3_absorb_inner(len, input, s);
     uint8_t lastBlock_[200U] = { 0U };
     uint8_t *lastBlock = lastBlock_;
-    memcpy(lastBlock, input + input_len, (uint32_t)0U * sizeof (uint8_t));
+    memcpy(lastBlock, input + input_len, 0U * sizeof (uint8_t));
     lastBlock[0U] = suffix;
     Hacl_Impl_SHA3_loadState(len, lastBlock, s);
-    if (!((suffix & (uint8_t)0x80U) == (uint8_t)0U) && (uint32_t)0U == len - (uint32_t)1U)
+    if (!(((uint32_t)suffix & 0x80U) == 0U) && 0U == len - 1U)
     {
       Hacl_Impl_SHA3_state_permute(s);
     }
     uint8_t nextBlock_[200U] = { 0U };
     uint8_t *nextBlock = nextBlock_;
-    nextBlock[len - (uint32_t)1U] = (uint8_t)0x80U;
+    nextBlock[len - 1U] = 0x80U;
     Hacl_Impl_SHA3_loadState(len, nextBlock, s);
     Hacl_Impl_SHA3_state_permute(s);
     return;
@@ -146,13 +146,13 @@ Hacl_Hash_SHA3_update_last_sha3(
   memcpy(lastBlock, input, input_len * sizeof (uint8_t));
   lastBlock[input_len] = suffix;
   Hacl_Impl_SHA3_loadState(len, lastBlock, s);
-  if (!((suffix & (uint8_t)0x80U) == (uint8_t)0U) && input_len == len - (uint32_t)1U)
+  if (!(((uint32_t)suffix & 0x80U) == 0U) && input_len == len - 1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t nextBlock_[200U] = { 0U };
   uint8_t *nextBlock = nextBlock_;
-  nextBlock[len - (uint32_t)1U] = (uint8_t)0x80U;
+  nextBlock[len - 1U] = 0x80U;
   Hacl_Impl_SHA3_loadState(len, nextBlock, s);
   Hacl_Impl_SHA3_state_permute(s);
 }
@@ -174,15 +174,15 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
   uint8_t *buf0 = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
-  uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
+  uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
   Hacl_Streaming_Keccak_hash_buf block_state = { .fst = a, .snd = buf };
   Hacl_Streaming_Keccak_state
-  s = { .block_state = block_state, .buf = buf0, .total_len = (uint64_t)(uint32_t)0U };
+  s = { .block_state = block_state, .buf = buf0, .total_len = (uint64_t)0U };
   Hacl_Streaming_Keccak_state
   *p = (Hacl_Streaming_Keccak_state *)KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Keccak_state));
   p[0U] = s;
   uint64_t *s1 = block_state.snd;
-  memset(s1, 0U, (uint32_t)25U * sizeof (uint64_t));
+  memset(s1, 0U, 25U * sizeof (uint64_t));
   return p;
 }
 
@@ -207,12 +207,12 @@ Hacl_Streaming_Keccak_state *Hacl_Streaming_Keccak_copy(Hacl_Streaming_Keccak_st
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(i));
   uint8_t *buf1 = (uint8_t *)KRML_HOST_CALLOC(block_len(i), sizeof (uint8_t));
   memcpy(buf1, buf0, block_len(i) * sizeof (uint8_t));
-  uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
+  uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
   Hacl_Streaming_Keccak_hash_buf block_state = { .fst = i, .snd = buf };
   hash_buf2 scrut = { .fst = block_state0, .snd = block_state };
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
-  memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
+  memcpy(s_dst, s_src, 25U * sizeof (uint64_t));
   Hacl_Streaming_Keccak_state
   s = { .block_state = block_state, .buf = buf1, .total_len = total_len0 };
   Hacl_Streaming_Keccak_state
@@ -227,11 +227,11 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s)
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Keccak_hash_buf block_state = scrut.block_state;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
-  KRML_HOST_IGNORE(i);
+  KRML_MAYBE_UNUSED_VAR(i);
   uint64_t *s1 = block_state.snd;
-  memset(s1, 0U, (uint32_t)25U * sizeof (uint64_t));
+  memset(s1, 0U, 25U * sizeof (uint64_t));
   Hacl_Streaming_Keccak_state
-  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)(uint32_t)0U };
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   s[0U] = tmp;
 }
 
@@ -242,12 +242,12 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
   Hacl_Streaming_Keccak_hash_buf block_state = s.block_state;
   uint64_t total_len = s.total_len;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
-  if ((uint64_t)len > (uint64_t)0xFFFFFFFFFFFFFFFFU - total_len)
+  if ((uint64_t)len > 0xFFFFFFFFFFFFFFFFULL - total_len)
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
   }
   uint32_t sz;
-  if (total_len % (uint64_t)block_len(i) == (uint64_t)0U && total_len > (uint64_t)0U)
+  if (total_len % (uint64_t)block_len(i) == 0ULL && total_len > 0ULL)
   {
     sz = block_len(i);
   }
@@ -262,7 +262,7 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
-    if (total_len1 % (uint64_t)block_len(i) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+    if (total_len1 % (uint64_t)block_len(i) == 0ULL && total_len1 > 0ULL)
     {
       sz1 = block_len(i);
     }
@@ -283,14 +283,14 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
         }
       );
   }
-  else if (sz == (uint32_t)0U)
+  else if (sz == 0U)
   {
     Hacl_Streaming_Keccak_state s1 = *p;
     Hacl_Streaming_Keccak_hash_buf block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
-    if (total_len1 % (uint64_t)block_len(i) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+    if (total_len1 % (uint64_t)block_len(i) == 0ULL && total_len1 > 0ULL)
     {
       sz1 = block_len(i);
     }
@@ -298,14 +298,14 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
     {
       sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i));
     }
-    if (!(sz1 == (uint32_t)0U))
+    if (!(sz1 == 0U))
     {
       Spec_Hash_Definitions_hash_alg a1 = block_state1.fst;
       uint64_t *s2 = block_state1.snd;
       Hacl_Hash_SHA3_update_multi_sha3(a1, s2, buf, block_len(i) / block_len(a1));
     }
     uint32_t ite;
-    if ((uint64_t)len % (uint64_t)block_len(i) == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
+    if ((uint64_t)len % (uint64_t)block_len(i) == 0ULL && (uint64_t)len > 0ULL)
     {
       ite = block_len(i);
     }
@@ -343,7 +343,7 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
     uint8_t *buf0 = s1.buf;
     uint64_t total_len10 = s1.total_len;
     uint32_t sz10;
-    if (total_len10 % (uint64_t)block_len(i) == (uint64_t)0U && total_len10 > (uint64_t)0U)
+    if (total_len10 % (uint64_t)block_len(i) == 0ULL && total_len10 > 0ULL)
     {
       sz10 = block_len(i);
     }
@@ -368,7 +368,7 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
     uint8_t *buf = s10.buf;
     uint64_t total_len1 = s10.total_len;
     uint32_t sz1;
-    if (total_len1 % (uint64_t)block_len(i) == (uint64_t)0U && total_len1 > (uint64_t)0U)
+    if (total_len1 % (uint64_t)block_len(i) == 0ULL && total_len1 > 0ULL)
     {
       sz1 = block_len(i);
     }
@@ -376,20 +376,14 @@ Hacl_Streaming_Keccak_update(Hacl_Streaming_Keccak_state *p, uint8_t *data, uint
     {
       sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i));
     }
-    if (!(sz1 == (uint32_t)0U))
+    if (!(sz1 == 0U))
     {
       Spec_Hash_Definitions_hash_alg a1 = block_state1.fst;
       uint64_t *s2 = block_state1.snd;
       Hacl_Hash_SHA3_update_multi_sha3(a1, s2, buf, block_len(i) / block_len(a1));
     }
     uint32_t ite;
-    if
-    (
-      (uint64_t)(len - diff)
-      % (uint64_t)block_len(i)
-      == (uint64_t)0U
-      && (uint64_t)(len - diff) > (uint64_t)0U
-    )
+    if ((uint64_t)(len - diff) % (uint64_t)block_len(i) == 0ULL && (uint64_t)(len - diff) > 0ULL)
     {
       ite = block_len(i);
     }
@@ -433,7 +427,7 @@ finish_(
   uint8_t *buf_ = scrut0.buf;
   uint64_t total_len = scrut0.total_len;
   uint32_t r;
-  if (total_len % (uint64_t)block_len(a) == (uint64_t)0U && total_len > (uint64_t)0U)
+  if (total_len % (uint64_t)block_len(a) == 0ULL && total_len > 0ULL)
   {
     r = block_len(a);
   }
@@ -447,9 +441,9 @@ finish_(
   hash_buf2 scrut = { .fst = block_state, .snd = tmp_block_state };
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
-  memcpy(s_dst, s_src, (uint32_t)25U * sizeof (uint64_t));
+  memcpy(s_dst, s_src, 25U * sizeof (uint64_t));
   uint32_t ite;
-  if (r % block_len(a) == (uint32_t)0U && r > (uint32_t)0U)
+  if (r % block_len(a) == 0U && r > 0U)
   {
     ite = block_len(a);
   }
@@ -461,7 +455,7 @@ finish_(
   uint8_t *buf_multi = buf_1;
   Spec_Hash_Definitions_hash_alg a1 = tmp_block_state.fst;
   uint64_t *s0 = tmp_block_state.snd;
-  Hacl_Hash_SHA3_update_multi_sha3(a1, s0, buf_multi, (uint32_t)0U / block_len(a1));
+  Hacl_Hash_SHA3_update_multi_sha3(a1, s0, buf_multi, 0U / block_len(a1));
   Spec_Hash_Definitions_hash_alg a10 = tmp_block_state.fst;
   uint64_t *s1 = tmp_block_state.snd;
   Hacl_Hash_SHA3_update_last_sha3(a10, s1, buf_last, r);
@@ -495,7 +489,7 @@ Hacl_Streaming_Keccak_squeeze(Hacl_Streaming_Keccak_state *s, uint8_t *dst, uint
   {
     return Hacl_Streaming_Types_InvalidAlgorithm;
   }
-  if (l == (uint32_t)0U)
+  if (l == 0U)
   {
     return Hacl_Streaming_Types_InvalidLength;
   }
@@ -529,13 +523,7 @@ Hacl_SHA3_shake128_hacl(
   uint8_t *output
 )
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1344U,
-    (uint32_t)256U,
-    inputByteLen,
-    input,
-    (uint8_t)0x1FU,
-    outputByteLen,
-    output);
+  Hacl_Impl_SHA3_keccak(1344U, 256U, inputByteLen, input, 0x1FU, outputByteLen, output);
 }
 
 void
@@ -546,169 +534,99 @@ Hacl_SHA3_shake256_hacl(
   uint8_t *output
 )
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1088U,
-    (uint32_t)512U,
-    inputByteLen,
-    input,
-    (uint8_t)0x1FU,
-    outputByteLen,
-    output);
+  Hacl_Impl_SHA3_keccak(1088U, 512U, inputByteLen, input, 0x1FU, outputByteLen, output);
 }
 
 void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1152U,
-    (uint32_t)448U,
-    inputByteLen,
-    input,
-    (uint8_t)0x06U,
-    (uint32_t)28U,
-    output);
+  Hacl_Impl_SHA3_keccak(1152U, 448U, inputByteLen, input, 0x06U, 28U, output);
 }
 
 void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1088U,
-    (uint32_t)512U,
-    inputByteLen,
-    input,
-    (uint8_t)0x06U,
-    (uint32_t)32U,
-    output);
+  Hacl_Impl_SHA3_keccak(1088U, 512U, inputByteLen, input, 0x06U, 32U, output);
 }
 
 void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)832U,
-    (uint32_t)768U,
-    inputByteLen,
-    input,
-    (uint8_t)0x06U,
-    (uint32_t)48U,
-    output);
+  Hacl_Impl_SHA3_keccak(832U, 768U, inputByteLen, input, 0x06U, 48U, output);
 }
 
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)576U,
-    (uint32_t)1024U,
-    inputByteLen,
-    input,
-    (uint8_t)0x06U,
-    (uint32_t)64U,
-    output);
+  Hacl_Impl_SHA3_keccak(576U, 1024U, inputByteLen, input, 0x06U, 64U, output);
 }
 
 static const
 uint32_t
 keccak_rotc[24U] =
   {
-    (uint32_t)1U, (uint32_t)3U, (uint32_t)6U, (uint32_t)10U, (uint32_t)15U, (uint32_t)21U,
-    (uint32_t)28U, (uint32_t)36U, (uint32_t)45U, (uint32_t)55U, (uint32_t)2U, (uint32_t)14U,
-    (uint32_t)27U, (uint32_t)41U, (uint32_t)56U, (uint32_t)8U, (uint32_t)25U, (uint32_t)43U,
-    (uint32_t)62U, (uint32_t)18U, (uint32_t)39U, (uint32_t)61U, (uint32_t)20U, (uint32_t)44U
+    1U, 3U, 6U, 10U, 15U, 21U, 28U, 36U, 45U, 55U, 2U, 14U, 27U, 41U, 56U, 8U, 25U, 43U, 62U, 18U,
+    39U, 61U, 20U, 44U
   };
 
 static const
 uint32_t
 keccak_piln[24U] =
   {
-    (uint32_t)10U, (uint32_t)7U, (uint32_t)11U, (uint32_t)17U, (uint32_t)18U, (uint32_t)3U,
-    (uint32_t)5U, (uint32_t)16U, (uint32_t)8U, (uint32_t)21U, (uint32_t)24U, (uint32_t)4U,
-    (uint32_t)15U, (uint32_t)23U, (uint32_t)19U, (uint32_t)13U, (uint32_t)12U, (uint32_t)2U,
-    (uint32_t)20U, (uint32_t)14U, (uint32_t)22U, (uint32_t)9U, (uint32_t)6U, (uint32_t)1U
+    10U, 7U, 11U, 17U, 18U, 3U, 5U, 16U, 8U, 21U, 24U, 4U, 15U, 23U, 19U, 13U, 12U, 2U, 20U, 14U,
+    22U, 9U, 6U, 1U
   };
 
 static const
 uint64_t
 keccak_rndc[24U] =
   {
-    (uint64_t)0x0000000000000001U, (uint64_t)0x0000000000008082U, (uint64_t)0x800000000000808aU,
-    (uint64_t)0x8000000080008000U, (uint64_t)0x000000000000808bU, (uint64_t)0x0000000080000001U,
-    (uint64_t)0x8000000080008081U, (uint64_t)0x8000000000008009U, (uint64_t)0x000000000000008aU,
-    (uint64_t)0x0000000000000088U, (uint64_t)0x0000000080008009U, (uint64_t)0x000000008000000aU,
-    (uint64_t)0x000000008000808bU, (uint64_t)0x800000000000008bU, (uint64_t)0x8000000000008089U,
-    (uint64_t)0x8000000000008003U, (uint64_t)0x8000000000008002U, (uint64_t)0x8000000000000080U,
-    (uint64_t)0x000000000000800aU, (uint64_t)0x800000008000000aU, (uint64_t)0x8000000080008081U,
-    (uint64_t)0x8000000000008080U, (uint64_t)0x0000000080000001U, (uint64_t)0x8000000080008008U
+    0x0000000000000001ULL, 0x0000000000008082ULL, 0x800000000000808aULL, 0x8000000080008000ULL,
+    0x000000000000808bULL, 0x0000000080000001ULL, 0x8000000080008081ULL, 0x8000000000008009ULL,
+    0x000000000000008aULL, 0x0000000000000088ULL, 0x0000000080008009ULL, 0x000000008000000aULL,
+    0x000000008000808bULL, 0x800000000000008bULL, 0x8000000000008089ULL, 0x8000000000008003ULL,
+    0x8000000000008002ULL, 0x8000000000000080ULL, 0x000000000000800aULL, 0x800000008000000aULL,
+    0x8000000080008081ULL, 0x8000000000008080ULL, 0x0000000080000001ULL, 0x8000000080008008ULL
   };
 
 void Hacl_Impl_SHA3_state_permute(uint64_t *s)
 {
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)24U; i0++)
+  for (uint32_t i0 = 0U; i0 < 24U; i0++)
   {
     uint64_t _C[5U] = { 0U };
     KRML_MAYBE_FOR5(i,
-      (uint32_t)0U,
-      (uint32_t)5U,
-      (uint32_t)1U,
-      _C[i] =
-        s[i
-        + (uint32_t)0U]
-        ^
-          (s[i
-          + (uint32_t)5U]
-          ^ (s[i + (uint32_t)10U] ^ (s[i + (uint32_t)15U] ^ s[i + (uint32_t)20U]))););
+      0U,
+      5U,
+      1U,
+      _C[i] = s[i + 0U] ^ (s[i + 5U] ^ (s[i + 10U] ^ (s[i + 15U] ^ s[i + 20U]))););
     KRML_MAYBE_FOR5(i1,
-      (uint32_t)0U,
-      (uint32_t)5U,
-      (uint32_t)1U,
-      uint64_t uu____0 = _C[(i1 + (uint32_t)1U) % (uint32_t)5U];
-      uint64_t
-      _D =
-        _C[(i1 + (uint32_t)4U)
-        % (uint32_t)5U]
-        ^ (uu____0 << (uint32_t)1U | uu____0 >> (uint32_t)63U);
-      KRML_MAYBE_FOR5(i,
-        (uint32_t)0U,
-        (uint32_t)5U,
-        (uint32_t)1U,
-        s[i1 + (uint32_t)5U * i] = s[i1 + (uint32_t)5U * i] ^ _D;););
+      0U,
+      5U,
+      1U,
+      uint64_t uu____0 = _C[(i1 + 1U) % 5U];
+      uint64_t _D = _C[(i1 + 4U) % 5U] ^ (uu____0 << 1U | uu____0 >> 63U);
+      KRML_MAYBE_FOR5(i, 0U, 5U, 1U, s[i1 + 5U * i] = s[i1 + 5U * i] ^ _D;););
     uint64_t x = s[1U];
     uint64_t current = x;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)24U; i++)
+    for (uint32_t i = 0U; i < 24U; i++)
     {
       uint32_t _Y = keccak_piln[i];
       uint32_t r = keccak_rotc[i];
       uint64_t temp = s[_Y];
       uint64_t uu____1 = current;
-      s[_Y] = uu____1 << r | uu____1 >> ((uint32_t)64U - r);
+      s[_Y] = uu____1 << r | uu____1 >> (64U - r);
       current = temp;
     }
     KRML_MAYBE_FOR5(i,
-      (uint32_t)0U,
-      (uint32_t)5U,
-      (uint32_t)1U,
-      uint64_t
-      v0 =
-        s[(uint32_t)0U
-        + (uint32_t)5U * i]
-        ^ (~s[(uint32_t)1U + (uint32_t)5U * i] & s[(uint32_t)2U + (uint32_t)5U * i]);
-      uint64_t
-      v1 =
-        s[(uint32_t)1U
-        + (uint32_t)5U * i]
-        ^ (~s[(uint32_t)2U + (uint32_t)5U * i] & s[(uint32_t)3U + (uint32_t)5U * i]);
-      uint64_t
-      v2 =
-        s[(uint32_t)2U
-        + (uint32_t)5U * i]
-        ^ (~s[(uint32_t)3U + (uint32_t)5U * i] & s[(uint32_t)4U + (uint32_t)5U * i]);
-      uint64_t
-      v3 =
-        s[(uint32_t)3U
-        + (uint32_t)5U * i]
-        ^ (~s[(uint32_t)4U + (uint32_t)5U * i] & s[(uint32_t)0U + (uint32_t)5U * i]);
-      uint64_t
-      v4 =
-        s[(uint32_t)4U
-        + (uint32_t)5U * i]
-        ^ (~s[(uint32_t)0U + (uint32_t)5U * i] & s[(uint32_t)1U + (uint32_t)5U * i]);
-      s[(uint32_t)0U + (uint32_t)5U * i] = v0;
-      s[(uint32_t)1U + (uint32_t)5U * i] = v1;
-      s[(uint32_t)2U + (uint32_t)5U * i] = v2;
-      s[(uint32_t)3U + (uint32_t)5U * i] = v3;
-      s[(uint32_t)4U + (uint32_t)5U * i] = v4;);
+      0U,
+      5U,
+      1U,
+      uint64_t v0 = s[0U + 5U * i] ^ (~s[1U + 5U * i] & s[2U + 5U * i]);
+      uint64_t v1 = s[1U + 5U * i] ^ (~s[2U + 5U * i] & s[3U + 5U * i]);
+      uint64_t v2 = s[2U + 5U * i] ^ (~s[3U + 5U * i] & s[4U + 5U * i]);
+      uint64_t v3 = s[3U + 5U * i] ^ (~s[4U + 5U * i] & s[0U + 5U * i]);
+      uint64_t v4 = s[4U + 5U * i] ^ (~s[0U + 5U * i] & s[1U + 5U * i]);
+      s[0U + 5U * i] = v0;
+      s[1U + 5U * i] = v1;
+      s[2U + 5U * i] = v2;
+      s[3U + 5U * i] = v3;
+      s[4U + 5U * i] = v4;);
     uint64_t c = keccak_rndc[i0];
     s[0U] = s[0U] ^ c;
   }
@@ -718,9 +636,9 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 {
   uint8_t block[200U] = { 0U };
   memcpy(block, input, rateInBytes * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i++)
+  for (uint32_t i = 0U; i < 25U; i++)
   {
-    uint64_t u = load64_le(block + i * (uint32_t)8U);
+    uint64_t u = load64_le(block + i * 8U);
     uint64_t x = u;
     s[i] = s[i] ^ x;
   }
@@ -729,10 +647,10 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 static void storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
 {
   uint8_t block[200U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i++)
+  for (uint32_t i = 0U; i < 25U; i++)
   {
     uint64_t sj = s[i];
-    store64_le(block + i * (uint32_t)8U, sj);
+    store64_le(block + i * 8U, sj);
   }
   memcpy(res, block, rateInBytes * sizeof (uint8_t));
 }
@@ -754,7 +672,7 @@ absorb(
 {
   uint32_t n_blocks = inputByteLen / rateInBytes;
   uint32_t rem = inputByteLen % rateInBytes;
-  for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
+  for (uint32_t i = 0U; i < n_blocks; i++)
   {
     uint8_t *block = input + i * rateInBytes;
     Hacl_Impl_SHA3_absorb_inner(rateInBytes, block, s);
@@ -765,13 +683,13 @@ absorb(
   memcpy(lastBlock, last, rem * sizeof (uint8_t));
   lastBlock[rem] = delimitedSuffix;
   Hacl_Impl_SHA3_loadState(rateInBytes, lastBlock, s);
-  if (!((delimitedSuffix & (uint8_t)0x80U) == (uint8_t)0U) && rem == rateInBytes - (uint32_t)1U)
+  if (!(((uint32_t)delimitedSuffix & 0x80U) == 0U) && rem == rateInBytes - 1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t nextBlock_[200U] = { 0U };
   uint8_t *nextBlock = nextBlock_;
-  nextBlock[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
+  nextBlock[rateInBytes - 1U] = 0x80U;
   Hacl_Impl_SHA3_loadState(rateInBytes, nextBlock, s);
   Hacl_Impl_SHA3_state_permute(s);
 }
@@ -788,7 +706,7 @@ Hacl_Impl_SHA3_squeeze(
   uint32_t remOut = outputByteLen % rateInBytes;
   uint8_t *last = output + outputByteLen - remOut;
   uint8_t *blocks = output;
-  for (uint32_t i = (uint32_t)0U; i < outBlocks; i++)
+  for (uint32_t i = 0U; i < outBlocks; i++)
   {
     storeState(rateInBytes, s, blocks + i * rateInBytes);
     Hacl_Impl_SHA3_state_permute(s);
@@ -807,8 +725,8 @@ Hacl_Impl_SHA3_keccak(
   uint8_t *output
 )
 {
-  KRML_HOST_IGNORE(capacity);
-  uint32_t rateInBytes = rate / (uint32_t)8U;
+  KRML_MAYBE_UNUSED_VAR(capacity);
+  uint32_t rateInBytes = rate / 8U;
   uint64_t s[25U] = { 0U };
   absorb(s, rateInBytes, inputByteLen, input, delimitedSuffix);
   Hacl_Impl_SHA3_squeeze(s, rateInBytes, outputByteLen, output);

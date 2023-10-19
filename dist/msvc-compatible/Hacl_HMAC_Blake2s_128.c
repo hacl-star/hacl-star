@@ -42,66 +42,66 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   uint32_t data_len
 )
 {
-  uint32_t l = (uint32_t)64U;
+  uint32_t l = 64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *key_block = (uint8_t *)alloca(l * sizeof (uint8_t));
   memset(key_block, 0U, l * sizeof (uint8_t));
   uint8_t *nkey = key_block;
   uint32_t ite;
-  if (key_len <= (uint32_t)64U)
+  if (key_len <= 64U)
   {
     ite = key_len;
   }
   else
   {
-    ite = (uint32_t)32U;
+    ite = 32U;
   }
   uint8_t *zeroes = key_block + ite;
-  KRML_HOST_IGNORE(zeroes);
-  if (key_len <= (uint32_t)64U)
+  KRML_MAYBE_UNUSED_VAR(zeroes);
+  if (key_len <= 64U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
   }
   else
   {
-    Hacl_Blake2s_128_blake2s((uint32_t)32U, nkey, key_len, key, (uint32_t)0U, NULL);
+    Hacl_Blake2s_128_blake2s(32U, nkey, key_len, key, 0U, NULL);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < l; i++)
+  memset(ipad, 0x36U, l * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < l; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
-    ipad[i] = xi ^ yi;
+    ipad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *opad = (uint8_t *)alloca(l * sizeof (uint8_t));
-  memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < l; i++)
+  memset(opad, 0x5cU, l * sizeof (uint8_t));
+  for (uint32_t i = 0U; i < l; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
-    opad[i] = xi ^ yi;
+    opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 s[4U] KRML_POST_ALIGN(16) = { 0U };
-  Hacl_Blake2s_128_blake2s_init(s, (uint32_t)0U, (uint32_t)32U);
+  Hacl_Blake2s_128_blake2s_init(s, 0U, 32U);
   Lib_IntVector_Intrinsics_vec128 *s0 = s;
   uint8_t *dst1 = ipad;
-  if (data_len == (uint32_t)0U)
+  if (data_len == 0U)
   {
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Blake2s_128_blake2s_update_last((uint32_t)64U, wv, s0, (uint64_t)0U, (uint32_t)64U, ipad);
+    Hacl_Blake2s_128_blake2s_update_last(64U, wv, s0, 0ULL, 64U, ipad);
   }
   else
   {
-    uint32_t block_len = (uint32_t)64U;
+    uint32_t block_len = 64U;
     uint32_t n_blocks0 = data_len / block_len;
     uint32_t rem0 = data_len % block_len;
     K___uint32_t_uint32_t scrut;
-    if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
+    if (n_blocks0 > 0U && rem0 == 0U)
     {
-      uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
+      uint32_t n_blocks_ = n_blocks0 - 1U;
       scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks_, .snd = data_len - n_blocks_ * block_len });
     }
     else
@@ -114,9 +114,9 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Blake2s_128_blake2s_update_multi((uint32_t)64U, wv, s0, (uint64_t)0U, ipad, (uint32_t)1U);
+    Hacl_Blake2s_128_blake2s_update_multi(64U, wv, s0, 0ULL, ipad, 1U);
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv0[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Blake2s_128_blake2s_update_multi(n_blocks * (uint32_t)64U,
+    Hacl_Blake2s_128_blake2s_update_multi(n_blocks * 64U,
       wv0,
       s0,
       (uint64_t)block_len,
@@ -126,22 +126,21 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
     Hacl_Blake2s_128_blake2s_update_last(rem_len,
       wv1,
       s0,
-      (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
+      (uint64_t)64U + (uint64_t)full_blocks_len,
       rem_len,
       rem);
   }
-  Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst1, s0);
+  Hacl_Blake2s_128_blake2s_finish(32U, dst1, s0);
   uint8_t *hash1 = ipad;
-  Hacl_Blake2s_128_blake2s_init(s0, (uint32_t)0U, (uint32_t)32U);
-  uint32_t block_len = (uint32_t)64U;
-  uint32_t n_blocks0 = (uint32_t)32U / block_len;
-  uint32_t rem0 = (uint32_t)32U % block_len;
+  Hacl_Blake2s_128_blake2s_init(s0, 0U, 32U);
+  uint32_t block_len = 64U;
+  uint32_t n_blocks0 = 32U / block_len;
+  uint32_t rem0 = 32U % block_len;
   K___uint32_t_uint32_t scrut;
-  if (n_blocks0 > (uint32_t)0U && rem0 == (uint32_t)0U)
+  if (n_blocks0 > 0U && rem0 == 0U)
   {
-    uint32_t n_blocks_ = n_blocks0 - (uint32_t)1U;
-    scrut =
-      ((K___uint32_t_uint32_t){ .fst = n_blocks_, .snd = (uint32_t)32U - n_blocks_ * block_len });
+    uint32_t n_blocks_ = n_blocks0 - 1U;
+    scrut = ((K___uint32_t_uint32_t){ .fst = n_blocks_, .snd = 32U - n_blocks_ * block_len });
   }
   else
   {
@@ -153,9 +152,9 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-  Hacl_Blake2s_128_blake2s_update_multi((uint32_t)64U, wv, s0, (uint64_t)0U, opad, (uint32_t)1U);
+  Hacl_Blake2s_128_blake2s_update_multi(64U, wv, s0, 0ULL, opad, 1U);
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv0[4U] KRML_POST_ALIGN(16) = { 0U };
-  Hacl_Blake2s_128_blake2s_update_multi(n_blocks * (uint32_t)64U,
+  Hacl_Blake2s_128_blake2s_update_multi(n_blocks * 64U,
     wv0,
     s0,
     (uint64_t)block_len,
@@ -165,9 +164,9 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   Hacl_Blake2s_128_blake2s_update_last(rem_len,
     wv1,
     s0,
-    (uint64_t)(uint32_t)64U + (uint64_t)full_blocks_len,
+    (uint64_t)64U + (uint64_t)full_blocks_len,
     rem_len,
     rem);
-  Hacl_Blake2s_128_blake2s_finish((uint32_t)32U, dst, s0);
+  Hacl_Blake2s_128_blake2s_finish(32U, dst, s0);
 }
 

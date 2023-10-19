@@ -31,30 +31,30 @@
 KRML_MAYBE_UNUSED static void
 poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
-  KRML_HOST_IGNORE(dst);
-  KRML_HOST_IGNORE(src);
-  KRML_HOST_IGNORE(len);
-  KRML_HOST_IGNORE(key);
+  KRML_MAYBE_UNUSED_VAR(dst);
+  KRML_MAYBE_UNUSED_VAR(src);
+  KRML_MAYBE_UNUSED_VAR(len);
+  KRML_MAYBE_UNUSED_VAR(key);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ctx[192U] = { 0U };
-  memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-  uint32_t n_blocks = len / (uint32_t)16U;
-  uint32_t n_extra = len % (uint32_t)16U;
+  memcpy(ctx + 24U, key, 32U * sizeof (uint8_t));
+  uint32_t n_blocks = len / 16U;
+  uint32_t n_extra = len % 16U;
   uint8_t tmp[16U] = { 0U };
-  if (n_extra == (uint32_t)0U)
+  if (n_extra == 0U)
   {
-    KRML_HOST_IGNORE(x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U));
+    x64_poly1305(ctx, src, (uint64_t)len, 1ULL);
   }
   else
   {
-    uint32_t len16 = n_blocks * (uint32_t)16U;
+    uint32_t len16 = n_blocks * 16U;
     uint8_t *src16 = src;
     memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
-    KRML_HOST_IGNORE(x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U));
-    memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U));
+    x64_poly1305(ctx, src16, (uint64_t)len16, 0ULL);
+    memcpy(ctx + 24U, key, 32U * sizeof (uint8_t));
+    x64_poly1305(ctx, tmp, (uint64_t)n_extra, 1ULL);
   }
-  memcpy(dst, ctx, (uint32_t)16U * sizeof (uint8_t));
+  memcpy(dst, ctx, 16U * sizeof (uint8_t));
   #endif
 }
 
@@ -65,7 +65,7 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
-    KRML_HOST_IGNORE(vec128);
+    KRML_MAYBE_UNUSED_VAR(vec128);
     Hacl_Poly1305_256_poly1305_mac(dst, len, src, key);
     return;
   }
@@ -73,13 +73,13 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
-    KRML_HOST_IGNORE(vec256);
+    KRML_MAYBE_UNUSED_VAR(vec256);
     Hacl_Poly1305_128_poly1305_mac(dst, len, src, key);
     return;
   }
   #endif
-  KRML_HOST_IGNORE(vec256);
-  KRML_HOST_IGNORE(vec128);
+  KRML_MAYBE_UNUSED_VAR(vec256);
+  KRML_MAYBE_UNUSED_VAR(vec128);
   #if HACL_CAN_COMPILE_VALE
   poly1305_vale(dst, src, len, key);
   #else
