@@ -1401,9 +1401,9 @@ static inline void point_mul_g(uint64_t *out, uint8_t *scalar)
     uint64_t bits_l2 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r1, k2, 4U);
     precomp_get_consttime(Hacl_Ed25519_PrecompTable_precomp_basepoint_table_w4, bits_l2, tmp);
     Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp););
-  KRML_HOST_IGNORE(q2);
-  KRML_HOST_IGNORE(q3);
-  KRML_HOST_IGNORE(q4);
+  KRML_MAYBE_UNUSED_VAR(q2);
+  KRML_MAYBE_UNUSED_VAR(q3);
+  KRML_MAYBE_UNUSED_VAR(q4);
 }
 
 static inline void
@@ -1631,8 +1631,8 @@ static inline void sha512_pre_msg(uint8_t *hash, uint8_t *prefix, uint32_t len, 
   Hacl_Streaming_MD_state_64 *st = &p;
   Hacl_Streaming_Types_error_code err0 = Hacl_Streaming_SHA2_update_512(st, prefix, 32U);
   Hacl_Streaming_Types_error_code err1 = Hacl_Streaming_SHA2_update_512(st, input, len);
-  KRML_HOST_IGNORE(err0);
-  KRML_HOST_IGNORE(err1);
+  KRML_MAYBE_UNUSED_VAR(err0);
+  KRML_MAYBE_UNUSED_VAR(err1);
   Hacl_Streaming_SHA2_finish_512(st, hash);
 }
 
@@ -1655,9 +1655,9 @@ sha512_pre_pre2_msg(
   Hacl_Streaming_Types_error_code err0 = Hacl_Streaming_SHA2_update_512(st, prefix, 32U);
   Hacl_Streaming_Types_error_code err1 = Hacl_Streaming_SHA2_update_512(st, prefix2, 32U);
   Hacl_Streaming_Types_error_code err2 = Hacl_Streaming_SHA2_update_512(st, input, len);
-  KRML_HOST_IGNORE(err0);
-  KRML_HOST_IGNORE(err1);
-  KRML_HOST_IGNORE(err2);
+  KRML_MAYBE_UNUSED_VAR(err0);
+  KRML_MAYBE_UNUSED_VAR(err1);
+  KRML_MAYBE_UNUSED_VAR(err2);
   Hacl_Streaming_SHA2_finish_512(st, hash);
 }
 

@@ -52,8 +52,8 @@ The state may be reused as many times as desired.
 */
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
 {
-  KRML_HOST_IGNORE(a);
-  KRML_HOST_IGNORE(projectee);
+  KRML_MAYBE_UNUSED_VAR(a);
+  KRML_MAYBE_UNUSED_VAR(projectee);
   return true;
 }
 
@@ -116,8 +116,8 @@ create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 static EverCrypt_Error_error_code
 create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
-  KRML_HOST_IGNORE(dst);
-  KRML_HOST_IGNORE(k);
+  KRML_MAYBE_UNUSED_VAR(dst);
+  KRML_MAYBE_UNUSED_VAR(k);
   #if HACL_CAN_COMPILE_VALE
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
@@ -129,8 +129,8 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC(480U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + 176U;
-    KRML_HOST_IGNORE(aes128_key_expansion(k, keys_b));
-    KRML_HOST_IGNORE(aes128_keyhash_init(keys_b, hkeys_b));
+    aes128_key_expansion(k, keys_b);
+    aes128_keyhash_init(keys_b, hkeys_b);
     EverCrypt_AEAD_state_s
     *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek });
@@ -150,8 +150,8 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 static EverCrypt_Error_error_code
 create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
-  KRML_HOST_IGNORE(dst);
-  KRML_HOST_IGNORE(k);
+  KRML_MAYBE_UNUSED_VAR(dst);
+  KRML_MAYBE_UNUSED_VAR(k);
   #if HACL_CAN_COMPILE_VALE
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
@@ -163,8 +163,8 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC(544U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + 240U;
-    KRML_HOST_IGNORE(aes256_key_expansion(k, keys_b));
-    KRML_HOST_IGNORE(aes256_keyhash_init(keys_b, hkeys_b));
+    aes256_key_expansion(k, keys_b);
+    aes256_keyhash_init(keys_b, hkeys_b);
     EverCrypt_AEAD_state_s
     *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek });
@@ -238,15 +238,15 @@ encrypt_aes128_gcm(
   uint8_t *tag
 )
 {
-  KRML_HOST_IGNORE(s);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(plain);
-  KRML_HOST_IGNORE(plain_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(tag);
+  KRML_MAYBE_UNUSED_VAR(s);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(plain);
+  KRML_MAYBE_UNUSED_VAR(plain_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -266,12 +266,7 @@ encrypt_aes128_gcm(
   uint32_t bytes_len = len * 16U;
   uint8_t *iv_b = iv;
   memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-      (uint64_t)iv_len,
-      (uint64_t)len,
-      tmp_iv,
-      tmp_iv,
-      hkeys_b));
+  compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
   uint8_t *abytes_b = scratch_b + 16U;
   uint8_t *scratch_b1 = scratch_b + 32U;
@@ -293,23 +288,23 @@ encrypt_aes128_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    KRML_HOST_IGNORE(gcm128_encrypt_opt(auth_b_,
-        (uint64_t)ad_len,
-        auth_num,
-        keys_b,
-        tmp_iv,
-        hkeys_b,
-        abytes_b,
-        in128x6_b,
-        out128x6_b,
-        len128x6_,
-        in128_b,
-        out128_b,
-        len128_num_,
-        inout_b,
-        (uint64_t)plain_len,
-        scratch_b1,
-        tag));
+    gcm128_encrypt_opt(auth_b_,
+      (uint64_t)ad_len,
+      auth_num,
+      keys_b,
+      tmp_iv,
+      hkeys_b,
+      abytes_b,
+      in128x6_b,
+      out128x6_b,
+      len128x6_,
+      in128_b,
+      out128_b,
+      len128_num_,
+      inout_b,
+      (uint64_t)plain_len,
+      scratch_b1,
+      tag);
   }
   else
   {
@@ -322,23 +317,23 @@ encrypt_aes128_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    KRML_HOST_IGNORE(gcm128_encrypt_opt(auth_b_,
-        (uint64_t)ad_len,
-        auth_num,
-        keys_b,
-        tmp_iv,
-        hkeys_b,
-        abytes_b,
-        in128x6_b,
-        out128x6_b,
-        len128x6_,
-        in128_b,
-        out128_b,
-        len128_num_,
-        inout_b,
-        (uint64_t)plain_len,
-        scratch_b1,
-        tag));
+    gcm128_encrypt_opt(auth_b_,
+      (uint64_t)ad_len,
+      auth_num,
+      keys_b,
+      tmp_iv,
+      hkeys_b,
+      abytes_b,
+      in128x6_b,
+      out128x6_b,
+      len128x6_,
+      in128_b,
+      out128_b,
+      len128_num_,
+      inout_b,
+      (uint64_t)plain_len,
+      scratch_b1,
+      tag);
   }
   memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
     inout_b,
@@ -370,15 +365,15 @@ encrypt_aes256_gcm(
   uint8_t *tag
 )
 {
-  KRML_HOST_IGNORE(s);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(plain);
-  KRML_HOST_IGNORE(plain_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(tag);
+  KRML_MAYBE_UNUSED_VAR(s);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(plain);
+  KRML_MAYBE_UNUSED_VAR(plain_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -398,12 +393,7 @@ encrypt_aes256_gcm(
   uint32_t bytes_len = len * 16U;
   uint8_t *iv_b = iv;
   memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-      (uint64_t)iv_len,
-      (uint64_t)len,
-      tmp_iv,
-      tmp_iv,
-      hkeys_b));
+  compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
   uint8_t *abytes_b = scratch_b + 16U;
   uint8_t *scratch_b1 = scratch_b + 32U;
@@ -425,23 +415,23 @@ encrypt_aes256_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128x6_ = len128x6 / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
-    KRML_HOST_IGNORE(gcm256_encrypt_opt(auth_b_,
-        (uint64_t)ad_len,
-        auth_num,
-        keys_b,
-        tmp_iv,
-        hkeys_b,
-        abytes_b,
-        in128x6_b,
-        out128x6_b,
-        len128x6_,
-        in128_b,
-        out128_b,
-        len128_num_,
-        inout_b,
-        (uint64_t)plain_len,
-        scratch_b1,
-        tag));
+    gcm256_encrypt_opt(auth_b_,
+      (uint64_t)ad_len,
+      auth_num,
+      keys_b,
+      tmp_iv,
+      hkeys_b,
+      abytes_b,
+      in128x6_b,
+      out128x6_b,
+      len128x6_,
+      in128_b,
+      out128_b,
+      len128_num_,
+      inout_b,
+      (uint64_t)plain_len,
+      scratch_b1,
+      tag);
   }
   else
   {
@@ -454,23 +444,23 @@ encrypt_aes256_gcm(
     uint64_t auth_num = (uint64_t)ad_len / 16ULL;
     uint64_t len128_num_ = len128_num / 16ULL;
     uint64_t len128x6_ = 0ULL;
-    KRML_HOST_IGNORE(gcm256_encrypt_opt(auth_b_,
-        (uint64_t)ad_len,
-        auth_num,
-        keys_b,
-        tmp_iv,
-        hkeys_b,
-        abytes_b,
-        in128x6_b,
-        out128x6_b,
-        len128x6_,
-        in128_b,
-        out128_b,
-        len128_num_,
-        inout_b,
-        (uint64_t)plain_len,
-        scratch_b1,
-        tag));
+    gcm256_encrypt_opt(auth_b_,
+      (uint64_t)ad_len,
+      auth_num,
+      keys_b,
+      tmp_iv,
+      hkeys_b,
+      abytes_b,
+      in128x6_b,
+      out128x6_b,
+      len128x6_,
+      in128_b,
+      out128_b,
+      len128_num_,
+      inout_b,
+      (uint64_t)plain_len,
+      scratch_b1,
+      tag);
   }
   memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
     inout_b,
@@ -580,21 +570,21 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   uint8_t *tag
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(plain);
-  KRML_HOST_IGNORE(plain_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(tag);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(plain);
+  KRML_MAYBE_UNUSED_VAR(plain_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[480U] = { 0U };
   uint8_t *keys_b0 = ek;
   uint8_t *hkeys_b0 = ek + 176U;
-  KRML_HOST_IGNORE(aes128_key_expansion(k, keys_b0));
-  KRML_HOST_IGNORE(aes128_keyhash_init(keys_b0, hkeys_b0));
+  aes128_key_expansion(k, keys_b0);
+  aes128_keyhash_init(keys_b0, hkeys_b0);
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek };
   EverCrypt_AEAD_state_s *s = &p;
   if (s == NULL)
@@ -617,12 +607,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
     uint32_t bytes_len = len * 16U;
     uint8_t *iv_b = iv;
     memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-        (uint64_t)iv_len,
-        (uint64_t)len,
-        tmp_iv,
-        tmp_iv,
-        hkeys_b));
+    compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
     uint8_t *inout_b = scratch_b;
     uint8_t *abytes_b = scratch_b + 16U;
     uint8_t *scratch_b1 = scratch_b + 32U;
@@ -644,23 +629,23 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128x6_ = len128x6 / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
-      KRML_HOST_IGNORE(gcm128_encrypt_opt(auth_b_,
-          (uint64_t)ad_len,
-          auth_num,
-          keys_b,
-          tmp_iv,
-          hkeys_b,
-          abytes_b,
-          in128x6_b,
-          out128x6_b,
-          len128x6_,
-          in128_b,
-          out128_b,
-          len128_num_,
-          inout_b,
-          (uint64_t)plain_len,
-          scratch_b1,
-          tag));
+      gcm128_encrypt_opt(auth_b_,
+        (uint64_t)ad_len,
+        auth_num,
+        keys_b,
+        tmp_iv,
+        hkeys_b,
+        abytes_b,
+        in128x6_b,
+        out128x6_b,
+        len128x6_,
+        in128_b,
+        out128_b,
+        len128_num_,
+        inout_b,
+        (uint64_t)plain_len,
+        scratch_b1,
+        tag);
     }
     else
     {
@@ -673,23 +658,23 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
       uint64_t len128x6_ = 0ULL;
-      KRML_HOST_IGNORE(gcm128_encrypt_opt(auth_b_,
-          (uint64_t)ad_len,
-          auth_num,
-          keys_b,
-          tmp_iv,
-          hkeys_b,
-          abytes_b,
-          in128x6_b,
-          out128x6_b,
-          len128x6_,
-          in128_b,
-          out128_b,
-          len128_num_,
-          inout_b,
-          (uint64_t)plain_len,
-          scratch_b1,
-          tag));
+      gcm128_encrypt_opt(auth_b_,
+        (uint64_t)ad_len,
+        auth_num,
+        keys_b,
+        tmp_iv,
+        hkeys_b,
+        abytes_b,
+        in128x6_b,
+        out128x6_b,
+        len128x6_,
+        in128_b,
+        out128_b,
+        len128_num_,
+        inout_b,
+        (uint64_t)plain_len,
+        scratch_b1,
+        tag);
     }
     memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
       inout_b,
@@ -731,21 +716,21 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
   uint8_t *tag
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(plain);
-  KRML_HOST_IGNORE(plain_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(tag);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(plain);
+  KRML_MAYBE_UNUSED_VAR(plain_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[544U] = { 0U };
   uint8_t *keys_b0 = ek;
   uint8_t *hkeys_b0 = ek + 240U;
-  KRML_HOST_IGNORE(aes256_key_expansion(k, keys_b0));
-  KRML_HOST_IGNORE(aes256_keyhash_init(keys_b0, hkeys_b0));
+  aes256_key_expansion(k, keys_b0);
+  aes256_keyhash_init(keys_b0, hkeys_b0);
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek };
   EverCrypt_AEAD_state_s *s = &p;
   if (s == NULL)
@@ -768,12 +753,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
     uint32_t bytes_len = len * 16U;
     uint8_t *iv_b = iv;
     memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-        (uint64_t)iv_len,
-        (uint64_t)len,
-        tmp_iv,
-        tmp_iv,
-        hkeys_b));
+    compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
     uint8_t *inout_b = scratch_b;
     uint8_t *abytes_b = scratch_b + 16U;
     uint8_t *scratch_b1 = scratch_b + 32U;
@@ -795,23 +775,23 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128x6_ = len128x6 / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
-      KRML_HOST_IGNORE(gcm256_encrypt_opt(auth_b_,
-          (uint64_t)ad_len,
-          auth_num,
-          keys_b,
-          tmp_iv,
-          hkeys_b,
-          abytes_b,
-          in128x6_b,
-          out128x6_b,
-          len128x6_,
-          in128_b,
-          out128_b,
-          len128_num_,
-          inout_b,
-          (uint64_t)plain_len,
-          scratch_b1,
-          tag));
+      gcm256_encrypt_opt(auth_b_,
+        (uint64_t)ad_len,
+        auth_num,
+        keys_b,
+        tmp_iv,
+        hkeys_b,
+        abytes_b,
+        in128x6_b,
+        out128x6_b,
+        len128x6_,
+        in128_b,
+        out128_b,
+        len128_num_,
+        inout_b,
+        (uint64_t)plain_len,
+        scratch_b1,
+        tag);
     }
     else
     {
@@ -824,23 +804,23 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
       uint64_t auth_num = (uint64_t)ad_len / 16ULL;
       uint64_t len128_num_ = len128_num / 16ULL;
       uint64_t len128x6_ = 0ULL;
-      KRML_HOST_IGNORE(gcm256_encrypt_opt(auth_b_,
-          (uint64_t)ad_len,
-          auth_num,
-          keys_b,
-          tmp_iv,
-          hkeys_b,
-          abytes_b,
-          in128x6_b,
-          out128x6_b,
-          len128x6_,
-          in128_b,
-          out128_b,
-          len128_num_,
-          inout_b,
-          (uint64_t)plain_len,
-          scratch_b1,
-          tag));
+      gcm256_encrypt_opt(auth_b_,
+        (uint64_t)ad_len,
+        auth_num,
+        keys_b,
+        tmp_iv,
+        hkeys_b,
+        abytes_b,
+        in128x6_b,
+        out128x6_b,
+        len128x6_,
+        in128_b,
+        out128_b,
+        len128_num_,
+        inout_b,
+        (uint64_t)plain_len,
+        scratch_b1,
+        tag);
     }
     memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
       inout_b,
@@ -874,15 +854,15 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *tag
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(plain);
-  KRML_HOST_IGNORE(plain_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(tag);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(plain);
+  KRML_MAYBE_UNUSED_VAR(plain_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
@@ -894,8 +874,8 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
     uint8_t ek[480U] = { 0U };
     uint8_t *keys_b0 = ek;
     uint8_t *hkeys_b0 = ek + 176U;
-    KRML_HOST_IGNORE(aes128_key_expansion(k, keys_b0));
-    KRML_HOST_IGNORE(aes128_keyhash_init(keys_b0, hkeys_b0));
+    aes128_key_expansion(k, keys_b0);
+    aes128_keyhash_init(keys_b0, hkeys_b0);
     EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek };
     EverCrypt_AEAD_state_s *s = &p;
     if (s == NULL)
@@ -918,12 +898,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
       uint32_t bytes_len = len * 16U;
       uint8_t *iv_b = iv;
       memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-      KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-          (uint64_t)iv_len,
-          (uint64_t)len,
-          tmp_iv,
-          tmp_iv,
-          hkeys_b));
+      compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
       uint8_t *inout_b = scratch_b;
       uint8_t *abytes_b = scratch_b + 16U;
       uint8_t *scratch_b1 = scratch_b + 32U;
@@ -945,23 +920,23 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
         uint64_t auth_num = (uint64_t)ad_len / 16ULL;
         uint64_t len128x6_ = len128x6 / 16ULL;
         uint64_t len128_num_ = len128_num / 16ULL;
-        KRML_HOST_IGNORE(gcm128_encrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)plain_len,
-            scratch_b1,
-            tag));
+        gcm128_encrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)plain_len,
+          scratch_b1,
+          tag);
       }
       else
       {
@@ -974,23 +949,23 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
         uint64_t auth_num = (uint64_t)ad_len / 16ULL;
         uint64_t len128_num_ = len128_num / 16ULL;
         uint64_t len128x6_ = 0ULL;
-        KRML_HOST_IGNORE(gcm128_encrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)plain_len,
-            scratch_b1,
-            tag));
+        gcm128_encrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)plain_len,
+          scratch_b1,
+          tag);
       }
       memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
         inout_b,
@@ -1022,15 +997,15 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   uint8_t *tag
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(plain);
-  KRML_HOST_IGNORE(plain_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(tag);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(plain);
+  KRML_MAYBE_UNUSED_VAR(plain_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(tag);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
@@ -1042,8 +1017,8 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
     uint8_t ek[544U] = { 0U };
     uint8_t *keys_b0 = ek;
     uint8_t *hkeys_b0 = ek + 240U;
-    KRML_HOST_IGNORE(aes256_key_expansion(k, keys_b0));
-    KRML_HOST_IGNORE(aes256_keyhash_init(keys_b0, hkeys_b0));
+    aes256_key_expansion(k, keys_b0);
+    aes256_keyhash_init(keys_b0, hkeys_b0);
     EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek };
     EverCrypt_AEAD_state_s *s = &p;
     if (s == NULL)
@@ -1066,12 +1041,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
       uint32_t bytes_len = len * 16U;
       uint8_t *iv_b = iv;
       memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-      KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-          (uint64_t)iv_len,
-          (uint64_t)len,
-          tmp_iv,
-          tmp_iv,
-          hkeys_b));
+      compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
       uint8_t *inout_b = scratch_b;
       uint8_t *abytes_b = scratch_b + 16U;
       uint8_t *scratch_b1 = scratch_b + 32U;
@@ -1093,23 +1063,23 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
         uint64_t auth_num = (uint64_t)ad_len / 16ULL;
         uint64_t len128x6_ = len128x6 / 16ULL;
         uint64_t len128_num_ = len128_num / 16ULL;
-        KRML_HOST_IGNORE(gcm256_encrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)plain_len,
-            scratch_b1,
-            tag));
+        gcm256_encrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)plain_len,
+          scratch_b1,
+          tag);
       }
       else
       {
@@ -1122,23 +1092,23 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
         uint64_t auth_num = (uint64_t)ad_len / 16ULL;
         uint64_t len128_num_ = len128_num / 16ULL;
         uint64_t len128x6_ = 0ULL;
-        KRML_HOST_IGNORE(gcm256_encrypt_opt(auth_b_,
-            (uint64_t)ad_len,
-            auth_num,
-            keys_b,
-            tmp_iv,
-            hkeys_b,
-            abytes_b,
-            in128x6_b,
-            out128x6_b,
-            len128x6_,
-            in128_b,
-            out128_b,
-            len128_num_,
-            inout_b,
-            (uint64_t)plain_len,
-            scratch_b1,
-            tag));
+        gcm256_encrypt_opt(auth_b_,
+          (uint64_t)ad_len,
+          auth_num,
+          keys_b,
+          tmp_iv,
+          hkeys_b,
+          abytes_b,
+          in128x6_b,
+          out128x6_b,
+          len128x6_,
+          in128_b,
+          out128_b,
+          len128_num_,
+          inout_b,
+          (uint64_t)plain_len,
+          scratch_b1,
+          tag);
       }
       memcpy(cipher + (uint32_t)(uint64_t)plain_len / 16U * 16U,
         inout_b,
@@ -1170,7 +1140,7 @@ EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
   uint8_t *tag
 )
 {
-  KRML_HOST_IGNORE(iv_len);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
   uint8_t ek[32U] = { 0U };
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek };
   memcpy(ek, k, 32U * sizeof (uint8_t));
@@ -1264,15 +1234,15 @@ decrypt_aes128_gcm(
   uint8_t *dst
 )
 {
-  KRML_HOST_IGNORE(s);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(cipher_len);
-  KRML_HOST_IGNORE(tag);
-  KRML_HOST_IGNORE(dst);
+  KRML_MAYBE_UNUSED_VAR(s);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(cipher_len);
+  KRML_MAYBE_UNUSED_VAR(tag);
+  KRML_MAYBE_UNUSED_VAR(dst);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -1292,12 +1262,7 @@ decrypt_aes128_gcm(
   uint32_t bytes_len = len * 16U;
   uint8_t *iv_b = iv;
   memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-      (uint64_t)iv_len,
-      (uint64_t)len,
-      tmp_iv,
-      tmp_iv,
-      hkeys_b));
+  compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
   uint8_t *abytes_b = scratch_b + 16U;
   uint8_t *scratch_b1 = scratch_b + 32U;
@@ -1408,15 +1373,15 @@ decrypt_aes256_gcm(
   uint8_t *dst
 )
 {
-  KRML_HOST_IGNORE(s);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(cipher_len);
-  KRML_HOST_IGNORE(tag);
-  KRML_HOST_IGNORE(dst);
+  KRML_MAYBE_UNUSED_VAR(s);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(cipher_len);
+  KRML_MAYBE_UNUSED_VAR(tag);
+  KRML_MAYBE_UNUSED_VAR(dst);
   #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
@@ -1436,12 +1401,7 @@ decrypt_aes256_gcm(
   uint32_t bytes_len = len * 16U;
   uint8_t *iv_b = iv;
   memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-      (uint64_t)iv_len,
-      (uint64_t)len,
-      tmp_iv,
-      tmp_iv,
-      hkeys_b));
+  compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
   uint8_t *abytes_b = scratch_b + 16U;
   uint8_t *scratch_b1 = scratch_b + 32U;
@@ -1670,21 +1630,21 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   uint8_t *dst
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(cipher_len);
-  KRML_HOST_IGNORE(tag);
-  KRML_HOST_IGNORE(dst);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(cipher_len);
+  KRML_MAYBE_UNUSED_VAR(tag);
+  KRML_MAYBE_UNUSED_VAR(dst);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[480U] = { 0U };
   uint8_t *keys_b0 = ek;
   uint8_t *hkeys_b0 = ek + 176U;
-  KRML_HOST_IGNORE(aes128_key_expansion(k, keys_b0));
-  KRML_HOST_IGNORE(aes128_keyhash_init(keys_b0, hkeys_b0));
+  aes128_key_expansion(k, keys_b0);
+  aes128_keyhash_init(keys_b0, hkeys_b0);
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek };
   EverCrypt_AEAD_state_s *s = &p;
   if (s == NULL)
@@ -1705,12 +1665,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   uint32_t bytes_len = len * 16U;
   uint8_t *iv_b = iv;
   memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-      (uint64_t)iv_len,
-      (uint64_t)len,
-      tmp_iv,
-      tmp_iv,
-      hkeys_b));
+  compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
   uint8_t *abytes_b = scratch_b + 16U;
   uint8_t *scratch_b1 = scratch_b + 32U;
@@ -1829,21 +1784,21 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
   uint8_t *dst
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(cipher_len);
-  KRML_HOST_IGNORE(tag);
-  KRML_HOST_IGNORE(dst);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(cipher_len);
+  KRML_MAYBE_UNUSED_VAR(tag);
+  KRML_MAYBE_UNUSED_VAR(dst);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ek[544U] = { 0U };
   uint8_t *keys_b0 = ek;
   uint8_t *hkeys_b0 = ek + 240U;
-  KRML_HOST_IGNORE(aes256_key_expansion(k, keys_b0));
-  KRML_HOST_IGNORE(aes256_keyhash_init(keys_b0, hkeys_b0));
+  aes256_key_expansion(k, keys_b0);
+  aes256_keyhash_init(keys_b0, hkeys_b0);
   EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek };
   EverCrypt_AEAD_state_s *s = &p;
   if (s == NULL)
@@ -1864,12 +1819,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
   uint32_t bytes_len = len * 16U;
   uint8_t *iv_b = iv;
   memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-      (uint64_t)iv_len,
-      (uint64_t)len,
-      tmp_iv,
-      tmp_iv,
-      hkeys_b));
+  compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
   uint8_t *abytes_b = scratch_b + 16U;
   uint8_t *scratch_b1 = scratch_b + 32U;
@@ -1980,15 +1930,15 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
   uint8_t *dst
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(cipher_len);
-  KRML_HOST_IGNORE(tag);
-  KRML_HOST_IGNORE(dst);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(cipher_len);
+  KRML_MAYBE_UNUSED_VAR(tag);
+  KRML_MAYBE_UNUSED_VAR(dst);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
@@ -2000,8 +1950,8 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
     uint8_t ek[480U] = { 0U };
     uint8_t *keys_b0 = ek;
     uint8_t *hkeys_b0 = ek + 176U;
-    KRML_HOST_IGNORE(aes128_key_expansion(k, keys_b0));
-    KRML_HOST_IGNORE(aes128_keyhash_init(keys_b0, hkeys_b0));
+    aes128_key_expansion(k, keys_b0);
+    aes128_keyhash_init(keys_b0, hkeys_b0);
     EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES128, .ek = ek };
     EverCrypt_AEAD_state_s *s = &p;
     if (s == NULL)
@@ -2022,12 +1972,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
     uint32_t bytes_len = len * 16U;
     uint8_t *iv_b = iv;
     memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-        (uint64_t)iv_len,
-        (uint64_t)len,
-        tmp_iv,
-        tmp_iv,
-        hkeys_b));
+    compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
     uint8_t *inout_b = scratch_b;
     uint8_t *abytes_b = scratch_b + 16U;
     uint8_t *scratch_b1 = scratch_b + 32U;
@@ -2136,15 +2081,15 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
   uint8_t *dst
 )
 {
-  KRML_HOST_IGNORE(k);
-  KRML_HOST_IGNORE(iv);
-  KRML_HOST_IGNORE(iv_len);
-  KRML_HOST_IGNORE(ad);
-  KRML_HOST_IGNORE(ad_len);
-  KRML_HOST_IGNORE(cipher);
-  KRML_HOST_IGNORE(cipher_len);
-  KRML_HOST_IGNORE(tag);
-  KRML_HOST_IGNORE(dst);
+  KRML_MAYBE_UNUSED_VAR(k);
+  KRML_MAYBE_UNUSED_VAR(iv);
+  KRML_MAYBE_UNUSED_VAR(iv_len);
+  KRML_MAYBE_UNUSED_VAR(ad);
+  KRML_MAYBE_UNUSED_VAR(ad_len);
+  KRML_MAYBE_UNUSED_VAR(cipher);
+  KRML_MAYBE_UNUSED_VAR(cipher_len);
+  KRML_MAYBE_UNUSED_VAR(tag);
+  KRML_MAYBE_UNUSED_VAR(dst);
   #if HACL_CAN_COMPILE_VALE
   bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
@@ -2156,8 +2101,8 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
     uint8_t ek[544U] = { 0U };
     uint8_t *keys_b0 = ek;
     uint8_t *hkeys_b0 = ek + 240U;
-    KRML_HOST_IGNORE(aes256_key_expansion(k, keys_b0));
-    KRML_HOST_IGNORE(aes256_keyhash_init(keys_b0, hkeys_b0));
+    aes256_key_expansion(k, keys_b0);
+    aes256_keyhash_init(keys_b0, hkeys_b0);
     EverCrypt_AEAD_state_s p = { .impl = Spec_Cipher_Expansion_Vale_AES256, .ek = ek };
     EverCrypt_AEAD_state_s *s = &p;
     if (s == NULL)
@@ -2178,12 +2123,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
     uint32_t bytes_len = len * 16U;
     uint8_t *iv_b = iv;
     memcpy(tmp_iv, iv + bytes_len, iv_len % 16U * sizeof (uint8_t));
-    KRML_HOST_IGNORE(compute_iv_stdcall(iv_b,
-        (uint64_t)iv_len,
-        (uint64_t)len,
-        tmp_iv,
-        tmp_iv,
-        hkeys_b));
+    compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
     uint8_t *inout_b = scratch_b;
     uint8_t *abytes_b = scratch_b + 16U;
     uint8_t *scratch_b1 = scratch_b + 32U;

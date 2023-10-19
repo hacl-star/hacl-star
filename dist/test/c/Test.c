@@ -8180,14 +8180,6 @@ test_aead_st(
           uint8_t ciphertext_[ciphertext_blen];
           memset(ciphertext_, 0U, ciphertext_blen * sizeof (uint8_t));
           uint8_t *ciphertext_1 = ciphertext_;
-          if (tag_len == 0U)
-          {
-            KRML_HOST_IGNORE(1U);
-          }
-          else
-          {
-            KRML_HOST_IGNORE(tag_len);
-          }
           KRML_CHECK_SIZE(sizeof (uint8_t), tag_len);
           uint8_t tag_[tag_len];
           memset(tag_, 0U, tag_len * sizeof (uint8_t));

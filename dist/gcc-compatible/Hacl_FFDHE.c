@@ -151,11 +151,11 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, 0ULL, res_i);
     }
     uint64_t c1 = c;
-    KRML_HOST_IGNORE(c1);
+    KRML_MAYBE_UNUSED_VAR(c1);
   }
   else
   {
-    KRML_HOST_IGNORE(c0);
+    KRML_MAYBE_UNUSED_VAR(c0);
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t b2[nLen];

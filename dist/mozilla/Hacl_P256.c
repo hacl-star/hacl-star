@@ -204,7 +204,7 @@ static inline void bn_sub_mod4(uint64_t *res, uint64_t *n, uint64_t *x, uint64_t
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
   }
   uint64_t c1 = c;
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
   uint64_t c2 = 0ULL - c00;
   KRML_MAYBE_FOR4(i,
     0U,
@@ -278,7 +278,7 @@ static inline void bn_sqr4(uint64_t *res, uint64_t *x)
     uint64_t r = c;
     res[i0 + i0] = r;);
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, res, res);
-  KRML_HOST_IGNORE(c0);
+  KRML_MAYBE_UNUSED_VAR(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
     0U,
@@ -290,13 +290,13 @@ static inline void bn_sqr4(uint64_t *res, uint64_t *x)
     tmp[2U * i] = lo;
     tmp[2U * i + 1U] = hi;);
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, tmp, res);
-  KRML_HOST_IGNORE(c1);
+  KRML_MAYBE_UNUSED_VAR(c1);
 }
 
 static inline void bn_to_bytes_be4(uint8_t *res, uint64_t *f)
 {
   uint8_t tmp[32U] = { 0U };
-  KRML_HOST_IGNORE(tmp);
+  KRML_MAYBE_UNUSED_VAR(tmp);
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store64_be(res + i * 8U, f[4U - i - 1U]););
 }
 
@@ -1047,10 +1047,10 @@ static inline void point_mul_g(uint64_t *res, uint64_t *scalar)
     uint64_t bits_l2 = Hacl_Bignum_Lib_bn_get_bits_u64(1U, r1, k2, 4U);
     precomp_get_consttime(Hacl_P256_PrecompTable_precomp_basepoint_table_w4, bits_l2, tmp);
     point_add(res, res, tmp););
-  KRML_HOST_IGNORE(q1);
-  KRML_HOST_IGNORE(q2);
-  KRML_HOST_IGNORE(q3);
-  KRML_HOST_IGNORE(q4);
+  KRML_MAYBE_UNUSED_VAR(q1);
+  KRML_MAYBE_UNUSED_VAR(q2);
+  KRML_MAYBE_UNUSED_VAR(q3);
+  KRML_MAYBE_UNUSED_VAR(q4);
 }
 
 static inline void
@@ -1553,7 +1553,7 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[32U] = { 0U };
   memcpy(mHash, msg, 32U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(msg_len);
+  KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);
@@ -1594,7 +1594,7 @@ Hacl_P256_ecdsa_verif_without_hash(
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[32U] = { 0U };
   memcpy(mHash, msg, 32U * sizeof (uint8_t));
-  KRML_HOST_IGNORE(msg_len);
+  KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
   qmod_short(m_q, m_q);

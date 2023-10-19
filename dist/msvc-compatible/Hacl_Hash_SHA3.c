@@ -227,7 +227,7 @@ void Hacl_Streaming_Keccak_reset(Hacl_Streaming_Keccak_state *s)
   uint8_t *buf = scrut.buf;
   Hacl_Streaming_Keccak_hash_buf block_state = scrut.block_state;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
-  KRML_HOST_IGNORE(i);
+  KRML_MAYBE_UNUSED_VAR(i);
   uint64_t *s1 = block_state.snd;
   memset(s1, 0U, 25U * sizeof (uint64_t));
   Hacl_Streaming_Keccak_state
@@ -725,7 +725,7 @@ Hacl_Impl_SHA3_keccak(
   uint8_t *output
 )
 {
-  KRML_HOST_IGNORE(capacity);
+  KRML_MAYBE_UNUSED_VAR(capacity);
   uint32_t rateInBytes = rate / 8U;
   uint64_t s[25U] = { 0U };
   absorb(s, rateInBytes, inputByteLen, input, delimitedSuffix);

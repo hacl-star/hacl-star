@@ -58,7 +58,7 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
     ite = 64U;
   }
   uint8_t *zeroes = key_block + ite;
-  KRML_HOST_IGNORE(zeroes);
+  KRML_MAYBE_UNUSED_VAR(zeroes);
   if (key_len <= 128U)
   {
     memcpy(nkey, key, key_len * sizeof (uint8_t));
