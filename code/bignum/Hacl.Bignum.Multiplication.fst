@@ -225,9 +225,11 @@ let bn_sqr #t aLen a res =
   );
 
   let c0 = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res res res in
+  LowStar.Ignore.ignore c0;
   let tmp = create resLen (uint #t 0) in
   bn_sqr_diag aLen a tmp;
   let c1 = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res tmp res in
+  LowStar.Ignore.ignore c1;
   pop_frame ()
 
 

@@ -37,13 +37,13 @@ extern "C" {
 
 /* SNIPPET_START: FStar_UInt64_eq_mask */
 
-static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
+static KRML_NOINLINE uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
 
 /* SNIPPET_END: FStar_UInt64_eq_mask */
 
 /* SNIPPET_START: FStar_UInt64_gte_mask */
 
-static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
+static KRML_NOINLINE uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
 
 /* SNIPPET_END: FStar_UInt64_gte_mask */
 

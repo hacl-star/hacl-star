@@ -55,7 +55,8 @@ extern void TestLib_checku32(uint32_t uu___, uint32_t uu___1);
 
 extern void TestLib_checku64(uint64_t uu___, uint64_t uu___1);
 
-extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
+extern void
+TestLib_compare_and_print(Prims_string uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 extern uint8_t *TestLib_unsafe_malloc(uint32_t l);
 

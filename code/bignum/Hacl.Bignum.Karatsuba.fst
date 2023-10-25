@@ -47,6 +47,7 @@ let bn_sign_abs #t #aLen a b tmp res =
   let c0 = bn_sub_eq_len_u aLen a b tmp in
   let c1 = bn_sub_eq_len_u aLen b a res in
   map2T aLen res (mask_select (uint #t 0 -. c0)) res tmp;
+  LowStar.Ignore.ignore c1;
   c0
 
 
@@ -244,6 +245,7 @@ let bn_karatsuba_mul_open #t (self: unit -> bn_karatsuba_mul_st t) len a b tmp r
     self () len2 a0 b0 tmp1 r01;
     self () len2 a1 b1 tmp1 r23;
     let c = bn_karatsuba_last len c0 c1 tmp res in
+    LowStar.Ignore.ignore c;
     () end
 
 
@@ -353,7 +355,8 @@ let bn_karatsuba_sqr_open #t (self: unit -> bn_karatsuba_sqr_st t) len a tmp res
     let t0 = sub tmp 0ul len2 in
     let tmp' = sub tmp len len2 in
     let c0 = bn_sign_abs a0 a1 tmp' t0 in
-
+    LowStar.Ignore.ignore c0;
+    
     let t23 = sub tmp len len in
     let tmp1 = sub tmp (len +! len) (len +! len) in
     self () len2 t0 tmp1 t23;
@@ -363,6 +366,7 @@ let bn_karatsuba_sqr_open #t (self: unit -> bn_karatsuba_sqr_st t) len a tmp res
     self () len2 a0 tmp1 r01;
     self () len2 a1 tmp1 r23;
     let c = bn_karatsuba_last_sqr len tmp res in
+    LowStar.Ignore.ignore c;
     () end
 
 

@@ -563,6 +563,7 @@ let reset #index c i t t' state key =
   (**) let h1 = ST.get () in
   let State block_state buf _ _ k' = !*state in
   let i = c.index_of_state i block_state in
+  LowStar.Ignore.ignore i; // This is only used in types and proofs
   [@inline_let]
   let block_state: c.state.s i = block_state in
 

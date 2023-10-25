@@ -28,28 +28,33 @@
 #include "internal/Vale.h"
 #include "config.h"
 
-static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
+KRML_MAYBE_UNUSED static void
+poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
+  KRML_MAYBE_UNUSED_VAR(dst);
+  KRML_MAYBE_UNUSED_VAR(src);
+  KRML_MAYBE_UNUSED_VAR(len);
+  KRML_MAYBE_UNUSED_VAR(key);
   #if HACL_CAN_COMPILE_VALE
   uint8_t ctx[192U] = { 0U };
-  memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-  uint32_t n_blocks = len / (uint32_t)16U;
-  uint32_t n_extra = len % (uint32_t)16U;
+  memcpy(ctx + 24U, key, 32U * sizeof (uint8_t));
+  uint32_t n_blocks = len / 16U;
+  uint32_t n_extra = len % 16U;
   uint8_t tmp[16U] = { 0U };
-  if (n_extra == (uint32_t)0U)
+  if (n_extra == 0U)
   {
-    uint64_t scrut = x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U);
+    x64_poly1305(ctx, src, (uint64_t)len, 1ULL);
   }
   else
   {
-    uint32_t len16 = n_blocks * (uint32_t)16U;
+    uint32_t len16 = n_blocks * 16U;
     uint8_t *src16 = src;
     memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
-    uint64_t scrut = x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
-    memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
+    x64_poly1305(ctx, src16, (uint64_t)len16, 0ULL);
+    memcpy(ctx + 24U, key, 32U * sizeof (uint8_t));
+    x64_poly1305(ctx, tmp, (uint64_t)n_extra, 1ULL);
   }
-  memcpy(dst, ctx, (uint32_t)16U * sizeof (uint8_t));
+  memcpy(dst, ctx, 16U * sizeof (uint8_t));
   #endif
 }
 
@@ -60,6 +65,7 @@ void EverCrypt_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len,
   #if HACL_CAN_COMPILE_VEC256
   if (vec256)
   {
+    KRML_MAYBE_UNUSED_VAR(vec128);
     Hacl_MAC_Poly1305_Simd256_mac(output, input, input_len, key);
     return;
   }
@@ -67,13 +73,17 @@ void EverCrypt_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len,
   #if HACL_CAN_COMPILE_VEC128
   if (vec128)
   {
+    KRML_MAYBE_UNUSED_VAR(vec256);
     Hacl_MAC_Poly1305_Simd128_mac(output, input, input_len, key);
     return;
   }
   #endif
+  KRML_MAYBE_UNUSED_VAR(vec256);
+  KRML_MAYBE_UNUSED_VAR(vec128);
   #if HACL_CAN_COMPILE_VALE
   poly1305_vale(output, input, input_len, key);
   #else
+  KRML_HOST_IGNORE(poly1305_vale);
   Hacl_MAC_Poly1305_mac(output, input, input_len, key);
   #endif
 }

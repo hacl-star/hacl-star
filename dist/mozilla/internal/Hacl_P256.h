@@ -23,8 +23,8 @@
  */
 
 
-#ifndef __Lib_Memzero0_H
-#define __Lib_Memzero0_H
+#ifndef __internal_Hacl_P256_H
+#define __internal_Hacl_P256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,11 +35,24 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
+#include "internal/Hacl_P256_PrecompTable.h"
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum_Base.h"
+#include "../Hacl_P256.h"
+#include "lib_intrinsics.h"
+
+bool Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *public_key, uint8_t *private_key);
+
+bool
+Hacl_Impl_P256_DH_ecp256dh_r(
+  uint8_t *shared_secret,
+  uint8_t *their_pubkey,
+  uint8_t *private_key
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Lib_Memzero0_H_DEFINED
+#define __internal_Hacl_P256_H_DEFINED
 #endif

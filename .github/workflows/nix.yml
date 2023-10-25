@@ -1,0 +1,35 @@
+name: Nix
+
+on:
+  push:
+    branches-ignore: [ '_**' ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  nix:
+    runs-on: self-hosted
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: build hacl
+        run: |
+          nix build -L .#hacl
+      - name: build logs
+        run: |
+          nix log .#hacl
+      - name: resource monitor
+        run: |
+          nix build .#hacl.passthru.resource-monitor
+          cat result/resources.txt
+      - name: generate artifacts
+        run: |
+          nix build .#hacl.passthru.build-products
+      - uses: actions/upload-artifact@v3
+        with:
+          name: hints.tar.gz
+          path: result/hints.tar.gz
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist.tar.gz
+          path: result/dist.tar.gz

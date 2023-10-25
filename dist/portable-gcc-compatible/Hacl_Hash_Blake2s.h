@@ -35,7 +35,6 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Lib_Memzero0.h"
 #include "Hacl_Streaming_Types.h"
 
 /* SNIPPET_START: Hacl_Hash_Blake2s_block_state_t */

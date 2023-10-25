@@ -122,29 +122,32 @@ let create_in_aes_gcm (i: vale_impl):
 fun r dst k ->
   let a = alg_of_vale_impl i in
   let h0 = ST.get () in
-  let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
-  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-  let has_avx = EverCrypt.AutoConfig2.has_avx() in
-  let has_sse = EverCrypt.AutoConfig2.has_sse() in
-  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
-  if EverCrypt.TargetConfig.hacl_can_compile_vale &&
-     (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then (
-    let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
+  let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in 
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then (
+    let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+    let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+    let has_avx = EverCrypt.AutoConfig2.has_avx() in
+    let has_sse = EverCrypt.AutoConfig2.has_sse() in
+    let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+    if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then (
+      let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
 
-    vale_expand i k ek;
+      vale_expand i k ek;
 
-    let h2 = ST.get () in
-    B.modifies_only_not_unused_in B.loc_none h0 h2;
-    let p = B.malloc r (Ek i (G.hide (B.as_seq h0 k)) ek) 1ul in
-    let open LowStar.BufferOps in
-    dst *= p;
-    let h3 = ST.get() in
-    B.modifies_only_not_unused_in B.(loc_buffer dst) h2 h3;
-    Success
+      let h2 = ST.get () in
+      B.modifies_only_not_unused_in B.loc_none h0 h2;
+      let p = B.malloc r (Ek i (G.hide (B.as_seq h0 k)) ek) 1ul in
+      let open LowStar.BufferOps in
+      dst *= p;
+      let h3 = ST.get() in
+      B.modifies_only_not_unused_in B.(loc_buffer dst) h2 h3;
+      Success
 
+    ) else
+      UnsupportedAlgorithm
   ) else
-    UnsupportedAlgorithm
+      UnsupportedAlgorithm
+  
 
 let create_in_aes128_gcm: create_in_st AES128_GCM = create_in_aes_gcm Vale_AES128
 let create_in_aes256_gcm: create_in_st AES256_GCM = create_in_aes_gcm Vale_AES256
@@ -380,27 +383,31 @@ let encrypt_expand_aes256_gcm_no_check : encrypt_expand_st false AES256_GCM =
 
 let encrypt_expand_aes128_gcm : encrypt_expand_st true AES128_GCM =
   fun k iv iv_len ad ad_len plain plain_len cipher tag  ->
-  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-  let has_avx = EverCrypt.AutoConfig2.has_avx() in
-  let has_sse = EverCrypt.AutoConfig2.has_sse() in
-  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
-  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.hacl_can_compile_vale &&
-     (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
-    encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+    let has_avx = EverCrypt.AutoConfig2.has_avx() in
+    let has_sse = EverCrypt.AutoConfig2.has_sse() in
+    let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+    let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+    if  (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+      encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+    else
+      UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 
 let encrypt_expand_aes256_gcm : encrypt_expand_st true AES256_GCM =
   fun k iv iv_len ad ad_len plain plain_len cipher tag  ->
-  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-  let has_avx = EverCrypt.AutoConfig2.has_avx() in
-  let has_sse = EverCrypt.AutoConfig2.has_sse() in
-  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
-  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.hacl_can_compile_vale &&
-     (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
-    encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+    let has_avx = EverCrypt.AutoConfig2.has_avx() in
+    let has_sse = EverCrypt.AutoConfig2.has_sse() in
+    let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+    let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+    if  (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+      encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+    else
+      UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 
@@ -636,27 +643,31 @@ let decrypt_expand_aes256_gcm_no_check : decrypt_expand_st false AES256_GCM =
 
 let decrypt_expand_aes128_gcm : decrypt_expand_st true AES128_GCM =
   fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
-  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-  let has_avx = EverCrypt.AutoConfig2.has_avx() in
-  let has_sse = EverCrypt.AutoConfig2.has_sse() in
-  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
-  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.hacl_can_compile_vale &&
-     (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
-    decrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len cipher cipher_len tag dst
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+    let has_avx = EverCrypt.AutoConfig2.has_avx() in
+    let has_sse = EverCrypt.AutoConfig2.has_sse() in
+    let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+    let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+    if  (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+      decrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len cipher cipher_len tag dst
+    else
+      UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 
 let decrypt_expand_aes256_gcm : decrypt_expand_st true AES256_GCM =
   fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
-  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-  let has_avx = EverCrypt.AutoConfig2.has_avx() in
-  let has_sse = EverCrypt.AutoConfig2.has_sse() in
-  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
-  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.hacl_can_compile_vale &&
-     (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
-    decrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len cipher cipher_len tag dst
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+    let has_avx = EverCrypt.AutoConfig2.has_avx() in
+    let has_sse = EverCrypt.AutoConfig2.has_sse() in
+    let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+    let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+    if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+      decrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len cipher cipher_len tag dst
+    else
+      UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 

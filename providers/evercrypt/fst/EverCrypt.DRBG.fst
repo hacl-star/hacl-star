@@ -201,8 +201,7 @@ val mk_generate: #a:supported_alg -> EverCrypt.HMAC.compute_st a -> generate_st 
 let mk_generate #a hmac output st n additional_input additional_input_len =
   if additional_input_len >. max_additional_input_length || n >. max_output_length then
     false
-  else
-  let entropy_input_len = min_length a in
+  else (
   push_frame();
   let ok = mk_reseed hmac st additional_input additional_input_len in
   let result =
@@ -213,14 +212,14 @@ let mk_generate #a hmac output st n additional_input additional_input_len =
       let st_s = !*st in
       let b = mk_generate hmac
         output (p st_s) n additional_input_len additional_input in
-      true
+      b (* This used to be true, which is fishy *)
       end
   in
   let h1 = get () in
   pop_frame();
   let h2 = get () in
   frame_invariant (B.loc_all_regions_from false (HS.get_tip h1)) st h1 h2;
-  result
+  result )
 
 (** @type: true 
 *)

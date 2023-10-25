@@ -319,6 +319,8 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   assert (equal s12_16'' zero_4);
   ()
 
+#reset-options "--smtencoding.elim_box true --z3rlimit 100 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+
 let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   let n = num_bytes in
   let new_lo = (((lo64 q) / pow2 ((16 - n) * 8)) * pow2 ((16 - n) * 8)) % pow2_64 in

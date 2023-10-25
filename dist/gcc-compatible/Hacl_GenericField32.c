@@ -56,7 +56,7 @@ Check whether this library will work for a modulus `n`.
 bool Hacl_GenericField32_field_modulus_check(uint32_t len, uint32_t *n)
 {
   uint32_t m = Hacl_Bignum_Montgomery_bn_check_modulus_u32(len, n);
-  return m == (uint32_t)0xFFFFFFFFU;
+  return m == 0xFFFFFFFFU;
 }
 
 /**
@@ -82,7 +82,7 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
   uint32_t *r21 = r2;
   uint32_t *n11 = n1;
   memcpy(n11, n, len * sizeof (uint32_t));
-  uint32_t nBits = (uint32_t)32U * Hacl_Bignum_Lib_bn_get_top_index_u32(len, n);
+  uint32_t nBits = 32U * Hacl_Bignum_Lib_bn_get_top_index_u32(len, n);
   Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32(len, nBits, n, r21);
   uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 res = { .len = len, .n = n11, .mu = mu, .r2 = r21 };
@@ -283,27 +283,27 @@ Hacl_GenericField32_exp_consttime(
   uint32_t aMc[k1.len];
   memset(aMc, 0U, k1.len * sizeof (uint32_t));
   memcpy(aMc, aM, k1.len * sizeof (uint32_t));
-  if (bBits < (uint32_t)200U)
+  if (bBits < 200U)
   {
     KRML_CHECK_SIZE(sizeof (uint32_t), len1 + len1);
     uint32_t ctx[len1 + len1];
     memset(ctx, 0U, (len1 + len1) * sizeof (uint32_t));
     memcpy(ctx, k1.n, len1 * sizeof (uint32_t));
     memcpy(ctx + len1, k1.r2, len1 * sizeof (uint32_t));
-    uint32_t sw = (uint32_t)0U;
+    uint32_t sw = 0U;
     uint32_t *ctx_n = ctx;
     uint32_t *ctx_r2 = ctx + len1;
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, ctx_n, k1.mu, ctx_r2, resM);
-    for (uint32_t i0 = (uint32_t)0U; i0 < bBits; i0++)
+    for (uint32_t i0 = 0U; i0 < bBits; i0++)
     {
-      uint32_t i1 = (bBits - i0 - (uint32_t)1U) / (uint32_t)32U;
-      uint32_t j = (bBits - i0 - (uint32_t)1U) % (uint32_t)32U;
+      uint32_t i1 = (bBits - i0 - 1U) / 32U;
+      uint32_t j = (bBits - i0 - 1U) % 32U;
       uint32_t tmp = b[i1];
-      uint32_t bit = tmp >> j & (uint32_t)1U;
+      uint32_t bit = tmp >> j & 1U;
       uint32_t sw1 = bit ^ sw;
-      for (uint32_t i = (uint32_t)0U; i < len1; i++)
+      for (uint32_t i = 0U; i < len1; i++)
       {
-        uint32_t dummy = ((uint32_t)0U - sw1) & (resM[i] ^ aMc[i]);
+        uint32_t dummy = (0U - sw1) & (resM[i] ^ aMc[i]);
         resM[i] = resM[i] ^ dummy;
         aMc[i] = aMc[i] ^ dummy;
       }
@@ -314,9 +314,9 @@ Hacl_GenericField32_exp_consttime(
       sw = bit;
     }
     uint32_t sw0 = sw;
-    for (uint32_t i = (uint32_t)0U; i < len1; i++)
+    for (uint32_t i = 0U; i < len1; i++)
     {
-      uint32_t dummy = ((uint32_t)0U - sw0) & (resM[i] ^ aMc[i]);
+      uint32_t dummy = (0U - sw0) & (resM[i] ^ aMc[i]);
       resM[i] = resM[i] ^ dummy;
       aMc[i] = aMc[i] ^ dummy;
     }
@@ -324,22 +324,22 @@ Hacl_GenericField32_exp_consttime(
   else
   {
     uint32_t bLen;
-    if (bBits == (uint32_t)0U)
+    if (bBits == 0U)
     {
-      bLen = (uint32_t)1U;
+      bLen = 1U;
     }
     else
     {
-      bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+      bLen = (bBits - 1U) / 32U + 1U;
     }
     KRML_CHECK_SIZE(sizeof (uint32_t), len1 + len1);
     uint32_t ctx[len1 + len1];
     memset(ctx, 0U, (len1 + len1) * sizeof (uint32_t));
     memcpy(ctx, k1.n, len1 * sizeof (uint32_t));
     memcpy(ctx + len1, k1.r2, len1 * sizeof (uint32_t));
-    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)16U * len1);
-    uint32_t table[(uint32_t)16U * len1];
-    memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint32_t));
+    KRML_CHECK_SIZE(sizeof (uint32_t), 16U * len1);
+    uint32_t table[16U * len1];
+    memset(table, 0U, 16U * len1 * sizeof (uint32_t));
     KRML_CHECK_SIZE(sizeof (uint32_t), len1);
     uint32_t tmp[len1];
     memset(tmp, 0U, len1 * sizeof (uint32_t));
@@ -350,29 +350,29 @@ Hacl_GenericField32_exp_consttime(
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, ctx_n0, k1.mu, ctx_r20, t0);
     memcpy(t1, aMc, len1 * sizeof (uint32_t));
     KRML_MAYBE_FOR7(i,
-      (uint32_t)0U,
-      (uint32_t)7U,
-      (uint32_t)1U,
-      uint32_t *t11 = table + (i + (uint32_t)1U) * len1;
+      0U,
+      7U,
+      1U,
+      uint32_t *t11 = table + (i + 1U) * len1;
       uint32_t *ctx_n1 = ctx;
       Hacl_Bignum_Montgomery_bn_mont_sqr_u32(len1, ctx_n1, k1.mu, t11, tmp);
-      memcpy(table + ((uint32_t)2U * i + (uint32_t)2U) * len1, tmp, len1 * sizeof (uint32_t));
-      uint32_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * len1;
+      memcpy(table + (2U * i + 2U) * len1, tmp, len1 * sizeof (uint32_t));
+      uint32_t *t2 = table + (2U * i + 2U) * len1;
       uint32_t *ctx_n = ctx;
       Hacl_Bignum_Montgomery_bn_mont_mul_u32(len1, ctx_n, k1.mu, aMc, t2, tmp);
-      memcpy(table + ((uint32_t)2U * i + (uint32_t)3U) * len1, tmp, len1 * sizeof (uint32_t)););
-    if (bBits % (uint32_t)4U != (uint32_t)0U)
+      memcpy(table + (2U * i + 3U) * len1, tmp, len1 * sizeof (uint32_t)););
+    if (bBits % 4U != 0U)
     {
-      uint32_t i0 = bBits / (uint32_t)4U * (uint32_t)4U;
-      uint32_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, i0, (uint32_t)4U);
-      memcpy(resM, (uint32_t *)(table + (uint32_t)0U * len1), len1 * sizeof (uint32_t));
+      uint32_t i0 = bBits / 4U * 4U;
+      uint32_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, i0, 4U);
+      memcpy(resM, (uint32_t *)(table + 0U * len1), len1 * sizeof (uint32_t));
       KRML_MAYBE_FOR15(i1,
-        (uint32_t)0U,
-        (uint32_t)15U,
-        (uint32_t)1U,
-        uint32_t c = FStar_UInt32_eq_mask(bits_c, i1 + (uint32_t)1U);
-        const uint32_t *res_j = table + (i1 + (uint32_t)1U) * len1;
-        for (uint32_t i = (uint32_t)0U; i < len1; i++)
+        0U,
+        15U,
+        1U,
+        uint32_t c = FStar_UInt32_eq_mask(bits_c, i1 + 1U);
+        const uint32_t *res_j = table + (i1 + 1U) * len1;
+        for (uint32_t i = 0U; i < len1; i++)
         {
           uint32_t *os = resM;
           uint32_t x = (c & res_j[i]) | (~c & resM[i]);
@@ -388,24 +388,24 @@ Hacl_GenericField32_exp_consttime(
     KRML_CHECK_SIZE(sizeof (uint32_t), len1);
     uint32_t tmp0[len1];
     memset(tmp0, 0U, len1 * sizeof (uint32_t));
-    for (uint32_t i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
+    for (uint32_t i0 = 0U; i0 < bBits / 4U; i0++)
     {
       KRML_MAYBE_FOR4(i,
-        (uint32_t)0U,
-        (uint32_t)4U,
-        (uint32_t)1U,
+        0U,
+        4U,
+        1U,
         uint32_t *ctx_n = ctx;
         Hacl_Bignum_Montgomery_bn_mont_sqr_u32(len1, ctx_n, k1.mu, resM, resM););
-      uint32_t k2 = bBits - bBits % (uint32_t)4U - (uint32_t)4U * i0 - (uint32_t)4U;
-      uint32_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, k2, (uint32_t)4U);
-      memcpy(tmp0, (uint32_t *)(table + (uint32_t)0U * len1), len1 * sizeof (uint32_t));
+      uint32_t k2 = bBits - bBits % 4U - 4U * i0 - 4U;
+      uint32_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, k2, 4U);
+      memcpy(tmp0, (uint32_t *)(table + 0U * len1), len1 * sizeof (uint32_t));
       KRML_MAYBE_FOR15(i1,
-        (uint32_t)0U,
-        (uint32_t)15U,
-        (uint32_t)1U,
-        uint32_t c = FStar_UInt32_eq_mask(bits_l, i1 + (uint32_t)1U);
-        const uint32_t *res_j = table + (i1 + (uint32_t)1U) * len1;
-        for (uint32_t i = (uint32_t)0U; i < len1; i++)
+        0U,
+        15U,
+        1U,
+        uint32_t c = FStar_UInt32_eq_mask(bits_l, i1 + 1U);
+        const uint32_t *res_j = table + (i1 + 1U) * len1;
+        for (uint32_t i = 0U; i < len1; i++)
         {
           uint32_t *os = tmp0;
           uint32_t x = (c & res_j[i]) | (~c & tmp0[i]);
@@ -450,7 +450,7 @@ Hacl_GenericField32_exp_vartime(
   uint32_t aMc[k1.len];
   memset(aMc, 0U, k1.len * sizeof (uint32_t));
   memcpy(aMc, aM, k1.len * sizeof (uint32_t));
-  if (bBits < (uint32_t)200U)
+  if (bBits < 200U)
   {
     KRML_CHECK_SIZE(sizeof (uint32_t), len1 + len1);
     uint32_t ctx[len1 + len1];
@@ -460,13 +460,13 @@ Hacl_GenericField32_exp_vartime(
     uint32_t *ctx_n = ctx;
     uint32_t *ctx_r2 = ctx + len1;
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, ctx_n, k1.mu, ctx_r2, resM);
-    for (uint32_t i = (uint32_t)0U; i < bBits; i++)
+    for (uint32_t i = 0U; i < bBits; i++)
     {
-      uint32_t i1 = i / (uint32_t)32U;
-      uint32_t j = i % (uint32_t)32U;
+      uint32_t i1 = i / 32U;
+      uint32_t j = i % 32U;
       uint32_t tmp = b[i1];
-      uint32_t bit = tmp >> j & (uint32_t)1U;
-      if (!(bit == (uint32_t)0U))
+      uint32_t bit = tmp >> j & 1U;
+      if (!(bit == 0U))
       {
         uint32_t *ctx_n0 = ctx;
         Hacl_Bignum_Montgomery_bn_mont_mul_u32(len1, ctx_n0, k1.mu, resM, aMc, resM);
@@ -478,22 +478,22 @@ Hacl_GenericField32_exp_vartime(
   else
   {
     uint32_t bLen;
-    if (bBits == (uint32_t)0U)
+    if (bBits == 0U)
     {
-      bLen = (uint32_t)1U;
+      bLen = 1U;
     }
     else
     {
-      bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+      bLen = (bBits - 1U) / 32U + 1U;
     }
     KRML_CHECK_SIZE(sizeof (uint32_t), len1 + len1);
     uint32_t ctx[len1 + len1];
     memset(ctx, 0U, (len1 + len1) * sizeof (uint32_t));
     memcpy(ctx, k1.n, len1 * sizeof (uint32_t));
     memcpy(ctx + len1, k1.r2, len1 * sizeof (uint32_t));
-    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)16U * len1);
-    uint32_t table[(uint32_t)16U * len1];
-    memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint32_t));
+    KRML_CHECK_SIZE(sizeof (uint32_t), 16U * len1);
+    uint32_t table[16U * len1];
+    memset(table, 0U, 16U * len1 * sizeof (uint32_t));
     KRML_CHECK_SIZE(sizeof (uint32_t), len1);
     uint32_t tmp[len1];
     memset(tmp, 0U, len1 * sizeof (uint32_t));
@@ -504,21 +504,21 @@ Hacl_GenericField32_exp_vartime(
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, ctx_n0, k1.mu, ctx_r20, t0);
     memcpy(t1, aMc, len1 * sizeof (uint32_t));
     KRML_MAYBE_FOR7(i,
-      (uint32_t)0U,
-      (uint32_t)7U,
-      (uint32_t)1U,
-      uint32_t *t11 = table + (i + (uint32_t)1U) * len1;
+      0U,
+      7U,
+      1U,
+      uint32_t *t11 = table + (i + 1U) * len1;
       uint32_t *ctx_n1 = ctx;
       Hacl_Bignum_Montgomery_bn_mont_sqr_u32(len1, ctx_n1, k1.mu, t11, tmp);
-      memcpy(table + ((uint32_t)2U * i + (uint32_t)2U) * len1, tmp, len1 * sizeof (uint32_t));
-      uint32_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * len1;
+      memcpy(table + (2U * i + 2U) * len1, tmp, len1 * sizeof (uint32_t));
+      uint32_t *t2 = table + (2U * i + 2U) * len1;
       uint32_t *ctx_n = ctx;
       Hacl_Bignum_Montgomery_bn_mont_mul_u32(len1, ctx_n, k1.mu, aMc, t2, tmp);
-      memcpy(table + ((uint32_t)2U * i + (uint32_t)3U) * len1, tmp, len1 * sizeof (uint32_t)););
-    if (bBits % (uint32_t)4U != (uint32_t)0U)
+      memcpy(table + (2U * i + 3U) * len1, tmp, len1 * sizeof (uint32_t)););
+    if (bBits % 4U != 0U)
     {
-      uint32_t i = bBits / (uint32_t)4U * (uint32_t)4U;
-      uint32_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, i, (uint32_t)4U);
+      uint32_t i = bBits / 4U * 4U;
+      uint32_t bits_c = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, i, 4U);
       uint32_t bits_l32 = bits_c;
       const uint32_t *a_bits_l = table + bits_l32 * len1;
       memcpy(resM, (uint32_t *)a_bits_l, len1 * sizeof (uint32_t));
@@ -532,16 +532,16 @@ Hacl_GenericField32_exp_vartime(
     KRML_CHECK_SIZE(sizeof (uint32_t), len1);
     uint32_t tmp0[len1];
     memset(tmp0, 0U, len1 * sizeof (uint32_t));
-    for (uint32_t i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
+    for (uint32_t i = 0U; i < bBits / 4U; i++)
     {
       KRML_MAYBE_FOR4(i0,
-        (uint32_t)0U,
-        (uint32_t)4U,
-        (uint32_t)1U,
+        0U,
+        4U,
+        1U,
         uint32_t *ctx_n = ctx;
         Hacl_Bignum_Montgomery_bn_mont_sqr_u32(len1, ctx_n, k1.mu, resM, resM););
-      uint32_t k2 = bBits - bBits % (uint32_t)4U - (uint32_t)4U * i - (uint32_t)4U;
-      uint32_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, k2, (uint32_t)4U);
+      uint32_t k2 = bBits - bBits % 4U - 4U * i - 4U;
+      uint32_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, k2, 4U);
       uint32_t bits_l32 = bits_l;
       const uint32_t *a_bits_l = table + bits_l32 * len1;
       memcpy(tmp0, (uint32_t *)a_bits_l, len1 * sizeof (uint32_t));
@@ -574,38 +574,33 @@ Hacl_GenericField32_inverse(
   KRML_CHECK_SIZE(sizeof (uint32_t), len1);
   uint32_t n2[len1];
   memset(n2, 0U, len1 * sizeof (uint32_t));
-  uint32_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32((uint32_t)0U, k1.n[0U], (uint32_t)2U, n2);
+  uint32_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(0U, k1.n[0U], 2U, n2);
   uint32_t c1;
-  if ((uint32_t)1U < len1)
+  if (1U < len1)
   {
-    uint32_t *a1 = k1.n + (uint32_t)1U;
-    uint32_t *res1 = n2 + (uint32_t)1U;
+    uint32_t *a1 = k1.n + 1U;
+    uint32_t *res1 = n2 + 1U;
     uint32_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < (len1 - (uint32_t)1U) / (uint32_t)4U; i++)
+    for (uint32_t i = 0U; i < (len1 - 1U) / 4U; i++)
     {
-      uint32_t t1 = a1[(uint32_t)4U * i];
-      uint32_t *res_i0 = res1 + (uint32_t)4U * i;
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i0);
-      uint32_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
-      uint32_t *res_i1 = res1 + (uint32_t)4U * i + (uint32_t)1U;
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, (uint32_t)0U, res_i1);
-      uint32_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
-      uint32_t *res_i2 = res1 + (uint32_t)4U * i + (uint32_t)2U;
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, (uint32_t)0U, res_i2);
-      uint32_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
-      uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
+      uint32_t t1 = a1[4U * i];
+      uint32_t *res_i0 = res1 + 4U * i;
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, 0U, res_i0);
+      uint32_t t10 = a1[4U * i + 1U];
+      uint32_t *res_i1 = res1 + 4U * i + 1U;
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, 0U, res_i1);
+      uint32_t t11 = a1[4U * i + 2U];
+      uint32_t *res_i2 = res1 + 4U * i + 2U;
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, 0U, res_i2);
+      uint32_t t12 = a1[4U * i + 3U];
+      uint32_t *res_i = res1 + 4U * i + 3U;
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, 0U, res_i);
     }
-    for
-    (uint32_t
-      i = (len1 - (uint32_t)1U) / (uint32_t)4U * (uint32_t)4U;
-      i
-      < len1 - (uint32_t)1U;
-      i++)
+    for (uint32_t i = (len1 - 1U) / 4U * 4U; i < len1 - 1U; i++)
     {
       uint32_t t1 = a1[i];
       uint32_t *res_i = res1 + i;
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i);
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, 0U, res_i);
     }
     uint32_t c10 = c;
     c1 = c10;
@@ -614,6 +609,7 @@ Hacl_GenericField32_inverse(
   {
     c1 = c0;
   }
-  Hacl_GenericField32_exp_vartime(k, aM, k1.len * (uint32_t)32U, n2, aInvM);
+  KRML_MAYBE_UNUSED_VAR(c1);
+  Hacl_GenericField32_exp_vartime(k, aM, k1.len * 32U, n2, aInvM);
 }
 

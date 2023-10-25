@@ -66,10 +66,11 @@ let helper_smtpat (a: fixed_len_alg) (len: uint32_t{ v len `less_than_max_input_
 inline_for_extraction noextract
 let mk_wrap_key (a: fixed_len_alg) (hash: D.hash_st a): wrap_key_st a =
 fun output key len ->
-  //[@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
+  [@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = helper_smtpat a len in
   let nkey = B.sub output 0ul i in
   let zeroes = B.sub output i (D.block_len a `FStar.UInt32.sub` i) in
+  LowStar.Ignore.ignore zeroes;
   (**) assert B.(loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));
   (**) let h0 = ST.get () in
   (**) assert (Seq.equal (B.as_seq h0 zeroes) (Seq.create (v (D.block_len a `FStar.UInt32.sub` i)) (u8 0)));
