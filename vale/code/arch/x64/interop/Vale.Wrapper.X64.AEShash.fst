@@ -32,6 +32,7 @@ let length_aux5 (b:uint8_p) : Lemma
     DV.length_eq db
 
 #push-options "--z3cliopt smt.arith.nl=true"
+#set-options "--ext compat:normalizer_memo_ignore_cfg"
 inline_for_extraction
 let aes128_keyhash_init_stdcall key roundkeys_b hkeys_b =
   let h0 = get() in
@@ -70,6 +71,7 @@ let aes128_keyhash_init_stdcall key roundkeys_b hkeys_b =
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=true"
+#set-options "--ext compat:normalizer_memo_ignore_cfg"
 inline_for_extraction
 let aes256_keyhash_init_stdcall key roundkeys_b hkeys_b =
   let h0 = get() in

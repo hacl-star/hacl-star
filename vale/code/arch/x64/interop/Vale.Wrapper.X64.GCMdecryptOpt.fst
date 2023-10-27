@@ -199,7 +199,7 @@ val gcm128_decrypt_opt':
     )
 
 
-#push-options "--z3cliopt smt.arith.nl=true --smtencoding.nl_arith_repr boxwrap"
+#push-options "--z3cliopt smt.arith.nl=true --smtencoding.nl_arith_repr boxwrap --ext compat:normalizer_memo_ignore_cfg --retry 3"
 #restart-solver
 inline_for_extraction
 let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b

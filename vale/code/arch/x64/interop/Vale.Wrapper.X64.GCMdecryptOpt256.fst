@@ -199,6 +199,7 @@ val gcm256_decrypt_opt':
 
 
 #push-options "--smtencoding.nl_arith_repr boxwrap"
+#set-options "--ext compat:normalizer_memo_ignore_cfg"
 #restart-solver
 inline_for_extraction
 let gcm256_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
