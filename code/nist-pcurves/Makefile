@@ -7,7 +7,7 @@ all: dist/Makefile.basic
 # Defines rules for producing .checked, .krml, .depend, etc.
 include $(HACL_HOME)/Makefile.local
 
-FSTAR_ROOTS = Hacl.P256.fst Hacl.P384.fst
+FSTAR_ROOTS = Hacl.P256.fst Hacl.P384.fst Hacl.P521.fst
 
 CFLAGS += -I$(HACL_HOME)/lib/c -march=native -mtune=native -O3
 export CFLAGS
@@ -19,7 +19,7 @@ dist/libp256.a: dist/Makefile.basic
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libp256.a \
-	$(BASE_FLAGS) $(BIGNUM_BUNDLE) $(P256_BUNDLE) $(P384_BUNDLE) \
+	$(BASE_FLAGS) $(BIGNUM_BUNDLE) $(P256_BUNDLE) $(P384_BUNDLE) $(P521_BUNDLE) \
 	$(notdir $(HAND_WRITTEN_FILES)) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \
