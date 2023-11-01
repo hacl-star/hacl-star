@@ -90,6 +90,7 @@ val compute_iv_stdcall':
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=true"
+#set-options "--ext compat:normalizer_memo_ignore_cfg"
 inline_for_extraction
 let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   let h0 = get() in

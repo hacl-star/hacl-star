@@ -4,6 +4,8 @@ open FStar.Mul
 open Vale.Interop.Base
 module DV = LowStar.BufferView.Down
 
+#set-options "--ext compat:normalizer_memo_ignore_cfg"
+
 #set-options "--z3rlimit 50"
 
 let add_scalar_e out f1 f2 =
