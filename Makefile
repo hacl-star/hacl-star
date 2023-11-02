@@ -117,7 +117,7 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-ml test-hpke
+test-unstaged: test-handwritten test-c test-ml test-hpke
 
 ifeq ($(shell uname -m),x86_64)
 test-unstaged: vale_testInline
