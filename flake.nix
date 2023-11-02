@@ -6,7 +6,7 @@
     flake-utils.follows = "fstar/flake-utils";
     nixpkgs.follows = "fstar/nixpkgs";
     karamel = {
-      url = "github:fstarlang/karamel";
+      url = "github:fstarlang/karamel/protz_renamings";
       inputs.fstar.follows = "fstar";
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
