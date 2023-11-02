@@ -72,9 +72,43 @@ static inline void ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a, uint64_t *p_r2_n)
   uint32_t nLen = (ffdhe_len(a) - 1U) / 8U + 1U;
   uint64_t *p_n = p_r2_n;
   uint64_t *r2_n = p_r2_n + nLen;
-  KRML_CHECK_SIZE(sizeof (uint8_t), ffdhe_len(a));
-  uint8_t p_s[ffdhe_len(a)];
-  memset(p_s, 0U, ffdhe_len(a) * sizeof (uint8_t));
+  uint32_t sw;
+  switch (a)
+  {
+    case Spec_FFDHE_FFDHE2048:
+      {
+        sw = 256U;
+        break;
+      }
+    case Spec_FFDHE_FFDHE3072:
+      {
+        sw = 384U;
+        break;
+      }
+    case Spec_FFDHE_FFDHE4096:
+      {
+        sw = 512U;
+        break;
+      }
+    case Spec_FFDHE_FFDHE6144:
+      {
+        sw = 768U;
+        break;
+      }
+    case Spec_FFDHE_FFDHE8192:
+      {
+        sw = 1024U;
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  KRML_CHECK_SIZE(sizeof (uint8_t), sw);
+  uint8_t p_s[sw];
+  memset(p_s, 0U, sw * sizeof (uint8_t));
   const uint8_t *p;
   switch (a)
   {
