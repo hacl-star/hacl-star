@@ -535,7 +535,7 @@ let blake2s d kk k n = blake2 Blake2S d kk k n
 
 val blake2b:
     d:bytes
-  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 64)}
+  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 128)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
