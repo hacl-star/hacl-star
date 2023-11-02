@@ -893,7 +893,8 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
 	  -add-include '"libintvector.h"' \
-	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^) \
+	  -add-include '"clients/krmlrenamings.h"'
 
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
 

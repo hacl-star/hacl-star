@@ -135,7 +135,8 @@ BASE_FLAGS = \
   -add-early-include '"krml/internal/types.h"' \
   -add-early-include '"krml/lowstar_endianness.h"' \
   -header $(HACL_HOME)/dist/LICENSE.txt \
-  -funroll-loops 16
+  -funroll-loops 16 \
+  -record-renamings
 
 CURVE_BUNDLE_SLOW= \
   -bundle Hacl.Curve25519_64_Slow
