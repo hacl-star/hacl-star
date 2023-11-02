@@ -161,7 +161,7 @@ let length_aux2 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --ext compat:normalizer_memo_ignore_cfg"
 inline_for_extraction
 let gctr128_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blocks =
   let h0 = get() in
