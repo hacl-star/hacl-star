@@ -8,9 +8,6 @@ module S = Spec.Ed25519
 
 include Hacl.Spec.BignumQ.Definitions
 
-
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
-
 let feq (#a #b:Type) (f:(a -> b)) (x y:a) :
   Lemma (requires x == y) (ensures f x == f y) = ()
 
@@ -74,12 +71,13 @@ val lemma_subm_conditional:
     (x0 + x1 * pow2 56 + x2 * pow2 112 + x3 * pow2 168 + x4 * pow2 224) -
     (y0 + y1 * pow2 56 + y2 * pow2 112 + y3 * pow2 168 + y4 * pow2 224) + b4 * pow2 280)
 
+#push-options "--z3rlimit 50"
 let lemma_subm_conditional x0 x1 x2 x3 x4 y0 y1 y2 y3 y4 b0 b1 b2 b3 b4 =
   assert_norm (pow2 56 * pow2 56 = pow2 112);
   assert_norm (pow2 56 * pow2 112 = pow2 168);
   assert_norm (pow2 56 * pow2 168 = pow2 224);
   assert_norm (pow2 56 * pow2 224 = pow2 280)
-
+#pop-options
 
 val lemma_div224: x:qelem_wide5 ->
   Lemma
@@ -90,6 +88,7 @@ val lemma_div224: x:qelem_wide5 ->
     wide_as_nat5 x / pow2 224 ==
     v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280))
 
+#push-options "--z3rlimit 50"
 let lemma_div224 x =
   let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
   assert
@@ -115,9 +114,7 @@ let lemma_div224 x =
     (==) { FStar.Math.Lemmas.small_division_lemma_1 (v x0 + v x1 * pow2 56 + v x2 * pow2 112 + v x3 * pow2 168) (pow2 224) }
       v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280;
     }
-
-
-#set-options "--z3rlimit 200"
+#pop-options
 
 val lemma_div248_aux: x:qelem_wide5 ->
   Lemma
@@ -132,7 +129,6 @@ val lemma_div248_aux: x:qelem_wide5 ->
 open FStar.Tactics.CanonCommSemiring
 
 #push-options "--z3cliopt smt.arith.nl=false"
-
 let lemma_div248_aux x =
   let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
   assert_norm (pow2 248 == pow2 224 * pow2 24);
@@ -153,7 +149,6 @@ let lemma_div248_aux x =
   (==) { FStar.Math.Lemmas.lemma_div_plus (v x4) (v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256) (pow2 24) }
     v x4 / pow2 24 + v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256;
   }
-
 #pop-options
 
 val lemma_div248_x5: x5:uint64 ->
@@ -241,6 +236,7 @@ val lemma_div248: x:qelem_wide5 ->
 
     wide_as_nat5 x / pow2 248 == z0 + z1 * pow2 56 + z2 * pow2 112 + z3 * pow2 168 + z4 * pow2 224))
 
+#push-options "--z3rlimit 50"
 let lemma_div248 x =
   let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
   lemma_wide_as_nat_pow512 x;
@@ -272,7 +268,7 @@ let lemma_div248 x =
   (==) { lemma_div248_aux x }
     wide_as_nat5 x / pow2 248;
   }
-
+#pop-options
 
 val lemma_add_modq5:
     x:qelem5
@@ -319,7 +315,6 @@ let lemma_wide_as_nat_pow528 x =
   assert_norm (pow2 24 < pow2 40)
 
 #push-options "--z3cliopt smt.arith.nl=false"
-
 val lemma_div264_aux: x:qelem_wide5 ->
   Lemma
   (requires
@@ -401,7 +396,6 @@ let lemma_div264_x8 x8 =
     v x8 * pow2 184;
   }
 
-
 val lemma_div264_x9: x9:uint64{v x9 < pow2 40} ->
   Lemma (pow2 16 * (v x9 % pow2 40) * pow2 224 == v x9 * pow2 240)
 let lemma_div264_x9 x9 =
@@ -412,8 +406,6 @@ let lemma_div264_x9 x9 =
     (==) { _ by (Tactics.norm [delta; primops]; int_semiring ()) }
     v x9 * pow2 240;
   }
-
-//#pop-options
 
 val lemma_div264: x:qelem_wide5 ->
   Lemma
@@ -430,6 +422,7 @@ val lemma_div264: x:qelem_wide5 ->
 
     wide_as_nat5 x / pow2 264 == z0 + z1 * pow2 56 + z2 * pow2 112 + z3 * pow2 168 + z4 * pow2 224))
 
+#push-options "--z3rlimit 50"
 let lemma_div264 x =
   let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
   lemma_wide_as_nat_pow528 x;
@@ -461,8 +454,9 @@ let lemma_div264 x =
   (==) { lemma_div264_aux x }
     wide_as_nat5 x / pow2 264;
   }
-
 #pop-options
+
+#pop-options // "--z3cliopt smt.arith.nl=false"
 
 val lemma_mod_264_aux: t:qelem_wide5 ->
   Lemma
@@ -473,6 +467,7 @@ val lemma_mod_264_aux: t:qelem_wide5 ->
    (wide_as_nat5 t) % pow2 264 ==
    (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) % pow2 264))
 
+#push-options "--z3rlimit 150"
 let lemma_mod_264_aux t =
   let (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) = t in
   let res = (t0, t1, t2, t3, t4 &. u64 0xffffffffff) in
@@ -495,7 +490,7 @@ let lemma_mod_264_aux t =
   (==) { FStar.Math.Lemmas.cancel_mul_mod (v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) (pow2 264) }
     (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) % pow2 264;
   }
-
+#pop-options
 
 val lemma_as_nat_pow264: x:qelem5 ->
   Lemma
@@ -570,11 +565,13 @@ val lemma_sub_mod_264_aux:
     (x0 + x1 * pow2 56 + x2 * pow2 112 + x3 * pow2 168 + x4 * pow2 224) -
     (y0 + y1 * pow2 56 + y2 * pow2 112 + y3 * pow2 168 + y4 * pow2 224) + c5 * pow2 264)
 
+#push-options "--z3rlimit 50"
 let lemma_sub_mod_264_aux x0 x1 x2 x3 x4 y0 y1 y2 y3 y4 b0 b1 b2 b3 b4 =
   assert_norm (pow2 56 * pow2 56 = pow2 112);
   assert_norm (pow2 56 * pow2 112 = pow2 168);
   assert_norm (pow2 56 * pow2 168 = pow2 224);
   assert_norm (pow2 40 * pow2 224 = pow2 264)
+#pop-options
 
 val lemma_sub_mod_264:
     x:qelem5
@@ -595,6 +592,7 @@ val lemma_sub_mod_264:
      as_nat5 t == as_nat5 x - as_nat5 y
     else as_nat5 t == as_nat5 x - as_nat5 y + pow2 264))
 
+#push-options "--z3rlimit 50"
 let lemma_sub_mod_264 x y t c5 =
   assert (if v c5 = 0 then as_nat5 x >= as_nat5 y else as_nat5 x < as_nat5 y);
   assert (as_nat5 t == as_nat5 x - as_nat5 y + v c5 * pow2 264);
@@ -602,7 +600,7 @@ let lemma_sub_mod_264 x y t c5 =
     assert (v c5 == 0 /\ as_nat5 t == as_nat5 x - as_nat5 y)
   else
     assert (v c5 == 1 /\ as_nat5 t == as_nat5 x - as_nat5 y + pow2 264)
-
+#pop-options
 
 let lemma_mul_qelem5 (x0 x1 x2 x3 x4 y0 y1 y2 y3 y4:nat) : Lemma
   ((x0 + x1 * pow2 56 + x2 * pow2 112 + x3 * pow2 168 + x4 * pow2 224) *
@@ -629,9 +627,6 @@ let lemma_mul_qelem5 (x0 x1 x2 x3 x4 y0 y1 y2 y3 y4:nat) : Lemma
     (x3 * y4 + x4 * y3) * pow392 +
     (x4 * y4) * pow448)
   by (Tactics.norm [zeta; iota; delta; primops]; int_semiring ())
-
-
-#set-options "--z3rlimit 400"
 
 val lemma_mul_5_low_264:
   x1:nat -> x2:nat -> x3:nat -> x4:nat -> x5:nat ->
@@ -751,17 +746,26 @@ val lemma_mod_264_small:
        + pow2 112 * ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) % pow2 56)
        + pow2 168 * ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) % pow2 56)
        + pow2 224 * (a4 + ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) / pow2 56)))
+
+(* These silly lemmas needed to guide the proof below... *)
+private let aux_nat_over_pos (p : nat) (q : pos) : Lemma (p / q >= 0) = ()
+private let aux_nat_plus_nat (p : nat) (q : nat) : Lemma (p + q >= 0) = ()
+
 let lemma_mod_264_small a0 a1 a2 a3 a4 =
   Math.Lemmas.lemma_div_mod a0 (pow2 56);
   Math.Lemmas.distributivity_add_right (pow2 56) a1 (a0 / pow2 56);
+  (**) aux_nat_over_pos a0 (pow2 56);
+  (**) aux_nat_plus_nat a1 (a0 / pow2 56);
   let a1':nat = (a1 + (a0 / pow2 56)) in
+  (**) aux_nat_over_pos a1' (pow2 56);
+  (**) aux_nat_plus_nat a2 (a1' / pow2 56);
   let a2':nat = (a2 + (a1' / pow2 56)) in
+  (**) aux_nat_over_pos a2' (pow2 56);
+  (**) aux_nat_plus_nat a3 (a2' / pow2 56);
   let a3':nat = (a3 + (a2' / pow2 56)) in
   lemma_aux_0 a1' a2 56;
   lemma_aux_0 a2' a3 112;
   lemma_aux_0 a3' a4 168
-
-
 
 private
 val lemma_mod_264_:
@@ -786,6 +790,7 @@ let lemma_mod_264_ a0 a1 a2 a3 a4 =
   lemma_mod_264' x0 x1 x2 x3 (a4 + ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) / pow2 56))
 
 
+#push-options "--z3rlimit 50"
 let lemma_mul_5_low_264 x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 =
   lemma_div_nat_is_nat (x1 * y1) (pow2 56);
   lemma_div_nat_is_nat (x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) (pow2 56);
@@ -793,33 +798,36 @@ let lemma_mul_5_low_264 x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 =
   lemma_div_nat_is_nat (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4 + ((x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) / pow2 56)) (pow2 56);
   lemma_mul_5''' x1 x2 x3 x4 x5 y1 y2 y3 y4 y5;
   lemma_mod_264_ (x1 * y1) (x2 * y1 + x1 * y2) (x3 * y1 + x2 * y2 + x1 * y3) (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4) (x5 * y1 + x4 * y2 + x3 * y3 + x2 * y4 + x1 * y5)
+#pop-options
 
 private
 val lemma_optimized_barrett_reduce:
   a:nat{a < pow2 512} ->
   Lemma (a - (((a / pow2 248) * (pow2 512 / S.q)) / pow2 264) * S.q < 2 * S.q
     /\ a - (((a / pow2 248) * (pow2 512 / S.q)) / pow2 264) * S.q >= 0)
+#push-options "--z3rlimit 50"
 let lemma_optimized_barrett_reduce a =
   assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
   assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512)
-
-#push-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native --z3rlimit 30"
-
+#pop-options
 
 private
 val lemma_optimized_barrett_reduce2:
   a:nat{a < pow2 512} ->
   Lemma (a - ((a * (pow2 512 / S.q)) / pow2 512) * S.q < pow2 264 /\
          a - ((a * (pow2 512 / S.q)) / pow2 512) * S.q >= 0)
+
+#push-options "--z3rlimit 50"
 let lemma_optimized_barrett_reduce2 a =
   assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
   assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512)
+#pop-options
 
-
+#push-options "--fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native --z3rlimit 30"
 private
 let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
   (requires (x >= y /\ x - y < c))
@@ -833,11 +841,9 @@ let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
       Math.Lemmas.swap_mul c (x/c - y/c);
       Math.Lemmas.cancel_mul_div (x/c - y/c) c
       )
-
 #pop-options
 
-#set-options "--z3rlimit 700"
-
+#push-options "--z3rlimit 30"
 private
 let lemma_1 (x:nat) (y:nat) (c:pos) : Lemma
   (requires (x - y < c /\ x >= y))
@@ -848,6 +854,7 @@ let lemma_1 (x:nat) (y:nat) (c:pos) : Lemma
     Math.Lemmas.distributivity_sub_right c (y/c) (x/c);
     assert( (x%c) - (y%c) = x - y - c*((x/c) - (y/c)));
     lemma_0 x y c
+#pop-options
 
 val lemma_barrett_reduce':
   x:nat{x < pow2 512} ->
@@ -885,42 +892,25 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
     }
   )
 
-val lemma_barrett_reduce''':
-  x:nat{x < pow2 512} ->
-  (r:nat) ->
-  (qml:nat) ->
-  (u:nat) ->
-  (z:nat) ->
-  Lemma
-    (requires
-      r == x % pow2 264 /\
-      qml = (((((x / pow2 248) * (pow2 512 / S.q)) / pow2 264) * S.q) % pow2 264) /\
-      u == (if r < qml then pow2 264 + r - qml else r - qml) /\
-      z == (if u < S.q then u else u - S.q))
-    (ensures z = x % S.q)
-
-
-#restart-solver
-#reset-options "--z3rlimit 60 --fuel 0 --ifuel 0 --split_queries always"
-
+private
 let aux (a b c:int)
   : Lemma (requires 0 <= b /\ c < a)
           (ensures 0 <= a + b -c) = ()
 
-let lemma_barrett_reduce''' x r qml u z =
+#push-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+let lemma_barrett_reduce' x =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512);
   assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
+  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
 
   let m = pow2 512 / S.q in
   let l = S.q in
   assert_norm (2 * l < pow2 264);
 
-  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-  let q:nat = ((x / pow2 248) * m) / pow2 264 in
 
+  let q:nat = ((x / pow2 248) * m) / pow2 264 in
   let a' = (x % pow2 264) - (q * l) % pow2 264 in
-  assert_norm (2 * l < pow2 264);
   calc (<) {
     x - q * l;
     (<) { lemma_optimized_barrett_reduce x }
@@ -947,26 +937,38 @@ let lemma_barrett_reduce''' x r qml u z =
   Math.Lemmas.modulo_lemma (x - ((x * m) / pow2 512) * l) (pow2 264);
   Math.Lemmas.lemma_mod_sub x l ((x*m)/pow2 512);
   lemma_1 x (q*l) (pow2 264);
+  let r = x % pow2 264 in
   FStar.Math.Lemmas.modulo_range_lemma x (pow2 264);
   assert (0 <= r);
+  let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
   FStar.Math.Lemmas.modulo_range_lemma
     ((((x / pow2 248) * m) / pow2 264) * l)
     (pow2 264);
   assert (qml < pow2 264);
-  assert (u < 2 * l);
+  let u : (u:nat{u < 2 * l}) =
+    if r < qml
+    then let s = pow2 264 + r - qml in
+         aux (pow2 264) r qml;
+         assert (s >= 0);
+         assert (s < 2 * l) by (
+           Tactics.set_rlimit 150;
+           ()
+         );
+         s
+    else let _ = assert (r >= qml) in
+         let s = r - qml in
+         assert (s >= 0);
+         assert (s < 2 * l) by (
+           Tactics.set_rlimit 150;
+           ()
+         );
+         s
+  in
+  let z : nat = if u < l then u else u - l in
   Math.Lemmas.modulo_lemma u (pow2 264);
   assert (u == x - q * l);
+  assert (u < 2 * S.q /\ u = x - q * S.q /\ z == (if u < S.q then u else u - S.q));
   lemma_barrett_reduce'' u z x q;
   assert (z == x % S.q)
 
-let lemma_barrett_reduce' x =
-  let m = pow2 512 / S.q in
-  let l = S.q in
-  let r = x % pow2 264 in
-  let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
-  let u : nat =
-    if r < qml
-    then pow2 264 + r - qml
-    else r - qml in
-  let z : nat = if u < l then u else u - l in
-  lemma_barrett_reduce''' x r qml u z
+#pop-options

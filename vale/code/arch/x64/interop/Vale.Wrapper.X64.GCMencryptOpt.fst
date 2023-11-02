@@ -202,7 +202,7 @@ val gcm128_encrypt_opt':
       ))))
     )
 
-#push-options "--z3cliopt smt.arith.nl=true --z3rlimit 800"
+#push-options "--z3cliopt smt.arith.nl=true --retry 3 --z3rlimit 800 --ext compat:normalizer_memo_ignore_cfg"
 #restart-solver
 inline_for_extraction
 let gcm128_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
