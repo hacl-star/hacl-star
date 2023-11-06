@@ -2314,22 +2314,22 @@ EverCrypt_Hash_Incremental_hash(
       }
     case Spec_Hash_Definitions_SHA3_224:
       {
-        Hacl_Hash_SHA3_sha3_224(input_len, input, output);
+        Hacl_Hash_SHA3_sha3_224(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        Hacl_Hash_SHA3_sha3_256(input_len, input, output);
+        Hacl_Hash_SHA3_sha3_256(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        Hacl_Hash_SHA3_sha3_384(input_len, input, output);
+        Hacl_Hash_SHA3_sha3_384(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        Hacl_Hash_SHA3_sha3_512(input_len, input, output);
+        Hacl_Hash_SHA3_sha3_512(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_Blake2S:

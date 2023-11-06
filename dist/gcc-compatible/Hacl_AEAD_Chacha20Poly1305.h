@@ -65,23 +65,22 @@ Hacl_AEAD_Chacha20Poly1305_encrypt(
 );
 
 /**
-Decrypt a ciphertext `cipher` with key `k`.
+Decrypt a ciphertext `input` with key `key`.
 
-The arguments `k`, `n`, `aadlen`, and `aad` are same in encryption/decryption.
-Note: Encryption and decryption can be executed in-place, i.e., `m` and `cipher` can point to the same memory.
+The arguments `key`, `nonce`, `data`, and `data_len` are same in encryption/decryption.
+Note: Encryption and decryption can be executed in-place, i.e., `output` and `input` can point to the same memory.
 
-If decryption succeeds, the resulting plaintext is stored in `m` and the function returns the success code 0.
-If decryption fails, the array `m` remains unchanged and the function returns the error code 1.
+If decryption succeeds, the resulting plaintext is stored in `output` and the function returns the success code 0.
+If decryption fails, the array `output` remains unchanged and the function returns the error code 1.
 
-@param k Pointer to 32 bytes of memory where the AEAD key is read from.
-@param n Pointer to 12 bytes of memory where the AEAD nonce is read from.
-@param aadlen Length of the associated data.
-@param aad Pointer to `aadlen` bytes of memory where the associated data is read from.
-
-@param mlen Length of the ciphertext.
-@param m Pointer to `mlen` bytes of memory where the message is written to.
-@param cipher Pointer to `mlen` bytes of memory where the ciphertext is read from.
-@param mac Pointer to 16 bytes of memory where the mac is read from.
+@param output Pointer to `input_len` bytes of memory where the message is written to.
+@param input Pointer to `input_len` bytes of memory where the ciphertext is read from.
+@param input_len Length of the ciphertext.
+@param data Pointer to `data_len` bytes of memory where the associated data is read from.
+@param data_len Length of the associated data.
+@param key Pointer to 32 bytes of memory where the AEAD key is read from.
+@param nonce Pointer to 12 bytes of memory where the AEAD nonce is read from.
+@param tag Pointer to 16 bytes of memory where the mac is read from.
 
 @returns 0 on succeess; 1 on failure.
 */

@@ -155,25 +155,25 @@ Hacl_Hash_SHA3_shake256_hacl(
 
 /* SNIPPET_START: Hacl_Hash_SHA3_sha3_224 */
 
-void Hacl_Hash_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+void Hacl_Hash_SHA3_sha3_224(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 /* SNIPPET_END: Hacl_Hash_SHA3_sha3_224 */
 
 /* SNIPPET_START: Hacl_Hash_SHA3_sha3_256 */
 
-void Hacl_Hash_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+void Hacl_Hash_SHA3_sha3_256(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 /* SNIPPET_END: Hacl_Hash_SHA3_sha3_256 */
 
 /* SNIPPET_START: Hacl_Hash_SHA3_sha3_384 */
 
-void Hacl_Hash_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+void Hacl_Hash_SHA3_sha3_384(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 /* SNIPPET_END: Hacl_Hash_SHA3_sha3_384 */
 
 /* SNIPPET_START: Hacl_Hash_SHA3_sha3_512 */
 
-void Hacl_Hash_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+void Hacl_Hash_SHA3_sha3_512(uint8_t *output, uint8_t *input, uint32_t input_len);
 
 /* SNIPPET_END: Hacl_Hash_SHA3_sha3_512 */
 

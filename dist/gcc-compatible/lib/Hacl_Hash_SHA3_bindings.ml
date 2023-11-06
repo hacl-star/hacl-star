@@ -85,16 +85,16 @@ module Bindings(F:Cstubs.FOREIGN) =
            (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
     let hacl_Hash_SHA3_sha3_224 =
       foreign "Hacl_Hash_SHA3_sha3_224"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let hacl_Hash_SHA3_sha3_256 =
       foreign "Hacl_Hash_SHA3_sha3_256"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let hacl_Hash_SHA3_sha3_384 =
       foreign "Hacl_Hash_SHA3_sha3_384"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let hacl_Hash_SHA3_sha3_512 =
       foreign "Hacl_Hash_SHA3_sha3_512"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let hacl_Hash_SHA3_state_permute =
       foreign "Hacl_Hash_SHA3_state_permute"
         ((ptr uint64_t) @-> (returning void))
