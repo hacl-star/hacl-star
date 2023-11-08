@@ -70,13 +70,10 @@ let chacha20_core k ctx ctr =
   k.(12ul) <- k.(12ul) +. ctr_u32
 
 
+inline_for_extraction noextract
 val chacha20_constants:
   b:glbuffer size_t 4ul{recallable b /\ witnessed b Spec.Chacha20.chacha20_constants}
-let chacha20_constants =
-  [@ inline_let]
-  let l = [Spec.c0;Spec.c1;Spec.c2;Spec.c3] in
-  assert_norm(List.Tot.length l == 4);
-  createL_global l
+let chacha20_constants = Hacl.Impl.Chacha20.Vec.chacha20_constants
 
 
 val chacha20_init:
@@ -151,7 +148,10 @@ let chacha20_encrypt_last ctx len out incr text =
   push_frame();
   let plain = create (size 64) (u8 0) in
   update_sub plain 0ul len text;
-  chacha20_encrypt_block ctx plain incr plain;
+  (* HACL-RS *)
+  let plain_copy = create (size 64) (u8 0) in
+  copy plain_copy plain;
+  chacha20_encrypt_block ctx plain incr plain_copy;
   copy out (sub plain 0ul len);
   pop_frame()
 

@@ -845,6 +845,20 @@ dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 # file that is *NOT* known to require sse2.
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
+# Rust distribution
+# -----------------
+#
+# Experimental for now, only a very small subset of files & algorithms compile
+dist/rs/src/Makefile.basic: DEFAULT_FLAGS += -backend rust
+
+dist/rs/src/Makefile.basic: VALE_ASMS =
+dist/rs/src/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/rs/src/Makefile.basic: HAND_WRITTEN_H_FILES =
+dist/rs/src/Makefile.basic: HAND_WRITTEN_FILES =
+dist/rs/src/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/rs/src/Makefile.basic: INTRINSIC_FLAGS =
+
+
 # Actual KaRaMeL invocations
 # --------------------------
 
@@ -854,7 +868,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
-	$(KRML) $(DEFAULT_FLAGS) \
+	$(KRML) $(KRML_EXTRA) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(filter %.krml,$^) \
 	  -silent \

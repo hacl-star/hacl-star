@@ -135,7 +135,9 @@ let derive_key_poly1305_do #w k n aadlen aad mlen m out =
   push_frame ();
   // Create a new buffer to derive the key
   let tmp = create 64ul (u8 0) in
-  chacha20_encrypt #w 64ul tmp tmp k n 0ul;
+  let tmp_copy = create 64ul (u8 0) in
+  (* HACL-RS *)
+  chacha20_encrypt #w 64ul tmp tmp_copy k n 0ul;
   // The derived key should only be the first 32 bytes
   let key = sub tmp 0ul 32ul in
   poly1305_do #w key aadlen aad mlen m out;
