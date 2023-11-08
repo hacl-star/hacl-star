@@ -153,7 +153,7 @@ fn chacha20_update(ctx: &mut [u32], len: u32, out: &mut [u8], text: &mut [u8]) -
   let rem: u32 = len.wrapping_rem(64u32);
   let nb: u32 = len.wrapping_div(64u32);
   let rem1: u32 = len.wrapping_rem(64u32);
-  for i in 0u32..nb
+  for i in 0u32..rem1
   {
     chacha20_encrypt_block(
       ctx,
