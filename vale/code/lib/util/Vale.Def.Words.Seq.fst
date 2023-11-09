@@ -80,12 +80,16 @@ let four_to_nat_to_four_8 (x:natN (pow2_norm 32)) :
   lemma_fundamental_div_mod_4 x;
   ()
 
+#push-options "--z3rlimit 20 --z3cliopt smt.arith.nl=true"
+(* Localized use of NL arith. The makefile passes the option to disable
+it in this file, so we reenable it here. *)
 let rec base_to_nat (base:pos) (cs : list (natN base)) : nat =
   match cs with
   | [] -> 0
   | c :: cs' -> c + base_to_nat base cs' * base
   (* NB: right-multiplying by base is a lot better than left-multiplying
   since it more closely matches the lemmas in FStar.Math.Lemmas. *)
+#pop-options
 
 (* If two lists represent the same number, their heads must match,
 otherwise their modulus wrt the base would differ. *)
@@ -145,16 +149,19 @@ let rec base_to_nat_inj (base:pos) (x y : list (natN base)) :
     assert (base_to_nat base xs == base_to_nat base ys);
     base_to_nat_inj base xs ys
 
+#push-options "--fuel 4"
+(* Fuel needed to prove length equality *)
 let four_to_nat_inj (x y : four (natN 256)) :
   Lemma (requires four_to_nat 8 x == four_to_nat 8 y)
         (ensures x == y)
   =
   let Mkfour x0 x1 x2 x3 = x in
   let Mkfour y0 y1 y2 y3 = y in
-  assert_norm (four_to_nat 8 x == base_to_nat 256 [x0; x1; x2; x3]);
-  assert_norm (four_to_nat 8 y == base_to_nat 256 [y0; y1; y2; y3]);
+  assert_norm (four_to_nat 8 (Mkfour x0 x1 x2 x3) == base_to_nat 256 [x0; x1; x2; x3]);
+  assert_norm (four_to_nat 8 (Mkfour y0 y1 y2 y3) == base_to_nat 256 [y0; y1; y2; y3]);
   base_to_nat_inj 256 [x0; x1; x2; x3] [y0; y1; y2; y3];
   ()
+#pop-options
 
 let nat_to_four_to_nat (x:four (natN 256)) :
   Lemma (nat_to_four 8 (four_to_nat 8 x) == x)
