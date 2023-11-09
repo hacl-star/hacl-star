@@ -125,7 +125,9 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -
     let c: (&mut [u64], &mut [u64]) = d.1.split_at_mut(4usize);
     fadd(c.1, x3.1, z31.1);
     fsub(c.0, x3.1, z31.1);
-    fmul2(c.0, c.0, ab.1, tmp2);
+    let mut dc_copy: [u64; 8] = [0u64; 8usize];
+    ((&mut dc_copy)[0usize..0usize + 8usize]).copy_from_slice(&c.0[0usize..0usize + 8usize]);
+    fmul2(c.0, &mut dc_copy, ab.1, tmp2);
     fadd(x3.1, c.0, c.1);
     fsub(z31.1, c.0, c.1);
     let a1: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(0usize);
@@ -135,7 +137,9 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -
     let ab1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(0usize);
     let dc1: (&mut [u64], &mut [u64]) = c0.0.split_at_mut(0usize);
     fsqr2(dc1.1, ab1.1, tmp2);
-    fsqr2(x3.1, x3.1, tmp2);
+    let mut nq_p1_copy: [u64; 8] = [0u64; 8usize];
+    ((&mut nq_p1_copy)[0usize..0usize + 8usize]).copy_from_slice(&x3.1[0usize..0usize + 8usize]);
+    fsqr2(x3.1, &mut nq_p1_copy, tmp2);
     ab1.0[0usize] = c0.1[0usize];
     ab1.0[1usize] = c0.1[1usize];
     ab1.0[2usize] = c0.1[2usize];

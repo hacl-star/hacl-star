@@ -58,7 +58,9 @@ fn point_add_and_double(
     let c: (&mut [u64], &mut [u64]) = d.1.split_at_mut(5usize);
     crate::hacl::bignum25519_51::fadd(c.1, x3.1, z31.1);
     crate::hacl::bignum25519_51::fsub(c.0, x3.1, z31.1);
-    crate::hacl::bignum25519_51::fmul2(c.0, c.0, ab.1, tmp2);
+    let mut dc_copy: [u64; 10] = [0u64; 10usize];
+    ((&mut dc_copy)[0usize..0usize + 10usize]).copy_from_slice(&c.0[0usize..0usize + 10usize]);
+    crate::hacl::bignum25519_51::fmul2(c.0, &mut dc_copy, ab.1, tmp2);
     crate::hacl::bignum25519_51::fadd(x3.1, c.0, c.1);
     crate::hacl::bignum25519_51::fsub(z31.1, c.0, c.1);
     let a1: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(0usize);
@@ -68,7 +70,9 @@ fn point_add_and_double(
     let ab1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(0usize);
     let dc1: (&mut [u64], &mut [u64]) = c0.0.split_at_mut(0usize);
     crate::hacl::bignum25519_51::fsqr2(dc1.1, ab1.1, tmp2);
-    crate::hacl::bignum25519_51::fsqr2(x3.1, x3.1, tmp2);
+    let mut nq_p1_copy: [u64; 10] = [0u64; 10usize];
+    ((&mut nq_p1_copy)[0usize..0usize + 10usize]).copy_from_slice(&x3.1[0usize..0usize + 10usize]);
+    crate::hacl::bignum25519_51::fsqr2(x3.1, &mut nq_p1_copy, tmp2);
     ab1.0[0usize] = c0.1[0usize];
     ab1.0[1usize] = c0.1[1usize];
     ab1.0[2usize] = c0.1[2usize];
