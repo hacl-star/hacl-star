@@ -897,7 +897,7 @@ let aux (a b c:int)
   : Lemma (requires 0 <= b /\ c < a)
           (ensures 0 <= a + b -c) = ()
 
-#push-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+#push-options "--z3rlimit 100 --fuel 0 --ifuel 0 --split_queries always"
 let lemma_barrett_reduce' x =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512);
@@ -951,7 +951,7 @@ let lemma_barrett_reduce' x =
          aux (pow2 264) r qml;
          assert (s >= 0);
          assert (s < 2 * l) by (
-           Tactics.set_rlimit 150;
+           Tactics.set_rlimit 250;
            ()
          );
          s
@@ -959,7 +959,7 @@ let lemma_barrett_reduce' x =
          let s = r - qml in
          assert (s >= 0);
          assert (s < 2 * l) by (
-           Tactics.set_rlimit 150;
+           Tactics.set_rlimit 250;
            ()
          );
          s
