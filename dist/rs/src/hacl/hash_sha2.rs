@@ -187,11 +187,13 @@ pub const k384_512: [u64; 80] =
         0x6c44198c4a475817u64];
 
 pub fn sha256_init(hash: &mut [u32]) -> ()
-for i in 0u32..8u32
 {
-    let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-    let x: u32 = (&h256)[i as usize];
-    os.1[i as usize] = x
+    for i in 0u32..8u32
+    {
+        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
+        let x: u32 = (&h256)[i as usize];
+        os.1[i as usize] = x
+    }
 }
 
 fn sha256_update(b: &mut [u8], hash: &mut [u32]) -> ()
@@ -362,11 +364,13 @@ pub fn sha256_finish(st: &mut [u32], h: &mut [u8]) -> ()
 }
 
 pub fn sha224_init(hash: &mut [u32]) -> ()
-for i in 0u32..8u32
 {
-    let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-    let x: u32 = (&h224)[i as usize];
-    os.1[i as usize] = x
+    for i in 0u32..8u32
+    {
+        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
+        let x: u32 = (&h224)[i as usize];
+        os.1[i as usize] = x
+    }
 }
 
 fn sha224_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
@@ -391,11 +395,13 @@ pub fn sha224_finish(st: &mut [u32], h: &mut [u8]) -> ()
 }
 
 pub fn sha512_init(hash: &mut [u64]) -> ()
-for i in 0u32..8u32
 {
-    let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
-    let x: u64 = (&h512)[i as usize];
-    os.1[i as usize] = x
+    for i in 0u32..8u32
+    {
+        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
+        let x: u64 = (&h512)[i as usize];
+        os.1[i as usize] = x
+    }
 }
 
 fn sha512_update(b: &mut [u8], hash: &mut [u64]) -> ()
@@ -574,11 +580,13 @@ pub fn sha512_finish(st: &mut [u64], h: &mut [u8]) -> ()
 }
 
 pub fn sha384_init(hash: &mut [u64]) -> ()
-for i in 0u32..8u32
 {
-    let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
-    let x: u64 = (&h384)[i as usize];
-    os.1[i as usize] = x
+    for i in 0u32..8u32
+    {
+        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
+        let x: u64 = (&h384)[i as usize];
+        os.1[i as usize] = x
+    }
 }
 
 pub fn sha384_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64]) -> ()
@@ -660,19 +668,6 @@ pub fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     sha224_update_last(len_, rem, lb.1, &mut st);
     sha224_finish(&mut st, rb)
 }
-
-fn op_Bang_Star__Hacl_Streaming_Functor_state_s  uint64_t* ()(
-    p: &mut [crate::hacl::streaming_md::state_64]
-) ->
-    crate::hacl::streaming_md::state_64
-{ p[0usize] }
-
-fn op_Star_Equals__Hacl_Streaming_Functor_state_s  uint64_t* ()(
-    p: &mut [crate::hacl::streaming_md::state_64],
-    v: crate::hacl::streaming_md::state_64
-) ->
-    ()
-{ p[0usize] = v }
 
 pub fn update_512(
     p: &mut [crate::hacl::streaming_md::state_64],

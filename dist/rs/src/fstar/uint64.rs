@@ -19,4 +19,3 @@ pub fn gte_mask(a: u64, b: u64) -> u64
   let x_xor_q_ = x_xor_q.wrapping_shr(63);
   return x_xor_q_.wrapping_sub(1u64);
 }
-

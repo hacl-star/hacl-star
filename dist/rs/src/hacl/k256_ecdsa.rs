@@ -458,7 +458,8 @@ fn qmul_shift_384(res: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
     }
 }
 
-fn qsquare_times_in_place(out: &mut [u64], b: u32) -> () for i in 0u32..b { qsqr(out, out) }
+fn qsquare_times_in_place(out: &mut [u64], b: u32) -> ()
+{ for i in 0u32..b { qsqr(out, out) } }
 
 fn qsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
@@ -640,7 +641,7 @@ pub fn point_negate(out: &mut [u64], p: &mut [u64]) -> ()
 }
 
 fn point_negate_conditional_vartime(p: &mut [u64], is_negate: bool) -> ()
-if is_negate { point_negate(p, p) }
+{ if is_negate { point_negate(p, p) } }
 
 fn aff_point_store(out: &mut [u8], p: &mut [u64]) -> ()
 {

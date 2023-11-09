@@ -599,33 +599,35 @@ pub fn fnormalize(out: &mut [u64], f: &mut [u64]) -> ()
 }
 
 pub fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
-if is_negate
 {
-    let a0: u64 = f[0usize];
-    let a1: u64 = f[1usize];
-    let a2: u64 = f[2usize];
-    let a3: u64 = f[3usize];
-    let a4: u64 = f[4usize];
-    let r0: u64 = 9007190664804446u64.wrapping_sub(a0);
-    let r1: u64 = 9007199254740990u64.wrapping_sub(a1);
-    let r2: u64 = 9007199254740990u64.wrapping_sub(a2);
-    let r3: u64 = 9007199254740990u64.wrapping_sub(a3);
-    let r4: u64 = 562949953421310u64.wrapping_sub(a4);
-    let f0: u64 = r0;
-    let f1: u64 = r1;
-    let f2: u64 = r2;
-    let f3: u64 = r3;
-    let f4: u64 = r4;
-    f[0usize] = f0;
-    f[1usize] = f1;
-    f[2usize] = f2;
-    f[3usize] = f3;
-    f[4usize] = f4;
-    fnormalize(f, f)
+    if is_negate
+    {
+        let a0: u64 = f[0usize];
+        let a1: u64 = f[1usize];
+        let a2: u64 = f[2usize];
+        let a3: u64 = f[3usize];
+        let a4: u64 = f[4usize];
+        let r0: u64 = 9007190664804446u64.wrapping_sub(a0);
+        let r1: u64 = 9007199254740990u64.wrapping_sub(a1);
+        let r2: u64 = 9007199254740990u64.wrapping_sub(a2);
+        let r3: u64 = 9007199254740990u64.wrapping_sub(a3);
+        let r4: u64 = 562949953421310u64.wrapping_sub(a4);
+        let f0: u64 = r0;
+        let f1: u64 = r1;
+        let f2: u64 = r2;
+        let f3: u64 = r3;
+        let f4: u64 = r4;
+        f[0usize] = f0;
+        f[1usize] = f1;
+        f[2usize] = f2;
+        f[3usize] = f3;
+        f[4usize] = f4;
+        fnormalize(f, f)
+    }
 }
 
 pub fn fsquare_times_in_place(out: &mut [u64], b: u32) -> ()
-for i in 0u32..b { fsqr(out, out) }
+{ for i in 0u32..b { fsqr(out, out) } }
 
 pub fn fsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {

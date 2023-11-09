@@ -154,15 +154,17 @@ fn bn_sub4(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> u64
 }
 
 fn bn_from_bytes_be4(res: &mut [u64], b: &mut [u8]) -> ()
-for i in 0u32..4u32
 {
-    let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
-    let u: u64 =
-        crate::lowstar::endianness::load64_be(
-            &mut b[4u32.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
-        );
-    let x: u64 = u;
-    os.1[i as usize] = x
+    for i in 0u32..4u32
+    {
+        let os: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
+        let u: u64 =
+            crate::lowstar::endianness::load64_be(
+                &mut b[4u32.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
+            );
+        let x: u64 = u;
+        os.1[i as usize] = x
+    }
 }
 
 fn bn2_to_bytes_be4(res: &mut [u8], x: &mut [u64], y: &mut [u64]) -> ()

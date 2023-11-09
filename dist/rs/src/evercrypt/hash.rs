@@ -1,5 +1,3 @@
-fn op_Bang_Star__EverCrypt_Hash_state_s(p: &mut [state_s]) -> state_s { p[0usize] }
-
 const k224_256: [u32; 64] =
     [0x428a2f98u32,
         0x71374491u32,
@@ -65,19 +63,6 @@ const k224_256: [u32; 64] =
         0xa4506cebu32,
         0xbef9a3f7u32,
         0xc67178f2u32];
-
-fn op_Bang_Star__Hacl_Streaming_Functor_state_s  EverCrypt_Hash_state_s* ()(
-    p: &mut [crate::evercrypt::hash_incremental::hash_state]
-) ->
-    crate::evercrypt::hash_incremental::hash_state
-{ p[0usize] }
-
-fn op_Star_Equals__Hacl_Streaming_Functor_state_s  EverCrypt_Hash_state_s* ()(
-    p: &mut [crate::evercrypt::hash_incremental::hash_state],
-    v: crate::evercrypt::hash_incremental::hash_state
-) ->
-    ()
-{ p[0usize] = v }
 
 pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {

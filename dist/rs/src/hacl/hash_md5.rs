@@ -67,7 +67,7 @@ const _t: [u32; 64] =
         0xeb86d391u32];
 
 pub fn legacy_init(s: &mut [u32]) -> ()
-for i in 0u32..4u32 { s[i as usize] = (&mut _h0)[i as usize] }
+{ for i in 0u32..4u32 { s[i as usize] = (&mut _h0)[i as usize] } }
 
 fn legacy_update(abcd: &mut [u32], x: &mut [u8]) -> ()
 {
@@ -1325,21 +1325,25 @@ fn legacy_pad(len: u64, dst: &mut [u8]) -> ()
 }
 
 pub fn legacy_finish(s: &mut [u32], dst: &mut [u8]) -> ()
-for i in 0u32..4u32
 {
-    crate::lowstar::endianness::store32_le(
-        &mut dst[i.wrapping_mul(4u32) as usize..],
-        (&mut s[0usize..])[i as usize]
-    )
+    for i in 0u32..4u32
+    {
+        crate::lowstar::endianness::store32_le(
+            &mut dst[i.wrapping_mul(4u32) as usize..],
+            (&mut s[0usize..])[i as usize]
+        )
+    }
 }
 
 pub fn legacy_update_multi(s: &mut [u32], blocks: &mut [u8], n_blocks: u32) -> ()
-for i in 0u32..n_blocks
 {
-    let sz: u32 = 64u32;
-    let block: (&mut [u8], &mut [u8]) =
-        blocks.split_at_mut((sz.wrapping_mul(i) as usize).wrapping_add(0usize));
-    legacy_update(s, block.1)
+    for i in 0u32..n_blocks
+    {
+        let sz: u32 = 64u32;
+        let block: (&mut [u8], &mut [u8]) =
+            blocks.split_at_mut((sz.wrapping_mul(i) as usize).wrapping_add(0usize));
+        legacy_update(s, block.1)
+    }
 }
 
 pub fn legacy_update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_len: u32) -> ()
@@ -1394,19 +1398,6 @@ pub fn legacy_hash(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     legacy_update_last(&mut s, blocks_len0 as u64, rest0, rest_len0);
     legacy_finish(&mut s, dst)
 }
-
-pub fn op_Bang_Star__Hacl_Streaming_Functor_state_s  uint32_t* ()(
-    p: &mut [crate::hacl::streaming_md::state_32]
-) ->
-    crate::hacl::streaming_md::state_32
-{ p[0usize] }
-
-pub fn op_Star_Equals__Hacl_Streaming_Functor_state_s  uint32_t* ()(
-    p: &mut [crate::hacl::streaming_md::state_32],
-    v: crate::hacl::streaming_md::state_32
-) ->
-    ()
-{ p[0usize] = v }
 
 pub fn legacy_hash(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 { legacy_hash(input, input_len, dst) }

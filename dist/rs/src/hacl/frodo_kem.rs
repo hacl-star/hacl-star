@@ -19,63 +19,75 @@ pub fn shake128_4x(
 }
 
 pub fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16]) -> ()
-if logq < 16u32
-for i in 0u32..n1
-for i0 in 0u32..n2
 {
-    a[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
-        a[i.wrapping_mul(n2).wrapping_add(i0) as usize] & 1u16.wrapping_shl(logq).wrapping_sub(1u16)
+    if logq < 16u32
+    for i in 0u32..n1
+    for i0 in 0u32..n2
+    {
+        a[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
+            a[i.wrapping_mul(n2).wrapping_add(i0) as usize]
+            &
+            1u16.wrapping_shl(logq).wrapping_sub(1u16)
+    }
 }
 
 pub fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
-for i in 0u32..n1
-for i0 in 0u32..n2
 {
-    a[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
-        (a[i.wrapping_mul(n2).wrapping_add(i0) as usize]).wrapping_add(
-            b[i.wrapping_mul(n2).wrapping_add(i0) as usize]
-        )
+    for i in 0u32..n1
+    for i0 in 0u32..n2
+    {
+        a[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
+            (a[i.wrapping_mul(n2).wrapping_add(i0) as usize]).wrapping_add(
+                b[i.wrapping_mul(n2).wrapping_add(i0) as usize]
+            )
+    }
 }
 
 pub fn matrix_sub(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
-for i in 0u32..n1
-for i0 in 0u32..n2
 {
-    b[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
-        (a[i.wrapping_mul(n2).wrapping_add(i0) as usize]).wrapping_sub(
-            b[i.wrapping_mul(n2).wrapping_add(i0) as usize]
-        )
+    for i in 0u32..n1
+    for i0 in 0u32..n2
+    {
+        b[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
+            (a[i.wrapping_mul(n2).wrapping_add(i0) as usize]).wrapping_sub(
+                b[i.wrapping_mul(n2).wrapping_add(i0) as usize]
+            )
+    }
 }
 
 pub fn matrix_mul(n1: u32, n2: u32, n3: u32, a: &mut [u16], b: &mut [u16], c: &mut [u16]) -> ()
-for i in 0u32..n1
-for i0 in 0u32..n3
 {
-    let mut res: u16 = 0u16;
-    for i1 in 0u32..n2
+    for i in 0u32..n1
+    for i0 in 0u32..n3
     {
-        let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
-        let bjk: u16 = b[i1.wrapping_mul(n3).wrapping_add(i0) as usize];
-        let res0: u16 = res;
-        res = res0.wrapping_add(aij.wrapping_mul(bjk))
-    };
-    c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = res
+        let mut res: u16 = 0u16;
+        for i1 in 0u32..n2
+        {
+            let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
+            let bjk: u16 = b[i1.wrapping_mul(n3).wrapping_add(i0) as usize];
+            let res0: u16 = res;
+            res = res0.wrapping_add(aij.wrapping_mul(bjk))
+        };
+        c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = res
+    }
 }
 
 pub fn matrix_mul_s(n1: u32, n2: u32, n3: u32, a: &mut [u16], b: &mut [u16], c: &mut [u16]) ->
     ()
-for i in 0u32..n1
-for i0 in 0u32..n3
 {
-    let mut res: u16 = 0u16;
-    for i1 in 0u32..n2
+    for i in 0u32..n1
+    for i0 in 0u32..n3
     {
-        let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
-        let bjk: u16 = b[i0.wrapping_mul(n2).wrapping_add(i1) as usize];
-        let res0: u16 = res;
-        res = res0.wrapping_add(aij.wrapping_mul(bjk))
-    };
-    c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = res
+        let mut res: u16 = 0u16;
+        for i1 in 0u32..n2
+        {
+            let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
+            let bjk: u16 = b[i0.wrapping_mul(n2).wrapping_add(i1) as usize];
+            let res0: u16 = res;
+            res = res0.wrapping_add(aij.wrapping_mul(bjk))
+        };
+        c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = res
+    }
 }
 
 pub fn matrix_eq(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> u16
@@ -91,21 +103,25 @@ pub fn matrix_eq(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> u16
 }
 
 pub fn matrix_to_lbytes(n1: u32, n2: u32, m: &mut [u16], res: &mut [u8]) -> ()
-for i in 0u32..n1.wrapping_mul(n2)
 {
-    crate::lowstar::endianness::store16_le(
-        &mut res[2u32.wrapping_mul(i) as usize..],
-        m[i as usize]
-    )
+    for i in 0u32..n1.wrapping_mul(n2)
+    {
+        crate::lowstar::endianness::store16_le(
+            &mut res[2u32.wrapping_mul(i) as usize..],
+            m[i as usize]
+        )
+    }
 }
 
 pub fn matrix_from_lbytes(n1: u32, n2: u32, b: &mut [u8], res: &mut [u16]) -> ()
-for i in 0u32..n1.wrapping_mul(n2)
 {
-    let os: (&mut [u16], &mut [u16]) = res.split_at_mut(0usize);
-    let u: u16 = crate::lowstar::endianness::load16_le(&mut b[2u32.wrapping_mul(i) as usize..]);
-    let x: u16 = u;
-    os.1[i as usize] = x
+    for i in 0u32..n1.wrapping_mul(n2)
+    {
+        let os: (&mut [u16], &mut [u16]) = res.split_at_mut(0usize);
+        let u: u16 = crate::lowstar::endianness::load16_le(&mut b[2u32.wrapping_mul(i) as usize..]);
+        let x: u16 = u;
+        os.1[i as usize] = x
+    }
 }
 
 pub const cdf_table640: [u16; 13] =
@@ -301,46 +317,53 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
 }
 
 pub fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &mut [u8], res: &mut [u16]) -> ()
-for i in 0u32..n
 {
-    let mut v8: [u8; 8] = [0u8; 8usize];
-    let chunk: (&mut [u8], &mut [u8]) =
-        a.split_at_mut((i.wrapping_mul(b) as usize).wrapping_add(0usize));
-    ((&mut v8)[0usize..0usize + b as usize]).copy_from_slice(&chunk.1[0usize..0usize + b as usize]);
-    let u: u64 = crate::lowstar::endianness::load64_le(&mut v8);
-    let x: u64 = u;
-    let x0: u64 = x;
-    for i0 in 0u32..8u32
+    for i in 0u32..n
     {
-        let rk: u64 = x0.wrapping_shr(b.wrapping_mul(i0)) & 1u64.wrapping_shl(b).wrapping_sub(1u64);
-        res[i.wrapping_mul(n).wrapping_add(i0) as usize] =
-            (rk as u16).wrapping_shl(logq.wrapping_sub(b))
+        let mut v8: [u8; 8] = [0u8; 8usize];
+        let chunk: (&mut [u8], &mut [u8]) =
+            a.split_at_mut((i.wrapping_mul(b) as usize).wrapping_add(0usize));
+        ((&mut v8)[0usize..0usize + b as usize]).copy_from_slice(
+            &chunk.1[0usize..0usize + b as usize]
+        );
+        let u: u64 = crate::lowstar::endianness::load64_le(&mut v8);
+        let x: u64 = u;
+        let x0: u64 = x;
+        for i0 in 0u32..8u32
+        {
+            let rk: u64 =
+                x0.wrapping_shr(b.wrapping_mul(i0)) & 1u64.wrapping_shl(b).wrapping_sub(1u64);
+            res[i.wrapping_mul(n).wrapping_add(i0) as usize] =
+                (rk as u16).wrapping_shl(logq.wrapping_sub(b))
+        }
     }
 }
 
 pub fn frodo_key_decode(logq: u32, b: u32, n: u32, a: &mut [u16], res: &mut [u8]) -> ()
-for i in 0u32..n
 {
-    let mut templong: u64 = 0u64;
-    for i0 in 0u32..8u32
+    for i in 0u32..n
     {
-        let aik: u16 = a[i.wrapping_mul(n).wrapping_add(i0) as usize];
-        let res1: u16 =
-            aik.wrapping_add(1u16.wrapping_shl(logq.wrapping_sub(b).wrapping_sub(1u32))).wrapping_shr(
-                logq.wrapping_sub(b)
-            );
-        templong =
-            templong
-            |
-            ((res1 & 1u16.wrapping_shl(b).wrapping_sub(1u16)) as u64).wrapping_shl(
-                b.wrapping_mul(i0)
-            )
-    };
-    let templong0: u64 = templong;
-    let mut v8: [u8; 8] = [0u8; 8usize];
-    crate::lowstar::endianness::store64_le(&mut v8, templong0);
-    let tmp: (&mut [u8], &mut [u8]) = (&mut v8).split_at_mut(0usize);
-    (res[i.wrapping_mul(b) as usize..i.wrapping_mul(b) as usize + b as usize]).copy_from_slice(
-        &tmp.1[0usize..0usize + b as usize]
-    )
+        let mut templong: u64 = 0u64;
+        for i0 in 0u32..8u32
+        {
+            let aik: u16 = a[i.wrapping_mul(n).wrapping_add(i0) as usize];
+            let res1: u16 =
+                aik.wrapping_add(1u16.wrapping_shl(logq.wrapping_sub(b).wrapping_sub(1u32))).wrapping_shr(
+                    logq.wrapping_sub(b)
+                );
+            templong =
+                templong
+                |
+                ((res1 & 1u16.wrapping_shl(b).wrapping_sub(1u16)) as u64).wrapping_shl(
+                    b.wrapping_mul(i0)
+                )
+        };
+        let templong0: u64 = templong;
+        let mut v8: [u8; 8] = [0u8; 8usize];
+        crate::lowstar::endianness::store64_le(&mut v8, templong0);
+        let tmp: (&mut [u8], &mut [u8]) = (&mut v8).split_at_mut(0usize);
+        (res[i.wrapping_mul(b) as usize..i.wrapping_mul(b) as usize + b as usize]).copy_from_slice(
+            &tmp.1[0usize..0usize + b as usize]
+        )
+    }
 }

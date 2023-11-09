@@ -282,12 +282,6 @@ fn exp_consttime(
     exp_consttime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 
-pub fn op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx'  uint64_t* uint64_t(
-    p: &mut [crate::hacl::bignum_montarithmetic::bn_mont_ctx_u64]
-) ->
-    crate::hacl::bignum_montarithmetic::bn_mont_ctx_u64
-{ p[0usize] }
-
 pub fn lt_mask(a: &mut [u64], b: &mut [u64]) -> u64
 {
     let mut acc: u64 = 0u64;
