@@ -52,12 +52,12 @@ let seq_four_to_seq_to_seq_four_BE (#a:Type) (x:seq a{length x % 4 == 0}) :
 
 unfold let pow2_24 = 16777216 //normalize_term (pow2 24)
 
-#reset-options "--z3rlimit 200 --using_facts_from 'Prims Vale.Def.Words_s'"
+#push-options "--z3rlimit 200 --using_facts_from 'Prims Vale.Def.Words_s'"
 let lemma_fundamental_div_mod_4 (x:nat32) :
   Lemma (x = x % pow2_8 + pow2_8 * ((x / pow2_8) % pow2_8) + pow2_16 * ((x / pow2_16) % pow2_8) + pow2_24 * ((x / pow2_24) % pow2_8))
   =
   ()
-#reset-options "--z3rlimit 30"
+#pop-options
 
 let four_to_nat_to_four_8 (x:natN (pow2_norm 32)) :
   Lemma (four_to_nat 8 (nat_to_four 8 x) == x)
@@ -80,29 +80,89 @@ let four_to_nat_to_four_8 (x:natN (pow2_norm 32)) :
   lemma_fundamental_div_mod_4 x;
   ()
 
-#reset-options "--z3rlimit 400 --using_facts_from 'Vale.Def.Words_s Prims'"
-let nat_to_four_to_nat (x:four (natN (pow2_norm 8))) :
+let rec base_to_nat (base:pos) (cs : list (natN base)) : nat =
+  match cs with
+  | [] -> 0
+  | c :: cs' -> c + base_to_nat base cs' * base
+  (* NB: right-multiplying by base is a lot better than left-multiplying
+  since it more closely matches the lemmas in FStar.Math.Lemmas. *)
+
+(* If two lists represent the same number, their heads must match,
+otherwise their modulus wrt the base would differ. *)
+let base_to_nat_inj_head (base:pos) (x y : list (natN base)) :
+  Lemma (requires base_to_nat base x == base_to_nat base y /\ Cons? x /\ Cons? y)
+        (ensures List.Tot.hd x == List.Tot.hd y)
+  =
+  match x, y with
+  | x1 :: xs, y1 :: ys ->
+    let x' = base_to_nat base x in
+    let y' = base_to_nat base y in
+    let open FStar.Math.Lemmas in
+    calc (==) {
+      x1 <: int;
+      == { small_mod x1 base }
+      x1 % base;
+      == { lemma_mod_plus x1 (base_to_nat base xs) base }
+      (x1 + base_to_nat base xs * base) % base;
+      == {}
+      x' % base;
+      == {}
+      y' % base;
+      == {}
+      (y1 + base_to_nat base ys * base) % base;
+      == { lemma_mod_plus y1 (base_to_nat base ys) base }
+      y1 % base;
+      == { small_mod y1 base }
+      y1;
+    }
+
+(* Generalizing the lemma above, if two lists represent the same number,
+and they have the same length, they must be the same list. The length requirement
+is due to the possibility of trailing zeroes. Another possibility is stating
+that one of them is a prefix of the other, which is enough for this module,
+even without stating that the "rest" is all zeroes. *)
+let rec base_to_nat_inj (base:pos) (x y : list (natN base)) :
+  Lemma (requires base_to_nat base x == base_to_nat base y /\ List.length x == List.length y)
+        (ensures x == y)
+  =
+  match x, y with
+  | [], [] -> ()
+  | x1 :: xs, y1 :: ys ->
+    base_to_nat_inj_head base x y;
+    let x' = base_to_nat base x in
+    let y' = base_to_nat base y in
+    let open FStar.Math.Lemmas in
+    calc (==) {
+      base_to_nat base xs * base;
+      == {}
+      x' - x1;
+      == {}
+      y' - y1;
+      == {}
+      base_to_nat base ys * base;
+    };
+    lemma_cancel_mul (base_to_nat base xs) (base_to_nat base ys) base;
+    assert (base_to_nat base xs == base_to_nat base ys);
+    base_to_nat_inj base xs ys
+
+let four_to_nat_inj (x y : four (natN 256)) :
+  Lemma (requires four_to_nat 8 x == four_to_nat 8 y)
+        (ensures x == y)
+  =
+  let Mkfour x0 x1 x2 x3 = x in
+  let Mkfour y0 y1 y2 y3 = y in
+  assert_norm (four_to_nat 8 x == base_to_nat 256 [x0; x1; x2; x3]);
+  assert_norm (four_to_nat 8 y == base_to_nat 256 [y0; y1; y2; y3]);
+  base_to_nat_inj 256 [x0; x1; x2; x3] [y0; y1; y2; y3];
+  ()
+
+let nat_to_four_to_nat (x:four (natN 256)) :
   Lemma (nat_to_four 8 (four_to_nat 8 x) == x)
   [SMTPat (nat_to_four 8 (four_to_nat 8 x))]
   =
-  let size = 8 in
-  let n1 = pow2_norm size in
-  let n2 = pow2_norm (2 * size) in
-  let n3 = pow2_norm (3 * size) in
-  let n4 = pow2_norm (4 * size) in
-  assert_norm (pow2 8 == 256);
-  assert_norm (pow2 16 == 0x10000);
-  assert_norm (pow2 24 == 0x1000000);
-  assert_norm (pow2 32 == 0x100000000);
-  let x' = four_to_nat 8 x in
-  assert_norm (nat_to_four 8 x' == Mkfour (x' % n1) ((x' / n1) % n1) ((x' / n2) % n1) ((x' / n3) % n1));
-  let Mkfour x0 x1 x2 x3 = x in
-  let x' = x0 + x1 * n1 + x2 * n2 + x3 * n3 in
-  assert_norm (four_to_nat 8 x == int_to_natN n4 (x0 + x1 * n1 + x2 * n2 + x3 * n3));
-  lemma_fundamental_div_mod_4 x';
-  ()
+  four_to_nat_to_four_8 (four_to_nat 8 x);
+  four_to_nat_inj (nat_to_four 8 (four_to_nat 8 x)) x
 
-#reset-options
 let four_to_seq_to_four_LE (#a:Type) (x:seq4 a) :
   Lemma (four_to_seq_LE (seq_to_four_LE x) == x)
   =
