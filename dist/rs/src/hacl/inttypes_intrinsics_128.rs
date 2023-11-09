@@ -10,7 +10,7 @@ pub fn add_carry_u64(cin: u64, x: u64, y: u64, r: &mut [u64]) -> u64
         );
     let c: u64 =
         crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(res, 64u32));
-    r[0u32 as usize] = crate::fstar::uint128::uint128_to_uint64(res);
+    r[0usize] = crate::fstar::uint128::uint128_to_uint64(res);
     c
 }
 
@@ -28,6 +28,6 @@ pub fn sub_borrow_u64(cin: u64, x: u64, y: u64, r: &mut [u64]) -> u64
         crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(res, 64u32))
         &
         1u64;
-    r[0u32 as usize] = crate::fstar::uint128::uint128_to_uint64(res);
+    r[0usize] = crate::fstar::uint128::uint128_to_uint64(res);
     c
 }

@@ -1,6 +1,6 @@
 fn bn_is_zero_mask4(f: &mut [u64]) -> u64
 {
-    let mut bn_zero: [u64; 4] = [0u64; 4u32 as usize];
+    let mut bn_zero: [u64; 4] = [0u64; 4usize];
     let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
     for i in 0u32..4u32
     {
@@ -79,7 +79,7 @@ fn bn_add_mod4(res: &mut [u64], n: &mut [u64], x: &mut [u64], y: &mut [u64]) -> 
         c = crate::lib::inttypes::intrinsics::add_carry_u64(c, t1, t2, res_i.1)
     };
     let c0: u64 = c;
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     let mut c1: u64 = 0u64;
     for i in 0u32..1u32
     {
@@ -167,85 +167,85 @@ for i in 0u32..4u32
 
 fn bn2_to_bytes_be4(res: &mut [u8], x: &mut [u64], y: &mut [u64]) -> ()
 {
-    crate::hacl::impl::p256::bignum::bn_to_bytes_be4(&mut res[0u32 as usize..], x);
-    crate::hacl::impl::p256::bignum::bn_to_bytes_be4(&mut res[32u32 as usize..], y)
+    crate::hacl::impl::p256::bignum::bn_to_bytes_be4(&mut res[0usize..], x);
+    crate::hacl::impl::p256::bignum::bn_to_bytes_be4(&mut res[32usize..], y)
 }
 
 fn make_prime(n: &mut [u64]) -> ()
 {
-    n[0u32 as usize] = 0xffffffffffffffffu64;
-    n[1u32 as usize] = 0xffffffffu64;
-    n[2u32 as usize] = 0x0u64;
-    n[3u32 as usize] = 0xffffffff00000001u64
+    n[0usize] = 0xffffffffffffffffu64;
+    n[1usize] = 0xffffffffu64;
+    n[2usize] = 0x0u64;
+    n[3usize] = 0xffffffff00000001u64
 }
 
 fn make_order(n: &mut [u64]) -> ()
 {
-    n[0u32 as usize] = 0xf3b9cac2fc632551u64;
-    n[1u32 as usize] = 0xbce6faada7179e84u64;
-    n[2u32 as usize] = 0xffffffffffffffffu64;
-    n[3u32 as usize] = 0xffffffff00000000u64
+    n[0usize] = 0xf3b9cac2fc632551u64;
+    n[1usize] = 0xbce6faada7179e84u64;
+    n[2usize] = 0xffffffffffffffffu64;
+    n[3usize] = 0xffffffff00000000u64
 }
 
 fn make_a_coeff(a: &mut [u64]) -> ()
 {
-    a[0u32 as usize] = 0xfffffffffffffffcu64;
-    a[1u32 as usize] = 0x3ffffffffu64;
-    a[2u32 as usize] = 0x0u64;
-    a[3u32 as usize] = 0xfffffffc00000004u64
+    a[0usize] = 0xfffffffffffffffcu64;
+    a[1usize] = 0x3ffffffffu64;
+    a[2usize] = 0x0u64;
+    a[3usize] = 0xfffffffc00000004u64
 }
 
 fn make_b_coeff(b: &mut [u64]) -> ()
 {
-    b[0u32 as usize] = 0xd89cdf6229c4bddfu64;
-    b[1u32 as usize] = 0xacf005cd78843090u64;
-    b[2u32 as usize] = 0xe5a220abf7212ed6u64;
-    b[3u32 as usize] = 0xdc30061d04874834u64
+    b[0usize] = 0xd89cdf6229c4bddfu64;
+    b[1usize] = 0xacf005cd78843090u64;
+    b[2usize] = 0xe5a220abf7212ed6u64;
+    b[3usize] = 0xdc30061d04874834u64
 }
 
 fn make_g_x(n: &mut [u64]) -> ()
 {
-    n[0u32 as usize] = 0x79e730d418a9143cu64;
-    n[1u32 as usize] = 0x75ba95fc5fedb601u64;
-    n[2u32 as usize] = 0x79fb732b77622510u64;
-    n[3u32 as usize] = 0x18905f76a53755c6u64
+    n[0usize] = 0x79e730d418a9143cu64;
+    n[1usize] = 0x75ba95fc5fedb601u64;
+    n[2usize] = 0x79fb732b77622510u64;
+    n[3usize] = 0x18905f76a53755c6u64
 }
 
 fn make_g_y(n: &mut [u64]) -> ()
 {
-    n[0u32 as usize] = 0xddf25357ce95560au64;
-    n[1u32 as usize] = 0x8b4ab8e4ba19e45cu64;
-    n[2u32 as usize] = 0xd2e88688dd21f325u64;
-    n[3u32 as usize] = 0x8571ff1825885d85u64
+    n[0usize] = 0xddf25357ce95560au64;
+    n[1usize] = 0x8b4ab8e4ba19e45cu64;
+    n[2usize] = 0xd2e88688dd21f325u64;
+    n[3usize] = 0x8571ff1825885d85u64
 }
 
 fn make_fmont_R2(n: &mut [u64]) -> ()
 {
-    n[0u32 as usize] = 0x3u64;
-    n[1u32 as usize] = 0xfffffffbffffffffu64;
-    n[2u32 as usize] = 0xfffffffffffffffeu64;
-    n[3u32 as usize] = 0x4fffffffdu64
+    n[0usize] = 0x3u64;
+    n[1usize] = 0xfffffffbffffffffu64;
+    n[2usize] = 0xfffffffffffffffeu64;
+    n[3usize] = 0x4fffffffdu64
 }
 
 fn make_fzero(n: &mut [u64]) -> ()
 {
-    n[0u32 as usize] = 0u64;
-    n[1u32 as usize] = 0u64;
-    n[2u32 as usize] = 0u64;
-    n[3u32 as usize] = 0u64
+    n[0usize] = 0u64;
+    n[1usize] = 0u64;
+    n[2usize] = 0u64;
+    n[3usize] = 0u64
 }
 
 fn make_fone(n: &mut [u64]) -> ()
 {
-    n[0u32 as usize] = 0x1u64;
-    n[1u32 as usize] = 0xffffffff00000000u64;
-    n[2u32 as usize] = 0xffffffffffffffffu64;
-    n[3u32 as usize] = 0xfffffffeu64
+    n[0usize] = 0x1u64;
+    n[1usize] = 0xffffffff00000000u64;
+    n[2usize] = 0xffffffffffffffffu64;
+    n[3usize] = 0xfffffffeu64
 }
 
 fn bn_is_lt_prime_mask4(f: &mut [u64]) -> u64
 {
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     make_prime(&mut tmp);
     let c: u64 = bn_sub4(&mut tmp, f, &mut tmp);
     0u64.wrapping_sub(c)
@@ -259,27 +259,27 @@ fn feq_mask(a: &mut [u64], b: &mut [u64]) -> u64
 
 fn fadd(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
-    let mut n: [u64; 4] = [0u64; 4u32 as usize];
+    let mut n: [u64; 4] = [0u64; 4usize];
     make_prime(&mut n);
     bn_add_mod4(res, &mut n, x, y)
 }
 
 fn fsub(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
-    let mut n: [u64; 4] = [0u64; 4u32 as usize];
+    let mut n: [u64; 4] = [0u64; 4usize];
     make_prime(&mut n);
     crate::hacl::impl::p256::bignum::bn_sub_mod4(res, &mut n, x, y)
 }
 
 fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
 {
-    let mut zero: [u64; 4] = [0u64; 4u32 as usize];
+    let mut zero: [u64; 4] = [0u64; 4usize];
     if is_negate { fsub(f, &mut zero, f) }
 }
 
 fn mont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
 {
-    let mut n: [u64; 4] = [0u64; 4u32 as usize];
+    let mut n: [u64; 4] = [0u64; 4usize];
     make_prime(&mut n);
     let mut c0: u64 = 0u64;
     for i in 0u32..4u32
@@ -316,11 +316,9 @@ fn mont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
         let res_j0: u64 = res_j.0[4u32.wrapping_add(i) as usize];
         c0 = crate::lib::inttypes::intrinsics::add_carry_u64(c0, c1, res_j0, resb.1)
     };
-    (res[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &(&mut x[4u32 as usize..])[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (res[0usize..0usize + 4usize]).copy_from_slice(&(&mut x[4usize..])[0usize..0usize + 4usize]);
     let c00: u64 = c0;
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     let mut c: u64 = 0u64;
     for i in 0u32..1u32
     {
@@ -362,37 +360,35 @@ fn mont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
 
 fn fmul(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 8] = [0u64; 8u32 as usize];
+    let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl::p256::bignum::bn_mul4(&mut tmp, x, y);
     mont_reduction(res, &mut tmp)
 }
 
 fn fsqr(res: &mut [u64], x: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 8] = [0u64; 8u32 as usize];
+    let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl::p256::bignum::bn_sqr4(&mut tmp, x);
     mont_reduction(res, &mut tmp)
 }
 
 fn from_mont(res: &mut [u64], a: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 8] = [0u64; 8u32 as usize];
-    ((&mut tmp)[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &a[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    let mut tmp: [u64; 8] = [0u64; 8usize];
+    ((&mut tmp)[0usize..0usize + 4usize]).copy_from_slice(&a[0usize..0usize + 4usize]);
     mont_reduction(res, &mut tmp)
 }
 
 fn to_mont(res: &mut [u64], a: &mut [u64]) -> ()
 {
-    let mut r2modn: [u64; 4] = [0u64; 4u32 as usize];
+    let mut r2modn: [u64; 4] = [0u64; 4usize];
     make_fmont_R2(&mut r2modn);
     fmul(res, a, &mut r2modn)
 }
 
 fn fmul_by_b_coeff(res: &mut [u64], x: &mut [u64]) -> ()
 {
-    let mut b_coeff: [u64; 4] = [0u64; 4u32 as usize];
+    let mut b_coeff: [u64; 4] = [0u64; 4usize];
     make_b_coeff(&mut b_coeff);
     fmul(res, &mut b_coeff, x)
 }
@@ -405,49 +401,33 @@ fn fcube(res: &mut [u64], x: &mut [u64]) -> ()
 
 fn finv(res: &mut [u64], a: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 16] = [0u64; 16u32 as usize];
+    let mut tmp: [u64; 16] = [0u64; 16usize];
     let x30: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let x2: (&mut [u64], &mut [u64]) = x30.1.split_at_mut(4usize);
     let tmp1: (&mut [u64], &mut [u64]) = x2.1.split_at_mut(4usize);
     let tmp2: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(4usize);
-    (tmp1.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &a[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp1.0[0usize..0usize + 4usize]).copy_from_slice(&a[0usize..0usize + 4usize]);
     for i in 0u32..1u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp1.0, tmp1.0, a);
-    (x2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp1.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (x2.0[0usize..0usize + 4usize]).copy_from_slice(&tmp1.0[0usize..0usize + 4usize]);
     for i in 0u32..1u32 { fsqr(x2.0, x2.0) };
     fmul(x2.0, x2.0, a);
-    (tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.0[0usize..0usize + 4usize]).copy_from_slice(&x2.0[0usize..0usize + 4usize]);
     for i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, x2.0);
-    (tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.1[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize]);
     for i in 0u32..6u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, tmp2.0);
-    (tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.0[0usize..0usize + 4usize]).copy_from_slice(&tmp2.1[0usize..0usize + 4usize]);
     for i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, x2.0);
-    (x2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (x2.0[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize]);
     for i in 0u32..15u32 { fsqr(x2.0, x2.0) };
     fmul(x2.0, x2.0, tmp2.0);
-    (tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.0[0usize..0usize + 4usize]).copy_from_slice(&x2.0[0usize..0usize + 4usize]);
     for i in 0u32..2u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, tmp1.0);
-    (tmp1.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp1.0[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize]);
     for i in 0u32..32u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp1.0, tmp1.0, a);
     for i in 0u32..128u32 { fsqr(tmp1.0, tmp1.0) };
@@ -458,52 +438,36 @@ fn finv(res: &mut [u64], a: &mut [u64]) -> ()
     fmul(tmp1.0, tmp1.0, x2.0);
     for i in 0u32..2u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp2.0, tmp1.0, a);
-    (res[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    )
+    (res[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize])
 }
 
 fn fsqrt(res: &mut [u64], a: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 8] = [0u64; 8u32 as usize];
+    let mut tmp: [u64; 8] = [0u64; 8usize];
     let tmp1: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let tmp2: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(4usize);
-    (tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &a[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.0[0usize..0usize + 4usize]).copy_from_slice(&a[0usize..0usize + 4usize]);
     for i in 0u32..1u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, a);
-    (tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.1[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize]);
     for i in 0u32..2u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, tmp2.0);
-    (tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.0[0usize..0usize + 4usize]).copy_from_slice(&tmp2.1[0usize..0usize + 4usize]);
     for i in 0u32..4u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, tmp2.1);
-    (tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.1[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize]);
     for i in 0u32..8u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, tmp2.0);
-    (tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.0[0usize..0usize + 4usize]).copy_from_slice(&tmp2.1[0usize..0usize + 4usize]);
     for i in 0u32..16u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, tmp2.1);
-    (tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (tmp2.1[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize]);
     for i in 0u32..32u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, a);
     for i in 0u32..96u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, a);
     for i in 0u32..94u32 { fsqr(tmp2.1, tmp2.1) };
-    (res[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &tmp2.1[0u32 as usize..0u32 as usize + 4u32 as usize]
-    )
+    (res[0usize..0usize + 4usize]).copy_from_slice(&tmp2.1[0usize..0usize + 4usize])
 }
 
 fn make_base_point(p: &mut [u64]) -> ()
@@ -534,7 +498,7 @@ fn is_point_at_inf_vartime(p: &mut [u64]) -> bool
 
 fn to_aff_point(res: &mut [u64], p: &mut [u64]) -> ()
 {
-    let mut zinv: [u64; 4] = [0u64; 4u32 as usize];
+    let mut zinv: [u64; 4] = [0u64; 4usize];
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(4usize);
     let pz: (&mut [u64], &mut [u64]) = py.1.split_at_mut(4usize);
@@ -549,7 +513,7 @@ fn to_aff_point(res: &mut [u64], p: &mut [u64]) -> ()
 
 fn to_aff_point_x(res: &mut [u64], p: &mut [u64]) -> ()
 {
-    let mut zinv: [u64; 4] = [0u64; 4u32 as usize];
+    let mut zinv: [u64; 4] = [0u64; 4usize];
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let pz: (&mut [u64], &mut [u64]) = px.1.split_at_mut(8usize);
     finv(&mut zinv, pz.1);
@@ -571,14 +535,14 @@ fn to_proj_point(res: &mut [u64], p: &mut [u64]) -> ()
 
 fn is_on_curve_vartime(p: &mut [u64]) -> bool
 {
-    let mut rp: [u64; 4] = [0u64; 4u32 as usize];
-    let mut tx: [u64; 4] = [0u64; 4u32 as usize];
-    let mut ty: [u64; 4] = [0u64; 4u32 as usize];
+    let mut rp: [u64; 4] = [0u64; 4usize];
+    let mut tx: [u64; 4] = [0u64; 4usize];
+    let mut ty: [u64; 4] = [0u64; 4usize];
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(4usize);
     to_mont(&mut tx, py.0);
     to_mont(&mut ty, py.1);
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     fcube(&mut rp, &mut tx);
     make_a_coeff(&mut tmp);
     fmul(&mut tmp, &mut tmp, &mut tx);
@@ -600,7 +564,7 @@ fn aff_point_store(res: &mut [u8], p: &mut [u64]) -> ()
 
 fn point_store(res: &mut [u8], p: &mut [u64]) -> ()
 {
-    let mut aff_p: [u64; 8] = [0u64; 8u32 as usize];
+    let mut aff_p: [u64; 8] = [0u64; 8usize];
     to_aff_point(&mut aff_p, p);
     aff_point_store(res, &mut aff_p)
 }
@@ -624,7 +588,7 @@ fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
 
 fn load_point_vartime(p: &mut [u64], b: &mut [u8]) -> bool
 {
-    let mut p_aff: [u64; 8] = [0u64; 8u32 as usize];
+    let mut p_aff: [u64; 8] = [0u64; 8usize];
     let res: bool = aff_point_load_vartime(&mut p_aff, b);
     if res { to_proj_point(p, &mut p_aff) };
     res
@@ -632,7 +596,7 @@ fn load_point_vartime(p: &mut [u64], b: &mut [u8]) -> bool
 
 fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> bool
 {
-    let s0: u8 = s[0u32 as usize];
+    let s0: u8 = s[0usize];
     let s01: u8 = s0;
     if ! (s01 == 0x02u8 || s01 == 0x03u8)
     { falsebool }
@@ -647,11 +611,11 @@ fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> b
         { falsebool }
         else
         {
-            let mut y2M: [u64; 4] = [0u64; 4u32 as usize];
-            let mut xM: [u64; 4] = [0u64; 4u32 as usize];
-            let mut yM: [u64; 4] = [0u64; 4u32 as usize];
+            let mut y2M: [u64; 4] = [0u64; 4usize];
+            let mut xM: [u64; 4] = [0u64; 4usize];
+            let mut yM: [u64; 4] = [0u64; 4usize];
             to_mont(&mut xM, x);
-            let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+            let mut tmp: [u64; 4] = [0u64; 4usize];
             fcube(&mut y2M, &mut xM);
             make_a_coeff(&mut tmp);
             fmul(&mut tmp, &mut tmp, &mut xM);
@@ -668,7 +632,7 @@ fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> b
             { falsebool }
             else
             {
-                let is_y_odd1: u64 = y[0u32 as usize] & 1u64;
+                let is_y_odd1: u64 = y[0usize] & 1u64;
                 let is_y_odd2: bool = is_y_odd1 == 1u64;
                 fnegate_conditional_vartime(y, is_y_odd2 != is_y_odd);
                 truebool
@@ -679,7 +643,7 @@ fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> b
 
 fn point_double(res: &mut [u64], p: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 20] = [0u64; 20u32 as usize];
+    let mut tmp: [u64; 20] = [0u64; 20usize];
     let x: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(8usize);
     let x3: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
@@ -731,7 +695,7 @@ fn point_double(res: &mut [u64], p: &mut [u64]) -> ()
 
 fn point_add(res: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 36] = [0u64; 36u32 as usize];
+    let mut tmp: [u64; 36] = [0u64; 36usize];
     let t0: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(24usize);
     let x3: (&mut [u64], &mut [u64]) = t1.1.split_at_mut(0usize);
@@ -800,15 +764,13 @@ fn point_add(res: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
     fmul(z3.1, t5.0, z3.1);
     fmul(t2.0, t4.0, t11.0);
     fadd(z3.1, z3.1, t2.0);
-    (res[0u32 as usize..0u32 as usize + 12u32 as usize]).copy_from_slice(
-        &y3.0[0u32 as usize..0u32 as usize + 12u32 as usize]
-    )
+    (res[0usize..0usize + 12usize]).copy_from_slice(&y3.0[0usize..0usize + 12usize])
 }
 
 fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
 {
-    (tmp[0u32 as usize..0u32 as usize + 12u32 as usize]).copy_from_slice(
-        &(&mut table[0u32 as usize..] as &mut [u64])[0u32 as usize..0u32 as usize + 12u32 as usize]
+    (tmp[0usize..0usize + 12usize]).copy_from_slice(
+        &(&mut table[0usize..] as &mut [u64])[0usize..0usize + 12usize]
     );
     for i in 0u32..15u32
     {
@@ -828,7 +790,7 @@ fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
 
 fn bn_is_lt_order_mask4(f: &mut [u64]) -> u64
 {
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     make_order(&mut tmp);
     let c: u64 = bn_sub4(&mut tmp, f, &mut tmp);
     0u64.wrapping_sub(c)
@@ -843,7 +805,7 @@ fn bn_is_lt_order_and_gt_zero_mask4(f: &mut [u64]) -> u64
 
 fn qmod_short(res: &mut [u64], x: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     make_order(&mut tmp);
     let c: u64 = bn_sub4(&mut tmp, x, &mut tmp);
     bn_cmovznz4(res, c, &mut tmp, x)
@@ -851,14 +813,14 @@ fn qmod_short(res: &mut [u64], x: &mut [u64]) -> ()
 
 fn qadd(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
-    let mut n: [u64; 4] = [0u64; 4u32 as usize];
+    let mut n: [u64; 4] = [0u64; 4usize];
     make_order(&mut n);
     bn_add_mod4(res, &mut n, x, y)
 }
 
 fn qmont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
 {
-    let mut n: [u64; 4] = [0u64; 4u32 as usize];
+    let mut n: [u64; 4] = [0u64; 4usize];
     make_order(&mut n);
     let mut c0: u64 = 0u64;
     for i in 0u32..4u32
@@ -895,11 +857,9 @@ fn qmont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
         let res_j0: u64 = res_j.0[4u32.wrapping_add(i) as usize];
         c0 = crate::lib::inttypes::intrinsics::add_carry_u64(c0, c1, res_j0, resb.1)
     };
-    (res[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &(&mut x[4u32 as usize..])[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (res[0usize..0usize + 4usize]).copy_from_slice(&(&mut x[4usize..])[0usize..0usize + 4usize]);
     let c00: u64 = c0;
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     let mut c: u64 = 0u64;
     for i in 0u32..1u32
     {
@@ -941,39 +901,37 @@ fn qmont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
 
 fn from_qmont(res: &mut [u64], x: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 8] = [0u64; 8u32 as usize];
-    ((&mut tmp)[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    let mut tmp: [u64; 8] = [0u64; 8usize];
+    ((&mut tmp)[0usize..0usize + 4usize]).copy_from_slice(&x[0usize..0usize + 4usize]);
     qmont_reduction(res, &mut tmp)
 }
 
 fn qmul(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 8] = [0u64; 8u32 as usize];
+    let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl::p256::bignum::bn_mul4(&mut tmp, x, y);
     qmont_reduction(res, &mut tmp)
 }
 
 fn qsqr(res: &mut [u64], x: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 8] = [0u64; 8u32 as usize];
+    let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl::p256::bignum::bn_sqr4(&mut tmp, x);
     qmont_reduction(res, &mut tmp)
 }
 
 pub fn ecp256dh_i(public_key: &mut [u8], private_key: &mut [u8]) -> bool
 {
-    let mut tmp: [u64; 16] = [0u64; 16u32 as usize];
+    let mut tmp: [u64; 16] = [0u64; 16usize];
     let sk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let pk: (&mut [u64], &mut [u64]) = sk.1.split_at_mut(4usize);
     bn_from_bytes_be4(pk.0, private_key);
     let is_b_valid: u64 = bn_is_lt_order_and_gt_zero_mask4(pk.0);
-    let mut oneq: [u64; 4] = [0u64; 4u32 as usize];
-    (&mut oneq)[0u32 as usize] = 1u64;
-    (&mut oneq)[1u32 as usize] = 0u64;
-    (&mut oneq)[2u32 as usize] = 0u64;
-    (&mut oneq)[3u32 as usize] = 0u64;
+    let mut oneq: [u64; 4] = [0u64; 4usize];
+    (&mut oneq)[0usize] = 1u64;
+    (&mut oneq)[1usize] = 0u64;
+    (&mut oneq)[2usize] = 0u64;
+    (&mut oneq)[3usize] = 0u64;
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = pk.0.split_at_mut(0usize);
@@ -990,17 +948,17 @@ pub fn ecp256dh_i(public_key: &mut [u8], private_key: &mut [u8]) -> bool
 pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key: &mut [u8]) ->
     bool
 {
-    let mut tmp: [u64; 16] = [0u64; 16u32 as usize];
+    let mut tmp: [u64; 16] = [0u64; 16usize];
     let sk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let pk: (&mut [u64], &mut [u64]) = sk.1.split_at_mut(4usize);
     let is_pk_valid: bool = load_point_vartime(pk.1, their_pubkey);
     bn_from_bytes_be4(pk.0, private_key);
     let is_b_valid: u64 = bn_is_lt_order_and_gt_zero_mask4(pk.0);
-    let mut oneq: [u64; 4] = [0u64; 4u32 as usize];
-    (&mut oneq)[0u32 as usize] = 1u64;
-    (&mut oneq)[1u32 as usize] = 0u64;
-    (&mut oneq)[2u32 as usize] = 0u64;
-    (&mut oneq)[3u32 as usize] = 0u64;
+    let mut oneq: [u64; 4] = [0u64; 4usize];
+    (&mut oneq)[0usize] = 1u64;
+    (&mut oneq)[1usize] = 0u64;
+    (&mut oneq)[2usize] = 0u64;
+    (&mut oneq)[3usize] = 0u64;
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = pk.0.split_at_mut(0usize);
@@ -1009,7 +967,7 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
         os.1[i as usize] = x
     };
     let is_sk_valid: u64 = is_b_valid;
-    let mut ss_proj: [u64; 12] = [0u64; 12u32 as usize];
+    let mut ss_proj: [u64; 12] = [0u64; 12usize];
     if is_pk_valid
     {
         crate::hacl::impl::p256::pointmul::point_mul(&mut ss_proj, pk.0, pk.1);
@@ -1020,7 +978,7 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
 
 fn qinv(res: &mut [u64], r: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 28] = [0u64; 28u32 as usize];
+    let mut tmp: [u64; 28] = [0u64; 28usize];
     let x6: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let x_11: (&mut [u64], &mut [u64]) = x6.1.split_at_mut(4usize);
     let x_101: (&mut [u64], &mut [u64]) = x_11.1.split_at_mut(4usize);
@@ -1028,42 +986,30 @@ fn qinv(res: &mut [u64], r: &mut [u64]) -> ()
     let x_1111: (&mut [u64], &mut [u64]) = x_111.1.split_at_mut(4usize);
     let x_10101: (&mut [u64], &mut [u64]) = x_1111.1.split_at_mut(4usize);
     let x_101111: (&mut [u64], &mut [u64]) = x_10101.1.split_at_mut(4usize);
-    (x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &r[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (x_11.0[0usize..0usize + 4usize]).copy_from_slice(&r[0usize..0usize + 4usize]);
     for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_101.0, x_11.0, r);
     qmul(x_111.0, x_11.0, x_101.0);
     qmul(x_1111.0, x_11.0, x_111.0);
-    (x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x_111.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (x_11.0[0usize..0usize + 4usize]).copy_from_slice(&x_111.0[0usize..0usize + 4usize]);
     for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_10101.0, x_111.0, x_11.0);
     for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_101111.0, x_11.0, r);
-    (x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x_101111.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (x_11.0[0usize..0usize + 4usize]).copy_from_slice(&x_101111.0[0usize..0usize + 4usize]);
     for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_101111.1, x_111.0, x_11.0);
     qmul(x_11.0, x_101111.0, x_11.0);
-    let mut tmp1: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp1: [u64; 4] = [0u64; 4usize];
     for i in 0u32..2u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_11.0, x_11.0, x_101.0);
-    ((&mut tmp1)[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    ((&mut tmp1)[0usize..0usize + 4usize]).copy_from_slice(&x_11.0[0usize..0usize + 4usize]);
     for i in 0u32..8u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_11.0);
-    (x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &(&mut tmp1)[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    (x_11.0[0usize..0usize + 4usize]).copy_from_slice(&(&mut tmp1)[0usize..0usize + 4usize]);
     for i in 0u32..16u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_11.0, x_11.0, &mut tmp1);
-    ((&mut tmp1)[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
+    ((&mut tmp1)[0usize..0usize + 4usize]).copy_from_slice(&x_11.0[0usize..0usize + 4usize]);
     for i in 0u32..64u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_11.0);
     for i in 0u32..32u32 { qsqr(&mut tmp1, &mut tmp1) };
@@ -1120,17 +1066,13 @@ fn qinv(res: &mut [u64], r: &mut [u64]) -> ()
     qmul(&mut tmp1, &mut tmp1, x_101111.0);
     for i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_10101.0);
-    (x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &(&mut tmp1)[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
-    (res[0u32 as usize..0u32 as usize + 4u32 as usize]).copy_from_slice(
-        &x_11.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    )
+    (x_11.0[0usize..0usize + 4usize]).copy_from_slice(&(&mut tmp1)[0usize..0usize + 4usize]);
+    (res[0usize..0usize + 4usize]).copy_from_slice(&x_11.0[0usize..0usize + 4usize])
 }
 
 fn qmul_mont(sinv: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     from_qmont(&mut tmp, b);
     qmul(res, sinv, &mut tmp)
 }
@@ -1143,7 +1085,7 @@ fn ecdsa_verify_msg_as_qelem(
 ) ->
     bool
 {
-    let mut tmp: [u64; 28] = [0u64; 28u32 as usize];
+    let mut tmp: [u64; 28] = [0u64; 28usize];
     let pk: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let r_q: (&mut [u64], &mut [u64]) = pk.1.split_at_mut(12usize);
     let s_q: (&mut [u64], &mut [u64]) = r_q.1.split_at_mut(4usize);
@@ -1160,17 +1102,17 @@ fn ecdsa_verify_msg_as_qelem(
     { falsebool }
     else
     {
-        let mut sinv: [u64; 4] = [0u64; 4u32 as usize];
+        let mut sinv: [u64; 4] = [0u64; 4usize];
         qinv(&mut sinv, u1.0);
         qmul_mont(&mut sinv, m_q, u2.0);
         qmul_mont(&mut sinv, s_q.0, u2.1);
-        let mut res: [u64; 12] = [0u64; 12u32 as usize];
+        let mut res: [u64; 12] = [0u64; 12usize];
         crate::hacl::impl::p256::pointmul::point_mul_double_g(&mut res, u2.0, u2.1, r_q.0);
         if is_point_at_inf_vartime(&mut res)
         { falsebool }
         else
         {
-            let mut x: [u64; 4] = [0u64; 4u32 as usize];
+            let mut x: [u64; 4] = [0u64; 4usize];
             to_aff_point_x(&mut x, &mut res);
             qmod_short(&mut x, &mut x);
             let res1: bool = bn_is_eq_vartime4(&mut x, s_q.0);
@@ -1187,18 +1129,18 @@ fn ecdsa_sign_msg_as_qelem(
 ) ->
     bool
 {
-    let mut rsdk_q: [u64; 16] = [0u64; 16u32 as usize];
+    let mut rsdk_q: [u64; 16] = [0u64; 16usize];
     let r_q: (&mut [u64], &mut [u64]) = (&mut rsdk_q).split_at_mut(0usize);
     let s_q: (&mut [u64], &mut [u64]) = r_q.1.split_at_mut(4usize);
     let d_a: (&mut [u64], &mut [u64]) = s_q.1.split_at_mut(4usize);
     let k_q: (&mut [u64], &mut [u64]) = d_a.1.split_at_mut(4usize);
     bn_from_bytes_be4(k_q.0, private_key);
     let is_b_valid: u64 = bn_is_lt_order_and_gt_zero_mask4(k_q.0);
-    let mut oneq: [u64; 4] = [0u64; 4u32 as usize];
-    (&mut oneq)[0u32 as usize] = 1u64;
-    (&mut oneq)[1u32 as usize] = 0u64;
-    (&mut oneq)[2u32 as usize] = 0u64;
-    (&mut oneq)[3u32 as usize] = 0u64;
+    let mut oneq: [u64; 4] = [0u64; 4usize];
+    (&mut oneq)[0usize] = 1u64;
+    (&mut oneq)[1usize] = 0u64;
+    (&mut oneq)[2usize] = 0u64;
+    (&mut oneq)[3usize] = 0u64;
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = k_q.0.split_at_mut(0usize);
@@ -1209,11 +1151,11 @@ fn ecdsa_sign_msg_as_qelem(
     let is_sk_valid: u64 = is_b_valid;
     bn_from_bytes_be4(k_q.1, nonce);
     let is_b_valid0: u64 = bn_is_lt_order_and_gt_zero_mask4(k_q.1);
-    let mut oneq0: [u64; 4] = [0u64; 4u32 as usize];
-    (&mut oneq0)[0u32 as usize] = 1u64;
-    (&mut oneq0)[1u32 as usize] = 0u64;
-    (&mut oneq0)[2u32 as usize] = 0u64;
-    (&mut oneq0)[3u32 as usize] = 0u64;
+    let mut oneq0: [u64; 4] = [0u64; 4usize];
+    (&mut oneq0)[0usize] = 1u64;
+    (&mut oneq0)[1usize] = 0u64;
+    (&mut oneq0)[2usize] = 0u64;
+    (&mut oneq0)[3usize] = 0u64;
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = k_q.1.split_at_mut(0usize);
@@ -1223,11 +1165,11 @@ fn ecdsa_sign_msg_as_qelem(
     };
     let is_nonce_valid: u64 = is_b_valid0;
     let are_sk_nonce_valid: u64 = is_sk_valid & is_nonce_valid;
-    let mut p: [u64; 12] = [0u64; 12u32 as usize];
+    let mut p: [u64; 12] = [0u64; 12usize];
     crate::hacl::impl::p256::pointmul::point_mul_g(&mut p, k_q.1);
     to_aff_point_x(s_q.0, &mut p);
     qmod_short(s_q.0, s_q.0);
-    let mut kinv: [u64; 4] = [0u64; 4u32 as usize];
+    let mut kinv: [u64; 4] = [0u64; 4usize];
     qinv(&mut kinv, k_q.1);
     qmul(d_a.0, s_q.0, k_q.0);
     from_qmont(m_q, m_q);
@@ -1243,14 +1185,14 @@ fn ecdsa_sign_msg_as_qelem(
 
 pub fn validate_public_key(public_key: &mut [u8]) -> bool
 {
-    let mut point_jac: [u64; 12] = [0u64; 12u32 as usize];
+    let mut point_jac: [u64; 12] = [0u64; 12usize];
     let res: bool = load_point_vartime(&mut point_jac, public_key);
     res
 }
 
 pub fn validate_private_key(private_key: &mut [u8]) -> bool
 {
-    let mut bn_sk: [u64; 4] = [0u64; 4u32 as usize];
+    let mut bn_sk: [u64; 4] = [0u64; 4usize];
     bn_from_bytes_be4(&mut bn_sk, private_key);
     let res: u64 = bn_is_lt_order_and_gt_zero_mask4(&mut bn_sk);
     res == 0xFFFFFFFFFFFFFFFFu64
@@ -1258,13 +1200,13 @@ pub fn validate_private_key(private_key: &mut [u8]) -> bool
 
 pub fn uncompressed_to_raw(pk: &mut [u8], pk_raw: &mut [u8]) -> bool
 {
-    let pk0: u8 = pk[0u32 as usize];
+    let pk0: u8 = pk[0usize];
     if pk0 != 0x04u8
     { falsebool }
     else
     {
-        (pk_raw[0u32 as usize..0u32 as usize + 64u32 as usize]).copy_from_slice(
-            &(&mut pk[1u32 as usize..])[0u32 as usize..0u32 as usize + 64u32 as usize]
+        (pk_raw[0usize..0usize + 64usize]).copy_from_slice(
+            &(&mut pk[1usize..])[0usize..0usize + 64usize]
         );
         truebool
     }
@@ -1272,39 +1214,33 @@ pub fn uncompressed_to_raw(pk: &mut [u8], pk_raw: &mut [u8]) -> bool
 
 pub fn compressed_to_raw(pk: &mut [u8], pk_raw: &mut [u8]) -> bool
 {
-    let mut xa: [u64; 4] = [0u64; 4u32 as usize];
-    let mut ya: [u64; 4] = [0u64; 4u32 as usize];
+    let mut xa: [u64; 4] = [0u64; 4usize];
+    let mut ya: [u64; 4] = [0u64; 4usize];
     let pk_xb: (&mut [u8], &mut [u8]) = pk.split_at_mut(1usize);
     let b: bool = aff_point_decompress_vartime(&mut xa, &mut ya, pk_xb.0);
     if b
     {
-        (pk_raw[0u32 as usize..0u32 as usize + 32u32 as usize]).copy_from_slice(
-            &pk_xb.1[0u32 as usize..0u32 as usize + 32u32 as usize]
-        );
-        crate::hacl::impl::p256::bignum::bn_to_bytes_be4(&mut pk_raw[32u32 as usize..], &mut ya)
+        (pk_raw[0usize..0usize + 32usize]).copy_from_slice(&pk_xb.1[0usize..0usize + 32usize]);
+        crate::hacl::impl::p256::bignum::bn_to_bytes_be4(&mut pk_raw[32usize..], &mut ya)
     };
     b
 }
 
 pub fn raw_to_uncompressed(pk_raw: &mut [u8], pk: &mut [u8]) -> ()
 {
-    pk[0u32 as usize] = 0x04u8;
-    (pk[1u32 as usize..1u32 as usize + 64u32 as usize]).copy_from_slice(
-        &pk_raw[0u32 as usize..0u32 as usize + 64u32 as usize]
-    )
+    pk[0usize] = 0x04u8;
+    (pk[1usize..1usize + 64usize]).copy_from_slice(&pk_raw[0usize..0usize + 64usize])
 }
 
 pub fn raw_to_compressed(pk_raw: &mut [u8], pk: &mut [u8]) -> ()
 {
     let pk_x: (&mut [u8], &mut [u8]) = pk_raw.split_at_mut(0usize);
     let pk_y: (&mut [u8], &mut [u8]) = pk_x.1.split_at_mut(32usize);
-    let mut bn_f: [u64; 4] = [0u64; 4u32 as usize];
+    let mut bn_f: [u64; 4] = [0u64; 4usize];
     bn_from_bytes_be4(&mut bn_f, pk_y.1);
-    let is_odd_f: u64 = (&mut bn_f)[0u32 as usize] & 1u64;
-    pk[0u32 as usize] = (is_odd_f as u8).wrapping_add(0x02u8);
-    (pk[1u32 as usize..1u32 as usize + 32u32 as usize]).copy_from_slice(
-        &pk_y.0[0u32 as usize..0u32 as usize + 32u32 as usize]
-    )
+    let is_odd_f: u64 = (&mut bn_f)[0usize] & 1u64;
+    pk[0usize] = (is_odd_f as u8).wrapping_add(0x02u8);
+    (pk[1usize..1usize + 32usize]).copy_from_slice(&pk_y.0[0usize..0usize + 32usize])
 }
 
 pub fn dh_initiator(public_key: &mut [u8], private_key: &mut [u8]) -> bool

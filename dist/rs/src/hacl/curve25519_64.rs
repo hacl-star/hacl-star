@@ -64,10 +64,10 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -
     let dc1: (&mut [u64], &mut [u64]) = c0.0.split_at_mut(0usize);
     crate::hacl::impl::curve25519::field64::vale::fsqr2(dc1.1, ab1.1, tmp2);
     crate::hacl::impl::curve25519::field64::vale::fsqr2(x3.1, x3.1, tmp2);
-    ab1.0[0u32 as usize] = c0.1[0u32 as usize];
-    ab1.0[1u32 as usize] = c0.1[1u32 as usize];
-    ab1.0[2u32 as usize] = c0.1[2u32 as usize];
-    ab1.0[3u32 as usize] = c0.1[3u32 as usize];
+    ab1.0[0usize] = c0.1[0usize];
+    ab1.0[1usize] = c0.1[1usize];
+    ab1.0[2usize] = c0.1[2usize];
+    ab1.0[3usize] = c0.1[3usize];
     crate::hacl::impl::curve25519::field64::vale::fsub(c0.1, dc1.0, c0.1);
     crate::hacl::impl::curve25519::field64::vale::fmul_scalar(b1.1, c0.1, 121665u64);
     crate::hacl::impl::curve25519::field64::vale::fadd(b1.1, b1.1, dc1.0);
@@ -88,10 +88,10 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
     crate::hacl::impl::curve25519::field64::vale::fadd(ab.0, z2.0, z2.1);
     crate::hacl::impl::curve25519::field64::vale::fsub(d.0, z2.0, z2.1);
     crate::hacl::impl::curve25519::field64::vale::fsqr2(dc.1, ab.1, tmp2);
-    ab.0[0u32 as usize] = c.1[0u32 as usize];
-    ab.0[1u32 as usize] = c.1[1u32 as usize];
-    ab.0[2u32 as usize] = c.1[2u32 as usize];
-    ab.0[3u32 as usize] = c.1[3u32 as usize];
+    ab.0[0usize] = c.1[0usize];
+    ab.0[1usize] = c.1[1usize];
+    ab.0[2usize] = c.1[2usize];
+    ab.0[3usize] = c.1[3usize];
     crate::hacl::impl::curve25519::field64::vale::fsub(c.1, dc.0, c.1);
     crate::hacl::impl::curve25519::field64::vale::fmul_scalar(d.0, c.1, 121665u64);
     crate::hacl::impl::curve25519::field64::vale::fadd(d.0, d.0, dc.0);
@@ -100,25 +100,23 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
 
 fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
 {
-    let mut tmp2: [u64; 16] = [0u64; 16u32 as usize];
-    let mut p01_tmp1_swap: [u64; 33] = [0u64; 33u32 as usize];
+    let mut tmp2: [u64; 16] = [0u64; 16usize];
+    let mut p01_tmp1_swap: [u64; 33] = [0u64; 33usize];
     let p0: (&mut [u64], &mut [u64]) = (&mut p01_tmp1_swap).split_at_mut(0usize);
     let p01: (&mut [u64], &mut [u64]) = p0.1.split_at_mut(0usize);
     let p03: (&mut [u64], &mut [u64]) = p01.1.split_at_mut(0usize);
     let p11: (&mut [u64], &mut [u64]) = p03.1.split_at_mut(8usize);
-    (p11.1[0u32 as usize..0u32 as usize + 8u32 as usize]).copy_from_slice(
-        &init[0u32 as usize..0u32 as usize + 8u32 as usize]
-    );
+    (p11.1[0usize..0usize + 8usize]).copy_from_slice(&init[0usize..0usize + 8usize]);
     let x0: (&mut [u64], &mut [u64]) = p11.0.split_at_mut(0usize);
     let z0: (&mut [u64], &mut [u64]) = x0.1.split_at_mut(4usize);
-    z0.0[0u32 as usize] = 1u64;
-    z0.0[1u32 as usize] = 0u64;
-    z0.0[2u32 as usize] = 0u64;
-    z0.0[3u32 as usize] = 0u64;
-    z0.1[0u32 as usize] = 0u64;
-    z0.1[1u32 as usize] = 0u64;
-    z0.1[2u32 as usize] = 0u64;
-    z0.1[3u32 as usize] = 0u64;
+    z0.0[0usize] = 1u64;
+    z0.0[1usize] = 0u64;
+    z0.0[2usize] = 0u64;
+    z0.0[3usize] = 0u64;
+    z0.1[0usize] = 0u64;
+    z0.1[1usize] = 0u64;
+    z0.1[2usize] = 0u64;
+    z0.1[3usize] = 0u64;
     let p01_tmp1: (&mut [u64], &mut [u64]) = p01.1.split_at_mut(0usize);
     let p01_tmp11: (&mut [u64], &mut [u64]) = p01_tmp1.1.split_at_mut(0usize);
     let nq1: (&mut [u64], &mut [u64]) = p01_tmp11.1.split_at_mut(0usize);
@@ -126,7 +124,7 @@ fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
     let swap: (&mut [u64], &mut [u64]) = nq_p11.1.split_at_mut(24usize);
     crate::hacl::impl::curve25519::field64::vale::cswap2(1u64, nq_p11.0, swap.0);
     point_add_and_double(init, nq1.0, &mut tmp2);
-    swap.1[0u32 as usize] = 1u64;
+    swap.1[0usize] = 1u64;
     for i in 0u32..251u32
     {
         let p01_tmp12: (&mut [u64], &mut [u64]) = nq_p11.0.split_at_mut(0usize);
@@ -141,21 +139,19 @@ fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
             1u8)
             as
             u64;
-        let sw: u64 = swap1.1[0u32 as usize] ^ bit;
+        let sw: u64 = swap1.1[0usize] ^ bit;
         crate::hacl::impl::curve25519::field64::vale::cswap2(sw, nq_p12.0, nq_p12.1);
         point_add_and_double(init, nq_p12.0, &mut tmp2);
-        swap1.1[0u32 as usize] = bit
+        swap1.1[0usize] = bit
     };
-    let sw: u64 = swap.1[0u32 as usize];
+    let sw: u64 = swap.1[0usize];
     crate::hacl::impl::curve25519::field64::vale::cswap2(sw, nq_p11.0, swap.0);
     let nq10: (&mut [u64], &mut [u64]) = p01_tmp11.0.split_at_mut(0usize);
     let tmp1: (&mut [u64], &mut [u64]) = nq10.1.split_at_mut(16usize);
     point_double(tmp1.0, tmp1.1, &mut tmp2);
     point_double(tmp1.0, tmp1.1, &mut tmp2);
     point_double(tmp1.0, tmp1.1, &mut tmp2);
-    (out[0u32 as usize..0u32 as usize + 8u32 as usize]).copy_from_slice(
-        &p01.0[0u32 as usize..0u32 as usize + 8u32 as usize]
-    )
+    (out[0usize..0usize + 8usize]).copy_from_slice(&p01.0[0usize..0usize + 8usize])
 }
 
 fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32) -> ()
@@ -167,7 +163,7 @@ fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32) -> ()
 
 fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
 {
-    let mut t1: [u64; 16] = [0u64; 16u32 as usize];
+    let mut t1: [u64; 16] = [0u64; 16usize];
     let a1: (&mut [u64], &mut [u64]) = (&mut t1).split_at_mut(0usize);
     let b1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(4usize);
     let t01: (&mut [u64], &mut [u64]) = b1.1.split_at_mut(8usize);
@@ -208,18 +204,18 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
 
 fn store_felem(b: &mut [u64], f: &mut [u64]) -> ()
 {
-    let f3: u64 = f[3u32 as usize];
+    let f3: u64 = f[3usize];
     let top_bit: u64 = f3.wrapping_shr(63u32);
-    f[3u32 as usize] = f3 & 0x7fffffffffffffffu64;
+    f[3usize] = f3 & 0x7fffffffffffffffu64;
     crate::hacl::impl::curve25519::field64::vale::add_scalar(f, f, 19u64.wrapping_mul(top_bit));
-    let f30: u64 = f[3u32 as usize];
+    let f30: u64 = f[3usize];
     let top_bit0: u64 = f30.wrapping_shr(63u32);
-    f[3u32 as usize] = f30 & 0x7fffffffffffffffu64;
+    f[3usize] = f30 & 0x7fffffffffffffffu64;
     crate::hacl::impl::curve25519::field64::vale::add_scalar(f, f, 19u64.wrapping_mul(top_bit0));
-    let f0: u64 = f[0u32 as usize];
-    let f1: u64 = f[1u32 as usize];
-    let f2: u64 = f[2u32 as usize];
-    let f31: u64 = f[3u32 as usize];
+    let f0: u64 = f[0usize];
+    let f1: u64 = f[1usize];
+    let f2: u64 = f[2usize];
+    let f31: u64 = f[3usize];
     let m0: u64 = crate::fstar::uint64::gte_mask(f0, 0xffffffffffffffedu64);
     let m1: u64 = crate::fstar::uint64::eq_mask(f1, 0xffffffffffffffffu64);
     let m2: u64 = crate::fstar::uint64::eq_mask(f2, 0xffffffffffffffffu64);
@@ -233,19 +229,19 @@ fn store_felem(b: &mut [u64], f: &mut [u64]) -> ()
     let o1: u64 = f1';
     let o2: u64 = f2';
     let o3: u64 = f3';
-    b[0u32 as usize] = o0;
-    b[1u32 as usize] = o1;
-    b[2u32 as usize] = o2;
-    b[3u32 as usize] = o3
+    b[0usize] = o0;
+    b[1usize] = o1;
+    b[2usize] = o2;
+    b[3usize] = o3
 }
 
 fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
 {
     let x: (&mut [u64], &mut [u64]) = i.split_at_mut(0usize);
     let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
-    let mut u64s: [u64; 4] = [0u64; 4u32 as usize];
-    let mut tmp_w: [u64; 16] = [0u64; 16u32 as usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
+    let mut u64s: [u64; 4] = [0u64; 4usize];
+    let mut tmp_w: [u64; 16] = [0u64; 16usize];
     finv(&mut tmp, z.1, &mut tmp_w);
     crate::hacl::impl::curve25519::field64::vale::fmul(&mut tmp, &mut tmp, z.0, &mut tmp_w);
     store_felem(&mut u64s, &mut tmp);
@@ -260,8 +256,8 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
 
 pub fn scalarmult(out: &mut [u8], priv: &mut [u8], pub: &mut [u8]) -> ()
 {
-    let mut init: [u64; 8] = [0u64; 8u32 as usize];
-    let mut tmp: [u64; 4] = [0u64; 4u32 as usize];
+    let mut init: [u64; 8] = [0u64; 8usize];
+    let mut tmp: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -272,25 +268,25 @@ pub fn scalarmult(out: &mut [u8], priv: &mut [u8], pub: &mut [u8]) -> ()
         let x: u64 = r;
         os.1[i as usize] = x
     };
-    let tmp3: u64 = (&mut tmp)[3u32 as usize];
-    (&mut tmp)[3u32 as usize] = tmp3 & 0x7fffffffffffffffu64;
+    let tmp3: u64 = (&mut tmp)[3usize];
+    (&mut tmp)[3usize] = tmp3 & 0x7fffffffffffffffu64;
     let x: (&mut [u64], &mut [u64]) = (&mut init).split_at_mut(0usize);
     let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
-    z.1[0u32 as usize] = 1u64;
-    z.1[1u32 as usize] = 0u64;
-    z.1[2u32 as usize] = 0u64;
-    z.1[3u32 as usize] = 0u64;
-    z.0[0u32 as usize] = (&mut tmp)[0u32 as usize];
-    z.0[1u32 as usize] = (&mut tmp)[1u32 as usize];
-    z.0[2u32 as usize] = (&mut tmp)[2u32 as usize];
-    z.0[3u32 as usize] = (&mut tmp)[3u32 as usize];
+    z.1[0usize] = 1u64;
+    z.1[1usize] = 0u64;
+    z.1[2usize] = 0u64;
+    z.1[3usize] = 0u64;
+    z.0[0usize] = (&mut tmp)[0usize];
+    z.0[1usize] = (&mut tmp)[1usize];
+    z.0[2usize] = (&mut tmp)[2usize];
+    z.0[3usize] = (&mut tmp)[3usize];
     montgomery_ladder(z.0, priv, z.0);
     encode_point(out, z.0)
 }
 
 pub fn secret_to_public(pub: &mut [u8], priv: &mut [u8]) -> ()
 {
-    let mut basepoint: [u8; 32] = [0u8; 32u32 as usize];
+    let mut basepoint: [u8; 32] = [0u8; 32usize];
     for i in 0u32..32u32
     {
         let os: (&mut [u8], &mut [u8]) = (&mut basepoint).split_at_mut(0usize);
@@ -302,7 +298,7 @@ pub fn secret_to_public(pub: &mut [u8], priv: &mut [u8]) -> ()
 
 pub fn ecdh(out: &mut [u8], priv: &mut [u8], pub: &mut [u8]) -> bool
 {
-    let mut zeros: [u8; 32] = [0u8; 32u32 as usize];
+    let mut zeros: [u8; 32] = [0u8; 32usize];
     scalarmult(out, priv, pub);
     let mut res: u8 = 255u8;
     for i in 0u32..32u32

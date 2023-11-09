@@ -3,14 +3,14 @@ pub fn poly1305_init(ctx: &mut [u64], key: &mut [u8]) -> ()
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);
     let pre: (&mut [u64], &mut [u64]) = acc.1.split_at_mut(5usize);
     let kr: (&mut [u8], &mut [u8]) = key.split_at_mut(0usize);
-    pre.0[0u32 as usize] = 0u64;
-    pre.0[1u32 as usize] = 0u64;
-    pre.0[2u32 as usize] = 0u64;
-    pre.0[3u32 as usize] = 0u64;
-    pre.0[4u32 as usize] = 0u64;
-    let u: u64 = crate::lowstar::endianness::load64_le(&mut kr.1[0u32 as usize..]);
+    pre.0[0usize] = 0u64;
+    pre.0[1usize] = 0u64;
+    pre.0[2usize] = 0u64;
+    pre.0[3usize] = 0u64;
+    pre.0[4usize] = 0u64;
+    let u: u64 = crate::lowstar::endianness::load64_le(&mut kr.1[0usize..]);
     let lo: u64 = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&mut kr.1[8u32 as usize..]);
+    let u0: u64 = crate::lowstar::endianness::load64_le(&mut kr.1[8usize..]);
     let hi: u64 = u0;
     let mask0: u64 = 0x0ffffffc0fffffffu64;
     let mask1: u64 = 0x0ffffffc0ffffffcu64;
@@ -32,41 +32,41 @@ pub fn poly1305_init(ctx: &mut [u64], key: &mut [u8]) -> ()
     let f20: u64 = f2;
     let f30: u64 = f3;
     let f40: u64 = f4;
-    r5.0[0u32 as usize] = f00;
-    r5.0[1u32 as usize] = f10;
-    r5.0[2u32 as usize] = f20;
-    r5.0[3u32 as usize] = f30;
-    r5.0[4u32 as usize] = f40;
-    let f200: u64 = r5.0[0u32 as usize];
-    let f21: u64 = r5.0[1u32 as usize];
-    let f22: u64 = r5.0[2u32 as usize];
-    let f23: u64 = r5.0[3u32 as usize];
-    let f24: u64 = r5.0[4u32 as usize];
-    rn.0[0u32 as usize] = f200.wrapping_mul(5u64);
-    rn.0[1u32 as usize] = f21.wrapping_mul(5u64);
-    rn.0[2u32 as usize] = f22.wrapping_mul(5u64);
-    rn.0[3u32 as usize] = f23.wrapping_mul(5u64);
-    rn.0[4u32 as usize] = f24.wrapping_mul(5u64);
-    rn_5.0[0u32 as usize] = r5.0[0u32 as usize];
-    rn_5.0[1u32 as usize] = r5.0[1u32 as usize];
-    rn_5.0[2u32 as usize] = r5.0[2u32 as usize];
-    rn_5.0[3u32 as usize] = r5.0[3u32 as usize];
-    rn_5.0[4u32 as usize] = r5.0[4u32 as usize];
-    rn_5.1[0u32 as usize] = rn.0[0u32 as usize];
-    rn_5.1[1u32 as usize] = rn.0[1u32 as usize];
-    rn_5.1[2u32 as usize] = rn.0[2u32 as usize];
-    rn_5.1[3u32 as usize] = rn.0[3u32 as usize];
-    rn_5.1[4u32 as usize] = rn.0[4u32 as usize]
+    r5.0[0usize] = f00;
+    r5.0[1usize] = f10;
+    r5.0[2usize] = f20;
+    r5.0[3usize] = f30;
+    r5.0[4usize] = f40;
+    let f200: u64 = r5.0[0usize];
+    let f21: u64 = r5.0[1usize];
+    let f22: u64 = r5.0[2usize];
+    let f23: u64 = r5.0[3usize];
+    let f24: u64 = r5.0[4usize];
+    rn.0[0usize] = f200.wrapping_mul(5u64);
+    rn.0[1usize] = f21.wrapping_mul(5u64);
+    rn.0[2usize] = f22.wrapping_mul(5u64);
+    rn.0[3usize] = f23.wrapping_mul(5u64);
+    rn.0[4usize] = f24.wrapping_mul(5u64);
+    rn_5.0[0usize] = r5.0[0usize];
+    rn_5.0[1usize] = r5.0[1usize];
+    rn_5.0[2usize] = r5.0[2usize];
+    rn_5.0[3usize] = r5.0[3usize];
+    rn_5.0[4usize] = r5.0[4usize];
+    rn_5.1[0usize] = rn.0[0usize];
+    rn_5.1[1usize] = rn.0[1usize];
+    rn_5.1[2usize] = rn.0[2usize];
+    rn_5.1[3usize] = rn.0[3usize];
+    rn_5.1[4usize] = rn.0[4usize]
 }
 
 pub fn poly1305_update1(ctx: &mut [u64], text: &mut [u8]) -> ()
 {
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
     let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
-    let mut e: [u64; 5] = [0u64; 5u32 as usize];
-    let u: u64 = crate::lowstar::endianness::load64_le(&mut text[0u32 as usize..]);
+    let mut e: [u64; 5] = [0u64; 5usize];
+    let u: u64 = crate::lowstar::endianness::load64_le(&mut text[0usize..]);
     let lo: u64 = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&mut text[8u32 as usize..]);
+    let u0: u64 = crate::lowstar::endianness::load64_le(&mut text[8usize..]);
     let hi: u64 = u0;
     let f0: u64 = lo;
     let f1: u64 = hi;
@@ -80,36 +80,36 @@ pub fn poly1305_update1(ctx: &mut [u64], text: &mut [u8]) -> ()
     let f20: u64 = f2;
     let f30: u64 = f3;
     let f40: u64 = f4;
-    (&mut e)[0u32 as usize] = f010;
-    (&mut e)[1u32 as usize] = f110;
-    (&mut e)[2u32 as usize] = f20;
-    (&mut e)[3u32 as usize] = f30;
-    (&mut e)[4u32 as usize] = f40;
+    (&mut e)[0usize] = f010;
+    (&mut e)[1usize] = f110;
+    (&mut e)[2usize] = f20;
+    (&mut e)[3usize] = f30;
+    (&mut e)[4usize] = f40;
     let b: u64 = 0x1000000u64;
     let mask: u64 = b;
-    let f41: u64 = (&mut e)[4u32 as usize];
-    (&mut e)[4u32 as usize] = f41 | mask;
+    let f41: u64 = (&mut e)[4usize];
+    (&mut e)[4usize] = f41 | mask;
     let r: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
     let r5: (&mut [u64], &mut [u64]) = r.1.split_at_mut(5usize);
-    let r0: u64 = r5.0[0u32 as usize];
-    let r1: u64 = r5.0[1u32 as usize];
-    let r2: u64 = r5.0[2u32 as usize];
-    let r3: u64 = r5.0[3u32 as usize];
-    let r4: u64 = r5.0[4u32 as usize];
-    let r51: u64 = r5.1[1u32 as usize];
-    let r52: u64 = r5.1[2u32 as usize];
-    let r53: u64 = r5.1[3u32 as usize];
-    let r54: u64 = r5.1[4u32 as usize];
-    let f10: u64 = (&mut e)[0u32 as usize];
-    let f111: u64 = (&mut e)[1u32 as usize];
-    let f12: u64 = (&mut e)[2u32 as usize];
-    let f13: u64 = (&mut e)[3u32 as usize];
-    let f14: u64 = (&mut e)[4u32 as usize];
-    let a0: u64 = acc.1[0u32 as usize];
-    let a1: u64 = acc.1[1u32 as usize];
-    let a2: u64 = acc.1[2u32 as usize];
-    let a3: u64 = acc.1[3u32 as usize];
-    let a4: u64 = acc.1[4u32 as usize];
+    let r0: u64 = r5.0[0usize];
+    let r1: u64 = r5.0[1usize];
+    let r2: u64 = r5.0[2usize];
+    let r3: u64 = r5.0[3usize];
+    let r4: u64 = r5.0[4usize];
+    let r51: u64 = r5.1[1usize];
+    let r52: u64 = r5.1[2usize];
+    let r53: u64 = r5.1[3usize];
+    let r54: u64 = r5.1[4usize];
+    let f10: u64 = (&mut e)[0usize];
+    let f111: u64 = (&mut e)[1usize];
+    let f12: u64 = (&mut e)[2usize];
+    let f13: u64 = (&mut e)[3usize];
+    let f14: u64 = (&mut e)[4usize];
+    let a0: u64 = acc.1[0usize];
+    let a1: u64 = acc.1[1usize];
+    let a2: u64 = acc.1[2usize];
+    let a3: u64 = acc.1[3usize];
+    let a4: u64 = acc.1[4usize];
     let a01: u64 = a0.wrapping_add(f10);
     let a11: u64 = a1.wrapping_add(f111);
     let a21: u64 = a2.wrapping_add(f12);
@@ -174,11 +174,11 @@ pub fn poly1305_update1(ctx: &mut [u64], text: &mut [u8]) -> ()
     let o2: u64 = x21;
     let o3: u64 = x32;
     let o4: u64 = x42;
-    acc.1[0u32 as usize] = o0;
-    acc.1[1u32 as usize] = o1;
-    acc.1[2u32 as usize] = o2;
-    acc.1[3u32 as usize] = o3;
-    acc.1[4u32 as usize] = o4
+    acc.1[0usize] = o0;
+    acc.1[1usize] = o1;
+    acc.1[2usize] = o2;
+    acc.1[3usize] = o3;
+    acc.1[4usize] = o4
 }
 
 pub fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
@@ -191,10 +191,10 @@ pub fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
     {
         let block: (&mut [u8], &mut [u8]) =
             text.split_at_mut((i.wrapping_mul(16u32) as usize).wrapping_add(0usize));
-        let mut e: [u64; 5] = [0u64; 5u32 as usize];
-        let u: u64 = crate::lowstar::endianness::load64_le(&mut block.1[0u32 as usize..]);
+        let mut e: [u64; 5] = [0u64; 5usize];
+        let u: u64 = crate::lowstar::endianness::load64_le(&mut block.1[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&mut block.1[8u32 as usize..]);
+        let u0: u64 = crate::lowstar::endianness::load64_le(&mut block.1[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -208,36 +208,36 @@ pub fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
         let f20: u64 = f2;
         let f30: u64 = f3;
         let f40: u64 = f4;
-        (&mut e)[0u32 as usize] = f010;
-        (&mut e)[1u32 as usize] = f110;
-        (&mut e)[2u32 as usize] = f20;
-        (&mut e)[3u32 as usize] = f30;
-        (&mut e)[4u32 as usize] = f40;
+        (&mut e)[0usize] = f010;
+        (&mut e)[1usize] = f110;
+        (&mut e)[2usize] = f20;
+        (&mut e)[3usize] = f30;
+        (&mut e)[4usize] = f40;
         let b: u64 = 0x1000000u64;
         let mask: u64 = b;
-        let f41: u64 = (&mut e)[4u32 as usize];
-        (&mut e)[4u32 as usize] = f41 | mask;
+        let f41: u64 = (&mut e)[4usize];
+        (&mut e)[4usize] = f41 | mask;
         let r: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
         let r5: (&mut [u64], &mut [u64]) = r.1.split_at_mut(5usize);
-        let r0: u64 = r5.0[0u32 as usize];
-        let r1: u64 = r5.0[1u32 as usize];
-        let r2: u64 = r5.0[2u32 as usize];
-        let r3: u64 = r5.0[3u32 as usize];
-        let r4: u64 = r5.0[4u32 as usize];
-        let r51: u64 = r5.1[1u32 as usize];
-        let r52: u64 = r5.1[2u32 as usize];
-        let r53: u64 = r5.1[3u32 as usize];
-        let r54: u64 = r5.1[4u32 as usize];
-        let f10: u64 = (&mut e)[0u32 as usize];
-        let f111: u64 = (&mut e)[1u32 as usize];
-        let f12: u64 = (&mut e)[2u32 as usize];
-        let f13: u64 = (&mut e)[3u32 as usize];
-        let f14: u64 = (&mut e)[4u32 as usize];
-        let a0: u64 = acc.1[0u32 as usize];
-        let a1: u64 = acc.1[1u32 as usize];
-        let a2: u64 = acc.1[2u32 as usize];
-        let a3: u64 = acc.1[3u32 as usize];
-        let a4: u64 = acc.1[4u32 as usize];
+        let r0: u64 = r5.0[0usize];
+        let r1: u64 = r5.0[1usize];
+        let r2: u64 = r5.0[2usize];
+        let r3: u64 = r5.0[3usize];
+        let r4: u64 = r5.0[4usize];
+        let r51: u64 = r5.1[1usize];
+        let r52: u64 = r5.1[2usize];
+        let r53: u64 = r5.1[3usize];
+        let r54: u64 = r5.1[4usize];
+        let f10: u64 = (&mut e)[0usize];
+        let f111: u64 = (&mut e)[1usize];
+        let f12: u64 = (&mut e)[2usize];
+        let f13: u64 = (&mut e)[3usize];
+        let f14: u64 = (&mut e)[4usize];
+        let a0: u64 = acc.1[0usize];
+        let a1: u64 = acc.1[1usize];
+        let a2: u64 = acc.1[2usize];
+        let a3: u64 = acc.1[3usize];
+        let a4: u64 = acc.1[4usize];
         let a01: u64 = a0.wrapping_add(f10);
         let a11: u64 = a1.wrapping_add(f111);
         let a21: u64 = a2.wrapping_add(f12);
@@ -302,24 +302,24 @@ pub fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
         let o2: u64 = x21;
         let o3: u64 = x32;
         let o4: u64 = x42;
-        acc.1[0u32 as usize] = o0;
-        acc.1[1u32 as usize] = o1;
-        acc.1[2u32 as usize] = o2;
-        acc.1[3u32 as usize] = o3;
-        acc.1[4u32 as usize] = o4
+        acc.1[0usize] = o0;
+        acc.1[1usize] = o1;
+        acc.1[2usize] = o2;
+        acc.1[3usize] = o3;
+        acc.1[4usize] = o4
     };
     if rem > 0u32
     {
         let last: (&mut [u8], &mut [u8]) =
             text.split_at_mut((nb.wrapping_mul(16u32) as usize).wrapping_add(0usize));
-        let mut e: [u64; 5] = [0u64; 5u32 as usize];
-        let mut tmp: [u8; 16] = [0u8; 16u32 as usize];
-        ((&mut tmp)[0u32 as usize..0u32 as usize + rem as usize]).copy_from_slice(
-            &last.1[0u32 as usize..0u32 as usize + rem as usize]
+        let mut e: [u64; 5] = [0u64; 5usize];
+        let mut tmp: [u8; 16] = [0u8; 16usize];
+        ((&mut tmp)[0usize..0usize + rem as usize]).copy_from_slice(
+            &last.1[0usize..0usize + rem as usize]
         );
-        let u: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[0u32 as usize..]);
+        let u: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[0usize..]);
         let lo: u64 = u;
-        let u0: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[8u32 as usize..]);
+        let u0: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[8usize..]);
         let hi: u64 = u0;
         let f0: u64 = lo;
         let f1: u64 = hi;
@@ -333,36 +333,36 @@ pub fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
         let f20: u64 = f2;
         let f30: u64 = f3;
         let f40: u64 = f4;
-        (&mut e)[0u32 as usize] = f010;
-        (&mut e)[1u32 as usize] = f110;
-        (&mut e)[2u32 as usize] = f20;
-        (&mut e)[3u32 as usize] = f30;
-        (&mut e)[4u32 as usize] = f40;
+        (&mut e)[0usize] = f010;
+        (&mut e)[1usize] = f110;
+        (&mut e)[2usize] = f20;
+        (&mut e)[3usize] = f30;
+        (&mut e)[4usize] = f40;
         let b: u64 = 1u64.wrapping_shl(rem.wrapping_mul(8u32).wrapping_rem(26u32));
         let mask: u64 = b;
         let fi: u64 = (&mut e)[rem.wrapping_mul(8u32).wrapping_div(26u32) as usize];
         (&mut e)[rem.wrapping_mul(8u32).wrapping_div(26u32) as usize] = fi | mask;
         let r: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);
         let r5: (&mut [u64], &mut [u64]) = r.1.split_at_mut(5usize);
-        let r0: u64 = r5.0[0u32 as usize];
-        let r1: u64 = r5.0[1u32 as usize];
-        let r2: u64 = r5.0[2u32 as usize];
-        let r3: u64 = r5.0[3u32 as usize];
-        let r4: u64 = r5.0[4u32 as usize];
-        let r51: u64 = r5.1[1u32 as usize];
-        let r52: u64 = r5.1[2u32 as usize];
-        let r53: u64 = r5.1[3u32 as usize];
-        let r54: u64 = r5.1[4u32 as usize];
-        let f10: u64 = (&mut e)[0u32 as usize];
-        let f111: u64 = (&mut e)[1u32 as usize];
-        let f12: u64 = (&mut e)[2u32 as usize];
-        let f13: u64 = (&mut e)[3u32 as usize];
-        let f14: u64 = (&mut e)[4u32 as usize];
-        let a0: u64 = acc.1[0u32 as usize];
-        let a1: u64 = acc.1[1u32 as usize];
-        let a2: u64 = acc.1[2u32 as usize];
-        let a3: u64 = acc.1[3u32 as usize];
-        let a4: u64 = acc.1[4u32 as usize];
+        let r0: u64 = r5.0[0usize];
+        let r1: u64 = r5.0[1usize];
+        let r2: u64 = r5.0[2usize];
+        let r3: u64 = r5.0[3usize];
+        let r4: u64 = r5.0[4usize];
+        let r51: u64 = r5.1[1usize];
+        let r52: u64 = r5.1[2usize];
+        let r53: u64 = r5.1[3usize];
+        let r54: u64 = r5.1[4usize];
+        let f10: u64 = (&mut e)[0usize];
+        let f111: u64 = (&mut e)[1usize];
+        let f12: u64 = (&mut e)[2usize];
+        let f13: u64 = (&mut e)[3usize];
+        let f14: u64 = (&mut e)[4usize];
+        let a0: u64 = acc.1[0usize];
+        let a1: u64 = acc.1[1usize];
+        let a2: u64 = acc.1[2usize];
+        let a3: u64 = acc.1[3usize];
+        let a4: u64 = acc.1[4usize];
         let a01: u64 = a0.wrapping_add(f10);
         let a11: u64 = a1.wrapping_add(f111);
         let a21: u64 = a2.wrapping_add(f12);
@@ -427,11 +427,11 @@ pub fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
         let o2: u64 = x21;
         let o3: u64 = x32;
         let o4: u64 = x42;
-        acc.1[0u32 as usize] = o0;
-        acc.1[1u32 as usize] = o1;
-        acc.1[2u32 as usize] = o2;
-        acc.1[3u32 as usize] = o3;
-        acc.1[4u32 as usize] = o4
+        acc.1[0usize] = o0;
+        acc.1[1usize] = o1;
+        acc.1[2usize] = o2;
+        acc.1[3usize] = o3;
+        acc.1[4usize] = o4
     }
 }
 
@@ -439,11 +439,11 @@ pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64]) -> ()
 {
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);
     let ks: (&mut [u8], &mut [u8]) = key.split_at_mut(16usize);
-    let f0: u64 = acc.1[0u32 as usize];
-    let f1: u64 = acc.1[1u32 as usize];
-    let f2: u64 = acc.1[2u32 as usize];
-    let f3: u64 = acc.1[3u32 as usize];
-    let f4: u64 = acc.1[4u32 as usize];
+    let f0: u64 = acc.1[0usize];
+    let f1: u64 = acc.1[1usize];
+    let f2: u64 = acc.1[2usize];
+    let f3: u64 = acc.1[3usize];
+    let f4: u64 = acc.1[4usize];
     let l: u64 = f0.wrapping_add(0u64);
     let tmp0: u64 = l & 0x3ffffffu64;
     let c0: u64 = l.wrapping_shr(26u32);
@@ -503,16 +503,16 @@ pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64]) -> ()
     let f210: u64 = o2;
     let f310: u64 = o3;
     let f410: u64 = o4;
-    acc.1[0u32 as usize] = f010;
-    acc.1[1u32 as usize] = f110;
-    acc.1[2u32 as usize] = f210;
-    acc.1[3u32 as usize] = f310;
-    acc.1[4u32 as usize] = f410;
-    let f00: u64 = acc.1[0u32 as usize];
-    let f10: u64 = acc.1[1u32 as usize];
-    let f20: u64 = acc.1[2u32 as usize];
-    let f30: u64 = acc.1[3u32 as usize];
-    let f40: u64 = acc.1[4u32 as usize];
+    acc.1[0usize] = f010;
+    acc.1[1usize] = f110;
+    acc.1[2usize] = f210;
+    acc.1[3usize] = f310;
+    acc.1[4usize] = f410;
+    let f00: u64 = acc.1[0usize];
+    let f10: u64 = acc.1[1usize];
+    let f20: u64 = acc.1[2usize];
+    let f30: u64 = acc.1[3usize];
+    let f40: u64 = acc.1[4usize];
     let f011: u64 = f00;
     let f111: u64 = f10;
     let f211: u64 = f20;
@@ -522,9 +522,9 @@ pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64]) -> ()
     let hi: u64 = f211.wrapping_shr(12u32) | f311.wrapping_shl(14u32) | f411.wrapping_shl(40u32);
     let f100: u64 = lo;
     let f112: u64 = hi;
-    let u: u64 = crate::lowstar::endianness::load64_le(&mut ks.1[0u32 as usize..]);
+    let u: u64 = crate::lowstar::endianness::load64_le(&mut ks.1[0usize..]);
     let lo0: u64 = u;
-    let u0: u64 = crate::lowstar::endianness::load64_le(&mut ks.1[8u32 as usize..]);
+    let u0: u64 = crate::lowstar::endianness::load64_le(&mut ks.1[8usize..]);
     let hi0: u64 = u0;
     let f200: u64 = lo0;
     let f212: u64 = hi0;
@@ -534,13 +534,13 @@ pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64]) -> ()
     let r11: u64 = r1.wrapping_add(c);
     let f300: u64 = r0;
     let f312: u64 = r11;
-    crate::lowstar::endianness::store64_le(&mut tag[0u32 as usize..], f300);
-    crate::lowstar::endianness::store64_le(&mut tag[8u32 as usize..], f312)
+    crate::lowstar::endianness::store64_le(&mut tag[0usize..], f300);
+    crate::lowstar::endianness::store64_le(&mut tag[8usize..], f312)
 }
 
 pub fn poly1305_mac(tag: &mut [u8], len: u32, text: &mut [u8], key: &mut [u8]) -> ()
 {
-    let mut ctx: [u64; 25] = [0u64; 25u32 as usize];
+    let mut ctx: [u64; 25] = [0u64; 25usize];
     poly1305_init(&mut ctx, key);
     poly1305_update(&mut ctx, len, text);
     poly1305_finish(tag, key, &mut ctx)

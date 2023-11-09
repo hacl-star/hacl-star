@@ -18,7 +18,7 @@ fn secretbox_detached(
 ) ->
     ()
 {
-    let mut xkeys: [u8; 96] = [0u8; 96u32 as usize];
+    let mut xkeys: [u8; 96] = [0u8; 96usize];
     secretbox_init(&mut xkeys, k, n);
     let mkey: (&mut [u8], &mut [u8]) = (&mut xkeys).split_at_mut(32usize);
     let n1: (&mut [u8], &mut [u8]) = n.split_at_mut(16usize);
@@ -28,9 +28,9 @@ fn secretbox_detached(
     let mlen1: u32 = mlen.wrapping_sub(mlen0);
     let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);
     let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
-    let mut block0: [u8; 32] = [0u8; 32u32 as usize];
-    ((&mut block0)[0u32 as usize..0u32 as usize + mlen0 as usize]).copy_from_slice(
-        &m1.0[0u32 as usize..0u32 as usize + mlen0 as usize]
+    let mut block0: [u8; 32] = [0u8; 32usize];
+    ((&mut block0)[0usize..0usize + mlen0 as usize]).copy_from_slice(
+        &m1.0[0usize..0usize + mlen0 as usize]
     );
     for i in 0u32..32u32
     {
@@ -40,8 +40,8 @@ fn secretbox_detached(
     };
     let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
-    (c1.0[0u32 as usize..0u32 as usize + mlen0 as usize]).copy_from_slice(
-        &(&mut (&mut block0)[0u32 as usize..])[0u32 as usize..0u32 as usize + mlen0 as usize]
+    (c1.0[0usize..0usize + mlen0 as usize]).copy_from_slice(
+        &(&mut (&mut block0)[0usize..])[0usize..0usize + mlen0 as usize]
     );
     crate::hacl::salsa20::salsa20_encrypt(mlen1, c1.1, m1.1, subkey.1, n1.1, 1u32);
     crate::hacl::poly1305_32::poly1305_mac(tag, mlen, c1.0, ekey0.0)
@@ -57,10 +57,10 @@ fn secretbox_open_detached(
 ) ->
     u32
 {
-    let mut xkeys: [u8; 96] = [0u8; 96u32 as usize];
+    let mut xkeys: [u8; 96] = [0u8; 96usize];
     secretbox_init(&mut xkeys, k, n);
     let mkey: (&mut [u8], &mut [u8]) = (&mut xkeys).split_at_mut(32usize);
-    let mut tag': [u8; 16] = [0u8; 16u32 as usize];
+    let mut tag': [u8; 16] = [0u8; 16usize];
     crate::hacl::poly1305_32::poly1305_mac(&mut tag', mlen, c, mkey.1);
     let mut res: u8 = 255u8;
     for i in 0u32..16u32
@@ -78,9 +78,9 @@ fn secretbox_open_detached(
         let mlen1: u32 = mlen.wrapping_sub(mlen0);
         let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
         let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
-        let mut block0: [u8; 32] = [0u8; 32u32 as usize];
-        ((&mut block0)[0u32 as usize..0u32 as usize + mlen0 as usize]).copy_from_slice(
-            &c1.0[0u32 as usize..0u32 as usize + mlen0 as usize]
+        let mut block0: [u8; 32] = [0u8; 32usize];
+        ((&mut block0)[0usize..0usize + mlen0 as usize]).copy_from_slice(
+            &c1.0[0usize..0usize + mlen0 as usize]
         );
         for i in 0u32..32u32
         {
@@ -90,8 +90,8 @@ fn secretbox_open_detached(
         };
         let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);
         let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
-        (m1.0[0u32 as usize..0u32 as usize + mlen0 as usize]).copy_from_slice(
-            &(&mut (&mut block0)[0u32 as usize..])[0u32 as usize..0u32 as usize + mlen0 as usize]
+        (m1.0[0usize..0usize + mlen0 as usize]).copy_from_slice(
+            &(&mut (&mut block0)[0usize..])[0usize..0usize + mlen0 as usize]
         );
         crate::hacl::salsa20::salsa20_decrypt(mlen1, m1.1, c1.1, subkey.1, n1.1, 1u32);
         0u32
@@ -117,7 +117,7 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &mut [u8], n: &mut [u8], c: &
 
 fn box_beforenm(k: &mut [u8], pk: &mut [u8], sk: &mut [u8]) -> u32
 {
-    let mut n0: [u8; 16] = [0u8; 16u32 as usize];
+    let mut n0: [u8; 16] = [0u8; 16usize];
     let r: bool = crate::hacl::curve25519_51::ecdh(k, sk, pk);
     if r
     {
@@ -153,7 +153,7 @@ fn box_detached(
 ) ->
     u32
 {
-    let mut k: [u8; 32] = [0u8; 32u32 as usize];
+    let mut k: [u8; 32] = [0u8; 32usize];
     let r: u32 = box_beforenm(&mut k, pk, sk);
     if r == 0u32 { box_detached_afternm(mlen, c, tag, &mut k, n, m) } else { 0xffffffffu32 }
 }
@@ -180,7 +180,7 @@ fn box_open_detached(
 ) ->
     u32
 {
-    let mut k: [u8; 32] = [0u8; 32u32 as usize];
+    let mut k: [u8; 32] = [0u8; 32usize];
     let r: u32 = box_beforenm(&mut k, pk, sk);
     if r == 0u32 { box_open_detached_afternm(mlen, m, &mut k, n, c, tag) } else { 0xffffffffu32 }
 }

@@ -8,4 +8,4 @@ pub fn op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx'  uint32_t* uint32_t
     p: &mut [crate::hacl::bignum::montarithmetic::bn_mont_ctx_u32]
 ) ->
     crate::hacl::bignum::montarithmetic::bn_mont_ctx_u32
-{ p[0u32 as usize] }
+{ p[0usize] }

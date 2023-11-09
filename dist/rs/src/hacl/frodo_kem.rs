@@ -149,15 +149,15 @@ pub fn frodo_pack(n1: u32, n2: u32, d: u32, a: &mut [u16], res: &mut [u8]) -> ()
         let r: (&mut [u8], &mut [u8]) =
             res.split_at_mut((d.wrapping_mul(i) as usize).wrapping_add(0usize));
         let maskd: u16 = (1u32.wrapping_shl(d) as u16).wrapping_sub(1u16);
-        let mut v16: [u8; 16] = [0u8; 16u32 as usize];
-        let a0: u16 = a1.1[0u32 as usize] & maskd;
-        let a11: u16 = a1.1[1u32 as usize] & maskd;
-        let a2: u16 = a1.1[2u32 as usize] & maskd;
-        let a3: u16 = a1.1[3u32 as usize] & maskd;
-        let a4: u16 = a1.1[4u32 as usize] & maskd;
-        let a5: u16 = a1.1[5u32 as usize] & maskd;
-        let a6: u16 = a1.1[6u32 as usize] & maskd;
-        let a7: u16 = a1.1[7u32 as usize] & maskd;
+        let mut v16: [u8; 16] = [0u8; 16usize];
+        let a0: u16 = a1.1[0usize] & maskd;
+        let a11: u16 = a1.1[1usize] & maskd;
+        let a2: u16 = a1.1[2usize] & maskd;
+        let a3: u16 = a1.1[3usize] & maskd;
+        let a4: u16 = a1.1[4usize] & maskd;
+        let a5: u16 = a1.1[5usize] & maskd;
+        let a6: u16 = a1.1[6usize] & maskd;
+        let a7: u16 = a1.1[7usize] & maskd;
         let templong: crate::fstar::uint128::uint128 =
             crate::fstar::uint128::logor(
                 crate::fstar::uint128::logor(
@@ -208,9 +208,7 @@ pub fn frodo_pack(n1: u32, n2: u32, d: u32, a: &mut [u16], res: &mut [u8]) -> ()
         crate::lowstar::endianness::store128_be(&mut v16, templong);
         let src: (&mut [u8], &mut [u8]) =
             (&mut v16).split_at_mut((16u32.wrapping_sub(d) as usize).wrapping_add(0usize));
-        (r.1[0u32 as usize..0u32 as usize + d as usize]).copy_from_slice(
-            &src.1[0u32 as usize..0u32 as usize + d as usize]
-        )
+        (r.1[0usize..0usize + d as usize]).copy_from_slice(&src.1[0usize..0usize + d as usize])
     }
 }
 
@@ -224,13 +222,13 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
         let r: (&mut [u16], &mut [u16]) =
             res.split_at_mut((8u32.wrapping_mul(i) as usize).wrapping_add(0usize));
         let maskd: u16 = (1u32.wrapping_shl(d) as u16).wrapping_sub(1u16);
-        let mut src: [u8; 16] = [0u8; 16u32 as usize];
+        let mut src: [u8; 16] = [0u8; 16usize];
         ((&mut src)[16u32.wrapping_sub(d) as usize..16u32.wrapping_sub(d) as usize + d as usize]).copy_from_slice(
-            &b1.1[0u32 as usize..0u32 as usize + d as usize]
+            &b1.1[0usize..0usize + d as usize]
         );
         let u: crate::fstar::uint128::uint128 = crate::lowstar::endianness::load128_be(&mut src);
         let templong: crate::fstar::uint128::uint128 = u;
-        r.1[0u32 as usize] =
+        r.1[0usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 7u32.wrapping_mul(d))
             )
@@ -238,7 +236,7 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
             u16
             &
             maskd;
-        r.1[1u32 as usize] =
+        r.1[1usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 6u32.wrapping_mul(d))
             )
@@ -246,7 +244,7 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
             u16
             &
             maskd;
-        r.1[2u32 as usize] =
+        r.1[2usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 5u32.wrapping_mul(d))
             )
@@ -254,7 +252,7 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
             u16
             &
             maskd;
-        r.1[3u32 as usize] =
+        r.1[3usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 4u32.wrapping_mul(d))
             )
@@ -262,7 +260,7 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
             u16
             &
             maskd;
-        r.1[4u32 as usize] =
+        r.1[4usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 3u32.wrapping_mul(d))
             )
@@ -270,7 +268,7 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
             u16
             &
             maskd;
-        r.1[5u32 as usize] =
+        r.1[5usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 2u32.wrapping_mul(d))
             )
@@ -278,7 +276,7 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
             u16
             &
             maskd;
-        r.1[6u32 as usize] =
+        r.1[6usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 1u32.wrapping_mul(d))
             )
@@ -286,7 +284,7 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
             u16
             &
             maskd;
-        r.1[7u32 as usize] =
+        r.1[7usize] =
             crate::fstar::uint128::uint128_to_uint64(
                 crate::fstar::uint128::shift_right(templong, 0u32.wrapping_mul(d))
             )
@@ -300,12 +298,10 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
 pub fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &mut [u8], res: &mut [u16]) -> ()
 for i in 0u32..n
 {
-    let mut v8: [u8; 8] = [0u8; 8u32 as usize];
+    let mut v8: [u8; 8] = [0u8; 8usize];
     let chunk: (&mut [u8], &mut [u8]) =
         a.split_at_mut((i.wrapping_mul(b) as usize).wrapping_add(0usize));
-    ((&mut v8)[0u32 as usize..0u32 as usize + b as usize]).copy_from_slice(
-        &chunk.1[0u32 as usize..0u32 as usize + b as usize]
-    );
+    ((&mut v8)[0usize..0usize + b as usize]).copy_from_slice(&chunk.1[0usize..0usize + b as usize]);
     let u: u64 = crate::lowstar::endianness::load64_le(&mut v8);
     let x: u64 = u;
     let x0: u64 = x;
@@ -336,10 +332,10 @@ for i in 0u32..n
             )
     };
     let templong0: u64 = templong;
-    let mut v8: [u8; 8] = [0u8; 8u32 as usize];
+    let mut v8: [u8; 8] = [0u8; 8usize];
     crate::lowstar::endianness::store64_le(&mut v8, templong0);
     let tmp: (&mut [u8], &mut [u8]) = (&mut v8).split_at_mut(0usize);
     (res[i.wrapping_mul(b) as usize..i.wrapping_mul(b) as usize + b as usize]).copy_from_slice(
-        &tmp.1[0u32 as usize..0u32 as usize + b as usize]
+        &tmp.1[0usize..0usize + b as usize]
     )
 }

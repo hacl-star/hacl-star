@@ -18,7 +18,7 @@ fn op_Bang_Star__Hacl_Streaming_Functor_state_s Spec_Hash_Definitions_hash_alg *
     p: &mut [crate::hacl::streaming::keccak::state]
 ) ->
     crate::hacl::streaming::keccak::state
-{ p[0u32 as usize] }
+{ p[0usize] }
 
 fn
 op_Star_Equals__Hacl_Streaming_Functor_state_s Spec_Hash_Definitions_hash_alg *  uint64_t* ()(
@@ -26,7 +26,7 @@ op_Star_Equals__Hacl_Streaming_Functor_state_s Spec_Hash_Definitions_hash_alg * 
     v: crate::hacl::streaming::keccak::state
 ) ->
     ()
-{ p[0u32 as usize] = v }
+{ p[0usize] = v }
 
 pub fn block_len(s: &mut [crate::hacl::streaming::keccak::state]) -> u32
 {
@@ -177,7 +177,7 @@ const keccak_rndc: [u64; 24] =
 pub fn state_permute(s: &mut [u64]) -> ()
 for i in 0u32..24u32
 {
-    let mut _C: [u64; 5] = [0u64; 5u32 as usize];
+    let mut _C: [u64; 5] = [0u64; 5usize];
     for i0 in 0u32..5u32
     {
         (&mut _C)[i0 as usize] =
@@ -202,7 +202,7 @@ for i in 0u32..24u32
                 s[i0.wrapping_add(5u32.wrapping_mul(i1)) as usize] ^ _D
         }
     };
-    let x: u64 = s[1u32 as usize];
+    let x: u64 = s[1usize];
     let mut current: u64 = x;
     for i0 in 0u32..24u32
     {
@@ -252,14 +252,14 @@ for i in 0u32..24u32
         s[4u32.wrapping_add(5u32.wrapping_mul(i0)) as usize] = v4
     };
     let c: u64 = (&keccak_rndc)[i as usize];
-    s[0u32 as usize] = s[0u32 as usize] ^ c
+    s[0usize] = s[0usize] ^ c
 }
 
 pub fn loadState(rateInBytes: u32, input: &mut [u8], s: &mut [u64]) -> ()
 {
-    let mut block: [u8; 200] = [0u8; 200u32 as usize];
-    ((&mut block)[0u32 as usize..0u32 as usize + rateInBytes as usize]).copy_from_slice(
-        &input[0u32 as usize..0u32 as usize + rateInBytes as usize]
+    let mut block: [u8; 200] = [0u8; 200usize];
+    ((&mut block)[0usize..0usize + rateInBytes as usize]).copy_from_slice(
+        &input[0usize..0usize + rateInBytes as usize]
     );
     for i in 0u32..25u32
     {
@@ -274,7 +274,7 @@ pub fn loadState(rateInBytes: u32, input: &mut [u8], s: &mut [u64]) -> ()
 
 fn storeState(rateInBytes: u32, s: &mut [u64], res: &mut [u8]) -> ()
 {
-    let mut block: [u8; 200] = [0u8; 200u32 as usize];
+    let mut block: [u8; 200] = [0u8; 200usize];
     for i in 0u32..25u32
     {
         let sj: u64 = s[i as usize];
@@ -283,8 +283,8 @@ fn storeState(rateInBytes: u32, s: &mut [u64], res: &mut [u8]) -> ()
             sj
         )
     };
-    (res[0u32 as usize..0u32 as usize + rateInBytes as usize]).copy_from_slice(
-        &(&mut (&mut block)[0u32 as usize..])[0u32 as usize..0u32 as usize + rateInBytes as usize]
+    (res[0usize..0usize + rateInBytes as usize]).copy_from_slice(
+        &(&mut (&mut block)[0usize..])[0usize..0usize + rateInBytes as usize]
     )
 }
 
@@ -313,16 +313,16 @@ fn absorb(
     };
     let last: (&mut [u8], &mut [u8]) =
         input.split_at_mut((n_blocks.wrapping_mul(rateInBytes) as usize).wrapping_add(0usize));
-    let mut lastBlock_: [u8; 200] = [0u8; 200u32 as usize];
+    let mut lastBlock_: [u8; 200] = [0u8; 200usize];
     let lastBlock: (&mut [u8], &mut [u8]) = (&mut lastBlock_).split_at_mut(0usize);
-    (lastBlock.1[0u32 as usize..0u32 as usize + rem as usize]).copy_from_slice(
-        &last.1[0u32 as usize..0u32 as usize + rem as usize]
+    (lastBlock.1[0usize..0usize + rem as usize]).copy_from_slice(
+        &last.1[0usize..0usize + rem as usize]
     );
     lastBlock.1[rem as usize] = delimitedSuffix;
     loadState(rateInBytes, lastBlock.1, s);
     if ! delimitedSuffix & 0x80u8 == 0u8 && rem == rateInBytes.wrapping_sub(1u32)
     { state_permute(s) };
-    let mut nextBlock_: [u8; 200] = [0u8; 200u32 as usize];
+    let mut nextBlock_: [u8; 200] = [0u8; 200usize];
     let nextBlock: (&mut [u8], &mut [u8]) = (&mut nextBlock_).split_at_mut(0usize);
     nextBlock.1[rateInBytes.wrapping_sub(1u32) as usize] = 0x80u8;
     loadState(rateInBytes, nextBlock.1, s);

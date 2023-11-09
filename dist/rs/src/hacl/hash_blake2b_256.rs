@@ -25,20 +25,20 @@ pub fn blake2b_init(hash: &mut [crate::lib::intvector::intrinsics::vec256], kk: 
     &mut [crate::lib::intvector::intrinsics::vec256])
     =
         r2.1.split_at_mut(1usize);
-    let iv0: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[0u32 as usize];
-    let iv1: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[1u32 as usize];
-    let iv2: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[2u32 as usize];
-    let iv3: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[3u32 as usize];
-    let iv4: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[4u32 as usize];
-    let iv5: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[5u32 as usize];
-    let iv6: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[6u32 as usize];
-    let iv7: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[7u32 as usize];
-    r3.0[0u32 as usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv0, iv1, iv2, iv3);
-    r3.1[0u32 as usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv4, iv5, iv6, iv7);
+    let iv0: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[0usize];
+    let iv1: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[1usize];
+    let iv2: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[2usize];
+    let iv3: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[3usize];
+    let iv4: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[4usize];
+    let iv5: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[5usize];
+    let iv6: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[6usize];
+    let iv7: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[7usize];
+    r3.0[0usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv0, iv1, iv2, iv3);
+    r3.1[0usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv4, iv5, iv6, iv7);
     let kk_shift_8: u64 = (kk as u64).wrapping_shl(8u32);
     let iv0': u64 = iv0 ^ (0x01010000u64 ^ (kk_shift_8 ^ nn as u64));
-    r1.0[0u32 as usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv0', iv1, iv2, iv3);
-    r2.0[0u32 as usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv4, iv5, iv6, iv7)
+    r1.0[0usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv0', iv1, iv2, iv3);
+    r2.0[0usize] = crate::lib::intvector::intrinsics::vec256_load64s(iv4, iv5, iv6, iv7)
 }
 
 fn blake2b_update(
@@ -104,33 +104,33 @@ pub fn load_state256b_from_state32(
     let b1: (&mut [u64], &mut [u64]) = b0.1.split_at_mut(4usize);
     let b2: (&mut [u64], &mut [u64]) = b1.1.split_at_mut(4usize);
     let b3: (&mut [u64], &mut [u64]) = b2.1.split_at_mut(4usize);
-    r1.0[0u32 as usize] =
+    r1.0[0usize] =
         crate::lib::intvector::intrinsics::vec256_load64s(
-            b1.0[0u32 as usize],
-            b1.0[1u32 as usize],
-            b1.0[2u32 as usize],
-            b1.0[3u32 as usize]
+            b1.0[0usize],
+            b1.0[1usize],
+            b1.0[2usize],
+            b1.0[3usize]
         );
-    r2.0[0u32 as usize] =
+    r2.0[0usize] =
         crate::lib::intvector::intrinsics::vec256_load64s(
-            b2.0[0u32 as usize],
-            b2.0[1u32 as usize],
-            b2.0[2u32 as usize],
-            b2.0[3u32 as usize]
+            b2.0[0usize],
+            b2.0[1usize],
+            b2.0[2usize],
+            b2.0[3usize]
         );
-    r3.0[0u32 as usize] =
+    r3.0[0usize] =
         crate::lib::intvector::intrinsics::vec256_load64s(
-            b3.0[0u32 as usize],
-            b3.0[1u32 as usize],
-            b3.0[2u32 as usize],
-            b3.0[3u32 as usize]
+            b3.0[0usize],
+            b3.0[1usize],
+            b3.0[2usize],
+            b3.0[3usize]
         );
-    r3.1[0u32 as usize] =
+    r3.1[0usize] =
         crate::lib::intvector::intrinsics::vec256_load64s(
-            b3.1[0u32 as usize],
-            b3.1[1u32 as usize],
-            b3.1[2u32 as usize],
-            b3.1[3u32 as usize]
+            b3.1[0usize],
+            b3.1[1usize],
+            b3.1[2usize],
+            b3.1[3usize]
         )
 }
 
@@ -168,8 +168,8 @@ pub fn store_state256b_to_state32(
     let b1: (&mut [u64], &mut [u64]) = b0.1.split_at_mut(4usize);
     let b2: (&mut [u64], &mut [u64]) = b1.1.split_at_mut(4usize);
     let b3: (&mut [u64], &mut [u64]) = b2.1.split_at_mut(4usize);
-    let mut b8: [u8; 32] = [0u8; 32u32 as usize];
-    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b8, r1.0[0u32 as usize]);
+    let mut b8: [u8; 32] = [0u8; 32usize];
+    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b8, r1.0[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = b1.0.split_at_mut(0usize);
@@ -180,8 +180,8 @@ pub fn store_state256b_to_state32(
         let x: u64 = r;
         os.1[i as usize] = x
     };
-    let mut b80: [u8; 32] = [0u8; 32u32 as usize];
-    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b80, r2.0[0u32 as usize]);
+    let mut b80: [u8; 32] = [0u8; 32usize];
+    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b80, r2.0[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = b2.0.split_at_mut(0usize);
@@ -192,8 +192,8 @@ pub fn store_state256b_to_state32(
         let x: u64 = r;
         os.1[i as usize] = x
     };
-    let mut b81: [u8; 32] = [0u8; 32u32 as usize];
-    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b81, r3.0[0u32 as usize]);
+    let mut b81: [u8; 32] = [0u8; 32usize];
+    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b81, r3.0[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = b3.0.split_at_mut(0usize);
@@ -204,8 +204,8 @@ pub fn store_state256b_to_state32(
         let x: u64 = r;
         os.1[i as usize] = x
     };
-    let mut b82: [u8; 32] = [0u8; 32u32 as usize];
-    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b82, r3.1[0u32 as usize]);
+    let mut b82: [u8; 32] = [0u8; 32usize];
+    crate::lib::intvector::intrinsics::vec256_store64_le(&mut b82, r3.1[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = b3.1.split_at_mut(0usize);
@@ -221,6 +221,6 @@ pub fn store_state256b_to_state32(
 pub fn blake2b_malloc(r: ()) -> &mut [crate::lib::intvector::intrinsics::vec256]
 {
     let mut buf: Vec<crate::lib::intvector::intrinsics::vec256> =
-        vec![crate::lib::intvector::intrinsics::vec256_zero; 4u32 as usize];
+        vec![crate::lib::intvector::intrinsics::vec256_zero; 4usize];
     &mut buf
 }

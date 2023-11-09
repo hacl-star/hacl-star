@@ -1,48 +1,48 @@
 pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
-    let f10: u64 = f1[0u32 as usize];
-    let f20: u64 = f2[0u32 as usize];
-    let f11: u64 = f1[1u32 as usize];
-    let f21: u64 = f2[1u32 as usize];
-    let f12: u64 = f1[2u32 as usize];
-    let f22: u64 = f2[2u32 as usize];
-    let f13: u64 = f1[3u32 as usize];
-    let f23: u64 = f2[3u32 as usize];
-    let f14: u64 = f1[4u32 as usize];
-    let f24: u64 = f2[4u32 as usize];
-    out[0u32 as usize] = f10.wrapping_add(f20);
-    out[1u32 as usize] = f11.wrapping_add(f21);
-    out[2u32 as usize] = f12.wrapping_add(f22);
-    out[3u32 as usize] = f13.wrapping_add(f23);
-    out[4u32 as usize] = f14.wrapping_add(f24)
+    let f10: u64 = f1[0usize];
+    let f20: u64 = f2[0usize];
+    let f11: u64 = f1[1usize];
+    let f21: u64 = f2[1usize];
+    let f12: u64 = f1[2usize];
+    let f22: u64 = f2[2usize];
+    let f13: u64 = f1[3usize];
+    let f23: u64 = f2[3usize];
+    let f14: u64 = f1[4usize];
+    let f24: u64 = f2[4usize];
+    out[0usize] = f10.wrapping_add(f20);
+    out[1usize] = f11.wrapping_add(f21);
+    out[2usize] = f12.wrapping_add(f22);
+    out[3usize] = f13.wrapping_add(f23);
+    out[4usize] = f14.wrapping_add(f24)
 }
 
 pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
-    let f10: u64 = f1[0u32 as usize];
-    let f20: u64 = f2[0u32 as usize];
-    let f11: u64 = f1[1u32 as usize];
-    let f21: u64 = f2[1u32 as usize];
-    let f12: u64 = f1[2u32 as usize];
-    let f22: u64 = f2[2u32 as usize];
-    let f13: u64 = f1[3u32 as usize];
-    let f23: u64 = f2[3u32 as usize];
-    let f14: u64 = f1[4u32 as usize];
-    let f24: u64 = f2[4u32 as usize];
-    out[0u32 as usize] = f10.wrapping_add(0x3fffffffffff68u64).wrapping_sub(f20);
-    out[1u32 as usize] = f11.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f21);
-    out[2u32 as usize] = f12.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f22);
-    out[3u32 as usize] = f13.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f23);
-    out[4u32 as usize] = f14.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f24)
+    let f10: u64 = f1[0usize];
+    let f20: u64 = f2[0usize];
+    let f11: u64 = f1[1usize];
+    let f21: u64 = f2[1usize];
+    let f12: u64 = f1[2usize];
+    let f22: u64 = f2[2usize];
+    let f13: u64 = f1[3usize];
+    let f23: u64 = f2[3usize];
+    let f14: u64 = f1[4usize];
+    let f24: u64 = f2[4usize];
+    out[0usize] = f10.wrapping_add(0x3fffffffffff68u64).wrapping_sub(f20);
+    out[1usize] = f11.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f21);
+    out[2usize] = f12.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f22);
+    out[3usize] = f13.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f23);
+    out[4usize] = f14.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f24)
 }
 
 pub fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
 {
-    let f10: u64 = f1[0u32 as usize];
-    let f11: u64 = f1[1u32 as usize];
-    let f12: u64 = f1[2u32 as usize];
-    let f13: u64 = f1[3u32 as usize];
-    let f14: u64 = f1[4u32 as usize];
+    let f10: u64 = f1[0usize];
+    let f11: u64 = f1[1usize];
+    let f12: u64 = f1[2usize];
+    let f13: u64 = f1[3usize];
+    let f14: u64 = f1[4usize];
     let tmp_w0: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f10);
     let tmp_w1: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f11);
     let tmp_w2: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(f2, f12);
@@ -81,20 +81,20 @@ pub fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
     let o2: u64 = tmp2;
     let o3: u64 = tmp3;
     let o4: u64 = tmp4;
-    out[0u32 as usize] = o0;
-    out[1u32 as usize] = o1;
-    out[2u32 as usize] = o2;
-    out[3u32 as usize] = o3;
-    out[4u32 as usize] = o4
+    out[0usize] = o0;
+    out[1usize] = o1;
+    out[2usize] = o2;
+    out[3usize] = o3;
+    out[4usize] = o4
 }
 
 pub fn store_felem(u64s: &mut [u64], f: &mut [u64]) -> ()
 {
-    let f0: u64 = f[0u32 as usize];
-    let f1: u64 = f[1u32 as usize];
-    let f2: u64 = f[2u32 as usize];
-    let f3: u64 = f[3u32 as usize];
-    let f4: u64 = f[4u32 as usize];
+    let f0: u64 = f[0usize];
+    let f1: u64 = f[1usize];
+    let f2: u64 = f[2usize];
+    let f3: u64 = f[3usize];
+    let f4: u64 = f[4usize];
     let l': u64 = f0.wrapping_add(0u64);
     let tmp0: u64 = l' & 0x7ffffffffffffu64;
     let c0: u64 = l'.wrapping_shr(51u32);
@@ -142,10 +142,10 @@ pub fn store_felem(u64s: &mut [u64], f: &mut [u64]) -> ()
     let o10: u64 = o1;
     let o20: u64 = o2;
     let o30: u64 = o3;
-    u64s[0u32 as usize] = o00;
-    u64s[1u32 as usize] = o10;
-    u64s[2u32 as usize] = o20;
-    u64s[3u32 as usize] = o30
+    u64s[0usize] = o00;
+    u64s[1usize] = o10;
+    u64s[2usize] = o20;
+    u64s[3usize] = o30
 }
 
 pub fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()

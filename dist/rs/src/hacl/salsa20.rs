@@ -60,11 +60,9 @@ fn rounds(st: &mut [u32]) -> ()
 
 fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
 {
-    (k[0u32 as usize..0u32 as usize + 16u32 as usize]).copy_from_slice(
-        &ctx[0u32 as usize..0u32 as usize + 16u32 as usize]
-    );
+    (k[0usize..0usize + 16usize]).copy_from_slice(&ctx[0usize..0usize + 16usize]);
     let ctr_u32: u32 = ctr;
-    k[8u32 as usize] = (k[8u32 as usize]).wrapping_add(ctr_u32);
+    k[8usize] = (k[8usize]).wrapping_add(ctr_u32);
     rounds(k);
     for i in 0u32..16u32
     {
@@ -72,15 +70,15 @@ fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
         let x: u32 = (os.1[i as usize]).wrapping_add(ctx[i as usize]);
         os.1[i as usize] = x
     };
-    k[8u32 as usize] = (k[8u32 as usize]).wrapping_add(ctr_u32)
+    k[8usize] = (k[8usize]).wrapping_add(ctr_u32)
 }
 
 fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
 {
-    let mut ctx: [u32; 16] = [0u32; 16u32 as usize];
-    let mut k: [u32; 16] = [0u32; 16u32 as usize];
-    let mut k32: [u32; 8] = [0u32; 8u32 as usize];
-    let mut n32: [u32; 2] = [0u32; 2u32 as usize];
+    let mut ctx: [u32; 16] = [0u32; 16usize];
+    let mut k: [u32; 16] = [0u32; 16usize];
+    let mut k32: [u32; 8] = [0u32; 8usize];
+    let mut n32: [u32; 2] = [0u32; 2usize];
     for i in 0u32..8u32
     {
         let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
@@ -101,23 +99,17 @@ fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
         let x: u32 = r;
         os.1[i as usize] = x
     };
-    (&mut ctx)[0u32 as usize] = 0x61707865u32;
+    (&mut ctx)[0usize] = 0x61707865u32;
     let k0: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
     let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
-    ((&mut ctx)[1u32 as usize..1u32 as usize + 4u32 as usize]).copy_from_slice(
-        &k1.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
-    (&mut ctx)[5u32 as usize] = 0x3320646eu32;
-    ((&mut ctx)[6u32 as usize..6u32 as usize + 2u32 as usize]).copy_from_slice(
-        &(&mut n32)[0u32 as usize..0u32 as usize + 2u32 as usize]
-    );
-    (&mut ctx)[8u32 as usize] = 0u32;
-    (&mut ctx)[9u32 as usize] = 0u32;
-    (&mut ctx)[10u32 as usize] = 0x79622d32u32;
-    ((&mut ctx)[11u32 as usize..11u32 as usize + 4u32 as usize]).copy_from_slice(
-        &k1.1[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
-    (&mut ctx)[15u32 as usize] = 0x6b206574u32;
+    ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..0usize + 4usize]);
+    (&mut ctx)[5usize] = 0x3320646eu32;
+    ((&mut ctx)[6usize..6usize + 2usize]).copy_from_slice(&(&mut n32)[0usize..0usize + 2usize]);
+    (&mut ctx)[8usize] = 0u32;
+    (&mut ctx)[9usize] = 0u32;
+    (&mut ctx)[10usize] = 0x79622d32u32;
+    ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..0usize + 4usize]);
+    (&mut ctx)[15usize] = 0x6b206574u32;
     salsa20_core(&mut k, &mut ctx, 0u32);
     for i in 0u32..16u32
     {
@@ -130,9 +122,9 @@ fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
 
 fn hsalsa20(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
 {
-    let mut ctx: [u32; 16] = [0u32; 16u32 as usize];
-    let mut k32: [u32; 8] = [0u32; 8u32 as usize];
-    let mut n32: [u32; 4] = [0u32; 4u32 as usize];
+    let mut ctx: [u32; 16] = [0u32; 16usize];
+    let mut k32: [u32; 8] = [0u32; 8usize];
+    let mut n32: [u32; 4] = [0u32; 4usize];
     for i in 0u32..8u32
     {
         let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
@@ -155,28 +147,22 @@ fn hsalsa20(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
     };
     let k0: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
     let k1: (&mut [u32], &mut [u32]) = k0.1.split_at_mut(4usize);
-    (&mut ctx)[0u32 as usize] = 0x61707865u32;
-    ((&mut ctx)[1u32 as usize..1u32 as usize + 4u32 as usize]).copy_from_slice(
-        &k1.0[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
-    (&mut ctx)[5u32 as usize] = 0x3320646eu32;
-    ((&mut ctx)[6u32 as usize..6u32 as usize + 4u32 as usize]).copy_from_slice(
-        &(&mut n32)[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
-    (&mut ctx)[10u32 as usize] = 0x79622d32u32;
-    ((&mut ctx)[11u32 as usize..11u32 as usize + 4u32 as usize]).copy_from_slice(
-        &k1.1[0u32 as usize..0u32 as usize + 4u32 as usize]
-    );
-    (&mut ctx)[15u32 as usize] = 0x6b206574u32;
+    (&mut ctx)[0usize] = 0x61707865u32;
+    ((&mut ctx)[1usize..1usize + 4usize]).copy_from_slice(&k1.0[0usize..0usize + 4usize]);
+    (&mut ctx)[5usize] = 0x3320646eu32;
+    ((&mut ctx)[6usize..6usize + 4usize]).copy_from_slice(&(&mut n32)[0usize..0usize + 4usize]);
+    (&mut ctx)[10usize] = 0x79622d32u32;
+    ((&mut ctx)[11usize..11usize + 4usize]).copy_from_slice(&k1.1[0usize..0usize + 4usize]);
+    (&mut ctx)[15usize] = 0x6b206574u32;
     rounds(&mut ctx);
-    let r0: u32 = (&mut ctx)[0u32 as usize];
-    let r1: u32 = (&mut ctx)[5u32 as usize];
-    let r2: u32 = (&mut ctx)[10u32 as usize];
-    let r3: u32 = (&mut ctx)[15u32 as usize];
-    let r4: u32 = (&mut ctx)[6u32 as usize];
-    let r5: u32 = (&mut ctx)[7u32 as usize];
-    let r6: u32 = (&mut ctx)[8u32 as usize];
-    let r7: u32 = (&mut ctx)[9u32 as usize];
+    let r0: u32 = (&mut ctx)[0usize];
+    let r1: u32 = (&mut ctx)[5usize];
+    let r2: u32 = (&mut ctx)[10usize];
+    let r3: u32 = (&mut ctx)[15usize];
+    let r4: u32 = (&mut ctx)[6usize];
+    let r5: u32 = (&mut ctx)[7usize];
+    let r6: u32 = (&mut ctx)[8usize];
+    let r7: u32 = (&mut ctx)[9usize];
     let mut res: [u32; 8] = [r0, r1, r2, r3, r4, r5, r6, r7];
     for i in 0u32..8u32
     {

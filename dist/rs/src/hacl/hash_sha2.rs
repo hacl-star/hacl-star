@@ -196,58 +196,56 @@ for i in 0u32..8u32
 
 fn sha256_update(b: &mut [u8], hash: &mut [u32]) -> ()
 {
-    let mut hash_old: [u32; 8] = [0u32; 8u32 as usize];
-    let mut ws: [u32; 16] = [0u32; 16u32 as usize];
-    ((&mut hash_old)[0u32 as usize..0u32 as usize + 8u32 as usize]).copy_from_slice(
-        &hash[0u32 as usize..0u32 as usize + 8u32 as usize]
-    );
+    let mut hash_old: [u32; 8] = [0u32; 8usize];
+    let mut ws: [u32; 16] = [0u32; 16usize];
+    ((&mut hash_old)[0usize..0usize + 8usize]).copy_from_slice(&hash[0usize..0usize + 8usize]);
     let b1: &mut [u8] = b;
-    let u: u32 = crate::lowstar::endianness::load32_be(&mut b1[0u32 as usize..]);
-    (&mut ws)[0u32 as usize] = u;
-    let u0: u32 = crate::lowstar::endianness::load32_be(&mut b1[4u32 as usize..]);
-    (&mut ws)[1u32 as usize] = u0;
-    let u1: u32 = crate::lowstar::endianness::load32_be(&mut b1[8u32 as usize..]);
-    (&mut ws)[2u32 as usize] = u1;
-    let u2: u32 = crate::lowstar::endianness::load32_be(&mut b1[12u32 as usize..]);
-    (&mut ws)[3u32 as usize] = u2;
-    let u3: u32 = crate::lowstar::endianness::load32_be(&mut b1[16u32 as usize..]);
-    (&mut ws)[4u32 as usize] = u3;
-    let u4: u32 = crate::lowstar::endianness::load32_be(&mut b1[20u32 as usize..]);
-    (&mut ws)[5u32 as usize] = u4;
-    let u5: u32 = crate::lowstar::endianness::load32_be(&mut b1[24u32 as usize..]);
-    (&mut ws)[6u32 as usize] = u5;
-    let u6: u32 = crate::lowstar::endianness::load32_be(&mut b1[28u32 as usize..]);
-    (&mut ws)[7u32 as usize] = u6;
-    let u7: u32 = crate::lowstar::endianness::load32_be(&mut b1[32u32 as usize..]);
-    (&mut ws)[8u32 as usize] = u7;
-    let u8: u32 = crate::lowstar::endianness::load32_be(&mut b1[36u32 as usize..]);
-    (&mut ws)[9u32 as usize] = u8;
-    let u9: u32 = crate::lowstar::endianness::load32_be(&mut b1[40u32 as usize..]);
-    (&mut ws)[10u32 as usize] = u9;
-    let u10: u32 = crate::lowstar::endianness::load32_be(&mut b1[44u32 as usize..]);
-    (&mut ws)[11u32 as usize] = u10;
-    let u11: u32 = crate::lowstar::endianness::load32_be(&mut b1[48u32 as usize..]);
-    (&mut ws)[12u32 as usize] = u11;
-    let u12: u32 = crate::lowstar::endianness::load32_be(&mut b1[52u32 as usize..]);
-    (&mut ws)[13u32 as usize] = u12;
-    let u13: u32 = crate::lowstar::endianness::load32_be(&mut b1[56u32 as usize..]);
-    (&mut ws)[14u32 as usize] = u13;
-    let u14: u32 = crate::lowstar::endianness::load32_be(&mut b1[60u32 as usize..]);
-    (&mut ws)[15u32 as usize] = u14;
+    let u: u32 = crate::lowstar::endianness::load32_be(&mut b1[0usize..]);
+    (&mut ws)[0usize] = u;
+    let u0: u32 = crate::lowstar::endianness::load32_be(&mut b1[4usize..]);
+    (&mut ws)[1usize] = u0;
+    let u1: u32 = crate::lowstar::endianness::load32_be(&mut b1[8usize..]);
+    (&mut ws)[2usize] = u1;
+    let u2: u32 = crate::lowstar::endianness::load32_be(&mut b1[12usize..]);
+    (&mut ws)[3usize] = u2;
+    let u3: u32 = crate::lowstar::endianness::load32_be(&mut b1[16usize..]);
+    (&mut ws)[4usize] = u3;
+    let u4: u32 = crate::lowstar::endianness::load32_be(&mut b1[20usize..]);
+    (&mut ws)[5usize] = u4;
+    let u5: u32 = crate::lowstar::endianness::load32_be(&mut b1[24usize..]);
+    (&mut ws)[6usize] = u5;
+    let u6: u32 = crate::lowstar::endianness::load32_be(&mut b1[28usize..]);
+    (&mut ws)[7usize] = u6;
+    let u7: u32 = crate::lowstar::endianness::load32_be(&mut b1[32usize..]);
+    (&mut ws)[8usize] = u7;
+    let u8: u32 = crate::lowstar::endianness::load32_be(&mut b1[36usize..]);
+    (&mut ws)[9usize] = u8;
+    let u9: u32 = crate::lowstar::endianness::load32_be(&mut b1[40usize..]);
+    (&mut ws)[10usize] = u9;
+    let u10: u32 = crate::lowstar::endianness::load32_be(&mut b1[44usize..]);
+    (&mut ws)[11usize] = u10;
+    let u11: u32 = crate::lowstar::endianness::load32_be(&mut b1[48usize..]);
+    (&mut ws)[12usize] = u11;
+    let u12: u32 = crate::lowstar::endianness::load32_be(&mut b1[52usize..]);
+    (&mut ws)[13usize] = u12;
+    let u13: u32 = crate::lowstar::endianness::load32_be(&mut b1[56usize..]);
+    (&mut ws)[14usize] = u13;
+    let u14: u32 = crate::lowstar::endianness::load32_be(&mut b1[60usize..]);
+    (&mut ws)[15usize] = u14;
     for i in 0u32..4u32
     {
         for i0 in 0u32..16u32
         {
             let k_t: u32 = (&k224_256)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
             let ws_t: u32 = (&mut ws)[i0 as usize];
-            let a0: u32 = hash[0u32 as usize];
-            let b0: u32 = hash[1u32 as usize];
-            let c0: u32 = hash[2u32 as usize];
-            let d0: u32 = hash[3u32 as usize];
-            let e0: u32 = hash[4u32 as usize];
-            let f0: u32 = hash[5u32 as usize];
-            let g0: u32 = hash[6u32 as usize];
-            let h02: u32 = hash[7u32 as usize];
+            let a0: u32 = hash[0usize];
+            let b0: u32 = hash[1usize];
+            let c0: u32 = hash[2usize];
+            let d0: u32 = hash[3usize];
+            let e0: u32 = hash[4usize];
+            let f0: u32 = hash[5usize];
+            let g0: u32 = hash[6usize];
+            let h02: u32 = hash[7usize];
             let k_e_t: u32 = k_t;
             let t1: u32 =
                 h02.wrapping_add(
@@ -273,14 +271,14 @@ fn sha256_update(b: &mut [u8], hash: &mut [u32]) -> ()
             let f1: u32 = e0;
             let g1: u32 = f0;
             let h12: u32 = g0;
-            hash[0u32 as usize] = a1;
-            hash[1u32 as usize] = b10;
-            hash[2u32 as usize] = c1;
-            hash[3u32 as usize] = d1;
-            hash[4u32 as usize] = e1;
-            hash[5u32 as usize] = f1;
-            hash[6u32 as usize] = g1;
-            hash[7u32 as usize] = h12
+            hash[0usize] = a1;
+            hash[1usize] = b10;
+            hash[2usize] = c1;
+            hash[3usize] = d1;
+            hash[4usize] = e1;
+            hash[5usize] = f1;
+            hash[6usize] = g1;
+            hash[7usize] = h12
         };
         if i < 3u32
         for i0 in 0u32..16u32
@@ -324,17 +322,17 @@ pub fn sha256_update_last(totlen: u64, len: u32, b: &mut [u8], hash: &mut [u32])
 {
     let blocks: u32 = if len.wrapping_add(8u32).wrapping_add(1u32) <= 64u32 { 1u32 } else { 2u32 };
     let fin: u32 = blocks.wrapping_mul(64u32);
-    let mut last: [u8; 128] = [0u8; 128u32 as usize];
-    let mut totlen_buf: [u8; 8] = [0u8; 8u32 as usize];
+    let mut last: [u8; 128] = [0u8; 128usize];
+    let mut totlen_buf: [u8; 8] = [0u8; 8usize];
     let total_len_bits: u64 = totlen.wrapping_shl(3u32);
     crate::lowstar::endianness::store64_be(&mut totlen_buf, total_len_bits);
     let b0: &mut [u8] = b;
-    ((&mut last)[0u32 as usize..0u32 as usize + len as usize]).copy_from_slice(
-        &b0[0u32 as usize..0u32 as usize + len as usize]
+    ((&mut last)[0usize..0usize + len as usize]).copy_from_slice(
+        &b0[0usize..0usize + len as usize]
     );
     (&mut last)[len as usize] = 0x80u8;
-    ((&mut last)[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8u32 as usize]).copy_from_slice(
-        &(&mut totlen_buf)[0u32 as usize..0u32 as usize + 8u32 as usize]
+    ((&mut last)[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
+        &(&mut totlen_buf)[0usize..0usize + 8usize]
     );
     let last0: (&mut [u8], &mut [u8]) = (&mut last).split_at_mut(0usize);
     let last1: (&mut [u8], &mut [u8]) = last0.1.split_at_mut(64usize);
@@ -350,7 +348,7 @@ pub fn sha256_update_last(totlen: u64, len: u32, b: &mut [u8], hash: &mut [u32])
 
 pub fn sha256_finish(st: &mut [u32], h: &mut [u8]) -> ()
 {
-    let mut hbuf: [u8; 32] = [0u8; 32u32 as usize];
+    let mut hbuf: [u8; 32] = [0u8; 32usize];
     for i in 0u32..8u32
     {
         crate::lowstar::endianness::store32_be(
@@ -358,8 +356,8 @@ pub fn sha256_finish(st: &mut [u32], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0u32 as usize..0u32 as usize + 32u32 as usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0u32 as usize..])[0u32 as usize..0u32 as usize + 32u32 as usize]
+    (h[0usize..0usize + 32usize]).copy_from_slice(
+        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 32usize]
     )
 }
 
@@ -379,7 +377,7 @@ pub fn sha224_update_last(totlen: u64, len: u32, b: &mut [u8], st: &mut [u32]) -
 
 pub fn sha224_finish(st: &mut [u32], h: &mut [u8]) -> ()
 {
-    let mut hbuf: [u8; 32] = [0u8; 32u32 as usize];
+    let mut hbuf: [u8; 32] = [0u8; 32usize];
     for i in 0u32..8u32
     {
         crate::lowstar::endianness::store32_be(
@@ -387,8 +385,8 @@ pub fn sha224_finish(st: &mut [u32], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0u32 as usize..0u32 as usize + 28u32 as usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0u32 as usize..])[0u32 as usize..0u32 as usize + 28u32 as usize]
+    (h[0usize..0usize + 28usize]).copy_from_slice(
+        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 28usize]
     )
 }
 
@@ -402,58 +400,56 @@ for i in 0u32..8u32
 
 fn sha512_update(b: &mut [u8], hash: &mut [u64]) -> ()
 {
-    let mut hash_old: [u64; 8] = [0u64; 8u32 as usize];
-    let mut ws: [u64; 16] = [0u64; 16u32 as usize];
-    ((&mut hash_old)[0u32 as usize..0u32 as usize + 8u32 as usize]).copy_from_slice(
-        &hash[0u32 as usize..0u32 as usize + 8u32 as usize]
-    );
+    let mut hash_old: [u64; 8] = [0u64; 8usize];
+    let mut ws: [u64; 16] = [0u64; 16usize];
+    ((&mut hash_old)[0usize..0usize + 8usize]).copy_from_slice(&hash[0usize..0usize + 8usize]);
     let b1: &mut [u8] = b;
-    let u: u64 = crate::lowstar::endianness::load64_be(&mut b1[0u32 as usize..]);
-    (&mut ws)[0u32 as usize] = u;
-    let u0: u64 = crate::lowstar::endianness::load64_be(&mut b1[8u32 as usize..]);
-    (&mut ws)[1u32 as usize] = u0;
-    let u1: u64 = crate::lowstar::endianness::load64_be(&mut b1[16u32 as usize..]);
-    (&mut ws)[2u32 as usize] = u1;
-    let u2: u64 = crate::lowstar::endianness::load64_be(&mut b1[24u32 as usize..]);
-    (&mut ws)[3u32 as usize] = u2;
-    let u3: u64 = crate::lowstar::endianness::load64_be(&mut b1[32u32 as usize..]);
-    (&mut ws)[4u32 as usize] = u3;
-    let u4: u64 = crate::lowstar::endianness::load64_be(&mut b1[40u32 as usize..]);
-    (&mut ws)[5u32 as usize] = u4;
-    let u5: u64 = crate::lowstar::endianness::load64_be(&mut b1[48u32 as usize..]);
-    (&mut ws)[6u32 as usize] = u5;
-    let u6: u64 = crate::lowstar::endianness::load64_be(&mut b1[56u32 as usize..]);
-    (&mut ws)[7u32 as usize] = u6;
-    let u7: u64 = crate::lowstar::endianness::load64_be(&mut b1[64u32 as usize..]);
-    (&mut ws)[8u32 as usize] = u7;
-    let u8: u64 = crate::lowstar::endianness::load64_be(&mut b1[72u32 as usize..]);
-    (&mut ws)[9u32 as usize] = u8;
-    let u9: u64 = crate::lowstar::endianness::load64_be(&mut b1[80u32 as usize..]);
-    (&mut ws)[10u32 as usize] = u9;
-    let u10: u64 = crate::lowstar::endianness::load64_be(&mut b1[88u32 as usize..]);
-    (&mut ws)[11u32 as usize] = u10;
-    let u11: u64 = crate::lowstar::endianness::load64_be(&mut b1[96u32 as usize..]);
-    (&mut ws)[12u32 as usize] = u11;
-    let u12: u64 = crate::lowstar::endianness::load64_be(&mut b1[104u32 as usize..]);
-    (&mut ws)[13u32 as usize] = u12;
-    let u13: u64 = crate::lowstar::endianness::load64_be(&mut b1[112u32 as usize..]);
-    (&mut ws)[14u32 as usize] = u13;
-    let u14: u64 = crate::lowstar::endianness::load64_be(&mut b1[120u32 as usize..]);
-    (&mut ws)[15u32 as usize] = u14;
+    let u: u64 = crate::lowstar::endianness::load64_be(&mut b1[0usize..]);
+    (&mut ws)[0usize] = u;
+    let u0: u64 = crate::lowstar::endianness::load64_be(&mut b1[8usize..]);
+    (&mut ws)[1usize] = u0;
+    let u1: u64 = crate::lowstar::endianness::load64_be(&mut b1[16usize..]);
+    (&mut ws)[2usize] = u1;
+    let u2: u64 = crate::lowstar::endianness::load64_be(&mut b1[24usize..]);
+    (&mut ws)[3usize] = u2;
+    let u3: u64 = crate::lowstar::endianness::load64_be(&mut b1[32usize..]);
+    (&mut ws)[4usize] = u3;
+    let u4: u64 = crate::lowstar::endianness::load64_be(&mut b1[40usize..]);
+    (&mut ws)[5usize] = u4;
+    let u5: u64 = crate::lowstar::endianness::load64_be(&mut b1[48usize..]);
+    (&mut ws)[6usize] = u5;
+    let u6: u64 = crate::lowstar::endianness::load64_be(&mut b1[56usize..]);
+    (&mut ws)[7usize] = u6;
+    let u7: u64 = crate::lowstar::endianness::load64_be(&mut b1[64usize..]);
+    (&mut ws)[8usize] = u7;
+    let u8: u64 = crate::lowstar::endianness::load64_be(&mut b1[72usize..]);
+    (&mut ws)[9usize] = u8;
+    let u9: u64 = crate::lowstar::endianness::load64_be(&mut b1[80usize..]);
+    (&mut ws)[10usize] = u9;
+    let u10: u64 = crate::lowstar::endianness::load64_be(&mut b1[88usize..]);
+    (&mut ws)[11usize] = u10;
+    let u11: u64 = crate::lowstar::endianness::load64_be(&mut b1[96usize..]);
+    (&mut ws)[12usize] = u11;
+    let u12: u64 = crate::lowstar::endianness::load64_be(&mut b1[104usize..]);
+    (&mut ws)[13usize] = u12;
+    let u13: u64 = crate::lowstar::endianness::load64_be(&mut b1[112usize..]);
+    (&mut ws)[14usize] = u13;
+    let u14: u64 = crate::lowstar::endianness::load64_be(&mut b1[120usize..]);
+    (&mut ws)[15usize] = u14;
     for i in 0u32..5u32
     {
         for i0 in 0u32..16u32
         {
             let k_t: u64 = (&k384_512)[16u32.wrapping_mul(i).wrapping_add(i0) as usize];
             let ws_t: u64 = (&mut ws)[i0 as usize];
-            let a0: u64 = hash[0u32 as usize];
-            let b0: u64 = hash[1u32 as usize];
-            let c0: u64 = hash[2u32 as usize];
-            let d0: u64 = hash[3u32 as usize];
-            let e0: u64 = hash[4u32 as usize];
-            let f0: u64 = hash[5u32 as usize];
-            let g0: u64 = hash[6u32 as usize];
-            let h02: u64 = hash[7u32 as usize];
+            let a0: u64 = hash[0usize];
+            let b0: u64 = hash[1usize];
+            let c0: u64 = hash[2usize];
+            let d0: u64 = hash[3usize];
+            let e0: u64 = hash[4usize];
+            let f0: u64 = hash[5usize];
+            let g0: u64 = hash[6usize];
+            let h02: u64 = hash[7usize];
             let k_e_t: u64 = k_t;
             let t1: u64 =
                 h02.wrapping_add(
@@ -479,14 +475,14 @@ fn sha512_update(b: &mut [u8], hash: &mut [u64]) -> ()
             let f1: u64 = e0;
             let g1: u64 = f0;
             let h12: u64 = g0;
-            hash[0u32 as usize] = a1;
-            hash[1u32 as usize] = b10;
-            hash[2u32 as usize] = c1;
-            hash[3u32 as usize] = d1;
-            hash[4u32 as usize] = e1;
-            hash[5u32 as usize] = f1;
-            hash[6u32 as usize] = g1;
-            hash[7u32 as usize] = h12
+            hash[0usize] = a1;
+            hash[1usize] = b10;
+            hash[2usize] = c1;
+            hash[3usize] = d1;
+            hash[4usize] = e1;
+            hash[5usize] = f1;
+            hash[6usize] = g1;
+            hash[7usize] = h12
         };
         if i < 4u32
         for i0 in 0u32..16u32
@@ -537,20 +533,18 @@ pub fn sha512_update_last(
     let blocks: u32 =
         if len.wrapping_add(16u32).wrapping_add(1u32) <= 128u32 { 1u32 } else { 2u32 };
     let fin: u32 = blocks.wrapping_mul(128u32);
-    let mut last: [u8; 256] = [0u8; 256u32 as usize];
-    let mut totlen_buf: [u8; 16] = [0u8; 16u32 as usize];
+    let mut last: [u8; 256] = [0u8; 256usize];
+    let mut totlen_buf: [u8; 16] = [0u8; 16usize];
     let total_len_bits: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::shift_left(totlen, 3u32);
     crate::lowstar::endianness::store128_be(&mut totlen_buf, total_len_bits);
     let b0: &mut [u8] = b;
-    ((&mut last)[0u32 as usize..0u32 as usize + len as usize]).copy_from_slice(
-        &b0[0u32 as usize..0u32 as usize + len as usize]
+    ((&mut last)[0usize..0usize + len as usize]).copy_from_slice(
+        &b0[0usize..0usize + len as usize]
     );
     (&mut last)[len as usize] = 0x80u8;
-    ((&mut last)[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize
-    +
-    16u32 as usize]).copy_from_slice(
-        &(&mut totlen_buf)[0u32 as usize..0u32 as usize + 16u32 as usize]
+    ((&mut last)[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize + 16usize]).copy_from_slice(
+        &(&mut totlen_buf)[0usize..0usize + 16usize]
     );
     let last0: (&mut [u8], &mut [u8]) = (&mut last).split_at_mut(0usize);
     let last1: (&mut [u8], &mut [u8]) = last0.1.split_at_mut(128usize);
@@ -566,7 +560,7 @@ pub fn sha512_update_last(
 
 pub fn sha512_finish(st: &mut [u64], h: &mut [u8]) -> ()
 {
-    let mut hbuf: [u8; 64] = [0u8; 64u32 as usize];
+    let mut hbuf: [u8; 64] = [0u8; 64usize];
     for i in 0u32..8u32
     {
         crate::lowstar::endianness::store64_be(
@@ -574,8 +568,8 @@ pub fn sha512_finish(st: &mut [u64], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0u32 as usize..0u32 as usize + 64u32 as usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0u32 as usize..])[0u32 as usize..0u32 as usize + 64u32 as usize]
+    (h[0usize..0usize + 64usize]).copy_from_slice(
+        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 64usize]
     )
 }
 
@@ -601,7 +595,7 @@ pub fn sha384_update_last(
 
 pub fn sha384_finish(st: &mut [u64], h: &mut [u8]) -> ()
 {
-    let mut hbuf: [u8; 64] = [0u8; 64u32 as usize];
+    let mut hbuf: [u8; 64] = [0u8; 64usize];
     for i in 0u32..8u32
     {
         crate::lowstar::endianness::store64_be(
@@ -609,8 +603,8 @@ pub fn sha384_finish(st: &mut [u64], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0u32 as usize..0u32 as usize + 48u32 as usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0u32 as usize..])[0u32 as usize..0u32 as usize + 48u32 as usize]
+    (h[0usize..0usize + 48usize]).copy_from_slice(
+        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 48usize]
     )
 }
 
@@ -626,7 +620,7 @@ pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = dst;
-    let mut st: [u32; 8] = [0u32; 8u32 as usize];
+    let mut st: [u32; 8] = [0u32; 8usize];
     sha256_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(64u32);
     let len': u64 = input_len as u64;
@@ -654,7 +648,7 @@ pub fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = dst;
-    let mut st: [u32; 8] = [0u32; 8u32 as usize];
+    let mut st: [u32; 8] = [0u32; 8usize];
     sha224_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(64u32);
     let len': u64 = input_len as u64;
@@ -671,14 +665,14 @@ fn op_Bang_Star__Hacl_Streaming_Functor_state_s  uint64_t* ()(
     p: &mut [crate::hacl::streaming::md::state_64]
 ) ->
     crate::hacl::streaming::md::state_64
-{ p[0u32 as usize] }
+{ p[0usize] }
 
 fn op_Star_Equals__Hacl_Streaming_Functor_state_s  uint64_t* ()(
     p: &mut [crate::hacl::streaming::md::state_64],
     v: crate::hacl::streaming::md::state_64
 ) ->
     ()
-{ p[0u32 as usize] = v }
+{ p[0usize] = v }
 
 pub fn update_512(
     p: &mut [crate::hacl::streaming::md::state_64],
@@ -692,7 +686,7 @@ pub fn hash_512(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = dst;
-    let mut st: [u64; 8] = [0u64; 8u32 as usize];
+    let mut st: [u64; 8] = [0u64; 8usize];
     sha512_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(128u32);
     let len': crate::fstar::uint128::uint128 =
@@ -721,7 +715,7 @@ pub fn hash_384(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {
     let ib: &mut [u8] = input;
     let rb: &mut [u8] = dst;
-    let mut st: [u64; 8] = [0u64; 8u32 as usize];
+    let mut st: [u64; 8] = [0u64; 8usize];
     sha384_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(128u32);
     let len': crate::fstar::uint128::uint128 =

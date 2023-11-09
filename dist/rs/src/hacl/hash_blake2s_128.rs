@@ -25,20 +25,20 @@ pub fn blake2s_init(hash: &mut [crate::lib::intvector::intrinsics::vec128], kk: 
     &mut [crate::lib::intvector::intrinsics::vec128])
     =
         r2.1.split_at_mut(1usize);
-    let iv0: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[0u32 as usize];
-    let iv1: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[1u32 as usize];
-    let iv2: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[2u32 as usize];
-    let iv3: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[3u32 as usize];
-    let iv4: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[4u32 as usize];
-    let iv5: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[5u32 as usize];
-    let iv6: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[6u32 as usize];
-    let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7u32 as usize];
-    r3.0[0u32 as usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv0, iv1, iv2, iv3);
-    r3.1[0u32 as usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv4, iv5, iv6, iv7);
+    let iv0: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[0usize];
+    let iv1: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[1usize];
+    let iv2: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[2usize];
+    let iv3: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[3usize];
+    let iv4: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[4usize];
+    let iv5: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[5usize];
+    let iv6: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[6usize];
+    let iv7: u32 = (&crate::hacl::impl_blake2_constants::ivTable_S)[7usize];
+    r3.0[0usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv0, iv1, iv2, iv3);
+    r3.1[0usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv4, iv5, iv6, iv7);
     let kk_shift_8: u32 = kk.wrapping_shl(8u32);
     let iv0': u32 = iv0 ^ (0x01010000u32 ^ (kk_shift_8 ^ nn));
-    r1.0[0u32 as usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv0', iv1, iv2, iv3);
-    r2.0[0u32 as usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv4, iv5, iv6, iv7)
+    r1.0[0usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv0', iv1, iv2, iv3);
+    r2.0[0usize] = crate::lib::intvector::intrinsics::vec128_load32s(iv4, iv5, iv6, iv7)
 }
 
 fn blake2s_update(
@@ -95,8 +95,8 @@ pub fn store_state128s_to_state32(
     let b1: (&mut [u32], &mut [u32]) = b0.1.split_at_mut(4usize);
     let b2: (&mut [u32], &mut [u32]) = b1.1.split_at_mut(4usize);
     let b3: (&mut [u32], &mut [u32]) = b2.1.split_at_mut(4usize);
-    let mut b8: [u8; 16] = [0u8; 16u32 as usize];
-    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b8, r1.0[0u32 as usize]);
+    let mut b8: [u8; 16] = [0u8; 16usize];
+    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b8, r1.0[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u32], &mut [u32]) = b1.0.split_at_mut(0usize);
@@ -107,8 +107,8 @@ pub fn store_state128s_to_state32(
         let x: u32 = r;
         os.1[i as usize] = x
     };
-    let mut b80: [u8; 16] = [0u8; 16u32 as usize];
-    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b80, r2.0[0u32 as usize]);
+    let mut b80: [u8; 16] = [0u8; 16usize];
+    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b80, r2.0[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u32], &mut [u32]) = b2.0.split_at_mut(0usize);
@@ -119,8 +119,8 @@ pub fn store_state128s_to_state32(
         let x: u32 = r;
         os.1[i as usize] = x
     };
-    let mut b81: [u8; 16] = [0u8; 16u32 as usize];
-    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b81, r3.0[0u32 as usize]);
+    let mut b81: [u8; 16] = [0u8; 16usize];
+    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b81, r3.0[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u32], &mut [u32]) = b3.0.split_at_mut(0usize);
@@ -131,8 +131,8 @@ pub fn store_state128s_to_state32(
         let x: u32 = r;
         os.1[i as usize] = x
     };
-    let mut b82: [u8; 16] = [0u8; 16u32 as usize];
-    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b82, r3.1[0u32 as usize]);
+    let mut b82: [u8; 16] = [0u8; 16usize];
+    crate::lib::intvector::intrinsics::vec128_store32_le(&mut b82, r3.1[0usize]);
     for i in 0u32..4u32
     {
         let os: (&mut [u32], &mut [u32]) = b3.1.split_at_mut(0usize);
@@ -179,39 +179,39 @@ pub fn load_state128s_from_state32(
     let b1: (&mut [u32], &mut [u32]) = b0.1.split_at_mut(4usize);
     let b2: (&mut [u32], &mut [u32]) = b1.1.split_at_mut(4usize);
     let b3: (&mut [u32], &mut [u32]) = b2.1.split_at_mut(4usize);
-    r1.0[0u32 as usize] =
+    r1.0[0usize] =
         crate::lib::intvector::intrinsics::vec128_load32s(
-            b1.0[0u32 as usize],
-            b1.0[1u32 as usize],
-            b1.0[2u32 as usize],
-            b1.0[3u32 as usize]
+            b1.0[0usize],
+            b1.0[1usize],
+            b1.0[2usize],
+            b1.0[3usize]
         );
-    r2.0[0u32 as usize] =
+    r2.0[0usize] =
         crate::lib::intvector::intrinsics::vec128_load32s(
-            b2.0[0u32 as usize],
-            b2.0[1u32 as usize],
-            b2.0[2u32 as usize],
-            b2.0[3u32 as usize]
+            b2.0[0usize],
+            b2.0[1usize],
+            b2.0[2usize],
+            b2.0[3usize]
         );
-    r3.0[0u32 as usize] =
+    r3.0[0usize] =
         crate::lib::intvector::intrinsics::vec128_load32s(
-            b3.0[0u32 as usize],
-            b3.0[1u32 as usize],
-            b3.0[2u32 as usize],
-            b3.0[3u32 as usize]
+            b3.0[0usize],
+            b3.0[1usize],
+            b3.0[2usize],
+            b3.0[3usize]
         );
-    r3.1[0u32 as usize] =
+    r3.1[0usize] =
         crate::lib::intvector::intrinsics::vec128_load32s(
-            b3.1[0u32 as usize],
-            b3.1[1u32 as usize],
-            b3.1[2u32 as usize],
-            b3.1[3u32 as usize]
+            b3.1[0usize],
+            b3.1[1usize],
+            b3.1[2usize],
+            b3.1[3usize]
         )
 }
 
 pub fn blake2s_malloc(r: ()) -> &mut [crate::lib::intvector::intrinsics::vec128]
 {
     let mut buf: Vec<crate::lib::intvector::intrinsics::vec128> =
-        vec![crate::lib::intvector::intrinsics::vec128_zero; 4u32 as usize];
+        vec![crate::lib::intvector::intrinsics::vec128_zero; 4usize];
     &mut buf
 }

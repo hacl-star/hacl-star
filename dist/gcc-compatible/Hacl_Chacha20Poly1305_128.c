@@ -1096,7 +1096,8 @@ Hacl_Chacha20Poly1305_128_aead_encrypt(
 {
   Hacl_Chacha20_Vec128_chacha20_encrypt_128(mlen, cipher, m, k, n, 1U);
   uint8_t tmp[64U] = { 0U };
-  Hacl_Chacha20_Vec128_chacha20_encrypt_128(64U, tmp, tmp, k, n, 0U);
+  uint8_t tmp_copy[64U] = { 0U };
+  Hacl_Chacha20_Vec128_chacha20_encrypt_128(64U, tmp, tmp_copy, k, n, 0U);
   uint8_t *key = tmp;
   poly1305_do_128(key, aadlen, aad, mlen, cipher, mac);
 }
@@ -1136,7 +1137,8 @@ Hacl_Chacha20Poly1305_128_aead_decrypt(
 {
   uint8_t computed_mac[16U] = { 0U };
   uint8_t tmp[64U] = { 0U };
-  Hacl_Chacha20_Vec128_chacha20_encrypt_128(64U, tmp, tmp, k, n, 0U);
+  uint8_t tmp_copy[64U] = { 0U };
+  Hacl_Chacha20_Vec128_chacha20_encrypt_128(64U, tmp, tmp_copy, k, n, 0U);
   uint8_t *key = tmp;
   poly1305_do_128(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = 255U;

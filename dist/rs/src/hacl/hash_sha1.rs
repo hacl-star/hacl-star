@@ -6,12 +6,12 @@ for i in 0u32..5u32 { s[i as usize] = (&mut _h0)[i as usize] }
 
 fn legacy_update(h: &mut [u32], l: &mut [u8]) -> ()
 {
-    let ha: u32 = h[0u32 as usize];
-    let hb: u32 = h[1u32 as usize];
-    let hc: u32 = h[2u32 as usize];
-    let hd: u32 = h[3u32 as usize];
-    let he: u32 = h[4u32 as usize];
-    let mut _w: [u32; 80] = [0u32; 80u32 as usize];
+    let ha: u32 = h[0usize];
+    let hb: u32 = h[1usize];
+    let hc: u32 = h[2usize];
+    let hd: u32 = h[3usize];
+    let he: u32 = h[4usize];
+    let mut _w: [u32; 80] = [0u32; 80usize];
     for i in 0u32..80u32
     {
         let v: u32 =
@@ -36,11 +36,11 @@ fn legacy_update(h: &mut [u32], l: &mut [u8]) -> ()
     };
     for i in 0u32..80u32
     {
-        let _a: u32 = h[0u32 as usize];
-        let _b: u32 = h[1u32 as usize];
-        let _c: u32 = h[2u32 as usize];
-        let _d: u32 = h[3u32 as usize];
-        let _e: u32 = h[4u32 as usize];
+        let _a: u32 = h[0usize];
+        let _b: u32 = h[1usize];
+        let _c: u32 = h[2usize];
+        let _d: u32 = h[3usize];
+        let _e: u32 = h[4usize];
         let wmit: u32 = (&mut _w)[i as usize];
         let ite: u32 =
             if i < 20u32
@@ -59,29 +59,29 @@ fn legacy_update(h: &mut [u32], l: &mut [u8]) -> ()
             (_a.wrapping_shl(5u32) | _a.wrapping_shr(27u32)).wrapping_add(ite).wrapping_add(_e).wrapping_add(
                 ite0
             ).wrapping_add(wmit);
-        h[0u32 as usize] = _T;
-        h[1u32 as usize] = _a;
-        h[2u32 as usize] = _b.wrapping_shl(30u32) | _b.wrapping_shr(2u32);
-        h[3u32 as usize] = _c;
-        h[4u32 as usize] = _d
+        h[0usize] = _T;
+        h[1usize] = _a;
+        h[2usize] = _b.wrapping_shl(30u32) | _b.wrapping_shr(2u32);
+        h[3usize] = _c;
+        h[4usize] = _d
     };
     for i in 0u32..80u32 { (&mut _w)[i as usize] = 0u32 };
-    let sta: u32 = h[0u32 as usize];
-    let stb: u32 = h[1u32 as usize];
-    let stc: u32 = h[2u32 as usize];
-    let std: u32 = h[3u32 as usize];
-    let ste: u32 = h[4u32 as usize];
-    h[0u32 as usize] = sta.wrapping_add(ha);
-    h[1u32 as usize] = stb.wrapping_add(hb);
-    h[2u32 as usize] = stc.wrapping_add(hc);
-    h[3u32 as usize] = std.wrapping_add(hd);
-    h[4u32 as usize] = ste.wrapping_add(he)
+    let sta: u32 = h[0usize];
+    let stb: u32 = h[1usize];
+    let stc: u32 = h[2usize];
+    let std: u32 = h[3usize];
+    let ste: u32 = h[4usize];
+    h[0usize] = sta.wrapping_add(ha);
+    h[1usize] = stb.wrapping_add(hb);
+    h[2usize] = stc.wrapping_add(hc);
+    h[3usize] = std.wrapping_add(hd);
+    h[4usize] = ste.wrapping_add(he)
 }
 
 fn legacy_pad(len: u64, dst: &mut [u8]) -> ()
 {
     let dst1: (&mut [u8], &mut [u8]) = dst.split_at_mut(0usize);
-    dst1.1[0u32 as usize] = 0x80u8;
+    dst1.1[0usize] = 0x80u8;
     let dst2: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(1usize);
     for
     i
@@ -106,7 +106,7 @@ for i in 0u32..5u32
 {
     crate::lowstar::endianness::store32_be(
         &mut dst[i.wrapping_mul(4u32) as usize..],
-        (&mut s[0u32 as usize..])[i as usize]
+        (&mut s[0usize..])[i as usize]
     )
 }
 
@@ -136,13 +136,13 @@ pub fn legacy_update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_
             ).wrapping_rem(64u32)
         ).wrapping_add(8u32);
     let tmp_len: u32 = rest_len.wrapping_add(pad_len);
-    let mut tmp_twoblocks: [u8; 128] = [0u8; 128u32 as usize];
+    let mut tmp_twoblocks: [u8; 128] = [0u8; 128usize];
     let tmp: (&mut [u8], &mut [u8]) = (&mut tmp_twoblocks).split_at_mut(0usize);
     let tmp_rest: (&mut [u8], &mut [u8]) = tmp.1.split_at_mut(0usize);
     let tmp_pad: (&mut [u8], &mut [u8]) =
         tmp_rest.1.split_at_mut((rest_len as usize).wrapping_add(0usize));
-    (tmp_pad.0[0u32 as usize..0u32 as usize + rest_len as usize]).copy_from_slice(
-        &rest.1[0u32 as usize..0u32 as usize + rest_len as usize]
+    (tmp_pad.0[0usize..0usize + rest_len as usize]).copy_from_slice(
+        &rest.1[0usize..0usize + rest_len as usize]
     );
     legacy_pad(total_input_len, tmp_pad.1);
     legacy_update_multi(s, tmp_pad.0, tmp_len.wrapping_div(64u32))

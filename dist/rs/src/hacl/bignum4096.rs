@@ -95,7 +95,7 @@ pub fn add_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> 
         c = crate::lib::inttypes::intrinsics::add_carry_u64(c, t1, t2, res_i.1)
     };
     let c0: u64 = c;
-    let mut tmp: [u64; 64] = [0u64; 64u32 as usize];
+    let mut tmp: [u64; 64] = [0u64; 64usize];
     let mut c1: u64 = 0u64;
     for i in 0u32..16u32
     {
@@ -137,13 +137,13 @@ pub fn add_mod(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> 
 
 pub fn mul(a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 256] = [0u64; 256u32 as usize];
+    let mut tmp: [u64; 256] = [0u64; 256usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_mul_uint64(64u32, a, b, &mut tmp, res)
 }
 
 pub fn sqr(a: &mut [u64], res: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 256] = [0u64; 256u32 as usize];
+    let mut tmp: [u64; 256] = [0u64; 256usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_sqr_uint64(64u32, a, &mut tmp, res)
 }
 
@@ -184,11 +184,9 @@ fn reduction(n: &mut [u64], nInv: u64, c: &mut [u64], res: &mut [u64]) -> ()
         let res_j0: u64 = res_j.0[64u32.wrapping_add(i) as usize];
         c0 = crate::lib::inttypes::intrinsics::add_carry_u64(c0, c10, res_j0, resb.1)
     };
-    (res[0u32 as usize..0u32 as usize + 64u32 as usize]).copy_from_slice(
-        &(&mut c[64u32 as usize..])[0u32 as usize..0u32 as usize + 64u32 as usize]
-    );
+    (res[0usize..0usize + 64usize]).copy_from_slice(&(&mut c[64usize..])[0usize..0usize + 64usize]);
     let c00: u64 = c0;
-    let mut tmp: [u64; 64] = [0u64; 64u32 as usize];
+    let mut tmp: [u64; 64] = [0u64; 64usize];
     let mut c1: u64 = 0u64;
     for i in 0u32..16u32
     {
@@ -230,26 +228,24 @@ fn reduction(n: &mut [u64], nInv: u64, c: &mut [u64], res: &mut [u64]) -> ()
 
 fn from(n: &mut [u64], nInv_u64: u64, aM: &mut [u64], a: &mut [u64]) -> ()
 {
-    let mut tmp: [u64; 128] = [0u64; 128u32 as usize];
-    ((&mut tmp)[0u32 as usize..0u32 as usize + 64u32 as usize]).copy_from_slice(
-        &aM[0u32 as usize..0u32 as usize + 64u32 as usize]
-    );
+    let mut tmp: [u64; 128] = [0u64; 128usize];
+    ((&mut tmp)[0usize..0usize + 64usize]).copy_from_slice(&aM[0usize..0usize + 64usize]);
     reduction(n, nInv_u64, &mut tmp, a)
 }
 
 fn amont_mul(n: &mut [u64], nInv_u64: u64, aM: &mut [u64], bM: &mut [u64], resM: &mut [u64]) ->
     ()
 {
-    let mut c: [u64; 128] = [0u64; 128u32 as usize];
-    let mut tmp: [u64; 256] = [0u64; 256u32 as usize];
+    let mut c: [u64; 128] = [0u64; 128usize];
+    let mut tmp: [u64; 256] = [0u64; 256usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_mul_uint64(64u32, aM, bM, &mut tmp, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
 
 fn amont_sqr(n: &mut [u64], nInv_u64: u64, aM: &mut [u64], resM: &mut [u64]) -> ()
 {
-    let mut c: [u64; 128] = [0u64; 128u32 as usize];
-    let mut tmp: [u64; 256] = [0u64; 256u32 as usize];
+    let mut c: [u64; 128] = [0u64; 128usize];
+    let mut tmp: [u64; 256] = [0u64; 256usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_sqr_uint64(64u32, aM, &mut tmp, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
@@ -264,9 +260,9 @@ fn exp_vartime(
 ) ->
     ()
 {
-    let mut r2: [u64; 64] = [0u64; 64u32 as usize];
+    let mut r2: [u64; 64] = [0u64; 64usize];
     precompr2(nBits, n, &mut r2);
-    let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0u32 as usize]);
+    let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0usize]);
     exp_vartime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 
@@ -280,9 +276,9 @@ fn exp_consttime(
 ) ->
     ()
 {
-    let mut r2: [u64; 64] = [0u64; 64u32 as usize];
+    let mut r2: [u64; 64] = [0u64; 64usize];
     precompr2(nBits, n, &mut r2);
-    let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0u32 as usize]);
+    let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0usize]);
     exp_consttime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 
@@ -290,7 +286,7 @@ pub fn op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx'  uint64_t* uint64_t
     p: &mut [crate::hacl::bignum::montarithmetic::bn_mont_ctx_u64]
 ) ->
     crate::hacl::bignum::montarithmetic::bn_mont_ctx_u64
-{ p[0u32 as usize] }
+{ p[0usize] }
 
 pub fn lt_mask(a: &mut [u64], b: &mut [u64]) -> u64
 {

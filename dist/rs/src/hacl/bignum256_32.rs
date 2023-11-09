@@ -95,7 +95,7 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
         c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t1, t2, res_i.1)
     };
     let c0: u32 = c;
-    let mut tmp: [u32; 8] = [0u32; 8u32 as usize];
+    let mut tmp: [u32; 8] = [0u32; 8usize];
     let mut c1: u32 = 0u32;
     for i in 0u32..2u32
     {
@@ -172,11 +172,9 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
         let res_j0: u32 = res_j.0[8u32.wrapping_add(i) as usize];
         c0 = crate::lib::inttypes::intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
     };
-    (res[0u32 as usize..0u32 as usize + 8u32 as usize]).copy_from_slice(
-        &(&mut c[8u32 as usize..])[0u32 as usize..0u32 as usize + 8u32 as usize]
-    );
+    (res[0usize..0usize + 8usize]).copy_from_slice(&(&mut c[8usize..])[0usize..0usize + 8usize]);
     let c00: u32 = c0;
-    let mut tmp: [u32; 8] = [0u32; 8u32 as usize];
+    let mut tmp: [u32; 8] = [0u32; 8usize];
     let mut c1: u32 = 0u32;
     for i in 0u32..2u32
     {
@@ -218,10 +216,8 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
 
 fn from(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], a: &mut [u32]) -> ()
 {
-    let mut tmp: [u32; 16] = [0u32; 16u32 as usize];
-    ((&mut tmp)[0u32 as usize..0u32 as usize + 8u32 as usize]).copy_from_slice(
-        &aM[0u32 as usize..0u32 as usize + 8u32 as usize]
-    );
+    let mut tmp: [u32; 16] = [0u32; 16usize];
+    ((&mut tmp)[0usize..0usize + 8usize]).copy_from_slice(&aM[0usize..0usize + 8usize]);
     reduction(n, nInv_u64, &mut tmp, a)
 }
 
@@ -235,9 +231,9 @@ fn exp_vartime(
 ) ->
     ()
 {
-    let mut r2: [u32; 8] = [0u32; 8u32 as usize];
+    let mut r2: [u32; 8] = [0u32; 8usize];
     precompr2(nBits, n, &mut r2);
-    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0u32 as usize]);
+    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     exp_vartime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 
@@ -251,9 +247,9 @@ fn exp_consttime(
 ) ->
     ()
 {
-    let mut r2: [u32; 8] = [0u32; 8u32 as usize];
+    let mut r2: [u32; 8] = [0u32; 8usize];
     precompr2(nBits, n, &mut r2);
-    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0u32 as usize]);
+    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     exp_consttime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 

@@ -459,10 +459,19 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
   }
 }
 
+#define DEBUG(start, x, len, fmt) \
+  do { \
+    printf("%s[", start); \
+    for (int i = 0; i < len - 1; ++i) \
+      printf("%"fmt", ", x[i]); \
+    printf("%"fmt"]\n", x[len-1]); \
+  } while (0)
+
 void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
 {
   uint64_t *acc = ctx;
   uint8_t *ks = key + 16U;
+  DEBUG("acc = ", acc, 5, PRIu64);
   uint64_t f0 = acc[0U];
   uint64_t f13 = acc[1U];
   uint64_t f23 = acc[2U];
@@ -482,6 +491,7 @@ void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
   uint64_t c30 = l3 >> 26U;
   uint64_t l4 = f40 + c30;
   uint64_t tmp40 = l4 & 0x3ffffffULL;
+  printf("tmp40 = %"PRIu64"\n", tmp40);
   uint64_t c40 = l4 >> 26U;
   uint64_t f010 = tmp00 + c40 * 5ULL;
   uint64_t f110 = tmp10;
@@ -503,6 +513,8 @@ void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
   uint64_t l8 = f410 + c3;
   uint64_t tmp4 = l8 & 0x3ffffffULL;
   uint64_t c4 = l8 >> 26U;
+  printf("c4 = %"PRIu64"\n", c4);
+  printf("tmp4 = %"PRIu64"\n", tmp4);
   uint64_t f02 = tmp0 + c4 * 5ULL;
   uint64_t f12 = tmp1;
   uint64_t f22 = tmp2;
@@ -558,6 +570,8 @@ void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
   uint64_t r11 = r1 + c;
   uint64_t f30 = r0;
   uint64_t f31 = r11;
+  printf("f30 = %"PRIu64"\n", f30);
+  printf("f31 = %"PRIu64"\n", f31);
   store64_le(tag, f30);
   store64_le(tag + 8U, f31);
 }

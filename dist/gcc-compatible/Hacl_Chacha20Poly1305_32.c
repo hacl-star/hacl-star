@@ -22,6 +22,14 @@
  * SOFTWARE.
  */
 
+#define DEBUG(start, x, len, fmt) \
+  do { \
+    printf("%s[", start); \
+    for (int i = 0; i < len - 1; ++i) \
+      printf("%"fmt", ", x[i]); \
+    printf("%"fmt"]\n", x[len-1]); \
+  } while (0)
+
 
 #include "Hacl_Chacha20Poly1305_32.h"
 
@@ -416,16 +424,20 @@ poly1305_do_32(
 )
 {
   uint64_t ctx[25U] = { 0U };
+  DEBUG("do_32 ctx = ", ctx, 25, PRIu64);
   uint8_t block[16U] = { 0U };
   Hacl_Poly1305_32_poly1305_init(ctx, k);
+  DEBUG("do_32 ctx = ", ctx, 25, PRIu64);
   if (aadlen != 0U)
   {
     poly1305_padded_32(ctx, aadlen, aad);
   }
+  DEBUG("do_32 ctx = ", ctx, 25, PRIu64);
   if (mlen != 0U)
   {
     poly1305_padded_32(ctx, mlen, m);
   }
+  DEBUG("do_32 ctx = ", ctx, 25, PRIu64);
   store64_le(block, (uint64_t)aadlen);
   store64_le(block + 8U, (uint64_t)mlen);
   uint64_t *pre = ctx + 5U;
@@ -546,7 +558,11 @@ poly1305_do_32(
   acc[2U] = o2;
   acc[3U] = o3;
   acc[4U] = o4;
+  DEBUG("do_32 ctx = ", ctx, 20, PRIu64);
+  DEBUG("do_32 k = ", k, 32, PRIu8);
   Hacl_Poly1305_32_poly1305_finish(out, k, ctx);
+  DEBUG("do_32 ctx = ", ctx, 20, PRIu64);
+  DEBUG("do_32 out = ", out, 16, PRIu8);
 }
 
 /**
@@ -579,7 +595,9 @@ Hacl_Chacha20Poly1305_32_aead_encrypt(
 {
   Hacl_Chacha20_chacha20_encrypt(mlen, cipher, m, k, n, 1U);
   uint8_t tmp[64U] = { 0U };
-  Hacl_Chacha20_chacha20_encrypt(64U, tmp, tmp, k, n, 0U);
+  uint8_t tmp_copy[64U] = { 0U };
+  Hacl_Chacha20_chacha20_encrypt(64U, tmp, tmp_copy, k, n, 0U);
+  DEBUG("tmp = ", tmp, 64, PRIu8);
   uint8_t *key = tmp;
   poly1305_do_32(key, aadlen, aad, mlen, cipher, mac);
 }
@@ -619,7 +637,8 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
 {
   uint8_t computed_mac[16U] = { 0U };
   uint8_t tmp[64U] = { 0U };
-  Hacl_Chacha20_chacha20_encrypt(64U, tmp, tmp, k, n, 0U);
+  uint8_t tmp_copy[64U] = { 0U };
+  Hacl_Chacha20_chacha20_encrypt(64U, tmp, tmp_copy, k, n, 0U);
   uint8_t *key = tmp;
   poly1305_do_32(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = 255U;

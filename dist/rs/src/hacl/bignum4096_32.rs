@@ -95,7 +95,7 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
         c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t1, t2, res_i.1)
     };
     let c0: u32 = c;
-    let mut tmp: [u32; 128] = [0u32; 128u32 as usize];
+    let mut tmp: [u32; 128] = [0u32; 128usize];
     let mut c1: u32 = 0u32;
     for i in 0u32..32u32
     {
@@ -137,13 +137,13 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
 
 pub fn mul(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
 {
-    let mut tmp: [u32; 512] = [0u32; 512u32 as usize];
+    let mut tmp: [u32; 512] = [0u32; 512usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_mul_uint32(128u32, a, b, &mut tmp, res)
 }
 
 pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
 {
-    let mut tmp: [u32; 512] = [0u32; 512u32 as usize];
+    let mut tmp: [u32; 512] = [0u32; 512usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_sqr_uint32(128u32, a, &mut tmp, res)
 }
 
@@ -184,11 +184,11 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
         let res_j0: u32 = res_j.0[128u32.wrapping_add(i) as usize];
         c0 = crate::lib::inttypes::intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
     };
-    (res[0u32 as usize..0u32 as usize + 128u32 as usize]).copy_from_slice(
-        &(&mut c[128u32 as usize..])[0u32 as usize..0u32 as usize + 128u32 as usize]
+    (res[0usize..0usize + 128usize]).copy_from_slice(
+        &(&mut c[128usize..])[0usize..0usize + 128usize]
     );
     let c00: u32 = c0;
-    let mut tmp: [u32; 128] = [0u32; 128u32 as usize];
+    let mut tmp: [u32; 128] = [0u32; 128usize];
     let mut c1: u32 = 0u32;
     for i in 0u32..32u32
     {
@@ -230,26 +230,24 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
 
 fn from(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], a: &mut [u32]) -> ()
 {
-    let mut tmp: [u32; 256] = [0u32; 256u32 as usize];
-    ((&mut tmp)[0u32 as usize..0u32 as usize + 128u32 as usize]).copy_from_slice(
-        &aM[0u32 as usize..0u32 as usize + 128u32 as usize]
-    );
+    let mut tmp: [u32; 256] = [0u32; 256usize];
+    ((&mut tmp)[0usize..0usize + 128usize]).copy_from_slice(&aM[0usize..0usize + 128usize]);
     reduction(n, nInv_u64, &mut tmp, a)
 }
 
 fn amont_mul(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], bM: &mut [u32], resM: &mut [u32]) ->
     ()
 {
-    let mut c: [u32; 256] = [0u32; 256u32 as usize];
-    let mut tmp: [u32; 512] = [0u32; 512u32 as usize];
+    let mut c: [u32; 256] = [0u32; 256usize];
+    let mut tmp: [u32; 512] = [0u32; 512usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_mul_uint32(128u32, aM, bM, &mut tmp, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
 
 fn amont_sqr(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], resM: &mut [u32]) -> ()
 {
-    let mut c: [u32; 256] = [0u32; 256u32 as usize];
-    let mut tmp: [u32; 512] = [0u32; 512u32 as usize];
+    let mut c: [u32; 256] = [0u32; 256usize];
+    let mut tmp: [u32; 512] = [0u32; 512usize];
     crate::hacl::bignum::karatsuba::bn_karatsuba_sqr_uint32(128u32, aM, &mut tmp, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
@@ -264,9 +262,9 @@ fn exp_vartime(
 ) ->
     ()
 {
-    let mut r2: [u32; 128] = [0u32; 128u32 as usize];
+    let mut r2: [u32; 128] = [0u32; 128usize];
     precompr2(nBits, n, &mut r2);
-    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0u32 as usize]);
+    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     exp_vartime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 
@@ -280,9 +278,9 @@ fn exp_consttime(
 ) ->
     ()
 {
-    let mut r2: [u32; 128] = [0u32; 128u32 as usize];
+    let mut r2: [u32; 128] = [0u32; 128usize];
     precompr2(nBits, n, &mut r2);
-    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0u32 as usize]);
+    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     exp_consttime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 

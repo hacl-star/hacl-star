@@ -24,7 +24,7 @@ pub fn felem_load(b: &mut [u8], out: &mut [u64]) -> ()
 
 pub fn felem_store(a: &mut [u64], out: &mut [u8]) -> ()
 {
-    let mut tmp: [u64; 5] = [0u64; 5u32 as usize];
+    let mut tmp: [u64; 5] = [0u64; 5usize];
     crate::hacl::bignum_k256::fnormalize(&mut tmp, a);
     crate::hacl::bignum_k256::store_felem(out, &mut tmp)
 }
@@ -43,7 +43,7 @@ pub fn point_double(p: &mut [u64], out: &mut [u64]) -> ()
 
 pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
 {
-    let mut scalar_q: [u64; 4] = [0u64; 4u32 as usize];
+    let mut scalar_q: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = (&mut scalar_q).split_at_mut(0usize);
@@ -62,7 +62,7 @@ pub fn point_store(p: &mut [u64], out: &mut [u8]) -> ()
 
 pub fn is_point_valid(b: &mut [u8]) -> bool
 {
-    let mut p: [u64; 10] = [0u64; 10u32 as usize];
+    let mut p: [u64; 10] = [0u64; 10usize];
     let res: bool = crate::hacl::k256_ecdsa::aff_point_load_vartime(&mut p, b);
     res
 }

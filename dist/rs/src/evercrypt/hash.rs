@@ -1,4 +1,4 @@
-fn op_Bang_Star__EverCrypt_Hash_state_s(p: &mut [state_s]) -> state_s { p[0u32 as usize] }
+fn op_Bang_Star__EverCrypt_Hash_state_s(p: &mut [state_s]) -> state_s { p[0usize] }
 
 const k224_256: [u32; 64] =
     [0x428a2f98u32,
@@ -70,18 +70,18 @@ fn op_Bang_Star__Hacl_Streaming_Functor_state_s  EverCrypt_Hash_state_s* ()(
     p: &mut [incremental::hash_state]
 ) ->
     incremental::hash_state
-{ p[0u32 as usize] }
+{ p[0usize] }
 
 fn op_Star_Equals__Hacl_Streaming_Functor_state_s  EverCrypt_Hash_state_s* ()(
     p: &mut [incremental::hash_state],
     v: incremental::hash_state
 ) ->
     ()
-{ p[0u32 as usize] = v }
+{ p[0usize] = v }
 
 pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {
-    let mut st: [u32; 8] = [0u32; 8u32 as usize];
+    let mut st: [u32; 8] = [0u32; 8usize];
     for i in 0u32..8u32
     {
         let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
@@ -117,7 +117,7 @@ pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 
 fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {
-    let mut st: [u32; 8] = [0u32; 8u32 as usize];
+    let mut st: [u32; 8] = [0u32; 8usize];
     for i in 0u32..8u32
     {
         let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);

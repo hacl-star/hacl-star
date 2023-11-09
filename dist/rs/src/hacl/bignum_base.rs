@@ -1,15 +1,15 @@
 pub fn mul_wide_add2_u32(a: u32, b: u32, c_in: u32, out: &mut [u32]) -> u32
 {
-    let out0: u32 = out[0u32 as usize];
+    let out0: u32 = out[0usize];
     let res: u64 =
         (a as u64).wrapping_mul(b as u64).wrapping_add(c_in as u64).wrapping_add(out0 as u64);
-    out[0u32 as usize] = res as u32;
+    out[0usize] = res as u32;
     res.wrapping_shr(32u32) as u32
 }
 
 pub fn mul_wide_add2_u64(a: u64, b: u64, c_in: u64, out: &mut [u64]) -> u64
 {
-    let out0: u64 = out[0u32 as usize];
+    let out0: u64 = out[0usize];
     let res: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::add(
             crate::fstar::uint128::add(
@@ -18,7 +18,7 @@ pub fn mul_wide_add2_u64(a: u64, b: u64, c_in: u64, out: &mut [u64]) -> u64
             ),
             crate::fstar::uint128::uint64_to_uint128(out0)
         );
-    out[0u32 as usize] = crate::fstar::uint128::uint128_to_uint64(res);
+    out[0usize] = crate::fstar::uint128::uint128_to_uint64(res);
     crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(res, 64u32))
 }
 
