@@ -6,4 +6,4 @@ pub fn extract_blake2s_128(
     ikmlen: u32
 ) ->
     ()
-{ crate::hacl::hmac::blake2s_128::compute_blake2s_128(prk, salt, saltlen, ikm, ikmlen) }
+{ crate::hacl::hmac_blake2s_128::compute_blake2s_128(prk, salt, saltlen, ikm, ikmlen) }

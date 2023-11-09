@@ -32,14 +32,14 @@ pub fn felem_mul(a: &mut [u64], b: &mut [u64], out: &mut [u64]) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 10] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
-    crate::hacl::impl::curve25519::field51::fmul(out, a, b, &mut tmp)
+    crate::hacl::bignum25519_51::fmul(out, a, b, &mut tmp)
 }
 
 pub fn felem_sqr(a: &mut [u64], out: &mut [u64]) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 5] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::hacl::impl::curve25519::field51::fsqr(out, a, &mut tmp)
+    crate::hacl::bignum25519_51::fsqr(out, a, &mut tmp)
 }
 
 pub fn felem_inv(a: &mut [u64], out: &mut [u64]) -> ()
@@ -94,7 +94,7 @@ pub fn point_double(p: &mut [u64], out: &mut [u64]) -> ()
 { crate::hacl::ed25519::point_double(out, p) }
 
 pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
-{ crate::hacl::impl::ed25519::ladder::point_mul(out, scalar, p) }
+{ crate::hacl::impl_ed25519_ladder::point_mul(out, scalar, p) }
 
 pub fn point_eq(p: &mut [u64], q: &mut [u64]) -> bool
 { crate::hacl::ed25519::point_equal(p, q) }

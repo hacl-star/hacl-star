@@ -67,14 +67,14 @@ const k224_256: [u32; 64] =
         0xc67178f2u32];
 
 fn op_Bang_Star__Hacl_Streaming_Functor_state_s  EverCrypt_Hash_state_s* ()(
-    p: &mut [incremental::hash_state]
+    p: &mut [crate::evercrypt::hash_incremental::hash_state]
 ) ->
-    incremental::hash_state
+    crate::evercrypt::hash_incremental::hash_state
 { p[0usize] }
 
 fn op_Star_Equals__Hacl_Streaming_Functor_state_s  EverCrypt_Hash_state_s* ()(
-    p: &mut [incremental::hash_state],
-    v: incremental::hash_state
+    p: &mut [crate::evercrypt::hash_incremental::hash_state],
+    v: crate::evercrypt::hash_incremental::hash_state
 ) ->
     ()
 { p[0usize] = v }

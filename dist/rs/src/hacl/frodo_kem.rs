@@ -139,6 +139,11 @@ pub const cdf_table976: [u16; 11] =
 pub const cdf_table1344: [u16; 7] =
     [9142u16, 23462u16, 30338u16, 32361u16, 32725u16, 32765u16, 32767u16];
 
+pub fn randombytes_(len: u32, res: &mut [u8]) -> ()
+{
+    crate::lowstar::ignore::ignore::<bool>(crate::lib::randombuffer_system::randombytes(res, len))
+}
+
 pub fn frodo_pack(n1: u32, n2: u32, d: u32, a: &mut [u16], res: &mut [u8]) -> ()
 {
     let n: u32 = n1.wrapping_mul(n2).wrapping_div(8u32);

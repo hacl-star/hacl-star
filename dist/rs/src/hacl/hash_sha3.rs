@@ -1,5 +1,5 @@
 pub fn update_multi_sha3(
-    a: crate::spec::hash::definitions::hash_alg,
+    a: crate::spec::hash_definitions::hash_alg,
     s: &mut [u64],
     blocks: &mut [u8],
     n_blocks: u32
@@ -8,36 +8,34 @@ pub fn update_multi_sha3(
 for i in 0u32..n_blocks
 {
     let block: (&mut [u8], &mut [u8]) =
-        blocks.split_at_mut(
-            (i.wrapping_mul(crate::hacl::hash::sha3::block_len(a)) as usize).wrapping_add(0usize)
-        );
-    crate::hacl::impl::sha3::absorb_inner(crate::hacl::hash::sha3::block_len(a), block.1, s)
+        blocks.split_at_mut((i.wrapping_mul(block_len(a)) as usize).wrapping_add(0usize));
+    crate::hacl::impl_sha3::absorb_inner(block_len(a), block.1, s)
 }
 
 fn op_Bang_Star__Hacl_Streaming_Functor_state_s Spec_Hash_Definitions_hash_alg *  uint64_t* ()(
-    p: &mut [crate::hacl::streaming::keccak::state]
+    p: &mut [crate::hacl::streaming_keccak::state]
 ) ->
-    crate::hacl::streaming::keccak::state
+    crate::hacl::streaming_keccak::state
 { p[0usize] }
 
 fn
 op_Star_Equals__Hacl_Streaming_Functor_state_s Spec_Hash_Definitions_hash_alg *  uint64_t* ()(
-    p: &mut [crate::hacl::streaming::keccak::state],
-    v: crate::hacl::streaming::keccak::state
+    p: &mut [crate::hacl::streaming_keccak::state],
+    v: crate::hacl::streaming_keccak::state
 ) ->
     ()
 { p[0usize] = v }
 
-pub fn block_len(s: &mut [crate::hacl::streaming::keccak::state]) -> u32
+pub fn block_len(s: &mut [crate::hacl::streaming_keccak::state]) -> u32
 {
-    let a1: crate::spec::hash::definitions::hash_alg = crate::hacl::streaming::keccak::get_alg(s);
-    crate::hacl::hash::sha3::block_len(a1)
+    let a1: crate::spec::hash_definitions::hash_alg = crate::hacl::streaming_keccak::get_alg(s);
+    block_len(a1)
 }
 
-pub fn hash_len(s: &mut [crate::hacl::streaming::keccak::state]) -> u32
+pub fn hash_len(s: &mut [crate::hacl::streaming_keccak::state]) -> u32
 {
-    let a1: crate::spec::hash::definitions::hash_alg = crate::hacl::streaming::keccak::get_alg(s);
-    crate::hacl::hash::sha3::hash_len(a1)
+    let a1: crate::spec::hash_definitions::hash_alg = crate::hacl::streaming_keccak::get_alg(s);
+    hash_len(a1)
 }
 
 pub fn shake128_hacl(
@@ -48,7 +46,7 @@ pub fn shake128_hacl(
 ) ->
     ()
 {
-    crate::hacl::impl::sha3::keccak(
+    crate::hacl::impl_sha3::keccak(
         1344u32,
         256u32,
         inputByteLen,
@@ -67,7 +65,7 @@ pub fn shake256_hacl(
 ) ->
     ()
 {
-    crate::hacl::impl::sha3::keccak(
+    crate::hacl::impl_sha3::keccak(
         1088u32,
         512u32,
         inputByteLen,
@@ -79,22 +77,16 @@ pub fn shake256_hacl(
 }
 
 pub fn sha3_224(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{
-    crate::hacl::impl::sha3::keccak(1152u32, 448u32, inputByteLen, input, 0x06u8, 28u32, output)
-}
+{ crate::hacl::impl_sha3::keccak(1152u32, 448u32, inputByteLen, input, 0x06u8, 28u32, output) }
 
 pub fn sha3_256(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{
-    crate::hacl::impl::sha3::keccak(1088u32, 512u32, inputByteLen, input, 0x06u8, 32u32, output)
-}
+{ crate::hacl::impl_sha3::keccak(1088u32, 512u32, inputByteLen, input, 0x06u8, 32u32, output) }
 
 pub fn sha3_384(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{ crate::hacl::impl::sha3::keccak(832u32, 768u32, inputByteLen, input, 0x06u8, 48u32, output) }
+{ crate::hacl::impl_sha3::keccak(832u32, 768u32, inputByteLen, input, 0x06u8, 48u32, output) }
 
 pub fn sha3_512(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{
-    crate::hacl::impl::sha3::keccak(576u32, 1024u32, inputByteLen, input, 0x06u8, 64u32, output)
-}
+{ crate::hacl::impl_sha3::keccak(576u32, 1024u32, inputByteLen, input, 0x06u8, 64u32, output) }
 
 const keccak_rotc: [u32; 24] =
     [1u32,
@@ -327,4 +319,22 @@ fn absorb(
     nextBlock.1[rateInBytes.wrapping_sub(1u32) as usize] = 0x80u8;
     loadState(rateInBytes, nextBlock.1, s);
     state_permute(s)
+}
+
+pub fn keccak(
+    rate: u32,
+    capacity: u32,
+    inputByteLen: u32,
+    input: &mut [u8],
+    delimitedSuffix: u8,
+    outputByteLen: u32,
+    output: &mut [u8]
+) ->
+    ()
+{
+    crate::lowstar::ignore::ignore::<u32>(capacity);
+    let rateInBytes: u32 = rate.wrapping_div(8u32);
+    let mut s: [u64; 25] = [0u64; 25usize];
+    absorb(&mut s, rateInBytes, inputByteLen, input, delimitedSuffix);
+    crate::hacl::impl_sha3::squeeze(&mut s, rateInBytes, outputByteLen, output)
 }

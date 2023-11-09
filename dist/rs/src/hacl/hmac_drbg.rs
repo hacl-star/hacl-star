@@ -7,3 +7,10 @@ pub const max_length: u32 = 65536u32;
 pub const max_personalization_string_length: u32 = 65536u32;
 
 pub const max_additional_input_length: u32 = 65536u32;
+
+pub fn uu___is_State(a: crate::spec::hash_definitions::hash_alg, projectee: state) -> bool
+{
+    crate::lowstar::ignore::ignore::<crate::spec::hash_definitions::hash_alg>(a);
+    crate::lowstar::ignore::ignore::<state>(projectee);
+    truebool
+}

@@ -11,25 +11,25 @@ pub fn reduce_513(a: &mut [u64]) -> ()
     let f2: u64 = a[2usize];
     let f3: u64 = a[3usize];
     let f4: u64 = a[4usize];
-    let l': u64 = f0.wrapping_add(0u64);
-    let tmp0: u64 = l' & 0x7ffffffffffffu64;
-    let c0: u64 = l'.wrapping_shr(51u32);
-    let l'0: u64 = f1.wrapping_add(c0);
-    let tmp1: u64 = l'0 & 0x7ffffffffffffu64;
-    let c1: u64 = l'0.wrapping_shr(51u32);
-    let l'1: u64 = f2.wrapping_add(c1);
-    let tmp2: u64 = l'1 & 0x7ffffffffffffu64;
-    let c2: u64 = l'1.wrapping_shr(51u32);
-    let l'2: u64 = f3.wrapping_add(c2);
-    let tmp3: u64 = l'2 & 0x7ffffffffffffu64;
-    let c3: u64 = l'2.wrapping_shr(51u32);
-    let l'3: u64 = f4.wrapping_add(c3);
-    let tmp4: u64 = l'3 & 0x7ffffffffffffu64;
-    let c4: u64 = l'3.wrapping_shr(51u32);
-    let l'4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
-    let tmp0': u64 = l'4 & 0x7ffffffffffffu64;
-    let c5: u64 = l'4.wrapping_shr(51u32);
-    a[0usize] = tmp0';
+    let l_: u64 = f0.wrapping_add(0u64);
+    let tmp0: u64 = l_ & 0x7ffffffffffffu64;
+    let c0: u64 = l_.wrapping_shr(51u32);
+    let l_0: u64 = f1.wrapping_add(c0);
+    let tmp1: u64 = l_0 & 0x7ffffffffffffu64;
+    let c1: u64 = l_0.wrapping_shr(51u32);
+    let l_1: u64 = f2.wrapping_add(c1);
+    let tmp2: u64 = l_1 & 0x7ffffffffffffu64;
+    let c2: u64 = l_1.wrapping_shr(51u32);
+    let l_2: u64 = f3.wrapping_add(c2);
+    let tmp3: u64 = l_2 & 0x7ffffffffffffu64;
+    let c3: u64 = l_2.wrapping_shr(51u32);
+    let l_3: u64 = f4.wrapping_add(c3);
+    let tmp4: u64 = l_3 & 0x7ffffffffffffu64;
+    let c4: u64 = l_3.wrapping_shr(51u32);
+    let l_4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
+    let tmp0_: u64 = l_4 & 0x7ffffffffffffu64;
+    let c5: u64 = l_4.wrapping_shr(51u32);
+    a[0usize] = tmp0_;
     a[1usize] = tmp1.wrapping_add(c5);
     a[2usize] = tmp2;
     a[3usize] = tmp3;
@@ -40,7 +40,7 @@ fn fmul(output: &mut [u64], input: &mut [u64], input2: &mut [u64]) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 10] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
-    crate::hacl::impl::curve25519::field51::fmul(output, input, input2, &mut tmp)
+    crate::hacl::bignum25519_51::fmul(output, input, input2, &mut tmp)
 }
 
 fn times_2(out: &mut [u64], a: &mut [u64]) -> ()
@@ -88,7 +88,7 @@ fn fsquare(out: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 5] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::hacl::impl::curve25519::field51::fsqr(out, a, &mut tmp)
+    crate::hacl::bignum25519_51::fsqr(out, a, &mut tmp)
 }
 
 fn fsquare_times(output: &mut [u64], input: &mut [u64], count: u32) -> ()
@@ -119,25 +119,25 @@ fn reduce(out: &mut [u64]) -> ()
     let o2: u64 = out[2usize];
     let o3: u64 = out[3usize];
     let o4: u64 = out[4usize];
-    let l': u64 = o0.wrapping_add(0u64);
-    let tmp0: u64 = l' & 0x7ffffffffffffu64;
-    let c0: u64 = l'.wrapping_shr(51u32);
-    let l'0: u64 = o1.wrapping_add(c0);
-    let tmp1: u64 = l'0 & 0x7ffffffffffffu64;
-    let c1: u64 = l'0.wrapping_shr(51u32);
-    let l'1: u64 = o2.wrapping_add(c1);
-    let tmp2: u64 = l'1 & 0x7ffffffffffffu64;
-    let c2: u64 = l'1.wrapping_shr(51u32);
-    let l'2: u64 = o3.wrapping_add(c2);
-    let tmp3: u64 = l'2 & 0x7ffffffffffffu64;
-    let c3: u64 = l'2.wrapping_shr(51u32);
-    let l'3: u64 = o4.wrapping_add(c3);
-    let tmp4: u64 = l'3 & 0x7ffffffffffffu64;
-    let c4: u64 = l'3.wrapping_shr(51u32);
-    let l'4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
-    let tmp0': u64 = l'4 & 0x7ffffffffffffu64;
-    let c5: u64 = l'4.wrapping_shr(51u32);
-    let f0: u64 = tmp0';
+    let l_: u64 = o0.wrapping_add(0u64);
+    let tmp0: u64 = l_ & 0x7ffffffffffffu64;
+    let c0: u64 = l_.wrapping_shr(51u32);
+    let l_0: u64 = o1.wrapping_add(c0);
+    let tmp1: u64 = l_0 & 0x7ffffffffffffu64;
+    let c1: u64 = l_0.wrapping_shr(51u32);
+    let l_1: u64 = o2.wrapping_add(c1);
+    let tmp2: u64 = l_1 & 0x7ffffffffffffu64;
+    let c2: u64 = l_1.wrapping_shr(51u32);
+    let l_2: u64 = o3.wrapping_add(c2);
+    let tmp3: u64 = l_2 & 0x7ffffffffffffu64;
+    let c3: u64 = l_2.wrapping_shr(51u32);
+    let l_3: u64 = o4.wrapping_add(c3);
+    let tmp4: u64 = l_3 & 0x7ffffffffffffu64;
+    let c4: u64 = l_3.wrapping_shr(51u32);
+    let l_4: u64 = tmp0.wrapping_add(c4.wrapping_mul(19u64));
+    let tmp0_: u64 = l_4 & 0x7ffffffffffffu64;
+    let c5: u64 = l_4.wrapping_shr(51u32);
+    let f0: u64 = tmp0_;
     let f1: u64 = tmp1.wrapping_add(c5);
     let f2: u64 = tmp2;
     let f3: u64 = tmp3;
@@ -148,16 +148,16 @@ fn reduce(out: &mut [u64]) -> ()
     let m3: u64 = crate::fstar::uint64::eq_mask(f3, 0x7ffffffffffffu64);
     let m4: u64 = crate::fstar::uint64::eq_mask(f4, 0x7ffffffffffffu64);
     let mask: u64 = m0 & m1 & m2 & m3 & m4;
-    let f0': u64 = f0.wrapping_sub(mask & 0x7ffffffffffedu64);
-    let f1': u64 = f1.wrapping_sub(mask & 0x7ffffffffffffu64);
-    let f2': u64 = f2.wrapping_sub(mask & 0x7ffffffffffffu64);
-    let f3': u64 = f3.wrapping_sub(mask & 0x7ffffffffffffu64);
-    let f4': u64 = f4.wrapping_sub(mask & 0x7ffffffffffffu64);
-    let f01: u64 = f0';
-    let f11: u64 = f1';
-    let f21: u64 = f2';
-    let f31: u64 = f3';
-    let f41: u64 = f4';
+    let f0_: u64 = f0.wrapping_sub(mask & 0x7ffffffffffedu64);
+    let f1_: u64 = f1.wrapping_sub(mask & 0x7ffffffffffffu64);
+    let f2_: u64 = f2.wrapping_sub(mask & 0x7ffffffffffffu64);
+    let f3_: u64 = f3.wrapping_sub(mask & 0x7ffffffffffffu64);
+    let f4_: u64 = f4.wrapping_sub(mask & 0x7ffffffffffffu64);
+    let f01: u64 = f0_;
+    let f11: u64 = f1_;
+    let f21: u64 = f2_;
+    let f31: u64 = f3_;
+    let f41: u64 = f4_;
     out[0usize] = f01;
     out[1usize] = f11;
     out[2usize] = f21;
@@ -607,21 +607,21 @@ fn barrett_reduction(z: &mut [u64], t: &mut [u64]) -> ()
     let mu2: u64 = m21;
     let mu3: u64 = m31;
     let mu4: u64 = m41;
-    let y': u64 = (t5 & 0xffffffu64).wrapping_shl(32u32);
-    let x': u64 = t4.wrapping_shr(24u32);
-    let z0: u64 = x' | y';
-    let y'0: u64 = (t6 & 0xffffffu64).wrapping_shl(32u32);
-    let x'0: u64 = t5.wrapping_shr(24u32);
-    let z1: u64 = x'0 | y'0;
-    let y'1: u64 = (t7 & 0xffffffu64).wrapping_shl(32u32);
-    let x'1: u64 = t6.wrapping_shr(24u32);
-    let z2: u64 = x'1 | y'1;
-    let y'2: u64 = (t8 & 0xffffffu64).wrapping_shl(32u32);
-    let x'2: u64 = t7.wrapping_shr(24u32);
-    let z3: u64 = x'2 | y'2;
-    let y'3: u64 = (t9 & 0xffffffu64).wrapping_shl(32u32);
-    let x'3: u64 = t8.wrapping_shr(24u32);
-    let z4: u64 = x'3 | y'3;
+    let y_: u64 = (t5 & 0xffffffu64).wrapping_shl(32u32);
+    let x_: u64 = t4.wrapping_shr(24u32);
+    let z0: u64 = x_ | y_;
+    let y_0: u64 = (t6 & 0xffffffu64).wrapping_shl(32u32);
+    let x_0: u64 = t5.wrapping_shr(24u32);
+    let z1: u64 = x_0 | y_0;
+    let y_1: u64 = (t7 & 0xffffffu64).wrapping_shl(32u32);
+    let x_1: u64 = t6.wrapping_shr(24u32);
+    let z2: u64 = x_1 | y_1;
+    let y_2: u64 = (t8 & 0xffffffu64).wrapping_shl(32u32);
+    let x_2: u64 = t7.wrapping_shr(24u32);
+    let z3: u64 = x_2 | y_2;
+    let y_3: u64 = (t9 & 0xffffffu64).wrapping_shl(32u32);
+    let x_3: u64 = t8.wrapping_shr(24u32);
+    let z4: u64 = x_3 | y_3;
     let q0: u64 = z0;
     let q1: u64 = z1;
     let q2: u64 = z2;
@@ -730,27 +730,27 @@ fn barrett_reduction(z: &mut [u64], t: &mut [u64]) -> ()
     let c8: crate::fstar::uint128::uint128 = carry7;
     let t81: u64 = t103;
     let t91: u64 = crate::fstar::uint128::uint128_to_uint64(c8);
-    let qmu4': u64 = t41;
-    let qmu5': u64 = t51;
-    let qmu6': u64 = t61;
-    let qmu7': u64 = t71;
-    let qmu8': u64 = t81;
-    let qmu9': u64 = t91;
-    let y'4: u64 = (qmu5' & 0xffffffffffu64).wrapping_shl(16u32);
-    let x'4: u64 = qmu4'.wrapping_shr(40u32);
-    let z01: u64 = x'4 | y'4;
-    let y'5: u64 = (qmu6' & 0xffffffffffu64).wrapping_shl(16u32);
-    let x'5: u64 = qmu5'.wrapping_shr(40u32);
-    let z11: u64 = x'5 | y'5;
-    let y'6: u64 = (qmu7' & 0xffffffffffu64).wrapping_shl(16u32);
-    let x'6: u64 = qmu6'.wrapping_shr(40u32);
-    let z21: u64 = x'6 | y'6;
-    let y'7: u64 = (qmu8' & 0xffffffffffu64).wrapping_shl(16u32);
-    let x'7: u64 = qmu7'.wrapping_shr(40u32);
-    let z31: u64 = x'7 | y'7;
-    let y'8: u64 = (qmu9' & 0xffffffffffu64).wrapping_shl(16u32);
-    let x'8: u64 = qmu8'.wrapping_shr(40u32);
-    let z41: u64 = x'8 | y'8;
+    let qmu4_: u64 = t41;
+    let qmu5_: u64 = t51;
+    let qmu6_: u64 = t61;
+    let qmu7_: u64 = t71;
+    let qmu8_: u64 = t81;
+    let qmu9_: u64 = t91;
+    let y_4: u64 = (qmu5_ & 0xffffffffffu64).wrapping_shl(16u32);
+    let x_4: u64 = qmu4_.wrapping_shr(40u32);
+    let z01: u64 = x_4 | y_4;
+    let y_5: u64 = (qmu6_ & 0xffffffffffu64).wrapping_shl(16u32);
+    let x_5: u64 = qmu5_.wrapping_shr(40u32);
+    let z11: u64 = x_5 | y_5;
+    let y_6: u64 = (qmu7_ & 0xffffffffffu64).wrapping_shl(16u32);
+    let x_6: u64 = qmu6_.wrapping_shr(40u32);
+    let z21: u64 = x_6 | y_6;
+    let y_7: u64 = (qmu8_ & 0xffffffffffu64).wrapping_shl(16u32);
+    let x_7: u64 = qmu7_.wrapping_shr(40u32);
+    let z31: u64 = x_7 | y_7;
+    let y_8: u64 = (qmu9_ & 0xffffffffffu64).wrapping_shl(16u32);
+    let x_8: u64 = qmu8_.wrapping_shr(40u32);
+    let z41: u64 = x_8 | y_8;
     let qdiv0: u64 = z01;
     let qdiv1: u64 = z11;
     let qdiv2: u64 = z21;
@@ -1316,7 +1316,7 @@ fn point_negate_mul_double_g_vartime(
 {
     let mut q2_neg: [u64; 20] = [0u64; 20usize];
     point_negate(q2, &mut q2_neg);
-    crate::hacl::impl::ed25519::ladder::point_mul_g_double_vartime(
+    crate::hacl::impl_ed25519_ladder::point_mul_g_double_vartime(
         out,
         scalar1,
         scalar2,
@@ -1331,7 +1331,7 @@ fn store_56(out: &mut [u8], b: &mut [u64]) -> ()
     let b2: u64 = b[2usize];
     let b3: u64 = b[3usize];
     let b4: u64 = b[4usize];
-    let b4': u32 = b4 as u32;
+    let b4_: u32 = b4 as u32;
     let b8: (&mut [u8], &mut [u8]) = out.split_at_mut(0usize);
     crate::lowstar::endianness::store64_le(b8.1, b0);
     let b80: (&mut [u8], &mut [u8]) = b8.1.split_at_mut(7usize);
@@ -1340,7 +1340,7 @@ fn store_56(out: &mut [u8], b: &mut [u64]) -> ()
     crate::lowstar::endianness::store64_le(b81.1, b2);
     let b82: (&mut [u8], &mut [u8]) = b81.1.split_at_mut(7usize);
     crate::lowstar::endianness::store64_le(b82.1, b3);
-    crate::lowstar::endianness::store32_le(&mut b80.0[28usize..], b4')
+    crate::lowstar::endianness::store32_le(&mut b80.0[28usize..], b4_)
 }
 
 fn load_64_bytes(out: &mut [u64], b: &mut [u8]) -> ()
@@ -1427,7 +1427,7 @@ fn sha512_modq_pre(out: &mut [u64], prefix: &mut [u8], len: u32, input: &mut [u8
 {
     let mut tmp: [u64; 10] = [0u64; 10usize];
     let mut hash: [u8; 64] = [0u8; 64usize];
-    crate::hacl::impl::sha512::modq::sha512_pre_msg(&mut hash, prefix, len, input);
+    crate::hacl::impl_sha512_modq::sha512_pre_msg(&mut hash, prefix, len, input);
     load_64_bytes(&mut tmp, &mut hash);
     barrett_reduction(out, &mut tmp)
 }
@@ -1443,7 +1443,7 @@ fn sha512_modq_pre_pre2(
 {
     let mut tmp: [u64; 10] = [0u64; 10usize];
     let mut hash: [u8; 64] = [0u8; 64usize];
-    crate::hacl::impl::sha512::modq::sha512_pre_pre2_msg(&mut hash, prefix, prefix2, len, input);
+    crate::hacl::impl_sha512_modq::sha512_pre_pre2_msg(&mut hash, prefix, prefix2, len, input);
     load_64_bytes(&mut tmp, &mut hash);
     barrett_reduction(out, &mut tmp)
 }
@@ -1451,7 +1451,7 @@ fn sha512_modq_pre_pre2(
 fn point_mul_g_compress(out: &mut [u8], s: &mut [u8]) -> ()
 {
     let mut tmp: [u64; 20] = [0u64; 20usize];
-    crate::hacl::impl::ed25519::ladder::point_mul_g(&mut tmp, s);
+    crate::hacl::impl_ed25519_ladder::point_mul_g(&mut tmp, s);
     point_compress(out, &mut tmp)
 }
 
@@ -1519,14 +1519,14 @@ pub fn sign(signature: &mut [u8], private_key: &mut [u8], msg_len: u32, msg: &mu
 pub fn verify(public_key: &mut [u8], msg_len: u32, msg: &mut [u8], signature: &mut [u8]) ->
     bool
 {
-    let mut a': [u64; 20] = [0u64; 20usize];
-    let b: bool = point_decompress(&mut a', public_key);
+    let mut a_: [u64; 20] = [0u64; 20usize];
+    let b: bool = point_decompress(&mut a_, public_key);
     if b
     {
-        let mut r': [u64; 20] = [0u64; 20usize];
+        let mut r_: [u64; 20] = [0u64; 20usize];
         let rs: (&mut [u8], &mut [u8]) = signature.split_at_mut(0usize);
-        let b': bool = point_decompress(&mut r', rs.1);
-        if b'
+        let b_: bool = point_decompress(&mut r_, rs.1);
+        if b_
         {
             let mut hb: [u8; 32] = [0u8; 32usize];
             let rs1: (&mut [u8], &mut [u8]) = rs.1.split_at_mut(0usize);
@@ -1543,8 +1543,8 @@ pub fn verify(public_key: &mut [u8], msg_len: u32, msg: &mut [u8], signature: &m
                 sha512_modq_pre_pre2(&mut tmp0, sb.0, public_key, msg_len, msg);
                 store_56(&mut hb, &mut tmp0);
                 let mut exp_d: [u64; 20] = [0u64; 20usize];
-                point_negate_mul_double_g_vartime(&mut exp_d, sb.1, &mut hb, &mut a');
-                let b2: bool = point_equal(&mut exp_d, &mut r');
+                point_negate_mul_double_g_vartime(&mut exp_d, sb.1, &mut hb, &mut a_);
+                let b2: bool = point_equal(&mut exp_d, &mut r_);
                 b2
             }
         }

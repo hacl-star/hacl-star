@@ -1396,14 +1396,14 @@ pub fn legacy_hash(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 }
 
 pub fn op_Bang_Star__Hacl_Streaming_Functor_state_s  uint32_t* ()(
-    p: &mut [crate::hacl::streaming::md::state_32]
+    p: &mut [crate::hacl::streaming_md::state_32]
 ) ->
-    crate::hacl::streaming::md::state_32
+    crate::hacl::streaming_md::state_32
 { p[0usize] }
 
 pub fn op_Star_Equals__Hacl_Streaming_Functor_state_s  uint32_t* ()(
-    p: &mut [crate::hacl::streaming::md::state_32],
-    v: crate::hacl::streaming::md::state_32
+    p: &mut [crate::hacl::streaming_md::state_32],
+    v: crate::hacl::streaming_md::state_32
 ) ->
     ()
 { p[0usize] = v }

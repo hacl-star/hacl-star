@@ -16,17 +16,17 @@ fn load_skey(
     let pkey: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
     let d: (&mut [u64], &mut [u64]) = pkey.1.split_at_mut((pkeyLen as usize).wrapping_add(0usize));
     let b: bool = load_pkey(modBits, eBits, nb, eb, d.0);
-    crate::hacl::bignum::convert::bn_from_bytes_be_uint64(dbLen, db, d.1);
-    let m1: u64 = crate::hacl::impl::rsapss::keys::check_exponent_u64(dBits, d.1);
+    crate::hacl::bignum_convert::bn_from_bytes_be_uint64(dbLen, db, d.1);
+    let m1: u64 = crate::hacl::impl_rsapss_keys::check_exponent_u64(dBits, d.1);
     b && m1 == 0xFFFFFFFFFFFFFFFFu64
 }
 
 pub fn mgf_hash(
-    a: crate::spec::hash::definitions::hash_alg,
+    a: crate::spec::hash_definitions::hash_alg,
     len: u32,
     mgfseed: &mut [u8],
     maskLen: u32,
     res: &mut [u8]
 ) ->
     ()
-{ crate::hacl::impl::rsapss::mgf::mgf_hash(a, len, mgfseed, maskLen, res) }
+{ crate::hacl::impl_rsapss_mgf::mgf_hash(a, len, mgfseed, maskLen, res) }

@@ -7,26 +7,26 @@ pub fn add(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
         let t2: u32 = b[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) =
             res.split_at_mut((4u32.wrapping_mul(i) as usize).wrapping_add(0usize));
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t1, t2, res_i.1);
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t1, t2, res_i.1);
         let t10: u32 = a[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = b[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t10, t20, res_i0.1);
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t10, t20, res_i0.1);
         let t11: u32 = a[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let t21: u32 = b[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t11, t21, res_i1.1);
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t11, t21, res_i1.1);
         let t12: u32 = a[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let t22: u32 = b[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t12, t22, res_i2.1)
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t12, t22, res_i2.1)
     };
     for i in 128u32..128u32
     {
         let t1: u32 = a[i as usize];
         let t2: u32 = b[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = res.split_at_mut((i as usize).wrapping_add(0usize));
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t1, t2, res_i.1)
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t1, t2, res_i.1)
     };
     c
 }
@@ -40,26 +40,26 @@ pub fn sub(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
         let t2: u32 = b[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) =
             res.split_at_mut((4u32.wrapping_mul(i) as usize).wrapping_add(0usize));
-        c = crate::lib::inttypes::intrinsics::sub_borrow_u32(c, t1, t2, res_i.1);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t1, t2, res_i.1);
         let t10: u32 = a[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = b[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::sub_borrow_u32(c, t10, t20, res_i0.1);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t10, t20, res_i0.1);
         let t11: u32 = a[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let t21: u32 = b[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::sub_borrow_u32(c, t11, t21, res_i1.1);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t11, t21, res_i1.1);
         let t12: u32 = a[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let t22: u32 = b[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::sub_borrow_u32(c, t12, t22, res_i2.1)
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t12, t22, res_i2.1)
     };
     for i in 128u32..128u32
     {
         let t1: u32 = a[i as usize];
         let t2: u32 = b[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = res.split_at_mut((i as usize).wrapping_add(0usize));
-        c = crate::lib::inttypes::intrinsics::sub_borrow_u32(c, t1, t2, res_i.1)
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t1, t2, res_i.1)
     };
     c
 }
@@ -73,26 +73,26 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
         let t2: u32 = b[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) =
             res.split_at_mut((4u32.wrapping_mul(i) as usize).wrapping_add(0usize));
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t1, t2, res_i.1);
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t1, t2, res_i.1);
         let t10: u32 = a[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = b[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t10, t20, res_i0.1);
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t10, t20, res_i0.1);
         let t11: u32 = a[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let t21: u32 = b[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t11, t21, res_i1.1);
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t11, t21, res_i1.1);
         let t12: u32 = a[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let t22: u32 = b[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t12, t22, res_i2.1)
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t12, t22, res_i2.1)
     };
     for i in 128u32..128u32
     {
         let t1: u32 = a[i as usize];
         let t2: u32 = b[i as usize];
         let res_i: (&mut [u32], &mut [u32]) = res.split_at_mut((i as usize).wrapping_add(0usize));
-        c = crate::lib::inttypes::intrinsics::add_carry_u32(c, t1, t2, res_i.1)
+        c = crate::lib::inttypes_intrinsics::add_carry_u32(c, t1, t2, res_i.1)
     };
     let c0: u32 = c;
     let mut tmp: [u32; 128] = [0u32; 128usize];
@@ -103,19 +103,19 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
         let t2: u32 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) =
             (&mut tmp).split_at_mut((4u32.wrapping_mul(i) as usize).wrapping_add(0usize));
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1);
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1);
         let t10: u32 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t10, t20, res_i0.1);
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t10, t20, res_i0.1);
         let t11: u32 = res[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let t21: u32 = n[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t11, t21, res_i1.1);
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t11, t21, res_i1.1);
         let t12: u32 = res[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let t22: u32 = n[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t12, t22, res_i2.1)
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t12, t22, res_i2.1)
     };
     for i in 128u32..128u32
     {
@@ -123,7 +123,7 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
         let t2: u32 = n[i as usize];
         let res_i: (&mut [u32], &mut [u32]) =
             (&mut tmp).split_at_mut((i as usize).wrapping_add(0usize));
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1)
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1)
     };
     let c10: u32 = c1;
     let c2: u32 = c0.wrapping_sub(c10);
@@ -138,13 +138,13 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
 pub fn mul(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
 {
     let mut tmp: [u32; 512] = [0u32; 512usize];
-    crate::hacl::bignum::karatsuba::bn_karatsuba_mul_uint32(128u32, a, b, &mut tmp, res)
+    crate::hacl::bignum_karatsuba::bn_karatsuba_mul_uint32(128u32, a, b, &mut tmp, res)
 }
 
 pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
 {
     let mut tmp: [u32; 512] = [0u32; 512usize];
-    crate::hacl::bignum::karatsuba::bn_karatsuba_sqr_uint32(128u32, a, &mut tmp, res)
+    crate::hacl::bignum_karatsuba::bn_karatsuba_sqr_uint32(128u32, a, &mut tmp, res)
 }
 
 fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
@@ -182,7 +182,7 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
         let c10: u32 = r;
         let resb: (&mut [u32], &mut [u32]) = res_j.1.split_at_mut(128usize);
         let res_j0: u32 = res_j.0[128u32.wrapping_add(i) as usize];
-        c0 = crate::lib::inttypes::intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
+        c0 = crate::lib::inttypes_intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
     };
     (res[0usize..0usize + 128usize]).copy_from_slice(
         &(&mut c[128usize..])[0usize..0usize + 128usize]
@@ -196,19 +196,19 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
         let t2: u32 = n[4u32.wrapping_mul(i) as usize];
         let res_i: (&mut [u32], &mut [u32]) =
             (&mut tmp).split_at_mut((4u32.wrapping_mul(i) as usize).wrapping_add(0usize));
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1);
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1);
         let t10: u32 = res[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let t20: u32 = n[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
         let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t10, t20, res_i0.1);
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t10, t20, res_i0.1);
         let t11: u32 = res[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let t21: u32 = n[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
         let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t11, t21, res_i1.1);
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t11, t21, res_i1.1);
         let t12: u32 = res[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let t22: u32 = n[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
         let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t12, t22, res_i2.1)
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t12, t22, res_i2.1)
     };
     for i in 128u32..128u32
     {
@@ -216,7 +216,7 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
         let t2: u32 = n[i as usize];
         let res_i: (&mut [u32], &mut [u32]) =
             (&mut tmp).split_at_mut((i as usize).wrapping_add(0usize));
-        c1 = crate::lib::inttypes::intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1)
+        c1 = crate::lib::inttypes_intrinsics::sub_borrow_u32(c1, t1, t2, res_i.1)
     };
     let c10: u32 = c1;
     let c2: u32 = c00.wrapping_sub(c10);
@@ -240,7 +240,7 @@ fn amont_mul(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], bM: &mut [u32], resM:
 {
     let mut c: [u32; 256] = [0u32; 256usize];
     let mut tmp: [u32; 512] = [0u32; 512usize];
-    crate::hacl::bignum::karatsuba::bn_karatsuba_mul_uint32(128u32, aM, bM, &mut tmp, &mut c);
+    crate::hacl::bignum_karatsuba::bn_karatsuba_mul_uint32(128u32, aM, bM, &mut tmp, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
 
@@ -248,7 +248,7 @@ fn amont_sqr(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], resM: &mut [u32]) -> 
 {
     let mut c: [u32; 256] = [0u32; 256usize];
     let mut tmp: [u32; 512] = [0u32; 512usize];
-    crate::hacl::bignum::karatsuba::bn_karatsuba_sqr_uint32(128u32, aM, &mut tmp, &mut c);
+    crate::hacl::bignum_karatsuba::bn_karatsuba_sqr_uint32(128u32, aM, &mut tmp, &mut c);
     areduction(n, nInv_u64, &mut c, resM)
 }
 

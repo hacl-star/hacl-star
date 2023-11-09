@@ -21,8 +21,8 @@ pub fn blake2b_init(hash: &mut [u64], kk: u32, nn: u32) -> ()
     r3.1[2usize] = iv6;
     r3.1[3usize] = iv7;
     let kk_shift_8: u64 = (kk as u64).wrapping_shl(8u32);
-    let iv0': u64 = iv0 ^ (0x01010000u64 ^ (kk_shift_8 ^ nn as u64));
-    r1.0[0usize] = iv0';
+    let iv0_: u64 = iv0 ^ (0x01010000u64 ^ (kk_shift_8 ^ nn as u64));
+    r1.0[0usize] = iv0_;
     r1.0[1usize] = iv1;
     r1.0[2usize] = iv2;
     r1.0[3usize] = iv3;
@@ -30,6 +30,32 @@ pub fn blake2b_init(hash: &mut [u64], kk: u32, nn: u32) -> ()
     r2.0[1usize] = iv5;
     r2.0[2usize] = iv6;
     r2.0[3usize] = iv7
+}
+
+pub fn blake2b_update_multi(
+    len: u32,
+    wv: &mut [u64],
+    hash: &mut [u64],
+    prev: crate::fstar::uint128::uint128,
+    blocks: &mut [u8],
+    nb: u32
+) ->
+    ()
+{
+    crate::lowstar::ignore::ignore::<u32>(len);
+    for i in 0u32..nb
+    {
+        let totlen: crate::fstar::uint128::uint128 =
+            crate::fstar::uint128::add_mod(
+                prev,
+                crate::fstar::uint128::uint64_to_uint128(
+                    i.wrapping_add(1u32).wrapping_mul(128u32) as u64
+                )
+            );
+        let b: (&mut [u8], &mut [u8]) =
+            blocks.split_at_mut((i.wrapping_mul(128u32) as usize).wrapping_add(0usize));
+        crate::hacl::blake2b_32::blake2b_update_block(wv, hash, falsebool, totlen, b.1)
+    }
 }
 
 fn blake2b_update(
@@ -90,8 +116,8 @@ pub fn blake2s_init(hash: &mut [u32], kk: u32, nn: u32) -> ()
     r3.1[2usize] = iv6;
     r3.1[3usize] = iv7;
     let kk_shift_8: u32 = kk.wrapping_shl(8u32);
-    let iv0': u32 = iv0 ^ (0x01010000u32 ^ (kk_shift_8 ^ nn));
-    r1.0[0usize] = iv0';
+    let iv0_: u32 = iv0 ^ (0x01010000u32 ^ (kk_shift_8 ^ nn));
+    r1.0[0usize] = iv0_;
     r1.0[1usize] = iv1;
     r1.0[2usize] = iv2;
     r1.0[3usize] = iv3;
@@ -99,6 +125,26 @@ pub fn blake2s_init(hash: &mut [u32], kk: u32, nn: u32) -> ()
     r2.0[1usize] = iv5;
     r2.0[2usize] = iv6;
     r2.0[3usize] = iv7
+}
+
+pub fn blake2s_update_multi(
+    len: u32,
+    wv: &mut [u32],
+    hash: &mut [u32],
+    prev: u64,
+    blocks: &mut [u8],
+    nb: u32
+) ->
+    ()
+{
+    crate::lowstar::ignore::ignore::<u32>(len);
+    for i in 0u32..nb
+    {
+        let totlen: u64 = prev.wrapping_add(i.wrapping_add(1u32).wrapping_mul(64u32) as u64);
+        let b: (&mut [u8], &mut [u8]) =
+            blocks.split_at_mut((i.wrapping_mul(64u32) as usize).wrapping_add(0usize));
+        crate::hacl::blake2s_32::blake2s_update_block(wv, hash, falsebool, totlen, b.1)
+    }
 }
 
 fn blake2s_update(

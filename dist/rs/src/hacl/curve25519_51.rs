@@ -58,7 +58,7 @@ fn point_add_and_double(
     let c: (&mut [u64], &mut [u64]) = d.1.split_at_mut(5usize);
     crate::hacl::bignum25519_51::fadd(c.1, x3.1, z31.1);
     crate::hacl::bignum25519_51::fsub(c.0, x3.1, z31.1);
-    crate::hacl::impl::curve25519::field51::fmul2(c.0, c.0, ab.1, tmp2);
+    crate::hacl::bignum25519_51::fmul2(c.0, c.0, ab.1, tmp2);
     crate::hacl::bignum25519_51::fadd(x3.1, c.0, c.1);
     crate::hacl::bignum25519_51::fsub(z31.1, c.0, c.1);
     let a1: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(0usize);
@@ -67,8 +67,8 @@ fn point_add_and_double(
     let c0: (&mut [u64], &mut [u64]) = d0.1.split_at_mut(5usize);
     let ab1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(0usize);
     let dc1: (&mut [u64], &mut [u64]) = c0.0.split_at_mut(0usize);
-    crate::hacl::impl::curve25519::field51::fsqr2(dc1.1, ab1.1, tmp2);
-    crate::hacl::impl::curve25519::field51::fsqr2(x3.1, x3.1, tmp2);
+    crate::hacl::bignum25519_51::fsqr2(dc1.1, ab1.1, tmp2);
+    crate::hacl::bignum25519_51::fsqr2(x3.1, x3.1, tmp2);
     ab1.0[0usize] = c0.1[0usize];
     ab1.0[1usize] = c0.1[1usize];
     ab1.0[2usize] = c0.1[2usize];
@@ -77,8 +77,8 @@ fn point_add_and_double(
     crate::hacl::bignum25519_51::fsub(c0.1, dc1.0, c0.1);
     crate::hacl::bignum25519_51::fmul1(b1.1, c0.1, 121665u64);
     crate::hacl::bignum25519_51::fadd(b1.1, b1.1, dc1.0);
-    crate::hacl::impl::curve25519::field51::fmul2(z2.0, dc1.1, ab1.1, tmp2);
-    crate::hacl::impl::curve25519::field51::fmul(z31.0, z31.0, x1.1, tmp2)
+    crate::hacl::bignum25519_51::fmul2(z2.0, dc1.1, ab1.1, tmp2);
+    crate::hacl::bignum25519_51::fmul(z31.0, z31.0, x1.1, tmp2)
 }
 
 fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [crate::fstar::uint128::uint128]) ->
@@ -94,7 +94,7 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [crate::fstar::uint
     let dc: (&mut [u64], &mut [u64]) = c.0.split_at_mut(0usize);
     crate::hacl::bignum25519_51::fadd(ab.0, z2.0, z2.1);
     crate::hacl::bignum25519_51::fsub(d.0, z2.0, z2.1);
-    crate::hacl::impl::curve25519::field51::fsqr2(dc.1, ab.1, tmp2);
+    crate::hacl::bignum25519_51::fsqr2(dc.1, ab.1, tmp2);
     ab.0[0usize] = c.1[0usize];
     ab.0[1usize] = c.1[1usize];
     ab.0[2usize] = c.1[2usize];
@@ -103,7 +103,7 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [crate::fstar::uint
     crate::hacl::bignum25519_51::fsub(c.1, dc.0, c.1);
     crate::hacl::bignum25519_51::fmul1(d.0, c.1, 121665u64);
     crate::hacl::bignum25519_51::fadd(d.0, d.0, dc.0);
-    crate::hacl::impl::curve25519::field51::fmul2(z2.0, dc.1, ab.1, tmp2)
+    crate::hacl::bignum25519_51::fmul2(z2.0, dc.1, ab.1, tmp2)
 }
 
 fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
@@ -173,8 +173,8 @@ pub fn fsquare_times(
 ) ->
     ()
 {
-    crate::hacl::impl::curve25519::field51::fsqr(o, inp, tmp);
-    for i in 0u32..n.wrapping_sub(1u32) { crate::hacl::impl::curve25519::field51::fsqr(o, o, tmp) }
+    crate::hacl::bignum25519_51::fsqr(o, inp, tmp);
+    for i in 0u32..n.wrapping_sub(1u32) { crate::hacl::bignum25519_51::fsqr(o, o, tmp) }
 }
 
 pub fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [crate::fstar::uint128::uint128]) -> ()
@@ -187,38 +187,38 @@ pub fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [crate::fstar::uint128::uint
         tmp.split_at_mut(0usize);
     fsquare_times(b1.0, i, tmp1.1, 1u32);
     fsquare_times(t01.1, b1.0, tmp1.1, 2u32);
-    crate::hacl::impl::curve25519::field51::fmul(t01.0, t01.1, i, tmp1.1);
-    crate::hacl::impl::curve25519::field51::fmul(b1.0, t01.0, b1.0, tmp1.1);
+    crate::hacl::bignum25519_51::fmul(t01.0, t01.1, i, tmp1.1);
+    crate::hacl::bignum25519_51::fmul(b1.0, t01.0, b1.0, tmp1.1);
     fsquare_times(t01.1, b1.0, tmp1.1, 1u32);
-    crate::hacl::impl::curve25519::field51::fmul(t01.0, t01.1, t01.0, tmp1.1);
+    crate::hacl::bignum25519_51::fmul(t01.0, t01.1, t01.0, tmp1.1);
     fsquare_times(t01.1, t01.0, tmp1.1, 5u32);
-    crate::hacl::impl::curve25519::field51::fmul(t01.0, t01.1, t01.0, tmp1.1);
+    crate::hacl::bignum25519_51::fmul(t01.0, t01.1, t01.0, tmp1.1);
     let b10: (&mut [u64], &mut [u64]) = t01.0.split_at_mut(0usize);
     let c1: (&mut [u64], &mut [u64]) = b10.1.split_at_mut(5usize);
     let t010: (&mut [u64], &mut [u64]) = t01.1.split_at_mut(0usize);
     let tmp10: (&mut [crate::fstar::uint128::uint128], &mut [crate::fstar::uint128::uint128]) =
         tmp1.1.split_at_mut(0usize);
     fsquare_times(t010.1, c1.0, tmp10.1, 10u32);
-    crate::hacl::impl::curve25519::field51::fmul(c1.1, t010.1, c1.0, tmp10.0);
+    crate::hacl::bignum25519_51::fmul(c1.1, t010.1, c1.0, tmp10.0);
     fsquare_times(t010.1, c1.1, tmp10.1, 20u32);
-    crate::hacl::impl::curve25519::field51::fmul(t010.1, t010.1, c1.1, tmp10.0);
+    crate::hacl::bignum25519_51::fmul(t010.1, t010.1, c1.1, tmp10.0);
     fsquare_times(t010.1, t010.1, tmp10.1, 10u32);
-    crate::hacl::impl::curve25519::field51::fmul(c1.0, t010.1, c1.0, tmp10.0);
+    crate::hacl::bignum25519_51::fmul(c1.0, t010.1, c1.0, tmp10.0);
     fsquare_times(t010.1, c1.0, tmp10.1, 50u32);
-    crate::hacl::impl::curve25519::field51::fmul(c1.1, t010.1, c1.0, tmp10.0);
+    crate::hacl::bignum25519_51::fmul(c1.1, t010.1, c1.0, tmp10.0);
     let b11: (&mut [u64], &mut [u64]) = c1.0.split_at_mut(0usize);
     let c10: (&mut [u64], &mut [u64]) = c1.1.split_at_mut(0usize);
     let t011: (&mut [u64], &mut [u64]) = t010.1.split_at_mut(0usize);
     let tmp11: (&mut [crate::fstar::uint128::uint128], &mut [crate::fstar::uint128::uint128]) =
         tmp10.1.split_at_mut(0usize);
     fsquare_times(t011.1, c10.1, tmp11.1, 100u32);
-    crate::hacl::impl::curve25519::field51::fmul(t011.1, t011.1, c10.1, tmp10.0);
+    crate::hacl::bignum25519_51::fmul(t011.1, t011.1, c10.1, tmp10.0);
     fsquare_times(t011.1, t011.1, tmp11.1, 50u32);
-    crate::hacl::impl::curve25519::field51::fmul(t011.1, t011.1, b11.1, tmp10.0);
+    crate::hacl::bignum25519_51::fmul(t011.1, t011.1, b11.1, tmp10.0);
     fsquare_times(t011.1, t011.1, tmp11.1, 5u32);
     let a: (&mut [u64], &mut [u64]) = b1.0.split_at_mut(0usize);
     let t0: (&mut [u64], &mut [u64]) = t011.1.split_at_mut(0usize);
-    crate::hacl::impl::curve25519::field51::fmul(o, t0.1, a.1, tmp10.0)
+    crate::hacl::bignum25519_51::fmul(o, t0.1, a.1, tmp10.0)
 }
 
 fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
@@ -230,7 +230,7 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
     let mut tmp_w: [crate::fstar::uint128::uint128; 10] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
     finv(&mut tmp, z.1, &mut tmp_w);
-    crate::hacl::impl::curve25519::field51::fmul(&mut tmp, &mut tmp, z.0, &mut tmp_w);
+    crate::hacl::bignum25519_51::fmul(&mut tmp, &mut tmp, z.0, &mut tmp_w);
     crate::hacl::bignum25519_51::store_felem(&mut u64s, &mut tmp);
     for i0 in 0u32..4u32
     {
@@ -241,7 +241,7 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
     }
 }
 
-pub fn scalarmult(out: &mut [u8], priv: &mut [u8], pub: &mut [u8]) -> ()
+pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
 {
     let mut init: [u64; 10] = [0u64; 10usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
@@ -249,7 +249,7 @@ pub fn scalarmult(out: &mut [u8], priv: &mut [u8], pub: &mut [u8]) -> ()
     {
         let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) =
-            pub.split_at_mut((i.wrapping_mul(8u32) as usize).wrapping_add(0usize));
+            r#pub.split_at_mut((i.wrapping_mul(8u32) as usize).wrapping_add(0usize));
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;
@@ -277,11 +277,11 @@ pub fn scalarmult(out: &mut [u8], priv: &mut [u8], pub: &mut [u8]) -> ()
     z.0[2usize] = f1h | f2l;
     z.0[3usize] = f2h | f3l;
     z.0[4usize] = f3h;
-    montgomery_ladder(z.0, priv, z.0);
+    montgomery_ladder(z.0, r#priv, z.0);
     encode_point(out, z.0)
 }
 
-pub fn secret_to_public(pub: &mut [u8], priv: &mut [u8]) -> ()
+pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
 {
     let mut basepoint: [u8; 32] = [0u8; 32usize];
     for i in 0u32..32u32
@@ -290,13 +290,13 @@ pub fn secret_to_public(pub: &mut [u8], priv: &mut [u8]) -> ()
         let x: u8 = (&g25519)[i as usize];
         os.1[i as usize] = x
     };
-    scalarmult(pub, priv, &mut basepoint)
+    scalarmult(r#pub, r#priv, &mut basepoint)
 }
 
-pub fn ecdh(out: &mut [u8], priv: &mut [u8], pub: &mut [u8]) -> bool
+pub fn ecdh(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> bool
 {
     let mut zeros: [u8; 32] = [0u8; 32usize];
-    scalarmult(out, priv, pub);
+    scalarmult(out, r#priv, r#pub);
     let mut res: u8 = 255u8;
     for i in 0u32..32u32
     {

@@ -47,36 +47,36 @@ pub fn recall(uu___: ()) -> () { () }
 pub fn init(uu___: ()) -> ()
 if crate::evercrypt::targetconfig::hacl_can_compile_vale
 {
-    if crate::vale::stdcalls::x64::cpuid::check_aesni(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_aesni(()) != 0u64
     {
         (&mut cpu_has_aesni)[0usize] = truebool;
         (&mut cpu_has_pclmulqdq)[0usize] = truebool
     };
-    if crate::vale::stdcalls::x64::cpuid::check_sha(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_sha(()) != 0u64
     { (&mut cpu_has_shaext)[0usize] = truebool };
-    if crate::vale::stdcalls::x64::cpuid::check_adx_bmi2(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_adx_bmi2(()) != 0u64
     {
         (&mut cpu_has_bmi2)[0usize] = truebool;
         (&mut cpu_has_adx)[0usize] = truebool
     };
-    if crate::vale::stdcalls::x64::cpuid::check_avx(()) != 0u64
-    if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
-    if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_avx(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_osxsave(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0(()) != 0u64
     { (&mut cpu_has_avx)[0usize] = truebool };
-    if crate::vale::stdcalls::x64::cpuid::check_avx2(()) != 0u64
-    if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
-    if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_avx2(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_osxsave(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0(()) != 0u64
     { (&mut cpu_has_avx2)[0usize] = truebool };
-    if crate::vale::stdcalls::x64::cpuid::check_sse(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_sse(()) != 0u64
     { (&mut cpu_has_sse)[0usize] = truebool };
-    if crate::vale::stdcalls::x64::cpuid::check_movbe(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_movbe(()) != 0u64
     { (&mut cpu_has_movbe)[0usize] = truebool };
-    if crate::vale::stdcalls::x64::cpuid::check_rdrand(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_rdrand(()) != 0u64
     { (&mut cpu_has_rdrand)[0usize] = truebool };
-    if crate::vale::stdcalls::x64::cpuid::check_avx512(()) != 0u64
-    if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
-    if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
-    if crate::vale::stdcalls::x64::cpuid::check_avx512_xcr0(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_avx512(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_osxsave(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0(()) != 0u64
+    if crate::vale::stdcalls_x64_cpuid::check_avx512_xcr0(()) != 0u64
     { (&mut cpu_has_avx512)[0usize] = truebool }
 }
 

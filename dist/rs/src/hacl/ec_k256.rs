@@ -30,7 +30,7 @@ pub fn felem_store(a: &mut [u64], out: &mut [u8]) -> ()
 }
 
 pub fn mk_point_at_inf(p: &mut [u64]) -> ()
-{ crate::hacl::impl::k256::point::make_point_at_inf(p) }
+{ crate::hacl::impl_k256_point::make_point_at_inf(p) }
 
 pub fn point_negate(p: &mut [u64], out: &mut [u64]) -> ()
 { crate::hacl::k256_ecdsa::point_negate(out, p) }
@@ -54,7 +54,7 @@ pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
         let x: u64 = u;
         os.1[i as usize] = x
     };
-    crate::hacl::impl::k256::pointmul::point_mul(out, &mut scalar_q, p)
+    crate::hacl::impl_k256_pointmul::point_mul(out, &mut scalar_q, p)
 }
 
 pub fn point_store(p: &mut [u64], out: &mut [u8]) -> ()
