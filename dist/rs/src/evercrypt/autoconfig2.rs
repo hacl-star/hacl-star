@@ -47,37 +47,37 @@ pub fn recall(uu___: ()) -> () { () }
 pub fn init(uu___: ()) -> ()
 if crate::evercrypt::targetconfig::hacl_can_compile_vale
 {
-  if crate::vale::stdcalls::x64::cpuid::check_aesni(()) != 0u64
-  {
-    (&mut cpu_has_aesni)[0u32 as usize] = truebool;
-    (&mut cpu_has_pclmulqdq)[0u32 as usize] = truebool
-  };
-  if crate::vale::stdcalls::x64::cpuid::check_sha(()) != 0u64
-  { (&mut cpu_has_shaext)[0u32 as usize] = truebool };
-  if crate::vale::stdcalls::x64::cpuid::check_adx_bmi2(()) != 0u64
-  {
-    (&mut cpu_has_bmi2)[0u32 as usize] = truebool;
-    (&mut cpu_has_adx)[0u32 as usize] = truebool
-  };
-  if crate::vale::stdcalls::x64::cpuid::check_avx(()) != 0u64
-  if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
-  if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
-  { (&mut cpu_has_avx)[0u32 as usize] = truebool };
-  if crate::vale::stdcalls::x64::cpuid::check_avx2(()) != 0u64
-  if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
-  if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
-  { (&mut cpu_has_avx2)[0u32 as usize] = truebool };
-  if crate::vale::stdcalls::x64::cpuid::check_sse(()) != 0u64
-  { (&mut cpu_has_sse)[0u32 as usize] = truebool };
-  if crate::vale::stdcalls::x64::cpuid::check_movbe(()) != 0u64
-  { (&mut cpu_has_movbe)[0u32 as usize] = truebool };
-  if crate::vale::stdcalls::x64::cpuid::check_rdrand(()) != 0u64
-  { (&mut cpu_has_rdrand)[0u32 as usize] = truebool };
-  if crate::vale::stdcalls::x64::cpuid::check_avx512(()) != 0u64
-  if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
-  if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
-  if crate::vale::stdcalls::x64::cpuid::check_avx512_xcr0(()) != 0u64
-  { (&mut cpu_has_avx512)[0u32 as usize] = truebool }
+    if crate::vale::stdcalls::x64::cpuid::check_aesni(()) != 0u64
+    {
+        (&mut cpu_has_aesni)[0u32 as usize] = truebool;
+        (&mut cpu_has_pclmulqdq)[0u32 as usize] = truebool
+    };
+    if crate::vale::stdcalls::x64::cpuid::check_sha(()) != 0u64
+    { (&mut cpu_has_shaext)[0u32 as usize] = truebool };
+    if crate::vale::stdcalls::x64::cpuid::check_adx_bmi2(()) != 0u64
+    {
+        (&mut cpu_has_bmi2)[0u32 as usize] = truebool;
+        (&mut cpu_has_adx)[0u32 as usize] = truebool
+    };
+    if crate::vale::stdcalls::x64::cpuid::check_avx(()) != 0u64
+    if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
+    if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
+    { (&mut cpu_has_avx)[0u32 as usize] = truebool };
+    if crate::vale::stdcalls::x64::cpuid::check_avx2(()) != 0u64
+    if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
+    if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
+    { (&mut cpu_has_avx2)[0u32 as usize] = truebool };
+    if crate::vale::stdcalls::x64::cpuid::check_sse(()) != 0u64
+    { (&mut cpu_has_sse)[0u32 as usize] = truebool };
+    if crate::vale::stdcalls::x64::cpuid::check_movbe(()) != 0u64
+    { (&mut cpu_has_movbe)[0u32 as usize] = truebool };
+    if crate::vale::stdcalls::x64::cpuid::check_rdrand(()) != 0u64
+    { (&mut cpu_has_rdrand)[0u32 as usize] = truebool };
+    if crate::vale::stdcalls::x64::cpuid::check_avx512(()) != 0u64
+    if crate::vale::stdcalls::x64::cpuid::check_osxsave(()) != 0u64
+    if crate::vale::stdcalls::x64::cpuid::check_avx_xcr0(()) != 0u64
+    if crate::vale::stdcalls::x64::cpuid::check_avx512_xcr0(()) != 0u64
+    { (&mut cpu_has_avx512)[0u32 as usize] = truebool }
 }
 
 pub fn disable_avx2(uu___: ()) -> () { (&mut cpu_has_avx2)[0u32 as usize] = falsebool }
@@ -105,14 +105,14 @@ pub fn disable_avx512(uu___: ()) -> () { (&mut cpu_has_avx512)[0u32 as usize] = 
 
 pub fn has_vec128(uu___: ()) -> bool
 {
-  let avx: bool = has_avx(());
-  let other: bool = crate::evercrypt::targetconfig::has_vec128_not_avx(());
-  avx || other
+    let avx: bool = has_avx(());
+    let other: bool = crate::evercrypt::targetconfig::has_vec128_not_avx(());
+    avx || other
 }
 
 pub fn has_vec256(uu___: ()) -> bool
 {
-  let avx2: bool = has_avx2(());
-  let other: bool = crate::evercrypt::targetconfig::has_vec256_not_avx2(());
-  avx2 || other
+    let avx2: bool = has_avx2(());
+    let other: bool = crate::evercrypt::targetconfig::has_vec256_not_avx2(());
+    avx2 || other
 }

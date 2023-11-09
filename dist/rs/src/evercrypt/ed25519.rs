@@ -5,17 +5,17 @@ pub fn expand_keys(expanded_keys: &mut [u8], private_key: &mut [u8]) -> ()
 { crate::hacl::ed25519::expand_keys(expanded_keys, private_key) }
 
 pub fn sign_expanded(
-  signature: &mut [u8],
-  expanded_keys: &mut [u8],
-  msg_len: u32,
-  msg: &mut [u8]
+    signature: &mut [u8],
+    expanded_keys: &mut [u8],
+    msg_len: u32,
+    msg: &mut [u8]
 ) ->
-  ()
+    ()
 { crate::hacl::ed25519::sign_expanded(signature, expanded_keys, msg_len, msg) }
 
 pub fn sign(signature: &mut [u8], private_key: &mut [u8], msg_len: u32, msg: &mut [u8]) -> ()
 { crate::hacl::ed25519::sign(signature, private_key, msg_len, msg) }
 
 pub fn verify(public_key: &mut [u8], msg_len: u32, msg: &mut [u8], signature: &mut [u8]) ->
-  bool
+    bool
 { crate::hacl::ed25519::verify(public_key, msg_len, msg, signature) }
