@@ -1269,3 +1269,19 @@ val create16: #a:Type0 -> st:lbuffer a 16ul
   (requires fun h -> live h st)
   (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
     as_seq h1 st == Seq.create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
+
+
+inline_for_extraction
+val create32: #a:Type0 -> st:lbuffer a 32ul
+  -> v0:a -> v1:a -> v2:a -> v3:a
+  -> v4:a -> v5:a -> v6:a -> v7:a
+  -> v8:a -> v9:a -> v10:a -> v11:a
+  -> v12:a -> v13:a -> v14:a -> v15:a
+  -> v16:a -> v17:a -> v18:a -> v19:a
+  -> v20:a -> v21:a -> v22:a -> v23:a
+  -> v24:a -> v25:a -> v26:a -> v27:a
+  -> v28:a -> v29:a -> v30:a -> v31:a ->
+  Stack unit
+  (requires fun h -> live h st)
+  (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+    as_seq h1 st == Seq.create32 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31)

@@ -610,7 +610,7 @@ let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
       FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize))
   else ()
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let create8 #a st v0 v1 v2 v3 v4 v5 v6 v7 =
   let h0 = ST.get () in
@@ -645,3 +645,43 @@ let create16 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
   st.(15ul) <- v15;
   let h1 = ST.get () in
   assert (Seq.equal (as_seq h1 st) (Seq.create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15))
+
+#set-options "--z3rlimit 400 --fuel 0 --ifuel 0"
+
+let create32 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 =
+  let h0 = ST.get () in
+  st.(0ul) <- v0;
+  st.(1ul) <- v1;
+  st.(2ul) <- v2;
+  st.(3ul) <- v3;
+  st.(4ul) <- v4;
+  st.(5ul) <- v5;
+  st.(6ul) <- v6;
+  st.(7ul) <- v7;
+  st.(8ul) <- v8;
+  st.(9ul) <- v9;
+  st.(10ul) <- v10;
+  st.(11ul) <- v11;
+  st.(12ul) <- v12;
+  st.(13ul) <- v13;
+  st.(14ul) <- v14;
+  st.(15ul) <- v15;
+  st.(16ul) <- v16;
+  st.(17ul) <- v17;
+  st.(18ul) <- v18;
+  st.(19ul) <- v19;
+  st.(20ul) <- v20;
+  st.(21ul) <- v21;
+  st.(22ul) <- v22;
+  st.(23ul) <- v23;
+  st.(24ul) <- v24;
+  st.(25ul) <- v25;
+  st.(26ul) <- v26;
+  st.(27ul) <- v27;
+  st.(28ul) <- v28;
+  st.(29ul) <- v29;
+  st.(30ul) <- v30;
+  st.(31ul) <- v31;
+  let h1 = ST.get () in
+  assert (Seq.equal (as_seq h1 st) (Seq.create32 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31));
+  admit()
