@@ -6,6 +6,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 module PS = Lib.PrintSequence
+module S = Spec.Blake2
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -797,62 +798,105 @@ let test16_expected : lbytes 64 =
   assert_norm (FStar.List.length l = 64);
   of_list l
 
+(* Parameters are not present in the Blake2 RFC, instead, they are specified in the Blake2 paper.
+   Hence, there are no official test vectors corresponding to them. The tests below aim to
+   cover the different possible parameters, and the results were generated using the Blake2
+   implementation in Python 3's hashlib *)
+
+let test17_params : S.blake2s_params =
+  { S.blake2s_default_params with fanout = u8 5; node_depth = u8 3 }
+
+let test17_expected : lbytes 32 =
+  let l = List.Tot.map u8_from_UInt8 [
+    0xA7uy; 0x4Euy; 0xDBuy; 0x2Duy; 0x8Fuy; 0xBBuy; 0x84uy; 0xFBuy;
+    0x83uy; 0xEDuy; 0x64uy; 0x06uy; 0x82uy; 0x28uy; 0x7Cuy; 0x92uy;
+    0x6Auy; 0xF5uy; 0xC3uy; 0x04uy; 0x09uy; 0xD1uy; 0xA8uy; 0xD4uy;
+    0x66uy; 0x2Duy; 0x4Fuy; 0x34uy; 0xEBuy; 0xC4uy; 0xA0uy; 0x7Fuy
+  ] in
+  assert_norm (List.Tot.length l = 32);
+  of_list l
+
+let test18_params : S.blake2s_params =
+  { S.blake2s_default_params with leaf_length = u32 43; depth = u8 4; inner_length = u8 9 }
+
+let test18_expected : lbytes 32 =
+  let l = List.Tot.map u8_from_UInt8 [
+    0x68uy; 0x1Auy; 0xDCuy; 0x05uy; 0x69uy; 0xD8uy; 0xE9uy; 0x1Buy;
+    0x36uy; 0xDFuy; 0x5Fuy; 0x1Duy; 0x85uy; 0x64uy; 0x42uy; 0x2Fuy;
+    0x4Duy; 0x79uy; 0xD7uy; 0x31uy; 0xCBuy; 0x7Duy; 0xBCuy; 0xB7uy;
+    0xC8uy; 0xEBuy; 0xB4uy; 0x80uy; 0xA6uy; 0xCEuy; 0x3Buy; 0x91uy
+  ] in
+  assert_norm (List.Tot.length l = 32);
+  of_list l
+
+let test19_params : S.blake2s_params =
+  let s = create 8 (u8_from_UInt8 0x11uy) in
+  { S.blake2s_default_params with salt = s; personal = s }
+
+let test19_expected : lbytes 32 =
+  let l = List.Tot.map u8_from_UInt8 [
+    0xD3uy; 0x93uy; 0xA6uy; 0xDEuy; 0xB6uy; 0xE3uy; 0x98uy; 0xB3uy;
+    0x46uy; 0x11uy; 0xF0uy; 0x82uy; 0xCBuy; 0x2Fuy; 0xC0uy; 0x2Buy;
+    0x5Cuy; 0xE1uy; 0x3Buy; 0xF7uy; 0x0Cuy; 0x64uy; 0x70uy; 0xD2uy;
+    0x64uy; 0x1Fuy; 0x3Auy; 0xD1uy; 0x48uy; 0x93uy; 0xF5uy; 0x8Buy
+  ] in
+  assert_norm (List.Tot.length l = 32);
+  of_list l
 
 let emp_key : lbytes 0 =
   let l = List.Tot.map u8_from_UInt8 [] in
   assert_norm (List.Tot.length l == 0);
   of_list l
 
-
-type blake2_alg =
-  | BLAKE2B
-  | BLAKE2S
-
-let blake2_length (a:blake2_alg) =
-  allow_inversion blake2_alg;
+let blake2_length (a:S.alg) =
+  allow_inversion S.alg;
   match a with
-  | BLAKE2B -> 64
-  | BLAKE2S -> 32
+  | S.Blake2B -> 64
+  | S.Blake2S -> 32
 
 noeq type vec =
   | Vec :
-    a:blake2_alg
+    a:S.alg
     -> num:nat
+    -> params: S.blake2_params a
     -> plain:bytes{length plain <= max_size_t}
     -> key:bytes{length key <= blake2_length a}
     -> hash:bytes{length hash = blake2_length a} -> vec
 
 let test_vectors : list vec = [
-  Vec BLAKE2S 1 test1_plaintext emp_key test1_expected;
-  Vec BLAKE2S 2 test2_plaintext test2_key test2_expected;
-  Vec BLAKE2S 3 test3_plaintext test3_key test3_expected;
-  Vec BLAKE2S 4 test4_plaintext test4_key test4_expected;
-  Vec BLAKE2S 7 test7_plaintext test7_key test7_expected;
-  Vec BLAKE2S 8 test8_plaintext test8_key test8_expected;
-  Vec BLAKE2S 9 test9_plaintext test9_key test9_expected;
-  Vec BLAKE2S 10 test10_plaintext test10_key test10_expected;
-  Vec BLAKE2S 11 test11_plaintext test11_key test11_expected;
+  Vec S.Blake2S 1 S.blake2s_default_params test1_plaintext emp_key test1_expected;
+  Vec S.Blake2S 2 S.blake2s_default_params test2_plaintext test2_key test2_expected;
+  Vec S.Blake2S 3 S.blake2s_default_params test3_plaintext test3_key test3_expected;
+  Vec S.Blake2S 4 S.blake2s_default_params test4_plaintext test4_key test4_expected;
+  Vec S.Blake2S 7 S.blake2s_default_params test7_plaintext test7_key test7_expected;
+  Vec S.Blake2S 8 S.blake2s_default_params test8_plaintext test8_key test8_expected;
+  Vec S.Blake2S 9 S.blake2s_default_params test9_plaintext test9_key test9_expected;
+  Vec S.Blake2S 10 S.blake2s_default_params test10_plaintext test10_key test10_expected;
+  Vec S.Blake2S 11 S.blake2s_default_params test11_plaintext test11_key test11_expected;
+  Vec S.Blake2S 17 test17_params test1_plaintext emp_key test17_expected;
+  Vec S.Blake2S 18 test18_params test2_plaintext test2_key test18_expected;
+  Vec S.Blake2S 19 test19_params test2_plaintext emp_key test19_expected;
 
-  Vec BLAKE2B 0 test0_plaintext test0_key test0_expected;
-  Vec BLAKE2B 5 test5_plaintext emp_key test5_expected;
-  Vec BLAKE2B 6 test6_plaintext test6_key test6_expected;
-  Vec BLAKE2B 12 test12_plaintext test12_key test12_expected;
-  Vec BLAKE2B 13 test13_plaintext test13_key test13_expected;
-  Vec BLAKE2B 14 test14_plaintext test14_key test14_expected;
-  Vec BLAKE2B 15 test15_plaintext test15_key test15_expected;
-  Vec BLAKE2B 16 test16_plaintext test16_key test16_expected
+  Vec S.Blake2B 0 S.blake2b_default_params test0_plaintext test0_key test0_expected;
+  Vec S.Blake2B 5 S.blake2b_default_params test5_plaintext emp_key test5_expected;
+  Vec S.Blake2B 6 S.blake2b_default_params test6_plaintext test6_key test6_expected;
+  Vec S.Blake2B 12 S.blake2b_default_params test12_plaintext test12_key test12_expected;
+  Vec S.Blake2B 13 S.blake2b_default_params test13_plaintext test13_key test13_expected;
+  Vec S.Blake2B 14 S.blake2b_default_params test14_plaintext test14_key test14_expected;
+  Vec S.Blake2B 15 S.blake2b_default_params test15_plaintext test15_key test15_expected;
+  Vec S.Blake2B 16 S.blake2b_default_params test16_plaintext test16_key test16_expected;
 ]
 
 
 #set-options "--ifuel 2"
 
 let test_one (v:vec) =
-  let Vec a num plain key tag = v in
+  let Vec a num params plain key tag = v in
   let expected = tag in
   let computed =
     match a with
-    | BLAKE2S -> Spec.Blake2.blake2s plain Spec.Blake2.blake2s_default_params (Seq.length key) key 32
-    | BLAKE2B -> Spec.Blake2.blake2b plain Spec.Blake2.blake2b_default_params (Seq.length key) key 64 in
+    | S.Blake2S -> S.blake2s plain params (Seq.length key) key 32
+    | S.Blake2B -> S.blake2b plain params (Seq.length key) key 64 in
 
   IO.print_string ("\n\nTEST Blake2 "^(string_of_int num)^":");
   PS.print_compare true (length expected) expected computed
