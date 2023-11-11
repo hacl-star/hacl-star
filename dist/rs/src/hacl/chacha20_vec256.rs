@@ -1,4 +1,4 @@
-fn double_round_256(st: &mut [crate::lib::intvector_intrinsics::vec256]) -> ()
+#[inline] fn double_round_256(st: &mut [crate::lib::intvector_intrinsics::vec256]) -> ()
 {
     st[0usize] = crate::lib::intvector_intrinsics::vec256_add32(st[0usize], st[4usize]);
     let std: crate::lib::intvector_intrinsics::vec256 =
@@ -130,7 +130,7 @@ fn double_round_256(st: &mut [crate::lib::intvector_intrinsics::vec256]) -> ()
     st[4usize] = crate::lib::intvector_intrinsics::vec256_rotate_left32(std30, 7u32)
 }
 
-fn chacha20_core_256(
+#[inline] fn chacha20_core_256(
     k: &mut [crate::lib::intvector_intrinsics::vec256],
     ctx: &mut [crate::lib::intvector_intrinsics::vec256],
     ctr: u32
@@ -167,7 +167,7 @@ fn chacha20_core_256(
     k[12usize] = crate::lib::intvector_intrinsics::vec256_add32(k[12usize], cv)
 }
 
-fn chacha20_init_256(
+#[inline] fn chacha20_init_256(
     ctx: &mut [crate::lib::intvector_intrinsics::vec256],
     k: &mut [u8],
     n: &mut [u8],

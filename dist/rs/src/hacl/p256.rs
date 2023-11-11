@@ -1,4 +1,4 @@
-fn bn_is_zero_mask4(f: &mut [u64]) -> u64
+#[inline] fn bn_is_zero_mask4(f: &mut [u64]) -> u64
 {
     let mut bn_zero: [u64; 4] = [0u64; 4usize];
     let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
@@ -12,13 +12,13 @@ fn bn_is_zero_mask4(f: &mut [u64]) -> u64
     res
 }
 
-fn bn_is_zero_vartime4(f: &mut [u64]) -> bool
+#[inline] fn bn_is_zero_vartime4(f: &mut [u64]) -> bool
 {
     let m: u64 = bn_is_zero_mask4(f);
     m == 0xFFFFFFFFFFFFFFFFu64
 }
 
-fn bn_is_eq_mask4(a: &mut [u64], b: &mut [u64]) -> u64
+#[inline] fn bn_is_eq_mask4(a: &mut [u64], b: &mut [u64]) -> u64
 {
     let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
     for i in 0u32..4u32
@@ -30,13 +30,13 @@ fn bn_is_eq_mask4(a: &mut [u64], b: &mut [u64]) -> u64
     mask1
 }
 
-fn bn_is_eq_vartime4(a: &mut [u64], b: &mut [u64]) -> bool
+#[inline] fn bn_is_eq_vartime4(a: &mut [u64], b: &mut [u64]) -> bool
 {
     let m: u64 = bn_is_eq_mask4(a, b);
     m == 0xFFFFFFFFFFFFFFFFu64
 }
 
-fn bn_cmovznz4(res: &mut [u64], cin: u64, x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn bn_cmovznz4(res: &mut [u64], cin: u64, x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mask: u64 = ! crate::fstar::uint64::eq_mask(cin, 0u64);
     for i in 0u32..4u32
@@ -48,7 +48,7 @@ fn bn_cmovznz4(res: &mut [u64], cin: u64, x: &mut [u64], y: &mut [u64]) -> ()
     }
 }
 
-fn bn_add_mod4(res: &mut [u64], n: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn bn_add_mod4(res: &mut [u64], n: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mut c: u64 = 0u64;
     for i in 0u32..1u32
@@ -119,7 +119,7 @@ fn bn_add_mod4(res: &mut [u64], n: &mut [u64], x: &mut [u64], y: &mut [u64]) -> 
     }
 }
 
-fn bn_sub4(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> u64
+#[inline] fn bn_sub4(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> u64
 {
     let mut c: u64 = 0u64;
     for i in 0u32..1u32
@@ -153,7 +153,7 @@ fn bn_sub4(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> u64
     c0
 }
 
-fn bn_from_bytes_be4(res: &mut [u64], b: &mut [u8]) -> ()
+#[inline] fn bn_from_bytes_be4(res: &mut [u64], b: &mut [u8]) -> ()
 {
     for i in 0u32..4u32
     {
@@ -167,13 +167,13 @@ fn bn_from_bytes_be4(res: &mut [u64], b: &mut [u8]) -> ()
     }
 }
 
-fn bn2_to_bytes_be4(res: &mut [u8], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn bn2_to_bytes_be4(res: &mut [u8], x: &mut [u64], y: &mut [u64]) -> ()
 {
     crate::hacl::impl_p256_bignum::bn_to_bytes_be4(&mut res[0usize..], x);
     crate::hacl::impl_p256_bignum::bn_to_bytes_be4(&mut res[32usize..], y)
 }
 
-fn make_prime(n: &mut [u64]) -> ()
+#[inline] fn make_prime(n: &mut [u64]) -> ()
 {
     n[0usize] = 0xffffffffffffffffu64;
     n[1usize] = 0xffffffffu64;
@@ -181,7 +181,7 @@ fn make_prime(n: &mut [u64]) -> ()
     n[3usize] = 0xffffffff00000001u64
 }
 
-fn make_order(n: &mut [u64]) -> ()
+#[inline] fn make_order(n: &mut [u64]) -> ()
 {
     n[0usize] = 0xf3b9cac2fc632551u64;
     n[1usize] = 0xbce6faada7179e84u64;
@@ -189,7 +189,7 @@ fn make_order(n: &mut [u64]) -> ()
     n[3usize] = 0xffffffff00000000u64
 }
 
-fn make_a_coeff(a: &mut [u64]) -> ()
+#[inline] fn make_a_coeff(a: &mut [u64]) -> ()
 {
     a[0usize] = 0xfffffffffffffffcu64;
     a[1usize] = 0x3ffffffffu64;
@@ -197,7 +197,7 @@ fn make_a_coeff(a: &mut [u64]) -> ()
     a[3usize] = 0xfffffffc00000004u64
 }
 
-fn make_b_coeff(b: &mut [u64]) -> ()
+#[inline] fn make_b_coeff(b: &mut [u64]) -> ()
 {
     b[0usize] = 0xd89cdf6229c4bddfu64;
     b[1usize] = 0xacf005cd78843090u64;
@@ -205,7 +205,7 @@ fn make_b_coeff(b: &mut [u64]) -> ()
     b[3usize] = 0xdc30061d04874834u64
 }
 
-fn make_g_x(n: &mut [u64]) -> ()
+#[inline] fn make_g_x(n: &mut [u64]) -> ()
 {
     n[0usize] = 0x79e730d418a9143cu64;
     n[1usize] = 0x75ba95fc5fedb601u64;
@@ -213,7 +213,7 @@ fn make_g_x(n: &mut [u64]) -> ()
     n[3usize] = 0x18905f76a53755c6u64
 }
 
-fn make_g_y(n: &mut [u64]) -> ()
+#[inline] fn make_g_y(n: &mut [u64]) -> ()
 {
     n[0usize] = 0xddf25357ce95560au64;
     n[1usize] = 0x8b4ab8e4ba19e45cu64;
@@ -221,7 +221,7 @@ fn make_g_y(n: &mut [u64]) -> ()
     n[3usize] = 0x8571ff1825885d85u64
 }
 
-fn make_fmont_R2(n: &mut [u64]) -> ()
+#[inline] fn make_fmont_R2(n: &mut [u64]) -> ()
 {
     n[0usize] = 0x3u64;
     n[1usize] = 0xfffffffbffffffffu64;
@@ -229,7 +229,7 @@ fn make_fmont_R2(n: &mut [u64]) -> ()
     n[3usize] = 0x4fffffffdu64
 }
 
-fn make_fzero(n: &mut [u64]) -> ()
+#[inline] fn make_fzero(n: &mut [u64]) -> ()
 {
     n[0usize] = 0u64;
     n[1usize] = 0u64;
@@ -237,7 +237,7 @@ fn make_fzero(n: &mut [u64]) -> ()
     n[3usize] = 0u64
 }
 
-fn make_fone(n: &mut [u64]) -> ()
+#[inline] fn make_fone(n: &mut [u64]) -> ()
 {
     n[0usize] = 0x1u64;
     n[1usize] = 0xffffffff00000000u64;
@@ -245,7 +245,7 @@ fn make_fone(n: &mut [u64]) -> ()
     n[3usize] = 0xfffffffeu64
 }
 
-fn bn_is_lt_prime_mask4(f: &mut [u64]) -> u64
+#[inline] fn bn_is_lt_prime_mask4(f: &mut [u64]) -> u64
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     make_prime(&mut tmp);
@@ -253,33 +253,33 @@ fn bn_is_lt_prime_mask4(f: &mut [u64]) -> u64
     0u64.wrapping_sub(c)
 }
 
-fn feq_mask(a: &mut [u64], b: &mut [u64]) -> u64
+#[inline] fn feq_mask(a: &mut [u64], b: &mut [u64]) -> u64
 {
     let r: u64 = bn_is_eq_mask4(a, b);
     r
 }
 
-fn fadd(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn fadd(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     make_prime(&mut n);
     bn_add_mod4(res, &mut n, x, y)
 }
 
-fn fsub(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn fsub(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     make_prime(&mut n);
     crate::hacl::impl_p256_bignum::bn_sub_mod4(res, &mut n, x, y)
 }
 
-fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
+#[inline] fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
 {
     let mut zero: [u64; 4] = [0u64; 4usize];
     if is_negate { fsub(f, &mut zero, f) }
 }
 
-fn mont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn mont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     make_prime(&mut n);
@@ -360,48 +360,48 @@ fn mont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
     }
 }
 
-fn fmul(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn fmul(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl_p256_bignum::bn_mul4(&mut tmp, x, y);
     mont_reduction(res, &mut tmp)
 }
 
-fn fsqr(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn fsqr(res: &mut [u64], x: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl_p256_bignum::bn_sqr4(&mut tmp, x);
     mont_reduction(res, &mut tmp)
 }
 
-fn from_mont(res: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn from_mont(res: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     ((&mut tmp)[0usize..0usize + 4usize]).copy_from_slice(&a[0usize..0usize + 4usize]);
     mont_reduction(res, &mut tmp)
 }
 
-fn to_mont(res: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn to_mont(res: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut r2modn: [u64; 4] = [0u64; 4usize];
     make_fmont_R2(&mut r2modn);
     fmul(res, a, &mut r2modn)
 }
 
-fn fmul_by_b_coeff(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn fmul_by_b_coeff(res: &mut [u64], x: &mut [u64]) -> ()
 {
     let mut b_coeff: [u64; 4] = [0u64; 4usize];
     make_b_coeff(&mut b_coeff);
     fmul(res, &mut b_coeff, x)
 }
 
-fn fcube(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn fcube(res: &mut [u64], x: &mut [u64]) -> ()
 {
     fsqr(res, x);
     fmul(res, res, x)
 }
 
-fn finv(res: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn finv(res: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 16] = [0u64; 16usize];
     let x30: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -443,7 +443,7 @@ fn finv(res: &mut [u64], a: &mut [u64]) -> ()
     (res[0usize..0usize + 4usize]).copy_from_slice(&tmp2.0[0usize..0usize + 4usize])
 }
 
-fn fsqrt(res: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn fsqrt(res: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     let tmp1: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -472,7 +472,7 @@ fn fsqrt(res: &mut [u64], a: &mut [u64]) -> ()
     (res[0usize..0usize + 4usize]).copy_from_slice(&tmp2.1[0usize..0usize + 4usize])
 }
 
-fn make_base_point(p: &mut [u64]) -> ()
+#[inline] fn make_base_point(p: &mut [u64]) -> ()
 {
     let x: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let y: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
@@ -482,7 +482,7 @@ fn make_base_point(p: &mut [u64]) -> ()
     make_fone(z.1)
 }
 
-fn make_point_at_inf(p: &mut [u64]) -> ()
+#[inline] fn make_point_at_inf(p: &mut [u64]) -> ()
 {
     let x: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let y: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
@@ -492,13 +492,13 @@ fn make_point_at_inf(p: &mut [u64]) -> ()
     make_fzero(z.1)
 }
 
-fn is_point_at_inf_vartime(p: &mut [u64]) -> bool
+#[inline] fn is_point_at_inf_vartime(p: &mut [u64]) -> bool
 {
     let pz: (&mut [u64], &mut [u64]) = p.split_at_mut(8usize);
     bn_is_zero_vartime4(pz.1)
 }
 
-fn to_aff_point(res: &mut [u64], p: &mut [u64]) -> ()
+#[inline] fn to_aff_point(res: &mut [u64], p: &mut [u64]) -> ()
 {
     let mut zinv: [u64; 4] = [0u64; 4usize];
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
@@ -513,7 +513,7 @@ fn to_aff_point(res: &mut [u64], p: &mut [u64]) -> ()
     from_mont(y.1, y.1)
 }
 
-fn to_aff_point_x(res: &mut [u64], p: &mut [u64]) -> ()
+#[inline] fn to_aff_point_x(res: &mut [u64], p: &mut [u64]) -> ()
 {
     let mut zinv: [u64; 4] = [0u64; 4usize];
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
@@ -523,7 +523,7 @@ fn to_aff_point_x(res: &mut [u64], p: &mut [u64]) -> ()
     from_mont(res, res)
 }
 
-fn to_proj_point(res: &mut [u64], p: &mut [u64]) -> ()
+#[inline] fn to_proj_point(res: &mut [u64], p: &mut [u64]) -> ()
 {
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(4usize);
@@ -535,7 +535,7 @@ fn to_proj_point(res: &mut [u64], p: &mut [u64]) -> ()
     make_fone(rz.1)
 }
 
-fn is_on_curve_vartime(p: &mut [u64]) -> bool
+#[inline] fn is_on_curve_vartime(p: &mut [u64]) -> bool
 {
     let mut rp: [u64; 4] = [0u64; 4usize];
     let mut tx: [u64; 4] = [0u64; 4usize];
@@ -557,21 +557,21 @@ fn is_on_curve_vartime(p: &mut [u64]) -> bool
     r0
 }
 
-fn aff_point_store(res: &mut [u8], p: &mut [u64]) -> ()
+#[inline] fn aff_point_store(res: &mut [u8], p: &mut [u64]) -> ()
 {
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(4usize);
     bn2_to_bytes_be4(res, py.0, py.1)
 }
 
-fn point_store(res: &mut [u8], p: &mut [u64]) -> ()
+#[inline] fn point_store(res: &mut [u8], p: &mut [u64]) -> ()
 {
     let mut aff_p: [u64; 8] = [0u64; 8usize];
     to_aff_point(&mut aff_p, p);
     aff_point_store(res, &mut aff_p)
 }
 
-fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
+#[inline] fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
 {
     let p_x: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
     let p_y: (&mut [u8], &mut [u8]) = p_x.1.split_at_mut(32usize);
@@ -588,7 +588,7 @@ fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
     if ! is_xy_valid { falsebool } else { is_on_curve_vartime(px.0) }
 }
 
-fn load_point_vartime(p: &mut [u64], b: &mut [u8]) -> bool
+#[inline] fn load_point_vartime(p: &mut [u64], b: &mut [u8]) -> bool
 {
     let mut p_aff: [u64; 8] = [0u64; 8usize];
     let res: bool = aff_point_load_vartime(&mut p_aff, b);
@@ -596,7 +596,7 @@ fn load_point_vartime(p: &mut [u64], b: &mut [u8]) -> bool
     res
 }
 
-fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> bool
+#[inline] fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> bool
 {
     let s0: u8 = s[0usize];
     let s01: u8 = s0;
@@ -643,7 +643,7 @@ fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> b
     }
 }
 
-fn point_double(res: &mut [u64], p: &mut [u64]) -> ()
+#[inline] fn point_double(res: &mut [u64], p: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 20] = [0u64; 20usize];
     let x: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
@@ -695,7 +695,7 @@ fn point_double(res: &mut [u64], p: &mut [u64]) -> ()
     fadd(z3.1, z3.1, z3.1)
 }
 
-fn point_add(res: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
+#[inline] fn point_add(res: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 36] = [0u64; 36usize];
     let t0: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -769,7 +769,7 @@ fn point_add(res: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
     (res[0usize..0usize + 12usize]).copy_from_slice(&y3.0[0usize..0usize + 12usize])
 }
 
-fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
+#[inline] fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
 {
     (tmp[0usize..0usize + 12usize]).copy_from_slice(
         &(&mut table[0usize..] as &mut [u64])[0usize..0usize + 12usize]
@@ -790,7 +790,7 @@ fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
     }
 }
 
-fn bn_is_lt_order_mask4(f: &mut [u64]) -> u64
+#[inline] fn bn_is_lt_order_mask4(f: &mut [u64]) -> u64
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     make_order(&mut tmp);
@@ -798,14 +798,14 @@ fn bn_is_lt_order_mask4(f: &mut [u64]) -> u64
     0u64.wrapping_sub(c)
 }
 
-fn bn_is_lt_order_and_gt_zero_mask4(f: &mut [u64]) -> u64
+#[inline] fn bn_is_lt_order_and_gt_zero_mask4(f: &mut [u64]) -> u64
 {
     let is_lt_order: u64 = bn_is_lt_order_mask4(f);
     let is_eq_zero: u64 = bn_is_zero_mask4(f);
     is_lt_order & ! is_eq_zero
 }
 
-fn qmod_short(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn qmod_short(res: &mut [u64], x: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     make_order(&mut tmp);
@@ -813,14 +813,14 @@ fn qmod_short(res: &mut [u64], x: &mut [u64]) -> ()
     bn_cmovznz4(res, c, &mut tmp, x)
 }
 
-fn qadd(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn qadd(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     make_order(&mut n);
     bn_add_mod4(res, &mut n, x, y)
 }
 
-fn qmont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn qmont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     make_order(&mut n);
@@ -901,21 +901,21 @@ fn qmont_reduction(res: &mut [u64], x: &mut [u64]) -> ()
     }
 }
 
-fn from_qmont(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn from_qmont(res: &mut [u64], x: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     ((&mut tmp)[0usize..0usize + 4usize]).copy_from_slice(&x[0usize..0usize + 4usize]);
     qmont_reduction(res, &mut tmp)
 }
 
-fn qmul(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn qmul(res: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl_p256_bignum::bn_mul4(&mut tmp, x, y);
     qmont_reduction(res, &mut tmp)
 }
 
-fn qsqr(res: &mut [u64], x: &mut [u64]) -> ()
+#[inline] fn qsqr(res: &mut [u64], x: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::impl_p256_bignum::bn_sqr4(&mut tmp, x);
@@ -978,7 +978,7 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
     is_sk_valid == 0xFFFFFFFFFFFFFFFFu64 && is_pk_valid
 }
 
-fn qinv(res: &mut [u64], r: &mut [u64]) -> ()
+#[inline] fn qinv(res: &mut [u64], r: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 28] = [0u64; 28usize];
     let x6: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -1072,14 +1072,14 @@ fn qinv(res: &mut [u64], r: &mut [u64]) -> ()
     (res[0usize..0usize + 4usize]).copy_from_slice(&x_11.0[0usize..0usize + 4usize])
 }
 
-fn qmul_mont(sinv: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
+#[inline] fn qmul_mont(sinv: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     from_qmont(&mut tmp, b);
     qmul(res, sinv, &mut tmp)
 }
 
-fn ecdsa_verify_msg_as_qelem(
+#[inline] fn ecdsa_verify_msg_as_qelem(
     m_q: &mut [u64],
     public_key: &mut [u8],
     signature_r: &mut [u8],
@@ -1123,7 +1123,7 @@ fn ecdsa_verify_msg_as_qelem(
     }
 }
 
-fn ecdsa_sign_msg_as_qelem(
+#[inline] fn ecdsa_sign_msg_as_qelem(
     signature: &mut [u8],
     m_q: &mut [u64],
     private_key: &mut [u8],

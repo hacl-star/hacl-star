@@ -1,4 +1,4 @@
-fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
+#[inline] fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::add_scalar(out, f1, f2) }
@@ -10,7 +10,7 @@ fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
     }
 }
 
-fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::fadd(out, f1, f2) }
@@ -18,7 +18,7 @@ fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fadd::fadd_e(out, f1, f2)) }
 }
 
-fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fadd_inline::fsub(out, f1, f2) }
@@ -26,7 +26,7 @@ fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsub::fsub_e(out, f1, f2)) }
 }
 
-fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fmul_inline::fmul(out, f1, f2, &mut tmp[0usize..]) }
@@ -38,7 +38,7 @@ fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
     }
 }
 
-fn fmul2(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fmul2(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fmul_inline::fmul2(out, f1, f2, tmp) }
@@ -50,7 +50,7 @@ fn fmul2(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], tmp: &mut [u64]) -> ()
     }
 }
 
-fn fmul_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
+#[inline] fn fmul_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fmul_inline::fmul_scalar(out, f1, f2) }
@@ -62,7 +62,7 @@ fn fmul_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
     }
 }
 
-fn fsqr(out: &mut [u64], f1: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fsqr(out: &mut [u64], f1: &mut [u64], tmp: &mut [u64]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fsqr_inline::fsqr(out, f1, tmp) }
@@ -70,7 +70,7 @@ fn fsqr(out: &mut [u64], f1: &mut [u64], tmp: &mut [u64]) -> ()
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr_e(tmp, f1, out)) }
 }
 
-fn fsqr2(out: &mut [u64], f: &mut [u64], tmp: &mut [u64]) -> ()
+#[inline] fn fsqr2(out: &mut [u64], f: &mut [u64], tmp: &mut [u64]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fsqr_inline::fsqr2(out, f, tmp) }
@@ -78,7 +78,7 @@ fn fsqr2(out: &mut [u64], f: &mut [u64], tmp: &mut [u64]) -> ()
     { crate::lowstar::ignore::ignore::<u64>(crate::vale::stdcalls_x64_fsqr::fsqr2_e(tmp, f, out)) }
 }
 
-fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()
+#[inline] fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
     { crate::vale::inline_x64_fswap_inline::cswap2(bit, p1, p2) }

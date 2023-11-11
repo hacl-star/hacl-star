@@ -1,4 +1,4 @@
-fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32) -> ()
+#[inline] fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32) -> ()
 {
     let sta: u32 = st[b as usize];
     let stb: u32 = st[a as usize];
@@ -32,7 +32,7 @@ fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32) -> ()
     st[a as usize] = sta12
 }
 
-fn double_round(st: &mut [u32]) -> ()
+#[inline] fn double_round(st: &mut [u32]) -> ()
 {
     quarter_round(st, 0u32, 4u32, 8u32, 12u32);
     quarter_round(st, 5u32, 9u32, 13u32, 1u32);
@@ -44,7 +44,7 @@ fn double_round(st: &mut [u32]) -> ()
     quarter_round(st, 15u32, 12u32, 13u32, 14u32)
 }
 
-fn rounds(st: &mut [u32]) -> ()
+#[inline] fn rounds(st: &mut [u32]) -> ()
 {
     double_round(st);
     double_round(st);
@@ -58,7 +58,7 @@ fn rounds(st: &mut [u32]) -> ()
     double_round(st)
 }
 
-fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
+#[inline] fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
 {
     (k[0usize..0usize + 16usize]).copy_from_slice(&ctx[0usize..0usize + 16usize]);
     let ctr_u32: u32 = ctr;
@@ -73,7 +73,7 @@ fn salsa20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
     k[8usize] = (k[8usize]).wrapping_add(ctr_u32)
 }
 
-fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
+#[inline] fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k: [u32; 16] = [0u32; 16usize];
@@ -120,7 +120,7 @@ fn salsa20_key_block0(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
     }
 }
 
-fn salsa20_encrypt(
+#[inline] fn salsa20_encrypt(
     len: u32,
     out: &mut [u8],
     text: &mut [u8],
@@ -242,7 +242,7 @@ fn salsa20_encrypt(
     }
 }
 
-fn salsa20_decrypt(
+#[inline] fn salsa20_decrypt(
     len: u32,
     out: &mut [u8],
     cipher: &mut [u8],
@@ -364,7 +364,7 @@ fn salsa20_decrypt(
     }
 }
 
-fn hsalsa20(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
+#[inline] fn hsalsa20(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
 {
     let mut ctx: [u32; 16] = [0u32; 16usize];
     let mut k32: [u32; 8] = [0u32; 8usize];

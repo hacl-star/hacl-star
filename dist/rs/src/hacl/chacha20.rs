@@ -1,7 +1,7 @@
 pub const chacha20_constants: [u32; 4] =
     [0x61707865u32, 0x3320646eu32, 0x79622d32u32, 0x6b206574u32];
 
-fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32) -> ()
+#[inline] fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32) -> ()
 {
     let sta: u32 = st[a as usize];
     let stb: u32 = st[b as usize];
@@ -37,7 +37,7 @@ fn quarter_round(st: &mut [u32], a: u32, b: u32, c: u32, d: u32) -> ()
     st[b as usize] = std22
 }
 
-fn double_round(st: &mut [u32]) -> ()
+#[inline] fn double_round(st: &mut [u32]) -> ()
 {
     quarter_round(st, 0u32, 4u32, 8u32, 12u32);
     quarter_round(st, 1u32, 5u32, 9u32, 13u32);
@@ -49,7 +49,7 @@ fn double_round(st: &mut [u32]) -> ()
     quarter_round(st, 3u32, 4u32, 9u32, 14u32)
 }
 
-fn rounds(st: &mut [u32]) -> ()
+#[inline] fn rounds(st: &mut [u32]) -> ()
 {
     double_round(st);
     double_round(st);
@@ -63,7 +63,7 @@ fn rounds(st: &mut [u32]) -> ()
     double_round(st)
 }
 
-fn chacha20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
+#[inline] fn chacha20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
 {
     (k[0usize..0usize + 16usize]).copy_from_slice(&ctx[0usize..0usize + 16usize]);
     let ctr_u32: u32 = ctr;
@@ -139,7 +139,13 @@ fn chacha20_encrypt_block(ctx: &mut [u32], out: &mut [u8], incr: u32, text: &mut
     }
 }
 
-fn chacha20_encrypt_last(ctx: &mut [u32], len: u32, out: &mut [u8], incr: u32, text: &mut [u8]) ->
+#[inline] fn chacha20_encrypt_last(
+    ctx: &mut [u32],
+    len: u32,
+    out: &mut [u8],
+    incr: u32,
+    text: &mut [u8]
+) ->
     ()
 {
     let mut plain: [u8; 64] = [0u8; 64usize];

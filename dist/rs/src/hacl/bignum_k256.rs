@@ -1,4 +1,4 @@
-pub fn is_felem_zero_vartime(f: &mut [u64]) -> bool
+#[inline] pub fn is_felem_zero_vartime(f: &mut [u64]) -> bool
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -8,7 +8,7 @@ pub fn is_felem_zero_vartime(f: &mut [u64]) -> bool
     f0 == 0u64 && f1 == 0u64 && f2 == 0u64 && f3 == 0u64 && f4 == 0u64
 }
 
-pub fn is_felem_eq_vartime(f1: &mut [u64], f2: &mut [u64]) -> bool
+#[inline] pub fn is_felem_eq_vartime(f1: &mut [u64], f2: &mut [u64]) -> bool
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -23,7 +23,7 @@ pub fn is_felem_eq_vartime(f1: &mut [u64], f2: &mut [u64]) -> bool
     a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4
 }
 
-pub fn is_felem_lt_prime_minus_order_vartime(f: &mut [u64]) -> bool
+#[inline] pub fn is_felem_lt_prime_minus_order_vartime(f: &mut [u64]) -> bool
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -48,7 +48,7 @@ pub fn is_felem_lt_prime_minus_order_vartime(f: &mut [u64]) -> bool
     if f1 > 0x1950b75fc4402u64 { falsebool } else { f0 < 0xda1722fc9baeeu64 }
 }
 
-pub fn load_felem(f: &mut [u64], b: &mut [u8]) -> ()
+#[inline] pub fn load_felem(f: &mut [u64], b: &mut [u8]) -> ()
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
@@ -82,7 +82,7 @@ pub fn load_felem(f: &mut [u64], b: &mut [u8]) -> ()
     f[4usize] = f40
 }
 
-pub fn load_felem_lt_prime_vartime(f: &mut [u64], b: &mut [u8]) -> bool
+#[inline] pub fn load_felem_lt_prime_vartime(f: &mut [u64], b: &mut [u8]) -> bool
 {
     load_felem(f, b);
     let f0: u64 = f[0usize];
@@ -99,7 +99,7 @@ pub fn load_felem_lt_prime_vartime(f: &mut [u64], b: &mut [u8]) -> bool
     ! is_ge_p
 }
 
-pub fn store_felem(b: &mut [u8], f: &mut [u64]) -> ()
+#[inline] pub fn store_felem(b: &mut [u8], f: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     let f0: u64 = f[0usize];
@@ -128,7 +128,7 @@ pub fn store_felem(b: &mut [u8], f: &mut [u64]) -> ()
     }
 }
 
-pub fn fmul_small_num(out: &mut [u64], f: &mut [u64], num: u64) -> ()
+#[inline] pub fn fmul_small_num(out: &mut [u64], f: &mut [u64], num: u64) -> ()
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -152,7 +152,7 @@ pub fn fmul_small_num(out: &mut [u64], f: &mut [u64], num: u64) -> ()
     out[4usize] = f40
 }
 
-pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -181,7 +181,7 @@ pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
     out[4usize] = f4
 }
 
-pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], x: u64) -> ()
+#[inline] pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], x: u64) -> ()
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -220,7 +220,7 @@ pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64], x: u64) -> ()
     out[4usize] = f4
 }
 
-pub fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] pub fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     let a0: u64 = f1[0usize];
     let a1: u64 = f1[1usize];
@@ -369,7 +369,7 @@ pub fn fmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
     out[4usize] = f4
 }
 
-pub fn fsqr(out: &mut [u64], f: &mut [u64]) -> ()
+#[inline] pub fn fsqr(out: &mut [u64], f: &mut [u64]) -> ()
 {
     let a0: u64 = f[0usize];
     let a1: u64 = f[1usize];
@@ -485,7 +485,7 @@ pub fn fsqr(out: &mut [u64], f: &mut [u64]) -> ()
     out[4usize] = f4
 }
 
-pub fn fnormalize_weak(out: &mut [u64], f: &mut [u64]) -> ()
+#[inline] pub fn fnormalize_weak(out: &mut [u64], f: &mut [u64]) -> ()
 {
     let t0: u64 = f[0usize];
     let t1: u64 = f[1usize];
@@ -521,7 +521,7 @@ pub fn fnormalize_weak(out: &mut [u64], f: &mut [u64]) -> ()
     out[4usize] = f4
 }
 
-pub fn fnormalize(out: &mut [u64], f: &mut [u64]) -> ()
+#[inline] pub fn fnormalize(out: &mut [u64], f: &mut [u64]) -> ()
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -598,7 +598,7 @@ pub fn fnormalize(out: &mut [u64], f: &mut [u64]) -> ()
     out[4usize] = f40
 }
 
-pub fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
+#[inline] pub fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
 {
     if is_negate
     {
@@ -626,16 +626,16 @@ pub fn fnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
     }
 }
 
-pub fn fsquare_times_in_place(out: &mut [u64], b: u32) -> ()
+#[inline] pub fn fsquare_times_in_place(out: &mut [u64], b: u32) -> ()
 { for i in 0u32..b { fsqr(out, out) } }
 
-pub fn fsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
+#[inline] pub fn fsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
     (out[0usize..0usize + 5usize]).copy_from_slice(&a[0usize..0usize + 5usize]);
     for i in 0u32..b { fsqr(out, out) }
 }
 
-pub fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &mut [u64]) -> ()
+#[inline] pub fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &mut [u64]) -> ()
 {
     let mut x3: [u64; 5] = [0u64; 5usize];
     let mut x22: [u64; 5] = [0u64; 5usize];
@@ -667,7 +667,7 @@ pub fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &mut [u64]) -> ()
     fmul(out, out, &mut x22)
 }
 
-pub fn finv(out: &mut [u64], f: &mut [u64]) -> ()
+#[inline] pub fn finv(out: &mut [u64], f: &mut [u64]) -> ()
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
     fexp_223_23(out, &mut x2, f);
@@ -679,7 +679,7 @@ pub fn finv(out: &mut [u64], f: &mut [u64]) -> ()
     fmul(out, out, f)
 }
 
-pub fn fsqrt(out: &mut [u64], f: &mut [u64]) -> ()
+#[inline] pub fn fsqrt(out: &mut [u64], f: &mut [u64]) -> ()
 {
     let mut x2: [u64; 5] = [0u64; 5usize];
     fexp_223_23(out, &mut x2, f);

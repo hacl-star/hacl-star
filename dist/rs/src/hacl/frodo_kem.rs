@@ -18,7 +18,7 @@ pub fn shake128_4x(
     crate::hacl::hash_sha3::shake128_hacl(input_len, input3, output_len, output3)
 }
 
-pub fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16]) -> ()
+#[inline] pub fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16]) -> ()
 {
     if logq < 16u32
     for i in 0u32..n1
@@ -31,7 +31,7 @@ pub fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16]) -> ()
     }
 }
 
-pub fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
+#[inline] pub fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
 {
     for i in 0u32..n1
     for i0 in 0u32..n2
@@ -43,7 +43,7 @@ pub fn matrix_add(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
     }
 }
 
-pub fn matrix_sub(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
+#[inline] pub fn matrix_sub(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
 {
     for i in 0u32..n1
     for i0 in 0u32..n2
@@ -55,7 +55,15 @@ pub fn matrix_sub(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> ()
     }
 }
 
-pub fn matrix_mul(n1: u32, n2: u32, n3: u32, a: &mut [u16], b: &mut [u16], c: &mut [u16]) -> ()
+#[inline] pub fn matrix_mul(
+    n1: u32,
+    n2: u32,
+    n3: u32,
+    a: &mut [u16],
+    b: &mut [u16],
+    c: &mut [u16]
+) ->
+    ()
 {
     for i in 0u32..n1
     for i0 in 0u32..n3
@@ -72,7 +80,14 @@ pub fn matrix_mul(n1: u32, n2: u32, n3: u32, a: &mut [u16], b: &mut [u16], c: &m
     }
 }
 
-pub fn matrix_mul_s(n1: u32, n2: u32, n3: u32, a: &mut [u16], b: &mut [u16], c: &mut [u16]) ->
+#[inline] pub fn matrix_mul_s(
+    n1: u32,
+    n2: u32,
+    n3: u32,
+    a: &mut [u16],
+    b: &mut [u16],
+    c: &mut [u16]
+) ->
     ()
 {
     for i in 0u32..n1
@@ -90,7 +105,7 @@ pub fn matrix_mul_s(n1: u32, n2: u32, n3: u32, a: &mut [u16], b: &mut [u16], c: 
     }
 }
 
-pub fn matrix_eq(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> u16
+#[inline] pub fn matrix_eq(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> u16
 {
     let mut res: u16 = 0xFFFFu16;
     for i in 0u32..n1.wrapping_mul(n2)
@@ -102,7 +117,7 @@ pub fn matrix_eq(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> u16
     r
 }
 
-pub fn matrix_to_lbytes(n1: u32, n2: u32, m: &mut [u16], res: &mut [u8]) -> ()
+#[inline] pub fn matrix_to_lbytes(n1: u32, n2: u32, m: &mut [u16], res: &mut [u8]) -> ()
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
@@ -113,7 +128,7 @@ pub fn matrix_to_lbytes(n1: u32, n2: u32, m: &mut [u16], res: &mut [u8]) -> ()
     }
 }
 
-pub fn matrix_from_lbytes(n1: u32, n2: u32, b: &mut [u8], res: &mut [u16]) -> ()
+#[inline] pub fn matrix_from_lbytes(n1: u32, n2: u32, b: &mut [u8], res: &mut [u16]) -> ()
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
@@ -160,7 +175,7 @@ pub fn randombytes_(len: u32, res: &mut [u8]) -> ()
     crate::lowstar::ignore::ignore::<bool>(crate::lib::randombuffer_system::randombytes(res, len))
 }
 
-pub fn frodo_pack(n1: u32, n2: u32, d: u32, a: &mut [u16], res: &mut [u8]) -> ()
+#[inline] pub fn frodo_pack(n1: u32, n2: u32, d: u32, a: &mut [u16], res: &mut [u8]) -> ()
 {
     let n: u32 = n1.wrapping_mul(n2).wrapping_div(8u32);
     for i in 0u32..n
@@ -233,7 +248,7 @@ pub fn frodo_pack(n1: u32, n2: u32, d: u32, a: &mut [u16], res: &mut [u8]) -> ()
     }
 }
 
-pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> ()
+#[inline] pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> ()
 {
     let n: u32 = n1.wrapping_mul(n2).wrapping_div(8u32);
     for i in 0u32..n
@@ -316,7 +331,8 @@ pub fn frodo_unpack(n1: u32, n2: u32, d: u32, b: &mut [u8], res: &mut [u16]) -> 
     }
 }
 
-pub fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &mut [u8], res: &mut [u16]) -> ()
+#[inline] pub fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &mut [u8], res: &mut [u16]) ->
+    ()
 {
     for i in 0u32..n
     {
@@ -339,7 +355,8 @@ pub fn frodo_key_encode(logq: u32, b: u32, n: u32, a: &mut [u8], res: &mut [u16]
     }
 }
 
-pub fn frodo_key_decode(logq: u32, b: u32, n: u32, a: &mut [u16], res: &mut [u8]) -> ()
+#[inline] pub fn frodo_key_decode(logq: u32, b: u32, n: u32, a: &mut [u16], res: &mut [u8]) ->
+    ()
 {
     for i in 0u32..n
     {

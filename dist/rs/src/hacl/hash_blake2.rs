@@ -58,7 +58,7 @@ pub fn blake2b_update_multi(
     }
 }
 
-fn blake2b_update(
+#[inline] fn blake2b_update(
     wv: &mut [u64],
     hash: &mut [u64],
     kk: u32,
@@ -147,7 +147,7 @@ pub fn blake2s_update_multi(
     }
 }
 
-fn blake2s_update(
+#[inline] fn blake2s_update(
     wv: &mut [u32],
     hash: &mut [u32],
     kk: u32,

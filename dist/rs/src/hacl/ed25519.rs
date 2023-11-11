@@ -1,7 +1,7 @@
-fn fsum(out: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
+#[inline] fn fsum(out: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
 { crate::hacl::bignum25519_51::fadd(out, a, b) }
 
-fn fdifference(out: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
+#[inline] fn fdifference(out: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
 { crate::hacl::bignum25519_51::fsub(out, a, b) }
 
 pub fn reduce_513(a: &mut [u64]) -> ()
@@ -36,14 +36,14 @@ pub fn reduce_513(a: &mut [u64]) -> ()
     a[4usize] = tmp4
 }
 
-fn fmul(output: &mut [u64], input: &mut [u64], input2: &mut [u64]) -> ()
+#[inline] fn fmul(output: &mut [u64], input: &mut [u64], input2: &mut [u64]) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 10] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 10usize];
     crate::hacl::bignum25519_51::fmul(output, input, input2, &mut tmp)
 }
 
-fn times_2(out: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn times_2(out: &mut [u64], a: &mut [u64]) -> ()
 {
     let a0: u64 = a[0usize];
     let a1: u64 = a[1usize];
@@ -62,7 +62,7 @@ fn times_2(out: &mut [u64], a: &mut [u64]) -> ()
     out[4usize] = o4
 }
 
-fn times_d(out: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn times_d(out: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut d: [u64; 5] = [0u64; 5usize];
     (&mut d)[0usize] = 0x00034dca135978a3u64;
@@ -73,7 +73,7 @@ fn times_d(out: &mut [u64], a: &mut [u64]) -> ()
     fmul(out, &mut d, a)
 }
 
-fn times_2d(out: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn times_2d(out: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut d2: [u64; 5] = [0u64; 5usize];
     (&mut d2)[0usize] = 0x00069b9426b2f159u64;
@@ -84,21 +84,21 @@ fn times_2d(out: &mut [u64], a: &mut [u64]) -> ()
     fmul(out, &mut d2, a)
 }
 
-fn fsquare(out: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn fsquare(out: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 5] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
     crate::hacl::bignum25519_51::fsqr(out, a, &mut tmp)
 }
 
-fn fsquare_times(output: &mut [u64], input: &mut [u64], count: u32) -> ()
+#[inline] fn fsquare_times(output: &mut [u64], input: &mut [u64], count: u32) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 5] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
     crate::hacl::curve25519_51::fsquare_times(output, input, &mut tmp, count)
 }
 
-fn fsquare_times_inplace(output: &mut [u64], count: u32) -> ()
+#[inline] fn fsquare_times_inplace(output: &mut [u64], count: u32) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 5] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
@@ -112,7 +112,7 @@ pub fn inverse(out: &mut [u64], a: &mut [u64]) -> ()
     crate::hacl::curve25519_51::finv(out, a, &mut tmp)
 }
 
-fn reduce(out: &mut [u64]) -> ()
+#[inline] fn reduce(out: &mut [u64]) -> ()
 {
     let o0: u64 = out[0usize];
     let o1: u64 = out[1usize];
@@ -329,7 +329,7 @@ pub fn make_point_inf(b: &mut [u64]) -> ()
     t.1[4usize] = 0u64
 }
 
-fn pow2_252m2(out: &mut [u64], z: &mut [u64]) -> ()
+#[inline] fn pow2_252m2(out: &mut [u64], z: &mut [u64]) -> ()
 {
     let mut buf: [u64; 20] = [0u64; 20usize];
     let a: (&mut [u64], &mut [u64]) = (&mut buf).split_at_mut(0usize);
@@ -365,7 +365,7 @@ fn pow2_252m2(out: &mut [u64], z: &mut [u64]) -> ()
     fmul(out, t00.1, a0.1)
 }
 
-fn is_0(x: &mut [u64]) -> bool
+#[inline] fn is_0(x: &mut [u64]) -> bool
 {
     let x0: u64 = x[0usize];
     let x1: u64 = x[1usize];
@@ -375,7 +375,7 @@ fn is_0(x: &mut [u64]) -> bool
     x0 == 0u64 && x1 == 0u64 && x2 == 0u64 && x3 == 0u64 && x4 == 0u64
 }
 
-fn mul_modp_sqrt_m1(x: &mut [u64]) -> ()
+#[inline] fn mul_modp_sqrt_m1(x: &mut [u64]) -> ()
 {
     let mut sqrt_m1: [u64; 5] = [0u64; 5usize];
     (&mut sqrt_m1)[0usize] = 0x00061b274a0ea0b0u64;
@@ -386,7 +386,7 @@ fn mul_modp_sqrt_m1(x: &mut [u64]) -> ()
     fmul(x, x, &mut sqrt_m1)
 }
 
-fn recover_x(x: &mut [u64], y: &mut [u64], sign: u64) -> bool
+#[inline] fn recover_x(x: &mut [u64], y: &mut [u64], sign: u64) -> bool
 {
     let mut tmp: [u64; 15] = [0u64; 15usize];
     let x2: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
@@ -575,7 +575,7 @@ pub fn point_compress(z: &mut [u8], p: &mut [u64]) -> ()
     z[31usize] = o31.wrapping_add(xbyte.wrapping_shl(7u32))
 }
 
-fn barrett_reduction(z: &mut [u64], t: &mut [u64]) -> ()
+#[inline] fn barrett_reduction(z: &mut [u64], t: &mut [u64]) -> ()
 {
     let t0: u64 = t[0usize];
     let t1: u64 = t[1usize];
@@ -948,7 +948,7 @@ fn barrett_reduction(z: &mut [u64], t: &mut [u64]) -> ()
     z[4usize] = z44
 }
 
-fn mul_modq(out: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn mul_modq(out: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 10] = [0u64; 10usize];
     let x0: u64 = x[0usize];
@@ -1104,7 +1104,7 @@ fn mul_modq(out: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
     barrett_reduction(out, &mut tmp)
 }
 
-fn add_modq(out: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
+#[inline] fn add_modq(out: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
 {
     let x0: u64 = x[0usize];
     let x1: u64 = x[1usize];
@@ -1191,7 +1191,7 @@ fn add_modq(out: &mut [u64], x: &mut [u64], y: &mut [u64]) -> ()
     out[4usize] = z41
 }
 
-fn gte_q(s: &mut [u64]) -> bool
+#[inline] fn gte_q(s: &mut [u64]) -> bool
 {
     let s0: u64 = s[0usize];
     let s1: u64 = s[1usize];
@@ -1222,7 +1222,7 @@ fn gte_q(s: &mut [u64]) -> bool
     if s0 >= 0x12631a5cf5d3edu64 { truebool } else { falsebool }
 }
 
-fn eq(a: &mut [u64], b: &mut [u64]) -> bool
+#[inline] fn eq(a: &mut [u64], b: &mut [u64]) -> bool
 {
     let a0: u64 = a[0usize];
     let a1: u64 = a[1usize];
@@ -1285,7 +1285,7 @@ pub fn point_negate(p: &mut [u64], out: &mut [u64]) -> ()
     reduce_513(t1.1)
 }
 
-fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
+#[inline] fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
 {
     (tmp[0usize..0usize + 20usize]).copy_from_slice(
         &(&mut table[0usize..] as &mut [u64])[0usize..0usize + 20usize]
@@ -1306,7 +1306,7 @@ fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
     }
 }
 
-fn point_negate_mul_double_g_vartime(
+#[inline] fn point_negate_mul_double_g_vartime(
     out: &mut [u64],
     scalar1: &mut [u8],
     scalar2: &mut [u8],
@@ -1324,7 +1324,7 @@ fn point_negate_mul_double_g_vartime(
     )
 }
 
-fn store_56(out: &mut [u8], b: &mut [u64]) -> ()
+#[inline] fn store_56(out: &mut [u8], b: &mut [u64]) -> ()
 {
     let b0: u64 = b[0usize];
     let b1: u64 = b[1usize];
@@ -1343,7 +1343,7 @@ fn store_56(out: &mut [u8], b: &mut [u64]) -> ()
     crate::lowstar::endianness::store32_le(&mut b80.0[28usize..], b4_)
 }
 
-fn load_64_bytes(out: &mut [u64], b: &mut [u8]) -> ()
+#[inline] fn load_64_bytes(out: &mut [u64], b: &mut [u8]) -> ()
 {
     let b8: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
     let u: u64 = crate::lowstar::endianness::load64_le(b8.1);
@@ -1395,7 +1395,7 @@ fn load_64_bytes(out: &mut [u64], b: &mut [u8]) -> ()
     out[9usize] = b9
 }
 
-fn load_32_bytes(out: &mut [u64], b: &mut [u8]) -> ()
+#[inline] fn load_32_bytes(out: &mut [u64], b: &mut [u8]) -> ()
 {
     let b8: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
     let u: u64 = crate::lowstar::endianness::load64_le(b8.1);
@@ -1423,7 +1423,8 @@ fn load_32_bytes(out: &mut [u64], b: &mut [u8]) -> ()
     out[4usize] = b41
 }
 
-fn sha512_modq_pre(out: &mut [u64], prefix: &mut [u8], len: u32, input: &mut [u8]) -> ()
+#[inline] fn sha512_modq_pre(out: &mut [u64], prefix: &mut [u8], len: u32, input: &mut [u8]) ->
+    ()
 {
     let mut tmp: [u64; 10] = [0u64; 10usize];
     let mut hash: [u8; 64] = [0u8; 64usize];
@@ -1432,7 +1433,7 @@ fn sha512_modq_pre(out: &mut [u64], prefix: &mut [u8], len: u32, input: &mut [u8
     barrett_reduction(out, &mut tmp)
 }
 
-fn sha512_modq_pre_pre2(
+#[inline] fn sha512_modq_pre_pre2(
     out: &mut [u64],
     prefix: &mut [u8],
     prefix2: &mut [u8],
@@ -1448,14 +1449,14 @@ fn sha512_modq_pre_pre2(
     barrett_reduction(out, &mut tmp)
 }
 
-fn point_mul_g_compress(out: &mut [u8], s: &mut [u8]) -> ()
+#[inline] fn point_mul_g_compress(out: &mut [u8], s: &mut [u8]) -> ()
 {
     let mut tmp: [u64; 20] = [0u64; 20usize];
     crate::hacl::impl_ed25519_ladder::point_mul_g(&mut tmp, s);
     point_compress(out, &mut tmp)
 }
 
-fn secret_expand(expanded: &mut [u8], secret: &mut [u8]) -> ()
+#[inline] fn secret_expand(expanded: &mut [u8], secret: &mut [u8]) -> ()
 {
     crate::hacl::hash_sha2::hash_512(secret, 32u32, expanded);
     let h_low: (&mut [u8], &mut [u8]) = expanded.split_at_mut(0usize);

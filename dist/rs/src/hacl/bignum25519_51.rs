@@ -1,4 +1,4 @@
-pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     let f10: u64 = f1[0usize];
     let f20: u64 = f2[0usize];
@@ -17,7 +17,7 @@ pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
     out[4usize] = f14.wrapping_add(f24)
 }
 
-pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     let f10: u64 = f1[0usize];
     let f20: u64 = f2[0usize];
@@ -36,7 +36,7 @@ pub fn fsub(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
     out[4usize] = f14.wrapping_add(0x3ffffffffffff8u64).wrapping_sub(f24)
 }
 
-pub fn fmul(
+#[inline] pub fn fmul(
     out: &mut [u64],
     f1: &mut [u64],
     f2: &mut [u64],
@@ -149,7 +149,7 @@ pub fn fmul(
     out[4usize] = o40
 }
 
-pub fn fmul2(
+#[inline] pub fn fmul2(
     out: &mut [u64],
     f1: &mut [u64],
     f2: &mut [u64],
@@ -374,7 +374,7 @@ pub fn fmul2(
     out[9usize] = o242
 }
 
-pub fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
+#[inline] pub fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
 {
     let f10: u64 = f1[0usize];
     let f11: u64 = f1[1usize];
@@ -426,7 +426,12 @@ pub fn fmul1(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
     out[4usize] = o4
 }
 
-pub fn fsqr(out: &mut [u64], f: &mut [u64], uu___: &mut [crate::fstar::uint128::uint128]) -> ()
+#[inline] pub fn fsqr(
+    out: &mut [u64],
+    f: &mut [u64],
+    uu___: &mut [crate::fstar::uint128::uint128]
+) ->
+    ()
 {
     crate::lowstar::ignore::ignore::<&mut [crate::fstar::uint128::uint128]>(uu___);
     let f0: u64 = f[0usize];
@@ -525,7 +530,11 @@ pub fn fsqr(out: &mut [u64], f: &mut [u64], uu___: &mut [crate::fstar::uint128::
     out[4usize] = o40
 }
 
-pub fn fsqr2(out: &mut [u64], f: &mut [u64], uu___: &mut [crate::fstar::uint128::uint128]) ->
+#[inline] pub fn fsqr2(
+    out: &mut [u64],
+    f: &mut [u64],
+    uu___: &mut [crate::fstar::uint128::uint128]
+) ->
     ()
 {
     crate::lowstar::ignore::ignore::<&mut [crate::fstar::uint128::uint128]>(uu___);
@@ -789,7 +798,7 @@ pub fn store_felem(u64s: &mut [u64], f: &mut [u64]) -> ()
     u64s[3usize] = o30
 }
 
-pub fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()
+#[inline] pub fn cswap2(bit: u64, p1: &mut [u64], p2: &mut [u64]) -> ()
 {
     let mask: u64 = 0u64.wrapping_sub(bit);
     for i in 0u32..10u32

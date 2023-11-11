@@ -61,7 +61,7 @@ pub fn blake2s_update_multi(
     }
 }
 
-fn blake2s_update(
+#[inline] fn blake2s_update(
     wv: &mut [crate::lib::intvector_intrinsics::vec128],
     hash: &mut [crate::lib::intvector_intrinsics::vec128],
     kk: u32,

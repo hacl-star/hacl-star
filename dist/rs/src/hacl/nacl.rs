@@ -115,7 +115,7 @@ fn secretbox_open_easy(mlen: u32, m: &mut [u8], k: &mut [u8], n: &mut [u8], c: &
     secretbox_open_detached(mlen, m, k, n, cip.1, cip.0)
 }
 
-fn box_beforenm(k: &mut [u8], pk: &mut [u8], sk: &mut [u8]) -> u32
+#[inline] fn box_beforenm(k: &mut [u8], pk: &mut [u8], sk: &mut [u8]) -> u32
 {
     let mut n0: [u8; 16] = [0u8; 16usize];
     let r: bool = crate::hacl::curve25519_51::ecdh(k, sk, pk);
@@ -128,7 +128,7 @@ fn box_beforenm(k: &mut [u8], pk: &mut [u8], sk: &mut [u8]) -> u32
     { 0xffffffffu32 }
 }
 
-fn box_detached_afternm(
+#[inline] fn box_detached_afternm(
     mlen: u32,
     c: &mut [u8],
     tag: &mut [u8],
@@ -142,7 +142,7 @@ fn box_detached_afternm(
     0u32
 }
 
-fn box_detached(
+#[inline] fn box_detached(
     mlen: u32,
     c: &mut [u8],
     tag: &mut [u8],
@@ -158,7 +158,7 @@ fn box_detached(
     if r == 0u32 { box_detached_afternm(mlen, c, tag, &mut k, n, m) } else { 0xffffffffu32 }
 }
 
-fn box_open_detached_afternm(
+#[inline] fn box_open_detached_afternm(
     mlen: u32,
     m: &mut [u8],
     k: &mut [u8],
@@ -169,7 +169,7 @@ fn box_open_detached_afternm(
     u32
 { secretbox_open_detached(mlen, m, k, n, c, tag) }
 
-fn box_open_detached(
+#[inline] fn box_open_detached(
     mlen: u32,
     m: &mut [u8],
     pk: &mut [u8],
@@ -185,7 +185,14 @@ fn box_open_detached(
     if r == 0u32 { box_open_detached_afternm(mlen, m, &mut k, n, c, tag) } else { 0xffffffffu32 }
 }
 
-fn box_easy_afternm(mlen: u32, c: &mut [u8], k: &mut [u8], n: &mut [u8], m: &mut [u8]) -> u32
+#[inline] fn box_easy_afternm(
+    mlen: u32,
+    c: &mut [u8],
+    k: &mut [u8],
+    n: &mut [u8],
+    m: &mut [u8]
+) ->
+    u32
 {
     let tag: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let cip: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(16usize);
@@ -193,7 +200,14 @@ fn box_easy_afternm(mlen: u32, c: &mut [u8], k: &mut [u8], n: &mut [u8], m: &mut
     res
 }
 
-fn box_easy(mlen: u32, c: &mut [u8], sk: &mut [u8], pk: &mut [u8], n: &mut [u8], m: &mut [u8]) ->
+#[inline] fn box_easy(
+    mlen: u32,
+    c: &mut [u8],
+    sk: &mut [u8],
+    pk: &mut [u8],
+    n: &mut [u8],
+    m: &mut [u8]
+) ->
     u32
 {
     let tag: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
@@ -202,7 +216,13 @@ fn box_easy(mlen: u32, c: &mut [u8], sk: &mut [u8], pk: &mut [u8], n: &mut [u8],
     res
 }
 
-fn box_open_easy_afternm(mlen: u32, m: &mut [u8], k: &mut [u8], n: &mut [u8], c: &mut [u8]) ->
+#[inline] fn box_open_easy_afternm(
+    mlen: u32,
+    m: &mut [u8],
+    k: &mut [u8],
+    n: &mut [u8],
+    c: &mut [u8]
+) ->
     u32
 {
     let tag: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
@@ -210,7 +230,7 @@ fn box_open_easy_afternm(mlen: u32, m: &mut [u8], k: &mut [u8], n: &mut [u8], c:
     box_open_detached_afternm(mlen, m, k, n, cip.1, cip.0)
 }
 
-fn box_open_easy(
+#[inline] fn box_open_easy(
     mlen: u32,
     m: &mut [u8],
     pk: &mut [u8],

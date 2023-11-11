@@ -1,4 +1,4 @@
-fn bn_add(aLen: u32, a: &mut [u64], bLen: u32, b: &mut [u64], res: &mut [u64]) -> u64
+#[inline] fn bn_add(aLen: u32, a: &mut [u64], bLen: u32, b: &mut [u64], res: &mut [u64]) -> u64
 {
     let a0: (&mut [u64], &mut [u64]) = a.split_at_mut(0usize);
     let res0: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
@@ -175,7 +175,7 @@ fn add_mod4(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
     }
 }
 
-fn is_qelem_zero(f: &mut [u64]) -> u64
+#[inline] fn is_qelem_zero(f: &mut [u64]) -> u64
 {
     let mut bn_zero: [u64; 4] = [0u64; 4usize];
     let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
@@ -189,7 +189,7 @@ fn is_qelem_zero(f: &mut [u64]) -> u64
     res
 }
 
-fn is_qelem_zero_vartime(f: &mut [u64]) -> bool
+#[inline] fn is_qelem_zero_vartime(f: &mut [u64]) -> bool
 {
     let f0: u64 = f[0usize];
     let f1: u64 = f[1usize];
@@ -198,7 +198,7 @@ fn is_qelem_zero_vartime(f: &mut [u64]) -> bool
     f0 == 0u64 && f1 == 0u64 && f2 == 0u64 && f3 == 0u64
 }
 
-fn load_qelem_check(f: &mut [u64], b: &mut [u8]) -> u64
+#[inline] fn load_qelem_check(f: &mut [u64], b: &mut [u8]) -> u64
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     (&mut n)[0usize] = 0xbfd25e8cd0364141u64;
@@ -227,7 +227,7 @@ fn load_qelem_check(f: &mut [u64], b: &mut [u8]) -> u64
     ! is_zero & is_lt_q
 }
 
-fn load_qelem_vartime(f: &mut [u64], b: &mut [u8]) -> bool
+#[inline] fn load_qelem_vartime(f: &mut [u64], b: &mut [u8]) -> bool
 {
     for i in 0u32..4u32
     {
@@ -261,7 +261,7 @@ fn load_qelem_vartime(f: &mut [u64], b: &mut [u8]) -> bool
     ! is_zero && is_lt_q_b
 }
 
-fn modq_short(out: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn modq_short(out: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     (&mut tmp)[0usize] = 0x402da1732fc9bebfu64;
@@ -278,7 +278,7 @@ fn modq_short(out: &mut [u64], a: &mut [u64]) -> ()
     }
 }
 
-fn load_qelem_modq(f: &mut [u64], b: &mut [u8]) -> ()
+#[inline] fn load_qelem_modq(f: &mut [u64], b: &mut [u8]) -> ()
 {
     let mut tmp: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
@@ -295,7 +295,7 @@ fn load_qelem_modq(f: &mut [u64], b: &mut [u8]) -> ()
     modq_short(f, &mut tmp)
 }
 
-fn qadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] fn qadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     (&mut n)[0usize] = 0xbfd25e8cd0364141u64;
@@ -305,7 +305,7 @@ fn qadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
     add_mod4(&mut n, f1, f2, out)
 }
 
-fn modq(out: &mut [u64], a: &mut [u64]) -> ()
+#[inline] fn modq(out: &mut [u64], a: &mut [u64]) -> ()
 {
     let mut r: [u64; 4] = [0u64; 4usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
@@ -356,21 +356,21 @@ fn modq(out: &mut [u64], a: &mut [u64]) -> ()
     }
 }
 
-fn qmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
+#[inline] fn qmul(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::k256_scalar::mul4(f1, f2, &mut tmp);
     modq(out, &mut tmp)
 }
 
-fn qsqr(out: &mut [u64], f: &mut [u64]) -> ()
+#[inline] fn qsqr(out: &mut [u64], f: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 8] = [0u64; 8usize];
     crate::hacl::k256_scalar::sqr4(f, &mut tmp);
     modq(out, &mut tmp)
 }
 
-fn qnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
+#[inline] fn qnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
 {
     let mut n: [u64; 4] = [0u64; 4usize];
     (&mut n)[0usize] = 0xbfd25e8cd0364141u64;
@@ -381,7 +381,7 @@ fn qnegate_conditional_vartime(f: &mut [u64], is_negate: bool) -> ()
     if is_negate { crate::hacl::k256_scalar::sub_mod4(&mut n, &mut zero, f, f) }
 }
 
-fn is_qelem_le_q_halved_vartime(f: &mut [u64]) -> bool
+#[inline] fn is_qelem_le_q_halved_vartime(f: &mut [u64]) -> bool
 {
     let a0: u64 = f[0usize];
     let a1: u64 = f[1usize];
@@ -405,7 +405,7 @@ fn is_qelem_le_q_halved_vartime(f: &mut [u64]) -> bool
     if a1 > 0x5d576e7357a4501du64 { falsebool } else { a0 <= 0xdfe92f46681b20a0u64 }
 }
 
-fn qmul_shift_384(res: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
+#[inline] fn qmul_shift_384(res: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
 {
     let mut l: [u64; 8] = [0u64; 8usize];
     crate::hacl::k256_scalar::mul4(a, b, &mut l);
@@ -458,16 +458,16 @@ fn qmul_shift_384(res: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
     }
 }
 
-fn qsquare_times_in_place(out: &mut [u64], b: u32) -> ()
+#[inline] fn qsquare_times_in_place(out: &mut [u64], b: u32) -> ()
 { for i in 0u32..b { qsqr(out, out) } }
 
-fn qsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
+#[inline] fn qsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
     (out[0usize..0usize + 4usize]).copy_from_slice(&a[0usize..0usize + 4usize]);
     for i in 0u32..b { qsqr(out, out) }
 }
 
-fn qinv(out: &mut [u64], f: &mut [u64]) -> ()
+#[inline] fn qinv(out: &mut [u64], f: &mut [u64]) -> ()
 {
     let mut x_10: [u64; 4] = [0u64; 4usize];
     let mut x_11: [u64; 4] = [0u64; 4usize];
@@ -551,7 +551,7 @@ fn qinv(out: &mut [u64], f: &mut [u64]) -> ()
     qmul(out, out, &mut x6)
 }
 
-fn to_aff_point(p_aff: &mut [u64], p: &mut [u64]) -> ()
+#[inline] fn to_aff_point(p_aff: &mut [u64], p: &mut [u64]) -> ()
 {
     let x: (&mut [u64], &mut [u64]) = p_aff.split_at_mut(0usize);
     let y: (&mut [u64], &mut [u64]) = x.1.split_at_mut(5usize);
@@ -566,7 +566,7 @@ fn to_aff_point(p_aff: &mut [u64], p: &mut [u64]) -> ()
     crate::hacl::bignum_k256::fnormalize(y.1, y.1)
 }
 
-fn to_aff_point_x(x: &mut [u64], p: &mut [u64]) -> ()
+#[inline] fn to_aff_point_x(x: &mut [u64], p: &mut [u64]) -> ()
 {
     let x1: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let z1: (&mut [u64], &mut [u64]) = x1.1.split_at_mut(10usize);
@@ -576,7 +576,7 @@ fn to_aff_point_x(x: &mut [u64], p: &mut [u64]) -> ()
     crate::hacl::bignum_k256::fnormalize(x, x)
 }
 
-fn is_on_curve_vartime(p: &mut [u64]) -> bool
+#[inline] fn is_on_curve_vartime(p: &mut [u64]) -> bool
 {
     let mut y2_exp: [u64; 5] = [0u64; 5usize];
     let x: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
@@ -640,10 +640,10 @@ pub fn point_negate(out: &mut [u64], p: &mut [u64]) -> ()
     crate::hacl::bignum_k256::fnormalize_weak(oz.0, oz.0)
 }
 
-fn point_negate_conditional_vartime(p: &mut [u64], is_negate: bool) -> ()
+#[inline] fn point_negate_conditional_vartime(p: &mut [u64], is_negate: bool) -> ()
 { if is_negate { point_negate(p, p) } }
 
-fn aff_point_store(out: &mut [u8], p: &mut [u64]) -> ()
+#[inline] fn aff_point_store(out: &mut [u8], p: &mut [u64]) -> ()
 {
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
@@ -669,7 +669,7 @@ pub fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
     if is_x_valid && is_y_valid { is_on_curve_vartime(bn_py.0) } else { falsebool }
 }
 
-fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> bool
+#[inline] fn aff_point_decompress_vartime(x: &mut [u64], y: &mut [u64], s: &mut [u8]) -> bool
 {
     let s0: u8 = s[0usize];
     let s01: u8 = s0;
@@ -813,7 +813,7 @@ pub fn point_add(out: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
     crate::hacl::bignum_k256::fnormalize_weak(z3.1, z3.1)
 }
 
-fn scalar_split_lambda(r1: &mut [u64], r2: &mut [u64], k: &mut [u64]) -> ()
+#[inline] fn scalar_split_lambda(r1: &mut [u64], r2: &mut [u64], k: &mut [u64]) -> ()
 {
     let mut tmp1: [u64; 4] = [0u64; 4usize];
     let mut tmp2: [u64; 4] = [0u64; 4usize];
@@ -846,7 +846,7 @@ fn scalar_split_lambda(r1: &mut [u64], r2: &mut [u64], k: &mut [u64]) -> ()
     qadd(r1, k, &mut tmp2)
 }
 
-fn point_mul_lambda(res: &mut [u64], p: &mut [u64]) -> ()
+#[inline] fn point_mul_lambda(res: &mut [u64], p: &mut [u64]) -> ()
 {
     let rx: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
     let ry: (&mut [u64], &mut [u64]) = rx.1.split_at_mut(5usize);
@@ -873,7 +873,7 @@ fn point_mul_lambda(res: &mut [u64], p: &mut [u64]) -> ()
     rz.1[4usize] = pz.1[4usize]
 }
 
-fn point_mul_lambda_inplace(res: &mut [u64]) -> ()
+#[inline] fn point_mul_lambda_inplace(res: &mut [u64]) -> ()
 {
     let rx: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
     let mut beta: [u64; 5] = [0u64; 5usize];
@@ -885,7 +885,7 @@ fn point_mul_lambda_inplace(res: &mut [u64]) -> ()
     crate::hacl::bignum_k256::fmul(rx.1, &mut beta, rx.1)
 }
 
-fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
+#[inline] fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
 {
     (tmp[0usize..0usize + 15usize]).copy_from_slice(
         &(&mut table[0usize..] as &mut [u64])[0usize..0usize + 15usize]
@@ -906,7 +906,12 @@ fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
     }
 }
 
-fn check_ecmult_endo_split(r1: &mut [u64], r2: &mut [u64], r3: &mut [u64], r4: &mut [u64]) ->
+#[inline] fn check_ecmult_endo_split(
+    r1: &mut [u64],
+    r2: &mut [u64],
+    r3: &mut [u64],
+    r4: &mut [u64]
+) ->
     bool
 {
     let f2: u64 = r1[2usize];
@@ -924,7 +929,7 @@ fn check_ecmult_endo_split(r1: &mut [u64], r2: &mut [u64], r3: &mut [u64], r4: &
     b1 && b2 && b3 && b4
 }
 
-fn fmul_eq_vartime(r: &mut [u64], z: &mut [u64], x: &mut [u64]) -> bool
+#[inline] fn fmul_eq_vartime(r: &mut [u64], z: &mut [u64], x: &mut [u64]) -> bool
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
     crate::hacl::bignum_k256::fmul(&mut tmp, r, z);

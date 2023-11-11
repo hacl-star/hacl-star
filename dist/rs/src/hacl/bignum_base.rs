@@ -1,4 +1,4 @@
-pub fn mul_wide_add2_u32(a: u32, b: u32, c_in: u32, out: &mut [u32]) -> u32
+#[inline] pub fn mul_wide_add2_u32(a: u32, b: u32, c_in: u32, out: &mut [u32]) -> u32
 {
     let out0: u32 = out[0usize];
     let res: u64 =
@@ -7,7 +7,7 @@ pub fn mul_wide_add2_u32(a: u32, b: u32, c_in: u32, out: &mut [u32]) -> u32
     res.wrapping_shr(32u32) as u32
 }
 
-pub fn mul_wide_add2_u64(a: u64, b: u64, c_in: u64, out: &mut [u64]) -> u64
+#[inline] pub fn mul_wide_add2_u64(a: u64, b: u64, c_in: u64, out: &mut [u64]) -> u64
 {
     let out0: u64 = out[0usize];
     let res: crate::fstar::uint128::uint128 =
@@ -44,7 +44,7 @@ pub fn bn_get_top_index_u64(len: u32, b: &mut [u64]) -> u64
     r#priv
 }
 
-pub fn bn_get_bits_u32(len: u32, b: &mut [u32], i: u32, l: u32) -> u32
+#[inline] pub fn bn_get_bits_u32(len: u32, b: &mut [u32], i: u32, l: u32) -> u32
 {
     let i1: u32 = i.wrapping_div(32u32);
     let j: u32 = i.wrapping_rem(32u32);
@@ -57,7 +57,7 @@ pub fn bn_get_bits_u32(len: u32, b: &mut [u32], i: u32, l: u32) -> u32
     ite & 1u32.wrapping_shl(l).wrapping_sub(1u32)
 }
 
-pub fn bn_get_bits_u64(len: u32, b: &mut [u64], i: u32, l: u32) -> u64
+#[inline] pub fn bn_get_bits_u64(len: u32, b: &mut [u64], i: u32, l: u32) -> u64
 {
     let i1: u32 = i.wrapping_div(64u32);
     let j: u32 = i.wrapping_rem(64u32);

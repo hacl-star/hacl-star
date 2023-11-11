@@ -1,4 +1,4 @@
-fn poly1305_padded_256(
+#[inline] fn poly1305_padded_256(
     ctx: &mut [crate::lib::intvector_intrinsics::vec256],
     len: u32,
     text: &mut [u8]
@@ -1158,7 +1158,7 @@ fn poly1305_padded_256(
     }
 }
 
-fn poly1305_do_256(
+#[inline] fn poly1305_do_256(
     k: &mut [u8],
     aadlen: u32,
     aad: &mut [u8],

@@ -67,7 +67,7 @@ pub fn blake2b_update_multi(
     }
 }
 
-fn blake2b_update(
+#[inline] fn blake2b_update(
     wv: &mut [crate::lib::intvector_intrinsics::vec256],
     hash: &mut [crate::lib::intvector_intrinsics::vec256],
     kk: u32,

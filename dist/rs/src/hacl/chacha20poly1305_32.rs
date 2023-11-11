@@ -1,4 +1,4 @@
-fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
+#[inline] fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
 {
     let n: u32 = len.wrapping_div(16u32);
     let r: u32 = len.wrapping_rem(16u32);
@@ -380,7 +380,7 @@ fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
     }
 }
 
-fn poly1305_do_32(
+#[inline] fn poly1305_do_32(
     k: &mut [u8],
     aadlen: u32,
     aad: &mut [u8],

@@ -1,4 +1,4 @@
-fn sha224_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
+#[inline] fn sha224_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
 {
     for i in 0u32..8u32
     {
@@ -15,7 +15,7 @@ fn sha224_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
     }
 }
 
-fn sha256_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
+#[inline] fn sha256_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
 {
     for i in 0u32..8u32
     {

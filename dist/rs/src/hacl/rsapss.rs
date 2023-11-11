@@ -1,4 +1,4 @@
-fn load_skey(
+#[inline] fn load_skey(
     modBits: u32,
     eBits: u32,
     dBits: u32,

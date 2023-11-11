@@ -135,7 +135,7 @@ pub fn add_mod(n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> 
     }
 }
 
-fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
+#[inline] fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
 {
     let mut c0: u32 = 0u32;
     for i in 0u32..8u32
@@ -214,14 +214,14 @@ fn reduction(n: &mut [u32], nInv: u32, c: &mut [u32], res: &mut [u32]) -> ()
     }
 }
 
-fn from(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], a: &mut [u32]) -> ()
+#[inline] fn from(n: &mut [u32], nInv_u64: u32, aM: &mut [u32], a: &mut [u32]) -> ()
 {
     let mut tmp: [u32; 16] = [0u32; 16usize];
     ((&mut tmp)[0usize..0usize + 8usize]).copy_from_slice(&aM[0usize..0usize + 8usize]);
     reduction(n, nInv_u64, &mut tmp, a)
 }
 
-fn exp_vartime(
+#[inline] fn exp_vartime(
     nBits: u32,
     n: &mut [u32],
     a: &mut [u32],
@@ -237,7 +237,7 @@ fn exp_vartime(
     exp_vartime_precomp(n, mu, &mut r2, a, bBits, b, res)
 }
 
-fn exp_consttime(
+#[inline] fn exp_consttime(
     nBits: u32,
     n: &mut [u32],
     a: &mut [u32],

@@ -196,7 +196,7 @@ pub fn sha256_init(hash: &mut [u32]) -> ()
     }
 }
 
-fn sha256_update(b: &mut [u8], hash: &mut [u32]) -> ()
+#[inline] fn sha256_update(b: &mut [u8], hash: &mut [u32]) -> ()
 {
     let mut hash_old: [u32; 8] = [0u32; 8usize];
     let mut ws: [u32; 16] = [0u32; 16usize];
@@ -373,7 +373,7 @@ pub fn sha224_init(hash: &mut [u32]) -> ()
     }
 }
 
-fn sha224_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
+#[inline] fn sha224_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
 { sha256_update_nblocks(len, b, st) }
 
 pub fn sha224_update_last(totlen: u64, len: u32, b: &mut [u8], st: &mut [u32]) -> ()
@@ -404,7 +404,7 @@ pub fn sha512_init(hash: &mut [u64]) -> ()
     }
 }
 
-fn sha512_update(b: &mut [u8], hash: &mut [u64]) -> ()
+#[inline] fn sha512_update(b: &mut [u8], hash: &mut [u64]) -> ()
 {
     let mut hash_old: [u64; 8] = [0u64; 8usize];
     let mut ws: [u64; 16] = [0u64; 16usize];
