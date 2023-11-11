@@ -176,13 +176,6 @@ chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr, 
   memcpy(out, plain, len * sizeof (uint8_t));
 }
 
-void debug_ctx(uint32_t *ctx) {
-  printf("ctx: ");
-  for (int i = 0; i < 15; ++i)
-    printf("%"PRIu32", ", ctx[i]);
-  printf("%"PRIu32"\n", ctx[15]);
-}
-
 void
 Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text)
 {
@@ -191,15 +184,12 @@ Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, ui
   uint32_t rem1 = len % 64U;
   for (uint32_t i = 0U; i < nb; i++)
   {
-    debug_ctx(ctx);
     chacha20_encrypt_block(ctx, out + i * 64U, i, text + i * 64U);
   }
   if (rem1 > 0U)
   {
-    debug_ctx(ctx);
     chacha20_encrypt_last(ctx, rem, out + nb * 64U, nb, text + nb * 64U);
   }
-  debug_ctx(ctx);
 }
 
 void

@@ -145,9 +145,9 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -
     let c: (&mut [u64], &mut [u64]) = d.1.split_at_mut(4usize);
     fadd(c.1, x3.1, z31.1);
     fsub(c.0, x3.1, z31.1);
-    let mut dc_copy: [u64; 8] = [0u64; 8usize];
-    ((&mut dc_copy)[0usize..0usize + 8usize]).copy_from_slice(&c.0[0usize..0usize + 8usize]);
-    fmul2(c.0, &mut dc_copy, ab.1, tmp2);
+    let mut f1_copy: [u64; 8] = [0u64; 8usize];
+    ((&mut f1_copy)[0usize..0usize + 8usize]).copy_from_slice(&c.0[0usize..0usize + 8usize]);
+    fmul2(c.0, &mut f1_copy, ab.1, tmp2);
     fadd(x3.1, c.0, c.1);
     fsub(z31.1, c.0, c.1);
     let a1: (&mut [u64], &mut [u64]) = ab.1.split_at_mut(0usize);
@@ -157,18 +157,24 @@ fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -
     let ab1: (&mut [u64], &mut [u64]) = a1.1.split_at_mut(0usize);
     let dc1: (&mut [u64], &mut [u64]) = c0.0.split_at_mut(0usize);
     fsqr2(dc1.1, ab1.1, tmp2);
-    let mut nq_p1_copy: [u64; 8] = [0u64; 8usize];
-    ((&mut nq_p1_copy)[0usize..0usize + 8usize]).copy_from_slice(&x3.1[0usize..0usize + 8usize]);
-    fsqr2(x3.1, &mut nq_p1_copy, tmp2);
+    let mut f1_copy0: [u64; 8] = [0u64; 8usize];
+    ((&mut f1_copy0)[0usize..0usize + 8usize]).copy_from_slice(&x3.1[0usize..0usize + 8usize]);
+    fsqr2(x3.1, &mut f1_copy0, tmp2);
     ab1.0[0usize] = c0.1[0usize];
     ab1.0[1usize] = c0.1[1usize];
     ab1.0[2usize] = c0.1[2usize];
     ab1.0[3usize] = c0.1[3usize];
-    fsub(c0.1, dc1.0, c0.1);
+    let mut f2_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut f2_copy)[0usize..0usize + 4usize]).copy_from_slice(&c0.1[0usize..0usize + 4usize]);
+    fsub(c0.1, dc1.0, &mut f2_copy);
     fmul_scalar(b1.1, c0.1, 121665u64);
-    fadd(b1.1, b1.1, dc1.0);
+    let mut f1_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut f1_copy1)[0usize..0usize + 4usize]).copy_from_slice(&b1.1[0usize..0usize + 4usize]);
+    fadd(b1.1, &mut f1_copy1, dc1.0);
     fmul2(z2.0, dc1.1, ab1.1, tmp2);
-    fmul(z31.0, z31.0, x1.1, tmp2)
+    let mut f1_copy2: [u64; 4] = [0u64; 4usize];
+    ((&mut f1_copy2)[0usize..0usize + 4usize]).copy_from_slice(&z31.0[0usize..0usize + 4usize]);
+    fmul(z31.0, &mut f1_copy2, x1.1, tmp2)
 }
 
 fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
@@ -188,9 +194,13 @@ fn point_double(nq: &mut [u64], tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
     ab.0[1usize] = c.1[1usize];
     ab.0[2usize] = c.1[2usize];
     ab.0[3usize] = c.1[3usize];
-    fsub(c.1, dc.0, c.1);
+    let mut f2_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut f2_copy)[0usize..0usize + 4usize]).copy_from_slice(&c.1[0usize..0usize + 4usize]);
+    fsub(c.1, dc.0, &mut f2_copy);
     fmul_scalar(d.0, c.1, 121665u64);
-    fadd(d.0, d.0, dc.0);
+    let mut f1_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut f1_copy)[0usize..0usize + 4usize]).copy_from_slice(&d.0[0usize..0usize + 4usize]);
+    fadd(d.0, &mut f1_copy, dc.0);
     fmul2(z2.0, dc.1, ab.1, tmp2)
 }
 
@@ -253,7 +263,12 @@ fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
 fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32) -> ()
 {
     fsqr(o, inp, tmp);
-    for i in 0u32..n.wrapping_sub(1u32) { fsqr(o, o, tmp) }
+    for i in 0u32..n.wrapping_sub(1u32)
+    {
+        let mut f1_copy: [u64; 4] = [0u64; 4usize];
+        ((&mut f1_copy)[0usize..0usize + 4usize]).copy_from_slice(&o[0usize..0usize + 4usize]);
+        fsqr(o, &mut f1_copy, tmp)
+    }
 }
 
 fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
@@ -266,11 +281,17 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
     fsquare_times(b1.0, i, tmp1.1, 1u32);
     fsquare_times(t01.1, b1.0, tmp1.1, 2u32);
     fmul(t01.0, t01.1, i, tmp1.1);
-    fmul(b1.0, t01.0, b1.0, tmp1.1);
+    let mut f2_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut f2_copy)[0usize..0usize + 4usize]).copy_from_slice(&b1.0[0usize..0usize + 4usize]);
+    fmul(b1.0, t01.0, &mut f2_copy, tmp1.1);
     fsquare_times(t01.1, b1.0, tmp1.1, 1u32);
-    fmul(t01.0, t01.1, t01.0, tmp1.1);
+    let mut f2_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut f2_copy0)[0usize..0usize + 4usize]).copy_from_slice(&t01.0[0usize..0usize + 4usize]);
+    fmul(t01.0, t01.1, &mut f2_copy0, tmp1.1);
     fsquare_times(t01.1, t01.0, tmp1.1, 5u32);
-    fmul(t01.0, t01.1, t01.0, tmp1.1);
+    let mut f2_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut f2_copy1)[0usize..0usize + 4usize]).copy_from_slice(&t01.0[0usize..0usize + 4usize]);
+    fmul(t01.0, t01.1, &mut f2_copy1, tmp1.1);
     let b10: (&mut [u64], &mut [u64]) = t01.0.split_at_mut(0usize);
     let c1: (&mut [u64], &mut [u64]) = b10.1.split_at_mut(4usize);
     let t010: (&mut [u64], &mut [u64]) = t01.1.split_at_mut(0usize);
@@ -278,9 +299,15 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
     fsquare_times(t010.1, c1.0, tmp10.1, 10u32);
     fmul(c1.1, t010.1, c1.0, tmp10.0);
     fsquare_times(t010.1, c1.1, tmp10.1, 20u32);
-    fmul(t010.1, t010.1, c1.1, tmp10.0);
-    fsquare_times(t010.1, t010.1, tmp10.1, 10u32);
-    fmul(c1.0, t010.1, c1.0, tmp10.0);
+    let mut f1_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut f1_copy)[0usize..0usize + 4usize]).copy_from_slice(&t010.1[0usize..0usize + 4usize]);
+    fmul(t010.1, &mut f1_copy, c1.1, tmp10.0);
+    let mut i_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut i_copy)[0usize..0usize + 4usize]).copy_from_slice(&t010.1[0usize..0usize + 4usize]);
+    fsquare_times(t010.1, &mut i_copy, tmp10.1, 10u32);
+    let mut f2_copy2: [u64; 4] = [0u64; 4usize];
+    ((&mut f2_copy2)[0usize..0usize + 4usize]).copy_from_slice(&c1.0[0usize..0usize + 4usize]);
+    fmul(c1.0, t010.1, &mut f2_copy2, tmp10.0);
     fsquare_times(t010.1, c1.0, tmp10.1, 50u32);
     fmul(c1.1, t010.1, c1.0, tmp10.0);
     let b11: (&mut [u64], &mut [u64]) = c1.0.split_at_mut(0usize);
@@ -288,10 +315,18 @@ fn finv(o: &mut [u64], i: &mut [u64], tmp: &mut [u64]) -> ()
     let t011: (&mut [u64], &mut [u64]) = t010.1.split_at_mut(0usize);
     let tmp11: (&mut [u64], &mut [u64]) = tmp10.1.split_at_mut(0usize);
     fsquare_times(t011.1, c10.1, tmp11.1, 100u32);
-    fmul(t011.1, t011.1, c10.1, tmp10.0);
-    fsquare_times(t011.1, t011.1, tmp11.1, 50u32);
-    fmul(t011.1, t011.1, b11.1, tmp10.0);
-    fsquare_times(t011.1, t011.1, tmp11.1, 5u32);
+    let mut f1_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut f1_copy0)[0usize..0usize + 4usize]).copy_from_slice(&t011.1[0usize..0usize + 4usize]);
+    fmul(t011.1, &mut f1_copy0, c10.1, tmp10.0);
+    let mut i_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut i_copy0)[0usize..0usize + 4usize]).copy_from_slice(&t011.1[0usize..0usize + 4usize]);
+    fsquare_times(t011.1, &mut i_copy0, tmp11.1, 50u32);
+    let mut f1_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut f1_copy1)[0usize..0usize + 4usize]).copy_from_slice(&t011.1[0usize..0usize + 4usize]);
+    fmul(t011.1, &mut f1_copy1, b11.1, tmp10.0);
+    let mut i_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut i_copy1)[0usize..0usize + 4usize]).copy_from_slice(&t011.1[0usize..0usize + 4usize]);
+    fsquare_times(t011.1, &mut i_copy1, tmp11.1, 5u32);
     let a: (&mut [u64], &mut [u64]) = b1.0.split_at_mut(0usize);
     let t0: (&mut [u64], &mut [u64]) = t011.1.split_at_mut(0usize);
     fmul(o, t0.1, a.1, tmp10.0)
@@ -338,7 +373,9 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
     let mut u64s: [u64; 4] = [0u64; 4usize];
     let mut tmp_w: [u64; 16] = [0u64; 16usize];
     finv(&mut tmp, z.1, &mut tmp_w);
-    fmul(&mut tmp, &mut tmp, z.0, &mut tmp_w);
+    let mut f1_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut f1_copy)[0usize..0usize + 4usize]).copy_from_slice(&(&mut tmp)[0usize..0usize + 4usize]);
+    fmul(&mut tmp, &mut f1_copy, z.0, &mut tmp_w);
     store_felem(&mut u64s, &mut tmp);
     for i0 in 0u32..4u32
     {
@@ -352,6 +389,7 @@ fn encode_point(o: &mut [u8], i: &mut [u64]) -> ()
 pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
 {
     let mut init: [u64; 8] = [0u64; 8usize];
+    let mut init_copy: [u64; 8] = [0u64; 8usize];
     let mut tmp: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
@@ -375,7 +413,8 @@ pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
     z.0[1usize] = (&mut tmp)[1usize];
     z.0[2usize] = (&mut tmp)[2usize];
     z.0[3usize] = (&mut tmp)[3usize];
-    montgomery_ladder(z.0, r#priv, z.0);
+    ((&mut init_copy)[0usize..0usize + 8usize]).copy_from_slice(&z.0[0usize..0usize + 8usize]);
+    montgomery_ladder(z.0, r#priv, &mut init_copy);
     encode_point(out, z.0)
 }
 

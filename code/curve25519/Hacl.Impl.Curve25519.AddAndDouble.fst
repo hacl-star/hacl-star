@@ -69,9 +69,6 @@ val point_add_and_double0:
       fget_xz h1 nq_p1 == S.add_and_double1_0 (fget_x h0 ab) (fget_z h0 ab) (fget_xz h0 nq_p1))
 [@ Meta.Attribute.inline_ ]
 let point_add_and_double0 #s nq_p1 ab dc tmp2 =
-  let h00 = ST.get () in
-  push_frame ();
-  let h0 = ST.get () in
   let x3 = sub nq_p1 0ul (nlimb s) in
   let z3 = sub nq_p1 (nlimb s) (nlimb s) in
   let a : felem s = sub ab 0ul (nlimb s) in
@@ -86,16 +83,11 @@ let point_add_and_double0 #s nq_p1 ab dc tmp2 =
   //fmul d d a;   // d = da = d * a
   //fmul c c b;   // c = cb = c * b
   (* HACL-RS *)
-  let dc_copy = create (2ul *! nlimb s) (limb_zero s) in
-  copy dc_copy dc;
-  fmul2 dc dc_copy ab tmp2;   // d|c = d*a|c*b
+  fmul2_a dc dc ab tmp2;   // d|c = d*a|c*b
   fadd x3 d c;  // x3 = da + cb
-  fsub z3 d c;  // z3 = da - cb
-  let h1 = ST.get () in
-  assert (modifies (loc dc_copy |+| (loc nq_p1 |+| loc dc |+| loc tmp2)) h0 h1);
-  pop_frame ();
-  let h11 = ST.get () in
-  LowStar.Buffer.modifies_fresh_frame_popped h00 h0 (loc nq_p1 |+| loc dc |+| loc tmp2) h1 h11
+  fsub z3 d c  // z3 = da - cb
+
+#restart-solver
 
 val point_add_and_double1:
     #s:field_spec
@@ -121,9 +113,6 @@ val point_add_and_double1:
 	  (feval h0 (gsub tmp1 (nlimb s) (nlimb s))) (fget_xz h0 nq_p1))
 [@ Meta.Attribute.inline_ ]
 let point_add_and_double1 #s nq nq_p1 tmp1 tmp2 =
-  let h00 = ST.get () in
-  push_frame ();
-  let h0 = ST.get () in
   let x2 = sub nq 0ul (nlimb s) in
   let z2 = sub nq (nlimb s) (nlimb s) in
   let x3 = sub nq_p1 0ul (nlimb s) in
@@ -144,25 +133,18 @@ let point_add_and_double1 #s nq nq_p1 tmp1 tmp2 =
   //fsqr x3 x3;   // x3 = (da + cb) ^ 2
   //fsqr z3 z3;   // z3 = (da - cb) ^ 2
   (* HACL-RS *)
-  let nq_p1_copy = create (nlimb s +! nlimb s) (limb_zero s) in
-  copy nq_p1_copy nq_p1;
-  fsqr2 nq_p1 nq_p1_copy tmp2;   // x3|z3 = x3*x3|z3*z3
+  fsqr2_a nq_p1 nq_p1 tmp2;   // x3|z3 = x3*x3|z3*z3
 
   copy_felem a c;                           // a = bb
-  fsub c d c;   // c = e = aa - bb
+  fsub_a c d c;   // c = e = aa - bb
   assert_norm (121665 < pow2 17);
   fmul1 b c (u64 121665); // b = e * 121665
-  fadd b b d;   // b = (e * 121665) + aa
+  fadd_a b b d;   // b = (e * 121665) + aa
 
   (* CAN RUN IN PARALLEL *)
   //fmul x2 d a;  // x2 = aa * bb
   //fmul z2 c b;  // z2 = e * (aa + (e * 121665))
-  fmul2 nq dc ab tmp2;  // x2|z2 = aa * bb | e * (aa + (e * 121665))
-  let h1 = ST.get () in
-  assert (modifies (loc nq_p1_copy |+| (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2)) h0 h1);
-  pop_frame ();
-  let h11 = ST.get () in
-  LowStar.Buffer.modifies_fresh_frame_popped h00 h0 (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h1 h11
+  fmul2 nq dc ab tmp2  // x2|z2 = aa * bb | e * (aa + (e * 121665))
 
 val point_add_and_double:
     #s:field_spec
@@ -209,7 +191,7 @@ let point_add_and_double #s q p01_tmp1 tmp2 =
 
   point_add_and_double0 #s nq_p1 ab dc tmp2;
   point_add_and_double1 #s nq nq_p1 tmp1 tmp2;
-  fmul z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
+  fmul_a z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
   S.lemma_add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)
 
 val point_double:
@@ -254,10 +236,10 @@ let point_double #s nq tmp1 tmp2 =
   //fsqr c b;     // c = bb = b^2
   fsqr2 dc ab tmp2;     // d|c = aa | bb
   copy_felem a c;                           // a = bb
-  fsub c d c;   // c = e = aa - bb
+  fsub_a c d c;   // c = e = aa - bb
   assert_norm (121665 < pow2 17);
   fmul1 b c (u64 121665); // b = e * 121665
-  fadd b b d;   // b = (e * 121665) + aa
+  fadd_a b b d;   // b = (e * 121665) + aa
 
   (* CAN RUN IN PARALLEL *)
   //fmul x2 d a;  // x2 = aa * bb

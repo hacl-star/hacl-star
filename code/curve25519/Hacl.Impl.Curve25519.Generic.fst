@@ -100,7 +100,7 @@ let encode_point #s o i =
   let tmp_w = create (2ul `FStar.UInt32.mul` ((nwide s) <: FStar.UInt32.t)) (wide_zero s) in
   let h0 = ST.get () in
   finv tmp z tmp_w;
-  fmul tmp tmp x tmp_w;
+  fmul_a tmp tmp x tmp_w;
   let h1 = ST.get () in
   assert (feval h1 tmp == S.fmul (S.fpow (feval h0 z) (pow2 255 - 21)) (feval h0 x));
   assert (feval h1 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));
@@ -475,8 +475,11 @@ val scalarmult: (#s: field_spec) -> scalarmult_st s True
 let scalarmult #s out priv pub =
   push_frame ();
   let init = create (2ul `FStar.UInt32.mul` ((nlimb s) <: FStar.UInt32.t)) (limb_zero s) in
+  let init_copy = create (2ul `FStar.UInt32.mul` ((nlimb s) <: FStar.UInt32.t)) (limb_zero s) in
   decode_point #s init pub;
-  montgomery_ladder #s init priv init;
+  copy init_copy init;
+  (* HACL-RS *)
+  montgomery_ladder #s init priv init_copy;
   encode_point #s out init;
   pop_frame()
 

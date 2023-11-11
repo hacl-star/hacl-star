@@ -46,6 +46,31 @@ val fsqr_s:
 let fsqr_s #s out f1 tmp =
   C.fsqr #s out f1 tmp
 
+(* HACL-RS *)
+val fsqr_sa:
+    #s:field_spec
+  -> out:felem s
+  -> f1:felem s
+  -> tmp:felem_wide s
+  -> Stack unit
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h tmp /\
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out tmp) /\
+      disjoint tmp f1 /\
+      fsquare_times_inv h f1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out |+| loc tmp) h0 h1 /\
+      fsquare_times_inv h1 out /\
+      feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
+[@ Meta.Attribute.inline_ ]
+let fsqr_sa #s out f1 tmp =
+  push_frame ();
+  let f1_copy = create (nlimb s) (limb_zero s) in
+  copy f1_copy f1;
+  C.fsqr #s out f1_copy tmp;
+  pop_frame ()
+
 
 noextract
 val fmuls_pre: #s:field_spec -> h:mem -> f1:felem s -> f2:felem s -> Type0
@@ -77,6 +102,62 @@ val fmul_s:
 [@ Meta.Attribute.inline_ ]
 let fmul_s #s out f1 f2 tmp =
   C.fmul #s out f1 f2 tmp
+
+(* HACL-RS *)
+val fmul_sa1:
+    #s:field_spec
+  -> out:felem s
+  -> f1:felem s
+  -> f2:felem s
+  -> tmp:felem_wide2 s
+  -> Stack unit
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out f2 \/ out == f2) /\
+      (disjoint out tmp) /\
+      (disjoint f1 f2 \/ f1 == f2) /\
+      disjoint f1 tmp /\
+      disjoint f2 tmp /\
+      fmuls_pre h f1 f2)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out |+| loc tmp) h0 h1 /\ fsquare_times_inv h1 out /\
+      feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
+[@ Meta.Attribute.inline_ ]
+let fmul_sa1 #s out f1 f2 tmp =
+  push_frame ();
+  let f1_copy = create  (nlimb s) (limb_zero s)in
+  copy f1_copy f1;
+  C.fmul #s out f1_copy f2 tmp;
+  pop_frame ()
+
+(* HACL-RS *)
+val fmul_sa2:
+    #s:field_spec
+  -> out:felem s
+  -> f1:felem s
+  -> f2:felem s
+  -> tmp:felem_wide2 s
+  -> Stack unit
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out f2 \/ out == f2) /\
+      (disjoint out tmp) /\
+      (disjoint f1 f2 \/ f1 == f2) /\
+      disjoint f1 tmp /\
+      disjoint f2 tmp /\
+      fmuls_pre h f1 f2)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out |+| loc tmp) h0 h1 /\ fsquare_times_inv h1 out /\
+      feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
+[@ Meta.Attribute.inline_ ]
+let fmul_sa2 #s out f1 f2 tmp =
+  push_frame ();
+  let f2_copy = create  (nlimb s) (limb_zero s)in
+  copy f2_copy f2;
+  C.fmul #s out f1 f2_copy tmp;
+  pop_frame ()
 
 
 val fsquare_times:
@@ -115,9 +196,35 @@ let fsquare_times #s o inp tmp n =
   Lib.Loops.for 0ul (n -! 1ul) inv
   (fun i ->
     let h2 = ST.get () in
-    fsqr_s #s o o tmp;
+    fsqr_sa #s o o tmp;
     S.lemma_pow_add (feval #s h0 inp) (pow2 (v i + 1)) (pow2 (v i + 1));
     Math.Lemmas.pow2_double_sum (v i + 1))
+
+(* HACL-RS *)
+[@ Meta.Attribute.inline_ ]
+val fsquare_times_a:
+    #s:field_spec
+  -> o:felem s
+  -> i:felem s
+  -> tmp:felem_wide s
+  -> n:size_t{v n > 0}
+  -> Stack unit
+    (requires fun h0 ->
+      live h0 o /\ live h0 i /\ live h0 tmp /\
+      (disjoint o i \/ o == i) /\
+      disjoint o tmp /\
+      disjoint tmp i /\
+      fsquare_times_inv h0 i)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc o |+| loc tmp) h0 h1 /\
+      fsquare_times_inv h1 o /\
+      feval h1 o == S.pow (feval #s h0 i) (pow2 (v n)))
+let fsquare_times_a #s o i tmp n =
+  push_frame ();
+  let i_copy = create  (nlimb s) (limb_zero s)in
+  copy i_copy i;
+  fsquare_times #s o i_copy tmp n;
+  pop_frame ()
 
 
 val finv1:
@@ -156,11 +263,11 @@ let finv1 #s i t1 tmp =
   (* 2 *) fsquare_times #s a i tmp1 1ul;
   (* 8 *) fsquare_times #s t0 a tmp1 2ul;
   (* 9 *) fmul_s #s b t0 i tmp;
-  (* 11 *) fmul_s #s a b a tmp;
+  (* 11 *) fmul_sa2 #s a b a tmp;
   (* 22 *) fsquare_times #s t0 a tmp1 1ul;
-  (* 2^5 - 2^0 = 31 *) fmul_s #s b t0 b tmp;
+  (* 2^5 - 2^0 = 31 *) fmul_sa2 #s b t0 b tmp;
   (* 2^10 - 2^5 *) fsquare_times #s t0 b tmp1 5ul;
-  (* 2^10 - 2^0 *) fmul_s #s b t0 b tmp
+  (* 2^10 - 2^0 *) fmul_sa2 #s b t0 b tmp
 
 
 val finv2:
@@ -201,9 +308,9 @@ let finv2 #s t1 tmp =
   (* 2^20 - 2^10 *) fsquare_times #s t0 b tmp1 10ul;
   (* 2^20 - 2^0 *) fmul_s #s c t0 b tmp;
   (* 2^40 - 2^20 *) fsquare_times #s t0 c tmp1 20ul;
-  (* 2^40 - 2^0 *) fmul_s #s t0 t0 c tmp;
-  (* 2^50 - 2^10 *) fsquare_times #s t0 t0 tmp1 10ul;
-  (* 2^50 - 2^0 *) fmul_s #s b t0 b tmp;
+  (* 2^40 - 2^0 *) fmul_sa1 #s t0 t0 c tmp;
+  (* 2^50 - 2^10 *) fsquare_times_a #s t0 t0 tmp1 10ul;
+  (* 2^50 - 2^0 *) fmul_sa2 #s b t0 b tmp;
   (* 2^100 - 2^50 *) fsquare_times #s t0 b tmp1 50ul;
   (* 2^100 - 2^0 *) fmul_s #s c t0 b tmp
 
@@ -243,10 +350,10 @@ let finv3 #s t1 tmp =
   let t0 : felem s = sub t1 (3ul *! nlimb s) (nlimb s) in
   let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
   (* 2^200 - 2^100 *) fsquare_times #s t0 c tmp1 100ul;
-  (* 2^200 - 2^0 *) fmul_s #s t0 t0 c tmp;
-  (* 2^250 - 2^50 *) fsquare_times #s t0 t0 tmp1 50ul;
-  (* 2^250 - 2^0 *) fmul_s #s t0 t0 b tmp;
-  (* 2^255 - 2^5 *) fsquare_times #s t0 t0 tmp1 5ul
+  (* 2^200 - 2^0 *) fmul_sa1 #s t0 t0 c tmp;
+  (* 2^250 - 2^50 *) fsquare_times_a #s t0 t0 tmp1 50ul;
+  (* 2^250 - 2^0 *) fmul_sa1 #s t0 t0 b tmp;
+  (* 2^255 - 2^5 *) fsquare_times_a #s t0 t0 tmp1 5ul
 
 
 val finv0:
