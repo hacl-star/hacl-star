@@ -40,3 +40,34 @@ fn poly1305_vale(dst: &mut [u8], src: &mut [u8], len: u32, key: &mut [u8]) -> ()
         (dst[0usize..0usize + 16usize]).copy_from_slice(&(&mut ctx)[0usize..0usize + 16usize])
     }
 }
+
+pub fn poly1305(dst: &mut [u8], src: &mut [u8], len: u32, key: &mut [u8]) -> ()
+{
+    let vec256: bool = crate::evercrypt::autoconfig2::has_vec256(());
+    let vec128: bool = crate::evercrypt::autoconfig2::has_vec128(());
+    if crate::evercrypt::targetconfig::hacl_can_compile_vec256 && vec256
+    {
+        crate::lowstar::ignore::ignore::<bool>(vec128);
+        crate::hacl::poly1305_256::poly1305_mac(dst, len, src, key)
+    }
+    else
+    if crate::evercrypt::targetconfig::hacl_can_compile_vec128 && vec128
+    {
+        crate::lowstar::ignore::ignore::<bool>(vec256);
+        crate::hacl::poly1305_128::poly1305_mac(dst, len, src, key)
+    }
+    else
+    {
+        crate::lowstar::ignore::ignore::<bool>(vec256);
+        crate::lowstar::ignore::ignore::<bool>(vec128);
+        if crate::evercrypt::targetconfig::hacl_can_compile_vale
+        { poly1305_vale(dst, src, len, key) }
+        else
+        {
+            crate::lowstar::ignore::ignore::<(&mut [u8], &mut [u8], u32, &mut [u8]) ()>(
+                poly1305_vale
+            );
+            crate::hacl::poly1305_32::poly1305_mac(dst, len, src, key)
+        }
+    }
+}

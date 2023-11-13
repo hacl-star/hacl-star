@@ -17,8 +17,7 @@ fn legacy_update(h: &mut [u32], l: &mut [u8]) -> ()
         let v: u32 =
             if i < 16u32
             {
-                let b: (&mut [u8], &mut [u8]) =
-                    l.split_at_mut((i.wrapping_mul(4u32) as usize).wrapping_add(0usize));
+                let b: (&mut [u8], &mut [u8]) = l.split_at_mut(i.wrapping_mul(4u32) as usize);
                 let u: u32 = crate::lowstar::endianness::load32_be(b.1);
                 u
             }
@@ -92,11 +91,11 @@ fn legacy_pad(len: u64, dst: &mut [u8]) -> ()
     { dst2.1[i as usize] = 0u8 };
     let dst3: (&mut [u8], &mut [u8]) =
         dst2.1.split_at_mut(
-            (128u32.wrapping_sub(9u32.wrapping_add(len.wrapping_rem(64u32 as u64) as u32)).wrapping_rem(
+            128u32.wrapping_sub(9u32.wrapping_add(len.wrapping_rem(64u32 as u64) as u32)).wrapping_rem(
                 64u32
             )
             as
-            usize).wrapping_add(0usize)
+            usize
         );
     crate::lowstar::endianness::store64_be(dst3.1, len.wrapping_shl(3u32))
 }
@@ -117,8 +116,7 @@ pub fn legacy_update_multi(s: &mut [u32], blocks: &mut [u8], n_blocks: u32) -> (
     for i in 0u32..n_blocks
     {
         let sz: u32 = 64u32;
-        let block: (&mut [u8], &mut [u8]) =
-            blocks.split_at_mut((sz.wrapping_mul(i) as usize).wrapping_add(0usize));
+        let block: (&mut [u8], &mut [u8]) = blocks.split_at_mut(sz.wrapping_mul(i) as usize);
         legacy_update(s, block.1)
     }
 }
@@ -129,8 +127,7 @@ pub fn legacy_update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_
     let blocks_len: u32 = blocks_n.wrapping_mul(64u32);
     let blocks: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
     let rest_len: u32 = input_len.wrapping_sub(blocks_len);
-    let rest: (&mut [u8], &mut [u8]) =
-        blocks.1.split_at_mut((blocks_len as usize).wrapping_add(0usize));
+    let rest: (&mut [u8], &mut [u8]) = blocks.1.split_at_mut(blocks_len as usize);
     legacy_update_multi(s, rest.0, blocks_n);
     let total_input_len: u64 = prev_len.wrapping_add(input_len as u64);
     let pad_len: u32 =
@@ -143,8 +140,7 @@ pub fn legacy_update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_
     let mut tmp_twoblocks: [u8; 128] = [0u8; 128usize];
     let tmp: (&mut [u8], &mut [u8]) = (&mut tmp_twoblocks).split_at_mut(0usize);
     let tmp_rest: (&mut [u8], &mut [u8]) = tmp.1.split_at_mut(0usize);
-    let tmp_pad: (&mut [u8], &mut [u8]) =
-        tmp_rest.1.split_at_mut((rest_len as usize).wrapping_add(0usize));
+    let tmp_pad: (&mut [u8], &mut [u8]) = tmp_rest.1.split_at_mut(rest_len as usize);
     (tmp_pad.0[0usize..0usize + rest_len as usize]).copy_from_slice(
         &rest.1[0usize..0usize + rest_len as usize]
     );
@@ -165,8 +161,7 @@ pub fn legacy_hash(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     let blocks_len: u32 = blocks_n1.wrapping_mul(64u32);
     let blocks: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
     let rest_len: u32 = input_len.wrapping_sub(blocks_len);
-    let rest: (&mut [u8], &mut [u8]) =
-        blocks.1.split_at_mut((blocks_len as usize).wrapping_add(0usize));
+    let rest: (&mut [u8], &mut [u8]) = blocks.1.split_at_mut(blocks_len as usize);
     let blocks_n0: u32 = blocks_n1;
     let blocks_len0: u32 = blocks_len;
     let blocks0: &mut [u8] = rest.0;

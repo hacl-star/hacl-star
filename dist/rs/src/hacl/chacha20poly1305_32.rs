@@ -3,16 +3,14 @@
     let n: u32 = len.wrapping_div(16u32);
     let r: u32 = len.wrapping_rem(16u32);
     let blocks: (&mut [u8], &mut [u8]) = text.split_at_mut(0usize);
-    let rem: (&mut [u8], &mut [u8]) =
-        blocks.1.split_at_mut((n.wrapping_mul(16u32) as usize).wrapping_add(0usize));
+    let rem: (&mut [u8], &mut [u8]) = blocks.1.split_at_mut(n.wrapping_mul(16u32) as usize);
     let pre: (&mut [u64], &mut [u64]) = ctx.split_at_mut(5usize);
     let acc: (&mut [u64], &mut [u64]) = pre.0.split_at_mut(0usize);
     let nb: u32 = n.wrapping_mul(16u32).wrapping_div(16u32);
     let rem1: u32 = n.wrapping_mul(16u32).wrapping_rem(16u32);
     for i in 0u32..nb
     {
-        let block: (&mut [u8], &mut [u8]) =
-            rem.0.split_at_mut((i.wrapping_mul(16u32) as usize).wrapping_add(0usize));
+        let block: (&mut [u8], &mut [u8]) = rem.0.split_at_mut(i.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let u: u64 = crate::lowstar::endianness::load64_le(&mut block.1[0usize..]);
         let lo: u64 = u;
@@ -132,8 +130,7 @@
     };
     if rem1 > 0u32
     {
-        let last: (&mut [u8], &mut [u8]) =
-            rem.0.split_at_mut((nb.wrapping_mul(16u32) as usize).wrapping_add(0usize));
+        let last: (&mut [u8], &mut [u8]) = rem.0.split_at_mut(nb.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
         ((&mut tmp)[0usize..0usize + rem1 as usize]).copy_from_slice(

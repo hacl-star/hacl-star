@@ -8,8 +8,7 @@
     let n: u32 = len.wrapping_div(16u32);
     let r: u32 = len.wrapping_rem(16u32);
     let blocks: (&mut [u8], &mut [u8]) = text.split_at_mut(0usize);
-    let rem: (&mut [u8], &mut [u8]) =
-        blocks.1.split_at_mut((n.wrapping_mul(16u32) as usize).wrapping_add(0usize));
+    let rem: (&mut [u8], &mut [u8]) = blocks.1.split_at_mut(n.wrapping_mul(16u32) as usize);
     let
     pre:
     (&mut [crate::lib::intvector_intrinsics::vec256],
@@ -31,13 +30,11 @@
         let text0: (&mut [u8], &mut [u8]) = t0.1.split_at_mut(0usize);
         crate::hacl::poly1305_256::load_acc4(acc.1, text0.1);
         let len1: u32 = len0.wrapping_sub(bs);
-        let text1: (&mut [u8], &mut [u8]) =
-            text0.1.split_at_mut((bs as usize).wrapping_add(0usize));
+        let text1: (&mut [u8], &mut [u8]) = text0.1.split_at_mut(bs as usize);
         let nb: u32 = len1.wrapping_div(bs);
         for i in 0u32..nb
         {
-            let block: (&mut [u8], &mut [u8]) =
-                text1.1.split_at_mut((i.wrapping_mul(bs) as usize).wrapping_add(0usize));
+            let block: (&mut [u8], &mut [u8]) = text1.1.split_at_mut(i.wrapping_mul(bs) as usize);
             let mut e: [crate::lib::intvector_intrinsics::vec256; 5] =
                 [crate::lib::intvector_intrinsics::vec256_zero; 5usize];
             let lo: crate::lib::intvector_intrinsics::vec256 =
@@ -319,13 +316,12 @@
         crate::hacl::poly1305_256::fmul_r4_normalize(acc.1, pre.1)
     };
     let len1: u32 = n.wrapping_mul(16u32).wrapping_sub(len0);
-    let t1: (&mut [u8], &mut [u8]) = t0.1.split_at_mut((len0 as usize).wrapping_add(0usize));
+    let t1: (&mut [u8], &mut [u8]) = t0.1.split_at_mut(len0 as usize);
     let nb: u32 = len1.wrapping_div(16u32);
     let rem1: u32 = len1.wrapping_rem(16u32);
     for i in 0u32..nb
     {
-        let block: (&mut [u8], &mut [u8]) =
-            t1.1.split_at_mut((i.wrapping_mul(16u32) as usize).wrapping_add(0usize));
+        let block: (&mut [u8], &mut [u8]) = t1.1.split_at_mut(i.wrapping_mul(16u32) as usize);
         let mut e: [crate::lib::intvector_intrinsics::vec256; 5] =
             [crate::lib::intvector_intrinsics::vec256_zero; 5usize];
         let u: u64 = crate::lowstar::endianness::load64_le(&mut block.1[0usize..]);
@@ -596,8 +592,7 @@
     };
     if rem1 > 0u32
     {
-        let last: (&mut [u8], &mut [u8]) =
-            t1.1.split_at_mut((nb.wrapping_mul(16u32) as usize).wrapping_add(0usize));
+        let last: (&mut [u8], &mut [u8]) = t1.1.split_at_mut(nb.wrapping_mul(16u32) as usize);
         let mut e: [crate::lib::intvector_intrinsics::vec256; 5] =
             [crate::lib::intvector_intrinsics::vec256_zero; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];

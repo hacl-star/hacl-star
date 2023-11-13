@@ -1,3 +1,12 @@
+pub fn mk_felem_zero(f: &mut [u64]) -> ()
+{ (f[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]) }
+
+pub fn mk_felem_one(f: &mut [u64]) -> ()
+{
+    (f[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    f[0usize] = 1u64
+}
+
 pub fn felem_add(a: &mut [u64], b: &mut [u64], out: &mut [u64]) -> ()
 {
     crate::hacl::bignum_k256::fadd(out, a, b);
@@ -29,8 +38,26 @@ pub fn felem_store(a: &mut [u64], out: &mut [u8]) -> ()
     crate::hacl::bignum_k256::store_felem(out, &mut tmp)
 }
 
-pub fn mk_point_at_inf(p: &mut [u64]) -> ()
-{ crate::hacl::impl_k256_point::make_point_at_inf(p) }
+pub fn mk_point_at_inf(p: &mut [u64]) -> () { crate::hacl::k256_ecdsa::make_point_at_inf(p) }
+
+pub fn mk_base_point(p: &mut [u64]) -> ()
+{
+    let gx: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
+    let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
+    let gz: (&mut [u64], &mut [u64]) = gy.1.split_at_mut(5usize);
+    gy.0[0usize] = 0x2815b16f81798u64;
+    gy.0[1usize] = 0xdb2dce28d959fu64;
+    gy.0[2usize] = 0xe870b07029bfcu64;
+    gy.0[3usize] = 0xbbac55a06295cu64;
+    gy.0[4usize] = 0x79be667ef9dcu64;
+    gz.0[0usize] = 0x7d08ffb10d4b8u64;
+    gz.0[1usize] = 0x48a68554199c4u64;
+    gz.0[2usize] = 0xe1108a8fd17b4u64;
+    gz.0[3usize] = 0xc4655da4fbfc0u64;
+    gz.0[4usize] = 0x483ada7726a3u64;
+    (gz.1[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    gz.1[0usize] = 1u64
+}
 
 pub fn point_negate(p: &mut [u64], out: &mut [u64]) -> ()
 { crate::hacl::k256_ecdsa::point_negate(out, p) }
@@ -59,6 +86,26 @@ pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
 
 pub fn point_store(p: &mut [u64], out: &mut [u8]) -> ()
 { crate::hacl::k256_ecdsa::point_store(out, p) }
+
+pub fn point_load(b: &mut [u8], out: &mut [u64]) -> ()
+{
+    let mut p_aff: [u64; 10] = [0u64; 10usize];
+    let px: (&mut [u64], &mut [u64]) = (&mut p_aff).split_at_mut(0usize);
+    let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
+    let pxb: (&mut [u8], &mut [u8]) = b.split_at_mut(0usize);
+    let pyb: (&mut [u8], &mut [u8]) = pxb.1.split_at_mut(32usize);
+    crate::hacl::bignum_k256::load_felem(py.0, pyb.0);
+    crate::hacl::bignum_k256::load_felem(py.1, pyb.1);
+    let x: (&mut [u64], &mut [u64]) = py.0.split_at_mut(0usize);
+    let y: (&mut [u64], &mut [u64]) = py.1.split_at_mut(0usize);
+    let x1: (&mut [u64], &mut [u64]) = out.split_at_mut(0usize);
+    let y1: (&mut [u64], &mut [u64]) = x1.1.split_at_mut(5usize);
+    let z1: (&mut [u64], &mut [u64]) = y1.1.split_at_mut(5usize);
+    (y1.0[0usize..0usize + 5usize]).copy_from_slice(&x.1[0usize..0usize + 5usize]);
+    (z1.0[0usize..0usize + 5usize]).copy_from_slice(&y.1[0usize..0usize + 5usize]);
+    (z1.1[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    z1.1[0usize] = 1u64
+}
 
 pub fn is_point_valid(b: &mut [u8]) -> bool
 {

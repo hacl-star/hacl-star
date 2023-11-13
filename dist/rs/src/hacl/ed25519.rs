@@ -171,8 +171,7 @@ pub fn load_51(output: &mut [u64], input: &mut [u8]) -> ()
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = (&mut u64s).split_at_mut(0usize);
-        let bj: (&mut [u8], &mut [u8]) =
-            input.split_at_mut((i.wrapping_mul(8u32) as usize).wrapping_add(0usize));
+        let bj: (&mut [u8], &mut [u8]) = input.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;
@@ -1294,9 +1293,7 @@ pub fn point_negate(p: &mut [u64], out: &mut [u64]) -> ()
     {
         let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i.wrapping_add(1u32) as u64);
         let res_j: (&[u64], &[u64]) =
-            table.split_at_mut(
-                (i.wrapping_add(1u32).wrapping_mul(20u32) as usize).wrapping_add(0usize)
-            );
+            table.split_at_mut(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
         for i0 in 0u32..20u32
         {
             let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
@@ -1304,6 +1301,153 @@ pub fn point_negate(p: &mut [u64], out: &mut [u64]) -> ()
             os.1[i0 as usize] = x
         }
     }
+}
+
+#[inline] fn point_mul_g(out: &mut [u64], scalar: &mut [u8]) -> ()
+{
+    let mut bscalar: [u64; 4] = [0u64; 4usize];
+    for i in 0u32..4u32
+    {
+        let os: (&mut [u64], &mut [u64]) = (&mut bscalar).split_at_mut(0usize);
+        let bj: (&mut [u8], &mut [u8]) = scalar.split_at_mut(i.wrapping_mul(8u32) as usize);
+        let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
+        let r: u64 = u;
+        let x: u64 = r;
+        os.1[i as usize] = x
+    };
+    let mut q1: [u64; 20] = [0u64; 20usize];
+    let gx: (&mut [u64], &mut [u64]) = (&mut q1).split_at_mut(0usize);
+    let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
+    let gz: (&mut [u64], &mut [u64]) = gy.1.split_at_mut(5usize);
+    let gt: (&mut [u64], &mut [u64]) = gz.1.split_at_mut(5usize);
+    gy.0[0usize] = 0x00062d608f25d51au64;
+    gy.0[1usize] = 0x000412a4b4f6592au64;
+    gy.0[2usize] = 0x00075b7171a4b31du64;
+    gy.0[3usize] = 0x0001ff60527118feu64;
+    gy.0[4usize] = 0x000216936d3cd6e5u64;
+    gz.0[0usize] = 0x0006666666666658u64;
+    gz.0[1usize] = 0x0004ccccccccccccu64;
+    gz.0[2usize] = 0x0001999999999999u64;
+    gz.0[3usize] = 0x0003333333333333u64;
+    gz.0[4usize] = 0x0006666666666666u64;
+    gt.0[0usize] = 1u64;
+    gt.0[1usize] = 0u64;
+    gt.0[2usize] = 0u64;
+    gt.0[3usize] = 0u64;
+    gt.0[4usize] = 0u64;
+    gt.1[0usize] = 0x00068ab3a5b7dda3u64;
+    gt.1[1usize] = 0x00000eea2a5eadbbu64;
+    gt.1[2usize] = 0x0002af8df483c27eu64;
+    gt.1[3usize] = 0x000332b375274732u64;
+    gt.1[4usize] = 0x00067875f0fd78b7u64;
+    let mut q2: [u64; 20] =
+        [13559344787725u64,
+            2051621493703448u64,
+            1947659315640708u64,
+            626856790370168u64,
+            1592804284034836u64,
+            1781728767459187u64,
+            278818420518009u64,
+            2038030359908351u64,
+            910625973862690u64,
+            471887343142239u64,
+            1298543306606048u64,
+            794147365642417u64,
+            129968992326749u64,
+            523140861678572u64,
+            1166419653909231u64,
+            2009637196928390u64,
+            1288020222395193u64,
+            1007046974985829u64,
+            208981102651386u64,
+            2074009315253380u64];
+    let mut q3: [u64; 20] =
+        [557549315715710u64,
+            196756086293855u64,
+            846062225082495u64,
+            1865068224838092u64,
+            991112090754908u64,
+            522916421512828u64,
+            2098523346722375u64,
+            1135633221747012u64,
+            858420432114866u64,
+            186358544306082u64,
+            1044420411868480u64,
+            2080052304349321u64,
+            557301814716724u64,
+            1305130257814057u64,
+            2126012765451197u64,
+            1441004402875101u64,
+            353948968859203u64,
+            470765987164835u64,
+            1507675957683570u64,
+            1086650358745097u64];
+    let mut q4: [u64; 20] =
+        [1129953239743101u64,
+            1240339163956160u64,
+            61002583352401u64,
+            2017604552196030u64,
+            1576867829229863u64,
+            1508654942849389u64,
+            270111619664077u64,
+            1253097517254054u64,
+            721798270973250u64,
+            161923365415298u64,
+            828530877526011u64,
+            1494851059386763u64,
+            662034171193976u64,
+            1315349646974670u64,
+            2199229517308806u64,
+            497078277852673u64,
+            1310507715989956u64,
+            1881315714002105u64,
+            2214039404983803u64,
+            1331036420272667u64];
+    let r1: (&mut [u64], &mut [u64]) = (&mut bscalar).split_at_mut(0usize);
+    let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(1usize);
+    let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(1usize);
+    let r4: (&mut [u64], &mut [u64]) = r3.1.split_at_mut(1usize);
+    make_point_inf(out);
+    let mut tmp: [u64; 20] = [0u64; 20usize];
+    for i in 0u32..16u32
+    {
+        for i0 in 0u32..4u32 { point_double(out, out) };
+        let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
+        let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
+        precomp_get_consttime(
+            &crate::hacl::ed25519_precomptable::precomp_g_pow2_192_table_w4,
+            bits_l,
+            &mut tmp
+        );
+        point_add(out, out, &mut tmp);
+        let k0: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
+        let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.0, k0, 4u32);
+        precomp_get_consttime(
+            &crate::hacl::ed25519_precomptable::precomp_g_pow2_128_table_w4,
+            bits_l0,
+            &mut tmp
+        );
+        point_add(out, out, &mut tmp);
+        let k1: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
+        let bits_l1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r3.0, k1, 4u32);
+        precomp_get_consttime(
+            &crate::hacl::ed25519_precomptable::precomp_g_pow2_64_table_w4,
+            bits_l1,
+            &mut tmp
+        );
+        point_add(out, out, &mut tmp);
+        let k2: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
+        let bits_l2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r2.0, k2, 4u32);
+        precomp_get_consttime(
+            &crate::hacl::ed25519_precomptable::precomp_basepoint_table_w4,
+            bits_l2,
+            &mut tmp
+        );
+        point_add(out, out, &mut tmp)
+    };
+    crate::lowstar::ignore::ignore::<&mut [u64]>(&mut q2);
+    crate::lowstar::ignore::ignore::<&mut [u64]>(&mut q3);
+    crate::lowstar::ignore::ignore::<&mut [u64]>(&mut q4)
 }
 
 #[inline] fn point_negate_mul_double_g_vartime(
@@ -1452,7 +1596,7 @@ pub fn point_negate(p: &mut [u64], out: &mut [u64]) -> ()
 #[inline] fn point_mul_g_compress(out: &mut [u8], s: &mut [u8]) -> ()
 {
     let mut tmp: [u64; 20] = [0u64; 20usize];
-    crate::hacl::impl_ed25519_ladder::point_mul_g(&mut tmp, s);
+    point_mul_g(&mut tmp, s);
     point_compress(out, &mut tmp)
 }
 

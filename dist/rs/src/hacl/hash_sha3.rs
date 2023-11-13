@@ -9,7 +9,7 @@ pub fn update_multi_sha3(
     for i in 0u32..n_blocks
     {
         let block: (&mut [u8], &mut [u8]) =
-            blocks.split_at_mut((i.wrapping_mul(block_len(a)) as usize).wrapping_add(0usize));
+            blocks.split_at_mut(i.wrapping_mul(block_len(a)) as usize);
         crate::hacl::impl_sha3::absorb_inner(block_len(a), block.1, s)
     }
 }
@@ -290,11 +290,11 @@ fn absorb(
     for i in 0u32..n_blocks
     {
         let block: (&mut [u8], &mut [u8]) =
-            input.split_at_mut((i.wrapping_mul(rateInBytes) as usize).wrapping_add(0usize));
+            input.split_at_mut(i.wrapping_mul(rateInBytes) as usize);
         absorb_inner(rateInBytes, block.1, s)
     };
     let last: (&mut [u8], &mut [u8]) =
-        input.split_at_mut((n_blocks.wrapping_mul(rateInBytes) as usize).wrapping_add(0usize));
+        input.split_at_mut(n_blocks.wrapping_mul(rateInBytes) as usize);
     let mut lastBlock_: [u8; 200] = [0u8; 200usize];
     let lastBlock: (&mut [u8], &mut [u8]) = (&mut lastBlock_).split_at_mut(0usize);
     (lastBlock.1[0usize..0usize + rem as usize]).copy_from_slice(

@@ -64,6 +64,29 @@ const k224_256: [u32; 64] =
         0xbef9a3f7u32,
         0xc67178f2u32];
 
+pub fn update_multi_256(s: &mut [u32], blocks: &mut [u8], n: u32) -> ()
+{
+    if crate::evercrypt::targetconfig::hacl_can_compile_vale
+    {
+        let has_shaext: bool = crate::evercrypt::autoconfig2::has_shaext(());
+        let has_sse: bool = crate::evercrypt::autoconfig2::has_sse(());
+        if has_shaext && has_sse
+        {
+            let n1: u64 = n as u64;
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_sha::sha256_update(s, blocks, n1, &mut k224_256)
+            )
+        }
+        else
+        { crate::hacl::hash_sha2::sha256_update_nblocks(n.wrapping_mul(64u32), blocks, s) }
+    }
+    else
+    {
+        crate::lowstar::ignore::ignore::<&mut [u32]>(&mut k224_256);
+        crate::hacl::hash_sha2::sha256_update_nblocks(n.wrapping_mul(64u32), blocks, s)
+    }
+}
+
 pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 {
     let mut st: [u32; 8] = [0u32; 8usize];
@@ -83,8 +106,7 @@ pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     let blocks_len: u32 = blocks_n1.wrapping_mul(64u32);
     let blocks: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
     let rest_len: u32 = input_len.wrapping_sub(blocks_len);
-    let rest: (&mut [u8], &mut [u8]) =
-        blocks.1.split_at_mut((blocks_len as usize).wrapping_add(0usize));
+    let rest: (&mut [u8], &mut [u8]) = blocks.1.split_at_mut(blocks_len as usize);
     let blocks_n0: u32 = blocks_n1;
     let blocks_len0: u32 = blocks_len;
     let blocks0: &mut [u8] = rest.0;
@@ -119,8 +141,7 @@ fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     let blocks_len: u32 = blocks_n1.wrapping_mul(64u32);
     let blocks: (&mut [u8], &mut [u8]) = input.split_at_mut(0usize);
     let rest_len: u32 = input_len.wrapping_sub(blocks_len);
-    let rest: (&mut [u8], &mut [u8]) =
-        blocks.1.split_at_mut((blocks_len as usize).wrapping_add(0usize));
+    let rest: (&mut [u8], &mut [u8]) = blocks.1.split_at_mut(blocks_len as usize);
     let blocks_n0: u32 = blocks_n1;
     let blocks_len0: u32 = blocks_len;
     let blocks0: &mut [u8] = rest.0;

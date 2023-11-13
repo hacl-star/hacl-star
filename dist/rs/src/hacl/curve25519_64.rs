@@ -394,8 +394,7 @@ pub fn scalarmult(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> ()
     for i in 0u32..4u32
     {
         let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
-        let bj: (&mut [u8], &mut [u8]) =
-            r#pub.split_at_mut((i.wrapping_mul(8u32) as usize).wrapping_add(0usize));
+        let bj: (&mut [u8], &mut [u8]) = r#pub.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;

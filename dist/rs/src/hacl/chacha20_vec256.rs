@@ -185,8 +185,7 @@
     for i in 0u32..8u32
     {
         let os: &mut [u32] = &mut (&mut (&mut ctx1)[4usize..])[0usize..];
-        let bj: (&mut [u8], &mut [u8]) =
-            k.split_at_mut((i.wrapping_mul(4u32) as usize).wrapping_add(0usize));
+        let bj: (&mut [u8], &mut [u8]) = k.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
@@ -196,8 +195,7 @@
     for i in 0u32..3u32
     {
         let os: &mut [u32] = &mut (&mut (&mut ctx1)[13usize..])[0usize..];
-        let bj: (&mut [u8], &mut [u8]) =
-            n.split_at_mut((i.wrapping_mul(4u32) as usize).wrapping_add(0usize));
+        let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
@@ -249,10 +247,8 @@ pub fn chacha20_encrypt_256(
     let rem1: u32 = len.wrapping_rem(512u32);
     for i in 0u32..nb
     {
-        let uu____0: (&mut [u8], &mut [u8]) =
-            out.split_at_mut((i.wrapping_mul(512u32) as usize).wrapping_add(0usize));
-        let uu____1: (&mut [u8], &mut [u8]) =
-            text.split_at_mut((i.wrapping_mul(512u32) as usize).wrapping_add(0usize));
+        let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(512u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = text.split_at_mut(i.wrapping_mul(512u32) as usize);
         let mut k: [crate::lib::intvector_intrinsics::vec256; 16] =
             [crate::lib::intvector_intrinsics::vec256_zero; 16usize];
         chacha20_core_256(&mut k, &mut ctx, i);
@@ -496,8 +492,7 @@ pub fn chacha20_encrypt_256(
     };
     if rem1 > 0u32
     {
-        let uu____2: (&mut [u8], &mut [u8]) =
-            out.split_at_mut((nb.wrapping_mul(512u32) as usize).wrapping_add(0usize));
+        let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(512u32) as usize);
         let mut plain: [u8; 512] = [0u8; 512usize];
         ((&mut plain)[0usize..0usize + rem as usize]).copy_from_slice(
             &(&mut text[nb.wrapping_mul(512u32) as usize..])[0usize..0usize + rem as usize]
@@ -766,10 +761,8 @@ pub fn chacha20_decrypt_256(
     let rem1: u32 = len.wrapping_rem(512u32);
     for i in 0u32..nb
     {
-        let uu____0: (&mut [u8], &mut [u8]) =
-            out.split_at_mut((i.wrapping_mul(512u32) as usize).wrapping_add(0usize));
-        let uu____1: (&mut [u8], &mut [u8]) =
-            cipher.split_at_mut((i.wrapping_mul(512u32) as usize).wrapping_add(0usize));
+        let uu____0: (&mut [u8], &mut [u8]) = out.split_at_mut(i.wrapping_mul(512u32) as usize);
+        let uu____1: (&mut [u8], &mut [u8]) = cipher.split_at_mut(i.wrapping_mul(512u32) as usize);
         let mut k: [crate::lib::intvector_intrinsics::vec256; 16] =
             [crate::lib::intvector_intrinsics::vec256_zero; 16usize];
         chacha20_core_256(&mut k, &mut ctx, i);
@@ -1013,8 +1006,7 @@ pub fn chacha20_decrypt_256(
     };
     if rem1 > 0u32
     {
-        let uu____2: (&mut [u8], &mut [u8]) =
-            out.split_at_mut((nb.wrapping_mul(512u32) as usize).wrapping_add(0usize));
+        let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(512u32) as usize);
         let mut plain: [u8; 512] = [0u8; 512usize];
         ((&mut plain)[0usize..0usize + rem as usize]).copy_from_slice(
             &(&mut cipher[nb.wrapping_mul(512u32) as usize..])[0usize..0usize + rem as usize]

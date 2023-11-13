@@ -27,7 +27,7 @@ fn secretbox_detached(
     let mlen0: u32 = if mlen <= 32u32 { mlen } else { 32u32 };
     let mlen1: u32 = mlen.wrapping_sub(mlen0);
     let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);
-    let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
+    let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut(mlen0 as usize);
     let mut block0: [u8; 32] = [0u8; 32usize];
     ((&mut block0)[0usize..0usize + mlen0 as usize]).copy_from_slice(
         &m1.0[0usize..0usize + mlen0 as usize]
@@ -39,7 +39,7 @@ fn secretbox_detached(
         os.1[i as usize] = x
     };
     let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
-    let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
+    let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut(mlen0 as usize);
     (c1.0[0usize..0usize + mlen0 as usize]).copy_from_slice(
         &(&mut (&mut block0)[0usize..])[0usize..0usize + mlen0 as usize]
     );
@@ -77,7 +77,7 @@ fn secretbox_open_detached(
         let mlen0: u32 = if mlen <= 32u32 { mlen } else { 32u32 };
         let mlen1: u32 = mlen.wrapping_sub(mlen0);
         let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
-        let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
+        let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut(mlen0 as usize);
         let mut block0: [u8; 32] = [0u8; 32usize];
         ((&mut block0)[0usize..0usize + mlen0 as usize]).copy_from_slice(
             &c1.0[0usize..0usize + mlen0 as usize]
@@ -89,7 +89,7 @@ fn secretbox_open_detached(
             os.1[i as usize] = x
         };
         let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);
-        let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut((mlen0 as usize).wrapping_add(0usize));
+        let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut(mlen0 as usize);
         (m1.0[0usize..0usize + mlen0 as usize]).copy_from_slice(
             &(&mut (&mut block0)[0usize..])[0usize..0usize + mlen0 as usize]
         );

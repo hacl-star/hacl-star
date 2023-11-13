@@ -314,8 +314,7 @@ pub fn sha256_update_nblocks(len: u32, b: &mut [u8], st: &mut [u32]) -> ()
     for i in 0u32..blocks
     {
         let b0: &mut [u8] = b;
-        let mb: (&mut [u8], &mut [u8]) =
-            b0.split_at_mut((i.wrapping_mul(64u32) as usize).wrapping_add(0usize));
+        let mb: (&mut [u8], &mut [u8]) = b0.split_at_mut(i.wrapping_mul(64u32) as usize);
         sha256_update(mb.1, st)
     }
 }
@@ -522,8 +521,7 @@ pub fn sha512_update_nblocks(len: u32, b: &mut [u8], st: &mut [u64]) -> ()
     for i in 0u32..blocks
     {
         let b0: &mut [u8] = b;
-        let mb: (&mut [u8], &mut [u8]) =
-            b0.split_at_mut((i.wrapping_mul(128u32) as usize).wrapping_add(0usize));
+        let mb: (&mut [u8], &mut [u8]) = b0.split_at_mut(i.wrapping_mul(128u32) as usize);
         sha512_update(mb.1, st)
     }
 }
@@ -635,8 +633,7 @@ pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     sha256_update_nblocks(input_len, ib, &mut st);
     let rem1: u32 = input_len.wrapping_rem(64u32);
     let b0: &mut [u8] = ib;
-    let lb: (&mut [u8], &mut [u8]) =
-        b0.split_at_mut((input_len.wrapping_sub(rem1) as usize).wrapping_add(0usize));
+    let lb: (&mut [u8], &mut [u8]) = b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
     sha256_update_last(len_, rem, lb.1, &mut st);
     sha256_finish(&mut st, rb)
 }
@@ -663,8 +660,7 @@ pub fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     sha224_update_nblocks(input_len, ib, &mut st);
     let rem1: u32 = input_len.wrapping_rem(64u32);
     let b0: &mut [u8] = ib;
-    let lb: (&mut [u8], &mut [u8]) =
-        b0.split_at_mut((input_len.wrapping_sub(rem1) as usize).wrapping_add(0usize));
+    let lb: (&mut [u8], &mut [u8]) = b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
     sha224_update_last(len_, rem, lb.1, &mut st);
     sha224_finish(&mut st, rb)
 }
@@ -689,8 +685,7 @@ pub fn hash_512(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     sha512_update_nblocks(input_len, ib, &mut st);
     let rem1: u32 = input_len.wrapping_rem(128u32);
     let b0: &mut [u8] = ib;
-    let lb: (&mut [u8], &mut [u8]) =
-        b0.split_at_mut((input_len.wrapping_sub(rem1) as usize).wrapping_add(0usize));
+    let lb: (&mut [u8], &mut [u8]) = b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
     sha512_update_last(len_, rem, lb.1, &mut st);
     sha512_finish(&mut st, rb)
 }
@@ -718,8 +713,7 @@ pub fn hash_384(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
     sha384_update_nblocks(input_len, ib, &mut st);
     let rem1: u32 = input_len.wrapping_rem(128u32);
     let b0: &mut [u8] = ib;
-    let lb: (&mut [u8], &mut [u8]) =
-        b0.split_at_mut((input_len.wrapping_sub(rem1) as usize).wrapping_add(0usize));
+    let lb: (&mut [u8], &mut [u8]) = b0.split_at_mut(input_len.wrapping_sub(rem1) as usize);
     sha384_update_last(len_, rem, lb.1, &mut st);
     sha384_finish(&mut st, rb)
 }
