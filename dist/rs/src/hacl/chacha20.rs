@@ -65,7 +65,7 @@ pub const chacha20_constants: [u32; 4] =
 
 #[inline] fn chacha20_core(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
 {
-    (k[0usize..0usize + 16usize]).copy_from_slice(&ctx[0usize..0usize + 16usize]);
+    (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = ctr;
     k[12usize] = (k[12usize]).wrapping_add(ctr_u32);
     rounds(k);
@@ -146,16 +146,12 @@ fn chacha20_encrypt_block(ctx: &mut [u32], out: &mut [u8], incr: u32, text: &mut
     ()
 {
     let mut plain: [u8; 64] = [0u8; 64usize];
-    ((&mut plain)[0usize..0usize + len as usize]).copy_from_slice(
-        &text[0usize..0usize + len as usize]
-    );
+    ((&mut plain)[0usize..len as usize]).copy_from_slice(&text[0usize..len as usize]);
     let mut plain_copy: [u8; 64] = [0u8; 64usize];
-    ((&mut plain_copy)[0usize..0usize + 64usize]).copy_from_slice(
-        &(&mut plain)[0usize..0usize + 64usize]
-    );
+    ((&mut plain_copy)[0usize..64usize]).copy_from_slice(&(&mut plain)[0usize..64usize]);
     chacha20_encrypt_block(ctx, &mut plain, incr, &mut plain_copy);
-    (out[0usize..0usize + len as usize]).copy_from_slice(
-        &(&mut (&mut plain)[0usize..])[0usize..0usize + len as usize]
+    (out[0usize..len as usize]).copy_from_slice(
+        &(&mut (&mut plain)[0usize..])[0usize..len as usize]
     )
 }
 

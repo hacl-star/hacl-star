@@ -1365,9 +1365,7 @@ pub fn legacy_update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_
     let tmp: (&mut [u8], &mut [u8]) = (&mut tmp_twoblocks).split_at_mut(0usize);
     let tmp_rest: (&mut [u8], &mut [u8]) = tmp.1.split_at_mut(0usize);
     let tmp_pad: (&mut [u8], &mut [u8]) = tmp_rest.1.split_at_mut(rest_len as usize);
-    (tmp_pad.0[0usize..0usize + rest_len as usize]).copy_from_slice(
-        &rest.1[0usize..0usize + rest_len as usize]
-    );
+    (tmp_pad.0[0usize..rest_len as usize]).copy_from_slice(&rest.1[0usize..rest_len as usize]);
     legacy_pad(total_input_len, tmp_pad.1);
     legacy_update_multi(s, tmp_pad.0, tmp_len.wrapping_div(64u32))
 }

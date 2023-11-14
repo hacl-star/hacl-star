@@ -8,9 +8,7 @@
     ()
 {
     let mut mgfseed_counter: Vec<u8> = vec![0u8; len.wrapping_add(4u32) as usize];
-    ((&mut mgfseed_counter)[0usize..0usize + len as usize]).copy_from_slice(
-        &mgfseed[0usize..0usize + len as usize]
-    );
+    ((&mut mgfseed_counter)[0usize..len as usize]).copy_from_slice(&mgfseed[0usize..len as usize]);
     let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
     let n: u32 = maskLen.wrapping_sub(1u32).wrapping_div(hLen).wrapping_add(1u32);
     let accLen: u32 = n.wrapping_mul(hLen);
@@ -25,8 +23,8 @@
         c.1[3usize] = i as u8;
         crate::hacl::impl_rsapss_mgf::hash(a, acc_i.1, len.wrapping_add(4u32), c.0)
     };
-    (res[0usize..0usize + maskLen as usize]).copy_from_slice(
-        &(&mut (&mut acc)[0usize..])[0usize..0usize + maskLen as usize]
+    (res[0usize..maskLen as usize]).copy_from_slice(
+        &(&mut (&mut acc)[0usize..])[0usize..maskLen as usize]
     )
 }
 
@@ -110,7 +108,7 @@
     crate::hacl::impl_rsapss_mgf::hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
     ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
     +
-    saltLen as usize]).copy_from_slice(&salt[0usize..0usize + saltLen as usize]);
+    saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
     crate::hacl::impl_rsapss_mgf::hash(a, &mut m1Hash, m1Len, &mut m1);
     let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let dbLen: u32 = emLen.wrapping_sub(hLen).wrapping_sub(1u32);
@@ -121,7 +119,7 @@
     as
     usize
     +
-    saltLen as usize]).copy_from_slice(&salt[0usize..0usize + saltLen as usize]);
+    saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
     let mut dbMask: Vec<u8> = vec![0u8; dbLen as usize];
     mgf_hash(a, hLen, &mut m1Hash, dbLen, &mut dbMask);
     for i in 0u32..dbLen
@@ -133,11 +131,9 @@
     let msBits: u32 = emBits.wrapping_rem(8u32);
     if msBits > 0u32
     { (&mut db)[0usize] = (&mut db)[0usize] & 0xffu8.wrapping_shr(8u32.wrapping_sub(msBits)) };
-    (em[0usize..0usize + dbLen as usize]).copy_from_slice(
-        &(&mut db)[0usize..0usize + dbLen as usize]
-    );
+    (em[0usize..dbLen as usize]).copy_from_slice(&(&mut db)[0usize..dbLen as usize]);
     (em[dbLen as usize..dbLen as usize + hLen as usize]).copy_from_slice(
-        &(&mut m1Hash)[0usize..0usize + hLen as usize]
+        &(&mut m1Hash)[0usize..hLen as usize]
     );
     em[emLen.wrapping_sub(1u32) as usize] = 0xbcu8
 }
@@ -157,10 +153,10 @@
     let em_0: u8 = if msBits > 0u32 { em[0usize] & 0xffu8.wrapping_shl(msBits) } else { 0u8 };
     let em_last: u8 = em[emLen.wrapping_sub(1u32) as usize];
     if emLen < saltLen.wrapping_add(crate::hacl::impl_rsapss_mgf::hash_len(a)).wrapping_add(2u32)
-    { falsebool }
+    { false }
     else
     if ! (em_last == 0xbcu8 && em_0 == 0u8)
-    { falsebool }
+    { false }
     else
     {
         let emLen1: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
@@ -197,7 +193,7 @@
         };
         let z: u8 = res;
         if ! z == 255u8
-        { falsebool }
+        { false }
         else
         {
             let m1Len: u32 = 8u32.wrapping_add(hLen).wrapping_add(saltLen);
@@ -205,7 +201,7 @@
             crate::hacl::impl_rsapss_mgf::hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
             ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
             +
-            saltLen as usize]).copy_from_slice(&salt.1[0usize..0usize + saltLen as usize]);
+            saltLen as usize]).copy_from_slice(&salt.1[0usize..saltLen as usize]);
             crate::hacl::impl_rsapss_mgf::hash(a, &mut m1Hash0, m1Len, &mut m1);
             let mut res0: u8 = 255u8;
             for i in 0u32..hLen
@@ -218,6 +214,36 @@
             z0 == 255u8
         }
     }
+}
+
+#[inline] fn load_pkey(
+    modBits: u32,
+    eBits: u32,
+    nb: &mut [u8],
+    eb: &mut [u8],
+    pkey: &mut [u64]
+) ->
+    bool
+{
+    let nbLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    let ebLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+    let n: (&mut [u64], &mut [u64]) = pkey.split_at_mut(0usize);
+    let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen as usize);
+    let e: (&mut [u64], &mut [u64]) =
+        r2.1.split_at_mut(nLen.wrapping_add(nLen) as usize - nLen as usize);
+    crate::hacl::bignum_base::bn_from_bytes_be_uint64(nbLen, nb, r2.0);
+    crate::hacl::bignum::bn_precomp_r2_mod_n_u64(
+        modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
+        modBits.wrapping_sub(1u32),
+        r2.0,
+        e.0
+    );
+    crate::hacl::bignum_base::bn_from_bytes_be_uint64(ebLen, eb, e.1);
+    let m0: u64 = check_modulus_u64(modBits, r2.0);
+    let m1: u64 = check_exponent_u64(eBits, e.1);
+    let m: u64 = m0 & m1;
+    m == 0xFFFFFFFFFFFFFFFFu64
 }
 
 #[inline] fn load_skey(
@@ -241,6 +267,186 @@
     crate::hacl::bignum_base::bn_from_bytes_be_uint64(dbLen, db, d.1);
     let m1: u64 = check_exponent_u64(dBits, d.1);
     b && m1 == 0xFFFFFFFFFFFFFFFFu64
+}
+
+pub fn rsapss_sign(
+    a: crate::spec::hash_definitions::hash_alg,
+    modBits: u32,
+    eBits: u32,
+    dBits: u32,
+    skey: &mut [u64],
+    saltLen: u32,
+    salt: &mut [u8],
+    msgLen: u32,
+    msg: &mut [u8],
+    sgnt: &mut [u8]
+) ->
+    bool
+{
+    let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
+    let b: bool =
+        saltLen <= 0xffffffffu32.wrapping_sub(hLen).wrapping_sub(8u32)
+        &&
+        saltLen.wrapping_add(hLen).wrapping_add(2u32)
+        <=
+        modBits.wrapping_sub(1u32).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    if b
+    {
+        let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let mut m: Vec<u64> = vec![0u64; nLen as usize];
+        let emBits: u32 = modBits.wrapping_sub(1u32);
+        let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let mut em: Vec<u8> = vec![0u8; emLen as usize];
+        pss_encode(a, saltLen, salt, msgLen, msg, emBits, &mut em);
+        crate::hacl::bignum_base::bn_from_bytes_be_uint64(emLen, &mut em, &mut (&mut m)[0usize..]);
+        let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let mut s: Vec<u64> = vec![0u64; nLen1 as usize];
+        let mut m_: Vec<u64> = vec![0u64; nLen1 as usize];
+        let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let n: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
+        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
+        let e: (&mut [u64], &mut [u64]) =
+            r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+        let d: (&mut [u64], &mut [u64]) =
+            e.1.split_at_mut(
+                nLen2.wrapping_add(nLen2).wrapping_add(eLen) as usize
+                -
+                nLen2.wrapping_add(nLen2) as usize
+            );
+        let mu: u64 = crate::hacl::bignum::mod_inv_uint64(r2.0[0usize]);
+        crate::hacl::bignum::bn_mod_exp_consttime_precomp_u64(
+            modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
+            r2.0,
+            mu,
+            e.0,
+            &mut m,
+            dBits,
+            d.1,
+            &mut s
+        );
+        let mu0: u64 = crate::hacl::bignum::mod_inv_uint64(r2.0[0usize]);
+        crate::hacl::bignum::bn_mod_exp_vartime_precomp_u64(
+            modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
+            r2.0,
+            mu0,
+            e.0,
+            &mut s,
+            eBits,
+            d.0,
+            &mut m_
+        );
+        let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
+        for i in 0u32..nLen2
+        {
+            let uu____0: u64 =
+                crate::fstar::uint64::eq_mask((&mut m)[i as usize], (&mut m_)[i as usize]);
+            mask = uu____0 & mask
+        };
+        let mask1: u64 = mask;
+        let eq_m: u64 = mask1;
+        for i in 0u32..nLen2
+        {
+            let os: (&mut [u64], &mut [u64]) = (&mut s).split_at_mut(0usize);
+            let x: u64 = os.1[i as usize];
+            let x0: u64 = eq_m & x;
+            os.1[i as usize] = x0
+        };
+        let eq_b: bool = eq_m == 0xFFFFFFFFFFFFFFFFu64;
+        crate::hacl::bignum_base::bn_to_bytes_be_uint64(k, &mut s, sgnt);
+        let eq_b0: bool = eq_b;
+        eq_b0
+    }
+    else
+    { false }
+}
+
+pub fn rsapss_verify(
+    a: crate::spec::hash_definitions::hash_alg,
+    modBits: u32,
+    eBits: u32,
+    pkey: &mut [u64],
+    saltLen: u32,
+    sgntLen: u32,
+    sgnt: &mut [u8],
+    msgLen: u32,
+    msg: &mut [u8]
+) ->
+    bool
+{
+    let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
+    let b: bool =
+        saltLen <= 0xffffffffu32.wrapping_sub(hLen).wrapping_sub(8u32)
+        &&
+        sgntLen == modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+    if b
+    {
+        let nLen: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let mut m: Vec<u64> = vec![0u64; nLen as usize];
+        let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+        let mut s: Vec<u64> = vec![0u64; nLen1 as usize];
+        crate::hacl::bignum_base::bn_from_bytes_be_uint64(k, sgnt, &mut s);
+        let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
+        let n: (&mut [u64], &mut [u64]) = pkey.split_at_mut(0usize);
+        let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
+        let e: (&mut [u64], &mut [u64]) =
+            r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
+        let mut acc: u64 = 0u64;
+        for i in 0u32..nLen2
+        {
+            let beq: u64 = crate::fstar::uint64::eq_mask((&mut s)[i as usize], r2.0[i as usize]);
+            let blt: u64 = ! crate::fstar::uint64::gte_mask((&mut s)[i as usize], r2.0[i as usize]);
+            acc = beq & acc | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        };
+        let mask: u64 = acc;
+        let res: bool =
+            if mask == 0xFFFFFFFFFFFFFFFFu64
+            {
+                let mu: u64 = crate::hacl::bignum::mod_inv_uint64(r2.0[0usize]);
+                crate::hacl::bignum::bn_mod_exp_vartime_precomp_u64(
+                    modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32),
+                    r2.0,
+                    mu,
+                    e.0,
+                    &mut s,
+                    eBits,
+                    e.1,
+                    &mut m
+                );
+                let ite: bool =
+                    if ! modBits.wrapping_sub(1u32).wrapping_rem(8u32) == 0u32
+                    { true }
+                    else
+                    {
+                        let i: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32);
+                        let j: u32 = modBits.wrapping_sub(1u32).wrapping_rem(64u32);
+                        let tmp: u64 = (&mut m)[i as usize];
+                        let get_bit: u64 = tmp.wrapping_shr(j) & 1u64;
+                        get_bit == 0u64
+                    };
+                if ite { true } else { false }
+            }
+            else
+            { false };
+        let b1: bool = res;
+        let b10: bool = b1;
+        if b10
+        {
+            let emBits: u32 = modBits.wrapping_sub(1u32);
+            let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
+            let mut em: Vec<u8> = vec![0u8; emLen as usize];
+            let m1: (&mut [u64], &mut [u64]) = (&mut m).split_at_mut(0usize);
+            crate::hacl::bignum_base::bn_to_bytes_be_uint64(emLen, m1.1, &mut em);
+            let res0: bool = pss_verify(a, saltLen, msgLen, msg, emBits, &mut em);
+            res0
+        }
+        else
+        { false }
+    }
+    else
+    { false }
 }
 
 pub fn rsapss_skey_sign(
@@ -270,7 +476,7 @@ pub fn rsapss_skey_sign(
     if b
     { rsapss_sign(a, modBits, eBits, dBits, &mut skey, saltLen, salt, msgLen, msg, sgnt) }
     else
-    { falsebool }
+    { false }
 }
 
 pub fn rsapss_pkey_verify(
@@ -298,7 +504,7 @@ pub fn rsapss_pkey_verify(
     if b
     { rsapss_verify(a, modBits, eBits, &mut pkey, saltLen, sgntLen, sgnt, msgLen, msg) }
     else
-    { falsebool }
+    { false }
 }
 
 pub fn mgf_hash(

@@ -133,9 +133,7 @@
         let last: (&mut [u8], &mut [u8]) = rem.0.split_at_mut(nb.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
-        ((&mut tmp)[0usize..0usize + rem1 as usize]).copy_from_slice(
-            &last.1[0usize..0usize + rem1 as usize]
-        );
+        ((&mut tmp)[0usize..rem1 as usize]).copy_from_slice(&last.1[0usize..rem1 as usize]);
         let u: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[0usize..]);
         let lo: u64 = u;
         let u0: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[8usize..]);
@@ -253,7 +251,7 @@
         acc.1[4usize] = o4
     };
     let mut tmp: [u8; 16] = [0u8; 16usize];
-    ((&mut tmp)[0usize..0usize + r as usize]).copy_from_slice(&rem.1[0usize..0usize + r as usize]);
+    ((&mut tmp)[0usize..r as usize]).copy_from_slice(&rem.1[0usize..r as usize]);
     if r > 0u32
     {
         let pre0: (&mut [u64], &mut [u64]) = pre.1.split_at_mut(0usize);

@@ -29,9 +29,7 @@ fn secretbox_detached(
     let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);
     let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut(mlen0 as usize);
     let mut block0: [u8; 32] = [0u8; 32usize];
-    ((&mut block0)[0usize..0usize + mlen0 as usize]).copy_from_slice(
-        &m1.0[0usize..0usize + mlen0 as usize]
-    );
+    ((&mut block0)[0usize..mlen0 as usize]).copy_from_slice(&m1.0[0usize..mlen0 as usize]);
     for i in 0u32..32u32
     {
         let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
@@ -40,8 +38,8 @@ fn secretbox_detached(
     };
     let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
     let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut(mlen0 as usize);
-    (c1.0[0usize..0usize + mlen0 as usize]).copy_from_slice(
-        &(&mut (&mut block0)[0usize..])[0usize..0usize + mlen0 as usize]
+    (c1.0[0usize..mlen0 as usize]).copy_from_slice(
+        &(&mut (&mut block0)[0usize..])[0usize..mlen0 as usize]
     );
     crate::hacl::salsa20::salsa20_encrypt(mlen1, c1.1, m1.1, subkey.1, n1.1, 1u32);
     crate::hacl::poly1305_32::poly1305_mac(tag, mlen, c1.0, ekey0.0)
@@ -79,9 +77,7 @@ fn secretbox_open_detached(
         let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
         let c1: (&mut [u8], &mut [u8]) = c0.1.split_at_mut(mlen0 as usize);
         let mut block0: [u8; 32] = [0u8; 32usize];
-        ((&mut block0)[0usize..0usize + mlen0 as usize]).copy_from_slice(
-            &c1.0[0usize..0usize + mlen0 as usize]
-        );
+        ((&mut block0)[0usize..mlen0 as usize]).copy_from_slice(&c1.0[0usize..mlen0 as usize]);
         for i in 0u32..32u32
         {
             let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
@@ -90,8 +86,8 @@ fn secretbox_open_detached(
         };
         let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);
         let m1: (&mut [u8], &mut [u8]) = m0.1.split_at_mut(mlen0 as usize);
-        (m1.0[0usize..0usize + mlen0 as usize]).copy_from_slice(
-            &(&mut (&mut block0)[0usize..])[0usize..0usize + mlen0 as usize]
+        (m1.0[0usize..mlen0 as usize]).copy_from_slice(
+            &(&mut (&mut block0)[0usize..])[0usize..mlen0 as usize]
         );
         crate::hacl::salsa20::salsa20_decrypt(mlen1, m1.1, c1.1, subkey.1, n1.1, 1u32);
         0u32

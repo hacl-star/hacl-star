@@ -28,7 +28,7 @@ pub fn bn_from_bytes_be_uint64(len: u32, b: &mut [u8], res: &mut [u64]) -> ()
     let tmpLen: u32 = 8u32.wrapping_mul(bnLen);
     let mut tmp: Vec<u8> = vec![0u8; tmpLen as usize];
     ((&mut tmp)[tmpLen.wrapping_sub(len) as usize..tmpLen.wrapping_sub(len) as usize + len as usize]).copy_from_slice(
-        &b[0usize..0usize + len as usize]
+        &b[0usize..len as usize]
     );
     for i in 0u32..bnLen
     {
@@ -55,8 +55,8 @@ pub fn bn_to_bytes_be_uint64(len: u32, b: &mut [u64], res: &mut [u8]) -> ()
             b[bnLen.wrapping_sub(i).wrapping_sub(1u32) as usize]
         )
     };
-    (res[0usize..0usize + len as usize]).copy_from_slice(
-        &(&mut (&mut tmp)[tmpLen.wrapping_sub(len) as usize..])[0usize..0usize + len as usize]
+    (res[0usize..len as usize]).copy_from_slice(
+        &(&mut (&mut tmp)[tmpLen.wrapping_sub(len) as usize..])[0usize..len as usize]
     )
 }
 
@@ -245,7 +245,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
 ) ->
     ()
 {
-    (res[0usize..0usize + aLen.wrapping_add(bLen) as usize]).copy_from_slice(
+    (res[0usize..aLen.wrapping_add(bLen) as usize]).copy_from_slice(
         &vec![0u32; aLen.wrapping_add(bLen) as usize]
     );
     for i in 0u32..bLen
@@ -289,7 +289,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
 ) ->
     ()
 {
-    (res[0usize..0usize + aLen.wrapping_add(bLen) as usize]).copy_from_slice(
+    (res[0usize..aLen.wrapping_add(bLen) as usize]).copy_from_slice(
         &vec![0u64; aLen.wrapping_add(bLen) as usize]
     );
     for i in 0u32..bLen
@@ -326,7 +326,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
 
 #[inline] pub fn bn_sqr_u32(aLen: u32, a: &mut [u32], res: &mut [u32]) -> ()
 {
-    (res[0usize..0usize + aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+    (res[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &vec![0u32; aLen.wrapping_add(aLen) as usize]
     );
     for i in 0u32..aLen
@@ -377,7 +377,7 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
 
 #[inline] pub fn bn_sqr_u64(aLen: u32, a: &mut [u64], res: &mut [u64]) -> ()
 {
-    (res[0usize..0usize + aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+    (res[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
         &vec![0u64; aLen.wrapping_add(aLen) as usize]
     );
     for i in 0u32..aLen

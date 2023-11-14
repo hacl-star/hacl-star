@@ -1,9 +1,9 @@
 pub fn mk_felem_zero(f: &mut [u64]) -> ()
-{ (f[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]) }
+{ (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]) }
 
 pub fn mk_felem_one(f: &mut [u64]) -> ()
 {
-    (f[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    (f[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
     f[0usize] = 1u64
 }
 
@@ -55,7 +55,7 @@ pub fn mk_base_point(p: &mut [u64]) -> ()
     gz.0[2usize] = 0xe1108a8fd17b4u64;
     gz.0[3usize] = 0xc4655da4fbfc0u64;
     gz.0[4usize] = 0x483ada7726a3u64;
-    (gz.1[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    (gz.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
     gz.1[0usize] = 1u64
 }
 
@@ -81,7 +81,7 @@ pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
         let x: u64 = u;
         os.1[i as usize] = x
     };
-    crate::hacl::impl_k256_pointmul::point_mul(out, &mut scalar_q, p)
+    crate::hacl::k256_ecdsa::point_mul(out, &mut scalar_q, p)
 }
 
 pub fn point_store(p: &mut [u64], out: &mut [u8]) -> ()
@@ -101,9 +101,9 @@ pub fn point_load(b: &mut [u8], out: &mut [u64]) -> ()
     let x1: (&mut [u64], &mut [u64]) = out.split_at_mut(0usize);
     let y1: (&mut [u64], &mut [u64]) = x1.1.split_at_mut(5usize);
     let z1: (&mut [u64], &mut [u64]) = y1.1.split_at_mut(5usize);
-    (y1.0[0usize..0usize + 5usize]).copy_from_slice(&x.1[0usize..0usize + 5usize]);
-    (z1.0[0usize..0usize + 5usize]).copy_from_slice(&y.1[0usize..0usize + 5usize]);
-    (z1.1[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    (y1.0[0usize..5usize]).copy_from_slice(&x.1[0usize..5usize]);
+    (z1.0[0usize..5usize]).copy_from_slice(&y.1[0usize..5usize]);
+    (z1.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
     z1.1[0usize] = 1u64
 }
 

@@ -10,8 +10,8 @@ pub fn aead_encrypt(
 ) ->
     ()
 {
-    let vec256: bool = crate::evercrypt::autoconfig2::has_vec256(());
-    let vec128: bool = crate::evercrypt::autoconfig2::has_vec128(());
+    let vec256: bool = crate::evercrypt::autoconfig2::has_vec256();
+    let vec128: bool = crate::evercrypt::autoconfig2::has_vec128();
     if crate::evercrypt::targetconfig::hacl_can_compile_vec256 && vec256
     {
         crate::lowstar::ignore::ignore::<bool>(vec128);
@@ -43,8 +43,8 @@ pub fn aead_decrypt(
 ) ->
     u32
 {
-    let vec256: bool = crate::evercrypt::autoconfig2::has_vec256(());
-    let vec128: bool = crate::evercrypt::autoconfig2::has_vec128(());
+    let vec256: bool = crate::evercrypt::autoconfig2::has_vec256();
+    let vec128: bool = crate::evercrypt::autoconfig2::has_vec128();
     if crate::evercrypt::targetconfig::hacl_can_compile_vec256 && vec256
     {
         crate::lowstar::ignore::ignore::<bool>(vec128);

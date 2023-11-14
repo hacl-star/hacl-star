@@ -68,8 +68,8 @@ pub fn update_multi_256(s: &mut [u32], blocks: &mut [u8], n: u32) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_vale
     {
-        let has_shaext: bool = crate::evercrypt::autoconfig2::has_shaext(());
-        let has_sse: bool = crate::evercrypt::autoconfig2::has_sse(());
+        let has_shaext: bool = crate::evercrypt::autoconfig2::has_shaext();
+        let has_sse: bool = crate::evercrypt::autoconfig2::has_sse();
         if has_shaext && has_sse
         {
             let n1: u64 = n as u64;

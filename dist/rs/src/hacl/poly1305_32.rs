@@ -312,9 +312,7 @@ pub fn poly1305_update(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
         let last: (&mut [u8], &mut [u8]) = text.split_at_mut(nb.wrapping_mul(16u32) as usize);
         let mut e: [u64; 5] = [0u64; 5usize];
         let mut tmp: [u8; 16] = [0u8; 16usize];
-        ((&mut tmp)[0usize..0usize + rem as usize]).copy_from_slice(
-            &last.1[0usize..0usize + rem as usize]
-        );
+        ((&mut tmp)[0usize..rem as usize]).copy_from_slice(&last.1[0usize..rem as usize]);
         let u: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[0usize..]);
         let lo: u64 = u;
         let u0: u64 = crate::lowstar::endianness::load64_le(&mut (&mut tmp)[8usize..]);

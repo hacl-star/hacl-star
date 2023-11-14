@@ -94,7 +94,7 @@
     let r2_n: (&mut [u64], &mut [u64]) = p_n.1.split_at_mut(nLen as usize);
     let mut res_n: Vec<u64> = vec![0u64; nLen as usize];
     let mu: u64 = crate::hacl::bignum::mod_inv_uint64(r2_n.0[0usize]);
-    crate::hacl::bignum_exponentiation::bn_mod_exp_consttime_precomp_u64(
+    crate::hacl::bignum::bn_mod_exp_consttime_precomp_u64(
         (crate::hacl::impl_ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(
             1u32
         ),

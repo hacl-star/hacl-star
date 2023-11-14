@@ -31,21 +31,21 @@
     let f3: u64 = f[3usize];
     let f4: u64 = f[4usize];
     if f4 > 0u64
-    { falsebool }
+    { false }
     else
     if f3 > 0u64
-    { falsebool }
+    { false }
     else
     if f2 < 0x1455123u64
-    { truebool }
+    { true }
     else
     if f2 > 0x1455123u64
-    { falsebool }
+    { false }
     else
     if f1 < 0x1950b75fc4402u64
-    { truebool }
+    { true }
     else
-    if f1 > 0x1950b75fc4402u64 { falsebool } else { f0 < 0xda1722fc9baeeu64 }
+    if f1 > 0x1950b75fc4402u64 { false } else { f0 < 0xda1722fc9baeeu64 }
 }
 
 #[inline] pub fn load_felem(f: &mut [u64], b: &mut [u8]) -> ()
@@ -630,7 +630,7 @@
 
 #[inline] pub fn fsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
-    (out[0usize..0usize + 5usize]).copy_from_slice(&a[0usize..0usize + 5usize]);
+    (out[0usize..5usize]).copy_from_slice(&a[0usize..5usize]);
     for i in 0u32..b { fsqr(out, out) }
 }
 

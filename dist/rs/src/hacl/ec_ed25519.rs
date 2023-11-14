@@ -94,7 +94,7 @@ pub fn point_double(p: &mut [u64], out: &mut [u64]) -> ()
 { crate::hacl::ed25519::point_double(out, p) }
 
 pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
-{ crate::hacl::impl_ed25519_ladder::point_mul(out, scalar, p) }
+{ crate::hacl::ed25519::point_mul(out, scalar, p) }
 
 pub fn point_eq(p: &mut [u64], q: &mut [u64]) -> bool
 { crate::hacl::ed25519::point_equal(p, q) }

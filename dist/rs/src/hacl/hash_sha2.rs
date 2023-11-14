@@ -200,7 +200,7 @@ pub fn sha256_init(hash: &mut [u32]) -> ()
 {
     let mut hash_old: [u32; 8] = [0u32; 8usize];
     let mut ws: [u32; 16] = [0u32; 16usize];
-    ((&mut hash_old)[0usize..0usize + 8usize]).copy_from_slice(&hash[0usize..0usize + 8usize]);
+    ((&mut hash_old)[0usize..8usize]).copy_from_slice(&hash[0usize..8usize]);
     let b1: &mut [u8] = b;
     let u: u32 = crate::lowstar::endianness::load32_be(&mut b1[0usize..]);
     (&mut ws)[0usize] = u;
@@ -328,12 +328,10 @@ pub fn sha256_update_last(totlen: u64, len: u32, b: &mut [u8], hash: &mut [u32])
     let total_len_bits: u64 = totlen.wrapping_shl(3u32);
     crate::lowstar::endianness::store64_be(&mut totlen_buf, total_len_bits);
     let b0: &mut [u8] = b;
-    ((&mut last)[0usize..0usize + len as usize]).copy_from_slice(
-        &b0[0usize..0usize + len as usize]
-    );
+    ((&mut last)[0usize..len as usize]).copy_from_slice(&b0[0usize..len as usize]);
     (&mut last)[len as usize] = 0x80u8;
     ((&mut last)[fin.wrapping_sub(8u32) as usize..fin.wrapping_sub(8u32) as usize + 8usize]).copy_from_slice(
-        &(&mut totlen_buf)[0usize..0usize + 8usize]
+        &(&mut totlen_buf)[0usize..8usize]
     );
     let last0: (&mut [u8], &mut [u8]) = (&mut last).split_at_mut(0usize);
     let last1: (&mut [u8], &mut [u8]) = last0.1.split_at_mut(64usize);
@@ -357,9 +355,7 @@ pub fn sha256_finish(st: &mut [u32], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0usize..0usize + 32usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 32usize]
-    )
+    (h[0usize..32usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..32usize])
 }
 
 pub fn sha224_init(hash: &mut [u32]) -> ()
@@ -388,9 +384,7 @@ pub fn sha224_finish(st: &mut [u32], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0usize..0usize + 28usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 28usize]
-    )
+    (h[0usize..28usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..28usize])
 }
 
 pub fn sha512_init(hash: &mut [u64]) -> ()
@@ -407,7 +401,7 @@ pub fn sha512_init(hash: &mut [u64]) -> ()
 {
     let mut hash_old: [u64; 8] = [0u64; 8usize];
     let mut ws: [u64; 16] = [0u64; 16usize];
-    ((&mut hash_old)[0usize..0usize + 8usize]).copy_from_slice(&hash[0usize..0usize + 8usize]);
+    ((&mut hash_old)[0usize..8usize]).copy_from_slice(&hash[0usize..8usize]);
     let b1: &mut [u8] = b;
     let u: u64 = crate::lowstar::endianness::load64_be(&mut b1[0usize..]);
     (&mut ws)[0usize] = u;
@@ -543,12 +537,10 @@ pub fn sha512_update_last(
         crate::fstar::uint128::shift_left(totlen, 3u32);
     crate::lowstar::endianness::store128_be(&mut totlen_buf, total_len_bits);
     let b0: &mut [u8] = b;
-    ((&mut last)[0usize..0usize + len as usize]).copy_from_slice(
-        &b0[0usize..0usize + len as usize]
-    );
+    ((&mut last)[0usize..len as usize]).copy_from_slice(&b0[0usize..len as usize]);
     (&mut last)[len as usize] = 0x80u8;
     ((&mut last)[fin.wrapping_sub(16u32) as usize..fin.wrapping_sub(16u32) as usize + 16usize]).copy_from_slice(
-        &(&mut totlen_buf)[0usize..0usize + 16usize]
+        &(&mut totlen_buf)[0usize..16usize]
     );
     let last0: (&mut [u8], &mut [u8]) = (&mut last).split_at_mut(0usize);
     let last1: (&mut [u8], &mut [u8]) = last0.1.split_at_mut(128usize);
@@ -572,9 +564,7 @@ pub fn sha512_finish(st: &mut [u64], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0usize..0usize + 64usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 64usize]
-    )
+    (h[0usize..64usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..64usize])
 }
 
 pub fn sha384_init(hash: &mut [u64]) -> ()
@@ -609,9 +599,7 @@ pub fn sha384_finish(st: &mut [u64], h: &mut [u8]) -> ()
             st[i as usize]
         )
     };
-    (h[0usize..0usize + 48usize]).copy_from_slice(
-        &(&mut (&mut hbuf)[0usize..])[0usize..0usize + 48usize]
-    )
+    (h[0usize..48usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..48usize])
 }
 
 pub fn update_256(

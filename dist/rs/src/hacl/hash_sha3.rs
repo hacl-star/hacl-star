@@ -240,8 +240,8 @@ pub fn state_permute(s: &mut [u64]) -> ()
 pub fn loadState(rateInBytes: u32, input: &mut [u8], s: &mut [u64]) -> ()
 {
     let mut block: [u8; 200] = [0u8; 200usize];
-    ((&mut block)[0usize..0usize + rateInBytes as usize]).copy_from_slice(
-        &input[0usize..0usize + rateInBytes as usize]
+    ((&mut block)[0usize..rateInBytes as usize]).copy_from_slice(
+        &input[0usize..rateInBytes as usize]
     );
     for i in 0u32..25u32
     {
@@ -265,8 +265,8 @@ fn storeState(rateInBytes: u32, s: &mut [u64], res: &mut [u8]) -> ()
             sj
         )
     };
-    (res[0usize..0usize + rateInBytes as usize]).copy_from_slice(
-        &(&mut (&mut block)[0usize..])[0usize..0usize + rateInBytes as usize]
+    (res[0usize..rateInBytes as usize]).copy_from_slice(
+        &(&mut (&mut block)[0usize..])[0usize..rateInBytes as usize]
     )
 }
 
@@ -297,9 +297,7 @@ fn absorb(
         input.split_at_mut(n_blocks.wrapping_mul(rateInBytes) as usize);
     let mut lastBlock_: [u8; 200] = [0u8; 200usize];
     let lastBlock: (&mut [u8], &mut [u8]) = (&mut lastBlock_).split_at_mut(0usize);
-    (lastBlock.1[0usize..0usize + rem as usize]).copy_from_slice(
-        &last.1[0usize..0usize + rem as usize]
-    );
+    (lastBlock.1[0usize..rem as usize]).copy_from_slice(&last.1[0usize..rem as usize]);
     lastBlock.1[rem as usize] = delimitedSuffix;
     loadState(rateInBytes, lastBlock.1, s);
     if ! delimitedSuffix & 0x80u8 == 0u8 && rem == rateInBytes.wrapping_sub(1u32)
@@ -309,6 +307,22 @@ fn absorb(
     nextBlock.1[rateInBytes.wrapping_sub(1u32) as usize] = 0x80u8;
     loadState(rateInBytes, nextBlock.1, s);
     state_permute(s)
+}
+
+pub fn squeeze(s: &mut [u64], rateInBytes: u32, outputByteLen: u32, output: &mut [u8]) -> ()
+{
+    let outBlocks: u32 = outputByteLen.wrapping_div(rateInBytes);
+    let remOut: u32 = outputByteLen.wrapping_rem(rateInBytes);
+    let last: (&mut [u8], &mut [u8]) =
+        output.split_at_mut(outputByteLen.wrapping_sub(remOut) as usize);
+    let blocks: (&mut [u8], &mut [u8]) =
+        last.1.split_at_mut(0usize - outputByteLen.wrapping_sub(remOut) as usize);
+    for i in 0u32..outBlocks
+    {
+        storeState(rateInBytes, s, &mut blocks.1[i.wrapping_mul(rateInBytes) as usize..]);
+        state_permute(s)
+    };
+    storeState(remOut, s, blocks.0)
 }
 
 pub fn keccak(
@@ -326,5 +340,5 @@ pub fn keccak(
     let rateInBytes: u32 = rate.wrapping_div(8u32);
     let mut s: [u64; 25] = [0u64; 25usize];
     absorb(&mut s, rateInBytes, inputByteLen, input, delimitedSuffix);
-    crate::hacl::impl_sha3::squeeze(&mut s, rateInBytes, outputByteLen, output)
+    squeeze(&mut s, rateInBytes, outputByteLen, output)
 }

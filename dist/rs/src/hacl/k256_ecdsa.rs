@@ -240,7 +240,7 @@ fn sub_mod4(n: &mut [u64], a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
 
 fn mul4(a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
 {
-    (res[0usize..0usize + 8usize]).copy_from_slice(&[0u64; 8usize]);
+    (res[0usize..8usize]).copy_from_slice(&[0u64; 8usize]);
     for i in 0u32..4u32
     {
         let bj: u64 = b[i as usize];
@@ -275,7 +275,7 @@ fn mul4(a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> ()
 
 fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
 {
-    (res[0usize..0usize + 8usize]).copy_from_slice(&[0u64; 8usize]);
+    (res[0usize..8usize]).copy_from_slice(&[0u64; 8usize]);
     for i in 0u32..4u32
     {
         let ab: (&mut [u64], &mut [u64]) = a.split_at_mut(0usize);
@@ -397,18 +397,18 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
     let a3: u64 = f[3usize];
     let is_lt_q_b: bool =
         if a3 < 0xffffffffffffffffu64
-        { truebool }
+        { true }
         else
         if a2 < 0xfffffffffffffffeu64
-        { truebool }
+        { true }
         else
         if a2 > 0xfffffffffffffffeu64
-        { falsebool }
+        { false }
         else
         if a1 < 0xbaaedce6af48a03bu64
-        { truebool }
+        { true }
         else
-        if a1 > 0xbaaedce6af48a03bu64 { falsebool } else { a0 < 0xbfd25e8cd0364141u64 };
+        if a1 > 0xbaaedce6af48a03bu64 { false } else { a0 < 0xbfd25e8cd0364141u64 };
     ! is_zero && is_lt_q_b
 }
 
@@ -442,7 +442,7 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
         let x: u64 = u;
         os.1[i as usize] = x
     };
-    ((&mut tmp)[0usize..0usize + 4usize]).copy_from_slice(&f[0usize..0usize + 4usize]);
+    ((&mut tmp)[0usize..4usize]).copy_from_slice(&f[0usize..4usize]);
     modq_short(f, &mut tmp)
 }
 
@@ -480,7 +480,7 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
     u64
 {
     let mut tmp: Vec<u64> = vec![0u64; len.wrapping_add(2u32) as usize];
-    ((&mut tmp)[0usize..0usize + len.wrapping_add(2u32) as usize]).copy_from_slice(
+    ((&mut tmp)[0usize..len.wrapping_add(2u32) as usize]).copy_from_slice(
         &vec![0u64; len.wrapping_add(2u32) as usize]
     );
     for i in 0u32..2u32
@@ -513,7 +513,7 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
         let r: u64 = c;
         res_j.0[len.wrapping_add(i) as usize] = r
     };
-    (res[2usize..2usize + len as usize]).copy_from_slice(&a[0usize..0usize + len as usize]);
+    (res[2usize..2usize + len as usize]).copy_from_slice(&a[0usize..len as usize]);
     crate::lowstar::ignore::ignore::<u64>(
         bn_add(resLen, res, len.wrapping_add(2u32), &mut tmp, res)
     );
@@ -597,21 +597,21 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
     let a2: u64 = f[2usize];
     let a3: u64 = f[3usize];
     if a3 < 0x7fffffffffffffffu64
-    { truebool }
+    { true }
     else
     if a3 > 0x7fffffffffffffffu64
-    { falsebool }
+    { false }
     else
     if a2 < 0xffffffffffffffffu64
-    { truebool }
+    { true }
     else
     if a2 > 0xffffffffffffffffu64
-    { falsebool }
+    { false }
     else
     if a1 < 0x5d576e7357a4501du64
-    { truebool }
+    { true }
     else
-    if a1 > 0x5d576e7357a4501du64 { falsebool } else { a0 <= 0xdfe92f46681b20a0u64 }
+    if a1 > 0x5d576e7357a4501du64 { false } else { a0 <= 0xdfe92f46681b20a0u64 }
 }
 
 #[inline] fn qmul_shift_384(res: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
@@ -619,8 +619,8 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
     let mut l: [u64; 8] = [0u64; 8usize];
     mul4(a, b, &mut l);
     let mut res_b_padded: [u64; 4] = [0u64; 4usize];
-    ((&mut (&mut res_b_padded)[0usize..])[0usize..0usize + 2usize]).copy_from_slice(
-        &(&mut (&mut l)[6usize..])[0usize..0usize + 2usize]
+    ((&mut (&mut res_b_padded)[0usize..])[0usize..2usize]).copy_from_slice(
+        &(&mut (&mut l)[6usize..])[0usize..2usize]
     );
     let c0: u64 =
         crate::lib::inttypes_intrinsics::add_carry_u64(
@@ -670,7 +670,7 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
 
 #[inline] fn qsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
-    (out[0usize..0usize + 4usize]).copy_from_slice(&a[0usize..0usize + 4usize]);
+    (out[0usize..4usize]).copy_from_slice(&a[0usize..4usize]);
     for i in 0u32..b { qsqr(out, out) }
 }
 
@@ -763,10 +763,10 @@ pub fn make_point_at_inf(p: &mut [u64]) -> ()
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
     let pz: (&mut [u64], &mut [u64]) = py.1.split_at_mut(5usize);
-    (py.0[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
-    (pz.0[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    (py.0[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
+    (pz.0[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
     pz.0[0usize] = 1u64;
-    (pz.1[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize])
+    (pz.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize])
 }
 
 #[inline] fn to_aff_point(p_aff: &mut [u64], p: &mut [u64]) -> ()
@@ -884,7 +884,7 @@ pub fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
     let bn_py: (&mut [u64], &mut [u64]) = bn_px.1.split_at_mut(5usize);
     let is_x_valid: bool = crate::hacl::bignum_k256::load_felem_lt_prime_vartime(bn_py.0, py.0);
     let is_y_valid: bool = crate::hacl::bignum_k256::load_felem_lt_prime_vartime(bn_py.1, py.1);
-    if is_x_valid && is_y_valid { is_on_curve_vartime(bn_py.0) } else { falsebool }
+    if is_x_valid && is_y_valid { is_on_curve_vartime(bn_py.0) } else { false }
 }
 
 #[inline] fn load_point_vartime(p: &mut [u64], b: &mut [u8]) -> bool
@@ -898,9 +898,9 @@ pub fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
         let x1: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
         let y1: (&mut [u64], &mut [u64]) = x1.1.split_at_mut(5usize);
         let z1: (&mut [u64], &mut [u64]) = y1.1.split_at_mut(5usize);
-        (y1.0[0usize..0usize + 5usize]).copy_from_slice(&y.0[0usize..0usize + 5usize]);
-        (z1.0[0usize..0usize + 5usize]).copy_from_slice(&y.1[0usize..0usize + 5usize]);
-        (z1.1[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+        (y1.0[0usize..5usize]).copy_from_slice(&y.0[0usize..5usize]);
+        (z1.0[0usize..5usize]).copy_from_slice(&y.1[0usize..5usize]);
+        (z1.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
         z1.1[0usize] = 1u64
     };
     res
@@ -911,14 +911,14 @@ pub fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
     let s0: u8 = s[0usize];
     let s01: u8 = s0;
     if ! (s01 == 0x02u8 || s01 == 0x03u8)
-    { falsebool }
+    { false }
     else
     {
         let xb: (&mut [u8], &mut [u8]) = s.split_at_mut(1usize);
         let is_x_valid: bool = crate::hacl::bignum_k256::load_felem_lt_prime_vartime(x, xb.1);
         let is_y_odd: bool = s01 == 0x03u8;
         if ! is_x_valid
-        { falsebool }
+        { false }
         else
         {
             let mut y2: [u64; 5] = [0u64; 5usize];
@@ -941,13 +941,13 @@ pub fn aff_point_load_vartime(p: &mut [u64], b: &mut [u8]) -> bool
             let is_y_valid: bool = res;
             let is_y_valid0: bool = is_y_valid;
             if ! is_y_valid0
-            { falsebool }
+            { false }
             else
             {
                 let x0: u64 = y[0usize];
                 let is_y_odd1: bool = x0 & 1u64 == 1u64;
                 crate::hacl::bignum_k256::fnegate_conditional_vartime(y, is_y_odd1 != is_y_odd);
-                truebool
+                true
             }
         }
     }
@@ -1122,16 +1122,75 @@ pub fn point_add(out: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
     crate::hacl::bignum_k256::fmul(rx.1, &mut beta, rx.1)
 }
 
+pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
+{
+    let mut table: [u64; 240] = [0u64; 240usize];
+    let mut tmp: [u64; 15] = [0u64; 15usize];
+    let t0: (&mut [u64], &mut [u64]) = (&mut table).split_at_mut(0usize);
+    let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(15usize);
+    make_point_at_inf(t1.0);
+    (t1.1[0usize..15usize]).copy_from_slice(&q[0usize..15usize]);
+    for i in 0u32..7u32
+    {
+        let t11: (&mut [u64], &mut [u64]) =
+            t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(15u32) as usize);
+        point_double(&mut tmp, t11.1);
+        (t11.0[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(15u32) as usize..2u32.wrapping_mul(
+            i
+        ).wrapping_add(2u32).wrapping_mul(15u32)
+        as
+        usize
+        +
+        15usize]).copy_from_slice(&(&mut tmp)[0usize..15usize]);
+        let t2: (&mut [u64], &mut [u64]) =
+            t11.1.split_at_mut(
+                2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(15u32) as usize
+                -
+                i.wrapping_add(1u32).wrapping_mul(15u32) as usize
+            );
+        point_add(&mut tmp, q, t2.1);
+        (t11.0[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(15u32) as usize..2u32.wrapping_mul(
+            i
+        ).wrapping_add(3u32).wrapping_mul(15u32)
+        as
+        usize
+        +
+        15usize]).copy_from_slice(&(&mut tmp)[0usize..15usize])
+    };
+    make_point_at_inf(out);
+    let mut tmp0: [u64; 15] = [0u64; 15usize];
+    for i in 0u32..64u32
+    {
+        for i0 in 0u32..4u32 { point_double(out, out) };
+        let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
+        let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar, k, 4u32);
+        ((&mut tmp0)[0usize..15usize]).copy_from_slice(
+            &(&mut t1.0[0usize..] as &mut [u64])[0usize..15usize]
+        );
+        for i0 in 0u32..15u32
+        {
+            let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
+            let res_j: (&[u64], &[u64]) =
+                t1.0.split_at(i0.wrapping_add(1u32).wrapping_mul(15u32) as usize);
+            for i1 in 0u32..15u32
+            {
+                let os: (&mut [u64], &mut [u64]) = (&mut tmp0).split_at_mut(0usize);
+                let x: u64 = c & res_j.1[i1 as usize] | ! c & os.1[i1 as usize];
+                os.1[i1 as usize] = x
+            }
+        };
+        point_add(out, out, &mut tmp0)
+    }
+}
+
 #[inline] fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
 {
-    (tmp[0usize..0usize + 15usize]).copy_from_slice(
-        &(&mut table[0usize..] as &mut [u64])[0usize..0usize + 15usize]
-    );
+    (tmp[0usize..15usize]).copy_from_slice(&(&mut table[0usize..])[0usize..15usize]);
     for i in 0u32..15u32
     {
         let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i.wrapping_add(1u32) as u64);
         let res_j: (&[u64], &[u64]) =
-            table.split_at_mut(i.wrapping_add(1u32).wrapping_mul(15u32) as usize);
+            table.split_at(i.wrapping_add(1u32).wrapping_mul(15u32) as usize);
         for i0 in 0u32..15u32
         {
             let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
@@ -1157,7 +1216,7 @@ pub fn point_add(out: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
     gz.0[2usize] = 0xe1108a8fd17b4u64;
     gz.0[3usize] = 0xc4655da4fbfc0u64;
     gz.0[4usize] = 0x483ada7726a3u64;
-    (gz.1[0usize..0usize + 5usize]).copy_from_slice(&[0u64; 5usize]);
+    (gz.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
     gz.1[0usize] = 1u64;
     let mut q2: [u64; 15] =
         [4496295042185355u64,
@@ -1251,6 +1310,252 @@ pub fn point_add(out: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
             &mut tmp
         );
         point_add(out, out, &mut tmp)
+    }
+}
+
+#[inline] fn point_mul_g_double_vartime(
+    out: &mut [u64],
+    scalar1: &mut [u64],
+    scalar2: &mut [u64],
+    q2: &mut [u64]
+) ->
+    ()
+{
+    let mut q1: [u64; 15] = [0u64; 15usize];
+    let gx: (&mut [u64], &mut [u64]) = (&mut q1).split_at_mut(0usize);
+    let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
+    let gz: (&mut [u64], &mut [u64]) = gy.1.split_at_mut(5usize);
+    gy.0[0usize] = 0x2815b16f81798u64;
+    gy.0[1usize] = 0xdb2dce28d959fu64;
+    gy.0[2usize] = 0xe870b07029bfcu64;
+    gy.0[3usize] = 0xbbac55a06295cu64;
+    gy.0[4usize] = 0x79be667ef9dcu64;
+    gz.0[0usize] = 0x7d08ffb10d4b8u64;
+    gz.0[1usize] = 0x48a68554199c4u64;
+    gz.0[2usize] = 0xe1108a8fd17b4u64;
+    gz.0[3usize] = 0xc4655da4fbfc0u64;
+    gz.0[4usize] = 0x483ada7726a3u64;
+    (gz.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
+    gz.1[0usize] = 1u64;
+    let mut table2: [u64; 480] = [0u64; 480usize];
+    let mut tmp: [u64; 15] = [0u64; 15usize];
+    let t0: (&mut [u64], &mut [u64]) = (&mut table2).split_at_mut(0usize);
+    let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(15usize);
+    make_point_at_inf(t1.0);
+    (t1.1[0usize..15usize]).copy_from_slice(&q2[0usize..15usize]);
+    for i in 0u32..15u32
+    {
+        let t11: (&mut [u64], &mut [u64]) =
+            t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(15u32) as usize);
+        point_double(&mut tmp, t11.1);
+        (t11.0[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(15u32) as usize..2u32.wrapping_mul(
+            i
+        ).wrapping_add(2u32).wrapping_mul(15u32)
+        as
+        usize
+        +
+        15usize]).copy_from_slice(&(&mut tmp)[0usize..15usize]);
+        let t2: (&mut [u64], &mut [u64]) =
+            t11.1.split_at_mut(
+                2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(15u32) as usize
+                -
+                i.wrapping_add(1u32).wrapping_mul(15u32) as usize
+            );
+        point_add(&mut tmp, q2, t2.1);
+        (t11.0[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(15u32) as usize..2u32.wrapping_mul(
+            i
+        ).wrapping_add(3u32).wrapping_mul(15u32)
+        as
+        usize
+        +
+        15usize]).copy_from_slice(&(&mut tmp)[0usize..15usize])
+    };
+    let mut tmp0: [u64; 15] = [0u64; 15usize];
+    let i: u32 = 255u32;
+    let bits_c: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar1, i, 5u32);
+    let bits_l32: u32 = bits_c as u32;
+    let a_bits_l: &[u64] =
+        &mut
+        (&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(15u32)
+        as
+        usize..];
+    (out[0usize..15usize]).copy_from_slice(&a_bits_l[0usize..15usize]);
+    let i0: u32 = 255u32;
+    let bits_c0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar2, i0, 5u32);
+    let bits_l320: u32 = bits_c0 as u32;
+    let a_bits_l0: (&[u64], &[u64]) = t1.0.split_at(bits_l320.wrapping_mul(15u32) as usize);
+    ((&mut tmp0)[0usize..15usize]).copy_from_slice(&a_bits_l0.1[0usize..15usize]);
+    point_add(out, out, &mut tmp0);
+    let mut tmp1: [u64; 15] = [0u64; 15usize];
+    for i1 in 0u32..51u32
+    {
+        for i2 in 0u32..5u32 { point_double(out, out) };
+        let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
+        let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar2, k, 5u32);
+        let bits_l321: u32 = bits_l as u32;
+        let a_bits_l1: (&[u64], &[u64]) =
+            a_bits_l0.1.split_at(
+                bits_l321.wrapping_mul(15u32) as usize - bits_l320.wrapping_mul(15u32) as usize
+            );
+        ((&mut tmp1)[0usize..15usize]).copy_from_slice(&a_bits_l1.1[0usize..15usize]);
+        point_add(out, out, &mut tmp1);
+        let k0: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
+        let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar1, k0, 5u32);
+        let bits_l322: u32 = bits_l0 as u32;
+        let a_bits_l2: &[u64] =
+            &mut
+            (&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l322.wrapping_mul(
+                15u32
+            )
+            as
+            usize..];
+        ((&mut tmp1)[0usize..15usize]).copy_from_slice(&a_bits_l2[0usize..15usize]);
+        point_add(out, out, &mut tmp1)
+    }
+}
+
+#[inline] fn point_mul_g_double_split_lambda_table(
+    out: &mut [u64],
+    r1: &mut [u64],
+    r2: &mut [u64],
+    r3: &mut [u64],
+    r4: &mut [u64],
+    p2: &mut [u64],
+    is_negate1: bool,
+    is_negate2: bool,
+    is_negate3: bool,
+    is_negate4: bool
+) ->
+    ()
+{
+    let mut table2: [u64; 480] = [0u64; 480usize];
+    let mut tmp: [u64; 15] = [0u64; 15usize];
+    let t0: (&mut [u64], &mut [u64]) = (&mut table2).split_at_mut(0usize);
+    let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(15usize);
+    make_point_at_inf(t1.0);
+    (t1.1[0usize..15usize]).copy_from_slice(&p2[0usize..15usize]);
+    for i in 0u32..15u32
+    {
+        let t11: (&mut [u64], &mut [u64]) =
+            t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(15u32) as usize);
+        point_double(&mut tmp, t11.1);
+        (t11.0[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(15u32) as usize..2u32.wrapping_mul(
+            i
+        ).wrapping_add(2u32).wrapping_mul(15u32)
+        as
+        usize
+        +
+        15usize]).copy_from_slice(&(&mut tmp)[0usize..15usize]);
+        let t2: (&mut [u64], &mut [u64]) =
+            t11.1.split_at_mut(
+                2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(15u32) as usize
+                -
+                i.wrapping_add(1u32).wrapping_mul(15u32) as usize
+            );
+        point_add(&mut tmp, p2, t2.1);
+        (t11.0[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(15u32) as usize..2u32.wrapping_mul(
+            i
+        ).wrapping_add(3u32).wrapping_mul(15u32)
+        as
+        usize
+        +
+        15usize]).copy_from_slice(&(&mut tmp)[0usize..15usize])
+    };
+    let mut tmp0: [u64; 15] = [0u64; 15usize];
+    let mut tmp1: [u64; 15] = [0u64; 15usize];
+    let i: u32 = 125u32;
+    let bits_c: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r1, i, 5u32);
+    let bits_l32: u32 = bits_c as u32;
+    let a_bits_l: &[u64] =
+        &mut
+        (&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(15u32)
+        as
+        usize..];
+    (out[0usize..15usize]).copy_from_slice(&a_bits_l[0usize..15usize]);
+    point_negate_conditional_vartime(out, is_negate1);
+    let i0: u32 = 125u32;
+    let bits_c0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r2, i0, 5u32);
+    let bits_l320: u32 = bits_c0 as u32;
+    let a_bits_l0: &[u64] =
+        &mut
+        (&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l320.wrapping_mul(15u32)
+        as
+        usize..];
+    ((&mut tmp1)[0usize..15usize]).copy_from_slice(&a_bits_l0[0usize..15usize]);
+    point_negate_conditional_vartime(&mut tmp1, is_negate2);
+    point_mul_lambda_inplace(&mut tmp1);
+    point_add(out, out, &mut tmp1);
+    let mut tmp10: [u64; 15] = [0u64; 15usize];
+    let i1: u32 = 125u32;
+    let bits_c1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r3, i1, 5u32);
+    let bits_l321: u32 = bits_c1 as u32;
+    let a_bits_l1: (&[u64], &[u64]) = t1.0.split_at(bits_l321.wrapping_mul(15u32) as usize);
+    ((&mut tmp0)[0usize..15usize]).copy_from_slice(&a_bits_l1.1[0usize..15usize]);
+    point_negate_conditional_vartime(&mut tmp0, is_negate3);
+    let i2: u32 = 125u32;
+    let bits_c2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r4, i2, 5u32);
+    let bits_l322: u32 = bits_c2 as u32;
+    let a_bits_l2: (&[u64], &[u64]) =
+        a_bits_l1.1.split_at(
+            bits_l322.wrapping_mul(15u32) as usize - bits_l321.wrapping_mul(15u32) as usize
+        );
+    ((&mut tmp10)[0usize..15usize]).copy_from_slice(&a_bits_l2.1[0usize..15usize]);
+    point_negate_conditional_vartime(&mut tmp10, is_negate4);
+    point_mul_lambda_inplace(&mut tmp10);
+    point_add(&mut tmp0, &mut tmp0, &mut tmp10);
+    point_add(out, out, &mut tmp0);
+    let mut tmp2: [u64; 15] = [0u64; 15usize];
+    for i3 in 0u32..25u32
+    {
+        for i4 in 0u32..5u32 { point_double(out, out) };
+        let k: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+        let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r4, k, 5u32);
+        let bits_l323: u32 = bits_l as u32;
+        let a_bits_l3: (&[u64], &[u64]) =
+            a_bits_l2.1.split_at(
+                bits_l323.wrapping_mul(15u32) as usize - bits_l322.wrapping_mul(15u32) as usize
+            );
+        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l3.1[0usize..15usize]);
+        point_negate_conditional_vartime(&mut tmp2, is_negate4);
+        point_mul_lambda_inplace(&mut tmp2);
+        point_add(out, out, &mut tmp2);
+        let k0: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+        let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r3, k0, 5u32);
+        let bits_l324: u32 = bits_l0 as u32;
+        let a_bits_l4: (&[u64], &[u64]) =
+            a_bits_l3.1.split_at(
+                bits_l324.wrapping_mul(15u32) as usize - bits_l323.wrapping_mul(15u32) as usize
+            );
+        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l4.1[0usize..15usize]);
+        point_negate_conditional_vartime(&mut tmp2, is_negate3);
+        point_add(out, out, &mut tmp2);
+        let k1: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+        let bits_l1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r2, k1, 5u32);
+        let bits_l325: u32 = bits_l1 as u32;
+        let a_bits_l5: &[u64] =
+            &mut
+            (&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l325.wrapping_mul(
+                15u32
+            )
+            as
+            usize..];
+        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l5[0usize..15usize]);
+        point_negate_conditional_vartime(&mut tmp2, is_negate2);
+        point_mul_lambda_inplace(&mut tmp2);
+        point_add(out, out, &mut tmp2);
+        let k2: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
+        let bits_l2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r1, k2, 5u32);
+        let bits_l326: u32 = bits_l2 as u32;
+        let a_bits_l6: &[u64] =
+            &mut
+            (&crate::hacl::k256_precomptable::precomp_basepoint_table_w5)[bits_l326.wrapping_mul(
+                15u32
+            )
+            as
+            usize..];
+        ((&mut tmp2)[0usize..15usize]).copy_from_slice(&a_bits_l6[0usize..15usize]);
+        point_negate_conditional_vartime(&mut tmp2, is_negate1);
+        point_add(out, out, &mut tmp2)
     }
 }
 
@@ -1376,7 +1681,7 @@ pub fn ecdsa_verify_hashed_msg(m: &mut [u8], public_key: &mut [u8], signature: &
     let is_rs_valid: bool = is_r_valid && is_s_valid;
     load_qelem_modq(m_q.1, m);
     if ! (is_pk_valid && is_rs_valid)
-    { falsebool }
+    { false }
     else
     {
         let mut sinv: [u64; 4] = [0u64; 4usize];
@@ -1395,7 +1700,7 @@ pub fn ecdsa_verify_hashed_msg(m: &mut [u8], public_key: &mut [u8], signature: &
         crate::hacl::bignum_k256::fnormalize(&mut tmp1, pz.1);
         let b: bool = crate::hacl::bignum_k256::is_felem_zero_vartime(&mut tmp1);
         if b
-        { falsebool }
+        { false }
         else
         {
             let x: (&mut [u64], &mut [u64]) = pz.0.split_at_mut(0usize);
@@ -1423,10 +1728,10 @@ pub fn ecdsa_verify_hashed_msg(m: &mut [u8], public_key: &mut [u8], signature: &
                     fmul_eq_vartime(&mut tmp_q, z.1, &mut tmp_x)
                 }
                 else
-                { falsebool }
+                { false }
             }
             else
-            { truebool }
+            { true }
         }
     }
 }
@@ -1451,13 +1756,13 @@ pub fn secp256k1_ecdsa_signature_normalize(signature: &mut [u8]) -> bool
     let s: (&mut [u8], &mut [u8]) = signature.split_at_mut(32usize);
     let is_sk_valid: bool = load_qelem_vartime(&mut s_q, s.1);
     if ! is_sk_valid
-    { falsebool }
+    { false }
     else
     {
         let is_sk_lt_q_halved: bool = is_qelem_le_q_halved_vartime(&mut s_q);
         qnegate_conditional_vartime(&mut s_q, ! is_sk_lt_q_halved);
         store_qelem(&mut s.0[32usize..], &mut s_q);
-        truebool
+        true
     }
 }
 
@@ -1479,7 +1784,7 @@ pub fn secp256k1_ecdsa_sign_hashed_msg(
     bool
 {
     let b: bool = ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
-    if b { secp256k1_ecdsa_signature_normalize(signature) } else { falsebool }
+    if b { secp256k1_ecdsa_signature_normalize(signature) } else { false }
 }
 
 pub fn secp256k1_ecdsa_sign_sha256(
@@ -1505,10 +1810,7 @@ pub fn secp256k1_ecdsa_verify_hashed_msg(
     bool
 {
     let is_s_normalized: bool = secp256k1_ecdsa_is_signature_normalized(signature);
-    if ! is_s_normalized
-    { falsebool }
-    else
-    { ecdsa_verify_hashed_msg(msgHash, public_key, signature) }
+    if ! is_s_normalized { false } else { ecdsa_verify_hashed_msg(msgHash, public_key, signature) }
 }
 
 pub fn secp256k1_ecdsa_verify_sha256(
@@ -1529,20 +1831,18 @@ pub fn public_key_uncompressed_to_raw(pk_raw: &mut [u8], pk: &mut [u8]) -> bool
 {
     let pk0: u8 = pk[0usize];
     if pk0 != 0x04u8
-    { falsebool }
+    { false }
     else
     {
-        (pk_raw[0usize..0usize + 64usize]).copy_from_slice(
-            &(&mut pk[1usize..])[0usize..0usize + 64usize]
-        );
-        truebool
+        (pk_raw[0usize..64usize]).copy_from_slice(&(&mut pk[1usize..])[0usize..64usize]);
+        true
     }
 }
 
 pub fn public_key_uncompressed_from_raw(pk: &mut [u8], pk_raw: &mut [u8]) -> ()
 {
     pk[0usize] = 0x04u8;
-    (pk[1usize..1usize + 64usize]).copy_from_slice(&pk_raw[0usize..0usize + 64usize])
+    (pk[1usize..1usize + 64usize]).copy_from_slice(&pk_raw[0usize..64usize])
 }
 
 pub fn public_key_compressed_to_raw(pk_raw: &mut [u8], pk: &mut [u8]) -> bool
@@ -1553,7 +1853,7 @@ pub fn public_key_compressed_to_raw(pk_raw: &mut [u8], pk: &mut [u8]) -> bool
     let b: bool = aff_point_decompress_vartime(&mut xa, &mut ya, pk_xb.0);
     if b
     {
-        (pk_raw[0usize..0usize + 32usize]).copy_from_slice(&pk_xb.1[0usize..0usize + 32usize]);
+        (pk_raw[0usize..32usize]).copy_from_slice(&pk_xb.1[0usize..32usize]);
         crate::hacl::bignum_k256::store_felem(&mut pk_raw[32usize..], &mut ya)
     };
     b
@@ -1567,7 +1867,7 @@ pub fn public_key_compressed_from_raw(pk: &mut [u8], pk_raw: &mut [u8]) -> ()
     let is_pk_y_odd: bool = x0 & 1u8 == 1u8;
     let ite: u8 = if is_pk_y_odd { 0x03u8 } else { 0x02u8 };
     pk[0usize] = ite;
-    (pk[1usize..1usize + 32usize]).copy_from_slice(&pk_y.0[0usize..0usize + 32usize])
+    (pk[1usize..1usize + 32usize]).copy_from_slice(&pk_y.0[0usize..32usize])
 }
 
 pub fn is_public_key_valid(public_key: &mut [u8]) -> bool
@@ -1623,7 +1923,7 @@ pub fn ecdh(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key: &mut
     let is_sk_valid: u64 = is_b_valid;
     if is_pk_valid
     {
-        crate::hacl::impl_k256_pointmul::point_mul(sk.0, sk.1, ss.0);
+        point_mul(sk.0, sk.1, ss.0);
         point_store(shared_secret, sk.0)
     };
     is_sk_valid == 0xFFFFFFFFFFFFFFFFu64 && is_pk_valid

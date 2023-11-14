@@ -100,7 +100,7 @@
 
 #[inline] fn chacha20_core_32(k: &mut [u32], ctx: &mut [u32], ctr: u32) -> ()
 {
-    (k[0usize..0usize + 16usize]).copy_from_slice(&ctx[0usize..0usize + 16usize]);
+    (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = 1u32.wrapping_mul(ctr);
     let cv: u32 = ctr_u32;
     k[12usize] = (k[12usize]).wrapping_add(cv);
@@ -201,8 +201,8 @@ pub fn chacha20_encrypt_32(
     {
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(64u32) as usize);
         let mut plain: [u8; 64] = [0u8; 64usize];
-        ((&mut plain)[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut text[nb.wrapping_mul(64u32) as usize..])[0usize..0usize + rem as usize]
+        ((&mut plain)[0usize..rem as usize]).copy_from_slice(
+            &(&mut text[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [u32; 16] = [0u32; 16usize];
         chacha20_core_32(&mut k, &mut ctx, nb);
@@ -219,8 +219,8 @@ pub fn chacha20_encrypt_32(
                 y
             )
         };
-        (uu____2.1[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut (&mut plain)[0usize..])[0usize..0usize + rem as usize]
+        (uu____2.1[0usize..rem as usize]).copy_from_slice(
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }
@@ -264,8 +264,8 @@ pub fn chacha20_decrypt_32(
     {
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(64u32) as usize);
         let mut plain: [u8; 64] = [0u8; 64usize];
-        ((&mut plain)[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut cipher[nb.wrapping_mul(64u32) as usize..])[0usize..0usize + rem as usize]
+        ((&mut plain)[0usize..rem as usize]).copy_from_slice(
+            &(&mut cipher[nb.wrapping_mul(64u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [u32; 16] = [0u32; 16usize];
         chacha20_core_32(&mut k, &mut ctx, nb);
@@ -282,8 +282,8 @@ pub fn chacha20_decrypt_32(
                 y
             )
         };
-        (uu____2.1[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut (&mut plain)[0usize..])[0usize..0usize + rem as usize]
+        (uu____2.1[0usize..rem as usize]).copy_from_slice(
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }

@@ -137,7 +137,7 @@
 ) ->
     ()
 {
-    (k[0usize..0usize + 16usize]).copy_from_slice(&ctx[0usize..0usize + 16usize]);
+    (k[0usize..16usize]).copy_from_slice(&ctx[0usize..16usize]);
     let ctr_u32: u32 = 4u32.wrapping_mul(ctr);
     let cv: crate::lib::intvector_intrinsics::vec128 =
         crate::lib::intvector_intrinsics::vec128_load32(ctr_u32);
@@ -389,8 +389,8 @@ pub fn chacha20_encrypt_128(
     {
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(256u32) as usize);
         let mut plain: [u8; 256] = [0u8; 256usize];
-        ((&mut plain)[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut text[nb.wrapping_mul(256u32) as usize..])[0usize..0usize + rem as usize]
+        ((&mut plain)[0usize..rem as usize]).copy_from_slice(
+            &(&mut text[nb.wrapping_mul(256u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [crate::lib::intvector_intrinsics::vec128; 16] =
             [crate::lib::intvector_intrinsics::vec128_zero; 16usize];
@@ -536,8 +536,8 @@ pub fn chacha20_encrypt_128(
                 y
             )
         };
-        (uu____2.1[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut (&mut plain)[0usize..])[0usize..0usize + rem as usize]
+        (uu____2.1[0usize..rem as usize]).copy_from_slice(
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }
@@ -711,8 +711,8 @@ pub fn chacha20_decrypt_128(
     {
         let uu____2: (&mut [u8], &mut [u8]) = out.split_at_mut(nb.wrapping_mul(256u32) as usize);
         let mut plain: [u8; 256] = [0u8; 256usize];
-        ((&mut plain)[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut cipher[nb.wrapping_mul(256u32) as usize..])[0usize..0usize + rem as usize]
+        ((&mut plain)[0usize..rem as usize]).copy_from_slice(
+            &(&mut cipher[nb.wrapping_mul(256u32) as usize..])[0usize..rem as usize]
         );
         let mut k: [crate::lib::intvector_intrinsics::vec128; 16] =
             [crate::lib::intvector_intrinsics::vec128_zero; 16usize];
@@ -858,8 +858,8 @@ pub fn chacha20_decrypt_128(
                 y
             )
         };
-        (uu____2.1[0usize..0usize + rem as usize]).copy_from_slice(
-            &(&mut (&mut plain)[0usize..])[0usize..0usize + rem as usize]
+        (uu____2.1[0usize..rem as usize]).copy_from_slice(
+            &(&mut (&mut plain)[0usize..])[0usize..rem as usize]
         )
     }
 }

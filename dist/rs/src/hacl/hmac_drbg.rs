@@ -12,5 +12,5 @@ pub fn uu___is_State(a: crate::spec::hash_definitions::hash_alg, projectee: stat
 {
     crate::lowstar::ignore::ignore::<crate::spec::hash_definitions::hash_alg>(a);
     crate::lowstar::ignore::ignore::<state>(projectee);
-    truebool
+    true
 }
