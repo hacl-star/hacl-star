@@ -359,9 +359,9 @@ let absorb_next (#a:keccak_alg) (#m:m_spec{is_supported m})
 noextract
 let load_last_blocks (rem:size_nat{rem < 256})
                      (b:lseq uint8 rem)
-                     (delimitedSuffix:byte_t) :
+                     (delimitedSuffix:byte_t)
+                     (lastBlock:lseq uint8 256) :
                      lseq uint8 256 =
-  let lastBlock = create 256 (u8 0) in
   let lastBlock = update_sub lastBlock 0 rem b in
   lastBlock.[rem] <- byte_to_uint8 delimitedSuffix
 
@@ -369,32 +369,36 @@ noextract
 let load_last_block1 (#m:m_spec{lanes m == 1})
                      (rem:size_nat{rem < 256})
                      (b:multiseq (lanes m) rem)
-                     (delimitedSuffix:byte_t) :
+                     (delimitedSuffix:byte_t)
+                     (b':multiseq (lanes m) 256) :
                      multiseq (lanes m) 256 =
   let b = b.(|0|) in
-  ntup1 (load_last_blocks rem b delimitedSuffix)
+  let b' = b'.(|0|) in
+  ntup1 (load_last_blocks rem b delimitedSuffix b')
 
 noextract
 let load_last_block4 (#m:m_spec{lanes m == 4})
                      (rem:size_nat{rem < 256})
                      (b:multiseq (lanes m) rem)
-                     (delimitedSuffix:byte_t) :
+                     (delimitedSuffix:byte_t)
+                     (b':multiseq (lanes m) 256) :
                      multiseq (lanes m) 256 =
-  let l0 = load_last_blocks rem b.(|0|) delimitedSuffix in
-  let l1 = load_last_blocks rem b.(|1|) delimitedSuffix in
-  let l2 = load_last_blocks rem b.(|2|) delimitedSuffix in
-  let l3 = load_last_blocks rem b.(|3|) delimitedSuffix in
+  let l0 = load_last_blocks rem b.(|0|) delimitedSuffix b'.(|0|) in
+  let l1 = load_last_blocks rem b.(|1|) delimitedSuffix b'.(|1|) in
+  let l2 = load_last_blocks rem b.(|2|) delimitedSuffix b'.(|2|) in
+  let l3 = load_last_blocks rem b.(|3|) delimitedSuffix b'.(|3|) in
   ntup4 (l0, (l1, (l2, l3)))
 
 noextract
 let load_last_block (#m:m_spec{is_supported m})
                     (rem:size_nat{rem < 256})
                     (b:multiseq (lanes m) rem)
-                    (delimitedSuffix:byte_t) :
+                    (delimitedSuffix:byte_t)
+                    (b':multiseq (lanes m) 256) :
                     multiseq (lanes m) 256 =
   match lanes m with
-  | 1 -> load_last_block1 #m rem b delimitedSuffix
-  | 4 -> load_last_block4 #m rem b delimitedSuffix
+  | 1 -> load_last_block1 #m rem b delimitedSuffix b'
+  | 4 -> load_last_block4 #m rem b delimitedSuffix b'
 
 val absorb_last:
     #a:keccak_alg
@@ -407,7 +411,7 @@ val absorb_last:
   Tot (state m)
 
 let absorb_last #a #m delimitedSuffix rateInBytes rem input s =
-  let lastBlock = load_last_block #m rem input delimitedSuffix in
+  let lastBlock = load_last_block #m rem input delimitedSuffix (next_block_seq_zero m) in
   let s = loadState #a #m lastBlock s in
   let s =
     if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
