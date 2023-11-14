@@ -897,6 +897,13 @@ let aux (a b c:int)
   : Lemma (requires 0 <= b /\ c < a)
           (ensures 0 <= a + b -c) = ()
 
+// The proof below fails to replay hints. And, when hints have been
+// used for the file, the query ends up failing, yet it succeeds when
+// hints are disabled. This is puzzling but something that's been
+// observed elsewhere, probably just due to Z3 randomness. In any case,
+// restarting the solver seems to avoid the problem...
+#restart-solver
+
 #push-options "--z3rlimit 100 --fuel 0 --ifuel 0 --split_queries always"
 let lemma_barrett_reduce' x =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
