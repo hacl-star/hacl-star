@@ -646,7 +646,7 @@ let create16 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
   let h1 = ST.get () in
   assert (Seq.equal (as_seq h1 st) (Seq.create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15))
 
-#set-options "--z3rlimit 400 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let create32 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31 =
   let h0 = ST.get () in
@@ -666,6 +666,8 @@ let create32 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17
   st.(13ul) <- v13;
   st.(14ul) <- v14;
   st.(15ul) <- v15;
+  let h1 = ST.get () in
+  assert (modifies (loc st) h0 h1);
   st.(16ul) <- v16;
   st.(17ul) <- v17;
   st.(18ul) <- v18;
@@ -683,5 +685,4 @@ let create32 #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17
   st.(30ul) <- v30;
   st.(31ul) <- v31;
   let h1 = ST.get () in
-  assert (Seq.equal (as_seq h1 st) (Seq.create32 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31));
-  admit()
+  assert (Seq.equal (as_seq h1 st) (Seq.create32 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31))

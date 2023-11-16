@@ -746,8 +746,6 @@ let alloc_multi1 m =
   Lib.NTuple.eq_intro (as_seq_multi h0 b) (next_block_seq_zero m);
   b
 
-module B = LowStar.Buffer
-
 inline_for_extraction noextract
 val alloc_multi4: m:m_spec{lanes m == 4} ->
   StackInline (multibuf (lanes m) 256ul)
