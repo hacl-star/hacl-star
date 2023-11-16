@@ -15,7 +15,7 @@
 #include "sha2_vectors.h"
 #include "test_helpers.h"
 
-typedef Hacl_Hash_SHA2_state_sha2_256 sha2_state;
+typedef Hacl_Hash_SHA2_state_t_256 sha2_state;
 
 int
 main()

@@ -35,19 +35,19 @@ inline_for_extraction noextract
 let hacl_sha2_512 = hacl_md SHA2_512
 
 inline_for_extraction noextract
-let state_t_224 = state_t SHA2_224
+let state_224 = state_t SHA2_224
 inline_for_extraction noextract
-let state_t_256 = state_t SHA2_256
+let state_256 = state_t SHA2_256
 inline_for_extraction noextract
-let state_t_384 = state_t SHA2_384
+let state_384 = state_t SHA2_384
 inline_for_extraction noextract
-let state_t_512 = state_t SHA2_512
+let state_512 = state_t SHA2_512
 
 /// Type abbreviations - for pretty code generation
-let state_sha2_224 = Hacl.Streaming.MD.state_32
-let state_sha2_256 = Hacl.Streaming.MD.state_32
-let state_sha2_384 = Hacl.Streaming.MD.state_64
-let state_sha2_512 = Hacl.Streaming.MD.state_64
+let state_t_224 = Hacl.Streaming.MD.state_32
+let state_t_256 = Hacl.Streaming.MD.state_32
+let state_t_384 = Hacl.Streaming.MD.state_64
+let state_t_512 = Hacl.Streaming.MD.state_64
 
 open Lib.Buffer
 open Lib.IntTypes
@@ -62,27 +62,27 @@ module ST = FStar.HyperStack.ST
 // --------
 
 inline_for_extraction noextract
-let alloca_256 = F.alloca hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
+let alloca_256 = F.alloca hacl_sha2_256 () (state_256.s ()) (G.erased unit)
 
 [@@ Comment
 "Allocate initial state for the SHA2_256 hash. The state is to be freed by
 calling `free_256`."]
-let malloc_256 = F.malloc hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
+let malloc_256 = F.malloc hacl_sha2_256 () (state_256.s ()) (G.erased unit)
 
 [@@ Comment
 "Copies the state passed as argument into a newly allocated state (deep copy).
 The state is to be freed by calling `free_256`. Cloning the state this way is
 useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch."]
-let copy_256 = F.copy hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
+let copy_256 = F.copy hacl_sha2_256 () (state_256.s ()) (G.erased unit)
 
 [@@ Comment
 "Reset an existing state to the initial hash state with empty data."]
-let reset_256 = F.reset hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+let reset_256 = F.reset hacl_sha2_256 (G.hide ()) (state_256.s ()) (G.erased unit)
 
 [@@ CInline ]
 private
-let update_224_256 = F.update hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+let update_224_256 = F.update hacl_sha2_256 (G.hide ()) (state_256.s ()) (G.erased unit)
 
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns 0 for
@@ -91,20 +91,20 @@ success, or 1 if the combined length of all of the data passed to `update_256`
 
 This function is identical to the update function for SHA2_224.";
 ]
-let update_256: F.update_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit) = fun state input input_len -> update_224_256 state input input_len
+let update_256: F.update_st hacl_sha2_256 (G.hide ()) (state_256.s ()) (G.erased unit) = fun state input input_len -> update_224_256 state input input_len
 
 [@@ Comment
 "Write the resulting hash into `output`, an array of 32 bytes. The state remains
 valid after a call to `digest_256`, meaning the user may feed more data into
 the hash via `update_256`. (The digest_256 function operates on an internal copy of
 the state and therefore does not invalidate the client-held state `p`.)"]
-let digest_256 = F.digest hacl_sha2_256 () (state_t_256.s ()) (G.erased unit)
+let digest_256 = F.digest hacl_sha2_256 () (state_256.s ()) (G.erased unit)
 
 [@@ Comment
 "Free a state allocated with `malloc_256`.
 
 This function is identical to the free function for SHA2_224."]
-let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit)
+let free_256 = F.free hacl_sha2_256 (G.hide ()) (state_256.s ()) (G.erased unit)
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `output`, an array of 32 bytes."]
@@ -125,18 +125,18 @@ let hash_256 output input input_len =
 // --------
 
 inline_for_extraction noextract
-let alloca_224 = F.alloca hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let malloc_224 = F.malloc hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let reset_224 = F.reset hacl_sha2_224 (G.hide ()) (state_t_224.s ()) (G.erased unit)
+let alloca_224 = F.alloca hacl_sha2_224 () (state_224.s ()) (G.erased unit)
+let malloc_224 = F.malloc hacl_sha2_224 () (state_224.s ()) (G.erased unit)
+let reset_224 = F.reset hacl_sha2_224 (G.hide ()) (state_224.s ()) (G.erased unit)
 // We assume verified clients will rely on Spec.SHA2.Lemmas to prove that update_224 has the same effect as update_256.
-let update_224: F.update_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit) = fun state input input_len -> update_224_256 state input input_len
+let update_224: F.update_st hacl_sha2_256 (G.hide ()) (state_256.s ()) (G.erased unit) = fun state input input_len -> update_224_256 state input input_len
 
 [@@ Comment
 "Write the resulting hash into `output`, an array of 28 bytes. The state remains
 valid after a call to `digest_224`, meaning the user may feed more data into
 the hash via `update_224`."]
-let digest_224 = F.digest hacl_sha2_224 () (state_t_224.s ()) (G.erased unit)
-let free_224: F.free_st hacl_sha2_256 (G.hide ()) (state_t_256.s ()) (G.erased unit) = fun state -> free_256 state
+let digest_224 = F.digest hacl_sha2_224 () (state_224.s ()) (G.erased unit)
+let free_224: F.free_st hacl_sha2_256 (G.hide ()) (state_256.s ()) (G.erased unit) = fun state -> free_256 state
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `output`, an array of 28 bytes."]
@@ -157,21 +157,21 @@ let hash_224 output input input_len =
 // --------
 
 inline_for_extraction noextract
-let alloca_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
-let malloc_512 = F.malloc hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+let alloca_512 = F.alloca hacl_sha2_512 () (state_512.s ()) (G.erased unit)
+let malloc_512 = F.malloc hacl_sha2_512 () (state_512.s ()) (G.erased unit)
 
 [@@ Comment
 "Copies the state passed as argument into a newly allocated state (deep copy).
 The state is to be freed by calling `free_512`. Cloning the state this way is
 useful, for instance, if your control-flow diverges and you need to feed
 more (different) data into the hash in each branch."]
-let copy_512 = F.copy hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+let copy_512 = F.copy hacl_sha2_512 () (state_512.s ()) (G.erased unit)
 
-let reset_512 = F.reset hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
+let reset_512 = F.reset hacl_sha2_512 (G.hide ()) (state_512.s ()) (G.erased unit)
 
 [@@ CInline ]
 private
-let update_384_512 = F.update hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
+let update_384_512 = F.update hacl_sha2_512 (G.hide ()) (state_512.s ()) (G.erased unit)
 [@@ Comment
 "Feed an arbitrary amount of data into the hash. This function returns 0 for
 success, or 1 if the combined length of all of the data passed to `update_512`
@@ -179,21 +179,21 @@ success, or 1 if the combined length of all of the data passed to `update_512`
 
 This function is identical to the update function for SHA2_384.";
 ]
-let update_512: F.update_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit) = fun state input input_len -> update_384_512 state input input_len
+let update_512: F.update_st hacl_sha2_512 (G.hide ()) (state_512.s ()) (G.erased unit) = fun state input input_len -> update_384_512 state input input_len
 
 [@@ Comment
 "Write the resulting hash into `output`, an array of 64 bytes. The state remains
 valid after a call to `digest_512`, meaning the user may feed more data into
 the hash via `update_512`. (The digest_512 function operates on an internal copy of
 the state and therefore does not invalidate the client-held state `p`.)"]
-let digest_512 = F.digest hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+let digest_512 = F.digest hacl_sha2_512 () (state_512.s ()) (G.erased unit)
 
 [@@ Comment
 "Free a state allocated with `malloc_512`.
 
 This function is identical to the free function for SHA2_384.";
 ]
-let free_512 = F.free hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
+let free_512 = F.free hacl_sha2_512 (G.hide ()) (state_512.s ()) (G.erased unit)
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `output`, an array of 64 bytes."]
@@ -214,18 +214,18 @@ let hash_512 output input input_len =
 // --------
 
 inline_for_extraction noextract
-let alloca_384 = F.alloca hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let malloc_384 = F.malloc hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
-let reset_384 = F.reset hacl_sha2_384 (G.hide ()) (state_t_384.s ()) (G.erased unit)
-let update_384: F.update_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit) = fun state input input_len -> update_384_512 state input input_len
+let alloca_384 = F.alloca hacl_sha2_384 () (state_384.s ()) (G.erased unit)
+let malloc_384 = F.malloc hacl_sha2_384 () (state_384.s ()) (G.erased unit)
+let reset_384 = F.reset hacl_sha2_384 (G.hide ()) (state_384.s ()) (G.erased unit)
+let update_384: F.update_st hacl_sha2_512 (G.hide ()) (state_512.s ()) (G.erased unit) = fun state input input_len -> update_384_512 state input input_len
 
 [@@ Comment
 "Write the resulting hash into `output`, an array of 48 bytes. The state remains
 valid after a call to `digest_384`, meaning the user may feed more data into
 the hash via `update_384`."]
-let digest_384 = F.digest hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
+let digest_384 = F.digest hacl_sha2_384 () (state_384.s ()) (G.erased unit)
 
-let free_384: F.free_st hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit) = fun state -> free_512 state
+let free_384: F.free_st hacl_sha2_512 (G.hide ()) (state_512.s ()) (G.erased unit) = fun state -> free_512 state
 
 [@@ Comment
 "Hash `input`, of len `input_len`, into `output`, an array of 48 bytes."]
