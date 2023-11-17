@@ -1042,3 +1042,332 @@ let absorb #a #m rateInBytes len b delimitedSuffix s =
   let h1 = ST.get() in
   LSeq.eq_intro (as_seq h1 s)
     (V.absorb #a #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
+
+inline_for_extraction noextract
+val alloc_output1: m:m_spec{lanes m == 1}
+  -> outputByteLen:size_t{v outputByteLen > 0} ->
+  StackInline (multibuf (lanes m) outputByteLen)
+  (requires fun h -> True)
+  (ensures  fun h0 b h1 -> live_multi h1 b /\
+    stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)) /\
+    as_seq_multi h1 b == init_b #m (v outputByteLen))
+
+let alloc_output1 m outputByteLen =
+  let b = create outputByteLen (u8 0) in
+  let b = ntup1 b in
+  let h0 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h0 b) (init_b #m (v outputByteLen));
+  b
+
+inline_for_extraction noextract
+val alloc_output4: m:m_spec{lanes m == 4}
+  -> outputByteLen:size_t{v outputByteLen > 0} ->
+  StackInline (multibuf (lanes m) outputByteLen)
+  (requires fun h -> True)
+  (ensures  fun h0 b h1 -> live_multi h1 b /\ internally_disjoint b /\
+    stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)) /\
+    as_seq_multi h1 b == init_b #m (v outputByteLen))
+
+let alloc_output4 m outputByteLen =
+  let b0 = create outputByteLen (u8 0) in
+  let b1 = create outputByteLen (u8 0) in
+  let b2 = create outputByteLen (u8 0) in
+  let b3 = create outputByteLen (u8 0) in
+  let b = ntup4 (b0, (b1, (b2, b3))) in
+  let h0 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h0 b) (init_b #m (v outputByteLen));
+  admit(); //Can't prove (stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)))
+  b
+
+inline_for_extraction noextract
+val alloc_output: m:m_spec{is_supported m}
+  -> outputByteLen:size_t{v outputByteLen > 0} ->
+  StackInline (multibuf (lanes m) outputByteLen)
+  (requires fun h -> True)
+  (ensures  fun h0 b h1 -> live_multi h1 b /\ internally_disjoint b /\
+    stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)) /\
+    as_seq_multi h1 b == init_b #m (v outputByteLen))
+
+let alloc_output m outputByteLen =
+  match lanes m with
+  | 1 -> alloc_output1 m outputByteLen
+  | 4 -> alloc_output4 m outputByteLen
+
+inline_for_extraction noextract
+val update_output1:
+  #m:m_spec{lanes m == 1}
+  -> block:lbuffer uint8 (size (lanes m) *! 256ul)
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> i:size_t{v i < v outputByteLen / v rateInBytes}
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
+    disjoint_multi b block)
+  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\ as_seq_multi h1 b ==
+      V.update_b #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v i) (as_seq_multi h0 b))
+
+let update_output1 #m block rateInBytes outputByteLen i b =
+  let h0 = ST.get() in
+  assert (v i * v rateInBytes < v outputByteLen);
+  assert (v i + 1 <= v outputByteLen / v rateInBytes);
+  assert ((v i + 1) * v rateInBytes <= v outputByteLen);
+  assert (v i * v rateInBytes + v rateInBytes <= v outputByteLen);
+  update_sub b.(|0|) (i *! rateInBytes) rateInBytes (sub block 0ul rateInBytes);
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 b)
+    (V.update_b #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v i) (as_seq_multi h0 b))
+
+inline_for_extraction noextract
+val update_output4:
+  #m:m_spec{lanes m == 4}
+  -> block:lbuffer uint8 (size (lanes m) *! 256ul)
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> i:size_t{v i < v outputByteLen / v rateInBytes}
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
+    disjoint_multi b block)
+  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\ as_seq_multi h1 b ==
+      V.update_b #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v i) (as_seq_multi h0 b))
+
+let update_output4 #m block rateInBytes outputByteLen i b =
+  let h0 = ST.get() in
+  assert (v i * v rateInBytes < v outputByteLen);
+  assert (v i + 1 <= v outputByteLen / v rateInBytes);
+  assert ((v i + 1) * v rateInBytes <= v outputByteLen);
+  assert (v i * v rateInBytes + v rateInBytes <= v outputByteLen);
+  assert (internally_disjoint4 b.(|0|) b.(|1|) b.(|2|) b.(|3|));
+  update_sub b.(|0|) (i *! rateInBytes) rateInBytes (sub block 0ul rateInBytes);
+  update_sub b.(|1|) (i *! rateInBytes) rateInBytes (sub block 256ul rateInBytes);
+  update_sub b.(|2|) (i *! rateInBytes) rateInBytes (sub block 512ul rateInBytes);
+  update_sub b.(|3|) (i *! rateInBytes) rateInBytes (sub block 768ul rateInBytes);
+  loc_multi4 b;
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 b)
+    (V.update_b #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v i) (as_seq_multi h0 b))
+
+inline_for_extraction noextract
+val update_output:
+  #m:m_spec{is_supported m}
+  -> block:lbuffer uint8 (size (lanes m) *! 256ul)
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> i:size_t{v i < v outputByteLen / v rateInBytes}
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
+    disjoint_multi b block)
+  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\ as_seq_multi h1 b ==
+      V.update_b #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v i) (as_seq_multi h0 b))
+
+let update_output #m block rateInBytes outputByteLen i b =
+  match lanes m with
+  | 1 -> update_output1 #m block rateInBytes outputByteLen i b
+  | 4 -> update_output4 #m block rateInBytes outputByteLen i b
+
+inline_for_extraction noextract
+val update_output_last1:
+  #m:m_spec{lanes m == 1}
+  -> block:lbuffer uint8 (size (lanes m) *! 256ul)
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> outRem:size_t{v outRem == v outputByteLen % v rateInBytes}
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
+    disjoint_multi b block)
+  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\ as_seq_multi h1 b ==
+      V.update_b_last #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v outRem) (as_seq_multi h0 b))
+
+let update_output_last1 #m block rateInBytes outputByteLen outRem b =
+  let h0 = ST.get() in
+  update_sub b.(|0|) (outputByteLen -! outRem) outRem (sub block 0ul outRem);
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 b)
+    (V.update_b_last #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v outRem) (as_seq_multi h0 b))
+
+inline_for_extraction noextract
+val update_output_last4:
+  #m:m_spec{lanes m == 4}
+  -> block:lbuffer uint8 (size (lanes m) *! 256ul)
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> outRem:size_t{v outRem == v outputByteLen % v rateInBytes}
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
+    disjoint_multi b block)
+  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\ as_seq_multi h1 b ==
+      V.update_b_last #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v outRem) (as_seq_multi h0 b))
+
+#push-options "--max_fuel 0 --max_ifuel 0  --z3rlimit 200"
+let update_output_last4 #m block rateInBytes outputByteLen outRem b =
+  let h0 = ST.get() in
+  assert (internally_disjoint4 b.(|0|) b.(|1|) b.(|2|) b.(|3|));
+  update_sub b.(|0|) (outputByteLen -! outRem) outRem (sub block 0ul outRem);
+  update_sub b.(|1|) (outputByteLen -! outRem) outRem (sub block 256ul outRem);
+  update_sub b.(|2|) (outputByteLen -! outRem) outRem (sub block 512ul outRem);
+  update_sub b.(|3|) (outputByteLen -! outRem) outRem (sub block 768ul outRem);
+  loc_multi4 b;
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 b)
+    (V.update_b_last #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v outRem) (as_seq_multi h0 b))
+#pop-options
+
+inline_for_extraction noextract
+val update_output_last:
+  #m:m_spec{is_supported m}
+  -> block:lbuffer uint8 (size (lanes m) *! 256ul)
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> outRem:size_t{v outRem == v outputByteLen % v rateInBytes}
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
+    disjoint_multi b block)
+  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\ as_seq_multi h1 b ==
+      V.update_b_last #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v outRem) (as_seq_multi h0 b))
+
+let update_output_last #m block rateInBytes outputByteLen outRem b =
+  match lanes m with
+  | 1 -> update_output_last1 #m block rateInBytes outputByteLen outRem b
+  | 4 -> update_output_last4 #m block rateInBytes outputByteLen outRem b
+
+inline_for_extraction noextract
+val squeeze_inner: #a:keccak_alg -> #m:m_spec{is_supported m}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> i:size_t{v i < v outputByteLen / v rateInBytes}
+  -> s:state_t m
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+  (requires fun h -> live_multi h b /\ live h s /\ internally_disjoint b /\
+    disjoint_multi b s)
+  (ensures  fun h0 _ h1 -> modifies (loc s |+| loc_multi b) h0 h1 /\
+    (let s', b' = 
+      V.squeeze_inner #a #m (v rateInBytes) (v outputByteLen) (v i) (as_seq h0 s, as_seq_multi h0 b) in
+      as_seq h1 s == s' /\
+      as_seq_multi h1 b == b'))
+
+let squeeze_inner #a #m rateInBytes outputByteLen i s b =
+  let h0 = ST.get() in
+  push_frame();
+  let hbuf = create (size (lanes m) *. 32ul *. size (word_length a)) (u8 0) in
+  storeState #a #m s hbuf;
+  update_output #m hbuf rateInBytes outputByteLen i b;
+  if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
+  state_permute m s;
+  pop_frame();
+  let h1 = ST.get() in
+  let s', b' =
+    V.squeeze_inner #a #m (v rateInBytes) (v outputByteLen) (v i) (as_seq h0 s, as_seq_multi h0 b) in
+  LSeq.eq_intro (as_seq h1 s) s';
+  Lib.NTuple.eq_intro (as_seq_multi h1 b) b'
+
+inline_for_extraction noextract
+val squeeze_nblocks:# a:keccak_alg -> #m:m_spec{is_supported m}
+  -> s:state_t m
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+    (requires fun h -> live_multi h b /\ live h s /\ internally_disjoint b /\
+      disjoint_multi b s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc s |+| loc_multi b) h0 h1 /\
+      (let s', b' = 
+        V.squeeze_nblocks #a #m (v rateInBytes) (v outputByteLen) (as_seq h0 s, as_seq_multi h0 b) in
+        as_seq h1 s == s' /\
+        as_seq_multi h1 b == b'))
+
+let squeeze_nblocks #a #m s rateInBytes outputByteLen b =
+  [@ inline_let]
+  let refl h i : GTot ((V.state m) & (V.multiseq (lanes m) (v outputByteLen))) = as_seq h s, as_seq_multi h b in
+  if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
+  [@ inline_let]
+  let footprint i = loc_union (loc s) (loc_multi b) in
+  [@ inline_let]
+  let spec h0 = V.squeeze_inner #a #m (v rateInBytes) (v outputByteLen) in
+  let h0 = ST.get () in
+  loop h0 (outputByteLen /. rateInBytes) (V.squeeze_s m (v rateInBytes) (v outputByteLen)) refl footprint spec
+  (fun i ->
+    Loop.unfold_repeat_gen (v outputByteLen / v rateInBytes)
+      (V.squeeze_s m (v rateInBytes) (v outputByteLen)) (spec h0) (refl h0 0) (v i);
+    squeeze_inner #a #m rateInBytes outputByteLen i s b
+  )
+
+inline_for_extraction noextract
+val squeeze_last:# a:keccak_alg -> #m:m_spec{is_supported m}
+  -> s:state_t m
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+    (requires fun h -> live_multi h b /\ live h s /\ internally_disjoint b /\
+      disjoint_multi b s)
+    (ensures  fun h0 _ h1 ->
+      modifies_multi b h0 h1 /\
+      as_seq_multi h1 b == V.squeeze_last #a #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
+
+#push-options "--max_fuel 0 --max_ifuel 0  --z3rlimit 200"
+let squeeze_last #a #m s rateInBytes outputByteLen b =
+  let h0 = ST.get () in
+  push_frame();
+  let remOut = outputByteLen %. rateInBytes in
+  let hbuf = create (size (lanes m) *. 32ul *. size (word_length a)) (u8 0) in
+  storeState #a #m s hbuf;
+  update_output_last #m hbuf rateInBytes outputByteLen remOut b;
+  pop_frame();
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 b) (V.squeeze_last #a #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
+#pop-options
+
+inline_for_extraction noextract
+val squeeze:# a:keccak_alg -> #m:m_spec{is_supported m}
+  -> s:state_t m
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> outputByteLen:size_t
+  -> b:multibuf (lanes m) outputByteLen ->
+  Stack unit
+    (requires fun h -> live_multi h b /\ live h s /\ internally_disjoint b /\
+      disjoint_multi b s)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc s |+| loc_multi b) h0 h1 /\
+      as_seq_multi h1 b == V.squeeze #a #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
+
+let squeeze #a #m s rateInBytes outputByteLen b =
+  squeeze_nblocks #a #m s rateInBytes outputByteLen b;
+  squeeze_last #a #m s rateInBytes outputByteLen b
+
+inline_for_extraction noextract
+val keccak:# a:keccak_alg -> #m:m_spec{is_supported m}
+  -> rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 2048}
+  -> inputByteLen:size_t
+  -> input:multibuf (lanes m) inputByteLen
+  -> delimitedSuffix:byte_t
+  -> outputByteLen:size_t
+  -> output:multibuf (lanes m) outputByteLen ->
+  Stack unit
+    (requires fun h -> live_multi h input /\ live_multi h output /\
+      internally_disjoint output /\ disjoint_multi_multi input output)
+    (ensures  fun h0 _ h1 ->
+      modifies_multi output h0 h1 /\
+      as_seq_multi h1 output ==
+        V.keccak #a #m (v rate) (v inputByteLen) (as_seq_multi h0 input) delimitedSuffix (v outputByteLen) (as_seq_multi h0 output))
+
+let keccak #a #m rate inputByteLen input delimitedSuffix outputByteLen output =
+  let h0 = ST.get () in
+  push_frame();
+  let rateInBytes = rate /. 8ul in
+  let s = create 25ul (zero_element m) in
+  let h0' = ST.get () in
+  Lib.NTuple.eq_intro (as_seq_multi h0' input) (as_seq_multi h0 input);
+  absorb #a #m rateInBytes inputByteLen input delimitedSuffix s;
+  let h0' = ST.get () in
+  Lib.NTuple.eq_intro (as_seq_multi h0' output) (as_seq_multi h0 output);
+  squeeze #a #m s rateInBytes outputByteLen output;
+  pop_frame();
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 output) (V.keccak #a #m (v rate) (v inputByteLen) (as_seq_multi h0 input) delimitedSuffix (v outputByteLen) (as_seq_multi h0 output))
