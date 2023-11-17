@@ -48,18 +48,18 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_SHA2_sha384_finish =
       foreign "Hacl_Hash_SHA2_sha384_finish"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
-    type hacl_Hash_SHA2_state_sha2_224 = hacl_Streaming_MD_state_32
-    let hacl_Hash_SHA2_state_sha2_224 =
-      typedef hacl_Streaming_MD_state_32 "Hacl_Hash_SHA2_state_sha2_224"
-    type hacl_Hash_SHA2_state_sha2_256 = hacl_Streaming_MD_state_32
-    let hacl_Hash_SHA2_state_sha2_256 =
-      typedef hacl_Streaming_MD_state_32 "Hacl_Hash_SHA2_state_sha2_256"
-    type hacl_Hash_SHA2_state_sha2_384 = hacl_Streaming_MD_state_64
-    let hacl_Hash_SHA2_state_sha2_384 =
-      typedef hacl_Streaming_MD_state_64 "Hacl_Hash_SHA2_state_sha2_384"
-    type hacl_Hash_SHA2_state_sha2_512 = hacl_Streaming_MD_state_64
-    let hacl_Hash_SHA2_state_sha2_512 =
-      typedef hacl_Streaming_MD_state_64 "Hacl_Hash_SHA2_state_sha2_512"
+    type hacl_Hash_SHA2_state_t_224 = hacl_Streaming_MD_state_32
+    let hacl_Hash_SHA2_state_t_224 =
+      typedef hacl_Streaming_MD_state_32 "Hacl_Hash_SHA2_state_t_224"
+    type hacl_Hash_SHA2_state_t_256 = hacl_Streaming_MD_state_32
+    let hacl_Hash_SHA2_state_t_256 =
+      typedef hacl_Streaming_MD_state_32 "Hacl_Hash_SHA2_state_t_256"
+    type hacl_Hash_SHA2_state_t_384 = hacl_Streaming_MD_state_64
+    let hacl_Hash_SHA2_state_t_384 =
+      typedef hacl_Streaming_MD_state_64 "Hacl_Hash_SHA2_state_t_384"
+    type hacl_Hash_SHA2_state_t_512 = hacl_Streaming_MD_state_64
+    let hacl_Hash_SHA2_state_t_512 =
+      typedef hacl_Streaming_MD_state_64 "Hacl_Hash_SHA2_state_t_512"
     let hacl_Hash_SHA2_malloc_256 =
       foreign "Hacl_Hash_SHA2_malloc_256"
         (void @-> (returning (ptr hacl_Streaming_MD_state_32)))

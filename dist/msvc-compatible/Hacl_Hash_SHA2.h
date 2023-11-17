@@ -38,13 +38,13 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
-typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_sha2_224;
+typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_t_224;
 
-typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_sha2_256;
+typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_t_256;
 
-typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_sha2_384;
+typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_t_384;
 
-typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_sha2_512;
+typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_t_512;
 
 /**
 Allocate initial state for the SHA2_256 hash. The state is to be freed by

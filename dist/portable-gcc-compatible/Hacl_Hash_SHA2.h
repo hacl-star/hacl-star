@@ -38,29 +38,29 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
-/* SNIPPET_START: Hacl_Hash_SHA2_state_sha2_224 */
+/* SNIPPET_START: Hacl_Hash_SHA2_state_t_224 */
 
-typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_sha2_224;
+typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_t_224;
 
-/* SNIPPET_END: Hacl_Hash_SHA2_state_sha2_224 */
+/* SNIPPET_END: Hacl_Hash_SHA2_state_t_224 */
 
-/* SNIPPET_START: Hacl_Hash_SHA2_state_sha2_256 */
+/* SNIPPET_START: Hacl_Hash_SHA2_state_t_256 */
 
-typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_sha2_256;
+typedef Hacl_Streaming_MD_state_32 Hacl_Hash_SHA2_state_t_256;
 
-/* SNIPPET_END: Hacl_Hash_SHA2_state_sha2_256 */
+/* SNIPPET_END: Hacl_Hash_SHA2_state_t_256 */
 
-/* SNIPPET_START: Hacl_Hash_SHA2_state_sha2_384 */
+/* SNIPPET_START: Hacl_Hash_SHA2_state_t_384 */
 
-typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_sha2_384;
+typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_t_384;
 
-/* SNIPPET_END: Hacl_Hash_SHA2_state_sha2_384 */
+/* SNIPPET_END: Hacl_Hash_SHA2_state_t_384 */
 
-/* SNIPPET_START: Hacl_Hash_SHA2_state_sha2_512 */
+/* SNIPPET_START: Hacl_Hash_SHA2_state_t_512 */
 
-typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_sha2_512;
+typedef Hacl_Streaming_MD_state_64 Hacl_Hash_SHA2_state_t_512;
 
-/* SNIPPET_END: Hacl_Hash_SHA2_state_sha2_512 */
+/* SNIPPET_END: Hacl_Hash_SHA2_state_t_512 */
 
 /* SNIPPET_START: Hacl_Hash_SHA2_malloc_256 */
 
