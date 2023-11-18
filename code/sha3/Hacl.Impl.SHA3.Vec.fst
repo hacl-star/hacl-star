@@ -185,7 +185,7 @@ let state_theta m s =
 
 #reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
 
-private
+private noextract
 val index_map: #a:Type -> #b:Type -> f:(a -> b) -> l:list a -> i:nat{i < List.Tot.length l} ->
   Lemma (List.Tot.index (List.Tot.map f l) i == f (List.Tot.index l i))
 let rec index_map #a #b f l i =
@@ -316,7 +316,8 @@ let state_iota m s round =
   let c = keccak_rndc.(round) in
   set m s 0ul 0ul (get m s 0ul 0ul ^| (load_element m (secret c)))
 
-private val state_permute:
+inline_for_extraction noextract
+val state_permute:
     m:m_spec
   -> s:state_t m
   -> Stack unit

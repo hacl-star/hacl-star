@@ -659,6 +659,7 @@ REQUIRED_FLAGS	= \
 
 TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 
+
 # Note: we include libintvector.h in C files whenever possible, but fall back to
 # including this header in .h when the public API of a given algorithm (e.g.
 # Poly1305/256) directly refers to a LibIntVector type.
@@ -720,6 +721,7 @@ LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 BUNDLE_FLAGS	=\
   $(BLAKE2_BUNDLE) \
   $(SHA3_BUNDLE) \
+  $(SHA3_VEC_BUNDLE) \
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA2MB_BUNDLE) \
@@ -863,6 +865,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	  -fparentheses \
 	  -fcast-allocations \
 	  -fextern-c \
+	  -dinline -dreachability \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
 	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
@@ -886,6 +889,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst _,.,$*) \
           -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt.* \
+	  -add-include '"krml/internal/compat.h"' \
 	  -add-include '"internal/Hacl_Hash_SHA2.h"' \
 	  -static-header Hacl.Impl.SHA2.Generic \
 	  -fparentheses -fcurly-braces -fno-shadow \
