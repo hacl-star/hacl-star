@@ -142,61 +142,8 @@ bn_slow_precomp(
   uint32_t *a1 = (uint32_t *)alloca((len + len) * sizeof (uint32_t));
   memset(a1, 0U, (len + len) * sizeof (uint32_t));
   memcpy(a1, a, (len + len) * sizeof (uint32_t));
-  uint32_t c0 = 0U;
-  for (uint32_t i0 = 0U; i0 < len; i0++)
-  {
-    uint32_t qj = mu * a1[i0];
-    uint32_t *res_j0 = a1 + i0;
-    uint32_t c = 0U;
-    for (uint32_t i = 0U; i < len / 4U; i++)
-    {
-      uint32_t a_i = n[4U * i];
-      uint32_t *res_i0 = res_j0 + 4U * i;
-      c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c, res_i0);
-      uint32_t a_i0 = n[4U * i + 1U];
-      uint32_t *res_i1 = res_j0 + 4U * i + 1U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i0, qj, c, res_i1);
-      uint32_t a_i1 = n[4U * i + 2U];
-      uint32_t *res_i2 = res_j0 + 4U * i + 2U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i1, qj, c, res_i2);
-      uint32_t a_i2 = n[4U * i + 3U];
-      uint32_t *res_i = res_j0 + 4U * i + 3U;
-      c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c, res_i);
-    }
-    for (uint32_t i = len / 4U * 4U; i < len; i++)
-    {
-      uint32_t a_i = n[i];
-      uint32_t *res_i = res_j0 + i;
-      c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c, res_i);
-    }
-    uint32_t r = c;
-    uint32_t c1 = r;
-    uint32_t *resb = a1 + len + i0;
-    uint32_t res_j = a1[len + i0];
-    c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, c1, res_j, resb);
-  }
-  memcpy(a_mod, a1 + len, (len + len - len) * sizeof (uint32_t));
-  uint32_t c00 = c0;
-  KRML_CHECK_SIZE(sizeof (uint32_t), len);
-  uint32_t *tmp0 = (uint32_t *)alloca(len * sizeof (uint32_t));
-  memset(tmp0, 0U, len * sizeof (uint32_t));
-  uint32_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u32(len, a_mod, n, tmp0);
-  KRML_MAYBE_UNUSED_VAR(c1);
-  uint32_t m = 0U - c00;
-  for (uint32_t i = 0U; i < len; i++)
-  {
-    uint32_t *os = a_mod;
-    uint32_t x = (m & tmp0[i]) | (~m & a_mod[i]);
-    os[i] = x;
-  }
-  KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-  uint32_t *c = (uint32_t *)alloca((len + len) * sizeof (uint32_t));
-  memset(c, 0U, (len + len) * sizeof (uint32_t));
-  KRML_CHECK_SIZE(sizeof (uint32_t), 4U * len);
-  uint32_t *tmp = (uint32_t *)alloca(4U * len * sizeof (uint32_t));
-  memset(tmp, 0U, 4U * len * sizeof (uint32_t));
-  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a_mod, r2, tmp, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c, res);
+  Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32(len, n, mu, a1, a_mod);
+  Hacl_Bignum_Montgomery_bn_to_mont_u32(len, n, mu, r2, a_mod, res);
 }
 
 /**
