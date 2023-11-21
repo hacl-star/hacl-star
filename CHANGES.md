@@ -13,6 +13,14 @@ Each change begins with a version (if applicable) and a timestamp, and then a se
 - Fixed for any bug fixes.
 - Security in case of vulnerabilities.
 
+## 2023-11-21
+
+- Changed the API for more clarity and consistency. Heavy renaming of modules,
+  functions and arguments as well as changes in the order of arguments. Blake2,
+  MD5, SHA-1, SHA-2, SHA-3, Poly1305 and EverCrypt are concerned. See
+  https://github.com/hacl-star/hacl-star/pull/789 for a detailed list of the
+  changes.
+
 ## 2023-05-22
 
 - Change the return code of the Hacl_Streaming_XXX_update family of functions. These
