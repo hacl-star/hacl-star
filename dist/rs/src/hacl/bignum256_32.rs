@@ -270,7 +270,12 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
         let r: u32 = c;
         res_j.0[i.wrapping_add(i) as usize] = r
     };
-    let c0: u32 = crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, res, res, res);
+    let mut a_copy: [u32; 16] = [0u32; 16usize];
+    let mut b_copy: [u32; 16] = [0u32; 16usize];
+    ((&mut a_copy)[0usize..16usize]).copy_from_slice(&res[0usize..16usize]);
+    ((&mut b_copy)[0usize..16usize]).copy_from_slice(&res[0usize..16usize]);
+    let r: u32 = crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, &mut a_copy, &mut b_copy, res);
+    let c0: u32 = r;
     crate::lowstar::ignore::ignore::<u32>(c0);
     let mut tmp: [u32; 16] = [0u32; 16usize];
     for i in 0u32..8u32
@@ -281,7 +286,13 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
         (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
         (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
     };
-    let c1: u32 = crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, res, &mut tmp, res);
+    let mut a_copy0: [u32; 16] = [0u32; 16usize];
+    let mut b_copy0: [u32; 16] = [0u32; 16usize];
+    ((&mut a_copy0)[0usize..16usize]).copy_from_slice(&res[0usize..16usize]);
+    ((&mut b_copy0)[0usize..16usize]).copy_from_slice(&(&mut tmp)[0usize..16usize]);
+    let r0: u32 =
+        crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, &mut a_copy0, &mut b_copy0, res);
+    let c1: u32 = r0;
     crate::lowstar::ignore::ignore::<u32>(c1)
 }
 
@@ -507,7 +518,13 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
         let r: u32 = c1;
         res_j.0[i.wrapping_add(i) as usize] = r
     };
-    let c0: u32 = crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, &mut c, &mut c, &mut c);
+    let mut a_copy: [u32; 16] = [0u32; 16usize];
+    let mut b_copy: [u32; 16] = [0u32; 16usize];
+    ((&mut a_copy)[0usize..16usize]).copy_from_slice(&(&mut c)[0usize..16usize]);
+    ((&mut b_copy)[0usize..16usize]).copy_from_slice(&(&mut c)[0usize..16usize]);
+    let r: u32 =
+        crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, &mut a_copy, &mut b_copy, &mut c);
+    let c0: u32 = r;
     crate::lowstar::ignore::ignore::<u32>(c0);
     let mut tmp: [u32; 16] = [0u32; 16usize];
     for i in 0u32..8u32
@@ -518,7 +535,13 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
         (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
         (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
     };
-    let c1: u32 = crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, &mut c, &mut tmp, &mut c);
+    let mut a_copy0: [u32; 16] = [0u32; 16usize];
+    let mut b_copy0: [u32; 16] = [0u32; 16usize];
+    ((&mut a_copy0)[0usize..16usize]).copy_from_slice(&(&mut c)[0usize..16usize]);
+    ((&mut b_copy0)[0usize..16usize]).copy_from_slice(&(&mut tmp)[0usize..16usize]);
+    let r0: u32 =
+        crate::hacl::bignum_base::bn_add_eq_len_u32(16u32, &mut a_copy0, &mut b_copy0, &mut c);
+    let c1: u32 = r0;
     crate::lowstar::ignore::ignore::<u32>(c1);
     areduction(n, nInv_u64, &mut c, resM)
 }

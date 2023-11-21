@@ -360,7 +360,16 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
         let r: u32 = c;
         res_j.0[i.wrapping_add(i) as usize] = r
     };
-    let c0: u32 = bn_add_eq_len_u32(aLen.wrapping_add(aLen), res, res, res);
+    let mut a_copy: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
+    let mut b_copy: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
+    ((&mut a_copy)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &res[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    ((&mut b_copy)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &res[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    let r: u32 = bn_add_eq_len_u32(aLen.wrapping_add(aLen), &mut a_copy, &mut b_copy, res);
+    let c0: u32 = r;
     crate::lowstar::ignore::ignore::<u32>(c0);
     let mut tmp: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
     for i in 0u32..aLen
@@ -371,7 +380,16 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
         (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
         (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
     };
-    let c1: u32 = bn_add_eq_len_u32(aLen.wrapping_add(aLen), res, &mut tmp, res);
+    let mut a_copy0: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
+    let mut b_copy0: Vec<u32> = vec![0u32; aLen.wrapping_add(aLen) as usize];
+    ((&mut a_copy0)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &res[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    ((&mut b_copy0)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &(&mut tmp)[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    let r0: u32 = bn_add_eq_len_u32(aLen.wrapping_add(aLen), &mut a_copy0, &mut b_copy0, res);
+    let c1: u32 = r0;
     crate::lowstar::ignore::ignore::<u32>(c1)
 }
 
@@ -411,7 +429,16 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
         let r: u64 = c;
         res_j.0[i.wrapping_add(i) as usize] = r
     };
-    let c0: u64 = bn_add_eq_len_u64(aLen.wrapping_add(aLen), res, res, res);
+    let mut a_copy: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
+    let mut b_copy: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
+    ((&mut a_copy)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &res[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    ((&mut b_copy)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &res[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    let r: u64 = bn_add_eq_len_u64(aLen.wrapping_add(aLen), &mut a_copy, &mut b_copy, res);
+    let c0: u64 = r;
     crate::lowstar::ignore::ignore::<u64>(c0);
     let mut tmp: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
     for i in 0u32..aLen
@@ -426,6 +453,15 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
         (&mut tmp)[2u32.wrapping_mul(i) as usize] = lo;
         (&mut tmp)[2u32.wrapping_mul(i).wrapping_add(1u32) as usize] = hi
     };
-    let c1: u64 = bn_add_eq_len_u64(aLen.wrapping_add(aLen), res, &mut tmp, res);
+    let mut a_copy0: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
+    let mut b_copy0: Vec<u64> = vec![0u64; aLen.wrapping_add(aLen) as usize];
+    ((&mut a_copy0)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &res[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    ((&mut b_copy0)[0usize..aLen.wrapping_add(aLen) as usize]).copy_from_slice(
+        &(&mut tmp)[0usize..aLen.wrapping_add(aLen) as usize]
+    );
+    let r0: u64 = bn_add_eq_len_u64(aLen.wrapping_add(aLen), &mut a_copy0, &mut b_copy0, res);
+    let c1: u64 = r0;
     crate::lowstar::ignore::ignore::<u64>(c1)
 }
