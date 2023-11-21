@@ -50,24 +50,24 @@ shake256_hacl(uint32_t inputByteLen, uint8_t *input, uint32_t outputByteLen, uin
   Hacl_Impl_SHA3_keccak(1088U, 512U, inputByteLen, input, 0x1FU, outputByteLen, output);
 }
 
-static void sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
+static void sha3_224(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
-  Hacl_Impl_SHA3_keccak(1152U, 448U, inputByteLen, input, 0x06U, 28U, output);
+  Hacl_Impl_SHA3_keccak(1152U, 448U, input_len, input, 0x06U, 28U, output);
 }
 
-static void sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
+static void sha3_256(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
-  Hacl_Impl_SHA3_keccak(1088U, 512U, inputByteLen, input, 0x06U, 32U, output);
+  Hacl_Impl_SHA3_keccak(1088U, 512U, input_len, input, 0x06U, 32U, output);
 }
 
-static void sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
+static void sha3_384(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
-  Hacl_Impl_SHA3_keccak(832U, 768U, inputByteLen, input, 0x06U, 48U, output);
+  Hacl_Impl_SHA3_keccak(832U, 768U, input_len, input, 0x06U, 48U, output);
 }
 
-static void sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
+static void sha3_512(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
-  Hacl_Impl_SHA3_keccak(576U, 1024U, inputByteLen, input, 0x06U, 64U, output);
+  Hacl_Impl_SHA3_keccak(576U, 1024U, input_len, input, 0x06U, 64U, output);
 }
 
 extern bool
@@ -87,10 +87,10 @@ test_sha3(
   uint8_t test256[32U] = { 0U };
   uint8_t test384[48U] = { 0U };
   uint8_t test512[64U] = { 0U };
-  sha3_224(msg_len, msg, test224);
-  sha3_256(msg_len, msg, test256);
-  sha3_384(msg_len, msg, test384);
-  sha3_512(msg_len, msg, test512);
+  sha3_224(test224, msg, msg_len);
+  sha3_256(test256, msg, msg_len);
+  sha3_384(test384, msg, msg_len);
+  sha3_512(test512, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(28U, test224, expected224))
   {
     exit((int32_t)255);

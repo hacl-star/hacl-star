@@ -35,68 +35,68 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_2p_s
+typedef struct Hacl_Hash_SHA2_uint8_2p_s
 {
   uint8_t *fst;
   uint8_t *snd;
 }
-Hacl_Impl_SHA2_Types_uint8_2p;
+Hacl_Hash_SHA2_uint8_2p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_3p_s
+typedef struct Hacl_Hash_SHA2_uint8_3p_s
 {
   uint8_t *fst;
-  Hacl_Impl_SHA2_Types_uint8_2p snd;
+  Hacl_Hash_SHA2_uint8_2p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_3p;
+Hacl_Hash_SHA2_uint8_3p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_4p_s
+typedef struct Hacl_Hash_SHA2_uint8_4p_s
 {
   uint8_t *fst;
-  Hacl_Impl_SHA2_Types_uint8_3p snd;
+  Hacl_Hash_SHA2_uint8_3p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_4p;
+Hacl_Hash_SHA2_uint8_4p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_5p_s
+typedef struct Hacl_Hash_SHA2_uint8_5p_s
 {
   uint8_t *fst;
-  Hacl_Impl_SHA2_Types_uint8_4p snd;
+  Hacl_Hash_SHA2_uint8_4p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_5p;
+Hacl_Hash_SHA2_uint8_5p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_6p_s
+typedef struct Hacl_Hash_SHA2_uint8_6p_s
 {
   uint8_t *fst;
-  Hacl_Impl_SHA2_Types_uint8_5p snd;
+  Hacl_Hash_SHA2_uint8_5p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_6p;
+Hacl_Hash_SHA2_uint8_6p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_7p_s
+typedef struct Hacl_Hash_SHA2_uint8_7p_s
 {
   uint8_t *fst;
-  Hacl_Impl_SHA2_Types_uint8_6p snd;
+  Hacl_Hash_SHA2_uint8_6p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_7p;
+Hacl_Hash_SHA2_uint8_7p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_8p_s
+typedef struct Hacl_Hash_SHA2_uint8_8p_s
 {
   uint8_t *fst;
-  Hacl_Impl_SHA2_Types_uint8_7p snd;
+  Hacl_Hash_SHA2_uint8_7p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_8p;
+Hacl_Hash_SHA2_uint8_8p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_2x4p_s
+typedef struct Hacl_Hash_SHA2_uint8_2x4p_s
 {
-  Hacl_Impl_SHA2_Types_uint8_4p fst;
-  Hacl_Impl_SHA2_Types_uint8_4p snd;
+  Hacl_Hash_SHA2_uint8_4p fst;
+  Hacl_Hash_SHA2_uint8_4p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_2x4p;
+Hacl_Hash_SHA2_uint8_2x4p;
 
-typedef struct Hacl_Impl_SHA2_Types_uint8_2x8p_s
+typedef struct Hacl_Hash_SHA2_uint8_2x8p_s
 {
-  Hacl_Impl_SHA2_Types_uint8_8p fst;
-  Hacl_Impl_SHA2_Types_uint8_8p snd;
+  Hacl_Hash_SHA2_uint8_8p fst;
+  Hacl_Hash_SHA2_uint8_8p snd;
 }
-Hacl_Impl_SHA2_Types_uint8_2x8p;
+Hacl_Hash_SHA2_uint8_2x8p;
 
 #if defined(__cplusplus)
 }

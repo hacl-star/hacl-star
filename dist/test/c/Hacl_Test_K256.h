@@ -30,6 +30,7 @@
 #include "krmllib.h"
 #include "libintvector.h"
 #include "lib_intrinsics.h"
+#include "clients/krmlrenamings.h"
 
 exit_code main(void);
 

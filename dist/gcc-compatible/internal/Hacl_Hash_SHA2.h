@@ -40,7 +40,7 @@ extern "C" {
 
 static const
 uint32_t
-Hacl_Impl_SHA2_Generic_h224[8U] =
+Hacl_Hash_SHA2_h224[8U] =
   {
     0xc1059ed8U, 0x367cd507U, 0x3070dd17U, 0xf70e5939U, 0xffc00b31U, 0x68581511U, 0x64f98fa7U,
     0xbefa4fa4U
@@ -48,7 +48,7 @@ Hacl_Impl_SHA2_Generic_h224[8U] =
 
 static const
 uint32_t
-Hacl_Impl_SHA2_Generic_h256[8U] =
+Hacl_Hash_SHA2_h256[8U] =
   {
     0x6a09e667U, 0xbb67ae85U, 0x3c6ef372U, 0xa54ff53aU, 0x510e527fU, 0x9b05688cU, 0x1f83d9abU,
     0x5be0cd19U
@@ -56,7 +56,7 @@ Hacl_Impl_SHA2_Generic_h256[8U] =
 
 static const
 uint64_t
-Hacl_Impl_SHA2_Generic_h384[8U] =
+Hacl_Hash_SHA2_h384[8U] =
   {
     0xcbbb9d5dc1059ed8ULL, 0x629a292a367cd507ULL, 0x9159015a3070dd17ULL, 0x152fecd8f70e5939ULL,
     0x67332667ffc00b31ULL, 0x8eb44a8768581511ULL, 0xdb0c2e0d64f98fa7ULL, 0x47b5481dbefa4fa4ULL
@@ -64,7 +64,7 @@ Hacl_Impl_SHA2_Generic_h384[8U] =
 
 static const
 uint64_t
-Hacl_Impl_SHA2_Generic_h512[8U] =
+Hacl_Hash_SHA2_h512[8U] =
   {
     0x6a09e667f3bcc908ULL, 0xbb67ae8584caa73bULL, 0x3c6ef372fe94f82bULL, 0xa54ff53a5f1d36f1ULL,
     0x510e527fade682d1ULL, 0x9b05688c2b3e6c1fULL, 0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL
@@ -72,7 +72,7 @@ Hacl_Impl_SHA2_Generic_h512[8U] =
 
 static const
 uint32_t
-Hacl_Impl_SHA2_Generic_k224_256[64U] =
+Hacl_Hash_SHA2_k224_256[64U] =
   {
     0x428a2f98U, 0x71374491U, 0xb5c0fbcfU, 0xe9b5dba5U, 0x3956c25bU, 0x59f111f1U, 0x923f82a4U,
     0xab1c5ed5U, 0xd807aa98U, 0x12835b01U, 0x243185beU, 0x550c7dc3U, 0x72be5d74U, 0x80deb1feU,
@@ -88,7 +88,7 @@ Hacl_Impl_SHA2_Generic_k224_256[64U] =
 
 static const
 uint64_t
-Hacl_Impl_SHA2_Generic_k384_512[80U] =
+Hacl_Hash_SHA2_k384_512[80U] =
   {
     0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL, 0xe9b5dba58189dbbcULL,
     0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL, 0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL,
@@ -112,54 +112,49 @@ Hacl_Impl_SHA2_Generic_k384_512[80U] =
     0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
   };
 
-void Hacl_SHA2_Scalar32_sha256_init(uint32_t *hash);
+void Hacl_Hash_SHA2_sha256_init(uint32_t *hash);
 
-void Hacl_SHA2_Scalar32_sha256_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st);
-
-void
-Hacl_SHA2_Scalar32_sha256_update_last(
-  uint64_t totlen,
-  uint32_t len,
-  uint8_t *b,
-  uint32_t *hash
-);
-
-void Hacl_SHA2_Scalar32_sha256_finish(uint32_t *st, uint8_t *h);
-
-void Hacl_SHA2_Scalar32_sha224_init(uint32_t *hash);
+void Hacl_Hash_SHA2_sha256_update_nblocks(uint32_t len, uint8_t *b, uint32_t *st);
 
 void
-Hacl_SHA2_Scalar32_sha224_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *st);
+Hacl_Hash_SHA2_sha256_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *hash);
 
-void Hacl_SHA2_Scalar32_sha224_finish(uint32_t *st, uint8_t *h);
+void Hacl_Hash_SHA2_sha256_finish(uint32_t *st, uint8_t *h);
 
-void Hacl_SHA2_Scalar32_sha512_init(uint64_t *hash);
-
-void Hacl_SHA2_Scalar32_sha512_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st);
+void Hacl_Hash_SHA2_sha224_init(uint32_t *hash);
 
 void
-Hacl_SHA2_Scalar32_sha512_update_last(
+Hacl_Hash_SHA2_sha224_update_last(uint64_t totlen, uint32_t len, uint8_t *b, uint32_t *st);
+
+void Hacl_Hash_SHA2_sha224_finish(uint32_t *st, uint8_t *h);
+
+void Hacl_Hash_SHA2_sha512_init(uint64_t *hash);
+
+void Hacl_Hash_SHA2_sha512_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st);
+
+void
+Hacl_Hash_SHA2_sha512_update_last(
   FStar_UInt128_uint128 totlen,
   uint32_t len,
   uint8_t *b,
   uint64_t *hash
 );
 
-void Hacl_SHA2_Scalar32_sha512_finish(uint64_t *st, uint8_t *h);
+void Hacl_Hash_SHA2_sha512_finish(uint64_t *st, uint8_t *h);
 
-void Hacl_SHA2_Scalar32_sha384_init(uint64_t *hash);
+void Hacl_Hash_SHA2_sha384_init(uint64_t *hash);
 
-void Hacl_SHA2_Scalar32_sha384_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st);
+void Hacl_Hash_SHA2_sha384_update_nblocks(uint32_t len, uint8_t *b, uint64_t *st);
 
 void
-Hacl_SHA2_Scalar32_sha384_update_last(
+Hacl_Hash_SHA2_sha384_update_last(
   FStar_UInt128_uint128 totlen,
   uint32_t len,
   uint8_t *b,
   uint64_t *st
 );
 
-void Hacl_SHA2_Scalar32_sha384_finish(uint64_t *st, uint8_t *h);
+void Hacl_Hash_SHA2_sha384_finish(uint64_t *st, uint8_t *h);
 
 #if defined(__cplusplus)
 }

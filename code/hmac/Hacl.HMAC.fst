@@ -83,7 +83,7 @@ fun output key len ->
     (**) Seq.lemma_eq_elim (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes));
     (**) assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
   end else begin
-    hash key len nkey;
+    hash nkey key len;
     (**) let h1 = ST.get () in
     (**) assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
     (**) assert (Seq.equal (B.as_seq h1 nkey) (Spec.Agile.Hash.hash a (B.as_seq h0 key)));
@@ -429,10 +429,10 @@ let mk_compute i hash alloca init update_multi update_last finish dst key key_le
   (**)                     loc_buffer opad `loc_union` loc_buffer s) h1 h2);
   (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7
 
-let legacy_compute_sha1: compute_st SHA1 =
+let compute_sha1: compute_st SHA1 =
   let open Hacl.Hash.SHA1 in
-  mk_compute (D.mk_impl SHA1 ()) legacy_hash legacy_alloca legacy_init
-             legacy_update_multi legacy_update_last legacy_finish
+  mk_compute (D.mk_impl SHA1 ()) hash_oneshot alloca init
+             update_multi update_last finish
 
 let compute_sha2_256: compute_st SHA2_256 =
   let open Hacl.Streaming.SHA2 in
@@ -453,11 +453,9 @@ let compute_sha2_512: compute_st SHA2_512 =
              update_multi_512 update_last_512 finish_512
 
 let compute_blake2s_32: compute_st Blake2S =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (D.mk_impl Blake2S C.M32) hash_blake2s_32 alloca_blake2s_32 init_blake2s_32
-             update_multi_blake2s_32 update_last_blake2s_32 finish_blake2s_32
+  let open Hacl.Hash.Blake2s_32 in
+  mk_compute (D.mk_impl Blake2S C.M32) hash alloca init update_multi update_last finish
 
 let compute_blake2b_32: compute_st Blake2B =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (D.mk_impl Blake2B C.M32) hash_blake2b_32 alloca_blake2b_32 init_blake2b_32
-             update_multi_blake2b_32 update_last_blake2b_32 finish_blake2b_32
+  let open Hacl.Hash.Blake2b_32 in
+  mk_compute (D.mk_impl Blake2B C.M32) hash alloca init update_multi update_last finish

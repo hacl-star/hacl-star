@@ -479,7 +479,7 @@ fi
 
 if ! $compile_vec128; then
   echo "$CC $CROSS_CFLAGS cannot compile 128-bit vector arithmetic, disabling"
-  echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
+  echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c *_Simd128.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
 else
   echo "#define HACL_CAN_COMPILE_VEC128 1" >> config.h
@@ -487,7 +487,7 @@ fi
 
 if ! $compile_vec256; then
   echo "$build_target does not support 256-bit arithmetic"
-  echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
+  echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c *_Simd256.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h
 else
   echo "#define HACL_CAN_COMPILE_VEC256 1" >> config.h

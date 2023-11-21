@@ -15,106 +15,101 @@ module Bindings(F:Cstubs.FOREIGN) =
         (spec_Hash_Definitions_hash_alg @->
            ((ptr uint64_t) @->
               (ocaml_bytes @-> (uint32_t @-> (returning void)))))
-    type hacl_Streaming_Keccak_hash_buf =
-      [ `hacl_Streaming_Keccak_hash_buf ] structure
-    let (hacl_Streaming_Keccak_hash_buf :
-      [ `hacl_Streaming_Keccak_hash_buf ] structure typ) =
-      structure "Hacl_Streaming_Keccak_hash_buf_s"
-    let hacl_Streaming_Keccak_hash_buf_fst =
-      field hacl_Streaming_Keccak_hash_buf "fst"
-        spec_Hash_Definitions_hash_alg
-    let hacl_Streaming_Keccak_hash_buf_snd =
-      field hacl_Streaming_Keccak_hash_buf "snd" (ptr uint64_t)
-    let _ = seal hacl_Streaming_Keccak_hash_buf
-    type hacl_Streaming_Keccak_state =
-      [ `hacl_Streaming_Keccak_state ] structure
-    let (hacl_Streaming_Keccak_state :
-      [ `hacl_Streaming_Keccak_state ] structure typ) =
-      structure "Hacl_Streaming_Keccak_state_s"
-    let hacl_Streaming_Keccak_state_block_state =
-      field hacl_Streaming_Keccak_state "block_state"
-        hacl_Streaming_Keccak_hash_buf
-    let hacl_Streaming_Keccak_state_buf =
-      field hacl_Streaming_Keccak_state "buf" (ptr uint8_t)
-    let hacl_Streaming_Keccak_state_total_len =
-      field hacl_Streaming_Keccak_state "total_len" uint64_t
-    let _ = seal hacl_Streaming_Keccak_state
-    let hacl_Streaming_Keccak_get_alg =
-      foreign "Hacl_Streaming_Keccak_get_alg"
-        ((ptr hacl_Streaming_Keccak_state) @->
+    type hacl_Hash_SHA3_hash_buf = [ `hacl_Hash_SHA3_hash_buf ] structure
+    let (hacl_Hash_SHA3_hash_buf :
+      [ `hacl_Hash_SHA3_hash_buf ] structure typ) =
+      structure "Hacl_Hash_SHA3_hash_buf_s"
+    let hacl_Hash_SHA3_hash_buf_fst =
+      field hacl_Hash_SHA3_hash_buf "fst" spec_Hash_Definitions_hash_alg
+    let hacl_Hash_SHA3_hash_buf_snd =
+      field hacl_Hash_SHA3_hash_buf "snd" (ptr uint64_t)
+    let _ = seal hacl_Hash_SHA3_hash_buf
+    type hacl_Hash_SHA3_state_t = [ `hacl_Hash_SHA3_state_t ] structure
+    let (hacl_Hash_SHA3_state_t : [ `hacl_Hash_SHA3_state_t ] structure typ)
+      = structure "Hacl_Hash_SHA3_state_t_s"
+    let hacl_Hash_SHA3_state_t_block_state =
+      field hacl_Hash_SHA3_state_t "block_state" hacl_Hash_SHA3_hash_buf
+    let hacl_Hash_SHA3_state_t_buf =
+      field hacl_Hash_SHA3_state_t "buf" (ptr uint8_t)
+    let hacl_Hash_SHA3_state_t_total_len =
+      field hacl_Hash_SHA3_state_t "total_len" uint64_t
+    let _ = seal hacl_Hash_SHA3_state_t
+    let hacl_Hash_SHA3_get_alg =
+      foreign "Hacl_Hash_SHA3_get_alg"
+        ((ptr hacl_Hash_SHA3_state_t) @->
            (returning spec_Hash_Definitions_hash_alg))
-    let hacl_Streaming_Keccak_malloc =
-      foreign "Hacl_Streaming_Keccak_malloc"
+    let hacl_Hash_SHA3_malloc =
+      foreign "Hacl_Hash_SHA3_malloc"
         (spec_Hash_Definitions_hash_alg @->
-           (returning (ptr hacl_Streaming_Keccak_state)))
-    let hacl_Streaming_Keccak_free =
-      foreign "Hacl_Streaming_Keccak_free"
-        ((ptr hacl_Streaming_Keccak_state) @-> (returning void))
-    let hacl_Streaming_Keccak_copy =
-      foreign "Hacl_Streaming_Keccak_copy"
-        ((ptr hacl_Streaming_Keccak_state) @->
-           (returning (ptr hacl_Streaming_Keccak_state)))
-    let hacl_Streaming_Keccak_reset =
-      foreign "Hacl_Streaming_Keccak_reset"
-        ((ptr hacl_Streaming_Keccak_state) @-> (returning void))
-    let hacl_Streaming_Keccak_update =
-      foreign "Hacl_Streaming_Keccak_update"
-        ((ptr hacl_Streaming_Keccak_state) @->
+           (returning (ptr hacl_Hash_SHA3_state_t)))
+    let hacl_Hash_SHA3_free =
+      foreign "Hacl_Hash_SHA3_free"
+        ((ptr hacl_Hash_SHA3_state_t) @-> (returning void))
+    let hacl_Hash_SHA3_copy =
+      foreign "Hacl_Hash_SHA3_copy"
+        ((ptr hacl_Hash_SHA3_state_t) @->
+           (returning (ptr hacl_Hash_SHA3_state_t)))
+    let hacl_Hash_SHA3_reset =
+      foreign "Hacl_Hash_SHA3_reset"
+        ((ptr hacl_Hash_SHA3_state_t) @-> (returning void))
+    let hacl_Hash_SHA3_update =
+      foreign "Hacl_Hash_SHA3_update"
+        ((ptr hacl_Hash_SHA3_state_t) @->
            (ocaml_bytes @->
               (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
-    let hacl_Streaming_Keccak_finish =
-      foreign "Hacl_Streaming_Keccak_finish"
-        ((ptr hacl_Streaming_Keccak_state) @->
+    let hacl_Hash_SHA3_digest =
+      foreign "Hacl_Hash_SHA3_digest"
+        ((ptr hacl_Hash_SHA3_state_t) @->
            (ocaml_bytes @-> (returning hacl_Streaming_Types_error_code)))
-    let hacl_Streaming_Keccak_squeeze =
-      foreign "Hacl_Streaming_Keccak_squeeze"
-        ((ptr hacl_Streaming_Keccak_state) @->
+    let hacl_Hash_SHA3_squeeze =
+      foreign "Hacl_Hash_SHA3_squeeze"
+        ((ptr hacl_Hash_SHA3_state_t) @->
            (ocaml_bytes @->
               (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
-    let hacl_Streaming_Keccak_block_len =
-      foreign "Hacl_Streaming_Keccak_block_len"
-        ((ptr hacl_Streaming_Keccak_state) @-> (returning uint32_t))
-    let hacl_Streaming_Keccak_hash_len =
-      foreign "Hacl_Streaming_Keccak_hash_len"
-        ((ptr hacl_Streaming_Keccak_state) @-> (returning uint32_t))
-    let hacl_Streaming_Keccak_is_shake =
-      foreign "Hacl_Streaming_Keccak_is_shake"
-        ((ptr hacl_Streaming_Keccak_state) @-> (returning bool))
-    let hacl_SHA3_shake128_hacl =
-      foreign "Hacl_SHA3_shake128_hacl"
+    let hacl_Hash_SHA3_block_len =
+      foreign "Hacl_Hash_SHA3_block_len"
+        ((ptr hacl_Hash_SHA3_state_t) @-> (returning uint32_t))
+    let hacl_Hash_SHA3_hash_len =
+      foreign "Hacl_Hash_SHA3_hash_len"
+        ((ptr hacl_Hash_SHA3_state_t) @-> (returning uint32_t))
+    let hacl_Hash_SHA3_is_shake =
+      foreign "Hacl_Hash_SHA3_is_shake"
+        ((ptr hacl_Hash_SHA3_state_t) @-> (returning bool))
+    let hacl_Hash_SHA3_shake128_hacl =
+      foreign "Hacl_Hash_SHA3_shake128_hacl"
         (uint32_t @->
            (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
-    let hacl_SHA3_shake256_hacl =
-      foreign "Hacl_SHA3_shake256_hacl"
+    let hacl_Hash_SHA3_shake256_hacl =
+      foreign "Hacl_Hash_SHA3_shake256_hacl"
         (uint32_t @->
            (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
-    let hacl_SHA3_sha3_224 =
-      foreign "Hacl_SHA3_sha3_224"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
-    let hacl_SHA3_sha3_256 =
-      foreign "Hacl_SHA3_sha3_256"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
-    let hacl_SHA3_sha3_384 =
-      foreign "Hacl_SHA3_sha3_384"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
-    let hacl_SHA3_sha3_512 =
-      foreign "Hacl_SHA3_sha3_512"
-        (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
-    let hacl_Impl_SHA3_state_permute =
-      foreign "Hacl_Impl_SHA3_state_permute"
+    let hacl_Hash_SHA3_sha3_224 =
+      foreign "Hacl_Hash_SHA3_sha3_224"
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let hacl_Hash_SHA3_sha3_256 =
+      foreign "Hacl_Hash_SHA3_sha3_256"
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let hacl_Hash_SHA3_sha3_384 =
+      foreign "Hacl_Hash_SHA3_sha3_384"
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let hacl_Hash_SHA3_sha3_512 =
+      foreign "Hacl_Hash_SHA3_sha3_512"
+        (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let hacl_Hash_SHA3_state_permute =
+      foreign "Hacl_Hash_SHA3_state_permute"
         ((ptr uint64_t) @-> (returning void))
-    let hacl_Impl_SHA3_loadState =
-      foreign "Hacl_Impl_SHA3_loadState"
+    let hacl_Hash_SHA3_loadState =
+      foreign "Hacl_Hash_SHA3_loadState"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Impl_SHA3_absorb_inner =
-      foreign "Hacl_Impl_SHA3_absorb_inner"
+    let hacl_Hash_SHA3_absorb_inner =
+      foreign "Hacl_Hash_SHA3_absorb_inner"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Impl_SHA3_squeeze =
-      foreign "Hacl_Impl_SHA3_squeeze"
+    let hacl_Hash_SHA3_squeeze0 =
+      foreign "Hacl_Hash_SHA3_squeeze0"
         ((ptr uint64_t) @->
            (uint32_t @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
-    let hacl_Impl_SHA3_keccak =
-      foreign "Hacl_Impl_SHA3_keccak"
+    let hacl_Hash_SHA3_keccak =
+      foreign "Hacl_Hash_SHA3_keccak"
         (uint32_t @->
            (uint32_t @->
               (uint32_t @->

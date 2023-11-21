@@ -31,6 +31,10 @@
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
+#include "internal/Hacl_Hash_Blake2s_Simd128.h"
+#include "internal/Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2b_Simd256.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "config.h"
 
 #define MD5_s 0
@@ -214,7 +218,7 @@ static EverCrypt_Hash_state_s *create_in(Spec_Hash_Definitions_hash_alg a)
             (
               (EverCrypt_Hash_state_s){
                 .tag = Blake2S_128_s,
-                { .case_Blake2S_128_s = Hacl_Blake2s_128_blake2s_malloc() }
+                { .case_Blake2S_128_s = Hacl_Hash_Blake2s_Simd128_malloc_with_key() }
               }
             );
         }
@@ -239,7 +243,7 @@ static EverCrypt_Hash_state_s *create_in(Spec_Hash_Definitions_hash_alg a)
             (
               (EverCrypt_Hash_state_s){
                 .tag = Blake2B_256_s,
-                { .case_Blake2B_256_s = Hacl_Blake2b_256_blake2b_malloc() }
+                { .case_Blake2B_256_s = Hacl_Hash_Blake2b_Simd256_malloc_with_key() }
               }
             );
         }
@@ -272,37 +276,37 @@ static void init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
-    Hacl_Hash_Core_MD5_legacy_init(p1);
+    Hacl_Hash_MD5_init(p1);
     return;
   }
   if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
-    Hacl_Hash_Core_SHA1_legacy_init(p1);
+    Hacl_Hash_SHA1_init(p1);
     return;
   }
   if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
-    Hacl_SHA2_Scalar32_sha224_init(p1);
+    Hacl_Hash_SHA2_sha224_init(p1);
     return;
   }
   if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
-    Hacl_SHA2_Scalar32_sha256_init(p1);
+    Hacl_Hash_SHA2_sha256_init(p1);
     return;
   }
   if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
-    Hacl_SHA2_Scalar32_sha384_init(p1);
+    Hacl_Hash_SHA2_sha384_init(p1);
     return;
   }
   if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
-    Hacl_SHA2_Scalar32_sha512_init(p1);
+    Hacl_Hash_SHA2_sha512_init(p1);
     return;
   }
   if (scrut.tag == SHA3_224_s)
@@ -332,14 +336,14 @@ static void init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
-    Hacl_Blake2s_32_blake2s_init(p1, 0U, 32U);
+    Hacl_Hash_Blake2s_init(p1, 0U, 32U);
     return;
   }
   if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
-    Hacl_Blake2s_128_blake2s_init(p1, 0U, 32U);
+    Hacl_Hash_Blake2s_Simd128_init(p1, 0U, 32U);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -349,14 +353,14 @@ static void init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
-    Hacl_Blake2b_32_blake2b_init(p1, 0U, 64U);
+    Hacl_Hash_Blake2b_init(p1, 0U, 64U);
     return;
   }
   if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
-    Hacl_Blake2b_256_blake2b_init(p1, 0U, 64U);
+    Hacl_Hash_Blake2b_Simd256_init(p1, 0U, 64U);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -396,10 +400,10 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
     sha256_update(s, blocks, n1, k224_256);
     return;
   }
-  Hacl_SHA2_Scalar32_sha256_update_nblocks(n * 64U, blocks, s);
+  Hacl_Hash_SHA2_sha256_update_nblocks(n * 64U, blocks, s);
   #else
   KRML_HOST_IGNORE(k224_256);
-  Hacl_SHA2_Scalar32_sha256_update_nblocks(n * 64U, blocks, s);
+  Hacl_Hash_SHA2_sha256_update_nblocks(n * 64U, blocks, s);
   #endif
 }
 
@@ -411,14 +415,14 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
   {
     uint32_t *p1 = scrut.case_MD5_s;
     uint32_t n = len / 64U;
-    Hacl_Hash_MD5_legacy_update_multi(p1, blocks, n);
+    Hacl_Hash_MD5_update_multi(p1, blocks, n);
     return;
   }
   if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
     uint32_t n = len / 64U;
-    Hacl_Hash_SHA1_legacy_update_multi(p1, blocks, n);
+    Hacl_Hash_SHA1_update_multi(p1, blocks, n);
     return;
   }
   if (scrut.tag == SHA2_224_s)
@@ -439,14 +443,14 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     uint32_t n = len / 128U;
-    Hacl_SHA2_Scalar32_sha384_update_nblocks(n * 128U, blocks, p1);
+    Hacl_Hash_SHA2_sha384_update_nblocks(n * 128U, blocks, p1);
     return;
   }
   if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     uint32_t n = len / 128U;
-    Hacl_SHA2_Scalar32_sha512_update_nblocks(n * 128U, blocks, p1);
+    Hacl_Hash_SHA2_sha512_update_nblocks(n * 128U, blocks, p1);
     return;
   }
   if (scrut.tag == SHA3_224_s)
@@ -482,7 +486,7 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
     uint32_t *p1 = scrut.case_Blake2S_s;
     uint32_t n = len / 64U;
     uint32_t wv[16U] = { 0U };
-    Hacl_Blake2s_32_blake2s_update_multi(n * 64U, wv, p1, prevlen, blocks, n);
+    Hacl_Hash_Blake2s_update_multi(n * 64U, wv, p1, prevlen, blocks, n);
     return;
   }
   if (scrut.tag == Blake2S_128_s)
@@ -491,7 +495,7 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
     #if HACL_CAN_COMPILE_VEC128
     uint32_t n = len / 64U;
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Blake2s_128_blake2s_update_multi(n * 64U, wv, p1, prevlen, blocks, n);
+    Hacl_Hash_Blake2s_Simd128_update_multi(n * 64U, wv, p1, prevlen, blocks, n);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -503,7 +507,7 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
     uint64_t *p1 = scrut.case_Blake2B_s;
     uint32_t n = len / 128U;
     uint64_t wv[16U] = { 0U };
-    Hacl_Blake2b_32_blake2b_update_multi(n * 128U,
+    Hacl_Hash_Blake2b_update_multi(n * 128U,
       wv,
       p1,
       FStar_UInt128_uint64_to_uint128(prevlen),
@@ -517,7 +521,7 @@ update_multi(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *blocks, uint3
     #if HACL_CAN_COMPILE_VEC256
     uint32_t n = len / 128U;
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };
-    Hacl_Blake2b_256_blake2b_update_multi(n * 128U,
+    Hacl_Hash_Blake2b_Simd256_update_multi(n * 128U,
       wv,
       p1,
       FStar_UInt128_uint64_to_uint128(prevlen),
@@ -543,31 +547,31 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
   if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
-    Hacl_Hash_MD5_legacy_update_last(p1, prev_len, last, last_len);
+    Hacl_Hash_MD5_update_last(p1, prev_len, last, last_len);
     return;
   }
   if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
-    Hacl_Hash_SHA1_legacy_update_last(p1, prev_len, last, last_len);
+    Hacl_Hash_SHA1_update_last(p1, prev_len, last, last_len);
     return;
   }
   if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
-    Hacl_SHA2_Scalar32_sha224_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
+    Hacl_Hash_SHA2_sha224_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
     return;
   }
   if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
-    Hacl_SHA2_Scalar32_sha256_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
+    Hacl_Hash_SHA2_sha256_update_last(prev_len + (uint64_t)last_len, last_len, last, p1);
     return;
   }
   if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
-    Hacl_SHA2_Scalar32_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
+    Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
         FStar_UInt128_uint64_to_uint128((uint64_t)last_len)),
       last_len,
       last,
@@ -577,7 +581,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
   if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
-    Hacl_SHA2_Scalar32_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
+    Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(prev_len),
         FStar_UInt128_uint64_to_uint128((uint64_t)last_len)),
       last_len,
       last,
@@ -612,7 +616,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     uint32_t wv[16U] = { 0U };
-    Hacl_Blake2s_32_blake2s_update_last(last_len, wv, p1, prev_len, last_len, last);
+    Hacl_Hash_Blake2s_update_last(last_len, wv, p1, prev_len, last_len, last);
     return;
   }
   if (scrut.tag == Blake2S_128_s)
@@ -620,7 +624,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
     KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 wv[4U] KRML_POST_ALIGN(16) = { 0U };
-    Hacl_Blake2s_128_blake2s_update_last(last_len, wv, p1, prev_len, last_len, last);
+    Hacl_Hash_Blake2s_Simd128_update_last(last_len, wv, p1, prev_len, last_len, last);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -631,7 +635,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     uint64_t wv[16U] = { 0U };
-    Hacl_Blake2b_32_blake2b_update_last(last_len,
+    Hacl_Hash_Blake2b_update_last(last_len,
       wv,
       p1,
       FStar_UInt128_uint64_to_uint128(prev_len),
@@ -644,7 +648,7 @@ update_last(EverCrypt_Hash_state_s *s, uint64_t prev_len, uint8_t *last, uint32_
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
     KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv[4U] KRML_POST_ALIGN(32) = { 0U };
-    Hacl_Blake2b_256_blake2b_update_last(last_len,
+    Hacl_Hash_Blake2b_Simd256_update_last(last_len,
       wv,
       p1,
       FStar_UInt128_uint64_to_uint128(prev_len),
@@ -669,74 +673,74 @@ static void finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
   if (scrut.tag == MD5_s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
-    Hacl_Hash_Core_MD5_legacy_finish(p1, dst);
+    Hacl_Hash_MD5_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
-    Hacl_Hash_Core_SHA1_legacy_finish(p1, dst);
+    Hacl_Hash_SHA1_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
-    Hacl_SHA2_Scalar32_sha224_finish(p1, dst);
+    Hacl_Hash_SHA2_sha224_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
-    Hacl_SHA2_Scalar32_sha256_finish(p1, dst);
+    Hacl_Hash_SHA2_sha256_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
-    Hacl_SHA2_Scalar32_sha384_finish(p1, dst);
+    Hacl_Hash_SHA2_sha384_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
-    Hacl_SHA2_Scalar32_sha512_finish(p1, dst);
+    Hacl_Hash_SHA2_sha512_finish(p1, dst);
     return;
   }
   if (scrut.tag == SHA3_224_s)
   {
     uint64_t *p1 = scrut.case_SHA3_224_s;
-    Hacl_Impl_SHA3_squeeze(p1, 144U, 28U, dst);
+    Hacl_Hash_SHA3_squeeze0(p1, 144U, 28U, dst);
     return;
   }
   if (scrut.tag == SHA3_256_s)
   {
     uint64_t *p1 = scrut.case_SHA3_256_s;
-    Hacl_Impl_SHA3_squeeze(p1, 136U, 32U, dst);
+    Hacl_Hash_SHA3_squeeze0(p1, 136U, 32U, dst);
     return;
   }
   if (scrut.tag == SHA3_384_s)
   {
     uint64_t *p1 = scrut.case_SHA3_384_s;
-    Hacl_Impl_SHA3_squeeze(p1, 104U, 48U, dst);
+    Hacl_Hash_SHA3_squeeze0(p1, 104U, 48U, dst);
     return;
   }
   if (scrut.tag == SHA3_512_s)
   {
     uint64_t *p1 = scrut.case_SHA3_512_s;
-    Hacl_Impl_SHA3_squeeze(p1, 72U, 64U, dst);
+    Hacl_Hash_SHA3_squeeze0(p1, 72U, 64U, dst);
     return;
   }
   if (scrut.tag == Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
-    Hacl_Blake2s_32_blake2s_finish(32U, dst, p1);
+    Hacl_Hash_Blake2s_finish(32U, dst, p1);
     return;
   }
   if (scrut.tag == Blake2S_128_s)
   {
     Lib_IntVector_Intrinsics_vec128 *p1 = scrut.case_Blake2S_128_s;
     #if HACL_CAN_COMPILE_VEC128
-    Hacl_Blake2s_128_blake2s_finish(32U, dst, p1);
+    Hacl_Hash_Blake2s_Simd128_finish(32U, dst, p1);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -746,14 +750,14 @@ static void finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
   if (scrut.tag == Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
-    Hacl_Blake2b_32_blake2b_finish(64U, dst, p1);
+    Hacl_Hash_Blake2b_finish(64U, dst, p1);
     return;
   }
   if (scrut.tag == Blake2B_256_s)
   {
     Lib_IntVector_Intrinsics_vec256 *p1 = scrut.case_Blake2B_256_s;
     #if HACL_CAN_COMPILE_VEC256
-    Hacl_Blake2b_256_blake2b_finish(64U, dst, p1);
+    Hacl_Hash_Blake2b_Simd256_finish(64U, dst, p1);
     return;
     #else
     KRML_MAYBE_UNUSED_VAR(p1);
@@ -1028,7 +1032,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
     {
       Lib_IntVector_Intrinsics_vec128 *p_dst = scrut.case_Blake2S_128_s;
       #if HACL_CAN_COMPILE_VEC128
-      Hacl_Blake2s_128_load_state128s_from_state32(p_dst, p_src);
+      Hacl_Hash_Blake2s_Simd128_load_state128s_from_state32(p_dst, p_src);
       return;
       #else
       KRML_MAYBE_UNUSED_VAR(p_dst);
@@ -1055,7 +1059,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
     {
       Lib_IntVector_Intrinsics_vec256 *p_dst = scrut.case_Blake2B_256_s;
       #if HACL_CAN_COMPILE_VEC256
-      Hacl_Blake2b_256_load_state256b_from_state32(p_dst, p_src);
+      Hacl_Hash_Blake2b_Simd256_load_state256b_from_state32(p_dst, p_src);
       return;
       #else
       KRML_MAYBE_UNUSED_VAR(p_dst);
@@ -1082,7 +1086,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
     {
       uint32_t *p_dst = scrut.case_Blake2S_s;
       #if HACL_CAN_COMPILE_VEC128
-      Hacl_Blake2s_128_store_state128s_to_state32(p_dst, p_src);
+      Hacl_Hash_Blake2s_Simd128_store_state128s_to_state32(p_dst, p_src);
       return;
       #else
       KRML_MAYBE_UNUSED_VAR(p_dst);
@@ -1109,7 +1113,7 @@ static void copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)
     {
       uint64_t *p_dst = scrut.case_Blake2B_s;
       #if HACL_CAN_COMPILE_VEC256
-      Hacl_Blake2b_256_store_state256b_to_state32(p_dst, p_src);
+      Hacl_Hash_Blake2b_Simd256_store_state256b_to_state32(p_dst, p_src);
       return;
       #else
       KRML_MAYBE_UNUSED_VAR(p_dst);
@@ -1263,18 +1267,18 @@ choice of algorithm (see Hacl_Spec.h). This API will automatically pick the most
 efficient implementation, provided you have called EverCrypt_AutoConfig2_init()
 before. The state is to be freed by calling `free`.
 */
-EverCrypt_Hash_Incremental_hash_state
-*EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a)
+EverCrypt_Hash_Incremental_state_t
+*EverCrypt_Hash_Incremental_malloc(Spec_Hash_Definitions_hash_alg a)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
   EverCrypt_Hash_state_s *block_state = create_in(a);
-  EverCrypt_Hash_Incremental_hash_state
+  EverCrypt_Hash_Incremental_state_t
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  EverCrypt_Hash_Incremental_hash_state
+  EverCrypt_Hash_Incremental_state_t
   *p =
-    (EverCrypt_Hash_Incremental_hash_state *)KRML_HOST_MALLOC(sizeof (
-        EverCrypt_Hash_Incremental_hash_state
+    (EverCrypt_Hash_Incremental_state_t *)KRML_HOST_MALLOC(sizeof (
+        EverCrypt_Hash_Incremental_state_t
       ));
   p[0U] = s;
   init(block_state);
@@ -1284,17 +1288,17 @@ EverCrypt_Hash_Incremental_hash_state
 /**
 Reset an existing state to the initial hash state with empty data.
 */
-void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_hash_state *s)
+void EverCrypt_Hash_Incremental_reset(EverCrypt_Hash_Incremental_state_t *state)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *s;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   Spec_Hash_Definitions_hash_alg i = alg_of_state(block_state);
   KRML_MAYBE_UNUSED_VAR(i);
   init(block_state);
-  EverCrypt_Hash_Incremental_hash_state
+  EverCrypt_Hash_Incremental_state_t
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  s[0U] = tmp;
+  state[0U] = tmp;
 }
 
 /**
@@ -1306,14 +1310,14 @@ algorithm. Both limits are unlikely to be attained in practice.
 */
 EverCrypt_Error_error_code
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_hash_state *s,
-  uint8_t *data,
-  uint32_t len
+  EverCrypt_Hash_Incremental_state_t *state,
+  uint8_t *chunk,
+  uint32_t chunk_len
 )
 {
-  EverCrypt_Hash_Incremental_hash_state s1 = *s;
-  EverCrypt_Hash_state_s *block_state = s1.block_state;
-  uint64_t total_len = s1.total_len;
+  EverCrypt_Hash_Incremental_state_t s = *state;
+  EverCrypt_Hash_state_s *block_state = s.block_state;
+  uint64_t total_len = s.total_len;
   Spec_Hash_Definitions_hash_alg i1 = alg_of_state(block_state);
   uint64_t sw;
   switch (i1)
@@ -1395,7 +1399,7 @@ EverCrypt_Hash_Incremental_update(
       }
   }
   Hacl_Streaming_Types_error_code ite;
-  if ((uint64_t)len > sw - total_len)
+  if ((uint64_t)chunk_len > sw - total_len)
   {
     ite = Hacl_Streaming_Types_MaximumLengthExceeded;
   }
@@ -1410,12 +1414,12 @@ EverCrypt_Hash_Incremental_update(
     {
       sz = (uint32_t)(total_len % (uint64_t)block_len(i1));
     }
-    if (len <= block_len(i1) - sz)
+    if (chunk_len <= block_len(i1) - sz)
     {
-      EverCrypt_Hash_Incremental_hash_state s2 = *s;
-      EverCrypt_Hash_state_s *block_state1 = s2.block_state;
-      uint8_t *buf = s2.buf;
-      uint64_t total_len1 = s2.total_len;
+      EverCrypt_Hash_Incremental_state_t s1 = *state;
+      EverCrypt_Hash_state_s *block_state1 = s1.block_state;
+      uint8_t *buf = s1.buf;
+      uint64_t total_len1 = s1.total_len;
       uint32_t sz1;
       if (total_len1 % (uint64_t)block_len(i1) == 0ULL && total_len1 > 0ULL)
       {
@@ -1426,12 +1430,12 @@ EverCrypt_Hash_Incremental_update(
         sz1 = (uint32_t)(total_len1 % (uint64_t)block_len(i1));
       }
       uint8_t *buf2 = buf + sz1;
-      memcpy(buf2, data, len * sizeof (uint8_t));
-      uint64_t total_len2 = total_len1 + (uint64_t)len;
-      *s
+      memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
+      uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
+      *state
       =
         (
-          (EverCrypt_Hash_Incremental_hash_state){
+          (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state1,
             .buf = buf,
             .total_len = total_len2
@@ -1440,10 +1444,10 @@ EverCrypt_Hash_Incremental_update(
     }
     else if (sz == 0U)
     {
-      EverCrypt_Hash_Incremental_hash_state s2 = *s;
-      EverCrypt_Hash_state_s *block_state1 = s2.block_state;
-      uint8_t *buf = s2.buf;
-      uint64_t total_len1 = s2.total_len;
+      EverCrypt_Hash_Incremental_state_t s1 = *state;
+      EverCrypt_Hash_state_s *block_state1 = s1.block_state;
+      uint8_t *buf = s1.buf;
+      uint64_t total_len1 = s1.total_len;
       uint32_t sz1;
       if (total_len1 % (uint64_t)block_len(i1) == 0ULL && total_len1 > 0ULL)
       {
@@ -1459,41 +1463,41 @@ EverCrypt_Hash_Incremental_update(
         update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
-      if ((uint64_t)len % (uint64_t)block_len(i1) == 0ULL && (uint64_t)len > 0ULL)
+      if ((uint64_t)chunk_len % (uint64_t)block_len(i1) == 0ULL && (uint64_t)chunk_len > 0ULL)
       {
         ite0 = block_len(i1);
       }
       else
       {
-        ite0 = (uint32_t)((uint64_t)len % (uint64_t)block_len(i1));
+        ite0 = (uint32_t)((uint64_t)chunk_len % (uint64_t)block_len(i1));
       }
-      uint32_t n_blocks = (len - ite0) / block_len(i1);
+      uint32_t n_blocks = (chunk_len - ite0) / block_len(i1);
       uint32_t data1_len = n_blocks * block_len(i1);
-      uint32_t data2_len = len - data1_len;
-      uint8_t *data1 = data;
-      uint8_t *data2 = data + data1_len;
+      uint32_t data2_len = chunk_len - data1_len;
+      uint8_t *data1 = chunk;
+      uint8_t *data2 = chunk + data1_len;
       update_multi(block_state1, total_len1, data1, data1_len);
       uint8_t *dst = buf;
       memcpy(dst, data2, data2_len * sizeof (uint8_t));
-      *s
+      *state
       =
         (
-          (EverCrypt_Hash_Incremental_hash_state){
+          (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state1,
             .buf = buf,
-            .total_len = total_len1 + (uint64_t)len
+            .total_len = total_len1 + (uint64_t)chunk_len
           }
         );
     }
     else
     {
       uint32_t diff = block_len(i1) - sz;
-      uint8_t *data1 = data;
-      uint8_t *data2 = data + diff;
-      EverCrypt_Hash_Incremental_hash_state s2 = *s;
-      EverCrypt_Hash_state_s *block_state10 = s2.block_state;
-      uint8_t *buf0 = s2.buf;
-      uint64_t total_len10 = s2.total_len;
+      uint8_t *chunk1 = chunk;
+      uint8_t *chunk2 = chunk + diff;
+      EverCrypt_Hash_Incremental_state_t s1 = *state;
+      EverCrypt_Hash_state_s *block_state10 = s1.block_state;
+      uint8_t *buf0 = s1.buf;
+      uint64_t total_len10 = s1.total_len;
       uint32_t sz10;
       if (total_len10 % (uint64_t)block_len(i1) == 0ULL && total_len10 > 0ULL)
       {
@@ -1504,21 +1508,21 @@ EverCrypt_Hash_Incremental_update(
         sz10 = (uint32_t)(total_len10 % (uint64_t)block_len(i1));
       }
       uint8_t *buf2 = buf0 + sz10;
-      memcpy(buf2, data1, diff * sizeof (uint8_t));
+      memcpy(buf2, chunk1, diff * sizeof (uint8_t));
       uint64_t total_len2 = total_len10 + (uint64_t)diff;
-      *s
+      *state
       =
         (
-          (EverCrypt_Hash_Incremental_hash_state){
+          (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state10,
             .buf = buf0,
             .total_len = total_len2
           }
         );
-      EverCrypt_Hash_Incremental_hash_state s20 = *s;
-      EverCrypt_Hash_state_s *block_state1 = s20.block_state;
-      uint8_t *buf = s20.buf;
-      uint64_t total_len1 = s20.total_len;
+      EverCrypt_Hash_Incremental_state_t s10 = *state;
+      EverCrypt_Hash_state_s *block_state1 = s10.block_state;
+      uint8_t *buf = s10.buf;
+      uint64_t total_len1 = s10.total_len;
       uint32_t sz1;
       if (total_len1 % (uint64_t)block_len(i1) == 0ULL && total_len1 > 0ULL)
       {
@@ -1534,29 +1538,35 @@ EverCrypt_Hash_Incremental_update(
         update_multi(block_state1, prevlen, buf, block_len(i1));
       }
       uint32_t ite0;
-      if ((uint64_t)(len - diff) % (uint64_t)block_len(i1) == 0ULL && (uint64_t)(len - diff) > 0ULL)
+      if
+      (
+        (uint64_t)(chunk_len - diff)
+        % (uint64_t)block_len(i1)
+        == 0ULL
+        && (uint64_t)(chunk_len - diff) > 0ULL
+      )
       {
         ite0 = block_len(i1);
       }
       else
       {
-        ite0 = (uint32_t)((uint64_t)(len - diff) % (uint64_t)block_len(i1));
+        ite0 = (uint32_t)((uint64_t)(chunk_len - diff) % (uint64_t)block_len(i1));
       }
-      uint32_t n_blocks = (len - diff - ite0) / block_len(i1);
+      uint32_t n_blocks = (chunk_len - diff - ite0) / block_len(i1);
       uint32_t data1_len = n_blocks * block_len(i1);
-      uint32_t data2_len = len - diff - data1_len;
-      uint8_t *data11 = data2;
-      uint8_t *data21 = data2 + data1_len;
-      update_multi(block_state1, total_len1, data11, data1_len);
+      uint32_t data2_len = chunk_len - diff - data1_len;
+      uint8_t *data1 = chunk2;
+      uint8_t *data2 = chunk2 + data1_len;
+      update_multi(block_state1, total_len1, data1, data1_len);
       uint8_t *dst = buf;
-      memcpy(dst, data21, data2_len * sizeof (uint8_t));
-      *s
+      memcpy(dst, data2, data2_len * sizeof (uint8_t));
+      *state
       =
         (
-          (EverCrypt_Hash_Incremental_hash_state){
+          (EverCrypt_Hash_Incremental_state_t){
             .block_state = block_state1,
             .buf = buf,
-            .total_len = total_len1 + (uint64_t)(len - diff)
+            .total_len = total_len1 + (uint64_t)(chunk_len - diff)
           }
         );
     }
@@ -1580,9 +1590,9 @@ EverCrypt_Hash_Incremental_update(
   }
 }
 
-static void finish_md5(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_md5(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1615,12 +1625,12 @@ static void finish_md5(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha1(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha1(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1653,12 +1663,12 @@ static void finish_sha1(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha224(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha224(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1692,12 +1702,12 @@ static void finish_sha224(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha256(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha256(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1731,12 +1741,12 @@ static void finish_sha256(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha3_224(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha3_224(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1770,12 +1780,12 @@ static void finish_sha3_224(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *d
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha3_256(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha3_256(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1809,12 +1819,12 @@ static void finish_sha3_256(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *d
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha3_384(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha3_384(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1848,12 +1858,12 @@ static void finish_sha3_384(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *d
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha3_512(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha3_512(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1887,12 +1897,12 @@ static void finish_sha3_512(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *d
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha384(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha384(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1926,12 +1936,12 @@ static void finish_sha384(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_sha512(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_sha512(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -1965,12 +1975,12 @@ static void finish_sha512(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_blake2s(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_blake2s(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -2018,12 +2028,12 @@ static void finish_blake2s(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *ds
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
-static void finish_blake2b(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *dst)
+static void digest_blake2b(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *p;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -2071,90 +2081,91 @@ static void finish_blake2b(EverCrypt_Hash_Incremental_hash_state *p, uint8_t *ds
   update_multi(&tmp_block_state, prev_len, buf_multi, 0U);
   uint64_t prev_len_last = total_len - (uint64_t)r;
   update_last(&tmp_block_state, prev_len_last, buf_last, r);
-  finish(&tmp_block_state, dst);
+  finish(&tmp_block_state, output);
 }
 
 /**
 Perform a run-time test to determine which algorithm was chosen for the given piece of state.
 */
 Spec_Hash_Definitions_hash_alg
-EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_hash_state *s)
+EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_state_t *s)
 {
   EverCrypt_Hash_state_s *block_state = (*s).block_state;
   return alg_of_state(block_state);
 }
 
 /**
-Write the resulting hash into `dst`, an array whose length is
+Write the resulting hash into `output`, an array whose length is
 algorithm-specific. You can use the macros defined earlier in this file to
 allocate a destination buffer of the right length. The state remains valid after
-a call to `finish`, meaning the user may feed more data into the hash via
+a call to `digest`, meaning the user may feed more data into the hash via
 `update`. (The finish function operates on an internal copy of the state and
 therefore does not invalidate the client-held state.)
 */
-void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_hash_state *s, uint8_t *dst)
+void
+EverCrypt_Hash_Incremental_digest(EverCrypt_Hash_Incremental_state_t *state, uint8_t *output)
 {
-  Spec_Hash_Definitions_hash_alg a1 = EverCrypt_Hash_Incremental_alg_of_state(s);
+  Spec_Hash_Definitions_hash_alg a1 = EverCrypt_Hash_Incremental_alg_of_state(state);
   switch (a1)
   {
     case Spec_Hash_Definitions_MD5:
       {
-        finish_md5(s, dst);
+        digest_md5(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        finish_sha1(s, dst);
+        digest_sha1(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA2_224:
       {
-        finish_sha224(s, dst);
+        digest_sha224(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        finish_sha256(s, dst);
+        digest_sha256(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        finish_sha384(s, dst);
+        digest_sha384(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        finish_sha512(s, dst);
+        digest_sha512(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA3_224:
       {
-        finish_sha3_224(s, dst);
+        digest_sha3_224(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        finish_sha3_256(s, dst);
+        digest_sha3_256(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        finish_sha3_384(s, dst);
+        digest_sha3_384(state, output);
         break;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        finish_sha3_512(s, dst);
+        digest_sha3_512(state, output);
         break;
       }
     case Spec_Hash_Definitions_Blake2S:
       {
-        finish_blake2s(s, dst);
+        digest_blake2s(state, output);
         break;
       }
     case Spec_Hash_Definitions_Blake2B:
       {
-        finish_blake2b(s, dst);
+        digest_blake2b(state, output);
         break;
       }
     default:
@@ -2168,17 +2179,17 @@ void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_hash_state *s,
 /**
 Free a state previously allocated with `create_in`.
 */
-void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_hash_state *s)
+void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_t *state)
 {
-  EverCrypt_Hash_Incremental_hash_state scrut = *s;
+  EverCrypt_Hash_Incremental_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   free_(block_state);
   KRML_HOST_FREE(buf);
-  KRML_HOST_FREE(s);
+  KRML_HOST_FREE(state);
 }
 
-void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void EverCrypt_Hash_Incremental_hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t st[8U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -2186,7 +2197,7 @@ void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uin
     8U,
     1U,
     uint32_t *os = st;
-    uint32_t x = Hacl_Impl_SHA2_Generic_h256[i];
+    uint32_t x = Hacl_Hash_SHA2_h256[i];
     os[i] = x;);
   uint32_t *s = st;
   uint32_t blocks_n0 = input_len / 64U;
@@ -2209,14 +2220,14 @@ void EverCrypt_Hash_Incremental_hash_256(uint8_t *input, uint32_t input_len, uin
   uint32_t rest_len = rest_len0;
   uint8_t *rest = rest0;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
-  Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)blocks_len + (uint64_t)rest_len,
+  Hacl_Hash_SHA2_sha256_update_last((uint64_t)blocks_len + (uint64_t)rest_len,
     rest_len,
     rest,
     s);
-  Hacl_SHA2_Scalar32_sha256_finish(s, dst);
+  Hacl_Hash_SHA2_sha256_finish(s, output);
 }
 
-static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_224(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t st[8U] = { 0U };
   KRML_MAYBE_FOR8(i,
@@ -2224,7 +2235,7 @@ static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
     8U,
     1U,
     uint32_t *os = st;
-    uint32_t x = Hacl_Impl_SHA2_Generic_h224[i];
+    uint32_t x = Hacl_Hash_SHA2_h224[i];
     os[i] = x;);
   uint32_t *s = st;
   uint32_t blocks_n0 = input_len / 64U;
@@ -2247,15 +2258,15 @@ static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint32_t rest_len = rest_len0;
   uint8_t *rest = rest0;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
-  Hacl_SHA2_Scalar32_sha224_update_last((uint64_t)blocks_len + (uint64_t)rest_len,
+  Hacl_Hash_SHA2_sha224_update_last((uint64_t)blocks_len + (uint64_t)rest_len,
     rest_len,
     rest,
     s);
-  Hacl_SHA2_Scalar32_sha224_finish(s, dst);
+  Hacl_Hash_SHA2_sha224_finish(s, output);
 }
 
 /**
-Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
 your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
 earlier in this file to allocate a destination buffer of the right length. This
 API will automatically pick the most efficient implementation, provided you have
@@ -2264,61 +2275,61 @@ called EverCrypt_AutoConfig2_init() before.
 void
 EverCrypt_Hash_Incremental_hash(
   Spec_Hash_Definitions_hash_alg a,
-  uint8_t *dst,
+  uint8_t *output,
   uint8_t *input,
-  uint32_t len
+  uint32_t input_len
 )
 {
   switch (a)
   {
     case Spec_Hash_Definitions_MD5:
       {
-        Hacl_Hash_MD5_legacy_hash(input, len, dst);
+        Hacl_Hash_MD5_hash_oneshot(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        Hacl_Hash_SHA1_legacy_hash(input, len, dst);
+        Hacl_Hash_SHA1_hash_oneshot(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_224:
       {
-        hash_224(input, len, dst);
+        hash_224(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        EverCrypt_Hash_Incremental_hash_256(input, len, dst);
+        EverCrypt_Hash_Incremental_hash_256(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        Hacl_Streaming_SHA2_hash_384(input, len, dst);
+        Hacl_Hash_SHA2_hash_384(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        Hacl_Streaming_SHA2_hash_512(input, len, dst);
+        Hacl_Hash_SHA2_hash_512(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA3_224:
       {
-        Hacl_SHA3_sha3_224(len, input, dst);
+        Hacl_Hash_SHA3_sha3_224(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA3_256:
       {
-        Hacl_SHA3_sha3_256(len, input, dst);
+        Hacl_Hash_SHA3_sha3_256(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA3_384:
       {
-        Hacl_SHA3_sha3_384(len, input, dst);
+        Hacl_Hash_SHA3_sha3_384(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_SHA3_512:
       {
-        Hacl_SHA3_sha3_512(len, input, dst);
+        Hacl_Hash_SHA3_sha3_512(output, input, input_len);
         break;
       }
     case Spec_Hash_Definitions_Blake2S:
@@ -2327,12 +2338,12 @@ EverCrypt_Hash_Incremental_hash(
         bool vec128 = EverCrypt_AutoConfig2_has_vec128();
         if (vec128)
         {
-          Hacl_Blake2s_128_blake2s(32U, dst, len, input, 0U, NULL);
+          Hacl_Hash_Blake2s_Simd128_hash_with_key(output, 32U, input, input_len, NULL, 0U);
           return;
         }
-        Hacl_Blake2s_32_blake2s(32U, dst, len, input, 0U, NULL);
+        Hacl_Hash_Blake2s_hash_with_key(output, 32U, input, input_len, NULL, 0U);
         #else
-        Hacl_Blake2s_32_blake2s(32U, dst, len, input, 0U, NULL);
+        Hacl_Hash_Blake2s_hash_with_key(output, 32U, input, input_len, NULL, 0U);
         #endif
         break;
       }
@@ -2342,12 +2353,12 @@ EverCrypt_Hash_Incremental_hash(
         bool vec256 = EverCrypt_AutoConfig2_has_vec256();
         if (vec256)
         {
-          Hacl_Blake2b_256_blake2b(64U, dst, len, input, 0U, NULL);
+          Hacl_Hash_Blake2b_Simd256_hash_with_key(output, 64U, input, input_len, NULL, 0U);
           return;
         }
-        Hacl_Blake2b_32_blake2b(64U, dst, len, input, 0U, NULL);
+        Hacl_Hash_Blake2b_hash_with_key(output, 64U, input, input_len, NULL, 0U);
         #else
-        Hacl_Blake2b_32_blake2b(64U, dst, len, input, 0U, NULL);
+        Hacl_Hash_Blake2b_hash_with_key(output, 64U, input, input_len, NULL, 0U);
         #endif
         break;
       }

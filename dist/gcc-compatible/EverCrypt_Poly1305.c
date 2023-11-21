@@ -58,7 +58,7 @@ poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
   #endif
 }
 
-void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
+void EverCrypt_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, uint8_t *key)
 {
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
@@ -66,7 +66,7 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   if (vec256)
   {
     KRML_MAYBE_UNUSED_VAR(vec128);
-    Hacl_Poly1305_256_poly1305_mac(dst, len, src, key);
+    Hacl_MAC_Poly1305_Simd256_mac(output, input, input_len, key);
     return;
   }
   #endif
@@ -74,17 +74,17 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   if (vec128)
   {
     KRML_MAYBE_UNUSED_VAR(vec256);
-    Hacl_Poly1305_128_poly1305_mac(dst, len, src, key);
+    Hacl_MAC_Poly1305_Simd128_mac(output, input, input_len, key);
     return;
   }
   #endif
   KRML_MAYBE_UNUSED_VAR(vec256);
   KRML_MAYBE_UNUSED_VAR(vec128);
   #if HACL_CAN_COMPILE_VALE
-  poly1305_vale(dst, src, len, key);
+  poly1305_vale(output, input, input_len, key);
   #else
   KRML_HOST_IGNORE(poly1305_vale);
-  Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
+  Hacl_MAC_Poly1305_mac(output, input, input_len, key);
   #endif
 }
 
