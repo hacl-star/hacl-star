@@ -12,7 +12,7 @@
 #include "test_helpers.h"
 
 #include "EverCrypt_AutoConfig2.h"
-#include "Hacl_Poly1305_32.h"
+#include "Hacl_MAC_Poly1305.h"
 
 #include "poly1305_vectors.h"
 
@@ -30,7 +30,7 @@ print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp)
 {
   uint8_t comp[16] = { 0 };
 
-  Hacl_Poly1305_32_poly1305_mac(comp, in_len, in, key);
+  Hacl_MAC_Poly1305_mac(comp, in, in_len, key);
   printf("Poly1305 (32-bit) Result:\n");
   bool ok = print_result(comp, exp);
 
@@ -58,13 +58,13 @@ main()
   memset(plain, 'P', SIZE);
   memset(key, 'K', 16);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_32_poly1305_mac(plain, SIZE, plain, key);
+    Hacl_MAC_Poly1305_mac(plain, plain, SIZE, key);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_32_poly1305_mac(tag, SIZE, plain, key);
+    Hacl_MAC_Poly1305_mac(tag, plain, SIZE, key);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();

@@ -186,7 +186,7 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
 /// key remains the same (i.e. we specify it fully just like ``seen``).
 ///
 /// Note: annotating the projector because of an interleaving bug.
-val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot (c.key.I.t i)
+val reveal_key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot (c.key.I.t i)
 
 /// Framing
 /// =======
@@ -255,7 +255,7 @@ val seen_length:
   (fun h0 l h1 -> h0 == h1 /\ U64.v l == U32.v (c.init_input_len i) +  S.length (seen c i h0 s)))
 
 inline_for_extraction noextract
-let create_in_st
+let malloc_st
   (#index: Type0)
   (c:block index)
   (i:index)
@@ -271,19 +271,19 @@ let create_in_st
     invariant c i h1 s /\
     freeable c i h1 s /\
     seen c i h1 s == S.empty /\
-    key c i h1 s == c.key.v i h0 k /\
+    reveal_key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 
 inline_for_extraction noextract
-val create_in:
+val malloc:
   #index: Type0 ->
   c:block index ->
   i:index ->
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
-  create_in_st c i t t'
+  malloc_st c i t t'
 
 inline_for_extraction noextract
 let copy_st
@@ -302,7 +302,7 @@ let copy_st
     invariant c i h1 s /\
     freeable c i h1 s /\
     seen c i h1 s == seen c i h0 s0 /\
-    key c i h1 s == key c i h0 s0 /\
+    reveal_key c i h1 s == reveal_key c i h0 s0 /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
@@ -330,7 +330,7 @@ let alloca_st
   (ensures (fun h0 s h1 ->
     invariant c i h1 s /\
     seen c i h1 s == S.empty /\
-    key c i h1 s == c.key.v i h0 k /\
+    reveal_key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint c i h1 s))))
@@ -344,38 +344,37 @@ val alloca:
   t':Type0 { t' == optional_key i c.km c.key } ->
   alloca_st #index c i t t'
 
-/// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
-let init_st
+let reset_st
   (#index: Type0)
   (c:block index)
   (i:G.erased index)
   (t:Type0 { t == c.state.s i })
   (t':Type0 { t' == optional_key (G.reveal i) c.km c.key }) =
-  k:c.key.s i ->
-  s:state c i t t' ->
+  state:state c i t t' ->
+  key:c.key.s i ->
   Stack unit
   (requires (fun h0 ->
-    c.key.invariant #i h0 k /\
-    B.loc_disjoint (c.key.footprint #i h0 k) (footprint c i h0 s) /\
-    invariant c i h0 s))
+    c.key.invariant #i h0 key /\
+    B.loc_disjoint (c.key.footprint #i h0 key) (footprint c i h0 state) /\
+    invariant c i h0 state))
   (ensures (fun h0 _ h1 ->
-    invariant c i h1 s /\
-    seen c i h1 s == S.empty /\
-    key c i h1 s == c.key.v i h0 k /\
-    footprint c i h0 s == footprint c i h1 s /\
-    B.(modifies (footprint c i h0 s) h0 h1) /\
-    preserves_freeable c i s h0 h1))
+    invariant c i h1 state /\
+    seen c i h1 state == S.empty /\
+    reveal_key c i h1 state == c.key.v i h0 key /\
+    footprint c i h0 state == footprint c i h1 state /\
+    B.(modifies (footprint c i h0 state) h0 h1) /\
+    preserves_freeable c i state h0 h1))
 
 inline_for_extraction noextract
-val init:
+val reset:
   #index:Type0 ->
   c:block index ->
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
-  init_st #index c i t t')
+  reset_st #index c i t t')
 
 unfold noextract
 let update_pre
@@ -406,7 +405,7 @@ let update_post
   B.(modifies (footprint c i h0 s) h0 h1) /\
   footprint c i h0 s == footprint c i h1 s /\
   seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data /\
-  key c i h1 s == key c i h0 s /\
+  reveal_key c i h1 s == reveal_key c i h0 s /\
   preserves_freeable c i s h0 h1
 
 inline_for_extraction noextract
@@ -444,7 +443,7 @@ val update:
   update_st #index c i t t')
 
 inline_for_extraction noextract
-let finish_st
+let digest_st
   #index
   (c: block index)
   (i: index)
@@ -461,31 +460,31 @@ let finish_st
     (ensures fun h0 s' h1 ->
       invariant c i h1 s /\
       seen c i h0 s == seen c i h1 s /\
-      key c i h1 s == key c i h0 s /\
+      reveal_key c i h1 s == reveal_key c i h0 s /\
       footprint c i h0 s == footprint c i h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
       seen_bounded c i h0 s;
-      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
+      S.equal (B.as_seq h1 dst) (c.spec_s i (reveal_key c i h0 s) (seen c i h0 s) l)) /\
       preserves_freeable c i s h0 h1)
 
 /// A word of caution. Once partially applied to a type class, this function
 /// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
 /// ``state`` is indexed over ``i``, then this function will not compile to C.
-/// (In other words: there's a reason why mk_finish does *NOT* take i ghostly.)
+/// (In other words: there's a reason why digest does *NOT* take i ghostly.)
 ///
-/// To work around this, it suffices to apply ``mk_finish`` to each possible
+/// To work around this, it suffices to apply ``digest`` to each possible
 /// value for the index, then to abstract over ``i`` again if agility is
 /// desired. See EverCrypt.Hash.Incremental for an example. Alternatively, we
 /// could provide a finish that relies on a heap allocation of abstract state
 /// and does not need to be specialized.
 inline_for_extraction noextract
-val mk_finish:
+val digest:
   #index:Type0 ->
   c:block index ->
   i:index ->
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
-  finish_st c i t t'
+  digest_st c i t t'
 
 inline_for_extraction noextract
 let free_st

@@ -132,8 +132,8 @@ let hacl_md (a:alg)// : block unit =
     (* init *)
     (fun _ _ _ s ->
       match a with
-      | MD5 -> Hacl.Hash.MD5.legacy_init s
-      | SHA1 -> Hacl.Hash.SHA1.legacy_init s
+      | MD5 -> Hacl.Hash.MD5.init s
+      | SHA1 -> Hacl.Hash.SHA1.init s
       | SHA2_224 -> Hacl.Hash.SHA2.init_224 s
       | SHA2_256 -> Hacl.Hash.SHA2.init_256 s
       | SHA2_384 -> Hacl.Hash.SHA2.init_384 s
@@ -145,8 +145,8 @@ let hacl_md (a:alg)// : block unit =
       [@inline_let]
       let update_multi : update_multi_st (|a,()|) =
         match a with
-        | MD5 -> Hacl.Hash.MD5.legacy_update_multi
-        | SHA1 -> Hacl.Hash.SHA1.legacy_update_multi
+        | MD5 -> Hacl.Hash.MD5.update_multi
+        | SHA1 -> Hacl.Hash.SHA1.update_multi
         | SHA2_224 -> Hacl.Hash.SHA2.update_multi_224
         | SHA2_256 -> Hacl.Hash.SHA2.update_multi_256
         | SHA2_384 -> Hacl.Hash.SHA2.update_multi_384
@@ -159,8 +159,8 @@ let hacl_md (a:alg)// : block unit =
       [@inline_let]
       let update_last : update_last_st (|a,()|) =
         match a with
-        | MD5 -> Hacl.Hash.MD5.legacy_update_last
-        | SHA1 -> Hacl.Hash.SHA1.legacy_update_last
+        | MD5 -> Hacl.Hash.MD5.update_last
+        | SHA1 -> Hacl.Hash.SHA1.update_last
         | SHA2_224 -> Hacl.Hash.SHA2.update_last_224
         | SHA2_256 -> Hacl.Hash.SHA2.update_last_256
         | SHA2_384 -> Hacl.Hash.SHA2.update_last_384
@@ -173,8 +173,8 @@ let hacl_md (a:alg)// : block unit =
       [@inline_let]
       let finish : finish_st (|a,()|) =
         match a with
-        | MD5 -> Hacl.Hash.MD5.legacy_finish
-        | SHA1 -> Hacl.Hash.SHA1.legacy_finish
+        | MD5 -> Hacl.Hash.MD5.finish
+        | SHA1 -> Hacl.Hash.SHA1.finish
         | SHA2_224 -> Hacl.Hash.SHA2.finish_224
         | SHA2_256 -> Hacl.Hash.SHA2.finish_256
         | SHA2_384 -> Hacl.Hash.SHA2.finish_384

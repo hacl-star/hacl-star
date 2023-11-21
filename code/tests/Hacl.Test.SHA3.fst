@@ -30,10 +30,10 @@ let test_sha3 msg_len msg expected224 expected256 expected384 expected512 =
   let test384 = create 48ul (u8 0) in
   let test512 = create 64ul (u8 0) in
 
-  sha3_224 msg_len msg test224;
-  sha3_256 msg_len msg test256;
-  sha3_384 msg_len msg test384;
-  sha3_512 msg_len msg test512;
+  sha3_224 test224 msg msg_len;
+  sha3_256 test256 msg msg_len;
+  sha3_384 test384 msg msg_len;
+  sha3_512 test512 msg msg_len;
 
   if not (result_compare_display 28ul (to_const test224) (to_const expected224)) then C.exit 255l;
   if not (result_compare_display 32ul (to_const test256) (to_const expected256)) then C.exit 255l;

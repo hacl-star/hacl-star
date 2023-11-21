@@ -1,22 +1,9 @@
 module Hacl.Streaming.Poly1305_256
 
-module G = FStar.Ghost
-module F = Hacl.Streaming.Functor
-module I = Hacl.Streaming.Interface
+open Hacl.Meta.Poly1305
+open Hacl.Poly1305_256
 
-open Hacl.Impl.Poly1305.Fields
-open Hacl.Streaming.Poly1305
+friend Hacl.Meta.Poly1305
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
-
-/// Type abbreviation - makes KaRaMeL use pretty names in the generated code
-let poly1305_256_state = F.state_s (poly1305 M256) () (t M256) (poly1305_key.I.s ())
-
-noextract
-let alloca = F.alloca (poly1305 M256) () (t M256) (poly1305_key.I.s ())
-let create_in = F.create_in (poly1305 M256) () (t M256) (poly1305_key.I.s ())
-let init = F.init (poly1305 M256) (G.hide ()) (t M256) (poly1305_key.I.s ())
-[@@ Comment "0 = success, 1 = max length exceeded" ]
-let update = F.update (poly1305 M256) (G.hide ()) (t M256) (poly1305_key.I.s ())
-let finish = F.mk_finish (poly1305 M256) () (t M256) (poly1305_key.I.s ())
-let free = F.free (poly1305 M256) (G.hide ()) (t M256) (poly1305_key.I.s ())
+(* The one-shot MAC *)
+let mac = poly1305_poly1305_mac_higher #M256 True poly1305_finish poly1305_update poly1305_init

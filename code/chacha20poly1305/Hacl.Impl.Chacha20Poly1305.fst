@@ -143,55 +143,56 @@ let derive_key_poly1305_do #w k n aadlen aad mlen m out =
 
 inline_for_extraction noextract
 let aead_encrypt_st (w:field_spec) =
-    key:lbuffer uint8 32ul
-  -> nonce:lbuffer uint8 12ul
-  -> alen:size_t
-  -> aad:lbuffer uint8 alen
-  -> len:size_t
-  -> input:lbuffer uint8 len
-  -> output:lbuffer uint8 len
-  -> tag:lbuffer uint8 16ul ->
+    output:buffer uint8
+  -> tag:lbuffer uint8 16ul
+  -> input:buffer uint8
+  -> input_len:size_t { length input = v input_len /\ length output = v input_len }
+  -> data:buffer uint8
+  -> data_len:size_t { length data = v data_len }
+  -> key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 12ul ->
   Stack unit
   (requires fun h ->
-    live h key /\ live h nonce /\ live h aad /\
+    live h key /\ live h nonce /\ live h data /\
     live h input /\ live h output /\ live h tag /\
     disjoint key output /\ disjoint nonce output /\
     disjoint key tag /\ disjoint nonce tag /\
-    disjoint output tag /\ eq_or_disjoint input output /\
-    disjoint aad output)
+    disjoint output tag /\
+    eq_or_disjoint (input <: lbuffer uint8 input_len) (output <: lbuffer uint8 input_len) /\
+    disjoint data output)
   (ensures  fun h0 _ h1 -> modifies2 output tag h0 h1 /\
-    Seq.append (as_seq h1 output) (as_seq h1 tag) ==
-    Spec.aead_encrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 input) (as_seq h0 aad))
+    Seq.append (as_seq h1 (output <: lbuffer uint8 input_len)) (as_seq h1 tag) ==
+    Spec.aead_encrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 (input <: lbuffer uint8 input_len)) (as_seq h0 (data <: lbuffer uint8 data_len)))
 
 noextract
 val aead_encrypt: #w:field_spec -> aead_encrypt_st w
 
 [@ Meta.Attribute.specialize ]
-let aead_encrypt #w k n aadlen aad mlen m cipher mac =
-  chacha20_encrypt #w mlen cipher m k n 1ul;
-  derive_key_poly1305_do #w k n aadlen aad mlen cipher mac
+let aead_encrypt #w output tag input input_len data data_len key nonce =
+  chacha20_encrypt #w input_len output input key nonce 1ul;
+  derive_key_poly1305_do #w key nonce data_len data input_len output tag
 
 
 
 inline_for_extraction noextract
 let aead_decrypt_st (w:field_spec) =
-    key:lbuffer uint8 32ul
+    output:buffer uint8
+  -> input:buffer uint8
+  -> input_len:size_t { length input = v input_len /\ length output = v input_len }
+  -> data:buffer uint8
+  -> data_len:size_t { length data = v data_len }
+  -> key:lbuffer uint8 32ul
   -> nonce:lbuffer uint8 12ul
-  -> alen:size_t
-  -> aad:lbuffer uint8 alen
-  -> len:size_t
-  -> input:lbuffer uint8 len
-  -> output:lbuffer uint8 len
-  -> mac:lbuffer uint8 16ul ->
+  -> tag:lbuffer uint8 16ul ->
   Stack UInt32.t
   (requires fun h ->
-    live h key /\ live h nonce /\ live h aad /\
-    live h input /\ live h output /\ live h mac /\
-    eq_or_disjoint input output)
-  (ensures  fun h0 z h1 -> modifies1 input h0 h1 /\
-   (let plain = Spec.aead_decrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 output) (as_seq h0 mac) (as_seq h0 aad) in
+    live h key /\ live h nonce /\ live h (data <: lbuffer uint8 data_len) /\
+    live h input /\ live h output /\ live h tag /\
+    eq_or_disjoint (input <: lbuffer uint8 input_len) (output <: lbuffer uint8 input_len))
+  (ensures  fun h0 z h1 -> modifies1 output h0 h1 /\
+   (let plain = Spec.aead_decrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 (input <: lbuffer uint8 input_len)) (as_seq h0 tag) (as_seq h0 (data <: lbuffer uint8 data_len)) in
     match z with
-    | 0ul -> Some? plain /\ as_seq h1 input == Some?.v plain // decryption succeeded
+    | 0ul -> Some? plain /\ as_seq h1 (output <: lbuffer uint8 input_len) == Some?.v plain // decryption succeeded
     | 1ul -> None? plain
     | _ -> false)  // decryption failed
   )
@@ -201,19 +202,19 @@ noextract
 val aead_decrypt: #w:field_spec -> aead_decrypt_st w
 
 [@ Meta.Attribute.specialize ]
-let aead_decrypt #w k n aadlen aad mlen m cipher mac =
+let aead_decrypt #w output input input_len data data_len key nonce tag =
   push_frame();
   let h0 = ST.get() in
   // Create a buffer to store the temporary mac
-  let computed_mac = create 16ul (u8 0) in
+  let computed_tag = create 16ul (u8 0) in
   // Compute the expected mac using Poly1305
-  derive_key_poly1305_do #w k n aadlen aad mlen cipher computed_mac;
+  derive_key_poly1305_do #w key nonce data_len data input_len input computed_tag;
   let h1 = ST.get() in
   let res =
-    if lbytes_eq computed_mac mac then (
-      assert (BSeq.lbytes_eq (as_seq h1 computed_mac) (as_seq h1 mac));
+    if lbytes_eq computed_tag tag then (
+      assert (BSeq.lbytes_eq (as_seq h1 computed_tag) (as_seq h1 tag));
       // If the computed mac matches the mac given, decrypt the ciphertext and return 0
-      chacha20_encrypt #w mlen m cipher k n 1ul;
+      chacha20_encrypt #w input_len output input key nonce 1ul;
       0ul
     ) else 1ul // Macs do not agree, do not decrypt
   in

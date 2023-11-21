@@ -107,7 +107,7 @@ let stateful_keccak: stateful alg =
       ())
     (* alloca: *) (fun (a: alg) ->
       a, B.alloca (Lib.IntTypes.u64 0) 25ul)
-    (* create_in: *) (fun a r ->
+    (* malloc: *) (fun a r ->
       a, B.malloc r (Lib.IntTypes.u64 0) 25ul)
     (* free: *) (fun _ (_, s) ->
       B.free s)
@@ -185,7 +185,7 @@ let hacl_keccak (a: G.erased alg): block alg =
       Hacl.Hash.SHA3.(finish_keccak a s dst l))
 
 // For pretty names in C
-let state = F.state_s' (hacl_keccak SHA3_256) SHA3_256
+let state_t = F.state_s' (hacl_keccak SHA3_256) SHA3_256
 
 let sha3_state a = singleton a & b:B.buffer uint64 { B.len b == 25ul }
 
@@ -193,7 +193,7 @@ let get_alg (a: G.erased alg) =
   F.index_of_state (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 
 let malloc (a: alg) =
-  F.create_in (hacl_keccak a) a (sha3_state a) (G.erased unit)
+  F.malloc (hacl_keccak a) a (sha3_state a) (G.erased unit)
 
 let free (a: G.erased alg) =
   F.free (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
@@ -202,19 +202,19 @@ let copy (a: G.erased alg) =
   F.copy (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 
 let reset (a: G.erased alg) =
-  F.init (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
+  F.reset (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 
 let update (a: G.erased alg) =
   F.update (hacl_keccak a) a (sha3_state (G.reveal a)) (G.erased unit)
 
 private
-let finish_ (a: alg) =
-  F.mk_finish #alg (hacl_keccak a) a (sha3_state a) (G.erased unit)
+let digest_ (a: alg) =
+  F.digest #alg (hacl_keccak a) a (sha3_state a) (G.erased unit)
 
 open Hacl.Streaming.Functor
 
 // Unfortunate copy-paste since there are small variations (error code, output length)
-val finish:
+val digest:
   a:G.erased alg -> (
   let c = hacl_keccak a in
   let a = G.reveal a in
@@ -235,7 +235,7 @@ val finish:
           not (is_shake a) /\
           invariant c i h1 s /\
           seen c i h0 s == seen c i h1 s /\
-          key c i h1 s == key c i h0 s /\
+          reveal_key c i h1 s == reveal_key c i h0 s /\
           footprint c i h0 s == footprint c i h1 s /\
           B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
           seen_bounded c i h0 s;
@@ -246,12 +246,12 @@ val finish:
       | _ ->
           False))
 
-let finish a s dst =
-  let a = get_alg a s in
+let digest a state output =
+  let a = get_alg a state in
   if (a = Shake128 || a = Shake256) then
     InvalidAlgorithm
   else begin
-    finish_ a s dst (Hacl.Hash.SHA3.hash_len a);
+    digest_ a state output (Hacl.Hash.SHA3.hash_len a);
     Success
   end
 
@@ -280,11 +280,11 @@ val squeeze:
           l <> 0ul /\
           invariant c i h1 s /\
           seen c i h0 s == seen c i h1 s /\
-          key c i h1 s == key c i h0 s /\
+          reveal_key c i h1 s == reveal_key c i h0 s /\
           footprint c i h0 s == footprint c i h1 s /\
           B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
           seen_bounded c i h0 s;
-          S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s) l)) /\
+          S.equal (B.as_seq h1 dst) (c.spec_s i (reveal_key c i h0 s) (seen c i h0 s) l)) /\
           preserves_freeable c i s h0 h1
       | InvalidAlgorithm ->
           not (is_shake a)
@@ -300,7 +300,7 @@ let squeeze a s dst l =
   else if l = 0ul then
     InvalidLength
   else begin
-    finish_ a s dst l;
+    digest_ a s dst l;
     Success
   end
 

@@ -606,10 +606,10 @@ let poly1305_finish #s tag key ctx =
 
 noextract
 [@ Meta.Attribute.specialize ]
-let poly1305_mac #s tag len text key =
+let poly1305_mac #s output input input_len key =
   push_frame ();
   let ctx = create (nlimb s +! precomplen s) (limb_zero s) in
   poly1305_init #s ctx key;
-  poly1305_update #s ctx len text;
-  poly1305_finish #s tag key ctx;
+  poly1305_update #s ctx input_len input;
+  poly1305_finish #s output key ctx;
   pop_frame ()

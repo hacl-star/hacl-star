@@ -268,7 +268,7 @@ friend Spec.Agile.Hash
 
 #push-options "--ifuel 0 --fuel 0 --z3rlimit 200"
 noextract inline_for_extraction
-let mk_hash a alloca update_multi update_last finish input input_len dst =
+let mk_hash a alloca update_multi update_last finish output input input_len =
   (**) let h0 = ST.get () in
   ST.push_frame ();
   let s = alloca () in
@@ -310,8 +310,8 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   (**) Spec.Hash.Lemmas.update_multi_associative a (Spec.Agile.Hash.init a) (blocks_v0) (rest_v0 `S.append` padding);
   (**) assert (as_seq h02 s == Spec.Agile.Hash.(update_multi a (init a) () (input_v0 `S.append` padding)));
 
-finish s dst;
+finish s output;
   (**) let h03 = ST.get () in
-  (**) assert (B.as_seq h03 dst == Spec.Agile.Hash.hash a input_v0);
+  (**) assert (B.as_seq h03 output == Spec.Agile.Hash.hash a input_v0);
 
   ST.pop_frame ()

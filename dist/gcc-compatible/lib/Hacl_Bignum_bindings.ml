@@ -62,12 +62,6 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @->
            (uint32_t @->
               ((ptr uint32_t) @-> ((ptr uint32_t) @-> (returning void)))))
-    let hacl_Bignum_Montgomery_bn_mont_reduction_u32 =
-      foreign "Hacl_Bignum_Montgomery_bn_mont_reduction_u32"
-        (uint32_t @->
-           ((ptr uint32_t) @->
-              (uint32_t @->
-                 ((ptr uint32_t) @-> ((ptr uint32_t) @-> (returning void))))))
     let hacl_Bignum_Montgomery_bn_to_mont_u32 =
       foreign "Hacl_Bignum_Montgomery_bn_to_mont_u32"
         (uint32_t @->
@@ -102,12 +96,6 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @->
            (uint32_t @->
               ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
-    let hacl_Bignum_Montgomery_bn_mont_reduction_u64 =
-      foreign "Hacl_Bignum_Montgomery_bn_mont_reduction_u64"
-        (uint32_t @->
-           ((ptr uint64_t) @->
-              (uint64_t @->
-                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
     let hacl_Bignum_Montgomery_bn_to_mont_u64 =
       foreign "Hacl_Bignum_Montgomery_bn_to_mont_u64"
         (uint32_t @->
@@ -130,6 +118,18 @@ module Bindings(F:Cstubs.FOREIGN) =
                     ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))))
     let hacl_Bignum_Montgomery_bn_mont_sqr_u64 =
       foreign "Hacl_Bignum_Montgomery_bn_mont_sqr_u64"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              (uint64_t @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32 =
+      foreign "Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32"
+        (uint32_t @->
+           ((ptr uint32_t) @->
+              (uint32_t @->
+                 ((ptr uint32_t) @-> ((ptr uint32_t) @-> (returning void))))))
+    let hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64 =
+      foreign "Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64"
         (uint32_t @->
            ((ptr uint64_t) @->
               (uint64_t @->

@@ -3,12 +3,12 @@ Which API to use
 
 HACL* APIs are specialized for a given architecture revision and do not have any
 agility overhead. Consider, for instance, Chacha-Poly encryption from
-``Hacl_Chacha20Poly1305_256.h``:
+``Hacl_AEAD_Chacha20Poly1305_Simd256.h``:
 
-.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Chacha20Poly1305_256.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_AEAD_Chacha20Poly1305_Simd256.h
     :language: c
-    :start-after: SNIPPET_START: Hacl_Chacha20Poly1305_256_aead_encrypt
-    :end-before: SNIPPET_END: Hacl_Chacha20Poly1305_256_aead_encrypt
+    :start-after: SNIPPET_START: Hacl_AEAD_Chacha20Poly1305_Simd256_encrypt
+    :end-before: SNIPPET_END: Hacl_AEAD_Chacha20Poly1305_Simd256_encrypt
 
 In order to use this function, you must ascertain that the architecture you're
 running on supports 256-bit vector instructions (AVX2 + SSE4); furthermore, your

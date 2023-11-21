@@ -904,16 +904,10 @@ Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32(
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32 */
 
-/* SNIPPET_START: Hacl_Bignum_Montgomery_bn_mont_reduction_u32 */
+/* SNIPPET_START: bn_mont_reduction_u32 */
 
-void
-Hacl_Bignum_Montgomery_bn_mont_reduction_u32(
-  uint32_t len,
-  uint32_t *n,
-  uint32_t nInv,
-  uint32_t *c,
-  uint32_t *res
-)
+static void
+bn_mont_reduction_u32(uint32_t len, uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t *res)
 {
   uint32_t c0 = 0U;
   for (uint32_t i0 = 0U; i0 < len; i0++)
@@ -990,7 +984,7 @@ Hacl_Bignum_Montgomery_bn_mont_reduction_u32(
   }
 }
 
-/* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_reduction_u32 */
+/* SNIPPET_END: bn_mont_reduction_u32 */
 
 /* SNIPPET_START: Hacl_Bignum_Montgomery_bn_to_mont_u32 */
 
@@ -1011,7 +1005,7 @@ Hacl_Bignum_Montgomery_bn_to_mont_u32(
   uint32_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint32_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a, r2, tmp, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, nInv, c, aM);
+  bn_mont_reduction_u32(len, n, nInv, c, aM);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_to_mont_u32 */
@@ -1031,7 +1025,7 @@ Hacl_Bignum_Montgomery_bn_from_mont_u32(
   uint32_t tmp[len + len];
   memset(tmp, 0U, (len + len) * sizeof (uint32_t));
   memcpy(tmp, aM, len * sizeof (uint32_t));
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, nInv_u64, tmp, a);
+  bn_mont_reduction_u32(len, n, nInv_u64, tmp, a);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_from_mont_u32 */
@@ -1055,7 +1049,7 @@ Hacl_Bignum_Montgomery_bn_mont_mul_u32(
   uint32_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint32_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, aM, bM, tmp, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, nInv_u64, c, resM);
+  bn_mont_reduction_u32(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_mul_u32 */
@@ -1078,7 +1072,7 @@ Hacl_Bignum_Montgomery_bn_mont_sqr_u32(
   uint32_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint32_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(len, aM, tmp, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, nInv_u64, c, resM);
+  bn_mont_reduction_u32(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_sqr_u32 */
@@ -1129,16 +1123,10 @@ Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64 */
 
-/* SNIPPET_START: Hacl_Bignum_Montgomery_bn_mont_reduction_u64 */
+/* SNIPPET_START: bn_mont_reduction_u64 */
 
-void
-Hacl_Bignum_Montgomery_bn_mont_reduction_u64(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t nInv,
-  uint64_t *c,
-  uint64_t *res
-)
+static void
+bn_mont_reduction_u64(uint32_t len, uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
 {
   uint64_t c0 = 0ULL;
   for (uint32_t i0 = 0U; i0 < len; i0++)
@@ -1215,7 +1203,7 @@ Hacl_Bignum_Montgomery_bn_mont_reduction_u64(
   }
 }
 
-/* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_reduction_u64 */
+/* SNIPPET_END: bn_mont_reduction_u64 */
 
 /* SNIPPET_START: Hacl_Bignum_Montgomery_bn_to_mont_u64 */
 
@@ -1236,7 +1224,7 @@ Hacl_Bignum_Montgomery_bn_to_mont_u64(
   uint64_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint64_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a, r2, tmp, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, nInv, c, aM);
+  bn_mont_reduction_u64(len, n, nInv, c, aM);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_to_mont_u64 */
@@ -1256,7 +1244,7 @@ Hacl_Bignum_Montgomery_bn_from_mont_u64(
   uint64_t tmp[len + len];
   memset(tmp, 0U, (len + len) * sizeof (uint64_t));
   memcpy(tmp, aM, len * sizeof (uint64_t));
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, nInv_u64, tmp, a);
+  bn_mont_reduction_u64(len, n, nInv_u64, tmp, a);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_from_mont_u64 */
@@ -1280,7 +1268,7 @@ Hacl_Bignum_Montgomery_bn_mont_mul_u64(
   uint64_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint64_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, aM, bM, tmp, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, nInv_u64, c, resM);
+  bn_mont_reduction_u64(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_mul_u64 */
@@ -1303,15 +1291,15 @@ Hacl_Bignum_Montgomery_bn_mont_sqr_u64(
   uint64_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint64_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(len, aM, tmp, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, nInv_u64, c, resM);
+  bn_mont_reduction_u64(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_mont_sqr_u64 */
 
-/* SNIPPET_START: bn_almost_mont_reduction_u32 */
+/* SNIPPET_START: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32 */
 
-static void
-bn_almost_mont_reduction_u32(
+void
+Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32(
   uint32_t len,
   uint32_t *n,
   uint32_t nInv,
@@ -1368,7 +1356,7 @@ bn_almost_mont_reduction_u32(
   }
 }
 
-/* SNIPPET_END: bn_almost_mont_reduction_u32 */
+/* SNIPPET_END: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32 */
 
 /* SNIPPET_START: bn_almost_mont_mul_u32 */
 
@@ -1389,7 +1377,7 @@ bn_almost_mont_mul_u32(
   uint32_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint32_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, aM, bM, tmp, c);
-  bn_almost_mont_reduction_u32(len, n, nInv_u64, c, resM);
+  Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: bn_almost_mont_mul_u32 */
@@ -1412,15 +1400,15 @@ bn_almost_mont_sqr_u32(
   uint32_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint32_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32(len, aM, tmp, c);
-  bn_almost_mont_reduction_u32(len, n, nInv_u64, c, resM);
+  Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: bn_almost_mont_sqr_u32 */
 
-/* SNIPPET_START: bn_almost_mont_reduction_u64 */
+/* SNIPPET_START: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64 */
 
-static void
-bn_almost_mont_reduction_u64(
+void
+Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64(
   uint32_t len,
   uint64_t *n,
   uint64_t nInv,
@@ -1477,7 +1465,7 @@ bn_almost_mont_reduction_u64(
   }
 }
 
-/* SNIPPET_END: bn_almost_mont_reduction_u64 */
+/* SNIPPET_END: Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64 */
 
 /* SNIPPET_START: bn_almost_mont_mul_u64 */
 
@@ -1498,7 +1486,7 @@ bn_almost_mont_mul_u64(
   uint64_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint64_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, aM, bM, tmp, c);
-  bn_almost_mont_reduction_u64(len, n, nInv_u64, c, resM);
+  Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: bn_almost_mont_mul_u64 */
@@ -1521,7 +1509,7 @@ bn_almost_mont_sqr_u64(
   uint64_t tmp[4U * len];
   memset(tmp, 0U, 4U * len * sizeof (uint64_t));
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(len, aM, tmp, c);
-  bn_almost_mont_reduction_u64(len, n, nInv_u64, c, resM);
+  Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64(len, n, nInv_u64, c, resM);
 }
 
 /* SNIPPET_END: bn_almost_mont_sqr_u64 */
@@ -1618,14 +1606,7 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
     KRML_CHECK_SIZE(sizeof (uint32_t), len);
     uint32_t aM[len];
     memset(aM, 0U, len * sizeof (uint32_t));
-    KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-    uint32_t c[len + len];
-    memset(c, 0U, (len + len) * sizeof (uint32_t));
-    KRML_CHECK_SIZE(sizeof (uint32_t), 4U * len);
-    uint32_t tmp0[4U * len];
-    memset(tmp0, 0U, 4U * len * sizeof (uint32_t));
-    Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a, r2, tmp0, c);
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c, aM);
+    Hacl_Bignum_Montgomery_bn_to_mont_u32(len, n, mu, r2, a, aM);
     KRML_CHECK_SIZE(sizeof (uint32_t), len);
     uint32_t resM[len];
     memset(resM, 0U, len * sizeof (uint32_t));
@@ -1651,24 +1632,13 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
       uint32_t *ctx_n0 = ctx;
       bn_almost_mont_sqr_u32(len, ctx_n0, mu, aM, aM);
     }
-    KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-    uint32_t tmp[len + len];
-    memset(tmp, 0U, (len + len) * sizeof (uint32_t));
-    memcpy(tmp, resM, len * sizeof (uint32_t));
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, tmp, res);
+    Hacl_Bignum_Montgomery_bn_from_mont_u32(len, n, mu, resM, res);
     return;
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
   uint32_t aM[len];
   memset(aM, 0U, len * sizeof (uint32_t));
-  KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-  uint32_t c[len + len];
-  memset(c, 0U, (len + len) * sizeof (uint32_t));
-  KRML_CHECK_SIZE(sizeof (uint32_t), 4U * len);
-  uint32_t tmp0[4U * len];
-  memset(tmp0, 0U, 4U * len * sizeof (uint32_t));
-  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a, r2, tmp0, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c, aM);
+  Hacl_Bignum_Montgomery_bn_to_mont_u32(len, n, mu, r2, a, aM);
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
   uint32_t resM[len];
   memset(resM, 0U, len * sizeof (uint32_t));
@@ -1725,8 +1695,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n, mu, ctx_r2, resM);
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
-  uint32_t tmp1[len];
-  memset(tmp1, 0U, len * sizeof (uint32_t));
+  uint32_t tmp0[len];
+  memset(tmp0, 0U, len * sizeof (uint32_t));
   for (uint32_t i = 0U; i < bBits / 4U; i++)
   {
     KRML_MAYBE_FOR4(i0,
@@ -1739,15 +1709,11 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
     uint32_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, k, 4U);
     uint32_t bits_l32 = bits_l;
     const uint32_t *a_bits_l = table + bits_l32 * len;
-    memcpy(tmp1, (uint32_t *)a_bits_l, len * sizeof (uint32_t));
+    memcpy(tmp0, (uint32_t *)a_bits_l, len * sizeof (uint32_t));
     uint32_t *ctx_n = ctx;
-    bn_almost_mont_mul_u32(len, ctx_n, mu, resM, tmp1, resM);
+    bn_almost_mont_mul_u32(len, ctx_n, mu, resM, tmp0, resM);
   }
-  KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-  uint32_t tmp2[len + len];
-  memset(tmp2, 0U, (len + len) * sizeof (uint32_t));
-  memcpy(tmp2, resM, len * sizeof (uint32_t));
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, tmp2, res);
+  Hacl_Bignum_Montgomery_bn_from_mont_u32(len, n, mu, resM, res);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32 */
@@ -1771,14 +1737,7 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
     KRML_CHECK_SIZE(sizeof (uint32_t), len);
     uint32_t aM[len];
     memset(aM, 0U, len * sizeof (uint32_t));
-    KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-    uint32_t c[len + len];
-    memset(c, 0U, (len + len) * sizeof (uint32_t));
-    KRML_CHECK_SIZE(sizeof (uint32_t), 4U * len);
-    uint32_t tmp0[4U * len];
-    memset(tmp0, 0U, 4U * len * sizeof (uint32_t));
-    Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a, r2, tmp0, c);
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c, aM);
+    Hacl_Bignum_Montgomery_bn_to_mont_u32(len, n, mu, r2, a, aM);
     KRML_CHECK_SIZE(sizeof (uint32_t), len);
     uint32_t resM[len];
     memset(resM, 0U, len * sizeof (uint32_t));
@@ -1817,24 +1776,13 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
       resM[i] = resM[i] ^ dummy;
       aM[i] = aM[i] ^ dummy;
     }
-    KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-    uint32_t tmp[len + len];
-    memset(tmp, 0U, (len + len) * sizeof (uint32_t));
-    memcpy(tmp, resM, len * sizeof (uint32_t));
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, tmp, res);
+    Hacl_Bignum_Montgomery_bn_from_mont_u32(len, n, mu, resM, res);
     return;
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
   uint32_t aM[len];
   memset(aM, 0U, len * sizeof (uint32_t));
-  KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-  uint32_t c0[len + len];
-  memset(c0, 0U, (len + len) * sizeof (uint32_t));
-  KRML_CHECK_SIZE(sizeof (uint32_t), 4U * len);
-  uint32_t tmp0[4U * len];
-  memset(tmp0, 0U, 4U * len * sizeof (uint32_t));
-  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a, r2, tmp0, c0);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c0, aM);
+  Hacl_Bignum_Montgomery_bn_to_mont_u32(len, n, mu, r2, a, aM);
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
   uint32_t resM[len];
   memset(resM, 0U, len * sizeof (uint32_t));
@@ -1901,8 +1849,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n, mu, ctx_r2, resM);
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
-  uint32_t tmp1[len];
-  memset(tmp1, 0U, len * sizeof (uint32_t));
+  uint32_t tmp0[len];
+  memset(tmp0, 0U, len * sizeof (uint32_t));
   for (uint32_t i0 = 0U; i0 < bBits / 4U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -1913,7 +1861,7 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
       bn_almost_mont_sqr_u32(len, ctx_n, mu, resM, resM););
     uint32_t k = bBits - bBits % 4U - 4U * i0 - 4U;
     uint32_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u32(bLen, b, k, 4U);
-    memcpy(tmp1, (uint32_t *)(table + 0U * len), len * sizeof (uint32_t));
+    memcpy(tmp0, (uint32_t *)(table + 0U * len), len * sizeof (uint32_t));
     KRML_MAYBE_FOR15(i1,
       0U,
       15U,
@@ -1922,18 +1870,14 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
       const uint32_t *res_j = table + (i1 + 1U) * len;
       for (uint32_t i = 0U; i < len; i++)
       {
-        uint32_t *os = tmp1;
-        uint32_t x = (c & res_j[i]) | (~c & tmp1[i]);
+        uint32_t *os = tmp0;
+        uint32_t x = (c & res_j[i]) | (~c & tmp0[i]);
         os[i] = x;
       });
     uint32_t *ctx_n = ctx;
-    bn_almost_mont_mul_u32(len, ctx_n, mu, resM, tmp1, resM);
+    bn_almost_mont_mul_u32(len, ctx_n, mu, resM, tmp0, resM);
   }
-  KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
-  uint32_t tmp2[len + len];
-  memset(tmp2, 0U, (len + len) * sizeof (uint32_t));
-  memcpy(tmp2, resM, len * sizeof (uint32_t));
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, tmp2, res);
+  Hacl_Bignum_Montgomery_bn_from_mont_u32(len, n, mu, resM, res);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32 */
@@ -2076,14 +2020,7 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
     KRML_CHECK_SIZE(sizeof (uint64_t), len);
     uint64_t aM[len];
     memset(aM, 0U, len * sizeof (uint64_t));
-    KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-    uint64_t c[len + len];
-    memset(c, 0U, (len + len) * sizeof (uint64_t));
-    KRML_CHECK_SIZE(sizeof (uint64_t), 4U * len);
-    uint64_t tmp0[4U * len];
-    memset(tmp0, 0U, 4U * len * sizeof (uint64_t));
-    Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a, r2, tmp0, c);
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, c, aM);
+    Hacl_Bignum_Montgomery_bn_to_mont_u64(len, n, mu, r2, a, aM);
     KRML_CHECK_SIZE(sizeof (uint64_t), len);
     uint64_t resM[len];
     memset(resM, 0U, len * sizeof (uint64_t));
@@ -2109,24 +2046,13 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
       uint64_t *ctx_n0 = ctx;
       bn_almost_mont_sqr_u64(len, ctx_n0, mu, aM, aM);
     }
-    KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-    uint64_t tmp[len + len];
-    memset(tmp, 0U, (len + len) * sizeof (uint64_t));
-    memcpy(tmp, resM, len * sizeof (uint64_t));
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, tmp, res);
+    Hacl_Bignum_Montgomery_bn_from_mont_u64(len, n, mu, resM, res);
     return;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t aM[len];
   memset(aM, 0U, len * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-  uint64_t c[len + len];
-  memset(c, 0U, (len + len) * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), 4U * len);
-  uint64_t tmp0[4U * len];
-  memset(tmp0, 0U, 4U * len * sizeof (uint64_t));
-  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a, r2, tmp0, c);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, c, aM);
+  Hacl_Bignum_Montgomery_bn_to_mont_u64(len, n, mu, r2, a, aM);
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t resM[len];
   memset(resM, 0U, len * sizeof (uint64_t));
@@ -2183,8 +2109,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
     Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n, mu, ctx_r2, resM);
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
-  uint64_t tmp1[len];
-  memset(tmp1, 0U, len * sizeof (uint64_t));
+  uint64_t tmp0[len];
+  memset(tmp0, 0U, len * sizeof (uint64_t));
   for (uint32_t i = 0U; i < bBits / 4U; i++)
   {
     KRML_MAYBE_FOR4(i0,
@@ -2197,15 +2123,11 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, k, 4U);
     uint32_t bits_l32 = (uint32_t)bits_l;
     const uint64_t *a_bits_l = table + bits_l32 * len;
-    memcpy(tmp1, (uint64_t *)a_bits_l, len * sizeof (uint64_t));
+    memcpy(tmp0, (uint64_t *)a_bits_l, len * sizeof (uint64_t));
     uint64_t *ctx_n = ctx;
-    bn_almost_mont_mul_u64(len, ctx_n, mu, resM, tmp1, resM);
+    bn_almost_mont_mul_u64(len, ctx_n, mu, resM, tmp0, resM);
   }
-  KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-  uint64_t tmp2[len + len];
-  memset(tmp2, 0U, (len + len) * sizeof (uint64_t));
-  memcpy(tmp2, resM, len * sizeof (uint64_t));
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, tmp2, res);
+  Hacl_Bignum_Montgomery_bn_from_mont_u64(len, n, mu, resM, res);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64 */
@@ -2229,14 +2151,7 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
     KRML_CHECK_SIZE(sizeof (uint64_t), len);
     uint64_t aM[len];
     memset(aM, 0U, len * sizeof (uint64_t));
-    KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-    uint64_t c[len + len];
-    memset(c, 0U, (len + len) * sizeof (uint64_t));
-    KRML_CHECK_SIZE(sizeof (uint64_t), 4U * len);
-    uint64_t tmp0[4U * len];
-    memset(tmp0, 0U, 4U * len * sizeof (uint64_t));
-    Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a, r2, tmp0, c);
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, c, aM);
+    Hacl_Bignum_Montgomery_bn_to_mont_u64(len, n, mu, r2, a, aM);
     KRML_CHECK_SIZE(sizeof (uint64_t), len);
     uint64_t resM[len];
     memset(resM, 0U, len * sizeof (uint64_t));
@@ -2275,24 +2190,13 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
       resM[i] = resM[i] ^ dummy;
       aM[i] = aM[i] ^ dummy;
     }
-    KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-    uint64_t tmp[len + len];
-    memset(tmp, 0U, (len + len) * sizeof (uint64_t));
-    memcpy(tmp, resM, len * sizeof (uint64_t));
-    Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, tmp, res);
+    Hacl_Bignum_Montgomery_bn_from_mont_u64(len, n, mu, resM, res);
     return;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t aM[len];
   memset(aM, 0U, len * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-  uint64_t c0[len + len];
-  memset(c0, 0U, (len + len) * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), 4U * len);
-  uint64_t tmp0[4U * len];
-  memset(tmp0, 0U, 4U * len * sizeof (uint64_t));
-  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a, r2, tmp0, c0);
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, c0, aM);
+  Hacl_Bignum_Montgomery_bn_to_mont_u64(len, n, mu, r2, a, aM);
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t resM[len];
   memset(resM, 0U, len * sizeof (uint64_t));
@@ -2359,8 +2263,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
     Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n, mu, ctx_r2, resM);
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
-  uint64_t tmp1[len];
-  memset(tmp1, 0U, len * sizeof (uint64_t));
+  uint64_t tmp0[len];
+  memset(tmp0, 0U, len * sizeof (uint64_t));
   for (uint32_t i0 = 0U; i0 < bBits / 4U; i0++)
   {
     KRML_MAYBE_FOR4(i,
@@ -2371,7 +2275,7 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
       bn_almost_mont_sqr_u64(len, ctx_n, mu, resM, resM););
     uint32_t k = bBits - bBits % 4U - 4U * i0 - 4U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, k, 4U);
-    memcpy(tmp1, (uint64_t *)(table + 0U * len), len * sizeof (uint64_t));
+    memcpy(tmp0, (uint64_t *)(table + 0U * len), len * sizeof (uint64_t));
     KRML_MAYBE_FOR15(i1,
       0U,
       15U,
@@ -2380,18 +2284,14 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
       const uint64_t *res_j = table + (i1 + 1U) * len;
       for (uint32_t i = 0U; i < len; i++)
       {
-        uint64_t *os = tmp1;
-        uint64_t x = (c & res_j[i]) | (~c & tmp1[i]);
+        uint64_t *os = tmp0;
+        uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
         os[i] = x;
       });
     uint64_t *ctx_n = ctx;
-    bn_almost_mont_mul_u64(len, ctx_n, mu, resM, tmp1, resM);
+    bn_almost_mont_mul_u64(len, ctx_n, mu, resM, tmp0, resM);
   }
-  KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-  uint64_t tmp2[len + len];
-  memset(tmp2, 0U, (len + len) * sizeof (uint64_t));
-  memcpy(tmp2, resM, len * sizeof (uint64_t));
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, tmp2, res);
+  Hacl_Bignum_Montgomery_bn_from_mont_u64(len, n, mu, resM, res);
 }
 
 /* SNIPPET_END: Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64 */

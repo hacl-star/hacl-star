@@ -125,15 +125,6 @@ Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32(
 );
 
 void
-Hacl_Bignum_Montgomery_bn_mont_reduction_u32(
-  uint32_t len,
-  uint32_t *n,
-  uint32_t nInv,
-  uint32_t *c,
-  uint32_t *res
-);
-
-void
 Hacl_Bignum_Montgomery_bn_to_mont_u32(
   uint32_t len,
   uint32_t *n,
@@ -182,15 +173,6 @@ Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
 );
 
 void
-Hacl_Bignum_Montgomery_bn_mont_reduction_u64(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t nInv,
-  uint64_t *c,
-  uint64_t *res
-);
-
-void
 Hacl_Bignum_Montgomery_bn_to_mont_u64(
   uint32_t len,
   uint64_t *n,
@@ -226,6 +208,24 @@ Hacl_Bignum_Montgomery_bn_mont_sqr_u64(
   uint64_t nInv_u64,
   uint64_t *aM,
   uint64_t *resM
+);
+
+void
+Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u32(
+  uint32_t len,
+  uint32_t *n,
+  uint32_t nInv,
+  uint32_t *c,
+  uint32_t *res
+);
+
+void
+Hacl_Bignum_AlmostMontgomery_bn_almost_mont_reduction_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv,
+  uint64_t *c,
+  uint64_t *res
 );
 
 uint32_t
