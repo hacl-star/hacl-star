@@ -38,7 +38,7 @@ extern "C" {
 #include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Curve25519_51.h"
-#include "Hacl_Chacha20Poly1305_128.h"
+#include "Hacl_AEAD_Chacha20Poly1305_Simd128.h"
 
 uint32_t
 Hacl_HPKE_Curve51_CP128_SHA256_setupBaseS(

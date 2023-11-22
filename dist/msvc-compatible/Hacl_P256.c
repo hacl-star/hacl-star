@@ -1547,7 +1547,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
 {
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[32U] = { 0U };
-  Hacl_Streaming_SHA2_hash_256(msg, msg_len, mHash);
+  Hacl_Hash_SHA2_hash_256(mHash, msg, msg_len);
   KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
@@ -1580,7 +1580,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
 {
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[48U] = { 0U };
-  Hacl_Streaming_SHA2_hash_384(msg, msg_len, mHash);
+  Hacl_Hash_SHA2_hash_384(mHash, msg, msg_len);
   KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
@@ -1613,7 +1613,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 {
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[64U] = { 0U };
-  Hacl_Streaming_SHA2_hash_512(msg, msg_len, mHash);
+  Hacl_Hash_SHA2_hash_512(mHash, msg, msg_len);
   KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
@@ -1692,7 +1692,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
 {
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[32U] = { 0U };
-  Hacl_Streaming_SHA2_hash_256(msg, msg_len, mHash);
+  Hacl_Hash_SHA2_hash_256(mHash, msg, msg_len);
   KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
@@ -1723,7 +1723,7 @@ Hacl_P256_ecdsa_verif_p256_sha384(
 {
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[48U] = { 0U };
-  Hacl_Streaming_SHA2_hash_384(msg, msg_len, mHash);
+  Hacl_Hash_SHA2_hash_384(mHash, msg, msg_len);
   KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);
@@ -1754,7 +1754,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
 {
   uint64_t m_q[4U] = { 0U };
   uint8_t mHash[64U] = { 0U };
-  Hacl_Streaming_SHA2_hash_512(msg, msg_len, mHash);
+  Hacl_Hash_SHA2_hash_512(mHash, msg, msg_len);
   KRML_MAYBE_UNUSED_VAR(msg_len);
   uint8_t *mHash32 = mHash;
   bn_from_bytes_be4(m_q, mHash32);

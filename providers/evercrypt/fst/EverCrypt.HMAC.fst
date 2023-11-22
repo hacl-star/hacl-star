@@ -54,8 +54,7 @@ val compute_blake2b: compute_st Blake2B
 
 let compute_sha1 =
   let open Hacl.Hash.SHA1 in
-  mk_compute (|SHA1, ()|) legacy_hash legacy_alloca legacy_init legacy_update_multi
-             legacy_update_last legacy_finish
+  mk_compute (|SHA1, ()|) hash_oneshot alloca init update_multi update_last finish
 
 (* This implementation calls into EverCrypt.Hash, which multiplexes
    between Hacl and Vale implementations of SHA2_256 functions depending on
@@ -79,14 +78,14 @@ let compute_sha2_512 =
              update_last_512 finish_512
 
 let compute_blake2s =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (|Blake2S, Hacl.Impl.Blake2.Core.M32|) hash_blake2s_32 alloca_blake2s_32
-             init_blake2s_32 update_multi_blake2s_32 update_last_blake2s_32 finish_blake2s_32
+  let open Hacl.Hash.Blake2s_32 in
+  mk_compute (|Blake2S, Hacl.Impl.Blake2.Core.M32|) hash alloca init update_multi
+             update_last finish
 
 let compute_blake2b =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (|Blake2B, Hacl.Impl.Blake2.Core.M32|) hash_blake2b_32 alloca_blake2b_32
-             init_blake2b_32 update_multi_blake2b_32 update_last_blake2b_32 finish_blake2b_32
+  let open Hacl.Hash.Blake2b_32 in
+  mk_compute (|Blake2B, Hacl.Impl.Blake2.Core.M32|) hash alloca init update_multi
+             update_last finish
 
 let compute a mac key keylen data datalen =
   match a with

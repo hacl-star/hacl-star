@@ -952,6 +952,7 @@ let lemma_barrett_reduce' x =
          assert (s >= 0);
          assert (s < 2 * l) by (
            Tactics.set_rlimit 250;
+           Tactics.set_options "--retry 5";
            ()
          );
          s
@@ -960,6 +961,7 @@ let lemma_barrett_reduce' x =
          assert (s >= 0);
          assert (s < 2 * l) by (
            Tactics.set_rlimit 250;
+           Tactics.set_options "--retry 5";
            ()
          );
          s

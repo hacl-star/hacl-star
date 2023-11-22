@@ -35,7 +35,7 @@ extern "C" {
 #include "krml/lowstar_endianness.h"
 #include "krml/internal/target.h"
 
-#include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2s_Simd128.h"
 
 /**
 Write the HMAC-BLAKE2s MAC of a message (`data`) by using a key (`key`) into `dst`.

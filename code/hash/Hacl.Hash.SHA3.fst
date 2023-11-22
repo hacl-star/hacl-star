@@ -114,12 +114,12 @@ let update_last = update_last_sha3
 
 let finish a = Hacl.Hash.PadFinish.finish (| a, () |)
 
-let hash a input len dst =
+let hash a output input input_len =
   match a with
-  | SHA3_224 -> Hacl.SHA3.sha3_224 len input dst
-  | SHA3_256 -> Hacl.SHA3.sha3_256 len input dst
-  | SHA3_384 -> Hacl.SHA3.sha3_384 len input dst
-  | SHA3_512 -> Hacl.SHA3.sha3_512 len input dst
+  | SHA3_224 -> Hacl.SHA3.sha3_224 output input input_len
+  | SHA3_256 -> Hacl.SHA3.sha3_256 output input input_len
+  | SHA3_384 -> Hacl.SHA3.sha3_384 output input input_len
+  | SHA3_512 -> Hacl.SHA3.sha3_512 output input input_len
 
 let finish_keccak (a: keccak_alg): finish_st a = fun s dst l ->
   if is_shake a then

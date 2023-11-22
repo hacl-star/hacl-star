@@ -127,7 +127,7 @@ let secretbox_detached mlen c tag k n m =
   secretbox_init xkeys k n;
   let mkey = sub xkeys 32ul 32ul in
   secretbox_detached_cipher mlen c k xkeys n m;
-  poly1305_mac tag mlen c mkey;
+  Hacl.Streaming.Poly1305_32.mac tag c mlen mkey;
   let h1 = ST.get () in
   assert (
     let (tag1, cipher) = Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) in
@@ -213,7 +213,7 @@ let secretbox_open_detached mlen m k n c tag =
   let mkey = sub xkeys 32ul 32ul in
 
   let tag' = create 16ul (u8 0) in
-  Hacl.Poly1305_32.poly1305_mac tag' mlen c mkey;
+  Hacl.Streaming.Poly1305_32.mac tag' c mlen mkey;
 
   let res =
     if lbytes_eq tag tag' then (

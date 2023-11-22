@@ -224,7 +224,7 @@ extern void
 TestLib_compare_and_print(Prims_string uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 /**
-Hash `input`, of len `len`, into `dst`, an array whose length is determined by
+Hash `input`, of len `input_len`, into `output`, an array whose length is determined by
 your choice of algorithm `a` (see Hacl_Spec.h). You can use the macros defined
 earlier in this file to allocate a destination buffer of the right length. This
 API will automatically pick the most efficient implementation, provided you have
@@ -233,9 +233,9 @@ called EverCrypt_AutoConfig2_init() before.
 extern void
 EverCrypt_Hash_Incremental_hash(
   Spec_Hash_Definitions_hash_alg a,
-  uint8_t *dst,
+  uint8_t *output,
   uint8_t *input,
-  uint32_t len
+  uint32_t input_len
 );
 
 extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
@@ -3101,7 +3101,7 @@ vectors1[35U] =
 static uint32_t vectors_len1 = 35U;
 
 extern void
-EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
+EverCrypt_Poly1305_mac(uint8_t *output, uint8_t *input, uint32_t input_len, uint8_t *key);
 
 static uint8_t
 hash_vectors_low0[16U] =
@@ -7582,7 +7582,7 @@ static void test_one_poly1305(vector1 v)
   {
     if (key_len == 32U)
     {
-      EverCrypt_Poly1305_poly1305(dst, input, input_len, key);
+      EverCrypt_Poly1305_mac(dst, input, input_len, key);
     }
     if (tag_len == 16U)
     {

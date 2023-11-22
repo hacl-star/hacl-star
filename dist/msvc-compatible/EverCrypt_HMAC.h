@@ -38,13 +38,14 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_Blake2.h"
+#include "Hacl_Hash_Blake2s.h"
+#include "Hacl_Hash_Blake2b.h"
 
 bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 
-extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint32_t x1, uint8_t *x2);
+extern void (*EverCrypt_HMAC_hash_256)(uint8_t *x0, uint8_t *x1, uint32_t x2);
 
 void
 EverCrypt_HMAC_compute(
