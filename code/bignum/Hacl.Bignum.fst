@@ -34,6 +34,16 @@ let bn_add_mod_n #t len n a b res =
   let c0 = bn_add_eq_len len a b res in
   bn_reduce_once len n c0 res
 
+(* HACL-RS *)
+let bn_add_mod_n_a #t len n a b res =
+  push_frame ();
+  let a_copy = create len (uint #t 0) in
+  let b_copy = create len (uint #t 0) in
+  copy a_copy a;
+  copy b_copy b;
+  bn_add_mod_n #t len n a_copy b_copy res;
+  pop_frame ()
+
 let bn_sub_mod_n #t len n a b res =
   push_frame ();
   let c0 = bn_sub_eq_len len a b res in

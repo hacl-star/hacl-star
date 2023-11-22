@@ -150,6 +150,10 @@ let bn_add_mod_n_st (t:limb_t) (len:size_t{v len > 0}) =
 inline_for_extraction noextract
 val bn_add_mod_n: #t:limb_t -> len:size_t{v len > 0} -> bn_add_mod_n_st t len
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val bn_add_mod_n_a: #t:limb_t -> len:size_t{v len > 0} -> bn_add_mod_n_st t len
+
 
 inline_for_extraction noextract
 let bn_sub_mod_n_st (t:limb_t) (len:size_t{v len > 0}) =
