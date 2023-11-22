@@ -50,9 +50,9 @@ let msg_as_felem alg msg_len msg res =
   match alg with
     | S.NoHash -> copy mHash (sub msg 0ul 32ul)
     | S.Hash a -> match a with
-      | SHA2_256 -> Hacl.Streaming.SHA2.hash_256 msg msg_len mHash
-      | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 msg msg_len mHash
-      | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 msg msg_len mHash
+      | SHA2_256 -> Hacl.Streaming.SHA2.hash_256 mHash msg msg_len
+      | SHA2_384 -> Hacl.Streaming.SHA2.hash_384 mHash msg msg_len
+      | SHA2_512 -> Hacl.Streaming.SHA2.hash_512 mHash msg msg_len
   end;
   LowStar.Ignore.ignore msg_len;
   let mHash32 = sub mHash 0ul 32ul in

@@ -11,11 +11,11 @@
 #include <unistd.h>
 
 #include "EverCrypt_AutoConfig2.h"
-#include "Hacl_Streaming_Poly1305_256.h"
+#include "Hacl_MAC_Poly1305_Simd256.h"
 #include "poly1305_vectors.h"
 #include "test_helpers.h"
 
-typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s poly1305_state;
+typedef struct Hacl_MAC_Poly1305_Simd256_state_t poly1305_state;
 
 int
 main()
@@ -30,34 +30,34 @@ main()
   poly1305_test_vector* v = vectors;
 
   if (EverCrypt_AutoConfig2_has_avx2()) {
-    poly1305_state* s = Hacl_Streaming_Poly1305_256_create_in(v->key);
-    assert(Hacl_Streaming_Poly1305_256_update(s, v->input, 8) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(s, v->input + 8, 6) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(
+    poly1305_state* s = Hacl_MAC_Poly1305_Simd256_malloc(v->key);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, v->input, 8) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, v->input + 8, 6) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(
              s, v->input + 14, v->input_len - 14) == 0);
-    Hacl_Streaming_Poly1305_256_finish(s, tag);
+    Hacl_MAC_Poly1305_Simd256_digest(s, tag);
     ok &= compare_and_print(16, tag, v->tag);
 
     v++;
-    Hacl_Streaming_Poly1305_256_init(v->key, s);
-    assert(Hacl_Streaming_Poly1305_256_update(s, NULL, 0) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(s, v->input, v->input_len) == 0);
-    Hacl_Streaming_Poly1305_256_finish(s, tag);
+    Hacl_MAC_Poly1305_Simd256_reset(s, v->key);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, NULL, 0) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, v->input, v->input_len) == 0);
+    Hacl_MAC_Poly1305_Simd256_digest(s, tag);
     ok &= compare_and_print(16, tag, v->tag);
 
     v++;
-    Hacl_Streaming_Poly1305_256_init(v->key, s);
-    assert(Hacl_Streaming_Poly1305_256_update(s, NULL, 0) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(s, v->input, 8) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(s, v->input + 8, 8) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(s, v->input + 16, 16) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(s, v->input + 32, 8) == 0);
-    assert(Hacl_Streaming_Poly1305_256_update(
+    Hacl_MAC_Poly1305_Simd256_reset(s, v->key);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, NULL, 0) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, v->input, 8) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, v->input + 8, 8) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, v->input + 16, 16) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(s, v->input + 32, 8) == 0);
+    assert(Hacl_MAC_Poly1305_Simd256_update(
              s, v->input + 40, v->input_len - 40) == 0);
-    Hacl_Streaming_Poly1305_256_finish(s, tag);
+    Hacl_MAC_Poly1305_Simd256_digest(s, tag);
     ok &= compare_and_print(16, tag, v->tag);
 
-    Hacl_Streaming_Poly1305_256_free(s);
+    Hacl_MAC_Poly1305_Simd256_free(s);
   } else {
     printf("Poly1305 (256-bit) streaming: no AVX2 support: ignoring tests\n");
   }

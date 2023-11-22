@@ -181,6 +181,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
   assert (Seq.equal sf s_init)
 #pop-options
 
+#push-options "--ext compat:normalizer_memo_ignore_cfg"
 let sha256_update ctx_b in_b num_val k_b =
   let h0 = get() in
   DV.length_eq (get_downview in_b);
@@ -197,3 +198,4 @@ let sha256_update ctx_b in_b num_val k_b =
   simplify_le_bytes_to_hash_uint32 ctx_b h1;
   lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 in_b h0;
   ()
+#pop-options

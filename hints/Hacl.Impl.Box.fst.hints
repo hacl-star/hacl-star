@@ -61,7 +61,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "63e87bd71d4866de2aa9f13ffd1715ef"
+      "e888e2ee3fa487a5054fc0f7bcdfaece"
     ],
     [
       "Hacl.Impl.Box.box_beforenm",
@@ -246,7 +246,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f8e992dd0e641e0b371728bfb15a542e"
+      "a18458bcb398b16806a1e8a7169b69fb"
     ],
     [
       "Hacl.Impl.Box.box_detached_afternm",
@@ -317,7 +317,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e02b2d1f604d55b8ad1d585fab5d7267"
+      "97dba7b5758da24ce3e170c03e200bcf"
     ],
     [
       "Hacl.Impl.Box.box_detached_afternm",
@@ -326,9 +326,15 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "bool_typing", "constructor_distinct_Lib.IntTypes.PUB",
+        "bool_typing", "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W32",
+        "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W32@tok",
+        "equality_tok_FStar.Integers.W8@tok",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
@@ -351,6 +357,8 @@
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__b",
@@ -364,7 +372,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "8ef4e60710c61bb1fa7f72dc4b7dc0df"
+      "19e942dc5a992280731bedb94008e8c7"
     ],
     [
       "Hacl.Impl.Box.box_detached",
@@ -437,7 +445,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7e7489df9aaa4af358051ac125701fae"
+      "b04491b2ddc12bc650ae0db647faa032"
     ],
     [
       "Hacl.Impl.Box.box_detached",
@@ -616,7 +624,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "033a9793005b6cc0af45acc11ac1e376"
+      "0cef4ffa87b01e23868feb8702ae0d9e"
     ],
     [
       "Hacl.Impl.Box.box_open_detached_afternm",
@@ -687,7 +695,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "46bf275a6b27b0ccdb7e4a106f80a265"
+      "4517757c752fb067d0c2ebf7e87b661d"
     ],
     [
       "Hacl.Impl.Box.box_open_detached_afternm",
@@ -713,7 +721,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "cd634389dbe7026b54dcca83809e2125"
+      "dbae9bc1eb80615d4823462dccb6ccf9"
     ],
     [
       "Hacl.Impl.Box.box_open_detached",
@@ -785,7 +793,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a9c766457bf2905f8f42531db0cb7737"
+      "50800363477e06c562cbb4c2ef808329"
     ],
     [
       "Hacl.Impl.Box.box_open_detached",
@@ -958,7 +966,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "694fb726a39b5b129d0148e5c827c488"
+      "a277049ef3621c1e3c755987ad7c4eea"
     ],
     [
       "Hacl.Impl.Box.box_easy_afternm",
@@ -1012,7 +1020,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cbbdaee5a95a3a01941d6581ff56add7"
+      "61f8a8807963151db0751a706146f406"
     ],
     [
       "Hacl.Impl.Box.box_easy_afternm",
@@ -1054,7 +1062,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "76c22fd9a74e049f62467e5e8bf1255a"
+      "546c400c47411a370b4f3c9cd996eef7"
     ],
     [
       "Hacl.Impl.Box.box_easy_afternm",
@@ -1153,7 +1161,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2382e1a10a0bbe54ccaac5aea9711a9d"
+      "a7369907456ae371574706c0c822fa63"
     ],
     [
       "Hacl.Impl.Box.box_easy",
@@ -1208,7 +1216,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2b56d95ab25ed36e60c7dd38a46af9ec"
+      "bc28296c5426ee12a643d3af892ace75"
     ],
     [
       "Hacl.Impl.Box.box_easy",
@@ -1250,7 +1258,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "48d379b64fd85faf657eab23e25e0e52"
+      "7c912a62a4ce51fb11b2bdbf1ca4a355"
     ],
     [
       "Hacl.Impl.Box.box_easy",
@@ -1356,7 +1364,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "bda06972f1157de9e2c71096e4060226"
+      "95e0a44ad381c308873d9e3f0cf639aa"
     ],
     [
       "Hacl.Impl.Box.box_open_easy_afternm",
@@ -1415,7 +1423,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7ffc288774233b4aff7fb78978d1ab2e"
+      "e0b127a15537d8b2f94984a8d4dfed0a"
     ],
     [
       "Hacl.Impl.Box.box_open_easy_afternm",
@@ -1457,7 +1465,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "445c60219396cd714304f4e8bb5ce60b"
+      "1024f6b6605716fc474b75fb19ab3d20"
     ],
     [
       "Hacl.Impl.Box.box_open_easy_afternm",
@@ -1562,7 +1570,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "61179e0c2f6f10107aaff86b6f917164"
+      "373124f3736221fac9f95a5273caf7a7"
     ],
     [
       "Hacl.Impl.Box.box_open_easy",
@@ -1621,7 +1629,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "693cff9dc6fa2c5939d808c0ea44499f"
+      "8d3ebfae2bb4f8cef7e67722105b1075"
     ],
     [
       "Hacl.Impl.Box.box_open_easy",
@@ -1663,7 +1671,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "22c26e19502d805cc44d9aac8c38a129"
+      "3ba541eb1aaea475ed857ab1564a1d8e"
     ],
     [
       "Hacl.Impl.Box.box_open_easy",
@@ -1752,7 +1760,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d0e14da6fa8c203ebd32355504287300"
+      "f71c380c97850342ec81b48ab1b15976"
     ]
   ]
 ]

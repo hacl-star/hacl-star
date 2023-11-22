@@ -1,18 +1,18 @@
 [
-  "ΩÀùh›Ü‰‡ußÊw€µûœ",
+  "ï\u000f’bÖ€§¬\u001bIˆÍåØ¸r",
   [
     [
-      "Hacl.Streaming.Poly1305_128.poly1305_128_state",
+      "Hacl.Streaming.Poly1305_128.state_t",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@query", "constructor_distinct_Hacl.Streaming.Interface.Runtime",
         "equality_tok_Hacl.Impl.Poly1305.Fields.M128@tok",
         "equality_tok_Hacl.Streaming.Interface.Runtime@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
-        "equation_Hacl.Streaming.Poly1305.k",
         "equation_Hacl.Streaming.Poly1305.poly1305",
+        "equation_Hacl.Streaming.Poly1305.poly1305_key",
         "equation_Hacl.Streaming.Poly1305.stateful_poly1305_ctx",
         "interpretation_Tm_abs_ba23de111e861af55e3d7645d241e186",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -26,7 +26,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s"
       ],
       0,
-      "b29521e6468a71fd7a4abee720761e3f"
+      "d017148533a5d4162e91959a857a4030"
     ],
     [
       "Hacl.Streaming.Poly1305_128.alloca",
@@ -53,20 +53,20 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s"
       ],
       0,
-      "e93371352e20dd224987bbdfb7b21401"
+      "8601226b423f844c8a03df05ce25e19f"
     ],
     [
-      "Hacl.Streaming.Poly1305_128.create_in",
+      "Hacl.Streaming.Poly1305_128.malloc",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@query", "constructor_distinct_Hacl.Streaming.Interface.Runtime",
         "equality_tok_Hacl.Impl.Poly1305.Fields.M128@tok",
         "equality_tok_Hacl.Streaming.Interface.Runtime@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
-        "equation_Hacl.Streaming.Poly1305.k",
         "equation_Hacl.Streaming.Poly1305.poly1305",
+        "equation_Hacl.Streaming.Poly1305.poly1305_key",
         "equation_Hacl.Streaming.Poly1305.stateful_poly1305_ctx",
         "interpretation_Tm_abs_ba23de111e861af55e3d7645d241e186",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -80,25 +80,22 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s"
       ],
       0,
-      "1c951f69d558470819dde31b103df849"
+      "a86d343e6a54d2df31f9d6300f0a9472"
     ],
     [
-      "Hacl.Streaming.Poly1305_128.init",
+      "Hacl.Streaming.Poly1305_128.reset",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@query", "constructor_distinct_Hacl.Streaming.Interface.Runtime",
         "equality_tok_Hacl.Impl.Poly1305.Fields.M128@tok",
         "equality_tok_Hacl.Streaming.Interface.Runtime@tok",
-        "equation_FStar.Pervasives.pattern",
         "equation_Hacl.Streaming.Interface.optional_key",
-        "equation_Hacl.Streaming.Poly1305.k",
         "equation_Hacl.Streaming.Poly1305.poly1305",
+        "equation_Hacl.Streaming.Poly1305.poly1305_key",
         "equation_Hacl.Streaming.Poly1305.stateful_poly1305_ctx",
-        "function_token_typing_FStar.Pervasives.pattern",
         "interpretation_Tm_abs_ba23de111e861af55e3d7645d241e186",
-        "lemma_FStar.Ghost.reveal_hide",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
         "proj_equation_Hacl.Streaming.Interface.Block_km",
         "proj_equation_Hacl.Streaming.Interface.Block_state",
@@ -107,11 +104,10 @@
         "projection_inverse_Hacl.Streaming.Interface.Block_km",
         "projection_inverse_Hacl.Streaming.Interface.Block_state",
         "projection_inverse_Hacl.Streaming.Interface.Stateful_s",
-        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s",
-        "unit_typing"
+        "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s"
       ],
       0,
-      "f61bef7b1059a5352fe418836602d4f6"
+      "b74215413af11a5a1f8eb8cfde05ee17"
     ],
     [
       "Hacl.Streaming.Poly1305_128.update",
@@ -142,20 +138,20 @@
         "unit_typing"
       ],
       0,
-      "9f23588a46d56da4b92e921688b2aab1"
+      "536eed759fcb3e1370d5713a29249727"
     ],
     [
-      "Hacl.Streaming.Poly1305_128.finish",
+      "Hacl.Streaming.Poly1305_128.digest",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@query", "constructor_distinct_Hacl.Streaming.Interface.Runtime",
         "equality_tok_Hacl.Impl.Poly1305.Fields.M128@tok",
         "equality_tok_Hacl.Streaming.Interface.Runtime@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
-        "equation_Hacl.Streaming.Poly1305.k",
         "equation_Hacl.Streaming.Poly1305.poly1305",
+        "equation_Hacl.Streaming.Poly1305.poly1305_key",
         "equation_Hacl.Streaming.Poly1305.stateful_poly1305_ctx",
         "interpretation_Tm_abs_ba23de111e861af55e3d7645d241e186",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -169,7 +165,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s"
       ],
       0,
-      "c60626a368b6e7b41dc3bc9edd4ac34d"
+      "331874a1e82ebcaa0ea63e0639d66479"
     ],
     [
       "Hacl.Streaming.Poly1305_128.free",
@@ -200,7 +196,7 @@
         "unit_typing"
       ],
       0,
-      "d67f151a8c9e351e6fd895a29dc6a2a8"
+      "d91c6c66c7e0814c5bc361de78ee8909"
     ]
   ]
 ]

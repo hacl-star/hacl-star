@@ -415,7 +415,7 @@ static inline void sha384_finish(uint64_t *st, uint8_t *h)
 
 static uint32_t _h0[5U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U, 0xc3d2e1f0U };
 
-static void legacy_init(uint32_t *s)
+static void init(uint32_t *s)
 {
   for (uint32_t i = 0U; i < 5U; i++)
   {
@@ -423,7 +423,7 @@ static void legacy_init(uint32_t *s)
   }
 }
 
-static void legacy_update(uint32_t *h, uint8_t *l)
+static void update(uint32_t *h, uint8_t *l)
 {
   uint32_t ha = h[0U];
   uint32_t hb = h[1U];
@@ -511,7 +511,7 @@ static void legacy_update(uint32_t *h, uint8_t *l)
   h[4U] = ste + he;
 }
 
-static void legacy_pad(uint64_t len, uint8_t *dst)
+static void pad(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = 0x80U;
@@ -524,7 +524,7 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << 3U);
 }
 
-static void legacy_finish(uint32_t *s, uint8_t *dst)
+static void finish(uint32_t *s, uint8_t *dst)
 {
   for (uint32_t i = 0U; i < 5U; i++)
   {
@@ -532,25 +532,24 @@ static void legacy_finish(uint32_t *s, uint8_t *dst)
   }
 }
 
-static void legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
+static void update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = 0U; i < n_blocks; i++)
   {
     uint32_t sz = 64U;
     uint8_t *block = blocks + sz * i;
-    legacy_update(s, block);
+    update(s, block);
   }
 }
 
-static void
-legacy_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len)
+static void update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len)
 {
   uint32_t blocks_n = input_len / 64U;
   uint32_t blocks_len = blocks_n * 64U;
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  legacy_update_multi(s, blocks, blocks_n);
+  update_multi(s, blocks, blocks_n);
   uint64_t total_input_len = prev_len + (uint64_t)input_len;
   uint32_t pad_len = 1U + (128U - (9U + (uint32_t)(total_input_len % (uint64_t)64U))) % 64U + 8U;
   uint32_t tmp_len = rest_len + pad_len;
@@ -559,11 +558,11 @@ legacy_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t inpu
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
-  legacy_pad(total_input_len, tmp_pad);
-  legacy_update_multi(s, tmp, tmp_len / 64U);
+  pad(total_input_len, tmp_pad);
+  update_multi(s, tmp, tmp_len / 64U);
 }
 
-static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_oneshot(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint32_t s[5U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U, 0xc3d2e1f0U };
   uint32_t blocks_n0 = input_len / 64U;
@@ -585,18 +584,18 @@ static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *blocks = blocks0;
   uint32_t rest_len = rest_len0;
   uint8_t *rest = rest0;
-  legacy_update_multi(s, blocks, blocks_n);
-  legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  legacy_finish(s, dst);
+  update_multi(s, blocks, blocks_n);
+  update_last(s, (uint64_t)blocks_len, rest, rest_len);
+  finish(s, output);
 }
 
 /**
-Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes.
+Hash `input`, of len `input_len`, into `output`, an array of 32 bytes.
 */
-static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint8_t *ib = input;
-  uint8_t *rb = dst;
+  uint8_t *rb = output;
   uint32_t st[8U] = { 0U };
   sha256_init(st);
   uint32_t rem = input_len % 64U;
@@ -610,12 +609,12 @@ static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 }
 
 /**
-Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes.
+Hash `input`, of len `input_len`, into `output`, an array of 64 bytes.
 */
-static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint8_t *ib = input;
-  uint8_t *rb = dst;
+  uint8_t *rb = output;
   uint64_t st[8U] = { 0U };
   sha512_init(st);
   uint32_t rem = input_len % 128U;
@@ -629,12 +628,12 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 }
 
 /**
-Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes.
+Hash `input`, of len `input_len`, into `output`, an array of 48 bytes.
 */
-static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint8_t *ib = input;
-  uint8_t *rb = dst;
+  uint8_t *rb = output;
   uint64_t st[8U] = { 0U };
   sha384_init(st);
   uint32_t rem = input_len % 128U;
@@ -663,13 +662,7 @@ The key can be any length and will be hashed if it is longer and padded if it is
 `dst` must point to 20 bytes of memory.
 */
 static void
-legacy_compute_sha1(
-  uint8_t *dst,
-  uint8_t *key,
-  uint32_t key_len,
-  uint8_t *data,
-  uint32_t data_len
-)
+compute_sha1(uint8_t *dst, uint8_t *key, uint32_t key_len, uint8_t *data, uint32_t data_len)
 {
   uint32_t l = 64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
@@ -693,7 +686,7 @@ legacy_compute_sha1(
   }
   else
   {
-    legacy_hash(key, key_len, nkey);
+    hash_oneshot(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -717,7 +710,7 @@ legacy_compute_sha1(
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    legacy_update_last(s, 0ULL, ipad, 64U);
+    update_last(s, 0ULL, ipad, 64U);
   }
   else
   {
@@ -739,13 +732,13 @@ legacy_compute_sha1(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    legacy_update_multi(s, ipad, 1U);
-    legacy_update_multi(s, full_blocks, n_blocks);
-    legacy_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
+    update_multi(s, ipad, 1U);
+    update_multi(s, full_blocks, n_blocks);
+    update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
-  legacy_finish(s, dst1);
+  finish(s, dst1);
   uint8_t *hash1 = ipad;
-  legacy_init(s);
+  init(s);
   uint32_t block_len = 64U;
   uint32_t n_blocks0 = 20U / block_len;
   uint32_t rem0 = 20U % block_len;
@@ -764,10 +757,10 @@ legacy_compute_sha1(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  legacy_update_multi(s, opad, 1U);
-  legacy_update_multi(s, full_blocks, n_blocks);
-  legacy_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
-  legacy_finish(s, dst);
+  update_multi(s, opad, 1U);
+  update_multi(s, full_blocks, n_blocks);
+  update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
+  finish(s, dst);
 }
 
 /**
@@ -807,7 +800,7 @@ compute_sha2_256(
   }
   else
   {
-    hash_256(key, key_len, nkey);
+    hash_256(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -934,7 +927,7 @@ compute_sha2_384(
   }
   else
   {
-    hash_384(key, key_len, nkey);
+    hash_384(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -1069,7 +1062,7 @@ compute_sha2_512(
   }
   else
   {
-    hash_512(key, key_len, nkey);
+    hash_512(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t ipad[l];
@@ -1309,8 +1302,8 @@ instantiate(
             (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         }
         input0[20U] = 0U;
-        legacy_compute_sha1(k_, k, 20U, input0, input_len);
-        legacy_compute_sha1(v, k_, 20U, v, 20U);
+        compute_sha1(k_, k, 20U, input0, input_len);
+        compute_sha1(v, k_, 20U, v, 20U);
         memcpy(k, k_, 20U * sizeof (uint8_t));
         if (entropy_input_len + nonce_len + personalization_string_len != 0U)
         {
@@ -1327,8 +1320,8 @@ instantiate(
               (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
           }
           input[20U] = 1U;
-          legacy_compute_sha1(k_0, k, 20U, input, input_len0);
-          legacy_compute_sha1(v, k_0, 20U, v, 20U);
+          compute_sha1(k_0, k, 20U, input, input_len0);
+          compute_sha1(v, k_0, 20U, v, 20U);
           memcpy(k, k_0, 20U * sizeof (uint8_t));
         }
         break;
@@ -1558,8 +1551,8 @@ reseed(
             (entropy_input_len + additional_input_input_len) * sizeof (uint8_t));
         }
         input0[20U] = 0U;
-        legacy_compute_sha1(k_, k, 20U, input0, input_len);
-        legacy_compute_sha1(v, k_, 20U, v, 20U);
+        compute_sha1(k_, k, 20U, input0, input_len);
+        compute_sha1(v, k_, 20U, v, 20U);
         memcpy(k, k_, 20U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != 0U)
         {
@@ -1576,8 +1569,8 @@ reseed(
               (entropy_input_len + additional_input_input_len) * sizeof (uint8_t));
           }
           input[20U] = 1U;
-          legacy_compute_sha1(k_0, k, 20U, input, input_len0);
-          legacy_compute_sha1(v, k_0, 20U, v, 20U);
+          compute_sha1(k_0, k, 20U, input, input_len0);
+          compute_sha1(v, k_0, 20U, v, 20U);
           memcpy(k, k_0, 20U * sizeof (uint8_t));
         }
         ctr[0U] = 1U;
@@ -1793,8 +1786,8 @@ generate(
               memcpy(input0 + 21U, additional_input, additional_input_len * sizeof (uint8_t));
             }
             input0[20U] = 0U;
-            legacy_compute_sha1(k_, k, 20U, input0, input_len);
-            legacy_compute_sha1(v, k_, 20U, v, 20U);
+            compute_sha1(k_, k, 20U, input0, input_len);
+            compute_sha1(v, k_, 20U, v, 20U);
             memcpy(k, k_, 20U * sizeof (uint8_t));
             if (additional_input_len != 0U)
             {
@@ -1809,8 +1802,8 @@ generate(
                 memcpy(input + 21U, additional_input, additional_input_len * sizeof (uint8_t));
               }
               input[20U] = 1U;
-              legacy_compute_sha1(k_0, k, 20U, input, input_len0);
-              legacy_compute_sha1(v, k_0, 20U, v, 20U);
+              compute_sha1(k_0, k, 20U, input, input_len0);
+              compute_sha1(v, k_0, 20U, v, 20U);
               memcpy(k, k_0, 20U * sizeof (uint8_t));
             }
           }
@@ -1819,13 +1812,13 @@ generate(
           uint8_t *out = output1;
           for (uint32_t i = 0U; i < max; i++)
           {
-            legacy_compute_sha1(v, k, 20U, v, 20U);
+            compute_sha1(v, k, 20U, v, 20U);
             memcpy(out + i * 20U, v, 20U * sizeof (uint8_t));
           }
           if (max * 20U < n)
           {
             uint8_t *block = output1 + max * 20U;
-            legacy_compute_sha1(v, k, 20U, v, 20U);
+            compute_sha1(v, k, 20U, v, 20U);
             memcpy(block, v, (n - max * 20U) * sizeof (uint8_t));
           }
           uint32_t input_len = 21U + additional_input_len;
@@ -1839,8 +1832,8 @@ generate(
             memcpy(input0 + 21U, additional_input, additional_input_len * sizeof (uint8_t));
           }
           input0[20U] = 0U;
-          legacy_compute_sha1(k_, k, 20U, input0, input_len);
-          legacy_compute_sha1(v, k_, 20U, v, 20U);
+          compute_sha1(k_, k, 20U, input0, input_len);
+          compute_sha1(v, k_, 20U, v, 20U);
           memcpy(k, k_, 20U * sizeof (uint8_t));
           if (additional_input_len != 0U)
           {
@@ -1855,8 +1848,8 @@ generate(
               memcpy(input + 21U, additional_input, additional_input_len * sizeof (uint8_t));
             }
             input[20U] = 1U;
-            legacy_compute_sha1(k_0, k, 20U, input, input_len0);
-            legacy_compute_sha1(v, k_0, 20U, v, 20U);
+            compute_sha1(k_0, k, 20U, input, input_len0);
+            compute_sha1(v, k_0, 20U, v, 20U);
             memcpy(k, k_0, 20U * sizeof (uint8_t));
           }
           uint32_t old_ctr = ctr[0U];

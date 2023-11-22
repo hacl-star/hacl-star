@@ -130,17 +130,17 @@ val poly1305_finish: #s:field_spec -> poly1305_finish_st s
 
 inline_for_extraction noextract
 let poly1305_mac_st (s:field_spec) =
-    tag:lbuffer uint8 16ul
-  -> len:size_t
-  -> text:lbuffer uint8 len
+    output:lbuffer uint8 16ul
+  -> input:buffer uint8
+  -> input_len:size_t { length input = v input_len }
   -> key:lbuffer uint8 32ul ->
   Stack unit
   (requires fun h ->
-    live h text /\ live h tag /\ live h key /\
-    disjoint tag text /\ disjoint tag key)
+    live h input /\ live h output /\ live h key /\
+    disjoint output input /\ disjoint output key)
   (ensures  fun h0 _ h1 ->
-    modifies (loc tag) h0 h1 /\
-    as_seq h1 tag == S.poly1305_mac (as_seq h0 text) (as_seq h0 key))
+    modifies (loc output) h0 h1 /\
+    as_seq h1 output == S.poly1305_mac (as_seq h0 (input <: lbuffer uint8 input_len)) (as_seq h0 key))
 
 noextract
 [@ Meta.Attribute.specialize ]

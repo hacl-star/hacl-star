@@ -149,6 +149,7 @@ module T = FStar.Tactics
 module LBV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 
+#push-options "--ext compat:normalizer_memo_ignore_cfg"
 let memcpy_Test
   (dst:B.buffer UInt8.t{B.length dst % 8 == 0})
   (src:IB.ibuffer UInt8.t{B.length src % 8 == 0})
@@ -176,6 +177,7 @@ let memcpy_Test
     // lbv_as_seq_eq dst src Vale.Interop.Views.up_view64 h1; //And a lemma to rephrase the Vale postcondition
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
+#pop-options
 
 module VC = Vale.Lib.X64.Cpuidstdcall
 

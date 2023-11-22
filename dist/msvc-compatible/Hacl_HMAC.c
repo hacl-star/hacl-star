@@ -23,12 +23,13 @@
  */
 
 
-#include "Hacl_HMAC.h"
+#include "internal/Hacl_HMAC.h"
 
 #include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
-#include "internal/Hacl_Hash_Blake2.h"
+#include "internal/Hacl_Hash_Blake2s.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 
 /**
 Write the HMAC-SHA-1 MAC of a message (`data`) by using a key (`key`) into `dst`.
@@ -37,7 +38,7 @@ The key can be any length and will be hashed if it is longer and padded if it is
 `dst` must point to 20 bytes of memory.
 */
 void
-Hacl_HMAC_legacy_compute_sha1(
+Hacl_HMAC_compute_sha1(
   uint8_t *dst,
   uint8_t *key,
   uint32_t key_len,
@@ -67,7 +68,7 @@ Hacl_HMAC_legacy_compute_sha1(
   }
   else
   {
-    Hacl_Hash_SHA1_legacy_hash(key, key_len, nkey);
+    Hacl_Hash_SHA1_hash_oneshot(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -91,7 +92,7 @@ Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    Hacl_Hash_SHA1_legacy_update_last(s, 0ULL, ipad, 64U);
+    Hacl_Hash_SHA1_update_last(s, 0ULL, ipad, 64U);
   }
   else
   {
@@ -113,13 +114,13 @@ Hacl_HMAC_legacy_compute_sha1(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    Hacl_Hash_SHA1_legacy_update_multi(s, ipad, 1U);
-    Hacl_Hash_SHA1_legacy_update_multi(s, full_blocks, n_blocks);
-    Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
+    Hacl_Hash_SHA1_update_multi(s, ipad, 1U);
+    Hacl_Hash_SHA1_update_multi(s, full_blocks, n_blocks);
+    Hacl_Hash_SHA1_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
-  Hacl_Hash_Core_SHA1_legacy_finish(s, dst1);
+  Hacl_Hash_SHA1_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_Hash_Core_SHA1_legacy_init(s);
+  Hacl_Hash_SHA1_init(s);
   uint32_t block_len = 64U;
   uint32_t n_blocks0 = 20U / block_len;
   uint32_t rem0 = 20U % block_len;
@@ -138,10 +139,10 @@ Hacl_HMAC_legacy_compute_sha1(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  Hacl_Hash_SHA1_legacy_update_multi(s, opad, 1U);
-  Hacl_Hash_SHA1_legacy_update_multi(s, full_blocks, n_blocks);
-  Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
-  Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
+  Hacl_Hash_SHA1_update_multi(s, opad, 1U);
+  Hacl_Hash_SHA1_update_multi(s, full_blocks, n_blocks);
+  Hacl_Hash_SHA1_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
+  Hacl_Hash_SHA1_finish(s, dst);
 }
 
 /**
@@ -181,7 +182,7 @@ Hacl_HMAC_compute_sha2_256(
   }
   else
   {
-    Hacl_Streaming_SHA2_hash_256(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_256(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -207,13 +208,13 @@ Hacl_HMAC_compute_sha2_256(
     8U,
     1U,
     uint32_t *os = st;
-    uint32_t x = Hacl_Impl_SHA2_Generic_h256[i];
+    uint32_t x = Hacl_Hash_SHA2_h256[i];
     os[i] = x;);
   uint32_t *s = st;
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    Hacl_SHA2_Scalar32_sha256_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
+    Hacl_Hash_SHA2_sha256_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
   }
   else
   {
@@ -235,18 +236,16 @@ Hacl_HMAC_compute_sha2_256(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    Hacl_SHA2_Scalar32_sha256_update_nblocks(64U, ipad, s);
-    Hacl_SHA2_Scalar32_sha256_update_nblocks(n_blocks * 64U, full_blocks, s);
-    Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)64U
-      + (uint64_t)full_blocks_len
-      + (uint64_t)rem_len,
+    Hacl_Hash_SHA2_sha256_update_nblocks(64U, ipad, s);
+    Hacl_Hash_SHA2_sha256_update_nblocks(n_blocks * 64U, full_blocks, s);
+    Hacl_Hash_SHA2_sha256_update_last((uint64_t)64U + (uint64_t)full_blocks_len + (uint64_t)rem_len,
       rem_len,
       rem,
       s);
   }
-  Hacl_SHA2_Scalar32_sha256_finish(s, dst1);
+  Hacl_Hash_SHA2_sha256_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_SHA2_Scalar32_sha256_init(s);
+  Hacl_Hash_SHA2_sha256_init(s);
   uint32_t block_len = 64U;
   uint32_t n_blocks0 = 32U / block_len;
   uint32_t rem0 = 32U % block_len;
@@ -265,15 +264,13 @@ Hacl_HMAC_compute_sha2_256(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  Hacl_SHA2_Scalar32_sha256_update_nblocks(64U, opad, s);
-  Hacl_SHA2_Scalar32_sha256_update_nblocks(n_blocks * 64U, full_blocks, s);
-  Hacl_SHA2_Scalar32_sha256_update_last((uint64_t)64U
-    + (uint64_t)full_blocks_len
-    + (uint64_t)rem_len,
+  Hacl_Hash_SHA2_sha256_update_nblocks(64U, opad, s);
+  Hacl_Hash_SHA2_sha256_update_nblocks(n_blocks * 64U, full_blocks, s);
+  Hacl_Hash_SHA2_sha256_update_last((uint64_t)64U + (uint64_t)full_blocks_len + (uint64_t)rem_len,
     rem_len,
     rem,
     s);
-  Hacl_SHA2_Scalar32_sha256_finish(s, dst);
+  Hacl_Hash_SHA2_sha256_finish(s, dst);
 }
 
 /**
@@ -313,7 +310,7 @@ Hacl_HMAC_compute_sha2_384(
   }
   else
   {
-    Hacl_Streaming_SHA2_hash_384(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_384(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -339,13 +336,13 @@ Hacl_HMAC_compute_sha2_384(
     8U,
     1U,
     uint64_t *os = st;
-    uint64_t x = Hacl_Impl_SHA2_Generic_h384[i];
+    uint64_t x = Hacl_Hash_SHA2_h384[i];
     os[i] = x;);
   uint64_t *s = st;
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    Hacl_SHA2_Scalar32_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
+    Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
         FStar_UInt128_uint64_to_uint128((uint64_t)128U)),
       128U,
       ipad,
@@ -371,18 +368,18 @@ Hacl_HMAC_compute_sha2_384(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    Hacl_SHA2_Scalar32_sha384_update_nblocks(128U, ipad, s);
-    Hacl_SHA2_Scalar32_sha384_update_nblocks(n_blocks * 128U, full_blocks, s);
-    Hacl_SHA2_Scalar32_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
+    Hacl_Hash_SHA2_sha384_update_nblocks(128U, ipad, s);
+    Hacl_Hash_SHA2_sha384_update_nblocks(n_blocks * 128U, full_blocks, s);
+    Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
           FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
         FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
       rem_len,
       rem,
       s);
   }
-  Hacl_SHA2_Scalar32_sha384_finish(s, dst1);
+  Hacl_Hash_SHA2_sha384_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_SHA2_Scalar32_sha384_init(s);
+  Hacl_Hash_SHA2_sha384_init(s);
   uint32_t block_len = 128U;
   uint32_t n_blocks0 = 48U / block_len;
   uint32_t rem0 = 48U % block_len;
@@ -401,15 +398,15 @@ Hacl_HMAC_compute_sha2_384(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  Hacl_SHA2_Scalar32_sha384_update_nblocks(128U, opad, s);
-  Hacl_SHA2_Scalar32_sha384_update_nblocks(n_blocks * 128U, full_blocks, s);
-  Hacl_SHA2_Scalar32_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
+  Hacl_Hash_SHA2_sha384_update_nblocks(128U, opad, s);
+  Hacl_Hash_SHA2_sha384_update_nblocks(n_blocks * 128U, full_blocks, s);
+  Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
         FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
       FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
     rem_len,
     rem,
     s);
-  Hacl_SHA2_Scalar32_sha384_finish(s, dst);
+  Hacl_Hash_SHA2_sha384_finish(s, dst);
 }
 
 /**
@@ -449,7 +446,7 @@ Hacl_HMAC_compute_sha2_512(
   }
   else
   {
-    Hacl_Streaming_SHA2_hash_512(key, key_len, nkey);
+    Hacl_Hash_SHA2_hash_512(nkey, key, key_len);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -475,13 +472,13 @@ Hacl_HMAC_compute_sha2_512(
     8U,
     1U,
     uint64_t *os = st;
-    uint64_t x = Hacl_Impl_SHA2_Generic_h512[i];
+    uint64_t x = Hacl_Hash_SHA2_h512[i];
     os[i] = x;);
   uint64_t *s = st;
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
-    Hacl_SHA2_Scalar32_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
+    Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
         FStar_UInt128_uint64_to_uint128((uint64_t)128U)),
       128U,
       ipad,
@@ -507,18 +504,18 @@ Hacl_HMAC_compute_sha2_512(
     uint32_t full_blocks_len = n_blocks * block_len;
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
-    Hacl_SHA2_Scalar32_sha512_update_nblocks(128U, ipad, s);
-    Hacl_SHA2_Scalar32_sha512_update_nblocks(n_blocks * 128U, full_blocks, s);
-    Hacl_SHA2_Scalar32_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
+    Hacl_Hash_SHA2_sha512_update_nblocks(128U, ipad, s);
+    Hacl_Hash_SHA2_sha512_update_nblocks(n_blocks * 128U, full_blocks, s);
+    Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
           FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
         FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
       rem_len,
       rem,
       s);
   }
-  Hacl_SHA2_Scalar32_sha512_finish(s, dst1);
+  Hacl_Hash_SHA2_sha512_finish(s, dst1);
   uint8_t *hash1 = ipad;
-  Hacl_SHA2_Scalar32_sha512_init(s);
+  Hacl_Hash_SHA2_sha512_init(s);
   uint32_t block_len = 128U;
   uint32_t n_blocks0 = 64U / block_len;
   uint32_t rem0 = 64U % block_len;
@@ -537,15 +534,15 @@ Hacl_HMAC_compute_sha2_512(
   uint32_t full_blocks_len = n_blocks * block_len;
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
-  Hacl_SHA2_Scalar32_sha512_update_nblocks(128U, opad, s);
-  Hacl_SHA2_Scalar32_sha512_update_nblocks(n_blocks * 128U, full_blocks, s);
-  Hacl_SHA2_Scalar32_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
+  Hacl_Hash_SHA2_sha512_update_nblocks(128U, opad, s);
+  Hacl_Hash_SHA2_sha512_update_nblocks(n_blocks * 128U, full_blocks, s);
+  Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
         FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
       FStar_UInt128_uint64_to_uint128((uint64_t)rem_len)),
     rem_len,
     rem,
     s);
-  Hacl_SHA2_Scalar32_sha512_finish(s, dst);
+  Hacl_Hash_SHA2_sha512_finish(s, dst);
 }
 
 /**
@@ -585,7 +582,7 @@ Hacl_HMAC_compute_blake2s_32(
   }
   else
   {
-    Hacl_Blake2s_32_blake2s(32U, nkey, key_len, key, 0U, NULL);
+    Hacl_Hash_Blake2s_hash_with_key(nkey, 32U, key, key_len, NULL, 0U);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -606,13 +603,13 @@ Hacl_HMAC_compute_blake2s_32(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint32_t s[16U] = { 0U };
-  Hacl_Blake2s_32_blake2s_init(s, 0U, 32U);
+  Hacl_Hash_Blake2s_init(s, 0U, 32U);
   uint32_t *s0 = s;
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     uint32_t wv[16U] = { 0U };
-    Hacl_Blake2s_32_blake2s_update_last(64U, wv, s0, 0ULL, 64U, ipad);
+    Hacl_Hash_Blake2s_update_last(64U, wv, s0, 0ULL, 64U, ipad);
   }
   else
   {
@@ -635,25 +632,25 @@ Hacl_HMAC_compute_blake2s_32(
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
     uint32_t wv[16U] = { 0U };
-    Hacl_Blake2s_32_blake2s_update_multi(64U, wv, s0, 0ULL, ipad, 1U);
+    Hacl_Hash_Blake2s_update_multi(64U, wv, s0, 0ULL, ipad, 1U);
     uint32_t wv0[16U] = { 0U };
-    Hacl_Blake2s_32_blake2s_update_multi(n_blocks * 64U,
+    Hacl_Hash_Blake2s_update_multi(n_blocks * 64U,
       wv0,
       s0,
       (uint64_t)block_len,
       full_blocks,
       n_blocks);
     uint32_t wv1[16U] = { 0U };
-    Hacl_Blake2s_32_blake2s_update_last(rem_len,
+    Hacl_Hash_Blake2s_update_last(rem_len,
       wv1,
       s0,
       (uint64_t)64U + (uint64_t)full_blocks_len,
       rem_len,
       rem);
   }
-  Hacl_Blake2s_32_blake2s_finish(32U, dst1, s0);
+  Hacl_Hash_Blake2s_finish(32U, dst1, s0);
   uint8_t *hash1 = ipad;
-  Hacl_Blake2s_32_blake2s_init(s0, 0U, 32U);
+  Hacl_Hash_Blake2s_init(s0, 0U, 32U);
   uint32_t block_len = 64U;
   uint32_t n_blocks0 = 32U / block_len;
   uint32_t rem0 = 32U % block_len;
@@ -673,22 +670,22 @@ Hacl_HMAC_compute_blake2s_32(
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
   uint32_t wv[16U] = { 0U };
-  Hacl_Blake2s_32_blake2s_update_multi(64U, wv, s0, 0ULL, opad, 1U);
+  Hacl_Hash_Blake2s_update_multi(64U, wv, s0, 0ULL, opad, 1U);
   uint32_t wv0[16U] = { 0U };
-  Hacl_Blake2s_32_blake2s_update_multi(n_blocks * 64U,
+  Hacl_Hash_Blake2s_update_multi(n_blocks * 64U,
     wv0,
     s0,
     (uint64_t)block_len,
     full_blocks,
     n_blocks);
   uint32_t wv1[16U] = { 0U };
-  Hacl_Blake2s_32_blake2s_update_last(rem_len,
+  Hacl_Hash_Blake2s_update_last(rem_len,
     wv1,
     s0,
     (uint64_t)64U + (uint64_t)full_blocks_len,
     rem_len,
     rem);
-  Hacl_Blake2s_32_blake2s_finish(32U, dst, s0);
+  Hacl_Hash_Blake2s_finish(32U, dst, s0);
 }
 
 /**
@@ -728,7 +725,7 @@ Hacl_HMAC_compute_blake2b_32(
   }
   else
   {
-    Hacl_Blake2b_32_blake2b(64U, nkey, key_len, key, 0U, NULL);
+    Hacl_Hash_Blake2b_hash_with_key(nkey, 64U, key, key_len, NULL, 0U);
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = (uint8_t *)alloca(l * sizeof (uint8_t));
@@ -749,18 +746,13 @@ Hacl_HMAC_compute_blake2b_32(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint64_t s[16U] = { 0U };
-  Hacl_Blake2b_32_blake2b_init(s, 0U, 64U);
+  Hacl_Hash_Blake2b_init(s, 0U, 64U);
   uint64_t *s0 = s;
   uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     uint64_t wv[16U] = { 0U };
-    Hacl_Blake2b_32_blake2b_update_last(128U,
-      wv,
-      s0,
-      FStar_UInt128_uint64_to_uint128(0ULL),
-      128U,
-      ipad);
+    Hacl_Hash_Blake2b_update_last(128U, wv, s0, FStar_UInt128_uint64_to_uint128(0ULL), 128U, ipad);
   }
   else
   {
@@ -783,21 +775,16 @@ Hacl_HMAC_compute_blake2b_32(
     uint8_t *full_blocks = data;
     uint8_t *rem = data + full_blocks_len;
     uint64_t wv[16U] = { 0U };
-    Hacl_Blake2b_32_blake2b_update_multi(128U,
-      wv,
-      s0,
-      FStar_UInt128_uint64_to_uint128(0ULL),
-      ipad,
-      1U);
+    Hacl_Hash_Blake2b_update_multi(128U, wv, s0, FStar_UInt128_uint64_to_uint128(0ULL), ipad, 1U);
     uint64_t wv0[16U] = { 0U };
-    Hacl_Blake2b_32_blake2b_update_multi(n_blocks * 128U,
+    Hacl_Hash_Blake2b_update_multi(n_blocks * 128U,
       wv0,
       s0,
       FStar_UInt128_uint64_to_uint128((uint64_t)block_len),
       full_blocks,
       n_blocks);
     uint64_t wv1[16U] = { 0U };
-    Hacl_Blake2b_32_blake2b_update_last(rem_len,
+    Hacl_Hash_Blake2b_update_last(rem_len,
       wv1,
       s0,
       FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
@@ -805,9 +792,9 @@ Hacl_HMAC_compute_blake2b_32(
       rem_len,
       rem);
   }
-  Hacl_Blake2b_32_blake2b_finish(64U, dst1, s0);
+  Hacl_Hash_Blake2b_finish(64U, dst1, s0);
   uint8_t *hash1 = ipad;
-  Hacl_Blake2b_32_blake2b_init(s0, 0U, 64U);
+  Hacl_Hash_Blake2b_init(s0, 0U, 64U);
   uint32_t block_len = 128U;
   uint32_t n_blocks0 = 64U / block_len;
   uint32_t rem0 = 64U % block_len;
@@ -827,27 +814,22 @@ Hacl_HMAC_compute_blake2b_32(
   uint8_t *full_blocks = hash1;
   uint8_t *rem = hash1 + full_blocks_len;
   uint64_t wv[16U] = { 0U };
-  Hacl_Blake2b_32_blake2b_update_multi(128U,
-    wv,
-    s0,
-    FStar_UInt128_uint64_to_uint128(0ULL),
-    opad,
-    1U);
+  Hacl_Hash_Blake2b_update_multi(128U, wv, s0, FStar_UInt128_uint64_to_uint128(0ULL), opad, 1U);
   uint64_t wv0[16U] = { 0U };
-  Hacl_Blake2b_32_blake2b_update_multi(n_blocks * 128U,
+  Hacl_Hash_Blake2b_update_multi(n_blocks * 128U,
     wv0,
     s0,
     FStar_UInt128_uint64_to_uint128((uint64_t)block_len),
     full_blocks,
     n_blocks);
   uint64_t wv1[16U] = { 0U };
-  Hacl_Blake2b_32_blake2b_update_last(rem_len,
+  Hacl_Hash_Blake2b_update_last(rem_len,
     wv1,
     s0,
     FStar_UInt128_add(FStar_UInt128_uint64_to_uint128((uint64_t)128U),
       FStar_UInt128_uint64_to_uint128((uint64_t)full_blocks_len)),
     rem_len,
     rem);
-  Hacl_Blake2b_32_blake2b_finish(64U, dst, s0);
+  Hacl_Hash_Blake2b_finish(64U, dst, s0);
 }
 
