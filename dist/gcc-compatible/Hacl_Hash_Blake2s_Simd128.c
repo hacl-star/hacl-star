@@ -26,6 +26,7 @@
 #include "internal/Hacl_Hash_Blake2s_Simd128.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "lib_memzero0.h"
 
 static inline void
@@ -214,6 +215,7 @@ update_block(
 void
 Hacl_Hash_Blake2s_Simd128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t kk, uint32_t nn)
 {
+  uint32_t tmp[8U] = { 0U };
   Lib_IntVector_Intrinsics_vec128 *r0 = hash;
   Lib_IntVector_Intrinsics_vec128 *r1 = hash + 1U;
   Lib_IntVector_Intrinsics_vec128 *r2 = hash + 2U;
@@ -228,10 +230,59 @@ Hacl_Hash_Blake2s_Simd128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t k
   uint32_t iv7 = Hacl_Hash_Blake2s_ivTable_S[7U];
   r2[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0, iv1, iv2, iv3);
   r3[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
-  uint32_t kk_shift_8 = kk << 8U;
-  uint32_t iv0_ = iv0 ^ (0x01010000U ^ (kk_shift_8 ^ nn));
-  r0[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv1, iv2, iv3);
-  r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
+  uint8_t salt[8U] = { 0U };
+  uint8_t personal[8U] = { 0U };
+  Hacl_Hash_Blake2s_blake2s_params
+  p =
+    {
+      .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
+      .node_offset = 0U, .xof_length = 0U, .node_depth = 0U, .inner_length = 0U, .salt = salt,
+      .personal = personal
+    };
+  KRML_MAYBE_FOR2(i,
+    0U,
+    2U,
+    1U,
+    uint32_t *os = tmp + 4U;
+    uint8_t *bj = p.salt + i * 4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
+  KRML_MAYBE_FOR2(i,
+    0U,
+    2U,
+    1U,
+    uint32_t *os = tmp + 6U;
+    uint8_t *bj = p.personal + i * 4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;);
+  tmp[0U] = nn ^ (kk << 8U ^ ((uint32_t)p.fanout << 16U ^ (uint32_t)p.depth << 24U));
+  tmp[1U] = p.leaf_length;
+  tmp[2U] = p.node_offset;
+  tmp[3U] =
+    (uint32_t)p.xof_length
+    ^ ((uint32_t)p.node_depth << 16U ^ (uint32_t)p.inner_length << 24U);
+  uint32_t tmp0 = tmp[0U];
+  uint32_t tmp1 = tmp[1U];
+  uint32_t tmp2 = tmp[2U];
+  uint32_t tmp3 = tmp[3U];
+  uint32_t tmp4 = tmp[4U];
+  uint32_t tmp5 = tmp[5U];
+  uint32_t tmp6 = tmp[6U];
+  uint32_t tmp7 = tmp[7U];
+  uint32_t iv0_ = iv0 ^ tmp0;
+  uint32_t iv1_ = iv1 ^ tmp1;
+  uint32_t iv2_ = iv2 ^ tmp2;
+  uint32_t iv3_ = iv3 ^ tmp3;
+  uint32_t iv4_ = iv4 ^ tmp4;
+  uint32_t iv5_ = iv5 ^ tmp5;
+  uint32_t iv6_ = iv6 ^ tmp6;
+  uint32_t iv7_ = iv7 ^ tmp7;
+  r0[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv1_, iv2_, iv3_);
+  r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4_, iv5_, iv6_, iv7_);
 }
 
 static void

@@ -260,7 +260,7 @@ let blake2_prevlen (a : alg)
 noextract
 let init_s (a : alg) (kk : size_nat{kk <= max_key a}) :
   Tot (t a) =
-  Spec.blake2_init_hash a kk (output_size a)
+  Spec.blake2_init_hash a (Spec.blake2_default_params a) kk (output_size a)
 
 noextract
 let update_multi_s (#a : alg) (acc : t a)
@@ -290,7 +290,7 @@ let spec_s (a : alg)
   (kk : size_nat{kk <= max_key a})
   (key : lbytes kk)
   (input : S.seq uint8{if kk = 0 then S.length input <= max_input_length a else S.length input + Spec.size_block a <= max_input_length a}) =
-  Spec.blake2 a input kk key (output_size a)
+  Spec.blake2 a input (Spec.blake2_default_params a) kk key (output_size a)
 
 /// Interlude for spec proofs
 /// -------------------------
@@ -457,7 +457,7 @@ val spec_is_incremental :
   input:S.seq uint8 { if kk = 0 then S.length input <= max_input_length a else  S.length input + (Spec.size_block a) <= max_input_length a } ->
   Lemma(
     blake2_hash_incremental_s a kk k input ==
-      Spec.blake2 a input kk k (output_size a))
+      Spec.blake2 a input (Spec.blake2_default_params a) kk k (output_size a))
 
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false"
