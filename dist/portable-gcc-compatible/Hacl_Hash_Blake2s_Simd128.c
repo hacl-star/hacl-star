@@ -26,6 +26,7 @@
 #include "internal/Hacl_Hash_Blake2s_Simd128.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "lib_memzero0.h"
 
 /* SNIPPET_START: update_block */
@@ -237,7 +238,7 @@ Hacl_Hash_Blake2s_Simd128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t k
   r3[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
   uint8_t salt[8U] = { 0U };
   uint8_t personal[8U] = { 0U };
-  Hacl_Impl_Blake2_Core_blake2s_params
+  Hacl_Hash_Blake2s_blake2s_params
   p =
     {
       .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,

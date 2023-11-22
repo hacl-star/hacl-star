@@ -26,6 +26,7 @@
 #include "internal/Hacl_Hash_Blake2b_Simd256.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "lib_memzero0.h"
 
 static inline void
@@ -231,7 +232,7 @@ Hacl_Hash_Blake2b_Simd256_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t k
   r3[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
   uint8_t salt[16U] = { 0U };
   uint8_t personal[16U] = { 0U };
-  Hacl_Impl_Blake2_Core_blake2b_params
+  Hacl_Hash_Blake2s_blake2b_params
   p =
     {
       .digest_length1 = 64U, .key_length1 = 0U, .fanout1 = 1U, .depth1 = 1U, .leaf_length1 = 0U,

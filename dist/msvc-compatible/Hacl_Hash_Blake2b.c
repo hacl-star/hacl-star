@@ -474,6 +474,7 @@ update_block(uint64_t *wv, uint64_t *hash, bool flag, FStar_UInt128_uint128 totl
 
 void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
 {
+  uint64_t tmp[8U] = { 0U };
   uint64_t *r0 = hash;
   uint64_t *r1 = hash + 4U;
   uint64_t *r2 = hash + 8U;
@@ -494,16 +495,68 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
   r3[1U] = iv5;
   r3[2U] = iv6;
   r3[3U] = iv7;
-  uint64_t kk_shift_8 = (uint64_t)kk << 8U;
-  uint64_t iv0_ = iv0 ^ (0x01010000ULL ^ (kk_shift_8 ^ (uint64_t)nn));
+  uint8_t salt[16U] = { 0U };
+  uint8_t personal[16U] = { 0U };
+  Hacl_Hash_Blake2s_blake2b_params
+  p =
+    {
+      .digest_length1 = 64U, .key_length1 = 0U, .fanout1 = 1U, .depth1 = 1U, .leaf_length1 = 0U,
+      .node_offset1 = 0U, .xof_length1 = 0U, .node_depth1 = 0U, .inner_length1 = 0U, .salt1 = salt,
+      .personal1 = personal
+    };
+  KRML_MAYBE_FOR2(i,
+    0U,
+    2U,
+    1U,
+    uint64_t *os = tmp + 4U;
+    uint8_t *bj = p.salt1 + i * 8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;);
+  KRML_MAYBE_FOR2(i,
+    0U,
+    2U,
+    1U,
+    uint64_t *os = tmp + 6U;
+    uint8_t *bj = p.personal1 + i * 8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;);
+  tmp[0U] =
+    (uint64_t)nn
+    ^
+      ((uint64_t)kk
+      << 8U
+      ^ ((uint64_t)p.fanout1 << 16U ^ ((uint64_t)p.depth1 << 24U ^ (uint64_t)p.leaf_length1 << 32U)));
+  tmp[1U] = (uint64_t)p.node_offset1 ^ (uint64_t)p.xof_length1 << 32U;
+  tmp[2U] = (uint64_t)p.node_depth1 ^ (uint64_t)p.inner_length1 << 8U;
+  tmp[3U] = 0ULL;
+  uint64_t tmp0 = tmp[0U];
+  uint64_t tmp1 = tmp[1U];
+  uint64_t tmp2 = tmp[2U];
+  uint64_t tmp3 = tmp[3U];
+  uint64_t tmp4 = tmp[4U];
+  uint64_t tmp5 = tmp[5U];
+  uint64_t tmp6 = tmp[6U];
+  uint64_t tmp7 = tmp[7U];
+  uint64_t iv0_ = iv0 ^ tmp0;
+  uint64_t iv1_ = iv1 ^ tmp1;
+  uint64_t iv2_ = iv2 ^ tmp2;
+  uint64_t iv3_ = iv3 ^ tmp3;
+  uint64_t iv4_ = iv4 ^ tmp4;
+  uint64_t iv5_ = iv5 ^ tmp5;
+  uint64_t iv6_ = iv6 ^ tmp6;
+  uint64_t iv7_ = iv7 ^ tmp7;
   r0[0U] = iv0_;
-  r0[1U] = iv1;
-  r0[2U] = iv2;
-  r0[3U] = iv3;
-  r1[0U] = iv4;
-  r1[1U] = iv5;
-  r1[2U] = iv6;
-  r1[3U] = iv7;
+  r0[1U] = iv1_;
+  r0[2U] = iv2_;
+  r0[3U] = iv3_;
+  r1[0U] = iv4_;
+  r1[1U] = iv5_;
+  r1[2U] = iv6_;
+  r1[3U] = iv7_;
 }
 
 static void update_key(uint64_t *wv, uint64_t *hash, uint32_t kk, uint8_t *k, uint32_t ll)

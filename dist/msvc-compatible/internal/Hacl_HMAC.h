@@ -42,38 +42,6 @@ extern "C" {
 #include "internal/Hacl_Hash_Blake2b.h"
 #include "../Hacl_HMAC.h"
 
-typedef struct Hacl_Impl_Blake2_Core_blake2s_params_s
-{
-  uint8_t digest_length;
-  uint8_t key_length;
-  uint8_t fanout;
-  uint8_t depth;
-  uint32_t leaf_length;
-  uint32_t node_offset;
-  uint16_t xof_length;
-  uint8_t node_depth;
-  uint8_t inner_length;
-  uint8_t *salt;
-  uint8_t *personal;
-}
-Hacl_Impl_Blake2_Core_blake2s_params;
-
-typedef struct Hacl_Impl_Blake2_Core_blake2b_params_s
-{
-  uint8_t digest_length1;
-  uint8_t key_length1;
-  uint8_t fanout1;
-  uint8_t depth1;
-  uint32_t leaf_length1;
-  uint32_t node_offset1;
-  uint32_t xof_length1;
-  uint8_t node_depth1;
-  uint8_t inner_length1;
-  uint8_t *salt1;
-  uint8_t *personal1;
-}
-Hacl_Impl_Blake2_Core_blake2b_params;
-
 typedef struct K___uint32_t_uint32_t_s
 {
   uint32_t fst;
