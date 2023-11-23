@@ -104,7 +104,7 @@ val sqr: a:lbignum t_limbs n_limbs -> BN.bn_karatsuba_sqr_st t_limbs n_limbs a
   true otherwise.
    • 1 < n
    • n % 2 = 1"]
-val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
+val mod_op: BS.bn_mod_slow_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
