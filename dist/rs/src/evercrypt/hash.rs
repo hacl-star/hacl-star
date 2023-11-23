@@ -87,7 +87,7 @@ pub fn update_multi_256(s: &mut [u32], blocks: &mut [u8], n: u32) -> ()
     }
 }
 
-pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
+pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let mut st: [u32; 8] = [0u32; 8usize];
     for i in 0u32..8u32
@@ -119,10 +119,10 @@ pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
         rest0,
         s
     );
-    crate::hacl::hash_sha2::sha256_finish(s, dst)
+    crate::hacl::hash_sha2::sha256_finish(s, output)
 }
 
-fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
+fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let mut st: [u32; 8] = [0u32; 8usize];
     for i in 0u32..8u32
@@ -154,7 +154,7 @@ fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
         rest0,
         s
     );
-    crate::hacl::hash_sha2::sha224_finish(s, dst)
+    crate::hacl::hash_sha2::sha224_finish(s, output)
 }
 
 pub const md5_hash_len: u32 = 16u32;

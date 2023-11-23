@@ -603,17 +603,17 @@ pub fn sha384_finish(st: &mut [u64], h: &mut [u8]) -> ()
 }
 
 pub fn update_256(
-    p: &mut [crate::hacl::streaming_md::state_32],
+    state: &mut [crate::hacl::streaming_md::state_32],
     input: &mut [u8],
     input_len: u32
 ) ->
     crate::hacl::streaming_types::error_code
-{ crate::hacl::streaming_sha2::update_224_256(p, input, input_len) }
+{ crate::hacl::streaming_sha2::update_224_256(state, input, input_len) }
 
-pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
+pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let ib: &mut [u8] = input;
-    let rb: &mut [u8] = dst;
+    let rb: &mut [u8] = output;
     let mut st: [u32; 8] = [0u32; 8usize];
     sha256_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(64u32);
@@ -627,20 +627,20 @@ pub fn hash_256(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 }
 
 pub fn update_224(
-    p: &mut [crate::hacl::streaming_md::state_32],
+    state: &mut [crate::hacl::streaming_md::state_32],
     input: &mut [u8],
     input_len: u32
 ) ->
     crate::hacl::streaming_types::error_code
-{ crate::hacl::streaming_sha2::update_224_256(p, input, input_len) }
+{ crate::hacl::streaming_sha2::update_224_256(state, input, input_len) }
 
-pub fn free_224(p: &mut [crate::hacl::streaming_md::state_32]) -> ()
-{ crate::hacl::streaming_sha2::free_256(p) }
+pub fn free_224(state: &mut [crate::hacl::streaming_md::state_32]) -> ()
+{ crate::hacl::streaming_sha2::free_256(state) }
 
-pub fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
+pub fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let ib: &mut [u8] = input;
-    let rb: &mut [u8] = dst;
+    let rb: &mut [u8] = output;
     let mut st: [u32; 8] = [0u32; 8usize];
     sha224_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(64u32);
@@ -654,17 +654,17 @@ pub fn hash_224(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 }
 
 pub fn update_512(
-    p: &mut [crate::hacl::streaming_md::state_64],
+    state: &mut [crate::hacl::streaming_md::state_64],
     input: &mut [u8],
     input_len: u32
 ) ->
     crate::hacl::streaming_types::error_code
-{ crate::hacl::streaming_sha2::update_384_512(p, input, input_len) }
+{ crate::hacl::streaming_sha2::update_384_512(state, input, input_len) }
 
-pub fn hash_512(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
+pub fn hash_512(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let ib: &mut [u8] = input;
-    let rb: &mut [u8] = dst;
+    let rb: &mut [u8] = output;
     let mut st: [u64; 8] = [0u64; 8usize];
     sha512_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(128u32);
@@ -679,20 +679,20 @@ pub fn hash_512(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
 }
 
 pub fn update_384(
-    p: &mut [crate::hacl::streaming_md::state_64],
+    state: &mut [crate::hacl::streaming_md::state_64],
     input: &mut [u8],
     input_len: u32
 ) ->
     crate::hacl::streaming_types::error_code
-{ crate::hacl::streaming_sha2::update_384_512(p, input, input_len) }
+{ crate::hacl::streaming_sha2::update_384_512(state, input, input_len) }
 
-pub fn free_384(p: &mut [crate::hacl::streaming_md::state_64]) -> ()
-{ crate::hacl::streaming_sha2::free_512(p) }
+pub fn free_384(state: &mut [crate::hacl::streaming_md::state_64]) -> ()
+{ crate::hacl::streaming_sha2::free_512(state) }
 
-pub fn hash_384(input: &mut [u8], input_len: u32, dst: &mut [u8]) -> ()
+pub fn hash_384(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
     let ib: &mut [u8] = input;
-    let rb: &mut [u8] = dst;
+    let rb: &mut [u8] = output;
     let mut st: [u64; 8] = [0u64; 8usize];
     sha384_init(&mut st);
     let rem: u32 = input_len.wrapping_rem(128u32);

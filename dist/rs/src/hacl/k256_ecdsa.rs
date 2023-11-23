@@ -1671,7 +1671,7 @@ pub fn ecdsa_sign_sha256(
     bool
 {
     let mut msgHash: [u8; 32] = [0u8; 32usize];
-    crate::hacl::hash_sha2::hash_256(msg, msg_len, &mut msgHash);
+    crate::hacl::hash_sha2::hash_256(&mut msgHash, msg, msg_len);
     let b: bool = ecdsa_sign_hashed_msg(signature, &mut msgHash, private_key, nonce);
     b
 }
@@ -1756,7 +1756,7 @@ pub fn ecdsa_verify_sha256(
     bool
 {
     let mut mHash: [u8; 32] = [0u8; 32usize];
-    crate::hacl::hash_sha2::hash_256(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_256(&mut mHash, msg, msg_len);
     let b: bool = ecdsa_verify_hashed_msg(&mut mHash, public_key, signature);
     b
 }
@@ -1808,7 +1808,7 @@ pub fn secp256k1_ecdsa_sign_sha256(
     bool
 {
     let mut msgHash: [u8; 32] = [0u8; 32usize];
-    crate::hacl::hash_sha2::hash_256(msg, msg_len, &mut msgHash);
+    crate::hacl::hash_sha2::hash_256(&mut msgHash, msg, msg_len);
     let b: bool = secp256k1_ecdsa_sign_hashed_msg(signature, &mut msgHash, private_key, nonce);
     b
 }
@@ -1833,7 +1833,7 @@ pub fn secp256k1_ecdsa_verify_sha256(
     bool
 {
     let mut mHash: [u8; 32] = [0u8; 32usize];
-    crate::hacl::hash_sha2::hash_256(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_256(&mut mHash, msg, msg_len);
     let b: bool = secp256k1_ecdsa_verify_hashed_msg(&mut mHash, public_key, signature);
     b
 }

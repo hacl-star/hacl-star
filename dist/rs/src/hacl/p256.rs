@@ -1606,7 +1606,7 @@ pub fn ecdsa_sign_p256_sha2(
 {
     let mut m_q: [u64; 4] = [0u64; 4usize];
     let mut mHash: [u8; 32] = [0u8; 32usize];
-    crate::hacl::hash_sha2::hash_256(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_256(&mut mHash, msg, msg_len);
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
@@ -1626,7 +1626,7 @@ pub fn ecdsa_sign_p256_sha384(
 {
     let mut m_q: [u64; 4] = [0u64; 4usize];
     let mut mHash: [u8; 48] = [0u8; 48usize];
-    crate::hacl::hash_sha2::hash_384(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_384(&mut mHash, msg, msg_len);
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
@@ -1646,7 +1646,7 @@ pub fn ecdsa_sign_p256_sha512(
 {
     let mut m_q: [u64; 4] = [0u64; 4usize];
     let mut mHash: [u8; 64] = [0u8; 64usize];
-    crate::hacl::hash_sha2::hash_512(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_512(&mut mHash, msg, msg_len);
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
@@ -1686,7 +1686,7 @@ pub fn ecdsa_verif_p256_sha2(
 {
     let mut m_q: [u64; 4] = [0u64; 4usize];
     let mut mHash: [u8; 32] = [0u8; 32usize];
-    crate::hacl::hash_sha2::hash_256(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_256(&mut mHash, msg, msg_len);
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
@@ -1706,7 +1706,7 @@ pub fn ecdsa_verif_p256_sha384(
 {
     let mut m_q: [u64; 4] = [0u64; 4usize];
     let mut mHash: [u8; 48] = [0u8; 48usize];
-    crate::hacl::hash_sha2::hash_384(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_384(&mut mHash, msg, msg_len);
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
@@ -1726,7 +1726,7 @@ pub fn ecdsa_verif_p256_sha512(
 {
     let mut m_q: [u64; 4] = [0u64; 4usize];
     let mut mHash: [u8; 64] = [0u8; 64usize];
-    crate::hacl::hash_sha2::hash_512(msg, msg_len, &mut mHash);
+    crate::hacl::hash_sha2::hash_512(&mut mHash, msg, msg_len);
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);

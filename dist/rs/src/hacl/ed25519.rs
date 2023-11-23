@@ -1796,7 +1796,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
 
 #[inline] fn secret_expand(expanded: &mut [u8], secret: &mut [u8]) -> ()
 {
-    crate::hacl::hash_sha2::hash_512(secret, 32u32, expanded);
+    crate::hacl::hash_sha2::hash_512(expanded, secret, 32u32);
     let h_low: (&mut [u8], &mut [u8]) = expanded.split_at_mut(0usize);
     let h_low0: u8 = h_low.1[0usize];
     let h_low31: u8 = h_low.1[31usize];

@@ -14,13 +14,13 @@ pub fn update_multi_sha3(
     }
 }
 
-pub fn block_len(s: &mut [crate::hacl::streaming_keccak::state]) -> u32
+pub fn block_len(s: &mut [crate::hacl::streaming_keccak::state_t]) -> u32
 {
     let a1: crate::spec::hash_definitions::hash_alg = crate::hacl::streaming_keccak::get_alg(s);
     block_len(a1)
 }
 
-pub fn hash_len(s: &mut [crate::hacl::streaming_keccak::state]) -> u32
+pub fn hash_len(s: &mut [crate::hacl::streaming_keccak::state_t]) -> u32
 {
     let a1: crate::spec::hash_definitions::hash_alg = crate::hacl::streaming_keccak::get_alg(s);
     hash_len(a1)
@@ -64,17 +64,17 @@ pub fn shake256_hacl(
     )
 }
 
-pub fn sha3_224(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{ crate::hacl::impl_sha3::keccak(1152u32, 448u32, inputByteLen, input, 0x06u8, 28u32, output) }
+pub fn sha3_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+{ crate::hacl::impl_sha3::keccak(1152u32, 448u32, input_len, input, 0x06u8, 28u32, output) }
 
-pub fn sha3_256(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{ crate::hacl::impl_sha3::keccak(1088u32, 512u32, inputByteLen, input, 0x06u8, 32u32, output) }
+pub fn sha3_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+{ crate::hacl::impl_sha3::keccak(1088u32, 512u32, input_len, input, 0x06u8, 32u32, output) }
 
-pub fn sha3_384(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{ crate::hacl::impl_sha3::keccak(832u32, 768u32, inputByteLen, input, 0x06u8, 48u32, output) }
+pub fn sha3_384(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+{ crate::hacl::impl_sha3::keccak(832u32, 768u32, input_len, input, 0x06u8, 48u32, output) }
 
-pub fn sha3_512(inputByteLen: u32, input: &mut [u8], output: &mut [u8]) -> ()
-{ crate::hacl::impl_sha3::keccak(576u32, 1024u32, inputByteLen, input, 0x06u8, 64u32, output) }
+pub fn sha3_512(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
+{ crate::hacl::impl_sha3::keccak(576u32, 1024u32, input_len, input, 0x06u8, 64u32, output) }
 
 const keccak_rotc: [u32; 24] =
     [1u32,

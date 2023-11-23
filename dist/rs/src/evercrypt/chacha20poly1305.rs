@@ -15,19 +15,19 @@ pub fn aead_encrypt(
     if crate::evercrypt::targetconfig::hacl_can_compile_vec256 && vec256
     {
         crate::lowstar::ignore::ignore::<bool>(vec128);
-        crate::hacl::chacha20poly1305_256::aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag)
+        crate::hacl::aead_chacha20poly1305_simd256::encrypt(cipher, tag, m, mlen, aad, aadlen, k, n)
     }
     else
     if crate::evercrypt::targetconfig::hacl_can_compile_vec128 && vec128
     {
         crate::lowstar::ignore::ignore::<bool>(vec256);
-        crate::hacl::chacha20poly1305_128::aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag)
+        crate::hacl::aead_chacha20poly1305_simd128::encrypt(cipher, tag, m, mlen, aad, aadlen, k, n)
     }
     else
     {
         crate::lowstar::ignore::ignore::<bool>(vec128);
         crate::lowstar::ignore::ignore::<bool>(vec256);
-        crate::hacl::chacha20poly1305_32::aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag)
+        crate::hacl::aead_chacha20poly1305::encrypt(cipher, tag, m, mlen, aad, aadlen, k, n)
     }
 }
 
@@ -48,18 +48,18 @@ pub fn aead_decrypt(
     if crate::evercrypt::targetconfig::hacl_can_compile_vec256 && vec256
     {
         crate::lowstar::ignore::ignore::<bool>(vec128);
-        crate::hacl::chacha20poly1305_256::aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag)
+        crate::hacl::aead_chacha20poly1305_simd256::decrypt(m, cipher, mlen, aad, aadlen, k, n, tag)
     }
     else
     if crate::evercrypt::targetconfig::hacl_can_compile_vec128 && vec128
     {
         crate::lowstar::ignore::ignore::<bool>(vec256);
-        crate::hacl::chacha20poly1305_128::aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag)
+        crate::hacl::aead_chacha20poly1305_simd128::decrypt(m, cipher, mlen, aad, aadlen, k, n, tag)
     }
     else
     {
         crate::lowstar::ignore::ignore::<bool>(vec128);
         crate::lowstar::ignore::ignore::<bool>(vec256);
-        crate::hacl::chacha20poly1305_32::aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag)
+        crate::hacl::aead_chacha20poly1305::decrypt(m, cipher, mlen, aad, aadlen, k, n, tag)
     }
 }

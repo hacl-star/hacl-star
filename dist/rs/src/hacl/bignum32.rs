@@ -5,7 +5,13 @@ pub fn sub(len: u32, a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
 { crate::hacl::bignum_base::bn_sub_eq_len_u32(len, a, b, res) }
 
 pub fn add_mod(len: u32, n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
-{ crate::hacl::bignum::bn_add_mod_n_u32(len, n, a, b, res) }
+{
+    let mut a_copy: Vec<u32> = vec![0u32; len as usize];
+    let mut b_copy: Vec<u32> = vec![0u32; len as usize];
+    ((&mut a_copy)[0usize..len as usize]).copy_from_slice(&a[0usize..len as usize]);
+    ((&mut b_copy)[0usize..len as usize]).copy_from_slice(&b[0usize..len as usize]);
+    crate::hacl::bignum::bn_add_mod_n_u32(len, n, &mut a_copy, &mut b_copy, res)
+}
 
 pub fn sub_mod(len: u32, n: &mut [u32], a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> ()
 { crate::hacl::bignum::bn_sub_mod_n_u32(len, n, a, b, res) }
@@ -37,62 +43,11 @@ pub fn sqr(len: u32, a: &mut [u32], res: &mut [u32]) -> ()
     ((&mut a1)[0usize..len.wrapping_add(len) as usize]).copy_from_slice(
         &a[0usize..len.wrapping_add(len) as usize]
     );
-    let mut c0: u32 = 0u32;
-    for i in 0u32..len
-    {
-        let qj: u32 = mu.wrapping_mul((&mut a1)[i as usize]);
-        let res_j: (&mut [u32], &mut [u32]) = (&mut a1).split_at_mut(i as usize);
-        let mut c: u32 = 0u32;
-        for i0 in 0u32..len.wrapping_div(4u32)
-        {
-            let a_i: u32 = n[4u32.wrapping_mul(i0) as usize];
-            let res_i: (&mut [u32], &mut [u32]) =
-                res_j.1.split_at_mut(4u32.wrapping_mul(i0) as usize);
-            c = crate::hacl::bignum_base::mul_wide_add2_u32(a_i, qj, c, res_i.1);
-            let a_i0: u32 = n[4u32.wrapping_mul(i0).wrapping_add(1u32) as usize];
-            let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-            c = crate::hacl::bignum_base::mul_wide_add2_u32(a_i0, qj, c, res_i0.1);
-            let a_i1: u32 = n[4u32.wrapping_mul(i0).wrapping_add(2u32) as usize];
-            let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-            c = crate::hacl::bignum_base::mul_wide_add2_u32(a_i1, qj, c, res_i1.1);
-            let a_i2: u32 = n[4u32.wrapping_mul(i0).wrapping_add(3u32) as usize];
-            let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-            c = crate::hacl::bignum_base::mul_wide_add2_u32(a_i2, qj, c, res_i2.1)
-        };
-        for i0 in len.wrapping_div(4u32).wrapping_mul(4u32)..len
-        {
-            let a_i: u32 = n[i0 as usize];
-            let res_i: (&mut [u32], &mut [u32]) = res_j.1.split_at_mut(i0 as usize);
-            c = crate::hacl::bignum_base::mul_wide_add2_u32(a_i, qj, c, res_i.1)
-        };
-        let r: u32 = c;
-        let c1: u32 = r;
-        let resb: (&mut [u32], &mut [u32]) =
-            res_j.1.split_at_mut(len.wrapping_add(i) as usize - i as usize);
-        let res_j0: u32 = res_j.0[len.wrapping_add(i) as usize];
-        c0 = crate::lib::inttypes_intrinsics::add_carry_u32(c0, c1, res_j0, resb.1)
-    };
-    ((&mut a_mod)[0usize..len.wrapping_add(len).wrapping_sub(len) as usize]).copy_from_slice(
-        &(&mut (&mut a1)[len as usize..])[0usize..len.wrapping_add(len).wrapping_sub(len) as usize]
-    );
-    let c00: u32 = c0;
-    let mut tmp: Vec<u32> = vec![0u32; len as usize];
-    let c1: u32 = crate::hacl::bignum_base::bn_sub_eq_len_u32(len, &mut a_mod, n, &mut tmp);
-    crate::lowstar::ignore::ignore::<u32>(c1);
-    let m: u32 = 0u32.wrapping_sub(c00);
-    for i in 0u32..len
-    {
-        let os: (&mut [u32], &mut [u32]) = (&mut a_mod).split_at_mut(0usize);
-        let x: u32 = m & (&mut tmp)[i as usize] | ! m & os.1[i as usize];
-        os.1[i as usize] = x
-    };
-    let mut c: Vec<u32> = vec![0u32; len.wrapping_add(len) as usize];
-    let mut tmp0: Vec<u32> = vec![0u32; 4u32.wrapping_mul(len) as usize];
-    crate::hacl::bignum::bn_karatsuba_mul_uint32(len, &mut a_mod, r2, &mut tmp0, &mut c);
-    crate::hacl::bignum::bn_mont_reduction_u32(len, n, mu, &mut c, res)
+    crate::hacl::bignum::bn_almost_mont_reduction_u32(len, n, mu, &mut a1, &mut a_mod);
+    crate::hacl::bignum::bn_to_mont_u32(len, n, mu, r2, &mut a_mod, res)
 }
 
-pub fn mod(len: u32, n: &mut [u32], a: &mut [u32], res: &mut [u32]) -> bool
+pub fn mod_op(len: u32, n: &mut [u32], a: &mut [u32], res: &mut [u32]) -> bool
 {
     let mut one: Vec<u32> = vec![0u32; len as usize];
     ((&mut one)[0usize..len as usize]).copy_from_slice(&vec![0u32; len as usize]);
