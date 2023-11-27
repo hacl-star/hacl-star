@@ -10,11 +10,11 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Hacl.Impl.Blake2.Core.M32",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
         "equation_Hacl.Impl.Blake2.Generic.is_valid_blake2_config",
         "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
@@ -26,7 +26,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "77fa2d7e172933ea083452ce88c6d0f8"
+      "9bc046932b0686a8388eb9e68599f275"
     ],
     [
       "Hacl.Streaming.Blake2b_32.state_t",
@@ -36,18 +36,19 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
         "equation_Hacl.Streaming.Blake2.Common.blake2",
         "equation_Hacl.Streaming.Blake2.Common.empty_key",
         "equation_Hacl.Streaming.Blake2.Common.stateful_blake2",
         "equation_Hacl.Streaming.Blake2b_32.blake2b_32",
         "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Blake2.max_key",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.max_key",
         "equation_Spec.GaloisField.gf",
         "interpretation_Tm_abs_07dcc7d8629660ea0cb1165f30e98a35",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -66,7 +67,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "edc24c28868b01e81d2c575e8a73a1f9"
+      "2e6e845fe71fb245fe10459a4fd46345"
     ],
     [
       "Hacl.Streaming.Blake2b_32.alloca",
@@ -74,16 +75,16 @@
       2,
       1,
       [
-        "@query", "constructor_distinct_Spec.Blake2.Blake2B",
+        "@query", "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
         "equation_Hacl.Streaming.Blake2.Common.blake2",
         "equation_Hacl.Streaming.Blake2.Common.empty_key",
         "equation_Hacl.Streaming.Blake2.Common.stateful_blake2",
         "equation_Hacl.Streaming.Blake2.Common.stateful_key",
         "equation_Hacl.Streaming.Blake2b_32.blake2b_32",
-        "equation_Spec.Blake2.max_key",
+        "equation_Spec.Blake2.Definitions.max_key",
         "interpretation_Tm_abs_07dcc7d8629660ea0cb1165f30e98a35",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
         "proj_equation_Hacl.Streaming.Interface.Block_km",
@@ -97,7 +98,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s"
       ],
       0,
-      "1490a52d1d720916ed9fc6b1ec159629"
+      "72a9854bed92639cfda982ea240c8523"
     ],
     [
       "Hacl.Streaming.Blake2b_32.malloc",
@@ -108,13 +109,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
-        "equality_tok_Spec.Blake2.Blake2S@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
         "equation_Hacl.Streaming.Blake2.Common.blake2",
         "equation_Hacl.Streaming.Blake2.Common.empty_key",
         "equation_Hacl.Streaming.Blake2.Common.stateful_blake2",
@@ -122,7 +123,8 @@
         "equation_Hacl.Streaming.Blake2b_32.blake2b_32",
         "equation_Hacl.Streaming.Interface.optional_key",
         "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Blake2.max_key",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.max_key",
         "equation_Spec.GaloisField.gf",
         "interpretation_Tm_abs_07dcc7d8629660ea0cb1165f30e98a35",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -144,7 +146,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "794951c267917ef427d9692f4921c77e"
+      "e82de41db5718d2cedd28c1ee5eb5740"
     ],
     [
       "Hacl.Streaming.Blake2b_32.reset",
@@ -155,13 +157,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
-        "equality_tok_Spec.Blake2.Blake2S@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
         "equation_Hacl.Streaming.Blake2.Common.blake2",
         "equation_Hacl.Streaming.Blake2.Common.empty_key",
         "equation_Hacl.Streaming.Blake2.Common.stateful_blake2",
@@ -169,7 +171,8 @@
         "equation_Hacl.Streaming.Blake2b_32.blake2b_32",
         "equation_Hacl.Streaming.Interface.optional_key",
         "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Blake2.max_key",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.max_key",
         "equation_Spec.GaloisField.gf",
         "interpretation_Tm_abs_07dcc7d8629660ea0cb1165f30e98a35",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -191,7 +194,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b951a5ba2f2687b9f6cd69eadc1685df"
+      "226f648f381c594334b1bb8e8f555a2f"
     ],
     [
       "Hacl.Streaming.Blake2b_32.update",
@@ -202,13 +205,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
-        "equality_tok_Spec.Blake2.Blake2S@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
         "equation_Hacl.Streaming.Blake2.Common.blake2",
         "equation_Hacl.Streaming.Blake2.Common.empty_key",
         "equation_Hacl.Streaming.Blake2.Common.stateful_blake2",
@@ -216,7 +219,8 @@
         "equation_Hacl.Streaming.Blake2b_32.blake2b_32",
         "equation_Hacl.Streaming.Interface.optional_key",
         "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Blake2.max_key",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.max_key",
         "equation_Spec.GaloisField.gf",
         "interpretation_Tm_abs_07dcc7d8629660ea0cb1165f30e98a35",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -238,7 +242,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "06fd2995f13c0edc771881b51f0e8723"
+      "b1801a0b0a408e6586f4427425a47c5b"
     ],
     [
       "Hacl.Streaming.Blake2b_32.digest",
@@ -249,13 +253,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
-        "equality_tok_Spec.Blake2.Blake2S@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
         "equation_Hacl.Streaming.Blake2.Common.blake2",
         "equation_Hacl.Streaming.Blake2.Common.empty_key",
         "equation_Hacl.Streaming.Blake2.Common.stateful_blake2",
@@ -263,7 +267,8 @@
         "equation_Hacl.Streaming.Blake2b_32.blake2b_32",
         "equation_Hacl.Streaming.Interface.optional_key",
         "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Blake2.max_key",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.max_key",
         "equation_Spec.GaloisField.gf",
         "interpretation_Tm_abs_07dcc7d8629660ea0cb1165f30e98a35",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -285,7 +290,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "cd09e30b7e2202c36e289d214e88ace9"
+      "a2b6f4b67b56579b6ec2542f66557706"
     ],
     [
       "Hacl.Streaming.Blake2b_32.free",
@@ -296,13 +301,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Hacl.Streaming.Interface.Erased",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Blake2.Blake2B",
+        "constructor_distinct_Spec.Blake2.Definitions.Blake2B",
         "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "equality_tok_Hacl.Streaming.Interface.Erased@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Blake2.Blake2B@tok",
-        "equality_tok_Spec.Blake2.Blake2S@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2B@tok",
+        "equality_tok_Spec.Blake2.Definitions.Blake2S@tok",
         "equation_Hacl.Streaming.Blake2.Common.blake2",
         "equation_Hacl.Streaming.Blake2.Common.empty_key",
         "equation_Hacl.Streaming.Blake2.Common.stateful_blake2",
@@ -310,7 +315,8 @@
         "equation_Hacl.Streaming.Blake2b_32.blake2b_32",
         "equation_Hacl.Streaming.Interface.optional_key",
         "equation_Lib.IntTypes.unsigned", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Blake2.max_key",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Blake2.Definitions.max_key",
         "equation_Spec.GaloisField.gf",
         "interpretation_Tm_abs_07dcc7d8629660ea0cb1165f30e98a35",
         "proj_equation_Hacl.Streaming.Interface.Block_key",
@@ -332,7 +338,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "cb644d2be838b1f1c85e621d9dada89c"
+      "57773aa13b06dadd5781caec274ccd82"
     ]
   ]
 ]
