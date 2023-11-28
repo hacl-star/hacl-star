@@ -3,7 +3,13 @@ pub type uint128 = u128;
 pub fn add(x: uint128, y: uint128) -> uint128 {
     x.wrapping_add(y)
 }
+pub fn add_mod(x: uint128, y: uint128) -> uint128 {
+    x.wrapping_add(y)
+}
 pub fn sub(x: uint128, y: uint128) -> uint128 {
+    x.wrapping_sub(y)
+}
+pub fn sub_mod(x: uint128, y: uint128) -> uint128 {
     x.wrapping_sub(y)
 }
 pub fn logand(x: uint128, y: uint128) -> uint128 {
