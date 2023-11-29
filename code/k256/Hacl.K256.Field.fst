@@ -196,6 +196,12 @@ let fmul out f1 f2 =
     (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul), f1.(4ul))
     (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul), f2.(4ul)))
 
+let fmul_a out f1 f2 =
+  push_frame ();
+  let f1_copy = create nlimb (u64 0) in
+  copy f1_copy f1;
+  fmul out f1_copy f2;
+  pop_frame()
 
 [@CInline]
 let fsqr out f =
@@ -212,6 +218,14 @@ let fnormalize_weak out f =
 [@CInline]
 let fnormalize out f =
   make_u52_5 out (BI.normalize5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))
+
+(* HACL-RS *)
+let fnormalize_a out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fnormalize out f_copy;
+  pop_frame ()
 
 
 let fmul_3b_normalize_weak out f =
@@ -244,7 +258,7 @@ let fnegate_conditional_vartime f is_negate =
     assert (felem_fits5 (as_felem5 h1 f) (2,2,2,2,2));
     assert (as_nat h1 f == 2 * S.prime - as_nat h0 f);
     BL.normalize5_lemma (2,2,2,2,2) (as_felem5 h1 f);
-    fnormalize f f;
+    fnormalize_a f f;
     let h2 = ST.get () in
     assert (inv_fully_reduced h2 f);
     assert (as_nat h2 f == (2 * S.prime - as_nat h0 f) % S.prime);
