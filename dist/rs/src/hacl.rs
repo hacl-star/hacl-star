@@ -13,4 +13,4 @@ pub mod bignum256;
 pub mod bignum256_32;
 pub mod bignum4096;
 pub mod bignum4096_32;
-// pub mod bignum_k256;
+pub mod bignum_k256;

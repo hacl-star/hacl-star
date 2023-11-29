@@ -621,17 +621,31 @@
         f[2usize] = f2;
         f[3usize] = f3;
         f[4usize] = f4;
-        fnormalize(f, f)
+        let mut f_copy: [u64; 5] = [0u64; 5usize];
+        ((&mut f_copy)[0usize..5usize]).copy_from_slice(&f[0usize..5usize]);
+        fnormalize(f, &mut f_copy)
     }
 }
 
 #[inline] pub fn fsquare_times_in_place(out: &mut [u64], b: u32) -> ()
-{ for i in 0u32..b { fsqr(out, out) } }
+{
+    for i in 0u32..b
+    {
+        let mut x_copy: [u64; 5] = [0u64; 5usize];
+        ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+        fsqr(out, &mut x_copy)
+    }
+}
 
 #[inline] pub fn fsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
     (out[0usize..5usize]).copy_from_slice(&a[0usize..5usize]);
-    for i in 0u32..b { fsqr(out, out) }
+    for i in 0u32..b
+    {
+        let mut x_copy: [u64; 5] = [0u64; 5usize];
+        ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+        fsqr(out, &mut x_copy)
+    }
 }
 
 #[inline] pub fn fexp_223_23(out: &mut [u64], x2: &mut [u64], f: &mut [u64]) -> ()
@@ -641,29 +655,53 @@
     let mut x44: [u64; 5] = [0u64; 5usize];
     let mut x88: [u64; 5] = [0u64; 5usize];
     fsquare_times(x2, f, 1u32);
-    fmul(x2, x2, f);
+    let mut f1_copy: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&x2[0usize..5usize]);
+    fmul(x2, &mut f1_copy, f);
     fsquare_times(&mut x3, x2, 1u32);
-    fmul(&mut x3, &mut x3, f);
+    let mut f1_copy0: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&(&mut x3)[0usize..5usize]);
+    fmul(&mut x3, &mut f1_copy0, f);
     fsquare_times(out, &mut x3, 3u32);
-    fmul(out, out, &mut x3);
+    let mut f1_copy1: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy1)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy1, &mut x3);
     fsquare_times_in_place(out, 3u32);
-    fmul(out, out, &mut x3);
+    let mut f1_copy2: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy2)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy2, &mut x3);
     fsquare_times_in_place(out, 2u32);
-    fmul(out, out, x2);
+    let mut f1_copy3: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy3)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy3, x2);
     fsquare_times(&mut x22, out, 11u32);
-    fmul(&mut x22, &mut x22, out);
+    let mut f1_copy4: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy4)[0usize..5usize]).copy_from_slice(&(&mut x22)[0usize..5usize]);
+    fmul(&mut x22, &mut f1_copy4, out);
     fsquare_times(&mut x44, &mut x22, 22u32);
-    fmul(&mut x44, &mut x44, &mut x22);
+    let mut f1_copy5: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy5)[0usize..5usize]).copy_from_slice(&(&mut x44)[0usize..5usize]);
+    fmul(&mut x44, &mut f1_copy5, &mut x22);
     fsquare_times(&mut x88, &mut x44, 44u32);
-    fmul(&mut x88, &mut x88, &mut x44);
+    let mut f1_copy6: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy6)[0usize..5usize]).copy_from_slice(&(&mut x88)[0usize..5usize]);
+    fmul(&mut x88, &mut f1_copy6, &mut x44);
     fsquare_times(out, &mut x88, 88u32);
-    fmul(out, out, &mut x88);
+    let mut f1_copy7: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy7)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy7, &mut x88);
     fsquare_times_in_place(out, 44u32);
-    fmul(out, out, &mut x44);
+    let mut f1_copy8: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy8)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy8, &mut x44);
     fsquare_times_in_place(out, 3u32);
-    fmul(out, out, &mut x3);
+    let mut f1_copy9: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy9)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy9, &mut x3);
     fsquare_times_in_place(out, 23u32);
-    fmul(out, out, &mut x22)
+    let mut f1_copy10: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy10)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy10, &mut x22)
 }
 
 #[inline] pub fn finv(out: &mut [u64], f: &mut [u64]) -> ()
@@ -671,11 +709,17 @@
     let mut x2: [u64; 5] = [0u64; 5usize];
     fexp_223_23(out, &mut x2, f);
     fsquare_times_in_place(out, 5u32);
-    fmul(out, out, f);
+    let mut f1_copy: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy, f);
     fsquare_times_in_place(out, 3u32);
-    fmul(out, out, &mut x2);
+    let mut f1_copy0: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy0)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy0, &mut x2);
     fsquare_times_in_place(out, 2u32);
-    fmul(out, out, f)
+    let mut f1_copy1: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy1)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy1, f)
 }
 
 #[inline] pub fn fsqrt(out: &mut [u64], f: &mut [u64]) -> ()
@@ -683,6 +727,8 @@
     let mut x2: [u64; 5] = [0u64; 5usize];
     fexp_223_23(out, &mut x2, f);
     fsquare_times_in_place(out, 6u32);
-    fmul(out, out, &mut x2);
+    let mut f1_copy: [u64; 5] = [0u64; 5usize];
+    ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
+    fmul(out, &mut f1_copy, &mut x2);
     fsquare_times_in_place(out, 2u32)
 }
