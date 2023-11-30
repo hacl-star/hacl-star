@@ -113,7 +113,9 @@ let print_modified_input
      let arg_name = arg_names i in
      // If the register is reserved, explicitly allocate the variable in it
      let reg_alloc = if reserved_regs (of_arg i) then "\"" ^ reg_names (of_arg i) ^ "\"" else "reg" in
-     let arg_reg = arg_name ^ " = inout(" ^ reg_alloc ^ ") " ^ arg_name ^ arg_to_asm a in
+     // The => _ at the end is needed to indicate that it's not the input that is modified, but rather
+     // that the output is written to a discarded value
+     let arg_reg = arg_name ^ " = inout(" ^ reg_alloc ^ ") " ^ arg_name ^ arg_to_asm a ^ " => _" in
      // If the register corresponds to an argument `name`, print it as {name} in the code
      let modified_reg_names = fun r -> if r = of_arg i then "{" ^ arg_name ^ "}" else reg_names r in
      [arg_reg], modified_reg_names
