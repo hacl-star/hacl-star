@@ -537,6 +537,7 @@ obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
 obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
+obj/inline-vale-rust-curve25519.exe: vale/code/crypto/ecc/curve25519/RustInline25519.ml
 obj/inline-vale-testInline.exe: vale/code/test/TestInlineMain.ml
 
 obj/vale_testInline.h: obj/inline-vale-testInline.exe

@@ -19,6 +19,7 @@ open Vale.X64.MemoryAdapters
 module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
 module PR = Vale.X64.Print_Inline_s
+module PRR = Vale.X64.Print_Rust_Inline_s
 
 module FU = Vale.Curve25519.X64.FastUtil
 module FH = Vale.Curve25519.X64.FastHybrid
@@ -174,6 +175,9 @@ let add1_names (n:nat) =
 let add1_code_inline () : FStar.All.ML int =
   PR.print_inline "add_scalar" 0 None (List.length dom) dom add1_names code_add1 of_arg add1_regs_modified add1_comments
 
+let add1_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "add_scalar" 0 None (List.length dom) dom add1_names code_add1 of_arg add1_regs_modified add1_comments
+
 
 [@__reduce__]
 let fadd_dom: IX64.arity_ok_stdcall td =
@@ -298,6 +302,9 @@ let fadd_names (n:nat) =
 let fadd_code_inline () : FStar.All.ML int =
   PR.print_inline "fadd" 0 None (List.length fadd_dom) fadd_dom fadd_names code_Fadd of_arg fadd_regs_modified fadd_comments
 
+let fadd_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "fadd" 0 None (List.length fadd_dom) fadd_dom fadd_names code_Fadd of_arg fadd_regs_modified fadd_comments
+
 [@__reduce__]
 let fsub_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_no_mod] in
@@ -420,3 +427,6 @@ let fsub_names (n:nat) =
 
 let fsub_code_inline () : FStar.All.ML int =
   PR.print_inline "fsub" 0 None (List.length fsub_dom) fsub_dom fsub_names code_Fsub of_arg fsub_regs_modified fsub_comments
+
+let fsub_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "fsub" 0 None (List.length fsub_dom) fsub_dom fsub_names code_Fsub of_arg fsub_regs_modified fsub_comments

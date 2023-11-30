@@ -183,6 +183,9 @@ let fsqr_names (n:nat) =
 let fsqr_code_inline () : FStar.All.ML int =
   PR.print_inline "fsqr" 0 None (List.length fsqr_dom) fsqr_dom fsqr_names code_Fsqr of_arg fsqr_regs_modified fsqr_comments
 
+let fsqr_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "fsqr" 0 None (List.length fsqr_dom) fsqr_dom fsqr_names code_Fsqr of_arg fsqr_regs_modified fsqr_comments
+
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
 let fsqr2_pre : VSig.vale_pre fsqr_dom =
@@ -298,3 +301,6 @@ let fsqr2_names (n:nat) : string =
 
 let fsqr2_code_inline () : FStar.All.ML int =
   PR.print_inline "fsqr2" 0 None (List.length fsqr_dom) fsqr_dom fsqr2_names code_Fsqr2 of_arg fsqr_regs_modified fsqr2_comments
+
+let fsqr2_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "fsqr2" 0 None (List.length fsqr_dom) fsqr_dom fsqr2_names code_Fsqr2 of_arg fsqr_regs_modified fsqr2_comments

@@ -160,7 +160,7 @@ let cswap2 bit p0 p1
     let (x, _) = lowstar_cswap_normal_t bit p0 p1 () in
     ()
 
-let cswap_comments : list string = 
+let cswap_comments : list string =
   ["Computes p1 <- bit ? p2 : p1 in constant time"]
 
 let cswap_names (n:nat) : string =
@@ -172,3 +172,6 @@ let cswap_names (n:nat) : string =
 
 let cswap2_code_inline () : FStar.All.ML int =
   PR.print_inline "cswap2" 0 None (List.length cswap_dom) cswap_dom cswap_names code_cswap of_arg cswap_regs_modified cswap_comments
+
+let cswap2_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "cswap2" 0 None (List.length cswap_dom) cswap_dom cswap_names code_cswap of_arg cswap_regs_modified cswap_comments

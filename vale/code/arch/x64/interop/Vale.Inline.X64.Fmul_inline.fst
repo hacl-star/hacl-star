@@ -199,6 +199,9 @@ let fmul_names (n:nat) =
 let fmul_code_inline () : FStar.All.ML int =
   PR.print_inline "fmul" 0 None (List.length fmul_dom) fmul_dom fmul_names code_Fmul fmul_of_arg fmul_regs_modified fmul_comments
 
+let fmul_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "fmul" 0 None (List.length fmul_dom) fmul_dom fmul_names code_Fmul fmul_of_arg fmul_regs_modified fmul_comments
+
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
 let fmul2_pre : VSig.vale_pre fmul_dom =
@@ -323,6 +326,10 @@ let fmul2_names (n:nat) =
 
 let fmul2_code_inline () : FStar.All.ML int =
   PR.print_inline "fmul2" 0 None (List.length fmul_dom) fmul_dom fmul2_names code_Fmul2 fmul_of_arg fmul_regs_modified fmul2_comments
+
+let fmul2_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "fmul2" 0 None (List.length fmul_dom) fmul_dom fmul2_names code_Fmul2 fmul_of_arg fmul_regs_modified fmul2_comments
+
 
 [@__reduce__]
 let fmul1_dom: IX64.arity_ok 3 td =
@@ -458,3 +465,6 @@ let fmul1_names (n:nat) =
 
 let fmul1_code_inline () : FStar.All.ML int =
   PR.print_inline "fmul_scalar" 0 None (List.length fmul1_dom) fmul1_dom fmul1_names code_Fmul1 of_arg fmul1_regs_modified fmul1_comments
+
+let fmul1_code_rust_inline () : FStar.All.ML int =
+  PRR.print_inline "fmul_scalar" 0 None (List.length fmul1_dom) fmul1_dom fmul1_names code_Fmul1 of_arg fmul1_regs_modified fmul1_comments
