@@ -106,7 +106,7 @@ let print_modified_input
    if regs_mod (of_arg i) then
      let arg_name = arg_names i in
      // If the register is reserved, explicitly allocate the variable in it
-     let reg_alloc = if reserved_regs (of_arg i) then reg_names (of_arg i) else "reg" in
+     let reg_alloc = if reserved_regs (of_arg i) then "\"" ^ reg_names (of_arg i) ^ "\"" else "reg" in
      let arg_reg = arg_name ^ " = inout(" ^ reg_alloc ^ ") " ^ arg_name in
      // If the register corresponds to an argument `name`, print it as {name} in the code
      let modified_reg_names = fun r -> if r = of_arg i then "{" ^ arg_name ^ "}" else reg_names r in
@@ -151,7 +151,7 @@ let print_nonmodified_input
    if regs_mod (of_arg i) then [], reg_names else
      let arg_name = arg_names i in
      // If the register is reserved, explicitly allocate the variable in it
-     let reg_alloc = if reserved_regs (of_arg i) then reg_names (of_arg i) else "reg" in
+     let reg_alloc = if reserved_regs (of_arg i) then "\"" ^ reg_names (of_arg i) ^ "\"" else "reg" in
      let arg_reg = arg_name ^ " = in(" ^ reg_alloc ^ ") " ^ arg_name in
      // If the register corresponds to an argument `name`, print it as {name} in the code
      let modified_reg_names = fun r -> if r = of_arg i then "{" ^ arg_name ^ "}" else reg_names r in
@@ -199,7 +199,7 @@ let print_modified_registers
     // This register is not modified, or was already specified as input or output: we skip it
     if not (regs_mod a) || input_register 0 a then aux q
     // Register not modified or already specified in inputs, we add it
-    else "    out(" ^ P.print_reg_name a ^ ") _,\n" ^ aux q
+    else "    out(\"" ^ P.print_reg_name a ^ "\") _,\n" ^ aux q
   in aux [rRax; rRbx; rRcx; rRdx; rRsi; rRdi; rRbp; rRsp; rR8; rR9; rR10; rR11; rR12; rR13; rR14; rR15]
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
