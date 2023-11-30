@@ -525,6 +525,9 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 	$< > $@
 
+dist/vale/%-inline.rs: obj/rustinline-vale-%.exe | dist/vale
+	$< > $@
+
 dist/vale/%-ppc64le.S: obj/vale-%-ppc64le.exe | dist/vale
 	$< > $@
 
@@ -537,7 +540,7 @@ obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
 obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
-obj/inline-vale-rust-curve25519.exe: vale/code/crypto/ecc/curve25519/RustInline25519.ml
+obj/rustinline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/RustInline25519.ml
 obj/inline-vale-testInline.exe: vale/code/test/TestInlineMain.ml
 
 obj/vale_testInline.h: obj/inline-vale-testInline.exe
@@ -553,6 +556,11 @@ obj/inline-vale-%.exe: $(ALL_CMX_FILES)
 	  $(OCAMLOPT) $^ -o $@ \
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
+obj/rustinline-vale-%.exe: $(ALL_CMX_FILES)
+	$(call run-with-log,\
+	  $(OCAMLOPT) $^ -o $@ \
+	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
+
 obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 	$(call run-with-log,\
 	  $(OCAMLOPT) $^ -o $@ \
@@ -561,7 +569,8 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
-  dist/vale/curve25519-inline.h dist/vale/sha256-ppc64le.S dist/vale/aesgcm-ppc64le.S
+  dist/vale/curve25519-inline.h dist/vale/curve25519-inline.rs \
+  dist/vale/sha256-ppc64le.S dist/vale/aesgcm-ppc64le.S
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
