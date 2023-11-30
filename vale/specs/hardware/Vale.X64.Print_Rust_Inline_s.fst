@@ -98,6 +98,12 @@ and build_reserved_args_block (l:list code) (reserved:reg_64 -> bool)
     build_reserved_args_block tl reserved r
   )
 
+// If the argument passed to asm is an array, we need to transform it into a pointer
+let arg_to_asm (a:td) = match a with
+  | TD_Base _ -> ""
+  | TD_Buffer _ _ _ -> ".as_mut_ptr()"
+  | TD_ImmBuffer _ _ _ -> ".as_ptr()"
+
 // If the register in which a is passed is modified, we should specify "name = inout(reg) name,"
 // If the register is reserved, we should explicitly allocate it
 let print_modified_input
@@ -107,7 +113,7 @@ let print_modified_input
      let arg_name = arg_names i in
      // If the register is reserved, explicitly allocate the variable in it
      let reg_alloc = if reserved_regs (of_arg i) then "\"" ^ reg_names (of_arg i) ^ "\"" else "reg" in
-     let arg_reg = arg_name ^ " = inout(" ^ reg_alloc ^ ") " ^ arg_name in
+     let arg_reg = arg_name ^ " = inout(" ^ reg_alloc ^ ") " ^ arg_name ^ arg_to_asm a in
      // If the register corresponds to an argument `name`, print it as {name} in the code
      let modified_reg_names = fun r -> if r = of_arg i then "{" ^ arg_name ^ "}" else reg_names r in
      [arg_reg], modified_reg_names
@@ -152,7 +158,7 @@ let print_nonmodified_input
      let arg_name = arg_names i in
      // If the register is reserved, explicitly allocate the variable in it
      let reg_alloc = if reserved_regs (of_arg i) then "\"" ^ reg_names (of_arg i) ^ "\"" else "reg" in
-     let arg_reg = arg_name ^ " = in(" ^ reg_alloc ^ ") " ^ arg_name in
+     let arg_reg = arg_name ^ " = in(" ^ reg_alloc ^ ") " ^ arg_name ^ arg_to_asm a in
      // If the register corresponds to an argument `name`, print it as {name} in the code
      let modified_reg_names = fun r -> if r = of_arg i then "{" ^ arg_name ^ "}" else reg_names r in
      [arg_reg], modified_reg_names
