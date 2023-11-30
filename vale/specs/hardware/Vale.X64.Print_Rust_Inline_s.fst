@@ -202,28 +202,6 @@ let print_modified_registers
     else "out(" ^ P.print_reg_name a ^ ") _,\n" ^ aux q
   in aux [rRax; rRbx; rRcx; rRdx; rRsi; rRdi; rRbp; rRsp; rR8; rR9; rR10; rR11; rR12; rR13; rR14; rR15]
 
-
-(*
-// Prints "register uint64_t *argi_r __asm__("[reg]") = argi;\n"
-let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
-  let ty = match a with
-    | TD_Base _ -> "uint64_t "
-    | _ -> "uint64_t *"
-  in
-  if reserved (of_arg i) then
-    // If the associated register is reserved, we really this argument in it. For instance if it is Rdx and we have Mul(x) instructions
-    true, "  register " ^ ty ^ names i ^ "_r __asm__(\"" ^ P.print_reg_name (of_arg i) ^ "\") = " ^ names i ^ ";\n"
-  else false, ""
-
-let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
-  match args with
-  | [] -> false, ""
-  | a::q ->
-    let was_explicit, explicit_str = print_explicit_register_arg n a i of_arg reserved names in
-    let are_explicit, rest_str = print_explicit_register_args n q (i+1) of_arg reserved names in
-    was_explicit || are_explicit, explicit_str ^ rest_str
-*)
-
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
    each line should be in quotes, and end by a colon in Rust inline assembly *)
 let print_cmp (c:ocmp) (counter:int) (p:P.printer) : string =
@@ -232,12 +210,12 @@ let print_cmp (c:ocmp) (counter:int) (p:P.printer) : string =
     "  cmp " ^ first ^ ", " ^ second ^ "\n"
   in
   match c with
-  | OEq o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  je " ^ "L" ^ string_of_int counter ^ ",\"\n"
-  | ONe o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jne "^ "L" ^ string_of_int counter ^ ",\"\n"
-  | OLe o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jbe "^ "L" ^ string_of_int counter ^ ",\"\n"
-  | OGe o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jae "^ "L" ^ string_of_int counter ^ ",\"\n"
-  | OLt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jb " ^ "L" ^ string_of_int counter ^ ",\"\n"
-  | OGt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  ja " ^ "L" ^ string_of_int counter ^ ",\"\n"
+  | OEq o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  je " ^ "L" ^ string_of_int counter ^ "\",\n"
+  | ONe o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jne "^ "L" ^ string_of_int counter ^ "\",\n"
+  | OLe o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jbe "^ "L" ^ string_of_int counter ^ "\",\n"
+  | OGe o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jae "^ "L" ^ string_of_int counter ^ "\",\n"
+  | OLt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jb " ^ "L" ^ string_of_int counter ^ "\",\n"
+  | OGt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  ja " ^ "L" ^ string_of_int counter ^ "\",\n"
 
 let rec print_spaces (n:nat) : string =
   match n with
@@ -250,7 +228,7 @@ let print_ins (ins:ins) (p:P.printer) : string =
   | Instr _ _ (AnnotateComment s) -> "    // " ^ s
   | Instr _ _ (AnnotateLargeComment s) -> "\n    /////// " ^ s ^ " ////// \n"
   | Instr _ _ (AnnotateSpace n) -> print_spaces n
-  | _ -> "    \"" ^ P.print_ins ins p ^ ",\""
+  | _ -> "    \"" ^ P.print_ins ins p ^ "\","
 
 let rec print_block (b:codes) (n:int) (p:P.printer) : string & int =
   match b with
@@ -279,7 +257,7 @@ and print_code (c:code) (n:int) (p:P.printer) : string & int =
     let n2 = n + 1 in
     let cmp = print_cmp (P.cmp_not cond) n1 p in
     let true_str, n' = print_code true_code (n + 2) p in
-    let jmp = "    \"  jmp L" ^ string_of_int n2 ^ ",\"\n" in
+    let jmp = "    \"  jmp L" ^ string_of_int n2 ^ "\",\n" in
     let label1 = "    \"L" ^ string_of_int n1 ^ ":\"\n" in
     let false_str, n' = print_code false_code n' p in
     let label2 = "    \"L" ^ string_of_int n2 ^ ":\"\n" in
@@ -287,7 +265,7 @@ and print_code (c:code) (n:int) (p:P.printer) : string & int =
   | While cond body ->
     let n1 = n in
     let n2 = n + 1 in
-    let jmp = "    \"  jmp L" ^ string_of_int n2 ^ ",\"\n" in
+    let jmp = "    \"  jmp L" ^ string_of_int n2 ^ "\",\n" in
     let label1 = "    \"" ^ p.P.align() ^ " 16\nL" ^ string_of_int n1 ^ ":\"\n" in
     let body_str, n' = print_code body (n + 2) p in
     let label2 = "    \"" ^ p.P.align() ^ " 16\nL" ^ string_of_int n2 ^ ":\"\n" in
