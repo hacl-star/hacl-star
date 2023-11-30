@@ -361,7 +361,7 @@ let print_inline
   let (code_str, final_label) = print_code (remove_blank code) label printer in
 
   // Close the asm! block, then the unsafe block, then the function
-  let close_code = "    );\n  }\n}" in
+  let close_code = "    );\n  }\n}\n\n" in
 
   print_string (comments ^ header ^ start_code ^ code_str ^ output_str ^ input_str ^ modified_str ^ close_code);
   final_label
