@@ -332,15 +332,16 @@ let print_inline
   // Start printing the code, need an unsafe block and the asm! macro
   let start_code =  "  unsafe {\n    asm!(\n" in
 
+  // Rust inline asm registers do not have an additional % prefix
+  let inlined_reg_prefix () = "" in
+
   // Initially, the register names are the same as in assembly
   // This function will be modified to address arguments by their name instead of explicitly allocating them
-  // TODO: Need to redefine print_reg_name to avoid the % prefix
   let init_reg_names r = P.print_reg_name r in
 
   // Each *modified* input should be specified as `name = inout(reg) name`
   // If we have a return value, it should be written only and specified as "name = out(reg) name"
   let output_str, output_reg_names =  print_modified_inputs n of_arg regs_mod reserved_regs args ret_val init_reg_names arg_names in
-
 
   // Each *non-modified* input should be specified as `name = in(reg) name`
   let input_str, inlined_reg_names = print_nonmodified_inputs n of_arg regs_mod reserved_regs args output_reg_names arg_names in
@@ -354,6 +355,7 @@ let print_inline
   let inlined_small_reg_names _ = "ERROR" in
 
   let printer = {P.gcc with
+    P.reg_prefix = inlined_reg_prefix;
     P.print_reg_name = inlined_reg_names;
     P.print_reg32_name = inlined_reg32_names;
     P.print_small_reg_name = inlined_small_reg_names } in
