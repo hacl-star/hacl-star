@@ -138,7 +138,7 @@ let print_modified_inputs
   (arg_names:nat -> string) =
   let rec aux = function
   | [] -> ""
-  | a :: q -> a ^ ",\n" ^ aux q
+  | a :: q -> "    " ^ a ^ ",\n" ^ aux q
   in
   let outputs, output_reg_names = get_modified_input_strings n of_arg regs_mod reserved_regs args 0 ret_val reg_names arg_names in
   aux outputs, output_reg_names
@@ -173,7 +173,7 @@ let print_nonmodified_inputs
   (args:list td{List.Tot.length args <= n}) (reg_names:reg_64 -> string) (arg_names:nat -> string) =
   let rec aux = function
   | [] -> ""
-  | a :: q -> a ^ ",\n" ^ aux q
+  | a :: q -> "    " ^ a ^ ",\n" ^ aux q
   in
   let inputs, input_reg_names = get_nonmodified_input_strings n of_arg regs_mod reserved_regs args 0 reg_names arg_names in
   aux inputs, input_reg_names
@@ -199,7 +199,7 @@ let print_modified_registers
     // This register is not modified, or was already specified as input or output: we skip it
     if not (regs_mod a) || input_register 0 a then aux q
     // Register not modified or already specified in inputs, we add it
-    else "out(" ^ P.print_reg_name a ^ ") _,\n" ^ aux q
+    else "    out(" ^ P.print_reg_name a ^ ") _,\n" ^ aux q
   in aux [rRax; rRbx; rRcx; rRdx; rRsi; rRdi; rRbp; rRsp; rR8; rR9; rR10; rR11; rR12; rR13; rR14; rR15]
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
