@@ -350,9 +350,10 @@ let print_inline
   // This also ensures that this register is not used for allocation of input/output in Rust
   let modified_str = print_modified_registers n ret_val of_arg regs_mod reserved_regs args in
 
-  // We do not support for reg32 and small registers
-  let inlined_reg32_names _ = "ERROR" in
-  let inlined_small_reg_names _ = "ERROR" in
+  // According to the Rust documentation, reg32 and small registers are aliases treated as identical to the
+  // base register name. We simplify by using the regular name
+  let inlined_reg32_names = inlined_reg_names in
+  let inlined_small_reg_names = inlined_reg_names in
 
   let printer = {P.gcc with
     P.reg_prefix = inlined_reg_prefix;
