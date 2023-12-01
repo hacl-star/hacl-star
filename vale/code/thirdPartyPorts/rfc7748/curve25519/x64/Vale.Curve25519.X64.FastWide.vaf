@@ -494,10 +494,12 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         inA_in := rsi;
         dst_in := r12;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; memLayout;
+        rax; rcx; rdx; rdi; rsi; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        efl; heap0; memLayout; stack; stackTaint;
     requires
         adx_enabled && bmi2_enabled;
+        rsp <= init_rsp(stack);
+        rsp >= init_rsp(stack) - 48;
         is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -528,12 +530,18 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-
+        
+        rsp == old(rsp);
+        stack == free_stack64(rsp-8, rsp, store_stack64(rsp-8, old(r12), old(stack)));
+        stackTaint == store_taint_stack64(rsp-8, Public, old(stackTaint));
 {
     CreateHeaplets(list(
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
+
+    // r12 will be modified by Fast_sqr
+    Push(r12);
 
     LargeComment("Compute the raw multiplication: tmp <- f * f");
     Fast_sqr(0, tmp_b, inA_b);
@@ -541,7 +549,7 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     Newline();
     Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, r12);
+    Pop(rdi);
 
     LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
@@ -623,7 +631,6 @@ procedure Fsqr_stdcall(
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r12);
-    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -649,7 +656,6 @@ procedure Fsqr_stdcall(
         Pop_Secret(rsi);
     }
 
-    Pop_Secret(rbx);
     Pop_Secret(r12);
     Pop_Secret(r14);
     Pop_Secret(r13);
@@ -666,10 +672,12 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         inA_in := rsi;
         dst_in := r12;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; memLayout;
+        rax; rcx; rdx; rdi; rsi; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        efl; heap0; memLayout; stack; stackTaint;
     requires
         adx_enabled && bmi2_enabled;
+        rsp <= init_rsp(stack);        
+        rsp >= init_rsp(stack) - 48;
         is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -711,19 +719,24 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
+        rsp == old(rsp);
+        stack == free_stack64(rsp-8, rsp, store_stack64(rsp-8, old(r12), old(stack)));
+        stackTaint == store_taint_stack64(rsp-8, Public, old(stackTaint));
 {
     CreateHeaplets(list(
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
+    // r12 will be modified by Fast_sqr
+    Push(r12);
     Fast_sqr(0, tmp_b, inA_b);
     Newline();
     Fast_sqr(4, tmp_b, inA_b);
     Newline();
     Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, r12);
+    Pop(rdi);
     Newline();
     Carry_wide(0, dst_b, tmp_b);
     Newline();
@@ -817,7 +830,6 @@ procedure Fsqr2_stdcall(
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r12);
-    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -843,7 +855,6 @@ procedure Fsqr2_stdcall(
         Pop_Secret(rsi);
     }
 
-    Pop_Secret(rbx);
     Pop_Secret(r12);
     Pop_Secret(r14);
     Pop_Secret(r13);
