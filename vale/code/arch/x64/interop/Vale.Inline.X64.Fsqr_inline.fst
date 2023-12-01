@@ -20,6 +20,7 @@ module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
 open Vale.AsLowStar.MemoryHelpers
 module PR = Vale.X64.Print_Inline_s
+module PRR = Vale.X64.Print_Rust_Inline_s
 
 module FU = Vale.Curve25519.X64.FastUtil
 module FH = Vale.Curve25519.X64.FastHybrid

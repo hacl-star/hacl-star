@@ -19,6 +19,7 @@ open Vale.X64.MemoryAdapters
 module VS = Vale.X64.State
 module MS = Vale.X64.Machine_s
 module PR = Vale.X64.Print_Inline_s
+module PRR = Vale.X64.Print_Rust_Inline_s
 
 module FU = Vale.Curve25519.X64.FastUtil
 module FH = Vale.Curve25519.X64.FastHybrid
@@ -72,7 +73,7 @@ let fmul_post : VSig.vale_post fmul_dom =
 
 let fmul_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
-  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR13 || r = rR14 then true
+  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 then true
   else false
 
 let fmul_xmms_modified = fun _ -> false
@@ -363,7 +364,7 @@ let fmul1_post : VSig.vale_post fmul1_dom =
 
 let fmul1_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
-  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR13 then true
+  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 then true
   else false
 
 let fmul1_xmms_modified = fun _ -> false
