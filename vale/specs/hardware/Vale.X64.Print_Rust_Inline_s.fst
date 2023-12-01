@@ -111,13 +111,18 @@ let print_modified_input
   (reg_names:reg_64 -> string) (arg_names:nat -> string) : list string & (reg_64 -> string) =
    if regs_mod (of_arg i) then
      let arg_name = arg_names i in
-     // If the register is reserved, explicitly allocate the variable in it
-     let reg_alloc = if reserved_regs (of_arg i) then "\"" ^ reg_names (of_arg i) ^ "\"" else "reg" in
      // The => _ at the end is needed to indicate that it's not the input that is modified, but rather
      // that the output is written to a discarded value
-     let arg_reg = arg_name ^ " = inout(" ^ reg_alloc ^ ") " ^ arg_name ^ arg_to_asm a ^ " => _" in
-     // If the register corresponds to an argument `name`, print it as {name} in the code
-     let modified_reg_names = fun r -> if r = of_arg i then "{" ^ arg_name ^ "}" else reg_names r in
+     let arg_reg =
+       if reserved_regs (of_arg i) then
+         "inout(\"" ^ reg_names (of_arg i) ^ "\") " ^ arg_name ^ arg_to_asm a ^ " => _"
+       else
+         arg_name ^ " = inout(reg) "  ^ arg_name ^ arg_to_asm a ^ " => _"
+     in
+
+     // If the register corresponds to an argument `name` which is not explicitly allocated in register,
+     // print it as {name} in the code
+     let modified_reg_names = fun r -> if r = of_arg i && not (reserved_regs r) then "{" ^ arg_name ^ "}" else reg_names r in
      [arg_reg], modified_reg_names
    else
      [], reg_names
@@ -159,10 +164,15 @@ let print_nonmodified_input
    if regs_mod (of_arg i) then [], reg_names else
      let arg_name = arg_names i in
      // If the register is reserved, explicitly allocate the variable in it
-     let reg_alloc = if reserved_regs (of_arg i) then "\"" ^ reg_names (of_arg i) ^ "\"" else "reg" in
-     let arg_reg = arg_name ^ " = in(" ^ reg_alloc ^ ") " ^ arg_name ^ arg_to_asm a in
-     // If the register corresponds to an argument `name`, print it as {name} in the code
-     let modified_reg_names = fun r -> if r = of_arg i then "{" ^ arg_name ^ "}" else reg_names r in
+     let arg_reg =
+       if reserved_regs (of_arg i) then
+         "in(\"" ^ reg_names (of_arg i) ^ "\") " ^ arg_name ^ arg_to_asm a
+       else
+         arg_name ^ " = in(reg) "  ^ arg_name ^ arg_to_asm a
+     in
+     // If the register corresponds to an argument `name` which is not explicitly allocated in register,
+     // print it as {name} in the code
+     let modified_reg_names = fun r -> if r = of_arg i && not (reserved_regs r) then "{" ^ arg_name ^ "}" else reg_names r in
      [arg_reg], modified_reg_names
 
 // Get a list of strings corresponding to modified inputs
