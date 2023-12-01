@@ -1,5 +1,5 @@
 {
-  description = "Hacl*";
+  description = "HACL*";
 
   inputs = {
     fstar.url = "github:fstarlang/fstar";
