@@ -567,10 +567,11 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
 # The ones in secure_api are legacy and should go.
-VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
+VALE_C_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
-  dist/vale/curve25519-inline.h dist/vale/curve25519-inline.rs \
-  dist/vale/sha256-ppc64le.S dist/vale/aesgcm-ppc64le.S
+  dist/vale/curve25519-inline.h dist/vale/sha256-ppc64le.S dist/vale/aesgcm-ppc64le.S
+
+VALE_ASMS = $(VALE_C_ASMS) dist/vale/curve25519-inline.rs
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
@@ -785,6 +786,7 @@ WASM_FLAGS	=\
   ./test.js
 
 dist/wasm/Makefile.basic: VALE_ASMS =
+dist/wasm/Makefile.basic: VALE_C_ASMS =
 dist/wasm/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/wasm/Makefile.basic: HAND_WRITTEN_H_FILES =
 dist/wasm/Makefile.basic: HAND_WRITTEN_FILES =
@@ -861,11 +863,11 @@ dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 # --------------------------
 
 .PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS)
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) 
 	mkdir -p $(dir $@)
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
-	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
+	[ x"$(VALE_C_ASMS)" != x ] && cp $(VALE_C_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(filter %.krml,$^) \
