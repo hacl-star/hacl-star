@@ -1163,6 +1163,66 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     DestroyHeaplets();
 }
 
+procedure Fmul1_rust(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    {:options z3rlimit(600)}
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+        b @= rdx;
+
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
+
+        a := pow2_four(a0, a1, a2, a3);
+
+        tmp0 @= r8;
+        tmp1 @= r9;
+        tmp2 @= r10;
+        tmp3 @= r11;
+    reads
+        dst_ptr; inA_ptr;
+
+    modifies
+        rax; rcx; b;
+        tmp0; tmp1; tmp2; tmp3;
+        rbx; r13;
+        heap0; memLayout; efl;
+        rsp; stack; stackTaint;
+
+    requires
+        rsp == init_rsp(stack);    
+        is_initial_heap(memLayout, mem);
+        b == inB;
+        adx_enabled && bmi2_enabled;
+        buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
+
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memLayout, Secret);
+
+        b < 131072; // < pow2 17
+    ensures
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
+        let d := pow2_four(d0, d1, d2, d3);
+        d % prime == old(a * b) % prime;
+
+        modifies_buffer(dst_b, old(mem), mem);
+
+        rsp == old(rsp);
+        rbx == old(rbx);
+{
+        Push_Secret(rbx);
+        Fmul1(dst_b, inA_b, inB);
+        Pop_Secret(rbx);
+}              
+
 procedure Fmul1_stdcall(
         inline win:bool,
         ghost dst_b:buffer64,
