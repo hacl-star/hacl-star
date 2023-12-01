@@ -215,7 +215,6 @@ procedure Fmul_stdcall(
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r15);
-    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -242,7 +241,6 @@ procedure Fmul_stdcall(
         Pop_Secret(rsi);
     }
 
-    Pop_Secret(rbx);
     Pop_Secret(r15);
     Pop_Secret(r14);
     Pop_Secret(r13);
@@ -265,7 +263,7 @@ procedure Fmul2(
     reads
         r15;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
+        rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
         efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
@@ -455,7 +453,6 @@ procedure Fmul2_stdcall(
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r15);
-    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -482,7 +479,6 @@ procedure Fmul2_stdcall(
         Pop_Secret(rsi);
     }
 
-    Pop_Secret(rbx);
     Pop_Secret(r15);
     Pop_Secret(r14);
     Pop_Secret(r13);
