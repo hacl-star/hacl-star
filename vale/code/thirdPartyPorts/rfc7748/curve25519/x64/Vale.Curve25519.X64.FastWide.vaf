@@ -201,17 +201,20 @@ procedure Fmul_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
+    Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r15);
@@ -244,6 +247,7 @@ procedure Fmul_stdcall(
     Pop_Secret(r15);
     Pop_Secret(r14);
     Pop_Secret(r13);
+    Pop_Secret(r12);
 }
 
 procedure Fmul2(
@@ -439,17 +443,20 @@ procedure Fmul2_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
+    Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r15);
@@ -482,6 +489,7 @@ procedure Fmul2_stdcall(
     Pop_Secret(r15);
     Pop_Secret(r14);
     Pop_Secret(r13);
+    Pop_Secret(r12);
 }
 
 procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)

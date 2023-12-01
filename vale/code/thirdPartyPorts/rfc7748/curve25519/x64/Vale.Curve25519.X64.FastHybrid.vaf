@@ -1218,11 +1218,13 @@ procedure Fmul1_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
@@ -1232,7 +1234,7 @@ procedure Fmul1_stdcall(
     // Store callee-save registers
     Push_Secret(rdi);
     Push_Secret(r13);
-    Push_Secret(rbx);
+    Push_Secret(r12);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -1250,7 +1252,7 @@ procedure Fmul1_stdcall(
         Pop_Secret(rsi);
     }
 
-    Pop_Secret(rbx);
+    Pop_Secret(r12);
     Pop_Secret(r13);
     Pop_Secret(rdi);
 }
