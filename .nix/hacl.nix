@@ -114,7 +114,7 @@
 
     buildPhase = ''
       RESOURCEMONITOR=1 make -j$NIX_BUILD_CORES ci 2>&1 | tee log.txt
-      bash ${fstar-scripts}/remove_stale_hints.sh || true
+      bash ${fstar-scripts}/remove_stale_hints.sh
     '';
 
     installPhase = ''
