@@ -461,7 +461,9 @@ min-test-unstaged: $(filter-out \
 obj/Meta_Interface.ml: CODEGEN = Plugin
 obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
 
-obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
+# If fstar.exe was changed in the slightest, this object
+# must be recompiled
+obj/Meta_Interface.cmxs: obj/Meta_Interface.ml $(FSTAR_EXE)
 	$(OCAMLSHARED) $< -o $@
 
 obj/Test_Lowstarize.ml: CODEGEN = Plugin
