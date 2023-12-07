@@ -37,17 +37,11 @@ FILES=" \
   Hacl_IntTypes_Intrinsics_128 \
   Hacl_Krmllib \
   Hacl_Lib \
-<<<<<<< HEAD
   Hacl_MAC_Poly1305_Simd128 \
   Hacl_MAC_Poly1305_Simd256 \
   Hacl_MAC_Poly1305 \
-=======
-  Hacl_Poly1305_128 \
-  Hacl_Poly1305_256 \
-  Hacl_Poly1305_32 \
   Hacl_P256 \
   Hacl_P256_PrecompTable \
->>>>>>> main
   Hacl_RSAPSS \
   Hacl_SHA2_Types \
   Hacl_Spec \
