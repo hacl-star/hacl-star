@@ -202,7 +202,7 @@ let repeat_gen_blocks_multi_vec_step #inp_t w blocksize n hi_f inp a a_vec f f_v
 
   assert (repeat_gen_blocks_multi_vec_equiv_pre w blocksize n hi_f a a_vec f f_v normalize_v i b_v acc_v)
 
-#push-options "--z3rlimit_factor 2"
+#push-options "--z3rlimit_factor 4"
 let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v acc_v0 =
   let len = length inp in
   let blocksize_v = w * blocksize in
@@ -423,6 +423,7 @@ let normalize_v_map #a w blocksize n i b =
   b
 
 
+#push-options "--z3rlimit 50"
 let map_blocks_multi_vec_equiv_pre
   (#a:Type)
   (w:pos)
@@ -437,9 +438,9 @@ let map_blocks_multi_vec_equiv_pre
   : prop
  =
   Math.Lemmas.lemma_mult_le_right w (i + 1) n;
-
   repeat_gen_blocks_map_f #a (w * blocksize) n f_v i b_v acc_v `Seq.equal`
   map_blocks_multi_acc blocksize (w * i) hi_f w b_v f acc_v
+#pop-options
 
 // It means the following
 // Seq.append acc_v (f_v i b_v) ==

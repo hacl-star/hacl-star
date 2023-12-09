@@ -25,7 +25,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
-#reset-options "--z3rlimit 200 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*' --record_options"
+#reset-options "--z3rlimit 300 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*' --record_options"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract
@@ -462,7 +462,7 @@ let montgomery_ladder #s out key init =
   copy out p0;
   pop_frame ()
 
-#set-options "--fuel 0 --ifuel 1 --z3rlimit 300"
+#set-options "--fuel 0 --ifuel 1 --z3rlimit 400"
 
 inline_for_extraction noextract
 let g25519_t = x:glbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x}
