@@ -460,7 +460,7 @@ val bn_get_bits_limb_lemma:
   -> ind:size_nat{ind / bits t < nLen} ->
   Lemma (v (bn_get_bits_limb n ind) == bn_v n / pow2 ind % pow2 (bits t))
 
-#push-options "--z3rlimit 75"
+#push-options "--z3rlimit 100"
 let bn_get_bits_limb_lemma #t #nLen n ind =
   let pbits = bits t in
   let i = ind / pbits in

@@ -131,7 +131,7 @@ val cswap2:
 let cswap2 #s bit p0 p1 =
   C.cswap2 #s bit p0 p1
 
-#set-options "--z3rlimit 150 --fuel 0 --ifuel 1"
+#set-options "--z3rlimit 300 --fuel 0 --ifuel 1"
 
 val ladder_step:
     #s:field_spec
