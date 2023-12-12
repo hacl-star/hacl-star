@@ -159,8 +159,9 @@ val precomp_base_table_list_lemma_step
   (requires precomp_base_table_inv k g (n - 1) g_i_acc1)
   (ensures (let (g_i, acc_i) = precomp_base_table_f k g (n - 1) g_i_acc1 in
     precomp_base_table_inv k g n (g_i, acc_i)))
-#push-options "--z3rlimit 75"
+#push-options "--z3rlimit 100"
 let precomp_base_table_list_lemma_step #t #a_t #len #ctx_len k g n g_i_acc1 =
+  assert (unsigned a_t);
   let (g_i1, acc_i1) = g_i_acc1 in
   let (g_i, acc_i) = precomp_base_table_f k g (n - 1) g_i_acc1 in
   assert (g_i == k.concr_ops.SE.mul g_i1 g);

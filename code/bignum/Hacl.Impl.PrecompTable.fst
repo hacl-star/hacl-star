@@ -228,8 +228,9 @@ val precomp_table_inv_lemma_j:
   (ensures
     precomp_table_inv len ctx_len k a table_len table2 j)
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 75"
 let precomp_table_inv_lemma_j #a_t len ctx_len k a table_len table1 table2 i j =
+  assert (j < v table_len);
   assert (precomp_table_inv len ctx_len k a table_len table1 j);
   let bj1 = spec_table_sub_len (v len) (v table_len) table1 j in
   let bj2 = spec_table_sub_len (v len) (v table_len) table2 j in
@@ -500,11 +501,10 @@ let lprecomp_get_vartime #a_t len ctx_len k a table_len table bits_l tmp =
   assert (k.to.refl (as_seq h1 a_bits_l) == S.pow k.to.comm_monoid (k.to.refl a) (v bits_l));
   copy tmp a_bits_l
 
-#push-options "--z3rlimit 100"
+
 let lprecomp_get_consttime #a_t len ctx_len k a table_len table bits_l tmp =
   let h0 = ST.get () in
   table_select_consttime len table_len table bits_l tmp;
   let h1 = ST.get () in
   assert (precomp_table_inv len ctx_len k a table_len (as_seq h0 table) (v bits_l));
   assert (k.to.refl (as_seq h1 tmp) == S.pow k.to.comm_monoid (k.to.refl a) (v bits_l))
-#pop-options

@@ -419,7 +419,7 @@ val lemma_pow_mod_prime_zero_: #m:prime -> a:nat_mod m -> b:pos -> Lemma
   (requires pow a b % m = 0)
   (ensures  a = 0)
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 150"
 let rec lemma_pow_mod_prime_zero_ #m a b =
   if b = 1 then lemma_pow1 a
   else begin

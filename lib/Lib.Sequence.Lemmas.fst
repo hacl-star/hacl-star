@@ -391,7 +391,7 @@ let len0_le_len_fraction blocksize len len0 =
   Math.Lemmas.lemma_div_le len0 len blocksize;
   Math.Lemmas.lemma_mult_le_right blocksize (len0 / blocksize) (len / blocksize)
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 100"
 let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 =
   let len = length inp in
   let len1 = len - len0 in
