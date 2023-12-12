@@ -36,10 +36,6 @@ module Equiv = Spec.SHA3.Equivalence
 module V = Hacl.Spec.SHA3.Vec
 module HD = Hacl.Hash.Definitions
 
-//let two_pointers = Lib.Buffer.buffer Lib.IntTypes.uint8 & Lib.Buffer.buffer Lib.IntTypes.uint8
-//let three_pointers = Lib.Buffer.buffer Lib.IntTypes.uint8 & two_pointers
-//let four_pointers = Lib.Buffer.buffer Lib.IntTypes.uint8 & three_pointers
-
 let disjoint4_4 #len1 #len2 #a (b0 b1 b2 b3: lbuffer a len1) (b4 b5 b6 b7: lbuffer a len2) =
   disjoint b0 b4 /\ disjoint b0 b5 /\ disjoint b0 b6 /\ disjoint b0 b7 /\
   disjoint b1 b4 /\ disjoint b1 b5 /\ disjoint b1 b6 /\ disjoint b1 b7 /\
@@ -1241,7 +1237,7 @@ let store_output4 #m block outputByteLen start len b =
     store_block4 #m block outputByteLen start 32ul i b;
     let h1 = ST.get () in
     assert (modifies_multi b h0 h1));
-  if (v len / 32 < (v outputByteLen - v start) / 32) && (v len / 32 < 256 / 32)
+  if (len /. 32ul <. (outputByteLen -! start) /. 32ul) && (len /. 32ul <. 256ul /. 32ul)
     then store_block4 #m block outputByteLen start (len %. 32ul) (len /. 32ul) b;
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b)
