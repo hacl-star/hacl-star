@@ -1003,7 +1003,7 @@ let get_multilast_1 #m rateInBytes len b b' =
   Lib.NTuple.eq_intro (as_seq_multi h1 b') (V.get_multilast_spec #m (v rateInBytes) (v len) (as_seq_multi h0 b))
 #pop-options
 
-#push-options "--max_ifuel 1"
+#push-options "--max_ifuel 1 --z3rlimit 500"
 inline_for_extraction noextract
 val get_multilast_4: #m:m_spec{lanes m == 4} -> get_multilast_t m
 let get_multilast_4 #m rateInBytes len b b' =
@@ -1021,6 +1021,7 @@ let get_multilast_4 #m rateInBytes len b b' =
   get_multilast_disjoint_helper rateInBytes len b2 bl2;
   get_multilast_disjoint_helper rateInBytes len b3 bl3;
   let h0' = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h0' b) (as_seq_multi h0 b);
   Lib.NTuple.eq_intro (as_seq_multi h0' b') (next_block_seq_zero m);
   update_sub bl0 0ul rem (sub b0 (len -! rem) rem);
   update_sub bl1 0ul rem (sub b1 (len -! rem) rem);
@@ -1176,7 +1177,8 @@ val store_block4:
   -> outputByteLen:size_t
   -> start:size_t
   -> len:size_t{v len <= 32}
-  -> i:size_t{v i < (v outputByteLen - v start) / 32 /\ v i < 256 / 32}
+  -> i:size_t{v start + v i * 32 + v len <= v outputByteLen /\
+              v i * 128 + 128 <= 1024}
   -> b:multibuf (lanes m) outputByteLen ->
   Stack unit
   (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
@@ -1185,7 +1187,6 @@ val store_block4:
     as_seq_multi h1 b ==
       V.store_block4 #m (v outputByteLen) (v start) (v len) (as_seq h0 block) (v i) (as_seq_multi h0 b))
 
-#push-options "--max_ifuel 1 --z3rlimit 500"
 let store_block4 #m block outputByteLen start len i b =
   let h0 = ST.get() in
   assert (v i * 128 + v len == v (i *! 128ul +! len));
@@ -1199,7 +1200,6 @@ let store_block4 #m block outputByteLen start len i b =
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b)
     (V.store_block4 #m (v outputByteLen) (v start) (v len) (as_seq h0 block) (v i) (as_seq_multi h0 b))
-#pop-options
 
 inline_for_extraction noextract
 val store_output4:
@@ -1216,7 +1216,6 @@ val store_output4:
     as_seq_multi h1 b ==
       V.store_output4 #m (v outputByteLen) (v start) (v len) (as_seq h0 block) (as_seq_multi h0 b))
 
-#push-options "--z3rlimit 100"
 let store_output4 #m block outputByteLen start len b =
   let h0_init = ST.get() in
   [@ inline_let]
@@ -1233,16 +1232,14 @@ let store_output4 #m block outputByteLen start len b =
     Loop.unfold_repeat_gen (v len / 32)
       (V.store_block4_s m (v outputByteLen) (v start) 32 (as_seq h0 block))
       (spec h0) (refl h0 0) (v i);
-    let h0' = ST.get () in
     store_block4 #m block outputByteLen start 32ul i b;
     let h1 = ST.get () in
     assert (modifies_multi b h0 h1));
-  if (len /. 32ul <. (outputByteLen -! start) /. 32ul) && (len /. 32ul <. 256ul /. 32ul)
+  if (len %. 32ul >. 0ul)
     then store_block4 #m block outputByteLen start (len %. 32ul) (len /. 32ul) b;
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b)
     (V.store_output4 #m (v outputByteLen) (v start) (v len) (as_seq h0_init block) (as_seq_multi h0_init b))
-#pop-options
 
 inline_for_extraction noextract
 val update_output1:

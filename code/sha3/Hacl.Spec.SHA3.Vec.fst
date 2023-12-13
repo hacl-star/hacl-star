@@ -521,9 +521,11 @@ let store_block4
   (start:size_nat)
   (len:size_nat{len <= 32})
   (block:lseq uint8 (lanes m * 256))
-  (i:size_nat{i < (outputByteLen - start) / 32 /\ i < 256 / 32})
+  (i:size_nat{start + i * 32 + len <= outputByteLen /\
+              i * 128 + 128 <= 1024})
   (b:multiseq (lanes m) outputByteLen) :
   (multiseq (lanes m) outputByteLen) =
+  assert (i * 128 + 32 + len <= 1024);
   let (l0, (l1, (l2, l3))) = tup4 b in
   let l0 = update_sub #uint8 #outputByteLen
     l0 (start + i * 32) len (sub block (i * 128) len) in
@@ -552,7 +554,7 @@ let store_output4
   let outBlocks = len / 32 in
   let b = repeat_gen outBlocks (store_block4_s m outputByteLen start 32 block)
     (store_block4 #m outputByteLen start 32 block) b in
-  let b = if (len / 32 < (outputByteLen - start) / 32) && (len / 32 < 256 / 32)
+  let b = if (len % 32 > 0)
     then store_block4 #m outputByteLen start (len % 32) block (len / 32) b else b in
   b
 
