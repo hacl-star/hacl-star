@@ -7,14 +7,12 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.Ed25519.PointOps.point_inv",
+        "refinement_interpretation_Tm_refine_94731b6ed30abda0dd818e3b0948e9b4"
       ],
       0,
-      "0aa0bfea0e11bb3b22dbe05ccc8d864b"
+      "b7fafcef07cfb362257dcb48f4280eee"
     ],
     [
       "Hacl.Impl.Ed25519.Group.refl",
@@ -22,12 +20,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Spec.Ed25519.PointOps.point_inv",
-        "refinement_interpretation_Tm_refine_94731b6ed30abda0dd818e3b0948e9b4"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "e2439c8bae2d1b499d0a6aff99e18d3c"
+      "e4780c6ba8d7c68d7fd19c06fca5d6d5"
     ],
     [
       "Hacl.Impl.Ed25519.Group.linv_ctx",
@@ -44,7 +44,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "a1a6bc87f9741933f1b9faac4381e421"
+      "43c99309127591ecd43310eb29579abe"
     ],
     [
       "Hacl.Impl.Ed25519.Group.mk_to_ed25519_comm_monoid",
@@ -74,7 +74,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "aa4070764f4b1f10f6a62031ee8b9571"
+      "22374b4c54a335c72a3529f816128c6d"
     ],
     [
       "Hacl.Impl.Ed25519.Group.point_add",
@@ -107,7 +107,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "cae0fc2876a99a49bc7e12b709879b63"
+      "46714101cd35fe995aa2e63f34dc74c8"
     ],
     [
       "Hacl.Impl.Ed25519.Group.point_add",
@@ -213,7 +213,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f8ca9b75a4809e7d8f245da97532af93"
+      "4b04f41f11752f72a1595b22941cf7c2"
     ],
     [
       "Hacl.Impl.Ed25519.Group.point_double",
@@ -246,7 +246,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "9dbb1c5d05e19af1baf1f5bc41f2b8ad"
+      "3c293be5e1644f65ec166614a15fdb53"
     ],
     [
       "Hacl.Impl.Ed25519.Group.point_double",
@@ -357,7 +357,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "23f819d2d4a0663f9833a28f483863fd"
+      "20ed886386aa99e96e4d019caaef0a32"
     ],
     [
       "Hacl.Impl.Ed25519.Group.point_zero",
@@ -390,7 +390,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "2e4df2020044194cdff85380d5248693"
+      "a40da664ec55e4981ba9744b18ee503c"
     ],
     [
       "Hacl.Impl.Ed25519.Group.point_zero",
@@ -493,7 +493,7 @@
         "typing_Spec.Curve25519.zero", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "7e317f4103d57665a007658fc8f6dd2a"
+      "f404b67494b8f131655652bd6fae3512"
     ],
     [
       "Hacl.Impl.Ed25519.Group.mk_ed25519_concrete_ops",
@@ -526,7 +526,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "b3c040148cf1a0e4c5a9dc739e684bea"
+      "652bc1ec697f90b27b7467b2387c6cce"
     ]
   ]
 ]

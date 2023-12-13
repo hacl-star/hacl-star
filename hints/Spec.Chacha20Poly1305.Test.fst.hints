@@ -13,7 +13,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "6e322b0959120c55aed74a7ca32bc655"
+      "6aaa692c06ef147175b4380854977729"
     ],
     [
       "Spec.Chacha20Poly1305.Test.test_nonce",
@@ -101,25 +101,11 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "2e18f881f77c24e2fd2b7ae22a322d03"
+      "d489896983551366dfdff1fb5fb12e86"
     ],
     [
       "Spec.Chacha20Poly1305.Test.test_aead",
       2,
-      0,
-      2,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "3baca11c9937ae4e3321152a630df541"
-    ],
-    [
-      "Spec.Chacha20Poly1305.Test.test_aead",
-      3,
       0,
       2,
       [
@@ -149,7 +135,21 @@
         "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.zero"
       ],
       0,
-      "4c3643e4e64694d984e0ac8126f854f2"
+      "c36bc293ae092ff166025f305b8d43c7"
+    ],
+    [
+      "Spec.Chacha20Poly1305.Test.test_aead",
+      3,
+      0,
+      2,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "df0ef8c50c6490822ab03cf3e3cc9622"
     ]
   ]
 ]

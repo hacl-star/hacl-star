@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "7bf81fd8ef1f79974a4cefaae5ae6bd1"
+      "a6d7a8b690c2e239c862132e82e1537d"
     ],
     [
       "Spec.Chacha20.block",
@@ -32,7 +32,7 @@
         "typing_Spec.Chacha20.size_key"
       ],
       0,
-      "1d3eb4b02fbb057c38941fb50e7702eb"
+      "7b0fe314e1dcb5a65a2f1b8c4d41da83"
     ],
     [
       "Spec.Chacha20.nonce",
@@ -64,7 +64,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "801d6e374ace7e6093915a7f306c27fd"
+      "0b9746d0574e41899fe6ee4afaae1e77"
     ],
     [
       "Spec.Chacha20.line",
@@ -120,7 +120,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4ab5aa2b6548322a0c9b2b54665ec138"
+      "d5f34b6cfc84d66e13f07485aaac2935"
     ],
     [
       "Spec.Chacha20.column_round",
@@ -171,7 +171,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "58fa1f900b1b95a4d10a701fdc58ccdc"
+      "6ef3f372d76109189ae658bd064bd05b"
     ],
     [
       "Spec.Chacha20.chacha20_add_counter",
@@ -254,7 +254,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "00a99a6a39a27d4bbb95cdd57eb58798"
+      "e57306d121a408ffa231087bc1061148"
     ],
     [
       "Spec.Chacha20.chacha20_init",
@@ -278,7 +278,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "d98bcacee382c9572430f69a07582d31"
+      "f2c6ea513aa6f4e9713f5ec3cb58f10b"
     ],
     [
       "Spec.Chacha20.chacha20_key_block0",
@@ -306,7 +306,7 @@
         "typing_FStar.Seq.Base.length", "typing_Prims.pow2"
       ],
       0,
-      "b5f3e02e0b0286d6e890a1244dc090a3"
+      "397944e8d178ab359cec34216984e242"
     ],
     [
       "Spec.Chacha20.chacha20_key_block",
@@ -391,7 +391,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "47cc8f1ccbb839d83dac3a2806914b76"
+      "8fa8f145e0ec4a69a41d85745b6e1571"
     ],
     [
       "Spec.Chacha20.chacha20_update",
@@ -399,14 +399,17 @@
       0,
       1,
       [
-        "@query", "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
-        "equation_Spec.Chacha20.size_block",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.Chacha20.size_block",
+        "equation_Spec.Chacha20.size_key", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_6351ef8449b8c1189b409c79b3192d82",
+        "typing_Spec.Chacha20.size_key"
       ],
       0,
-      "c05ab80712070eaf93328c29c0546b66"
+      "35ed8355040d6364542e81b1784b1f1d"
     ],
     [
       "Spec.Chacha20.chacha20_update",
@@ -424,7 +427,7 @@
         "typing_Spec.Chacha20.size_key"
       ],
       0,
-      "66495f3c541ad401fbbac12f512080ad"
+      "a33ff190d3a3eb37601b4f69a8364c9f"
     ],
     [
       "Spec.Chacha20.chacha20_encrypt_bytes",
@@ -439,7 +442,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "21008a75097cc01b55be9566fced17a5"
+      "f33730040779322cc1e43d73bba28944"
     ],
     [
       "Spec.Chacha20.chacha20_encrypt_bytes",
@@ -454,7 +457,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "41f8623d9a23e5d1c0d7207af9bea5af"
+      "e40fef22ecd4259d5fd9981c28089e2f"
     ],
     [
       "Spec.Chacha20.chacha20_decrypt_bytes",
@@ -469,7 +472,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d9f84d57be73f85f731db8923be2d111"
+      "57a30f550c5ce9e7c4da7343d413ebd4"
     ],
     [
       "Spec.Chacha20.chacha20_decrypt_bytes",
@@ -484,16 +487,19 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "54f3b726da97c6249e23c079a6f5280d"
+      "4075d2beb66ffa122ee86901fdcd42c7"
     ],
     [
       "Spec.Chacha20.chacha20_decrypt_bytes",
       3,
       0,
       1,
-      [ "@query" ],
+      [
+        "@query", "equation_Spec.Chacha20.size_block",
+        "projection_inverse_BoxInt_proj_0"
+      ],
       0,
-      "10eedb6d75336a94b146dafadca711b2"
+      "ab1c25a05794e99974c4e3fd810388dd"
     ]
   ]
 ]
