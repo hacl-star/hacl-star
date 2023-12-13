@@ -25,7 +25,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c1eaa3d41ace1282e65df8cf7e699931"
+      "09b1642a085e56110e157b9fba242cec"
     ],
     [
       "Hacl.Spec.Curve25519.Field64.Definition.feval4",
@@ -38,7 +38,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "9afa366d569fe30174ddafa0f6672114"
+      "ca0c9e368988e76cd9a4e71e580eb4ec"
     ],
     [
       "Hacl.Spec.Curve25519.Field64.Definition.bn_v_is_as_nat",
@@ -53,7 +53,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "1a63e6fc30c804bbe7fcc67e4f27d5d2"
+      "fccd5401cfc2dc340817daaff310e50f"
     ],
     [
       "Hacl.Spec.Curve25519.Field64.Definition.bn_v_is_as_nat",
@@ -63,12 +63,17 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Spec.Curve25519.Field64.Definition.as_nat4",
         "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3a782e8fe58e9a89ea23233cc13ebfd4"
+      "93d7e03857c1feeff4951859a1114ea1"
     ],
     [
       "Hacl.Spec.Curve25519.Field64.Definition.bn_v_is_as_nat",
@@ -88,7 +93,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "5d2050a39433026660922bcc48b4e248"
+      "e5a14b6b5e2a6301ff9cc859028409e2"
     ]
   ]
 ]

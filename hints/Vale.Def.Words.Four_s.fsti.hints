@@ -4,16 +4,22 @@
     [
       "Vale.Def.Words.Four_s.nat_to_four_unfold",
       1,
-      2,
       1,
+      0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "int_inversion", "primitive_Prims.op_Multiply",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
       ],
       0,
-      "6dc15329d8a267c49d0e0899482f76c7"
+      "69114e97d6b7fbb65c82894d998762a1"
     ],
     [
       "Vale.Def.Words.Four_s.nat_to_four_unfold",
@@ -33,7 +39,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "5a614847848b0b7423e56dad1a15b9f5"
+      "f23a954b327a3ac2e5cb412128a9acd1"
     ],
     [
       "Vale.Def.Words.Four_s.nat_to_four",
@@ -47,25 +53,40 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ddbda8ed855a007ea2aa72b1618d5dae"
+      "bc1ca035363c7f52ed6735622a8c9f0d"
     ],
     [
       "Vale.Def.Words.Four_s.nat_to_four",
       2,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
       0,
-      "e1db5277a818a8d8d37492861002a856"
+      "7e5793dbf59c71ecd4fcf907ec21abcc"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat_unfold",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
       0,
-      "fe026b9c21937df273af49b57c833151"
+      "3ca068d2ae33013d7ee8bbd2db4de8ec"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat_unfold",
@@ -85,16 +106,20 @@
         "typing_Prims.pow2"
       ],
       0,
-      "c5b4cf098459dde2383324abf7f50019"
+      "c0ca4113b0e7a59229faa57f05d6b7cd"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
       0,
-      "6210db89bfafdc73304a77c25d656ce6"
+      "22e7ac664b9421406ee17d7dbc9f1d8f"
     ],
     [
       "Vale.Def.Words.Four_s.four_to_nat",
@@ -108,7 +133,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "452f0366ed733fda023ce3e4546751be"
+      "dc31c6d17eac59165b9756b578391cc2"
     ],
     [
       "Vale.Def.Words.Four_s.four_select",
@@ -123,7 +148,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "9a937acffc0f11a70ca90af27efc7325"
+      "00436f9ff24e65dc3da0027806c24430"
     ],
     [
       "Vale.Def.Words.Four_s.four_insert",
@@ -138,7 +163,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "985ff81e7761b73f404411c6051bc1ce"
+      "c9ce6dda645025aedc813d66e325ec48"
     ]
   ]
 ]

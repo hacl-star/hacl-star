@@ -165,6 +165,7 @@ val point_add_and_double:
      (let p2, p3 = P.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
       fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3)))
 
+#push-options "--z3rlimit 450"
 [@ Meta.Attribute.specialize ]
 let point_add_and_double #s q p01_tmp1 tmp2 =
   let h0 = ST.get () in
@@ -189,6 +190,7 @@ let point_add_and_double #s q p01_tmp1 tmp2 =
   point_add_and_double1 #s nq nq_p1 tmp1 tmp2;
   fmul z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
   S.lemma_add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)
+#pop-options
 
 val point_double:
     #s:field_spec

@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "ae04305d4a29d2ef306619995dc83950"
+      "4123c3f0f8d353a1c4795c1252b4d033"
     ],
     [
       "Hacl.Streaming.MD.init_elem",
@@ -90,7 +90,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c61058e6f5bac1c6c2d9585f26e29a3c"
+      "2778f47df883f07aebf338b6f312eb01"
     ],
     [
       "Hacl.Streaming.MD.state_t",
@@ -154,7 +154,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok", "unit_typing"
       ],
       0,
-      "2e02a44f2188b5052ce778d609443324"
+      "23e319b1d7eb1ba520b270b0850fe211"
     ],
     [
       "Hacl.Streaming.MD.update_multi_s",
@@ -196,7 +196,7 @@
         "typing_Spec.Hash.Definitions.is_md", "unit_typing"
       ],
       0,
-      "858e83c8a5b60443b7f9e71925e4e1ee"
+      "9f5aabbb19a99b2dca863cc665817249"
     ],
     [
       "Hacl.Streaming.MD.update_multi_zero",
@@ -256,7 +256,7 @@
         "typing_Spec.Hash.Definitions.is_md"
       ],
       0,
-      "7b822a03d7ca665c0e202eb9d3f5fa1f"
+      "1b70f657e16b13e246894c05dea33834"
     ],
     [
       "Hacl.Streaming.MD.update_multi_associative",
@@ -308,43 +308,11 @@
         "typing_Spec.Hash.Definitions.is_md"
       ],
       0,
-      "1e5d66bc846689ae6480d3938fbd588d"
+      "36f05c7a0395064c54191ad2e63f8a9c"
     ],
     [
       "Hacl.Streaming.MD.md_prevlen",
       1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W32",
-        "constructor_distinct_FStar.Integers.W8",
-        "constructor_distinct_Lib.IntTypes.PUB",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W32@tok",
-        "equality_tok_FStar.Integers.W8@tok",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Hacl.Hash.Definitions.block_len",
-        "equation_Hacl.Streaming.MD.alg", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.v", "equation_Prims.nonzero",
-        "equation_Spec.Hash.Definitions.md_alg",
-        "projection_inverse_FStar.Integers.Signed__0",
-        "projection_inverse_FStar.Integers.Unsigned__0",
-        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
-        "refinement_interpretation_Tm_refine_91c352d831715ed604553457a8078865",
-        "refinement_interpretation_Tm_refine_e7c5f4e71af26642dc90739b89f6278e",
-        "typing_Hacl.Hash.Definitions.block_len",
-        "typing_Spec.Hash.Definitions.block_length"
-      ],
-      0,
-      "131241da3902100c1c2366d6dc581c4d"
-    ],
-    [
-      "Hacl.Streaming.MD.md_prevlen",
-      2,
       0,
       0,
       [
@@ -416,7 +384,39 @@
         "typing_Spec.Hash.Definitions.is_md"
       ],
       0,
-      "9137ad36adadef4373e2dd36a827de68"
+      "ec154ae066ef2c75621b56b5f4766194"
+    ],
+    [
+      "Hacl.Streaming.MD.md_prevlen",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W32",
+        "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W32@tok",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Hash.Definitions.block_len",
+        "equation_Hacl.Streaming.MD.alg", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.v", "equation_Prims.nonzero",
+        "equation_Spec.Hash.Definitions.md_alg",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_91c352d831715ed604553457a8078865",
+        "refinement_interpretation_Tm_refine_e7c5f4e71af26642dc90739b89f6278e",
+        "typing_Hacl.Hash.Definitions.block_len",
+        "typing_Spec.Hash.Definitions.block_length"
+      ],
+      0,
+      "e486ffbcc9a07ed4160d538e22e55244"
     ],
     [
       "Hacl.Streaming.MD.hacl_md",
@@ -748,7 +748,7 @@
         "unit_typing"
       ],
       0,
-      "63eedf97333facb81f91f8b37470d3b1"
+      "42bc9856b26cd43e4a96e379156e2eb6"
     ],
     [
       "Hacl.Streaming.MD.hacl_sha2_256",
@@ -774,7 +774,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "d8e0e0e27f02fa97ee667750ebdd0e56"
+      "735e5c68aa32f2936da8a128a04d73c2"
     ],
     [
       "Hacl.Streaming.MD.state_32",
@@ -820,7 +820,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "869e93b800b41aa85d8e551be47860df"
+      "4fcf551435a6a52f8313637ce8bc9633"
     ],
     [
       "Hacl.Streaming.MD.hacl_sha2_512",
@@ -847,7 +847,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "dba7aeb01d24d877853a8e66749d721b"
+      "76a8b12bcffea30022a29f24e06bc9d5"
     ],
     [
       "Hacl.Streaming.MD.state_64",
@@ -902,7 +902,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3687ef8612b89f066f714165f54f79fa"
+      "defaf8cf01bf4d4d6ce0c8e204651752"
     ]
   ]
 ]
