@@ -51,6 +51,7 @@ val blake2b_update_incremental
                 let s:words_state Blake2B = update_multi Blake2B s 0 bs in
                 update_last Blake2B s (S.length bs) l))
 
+#push-options "--z3rlimit 400 --split_queries always"
 /// Unclear why this proof needs to be spelled out more than the one for blake2s
 let blake2b_update_incremental input s =
   let a = Blake2B in
@@ -82,6 +83,7 @@ let blake2b_update_incremental input s =
   in
   aux ();
   assert (s_m' == s_m)
+#pop-options
 
 val blake2s_update_incremental
   (input : bytes {S.length input `less_than_max_input_length` Blake2S})
@@ -135,7 +137,7 @@ let blake2_is_hash_incremental a input =
   let a' = to_blake_alg a in
   let n_blocks, l_last = Spec.Blake2.split a' (S.length input) in
   let blocks, last = Lib.UpdateMulti.split_at_last_lazy (block_length a) input in
-  let s_i = Spec.Blake2.blake2_init_hash a' 0 (Spec.Blake2.max_output (to_blake_alg a)) in
+  let s_i = Spec.Blake2.blake2_init_hash a' (Spec.Blake2.blake2_default_params a') 0 (Spec.Blake2.max_output (to_blake_alg a)) in
   let s_i': words_state a = init a in
   assert (s_i == s_i');
 

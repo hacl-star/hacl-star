@@ -32,6 +32,7 @@
 #include "internal/Hacl_Hash_SHA2.h"
 #include "krmllib.h"
 #include "libintvector.h"
+#include "clients/krmlrenamings.h"
 
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1

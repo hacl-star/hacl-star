@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "04d292d65da7db62aefff4f1b73f1cb0"
+      "fc89860f0aa8118138f3d7d6624c1ee0"
     ],
     [
       "Vale.Math.Bits.b_i2b",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "4c4609ea74fe7a783e145105d06fc97c"
+      "0119209b165bfadf4038f4cc5ad06546"
     ],
     [
       "Vale.Math.Bits.b_b2i",
@@ -26,7 +26,7 @@
       0,
       [ "@query" ],
       0,
-      "a28d72cbe27872c65e3dbdc15142d921"
+      "07c79366fcc0df3c291513395091d6ad"
     ],
     [
       "Vale.Math.Bits.b_b2i",
@@ -35,16 +35,20 @@
       0,
       [ "@query" ],
       0,
-      "b34186d0248e9cd80c33afd64e8f9882"
+      "e66d23de331e1bd76bc88fd4f3ec56d2"
     ],
     [
       "Vale.Math.Bits.b_uext",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
       0,
-      "550790916d291ae57a0d5cff60566a92"
+      "c7ce088b85823177aae2951ddf5071a2"
     ],
     [
       "Vale.Math.Bits.b_uext",
@@ -57,7 +61,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "086a73b293405e199327f337626e05ac"
+      "be4f026f00a41a8f8297f8b5a5905cc2"
     ],
     [
       "Vale.Math.Bits.b_and",
@@ -70,7 +74,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "be7077b7f73d1081bdf298a5435d140e"
+      "94b2f84c2e5ec60dafd08f1078f82411"
     ],
     [
       "Vale.Math.Bits.b_and",
@@ -79,7 +83,7 @@
       0,
       [ "@query" ],
       0,
-      "9dfadd1d41a0ff3156938d5b75b43eca"
+      "1c9ad7b69947a14fc07467e619e3bd7b"
     ],
     [
       "Vale.Math.Bits.b_or",
@@ -92,7 +96,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "4052e40fed54905a9aca5815944472ea"
+      "8c560655f7a5723bf2c290d47be530dd"
     ],
     [
       "Vale.Math.Bits.b_or",
@@ -101,7 +105,7 @@
       0,
       [ "@query" ],
       0,
-      "b29a110de811f06d36c2d18856dae04f"
+      "80afa064af6a483ae4e10eeef4f96002"
     ],
     [
       "Vale.Math.Bits.b_xor",
@@ -114,7 +118,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "7e4068eb1f18b9feff0290436251ddff"
+      "205032264283038dc5e34a11f826d6a3"
     ],
     [
       "Vale.Math.Bits.b_xor",
@@ -123,7 +127,7 @@
       0,
       [ "@query" ],
       0,
-      "7081b843f5478607c813b073c173e204"
+      "f316cf6b9dd9a0a4d3291173e5a830a4"
     ],
     [
       "Vale.Math.Bits.b_not",
@@ -132,7 +136,7 @@
       0,
       [ "@query" ],
       0,
-      "2ff51f0ca0c98e5f89d89126fd1e3da1"
+      "686f39aa6a1ffeede1d88d6454b4f55c"
     ],
     [
       "Vale.Math.Bits.b_not",
@@ -141,7 +145,7 @@
       0,
       [ "@query" ],
       0,
-      "cce70561057649069afc5aefd110f6e8"
+      "8ad4df58b4f0321cd20610f2b1dbe18c"
     ],
     [
       "Vale.Math.Bits.b_shl",
@@ -150,7 +154,7 @@
       0,
       [ "@query" ],
       0,
-      "eb0aec2b035a2c4f191bfbc80b992cc8"
+      "bc72d2844d14fc369a19733c2a0e0e52"
     ],
     [
       "Vale.Math.Bits.b_shl",
@@ -159,7 +163,7 @@
       0,
       [ "@query" ],
       0,
-      "5cf125f4ca271b684fc0a7d371b471ed"
+      "45f0a40dc9d5dd4379607081cf0e99b9"
     ],
     [
       "Vale.Math.Bits.b_shr",
@@ -168,7 +172,7 @@
       0,
       [ "@query" ],
       0,
-      "fba186b125bd072bb597f5ccabcfa0e1"
+      "e6ab4ec880241d69fc1225233da2bf0e"
     ],
     [
       "Vale.Math.Bits.b_shr",
@@ -177,7 +181,7 @@
       0,
       [ "@query" ],
       0,
-      "c882806ca8ec524c06772f2d715f7666"
+      "420935a131e5f2855221396658fdc0a8"
     ],
     [
       "Vale.Math.Bits.b_add",
@@ -190,7 +194,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "cf0d216c06ba2aaa199f5c0fe854b862"
+      "43e4c2a86ca27033eb0503d067ceaf16"
     ],
     [
       "Vale.Math.Bits.b_add",
@@ -199,7 +203,7 @@
       0,
       [ "@query" ],
       0,
-      "aec5a3fbc0ceeb58febd7e7fc5e9a89f"
+      "265bf82a499b8650e8d93f445f3be17d"
     ],
     [
       "Vale.Math.Bits.b_sub",
@@ -212,7 +216,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "b14110fb7650c8722639e698c99607d9"
+      "b807145f319a19c79cfc8843ddc0be0c"
     ],
     [
       "Vale.Math.Bits.b_sub",
@@ -221,7 +225,7 @@
       0,
       [ "@query" ],
       0,
-      "0dd9f08ad548cfcd876b7ed7aeb1d396"
+      "c6eb7e31b540bac335fcff07d7b0ba33"
     ],
     [
       "Vale.Math.Bits.b_mul",
@@ -234,7 +238,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "e3b5e15306d07a83acead6fe64989b90"
+      "09068b0f4500c39dcf85e35bad182663"
     ],
     [
       "Vale.Math.Bits.b_mul",
@@ -243,7 +247,7 @@
       0,
       [ "@query" ],
       0,
-      "a946a24bcd05d9fe3de9d93b787853b5"
+      "679a75fa690adbdf5318fdce903e6414"
     ],
     [
       "Vale.Math.Bits.b_div",
@@ -256,7 +260,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "2f51a04e16ffb5cca649aaf8b56177b3"
+      "b2128973cba940c5a9a472d5f3825918"
     ],
     [
       "Vale.Math.Bits.b_div",
@@ -265,7 +269,7 @@
       0,
       [ "@query" ],
       0,
-      "3a3d5eeae416b66ad4398755747f6e1b"
+      "5f6591931e3a69a8c16052f60bb2ee6a"
     ],
     [
       "Vale.Math.Bits.b_mod",
@@ -278,7 +282,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "5c2c3a5203b28bfcc45e104d6d5964dd"
+      "e065350b37128f3426a430cff793f4ef"
     ],
     [
       "Vale.Math.Bits.b_mod",
@@ -287,16 +291,31 @@
       0,
       [ "@query" ],
       0,
-      "e664a70ce58774b50a6402dd2b9232f1"
+      "7cd023dba14d441648863e2fb4f54310"
     ],
     [
       "Vale.Math.Bits.uext",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "bool_inversion", "bool_typing",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
+      ],
       0,
-      "a84282c98a99c2b784d9e5712f984839"
+      "1e4705976eb8ae3ced04ad70be24d4d5"
     ],
     [
       "Vale.Math.Bits.uext",
@@ -320,7 +339,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "c8aa9f2d85f88cda545e622b3db3573f"
+      "dcb6c0eae3bc54bb9080c4b0e83f655c"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_eq",
@@ -333,7 +352,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "aec40c0345c2f9337609c558e2a32f32"
+      "48204eb268dc651e6cdab3a0c8cc2ef6"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_uext",
@@ -358,7 +377,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "c45bbcda2b8e6c721311e402b119b7a8"
+      "b1e4a8f992f7aefd896d098fa4936df0"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_and",
@@ -371,7 +390,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "522a23d32aec8710be8e1de484d72d78"
+      "07855773abe68420e28a76127aedb384"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_or",
@@ -384,7 +403,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "e3aaa1bc717969c8152b47bb44e214d9"
+      "a1a74389f2f75652cec35a6768b570c3"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_xor",
@@ -397,7 +416,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "05b6e1c6bf1c0e51472baefe963703f8"
+      "cece15be20d7ce18285641217d14882f"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_shl",
@@ -416,7 +435,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "8fa2fe55982bdc27325de6f76d7ee062"
+      "59e78fdddbe3d1e981df0b700e620a88"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_shr",
@@ -435,7 +454,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "0551331cc35608f353a0171e9f4f5b5a"
+      "5ed8b6326e2de3c1d3c7f814681c226f"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_add",
@@ -448,7 +467,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "a531797a2d6812ffc9c345f978ce1c87"
+      "21f35241a70b43284cf6c29881ca64f1"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_sub",
@@ -461,7 +480,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "d760ef93a743c06e102400b68785d0a1"
+      "a75e79baa6802e207f32381e0806cea5"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_mul",
@@ -474,7 +493,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "c8112b774032c34b2d5003e228337c69"
+      "ee8899cd40a04b5c0c28f633112b61c5"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_div",
@@ -487,7 +506,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "20fb51646ca030a6ae28e0386d77773f"
+      "0500326ff1037111d7afaeffbb714a57"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_mod",
@@ -500,7 +519,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "8e69cd7762f74c858d6ceb85587e944b"
+      "54186624789d7f4a52fe8fb7edc31958"
     ],
     [
       "Vale.Math.Bits.add_hide",
@@ -513,7 +532,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "1e6d475f28a2dc598bf949a11e4f1a24"
+      "2817277ea5f240692b37796b2d1b168b"
     ],
     [
       "Vale.Math.Bits.sub_hide",
@@ -526,7 +545,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "96ad314ed7b7fcc781bb8adaba8f59c4"
+      "14ff8e273f1e25a85e62baf10f67faf6"
     ],
     [
       "Vale.Math.Bits.mul_hide",
@@ -539,7 +558,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "dc470baf59a57a4daa8c48f5fd741df0"
+      "d943abcdf2093fd6d15862b03fef6979"
     ],
     [
       "Vale.Math.Bits.lemmas_i2b_all",
@@ -564,7 +583,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "879c6afae8a7cddfd2448ccc496347f4"
+      "0a3f0979e29171a8c59e1cffb78a2ba9"
     ],
     [
       "Vale.Math.Bits.lemma_i2b_equal",
@@ -577,7 +596,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "176288dac11cf9da8c2bfb05d280d319"
+      "7e22b08bed47034cbcfec01f01880090"
     ],
     [
       "Vale.Math.Bits.is_bv8",
@@ -601,7 +620,7 @@
         "refinement_interpretation_Tm_refine_e894bfc63f13ed92c34b8ee70610cbb6"
       ],
       0,
-      "8d7df70e2c5fb202f95ff1b470191700"
+      "dfc424e4227177f8ed2c24044240387b"
     ],
     [
       "Vale.Math.Bits.is_bv16",
@@ -625,7 +644,7 @@
         "refinement_interpretation_Tm_refine_83a3ed182b7b68b570641be544c91207"
       ],
       0,
-      "5ceda99e3856414f8df69d5aaa9e1065"
+      "923d9c49ee2d5160d222dc8d9fa7501c"
     ],
     [
       "Vale.Math.Bits.is_bv32",
@@ -649,7 +668,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "1ee4f33d0a788454237f6f6853ff5a94"
+      "1e06f9f30117d44adf2aa151a4e39cf3"
     ],
     [
       "Vale.Math.Bits.is_bv64",
@@ -673,7 +692,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "941a6b65fc76b925bc0e44e3e88ec39b"
+      "67483f3116336b33950679075e5611b4"
     ],
     [
       "Vale.Math.Bits.bveq",
@@ -686,7 +705,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "de8369805df3735ffbe1fe4c59c5f05d"
+      "0815f9ce72c17f1e4359974e592d543c"
     ],
     [
       "Vale.Math.Bits.bveq",
@@ -695,7 +714,7 @@
       0,
       [ "@query" ],
       0,
-      "7957d71bf6b9f9b733ab65e34e8c422e"
+      "0468f25e68ffaab0f0729289cf022f22"
     ],
     [
       "Vale.Math.Bits.lemma_bveq",
@@ -708,7 +727,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "8ec248aa193232ed7d5a1504886fdb3a"
+      "629cf50721a3d26ac576bbec3c894a37"
     ]
   ]
 ]

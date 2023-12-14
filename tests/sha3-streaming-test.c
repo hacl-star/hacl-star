@@ -11,11 +11,11 @@ const uint8_t expected_hash[] = { 0x64, 0x4b, 0xcc, 0x7e, 0x56, 0x43, 0x73,
 int
 main()
 {
-  Hacl_Streaming_Keccak_state* s = Hacl_Streaming_Keccak_malloc(Spec_Hash_Definitions_SHA3_256);
-  assert(Hacl_Streaming_Keccak_update(s, (uint8_t*)"hello world", 11) == 0);
+  Hacl_Hash_SHA3_state_t* s = Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_SHA3_256);
+  assert(Hacl_Hash_SHA3_update(s, (uint8_t*)"hello world", 11) == 0);
   uint8_t hash[32] = { 0 };
-  Hacl_Streaming_Keccak_finish(s, hash);
-  Hacl_Streaming_Keccak_free(s);
+  Hacl_Hash_SHA3_digest(s, hash);
+  Hacl_Hash_SHA3_free(s);
   for (int i = 0; i < 32; ++i) {
     if (hash[i] != expected_hash[i]) {
       printf("Hash and reference differ at index %d\n", i);

@@ -652,9 +652,10 @@ REQUIRED_FLAGS	= \
   -add-include 'Hacl_Frodo64.c:"lib_memzero0.h"' \
   -add-include 'Hacl_Frodo640.c:"lib_memzero0.h"' \
   -add-include 'Hacl_Frodo976.c:"lib_memzero0.h"' \
-  -add-include 'Hacl_Hash_Blake2.c:"lib_memzero0.h"' \
-  -add-include 'Hacl_Hash_Blake2b_256.c:"lib_memzero0.h"' \
-  -add-include 'Hacl_Hash_Blake2s_128.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2b.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2s.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2b_Simd256.c:"lib_memzero0.h"' \
+  -add-include 'Hacl_Hash_Blake2s_Simd128.c:"lib_memzero0.h"' \
   $(BASE_FLAGS)
 
 TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
@@ -669,14 +670,14 @@ TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
   \
-  -add-include 'Hacl_Chacha20Poly1305_128.c:"libintvector.h"' \
+  -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd128.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
   \
-  -add-include 'Hacl_Hash_Blake2s_128:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
+  -add-include 'Hacl_Hash_Blake2s_Simd128:"libintvector.h"' \
+  -add-include 'Hacl_MAC_Poly1305_Simd128:"libintvector.h"' \
   \
-  -add-include 'Hacl_Chacha20Poly1305_256.c:"libintvector.h"' \
+  -add-include 'Hacl_AEAD_Chacha20Poly1305_Simd256.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
@@ -721,6 +722,7 @@ LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
   $(BLAKE2_BUNDLE) \
+  $(HMAC_BUNDLE) \
   $(SHA3_BUNDLE) \
   $(SHA3_SCALAR_BUNDLE) \
   $(SHA3_SIMD256_BUNDLE) \
@@ -812,7 +814,7 @@ dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
 dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
   -bundle Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
-  -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
+  -bundle 'Hacl.Streaming.Poly1305_32=Hacl.Poly1305_32,Hacl.Impl.Poly1305.Field32xN_32'[rename=Hacl_MAC_Poly1305,rename-prefix] \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 
@@ -895,7 +897,8 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
 	  -add-include '"libintvector.h"' \
-	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^) \
+	  -add-include '"clients/krmlrenamings.h"'
 
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
 

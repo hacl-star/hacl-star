@@ -2,8 +2,8 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_HMAC_legacy_compute_sha1 =
-      foreign "Hacl_HMAC_legacy_compute_sha1"
+    let hacl_HMAC_compute_sha1 =
+      foreign "Hacl_HMAC_compute_sha1"
         (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))

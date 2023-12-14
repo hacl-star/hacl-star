@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "214e890722e33a973dccebd201ea6f02"
+      "a2822e45afd306617473a632809976c1"
     ],
     [
       "Spec.Salsa20.block",
@@ -32,7 +32,7 @@
         "typing_Spec.Salsa20.size_key"
       ],
       0,
-      "96729ee6595da0ee090ab1885fc64edc"
+      "5e5e2fea48b28c5f0420653396d592f7"
     ],
     [
       "Spec.Salsa20.nonce",
@@ -81,7 +81,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "e0f6247f4abdd20b3e3dd6b7dc0a1711"
+      "73ee6aaec3c2b5819f3b789bddd76212"
     ],
     [
       "Spec.Salsa20.line",
@@ -112,7 +112,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ac5d98ad535f22d98bad0a57bc0676f1"
+      "4b067a26245aa485c5712a1943b4249c"
     ],
     [
       "Spec.Salsa20.quarter_round",
@@ -240,7 +240,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3e25dd5cbcdcf285c4b0a00cdb22cb72"
+      "97819edb6b335fac01b21318e1bbc30a"
     ],
     [
       "Spec.Salsa20.constant1",
@@ -261,7 +261,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "02d50046e3dfbdbb1c00fa301170761f"
+      "b6e390658ee977df2971cdeae48933d5"
     ],
     [
       "Spec.Salsa20.constant2",
@@ -282,7 +282,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0d93447ee13e650f8ae87094253df2b5"
+      "a2dc2f069e311d1de2a1a1d0ceaa3b7d"
     ],
     [
       "Spec.Salsa20.constant3",
@@ -303,7 +303,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "028c9a8c563bfa14ab10454856dbed92"
+      "3dba23f92b2c42de5d198cdeb4912878"
     ],
     [
       "Spec.Salsa20.setup",
@@ -349,7 +349,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "50a9524320cf231827e9c90b612835e9"
+      "8e4f94fdf51dbedbafcd9087427639f2"
     ],
     [
       "Spec.Salsa20.salsa20_init",
@@ -373,7 +373,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "ba6995be0c6f9c89c061d12db0dd4cfb"
+      "e4942a2aa54675c23b4cb2127b72a0d1"
     ],
     [
       "Spec.Salsa20.xsetup",
@@ -411,7 +411,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "682d03ed270ddb8512d7fb6806689d90"
+      "dfbf06f7f9c2f796781ccaf599d95ae8"
     ],
     [
       "Spec.Salsa20.hsalsa20_init",
@@ -437,7 +437,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "c9cf96715aedd64c10bec4476d17089a"
+      "95cdc9cd0d8376228957f747ce56ce2e"
     ],
     [
       "Spec.Salsa20.hsalsa20",
@@ -471,7 +471,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "926f516668eef6412d665084910c600d"
+      "a9145e7c27d04548077cb7ebd91b43c8"
     ],
     [
       "Spec.Salsa20.salsa20_key_block",
@@ -491,7 +491,7 @@
         "typing_Prims.pow2", "typing_Spec.Salsa20.size_key"
       ],
       0,
-      "efed0a1fcc74ed457beab8e3b578e9eb"
+      "2ca0ebbca7d11e89c534a6fcb0e680d0"
     ],
     [
       "Spec.Salsa20.salsa20_key_block0",
@@ -514,7 +514,7 @@
         "typing_FStar.Seq.Base.length", "typing_Prims.pow2"
       ],
       0,
-      "529e778a3af795d92ec17db4259ea5eb"
+      "ef9c91f8fe35ede72c5b3b609cc69676"
     ],
     [
       "Spec.Salsa20.xor_block",
@@ -566,7 +566,7 @@
         "typing_Spec.Salsa20.size_nonce"
       ],
       0,
-      "e2b6e688dc74fc73275b94f296954d57"
+      "2a19b64516a67f01747ba3d0e158cd50"
     ],
     [
       "Spec.Salsa20.salsa20_update",
@@ -581,7 +581,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c208e71bc94b345efb7e598d749729ec"
+      "b1e8c60a8867c159e83cb1cfbb81d231"
     ],
     [
       "Spec.Salsa20.salsa20_update",
@@ -589,14 +589,17 @@
       0,
       1,
       [
-        "@query", "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
-        "equation_Spec.Salsa20.size_block",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.Salsa20.size_block",
+        "equation_Spec.Salsa20.size_key", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_dda759161d804d4dfe5d3e277dc0badd",
+        "typing_Spec.Salsa20.size_key"
       ],
       0,
-      "f9fe7d6374b52b0406c3583af37e39cf"
+      "153b244b571690e1b1be94421c81efcf"
     ],
     [
       "Spec.Salsa20.salsa20_update",
@@ -614,7 +617,7 @@
         "typing_Spec.Salsa20.size_key"
       ],
       0,
-      "ee1435bf93c2510fe6f1544cfc51788e"
+      "f68f1a60ff779dd852d1e7f39edcb15e"
     ],
     [
       "Spec.Salsa20.salsa20_encrypt_bytes",
@@ -629,7 +632,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cebb7a5c2546ccd8d42f17e5a3ece569"
+      "e3a234407e57a42d684a123d0339ea63"
     ],
     [
       "Spec.Salsa20.salsa20_encrypt_bytes",
@@ -644,7 +647,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "34d37924786d3f73e99c8c6d2ed5db39"
+      "cd1d80b91eb67855523a5a9c8b44dbab"
     ],
     [
       "Spec.Salsa20.salsa20_decrypt_bytes",
@@ -659,7 +662,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "0fefaf3a516b474443f7e12c6f8cd5e9"
+      "1cc60410df4d168e474ac7252d98a04e"
     ],
     [
       "Spec.Salsa20.salsa20_decrypt_bytes",
@@ -674,16 +677,19 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c37b911f6640a2eba296f8e2f2c9a189"
+      "c6776f1ff7fd34e86f2b518616c3b0a5"
     ],
     [
       "Spec.Salsa20.salsa20_decrypt_bytes",
       3,
       0,
       1,
-      [ "@query" ],
+      [
+        "@query", "equation_Spec.Salsa20.size_block",
+        "projection_inverse_BoxInt_proj_0"
+      ],
       0,
-      "863be472163f0d540cb16b1ac7db1d12"
+      "cb5566b0a33c6b1e9d8436458aec5661"
     ]
   ]
 ]

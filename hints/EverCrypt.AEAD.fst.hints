@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "a3b6f687c844baceb9fa3c409290c38b"
+      "7e35d195212b83ca383d8f9629ae330d"
     ],
     [
       "EverCrypt.AEAD.supported_alg_of_impl",
@@ -54,7 +54,7 @@
         "typing_tok_Spec.Agile.AEAD.AES256_GCM@tok"
       ],
       0,
-      "f4b3b759ec9ea567530c94d98d922259"
+      "1553fb41c89d346840f6edc48d10ef41"
     ],
     [
       "EverCrypt.AEAD.alg_of_vale_impl",
@@ -77,7 +77,7 @@
         "refinement_interpretation_Tm_refine_c029c44ff4b4f840d75208dea95cad35"
       ],
       0,
-      "c2dd00a6154e3d14ef0f8f40c189e14e"
+      "65ad6d59f808957b02088159474d22d5"
     ],
     [
       "EverCrypt.AEAD.loc_includes_union_l_footprint_s",
@@ -86,7 +86,7 @@
       0,
       [ "@query" ],
       0,
-      "c47f8ac8f3cb64819e8c33ff46dbdb33"
+      "f0645ffd7f0c70f77a43749d73e53dac"
     ],
     [
       "EverCrypt.AEAD.invariant_s",
@@ -191,7 +191,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "012651f8a2fbe791942fb224be554596"
+      "6904e215fbc9b17e640cd4b0f39c511d"
     ],
     [
       "EverCrypt.AEAD.invariant",
@@ -205,7 +205,7 @@
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
       ],
       0,
-      "4c6166381511b062cd15bbd9e64476ef"
+      "c860a284f24a13435842946eef71218c"
     ],
     [
       "EverCrypt.AEAD.invariant_loc_in_footprint",
@@ -253,7 +253,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in"
       ],
       0,
-      "b5a2f83ffe9cbed1f36515d6af7642a0"
+      "6ee777e83c892ec3235d56bf66f8a5fd"
     ],
     [
       "EverCrypt.AEAD.frame_invariant",
@@ -402,7 +402,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2fee19d4c6e965364291333480fc930e"
+      "76ccd58c474f712d3435c5b41b5d5f67"
     ],
     [
       "EverCrypt.AEAD.alg_of_state",
@@ -447,7 +447,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "ff606d82dafc28281b17b19811d854c1"
+      "20342ec7f236456f3f09d148710daa13"
     ],
     [
       "EverCrypt.AEAD.create_in_st",
@@ -456,7 +456,7 @@
       0,
       [ "@query", "projection_inverse_BoxBool_proj_0" ],
       0,
-      "37a97643d9ba5e83888d5268516c0256"
+      "4efa11d0f20c40cad76a5aaec805411c"
     ],
     [
       "EverCrypt.AEAD.alloca_st",
@@ -465,16 +465,199 @@
       0,
       [ "@query" ],
       0,
-      "39d0a2e8c1417a521c190e5c768ca8ae"
+      "6b54044adf22d42a68bc216b59ae9b83"
     ],
     [
       "EverCrypt.AEAD.create_in_chacha20_poly1305",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "bool_inversion", "bool_typing",
+        "constructor_distinct_EverCrypt.Error.Success",
+        "constructor_distinct_FStar.Integers.Unsigned",
+        "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.SEC",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
+        "constructor_distinct_Spec.Agile.Cipher.CHACHA20",
+        "constructor_distinct_Spec.Cipher.Expansion.Hacl_CHACHA20",
+        "equality_tok_EverCrypt.Error.Success@tok",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equality_tok_Spec.Agile.Cipher.CHACHA20@tok",
+        "equality_tok_Spec.Cipher.Expansion.Hacl_CHACHA20@tok",
+        "equation_EverCrypt.AEAD.as_kv",
+        "equation_EverCrypt.AEAD.config_pre",
+        "equation_EverCrypt.AEAD.footprint",
+        "equation_EverCrypt.AEAD.footprint_s",
+        "equation_EverCrypt.AEAD.freeable",
+        "equation_EverCrypt.AEAD.freeable_s",
+        "equation_EverCrypt.AEAD.invariant",
+        "equation_EverCrypt.AEAD.invariant_s",
+        "equation_EverCrypt.AEAD.supported_alg_of_impl",
+        "equation_EverCrypt.CTR.Keys.uint8",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.Integers.int_t", "equation_FStar.Integers.uint_8",
+        "equation_FStar.Monotonic.Heap.equal_dom",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_heap_color",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.byte_t", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.sec_int_t",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.pointer",
+        "equation_LowStar.Buffer.pointer_or_null",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.disjoint",
+        "equation_LowStar.Monotonic.Buffer.fresh_loc",
+        "equation_LowStar.Monotonic.Buffer.get",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Agile.AEAD.cipher_alg_of_supported_alg",
+        "equation_Spec.Agile.AEAD.is_supported_alg",
+        "equation_Spec.Agile.AEAD.key_length",
+        "equation_Spec.Agile.AEAD.uint8",
+        "equation_Spec.Agile.Cipher.key_length",
+        "equation_Spec.Chacha20.size_key",
+        "equation_Spec.Cipher.Expansion.concrete_expand",
+        "equation_Spec.Cipher.Expansion.concrete_xkey_length",
+        "equation_Spec.GaloisField.gf", "equation_Spec.Poly1305.size_key",
+        "function_token_typing_FStar.Integers.uint_8",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.byte_t",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_LowStar.Buffer.trivial_preorder",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
+        "kinding_EverCrypt.AEAD.state_s@tok",
+        "lemma_FStar.Ghost.reveal_hide",
+        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Seq.Base.lemma_eq_refl",
+        "lemma_FStar.Seq.Base.lemma_index_create",
+        "lemma_FStar.Seq.Base.lemma_index_upd1",
+        "lemma_FStar.Seq.Properties.slice_is_empty",
+        "lemma_FStar.Seq.Properties.slice_length",
+        "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_addresses_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
+        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_EverCrypt.AEAD.Ek_ek",
+        "projection_inverse_EverCrypt.AEAD.Ek_impl",
+        "projection_inverse_EverCrypt.AEAD.Ek_kv",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_161e04719814801d293219f408210f95",
+        "refinement_interpretation_Tm_refine_3adad2fa15bf57cd1bb4986f7f40a94b",
+        "refinement_interpretation_Tm_refine_405fda013880964b52cbb5b7111863be",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_48486e77aa5457d9a27027fef170c244",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_984d8cab34fc52b3ffe0c6a5bc4d2090",
+        "refinement_interpretation_Tm_refine_9f148e827f089e37835ae98ab1a7a73a",
+        "refinement_interpretation_Tm_refine_b361ba8089a6e963921008d537e799a1",
+        "refinement_interpretation_Tm_refine_b913a3f691ca99086652e0a655e72f17",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "refinement_interpretation_Tm_refine_da11fddce86d1a8b8207757b4a6e95de",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "true_interp", "typing_FStar.Map.domain",
+        "typing_FStar.Monotonic.HyperHeap.color",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.is_heap_color",
+        "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
+        "typing_FStar.Set.singleton", "typing_FStar.UInt.fits",
+        "typing_FStar.UInt32.uint_to_t", "typing_Lib.IntTypes.v",
+        "typing_LowStar.Buffer.pointer_or_null",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
+        "typing_LowStar.Monotonic.Buffer.as_addr",
+        "typing_LowStar.Monotonic.Buffer.as_seq",
+        "typing_LowStar.Monotonic.Buffer.frameOf",
+        "typing_LowStar.Monotonic.Buffer.g_is_null",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_LowStar.Monotonic.Buffer.length",
+        "typing_LowStar.Monotonic.Buffer.loc_addresses",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
+        "typing_LowStar.Monotonic.Buffer.loc_regions",
+        "typing_LowStar.Monotonic.Buffer.loc_union",
+        "typing_LowStar.Monotonic.Buffer.loc_unused_in",
+        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
+        "typing_Spec.Agile.AEAD.kv",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Poly1305.size_key",
+        "typing_tok_EverCrypt.Error.Success@tok",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok",
+        "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
+      ],
       0,
-      "cd8f3650f2e71e7b13be660b1840756f"
+      "b2c617fcb4c168a4ac911b2f54c20258"
     ],
     [
       "EverCrypt.AEAD.create_in_chacha20_poly1305",
@@ -670,7 +853,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "1d41d4351b75fac9d6c353a675ea8bcc"
+      "9489e7b537618a27cce6bd3ef0d8f491"
     ],
     [
       "EverCrypt.AEAD.create_in_aes_gcm",
@@ -878,16 +1061,34 @@
         "typing_tok_EverCrypt.Error.UnsupportedAlgorithm@tok"
       ],
       0,
-      "aa1d43442b6f53f916b7c24612dfc6ee"
+      "f43ea9d91dbe9ba3dd9be199a3fa358c"
     ],
     [
       "EverCrypt.AEAD.create_in",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_EverCrypt.Error.UnsupportedAlgorithm",
+        "equality_tok_EverCrypt.Error.UnsupportedAlgorithm@tok",
+        "equality_tok_Spec.Agile.AEAD.AES128_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.AES256_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "lemma_LowStar.Monotonic.Buffer.modifies_refl",
+        "refinement_interpretation_Tm_refine_5cfeaf80ca9486357b6c6d01114a47a0",
+        "refinement_interpretation_Tm_refine_66ea836f4d62f44eace18c4297943b11",
+        "refinement_interpretation_Tm_refine_984d8cab34fc52b3ffe0c6a5bc4d2090",
+        "refinement_interpretation_Tm_refine_e55ca2031f0926499978c5b5c26be0b9",
+        "refinement_interpretation_Tm_refine_e692cabf996d3cca074ab12757df58a8",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_tok_EverCrypt.Error.UnsupportedAlgorithm@tok"
+      ],
       0,
-      "314847f1a3e648ac2a510737656e6151"
+      "f7117d79796e5bfe456c31682bcb646a"
     ],
     [
       "EverCrypt.AEAD.create_in",
@@ -922,16 +1123,168 @@
         "typing_tok_EverCrypt.Error.UnsupportedAlgorithm@tok"
       ],
       0,
-      "b7af199e9611203e4a6143ff58367ce8"
+      "80840f7089aebc0611101ed703c78db7"
     ],
     [
       "EverCrypt.AEAD.alloca_chacha20_poly1305",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "bool_inversion", "bool_typing",
+        "constructor_distinct_FStar.Integers.Unsigned",
+        "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.SEC",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
+        "constructor_distinct_Spec.Agile.Cipher.CHACHA20",
+        "constructor_distinct_Spec.Cipher.Expansion.Hacl_CHACHA20",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equality_tok_Spec.Agile.Cipher.CHACHA20@tok",
+        "equality_tok_Spec.Cipher.Expansion.Hacl_CHACHA20@tok",
+        "equation_EverCrypt.AEAD.as_kv", "equation_EverCrypt.AEAD.footprint",
+        "equation_EverCrypt.AEAD.footprint_s",
+        "equation_EverCrypt.AEAD.invariant",
+        "equation_EverCrypt.AEAD.invariant_s",
+        "equation_EverCrypt.AEAD.supported_alg_of_impl",
+        "equation_EverCrypt.CTR.Keys.uint8",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.inline_stack_inv",
+        "equation_FStar.Integers.int_t", "equation_FStar.Integers.uint_8",
+        "equation_FStar.Monotonic.Heap.equal_dom",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.byte_t",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.sec_int_t", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.pointer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.disjoint",
+        "equation_LowStar.Monotonic.Buffer.fresh_loc",
+        "equation_LowStar.Monotonic.Buffer.get",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Agile.AEAD.cipher_alg_of_supported_alg",
+        "equation_Spec.Agile.AEAD.is_supported_alg",
+        "equation_Spec.Agile.AEAD.key_length",
+        "equation_Spec.Agile.AEAD.uint8",
+        "equation_Spec.Agile.Cipher.key_length",
+        "equation_Spec.Chacha20.size_key",
+        "equation_Spec.Cipher.Expansion.concrete_expand",
+        "equation_Spec.Cipher.Expansion.concrete_xkey_length",
+        "equation_Spec.GaloisField.gf", "equation_Spec.Poly1305.size_key",
+        "function_token_typing_FStar.Integers.uint_8",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.byte_t",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_LowStar.Buffer.trivial_preorder",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
+        "kinding_EverCrypt.AEAD.state_s@tok",
+        "lemma_FStar.Ghost.reveal_hide",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_intro",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Seq.Base.lemma_eq_refl",
+        "lemma_FStar.Seq.Base.lemma_index_create",
+        "lemma_FStar.Seq.Properties.slice_length",
+        "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_addresses_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_r",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
+        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_EverCrypt.AEAD.Ek_ek",
+        "projection_inverse_EverCrypt.AEAD.Ek_impl",
+        "projection_inverse_EverCrypt.AEAD.Ek_kv",
+        "projection_inverse_FStar.Integers.Unsigned__0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_0319fb5ba557ddfef833720396790fd1",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_2c00302a4ec68ddf994feab8aa0d428c",
+        "refinement_interpretation_Tm_refine_3adad2fa15bf57cd1bb4986f7f40a94b",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e",
+        "refinement_interpretation_Tm_refine_6c9144323fd28b0cbde669abc7f6d410",
+        "refinement_interpretation_Tm_refine_90a1661541e4f009452ab107b47b5955",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "true_interp", "typing_FStar.Map.domain",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.Set.singleton", "typing_FStar.UInt.fits",
+        "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
+        "typing_LowStar.Monotonic.Buffer.as_addr",
+        "typing_LowStar.Monotonic.Buffer.as_seq",
+        "typing_LowStar.Monotonic.Buffer.frameOf",
+        "typing_LowStar.Monotonic.Buffer.g_is_null",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_LowStar.Monotonic.Buffer.length",
+        "typing_LowStar.Monotonic.Buffer.loc_addresses",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
+        "typing_LowStar.Monotonic.Buffer.loc_regions",
+        "typing_LowStar.Monotonic.Buffer.loc_union",
+        "typing_LowStar.Monotonic.Buffer.loc_unused_in",
+        "typing_Spec.AES.gf8", "typing_Spec.Agile.AEAD.is_supported_alg",
+        "typing_Spec.Agile.AEAD.key_length", "typing_Spec.Agile.AEAD.kv",
+        "typing_Spec.Chacha20.size_key",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Poly1305.size_key",
+        "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
+      ],
       0,
-      "899c9d55a5f60440a079ea8133cf2df7"
+      "98eb8a47a54c474c1cbb71d4f344d65e"
     ],
     [
       "EverCrypt.AEAD.alloca_chacha20_poly1305",
@@ -1100,7 +1453,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "f5c84b2f6902b570a625f27b56ff24bd"
+      "dab23b118d77096ad8dc265576be8bd1"
     ],
     [
       "EverCrypt.AEAD.alloca_aes_gcm",
@@ -1312,16 +1665,34 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "b83f3e8e5f108d3f9e8a7d2df9fd6667"
+      "1b59cc5f27d0e657410196de7486f803"
     ],
     [
       "EverCrypt.AEAD.alloca",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Spec.Agile.AEAD.AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AES256_GCM",
+        "disc_equation_Spec.Agile.AEAD.CHACHA20_POLY1305",
+        "equality_tok_Spec.Agile.AEAD.AES128_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.AES256_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equation_EverCrypt.AEAD.config_pre",
+        "equation_Spec.Agile.AEAD.is_supported_alg",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_0319fb5ba557ddfef833720396790fd1",
+        "refinement_interpretation_Tm_refine_2eef4f5b3ef37e3ff95c04d51859e716",
+        "refinement_interpretation_Tm_refine_99ada403f00103c1c9eb563019e967f7",
+        "refinement_interpretation_Tm_refine_c85854d5f66a184b37bfa060ff70e13e",
+        "refinement_interpretation_Tm_refine_e692cabf996d3cca074ab12757df58a8",
+        "typing_Spec.Agile.AEAD.is_supported_alg"
+      ],
       0,
-      "c7cddec90d309a0850ef1eb154a99da1"
+      "fca5860247437b0ccf962cf7ec4a3014"
     ],
     [
       "EverCrypt.AEAD.alloca",
@@ -1347,7 +1718,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "fb8d2fdf39b76ae0910ac24ceec27648"
+      "0d4e687b032f46795c337e09415d231c"
     ],
     [
       "EverCrypt.AEAD.encrypt_gen_pre",
@@ -1361,7 +1732,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "2c3750d2e0cafdd924b940da9a694ba8"
+      "0097e93f41b3ab0e4141b885eb56b15c"
     ],
     [
       "EverCrypt.AEAD.encrypt_pre",
@@ -1381,7 +1752,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "2bff6c32fe54f59de0e89461cac88216"
+      "7f247ab5d7792cbff4b15db5681ae5d8"
     ],
     [
       "EverCrypt.AEAD.encrypt_st",
@@ -1416,7 +1787,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "87cef5e35e0328b5309d7d67b14dd17f"
+      "d1cd39ea840c40a563f0e1d98ce1b8ad"
     ],
     [
       "EverCrypt.AEAD.aes_gcm_encrypt",
@@ -1462,7 +1833,7 @@
         "typing_EverCrypt.CTR.Keys.vale_alg_of_vale_impl", "unit_typing"
       ],
       0,
-      "1d030f4b95976d5be74578b062df7e51"
+      "c2fc58a4750db1dc8517268f3204acf6"
     ],
     [
       "EverCrypt.AEAD.encrypt_aes_gcm",
@@ -1828,7 +2199,7 @@
         "typing_tok_Vale.AES.AES_common_s.AES_256@tok"
       ],
       0,
-      "f132e59399aa2e15aef81a9d8f05f777"
+      "2d7ed666615e520f49db7e7cb9629e27"
     ],
     [
       "EverCrypt.AEAD.encrypt_aes128_gcm",
@@ -1855,7 +2226,7 @@
         "typing_EverCrypt.TargetConfig.x64"
       ],
       0,
-      "02752e80127d15132cc2a406797f389e"
+      "b4c2461ff5d9e964c146c919f864a4da"
     ],
     [
       "EverCrypt.AEAD.encrypt_aes256_gcm",
@@ -1888,7 +2259,7 @@
         "typing_EverCrypt.TargetConfig.x64"
       ],
       0,
-      "b1bede3422b9b4e076eac3baddcb7ac8"
+      "900024d19609b9f31cdbfb6e004e394b"
     ],
     [
       "EverCrypt.AEAD.encrypt",
@@ -1896,13 +2267,220 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "bool_inversion",
+        "constructor_distinct_EverCrypt.Error.InvalidKey",
+        "constructor_distinct_EverCrypt.Error.Success",
+        "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W32",
+        "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_FStar.Integers.Winfinite",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.SEC",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Agile.AEAD.AES128_GCM",
+        "constructor_distinct_Spec.Agile.AEAD.AES256_GCM",
+        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
+        "constructor_distinct_Spec.Cipher.Expansion.Hacl_CHACHA20",
+        "constructor_distinct_Spec.Cipher.Expansion.Vale_AES128",
+        "constructor_distinct_Spec.Cipher.Expansion.Vale_AES256",
+        "disc_equation_Spec.Cipher.Expansion.Hacl_CHACHA20",
+        "disc_equation_Spec.Cipher.Expansion.Vale_AES128",
+        "disc_equation_Spec.Cipher.Expansion.Vale_AES256",
+        "equality_tok_EverCrypt.Error.InvalidKey@tok",
+        "equality_tok_EverCrypt.Error.Success@tok",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W32@tok",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_FStar.Integers.Winfinite@tok",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.Agile.AEAD.AES128_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.AES256_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equality_tok_Spec.Cipher.Expansion.Hacl_CHACHA20@tok",
+        "equality_tok_Spec.Cipher.Expansion.Vale_AES128@tok",
+        "equality_tok_Spec.Cipher.Expansion.Vale_AES256@tok",
+        "equation_EverCrypt.AEAD.ad_p", "equation_EverCrypt.AEAD.as_kv",
+        "equation_EverCrypt.AEAD.config_pre",
+        "equation_EverCrypt.AEAD.encrypt_live_disjoint_pre",
+        "equation_EverCrypt.AEAD.encrypt_pre",
+        "equation_EverCrypt.AEAD.footprint",
+        "equation_EverCrypt.AEAD.footprint_s",
+        "equation_EverCrypt.AEAD.freeable",
+        "equation_EverCrypt.AEAD.invariant",
+        "equation_EverCrypt.AEAD.invariant_s",
+        "equation_EverCrypt.AEAD.iv_p", "equation_EverCrypt.AEAD.plain_p",
+        "equation_EverCrypt.AEAD.preserves_freeable",
+        "equation_EverCrypt.AEAD.state",
+        "equation_EverCrypt.AEAD.supported_alg_of_impl",
+        "equation_EverCrypt.CTR.Keys.uint8",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.eq_or_disjoint",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.byte_t",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.sec_int_t", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
+        "equation_LowStar.Buffer.buffer", "equation_LowStar.Buffer.pointer",
+        "equation_LowStar.Buffer.pointer_or_null",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.disjoint",
+        "equation_LowStar.Monotonic.Buffer.get",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.squash",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Agile.AEAD.ad", "equation_Spec.Agile.AEAD.cipher",
+        "equation_Spec.Agile.AEAD.cipher_length",
+        "equation_Spec.Agile.AEAD.encrypt",
+        "equation_Spec.Agile.AEAD.encrypted", "equation_Spec.Agile.AEAD.iv",
+        "equation_Spec.Agile.AEAD.iv_length",
+        "equation_Spec.Agile.AEAD.key_length", "equation_Spec.Agile.AEAD.kv",
+        "equation_Spec.Agile.AEAD.lbytes",
+        "equation_Spec.Agile.AEAD.max_length",
+        "equation_Spec.Agile.AEAD.plain",
+        "equation_Spec.Agile.AEAD.supported_alg",
+        "equation_Spec.Agile.AEAD.tag_length",
+        "equation_Spec.Agile.AEAD.uint8", "equation_Spec.Chacha20.size_key",
+        "equation_Spec.Chacha20.size_nonce",
+        "equation_Spec.Chacha20Poly1305.aead_encrypt",
+        "equation_Spec.Chacha20Poly1305.key",
+        "equation_Spec.Chacha20Poly1305.nonce",
+        "equation_Spec.Chacha20Poly1305.size_key",
+        "equation_Spec.Chacha20Poly1305.size_nonce",
+        "equation_Spec.Cipher.Expansion.concrete_expand",
+        "equation_Spec.Cipher.Expansion.concrete_xkey_length",
+        "equation_Spec.Cipher.Expansion.uu___30",
+        "equation_Spec.GaloisField.gf", "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
+        "fuel_guarded_inversion_Spec.Cipher.Expansion.impl",
+        "function_token_typing_Lib.IntTypes.byte_t",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Prims.int",
+        "function_token_typing_Spec.Cipher.Expansion.uu___30",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
+        "inversion-interp", "kinding_EverCrypt.AEAD.state_s@tok",
+        "lemma_EverCrypt.AEAD.frame_invariant",
+        "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_eq_refl",
+        "lemma_FStar.Seq.Properties.slice_length",
+        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.Sequence.eq_elim",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_LowStar.Monotonic.Buffer.live_is_null",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
+        "lemma_LowStar.Monotonic.Buffer.modifies_refl",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction", "primitive_Prims.op_disEquality",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_EverCrypt.AEAD.Ek_ek",
+        "projection_inverse_EverCrypt.AEAD.Ek_impl",
+        "projection_inverse_EverCrypt.AEAD.Ek_kv",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_1e64982fd73e0ea5a2ac3364e3b86e76",
+        "refinement_interpretation_Tm_refine_1f612ea38e642dcb2eb422028ba8b5b6",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
+        "refinement_interpretation_Tm_refine_3e9a939c523db9441d96f9f909e76ac9",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_441053ce797e25d73d24fdb378a43afc",
+        "refinement_interpretation_Tm_refine_48105a3b0a4d5ade4079db78fd09b575",
+        "refinement_interpretation_Tm_refine_485bc5b41c309040098b0ab067e4ac2c",
+        "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e",
+        "refinement_interpretation_Tm_refine_615cdbff9e4be4b2687efb17f829c7c1",
+        "refinement_interpretation_Tm_refine_9315e6f2e6143f3996b9238ef3ae182b",
+        "refinement_interpretation_Tm_refine_982fb3d3fec67274e50be352a80fb36e",
+        "refinement_interpretation_Tm_refine_9c278566a1076c216e9de7ddec9e41a6",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_b19a1c83769dccbdda4cf44bd4e3d295",
+        "refinement_interpretation_Tm_refine_bb420391019b08a67df8b6b95c3fc57c",
+        "refinement_interpretation_Tm_refine_bdb8e2f4b5a690ae0ff20fed002844e2",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
+        "refinement_interpretation_Tm_refine_ce5a1bd8437baa640019cd70bf466fc0",
+        "refinement_interpretation_Tm_refine_d0d1d775fb84f5ab7f71a0ac3e01bffa",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_dd6b7c82943901495ce61ec2042328d2",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_e6471c192f70c5d96f8a4a619c9552e7",
+        "refinement_interpretation_Tm_refine_e86c95ce88afc69c180cbf98a0593f5d",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f329878e92bb1efc120000057d7014bb",
+        "refinement_interpretation_Tm_refine_fb77d4109290540100357b20e0a78486",
+        "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_kinding_Tm_refine_ce5a1bd8437baa640019cd70bf466fc0",
+        "typing_EverCrypt.AEAD.footprint_s", "typing_FStar.Ghost.reveal",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
+        "typing_FStar.Monotonic.HyperHeap.root",
+        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.length",
+        "typing_FStar.Set.singleton", "typing_FStar.UInt32.uint_to_t",
+        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.loc",
+        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.Sequence.concat",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.as_addr",
+        "typing_LowStar.Monotonic.Buffer.as_seq",
+        "typing_LowStar.Monotonic.Buffer.frameOf",
+        "typing_LowStar.Monotonic.Buffer.g_is_null",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_LowStar.Monotonic.Buffer.length",
+        "typing_LowStar.Monotonic.Buffer.loc_addresses",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
+        "typing_LowStar.Monotonic.Buffer.loc_union",
+        "typing_LowStar.Monotonic.Buffer.mgsub", "typing_Spec.AES.gf8",
+        "typing_Spec.Agile.AEAD.encrypt", "typing_Spec.Agile.AEAD.kv",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Poly1305.size_key",
+        "typing_tok_EverCrypt.Error.InvalidKey@tok",
+        "typing_tok_EverCrypt.Error.Success@tok",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "783f766d0b0b07d277350613baad0fcd"
+      "eb1e75b6e22cac320a7be4f3a263c6e7"
     ],
     [
       "EverCrypt.AEAD.encrypt",
@@ -2123,7 +2701,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9259ea8975e6fd9c115c77d40b148a94"
+      "5921d6c93a6005dd7732af892835bf4f"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_pre",
@@ -2132,7 +2710,7 @@
       0,
       [ "@query" ],
       0,
-      "77aeed53a67fc9d6f2f06bcb18efa9a8"
+      "fef855d7ec76c056e426d666a385e00f"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_st",
@@ -2156,7 +2734,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "8b2a0777fea0cd7152338cbd2ea52b02"
+      "7184633b06867ac1cad4f64ddfa5c050"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes_gcm",
@@ -2315,7 +2893,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b0778034c53b3a7fd1f7a223bc56ac38"
+      "caaea83ab9c205dc472b2bd5fe7695a1"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes128_gcm_no_check",
@@ -2329,7 +2907,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "00048720a4fa984a83ab58aeb5630fb2"
+      "46d3f2d5742c3d071c868309bacc246a"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes128_gcm_no_check",
@@ -2368,7 +2946,7 @@
         "typing_tok_EverCrypt.Error.Success@tok"
       ],
       0,
-      "9783e6c7f4dec7070b07265bdf8137c8"
+      "7faae32d83e046062b9cd92109bfcd85"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes256_gcm_no_check",
@@ -2393,7 +2971,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "4405213e5bb1efd3879f982d8e92c377"
+      "ec2110be038263c376ce144641ab4a25"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes256_gcm_no_check",
@@ -2438,7 +3016,7 @@
         "typing_tok_EverCrypt.Error.Success@tok"
       ],
       0,
-      "21fc1088747e4ca80c7ea7f6c4cafe7f"
+      "e1bac7b98050f6342430c820398e5464"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes128_gcm",
@@ -2452,7 +3030,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "8d9c2d20c732f94f5458d09f131bc3ac"
+      "ee8b5314931c0deeac210c9d28666ed0"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes128_gcm",
@@ -2542,7 +3120,7 @@
         "typing_tok_EverCrypt.Error.UnsupportedAlgorithm@tok"
       ],
       0,
-      "62d89b6df5a6f7a3a559d9952e2490f2"
+      "734247a238bfab50b6fe01a50aa9f86b"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes256_gcm",
@@ -2567,7 +3145,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "9eaf8facfdd8ffc658586dfdb5b22b61"
+      "fe63a447f05b0e91c5dc36fb9125f814"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_aes256_gcm",
@@ -2683,7 +3261,7 @@
         "typing_tok_Spec.Agile.AEAD.AES256_GCM@tok"
       ],
       0,
-      "de86c733f6e0e825f2127e80da62e263"
+      "9447c797e80ece4d94e828452aeb2723"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_chacha20_poly1305",
@@ -2711,7 +3289,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "5293c2764179f2212fd37fa9c8eb20c9"
+      "af3177c7d0955acf53e818ec20900bf4"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand_chacha20_poly1305",
@@ -2988,25 +3566,11 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "4f80cd41e55100105732a9b8760dfb01"
+      "67ead779a5a790847a7e5e5f8c3dd1fa"
     ],
     [
       "EverCrypt.AEAD.encrypt_expand",
       1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "81fa02723619faa5eb10436458b2cc52"
-    ],
-    [
-      "EverCrypt.AEAD.encrypt_expand",
-      2,
       0,
       0,
       [
@@ -3036,7 +3600,21 @@
         "typing_tok_EverCrypt.Error.Success@tok"
       ],
       0,
-      "98c2b28558492154dd03e308cbd86109"
+      "ce3d1d146b4786c35e526623c65d6dcc"
+    ],
+    [
+      "EverCrypt.AEAD.encrypt_expand",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "a3e30b315eae21767ba7880fa755c09e"
     ],
     [
       "EverCrypt.AEAD.decrypt_st",
@@ -3088,7 +3666,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "908d2937c4d960b4bbfba542cab98293"
+      "426a57b6c1fed2ced163f4933baf2c85"
     ],
     [
       "EverCrypt.AEAD.aes_gcm_decrypt",
@@ -3134,7 +3712,7 @@
         "typing_EverCrypt.CTR.Keys.vale_alg_of_vale_impl", "unit_typing"
       ],
       0,
-      "7debada8c052c2fe244580ee3fd67194"
+      "997f628ed7aa23da4ccfe35ce2940107"
     ],
     [
       "EverCrypt.AEAD.decrypt_aes_gcm",
@@ -3509,7 +4087,7 @@
         "typing_tok_Vale.AES.AES_common_s.AES_256@tok"
       ],
       0,
-      "b8ef1dce20ec69d3f98ac49f6e6f573f"
+      "04132ef7e6819a02e8a62cf74e79e035"
     ],
     [
       "EverCrypt.AEAD.decrypt_aes128_gcm",
@@ -3535,7 +4113,7 @@
         "typing_EverCrypt.TargetConfig.x64"
       ],
       0,
-      "4a8e81686735299718a72a7f470a8b79"
+      "2b5cedde71a47c85efb9db7f03fa32c3"
     ],
     [
       "EverCrypt.AEAD.decrypt_aes256_gcm",
@@ -3567,47 +4145,11 @@
         "typing_EverCrypt.TargetConfig.x64"
       ],
       0,
-      "25e558c8f4254ce697ee3e052f18b220"
+      "e67634179643a9c2f6d276d4700396e5"
     ],
     [
       "EverCrypt.AEAD.decrypt_chacha20_poly1305",
       1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W8",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
-        "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W8@tok",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred",
-        "equation_Spec.Agile.AEAD.is_supported_alg",
-        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_FStar.Integers.Signed__0",
-        "projection_inverse_FStar.Integers.Unsigned__0",
-        "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
-      ],
-      0,
-      "4848a30b00dcb17cd9c892df5a055fc4"
-    ],
-    [
-      "EverCrypt.AEAD.decrypt_chacha20_poly1305",
-      2,
       0,
       0,
       [
@@ -3674,13 +4216,13 @@
         "equation_Lib.Buffer.eq_or_disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.byte_t", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.sec_int_t", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_LowStar.Buffer.buffer", "equation_LowStar.Buffer.pointer",
+        "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.byte_t",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.pointer",
         "equation_LowStar.Buffer.pointer_or_null",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.disjoint",
@@ -3700,6 +4242,8 @@
         "equation_Spec.Agile.Cipher.key_length",
         "equation_Spec.Chacha20.size_key",
         "equation_Spec.Chacha20Poly1305.aead_decrypt",
+        "equation_Spec.Chacha20Poly1305.key",
+        "equation_Spec.Chacha20Poly1305.size_key",
         "equation_Spec.Cipher.Expansion.concrete_expand",
         "equation_Spec.Cipher.Expansion.concrete_xkey_length",
         "equation_Spec.GaloisField.gf", "equation_Spec.Poly1305.size_key",
@@ -3751,7 +4295,6 @@
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_1e64982fd73e0ea5a2ac3364e3b86e76",
         "refinement_interpretation_Tm_refine_1f612ea38e642dcb2eb422028ba8b5b6",
         "refinement_interpretation_Tm_refine_28c7ab7e2e3881c52f6b844840d99221",
@@ -3769,6 +4312,7 @@
         "refinement_interpretation_Tm_refine_9e5d748a0876a43b3055c6e74cacea51",
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
         "refinement_interpretation_Tm_refine_bdb8e2f4b5a690ae0ff20fed002844e2",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
         "refinement_interpretation_Tm_refine_d0d1d775fb84f5ab7f71a0ac3e01bffa",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
@@ -3810,7 +4354,43 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "9c04cac7a4d301074743eb2f2eaaeaf8"
+      "198027081afd8f446d8f4ef5a5df821b"
+    ],
+    [
+      "EverCrypt.AEAD.decrypt_chacha20_poly1305",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred",
+        "equation_Spec.Agile.AEAD.is_supported_alg",
+        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+      ],
+      0,
+      "8cdc9d7d18115176777c9c816fea24b9"
     ],
     [
       "EverCrypt.AEAD.decrypt",
@@ -3818,22 +4398,10 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "54e2b7ded2230ff85741e9e4d140746f"
-    ],
-    [
-      "EverCrypt.AEAD.decrypt",
-      2,
-      0,
-      0,
-      [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_EverCrypt.Error.InvalidKey",
+        "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U8",
@@ -3846,6 +4414,8 @@
         "disc_equation_Spec.Cipher.Expansion.Vale_AES128",
         "disc_equation_Spec.Cipher.Expansion.Vale_AES256",
         "equality_tok_EverCrypt.Error.InvalidKey@tok",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W8@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Agile.AEAD.AES128_GCM@tok",
@@ -3874,6 +4444,8 @@
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_EverCrypt.AEAD.Ek_impl",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_1f612ea38e642dcb2eb422028ba8b5b6",
         "refinement_interpretation_Tm_refine_273338279bf37cbeeea1300ffa8034be",
@@ -3896,7 +4468,21 @@
         "typing_tok_EverCrypt.Error.InvalidKey@tok"
       ],
       0,
-      "b363254dd171b585613f0c85c3fdf365"
+      "50ff43ce52ea1060bb48c71b653ba867"
+    ],
+    [
+      "EverCrypt.AEAD.decrypt",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "0e82208ed9d229b000ace7b7bd296db2"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_st",
@@ -3929,7 +4515,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "2de5e471de36652b5a9d42ea018b6949"
+      "30066b7fafe8ef274d38c8baa8d93188"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes_gcm",
@@ -4082,7 +4668,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9395053b1a6ae858946abe26bbedc12c"
+      "f0a14dc6f8c38e47dedaf33441afc34e"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes128_gcm_no_check",
@@ -4096,7 +4682,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "c675ad0da49dce7d33f17da8c3f49f2e"
+      "713d615fa48f81fd8b77f8f924cb0a6b"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes128_gcm_no_check",
@@ -4131,7 +4717,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b1ce31b5b60f12dcf893eccbf6a84228"
+      "260fe90065997154ba639cb8814d938b"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes256_gcm_no_check",
@@ -4156,7 +4742,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "4a01b53e4e9d0af6bece1ee2f7be29af"
+      "25f4e51b2c918c3d9731cce30a5bc580"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes256_gcm_no_check",
@@ -4197,7 +4783,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "bd3a755eed4e15a190e8d0a870e25fe4"
+      "52d9017ce5658c5bae1e5d171f8861cf"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes128_gcm",
@@ -4211,7 +4797,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "05e6cc935f54e8fbcd8cd16e5f313dc1"
+      "233d6b36148ea91a849bb15779f03780"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes128_gcm",
@@ -4304,7 +4890,7 @@
         "typing_tok_EverCrypt.Error.UnsupportedAlgorithm@tok"
       ],
       0,
-      "b8bef5539b8c1e6f7489af5f650dbc43"
+      "3c327f2bcda94e4c47e49456553a7da9"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes256_gcm",
@@ -4329,7 +4915,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "ae135a6529a06923122a1fd42d6d32a3"
+      "e8ccd4959dd3d4d489c7b7ecdc767793"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_aes256_gcm",
@@ -4425,7 +5011,7 @@
         "typing_tok_EverCrypt.Error.UnsupportedAlgorithm@tok"
       ],
       0,
-      "9b62dcd2443bcd3cdefafa9119fa8584"
+      "90fac3721ab59870ae9c345e893bff35"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_chacha20_poly1305",
@@ -4453,7 +5039,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "f48599a85c29f9b4816cab93a130ded7"
+      "1eb7742fc1989052192e32d4b75db212"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand_chacha20_poly1305",
@@ -4603,11 +5189,38 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "bc0ce9c99d873e2c0aa1ea078ac191f7"
+      "18b888d4c35a3880c37cc928a9d81127"
     ],
     [
       "EverCrypt.AEAD.decrypt_expand",
       1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
+        "disc_equation_Spec.Agile.AEAD.AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AES256_GCM",
+        "disc_equation_Spec.Agile.AEAD.CHACHA20_POLY1305",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equation_EverCrypt.AEAD.ad_p", "equation_EverCrypt.AEAD.cipher_p",
+        "equation_EverCrypt.AEAD.config_pre", "equation_EverCrypt.AEAD.iv_p",
+        "equation_Spec.Agile.AEAD.iv_length",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_1f612ea38e642dcb2eb422028ba8b5b6",
+        "refinement_interpretation_Tm_refine_4a2fab199af0b7c10817924a17a0d1b6",
+        "refinement_interpretation_Tm_refine_544f43b1b4ea48c13e3d3578d839de5a",
+        "refinement_interpretation_Tm_refine_7d628c9afa4eedea0cf75e43ce2844c1",
+        "refinement_interpretation_Tm_refine_9e5d748a0876a43b3055c6e74cacea51",
+        "refinement_interpretation_Tm_refine_d0d1d775fb84f5ab7f71a0ac3e01bffa",
+        "refinement_interpretation_Tm_refine_e692cabf996d3cca074ab12757df58a8"
+      ],
+      0,
+      "84f0a76550664f4c2fceb6948abec245"
+    ],
+    [
+      "EverCrypt.AEAD.decrypt_expand",
+      2,
       0,
       0,
       [
@@ -4617,42 +5230,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "59f6e41b0467012012770eaf36ffaa72"
-    ],
-    [
-      "EverCrypt.AEAD.decrypt_expand",
-      2,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W8",
-        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
-        "disc_equation_Spec.Agile.AEAD.AES128_GCM",
-        "disc_equation_Spec.Agile.AEAD.AES256_GCM",
-        "disc_equation_Spec.Agile.AEAD.CHACHA20_POLY1305",
-        "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W8@tok",
-        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
-        "equation_EverCrypt.AEAD.ad_p", "equation_EverCrypt.AEAD.cipher_p",
-        "equation_EverCrypt.AEAD.config_pre", "equation_EverCrypt.AEAD.iv_p",
-        "equation_Spec.Agile.AEAD.iv_length",
-        "equation_Spec.Agile.AEAD.supported_alg",
-        "lemma_FStar.Ghost.reveal_hide",
-        "projection_inverse_FStar.Integers.Signed__0",
-        "projection_inverse_FStar.Integers.Unsigned__0",
-        "refinement_interpretation_Tm_refine_1e5991971a05abb3200f8781b7e6ced0",
-        "refinement_interpretation_Tm_refine_1f612ea38e642dcb2eb422028ba8b5b6",
-        "refinement_interpretation_Tm_refine_544f43b1b4ea48c13e3d3578d839de5a",
-        "refinement_interpretation_Tm_refine_6c8296a95dd15cc6fa3dabad38eb5405",
-        "refinement_interpretation_Tm_refine_7d628c9afa4eedea0cf75e43ce2844c1",
-        "refinement_interpretation_Tm_refine_9e5d748a0876a43b3055c6e74cacea51",
-        "refinement_interpretation_Tm_refine_d0d1d775fb84f5ab7f71a0ac3e01bffa",
-        "refinement_kinding_Tm_refine_ce5a1bd8437baa640019cd70bf466fc0"
-      ],
-      0,
-      "55a4a2832927ad85418bd79da97c8258"
+      "0f3a77192f7a6fb5d7df8b8e4730cd1a"
     ],
     [
       "EverCrypt.AEAD.free",
@@ -4730,7 +5308,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1f9d171253f9ab90efee9292d6c2d8ac"
+      "3010cb1ddacdf9e94201917d2c1f6a18"
     ]
   ]
 ]

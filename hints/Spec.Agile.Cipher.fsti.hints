@@ -6,15 +6,6 @@
       1,
       0,
       1,
-      [ "@query", "assumption_Spec.Agile.Cipher.cipher_alg__uu___haseq" ],
-      0,
-      "05c231b0032b50c397417e71d4e6b98a"
-    ],
-    [
-      "Spec.Agile.Cipher.aes_alg_of_alg",
-      2,
-      0,
-      1,
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Spec.Agile.Cipher.AES128",
@@ -25,10 +16,20 @@
         "equality_tok_Spec.Agile.Cipher.AES128@tok",
         "equality_tok_Spec.Agile.Cipher.AES256@tok",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
+        "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_177c69f55dbc44094b230a6a570a50b1"
       ],
       0,
-      "23d9272edf357a94db05199064087497"
+      "b97a4b5be05a7892b02af81bd6173052"
+    ],
+    [
+      "Spec.Agile.Cipher.aes_alg_of_alg",
+      2,
+      0,
+      1,
+      [ "@query", "assumption_Spec.Agile.Cipher.cipher_alg__uu___haseq" ],
+      0,
+      "cb1da23c800cc560432aa28d63cf1edf"
     ],
     [
       "Spec.Agile.Cipher.key_length",
@@ -69,7 +70,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "723c12b758c26e7c7e8494f3f57ac3c6"
+      "f011f55a8a4390ab28ee70385d166e83"
     ],
     [
       "Spec.Agile.Cipher.key",
@@ -87,7 +88,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "97c280f47c14e2f666f87bb80ed17786"
+      "7dee5786b21ff7d0eaa613c48f29e665"
     ],
     [
       "Spec.Agile.Cipher.block_length",
@@ -102,7 +103,7 @@
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg"
       ],
       0,
-      "dfde4b57fe4446a940c00b5815a69000"
+      "ff1bf247c5adf8103b72732cf7078c66"
     ],
     [
       "Spec.Agile.Cipher.block",
@@ -145,7 +146,7 @@
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg"
       ],
       0,
-      "fc36e1adf9753287c48f6c2eccd0fa2a"
+      "61a075c169183d3be26d4c1be8193c84"
     ],
     [
       "Spec.Agile.Cipher.ctr_stream",
@@ -198,7 +199,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c49f8f0a56ba78555bd81ce68357d281"
+      "d26300ff348bc0008c6511b70e9cb2d8"
     ]
   ]
 ]

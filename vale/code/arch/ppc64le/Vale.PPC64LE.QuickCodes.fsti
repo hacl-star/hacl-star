@@ -106,6 +106,7 @@ let va_range1 = mk_range "" 0 0 0 0
 val empty_list_is_small (#a:Type) (x:list a) : Lemma
   ([] #a == x \/ [] #a << x)
 
+#push-options "--z3rlimit 20"
 [@va_qattr]
 let rec wp (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k:va_state -> a -> Type0) (s0:va_state) :
   Tot Type0 (decreases %[cs; 0; qcs])
@@ -155,6 +156,7 @@ and wp_Bind (#a:Type0) (#b:Type0) (cs:codes) (qcs:va_state -> a -> GTot (quickCo
   Tot (wp_Bind_t a) (decreases %[cs; 1; qcs])
   =
   let f s0 g = wp cs (qcs s0 g) mods k s0 in f
+#pop-options
 
 val wp_sound (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k:va_state -> a -> Type0) (s0:va_state)
   : Ghost (va_state & va_fuel & a)

@@ -19,16 +19,7 @@
         "typing_Spec.Curve25519.prime"
       ],
       0,
-      "1377d410b54ec3f9429a65186b08f5dc"
-    ],
-    [
-      "Spec.Ed25519.PointOps.d",
-      1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "1394a14ee42e06524950539aa04a852b"
+      "d36f5a086e8ad0d2ec20c63f829eda68"
     ],
     [
       "Spec.Ed25519.PointOps.g_x",
@@ -44,7 +35,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "960a74cf41da05384bb9df4f3aa84848"
+      "2a5c921305dad0e1c79f1ecae4ae620e"
     ],
     [
       "Spec.Ed25519.PointOps.g_y",
@@ -60,7 +51,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "13f4c1a2e0014e9f298bd1df2d0998f1"
+      "ca61b437686a2f17ffd94fc19cfed5ad"
     ],
     [
       "Spec.Ed25519.PointOps.g",
@@ -76,7 +67,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "a0e4e33a55ab75f9c902be55f106ed4c"
+      "2111ca33e507512fedf7dc228b57002c"
     ],
     [
       "Spec.Ed25519.PointOps.is_on_curve",
@@ -92,7 +83,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "1313cb2a921f06bdca1ac81e3a0f4d9b"
+      "37eb0fe8f8e9b44a0be58ac43feb770b"
     ],
     [
       "Spec.Ed25519.PointOps.is_ext",
@@ -108,7 +99,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "eb848a0080ce81fa652a8d737bddb0bc"
+      "78cd1a397de4826b1026a16984ea633a"
     ],
     [
       "Spec.Ed25519.PointOps.aff_point_add",
@@ -124,7 +115,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6a9531d4ef5964f301d51e049203267a"
+      "6a6df3acf23563f48f0a2d0234538e43"
     ],
     [
       "Spec.Ed25519.PointOps.aff_point_double",
@@ -140,7 +131,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6a4e3dd62141039f9117720d85fc19ae"
+      "67348c1ed421266ea52ec456fdd9803d"
     ],
     [
       "Spec.Ed25519.PointOps.aff_point_negate",
@@ -158,7 +149,7 @@
         "refinement_interpretation_Tm_refine_c9f318957334bae90e9d8f370d26a655"
       ],
       0,
-      "4640a55b31a6b9f91fe47e827829961f"
+      "903cd360fe8da83a26f40380f7a297a0"
     ],
     [
       "Spec.Ed25519.PointOps.point_add",
@@ -174,7 +165,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8cc485abd23950029e2fd476fa64a504"
+      "cb666ce0e92ef03b67145c6865eedc68"
     ],
     [
       "Spec.Ed25519.PointOps.point_double",
@@ -190,7 +181,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "766985f4e92a0ba363b4f79ca124c899"
+      "2958b23b34bded4e36c38ad24cdadab1"
     ],
     [
       "Spec.Ed25519.PointOps.point_negate",
@@ -208,7 +199,7 @@
         "refinement_interpretation_Tm_refine_c9f318957334bae90e9d8f370d26a655"
       ],
       0,
-      "e1a01c2556ea747023c2627970ed332a"
+      "98327498c95349dca7cf2fdbabfd2d76"
     ],
     [
       "Spec.Ed25519.PointOps.point_compress",
@@ -241,7 +232,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "78bee6a55a9590abbd6ab182889d6e36"
+      "8e9ee226470aee028a28cfaae6ec721d"
     ],
     [
       "Spec.Ed25519.PointOps.recover_x",
@@ -267,11 +258,32 @@
         "typing_Spec.Ed25519.PointOps.d"
       ],
       0,
-      "41c8023d0f384199d62395c82552155b"
+      "a64e474d5fa0e8813d86cc0313cdc214"
     ],
     [
       "Spec.Ed25519.PointOps.point_decompress",
       1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "constructor_distinct_FStar.Pervasives.Native.Some",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_Prims.nonzero", "equation_Spec.Curve25519.elem",
+        "equation_Spec.Ed25519.PointOps.recover_x", "int_inversion",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
+      ],
+      0,
+      "75b591e08e8cc6efd1d672114bc9c739"
+    ],
+    [
+      "Spec.Ed25519.PointOps.point_decompress",
+      2,
       0,
       0,
       [
@@ -282,31 +294,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "dd8c80ec168e834fb4b0927c87f4af5e"
-    ],
-    [
-      "Spec.Ed25519.PointOps.point_decompress",
-      2,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_FStar.Pervasives.Native.None",
-        "constructor_distinct_FStar.Pervasives.Native.Some",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nonzero", "equation_Spec.Curve25519.elem",
-        "equation_Spec.Ed25519.PointOps.recover_x", "int_inversion",
-        "primitive_Prims.op_GreaterThanOrEqual",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
-      ],
-      0,
-      "6d62cf26677f544ba1dc2c9f75da74b5"
+      "8a7f37cd188c3c7443115fcabde3cc6b"
     ],
     [
       "Spec.Ed25519.PointOps.point_equal",
@@ -322,7 +310,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "7913ccbd3d10d574da839e76f12f3f8a"
+      "6dc0bc8160125822328672eadcf4935e"
     ]
   ]
 ]

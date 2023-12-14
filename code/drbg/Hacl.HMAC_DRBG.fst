@@ -196,7 +196,7 @@ let instantiate a st
 =
   match a with
   | SHA1     ->
-    mk_instantiate Hacl.HMAC.legacy_compute_sha1 st
+    mk_instantiate Hacl.HMAC.compute_sha1 st
       entropy_input_len entropy_input
       nonce_len nonce
       personalization_string_len personalization_string
@@ -240,7 +240,7 @@ let reseed a st
   additional_input_input_len additional_input_input =
   match a with
   | SHA1 ->
-    mk_reseed Hacl.HMAC.legacy_compute_sha1 st
+    mk_reseed Hacl.HMAC.compute_sha1 st
       entropy_input_len entropy_input
       additional_input_input_len additional_input_input
   | SHA2_256 ->
@@ -306,7 +306,7 @@ let mk_generate #a hmac output st n additional_input_len additional_input =
 let generate a output st n additional_input_len additional_input =
   match a with
   | SHA1     ->
-    mk_generate Hacl.HMAC.legacy_compute_sha1 output st n
+    mk_generate Hacl.HMAC.compute_sha1 output st n
       additional_input_len additional_input
   | SHA2_256 ->
     mk_generate Hacl.HMAC.compute_sha2_256 output st n

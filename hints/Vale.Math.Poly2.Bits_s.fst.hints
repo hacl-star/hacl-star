@@ -12,16 +12,20 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "18dea3fa38f42a54059b654ae7f705fe"
+      "3aebc481f5f701d6ee4d65c1cb2b2aeb"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_uint",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
       0,
-      "467380d4b63c4de135763f52a8532b82"
+      "6971ec22cb9b39d8fca23125823509ed"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_uint",
@@ -34,7 +38,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "3446dc82a5f839fad00feaea195e6662"
+      "fee5ce10d3ed491a046dc4e3adbbce1f"
     ],
     [
       "Vale.Math.Poly2.Bits_s.to_double32_def",
@@ -65,7 +69,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "da7446689eb872bb77cea2f614c81581"
+      "2e067ec4adf238be182face7ccd63986"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_double32_def",
@@ -89,7 +93,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "a0bac75f5e24dfed65ac45c36d8f9adb"
+      "2d758cf4615322be2a49ba740c5a4b87"
     ],
     [
       "Vale.Math.Poly2.Bits_s.to_quad32_def",
@@ -120,7 +124,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "268229ec3fba89ed7c9bbe3775e80168"
+      "919f9307dc9596d86d80732b6b9246e0"
     ],
     [
       "Vale.Math.Poly2.Bits_s.of_quad32_def",
@@ -146,7 +150,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "5f6bae4ea16cb88721bdc79bda46cd9d"
+      "d5ac92bfdb058abcc8da2020bc14906a"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_to_double32",
@@ -155,7 +159,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.to_double32" ],
       0,
-      "3e506519bb2aa66b3f17f17c390d4ba4"
+      "c8f98cd57f8faaf540972ed352e2819f"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_of_double32",
@@ -164,7 +168,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.of_double32" ],
       0,
-      "3e341dedcc3fe5ff5f2ef3b34f05c171"
+      "6cf1031bd7806f93bf67ec593de381e0"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_to_quad32",
@@ -173,7 +177,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.to_quad32" ],
       0,
-      "2ceb29db6b227ae0587673d3f8161dfb"
+      "dcd92126899b8f72e847bd965592882f"
     ],
     [
       "Vale.Math.Poly2.Bits_s.reveal_of_quad32",
@@ -182,7 +186,7 @@
       0,
       [ "@query", "equation_Vale.Math.Poly2.Bits_s.of_quad32" ],
       0,
-      "3c1f91b9fc2e0c0a975c7a500fc5223a"
+      "311744deab3986ab5bf944c2278b62fd"
     ]
   ]
 ]

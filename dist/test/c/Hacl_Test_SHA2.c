@@ -427,12 +427,12 @@ static inline void sha384_finish(uint64_t *st, uint8_t *h)
 }
 
 /**
-Hash `input`, of len `input_len`, into `dst`, an array of 32 bytes.
+Hash `input`, of len `input_len`, into `output`, an array of 32 bytes.
 */
-static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_256(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint8_t *ib = input;
-  uint8_t *rb = dst;
+  uint8_t *rb = output;
   uint32_t st[8U] = { 0U };
   sha256_init(st);
   uint32_t rem = input_len % 64U;
@@ -446,12 +446,12 @@ static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 }
 
 /**
-Hash `input`, of len `input_len`, into `dst`, an array of 28 bytes.
+Hash `input`, of len `input_len`, into `output`, an array of 28 bytes.
 */
-static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_224(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint8_t *ib = input;
-  uint8_t *rb = dst;
+  uint8_t *rb = output;
   uint32_t st[8U] = { 0U };
   sha224_init(st);
   uint32_t rem = input_len % 64U;
@@ -465,12 +465,12 @@ static void hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 }
 
 /**
-Hash `input`, of len `input_len`, into `dst`, an array of 64 bytes.
+Hash `input`, of len `input_len`, into `output`, an array of 64 bytes.
 */
-static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_512(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint8_t *ib = input;
-  uint8_t *rb = dst;
+  uint8_t *rb = output;
   uint64_t st[8U] = { 0U };
   sha512_init(st);
   uint32_t rem = input_len % 128U;
@@ -484,12 +484,12 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 }
 
 /**
-Hash `input`, of len `input_len`, into `dst`, an array of 48 bytes.
+Hash `input`, of len `input_len`, into `output`, an array of 48 bytes.
 */
-static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
+static void hash_384(uint8_t *output, uint8_t *input, uint32_t input_len)
 {
   uint8_t *ib = input;
-  uint8_t *rb = dst;
+  uint8_t *rb = output;
   uint64_t st[8U] = { 0U };
   sha384_init(st);
   uint32_t rem = input_len % 128U;
@@ -521,10 +521,10 @@ test_sha2(
   uint8_t test256[32U] = { 0U };
   uint8_t test384[48U] = { 0U };
   uint8_t test512[64U] = { 0U };
-  hash_224(msg, msg_len, test224);
-  hash_256(msg, msg_len, test256);
-  hash_384(msg, msg_len, test384);
-  hash_512(msg, msg_len, test512);
+  hash_224(test224, msg, msg_len);
+  hash_256(test256, msg, msg_len);
+  hash_384(test384, msg, msg_len);
+  hash_512(test512, msg, msg_len);
   if (!Lib_PrintBuffer_result_compare_display(28U, test224, expected224))
   {
     exit((int32_t)255);

@@ -135,7 +135,8 @@ BASE_FLAGS = \
   -add-early-include '"krml/internal/types.h"' \
   -add-early-include '"krml/lowstar_endianness.h"' \
   -header $(HACL_HOME)/dist/LICENSE.txt \
-  -funroll-loops 16
+  -funroll-loops 16 \
+  -record-renamings
 
 CURVE_BUNDLE_SLOW= \
   -bundle Hacl.Curve25519_64_Slow
@@ -152,20 +153,31 @@ CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
 # First, match the Blake2 stuff
 BLAKE2_BUNDLE_BASE= \
   -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants \
-  -bundle 'Hacl.Blake2b_32+Hacl.Blake2s_32=Hacl.Hash.Blake2,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2]'
+  -bundle 'Hacl.Streaming.Blake2b_32=Hacl.Blake2b_32,Hacl.Hash.Blake2b_32,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2b,rename-prefix]' \
+  -bundle 'Hacl.Streaming.Blake2s_32=Hacl.Blake2s_32,Hacl.Hash.Blake2s_32,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2s,rename-prefix]'
 BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
-  -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
-  -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
+  -bundle Hacl.Streaming.Blake2b_256=Hacl.Blake2b_256,Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_Simd256,rename-prefix] \
+  -bundle Hacl.Streaming.Blake2s_128=Hacl.Blake2s_128,Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_Simd128,rename-prefix]
+
+# NOTE: code/hash re-exports internal Blake2 operations with the hash signature,
+# but really, these should be thin wrappers that defer to the actual
+# repeati-based implementation in code/blake2, as opposed to re-generating a
+# copy of the code for the sole purpose of HMAC.
+# TODO: make Hacl.Hash.Blake2* just inline_for_extraction wrappers that call the
+# underlying implementation in code/blake2
+HMAC_BUNDLE=-bundle Hacl.HMAC= \
+  -bundle Hacl.HMAC.Blake2s_128= \
+  -bundle Hacl.HMAC.Blake2b_256=
 
 # Note: Hacl_Hash_SHA2 is legacy SHA2 here, will eventually go away, there's a proper
 # bundle in STREAMING_BUNDLE, below
 HASH_BUNDLE= \
   -bundle Hacl.Streaming.MD,Spec.Hash.Definitions,Hacl.Streaming.Types[rename=Hacl_Streaming_Types] \
-  -bundle Hacl.Streaming.MD5=Hacl.Hash.MD5,Hacl.Hash.Core.MD5[rename=Hacl_Hash_MD5] \
-  -bundle Hacl.Streaming.SHA1=Hacl.Hash.SHA1,Hacl.Hash.Core.SHA1[rename=Hacl_Hash_SHA1] \
+  -bundle Hacl.Streaming.MD5=Hacl.Hash.MD5,Hacl.Hash.Core.MD5[rename=Hacl_Hash_MD5,rename-prefix] \
+  -bundle Hacl.Streaming.SHA1=Hacl.Hash.SHA1,Hacl.Hash.Core.SHA1[rename=Hacl_Hash_SHA1,rename-prefix] \
   -bundle Hacl.Impl.SHA2.Types=[rename=Hacl_SHA2_Types] \
   -static-header Hacl.Impl.SHA2.Generic \
-  -bundle Hacl.Streaming.SHA2=Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32[rename=Hacl_Hash_SHA2] \
+  -bundle Hacl.Streaming.SHA2=Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32[rename=Hacl_Hash_SHA2,rename-prefix] \
   -bundle Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash_Base]
 # TODO: for some reason, the CSHAKE and SHA3 tests use the internal API and
 # therefore Hacl.Impl.SHA3 cannot be put on the right-hand side of the bundle
@@ -176,13 +188,16 @@ SHA3_SCALAR_BUNDLE=-bundle Hacl.Hash.SHA3.Scalar=Hacl.Spec.SHA3.Vec.*,Hacl.Impl.
 SHA3_SIMD256_BUNDLE=-bundle Hacl.Hash.SHA3.Simd256=Hacl.Spec.SHA3.Vec.*,Hacl.Impl.SHA3.Vec,Hacl.Hash.SHA3.Simd256
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
-CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
+CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305 \
+  -bundle Hacl.Chacha20Poly1305_32=[rename=Hacl_AEAD_Chacha20Poly1305,rename-prefix] \
+  -bundle Hacl.Chacha20Poly1305_128=[rename=Hacl_AEAD_Chacha20Poly1305_Simd128,rename-prefix] \
+  -bundle Hacl.Chacha20Poly1305_256=[rename=Hacl_AEAD_Chacha20Poly1305_Simd256,rename-prefix]
 ED_BUNDLE= \
   -bundle Hacl.Ed25519.PrecompTable -static-header Hacl.Ed25519.PrecompTable \
   -bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
-POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
-  -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
-  -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
+POLY_BUNDLE=-bundle 'Hacl.Streaming.Poly1305_32=Hacl.Poly1305_32,Hacl.Impl.Poly1305.Field32xN_32[rename=Hacl_MAC_Poly1305,rename-prefix]' \
+  -bundle 'Hacl.Streaming.Poly1305_128=Hacl.Poly1305_128,Hacl.Impl.Poly1305.Field32xN_128[rename=Hacl_MAC_Poly1305_Simd128,rename-prefix]' \
+  -bundle 'Hacl.Streaming.Poly1305_256=Hacl.Poly1305_256,Hacl.Impl.Poly1305.Field32xN_256[rename=Hacl_MAC_Poly1305_Simd256,rename-prefix]'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 P256_BUNDLE= \
   -bundle Hacl.P256.PrecompTable -static-header Hacl.P256.PrecompTable \

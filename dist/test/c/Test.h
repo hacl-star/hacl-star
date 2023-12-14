@@ -31,6 +31,7 @@
 #include "internal/Hacl_Hash_SHA2.h"
 #include "krmllib.h"
 #include "libintvector.h"
+#include "clients/krmlrenamings.h"
 
 exit_code main(void);
 
