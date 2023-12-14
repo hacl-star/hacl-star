@@ -16,8 +16,10 @@ open Hacl.Spec.SHA3.Vec.Common
 open Hacl.Impl.SHA3.Vec
 
 module S = Spec.SHA3
+module V = Hacl.Spec.SHA3.Vec
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
+module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -112,3 +114,63 @@ val sha3_512:
 let sha3_512 output input inputByteLen =
   admit();
   keccak #SHA3_512 #M32 576ul (* 1024ul *) inputByteLen input (byte 0x06) 64ul output
+
+val state_malloc:
+    r:rid
+  -> ST.ST (s:buffer uint64 { length s = 25 })
+  (requires (fun _ ->
+    ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    live h1 s /\
+    M.(modifies loc_none h0 h1) /\
+    fresh_loc (loc_addr_of_buffer s) h0 h1 /\
+    (M.loc_includes (M.loc_region_only true r) (loc_addr_of_buffer s)) /\
+    freeable s))
+
+let state_malloc r =
+  malloc r (u64 0) 25ul
+
+val state_free:
+    s:buffer uint64 { length s = 25 }
+  -> ST.ST unit
+  (requires fun h0 ->
+    freeable s /\ live h0 s)
+  (ensures fun h0 _ h1 ->
+    M.modifies (loc_addr_of_buffer s) h0 h1)
+
+let state_free s =
+  free s
+
+open Lib.NTuple
+open Lib.MultiBuffer
+open Lib.IntVector
+
+val shake128_absorb:
+  state:lbuffer_t MUT (vec_t U64 1) 25ul
+  -> input:buffer_t MUT uint8
+  -> inputByteLen:size_t{v inputByteLen == length input}
+  -> Stack unit
+     (requires fun h ->
+       live h input /\ live h state /\ disjoint input state)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc state) h0 h1 /\
+       as_seq h1 state ==
+          V.absorb #Shake128 #M32 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (byte 0x1F))
+let shake128_absorb state input inputByteLen =
+  absorb #Shake128 #M32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
+
+val shake128_squeeze_nblocks:
+  state:lbuffer_t MUT (vec_t U64 1) 25ul
+  -> output:buffer_t MUT uint8
+  -> outputByteLen:size_t{v outputByteLen == length output}
+  -> Stack unit
+     (requires fun h ->
+       live h output /\ live h state /\ disjoint output state)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc state |+| loc output) h0 h1 /\
+       (let s', b' = 
+          V.squeeze_nblocks #Shake128 #M32 168 (v outputByteLen) (as_seq h0 state, as_seq_multi h0 (ntup1 output)) in
+          as_seq h1 state == s' /\
+          as_seq_multi h1 (ntup1 output) == b'))
+let shake128_squeeze_nblocks state output outputByteLen =
+  squeeze_nblocks #Shake128 #M32 state 168ul outputByteLen (ntup1 output)

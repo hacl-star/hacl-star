@@ -748,7 +748,6 @@ val alloc_multi4: m:m_spec{lanes m == 4} ->
     as_seq_multi h1 b == next_block_seq_zero m)
 
 let alloc_multi4 m =
-  //let h0' = ST.get() in
   let b0 = create 256ul (u8 0) in
   let b1 = create 256ul (u8 0) in
   let b2 = create 256ul (u8 0) in
@@ -756,10 +755,6 @@ let alloc_multi4 m =
   let b = ntup4 (b0, (b1, (b2, b3))) in
   let h0 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h0 b) (next_block_seq_zero m);
-  //let h1 = ST.get() in
-  //assert (stack_allocated b0 h0' h1 (Seq.create 256 (u8 0)));
-  //assert (stack_allocated b1 h0' h1 (Seq.create 256 (u8 0)));
-  admit(); //Can't prove (stack_allocated_multi b h0 h1 (Seq.create 256 (u8 0)))
   b
 
 inline_for_extraction noextract
@@ -1152,7 +1147,6 @@ let alloc_output4 m outputByteLen =
   let b = ntup4 (b0, (b1, (b2, b3))) in
   let h0 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h0 b) (init_b #m (v outputByteLen));
-  admit(); //Can't prove (stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)))
   b
 
 inline_for_extraction noextract
