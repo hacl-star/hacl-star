@@ -115,6 +115,7 @@ let sha3_512 output input inputByteLen =
   admit();
   keccak #SHA3_512 #M32 576ul (* 1024ul *) inputByteLen input (byte 0x06) 64ul output
 
+inline_for_extraction
 val state_malloc:
     r:rid
   -> ST.ST (s:buffer uint64 { length s = 25 })

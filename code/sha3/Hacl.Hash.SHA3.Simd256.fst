@@ -257,6 +257,7 @@ let sha3_512 output0 output1 output2 output3
   let rb = ntup4 (output0,(output1,(output2,output3))) in
   keccak #SHA3_512 #M256 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb
 
+inline_for_extraction
 val state_malloc:
     r:rid
   -> ST.ST (s:buffer uint64 { length s = 100 })
