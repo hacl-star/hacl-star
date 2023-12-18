@@ -277,12 +277,12 @@ val ladder0_:
       M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)))
 [@ Meta.Attribute.inline_ ]
 let ladder0_ #s k q p01_tmp1_swap tmp2 =
+  let swap:lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *! nlimb s) 1ul in
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
 
   (* HACL-RS: take sub from p01_tmp1 instead of p01_tmp1_swap *)
   let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
   let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
-  let swap:lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *! nlimb s) 1ul in
 
   assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
   assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
