@@ -84,6 +84,11 @@ let point_add_and_double0 #s nq_p1 ab dc tmp2 =
   //fmul c c b;   // c = cb = c * b
   (* HACL-RS *)
   fmul2_a dc dc ab tmp2;   // d|c = d*a|c*b
+
+  (* HACL-RS *)
+  let d : felem s = sub dc 0ul (nlimb s) in
+  let c : felem s = sub dc (nlimb s) (nlimb s) in
+
   fadd x3 d c;  // x3 = da + cb
   fsub z3 d c  // z3 = da - cb
 
@@ -191,6 +196,10 @@ let point_add_and_double #s q p01_tmp1 tmp2 =
 
   point_add_and_double0 #s nq_p1 ab dc tmp2;
   point_add_and_double1 #s nq nq_p1 tmp1 tmp2;
+
+  (* HACL-RS *)
+  let z3 = sub nq_p1 (nlimb s) (nlimb s) in
+
   fmul_a z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
   S.lemma_add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)
 

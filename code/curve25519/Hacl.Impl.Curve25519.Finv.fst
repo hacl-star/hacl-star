@@ -264,8 +264,16 @@ let finv1 #s i t1 tmp =
   (* 8 *) fsquare_times #s t0 a tmp1 2ul;
   (* 9 *) fmul_s #s b t0 i tmp;
   (* 11 *) fmul_sa2 #s a b a tmp;
+
+  (* HACL-RS *)
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+
   (* 22 *) fsquare_times #s t0 a tmp1 1ul;
   (* 2^5 - 2^0 = 31 *) fmul_sa2 #s b t0 b tmp;
+
+  (* HACL-RS *)
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+
   (* 2^10 - 2^5 *) fsquare_times #s t0 b tmp1 5ul;
   (* 2^10 - 2^0 *) fmul_sa2 #s b t0 b tmp
 
@@ -307,10 +315,22 @@ let finv2 #s t1 tmp =
   let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
   (* 2^20 - 2^10 *) fsquare_times #s t0 b tmp1 10ul;
   (* 2^20 - 2^0 *) fmul_s #s c t0 b tmp;
+
+  (* HACL-RS *)
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+
   (* 2^40 - 2^20 *) fsquare_times #s t0 c tmp1 20ul;
   (* 2^40 - 2^0 *) fmul_sa1 #s t0 t0 c tmp;
+
+  (* HACL-RS *)
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+
   (* 2^50 - 2^10 *) fsquare_times_a #s t0 t0 tmp1 10ul;
   (* 2^50 - 2^0 *) fmul_sa2 #s b t0 b tmp;
+
+  (* HACL-RS *)
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+
   (* 2^100 - 2^50 *) fsquare_times #s t0 b tmp1 50ul;
   (* 2^100 - 2^0 *) fmul_s #s c t0 b tmp
 
@@ -351,8 +371,16 @@ let finv3 #s t1 tmp =
   let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
   (* 2^200 - 2^100 *) fsquare_times #s t0 c tmp1 100ul;
   (* 2^200 - 2^0 *) fmul_sa1 #s t0 t0 c tmp;
+
+  (* HACL-RS *)
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+
   (* 2^250 - 2^50 *) fsquare_times_a #s t0 t0 tmp1 50ul;
   (* 2^250 - 2^0 *) fmul_sa1 #s t0 t0 b tmp;
+
+  (* HACL-RS *)
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+
   (* 2^255 - 2^5 *) fsquare_times_a #s t0 t0 tmp1 5ul
 
 
