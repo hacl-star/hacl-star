@@ -278,8 +278,10 @@ val ladder0_:
 [@ Meta.Attribute.inline_ ]
 let ladder0_ #s k q p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
-  let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
-  let nq_p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
+
+  (* HACL-RS: take sub from p01_tmp1 instead of p01_tmp1_swap *)
+  let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
+  let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
   let swap:lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *! nlimb s) 1ul in
 
   assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
@@ -291,6 +293,10 @@ let ladder0_ #s k q p01_tmp1_swap tmp2 =
 
   // bit 255 is 0 and bit 254 is 1
   cswap2 #s (u64 1) nq nq_p1;
+
+  (* HACL-RS *)
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
+
   point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- u64 1;
 
@@ -298,6 +304,11 @@ let ladder0_ #s k q p01_tmp1_swap tmp2 =
   //First iteration can be skipped because top bit of scalar is 0
   ladder_step_loop #s k q p01_tmp1_swap tmp2;
   let sw = swap.(0ul) in
+
+  (* HACL-RS *)
+  let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
+  let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
+
   cswap2 #s sw nq nq_p1
 
 val ladder1_:
