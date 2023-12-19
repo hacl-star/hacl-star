@@ -136,7 +136,7 @@ let lowerUpper128b (l:bv_t 64) (u:bv_t 64) : bv_t 128 =
   b_add #128 (b_mul #128 (b_uext #64 #64 u) 0x10000000000000000) (b_uext #64 #64 l)
 
 //this was so flaky, new options helped.
-#reset-options "--smtencoding.elim_box true --z3refresh --z3rlimit 12 --max_ifuel 1 --max_fuel 1"
+#reset-options "--smtencoding.elim_box true --z3refresh --z3rlimit 40 --max_ifuel 1 --max_fuel 1"
 let lemma_lowerUpper128_andu
     (x:uint_t 128) (x0:uint_t 64) (x1:uint_t 64) (y:uint_t 128)
     (y0:uint_t 64) (y1:uint_t 64) (z:uint_t 128) (z0:uint_t 64) (z1:uint_t 64) :
