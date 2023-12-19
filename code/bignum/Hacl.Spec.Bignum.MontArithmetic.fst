@@ -74,7 +74,10 @@ let from_mont_lemma_nonzero pbits rLen n mu aM =
   assert (d % n <> 0);
 
   mul_nonzero_lemma n aM d;
-  assert (a <> 0)
+  assert
+   (let a = M.from_mont pbits rLen n mu aM in
+    0 < a /\ a < n); // For some reason, this makes the proof instant.
+  ()
 
 ///////////////////////////////////////////////
 
