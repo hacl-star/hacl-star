@@ -190,8 +190,8 @@ pub fn sha256_init(hash: &mut [u32]) -> ()
 {
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
         let x: u32 = (&h256)[i as usize];
+        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
         os.1[i as usize] = x
     }
 }
@@ -302,8 +302,8 @@ pub fn sha256_init(hash: &mut [u32]) -> ()
     };
     for i in 0u32..8u32
     {
+        let x: u32 = (hash[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
         let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
-        let x: u32 = (os.1[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
         os.1[i as usize] = x
     }
 }
@@ -362,8 +362,8 @@ pub fn sha224_init(hash: &mut [u32]) -> ()
 {
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
         let x: u32 = (&h224)[i as usize];
+        let os: (&mut [u32], &mut [u32]) = hash.split_at_mut(0usize);
         os.1[i as usize] = x
     }
 }
@@ -391,8 +391,8 @@ pub fn sha512_init(hash: &mut [u64]) -> ()
 {
     for i in 0u32..8u32
     {
-        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
         let x: u64 = (&h512)[i as usize];
+        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
         os.1[i as usize] = x
     }
 }
@@ -503,8 +503,8 @@ pub fn sha512_init(hash: &mut [u64]) -> ()
     };
     for i in 0u32..8u32
     {
+        let x: u64 = (hash[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
         let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
-        let x: u64 = (os.1[i as usize]).wrapping_add((&mut hash_old)[i as usize]);
         os.1[i as usize] = x
     }
 }
@@ -571,8 +571,8 @@ pub fn sha384_init(hash: &mut [u64]) -> ()
 {
     for i in 0u32..8u32
     {
-        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
         let x: u64 = (&h384)[i as usize];
+        let os: (&mut [u64], &mut [u64]) = hash.split_at_mut(0usize);
         os.1[i as usize] = x
     }
 }

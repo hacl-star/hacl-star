@@ -15,7 +15,7 @@ pub fn expand_blake2s_128(
     let text0: (&mut [u8], &mut [u8]) = (&mut text).split_at_mut(tlen as usize);
     let tag: (&mut [u8], &mut [u8]) = text0.1.split_at_mut(0usize - tlen as usize);
     let ctr: (&mut [u8], &mut [u8]) = tag.1.split_at_mut(tlen.wrapping_add(infolen) as usize);
-    ((&mut text0.0[tlen as usize..])[0usize..infolen as usize]).copy_from_slice(
+    ((&mut (&mut text)[tlen as usize..])[0usize..infolen as usize]).copy_from_slice(
         &info[0usize..infolen as usize]
     );
     for i in 0u32..n
@@ -37,7 +37,7 @@ pub fn expand_blake2s_128(
                 ctr.0,
                 prk,
                 prklen,
-                text0.0,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };
@@ -64,7 +64,7 @@ pub fn expand_blake2s_128(
                 ctr.0,
                 prk,
                 prklen,
-                text0.0,
+                &mut text,
                 tlen.wrapping_add(infolen).wrapping_add(1u32)
             )
         };

@@ -92,8 +92,8 @@ pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     let mut st: [u32; 8] = [0u32; 8usize];
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
         let x: u32 = (&crate::hacl::hash_sha2::h256)[i as usize];
+        let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let s: &mut [u32] = &mut st;
@@ -127,8 +127,8 @@ fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     let mut st: [u32; 8] = [0u32; 8usize];
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
         let x: u32 = (&crate::hacl::hash_sha2::h224)[i as usize];
+        let os: (&mut [u32], &mut [u32]) = (&mut st).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let s: &mut [u32] = &mut st;

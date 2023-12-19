@@ -66,8 +66,8 @@
     rounds(k);
     for i in 0u32..16u32
     {
+        let x: u32 = (k[i as usize]).wrapping_add(ctx[i as usize]);
         let os: (&mut [u32], &mut [u32]) = k.split_at_mut(0usize);
-        let x: u32 = (os.1[i as usize]).wrapping_add(ctx[i as usize]);
         os.1[i as usize] = x
     };
     k[8usize] = (k[8usize]).wrapping_add(ctr_u32)
@@ -81,20 +81,20 @@
     let mut n32: [u32; 2] = [0u32; 2usize];
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     for i in 0u32..2u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     (&mut ctx)[0usize] = 0x61707865u32;
@@ -133,20 +133,20 @@
     let mut n32: [u32; 2] = [0u32; 2usize];
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     for i in 0u32..2u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     (&mut ctx)[0usize] = 0x61707865u32;
@@ -174,17 +174,17 @@
         let mut bl: [u32; 16] = [0u32; 16usize];
         for i0 in 0u32..16u32
         {
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             let bj: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             os.1[i0 as usize] = x
         };
         for i0 in 0u32..16u32
         {
+            let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
             let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            let x: u32 = os.1[i0 as usize] ^ (&mut k10)[i0 as usize];
             os.1[i0 as usize] = x
         };
         for i0 in 0u32..16u32
@@ -207,18 +207,18 @@
         let mut bl: [u32; 16] = [0u32; 16usize];
         for i in 0u32..16u32
         {
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             let bj: (&mut [u8], &mut [u8]) =
                 (&mut plain).split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             os.1[i as usize] = x
         };
         for i in 0u32..16u32
         {
+            let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
             let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            let x: u32 = os.1[i as usize] ^ (&mut k10)[i as usize];
             os.1[i as usize] = x
         };
         for i in 0u32..16u32
@@ -249,20 +249,20 @@
     let mut n32: [u32; 2] = [0u32; 2usize];
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     for i in 0u32..2u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     (&mut ctx)[0usize] = 0x61707865u32;
@@ -290,17 +290,17 @@
         let mut bl: [u32; 16] = [0u32; 16usize];
         for i0 in 0u32..16u32
         {
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             let bj: (&mut [u8], &mut [u8]) = uu____1.1.split_at_mut(i0.wrapping_mul(4u32) as usize);
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             os.1[i0 as usize] = x
         };
         for i0 in 0u32..16u32
         {
+            let x: u32 = (&mut bl)[i0 as usize] ^ (&mut k10)[i0 as usize];
             let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            let x: u32 = os.1[i0 as usize] ^ (&mut k10)[i0 as usize];
             os.1[i0 as usize] = x
         };
         for i0 in 0u32..16u32
@@ -323,18 +323,18 @@
         let mut bl: [u32; 16] = [0u32; 16usize];
         for i in 0u32..16u32
         {
-            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             let bj: (&mut [u8], &mut [u8]) =
                 (&mut plain).split_at_mut(i.wrapping_mul(4u32) as usize);
             let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
             let r: u32 = u;
             let x: u32 = r;
+            let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
             os.1[i as usize] = x
         };
         for i in 0u32..16u32
         {
+            let x: u32 = (&mut bl)[i as usize] ^ (&mut k10)[i as usize];
             let os: (&mut [u32], &mut [u32]) = (&mut bl).split_at_mut(0usize);
-            let x: u32 = os.1[i as usize] ^ (&mut k10)[i as usize];
             os.1[i as usize] = x
         };
         for i in 0u32..16u32
@@ -357,20 +357,20 @@
     let mut n32: [u32; 4] = [0u32; 4usize];
     for i in 0u32..8u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = key.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     for i in 0u32..4u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut n32).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let k0: (&mut [u32], &mut [u32]) = (&mut k32).split_at_mut(0usize);

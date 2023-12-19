@@ -73,12 +73,12 @@ pub fn point_mul(scalar: &mut [u8], p: &mut [u64], out: &mut [u64]) -> ()
     let mut scalar_q: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
-        let os: (&mut [u64], &mut [u64]) = (&mut scalar_q).split_at_mut(0usize);
         let u: u64 =
             crate::lowstar::endianness::load64_be(
                 &mut scalar[4u32.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(8u32) as usize..]
             );
         let x: u64 = u;
+        let os: (&mut [u64], &mut [u64]) = (&mut scalar_q).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     crate::hacl::k256_ecdsa::point_mul(out, &mut scalar_q, p)

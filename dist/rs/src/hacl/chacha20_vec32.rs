@@ -116,8 +116,8 @@
     double_round_32(k);
     for i in 0u32..16u32
     {
+        let x: u32 = (k[i as usize]).wrapping_add(ctx[i as usize]);
         let os: (&mut [u32], &mut [u32]) = k.split_at_mut(0usize);
-        let x: u32 = (os.1[i as usize]).wrapping_add(ctx[i as usize]);
         os.1[i as usize] = x
     };
     k[12usize] = (k[12usize]).wrapping_add(cv)
@@ -128,33 +128,35 @@
     let mut ctx1: [u32; 16] = [0u32; 16usize];
     for i in 0u32..4u32
     {
-        let os: &mut [u32] = &mut (&mut (&mut ctx1)[0usize..])[0usize..];
         let x: u32 = (&crate::hacl::chacha20::chacha20_constants)[i as usize];
+        let os: &mut [u32] = &mut (&mut (&mut ctx1)[0usize..])[0usize..];
         os[i as usize] = x
     };
+    let uu____0: (&mut [u32], &mut [u32]) = (&mut ctx1).split_at_mut(4usize);
     for i in 0u32..8u32
     {
-        let os: &mut [u32] = &mut (&mut (&mut ctx1)[4usize..])[0usize..];
         let bj: (&mut [u8], &mut [u8]) = k.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
-        os[i as usize] = x
+        let os: (&mut [u32], &mut [u32]) = uu____0.1.split_at_mut(0usize);
+        os.1[i as usize] = x
     };
     (&mut ctx1)[12usize] = ctr;
+    let uu____1: (&mut [u32], &mut [u32]) = (&mut ctx1).split_at_mut(13usize);
     for i in 0u32..3u32
     {
-        let os: &mut [u32] = &mut (&mut (&mut ctx1)[13usize..])[0usize..];
         let bj: (&mut [u8], &mut [u8]) = n.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
-        os[i as usize] = x
+        let os: (&mut [u32], &mut [u32]) = uu____1.1.split_at_mut(0usize);
+        os.1[i as usize] = x
     };
     for i in 0u32..16u32
     {
-        let os: (&mut [u32], &mut [u32]) = ctx.split_at_mut(0usize);
         let x: u32 = (&mut ctx1)[i as usize];
+        let os: (&mut [u32], &mut [u32]) = ctx.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let ctr1: u32 = 0u32;

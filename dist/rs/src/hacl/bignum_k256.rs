@@ -53,11 +53,11 @@
     let mut tmp: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
-        let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = b.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_be(bj.1);
         let r: u64 = u;
         let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let s0: u64 = (&mut tmp)[3usize];

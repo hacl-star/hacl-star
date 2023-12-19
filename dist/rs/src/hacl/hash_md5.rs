@@ -1367,7 +1367,7 @@ pub fn update_last(s: &mut [u32], prev_len: u64, input: &mut [u8], input_len: u3
     let tmp_pad: (&mut [u8], &mut [u8]) = tmp_rest.1.split_at_mut(rest_len as usize);
     (tmp_pad.0[0usize..rest_len as usize]).copy_from_slice(&rest.1[0usize..rest_len as usize]);
     pad(total_input_len, tmp_pad.1);
-    update_multi(s, tmp_pad.0, tmp_len.wrapping_div(64u32))
+    update_multi(s, tmp.1, tmp_len.wrapping_div(64u32))
 }
 
 pub fn hash_oneshot(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()

@@ -10,11 +10,11 @@
     let mut m_w: [u32; 16] = [0u32; 16usize];
     for i in 0u32..16u32
     {
-        let os: (&mut [u32], &mut [u32]) = (&mut m_w).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = d.split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = (&mut m_w).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let mut mask: crate::lib::intvector_intrinsics::vec128 =
@@ -626,7 +626,7 @@ pub fn finish(
     crate::lib::intvector_intrinsics::vec128_store32_le(second.1, row1.1[0usize]);
     let r#final: (&mut [u8], &mut [u8]) = second.0.split_at_mut(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
-    crate::lib::memzero0::memzero::<u8>(r#final.0, 32u32)
+    crate::lib::memzero0::memzero::<u8>(&mut b, 32u32)
 }
 
 pub fn store_state128s_to_state32(
@@ -667,44 +667,44 @@ pub fn store_state128s_to_state32(
     crate::lib::intvector_intrinsics::vec128_store32_le(&mut b8, r1.0[0usize]);
     for i in 0u32..4u32
     {
-        let os: (&mut [u32], &mut [u32]) = b1.0.split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = (&mut b8).split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = b1.0.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let mut b80: [u8; 16] = [0u8; 16usize];
     crate::lib::intvector_intrinsics::vec128_store32_le(&mut b80, r2.0[0usize]);
     for i in 0u32..4u32
     {
-        let os: (&mut [u32], &mut [u32]) = b2.0.split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = (&mut b80).split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = b2.0.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let mut b81: [u8; 16] = [0u8; 16usize];
     crate::lib::intvector_intrinsics::vec128_store32_le(&mut b81, r3.0[0usize]);
     for i in 0u32..4u32
     {
-        let os: (&mut [u32], &mut [u32]) = b3.0.split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = (&mut b81).split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = b3.0.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let mut b82: [u8; 16] = [0u8; 16usize];
     crate::lib::intvector_intrinsics::vec128_store32_le(&mut b82, r3.1[0usize]);
     for i in 0u32..4u32
     {
-        let os: (&mut [u32], &mut [u32]) = b3.1.split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = (&mut b82).split_at_mut(i.wrapping_mul(4u32) as usize);
         let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
         let r: u32 = u;
         let x: u32 = r;
+        let os: (&mut [u32], &mut [u32]) = b3.1.split_at_mut(0usize);
         os.1[i as usize] = x
     }
 }

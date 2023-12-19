@@ -32,8 +32,8 @@ fn secretbox_detached(
     ((&mut block0)[0usize..mlen0 as usize]).copy_from_slice(&m1.0[0usize..mlen0 as usize]);
     for i in 0u32..32u32
     {
+        let x: u8 = (&mut block0)[i as usize] ^ ekey0.1[i as usize];
         let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
-        let x: u8 = os.1[i as usize] ^ ekey0.1[i as usize];
         os.1[i as usize] = x
     };
     let c0: (&mut [u8], &mut [u8]) = c.split_at_mut(0usize);
@@ -42,7 +42,7 @@ fn secretbox_detached(
         &(&mut (&mut block0)[0usize..])[0usize..mlen0 as usize]
     );
     crate::hacl::salsa20::salsa20_encrypt(mlen1, c1.1, m1.1, subkey.1, n1.1, 1u32);
-    crate::hacl::mac_poly1305::mac(tag, c1.0, mlen, ekey0.0)
+    crate::hacl::mac_poly1305::mac(tag, c, mlen, ekey0.0)
 }
 
 fn secretbox_open_detached(
@@ -80,8 +80,8 @@ fn secretbox_open_detached(
         ((&mut block0)[0usize..mlen0 as usize]).copy_from_slice(&c1.0[0usize..mlen0 as usize]);
         for i in 0u32..32u32
         {
+            let x: u8 = (&mut block0)[i as usize] ^ ekey0.1[i as usize];
             let os: (&mut [u8], &mut [u8]) = (&mut block0).split_at_mut(0usize);
-            let x: u8 = os.1[i as usize] ^ ekey0.1[i as usize];
             os.1[i as usize] = x
         };
         let m0: (&mut [u8], &mut [u8]) = m.split_at_mut(0usize);

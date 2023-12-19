@@ -132,9 +132,9 @@ pub fn shake128_4x(
 {
     for i in 0u32..n1.wrapping_mul(n2)
     {
-        let os: (&mut [u16], &mut [u16]) = res.split_at_mut(0usize);
         let u: u16 = crate::lowstar::endianness::load16_le(&mut b[2u32.wrapping_mul(i) as usize..]);
         let x: u16 = u;
+        let os: (&mut [u16], &mut [u16]) = res.split_at_mut(0usize);
         os.1[i as usize] = x
     }
 }

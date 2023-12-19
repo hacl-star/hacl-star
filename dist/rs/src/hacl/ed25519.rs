@@ -170,11 +170,11 @@ pub fn load_51(output: &mut [u64], input: &mut [u8]) -> ()
     let mut u64s: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
-        let os: (&mut [u64], &mut [u64]) = (&mut u64s).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = input.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = (&mut u64s).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let u64s3: u64 = (&mut u64s)[3usize];
@@ -1286,11 +1286,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let mut bscalar: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
-        let os: (&mut [u64], &mut [u64]) = (&mut bscalar).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = scalar.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = (&mut bscalar).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let mut table: [u64; 320] = [0u64; 320usize];
@@ -1304,7 +1304,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
         let t11: (&mut [u64], &mut [u64]) =
             t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
         point_double(&mut tmp, t11.1);
-        (t11.0[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
+        ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
         ).wrapping_add(2u32).wrapping_mul(20u32)
         as
@@ -1312,13 +1312,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
         +
         20usize]).copy_from_slice(&(&mut tmp)[0usize..20usize]);
         let t2: (&mut [u64], &mut [u64]) =
-            t11.1.split_at_mut(
+            (&mut table).split_at_mut(
                 2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize
-                -
-                i.wrapping_add(1u32).wrapping_mul(20u32) as usize
             );
         point_add(&mut tmp, q, t2.1);
-        (t11.0[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
+        ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
         ).wrapping_add(3u32).wrapping_mul(20u32)
         as
@@ -1334,17 +1332,17 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, &mut bscalar, k, 4u32);
         ((&mut tmp0)[0usize..20usize]).copy_from_slice(
-            &(&mut t1.0[0usize..] as &mut [u64])[0usize..20usize]
+            &(&mut (&mut table)[0usize..] as &mut [u64])[0usize..20usize]
         );
         for i0 in 0u32..15u32
         {
             let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i0.wrapping_add(1u32) as u64);
             let res_j: (&[u64], &[u64]) =
-                t1.0.split_at(i0.wrapping_add(1u32).wrapping_mul(20u32) as usize);
+                (&mut table).split_at(i0.wrapping_add(1u32).wrapping_mul(20u32) as usize);
             for i1 in 0u32..20u32
             {
+                let x: u64 = c & res_j.1[i1 as usize] | ! c & (&mut tmp0)[i1 as usize];
                 let os: (&mut [u64], &mut [u64]) = (&mut tmp0).split_at_mut(0usize);
-                let x: u64 = c & res_j.1[i1 as usize] | ! c & os.1[i1 as usize];
                 os.1[i1 as usize] = x
             }
         };
@@ -1362,8 +1360,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             table.split_at(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
         for i0 in 0u32..20u32
         {
+            let x: u64 = c & res_j.1[i0 as usize] | ! c & tmp[i0 as usize];
             let os: (&mut [u64], &mut [u64]) = tmp.split_at_mut(0usize);
-            let x: u64 = c & res_j.1[i0 as usize] | ! c & os.1[i0 as usize];
             os.1[i0 as usize] = x
         }
     }
@@ -1374,11 +1372,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let mut bscalar: [u64; 4] = [0u64; 4usize];
     for i in 0u32..4u32
     {
-        let os: (&mut [u64], &mut [u64]) = (&mut bscalar).split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = scalar.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = (&mut bscalar).split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let mut q1: [u64; 20] = [0u64; 20usize];
@@ -1554,20 +1552,20 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     gt.1[4usize] = 0x00067875f0fd78b7u64;
     for i in 0u32..4u32
     {
-        let os: (&mut [u64], &mut [u64]) = bscalar2.0.split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = scalar1.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = bscalar2.0.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     for i in 0u32..4u32
     {
-        let os: (&mut [u64], &mut [u64]) = bscalar2.1.split_at_mut(0usize);
         let bj: (&mut [u8], &mut [u8]) = scalar2.split_at_mut(i.wrapping_mul(8u32) as usize);
         let u: u64 = crate::lowstar::endianness::load64_le(bj.1);
         let r: u64 = u;
         let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = bscalar2.1.split_at_mut(0usize);
         os.1[i as usize] = x
     };
     let mut table2: [u64; 640] = [0u64; 640usize];
@@ -1581,7 +1579,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
         let t11: (&mut [u64], &mut [u64]) =
             t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
         point_double(&mut tmp1, t11.1);
-        (t11.0[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
+        ((&mut table2)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
         ).wrapping_add(2u32).wrapping_mul(20u32)
         as
@@ -1589,13 +1587,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
         +
         20usize]).copy_from_slice(&(&mut tmp1)[0usize..20usize]);
         let t2: (&mut [u64], &mut [u64]) =
-            t11.1.split_at_mut(
+            (&mut table2).split_at_mut(
                 2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize
-                -
-                i.wrapping_add(1u32).wrapping_mul(20u32) as usize
             );
         point_add(&mut tmp1, q2, t2.1);
-        (t11.0[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
+        ((&mut table2)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
         ).wrapping_add(3u32).wrapping_mul(20u32)
         as
@@ -1678,7 +1674,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     crate::lowstar::endianness::store64_le(b81.1, b2);
     let b82: (&mut [u8], &mut [u8]) = b81.1.split_at_mut(7usize);
     crate::lowstar::endianness::store64_le(b82.1, b3);
-    crate::lowstar::endianness::store32_le(&mut b80.0[28usize..], b4_)
+    crate::lowstar::endianness::store32_le(&mut out[28usize..], b4_)
 }
 
 #[inline] fn load_64_bytes(out: &mut [u64], b: &mut [u8]) -> ()
@@ -1719,7 +1715,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let u7: u64 = crate::lowstar::endianness::load64_le(b87.1);
     let z7: u64 = u7;
     let b88: u64 = z7 & 0xffffffffffffffu64;
-    let b63: u8 = b80.0[63usize];
+    let b63: u8 = b[63usize];
     let b9: u64 = b63 as u64;
     out[0usize] = b0;
     out[1usize] = b1;
@@ -1751,7 +1747,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let u2: u64 = crate::lowstar::endianness::load64_le(b82.1);
     let z2: u64 = u2;
     let b3: u64 = z2 & 0xffffffffffffffu64;
-    let u3: u32 = crate::lowstar::endianness::load32_le(&mut b80.0[28usize..]);
+    let u3: u32 = crate::lowstar::endianness::load32_le(&mut b[28usize..]);
     let b4: u32 = u3;
     let b41: u64 = b4 as u64;
     out[0usize] = b0;

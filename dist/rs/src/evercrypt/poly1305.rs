@@ -22,7 +22,7 @@ fn poly1305_vale(dst: &mut [u8], src: &mut [u8], len: u32, key: &mut [u8]) -> ()
             let len16: u32 = n_blocks.wrapping_mul(16u32);
             let src16: (&mut [u8], &mut [u8]) = src.split_at_mut(0usize);
             ((&mut tmp)[0usize..n_extra as usize]).copy_from_slice(
-                &src16.1[len16 as usize..len16 as usize + n_extra as usize]
+                &src[len16 as usize..len16 as usize + n_extra as usize]
             );
             crate::lowstar::ignore::ignore::<u64>(
                 crate::vale::stdcalls_x64_poly::x64_poly1305(&mut ctx, src16.1, len16 as u64, 0u64)

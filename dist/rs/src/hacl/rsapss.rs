@@ -21,7 +21,7 @@
         c.1[1usize] = i.wrapping_shr(16u32) as u8;
         c.1[2usize] = i.wrapping_shr(8u32) as u8;
         c.1[3usize] = i as u8;
-        crate::hacl::impl_rsapss_mgf::hash(a, acc_i.1, len.wrapping_add(4u32), c.0)
+        crate::hacl::impl_rsapss_mgf::hash(a, acc_i.1, len.wrapping_add(4u32), &mut mgfseed_counter)
     };
     (res[0usize..maskLen as usize]).copy_from_slice(
         &(&mut (&mut acc)[0usize..])[0usize..maskLen as usize]
@@ -124,8 +124,8 @@
     mgf_hash(a, hLen, &mut m1Hash, dbLen, &mut dbMask);
     for i in 0u32..dbLen
     {
+        let x: u8 = (&mut db)[i as usize] ^ (&mut dbMask)[i as usize];
         let os: (&mut [u8], &mut [u8]) = (&mut db).split_at_mut(0usize);
-        let x: u8 = os.1[i as usize] ^ (&mut dbMask)[i as usize];
         os.1[i as usize] = x
     };
     let msBits: u32 = emBits.wrapping_rem(8u32);
@@ -169,8 +169,8 @@
         mgf_hash(a, hLen, m1Hash.1, dbLen, &mut dbMask);
         for i in 0u32..dbLen
         {
+            let x: u8 = (&mut dbMask)[i as usize] ^ m1Hash.0[i as usize];
             let os: (&mut [u8], &mut [u8]) = (&mut dbMask).split_at_mut(0usize);
-            let x: u8 = os.1[i as usize] ^ m1Hash.0[i as usize];
             os.1[i as usize] = x
         };
         let msBits1: u32 = emBits.wrapping_rem(8u32);
@@ -348,9 +348,9 @@ pub fn rsapss_sign(
         let eq_m: u64 = mask1;
         for i in 0u32..nLen2
         {
-            let os: (&mut [u64], &mut [u64]) = (&mut s).split_at_mut(0usize);
-            let x: u64 = os.1[i as usize];
+            let x: u64 = (&mut s)[i as usize];
             let x0: u64 = eq_m & x;
+            let os: (&mut [u64], &mut [u64]) = (&mut s).split_at_mut(0usize);
             os.1[i as usize] = x0
         };
         let eq_b: bool = eq_m == 0xFFFFFFFFFFFFFFFFu64;

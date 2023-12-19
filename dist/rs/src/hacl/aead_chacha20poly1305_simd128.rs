@@ -1448,7 +1448,7 @@
     acc.1[2usize] = o2;
     acc.1[3usize] = o3;
     acc.1[4usize] = o4;
-    crate::hacl::mac_poly1305_simd128::poly1305_finish(out, k, acc.1)
+    crate::hacl::mac_poly1305_simd128::poly1305_finish(out, k, &mut ctx)
 }
 
 pub fn encrypt(
