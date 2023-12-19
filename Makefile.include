@@ -6,6 +6,10 @@ VALE_BUNDLES=\
   -bundle 'Vale.Inline.X64.*[rename=Vale_Inline]' \
   -bundle Vale.*[rename=Unused2]
 
+# NOTE: Please keep this list of directories in sync with
+# Hacl.fst.config.json and vale/Hacl.Vale.fst.config.json so the vscode
+# extension works seamlessly.
+
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
 SPECS_DIR 	= $(HACL_HOME)/specs $(addprefix $(HACL_HOME)/specs/,lemmas tests drbg frodo tests/p256)

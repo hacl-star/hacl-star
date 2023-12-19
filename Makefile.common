@@ -73,6 +73,8 @@ INCLUDES = \
 
 # 0. Vale
 
+# Please keep this in sync with vale/Hacl.Vale.fst.config.json
+# so the vscode extension works seamlessly.
 VALE_FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
   --max_fuel 1 --max_ifuel 1 --initial_ifuel 0 \
@@ -107,6 +109,9 @@ endif
 # 331: name is being ignored
 # 332: abstract keyword
 # 337: special treatment of @ is deprecated + Multiple decreases clauses on definition
+#
+# Please keep this in sync with Hacl.fst.config.json
+# so the vscode extension works seamlessly.
 FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
