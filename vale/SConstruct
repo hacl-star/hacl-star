@@ -790,7 +790,7 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
     Depends(temptargetfiles, hintfile)
   env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
-    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile} {fstar_record_hints}' +
+    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_dir ../hints {fstar_record_hints}' +
     (f' --debug {file_module_name(File(sourcefile))} --debug_level print_normalized_terms' if profile else '') +
     f' 1> {temptargetfile} 2> {stderrfile}')
   CopyFile(targetfile, temptargetfile)
@@ -807,7 +807,6 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
   env = options.env
   base_name = file_drop_extension(sourcefile)
   module_name = file_module_name(sourcefile)
-  hintfile = to_hint_file(sourcefile)
   mlfile = ml_out_file(sourcefile, '.ml')
   Depends(mlfile, to_obj_dir(base_name + '.fst.verified'))
   verifier_flags = options.verifier_flags.replace('--use_extracted_interfaces true', '')
