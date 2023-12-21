@@ -570,7 +570,7 @@ static void update_key(uint32_t *wv, uint32_t *hash, uint32_t kk, uint8_t *k, ui
   {
     update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 void
@@ -607,7 +607,7 @@ Hacl_Hash_Blake2s_update_last(
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
   update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 static void
@@ -665,7 +665,7 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store32_le(second + i * 4U, row1[i]););
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, 32U, uint8_t);
+  Lib_Memzero0_memzero(b, 32U, uint8_t, void *);
 }
 
 /**
@@ -976,7 +976,7 @@ Hacl_Hash_Blake2s_hash_with_key(
   Hacl_Hash_Blake2s_init(b, key_len, output_len);
   update(b1, b, key_len, key, input_len, input);
   Hacl_Hash_Blake2s_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, 16U, uint32_t);
-  Lib_Memzero0_memzero(b, 16U, uint32_t);
+  Lib_Memzero0_memzero(b1, 16U, uint32_t, void *);
+  Lib_Memzero0_memzero(b, 16U, uint32_t, void *);
 }
 
