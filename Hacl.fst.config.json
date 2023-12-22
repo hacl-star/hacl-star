@@ -8,7 +8,8 @@
     "--cmi",
     "--already_cached", "Prims FStar LowStar C Spec.Loops TestLib WasmSupport",
     "--warn_error", "@240+241@247-272-274@319@328@331@332@337",
-    "--trivial_pre_for_unannotated_effectful_fns", "false"
+    "--trivial_pre_for_unannotated_effectful_fns", "false",
+    "--hint_dir", "hints"
   ],
   "include_dirs": [
     "lib",
