@@ -23,9 +23,13 @@ module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+inline_for_extraction noextract
+let same_as x = y:size_t { x == y }
+
 val shake128:
-  output:buffer_t MUT uint8
-  -> outputByteLen:size_t{v outputByteLen == length output}
+  g_outputByteLen:Ghost.erased size_t
+  -> output: lbuffer uint8 g_outputByteLen
+  -> outputByteLen: same_as g_outputByteLen
   -> input:buffer_t MUT uint8
   -> inputByteLen:size_t{v inputByteLen == length input}
   -> Stack unit
@@ -35,7 +39,7 @@ val shake128:
        modifies (loc output) h0 h1 /\
        as_seq h1 (output <: lbuffer uint8 outputByteLen) ==
        S.shake128 (v inputByteLen) (as_seq h0 (input <: lbuffer uint8 inputByteLen)) (v outputByteLen))
-let shake128 output outputByteLen input inputByteLen =
+let shake128 _ output outputByteLen input inputByteLen =
   admit();
   keccak #Shake128 #M32 1344ul (* 256ul *) inputByteLen input (byte 0x1F) outputByteLen output
 

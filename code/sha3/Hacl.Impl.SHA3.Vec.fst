@@ -145,7 +145,7 @@ val state_theta1:
     (requires fun h0 -> live h0 s /\ live h0 _C /\ disjoint _C s)
     (ensures  fun h0 _ h1 ->
       modifies (loc s) h0 h1 /\
-      as_seq h1 s == V.state_theta1 m (as_seq h0 s) (as_seq h0 _C))
+      as_seq h1 s == V.state_theta1 m (as_seq h0 _C) (as_seq h0 s))
 let state_theta1 m s _C =
   [@ inline_let]
   let spec h0 = V.state_theta_inner_s m (as_seq h0 _C) in
@@ -229,7 +229,7 @@ let state_pi_rho m s =
   let h1 = ST.get () in
   assert (bget h1 current 0 == V.get m (as_seq h0 s) 1 0);
   [@ inline_let]
-  let refl h i : GTot ((element_t m) & (V.state m)) = bget h current 0, as_seq h s in
+  let refl h i : GTot ((element_t m) & (V.state_spec m)) = bget h current 0, as_seq h s in
   [@ inline_let]
   let footprint i = loc_union (loc current) (loc s) in
   [@ inline_let]
@@ -422,6 +422,7 @@ val load_blocks1: #a:keccak_alg -> #m:m_spec{lanes m == 1}
   (ensures  fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
     as_seq h1 ws == V.load_blocks #a #m (as_seq_multi h0 b))
 
+#push-options "--z3rlimit 200"
 let load_blocks1 #a #m ib ws =
   let h0 = ST.get() in
   let b = ib.(|0|) in
@@ -439,6 +440,7 @@ let load_blocks1 #a #m ib ws =
   load_blocks_spec1_lemma #a #m (as_seq_multi h0 ib);
   assert (as_seq h1 ws == load_blocks_spec1 #a #m (as_seq_multi h0 ib));
   assert (as_seq h1 ws == V.load_blocks #a #m (as_seq_multi h0 ib))
+#pop-options
 
 noextract
 let load_blocks_spec4 (#a:keccak_alg) (#m:m_spec{lanes m == 4}) (b:multiblock_spec a m) : ws_spec m =
@@ -526,6 +528,7 @@ val load_blocks4: #a:keccak_alg -> #m:m_spec{lanes m == 4}
   (ensures  fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
     as_seq h1 ws == V.load_blocks #a #m (as_seq_multi h0 b))
 
+#push-options "--z3rlimit 200"
 let load_blocks4 #a #m ib ws =
   let h0 = ST.get() in
   let (b0,(b1,(b2,b3))) = tup4 ib in
@@ -544,6 +547,7 @@ let load_blocks4 #a #m ib ws =
   assert (as_seq h1 ws == load_blocks_spec4 #a #m (as_seq_multi h0 ib));
   assert (as_seq h1 ws == V.load_blocks #a #m (as_seq_multi h0 ib));
   ()
+#pop-options
 
 inline_for_extraction noextract
 val load_blocks: #a:keccak_alg -> #m:m_spec{is_supported m}
@@ -869,6 +873,7 @@ val absorb_last: #a:keccak_alg -> #m:m_spec{is_supported m}
   (ensures  fun h0 _ h1 -> modifies (loc s |+| loc_multi b) h0 h1 /\
     as_seq h1 s == V.absorb_last #a #m delimitedSuffix (v rateInBytes) (v rem) (as_seq_multi h0 b) (as_seq h0 s))
 
+#push-options "--z3rlimit 200"
 let absorb_last #a #m rateInBytes rem delimitedSuffix b s =
   load_last_block #m rem delimitedSuffix b;
   if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
@@ -876,6 +881,7 @@ let absorb_last #a #m rateInBytes rem delimitedSuffix b s =
   if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
        (rem =. (rateInBytes -! 1ul)) then state_permute m s;
   absorb_next #a #m rateInBytes s
+#pop-options
 
 inline_for_extraction noextract
 val absorb_inner: #a:keccak_alg -> #m:m_spec{is_supported m}
@@ -923,6 +929,7 @@ let get_multiblock_1 #m rateInBytes len b i b' =
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b') (V.get_multiblock_spec #m (v rateInBytes) (v len) (as_seq_multi h0 b) (v i))
 
+#push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val get_multiblock_4: #m:m_spec{lanes m == 4} -> get_multiblock_t m
 let get_multiblock_4 #m rateInBytes len b i b' =
@@ -942,6 +949,7 @@ let get_multiblock_4 #m rateInBytes len b i b' =
   loc_multi4 b';
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b') (V.get_multiblock_spec #m (v rateInBytes) (v len) (as_seq_multi h0 b) (v i))
+#pop-options
 
 inline_for_extraction noextract
 val get_multiblock: #m:m_spec{is_supported m} -> get_multiblock_t m
@@ -981,7 +989,7 @@ let get_multilast_t (m:m_spec{is_supported m}) =
   (ensures  fun h0 _ h1 -> modifies_multi b' h0 h1 /\
     as_seq_multi h1 b' == V.get_multilast_spec (v rateInBytes) (v len) (as_seq_multi h0 b))
 
-#push-options "--max_ifuel 1"
+#push-options "--max_ifuel 1 --z3rlimit 200"
 inline_for_extraction noextract
 val get_multilast_1: #m:m_spec{lanes m == 1} -> get_multilast_t m
 let get_multilast_1 #m rateInBytes len b b' =
@@ -1113,56 +1121,6 @@ let absorb #a #m rateInBytes len b delimitedSuffix s =
   LSeq.eq_intro (as_seq h0' s) (as_seq h0_s s);
   absorb_last #a #m rateInBytes rem delimitedSuffix b' s;
   pop_frame ()
-
-inline_for_extraction noextract
-val alloc_output1: m:m_spec{lanes m == 1}
-  -> outputByteLen:size_t{v outputByteLen > 0} ->
-  StackInline (multibuf (lanes m) outputByteLen)
-  (requires fun h -> True)
-  (ensures  fun h0 b h1 -> live_multi h1 b /\
-    stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)) /\
-    as_seq_multi h1 b == init_b #m (v outputByteLen))
-
-let alloc_output1 m outputByteLen =
-  let b = create outputByteLen (u8 0) in
-  let b = ntup1 b in
-  let h0 = ST.get() in
-  Lib.NTuple.eq_intro (as_seq_multi h0 b) (init_b #m (v outputByteLen));
-  b
-
-inline_for_extraction noextract
-val alloc_output4: m:m_spec{lanes m == 4}
-  -> outputByteLen:size_t{v outputByteLen > 0} ->
-  StackInline (multibuf (lanes m) outputByteLen)
-  (requires fun h -> True)
-  (ensures  fun h0 b h1 -> live_multi h1 b /\ internally_disjoint b /\
-    stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)) /\
-    as_seq_multi h1 b == init_b #m (v outputByteLen))
-
-let alloc_output4 m outputByteLen =
-  let b0 = create outputByteLen (u8 0) in
-  let b1 = create outputByteLen (u8 0) in
-  let b2 = create outputByteLen (u8 0) in
-  let b3 = create outputByteLen (u8 0) in
-  let b = ntup4 (b0, (b1, (b2, b3))) in
-  let h0 = ST.get() in
-  Lib.NTuple.eq_intro (as_seq_multi h0 b) (init_b #m (v outputByteLen));
-  b
-
-inline_for_extraction noextract
-val alloc_output: m:m_spec{is_supported m}
-  -> outputByteLen:size_t{v outputByteLen > 0} ->
-  StackInline (multibuf (lanes m) outputByteLen)
-  (requires fun h -> True)
-  (ensures  fun h0 b h1 -> live_multi h1 b /\ internally_disjoint b /\
-    stack_allocated_multi b h0 h1 (Seq.create (v outputByteLen) (u8 0)) /\
-    as_seq_multi h1 b == init_b #m (v outputByteLen))
-
-(* Not used yet *)
-let alloc_output m outputByteLen =
-  match lanes m with
-  | 1 -> alloc_output1 m outputByteLen
-  | 4 -> alloc_output4 m outputByteLen
 
 inline_for_extraction noextract
 val store_block4:
@@ -1408,7 +1366,7 @@ val squeeze_nblocks:# a:keccak_alg -> #m:m_spec{is_supported m}
 
 let squeeze_nblocks #a #m s rateInBytes outputByteLen b =
   [@ inline_let]
-  let refl h i : GTot ((V.state m) & (V.multiseq (lanes m) (v outputByteLen))) = as_seq h s, as_seq_multi h b in
+  let refl h i : GTot ((V.state_spec m) & (V.multiseq (lanes m) (v outputByteLen))) = as_seq h s, as_seq_multi h b in
   if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
   [@ inline_let]
   let footprint i = loc_union (loc s) (loc_multi b) in
