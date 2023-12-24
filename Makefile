@@ -345,7 +345,7 @@ endif
 	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
-	    --hint_file hints/$(notdir $*).hints \
+	    --hint_dir hints/ \
 	    $(notdir $*) > $@ \
 	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$(call to-obj-dir,$@))
 
@@ -413,7 +413,7 @@ hints:
 %.checked: | hints
 	$(call run-with-log,\
 	  $(FSTAR) $(FSTAR_FLAGS) \
-	    --hint_file hints/$(notdir $*).hints \
+	    --hint_dir hints \
 	    $< \
 	    && \
 	    touch -c $@ \
