@@ -32,6 +32,8 @@ ifndef FSTAR_HOME
   endif
 endif
 
+FSTAR_EXE := $(FSTAR_HOME)/bin/fstar.exe
+
 ifndef FSTAR_ULIB
 FSTAR_ULIB := $(shell if test -d "$(FSTAR_HOME)/ulib" ; then echo "$(FSTAR_HOME)/ulib" ; else echo "$(FSTAR_HOME)/lib/fstar" ; fi)
 endif
@@ -71,6 +73,8 @@ INCLUDES = \
 
 # 0. Vale
 
+# Please keep this in sync with vale/Hacl.Vale.fst.config.json
+# so the vscode extension works seamlessly.
 VALE_FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
   --max_fuel 1 --max_ifuel 1 --initial_ifuel 0 \
@@ -105,7 +109,10 @@ endif
 # 331: name is being ignored
 # 332: abstract keyword
 # 337: special treatment of @ is deprecated + Multiple decreases clauses on definition
-FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
+#
+# Please keep this in sync with Hacl.fst.config.json
+# so the vscode extension works seamlessly.
+FSTAR_NO_FLAGS = $(FSTAR_EXE) $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
   --warn_error '@240+241@247-272-274@319@328@331@332@337' \

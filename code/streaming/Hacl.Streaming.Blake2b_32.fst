@@ -30,23 +30,23 @@ let alloca =
 
 [@ (Comment "  State allocation function when there is no key")]
 let malloc =
-  F.malloc (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2S)
+  F.malloc (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Re-initialization function when there is no key")]
 let reset =
-  F.reset (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2S)
+  F.reset (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let update =
-  F.update (blake2b_32 0) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2S)
+  F.update (blake2b_32 0) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Finish function when there is no key")]
 let digest =
-  F.digest (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2S)
+  F.digest (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Free state function when there is no key")]
 let free =
-  F.free (blake2b_32 0) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2S)
+  F.free (blake2b_32 0) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 (* The one-shot hash *)
 [@@ Comment "Write the BLAKE2b digest of message `input` using key `key` into `output`.
