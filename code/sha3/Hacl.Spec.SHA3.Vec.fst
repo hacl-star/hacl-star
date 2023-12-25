@@ -265,10 +265,19 @@ noextract
 let ws_spec (m:m_spec) = lseq (element_t m) 32
 
 noextract
-let ws_spec_v (#a:keccak_alg) (#m:m_spec) (st:ws_spec m) : lseq (lseq (word a) 32) (lanes m) =
-  createi #(lseq (word a) 32) (lanes m) (fun i ->
-    createi 32 (fun j ->
-      (vec_v st.[j]).[i]))
+let ws_spec_v (#m:m_spec) (st:ws_spec m) : lseq (lseq uint64 32) (lanes m) =
+  createi #(lseq uint64 32) (lanes m) (fun i ->
+    create32 (vec_v st.[0]).[i] (vec_v st.[1]).[i] (vec_v st.[2]).[i]
+             (vec_v st.[3]).[i] (vec_v st.[4]).[i] (vec_v st.[5]).[i]
+             (vec_v st.[6]).[i] (vec_v st.[7]).[i] (vec_v st.[8]).[i]
+             (vec_v st.[9]).[i] (vec_v st.[10]).[i] (vec_v st.[11]).[i]
+             (vec_v st.[12]).[i] (vec_v st.[13]).[i] (vec_v st.[14]).[i]
+             (vec_v st.[15]).[i] (vec_v st.[16]).[i] (vec_v st.[17]).[i]
+             (vec_v st.[18]).[i] (vec_v st.[19]).[i] (vec_v st.[20]).[i]
+             (vec_v st.[21]).[i] (vec_v st.[22]).[i] (vec_v st.[23]).[i]
+             (vec_v st.[24]).[i] (vec_v st.[25]).[i] (vec_v st.[26]).[i]
+             (vec_v st.[27]).[i] (vec_v st.[28]).[i] (vec_v st.[29]).[i]
+             (vec_v st.[30]).[i] (vec_v st.[31]).[i])
 
 noextract
 let multiseq (lanes:lanes_t) (len:nat) =
