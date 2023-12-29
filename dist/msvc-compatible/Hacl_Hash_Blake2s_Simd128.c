@@ -305,7 +305,7 @@ update_key(
   {
     update_block(wv, hash, false, lb, b);
   }
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 void
@@ -342,7 +342,7 @@ Hacl_Hash_Blake2s_Simd128_update_last(
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
   update_block(wv, hash, true, totlen, b);
-  Lib_Memzero0_memzero(b, 64U, uint8_t);
+  Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
 static inline void
@@ -418,7 +418,7 @@ Hacl_Hash_Blake2s_Simd128_finish(
   Lib_IntVector_Intrinsics_vec128_store32_le(second, row1[0U]);
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
-  Lib_Memzero0_memzero(b, 32U, uint8_t);
+  Lib_Memzero0_memzero(b, 32U, uint8_t, void *);
 }
 
 void
@@ -839,7 +839,7 @@ Hacl_Hash_Blake2s_Simd128_hash_with_key(
   Hacl_Hash_Blake2s_Simd128_init(b, key_len, output_len);
   update(b1, b, key_len, key, input_len, input);
   Hacl_Hash_Blake2s_Simd128_finish(output_len, output, b);
-  Lib_Memzero0_memzero(b1, 4U, Lib_IntVector_Intrinsics_vec128);
-  Lib_Memzero0_memzero(b, 4U, Lib_IntVector_Intrinsics_vec128);
+  Lib_Memzero0_memzero(b1, 4U, Lib_IntVector_Intrinsics_vec128, void *);
+  Lib_Memzero0_memzero(b, 4U, Lib_IntVector_Intrinsics_vec128, void *);
 }
 
