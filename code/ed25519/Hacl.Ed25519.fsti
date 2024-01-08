@@ -51,7 +51,7 @@ val expand_keys:
 
   @param[out] signature Points to 64 bytes of valid memory, i.e., `uint8_t[64]`. Must not overlap the memory locations of `expanded_keys` nor `msg`.
   @param[in] expanded_keys Points to 96 bytes of valid memory, i.e., `uint8_t[96]`, containing the expanded keys obtained by invoking `expand_keys`.
-  @param[in] msglen Length of `msg`.
+  @param[in] msg_len Length of `msg`.
   @param[in] msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
 
   If one needs to sign several messages under the same private key, it is more efficient
