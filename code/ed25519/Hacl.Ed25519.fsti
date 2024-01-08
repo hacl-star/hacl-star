@@ -77,7 +77,7 @@ val sign_expanded:
 
   @param[out] signature Points to 64 bytes of valid memory, i.e., `uint8_t[64]`. Must not overlap the memory locations of `private_key` nor `msg`.
   @param[in] private_key Points to 32 bytes of valid memory containing the private key, i.e., `uint8_t[32]`.
-  @param[in] msglen Length of `msg`.
+  @param[in] msg_len Length of `msg`.
   @param[in] msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
 
   The function first calls `expand_keys` and then invokes `sign_expanded`.
