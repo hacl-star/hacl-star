@@ -4,6 +4,9 @@ on:
   pull_request_target:
     branches: [ main ]
 
+permissions:
+  pull-requests: write
+
 jobs:
   hacl-packages-create-branch:
     runs-on: ubuntu-latest
