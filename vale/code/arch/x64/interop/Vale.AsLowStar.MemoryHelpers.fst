@@ -123,6 +123,7 @@ let same_down_up_buffer_length src b =
   DV.length_eq db;
   FStar.Math.Lemmas.cancel_mul_div (B.length b) (view_n src)
 
+#push-options "--z3rlimit 80"
 let down_up_buffer_read_reveal src h s b i =
   let db = get_downview b in
   let n:pos = view_n src in
@@ -140,6 +141,7 @@ let down_up_buffer_read_reveal src h s b i =
   let aux () : Lemma (n * ((i*n)/n) == i*n) =
     FStar.Math.Lemmas.cancel_mul_div i n
   in aux()
+#pop-options
 
 let same_buffer_same_upviews #src #bt b h0 h1 =
     let dv = get_downview b in

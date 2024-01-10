@@ -70,6 +70,10 @@ val mod_inv_limb_inv_vb_is_even:
     v n0 % 2 = 1 /\ pow2 (bits t - i + 1) == v ub0 * 2 * v alpha - v vb0 * v beta))
   (ensures v vb0 % 2 = 0)
 
+private
+let aux_mod_2_neg (n:nat) : Lemma (n % 2 == (-n) % 2) =
+  ()
+
 let mod_inv_limb_inv_vb_is_even #t n0 i ub0 vb0 =
   let alpha = uint #t #SEC 1 <<. size (bits t - 1) in let beta = n0 in
   Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 1 (bits t - i + 1);
@@ -82,9 +86,9 @@ let mod_inv_limb_inv_vb_is_even #t n0 i ub0 vb0 =
     (- v vb0 * v beta) % 2;
     (==) { Math.Lemmas.lemma_mod_mul_distr_r (- v vb0) (v beta) 2 }
     (- v vb0) % 2;
-    (==) { }
+    (==) { aux_mod_2_neg (v vb0) } // flaky without the lemma call
     v vb0 % 2;
-    }
+  }
 
 
 val mod_inv_limb_inv_step_even:

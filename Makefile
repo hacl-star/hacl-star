@@ -469,7 +469,7 @@ obj/Meta_Interface.cmxs: obj/Meta_Interface.ml $(FSTAR_EXE)
 obj/Test_Lowstarize.ml: CODEGEN = Plugin
 obj/Test_Lowstarize.ml: obj/Test.Lowstarize.fst.checked
 
-obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
+obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml $(FSTAR_EXE)
 	$(OCAMLSHARED) $< -o $@
 
 # IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.
