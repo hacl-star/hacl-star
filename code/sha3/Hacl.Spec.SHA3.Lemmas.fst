@@ -48,3 +48,50 @@ let transpose_ws_lemma_ij #m ws j i =
   match lanes m with
   | 1 -> ()
   | 4 -> transpose_ws4_lemma_ij #m ws j i
+
+val transpose_s4_lemma:
+    #a:keccak_alg
+  -> #m:m_spec{lanes m == 4}
+  -> ws:ws_spec m
+  -> j:nat{j < lanes m}
+  -> i:nat{i < 32 * word_length a} ->
+  Lemma
+   (let l = lanes m in
+    let ind = 32 * j + i / word_length a in
+    Seq.index (vec_v (transpose_s_ws ws).[ind / l]) (ind % l) ==
+    Seq.index (ws_spec_v ws).[j] (i / word_length a))
+
+let transpose_s4_lemma #a #m ws _ _ =
+  let r0 = transpose4x4_lseq (sub ws 0 4) in
+  transpose4x4_lemma (sub ws 0 4);
+  let r1 = transpose4x4_lseq (sub ws 4 4) in
+  transpose4x4_lemma (sub ws 4 4);
+  let r2 = transpose4x4_lseq (sub ws 8 4) in
+  transpose4x4_lemma (sub ws 8 4);
+  let r3 = transpose4x4_lseq (sub ws 12 4) in
+  transpose4x4_lemma (sub ws 12 4);
+  let r4 = transpose4x4_lseq (sub ws 16 4) in
+  transpose4x4_lemma (sub ws 16 4);
+  let r5 = transpose4x4_lseq (sub ws 20 4) in
+  transpose4x4_lemma (sub ws 20 4);
+  let r6 = transpose4x4_lseq (sub ws 24 4) in
+  transpose4x4_lemma (sub ws 24 4);
+  let r7 = transpose4x4_lseq (sub ws 28 4) in
+  transpose4x4_lemma (sub ws 28 4)
+
+val transpose_s_lemma_ij:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> ws:ws_spec m
+  -> j:nat{j < lanes m}
+  -> i:nat{i < 32 * word_length a} ->
+  Lemma
+   (let l = lanes m in
+    let ind = 32 * j + i / word_length a in
+    Seq.index (vec_v (transpose_s_ws ws).[ind / l]) (ind % l) ==
+    Seq.index (ws_spec_v ws).[j] (i / word_length a))
+
+let transpose_s_lemma_ij #a #m ws j i =
+  match lanes m with
+  | 1 -> ()
+  | 4 -> transpose_s4_lemma #a #m ws j i

@@ -375,3 +375,304 @@ val state_permute_lemma_l:
            Spec.state_permute (state_spec_v s).[l])
 
 let state_permute_lemma_l m s l = state_permute_loop m s l 24
+
+(* loadState *)
+
+val load_blocks_lemma_ij:
+    #a:keccak_alg
+  -> #m:m_spec
+  -> b:multiblock_spec a m
+  -> j:nat{j < lanes m}
+  -> i:nat{i < 32} ->
+  Lemma (let l = lanes m in
+    let ind = (i / l * l + j) * word_length a in
+    (vec_v (load_blocks b).[i]).[j] ==
+    BSeq.uint_from_bytes_le
+      (Seq.slice b.(|i % l|) ind (ind + word_length a)))
+
+let load_blocks_lemma_ij #a #m b j i =
+  let l = lanes m in
+  let idx_i = i % l in
+  let idx_j = i / l in
+
+  let blocksize = word_length a in
+  let blocksize_l = l * blocksize in
+  let b_j = Seq.slice b.(|idx_i|) (idx_j * blocksize_l) (idx_j * blocksize_l + blocksize_l) in
+
+  assert (vec_v ((load_blocks #a #m b).[i]) == BSeq.uints_from_bytes_le b_j);
+  BSeq.index_uints_from_bytes_le #(word_t a) #SEC #(lanes m) b_j j;
+  assert ((vec_v ((load_blocks #a #m b).[i])).[j] ==
+    BSeq.uint_from_bytes_le (Seq.slice b_j (j * blocksize) (j * blocksize + blocksize)));
+
+  calc (==) {
+    idx_j * blocksize_l + j * blocksize;
+    (==) { Math.Lemmas.paren_mul_right idx_j l blocksize;
+      Math.Lemmas.distributivity_add_left (idx_j * l) j blocksize }
+    (idx_j * l + j) * blocksize;
+  };
+
+  Seq.Properties.slice_slice b.(|idx_i|)
+    (idx_j * blocksize_l) (idx_j * blocksize_l + blocksize_l)
+    (j * blocksize) (j * blocksize + blocksize);
+
+  assert ((vec_v ((load_blocks #a #m b).[i])).[j] ==
+    BSeq.uint_from_bytes_le
+      (Seq.slice b.(|idx_i|) ((idx_j * l + j) * blocksize)
+        ((idx_j * l + j) * blocksize + blocksize)))
+
+val load_blocks_lemma_ij_subst:
+    #a:keccak_alg
+  -> #m:m_spec
+  -> b:multiblock_spec a m
+  -> j:nat{j < lanes m}
+  -> i:nat{i < 32} ->
+  Lemma (let l = lanes m in
+    (vec_v (load_blocks b).[i / l * l + j]).[i % l] ==
+    BSeq.uint_from_bytes_le
+      (Seq.slice b.(|j|) (i * word_length a) (i * word_length a + word_length a)))
+
+let load_blocks_lemma_ij_subst #a #m b j i =
+  let l = lanes m in
+  let i_new = i / l * l + j in
+  let j_new = i % l in
+  load_blocks_lemma_ij #a #m b j_new i_new;
+
+  calc (==) {
+    i_new % l;
+    (==) { }
+    (i / l * l + j) % l;
+    (==) { Math.Lemmas.modulo_addition_lemma j l (i / l) }
+    j % l;
+    (==) { Math.Lemmas.small_mod j l }
+    j;
+    };
+
+  calc (==) {
+    i_new / l * l + j_new;
+    (==) { }
+    (i / l * l + j) / l * l + i % l;
+    (==) { Math.Lemmas.division_addition_lemma j l (i / l) }
+    (i / l + j / l) * l + i % l;
+    (==) { Math.Lemmas.distributivity_add_left (i / l) (j / l) l }
+    i / l * l + j / l * l + i % l;
+    (==) { Math.Lemmas.euclidean_division_definition i l }
+    i + j / l * l;
+    (==) { Math.Lemmas.small_div j l }
+    i;
+    }
+
+val load_ws_lemma_l:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> b:multiblock_spec a m
+  -> l:nat{l < lanes m}
+  -> i:nat{i < 25} ->
+  Lemma ((ws_spec_v (load_ws b)).[l].[i] == BSeq.uint_from_bytes_le
+      (Seq.slice (Seq.slice b.(|l|) 0 200) (i * word_length a) (i * word_length a + word_length a)))
+
+let load_ws_lemma_l #a #m b l i =
+  assert (Seq.slice (Seq.slice b.(|l|) 0 200) (i * word_length a) (i * word_length a + word_length a) ==
+    Seq.slice b.(|l|) (i * word_length a) (i * word_length a + word_length a));
+  Lemmas.transpose_ws_lemma_ij (load_blocks #a #m b) l i;
+  load_blocks_lemma_ij_subst #a #m b l i
+
+val loadState_inner_lemma_l:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> b:multiblock_spec a m
+  -> s:state_spec m
+  -> l:nat{l < lanes m}
+  -> i:nat{i < 25} ->
+  Lemma ((state_spec_v (loadState_inner m (load_ws b) i s)).[l] ==
+    Spec.loadState_inner (Seq.slice b.(|l|) 0 200) i (state_spec_v s).[l])
+
+let loadState_inner_lemma_l #a #m b s l i =
+  load_ws_lemma_l #a #m b l i;
+  eq_intro (state_spec_v (loadState_inner m (load_ws #a #m b) i s)).[l]
+    (Spec.loadState_inner (Seq.slice b.(|l|) 0 200) i (state_spec_v s).[l])
+
+val loadState_loop_full:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> b:multiblock_spec a m
+  -> s:state_spec m
+  -> l:nat{l < lanes m}
+  -> n:nat{n <= 25} ->
+  Lemma
+  ((state_spec_v (repeati n (loadState_inner m (load_ws b)) s)).[l] ==
+    repeati n (Spec.loadState_inner (Seq.slice b.(|l|) 0 200))
+      (state_spec_v s).[l])
+
+let rec loadState_loop_full #a #m r b s l n =
+  if n = 0 then begin
+    eq_repeati0 n (loadState_inner m (load_ws b)) s;
+    eq_repeati0 n (Spec.loadState_inner (Seq.slice b.(|l|) 0 200))
+      (state_spec_v s).[l];
+    () end
+  else begin
+    let lp0 = repeati (n - 1) (loadState_inner m (load_ws b)) s in
+    loadState_loop_full #a #m r b s l (n - 1);
+    unfold_repeati n (loadState_inner m (load_ws b)) s (n - 1);
+    unfold_repeati n (Spec.loadState_inner (Seq.slice b.(|l|) 0 200))
+      (state_spec_v s).[l] (n - 1);
+    loadState_inner_lemma_l #a #m b lp0 l (n - 1);
+    () end
+
+val update_sub_b_lemma:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> b:multiblock_spec a m
+  -> l:nat{l < lanes m} ->
+  Lemma
+  (requires
+    forall l. l < lanes m ==> (forall j. (j >= r /\ j < 256) ==> Seq.index b.(|l|) j == u8 0))
+  (ensures
+    Seq.slice b.(|l|) 0 200 == update_sub (create 200 (u8 0)) 0 r (Seq.slice b.(|l|) 0 r))
+
+let update_sub_b_lemma #a #m r b l =
+  assert (forall j. (j >= 0 /\ j < r) ==>
+    Seq.index (Seq.slice b.(|l|) 0 200) j == Seq.index (Seq.slice b.(|l|) 0 r) j);
+  eq_intro (Seq.slice b.(|l|) 0 200) (update_sub (create 200 (u8 0)) 0 r (Seq.slice b.(|l|) 0 r))
+
+val loadState_loop:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> b:multiblock_spec a m
+  -> s:state_spec m
+  -> l:nat{l < lanes m}
+  -> n:nat{n <= 25} ->
+  Lemma
+  (requires
+    forall l. l < lanes m ==> (forall j. (j >= r /\ j < 256) ==> Seq.index b.(|l|) j == u8 0))
+  (ensures (let bs = update_sub (create 200 (u8 0)) 0 r (Seq.slice b.(|l|) 0 r) in
+    (state_spec_v (repeati n (loadState_inner m (load_ws b)) s)).[l] ==
+      repeati n (Spec.loadState_inner bs) (state_spec_v s).[l]))
+
+let loadState_loop #a #m r b s l n =
+  loadState_loop_full #a #m r b s l n;
+  update_sub_b_lemma #a #m r b l
+
+val loadState_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> b:multiblock_spec a m
+  -> s:state_spec m
+  -> l:nat{l < lanes m} ->
+  Lemma
+  (requires
+    forall l. l < lanes m ==> (forall j. (j >= r /\ j < 256) ==> Seq.index b.(|l|) j == u8 0))
+  (ensures 
+    (state_spec_v (loadState #a #m r b s)).[l] ==
+      Spec.loadState r (Seq.slice b.(|l|) 0 r) (state_spec_v s).[l])
+
+let loadState_lemma_l  #a #m r b s l = loadState_loop #a #m r b s l 25
+
+(* storeState *)
+
+val store_state_lemma_ij:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> s:state_spec m
+  -> j:nat{j < lanes m}
+  -> i:nat{i < 25 * word_length a} ->
+  Lemma
+   (let ws = create 32 (zero_element m) in
+    let ws = update_sub ws 0 25 s in
+    (storeState #a #m s).[j * (32 * word_length a) + i] ==
+      (BSeq.uint_to_bytes_le (Seq.index (state_spec_v s).[j] (i / word_length a))).[i % word_length a])
+
+let store_state_lemma_ij #a #m s j i =
+  let ws = create 32 (zero_element m) in
+  let ws = update_sub ws 0 25 s in
+  let ws1 = transpose_s_ws ws in
+  let j_v = j * (32 * word_length a) + i in
+  let blocksize_v = word_length a * lanes m in
+
+  calc (==) { // j_v % blocksize_v / word_length a
+    (j * (32 * word_length a) + i) % blocksize_v / word_length a;
+    (==) { Math.Lemmas.modulo_division_lemma (j * (32 * word_length a) + i) (word_length a) (lanes m) }
+    (j * (32 * word_length a) + i) / word_length a % lanes m;
+    (==) { Math.Lemmas.paren_mul_right j 32 (word_length a);
+           Math.Lemmas.division_addition_lemma i (word_length a) (32 * j) }
+    (32 * j + i / word_length a) % lanes m;
+    };
+
+  calc (==) { // j_v / blocksize_v
+    (j * (32 * word_length a) + i) / (word_length a * lanes m);
+    (==) { Math.Lemmas.division_multiplication_lemma (j * (32 * word_length a) + i) (word_length a) (lanes m) }
+    (j * (32 * word_length a) + i) / word_length a / lanes m;
+    (==) { Math.Lemmas.paren_mul_right j 32 (word_length a);
+           Math.Lemmas.division_addition_lemma i (word_length a) (32 * j) }
+    (32 * j + i / word_length a) / lanes m;
+    };
+
+  calc (==) {
+    Seq.index (storeState #a #m s) j_v;
+    (==) { index_vecs_to_bytes_le #(word_t a) #(lanes m) #32 ws1 j_v }
+    (BSeq.uints_to_bytes_le (vec_v ws1.[j_v / blocksize_v])).[j_v % blocksize_v];
+    (==) { BSeq.index_uints_to_bytes_le (vec_v ws1.[j_v / blocksize_v]) (j_v % blocksize_v) }
+    (BSeq.uint_to_bytes_le
+      (Seq.index (vec_v ws1.[j_v / blocksize_v]) (j_v % blocksize_v / word_length a))).[(j_v % blocksize_v) % word_length a];
+    (==) { Math.Lemmas.modulo_modulo_lemma j_v (word_length a) (lanes m) }
+    (BSeq.uint_to_bytes_le
+      (Seq.index (vec_v ws1.[j_v / blocksize_v]) (j_v % blocksize_v / word_length a))).[j_v % word_length a];
+    (==) { Lemmas.transpose_s_lemma_ij #a #m ws j i }
+    (BSeq.uint_to_bytes_le (Seq.index (ws_spec_v ws).[j] (i / word_length a))).[j_v % word_length a];
+    (==) { Math.Lemmas.paren_mul_right j 32 (word_length a);
+           Math.Lemmas.modulo_addition_lemma i (word_length a) (j * 32) }
+    (BSeq.uint_to_bytes_le (Seq.index (ws_spec_v ws).[j] (i / word_length a))).[i % word_length a];
+    (==) { eq_intro (sub (ws_spec_v ws).[j] 0 25) (state_spec_v s).[j]}
+    (BSeq.uint_to_bytes_le (Seq.index (state_spec_v s).[j] (i / word_length a))).[i % word_length a];
+    }
+
+val store_state_lemma_ij_sub:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> s:state_spec m
+  -> block:Lib.ByteSequence.lbytes 200
+  -> j:nat{j < lanes m}
+  -> i:nat{i < 25} ->
+  Lemma
+   (sub (sub (storeState #a #m s) (j * (32 * word_length a)) (25 * word_length a)) (i * word_length a) (word_length a) ==
+      sub (Spec.storeState_inner (state_spec_v s).[j] i block) (i * word_length a) (word_length a))
+
+let store_state_lemma_ij_sub #a #m s block j i =
+  let aux (k:nat{k < word_length a}) : Lemma (
+      (sub (storeState #a #m s) (j * (32 * word_length a)) (25 * word_length a)).[i * word_length a + k] ==
+        (Spec.storeState_inner (state_spec_v s).[j] i block).[i * word_length a + k]) =
+    store_state_lemma_ij #a #m s j (i * word_length a + k) in
+
+  Classical.forall_intro aux;
+  eq_intro
+    (sub (sub (storeState #a #m s) (j * (32 * word_length a)) (25 * word_length a)) (i * word_length a) (word_length a))
+    (sub (Spec.storeState_inner (state_spec_v s).[j] i block) (i * word_length a) (word_length a))
+
+val storeState_inner_loop:
+    #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> s:state_spec m
+  -> l:nat{l < lanes m}
+  -> n:nat{n <= 25} ->
+  Lemma
+   (sub (storeState #a #m s) (l * (32 * word_length a)) (25 * word_length a) ==
+     repeati n (Spec.storeState_inner (state_spec_v s).[l]) (create 200 (u8 0)))
+
+let rec storeState_inner_loop #a #m s l n =
+  let lp = repeati n (Spec.storeState_inner (state_spec_v s).[l]) (create 200 (u8 0)) in
+  
+  if n = 0 then begin
+    eq_repeati0 n (Spec.storeState_inner (state_spec_v s).[l])
+      (create 200 (u8 0));
+    () end
+  else begin
+    let lp0 = repeati (n - 1) (Spec.storeState_inner (state_spec_v s).[l]) (create 200 (u8 0)) in
+    storeState_inner_loop #a #m s l (n - 1);
+    unfold_repeati n (Spec.storeState_inner (state_spec_v s).[l])
+      (create 200 (u8 0)) (n - 1);
+    store_state_lemma_ij_sub #a #m s lp0 l (n - 1);
+    assert (lp == (Spec.storeState_inner (state_spec_v s).[l]) (n - 1) lp0);
+    () end

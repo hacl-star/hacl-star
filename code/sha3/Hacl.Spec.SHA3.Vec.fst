@@ -375,29 +375,46 @@ let loadState_inner (m:m_spec) (ws:ws_spec m) (j:size_nat{j < 25}) (s:state_spec
 let loadState
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
-  (b:multiblock_spec a m)
+  (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
+  (b:multiblock_spec a m{forall l. l < lanes m ==> 
+    (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
   (s:state_spec m) :
   Tot (state_spec m) =
   let ws = load_ws b in
   repeati 25 (loadState_inner m ws) s
 
 noextract
+let transpose_s_ws4 (#m:m_spec{lanes m == 4}) (ws:ws_spec m) : ws_spec m =
+  let (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7) = transpose_ws4_0 ws in
+  let (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15) = transpose_ws4_1 ws in
+  let (ws16,ws17,ws18,ws19,ws20,ws21,ws22,ws23) = transpose_ws4_2 ws in
+  let (ws24,ws25,ws26,ws27,ws28,ws29,ws30,ws31) = transpose_ws4_3 ws in
+  create32 ws0 ws4 ws8 ws12 ws16 ws20 ws24 ws28 ws1 ws5 ws9 ws13 ws17 ws21 ws25 ws29
+    ws2 ws6 ws10 ws14 ws18 ws22 ws26 ws30 ws3 ws7 ws11 ws15 ws19 ws23 ws27 ws31
+
+noextract
+let transpose_s_ws (#m:m_spec{is_supported m}) (ws:ws_spec m) : ws_spec m =
+  match lanes m with
+  | 1 -> ws
+  | 4 -> transpose_s_ws4 #m ws
+
+noextract
 let storeState (#a:keccak_alg) (#m:m_spec{is_supported m}) (s:state_spec m) :
                 lseq uint8 (lanes m * 32 * word_length a) =
   let ws = create 32 (zero_element m) in
   let ws = update_sub ws 0 25 s in
-  let ws = transpose_ws #m ws in
+  let ws = transpose_s_ws #m ws in
   Lib.IntVector.Serialize.vecs_to_bytes_le ws
 
 noextract
-let next_blocks (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 256})
+let next_blocks (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                  (b:lseq uint8 256) :
                  lseq uint8 256 =
   b.[rateInBytes - 1] <- u8 0x80
 
 noextract
 let next_block1 (#m:m_spec{lanes m == 1})
-                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 256})
+                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                 (b:multiseq (lanes m) 256) :
                 multiseq (lanes m) 256 =
   let b = b.(|0|) in
@@ -405,7 +422,7 @@ let next_block1 (#m:m_spec{lanes m == 1})
 
 noextract
 let next_block4 (#m:m_spec{lanes m == 4})
-                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 256})
+                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                 (b:multiseq (lanes m) 256) :
                 multiseq (lanes m) 256 =
   let b0 = b.(|0|) in
@@ -420,7 +437,7 @@ let next_block4 (#m:m_spec{lanes m == 4})
 
 noextract
 let next_block (#m:m_spec{is_supported m})
-               (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 256})
+               (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                (b:multiseq (lanes m) 256) :
                multiseq (lanes m) 256 =
   match lanes m with
@@ -428,63 +445,76 @@ let next_block (#m:m_spec{is_supported m})
   | 4 -> next_block4 #m rateInBytes b
 
 let absorb_next (#a:keccak_alg) (#m:m_spec{is_supported m})
-                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 256})
+                (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                 (s:state_spec m) : Tot (state_spec m) =
   let nextBlock = next_block #m rateInBytes (next_block_seq_zero m) in
-  let s = loadState #a #m nextBlock s in
+  let s = loadState #a #m rateInBytes nextBlock s in
   state_permute m s
 
 noextract
-let load_last_blocks (rem:size_nat{rem < 256})
+let load_last_blocks (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+                     (rem:size_nat{rem < rateInBytes})
                      (delimitedSuffix:byte_t)
-                     (lastBlock:lseq uint8 256) :
-                     lseq uint8 256 =
+                     (lastBlock:lseq uint8 256{forall i. (i >= rateInBytes /\ i < 256) ==>
+                        Seq.index lastBlock i == u8 0}) :
+                     b':lseq uint8 256{forall i. (i >= rateInBytes /\ i < 256) ==>
+                       Seq.index b' i == u8 0} =
   lastBlock.[rem] <- byte_to_uint8 delimitedSuffix
 
 noextract
 let load_last_block1 (#m:m_spec{lanes m == 1})
-                     (rem:size_nat{rem < 256})
+                     (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+                     (rem:size_nat{rem < rateInBytes})
                      (delimitedSuffix:byte_t)
-                     (b:multiseq (lanes m) 256) :
-                     multiseq (lanes m) 256 =
+                     (b:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                        (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)}) :
+                     b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                       (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
   let b = b.(|0|) in
-  ntup1 (load_last_blocks rem delimitedSuffix b)
+  ntup1 (load_last_blocks rateInBytes rem delimitedSuffix b)
 
 noextract
 let load_last_block4 (#m:m_spec{lanes m == 4})
-                     (rem:size_nat{rem < 256})
+                     (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+                     (rem:size_nat{rem < rateInBytes})
                      (delimitedSuffix:byte_t)
-                     (b:multiseq (lanes m) 256) :
-                     multiseq (lanes m) 256 =
-  let l0 = load_last_blocks rem delimitedSuffix b.(|0|) in
-  let l1 = load_last_blocks rem delimitedSuffix b.(|1|) in
-  let l2 = load_last_blocks rem delimitedSuffix b.(|2|) in
-  let l3 = load_last_blocks rem delimitedSuffix b.(|3|) in
+                     (b:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                        (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)}) :
+                     b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                       (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
+  let l0 = load_last_blocks rateInBytes rem delimitedSuffix b.(|0|) in
+  let l1 = load_last_blocks rateInBytes rem delimitedSuffix b.(|1|) in
+  let l2 = load_last_blocks rateInBytes rem delimitedSuffix b.(|2|) in
+  let l3 = load_last_blocks rateInBytes rem delimitedSuffix b.(|3|) in
   ntup4 (l0, (l1, (l2, l3)))
 
 noextract
 let load_last_block (#m:m_spec{is_supported m})
-                    (rem:size_nat{rem < 256})
+                    (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+                    (rem:size_nat{rem < rateInBytes})
                     (delimitedSuffix:byte_t)
-                    (b:multiseq (lanes m) 256) :
-                    multiseq (lanes m) 256 =
+                    (b:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                       (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)}) :
+                    b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                      (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
   match lanes m with
-  | 1 -> load_last_block1 #m rem delimitedSuffix b
-  | 4 -> load_last_block4 #m rem delimitedSuffix b
+  | 1 -> load_last_block1 #m rateInBytes rem delimitedSuffix b
+  | 4 -> load_last_block4 #m rateInBytes rem delimitedSuffix b
 
 val absorb_last:
     #a:keccak_alg
   -> #m:m_spec{is_supported m}
   -> delimitedSuffix:byte_t
-  -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256}
+  -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
   -> rem:size_nat{rem < rateInBytes}
-  -> input:multiseq (lanes m) 256
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+       (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
   -> s:state_spec m ->
   Tot (state_spec m)
 
 let absorb_last #a #m delimitedSuffix rateInBytes rem input s =
-  let lastBlock = load_last_block #m rem delimitedSuffix input in
-  let s = loadState #a #m lastBlock s in
+  let lastBlock = load_last_block #m rateInBytes rem delimitedSuffix input in
+  let s = loadState #a #m rateInBytes lastBlock s in
   let s =
     if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
        (rem = rateInBytes - 1)
@@ -494,55 +524,81 @@ let absorb_last #a #m delimitedSuffix rateInBytes rem input s =
 let absorb_inner
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
-  (b:multiblock_spec a m)
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+  (b:multiblock_spec a m{forall l. l < lanes m ==> 
+     (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
   (s:state_spec m) :
   Tot (state_spec m) =
-  let s = loadState b s in
+  let s = loadState rateInBytes b s in
   state_permute m s
 
 noextract
 let get_multiblock_spec (#m:m_spec)
-                        (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+                        (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                         (inputByteLen:nat)
                         (b:multiseq (lanes m) inputByteLen)
                         (i:nat{i < inputByteLen / rateInBytes})
-                        : multiseq (lanes m) 256 =
+                        : b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                            (forall j. (j >= rateInBytes /\ j < 256) ==> Seq.index b'.(|l|) j == u8 0)} =
 
     assert (i * rateInBytes < inputByteLen);
     assert (i + 1 <= inputByteLen / rateInBytes);
     assert ((i + 1) * rateInBytes <= inputByteLen);
     assert (i * rateInBytes + rateInBytes <= inputByteLen);
-    Lib.NTuple.createi #(Seq.lseq uint8 256) (lanes m)
+    let b' = Lib.NTuple.createi #(Seq.lseq uint8 256) (lanes m)
       (fun j -> update_sub (create 256 (u8 0)) 0 rateInBytes
-        (Seq.slice b.(|j|) (i * rateInBytes) (i * rateInBytes + rateInBytes)))
+        (Seq.slice b.(|j|) (i * rateInBytes) (i * rateInBytes + rateInBytes))) in
+    let aux (l:nat{l < lanes m}) : Lemma (forall j. (j >= rateInBytes /\ j < 256) ==>
+      Seq.index b'.(|l|) j == u8 0) =
+      eq_intro (slice #uint8 #256 b'.(|l|) rateInBytes 256)
+        (create (256 - rateInBytes) (u8 0));
+      assert (forall j. (j >= 0 /\ j < (256 - rateInBytes)) ==> 
+        Seq.index (slice #uint8 #256 b'.(|l|) rateInBytes 256) j ==
+          Seq.index b'.(|l|) (rateInBytes + j));
+      assert (forall j. (j >= rateInBytes /\ j < 256) ==> (j - rateInBytes >= 0)) in
+
+    Classical.forall_intro aux;
+    b'
 
 noextract
 let get_multilast_spec (#m:m_spec) 
-                        (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+                        (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
                         (inputByteLen:nat)
                         (b:multiseq (lanes m) inputByteLen)
-                        : multiseq (lanes m) 256 =
+                        : b':multiseq (lanes m) 256{forall l. l < lanes m ==> 
+                            (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b'.(|l|) i == u8 0)} =
     let rem = inputByteLen % rateInBytes in
-    Lib.NTuple.createi #(Seq.lseq uint8 256) (lanes m)
+    let b' = Lib.NTuple.createi #(Seq.lseq uint8 256) (lanes m)
       (fun j -> update_sub (create 256 (u8 0)) 0 rem
-        (Seq.slice b.(|j|) (inputByteLen - rem) inputByteLen))
+        (Seq.slice b.(|j|) (inputByteLen - rem) inputByteLen)) in
+    let aux (l:nat{l < lanes m}) : Lemma (forall j. (j >= rateInBytes /\ j < 256) ==>
+      Seq.index b'.(|l|) j == u8 0) =
+      eq_intro (slice #uint8 #256 b'.(|l|) rateInBytes 256)
+        (create (256 - rateInBytes) (u8 0));
+      assert (forall j. (j >= 0 /\ j < (256 - rateInBytes)) ==> 
+        Seq.index (slice #uint8 #256 b'.(|l|) rateInBytes 256) j ==
+          Seq.index b'.(|l|) (rateInBytes + j));
+      assert (forall j. (j >= rateInBytes /\ j < 256) ==> (j - rateInBytes >= 0)) in
+
+    Classical.forall_intro aux;
+    b'
 
 let absorb_inner_block
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
-  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (i:nat{i < inputByteLen / rateInBytes})
   (s:state_spec m) :
   Tot (state_spec m) =
   let mb = get_multiblock_spec #m rateInBytes inputByteLen input i in
-  absorb_inner #a #m mb s
+  absorb_inner #a #m rateInBytes mb s
 
 let absorb_inner_nblocks
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
-  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (s:state_spec m) :
@@ -555,7 +611,7 @@ let absorb
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (s:state_spec m)
-  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
   (input:multiseq (lanes m) inputByteLen)
   (delimitedSuffix:byte_t) :
@@ -567,53 +623,10 @@ let absorb
   let s = absorb_last #a #m delimitedSuffix rateInBytes rem mb s in
   s
 
-let store_block4
-  (#m:m_spec{lanes m == 4})
-  (outputByteLen:size_nat)
-  (start:size_nat)
-  (len:size_nat{len <= 32})
-  (block:lseq uint8 (lanes m * 256))
-  (i:size_nat{start + i * 32 + len <= outputByteLen /\
-              i * 128 + 128 <= 1024})
-  (b:multiseq (lanes m) outputByteLen) :
-  (multiseq (lanes m) outputByteLen) =
-  assert (i * 128 + 32 + len <= 1024);
-  let (l0, (l1, (l2, l3))) = tup4 b in
-  let l0 = update_sub #uint8 #outputByteLen
-    l0 (start + i * 32) len (sub block (i * 128) len) in
-  let l1 = update_sub #uint8 #outputByteLen
-    l1 (start + i * 32) len (sub block (i * 128 + 32) len) in
-  let l2 = update_sub #uint8 #outputByteLen
-    l2 (start + i * 32) len (sub block (i * 128 + 64) len) in
-  let l3 = update_sub #uint8 #outputByteLen
-    l3 (start + i * 32) len (sub block (i * 128 + 96) len) in
-  ntup4 (l0, (l1, (l2, l3)))
-
-val store_block4_s: 
-  m:m_spec -> outputByteLen:size_nat -> start:size_nat ->
-  len:size_nat{len <= 32} -> block:lseq uint8 (lanes m * 256) ->
-  i:size_nat{i <= (outputByteLen - start) / 32 /\ i <= 256 / 32} -> Type0
-let store_block4_s m outputByteLen start len block i = multiseq (lanes m) outputByteLen
-
-let store_output4
-  (#m:m_spec{lanes m == 4})
-  (outputByteLen:size_nat)
-  (start:size_nat)
-  (len:size_nat{start + len <= outputByteLen /\ len <= 256})
-  (block:lseq uint8 (lanes m * 256))
-  (b:multiseq (lanes m) outputByteLen) :
-  (multiseq (lanes m) outputByteLen) =
-  let outBlocks = len / 32 in
-  let b = repeat_gen outBlocks (store_block4_s m outputByteLen start 32 block)
-    (store_block4 #m outputByteLen start 32 block) b in
-  let b = if (len % 32 > 0)
-    then store_block4 #m outputByteLen start (len % 32) block (len / 32) b else b in
-  b
-
 noextract
 let update_b1 (#m:m_spec{lanes m == 1})
               (block:lseq uint8 (lanes m * 256))
-              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
               (i:size_nat{i < outputByteLen / rateInBytes})
               (b:multiseq (lanes m) outputByteLen):
@@ -630,20 +643,30 @@ let update_b1 (#m:m_spec{lanes m == 1})
 noextract
 let update_b4 (#m:m_spec{lanes m == 4})
               (block:lseq uint8 (lanes m * 256))
-              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
               (i:size_nat{i < outputByteLen / rateInBytes})
               (b:multiseq (lanes m) outputByteLen):
               multiseq (lanes m) outputByteLen =
+  assert (i * rateInBytes < outputByteLen);
   assert (i + 1 <= outputByteLen / rateInBytes);
   assert ((i + 1) * rateInBytes <= outputByteLen);
   assert (i * rateInBytes + rateInBytes <= outputByteLen);
-  store_output4 #m outputByteLen (i * rateInBytes) rateInBytes block b
+  let (l0,(l1,(l2,l3))) = tup4 b in
+  let l0 = update_sub #uint8 #outputByteLen 
+    l0 (i * rateInBytes) rateInBytes (sub block 0 rateInBytes) in
+  let l1 = update_sub #uint8 #outputByteLen 
+    l1 (i * rateInBytes) rateInBytes (sub block 256 rateInBytes) in
+  let l2 = update_sub #uint8 #outputByteLen 
+    l2 (i * rateInBytes) rateInBytes (sub block 512 rateInBytes) in
+  let l3 = update_sub #uint8 #outputByteLen 
+    l3 (i * rateInBytes) rateInBytes (sub block 768 rateInBytes) in
+  ntup4 (l0, (l1, (l2, l3)))
 
 noextract
 let update_b (#m:m_spec{is_supported m})
              (block:lseq uint8 (lanes m * 256))
-             (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+             (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
              (outputByteLen:size_nat)
              (i:size_nat{i < outputByteLen / rateInBytes})
              (b:multiseq (lanes m) outputByteLen):
@@ -655,12 +678,11 @@ let update_b (#m:m_spec{is_supported m})
 noextract
 let update_b_last1 (#m:m_spec{lanes m == 1})
               (block:lseq uint8 (lanes m * 256))
-              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
               (outRem:size_nat{outRem == outputByteLen % rateInBytes})
               (b:multiseq (lanes m) outputByteLen):
               multiseq (lanes m) outputByteLen =
-  assert (outputByteLen / rateInBytes <= outputByteLen);
   let l = tup1 b in
   let l = update_sub #uint8 #outputByteLen 
     l (outputByteLen - outRem) outRem (sub block 0 outRem) in
@@ -669,17 +691,26 @@ let update_b_last1 (#m:m_spec{lanes m == 1})
 noextract
 let update_b_last4 (#m:m_spec{lanes m == 4})
               (block:lseq uint8 (lanes m * 256))
-              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+              (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
               (outputByteLen:size_nat)
               (outRem:size_nat{outRem == outputByteLen % rateInBytes})
               (b:multiseq (lanes m) outputByteLen):
               multiseq (lanes m) outputByteLen =
-  store_output4 #m outputByteLen (outputByteLen - outRem) outRem block b
+  let (l0,(l1,(l2,l3))) = tup4 b in
+  let l0 = update_sub #uint8 #outputByteLen 
+    l0 (outputByteLen - outRem) outRem (sub block 0 outRem) in
+  let l1 = update_sub #uint8 #outputByteLen 
+    l1 (outputByteLen - outRem) outRem (sub block 256 outRem) in
+  let l2 = update_sub #uint8 #outputByteLen 
+    l2 (outputByteLen - outRem) outRem (sub block 512 outRem) in
+  let l3 = update_sub #uint8 #outputByteLen 
+    l3 (outputByteLen - outRem) outRem (sub block 768 outRem) in
+  ntup4 (l0, (l1, (l2, l3)))
 
 noextract
 let update_b_last (#m:m_spec{is_supported m})
              (block:lseq uint8 (lanes m * 256))
-             (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+             (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
              (outputByteLen:size_nat)
              (outRem:size_nat{outRem == outputByteLen % rateInBytes})
              (b:multiseq (lanes m) outputByteLen):
@@ -691,7 +722,7 @@ let update_b_last (#m:m_spec{is_supported m})
 let squeeze_inner
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
-  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
   (i:size_nat{i < outputByteLen / rateInBytes})
   (s, b) :
@@ -703,14 +734,14 @@ let squeeze_inner
   s, b
 
 val squeeze_s: 
-  m:m_spec -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256} ->
+  m:m_spec -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200} ->
   outputByteLen:size_nat -> i:size_nat{i <= outputByteLen / rateInBytes} -> Type0
 let squeeze_s m rateInBytes outputByteLen i = (state_spec m) & (multiseq (lanes m) outputByteLen)
 
 let squeeze_nblocks
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
-  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
   (s, b) :
   ((state_spec m) & (multiseq (lanes m) outputByteLen)) =
@@ -722,7 +753,7 @@ let squeeze_last
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (s:state_spec m)
-  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
   (b:multiseq (lanes m) outputByteLen) :
   Tot (multiseq (lanes m) outputByteLen) =
@@ -734,7 +765,7 @@ let squeeze
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (s:state_spec m)
-  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 256})
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
   (b:multiseq (lanes m) outputByteLen) :
   Tot (multiseq (lanes m) outputByteLen) =
@@ -744,7 +775,7 @@ let squeeze
 val keccak:
     #a:keccak_alg
   -> #m:m_spec{is_supported m}
-  -> rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 2048}
+  -> rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
   -> delimitedSuffix:byte_t

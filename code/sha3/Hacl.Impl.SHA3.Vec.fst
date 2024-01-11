@@ -619,14 +619,17 @@ let load_ws #a #m b ws =
 
 inline_for_extraction noextract
 val loadState: #a:keccak_alg -> #m:m_spec{is_supported m}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> b:multibuf (lanes m) 256ul
   -> s:state_t m ->
   Stack unit
-  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
+  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\
+    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == V.loadState #a #m (as_seq_multi h0 b) (as_seq h0 s))
+    as_seq h1 s == V.loadState #a #m (v rateInBytes) (as_seq_multi h0 b) (as_seq h0 s))
 
-let loadState #a #m b s =
+let loadState #a #m _ b s =
   let init_h0 = ST.get() in
   push_frame ();
   let ws = create 32ul (zero_element m) in
@@ -642,6 +645,47 @@ let loadState #a #m b s =
   pop_frame()
 
 inline_for_extraction noextract
+val transpose_s_ws4:
+    #m:m_spec{lanes m == 4}
+  -> ws:ws_t m
+  -> Stack unit
+    (requires fun h -> live h ws)
+    (ensures  fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
+      as_seq h1 ws == V.transpose_s_ws (as_seq h0 ws))
+
+let transpose_s_ws4 #m ws =
+  let (ws0,ws1,ws2,ws3) =
+    transpose4x4 (ws.(0ul),ws.(1ul),ws.(2ul),ws.(3ul)) in
+  let (ws4,ws5,ws6,ws7) =
+    transpose4x4 (ws.(4ul),ws.(5ul),ws.(6ul),ws.(7ul)) in
+  let (ws8,ws9,ws10,ws11) =
+    transpose4x4 (ws.(8ul),ws.(9ul),ws.(10ul),ws.(11ul)) in
+  let (ws12,ws13,ws14,ws15) =
+    transpose4x4 (ws.(12ul),ws.(13ul),ws.(14ul),ws.(15ul)) in
+  let (ws16,ws17,ws18,ws19) =
+    transpose4x4 (ws.(16ul),ws.(17ul),ws.(18ul),ws.(19ul)) in
+  let (ws20,ws21,ws22,ws23) =
+    transpose4x4 (ws.(20ul),ws.(21ul),ws.(22ul),ws.(23ul)) in
+  let (ws24,ws25,ws26,ws27) =
+    transpose4x4 (ws.(24ul),ws.(25ul),ws.(26ul),ws.(27ul)) in
+  let (ws28,ws29,ws30,ws31) =
+    transpose4x4 (ws.(28ul),ws.(29ul),ws.(30ul),ws.(31ul)) in
+  create32 ws ws0 ws4 ws8 ws12 ws16 ws20 ws24 ws28 ws1 ws5 ws9 ws13 ws17 ws21 ws25
+    ws29 ws2 ws6 ws10 ws14 ws18 ws22 ws26 ws30 ws3 ws7 ws11 ws15 ws19 ws23 ws27 ws31
+
+inline_for_extraction noextract
+val transpose_s_ws: #m:m_spec{is_supported m} -> ws:ws_t m ->
+  Stack unit
+  (requires fun h -> live h ws)
+  (ensures  fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
+    as_seq h1 ws == V.transpose_s_ws (as_seq h0 ws))
+
+let transpose_s_ws #m ws =
+  match lanes m with
+  | 1 -> ()
+  | 4 -> transpose_s_ws4 ws
+
+inline_for_extraction noextract
 val storeState: #a:keccak_alg -> #m:m_spec{is_supported m}
   -> s:state_t m
   -> hbuf:lbuffer uint8 (size (lanes m) *! 32ul *! 8ul) ->
@@ -655,13 +699,13 @@ let storeState #a #m s hbuf =
   push_frame ();
   let ws = create 32ul (zero_element m) in
   update_sub ws 0ul 25ul s;
-  transpose_ws ws;
+  transpose_s_ws ws;
   Lib.IntVector.Serialize.vecs_store_le hbuf ws;
   pop_frame()
 
 inline_for_extraction noextract
 val next_blocks:
-  rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> nextBlock:lbuffer uint8 256ul ->
   Stack unit
   (requires fun h -> live h nextBlock /\
@@ -674,7 +718,7 @@ let next_blocks rateInBytes nextBlock =
 
 inline_for_extraction noextract
 val next_block1: #m:m_spec{lanes m == 1}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
   (requires fun h -> live_multi h b /\
@@ -692,7 +736,7 @@ let next_block1 #m rateInBytes b =
 
 inline_for_extraction noextract
 val next_block4: #m:m_spec{lanes m == 4}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
   (requires fun h -> live_multi h b /\ internally_disjoint b /\ 
@@ -715,7 +759,7 @@ let next_block4 #m rateInBytes b =
 
 inline_for_extraction noextract
 val next_block: #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
   (requires fun h -> live_multi h b /\ internally_disjoint b /\ 
@@ -776,7 +820,7 @@ let alloc_multi m =
 
 inline_for_extraction noextract
 val absorb_next: #a:keccak_alg -> #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> s:state_t m ->
   Stack unit
   (requires fun h -> live h s)
@@ -788,96 +832,119 @@ let absorb_next #a #m rateInBytes s =
   let b = alloc_multi m in
   next_block #m rateInBytes b;
   if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
-  loadState #a #m b s;
+  let h0 = ST.get() in
+  assert (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+    Seq.index (as_seq_multi h0 b).(|l|) i == u8 0));
+  loadState #a #m rateInBytes b s;
   state_permute m s;
   pop_frame()
 
 inline_for_extraction noextract
 val load_last_blocks:
-  rem:size_t{v rem < 256}
+  rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> rem:size_t{v rem < v rateInBytes}
   -> delimitedSuffix:byte_t
   -> lastBlock:lbuffer uint8 256ul ->
   Stack unit
-  (requires fun h -> live h lastBlock)
+  (requires fun h -> live h lastBlock /\ (forall i. (i >= v rateInBytes /\ i < 256) ==>
+    Seq.index (as_seq h lastBlock) i == u8 0))
   (ensures  fun h0 _ h1 -> modifies (loc lastBlock) h0 h1 /\
-    as_seq h1 lastBlock == V.load_last_blocks (v rem) delimitedSuffix (as_seq h0 lastBlock))
+    as_seq h1 lastBlock ==
+      V.load_last_blocks (v rateInBytes) (v rem) delimitedSuffix (as_seq h0 lastBlock))
 
-let load_last_blocks rem delimitedSuffix lastBlock =
+let load_last_blocks _ rem delimitedSuffix lastBlock =
   lastBlock.(rem) <- byte_to_uint8 delimitedSuffix
 
 inline_for_extraction noextract
 val load_last_block1: #m:m_spec{lanes m == 1}
-  -> rem:size_t{v rem < 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> rem:size_t{v rem < v rateInBytes}
   -> delimitedSuffix:byte_t
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
-  (requires fun h -> live_multi h b)
+  (requires fun h -> live_multi h b /\
+    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
-    as_seq_multi h1 b == V.load_last_block #m (v rem) delimitedSuffix (as_seq_multi h0 b))
+    as_seq_multi h1 b ==
+      V.load_last_block #m (v rateInBytes) (v rem) delimitedSuffix (as_seq_multi h0 b))
 
-let load_last_block1 #m rem delimitedSuffix b =
+let load_last_block1 #m rateInBytes rem delimitedSuffix b =
   let h0 = ST.get() in
   let b0 = b.(|0|) in
-  load_last_blocks rem delimitedSuffix b0;
+  load_last_blocks rateInBytes rem delimitedSuffix b0;
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b) 
-    (V.load_last_block #m (v rem) delimitedSuffix (as_seq_multi h0 b))
+    (V.load_last_block #m (v rateInBytes) (v rem) delimitedSuffix (as_seq_multi h0 b))
 
 inline_for_extraction noextract
 val load_last_block4: #m:m_spec{lanes m == 4}
-  -> rem:size_t{v rem < 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> rem:size_t{v rem < v rateInBytes}
   -> delimitedSuffix:byte_t
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
-  (requires fun h -> live_multi h b /\ internally_disjoint b)
+  (requires fun h -> live_multi h b /\ internally_disjoint b /\
+    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
-    as_seq_multi h1 b == V.load_last_block #m (v rem) delimitedSuffix (as_seq_multi h0 b))
+    as_seq_multi h1 b ==
+      V.load_last_block #m (v rateInBytes) (v rem) delimitedSuffix (as_seq_multi h0 b))
 
-let load_last_block4 #m rem delimitedSuffix b =
+let load_last_block4 #m rateInBytes rem delimitedSuffix b =
   let h0 = ST.get() in
   let (b0,(b1,(b2,b3))) = tup4 b in
   assert (internally_disjoint4 b0 b1 b2 b3);
-  load_last_blocks rem delimitedSuffix b0;
-  load_last_blocks rem delimitedSuffix b1;
-  load_last_blocks rem delimitedSuffix b2;
-  load_last_blocks rem delimitedSuffix b3;
+  load_last_blocks rateInBytes rem delimitedSuffix b0;
+  load_last_blocks rateInBytes rem delimitedSuffix b1;
+  load_last_blocks rateInBytes rem delimitedSuffix b2;
+  load_last_blocks rateInBytes rem delimitedSuffix b3;
   loc_multi4 b;
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b) 
-    (V.load_last_block #m (v rem) delimitedSuffix (as_seq_multi h0 b))
+    (V.load_last_block #m (v rateInBytes) (v rem) delimitedSuffix (as_seq_multi h0 b))
 
 inline_for_extraction noextract
 val load_last_block: #m:m_spec{is_supported m}
-  -> rem:size_t{v rem < 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> rem:size_t{v rem < v rateInBytes}
   -> delimitedSuffix:byte_t
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
-  (requires fun h -> live_multi h b /\ internally_disjoint b)
+  (requires fun h -> live_multi h b /\ internally_disjoint b /\
+    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
-    as_seq_multi h1 b == V.load_last_block #m (v rem) delimitedSuffix (as_seq_multi h0 b))
+    as_seq_multi h1 b ==
+      V.load_last_block #m (v rateInBytes) (v rem) delimitedSuffix (as_seq_multi h0 b))
 
-let load_last_block #m rem delimitedSuffix b =
+let load_last_block #m rateInBytes rem delimitedSuffix b =
   match lanes m with
-  | 1 -> load_last_block1 #m rem delimitedSuffix b
-  | 4 -> load_last_block4 #m rem delimitedSuffix b
+  | 1 -> load_last_block1 #m rateInBytes rem delimitedSuffix b
+  | 4 -> load_last_block4 #m rateInBytes rem delimitedSuffix b
 
 inline_for_extraction noextract
 val absorb_last: #a:keccak_alg -> #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> rem:size_t{v rem < v rateInBytes}
   -> delimitedSuffix:byte_t
   -> b:multibuf (lanes m) 256ul
   -> s:state_t m ->
   Stack unit
-  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\ internally_disjoint b)
+  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\ internally_disjoint b /\
+    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies (loc s |+| loc_multi b) h0 h1 /\
     as_seq h1 s == V.absorb_last #a #m delimitedSuffix (v rateInBytes) (v rem) (as_seq_multi h0 b) (as_seq h0 s))
 
 #push-options "--z3rlimit 200"
 let absorb_last #a #m rateInBytes rem delimitedSuffix b s =
-  load_last_block #m rem delimitedSuffix b;
+  load_last_block #m rateInBytes rem delimitedSuffix b;
   if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
-  loadState #a #m b s;
+  let h0 = ST.get() in
+  assert (forall l. l < lanes m ==> (forall j. (j >= v rateInBytes /\ j < 256) ==>
+    Seq.index (as_seq_multi h0 b).(|l|) j == u8 0));
+  loadState #a #m rateInBytes b s;
   if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
        (rem =. (rateInBytes -! 1ul)) then state_permute m s;
   absorb_next #a #m rateInBytes s
@@ -885,15 +952,18 @@ let absorb_last #a #m rateInBytes rem delimitedSuffix b s =
 
 inline_for_extraction noextract
 val absorb_inner: #a:keccak_alg -> #m:m_spec{is_supported m}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> b:multibuf (lanes m) 256ul
   -> s:state_t m ->
   Stack unit
-  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
+  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\
+    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+      Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == V.absorb_inner #a #m (as_seq_multi h0 b) (as_seq h0 s))
+    as_seq h1 s == V.absorb_inner #a #m (v rateInBytes) (as_seq_multi h0 b) (as_seq h0 s))
 
-let absorb_inner #a #m b s =
-  loadState #a #m b s;
+let absorb_inner #a #m rateInBytes b s =
+  loadState #a #m rateInBytes b s;
   state_permute m s
 
 noextract
@@ -902,7 +972,7 @@ let preserves_disjoint_multi #lanes #len #len' (b:multibuf lanes len) (r:multibu
 
 inline_for_extraction noextract
 let get_multiblock_t (m:m_spec{is_supported m}) =
-    rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+    rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
   -> i:size_t{v i < v len / v rateInBytes}
@@ -929,7 +999,7 @@ let get_multiblock_1 #m rateInBytes len b i b' =
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b') (V.get_multiblock_spec #m (v rateInBytes) (v len) (as_seq_multi h0 b) (v i))
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 inline_for_extraction noextract
 val get_multiblock_4: #m:m_spec{lanes m == 4} -> get_multiblock_t m
 let get_multiblock_4 #m rateInBytes len b i b' =
@@ -960,7 +1030,7 @@ let get_multiblock #m rateInBytes len b i b' =
 
 #push-options "--max_ifuel 1"
 inline_for_extraction noextract
-val get_multilast_disjoint_helper: rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+val get_multilast_disjoint_helper: rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:lbuffer uint8 len
   -> b':lbuffer uint8 256ul ->
@@ -978,7 +1048,7 @@ let get_multilast_disjoint_helper rateInBytes len b b' =
 
 inline_for_extraction noextract
 let get_multilast_t (m:m_spec{is_supported m}) =
-    rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+    rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
   -> b':multibuf (lanes m) 256ul ->
@@ -1044,7 +1114,7 @@ let get_multilast #m rateInBytes len b b' =
 
 inline_for_extraction noextract
 val absorb_inner_block: #a:keccak_alg -> #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
   -> i:size_t{v i < v len / v rateInBytes}
@@ -1057,12 +1127,16 @@ val absorb_inner_block: #a:keccak_alg -> #m:m_spec{is_supported m}
 let absorb_inner_block #a #m rateInBytes len b i s =
   let h0 = ST.get() in
   push_frame ();
+  if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
   let b' = alloc_multi m in
   let h0' = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h0' b) (as_seq_multi h0 b);
   get_multiblock #m rateInBytes len b i b';
   if (lanes m = 1) then loc_multi1 b' else loc_multi4 b';
-  absorb_inner #a #m b' s;
+  let h0' = ST.get() in
+  assert (forall l. l < lanes m ==> (forall j. (j >= v rateInBytes /\ j < 256) ==>
+    Seq.index (as_seq_multi h0' b').(|l|) j == u8 0));
+  absorb_inner #a #m rateInBytes b' s;
   let h1 = ST.get() in
   assert (modifies (loc s |+| loc_multi b') h0 h1);
   pop_frame ();
@@ -1072,7 +1146,7 @@ let absorb_inner_block #a #m rateInBytes len b i s =
 
 inline_for_extraction noextract
 val absorb_inner_nblocks: #a:keccak_alg -> #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
   -> s:state_t m ->
@@ -1093,7 +1167,7 @@ let absorb_inner_nblocks #a #m rateInBytes len b s =
 
 inline_for_extraction noextract
 val absorb: #a:keccak_alg -> #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
   -> delimitedSuffix:byte_t
@@ -1103,6 +1177,7 @@ val absorb: #a:keccak_alg -> #m:m_spec{is_supported m}
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
     as_seq h1 s == V.absorb #a #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
 
+#push-options "--max_ifuel 1 --z3rlimit 200"
 let absorb #a #m rateInBytes len b delimitedSuffix s =
   let h0 = ST.get() in
   assert (v (len %. rateInBytes) == v len % v rateInBytes);
@@ -1121,83 +1196,13 @@ let absorb #a #m rateInBytes len b delimitedSuffix s =
   LSeq.eq_intro (as_seq h0' s) (as_seq h0_s s);
   absorb_last #a #m rateInBytes rem delimitedSuffix b' s;
   pop_frame ()
-
-inline_for_extraction noextract
-val store_block4:
-  #m:m_spec{lanes m == 4}
-  -> block:lbuffer uint8 1024ul
-  -> outputByteLen:size_t
-  -> start:size_t
-  -> len:size_t{v len <= 32}
-  -> i:size_t{v start + v i * 32 + v len <= v outputByteLen /\
-              v i * 128 + 128 <= 1024}
-  -> b:multibuf (lanes m) outputByteLen ->
-  Stack unit
-  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
-    disjoint_multi b block)
-  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
-    as_seq_multi h1 b ==
-      V.store_block4 #m (v outputByteLen) (v start) (v len) (as_seq h0 block) (v i) (as_seq_multi h0 b))
-
-let store_block4 #m block outputByteLen start len i b =
-  let h0 = ST.get() in
-  assert (v i * 128 + v len == v (i *! 128ul +! len));
-  let (b0,(b1,(b2,b3))) = tup4 b in
-  assert (internally_disjoint4 b0 b1 b2 b3);
-  update_sub b0 (start +! i *! 32ul) len (sub block (i *! 128ul) len);
-  update_sub b1 (start +! i *! 32ul) len (sub block (i *! 128ul +! 32ul) len);
-  update_sub b2 (start +! i *! 32ul) len (sub block (i *! 128ul +! 64ul) len);
-  update_sub b3 (start +! i *! 32ul) len (sub block (i *! 128ul +! 96ul) len);
-  loc_multi4 b;
-  let h1 = ST.get() in
-  Lib.NTuple.eq_intro (as_seq_multi h1 b)
-    (V.store_block4 #m (v outputByteLen) (v start) (v len) (as_seq h0 block) (v i) (as_seq_multi h0 b))
-
-inline_for_extraction noextract
-val store_output4:
-  #m:m_spec{lanes m == 4}
-  -> block:lbuffer uint8 (size (lanes m) *! 256ul)
-  -> outputByteLen:size_t
-  -> start:size_t
-  -> len:size_t{v start + v len <= v outputByteLen /\ v len <= 256}
-  -> b:multibuf (lanes m) outputByteLen ->
-  Stack unit
-  (requires fun h -> live h block /\ live_multi h b /\ internally_disjoint b /\
-    disjoint_multi b block)
-  (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
-    as_seq_multi h1 b ==
-      V.store_output4 #m (v outputByteLen) (v start) (v len) (as_seq h0 block) (as_seq_multi h0 b))
-
-let store_output4 #m block outputByteLen start len b =
-  let h0_init = ST.get() in
-  [@ inline_let]
-  let refl h i : GTot (V.multiseq (lanes m) (v outputByteLen)) = as_seq_multi h b in
-  loc_multi4 b;
-  [@ inline_let]
-  let footprint i = loc_multi b in
-  [@ inline_let]
-  let spec h0 = V.store_block4 #m (v outputByteLen) (v start) 32 (as_seq h0 block) in
-  let h0 = ST.get () in
-  loop h0 (len /. 32ul)
-    (V.store_block4_s m (v outputByteLen) (v start) 32 (as_seq h0 block)) refl footprint spec
-  (fun i ->
-    Loop.unfold_repeat_gen (v len / 32)
-      (V.store_block4_s m (v outputByteLen) (v start) 32 (as_seq h0 block))
-      (spec h0) (refl h0 0) (v i);
-    store_block4 #m block outputByteLen start 32ul i b;
-    let h1 = ST.get () in
-    assert (modifies_multi b h0 h1));
-  if (len %. 32ul >. 0ul)
-    then store_block4 #m block outputByteLen start (len %. 32ul) (len /. 32ul) b;
-  let h1 = ST.get() in
-  Lib.NTuple.eq_intro (as_seq_multi h1 b)
-    (V.store_output4 #m (v outputByteLen) (v start) (v len) (as_seq h0_init block) (as_seq_multi h0_init b))
+#pop-options
 
 inline_for_extraction noextract
 val update_output1:
   #m:m_spec{lanes m == 1}
   -> block:lbuffer uint8 (size (lanes m) *! 256ul)
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> i:size_t{v i < v outputByteLen / v rateInBytes}
   -> b:multibuf (lanes m) outputByteLen ->
@@ -1222,7 +1227,7 @@ inline_for_extraction noextract
 val update_output4:
   #m:m_spec{lanes m == 4}
   -> block:lbuffer uint8 (size (lanes m) *! 256ul)
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> i:size_t{v i < v outputByteLen / v rateInBytes}
   -> b:multibuf (lanes m) outputByteLen ->
@@ -1233,16 +1238,27 @@ val update_output4:
       V.update_b #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v i) (as_seq_multi h0 b))
 
 let update_output4 #m block rateInBytes outputByteLen i b =
+  let h0 = ST.get() in
+  loc_multi4 b;
+  let (b0,(b1,(b2,b3))) = tup4 b in
+  assert (internally_disjoint4 b0 b1 b2 b3);
+  assert (v i * v rateInBytes < v outputByteLen);
   assert (v i + 1 <= v outputByteLen / v rateInBytes);
   assert ((v i + 1) * v rateInBytes <= v outputByteLen);
   assert (v i * v rateInBytes + v rateInBytes <= v outputByteLen);
-  store_output4 #m block outputByteLen (i *! rateInBytes) rateInBytes b
+  update_sub b0 (i *! rateInBytes) rateInBytes (sub block 0ul rateInBytes);
+  update_sub b1 (i *! rateInBytes) rateInBytes (sub block 256ul rateInBytes);
+  update_sub b2 (i *! rateInBytes) rateInBytes (sub block 512ul rateInBytes);
+  update_sub b3 (i *! rateInBytes) rateInBytes (sub block 768ul rateInBytes);
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 b)
+    (V.update_b #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v i) (as_seq_multi h0 b))
 
 inline_for_extraction noextract
 val update_output:
   #m:m_spec{is_supported m}
   -> block:lbuffer uint8 (size (lanes m) *! 256ul)
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> i:size_t{v i < v outputByteLen / v rateInBytes}
   -> b:multibuf (lanes m) outputByteLen ->
@@ -1261,7 +1277,7 @@ inline_for_extraction noextract
 val update_output_last1:
   #m:m_spec{lanes m == 1}
   -> block:lbuffer uint8 (size (lanes m) *! 256ul)
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> outRem:size_t{v outRem == v outputByteLen % v rateInBytes}
   -> b:multibuf (lanes m) outputByteLen ->
@@ -1273,6 +1289,7 @@ val update_output_last1:
 
 let update_output_last1 #m block rateInBytes outputByteLen outRem b =
   let h0 = ST.get() in
+  assert (v (outputByteLen -! outRem) == v outputByteLen - v outRem);
   update_sub b.(|0|) (outputByteLen -! outRem) outRem (sub block 0ul outRem);
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 b)
@@ -1282,7 +1299,7 @@ inline_for_extraction noextract
 val update_output_last4:
   #m:m_spec{lanes m == 4}
   -> block:lbuffer uint8 (size (lanes m) *! 256ul)
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> outRem:size_t{v outRem == v outputByteLen % v rateInBytes}
   -> b:multibuf (lanes m) outputByteLen ->
@@ -1293,14 +1310,24 @@ val update_output_last4:
       V.update_b_last #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v outRem) (as_seq_multi h0 b))
 
 let update_output_last4 #m block rateInBytes outputByteLen outRem b =
+  let h0 = ST.get() in
+  loc_multi4 b;
+  let (b0,(b1,(b2,b3))) = tup4 b in
+  assert (internally_disjoint4 b0 b1 b2 b3);
   assert (v (outputByteLen -! outRem) == v outputByteLen - v outRem);
-  store_output4 #m block outputByteLen (outputByteLen -! outRem) outRem b
+  update_sub b0 (outputByteLen -! outRem) outRem (sub block 0ul outRem);
+  update_sub b1 (outputByteLen -! outRem) outRem (sub block 256ul outRem);
+  update_sub b2 (outputByteLen -! outRem) outRem (sub block 512ul outRem);
+  update_sub b3 (outputByteLen -! outRem) outRem (sub block 768ul outRem);
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 b)
+    (V.update_b_last #m (as_seq h0 block) (v rateInBytes) (v outputByteLen) (v outRem) (as_seq_multi h0 b))
 
 inline_for_extraction noextract
 val update_output_last:
   #m:m_spec{is_supported m}
   -> block:lbuffer uint8 (size (lanes m) *! 256ul)
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> outRem:size_t{v outRem == v outputByteLen % v rateInBytes}
   -> b:multibuf (lanes m) outputByteLen ->
@@ -1317,7 +1344,7 @@ let update_output_last #m block rateInBytes outputByteLen outRem b =
 
 inline_for_extraction noextract
 val squeeze_inner: #a:keccak_alg -> #m:m_spec{is_supported m}
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> i:size_t{v i < v outputByteLen / v rateInBytes}
   -> s:state_t m
@@ -1351,7 +1378,7 @@ let squeeze_inner #a #m rateInBytes outputByteLen i s b =
 inline_for_extraction noextract
 val squeeze_nblocks:# a:keccak_alg -> #m:m_spec{is_supported m}
   -> s:state_t m
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> b:multibuf (lanes m) outputByteLen ->
   Stack unit
@@ -1383,7 +1410,7 @@ let squeeze_nblocks #a #m s rateInBytes outputByteLen b =
 inline_for_extraction noextract
 val squeeze_last:# a:keccak_alg -> #m:m_spec{is_supported m}
   -> s:state_t m
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> b:multibuf (lanes m) outputByteLen ->
   Stack unit
@@ -1409,7 +1436,7 @@ let squeeze_last #a #m s rateInBytes outputByteLen b =
 inline_for_extraction noextract
 val squeeze:# a:keccak_alg -> #m:m_spec{is_supported m}
   -> s:state_t m
-  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 256}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
   -> b:multibuf (lanes m) outputByteLen ->
   Stack unit
@@ -1425,7 +1452,7 @@ let squeeze #a #m s rateInBytes outputByteLen b =
 
 inline_for_extraction noextract
 val keccak:# a:keccak_alg -> #m:m_spec{is_supported m}
-  -> rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 2048}
+  -> rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
   -> inputByteLen:size_t
   -> input:multibuf (lanes m) inputByteLen
   -> delimitedSuffix:byte_t
