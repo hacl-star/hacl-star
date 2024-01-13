@@ -846,7 +846,7 @@ val load_last_blocks:
   -> delimitedSuffix:byte_t
   -> lastBlock:lbuffer uint8 256ul ->
   Stack unit
-  (requires fun h -> live h lastBlock /\ (forall i. (i >= v rateInBytes /\ i < 256) ==>
+  (requires fun h -> live h lastBlock /\ (forall i. (i >= v rem /\ i < 256) ==>
     Seq.index (as_seq h lastBlock) i == u8 0))
   (ensures  fun h0 _ h1 -> modifies (loc lastBlock) h0 h1 /\
     as_seq h1 lastBlock ==
@@ -863,7 +863,7 @@ val load_last_block1: #m:m_spec{lanes m == 1}
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
   (requires fun h -> live_multi h b /\
-    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+    (forall l. l < lanes m ==> (forall i. (i >= v rem /\ i < 256) ==>
       Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
     as_seq_multi h1 b ==
@@ -885,7 +885,7 @@ val load_last_block4: #m:m_spec{lanes m == 4}
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
   (requires fun h -> live_multi h b /\ internally_disjoint b /\
-    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+    (forall l. l < lanes m ==> (forall i. (i >= v rem /\ i < 256) ==>
       Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
     as_seq_multi h1 b ==
@@ -912,7 +912,7 @@ val load_last_block: #m:m_spec{is_supported m}
   -> b:multibuf (lanes m) 256ul ->
   Stack unit
   (requires fun h -> live_multi h b /\ internally_disjoint b /\
-    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+    (forall l. l < lanes m ==> (forall i. (i >= v rem /\ i < 256) ==>
       Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies_multi b h0 h1 /\
     as_seq_multi h1 b ==
@@ -932,7 +932,7 @@ val absorb_last: #a:keccak_alg -> #m:m_spec{is_supported m}
   -> s:state_t m ->
   Stack unit
   (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s /\ internally_disjoint b /\
-    (forall l. l < lanes m ==> (forall i. (i >= v rateInBytes /\ i < 256) ==>
+    (forall l. l < lanes m ==> (forall i. (i >= v rem /\ i < 256) ==>
       Seq.index (as_seq_multi h b).(|l|) i == u8 0)))
   (ensures  fun h0 _ h1 -> modifies (loc s |+| loc_multi b) h0 h1 /\
     as_seq h1 s == V.absorb_last #a #m delimitedSuffix (v rateInBytes) (v rem) (as_seq_multi h0 b) (as_seq h0 s))
@@ -942,7 +942,7 @@ let absorb_last #a #m rateInBytes rem delimitedSuffix b s =
   load_last_block #m rateInBytes rem delimitedSuffix b;
   if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
   let h0 = ST.get() in
-  assert (forall l. l < lanes m ==> (forall j. (j >= v rateInBytes /\ j < 256) ==>
+  assert (forall l. l < lanes m ==> (forall j. (j >= (v rem + 1) /\ j < 256) ==>
     Seq.index (as_seq_multi h0 b).(|l|) j == u8 0));
   loadState #a #m rateInBytes b s;
   if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&

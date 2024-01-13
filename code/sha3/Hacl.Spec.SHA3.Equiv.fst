@@ -573,19 +573,17 @@ let loadState_lemma_l  #a #m r b s l = loadState_loop #a #m r b s l 25
 
 (* storeState *)
 
-val store_state_lemma_ij:
+val storeState_lemma_ij:
     #a:keccak_alg
   -> #m:m_spec{is_supported m}
   -> s:state_spec m
   -> j:nat{j < lanes m}
   -> i:nat{i < 25 * word_length a} ->
   Lemma
-   (let ws = create 32 (zero_element m) in
-    let ws = update_sub ws 0 25 s in
-    (storeState #a #m s).[j * (32 * word_length a) + i] ==
+   ((storeState #a #m s).[j * (32 * word_length a) + i] ==
       (BSeq.uint_to_bytes_le (Seq.index (state_spec_v s).[j] (i / word_length a))).[i % word_length a])
 
-let store_state_lemma_ij #a #m s j i =
+let storeState_lemma_ij #a #m s j i =
   let ws = create 32 (zero_element m) in
   let ws = update_sub ws 0 25 s in
   let ws1 = transpose_s_ws ws in
@@ -625,11 +623,11 @@ let store_state_lemma_ij #a #m s j i =
     (==) { Math.Lemmas.paren_mul_right j 32 (word_length a);
            Math.Lemmas.modulo_addition_lemma i (word_length a) (j * 32) }
     (BSeq.uint_to_bytes_le (Seq.index (ws_spec_v ws).[j] (i / word_length a))).[i % word_length a];
-    (==) { eq_intro (sub (ws_spec_v ws).[j] 0 25) (state_spec_v s).[j]}
+    (==) { }
     (BSeq.uint_to_bytes_le (Seq.index (state_spec_v s).[j] (i / word_length a))).[i % word_length a];
     }
 
-val store_state_lemma_ij_sub:
+val storeState_lemma_ij_sub:
     #a:keccak_alg
   -> #m:m_spec{is_supported m}
   -> s:state_spec m
@@ -640,18 +638,18 @@ val store_state_lemma_ij_sub:
    (sub (sub (storeState #a #m s) (j * (32 * word_length a)) (25 * word_length a)) (i * word_length a) (word_length a) ==
       sub (Spec.storeState_inner (state_spec_v s).[j] i block) (i * word_length a) (word_length a))
 
-let store_state_lemma_ij_sub #a #m s block j i =
+let storeState_lemma_ij_sub #a #m s block j i =
   let aux (k:nat{k < word_length a}) : Lemma (
       (sub (storeState #a #m s) (j * (32 * word_length a)) (25 * word_length a)).[i * word_length a + k] ==
         (Spec.storeState_inner (state_spec_v s).[j] i block).[i * word_length a + k]) =
-    store_state_lemma_ij #a #m s j (i * word_length a + k) in
+    storeState_lemma_ij #a #m s j (i * word_length a + k) in
 
   Classical.forall_intro aux;
   eq_intro
     (sub (sub (storeState #a #m s) (j * (32 * word_length a)) (25 * word_length a)) (i * word_length a) (word_length a))
     (sub (Spec.storeState_inner (state_spec_v s).[j] i block) (i * word_length a) (word_length a))
 
-val storeState_inner_loop:
+val storeState_loop:
     #a:keccak_alg
   -> #m:m_spec{is_supported m}
   -> s:state_spec m
@@ -661,7 +659,7 @@ val storeState_inner_loop:
    (sub (storeState #a #m s) (l * (32 * word_length a)) (25 * word_length a) ==
      repeati n (Spec.storeState_inner (state_spec_v s).[l]) (create 200 (u8 0)))
 
-let rec storeState_inner_loop #a #m s l n =
+let rec storeState_loop #a #m s l n =
   let lp = repeati n (Spec.storeState_inner (state_spec_v s).[l]) (create 200 (u8 0)) in
   
   if n = 0 then begin
@@ -670,9 +668,140 @@ let rec storeState_inner_loop #a #m s l n =
     () end
   else begin
     let lp0 = repeati (n - 1) (Spec.storeState_inner (state_spec_v s).[l]) (create 200 (u8 0)) in
-    storeState_inner_loop #a #m s l (n - 1);
+    storeState_loop #a #m s l (n - 1);
     unfold_repeati n (Spec.storeState_inner (state_spec_v s).[l])
       (create 200 (u8 0)) (n - 1);
-    store_state_lemma_ij_sub #a #m s lp0 l (n - 1);
+    storeState_lemma_ij_sub #a #m s lp0 l (n - 1);
     assert (lp == (Spec.storeState_inner (state_spec_v s).[l]) (n - 1) lp0);
-    () end
+    () end; admit()
+
+val storeState_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> s:state_spec m
+  -> l:nat{l < lanes m} ->
+  Lemma
+   (sub (storeState #a #m s) (l * (32 * word_length a)) r ==
+     Spec.storeState r (state_spec_v s).[l])
+
+let storeState_lemma_l  #a #m r s l =
+  storeState_loop #a #m s l 25
+
+(* absorb_next *)
+
+val next_block_lemma_l:
+  #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> l:nat{l < lanes m} ->
+  Lemma
+   (sub #uint8 #256 ((next_block #m r (next_block_seq_zero m)).(|l|)) 0 r ==
+    ((create r (u8 0)).[r - 1] <- u8 0x80))
+
+let next_block_lemma_l #m r l =
+  eq_intro (sub #uint8 #256 ((next_block #m r (next_block_seq_zero m)).(|l|)) 0 r)
+    ((create r (u8 0)).[r - 1] <- u8 0x80)
+
+val absorb_next_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> s:state_spec m
+  -> l:nat{l < lanes m} ->
+  Lemma
+   ((state_spec_v (absorb_next #a #m r s)).[l] ==
+    Spec.absorb_next (state_spec_v s).[l] r)
+
+let absorb_next_lemma_l  #a #m r s l =
+  next_block_lemma_l #m r l;
+  let b = next_block #m r (next_block_seq_zero m) in
+  loadState_lemma_l #a #m r b s l;
+  let s = loadState #a #m r b s in
+  state_permute_lemma_l m s l
+
+(* absorb_last *)
+
+val load_last_block_lemma_helper:
+  #m:m_spec{is_supported m}
+  -> delimitedSuffix:byte_t
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> rem:size_nat{rem < r}
+  -> input:Lib.ByteSequence.lbytes rem ->
+  Lemma(let b_0 = update_sub (create r (u8 0)) 0 rem input in
+        let b = b_0.[rem] <- byte_to_uint8 delimitedSuffix in
+        (forall i. (i >= 0 /\ i < rem) ==> Seq.index b i == Seq.index input i) /\
+        Seq.index b rem == byte_to_uint8 delimitedSuffix /\
+        (forall i. (i >= (rem + 1) /\ i < r) ==> Seq.index b i == u8 0))
+
+let load_last_block_lemma_helper #m delimitedSuffix r rem input = 
+  let b_0 = update_sub (create r (u8 0)) 0 rem input in
+  let b = b_0.[rem] <- byte_to_uint8 delimitedSuffix in
+  eq_intro (slice #uint8 #r b_0 (rem + 1) r)
+        (create (r - (rem + 1)) (u8 0));
+  assert (forall j. (j >= 0 /\ j < (r - (rem + 1))) ==> 
+        Seq.index (slice #uint8 #r b (rem + 1) r) j ==
+          Seq.index b ((rem + 1) + j));
+  assert (forall j. (j >= (rem + 1) /\ j < r) ==> (j - (rem + 1) >= 0))
+
+  val load_last_block_lemma_l:
+  #m:m_spec{is_supported m}
+  -> delimitedSuffix:byte_t
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> rem:size_nat{rem < r}
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+       (forall i. (i >= rem /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
+  -> l:nat{l < lanes m} ->
+  Lemma
+   (let b = update_sub (create r (u8 0)) 0 rem (sub #uint8 #256 input.(|l|) 0 rem) in
+    sub #uint8 #256 ((load_last_block #m r rem delimitedSuffix input).(|l|)) 0 r ==
+      (b.[rem] <- byte_to_uint8 delimitedSuffix))
+
+let load_last_block_lemma_l #m delimitedSuffix r rem input l =
+  let b = update_sub (create r (u8 0)) 0 rem (sub #uint8 #256 input.(|l|) 0 rem) in
+  load_last_block_lemma_helper #m delimitedSuffix r rem (sub #uint8 #256 input.(|l|) 0 rem);
+  eq_intro (sub #uint8 #256 ((load_last_block #m r rem delimitedSuffix input).(|l|)) 0 r)
+    (b.[rem] <- byte_to_uint8 delimitedSuffix)
+
+val absorb_last_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> delimitedSuffix:byte_t
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> rem:size_nat{rem < r}
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+       (forall i. (i >= rem /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
+  -> s:state_spec m
+  -> l:nat{l < lanes m} ->
+  Lemma
+   ((state_spec_v (absorb_last #a #m delimitedSuffix r rem input s)).[l] ==
+    Spec.absorb_last delimitedSuffix r rem (sub #uint8 #256 input.(|l|) 0 rem) (state_spec_v s).[l])
+
+let absorb_last_lemma_l #a #m delimitedSuffix r rem input s l =
+  load_last_block_lemma_l #m delimitedSuffix r rem input l;
+  let lastBlock = load_last_block #m r rem delimitedSuffix input in
+  loadState_lemma_l #a #m r lastBlock s l;
+  let s = loadState #a #m r lastBlock s in
+  let s =
+    if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
+       (rem = r - 1)
+    then (state_permute_lemma_l m s l; state_permute m s) else s in
+  absorb_next_lemma_l #a #m r s l
+
+(* absorb_inner *)
+
+val absorb_inner_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> input:multiseq (lanes m) 256{forall l. l < lanes m ==> 
+     (forall i. (i >= r /\ i < 256) ==> Seq.index input.(|l|) i == u8 0)}
+  -> s:state_spec m
+  -> l:nat{l < lanes m} ->
+  Lemma
+   ((state_spec_v (absorb_inner #a #m r input s)).[l] ==
+    Spec.absorb_inner r (sub #uint8 #256 input.(|l|) 0 r) (state_spec_v s).[l])
+
+let absorb_inner_lemma_l #a #m r input s l =
+  loadState_lemma_l #a #m r input s l;
+  let s = loadState #a #m r input s in
+  state_permute_lemma_l m s l
