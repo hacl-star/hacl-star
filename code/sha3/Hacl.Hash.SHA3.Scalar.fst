@@ -163,7 +163,7 @@ val shake128_absorb_nblocks:
 let shake128_absorb_nblocks state input inputByteLen =
   absorb_inner_nblocks #Shake128 #M32 168ul inputByteLen (ntup1 input) state
 
-val shake128_absorb_last:
+val shake128_absorb_final:
   state:lbuffer_t MUT (vec_t U64 1) 25ul
   -> input:buffer_t MUT uint8
   -> inputByteLen:size_t{v inputByteLen == length input}
@@ -174,22 +174,8 @@ val shake128_absorb_last:
        modifies (loc state) h0 h1 /\
        as_seq h1 state ==
          V.absorb_final #Shake128 #M32 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (byte 0x1F))
-let shake128_absorb_last state input inputByteLen =
+let shake128_absorb_final state input inputByteLen =
   absorb_final #Shake128 #M32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
-
-val shake128_absorb:
-  state:lbuffer_t MUT (vec_t U64 1) 25ul
-  -> input:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input}
-  -> Stack unit
-     (requires fun h ->
-       live h input /\ live h state /\ disjoint input state)
-     (ensures  fun h0 _ h1 ->
-       modifies (loc state) h0 h1 /\
-       as_seq h1 state ==
-          V.absorb #Shake128 #M32 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (byte 0x1F))
-let shake128_absorb state input inputByteLen =
-  absorb #Shake128 #M32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
 
 val shake128_squeeze_nblocks:
   state:lbuffer_t MUT (vec_t U64 1) 25ul
