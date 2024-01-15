@@ -1166,6 +1166,43 @@ let absorb_inner_nblocks #a #m rateInBytes len b s =
     absorb_inner_block #a #m rateInBytes len b i s)
 
 inline_for_extraction noextract
+val absorb_final: #a:keccak_alg -> #m:m_spec{is_supported m}
+  -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
+  -> len:size_t
+  -> b:multibuf (lanes m) len
+  -> delimitedSuffix:byte_t
+  -> s:state_t m ->
+  Stack unit
+  (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
+  (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
+    as_seq h1 s ==
+      V.absorb_final #a #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
+
+#push-options "--max_ifuel 1 --z3rlimit 200"
+let absorb_final #a #m rateInBytes len b delimitedSuffix s =
+  let h0 = ST.get() in
+  assert (v (len %. rateInBytes) == v len % v rateInBytes);
+  let rem = len %. rateInBytes in
+  push_frame ();
+  if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
+  let b' = alloc_multi m in
+  let h0' = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h0' b) (as_seq_multi h0 b);
+  get_multilast #m rateInBytes len b b';
+  if (lanes m = 1) then loc_multi1 b' else loc_multi4 b';
+  let h0' = ST.get() in
+  assert (modifies_multi b' h0 h0');
+  absorb_last #a #m rateInBytes rem delimitedSuffix b' s;
+  let h1 = ST.get() in
+  assert (modifies (loc s |+| loc_multi b') h0 h1);
+  pop_frame ();
+  let h1 = ST.get() in
+  LSeq.eq_intro (as_seq h1 s)
+    (V.absorb_final #a #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix);
+  ()
+#pop-options
+
+inline_for_extraction noextract
 val absorb: #a:keccak_alg -> #m:m_spec{is_supported m}
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
@@ -1177,26 +1214,10 @@ val absorb: #a:keccak_alg -> #m:m_spec{is_supported m}
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
     as_seq h1 s == V.absorb #a #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
 
-#push-options "--max_ifuel 1 --z3rlimit 200"
 let absorb #a #m rateInBytes len b delimitedSuffix s =
-  let h0 = ST.get() in
-  assert (v (len %. rateInBytes) == v len % v rateInBytes);
-  push_frame ();
-  let h0' = ST.get() in
-  Lib.NTuple.eq_intro (as_seq_multi h0' b) (as_seq_multi h0 b);
+  if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
   absorb_inner_nblocks #a #m rateInBytes len b s;
-  let h0_s = ST.get() in
-  let rem = len %. rateInBytes in
-  let b' = alloc_multi m in
-  let h0' = ST.get() in
-  Lib.NTuple.eq_intro (as_seq_multi h0' b) (as_seq_multi h0 b);
-  get_multilast #m rateInBytes len b b';
-  if (lanes m = 1) then loc_multi1 b' else loc_multi4 b';
-  let h0' = ST.get() in
-  LSeq.eq_intro (as_seq h0' s) (as_seq h0_s s);
-  absorb_last #a #m rateInBytes rem delimitedSuffix b' s;
-  pop_frame ()
-#pop-options
+  absorb_final #a #m rateInBytes len b delimitedSuffix s
 
 inline_for_extraction noextract
 val update_output1:

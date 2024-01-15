@@ -607,6 +607,21 @@ let absorb_inner_nblocks
   let s = repeati blocks (absorb_inner_block #a #m rateInBytes inputByteLen input) s in
   s
 
+let absorb_final
+  (#a:keccak_alg)
+  (#m:m_spec{is_supported m})
+  (s:state_spec m)
+  (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
+  (inputByteLen:nat)
+  (input:multiseq (lanes m) inputByteLen)
+  (delimitedSuffix:byte_t) :
+  Tot (state_spec m) =
+
+  let rem = inputByteLen % rateInBytes in
+  let mb = get_multilast_spec #m rateInBytes inputByteLen input in
+  let s = absorb_last #a #m delimitedSuffix rateInBytes rem mb s in
+  s
+
 let absorb
   (#a:keccak_alg)
   (#m:m_spec{is_supported m})
@@ -618,10 +633,7 @@ let absorb
   Tot (state_spec m) =
 
   let s = absorb_inner_nblocks #a #m rateInBytes inputByteLen input s in
-  let rem = inputByteLen % rateInBytes in
-  let mb = get_multilast_spec #m rateInBytes inputByteLen input in
-  let s = absorb_last #a #m delimitedSuffix rateInBytes rem mb s in
-  s
+  absorb_final #a #m s rateInBytes inputByteLen input delimitedSuffix
 
 noextract
 let update_b1 (#m:m_spec{lanes m == 1})

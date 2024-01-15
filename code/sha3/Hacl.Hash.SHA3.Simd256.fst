@@ -25,97 +25,74 @@ module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+inline_for_extraction noextract
+let same_as x = y:size_t { x == y }
+
 val shake128:
-  output0:buffer_t MUT uint8
-  -> output1:buffer_t MUT uint8
-  -> output2:buffer_t MUT uint8
-  -> output3:buffer_t MUT uint8
-  -> outputByteLen:size_t{v outputByteLen == length output0 /\ 
-                          v outputByteLen == length output1 /\
-                          v outputByteLen == length output2 /\
-                          v outputByteLen == length output3}
-  -> input0:buffer_t MUT uint8
-  -> input1:buffer_t MUT uint8
-  -> input2:buffer_t MUT uint8
-  -> input3:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input0 /\ 
-                         v inputByteLen == length input1 /\
-                         v inputByteLen == length input2 /\
-                         v inputByteLen == length input3}
+  g_outputByteLen:Ghost.erased size_t
+  -> output0:lbuffer uint8 g_outputByteLen
+  -> output1:lbuffer uint8 g_outputByteLen
+  -> output2:lbuffer uint8 g_outputByteLen
+  -> output3:lbuffer uint8 g_outputByteLen
+  -> outputByteLen: same_as g_outputByteLen
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (input0 <: lbuffer uint8 inputByteLen)
-               (input1 <: lbuffer uint8 inputByteLen)
-               (input2 <: lbuffer uint8 inputByteLen)
-               (input3 <: lbuffer uint8 inputByteLen) /\
-       live4 h (output0 <: lbuffer uint8 outputByteLen)
-               (output1 <: lbuffer uint8 outputByteLen)
-               (output2 <: lbuffer uint8 outputByteLen)
-               (output3 <: lbuffer uint8 outputByteLen) /\
-       internally_disjoint4 (output0 <: lbuffer uint8 outputByteLen)
-                            (output1 <: lbuffer uint8 outputByteLen)
-                            (output2 <: lbuffer uint8 outputByteLen)
-                            (output3 <: lbuffer uint8 outputByteLen))
+       live4 h input0 input1 input2 input3 /\
+       live4 h output0 output1 output2 output3 /\
+       internally_disjoint4 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
-       as_seq h1 (output0 <: lbuffer uint8 outputByteLen) ==
-        S.shake128 (v inputByteLen) (as_seq h0 (input0 <: lbuffer uint8 inputByteLen)) (v outputByteLen) /\
-       as_seq h1 (output1 <: lbuffer uint8 outputByteLen) ==
-        S.shake128 (v inputByteLen) (as_seq h0 (input1 <: lbuffer uint8 inputByteLen)) (v outputByteLen) /\
-       as_seq h1 (output2 <: lbuffer uint8 outputByteLen) ==
-        S.shake128 (v inputByteLen) (as_seq h0 (input2 <: lbuffer uint8 inputByteLen)) (v outputByteLen) /\
-       as_seq h1 (output3 <: lbuffer uint8 outputByteLen) ==
-        S.shake128 (v inputByteLen) (as_seq h0 (input3 <: lbuffer uint8 inputByteLen)) (v outputByteLen))
-let shake128 output0 output1 output2 output3 outputByteLen
-      input0 input1 input2 input3 inputByteLen =
+       as_seq h1 output0 ==
+        S.shake128 (v inputByteLen) (as_seq h0 input0) (v outputByteLen) /\
+       as_seq h1 output1 ==
+        S.shake128 (v inputByteLen) (as_seq h0 input1) (v outputByteLen) /\
+       as_seq h1 output2 ==
+        S.shake128 (v inputByteLen) (as_seq h0 input2) (v outputByteLen) /\
+       as_seq h1 output3 ==
+        S.shake128 (v inputByteLen) (as_seq h0 input3) (v outputByteLen))
+let shake128 _ output0 output1 output2 output3 outputByteLen
+      _ input0 input1 input2 input3 inputByteLen =
   admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
   keccak #Shake128 #M256 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb
 
 val shake256:
-  output0:buffer_t MUT uint8
-  -> output1:buffer_t MUT uint8
-  -> output2:buffer_t MUT uint8
-  -> output3:buffer_t MUT uint8
-  -> outputByteLen:size_t{v outputByteLen == length output0 /\ 
-                          v outputByteLen == length output1 /\
-                          v outputByteLen == length output2 /\
-                          v outputByteLen == length output3}
-  -> input0:buffer_t MUT uint8
-  -> input1:buffer_t MUT uint8
-  -> input2:buffer_t MUT uint8
-  -> input3:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input0 /\ 
-                         v inputByteLen == length input1 /\
-                         v inputByteLen == length input2 /\
-                         v inputByteLen == length input3}
+  g_outputByteLen:Ghost.erased size_t
+  -> output0:lbuffer uint8 g_outputByteLen
+  -> output1:lbuffer uint8 g_outputByteLen
+  -> output2:lbuffer uint8 g_outputByteLen
+  -> output3:lbuffer uint8 g_outputByteLen
+  -> outputByteLen: same_as g_outputByteLen
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (input0 <: lbuffer uint8 inputByteLen)
-               (input1 <: lbuffer uint8 inputByteLen)
-               (input2 <: lbuffer uint8 inputByteLen)
-               (input3 <: lbuffer uint8 inputByteLen) /\
-       live4 h (output0 <: lbuffer uint8 outputByteLen)
-               (output1 <: lbuffer uint8 outputByteLen)
-               (output2 <: lbuffer uint8 outputByteLen)
-               (output3 <: lbuffer uint8 outputByteLen) /\
-       internally_disjoint4 (output0 <: lbuffer uint8 outputByteLen)
-                            (output1 <: lbuffer uint8 outputByteLen)
-                            (output2 <: lbuffer uint8 outputByteLen)
-                            (output3 <: lbuffer uint8 outputByteLen))
+       live4 h input0 input1 input2 input3 /\
+       live4 h output0 output1 output2 output3 /\
+       internally_disjoint4 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
-       as_seq h1 (output0 <: lbuffer uint8 outputByteLen) ==
-        S.shake256 (v inputByteLen) (as_seq h0 (input0 <: lbuffer uint8 inputByteLen)) (v outputByteLen) /\
-       as_seq h1 (output1 <: lbuffer uint8 outputByteLen) ==
-        S.shake256 (v inputByteLen) (as_seq h0 (input1 <: lbuffer uint8 inputByteLen)) (v outputByteLen) /\
-       as_seq h1 (output2 <: lbuffer uint8 outputByteLen) ==
-        S.shake256 (v inputByteLen) (as_seq h0 (input2 <: lbuffer uint8 inputByteLen)) (v outputByteLen) /\
-       as_seq h1 (output3 <: lbuffer uint8 outputByteLen) ==
-        S.shake256 (v inputByteLen) (as_seq h0 (input3 <: lbuffer uint8 inputByteLen)) (v outputByteLen))
-let shake256 output0 output1 output2 output3 outputByteLen
-      input0 input1 input2 input3 inputByteLen =
+       as_seq h1 output0 ==
+        S.shake256 (v inputByteLen) (as_seq h0 input0) (v outputByteLen) /\
+       as_seq h1 output1 ==
+        S.shake256 (v inputByteLen) (as_seq h0 input1) (v outputByteLen) /\
+       as_seq h1 output2 ==
+        S.shake256 (v inputByteLen) (as_seq h0 input2) (v outputByteLen) /\
+       as_seq h1 output3 ==
+        S.shake256 (v inputByteLen) (as_seq h0 input3) (v outputByteLen))
+let shake256 _ output0 output1 output2 output3 outputByteLen
+      _ input0 input1 input2 input3 inputByteLen =
   admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
@@ -126,30 +103,25 @@ val sha3_224:
   -> output1:lbuffer uint8 28ul
   -> output2:lbuffer uint8 28ul
   -> output3:lbuffer uint8 28ul
-  -> input0:buffer_t MUT uint8
-  -> input1:buffer_t MUT uint8
-  -> input2:buffer_t MUT uint8
-  -> input3:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input0 /\ 
-                         v inputByteLen == length input1 /\
-                         v inputByteLen == length input2 /\
-                         v inputByteLen == length input3}
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (input0 <: lbuffer uint8 inputByteLen)
-               (input1 <: lbuffer uint8 inputByteLen)
-               (input2 <: lbuffer uint8 inputByteLen)
-               (input3 <: lbuffer uint8 inputByteLen) /\
+       live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
        internally_disjoint4 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
-       as_seq h1 output0 == S.sha3_224 (v inputByteLen) (as_seq h0 (input0 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output1 == S.sha3_224 (v inputByteLen) (as_seq h0 (input1 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output2 == S.sha3_224 (v inputByteLen) (as_seq h0 (input2 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output3 == S.sha3_224 (v inputByteLen) (as_seq h0 (input3 <: lbuffer uint8 inputByteLen)))
+       as_seq h1 output0 == S.sha3_224 (v inputByteLen) (as_seq h0 input0) /\
+       as_seq h1 output1 == S.sha3_224 (v inputByteLen) (as_seq h0 input1) /\
+       as_seq h1 output2 == S.sha3_224 (v inputByteLen) (as_seq h0 input2) /\
+       as_seq h1 output3 == S.sha3_224 (v inputByteLen) (as_seq h0 input3))
 let sha3_224 output0 output1 output2 output3
-        input0 input1 input2 input3 inputByteLen =
+        _ input0 input1 input2 input3 inputByteLen =
   admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
@@ -160,30 +132,25 @@ val sha3_256:
   -> output1:lbuffer uint8 32ul
   -> output2:lbuffer uint8 32ul
   -> output3:lbuffer uint8 32ul
-  -> input0:buffer_t MUT uint8
-  -> input1:buffer_t MUT uint8
-  -> input2:buffer_t MUT uint8
-  -> input3:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input0 /\ 
-                         v inputByteLen == length input1 /\
-                         v inputByteLen == length input2 /\
-                         v inputByteLen == length input3}
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (input0 <: lbuffer uint8 inputByteLen)
-               (input1 <: lbuffer uint8 inputByteLen)
-               (input2 <: lbuffer uint8 inputByteLen)
-               (input3 <: lbuffer uint8 inputByteLen) /\
+       live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
        internally_disjoint4 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
-       as_seq h1 output0 == S.sha3_256 (v inputByteLen) (as_seq h0 (input0 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output1 == S.sha3_256 (v inputByteLen) (as_seq h0 (input1 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output2 == S.sha3_256 (v inputByteLen) (as_seq h0 (input2 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output3 == S.sha3_256 (v inputByteLen) (as_seq h0 (input3 <: lbuffer uint8 inputByteLen)))
+       as_seq h1 output0 == S.sha3_256 (v inputByteLen) (as_seq h0 input0) /\
+       as_seq h1 output1 == S.sha3_256 (v inputByteLen) (as_seq h0 input1) /\
+       as_seq h1 output2 == S.sha3_256 (v inputByteLen) (as_seq h0 input2) /\
+       as_seq h1 output3 == S.sha3_256 (v inputByteLen) (as_seq h0 input3))
 let sha3_256 output0 output1 output2 output3
-        input0 input1 input2 input3 inputByteLen =
+        _ input0 input1 input2 input3 inputByteLen =
   admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
@@ -194,30 +161,25 @@ val sha3_384:
   -> output1:lbuffer uint8 48ul
   -> output2:lbuffer uint8 48ul
   -> output3:lbuffer uint8 48ul
-  -> input0:buffer_t MUT uint8
-  -> input1:buffer_t MUT uint8
-  -> input2:buffer_t MUT uint8
-  -> input3:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input0 /\ 
-                         v inputByteLen == length input1 /\
-                         v inputByteLen == length input2 /\
-                         v inputByteLen == length input3}
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (input0 <: lbuffer uint8 inputByteLen)
-               (input1 <: lbuffer uint8 inputByteLen)
-               (input2 <: lbuffer uint8 inputByteLen)
-               (input3 <: lbuffer uint8 inputByteLen) /\
+       live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
        internally_disjoint4 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
-       as_seq h1 output0 == S.sha3_384 (v inputByteLen) (as_seq h0 (input0 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output1 == S.sha3_384 (v inputByteLen) (as_seq h0 (input1 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output2 == S.sha3_384 (v inputByteLen) (as_seq h0 (input2 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output3 == S.sha3_384 (v inputByteLen) (as_seq h0 (input3 <: lbuffer uint8 inputByteLen)))
+       as_seq h1 output0 == S.sha3_384 (v inputByteLen) (as_seq h0 input0) /\
+       as_seq h1 output1 == S.sha3_384 (v inputByteLen) (as_seq h0 input1) /\
+       as_seq h1 output2 == S.sha3_384 (v inputByteLen) (as_seq h0 input2) /\
+       as_seq h1 output3 == S.sha3_384 (v inputByteLen) (as_seq h0 input3))
 let sha3_384 output0 output1 output2 output3
-        input0 input1 input2 input3 inputByteLen =
+        _ input0 input1 input2 input3 inputByteLen =
   admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
@@ -228,30 +190,25 @@ val sha3_512:
   -> output1:lbuffer uint8 64ul
   -> output2:lbuffer uint8 64ul
   -> output3:lbuffer uint8 64ul
-  -> input0:buffer_t MUT uint8
-  -> input1:buffer_t MUT uint8
-  -> input2:buffer_t MUT uint8
-  -> input3:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input0 /\ 
-                         v inputByteLen == length input1 /\
-                         v inputByteLen == length input2 /\
-                         v inputByteLen == length input3}
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (input0 <: lbuffer uint8 inputByteLen)
-               (input1 <: lbuffer uint8 inputByteLen)
-               (input2 <: lbuffer uint8 inputByteLen)
-               (input3 <: lbuffer uint8 inputByteLen) /\
+       live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
        internally_disjoint4 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
-       as_seq h1 output0 == S.sha3_512 (v inputByteLen) (as_seq h0 (input0 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output1 == S.sha3_512 (v inputByteLen) (as_seq h0 (input1 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output2 == S.sha3_512 (v inputByteLen) (as_seq h0 (input2 <: lbuffer uint8 inputByteLen)) /\
-       as_seq h1 output3 == S.sha3_512 (v inputByteLen) (as_seq h0 (input3 <: lbuffer uint8 inputByteLen)))
+       as_seq h1 output0 == S.sha3_512 (v inputByteLen) (as_seq h0 input0) /\
+       as_seq h1 output1 == S.sha3_512 (v inputByteLen) (as_seq h0 input1) /\
+       as_seq h1 output2 == S.sha3_512 (v inputByteLen) (as_seq h0 input2) /\
+       as_seq h1 output3 == S.sha3_512 (v inputByteLen) (as_seq h0 input3))
 let sha3_512 output0 output1 output2 output3
-        input0 input1 input2 input3 inputByteLen =
+        _ input0 input1 input2 input3 inputByteLen =
   admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
@@ -288,22 +245,17 @@ open Lib.NTuple
 open Lib.MultiBuffer
 open Lib.IntVector
 
-val shake128_absorb:
+val shake128_absorb_nblocks:
   state:lbuffer_t MUT (vec_t U64 4) 25ul
-  -> input0:buffer_t MUT uint8
-  -> input1:buffer_t MUT uint8
-  -> input2:buffer_t MUT uint8
-  -> input3:buffer_t MUT uint8
-  -> inputByteLen:size_t{v inputByteLen == length input0 /\ 
-                         v inputByteLen == length input1 /\
-                         v inputByteLen == length input2 /\
-                         v inputByteLen == length input3}
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (input0 <: lbuffer uint8 inputByteLen)
-               (input1 <: lbuffer uint8 inputByteLen)
-               (input2 <: lbuffer uint8 inputByteLen)
-               (input3 <: lbuffer uint8 inputByteLen) /\
+       live4 h input0 input1 input2 input3 /\
        live h state /\
        disjoint input0 state /\
        disjoint input1 state /\
@@ -312,26 +264,44 @@ val shake128_absorb:
      (ensures  fun h0 _ h1 ->
        modifies (loc state) h0 h1 /\
        as_seq h1 state ==
-          V.absorb #Shake128 #M256 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup4 (input0, (input1, (input2, input3))))) (byte 0x1F))
-let shake128_absorb state input0 input1 input2 input3 inputByteLen =
-  absorb #Shake128 #M256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) (byte 0x1F) state
+          V.absorb_inner_nblocks #Shake128 #M256 168 (v inputByteLen) (as_seq_multi h0 (ntup4 (input0, (input1, (input2, input3))))) (as_seq h0 state))
+let shake128_absorb_nblocks state _ input0 input1 input2 input3 inputByteLen =
+  absorb_inner_nblocks #Shake128 #M256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) state
+
+val shake128_absorb_last:
+  state:lbuffer_t MUT (vec_t U64 4) 25ul
+  -> g_inputByteLen:Ghost.erased size_t
+  -> input0:lbuffer uint8 g_inputByteLen
+  -> input1:lbuffer uint8 g_inputByteLen
+  -> input2:lbuffer uint8 g_inputByteLen
+  -> input3:lbuffer uint8 g_inputByteLen
+  -> inputByteLen: same_as g_inputByteLen
+  -> Stack unit
+     (requires fun h ->
+       live4 h input0 input1 input2 input3 /\
+       live h state /\
+       disjoint input0 state /\
+       disjoint input1 state /\
+       disjoint input2 state /\
+       disjoint input3 state)
+     (ensures  fun h0 _ h1 ->
+       modifies (loc state) h0 h1 /\
+       as_seq h1 state ==
+         V.absorb_final #Shake128 #M256 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup4 (input0, (input1, (input2, input3))))) (byte 0x1F))
+let shake128_absorb_last state _ input0 input1 input2 input3 inputByteLen =
+  absorb_final #Shake128 #M256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) (byte 0x1F) state
 
 val shake128_squeeze_nblocks:
   state:lbuffer_t MUT (vec_t U64 4) 25ul
-  -> output0:buffer_t MUT uint8
-  -> output1:buffer_t MUT uint8
-  -> output2:buffer_t MUT uint8
-  -> output3:buffer_t MUT uint8
-  -> outputByteLen:size_t{v outputByteLen == length output0 /\ 
-                          v outputByteLen == length output1 /\
-                          v outputByteLen == length output2 /\
-                          v outputByteLen == length output3}
+  -> g_outputByteLen:Ghost.erased size_t
+  -> output0:lbuffer uint8 g_outputByteLen
+  -> output1:lbuffer uint8 g_outputByteLen
+  -> output2:lbuffer uint8 g_outputByteLen
+  -> output3:lbuffer uint8 g_outputByteLen
+  -> outputByteLen: same_as g_outputByteLen
   -> Stack unit
      (requires fun h ->
-       live4 h (output0 <: lbuffer uint8 outputByteLen)
-               (output1 <: lbuffer uint8 outputByteLen)
-               (output2 <: lbuffer uint8 outputByteLen)
-               (output3 <: lbuffer uint8 outputByteLen) /\
+       live4 h output0 output1 output2 output3 /\
        live h state /\
        disjoint output0 output1 /\
        disjoint output0 output2 /\
@@ -346,9 +316,9 @@ val shake128_squeeze_nblocks:
      (ensures  fun h0 _ h1 ->
        modifies (loc state |+| loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
        (let s', b' = 
-          V.squeeze_nblocks #Shake128 #M256 168 (v outputByteLen) (as_seq h0 state, as_seq_multi h0 (ntup4 (output0, (output1, (output2, output3))))) in
+          V.squeeze_nblocks #Shake128 #M256 168 (v outputByteLen) (as_seq h0 state, as_seq_multi h0 (ntup4 #(lbuffer uint8 outputByteLen) #4 (output0, (output1, (output2, output3))))) in
           as_seq h1 state == s' /\
-          as_seq_multi h1 (ntup4 (output0, (output1, (output2, output3)))) == b'))
-let shake128_squeeze_nblocks state output0 output1 output2 output3 outputByteLen =
+          as_seq_multi h1 (ntup4 #(lbuffer uint8 outputByteLen) #4 (output0, (output1, (output2, output3)))) == b'))
+let shake128_squeeze_nblocks state _ output0 output1 output2 output3 outputByteLen =
   loc_multi4 #4 #outputByteLen (ntup4 (output0, (output1, (output2, output3))));
   squeeze_nblocks #Shake128 #M256 state 168ul outputByteLen (ntup4 (output0, (output1, (output2, output3))))
