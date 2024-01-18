@@ -23,9 +23,6 @@ module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-inline_for_extraction noextract
-let same_as x = y:size_t { x == y }
-
 val shake128:
   output:buffer_t MUT uint8
   -> outputByteLen:size_t{v outputByteLen == length output}
@@ -118,6 +115,7 @@ let sha3_512 output input inputByteLen =
   admit();
   keccak #SHA3_512 #M32 576ul (* 1024ul *) inputByteLen input (byte 0x06) 64ul output
 
+[@@ Comment "Allocate state buffer of 200-bytes"]
 inline_for_extraction
 val state_malloc:
     r:rid
@@ -134,6 +132,7 @@ val state_malloc:
 let state_malloc r =
   malloc r (u64 0) 25ul
 
+[@@ Comment "Free state buffer"]
 val state_free:
     s:buffer uint64 { length s = 25 }
   -> ST.ST unit
@@ -149,6 +148,15 @@ open Lib.NTuple
 open Lib.MultiBuffer
 open Lib.IntVector
 
+[@@ Comment "Absorb number of input blocks and write the output state
+
+  This function is intended to receive a hash state and input buffer.
+  It prcoesses an input of multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block are ignored.
+
+  The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
+  The argument `input` (IN) points to `inputByteLen` bytes of valid memory,
+  i.e., uint8_t[inputByteLen]"]
 val shake128_absorb_nblocks:
   state:lbuffer_t MUT (vec_t U64 1) 25ul
   -> input:buffer_t MUT uint8
@@ -163,6 +171,19 @@ val shake128_absorb_nblocks:
 let shake128_absorb_nblocks state input inputByteLen =
   absorb_inner_nblocks #Shake128 #M32 168ul inputByteLen (ntup1 input) state
 
+[@@ Comment "Absorb a final partial block of input and write the output state
+
+  This function is intended to receive a hash state and input buffer.
+  It prcoesses a sequence of bytes at end of input buffer that is less 
+  than 168-bytes (SHAKE128 block size),
+  any bytes of full blocks at start of input buffer are ignored.
+
+  The argument `state` (IN/OUT) points to hash state, i.e., uint64_t[25]
+  The argument `input` (IN) points to `inputByteLen` bytes of valid memory,
+  i.e., uint8_t[inputByteLen]
+  
+  Note: Full size of input buffer must be passed to `inputByteLen` including
+  the number of full-block bytes at start of input buffer that are ignored"]
 val shake128_absorb_final:
   state:lbuffer_t MUT (vec_t U64 1) 25ul
   -> input:buffer_t MUT uint8
@@ -177,6 +198,15 @@ val shake128_absorb_final:
 let shake128_absorb_final state input inputByteLen =
   absorb_final #Shake128 #M32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
 
+[@@ Comment "Squeeze a hash state to output buffer
+
+  This function is intended to receive a hash state and output buffer.
+  It produces an output of multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block are ignored.
+
+  The argument `state` (IN) points to hash state, i.e., uint64_t[25]
+  The argument `output` (OUT) points to `outputByteLen` bytes of valid memory,
+  i.e., uint8_t[outputByteLen]"]
 val shake128_squeeze_nblocks:
   state:lbuffer_t MUT (vec_t U64 1) 25ul
   -> output:buffer_t MUT uint8

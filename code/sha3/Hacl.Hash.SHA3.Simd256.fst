@@ -214,6 +214,7 @@ let sha3_512 output0 output1 output2 output3
   let rb = ntup4 (output0,(output1,(output2,output3))) in
   keccak #SHA3_512 #M256 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb
 
+[@@ Comment "Allocate quadruple state buffer (200-bytes for each)"]
 inline_for_extraction
 val state_malloc:
     r:rid
@@ -230,6 +231,7 @@ val state_malloc:
 let state_malloc r =
   malloc r (u64 0) 100ul
 
+[@@ Comment "Free quadruple state buffer"]
 val state_free:
     s:buffer uint64 { length s = 100 }
   -> ST.ST unit
@@ -245,6 +247,16 @@ open Lib.NTuple
 open Lib.MultiBuffer
 open Lib.IntVector
 
+[@@ Comment "Absorb number of blocks of 4 input buffers and write the output states
+
+  This function is intended to receive a quadruple hash state and 4 input buffers.
+  It prcoesses an inputs of multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block for each buffer are ignored.
+
+  The argument `state` (IN/OUT) points to quadruple hash state,
+  i.e., Lib_IntVector_Intrinsics_vec256[25]
+  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes 
+  of valid memory for each buffer, i.e., uint8_t[inputByteLen]"]
 val shake128_absorb_nblocks:
   state:lbuffer_t MUT (vec_t U64 4) 25ul
   -> g_inputByteLen:Ghost.erased size_t
@@ -268,6 +280,20 @@ val shake128_absorb_nblocks:
 let shake128_absorb_nblocks state _ input0 input1 input2 input3 inputByteLen =
   absorb_inner_nblocks #Shake128 #M256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) state
 
+[@@ Comment "Absorb a final partial blocks of 4 input buffers and write the output states
+
+  This function is intended to receive a quadruple hash state and 4 input buffers.
+  It prcoesses a sequence of bytes at end of each input buffer that is less 
+  than 168-bytes (SHAKE128 block size),
+  any bytes of full blocks at start of input buffers are ignored.
+
+  The argument `state` (IN/OUT) points to quadruple hash state,
+  i.e., Lib_IntVector_Intrinsics_vec256[25]
+  The arguments `input0/input1/input2/input3` (IN) point to `inputByteLen` bytes 
+  of valid memory for each buffer, i.e., uint8_t[inputByteLen]
+  
+  Note: Full size of input buffers must be passed to `inputByteLen` including
+  the number of full-block bytes at start of each input buffer that are ignored"]
 val shake128_absorb_final:
   state:lbuffer_t MUT (vec_t U64 4) 25ul
   -> g_inputByteLen:Ghost.erased size_t
@@ -291,6 +317,16 @@ val shake128_absorb_final:
 let shake128_absorb_final state _ input0 input1 input2 input3 inputByteLen =
   absorb_final #Shake128 #M256 168ul inputByteLen (ntup4 (input0, (input1, (input2, input3)))) (byte 0x1F) state
 
+[@@ Comment "Squeeze a quadruple hash state to 4 output buffers
+
+  This function is intended to receive a quadruple hash state and 4 output buffers.
+  It produces 4 outputs, each is multiple of 168-bytes (SHAKE128 block size),
+  any additional bytes of final partial block for each buffer are ignored.
+
+  The argument `state` (IN) points to quadruple hash state,
+  i.e., Lib_IntVector_Intrinsics_vec256[25]
+  The arguments `output0/output1/output2/output3` (OUT) point to `outputByteLen` bytes 
+  of valid memory for each buffer, i.e., uint8_t[inputByteLen]"]
 val shake128_squeeze_nblocks:
   state:lbuffer_t MUT (vec_t U64 4) 25ul
   -> g_outputByteLen:Ghost.erased size_t

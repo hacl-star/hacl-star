@@ -678,7 +678,7 @@ let rec storeState_loop #a #m s l n =
 val storeState_lemma_l:
   #a:keccak_alg
   -> #m:m_spec{is_supported m}
-  -> r:size_nat{r > 0 /\ r <= 200}
+  -> r:size_nat{r <= 200}
   -> s:state_spec m
   -> l:nat{l < lanes m} ->
   Lemma
@@ -687,6 +687,64 @@ val storeState_lemma_l:
 
 let storeState_lemma_l  #a #m r s l =
   storeState_loop #a #m s l 25
+
+val storeState_update_b_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> outputByteLen:size_nat
+  -> i:size_nat{i < outputByteLen / r}
+  -> b:multiseq (lanes m) outputByteLen
+  -> s:state_spec m
+  -> l:nat{l < lanes m} ->
+  Lemma
+   (let block = storeState #a #m s in
+    let b' = update_b #m block r outputByteLen i b in
+    i * r + r <= outputByteLen /\
+    sub #uint8 #outputByteLen b'.(|l|) (i * r) r ==
+     Spec.storeState r (state_spec_v s).[l] /\
+    (forall j. (j < i * r /\ j >= i * r + r) ==>
+      Seq.index b'.(|l|) j == Seq.index b.(|l|) j))
+
+let storeState_update_b_lemma_l #a #m r outputByteLen i b s l =
+  assert (i + 1 <= outputByteLen / r);
+  assert ((i + 1) * r <= outputByteLen);
+  assert (i * r + r <= outputByteLen);
+  storeState_lemma_l #a #m r s l
+
+val storeState_update_b_last_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> outputByteLen:size_nat
+  -> outRem:size_nat{outRem == outputByteLen % r}
+  -> b:multiseq (lanes m) outputByteLen
+  -> s:state_spec m
+  -> l:nat{l < lanes m} ->
+  Lemma
+   (let block = storeState #a #m s in
+    let b' = update_b_last #m block r outputByteLen outRem b in
+    outRem <= outputByteLen /\
+    sub #uint8 #outputByteLen b'.(|l|) (outputByteLen - outRem) outRem ==
+     Spec.storeState outRem (state_spec_v s).[l] /\
+    (forall i. (i < outputByteLen - outRem) ==>
+      Seq.index b'.(|l|) i == Seq.index b.(|l|) i))
+
+let storeState_update_b_last_lemma_l #a #m r outputByteLen outRem b s l =
+  let block = storeState #a #m s in
+  let b' = update_b_last #m block r outputByteLen outRem b in
+  assert (outputByteLen >= 0);
+  FStar.Math.Lemmas.lemma_mod_lt outputByteLen r;
+  assert (outRem <= outputByteLen);
+  eq_intro (sub #uint8 #outputByteLen b.(|l|) 0 (outputByteLen - outRem))
+    (sub #uint8 #outputByteLen b'.(|l|) 0 (outputByteLen - outRem));
+  assert (forall (i:nat). (i < outputByteLen - outRem) ==>
+    Seq.index b.(|l|) i == Seq.index (sub #uint8 #outputByteLen b.(|l|) 0 (outputByteLen - outRem)) i);
+  assert (forall (i:nat). (i < outputByteLen - outRem) ==>
+    Seq.index b'.(|l|) i == Seq.index (sub #uint8 #outputByteLen b'.(|l|) 0 (outputByteLen - outRem)) i);
+  assert (forall (i:nat). (i < outputByteLen - outRem) ==>
+    Seq.index b'.(|l|) i == Seq.index b.(|l|) i);
+  storeState_lemma_l #a #m outRem s l
 
 (* absorb_next *)
 
@@ -805,3 +863,261 @@ let absorb_inner_lemma_l #a #m r input s l =
   loadState_lemma_l #a #m r input s l;
   let s = loadState #a #m r input s in
   state_permute_lemma_l m s l
+
+(* absorb *)
+
+val absorb_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> s:state_spec m
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
+  -> delimitedSuffix:byte_t
+  -> l:nat{l < lanes m} ->
+  Lemma
+   ((state_spec_v (absorb #a #m s r inputByteLen input delimitedSuffix)).[l] ==
+    Spec.absorb (state_spec_v s).[l] r inputByteLen input.(|l|) delimitedSuffix)
+
+let absorb_lemma_l #a #m s r inputByteLen input delimitedSuffix l =
+  admit()
+
+(* squeeze_inner *)
+
+val squeeze_inner_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> outputByteLen:size_nat
+  -> i:size_nat{i < outputByteLen / r}
+  -> s:state_spec m
+  -> b:multiseq (lanes m) outputByteLen
+  -> l:nat{l < lanes m} ->
+  Lemma
+   (let s', b' = squeeze_inner #a #m r outputByteLen i (s, b) in
+    let s'_s, b'_s = Spec.squeeze_inner r outputByteLen i (state_spec_v s).[l] in
+    (state_spec_v s').[l] == s'_s /\ i * r + r <= outputByteLen /\
+    sub #uint8 #outputByteLen b'.(|l|) (i * r) r == b'_s /\
+    (forall j. (j < i * r /\ j >= i * r + r) ==>
+      Seq.index b'.(|l|) j == Seq.index b.(|l|) j))
+
+let squeeze_inner_lemma_l #a #m r outputByteLen i s b l =
+  storeState_update_b_lemma_l #a #m r outputByteLen i b s l;
+  state_permute_lemma_l m s l
+
+(* squeeze_last *)
+
+val squeeze_last_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> outputByteLen:size_nat
+  -> s:state_spec m
+  -> b:multiseq (lanes m) outputByteLen
+  -> l:nat{l < lanes m} ->
+  Lemma
+   (let outRem = outputByteLen % r in
+    let b' = squeeze_last #a #m s r outputByteLen b in
+    let b'_s = Spec.storeState outRem (state_spec_v s).[l] in
+    outRem <= outputByteLen /\
+    sub #uint8 #outputByteLen b'.(|l|) (outputByteLen - outRem) outRem == b'_s /\
+    (forall i. (i < outputByteLen - outRem) ==>
+      Seq.index b'.(|l|) i == Seq.index b.(|l|) i))
+
+let squeeze_last_lemma_l #a #m r outputByteLen s b l =
+  storeState_update_b_last_lemma_l #a #m r outputByteLen (outputByteLen % r) b s l
+
+(* squeeze *)
+
+val squeeze_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> s:state_spec m
+  -> r:size_nat{r > 0 /\ r <= 200}
+  -> outputByteLen:size_nat
+  -> b:multiseq (lanes m) outputByteLen
+  -> l:nat{l < lanes m} ->
+  Lemma
+   ((squeeze #a #m s r outputByteLen b).(|l|) ==
+      Spec.squeeze (state_spec_v s).[l] r outputByteLen)
+
+let squeeze_lemma_l #a #m s r outputByteLen b l =
+  admit()
+
+(* keccak *)
+
+val keccak_lemma_l:
+  #a:keccak_alg
+  -> #m:m_spec{is_supported m}
+  -> rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
+  -> delimitedSuffix:byte_t
+  -> outputByteLen:size_nat
+  -> b:multiseq (lanes m) outputByteLen
+  -> l:nat{l < lanes m} ->
+  Lemma
+   ((keccak #a #m rate inputByteLen input delimitedSuffix outputByteLen b).(|l|) ==
+      Spec.keccak rate (1600 - rate) inputByteLen input.(|l|) delimitedSuffix outputByteLen)
+
+let keccak_lemma_l #a #m rate inputByteLen input delimitedSuffix outputByteLen b l =
+  let r = rate / 8 in
+  eq_intro (state_spec_v (create 25 (zero_element m))).[l] (create 25 (u64 0));
+  let s = create 25 (zero_element m) in
+  absorb_lemma_l #a #m s r inputByteLen input delimitedSuffix l;
+  let s = absorb #a #m s r inputByteLen input delimitedSuffix in
+  squeeze_lemma_l #a #m s r outputByteLen b l
+
+(* shake128 *)
+
+val shake128_lemma_l:
+  inputByteLen:nat
+  -> input:seq uint8{length input == inputByteLen}
+  -> outputByteLen:size_nat
+  -> output:seq uint8{length output == outputByteLen} ->
+  Lemma
+   (shake128 inputByteLen input outputByteLen output ==
+      Spec.shake128 inputByteLen input outputByteLen)
+
+let shake128_lemma_l inputByteLen input outputByteLen output =
+  keccak_lemma_l #Shake128 #M32 1344 inputByteLen (ntup1 input) (byte 0x1F) outputByteLen (ntup1 output) 0
+
+val shake128_4_lemma_l:
+  inputByteLen:nat
+  -> input:multiseq 4 inputByteLen
+  -> outputByteLen:size_nat
+  -> output:multiseq 4 outputByteLen
+  -> l:nat{l < 4} ->
+  Lemma
+   ((shake128_4 inputByteLen input outputByteLen output).(|l|) ==
+      Spec.shake128 inputByteLen input.(|l|) outputByteLen)
+
+let shake128_4_lemma_l inputByteLen input outputByteLen output l =
+  keccak_lemma_l #Shake128 #M256 1344 inputByteLen input (byte 0x1F) outputByteLen output l
+
+(* shake256 *)
+
+val shake256_lemma_l:
+  inputByteLen:nat
+  -> input:seq uint8{length input == inputByteLen}
+  -> outputByteLen:size_nat
+  -> output:seq uint8{length output == outputByteLen} ->
+  Lemma
+   (shake256 inputByteLen input outputByteLen output ==
+      Spec.shake256 inputByteLen input outputByteLen)
+
+let shake256_lemma_l inputByteLen input outputByteLen output =
+  keccak_lemma_l #Shake256 #M32 1088 inputByteLen (ntup1 input) (byte 0x1F) outputByteLen (ntup1 output) 0
+
+val shake256_4_lemma_l:
+  inputByteLen:nat
+  -> input:multiseq 4 inputByteLen
+  -> outputByteLen:size_nat
+  -> output:multiseq 4 outputByteLen
+  -> l:nat{l < 4} ->
+  Lemma
+   ((shake256_4 inputByteLen input outputByteLen output).(|l|) ==
+      Spec.shake256 inputByteLen input.(|l|) outputByteLen)
+
+let shake256_4_lemma_l inputByteLen input outputByteLen output l =
+  keccak_lemma_l #Shake256 #M256 1088 inputByteLen input (byte 0x1F) outputByteLen output l
+
+(* sha3_224 *)
+
+val sha3_224_lemma_l:
+  inputByteLen:nat
+  -> input:seq uint8{length input == inputByteLen}
+  -> output:seq uint8{length output == 28} ->
+  Lemma
+   (sha3_224 inputByteLen input output ==
+      Spec.sha3_224 inputByteLen input)
+
+let sha3_224_lemma_l inputByteLen input output =
+  keccak_lemma_l #SHA3_224 #M32 1152 inputByteLen (ntup1 input) (byte 0x06) 28 (ntup1 output) 0
+
+val sha3_224_4_lemma_l:
+  inputByteLen:nat
+  -> input:multiseq 4 inputByteLen
+  -> output:multiseq 4 28
+  -> l:nat{l < 4} ->
+  Lemma
+   ((sha3_224_4 inputByteLen input output).(|l|) ==
+      Spec.sha3_224 inputByteLen input.(|l|))
+
+let sha3_224_4_lemma_l inputByteLen input output l =
+  keccak_lemma_l #SHA3_224 #M256 1152 inputByteLen input (byte 0x06) 28 output l
+
+(* sha3_256 *)
+
+val sha3_256_lemma_l:
+  inputByteLen:nat
+  -> input:seq uint8{length input == inputByteLen}
+  -> output:seq uint8{length output == 32} ->
+  Lemma
+   (sha3_256 inputByteLen input output ==
+      Spec.sha3_256 inputByteLen input)
+
+let sha3_256_lemma_l inputByteLen input output =
+  keccak_lemma_l #SHA3_256 #M32 1088 inputByteLen (ntup1 input) (byte 0x06) 32 (ntup1 output) 0
+
+val sha3_256_4_lemma_l:
+  inputByteLen:nat
+  -> input:multiseq 4 inputByteLen
+  -> output:multiseq 4 32
+  -> l:nat{l < 4} ->
+  Lemma
+   ((sha3_256_4 inputByteLen input output).(|l|) ==
+      Spec.sha3_256 inputByteLen input.(|l|))
+
+let sha3_256_4_lemma_l inputByteLen input output l =
+  keccak_lemma_l #SHA3_256 #M256 1088 inputByteLen input (byte 0x06) 32 output l
+
+(* sha3_384 *)
+
+val sha3_384_lemma_l:
+  inputByteLen:nat
+  -> input:seq uint8{length input == inputByteLen}
+  -> output:seq uint8{length output == 48} ->
+  Lemma
+   (sha3_384 inputByteLen input output ==
+      Spec.sha3_384 inputByteLen input)
+
+let sha3_384_lemma_l inputByteLen input output =
+  keccak_lemma_l #SHA3_384 #M32 832 inputByteLen (ntup1 input) (byte 0x06) 48 (ntup1 output) 0
+
+val sha3_384_4_lemma_l:
+  inputByteLen:nat
+  -> input:multiseq 4 inputByteLen
+  -> output:multiseq 4 48
+  -> l:nat{l < 4} ->
+  Lemma
+   ((sha3_384_4 inputByteLen input output).(|l|) ==
+      Spec.sha3_384 inputByteLen input.(|l|))
+
+let sha3_384_4_lemma_l inputByteLen input output l =
+  keccak_lemma_l #SHA3_384 #M256 832 inputByteLen input (byte 0x06) 48 output l
+
+(* sha3_512 *)
+
+val sha3_512_lemma_l:
+  inputByteLen:nat
+  -> input:seq uint8{length input == inputByteLen}
+  -> output:seq uint8{length output == 64} ->
+  Lemma
+   (sha3_512 inputByteLen input output ==
+      Spec.sha3_512 inputByteLen input)
+
+let sha3_512_lemma_l inputByteLen input output =
+  keccak_lemma_l #SHA3_512 #M32 576 inputByteLen (ntup1 input) (byte 0x06) 64 (ntup1 output) 0
+
+val sha3_512_4_lemma_l:
+  inputByteLen:nat
+  -> input:multiseq 4 inputByteLen
+  -> output:multiseq 4 64
+  -> l:nat{l < 4} ->
+  Lemma
+   ((sha3_512_4 inputByteLen input output).(|l|) ==
+      Spec.sha3_512 inputByteLen input.(|l|))
+
+let sha3_512_4_lemma_l inputByteLen input output l =
+  keccak_lemma_l #SHA3_512 #M256 576 inputByteLen input (byte 0x06) 64 output l
