@@ -219,8 +219,8 @@ let bn_sqr #t aLen a res =
   loop1 h0 aLen res spec
   (fun j ->
     Loops.unfold_repeati (v aLen) (spec h0) (as_seq h0 res) (v j);
-    let ab = sub a 0ul j in
     let a_j = a.(j) in
+    let ab = sub a 0ul j in
     res.(j +! j) <- bn_mul1_lshift_add j ab a_j resLen j res
   );
 

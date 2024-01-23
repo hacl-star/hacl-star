@@ -264,8 +264,8 @@
     (res[0usize..8usize]).copy_from_slice(&[0u64; 8usize]);
     for i in 0u32..4u32
     {
-        let ab: (&mut [u64], &mut [u64]) = x.split_at_mut(0usize);
         let a_j: u64 = x[i as usize];
+        let ab: (&mut [u64], &mut [u64]) = x.split_at_mut(0usize);
         let res_j: (&mut [u64], &mut [u64]) = res.split_at_mut(i as usize);
         let mut c: u64 = 0u64;
         for i0 in 0u32..i.wrapping_div(4u32)
@@ -496,8 +496,8 @@
         };
         let r: u64 = c;
         let c1: u64 = r;
-        let resb: (&mut [u64], &mut [u64]) = res_j.1.split_at_mut(4usize);
         let res_j0: u64 = x[4u32.wrapping_add(i) as usize];
+        let resb: (&mut [u64], &mut [u64]) = x.split_at_mut(i as usize + 4usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u64(c0, c1, res_j0, resb.1)
     };
     (res[0usize..4usize]).copy_from_slice(&(&mut x[4usize..])[0usize..4usize]);
@@ -958,10 +958,11 @@
     let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(12usize);
     make_point_at_inf(t1.0);
     (t1.1[0usize..12usize]).copy_from_slice(&p[0usize..12usize]);
+    crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table);
     for i in 0u32..7u32
     {
         let t11: (&mut [u64], &mut [u64]) =
-            t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(12u32) as usize);
+            (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(12u32) as usize);
         point_double(&mut tmp, t11.1);
         ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(12u32) as usize..2u32.wrapping_mul(
             i
@@ -1133,10 +1134,11 @@
     let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(12usize);
     make_point_at_inf(t1.0);
     (t1.1[0usize..12usize]).copy_from_slice(&q2[0usize..12usize]);
+    crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table2);
     for i in 0u32..15u32
     {
         let t11: (&mut [u64], &mut [u64]) =
-            t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(12u32) as usize);
+            (&mut table2).split_at_mut(i.wrapping_add(1u32).wrapping_mul(12u32) as usize);
         point_double(&mut tmp, t11.1);
         ((&mut table2)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(12u32) as usize..2u32.wrapping_mul(
             i
@@ -1171,7 +1173,8 @@
     let i0: u32 = 255u32;
     let bits_c0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar2, i0, 5u32);
     let bits_l320: u32 = bits_c0 as u32;
-    let a_bits_l0: (&[u64], &[u64]) = t1.0.split_at(bits_l320.wrapping_mul(12u32) as usize);
+    let a_bits_l0: (&[u64], &[u64]) =
+        (&mut table2).split_at(bits_l320.wrapping_mul(12u32) as usize);
     ((&mut tmp0)[0usize..12usize]).copy_from_slice(&a_bits_l0.1[0usize..12usize]);
     point_add(res, res, &mut tmp0);
     let mut tmp1: [u64; 12] = [0u64; 12usize];
@@ -1266,8 +1269,8 @@
         };
         let r: u64 = c;
         let c1: u64 = r;
-        let resb: (&mut [u64], &mut [u64]) = res_j.1.split_at_mut(4usize);
         let res_j0: u64 = x[4u32.wrapping_add(i) as usize];
+        let resb: (&mut [u64], &mut [u64]) = x.split_at_mut(i as usize + 4usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u64(c0, c1, res_j0, resb.1)
     };
     (res[0usize..4usize]).copy_from_slice(&(&mut x[4usize..])[0usize..4usize]);

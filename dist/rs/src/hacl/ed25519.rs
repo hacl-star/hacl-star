@@ -1303,10 +1303,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(20usize);
     make_point_inf(t1.0);
     (t1.1[0usize..20usize]).copy_from_slice(&q[0usize..20usize]);
+    crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table);
     for i in 0u32..7u32
     {
         let t11: (&mut [u64], &mut [u64]) =
-            t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
+            (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
         point_double(&mut tmp, t11.1);
         ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
@@ -1578,10 +1579,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let t1: (&mut [u64], &mut [u64]) = t0.1.split_at_mut(20usize);
     make_point_inf(t1.0);
     (t1.1[0usize..20usize]).copy_from_slice(&q2[0usize..20usize]);
+    crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table2);
     for i in 0u32..15u32
     {
         let t11: (&mut [u64], &mut [u64]) =
-            t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
+            (&mut table2).split_at_mut(i.wrapping_add(1u32).wrapping_mul(20u32) as usize);
         point_double(&mut tmp1, t11.1);
         ((&mut table2)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
@@ -1618,7 +1620,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let i0: u32 = 255u32;
     let bits_c0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, bscalar2.1, i0, 5u32);
     let bits_l320: u32 = bits_c0 as u32;
-    let a_bits_l0: (&[u64], &[u64]) = t1.0.split_at(bits_l320.wrapping_mul(20u32) as usize);
+    let a_bits_l0: (&[u64], &[u64]) =
+        (&mut table2).split_at(bits_l320.wrapping_mul(20u32) as usize);
     ((&mut tmp10)[0usize..20usize]).copy_from_slice(&a_bits_l0.1[0usize..20usize]);
     point_add(out, out, &mut tmp10);
     let mut tmp11: [u64; 20] = [0u64; 20usize];

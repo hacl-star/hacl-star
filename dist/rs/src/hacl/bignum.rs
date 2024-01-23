@@ -989,9 +989,8 @@ fn bn_mont_reduction_u32(len: u32, n: &mut [u32], nInv: u32, c: &mut [u32], res:
         };
         let r: u32 = c1;
         let c10: u32 = r;
-        let resb: (&mut [u32], &mut [u32]) =
-            res_j.1.split_at_mut(len.wrapping_add(i) as usize - i as usize);
         let res_j0: u32 = c[len.wrapping_add(i) as usize];
+        let resb: (&mut [u32], &mut [u32]) = c.split_at_mut(len.wrapping_add(i) as usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
     };
     (res[0usize..len.wrapping_add(len).wrapping_sub(len) as usize]).copy_from_slice(
@@ -1159,9 +1158,8 @@ fn bn_mont_reduction_u64(len: u32, n: &mut [u64], nInv: u64, c: &mut [u64], res:
         };
         let r: u64 = c1;
         let c10: u64 = r;
-        let resb: (&mut [u64], &mut [u64]) =
-            res_j.1.split_at_mut(len.wrapping_add(i) as usize - i as usize);
         let res_j0: u64 = c[len.wrapping_add(i) as usize];
+        let resb: (&mut [u64], &mut [u64]) = c.split_at_mut(len.wrapping_add(i) as usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u64(c0, c10, res_j0, resb.1)
     };
     (res[0usize..len.wrapping_add(len).wrapping_sub(len) as usize]).copy_from_slice(
@@ -1301,9 +1299,8 @@ pub fn bn_almost_mont_reduction_u32(
         };
         let r: u32 = c1;
         let c10: u32 = r;
-        let resb: (&mut [u32], &mut [u32]) =
-            res_j.1.split_at_mut(len.wrapping_add(i) as usize - i as usize);
         let res_j0: u32 = c[len.wrapping_add(i) as usize];
+        let resb: (&mut [u32], &mut [u32]) = c.split_at_mut(len.wrapping_add(i) as usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
     };
     (res[0usize..len.wrapping_add(len).wrapping_sub(len) as usize]).copy_from_slice(
@@ -1392,9 +1389,8 @@ pub fn bn_almost_mont_reduction_u64(
         };
         let r: u64 = c1;
         let c10: u64 = r;
-        let resb: (&mut [u64], &mut [u64]) =
-            res_j.1.split_at_mut(len.wrapping_add(i) as usize - i as usize);
         let res_j0: u64 = c[len.wrapping_add(i) as usize];
+        let resb: (&mut [u64], &mut [u64]) = c.split_at_mut(len.wrapping_add(i) as usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u64(c0, c10, res_j0, resb.1)
     };
     (res[0usize..len.wrapping_add(len).wrapping_sub(len) as usize]).copy_from_slice(
@@ -1571,10 +1567,11 @@ pub fn bn_mod_exp_vartime_precomp_u32(
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(len as usize);
         bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&mut aM)[0usize..len as usize]);
+        crate::lowstar::ignore::ignore::<&mut [u32]>(&mut table);
         for i in 0u32..7u32
         {
             let t11: (&mut [u32], &mut [u32]) =
-                t1.1.split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize);
             let mut aM_copy: Vec<u32> = vec![0u32; len as usize];
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len as usize);
@@ -1610,7 +1607,7 @@ pub fn bn_mod_exp_vartime_precomp_u32(
             let bits_c: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, i, 4u32);
             let bits_l32: u32 = bits_c;
             let a_bits_l: (&[u32], &[u32]) =
-                t1.1.split_at(bits_l32.wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at(bits_l32.wrapping_mul(len) as usize);
             ((&mut resM)[0usize..len as usize]).copy_from_slice(&a_bits_l.1[0usize..len as usize])
         }
         else
@@ -1638,7 +1635,7 @@ pub fn bn_mod_exp_vartime_precomp_u32(
             let bits_l: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, k, 4u32);
             let bits_l32: u32 = bits_l;
             let a_bits_l: (&[u32], &[u32]) =
-                t1.1.split_at(bits_l32.wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at(bits_l32.wrapping_mul(len) as usize);
             ((&mut tmp0)[0usize..len as usize]).copy_from_slice(&a_bits_l.1[0usize..len as usize]);
             let mut aM_copy: Vec<u32> = vec![0u32; len as usize];
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -1736,10 +1733,11 @@ pub fn bn_mod_exp_consttime_precomp_u32(
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(len as usize);
         bn_from_mont_u32(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&mut aM)[0usize..len as usize]);
+        crate::lowstar::ignore::ignore::<&mut [u32]>(&mut table);
         for i in 0u32..7u32
         {
             let t11: (&mut [u32], &mut [u32]) =
-                t1.1.split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize);
             let mut aM_copy: Vec<u32> = vec![0u32; len as usize];
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len as usize);
@@ -2003,10 +2001,11 @@ pub fn bn_mod_exp_vartime_precomp_u64(
         let ctx_r2: (&mut [u64], &mut [u64]) = ctx_n.1.split_at_mut(len as usize);
         bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&mut aM)[0usize..len as usize]);
+        crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table);
         for i in 0u32..7u32
         {
             let t11: (&mut [u64], &mut [u64]) =
-                t1.1.split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize);
             let mut aM_copy: Vec<u64> = vec![0u64; len as usize];
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
             let ctx_n0: (&mut [u64], &mut [u64]) = ctx_r2.1.split_at_mut(0usize - len as usize);
@@ -2042,7 +2041,7 @@ pub fn bn_mod_exp_vartime_precomp_u64(
             let bits_c: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, i, 4u32);
             let bits_l32: u32 = bits_c as u32;
             let a_bits_l: (&[u64], &[u64]) =
-                t1.1.split_at(bits_l32.wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at(bits_l32.wrapping_mul(len) as usize);
             ((&mut resM)[0usize..len as usize]).copy_from_slice(&a_bits_l.1[0usize..len as usize])
         }
         else
@@ -2070,7 +2069,7 @@ pub fn bn_mod_exp_vartime_precomp_u64(
             let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, k, 4u32);
             let bits_l32: u32 = bits_l as u32;
             let a_bits_l: (&[u64], &[u64]) =
-                t1.1.split_at(bits_l32.wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at(bits_l32.wrapping_mul(len) as usize);
             ((&mut tmp0)[0usize..len as usize]).copy_from_slice(&a_bits_l.1[0usize..len as usize]);
             let mut aM_copy: Vec<u64> = vec![0u64; len as usize];
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -2168,10 +2167,11 @@ pub fn bn_mod_exp_consttime_precomp_u64(
         let ctx_r2: (&mut [u64], &mut [u64]) = ctx_n.1.split_at_mut(len as usize);
         bn_from_mont_u64(len, ctx_r2.0, mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len as usize]).copy_from_slice(&(&mut aM)[0usize..len as usize]);
+        crate::lowstar::ignore::ignore::<&mut [u64]>(&mut table);
         for i in 0u32..7u32
         {
             let t11: (&mut [u64], &mut [u64]) =
-                t1.1.split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize - len as usize);
+                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len) as usize);
             let mut aM_copy: Vec<u64> = vec![0u64; len as usize];
             ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(&t11.1[0usize..len as usize]);
             let ctx_n0: (&mut [u64], &mut [u64]) = ctx_r2.1.split_at_mut(0usize - len as usize);

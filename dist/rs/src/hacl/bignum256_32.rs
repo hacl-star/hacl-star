@@ -245,8 +245,8 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
     (res[0usize..16usize]).copy_from_slice(&[0u32; 16usize]);
     for i in 0u32..8u32
     {
-        let ab: (&mut [u32], &mut [u32]) = a.split_at_mut(0usize);
         let a_j: u32 = a[i as usize];
+        let ab: (&mut [u32], &mut [u32]) = a.split_at_mut(0usize);
         let res_j: (&mut [u32], &mut [u32]) = res.split_at_mut(i as usize);
         let mut c: u32 = 0u32;
         for i0 in 0u32..i.wrapping_div(4u32)
@@ -348,8 +348,8 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
         };
         let r: u32 = c1;
         let c10: u32 = r;
-        let resb: (&mut [u32], &mut [u32]) = res_j.1.split_at_mut(8usize);
         let res_j0: u32 = c[8u32.wrapping_add(i) as usize];
+        let resb: (&mut [u32], &mut [u32]) = c.split_at_mut(i as usize + 8usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
     };
     (res[0usize..8usize]).copy_from_slice(&(&mut c[8usize..])[0usize..8usize]);
@@ -439,8 +439,8 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
         };
         let r: u32 = c1;
         let c10: u32 = r;
-        let resb: (&mut [u32], &mut [u32]) = res_j.1.split_at_mut(8usize);
         let res_j0: u32 = c[8u32.wrapping_add(i) as usize];
+        let resb: (&mut [u32], &mut [u32]) = c.split_at_mut(i as usize + 8usize);
         c0 = crate::lib::inttypes_intrinsics::add_carry_u32(c0, c10, res_j0, resb.1)
     };
     (res[0usize..8usize]).copy_from_slice(&(&mut c[8usize..])[0usize..8usize]);
@@ -642,10 +642,11 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(8usize);
         from(ctx_r2.0, mu, ctx_r2.1, t1.0);
         (t1.1[0usize..8usize]).copy_from_slice(&(&mut aM)[0usize..8usize]);
+        crate::lowstar::ignore::ignore::<&mut [u32]>(&mut table);
         for i in 0u32..7u32
         {
             let t11: (&mut [u32], &mut [u32]) =
-                t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(8u32) as usize);
+                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(8u32) as usize);
             let mut aM_copy: [u32; 8] = [0u32; 8usize];
             ((&mut aM_copy)[0usize..8usize]).copy_from_slice(&t11.1[0usize..8usize]);
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.0.split_at_mut(0usize);
@@ -678,7 +679,8 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
             let i: u32 = bBits.wrapping_div(4u32).wrapping_mul(4u32);
             let bits_c: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, i, 4u32);
             let bits_l32: u32 = bits_c;
-            let a_bits_l: (&[u32], &[u32]) = t1.0.split_at(bits_l32.wrapping_mul(8u32) as usize);
+            let a_bits_l: (&[u32], &[u32]) =
+                (&mut table).split_at(bits_l32.wrapping_mul(8u32) as usize);
             ((&mut resM)[0usize..8usize]).copy_from_slice(&a_bits_l.1[0usize..8usize])
         }
         else
@@ -703,7 +705,8 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
                 );
             let bits_l: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, k, 4u32);
             let bits_l32: u32 = bits_l;
-            let a_bits_l: (&[u32], &[u32]) = t1.0.split_at(bits_l32.wrapping_mul(8u32) as usize);
+            let a_bits_l: (&[u32], &[u32]) =
+                (&mut table).split_at(bits_l32.wrapping_mul(8u32) as usize);
             ((&mut tmp0)[0usize..8usize]).copy_from_slice(&a_bits_l.1[0usize..8usize]);
             let mut aM_copy: [u32; 8] = [0u32; 8usize];
             ((&mut aM_copy)[0usize..8usize]).copy_from_slice(&(&mut resM)[0usize..8usize]);
@@ -792,10 +795,11 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(8usize);
         from(ctx_r2.0, mu, ctx_r2.1, t1.0);
         (t1.1[0usize..8usize]).copy_from_slice(&(&mut aM)[0usize..8usize]);
+        crate::lowstar::ignore::ignore::<&mut [u32]>(&mut table);
         for i in 0u32..7u32
         {
             let t11: (&mut [u32], &mut [u32]) =
-                t1.0.split_at_mut(i.wrapping_add(1u32).wrapping_mul(8u32) as usize);
+                (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(8u32) as usize);
             let mut aM_copy: [u32; 8] = [0u32; 8usize];
             ((&mut aM_copy)[0usize..8usize]).copy_from_slice(&t11.1[0usize..8usize]);
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.0.split_at_mut(0usize);

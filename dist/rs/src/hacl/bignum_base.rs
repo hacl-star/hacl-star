@@ -335,8 +335,8 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
     );
     for i in 0u32..aLen
     {
-        let ab: (&mut [u32], &mut [u32]) = a.split_at_mut(0usize);
         let a_j: u32 = a[i as usize];
+        let ab: (&mut [u32], &mut [u32]) = a.split_at_mut(0usize);
         let res_j: (&mut [u32], &mut [u32]) = res.split_at_mut(i as usize);
         let mut c: u32 = 0u32;
         for i0 in 0u32..i.wrapping_div(4u32)
@@ -404,8 +404,8 @@ pub fn bn_add_eq_len_u64(aLen: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64
     );
     for i in 0u32..aLen
     {
-        let ab: (&mut [u64], &mut [u64]) = a.split_at_mut(0usize);
         let a_j: u64 = a[i as usize];
+        let ab: (&mut [u64], &mut [u64]) = a.split_at_mut(0usize);
         let res_j: (&mut [u64], &mut [u64]) = res.split_at_mut(i as usize);
         let mut c: u64 = 0u64;
         for i0 in 0u32..i.wrapping_div(4u32)
