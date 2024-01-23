@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 const k224_256: [u32; 64] =
     [0x428a2f98u32,
         0x71374491u32,

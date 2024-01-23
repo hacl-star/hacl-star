@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn bn_is_zero_mask4(f: &mut [u64]) -> u64
 {
     let mut bn_zero: [u64; 4] = [0u64; 4usize];
@@ -586,36 +590,36 @@
     let tmp1: (&mut [u64], &mut [u64]) = x2.1.split_at_mut(4usize);
     let tmp2: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(4usize);
     (tmp1.0[0usize..4usize]).copy_from_slice(&a[0usize..4usize]);
-    for i in 0u32..1u32 { fsqr(tmp1.0, tmp1.0) };
+    for _i in 0u32..1u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp1.0, tmp1.0, a);
     (x2.0[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
-    for i in 0u32..1u32 { fsqr(x2.0, x2.0) };
+    for _i in 0u32..1u32 { fsqr(x2.0, x2.0) };
     fmul(x2.0, x2.0, a);
     (tmp2.0[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
-    for i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
+    for _i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, x2.0);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for i in 0u32..6u32 { fsqr(tmp2.1, tmp2.1) };
+    for _i in 0u32..6u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    for i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
+    for _i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, x2.0);
     (x2.0[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for i in 0u32..15u32 { fsqr(x2.0, x2.0) };
+    for _i in 0u32..15u32 { fsqr(x2.0, x2.0) };
     fmul(x2.0, x2.0, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
-    for i in 0u32..2u32 { fsqr(tmp2.0, tmp2.0) };
+    for _i in 0u32..2u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, tmp1.0);
     (tmp1.0[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for i in 0u32..32u32 { fsqr(tmp1.0, tmp1.0) };
+    for _i in 0u32..32u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp1.0, tmp1.0, a);
-    for i in 0u32..128u32 { fsqr(tmp1.0, tmp1.0) };
+    for _i in 0u32..128u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp1.0, tmp1.0, tmp2.0);
-    for i in 0u32..32u32 { fsqr(tmp1.0, tmp1.0) };
+    for _i in 0u32..32u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp1.0, tmp1.0, tmp2.0);
-    for i in 0u32..30u32 { fsqr(tmp1.0, tmp1.0) };
+    for _i in 0u32..30u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp1.0, tmp1.0, x2.0);
-    for i in 0u32..2u32 { fsqr(tmp1.0, tmp1.0) };
+    for _i in 0u32..2u32 { fsqr(tmp1.0, tmp1.0) };
     fmul(tmp2.0, tmp1.0, a);
     (res[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize])
 }
@@ -626,26 +630,26 @@
     let tmp1: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let tmp2: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(4usize);
     (tmp2.0[0usize..4usize]).copy_from_slice(&a[0usize..4usize]);
-    for i in 0u32..1u32 { fsqr(tmp2.0, tmp2.0) };
+    for _i in 0u32..1u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, a);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for i in 0u32..2u32 { fsqr(tmp2.1, tmp2.1) };
+    for _i in 0u32..2u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    for i in 0u32..4u32 { fsqr(tmp2.0, tmp2.0) };
+    for _i in 0u32..4u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, tmp2.1);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for i in 0u32..8u32 { fsqr(tmp2.1, tmp2.1) };
+    for _i in 0u32..8u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    for i in 0u32..16u32 { fsqr(tmp2.0, tmp2.0) };
+    for _i in 0u32..16u32 { fsqr(tmp2.0, tmp2.0) };
     fmul(tmp2.0, tmp2.0, tmp2.1);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for i in 0u32..32u32 { fsqr(tmp2.1, tmp2.1) };
+    for _i in 0u32..32u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, a);
-    for i in 0u32..96u32 { fsqr(tmp2.1, tmp2.1) };
+    for _i in 0u32..96u32 { fsqr(tmp2.1, tmp2.1) };
     fmul(tmp2.1, tmp2.1, a);
-    for i in 0u32..94u32 { fsqr(tmp2.1, tmp2.1) };
+    for _i in 0u32..94u32 { fsqr(tmp2.1, tmp2.1) };
     (res[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize])
 }
 
@@ -983,7 +987,7 @@
     let mut tmp0: [u64; 12] = [0u64; 12usize];
     for i in 0u32..64u32
     {
-        for i0 in 0u32..4u32 { point_double(res, res) };
+        for _i in 0u32..4u32 { point_double(res, res) };
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar, k, 4u32);
         ((&mut tmp0)[0usize..12usize]).copy_from_slice(
@@ -1073,7 +1077,7 @@
     let mut tmp: [u64; 12] = [0u64; 12usize];
     for i in 0u32..16u32
     {
-        for i0 in 0u32..4u32 { point_double(res, res) };
+        for _i in 0u32..4u32 { point_double(res, res) };
         let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
         precomp_get_consttime(
@@ -1173,7 +1177,7 @@
     let mut tmp1: [u64; 12] = [0u64; 12usize];
     for i1 in 0u32..51u32
     {
-        for i2 in 0u32..5u32 { point_double(res, res) };
+        for _i in 0u32..5u32 { point_double(res, res) };
         let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar2, k, 5u32);
         let bits_l321: u32 = bits_l as u32;
@@ -1395,84 +1399,84 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
     let x_10101: (&mut [u64], &mut [u64]) = x_1111.1.split_at_mut(4usize);
     let x_101111: (&mut [u64], &mut [u64]) = x_10101.1.split_at_mut(4usize);
     (x_11.0[0usize..4usize]).copy_from_slice(&r[0usize..4usize]);
-    for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
+    for _i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_101.0, x_11.0, r);
     qmul(x_111.0, x_11.0, x_101.0);
     qmul(x_1111.0, x_11.0, x_111.0);
     (x_11.0[0usize..4usize]).copy_from_slice(&x_111.0[0usize..4usize]);
-    for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
+    for _i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_10101.0, x_111.0, x_11.0);
-    for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
+    for _i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_101111.0, x_11.0, r);
     (x_11.0[0usize..4usize]).copy_from_slice(&x_101111.0[0usize..4usize]);
-    for i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
+    for _i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_101111.1, x_111.0, x_11.0);
     qmul(x_11.0, x_101111.0, x_11.0);
     let mut tmp1: [u64; 4] = [0u64; 4usize];
-    for i in 0u32..2u32 { qsqr(x_11.0, x_11.0) };
+    for _i in 0u32..2u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_11.0, x_11.0, x_101.0);
     ((&mut tmp1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
-    for i in 0u32..8u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..8u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_11.0);
     (x_11.0[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
-    for i in 0u32..16u32 { qsqr(x_11.0, x_11.0) };
+    for _i in 0u32..16u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_11.0, x_11.0, &mut tmp1);
     ((&mut tmp1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
-    for i in 0u32..64u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..64u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_11.0);
-    for i in 0u32..32u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..32u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_11.0);
-    for i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101111.1);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_1111.0);
-    for i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_10101.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101111.0);
-    for i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_111.0);
-    for i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_111.0);
-    for i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_111.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_1111.0);
-    for i in 0u32..9u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..9u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101111.1);
-    for i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_10101.0);
-    for i in 0u32..2u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..2u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, r);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, r);
-    for i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_10101.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_1111.0);
-    for i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_1111.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_1111.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_111.0);
-    for i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101.0);
-    for i in 0u32..10u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..10u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101111.1);
-    for i in 0u32..2u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..2u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101.0);
-    for i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101.0);
-    for i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, r);
-    for i in 0u32..7u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..7u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_101111.0);
-    for i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
+    for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
     qmul(&mut tmp1, &mut tmp1, x_10101.0);
     (x_11.0[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
     (res[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize])

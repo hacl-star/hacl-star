@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_vale

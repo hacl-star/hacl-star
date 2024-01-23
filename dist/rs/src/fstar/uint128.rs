@@ -1,3 +1,5 @@
+#![allow(non_camel_case_types)]
+
 pub type uint128 = u128;
 
 pub fn add(x: uint128, y: uint128) -> uint128 {

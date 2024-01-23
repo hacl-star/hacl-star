@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn mgf_hash(
     a: crate::spec::hash_definitions::hash_alg,
     len: u32,
@@ -192,7 +196,7 @@
             res = uu____0 & res
         };
         let z: u8 = res;
-        if ! z == 255u8
+        if ! (z == 255u8)
         { false }
         else
         {
@@ -416,7 +420,7 @@ pub fn rsapss_verify(
                     &mut m
                 );
                 let ite: bool =
-                    if ! modBits.wrapping_sub(1u32).wrapping_rem(8u32) == 0u32
+                    if ! (modBits.wrapping_sub(1u32).wrapping_rem(8u32) == 0u32)
                     { true }
                     else
                     {

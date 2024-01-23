@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub const h224: [u32; 8] =
     [0xc1059ed8u32,
         0x367cd507u32,

@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn poly1305_padded_128(
     ctx: &mut [crate::lib::intvector_intrinsics::vec128],
     len: u32,

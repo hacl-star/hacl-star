@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 fn secretbox_init(xkeys: &mut [u8], k: &mut [u8], n: &mut [u8]) -> ()
 {
     let subkey: (&mut [u8], &mut [u8]) = xkeys.split_at_mut(0usize);

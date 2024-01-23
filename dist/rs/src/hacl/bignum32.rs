@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn add(len: u32, a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
 { crate::hacl::bignum_base::bn_add_eq_len_u32(len, a, b, res) }
 

@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn fsum(out: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
 { crate::hacl::bignum25519_51::fadd(out, a, b) }
 
@@ -484,7 +488,7 @@ pub fn make_point_inf(b: &mut [u64]) -> ()
                     reduce(x32.1);
                     let x00: u64 = x32.1[0usize];
                     let x01: u64 = x00 & 1u64;
-                    if ! x01 == sign
+                    if ! (x01 == sign)
                     {
                         t01.1[0usize] = 0u64;
                         ();
@@ -1328,7 +1332,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let mut tmp0: [u64; 20] = [0u64; 20usize];
     for i in 0u32..64u32
     {
-        for i0 in 0u32..4u32 { point_double(out, out) };
+        for _i in 0u32..4u32 { point_double(out, out) };
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, &mut bscalar, k, 4u32);
         ((&mut tmp0)[0usize..20usize]).copy_from_slice(
@@ -1475,7 +1479,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let mut tmp: [u64; 20] = [0u64; 20usize];
     for i in 0u32..16u32
     {
-        for i0 in 0u32..4u32 { point_double(out, out) };
+        for _i in 0u32..4u32 { point_double(out, out) };
         let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
         precomp_get_consttime(
@@ -1620,7 +1624,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let mut tmp11: [u64; 20] = [0u64; 20usize];
     for i1 in 0u32..51u32
     {
-        for i2 in 0u32..5u32 { point_double(out, out) };
+        for _i in 0u32..5u32 { point_double(out, out) };
         let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, bscalar2.1, k, 5u32);
         let bits_l321: u32 = bits_l as u32;

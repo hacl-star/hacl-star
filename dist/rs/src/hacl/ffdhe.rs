@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn ffdhe_check_pk(
     a: crate::spec::ffdhe::ffdhe_alg,
     pk_n: &mut [u64],

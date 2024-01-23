@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub const ffdhe_g2: [u8; 1] = [0x02u8];
 
 pub const ffdhe_p2048: [u8; 256] =

@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 const cpu_has_shaext: [bool; 1] = [false];
 
 const cpu_has_aesni: [bool; 1] = [false];

@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn sha224_init4(hash: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
 {
     for i in 0u32..8u32

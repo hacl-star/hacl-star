@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
 {
     let n: u32 = len.wrapping_div(16u32);

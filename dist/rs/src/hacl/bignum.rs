@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn bn_karatsuba_mul_uint32(
     aLen: u32,
     a: &mut [u32],
@@ -884,7 +888,7 @@ pub fn mod_inv_uint32(n0: u32) -> u32
     let mut vb: u32 = 0u32;
     ub = 1u32;
     vb = 0u32;
-    for i in 0u32..32u32
+    for _i in 0u32..32u32
     {
         let us: u32 = ub;
         let vs: u32 = vb;
@@ -905,7 +909,7 @@ pub fn mod_inv_uint64(n0: u64) -> u64
     let mut vb: u64 = 0u64;
     ub = 1u64;
     vb = 0u64;
-    for i in 0u32..64u32
+    for _i in 0u32..64u32
     {
         let us: u64 = ub;
         let vs: u64 = vb;
@@ -942,7 +946,7 @@ pub fn bn_precomp_r2_mod_n_u32(len: u32, nBits: u32, n: &mut [u32], res: &mut [u
     let i: u32 = nBits.wrapping_div(32u32);
     let j: u32 = nBits.wrapping_rem(32u32);
     res[i as usize] = res[i as usize] | 1u32.wrapping_shl(j);
-    for i0 in 0u32..64u32.wrapping_mul(len).wrapping_sub(nBits)
+    for _i in 0u32..64u32.wrapping_mul(len).wrapping_sub(nBits)
     {
         let mut a_copy: Vec<u32> = vec![0u32; len as usize];
         let mut b_copy: Vec<u32> = vec![0u32; len as usize];
@@ -1112,7 +1116,7 @@ pub fn bn_precomp_r2_mod_n_u64(len: u32, nBits: u32, n: &mut [u64], res: &mut [u
     let i: u32 = nBits.wrapping_div(64u32);
     let j: u32 = nBits.wrapping_rem(64u32);
     res[i as usize] = res[i as usize] | 1u64.wrapping_shl(j);
-    for i0 in 0u32..128u32.wrapping_mul(len).wrapping_sub(nBits)
+    for _i in 0u32..128u32.wrapping_mul(len).wrapping_sub(nBits)
     {
         let mut a_copy: Vec<u64> = vec![0u64; len as usize];
         let mut b_copy: Vec<u64> = vec![0u64; len as usize];
@@ -1528,7 +1532,7 @@ pub fn bn_mod_exp_vartime_precomp_u32(
             let j: u32 = i.wrapping_rem(32u32);
             let tmp: u32 = b[i1 as usize];
             let bit: u32 = tmp.wrapping_shr(j) & 1u32;
-            if ! bit == 0u32
+            if ! (bit == 0u32)
             {
                 let mut aM_copy: Vec<u32> = vec![0u32; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -1618,7 +1622,7 @@ pub fn bn_mod_exp_vartime_precomp_u32(
         let mut tmp0: Vec<u32> = vec![0u32; len as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for i0 in 0u32..4u32
+            for _i in 0u32..4u32
             {
                 let mut aM_copy: Vec<u32> = vec![0u32; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -1796,7 +1800,7 @@ pub fn bn_mod_exp_consttime_precomp_u32(
         let mut tmp0: Vec<u32> = vec![0u32; len as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for i0 in 0u32..4u32
+            for _i in 0u32..4u32
             {
                 let mut aM_copy: Vec<u32> = vec![0u32; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -1960,7 +1964,7 @@ pub fn bn_mod_exp_vartime_precomp_u64(
             let j: u32 = i.wrapping_rem(64u32);
             let tmp: u64 = b[i1 as usize];
             let bit: u64 = tmp.wrapping_shr(j) & 1u64;
-            if ! bit == 0u64
+            if ! (bit == 0u64)
             {
                 let mut aM_copy: Vec<u64> = vec![0u64; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -2050,7 +2054,7 @@ pub fn bn_mod_exp_vartime_precomp_u64(
         let mut tmp0: Vec<u64> = vec![0u64; len as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for i0 in 0u32..4u32
+            for _i in 0u32..4u32
             {
                 let mut aM_copy: Vec<u64> = vec![0u64; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(
@@ -2228,7 +2232,7 @@ pub fn bn_mod_exp_consttime_precomp_u64(
         let mut tmp0: Vec<u64> = vec![0u64; len as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for i0 in 0u32..4u32
+            for _i in 0u32..4u32
             {
                 let mut aM_copy: Vec<u64> = vec![0u64; len as usize];
                 ((&mut aM_copy)[0usize..len as usize]).copy_from_slice(

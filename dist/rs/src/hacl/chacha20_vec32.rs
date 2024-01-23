@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn double_round_32(st: &mut [u32]) -> ()
 {
     st[0usize] = (st[0usize]).wrapping_add(st[4usize]);

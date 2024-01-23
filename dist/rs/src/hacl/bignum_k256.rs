@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] pub fn is_felem_zero_vartime(f: &mut [u64]) -> bool
 {
     let f0: u64 = f[0usize];
@@ -629,7 +633,7 @@
 
 #[inline] pub fn fsquare_times_in_place(out: &mut [u64], b: u32) -> ()
 {
-    for i in 0u32..b
+    for _i in 0u32..b
     {
         let mut x_copy: [u64; 5] = [0u64; 5usize];
         ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);
@@ -640,7 +644,7 @@
 #[inline] pub fn fsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
     (out[0usize..5usize]).copy_from_slice(&a[0usize..5usize]);
-    for i in 0u32..b
+    for _i in 0u32..b
     {
         let mut x_copy: [u64; 5] = [0u64; 5usize];
         ((&mut x_copy)[0usize..5usize]).copy_from_slice(&out[0usize..5usize]);

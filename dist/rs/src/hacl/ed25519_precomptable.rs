@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub const precomp_basepoint_table_w4: [u64; 320] =
     [0u64,
         0u64,

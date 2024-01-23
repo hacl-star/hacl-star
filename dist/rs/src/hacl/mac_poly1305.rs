@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn poly1305_init(ctx: &mut [u64], key: &mut [u8]) -> ()
 {
     let acc: (&mut [u64], &mut [u64]) = ctx.split_at_mut(0usize);

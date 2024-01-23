@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn update_multi_sha3(
     a: crate::spec::hash_definitions::hash_alg,
     s: &mut [u64],
@@ -300,7 +304,7 @@ fn absorb(
     (lastBlock.1[0usize..rem as usize]).copy_from_slice(&last.1[0usize..rem as usize]);
     lastBlock.1[rem as usize] = delimitedSuffix;
     loadState(rateInBytes, lastBlock.1, s);
-    if ! delimitedSuffix & 0x80u8 == 0u8 && rem == rateInBytes.wrapping_sub(1u32)
+    if ! (delimitedSuffix & 0x80u8 == 0u8) && rem == rateInBytes.wrapping_sub(1u32)
     { state_permute(s) };
     let mut nextBlock_: [u8; 200] = [0u8; 200usize];
     let nextBlock: (&mut [u8], &mut [u8]) = (&mut nextBlock_).split_at_mut(0usize);

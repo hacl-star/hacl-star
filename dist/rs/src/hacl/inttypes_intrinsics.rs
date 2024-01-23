@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn add_carry_u32(cin: u32, x: u32, y: u32, r: &mut [u32]) -> u32
 {
     let res: u64 = (x as u64).wrapping_add(cin as u64).wrapping_add(y as u64);

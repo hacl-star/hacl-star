@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub const chacha20_constants: [u32; 4] =
     [0x61707865u32, 0x3320646eu32, 0x79622d32u32, 0x6b206574u32];
 

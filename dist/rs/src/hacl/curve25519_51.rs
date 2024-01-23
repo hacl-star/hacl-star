@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 const g25519: [u8; 32] =
     [9u8,
         0u8,
@@ -201,7 +205,7 @@ pub fn fsquare_times(
     ()
 {
     crate::hacl::bignum25519_51::fsqr(o, inp, tmp);
-    for i in 0u32..n.wrapping_sub(1u32)
+    for _i in 0u32..n.wrapping_sub(1u32)
     {
         let mut f1_copy: [u64; 5] = [0u64; 5usize];
         ((&mut f1_copy)[0usize..5usize]).copy_from_slice(&o[0usize..5usize]);

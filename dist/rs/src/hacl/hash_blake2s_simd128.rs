@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn update_block(
     wv: &mut [crate::lib::intvector_intrinsics::vec128],
     hash: &mut [crate::lib::intvector_intrinsics::vec128],
@@ -594,7 +598,7 @@ pub fn update_last(
     if kk > 0u32
     {
         update_key(wv, hash, kk, k, ll);
-        if ! ll == 0u32 { update_blocks(ll, wv, hash, lb, d) }
+        if ! (ll == 0u32) { update_blocks(ll, wv, hash, lb, d) }
     }
     else
     { update_blocks(ll, wv, hash, 0u32 as u64, d) }

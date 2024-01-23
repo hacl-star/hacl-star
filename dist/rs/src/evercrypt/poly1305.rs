@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 fn poly1305_vale(dst: &mut [u8], src: &mut [u8], len: u32, key: &mut [u8]) -> ()
 {
     crate::lowstar::ignore::ignore::<&mut [u8]>(dst);

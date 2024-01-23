@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn add_carry_u64(cin: u64, x: u64, y: u64, r: &mut [u64]) -> u64
 {
     let res: crate::fstar::uint128::uint128 =

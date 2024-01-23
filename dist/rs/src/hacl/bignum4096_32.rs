@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn add(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
 {
     let mut c: u32 = 0u32;
@@ -219,7 +223,7 @@ pub fn sqr(a: &mut [u32], res: &mut [u32]) -> ()
     let i: u32 = nBits.wrapping_div(32u32);
     let j: u32 = nBits.wrapping_rem(32u32);
     res[i as usize] = res[i as usize] | 1u32.wrapping_shl(j);
-    for i0 in 0u32..8192u32.wrapping_sub(nBits)
+    for _i in 0u32..8192u32.wrapping_sub(nBits)
     {
         let mut a_copy: [u32; 128] = [0u32; 128usize];
         let mut b_copy: [u32; 128] = [0u32; 128usize];
@@ -520,7 +524,7 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
             let j: u32 = i.wrapping_rem(32u32);
             let tmp: u32 = b[i1 as usize];
             let bit: u32 = tmp.wrapping_shr(j) & 1u32;
-            if ! bit == 0u32
+            if ! (bit == 0u32)
             {
                 let mut aM_copy: [u32; 128] = [0u32; 128usize];
                 ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&mut resM)[0usize..128usize]);
@@ -603,7 +607,7 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
         let mut tmp0: [u32; 128] = [0u32; 128usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for i0 in 0u32..4u32
+            for _i in 0u32..4u32
             {
                 let mut aM_copy: [u32; 128] = [0u32; 128usize];
                 ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&mut resM)[0usize..128usize]);
@@ -765,7 +769,7 @@ fn exp_check(n: &mut [u32], a: &mut [u32], bBits: u32, b: &mut [u32]) -> u32
         let mut tmp0: [u32; 128] = [0u32; 128usize];
         for i in 0u32..bBits.wrapping_div(4u32)
         {
-            for i0 in 0u32..4u32
+            for _i in 0u32..4u32
             {
                 let mut aM_copy: [u32; 128] = [0u32; 128usize];
                 ((&mut aM_copy)[0usize..128usize]).copy_from_slice(&(&mut resM)[0usize..128usize]);

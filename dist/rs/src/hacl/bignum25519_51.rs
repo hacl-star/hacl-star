@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] pub fn fadd(out: &mut [u64], f1: &mut [u64], f2: &mut [u64]) -> ()
 {
     let f10: u64 = f1[0usize];

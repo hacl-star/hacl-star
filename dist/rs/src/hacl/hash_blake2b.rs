@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 fn update_block(
     wv: &mut [u64],
     hash: &mut [u64],
@@ -543,7 +547,7 @@ fn update_blocks(
     if kk > 0u32
     {
         update_key(wv, hash, kk, k, ll);
-        if ! ll == 0u32 { update_blocks(ll, wv, hash, lb, d) }
+        if ! (ll == 0u32) { update_blocks(ll, wv, hash, lb, d) }
     }
     else
     { update_blocks(ll, wv, hash, crate::fstar::uint128::uint64_to_uint128(0u32 as u64), d) }

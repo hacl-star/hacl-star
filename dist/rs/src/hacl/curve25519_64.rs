@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
 {
     if crate::evercrypt::targetconfig::hacl_can_compile_inline_asm
@@ -276,7 +280,7 @@ fn montgomery_ladder(out: &mut [u64], key: &mut [u8], init: &mut [u64]) -> ()
 fn fsquare_times(o: &mut [u64], inp: &mut [u64], tmp: &mut [u64], n: u32) -> ()
 {
     fsqr(o, inp, tmp);
-    for i in 0u32..n.wrapping_sub(1u32)
+    for _i in 0u32..n.wrapping_sub(1u32)
     {
         let mut f1_copy: [u64; 4] = [0u64; 4usize];
         ((&mut f1_copy)[0usize..4usize]).copy_from_slice(&o[0usize..4usize]);

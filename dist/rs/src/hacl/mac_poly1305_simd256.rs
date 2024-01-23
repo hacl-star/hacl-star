@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub fn load_acc4(acc: &mut [crate::lib::intvector_intrinsics::vec256], b: &mut [u8]) -> ()
 {
     let mut e: [crate::lib::intvector_intrinsics::vec256; 5] =

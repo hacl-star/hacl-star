@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 pub const crypto_bytes: u32 = 24u32;
 
 pub const crypto_publickeybytes: u32 = 15632u32;

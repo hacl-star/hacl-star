@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn double_round_128(st: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
 {
     st[0usize] = crate::lib::intvector_intrinsics::vec128_add32(st[0usize], st[4usize]);

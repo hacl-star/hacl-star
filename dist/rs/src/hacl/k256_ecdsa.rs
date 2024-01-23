@@ -1,3 +1,7 @@
+#![allow(non_snake_case)]
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+
 #[inline] fn bn_add(aLen: u32, a: &mut [u64], bLen: u32, b: &mut [u64], res: &mut [u64]) -> u64
 {
     let a0: (&mut [u64], &mut [u64]) = a.split_at_mut(0usize);
@@ -677,12 +681,12 @@ fn sqr4(a: &mut [u64], res: &mut [u64]) -> ()
 }
 
 #[inline] fn qsquare_times_in_place(out: &mut [u64], b: u32) -> ()
-{ for i in 0u32..b { qsqr(out, out) } }
+{ for _i in 0u32..b { qsqr(out, out) } }
 
 #[inline] fn qsquare_times(out: &mut [u64], a: &mut [u64], b: u32) -> ()
 {
     (out[0usize..4usize]).copy_from_slice(&a[0usize..4usize]);
-    for i in 0u32..b { qsqr(out, out) }
+    for _i in 0u32..b { qsqr(out, out) }
 }
 
 #[inline] fn qinv(out: &mut [u64], f: &mut [u64]) -> ()
@@ -1170,7 +1174,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
     let mut tmp0: [u64; 15] = [0u64; 15usize];
     for i in 0u32..64u32
     {
-        for i0 in 0u32..4u32 { point_double(out, out) };
+        for _i in 0u32..4u32 { point_double(out, out) };
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar, k, 4u32);
         ((&mut tmp0)[0usize..15usize]).copy_from_slice(
@@ -1286,7 +1290,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
     let mut tmp: [u64; 15] = [0u64; 15usize];
     for i in 0u32..16u32
     {
-        for i0 in 0u32..4u32 { point_double(out, out) };
+        for _i in 0u32..4u32 { point_double(out, out) };
         let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
         precomp_get_consttime(
@@ -1396,7 +1400,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
     let mut tmp1: [u64; 15] = [0u64; 15usize];
     for i1 in 0u32..51u32
     {
-        for i2 in 0u32..5u32 { point_double(out, out) };
+        for _i in 0u32..5u32 { point_double(out, out) };
         let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar2, k, 5u32);
         let bits_l321: u32 = bits_l as u32;
@@ -1512,7 +1516,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
     let mut tmp2: [u64; 15] = [0u64; 15usize];
     for i3 in 0u32..25u32
     {
-        for i4 in 0u32..5u32 { point_double(out, out) };
+        for _i in 0u32..5u32 { point_double(out, out) };
         let k: u32 = 125u32.wrapping_sub(5u32.wrapping_mul(i3)).wrapping_sub(5u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, r4, k, 5u32);
         let bits_l323: u32 = bits_l as u32;
