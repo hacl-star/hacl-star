@@ -14,3 +14,6 @@ pub mod bignum256_32;
 pub mod bignum4096;
 pub mod bignum4096_32;
 pub mod bignum_k256;
+pub mod ed25519_precomptable;
+pub mod hash_md5;
+pub mod hash_sha1;
