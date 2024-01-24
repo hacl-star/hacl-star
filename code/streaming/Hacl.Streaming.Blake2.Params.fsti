@@ -10,7 +10,7 @@ module Spec = Spec.Blake2
 module Core = Hacl.Impl.Blake2.Core
 
 inline_for_extraction noextract
-val params (a: Spec.alg) : Type
+val params (a: Spec.alg) : Type0
 
 val footprint (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot B.loc
 
