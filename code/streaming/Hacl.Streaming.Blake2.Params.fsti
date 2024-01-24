@@ -7,6 +7,7 @@ module G = FStar.Ghost
 open FStar.HyperStack.ST
 
 module Spec = Spec.Blake2
+module Core = Hacl.Impl.Blake2.Core
 
 inline_for_extraction noextract
 val params (a: Spec.alg) : Type
@@ -44,6 +45,15 @@ val frame_freeable: #a: Spec.alg -> l:B.loc -> s:params a -> h0:HS.mem -> h1:HS.
     (ensures (
       freeable h1 s))
     [ SMTPat (freeable h1 s); SMTPat (B.modifies l h0 h1) ]
+
+inline_for_extraction noextract
+val get_params: #a: Spec.alg -> s: params a -> ST (Core.blake2_params a)
+  (requires fun h -> invariant h s)
+  (ensures fun h0 p h1 ->
+    h0 == h1 /\
+    Core.blake2_params_inv h1 p /\
+    B.(loc_includes (footprint h0 s) (Core.blake2_params_loc p)) /\
+    Core.blake2_params_v h1 p == v h1 s)
 
 inline_for_extraction noextract
 val alloca: a: Spec.alg -> StackInline (params a)

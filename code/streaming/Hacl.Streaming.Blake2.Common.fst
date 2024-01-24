@@ -282,9 +282,9 @@ let blake2_prevlen (a : alg)
 /// -----
 
 noextract
-let init_s (a : alg) (kk : size_nat{kk <= max_key a}) :
+let init_s (a : alg) (p: Spec.blake2_params a) (kk : size_nat{kk <= max_key a}) :
   Tot (t a) =
-  Spec.blake2_init_hash a (Spec.blake2_default_params a) kk (output_size a)
+  Spec.blake2_init_hash a p kk (output_size a)
 
 noextract
 let update_multi_s (#a : alg) (acc : t a)
@@ -311,10 +311,11 @@ let finish_s (#a : alg) (acc : t a) :
 
 noextract
 let spec_s (a : alg)
+  (p: Spec.blake2_params a)
   (kk : size_nat{kk <= max_key a})
   (key : lbytes kk)
   (input : S.seq uint8{if kk = 0 then S.length input <= max_input_length a else S.length input + Spec.size_block a <= max_input_length a}) =
-  Spec.blake2 a input (Spec.blake2_default_params a) kk key (output_size a)
+  Spec.blake2 a input p kk key (output_size a)
 
 /// Interlude for spec proofs
 /// -------------------------
@@ -402,20 +403,21 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
 noextract
 val blake2_hash_incremental_s :
   a : alg ->
+  p: Spec.blake2_params a ->
   kk: size_nat{kk <= max_key a} ->
   k: lbytes kk ->
   input:S.seq uint8 { if kk = 0 then S.length input <= max_input_length a else S.length input + (Spec.size_block a) <= max_input_length a } ->
   output:S.seq uint8 { S.length output = output_size a }
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_hash_incremental_s a kk k input0 =
+let blake2_hash_incremental_s a p kk k input0 =
   let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
   let key_block_len = S.length key_block in
   let input = Seq.append key_block input0 in
   assert (key_block_len = (if kk = 0 then 0 else Spec.size_block a));
   (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
   let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-  let acc1 = init_s a kk in
+  let acc1 = init_s a p kk in
   let acc2 = update_multi_s #a acc1 0 bs in
   let acc3 = update_last_s #a acc2 (S.length bs) l in
   let acc4 = finish_s #a acc3 in
@@ -476,22 +478,23 @@ let repeati_split_at_eq a s input =
 
 val spec_is_incremental :
   a : alg ->
+  p: Spec.blake2_params a ->
   kk: size_nat{kk <= max_key a} ->
   k: lbytes kk ->
   input:S.seq uint8 { if kk = 0 then S.length input <= max_input_length a else  S.length input + (Spec.size_block a) <= max_input_length a } ->
   Lemma(
-    blake2_hash_incremental_s a kk k input ==
-      Spec.blake2 a input (Spec.blake2_default_params a) kk k (output_size a))
+    blake2_hash_incremental_s a p kk k input ==
+      Spec.blake2 a input p kk k (output_size a))
 
 #restart-solver
 #push-options "--z3cliopt smt.arith.nl=false"
-let spec_is_incremental a kk k input0 =
+let spec_is_incremental a p kk k input0 =
   let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
   let key_block_len = S.length key_block in
   let input = Seq.append key_block input0 in
   let n_blocks, l_last = Spec.split a (S.length input) in
   let blocks, last = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-  let s = init_s a kk in
+  let s = init_s a p kk in
   repeati_split_at_eq a s input;
   let f = Spec.blake2_update1 a 0 input in
   let g = Spec.blake2_update1 a 0 blocks in
@@ -595,12 +598,12 @@ let blake2 (a : alg)
     (fun () -> if kk > 0 then block_len a else 0ul) (* init_input_len *)
 
     (fun () k -> if kk > 0 then Spec.blake2_key_block a kk (snd k) else S.empty)
-    (fun () _k -> init_s a kk) (* init_s *)
+    (fun () k -> init_s a (fst k) kk) (* init_s *)
 
     (fun () acc prevlen input -> update_multi_s acc prevlen input) (* update_multi_s *)
     (fun () acc prevlen input -> update_last_s acc prevlen input) (* update_last_s *)
     (fun () _k acc _ -> finish_s #a acc) (* finish_s *)
-    (fun () k input l -> spec_s a kk (snd k) input) (* spec_s *)
+    (fun () k input l -> spec_s a (fst k) kk (snd k) input) (* spec_s *)
 
     (* update_multi_zero *)
     (fun () acc prevlen -> update_multi_zero #a acc prevlen)
@@ -609,7 +612,7 @@ let blake2 (a : alg)
     (fun () acc prevlen1 prevlen2 input1 input2 ->
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
     (fun () k input _ ->
-     spec_is_incremental a kk (snd k) input) (* spec_is_incremental *)
+     spec_is_incremental a (fst k) kk (snd k) input) (* spec_is_incremental *)
     (fun _ acc -> ()) (* index_of_state *)
 
     (* init *)
@@ -620,7 +623,8 @@ let blake2 (a : alg)
       init_key_block a kk key buf_;
       let h1 = ST.get () in
       P.frame_invariant #a (B.loc_buffer buf_) (fst key) h0 h1;
-      init h (Lib.IntTypes.size kk) (output_len a))
+      let p = P.get_params (fst key) in
+      init h p (Lib.IntTypes.size kk) (output_len a))
 
     (* update_multi *)
     (fun _ acc prevlen blocks len ->
