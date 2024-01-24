@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] fn update_block(
     wv: &mut [crate::lib::intvector_intrinsics::vec128],
@@ -783,6 +784,17 @@ pub fn malloc_with_key() -> &mut [crate::lib::intvector_intrinsics::vec128]
         vec![crate::lib::intvector_intrinsics::vec128_zero; 4usize];
     &mut buf
 }
+
+pub struct block_state_t <'a>
+{
+    pub fst:
+    &'a mut [crate::lib::intvector_intrinsics::vec128],
+    pub snd:
+    &'a mut [crate::lib::intvector_intrinsics::vec128]
+}
+
+pub struct state_t <'a>
+{ pub block_state: block_state_t, pub buf: &'a mut [u8], pub total_len: u64 }
 
 pub fn hash_with_key(
     output: &mut [u8],

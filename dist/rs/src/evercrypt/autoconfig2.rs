@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 const cpu_has_shaext: [bool; 1] = [false];
 
@@ -65,13 +66,21 @@ pub fn init() -> ()
             (&mut cpu_has_adx)[0usize] = true
         };
         if crate::vale::stdcalls_x64_cpuid::check_avx() != 0u64
-        if crate::vale::stdcalls_x64_cpuid::check_osxsave() != 0u64
-        if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0() != 0u64
-        { (&mut cpu_has_avx)[0usize] = true };
+        {
+            if crate::vale::stdcalls_x64_cpuid::check_osxsave() != 0u64
+            {
+                if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0() != 0u64
+                { (&mut cpu_has_avx)[0usize] = true }
+            }
+        };
         if crate::vale::stdcalls_x64_cpuid::check_avx2() != 0u64
-        if crate::vale::stdcalls_x64_cpuid::check_osxsave() != 0u64
-        if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0() != 0u64
-        { (&mut cpu_has_avx2)[0usize] = true };
+        {
+            if crate::vale::stdcalls_x64_cpuid::check_osxsave() != 0u64
+            {
+                if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0() != 0u64
+                { (&mut cpu_has_avx2)[0usize] = true }
+            }
+        };
         if crate::vale::stdcalls_x64_cpuid::check_sse() != 0u64
         { (&mut cpu_has_sse)[0usize] = true };
         if crate::vale::stdcalls_x64_cpuid::check_movbe() != 0u64
@@ -79,10 +88,16 @@ pub fn init() -> ()
         if crate::vale::stdcalls_x64_cpuid::check_rdrand() != 0u64
         { (&mut cpu_has_rdrand)[0usize] = true };
         if crate::vale::stdcalls_x64_cpuid::check_avx512() != 0u64
-        if crate::vale::stdcalls_x64_cpuid::check_osxsave() != 0u64
-        if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0() != 0u64
-        if crate::vale::stdcalls_x64_cpuid::check_avx512_xcr0() != 0u64
-        { (&mut cpu_has_avx512)[0usize] = true }
+        {
+            if crate::vale::stdcalls_x64_cpuid::check_osxsave() != 0u64
+            {
+                if crate::vale::stdcalls_x64_cpuid::check_avx_xcr0() != 0u64
+                {
+                    if crate::vale::stdcalls_x64_cpuid::check_avx512_xcr0() != 0u64
+                    { (&mut cpu_has_avx512)[0usize] = true }
+                }
+            }
+        }
     }
 }
 

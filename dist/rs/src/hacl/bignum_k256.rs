@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] pub fn is_felem_zero_vartime(f: &mut [u64]) -> bool
 {
@@ -279,7 +280,7 @@
     let t4: u64 = crate::fstar::uint128::uint128_to_uint64(d4) & 0xfffffffffffffu64;
     let d5: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(d4, 52u32);
     let tx: u64 = t4.wrapping_shr(48u32);
-    let t4_: u64 = t4 & 0xffffffffffffu64;
+    let t4·: u64 = t4 & 0xffffffffffffu64;
     let c2: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(a0, b0);
     let d6: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::add_mod(
@@ -294,11 +295,11 @@
         );
     let u0: u64 = crate::fstar::uint128::uint128_to_uint64(d6) & 0xfffffffffffffu64;
     let d7: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(d6, 52u32);
-    let u0_: u64 = tx | u0.wrapping_shl(4u32);
+    let u0·: u64 = tx | u0.wrapping_shl(4u32);
     let c3: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::add_mod(
             c2,
-            crate::fstar::uint128::mul_wide(u0_, r.wrapping_shr(4u32))
+            crate::fstar::uint128::mul_wide(u0·, r.wrapping_shr(4u32))
         );
     let r0: u64 = crate::fstar::uint128::uint128_to_uint64(c3) & 0xfffffffffffffu64;
     let c4: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(c3, 52u32);
@@ -359,7 +360,7 @@
     let r3: u64 = crate::fstar::uint128::uint128_to_uint64(c11) & 0xfffffffffffffu64;
     let c12: u64 =
         crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(c11, 52u32));
-    let r4: u64 = c12.wrapping_add(t4_);
+    let r4: u64 = c12.wrapping_add(t4·);
     let f0: u64 = r0;
     let f11: u64 = r1;
     let f21: u64 = r2;
@@ -412,7 +413,7 @@
     let t4: u64 = crate::fstar::uint128::uint128_to_uint64(d4) & 0xfffffffffffffu64;
     let d5: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(d4, 52u32);
     let tx: u64 = t4.wrapping_shr(48u32);
-    let t4_: u64 = t4 & 0xffffffffffffu64;
+    let t4·: u64 = t4 & 0xffffffffffffu64;
     let c2: crate::fstar::uint128::uint128 = crate::fstar::uint128::mul_wide(a0, a0);
     let d6: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::add_mod(
@@ -421,11 +422,11 @@
         );
     let u0: u64 = crate::fstar::uint128::uint128_to_uint64(d6) & 0xfffffffffffffu64;
     let d7: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(d6, 52u32);
-    let u0_: u64 = tx | u0.wrapping_shl(4u32);
+    let u0·: u64 = tx | u0.wrapping_shl(4u32);
     let c3: crate::fstar::uint128::uint128 =
         crate::fstar::uint128::add_mod(
             c2,
-            crate::fstar::uint128::mul_wide(u0_, r.wrapping_shr(4u32))
+            crate::fstar::uint128::mul_wide(u0·, r.wrapping_shr(4u32))
         );
     let r0: u64 = crate::fstar::uint128::uint128_to_uint64(c3) & 0xfffffffffffffu64;
     let c4: crate::fstar::uint128::uint128 = crate::fstar::uint128::shift_right(c3, 52u32);
@@ -475,7 +476,7 @@
     let r3: u64 = crate::fstar::uint128::uint128_to_uint64(c11) & 0xfffffffffffffu64;
     let c12: u64 =
         crate::fstar::uint128::uint128_to_uint64(crate::fstar::uint128::shift_right(c11, 52u32));
-    let r4: u64 = c12.wrapping_add(t4_);
+    let r4: u64 = c12.wrapping_add(t4·);
     let f0: u64 = r0;
     let f1: u64 = r1;
     let f2: u64 = r2;

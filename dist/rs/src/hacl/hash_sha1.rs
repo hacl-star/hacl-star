@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 const _h0: [u32; 5] =
     [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32, 0xc3d2e1f0u32];
@@ -172,6 +173,30 @@ pub fn hash_oneshot(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     update_multi(&mut s, blocks0, blocks_n0);
     update_last(&mut s, blocks_len0 as u64, rest0, rest_len0);
     finish(&mut s, output)
+}
+
+pub fn digest(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) -> ()
+{
+    let block_state: &mut [u32] = state[0usize].block_state;
+    let buf_: &mut [u8] = state[0usize].buf;
+    let total_len: u64 = state[0usize].total_len;
+    let r: u32 =
+        if total_len.wrapping_rem(64u32 as u64) == 0u64 && total_len > 0u64
+        { 64u32 }
+        else
+        { total_len.wrapping_rem(64u32 as u64) as u32 };
+    let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
+    let mut tmp_block_state: [u32; 5] = [0u32; 5usize];
+    ((&mut tmp_block_state)[0usize..5usize]).copy_from_slice(&block_state[0usize..5usize]);
+    let ite: u32 =
+        if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
+    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    let buf_multi: (&mut [u8], &mut [u8]) =
+        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
+    update_multi(&mut tmp_block_state, buf_multi.1, 0u32);
+    let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
+    update_last(&mut tmp_block_state, prev_len_last, buf_multi.0, r);
+    finish(&mut tmp_block_state, output)
 }
 
 pub fn hash(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()

@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 pub const reseed_interval: u32 = 1024u32;
 
@@ -12,9 +13,12 @@ pub const max_personalization_string_length: u32 = 65536u32;
 
 pub const max_additional_input_length: u32 = 65536u32;
 
-pub fn uu___is_State(a: crate::spec::hash_definitions::hash_alg, projectee: state) -> bool
+pub struct state <'a>
+{ pub k: &'a mut [u8], pub v: &'a mut [u8], pub reseed_counter: &'a mut [u32] }
+
+pub fn uu___is_State(a: crate::hacl::streaming_types::hash_alg, projectee: state) -> bool
 {
-    crate::lowstar::ignore::ignore::<crate::spec::hash_definitions::hash_alg>(a);
+    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(a);
     crate::lowstar::ignore::ignore::<state>(projectee);
     true
 }

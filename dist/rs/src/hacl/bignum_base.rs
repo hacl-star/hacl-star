@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] pub fn mul_wide_add2_u32(a: u32, b: u32, c_in: u32, out: &mut [u32]) -> u32
 {

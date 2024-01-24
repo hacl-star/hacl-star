@@ -1659,7 +1659,20 @@ let digest #index c i t t' state output l =
 
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let State block_state buf_ total_len seen k' = !*state in
+  // HACL-RS, previously was:
+  //   let State block_state buf_ total_len seen k' = !*state in
+  // This is made really awful by the fact that projectors don't work (known
+  // issue, reported by Son years ago, that we bump into here as well).
+  let uu__ = !*state in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf_ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ seen _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k' = uu__ in
 
   push_frame ();
   let h1 = ST.get () in

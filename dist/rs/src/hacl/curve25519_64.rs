@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] fn add_scalar(out: &mut [u64], f1: &mut [u64], f2: u64) -> ()
 {
@@ -95,38 +96,8 @@
 }
 
 const g25519: [u8; 32] =
-    [9u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8];
+    [9u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8];
 
 fn point_add_and_double(q: &mut [u64], p01_tmp1: &mut [u64], tmp2: &mut [u64]) -> ()
 {
@@ -375,14 +346,14 @@ fn store_felem(b: &mut [u64], f: &mut [u64]) -> ()
     let m2: u64 = crate::fstar::uint64::eq_mask(f2, 0xffffffffffffffffu64);
     let m3: u64 = crate::fstar::uint64::eq_mask(f31, 0x7fffffffffffffffu64);
     let mask: u64 = m0 & m1 & m2 & m3;
-    let f0_: u64 = f0.wrapping_sub(mask & 0xffffffffffffffedu64);
-    let f1_: u64 = f1.wrapping_sub(mask & 0xffffffffffffffffu64);
-    let f2_: u64 = f2.wrapping_sub(mask & 0xffffffffffffffffu64);
-    let f3_: u64 = f31.wrapping_sub(mask & 0x7fffffffffffffffu64);
-    let o0: u64 = f0_;
-    let o1: u64 = f1_;
-    let o2: u64 = f2_;
-    let o3: u64 = f3_;
+    let f0·: u64 = f0.wrapping_sub(mask & 0xffffffffffffffedu64);
+    let f1·: u64 = f1.wrapping_sub(mask & 0xffffffffffffffffu64);
+    let f2·: u64 = f2.wrapping_sub(mask & 0xffffffffffffffffu64);
+    let f3·: u64 = f31.wrapping_sub(mask & 0x7fffffffffffffffu64);
+    let o0: u64 = f0·;
+    let o1: u64 = f1·;
+    let o2: u64 = f2·;
+    let o3: u64 = f3·;
     b[0usize] = o0;
     b[1usize] = o1;
     b[2usize] = o2;

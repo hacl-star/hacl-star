@@ -1,9 +1,10 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] fn mgf_hash(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     len: u32,
     mgfseed: &mut [u8],
     maskLen: u32,
@@ -95,7 +96,7 @@
 }
 
 #[inline] fn pss_encode(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     saltLen: u32,
     salt: &mut [u8],
     msgLen: u32,
@@ -143,7 +144,7 @@
 }
 
 #[inline] fn pss_verify(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     saltLen: u32,
     msgLen: u32,
     msg: &mut [u8],
@@ -274,7 +275,7 @@
 }
 
 pub fn rsapss_sign(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     dBits: u32,
@@ -306,7 +307,7 @@ pub fn rsapss_sign(
         let nLen1: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let k: u32 = modBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
         let mut s: Vec<u64> = vec![0u64; nLen1 as usize];
-        let mut m_: Vec<u64> = vec![0u64; nLen1 as usize];
+        let mut m·: Vec<u64> = vec![0u64; nLen1 as usize];
         let nLen2: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
         let n: (&mut [u64], &mut [u64]) = skey.split_at_mut(0usize);
@@ -339,13 +340,13 @@ pub fn rsapss_sign(
             &mut s,
             eBits,
             d.0,
-            &mut m_
+            &mut m·
         );
         let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
         for i in 0u32..nLen2
         {
             let uu____0: u64 =
-                crate::fstar::uint64::eq_mask((&mut m)[i as usize], (&mut m_)[i as usize]);
+                crate::fstar::uint64::eq_mask((&mut m)[i as usize], (&mut m·)[i as usize]);
             mask = uu____0 & mask
         };
         let mask1: u64 = mask;
@@ -367,7 +368,7 @@ pub fn rsapss_sign(
 }
 
 pub fn rsapss_verify(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     pkey: &mut [u64],
@@ -454,7 +455,7 @@ pub fn rsapss_verify(
 }
 
 pub fn rsapss_skey_sign(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     dBits: u32,
@@ -484,7 +485,7 @@ pub fn rsapss_skey_sign(
 }
 
 pub fn rsapss_pkey_verify(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     modBits: u32,
     eBits: u32,
     nb: &mut [u8],
@@ -512,7 +513,7 @@ pub fn rsapss_pkey_verify(
 }
 
 pub fn mgf_hash(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     len: u32,
     mgfseed: &mut [u8],
     maskLen: u32,

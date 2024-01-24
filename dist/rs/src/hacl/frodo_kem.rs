@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 pub fn shake128_4x(
     input_len: u32,
@@ -25,13 +26,15 @@ pub fn shake128_4x(
 #[inline] pub fn mod_pow2(n1: u32, n2: u32, logq: u32, a: &mut [u16]) -> ()
 {
     if logq < 16u32
-    for i in 0u32..n1
-    for i0 in 0u32..n2
     {
-        a[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
-            a[i.wrapping_mul(n2).wrapping_add(i0) as usize]
-            &
-            1u16.wrapping_shl(logq).wrapping_sub(1u16)
+        for i in 0u32..n1
+        for i0 in 0u32..n2
+        {
+            a[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
+                a[i.wrapping_mul(n2).wrapping_add(i0) as usize]
+                &
+                1u16.wrapping_shl(logq).wrapping_sub(1u16)
+        }
     }
 }
 
@@ -218,32 +221,12 @@ pub fn shake128_4x(
 }
 
 pub const cdf_table640: [u16; 13] =
-    [4643u16,
-        13363u16,
-        20579u16,
-        25843u16,
-        29227u16,
-        31145u16,
-        32103u16,
-        32525u16,
-        32689u16,
-        32745u16,
-        32762u16,
-        32766u16,
-        32767u16];
+    [4643u16, 13363u16, 20579u16, 25843u16, 29227u16, 31145u16, 32103u16, 32525u16, 32689u16,
+        32745u16, 32762u16, 32766u16, 32767u16];
 
 pub const cdf_table976: [u16; 11] =
-    [5638u16,
-        15915u16,
-        23689u16,
-        28571u16,
-        31116u16,
-        32217u16,
-        32613u16,
-        32731u16,
-        32760u16,
-        32766u16,
-        32767u16];
+    [5638u16, 15915u16, 23689u16, 28571u16, 31116u16, 32217u16, 32613u16, 32731u16, 32760u16,
+        32766u16, 32767u16];
 
 pub const cdf_table1344: [u16; 7] =
     [9142u16, 23462u16, 30338u16, 32361u16, 32725u16, 32765u16, 32767u16];

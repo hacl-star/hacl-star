@@ -1,9 +1,10 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 pub fn update_multi_sha3(
-    a: crate::spec::hash_definitions::hash_alg,
+    a: crate::hacl::streaming_types::hash_alg,
     s: &mut [u64],
     blocks: &mut [u8],
     n_blocks: u32
@@ -18,15 +19,29 @@ pub fn update_multi_sha3(
     }
 }
 
-pub fn block_len(s: &mut [crate::hacl::streaming_keccak::state_t]) -> u32
+pub struct hash_buf <'a>
+{ pub fst: crate::hacl::streaming_types::hash_alg, pub snd: &'a mut [u64] }
+
+struct hash_buf2 <'a> { pub fst: hash_buf, pub snd: hash_buf }
+
+pub struct state_t <'a>
+{ pub block_state: hash_buf, pub buf: &'a mut [u8], pub total_len: u64 }
+
+pub fn get_alg(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
-    let a1: crate::spec::hash_definitions::hash_alg = crate::hacl::streaming_keccak::get_alg(s);
+    let block_state: hash_buf = s[0usize].block_state;
+    block_state.fst
+}
+
+pub fn block_len(s: &mut [state_t]) -> u32
+{
+    let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
     block_len(a1)
 }
 
-pub fn hash_len(s: &mut [crate::hacl::streaming_keccak::state_t]) -> u32
+pub fn hash_len(s: &mut [state_t]) -> u32
 {
-    let a1: crate::spec::hash_definitions::hash_alg = crate::hacl::streaming_keccak::get_alg(s);
+    let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
     hash_len(a1)
 }
 
@@ -81,82 +96,20 @@ pub fn sha3_512(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 { crate::hacl::impl_sha3::keccak(576u32, 1024u32, input_len, input, 0x06u8, 64u32, output) }
 
 const keccak_rotc: [u32; 24] =
-    [1u32,
-        3u32,
-        6u32,
-        10u32,
-        15u32,
-        21u32,
-        28u32,
-        36u32,
-        45u32,
-        55u32,
-        2u32,
-        14u32,
-        27u32,
-        41u32,
-        56u32,
-        8u32,
-        25u32,
-        43u32,
-        62u32,
-        18u32,
-        39u32,
-        61u32,
-        20u32,
-        44u32];
+    [1u32, 3u32, 6u32, 10u32, 15u32, 21u32, 28u32, 36u32, 45u32, 55u32, 2u32, 14u32, 27u32, 41u32,
+        56u32, 8u32, 25u32, 43u32, 62u32, 18u32, 39u32, 61u32, 20u32, 44u32];
 
 const keccak_piln: [u32; 24] =
-    [10u32,
-        7u32,
-        11u32,
-        17u32,
-        18u32,
-        3u32,
-        5u32,
-        16u32,
-        8u32,
-        21u32,
-        24u32,
-        4u32,
-        15u32,
-        23u32,
-        19u32,
-        13u32,
-        12u32,
-        2u32,
-        20u32,
-        14u32,
-        22u32,
-        9u32,
-        6u32,
-        1u32];
+    [10u32, 7u32, 11u32, 17u32, 18u32, 3u32, 5u32, 16u32, 8u32, 21u32, 24u32, 4u32, 15u32, 23u32,
+        19u32, 13u32, 12u32, 2u32, 20u32, 14u32, 22u32, 9u32, 6u32, 1u32];
 
 const keccak_rndc: [u64; 24] =
-    [0x0000000000000001u64,
-        0x0000000000008082u64,
-        0x800000000000808au64,
-        0x8000000080008000u64,
-        0x000000000000808bu64,
-        0x0000000080000001u64,
-        0x8000000080008081u64,
-        0x8000000000008009u64,
-        0x000000000000008au64,
-        0x0000000000000088u64,
-        0x0000000080008009u64,
-        0x000000008000000au64,
-        0x000000008000808bu64,
-        0x800000000000008bu64,
-        0x8000000000008089u64,
-        0x8000000000008003u64,
-        0x8000000000008002u64,
-        0x8000000000000080u64,
-        0x000000000000800au64,
-        0x800000008000000au64,
-        0x8000000080008081u64,
-        0x8000000000008080u64,
-        0x0000000080000001u64,
-        0x8000000080008008u64];
+    [0x0000000000000001u64, 0x0000000000008082u64, 0x800000000000808au64, 0x8000000080008000u64,
+        0x000000000000808bu64, 0x0000000080000001u64, 0x8000000080008081u64, 0x8000000000008009u64,
+        0x000000000000008au64, 0x0000000000000088u64, 0x0000000080008009u64, 0x000000008000000au64,
+        0x000000008000808bu64, 0x800000000000008bu64, 0x8000000000008089u64, 0x8000000000008003u64,
+        0x8000000000008002u64, 0x8000000000000080u64, 0x000000000000800au64, 0x800000008000000au64,
+        0x8000000080008081u64, 0x8000000000008080u64, 0x0000000080000001u64, 0x8000000080008008u64];
 
 pub fn state_permute(s: &mut [u64]) -> ()
 {

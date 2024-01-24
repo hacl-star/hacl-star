@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 pub fn secret_to_public(r#pub: &mut [u8], r#priv: &mut [u8]) -> ()
 {

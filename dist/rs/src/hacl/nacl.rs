@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 fn secretbox_init(xkeys: &mut [u8], k: &mut [u8], n: &mut [u8]) -> ()
 {
@@ -62,12 +63,12 @@ fn secretbox_open_detached(
     let mut xkeys: [u8; 96] = [0u8; 96usize];
     secretbox_init(&mut xkeys, k, n);
     let mkey: (&mut [u8], &mut [u8]) = (&mut xkeys).split_at_mut(32usize);
-    let mut tag_: [u8; 16] = [0u8; 16usize];
-    crate::hacl::mac_poly1305::mac(&mut tag_, c, mlen, mkey.1);
+    let mut tag·: [u8; 16] = [0u8; 16usize];
+    crate::hacl::mac_poly1305::mac(&mut tag·, c, mlen, mkey.1);
     let mut res: u8 = 255u8;
     for i in 0u32..16u32
     {
-        let uu____0: u8 = crate::fstar::uint8::eq_mask(tag[i as usize], (&mut tag_)[i as usize]);
+        let uu____0: u8 = crate::fstar::uint8::eq_mask(tag[i as usize], (&mut tag·)[i as usize]);
         res = uu____0 & res
     };
     let z: u8 = res;

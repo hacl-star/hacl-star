@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] fn double_round_128(st: &mut [crate::lib::intvector_intrinsics::vec128]) -> ()
 {
@@ -265,102 +266,102 @@ pub fn chacha20_encrypt_128(
         let st13: crate::lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
         let st14: crate::lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
         let st15: crate::lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
-        let v0_: crate::lib::intvector_intrinsics::vec128 =
+        let v0·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
-        let v1_: crate::lib::intvector_intrinsics::vec128 =
+        let v1·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st0, st1);
-        let v2_: crate::lib::intvector_intrinsics::vec128 =
+        let v2·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st2, st3);
-        let v3_: crate::lib::intvector_intrinsics::vec128 =
+        let v3·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st2, st3);
-        let v0__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_, v2_);
-        let v1__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_, v2_);
-        let v2__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_, v3_);
-        let v3__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_, v3_);
-        let v0__0: crate::lib::intvector_intrinsics::vec128 = v0__;
-        let v2__0: crate::lib::intvector_intrinsics::vec128 = v2__;
-        let v1__0: crate::lib::intvector_intrinsics::vec128 = v1__;
-        let v3__0: crate::lib::intvector_intrinsics::vec128 = v3__;
-        let v0: crate::lib::intvector_intrinsics::vec128 = v0__0;
-        let v1: crate::lib::intvector_intrinsics::vec128 = v1__0;
-        let v2: crate::lib::intvector_intrinsics::vec128 = v2__0;
-        let v3: crate::lib::intvector_intrinsics::vec128 = v3__0;
-        let v0_0: crate::lib::intvector_intrinsics::vec128 =
+        let v0··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·, v2·);
+        let v1··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·, v2·);
+        let v2··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·, v3·);
+        let v3··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·, v3·);
+        let v0··0: crate::lib::intvector_intrinsics::vec128 = v0··;
+        let v2··0: crate::lib::intvector_intrinsics::vec128 = v2··;
+        let v1··0: crate::lib::intvector_intrinsics::vec128 = v1··;
+        let v3··0: crate::lib::intvector_intrinsics::vec128 = v3··;
+        let v0: crate::lib::intvector_intrinsics::vec128 = v0··0;
+        let v1: crate::lib::intvector_intrinsics::vec128 = v1··0;
+        let v2: crate::lib::intvector_intrinsics::vec128 = v2··0;
+        let v3: crate::lib::intvector_intrinsics::vec128 = v3··0;
+        let v0·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st4, st5);
-        let v1_0: crate::lib::intvector_intrinsics::vec128 =
+        let v1·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st4, st5);
-        let v2_0: crate::lib::intvector_intrinsics::vec128 =
+        let v2·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st6, st7);
-        let v3_0: crate::lib::intvector_intrinsics::vec128 =
+        let v3·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st6, st7);
-        let v0__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_0, v2_0);
-        let v1__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_0, v2_0);
-        let v2__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_0, v3_0);
-        let v3__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_0, v3_0);
-        let v0__2: crate::lib::intvector_intrinsics::vec128 = v0__1;
-        let v2__2: crate::lib::intvector_intrinsics::vec128 = v2__1;
-        let v1__2: crate::lib::intvector_intrinsics::vec128 = v1__1;
-        let v3__2: crate::lib::intvector_intrinsics::vec128 = v3__1;
-        let v4: crate::lib::intvector_intrinsics::vec128 = v0__2;
-        let v5: crate::lib::intvector_intrinsics::vec128 = v1__2;
-        let v6: crate::lib::intvector_intrinsics::vec128 = v2__2;
-        let v7: crate::lib::intvector_intrinsics::vec128 = v3__2;
-        let v0_1: crate::lib::intvector_intrinsics::vec128 =
+        let v0··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·0, v2·0);
+        let v1··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·0, v2·0);
+        let v2··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·0, v3·0);
+        let v3··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·0, v3·0);
+        let v0··2: crate::lib::intvector_intrinsics::vec128 = v0··1;
+        let v2··2: crate::lib::intvector_intrinsics::vec128 = v2··1;
+        let v1··2: crate::lib::intvector_intrinsics::vec128 = v1··1;
+        let v3··2: crate::lib::intvector_intrinsics::vec128 = v3··1;
+        let v4: crate::lib::intvector_intrinsics::vec128 = v0··2;
+        let v5: crate::lib::intvector_intrinsics::vec128 = v1··2;
+        let v6: crate::lib::intvector_intrinsics::vec128 = v2··2;
+        let v7: crate::lib::intvector_intrinsics::vec128 = v3··2;
+        let v0·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st8, st9);
-        let v1_1: crate::lib::intvector_intrinsics::vec128 =
+        let v1·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st8, st9);
-        let v2_1: crate::lib::intvector_intrinsics::vec128 =
+        let v2·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st10, st11);
-        let v3_1: crate::lib::intvector_intrinsics::vec128 =
+        let v3·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st10, st11);
-        let v0__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_1, v2_1);
-        let v1__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_1, v2_1);
-        let v2__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_1, v3_1);
-        let v3__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_1, v3_1);
-        let v0__4: crate::lib::intvector_intrinsics::vec128 = v0__3;
-        let v2__4: crate::lib::intvector_intrinsics::vec128 = v2__3;
-        let v1__4: crate::lib::intvector_intrinsics::vec128 = v1__3;
-        let v3__4: crate::lib::intvector_intrinsics::vec128 = v3__3;
-        let v8: crate::lib::intvector_intrinsics::vec128 = v0__4;
-        let v9: crate::lib::intvector_intrinsics::vec128 = v1__4;
-        let v10: crate::lib::intvector_intrinsics::vec128 = v2__4;
-        let v11: crate::lib::intvector_intrinsics::vec128 = v3__4;
-        let v0_2: crate::lib::intvector_intrinsics::vec128 =
+        let v0··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·1, v2·1);
+        let v1··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·1, v2·1);
+        let v2··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·1, v3·1);
+        let v3··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·1, v3·1);
+        let v0··4: crate::lib::intvector_intrinsics::vec128 = v0··3;
+        let v2··4: crate::lib::intvector_intrinsics::vec128 = v2··3;
+        let v1··4: crate::lib::intvector_intrinsics::vec128 = v1··3;
+        let v3··4: crate::lib::intvector_intrinsics::vec128 = v3··3;
+        let v8: crate::lib::intvector_intrinsics::vec128 = v0··4;
+        let v9: crate::lib::intvector_intrinsics::vec128 = v1··4;
+        let v10: crate::lib::intvector_intrinsics::vec128 = v2··4;
+        let v11: crate::lib::intvector_intrinsics::vec128 = v3··4;
+        let v0·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st12, st13);
-        let v1_2: crate::lib::intvector_intrinsics::vec128 =
+        let v1·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st12, st13);
-        let v2_2: crate::lib::intvector_intrinsics::vec128 =
+        let v2·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st14, st15);
-        let v3_2: crate::lib::intvector_intrinsics::vec128 =
+        let v3·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st14, st15);
-        let v0__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_2, v2_2);
-        let v1__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_2, v2_2);
-        let v2__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_2, v3_2);
-        let v3__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_2, v3_2);
-        let v0__6: crate::lib::intvector_intrinsics::vec128 = v0__5;
-        let v2__6: crate::lib::intvector_intrinsics::vec128 = v2__5;
-        let v1__6: crate::lib::intvector_intrinsics::vec128 = v1__5;
-        let v3__6: crate::lib::intvector_intrinsics::vec128 = v3__5;
-        let v12: crate::lib::intvector_intrinsics::vec128 = v0__6;
-        let v13: crate::lib::intvector_intrinsics::vec128 = v1__6;
-        let v14: crate::lib::intvector_intrinsics::vec128 = v2__6;
-        let v15: crate::lib::intvector_intrinsics::vec128 = v3__6;
+        let v0··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·2, v2·2);
+        let v1··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·2, v2·2);
+        let v2··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·2, v3·2);
+        let v3··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·2, v3·2);
+        let v0··6: crate::lib::intvector_intrinsics::vec128 = v0··5;
+        let v2··6: crate::lib::intvector_intrinsics::vec128 = v2··5;
+        let v1··6: crate::lib::intvector_intrinsics::vec128 = v1··5;
+        let v3··6: crate::lib::intvector_intrinsics::vec128 = v3··5;
+        let v12: crate::lib::intvector_intrinsics::vec128 = v0··6;
+        let v13: crate::lib::intvector_intrinsics::vec128 = v1··6;
+        let v14: crate::lib::intvector_intrinsics::vec128 = v2··6;
+        let v15: crate::lib::intvector_intrinsics::vec128 = v3··6;
         (&mut k)[0usize] = v0;
         (&mut k)[1usize] = v4;
         (&mut k)[2usize] = v8;
@@ -417,102 +418,102 @@ pub fn chacha20_encrypt_128(
         let st13: crate::lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
         let st14: crate::lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
         let st15: crate::lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
-        let v0_: crate::lib::intvector_intrinsics::vec128 =
+        let v0·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
-        let v1_: crate::lib::intvector_intrinsics::vec128 =
+        let v1·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st0, st1);
-        let v2_: crate::lib::intvector_intrinsics::vec128 =
+        let v2·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st2, st3);
-        let v3_: crate::lib::intvector_intrinsics::vec128 =
+        let v3·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st2, st3);
-        let v0__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_, v2_);
-        let v1__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_, v2_);
-        let v2__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_, v3_);
-        let v3__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_, v3_);
-        let v0__0: crate::lib::intvector_intrinsics::vec128 = v0__;
-        let v2__0: crate::lib::intvector_intrinsics::vec128 = v2__;
-        let v1__0: crate::lib::intvector_intrinsics::vec128 = v1__;
-        let v3__0: crate::lib::intvector_intrinsics::vec128 = v3__;
-        let v0: crate::lib::intvector_intrinsics::vec128 = v0__0;
-        let v1: crate::lib::intvector_intrinsics::vec128 = v1__0;
-        let v2: crate::lib::intvector_intrinsics::vec128 = v2__0;
-        let v3: crate::lib::intvector_intrinsics::vec128 = v3__0;
-        let v0_0: crate::lib::intvector_intrinsics::vec128 =
+        let v0··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·, v2·);
+        let v1··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·, v2·);
+        let v2··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·, v3·);
+        let v3··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·, v3·);
+        let v0··0: crate::lib::intvector_intrinsics::vec128 = v0··;
+        let v2··0: crate::lib::intvector_intrinsics::vec128 = v2··;
+        let v1··0: crate::lib::intvector_intrinsics::vec128 = v1··;
+        let v3··0: crate::lib::intvector_intrinsics::vec128 = v3··;
+        let v0: crate::lib::intvector_intrinsics::vec128 = v0··0;
+        let v1: crate::lib::intvector_intrinsics::vec128 = v1··0;
+        let v2: crate::lib::intvector_intrinsics::vec128 = v2··0;
+        let v3: crate::lib::intvector_intrinsics::vec128 = v3··0;
+        let v0·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st4, st5);
-        let v1_0: crate::lib::intvector_intrinsics::vec128 =
+        let v1·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st4, st5);
-        let v2_0: crate::lib::intvector_intrinsics::vec128 =
+        let v2·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st6, st7);
-        let v3_0: crate::lib::intvector_intrinsics::vec128 =
+        let v3·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st6, st7);
-        let v0__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_0, v2_0);
-        let v1__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_0, v2_0);
-        let v2__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_0, v3_0);
-        let v3__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_0, v3_0);
-        let v0__2: crate::lib::intvector_intrinsics::vec128 = v0__1;
-        let v2__2: crate::lib::intvector_intrinsics::vec128 = v2__1;
-        let v1__2: crate::lib::intvector_intrinsics::vec128 = v1__1;
-        let v3__2: crate::lib::intvector_intrinsics::vec128 = v3__1;
-        let v4: crate::lib::intvector_intrinsics::vec128 = v0__2;
-        let v5: crate::lib::intvector_intrinsics::vec128 = v1__2;
-        let v6: crate::lib::intvector_intrinsics::vec128 = v2__2;
-        let v7: crate::lib::intvector_intrinsics::vec128 = v3__2;
-        let v0_1: crate::lib::intvector_intrinsics::vec128 =
+        let v0··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·0, v2·0);
+        let v1··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·0, v2·0);
+        let v2··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·0, v3·0);
+        let v3··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·0, v3·0);
+        let v0··2: crate::lib::intvector_intrinsics::vec128 = v0··1;
+        let v2··2: crate::lib::intvector_intrinsics::vec128 = v2··1;
+        let v1··2: crate::lib::intvector_intrinsics::vec128 = v1··1;
+        let v3··2: crate::lib::intvector_intrinsics::vec128 = v3··1;
+        let v4: crate::lib::intvector_intrinsics::vec128 = v0··2;
+        let v5: crate::lib::intvector_intrinsics::vec128 = v1··2;
+        let v6: crate::lib::intvector_intrinsics::vec128 = v2··2;
+        let v7: crate::lib::intvector_intrinsics::vec128 = v3··2;
+        let v0·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st8, st9);
-        let v1_1: crate::lib::intvector_intrinsics::vec128 =
+        let v1·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st8, st9);
-        let v2_1: crate::lib::intvector_intrinsics::vec128 =
+        let v2·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st10, st11);
-        let v3_1: crate::lib::intvector_intrinsics::vec128 =
+        let v3·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st10, st11);
-        let v0__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_1, v2_1);
-        let v1__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_1, v2_1);
-        let v2__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_1, v3_1);
-        let v3__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_1, v3_1);
-        let v0__4: crate::lib::intvector_intrinsics::vec128 = v0__3;
-        let v2__4: crate::lib::intvector_intrinsics::vec128 = v2__3;
-        let v1__4: crate::lib::intvector_intrinsics::vec128 = v1__3;
-        let v3__4: crate::lib::intvector_intrinsics::vec128 = v3__3;
-        let v8: crate::lib::intvector_intrinsics::vec128 = v0__4;
-        let v9: crate::lib::intvector_intrinsics::vec128 = v1__4;
-        let v10: crate::lib::intvector_intrinsics::vec128 = v2__4;
-        let v11: crate::lib::intvector_intrinsics::vec128 = v3__4;
-        let v0_2: crate::lib::intvector_intrinsics::vec128 =
+        let v0··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·1, v2·1);
+        let v1··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·1, v2·1);
+        let v2··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·1, v3·1);
+        let v3··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·1, v3·1);
+        let v0··4: crate::lib::intvector_intrinsics::vec128 = v0··3;
+        let v2··4: crate::lib::intvector_intrinsics::vec128 = v2··3;
+        let v1··4: crate::lib::intvector_intrinsics::vec128 = v1··3;
+        let v3··4: crate::lib::intvector_intrinsics::vec128 = v3··3;
+        let v8: crate::lib::intvector_intrinsics::vec128 = v0··4;
+        let v9: crate::lib::intvector_intrinsics::vec128 = v1··4;
+        let v10: crate::lib::intvector_intrinsics::vec128 = v2··4;
+        let v11: crate::lib::intvector_intrinsics::vec128 = v3··4;
+        let v0·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st12, st13);
-        let v1_2: crate::lib::intvector_intrinsics::vec128 =
+        let v1·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st12, st13);
-        let v2_2: crate::lib::intvector_intrinsics::vec128 =
+        let v2·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st14, st15);
-        let v3_2: crate::lib::intvector_intrinsics::vec128 =
+        let v3·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st14, st15);
-        let v0__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_2, v2_2);
-        let v1__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_2, v2_2);
-        let v2__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_2, v3_2);
-        let v3__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_2, v3_2);
-        let v0__6: crate::lib::intvector_intrinsics::vec128 = v0__5;
-        let v2__6: crate::lib::intvector_intrinsics::vec128 = v2__5;
-        let v1__6: crate::lib::intvector_intrinsics::vec128 = v1__5;
-        let v3__6: crate::lib::intvector_intrinsics::vec128 = v3__5;
-        let v12: crate::lib::intvector_intrinsics::vec128 = v0__6;
-        let v13: crate::lib::intvector_intrinsics::vec128 = v1__6;
-        let v14: crate::lib::intvector_intrinsics::vec128 = v2__6;
-        let v15: crate::lib::intvector_intrinsics::vec128 = v3__6;
+        let v0··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·2, v2·2);
+        let v1··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·2, v2·2);
+        let v2··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·2, v3·2);
+        let v3··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·2, v3·2);
+        let v0··6: crate::lib::intvector_intrinsics::vec128 = v0··5;
+        let v2··6: crate::lib::intvector_intrinsics::vec128 = v2··5;
+        let v1··6: crate::lib::intvector_intrinsics::vec128 = v1··5;
+        let v3··6: crate::lib::intvector_intrinsics::vec128 = v3··5;
+        let v12: crate::lib::intvector_intrinsics::vec128 = v0··6;
+        let v13: crate::lib::intvector_intrinsics::vec128 = v1··6;
+        let v14: crate::lib::intvector_intrinsics::vec128 = v2··6;
+        let v15: crate::lib::intvector_intrinsics::vec128 = v3··6;
         (&mut k)[0usize] = v0;
         (&mut k)[1usize] = v4;
         (&mut k)[2usize] = v8;
@@ -587,102 +588,102 @@ pub fn chacha20_decrypt_128(
         let st13: crate::lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
         let st14: crate::lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
         let st15: crate::lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
-        let v0_: crate::lib::intvector_intrinsics::vec128 =
+        let v0·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
-        let v1_: crate::lib::intvector_intrinsics::vec128 =
+        let v1·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st0, st1);
-        let v2_: crate::lib::intvector_intrinsics::vec128 =
+        let v2·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st2, st3);
-        let v3_: crate::lib::intvector_intrinsics::vec128 =
+        let v3·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st2, st3);
-        let v0__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_, v2_);
-        let v1__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_, v2_);
-        let v2__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_, v3_);
-        let v3__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_, v3_);
-        let v0__0: crate::lib::intvector_intrinsics::vec128 = v0__;
-        let v2__0: crate::lib::intvector_intrinsics::vec128 = v2__;
-        let v1__0: crate::lib::intvector_intrinsics::vec128 = v1__;
-        let v3__0: crate::lib::intvector_intrinsics::vec128 = v3__;
-        let v0: crate::lib::intvector_intrinsics::vec128 = v0__0;
-        let v1: crate::lib::intvector_intrinsics::vec128 = v1__0;
-        let v2: crate::lib::intvector_intrinsics::vec128 = v2__0;
-        let v3: crate::lib::intvector_intrinsics::vec128 = v3__0;
-        let v0_0: crate::lib::intvector_intrinsics::vec128 =
+        let v0··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·, v2·);
+        let v1··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·, v2·);
+        let v2··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·, v3·);
+        let v3··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·, v3·);
+        let v0··0: crate::lib::intvector_intrinsics::vec128 = v0··;
+        let v2··0: crate::lib::intvector_intrinsics::vec128 = v2··;
+        let v1··0: crate::lib::intvector_intrinsics::vec128 = v1··;
+        let v3··0: crate::lib::intvector_intrinsics::vec128 = v3··;
+        let v0: crate::lib::intvector_intrinsics::vec128 = v0··0;
+        let v1: crate::lib::intvector_intrinsics::vec128 = v1··0;
+        let v2: crate::lib::intvector_intrinsics::vec128 = v2··0;
+        let v3: crate::lib::intvector_intrinsics::vec128 = v3··0;
+        let v0·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st4, st5);
-        let v1_0: crate::lib::intvector_intrinsics::vec128 =
+        let v1·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st4, st5);
-        let v2_0: crate::lib::intvector_intrinsics::vec128 =
+        let v2·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st6, st7);
-        let v3_0: crate::lib::intvector_intrinsics::vec128 =
+        let v3·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st6, st7);
-        let v0__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_0, v2_0);
-        let v1__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_0, v2_0);
-        let v2__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_0, v3_0);
-        let v3__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_0, v3_0);
-        let v0__2: crate::lib::intvector_intrinsics::vec128 = v0__1;
-        let v2__2: crate::lib::intvector_intrinsics::vec128 = v2__1;
-        let v1__2: crate::lib::intvector_intrinsics::vec128 = v1__1;
-        let v3__2: crate::lib::intvector_intrinsics::vec128 = v3__1;
-        let v4: crate::lib::intvector_intrinsics::vec128 = v0__2;
-        let v5: crate::lib::intvector_intrinsics::vec128 = v1__2;
-        let v6: crate::lib::intvector_intrinsics::vec128 = v2__2;
-        let v7: crate::lib::intvector_intrinsics::vec128 = v3__2;
-        let v0_1: crate::lib::intvector_intrinsics::vec128 =
+        let v0··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·0, v2·0);
+        let v1··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·0, v2·0);
+        let v2··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·0, v3·0);
+        let v3··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·0, v3·0);
+        let v0··2: crate::lib::intvector_intrinsics::vec128 = v0··1;
+        let v2··2: crate::lib::intvector_intrinsics::vec128 = v2··1;
+        let v1··2: crate::lib::intvector_intrinsics::vec128 = v1··1;
+        let v3··2: crate::lib::intvector_intrinsics::vec128 = v3··1;
+        let v4: crate::lib::intvector_intrinsics::vec128 = v0··2;
+        let v5: crate::lib::intvector_intrinsics::vec128 = v1··2;
+        let v6: crate::lib::intvector_intrinsics::vec128 = v2··2;
+        let v7: crate::lib::intvector_intrinsics::vec128 = v3··2;
+        let v0·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st8, st9);
-        let v1_1: crate::lib::intvector_intrinsics::vec128 =
+        let v1·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st8, st9);
-        let v2_1: crate::lib::intvector_intrinsics::vec128 =
+        let v2·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st10, st11);
-        let v3_1: crate::lib::intvector_intrinsics::vec128 =
+        let v3·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st10, st11);
-        let v0__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_1, v2_1);
-        let v1__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_1, v2_1);
-        let v2__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_1, v3_1);
-        let v3__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_1, v3_1);
-        let v0__4: crate::lib::intvector_intrinsics::vec128 = v0__3;
-        let v2__4: crate::lib::intvector_intrinsics::vec128 = v2__3;
-        let v1__4: crate::lib::intvector_intrinsics::vec128 = v1__3;
-        let v3__4: crate::lib::intvector_intrinsics::vec128 = v3__3;
-        let v8: crate::lib::intvector_intrinsics::vec128 = v0__4;
-        let v9: crate::lib::intvector_intrinsics::vec128 = v1__4;
-        let v10: crate::lib::intvector_intrinsics::vec128 = v2__4;
-        let v11: crate::lib::intvector_intrinsics::vec128 = v3__4;
-        let v0_2: crate::lib::intvector_intrinsics::vec128 =
+        let v0··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·1, v2·1);
+        let v1··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·1, v2·1);
+        let v2··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·1, v3·1);
+        let v3··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·1, v3·1);
+        let v0··4: crate::lib::intvector_intrinsics::vec128 = v0··3;
+        let v2··4: crate::lib::intvector_intrinsics::vec128 = v2··3;
+        let v1··4: crate::lib::intvector_intrinsics::vec128 = v1··3;
+        let v3··4: crate::lib::intvector_intrinsics::vec128 = v3··3;
+        let v8: crate::lib::intvector_intrinsics::vec128 = v0··4;
+        let v9: crate::lib::intvector_intrinsics::vec128 = v1··4;
+        let v10: crate::lib::intvector_intrinsics::vec128 = v2··4;
+        let v11: crate::lib::intvector_intrinsics::vec128 = v3··4;
+        let v0·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st12, st13);
-        let v1_2: crate::lib::intvector_intrinsics::vec128 =
+        let v1·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st12, st13);
-        let v2_2: crate::lib::intvector_intrinsics::vec128 =
+        let v2·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st14, st15);
-        let v3_2: crate::lib::intvector_intrinsics::vec128 =
+        let v3·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st14, st15);
-        let v0__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_2, v2_2);
-        let v1__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_2, v2_2);
-        let v2__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_2, v3_2);
-        let v3__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_2, v3_2);
-        let v0__6: crate::lib::intvector_intrinsics::vec128 = v0__5;
-        let v2__6: crate::lib::intvector_intrinsics::vec128 = v2__5;
-        let v1__6: crate::lib::intvector_intrinsics::vec128 = v1__5;
-        let v3__6: crate::lib::intvector_intrinsics::vec128 = v3__5;
-        let v12: crate::lib::intvector_intrinsics::vec128 = v0__6;
-        let v13: crate::lib::intvector_intrinsics::vec128 = v1__6;
-        let v14: crate::lib::intvector_intrinsics::vec128 = v2__6;
-        let v15: crate::lib::intvector_intrinsics::vec128 = v3__6;
+        let v0··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·2, v2·2);
+        let v1··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·2, v2·2);
+        let v2··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·2, v3·2);
+        let v3··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·2, v3·2);
+        let v0··6: crate::lib::intvector_intrinsics::vec128 = v0··5;
+        let v2··6: crate::lib::intvector_intrinsics::vec128 = v2··5;
+        let v1··6: crate::lib::intvector_intrinsics::vec128 = v1··5;
+        let v3··6: crate::lib::intvector_intrinsics::vec128 = v3··5;
+        let v12: crate::lib::intvector_intrinsics::vec128 = v0··6;
+        let v13: crate::lib::intvector_intrinsics::vec128 = v1··6;
+        let v14: crate::lib::intvector_intrinsics::vec128 = v2··6;
+        let v15: crate::lib::intvector_intrinsics::vec128 = v3··6;
         (&mut k)[0usize] = v0;
         (&mut k)[1usize] = v4;
         (&mut k)[2usize] = v8;
@@ -739,102 +740,102 @@ pub fn chacha20_decrypt_128(
         let st13: crate::lib::intvector_intrinsics::vec128 = (&mut k)[13usize];
         let st14: crate::lib::intvector_intrinsics::vec128 = (&mut k)[14usize];
         let st15: crate::lib::intvector_intrinsics::vec128 = (&mut k)[15usize];
-        let v0_: crate::lib::intvector_intrinsics::vec128 =
+        let v0·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st0, st1);
-        let v1_: crate::lib::intvector_intrinsics::vec128 =
+        let v1·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st0, st1);
-        let v2_: crate::lib::intvector_intrinsics::vec128 =
+        let v2·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st2, st3);
-        let v3_: crate::lib::intvector_intrinsics::vec128 =
+        let v3·: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st2, st3);
-        let v0__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_, v2_);
-        let v1__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_, v2_);
-        let v2__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_, v3_);
-        let v3__: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_, v3_);
-        let v0__0: crate::lib::intvector_intrinsics::vec128 = v0__;
-        let v2__0: crate::lib::intvector_intrinsics::vec128 = v2__;
-        let v1__0: crate::lib::intvector_intrinsics::vec128 = v1__;
-        let v3__0: crate::lib::intvector_intrinsics::vec128 = v3__;
-        let v0: crate::lib::intvector_intrinsics::vec128 = v0__0;
-        let v1: crate::lib::intvector_intrinsics::vec128 = v1__0;
-        let v2: crate::lib::intvector_intrinsics::vec128 = v2__0;
-        let v3: crate::lib::intvector_intrinsics::vec128 = v3__0;
-        let v0_0: crate::lib::intvector_intrinsics::vec128 =
+        let v0··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·, v2·);
+        let v1··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·, v2·);
+        let v2··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·, v3·);
+        let v3··: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·, v3·);
+        let v0··0: crate::lib::intvector_intrinsics::vec128 = v0··;
+        let v2··0: crate::lib::intvector_intrinsics::vec128 = v2··;
+        let v1··0: crate::lib::intvector_intrinsics::vec128 = v1··;
+        let v3··0: crate::lib::intvector_intrinsics::vec128 = v3··;
+        let v0: crate::lib::intvector_intrinsics::vec128 = v0··0;
+        let v1: crate::lib::intvector_intrinsics::vec128 = v1··0;
+        let v2: crate::lib::intvector_intrinsics::vec128 = v2··0;
+        let v3: crate::lib::intvector_intrinsics::vec128 = v3··0;
+        let v0·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st4, st5);
-        let v1_0: crate::lib::intvector_intrinsics::vec128 =
+        let v1·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st4, st5);
-        let v2_0: crate::lib::intvector_intrinsics::vec128 =
+        let v2·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st6, st7);
-        let v3_0: crate::lib::intvector_intrinsics::vec128 =
+        let v3·0: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st6, st7);
-        let v0__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_0, v2_0);
-        let v1__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_0, v2_0);
-        let v2__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_0, v3_0);
-        let v3__1: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_0, v3_0);
-        let v0__2: crate::lib::intvector_intrinsics::vec128 = v0__1;
-        let v2__2: crate::lib::intvector_intrinsics::vec128 = v2__1;
-        let v1__2: crate::lib::intvector_intrinsics::vec128 = v1__1;
-        let v3__2: crate::lib::intvector_intrinsics::vec128 = v3__1;
-        let v4: crate::lib::intvector_intrinsics::vec128 = v0__2;
-        let v5: crate::lib::intvector_intrinsics::vec128 = v1__2;
-        let v6: crate::lib::intvector_intrinsics::vec128 = v2__2;
-        let v7: crate::lib::intvector_intrinsics::vec128 = v3__2;
-        let v0_1: crate::lib::intvector_intrinsics::vec128 =
+        let v0··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·0, v2·0);
+        let v1··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·0, v2·0);
+        let v2··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·0, v3·0);
+        let v3··1: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·0, v3·0);
+        let v0··2: crate::lib::intvector_intrinsics::vec128 = v0··1;
+        let v2··2: crate::lib::intvector_intrinsics::vec128 = v2··1;
+        let v1··2: crate::lib::intvector_intrinsics::vec128 = v1··1;
+        let v3··2: crate::lib::intvector_intrinsics::vec128 = v3··1;
+        let v4: crate::lib::intvector_intrinsics::vec128 = v0··2;
+        let v5: crate::lib::intvector_intrinsics::vec128 = v1··2;
+        let v6: crate::lib::intvector_intrinsics::vec128 = v2··2;
+        let v7: crate::lib::intvector_intrinsics::vec128 = v3··2;
+        let v0·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st8, st9);
-        let v1_1: crate::lib::intvector_intrinsics::vec128 =
+        let v1·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st8, st9);
-        let v2_1: crate::lib::intvector_intrinsics::vec128 =
+        let v2·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st10, st11);
-        let v3_1: crate::lib::intvector_intrinsics::vec128 =
+        let v3·1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st10, st11);
-        let v0__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_1, v2_1);
-        let v1__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_1, v2_1);
-        let v2__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_1, v3_1);
-        let v3__3: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_1, v3_1);
-        let v0__4: crate::lib::intvector_intrinsics::vec128 = v0__3;
-        let v2__4: crate::lib::intvector_intrinsics::vec128 = v2__3;
-        let v1__4: crate::lib::intvector_intrinsics::vec128 = v1__3;
-        let v3__4: crate::lib::intvector_intrinsics::vec128 = v3__3;
-        let v8: crate::lib::intvector_intrinsics::vec128 = v0__4;
-        let v9: crate::lib::intvector_intrinsics::vec128 = v1__4;
-        let v10: crate::lib::intvector_intrinsics::vec128 = v2__4;
-        let v11: crate::lib::intvector_intrinsics::vec128 = v3__4;
-        let v0_2: crate::lib::intvector_intrinsics::vec128 =
+        let v0··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·1, v2·1);
+        let v1··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·1, v2·1);
+        let v2··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·1, v3·1);
+        let v3··3: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·1, v3·1);
+        let v0··4: crate::lib::intvector_intrinsics::vec128 = v0··3;
+        let v2··4: crate::lib::intvector_intrinsics::vec128 = v2··3;
+        let v1··4: crate::lib::intvector_intrinsics::vec128 = v1··3;
+        let v3··4: crate::lib::intvector_intrinsics::vec128 = v3··3;
+        let v8: crate::lib::intvector_intrinsics::vec128 = v0··4;
+        let v9: crate::lib::intvector_intrinsics::vec128 = v1··4;
+        let v10: crate::lib::intvector_intrinsics::vec128 = v2··4;
+        let v11: crate::lib::intvector_intrinsics::vec128 = v3··4;
+        let v0·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st12, st13);
-        let v1_2: crate::lib::intvector_intrinsics::vec128 =
+        let v1·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st12, st13);
-        let v2_2: crate::lib::intvector_intrinsics::vec128 =
+        let v2·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_low32(st14, st15);
-        let v3_2: crate::lib::intvector_intrinsics::vec128 =
+        let v3·2: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_interleave_high32(st14, st15);
-        let v0__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0_2, v2_2);
-        let v1__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0_2, v2_2);
-        let v2__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1_2, v3_2);
-        let v3__5: crate::lib::intvector_intrinsics::vec128 =
-            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1_2, v3_2);
-        let v0__6: crate::lib::intvector_intrinsics::vec128 = v0__5;
-        let v2__6: crate::lib::intvector_intrinsics::vec128 = v2__5;
-        let v1__6: crate::lib::intvector_intrinsics::vec128 = v1__5;
-        let v3__6: crate::lib::intvector_intrinsics::vec128 = v3__5;
-        let v12: crate::lib::intvector_intrinsics::vec128 = v0__6;
-        let v13: crate::lib::intvector_intrinsics::vec128 = v1__6;
-        let v14: crate::lib::intvector_intrinsics::vec128 = v2__6;
-        let v15: crate::lib::intvector_intrinsics::vec128 = v3__6;
+        let v0··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v0·2, v2·2);
+        let v1··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v0·2, v2·2);
+        let v2··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_low64(v1·2, v3·2);
+        let v3··5: crate::lib::intvector_intrinsics::vec128 =
+            crate::lib::intvector_intrinsics::vec128_interleave_high64(v1·2, v3·2);
+        let v0··6: crate::lib::intvector_intrinsics::vec128 = v0··5;
+        let v2··6: crate::lib::intvector_intrinsics::vec128 = v2··5;
+        let v1··6: crate::lib::intvector_intrinsics::vec128 = v1··5;
+        let v3··6: crate::lib::intvector_intrinsics::vec128 = v3··5;
+        let v12: crate::lib::intvector_intrinsics::vec128 = v0··6;
+        let v13: crate::lib::intvector_intrinsics::vec128 = v1··6;
+        let v14: crate::lib::intvector_intrinsics::vec128 = v2··6;
+        let v15: crate::lib::intvector_intrinsics::vec128 = v3··6;
         (&mut k)[0usize] = v0;
         (&mut k)[1usize] = v4;
         (&mut k)[2usize] = v8;

@@ -1,12 +1,9 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
-#[inline] fn ffdhe_check_pk(
-    a: crate::spec::ffdhe::ffdhe_alg,
-    pk_n: &mut [u64],
-    p_n: &mut [u64]
-) ->
+#[inline] fn ffdhe_check_pk(a: crate::hacl::spec::ffdhe_alg, pk_n: &mut [u64], p_n: &mut [u64]) ->
     u64
 {
     let nLen: u32 =
@@ -82,7 +79,7 @@
 }
 
 #[inline] fn ffdhe_compute_exp(
-    a: crate::spec::ffdhe::ffdhe_alg,
+    a: crate::hacl::spec::ffdhe_alg,
     p_r2_n: &mut [u64],
     sk_n: &mut [u64],
     b_n: &mut [u64],
@@ -117,11 +114,11 @@
     )
 }
 
-pub fn ffdhe_len(a: crate::spec::ffdhe::ffdhe_alg) -> u32
+pub fn ffdhe_len(a: crate::hacl::spec::ffdhe_alg) -> u32
 { crate::hacl::impl_ffdhe::ffdhe_len(a) }
 
 pub fn ffdhe_secret_to_public_precomp(
-    a: crate::spec::ffdhe::ffdhe_alg,
+    a: crate::hacl::spec::ffdhe_alg,
     p_r2_n: &mut [u64],
     sk: &mut [u8],
     pk: &mut [u8]
@@ -144,7 +141,7 @@ pub fn ffdhe_secret_to_public_precomp(
     ffdhe_compute_exp(a, p_r2_n, &mut sk_n, &mut g_n, pk)
 }
 
-pub fn ffdhe_secret_to_public(a: crate::spec::ffdhe::ffdhe_alg, sk: &mut [u8], pk: &mut [u8]) ->
+pub fn ffdhe_secret_to_public(a: crate::hacl::spec::ffdhe_alg, sk: &mut [u8], pk: &mut [u8]) ->
     ()
 {
     let len: u32 = crate::hacl::impl_ffdhe::ffdhe_len(a);
@@ -155,7 +152,7 @@ pub fn ffdhe_secret_to_public(a: crate::spec::ffdhe::ffdhe_alg, sk: &mut [u8], p
 }
 
 pub fn ffdhe_shared_secret_precomp(
-    a: crate::spec::ffdhe::ffdhe_alg,
+    a: crate::hacl::spec::ffdhe_alg,
     p_r2_n: &mut [u64],
     sk: &mut [u8],
     pk: &mut [u8],
@@ -176,7 +173,7 @@ pub fn ffdhe_shared_secret_precomp(
 }
 
 pub fn ffdhe_shared_secret(
-    a: crate::spec::ffdhe::ffdhe_alg,
+    a: crate::hacl::spec::ffdhe_alg,
     sk: &mut [u8],
     pk: &mut [u8],
     ss: &mut [u8]

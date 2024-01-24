@@ -1,74 +1,22 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 const _h0: [u32; 4] = [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32];
 
 const _t: [u32; 64] =
-    [0xd76aa478u32,
-        0xe8c7b756u32,
-        0x242070dbu32,
-        0xc1bdceeeu32,
-        0xf57c0fafu32,
-        0x4787c62au32,
-        0xa8304613u32,
-        0xfd469501u32,
-        0x698098d8u32,
-        0x8b44f7afu32,
-        0xffff5bb1u32,
-        0x895cd7beu32,
-        0x6b901122u32,
-        0xfd987193u32,
-        0xa679438eu32,
-        0x49b40821u32,
-        0xf61e2562u32,
-        0xc040b340u32,
-        0x265e5a51u32,
-        0xe9b6c7aau32,
-        0xd62f105du32,
-        0x02441453u32,
-        0xd8a1e681u32,
-        0xe7d3fbc8u32,
-        0x21e1cde6u32,
-        0xc33707d6u32,
-        0xf4d50d87u32,
-        0x455a14edu32,
-        0xa9e3e905u32,
-        0xfcefa3f8u32,
-        0x676f02d9u32,
-        0x8d2a4c8au32,
-        0xfffa3942u32,
-        0x8771f681u32,
-        0x6d9d6122u32,
-        0xfde5380cu32,
-        0xa4beea44u32,
-        0x4bdecfa9u32,
-        0xf6bb4b60u32,
-        0xbebfbc70u32,
-        0x289b7ec6u32,
-        0xeaa127fau32,
-        0xd4ef3085u32,
-        0x4881d05u32,
-        0xd9d4d039u32,
-        0xe6db99e5u32,
-        0x1fa27cf8u32,
-        0xc4ac5665u32,
-        0xf4292244u32,
-        0x432aff97u32,
-        0xab9423a7u32,
-        0xfc93a039u32,
-        0x655b59c3u32,
-        0x8f0ccc92u32,
-        0xffeff47du32,
-        0x85845dd1u32,
-        0x6fa87e4fu32,
-        0xfe2ce6e0u32,
-        0xa3014314u32,
-        0x4e0811a1u32,
-        0xf7537e82u32,
-        0xbd3af235u32,
-        0x2ad7d2bbu32,
-        0xeb86d391u32];
+    [0xd76aa478u32, 0xe8c7b756u32, 0x242070dbu32, 0xc1bdceeeu32, 0xf57c0fafu32, 0x4787c62au32,
+        0xa8304613u32, 0xfd469501u32, 0x698098d8u32, 0x8b44f7afu32, 0xffff5bb1u32, 0x895cd7beu32,
+        0x6b901122u32, 0xfd987193u32, 0xa679438eu32, 0x49b40821u32, 0xf61e2562u32, 0xc040b340u32,
+        0x265e5a51u32, 0xe9b6c7aau32, 0xd62f105du32, 0x02441453u32, 0xd8a1e681u32, 0xe7d3fbc8u32,
+        0x21e1cde6u32, 0xc33707d6u32, 0xf4d50d87u32, 0x455a14edu32, 0xa9e3e905u32, 0xfcefa3f8u32,
+        0x676f02d9u32, 0x8d2a4c8au32, 0xfffa3942u32, 0x8771f681u32, 0x6d9d6122u32, 0xfde5380cu32,
+        0xa4beea44u32, 0x4bdecfa9u32, 0xf6bb4b60u32, 0xbebfbc70u32, 0x289b7ec6u32, 0xeaa127fau32,
+        0xd4ef3085u32, 0x4881d05u32, 0xd9d4d039u32, 0xe6db99e5u32, 0x1fa27cf8u32, 0xc4ac5665u32,
+        0xf4292244u32, 0x432aff97u32, 0xab9423a7u32, 0xfc93a039u32, 0x655b59c3u32, 0x8f0ccc92u32,
+        0xffeff47du32, 0x85845dd1u32, 0x6fa87e4fu32, 0xfe2ce6e0u32, 0xa3014314u32, 0x4e0811a1u32,
+        0xf7537e82u32, 0xbd3af235u32, 0x2ad7d2bbu32, 0xeb86d391u32];
 
 pub fn init(s: &mut [u32]) -> ()
 { for i in 0u32..4u32 { s[i as usize] = (&mut _h0)[i as usize] } }
@@ -1395,6 +1343,30 @@ pub fn hash_oneshot(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     update_multi(&mut s, blocks0, blocks_n0);
     update_last(&mut s, blocks_len0 as u64, rest0, rest_len0);
     finish(&mut s, output)
+}
+
+pub fn digest(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) -> ()
+{
+    let block_state: &mut [u32] = state[0usize].block_state;
+    let buf_: &mut [u8] = state[0usize].buf;
+    let total_len: u64 = state[0usize].total_len;
+    let r: u32 =
+        if total_len.wrapping_rem(64u32 as u64) == 0u64 && total_len > 0u64
+        { 64u32 }
+        else
+        { total_len.wrapping_rem(64u32 as u64) as u32 };
+    let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
+    let mut tmp_block_state: [u32; 4] = [0u32; 4usize];
+    ((&mut tmp_block_state)[0usize..4usize]).copy_from_slice(&block_state[0usize..4usize]);
+    let ite: u32 =
+        if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
+    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    let buf_multi: (&mut [u8], &mut [u8]) =
+        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
+    update_multi(&mut tmp_block_state, buf_multi.1, 0u32);
+    let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
+    update_last(&mut tmp_block_state, prev_len_last, buf_multi.0, r);
+    finish(&mut tmp_block_state, output)
 }
 
 pub fn hash(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()

@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 pub fn poly1305_init(ctx: &mut [u64], key: &mut [u8]) -> ()
 {
@@ -414,6 +415,45 @@ pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64]) -> ()
     let f312: u64 = r11;
     crate::lowstar::endianness::store64_le(&mut tag[0usize..], f300);
     crate::lowstar::endianness::store64_le(&mut tag[8usize..], f312)
+}
+
+pub struct state_t <'a>
+{
+    pub block_state:
+    &'a mut [u64],
+    pub buf:
+    &'a mut [u8],
+    pub total_len:
+    u64,
+    pub p_key:
+    &'a mut [u8]
+}
+
+pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
+{
+    let block_state: &mut [u64] = state[0usize].block_state;
+    let buf_: &mut [u8] = state[0usize].buf;
+    let total_len: u64 = state[0usize].total_len;
+    let k·: &mut [u8] = state[0usize].p_key;
+    let r: u32 =
+        if total_len.wrapping_rem(16u32 as u64) == 0u64 && total_len > 0u64
+        { 16u32 }
+        else
+        { total_len.wrapping_rem(16u32 as u64) as u32 };
+    let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
+    let mut r1: [u64; 25] = [0u64; 25usize];
+    let tmp_block_state: &mut [u64] = &mut r1;
+    (tmp_block_state[0usize..25usize]).copy_from_slice(&block_state[0usize..25usize]);
+    let ite: u32 =
+        if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
+    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    let buf_multi: (&mut [u8], &mut [u8]) =
+        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
+    poly1305_update(tmp_block_state, 0u32, buf_multi.1);
+    poly1305_update(tmp_block_state, r, buf_multi.0);
+    let mut tmp: [u64; 25] = [0u64; 25usize];
+    ((&mut tmp)[0usize..25usize]).copy_from_slice(&tmp_block_state[0usize..25usize]);
+    poly1305_finish(output, k·, &mut tmp)
 }
 
 pub fn mac(output: &mut [u8], input: &mut [u8], input_len: u32, key: &mut [u8]) -> ()

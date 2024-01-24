@@ -1,40 +1,11 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 const g25519: [u8; 32] =
-    [9u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8,
-        0u8];
+    [9u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8];
 
 fn point_add_and_double(
     q: &mut [u64],

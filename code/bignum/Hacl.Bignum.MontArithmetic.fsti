@@ -76,8 +76,9 @@ let bn_mont_ctx_inv (#t:limb_t) (h:mem) (k:bn_mont_ctx t) =
 
 inline_for_extraction noextract
 let bn_v_n (#t:limb_t) (h:mem) (k:pbn_mont_ctx t) =
-  let k1 = B.deref h k in
-  let n : lbignum t k1.len = k1.n in
+  // HACL-RS: see long comment in SafeAPI.fst
+  let uu__k1 = B.deref h k in
+  let n : lbignum t uu__k1.len = uu__k1.n in
   bn_v h n
 
 inline_for_extraction noextract

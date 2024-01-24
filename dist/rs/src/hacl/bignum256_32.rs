@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 pub fn add(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
 {
@@ -1039,6 +1040,98 @@ pub fn mod_inv_prime_vartime(n: &mut [u32], a: &mut [u32], res: &mut [u32]) -> b
     else
     { (res[0usize..8usize]).copy_from_slice(&[0u32; 8usize]) };
     is_valid_m == 0xFFFFFFFFu32
+}
+
+pub fn mod_precomp(
+    k: &mut [crate::hacl::bignum::bn_mont_ctx_u32],
+    a: &mut [u32],
+    res: &mut [u32]
+) ->
+    ()
+{
+    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
+    let n: &mut [u32] = uu____0.n;
+    let mu: u32 = uu____0.mu;
+    let r2: &mut [u32] = uu____0.r2;
+    bn_slow_precomp(n, mu, r2, a, res)
+}
+
+pub fn mod_exp_vartime_precomp(
+    k: &mut [crate::hacl::bignum::bn_mont_ctx_u32],
+    a: &mut [u32],
+    bBits: u32,
+    b: &mut [u32],
+    res: &mut [u32]
+) ->
+    ()
+{
+    let n: &mut [u32] = k[0usize].n;
+    let mu: u32 = k[0usize].mu;
+    let r2: &mut [u32] = k[0usize].r2;
+    exp_vartime_precomp(n, mu, r2, a, bBits, b, res)
+}
+
+pub fn mod_exp_consttime_precomp(
+    k: &mut [crate::hacl::bignum::bn_mont_ctx_u32],
+    a: &mut [u32],
+    bBits: u32,
+    b: &mut [u32],
+    res: &mut [u32]
+) ->
+    ()
+{
+    let n: &mut [u32] = k[0usize].n;
+    let mu: u32 = k[0usize].mu;
+    let r2: &mut [u32] = k[0usize].r2;
+    exp_consttime_precomp(n, mu, r2, a, bBits, b, res)
+}
+
+pub fn mod_inv_prime_vartime_precomp(
+    k: &mut [crate::hacl::bignum::bn_mont_ctx_u32],
+    a: &mut [u32],
+    res: &mut [u32]
+) ->
+    ()
+{
+    let n: &mut [u32] = k[0usize].n;
+    let mu: u32 = k[0usize].mu;
+    let r2: &mut [u32] = k[0usize].r2;
+    let mut n2: [u32; 8] = [0u32; 8usize];
+    let c0: u32 =
+        crate::lib::inttypes_intrinsics::sub_borrow_u32(
+            0u32,
+            n[0usize],
+            2u32,
+            &mut (&mut n2)[0usize..]
+        );
+    let a1: (&mut [u32], &mut [u32]) = n.split_at_mut(1usize);
+    let res1: (&mut [u32], &mut [u32]) = (&mut n2).split_at_mut(1usize);
+    let mut c: u32 = c0;
+    for i in 0u32..1u32
+    {
+        let t1: u32 = a1.1[4u32.wrapping_mul(i) as usize];
+        let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t1, 0u32, res_i.1);
+        let t10: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
+        let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t10, 0u32, res_i0.1);
+        let t11: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
+        let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t11, 0u32, res_i1.1);
+        let t12: u32 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
+        let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t12, 0u32, res_i2.1)
+    };
+    for i in 4u32..7u32
+    {
+        let t1: u32 = a1.1[i as usize];
+        let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
+        c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t1, 0u32, res_i.1)
+    };
+    let c1: u32 = c;
+    let c2: u32 = c1;
+    crate::lowstar::ignore::ignore::<u32>(c2);
+    exp_vartime_precomp(n, mu, r2, a, 256u32, &mut n2, res)
 }
 
 pub fn bn_to_bytes_be(b: &mut [u32], res: &mut [u8]) -> ()

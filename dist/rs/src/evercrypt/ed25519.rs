@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 pub fn secret_to_public(public_key: &mut [u8], private_key: &mut [u8]) -> ()
 { crate::hacl::ed25519::secret_to_public(public_key, private_key) }

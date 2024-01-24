@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] fn update_block(
     wv: &mut [u32],
@@ -562,6 +563,11 @@ pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u32]) -> ()
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
     crate::lib::memzero0::memzero::<u8>(&mut b, 32u32)
 }
+
+pub struct block_state_t <'a> { pub fst: &'a mut [u32], pub snd: &'a mut [u32] }
+
+pub struct state_t <'a>
+{ pub block_state: block_state_t, pub buf: &'a mut [u8], pub total_len: u64 }
 
 pub fn hash_with_key(
     output: &mut [u8],

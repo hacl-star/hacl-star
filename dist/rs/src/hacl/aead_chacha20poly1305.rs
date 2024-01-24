@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
+#![allow(unused_assignments)]
 
 #[inline] fn poly1305_padded_32(ctx: &mut [u64], len: u32, text: &mut [u8]) -> ()
 {
