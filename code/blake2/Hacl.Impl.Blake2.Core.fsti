@@ -229,20 +229,15 @@ let blake2_params_v (#a:Spec.alg) (h: mem) (p: blake2_params a) : GTot (Spec.bla
   | Spec.Blake2S -> blake2s_params_v h p
   | Spec.Blake2B -> blake2b_params_v h p
 
-noextract inline_for_extraction
-val create_default_params: a:Spec.alg ->
-  salt: lbuffer uint8 (salt_len a) ->
-  personal: lbuffer uint8 (personal_len a) ->
-  Stack (blake2_params a)
-    (requires fun h -> live h salt /\ live h personal /\
-      as_seq h salt == Seq.create (Spec.salt_length a) (u8 0) /\
-      as_seq h personal == Seq.create (Spec.personal_length a) (u8 0)
-    )
-    (ensures (fun h0 p h1 ->
-      h0 == h1 /\
-      blake2_params_loc p == loc salt `union` loc personal /\
-      blake2_params_inv h1 p /\
-      blake2_params_v h1 p == Spec.blake2_default_params a))
+inline_for_extraction noextract
+val alloca_default_params: a: Spec.alg -> StackInline (blake2_params a)
+  (requires (fun _ -> True))
+  (ensures (fun h0 s h1 ->
+    blake2_params_inv h1 s /\
+    blake2_params_v h1 s == Spec.blake2_default_params a /\
+    LowStar.Buffer.(modifies loc_none h0 h1) /\
+    LowStar.Buffer.fresh_loc (blake2_params_loc s) h0 h1 /\
+    LowStar.Buffer.(loc_includes (loc_region_only true (FStar.HyperStack.get_tip h1)) (blake2_params_loc s))))
 
 noextract inline_for_extraction
 unfold let state_p (a:Spec.alg) (m:m_spec) =

@@ -544,6 +544,16 @@ let blake2_update_last #al #ms blake2_update_block #len wv hash prev rem d =
 inline_for_extraction noextract
 let blake2_init_st  (al:Spec.alg) (ms:m_spec) =
     hash: state_p al ms
+  -> kk: size_t{v kk <= Spec.max_key al}
+  -> nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al} ->
+  Stack unit
+    (requires (fun h -> live h hash))
+    (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
+			   state_v h1 hash == Spec.blake2_init_hash al (Spec.blake2_default_params al) (v kk) (v nn)))
+
+inline_for_extraction noextract
+let blake2_init_with_params_st  (al:Spec.alg) (ms:m_spec) =
+    hash: state_p al ms
   -> p: blake2_params al
   -> kk: size_t{v kk <= Spec.max_key al}
   -> nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al} ->
@@ -767,12 +777,12 @@ let serialize_params al kk nn p b =
   | Spec.Blake2B -> serialize_params_blake2b kk nn p b
 
 inline_for_extraction noextract
-val blake2_init:
+val blake2_init_with_params:
     #al:Spec.alg
   -> #ms:m_spec
-  -> blake2_init_st al ms
+  -> blake2_init_with_params_st al ms
 
-let blake2_init #al #ms hash p kk nn =
+let blake2_init_with_params #al #ms hash p kk nn =
   push_frame ();
   let h0 = ST.get() in
   let tmp = create 8ul (Spec.nat_to_word al 0) in
@@ -816,6 +826,18 @@ let blake2_init #al #ms hash p kk nn =
   assert (disjoint hash tmp);
   assert (modifies (loc hash `union` loc tmp) h0 h1);
   Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al (blake2_params_v h0 p) (v kk) (v nn));
+  pop_frame ()
+
+inline_for_extraction noextract
+val blake2_init:
+    #al:Spec.alg
+  -> #ms:m_spec
+  -> blake2_init_st al ms
+
+let blake2_init #al #ms hash kk nn =
+  push_frame ();
+  let p = alloca_default_params al in
+  blake2_init_with_params hash p kk nn;
   pop_frame ()
 
 #push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
@@ -1018,7 +1040,7 @@ inline_for_extraction noextract
 val blake2:
     #al:Spec.alg
   -> #ms:m_spec
-  -> blake2_init_st al ms
+  -> blake2_init_with_params_st al ms
   -> blake2_update_st al ms
   -> blake2_finish_st al ms
   -> blake2_st al ms
@@ -1038,7 +1060,7 @@ let blake2 #al #ms blake2_init blake2_update blake2_finish output output_len inp
     let h1 = ST.get() in
     salloc1 h1 stlen stzero (Ghost.hide (loc output |+| loc h)) spec
     (fun wv ->
-      blake2_init h params key_len output_len;
+      blake2_init_with_params h params key_len output_len;
       blake2_update wv h key_len key input_len input;
       blake2_finish output_len output h))
 #pop-options

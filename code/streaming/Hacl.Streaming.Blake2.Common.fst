@@ -487,7 +487,7 @@ val spec_is_incremental :
       Spec.blake2 a input p kk k (output_size a))
 
 #restart-solver
-#push-options "--z3cliopt smt.arith.nl=false"
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 100"
 let spec_is_incremental a p kk k input0 =
   let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
   let key_block_len = S.length key_block in
