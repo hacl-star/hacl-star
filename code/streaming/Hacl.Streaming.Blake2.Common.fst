@@ -578,7 +578,7 @@ inline_for_extraction noextract
 let blake2 (a : alg)
            (m : valid_m_spec a)
            (kk : key_size a)
-           (init : blake2_init_st a m)
+           (init : blake2_init_with_params_st a m)
            (update_multi : blake2_update_multi_st a m)
            (update_last : blake2_update_last_st a m)
            (finish : blake2_finish_st a m) :

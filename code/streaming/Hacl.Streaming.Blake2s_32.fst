@@ -10,7 +10,7 @@ module Spec = Spec.Blake2
 
 inline_for_extraction noextract
 let blake2s_32 kk =
-  Common.blake2 Spec.Blake2S Core.M32 kk Blake2s32.init Blake2s32.update_multi
+  Common.blake2 Spec.Blake2S Core.M32 kk Blake2s32.init_with_params Blake2s32.update_multi
          Blake2s32.update_last Blake2s32.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code

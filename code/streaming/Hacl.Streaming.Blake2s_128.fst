@@ -13,7 +13,7 @@ module Spec = Spec.Blake2
 /// The functor
 inline_for_extraction noextract
 let blake2s_128 kk =
-  Common.blake2 Spec.Blake2S Core.M128 kk Blake2s128.init Blake2s128.update_multi
+  Common.blake2 Spec.Blake2S Core.M128 kk Blake2s128.init_with_params Blake2s128.update_multi
          Blake2s128.update_last Blake2s128.finish
 
 /// Type abbreviations
