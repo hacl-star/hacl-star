@@ -959,6 +959,27 @@ pub fn mod_inv_prime_vartime(n: &mut [u32], a: &mut [u32], res: &mut [u32]) -> b
     is_valid_m == 0xFFFFFFFFu32
 }
 
+pub fn mont_ctx_init(n: &mut [u32]) -> &mut [crate::hacl::bignum::bn_mont_ctx_u32]
+{
+    let mut r2: Vec<u32> = vec![0u32; 128usize];
+    let mut n1: Vec<u32> = vec![0u32; 128usize];
+    let r21: &mut [u32] = &mut r2;
+    let n11: &mut [u32] = &mut n1;
+    (n11[0usize..128usize]).copy_from_slice(&n[0usize..128usize]);
+    let nBits: u32 = 32u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u32(128u32, n));
+    precompr2(nBits, n, r21);
+    let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
+    let res: crate::hacl::bignum::bn_mont_ctx_u32 =
+        crate::hacl::bignum::bn_mont_ctx_u32 { len: 128u32, n: n11, mu: mu, r2: r21 };
+    let mut buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
+        {
+            let mut tmp: Vec<crate::hacl::bignum::bn_mont_ctx_u32> = Vec::new();
+            tmp.push(res);
+            tmp
+        };
+    &mut buf
+}
+
 pub fn mod_precomp(
     k: &mut [crate::hacl::bignum::bn_mont_ctx_u32],
     a: &mut [u32],
@@ -966,10 +987,9 @@ pub fn mod_precomp(
 ) ->
     ()
 {
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    let n: &mut [u32] = uu____0.n;
-    let mu: u32 = uu____0.mu;
-    let r2: &mut [u32] = uu____0.r2;
+    let n: &mut [u32] = k[0usize].n;
+    let mu: u32 = k[0usize].mu;
+    let r2: &mut [u32] = k[0usize].r2;
     bn_slow_precomp(n, mu, r2, a, res)
 }
 

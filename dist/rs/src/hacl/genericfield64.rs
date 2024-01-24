@@ -9,6 +9,28 @@ pub fn field_modulus_check(len: u32, n: &mut [u64]) -> bool
     m == 0xFFFFFFFFFFFFFFFFu64
 }
 
+pub fn field_init(len: u32, n: &mut [u64]) -> &mut [crate::hacl::bignum::bn_mont_ctx_u64]
+{
+    let mut r2: Vec<u64> = vec![0u64; len as usize];
+    let mut n1: Vec<u64> = vec![0u64; len as usize];
+    let r21: &mut [u64] = &mut r2;
+    let n11: &mut [u64] = &mut n1;
+    (n11[0usize..len as usize]).copy_from_slice(&n[0usize..len as usize]);
+    let nBits: u32 =
+        64u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u64(len, n) as u32);
+    crate::hacl::bignum::bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
+    let mu: u64 = crate::hacl::bignum::mod_inv_uint64(n[0usize]);
+    let res: crate::hacl::bignum::bn_mont_ctx_u64 =
+        crate::hacl::bignum::bn_mont_ctx_u64 { len: len, n: n11, mu: mu, r2: r21 };
+    let mut buf: Vec<crate::hacl::bignum::bn_mont_ctx_u64> =
+        {
+            let mut tmp: Vec<crate::hacl::bignum::bn_mont_ctx_u64> = Vec::new();
+            tmp.push(res);
+            tmp
+        };
+    &mut buf
+}
+
 pub fn field_get_len(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64]) -> u32 { k[0usize].len }
 
 pub fn to_field(k: &mut [crate::hacl::bignum::bn_mont_ctx_u64], a: &mut [u64], aM: &mut [u64]) ->

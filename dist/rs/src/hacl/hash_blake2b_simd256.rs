@@ -514,6 +514,111 @@
     s1.1[0usize] = crate::lib::intvector_intrinsics::vec256_xor(s1.1[0usize], r3.1[0usize])
 }
 
+pub fn init(hash: &mut [crate::lib::intvector_intrinsics::vec256], kk: u32, nn: u32) -> ()
+{
+    let mut tmp: [u64; 8] = [0u64; 8usize];
+    let
+    r0:
+    (&mut [crate::lib::intvector_intrinsics::vec256],
+    &mut [crate::lib::intvector_intrinsics::vec256])
+    =
+        hash.split_at_mut(0usize);
+    let
+    r1:
+    (&mut [crate::lib::intvector_intrinsics::vec256],
+    &mut [crate::lib::intvector_intrinsics::vec256])
+    =
+        r0.1.split_at_mut(1usize);
+    let
+    r2:
+    (&mut [crate::lib::intvector_intrinsics::vec256],
+    &mut [crate::lib::intvector_intrinsics::vec256])
+    =
+        r1.1.split_at_mut(1usize);
+    let
+    r3:
+    (&mut [crate::lib::intvector_intrinsics::vec256],
+    &mut [crate::lib::intvector_intrinsics::vec256])
+    =
+        r2.1.split_at_mut(1usize);
+    let iv0: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[0usize];
+    let iv1: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[1usize];
+    let iv2: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[2usize];
+    let iv3: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[3usize];
+    let iv4: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[4usize];
+    let iv5: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[5usize];
+    let iv6: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[6usize];
+    let iv7: u64 = (&crate::hacl::impl_blake2_constants::ivTable_B)[7usize];
+    r3.0[0usize] = crate::lib::intvector_intrinsics::vec256_load64s(iv0, iv1, iv2, iv3);
+    r3.1[0usize] = crate::lib::intvector_intrinsics::vec256_load64s(iv4, iv5, iv6, iv7);
+    let mut salt: [u8; 16] = [0u8; 16usize];
+    let mut personal: [u8; 16] = [0u8; 16usize];
+    let p: crate::hacl::hash_blake2b::blake2b_params =
+        crate::hacl::hash_blake2b::blake2b_params
+        {
+            digest_length1: 64u8,
+            key_length1: 0u8,
+            fanout1: 1u8,
+            depth1: 1u8,
+            leaf_length1: 0u32,
+            node_offset1: 0u32,
+            xof_length1: 0u32,
+            node_depth1: 0u8,
+            inner_length1: 0u8,
+            salt1: &mut salt,
+            personal1: &mut personal
+        };
+    let uu____0: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(4usize);
+    for i in 0u32..2u32
+    {
+        let bj: &mut [u8] = &mut p.salt1[i.wrapping_mul(8u32) as usize..];
+        let u: u64 = crate::lowstar::endianness::load64_le(bj);
+        let r: u64 = u;
+        let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = uu____0.1.split_at_mut(0usize);
+        os.1[i as usize] = x
+    };
+    let uu____1: (&mut [u64], &mut [u64]) = uu____0.1.split_at_mut(2usize);
+    for i in 0u32..2u32
+    {
+        let bj: &mut [u8] = &mut p.personal1[i.wrapping_mul(8u32) as usize..];
+        let u: u64 = crate::lowstar::endianness::load64_le(bj);
+        let r: u64 = u;
+        let x: u64 = r;
+        let os: (&mut [u64], &mut [u64]) = uu____1.1.split_at_mut(0usize);
+        os.1[i as usize] = x
+    };
+    (&mut tmp)[0usize] =
+        nn as u64
+        ^
+        ((kk as u64).wrapping_shl(8u32)
+        ^
+        ((p.fanout1 as u64).wrapping_shl(16u32)
+        ^
+        ((p.depth1 as u64).wrapping_shl(24u32) ^ (p.leaf_length1 as u64).wrapping_shl(32u32))));
+    (&mut tmp)[1usize] = p.node_offset1 as u64 ^ (p.xof_length1 as u64).wrapping_shl(32u32);
+    (&mut tmp)[2usize] = p.node_depth1 as u64 ^ (p.inner_length1 as u64).wrapping_shl(8u32);
+    (&mut tmp)[3usize] = 0u64;
+    let tmp0: u64 = (&mut tmp)[0usize];
+    let tmp1: u64 = (&mut tmp)[1usize];
+    let tmp2: u64 = (&mut tmp)[2usize];
+    let tmp3: u64 = (&mut tmp)[3usize];
+    let tmp4: u64 = (&mut tmp)[4usize];
+    let tmp5: u64 = (&mut tmp)[5usize];
+    let tmp6: u64 = (&mut tmp)[6usize];
+    let tmp7: u64 = (&mut tmp)[7usize];
+    let iv0·: u64 = iv0 ^ tmp0;
+    let iv1·: u64 = iv1 ^ tmp1;
+    let iv2·: u64 = iv2 ^ tmp2;
+    let iv3·: u64 = iv3 ^ tmp3;
+    let iv4·: u64 = iv4 ^ tmp4;
+    let iv5·: u64 = iv5 ^ tmp5;
+    let iv6·: u64 = iv6 ^ tmp6;
+    let iv7·: u64 = iv7 ^ tmp7;
+    r1.0[0usize] = crate::lib::intvector_intrinsics::vec256_load64s(iv0·, iv1·, iv2·, iv3·);
+    r2.0[0usize] = crate::lib::intvector_intrinsics::vec256_load64s(iv4·, iv5·, iv6·, iv7·)
+}
+
 fn update_key(
     wv: &mut [crate::lib::intvector_intrinsics::vec256],
     hash: &mut [crate::lib::intvector_intrinsics::vec256],
@@ -798,14 +903,91 @@ pub fn malloc_with_key() -> &mut [crate::lib::intvector_intrinsics::vec256]
 
 pub struct block_state_t <'a>
 {
-    pub fst:
-    &'a mut [crate::lib::intvector_intrinsics::vec256],
-    pub snd:
-    &'a mut [crate::lib::intvector_intrinsics::vec256]
+    pub fst: &'a mut [crate::lib::intvector_intrinsics::vec256],
+    pub snd: &'a mut [crate::lib::intvector_intrinsics::vec256]
 }
 
 pub struct state_t <'a>
 { pub block_state: block_state_t, pub buf: &'a mut [u8], pub total_len: u64 }
+
+pub fn malloc() -> &mut [state_t]
+{
+    let mut buf: Vec<u8> = vec![0u8; 128usize];
+    let mut wv: Vec<crate::lib::intvector_intrinsics::vec256> =
+        vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
+    let mut b: Vec<crate::lib::intvector_intrinsics::vec256> =
+        vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
+    let block_state: block_state_t = block_state_t { fst: &mut wv, snd: &mut b };
+    let s: state_t = state_t { block_state: block_state, buf: &mut buf, total_len: 0u32 as u64 };
+    let mut p: Vec<state_t> =
+        {
+            let mut tmp: Vec<state_t> = Vec::new();
+            tmp.push(s);
+            tmp
+        };
+    init(block_state.snd, 0u32, 64u32);
+    &mut p
+}
+
+pub fn reset(state: &mut [state_t]) -> ()
+{
+    let scrut: state_t = state[0usize];
+    let buf: &mut [u8] = scrut.buf;
+    let block_state: block_state_t = scrut.block_state;
+    init(block_state.snd, 0u32, 64u32);
+    let tmp: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    state[0usize] = tmp
+}
+
+pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
+{
+    let block_state: block_state_t = state[0usize].block_state;
+    let buf_: &mut [u8] = state[0usize].buf;
+    let total_len: u64 = state[0usize].total_len;
+    let r: u32 =
+        if total_len.wrapping_rem(128u32 as u64) == 0u64 && total_len > 0u64
+        { 128u32 }
+        else
+        { total_len.wrapping_rem(128u32 as u64) as u32 };
+    let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
+    let mut wv: [crate::lib::intvector_intrinsics::vec256; 4] =
+        [crate::lib::intvector_intrinsics::vec256_zero; 4usize];
+    let mut b: [crate::lib::intvector_intrinsics::vec256; 4] =
+        [crate::lib::intvector_intrinsics::vec256_zero; 4usize];
+    let tmp_block_state: block_state_t = block_state_t { fst: &mut wv, snd: &mut b };
+    let src_b: &mut [crate::lib::intvector_intrinsics::vec256] = block_state.snd;
+    let dst_b: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.snd;
+    (dst_b[0usize..4usize]).copy_from_slice(&src_b[0usize..4usize]);
+    let prev_len: u64 = total_len.wrapping_sub(r as u64);
+    let ite: u32 =
+        if r.wrapping_rem(128u32) == 0u32 && r > 0u32 { 128u32 } else { r.wrapping_rem(128u32) };
+    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    let buf_multi: (&mut [u8], &mut [u8]) =
+        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
+    let wv0: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.fst;
+    let hash: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.snd;
+    let nb: u32 = 0u32;
+    update_multi(
+        0u32,
+        wv0,
+        hash,
+        crate::fstar::uint128::uint64_to_uint128(prev_len),
+        buf_multi.1,
+        nb
+    );
+    let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
+    let wv1: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.fst;
+    let hash0: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.snd;
+    update_last(
+        r,
+        wv1,
+        hash0,
+        crate::fstar::uint128::uint64_to_uint128(prev_len_last),
+        r,
+        buf_multi.0
+    );
+    finish(64u32, output, tmp_block_state.snd)
+}
 
 pub fn hash_with_key(
     output: &mut [u8],
@@ -821,7 +1003,7 @@ pub fn hash_with_key(
         [crate::lib::intvector_intrinsics::vec256_zero; 4usize];
     let mut b1: [crate::lib::intvector_intrinsics::vec256; 4] =
         [crate::lib::intvector_intrinsics::vec256_zero; 4usize];
-    crate::hacl::blake2b_256::init(&mut b, key_len, output_len);
+    init(&mut b, key_len, output_len);
     update(&mut b1, &mut b, key_len, key, input_len, input);
     finish(output_len, output, &mut b);
     crate::lib::memzero0::memzero::<crate::lib::intvector_intrinsics::vec256>(&mut b1, 4u32);

@@ -2402,14 +2402,45 @@ pub fn poly1305_finish(
 
 pub struct state_t <'a>
 {
-    pub block_state:
-    &'a mut [crate::lib::intvector_intrinsics::vec256],
-    pub buf:
-    &'a mut [u8],
-    pub total_len:
-    u64,
-    pub p_key:
-    &'a mut [u8]
+    pub block_state: &'a mut [crate::lib::intvector_intrinsics::vec256],
+    pub buf: &'a mut [u8],
+    pub total_len: u64,
+    pub p_key: &'a mut [u8]
+}
+
+pub fn malloc(key: &mut [u8]) -> &mut [state_t]
+{
+    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    let mut r1: Vec<crate::lib::intvector_intrinsics::vec256> =
+        vec![crate::lib::intvector_intrinsics::vec256_zero; 25usize];
+    let block_state: &mut [crate::lib::intvector_intrinsics::vec256] = &mut r1;
+    let mut k·: Vec<u8> = vec![0u8; 32usize];
+    ((&mut k·)[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
+    let k·0: &mut [u8] = &mut k·;
+    let s: state_t =
+        state_t { block_state: block_state, buf: &mut buf, total_len: 0u32 as u64, p_key: k·0 };
+    let mut p: Vec<state_t> =
+        {
+            let mut tmp: Vec<state_t> = Vec::new();
+            tmp.push(s);
+            tmp
+        };
+    poly1305_init(block_state, key);
+    &mut p
+}
+
+pub fn reset(state: &mut [state_t], key: &mut [u8]) -> ()
+{
+    let scrut: state_t = state[0usize];
+    let k·: &mut [u8] = scrut.p_key;
+    let buf: &mut [u8] = scrut.buf;
+    let block_state: &mut [crate::lib::intvector_intrinsics::vec256] = scrut.block_state;
+    poly1305_init(block_state, key);
+    (k·[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
+    let k·1: &mut [u8] = k·;
+    let tmp: state_t =
+        state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64, p_key: k·1 };
+    state[0usize] = tmp
 }
 
 pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()

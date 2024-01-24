@@ -1140,6 +1140,30 @@ pub fn point_add(out: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
 
 struct __bool_bool <'a> { pub fst: bool, pub snd: bool }
 
+#[inline] fn ecmult_endo_split(
+    r1: &mut [u64],
+    r2: &mut [u64],
+    q1: &mut [u64],
+    q2: &mut [u64],
+    scalar: &mut [u64],
+    q: &mut [u64]
+) ->
+    __bool_bool
+{
+    scalar_split_lambda(r1, r2, scalar);
+    point_mul_lambda(q2, q);
+    (q1[0usize..15usize]).copy_from_slice(&q[0usize..15usize]);
+    let b: bool = is_qelem_le_q_halved_vartime(r1);
+    qnegate_conditional_vartime(r1, ! b);
+    point_negate_conditional_vartime(q1, ! b);
+    let is_high1: bool = ! b;
+    let b0: bool = is_qelem_le_q_halved_vartime(r2);
+    qnegate_conditional_vartime(r2, ! b0);
+    point_negate_conditional_vartime(q2, ! b0);
+    let is_high2: bool = ! b0;
+    __bool_bool { fst: is_high1, snd: is_high2 }
+}
+
 pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
 {
     let mut table: [u64; 240] = [0u64; 240usize];
@@ -1568,6 +1592,72 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
 
 struct __bool_bool_bool_bool <'a> { pub fst: bool, pub snd: bool, pub thd: bool, pub f3: bool }
 
+#[inline] fn point_mul_g_double_split_lambda_vartime(
+    out: &mut [u64],
+    scalar1: &mut [u64],
+    scalar2: &mut [u64],
+    p2: &mut [u64]
+) ->
+    ()
+{
+    let mut g: [u64; 15] = [0u64; 15usize];
+    let gx: (&mut [u64], &mut [u64]) = (&mut g).split_at_mut(0usize);
+    let gy: (&mut [u64], &mut [u64]) = gx.1.split_at_mut(5usize);
+    let gz: (&mut [u64], &mut [u64]) = gy.1.split_at_mut(5usize);
+    gy.0[0usize] = 0x2815b16f81798u64;
+    gy.0[1usize] = 0xdb2dce28d959fu64;
+    gy.0[2usize] = 0xe870b07029bfcu64;
+    gy.0[3usize] = 0xbbac55a06295cu64;
+    gy.0[4usize] = 0x79be667ef9dcu64;
+    gz.0[0usize] = 0x7d08ffb10d4b8u64;
+    gz.0[1usize] = 0x48a68554199c4u64;
+    gz.0[2usize] = 0xe1108a8fd17b4u64;
+    gz.0[3usize] = 0xc4655da4fbfc0u64;
+    gz.0[4usize] = 0x483ada7726a3u64;
+    (gz.1[0usize..5usize]).copy_from_slice(&[0u64; 5usize]);
+    gz.1[0usize] = 1u64;
+    let mut r1234: [u64; 16] = [0u64; 16usize];
+    let mut q1234: [u64; 60] = [0u64; 60usize];
+    let r1: (&mut [u64], &mut [u64]) = (&mut r1234).split_at_mut(0usize);
+    let r2: (&mut [u64], &mut [u64]) = r1.1.split_at_mut(4usize);
+    let r3: (&mut [u64], &mut [u64]) = r2.1.split_at_mut(4usize);
+    let r4: (&mut [u64], &mut [u64]) = r3.1.split_at_mut(4usize);
+    let q1: (&mut [u64], &mut [u64]) = (&mut q1234).split_at_mut(0usize);
+    let q2: (&mut [u64], &mut [u64]) = q1.1.split_at_mut(15usize);
+    let q3: (&mut [u64], &mut [u64]) = q2.1.split_at_mut(15usize);
+    let q4: (&mut [u64], &mut [u64]) = q3.1.split_at_mut(15usize);
+    let scrut: __bool_bool = ecmult_endo_split(r2.0, r3.0, q2.0, q3.0, scalar1, &mut g);
+    let is_high1: bool = scrut.fst;
+    let is_high2: bool = scrut.snd;
+    let scrut0: __bool_bool = ecmult_endo_split(r4.0, r4.1, q4.0, q4.1, scalar2, p2);
+    let is_high3: bool = scrut0.fst;
+    let is_high4: bool = scrut0.snd;
+    let scrut1: __bool_bool_bool_bool =
+        __bool_bool_bool_bool { fst: is_high1, snd: is_high2, thd: is_high3, f3: is_high4 };
+    let is_high10: bool = scrut1.fst;
+    let is_high20: bool = scrut1.snd;
+    let is_high30: bool = scrut1.thd;
+    let is_high40: bool = scrut1.f3;
+    let is_r1234_valid: bool = check_ecmult_endo_split(r2.0, r3.0, r4.0, r4.1);
+    if is_r1234_valid
+    {
+        point_mul_g_double_split_lambda_table(
+            out,
+            r2.0,
+            r3.0,
+            r4.0,
+            r4.1,
+            p2,
+            is_high10,
+            is_high20,
+            is_high30,
+            is_high40
+        )
+    }
+    else
+    { point_mul_g_double_vartime(out, scalar1, scalar2, p2) }
+}
+
 #[inline] fn fmul_eq_vartime(r: &mut [u64], z: &mut [u64], x: &mut [u64]) -> bool
 {
     let mut tmp: [u64; 5] = [0u64; 5usize];
@@ -1675,12 +1765,7 @@ pub fn ecdsa_verify_hashed_msg(m: &mut [u8], public_key: &mut [u8], signature: &
         qmul(u2.0, m_q.1, &mut sinv);
         qmul(m_q.0, s_q.0, &mut sinv);
         let mut res: [u64; 15] = [0u64; 15usize];
-        crate::hacl::impl_k256_glv::point_mul_g_double_split_lambda_vartime(
-            &mut res,
-            u2.0,
-            m_q.0,
-            r_q.0
-        );
+        point_mul_g_double_split_lambda_vartime(&mut res, u2.0, m_q.0, r_q.0);
         let mut tmp1: [u64; 5] = [0u64; 5usize];
         let pz: (&mut [u64], &mut [u64]) = (&mut res).split_at_mut(10usize);
         crate::hacl::bignum_k256::fnormalize(&mut tmp1, pz.1);

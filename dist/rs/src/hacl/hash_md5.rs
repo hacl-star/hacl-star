@@ -1345,6 +1345,35 @@ pub fn hash_oneshot(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     finish(&mut s, output)
 }
 
+pub fn malloc() -> &mut [crate::hacl::streaming_types::state_32]
+{
+    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    let mut block_state: Vec<u32> = vec![0u32; 4usize];
+    let s: crate::hacl::streaming_types::state_32 =
+        crate::hacl::streaming_types::state_32
+        { block_state: &mut block_state, buf: &mut buf, total_len: 0u32 as u64 };
+    let mut p: Vec<crate::hacl::streaming_types::state_32> =
+        {
+            let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
+            tmp.push(s);
+            tmp
+        };
+    init(&mut block_state);
+    &mut p
+}
+
+pub fn reset(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
+{
+    let scrut: crate::hacl::streaming_types::state_32 = state[0usize];
+    let buf: &mut [u8] = scrut.buf;
+    let block_state: &mut [u32] = scrut.block_state;
+    init(block_state);
+    let tmp: crate::hacl::streaming_types::state_32 =
+        crate::hacl::streaming_types::state_32
+        { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    state[0usize] = tmp
+}
+
 pub fn digest(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) -> ()
 {
     let block_state: &mut [u32] = state[0usize].block_state;
@@ -1367,6 +1396,29 @@ pub fn digest(state: &mut [crate::hacl::streaming_types::state_32], output: &mut
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     update_last(&mut tmp_block_state, prev_len_last, buf_multi.0, r);
     finish(&mut tmp_block_state, output)
+}
+
+pub fn copy(state: &mut [crate::hacl::streaming_types::state_32]) ->
+    &mut [crate::hacl::streaming_types::state_32]
+{
+    let scrut: crate::hacl::streaming_types::state_32 = state[0usize];
+    let block_state0: &mut [u32] = scrut.block_state;
+    let buf0: &mut [u8] = scrut.buf;
+    let total_len0: u64 = scrut.total_len;
+    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
+    let mut block_state: Vec<u32> = vec![0u32; 4usize];
+    ((&mut block_state)[0usize..4usize]).copy_from_slice(&block_state0[0usize..4usize]);
+    let s: crate::hacl::streaming_types::state_32 =
+        crate::hacl::streaming_types::state_32
+        { block_state: &mut block_state, buf: &mut buf, total_len: total_len0 };
+    let mut p: Vec<crate::hacl::streaming_types::state_32> =
+        {
+            let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
+            tmp.push(s);
+            tmp
+        };
+    &mut p
 }
 
 pub fn hash(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
