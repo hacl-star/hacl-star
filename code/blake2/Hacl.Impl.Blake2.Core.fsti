@@ -84,7 +84,13 @@ inline_for_extraction noextract
 let get_blake2s_salt (p: blake2s_params) = p.salt
 
 inline_for_extraction noextract
+let set_blake2s_salt (p: blake2s_params) (b: lbuffer uint8 8ul) : blake2s_params = {p with salt = b}
+
+inline_for_extraction noextract
 let get_blake2s_personal (p: blake2s_params) = p.personal
+
+inline_for_extraction noextract
+let set_blake2s_personal (p: blake2s_params) (b: lbuffer uint8 8ul) : blake2s_params = {p with personal = b}
 
 inline_for_extraction noextract
 let set_blake2s_digest_length
@@ -101,10 +107,10 @@ let set_blake2s_key_length
   {p with key_length = to_u8 kk}
 
 let blake2s_params_inv (h: mem) (p: blake2s_params): GTot prop =
-  live h p.salt /\ live h p.personal
+  live h p.salt /\ live h p.personal /\ LowStar.Buffer.loc_disjoint (loc_addr_of_buffer p.salt) (loc_addr_of_buffer p.personal)
 
 let blake2s_params_loc (p: blake2s_params) =
-  loc p.salt `union` loc p.personal
+  loc_addr_of_buffer p.salt `union` loc_addr_of_buffer p.personal
 
 let blake2s_params_v (h: mem) (p: blake2s_params): GTot Spec.blake2s_params =
   Spec.Mkblake2s_params
@@ -138,10 +144,10 @@ type blake2b_params = {
 }
 
 let blake2b_params_inv (h: mem) (p: blake2b_params): GTot prop =
-  live h p.salt /\ live h p.personal
+  live h p.salt /\ live h p.personal /\ LowStar.Buffer.loc_disjoint (loc_addr_of_buffer p.salt) (loc_addr_of_buffer p.personal)
 
 let blake2b_params_loc (p: blake2b_params) =
-  loc p.salt `union` loc p.personal
+  loc_addr_of_buffer p.salt `union` loc_addr_of_buffer p.personal
 
 let blake2b_params_v (h: mem) (p: blake2b_params): GTot Spec.blake2b_params =
   Spec.Mkblake2b_params
@@ -188,10 +194,22 @@ let get_salt (#a: Spec.alg) (p: blake2_params a) : lbuffer uint8 (salt_len a) =
   | Spec.Blake2B -> p.salt
 
 inline_for_extraction noextract
+let set_salt (#a: Spec.alg) (p: blake2_params a) (b: lbuffer uint8 (salt_len a)) : blake2_params a =
+  match a with
+  | Spec.Blake2S -> set_blake2s_salt p b
+  | Spec.Blake2B -> {p with salt = b}
+
+inline_for_extraction noextract
 let get_personal (#a: Spec.alg) (p: blake2_params a) : lbuffer uint8 (personal_len a) =
   match a with
   | Spec.Blake2S -> get_blake2s_personal p
   | Spec.Blake2B -> p.personal
+
+inline_for_extraction noextract
+let set_personal (#a: Spec.alg) (p: blake2_params a) (b: lbuffer uint8 (personal_len a)) : blake2_params a =
+  match a with
+  | Spec.Blake2S -> set_blake2s_personal p b
+  | Spec.Blake2B -> {p with personal = b}
 
 noextract inline_for_extraction
 let blake2_params_inv (#a:Spec.alg) (h: mem) (p: blake2_params a) =
