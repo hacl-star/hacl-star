@@ -2309,8 +2309,6 @@ pub fn bn_mod_exp_consttime_u64(
     bn_mod_exp_consttime_precomp_u64(len, n, mu, &mut r2, a, bBits, b, res)
 }
 
-pub struct bn_mont_ctx_u32 <'a>
-{ pub len: u32, pub n: &'a mut [u32], pub mu: u32, pub r2: &'a mut [u32] }
+pub struct bn_mont_ctx_u32 { pub len: u32, pub n: Box<[u32]>, pub mu: u32, pub r2: Box<[u32]> }
 
-pub struct bn_mont_ctx_u64 <'a>
-{ pub len: u32, pub n: &'a mut [u64], pub mu: u64, pub r2: &'a mut [u64] }
+pub struct bn_mont_ctx_u64 { pub len: u32, pub n: Box<[u64]>, pub mu: u64, pub r2: Box<[u64]> }

@@ -1722,61 +1722,12 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     out[4usize] = b41
 }
 
-#[inline] fn sha512_pre_msg(hash: &mut [u8], prefix: &mut [u8], len: u32, input: &mut [u8]) ->
-    ()
-{
-    let mut buf: [u8; 128] = [0u8; 128usize];
-    let mut block_state: [u64; 8] = [0u64; 8usize];
-    let s: crate::hacl::streaming_types::state_64 =
-        crate::hacl::streaming_types::state_64
-        { block_state: &mut block_state, buf: &mut buf, total_len: 0u32 as u64 };
-    let mut p: crate::hacl::streaming_types::state_64 = s;
-    crate::hacl::hash_sha2::sha512_init(&mut block_state);
-    let st: &mut [crate::hacl::streaming_types::state_64] = &mut p;
-    let err0: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
-    let err1: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, input, len);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err0);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err1);
-    crate::hacl::hash_sha2::digest_512(st, hash)
-}
-
-#[inline] fn sha512_pre_pre2_msg(
-    hash: &mut [u8],
-    prefix: &mut [u8],
-    prefix2: &mut [u8],
-    len: u32,
-    input: &mut [u8]
-) ->
-    ()
-{
-    let mut buf: [u8; 128] = [0u8; 128usize];
-    let mut block_state: [u64; 8] = [0u64; 8usize];
-    let s: crate::hacl::streaming_types::state_64 =
-        crate::hacl::streaming_types::state_64
-        { block_state: &mut block_state, buf: &mut buf, total_len: 0u32 as u64 };
-    let mut p: crate::hacl::streaming_types::state_64 = s;
-    crate::hacl::hash_sha2::sha512_init(&mut block_state);
-    let st: &mut [crate::hacl::streaming_types::state_64] = &mut p;
-    let err0: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
-    let err1: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, prefix2, 32u32);
-    let err2: crate::hacl::streaming_types::error_code =
-        crate::hacl::hash_sha2::update_512(st, input, len);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err0);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err1);
-    crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::error_code>(err2);
-    crate::hacl::hash_sha2::digest_512(st, hash)
-}
-
 #[inline] fn sha512_modq_pre(out: &mut [u64], prefix: &mut [u8], len: u32, input: &mut [u8]) ->
     ()
 {
     let mut tmp: [u64; 10] = [0u64; 10usize];
     let mut hash: [u8; 64] = [0u8; 64usize];
-    sha512_pre_msg(&mut hash, prefix, len, input);
+    crate::hacl::impl_sha512_modq::sha512_pre_msg(&mut hash, prefix, len, input);
     load_64_bytes(&mut tmp, &mut hash);
     barrett_reduction(out, &mut tmp)
 }
@@ -1792,7 +1743,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 10] = [0u64; 10usize];
     let mut hash: [u8; 64] = [0u8; 64usize];
-    sha512_pre_pre2_msg(&mut hash, prefix, prefix2, len, input);
+    crate::hacl::impl_sha512_modq::sha512_pre_pre2_msg(&mut hash, prefix, prefix2, len, input);
     load_64_bytes(&mut tmp, &mut hash);
     barrett_reduction(out, &mut tmp)
 }

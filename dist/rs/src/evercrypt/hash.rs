@@ -57,14 +57,19 @@ pub fn update_multi_256(s: &mut [u32], blocks: &mut [u8], n: u32) -> ()
     }
 }
 
-pub struct state_t <'a>
-{ pub block_state: &'a mut [state_s], pub buf: &'a mut [u8], pub total_len: u64 }
+pub struct state_t { pub block_state: Box<[state_s]>, pub buf: Box<[u8]>, pub total_len: u64 }
 
-pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> &mut [state_t]
+pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Box<[state_t]>
 {
     let mut buf: Vec<u8> = vec![0u8; crate::evercrypt::hash_incremental::block_len(a)];
     let block_state: &mut [state_s] = create_in(a);
-    let s: state_t = state_t { block_state: block_state, buf: &mut buf, total_len: 0u32 as u64 };
+    let s: state_t =
+        state_t
+        {
+            block_state: (&*block_state).into(),
+            buf: buf.try_into().unwrap(),
+            total_len: 0u32 as u64
+        };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -72,24 +77,24 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> &mut [state_t]
             tmp
         };
     init(block_state);
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn reset(state: &mut [state_t]) -> ()
 {
-    let scrut: state_t = state[0usize];
-    let buf: &mut [u8] = scrut.buf;
-    let block_state: &mut [state_s] = scrut.block_state;
+    let block_state: &mut [state_s] = &mut *state[0usize].block_state;
+    let buf: &mut [u8] = &mut *state[0usize].buf;
     let i: crate::hacl::streaming_types::hash_alg = alg_of_state(block_state);
     crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(i);
     init(block_state);
-    let tmp: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    let tmp: state_t =
+        state_t { block_state: (&*block_state).into(), buf: (&*buf).into(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
 pub fn alg_of_state(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
-    let block_state: &mut [state_s] = s[0usize].block_state;
+    let block_state: &mut [state_s] = &mut *s[0usize].block_state;
     alg_of_state(block_state)
 }
 

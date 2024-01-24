@@ -3,10 +3,10 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
-pub struct context_s <'a>
+pub struct context_s
 {
-    pub ctx_key: &'a mut [u8],
-    pub ctx_nonce: &'a mut [u8],
-    pub ctx_seq: &'a mut [u64],
-    pub ctx_exporter: &'a mut [u8]
+    pub ctx_key: &mut [u8],
+    pub ctx_nonce: &mut [u8],
+    pub ctx_seq: &mut [u64],
+    pub ctx_exporter: &mut [u8]
 }

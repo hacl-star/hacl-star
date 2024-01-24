@@ -474,13 +474,17 @@ pub fn sha384_finish(st: &mut [u64], h: &mut [u8]) -> ()
     (h[0usize..48usize]).copy_from_slice(&(&mut (&mut hbuf)[0usize..])[0usize..48usize])
 }
 
-pub fn malloc_256() -> &mut [crate::hacl::streaming_types::state_32]
+pub fn malloc_256() -> Box<[crate::hacl::streaming_types::state_32]>
 {
     let mut buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 8usize];
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
-        { block_state: &mut block_state, buf: &mut buf, total_len: 0u32 as u64 };
+        {
+            block_state: block_state.try_into().unwrap(),
+            buf: buf.try_into().unwrap(),
+            total_len: 0u32 as u64
+        };
     let mut p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
@@ -488,15 +492,15 @@ pub fn malloc_256() -> &mut [crate::hacl::streaming_types::state_32]
             tmp
         };
     sha256_init(&mut block_state);
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn copy_256(state: &mut [crate::hacl::streaming_types::state_32]) ->
-    &mut [crate::hacl::streaming_types::state_32]
+    Box<[crate::hacl::streaming_types::state_32]>
 {
     let scrut: crate::hacl::streaming_types::state_32 = state[0usize];
-    let block_state0: &mut [u32] = scrut.block_state;
-    let buf0: &mut [u8] = scrut.buf;
+    let block_state0: &mut [u32] = &mut *scrut.block_state;
+    let buf0: &mut [u8] = &mut *scrut.buf;
     let total_len0: u64 = scrut.total_len;
     let mut buf: Vec<u8> = vec![0u8; 64usize];
     ((&mut buf)[0usize..64usize]).copy_from_slice(&buf0[0usize..64usize]);
@@ -504,25 +508,28 @@ pub fn copy_256(state: &mut [crate::hacl::streaming_types::state_32]) ->
     ((&mut block_state)[0usize..8usize]).copy_from_slice(&block_state0[0usize..8usize]);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
-        { block_state: &mut block_state, buf: &mut buf, total_len: total_len0 };
+        {
+            block_state: block_state.try_into().unwrap(),
+            buf: buf.try_into().unwrap(),
+            total_len: total_len0
+        };
     let mut p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
             tmp.push(s);
             tmp
         };
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn reset_256(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
 {
-    let scrut: crate::hacl::streaming_types::state_32 = state[0usize];
-    let buf: &mut [u8] = scrut.buf;
-    let block_state: &mut [u32] = scrut.block_state;
+    let block_state: &mut [u32] = &mut *state[0usize].block_state;
+    let buf: &mut [u8] = &mut *state[0usize].buf;
     sha256_init(block_state);
     let tmp: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
-        { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+        { block_state: (&*block_state).into(), buf: (&*buf).into(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
@@ -537,8 +544,8 @@ pub fn update_256(
 pub fn digest_256(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) ->
     ()
 {
-    let block_state: &mut [u32] = state[0usize].block_state;
-    let buf_: &mut [u8] = state[0usize].buf;
+    let block_state: &mut [u32] = &mut *state[0usize].block_state;
+    let buf_: &mut [u8] = &mut *state[0usize].buf;
     let total_len: u64 = state[0usize].total_len;
     let r: u32 =
         if total_len.wrapping_rem(64u32 as u64) == 0u64 && total_len > 0u64
@@ -575,13 +582,17 @@ pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     sha256_finish(&mut st, rb)
 }
 
-pub fn malloc_224() -> &mut [crate::hacl::streaming_types::state_32]
+pub fn malloc_224() -> Box<[crate::hacl::streaming_types::state_32]>
 {
     let mut buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 8usize];
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
-        { block_state: &mut block_state, buf: &mut buf, total_len: 0u32 as u64 };
+        {
+            block_state: block_state.try_into().unwrap(),
+            buf: buf.try_into().unwrap(),
+            total_len: 0u32 as u64
+        };
     let mut p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
@@ -589,18 +600,17 @@ pub fn malloc_224() -> &mut [crate::hacl::streaming_types::state_32]
             tmp
         };
     sha224_init(&mut block_state);
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn reset_224(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
 {
-    let scrut: crate::hacl::streaming_types::state_32 = state[0usize];
-    let buf: &mut [u8] = scrut.buf;
-    let block_state: &mut [u32] = scrut.block_state;
+    let block_state: &mut [u32] = &mut *state[0usize].block_state;
+    let buf: &mut [u8] = &mut *state[0usize].buf;
     sha224_init(block_state);
     let tmp: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
-        { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+        { block_state: (&*block_state).into(), buf: (&*buf).into(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
@@ -615,8 +625,8 @@ pub fn update_224(
 pub fn digest_224(state: &mut [crate::hacl::streaming_types::state_32], output: &mut [u8]) ->
     ()
 {
-    let block_state: &mut [u32] = state[0usize].block_state;
-    let buf_: &mut [u8] = state[0usize].buf;
+    let block_state: &mut [u32] = &mut *state[0usize].block_state;
+    let buf_: &mut [u8] = &mut *state[0usize].buf;
     let total_len: u64 = state[0usize].total_len;
     let r: u32 =
         if total_len.wrapping_rem(64u32 as u64) == 0u64 && total_len > 0u64
@@ -656,13 +666,17 @@ pub fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     sha224_finish(&mut st, rb)
 }
 
-pub fn malloc_512() -> &mut [crate::hacl::streaming_types::state_64]
+pub fn malloc_512() -> Box<[crate::hacl::streaming_types::state_64]>
 {
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     let mut block_state: Vec<u64> = vec![0u64; 8usize];
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
-        { block_state: &mut block_state, buf: &mut buf, total_len: 0u32 as u64 };
+        {
+            block_state: block_state.try_into().unwrap(),
+            buf: buf.try_into().unwrap(),
+            total_len: 0u32 as u64
+        };
     let mut p: Vec<crate::hacl::streaming_types::state_64> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
@@ -670,15 +684,15 @@ pub fn malloc_512() -> &mut [crate::hacl::streaming_types::state_64]
             tmp
         };
     sha512_init(&mut block_state);
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn copy_512(state: &mut [crate::hacl::streaming_types::state_64]) ->
-    &mut [crate::hacl::streaming_types::state_64]
+    Box<[crate::hacl::streaming_types::state_64]>
 {
     let scrut: crate::hacl::streaming_types::state_64 = state[0usize];
-    let block_state0: &mut [u64] = scrut.block_state;
-    let buf0: &mut [u8] = scrut.buf;
+    let block_state0: &mut [u64] = &mut *scrut.block_state;
+    let buf0: &mut [u8] = &mut *scrut.buf;
     let total_len0: u64 = scrut.total_len;
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     ((&mut buf)[0usize..128usize]).copy_from_slice(&buf0[0usize..128usize]);
@@ -686,25 +700,28 @@ pub fn copy_512(state: &mut [crate::hacl::streaming_types::state_64]) ->
     ((&mut block_state)[0usize..8usize]).copy_from_slice(&block_state0[0usize..8usize]);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
-        { block_state: &mut block_state, buf: &mut buf, total_len: total_len0 };
+        {
+            block_state: block_state.try_into().unwrap(),
+            buf: buf.try_into().unwrap(),
+            total_len: total_len0
+        };
     let mut p: Vec<crate::hacl::streaming_types::state_64> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
             tmp.push(s);
             tmp
         };
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn reset_512(state: &mut [crate::hacl::streaming_types::state_64]) -> ()
 {
-    let scrut: crate::hacl::streaming_types::state_64 = state[0usize];
-    let buf: &mut [u8] = scrut.buf;
-    let block_state: &mut [u64] = scrut.block_state;
+    let block_state: &mut [u64] = &mut *state[0usize].block_state;
+    let buf: &mut [u8] = &mut *state[0usize].buf;
     sha512_init(block_state);
     let tmp: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
-        { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+        { block_state: (&*block_state).into(), buf: (&*buf).into(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
@@ -719,8 +736,8 @@ pub fn update_512(
 pub fn digest_512(state: &mut [crate::hacl::streaming_types::state_64], output: &mut [u8]) ->
     ()
 {
-    let block_state: &mut [u64] = state[0usize].block_state;
-    let buf_: &mut [u8] = state[0usize].buf;
+    let block_state: &mut [u64] = &mut *state[0usize].block_state;
+    let buf_: &mut [u8] = &mut *state[0usize].buf;
     let total_len: u64 = state[0usize].total_len;
     let r: u32 =
         if total_len.wrapping_rem(128u32 as u64) == 0u64 && total_len > 0u64
@@ -766,13 +783,17 @@ pub fn hash_512(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
     sha512_finish(&mut st, rb)
 }
 
-pub fn malloc_384() -> &mut [crate::hacl::streaming_types::state_64]
+pub fn malloc_384() -> Box<[crate::hacl::streaming_types::state_64]>
 {
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     let mut block_state: Vec<u64> = vec![0u64; 8usize];
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
-        { block_state: &mut block_state, buf: &mut buf, total_len: 0u32 as u64 };
+        {
+            block_state: block_state.try_into().unwrap(),
+            buf: buf.try_into().unwrap(),
+            total_len: 0u32 as u64
+        };
     let mut p: Vec<crate::hacl::streaming_types::state_64> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
@@ -780,18 +801,17 @@ pub fn malloc_384() -> &mut [crate::hacl::streaming_types::state_64]
             tmp
         };
     sha384_init(&mut block_state);
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn reset_384(state: &mut [crate::hacl::streaming_types::state_64]) -> ()
 {
-    let scrut: crate::hacl::streaming_types::state_64 = state[0usize];
-    let buf: &mut [u8] = scrut.buf;
-    let block_state: &mut [u64] = scrut.block_state;
+    let block_state: &mut [u64] = &mut *state[0usize].block_state;
+    let buf: &mut [u8] = &mut *state[0usize].buf;
     sha384_init(block_state);
     let tmp: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
-        { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+        { block_state: (&*block_state).into(), buf: (&*buf).into(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
@@ -806,8 +826,8 @@ pub fn update_384(
 pub fn digest_384(state: &mut [crate::hacl::streaming_types::state_64], output: &mut [u8]) ->
     ()
 {
-    let block_state: &mut [u64] = state[0usize].block_state;
-    let buf_: &mut [u8] = state[0usize].buf;
+    let block_state: &mut [u64] = &mut *state[0usize].block_state;
+    let buf_: &mut [u8] = &mut *state[0usize].buf;
     let total_len: u64 = state[0usize].total_len;
     let r: u32 =
         if total_len.wrapping_rem(128u32 as u64) == 0u64 && total_len > 0u64

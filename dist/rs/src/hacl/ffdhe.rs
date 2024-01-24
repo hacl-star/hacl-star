@@ -132,10 +132,10 @@ pub fn ffdhe_secret_to_public_precomp(
     for i in 0u32..1u32
     {
         let x: u8 = (&crate::hacl::impl_ffdhe_constants::ffdhe_g2)[i as usize];
-        let os: &mut [u8] = &mut (&mut g)[0usize..];
+        let os: &mut [u8] = &mut g[0usize..];
         os[i as usize] = x
     };
-    crate::hacl::bignum_base::bn_from_bytes_be_uint64(1u32, &mut g, &mut (&mut g_n)[0usize..]);
+    crate::hacl::bignum_base::bn_from_bytes_be_uint64(1u32, g, &mut (&mut g_n)[0usize..]);
     let mut sk_n: Vec<u64> = vec![0u64; nLen as usize];
     crate::hacl::bignum_base::bn_from_bytes_be_uint64(len, sk, &mut sk_n);
     ffdhe_compute_exp(a, p_r2_n, &mut sk_n, &mut g_n, pk)

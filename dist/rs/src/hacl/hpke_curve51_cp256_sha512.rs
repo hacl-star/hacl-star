@@ -694,7 +694,7 @@ pub fn sealBase(
         {
             ctx_key: &mut ctx_key,
             ctx_nonce: &mut ctx_nonce,
-            ctx_seq: &mut ctx_seq,
+            ctx_seq: ctx_seq,
             ctx_exporter: &mut ctx_exporter
         };
     let res: u32 = setupBaseS(o_enc, o_ctx, skE, pkR, infolen, info);
@@ -762,7 +762,7 @@ pub fn openBase(
         {
             ctx_key: &mut ctx_key,
             ctx_nonce: &mut ctx_nonce,
-            ctx_seq: &mut ctx_seq,
+            ctx_seq: ctx_seq,
             ctx_exporter: &mut ctx_exporter
         };
     let res: u32 = setupBaseR(o_ctx, pkE, skR, infolen, info);

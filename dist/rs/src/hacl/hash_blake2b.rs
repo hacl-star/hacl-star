@@ -3,7 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
-pub struct blake2s_params <'a>
+pub struct blake2s_params
 {
     pub digest_length: u8,
     pub key_length: u8,
@@ -14,11 +14,11 @@ pub struct blake2s_params <'a>
     pub xof_length: u16,
     pub node_depth: u8,
     pub inner_length: u8,
-    pub salt: &'a mut [u8],
-    pub personal: &'a mut [u8]
+    pub salt: &mut [u8],
+    pub personal: &mut [u8]
 }
 
-pub struct blake2b_params <'a>
+pub struct blake2b_params
 {
     pub digest_length1: u8,
     pub key_length1: u8,
@@ -29,8 +29,8 @@ pub struct blake2b_params <'a>
     pub xof_length1: u32,
     pub node_depth1: u8,
     pub inner_length1: u8,
-    pub salt1: &'a mut [u8],
-    pub personal1: &'a mut [u8]
+    pub salt1: &mut [u8],
+    pub personal1: &mut [u8]
 }
 
 fn update_block(
@@ -707,18 +707,18 @@ pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u64]) -> ()
     crate::lib::memzero0::memzero::<u8>(&mut b, 64u32)
 }
 
-pub struct block_state_t <'a> { pub fst: &'a mut [u64], pub snd: &'a mut [u64] }
+pub struct block_state_t { pub fst: &mut [u64], pub snd: &mut [u64] }
 
-pub struct state_t <'a>
-{ pub block_state: block_state_t, pub buf: &'a mut [u8], pub total_len: u64 }
+pub struct state_t { pub block_state: block_state_t, pub buf: Box<[u8]>, pub total_len: u64 }
 
-pub fn malloc() -> &mut [state_t]
+pub fn malloc() -> Box<[state_t]>
 {
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     let mut wv: Vec<u64> = vec![0u64; 16usize];
     let mut b: Vec<u64> = vec![0u64; 16usize];
     let block_state: block_state_t = block_state_t { fst: &mut wv, snd: &mut b };
-    let s: state_t = state_t { block_state: block_state, buf: &mut buf, total_len: 0u32 as u64 };
+    let s: state_t =
+        state_t { block_state: block_state, buf: buf.try_into().unwrap(), total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -726,23 +726,23 @@ pub fn malloc() -> &mut [state_t]
             tmp
         };
     init(block_state.snd, 0u32, 64u32);
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn reset(state: &mut [state_t]) -> ()
 {
-    let scrut: state_t = state[0usize];
-    let buf: &mut [u8] = scrut.buf;
-    let block_state: block_state_t = scrut.block_state;
+    let block_state: block_state_t = state[0usize].block_state;
+    let buf: &mut [u8] = &mut *state[0usize].buf;
     init(block_state.snd, 0u32, 64u32);
-    let tmp: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    let tmp: state_t =
+        state_t { block_state: block_state, buf: (&*buf).into(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
 pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
 {
     let block_state: block_state_t = state[0usize].block_state;
-    let buf_: &mut [u8] = state[0usize].buf;
+    let buf_: &mut [u8] = &mut *state[0usize].buf;
     let total_len: u64 = state[0usize].total_len;
     let r: u32 =
         if total_len.wrapping_rem(128u32 as u64) == 0u64 && total_len > 0u64

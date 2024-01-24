@@ -1138,7 +1138,7 @@ pub fn point_add(out: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
     crate::hacl::bignum_k256::fmul(rx.1, &mut beta, rx.1)
 }
 
-struct __bool_bool <'a> { pub fst: bool, pub snd: bool }
+struct __bool_bool { pub fst: bool, pub snd: bool }
 
 #[inline] fn ecmult_endo_split(
     r1: &mut [u64],
@@ -1590,7 +1590,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u64], q: &mut [u64]) -> ()
     b1 && b2 && b3 && b4
 }
 
-struct __bool_bool_bool_bool <'a> { pub fst: bool, pub snd: bool, pub thd: bool, pub f3: bool }
+struct __bool_bool_bool_bool { pub fst: bool, pub snd: bool, pub thd: bool, pub f3: bool }
 
 #[inline] fn point_mul_g_double_split_lambda_vartime(
     out: &mut [u64],

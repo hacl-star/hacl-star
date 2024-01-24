@@ -3,7 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
-pub struct __uint32_t_uint32_t <'a> { pub fst: u32, pub snd: u32 }
+pub struct __uint32_t_uint32_t { pub fst: u32, pub snd: u32 }
 
 pub fn compute_sha1(
     dst: &mut [u8],

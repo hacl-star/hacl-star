@@ -13,8 +13,7 @@ pub const max_personalization_string_length: u32 = 65536u32;
 
 pub const max_additional_input_length: u32 = 65536u32;
 
-pub struct state <'a>
-{ pub k: &'a mut [u8], pub v: &'a mut [u8], pub reseed_counter: &'a mut [u32] }
+pub struct state { pub k: Box<[u8]>, pub v: Box<[u8]>, pub reseed_counter: Box<[u32]> }
 
 pub fn uu___is_State(a: crate::hacl::streaming_types::hash_alg, projectee: state) -> bool
 {

@@ -561,7 +561,17 @@ let reset #index c i t t' state key =
 
   let open LowStar.BufferOps in
   (**) let h1 = ST.get () in
-  let State block_state buf _ _ k' = !*state in
+  // HACL-RS, see comment for digest
+  let uu__ = !*state in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k' = uu__ in
+
+  // Previously:
+  // let State block_state buf _ _ k' = !*state in
+
   let i = c.index_of_state i block_state in
   LowStar.Ignore.ignore i; // This is only used in types and proofs
   [@inline_let]

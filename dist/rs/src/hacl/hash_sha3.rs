@@ -19,13 +19,11 @@ pub fn update_multi_sha3(
     }
 }
 
-pub struct hash_buf <'a>
-{ pub fst: crate::hacl::streaming_types::hash_alg, pub snd: &'a mut [u64] }
+pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: &mut [u64] }
 
-struct hash_buf2 <'a> { pub fst: hash_buf, pub snd: hash_buf }
+struct hash_buf2 { pub fst: hash_buf, pub snd: hash_buf }
 
-pub struct state_t <'a>
-{ pub block_state: hash_buf, pub buf: &'a mut [u8], pub total_len: u64 }
+pub struct state_t { pub block_state: hash_buf, pub buf: Box<[u8]>, pub total_len: u64 }
 
 pub fn get_alg(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
@@ -33,12 +31,13 @@ pub fn get_alg(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
     block_state.fst
 }
 
-pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> &mut [state_t]
+pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Box<[state_t]>
 {
     let mut buf: Vec<u8> = vec![0u8; block_len(a)];
     let mut buf0: Vec<u64> = vec![0u64; 25usize];
     let block_state: hash_buf = hash_buf { fst: a, snd: &mut buf0 };
-    let s: state_t = state_t { block_state: block_state, buf: &mut buf, total_len: 0u32 as u64 };
+    let s: state_t =
+        state_t { block_state: block_state, buf: buf.try_into().unwrap(), total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -47,14 +46,14 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> &mut [state_t]
         };
     let s1: &mut [u64] = block_state.snd;
     (s1[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    &mut p
+    p.try_into().unwrap()
 }
 
-pub fn copy(state: &mut [state_t]) -> &mut [state_t]
+pub fn copy(state: &mut [state_t]) -> Box<[state_t]>
 {
     let scrut: state_t = state[0usize];
     let block_state0: hash_buf = scrut.block_state;
-    let buf0: &mut [u8] = scrut.buf;
+    let buf0: &mut [u8] = &mut *scrut.buf;
     let total_len0: u64 = scrut.total_len;
     let i: crate::hacl::streaming_types::hash_alg = block_state0.fst;
     let mut buf: Vec<u8> = vec![0u8; block_len(i)];
@@ -65,26 +64,27 @@ pub fn copy(state: &mut [state_t]) -> &mut [state_t]
     let s_dst: &mut [u64] = scrut0.snd.snd;
     let s_src: &mut [u64] = scrut0.fst.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
-    let s: state_t = state_t { block_state: block_state, buf: &mut buf, total_len: total_len0 };
+    let s: state_t =
+        state_t { block_state: block_state, buf: buf.try_into().unwrap(), total_len: total_len0 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
             tmp.push(s);
             tmp
         };
-    &mut p
+    p.try_into().unwrap()
 }
 
 pub fn reset(state: &mut [state_t]) -> ()
 {
-    let scrut: state_t = state[0usize];
-    let buf: &mut [u8] = scrut.buf;
-    let block_state: hash_buf = scrut.block_state;
+    let block_state: hash_buf = state[0usize].block_state;
+    let buf: &mut [u8] = &mut *state[0usize].buf;
     let i: crate::hacl::streaming_types::hash_alg = block_state.fst;
     crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(i);
     let s: &mut [u64] = block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let tmp: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    let tmp: state_t =
+        state_t { block_state: block_state, buf: (&*buf).into(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
