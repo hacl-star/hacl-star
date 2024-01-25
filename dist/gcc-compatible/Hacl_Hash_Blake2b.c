@@ -759,6 +759,25 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
   Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
+/**
+  State allocation function when there is no key
+*/
+Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(K________ key)
+{
+  KRML_MAYBE_UNUSED_VAR(key);
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
+  uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
+  uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
+  Hacl_Hash_Blake2b_block_state_t block_state = { .fst = wv, .snd = b };
+  Hacl_Hash_Blake2b_state_t
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  Hacl_Hash_Blake2b_state_t
+  *p = (Hacl_Hash_Blake2b_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2b_state_t));
+  p[0U] = s;
+  Hacl_Hash_Blake2b_init(block_state.snd, 0U, 64U);
+  return p;
+}
+
 Hacl_Hash_Blake2s_blake2b_params
 *FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2b_params____(
   Hacl_Hash_Blake2s_blake2b_params *x
@@ -768,9 +787,10 @@ Hacl_Hash_Blake2s_blake2b_params
 }
 
 /**
-  State allocation function when there is no key
+  State allocation function when there are parameters but no key
 */
-Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(Hacl_Hash_Blake2s_blake2b_params *key)
+Hacl_Hash_Blake2b_state_t
+*Hacl_Hash_Blake2b_malloc_with_params(Hacl_Hash_Blake2s_blake2b_params *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
   uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
@@ -790,8 +810,23 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(Hacl_Hash_Blake2s_blake2b_pa
 /**
   Re-initialization function when there is no key
 */
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, K________ key)
+{
+  KRML_MAYBE_UNUSED_VAR(key);
+  Hacl_Hash_Blake2b_state_t scrut = *state;
+  uint8_t *buf = scrut.buf;
+  Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
+  Hacl_Hash_Blake2b_init(block_state.snd, 0U, 64U);
+  Hacl_Hash_Blake2b_state_t
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  state[0U] = tmp;
+}
+
+/**
+  Re-initialization function when there are parameters but no key
+*/
 void
-Hacl_Hash_Blake2b_reset(
+Hacl_Hash_Blake2b_reset_with_params(
   Hacl_Hash_Blake2b_state_t *state,
   Hacl_Hash_Blake2s_blake2b_params *key
 )

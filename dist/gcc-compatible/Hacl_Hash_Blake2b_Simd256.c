@@ -597,8 +597,38 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void)
 /**
   State allocation function when there is no key
 */
+Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(K________ key)
+{
+  KRML_MAYBE_UNUSED_VAR(key);
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
+  Lib_IntVector_Intrinsics_vec256
+  *wv =
+    (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
+      sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
+  memset(wv, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  Lib_IntVector_Intrinsics_vec256
+  *b =
+    (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
+      sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
+  memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = { .fst = wv, .snd = b };
+  Hacl_Hash_Blake2b_Simd256_state_t
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  Hacl_Hash_Blake2b_Simd256_state_t
+  *p =
+    (Hacl_Hash_Blake2b_Simd256_state_t *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Hash_Blake2b_Simd256_state_t
+      ));
+  p[0U] = s;
+  Hacl_Hash_Blake2b_Simd256_init(block_state.snd, 0U, 64U);
+  return p;
+}
+
+/**
+  State allocation function when there are parameters but no key
+*/
 Hacl_Hash_Blake2b_Simd256_state_t
-*Hacl_Hash_Blake2b_Simd256_malloc(Hacl_Hash_Blake2s_blake2b_params *key)
+*Hacl_Hash_Blake2b_Simd256_malloc_with_params(Hacl_Hash_Blake2s_blake2b_params *key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
@@ -629,8 +659,23 @@ Hacl_Hash_Blake2b_Simd256_state_t
 /**
   Re-initialization function when there is no key
 */
+void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state, K________ key)
+{
+  KRML_MAYBE_UNUSED_VAR(key);
+  Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
+  uint8_t *buf = scrut.buf;
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
+  Hacl_Hash_Blake2b_Simd256_init(block_state.snd, 0U, 64U);
+  Hacl_Hash_Blake2b_Simd256_state_t
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  state[0U] = tmp;
+}
+
+/**
+  Re-initialization function when there are parameters but no key
+*/
 void
-Hacl_Hash_Blake2b_Simd256_reset(
+Hacl_Hash_Blake2b_Simd256_reset_with_params(
   Hacl_Hash_Blake2b_Simd256_state_t *state,
   Hacl_Hash_Blake2s_blake2b_params *key
 )

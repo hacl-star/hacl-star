@@ -85,16 +85,29 @@ typedef struct Hacl_Hash_Blake2b_state_t_s
 }
 Hacl_Hash_Blake2b_state_t;
 
+typedef struct K_________s {  } K________;
+
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(Hacl_Hash_Blake2s_blake2b_params *key);
+Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(K________ key);
+
+/**
+  State allocation function when there are parameters but no key
+*/
+Hacl_Hash_Blake2b_state_t
+*Hacl_Hash_Blake2b_malloc_with_params(Hacl_Hash_Blake2s_blake2b_params *key);
 
 /**
   Re-initialization function when there is no key
 */
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, K________ key);
+
+/**
+  Re-initialization function when there are parameters but no key
+*/
 void
-Hacl_Hash_Blake2b_reset(
+Hacl_Hash_Blake2b_reset_with_params(
   Hacl_Hash_Blake2b_state_t *state,
   Hacl_Hash_Blake2s_blake2b_params *key
 );

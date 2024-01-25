@@ -89,12 +89,21 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_state_t_total_len =
       field hacl_Hash_Blake2b_state_t "total_len" uint64_t
     let _ = seal hacl_Hash_Blake2b_state_t
+    type k________ = [ `k________ ] structure
+    let (k________ : [ `k________ ] structure typ) = structure "K_________s"
+    let _ = seal k________
     let hacl_Hash_Blake2b_malloc =
       foreign "Hacl_Hash_Blake2b_malloc"
+        (k________ @-> (returning (ptr hacl_Hash_Blake2b_state_t)))
+    let hacl_Hash_Blake2b_malloc_with_params =
+      foreign "Hacl_Hash_Blake2b_malloc_with_params"
         ((ptr hacl_Hash_Blake2s_blake2b_params) @->
            (returning (ptr hacl_Hash_Blake2b_state_t)))
     let hacl_Hash_Blake2b_reset =
       foreign "Hacl_Hash_Blake2b_reset"
+        ((ptr hacl_Hash_Blake2b_state_t) @-> (k________ @-> (returning void)))
+    let hacl_Hash_Blake2b_reset_with_params =
+      foreign "Hacl_Hash_Blake2b_reset_with_params"
         ((ptr hacl_Hash_Blake2b_state_t) @->
            ((ptr hacl_Hash_Blake2s_blake2b_params) @-> (returning void)))
     let hacl_Hash_Blake2b_update =
