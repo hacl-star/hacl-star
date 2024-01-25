@@ -12,10 +12,13 @@ module Core = Hacl.Impl.Blake2.Core
 inline_for_extraction noextract
 val params (a: Spec.alg) : Type0
 
+inline_for_extraction noextract
 val footprint (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot B.loc
 
+inline_for_extraction noextract
 val freeable (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot prop
 
+inline_for_extraction noextract
 val invariant (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot prop
 
 val v (#a: Spec.alg) (h: HS.mem) (p: params a) : GTot (Spec.blake2_params a)

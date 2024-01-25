@@ -3,13 +3,15 @@ module Hacl.Streaming.Blake2.Params
 open Lib.IntTypes
 open Lib.Buffer
 
+module B = LowStar.Buffer
+
 let params a =
   B.pointer (Core.blake2_params a)
 
 let footprint #a h s =
   B.(loc_union (loc_addr_of_buffer s) (Core.blake2_params_loc (B.deref h s)))
 
-let freeable_s (#a: Spec.alg) (p: Core.blake2_params a) =
+let freeable_s (#a: Spec.alg) (p: Core.blake2_params a) : GTot prop =
   match a with
   | Spec.Blake2S -> freeable (Core.Mkblake2s_params?.salt p) /\ freeable (Core.Mkblake2s_params?.personal p)
   | Spec.Blake2B -> freeable (p.Core.salt) /\ freeable (p.Core.personal)
