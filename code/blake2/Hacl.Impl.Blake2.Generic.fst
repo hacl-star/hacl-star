@@ -800,9 +800,6 @@ let blake2_init_with_params #al #ms hash p kk nn =
   let iv7 = get_iv al 7ul in
   create_row #al #ms r2 iv0 iv1 iv2 iv3;
   create_row #al #ms r3 iv4 iv5 iv6 iv7;
-  // let salt = create (salt_len al) (u8 0) in
-  // let personal = create (personal_len al) (u8 0) in
-  // let p = create_default_params al salt personal in
   serialize_params al kk nn p tmp;
   let tmp0 = tmp.(0ul) in
   let tmp1 = tmp.(1ul) in
