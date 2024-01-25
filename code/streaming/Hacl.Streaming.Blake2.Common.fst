@@ -172,7 +172,6 @@ let unit_to_stateful_key_t (a : alg):
   Tot (stateful_key_t a false 0) =
   ((), ())
 
-
 /// The ``has_key`` parameter is meta
 /// TODO: this definition could be moved to Hacl.Streaming.Interface, it could
 /// be pretty useful in other situations as it generalizes ``stateful_buffer`` in
@@ -242,15 +241,17 @@ let stateful_key (a : alg) (has_params: bool) (kk : key_size a) :
     (* copy *)
     (fun _ s_src s_dst ->
       let h0 = ST.get () in
-      if has_params then P.copy #a (fst s_src) (fst s_dst) else ();
-      let h1 = ST.get () in
       if kk > 0 then
         B.blit (snd s_src <: B.buffer uint8) 0ul
                (snd s_dst <: B.buffer uint8) 0ul (U32.uint_to_t kk)
       else ();
-      let h2 = ST.get () in
-      // Need explicit call to ensure preservation of v
-      if has_params then P.frame_invariant #a (if kk = 0 then B.loc_none else B.loc_addr_of_buffer (snd s_dst <: B.buffer uint8)) (fst s_dst) h1 h2 else ()
+      let h1 = ST.get () in
+      if has_params then (
+        P.frame_invariant #a (if kk = 0 then B.loc_none else B.loc_addr_of_buffer (snd s_dst <: B.buffer uint8)) (fst s_dst) h0 h1;
+        P.frame_invariant #a (if kk = 0 then B.loc_none else B.loc_addr_of_buffer (snd s_dst <: B.buffer uint8)) (fst s_src) h0 h1;
+        P.copy #a (fst s_src) (fst s_dst)
+
+      ) else ()
     )
 
 inline_for_extraction noextract
