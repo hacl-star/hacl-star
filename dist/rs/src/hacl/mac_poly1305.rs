@@ -418,9 +418,9 @@ pub fn poly1305_finish(tag: &mut [u8], key: &mut [u8], ctx: &mut [u64]) -> ()
 }
 
 pub struct state_t
-{ pub block_state: Box<[u64]>, pub buf: Box<[u8]>, pub total_len: u64, pub p_key: Box<[u8]> }
+{ pub block_state: Vec<u64>, pub buf: Vec<u8>, pub total_len: u64, pub p_key: Vec<u8> }
 
-pub fn malloc(key: &mut [u8]) -> Box<[state_t]>
+pub fn malloc(key: &mut [u8]) -> Vec<state_t>
 {
     let mut buf: Vec<u8> = vec![0u8; 16usize];
     let mut r1: Vec<u64> = vec![0u64; 25usize];
@@ -431,10 +431,10 @@ pub fn malloc(key: &mut [u8]) -> Box<[state_t]>
     let s: state_t =
         state_t
         {
-            block_state: (&*block_state).into(),
-            buf: buf.try_into().unwrap(),
+            block_state: block_state.to_vec(),
+            buf: buf,
             total_len: 0u32 as u64,
-            p_key: (&*k·0).into()
+            p_key: k·0.to_vec()
         };
     let mut p: Vec<state_t> =
         {
@@ -443,34 +443,34 @@ pub fn malloc(key: &mut [u8]) -> Box<[state_t]>
             tmp
         };
     poly1305_init(block_state, key);
-    p.try_into().unwrap()
+    p
 }
 
 pub fn reset(state: &mut [state_t], key: &mut [u8]) -> ()
 {
-    let block_state: &mut [u64] = &mut *state[0usize].block_state;
-    let buf: &mut [u8] = &mut *state[0usize].buf;
-    let k·: &mut [u8] = &mut *state[0usize].p_key;
+    let block_state: &mut [u64] = &mut state[0usize].block_state;
+    let buf: &mut [u8] = &mut state[0usize].buf;
+    let k·: &mut [u8] = &mut state[0usize].p_key;
     poly1305_init(block_state, key);
     (k·[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
     let k·1: &mut [u8] = k·;
     let tmp: state_t =
         state_t
         {
-            block_state: (&*block_state).into(),
-            buf: (&*buf).into(),
+            block_state: block_state.to_vec(),
+            buf: buf.to_vec(),
             total_len: 0u32 as u64,
-            p_key: (&*k·1).into()
+            p_key: k·1.to_vec()
         };
     state[0usize] = tmp
 }
 
 pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
 {
-    let block_state: &mut [u64] = &mut *state[0usize].block_state;
-    let buf_: &mut [u8] = &mut *state[0usize].buf;
+    let block_state: &mut [u64] = &mut state[0usize].block_state;
+    let buf_: &mut [u8] = &mut state[0usize].buf;
     let total_len: u64 = state[0usize].total_len;
-    let k·: &mut [u8] = &mut *state[0usize].p_key;
+    let k·: &mut [u8] = &mut state[0usize].p_key;
     let r: u32 =
         if total_len.wrapping_rem(16u32 as u64) == 0u64 && total_len > 0u64
         { 16u32 }

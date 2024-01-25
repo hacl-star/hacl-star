@@ -3,7 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
-pub struct state_s { pub impl: crate::hacl::spec::impl, pub ek: Box<[u8]> }
+pub struct state_s { pub impl: crate::hacl::spec::impl, pub ek: Vec<u8> }
 
 pub fn uu___is_Ek(a: crate::hacl::spec::alg, projectee: state_s) -> bool
 {

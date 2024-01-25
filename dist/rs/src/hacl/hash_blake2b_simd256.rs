@@ -894,11 +894,11 @@ pub fn store_state256b_to_state32(
     }
 }
 
-pub fn malloc_with_key() -> &mut [crate::lib::intvector_intrinsics::vec256]
+pub fn malloc_with_key() -> Vec<crate::lib::intvector_intrinsics::vec256>
 {
     let mut buf: Vec<crate::lib::intvector_intrinsics::vec256> =
         vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
-    &mut buf
+    buf
 }
 
 pub struct block_state_t
@@ -907,9 +907,9 @@ pub struct block_state_t
     pub snd: &mut [crate::lib::intvector_intrinsics::vec256]
 }
 
-pub struct state_t { pub block_state: block_state_t, pub buf: Box<[u8]>, pub total_len: u64 }
+pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
 
-pub fn malloc() -> Box<[state_t]>
+pub fn malloc() -> Vec<state_t>
 {
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     let mut wv: Vec<crate::lib::intvector_intrinsics::vec256> =
@@ -917,8 +917,7 @@ pub fn malloc() -> Box<[state_t]>
     let mut b: Vec<crate::lib::intvector_intrinsics::vec256> =
         vec![crate::lib::intvector_intrinsics::vec256_zero; 4usize];
     let block_state: block_state_t = block_state_t { fst: &mut wv, snd: &mut b };
-    let s: state_t =
-        state_t { block_state: block_state, buf: buf.try_into().unwrap(), total_len: 0u32 as u64 };
+    let s: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -926,23 +925,23 @@ pub fn malloc() -> Box<[state_t]>
             tmp
         };
     init(block_state.snd, 0u32, 64u32);
-    p.try_into().unwrap()
+    p
 }
 
 pub fn reset(state: &mut [state_t]) -> ()
 {
     let block_state: block_state_t = state[0usize].block_state;
-    let buf: &mut [u8] = &mut *state[0usize].buf;
+    let buf: &mut [u8] = &mut state[0usize].buf;
     init(block_state.snd, 0u32, 64u32);
     let tmp: state_t =
-        state_t { block_state: block_state, buf: (&*buf).into(), total_len: 0u32 as u64 };
+        state_t { block_state: block_state, buf: buf.to_vec(), total_len: 0u32 as u64 };
     state[0usize] = tmp
 }
 
 pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
 {
     let block_state: block_state_t = state[0usize].block_state;
-    let buf_: &mut [u8] = &mut *state[0usize].buf;
+    let buf_: &mut [u8] = &mut state[0usize].buf;
     let total_len: u64 = state[0usize].total_len;
     let r: u32 =
         if total_len.wrapping_rem(128u32 as u64) == 0u64 && total_len > 0u64

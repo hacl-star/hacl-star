@@ -117,6 +117,24 @@
 pub fn ffdhe_len(a: crate::hacl::spec::ffdhe_alg) -> u32
 { crate::hacl::impl_ffdhe::ffdhe_len(a) }
 
+pub fn new_ffdhe_precomp_p(a: crate::hacl::spec::ffdhe_alg) -> Vec<u64>
+{
+    let nLen: u32 =
+        (crate::hacl::impl_ffdhe::ffdhe_len(a)).wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(
+            1u32
+        );
+    let mut res: Vec<u64> = vec![0u64; nLen.wrapping_add(nLen) as usize];
+    if false
+    { res }
+    else
+    {
+        let res1: &mut [u64] = &mut res;
+        let res2: &mut [u64] = res1;
+        ffdhe_precomp_p(a, res2);
+        res2.to_vec()
+    }
+}
+
 pub fn ffdhe_secret_to_public_precomp(
     a: crate::hacl::spec::ffdhe_alg,
     p_r2_n: &mut [u64],

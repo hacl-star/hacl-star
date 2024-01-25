@@ -959,7 +959,7 @@ pub fn mod_inv_prime_vartime(n: &mut [u32], a: &mut [u32], res: &mut [u32]) -> b
     is_valid_m == 0xFFFFFFFFu32
 }
 
-pub fn mont_ctx_init(n: &mut [u32]) -> Box<[crate::hacl::bignum::bn_mont_ctx_u32]>
+pub fn mont_ctx_init(n: &mut [u32]) -> Vec<crate::hacl::bignum::bn_mont_ctx_u32>
 {
     let mut r2: Vec<u32> = vec![0u32; 128usize];
     let mut n1: Vec<u32> = vec![0u32; 128usize];
@@ -971,14 +971,14 @@ pub fn mont_ctx_init(n: &mut [u32]) -> Box<[crate::hacl::bignum::bn_mont_ctx_u32
     let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     let res: crate::hacl::bignum::bn_mont_ctx_u32 =
         crate::hacl::bignum::bn_mont_ctx_u32
-        { len: 128u32, n: (&*n11).into(), mu: mu, r2: (&*r21).into() };
+        { len: 128u32, n: n11.to_vec(), mu: mu, r2: r21.to_vec() };
     let mut buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
         {
             let mut tmp: Vec<crate::hacl::bignum::bn_mont_ctx_u32> = Vec::new();
             tmp.push(res);
             tmp
         };
-    buf.try_into().unwrap()
+    buf
 }
 
 pub fn mod_precomp(
@@ -988,9 +988,9 @@ pub fn mod_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut *k[0usize].n;
+    let n: &mut [u32] = &mut k[0usize].n;
     let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut *k[0usize].r2;
+    let r2: &mut [u32] = &mut k[0usize].r2;
     bn_slow_precomp(n, mu, r2, a, res)
 }
 
@@ -1003,9 +1003,9 @@ pub fn mod_exp_vartime_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut *k[0usize].n;
+    let n: &mut [u32] = &mut k[0usize].n;
     let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut *k[0usize].r2;
+    let r2: &mut [u32] = &mut k[0usize].r2;
     exp_vartime_precomp(n, mu, r2, a, bBits, b, res)
 }
 
@@ -1018,9 +1018,9 @@ pub fn mod_exp_consttime_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut *k[0usize].n;
+    let n: &mut [u32] = &mut k[0usize].n;
     let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut *k[0usize].r2;
+    let r2: &mut [u32] = &mut k[0usize].r2;
     exp_consttime_precomp(n, mu, r2, a, bBits, b, res)
 }
 
@@ -1031,9 +1031,9 @@ pub fn mod_inv_prime_vartime_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut *k[0usize].n;
+    let n: &mut [u32] = &mut k[0usize].n;
     let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut *k[0usize].r2;
+    let r2: &mut [u32] = &mut k[0usize].r2;
     let mut n2: [u32; 128] = [0u32; 128usize];
     let c0: u32 =
         crate::lib::inttypes_intrinsics::sub_borrow_u32(
@@ -1070,6 +1070,83 @@ pub fn mod_inv_prime_vartime_precomp(
     let c2: u32 = c1;
     crate::lowstar::ignore::ignore::<u32>(c2);
     exp_vartime_precomp(n, mu, r2, a, 4096u32, &mut n2, res)
+}
+
+pub fn new_bn_from_bytes_be(len: u32, b: &mut [u8]) -> Vec<u32>
+{
+    if
+    len == 0u32
+    ||
+    ! (len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) <= 1073741823u32)
+    { (&mut []).to_vec() }
+    else
+    {
+        let mut res: Vec<u32> =
+            vec![0u32; len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) as usize];
+        if false
+        { res }
+        else
+        {
+            let res1: &mut [u32] = &mut res;
+            let res2: &mut [u32] = res1;
+            let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32);
+            let tmpLen: u32 = 4u32.wrapping_mul(bnLen);
+            let mut tmp: Vec<u8> = vec![0u8; tmpLen as usize];
+            ((&mut tmp)[tmpLen.wrapping_sub(len) as usize..tmpLen.wrapping_sub(len) as usize
+            +
+            len as usize]).copy_from_slice(&b[0usize..len as usize]);
+            for i in 0u32..bnLen
+            {
+                let u: u32 =
+                    crate::lowstar::endianness::load32_be(
+                        &mut
+                        (&mut tmp)[bnLen.wrapping_sub(i).wrapping_sub(1u32).wrapping_mul(4u32)
+                        as
+                        usize..]
+                    );
+                let x: u32 = u;
+                let os: (&mut [u32], &mut [u32]) = res2.split_at_mut(0usize);
+                os.1[i as usize] = x
+            };
+            res2.to_vec()
+        }
+    }
+}
+
+pub fn new_bn_from_bytes_le(len: u32, b: &mut [u8]) -> Vec<u32>
+{
+    if
+    len == 0u32
+    ||
+    ! (len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) <= 1073741823u32)
+    { (&mut []).to_vec() }
+    else
+    {
+        let mut res: Vec<u32> =
+            vec![0u32; len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32) as usize];
+        if false
+        { res }
+        else
+        {
+            let res1: &mut [u32] = &mut res;
+            let res2: &mut [u32] = res1;
+            let bnLen: u32 = len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32);
+            let tmpLen: u32 = 4u32.wrapping_mul(bnLen);
+            let mut tmp: Vec<u8> = vec![0u8; tmpLen as usize];
+            ((&mut tmp)[0usize..len as usize]).copy_from_slice(&b[0usize..len as usize]);
+            for i in 0u32..len.wrapping_sub(1u32).wrapping_div(4u32).wrapping_add(1u32)
+            {
+                let bj: (&mut [u8], &mut [u8]) =
+                    (&mut tmp).split_at_mut(i.wrapping_mul(4u32) as usize);
+                let u: u32 = crate::lowstar::endianness::load32_le(bj.1);
+                let r1: u32 = u;
+                let x: u32 = r1;
+                let os: (&mut [u32], &mut [u32]) = res2.split_at_mut(0usize);
+                os.1[i as usize] = x
+            };
+            res2.to_vec()
+        }
+    }
 }
 
 pub fn bn_to_bytes_be(b: &mut [u32], res: &mut [u8]) -> ()

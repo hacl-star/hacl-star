@@ -27,7 +27,7 @@ pub fn compute_blake2b_256(
             64u32,
             key,
             key_len,
-            vec![],
+            &mut [],
             0u32
         )
     };

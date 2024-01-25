@@ -480,7 +480,7 @@ pub fn compute_blake2s_32(
     if key_len <= 64u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
     else
-    { crate::hacl::hash_blake2s::hash_with_key(zeroes.0, 32u32, key, key_len, vec![], 0u32) };
+    { crate::hacl::hash_blake2s::hash_with_key(zeroes.0, 32u32, key, key_len, &mut [], 0u32) };
     let mut ipad: Vec<u8> = vec![0x36u8; l as usize];
     for i in 0u32..l
     {
@@ -605,7 +605,7 @@ pub fn compute_blake2b_32(
     if key_len <= 128u32
     { (zeroes.0[0usize..key_len as usize]).copy_from_slice(&key[0usize..key_len as usize]) }
     else
-    { crate::hacl::hash_blake2b::hash_with_key(zeroes.0, 64u32, key, key_len, vec![], 0u32) };
+    { crate::hacl::hash_blake2b::hash_with_key(zeroes.0, 64u32, key, key_len, &mut [], 0u32) };
     let mut ipad: Vec<u8> = vec![0x36u8; l as usize];
     for i in 0u32..l
     {
