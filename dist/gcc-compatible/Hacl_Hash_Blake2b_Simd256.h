@@ -37,6 +37,7 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "libintvector.h"
 
 typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
@@ -57,12 +58,17 @@ Hacl_Hash_Blake2b_Simd256_state_t;
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(void);
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_malloc(Hacl_Hash_Blake2s_blake2b_params *key);
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state);
+void
+Hacl_Hash_Blake2b_Simd256_reset(
+  Hacl_Hash_Blake2b_Simd256_state_t *state,
+  Hacl_Hash_Blake2s_blake2b_params *key
+);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded

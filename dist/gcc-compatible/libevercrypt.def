@@ -5,6 +5,7 @@ EXPORTS
   Hacl_Hash_Blake2b_update_multi
   Hacl_Hash_Blake2b_update_last
   Hacl_Hash_Blake2b_finish
+  FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2b_params____
   Hacl_Hash_Blake2b_malloc
   Hacl_Hash_Blake2b_reset
   Hacl_Hash_Blake2b_update
@@ -15,6 +16,7 @@ EXPORTS
   Hacl_Hash_Blake2s_update_multi
   Hacl_Hash_Blake2s_update_last
   Hacl_Hash_Blake2s_finish
+  FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2s_params____
   Hacl_Hash_Blake2s_malloc
   Hacl_Hash_Blake2s_reset
   Hacl_Hash_Blake2s_update
@@ -508,13 +510,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod
