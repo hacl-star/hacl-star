@@ -10,7 +10,12 @@ module Spec = Spec.Blake2
 
 inline_for_extraction noextract
 let blake2b_32 kk =
-  Common.blake2 Spec.Blake2B Core.M32 kk Blake2b32.init_with_params Blake2b32.update_multi
+  Common.blake2 Spec.Blake2B Core.M32 false kk Blake2b32.init Blake2b32.update_multi
+         Blake2b32.update_last Blake2b32.finish
+
+inline_for_extraction noextract
+let blake2b_32_params kk =
+  Common.blake2 Spec.Blake2B Core.M32 true kk Blake2b32.init_with_params Blake2b32.update_multi
          Blake2b32.update_last Blake2b32.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
@@ -32,9 +37,17 @@ let alloca =
 let malloc =
   F.malloc (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
+[@ (Comment "  State allocation function when there are parameters but no key")]
+let malloc_with_params =
+  F.malloc (blake2b_32_params 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+
 [@ (Comment "  Re-initialization function when there is no key")]
 let reset =
   F.reset (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+
+[@ (Comment "  Re-initialization function when there are parameters but no key")]
+let reset_with_params =
+  F.reset (blake2b_32_params 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let update =

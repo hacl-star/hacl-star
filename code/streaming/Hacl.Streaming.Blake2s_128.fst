@@ -13,7 +13,12 @@ module Spec = Spec.Blake2
 /// The functor
 inline_for_extraction noextract
 let blake2s_128 kk =
-  Common.blake2 Spec.Blake2S Core.M128 kk Blake2s128.init_with_params Blake2s128.update_multi
+  Common.blake2 Spec.Blake2S Core.M128 false kk Blake2s128.init Blake2s128.update_multi
+         Blake2s128.update_last Blake2s128.finish
+
+inline_for_extraction noextract
+let blake2s_128_params kk =
+  Common.blake2 Spec.Blake2S Core.M128 true kk Blake2s128.init_with_params Blake2s128.update_multi
          Blake2s128.update_last Blake2s128.finish
 
 /// Type abbreviations
@@ -29,9 +34,17 @@ let alloca =
 let malloc =
   F.malloc (blake2s_128 0) () (Common.s Spec.Blake2S Core.M128) (Common.empty_key Spec.Blake2S)
 
+[@ (Comment "  State allocation function when there are parameters but no key")]
+let malloc_with_params =
+  F.malloc (blake2s_128_params 0) () (Common.s Spec.Blake2S Core.M128) (Common.empty_key Spec.Blake2S)
+
 [@ (Comment "  Re-initialization function when there is no key")]
 let reset =
   F.reset (blake2s_128 0) () (Common.s Spec.Blake2S Core.M128) (Common.empty_key Spec.Blake2S)
+
+[@ (Comment "  Re-initialization function when there are parameters but no key")]
+let reset_with_params =
+  F.reset (blake2s_128_params 0) () (Common.s Spec.Blake2S Core.M128) (Common.empty_key Spec.Blake2S)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let update =
