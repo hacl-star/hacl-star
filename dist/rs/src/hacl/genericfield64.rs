@@ -3,6 +3,8 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+pub type pbn_mont_ctx_u64 <'a> = &'a mut [crate::hacl::bignum::bn_mont_ctx_u64];
+
 pub fn field_modulus_check(len: u32, n: &mut [u64]) -> bool
 {
     let m: u64 = crate::hacl::bignum::bn_check_modulus_u64(len, n);

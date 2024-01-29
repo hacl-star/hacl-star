@@ -373,8 +373,20 @@ let copy #index c i t t' state r =
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
 
+  // HACL-RS
+  // let State block_state0 buf0 total_len0 seen0 k0 = !*state in
   // All source state is suffixed by 0.
-  let State block_state0 buf0 total_len0 seen0 k0 = !*state in
+  let uu__ = !*state in
+  let State block_state0 _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf0 _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ total_len0 _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ seen0 _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k0 = uu__ in
+
   let i = c.index_of_state i block_state0 in
 
   (**) let h0 = ST.get () in
@@ -1132,8 +1144,20 @@ let update_small_functional_correctness #index c i t t' p data len h0 h1 =
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
 let update_small #index c i t t' p data len =
   let open LowStar.BufferOps in
-  let s = !*p in
-  let State block_state buf total_len seen_ k' = s in
+  // HACL-RS:
+  // let s = !*p in
+  // let State block_state buf total_len seen_ k' = s in
+  let uu__ = !*p in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ buf _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ seen_ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ _ k' = uu__ in
+
   [@inline_let]
   let block_state: c.state.s i = block_state in
 
@@ -1339,8 +1363,20 @@ let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
-  let s = !*p in
-  let State block_state buf total_len seen k' = s in
+  // HACL-RS
+  // let s = !*p in
+  // let State block_state buf total_len seen k' = s in
+  let uu__ = !*p in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ buf _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ seen _ = uu__ in
+  let uu__ = !*p in
+  let State _ _ _ _ k' = uu__ in
+
   [@inline_let]
   let block_state: c.state.s i = block_state in
   let sz = rest c i total_len in
@@ -1421,7 +1457,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
   optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h1 h2;
   stateful_frame_preserves_freeable #index #(Block?.state c) #i
                                     (B.loc_buffer dst)
-                                    (State?.block_state s) h1 h2;
+                                    block_state h1 h2;
   assert(preserves_freeable c i p h01 h2);
 
   [@inline_let]
@@ -1436,7 +1472,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
   stateful_frame_preserves_freeable #index #(Block?.state c) #i
                                     (B.loc_buffer p)
-                                    (State?.block_state s) h2 h3;
+                                    block_state h2 h3;
   assert(preserves_freeable c i p h2 h3);
   assert(preserves_freeable c i p h0 h3);
 
@@ -1503,7 +1539,20 @@ let update_round #index c i t t' p data len =
 let update #index c i t t' state chunk chunk_len =
   let open LowStar.BufferOps in
   let s = !*state in
-  let State block_state buf_ total_len seen k' = s in
+  // HACL-RS: previously, was:
+  //   let State block_state buf_ total_len seen k' = s in
+  // See comment in let digest
+  let uu__ = !*state in
+  let State block_state _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ buf_ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ total_len _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ seen _ = uu__ in
+  let uu__ = !*state in
+  let State _ _ _ _ k' = uu__ in
+
   let i = c.index_of_state i block_state in
 
   if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 chunk_len >^ c.max_input_len i -^ total_len) then
@@ -1720,8 +1769,9 @@ let digest #index c i t t' state output l =
   [@inline_let]
   let r_multi = U32.(r -^ r_last) in
   // Split the buffer according to the computed lengths
-  let buf_last = B.sub buf_ r_multi (Ghost.hide r_last) in
+  // HACL-RS: non-statically known indices, split left to right
   let buf_multi = B.sub buf_ 0ul r_multi in
+  let buf_last = B.sub buf_ r_multi (Ghost.hide r_last) in
 
   [@inline_let]
   let state_is_block = c.block_len i = c.blocks_state_len i in

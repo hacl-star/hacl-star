@@ -11,3 +11,797 @@ pub fn uu___is_Ek(a: crate::hacl::spec::alg, projectee: state_s) -> bool
     crate::lowstar::ignore::ignore::<state_s>(projectee);
     true
 }
+
+fn create_in_chacha20_poly1305(dst: &mut [&mut [state_s]], k: &mut [u8]) ->
+    crate::evercrypt::error::error_code
+{
+    let mut ek: Vec<u8> = vec![0u8; 32usize];
+    let mut p: Vec<state_s> =
+        {
+            let mut tmp: Vec<state_s> = Vec::new();
+            tmp.push(state_s { impl: crate::hacl::spec::impl::Hacl_CHACHA20, ek: ek });
+            tmp
+        };
+    ((&mut ek)[0usize..32usize]).copy_from_slice(&k[0usize..32usize]);
+    dst[0usize] = &mut p;
+    crate::evercrypt::error::error_code::Success
+}
+
+fn create_in_aes128_gcm(dst: &mut [&mut [state_s]], k: &mut [u8]) ->
+    crate::evercrypt::error::error_code
+{
+    crate::lowstar::ignore::ignore::<&mut [&mut [state_s]]>(dst);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(k);
+    if crate::evercrypt::targetconfig::hacl_can_compile_vale
+    {
+        let has_aesni: bool = crate::evercrypt::autoconfig2::has_aesni();
+        let has_pclmulqdq: bool = crate::evercrypt::autoconfig2::has_pclmulqdq();
+        let has_avx: bool = crate::evercrypt::autoconfig2::has_avx();
+        let has_sse: bool = crate::evercrypt::autoconfig2::has_sse();
+        let has_movbe: bool = crate::evercrypt::autoconfig2::has_movbe();
+        if has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe
+        {
+            let mut ek: Vec<u8> = vec![0u8; 480usize];
+            let keys_b: (&mut [u8], &mut [u8]) = (&mut ek).split_at_mut(0usize);
+            let hkeys_b: (&mut [u8], &mut [u8]) = keys_b.1.split_at_mut(176usize);
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_aes::aes128_key_expansion(k, hkeys_b.0)
+            );
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_aeshash::aes128_keyhash_init(hkeys_b.0, hkeys_b.1)
+            );
+            let mut p: Vec<state_s> =
+                {
+                    let mut tmp: Vec<state_s> = Vec::new();
+                    tmp.push(state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: ek });
+                    tmp
+                };
+            dst[0usize] = &mut p;
+            crate::evercrypt::error::error_code::Success
+        }
+        else
+        { crate::evercrypt::error::error_code::UnsupportedAlgorithm }
+    }
+    else
+    { crate::evercrypt::error::error_code::UnsupportedAlgorithm }
+}
+
+fn create_in_aes256_gcm(dst: &mut [&mut [state_s]], k: &mut [u8]) ->
+    crate::evercrypt::error::error_code
+{
+    crate::lowstar::ignore::ignore::<&mut [&mut [state_s]]>(dst);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(k);
+    if crate::evercrypt::targetconfig::hacl_can_compile_vale
+    {
+        let has_aesni: bool = crate::evercrypt::autoconfig2::has_aesni();
+        let has_pclmulqdq: bool = crate::evercrypt::autoconfig2::has_pclmulqdq();
+        let has_avx: bool = crate::evercrypt::autoconfig2::has_avx();
+        let has_sse: bool = crate::evercrypt::autoconfig2::has_sse();
+        let has_movbe: bool = crate::evercrypt::autoconfig2::has_movbe();
+        if has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe
+        {
+            let mut ek: Vec<u8> = vec![0u8; 544usize];
+            let keys_b: (&mut [u8], &mut [u8]) = (&mut ek).split_at_mut(0usize);
+            let hkeys_b: (&mut [u8], &mut [u8]) = keys_b.1.split_at_mut(240usize);
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_aes::aes256_key_expansion(k, hkeys_b.0)
+            );
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_aeshash::aes256_keyhash_init(hkeys_b.0, hkeys_b.1)
+            );
+            let mut p: Vec<state_s> =
+                {
+                    let mut tmp: Vec<state_s> = Vec::new();
+                    tmp.push(state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: ek });
+                    tmp
+                };
+            dst[0usize] = &mut p;
+            crate::evercrypt::error::error_code::Success
+        }
+        else
+        { crate::evercrypt::error::error_code::UnsupportedAlgorithm }
+    }
+    else
+    { crate::evercrypt::error::error_code::UnsupportedAlgorithm }
+}
+
+fn encrypt_aes128_gcm(
+    s: &mut [state_s],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    plain: &mut [u8],
+    plain_len: u32,
+    cipher: &mut [u8],
+    tag: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    crate::lowstar::ignore::ignore::<&mut [state_s]>(s);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(iv);
+    crate::lowstar::ignore::ignore::<u32>(iv_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(ad);
+    crate::lowstar::ignore::ignore::<u32>(ad_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(plain);
+    crate::lowstar::ignore::ignore::<u32>(plain_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(cipher);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(tag);
+    if crate::evercrypt::targetconfig::hacl_can_compile_vale
+    {
+        if false
+        { crate::evercrypt::error::error_code::InvalidKey }
+        else
+        if iv_len == 0u32
+        { crate::evercrypt::error::error_code::InvalidIVLength }
+        else
+        {
+            let ek: &mut [u8] = &mut s[0usize].ek;
+            let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(304usize);
+            let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
+            let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
+            let hkeys_b: (&mut [u8], &mut [u8]) = keys_b.1.split_at_mut(176usize);
+            let mut tmp_iv: [u8; 16] = [0u8; 16usize];
+            let len: u32 = iv_len.wrapping_div(16u32);
+            let bytes_len: u32 = len.wrapping_mul(16u32);
+            let iv_b: (&mut [u8], &mut [u8]) = iv.split_at_mut(0usize);
+            ((&mut tmp_iv)[0usize..iv_len.wrapping_rem(16u32) as usize]).copy_from_slice(
+                &iv[bytes_len as usize..bytes_len as usize + iv_len.wrapping_rem(16u32) as usize]
+            );
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_gcm_iv::compute_iv_stdcall(
+                    iv_b.1,
+                    iv_len as u64,
+                    len as u64,
+                    &mut tmp_iv,
+                    &mut tmp_iv,
+                    hkeys_b.1
+                )
+            );
+            let inout_b: (&mut [u8], &mut [u8]) = scratch_b.1.split_at_mut(0usize);
+            let abytes_b: (&mut [u8], &mut [u8]) = inout_b.1.split_at_mut(16usize);
+            let scratch_b1: (&mut [u8], &mut [u8]) = abytes_b.1.split_at_mut(16usize);
+            let plain_len·: u32 =
+                (plain_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let auth_len·: u32 = (ad_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let plain_b·: (&mut [u8], &mut [u8]) = plain.split_at_mut(0usize);
+            let out_b·: (&mut [u8], &mut [u8]) = cipher.split_at_mut(0usize);
+            let auth_b·: (&mut [u8], &mut [u8]) = ad.split_at_mut(0usize);
+            (abytes_b.0[0usize..(plain_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &plain[plain_len· as usize..plain_len· as usize
+                +
+                (plain_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            (scratch_b1.0[0usize..(ad_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &ad[auth_len· as usize..auth_len· as usize
+                +
+                (ad_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            let len128x6: u64 = (plain_len as u64).wrapping_div(96u64).wrapping_mul(96u64);
+            if len128x6.wrapping_div(16u64) >= 18u64
+            {
+                let len128_num: u64 =
+                    (plain_len as u64).wrapping_div(16u64).wrapping_mul(16u64).wrapping_sub(
+                        len128x6
+                    );
+                let in128x6_b: (&mut [u8], &mut [u8]) = plain_b·.1.split_at_mut(0usize);
+                let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                let in128_b: (&mut [u8], &mut [u8]) =
+                    in128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                let out128_b: (&mut [u8], &mut [u8]) =
+                    out128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                let len128x6·: u64 = len128x6.wrapping_div(16u64);
+                let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                crate::lowstar::ignore::ignore::<u64>(
+                    crate::vale::stdcalls_x64_gcmencryptopt::gcm128_encrypt_opt(
+                        auth_b·.1,
+                        ad_len as u64,
+                        auth_num,
+                        hkeys_b.0,
+                        &mut tmp_iv,
+                        hkeys_b.1,
+                        scratch_b1.0,
+                        in128_b.0,
+                        out128_b.0,
+                        len128x6·,
+                        in128_b.1,
+                        out128_b.1,
+                        len128_num·,
+                        abytes_b.0,
+                        plain_len as u64,
+                        scratch_b1.1,
+                        tag
+                    )
+                )
+            }
+            else
+            {
+                let len128x61: u32 = 0u32;
+                let len128_num: u64 = (plain_len as u64).wrapping_div(16u64).wrapping_mul(16u64);
+                let in128x6_b: (&mut [u8], &mut [u8]) = plain_b·.1.split_at_mut(0usize);
+                let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                let in128_b: (&mut [u8], &mut [u8]) = in128x6_b.1.split_at_mut(len128x61 as usize);
+                let out128_b: (&mut [u8], &mut [u8]) =
+                    out128x6_b.1.split_at_mut(len128x61 as usize);
+                let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                let len128x6·: u64 = 0u64;
+                crate::lowstar::ignore::ignore::<u64>(
+                    crate::vale::stdcalls_x64_gcmencryptopt::gcm128_encrypt_opt(
+                        auth_b·.1,
+                        ad_len as u64,
+                        auth_num,
+                        hkeys_b.0,
+                        &mut tmp_iv,
+                        hkeys_b.1,
+                        scratch_b1.0,
+                        in128_b.0,
+                        out128_b.0,
+                        len128x6·,
+                        in128_b.1,
+                        out128_b.1,
+                        len128_num·,
+                        abytes_b.0,
+                        plain_len as u64,
+                        scratch_b1.1,
+                        tag
+                    )
+                )
+            };
+            (cipher[(plain_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32) as usize..(plain_len
+            as
+            u64
+            as
+            u32).wrapping_div(16u32).wrapping_mul(16u32)
+            as
+            usize
+            +
+            (plain_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &abytes_b.0[0usize..(plain_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            crate::evercrypt::error::error_code::Success
+        }
+    }
+    else
+    { panic!(statically unreachable) }
+}
+
+fn encrypt_aes256_gcm(
+    s: &mut [state_s],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    plain: &mut [u8],
+    plain_len: u32,
+    cipher: &mut [u8],
+    tag: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    crate::lowstar::ignore::ignore::<&mut [state_s]>(s);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(iv);
+    crate::lowstar::ignore::ignore::<u32>(iv_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(ad);
+    crate::lowstar::ignore::ignore::<u32>(ad_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(plain);
+    crate::lowstar::ignore::ignore::<u32>(plain_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(cipher);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(tag);
+    if crate::evercrypt::targetconfig::hacl_can_compile_vale
+    {
+        if false
+        { crate::evercrypt::error::error_code::InvalidKey }
+        else
+        if iv_len == 0u32
+        { crate::evercrypt::error::error_code::InvalidIVLength }
+        else
+        {
+            let ek: &mut [u8] = &mut s[0usize].ek;
+            let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(368usize);
+            let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
+            let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
+            let hkeys_b: (&mut [u8], &mut [u8]) = keys_b.1.split_at_mut(240usize);
+            let mut tmp_iv: [u8; 16] = [0u8; 16usize];
+            let len: u32 = iv_len.wrapping_div(16u32);
+            let bytes_len: u32 = len.wrapping_mul(16u32);
+            let iv_b: (&mut [u8], &mut [u8]) = iv.split_at_mut(0usize);
+            ((&mut tmp_iv)[0usize..iv_len.wrapping_rem(16u32) as usize]).copy_from_slice(
+                &iv[bytes_len as usize..bytes_len as usize + iv_len.wrapping_rem(16u32) as usize]
+            );
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_gcm_iv::compute_iv_stdcall(
+                    iv_b.1,
+                    iv_len as u64,
+                    len as u64,
+                    &mut tmp_iv,
+                    &mut tmp_iv,
+                    hkeys_b.1
+                )
+            );
+            let inout_b: (&mut [u8], &mut [u8]) = scratch_b.1.split_at_mut(0usize);
+            let abytes_b: (&mut [u8], &mut [u8]) = inout_b.1.split_at_mut(16usize);
+            let scratch_b1: (&mut [u8], &mut [u8]) = abytes_b.1.split_at_mut(16usize);
+            let plain_len·: u32 =
+                (plain_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let auth_len·: u32 = (ad_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let plain_b·: (&mut [u8], &mut [u8]) = plain.split_at_mut(0usize);
+            let out_b·: (&mut [u8], &mut [u8]) = cipher.split_at_mut(0usize);
+            let auth_b·: (&mut [u8], &mut [u8]) = ad.split_at_mut(0usize);
+            (abytes_b.0[0usize..(plain_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &plain[plain_len· as usize..plain_len· as usize
+                +
+                (plain_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            (scratch_b1.0[0usize..(ad_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &ad[auth_len· as usize..auth_len· as usize
+                +
+                (ad_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            let len128x6: u64 = (plain_len as u64).wrapping_div(96u64).wrapping_mul(96u64);
+            if len128x6.wrapping_div(16u64) >= 18u64
+            {
+                let len128_num: u64 =
+                    (plain_len as u64).wrapping_div(16u64).wrapping_mul(16u64).wrapping_sub(
+                        len128x6
+                    );
+                let in128x6_b: (&mut [u8], &mut [u8]) = plain_b·.1.split_at_mut(0usize);
+                let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                let in128_b: (&mut [u8], &mut [u8]) =
+                    in128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                let out128_b: (&mut [u8], &mut [u8]) =
+                    out128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                let len128x6·: u64 = len128x6.wrapping_div(16u64);
+                let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                crate::lowstar::ignore::ignore::<u64>(
+                    crate::vale::stdcalls_x64_gcmencryptopt::gcm256_encrypt_opt(
+                        auth_b·.1,
+                        ad_len as u64,
+                        auth_num,
+                        hkeys_b.0,
+                        &mut tmp_iv,
+                        hkeys_b.1,
+                        scratch_b1.0,
+                        in128_b.0,
+                        out128_b.0,
+                        len128x6·,
+                        in128_b.1,
+                        out128_b.1,
+                        len128_num·,
+                        abytes_b.0,
+                        plain_len as u64,
+                        scratch_b1.1,
+                        tag
+                    )
+                )
+            }
+            else
+            {
+                let len128x61: u32 = 0u32;
+                let len128_num: u64 = (plain_len as u64).wrapping_div(16u64).wrapping_mul(16u64);
+                let in128x6_b: (&mut [u8], &mut [u8]) = plain_b·.1.split_at_mut(0usize);
+                let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                let in128_b: (&mut [u8], &mut [u8]) = in128x6_b.1.split_at_mut(len128x61 as usize);
+                let out128_b: (&mut [u8], &mut [u8]) =
+                    out128x6_b.1.split_at_mut(len128x61 as usize);
+                let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                let len128x6·: u64 = 0u64;
+                crate::lowstar::ignore::ignore::<u64>(
+                    crate::vale::stdcalls_x64_gcmencryptopt::gcm256_encrypt_opt(
+                        auth_b·.1,
+                        ad_len as u64,
+                        auth_num,
+                        hkeys_b.0,
+                        &mut tmp_iv,
+                        hkeys_b.1,
+                        scratch_b1.0,
+                        in128_b.0,
+                        out128_b.0,
+                        len128x6·,
+                        in128_b.1,
+                        out128_b.1,
+                        len128_num·,
+                        abytes_b.0,
+                        plain_len as u64,
+                        scratch_b1.1,
+                        tag
+                    )
+                )
+            };
+            (cipher[(plain_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32) as usize..(plain_len
+            as
+            u64
+            as
+            u32).wrapping_div(16u32).wrapping_mul(16u32)
+            as
+            usize
+            +
+            (plain_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &abytes_b.0[0usize..(plain_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            crate::evercrypt::error::error_code::Success
+        }
+    }
+    else
+    { panic!(statically unreachable) }
+}
+
+fn decrypt_aes128_gcm(
+    s: &mut [state_s],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    cipher: &mut [u8],
+    cipher_len: u32,
+    tag: &mut [u8],
+    dst: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    crate::lowstar::ignore::ignore::<&mut [state_s]>(s);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(iv);
+    crate::lowstar::ignore::ignore::<u32>(iv_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(ad);
+    crate::lowstar::ignore::ignore::<u32>(ad_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(cipher);
+    crate::lowstar::ignore::ignore::<u32>(cipher_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(tag);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(dst);
+    if crate::evercrypt::targetconfig::hacl_can_compile_vale
+    {
+        if false
+        { crate::evercrypt::error::error_code::InvalidKey }
+        else
+        if iv_len == 0u32
+        { crate::evercrypt::error::error_code::InvalidIVLength }
+        else
+        {
+            let ek: &mut [u8] = &mut s[0usize].ek;
+            let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(304usize);
+            let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
+            let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
+            let hkeys_b: (&mut [u8], &mut [u8]) = keys_b.1.split_at_mut(176usize);
+            let mut tmp_iv: [u8; 16] = [0u8; 16usize];
+            let len: u32 = iv_len.wrapping_div(16u32);
+            let bytes_len: u32 = len.wrapping_mul(16u32);
+            let iv_b: (&mut [u8], &mut [u8]) = iv.split_at_mut(0usize);
+            ((&mut tmp_iv)[0usize..iv_len.wrapping_rem(16u32) as usize]).copy_from_slice(
+                &iv[bytes_len as usize..bytes_len as usize + iv_len.wrapping_rem(16u32) as usize]
+            );
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_gcm_iv::compute_iv_stdcall(
+                    iv_b.1,
+                    iv_len as u64,
+                    len as u64,
+                    &mut tmp_iv,
+                    &mut tmp_iv,
+                    hkeys_b.1
+                )
+            );
+            let inout_b: (&mut [u8], &mut [u8]) = scratch_b.1.split_at_mut(0usize);
+            let abytes_b: (&mut [u8], &mut [u8]) = inout_b.1.split_at_mut(16usize);
+            let scratch_b1: (&mut [u8], &mut [u8]) = abytes_b.1.split_at_mut(16usize);
+            let cipher_len·: u32 =
+                (cipher_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let auth_len·: u32 = (ad_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let cipher_b·: (&mut [u8], &mut [u8]) = cipher.split_at_mut(0usize);
+            let out_b·: (&mut [u8], &mut [u8]) = dst.split_at_mut(0usize);
+            let auth_b·: (&mut [u8], &mut [u8]) = ad.split_at_mut(0usize);
+            (abytes_b.0[0usize..(cipher_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &cipher[cipher_len· as usize..cipher_len· as usize
+                +
+                (cipher_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            (scratch_b1.0[0usize..(ad_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &ad[auth_len· as usize..auth_len· as usize
+                +
+                (ad_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            let len128x6: u64 = (cipher_len as u64).wrapping_div(96u64).wrapping_mul(96u64);
+            let c: u64 =
+                if len128x6.wrapping_div(16u64) >= 6u64
+                {
+                    let len128_num: u64 =
+                        (cipher_len as u64).wrapping_div(16u64).wrapping_mul(16u64).wrapping_sub(
+                            len128x6
+                        );
+                    let in128x6_b: (&mut [u8], &mut [u8]) = cipher_b·.1.split_at_mut(0usize);
+                    let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                    let in128_b: (&mut [u8], &mut [u8]) =
+                        in128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                    let out128_b: (&mut [u8], &mut [u8]) =
+                        out128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                    let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                    let len128x6·: u64 = len128x6.wrapping_div(16u64);
+                    let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                    let c: u64 =
+                        crate::vale::stdcalls_x64_gcmdecryptopt::gcm128_decrypt_opt(
+                            auth_b·.1,
+                            ad_len as u64,
+                            auth_num,
+                            hkeys_b.0,
+                            &mut tmp_iv,
+                            hkeys_b.1,
+                            scratch_b1.0,
+                            in128_b.0,
+                            out128_b.0,
+                            len128x6·,
+                            in128_b.1,
+                            out128_b.1,
+                            len128_num·,
+                            abytes_b.0,
+                            cipher_len as u64,
+                            scratch_b1.1,
+                            tag
+                        );
+                    c
+                }
+                else
+                {
+                    let len128x61: u32 = 0u32;
+                    let len128_num: u64 =
+                        (cipher_len as u64).wrapping_div(16u64).wrapping_mul(16u64);
+                    let in128x6_b: (&mut [u8], &mut [u8]) = cipher_b·.1.split_at_mut(0usize);
+                    let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                    let in128_b: (&mut [u8], &mut [u8]) =
+                        in128x6_b.1.split_at_mut(len128x61 as usize);
+                    let out128_b: (&mut [u8], &mut [u8]) =
+                        out128x6_b.1.split_at_mut(len128x61 as usize);
+                    let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                    let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                    let len128x6·: u64 = 0u64;
+                    let c: u64 =
+                        crate::vale::stdcalls_x64_gcmdecryptopt::gcm128_decrypt_opt(
+                            auth_b·.1,
+                            ad_len as u64,
+                            auth_num,
+                            hkeys_b.0,
+                            &mut tmp_iv,
+                            hkeys_b.1,
+                            scratch_b1.0,
+                            in128_b.0,
+                            out128_b.0,
+                            len128x6·,
+                            in128_b.1,
+                            out128_b.1,
+                            len128_num·,
+                            abytes_b.0,
+                            cipher_len as u64,
+                            scratch_b1.1,
+                            tag
+                        );
+                    c
+                };
+            (dst[(cipher_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32) as usize..(cipher_len
+            as
+            u64
+            as
+            u32).wrapping_div(16u32).wrapping_mul(16u32)
+            as
+            usize
+            +
+            (cipher_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &abytes_b.0[0usize..(cipher_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            let r: u64 = c;
+            if r == 0u64
+            { crate::evercrypt::error::error_code::Success }
+            else
+            { crate::evercrypt::error::error_code::AuthenticationFailure }
+        }
+    }
+    else
+    { panic!(statically unreachable) }
+}
+
+fn decrypt_aes256_gcm(
+    s: &mut [state_s],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    cipher: &mut [u8],
+    cipher_len: u32,
+    tag: &mut [u8],
+    dst: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    crate::lowstar::ignore::ignore::<&mut [state_s]>(s);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(iv);
+    crate::lowstar::ignore::ignore::<u32>(iv_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(ad);
+    crate::lowstar::ignore::ignore::<u32>(ad_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(cipher);
+    crate::lowstar::ignore::ignore::<u32>(cipher_len);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(tag);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(dst);
+    if crate::evercrypt::targetconfig::hacl_can_compile_vale
+    {
+        if false
+        { crate::evercrypt::error::error_code::InvalidKey }
+        else
+        if iv_len == 0u32
+        { crate::evercrypt::error::error_code::InvalidIVLength }
+        else
+        {
+            let ek: &mut [u8] = &mut s[0usize].ek;
+            let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(368usize);
+            let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
+            let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
+            let hkeys_b: (&mut [u8], &mut [u8]) = keys_b.1.split_at_mut(240usize);
+            let mut tmp_iv: [u8; 16] = [0u8; 16usize];
+            let len: u32 = iv_len.wrapping_div(16u32);
+            let bytes_len: u32 = len.wrapping_mul(16u32);
+            let iv_b: (&mut [u8], &mut [u8]) = iv.split_at_mut(0usize);
+            ((&mut tmp_iv)[0usize..iv_len.wrapping_rem(16u32) as usize]).copy_from_slice(
+                &iv[bytes_len as usize..bytes_len as usize + iv_len.wrapping_rem(16u32) as usize]
+            );
+            crate::lowstar::ignore::ignore::<u64>(
+                crate::vale::stdcalls_x64_gcm_iv::compute_iv_stdcall(
+                    iv_b.1,
+                    iv_len as u64,
+                    len as u64,
+                    &mut tmp_iv,
+                    &mut tmp_iv,
+                    hkeys_b.1
+                )
+            );
+            let inout_b: (&mut [u8], &mut [u8]) = scratch_b.1.split_at_mut(0usize);
+            let abytes_b: (&mut [u8], &mut [u8]) = inout_b.1.split_at_mut(16usize);
+            let scratch_b1: (&mut [u8], &mut [u8]) = abytes_b.1.split_at_mut(16usize);
+            let cipher_len·: u32 =
+                (cipher_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let auth_len·: u32 = (ad_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32);
+            let cipher_b·: (&mut [u8], &mut [u8]) = cipher.split_at_mut(0usize);
+            let out_b·: (&mut [u8], &mut [u8]) = dst.split_at_mut(0usize);
+            let auth_b·: (&mut [u8], &mut [u8]) = ad.split_at_mut(0usize);
+            (abytes_b.0[0usize..(cipher_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &cipher[cipher_len· as usize..cipher_len· as usize
+                +
+                (cipher_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            (scratch_b1.0[0usize..(ad_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &ad[auth_len· as usize..auth_len· as usize
+                +
+                (ad_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            let len128x6: u64 = (cipher_len as u64).wrapping_div(96u64).wrapping_mul(96u64);
+            let c: u64 =
+                if len128x6.wrapping_div(16u64) >= 6u64
+                {
+                    let len128_num: u64 =
+                        (cipher_len as u64).wrapping_div(16u64).wrapping_mul(16u64).wrapping_sub(
+                            len128x6
+                        );
+                    let in128x6_b: (&mut [u8], &mut [u8]) = cipher_b·.1.split_at_mut(0usize);
+                    let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                    let in128_b: (&mut [u8], &mut [u8]) =
+                        in128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                    let out128_b: (&mut [u8], &mut [u8]) =
+                        out128x6_b.1.split_at_mut(len128x6 as u32 as usize);
+                    let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                    let len128x6·: u64 = len128x6.wrapping_div(16u64);
+                    let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                    let c: u64 =
+                        crate::vale::stdcalls_x64_gcmdecryptopt::gcm256_decrypt_opt(
+                            auth_b·.1,
+                            ad_len as u64,
+                            auth_num,
+                            hkeys_b.0,
+                            &mut tmp_iv,
+                            hkeys_b.1,
+                            scratch_b1.0,
+                            in128_b.0,
+                            out128_b.0,
+                            len128x6·,
+                            in128_b.1,
+                            out128_b.1,
+                            len128_num·,
+                            abytes_b.0,
+                            cipher_len as u64,
+                            scratch_b1.1,
+                            tag
+                        );
+                    c
+                }
+                else
+                {
+                    let len128x61: u32 = 0u32;
+                    let len128_num: u64 =
+                        (cipher_len as u64).wrapping_div(16u64).wrapping_mul(16u64);
+                    let in128x6_b: (&mut [u8], &mut [u8]) = cipher_b·.1.split_at_mut(0usize);
+                    let out128x6_b: (&mut [u8], &mut [u8]) = out_b·.1.split_at_mut(0usize);
+                    let in128_b: (&mut [u8], &mut [u8]) =
+                        in128x6_b.1.split_at_mut(len128x61 as usize);
+                    let out128_b: (&mut [u8], &mut [u8]) =
+                        out128x6_b.1.split_at_mut(len128x61 as usize);
+                    let auth_num: u64 = (ad_len as u64).wrapping_div(16u64);
+                    let len128_num·: u64 = len128_num.wrapping_div(16u64);
+                    let len128x6·: u64 = 0u64;
+                    let c: u64 =
+                        crate::vale::stdcalls_x64_gcmdecryptopt::gcm256_decrypt_opt(
+                            auth_b·.1,
+                            ad_len as u64,
+                            auth_num,
+                            hkeys_b.0,
+                            &mut tmp_iv,
+                            hkeys_b.1,
+                            scratch_b1.0,
+                            in128_b.0,
+                            out128_b.0,
+                            len128x6·,
+                            in128_b.1,
+                            out128_b.1,
+                            len128_num·,
+                            abytes_b.0,
+                            cipher_len as u64,
+                            scratch_b1.1,
+                            tag
+                        );
+                    c
+                };
+            (dst[(cipher_len as u64 as u32).wrapping_div(16u32).wrapping_mul(16u32) as usize..(cipher_len
+            as
+            u64
+            as
+            u32).wrapping_div(16u32).wrapping_mul(16u32)
+            as
+            usize
+            +
+            (cipher_len as u64 as u32).wrapping_rem(16u32) as usize]).copy_from_slice(
+                &abytes_b.0[0usize..(cipher_len as u64 as u32).wrapping_rem(16u32) as usize]
+            );
+            let r: u64 = c;
+            if r == 0u64
+            { crate::evercrypt::error::error_code::Success }
+            else
+            { crate::evercrypt::error::error_code::AuthenticationFailure }
+        }
+    }
+    else
+    { panic!(statically unreachable) }
+}
+
+fn decrypt_chacha20_poly1305(
+    s: &mut [state_s],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    cipher: &mut [u8],
+    cipher_len: u32,
+    tag: &mut [u8],
+    dst: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    if false
+    { crate::evercrypt::error::error_code::InvalidKey }
+    else
+    if iv_len != 12u32
+    { crate::evercrypt::error::error_code::InvalidIVLength }
+    else
+    {
+        let ek: &mut [u8] = &mut s[0usize].ek;
+        let r: u32 =
+            crate::evercrypt::chacha20poly1305::aead_decrypt(
+                ek,
+                iv,
+                ad_len,
+                ad,
+                cipher_len,
+                dst,
+                cipher,
+                tag
+            );
+        if r == 0u32
+        { crate::evercrypt::error::error_code::Success }
+        else
+        { crate::evercrypt::error::error_code::AuthenticationFailure }
+    }
+}

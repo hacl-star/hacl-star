@@ -35,3 +35,11 @@ pub fn load64_be(bytes: &[u8]) -> u64 {
 pub fn store64_be(bytes: &mut[u8], x: u64) {
     bytes[0..8].copy_from_slice(&u64::to_be_bytes(x))
 }
+
+pub fn load128_be(bytes: &[u8]) -> u128 {
+    u128::from_be_bytes(bytes[0..16].try_into().unwrap())
+}
+
+pub fn store128_be(bytes: &mut[u8], x: u128) {
+    bytes[0..16].copy_from_slice(&u128::to_be_bytes(x))
+}

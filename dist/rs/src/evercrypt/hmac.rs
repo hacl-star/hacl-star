@@ -3,6 +3,8 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+pub type supported_alg = crate::hacl::streaming_types::hash_alg;
+
 pub const hash_256: (&mut [u8], &mut [u8], u32) () = crate::evercrypt::hash::hash_256;
 
 pub fn compute_sha1(

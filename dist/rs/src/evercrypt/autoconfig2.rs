@@ -101,6 +101,8 @@ pub fn init() -> ()
     }
 }
 
+pub type disabler = () ();
+
 pub fn disable_avx2() -> () { (&mut cpu_has_avx2)[0usize] = false }
 
 pub fn disable_avx() -> () { (&mut cpu_has_avx)[0usize] = false }

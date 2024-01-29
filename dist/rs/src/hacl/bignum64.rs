@@ -3,6 +3,8 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+pub type pbn_mont_ctx_u64 <'a> = &'a mut [crate::hacl::bignum::bn_mont_ctx_u64];
+
 pub fn add(len: u32, a: &mut [u64], b: &mut [u64], res: &mut [u64]) -> u64
 { crate::hacl::bignum_base::bn_add_eq_len_u64(len, a, b, res) }
 

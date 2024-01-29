@@ -18,4 +18,4 @@ pub mod ed25519_precomptable;
 pub mod streaming_types;
 // pub mod hash_md5;
 // pub mod hash_sha1;
-// pub mod hash_sha2;
+pub mod hash_sha2;

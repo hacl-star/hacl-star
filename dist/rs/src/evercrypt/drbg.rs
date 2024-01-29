@@ -3,6 +3,8 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+pub type supported_alg = crate::hacl::streaming_types::hash_alg;
+
 pub const reseed_interval: u32 = 1024u32;
 
 pub const max_output_length: u32 = 65536u32;
