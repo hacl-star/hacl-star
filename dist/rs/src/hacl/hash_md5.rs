@@ -1515,14 +1515,13 @@ pub fn digest(state: &mut [crate::hacl::streaming_types::state_32], output: &mut
     let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
     let mut tmp_block_state: [u32; 4] = [0u32; 4usize];
     ((&mut tmp_block_state)[0usize..4usize]).copy_from_slice(&block_state[0usize..4usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
-    update_multi(&mut tmp_block_state, buf_multi.1, 0u32);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    update_multi(&mut tmp_block_state, buf_last.0, 0u32);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
-    update_last(&mut tmp_block_state, prev_len_last, buf_multi.0, r);
+    update_last(&mut tmp_block_state, prev_len_last, buf_last.1, r);
     finish(&mut tmp_block_state, output)
 }
 

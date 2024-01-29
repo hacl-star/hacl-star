@@ -2615,17 +2615,16 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
         [crate::lib::intvector_intrinsics::vec256_zero; 25usize];
     let tmp_block_state: &mut [crate::lib::intvector_intrinsics::vec256] = &mut r1;
     (tmp_block_state[0usize..25usize]).copy_from_slice(&block_state[0usize..25usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
     let ite0: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
-    poly1305_update(tmp_block_state, r.wrapping_sub(ite0), buf_multi.1);
+    poly1305_update(tmp_block_state, r.wrapping_sub(ite0), buf_last.0);
     let ite1: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
-    poly1305_update(tmp_block_state, ite1, buf_multi.0);
+    poly1305_update(tmp_block_state, ite1, buf_last.1);
     let mut tmp: [crate::lib::intvector_intrinsics::vec256; 25] =
         [crate::lib::intvector_intrinsics::vec256_zero; 25usize];
     ((&mut tmp)[0usize..25usize]).copy_from_slice(&tmp_block_state[0usize..25usize]);

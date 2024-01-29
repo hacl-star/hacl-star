@@ -619,13 +619,12 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
     let mut r1: [u64; 25] = [0u64; 25usize];
     let tmp_block_state: &mut [u64] = &mut r1;
     (tmp_block_state[0usize..25usize]).copy_from_slice(&block_state[0usize..25usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(16u32) == 0u32 && r > 0u32 { 16u32 } else { r.wrapping_rem(16u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
-    poly1305_update(tmp_block_state, 0u32, buf_multi.1);
-    poly1305_update(tmp_block_state, r, buf_multi.0);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    poly1305_update(tmp_block_state, 0u32, buf_last.0);
+    poly1305_update(tmp_block_state, r, buf_last.1);
     let mut tmp: [u64; 25] = [0u64; 25usize];
     ((&mut tmp)[0usize..25usize]).copy_from_slice(&tmp_block_state[0usize..25usize]);
     poly1305_finish(output, k·, &mut tmp)

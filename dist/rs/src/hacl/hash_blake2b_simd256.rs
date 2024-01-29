@@ -1127,11 +1127,10 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
     let dst_b: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.snd;
     (dst_b[0usize..4usize]).copy_from_slice(&src_b[0usize..4usize]);
     let prev_len: u64 = total_len.wrapping_sub(r as u64);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(128u32) == 0u32 && r > 0u32 { 128u32 } else { r.wrapping_rem(128u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
     let wv0: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.fst;
     let hash: &mut [crate::lib::intvector_intrinsics::vec256] = tmp_block_state.snd;
     let nb: u32 = 0u32;
@@ -1140,7 +1139,7 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
         wv0,
         hash,
         crate::fstar::uint128::uint64_to_uint128(prev_len),
-        buf_multi.1,
+        buf_last.0,
         nb
     );
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
@@ -1152,7 +1151,7 @@ pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
         hash0,
         crate::fstar::uint128::uint64_to_uint128(prev_len_last),
         r,
-        buf_multi.0
+        buf_last.1
     );
     finish(64u32, output, tmp_block_state.snd)
 }

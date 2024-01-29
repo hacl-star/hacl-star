@@ -486,6 +486,7 @@ pub fn malloc_256() -> Vec<crate::hacl::streaming_types::state_32>
 {
     let mut buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 8usize];
+    sha256_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
@@ -495,7 +496,6 @@ pub fn malloc_256() -> Vec<crate::hacl::streaming_types::state_32>
             tmp.push(s);
             tmp
         };
-    sha256_init(&mut block_state);
     p
 }
 
@@ -689,14 +689,13 @@ pub fn digest_256(state: &mut [crate::hacl::streaming_types::state_32], output: 
     let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
     let mut tmp_block_state: [u32; 8] = [0u32; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
-    sha256_update_nblocks(0u32, buf_multi.1, &mut tmp_block_state);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    sha256_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
-    sha256_update_last(prev_len_last.wrapping_add(r as u64), r, buf_multi.0, &mut tmp_block_state);
+    sha256_update_last(prev_len_last.wrapping_add(r as u64), r, buf_last.1, &mut tmp_block_state);
     sha256_finish(&mut tmp_block_state, output)
 }
 
@@ -720,6 +719,7 @@ pub fn malloc_224() -> Vec<crate::hacl::streaming_types::state_32>
 {
     let mut buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 8usize];
+    sha224_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
@@ -729,7 +729,6 @@ pub fn malloc_224() -> Vec<crate::hacl::streaming_types::state_32>
             tmp.push(s);
             tmp
         };
-    sha224_init(&mut block_state);
     p
 }
 
@@ -766,19 +765,15 @@ pub fn digest_224(state: &mut [crate::hacl::streaming_types::state_32], output: 
     let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
     let mut tmp_block_state: [u32; 8] = [0u32; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(64u32) == 0u32 && r > 0u32 { 64u32 } else { r.wrapping_rem(64u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
-    sha224_update_nblocks(0u32, buf_multi.1, &mut tmp_block_state);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    sha224_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
-    sha224_update_last(prev_len_last.wrapping_add(r as u64), r, buf_multi.0, &mut tmp_block_state);
+    sha224_update_last(prev_len_last.wrapping_add(r as u64), r, buf_last.1, &mut tmp_block_state);
     sha224_finish(&mut tmp_block_state, output)
 }
-
-pub fn free_224(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
-{ crate::hacl::streaming_sha2::free_256(state) }
 
 pub fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
@@ -800,6 +795,7 @@ pub fn malloc_512() -> Vec<crate::hacl::streaming_types::state_64>
 {
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     let mut block_state: Vec<u64> = vec![0u64; 8usize];
+    sha512_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
@@ -809,7 +805,6 @@ pub fn malloc_512() -> Vec<crate::hacl::streaming_types::state_64>
             tmp.push(s);
             tmp
         };
-    sha512_init(&mut block_state);
     p
 }
 
@@ -1003,12 +998,11 @@ pub fn digest_512(state: &mut [crate::hacl::streaming_types::state_64], output: 
     let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
     let mut tmp_block_state: [u64; 8] = [0u64; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(128u32) == 0u32 && r > 0u32 { 128u32 } else { r.wrapping_rem(128u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
-    sha512_update_nblocks(0u32, buf_multi.1, &mut tmp_block_state);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    sha512_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     sha512_update_last(
         crate::fstar::uint128::add(
@@ -1016,7 +1010,7 @@ pub fn digest_512(state: &mut [crate::hacl::streaming_types::state_64], output: 
             crate::fstar::uint128::uint64_to_uint128(r as u64)
         ),
         r,
-        buf_multi.0,
+        buf_last.1,
         &mut tmp_block_state
     );
     sha512_finish(&mut tmp_block_state, output)
@@ -1043,6 +1037,7 @@ pub fn malloc_384() -> Vec<crate::hacl::streaming_types::state_64>
 {
     let mut buf: Vec<u8> = vec![0u8; 128usize];
     let mut block_state: Vec<u64> = vec![0u64; 8usize];
+    sha384_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
@@ -1052,7 +1047,6 @@ pub fn malloc_384() -> Vec<crate::hacl::streaming_types::state_64>
             tmp.push(s);
             tmp
         };
-    sha384_init(&mut block_state);
     p
 }
 
@@ -1089,12 +1083,11 @@ pub fn digest_384(state: &mut [crate::hacl::streaming_types::state_64], output: 
     let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
     let mut tmp_block_state: [u64; 8] = [0u64; 8usize];
     ((&mut tmp_block_state)[0usize..8usize]).copy_from_slice(&block_state[0usize..8usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
         if r.wrapping_rem(128u32) == 0u32 && r > 0u32 { 128u32 } else { r.wrapping_rem(128u32) };
-    let buf_last: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(r.wrapping_sub(ite) as usize);
-    let buf_multi: (&mut [u8], &mut [u8]) =
-        buf_last.1.split_at_mut(0usize - r.wrapping_sub(ite) as usize);
-    sha384_update_nblocks(0u32, buf_multi.1, &mut tmp_block_state);
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    sha384_update_nblocks(0u32, buf_last.0, &mut tmp_block_state);
     let prev_len_last: u64 = total_len.wrapping_sub(r as u64);
     sha384_update_last(
         crate::fstar::uint128::add(
@@ -1102,14 +1095,11 @@ pub fn digest_384(state: &mut [crate::hacl::streaming_types::state_64], output: 
             crate::fstar::uint128::uint64_to_uint128(r as u64)
         ),
         r,
-        buf_multi.0,
+        buf_last.1,
         &mut tmp_block_state
     );
     sha384_finish(&mut tmp_block_state, output)
 }
-
-pub fn free_384(state: &mut [crate::hacl::streaming_types::state_64]) -> ()
-{ crate::hacl::streaming_sha2::free_512(state) }
 
 pub fn hash_384(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 {
