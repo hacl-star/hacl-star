@@ -15,8 +15,8 @@ open Lib.Buffer
 
 Comment "Compute the public key from the private key.
 
-  The outparam `public_key`  points to 32 bytes of valid memory, i.e., uint8_t[32].
-  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32]."]
+  @param[out] public_key Points to 32 bytes of valid memory, i.e., `uint8_t[32]`. Must not overlap the memory location of `private_key`.
+  @param[in] private_key Points to 32 bytes of valid memory containing the private key, i.e., `uint8_t[32]`."]
 val secret_to_public:
     public_key:lbuffer uint8 32ul
   -> private_key:lbuffer uint8 32ul ->
@@ -29,8 +29,8 @@ val secret_to_public:
 
 [@@ Comment "Compute the expanded keys for an Ed25519 signature.
 
-  The outparam `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
-  The argument `private_key`   points to 32 bytes of valid memory, i.e., uint8_t[32].
+  @param[out] expanded_keys Points to 96 bytes of valid memory, i.e., `uint8_t[96]`. Must not overlap the memory location of `private_key`.
+  @param[in] private_key Points to 32 bytes of valid memory containing the private key, i.e., `uint8_t[32]`.
 
   If one needs to sign several messages under the same private key, it is more efficient
   to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
@@ -49,11 +49,10 @@ val expand_keys:
 
 [@@ Comment "Create an Ed25519 signature with the (precomputed) expanded keys.
 
-  The outparam `signature`     points to 64 bytes of valid memory, i.e., uint8_t[64].
-  The argument `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
-  The argument `msg`    points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
-
-  The argument `expanded_keys` is obtained through `expand_keys`.
+  @param[out] signature Points to 64 bytes of valid memory, i.e., `uint8_t[64]`. Must not overlap the memory locations of `expanded_keys` nor `msg`.
+  @param[in] expanded_keys Points to 96 bytes of valid memory, i.e., `uint8_t[96]`, containing the expanded keys obtained by invoking `expand_keys`.
+  @param[in] msg_len Length of `msg`.
+  @param[in] msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
 
   If one needs to sign several messages under the same private key, it is more efficient
   to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
@@ -76,9 +75,10 @@ val sign_expanded:
 
 [@@ Comment "Create an Ed25519 signature.
 
-  The outparam `signature`   points to 64 bytes of valid memory, i.e., uint8_t[64].
-  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
-  The argument `msg`  points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  @param[out] signature Points to 64 bytes of valid memory, i.e., `uint8_t[64]`. Must not overlap the memory locations of `private_key` nor `msg`.
+  @param[in] private_key Points to 32 bytes of valid memory containing the private key, i.e., `uint8_t[32]`.
+  @param[in] msg_len Length of `msg`.
+  @param[in] msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
 
   The function first calls `expand_keys` and then invokes `sign_expanded`.
 
@@ -99,11 +99,12 @@ val sign:
 
 [@@ Comment "Verify an Ed25519 signature.
 
-  The function returns `true` if the signature is valid and `false` otherwise.
+  @param public_key Points to 32 bytes of valid memory containing the public key, i.e., `uint8_t[32]`.
+  @param msg_len Length of `msg`.
+  @param msg Points to `msg_len` bytes of valid memory containing the message, i.e., `uint8_t[msg_len]`.
+  @param signature Points to 64 bytes of valid memory containing the signature, i.e., `uint8_t[64]`.
 
-  The argument `public_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
-  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
-  The argument `signature`  points to 64 bytes of valid memory, i.e., uint8_t[64]."]
+  @return Returns `true` if the signature is valid and `false` otherwise."]
 val verify:
     public_key:lbuffer uint8 32ul
   -> msg_len:size_t

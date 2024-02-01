@@ -16,7 +16,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "0be6c3c363419e924a6a89fddf46aca9"
+      "a58d2f0403db306e4e22c34fe0a61fd3"
     ],
     [
       "Spec.Exponentiation.pow",
@@ -35,7 +35,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "1e418942193dc0fd2fedb7064e94e1a3"
+      "9b9c0eea0d69366ef01044fbdedf43a3"
     ],
     [
       "Spec.Exponentiation.pow_unfold",
@@ -48,16 +48,28 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "7cfed9fa563f65301c188b902e555e6f"
+      "2ba5709b63814c14ade9e55e603de2e7"
     ],
     [
       "Spec.Exponentiation.exp_fw_acc0",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Lib.Exponentiation.get_ith_lbits", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_54490d2ea58144a1cc3df5883baeec33",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
+        "typing_Prims.pow2"
+      ],
       0,
-      "c7de62edd32dcfaaa69876d5b3da962a"
+      "b587fd423b4d1ef3b7e176fcc914da21"
     ],
     [
       "Spec.Exponentiation.exp_fw_acc0",
@@ -78,7 +90,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "7794b1a3b50c6cdbcb3baa81ce12bcec"
+      "87c9669d786f649c3d6057fc19f0c7ea"
     ],
     [
       "Spec.Exponentiation.mul_acc_pow_a_bits_l",
@@ -87,7 +99,7 @@
       0,
       [ "@query" ],
       0,
-      "d21a9a51d23642d46f9fce9a26cdac06"
+      "1ede28fc74b2dae8470e87dfeb98d02e"
     ],
     [
       "Spec.Exponentiation.mul_acc_pow_a_bits_l",
@@ -96,7 +108,7 @@
       0,
       [ "@query" ],
       0,
-      "dc694e38826f68af9645e7a7b0d25cd3"
+      "b974d5000ccfa83fec0846d19a717492"
     ],
     [
       "Spec.Exponentiation.exp_fw_f",
@@ -105,7 +117,7 @@
       0,
       [ "@query" ],
       0,
-      "de1fabba44fe84735b599f3dcfc5d197"
+      "579495272a8e32562eb8e3b57d2b9290"
     ],
     [
       "Spec.Exponentiation.exp_fw_f",
@@ -114,7 +126,7 @@
       0,
       [ "@query" ],
       0,
-      "45ec4b0a65b689f7e9f036be6dba9952"
+      "44128977859d935d58b59b49a55074fa"
     ],
     [
       "Spec.Exponentiation.exp_fw",
@@ -134,7 +146,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "ed07b419be91593361c96b1a88e78fa4"
+      "1d5fd1ae7bb2d313a4ee94e66cc185c6"
     ],
     [
       "Spec.Exponentiation.exp_double_fw_acc0",
@@ -143,7 +155,7 @@
       0,
       [ "@query" ],
       0,
-      "de453aec791866e877ae7189a34df819"
+      "5bddd8c69bccc8956de918f62725e9ca"
     ],
     [
       "Spec.Exponentiation.exp_double_fw_f",
@@ -152,7 +164,7 @@
       0,
       [ "@query" ],
       0,
-      "733226d9baed6a1e8bc992cc29225ced"
+      "d5ff72c21b871ac9465990ec399c2377"
     ],
     [
       "Spec.Exponentiation.exp_double_fw",
@@ -172,7 +184,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "2cd53ffce6daafa64936deed60beb6d0"
+      "b0e9b138f0cc523dd1913c90592d14ad"
     ],
     [
       "Spec.Exponentiation.exp_four_fw_acc0",
@@ -181,7 +193,7 @@
       0,
       [ "@query" ],
       0,
-      "6685e8f42cb52e28fd10c6b1a180e1a4"
+      "d4e25dc9ac3b4fe5aeed88b00649c892"
     ],
     [
       "Spec.Exponentiation.exp_four_fw_f",
@@ -190,7 +202,7 @@
       0,
       [ "@query" ],
       0,
-      "b62c48d1367ea5d64b1797c833791739"
+      "30fd8b65342db449468054c87e2f7b7b"
     ],
     [
       "Spec.Exponentiation.exp_four_fw",
@@ -210,7 +222,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "de3a65fb3af5f605028847a27aecd338"
+      "a12e960530b491f271475040e31dfc7d"
     ]
   ]
 ]

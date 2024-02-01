@@ -71,13 +71,21 @@ val lemma_subm_conditional:
     (x0 + x1 * pow2 56 + x2 * pow2 112 + x3 * pow2 168 + x4 * pow2 224) -
     (y0 + y1 * pow2 56 + y2 * pow2 112 + y3 * pow2 168 + y4 * pow2 224) + b4 * pow2 280)
 
-#push-options "--z3rlimit 50"
 let lemma_subm_conditional x0 x1 x2 x3 x4 y0 y1 y2 y3 y4 b0 b1 b2 b3 b4 =
   assert_norm (pow2 56 * pow2 56 = pow2 112);
   assert_norm (pow2 56 * pow2 112 = pow2 168);
   assert_norm (pow2 56 * pow2 168 = pow2 224);
-  assert_norm (pow2 56 * pow2 224 = pow2 280)
-#pop-options
+  assert_norm (pow2 56 * pow2 224 = pow2 280);
+  assert (
+    x0 - y0 + b0 * pow2 56 +
+    (x1 - y1 - b0 + b1 * pow2 56) * pow2 56 +
+    (x2 - y2 - b1 + b2 * pow2 56) * pow2 112 +
+    (x3 - y3 - b2 + b3 * pow2 56) * pow2 168 +
+    (x4 - y4 - b3 + b4 * pow2 56) * pow2 224 ==
+    (x0 + x1 * pow2 56 + x2 * pow2 112 + x3 * pow2 168 + x4 * pow2 224) -
+    (y0 + y1 * pow2 56 + y2 * pow2 112 + y3 * pow2 168 + y4 * pow2 224) + b4 * pow2 280)
+  by (int_semiring ());
+  ()
 
 val lemma_div224: x:qelem_wide5 ->
   Lemma

@@ -19,7 +19,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5b6730f9882b27c6665cbaf73cb4e8dc"
+      "e8862ef9fb628b866a0fd4f46ebe2229"
     ],
     [
       "Hacl.Test.K256.pk1",
@@ -50,7 +50,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "d5b5d34e6098541a0e795b5228a74404"
+      "3ae22e0cd7c399aab850355224e3f8e9"
     ],
     [
       "Hacl.Test.K256.msg1",
@@ -81,7 +81,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "c79666b31ace809e506d3e3abb699a4a"
+      "65f1e4ba634a1503e94a32006de3e68e"
     ],
     [
       "Hacl.Test.K256.sgnt1",
@@ -112,7 +112,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "c126788af299fd68c705a1603547ae0c"
+      "9686b8fee67384b7bde034a2e374f021"
     ],
     [
       "Hacl.Test.K256.sk2",
@@ -143,7 +143,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "08d9d75fe73b705528c4bf2e898d82d0"
+      "2711f4199cb358fb0c6dc137d1807f36"
     ],
     [
       "Hacl.Test.K256.pk2",
@@ -174,7 +174,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "529f68dda9cc80cc063aba3da3ed016f"
+      "fea27db33980f362ea1e49d5f4a1f5c1"
     ],
     [
       "Hacl.Test.K256.nonce2",
@@ -205,7 +205,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "6ce777bd610d211c67bf426d0549da21"
+      "2807b006ed21fc89d5d1fe4053c063eb"
     ],
     [
       "Hacl.Test.K256.msgHash2",
@@ -236,7 +236,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "beb8f5587cd5b0f4ef2638f175d56ebd"
+      "05e77f9901fa7d7fa0822c4d0e44d039"
     ],
     [
       "Hacl.Test.K256.sgnt2",
@@ -267,7 +267,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "0266144e374b671205432914d4610102"
+      "d5e431c1c26616514611fe48167b3137"
     ],
     [
       "Hacl.Test.K256.test_secret_to_public",
@@ -322,13 +322,14 @@
         "equation_LowStar.ConstBuffer.live",
         "equation_LowStar.ConstBuffer.q_preorder",
         "equation_LowStar.ConstBuffer.qbuf_pre",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Spec.K256.uu___82",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Spec.K256.uu___59",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
-        "function_token_typing_Spec.K256.uu___82",
+        "function_token_typing_Spec.K256.uu___59",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
@@ -369,7 +370,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThan",
@@ -417,7 +417,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "046b1c66eebca77e6fee85ad0bab270b"
+      "93b974d2e406fa1ce60834b390d5b68c"
     ],
     [
       "Hacl.Test.K256.test_verify_sha256",
@@ -426,7 +426,7 @@
       0,
       [ "@query" ],
       0,
-      "76ff565a454743907502c64df0f46f09"
+      "c8c21d8770415b405499dbbef307b433"
     ],
     [
       "Hacl.Test.K256.test_verify_hashed",
@@ -435,7 +435,7 @@
       0,
       [ "@query" ],
       0,
-      "ce2170b5d8f1c5c370bb1979a8941eb4"
+      "b61352343d4ce5591f60c850fb295dfa"
     ],
     [
       "Hacl.Test.K256.test_sign_hashed",
@@ -490,13 +490,14 @@
         "equation_LowStar.ConstBuffer.live",
         "equation_LowStar.ConstBuffer.q_preorder",
         "equation_LowStar.ConstBuffer.qbuf_pre",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Spec.K256.uu___73",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Spec.K256.uu___59",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
-        "function_token_typing_Spec.K256.uu___73",
+        "function_token_typing_Spec.K256.uu___59",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
@@ -537,7 +538,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThan",
@@ -586,7 +586,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e08414ef312370cb4bb0f321d6504c3b"
+      "287bc2a44184929d1c075d490d371cb3"
     ],
     [
       "Hacl.Test.K256.test_sign_and_verify_hashed",
@@ -616,7 +616,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "9b3f29236d080a42d22990478a1dac03"
+      "841f96b96917b98108a01d8333eafd42"
     ],
     [
       "Hacl.Test.K256.test_public_key_compressed",
@@ -672,13 +672,14 @@
         "equation_LowStar.ConstBuffer.live",
         "equation_LowStar.ConstBuffer.q_preorder",
         "equation_LowStar.ConstBuffer.qbuf_pre",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Spec.K256.uu___73",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Spec.K256.uu___59",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
-        "function_token_typing_Spec.K256.uu___73",
+        "function_token_typing_Spec.K256.uu___59",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
@@ -720,7 +721,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThan",
@@ -772,7 +772,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "53eeb3bcd40f5b081197efda19719c50"
+      "6e64f43416de39a39b19f62333dacd01"
     ],
     [
       "Hacl.Test.K256.test_public_key_uncompressed",
@@ -828,13 +828,14 @@
         "equation_LowStar.ConstBuffer.live",
         "equation_LowStar.ConstBuffer.q_preorder",
         "equation_LowStar.ConstBuffer.qbuf_pre",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Spec.K256.uu___73",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_LowStar.Monotonic.Buffer.loc_not_in",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Spec.K256.uu___59",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
-        "function_token_typing_Spec.K256.uu___73",
+        "function_token_typing_Spec.K256.uu___59",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
@@ -876,7 +877,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThan",
@@ -928,7 +928,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "b637292972d4d6163a5cb514985d16e3"
+      "65a188b8119f3511de8a54a668f530f7"
     ],
     [
       "Hacl.Test.K256.main",
@@ -992,7 +992,7 @@
         "typing_tok_C.EXIT_SUCCESS@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "18bdf15d0f23c9860df522239cb5340b"
+      "ec1fd56ed3360c962bf052888cf69044"
     ]
   ]
 ]

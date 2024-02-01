@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_6c3579831eb81025494abc2bedea1303"
       ],
       0,
-      "09abc89f9dffb4cd64de0cf956a44521"
+      "2cd04ae25c82433693cda03e872e8cdb"
     ],
     [
       "Vale.AES.GHash.ghash_poly",
@@ -30,7 +30,7 @@
         "projection_inverse_BoxInt_proj_0", "well-founded-ordering-on-nat"
       ],
       0,
-      "8642cde057d7c7d19aefb4bbbcf10683"
+      "6a5563e02d9805a4d51d760679743251"
     ],
     [
       "Vale.AES.GHash.g_power",
@@ -47,7 +47,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "455ee1d198e04c53fc919f0931963573"
+      "34f6dbca6c4f8a3a6ceb5b14e9c5a866"
     ],
     [
       "Vale.AES.GHash.lemma_g_power_1",
@@ -66,7 +66,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "7f4ec01b402858c18511784e59ff9599"
+      "8fa826fd93162bc6dfd263a25cdad438"
     ],
     [
       "Vale.AES.GHash.lemma_g_power_n",
@@ -79,7 +79,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "14e8757df2faffcb165ed08d5ba08ee0"
+      "9846c3b71dcaa1c22fca9da60d98ed37"
     ],
     [
       "Vale.AES.GHash.lemma_g_power_n",
@@ -101,7 +101,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "3dc65eb34def6e2ba43675552968f3d3"
+      "38cfad365ed1149254643ffff5a8dd6c"
     ],
     [
       "Vale.AES.GHash.lemma_gf128_power",
@@ -114,7 +114,7 @@
         "equation_Vale.AES.GHash.shift_gf128_key_1"
       ],
       0,
-      "8fba09c1fe48f8e0cd85c24e250a8058"
+      "444de5cc188d870604d0802b86f80eff"
     ],
     [
       "Vale.AES.GHash.hkeys_reqs_priv",
@@ -128,7 +128,7 @@
         "typing_Vale.Def.Types_s.quad32"
       ],
       0,
-      "e06b16e86840605a49e3757cde364c43"
+      "528009a7c5945129989d9bde9a82d3ab"
     ],
     [
       "Vale.AES.GHash.ghash_poly_unroll",
@@ -149,7 +149,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "893e0270ac2275dd3099bfdc074b95cf"
+      "8772399dd75f004baaa5a9076dead337"
     ],
     [
       "Vale.AES.GHash.lemma_hkeys_reqs_pub_priv",
@@ -182,7 +182,7 @@
         "typing_Vale.Math.Poly2.Bits_s.of_quad32"
       ],
       0,
-      "05b52be889b335ad6a12c3d672d7b835"
+      "625900a68859a6d34b6938bca87fbd95"
     ],
     [
       "Vale.AES.GHash.ghash_unroll",
@@ -203,7 +203,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "01a7574f6b1f01132b258eacfd253636"
+      "0977c514c80be7faea2f01c95e9fe9a0"
     ],
     [
       "Vale.AES.GHash.ghash_unroll_back",
@@ -225,28 +225,11 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "bdefc56a7e90c91338201d44e38aafcf"
+      "826320ce456339175879fa352aa5d1fd"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_unroll_back_forward_rec",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
-        "equation_Prims.squash", "primitive_Prims.op_LessThan",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5b347df15ebd19e150f40aa97f5fa7e9"
-      ],
-      0,
-      "d779260f97edd47a7cb827670ce36dee"
-    ],
-    [
-      "Vale.AES.GHash.lemma_ghash_unroll_back_forward_rec",
-      2,
       1,
       0,
       [
@@ -263,7 +246,7 @@
         "binder_x_ae567c2fb75be05905677af440075565_3",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_4",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_5", "equation_Prims.nat",
-        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.squash",
+        "equation_Prims.squash", "equation_Vale.AES.GHash.gf128_power",
         "equation_Vale.AES.GHash.poly128",
         "equation_with_fuel_Vale.AES.GHash.ghash_unroll.fuel_instrumented",
         "equation_with_fuel_Vale.AES.GHash.ghash_unroll_back.fuel_instrumented",
@@ -272,9 +255,9 @@
         "primitive_Prims.op_GreaterThan", "primitive_Prims.op_LessThan",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_01bf4ea4232daa099d3c1a9e6ea80dd0",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5acac0d5053a30c9f19eebf8e5cc6442",
         "refinement_interpretation_Tm_refine_f54be9bebc70c1c037e0ec20437e5c81",
         "typing_Vale.AES.GHash.gf128_power",
         "typing_Vale.AES.GHash.ghash_unroll",
@@ -282,7 +265,24 @@
         "typing_Vale.Math.Poly2_s.mul", "well-founded-ordering-on-nat"
       ],
       0,
-      "5070745880be3f453f282d814f1a5896"
+      "dfe2d77daaedd93863af2574ee04a8d7"
+    ],
+    [
+      "Vale.AES.GHash.lemma_ghash_unroll_back_forward_rec",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
+        "equation_Prims.squash", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5b347df15ebd19e150f40aa97f5fa7e9"
+      ],
+      0,
+      "482f01092dd886f6ed74c575b813dd4c"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_unroll_back_forward",
@@ -295,7 +295,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "0384eea43eb57fafa544cf54b736a63a"
+      "f473040df73b32b754cafdd3387a17fa"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_unroll_back_forward",
@@ -321,7 +321,7 @@
         "typing_Vale.AES.GHash.ghash_unroll_back"
       ],
       0,
-      "9f9971b8af5cd7bbed458f663f072dcd"
+      "fd0483d2bdbe2d09b897b5ab779a956b"
     ],
     [
       "Vale.AES.GHash.lemma_gf128_mul_rev_mod_rev",
@@ -360,7 +360,7 @@
         "typing_Vale.Math.Poly2_s.zero"
       ],
       0,
-      "9fc060b3adc758a76eafb7912f590adb"
+      "4caf6146c0d8650d5b1926ba022d6d09"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_poly_degree",
@@ -397,25 +397,11 @@
         "typing_Vale.Math.Poly2_s.reverse", "well-founded-ordering-on-nat"
       ],
       0,
-      "30c18396ce1c93c1b90883d1c24d3377"
+      "70d62c389763967610777113e925b6ec"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_poly_unroll_n",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_912b1e5aa7e75b1068e998b02d50055d"
-      ],
-      0,
-      "3938a3c5bcbc5fe7dd92606759783b4c"
-    ],
-    [
-      "Vale.AES.GHash.lemma_ghash_poly_unroll_n",
-      2,
       1,
       0,
       [
@@ -431,7 +417,6 @@
         "binder_x_ae567c2fb75be05905677af440075565_3",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_4",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_5", "equation_Prims.nat",
-        "equation_Prims.op_Equals_Equals_Equals",
         "equation_with_fuel_Vale.AES.GHash.g_power.fuel_instrumented",
         "equation_with_fuel_Vale.AES.GHash.ghash_poly_unroll.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
@@ -442,7 +427,21 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "dbf4f2930902b25503f5a35fe9a8666b"
+      "15605322ee2ce5c0afe358c3767eee29"
+    ],
+    [
+      "Vale.AES.GHash.lemma_ghash_poly_unroll_n",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_912b1e5aa7e75b1068e998b02d50055d"
+      ],
+      0,
+      "f706063275298126cbe48034d1478df9"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_poly_unroll",
@@ -478,7 +477,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "56ac6756ae24210b06a74ef9afee28c9"
+      "01aeb99d42694f3ee6b58112063213b7"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_unroll_poly_unroll",
@@ -523,7 +522,7 @@
         "typing_Vale.Math.Poly2_s.reverse", "well-founded-ordering-on-nat"
       ],
       0,
-      "678d1c8bc6e658363b59341561514951"
+      "7dceb915a569049b69cbf4aaa684f734"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_poly_of_unroll",
@@ -532,7 +531,7 @@
       0,
       [ "@query" ],
       0,
-      "6f183d92749698c419579ec565e5a03d"
+      "ea45f664bdb27eef42734e62f62bd612"
     ],
     [
       "Vale.AES.GHash.lemma_add_manip",
@@ -541,7 +540,7 @@
       0,
       [ "@query" ],
       0,
-      "59ce23298ce233ebc79f9edd461c90e1"
+      "85da17d7c951bf9c739c65b04be834b0"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_def",
@@ -567,7 +566,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "c576dd2903d29d28d8d314f63b8ee955"
+      "64119950453637b8859f7b3d148e3cdd"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_reveal",
@@ -576,7 +575,7 @@
       0,
       [ "@query" ],
       0,
-      "5969516773e6f2ccf4dc13d26b2b95c0"
+      "7fbc5e937fd6596f66d3b68d97c1f907"
     ],
     [
       "Vale.AES.GHash.lemma_reverse_bytes_quad32_xor",
@@ -665,7 +664,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "604dfb4c512cadc8c2c6e26d5f36435b"
+      "1e4a6be5a63b2ee39e0a7397e4e0d805"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_poly_rec",
@@ -673,13 +672,56 @@
       1,
       0,
       [
-        "@query", "primitive_Prims.op_LessThan",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Vale.AES.GHash.ghash_incremental_def.fuel_instrumented",
+        "@fuel_correspondence_Vale.AES.GHash.ghash_poly.fuel_instrumented",
+        "@fuel_irrelevance_Vale.AES.GHash.ghash_incremental_def.fuel_instrumented",
+        "@fuel_irrelevance_Vale.AES.GHash.ghash_poly.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_4926595fe3e8db262b015229c320f9d3_3",
+        "binder_x_611f4d9b9b7ca657fff97fd0b29bf02c_2",
+        "binder_x_e97427d583e1f4d42a96b4bdd8dae147_0",
+        "binder_x_e97427d583e1f4d42a96b4bdd8dae147_1",
+        "equation_FStar.Seq.Properties.last", "equation_Prims.nat",
+        "equation_Vale.AES.GF128.gf128_mul_rev",
+        "equation_Vale.AES.GF128.op_Star_Tilde",
+        "equation_Vale.AES.GF128_s.gf128_of_quad32",
+        "equation_Vale.AES.GF128_s.gf128_to_quad32",
+        "equation_Vale.AES.GHash_s.gf128_mul_LE",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.Lib.Seqs_s.all_but_last",
+        "equation_with_fuel_Vale.AES.GHash.ghash_incremental_def.fuel_instrumented",
+        "equation_with_fuel_Vale.AES.GHash.ghash_poly.fuel_instrumented",
+        "fuel_guarded_inversion_Vale.Def.Words_s.four",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
+        "int_typing", "kinding_Vale.Def.Words_s.four@tok",
+        "l_quant_interp_9d28f2c215748aabc91cf2d5039b0560",
+        "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_Vale.Arch.Types.lemma_reverse_bytes_quad32",
+        "lemma_Vale.Math.Poly2.Lemmas.lemma_reverse_degree",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_LessThan",
         "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0"
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
+        "typing_FStar.Seq.Base.length", "typing_Vale.AES.GF128_s.gf128_mul",
+        "typing_Vale.AES.GF128_s.gf128_of_quad32",
+        "typing_Vale.AES.GF128_s.gf128_to_quad32",
+        "typing_Vale.Def.Types_s.quad32_xor",
+        "typing_Vale.Def.Types_s.reverse_bytes_quad32",
+        "typing_Vale.Math.Poly2.Bits_s.of_quad32",
+        "typing_Vale.Math.Poly2_s.reverse", "well-founded-ordering-on-nat"
       ],
       0,
-      "b94a3ca9528d9f7f5778c852abdd4f18"
+      "8d447d4453d1139aab807fa38af645eb"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_poly_rec",
@@ -737,7 +779,7 @@
         "typing_Vale.Math.Poly2_s.reverse", "well-founded-ordering-on-nat"
       ],
       0,
-      "69b9d456d66ba268fb312a7bc0172308"
+      "b9b957b865692e71c39b927b05b266b3"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_poly",
@@ -760,7 +802,7 @@
         "token_correspondence_Vale.AES.GHash.fun_seq_quad32_LE_poly128"
       ],
       0,
-      "9c04be89a0511500d7490f968da1c662"
+      "975258203c86f2bdfd8aabc9dce0ece3"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_def_0",
@@ -776,7 +818,7 @@
         "primitive_Prims.op_Equality"
       ],
       0,
-      "50b1076505e34f37d7c7d8a9bcda8e80"
+      "c2d80fe57c5d97465ce473fc80895a24"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_to_ghash",
@@ -791,26 +833,11 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "72187e7f11243fa4b7411108c713b2d6"
+      "f716a836464c96f4a0c7e0bc6e6fea5d"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_to_ghash",
       2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.squash",
-        "primitive_Prims.op_GreaterThan",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
-      ],
-      0,
-      "1eea1097c3f75af482978932d4588a26"
-    ],
-    [
-      "Vale.AES.GHash.ghash_incremental_to_ghash",
-      3,
       1,
       0,
       [
@@ -820,12 +847,10 @@
         "@fuel_irrelevance_Vale.AES.GHash.ghash_incremental_def.fuel_instrumented",
         "@fuel_irrelevance_Vale.AES.GHash_s.ghash_LE_def.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Prims_pretyping_e4836109f73687024ac3edd113084865",
         "binder_x_611f4d9b9b7ca657fff97fd0b29bf02c_1",
         "binder_x_e97427d583e1f4d42a96b4bdd8dae147_0",
         "data_typing_intro_Vale.Def.Words_s.Mkfour@tok",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
-        "equation_Vale.AES.GHash_s.ghash_plain_LE",
+        "equation_Prims.nat", "equation_Vale.AES.GHash_s.ghash_plain_LE",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.Lib.Seqs_s.all_but_last",
@@ -854,11 +879,25 @@
         "token_correspondence_Vale.AES.GHash.ghash_incremental_def",
         "token_correspondence_Vale.AES.GHash_s.ghash_LE_def",
         "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
-        "typing_Vale.Lib.Seqs_s.all_but_last", "typing_tok_Prims.LexTop@tok",
-        "well-founded-ordering-on-nat"
+        "typing_Vale.Lib.Seqs_s.all_but_last", "well-founded-ordering-on-nat"
       ],
       0,
-      "e4f7653ace0035df0b8f71ee7d2e0469"
+      "31e34d487e8d1d52165855b05adbf4f4"
+    ],
+    [
+      "Vale.AES.GHash.ghash_incremental_to_ghash",
+      3,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.squash",
+        "primitive_Prims.op_GreaterThan",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "c55ed7364b203436d733686f607e3b32"
     ],
     [
       "Vale.AES.GHash.lemma_hash_append",
@@ -908,7 +947,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ae46e33ebca8e57e28630c8c639e80cf"
+      "668830b6c0e827cd656c4c5fcff26b51"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental0_append",
@@ -941,7 +980,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar"
       ],
       0,
-      "24a22e43518606bd6a09da31adeab372"
+      "28bc88af68373628d128d20732984480"
     ],
     [
       "Vale.AES.GHash.lemma_hash_append2",
@@ -975,7 +1014,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar"
       ],
       0,
-      "954831d5e868e9645cb4af50e21fe323"
+      "ac0af96d84d9bcffc7971e4c631f1200"
     ],
     [
       "Vale.AES.GHash.lemma_hash_append3",
@@ -998,7 +1037,7 @@
         "typing_Vale.Def.Types_s.quad32"
       ],
       0,
-      "bb476a2c14675b1b75a84c55d64d4854"
+      "6966889e77e544ad3c4059ed1f0b37ce"
     ],
     [
       "Vale.AES.GHash.lemma_hash_append3",
@@ -1030,7 +1069,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "4652bd0f24e6af4e9f14d02cc8c034d4"
+      "2637267dc2452a61fc1a60776af9d2eb"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_bytes_pure_no_extra",
@@ -1053,7 +1092,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "7eb2db0640bcdc75ae13b9eac8ff1a6c"
+      "1889b8b71f31b959c244c298a3cee55a"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_bytes_pure_no_extra",
@@ -1089,7 +1128,7 @@
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1"
       ],
       0,
-      "a61e350d3aa8ce64acf6b9aa9d83e31e"
+      "c1d6f011e04dffd047660836bc08d97b"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper",
@@ -1111,7 +1150,7 @@
         "typing_Vale.Def.Types_s.le_quad32_to_bytes"
       ],
       0,
-      "66da309698ad9002a4cee4401615d2bd"
+      "7f4daed1c522d2b36ad600f870249af1"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper",
@@ -1156,7 +1195,7 @@
         "typing_Vale.Def.Types_s.le_quad32_to_bytes"
       ],
       0,
-      "699bf298147f3f087dcdd7b0a481545f"
+      "198b3d52a0de86aa1d412bf32f8407ad"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper_alt",
@@ -1183,7 +1222,7 @@
         "typing_Vale.Def.Types_s.le_quad32_to_bytes"
       ],
       0,
-      "c4138a486f2717d7ca3a7c56a30fbcf6"
+      "0878d8e0a1b4ddad93981b598cbf0b8d"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper_alt",
@@ -1223,7 +1262,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "cf16636f798e705c883cbcb5bd61727d"
+      "4c79fdda8f6186567134011e703f29b9"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_registers",
@@ -1242,7 +1281,7 @@
         "refinement_interpretation_Tm_refine_a44e89cdb825efe5e6a3ed3c110355a3"
       ],
       0,
-      "b497b83f147b48495b0f708d5137d0a6"
+      "73b00dc4da9fa72f87d6ed4ecf58963c"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_registers",
@@ -1284,7 +1323,7 @@
         "typing_FStar.Seq.Base.index", "typing_FStar.Seq.Base.length"
       ],
       0,
-      "6e26861b297ed93b47b6f8d422cbdc32"
+      "32af9442f0ad89abd85aebb56086c55e"
     ]
   ]
 ]

@@ -300,7 +300,7 @@ val lemma_sqr (a:int) (a0 a1 a2 a3
                    r14')
   (ensures
     a*a == pow2_eight d0 d1 d2 d3 d4 d5 d6 d7)
-#set-options "--__temp_fast_implicits" //this flag should be the default for use with tactics, but isn't yet
+
 let lemma_sqr a a0 a1 a2 a3
                 r8 r9 r10 r11 r12 r13 rax rcx
                 r8' r9' r10' r11' r12' r13' r14'

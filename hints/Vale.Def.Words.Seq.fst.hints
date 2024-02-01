@@ -26,7 +26,7 @@
         "typing_Vale.Def.Words.Seq_s.two_to_seq_LE"
       ],
       0,
-      "10d547e5305687b72e04661ad5b41042"
+      "bbe48050f561f0957c0ec0746c6b28a2"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_two_to_seq_LE",
@@ -43,7 +43,7 @@
         "typing_Vale.Def.Words.Seq_s.two_to_seq_LE"
       ],
       0,
-      "e556b156e105983d2a8856374d4f694d"
+      "3d09e876712d32d4c9ff9d8dae363ddf"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_seq_four_to_seq_LE",
@@ -52,7 +52,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "5d37e41c6e45e5232bcdddce6ff2761c"
+      "59a8ac300ec5052fc41a4b87c7eca8e7"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_seq_four_to_seq_LE",
@@ -94,7 +94,7 @@
         "typing_Tm_abs_c0ef6c6aba95253319fbfee7753c7c34"
       ],
       0,
-      "c883566852bb53e2bfa6e8520440aa60"
+      "e46780b9d5c5f1367ef2a5678a831529"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_seq_four_to_seq_BE",
@@ -103,7 +103,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "e992644fd9362c11e13e31402d858f59"
+      "cffcb141b0b8f7ad4aac173e113ed01d"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_seq_four_to_seq_BE",
@@ -148,7 +148,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_BE"
       ],
       0,
-      "1fec06ce34bb3582cf01d580a21e58f2"
+      "de85f0421767fdc0600b05f4601903d2"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_to_seq_four_LE",
@@ -157,7 +157,7 @@
       0,
       [ "@query" ],
       0,
-      "6eb8420de333ace862f7c6fff5365118"
+      "dc943edfd0b8cfc1d4359f247ce6b72b"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_to_seq_four_LE",
@@ -205,7 +205,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "1faf36b5ec7e89f40f82dc177ec19c1e"
+      "f229493a07efb093e52d5b8fecaecd26"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_to_seq_four_BE",
@@ -214,7 +214,7 @@
       0,
       [ "@query" ],
       0,
-      "7a827dbac353a19270cc317f289a4114"
+      "ac0ba950ff0156541ba83fd4b0fa35a9"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_to_seq_four_BE",
@@ -262,7 +262,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_BE"
       ],
       0,
-      "5b8e1e4b859ace64fe61e8cda6798ce5"
+      "70c64773b9679a34e932e2b576df2972"
     ],
     [
       "Vale.Def.Words.Seq.lemma_fundamental_div_mod_4",
@@ -277,7 +277,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "f622083f4ec0c8b7551c2d0200d175db"
+      "a04560216ad8b9294b9208f556ed368f"
     ],
     [
       "Vale.Def.Words.Seq.four_to_nat_to_four_8",
@@ -286,7 +286,7 @@
       0,
       [ "@query" ],
       0,
-      "3243cd9b54ea4188942be1a28797b795"
+      "947497a6bba0edf532592487a6861cbf"
     ],
     [
       "Vale.Def.Words.Seq.four_to_nat_to_four_8",
@@ -307,20 +307,30 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "030d2f8b21ac560921d0242e64a2389e"
+      "321785b14cc1e5ab3f7e1ab567defa9e"
     ],
     [
       "Vale.Def.Words.Seq.base_to_nat",
       1,
       1,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_1ce6ec69bc821322125dfb63c7ad2f5b_1",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Vale.Def.Words_s.natN",
+        "fuel_guarded_inversion_Prims.list", "int_inversion",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "subterm_ordering_Prims.Cons"
       ],
       0,
-      "7bf5f20a21bac2caeeb0b0b7c9f7134a"
+      "af7f7c6626205f45bf18ce5020cdc2c7"
     ],
     [
       "Vale.Def.Words.Seq.base_to_nat",
@@ -343,7 +353,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "c0599ab3278797ca04c207f6c60a22c1"
+      "949ecd09b4828222b9822b3cc9f284dc"
     ],
     [
       "Vale.Def.Words.Seq.base_to_nat_inj_head",
@@ -351,12 +361,27 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Vale.Def.Words.Seq.base_to_nat.fuel_instrumented",
+        "@fuel_irrelevance_Vale.Def.Words.Seq.base_to_nat.fuel_instrumented",
+        "@query", "disc_equation_Prims.Cons",
+        "equation_FStar.List.Tot.Base.hd", "equation_Prims.pos",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_with_fuel_Vale.Def.Words.Seq.base_to_nat.fuel_instrumented",
+        "int_inversion", "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c879216d8aacb5fceb9496138d144322"
       ],
       0,
-      "8f3962822e321874bdb3dfe2cfc948cf"
+      "0980da2db3f83cc614af80e382fdfae6"
     ],
     [
       "Vale.Def.Words.Seq.base_to_nat_inj_head",
@@ -384,20 +409,48 @@
         "refinement_interpretation_Tm_refine_c879216d8aacb5fceb9496138d144322"
       ],
       0,
-      "a5c52b1245c0713677cbcd2253c6f0ff"
+      "89f891d0cfffed2dc1eb270deac1fa84"
     ],
     [
       "Vale.Def.Words.Seq.base_to_nat_inj",
       1,
       1,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_correspondence_Vale.Def.Words.Seq.base_to_nat.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_irrelevance_Vale.Def.Words.Seq.base_to_nat.fuel_instrumented",
+        "@query", "binder_x_1ce6ec69bc821322125dfb63c7ad2f5b_1",
+        "binder_x_1ce6ec69bc821322125dfb63c7ad2f5b_2",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Tm_unit",
+        "data_elim_Prims.Cons", "disc_equation_Prims.Cons",
+        "disc_equation_Prims.Nil", "equation_FStar.List.Tot.Base.hd",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "equation_with_fuel_Vale.Def.Words.Seq.base_to_nat.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list", "int_inversion",
+        "primitive_Prims.op_Addition",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Prims.Cons_a",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "subterm_ordering_Prims.Cons",
+        "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "typing_Vale.Def.Words.Seq.base_to_nat"
       ],
       0,
-      "c674c1b798f776d2dd73954d5afa6265"
+      "24ed79ac50de942561c41011ab303ff7"
     ],
     [
       "Vale.Def.Words.Seq.base_to_nat_inj",
@@ -438,7 +491,7 @@
         "typing_Vale.Def.Words.Seq.base_to_nat"
       ],
       0,
-      "df9cad8bc54ce57c5b770933b854cbdb"
+      "bf6fa4792fe37aa3a5e60348f683c759"
     ],
     [
       "Vale.Def.Words.Seq.four_to_nat_inj",
@@ -469,7 +522,7 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "51b2915ad9912be6fff10a17b7fd0a4e"
+      "ffb058098be1fae494ade40aead54553"
     ],
     [
       "Vale.Def.Words.Seq.nat_to_four_to_nat",
@@ -478,7 +531,7 @@
       0,
       [ "@query" ],
       0,
-      "9f9f14d2f8c03178987d88322b5eb0c2"
+      "938c7d8fab3875cee2128221bb7fe9e7"
     ],
     [
       "Vale.Def.Words.Seq.nat_to_four_to_nat",
@@ -499,7 +552,7 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "9656e692203aedbef97814c01943ffa4"
+      "902c609e80c1d47d71adca68c1953801"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_to_four_LE",
@@ -530,7 +583,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_four_LE"
       ],
       0,
-      "a996d2eb9bf8ac05237906faae939cc3"
+      "b5cae688f41763e8031a9e6e270a08ab"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_four_to_seq_LE",
@@ -549,7 +602,7 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_LE"
       ],
       0,
-      "2905d9eac17cd1c5d33e9e8f7fda3f31"
+      "e06b222c75f60193b7f539abda091a77"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_to_four_BE",
@@ -580,7 +633,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_four_BE"
       ],
       0,
-      "1f7b35183810352ba56eabe2eecea27f"
+      "a26bf0966b19a7e88a18436f7206ef75"
     ],
     [
       "Vale.Def.Words.Seq.seq_to_four_to_seq_BE",
@@ -599,7 +652,7 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_BE"
       ],
       0,
-      "ab7cc96c4043a27665aeee42bc333d5f"
+      "7bcf50d78270f6a4f4530b1f8aa85a08"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_LE_is_seq_four_to_seq_LE",
@@ -614,7 +667,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "3771c4b94866a2d772ace474637d0840"
+      "a3e343360dea821a1e7df255f7ba023d"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_LE_is_seq_four_to_seq_LE",
@@ -651,7 +704,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "be30150c33a09038f15ac138cb252ff0"
+      "5faac5f9ebe2f3e7e66abe5b2c779f14"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_BE_is_seq_four_to_seq_BE",
@@ -660,7 +713,7 @@
       0,
       [ "@query" ],
       0,
-      "60934247435baa6f03128b2ce6da59b7"
+      "2d4c666fbb2843fd57e6d848354a0668"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_BE_is_seq_four_to_seq_BE",
@@ -701,7 +754,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_BE"
       ],
       0,
-      "187345548b097e530f03bc6c930f56e8"
+      "e97b848ec93ae0240489eca2c9642d6a"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_LE",
@@ -730,7 +783,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "80b77f4788ee4fe993eeb92503c926d0"
+      "8ce952114875ad73823d3ff65cbeb12b"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_LE",
@@ -772,7 +825,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "1c2ee3b1613ded8d85c1ded639cbc639"
+      "1bf00e5aac464746b35672a85133527e"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_BE",
@@ -801,7 +854,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_BE"
       ],
       0,
-      "984695df829535104050f6cb5c0a5bcc"
+      "7edb050fd9af839f3e7bb33980852d06"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_BE",
@@ -843,7 +896,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_BE"
       ],
       0,
-      "f557c4c49e436c643e8f2ccad9efa707"
+      "9ed9d8a797e49577198be4458fc54e3b"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat32_to_seq_nat8_to_seq_nat32_LE",
@@ -914,7 +967,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "c74bab9fd9920a0cb1262f8c2dcc1757"
+      "d17987911c5b9c815e3a48b03887d147"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_uint8_to_seq_nat8",
@@ -951,7 +1004,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "4d90f1f0f6b6c484308861e2adea3668"
+      "f2d811e2385adc3356699bc597983f87"
     ],
     [
       "Vale.Def.Words.Seq.seq_uint8_to_seq_nat8_to_seq_uint8",
@@ -1000,7 +1053,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "644d449fb9bb08a6a5e98c2dfff6d2dc"
+      "d66fbca6cde7a67fa260d1aa6dbaa25d"
     ],
     [
       "Vale.Def.Words.Seq.seq_nat8_to_seq_uint8_injective",
@@ -1031,7 +1084,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8"
       ],
       0,
-      "1bd933e0c0b87599e10922fbf660133c"
+      "bbebb52c60bdfbe34ff1aa76d783141a"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_LE_injective",
@@ -1040,7 +1093,7 @@
       0,
       [ "@query" ],
       0,
-      "78f53da3443647ebaba7b0ecec5d0074"
+      "834961427c37eec03913e5eff600d3fc"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_LE_injective",
@@ -1056,7 +1109,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "133241017f6e0ded80eb131fa7535c11"
+      "02afd07a07647e8c2abd712d8de05dd5"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_BE_injective",
@@ -1065,7 +1118,7 @@
       0,
       [ "@query" ],
       0,
-      "ac392a63c110b62e5dd6baa3b16f597c"
+      "6945a71861416dafa0bb1d76438357fe"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_BE_injective",
@@ -1081,7 +1134,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "596dde2c5e960cf346eb104f81a5fe7d"
+      "202f143a2bab8810d5f51eeab22b5d64"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_LE_injective_specific",
@@ -1090,7 +1143,7 @@
       0,
       [ "@query" ],
       0,
-      "6bbf1dc5b6f920710bab07104b23c956"
+      "5b2777c3798007683bf3d73d0da84f20"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_LE_injective_specific",
@@ -1099,7 +1152,7 @@
       0,
       [ "@query" ],
       0,
-      "8f271f75588615b4e99ceafb1631bf7b"
+      "0e242f8351d2dcba22b46ea39de5b610"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_BE_injective_specific",
@@ -1108,7 +1161,7 @@
       0,
       [ "@query" ],
       0,
-      "3d57d92b9b3fcdd07b0285b32f9cfe9a"
+      "e3dc879212257b16d206568538ffd207"
     ],
     [
       "Vale.Def.Words.Seq.seq_four_to_seq_BE_injective_specific",
@@ -1117,7 +1170,7 @@
       0,
       [ "@query" ],
       0,
-      "ca7e23cf8f62909af25ca8be65b82b7f"
+      "7283730469019b534b10ee4cd9dde1c6"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_LE_injective",
@@ -1134,7 +1187,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "688989571a448e4cd5b8c3d6ff597f31"
+      "a78f5595049ce4abb5e26dd5b72e1911"
     ],
     [
       "Vale.Def.Words.Seq.four_to_seq_BE_injective",
@@ -1151,7 +1204,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "a620a52926614bbab0936e02796015e5"
+      "5b1fecf8b56eb972e8c13d731bdb00ad"
     ],
     [
       "Vale.Def.Words.Seq.four_to_nat_8_injective",
@@ -1160,7 +1213,7 @@
       0,
       [ "@query" ],
       0,
-      "1c1e058aea5540e3d2e3cde89401b98e"
+      "5747fe86bbba83a5b52f302e21028e9c"
     ],
     [
       "Vale.Def.Words.Seq.four_to_nat_8_injective",
@@ -1182,7 +1235,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "32b004ebd9611cc21c8abe6f2ef57a2e"
+      "861e146b786d6e02f6076280d0473e02"
     ],
     [
       "Vale.Def.Words.Seq.nat_to_four_8_injective",
@@ -1191,7 +1244,7 @@
       0,
       [ "@query" ],
       0,
-      "979fd98ea36d82e41fb490eeca3e3394"
+      "dfa3fcbce50422eca52d59c762f62bd4"
     ],
     [
       "Vale.Def.Words.Seq.nat_to_four_8_injective",
@@ -1212,7 +1265,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "a176a24a5684c6db8b91b51d7a7686a8"
+      "69f9729dc80b6036afcc7a2dce777536"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_to_seq_four_LE",
@@ -1227,7 +1280,7 @@
         "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac"
       ],
       0,
-      "6f5fc08c0a119387092bf461d3d5e7ec"
+      "0c964434d8f71958fadb2d6e425b73b2"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_to_seq_four_LE",
@@ -1267,7 +1320,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "c8bea514f4bd36e30c6751b3add64e61"
+      "52b2890a389e12debb780e0cce037dd0"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_to_seq_four_BE",
@@ -1282,7 +1335,7 @@
         "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac"
       ],
       0,
-      "f693f20b008344e2a8e3a4a4cb671394"
+      "07d86718344fe9a633c899736127cae1"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_to_seq_four_BE",
@@ -1322,7 +1375,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_BE"
       ],
       0,
-      "8118b692e834ca3f8fea6f7c75d94c30"
+      "6b470bcc7f20a03ee1308ce9d96cd580"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_four_to_seq_LE",
@@ -1360,7 +1413,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "a7cfc49e19ec9333b1855c6671787e3c"
+      "72d281b9b05fc5e9c5689c682fdcfe10"
     ],
     [
       "Vale.Def.Words.Seq.append_distributes_seq_four_to_seq_BE",
@@ -1398,7 +1451,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_BE"
       ],
       0,
-      "783970167d0697166a10054d0fb2f0e2"
+      "258ffe4a62122a9a901cba95f1288e4b"
     ]
   ]
 ]

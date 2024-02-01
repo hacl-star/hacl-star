@@ -6,6 +6,8 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   nix:
     runs-on: self-hosted

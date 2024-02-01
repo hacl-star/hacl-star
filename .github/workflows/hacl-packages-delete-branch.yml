@@ -4,6 +4,8 @@ on:
   pull_request:
     types: [ closed ]
 
+permissions: {}
+
 jobs:
   hacl-packages-delete-branch:
     runs-on: ubuntu-latest

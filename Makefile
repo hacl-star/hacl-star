@@ -345,7 +345,7 @@ endif
 	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
-	    --hint_file hints/$(notdir $*).hints \
+	    --hint_dir hints/ \
 	    $(notdir $*) > $@ \
 	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$(call to-obj-dir,$@))
 
@@ -413,7 +413,7 @@ hints:
 %.checked: | hints
 	$(call run-with-log,\
 	  $(FSTAR) $(FSTAR_FLAGS) \
-	    --hint_file hints/$(notdir $*).hints \
+	    --hint_dir hints \
 	    $< \
 	    && \
 	    touch -c $@ \
@@ -461,13 +461,15 @@ min-test-unstaged: $(filter-out \
 obj/Meta_Interface.ml: CODEGEN = Plugin
 obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
 
-obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
+# If fstar.exe was changed in the slightest, this object
+# must be recompiled
+obj/Meta_Interface.cmxs: obj/Meta_Interface.ml $(FSTAR_EXE)
 	$(OCAMLSHARED) $< -o $@
 
 obj/Test_Lowstarize.ml: CODEGEN = Plugin
 obj/Test_Lowstarize.ml: obj/Test.Lowstarize.fst.checked
 
-obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
+obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml $(FSTAR_EXE)
 	$(OCAMLSHARED) $< -o $@
 
 # IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.

@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
       0,
-      "ae2f2d38a2456098636f1803317da16b"
+      "26241584515c55ed92f7b1dffa773edd"
     ],
     [
       "EverCrypt.Hash.alg13",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
       0,
-      "9bdee53171f22ed1e129b486e6d06cff"
+      "015b92b49ae98bb94772bda084845000"
     ],
     [
       "EverCrypt.Hash.uint32_fits_maxLength",
@@ -59,7 +59,7 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "287626a88d9cecd03619639a55886e6c"
+      "270bcc8d011038e666942a8253e43463"
     ],
     [
       "EverCrypt.Hash.loc_includes_union_l_footprint_s",
@@ -68,7 +68,7 @@
       0,
       [ "@query" ],
       0,
-      "8cf6ea39416bc93ddced85b6e92a45fb"
+      "74622fe0a84ffde5309a3b3d634c5442"
     ],
     [
       "EverCrypt.Hash.invariant",
@@ -82,7 +82,7 @@
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
       ],
       0,
-      "511e211abbac2d1d27bf61d422824a08"
+      "dac1ad78ec25b78f001e6a81fc381f11"
     ],
     [
       "EverCrypt.Hash.frame_invariant_implies_footprint_preservation",
@@ -131,7 +131,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "84feedec87da5d2ba1c3a84fa83236a4"
+      "62c607e59ccaee73f2ce1de59e2cfa4d"
     ],
     [
       "EverCrypt.Hash.ev_of_uint64",
@@ -139,22 +139,37 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.S32",
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "constructor_distinct_Lib.IntTypes.S64",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Tm_unit", "equation_Prims.nat",
-        "equation_Spec.Hash.Definitions.block_length",
-        "equation_Spec.Hash.Definitions.block_word_length",
+        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.extra_state",
+        "equation_Spec.Hash.Definitions.is_blake",
         "equation_Spec.Hash.Definitions.word_length", "int_inversion",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_0dd7d82d89ad57ee72279b3caed814b3",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Spec.Hash.Definitions.word_length"
+        "refinement_interpretation_Tm_refine_85fa9a0c1bbb99cdf2d74b81cf2c88fa",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt64.v", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Hash.Definitions.word_length", "unit_typing"
       ],
       0,
-      "70f243b8a156b8a94e60d3e8bd61573b"
+      "3556782443276987efa568da74b512de"
     ],
     [
       "EverCrypt.Hash.ev_of_uint64",
@@ -192,7 +207,7 @@
         "typing_Spec.Hash.Definitions.word_length", "unit_typing"
       ],
       0,
-      "d54caebb66c5837b556dce7973c97398"
+      "c738a469d7ac6f72fecfeb7096f1a362"
     ],
     [
       "EverCrypt.Hash.update_multi",
@@ -214,7 +229,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "83912c862d50b2f6abf83e7f27fdf2ce"
+      "f532fdc53dd12928a57769fab7f486ca"
     ],
     [
       "EverCrypt.Hash.prev_len_of_uint64",
@@ -222,22 +237,22 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.S32",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U16",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Tm_unit", "equation_Prims.nat",
-        "equation_Spec.Hash.Definitions.block_length",
-        "equation_Spec.Hash.Definitions.block_word_length",
-        "equation_Spec.Hash.Definitions.word_length", "int_inversion",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_Prims.nat",
+        "equation_Spec.Hash.Incremental.Definitions.prev_length_t",
+        "int_inversion", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_0dd7d82d89ad57ee72279b3caed814b3",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Spec.Hash.Definitions.word_length"
+        "refinement_interpretation_Tm_refine_85fa9a0c1bbb99cdf2d74b81cf2c88fa",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt64.v", "unit_typing"
       ],
       0,
-      "5da429ae633041e4f1018fe2269e8486"
+      "cc46864186ac0963b958b4c8ca0ea9ae"
     ],
     [
       "EverCrypt.Hash.prev_len_of_uint64",
@@ -260,7 +275,7 @@
         "typing_FStar.UInt64.v", "unit_typing"
       ],
       0,
-      "4902b72a2d2feac32140aa7879d49a64"
+      "6405b45a30ccc814f9fad7fefab28e68"
     ],
     [
       "EverCrypt.Hash.update_last",
@@ -298,7 +313,7 @@
         "typing_Spec.Hash.Definitions.less_than_max_input_length"
       ],
       0,
-      "60c819874d5a6e56688620f0767529f3"
+      "0c0572c2ea2579c292ef5ca9c63c9943"
     ],
     [
       "EverCrypt.Hash.finish",
@@ -336,7 +351,7 @@
         "typing_Spec.Hash.Definitions.is_shake", "unit_typing"
       ],
       0,
-      "df45783c34332bc3be7b3cb2c558d914"
+      "c8a84e2f02db33c777b3f24d56afead9"
     ]
   ]
 ]

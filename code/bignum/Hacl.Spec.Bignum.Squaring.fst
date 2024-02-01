@@ -339,6 +339,7 @@ val bn_sqr_loop_lemma:
    let tmp : lbignum t (aLen + aLen) = repeati i (bn_sqr_diag_f a) bn_zero in
    2 * eval_ resLen acc (i + i) + eval_ resLen tmp (i + i) == eval_ aLen a i * eval_ aLen a i)
 
+#push-options "--z3rlimit 75"
 let rec bn_sqr_loop_lemma #t #aLen a i =
   let pbits = bits t in
   let resLen = aLen + aLen in
@@ -383,7 +384,7 @@ let rec bn_sqr_loop_lemma #t #aLen a i =
       (==) { bn_eval_square a i }
       eval_ aLen a i * eval_ aLen a i;
     }; () end
-
+#pop-options
 
 val bn_sqr_lemma_eval: #t:limb_t -> #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum t aLen ->
   Lemma (bn_v (bn_sqr a) == bn_v a * bn_v a)

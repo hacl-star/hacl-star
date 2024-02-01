@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "f07d8b0f8b13ebd3b289bc62a2944869"
+      "af7ffb570767e56b6b6587800c4deab2"
     ],
     [
       "Lib.Exponentiation.exp_lr_f",
@@ -23,7 +23,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "99874af212be13736cb91ae279978060"
+      "b946f9b7df1fbf35892a42709f307060"
     ],
     [
       "Lib.Exponentiation.exp_mont_ladder_f",
@@ -38,7 +38,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "d52dd4614293157b43b6216fd522e0a9"
+      "b89a8270c3237662fae8ba6981b3b01e"
     ],
     [
       "Lib.Exponentiation.exp_mont_ladder_swap2_f",
@@ -55,7 +55,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "6539983a27fd2422bc910a3bd1f3d30c"
+      "3d211d5cca2062fcf1de6cdfb33bd989"
     ],
     [
       "Lib.Exponentiation.exp_mont_ladder_swap_f",
@@ -72,7 +72,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "129e41e3d5d01683749459a480574b12"
+      "079970e1855d10ad6df71379a9ebd242"
     ],
     [
       "Lib.Exponentiation.exp_pow2_lemma",
@@ -81,7 +81,7 @@
       0,
       [ "@query" ],
       0,
-      "6bf310a03e1e5bd37c393beffc58bea2"
+      "f1dd361a8462088a332ec17e75d30344"
     ],
     [
       "Lib.Exponentiation.get_ith_lbits",
@@ -93,16 +93,28 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "05ae0a43e35e66a3a5e47dd23e6797b1"
+      "0b9490b725bf049ec143c31837ba2a2c"
     ],
     [
       "Lib.Exponentiation.get_bits_l",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Lib.Exponentiation.get_ith_lbits", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
+        "refinement_interpretation_Tm_refine_bb0b8197bb42e9a1aaebe59e97685233",
+        "typing_Prims.pow2"
+      ],
       0,
-      "db9bcb18c97ef3b34aad74cf66e4d7ae"
+      "fe00b2c916678d9cace4fa5d0c180c17"
     ],
     [
       "Lib.Exponentiation.get_bits_l",
@@ -123,7 +135,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "fe46e890d452d56b7dfe2cc4424fac9a"
+      "a8b34a992b8f66ab2edd4c9c55b49654"
     ],
     [
       "Lib.Exponentiation.mul_acc_pow_a_bits_l",
@@ -132,7 +144,7 @@
       0,
       [ "@query" ],
       0,
-      "b05f5b8fd10a4bc5dcc4525dda573a34"
+      "090db47551627a89945af252b5c899f5"
     ],
     [
       "Lib.Exponentiation.mul_acc_pow_a_bits_l",
@@ -141,7 +153,7 @@
       0,
       [ "@query" ],
       0,
-      "6f0368d13b1aa4da8d64647bd76049df"
+      "f1fe73bf3dc67f862565000011c5ccb0"
     ],
     [
       "Lib.Exponentiation.exp_fw_f",
@@ -153,7 +165,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "fa9c943b1f68bf93b4a6b66cd482b225"
+      "4190c4007a6097094f18708a075e176d"
     ],
     [
       "Lib.Exponentiation.exp_fw_f",
@@ -166,16 +178,28 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "1813f9f90d888fc344495ce9115348a1"
+      "cacdcc1b9a19510a4f8018391f112b59"
     ],
     [
       "Lib.Exponentiation.exp_fw_acc0",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Lib.Exponentiation.get_ith_lbits", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_54490d2ea58144a1cc3df5883baeec33",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
+        "typing_Prims.pow2"
+      ],
       0,
-      "9fddaa2502f4a804f8e9d9ef559f64dc"
+      "c437433a48a15d84fa5adb58ee9a9773"
     ],
     [
       "Lib.Exponentiation.exp_fw_acc0",
@@ -196,7 +220,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "48d8f797cd2077893cd6175f095f3aa8"
+      "d5a8e48f3ac39caecf8114162d044059"
     ],
     [
       "Lib.Exponentiation.exp_fw",
@@ -216,7 +240,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "6f81d0b5385c443ebc6db7361e8de67f"
+      "5211b84319fe3b7375216115128f8ac5"
     ],
     [
       "Lib.Exponentiation.exp_double_fw_f",
@@ -225,7 +249,7 @@
       0,
       [ "@query" ],
       0,
-      "775cb8c50e8882e5539f97919c4d9646"
+      "430020d967fcb6d6087dc89597139a34"
     ],
     [
       "Lib.Exponentiation.exp_double_fw_acc0",
@@ -234,7 +258,7 @@
       0,
       [ "@query" ],
       0,
-      "af92de6eb792992cadfe017cd3bde8f2"
+      "2212920638005daa79d23f7a7d1784b5"
     ],
     [
       "Lib.Exponentiation.exp_double_fw",
@@ -254,7 +278,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "41ccfaa93de0e4100634df5e2c7a2630"
+      "d584b96ccce88344344690439f5cc928"
     ],
     [
       "Lib.Exponentiation.exp_four_fw_f",
@@ -263,7 +287,7 @@
       0,
       [ "@query" ],
       0,
-      "fe945057670ce40f943c461449281021"
+      "0f23f5162f65c8ec9fa234ed8043c3a6"
     ],
     [
       "Lib.Exponentiation.exp_four_fw_acc0",
@@ -272,7 +296,7 @@
       0,
       [ "@query" ],
       0,
-      "5b049055de673c5e6e8aa924831e2131"
+      "b94d5e6866a0e34360501f57d130ebd7"
     ],
     [
       "Lib.Exponentiation.exp_four_fw",
@@ -292,7 +316,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "5b96eec15b6f77d793d9781440429a34"
+      "6911f62cb9d9d5a16e48b00294724c26"
     ]
   ]
 ]

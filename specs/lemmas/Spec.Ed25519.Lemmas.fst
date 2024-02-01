@@ -87,16 +87,22 @@ let fdiv_to_one_denominator x1 x2 z1 z2 =
   prime_lemma ();
   LM.lemma_div_mod_prime_to_one_denominator #prime x1 x2 z1 z2
 
+(* For whatever reason, calling mod_mult_congr directly in the lemma
+below throws Z3 into a loop. Factoring it out and specializing b=0
+here works reliably. I am minimizing and reporting a Z3 bug. *)
+let mod_mult_congr0 (p:int{Euclid.is_prime p}) (a c:int) : Lemma
+  (requires (a * c) % p = 0 /\ c % p <> 0)
+  (ensures  a % p = 0)
+  = Fermat.mod_mult_congr p a 0 c
 
 val fmul_zero_lemma: x:elem -> y:elem -> Lemma (x *% y == 0 <==> (x == 0 \/ y == 0))
 let fmul_zero_lemma x y =
   prime_lemma ();
-  if x = 0 || y = 0 then ()
-  else
+  if y = 0 || x = 0 then ()
+  else (
     if (x *% y) = 0 then
-      Fermat.mod_mult_congr prime x 0 y
-    else ()
-
+      mod_mult_congr0 prime x y
+  )
 
 val fmul_nonzero_lemma: x:elem -> y:elem -> Lemma
   (requires x <> zero /\ y <> zero)

@@ -25,7 +25,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
-#reset-options "--z3rlimit 200 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*' --record_options"
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 1 --using_facts_from '* -FStar.Seq -Hacl.Spec.*' --record_options"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract
@@ -131,8 +131,6 @@ val cswap2:
 let cswap2 #s bit p0 p1 =
   C.cswap2 #s bit p0 p1
 
-#set-options "--z3rlimit 150 --fuel 0 --ifuel 1"
-
 val ladder_step:
     #s:field_spec
   -> k:scalar
@@ -164,6 +162,8 @@ val ladder_step:
       state_inv_t h1 (get_x q) /\ state_inv_t h1 (get_z q) /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
+
+#push-options "--z3rlimit 200 --fuel 0 --ifuel 1"
 [@ Meta.Attribute.inline_ ]
 let ladder_step #s k q i p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
@@ -186,9 +186,9 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
   cswap2 #s sw nq nq_p1;
   point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- bit
+#pop-options
 
-#set-options "--z3rlimit 300 --fuel 1 --ifuel 1"
-
+#push-options "--z3rlimit 300 --fuel 1 --ifuel 1"
 val ladder_step_loop:
     #s:field_spec
   -> k:scalar
@@ -250,9 +250,9 @@ let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
     (fun i ->
       Lib.LoopCombinators.unfold_repeati 251 (spec_fh h0) (acc h0) (v i);
       ladder_step #s k q i p01_tmp1_swap tmp2)
+#pop-options
 
-#set-options "--z3refresh --fuel 0 --ifuel 1 --z3rlimit 800"
-
+#push-options "--z3refresh --fuel 0 --ifuel 1 --z3rlimit 800"
 val ladder0_:
     #s:field_spec
   -> k:scalar
@@ -475,9 +475,9 @@ let montgomery_ladder #s out key init =
   let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
   copy out p0;
   pop_frame ()
+#pop-options
 
-#set-options "--fuel 0 --ifuel 1 --z3rlimit 300"
-
+#push-options "--fuel 0 --ifuel 1 --z3rlimit 400"
 inline_for_extraction noextract
 let g25519_t = x:glbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x}
 
@@ -516,3 +516,4 @@ let ecdh #s out priv pub =
   let r = lbytes_eq #32ul out zeros in
   pop_frame();
   not r
+#pop-options

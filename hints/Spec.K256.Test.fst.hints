@@ -14,7 +14,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "1f37a4932f626f2b460e38b23390ba23"
+      "375f2af7e15b81ce1c67b81862a94415"
     ],
     [
       "Spec.K256.Test.test1_msg",
@@ -29,7 +29,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3d9dcd7e93d764ae2a277b9a12ad540b"
+      "ab28bdccf682cca2bbb716347142a72c"
     ],
     [
       "Spec.K256.Test.test1_sgnt",
@@ -44,7 +44,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "5e9ae28d9560b38314f45aba3cecd686"
+      "5eb38a69365258a57da8135a809fed20"
     ],
     [
       "Spec.K256.Test.test2_sk",
@@ -59,7 +59,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "e177692d18d3fd07f0cee47d496fb665"
+      "6aa50abb7a815a534080f09385d4b193"
     ],
     [
       "Spec.K256.Test.test2_pk",
@@ -74,7 +74,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "e7606458d8a8bcf5aaca26ca62568342"
+      "0f204303338e85cc50ca49b9652caa9d"
     ],
     [
       "Spec.K256.Test.test2_nonce",
@@ -89,7 +89,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "bd352d5ed30ffc49b26bf8772fb531cd"
+      "a62fb0b9a3f8e35d52eba0b5d823fe2a"
     ],
     [
       "Spec.K256.Test.test2_msgHash",
@@ -104,7 +104,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8892078eaafb9c416a3f298e6a76b424"
+      "dfcd21080392d37305009204e2d37cd0"
     ],
     [
       "Spec.K256.Test.test2_sgnt",
@@ -119,26 +119,11 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "aff6bb505c988748cfd0884eda0eca04"
+      "66c24463c5aad145bb8a83823dc5d5e5"
     ],
     [
       "Spec.K256.Test.test_secret_to_public",
       1,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
-      ],
-      0,
-      "469f8c3eacf143b1916f23d19b48c990"
-    ],
-    [
-      "Spec.K256.Test.test_secret_to_public",
-      2,
       0,
       0,
       [
@@ -160,7 +145,22 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "c775b997d9e9d8c9a27b320a66709b40"
+      "2e8ead30e34103d8e4101613fb0bafc4"
+    ],
+    [
+      "Spec.K256.Test.test_secret_to_public",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "467cb98b478db8ddc817c60868767abc"
     ],
     [
       "Spec.K256.Test.test_verify",
@@ -180,11 +180,23 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "1147c9698be21638f87bc798777e2d80"
+      "f11c03425ead1f9623a50838cc45b32b"
     ],
     [
       "Spec.K256.Test.test_verify",
       2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.Sequence.length",
+        "refinement_interpretation_Tm_refine_9343b0c4d6c02093eb9f55c6ef4a33ab"
+      ],
+      0,
+      "c9e506034b04049f8113718188aa921b"
+    ],
+    [
+      "Spec.K256.Test.test_verify",
+      3,
       0,
       0,
       [
@@ -195,19 +207,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "2d94f463a8192a18601b5c27eb314e80"
-    ],
-    [
-      "Spec.K256.Test.test_verify",
-      3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.Sequence.length",
-        "refinement_interpretation_Tm_refine_9343b0c4d6c02093eb9f55c6ef4a33ab"
-      ],
-      0,
-      "779cb6e29626c8a43665020beec45e07"
+      "e13c8a2a0c6892d2f4d8ce0f1c28d96e"
     ],
     [
       "Spec.K256.Test.test_sign_and_verify",
@@ -222,26 +222,11 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f0200ec952cef3cec026d504b06383cf"
+      "22d140575bfabce1de8ce622c6b46073"
     ],
     [
       "Spec.K256.Test.test_sign_and_verify",
       2,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
-      ],
-      0,
-      "05436167b92ef3dae745b264ad868a28"
-    ],
-    [
-      "Spec.K256.Test.test_sign_and_verify",
-      3,
       0,
       0,
       [
@@ -263,7 +248,22 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "6d881dbf94a9f69f3f69ca77751d8f19"
+      "155868b30bbbf5a27c95c68f0a9bc3fa"
+    ],
+    [
+      "Spec.K256.Test.test_sign_and_verify",
+      3,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "fd5c7aedcc3d01a749e9f496806f38d9"
     ],
     [
       "Spec.K256.Test.test_public_key_compressed",
@@ -295,7 +295,7 @@
         "refinement_kinding_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "669a7e424f4b1e9b5e6e2d8f2767ce06"
+      "43d0638d6d0771f9010eb8bb407dd2f7"
     ],
     [
       "Spec.K256.Test.test_public_key_compressed",
@@ -318,7 +318,7 @@
         "refinement_kinding_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "f200469ee31a7915d4c91df55349f7e3"
+      "7d203c9dcc7d43b8eb72cf0720e6819d"
     ],
     [
       "Spec.K256.Test.test_public_key_uncompressed",
@@ -350,7 +350,7 @@
         "refinement_kinding_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "31847a927e01e7e19f91d6ae41b31830"
+      "02a3e8f483c2942b484146b675145dfe"
     ],
     [
       "Spec.K256.Test.test_public_key_uncompressed",
@@ -373,7 +373,7 @@
         "refinement_kinding_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "322978a51b1617e9d24e93a8f2164fcb"
+      "22fb04f9bdebbddf29e19eed2a6d6b5e"
     ],
     [
       "Spec.K256.Test.test",
@@ -390,7 +390,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "38c8ee9dba99079d2838669575cc705a"
+      "b562bdda7142e16b1b384bac1f957fb5"
     ]
   ]
 ]
