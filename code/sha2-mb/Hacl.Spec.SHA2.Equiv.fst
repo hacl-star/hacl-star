@@ -66,7 +66,8 @@ val seq_of_list_is_create8: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> x
 
 let seq_of_list_is_create8 #a x0 x1 x2 x3 x4 x5 x6 x7 =
   let rp = Seq.seq_of_list [x0; x1; x2; x3; x4; x5; x6; x7] in
-  assert_norm (length rp == 8);
+  assert_norm (List.length [x0; x1; x2; x3; x4; x5; x6; x7] == 8);
+  assert (length rp == 8);
   let lp = create8 x0 x1 x2 x3 x4 x5 x6 x7 in
 
   let aux (i:nat{i < 8}) : Lemma (Seq.index lp i == Seq.index rp i) =

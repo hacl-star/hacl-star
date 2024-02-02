@@ -88,36 +88,35 @@ let seq_map_injective #a #b f s s' =
   assert (equal s s')
 
 let list_to_seq #a l =
-  FStar.Seq.Properties.seq_of_list l
+  Seq.seq_of_list l
 
 let reveal_opaque_rec (s:string) = norm_spec [zeta; delta_only [s]]
 
 let rec lemma_list_to_seq_rec (#a:Type) (l:list a) (s:seq a) (n:nat) : Lemma
-  (requires n + List.length l == Seq.length s /\ Seq.equal (Seq.slice s n (Seq.length s)) (FStar.Seq.Properties.seq_of_list l))
+  (requires n + List.length l == Seq.length s /\ Seq.equal (Seq.slice s n (Seq.length s)) (list_to_seq l))
   (ensures list_to_seq_post l s n)
   (decreases l)
   =
-  reveal_opaque_rec (`%FStar.Seq.Properties.seq_of_list) (FStar.Seq.Properties.seq_of_list #a);
   match l with
   | [] -> ()
   | h::t ->
     let lem (i:nat) : Lemma
       (requires i < List.length t)
-      (ensures Seq.index (Seq.slice s (n + 1) (Seq.length s)) i == Seq.index (FStar.Seq.Properties.seq_of_list t) i)
-      [SMTPat (Seq.index (FStar.Seq.Properties.seq_of_list t) i)]
+      (ensures Seq.index (Seq.slice s (n + 1) (Seq.length s)) i == Seq.index (list_to_seq t) i)
+      [SMTPat (Seq.index (list_to_seq t) i)]
       =
       calc (==) {
         Seq.index (Seq.slice s (n + 1) (Seq.length s)) i;
         == {}
         Seq.index (Seq.slice s n (Seq.length s)) (i + 1);
         == {}
-        Seq.index (FStar.Seq.Properties.seq_of_list l) (i + 1);
+        Seq.index (list_to_seq l) (i + 1);
         == {}
-        Seq.index (FStar.Seq.Properties.seq_of_list t) i;
+        Seq.index (list_to_seq t) i;
       }
       in
     lemma_list_to_seq_rec t s (n + 1);
-    assert (Seq.index (FStar.Seq.Properties.seq_of_list l) 0 == h);
+    assert (Seq.index (list_to_seq l) 0 == h);
     ()
 
 let lemma_list_to_seq #a l =
