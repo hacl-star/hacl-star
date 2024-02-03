@@ -1806,6 +1806,7 @@ pub fn malloc(key: &mut [u8]) -> Vec<state_t>
     let mut r1: Vec<crate::lib::intvector_intrinsics::vec128> =
         vec![crate::lib::intvector_intrinsics::vec128_zero; 25usize];
     let block_state: &mut [crate::lib::intvector_intrinsics::vec128] = &mut r1;
+    poly1305_init(block_state, key);
     let mut k·: Vec<u8> = vec![0u8; 32usize];
     ((&mut k·)[0usize..32usize]).copy_from_slice(&key[0usize..32usize]);
     let k·0: &mut [u8] = &mut k·;
@@ -1823,7 +1824,6 @@ pub fn malloc(key: &mut [u8]) -> Vec<state_t>
             tmp.push(s);
             tmp
         };
-    poly1305_init(block_state, key);
     p
 }
 

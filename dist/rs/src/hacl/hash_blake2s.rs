@@ -672,6 +672,7 @@ pub fn malloc() -> Vec<state_t>
     let mut wv: Vec<u32> = vec![0u32; 16usize];
     let mut b: Vec<u32> = vec![0u32; 16usize];
     let block_state: block_state_t = block_state_t { fst: &mut wv, snd: &mut b };
+    init(block_state.snd, 0u32, 32u32);
     let s: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
         {
@@ -679,7 +680,6 @@ pub fn malloc() -> Vec<state_t>
             tmp.push(s);
             tmp
         };
-    init(block_state.snd, 0u32, 32u32);
     p
 }
 

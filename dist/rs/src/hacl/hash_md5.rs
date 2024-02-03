@@ -1351,6 +1351,7 @@ pub fn malloc() -> Vec<crate::hacl::streaming_types::state_32>
 {
     let mut buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 4usize];
+    init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
@@ -1360,7 +1361,6 @@ pub fn malloc() -> Vec<crate::hacl::streaming_types::state_32>
             tmp.push(s);
             tmp
         };
-    init(&mut block_state);
     p
 }
 

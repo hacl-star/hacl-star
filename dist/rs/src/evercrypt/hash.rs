@@ -63,6 +63,7 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 {
     let mut buf: Vec<u8> = vec![0u8; crate::evercrypt::hash_incremental::block_len(a)];
     let block_state: &mut [state_s] = create_in(a);
+    init(block_state);
     let s: state_t =
         state_t { block_state: block_state.to_vec(), buf: buf, total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
@@ -71,7 +72,6 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
             tmp.push(s);
             tmp
         };
-    init(block_state);
     p
 }
 
