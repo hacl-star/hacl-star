@@ -78,8 +78,9 @@ let make_hash_def (abef cdgh:quad32) :
     let g = to_uint32 cdgh.lo1 in
     let h = to_uint32 cdgh.lo0 in
     let l = [a; b; c; d; e; f; g; h] in
+    assert_norm (List.length l == 8);
     let hash = seq_of_list l in
-    assert_norm (length hash == 8);
+    assert (length hash == 8);
     elim_of_list l;
     //assert_norm (index hash 2 == c);
     hash
@@ -108,8 +109,9 @@ let make_ordered_hash_def (abcd efgh:quad32) :
     let g = to_uint32 efgh.hi2 in
     let h = to_uint32 efgh.hi3 in
     let l = [a; b; c; d; e; f; g; h] in
+    assert_norm (List.length l == 8);
     let hash = seq_of_list l in
-    assert_norm (length hash == 8);
+    assert (length hash == 8);
     elim_of_list l;
     hash
 [@"opaque_to_smt"] let make_ordered_hash = opaque_make make_ordered_hash_def

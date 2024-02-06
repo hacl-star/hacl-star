@@ -30,7 +30,7 @@
         "typing_FStar.Seq.Base.slice"
       ],
       0,
-      "30ae272e2ee7cf04dffc4e7d0dd2158d"
+      "a1ccf0af4d23ce827995344ff5920732"
     ],
     [
       "Hacl.Hash.Lemmas.lemma_slice_ijk",
@@ -60,7 +60,7 @@
         "typing_FStar.Seq.Base.slice"
       ],
       0,
-      "76301905e26aa11c5d2e43a15d09df8b"
+      "8433eeb1299a475e688b29aa0492b7ab"
     ],
     [
       "Hacl.Hash.Lemmas.init_index",
@@ -77,7 +77,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "94df92985eccaba89d116ea205cef375"
+      "13d855ce8a6c244b160ffbaab4742783"
     ],
     [
       "Hacl.Hash.Lemmas.init_next",
@@ -112,7 +112,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice"
       ],
       0,
-      "8339d84f3d1731628e7c66aecf2cd692"
+      "05703c626e22365c70ce9984d8b119f5"
     ],
     [
       "Hacl.Hash.Lemmas.tail_cons",
@@ -120,8 +120,7 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_FStar.Seq.Properties.cons",
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Seq.Base.cons",
         "equation_FStar.Seq.Properties.tail", "equation_Prims.nat",
         "int_inversion", "int_typing",
         "lemma_FStar.Seq.Base.lemma_create_len",
@@ -141,12 +140,11 @@
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
-        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
-        "typing_FStar.Seq.Properties.cons",
-        "typing_FStar.Seq.Properties.tail"
+        "typing_FStar.Seq.Base.cons", "typing_FStar.Seq.Base.create",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Properties.tail"
       ],
       0,
-      "29a81903d33a90cd9b19044461291788"
+      "39465692db79a6eb4198c8eb3db19c49"
     ],
     [
       "Hacl.Hash.Lemmas.create_next",
@@ -179,7 +177,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice"
       ],
       0,
-      "1154345ec1bba428c5cdeb09541bd355"
+      "92560e595ef621dd9f0ac9101487586b"
     ]
   ]
 ]
