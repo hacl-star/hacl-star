@@ -12,6 +12,18 @@ pub fn uu___is_Ek(a: crate::hacl::spec::alg, projectee: state_s) -> bool
     true
 }
 
+pub fn alg_of_state(s: &mut [state_s]) -> crate::hacl::spec::alg
+{
+    let r#impl: crate::hacl::spec::impl = s[0usize].impl;
+    match r#impl
+    {
+        crate::hacl::spec::impl::Hacl_CHACHA20 => crate::hacl::spec::alg::CHACHA20_POLY1305,
+        crate::hacl::spec::impl::Vale_AES128 => crate::hacl::spec::alg::AES128_GCM,
+        crate::hacl::spec::impl::Vale_AES256 => crate::hacl::spec::alg::AES256_GCM,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
 fn create_in_chacha20_poly1305(dst: &mut [&mut [state_s]], k: &mut [u8]) ->
     crate::evercrypt::error::error_code
 {
@@ -103,6 +115,18 @@ fn create_in_aes256_gcm(dst: &mut [&mut [state_s]], k: &mut [u8]) ->
     }
     else
     { crate::evercrypt::error::error_code::UnsupportedAlgorithm }
+}
+
+pub fn create_in(a: crate::hacl::spec::alg, dst: &mut [&mut [state_s]], k: &mut [u8]) ->
+    crate::evercrypt::error::error_code
+{
+    match a
+    {
+        crate::hacl::spec::alg::AES128_GCM => create_in_aes128_gcm(dst, k),
+        crate::hacl::spec::alg::AES256_GCM => create_in_aes256_gcm(dst, k),
+        crate::hacl::spec::alg::CHACHA20_POLY1305 => create_in_chacha20_poly1305(dst, k),
+        _ => crate::evercrypt::error::error_code::UnsupportedAlgorithm
+    }
 }
 
 fn encrypt_aes128_gcm(
@@ -264,7 +288,7 @@ fn encrypt_aes128_gcm(
         }
     }
     else
-    { panic!(statically unreachable) }
+    { panic!("statically unreachable") }
 }
 
 fn encrypt_aes256_gcm(
@@ -426,7 +450,81 @@ fn encrypt_aes256_gcm(
         }
     }
     else
-    { panic!(statically unreachable) }
+    { panic!("statically unreachable") }
+}
+
+pub fn encrypt(
+    s: &mut [state_s],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    plain: &mut [u8],
+    plain_len: u32,
+    cipher: &mut [u8],
+    tag: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    if false
+    { crate::evercrypt::error::error_code::InvalidKey }
+    else
+    {
+        let scrut: state_s = s[0usize];
+        let i: crate::hacl::spec::impl = scrut.impl;
+        let ek: &mut [u8] = &mut scrut.ek;
+        match i
+        {
+            crate::hacl::spec::impl::Vale_AES128 =>
+              encrypt_aes128_gcm(s, iv, iv_len, ad, ad_len, plain, plain_len, cipher, tag),
+            crate::hacl::spec::impl::Vale_AES256 =>
+              encrypt_aes256_gcm(s, iv, iv_len, ad, ad_len, plain, plain_len, cipher, tag),
+            crate::hacl::spec::impl::Hacl_CHACHA20 =>
+              if iv_len != 12u32
+              { crate::evercrypt::error::error_code::InvalidIVLength }
+              else
+              {
+                  crate::evercrypt::chacha20poly1305::aead_encrypt(
+                      ek,
+                      iv,
+                      ad_len,
+                      ad,
+                      plain_len,
+                      plain,
+                      cipher,
+                      tag
+                  );
+                  crate::evercrypt::error::error_code::Success
+              },
+            _ => panic!("Precondition of the function most likely violated")
+        }
+    }
+}
+
+pub fn encrypt_expand(
+    a: crate::hacl::spec::alg,
+    k: &mut [u8],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    plain: &mut [u8],
+    plain_len: u32,
+    cipher: &mut [u8],
+    tag: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    match a
+    {
+        crate::hacl::spec::alg::AES128_GCM =>
+          encrypt_expand_aes128_gcm(k, iv, iv_len, ad, ad_len, plain, plain_len, cipher, tag),
+        crate::hacl::spec::alg::AES256_GCM =>
+          encrypt_expand_aes256_gcm(k, iv, iv_len, ad, ad_len, plain, plain_len, cipher, tag),
+        crate::hacl::spec::alg::CHACHA20_POLY1305 =>
+          encrypt_expand_chacha20_poly1305(k, iv, iv_len, ad, ad_len, plain, plain_len, cipher, tag),
+        _ => panic!("Precondition of the function most likely violated")
+    }
 }
 
 fn decrypt_aes128_gcm(
@@ -595,7 +693,7 @@ fn decrypt_aes128_gcm(
         }
     }
     else
-    { panic!(statically unreachable) }
+    { panic!("statically unreachable") }
 }
 
 fn decrypt_aes256_gcm(
@@ -764,7 +862,7 @@ fn decrypt_aes256_gcm(
         }
     }
     else
-    { panic!(statically unreachable) }
+    { panic!("statically unreachable") }
 }
 
 fn decrypt_chacha20_poly1305(
@@ -803,5 +901,62 @@ fn decrypt_chacha20_poly1305(
         { crate::evercrypt::error::error_code::Success }
         else
         { crate::evercrypt::error::error_code::AuthenticationFailure }
+    }
+}
+
+pub fn decrypt(
+    s: &mut [state_s],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    cipher: &mut [u8],
+    cipher_len: u32,
+    tag: &mut [u8],
+    dst: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    if false
+    { crate::evercrypt::error::error_code::InvalidKey }
+    else
+    {
+        let i: crate::hacl::spec::impl = s[0usize].impl;
+        match i
+        {
+            crate::hacl::spec::impl::Vale_AES128 =>
+              decrypt_aes128_gcm(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst),
+            crate::hacl::spec::impl::Vale_AES256 =>
+              decrypt_aes256_gcm(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst),
+            crate::hacl::spec::impl::Hacl_CHACHA20 =>
+              decrypt_chacha20_poly1305(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst),
+            _ => panic!("Precondition of the function most likely violated")
+        }
+    }
+}
+
+pub fn decrypt_expand(
+    a: crate::hacl::spec::alg,
+    k: &mut [u8],
+    iv: &mut [u8],
+    iv_len: u32,
+    ad: &mut [u8],
+    ad_len: u32,
+    cipher: &mut [u8],
+    cipher_len: u32,
+    tag: &mut [u8],
+    dst: &mut [u8]
+) ->
+    crate::evercrypt::error::error_code
+{
+    match a
+    {
+        crate::hacl::spec::alg::AES128_GCM =>
+          decrypt_expand_aes128_gcm(k, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst),
+        crate::hacl::spec::alg::AES256_GCM =>
+          decrypt_expand_aes256_gcm(k, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst),
+        crate::hacl::spec::alg::CHACHA20_POLY1305 =>
+          decrypt_expand_chacha20_poly1305(k, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst),
+        _ => panic!("Precondition of the function most likely violated")
     }
 }

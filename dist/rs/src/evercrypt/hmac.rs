@@ -3,6 +3,20 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+pub fn is_supported_alg(uu___: crate::hacl::streaming_types::hash_alg) -> bool
+{
+    match uu___
+    {
+        crate::hacl::streaming_types::hash_alg::SHA1 => true,
+        crate::hacl::streaming_types::hash_alg::SHA2_256 => true,
+        crate::hacl::streaming_types::hash_alg::SHA2_384 => true,
+        crate::hacl::streaming_types::hash_alg::SHA2_512 => true,
+        crate::hacl::streaming_types::hash_alg::Blake2S => true,
+        crate::hacl::streaming_types::hash_alg::Blake2B => true,
+        _ => false
+    }
+}
+
 pub type supported_alg = crate::hacl::streaming_types::hash_alg;
 
 pub const hash_256: (&mut [u8], &mut [u8], u32) () = crate::evercrypt::hash::hash_256;
@@ -739,4 +753,32 @@ pub fn compute_blake2b(
         rem0.1
     );
     crate::hacl::hash_blake2b::finish(64u32, dst, s0)
+}
+
+pub fn compute(
+    a: crate::hacl::streaming_types::hash_alg,
+    mac: &mut [u8],
+    key: &mut [u8],
+    keylen: u32,
+    data: &mut [u8],
+    datalen: u32
+) ->
+    ()
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::SHA1 =>
+          compute_sha1(mac, key, keylen, data, datalen),
+        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
+          compute_sha2_256(mac, key, keylen, data, datalen),
+        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
+          compute_sha2_384(mac, key, keylen, data, datalen),
+        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
+          compute_sha2_512(mac, key, keylen, data, datalen),
+        crate::hacl::streaming_types::hash_alg::Blake2S =>
+          compute_blake2s(mac, key, keylen, data, datalen),
+        crate::hacl::streaming_types::hash_alg::Blake2B =>
+          compute_blake2b(mac, key, keylen, data, datalen),
+        _ => panic!("Precondition of the function most likely violated")
+    }
 }

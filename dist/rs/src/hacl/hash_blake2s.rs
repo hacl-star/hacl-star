@@ -662,7 +662,7 @@ pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u32]) -> ()
     crate::lib::memzero0::memzero::<u8>(&mut b, 32u32)
 }
 
-pub struct block_state_t { pub fst: &mut [u32], pub snd: &mut [u32] }
+pub struct block_state_t <'a> { pub fst: &'a mut [u32], pub snd: &'a mut [u32] }
 
 pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
 
@@ -693,7 +693,7 @@ pub fn reset(state: &mut [state_t]) -> ()
     state[0usize] = tmp
 }
 
-pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
+pub fn updateÂ·(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let total_len: u64 = state[0usize].total_len;

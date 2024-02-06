@@ -3,6 +3,46 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+#[inline] fn hash_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::MD5 => 16u32,
+        crate::hacl::streaming_types::hash_alg::SHA1 => 20u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_224 => 28u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_256 => 32u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_384 => 48u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_512 => 64u32,
+        crate::hacl::streaming_types::hash_alg::Blake2S => 32u32,
+        crate::hacl::streaming_types::hash_alg::Blake2B => 64u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_224 => 28u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_256 => 32u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_384 => 48u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_512 => 64u32,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
+#[inline] fn hash(
+    a: crate::hacl::streaming_types::hash_alg,
+    mHash: &mut [u8],
+    msgLen: u32,
+    msg: &mut [u8]
+) ->
+    ()
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
+          crate::hacl::hash_sha2::hash_256(mHash, msg, msgLen),
+        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
+          crate::hacl::hash_sha2::hash_384(mHash, msg, msgLen),
+        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
+          crate::hacl::hash_sha2::hash_512(mHash, msg, msgLen),
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
 #[inline] fn mgf_hash(
     a: crate::hacl::streaming_types::hash_alg,
     len: u32,
@@ -14,7 +54,7 @@
 {
     let mut mgfseed_counter: Vec<u8> = vec![0u8; len.wrapping_add(4u32) as usize];
     ((&mut mgfseed_counter)[0usize..len as usize]).copy_from_slice(&mgfseed[0usize..len as usize]);
-    let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
+    let hLen: u32 = hash_len(a);
     let n: u32 = maskLen.wrapping_sub(1u32).wrapping_div(hLen).wrapping_add(1u32);
     let accLen: u32 = n.wrapping_mul(hLen);
     let mut acc: Vec<u8> = vec![0u8; accLen as usize];
@@ -26,7 +66,7 @@
         c.1[1usize] = i.wrapping_shr(16u32) as u8;
         c.1[2usize] = i.wrapping_shr(8u32) as u8;
         c.1[3usize] = i as u8;
-        crate::hacl::impl_rsapss_mgf::hash(a, acc_i.1, len.wrapping_add(4u32), &mut mgfseed_counter)
+        hash(a, acc_i.1, len.wrapping_add(4u32), &mut mgfseed_counter)
     };
     (res[0usize..maskLen as usize]).copy_from_slice(
         &(&mut (&mut acc)[0usize..])[0usize..maskLen as usize]
@@ -106,15 +146,15 @@
 ) ->
     ()
 {
-    let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
+    let hLen: u32 = hash_len(a);
     let mut m1Hash: Vec<u8> = vec![0u8; hLen as usize];
     let m1Len: u32 = 8u32.wrapping_add(hLen).wrapping_add(saltLen);
     let mut m1: Vec<u8> = vec![0u8; m1Len as usize];
-    crate::hacl::impl_rsapss_mgf::hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
+    hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
     ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
     +
     saltLen as usize]).copy_from_slice(&salt[0usize..saltLen as usize]);
-    crate::hacl::impl_rsapss_mgf::hash(a, &mut m1Hash, m1Len, &mut m1);
+    hash(a, &mut m1Hash, m1Len, &mut m1);
     let emLen: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
     let dbLen: u32 = emLen.wrapping_sub(hLen).wrapping_sub(1u32);
     let mut db: Vec<u8> = vec![0u8; dbLen as usize];
@@ -157,7 +197,7 @@
     let msBits: u32 = emBits.wrapping_rem(8u32);
     let em_0: u8 = if msBits > 0u32 { em[0usize] & 0xffu8.wrapping_shl(msBits) } else { 0u8 };
     let em_last: u8 = em[emLen.wrapping_sub(1u32) as usize];
-    if emLen < saltLen.wrapping_add(crate::hacl::impl_rsapss_mgf::hash_len(a)).wrapping_add(2u32)
+    if emLen < saltLen.wrapping_add(hash_len(a)).wrapping_add(2u32)
     { false }
     else
     if ! (em_last == 0xbcu8 && em_0 == 0u8)
@@ -165,7 +205,7 @@
     else
     {
         let emLen1: u32 = emBits.wrapping_sub(1u32).wrapping_div(8u32).wrapping_add(1u32);
-        let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
+        let hLen: u32 = hash_len(a);
         let mut m1Hash0: Vec<u8> = vec![0u8; hLen as usize];
         let dbLen: u32 = emLen1.wrapping_sub(hLen).wrapping_sub(1u32);
         let maskedDB: (&mut [u8], &mut [u8]) = em.split_at_mut(0usize);
@@ -203,11 +243,11 @@
         {
             let m1Len: u32 = 8u32.wrapping_add(hLen).wrapping_add(saltLen);
             let mut m1: Vec<u8> = vec![0u8; m1Len as usize];
-            crate::hacl::impl_rsapss_mgf::hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
+            hash(a, &mut (&mut m1)[8usize..], msgLen, msg);
             ((&mut m1)[8u32.wrapping_add(hLen) as usize..8u32.wrapping_add(hLen) as usize
             +
             saltLen as usize]).copy_from_slice(&salt.1[0usize..saltLen as usize]);
-            crate::hacl::impl_rsapss_mgf::hash(a, &mut m1Hash0, m1Len, &mut m1);
+            hash(a, &mut m1Hash0, m1Len, &mut m1);
             let mut res0: u8 = 255u8;
             for i in 0u32..hLen
             {
@@ -288,7 +328,7 @@ pub fn rsapss_sign(
 ) ->
     bool
 {
-    let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
+    let hLen: u32 = hash_len(a);
     let b: bool =
         saltLen <= 0xffffffffu32.wrapping_sub(hLen).wrapping_sub(8u32)
         &&
@@ -380,7 +420,7 @@ pub fn rsapss_verify(
 ) ->
     bool
 {
-    let hLen: u32 = crate::hacl::impl_rsapss_mgf::hash_len(a);
+    let hLen: u32 = hash_len(a);
     let b: bool =
         saltLen <= 0xffffffffu32.wrapping_sub(hLen).wrapping_sub(8u32)
         &&
@@ -512,7 +552,7 @@ pub fn rsapss_pkey_verify(
     { false }
 }
 
-pub fn mgf_hash(
+pub fn mgf_hashÂ·(
     a: crate::hacl::streaming_types::hash_alg,
     len: u32,
     mgfseed: &mut [u8],

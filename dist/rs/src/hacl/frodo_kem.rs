@@ -220,6 +220,21 @@ pub fn shake128_4x(
     }
 }
 
+#[inline] pub fn frodo_gen_matrix(
+    a: crate::hacl::spec::frodo_gen_a,
+    n: u32,
+    seed: &mut [u8],
+    a_matrix: &mut [u16]
+) ->
+    ()
+{
+    match a
+    {
+        crate::hacl::spec::frodo_gen_a::SHAKE128 => frodo_gen_matrix_shake_4x(n, seed, a_matrix),
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
 pub const cdf_table640: [u16; 13] =
     [4643u16, 13363u16, 20579u16, 25843u16, 29227u16, 31145u16, 32103u16, 32525u16, 32689u16,
         32745u16, 32762u16, 32766u16, 32767u16];

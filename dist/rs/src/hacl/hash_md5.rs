@@ -1375,7 +1375,7 @@ pub fn reset(state: &mut [crate::hacl::streaming_types::state_32]) -> ()
     state[0usize] = tmp
 }
 
-pub fn update(
+pub fn updateÂ·(
     state: &mut [crate::hacl::streaming_types::state_32],
     chunk: &mut [u8],
     chunk_len: u32

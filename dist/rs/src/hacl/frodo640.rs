@@ -44,7 +44,7 @@ pub fn crypto_kem_keypair(pk: &mut [u8], sk: &mut [u8]) -> u32
     );
     let mut b_matrix: [u16; 5120] = [0u16; 5120usize];
     let mut a_matrix: [u16; 409600] = [0u16; 409600usize];
-    crate::hacl::impl_frodo_params::frodo_gen_matrix(
+    crate::hacl::frodo_kem::frodo_gen_matrix(
         crate::hacl::spec::frodo_gen_a::SHAKE128,
         640u32,
         b_bytes.0,
@@ -116,7 +116,7 @@ pub fn crypto_kem_enc(ct: &mut [u8], ss: &mut [u8], pk: &mut [u8]) -> u32
     let c2: (&mut [u8], &mut [u8]) = c1.1.split_at_mut(9600usize);
     let mut bp_matrix: [u16; 5120] = [0u16; 5120usize];
     let mut a_matrix: [u16; 409600] = [0u16; 409600usize];
-    crate::hacl::impl_frodo_params::frodo_gen_matrix(
+    crate::hacl::frodo_kem::frodo_gen_matrix(
         crate::hacl::spec::frodo_gen_a::SHAKE128,
         640u32,
         b.0,
@@ -239,7 +239,7 @@ pub fn crypto_kem_dec(ss: &mut [u8], ct: &mut [u8], sk: &mut [u8]) -> u32
     let seed_a: (&mut [u8], &mut [u8]) = pk.1.split_at_mut(0usize);
     let b: (&mut [u8], &mut [u8]) = seed_a.1.split_at_mut(16usize);
     let mut a_matrix: [u16; 409600] = [0u16; 409600usize];
-    crate::hacl::impl_frodo_params::frodo_gen_matrix(
+    crate::hacl::frodo_kem::frodo_gen_matrix(
         crate::hacl::spec::frodo_gen_a::SHAKE128,
         640u32,
         b.0,

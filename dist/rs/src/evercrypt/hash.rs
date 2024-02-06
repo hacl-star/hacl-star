@@ -57,11 +57,65 @@ pub fn update_multi_256(s: &mut [u32], blocks: &mut [u8], n: u32) -> ()
     }
 }
 
+pub fn hash_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::MD5 =>
+          crate::evercrypt::hash_incremental_macros::md5_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA1 =>
+          crate::evercrypt::hash_incremental_macros::sha1_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_224 =>
+          crate::evercrypt::hash_incremental_macros::sha2_224_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
+          crate::evercrypt::hash_incremental_macros::sha2_256_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
+          crate::evercrypt::hash_incremental_macros::sha2_384_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
+          crate::evercrypt::hash_incremental_macros::sha2_512_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_224 =>
+          crate::evercrypt::hash_incremental_macros::sha3_224_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_256 =>
+          crate::evercrypt::hash_incremental_macros::sha3_256_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_384 =>
+          crate::evercrypt::hash_incremental_macros::sha3_384_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_512 =>
+          crate::evercrypt::hash_incremental_macros::sha3_512_hash_len,
+        crate::hacl::streaming_types::hash_alg::Blake2S =>
+          crate::evercrypt::hash_incremental_macros::blake2s_hash_len,
+        crate::hacl::streaming_types::hash_alg::Blake2B =>
+          crate::evercrypt::hash_incremental_macros::blake2b_hash_len,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
+fn block_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::MD5 => 64u32,
+        crate::hacl::streaming_types::hash_alg::SHA1 => 64u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_224 => 64u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_256 => 64u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_384 => 128u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_512 => 128u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_224 => 144u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_256 => 136u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_384 => 104u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_512 => 72u32,
+        crate::hacl::streaming_types::hash_alg::Shake128 => 168u32,
+        crate::hacl::streaming_types::hash_alg::Shake256 => 136u32,
+        crate::hacl::streaming_types::hash_alg::Blake2S => 64u32,
+        crate::hacl::streaming_types::hash_alg::Blake2B => 128u32,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
 pub struct state_t { pub block_state: Vec<state_s>, pub buf: Vec<u8>, pub total_len: u64 }
 
 pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 {
-    let mut buf: Vec<u8> = vec![0u8; crate::evercrypt::hash_incremental::block_len(a)];
+    let mut buf: Vec<u8> = vec![0u8; block_len(a)];
     let block_state: &mut [state_s] = create_in(a);
     init(block_state);
     let s: state_t =
@@ -87,10 +141,214 @@ pub fn reset(state: &mut [state_t]) -> ()
     state[0usize] = tmp
 }
 
+pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
+    crate::evercrypt::error::error_code
+{
+    let block_state: &mut [state_s] = &mut state[0usize].block_state;
+    let total_len: u64 = state[0usize].total_len;
+    let i1: crate::hacl::streaming_types::hash_alg = alg_of_state(block_state);
+    let sw: u64 =
+        match i1
+        {
+            crate::hacl::streaming_types::hash_alg::MD5 => 2305843009213693951u64,
+            crate::hacl::streaming_types::hash_alg::SHA1 => 2305843009213693951u64,
+            crate::hacl::streaming_types::hash_alg::SHA2_224 => 2305843009213693951u64,
+            crate::hacl::streaming_types::hash_alg::SHA2_256 => 2305843009213693951u64,
+            crate::hacl::streaming_types::hash_alg::SHA2_384 => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::SHA2_512 => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::Blake2S => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::Blake2B => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::SHA3_224 => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::SHA3_256 => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::SHA3_384 => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::SHA3_512 => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::Shake128 => 18446744073709551615u64,
+            crate::hacl::streaming_types::hash_alg::Shake256 => 18446744073709551615u64,
+            _ => panic!("Precondition of the function most likely violated")
+        };
+    let ite: crate::hacl::streaming_types::error_code =
+        if chunk_len as u64 > sw.wrapping_sub(total_len)
+        { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
+        else
+        {
+            let sz: u32 =
+                if total_len.wrapping_rem(block_len(i1) as u64) == 0u64 && total_len > 0u64
+                { block_len(i1) }
+                else
+                { total_len.wrapping_rem(block_len(i1) as u64) as u32 };
+            if chunk_len <= (block_len(i1)).wrapping_sub(sz)
+            {
+                let block_state1: &mut [state_s] = &mut state[0usize].block_state;
+                let buf: &mut [u8] = &mut state[0usize].buf;
+                let total_len1: u64 = state[0usize].total_len;
+                let sz1: u32 =
+                    if total_len1.wrapping_rem(block_len(i1) as u64) == 0u64 && total_len1 > 0u64
+                    { block_len(i1) }
+                    else
+                    { total_len1.wrapping_rem(block_len(i1) as u64) as u32 };
+                let buf2: (&mut [u8], &mut [u8]) = buf.split_at_mut(sz1 as usize);
+                (buf2.1[0usize..chunk_len as usize]).copy_from_slice(
+                    &chunk[0usize..chunk_len as usize]
+                );
+                let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
+                state[0usize] =
+                    state_t
+                    { block_state: block_state1.to_vec(), buf: buf.to_vec(), total_len: total_len2 }
+            }
+            else
+            if sz == 0u32
+            {
+                let block_state1: &mut [state_s] = &mut state[0usize].block_state;
+                let buf: &mut [u8] = &mut state[0usize].buf;
+                let total_len1: u64 = state[0usize].total_len;
+                let sz1: u32 =
+                    if total_len1.wrapping_rem(block_len(i1) as u64) == 0u64 && total_len1 > 0u64
+                    { block_len(i1) }
+                    else
+                    { total_len1.wrapping_rem(block_len(i1) as u64) as u32 };
+                if ! (sz1 == 0u32)
+                {
+                    let prevlen: u64 = total_len1.wrapping_sub(sz1 as u64);
+                    update_multi(block_state1, prevlen, buf, block_len(i1))
+                };
+                let ite: u32 =
+                    if
+                    (chunk_len as u64).wrapping_rem(block_len(i1) as u64) == 0u64
+                    &&
+                    chunk_len as u64 > 0u64
+                    { block_len(i1) }
+                    else
+                    { (chunk_len as u64).wrapping_rem(block_len(i1) as u64) as u32 };
+                let n_blocks: u32 = chunk_len.wrapping_sub(ite).wrapping_div(block_len(i1));
+                let data1_len: u32 = n_blocks.wrapping_mul(block_len(i1));
+                let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
+                let data1: (&mut [u8], &mut [u8]) = chunk.split_at_mut(0usize);
+                let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
+                update_multi(block_state1, total_len1, data2.0, data1_len);
+                let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
+                (dst.1[0usize..data2_len as usize]).copy_from_slice(
+                    &data2.1[0usize..data2_len as usize]
+                );
+                state[0usize] =
+                    state_t
+                    {
+                        block_state: block_state1.to_vec(),
+                        buf: buf.to_vec(),
+                        total_len: total_len1.wrapping_add(chunk_len as u64)
+                    }
+            }
+            else
+            {
+                let diff: u32 = (block_len(i1)).wrapping_sub(sz);
+                let chunk1: (&mut [u8], &mut [u8]) = chunk.split_at_mut(0usize);
+                let chunk2: (&mut [u8], &mut [u8]) = chunk1.1.split_at_mut(diff as usize);
+                let block_state1: &mut [state_s] = &mut state[0usize].block_state;
+                let buf: &mut [u8] = &mut state[0usize].buf;
+                let total_len1: u64 = state[0usize].total_len;
+                let sz1: u32 =
+                    if total_len1.wrapping_rem(block_len(i1) as u64) == 0u64 && total_len1 > 0u64
+                    { block_len(i1) }
+                    else
+                    { total_len1.wrapping_rem(block_len(i1) as u64) as u32 };
+                let buf2: (&mut [u8], &mut [u8]) = buf.split_at_mut(sz1 as usize);
+                (buf2.1[0usize..diff as usize]).copy_from_slice(&chunk2.0[0usize..diff as usize]);
+                let total_len2: u64 = total_len1.wrapping_add(diff as u64);
+                state[0usize] =
+                    state_t
+                    { block_state: block_state1.to_vec(), buf: buf.to_vec(), total_len: total_len2 };
+                let block_state10: &mut [state_s] = &mut state[0usize].block_state;
+                let buf0: &mut [u8] = &mut state[0usize].buf;
+                let total_len10: u64 = state[0usize].total_len;
+                let sz10: u32 =
+                    if total_len10.wrapping_rem(block_len(i1) as u64) == 0u64 && total_len10 > 0u64
+                    { block_len(i1) }
+                    else
+                    { total_len10.wrapping_rem(block_len(i1) as u64) as u32 };
+                if ! (sz10 == 0u32)
+                {
+                    let prevlen: u64 = total_len10.wrapping_sub(sz10 as u64);
+                    update_multi(block_state10, prevlen, buf0, block_len(i1))
+                };
+                let ite: u32 =
+                    if
+                    (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(block_len(i1) as u64) == 0u64
+                    &&
+                    chunk_len.wrapping_sub(diff) as u64 > 0u64
+                    { block_len(i1) }
+                    else
+                    {
+                        (chunk_len.wrapping_sub(diff) as u64).wrapping_rem(block_len(i1) as u64)
+                        as
+                        u32
+                    };
+                let n_blocks: u32 =
+                    chunk_len.wrapping_sub(diff).wrapping_sub(ite).wrapping_div(block_len(i1));
+                let data1_len: u32 = n_blocks.wrapping_mul(block_len(i1));
+                let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
+                let data1: (&mut [u8], &mut [u8]) = chunk2.1.split_at_mut(0usize);
+                let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
+                update_multi(block_state10, total_len10, data2.0, data1_len);
+                let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
+                (dst.1[0usize..data2_len as usize]).copy_from_slice(
+                    &data2.1[0usize..data2_len as usize]
+                );
+                state[0usize] =
+                    state_t
+                    {
+                        block_state: block_state10.to_vec(),
+                        buf: buf0.to_vec(),
+                        total_len: total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64)
+                    }
+            };
+            crate::hacl::streaming_types::error_code::Success
+        };
+    match ite
+    {
+        crate::hacl::streaming_types::error_code::Success =>
+          crate::evercrypt::error::error_code::Success,
+        crate::hacl::streaming_types::error_code::MaximumLengthExceeded =>
+          crate::evercrypt::error::error_code::MaximumLengthExceeded,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
 pub fn alg_of_state(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
     let block_state: &mut [state_s] = &mut s[0usize].block_state;
     alg_of_state(block_state)
+}
+
+pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
+{
+    let a1: crate::hacl::streaming_types::hash_alg = alg_of_state(state);
+    match a1
+    {
+        crate::hacl::streaming_types::hash_alg::MD5 =>
+          crate::evercrypt::hash_incremental::digest_md5(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA1 =>
+          crate::evercrypt::hash_incremental::digest_sha1(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_224 =>
+          crate::evercrypt::hash_incremental::digest_sha224(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
+          crate::evercrypt::hash_incremental::digest_sha256(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
+          crate::evercrypt::hash_incremental::digest_sha384(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
+          crate::evercrypt::hash_incremental::digest_sha512(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_224 =>
+          crate::evercrypt::hash_incremental::digest_sha3_224(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_256 =>
+          crate::evercrypt::hash_incremental::digest_sha3_256(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_384 =>
+          crate::evercrypt::hash_incremental::digest_sha3_384(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_512 =>
+          crate::evercrypt::hash_incremental::digest_sha3_512(state, output),
+        crate::hacl::streaming_types::hash_alg::Blake2S =>
+          crate::evercrypt::hash_incremental::digest_blake2s(state, output),
+        crate::hacl::streaming_types::hash_alg::Blake2B =>
+          crate::evercrypt::hash_incremental::digest_blake2b(state, output),
+        _ => panic!("Precondition of the function most likely violated")
+    }
 }
 
 pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
@@ -161,6 +419,114 @@ fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
         s
     );
     crate::hacl::hash_sha2::sha224_finish(s, output)
+}
+
+pub fn hash(
+    a: crate::hacl::streaming_types::hash_alg,
+    output: &mut [u8],
+    input: &mut [u8],
+    input_len: u32
+) ->
+    ()
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::MD5 =>
+          crate::hacl::hash_md5::hash_oneshot(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA1 =>
+          crate::hacl::hash_sha1::hash_oneshot(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA2_224 => hash_224(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA2_256 => hash_256(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
+          crate::hacl::hash_sha2::hash_384(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
+          crate::hacl::hash_sha2::hash_512(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA3_224 =>
+          crate::hacl::hash_sha3::sha3_224(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA3_256 =>
+          crate::hacl::hash_sha3::sha3_256(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA3_384 =>
+          crate::hacl::hash_sha3::sha3_384(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::SHA3_512 =>
+          crate::hacl::hash_sha3::sha3_512(output, input, input_len),
+        crate::hacl::streaming_types::hash_alg::Blake2S =>
+          if crate::evercrypt::targetconfig::hacl_can_compile_vec128
+          {
+              let vec128: bool = crate::evercrypt::autoconfig2::has_vec128();
+              if vec128
+              {
+                  crate::hacl::hash_blake2s_simd128::hash_with_key(
+                      output,
+                      32u32,
+                      input,
+                      input_len,
+                      &mut [],
+                      0u32
+                  )
+              }
+              else
+              {
+                  crate::hacl::hash_blake2s::hash_with_key(
+                      output,
+                      32u32,
+                      input,
+                      input_len,
+                      &mut [],
+                      0u32
+                  )
+              }
+          }
+          else
+          {
+              crate::hacl::hash_blake2s::hash_with_key(
+                  output,
+                  32u32,
+                  input,
+                  input_len,
+                  &mut [],
+                  0u32
+              )
+          },
+        crate::hacl::streaming_types::hash_alg::Blake2B =>
+          if crate::evercrypt::targetconfig::hacl_can_compile_vec256
+          {
+              let vec256: bool = crate::evercrypt::autoconfig2::has_vec256();
+              if vec256
+              {
+                  crate::hacl::hash_blake2b_simd256::hash_with_key(
+                      output,
+                      64u32,
+                      input,
+                      input_len,
+                      &mut [],
+                      0u32
+                  )
+              }
+              else
+              {
+                  crate::hacl::hash_blake2b::hash_with_key(
+                      output,
+                      64u32,
+                      input,
+                      input_len,
+                      &mut [],
+                      0u32
+                  )
+              }
+          }
+          else
+          {
+              crate::hacl::hash_blake2b::hash_with_key(
+                  output,
+                  64u32,
+                  input,
+                  input_len,
+                  &mut [],
+                  0u32
+              )
+          },
+        _ => panic!("Precondition of the function most likely violated")
+    }
 }
 
 pub const md5_hash_len: u32 = 16u32;

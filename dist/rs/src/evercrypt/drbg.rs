@@ -15,6 +15,18 @@ pub const max_personalization_string_length: u32 = 65536u32;
 
 pub const max_additional_input_length: u32 = 65536u32;
 
+pub fn min_length(a: crate::hacl::streaming_types::hash_alg) -> u32
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::SHA1 => 16u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_256 => 32u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_384 => 32u32,
+        crate::hacl::streaming_types::hash_alg::SHA2_512 => 32u32,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
 enum state_s_tags
 {
     SHA1_s,

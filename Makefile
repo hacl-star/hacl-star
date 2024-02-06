@@ -856,7 +856,11 @@ dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 dist/rs/src/Makefile.basic: DEFAULT_FLAGS += -backend rust \
   -drop Hacl.GenericField32.field_free,Hacl.Bignum4096.mont_ctx_free,Hacl.Bignum4096_32.mont_ctx_free,Hacl.GenericField64.field_free \
   -drop Hacl.Bignum32.mont_ctx_free,Hacl.Bignum256_32.mont_ctx_free,Hacl.Bignum64.mont_ctx_free,Hacl.Bignum256.mont_ctx_free \
-  -drop Hacl.Streaming.SHA2.free_224,Hacl.Streaming.SHA2.free_256,Hacl.Streaming.SHA2.free_384,Hacl.Streaming.SHA2.free_512
+  -drop Hacl.Streaming.SHA2.free_224,Hacl.Streaming.SHA2.free_256,Hacl.Streaming.SHA2.free_384,Hacl.Streaming.SHA2.free_512 \
+  -drop Hacl.Streaming.Blake2b_32.free,Hacl.Streaming.Blake2s_32.free,Hacl.Streaming.Blake2b_256.free,Hacl.Streaming.Blake2s_128.free \
+  -drop Hacl.Streaming.SHA1.free,Hacl.Streaming.Keccak.free,Hacl.Streaming.MD5.free,EverCrypt.Hash.free_,EverCrypt.Hash.Incremental.free \
+  -drop Hacl.Streaming.Poly1305_32.free,Hacl.Streaming.Poly1305_128.free,Hacl.Streaming.Poly1305_256.free,Hacl.HMAC_DRBG.free \
+  -drop EverCrypt.AEAD.free
 
 dist/rs/src/Makefile.basic: VALE_ASMS =
 dist/rs/src/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =

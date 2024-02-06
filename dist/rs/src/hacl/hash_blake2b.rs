@@ -3,7 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
-pub struct blake2s_params
+pub struct blake2s_params <'a>
 {
     pub digest_length: u8,
     pub key_length: u8,
@@ -14,11 +14,11 @@ pub struct blake2s_params
     pub xof_length: u16,
     pub node_depth: u8,
     pub inner_length: u8,
-    pub salt: &mut [u8],
-    pub personal: &mut [u8]
+    pub salt: &'a mut [u8],
+    pub personal: &'a mut [u8]
 }
 
-pub struct blake2b_params
+pub struct blake2b_params <'a>
 {
     pub digest_length1: u8,
     pub key_length1: u8,
@@ -29,8 +29,8 @@ pub struct blake2b_params
     pub xof_length1: u32,
     pub node_depth1: u8,
     pub inner_length1: u8,
-    pub salt1: &mut [u8],
-    pub personal1: &mut [u8]
+    pub salt1: &'a mut [u8],
+    pub personal1: &'a mut [u8]
 }
 
 fn update_block(
@@ -707,7 +707,7 @@ pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u64]) -> ()
     crate::lib::memzero0::memzero::<u8>(&mut b, 64u32)
 }
 
-pub struct block_state_t { pub fst: &mut [u64], pub snd: &mut [u64] }
+pub struct block_state_t <'a> { pub fst: &'a mut [u64], pub snd: &'a mut [u64] }
 
 pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
 
@@ -738,7 +738,7 @@ pub fn reset(state: &mut [state_t]) -> ()
     state[0usize] = tmp
 }
 
-pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
+pub fn updateÂ·(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let total_len: u64 = state[0usize].total_len;

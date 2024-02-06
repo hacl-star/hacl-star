@@ -3,6 +3,32 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+fn block_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::SHA3_224 => 144u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_256 => 136u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_384 => 104u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_512 => 72u32,
+        crate::hacl::streaming_types::hash_alg::Shake128 => 168u32,
+        crate::hacl::streaming_types::hash_alg::Shake256 => 136u32,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
+fn hash_len(a: crate::hacl::streaming_types::hash_alg) -> u32
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::SHA3_224 => 28u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_256 => 32u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_384 => 48u32,
+        crate::hacl::streaming_types::hash_alg::SHA3_512 => 64u32,
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
 pub fn update_multi_sha3(
     a: crate::hacl::streaming_types::hash_alg,
     s: &mut [u64],
@@ -19,7 +45,62 @@ pub fn update_multi_sha3(
     }
 }
 
-pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: &mut [u64] }
+pub fn update_last_sha3(
+    a: crate::hacl::streaming_types::hash_alg,
+    s: &mut [u64],
+    input: &mut [u8],
+    input_len: u32
+) ->
+    ()
+{
+    let suffix: u8 =
+        if
+        a == crate::hacl::streaming_types::hash_alg::Shake128
+        ||
+        a == crate::hacl::streaming_types::hash_alg::Shake256
+        { 0x1fu8 }
+        else
+        { 0x06u8 };
+    let len: u32 = block_len(a);
+    if input_len == len
+    {
+        crate::hacl::impl_sha3::absorb_inner(len, input, s);
+        let mut lastBlock_: [u8; 200] = [0u8; 200usize];
+        let lastBlock: (&mut [u8], &mut [u8]) = (&mut lastBlock_).split_at_mut(0usize);
+        (lastBlock.1[0usize..0usize]).copy_from_slice(
+            &(&mut input[input_len as usize..])[0usize..0usize]
+        );
+        lastBlock.1[0usize] = suffix;
+        crate::hacl::impl_sha3::loadState(len, lastBlock.1, s);
+        if ! (suffix & 0x80u8 == 0u8) && 0u32 == len.wrapping_sub(1u32)
+        { crate::hacl::impl_sha3::state_permute(s) };
+        let mut nextBlock_: [u8; 200] = [0u8; 200usize];
+        let nextBlock: (&mut [u8], &mut [u8]) = (&mut nextBlock_).split_at_mut(0usize);
+        nextBlock.1[len.wrapping_sub(1u32) as usize] = 0x80u8;
+        crate::hacl::impl_sha3::loadState(len, nextBlock.1, s);
+        crate::hacl::impl_sha3::state_permute(s)
+    }
+    else
+    {
+        let mut lastBlock_: [u8; 200] = [0u8; 200usize];
+        let lastBlock: (&mut [u8], &mut [u8]) = (&mut lastBlock_).split_at_mut(0usize);
+        (lastBlock.1[0usize..input_len as usize]).copy_from_slice(
+            &input[0usize..input_len as usize]
+        );
+        lastBlock.1[input_len as usize] = suffix;
+        crate::hacl::impl_sha3::loadState(len, lastBlock.1, s);
+        if ! (suffix & 0x80u8 == 0u8) && input_len == len.wrapping_sub(1u32)
+        { crate::hacl::impl_sha3::state_permute(s) };
+        let mut nextBlock_: [u8; 200] = [0u8; 200usize];
+        let nextBlock: (&mut [u8], &mut [u8]) = (&mut nextBlock_).split_at_mut(0usize);
+        nextBlock.1[len.wrapping_sub(1u32) as usize] = 0x80u8;
+        crate::hacl::impl_sha3::loadState(len, nextBlock.1, s);
+        crate::hacl::impl_sha3::state_permute(s)
+    }
+}
+
+pub struct hash_buf <'a>
+{ pub fst: crate::hacl::streaming_types::hash_alg, pub snd: &'a mut [u64] }
 
 struct hash_buf2 { pub fst: hash_buf, pub snd: hash_buf }
 
@@ -226,16 +307,107 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     }
 }
 
-pub fn block_len(s: &mut [state_t]) -> u32
+fn digest_(
+    a: crate::hacl::streaming_types::hash_alg,
+    state: &mut [state_t],
+    output: &mut [u8],
+    l: u32
+) ->
+    ()
+{
+    let block_state: hash_buf = state[0usize].block_state;
+    let buf_: &mut [u8] = &mut state[0usize].buf;
+    let total_len: u64 = state[0usize].total_len;
+    let r: u32 =
+        if total_len.wrapping_rem(block_len(a) as u64) == 0u64 && total_len > 0u64
+        { block_len(a) }
+        else
+        { total_len.wrapping_rem(block_len(a) as u64) as u32 };
+    let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
+    let mut buf: [u64; 25] = [0u64; 25usize];
+    let tmp_block_state: hash_buf = hash_buf { fst: a, snd: &mut buf };
+    let scrut: hash_buf2 = hash_buf2 { fst: block_state, snd: tmp_block_state };
+    let s_dst: &mut [u64] = scrut.snd.snd;
+    let s_src: &mut [u64] = scrut.fst.snd;
+    (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
+    let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
+    let ite: u32 =
+        if r.wrapping_rem(block_len(a)) == 0u32 && r > 0u32
+        { block_len(a) }
+        else
+        { r.wrapping_rem(block_len(a)) };
+    let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
+    let a1: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
+    let s: &mut [u64] = tmp_block_state.snd;
+    update_multi_sha3(a1, s, buf_last.0, 0u32.wrapping_div(block_len(a1)));
+    let a10: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
+    let s0: &mut [u64] = tmp_block_state.snd;
+    update_last_sha3(a10, s0, buf_last.1, r);
+    let a11: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
+    let s1: &mut [u64] = tmp_block_state.snd;
+    if
+    a11 == crate::hacl::streaming_types::hash_alg::Shake128
+    ||
+    a11 == crate::hacl::streaming_types::hash_alg::Shake256
+    { crate::hacl::impl_sha3::squeeze(s1, block_len(a11), l, output) }
+    else
+    { crate::hacl::impl_sha3::squeeze(s1, block_len(a11), hash_len(a11), output) }
+}
+
+pub fn digest(state: &mut [state_t], output: &mut [u8]) ->
+    crate::hacl::streaming_types::error_code
+{
+    let a1: crate::hacl::streaming_types::hash_alg = get_alg(state);
+    if
+    a1 == crate::hacl::streaming_types::hash_alg::Shake128
+    ||
+    a1 == crate::hacl::streaming_types::hash_alg::Shake256
+    { crate::hacl::streaming_types::error_code::InvalidAlgorithm }
+    else
+    {
+        digest_(a1, state, output, hash_len(a1));
+        crate::hacl::streaming_types::error_code::Success
+    }
+}
+
+pub fn squeeze(s: &mut [state_t], dst: &mut [u8], l: u32) ->
+    crate::hacl::streaming_types::error_code
+{
+    let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
+    if
+    !
+    (a1 == crate::hacl::streaming_types::hash_alg::Shake128
+    ||
+    a1 == crate::hacl::streaming_types::hash_alg::Shake256)
+    { crate::hacl::streaming_types::error_code::InvalidAlgorithm }
+    else
+    if l == 0u32
+    { crate::hacl::streaming_types::error_code::InvalidLength }
+    else
+    {
+        digest_(a1, s, dst, l);
+        crate::hacl::streaming_types::error_code::Success
+    }
+}
+
+pub fn block_lenÂ·(s: &mut [state_t]) -> u32
 {
     let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
     block_len(a1)
 }
 
-pub fn hash_len(s: &mut [state_t]) -> u32
+pub fn hash_lenÂ·(s: &mut [state_t]) -> u32
 {
     let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
     hash_len(a1)
+}
+
+pub fn is_shake(s: &mut [state_t]) -> bool
+{
+    let uu____0: crate::hacl::streaming_types::hash_alg = get_alg(s);
+    uu____0 == crate::hacl::streaming_types::hash_alg::Shake128
+    ||
+    uu____0 == crate::hacl::streaming_types::hash_alg::Shake256
 }
 
 pub fn shake128_hacl(
@@ -459,7 +631,8 @@ fn absorb(
     state_permute(s)
 }
 
-pub fn squeeze(s: &mut [u64], rateInBytes: u32, outputByteLen: u32, output: &mut [u8]) -> ()
+pub fn squeezeÂ·(s: &mut [u64], rateInBytes: u32, outputByteLen: u32, output: &mut [u8]) ->
+    ()
 {
     let outBlocks: u32 = outputByteLen.wrapping_div(rateInBytes);
     let remOut: u32 = outputByteLen.wrapping_rem(rateInBytes);

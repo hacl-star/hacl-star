@@ -901,10 +901,10 @@ pub fn malloc_with_key() -> Vec<crate::lib::intvector_intrinsics::vec256>
     buf
 }
 
-pub struct block_state_t
+pub struct block_state_t <'a>
 {
-    pub fst: &mut [crate::lib::intvector_intrinsics::vec256],
-    pub snd: &mut [crate::lib::intvector_intrinsics::vec256]
+    pub fst: &'a mut [crate::lib::intvector_intrinsics::vec256],
+    pub snd: &'a mut [crate::lib::intvector_intrinsics::vec256]
 }
 
 pub struct state_t { pub block_state: block_state_t, pub buf: Vec<u8>, pub total_len: u64 }
@@ -938,7 +938,7 @@ pub fn reset(state: &mut [state_t]) -> ()
     state[0usize] = tmp
 }
 
-pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
+pub fn updateÂ·(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
     let total_len: u64 = state[0usize].total_len;

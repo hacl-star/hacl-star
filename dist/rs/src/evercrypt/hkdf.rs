@@ -488,3 +488,60 @@ fn expand_blake2b(
 fn extract_blake2b(prk: &mut [u8], salt: &mut [u8], saltlen: u32, ikm: &mut [u8], ikmlen: u32) ->
     ()
 { crate::evercrypt::hmac::compute_blake2b(prk, salt, saltlen, ikm, ikmlen) }
+
+pub fn expand(
+    a: crate::hacl::streaming_types::hash_alg,
+    okm: &mut [u8],
+    prk: &mut [u8],
+    prklen: u32,
+    info: &mut [u8],
+    infolen: u32,
+    len: u32
+) ->
+    ()
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::SHA1 =>
+          expand_sha1(okm, prk, prklen, info, infolen, len),
+        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
+          expand_sha2_256(okm, prk, prklen, info, infolen, len),
+        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
+          expand_sha2_384(okm, prk, prklen, info, infolen, len),
+        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
+          expand_sha2_512(okm, prk, prklen, info, infolen, len),
+        crate::hacl::streaming_types::hash_alg::Blake2S =>
+          expand_blake2s(okm, prk, prklen, info, infolen, len),
+        crate::hacl::streaming_types::hash_alg::Blake2B =>
+          expand_blake2b(okm, prk, prklen, info, infolen, len),
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
+
+pub fn extract(
+    a: crate::hacl::streaming_types::hash_alg,
+    prk: &mut [u8],
+    salt: &mut [u8],
+    saltlen: u32,
+    ikm: &mut [u8],
+    ikmlen: u32
+) ->
+    ()
+{
+    match a
+    {
+        crate::hacl::streaming_types::hash_alg::SHA1 =>
+          extract_sha1(prk, salt, saltlen, ikm, ikmlen),
+        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
+          extract_sha2_256(prk, salt, saltlen, ikm, ikmlen),
+        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
+          extract_sha2_384(prk, salt, saltlen, ikm, ikmlen),
+        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
+          extract_sha2_512(prk, salt, saltlen, ikm, ikmlen),
+        crate::hacl::streaming_types::hash_alg::Blake2S =>
+          extract_blake2s(prk, salt, saltlen, ikm, ikmlen),
+        crate::hacl::streaming_types::hash_alg::Blake2B =>
+          extract_blake2b(prk, salt, saltlen, ikm, ikmlen),
+        _ => panic!("Precondition of the function most likely violated")
+    }
+}
