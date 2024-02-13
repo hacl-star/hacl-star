@@ -587,9 +587,8 @@ Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void)
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(K________ key)
+Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(void)
 {
-  KRML_MAYBE_UNUSED_VAR(key);
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec128
   *wv =
@@ -649,9 +648,8 @@ Hacl_Hash_Blake2s_Simd128_state_t
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state, K________ key)
+void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state)
 {
-  KRML_MAYBE_UNUSED_VAR(key);
   Hacl_Hash_Blake2s_Simd128_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2s_Simd128_block_state_t block_state = scrut.block_state;

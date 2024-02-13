@@ -57,7 +57,7 @@ Hacl_Hash_Blake2s_Simd128_state_t;
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(K________ key);
+Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(void);
 
 /**
   State allocation function when there are parameters but no key
@@ -68,7 +68,7 @@ Hacl_Hash_Blake2s_Simd128_state_t
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state, K________ key);
+void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state);
 
 /**
   Re-initialization function when there are parameters but no key
