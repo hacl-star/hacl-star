@@ -10,6 +10,7 @@
   ocamlPackages,
   openssl,
   python3,
+  rustc,
   sd,
   stdenv,
   time,
@@ -80,7 +81,16 @@
     '';
 
     nativeBuildInputs =
-      [z3 fstar python3 which dotnet-runtime time runlim]
+      [
+        z3
+        fstar
+        python3
+        which
+        dotnet-runtime
+        time
+        runlim
+        rustc
+      ]
       ++ (with ocamlPackages; [
         ocaml
         findlib

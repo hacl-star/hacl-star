@@ -5,7 +5,7 @@ cryptographic algorithms, including Curve25519, Ed25519, AES-GCM,
 Chacha20, Poly1305, SHA-2, SHA-3, HMAC, and HKDF. This set of algorithms
 is enough to support the full NaCl API and several TLS 1.3 ciphersuites.
 The code for all of these algorithms is formally verified using the
-[F\*](https://fstarlang.github.io/) verification framework for memory
+[F\*](https://fstar-lang.org/) verification framework for memory
 safety, functional correctness, and secret independence (resistance to
 some types of timing side-channels).
 
