@@ -172,6 +172,8 @@ let unit_to_stateful_key_t (a : alg):
   Tot (stateful_key_t a false 0) =
   ((), ())
 
+#push-options "--z3rlimit 100"
+
 /// The ``has_key`` parameter is meta
 /// TODO: this definition could be moved to Hacl.Streaming.Interface, it could
 /// be pretty useful in other situations as it generalizes ``stateful_buffer`` in
@@ -253,6 +255,8 @@ let stateful_key (a : alg) (has_params: bool) (kk : key_size a) :
 
       ) else ()
     )
+
+#pop-options
 
 inline_for_extraction noextract
 let stateful_key_to_buffer (#a : alg) (#hp: bool) (#kk : key_size a)
