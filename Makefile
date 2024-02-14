@@ -513,22 +513,34 @@ dist/vale:
 	mkdir -p $@
 
 dist/vale/%-x86_64-mingw.S: obj/vale-%.exe | dist/vale
-	$< GCC Win > $@
+	$(call run-with-log,\
+	  $< GCC Win > $@ \
+	  ,[VALE-CODEGEN-GCC-WIN] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-x86_64-msvc.asm: obj/vale-%.exe | dist/vale
-	$< MASM Win > $@
+	$(call run-with-log,\
+	  $< MASM Win > $@ \
+	  ,[VALE-CODEGEN-MASM-WIN] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-x86_64-linux.S: obj/vale-%.exe | dist/vale
-	$< GCC Linux > $@
+	$(call run-with-log,\
+	  $< GCC Linux > $@ \
+	  ,[VALE-CODEGEN-GCC-LINUX] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
-	$< GCC MacOS > $@
+	$(call run-with-log,\
+	  $< GCC MacOS > $@ \
+	  ,[VALE-CODEGEN-GCC-MACOS] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
-	$< > $@
+	$(call run-with-log,\
+	  $< > $@ \
+	  ,[VALE-CODEGEN-INLINE] $(notdir $*),$(call to-obj-dir,$@))
 
 dist/vale/%-ppc64le.S: obj/vale-%-ppc64le.exe | dist/vale
-	$< > $@
+	$(call run-with-log,\
+	  $< > $@ \
+	  ,[VALE-CODEGEN-PPC] $(notdir $*),$(call to-obj-dir,$@))
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
@@ -542,7 +554,9 @@ obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
 obj/inline-vale-testInline.exe: vale/code/test/TestInlineMain.ml
 
 obj/vale_testInline.h: obj/inline-vale-testInline.exe
-	$< > $@
+	$(call run-with-log,\
+	  $< > $@ \
+	  ,[VALE-CODEGEN-INLINE] $(notdir $*),$(call to-obj-dir, $@))
 
 obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 	cp $< $@
