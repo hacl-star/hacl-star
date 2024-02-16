@@ -1,10 +1,10 @@
 pub fn eq_mask(a: u32, b: u32) -> u32
 {
   let x = a ^ b;
-  let minus_x = !x.wrapping_add(1u32);
+  let minus_x = (!x).wrapping_add(1u32);
   let x_or_minus_x = x | minus_x;
   let xnx = x_or_minus_x.wrapping_shr(31);
-  return xnx - 1u32;
+  return xnx.wrapping_sub(1u32);
 }
 
 pub fn gte_mask(a: u32, b: u32) -> u32
