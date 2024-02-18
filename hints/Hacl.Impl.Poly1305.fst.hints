@@ -4514,7 +4514,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "47f912d1235d1c50134d325c7c165a15"
+      "969614a87fe566cdb4eaa92df6b31573"
     ],
     [
       "Hacl.Impl.Poly1305.poly1305_update_multi_loop",
@@ -5495,6 +5495,7 @@
         "equation_Hacl.Impl.Poly1305.state_inv_t",
         "equation_Hacl.Impl.Poly1305.uu___1",
         "equation_Hacl.Spec.Poly1305.Field32xN.felem5",
+        "equation_Hacl.Spec.Poly1305.Field32xN.lanes",
         "equation_Hacl.Spec.Poly1305.Field32xN.precomp_r5",
         "equation_Hacl.Spec.Poly1305.Field32xN.uint64xN",
         "equation_Hacl.Spec.Poly1305.Vec.pfelem",
@@ -5528,7 +5529,8 @@
         "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
         "inversion-interp", "l_and-interp",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt32.uv_inv",
-        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.add_lemma",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.Buffer.modifies_sub",
+        "lemma_Lib.IntTypes.add_lemma",
         "lemma_LowStar.Monotonic.Buffer.gsub_gsub",
         "lemma_LowStar.Monotonic.Buffer.live_gsub",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
@@ -5551,6 +5553,7 @@
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_1953e82658d48909baba08664d801c60",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_335e5bfc9edee38d58c934e23a4de7eb",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
@@ -5562,6 +5565,7 @@
         "refinement_interpretation_Tm_refine_9920ad7fdb83d776ac74c5ec84d5fe0e",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_a02399036056b8ffd82c80848948f6b8",
+        "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181",
         "refinement_interpretation_Tm_refine_aaaa3c7b280b79820dc69bd666cbba6e",
         "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
@@ -5576,9 +5580,10 @@
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.add",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
+        "typing_Hacl.Spec.Poly1305.Field32xN.uint64xN",
         "typing_Lib.Buffer.gsub", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.v",
-        "typing_Lib.IntVector.vec_t",
+        "typing_Lib.IntTypes.add", "typing_Lib.IntTypes.minint",
+        "typing_Lib.IntTypes.v", "typing_Lib.IntVector.vec_t",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
@@ -5640,7 +5645,7 @@
         "typing_tok_Hacl.Impl.Poly1305.Fields.M32@tok"
       ],
       0,
-      "a9d85571435c3bf604f68696b916738a"
+      "e049ded24a382ca0923d61fd47dc37fd"
     ],
     [
       "Hacl.Impl.Poly1305.poly1305_finish_st",
@@ -5900,9 +5905,7 @@
         "equation_FStar.Monotonic.HyperStack.remove_elt",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t",
-        "equation_Hacl.Impl.Poly1305.as_get_acc",
-        "equation_Hacl.Impl.Poly1305.uu___1",
+        "equation_FStar.UInt.uint_t", "equation_Hacl.Impl.Poly1305.uu___1",
         "equation_Hacl.Spec.Poly1305.Field32xN.lanes",
         "equation_Hacl.Spec.Poly1305.Field32xN.uint64xN",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
@@ -5967,6 +5970,7 @@
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
@@ -6040,7 +6044,6 @@
         "typing_LowStar.Monotonic.Buffer.frameOf",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_addresses",
-        "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",

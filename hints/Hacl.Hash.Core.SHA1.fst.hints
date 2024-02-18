@@ -115,7 +115,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.SHA1.init"
       ],
       0,
-      "49d67e5b3eae59bd6bdbe90a664140ac"
+      "cf21578cba9edbc28affb65d31ebeee3"
     ],
     [
       "Hacl.Hash.Core.SHA1.init",
@@ -221,7 +221,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA1@tok", "unit_typing"
       ],
       0,
-      "e4bf01822a69349ce9c684b241afb8aa"
+      "e6d7cb13e4e5442601337639b0f40d7a"
     ],
     [
       "Hacl.Hash.Core.SHA1.block_t",
@@ -475,7 +475,7 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S128",
@@ -518,6 +518,8 @@
         "function_token_typing_Spec.AES.elem", "int_inversion", "int_typing",
         "lemma_Lib.IntTypes.mul_lemma",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.modifies_refl",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
@@ -542,11 +544,12 @@
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt32.v", "typing_Lib.Buffer.as_seq",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_Lib.Buffer.as_seq",
         "typing_Lib.ByteSequence.uint_at_index_be",
         "typing_Lib.ByteSequence.uints_from_bytes_be",
         "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.mul",
-        "typing_Lib.IntTypes.pub_int_v", "typing_Lib.Sequence.index",
+        "typing_Lib.Sequence.index",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.AES.gf8",
@@ -967,7 +970,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA1@tok"
       ],
       0,
-      "62e46180819605f4bfc80230237ac1b6"
+      "05a7272bac25a94db43f05f84f5b5aa3"
     ],
     [
       "Hacl.Hash.Core.SHA1.zero_out",
@@ -1281,7 +1284,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA1@tok"
       ],
       0,
-      "45dc297ac7250cc1414385fce823d5ae"
+      "61bb4758a009a666eacfa1851ad0fd68"
     ],
     [
       "Hacl.Hash.Core.SHA1.step4",
@@ -1356,7 +1359,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA1@tok"
       ],
       0,
-      "188fda1fbf330aa241651d63158361a7"
+      "93f8161a584b3fab9cd43de55b2be618"
     ],
     [
       "Hacl.Hash.Core.SHA1.update",
