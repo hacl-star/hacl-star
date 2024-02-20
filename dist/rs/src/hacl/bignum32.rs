@@ -240,7 +240,7 @@ pub fn mont_ctx_init(len: u32, n: &mut [u32]) -> Vec<crate::hacl::bignum::bn_mon
     let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
     let res: crate::hacl::bignum::bn_mont_ctx_u32 =
         crate::hacl::bignum::bn_mont_ctx_u32 { len: len, n: n11.to_vec(), mu: mu, r2: r21.to_vec() };
-    let buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
+    let mut buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
         {
             let mut tmp: Vec<crate::hacl::bignum::bn_mont_ctx_u32> = Vec::new();
             tmp.push(res);

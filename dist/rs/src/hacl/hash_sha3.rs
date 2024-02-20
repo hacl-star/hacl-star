@@ -97,18 +97,15 @@ pub fn update_last_sha3(
     }
 }
 
-// #[derive(PartialEq, Clone)]
 pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: Vec<u64> }
 
-// #[derive(PartialEq, Clone)]
 struct hash_buf2 { pub fst: hash_buf, pub snd: hash_buf }
 
-// #[derive(PartialEq, Clone)]
 pub struct state_t { pub block_state: hash_buf, pub buf: Vec<u8>, pub total_len: u64 }
 
 pub fn get_alg(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
-    let block_state: &hash_buf = &s[0usize].block_state;
+    let block_state: hash_buf = s[0usize].block_state;
     block_state.fst
 }
 
@@ -116,10 +113,10 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 {
     let mut buf: Vec<u8> = vec![0u8; block_len(a) as usize];
     let mut buf0: Vec<u64> = vec![0u64; 25usize];
-    let mut block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
+    let block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let s0: state_t = state_t { block_state: hash_buf { fst: block_state.fst, snd: block_state.snd }, buf: buf, total_len: 0u32 as u64 };
+    let s0: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -131,7 +128,7 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 
 pub fn copy(state: &mut [state_t]) -> Vec<state_t>
 {
-    let block_state0: &mut hash_buf = &mut state[0usize].block_state;
+    let block_state0: hash_buf = state[0usize].block_state;
     let buf0: &mut [u8] = &mut state[0usize].buf;
     let total_len0: u64 = state[0usize].total_len;
     let i: crate::hacl::streaming_types::hash_alg = block_state0.fst;
@@ -140,9 +137,10 @@ pub fn copy(state: &mut [state_t]) -> Vec<state_t>
         &buf0[0usize..block_len(i) as usize]
     );
     let mut buf1: Vec<u64> = vec![0u64; 25usize];
-    let mut block_state: &mut hash_buf = &hash_buf { fst: i, snd: buf1 };
-    let s_dst: &mut [u64] = &mut block_state.snd;
-    let s_src: &mut [u64] = &mut block_state0.snd;
+    let block_state: hash_buf = hash_buf { fst: i, snd: buf1 };
+    let scrut: hash_buf2 = hash_buf2 { fst: block_state0, snd: block_state };
+    let s_dst: &mut [u64] = &mut scrut.snd.snd;
+    let s_src: &mut [u64] = &mut scrut.fst.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
     let s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
     let mut p: Vec<state_t> =
