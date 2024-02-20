@@ -104,11 +104,11 @@ static inline void Hacl_K256_Field_load_felem(uint64_t *f, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = tmp;
     uint8_t *bj = b + i * 8U;
     uint64_t u = load64_be(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = tmp;
     os[i] = x;);
   uint64_t s0 = tmp[3U];
   uint64_t s1 = tmp[2U];
@@ -589,7 +589,9 @@ static inline void Hacl_K256_Field_fnegate_conditional_vartime(uint64_t *f, bool
     f[2U] = f2;
     f[3U] = f3;
     f[4U] = f4;
-    Hacl_K256_Field_fnormalize(f, f);
+    uint64_t f_copy[5U] = { 0U };
+    memcpy(f_copy, f, 5U * sizeof (uint64_t));
+    Hacl_K256_Field_fnormalize(f, f_copy);
     return;
   }
 }
@@ -598,7 +600,9 @@ static inline void Hacl_Impl_K256_Finv_fsquare_times_in_place(uint64_t *out, uin
 {
   for (uint32_t i = 0U; i < b; i++)
   {
-    Hacl_K256_Field_fsqr(out, out);
+    uint64_t x_copy[5U] = { 0U };
+    memcpy(x_copy, out, 5U * sizeof (uint64_t));
+    Hacl_K256_Field_fsqr(out, x_copy);
   }
 }
 
@@ -607,7 +611,9 @@ static inline void Hacl_Impl_K256_Finv_fsquare_times(uint64_t *out, uint64_t *a,
   memcpy(out, a, 5U * sizeof (uint64_t));
   for (uint32_t i = 0U; i < b; i++)
   {
-    Hacl_K256_Field_fsqr(out, out);
+    uint64_t x_copy[5U] = { 0U };
+    memcpy(x_copy, out, 5U * sizeof (uint64_t));
+    Hacl_K256_Field_fsqr(out, x_copy);
   }
 }
 
@@ -618,29 +624,53 @@ static inline void Hacl_Impl_K256_Finv_fexp_223_23(uint64_t *out, uint64_t *x2, 
   uint64_t x44[5U] = { 0U };
   uint64_t x88[5U] = { 0U };
   Hacl_Impl_K256_Finv_fsquare_times(x2, f, 1U);
-  Hacl_K256_Field_fmul(x2, x2, f);
+  uint64_t f1_copy[5U] = { 0U };
+  memcpy(f1_copy, x2, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x2, f1_copy, f);
   Hacl_Impl_K256_Finv_fsquare_times(x3, x2, 1U);
-  Hacl_K256_Field_fmul(x3, x3, f);
+  uint64_t f1_copy0[5U] = { 0U };
+  memcpy(f1_copy0, x3, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x3, f1_copy0, f);
   Hacl_Impl_K256_Finv_fsquare_times(out, x3, 3U);
-  Hacl_K256_Field_fmul(out, out, x3);
+  uint64_t f1_copy1[5U] = { 0U };
+  memcpy(f1_copy1, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy1, x3);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 3U);
-  Hacl_K256_Field_fmul(out, out, x3);
+  uint64_t f1_copy2[5U] = { 0U };
+  memcpy(f1_copy2, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy2, x3);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 2U);
-  Hacl_K256_Field_fmul(out, out, x2);
+  uint64_t f1_copy3[5U] = { 0U };
+  memcpy(f1_copy3, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy3, x2);
   Hacl_Impl_K256_Finv_fsquare_times(x22, out, 11U);
-  Hacl_K256_Field_fmul(x22, x22, out);
+  uint64_t f1_copy4[5U] = { 0U };
+  memcpy(f1_copy4, x22, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x22, f1_copy4, out);
   Hacl_Impl_K256_Finv_fsquare_times(x44, x22, 22U);
-  Hacl_K256_Field_fmul(x44, x44, x22);
+  uint64_t f1_copy5[5U] = { 0U };
+  memcpy(f1_copy5, x44, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x44, f1_copy5, x22);
   Hacl_Impl_K256_Finv_fsquare_times(x88, x44, 44U);
-  Hacl_K256_Field_fmul(x88, x88, x44);
+  uint64_t f1_copy6[5U] = { 0U };
+  memcpy(f1_copy6, x88, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(x88, f1_copy6, x44);
   Hacl_Impl_K256_Finv_fsquare_times(out, x88, 88U);
-  Hacl_K256_Field_fmul(out, out, x88);
+  uint64_t f1_copy7[5U] = { 0U };
+  memcpy(f1_copy7, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy7, x88);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 44U);
-  Hacl_K256_Field_fmul(out, out, x44);
+  uint64_t f1_copy8[5U] = { 0U };
+  memcpy(f1_copy8, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy8, x44);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 3U);
-  Hacl_K256_Field_fmul(out, out, x3);
+  uint64_t f1_copy9[5U] = { 0U };
+  memcpy(f1_copy9, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy9, x3);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 23U);
-  Hacl_K256_Field_fmul(out, out, x22);
+  uint64_t f1_copy10[5U] = { 0U };
+  memcpy(f1_copy10, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy10, x22);
 }
 
 static inline void Hacl_Impl_K256_Finv_finv(uint64_t *out, uint64_t *f)
@@ -648,11 +678,17 @@ static inline void Hacl_Impl_K256_Finv_finv(uint64_t *out, uint64_t *f)
   uint64_t x2[5U] = { 0U };
   Hacl_Impl_K256_Finv_fexp_223_23(out, x2, f);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 5U);
-  Hacl_K256_Field_fmul(out, out, f);
+  uint64_t f1_copy[5U] = { 0U };
+  memcpy(f1_copy, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy, f);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 3U);
-  Hacl_K256_Field_fmul(out, out, x2);
+  uint64_t f1_copy0[5U] = { 0U };
+  memcpy(f1_copy0, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy0, x2);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 2U);
-  Hacl_K256_Field_fmul(out, out, f);
+  uint64_t f1_copy1[5U] = { 0U };
+  memcpy(f1_copy1, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy1, f);
 }
 
 static inline void Hacl_Impl_K256_Finv_fsqrt(uint64_t *out, uint64_t *f)
@@ -660,7 +696,9 @@ static inline void Hacl_Impl_K256_Finv_fsqrt(uint64_t *out, uint64_t *f)
   uint64_t x2[5U] = { 0U };
   Hacl_Impl_K256_Finv_fexp_223_23(out, x2, f);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 6U);
-  Hacl_K256_Field_fmul(out, out, x2);
+  uint64_t f1_copy[5U] = { 0U };
+  memcpy(f1_copy, out, 5U * sizeof (uint64_t));
+  Hacl_K256_Field_fmul(out, f1_copy, x2);
   Hacl_Impl_K256_Finv_fsquare_times_in_place(out, 2U);
 }
 

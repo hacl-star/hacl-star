@@ -422,7 +422,7 @@ pub struct state_t
 
 pub fn malloc(key: &mut [u8]) -> Vec<state_t>
 {
-    let mut buf: Vec<u8> = vec![0u8; 16usize];
+    let buf: Vec<u8> = vec![0u8; 16usize];
     let mut r1: Vec<u64> = vec![0u64; 25usize];
     let block_state: &mut [u64] = &mut r1;
     poly1305_init(block_state, key);
@@ -437,7 +437,7 @@ pub fn malloc(key: &mut [u8]) -> Vec<state_t>
             total_len: 0u32 as u64,
             p_key: k·0.to_vec()
         };
-    let mut p: Vec<state_t> =
+    let p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
             tmp.push(s);

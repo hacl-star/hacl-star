@@ -253,7 +253,9 @@ let frame_seen #_ _ _ _ _ _ _ =
 
 let index_of_state #index c i t t' s =
   let open LowStar.BufferOps in
-  let State block_state _ _ _ _ = !*s in
+  // HACL-RS
+  let uu__ = !*s in
+  let State block_state _ _ _ _ = uu__ in
   c.index_of_state i block_state
 
 let seen_length #index c i t t' s =

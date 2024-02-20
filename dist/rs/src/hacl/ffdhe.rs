@@ -162,7 +162,7 @@
     crate::hacl::bignum_base::bn_to_bytes_be_uint64(ffdhe_len(a), &mut res_n, res)
 }
 
-pub fn ffdhe_lenÂ·(a: crate::hacl::spec::ffdhe_alg) -> u32 { ffdhe_len(a) }
+pub fn ffdhe_len0(a: crate::hacl::spec::ffdhe_alg) -> u32 { ffdhe_len(a) }
 
 pub fn new_ffdhe_precomp_p(a: crate::hacl::spec::ffdhe_alg) -> Vec<u64>
 {

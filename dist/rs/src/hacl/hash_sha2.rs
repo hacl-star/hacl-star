@@ -484,13 +484,13 @@ pub type state_t_512 = crate::hacl::streaming_types::state_64;
 
 pub fn malloc_256() -> Vec<crate::hacl::streaming_types::state_32>
 {
-    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    let buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 8usize];
     sha256_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
-    let mut p: Vec<crate::hacl::streaming_types::state_32> =
+    let p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
             tmp.push(s);
@@ -512,7 +512,7 @@ pub fn copy_256(state: &mut [crate::hacl::streaming_types::state_32]) ->
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
         { block_state: block_state, buf: buf, total_len: total_len0 };
-    let mut p: Vec<crate::hacl::streaming_types::state_32> =
+    let p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
             tmp.push(s);
@@ -717,13 +717,13 @@ pub fn hash_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 
 pub fn malloc_224() -> Vec<crate::hacl::streaming_types::state_32>
 {
-    let mut buf: Vec<u8> = vec![0u8; 64usize];
+    let buf: Vec<u8> = vec![0u8; 64usize];
     let mut block_state: Vec<u32> = vec![0u32; 8usize];
     sha224_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_32 =
         crate::hacl::streaming_types::state_32
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
-    let mut p: Vec<crate::hacl::streaming_types::state_32> =
+    let p: Vec<crate::hacl::streaming_types::state_32> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_32> = Vec::new();
             tmp.push(s);
@@ -793,13 +793,13 @@ pub fn hash_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 
 pub fn malloc_512() -> Vec<crate::hacl::streaming_types::state_64>
 {
-    let mut buf: Vec<u8> = vec![0u8; 128usize];
+    let buf: Vec<u8> = vec![0u8; 128usize];
     let mut block_state: Vec<u64> = vec![0u64; 8usize];
     sha512_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
-    let mut p: Vec<crate::hacl::streaming_types::state_64> =
+    let p: Vec<crate::hacl::streaming_types::state_64> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
             tmp.push(s);
@@ -821,7 +821,7 @@ pub fn copy_512(state: &mut [crate::hacl::streaming_types::state_64]) ->
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: block_state, buf: buf, total_len: total_len0 };
-    let mut p: Vec<crate::hacl::streaming_types::state_64> =
+    let p: Vec<crate::hacl::streaming_types::state_64> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
             tmp.push(s);
@@ -1035,13 +1035,13 @@ pub fn hash_512(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
 
 pub fn malloc_384() -> Vec<crate::hacl::streaming_types::state_64>
 {
-    let mut buf: Vec<u8> = vec![0u8; 128usize];
+    let buf: Vec<u8> = vec![0u8; 128usize];
     let mut block_state: Vec<u64> = vec![0u64; 8usize];
     sha384_init(&mut block_state);
     let s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
-    let mut p: Vec<crate::hacl::streaming_types::state_64> =
+    let p: Vec<crate::hacl::streaming_types::state_64> =
         {
             let mut tmp: Vec<crate::hacl::streaming_types::state_64> = Vec::new();
             tmp.push(s);

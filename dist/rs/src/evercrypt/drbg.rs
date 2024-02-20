@@ -27,6 +27,7 @@ pub fn min_length(a: crate::hacl::streaming_types::hash_alg) -> u32
     }
 }
 
+#[derive(PartialEq, Clone, Copy)]
 enum state_s_tags
 {
     SHA1_s,
@@ -34,5 +35,3 @@ enum state_s_tags
     SHA2_384_s,
     SHA2_512_s
 }
-
-pub fn create(a: crate::hacl::streaming_types::hash_alg) -> &mut [state_s] { create_in(a) }

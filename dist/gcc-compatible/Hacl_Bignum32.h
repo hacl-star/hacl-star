@@ -122,7 +122,7 @@ Write `a mod n` in `res`.
    • 1 < n
    • n % 2 = 1 
 */
-bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res);
+bool Hacl_Bignum32_mod_op(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res);
 
 /**
 Write `a ^ b mod n` in `res`.

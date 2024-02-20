@@ -41,7 +41,7 @@ pub fn update_multi_sha3(
     {
         let block: (&mut [u8], &mut [u8]) =
             blocks.split_at_mut(i.wrapping_mul(block_len(a)) as usize);
-        crate::hacl::impl_sha3::absorb_inner(block_len(a), block.1, s)
+        absorb_inner(block_len(a), block.1, s)
     }
 }
 
@@ -64,21 +64,20 @@ pub fn update_last_sha3(
     let len: u32 = block_len(a);
     if input_len == len
     {
-        crate::hacl::impl_sha3::absorb_inner(len, input, s);
+        absorb_inner(len, input, s);
         let mut lastBlock_: [u8; 200] = [0u8; 200usize];
         let lastBlock: (&mut [u8], &mut [u8]) = (&mut lastBlock_).split_at_mut(0usize);
         (lastBlock.1[0usize..0usize]).copy_from_slice(
             &(&mut input[input_len as usize..])[0usize..0usize]
         );
         lastBlock.1[0usize] = suffix;
-        crate::hacl::impl_sha3::loadState(len, lastBlock.1, s);
-        if ! (suffix & 0x80u8 == 0u8) && 0u32 == len.wrapping_sub(1u32)
-        { crate::hacl::impl_sha3::state_permute(s) };
+        loadState(len, lastBlock.1, s);
+        if ! (suffix & 0x80u8 == 0u8) && 0u32 == len.wrapping_sub(1u32) { state_permute(s) };
         let mut nextBlock_: [u8; 200] = [0u8; 200usize];
         let nextBlock: (&mut [u8], &mut [u8]) = (&mut nextBlock_).split_at_mut(0usize);
         nextBlock.1[len.wrapping_sub(1u32) as usize] = 0x80u8;
-        crate::hacl::impl_sha3::loadState(len, nextBlock.1, s);
-        crate::hacl::impl_sha3::state_permute(s)
+        loadState(len, nextBlock.1, s);
+        state_permute(s)
     }
     else
     {
@@ -88,38 +87,39 @@ pub fn update_last_sha3(
             &input[0usize..input_len as usize]
         );
         lastBlock.1[input_len as usize] = suffix;
-        crate::hacl::impl_sha3::loadState(len, lastBlock.1, s);
-        if ! (suffix & 0x80u8 == 0u8) && input_len == len.wrapping_sub(1u32)
-        { crate::hacl::impl_sha3::state_permute(s) };
+        loadState(len, lastBlock.1, s);
+        if ! (suffix & 0x80u8 == 0u8) && input_len == len.wrapping_sub(1u32) { state_permute(s) };
         let mut nextBlock_: [u8; 200] = [0u8; 200usize];
         let nextBlock: (&mut [u8], &mut [u8]) = (&mut nextBlock_).split_at_mut(0usize);
         nextBlock.1[len.wrapping_sub(1u32) as usize] = 0x80u8;
-        crate::hacl::impl_sha3::loadState(len, nextBlock.1, s);
-        crate::hacl::impl_sha3::state_permute(s)
+        loadState(len, nextBlock.1, s);
+        state_permute(s)
     }
 }
 
-pub struct hash_buf <'a>
-{ pub fst: crate::hacl::streaming_types::hash_alg, pub snd: &'a mut [u64] }
+// #[derive(PartialEq, Clone)]
+pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: Vec<u64> }
 
+// #[derive(PartialEq, Clone)]
 struct hash_buf2 { pub fst: hash_buf, pub snd: hash_buf }
 
+// #[derive(PartialEq, Clone)]
 pub struct state_t { pub block_state: hash_buf, pub buf: Vec<u8>, pub total_len: u64 }
 
 pub fn get_alg(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
-    let block_state: hash_buf = s[0usize].block_state;
+    let block_state: &hash_buf = &s[0usize].block_state;
     block_state.fst
 }
 
 pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 {
-    let mut buf: Vec<u8> = vec![0u8; block_len(a)];
+    let mut buf: Vec<u8> = vec![0u8; block_len(a) as usize];
     let mut buf0: Vec<u64> = vec![0u64; 25usize];
-    let block_state: hash_buf = hash_buf { fst: a, snd: &mut buf0 };
-    let s: &mut [u64] = block_state.snd;
+    let mut block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
+    let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let s0: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    let s0: state_t = state_t { block_state: hash_buf { fst: block_state.fst, snd: block_state.snd }, buf: buf, total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -131,17 +131,18 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 
 pub fn copy(state: &mut [state_t]) -> Vec<state_t>
 {
-    let block_state0: hash_buf = state[0usize].block_state;
+    let block_state0: &mut hash_buf = &mut state[0usize].block_state;
     let buf0: &mut [u8] = &mut state[0usize].buf;
     let total_len0: u64 = state[0usize].total_len;
     let i: crate::hacl::streaming_types::hash_alg = block_state0.fst;
-    let mut buf: Vec<u8> = vec![0u8; block_len(i)];
-    ((&mut buf)[0usize..block_len(i)]).copy_from_slice(&buf0[0usize..block_len(i)]);
+    let mut buf: Vec<u8> = vec![0u8; block_len(i) as usize];
+    ((&mut buf)[0usize..block_len(i) as usize]).copy_from_slice(
+        &buf0[0usize..block_len(i) as usize]
+    );
     let mut buf1: Vec<u64> = vec![0u64; 25usize];
-    let block_state: hash_buf = hash_buf { fst: i, snd: &mut buf1 };
-    let scrut: hash_buf2 = hash_buf2 { fst: block_state0, snd: block_state };
-    let s_dst: &mut [u64] = scrut.snd.snd;
-    let s_src: &mut [u64] = scrut.fst.snd;
+    let mut block_state: &mut hash_buf = &hash_buf { fst: i, snd: buf1 };
+    let s_dst: &mut [u64] = &mut block_state.snd;
+    let s_src: &mut [u64] = &mut block_state0.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
     let s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
     let mut p: Vec<state_t> =
@@ -159,7 +160,7 @@ pub fn reset(state: &mut [state_t]) -> ()
     let buf: &mut [u8] = &mut state[0usize].buf;
     let i: crate::hacl::streaming_types::hash_alg = block_state.fst;
     crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(i);
-    let s: &mut [u64] = block_state.snd;
+    let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
     let tmp: state_t =
         state_t { block_state: block_state, buf: buf.to_vec(), total_len: 0u32 as u64 };
@@ -211,7 +212,7 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             if ! (sz1 == 0u32)
             {
                 let a1: crate::hacl::streaming_types::hash_alg = block_state1.fst;
-                let s1: &mut [u64] = block_state1.snd;
+                let s1: &mut [u64] = &mut block_state1.snd;
                 update_multi_sha3(a1, s1, buf, (block_len(i)).wrapping_div(block_len(a1)))
             };
             let ite: u32 =
@@ -228,7 +229,7 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let data1: (&mut [u8], &mut [u8]) = chunk.split_at_mut(0usize);
             let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
             let a1: crate::hacl::streaming_types::hash_alg = block_state1.fst;
-            let s1: &mut [u64] = block_state1.snd;
+            let s1: &mut [u64] = &mut block_state1.snd;
             update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
@@ -271,7 +272,7 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             if ! (sz10 == 0u32)
             {
                 let a1: crate::hacl::streaming_types::hash_alg = block_state10.fst;
-                let s1: &mut [u64] = block_state10.snd;
+                let s1: &mut [u64] = &mut block_state10.snd;
                 update_multi_sha3(a1, s1, buf0, (block_len(i)).wrapping_div(block_len(a1)))
             };
             let ite: u32 =
@@ -289,7 +290,7 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let data1: (&mut [u8], &mut [u8]) = chunk2.1.split_at_mut(0usize);
             let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
             let a1: crate::hacl::streaming_types::hash_alg = block_state10.fst;
-            let s1: &mut [u64] = block_state10.snd;
+            let s1: &mut [u64] = &mut block_state10.snd;
             update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
@@ -325,10 +326,10 @@ fn digest_(
         { total_len.wrapping_rem(block_len(a) as u64) as u32 };
     let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
     let mut buf: [u64; 25] = [0u64; 25usize];
-    let tmp_block_state: hash_buf = hash_buf { fst: a, snd: &mut buf };
+    let tmp_block_state: hash_buf = hash_buf { fst: a, snd: Vec::from(buf) };
     let scrut: hash_buf2 = hash_buf2 { fst: block_state, snd: tmp_block_state };
-    let s_dst: &mut [u64] = scrut.snd.snd;
-    let s_src: &mut [u64] = scrut.fst.snd;
+    let s_dst: &mut [u64] = &mut scrut.snd.snd;
+    let s_src: &mut [u64] = &mut scrut.fst.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
     let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =
@@ -338,20 +339,20 @@ fn digest_(
         { r.wrapping_rem(block_len(a)) };
     let buf_last: (&mut [u8], &mut [u8]) = buf_multi.1.split_at_mut(r.wrapping_sub(ite) as usize);
     let a1: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
-    let s: &mut [u64] = tmp_block_state.snd;
+    let s: &mut [u64] = &mut tmp_block_state.snd;
     update_multi_sha3(a1, s, buf_last.0, 0u32.wrapping_div(block_len(a1)));
     let a10: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
-    let s0: &mut [u64] = tmp_block_state.snd;
+    let s0: &mut [u64] = &mut tmp_block_state.snd;
     update_last_sha3(a10, s0, buf_last.1, r);
     let a11: crate::hacl::streaming_types::hash_alg = tmp_block_state.fst;
-    let s1: &mut [u64] = tmp_block_state.snd;
+    let s1: &mut [u64] = &mut tmp_block_state.snd;
     if
     a11 == crate::hacl::streaming_types::hash_alg::Shake128
     ||
     a11 == crate::hacl::streaming_types::hash_alg::Shake256
-    { crate::hacl::impl_sha3::squeeze(s1, block_len(a11), l, output) }
+    { squeeze0(s1, block_len(a11), l, output) }
     else
-    { crate::hacl::impl_sha3::squeeze(s1, block_len(a11), hash_len(a11), output) }
+    { squeeze0(s1, block_len(a11), hash_len(a11), output) }
 }
 
 pub fn digest(state: &mut [state_t], output: &mut [u8]) ->
@@ -390,13 +391,13 @@ pub fn squeeze(s: &mut [state_t], dst: &mut [u8], l: u32) ->
     }
 }
 
-pub fn block_lenÂ·(s: &mut [state_t]) -> u32
+pub fn block_len0(s: &mut [state_t]) -> u32
 {
     let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
     block_len(a1)
 }
 
-pub fn hash_lenÂ·(s: &mut [state_t]) -> u32
+pub fn hash_len0(s: &mut [state_t]) -> u32
 {
     let a1: crate::hacl::streaming_types::hash_alg = get_alg(s);
     hash_len(a1)
@@ -417,17 +418,7 @@ pub fn shake128_hacl(
     output: &mut [u8]
 ) ->
     ()
-{
-    crate::hacl::impl_sha3::keccak(
-        1344u32,
-        256u32,
-        inputByteLen,
-        input,
-        0x1Fu8,
-        outputByteLen,
-        output
-    )
-}
+{ keccak(1344u32, 256u32, inputByteLen, input, 0x1Fu8, outputByteLen, output) }
 
 pub fn shake256_hacl(
     inputByteLen: u32,
@@ -436,29 +427,19 @@ pub fn shake256_hacl(
     output: &mut [u8]
 ) ->
     ()
-{
-    crate::hacl::impl_sha3::keccak(
-        1088u32,
-        512u32,
-        inputByteLen,
-        input,
-        0x1Fu8,
-        outputByteLen,
-        output
-    )
-}
+{ keccak(1088u32, 512u32, inputByteLen, input, 0x1Fu8, outputByteLen, output) }
 
 pub fn sha3_224(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
-{ crate::hacl::impl_sha3::keccak(1152u32, 448u32, input_len, input, 0x06u8, 28u32, output) }
+{ keccak(1152u32, 448u32, input_len, input, 0x06u8, 28u32, output) }
 
 pub fn sha3_256(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
-{ crate::hacl::impl_sha3::keccak(1088u32, 512u32, input_len, input, 0x06u8, 32u32, output) }
+{ keccak(1088u32, 512u32, input_len, input, 0x06u8, 32u32, output) }
 
 pub fn sha3_384(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
-{ crate::hacl::impl_sha3::keccak(832u32, 768u32, input_len, input, 0x06u8, 48u32, output) }
+{ keccak(832u32, 768u32, input_len, input, 0x06u8, 48u32, output) }
 
 pub fn sha3_512(output: &mut [u8], input: &mut [u8], input_len: u32) -> ()
-{ crate::hacl::impl_sha3::keccak(576u32, 1024u32, input_len, input, 0x06u8, 64u32, output) }
+{ keccak(576u32, 1024u32, input_len, input, 0x06u8, 64u32, output) }
 
 const keccak_rotc: [u32; 24] =
     [1u32, 3u32, 6u32, 10u32, 15u32, 21u32, 28u32, 36u32, 45u32, 55u32, 2u32, 14u32, 27u32, 41u32,
@@ -631,8 +612,7 @@ fn absorb(
     state_permute(s)
 }
 
-pub fn squeezeÂ·(s: &mut [u64], rateInBytes: u32, outputByteLen: u32, output: &mut [u8]) ->
-    ()
+pub fn squeeze0(s: &mut [u64], rateInBytes: u32, outputByteLen: u32, output: &mut [u8]) -> ()
 {
     let outBlocks: u32 = outputByteLen.wrapping_div(rateInBytes);
     let remOut: u32 = outputByteLen.wrapping_rem(rateInBytes);
@@ -663,5 +643,5 @@ pub fn keccak(
     let rateInBytes: u32 = rate.wrapping_div(8u32);
     let mut s: [u64; 25] = [0u64; 25usize];
     absorb(&mut s, rateInBytes, inputByteLen, input, delimitedSuffix);
-    squeeze(&mut s, rateInBytes, outputByteLen, output)
+    squeeze0(&mut s, rateInBytes, outputByteLen, output)
 }

@@ -3,6 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum ffdhe_alg
 {
     FFDHE2048,
@@ -12,6 +13,7 @@ pub enum ffdhe_alg
     FFDHE8192
 }
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum r#impl
 {
     Hacl_CHACHA20,
@@ -19,6 +21,7 @@ pub enum r#impl
     Vale_AES256
 }
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum alg
 {
     AES128_GCM,
@@ -30,6 +33,7 @@ pub enum alg
     AES256_CCM8
 }
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum frodo_gen_a
 {
     SHAKE128,

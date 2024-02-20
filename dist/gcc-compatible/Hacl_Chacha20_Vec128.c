@@ -153,8 +153,8 @@ chacha20_core_128(
     0U,
     16U,
     1U,
-    Lib_IntVector_Intrinsics_vec128 *os = k;
     Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_add32(k[i], ctx[i]);
+    Lib_IntVector_Intrinsics_vec128 *os = k;
     os[i] = x;);
   k[12U] = Lib_IntVector_Intrinsics_vec128_add32(k[12U], cv);
 }
@@ -167,37 +167,39 @@ chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *k, uint8_t *n, 
     0U,
     4U,
     1U,
-    uint32_t *os = ctx1;
     uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
+    uint32_t *os = ctx1;
     os[i] = x;);
+  uint32_t *uu____0 = ctx1 + 4U;
   KRML_MAYBE_FOR8(i,
     0U,
     8U,
     1U,
-    uint32_t *os = ctx1 + 4U;
     uint8_t *bj = k + i * 4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
+    uint32_t *os = uu____0;
     os[i] = x;);
   ctx1[12U] = ctr;
+  uint32_t *uu____1 = ctx1 + 13U;
   KRML_MAYBE_FOR3(i,
     0U,
     3U,
     1U,
-    uint32_t *os = ctx1 + 13U;
     uint8_t *bj = n + i * 4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
+    uint32_t *os = uu____1;
     os[i] = x;);
   KRML_MAYBE_FOR16(i,
     0U,
     16U,
     1U,
-    Lib_IntVector_Intrinsics_vec128 *os = ctx;
     uint32_t x = ctx1[i];
     Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_load32(x);
+    Lib_IntVector_Intrinsics_vec128 *os = ctx;
     os[i] = x0;);
   Lib_IntVector_Intrinsics_vec128 ctr1 = Lib_IntVector_Intrinsics_vec128_load32s(0U, 1U, 2U, 3U);
   Lib_IntVector_Intrinsics_vec128 c12 = ctx[12U];

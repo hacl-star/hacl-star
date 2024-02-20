@@ -77,9 +77,9 @@ static inline void bn_cmovznz4(uint64_t *res, uint64_t cin, uint64_t *x, uint64_
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t uu____0 = x[i];
     uint64_t x1 = uu____0 ^ (mask & (y[i] ^ uu____0));
+    uint64_t *os = res;
     os[i] = x1;);
 }
 
@@ -131,8 +131,8 @@ static inline void bn_add_mod4(uint64_t *res, uint64_t *n, uint64_t *x, uint64_t
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x1 = (c2 & res[i]) | (~c2 & tmp[i]);
+    uint64_t *os = res;
     os[i] = x1;);
 }
 
@@ -210,8 +210,8 @@ static inline void bn_sub_mod4(uint64_t *res, uint64_t *n, uint64_t *x, uint64_t
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x1 = (c2 & tmp[i]) | (~c2 & res[i]);
+    uint64_t *os = res;
     os[i] = x1;);
 }
 
@@ -250,8 +250,8 @@ static inline void bn_sqr4(uint64_t *res, uint64_t *x)
     0U,
     4U,
     1U,
-    uint64_t *ab = x;
     uint64_t a_j = x[i0];
+    uint64_t *ab = x;
     uint64_t *res_j = res + i0;
     uint64_t c = 0ULL;
     for (uint32_t i = 0U; i < i0 / 4U; i++)
@@ -277,7 +277,12 @@ static inline void bn_sqr4(uint64_t *res, uint64_t *x)
     }
     uint64_t r = c;
     res[i0 + i0] = r;);
-  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, res, res);
+  uint64_t a_copy0[8U] = { 0U };
+  uint64_t b_copy0[8U] = { 0U };
+  memcpy(a_copy0, res, 8U * sizeof (uint64_t));
+  memcpy(b_copy0, res, 8U * sizeof (uint64_t));
+  uint64_t r = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, a_copy0, b_copy0, res);
+  uint64_t c0 = r;
   KRML_MAYBE_UNUSED_VAR(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
@@ -289,7 +294,12 @@ static inline void bn_sqr4(uint64_t *res, uint64_t *x)
     uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
     tmp[2U * i] = lo;
     tmp[2U * i + 1U] = hi;);
-  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, tmp, res);
+  uint64_t a_copy[8U] = { 0U };
+  uint64_t b_copy[8U] = { 0U };
+  memcpy(a_copy, res, 8U * sizeof (uint64_t));
+  memcpy(b_copy, tmp, 8U * sizeof (uint64_t));
+  uint64_t r0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, a_copy, b_copy, res);
+  uint64_t c1 = r0;
   KRML_MAYBE_UNUSED_VAR(c1);
 }
 
@@ -306,9 +316,9 @@ static inline void bn_from_bytes_be4(uint64_t *res, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = res;
     os[i] = x;);
 }
 
@@ -455,8 +465,8 @@ static inline void mont_reduction(uint64_t *res, uint64_t *x)
     }
     uint64_t r = c;
     uint64_t c1 = r;
-    uint64_t *resb = x + 4U + i0;
     uint64_t res_j = x[4U + i0];
+    uint64_t *resb = x + 4U + i0;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c1, res_j, resb););
   memcpy(res, x + 4U, 4U * sizeof (uint64_t));
   uint64_t c00 = c0;
@@ -486,8 +496,8 @@ static inline void mont_reduction(uint64_t *res, uint64_t *x)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x1 = (c2 & res[i]) | (~c2 & tmp[i]);
+    uint64_t *os = res;
     os[i] = x1;);
 }
 
@@ -939,6 +949,7 @@ static inline void point_mul(uint64_t *res, uint64_t *scalar, uint64_t *p)
   uint64_t *t1 = table + 12U;
   make_point_at_inf(t0);
   memcpy(t1, p, 12U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table);
   KRML_MAYBE_FOR7(i,
     0U,
     7U,
@@ -967,8 +978,8 @@ static inline void point_mul(uint64_t *res, uint64_t *scalar, uint64_t *p)
         0U,
         12U,
         1U,
-        uint64_t *os = tmp0;
         uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
+        uint64_t *os = tmp0;
         os[i] = x;););
     point_add(res, res, tmp0);
   }
@@ -987,8 +998,8 @@ static inline void precomp_get_consttime(const uint64_t *table, uint64_t bits_l,
       0U,
       12U,
       1U,
-      uint64_t *os = tmp;
       uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
+      uint64_t *os = tmp;
       os[i] = x;););
 }
 
@@ -1064,6 +1075,7 @@ point_mul_double_g(uint64_t *res, uint64_t *scalar1, uint64_t *scalar2, uint64_t
   uint64_t *t1 = table2 + 12U;
   make_point_at_inf(t0);
   memcpy(t1, q2, 12U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table2);
   KRML_MAYBE_FOR15(i,
     0U,
     15U,
@@ -1165,8 +1177,8 @@ static inline void qmont_reduction(uint64_t *res, uint64_t *x)
     }
     uint64_t r = c;
     uint64_t c1 = r;
-    uint64_t *resb = x + 4U + i0;
     uint64_t res_j = x[4U + i0];
+    uint64_t *resb = x + 4U + i0;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c1, res_j, resb););
   memcpy(res, x + 4U, 4U * sizeof (uint64_t));
   uint64_t c00 = c0;
@@ -1196,8 +1208,8 @@ static inline void qmont_reduction(uint64_t *res, uint64_t *x)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x1 = (c2 & res[i]) | (~c2 & tmp[i]);
+    uint64_t *os = res;
     os[i] = x1;);
 }
 
@@ -1238,9 +1250,9 @@ bool Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *public_key, uint8_t *private_key)
     0U,
     4U,
     1U,
-    uint64_t *os = sk;
     uint64_t uu____0 = oneq[i];
     uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
+    uint64_t *os = sk;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid;
   point_mul_g(pk, sk);
@@ -1270,9 +1282,9 @@ Hacl_Impl_P256_DH_ecp256dh_r(
     0U,
     4U,
     1U,
-    uint64_t *os = sk;
     uint64_t uu____0 = oneq[i];
     uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
+    uint64_t *os = sk;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid;
   uint64_t ss_proj[12U] = { 0U };
@@ -1464,9 +1476,9 @@ ecdsa_sign_msg_as_qelem(
     0U,
     4U,
     1U,
-    uint64_t *os = d_a;
     uint64_t uu____0 = oneq0[i];
     uint64_t x = uu____0 ^ (is_b_valid0 & (d_a[i] ^ uu____0));
+    uint64_t *os = d_a;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid0;
   bn_from_bytes_be4(k_q, nonce);
@@ -1480,9 +1492,9 @@ ecdsa_sign_msg_as_qelem(
     0U,
     4U,
     1U,
-    uint64_t *os = k_q;
     uint64_t uu____1 = oneq[i];
     uint64_t x = uu____1 ^ (is_b_valid & (k_q[i] ^ uu____1));
+    uint64_t *os = k_q;
     os[i] = x;);
   uint64_t is_nonce_valid = is_b_valid;
   uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;

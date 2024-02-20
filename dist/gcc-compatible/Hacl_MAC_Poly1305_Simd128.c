@@ -1310,6 +1310,7 @@ Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key
       sizeof (Lib_IntVector_Intrinsics_vec128) * 25U);
   memset(r1, 0U, 25U * sizeof (Lib_IntVector_Intrinsics_vec128));
   Lib_IntVector_Intrinsics_vec128 *block_state = r1;
+  Hacl_MAC_Poly1305_Simd128_poly1305_init(block_state, key);
   uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC(32U, sizeof (uint8_t));
   memcpy(k_, key, 32U * sizeof (uint8_t));
   uint8_t *k_0 = k_;
@@ -1321,16 +1322,14 @@ Hacl_MAC_Poly1305_Simd128_state_t *Hacl_MAC_Poly1305_Simd128_malloc(uint8_t *key
         Hacl_MAC_Poly1305_Simd128_state_t
       ));
   p[0U] = s;
-  Hacl_MAC_Poly1305_Simd128_poly1305_init(block_state, key);
   return p;
 }
 
 void Hacl_MAC_Poly1305_Simd128_reset(Hacl_MAC_Poly1305_Simd128_state_t *state, uint8_t *key)
 {
-  Hacl_MAC_Poly1305_Simd128_state_t scrut = *state;
-  uint8_t *k_ = scrut.p_key;
-  uint8_t *buf = scrut.buf;
-  Lib_IntVector_Intrinsics_vec128 *block_state = scrut.block_state;
+  Lib_IntVector_Intrinsics_vec128 *block_state = (*state).block_state;
+  uint8_t *buf = (*state).buf;
+  uint8_t *k_ = (*state).p_key;
   Hacl_MAC_Poly1305_Simd128_poly1305_init(block_state, key);
   memcpy(k_, key, 32U * sizeof (uint8_t));
   uint8_t *k_1 = k_;
@@ -1349,8 +1348,7 @@ Hacl_MAC_Poly1305_Simd128_update(
   uint32_t chunk_len
 )
 {
-  Hacl_MAC_Poly1305_Simd128_state_t s = *state;
-  uint64_t total_len = s.total_len;
+  uint64_t total_len = (*state).total_len;
   if ((uint64_t)chunk_len > 0xffffffffULL - total_len)
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
@@ -1366,11 +1364,10 @@ Hacl_MAC_Poly1305_Simd128_update(
   }
   if (chunk_len <= 32U - sz)
   {
-    Hacl_MAC_Poly1305_Simd128_state_t s1 = *state;
-    Lib_IntVector_Intrinsics_vec128 *block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
-    uint8_t *k_1 = s1.p_key;
+    Lib_IntVector_Intrinsics_vec128 *block_state1 = (*state).block_state;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
+    uint8_t *k_1 = (*state).p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)32U == 0ULL && total_len1 > 0ULL)
     {
@@ -1396,11 +1393,10 @@ Hacl_MAC_Poly1305_Simd128_update(
   }
   else if (sz == 0U)
   {
-    Hacl_MAC_Poly1305_Simd128_state_t s1 = *state;
-    Lib_IntVector_Intrinsics_vec128 *block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
-    uint8_t *k_1 = s1.p_key;
+    Lib_IntVector_Intrinsics_vec128 *block_state1 = (*state).block_state;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
+    uint8_t *k_1 = (*state).p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)32U == 0ULL && total_len1 > 0ULL)
     {
@@ -1447,11 +1443,10 @@ Hacl_MAC_Poly1305_Simd128_update(
     uint32_t diff = 32U - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_MAC_Poly1305_Simd128_state_t s1 = *state;
-    Lib_IntVector_Intrinsics_vec128 *block_state10 = s1.block_state;
-    uint8_t *buf0 = s1.buf;
-    uint64_t total_len10 = s1.total_len;
-    uint8_t *k_1 = s1.p_key;
+    Lib_IntVector_Intrinsics_vec128 *block_state1 = (*state).block_state;
+    uint8_t *buf0 = (*state).buf;
+    uint64_t total_len10 = (*state).total_len;
+    uint8_t *k_1 = (*state).p_key;
     uint32_t sz10;
     if (total_len10 % (uint64_t)32U == 0ULL && total_len10 > 0ULL)
     {
@@ -1468,17 +1463,16 @@ Hacl_MAC_Poly1305_Simd128_update(
     =
       (
         (Hacl_MAC_Poly1305_Simd128_state_t){
-          .block_state = block_state10,
+          .block_state = block_state1,
           .buf = buf0,
           .total_len = total_len2,
           .p_key = k_1
         }
       );
-    Hacl_MAC_Poly1305_Simd128_state_t s10 = *state;
-    Lib_IntVector_Intrinsics_vec128 *block_state1 = s10.block_state;
-    uint8_t *buf = s10.buf;
-    uint64_t total_len1 = s10.total_len;
-    uint8_t *k_10 = s10.p_key;
+    Lib_IntVector_Intrinsics_vec128 *block_state10 = (*state).block_state;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
+    uint8_t *k_10 = (*state).p_key;
     uint32_t sz1;
     if (total_len1 % (uint64_t)32U == 0ULL && total_len1 > 0ULL)
     {
@@ -1490,7 +1484,7 @@ Hacl_MAC_Poly1305_Simd128_update(
     }
     if (!(sz1 == 0U))
     {
-      poly1305_update(block_state1, 32U, buf);
+      poly1305_update(block_state10, 32U, buf);
     }
     uint32_t ite;
     if
@@ -1507,14 +1501,14 @@ Hacl_MAC_Poly1305_Simd128_update(
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    poly1305_update(block_state1, data1_len, data1);
+    poly1305_update(block_state10, data1_len, data1);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
     *state
     =
       (
         (Hacl_MAC_Poly1305_Simd128_state_t){
-          .block_state = block_state1,
+          .block_state = block_state10,
           .buf = buf,
           .total_len = total_len1 + (uint64_t)(chunk_len - diff),
           .p_key = k_10
@@ -1527,11 +1521,10 @@ Hacl_MAC_Poly1305_Simd128_update(
 void
 Hacl_MAC_Poly1305_Simd128_digest(Hacl_MAC_Poly1305_Simd128_state_t *state, uint8_t *output)
 {
-  Hacl_MAC_Poly1305_Simd128_state_t scrut = *state;
-  Lib_IntVector_Intrinsics_vec128 *block_state = scrut.block_state;
-  uint8_t *buf_ = scrut.buf;
-  uint64_t total_len = scrut.total_len;
-  uint8_t *k_ = scrut.p_key;
+  Lib_IntVector_Intrinsics_vec128 *block_state = (*state).block_state;
+  uint8_t *buf_ = (*state).buf;
+  uint64_t total_len = (*state).total_len;
+  uint8_t *k_ = (*state).p_key;
   uint32_t r;
   if (total_len % (uint64_t)32U == 0ULL && total_len > 0ULL)
   {
@@ -1545,6 +1538,7 @@ Hacl_MAC_Poly1305_Simd128_digest(Hacl_MAC_Poly1305_Simd128_state_t *state, uint8
   KRML_PRE_ALIGN(16) Lib_IntVector_Intrinsics_vec128 r1[25U] KRML_POST_ALIGN(16) = { 0U };
   Lib_IntVector_Intrinsics_vec128 *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, 25U * sizeof (Lib_IntVector_Intrinsics_vec128));
+  uint8_t *buf_multi = buf_1;
   uint32_t ite0;
   if (r % 16U == 0U && r > 0U)
   {
@@ -1555,7 +1549,6 @@ Hacl_MAC_Poly1305_Simd128_digest(Hacl_MAC_Poly1305_Simd128_state_t *state, uint8
     ite0 = r % 16U;
   }
   uint8_t *buf_last = buf_1 + r - ite0;
-  uint8_t *buf_multi = buf_1;
   uint32_t ite;
   if (r % 16U == 0U && r > 0U)
   {

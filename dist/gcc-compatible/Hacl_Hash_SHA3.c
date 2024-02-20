@@ -176,13 +176,13 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_malloc(Spec_Hash_Definitions_hash_alg a)
   uint8_t *buf0 = (uint8_t *)KRML_HOST_CALLOC(block_len(a), sizeof (uint8_t));
   uint64_t *buf = (uint64_t *)KRML_HOST_CALLOC(25U, sizeof (uint64_t));
   Hacl_Hash_SHA3_hash_buf block_state = { .fst = a, .snd = buf };
+  uint64_t *s = block_state.snd;
+  memset(s, 0U, 25U * sizeof (uint64_t));
   Hacl_Hash_SHA3_state_t
-  s = { .block_state = block_state, .buf = buf0, .total_len = (uint64_t)0U };
+  s0 = { .block_state = block_state, .buf = buf0, .total_len = (uint64_t)0U };
   Hacl_Hash_SHA3_state_t
   *p = (Hacl_Hash_SHA3_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_SHA3_state_t));
-  p[0U] = s;
-  uint64_t *s1 = block_state.snd;
-  memset(s1, 0U, 25U * sizeof (uint64_t));
+  p[0U] = s0;
   return p;
 }
 
@@ -199,10 +199,9 @@ void Hacl_Hash_SHA3_free(Hacl_Hash_SHA3_state_t *state)
 
 Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
 {
-  Hacl_Hash_SHA3_state_t scrut0 = *state;
-  Hacl_Hash_SHA3_hash_buf block_state0 = scrut0.block_state;
-  uint8_t *buf0 = scrut0.buf;
-  uint64_t total_len0 = scrut0.total_len;
+  Hacl_Hash_SHA3_hash_buf block_state0 = (*state).block_state;
+  uint8_t *buf0 = (*state).buf;
+  uint64_t total_len0 = (*state).total_len;
   Spec_Hash_Definitions_hash_alg i = block_state0.fst;
   KRML_CHECK_SIZE(sizeof (uint8_t), block_len(i));
   uint8_t *buf1 = (uint8_t *)KRML_HOST_CALLOC(block_len(i), sizeof (uint8_t));
@@ -223,9 +222,8 @@ Hacl_Hash_SHA3_state_t *Hacl_Hash_SHA3_copy(Hacl_Hash_SHA3_state_t *state)
 
 void Hacl_Hash_SHA3_reset(Hacl_Hash_SHA3_state_t *state)
 {
-  Hacl_Hash_SHA3_state_t scrut = *state;
-  uint8_t *buf = scrut.buf;
-  Hacl_Hash_SHA3_hash_buf block_state = scrut.block_state;
+  Hacl_Hash_SHA3_hash_buf block_state = (*state).block_state;
+  uint8_t *buf = (*state).buf;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
   KRML_MAYBE_UNUSED_VAR(i);
   uint64_t *s = block_state.snd;
@@ -238,9 +236,8 @@ void Hacl_Hash_SHA3_reset(Hacl_Hash_SHA3_state_t *state)
 Hacl_Streaming_Types_error_code
 Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
-  Hacl_Hash_SHA3_state_t s = *state;
-  Hacl_Hash_SHA3_hash_buf block_state = s.block_state;
-  uint64_t total_len = s.total_len;
+  Hacl_Hash_SHA3_hash_buf block_state = (*state).block_state;
+  uint64_t total_len = (*state).total_len;
   Spec_Hash_Definitions_hash_alg i = block_state.fst;
   if ((uint64_t)chunk_len > 0xFFFFFFFFFFFFFFFFULL - total_len)
   {
@@ -257,10 +254,9 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
   }
   if (chunk_len <= block_len(i) - sz)
   {
-    Hacl_Hash_SHA3_state_t s1 = *state;
-    Hacl_Hash_SHA3_hash_buf block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
+    Hacl_Hash_SHA3_hash_buf block_state1 = (*state).block_state;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
     if (total_len1 % (uint64_t)block_len(i) == 0ULL && total_len1 > 0ULL)
     {
@@ -279,10 +275,9 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
   }
   else if (sz == 0U)
   {
-    Hacl_Hash_SHA3_state_t s1 = *state;
-    Hacl_Hash_SHA3_hash_buf block_state1 = s1.block_state;
-    uint8_t *buf = s1.buf;
-    uint64_t total_len1 = s1.total_len;
+    Hacl_Hash_SHA3_hash_buf block_state1 = (*state).block_state;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
     if (total_len1 % (uint64_t)block_len(i) == 0ULL && total_len1 > 0ULL)
     {
@@ -295,8 +290,8 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     if (!(sz1 == 0U))
     {
       Spec_Hash_Definitions_hash_alg a1 = block_state1.fst;
-      uint64_t *s2 = block_state1.snd;
-      Hacl_Hash_SHA3_update_multi_sha3(a1, s2, buf, block_len(i) / block_len(a1));
+      uint64_t *s1 = block_state1.snd;
+      Hacl_Hash_SHA3_update_multi_sha3(a1, s1, buf, block_len(i) / block_len(a1));
     }
     uint32_t ite;
     if ((uint64_t)chunk_len % (uint64_t)block_len(i) == 0ULL && (uint64_t)chunk_len > 0ULL)
@@ -313,8 +308,8 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
     Spec_Hash_Definitions_hash_alg a1 = block_state1.fst;
-    uint64_t *s2 = block_state1.snd;
-    Hacl_Hash_SHA3_update_multi_sha3(a1, s2, data1, data1_len / block_len(a1));
+    uint64_t *s1 = block_state1.snd;
+    Hacl_Hash_SHA3_update_multi_sha3(a1, s1, data1, data1_len / block_len(a1));
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
     *state
@@ -332,10 +327,9 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     uint32_t diff = block_len(i) - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_Hash_SHA3_state_t s1 = *state;
-    Hacl_Hash_SHA3_hash_buf block_state10 = s1.block_state;
-    uint8_t *buf0 = s1.buf;
-    uint64_t total_len10 = s1.total_len;
+    Hacl_Hash_SHA3_hash_buf block_state1 = (*state).block_state;
+    uint8_t *buf0 = (*state).buf;
+    uint64_t total_len10 = (*state).total_len;
     uint32_t sz10;
     if (total_len10 % (uint64_t)block_len(i) == 0ULL && total_len10 > 0ULL)
     {
@@ -352,15 +346,14 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     =
       (
         (Hacl_Hash_SHA3_state_t){
-          .block_state = block_state10,
+          .block_state = block_state1,
           .buf = buf0,
           .total_len = total_len2
         }
       );
-    Hacl_Hash_SHA3_state_t s10 = *state;
-    Hacl_Hash_SHA3_hash_buf block_state1 = s10.block_state;
-    uint8_t *buf = s10.buf;
-    uint64_t total_len1 = s10.total_len;
+    Hacl_Hash_SHA3_hash_buf block_state10 = (*state).block_state;
+    uint8_t *buf = (*state).buf;
+    uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
     if (total_len1 % (uint64_t)block_len(i) == 0ULL && total_len1 > 0ULL)
     {
@@ -372,9 +365,9 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     }
     if (!(sz1 == 0U))
     {
-      Spec_Hash_Definitions_hash_alg a1 = block_state1.fst;
-      uint64_t *s2 = block_state1.snd;
-      Hacl_Hash_SHA3_update_multi_sha3(a1, s2, buf, block_len(i) / block_len(a1));
+      Spec_Hash_Definitions_hash_alg a1 = block_state10.fst;
+      uint64_t *s1 = block_state10.snd;
+      Hacl_Hash_SHA3_update_multi_sha3(a1, s1, buf, block_len(i) / block_len(a1));
     }
     uint32_t ite;
     if
@@ -396,16 +389,16 @@ Hacl_Hash_SHA3_update(Hacl_Hash_SHA3_state_t *state, uint8_t *chunk, uint32_t ch
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    Spec_Hash_Definitions_hash_alg a1 = block_state1.fst;
-    uint64_t *s2 = block_state1.snd;
-    Hacl_Hash_SHA3_update_multi_sha3(a1, s2, data1, data1_len / block_len(a1));
+    Spec_Hash_Definitions_hash_alg a1 = block_state10.fst;
+    uint64_t *s1 = block_state10.snd;
+    Hacl_Hash_SHA3_update_multi_sha3(a1, s1, data1, data1_len / block_len(a1));
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
     *state
     =
       (
         (Hacl_Hash_SHA3_state_t){
-          .block_state = block_state1,
+          .block_state = block_state10,
           .buf = buf,
           .total_len = total_len1 + (uint64_t)(chunk_len - diff)
         }
@@ -422,10 +415,9 @@ digest_(
   uint32_t l
 )
 {
-  Hacl_Hash_SHA3_state_t scrut0 = *state;
-  Hacl_Hash_SHA3_hash_buf block_state = scrut0.block_state;
-  uint8_t *buf_ = scrut0.buf;
-  uint64_t total_len = scrut0.total_len;
+  Hacl_Hash_SHA3_hash_buf block_state = (*state).block_state;
+  uint8_t *buf_ = (*state).buf;
+  uint64_t total_len = (*state).total_len;
   uint32_t r;
   if (total_len % (uint64_t)block_len(a) == 0ULL && total_len > 0ULL)
   {
@@ -442,6 +434,7 @@ digest_(
   uint64_t *s_dst = scrut.snd.snd;
   uint64_t *s_src = scrut.fst.snd;
   memcpy(s_dst, s_src, 25U * sizeof (uint64_t));
+  uint8_t *buf_multi = buf_1;
   uint32_t ite;
   if (r % block_len(a) == 0U && r > 0U)
   {
@@ -452,7 +445,6 @@ digest_(
     ite = r % block_len(a);
   }
   uint8_t *buf_last = buf_1 + r - ite;
-  uint8_t *buf_multi = buf_1;
   Spec_Hash_Definitions_hash_alg a1 = tmp_block_state.fst;
   uint64_t *s0 = tmp_block_state.snd;
   Hacl_Hash_SHA3_update_multi_sha3(a1, s0, buf_multi, 0U / block_len(a1));

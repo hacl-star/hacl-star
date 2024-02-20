@@ -210,10 +210,10 @@ uint32_t Hacl_Frodo1344_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t kp_s[32U] = { 0U };
   for (uint32_t i = 0U; i < 32U; i++)
   {
-    uint8_t *os = kp_s;
     uint8_t uu____0 = s[i];
     uint8_t
     x = (uint32_t)uu____0 ^ ((uint32_t)(uint8_t)mask0 & ((uint32_t)kp[i] ^ (uint32_t)uu____0));
+    uint8_t *os = kp_s;
     os[i] = x;
   }
   uint32_t ss_init_len = 21664U;

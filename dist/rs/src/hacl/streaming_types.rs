@@ -3,6 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum hash_alg
 {
     SHA2_224,
@@ -21,6 +22,7 @@ pub enum hash_alg
     Shake256
 }
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum error_code
 {
     Success,

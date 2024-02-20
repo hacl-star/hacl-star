@@ -552,7 +552,7 @@ pub fn rsapss_pkey_verify(
     { false }
 }
 
-pub fn mgf_hashÂ·(
+pub fn mgf_hash0(
     a: crate::hacl::streaming_types::hash_alg,
     len: u32,
     mgfseed: &mut [u8],

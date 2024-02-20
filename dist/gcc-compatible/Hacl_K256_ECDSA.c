@@ -167,8 +167,8 @@ static void add_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x = (c2 & res[i]) | (~c2 & tmp[i]);
+    uint64_t *os = res;
     os[i] = x;);
 }
 
@@ -221,8 +221,8 @@ static void sub_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
+    uint64_t *os = res;
     os[i] = x;);
 }
 
@@ -261,8 +261,8 @@ static void sqr4(uint64_t *a, uint64_t *res)
     0U,
     4U,
     1U,
-    uint64_t *ab = a;
     uint64_t a_j = a[i0];
+    uint64_t *ab = a;
     uint64_t *res_j = res + i0;
     uint64_t c = 0ULL;
     for (uint32_t i = 0U; i < i0 / 4U; i++)
@@ -288,7 +288,12 @@ static void sqr4(uint64_t *a, uint64_t *res)
     }
     uint64_t r = c;
     res[i0 + i0] = r;);
-  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, res, res);
+  uint64_t a_copy0[8U] = { 0U };
+  uint64_t b_copy0[8U] = { 0U };
+  memcpy(a_copy0, res, 8U * sizeof (uint64_t));
+  memcpy(b_copy0, res, 8U * sizeof (uint64_t));
+  uint64_t r = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, a_copy0, b_copy0, res);
+  uint64_t c0 = r;
   KRML_MAYBE_UNUSED_VAR(c0);
   uint64_t tmp[8U] = { 0U };
   KRML_MAYBE_FOR4(i,
@@ -300,7 +305,12 @@ static void sqr4(uint64_t *a, uint64_t *res)
     uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
     tmp[2U * i] = lo;
     tmp[2U * i + 1U] = hi;);
-  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, res, tmp, res);
+  uint64_t a_copy[8U] = { 0U };
+  uint64_t b_copy[8U] = { 0U };
+  memcpy(a_copy, res, 8U * sizeof (uint64_t));
+  memcpy(b_copy, tmp, 8U * sizeof (uint64_t));
+  uint64_t r0 = Hacl_Bignum_Addition_bn_add_eq_len_u64(8U, a_copy, b_copy, res);
+  uint64_t c1 = r0;
   KRML_MAYBE_UNUSED_VAR(c1);
 }
 
@@ -339,9 +349,9 @@ static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = f;
     uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = f;
     os[i] = x;);
   uint64_t is_zero = is_qelem_zero(f);
   uint64_t acc = 0ULL;
@@ -362,9 +372,9 @@ static inline bool load_qelem_vartime(uint64_t *f, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = f;
     uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = f;
     os[i] = x;);
   bool is_zero = is_qelem_zero_vartime(f);
   uint64_t a0 = f[0U];
@@ -412,8 +422,8 @@ static inline void modq_short(uint64_t *out, uint64_t *a)
     0U,
     4U,
     1U,
-    uint64_t *os = out;
     uint64_t x = (mask & out[i]) | (~mask & a[i]);
+    uint64_t *os = out;
     os[i] = x;);
 }
 
@@ -424,9 +434,9 @@ static inline void load_qelem_modq(uint64_t *f, uint8_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = f;
     uint64_t u = load64_be(b + (4U - i - 1U) * 8U);
     uint64_t x = u;
+    uint64_t *os = f;
     os[i] = x;);
   memcpy(tmp, f, 4U * sizeof (uint64_t));
   modq_short(f, tmp);
@@ -520,8 +530,8 @@ static inline void modq(uint64_t *out, uint64_t *a)
     0U,
     4U,
     1U,
-    uint64_t *os = out;
     uint64_t x = (mask & out[i]) | (~mask & r[i]);
+    uint64_t *os = out;
     os[i] = x;);
 }
 
@@ -611,8 +621,8 @@ static inline void qmul_shift_384(uint64_t *res, uint64_t *a, uint64_t *b)
     0U,
     4U,
     1U,
-    uint64_t *os = res;
     uint64_t x = (mask & res[i]) | (~mask & res_b_padded[i]);
+    uint64_t *os = res;
     os[i] = x;);
 }
 
@@ -1127,6 +1137,7 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
   uint64_t *t1 = table + 15U;
   Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, q, 15U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table);
   KRML_MAYBE_FOR7(i,
     0U,
     7U,
@@ -1155,8 +1166,8 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
         0U,
         15U,
         1U,
-        uint64_t *os = tmp0;
         uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
+        uint64_t *os = tmp0;
         os[i] = x;););
     Hacl_Impl_K256_PointAdd_point_add(out, out, tmp0);
   }
@@ -1175,8 +1186,8 @@ static inline void precomp_get_consttime(const uint64_t *table, uint64_t bits_l,
       0U,
       15U,
       1U,
-      uint64_t *os = tmp;
       uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
+      uint64_t *os = tmp;
       os[i] = x;););
 }
 
@@ -1279,6 +1290,7 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
   uint64_t *t1 = table2 + 15U;
   Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, q2, 15U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table2);
   KRML_MAYBE_FOR15(i,
     0U,
     15U,
@@ -1342,6 +1354,7 @@ point_mul_g_double_split_lambda_table(
   uint64_t *t1 = table2 + 15U;
   Hacl_Impl_K256_Point_make_point_at_inf(t0);
   memcpy(t1, p2, 15U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table2);
   KRML_MAYBE_FOR15(i,
     0U,
     15U,
@@ -1577,9 +1590,9 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
     0U,
     4U,
     1U,
-    uint64_t *os = d_a;
     uint64_t uu____0 = oneq10[i];
     uint64_t x = uu____0 ^ (is_b_valid0 & (d_a[i] ^ uu____0));
+    uint64_t *os = d_a;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid0;
   uint64_t is_b_valid = load_qelem_check(k_q, nonce);
@@ -1588,9 +1601,9 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
     0U,
     4U,
     1U,
-    uint64_t *os = k_q;
     uint64_t uu____1 = oneq1[i];
     uint64_t x = uu____1 ^ (is_b_valid & (k_q[i] ^ uu____1));
+    uint64_t *os = k_q;
     os[i] = x;);
   uint64_t is_nonce_valid = is_b_valid;
   uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;
@@ -2063,9 +2076,9 @@ bool Hacl_K256_ECDSA_secret_to_public(uint8_t *public_key, uint8_t *private_key)
     0U,
     4U,
     1U,
-    uint64_t *os = sk;
     uint64_t uu____0 = oneq[i];
     uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
+    uint64_t *os = sk;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid;
   point_mul_g(pk, sk);
@@ -2098,9 +2111,9 @@ bool Hacl_K256_ECDSA_ecdh(uint8_t *shared_secret, uint8_t *their_pubkey, uint8_t
     0U,
     4U,
     1U,
-    uint64_t *os = sk;
     uint64_t uu____0 = oneq[i];
     uint64_t x = uu____0 ^ (is_b_valid & (sk[i] ^ uu____0));
+    uint64_t *os = sk;
     os[i] = x;);
   uint64_t is_sk_valid = is_b_valid;
   if (is_pk_valid)

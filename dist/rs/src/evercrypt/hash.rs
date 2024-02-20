@@ -3,6 +3,7 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
 
+#[derive(PartialEq, Clone, Copy)]
 enum state_s_tags
 {
     MD5_s,
@@ -61,30 +62,18 @@ pub fn hash_len(a: crate::hacl::streaming_types::hash_alg) -> u32
 {
     match a
     {
-        crate::hacl::streaming_types::hash_alg::MD5 =>
-          crate::evercrypt::hash_incremental_macros::md5_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA1 =>
-          crate::evercrypt::hash_incremental_macros::sha1_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA2_224 =>
-          crate::evercrypt::hash_incremental_macros::sha2_224_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
-          crate::evercrypt::hash_incremental_macros::sha2_256_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
-          crate::evercrypt::hash_incremental_macros::sha2_384_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
-          crate::evercrypt::hash_incremental_macros::sha2_512_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA3_224 =>
-          crate::evercrypt::hash_incremental_macros::sha3_224_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA3_256 =>
-          crate::evercrypt::hash_incremental_macros::sha3_256_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA3_384 =>
-          crate::evercrypt::hash_incremental_macros::sha3_384_hash_len,
-        crate::hacl::streaming_types::hash_alg::SHA3_512 =>
-          crate::evercrypt::hash_incremental_macros::sha3_512_hash_len,
-        crate::hacl::streaming_types::hash_alg::Blake2S =>
-          crate::evercrypt::hash_incremental_macros::blake2s_hash_len,
-        crate::hacl::streaming_types::hash_alg::Blake2B =>
-          crate::evercrypt::hash_incremental_macros::blake2b_hash_len,
+        crate::hacl::streaming_types::hash_alg::MD5 => md5_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA1 => sha1_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_224 => sha2_224_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_256 => sha2_256_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_384 => sha2_384_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA2_512 => sha2_512_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_224 => sha3_224_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_256 => sha3_256_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_384 => sha3_384_hash_len,
+        crate::hacl::streaming_types::hash_alg::SHA3_512 => sha3_512_hash_len,
+        crate::hacl::streaming_types::hash_alg::Blake2S => blake2s_hash_len,
+        crate::hacl::streaming_types::hash_alg::Blake2B => blake2b_hash_len,
         _ => panic!("Precondition of the function most likely violated")
     }
 }
@@ -112,22 +101,6 @@ fn block_len(a: crate::hacl::streaming_types::hash_alg) -> u32
 }
 
 pub struct state_t { pub block_state: Vec<state_s>, pub buf: Vec<u8>, pub total_len: u64 }
-
-pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
-{
-    let mut buf: Vec<u8> = vec![0u8; block_len(a)];
-    let block_state: &mut [state_s] = create_in(a);
-    init(block_state);
-    let s: state_t =
-        state_t { block_state: block_state.to_vec(), buf: buf, total_len: 0u32 as u64 };
-    let mut p: Vec<state_t> =
-        {
-            let mut tmp: Vec<state_t> = Vec::new();
-            tmp.push(s);
-            tmp
-        };
-    p
-}
 
 pub fn reset(state: &mut [state_t]) -> ()
 {
@@ -312,7 +285,7 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     }
 }
 
-pub fn alg_of_state(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
+pub fn alg_of_state0(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
     let block_state: &mut [state_s] = &mut s[0usize].block_state;
     alg_of_state(block_state)
@@ -320,33 +293,21 @@ pub fn alg_of_state(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 
 pub fn digest(state: &mut [state_t], output: &mut [u8]) -> ()
 {
-    let a1: crate::hacl::streaming_types::hash_alg = alg_of_state(state);
+    let a1: crate::hacl::streaming_types::hash_alg = alg_of_state0(state);
     match a1
     {
-        crate::hacl::streaming_types::hash_alg::MD5 =>
-          crate::evercrypt::hash_incremental::digest_md5(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA1 =>
-          crate::evercrypt::hash_incremental::digest_sha1(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA2_224 =>
-          crate::evercrypt::hash_incremental::digest_sha224(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA2_256 =>
-          crate::evercrypt::hash_incremental::digest_sha256(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA2_384 =>
-          crate::evercrypt::hash_incremental::digest_sha384(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA2_512 =>
-          crate::evercrypt::hash_incremental::digest_sha512(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA3_224 =>
-          crate::evercrypt::hash_incremental::digest_sha3_224(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA3_256 =>
-          crate::evercrypt::hash_incremental::digest_sha3_256(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA3_384 =>
-          crate::evercrypt::hash_incremental::digest_sha3_384(state, output),
-        crate::hacl::streaming_types::hash_alg::SHA3_512 =>
-          crate::evercrypt::hash_incremental::digest_sha3_512(state, output),
-        crate::hacl::streaming_types::hash_alg::Blake2S =>
-          crate::evercrypt::hash_incremental::digest_blake2s(state, output),
-        crate::hacl::streaming_types::hash_alg::Blake2B =>
-          crate::evercrypt::hash_incremental::digest_blake2b(state, output),
+        crate::hacl::streaming_types::hash_alg::MD5 => digest_md5(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA1 => digest_sha1(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_224 => digest_sha224(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_256 => digest_sha256(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_384 => digest_sha384(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA2_512 => digest_sha512(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_224 => digest_sha3_224(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_256 => digest_sha3_256(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_384 => digest_sha3_384(state, output),
+        crate::hacl::streaming_types::hash_alg::SHA3_512 => digest_sha3_512(state, output),
+        crate::hacl::streaming_types::hash_alg::Blake2S => digest_blake2s(state, output),
+        crate::hacl::streaming_types::hash_alg::Blake2B => digest_blake2b(state, output),
         _ => panic!("Precondition of the function most likely violated")
     }
 }

@@ -406,7 +406,7 @@
     }
 }
 
-pub fn salsa20_encryptÂ·(
+pub fn salsa20_encrypt0(
     len: u32,
     out: &mut [u8],
     text: &mut [u8],
@@ -417,7 +417,7 @@ pub fn salsa20_encryptÂ·(
     ()
 { salsa20_encrypt(len, out, text, key, n, ctr) }
 
-pub fn salsa20_decryptÂ·(
+pub fn salsa20_decrypt0(
     len: u32,
     out: &mut [u8],
     cipher: &mut [u8],
@@ -428,8 +428,7 @@ pub fn salsa20_decryptÂ·(
     ()
 { salsa20_decrypt(len, out, cipher, key, n, ctr) }
 
-pub fn salsa20_key_block0Â·(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
+pub fn salsa20_key_block00(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
 { salsa20_key_block0(out, key, n) }
 
-pub fn hsalsa20Â·(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> ()
-{ hsalsa20(out, key, n) }
+pub fn hsalsa200(out: &mut [u8], key: &mut [u8], n: &mut [u8]) -> () { hsalsa20(out, key, n) }
