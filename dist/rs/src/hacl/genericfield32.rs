@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 pub type pbn_mont_ctx_u32 <'a> = &'a mut [crate::hacl::bignum::bn_mont_ctx_u32];
 
@@ -21,7 +24,7 @@ pub fn field_init(len: u32, n: &mut [u32]) -> Vec<crate::hacl::bignum::bn_mont_c
     let nBits: u32 = 32u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u32(len, n));
     crate::hacl::bignum::bn_precomp_r2_mod_n_u32(len, nBits, n, r21);
     let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
-    let res: crate::hacl::bignum::bn_mont_ctx_u32 =
+    let mut res: crate::hacl::bignum::bn_mont_ctx_u32 =
         crate::hacl::bignum::bn_mont_ctx_u32 { len: len, n: n11.to_vec(), mu: mu, r2: r21.to_vec() };
     let mut buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
         {
@@ -32,14 +35,21 @@ pub fn field_init(len: u32, n: &mut [u32]) -> Vec<crate::hacl::bignum::bn_mont_c
     buf
 }
 
-pub fn field_get_len(k: &mut [crate::hacl::bignum::bn_mont_ctx_u32]) -> u32 { k[0usize].len }
+pub fn field_get_len(k: &mut [crate::hacl::bignum::bn_mont_ctx_u32]) -> u32 { (k[0usize]).len }
 
 pub fn to_field(k: &mut [crate::hacl::bignum::bn_mont_ctx_u32], a: &mut [u32], aM: &mut [u32]) ->
     ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    crate::hacl::bignum::bn_to_mont_u32(len1, &mut uu____0.n, uu____0.mu, &mut uu____0.r2, a, aM)
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    crate::hacl::bignum::bn_to_mont_u32(
+        len1,
+        &mut (*uu____0).n,
+        (*uu____0).mu,
+        &mut (*uu____0).r2,
+        a,
+        aM
+    )
 }
 
 pub fn from_field(
@@ -50,8 +60,8 @@ pub fn from_field(
     ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    crate::hacl::bignum::bn_from_mont_u32(len1, &mut uu____0.n, uu____0.mu, aM, a)
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    crate::hacl::bignum::bn_from_mont_u32(len1, &mut (*uu____0).n, (*uu____0).mu, aM, a)
 }
 
 pub fn add(
@@ -63,12 +73,12 @@ pub fn add(
     ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
     let mut a_copy: Vec<u32> = vec![0u32; len1 as usize];
     let mut b_copy: Vec<u32> = vec![0u32; len1 as usize];
     ((&mut a_copy)[0usize..len1 as usize]).copy_from_slice(&aM[0usize..len1 as usize]);
     ((&mut b_copy)[0usize..len1 as usize]).copy_from_slice(&bM[0usize..len1 as usize]);
-    crate::hacl::bignum::bn_add_mod_n_u32(len1, &mut uu____0.n, &mut a_copy, &mut b_copy, cM)
+    crate::hacl::bignum::bn_add_mod_n_u32(len1, &mut (*uu____0).n, &mut a_copy, &mut b_copy, cM)
 }
 
 pub fn sub(
@@ -80,7 +90,7 @@ pub fn sub(
     ()
 {
     let len1: u32 = field_get_len(k);
-    crate::hacl::bignum::bn_sub_mod_n_u32(len1, &mut k[0usize].n, aM, bM, cM)
+    crate::hacl::bignum::bn_sub_mod_n_u32(len1, &mut (k[0usize]).n, aM, bM, cM)
 }
 
 pub fn mul(
@@ -92,23 +102,29 @@ pub fn mul(
     ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    crate::hacl::bignum::bn_mont_mul_u32(len1, &mut uu____0.n, uu____0.mu, aM, bM, cM)
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    crate::hacl::bignum::bn_mont_mul_u32(len1, &mut (*uu____0).n, (*uu____0).mu, aM, bM, cM)
 }
 
 pub fn sqr(k: &mut [crate::hacl::bignum::bn_mont_ctx_u32], aM: &mut [u32], cM: &mut [u32]) ->
     ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    crate::hacl::bignum::bn_mont_sqr_u32(len1, &mut uu____0.n, uu____0.mu, aM, cM)
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    crate::hacl::bignum::bn_mont_sqr_u32(len1, &mut (*uu____0).n, (*uu____0).mu, aM, cM)
 }
 
 pub fn one(k: &mut [crate::hacl::bignum::bn_mont_ctx_u32], oneM: &mut [u32]) -> ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    crate::hacl::bignum::bn_from_mont_u32(len1, &mut uu____0.n, uu____0.mu, &mut uu____0.r2, oneM)
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    crate::hacl::bignum::bn_from_mont_u32(
+        len1,
+        &mut (*uu____0).n,
+        (*uu____0).mu,
+        &mut (*uu____0).r2,
+        oneM
+    )
 }
 
 pub fn exp_consttime(
@@ -121,22 +137,24 @@ pub fn exp_consttime(
     ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    let mut aMc: Vec<u32> = vec![0u32; uu____0.len as usize];
-    ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    let mut aMc: Vec<u32> = vec![0u32; (*uu____0).len as usize];
+    ((&mut aMc)[0usize..(*uu____0).len as usize]).copy_from_slice(
+        &aM[0usize..(*uu____0).len as usize]
+    );
     if bBits < 200u32
     {
         let mut ctx: Vec<u32> = vec![0u32; len1.wrapping_add(len1) as usize];
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(
-            &(&mut uu____0.n)[0usize..len1 as usize]
+            &(&mut (*uu____0).n)[0usize..len1 as usize]
         );
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
-            &(&mut uu____0.r2)[0usize..len1 as usize]
+            &(&mut (*uu____0).r2)[0usize..len1 as usize]
         );
         let mut sw: u32 = 0u32;
         let ctx_n: (&mut [u32], &mut [u32]) = (&mut ctx).split_at_mut(0usize);
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
+        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, (*uu____0).mu, ctx_r2.1, resM);
         for i in 0u32..bBits
         {
             let i1: u32 = bBits.wrapping_sub(i).wrapping_sub(1u32).wrapping_div(32u32);
@@ -155,13 +173,13 @@ pub fn exp_consttime(
             crate::hacl::bignum::bn_mont_mul_u32(
                 len1,
                 ctx_n0.1,
-                uu____0.mu,
+                (*uu____0).mu,
                 &mut aMc,
                 resM,
                 &mut aMc
             );
             let ctx_n1: (&mut [u32], &mut [u32]) = ctx_n0.1.split_at_mut(0usize);
-            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n1.1, uu____0.mu, resM, resM);
+            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n1.1, (*uu____0).mu, resM, resM);
             sw = bit
         };
         let sw0: u32 = sw;
@@ -181,10 +199,10 @@ pub fn exp_consttime(
             { bBits.wrapping_sub(1u32).wrapping_div(32u32).wrapping_add(1u32) };
         let mut ctx: Vec<u32> = vec![0u32; len1.wrapping_add(len1) as usize];
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(
-            &(&mut uu____0.n)[0usize..len1 as usize]
+            &(&mut (*uu____0).n)[0usize..len1 as usize]
         );
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
-            &(&mut uu____0.r2)[0usize..len1 as usize]
+            &(&mut (*uu____0).r2)[0usize..len1 as usize]
         );
         let mut table: Vec<u32> = vec![0u32; 16u32.wrapping_mul(len1) as usize];
         let mut tmp: Vec<u32> = vec![0u32; len1 as usize];
@@ -192,7 +210,7 @@ pub fn exp_consttime(
         let t1: (&mut [u32], &mut [u32]) = t0.1.split_at_mut(len1 as usize);
         let ctx_n: (&mut [u32], &mut [u32]) = (&mut ctx).split_at_mut(0usize);
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
+        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, (*uu____0).mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&mut aMc)[0usize..len1 as usize]);
         crate::lowstar::ignore::ignore::<&mut [u32]>(&mut table);
         for i in 0u32..7u32
@@ -200,7 +218,7 @@ pub fn exp_consttime(
             let t11: (&mut [u32], &mut [u32]) =
                 (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
+            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, (*uu____0).mu, t11.1, &mut tmp);
             ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                 i
             ).wrapping_add(2u32).wrapping_mul(len1)
@@ -216,7 +234,7 @@ pub fn exp_consttime(
             crate::hacl::bignum::bn_mont_mul_u32(
                 len1,
                 ctx_n1.1,
-                uu____0.mu,
+                (*uu____0).mu,
                 &mut aMc,
                 t2.1,
                 &mut tmp
@@ -255,7 +273,7 @@ pub fn exp_consttime(
         {
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
             let ctx_r20: (&mut [u32], &mut [u32]) = ctx_n0.1.split_at_mut(len1 as usize);
-            crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
+            crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r20.0, (*uu____0).mu, ctx_r20.1, resM)
         };
         let mut tmp0: Vec<u32> = vec![0u32; len1 as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -264,7 +282,7 @@ pub fn exp_consttime(
             {
                 let ctx_n0: (&mut [u32], &mut [u32]) =
                     ctx_r2.1.split_at_mut(0usize - len1 as usize);
-                crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, resM, resM)
+                crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, (*uu____0).mu, resM, resM)
             };
             let k2: u32 =
                 bBits.wrapping_sub(bBits.wrapping_rem(4u32)).wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(
@@ -289,7 +307,14 @@ pub fn exp_consttime(
                 }
             };
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_mul_u32(len1, ctx_n0.1, uu____0.mu, resM, &mut tmp0, resM)
+            crate::hacl::bignum::bn_mont_mul_u32(
+                len1,
+                ctx_n0.1,
+                (*uu____0).mu,
+                resM,
+                &mut tmp0,
+                resM
+            )
         }
     }
 }
@@ -304,21 +329,23 @@ pub fn exp_vartime(
     ()
 {
     let len1: u32 = field_get_len(k);
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    let mut aMc: Vec<u32> = vec![0u32; uu____0.len as usize];
-    ((&mut aMc)[0usize..uu____0.len as usize]).copy_from_slice(&aM[0usize..uu____0.len as usize]);
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    let mut aMc: Vec<u32> = vec![0u32; (*uu____0).len as usize];
+    ((&mut aMc)[0usize..(*uu____0).len as usize]).copy_from_slice(
+        &aM[0usize..(*uu____0).len as usize]
+    );
     if bBits < 200u32
     {
         let mut ctx: Vec<u32> = vec![0u32; len1.wrapping_add(len1) as usize];
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(
-            &(&mut uu____0.n)[0usize..len1 as usize]
+            &(&mut (*uu____0).n)[0usize..len1 as usize]
         );
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
-            &(&mut uu____0.r2)[0usize..len1 as usize]
+            &(&mut (*uu____0).r2)[0usize..len1 as usize]
         );
         let ctx_n: (&mut [u32], &mut [u32]) = (&mut ctx).split_at_mut(0usize);
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, resM);
+        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, (*uu____0).mu, ctx_r2.1, resM);
         for i in 0u32..bBits
         {
             let i1: u32 = i.wrapping_div(32u32);
@@ -332,14 +359,14 @@ pub fn exp_vartime(
                 crate::hacl::bignum::bn_mont_mul_u32(
                     len1,
                     ctx_n0.1,
-                    uu____0.mu,
+                    (*uu____0).mu,
                     resM,
                     &mut aMc,
                     resM
                 )
             };
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, &mut aMc, &mut aMc)
+            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, (*uu____0).mu, &mut aMc, &mut aMc)
         }
     }
     else
@@ -351,10 +378,10 @@ pub fn exp_vartime(
             { bBits.wrapping_sub(1u32).wrapping_div(32u32).wrapping_add(1u32) };
         let mut ctx: Vec<u32> = vec![0u32; len1.wrapping_add(len1) as usize];
         ((&mut ctx)[0usize..len1 as usize]).copy_from_slice(
-            &(&mut uu____0.n)[0usize..len1 as usize]
+            &(&mut (*uu____0).n)[0usize..len1 as usize]
         );
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
-            &(&mut uu____0.r2)[0usize..len1 as usize]
+            &(&mut (*uu____0).r2)[0usize..len1 as usize]
         );
         let mut table: Vec<u32> = vec![0u32; 16u32.wrapping_mul(len1) as usize];
         let mut tmp: Vec<u32> = vec![0u32; len1 as usize];
@@ -362,7 +389,7 @@ pub fn exp_vartime(
         let t1: (&mut [u32], &mut [u32]) = t0.1.split_at_mut(len1 as usize);
         let ctx_n: (&mut [u32], &mut [u32]) = (&mut ctx).split_at_mut(0usize);
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(len1 as usize);
-        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, uu____0.mu, ctx_r2.1, t1.0);
+        crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, (*uu____0).mu, ctx_r2.1, t1.0);
         (t1.1[0usize..len1 as usize]).copy_from_slice(&(&mut aMc)[0usize..len1 as usize]);
         crate::lowstar::ignore::ignore::<&mut [u32]>(&mut table);
         for i in 0u32..7u32
@@ -370,7 +397,7 @@ pub fn exp_vartime(
             let t11: (&mut [u32], &mut [u32]) =
                 (&mut table).split_at_mut(i.wrapping_add(1u32).wrapping_mul(len1) as usize);
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, t11.1, &mut tmp);
+            crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, (*uu____0).mu, t11.1, &mut tmp);
             ((&mut table)[2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(len1) as usize..2u32.wrapping_mul(
                 i
             ).wrapping_add(2u32).wrapping_mul(len1)
@@ -386,7 +413,7 @@ pub fn exp_vartime(
             crate::hacl::bignum::bn_mont_mul_u32(
                 len1,
                 ctx_n1.1,
-                uu____0.mu,
+                (*uu____0).mu,
                 &mut aMc,
                 t2.1,
                 &mut tmp
@@ -412,7 +439,7 @@ pub fn exp_vartime(
         {
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
             let ctx_r20: (&mut [u32], &mut [u32]) = ctx_n0.1.split_at_mut(len1 as usize);
-            crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r20.0, uu____0.mu, ctx_r20.1, resM)
+            crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r20.0, (*uu____0).mu, ctx_r20.1, resM)
         };
         let mut tmp0: Vec<u32> = vec![0u32; len1 as usize];
         for i in 0u32..bBits.wrapping_div(4u32)
@@ -421,7 +448,7 @@ pub fn exp_vartime(
             {
                 let ctx_n0: (&mut [u32], &mut [u32]) =
                     ctx_r2.1.split_at_mut(0usize - len1 as usize);
-                crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, uu____0.mu, resM, resM)
+                crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n0.1, (*uu____0).mu, resM, resM)
             };
             let k2: u32 =
                 bBits.wrapping_sub(bBits.wrapping_rem(4u32)).wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(
@@ -433,7 +460,14 @@ pub fn exp_vartime(
                 (&mut table).split_at(bits_l32.wrapping_mul(len1) as usize);
             ((&mut tmp0)[0usize..len1 as usize]).copy_from_slice(&a_bits_l.1[0usize..len1 as usize]);
             let ctx_n0: (&mut [u32], &mut [u32]) = ctx_r2.1.split_at_mut(0usize - len1 as usize);
-            crate::hacl::bignum::bn_mont_mul_u32(len1, ctx_n0.1, uu____0.mu, resM, &mut tmp0, resM)
+            crate::hacl::bignum::bn_mont_mul_u32(
+                len1,
+                ctx_n0.1,
+                (*uu____0).mu,
+                resM,
+                &mut tmp0,
+                resM
+            )
         }
     }
 }
@@ -445,20 +479,20 @@ pub fn inverse(
 ) ->
     ()
 {
-    let uu____0: crate::hacl::bignum::bn_mont_ctx_u32 = k[0usize];
-    let len1: u32 = uu____0.len;
+    let mut uu____0: &mut crate::hacl::bignum::bn_mont_ctx_u32 = &mut k[0usize];
+    let len1: u32 = (*uu____0).len;
     let mut n2: Vec<u32> = vec![0u32; len1 as usize];
     let c0: u32 =
         crate::lib::inttypes_intrinsics::sub_borrow_u32(
             0u32,
-            (&mut uu____0.n)[0usize],
+            (&mut (*uu____0).n)[0usize],
             2u32,
             &mut (&mut n2)[0usize..]
         );
     let c: u32 =
         if 1u32 < len1
         {
-            let a1: &mut [u32] = &mut (&mut uu____0.n)[1usize..];
+            let a1: &mut [u32] = &mut (&mut (*uu____0).n)[1usize..];
             let res1: (&mut [u32], &mut [u32]) = (&mut n2).split_at_mut(1usize);
             let mut c: u32 = c0;
             for i in 0u32..len1.wrapping_sub(1u32).wrapping_div(4u32)
@@ -501,5 +535,5 @@ pub fn inverse(
         else
         { c0 };
     crate::lowstar::ignore::ignore::<u32>(c);
-    exp_vartime(k, aM, uu____0.len.wrapping_mul(32u32), &mut n2, aInvM)
+    exp_vartime(k, aM, (*uu____0).len.wrapping_mul(32u32), &mut n2, aInvM)
 }

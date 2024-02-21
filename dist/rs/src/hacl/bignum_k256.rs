@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 #[inline] pub fn is_felem_zero_vartime(f: &mut [u64]) -> bool
 {

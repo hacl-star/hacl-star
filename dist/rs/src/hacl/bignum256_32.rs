@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 pub fn add(a: &mut [u32], b: &mut [u32], res: &mut [u32]) -> u32
 {
@@ -1052,7 +1055,7 @@ pub fn mont_ctx_init(n: &mut [u32]) -> Vec<crate::hacl::bignum::bn_mont_ctx_u32>
     let nBits: u32 = 32u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u32(8u32, n));
     precompr2(nBits, n, r21);
     let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
-    let res: crate::hacl::bignum::bn_mont_ctx_u32 =
+    let mut res: crate::hacl::bignum::bn_mont_ctx_u32 =
         crate::hacl::bignum::bn_mont_ctx_u32
         { len: 8u32, n: n11.to_vec(), mu: mu, r2: r21.to_vec() };
     let mut buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
@@ -1071,9 +1074,9 @@ pub fn mod_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     bn_slow_precomp(n, mu, r2, a, res)
 }
 
@@ -1086,9 +1089,9 @@ pub fn mod_exp_vartime_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     exp_vartime_precomp(n, mu, r2, a, bBits, b, res)
 }
 
@@ -1101,9 +1104,9 @@ pub fn mod_exp_consttime_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     exp_consttime_precomp(n, mu, r2, a, bBits, b, res)
 }
 
@@ -1114,9 +1117,9 @@ pub fn mod_inv_prime_vartime_precomp(
 ) ->
     ()
 {
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     let mut n2: [u32; 8] = [0u32; 8usize];
     let c0: u32 =
         crate::lib::inttypes_intrinsics::sub_borrow_u32(

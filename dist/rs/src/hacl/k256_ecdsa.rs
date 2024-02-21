@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 #[inline] fn bn_add(aLen: u32, a: &mut [u64], bLen: u32, b: &mut [u64], res: &mut [u64]) -> u64
 {

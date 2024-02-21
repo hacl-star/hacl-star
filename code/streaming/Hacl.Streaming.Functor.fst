@@ -629,8 +629,13 @@ let reset #index c i t t' state key =
   (**) assert(preserves_freeable c i state h1 h2);
 
   [@inline_let] let total_len = Int.Cast.uint32_to_uint64 (c.init_input_len i) in
-  let tmp: state_s c i t t' = State block_state buf total_len (G.hide S.empty) k' in
-  B.upd state 0ul tmp;
+  // HACL-RS: trigger the functional update pattern
+  let uu__ = !*state in
+  let State uu__block_state_ _ _ _ _ = uu__ in
+  let uu__ = !*state in
+  let State _ uu__buf_ _ _ _ = uu__ in
+  let uu__: state_s c i t t' = State uu__block_state_ uu__buf_ total_len (G.hide S.empty) k' in
+  B.upd state 0ul uu__;
   (**) let h3 = ST.get () in
   (**) c.state.frame_invariant B.(loc_buffer state) block_state h2 h3;
   (**) c.key.frame_invariant B.(loc_buffer state) key h2 h3;
@@ -838,12 +843,15 @@ val update_small:
   s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
+  bs:c.state.s i -> // HACL-RS
   Stack unit
     (requires fun h0 ->
+      bs == (B.deref h0 s).block_state /\ // HACL-RS
       update_pre c i s data len h0 /\
       U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
       U32.v len <= U32.v (c.blocks_state_len i) - U32.v (rest c i (total_len_h c i h0 s)))
     (ensures fun h0 s' h1 ->
+      bs == (B.deref h1 s).block_state /\ // HACL-RS
       update_post c i s data len h0 h1))
 
 /// SH: The proof obligations for update_small have problem succeeding in command
@@ -1155,13 +1163,12 @@ let update_small_functional_correctness #index c i t t' p data len h0 h1 =
 #restart-solver
 #push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false --z3refresh \
   --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2,-FStar.Seq.Properties.slice_slice,-LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
-let update_small #index c i t t' p data len =
+let update_small #index c i t t' p data len bs =
   let open LowStar.BufferOps in
   // HACL-RS:
   // let s = !*p in
   // let State block_state buf total_len seen_ k' = s in
-  let uu__ = !*p in
-  let State block_state _ _ _ _ = uu__ in
+  [@inline_let] let block_state = bs in
   let uu__ = !*p in
   let State _ buf _ _ _ = uu__ in
   let uu__ = !*p in
@@ -1215,12 +1222,17 @@ let update_small #index c i t t' p data len =
 
   // SECOND STATEFUL OPERATION
   let total_len = add_len c i total_len len in
+  // HACL-RS: trigger the functional update pattern
+  let uu__ = !*p in
+  let State uu__block_state _ _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ uu__buf _ _ _ = uu__ in
   [@inline_let]
-  let tmp: state_s c i t t' =
-    State #index #c #i block_state buf total_len
+  let uu__: state_s c i t t' =
+    State #index #c #i uu__block_state uu__buf total_len
           (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data))) k'
   in
-  p *= tmp;
+  p *= uu__;
 
   // Memory reasoning.
   let h2 = ST.get () in
@@ -1359,18 +1371,21 @@ val update_empty_or_full_buf:
   s:state c i t t' ->
   data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
+  bs:c.state.s i -> // HACL-RS
   Stack unit
     (requires fun h0 ->
+      bs == (B.deref h0 s).block_state /\ // HACL-RS
       update_pre c i s data len h0 /\
       U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\
       (rest c i (total_len_h c i h0 s) = 0ul \/
        rest c i (total_len_h c i h0 s) = c.blocks_state_len i) /\
        U32.v len > 0)
     (ensures fun h0 s' h1 ->
+      bs == (B.deref h1 s).block_state /\ // HACL-RS
       update_post c i s data len h0 h1))
 
 #push-options "--z3cliopt smt.arith.nl=false --z3rlimit 500"
-let update_empty_or_full_buf #index c i t t' p data len =
+let update_empty_or_full_buf #index c i t t' p data len bs =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.update_multi_associative i in
@@ -1379,8 +1394,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
   // HACL-RS
   // let s = !*p in
   // let State block_state buf total_len seen k' = s in
-  let uu__ = !*p in
-  let State block_state _ _ _ _ = uu__ in
+  [@inline_let] let block_state = bs in
   let uu__ = !*p in
   let State _ buf _ _ _ = uu__ in
   let uu__ = !*p in
@@ -1475,11 +1489,15 @@ let update_empty_or_full_buf #index c i t t' p data len =
 
   [@inline_let]
   let total_len' = add_len c i total_len len in
+  let uu__ = !*p in
+  let State uu__block_state _ _ _ _ = uu__ in
+  let uu__ = !*p in
+  let State _ uu__buf _ _ _ = uu__ in
   [@inline_let]
-  let tmp: state_s c i t t' = State #index #c #i block_state buf total_len'
+  let uu__: state_s c i t t' = State #index #c #i uu__block_state uu__buf total_len'
     (seen `S.append` B.as_seq h0 data) k'
   in
-  p *= tmp;
+  p *= uu__;
   let h3 = ST.get () in
   c.state.frame_invariant (B.loc_buffer p) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
@@ -1509,14 +1527,17 @@ val update_round:
   s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
+  bs:c.state.s i -> // HACL-RS
   Stack unit
     (requires fun h0 ->
+      bs == (B.deref h0 s).block_state /\ // HACL-RS
       update_pre c i s data len h0 /\
       U32.v (c.init_input_len i) + S.length (seen c i h0 s) + U32.v len <= U64.v (c.max_input_len i) /\ (
       let r = rest c i (total_len_h c i h0 s) in
       U32.v len + U32.v r = U32.v (c.blocks_state_len i) /\
       r <> 0ul))
     (ensures fun h0 _ h1 ->
+      bs == (B.deref h1 s).block_state /\ // HACL-RS
       update_post c i s data len h0 h1 /\
       begin
       let blocks, rest = split_at_last_all_seen c i h0 s in
@@ -1527,14 +1548,14 @@ val update_round:
       end))
 
 #push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false"
-let update_round #index c i t t' p data len =
+let update_round #index c i t t' p data len bs =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
   (**) let h0 = ST.get() in
-  update_small #index c i t t' p data len;
+  update_small #index c i t t' p data len bs;
   (**) let h1 = ST.get() in
   (**) split_at_last_small c i (all_seen c i h0 p) (B.as_seq h0 data);
   (**) begin // For some reason, the proof fails if we don't call those
@@ -1567,23 +1588,25 @@ let update #index c i t t' state chunk chunk_len =
   let State _ _ _ _ k' = uu__ in
 
   let i = c.index_of_state i block_state in
+  let h0 = ST.get () in
+  assert (block_state == (B.deref h0 state).block_state);
 
   if FStar.UInt64.(FStar.Int.Cast.uint32_to_uint64 chunk_len >^ c.max_input_len i -^ total_len) then
     Hacl.Streaming.Types.MaximumLengthExceeded
   else
     let sz = rest c i total_len in
     if chunk_len `U32.lte` (c.blocks_state_len i `U32.sub` sz) then
-      update_small c i t t' state chunk chunk_len
+      update_small c i t t' state chunk chunk_len block_state
     else if sz = 0ul then
-      update_empty_or_full_buf c i t t' state chunk chunk_len
+      update_empty_or_full_buf c i t t' state chunk chunk_len block_state
     else begin
       let h0 = ST.get () in
       let diff = c.blocks_state_len i `U32.sub` sz in
       let chunk1 = B.sub chunk 0ul diff in
       let chunk2 = B.sub chunk diff (chunk_len `U32.sub` diff) in
-      update_round c i t t' state chunk1 diff;
+      update_round c i t t' state chunk1 diff block_state;
       let h1 = ST.get () in
-      update_empty_or_full_buf c i t t' state chunk2 (chunk_len `U32.sub` diff);
+      update_empty_or_full_buf c i t t' state chunk2 (chunk_len `U32.sub` diff) block_state;
       let h2 = ST.get () in
       (
         let seen = G.reveal seen in

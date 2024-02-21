@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 pub struct state_s { pub impl: crate::hacl::spec::impl, pub ek: Vec<u8> }
 
@@ -14,7 +17,7 @@ pub fn uu___is_Ek(a: crate::hacl::spec::alg, projectee: state_s) -> bool
 
 pub fn alg_of_state(s: &mut [state_s]) -> crate::hacl::spec::alg
 {
-    let r#impl: crate::hacl::spec::impl = s[0usize].impl;
+    let r#impl: crate::hacl::spec::impl = (s[0usize]).impl;
     match r#impl
     {
         crate::hacl::spec::impl::Hacl_CHACHA20 => crate::hacl::spec::alg::CHACHA20_POLY1305,
@@ -160,7 +163,7 @@ fn encrypt_aes128_gcm(
         { crate::evercrypt::error::error_code::InvalidIVLength }
         else
         {
-            let ek: &mut [u8] = &mut s[0usize].ek;
+            let ek: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(304usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -322,7 +325,7 @@ fn encrypt_aes256_gcm(
         { crate::evercrypt::error::error_code::InvalidIVLength }
         else
         {
-            let ek: &mut [u8] = &mut s[0usize].ek;
+            let ek: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(368usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -470,9 +473,9 @@ pub fn encrypt(
     { crate::evercrypt::error::error_code::InvalidKey }
     else
     {
-        let scrut: state_s = s[0usize];
-        let i: crate::hacl::spec::impl = scrut.impl;
-        let ek: &mut [u8] = &mut scrut.ek;
+        let mut scrut: &mut state_s = &mut s[0usize];
+        let i: crate::hacl::spec::impl = (*scrut).impl;
+        let ek: &mut [u8] = &mut (*scrut).ek;
         match i
         {
             crate::hacl::spec::impl::Vale_AES128 =>
@@ -552,7 +555,7 @@ pub fn encrypt_expand_aes128_gcm_no_check(
         }
         else
         {
-            let ek0: &mut [u8] = &mut s[0usize].ek;
+            let ek0: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(304usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -737,7 +740,7 @@ pub fn encrypt_expand_aes256_gcm_no_check(
         }
         else
         {
-            let ek0: &mut [u8] = &mut s[0usize].ek;
+            let ek0: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(368usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -929,7 +932,7 @@ pub fn encrypt_expand_aes128_gcm(
             }
             else
             {
-                let ek0: &mut [u8] = &mut s[0usize].ek;
+                let ek0: &mut [u8] = &mut (s[0usize]).ek;
                 let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(304usize);
                 let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
                 let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -1127,7 +1130,7 @@ pub fn encrypt_expand_aes256_gcm(
             }
             else
             {
-                let ek0: &mut [u8] = &mut s[0usize].ek;
+                let ek0: &mut [u8] = &mut (s[0usize]).ek;
                 let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(368usize);
                 let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
                 let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -1286,7 +1289,7 @@ pub fn encrypt_expand_chacha20_poly1305(
         state_s { impl: crate::hacl::spec::impl::Hacl_CHACHA20, ek: Vec::from(ek) };
     ((&mut ek)[0usize..32usize]).copy_from_slice(&k[0usize..32usize]);
     let s: &mut [state_s] = p;
-    let ek0: &mut [u8] = &mut s[0usize].ek;
+    let ek0: &mut [u8] = &mut (s[0usize]).ek;
     crate::evercrypt::chacha20poly1305::aead_encrypt(
         ek0,
         iv,
@@ -1357,7 +1360,7 @@ fn decrypt_aes128_gcm(
         { crate::evercrypt::error::error_code::InvalidIVLength }
         else
         {
-            let ek: &mut [u8] = &mut s[0usize].ek;
+            let ek: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(304usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -1526,7 +1529,7 @@ fn decrypt_aes256_gcm(
         { crate::evercrypt::error::error_code::InvalidIVLength }
         else
         {
-            let ek: &mut [u8] = &mut s[0usize].ek;
+            let ek: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek.split_at_mut(368usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -1684,7 +1687,7 @@ fn decrypt_chacha20_poly1305(
     { crate::evercrypt::error::error_code::InvalidIVLength }
     else
     {
-        let ek: &mut [u8] = &mut s[0usize].ek;
+        let ek: &mut [u8] = &mut (s[0usize]).ek;
         let r: u32 =
             crate::evercrypt::chacha20poly1305::aead_decrypt(
                 ek,
@@ -1720,7 +1723,7 @@ pub fn decrypt(
     { crate::evercrypt::error::error_code::InvalidKey }
     else
     {
-        let i: crate::hacl::spec::impl = s[0usize].impl;
+        let i: crate::hacl::spec::impl = (s[0usize]).impl;
         match i
         {
             crate::hacl::spec::impl::Vale_AES128 =>
@@ -1777,7 +1780,7 @@ pub fn decrypt_expand_aes128_gcm_no_check(
         { crate::evercrypt::error::error_code::InvalidIVLength }
         else
         {
-            let ek0: &mut [u8] = &mut s[0usize].ek;
+            let ek0: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(304usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -1958,7 +1961,7 @@ pub fn decrypt_expand_aes256_gcm_no_check(
         { crate::evercrypt::error::error_code::InvalidIVLength }
         else
         {
-            let ek0: &mut [u8] = &mut s[0usize].ek;
+            let ek0: &mut [u8] = &mut (s[0usize]).ek;
             let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(368usize);
             let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
             let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -2146,7 +2149,7 @@ pub fn decrypt_expand_aes128_gcm(
             { crate::evercrypt::error::error_code::InvalidIVLength }
             else
             {
-                let ek0: &mut [u8] = &mut s[0usize].ek;
+                let ek0: &mut [u8] = &mut (s[0usize]).ek;
                 let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(304usize);
                 let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
                 let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);
@@ -2338,7 +2341,7 @@ pub fn decrypt_expand_aes256_gcm(
             { crate::evercrypt::error::error_code::InvalidIVLength }
             else
             {
-                let ek0: &mut [u8] = &mut s[0usize].ek;
+                let ek0: &mut [u8] = &mut (s[0usize]).ek;
                 let scratch_b: (&mut [u8], &mut [u8]) = ek0.split_at_mut(368usize);
                 let ek1: (&mut [u8], &mut [u8]) = scratch_b.0.split_at_mut(0usize);
                 let keys_b0: (&mut [u8], &mut [u8]) = ek1.1.split_at_mut(0usize);

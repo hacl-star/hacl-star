@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 #[inline] fn fsum(out: &mut [u64], a: &mut [u64], b: &mut [u64]) -> ()
 { crate::hacl::bignum25519_51::fadd(out, a, b) }
@@ -1727,7 +1730,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
 {
     let mut buf: [u8; 128] = [0u8; 128usize];
     let mut block_state: [u64; 8] = [0u64; 8usize];
-    let s: crate::hacl::streaming_types::state_64 =
+    let mut s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: Vec::from(block_state), buf: Vec::from(buf), total_len: 0u32 as u64 };
     let mut p: crate::hacl::streaming_types::state_64 = s;
@@ -1753,7 +1756,7 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
 {
     let mut buf: [u8; 128] = [0u8; 128usize];
     let mut block_state: [u64; 8] = [0u64; 8usize];
-    let s: crate::hacl::streaming_types::state_64 =
+    let mut s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: Vec::from(block_state), buf: Vec::from(buf), total_len: 0u32 as u64 };
     let mut p: crate::hacl::streaming_types::state_64 = s;

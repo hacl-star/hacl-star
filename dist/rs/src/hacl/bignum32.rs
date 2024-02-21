@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 pub type pbn_mont_ctx_u32 <'a> = &'a mut [crate::hacl::bignum::bn_mont_ctx_u32];
 
@@ -238,7 +241,7 @@ pub fn mont_ctx_init(len: u32, n: &mut [u32]) -> Vec<crate::hacl::bignum::bn_mon
     let nBits: u32 = 32u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u32(len, n));
     crate::hacl::bignum::bn_precomp_r2_mod_n_u32(len, nBits, n, r21);
     let mu: u32 = crate::hacl::bignum::mod_inv_uint32(n[0usize]);
-    let res: crate::hacl::bignum::bn_mont_ctx_u32 =
+    let mut res: crate::hacl::bignum::bn_mont_ctx_u32 =
         crate::hacl::bignum::bn_mont_ctx_u32 { len: len, n: n11.to_vec(), mu: mu, r2: r21.to_vec() };
     let mut buf: Vec<crate::hacl::bignum::bn_mont_ctx_u32> =
         {
@@ -256,10 +259,10 @@ pub fn mod_precomp(
 ) ->
     ()
 {
-    let len1: u32 = k[0usize].len;
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let len1: u32 = (k[0usize]).len;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     bn_slow_precomp(len1, n, mu, r2, a, res)
 }
 
@@ -272,10 +275,10 @@ pub fn mod_exp_vartime_precomp(
 ) ->
     ()
 {
-    let len1: u32 = k[0usize].len;
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let len1: u32 = (k[0usize]).len;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     crate::hacl::bignum::bn_mod_exp_vartime_precomp_u32(len1, n, mu, r2, a, bBits, b, res)
 }
 
@@ -288,10 +291,10 @@ pub fn mod_exp_consttime_precomp(
 ) ->
     ()
 {
-    let len1: u32 = k[0usize].len;
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let len1: u32 = (k[0usize]).len;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     crate::hacl::bignum::bn_mod_exp_consttime_precomp_u32(len1, n, mu, r2, a, bBits, b, res)
 }
 
@@ -302,10 +305,10 @@ pub fn mod_inv_prime_vartime_precomp(
 ) ->
     ()
 {
-    let len1: u32 = k[0usize].len;
-    let n: &mut [u32] = &mut k[0usize].n;
-    let mu: u32 = k[0usize].mu;
-    let r2: &mut [u32] = &mut k[0usize].r2;
+    let len1: u32 = (k[0usize]).len;
+    let n: &mut [u32] = &mut (k[0usize]).n;
+    let mu: u32 = (k[0usize]).mu;
+    let r2: &mut [u32] = &mut (k[0usize]).r2;
     let mut n2: Vec<u32> = vec![0u32; len1 as usize];
     let c0: u32 =
         crate::lib::inttypes_intrinsics::sub_borrow_u32(

@@ -706,11 +706,8 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
 void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state)
 {
   Hacl_Hash_Blake2b_block_state_t block_state = (*state).block_state;
-  uint8_t *buf = (*state).buf;
   Hacl_Hash_Blake2b_init(block_state.snd, 0U, 64U);
-  Hacl_Hash_Blake2b_state_t
-  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  state[0U] = tmp;
+  state->total_len = (uint64_t)0U;
 }
 
 /**
@@ -719,6 +716,7 @@ void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state)
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
+  Hacl_Hash_Blake2b_block_state_t block_state = (*state).block_state;
   uint64_t total_len = (*state).total_len;
   if ((uint64_t)chunk_len > 0xffffffffffffffffULL - total_len)
   {
@@ -735,7 +733,6 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
   }
   if (chunk_len <= 128U - sz)
   {
-    Hacl_Hash_Blake2b_block_state_t block_state1 = (*state).block_state;
     uint8_t *buf = (*state).buf;
     uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
@@ -750,19 +747,10 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, chunk, chunk_len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)chunk_len;
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len2
-        }
-      );
+    state->total_len = total_len2;
   }
   else if (sz == 0U)
   {
-    Hacl_Hash_Blake2b_block_state_t block_state1 = (*state).block_state;
     uint8_t *buf = (*state).buf;
     uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
@@ -777,8 +765,8 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint64_t *wv = block_state1.fst;
-      uint64_t *hash = block_state1.snd;
+      uint64_t *wv = block_state.fst;
+      uint64_t *hash = block_state.snd;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2b_update_multi(128U,
         wv,
@@ -801,8 +789,8 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    uint64_t *wv = block_state1.fst;
-    uint64_t *hash = block_state1.snd;
+    uint64_t *wv = block_state.fst;
+    uint64_t *hash = block_state.snd;
     uint32_t nb = data1_len / 128U;
     Hacl_Hash_Blake2b_update_multi(data1_len,
       wv,
@@ -812,23 +800,14 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
       nb);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state1,
-          .buf = buf,
-          .total_len = total_len1 + (uint64_t)chunk_len
-        }
-      );
+    state->total_len = total_len1 + (uint64_t)chunk_len;
   }
   else
   {
     uint32_t diff = 128U - sz;
     uint8_t *chunk1 = chunk;
     uint8_t *chunk2 = chunk + diff;
-    Hacl_Hash_Blake2b_block_state_t block_state1 = (*state).block_state;
-    uint8_t *buf0 = (*state).buf;
+    uint8_t *buf = (*state).buf;
     uint64_t total_len10 = (*state).total_len;
     uint32_t sz10;
     if (total_len10 % (uint64_t)128U == 0ULL && total_len10 > 0ULL)
@@ -839,20 +818,11 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     {
       sz10 = (uint32_t)(total_len10 % (uint64_t)128U);
     }
-    uint8_t *buf2 = buf0 + sz10;
+    uint8_t *buf2 = buf + sz10;
     memcpy(buf2, chunk1, diff * sizeof (uint8_t));
     uint64_t total_len2 = total_len10 + (uint64_t)diff;
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state1,
-          .buf = buf0,
-          .total_len = total_len2
-        }
-      );
-    Hacl_Hash_Blake2b_block_state_t block_state10 = (*state).block_state;
-    uint8_t *buf = (*state).buf;
+    state->total_len = total_len2;
+    uint8_t *buf0 = (*state).buf;
     uint64_t total_len1 = (*state).total_len;
     uint32_t sz1;
     if (total_len1 % (uint64_t)128U == 0ULL && total_len1 > 0ULL)
@@ -866,14 +836,14 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint64_t *wv = block_state10.fst;
-      uint64_t *hash = block_state10.snd;
+      uint64_t *wv = block_state.fst;
+      uint64_t *hash = block_state.snd;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2b_update_multi(128U,
         wv,
         hash,
         FStar_UInt128_uint64_to_uint128(prevlen),
-        buf,
+        buf0,
         nb);
     }
     uint32_t ite;
@@ -891,8 +861,8 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    uint64_t *wv = block_state10.fst;
-    uint64_t *hash = block_state10.snd;
+    uint64_t *wv = block_state.fst;
+    uint64_t *hash = block_state.snd;
     uint32_t nb = data1_len / 128U;
     Hacl_Hash_Blake2b_update_multi(data1_len,
       wv,
@@ -900,17 +870,9 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
       FStar_UInt128_uint64_to_uint128(total_len1),
       data1,
       nb);
-    uint8_t *dst = buf;
+    uint8_t *dst = buf0;
     memcpy(dst, data2, data2_len * sizeof (uint8_t));
-    *state
-    =
-      (
-        (Hacl_Hash_Blake2b_state_t){
-          .block_state = block_state10,
-          .buf = buf,
-          .total_len = total_len1 + (uint64_t)(chunk_len - diff)
-        }
-      );
+    state->total_len = total_len1 + (uint64_t)(chunk_len - diff);
   }
   return Hacl_Streaming_Types_Success;
 }

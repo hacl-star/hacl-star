@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 fn block_len(a: crate::hacl::streaming_types::hash_alg) -> u32
 {
@@ -99,24 +102,22 @@ pub fn update_last_sha3(
 
 pub struct hash_buf { pub fst: crate::hacl::streaming_types::hash_alg, pub snd: Vec<u64> }
 
-struct hash_buf2 { pub fst: hash_buf, pub snd: hash_buf }
-
 pub struct state_t { pub block_state: hash_buf, pub buf: Vec<u8>, pub total_len: u64 }
 
 pub fn get_alg(s: &mut [state_t]) -> crate::hacl::streaming_types::hash_alg
 {
-    let block_state: hash_buf = s[0usize].block_state;
-    block_state.fst
+    let mut block_state: &mut hash_buf = &mut (s[0usize]).block_state;
+    (*block_state).fst
 }
 
 pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 {
     let mut buf: Vec<u8> = vec![0u8; block_len(a) as usize];
     let mut buf0: Vec<u64> = vec![0u64; 25usize];
-    let block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
+    let mut block_state: hash_buf = hash_buf { fst: a, snd: buf0 };
     let s: &mut [u64] = &mut block_state.snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let s0: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
+    let mut s0: state_t = state_t { block_state: block_state, buf: buf, total_len: 0u32 as u64 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -128,21 +129,20 @@ pub fn malloc(a: crate::hacl::streaming_types::hash_alg) -> Vec<state_t>
 
 pub fn copy(state: &mut [state_t]) -> Vec<state_t>
 {
-    let block_state0: hash_buf = state[0usize].block_state;
-    let buf0: &mut [u8] = &mut state[0usize].buf;
-    let total_len0: u64 = state[0usize].total_len;
-    let i: crate::hacl::streaming_types::hash_alg = block_state0.fst;
+    let mut block_state0: &mut hash_buf = &mut (state[0usize]).block_state;
+    let buf0: &mut [u8] = &mut (state[0usize]).buf;
+    let total_len0: u64 = (state[0usize]).total_len;
+    let i: crate::hacl::streaming_types::hash_alg = (*block_state0).fst;
     let mut buf: Vec<u8> = vec![0u8; block_len(i) as usize];
     ((&mut buf)[0usize..block_len(i) as usize]).copy_from_slice(
         &buf0[0usize..block_len(i) as usize]
     );
     let mut buf1: Vec<u64> = vec![0u64; 25usize];
-    let block_state: hash_buf = hash_buf { fst: i, snd: buf1 };
-    let scrut: hash_buf2 = hash_buf2 { fst: block_state0, snd: block_state };
-    let s_dst: &mut [u64] = &mut scrut.snd.snd;
-    let s_src: &mut [u64] = &mut scrut.fst.snd;
+    let mut block_state: hash_buf = hash_buf { fst: i, snd: buf1 };
+    let s_src: &mut [u64] = &mut (*block_state0).snd;
+    let s_dst: &mut [u64] = &mut block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
-    let s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
+    let mut s: state_t = state_t { block_state: block_state, buf: buf, total_len: total_len0 };
     let mut p: Vec<state_t> =
         {
             let mut tmp: Vec<state_t> = Vec::new();
@@ -154,23 +154,20 @@ pub fn copy(state: &mut [state_t]) -> Vec<state_t>
 
 pub fn reset(state: &mut [state_t]) -> ()
 {
-    let block_state: hash_buf = state[0usize].block_state;
-    let buf: &mut [u8] = &mut state[0usize].buf;
-    let i: crate::hacl::streaming_types::hash_alg = block_state.fst;
+    let mut block_state: &mut hash_buf = &mut (state[0usize]).block_state;
+    let i: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
     crate::lowstar::ignore::ignore::<crate::hacl::streaming_types::hash_alg>(i);
-    let s: &mut [u64] = &mut block_state.snd;
+    let s: &mut [u64] = &mut (*block_state).snd;
     (s[0usize..25usize]).copy_from_slice(&[0u64; 25usize]);
-    let tmp: state_t =
-        state_t { block_state: block_state, buf: buf.to_vec(), total_len: 0u32 as u64 };
-    state[0usize] = tmp
+    (state[0usize]).total_len = 0u32 as u64
 }
 
 pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
     crate::hacl::streaming_types::error_code
 {
-    let block_state: hash_buf = state[0usize].block_state;
-    let total_len: u64 = state[0usize].total_len;
-    let i: crate::hacl::streaming_types::hash_alg = block_state.fst;
+    let mut block_state: &mut hash_buf = &mut (state[0usize]).block_state;
+    let total_len: u64 = (state[0usize]).total_len;
+    let i: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
     if chunk_len as u64 > 0xFFFFFFFFFFFFFFFFu64.wrapping_sub(total_len)
     { crate::hacl::streaming_types::error_code::MaximumLengthExceeded }
     else
@@ -182,9 +179,8 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             { total_len.wrapping_rem(block_len(i) as u64) as u32 };
         if chunk_len <= (block_len(i)).wrapping_sub(sz)
         {
-            let block_state1: hash_buf = state[0usize].block_state;
-            let buf: &mut [u8] = &mut state[0usize].buf;
-            let total_len1: u64 = state[0usize].total_len;
+            let buf: &mut [u8] = &mut (state[0usize]).buf;
+            let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
                 if total_len1.wrapping_rem(block_len(i) as u64) == 0u64 && total_len1 > 0u64
                 { block_len(i) }
@@ -193,15 +189,13 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let buf2: (&mut [u8], &mut [u8]) = buf.split_at_mut(sz1 as usize);
             (buf2.1[0usize..chunk_len as usize]).copy_from_slice(&chunk[0usize..chunk_len as usize]);
             let total_len2: u64 = total_len1.wrapping_add(chunk_len as u64);
-            state[0usize] =
-                state_t { block_state: block_state1, buf: buf.to_vec(), total_len: total_len2 }
+            (state[0usize]).total_len = total_len2
         }
         else
         if sz == 0u32
         {
-            let block_state1: hash_buf = state[0usize].block_state;
-            let buf: &mut [u8] = &mut state[0usize].buf;
-            let total_len1: u64 = state[0usize].total_len;
+            let buf: &mut [u8] = &mut (state[0usize]).buf;
+            let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
                 if total_len1.wrapping_rem(block_len(i) as u64) == 0u64 && total_len1 > 0u64
                 { block_len(i) }
@@ -209,8 +203,8 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
                 { total_len1.wrapping_rem(block_len(i) as u64) as u32 };
             if ! (sz1 == 0u32)
             {
-                let a1: crate::hacl::streaming_types::hash_alg = block_state1.fst;
-                let s1: &mut [u64] = &mut block_state1.snd;
+                let a1: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
+                let s1: &mut [u64] = &mut (*block_state).snd;
                 update_multi_sha3(a1, s1, buf, (block_len(i)).wrapping_div(block_len(a1)))
             };
             let ite: u32 =
@@ -226,29 +220,22 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(data1_len);
             let data1: (&mut [u8], &mut [u8]) = chunk.split_at_mut(0usize);
             let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
-            let a1: crate::hacl::streaming_types::hash_alg = block_state1.fst;
-            let s1: &mut [u64] = &mut block_state1.snd;
+            let a1: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
+            let s1: &mut [u64] = &mut (*block_state).snd;
             update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
             let dst: (&mut [u8], &mut [u8]) = buf.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
             );
-            state[0usize] =
-                state_t
-                {
-                    block_state: block_state1,
-                    buf: buf.to_vec(),
-                    total_len: total_len1.wrapping_add(chunk_len as u64)
-                }
+            (state[0usize]).total_len = total_len1.wrapping_add(chunk_len as u64)
         }
         else
         {
             let diff: u32 = (block_len(i)).wrapping_sub(sz);
             let chunk1: (&mut [u8], &mut [u8]) = chunk.split_at_mut(0usize);
             let chunk2: (&mut [u8], &mut [u8]) = chunk1.1.split_at_mut(diff as usize);
-            let block_state1: hash_buf = state[0usize].block_state;
-            let buf: &mut [u8] = &mut state[0usize].buf;
-            let total_len1: u64 = state[0usize].total_len;
+            let buf: &mut [u8] = &mut (state[0usize]).buf;
+            let total_len1: u64 = (state[0usize]).total_len;
             let sz1: u32 =
                 if total_len1.wrapping_rem(block_len(i) as u64) == 0u64 && total_len1 > 0u64
                 { block_len(i) }
@@ -257,11 +244,9 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let buf2: (&mut [u8], &mut [u8]) = buf.split_at_mut(sz1 as usize);
             (buf2.1[0usize..diff as usize]).copy_from_slice(&chunk2.0[0usize..diff as usize]);
             let total_len2: u64 = total_len1.wrapping_add(diff as u64);
-            state[0usize] =
-                state_t { block_state: block_state1, buf: buf.to_vec(), total_len: total_len2 };
-            let block_state10: hash_buf = state[0usize].block_state;
-            let buf0: &mut [u8] = &mut state[0usize].buf;
-            let total_len10: u64 = state[0usize].total_len;
+            (state[0usize]).total_len = total_len2;
+            let buf0: &mut [u8] = &mut (state[0usize]).buf;
+            let total_len10: u64 = (state[0usize]).total_len;
             let sz10: u32 =
                 if total_len10.wrapping_rem(block_len(i) as u64) == 0u64 && total_len10 > 0u64
                 { block_len(i) }
@@ -269,8 +254,8 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
                 { total_len10.wrapping_rem(block_len(i) as u64) as u32 };
             if ! (sz10 == 0u32)
             {
-                let a1: crate::hacl::streaming_types::hash_alg = block_state10.fst;
-                let s1: &mut [u64] = &mut block_state10.snd;
+                let a1: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
+                let s1: &mut [u64] = &mut (*block_state).snd;
                 update_multi_sha3(a1, s1, buf0, (block_len(i)).wrapping_div(block_len(a1)))
             };
             let ite: u32 =
@@ -287,20 +272,15 @@ pub fn update(state: &mut [state_t], chunk: &mut [u8], chunk_len: u32) ->
             let data2_len: u32 = chunk_len.wrapping_sub(diff).wrapping_sub(data1_len);
             let data1: (&mut [u8], &mut [u8]) = chunk2.1.split_at_mut(0usize);
             let data2: (&mut [u8], &mut [u8]) = data1.1.split_at_mut(data1_len as usize);
-            let a1: crate::hacl::streaming_types::hash_alg = block_state10.fst;
-            let s1: &mut [u64] = &mut block_state10.snd;
+            let a1: crate::hacl::streaming_types::hash_alg = (*block_state).fst;
+            let s1: &mut [u64] = &mut (*block_state).snd;
             update_multi_sha3(a1, s1, data2.0, data1_len.wrapping_div(block_len(a1)));
             let dst: (&mut [u8], &mut [u8]) = buf0.split_at_mut(0usize);
             (dst.1[0usize..data2_len as usize]).copy_from_slice(
                 &data2.1[0usize..data2_len as usize]
             );
-            state[0usize] =
-                state_t
-                {
-                    block_state: block_state10,
-                    buf: buf0.to_vec(),
-                    total_len: total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64)
-                }
+            (state[0usize]).total_len =
+                total_len10.wrapping_add(chunk_len.wrapping_sub(diff) as u64)
         };
         crate::hacl::streaming_types::error_code::Success
     }
@@ -314,9 +294,9 @@ fn digest_(
 ) ->
     ()
 {
-    let block_state: hash_buf = state[0usize].block_state;
-    let buf_: &mut [u8] = &mut state[0usize].buf;
-    let total_len: u64 = state[0usize].total_len;
+    let mut block_state: &mut hash_buf = &mut (state[0usize]).block_state;
+    let buf_: &mut [u8] = &mut (state[0usize]).buf;
+    let total_len: u64 = (state[0usize]).total_len;
     let r: u32 =
         if total_len.wrapping_rem(block_len(a) as u64) == 0u64 && total_len > 0u64
         { block_len(a) }
@@ -324,10 +304,9 @@ fn digest_(
         { total_len.wrapping_rem(block_len(a) as u64) as u32 };
     let buf_1: (&mut [u8], &mut [u8]) = buf_.split_at_mut(0usize);
     let mut buf: [u64; 25] = [0u64; 25usize];
-    let tmp_block_state: hash_buf = hash_buf { fst: a, snd: Vec::from(buf) };
-    let scrut: hash_buf2 = hash_buf2 { fst: block_state, snd: tmp_block_state };
-    let s_dst: &mut [u64] = &mut scrut.snd.snd;
-    let s_src: &mut [u64] = &mut scrut.fst.snd;
+    let mut tmp_block_state: hash_buf = hash_buf { fst: a, snd: Vec::from(buf) };
+    let s_src: &mut [u64] = &mut (*block_state).snd;
+    let s_dst: &mut [u64] = &mut tmp_block_state.snd;
     (s_dst[0usize..25usize]).copy_from_slice(&s_src[0usize..25usize]);
     let buf_multi: (&mut [u8], &mut [u8]) = buf_1.1.split_at_mut(0usize);
     let ite: u32 =

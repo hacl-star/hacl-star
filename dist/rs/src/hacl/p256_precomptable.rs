@@ -2,6 +2,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
 #![allow(unused_assignments)]
+#![allow(unused_mut)]
+#![allow(unreachable_patterns)]
+#![allow(const_item_mutation)]
 
 pub const precomp_basepoint_table_w4: [u64; 192] =
     [0u64, 0u64, 0u64, 0u64, 1u64, 18446744069414584320u64, 18446744073709551615u64, 4294967294u64,
