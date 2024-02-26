@@ -67,17 +67,15 @@
         "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U8",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.Box.ecdh",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Box.secretkey", "equation_Spec.Box.size_secretkey",
-        "equation_Spec.Curve25519.one", "equation_Spec.Curve25519.scalar",
-        "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Salsa20.size_nonce",
-        "function_token_typing_Spec.Curve25519.scalar",
+        "equation_Spec.Curve25519.one", "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Salsa20.size_nonce", "equation_Spec.SecretBox.key",
+        "equation_Spec.SecretBox.size_key",
+        "function_token_typing_Spec.SecretBox.key",
         "lemma_FStar.Pervasives.invertOption",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -87,7 +85,7 @@
         "typing_Spec.Poly1305.size_block", "typing_Spec.Salsa20.size_nonce"
       ],
       0,
-      "dd496dd0b3d3ccdcd16c2de1f8e661b3"
+      "39c75c6e9763658638cc57caf40e59f3"
     ],
     [
       "Spec.Box.box_detached_afternm",
@@ -135,7 +133,7 @@
         "typing_Spec.Box.box_beforenm"
       ],
       0,
-      "20f1854cb9584efdac6eb385de5f54c7"
+      "f25ec91dfa07c64e72a42e842b7c4d8a"
     ],
     [
       "Spec.Box.box_detached",
@@ -195,7 +193,7 @@
         "typing_Spec.Box.box_beforenm"
       ],
       0,
-      "e7454bd3b476a818f33edab445b1603a"
+      "fe79a774f4cafc53dfd925d08e043b2f"
     ],
     [
       "Spec.Box.box_open_detached",
@@ -269,7 +267,7 @@
         "refinement_kinding_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a"
       ],
       0,
-      "d0e6c9beeb8395c900a5c19faff294d7"
+      "236763d66486b6c9fc5f2fe80b6afe5f"
     ],
     [
       "Spec.Box.box_easy",
