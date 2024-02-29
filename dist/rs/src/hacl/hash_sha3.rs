@@ -593,16 +593,15 @@ pub fn squeeze0(s: &mut [u64], rateInBytes: u32, outputByteLen: u32, output: &mu
 {
     let outBlocks: u32 = outputByteLen.wrapping_div(rateInBytes);
     let remOut: u32 = outputByteLen.wrapping_rem(rateInBytes);
+    let blocks: (&mut [u8], &mut [u8]) = output.split_at_mut(0usize);
     let last: (&mut [u8], &mut [u8]) =
-        output.split_at_mut(outputByteLen.wrapping_sub(remOut) as usize);
-    let blocks: (&mut [u8], &mut [u8]) =
-        last.1.split_at_mut(0usize - outputByteLen.wrapping_sub(remOut) as usize);
+        blocks.1.split_at_mut(outputByteLen.wrapping_sub(remOut) as usize);
     for i in 0u32..outBlocks
     {
-        storeState(rateInBytes, s, &mut blocks.1[i.wrapping_mul(rateInBytes) as usize..]);
+        storeState(rateInBytes, s, &mut last.0[i.wrapping_mul(rateInBytes) as usize..]);
         state_permute(s)
     };
-    storeState(remOut, s, blocks.0)
+    storeState(remOut, s, last.1)
 }
 
 pub fn keccak(
