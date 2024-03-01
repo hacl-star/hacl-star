@@ -2,6 +2,14 @@ use std::convert::TryInto;
 
 // Little Endian
 
+pub fn load16_le(bytes: &[u8]) -> u16 {
+    u16::from_le_bytes(bytes[0..2].try_into().unwrap())
+}
+
+pub fn store16_le(bytes: &mut[u8], x: u16) {
+    bytes[0..2].copy_from_slice(&u16::to_le_bytes(x))
+}
+
 pub fn load32_le(bytes: &[u8]) -> u32 {
     u32::from_le_bytes(bytes[0..4].try_into().unwrap())
 }

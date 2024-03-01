@@ -32,22 +32,22 @@ pub mod aead_chacha20poly1305;
 // pub mod chacha20_vec256;
 // pub mod aead_chacha20poly1305_simd256;
 pub mod ed25519_precomptable;
-// pub mod ed25519; // TODO: miscompilation with a wrong type
+// pub mod ed25519; // TODO: doesn't borrow-check, too many operations in place
 // pub mod nacl; // TODO: ownership issue, need to insert a copy
 pub mod p256_precomptable;
 // pub mod p256; // TODO: numerous in-place functions, need to reproduce the patterns of ed25519 and debug
 pub mod bignum_k256;
 pub mod k256_precomptable;
 // pub mod k256_ecdsa; // TODO: same as p256
-// pub mod frodo_kem; // TODO: missing hand-written functions + pretty-printing error
+// pub mod frodo_kem; // TODO: missing randomness implementation
 pub mod hpke_interface_hacl_impl_hpke_hacl_meta_hpke;
 pub mod rsapss;
 pub mod impl_ffdhe_constants;
-// pub mod ffdhe; // TODO: miscompilation
+pub mod ffdhe;
 // pub mod frodo640; // TODO: needs frodo_kem, above
 // pub mod hkdf; // TODO: needs hmac, above
 // pub mod hpke_curve51_cp128_sha512;
-// pub mod genericfield32; // TODO: in-place APIs, missing functions not even going through
+// pub mod genericfield32; // TODO: in-place APIs
 // pub mod sha2_vec256;
 // pub mod ec_k256;
 pub mod bignum4096;
@@ -67,7 +67,7 @@ pub mod bignum32;
 // pub mod hpke_curve64_cp128_sha256;
 pub mod bignum256_32;
 // pub mod sha2_vec128;
-// pub mod hpke_curve51_cp32_sha256; // TODO: needs hkdf
+// pub mod hpke_curve51_cp32_sha256; // TODO: needs HKDF, above
 // pub mod hpke_curve64_cp256_sha256;
 // pub mod hpke_curve51_cp32_sha512;
 // pub mod hpke_p256_cp256_sha256;
