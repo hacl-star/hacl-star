@@ -654,8 +654,8 @@ Hacl_Hash_SHA3_squeeze0(
 {
   uint32_t outBlocks = outputByteLen / rateInBytes;
   uint32_t remOut = outputByteLen % rateInBytes;
-  uint8_t *last = output + outputByteLen - remOut;
   uint8_t *blocks = output;
+  uint8_t *last = output + outputByteLen - remOut;
   for (uint32_t i = 0U; i < outBlocks; i++)
   {
     storeState(rateInBytes, s, blocks + i * rateInBytes);
