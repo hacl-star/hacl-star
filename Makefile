@@ -94,7 +94,7 @@ all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible \
   compile-portable-gcc-compatible dist/wasm/Makefile.basic \
-  obj/libhaclml.cmxa
+  obj/libhaclml.cmxa compile-rust
 
 # Mozilla does not want to run the configure script, so this means that the
 # build of Mozilla will break on platforms other than x86-64
@@ -894,7 +894,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) 
 	echo "F* version: $(shell cd $(FSTAR_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "KaRaMeL version: $(shell cd $(KRML_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
-	if [ "$*" == "wasm" ]; then touch $@; fi
+	touch $@ # target not created for wasm and rust... but still creating it to avoid spurious rebuilds
 
 # Auto-generates a single C test file. Note that this rule will trigger multiple
 # times, for multiple KaRaMeL invocations in the test/ directory -- this may
@@ -944,6 +944,9 @@ compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmlli
 	cp $< dist/$*/Makefile
 	(if [ -f dist/$*/libintvector.h ]; then cp dist/configure dist/$*/configure; fi;)
 	$(MAKE) -C dist/$*
+
+compile-rust: dist/rs/src/Makefile.basic
+	cd dist/rs && cargo build
 
 ###########################
 # C tests (from F* files) #
