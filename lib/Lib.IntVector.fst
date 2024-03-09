@@ -508,3 +508,26 @@ let vec_store_be #t #w b v =
   | U32,8 -> vec256_store32_be b v
   | U64,4 -> vec256_store64_be b v
   | U128,2 -> admit() //vec256_store_be b v
+
+(* Generic Permutations: Possible on Intel, but not on ARM.
+   So we comment this out and only leave interleaving and rotate_lanes functions in the API *)
+
+let vec_permute2 #t v i1 i2 =
+  match t with
+  | U64 -> vec128_shuffle64 v i1 i2
+  | U128 -> vec256_shuffle128 v i1 i2
+
+let vec_permute2_lemma #t v i1 i2 = ()
+
+let vec_permute4 #t v i1 i2 i3 i4 =
+  match t with
+  | U32 -> vec128_shuffle32 v i1 i2 i3 i4
+  | U64 -> vec256_shuffle64 v i1 i2 i3 i4
+
+let vec_permute4_lemma #t v i1 i2 i3 i4 = ()
+
+let vec_permute8 #t v i1 i2 i3 i4 i5 i6 i7 i8 = admit()
+let vec_permute16 #t = admit()
+let vec_permute32 #t = admit()
+
+let cast_lemma #t #w t' w' v = admit()
