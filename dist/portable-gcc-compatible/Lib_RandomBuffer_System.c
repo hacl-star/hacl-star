@@ -31,6 +31,7 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 bool read_random_bytes(uint32_t len, uint8_t *buf) {
