@@ -6,4 +6,8 @@ pub mod lib {
 }
 pub mod hacl;
 
-pub mod test;
+pub mod test {
+  pub mod chachapoly;
+  pub mod curve;
+  pub mod sha2;
+}
