@@ -2,6 +2,10 @@ module Hacl.Bignum256_32
 
 open FStar.Mul
 
+open FStar.HyperStack.ST
+open Lib.IntTypes
+open Lib.Buffer
+
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module AM = Hacl.Bignum.AlmostMontgomery
@@ -20,6 +24,17 @@ let sub: BN.bn_sub_eq_len_st t_limbs n_limbs =
 let add_mod: BN.bn_add_mod_n_st t_limbs n_limbs =
   BN.bn_add_mod_n n_limbs
 
+(* HACL-RS *)
+inline_for_extraction noextract
+let add_mod_a : BN.bn_add_mod_n_st t_limbs n_limbs =
+  fun n a b res -> push_frame ();
+  let a_copy = create n_limbs (uint #t_limbs #SEC 0) in
+  let b_copy = create n_limbs (uint #t_limbs #SEC 0) in
+  copy a_copy a;
+  copy b_copy b;
+  add_mod n a_copy b_copy res;
+  pop_frame ()
+
 let sub_mod: BN.bn_sub_mod_n_st t_limbs n_limbs =
   BN.bn_sub_mod_n n_limbs
 
@@ -35,7 +50,7 @@ instance bn_inst: BN.bn t_limbs = {
   BN.len = n_limbs;
   BN.add;
   BN.sub;
-  BN.add_mod_n = add_mod;
+  BN.add_mod_n = add_mod_a;
   BN.sub_mod_n = sub_mod;
   BN.mul;
   BN.sqr
@@ -109,7 +124,7 @@ instance almost_mont_inst: AM.almost_mont t_limbs = {
 let bn_slow_precomp : BR.bn_mod_slow_precomp_st t_limbs n_limbs =
   BR.bn_mod_slow_precomp almost_mont_inst
 
-let mod n a res =
+let mod_op n a res =
   BS.mk_bn_mod_slow_safe n_limbs (BR.mk_bn_mod_slow n_limbs precompr2 bn_slow_precomp) n a res
 
 let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =

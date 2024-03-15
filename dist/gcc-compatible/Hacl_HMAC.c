@@ -207,8 +207,8 @@ Hacl_HMAC_compute_sha2_256(
     0U,
     8U,
     1U,
-    uint32_t *os = st;
     uint32_t x = Hacl_Hash_SHA2_h256[i];
+    uint32_t *os = st;
     os[i] = x;);
   uint32_t *s = st;
   uint8_t *dst1 = ipad;
@@ -335,8 +335,8 @@ Hacl_HMAC_compute_sha2_384(
     0U,
     8U,
     1U,
-    uint64_t *os = st;
     uint64_t x = Hacl_Hash_SHA2_h384[i];
+    uint64_t *os = st;
     os[i] = x;);
   uint64_t *s = st;
   uint8_t *dst1 = ipad;
@@ -471,8 +471,8 @@ Hacl_HMAC_compute_sha2_512(
     0U,
     8U,
     1U,
-    uint64_t *os = st;
     uint64_t x = Hacl_Hash_SHA2_h512[i];
+    uint64_t *os = st;
     os[i] = x;);
   uint64_t *s = st;
   uint8_t *dst1 = ipad;

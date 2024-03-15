@@ -100,7 +100,7 @@ let encode_point #s o i =
   let tmp_w = create (2ul `FStar.UInt32.mul` ((nwide s) <: FStar.UInt32.t)) (wide_zero s) in
   let h0 = ST.get () in
   finv tmp z tmp_w;
-  fmul tmp tmp x tmp_w;
+  fmul_a tmp tmp x tmp_w;
   let h1 = ST.get () in
   assert (feval h1 tmp == S.fmul (S.fpow (feval h0 z) (pow2 255 - 21)) (feval h0 x));
   assert (feval h1 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));
@@ -277,10 +277,12 @@ val ladder0_:
       M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)))
 [@ Meta.Attribute.inline_ ]
 let ladder0_ #s k q p01_tmp1_swap tmp2 =
-  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
-  let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
-  let nq_p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
   let swap:lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *! nlimb s) 1ul in
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
+
+  (* HACL-RS: take sub from p01_tmp1 instead of p01_tmp1_swap *)
+  let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
+  let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
 
   assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
   assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
@@ -291,6 +293,10 @@ let ladder0_ #s k q p01_tmp1_swap tmp2 =
 
   // bit 255 is 0 and bit 254 is 1
   cswap2 #s (u64 1) nq nq_p1;
+
+  (* HACL-RS *)
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
+
   point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- u64 1;
 
@@ -298,6 +304,12 @@ let ladder0_ #s k q p01_tmp1_swap tmp2 =
   //First iteration can be skipped because top bit of scalar is 0
   ladder_step_loop #s k q p01_tmp1_swap tmp2;
   let sw = swap.(0ul) in
+
+  (* HACL-RS *)
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
+  let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
+  let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
+
   cswap2 #s sw nq nq_p1
 
 val ladder1_:
@@ -350,15 +362,15 @@ val ladder2_:
       fget_xz h1 nq == M.montgomery_ladder1_1 nq')))
 [@ Meta.Attribute.inline_ ]
 let ladder2_ #s k q p01_tmp1_swap tmp2 =
-  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
-  let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
-  let nq_p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
-  assert (gsub p01_tmp1_swap 0ul (8ul *! nlimb s) == p01_tmp1);
-  assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
-  assert (gsub p01_tmp1 0ul (2ul *! nlimb s) == nq);
-  assert (gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
-  assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
+  // let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
+  // let nq_p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
+  // assert (gsub p01_tmp1_swap 0ul (8ul *! nlimb s) == p01_tmp1);
+  // assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
+  // assert (gsub p01_tmp1 0ul (2ul *! nlimb s) == nq);
+  // assert (gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
+  // assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
   ladder0_ #s k q p01_tmp1_swap tmp2;
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
   ladder1_ #s p01_tmp1 tmp2
 
 inline_for_extraction noextract
@@ -459,6 +471,8 @@ let montgomery_ladder #s out key init =
   let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
   assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == p0);
   ladder4_ #s key init p01_tmp1_swap tmp2;
+
+  let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
   copy out p0;
   pop_frame ()
 #pop-options
@@ -475,8 +489,11 @@ val scalarmult: (#s: field_spec) -> scalarmult_st s True
 let scalarmult #s out priv pub =
   push_frame ();
   let init = create (2ul `FStar.UInt32.mul` ((nlimb s) <: FStar.UInt32.t)) (limb_zero s) in
+  let init_copy = create (2ul `FStar.UInt32.mul` ((nlimb s) <: FStar.UInt32.t)) (limb_zero s) in
   decode_point #s init pub;
-  montgomery_ladder #s init priv init;
+  copy init_copy init;
+  (* HACL-RS *)
+  montgomery_ladder #s init priv init_copy;
   encode_point #s out init;
   pop_frame()
 

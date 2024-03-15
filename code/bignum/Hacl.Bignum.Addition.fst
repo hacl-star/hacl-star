@@ -267,6 +267,19 @@ let bn_add_eq_len_u (#t:limb_t) (aLen:size_t) : bn_add_eq_len_st t aLen =
   | U32 -> bn_add_eq_len_u32 aLen
   | U64 -> bn_add_eq_len_u64 aLen
 
+(* HACL-RS *)
+inline_for_extraction noextract
+let bn_add_eq_len_u_a (#t:limb_t) (aLen:size_t{v aLen > 0}) : bn_add_eq_len_st t aLen =
+  fun a b res ->
+  push_frame ();
+  let a_copy = create aLen (uint #t 0) in
+  let b_copy = create aLen (uint #t 0) in
+  copy a_copy a;
+  copy b_copy b;
+  let r = bn_add_eq_len_u #t aLen a_copy b_copy res in
+  pop_frame ();
+  r
+
 
 inline_for_extraction noextract
 val bn_add:

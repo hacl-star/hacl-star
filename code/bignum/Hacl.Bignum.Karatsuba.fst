@@ -108,7 +108,7 @@ val bn_lshift_add_early_stop_in_place:
   -> b:lbignum t bLen
   -> i:size_t{v i + v bLen <= v aLen} ->
   Stack (carry t)
-  (requires fun h -> live h a /\ live h b /\ disjoint a b)
+  (requires fun h -> live h a /\ live h b /\ disjoint a b /\ v bLen > 0)
   (ensures  fun h0 c h1 -> modifies (loc a) h0 h1 /\
     (c, as_seq h1 a) == K.bn_lshift_add_early_stop (as_seq h0 a) (as_seq h0 b) (v i))
 
@@ -118,7 +118,7 @@ let bn_lshift_add_early_stop_in_place #t #aLen #bLen a b i =
   let c =
     update_sub_f_carry h0 a i bLen
     (fun h -> Hacl.Spec.Bignum.Addition.bn_add (as_seq h0 r) (as_seq h0 b))
-    (fun _ -> bn_add_eq_len_u bLen r b r) in
+    (fun _ -> bn_add_eq_len_u_a bLen r b r) in
   c
 
 
@@ -356,7 +356,7 @@ let bn_karatsuba_sqr_open #t (self: unit -> bn_karatsuba_sqr_st t) len a tmp res
     let tmp' = sub tmp len len2 in
     let c0 = bn_sign_abs a0 a1 tmp' t0 in
     LowStar.Ignore.ignore c0;
-    
+
     let t23 = sub tmp len len in
     let tmp1 = sub tmp (len +! len) (len +! len) in
     self () len2 t0 tmp1 t23;

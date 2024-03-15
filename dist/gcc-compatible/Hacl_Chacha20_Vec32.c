@@ -147,8 +147,8 @@ static inline void chacha20_core_32(uint32_t *k, uint32_t *ctx, uint32_t ctr)
     0U,
     16U,
     1U,
-    uint32_t *os = k;
     uint32_t x = k[i] + ctx[i];
+    uint32_t *os = k;
     os[i] = x;);
   k[12U] = k[12U] + cv;
 }
@@ -160,36 +160,38 @@ static inline void chacha20_init_32(uint32_t *ctx, uint8_t *k, uint8_t *n, uint3
     0U,
     4U,
     1U,
-    uint32_t *os = ctx1;
     uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
+    uint32_t *os = ctx1;
     os[i] = x;);
+  uint32_t *uu____0 = ctx1 + 4U;
   KRML_MAYBE_FOR8(i,
     0U,
     8U,
     1U,
-    uint32_t *os = ctx1 + 4U;
     uint8_t *bj = k + i * 4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
+    uint32_t *os = uu____0;
     os[i] = x;);
   ctx1[12U] = ctr;
+  uint32_t *uu____1 = ctx1 + 13U;
   KRML_MAYBE_FOR3(i,
     0U,
     3U,
     1U,
-    uint32_t *os = ctx1 + 13U;
     uint8_t *bj = n + i * 4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
+    uint32_t *os = uu____1;
     os[i] = x;);
   KRML_MAYBE_FOR16(i,
     0U,
     16U,
     1U,
-    uint32_t *os = ctx;
     uint32_t x = ctx1[i];
+    uint32_t *os = ctx;
     os[i] = x;);
   uint32_t ctr1 = 0U;
   uint32_t c12 = ctx[12U];

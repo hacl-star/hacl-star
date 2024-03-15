@@ -215,11 +215,11 @@ void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input)
     0U,
     4U,
     1U,
-    uint64_t *os = u64s;
     uint8_t *bj = input + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = u64s;
     os[i] = x;);
   uint64_t u64s3 = u64s[3U];
   u64s[3U] = u64s3 & 0x7fffffffffffffffULL;
@@ -1246,11 +1246,11 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
     0U,
     4U,
     1U,
-    uint64_t *os = bscalar;
     uint8_t *bj = scalar + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = bscalar;
     os[i] = x;);
   uint64_t table[320U] = { 0U };
   uint64_t tmp[20U] = { 0U };
@@ -1258,6 +1258,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
   uint64_t *t1 = table + 20U;
   Hacl_Impl_Ed25519_PointConstants_make_point_inf(t0);
   memcpy(t1, q, 20U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table);
   KRML_MAYBE_FOR7(i,
     0U,
     7U,
@@ -1284,8 +1285,8 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *out, uint8_t *scalar, uint64_t
       const uint64_t *res_j = table + (i1 + 1U) * 20U;
       for (uint32_t i = 0U; i < 20U; i++)
       {
-        uint64_t *os = tmp0;
         uint64_t x = (c & res_j[i]) | (~c & tmp0[i]);
+        uint64_t *os = tmp0;
         os[i] = x;
       });
     Hacl_Impl_Ed25519_PointAdd_point_add(out, out, tmp0);
@@ -1303,8 +1304,8 @@ static inline void precomp_get_consttime(const uint64_t *table, uint64_t bits_l,
     const uint64_t *res_j = table + (i0 + 1U) * 20U;
     for (uint32_t i = 0U; i < 20U; i++)
     {
-      uint64_t *os = tmp;
       uint64_t x = (c & res_j[i]) | (~c & tmp[i]);
+      uint64_t *os = tmp;
       os[i] = x;
     });
 }
@@ -1316,11 +1317,11 @@ static inline void point_mul_g(uint64_t *out, uint8_t *scalar)
     0U,
     4U,
     1U,
-    uint64_t *os = bscalar;
     uint8_t *bj = scalar + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = bscalar;
     os[i] = x;);
   uint64_t q1[20U] = { 0U };
   uint64_t *gx = q1;
@@ -1441,21 +1442,21 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
     0U,
     4U,
     1U,
-    uint64_t *os = bscalar1;
     uint8_t *bj = scalar1 + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = bscalar1;
     os[i] = x;);
   KRML_MAYBE_FOR4(i,
     0U,
     4U,
     1U,
-    uint64_t *os = bscalar2;
     uint8_t *bj = scalar2 + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
+    uint64_t *os = bscalar2;
     os[i] = x;);
   uint64_t table2[640U] = { 0U };
   uint64_t tmp1[20U] = { 0U };
@@ -1463,6 +1464,7 @@ point_mul_g_double_vartime(uint64_t *out, uint8_t *scalar1, uint8_t *scalar2, ui
   uint64_t *t1 = table2 + 20U;
   Hacl_Impl_Ed25519_PointConstants_make_point_inf(t0);
   memcpy(t1, q2, 20U * sizeof (uint64_t));
+  KRML_MAYBE_UNUSED_VAR(table2);
   KRML_MAYBE_FOR15(i,
     0U,
     15U,

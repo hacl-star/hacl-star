@@ -60,7 +60,7 @@ print_test(int in_len,
 }
 
 int
-main()
+main(int argc, char *argv[])
 {
   EverCrypt_AutoConfig2_init();
 
@@ -76,6 +76,10 @@ main()
                      vectors[i].tag,
                      vectors[i].cipher);
   }
+
+  /* Short test for me (JP) while comparing traces with hacl-rs */
+  if (argc >= 2)
+    return EXIT_SUCCESS;
 
   uint8_t plain[SIZE];
   uint8_t cipher[SIZE];

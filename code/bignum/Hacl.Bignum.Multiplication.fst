@@ -219,16 +219,16 @@ let bn_sqr #t aLen a res =
   loop1 h0 aLen res spec
   (fun j ->
     Loops.unfold_repeati (v aLen) (spec h0) (as_seq h0 res) (v j);
-    let ab = sub a 0ul j in
     let a_j = a.(j) in
+    let ab = sub a 0ul j in
     res.(j +! j) <- bn_mul1_lshift_add j ab a_j resLen j res
   );
 
-  let c0 = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res res res in
+  let c0 = Hacl.Bignum.Addition.bn_add_eq_len_u_a resLen res res res in
   LowStar.Ignore.ignore c0;
   let tmp = create resLen (uint #t 0) in
   bn_sqr_diag aLen a tmp;
-  let c1 = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res tmp res in
+  let c1 = Hacl.Bignum.Addition.bn_add_eq_len_u_a resLen res tmp res in
   LowStar.Ignore.ignore c1;
   pop_frame ()
 

@@ -492,10 +492,12 @@ let squeeze s rateInBytes outputByteLen output =
   let outBlocks = outputByteLen /. rateInBytes in
   let remOut = outputByteLen %. rateInBytes in
   assert_spinoff (v outputByteLen - v remOut == v outBlocks * v rateInBytes);
+  // HACL-RS: the indices for `sub output` are not comparable -- JP: not sure
+  // why the code was written this way honestly
+  let blocks = sub output (size 0) (outBlocks *! rateInBytes) in
   let last = sub output (outputByteLen -. remOut) remOut in
   [@ inline_let]
   let a_spec (i:nat{i <= v outputByteLen / v rateInBytes}) = S.state in
-  let blocks = sub output (size 0) (outBlocks *! rateInBytes) in
   let h0 = ST.get() in
   fill_blocks h0 rateInBytes outBlocks blocks a_spec
     (fun h i -> as_seq h s)
