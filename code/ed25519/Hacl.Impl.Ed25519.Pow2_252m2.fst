@@ -46,16 +46,16 @@ let crecip_1 out buf z =
   (**) CI.lemma_pow_one (F51.fevalh h0 z);
   (**) CI.lemma_pow_add (F51.fevalh h0 z) 8 1;
   fmul_sa a a b; // a == b * a == z ** 11
-  (**) CI.lemma_pow_add (F51.fevalh h0 z) 9 2;
+  (**) CI.lemma_pow_add (F51.fevalh h0 z) 2 9;
   fsquare_times t0 a 1ul; // t0 == a ** 2 == z ** 22
   (**) CI.lemma_pow_mul (F51.fevalh h0 z) 11 2;
   fmul_sa b b t0; // b == z ** 31
-  (**) CI.lemma_pow_add (F51.fevalh h0 z) 22 9;
+  (**) CI.lemma_pow_add (F51.fevalh h0 z) 9 22;
   fsquare_times t0 b 5ul; // t0 == b ** (2 ** 5) == z ** 992
   (**) assert_norm (pow2 5 == 32);
   (**) CI.lemma_pow_mul (F51.fevalh h0 z) 31 32;
   fmul_sa b b t0; // b == t0 * b == z ** 1023
-  (**) CI.lemma_pow_add (F51.fevalh h0 z) 992 31;
+  (**) CI.lemma_pow_add (F51.fevalh h0 z) 31 992;
   fsquare_times t0 b 10ul; // t0 = b ** (2 ** 1024) == z ** 1047552
   (**) assert_norm (pow2 10 == 1024);
   (**) CI.lemma_pow_mul (F51.fevalh h0 z) 1023 1024;
@@ -68,8 +68,8 @@ let crecip_1 out buf z =
   (**) CI.lemma_pow_add (F51.fevalh h0 z) 1099510579200 1048575;
   fsquare_times_inplace t0 10ul; // t0 == z ** 1125899906841600
   (**) CI.lemma_pow_mul (F51.fevalh h0 z) 1099511627775 1024;
-  fmul b t0 b; // b == z ** 1125899906842623
-  (**) CI.lemma_pow_add (F51.fevalh h0 z) 1125899906841600 1023;
+  fmul_sa b b t0; // b == z ** 1125899906842623
+  (**) CI.lemma_pow_add (F51.fevalh h0 z) 1023 1125899906841600;
   fsquare_times t0 b 50ul; // t0 == z ** 1267650600228228275596796362752;
   (**) assert_norm (pow2 50 = 1125899906842624);
   (**) CI.lemma_pow_mul (F51.fevalh h0 z) 1125899906842623 1125899906842624
