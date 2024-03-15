@@ -47,7 +47,7 @@ let point_double_step_1 p tmp =
   fdifference tmp4 tmp1 tmp2; // tmp4 = tmp1 - tmp2 = g
 
   fsquare tmp1 z1;            // tmp1 = z1 * z1
-  times_2 tmp1 tmp1           // tmp1 = 2 * tmp1 = c
+  times_2_sa tmp1 tmp1           // tmp1 = 2 * tmp1 = c
 
 
 inline_for_extraction noextract
@@ -83,13 +83,13 @@ let point_double_step_2 p tmp =
   let y1 = gety p in
 
   fsum tmp2 x1 y1;            // tmp2 = x1 + y1
-  fsquare tmp2 tmp2;          // tmp2 = (x1 + y1) ** 2
+  fsquare_sa tmp2 tmp2;          // tmp2 = (x1 + y1) ** 2
   reduce_513 tmp3;
-  fdifference tmp2 tmp3 tmp2; // tmp2 = tmp3 - tmp2 = h - (x1 + y1) ** 2 = e
+  fdifference_sa2 tmp2 tmp3 tmp2; // tmp2 = tmp3 - tmp2 = h - (x1 + y1) ** 2 = e
 
   reduce_513 tmp1;
   reduce_513 tmp4;
-  fsum tmp1 tmp1 tmp4        // tmp1 = c + g = tmp1 + tmp4 = f
+  fsum_sa tmp1 tmp1 tmp4        // tmp1 = c + g = tmp1 + tmp4 = f
 
 
 inline_for_extraction noextract
