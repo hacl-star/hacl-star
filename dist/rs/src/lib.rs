@@ -10,5 +10,6 @@ pub mod test {
   pub mod chacha20;
   pub mod chachapoly;
   pub mod curve;
+  pub mod poly1305;
   pub mod sha2;
 }
