@@ -63,11 +63,30 @@ let make_one b =
 let fsum out a b =
   BN.fadd out a b
 
+let fsum_sa out a b =
+  push_frame ();
+  let a_copy = create 5ul (u64 0) in
+  copy a_copy a;
+  fsum out a_copy b;
+  pop_frame()
 
 [@CInline]
 let fdifference out a b =
   BN.fsub out a b
 
+let fdifference_sa1 out a b =
+  push_frame ();
+  let a_copy = create 5ul (u64 0) in
+  copy a_copy a;
+  fdifference out a_copy b;
+  pop_frame()
+
+let fdifference_sa2 out a b =
+  push_frame ();
+  let b_copy = create 5ul (u64 0) in
+  copy b_copy b;
+  fdifference out a b_copy;
+  pop_frame()
 
 inline_for_extraction noextract
 val carry51:
@@ -121,6 +140,12 @@ let fmul output input input2 =
   BN.fmul output input input2 tmp;
   pop_frame()
 
+let fmul_sa output input input2 =
+  push_frame();
+  let inp_copy = create 5ul (u64 0) in
+  copy inp_copy input;
+  fmul output inp_copy input2;
+  pop_frame()
 
 [@CInline]
 let times_2 out a =
@@ -175,6 +200,12 @@ let times_2 out a =
     F51.fevalh h1 out;
   }
 
+let times_2_sa out a =
+  push_frame();
+  let a_copy = create 5ul (u64 0) in
+  copy a_copy a;
+  times_2 out a;
+  pop_frame()
 
 [@CInline]
 let times_d out a =
@@ -216,6 +247,14 @@ let fsquare out a =
   pop_frame()
 
 
+let fsquare_sa out a =
+  push_frame();
+  let a_copy = create 5ul (u64 0) in
+  copy a_copy a;
+  fsquare out a;
+  pop_frame()
+
+
 [@CInline]
 let fsquare_times output input count =
   push_frame();
@@ -228,7 +267,10 @@ let fsquare_times output input count =
 let fsquare_times_inplace output count =
   push_frame();
   let tmp = create 5ul (u128 0) in
-  Hacl.Curve25519_51.fsquare_times output output tmp count;
+  // HACL-RS
+  let input = create 5ul (u64 0) in
+  copy input output;
+  Hacl.Curve25519_51.fsquare_times output input tmp count;
   pop_frame()
 
 
