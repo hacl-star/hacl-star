@@ -13,5 +13,6 @@ pub mod test {
   // FFDHE currently panicks with a substract with overflow in bignum
   // pub mod ffdhe;
   pub mod poly1305;
+  pub mod salsa20;
   pub mod sha2;
 }
