@@ -132,3 +132,20 @@ let point_double out p =
   let tmp = create 20ul (u64 0) in
   point_double_ out p tmp;
   pop_frame()
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val point_double_sa: out:point -> p:point -> Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ eq_or_disjoint out p /\
+    F51.point_inv_t h p)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.point_inv_t h1 out /\
+    F51.point_eval h1 out == Spec.Ed25519.point_double (F51.point_eval h0 p))
+
+let point_double_sa out p =
+  push_frame();
+  let p_copy = create 20ul (u64 0) in
+  copy p_copy p;
+  point_double out p_copy;
+  pop_frame()

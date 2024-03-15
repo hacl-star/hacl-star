@@ -160,5 +160,5 @@ let point_add_sa out p q =
   push_frame();
   let p_copy = create 20ul (u64 0) in
   copy p_copy p;
-  point_add out p q;
+  point_add out p_copy q;
   pop_frame()

@@ -51,7 +51,7 @@ val point_double : BE.lsqr_st U64 20ul 0ul mk_to_ed25519_comm_monoid
 let point_double ctx x xx =
   let h0 = ST.get () in
   Spec.Ed25519.Lemmas.to_aff_point_double_lemma (F51.refl_ext_point (as_seq h0 x));
-  Hacl.Impl.Ed25519.PointDouble.point_double xx x
+  Hacl.Impl.Ed25519.PointDouble.point_double_sa xx x
 
 
 inline_for_extraction noextract
