@@ -289,12 +289,18 @@ pub fn point_add(out: &mut [u64], p: &mut [u64], q: &mut [u64]) -> ()
     let z2: (&mut [u64], &mut [u64]) = y2.1.split_at_mut(5usize);
     let t2: (&mut [u64], &mut [u64]) = z2.1.split_at_mut(5usize);
     times_2d(tmp10.1, t1.1);
-    fmul(tmp10.1, tmp10.1, t2.1);
+    let mut inp_copy: [u64; 5] = [0u64; 5usize];
+    ((&mut inp_copy)[0usize..5usize]).copy_from_slice(&tmp10.1[0usize..5usize]);
+    fmul(tmp10.1, &mut inp_copy, t2.1);
     times_2(tmp20.1, t1.0);
-    fmul(tmp20.1, tmp20.1, t2.0);
+    let mut inp_copy0: [u64; 5] = [0u64; 5usize];
+    ((&mut inp_copy0)[0usize..5usize]).copy_from_slice(&tmp20.1[0usize..5usize]);
+    fmul(tmp20.1, &mut inp_copy0, t2.0);
     fdifference(tmp6.0, tmp5.0, tmp30.1);
     fdifference(tmp6.1, tmp20.1, tmp10.1);
-    fsum(tmp10.1, tmp20.1, tmp10.1);
+    let mut a_copy: [u64; 5] = [0u64; 5usize];
+    ((&mut a_copy)[0usize..5usize]).copy_from_slice(&tmp10.1[0usize..5usize]);
+    fsum(tmp10.1, &mut a_copy, tmp20.1);
     fsum(tmp20.1, tmp5.0, tmp30.1);
     let tmp_g: (&mut [u64], &mut [u64]) = tmp10.1.split_at_mut(0usize);
     let tmp_h: (&mut [u64], &mut [u64]) = tmp20.1.split_at_mut(0usize);
@@ -1328,6 +1334,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             (&mut table).split_at_mut(
                 2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize
             );
+        let mut p_copy: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy)[0usize..20usize]).copy_from_slice(&q[0usize..20usize]);
         point_add(&mut tmp, q, t2.1);
         ((&mut table)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
@@ -1359,6 +1367,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
                 os.1[i1 as usize] = x
             }
         };
+        let mut p_copy: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, out, &mut tmp0)
     }
 }
@@ -1451,6 +1461,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             bits_l,
             &mut tmp
         );
+        let mut p_copy: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, out, &mut tmp);
         let k0: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.0, k0, 4u32);
@@ -1459,6 +1471,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             bits_l0,
             &mut tmp
         );
+        let mut p_copy0: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy0)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, out, &mut tmp);
         let k1: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r3.0, k1, 4u32);
@@ -1467,6 +1481,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             bits_l1,
             &mut tmp
         );
+        let mut p_copy1: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy1)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, out, &mut tmp);
         let k2: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r2.0, k2, 4u32);
@@ -1475,6 +1491,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             bits_l2,
             &mut tmp
         );
+        let mut p_copy2: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy2)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, out, &mut tmp)
     };
     crate::lowstar::ignore::ignore::<&mut [u64]>(&mut q2);
@@ -1559,6 +1577,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             (&mut table2).split_at_mut(
                 2u32.wrapping_mul(i).wrapping_add(2u32).wrapping_mul(20u32) as usize
             );
+        let mut p_copy: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy)[0usize..20usize]).copy_from_slice(&q2[0usize..20usize]);
         point_add(&mut tmp1, q2, t2.1);
         ((&mut table2)[2u32.wrapping_mul(i).wrapping_add(3u32).wrapping_mul(20u32) as usize..2u32.wrapping_mul(
             i
@@ -1586,6 +1606,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let a_bits_l0: (&[u64], &[u64]) =
         (&mut table2).split_at(bits_l320.wrapping_mul(20u32) as usize);
     ((&mut tmp10)[0usize..20usize]).copy_from_slice(&a_bits_l0.1[0usize..20usize]);
+    let mut p_copy: [u64; 20] = [0u64; 20usize];
+    ((&mut p_copy)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
     point_add(out, out, &mut tmp10);
     let mut tmp11: [u64; 20] = [0u64; 20usize];
     for i1 in 0u32..51u32
@@ -1599,6 +1621,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
                 bits_l321.wrapping_mul(20u32) as usize - bits_l320.wrapping_mul(20u32) as usize
             );
         ((&mut tmp11)[0usize..20usize]).copy_from_slice(&a_bits_l1.1[0usize..20usize]);
+        let mut p_copy0: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy0)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, out, &mut tmp11);
         let k0: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
         let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, bscalar2.0, k0, 5u32);
@@ -1611,6 +1635,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
             as
             usize..];
         ((&mut tmp11)[0usize..20usize]).copy_from_slice(&a_bits_l2[0usize..20usize]);
+        let mut p_copy1: [u64; 20] = [0u64; 20usize];
+        ((&mut p_copy1)[0usize..20usize]).copy_from_slice(&out[0usize..20usize]);
         point_add(out, out, &mut tmp11)
     }
 }
