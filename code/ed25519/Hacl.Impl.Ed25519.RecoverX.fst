@@ -82,7 +82,7 @@ let mul_modp_sqrt_m1 x =
   let sqrt_m1 = create 5ul (u64 0) in
   make_u64_5 sqrt_m1 x0 x1 x2 x3 x4;
   assert_norm (S51.as_nat5 (x0, x1, x2, x3, x4) == SE.modp_sqrt_m1);
-  fmul x x sqrt_m1;
+  fmul_sa x x sqrt_m1;
   pop_frame()
 
 
