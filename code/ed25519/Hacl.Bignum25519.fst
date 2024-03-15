@@ -204,7 +204,7 @@ let times_2_sa out a =
   push_frame();
   let a_copy = create 5ul (u64 0) in
   copy a_copy a;
-  times_2 out a;
+  times_2 out a_copy;
   pop_frame()
 
 [@CInline]
@@ -251,7 +251,7 @@ let fsquare_sa out a =
   push_frame();
   let a_copy = create 5ul (u64 0) in
   copy a_copy a;
-  fsquare out a;
+  fsquare out a_copy;
   pop_frame()
 
 
