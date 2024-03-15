@@ -1,5 +1,5 @@
 [
-  "ìºB\u000fÝ\n\u000bñ»j–“W»òp",
+  "ðI\b¶Óæà·¡ÞZÖ-·ËW",
   [
     [
       "Hacl.Bignum25519.getx",
@@ -45,7 +45,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "1876af99002f09ad633105a223145638"
+      "f67a2cfce9cb10cec6b23cbe787d99b0"
     ],
     [
       "Hacl.Bignum25519.gety",
@@ -89,7 +89,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "59f61d0af6a382c355125d13782011bb"
+      "aa8a83cfebf4764612152dc0c73c10b2"
     ],
     [
       "Hacl.Bignum25519.getz",
@@ -133,7 +133,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "510feca8c28dfb7f3ed16e28f6692ccf"
+      "42e4dab92b0e1443d3cbea4be6b54bac"
     ],
     [
       "Hacl.Bignum25519.gett",
@@ -180,7 +180,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "33d3c287fe8d20fa648630a4977fa27a"
+      "0d638b11a2ecfbbf522c9342d59b7fc4"
     ],
     [
       "Hacl.Bignum25519.make_u64_10",
@@ -239,7 +239,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f5321b4d8b0edb7e63051e51891db6ba"
+      "1746ba4c2f93f3fc6007e11115c2b794"
     ],
     [
       "Hacl.Bignum25519.times_2",
@@ -255,7 +255,23 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8b3148bf3bcec3a30f823f155cd0a456"
+      "5123d7bfa03c6a9d0aea6efd97264224"
+    ],
+    [
+      "Hacl.Bignum25519.times_2_sa",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.Curve25519.prime", "int_typing",
+        "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "0bd3fe27d267702e75e6bd1e9bef606f"
     ],
     [
       "Hacl.Bignum25519.times_2d",
@@ -271,7 +287,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f3d8c7d227beeea0f5df283c6e19e874"
+      "6ddce1cfd30449809d1e8aab92316f2e"
     ],
     [
       "Hacl.Bignum25519.fsquare_times",
@@ -283,7 +299,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
       ],
       0,
-      "915b7ef0ae860f98a863da66496d1704"
+      "90dac704ab0909b51445cc9f2be49c70"
     ],
     [
       "Hacl.Bignum25519.fsquare_times_inplace",
@@ -295,7 +311,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
       ],
       0,
-      "e6b4b768e138fe40363f991fd3a4b3d4"
+      "50b2322401eada09c75a32d86284f9a1"
     ],
     [
       "Hacl.Bignum25519.inverse",
@@ -311,7 +327,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "fe9503d6cdf616002568600654578053"
+      "15a044cf277161eded8efc9c1c71ff5d"
     ],
     [
       "Hacl.Bignum25519.load_51",
@@ -320,7 +336,7 @@
       0,
       [ "@query" ],
       0,
-      "2ca029618e09ca9437e21515a522ecc3"
+      "df39dd38f6f958e5888431ee174d5eab"
     ],
     [
       "Hacl.Bignum25519.store_51",
@@ -360,7 +376,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "7b0695f4aabff01d8a9f19b7cb080461"
+      "1cc08a09c67d4401f2e9d86722da588c"
     ]
   ]
 ]

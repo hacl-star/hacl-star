@@ -143,3 +143,22 @@ let point_add out p q =
   let tmp = create 30ul (u64 0) in
   point_add_ out p q tmp;
   pop_frame()
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val point_add_sa: out:point -> p:point -> q:point -> Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ live h q /\
+    eq_or_disjoint p out /\ eq_or_disjoint q out /\
+    F51.point_inv_t h p /\ F51.point_inv_t h q)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.point_inv_t h1 out /\
+    F51.point_eval h1 out == Spec.Ed25519.point_add (F51.point_eval h0 p) (F51.point_eval h0 q))
+
+(* HACL-RS *)
+let point_add_sa out p q =
+  push_frame();
+  let p_copy = create 20ul (u64 0) in
+  copy p_copy p;
+  point_add out p q;
+  pop_frame()

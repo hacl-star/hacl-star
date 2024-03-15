@@ -36,6 +36,12 @@ let mul_modq out x y =
   barrett_reduction out tmp;
   pop_frame ()
 
+let mul_modq_sa out x y =
+  push_frame ();
+  let y_copy = create 5ul (u64 0) in
+  copy y_copy y;
+  mul_modq out x y_copy;
+  pop_frame()
 
 [@CInline]
 let add_modq out x y =
@@ -47,3 +53,10 @@ let add_modq out x y =
   out.(2ul) <- z2;
   out.(3ul) <- z3;
   out.(4ul) <- z4
+
+let add_modq_sa out x y =
+  push_frame ();
+  let y_copy = create 5ul (u64 0) in
+  copy y_copy y;
+  add_modq out x y_copy;
+  pop_frame()

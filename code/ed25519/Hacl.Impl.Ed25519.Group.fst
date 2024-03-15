@@ -43,7 +43,7 @@ let point_add ctx x y xy =
   let h0 = ST.get () in
   Spec.Ed25519.Lemmas.to_aff_point_add_lemma
     (F51.refl_ext_point (as_seq h0 x)) (F51.refl_ext_point (as_seq h0 y));
-  Hacl.Impl.Ed25519.PointAdd.point_add xy x y
+  Hacl.Impl.Ed25519.PointAdd.point_add_sa xy x y
 
 
 inline_for_extraction noextract

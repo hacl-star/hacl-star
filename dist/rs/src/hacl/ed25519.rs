@@ -110,7 +110,9 @@ pub fn reduce_513(a: &mut [u64]) -> ()
 {
     let mut tmp: [crate::fstar::uint128::uint128; 5] =
         [crate::fstar::uint128::uint64_to_uint128(0u64); 5usize];
-    crate::hacl::curve25519_51::fsquare_times(output, output, &mut tmp, count)
+    let mut input: [u64; 5] = [0u64; 5usize];
+    ((&mut input)[0usize..5usize]).copy_from_slice(&output[0usize..5usize]);
+    crate::hacl::curve25519_51::fsquare_times(output, &mut input, &mut tmp, count)
 }
 
 pub fn inverse(out: &mut [u64], a: &mut [u64]) -> ()
@@ -1856,8 +1858,12 @@ pub fn sign_expanded(
     sha512_modq_pre_pre2(&mut hq, ss.0, s.0, msg_len, msg);
     let mut aq: [u64; 5] = [0u64; 5usize];
     load_32_bytes(&mut aq, prefix.0);
-    mul_modq(&mut aq, &mut hq, &mut aq);
-    add_modq(&mut aq, &mut rq, &mut aq);
+    let mut y_copy: [u64; 5] = [0u64; 5usize];
+    ((&mut y_copy)[0usize..5usize]).copy_from_slice(&(&mut aq)[0usize..5usize]);
+    mul_modq(&mut aq, &mut hq, &mut y_copy);
+    let mut y_copy0: [u64; 5] = [0u64; 5usize];
+    ((&mut y_copy0)[0usize..5usize]).copy_from_slice(&(&mut aq)[0usize..5usize]);
+    add_modq(&mut aq, &mut rq, &mut y_copy0);
     store_56(ss.1, &mut aq)
 }
 
