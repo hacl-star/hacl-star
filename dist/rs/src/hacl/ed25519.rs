@@ -615,22 +615,22 @@ pub fn point_decompress(out: &mut [u64], s: &mut [u8]) -> bool
 pub fn point_compress(z: &mut [u8], p: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 15] = [0u64; 15usize];
-    let x: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(5usize);
+    let zinv: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
+    let x: (&mut [u64], &mut [u64]) = zinv.1.split_at_mut(5usize);
     let out: (&mut [u64], &mut [u64]) = x.1.split_at_mut(5usize);
-    let zinv1: (&mut [u64], &mut [u64]) = x.0.split_at_mut(0usize);
-    let x1: (&mut [u64], &mut [u64]) = out.0.split_at_mut(0usize);
-    let out1: (&mut [u64], &mut [u64]) = out.1.split_at_mut(0usize);
     let px: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
     let py: (&mut [u64], &mut [u64]) = px.1.split_at_mut(5usize);
     let pz: (&mut [u64], &mut [u64]) = py.1.split_at_mut(5usize);
-    inverse(zinv1.1, pz.1);
-    fmul(x1.1, py.0, zinv1.1);
-    reduce(x1.1);
-    fmul(out1.1, pz.0, zinv1.1);
-    reduce_513(out1.1);
-    let x0: u64 = x1.0[0usize];
-    let b: u64 = x0 & 1u64;
-    store_51(z, out1.0);
+    inverse(x.0, pz.1);
+    fmul(out.0, py.0, x.0);
+    reduce(out.0);
+    fmul(out.1, pz.0, x.0);
+    reduce_513(out.1);
+    let x0: (&mut [u64], &mut [u64]) = out.0.split_at_mut(0usize);
+    let out0: (&mut [u64], &mut [u64]) = out.1.split_at_mut(0usize);
+    let x00: u64 = x0.1[0usize];
+    let b: u64 = x00 & 1u64;
+    store_51(z, out0.1);
     let xbyte: u8 = b as u8;
     let o31: u8 = z[31usize];
     z[31usize] = o31.wrapping_add(xbyte.wrapping_shl(7u32))
@@ -1916,11 +1916,11 @@ pub fn secret_to_public(public_key: &mut [u8], private_key: &mut [u8]) -> ()
 
 pub fn expand_keys(expanded_keys: &mut [u8], private_key: &mut [u8]) -> ()
 {
-    let public_key: (&mut [u8], &mut [u8]) = expanded_keys.split_at_mut(0usize);
-    let s_prefix: (&mut [u8], &mut [u8]) = public_key.1.split_at_mut(32usize);
+    let s_prefix: (&mut [u8], &mut [u8]) = expanded_keys.split_at_mut(32usize);
+    secret_expand(s_prefix.1, private_key);
+    let public_key: (&mut [u8], &mut [u8]) = s_prefix.0.split_at_mut(0usize);
     let s: (&mut [u8], &mut [u8]) = s_prefix.1.split_at_mut(0usize);
-    secret_expand(s.0, private_key);
-    point_mul_g_compress(s_prefix.0, s.1)
+    point_mul_g_compress(public_key.1, s.1)
 }
 
 pub fn sign_expanded(
