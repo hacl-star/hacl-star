@@ -12,7 +12,7 @@ pub mod test {
   pub mod chacha20;
   pub mod chachapoly;
   pub mod curve;
-  // Ed25519 currently does not borrow-check
+  // Ed25519 currently panicks with an out of range slice in SHA2 
   // pub mod ed25519;
   // FFDHE currently panicks with a substract with overflow in bignum
   // pub mod ffdhe;

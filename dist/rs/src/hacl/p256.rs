@@ -1016,7 +1016,7 @@
 
 #[inline] fn precomp_get_consttime(table: &[u64], bits_l: u64, tmp: &mut [u64]) -> ()
 {
-    (tmp[0usize..12usize]).copy_from_slice(&(&mut table[0usize..])[0usize..12usize]);
+    (tmp[0usize..12usize]).copy_from_slice(&(&table[0usize..])[0usize..12usize]);
     for i in 0u32..15u32
     {
         let c: u64 = crate::fstar::uint64::eq_mask(bits_l, i.wrapping_add(1u32) as u64);
@@ -1145,8 +1145,7 @@
     let bits_c: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar1, i, 5u32);
     let bits_l32: u32 = bits_c as u32;
     let a_bits_l: &[u64] =
-        &mut
-        (&crate::hacl::p256_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(12u32)
+        &(&crate::hacl::p256_precomptable::precomp_basepoint_table_w5)[bits_l32.wrapping_mul(12u32)
         as
         usize..];
     (res[0usize..12usize]).copy_from_slice(&a_bits_l[0usize..12usize]);
@@ -1174,8 +1173,7 @@
         let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar1, k0, 5u32);
         let bits_l322: u32 = bits_l0 as u32;
         let a_bits_l2: &[u64] =
-            &mut
-            (&crate::hacl::p256_precomptable::precomp_basepoint_table_w5)[bits_l322.wrapping_mul(
+            &(&crate::hacl::p256_precomptable::precomp_basepoint_table_w5)[bits_l322.wrapping_mul(
                 12u32
             )
             as

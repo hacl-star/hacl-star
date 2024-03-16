@@ -32,7 +32,7 @@ pub mod aead_chacha20poly1305;
 // pub mod chacha20_vec256;
 // pub mod aead_chacha20poly1305_simd256;
 pub mod ed25519_precomptable;
-// pub mod ed25519; // TODO: doesn't borrow-check, too many operations in place
+pub mod ed25519;
 // pub mod nacl; // TODO: ownership issue, need to insert a copy
 pub mod p256_precomptable;
 // pub mod p256; // TODO: numerous in-place functions, need to reproduce the patterns of ed25519 and debug
