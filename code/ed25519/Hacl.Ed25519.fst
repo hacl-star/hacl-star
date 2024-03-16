@@ -39,10 +39,10 @@ let secret_to_public public_key private_key =
 
 
 let expand_keys expanded_keys private_key =
-  let public_key = sub expanded_keys 0ul 32ul in
   let s_prefix   = sub expanded_keys 32ul 64ul in
-  let s          = sub expanded_keys 32ul 32ul in
   secret_expand s_prefix private_key;
+  let public_key = sub expanded_keys 0ul 32ul in
+  let s          = sub expanded_keys 32ul 32ul in
   Hacl.Impl.Ed25519.Sign.point_mul_g_compress public_key s
 
 
