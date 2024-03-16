@@ -12,19 +12,12 @@ open Hacl.AES.Common
 open Hacl.AES.Generic.Lemmas
 open Hacl.AES.Round.Constant
 
-#set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 90"
-
-
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module Spec = Spec.AES
 module GF = Spec.GaloisField
 
-
-(* Parameters for AES-128 *)
-//noextract inline_for_extraction let nb =  4
-//noextract inline_for_extraction let nk =  4 // 4, 6, or 8 for 128/192/256
-//noextract inline_for_extraction let nr =  10 // 10, 12, or 14 for 128/192/256
+#set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 90"
 
 unfold type skey (v:Spec.variant) = lbuffer uint8 (size (normalize_term (Spec.key_size v)))
 
@@ -1274,25 +1267,6 @@ let aes_init_ #m #a ctx key nonce =
 
 (* BEGIN STANDARD PATTERN FOR AVOIDING INLINING *)
 inline_for_extraction noextract
-val aes128_bitslice_init:
-    ctx: aes_ctx M32 Spec.AES128
-  -> key: skey Spec.AES128
-  -> nonce: lbuffer uint8 12ul ->
-  Stack unit
-  (requires (fun h -> live h ctx /\ live h nonce /\ live h key /\ disjoint ctx key /\
-    as_seq h ctx == Seq.create (size_v (ctxlen M32 Spec.AES128)) (elem_zero M32)))
-  (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1 /\
-    (let n = LSeq.sub (as_seq h1 ctx) 0 (v (nlen M32)) in
-    let kex = LSeq.sub (as_seq h1 ctx)
-      (v (nlen M32)) ((Spec.num_rounds Spec.AES128+1) * v (klen M32)) in
-    let state = Spec.aes_ctr32_init_LE Spec.AES128
-      (as_seq h0 key) (as_seq h0 nonce) in
-    nonce_to_bytes M32 n == state.block /\
-    keyx_to_bytes M32 Spec.AES128 kex == state.key_ex)))
-
-let aes128_bitslice_init ctx key nonce = aes_init_ #M32 #Spec.AES128 ctx key nonce
-
-inline_for_extraction noextract
 val aes128_ni_init:
     ctx: aes_ctx MAES Spec.AES128
   -> key: skey Spec.AES128
@@ -1310,25 +1284,6 @@ val aes128_ni_init:
     keyx_to_bytes MAES Spec.AES128 kex == state.key_ex)))
 
 let aes128_ni_init ctx key nonce = aes_init_ #MAES #Spec.AES128 ctx key nonce
-
-inline_for_extraction noextract
-val aes256_bitslice_init:
-    ctx: aes_ctx M32 Spec.AES256
-  -> key: skey Spec.AES256
-  -> nonce: lbuffer uint8 12ul ->
-  Stack unit
-  (requires (fun h -> live h ctx /\ live h nonce /\ live h key /\ disjoint ctx key /\
-    as_seq h ctx == Seq.create (size_v (ctxlen M32 Spec.AES256)) (elem_zero M32)))
-  (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1 /\
-    (let n = LSeq.sub (as_seq h1 ctx) 0 (v (nlen M32)) in
-    let kex = LSeq.sub (as_seq h1 ctx)
-      (v (nlen M32)) ((Spec.num_rounds Spec.AES256+1) * v (klen M32)) in
-    let state = Spec.aes_ctr32_init_LE Spec.AES256
-      (as_seq h0 key) (as_seq h0 nonce) in
-    nonce_to_bytes M32 n == state.block /\
-    keyx_to_bytes M32 Spec.AES256 kex == state.key_ex)))
-
-let aes256_bitslice_init ctx key nonce = aes_init_ #M32 #Spec.AES256 ctx key nonce
 
 inline_for_extraction noextract
 val aes256_ni_init:
@@ -1371,8 +1326,6 @@ val aes_init:
 
 let aes_init #m #a ctx key nonce =
   match m,a with
-  | M32,Spec.AES128 -> aes128_bitslice_init ctx key nonce
-  | M32,Spec.AES256 -> aes256_bitslice_init ctx key nonce
   | MAES,Spec.AES128 -> aes128_ni_init ctx key nonce
   | MAES,Spec.AES256 -> aes256_ni_init ctx key nonce
 
@@ -1732,25 +1685,6 @@ let aes_ctr_ #m #a len out inp ctx counter =
 
 
 (* BEGIN STANDARD PATTERN FOR AVOIDING INLINING *)
-val aes128_ctr_bitslice:
-    len: size_t
-  -> out: lbuffer uint8 len
-  -> inp: lbuffer uint8 len
-  -> ctx: aes_ctx M32 Spec.AES128
-  -> counter: uint32
-  -> Stack unit
-  (requires (fun h -> live h out /\ live h inp /\ live h ctx /\
-    disjoint out inp /\ disjoint out ctx))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen M32))
-      ((Spec.num_rounds Spec.AES128+1) * v (klen M32)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen M32)) in
-    as_seq h1 out == Spec.aes_ctr32_encrypt_stream_LE Spec.AES128
-      (keyx_to_bytes M32 Spec.AES128 k) (nonce_to_bytes M32 n)
-      counter (as_seq h0 inp))))
-
-let aes128_ctr_bitslice len out inp ctx counter = aes_ctr_ #M32 #Spec.AES128 len out inp ctx counter
-
 inline_for_extraction noextract
 val aes128_ctr_ni:
     len: size_t
@@ -1771,7 +1705,6 @@ val aes128_ctr_ni:
 
 let aes128_ctr_ni len out inp ctx counter = aes_ctr_ #MAES #Spec.AES128 len out inp ctx counter 
 
-
 inline_for_extraction noextract
 val aes256_ctr_ni:
     len: size_t
@@ -1791,26 +1724,6 @@ val aes256_ctr_ni:
       counter (as_seq h0 inp))))
 
 let aes256_ctr_ni len out inp ctx counter = aes_ctr_ #MAES #Spec.AES256 len out inp ctx counter
-
-val aes256_ctr_bitslice:
-    len: size_t
-  -> out: lbuffer uint8 len
-  -> inp: lbuffer uint8 len
-  -> ctx: aes_ctx M32 Spec.AES256
-  -> counter: uint32
-  -> Stack unit
-  (requires (fun h -> live h out /\ live h inp /\ live h ctx /\
-    disjoint out inp /\ disjoint out ctx))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    (let k = LSeq.sub (as_seq h0 ctx) (v (nlen M32))
-      ((Spec.num_rounds Spec.AES256+1) * v (klen M32)) in
-    let n = LSeq.sub (as_seq h0 ctx) 0 (v (nlen M32)) in
-    as_seq h1 out == Spec.aes_ctr32_encrypt_stream_LE Spec.AES256
-      (keyx_to_bytes M32 Spec.AES256 k) (nonce_to_bytes M32 n)
-      counter (as_seq h0 inp))))
-
-let aes256_ctr_bitslice len out inp ctx counter = aes_ctr_ #M32 #Spec.AES256 len out inp ctx counter
-
 
 inline_for_extraction noextract
 val aes_ctr:
@@ -1834,8 +1747,6 @@ val aes_ctr:
 
 let aes_ctr #m #a len out inp ctx counter =
   match m,a with
-  | M32,Spec.AES128 -> aes128_ctr_bitslice len out inp ctx counter
-  | M32,Spec.AES256 -> aes256_ctr_bitslice len out inp ctx counter
   | MAES,Spec.AES128 -> aes128_ctr_ni len out inp ctx counter
   | MAES,Spec.AES256 -> aes256_ctr_ni len out inp ctx counter
 (* END INLINING PATTERN *)

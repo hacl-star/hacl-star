@@ -17,85 +17,71 @@ module LSeq = Lib.Sequence
 
 type m_spec =
   | MAES
-  | M32
 
 unfold noextract
 let stelem (m:m_spec) =
   match m with
   | MAES -> vec_t U128 1
-  | M32 -> uint64
 
 unfold noextract
 let stlen (m:m_spec) =
   match m with
   | MAES -> 4ul
-  | M32 -> 8ul
 
 unfold noextract
 let klen (m:m_spec) : n:size_t{v n <= 8} =
   match m with
   | MAES -> 1ul
-  | M32 -> 8ul
 
 unfold noextract
 let nlen (m:m_spec) =
   match m with
   | MAES -> 1ul
-  | M32 -> 8ul
 
 unfold noextract
 let blen (m:m_spec) =
   match m with
   | MAES -> 1ul
-  | M32 -> 2ul
 
 unfold noextract
 let elem_zero (m:m_spec) : stelem m =
   match m with
-  | M32 -> u64 0
   | MAES -> vec_zero U128 1
 
 unfold noextract
 let to_bytes (m:m_spec) (s:LSeq.lseq (stelem m) (v (blen m))) : LSeq.lseq uint8 16 =
   match m with
-  | M32 -> LSeq.create 16 (u8 0)
   | MAES -> uints_to_bytes_be (vec_v #U128 #1 (LSeq.index s 0))
 
 unfold noextract
 let state_to_bytes (m:m_spec) (s:LSeq.lseq (stelem m) (v (stlen m))) (i:size_nat{i < 4}) : LSeq.lseq uint8 16 =
   match m with
-  | M32 -> LSeq.create 16 (u8 0)
   | MAES -> uints_to_bytes_be (vec_v #U128 #1 (LSeq.index s i))
 
 unfold noextract
 let bytes_to_state (m:m_spec) (s0 s1 s2 s3:LSeq.lseq uint8 16) : LSeq.lseq (stelem m) (v (stlen m)) =
   match m with
-  | M32 -> LSeq.create 8 (u64 0)
   | MAES -> LSeq.create4 (vec_from_bytes_be U128 1 s0) (vec_from_bytes_be U128 1 s1)
       (vec_from_bytes_be U128 1 s2) (vec_from_bytes_be U128 1 s3)
 
 unfold noextract
 let key_to_bytes (m:m_spec) (s:LSeq.lseq (stelem m) (v (klen m))) : LSeq.lseq uint8 16 =
   match m with
-  | M32 -> LSeq.create 16 (u8 0)
   | MAES -> uints_to_bytes_be (vec_v #U128 #1 (LSeq.index s 0))
 
 unfold noextract
 let nonce_to_bytes (m:m_spec) (s:LSeq.lseq (stelem m) (v (nlen m))) : LSeq.lseq uint8 16 =
   match m with
-  | M32 -> LSeq.create 16 (u8 0)
   | MAES -> uints_to_bytes_be (vec_v #U128 #1 (LSeq.index s 0))
 
 unfold noextract
 let keys_to_bytes (m:m_spec) (a:Spec.AES.variant) (b:LSeq.lseq (stelem m) ((Spec.AES.num_rounds a-1) * v (klen m))) : LSeq.lseq uint8 ((Spec.AES.num_rounds a-1) * 16) =
   match m with
-  | M32 -> LSeq.create ((Spec.AES.num_rounds a-1) * 16) (u8 0)
   | MAES -> uints_to_bytes_be (LSeq.map (fun x -> LSeq.index (vec_v #U128 #1 x) 0) b)
 
 unfold noextract
 let keyx_to_bytes (m:m_spec) (a:Spec.AES.variant) (b:LSeq.lseq (stelem m) ((Spec.AES.num_rounds a+1) * v (klen m))) : LSeq.lseq uint8 ((Spec.AES.num_rounds a+1) * 16) =
   match m with
-  | M32 -> LSeq.create ((Spec.AES.num_rounds a+1) * 16) (u8 0)
   | MAES -> uints_to_bytes_be (LSeq.map (fun x -> LSeq.index (vec_v #U128 #1 x) 0) b)
 
 unfold noextract

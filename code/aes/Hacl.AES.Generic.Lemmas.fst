@@ -53,7 +53,6 @@ let key_to_bytes_ni_lemma m a b i =
 let key_to_bytes_lemma m a b i =
   match m with
   | MAES -> key_to_bytes_ni_lemma m a b i
-  | M32 -> (assume (sub (keys_to_bytes m a b) (i*16) 16 == key_to_bytes m (sub b (i*(v (klen m))) (v (klen m)))))
 
 val keyx_to_bytes_ni_lemma:
   m:m_spec{m == MAES}
@@ -84,7 +83,6 @@ let keyx_to_bytes_ni_lemma m a b i =
 let keyx_to_bytes_lemma m a b i =
   match m with
   | MAES -> keyx_to_bytes_ni_lemma m a b i
-  | M32 -> (assume (sub (keyx_to_bytes m a b) (i*16) 16 == key_to_bytes m (sub b (i*(v (klen m))) (v (klen m)))))
 
 let keys_to_bytes_lemma m a b =
   let b_s = sub b (v (klen m)) (v (klen m) * (num_rounds a-1)) in
@@ -142,7 +140,6 @@ let keyx_zero_ni_lemma m a b =
 let keyx_zero_lemma m a b =
   match m with
   | MAES -> keyx_zero_ni_lemma m a b
-  | M32 -> (assume (keyx_to_bytes m a b == create ((num_rounds a+1) * 16) (u8 0)))
 
 let u8_16_to_le_lemma x =
   eq_intro (Hacl.AES.Common.u8_16_to_le (Hacl.AES.Common.u8_16_to_le x)) x
