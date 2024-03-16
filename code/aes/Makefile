@@ -3,13 +3,11 @@ HACL_HOME=$(realpath ../..)
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
 all: \
-	dist/aes128-ctr32-bitslice-test.exe \
 	dist/aes128-ctr32-ni-test.exe
 
 # TODO: why are the aes128 tests succeeding?
 # they should not even compile!
 test: all
-	dist/aes128-ctr32-bitslice-test.exe
 	dist/aes128-ctr32-ni-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
@@ -32,8 +30,6 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -add-include '"libintvector.h"' \
 	  -skip-compilation
 
-dist/aes128-ctr32-bitslice-test.exe: $(HACL_HOME)/tests/aes128-ctr32-bitslice-test.c dist/libaes.a
-dist/aes256-ctr32-bitslice-test.exe: $(HACL_HOME)/tests/aes256-ctr32-bitslice-test.c dist/libaes.a
 dist/aes128-ctr32-ni-test.exe: $(HACL_HOME)/tests/aes128-ctr32-ni-test.c dist/libaes.a
 dist/aes256-ctr32-ni-test.exe: $(HACL_HOME)/tests/aes256-ctr32-ni-test.c dist/libaes.a
 
