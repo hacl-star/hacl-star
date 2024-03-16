@@ -1362,7 +1362,6 @@ val squeeze_nblocks_lemma_l:
 let squeeze_nblocks_lemma_l #a #m r outputByteLen s b l =
   lemma_generate_squeeze_inner_loop #a #m r outputByteLen outputByteLen s b l
 
-
 (* squeeze_last *)
 
 val squeeze_last_lemma_l:
@@ -1434,153 +1433,91 @@ let keccak_lemma_l #a #m rate inputByteLen input delimitedSuffix outputByteLen b
 (* shake128 *)
 
 val shake128_lemma_l:
-  inputByteLen:nat
-  -> input:seq uint8{length input == inputByteLen}
+  m:m_spec{is_supported m}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
   -> outputByteLen:size_nat
-  -> output:seq uint8{length output == outputByteLen} ->
+  -> output:multiseq (lanes m) outputByteLen
+  -> l:nat{l < lanes m} ->
   Lemma
-   (shake128 inputByteLen input outputByteLen output ==
-      Spec.shake128 inputByteLen input outputByteLen)
-
-let shake128_lemma_l inputByteLen input outputByteLen output =
-  keccak_lemma_l #Shake128 #M32 1344 inputByteLen (ntup1 input) (byte 0x1F) outputByteLen (ntup1 output) 0
-
-val shake128_4_lemma_l:
-  inputByteLen:nat
-  -> input:multiseq 4 inputByteLen
-  -> outputByteLen:size_nat
-  -> output:multiseq 4 outputByteLen
-  -> l:nat{l < 4} ->
-  Lemma
-   ((shake128_4 inputByteLen input outputByteLen output).(|l|) ==
+   ((shake128 m inputByteLen input outputByteLen output).(|l|) ==
       Spec.shake128 inputByteLen input.(|l|) outputByteLen)
 
-let shake128_4_lemma_l inputByteLen input outputByteLen output l =
-  keccak_lemma_l #Shake128 #M256 1344 inputByteLen input (byte 0x1F) outputByteLen output l
+let shake128_lemma_l m inputByteLen input outputByteLen output l =
+  keccak_lemma_l #Shake128 #m 1344 inputByteLen input (byte 0x1F) outputByteLen output l
 
 (* shake256 *)
 
 val shake256_lemma_l:
-  inputByteLen:nat
-  -> input:seq uint8{length input == inputByteLen}
+  m:m_spec{is_supported m}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
   -> outputByteLen:size_nat
-  -> output:seq uint8{length output == outputByteLen} ->
+  -> output:multiseq (lanes m) outputByteLen
+  -> l:nat{l < lanes m} ->
   Lemma
-   (shake256 inputByteLen input outputByteLen output ==
-      Spec.shake256 inputByteLen input outputByteLen)
-
-let shake256_lemma_l inputByteLen input outputByteLen output =
-  keccak_lemma_l #Shake256 #M32 1088 inputByteLen (ntup1 input) (byte 0x1F) outputByteLen (ntup1 output) 0
-
-val shake256_4_lemma_l:
-  inputByteLen:nat
-  -> input:multiseq 4 inputByteLen
-  -> outputByteLen:size_nat
-  -> output:multiseq 4 outputByteLen
-  -> l:nat{l < 4} ->
-  Lemma
-   ((shake256_4 inputByteLen input outputByteLen output).(|l|) ==
+   ((shake256 m inputByteLen input outputByteLen output).(|l|) ==
       Spec.shake256 inputByteLen input.(|l|) outputByteLen)
 
-let shake256_4_lemma_l inputByteLen input outputByteLen output l =
-  keccak_lemma_l #Shake256 #M256 1088 inputByteLen input (byte 0x1F) outputByteLen output l
+let shake256_lemma_l m inputByteLen input outputByteLen output l =
+  keccak_lemma_l #Shake256 #m 1088 inputByteLen input (byte 0x1F) outputByteLen output l
 
 (* sha3_224 *)
 
 val sha3_224_lemma_l:
-  inputByteLen:nat
-  -> input:seq uint8{length input == inputByteLen}
-  -> output:seq uint8{length output == 28} ->
+  m:m_spec{is_supported m}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
+  -> output:multiseq (lanes m) 28
+  -> l:nat{l < lanes m} ->
   Lemma
-   (sha3_224 inputByteLen input output ==
-      Spec.sha3_224 inputByteLen input)
-
-let sha3_224_lemma_l inputByteLen input output =
-  keccak_lemma_l #SHA3_224 #M32 1152 inputByteLen (ntup1 input) (byte 0x06) 28 (ntup1 output) 0
-
-val sha3_224_4_lemma_l:
-  inputByteLen:nat
-  -> input:multiseq 4 inputByteLen
-  -> output:multiseq 4 28
-  -> l:nat{l < 4} ->
-  Lemma
-   ((sha3_224_4 inputByteLen input output).(|l|) ==
+   ((sha3_224 m inputByteLen input output).(|l|) ==
       Spec.sha3_224 inputByteLen input.(|l|))
 
-let sha3_224_4_lemma_l inputByteLen input output l =
-  keccak_lemma_l #SHA3_224 #M256 1152 inputByteLen input (byte 0x06) 28 output l
+let sha3_224_lemma_l m inputByteLen input output l =
+  keccak_lemma_l #SHA3_224 #m 1152 inputByteLen input (byte 0x06) 28 output l
 
 (* sha3_256 *)
 
 val sha3_256_lemma_l:
-  inputByteLen:nat
-  -> input:seq uint8{length input == inputByteLen}
-  -> output:seq uint8{length output == 32} ->
+  m:m_spec{is_supported m}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
+  -> output:multiseq (lanes m) 32
+  -> l:nat{l < lanes m} ->
   Lemma
-   (sha3_256 inputByteLen input output ==
-      Spec.sha3_256 inputByteLen input)
-
-let sha3_256_lemma_l inputByteLen input output =
-  keccak_lemma_l #SHA3_256 #M32 1088 inputByteLen (ntup1 input) (byte 0x06) 32 (ntup1 output) 0
-
-val sha3_256_4_lemma_l:
-  inputByteLen:nat
-  -> input:multiseq 4 inputByteLen
-  -> output:multiseq 4 32
-  -> l:nat{l < 4} ->
-  Lemma
-   ((sha3_256_4 inputByteLen input output).(|l|) ==
+   ((sha3_256 m inputByteLen input output).(|l|) ==
       Spec.sha3_256 inputByteLen input.(|l|))
 
-let sha3_256_4_lemma_l inputByteLen input output l =
-  keccak_lemma_l #SHA3_256 #M256 1088 inputByteLen input (byte 0x06) 32 output l
+let sha3_256_lemma_l m inputByteLen input output l =
+  keccak_lemma_l #SHA3_256 #m 1088 inputByteLen input (byte 0x06) 32 output l
 
 (* sha3_384 *)
 
 val sha3_384_lemma_l:
-  inputByteLen:nat
-  -> input:seq uint8{length input == inputByteLen}
-  -> output:seq uint8{length output == 48} ->
+  m:m_spec{is_supported m}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
+  -> output:multiseq (lanes m) 48
+  -> l:nat{l < lanes m} ->
   Lemma
-   (sha3_384 inputByteLen input output ==
-      Spec.sha3_384 inputByteLen input)
-
-let sha3_384_lemma_l inputByteLen input output =
-  keccak_lemma_l #SHA3_384 #M32 832 inputByteLen (ntup1 input) (byte 0x06) 48 (ntup1 output) 0
-
-val sha3_384_4_lemma_l:
-  inputByteLen:nat
-  -> input:multiseq 4 inputByteLen
-  -> output:multiseq 4 48
-  -> l:nat{l < 4} ->
-  Lemma
-   ((sha3_384_4 inputByteLen input output).(|l|) ==
+   ((sha3_384 m inputByteLen input output).(|l|) ==
       Spec.sha3_384 inputByteLen input.(|l|))
 
-let sha3_384_4_lemma_l inputByteLen input output l =
-  keccak_lemma_l #SHA3_384 #M256 832 inputByteLen input (byte 0x06) 48 output l
+let sha3_384_lemma_l m inputByteLen input output l =
+  keccak_lemma_l #SHA3_384 #m 832 inputByteLen input (byte 0x06) 48 output l
 
 (* sha3_512 *)
 
 val sha3_512_lemma_l:
-  inputByteLen:nat
-  -> input:seq uint8{length input == inputByteLen}
-  -> output:seq uint8{length output == 64} ->
+  m:m_spec{is_supported m}
+  -> inputByteLen:nat
+  -> input:multiseq (lanes m) inputByteLen
+  -> output:multiseq (lanes m) 64
+  -> l:nat{l < lanes m} ->
   Lemma
-   (sha3_512 inputByteLen input output ==
-      Spec.sha3_512 inputByteLen input)
-
-let sha3_512_lemma_l inputByteLen input output =
-  keccak_lemma_l #SHA3_512 #M32 576 inputByteLen (ntup1 input) (byte 0x06) 64 (ntup1 output) 0
-
-val sha3_512_4_lemma_l:
-  inputByteLen:nat
-  -> input:multiseq 4 inputByteLen
-  -> output:multiseq 4 64
-  -> l:nat{l < 4} ->
-  Lemma
-   ((sha3_512_4 inputByteLen input output).(|l|) ==
+   ((sha3_512 m inputByteLen input output).(|l|) ==
       Spec.sha3_512 inputByteLen input.(|l|))
 
-let sha3_512_4_lemma_l inputByteLen input output l =
-  keccak_lemma_l #SHA3_512 #M256 576 inputByteLen input (byte 0x06) 64 output l
+let sha3_512_lemma_l m inputByteLen input output l =
+  keccak_lemma_l #SHA3_512 #m 576 inputByteLen input (byte 0x06) 64 output l

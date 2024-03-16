@@ -7,13 +7,17 @@ open FStar.Mul
 open LowStar.Buffer
 
 open Lib.IntTypes
+open Lib.IntVector
 open Lib.Buffer
 open Lib.ByteBuffer
+open Lib.NTuple
+open Lib.MultiBuffer
 
 open Spec.Hash.Definitions
 open Hacl.Spec.SHA3.Vec
 open Hacl.Spec.SHA3.Vec.Common
 open Hacl.Impl.SHA3.Vec
+open Hacl.Spec.SHA3.Equiv
 
 module S = Spec.SHA3
 module V = Hacl.Spec.SHA3.Vec
@@ -36,8 +40,11 @@ val shake128:
        as_seq h1 (output <: lbuffer uint8 outputByteLen) ==
        S.shake128 (v inputByteLen) (as_seq h0 (input <: lbuffer uint8 inputByteLen)) (v outputByteLen))
 let shake128 output outputByteLen input inputByteLen =
-  admit();
-  keccak #Shake128 #M32 1344ul (* 256ul *) inputByteLen input (byte 0x1F) outputByteLen output
+  let ib = ntup1 input in
+  let rb = ntup1 output in
+  let h0 = ST.get () in
+  keccak #Shake128 #M32 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  shake128_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0
 
 val shake256:
   output:buffer_t MUT uint8
@@ -52,8 +59,11 @@ val shake256:
        as_seq h1 (output <: lbuffer uint8 outputByteLen) ==
        S.shake256 (v inputByteLen) (as_seq h0 (input <: lbuffer uint8 inputByteLen)) (v outputByteLen))
 let shake256 output outputByteLen input inputByteLen =
-  admit();
-  keccak #Shake256 #M32 1088ul (* 512ul *) inputByteLen input (byte 0x1F) outputByteLen output
+  let ib = ntup1 input in
+  let rb = ntup1 output in
+  let h0 = ST.get () in
+  keccak #Shake256 #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  shake256_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0
 
 val sha3_224:
   output:lbuffer uint8 28ul
@@ -67,8 +77,11 @@ val sha3_224:
        as_seq h1 output ==
        S.sha3_224 (v inputByteLen) (as_seq h0 (input <: lbuffer uint8 inputByteLen)))
 let sha3_224 output input inputByteLen =
-  admit();
-  keccak #SHA3_224 #M32 1152ul (* 448ul *) inputByteLen input (byte 0x06) 28ul output
+  let ib = ntup1 input in
+  let rb = ntup1 output in
+  let h0 = ST.get () in
+  keccak #SHA3_224 #M32 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
+  sha3_224_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_256:
   output:lbuffer uint8 32ul
@@ -82,8 +95,11 @@ val sha3_256:
        as_seq h1 output ==
        S.sha3_256 (v inputByteLen) (as_seq h0 (input <: lbuffer uint8 inputByteLen)))
 let sha3_256 output input inputByteLen =
-  admit();
-  keccak #SHA3_256 #M32 1088ul (* 512ul *) inputByteLen input (byte 0x06) 32ul output
+  let ib = ntup1 input in
+  let rb = ntup1 output in
+  let h0 = ST.get () in
+  keccak #SHA3_256 #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
+  sha3_256_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_384:
   output:lbuffer uint8 48ul
@@ -97,8 +113,11 @@ val sha3_384:
        as_seq h1 output ==
        S.sha3_384 (v inputByteLen) (as_seq h0 (input <: lbuffer uint8 inputByteLen)))
 let sha3_384 output input inputByteLen =
-  admit();
-  keccak #SHA3_384 #M32 832ul (* 768ul *) inputByteLen input (byte 0x06) 48ul output
+  let ib = ntup1 input in
+  let rb = ntup1 output in
+  let h0 = ST.get () in
+  keccak #SHA3_384 #M32 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
+  sha3_384_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_512:
   output:lbuffer uint8 64ul
@@ -112,8 +131,11 @@ val sha3_512:
        as_seq h1 output ==
        S.sha3_512 (v inputByteLen) (as_seq h0 (input <: lbuffer uint8 inputByteLen)))
 let sha3_512 output input inputByteLen =
-  admit();
-  keccak #SHA3_512 #M32 576ul (* 1024ul *) inputByteLen input (byte 0x06) 64ul output
+  let ib = ntup1 input in
+  let rb = ntup1 output in
+  let h0 = ST.get () in
+  keccak #SHA3_512 #M32 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
+  sha3_512_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 [@@ Comment "Allocate state buffer of 200-bytes"]
 inline_for_extraction
@@ -143,10 +165,6 @@ val state_free:
 
 let state_free s =
   free s
-
-open Lib.NTuple
-open Lib.MultiBuffer
-open Lib.IntVector
 
 [@@ Comment "Absorb number of input blocks and write the output state
 

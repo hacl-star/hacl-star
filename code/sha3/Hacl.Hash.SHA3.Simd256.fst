@@ -7,6 +7,7 @@ open FStar.Mul
 open LowStar.Buffer
 
 open Lib.IntTypes
+open Lib.IntVector
 open Lib.NTuple
 open Lib.Buffer
 open Lib.ByteBuffer
@@ -16,6 +17,7 @@ open Spec.Hash.Definitions
 open Hacl.Spec.SHA3.Vec
 open Hacl.Spec.SHA3.Vec.Common
 open Hacl.Impl.SHA3.Vec
+open Hacl.Spec.SHA3.Equiv
 
 module S = Spec.SHA3
 module V = Hacl.Spec.SHA3.Vec
@@ -24,6 +26,14 @@ module B = LowStar.Buffer
 module M = LowStar.Modifies
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
+inline_for_extraction noextract
+let disjoint_in_out #len_in #len_out #a (b0 b1 b2 b3: lbuffer a len_in)
+    (b4 b5 b6 b7: lbuffer a len_out) =
+  disjoint b0 b4 /\ disjoint b0 b5 /\ disjoint b0 b6 /\ disjoint b0 b7 /\
+  disjoint b1 b4 /\ disjoint b1 b5 /\ disjoint b1 b6 /\ disjoint b1 b7 /\
+  disjoint b2 b4 /\ disjoint b2 b5 /\ disjoint b2 b6 /\ disjoint b2 b7 /\
+  disjoint b3 b4 /\ disjoint b3 b5 /\ disjoint b3 b6 /\ disjoint b3 b7
 
 inline_for_extraction noextract
 let same_as x = y:size_t { x == y }
@@ -45,7 +55,8 @@ val shake128:
      (requires fun h ->
        live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
-       internally_disjoint4 output0 output1 output2 output3)
+       internally_disjoint4 output0 output1 output2 output3 /\
+       disjoint_in_out input0 input1 input2 input3 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
        as_seq h1 output0 ==
@@ -58,10 +69,24 @@ val shake128:
         S.shake128 (v inputByteLen) (as_seq h0 input3) (v outputByteLen))
 let shake128 _ output0 output1 output2 output3 outputByteLen
       _ input0 input1 input2 input3 inputByteLen =
-  admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
-  keccak #Shake128 #M256 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb
+  let h0 = ST.get() in
+  assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  assert (disjoint_multi_multi ib rb);
+  loc_multi4 rb;
+  keccak #Shake128 #M256 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  let h1 = ST.get() in
+  shake128_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0;
+  shake128_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 1;
+  shake128_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 2;
+  shake128_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 3;
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 output1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 output2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 output3)
 
 val shake256:
   g_outputByteLen:Ghost.erased size_t
@@ -80,7 +105,8 @@ val shake256:
      (requires fun h ->
        live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
-       internally_disjoint4 output0 output1 output2 output3)
+       internally_disjoint4 output0 output1 output2 output3 /\
+       disjoint_in_out input0 input1 input2 input3 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
        as_seq h1 output0 ==
@@ -93,10 +119,24 @@ val shake256:
         S.shake256 (v inputByteLen) (as_seq h0 input3) (v outputByteLen))
 let shake256 _ output0 output1 output2 output3 outputByteLen
       _ input0 input1 input2 input3 inputByteLen =
-  admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
-  keccak #Shake256 #M256 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb
+  let h0 = ST.get() in
+  assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  assert (disjoint_multi_multi ib rb);
+  loc_multi4 rb;
+  keccak #Shake256 #M256 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  let h1 = ST.get() in
+  shake256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0;
+  shake256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 1;
+  shake256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 2;
+  shake256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 3;
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 output1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 output2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 output3)
 
 val sha3_224:
   output0:lbuffer uint8 28ul
@@ -113,7 +153,8 @@ val sha3_224:
      (requires fun h ->
        live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
-       internally_disjoint4 output0 output1 output2 output3)
+       internally_disjoint4 output0 output1 output2 output3 /\
+       disjoint_in_out input0 input1 input2 input3 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
        as_seq h1 output0 == S.sha3_224 (v inputByteLen) (as_seq h0 input0) /\
@@ -122,10 +163,24 @@ val sha3_224:
        as_seq h1 output3 == S.sha3_224 (v inputByteLen) (as_seq h0 input3))
 let sha3_224 output0 output1 output2 output3
         _ input0 input1 input2 input3 inputByteLen =
-  admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
-  keccak #SHA3_224 #M256 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb
+  let h0 = ST.get() in
+  assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  assert (disjoint_multi_multi ib rb);
+  loc_multi4 rb;
+  keccak #SHA3_224 #M256 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
+  let h1 = ST.get() in
+  sha3_224_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
+  sha3_224_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
+  sha3_224_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 2;
+  sha3_224_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 3;
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 output1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 output2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 output3)
 
 val sha3_256:
   output0:lbuffer uint8 32ul
@@ -142,7 +197,8 @@ val sha3_256:
      (requires fun h ->
        live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
-       internally_disjoint4 output0 output1 output2 output3)
+       internally_disjoint4 output0 output1 output2 output3 /\
+       disjoint_in_out input0 input1 input2 input3 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
        as_seq h1 output0 == S.sha3_256 (v inputByteLen) (as_seq h0 input0) /\
@@ -151,10 +207,24 @@ val sha3_256:
        as_seq h1 output3 == S.sha3_256 (v inputByteLen) (as_seq h0 input3))
 let sha3_256 output0 output1 output2 output3
         _ input0 input1 input2 input3 inputByteLen =
-  admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
-  keccak #SHA3_256 #M256 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb
+  let h0 = ST.get() in
+  assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  assert (disjoint_multi_multi ib rb);
+  loc_multi4 rb;
+  keccak #SHA3_256 #M256 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
+  let h1 = ST.get() in
+  sha3_256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
+  sha3_256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
+  sha3_256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 2;
+  sha3_256_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 3;
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 output1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 output2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 output3)
 
 val sha3_384:
   output0:lbuffer uint8 48ul
@@ -171,7 +241,8 @@ val sha3_384:
      (requires fun h ->
        live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
-       internally_disjoint4 output0 output1 output2 output3)
+       internally_disjoint4 output0 output1 output2 output3 /\
+       disjoint_in_out input0 input1 input2 input3 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
        as_seq h1 output0 == S.sha3_384 (v inputByteLen) (as_seq h0 input0) /\
@@ -180,10 +251,24 @@ val sha3_384:
        as_seq h1 output3 == S.sha3_384 (v inputByteLen) (as_seq h0 input3))
 let sha3_384 output0 output1 output2 output3
         _ input0 input1 input2 input3 inputByteLen =
-  admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
-  keccak #SHA3_384 #M256 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb
+  let h0 = ST.get() in
+  assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  assert (disjoint_multi_multi ib rb);
+  loc_multi4 rb;
+  keccak #SHA3_384 #M256 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
+  let h1 = ST.get() in
+  sha3_384_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
+  sha3_384_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
+  sha3_384_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 2;
+  sha3_384_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 3;
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 output1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 output2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 output3)
 
 val sha3_512:
   output0:lbuffer uint8 64ul
@@ -200,7 +285,8 @@ val sha3_512:
      (requires fun h ->
        live4 h input0 input1 input2 input3 /\
        live4 h output0 output1 output2 output3 /\
-       internally_disjoint4 output0 output1 output2 output3)
+       internally_disjoint4 output0 output1 output2 output3 /\
+       disjoint_in_out input0 input1 input2 input3 output0 output1 output2 output3)
      (ensures  fun h0 _ h1 ->
        modifies (loc output0 |+| loc output1 |+| loc output2 |+| loc output3) h0 h1 /\
        as_seq h1 output0 == S.sha3_512 (v inputByteLen) (as_seq h0 input0) /\
@@ -209,16 +295,30 @@ val sha3_512:
        as_seq h1 output3 == S.sha3_512 (v inputByteLen) (as_seq h0 input3))
 let sha3_512 output0 output1 output2 output3
         _ input0 input1 input2 input3 inputByteLen =
-  admit();
   let ib = ntup4 (input0,(input1,(input2,input3))) in
   let rb = ntup4 (output0,(output1,(output2,output3))) in
-  keccak #SHA3_512 #M256 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb
+  let h0 = ST.get() in
+  assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  assert (disjoint_multi_multi ib rb);
+  loc_multi4 rb;
+  keccak #SHA3_512 #M256 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
+  let h1 = ST.get() in
+  sha3_512_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0;
+  sha3_512_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 1;
+  sha3_512_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 2;
+  sha3_512_lemma_l M256 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 3;
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 output0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 output1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 output2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 output3)
 
 [@@ Comment "Allocate quadruple state buffer (200-bytes for each)"]
 inline_for_extraction
 val state_malloc:
     r:rid
-  -> ST.ST (s:buffer uint64 { length s = 100 })
+  -> ST.ST (s:buffer (vec_t U64 4) { length s = 25 })
   (requires (fun _ ->
     ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
@@ -229,11 +329,11 @@ val state_malloc:
     freeable s))
 
 let state_malloc r =
-  malloc r (u64 0) 100ul
+  malloc r (vec_zero U64 4) 25ul
 
 [@@ Comment "Free quadruple state buffer"]
 val state_free:
-    s:buffer uint64 { length s = 100 }
+    s:buffer (vec_t U64 4) { length s = 25 }
   -> ST.ST unit
   (requires fun h0 ->
     freeable s /\ live h0 s)
@@ -242,10 +342,6 @@ val state_free:
 
 let state_free s =
   free s
-
-open Lib.NTuple
-open Lib.MultiBuffer
-open Lib.IntVector
 
 [@@ Comment "Absorb number of blocks of 4 input buffers and write the output states
 

@@ -802,101 +802,57 @@ let keccak #a #m rate inputByteLen input delimitedSuffix outputByteLen b =
   squeeze #a #m s rateInBytes outputByteLen b
 
 let shake128
+  (m:m_spec{is_supported m})
   (inputByteLen:nat)
-  (input:seq uint8{length input == inputByteLen})
+  (input:multiseq (lanes m) inputByteLen)
   (outputByteLen:size_nat)
-  (output:seq uint8{length output == outputByteLen}) :
-  Tot (lbytes outputByteLen) =
+  (output:multiseq (lanes m) outputByteLen) :
+  Tot (multiseq (lanes m) outputByteLen) =
 
-  keccak #Shake128 #M32 1344 inputByteLen input (byte 0x1F) outputByteLen output
-
-let shake128_4
-  (inputByteLen:nat)
-  (input:multiseq 4 inputByteLen)
-  (outputByteLen:size_nat)
-  (output:multiseq 4 outputByteLen) :
-  Tot (multiseq 4 outputByteLen) =
-
-  keccak #Shake128 #M256 1344 inputByteLen input (byte 0x1F) outputByteLen output
+  keccak #Shake128 #m 1344 inputByteLen input (byte 0x1F) outputByteLen output
 
 let shake256
+  (m:m_spec{is_supported m})
   (inputByteLen:nat)
-  (input:seq uint8{length input == inputByteLen})
+  (input:multiseq (lanes m) inputByteLen)
   (outputByteLen:size_nat)
-  (output:seq uint8{length output == outputByteLen}) :
-  Tot (lbytes outputByteLen) =
+  (output:multiseq (lanes m) outputByteLen) :
+  Tot (multiseq (lanes m) outputByteLen) =
 
-  keccak #Shake256 #M32 1088 inputByteLen input (byte 0x1F) outputByteLen output
-
-let shake256_4
-  (inputByteLen:nat)
-  (input:multiseq 4 inputByteLen)
-  (outputByteLen:size_nat)
-  (output:multiseq 4 outputByteLen) :
-  Tot (multiseq 4 outputByteLen) =
-
-  keccak #Shake256 #M256 1088 inputByteLen input (byte 0x1F) outputByteLen output
+  keccak #Shake256 #m 1088 inputByteLen input (byte 0x1F) outputByteLen output
 
 let sha3_224
+  (m:m_spec{is_supported m})
   (inputByteLen:nat)
-  (input:seq uint8{length input == inputByteLen})
-  (output:seq uint8{length output == 28}) :
-  Tot (lbytes 28) =
+  (input:multiseq (lanes m) inputByteLen)
+  (output:multiseq (lanes m) 28) :
+  Tot (multiseq (lanes m) 28) =
 
-  keccak #SHA3_224 #M32 1152 inputByteLen input (byte 0x06) 28 output
-
-let sha3_224_4
-  (inputByteLen:nat)
-  (input:multiseq 4 inputByteLen)
-  (output:multiseq 4 28) :
-  Tot (multiseq 4 28) =
-
-  keccak #SHA3_224 #M256 1152 inputByteLen input (byte 0x06) 28 output
+  keccak #SHA3_224 #m 1152 inputByteLen input (byte 0x06) 28 output
 
 let sha3_256
+  (m:m_spec{is_supported m})
   (inputByteLen:nat)
-  (input:seq uint8{length input == inputByteLen})
-  (output:seq uint8{length output == 32}) :
-  Tot (lbytes 32) =
+  (input:multiseq (lanes m) inputByteLen)
+  (output:multiseq (lanes m) 32) :
+  Tot (multiseq (lanes m) 32) =
 
-  keccak #SHA3_256 #M32 1088 inputByteLen input (byte 0x06) 32 output
-
-let sha3_256_4
-  (inputByteLen:nat)
-  (input:multiseq 4 inputByteLen)
-  (output:multiseq 4 32) :
-  Tot (multiseq 4 32) =
-
-  keccak #SHA3_256 #M256 1088 inputByteLen input (byte 0x06) 32 output
+  keccak #SHA3_256 #m 1088 inputByteLen input (byte 0x06) 32 output
 
 let sha3_384
+  (m:m_spec{is_supported m})
   (inputByteLen:nat)
-  (input:seq uint8{length input == inputByteLen})
-  (output:seq uint8{length output == 48}) :
-  Tot (lbytes 48) =
+  (input:multiseq (lanes m) inputByteLen)
+  (output:multiseq (lanes m) 48) :
+  Tot (multiseq (lanes m) 48) =
 
-  keccak #SHA3_384 #M32 832 inputByteLen input (byte 0x06) 48 output
-
-let sha3_384_4
-  (inputByteLen:nat)
-  (input:multiseq 4 inputByteLen)
-  (output:multiseq 4 48) :
-  Tot (multiseq 4 48) =
-
-  keccak #SHA3_384 #M256 832 inputByteLen input (byte 0x06) 48 output
+  keccak #SHA3_384 #m 832 inputByteLen input (byte 0x06) 48 output
 
 let sha3_512
+  (m:m_spec{is_supported m})
   (inputByteLen:nat)
-  (input:seq uint8{length input == inputByteLen})
-  (output:seq uint8{length output == 64}) :
-  Tot (lbytes 64) =
+  (input:multiseq (lanes m) inputByteLen)
+  (output:multiseq (lanes m) 64) :
+  Tot (multiseq (lanes m) 64) =
 
-  keccak #SHA3_512 #M32 576 inputByteLen input (byte 0x06) 64 output
-
-let sha3_512_4
-  (inputByteLen:nat)
-  (input:multiseq 4 inputByteLen)
-  (output:multiseq 4 64) :
-  Tot (multiseq 4 64) =
-
-  keccak #SHA3_512 #M256 576 inputByteLen input (byte 0x06) 64 output
+  keccak #SHA3_512 #m 576 inputByteLen input (byte 0x06) 64 output

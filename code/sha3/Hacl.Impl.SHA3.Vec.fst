@@ -937,8 +937,14 @@ val absorb_last: #a:keccak_alg -> #m:m_spec{is_supported m}
   (ensures  fun h0 _ h1 -> modifies (loc s |+| loc_multi b) h0 h1 /\
     as_seq h1 s == V.absorb_last #a #m delimitedSuffix (v rateInBytes) (v rem) (as_seq_multi h0 b) (as_seq h0 s))
 
-#push-options "--z3rlimit 200"
 let absorb_last #a #m rateInBytes rem delimitedSuffix b s =
+  logand_spec delimitedSuffix (byte 0x80);
+  assert (v (delimitedSuffix &. byte 0x80) == UInt.logand #8 (v delimitedSuffix) 0x80);
+  eq_lemma (delimitedSuffix &. byte 0x80) (byte 0);
+  assert (((delimitedSuffix &. byte 0x80) =. byte 0) == (v (delimitedSuffix &. byte 0x80) = 0));
+  assert (v (rateInBytes -! 1ul) == v rateInBytes - 1);
+  eq_lemma rem (rateInBytes -! 1ul);
+  assert ((rem =. (rateInBytes -! 1ul)) == (v rem = v (rateInBytes -! 1ul)));
   load_last_block #m rateInBytes rem delimitedSuffix b;
   if (lanes m = 1) then loc_multi1 b else loc_multi4 b;
   let h0 = ST.get() in
@@ -948,7 +954,6 @@ let absorb_last #a #m rateInBytes rem delimitedSuffix b s =
   if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
        (rem =. (rateInBytes -! 1ul)) then state_permute m s;
   absorb_next #a #m rateInBytes s
-#pop-options
 
 inline_for_extraction noextract
 val absorb_inner: #a:keccak_alg -> #m:m_spec{is_supported m}
