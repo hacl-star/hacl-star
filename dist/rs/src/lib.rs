@@ -12,7 +12,7 @@ pub mod test {
   pub mod chacha20;
   pub mod chachapoly;
   pub mod curve;
-  // Ed25519 currently panicks with an out of range slice in SHA2 
+  // Ed25519 currently returns incorrect results due to the extraction of the streaming fonctor
   // pub mod ed25519;
   // FFDHE currently panicks with a substract with overflow in bignum
   // pub mod ffdhe;
