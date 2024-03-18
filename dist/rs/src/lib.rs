@@ -13,7 +13,7 @@ pub mod test {
   pub mod chachapoly;
   pub mod curve;
   // Ed25519 currently returns incorrect results due to the extraction of the streaming fonctor
-  // pub mod ed25519;
+  pub mod ed25519;
   // FFDHE currently panicks with a substract with overflow in bignum
   // pub mod ffdhe;
   pub mod poly1305;

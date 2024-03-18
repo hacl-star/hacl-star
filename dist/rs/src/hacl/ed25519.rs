@@ -1819,11 +1819,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
 {
     let mut buf: [u8; 128] = [0u8; 128usize];
     let mut block_state: [u64; 8] = [0u64; 8usize];
+    crate::hacl::hash_sha2::sha512_init(&mut block_state);
     let mut s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: Vec::from(block_state), buf: Vec::from(buf), total_len: 0u32 as u64 };
     let mut p: crate::hacl::streaming_types::state_64 = s;
-    crate::hacl::hash_sha2::sha512_init(&mut block_state);
     let st: &mut [crate::hacl::streaming_types::state_64] = &mut [p];
     let err0: crate::hacl::streaming_types::error_code =
         crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
@@ -1845,11 +1845,11 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
 {
     let mut buf: [u8; 128] = [0u8; 128usize];
     let mut block_state: [u64; 8] = [0u64; 8usize];
+    crate::hacl::hash_sha2::sha512_init(&mut block_state);
     let mut s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: Vec::from(block_state), buf: Vec::from(buf), total_len: 0u32 as u64 };
     let mut p: crate::hacl::streaming_types::state_64 = s;
-    crate::hacl::hash_sha2::sha512_init(&mut block_state);
     let st: &mut [crate::hacl::streaming_types::state_64] = &mut [p];
     let err0: crate::hacl::streaming_types::error_code =
         crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
