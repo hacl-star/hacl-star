@@ -483,7 +483,7 @@ let copy #index c i t t' state r =
   p
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 let alloca #index c i t t' k =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -506,15 +506,32 @@ let alloca #index c i t t' k =
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
   (**) c.key.frame_invariant B.loc_none k h1 h2;
 
+  c.init (G.hide i) k buf block_state;
+  (**) let h20 = ST.get () in
+  (**) B.loc_unused_in_not_unused_in_disjoint h20;
+  (**) assert (B.fresh_loc (c.state.footprint #i h20 block_state) h0 h20);
+  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h20);
+  (**) assert(0 % UInt32.v (Block?.block_len c i) = 0);
+  (**) c.update_multi_zero i (c.state.v i h20 block_state) 0;
+  (**) B.modifies_only_not_unused_in B.loc_none h0 h20;
+  (**) assert B.(modifies (c.state.footprint h2 block_state) h0 h20);
+  (**) c.key.frame_invariant (c.state.footprint #i h2 block_state) k h0 h20;
+  (**) assert (c.state.invariant h20 block_state);
+  // HACL-RS: reorder the operations to call init right after the creation of
+  // the block_state, and before the block_state is moved into the functor state
+  // (and thus not available anymore). This requires a slightly more subtle
+  // proof.
+  (**) assert (c.state.v i h20 block_state == c.init_s i (c.key.v i h20 k));
+
   let k': optional_key i c.km c.key =
     match c.km with
     | Runtime ->
         let k' = c.key.alloca i in
         (**) let h3 = ST.get () in
         (**) B.loc_unused_in_not_unused_in_disjoint h3;
-        (**) B.(modifies_only_not_unused_in loc_none h2 h3);
-        (**) c.key.frame_invariant B.loc_none k h2 h3;
-        (**) c.state.frame_invariant B.loc_none block_state h2 h3;
+        (**) B.(modifies_only_not_unused_in loc_none h20 h3);
+        (**) c.key.frame_invariant B.loc_none k h20 h3;
+        (**) c.state.frame_invariant B.loc_none block_state h20 h3;
         (**) assert (B.fresh_loc (c.key.footprint #i h3 k') h0 h3);
         (**) assert (c.key.invariant #i h3 k');
         (**) assert (c.key.invariant #i h3 k);
@@ -523,7 +540,7 @@ let alloca #index c i t t' k =
         (**) let h4 = ST.get () in
         (**) assert (B.fresh_loc (c.key.footprint #i h4 k') h0 h4);
         (**) B.loc_unused_in_not_unused_in_disjoint h4;
-        (**) B.(modifies_only_not_unused_in loc_none h2 h4);
+        (**) B.(modifies_only_not_unused_in loc_none h20 h4);
         (**) assert (c.key.invariant #i h4 k');
         (**) c.key.frame_invariant (c.key.footprint #i h3 k') k h3 h4;
         (**) c.state.frame_invariant (c.key.footprint #i h3 k') block_state h3 h4;
@@ -550,15 +567,6 @@ let alloca #index c i t t' k =
   (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h6);
   (**) assert (B.fresh_loc (footprint_s c i h6 s) h0 h6);
   (**) assert (optional_reveal h5 k' == optional_reveal h6 k');
-
-  c.init (G.hide i) k buf block_state;
-  (**) let h7 = ST.get () in
-  (**) assert (B.fresh_loc (c.state.footprint #i h7 block_state) h0 h7);
-  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h7);
-  (**) optional_frame (B.loc_union (c.state.footprint #i h7 block_state) (B.loc_buffer buf)) k' h6 h7;
-  (**) c.update_multi_zero i (c.state.v i h7 block_state) 0;
-  (**) B.modifies_only_not_unused_in B.loc_none h0 h7;
-  (**) assert (c.state.v i h7 block_state == c.init_s i (optional_reveal h6 k'));
 
   (**) let h8 = ST.get () in
   (**) assert (U64.v total_len <= U64.v (c.max_input_len i));
