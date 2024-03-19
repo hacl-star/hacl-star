@@ -318,7 +318,7 @@ pub fn test_blake2() {
   let mut comp = [0u8; expected2s4nk.len()];
   crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s4nk.len() as u32,
     &mut input2s4, input2s4.len() as u32, &mut empty_key, 0u32);
-  assert_eq!(comp, expected2s4);
+  assert_eq!(comp, expected2s4nk);
 
   let mut comp = [0u8; expected2s8nk.len()];
   crate::hacl::hash_blake2s::hash_with_key(&mut comp, expected2s8nk.len() as u32,
