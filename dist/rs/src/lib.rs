@@ -7,8 +7,8 @@ pub mod lib {
 pub mod hacl;
 
 pub mod test {
-  // Blake2 currently panicks with a substract with overflow
-  // pub mod blake2;
+  pub mod bignum4096;
+  pub mod blake2;
   pub mod chacha20;
   pub mod chachapoly;
   pub mod curve;
