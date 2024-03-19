@@ -1295,36 +1295,3 @@ pub fn test_ffdhe() {
   assert_eq!(ss1, ss2);
   assert_eq!(ss1, test8192_ss);
 }
- 
-/*
-static ffdhe_test_vector vectors[] = { { .alg = Spec_FFDHE_FFDHE2048,
-                                         .sk1 = test2048_sk1,
-                                         .pk1 = test2048_pk1,
-                                         .sk2 = test2048_sk2,
-                                         .pk2 = test2048_pk2,
-                                         .ss = test2048_ss },
-                                       { .alg = Spec_FFDHE_FFDHE3072,
-                                         .sk1 = test3072_sk1,
-                                         .pk1 = test3072_pk1,
-                                         .sk2 = test3072_sk2,
-                                         .pk2 = test3072_pk2,
-                                         .ss = test3072_ss },
-                                       { .alg = Spec_FFDHE_FFDHE4096,
-                                         .sk1 = test4096_sk1,
-                                         .pk1 = test4096_pk1,
-                                         .sk2 = test4096_sk2,
-                                         .pk2 = test4096_pk2,
-                                         .ss = test4096_ss },
-                                       { .alg = Spec_FFDHE_FFDHE6144,
-                                         .sk1 = test6144_sk1,
-                                         .pk1 = test6144_pk1,
-                                         .sk2 = test6144_sk2,
-                                         .pk2 = test6144_pk2,
-                                         .ss = test6144_ss },
-                                       { .alg = Spec_FFDHE_FFDHE8192,
-                                         .sk1 = test8192_sk1,
-                                         .pk1 = test8192_pk1,
-                                         .sk2 = test8192_sk2,
-                                         .pk2 = test8192_pk2,
-                                         .ss = test8192_ss } };
-*/
