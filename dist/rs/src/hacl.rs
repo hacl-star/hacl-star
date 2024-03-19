@@ -35,7 +35,7 @@ pub mod ed25519_precomptable;
 pub mod ed25519;
 // pub mod nacl; // TODO: ownership issue, need to insert a copy
 pub mod p256_precomptable;
-// pub mod p256; // TODO: numerous in-place functions, need to reproduce the patterns of ed25519 and debug
+pub mod p256;
 pub mod bignum_k256;
 pub mod k256_precomptable;
 // pub mod k256_ecdsa; // TODO: same as p256
