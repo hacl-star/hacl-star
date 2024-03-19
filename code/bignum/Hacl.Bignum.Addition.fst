@@ -342,3 +342,29 @@ let bn_add1 #t aLen a b1 res =
     LSeq.lemma_concat2 1 (LSeq.sub (as_seq h0 res) 0 1) (v rLen) (as_seq h res1) (as_seq h res);
     c1 end
   else c0
+
+inline_for_extraction noextract
+val bn_add1_eq:
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen}
+  -> b1:limb t
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h -> live h res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_add1 (as_seq h0 res) b1 in
+    c_out == c /\ as_seq h1 res == r))
+
+let bn_add1_eq #t aLen b1 res =
+  let c0 = addcarry_st (uint #t 0) res.(0ul) b1 (sub res 0ul 1ul) in
+  let h0 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 1) (LSeq.create 1 (LSeq.index (as_seq h0 res) 0));
+
+  if 1ul <. aLen then begin
+    [@inline_let] let rLen = aLen -! 1ul in
+    let res1 = sub res 1ul rLen in
+    let c1 = bn_add_carry rLen res1 c0 res1 in
+    let h = ST.get () in
+    LSeq.lemma_concat2 1 (LSeq.sub (as_seq h0 res) 0 1) (v rLen) (as_seq h res1) (as_seq h res);
+    c1 end
+  else c0

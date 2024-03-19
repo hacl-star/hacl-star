@@ -96,7 +96,7 @@ let bn_lshift_add_in_place #t #aLen a b1 i =
   let h0 = ST.get () in
   update_sub_f_carry h0 a i (aLen -! i)
   (fun h -> Hacl.Spec.Bignum.Addition.bn_add1 (as_seq h0 r) b1)
-  (fun _ -> bn_add1 (aLen -! i) r b1 r)
+  (fun _ -> bn_add1_eq (aLen -! i) b1 r)
 
 
 inline_for_extraction noextract
@@ -141,8 +141,10 @@ val bn_karatsuba_res:
 let bn_karatsuba_res #t #aLen r01 r23 c5 t45 res =
   let aLen2 = aLen /. 2ul in
   [@inline_let] let resLen = aLen +! aLen in
+  LowStar.Ignore.ignore res;
   let c6 = bn_lshift_add_early_stop_in_place res t45 aLen2 in
   let c7 = c5 +. c6 in
+  LowStar.Ignore.ignore res;
   let c8 = bn_lshift_add_in_place res c7 (aLen +! aLen2) in
   c8
 
@@ -244,6 +246,8 @@ let bn_karatsuba_mul_open #t (self: unit -> bn_karatsuba_mul_st t) len a b tmp r
     let r23 = sub res len len in
     self () len2 a0 b0 tmp1 r01;
     self () len2 a1 b1 tmp1 r23;
+    LowStar.Ignore.ignore res;
+    LowStar.Ignore.ignore tmp;
     let c = bn_karatsuba_last len c0 c1 tmp res in
     LowStar.Ignore.ignore c;
     () end
