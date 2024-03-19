@@ -343,8 +343,10 @@ let bn_add1 #t aLen a b1 res =
     c1 end
   else c0
 
+(* HACL-RS: Specific in-place version that only takes one argument when a == res.
+   Needed to avoid double sub on same index for a and res *)
 inline_for_extraction noextract
-val bn_add1_eq:
+val bn_add1_in_place:
     #t:limb_t
   -> aLen:size_t{0 < v aLen}
   -> b1:limb t
@@ -355,7 +357,7 @@ val bn_add1_eq:
     (let c, r = S.bn_add1 (as_seq h0 res) b1 in
     c_out == c /\ as_seq h1 res == r))
 
-let bn_add1_eq #t aLen b1 res =
+let bn_add1_in_place #t aLen b1 res =
   let c0 = addcarry_st (uint #t 0) res.(0ul) b1 (sub res 0ul 1ul) in
   let h0 = ST.get () in
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 1) (LSeq.create 1 (LSeq.index (as_seq h0 res) 0));
