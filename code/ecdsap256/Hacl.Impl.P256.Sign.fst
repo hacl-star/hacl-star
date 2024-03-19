@@ -39,7 +39,8 @@ let ecdsa_sign_r r k =
   let p = create_point () in
   point_mul_g p k; // p = [k]G
   to_aff_point_x r p;
-  qmod_short r r;
+  (* HACL-RS *)
+  qmod_short_sa r r;
   pop_frame ()
 
 

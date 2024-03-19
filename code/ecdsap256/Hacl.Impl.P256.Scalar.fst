@@ -108,6 +108,14 @@ let qmod_short res x =
   pop_frame ()
 
 
+let qmod_short_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qmod_short res x_copy;
+  pop_frame()
+
+
 [@CInline]
 let qadd res x y =
   let h0 = ST.get () in

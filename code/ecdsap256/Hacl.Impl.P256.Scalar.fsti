@@ -61,6 +61,15 @@ val qmod_short: res:felem -> x:felem -> Stack unit
     as_nat h1 res == as_nat h0 x % S.order)
 
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val qmod_short_sa: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == as_nat h0 x % S.order)
+
+
 val qadd: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h y /\ live h res /\
