@@ -51,7 +51,7 @@ let bn_is_lt_prime_mask4 f =
   push_frame ();
   let tmp = create_felem () in
   make_prime tmp;
-  let c = bn_sub4 tmp f tmp in
+  let c = bn_sub4_sa2 tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.prime else as_nat h0 f < S.prime);
   pop_frame ();
   u64 0 -. c
@@ -149,7 +149,7 @@ let fnegate_conditional_vartime f is_negate =
   let zero = create_felem () in
   if is_negate then begin
     let h0 = ST.get () in
-    fsub f zero f;
+    fsub_sa2 f zero f;
     let h1 = ST.get () in
     assert (as_nat h1 f == (0 - as_nat h0 f) % S.prime);
     Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
@@ -236,6 +236,13 @@ let from_mont res a =
   pop_frame ()
 
 
+let from_mont_sa res a =
+  push_frame();
+  let a_copy = create (size 4) (u64 0) in
+  copy a_copy a;
+  from_mont res a_copy;
+  pop_frame()
+
 [@CInline]
 let to_mont res a =
   push_frame ();
@@ -281,4 +288,4 @@ let fmul_by_b_coeff_sa res x =
 [@CInline]
 let fcube res x =
   fsqr res x;
-  fmul res res x
+  fmul_sa1 res res x

@@ -134,6 +134,25 @@ val bn_sub4: res:felem -> x:felem -> y:felem -> Stack uint64
     as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat h0 y /\
     (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val bn_sub4_sa1: res:felem -> x:felem -> y:felem -> Stack uint64
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res)
+  (ensures fun h0 c h1 -> modifies (loc res) h0 h1 /\ v c <= 1 /\
+    as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat h0 y /\
+    (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val bn_sub4_sa2: res:felem -> x:felem -> y:felem -> Stack uint64
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res)
+  (ensures fun h0 c h1 -> modifies (loc res) h0 h1 /\ v c <= 1 /\
+    as_nat h1 res - v c * pow2 256 == as_nat h0 x - as_nat h0 y /\
+    (if v c = 0 then as_nat h0 x >= as_nat h0 y else as_nat h0 x < as_nat h0 y))
 
 val bn_sub_mod4: res:felem -> n:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->

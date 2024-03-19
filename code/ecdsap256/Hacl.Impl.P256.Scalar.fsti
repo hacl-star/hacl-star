@@ -109,6 +109,15 @@ val from_qmont: res:felem -> x:felem -> Stack unit
     as_nat h1 res < S.order /\
     as_nat h1 res == qmont_as_nat h0 x)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val from_qmont_sa: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < S.order /\
+    as_nat h1 res == qmont_as_nat h0 x)
 
 val qmul: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->

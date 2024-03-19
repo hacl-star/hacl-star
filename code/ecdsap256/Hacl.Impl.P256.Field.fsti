@@ -198,6 +198,15 @@ val from_mont: res:felem -> x:felem -> Stack unit
     as_nat h1 res = (as_nat h0 x * SM.fmont_R_inv) % S.prime /\
     as_nat h1 res = fmont_as_nat h0 x)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val from_mont_sa: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ as_nat h x < S.prime)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * SM.fmont_R_inv) % S.prime /\
+    as_nat h1 res = fmont_as_nat h0 x)
+
 
 val to_mont: res:felem -> f:felem -> Stack unit
   (requires fun h ->

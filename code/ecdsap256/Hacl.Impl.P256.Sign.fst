@@ -71,7 +71,7 @@ let ecdsa_sign_s s k r d_a m =
   qmul s r d_a;  // s = r * d_a
   let h2 = ST.get () in
   assert (as_nat h2 s == (as_nat h0 r * as_nat h0 d_a * SM.qmont_R_inv) % S.order);
-  from_qmont m m;
+  from_qmont_sa m m;
   let h3 = ST.get () in
   assert (as_nat h3 m == as_nat h2 m * SM.qmont_R_inv % S.order);
   qadd_sa2 s m s;    // s = z + s

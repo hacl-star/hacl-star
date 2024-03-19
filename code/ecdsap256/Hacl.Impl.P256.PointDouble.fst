@@ -225,3 +225,10 @@ let point_double res p =
   let tmp = create 20ul (u64 0) in
   point_double_noalloc tmp res p;
   pop_frame ()
+
+let point_double_sa res p =
+  push_frame ();
+  let p_copy = create (size 12) (u64 0) in
+  copy p_copy p;
+  point_double res p_copy;
+  pop_frame ()

@@ -53,7 +53,7 @@ let point_add_1 t0 t1 t2 t3 t4 p q =
   fmul t2 z1 z2;
   fadd t3 x1 y1;
   fadd t4 x2 y2;
-  fmul t3 t3 t4;
+  fmul_sa1 t3 t3 t4;
   fadd t4 t0 t1
 
 

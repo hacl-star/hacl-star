@@ -43,7 +43,7 @@ let bn_is_lt_order_mask4 f =
   push_frame ();
   let tmp = create_felem () in
   make_order tmp;
-  let c = bn_sub4 tmp f tmp in
+  let c = bn_sub4_sa2 tmp f tmp in
   assert (if v c = 0 then as_nat h0 f >= S.order else as_nat h0 f < S.order);
   pop_frame ();
   u64 0 -. c
@@ -101,7 +101,7 @@ let qmod_short res x =
   let tmp = create_felem () in
   make_order tmp;
   let h0 = ST.get () in
-  let c = bn_sub4 tmp x tmp in
+  let c = bn_sub4_sa2 tmp x tmp in
   bn_cmovznz4 res c tmp x;
   BD.bn_eval_bound (as_seq h0 x) 4;
   qmod_short_lemma (as_nat h0 x);
@@ -176,6 +176,13 @@ let from_qmont res x =
   assert_norm (S.order < S.order * S.order);
   qmont_reduction res tmp;
   pop_frame ()
+
+let from_qmont_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  from_qmont res x_copy;
+  pop_frame()
 
 
 [@CInline]
