@@ -154,9 +154,13 @@ val blake2_mixing : #al:Spec.alg -> #m:m_spec -> wv:state_p al m -> x:row_p al m
 let blake2_mixing #al #m wv x y =
   let h0 = ST.get() in
   push_frame ();
+  [@inline_let]
   let a = 0ul in
+  [@inline_let]
   let b = 1ul in
+  [@inline_let]
   let c = 2ul in
+  [@inline_let]
   let d = 3ul in
   [@inline_let]
   let r0 = normalize_term (Lib.Sequence.index (Spec.rTable al) 0) in
