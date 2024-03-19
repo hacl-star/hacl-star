@@ -69,9 +69,9 @@ val point_double_2 (x3 y3 z3 t2:felem) : Stack unit
 let point_double_2 x3 y3 z3 t2 =
   fdouble_sa z3 z3;
   fmul_by_b_coeff y3 t2;
-  fsub y3 y3 z3;
+  fsub_sa1 y3 y3 z3;
   fdouble x3 y3;
-  fadd y3 x3 y3
+  fadd_sa2 y3 x3 y3
 
 
 inline_for_extraction noextract
@@ -100,11 +100,11 @@ val point_double_3 (x3 y3 t1 t2 t3:felem) : Stack unit
 
 let point_double_3 x3 y3 t1 t2 t3 =
   fsub x3 t1 y3;
-  fadd y3 t1 y3;
-  fmul y3 x3 y3;
-  fmul x3 x3 t3;
+  fadd_sa2 y3 t1 y3;
+  fmul_sa2 y3 x3 y3;
+  fmul_sa1 x3 x3 t3;
   fdouble t3 t2;
-  fadd t2 t2 t3
+  fadd_sa1 t2 t2 t3
 
 
 inline_for_extraction noextract
@@ -126,11 +126,11 @@ val point_double_4 (z3 t0 t2 t3:felem) : Stack unit
     fmont_as_nat h1 z3 == z3_s /\ fmont_as_nat h1 t3 == t3_s))
 
 let point_double_4 z3 t0 t2 t3 =
-  fmul_by_b_coeff z3 z3;
-  fsub z3 z3 t2;
-  fsub z3 z3 t0;
+  fmul_by_b_coeff_sa z3 z3;
+  fsub_sa1 z3 z3 t2;
+  fsub_sa1 z3 z3 t0;
   fdouble t3 z3;
-  fadd z3 z3 t3
+  fadd_sa1 z3 z3 t3
 
 
 inline_for_extraction noextract
@@ -155,10 +155,10 @@ val point_double_5 (y3 z3 t0 t2 t3:felem) : Stack unit
 
 let point_double_5 y3 z3 t0 t2 t3 =
   fdouble t3 t0;
-  fadd t0 t3 t0;
-  fsub t0 t0 t2;
-  fmul t0 t0 z3;
-  fadd y3 y3 t0
+  fadd_sa2 t0 t3 t0;
+  fsub_sa1 t0 t0 t2;
+  fmul_sa1 t0 t0 z3;
+  fadd_sa1 y3 y3 t0
 
 
 inline_for_extraction noextract
@@ -184,8 +184,8 @@ val point_double_6 (x3 z3 t0 t1 t4:felem) : Stack unit
 
 let point_double_6 x3 z3 t0 t1 t4 =
   fdouble t0 t4;
-  fmul z3 t0 z3;
-  fsub x3 x3 z3;
+  fmul_sa2 z3 t0 z3;
+  fsub_sa1 x3 x3 z3;
   fmul z3 t0 t1;
   fdouble_sa z3 z3;
   fdouble_sa z3 z3
