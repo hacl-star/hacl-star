@@ -19,6 +19,7 @@ pub mod test {
   // RSAPSS currently panicks with a substract with overflow in bignum
   // pub mod rsapss;
   pub mod salsa20;
+  pub mod sha1;
   pub mod sha2;
   pub mod sha3;
 }
