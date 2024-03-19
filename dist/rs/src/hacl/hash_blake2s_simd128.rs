@@ -157,22 +157,18 @@
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
             r3.1.split_at_mut(0usize);
-        let a: u32 = 0u32;
-        let b: u32 = 1u32;
-        let c: u32 = 2u32;
-        let d1: u32 = 3u32;
         let
         wv_a:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv3.0.split_at_mut(a.wrapping_mul(1u32) as usize);
+            wv3.0.split_at_mut(0usize);
         let
         wv_b:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a.1.split_at_mut(b.wrapping_mul(1u32) as usize - a.wrapping_mul(1u32) as usize);
+            wv_a.1.split_at_mut(1usize);
         wv_b.0[0usize] =
             crate::lib::intvector_intrinsics::vec128_add32(wv_b.0[0usize], wv_b.1[0usize]);
         wv_b.0[0usize] = crate::lib::intvector_intrinsics::vec128_add32(wv_b.0[0usize], x.1[0usize]);
@@ -181,131 +177,131 @@
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b.1.split_at_mut(d1.wrapping_mul(1u32) as usize - b.wrapping_mul(1u32) as usize);
+            wv3.1.split_at_mut(0usize);
         let
         wv_b0:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a0.1.split_at_mut(a.wrapping_mul(1u32) as usize - d1.wrapping_mul(1u32) as usize);
-        wv_b0.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b0.0[0usize], wv_b0.1[0usize]);
-        wv_b0.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b0.0[0usize], 16u32);
+            wv_b.0.split_at_mut(0usize);
+        wv_a0.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a0.1[0usize], wv_b0.1[0usize]);
+        wv_a0.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a0.1[0usize], 16u32);
         let
         wv_a1:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b0.1.split_at_mut(c.wrapping_mul(1u32) as usize - a.wrapping_mul(1u32) as usize);
+            wv_b.1.split_at_mut(1usize);
         let
         wv_b1:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a1.1.split_at_mut(d1.wrapping_mul(1u32) as usize - c.wrapping_mul(1u32) as usize);
-        wv_b1.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b1.0[0usize], wv_b1.1[0usize]);
+            wv_a0.1.split_at_mut(0usize);
+        wv_a1.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a1.1[0usize], wv_b1.1[0usize]);
         let
         wv_a2:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b1.1.split_at_mut(b.wrapping_mul(1u32) as usize - d1.wrapping_mul(1u32) as usize);
+            wv_a1.0.split_at_mut(0usize);
         let
         wv_b2:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a2.1.split_at_mut(c.wrapping_mul(1u32) as usize - b.wrapping_mul(1u32) as usize);
-        wv_b2.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b2.0[0usize], wv_b2.1[0usize]);
-        wv_b2.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b2.0[0usize], 12u32);
+            wv_a1.1.split_at_mut(0usize);
+        wv_a2.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a2.1[0usize], wv_b2.1[0usize]);
+        wv_a2.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a2.1[0usize], 12u32);
         let
         wv_a3:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b2.1.split_at_mut(a.wrapping_mul(1u32) as usize - c.wrapping_mul(1u32) as usize);
+            wv_b0.1.split_at_mut(0usize);
         let
         wv_b3:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a3.1.split_at_mut(b.wrapping_mul(1u32) as usize - a.wrapping_mul(1u32) as usize);
-        wv_b3.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b3.0[0usize], wv_b3.1[0usize]);
-        wv_b3.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b3.0[0usize], y.1[0usize]);
+            wv_a2.1.split_at_mut(0usize);
+        wv_a3.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a3.1[0usize], wv_b3.1[0usize]);
+        wv_a3.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a3.1[0usize], y.1[0usize]);
         let
         wv_a4:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b3.1.split_at_mut(d1.wrapping_mul(1u32) as usize - b.wrapping_mul(1u32) as usize);
+            wv_b1.1.split_at_mut(0usize);
         let
         wv_b4:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a4.1.split_at_mut(a.wrapping_mul(1u32) as usize - d1.wrapping_mul(1u32) as usize);
-        wv_b4.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b4.0[0usize], wv_b4.1[0usize]);
-        wv_b4.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b4.0[0usize], 8u32);
+            wv_a3.1.split_at_mut(0usize);
+        wv_a4.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a4.1[0usize], wv_b4.1[0usize]);
+        wv_a4.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a4.1[0usize], 8u32);
         let
         wv_a5:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b4.1.split_at_mut(c.wrapping_mul(1u32) as usize - a.wrapping_mul(1u32) as usize);
+            wv_b2.1.split_at_mut(0usize);
         let
         wv_b5:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a5.1.split_at_mut(d1.wrapping_mul(1u32) as usize - c.wrapping_mul(1u32) as usize);
-        wv_b5.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b5.0[0usize], wv_b5.1[0usize]);
+            wv_a4.1.split_at_mut(0usize);
+        wv_a5.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a5.1[0usize], wv_b5.1[0usize]);
         let
         wv_a6:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b5.1.split_at_mut(b.wrapping_mul(1u32) as usize - d1.wrapping_mul(1u32) as usize);
+            wv_b3.1.split_at_mut(0usize);
         let
         wv_b6:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a6.1.split_at_mut(c.wrapping_mul(1u32) as usize - b.wrapping_mul(1u32) as usize);
-        wv_b6.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b6.0[0usize], wv_b6.1[0usize]);
-        wv_b6.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b6.0[0usize], 7u32);
+            wv_a5.1.split_at_mut(0usize);
+        wv_a6.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a6.1[0usize], wv_b6.1[0usize]);
+        wv_a6.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a6.1[0usize], 7u32);
         let
         r10:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b6.1.split_at_mut(1usize - c.wrapping_mul(1u32) as usize);
+            wv_a6.1.split_at_mut(0usize);
         let
         r20:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            r10.1.split_at_mut(1usize);
+            wv_b6.1.split_at_mut(0usize);
         let
         r30:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv3.1.split_at_mut(0usize);
-        let v0: crate::lib::intvector_intrinsics::vec128 = r20.0[0usize];
+            wv_b5.1.split_at_mut(0usize);
+        let v0: crate::lib::intvector_intrinsics::vec128 = r10.1[0usize];
         let v1: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_rotate_right_lanes32(v0, 1u32);
-        r20.0[0usize] = v1;
+        r10.1[0usize] = v1;
         let v00: crate::lib::intvector_intrinsics::vec128 = r20.1[0usize];
         let v10: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_rotate_right_lanes32(v00, 2u32);
@@ -314,152 +310,148 @@
         let v11: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_rotate_right_lanes32(v01, 3u32);
         r30.1[0usize] = v11;
-        let a0: u32 = 0u32;
-        let b0: u32 = 1u32;
-        let c0: u32 = 2u32;
-        let d10: u32 = 3u32;
         let
         wv_a7:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            r10.0.split_at_mut(a0.wrapping_mul(1u32) as usize - c.wrapping_mul(1u32) as usize);
+            wv_b4.1.split_at_mut(0usize);
         let
         wv_b7:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a7.1.split_at_mut(b0.wrapping_mul(1u32) as usize - a0.wrapping_mul(1u32) as usize);
-        wv_b7.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b7.0[0usize], wv_b7.1[0usize]);
-        wv_b7.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b7.0[0usize], z.1[0usize]);
+            r10.1.split_at_mut(0usize);
+        wv_a7.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a7.1[0usize], wv_b7.1[0usize]);
+        wv_a7.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a7.1[0usize], z.1[0usize]);
         let
         wv_a8:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b7.1.split_at_mut(d10.wrapping_mul(1u32) as usize - b0.wrapping_mul(1u32) as usize);
+            r30.1.split_at_mut(0usize);
         let
         wv_b8:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a8.1.split_at_mut(a0.wrapping_mul(1u32) as usize - d10.wrapping_mul(1u32) as usize);
-        wv_b8.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b8.0[0usize], wv_b8.1[0usize]);
-        wv_b8.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b8.0[0usize], 16u32);
+            wv_a7.1.split_at_mut(0usize);
+        wv_a8.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a8.1[0usize], wv_b8.1[0usize]);
+        wv_a8.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a8.1[0usize], 16u32);
         let
         wv_a9:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b8.1.split_at_mut(c0.wrapping_mul(1u32) as usize - a0.wrapping_mul(1u32) as usize);
+            r20.1.split_at_mut(0usize);
         let
         wv_b9:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a9.1.split_at_mut(d10.wrapping_mul(1u32) as usize - c0.wrapping_mul(1u32) as usize);
-        wv_b9.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b9.0[0usize], wv_b9.1[0usize]);
+            wv_a8.1.split_at_mut(0usize);
+        wv_a9.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a9.1[0usize], wv_b9.1[0usize]);
         let
         wv_a10:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b9.1.split_at_mut(b0.wrapping_mul(1u32) as usize - d10.wrapping_mul(1u32) as usize);
+            wv_b7.1.split_at_mut(0usize);
         let
         wv_b10:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a10.1.split_at_mut(c0.wrapping_mul(1u32) as usize - b0.wrapping_mul(1u32) as usize);
-        wv_b10.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b10.0[0usize], wv_b10.1[0usize]);
-        wv_b10.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b10.0[0usize], 12u32);
+            wv_a9.1.split_at_mut(0usize);
+        wv_a10.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a10.1[0usize], wv_b10.1[0usize]);
+        wv_a10.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a10.1[0usize], 12u32);
         let
         wv_a11:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b10.1.split_at_mut(a0.wrapping_mul(1u32) as usize - c0.wrapping_mul(1u32) as usize);
+            wv_b8.1.split_at_mut(0usize);
         let
         wv_b11:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a11.1.split_at_mut(b0.wrapping_mul(1u32) as usize - a0.wrapping_mul(1u32) as usize);
-        wv_b11.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b11.0[0usize], wv_b11.1[0usize]);
-        wv_b11.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b11.0[0usize], w.1[0usize]);
+            wv_a10.1.split_at_mut(0usize);
+        wv_a11.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a11.1[0usize], wv_b11.1[0usize]);
+        wv_a11.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a11.1[0usize], w.1[0usize]);
         let
         wv_a12:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b11.1.split_at_mut(d10.wrapping_mul(1u32) as usize - b0.wrapping_mul(1u32) as usize);
+            wv_b9.1.split_at_mut(0usize);
         let
         wv_b12:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a12.1.split_at_mut(a0.wrapping_mul(1u32) as usize - d10.wrapping_mul(1u32) as usize);
-        wv_b12.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b12.0[0usize], wv_b12.1[0usize]);
-        wv_b12.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b12.0[0usize], 8u32);
+            wv_a11.1.split_at_mut(0usize);
+        wv_a12.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a12.1[0usize], wv_b12.1[0usize]);
+        wv_a12.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a12.1[0usize], 8u32);
         let
         wv_a13:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b12.1.split_at_mut(c0.wrapping_mul(1u32) as usize - a0.wrapping_mul(1u32) as usize);
+            wv_b10.1.split_at_mut(0usize);
         let
         wv_b13:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a13.1.split_at_mut(d10.wrapping_mul(1u32) as usize - c0.wrapping_mul(1u32) as usize);
-        wv_b13.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_add32(wv_b13.0[0usize], wv_b13.1[0usize]);
+            wv_a12.1.split_at_mut(0usize);
+        wv_a13.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_add32(wv_a13.1[0usize], wv_b13.1[0usize]);
         let
         wv_a14:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_b13.1.split_at_mut(b0.wrapping_mul(1u32) as usize - d10.wrapping_mul(1u32) as usize);
+            wv_b11.1.split_at_mut(0usize);
         let
         wv_b14:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            wv_a14.1.split_at_mut(c0.wrapping_mul(1u32) as usize - b0.wrapping_mul(1u32) as usize);
-        wv_b14.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_xor(wv_b14.0[0usize], wv_b14.1[0usize]);
-        wv_b14.0[0usize] =
-            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_b14.0[0usize], 7u32);
+            wv_a13.1.split_at_mut(0usize);
+        wv_a14.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_xor(wv_a14.1[0usize], wv_b14.1[0usize]);
+        wv_a14.1[0usize] =
+            crate::lib::intvector_intrinsics::vec128_rotate_right32(wv_a14.1[0usize], 7u32);
         let
         r11:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            r20.0.split_at_mut(0usize);
+            wv_a14.1.split_at_mut(0usize);
         let
         r21:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            r20.1.split_at_mut(0usize);
+            wv_b14.1.split_at_mut(0usize);
         let
         r31:
         (&mut [crate::lib::intvector_intrinsics::vec128],
         &mut [crate::lib::intvector_intrinsics::vec128])
         =
-            r30.1.split_at_mut(0usize);
+            wv_b13.1.split_at_mut(0usize);
         let v02: crate::lib::intvector_intrinsics::vec128 = r11.1[0usize];
         let v12: crate::lib::intvector_intrinsics::vec128 =
             crate::lib::intvector_intrinsics::vec128_rotate_right_lanes32(v02, 3u32);
