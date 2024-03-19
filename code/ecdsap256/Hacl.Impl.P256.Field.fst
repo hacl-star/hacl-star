@@ -83,6 +83,20 @@ let fadd res x y =
   SM.fmont_add_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
+let fadd_sa1 res x y =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fadd res x_copy y;
+  pop_frame()
+
+let fadd_sa2 res x y =
+  push_frame ();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  fadd res x y_copy;
+  pop_frame()
+
 
 let fdouble out x =
   fadd out x x
@@ -99,6 +113,22 @@ let fsub res x y =
   assert (as_nat h1 res == (as_nat h0 x - as_nat h0 y) % S.prime);
   SM.fmont_sub_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
+
+
+let fsub_sa1 res x y =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fsub res x_copy y;
+  pop_frame()
+
+
+let fsub_sa2 res x y =
+  push_frame ();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  fsub res x y_copy;
+  pop_frame()
 
 
 [@CInline]
@@ -145,6 +175,20 @@ let fmul res x y =
   mont_reduction res tmp;
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
+
+let fmul_sa1 res x y =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fmul res x_copy y;
+  pop_frame()
+
+let fmul_sa2 res x y =
+  push_frame ();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  fmul res x y_copy;
+  pop_frame()
 
 
 [@CInline]

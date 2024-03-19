@@ -129,6 +129,22 @@ let qadd res x y =
   pop_frame ()
 
 
+let qadd_sa1 res x y =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qadd res x_copy y;
+  pop_frame()
+
+
+let qadd_sa2 res x y =
+  push_frame();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  qadd res x y_copy;
+  pop_frame()
+
+
 val qmont_reduction: res:felem -> x:widefelem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ disjoint x res /\

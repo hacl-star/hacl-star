@@ -61,6 +61,28 @@ val fadd: res:felem -> x:felem -> y:felem -> Stack unit
     as_nat h1 res == S.fadd (as_nat h0 x) (as_nat h0 y) /\
     fmont_as_nat h1 res == S.fadd (fmont_as_nat h0 x) (fmont_as_nat h0 y))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fadd_sa1: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == S.fadd (as_nat h0 x) (as_nat h0 y) /\
+    fmont_as_nat h1 res == S.fadd (fmont_as_nat h0 x) (fmont_as_nat h0 y))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fadd_sa2: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == S.fadd (as_nat h0 x) (as_nat h0 y) /\
+    fmont_as_nat h1 res == S.fadd (fmont_as_nat h0 x) (fmont_as_nat h0 y))
+
 
 inline_for_extraction noextract
 val fdouble: res:felem -> x:felem -> Stack unit
@@ -73,6 +95,28 @@ val fdouble: res:felem -> x:felem -> Stack unit
 
 
 val fsub: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h res /\ live h x /\ live h y /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == S.fsub (as_nat h0 x) (as_nat h0 y) /\
+    fmont_as_nat h1 res == S.fsub (fmont_as_nat h0 x) (fmont_as_nat h0 y))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fsub_sa1: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h res /\ live h x /\ live h y /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == S.fsub (as_nat h0 x) (as_nat h0 y) /\
+    fmont_as_nat h1 res == S.fsub (fmont_as_nat h0 x) (fmont_as_nat h0 y))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fsub_sa2: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
     live h res /\ live h x /\ live h y /\
     eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
@@ -97,6 +141,27 @@ val fmul: res:felem -> x:felem -> y:felem -> Stack unit
     as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.fmont_R_inv) % S.prime /\
     fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 x) (fmont_as_nat h0 y))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_sa1: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.fmont_R_inv) % S.prime /\
+    fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 x) (fmont_as_nat h0 y))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_sa2: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.prime /\ as_nat h y < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.fmont_R_inv) % S.prime /\
+    fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 x) (fmont_as_nat h0 y))
 
 val fsqr: res:felem -> x:felem -> Stack unit
   (requires fun h ->

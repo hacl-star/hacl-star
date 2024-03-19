@@ -79,6 +79,27 @@ val qadd: res:felem -> x:felem -> y:felem -> Stack unit
     as_nat h1 res == S.qadd (as_nat h0 x) (as_nat h0 y) /\
     qmont_as_nat h1 res == S.qadd (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val qadd_sa1: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.order /\ as_nat h y < S.order)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == S.qadd (as_nat h0 x) (as_nat h0 y) /\
+    qmont_as_nat h1 res == S.qadd (qmont_as_nat h0 x) (qmont_as_nat h0 y))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val qadd_sa2: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.order /\ as_nat h y < S.order)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == S.qadd (as_nat h0 x) (as_nat h0 y) /\
+    qmont_as_nat h1 res == S.qadd (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
 val from_qmont: res:felem -> x:felem -> Stack unit
   (requires fun h ->

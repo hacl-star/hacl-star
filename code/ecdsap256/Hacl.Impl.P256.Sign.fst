@@ -74,10 +74,10 @@ let ecdsa_sign_s s k r d_a m =
   from_qmont m m;
   let h3 = ST.get () in
   assert (as_nat h3 m == as_nat h2 m * SM.qmont_R_inv % S.order);
-  qadd s m s;    // s = z + s
+  qadd_sa2 s m s;    // s = z + s
   let h4 = ST.get () in
   assert (as_nat h4 s == (as_nat h3 m + as_nat h2 s) % S.order);
-  qmul s kinv s; // s = kinv * s
+  qmul_sa2 s kinv s; // s = kinv * s
   let h5 = ST.get () in
   assert (as_nat h5 s == (as_nat h1 kinv * as_nat h4 s * SM.qmont_R_inv) % S.order);
   SM.lemma_ecdsa_sign_s
