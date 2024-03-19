@@ -98,8 +98,41 @@ val qmul: res:felem -> x:felem -> y:felem -> Stack unit
     as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.qmont_R_inv) % S.order /\
     qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 y))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val qmul_sa1: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.order /\ as_nat h y < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.qmont_R_inv) % S.order /\
+    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 y))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val qmul_sa2: res:felem -> x:felem -> y:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h y /\ live h res /\
+    eq_or_disjoint x y /\ eq_or_disjoint x res /\ eq_or_disjoint y res /\
+    as_nat h x < S.order /\ as_nat h y < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * as_nat h0 y * SM.qmont_R_inv) % S.order /\
+    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 y))
+
 
 val qsqr: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.order)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * as_nat h0 x * SM.qmont_R_inv) % S.order /\
+    qmont_as_nat h1 res = S.qmul (qmont_as_nat h0 x) (qmont_as_nat h0 x))
+
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val qsqr_sa: res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res /\
     as_nat h x < S.order)

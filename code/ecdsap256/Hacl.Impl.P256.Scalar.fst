@@ -174,6 +174,20 @@ let qmul res x y =
   SM.qmont_mul_lemma (as_nat h0 x) (as_nat h0 y);
   pop_frame ()
 
+let qmul_sa1 res x y =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qmul res x_copy y;
+  pop_frame()
+
+let qmul_sa2 res x y =
+  push_frame();
+  let y_copy = create (size 4) (u64 0) in
+  copy y_copy y;
+  qmul res x y_copy;
+  pop_frame()
+
 
 [@CInline]
 let qsqr res x =
@@ -186,3 +200,10 @@ let qsqr res x =
   qmont_reduction res tmp;
   SM.qmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()
+
+let qsqr_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  qsqr res x_copy;
+  pop_frame()
