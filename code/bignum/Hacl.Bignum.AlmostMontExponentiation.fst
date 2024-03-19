@@ -93,7 +93,9 @@ let bn_almost_mont_one #t k n mu ctx oneM =
   assert (linv n (as_seq h1 oneM));
   Math.Lemmas.small_mod (BD.bn_v (as_seq h1 oneM)) (BD.bn_v n);
   assert (BD.bn_v (as_seq h1 oneM) % BD.bn_v n ==
-    E.mont_one_ll (bits t) (v len) (BD.bn_v n) (v mu))
+    E.mont_one_ll (bits t) (v len) (BD.bn_v n) (v mu));
+  // HACL-RS
+  LowStar.Ignore.ignore ctx
 
 
 inline_for_extraction noextract
@@ -110,7 +112,9 @@ let bn_almost_mont_mul #t k n mu ctx aM bM resM =
   SA.bn_almost_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 bM);
   A.almost_mont_mul_is_mont_mul_lemma (bits t) (v k.AM.bn.BN.len) (BD.bn_v n) (v mu) (bn_v h0 aM) (bn_v h0 bM);
   let ctx_n = sub ctx 0ul k.AM.bn.BN.len in
-  k.AM.mul ctx_n mu aM bM resM
+  k.AM.mul ctx_n mu aM bM resM;
+  // HACL-RS
+  LowStar.Ignore.ignore ctx
 
 (* HACL-RS *)
 inline_for_extraction noextract
@@ -145,7 +149,9 @@ let bn_almost_mont_sqr #t k n mu ctx aM resM =
   SA.bn_almost_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 aM);
   A.almost_mont_mul_is_mont_mul_lemma (bits t) (v k.AM.bn.BN.len) (BD.bn_v n) (v mu) (bn_v h0 aM) (bn_v h0 aM);
   let ctx_n = sub ctx 0ul k.AM.bn.BN.len in
-  k.AM.sqr ctx_n mu aM resM
+  k.AM.sqr ctx_n mu aM resM;
+  // HACL-RS
+  LowStar.Ignore.ignore ctx
 
 (* HACL-RS *)
 inline_for_extraction noextract

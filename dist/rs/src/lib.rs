@@ -13,11 +13,10 @@ pub mod test {
   pub mod chachapoly;
   pub mod curve;
   pub mod ed25519;
-  // FFDHE currently panicks with a substract with overflow in bignum
+  // incorrect result
   // pub mod ffdhe;
   pub mod poly1305;
-  // RSAPSS currently panicks with a substract with overflow in bignum
-  // pub mod rsapss;
+  pub mod rsapss;
   pub mod salsa20;
   pub mod sha1;
   pub mod sha2;
