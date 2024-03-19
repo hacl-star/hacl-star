@@ -306,3 +306,10 @@ let point_add res p q =
   point_add_noalloc t0 t1 p q;
   copy res t1;
   pop_frame ()
+
+let point_add_sa res p q =
+  push_frame ();
+  let p_copy = create 12ul (u64 0) in
+  copy p_copy p;
+  point_add res p_copy q;
+  pop_frame ()
