@@ -928,6 +928,8 @@ let blake2_finish #al #ms nn output hash =
     Lib.Sequence.eq_intro (as_seq h1 full)
 	(Lib.Sequence.(as_seq h1 (gsub full 0ul (size_row al)) @|
 		       as_seq h1 (gsub full (size_row al) (size_row al))));
+    (* HACL-RS: Need to reinit split of full *)
+    LowStar.Ignore.ignore full;
     let final = sub full (size 0) nn in
     copy output final)
 
