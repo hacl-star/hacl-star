@@ -594,36 +594,118 @@
     let tmp1: (&mut [u64], &mut [u64]) = x2.1.split_at_mut(4usize);
     let tmp2: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(4usize);
     (tmp1.0[0usize..4usize]).copy_from_slice(&a[0usize..4usize]);
-    for _i in 0u32..1u32 { fsqr(tmp1.0, tmp1.0) };
-    fmul(tmp1.0, tmp1.0, a);
+    for _i in 0u32..1u32
+    {
+        let mut x_copy: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+        fsqr(tmp1.0, &mut x_copy)
+    };
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+    fmul(tmp1.0, &mut x_copy, a);
     (x2.0[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
-    for _i in 0u32..1u32 { fsqr(x2.0, x2.0) };
-    fmul(x2.0, x2.0, a);
+    for _i in 0u32..1u32
+    {
+        let mut x_copy0: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
+        fsqr(x2.0, &mut x_copy0)
+    };
+    let mut x_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
+    fmul(x2.0, &mut x_copy0, a);
     (tmp2.0[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
-    for _i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
-    fmul(tmp2.0, tmp2.0, x2.0);
+    for _i in 0u32..3u32
+    {
+        let mut x_copy1: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+        fsqr(tmp2.0, &mut x_copy1)
+    };
+    let mut x_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+    fmul(tmp2.0, &mut x_copy1, x2.0);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..6u32 { fsqr(tmp2.1, tmp2.1) };
-    fmul(tmp2.1, tmp2.1, tmp2.0);
+    for _i in 0u32..6u32
+    {
+        let mut x_copy2: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+        fsqr(tmp2.1, &mut x_copy2)
+    };
+    let mut x_copy2: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+    fmul(tmp2.1, &mut x_copy2, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    for _i in 0u32..3u32 { fsqr(tmp2.0, tmp2.0) };
-    fmul(tmp2.0, tmp2.0, x2.0);
+    for _i in 0u32..3u32
+    {
+        let mut x_copy3: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+        fsqr(tmp2.0, &mut x_copy3)
+    };
+    let mut x_copy3: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+    fmul(tmp2.0, &mut x_copy3, x2.0);
     (x2.0[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..15u32 { fsqr(x2.0, x2.0) };
-    fmul(x2.0, x2.0, tmp2.0);
+    for _i in 0u32..15u32
+    {
+        let mut x_copy4: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
+        fsqr(x2.0, &mut x_copy4)
+    };
+    let mut x_copy4: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
+    fmul(x2.0, &mut x_copy4, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&x2.0[0usize..4usize]);
-    for _i in 0u32..2u32 { fsqr(tmp2.0, tmp2.0) };
-    fmul(tmp2.0, tmp2.0, tmp1.0);
+    for _i in 0u32..2u32
+    {
+        let mut x_copy5: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+        fsqr(tmp2.0, &mut x_copy5)
+    };
+    let mut x_copy5: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+    fmul(tmp2.0, &mut x_copy5, tmp1.0);
     (tmp1.0[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..32u32 { fsqr(tmp1.0, tmp1.0) };
-    fmul(tmp1.0, tmp1.0, a);
-    for _i in 0u32..128u32 { fsqr(tmp1.0, tmp1.0) };
-    fmul(tmp1.0, tmp1.0, tmp2.0);
-    for _i in 0u32..32u32 { fsqr(tmp1.0, tmp1.0) };
-    fmul(tmp1.0, tmp1.0, tmp2.0);
-    for _i in 0u32..30u32 { fsqr(tmp1.0, tmp1.0) };
-    fmul(tmp1.0, tmp1.0, x2.0);
-    for _i in 0u32..2u32 { fsqr(tmp1.0, tmp1.0) };
+    for _i in 0u32..32u32
+    {
+        let mut x_copy6: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+        fsqr(tmp1.0, &mut x_copy6)
+    };
+    let mut x_copy6: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+    fmul(tmp1.0, &mut x_copy6, a);
+    for _i in 0u32..128u32
+    {
+        let mut x_copy7: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+        fsqr(tmp1.0, &mut x_copy7)
+    };
+    let mut x_copy7: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+    fmul(tmp1.0, &mut x_copy7, tmp2.0);
+    for _i in 0u32..32u32
+    {
+        let mut x_copy8: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+        fsqr(tmp1.0, &mut x_copy8)
+    };
+    let mut x_copy8: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+    fmul(tmp1.0, &mut x_copy8, tmp2.0);
+    for _i in 0u32..30u32
+    {
+        let mut x_copy9: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+        fsqr(tmp1.0, &mut x_copy9)
+    };
+    let mut x_copy9: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+    fmul(tmp1.0, &mut x_copy9, x2.0);
+    for _i in 0u32..2u32
+    {
+        let mut x_copy10: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy10)[0usize..4usize]).copy_from_slice(&tmp1.0[0usize..4usize]);
+        fsqr(tmp1.0, &mut x_copy10)
+    };
     fmul(tmp2.0, tmp1.0, a);
     (res[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize])
 }
@@ -634,26 +716,80 @@
     let tmp1: (&mut [u64], &mut [u64]) = (&mut tmp).split_at_mut(0usize);
     let tmp2: (&mut [u64], &mut [u64]) = tmp1.1.split_at_mut(4usize);
     (tmp2.0[0usize..4usize]).copy_from_slice(&a[0usize..4usize]);
-    for _i in 0u32..1u32 { fsqr(tmp2.0, tmp2.0) };
-    fmul(tmp2.0, tmp2.0, a);
+    for _i in 0u32..1u32
+    {
+        let mut x_copy: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+        fsqr(tmp2.0, &mut x_copy)
+    };
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+    fmul(tmp2.0, &mut x_copy, a);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..2u32 { fsqr(tmp2.1, tmp2.1) };
-    fmul(tmp2.1, tmp2.1, tmp2.0);
+    for _i in 0u32..2u32
+    {
+        let mut x_copy0: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+        fsqr(tmp2.1, &mut x_copy0)
+    };
+    let mut x_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+    fmul(tmp2.1, &mut x_copy0, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    for _i in 0u32..4u32 { fsqr(tmp2.0, tmp2.0) };
-    fmul(tmp2.0, tmp2.0, tmp2.1);
+    for _i in 0u32..4u32
+    {
+        let mut x_copy1: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+        fsqr(tmp2.0, &mut x_copy1)
+    };
+    let mut x_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+    fmul(tmp2.0, &mut x_copy1, tmp2.1);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..8u32 { fsqr(tmp2.1, tmp2.1) };
-    fmul(tmp2.1, tmp2.1, tmp2.0);
+    for _i in 0u32..8u32
+    {
+        let mut x_copy2: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+        fsqr(tmp2.1, &mut x_copy2)
+    };
+    let mut x_copy2: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+    fmul(tmp2.1, &mut x_copy2, tmp2.0);
     (tmp2.0[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
-    for _i in 0u32..16u32 { fsqr(tmp2.0, tmp2.0) };
-    fmul(tmp2.0, tmp2.0, tmp2.1);
+    for _i in 0u32..16u32
+    {
+        let mut x_copy3: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+        fsqr(tmp2.0, &mut x_copy3)
+    };
+    let mut x_copy3: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
+    fmul(tmp2.0, &mut x_copy3, tmp2.1);
     (tmp2.1[0usize..4usize]).copy_from_slice(&tmp2.0[0usize..4usize]);
-    for _i in 0u32..32u32 { fsqr(tmp2.1, tmp2.1) };
-    fmul(tmp2.1, tmp2.1, a);
-    for _i in 0u32..96u32 { fsqr(tmp2.1, tmp2.1) };
-    fmul(tmp2.1, tmp2.1, a);
-    for _i in 0u32..94u32 { fsqr(tmp2.1, tmp2.1) };
+    for _i in 0u32..32u32
+    {
+        let mut x_copy4: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+        fsqr(tmp2.1, &mut x_copy4)
+    };
+    let mut x_copy4: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+    fmul(tmp2.1, &mut x_copy4, a);
+    for _i in 0u32..96u32
+    {
+        let mut x_copy5: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+        fsqr(tmp2.1, &mut x_copy5)
+    };
+    let mut x_copy5: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+    fmul(tmp2.1, &mut x_copy5, a);
+    for _i in 0u32..94u32
+    {
+        let mut x_copy6: [u64; 4] = [0u64; 4usize];
+        ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize]);
+        fsqr(tmp2.1, &mut x_copy6)
+    };
     (res[0usize..4usize]).copy_from_slice(&tmp2.1[0usize..4usize])
 }
 
@@ -911,46 +1047,82 @@
     let z10: (&mut [u64], &mut [u64]) = z1.1.split_at_mut(0usize);
     let y20: (&mut [u64], &mut [u64]) = z2.0.split_at_mut(0usize);
     let z20: (&mut [u64], &mut [u64]) = z2.1.split_at_mut(0usize);
-    fsub(t4.0, t4.0, t5.0);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&t4.0[0usize..4usize]);
+    fsub(t4.0, &mut x_copy, t5.0);
     fadd(t5.0, y10.1, z10.1);
     fadd(t5.1, y20.1, z20.1);
-    fmul(t5.0, t5.0, t5.1);
+    let mut x_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&t5.0[0usize..4usize]);
+    fmul(t5.0, &mut x_copy0, t5.1);
     fadd(t5.1, t2.0, t3.0);
-    fsub(t5.0, t5.0, t5.1);
+    let mut x_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&t5.0[0usize..4usize]);
+    fsub(t5.0, &mut x_copy1, t5.1);
     let x10: (&mut [u64], &mut [u64]) = y1.0.split_at_mut(0usize);
     let z11: (&mut [u64], &mut [u64]) = z10.1.split_at_mut(0usize);
     let x20: (&mut [u64], &mut [u64]) = y2.0.split_at_mut(0usize);
     let z21: (&mut [u64], &mut [u64]) = z20.1.split_at_mut(0usize);
     fadd(y3.0, x10.1, z11.1);
     fadd(z3.0, x20.1, z21.1);
-    fmul(y3.0, y3.0, z3.0);
+    let mut x_copy2: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&y3.0[0usize..4usize]);
+    fmul(y3.0, &mut x_copy2, z3.0);
     fadd(z3.0, t11.0, t3.0);
-    fsub(z3.0, y3.0, z3.0);
+    let mut y_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy)[0usize..4usize]).copy_from_slice(&z3.0[0usize..4usize]);
+    fsub(z3.0, y3.0, &mut y_copy);
     fmul_by_b_coeff(z3.1, t3.0);
     fsub(y3.0, z3.0, z3.1);
     fadd(z3.1, y3.0, y3.0);
-    fadd(y3.0, y3.0, z3.1);
+    let mut x_copy3: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&y3.0[0usize..4usize]);
+    fadd(y3.0, &mut x_copy3, z3.1);
     fsub(z3.1, t2.0, y3.0);
-    fadd(y3.0, t2.0, y3.0);
+    let mut y_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy0)[0usize..4usize]).copy_from_slice(&y3.0[0usize..4usize]);
+    fadd(y3.0, t2.0, &mut y_copy0);
     fmul_by_b_coeff(z3.0, z3.0);
     fadd(t2.0, t3.0, t3.0);
-    fadd(t3.0, t2.0, t3.0);
-    fsub(z3.0, z3.0, t3.0);
-    fsub(z3.0, z3.0, t11.0);
+    let mut y_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy1)[0usize..4usize]).copy_from_slice(&t3.0[0usize..4usize]);
+    fadd(t3.0, t2.0, &mut y_copy1);
+    let mut x_copy4: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&z3.0[0usize..4usize]);
+    fsub(z3.0, &mut x_copy4, t3.0);
+    let mut x_copy5: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&z3.0[0usize..4usize]);
+    fsub(z3.0, &mut x_copy5, t11.0);
     fadd(t2.0, z3.0, z3.0);
-    fadd(z3.0, t2.0, z3.0);
+    let mut y_copy2: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy2)[0usize..4usize]).copy_from_slice(&z3.0[0usize..4usize]);
+    fadd(z3.0, t2.0, &mut y_copy2);
     fadd(t2.0, t11.0, t11.0);
-    fadd(t11.0, t2.0, t11.0);
-    fsub(t11.0, t11.0, t3.0);
+    let mut y_copy3: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy3)[0usize..4usize]).copy_from_slice(&t11.0[0usize..4usize]);
+    fadd(t11.0, t2.0, &mut y_copy3);
+    let mut x_copy6: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&t11.0[0usize..4usize]);
+    fsub(t11.0, &mut x_copy6, t3.0);
     fmul(t2.0, t5.0, z3.0);
     fmul(t3.0, t11.0, z3.0);
     fmul(z3.0, y3.0, z3.1);
-    fadd(z3.0, z3.0, t3.0);
-    fmul(y3.0, t4.0, y3.0);
-    fsub(y3.0, y3.0, t2.0);
-    fmul(z3.1, t5.0, z3.1);
+    let mut x_copy7: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&z3.0[0usize..4usize]);
+    fadd(z3.0, &mut x_copy7, t3.0);
+    let mut y_copy4: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy4)[0usize..4usize]).copy_from_slice(&y3.0[0usize..4usize]);
+    fmul(y3.0, t4.0, &mut y_copy4);
+    let mut x_copy8: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&y3.0[0usize..4usize]);
+    fsub(y3.0, &mut x_copy8, t2.0);
+    let mut y_copy5: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy5)[0usize..4usize]).copy_from_slice(&z3.1[0usize..4usize]);
+    fmul(z3.1, t5.0, &mut y_copy5);
     fmul(t2.0, t4.0, t11.0);
-    fadd(z3.1, z3.1, t2.0);
+    let mut x_copy9: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&z3.1[0usize..4usize]);
+    fadd(z3.1, &mut x_copy9, t2.0);
     (res[0usize..12usize]).copy_from_slice(&t1.1[0usize..12usize])
 }
 
@@ -1829,8 +2001,12 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
     qinv(&mut kinv, k_q.1);
     qmul(d_a.0, s_q.0, k_q.0);
     from_qmont(m_q, m_q);
-    qadd(d_a.0, m_q, d_a.0);
-    qmul(d_a.0, &mut kinv, d_a.0);
+    let mut y_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy)[0usize..4usize]).copy_from_slice(&d_a.0[0usize..4usize]);
+    qadd(d_a.0, m_q, &mut y_copy);
+    let mut y_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy0)[0usize..4usize]).copy_from_slice(&d_a.0[0usize..4usize]);
+    qmul(d_a.0, &mut kinv, &mut y_copy0);
     bn2_to_bytes_be4(signature, s_q.0, d_a.0);
     let is_r_zero: u64 = bn_is_zero_mask4(s_q.0);
     let is_s_zero: u64 = bn_is_zero_mask4(d_a.0);

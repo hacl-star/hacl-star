@@ -203,6 +203,12 @@ let fsqr res x =
   SM.fmont_mul_lemma (as_nat h0 x) (as_nat h0 x);
   pop_frame ()
 
+let fsqr_sa res x =
+  push_frame();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fsqr res x_copy;
+  pop_frame ()
 
 [@CInline]
 let from_mont res a =

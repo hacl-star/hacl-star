@@ -171,6 +171,15 @@ val fsqr: res:felem -> x:felem -> Stack unit
     as_nat h1 res = (as_nat h0 x * as_nat h0 x * SM.fmont_R_inv) % S.prime /\
     fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 x) (fmont_as_nat h0 x))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fsqr_sa: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.prime)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res = (as_nat h0 x * as_nat h0 x * SM.fmont_R_inv) % S.prime /\
+    fmont_as_nat h1 res = S.fmul (fmont_as_nat h0 x) (fmont_as_nat h0 x))
 
 val from_mont: res:felem -> x:felem -> Stack unit
   (requires fun h ->
