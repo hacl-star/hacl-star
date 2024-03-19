@@ -665,7 +665,8 @@ pub fn finish(nn: u32, output: &mut [u8], hash: &mut [u64]) -> ()
             row1.1[i as usize]
         )
     };
-    let r#final: (&mut [u8], &mut [u8]) = second.0.split_at_mut(0usize);
+    crate::lowstar::ignore::ignore::<&mut [u8]>(&mut b);
+    let r#final: (&mut [u8], &mut [u8]) = (&mut b).split_at_mut(0usize);
     (output[0usize..nn as usize]).copy_from_slice(&r#final.1[0usize..nn as usize]);
     crate::lib::memzero0::memzero::<u8>(&mut b, 64u32)
 }
