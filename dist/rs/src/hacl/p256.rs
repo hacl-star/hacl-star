@@ -1392,73 +1392,137 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
     (x_11.0[0usize..4usize]).copy_from_slice(&x_101111.0[0usize..4usize]);
     for _i in 0u32..1u32 { qsqr(x_11.0, x_11.0) };
     qmul(x_101111.1, x_111.0, x_11.0);
-    qmul(x_11.0, x_101111.0, x_11.0);
+    let mut y_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut y_copy)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
+    qmul(x_11.0, x_101111.0, &mut y_copy);
     let mut tmp1: [u64; 4] = [0u64; 4usize];
     for _i in 0u32..2u32 { qsqr(x_11.0, x_11.0) };
-    qmul(x_11.0, x_11.0, x_101.0);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
+    qmul(x_11.0, &mut x_copy, x_101.0);
     ((&mut tmp1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
     for _i in 0u32..8u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_11.0);
+    let mut x_copy0: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy0, x_11.0);
     (x_11.0[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
     for _i in 0u32..16u32 { qsqr(x_11.0, x_11.0) };
-    qmul(x_11.0, x_11.0, &mut tmp1);
+    let mut x_copy1: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
+    qmul(x_11.0, &mut x_copy1, &mut tmp1);
     ((&mut tmp1)[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize]);
     for _i in 0u32..64u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_11.0);
+    let mut x_copy2: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy2)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy2, x_11.0);
     for _i in 0u32..32u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_11.0);
+    let mut x_copy3: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy3)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy3, x_11.0);
     for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101111.1);
+    let mut x_copy4: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy4)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy4, x_101111.1);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_1111.0);
+    let mut x_copy5: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy5)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy5, x_1111.0);
     for _i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101.0);
+    let mut x_copy6: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy6)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy6, x_101.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_10101.0);
+    let mut x_copy7: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy7)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy7, x_10101.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101111.0);
+    let mut x_copy8: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy8)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy8, x_101111.0);
     for _i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_111.0);
+    let mut x_copy9: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy9)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy9, x_111.0);
     for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_111.0);
+    let mut x_copy10: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy10)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy10, x_111.0);
     for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_111.0);
+    let mut x_copy11: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy11)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy11, x_111.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_1111.0);
+    let mut x_copy12: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy12)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy12, x_1111.0);
     for _i in 0u32..9u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101111.1);
+    let mut x_copy13: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy13)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy13, x_101111.1);
     for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_10101.0);
+    let mut x_copy14: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy14)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy14, x_10101.0);
     for _i in 0u32..2u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, r);
+    let mut x_copy15: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy15)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy15, r);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, r);
+    let mut x_copy16: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy16)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy16, r);
     for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_10101.0);
+    let mut x_copy17: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy17)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy17, x_10101.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_1111.0);
+    let mut x_copy18: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy18)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy18, x_1111.0);
     for _i in 0u32..4u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_1111.0);
+    let mut x_copy19: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy19)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy19, x_1111.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_1111.0);
+    let mut x_copy20: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy20)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy20, x_1111.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_111.0);
+    let mut x_copy21: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy21)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy21, x_111.0);
     for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101.0);
+    let mut x_copy22: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy22)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy22, x_101.0);
     for _i in 0u32..10u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101111.1);
+    let mut x_copy23: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy23)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy23, x_101111.1);
     for _i in 0u32..2u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101.0);
+    let mut x_copy24: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy24)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy24, x_101.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101.0);
+    let mut x_copy25: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy25)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy25, x_101.0);
     for _i in 0u32..5u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101.0);
+    let mut x_copy26: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy26)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy26, x_101.0);
     for _i in 0u32..3u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, r);
+    let mut x_copy27: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy27)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy27, r);
     for _i in 0u32..7u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_101111.0);
+    let mut x_copy28: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy28)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy28, x_101111.0);
     for _i in 0u32..6u32 { qsqr(&mut tmp1, &mut tmp1) };
-    qmul(&mut tmp1, &mut tmp1, x_10101.0);
+    let mut x_copy29: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy29)[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
+    qmul(&mut tmp1, &mut x_copy29, x_10101.0);
     (x_11.0[0usize..4usize]).copy_from_slice(&(&mut tmp1)[0usize..4usize]);
     (res[0usize..4usize]).copy_from_slice(&x_11.0[0usize..4usize])
 }
@@ -1507,7 +1571,9 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
         {
             let mut x: [u64; 4] = [0u64; 4usize];
             to_aff_point_x(&mut x, &mut res);
-            qmod_short(&mut x, &mut x);
+            let mut x_copy: [u64; 4] = [0u64; 4usize];
+            ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut x)[0usize..4usize]);
+            qmod_short(&mut x, &mut x_copy);
             let res1: bool = bn_is_eq_vartime4(&mut x, s_q.0);
             res1
         }
@@ -1561,7 +1627,9 @@ pub fn ecp256dh_r(shared_secret: &mut [u8], their_pubkey: &mut [u8], private_key
     let mut p: [u64; 12] = [0u64; 12usize];
     point_mul_g(&mut p, k_q.1);
     to_aff_point_x(s_q.0, &mut p);
-    qmod_short(s_q.0, s_q.0);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&s_q.0[0usize..4usize]);
+    qmod_short(s_q.0, &mut x_copy);
     let mut kinv: [u64; 4] = [0u64; 4usize];
     qinv(&mut kinv, k_q.1);
     qmul(d_a.0, s_q.0, k_q.0);
@@ -1591,7 +1659,9 @@ pub fn ecdsa_sign_p256_sha2(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_sign_msg_as_qelem(signature, &mut m_q, private_key, nonce);
     res
 }
@@ -1611,7 +1681,9 @@ pub fn ecdsa_sign_p256_sha384(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_sign_msg_as_qelem(signature, &mut m_q, private_key, nonce);
     res
 }
@@ -1631,7 +1703,9 @@ pub fn ecdsa_sign_p256_sha512(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_sign_msg_as_qelem(signature, &mut m_q, private_key, nonce);
     res
 }
@@ -1651,7 +1725,9 @@ pub fn ecdsa_sign_p256_without_hash(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_sign_msg_as_qelem(signature, &mut m_q, private_key, nonce);
     res
 }
@@ -1671,7 +1747,9 @@ pub fn ecdsa_verif_p256_sha2(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_verify_msg_as_qelem(&mut m_q, public_key, signature_r, signature_s);
     res
 }
@@ -1691,7 +1769,9 @@ pub fn ecdsa_verif_p256_sha384(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_verify_msg_as_qelem(&mut m_q, public_key, signature_r, signature_s);
     res
 }
@@ -1711,7 +1791,9 @@ pub fn ecdsa_verif_p256_sha512(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_verify_msg_as_qelem(&mut m_q, public_key, signature_r, signature_s);
     res
 }
@@ -1731,7 +1813,9 @@ pub fn ecdsa_verif_without_hash(
     crate::lowstar::ignore::ignore::<u32>(msg_len);
     let mHash32: (&mut [u8], &mut [u8]) = (&mut mHash).split_at_mut(0usize);
     bn_from_bytes_be4(&mut m_q, mHash32.1);
-    qmod_short(&mut m_q, &mut m_q);
+    let mut x_copy: [u64; 4] = [0u64; 4usize];
+    ((&mut x_copy)[0usize..4usize]).copy_from_slice(&(&mut m_q)[0usize..4usize]);
+    qmod_short(&mut m_q, &mut x_copy);
     let res: bool = ecdsa_verify_msg_as_qelem(&mut m_q, public_key, signature_r, signature_s);
     res
 }
