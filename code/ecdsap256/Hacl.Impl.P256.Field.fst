@@ -99,7 +99,19 @@ let fadd_sa2 res x y =
 
 
 let fdouble out x =
-  fadd out x x
+  (* HACL-RS: Add copy instead of fadd out x x *)
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fadd out x_copy x;
+  pop_frame ()
+
+let fdouble_sa out x =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fdouble out x_copy;
+  pop_frame ()
 
 
 [@CInline]
@@ -259,6 +271,12 @@ let fmul_by_b_coeff res x =
   fmul res b_coeff x;
   pop_frame ()
 
+let fmul_by_b_coeff_sa res x =
+  push_frame ();
+  let x_copy = create (size 4) (u64 0) in
+  copy x_copy x;
+  fmul_by_b_coeff res x_copy;
+  pop_frame()
 
 [@CInline]
 let fcube res x =

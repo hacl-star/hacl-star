@@ -160,7 +160,7 @@ let point_add_4 x3 y3 z3 t1 t2 =
   fadd_sa1 x3 x3 z3;
   fsub z3 t1 x3;
   fadd_sa2 x3 t1 x3;
-  fmul_by_b_coeff y3 y3
+  fmul_by_b_coeff_sa y3 y3
 
 
 inline_for_extraction noextract

@@ -44,7 +44,7 @@ let point_double_1 t0 t1 t2 t3 t4 p =
   fsqr t1 y;
   fsqr t2 z;
   fmul t3 x y;
-  fdouble t3 t3;
+  fdouble_sa t3 t3;
   fmul t4 y z
 
 
@@ -67,7 +67,7 @@ val point_double_2 (x3 y3 z3 t2:felem) : Stack unit
     fmont_as_nat h1 z3 == z3_s))
 
 let point_double_2 x3 y3 z3 t2 =
-  fdouble z3 z3;
+  fdouble_sa z3 z3;
   fmul_by_b_coeff y3 t2;
   fsub y3 y3 z3;
   fdouble x3 y3;
@@ -187,8 +187,8 @@ let point_double_6 x3 z3 t0 t1 t4 =
   fmul z3 t0 z3;
   fsub x3 x3 z3;
   fmul z3 t0 t1;
-  fdouble z3 z3;
-  fdouble z3 z3
+  fdouble_sa z3 z3;
+  fdouble_sa z3 z3
 
 
 inline_for_extraction noextract

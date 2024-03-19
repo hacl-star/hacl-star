@@ -93,6 +93,16 @@ val fdouble: res:felem -> x:felem -> Stack unit
     as_nat h1 res == (2 * as_nat h0 x) % S.prime /\
     fmont_as_nat h1 res == (2 * fmont_as_nat h0 x) % S.prime)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fdouble_sa: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res == (2 * as_nat h0 x) % S.prime /\
+    fmont_as_nat h1 res == (2 * fmont_as_nat h0 x) % S.prime)
+
 
 val fsub: res:felem -> x:felem -> y:felem -> Stack unit
   (requires fun h ->
@@ -200,6 +210,17 @@ val to_mont: res:felem -> f:felem -> Stack unit
 ///  Special cases of the above functions
 
 val fmul_by_b_coeff: res:felem -> x:felem -> Stack unit
+  (requires fun h ->
+    live h x /\ live h res /\ eq_or_disjoint x res /\
+    as_nat h x < S.prime)
+  (ensures fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_nat h1 res < S.prime /\
+    fmont_as_nat h1 res =
+      S.fmul S.b_coeff (fmont_as_nat h0 x))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_by_b_coeff_sa: res:felem -> x:felem -> Stack unit
   (requires fun h ->
     live h x /\ live h res /\ eq_or_disjoint x res /\
     as_nat h x < S.prime)
