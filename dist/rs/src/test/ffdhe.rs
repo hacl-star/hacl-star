@@ -1,6 +1,9 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
 
+use std::io::stdout;
+use std::io::Write;
+
 const test2048_sk1: [u8; 256] = [
   0x52, 0xb0, 0x3e, 0xaf, 0x37, 0xb5, 0xf2, 0x08, 0x83, 0x7d, 0x1d, 0x90, 0x45,
   0xe6, 0x0e, 0xed, 0xe5, 0x2a, 0x9a, 0x75, 0x8b, 0x86, 0x38, 0x30, 0xdb, 0x57,
@@ -1230,10 +1233,11 @@ pub fn test_ffdhe() {
   let mut ss1 = [0u8; test2048_ss.len()];
   let mut ss2 = [0u8; test2048_ss.len()];
   let mut alg = FFDHE2048;
+  println!("FFDHE2048");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test2048_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test2048_sk2, &mut pk2); 
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test2048_sk1, &mut test2048_pk1, &mut ss1);
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test2048_sk2, &mut test2048_pk2, &mut ss2);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test2048_sk1, &mut test2048_pk2, &mut ss1);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test2048_sk2, &mut test2048_pk1, &mut ss2);
   assert_eq!(pk1, test2048_pk1);
   assert_eq!(pk2, test2048_pk2);
   assert_eq!(ss1, ss2);
@@ -1244,10 +1248,11 @@ pub fn test_ffdhe() {
   let mut ss1 = [0u8; test3072_ss.len()];
   let mut ss2 = [0u8; test3072_ss.len()];
   let mut alg = FFDHE3072;
+  println!("FFDHE3072");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test3072_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test3072_sk2, &mut pk2); 
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test3072_sk1, &mut test3072_pk1, &mut ss1);
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test3072_sk2, &mut test3072_pk2, &mut ss2);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test3072_sk1, &mut test3072_pk2, &mut ss1);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test3072_sk2, &mut test3072_pk1, &mut ss2);
   assert_eq!(pk1, test3072_pk1);
   assert_eq!(pk2, test3072_pk2);
   assert_eq!(ss1, ss2);
@@ -1258,10 +1263,11 @@ pub fn test_ffdhe() {
   let mut ss1 = [0u8; test4096_ss.len()];
   let mut ss2 = [0u8; test4096_ss.len()];
   let mut alg = FFDHE4096;
+  println!("FFDHE4096");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test4096_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test4096_sk2, &mut pk2); 
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test4096_sk1, &mut test4096_pk1, &mut ss1);
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test4096_sk2, &mut test4096_pk2, &mut ss2);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test4096_sk1, &mut test4096_pk2, &mut ss1);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test4096_sk2, &mut test4096_pk1, &mut ss2);
   assert_eq!(pk1, test4096_pk1);
   assert_eq!(pk2, test4096_pk2);
   assert_eq!(ss1, ss2);
@@ -1272,10 +1278,11 @@ pub fn test_ffdhe() {
   let mut ss1 = [0u8; test6144_ss.len()];
   let mut ss2 = [0u8; test6144_ss.len()];
   let mut alg = FFDHE6144;
+  println!("FFDHE6144");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test6144_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test6144_sk2, &mut pk2); 
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test6144_sk1, &mut test6144_pk1, &mut ss1);
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test6144_sk2, &mut test6144_pk2, &mut ss2);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test6144_sk1, &mut test6144_pk2, &mut ss1);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test6144_sk2, &mut test6144_pk1, &mut ss2);
   assert_eq!(pk1, test6144_pk1);
   assert_eq!(pk2, test6144_pk2);
   assert_eq!(ss1, ss2);
@@ -1286,10 +1293,11 @@ pub fn test_ffdhe() {
   let mut ss1 = [0u8; test8192_ss.len()];
   let mut ss2 = [0u8; test8192_ss.len()];
   let mut alg = FFDHE8192;
+  println!("FFDHE8192");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test8192_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test8192_sk2, &mut pk2); 
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test8192_sk1, &mut test8192_pk1, &mut ss1);
-  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test8192_sk2, &mut test8192_pk2, &mut ss2);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test8192_sk1, &mut test8192_pk2, &mut ss1);
+  crate::hacl::ffdhe::ffdhe_shared_secret(alg, &mut test8192_sk2, &mut test8192_pk1, &mut ss2);
   assert_eq!(pk1, test8192_pk1);
   assert_eq!(pk2, test8192_pk2);
   assert_eq!(ss1, ss2);
