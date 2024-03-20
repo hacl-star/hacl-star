@@ -10,7 +10,7 @@ pub mod hash_blake2s;
 pub mod hash_base;
 pub mod hash_sha1;
 pub mod hash_sha2;
-// pub mod hmac; // TODO: review splitting pattern to make sure it borrow-checks
+pub mod hmac;
 // pub mod hmac_blake2s_128;
 // pub mod hmac_blake2b_256;
 pub mod hash_sha3;

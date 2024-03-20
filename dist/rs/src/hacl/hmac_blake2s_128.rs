@@ -52,7 +52,6 @@ pub fn compute_blake2s_128(
         [crate::lib::intvector_intrinsics::vec128_zero; 4usize];
     crate::hacl::hash_blake2s_simd128::init(&mut s, 0u32, 32u32);
     let s0: &mut [crate::lib::intvector_intrinsics::vec128] = &mut s;
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     if data_len == 0u32
     {
         let mut wv: [crate::lib::intvector_intrinsics::vec128; 4] =
@@ -102,6 +101,7 @@ pub fn compute_blake2s_128(
             rem0.1
         )
     };
+    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_blake2s_simd128::finish(32u32, dst1.1, s0);
     let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
     crate::hacl::hash_blake2s_simd128::init(s0, 0u32, 32u32);
