@@ -1,5 +1,6 @@
 {
   bash,
+  cargo,
   dotnet-runtime,
   fetchFromGitHub,
   fstar,
