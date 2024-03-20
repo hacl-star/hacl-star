@@ -13,10 +13,10 @@ pub mod test {
    pub mod chachapoly;
    pub mod curve;
    pub mod ed25519;
+   pub mod hmac;
    // incorrect result
    // pub mod ffdhe;
-   // panic
-   // pub mod p256;
+   pub mod p256;
    pub mod poly1305;
    pub mod rsapss;
    pub mod salsa20;

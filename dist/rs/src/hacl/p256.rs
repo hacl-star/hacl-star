@@ -1045,8 +1045,6 @@
 #[inline] fn point_double(res: &mut [u64], p: &mut [u64]) -> ()
 {
     let mut tmp: [u64; 20] = [0u64; 20usize];
-    let x: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
-    let z: (&mut [u64], &mut [u64]) = x.1.split_at_mut(8usize);
     let x3: (&mut [u64], &mut [u64]) = res.split_at_mut(0usize);
     let y3: (&mut [u64], &mut [u64]) = x3.1.split_at_mut(4usize);
     let z3: (&mut [u64], &mut [u64]) = y3.1.split_at_mut(4usize);
@@ -1055,20 +1053,22 @@
     let t2: (&mut [u64], &mut [u64]) = t1.1.split_at_mut(4usize);
     let t3: (&mut [u64], &mut [u64]) = t2.1.split_at_mut(4usize);
     let t4: (&mut [u64], &mut [u64]) = t3.1.split_at_mut(4usize);
-    let x1: (&mut [u64], &mut [u64]) = z.0.split_at_mut(0usize);
-    let y: (&mut [u64], &mut [u64]) = x1.1.split_at_mut(4usize);
-    let z1: (&mut [u64], &mut [u64]) = z.1.split_at_mut(0usize);
+    let x: (&mut [u64], &mut [u64]) = p.split_at_mut(0usize);
+    let y: (&mut [u64], &mut [u64]) = x.1.split_at_mut(4usize);
+    let z: (&mut [u64], &mut [u64]) = y.1.split_at_mut(4usize);
     fsqr(t1.0, y.0);
-    fsqr(t2.0, y.1);
-    fsqr(t3.0, z1.1);
-    fmul(t4.0, y.0, y.1);
+    fsqr(t2.0, z.0);
+    fsqr(t3.0, z.1);
+    fmul(t4.0, y.0, z.0);
     let mut x_copy: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy)[0usize..4usize]).copy_from_slice(&t4.0[0usize..4usize]);
     let mut x_copy1: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy1)[0usize..4usize]).copy_from_slice(&(&mut x_copy)[0usize..4usize]);
     fadd(t4.0, &mut x_copy1, &mut x_copy);
-    fmul(t4.1, y.1, z1.1);
-    fmul(z3.1, x1.0, z1.0);
+    fmul(t4.1, z.0, z.1);
+    let x0: (&mut [u64], &mut [u64]) = y.0.split_at_mut(0usize);
+    let z0: (&mut [u64], &mut [u64]) = z.1.split_at_mut(0usize);
+    fmul(z3.1, x0.1, z0.1);
     let mut x_copy0: [u64; 4] = [0u64; 4usize];
     ((&mut x_copy0)[0usize..4usize]).copy_from_slice(&z3.1[0usize..4usize]);
     let mut x_copy10: [u64; 4] = [0u64; 4usize];
@@ -1324,6 +1324,7 @@
         };
         let k: u32 = 256u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar, k, 4u32);
+        crate::lowstar::ignore::ignore::<&[u64]>(&mut table);
         ((&mut tmp0)[0usize..12usize]).copy_from_slice(
             &(&mut (&mut table)[0usize..] as &mut [u64])[0usize..12usize]
         );
@@ -1397,6 +1398,9 @@
         };
         let k: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.1, k, 4u32);
+        crate::lowstar::ignore::ignore::<&[u64]>(
+            &crate::hacl::p256_precomptable::precomp_g_pow2_192_table_w4
+        );
         precomp_get_consttime(
             &crate::hacl::p256_precomptable::precomp_g_pow2_192_table_w4,
             bits_l,
@@ -1407,6 +1411,9 @@
         point_add(res, &mut p_copy, &mut tmp);
         let k0: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r4.0, k0, 4u32);
+        crate::lowstar::ignore::ignore::<&[u64]>(
+            &crate::hacl::p256_precomptable::precomp_g_pow2_128_table_w4
+        );
         precomp_get_consttime(
             &crate::hacl::p256_precomptable::precomp_g_pow2_128_table_w4,
             bits_l0,
@@ -1417,6 +1424,9 @@
         point_add(res, &mut p_copy0, &mut tmp);
         let k1: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l1: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r3.0, k1, 4u32);
+        crate::lowstar::ignore::ignore::<&[u64]>(
+            &crate::hacl::p256_precomptable::precomp_g_pow2_64_table_w4
+        );
         precomp_get_consttime(
             &crate::hacl::p256_precomptable::precomp_g_pow2_64_table_w4,
             bits_l1,
@@ -1427,6 +1437,9 @@
         point_add(res, &mut p_copy1, &mut tmp);
         let k2: u32 = 64u32.wrapping_sub(4u32.wrapping_mul(i)).wrapping_sub(4u32);
         let bits_l2: u64 = crate::hacl::bignum_base::bn_get_bits_u64(1u32, r2.0, k2, 4u32);
+        crate::lowstar::ignore::ignore::<&[u64]>(
+            &crate::hacl::p256_precomptable::precomp_basepoint_table_w4
+        );
         precomp_get_consttime(
             &crate::hacl::p256_precomptable::precomp_basepoint_table_w4,
             bits_l2,
@@ -1517,17 +1530,19 @@
         };
         let k: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
         let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar2, k, 5u32);
+        crate::lowstar::ignore::ignore::<&[u64]>(&mut table2);
         let bits_l321: u32 = bits_l as u32;
         let a_bits_l1: (&[u64], &[u64]) =
-            a_bits_l0.1.split_at(
-                bits_l321.wrapping_mul(12u32) as usize - bits_l320.wrapping_mul(12u32) as usize
-            );
+            (&mut table2).split_at(bits_l321.wrapping_mul(12u32) as usize);
         ((&mut tmp1)[0usize..12usize]).copy_from_slice(&a_bits_l1.1[0usize..12usize]);
         let mut p_copy0: [u64; 12] = [0u64; 12usize];
         ((&mut p_copy0)[0usize..12usize]).copy_from_slice(&res[0usize..12usize]);
         point_add(res, &mut p_copy0, &mut tmp1);
         let k0: u32 = 255u32.wrapping_sub(5u32.wrapping_mul(i1)).wrapping_sub(5u32);
         let bits_l0: u64 = crate::hacl::bignum_base::bn_get_bits_u64(4u32, scalar1, k0, 5u32);
+        crate::lowstar::ignore::ignore::<&[u64]>(
+            &crate::hacl::p256_precomptable::precomp_basepoint_table_w5
+        );
         let bits_l322: u32 = bits_l0 as u32;
         let a_bits_l2: &[u64] =
             &(&crate::hacl::p256_precomptable::precomp_basepoint_table_w5)[bits_l322.wrapping_mul(

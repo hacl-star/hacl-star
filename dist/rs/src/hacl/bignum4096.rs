@@ -685,6 +685,7 @@ fn exp_check(n: &mut [u64], a: &mut [u64], bBits: u32, b: &mut [u64]) -> u64
                     4u32
                 );
             let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, k, 4u32);
+            crate::lowstar::ignore::ignore::<&[u64]>(&mut table);
             let bits_l32: u32 = bits_l as u32;
             let a_bits_l: (&[u64], &[u64]) =
                 (&mut table).split_at(bits_l32.wrapping_mul(64u32) as usize);
@@ -858,6 +859,7 @@ fn exp_check(n: &mut [u64], a: &mut [u64], bBits: u32, b: &mut [u64]) -> u64
                     4u32
                 );
             let bits_l: u64 = crate::hacl::bignum_base::bn_get_bits_u64(bLen, b, k, 4u32);
+            crate::lowstar::ignore::ignore::<&[u64]>(&mut table);
             ((&mut tmp0)[0usize..64usize]).copy_from_slice(
                 &(&mut (&mut table)[0usize..] as &mut [u64])[0usize..64usize]
             );

@@ -289,6 +289,7 @@ pub fn exp_consttime(
                     4u32
                 );
             let bits_l: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, k2, 4u32);
+            crate::lowstar::ignore::ignore::<&[u32]>(&mut table);
             ((&mut tmp0)[0usize..len1 as usize]).copy_from_slice(
                 &(&mut (&mut table)[0u32.wrapping_mul(len1) as usize..] as &mut [u32])[0usize..len1
                 as
@@ -455,6 +456,7 @@ pub fn exp_vartime(
                     4u32
                 );
             let bits_l: u32 = crate::hacl::bignum_base::bn_get_bits_u32(bLen, b, k2, 4u32);
+            crate::lowstar::ignore::ignore::<&[u32]>(&mut table);
             let bits_l32: u32 = bits_l;
             let a_bits_l: (&[u32], &[u32]) =
                 (&mut table).split_at(bits_l32.wrapping_mul(len1) as usize);
