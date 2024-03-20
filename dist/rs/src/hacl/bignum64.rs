@@ -64,14 +64,15 @@ pub fn mod_op(len: u32, n: &mut [u64], a: &mut [u64], res: &mut [u64]) -> bool
     (&mut one)[0usize] = 1u64;
     let bit0: u64 = n[0usize] & 1u64;
     let m0: u64 = 0u64.wrapping_sub(bit0);
-    let mut acc: u64 = 0u64;
+    let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
         let beq: u64 = crate::fstar::uint64::eq_mask((&mut one)[i as usize], n[i as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask((&mut one)[i as usize], n[i as usize]);
-        acc = beq & acc | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc)[0usize] =
+            beq & (&mut acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
     };
-    let m1: u64 = acc;
+    let m1: u64 = (&mut acc)[0usize];
     let is_valid_m: u64 = m0 & m1;
     let nBits: u32 =
         64u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u64(len, n) as u32);
@@ -134,33 +135,35 @@ pub fn mod_inv_prime_vartime(len: u32, n: &mut [u64], a: &mut [u64], res: &mut [
     (&mut one)[0usize] = 1u64;
     let bit0: u64 = n[0usize] & 1u64;
     let m0: u64 = 0u64.wrapping_sub(bit0);
-    let mut acc: u64 = 0u64;
+    let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
         let beq: u64 = crate::fstar::uint64::eq_mask((&mut one)[i as usize], n[i as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask((&mut one)[i as usize], n[i as usize]);
-        acc = beq & acc | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc)[0usize] =
+            beq & (&mut acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
     };
-    let m1: u64 = acc;
+    let m1: u64 = (&mut acc)[0usize];
     let m00: u64 = m0 & m1;
     let mut bn_zero: Vec<u64> = vec![0u64; len as usize];
-    let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
+    let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..len
     {
         let uu____0: u64 = crate::fstar::uint64::eq_mask(a[i as usize], (&mut bn_zero)[i as usize]);
-        mask = uu____0 & mask
+        (&mut mask)[0usize] = uu____0 & (&mut mask)[0usize]
     };
-    let mask1: u64 = mask;
+    let mask1: u64 = (&mut mask)[0usize];
     let res1: u64 = mask1;
     let m10: u64 = res1;
-    let mut acc0: u64 = 0u64;
+    let mut acc0: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
         let beq: u64 = crate::fstar::uint64::eq_mask(a[i as usize], n[i as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask(a[i as usize], n[i as usize]);
-        acc0 = beq & acc0 | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc0)[0usize] =
+            beq & (&mut acc0)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
     };
-    let m2: u64 = acc0;
+    let m2: u64 = (&mut acc0)[0usize];
     let is_valid_m: u64 = m00 & ! m10 & m2;
     let nBits: u32 =
         64u32.wrapping_mul(crate::hacl::bignum_base::bn_get_top_index_u64(len, n) as u32);
@@ -179,25 +182,49 @@ pub fn mod_inv_prime_vartime(len: u32, n: &mut [u64], a: &mut [u64], res: &mut [
             {
                 let a1: (&mut [u64], &mut [u64]) = n.split_at_mut(1usize);
                 let res10: (&mut [u64], &mut [u64]) = (&mut n2).split_at_mut(1usize);
-                let mut c: u64 = c0;
+                let mut c: [u64; 1] = [c0; 1usize];
                 for i in 0u32..len.wrapping_sub(1u32).wrapping_div(4u32)
                 {
                     let t1: u64 = a1.1[4u32.wrapping_mul(i) as usize];
                     let res_i: (&mut [u64], &mut [u64]) =
                         res10.1.split_at_mut(4u32.wrapping_mul(i) as usize);
-                    c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t1, 0u64, res_i.1);
+                    (&mut c)[0usize] =
+                        crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                            (&mut c)[0usize],
+                            t1,
+                            0u64,
+                            res_i.1
+                        );
                     ();
                     let t10: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                     let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
-                    c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t10, 0u64, res_i0.1);
+                    (&mut c)[0usize] =
+                        crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                            (&mut c)[0usize],
+                            t10,
+                            0u64,
+                            res_i0.1
+                        );
                     ();
                     let t11: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                     let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
-                    c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t11, 0u64, res_i1.1);
+                    (&mut c)[0usize] =
+                        crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                            (&mut c)[0usize],
+                            t11,
+                            0u64,
+                            res_i1.1
+                        );
                     ();
                     let t12: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                     let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
-                    c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t12, 0u64, res_i2.1);
+                    (&mut c)[0usize] =
+                        crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                            (&mut c)[0usize],
+                            t12,
+                            0u64,
+                            res_i2.1
+                        );
                     ();
                     ();
                     ()
@@ -210,11 +237,17 @@ pub fn mod_inv_prime_vartime(len: u32, n: &mut [u64], a: &mut [u64], res: &mut [
                 {
                     let t1: u64 = a1.1[i as usize];
                     let res_i: (&mut [u64], &mut [u64]) = res10.1.split_at_mut(i as usize);
-                    c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t1, 0u64, res_i.1);
+                    (&mut c)[0usize] =
+                        crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                            (&mut c)[0usize],
+                            t1,
+                            0u64,
+                            res_i.1
+                        );
                     ();
                     ()
                 };
-                let c1: u64 = c;
+                let c1: u64 = (&mut c)[0usize];
                 c1
             }
             else
@@ -327,25 +360,49 @@ pub fn mod_inv_prime_vartime_precomp(
         {
             let a1: (&mut [u64], &mut [u64]) = n.split_at_mut(1usize);
             let res1: (&mut [u64], &mut [u64]) = (&mut n2).split_at_mut(1usize);
-            let mut c: u64 = c0;
+            let mut c: [u64; 1] = [c0; 1usize];
             for i in 0u32..len1.wrapping_sub(1u32).wrapping_div(4u32)
             {
                 let t1: u64 = a1.1[4u32.wrapping_mul(i) as usize];
                 let res_i: (&mut [u64], &mut [u64]) =
                     res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t1, 0u64, res_i.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                        (&mut c)[0usize],
+                        t1,
+                        0u64,
+                        res_i.1
+                    );
                 ();
                 let t10: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u64], &mut [u64]) = res_i.1.split_at_mut(1usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t10, 0u64, res_i0.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                        (&mut c)[0usize],
+                        t10,
+                        0u64,
+                        res_i0.1
+                    );
                 ();
                 let t11: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u64], &mut [u64]) = res_i0.1.split_at_mut(1usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t11, 0u64, res_i1.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                        (&mut c)[0usize],
+                        t11,
+                        0u64,
+                        res_i1.1
+                    );
                 ();
                 let t12: u64 = a1.1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u64], &mut [u64]) = res_i1.1.split_at_mut(1usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t12, 0u64, res_i2.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                        (&mut c)[0usize],
+                        t12,
+                        0u64,
+                        res_i2.1
+                    );
                 ();
                 ();
                 ()
@@ -358,11 +415,17 @@ pub fn mod_inv_prime_vartime_precomp(
             {
                 let t1: u64 = a1.1[i as usize];
                 let res_i: (&mut [u64], &mut [u64]) = res1.1.split_at_mut(i as usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u64(c, t1, 0u64, res_i.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u64(
+                        (&mut c)[0usize],
+                        t1,
+                        0u64,
+                        res_i.1
+                    );
                 ();
                 ()
             };
-            let c1: u64 = c;
+            let c1: u64 = (&mut c)[0usize];
             c1
         }
         else
@@ -487,24 +550,25 @@ pub fn bn_to_bytes_le(len: u32, b: &mut [u64], res: &mut [u8]) -> ()
 
 pub fn lt_mask(len: u32, a: &mut [u64], b: &mut [u64]) -> u64
 {
-    let mut acc: u64 = 0u64;
+    let mut acc: [u64; 1] = [0u64; 1usize];
     for i in 0u32..len
     {
         let beq: u64 = crate::fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask(a[i as usize], b[i as usize]);
-        acc = beq & acc | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc)[0usize] =
+            beq & (&mut acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
     };
-    acc
+    (&mut acc)[0usize]
 }
 
 pub fn eq_mask(len: u32, a: &mut [u64], b: &mut [u64]) -> u64
 {
-    let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
+    let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..len
     {
         let uu____0: u64 = crate::fstar::uint64::eq_mask(a[i as usize], b[i as usize]);
-        mask = uu____0 & mask
+        (&mut mask)[0usize] = uu____0 & (&mut mask)[0usize]
     };
-    let mask1: u64 = mask;
+    let mask1: u64 = (&mut mask)[0usize];
     mask1
 }

@@ -151,7 +151,7 @@ pub fn exp_consttime(
         ((&mut ctx)[len1 as usize..len1 as usize + len1 as usize]).copy_from_slice(
             &(&mut (*uu____0).r2)[0usize..len1 as usize]
         );
-        let mut sw: u32 = 0u32;
+        let mut sw: [u32; 1] = [0u32; 1usize];
         let ctx_n: (&mut [u32], &mut [u32]) = (&mut ctx).split_at_mut(0usize);
         let ctx_r2: (&mut [u32], &mut [u32]) = ctx_n.1.split_at_mut(len1 as usize);
         crate::hacl::bignum::bn_from_mont_u32(len1, ctx_r2.0, (*uu____0).mu, ctx_r2.1, resM);
@@ -161,7 +161,7 @@ pub fn exp_consttime(
             let j: u32 = bBits.wrapping_sub(i).wrapping_sub(1u32).wrapping_rem(32u32);
             let tmp: u32 = b[i1 as usize];
             let bit: u32 = tmp.wrapping_shr(j) & 1u32;
-            let sw1: u32 = bit ^ sw;
+            let sw1: u32 = bit ^ (&mut sw)[0usize];
             for i0 in 0u32..len1
             {
                 let dummy: u32 =
@@ -180,9 +180,9 @@ pub fn exp_consttime(
             );
             let ctx_n1: (&mut [u32], &mut [u32]) = ctx_n0.1.split_at_mut(0usize);
             crate::hacl::bignum::bn_mont_sqr_u32(len1, ctx_n1.1, (*uu____0).mu, resM, resM);
-            sw = bit
+            (&mut sw)[0usize] = bit
         };
-        let sw0: u32 = sw;
+        let sw0: u32 = (&mut sw)[0usize];
         for i in 0u32..len1
         {
             let dummy: u32 = 0u32.wrapping_sub(sw0) & (resM[i as usize] ^ (&mut aMc)[i as usize]);
@@ -494,25 +494,49 @@ pub fn inverse(
         {
             let a1: &mut [u32] = &mut (&mut (*uu____0).n)[1usize..];
             let res1: (&mut [u32], &mut [u32]) = (&mut n2).split_at_mut(1usize);
-            let mut c: u32 = c0;
+            let mut c: [u32; 1] = [c0; 1usize];
             for i in 0u32..len1.wrapping_sub(1u32).wrapping_div(4u32)
             {
                 let t1: u32 = a1[4u32.wrapping_mul(i) as usize];
                 let res_i: (&mut [u32], &mut [u32]) =
                     res1.1.split_at_mut(4u32.wrapping_mul(i) as usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t1, 0u32, res_i.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u32(
+                        (&mut c)[0usize],
+                        t1,
+                        0u32,
+                        res_i.1
+                    );
                 ();
                 let t10: u32 = a1[4u32.wrapping_mul(i).wrapping_add(1u32) as usize];
                 let res_i0: (&mut [u32], &mut [u32]) = res_i.1.split_at_mut(1usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t10, 0u32, res_i0.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u32(
+                        (&mut c)[0usize],
+                        t10,
+                        0u32,
+                        res_i0.1
+                    );
                 ();
                 let t11: u32 = a1[4u32.wrapping_mul(i).wrapping_add(2u32) as usize];
                 let res_i1: (&mut [u32], &mut [u32]) = res_i0.1.split_at_mut(1usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t11, 0u32, res_i1.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u32(
+                        (&mut c)[0usize],
+                        t11,
+                        0u32,
+                        res_i1.1
+                    );
                 ();
                 let t12: u32 = a1[4u32.wrapping_mul(i).wrapping_add(3u32) as usize];
                 let res_i2: (&mut [u32], &mut [u32]) = res_i1.1.split_at_mut(1usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t12, 0u32, res_i2.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u32(
+                        (&mut c)[0usize],
+                        t12,
+                        0u32,
+                        res_i2.1
+                    );
                 ();
                 ();
                 ()
@@ -525,11 +549,17 @@ pub fn inverse(
             {
                 let t1: u32 = a1[i as usize];
                 let res_i: (&mut [u32], &mut [u32]) = res1.1.split_at_mut(i as usize);
-                c = crate::lib::inttypes_intrinsics::sub_borrow_u32(c, t1, 0u32, res_i.1);
+                (&mut c)[0usize] =
+                    crate::lib::inttypes_intrinsics::sub_borrow_u32(
+                        (&mut c)[0usize],
+                        t1,
+                        0u32,
+                        res_i.1
+                    );
                 ();
                 ()
             };
-            let c1: u32 = c;
+            let c1: u32 = (&mut c)[0usize];
             c1
         }
         else

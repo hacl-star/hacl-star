@@ -25,11 +25,11 @@
         let os: (&mut [u32], &mut [u32]) = (&mut m_w).split_at_mut(0usize);
         os.1[i as usize] = x
     };
-    let mut mask: crate::lib::intvector_intrinsics::vec128 =
-        crate::lib::intvector_intrinsics::vec128_zero;
+    let mut mask: [crate::lib::intvector_intrinsics::vec128; 1] =
+        [crate::lib::intvector_intrinsics::vec128_zero; 1usize];
     let wv_14: u32 = if flag { 0xFFFFFFFFu32 } else { 0u32 };
     let wv_15: u32 = 0u32;
-    mask =
+    (&mut mask)[0usize] =
         crate::lib::intvector_intrinsics::vec128_load32s(
             totlen as u32,
             totlen.wrapping_shr(32u32) as u32,
@@ -43,7 +43,8 @@
     &mut [crate::lib::intvector_intrinsics::vec128])
     =
         wv.split_at_mut(3usize);
-    wv3.1[0usize] = crate::lib::intvector_intrinsics::vec128_xor(wv3.1[0usize], mask);
+    wv3.1[0usize] =
+        crate::lib::intvector_intrinsics::vec128_xor(wv3.1[0usize], (&mut mask)[0usize]);
     for i in 0u32..10u32
     {
         let start_idx: u32 = i.wrapping_rem(10u32).wrapping_mul(16u32);

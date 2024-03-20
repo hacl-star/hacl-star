@@ -537,9 +537,9 @@ pub fn encrypt_expand_aes128_gcm_no_check(
         crate::lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_aeshash::aes128_keyhash_init(hkeys_b.0, hkeys_b.1)
         );
-        let mut p: state_s =
-            state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) };
-        let s: &mut [state_s] = &mut [p];
+        let mut p: [state_s; 1] =
+            [state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) }; 1usize];
+        let s: &mut [state_s] = &mut p;
         if false
         {
             crate::lowstar::ignore::ignore::<crate::evercrypt::error::error_code>(
@@ -722,9 +722,9 @@ pub fn encrypt_expand_aes256_gcm_no_check(
         crate::lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_aeshash::aes256_keyhash_init(hkeys_b.0, hkeys_b.1)
         );
-        let mut p: state_s =
-            state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) };
-        let s: &mut [state_s] = &mut [p];
+        let mut p: [state_s; 1] =
+            [state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) }; 1usize];
+        let s: &mut [state_s] = &mut p;
         if false
         {
             crate::lowstar::ignore::ignore::<crate::evercrypt::error::error_code>(
@@ -914,9 +914,9 @@ pub fn encrypt_expand_aes128_gcm(
             crate::lowstar::ignore::ignore::<u64>(
                 crate::vale::stdcalls_x64_aeshash::aes128_keyhash_init(hkeys_b.0, hkeys_b.1)
             );
-            let mut p: state_s =
-                state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) };
-            let s: &mut [state_s] = &mut [p];
+            let mut p: [state_s; 1] =
+                [state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) }; 1usize];
+            let s: &mut [state_s] = &mut p;
             if false
             {
                 crate::lowstar::ignore::ignore::<crate::evercrypt::error::error_code>(
@@ -1112,9 +1112,9 @@ pub fn encrypt_expand_aes256_gcm(
             crate::lowstar::ignore::ignore::<u64>(
                 crate::vale::stdcalls_x64_aeshash::aes256_keyhash_init(hkeys_b.0, hkeys_b.1)
             );
-            let mut p: state_s =
-                state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) };
-            let s: &mut [state_s] = &mut [p];
+            let mut p: [state_s; 1] =
+                [state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) }; 1usize];
+            let s: &mut [state_s] = &mut p;
             if false
             {
                 crate::lowstar::ignore::ignore::<crate::evercrypt::error::error_code>(
@@ -1285,10 +1285,10 @@ pub fn encrypt_expand_chacha20_poly1305(
 {
     crate::lowstar::ignore::ignore::<u32>(iv_len);
     let mut ek: [u8; 32] = [0u8; 32usize];
-    let mut p: state_s =
-        state_s { impl: crate::hacl::spec::impl::Hacl_CHACHA20, ek: Vec::from(ek) };
+    let mut p: [state_s; 1] =
+        [state_s { impl: crate::hacl::spec::impl::Hacl_CHACHA20, ek: Vec::from(ek) }; 1usize];
     ((&mut ek)[0usize..32usize]).copy_from_slice(&k[0usize..32usize]);
-    let s: &mut [state_s] = &mut [p];
+    let s: &mut [state_s] = &mut p;
     let ek0: &mut [u8] = &mut (s[0usize]).ek;
     crate::evercrypt::chacha20poly1305::aead_encrypt(
         ek0,
@@ -1770,9 +1770,9 @@ pub fn decrypt_expand_aes128_gcm_no_check(
         crate::lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_aeshash::aes128_keyhash_init(hkeys_b.0, hkeys_b.1)
         );
-        let mut p: state_s =
-            state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) };
-        let s: &mut [state_s] = &mut [p];
+        let mut p: [state_s; 1] =
+            [state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) }; 1usize];
+        let s: &mut [state_s] = &mut p;
         if false
         { crate::evercrypt::error::error_code::InvalidKey }
         else
@@ -1951,9 +1951,9 @@ pub fn decrypt_expand_aes256_gcm_no_check(
         crate::lowstar::ignore::ignore::<u64>(
             crate::vale::stdcalls_x64_aeshash::aes256_keyhash_init(hkeys_b.0, hkeys_b.1)
         );
-        let mut p: state_s =
-            state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) };
-        let s: &mut [state_s] = &mut [p];
+        let mut p: [state_s; 1] =
+            [state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) }; 1usize];
+        let s: &mut [state_s] = &mut p;
         if false
         { crate::evercrypt::error::error_code::InvalidKey }
         else
@@ -2139,9 +2139,9 @@ pub fn decrypt_expand_aes128_gcm(
             crate::lowstar::ignore::ignore::<u64>(
                 crate::vale::stdcalls_x64_aeshash::aes128_keyhash_init(hkeys_b.0, hkeys_b.1)
             );
-            let mut p: state_s =
-                state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) };
-            let s: &mut [state_s] = &mut [p];
+            let mut p: [state_s; 1] =
+                [state_s { impl: crate::hacl::spec::impl::Vale_AES128, ek: Vec::from(ek) }; 1usize];
+            let s: &mut [state_s] = &mut p;
             if false
             { crate::evercrypt::error::error_code::InvalidKey }
             else
@@ -2331,9 +2331,9 @@ pub fn decrypt_expand_aes256_gcm(
             crate::lowstar::ignore::ignore::<u64>(
                 crate::vale::stdcalls_x64_aeshash::aes256_keyhash_init(hkeys_b.0, hkeys_b.1)
             );
-            let mut p: state_s =
-                state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) };
-            let s: &mut [state_s] = &mut [p];
+            let mut p: [state_s; 1] =
+                [state_s { impl: crate::hacl::spec::impl::Vale_AES256, ek: Vec::from(ek) }; 1usize];
+            let s: &mut [state_s] = &mut p;
             if false
             { crate::evercrypt::error::error_code::InvalidKey }
             else
@@ -2497,10 +2497,10 @@ pub fn decrypt_expand_chacha20_poly1305(
     crate::evercrypt::error::error_code
 {
     let mut ek: [u8; 32] = [0u8; 32usize];
-    let mut p: state_s =
-        state_s { impl: crate::hacl::spec::impl::Hacl_CHACHA20, ek: Vec::from(ek) };
+    let mut p: [state_s; 1] =
+        [state_s { impl: crate::hacl::spec::impl::Hacl_CHACHA20, ek: Vec::from(ek) }; 1usize];
     ((&mut ek)[0usize..32usize]).copy_from_slice(&k[0usize..32usize]);
-    let s: &mut [state_s] = &mut [p];
+    let s: &mut [state_s] = &mut p;
     let r: crate::evercrypt::error::error_code =
         decrypt_chacha20_poly1305(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
     r

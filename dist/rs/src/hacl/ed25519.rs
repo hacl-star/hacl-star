@@ -1823,8 +1823,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let mut s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: Vec::from(block_state), buf: Vec::from(buf), total_len: 0u32 as u64 };
-    let mut p: crate::hacl::streaming_types::state_64 = s;
-    let st: &mut [crate::hacl::streaming_types::state_64] = &mut [p];
+    let mut p: [crate::hacl::streaming_types::state_64; 1] = [s; 1usize];
+    let st: &mut [crate::hacl::streaming_types::state_64] = &mut p;
     let err0: crate::hacl::streaming_types::error_code =
         crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
     let err1: crate::hacl::streaming_types::error_code =
@@ -1849,8 +1849,8 @@ pub fn point_mul(out: &mut [u64], scalar: &mut [u8], q: &mut [u64]) -> ()
     let mut s: crate::hacl::streaming_types::state_64 =
         crate::hacl::streaming_types::state_64
         { block_state: Vec::from(block_state), buf: Vec::from(buf), total_len: 0u32 as u64 };
-    let mut p: crate::hacl::streaming_types::state_64 = s;
-    let st: &mut [crate::hacl::streaming_types::state_64] = &mut [p];
+    let mut p: [crate::hacl::streaming_types::state_64; 1] = [s; 1usize];
+    let st: &mut [crate::hacl::streaming_types::state_64] = &mut p;
     let err0: crate::hacl::streaming_types::error_code =
         crate::hacl::hash_sha2::update_512(st, prefix, 32u32);
     let err1: crate::hacl::streaming_types::error_code =

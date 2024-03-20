@@ -68,13 +68,13 @@ fn secretbox_open_detached(
     let mkey: (&mut [u8], &mut [u8]) = (&mut xkeys).split_at_mut(32usize);
     let mut tag·: [u8; 16] = [0u8; 16usize];
     crate::hacl::mac_poly1305::mac(&mut tag·, c, mlen, mkey.1);
-    let mut res: u8 = 255u8;
+    let mut res: [u8; 1] = [255u8; 1usize];
     for i in 0u32..16u32
     {
         let uu____0: u8 = crate::fstar::uint8::eq_mask(tag[i as usize], (&mut tag·)[i as usize]);
-        res = uu____0 & res
+        (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
     };
-    let z: u8 = res;
+    let z: u8 = (&mut res)[0usize];
     if z == 255u8
     {
         let subkey: (&mut [u8], &mut [u8]) = mkey.0.split_at_mut(0usize);

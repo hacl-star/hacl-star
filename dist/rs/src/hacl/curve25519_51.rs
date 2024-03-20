@@ -344,13 +344,13 @@ pub fn ecdh(out: &mut [u8], r#priv: &mut [u8], r#pub: &mut [u8]) -> bool
 {
     let mut zeros: [u8; 32] = [0u8; 32usize];
     scalarmult(out, r#priv, r#pub);
-    let mut res: u8 = 255u8;
+    let mut res: [u8; 1] = [255u8; 1usize];
     for i in 0u32..32u32
     {
         let uu____0: u8 = crate::fstar::uint8::eq_mask(out[i as usize], (&mut zeros)[i as usize]);
-        res = uu____0 & res
+        (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
     };
-    let z: u8 = res;
+    let z: u8 = (&mut res)[0usize];
     let r: bool = z == 255u8;
     ! r
 }

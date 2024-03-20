@@ -681,14 +681,14 @@ pub fn sealBase(
 {
     let mut ctx_key: [u8; 32] = [0u8; 32usize];
     let mut ctx_nonce: [u8; 12] = [0u8; 12usize];
-    let mut ctx_seq: u64 = 0u64;
+    let mut ctx_seq: [u64; 1] = [0u64; 1usize];
     let mut ctx_exporter: [u8; 32] = [0u8; 32usize];
     let o_ctx: crate::hacl::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s =
         crate::hacl::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s
         {
             ctx_key: &mut ctx_key,
             ctx_nonce: &mut ctx_nonce,
-            ctx_seq: &mut [ctx_seq],
+            ctx_seq: &mut ctx_seq,
             ctx_exporter: &mut ctx_exporter
         };
     let res: u32 = setupBaseS(o_enc, o_ctx, skE, pkR, infolen, info);
@@ -749,14 +749,14 @@ pub fn openBase(
 {
     let mut ctx_key: [u8; 32] = [0u8; 32usize];
     let mut ctx_nonce: [u8; 12] = [0u8; 12usize];
-    let mut ctx_seq: u64 = 0u64;
+    let mut ctx_seq: [u64; 1] = [0u64; 1usize];
     let mut ctx_exporter: [u8; 32] = [0u8; 32usize];
     let o_ctx: crate::hacl::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s =
         crate::hacl::hpke_interface_hacl_impl_hpke_hacl_meta_hpke::context_s
         {
             ctx_key: &mut ctx_key,
             ctx_nonce: &mut ctx_nonce,
-            ctx_seq: &mut [ctx_seq],
+            ctx_seq: &mut ctx_seq,
             ctx_exporter: &mut ctx_exporter
         };
     let res: u32 = setupBaseR(o_ctx, pkE, skR, infolen, info);

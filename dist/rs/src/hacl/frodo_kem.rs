@@ -85,15 +85,15 @@ pub fn shake128_4x(
     {
         for i0 in 0u32..n3
         {
-            let mut res: u16 = 0u16;
+            let mut res: [u16; 1] = [0u16; 1usize];
             for i1 in 0u32..n2
             {
                 let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
                 let bjk: u16 = b[i1.wrapping_mul(n3).wrapping_add(i0) as usize];
-                let res0: u16 = res;
-                res = res0.wrapping_add(aij.wrapping_mul(bjk))
+                let res0: u16 = (&mut res)[0usize];
+                (&mut res)[0usize] = res0.wrapping_add(aij.wrapping_mul(bjk))
             };
-            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = res
+            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = (&mut res)[0usize]
         }
     }
 }
@@ -112,28 +112,28 @@ pub fn shake128_4x(
     {
         for i0 in 0u32..n3
         {
-            let mut res: u16 = 0u16;
+            let mut res: [u16; 1] = [0u16; 1usize];
             for i1 in 0u32..n2
             {
                 let aij: u16 = a[i.wrapping_mul(n2).wrapping_add(i1) as usize];
                 let bjk: u16 = b[i0.wrapping_mul(n2).wrapping_add(i1) as usize];
-                let res0: u16 = res;
-                res = res0.wrapping_add(aij.wrapping_mul(bjk))
+                let res0: u16 = (&mut res)[0usize];
+                (&mut res)[0usize] = res0.wrapping_add(aij.wrapping_mul(bjk))
             };
-            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = res
+            c[i.wrapping_mul(n3).wrapping_add(i0) as usize] = (&mut res)[0usize]
         }
     }
 }
 
 #[inline] pub fn matrix_eq(n1: u32, n2: u32, a: &mut [u16], b: &mut [u16]) -> u16
 {
-    let mut res: u16 = 0xFFFFu16;
+    let mut res: [u16; 1] = [0xFFFFu16; 1usize];
     for i in 0u32..n1.wrapping_mul(n2)
     {
         let uu____0: u16 = crate::fstar::uint16::eq_mask(a[i as usize], b[i as usize]);
-        res = uu____0 & res
+        (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
     };
-    let r: u16 = res;
+    let r: u16 = (&mut res)[0usize];
     r
 }
 
@@ -274,16 +274,16 @@ pub const cdf_table1344: [u16; 7] =
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
-            let mut sample: u16 = 0u16;
+            let mut sample: [u16; 1] = [0u16; 1usize];
             let bound: u32 = 12u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = sample;
+                let sample0: u16 = (&mut sample)[0usize];
                 let ti: u16 = (&cdf_table640)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
-                sample = samplei.wrapping_add(sample0)
+                (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = sample;
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
@@ -305,16 +305,16 @@ pub const cdf_table1344: [u16; 7] =
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
-            let mut sample: u16 = 0u16;
+            let mut sample: [u16; 1] = [0u16; 1usize];
             let bound: u32 = 12u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = sample;
+                let sample0: u16 = (&mut sample)[0usize];
                 let ti: u16 = (&cdf_table640)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
-                sample = samplei.wrapping_add(sample0)
+                (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = sample;
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
@@ -336,16 +336,16 @@ pub const cdf_table1344: [u16; 7] =
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
-            let mut sample: u16 = 0u16;
+            let mut sample: [u16; 1] = [0u16; 1usize];
             let bound: u32 = 10u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = sample;
+                let sample0: u16 = (&mut sample)[0usize];
                 let ti: u16 = (&cdf_table976)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
-                sample = samplei.wrapping_add(sample0)
+                (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = sample;
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
@@ -367,16 +367,16 @@ pub const cdf_table1344: [u16; 7] =
             let uu____0: u16 = u;
             let prnd: u16 = uu____0.wrapping_shr(1u32);
             let sign: u16 = uu____0 & 1u16;
-            let mut sample: u16 = 0u16;
+            let mut sample: [u16; 1] = [0u16; 1usize];
             let bound: u32 = 6u32;
             for i1 in 0u32..bound
             {
-                let sample0: u16 = sample;
+                let sample0: u16 = (&mut sample)[0usize];
                 let ti: u16 = (&cdf_table1344)[i1 as usize];
                 let samplei: u16 = (ti.wrapping_sub(prnd) as u32 as u16).wrapping_shr(15u32);
-                sample = samplei.wrapping_add(sample0)
+                (&mut sample)[0usize] = samplei.wrapping_add(sample0)
             };
-            let sample0: u16 = sample;
+            let sample0: u16 = (&mut sample)[0usize];
             res[i.wrapping_mul(n2).wrapping_add(i0) as usize] =
                 ((! sign).wrapping_add(1u16) ^ sample0).wrapping_add(sign)
         }
@@ -565,7 +565,7 @@ pub fn randombytes_(len: u32, res: &mut [u8]) -> ()
 {
     for i in 0u32..n
     {
-        let mut templong: u64 = 0u64;
+        let mut templong: [u64; 1] = [0u64; 1usize];
         for i0 in 0u32..8u32
         {
             let aik: u16 = a[i.wrapping_mul(n).wrapping_add(i0) as usize];
@@ -573,14 +573,14 @@ pub fn randombytes_(len: u32, res: &mut [u8]) -> ()
                 aik.wrapping_add(1u16.wrapping_shl(logq.wrapping_sub(b).wrapping_sub(1u32))).wrapping_shr(
                     logq.wrapping_sub(b)
                 );
-            templong =
-                templong
+            (&mut templong)[0usize] =
+                (&mut templong)[0usize]
                 |
                 ((res1 & 1u16.wrapping_shl(b).wrapping_sub(1u16)) as u64).wrapping_shl(
                     b.wrapping_mul(i0)
                 )
         };
-        let templong0: u64 = templong;
+        let templong0: u64 = (&mut templong)[0usize];
         let mut v8: [u8; 8] = [0u8; 8usize];
         crate::lowstar::endianness::store64_le(&mut v8, templong0);
         let tmp: (&mut [u8], &mut [u8]) = (&mut v8).split_at_mut(0usize);

@@ -87,14 +87,15 @@
         let i: u32 = bs.wrapping_div(64u32);
         let j: u32 = bs.wrapping_rem(64u32);
         (&mut b2)[i as usize] = (&mut b2)[i as usize] | 1u64.wrapping_shl(j);
-        let mut acc: u64 = 0u64;
+        let mut acc: [u64; 1] = [0u64; 1usize];
         for i0 in 0u32..bLen
         {
             let beq: u64 = crate::fstar::uint64::eq_mask(b[i0 as usize], (&mut b2)[i0 as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask(b[i0 as usize], (&mut b2)[i0 as usize]);
-            acc = beq & acc | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] =
+                beq & (&mut acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
         };
-        let res: u64 = acc;
+        let res: u64 = (&mut acc)[0usize];
         res
     }
 }
@@ -108,14 +109,15 @@
     let i: u32 = modBits.wrapping_sub(1u32).wrapping_div(64u32);
     let j: u32 = modBits.wrapping_sub(1u32).wrapping_rem(64u32);
     (&mut b2)[i as usize] = (&mut b2)[i as usize] | 1u64.wrapping_shl(j);
-    let mut acc: u64 = 0u64;
+    let mut acc: [u64; 1] = [0u64; 1usize];
     for i0 in 0u32..nLen
     {
         let beq: u64 = crate::fstar::uint64::eq_mask((&mut b2)[i0 as usize], n[i0 as usize]);
         let blt: u64 = ! crate::fstar::uint64::gte_mask((&mut b2)[i0 as usize], n[i0 as usize]);
-        acc = beq & acc | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+        (&mut acc)[0usize] =
+            beq & (&mut acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
     };
-    let res: u64 = acc;
+    let res: u64 = (&mut acc)[0usize];
     let m1: u64 = res;
     let m2: u64 = check_num_bits_u64(modBits, n);
     m0 & (m1 & m2)
@@ -125,13 +127,13 @@
 {
     let eLen: u32 = eBits.wrapping_sub(1u32).wrapping_div(64u32).wrapping_add(1u32);
     let mut bn_zero: Vec<u64> = vec![0u64; eLen as usize];
-    let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
+    let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
     for i in 0u32..eLen
     {
         let uu____0: u64 = crate::fstar::uint64::eq_mask(e[i as usize], (&mut bn_zero)[i as usize]);
-        mask = uu____0 & mask
+        (&mut mask)[0usize] = uu____0 & (&mut mask)[0usize]
     };
-    let mask1: u64 = mask;
+    let mask1: u64 = (&mut mask)[0usize];
     let res: u64 = mask1;
     let m0: u64 = res;
     let m1: u64 = check_num_bits_u64(eBits, e);
@@ -232,14 +234,14 @@
         (&mut pad2)[padLen.wrapping_sub(1u32) as usize] = 0x01u8;
         let pad: (&mut [u8], &mut [u8]) = (&mut dbMask).split_at_mut(0usize);
         let salt: (&mut [u8], &mut [u8]) = pad.1.split_at_mut(padLen as usize);
-        let mut res: u8 = 255u8;
+        let mut res: [u8; 1] = [255u8; 1usize];
         for i in 0u32..padLen
         {
             let uu____0: u8 =
                 crate::fstar::uint8::eq_mask(salt.0[i as usize], (&mut pad2)[i as usize]);
-            res = uu____0 & res
+            (&mut res)[0usize] = uu____0 & (&mut res)[0usize]
         };
-        let z: u8 = res;
+        let z: u8 = (&mut res)[0usize];
         if ! (z == 255u8)
         { false }
         else
@@ -251,14 +253,14 @@
             +
             saltLen as usize]).copy_from_slice(&salt.1[0usize..saltLen as usize]);
             hash(a, &mut m1Hash0, m1Len, &mut m1);
-            let mut res0: u8 = 255u8;
+            let mut res0: [u8; 1] = [255u8; 1usize];
             for i in 0u32..hLen
             {
                 let uu____1: u8 =
                     crate::fstar::uint8::eq_mask((&mut m1Hash0)[i as usize], m1Hash.1[i as usize]);
-                res0 = uu____1 & res0
+                (&mut res0)[0usize] = uu____1 & (&mut res0)[0usize]
             };
-            let z0: u8 = res0;
+            let z0: u8 = (&mut res0)[0usize];
             z0 == 255u8
         }
     }
@@ -385,14 +387,14 @@ pub fn rsapss_sign(
             d.0,
             &mut m·
         );
-        let mut mask: u64 = 0xFFFFFFFFFFFFFFFFu64;
+        let mut mask: [u64; 1] = [0xFFFFFFFFFFFFFFFFu64; 1usize];
         for i in 0u32..nLen2
         {
             let uu____0: u64 =
                 crate::fstar::uint64::eq_mask((&mut m)[i as usize], (&mut m·)[i as usize]);
-            mask = uu____0 & mask
+            (&mut mask)[0usize] = uu____0 & (&mut mask)[0usize]
         };
-        let mask1: u64 = mask;
+        let mask1: u64 = (&mut mask)[0usize];
         let eq_m: u64 = mask1;
         for i in 0u32..nLen2
         {
@@ -441,14 +443,15 @@ pub fn rsapss_verify(
         let r2: (&mut [u64], &mut [u64]) = n.1.split_at_mut(nLen2 as usize);
         let e: (&mut [u64], &mut [u64]) =
             r2.1.split_at_mut(nLen2.wrapping_add(nLen2) as usize - nLen2 as usize);
-        let mut acc: u64 = 0u64;
+        let mut acc: [u64; 1] = [0u64; 1usize];
         for i in 0u32..nLen2
         {
             let beq: u64 = crate::fstar::uint64::eq_mask((&mut s)[i as usize], r2.0[i as usize]);
             let blt: u64 = ! crate::fstar::uint64::gte_mask((&mut s)[i as usize], r2.0[i as usize]);
-            acc = beq & acc | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
+            (&mut acc)[0usize] =
+                beq & (&mut acc)[0usize] | ! beq & (blt & 0xFFFFFFFFFFFFFFFFu64 | ! blt & 0u64)
         };
-        let mask: u64 = acc;
+        let mask: u64 = (&mut acc)[0usize];
         let res: bool =
             if mask == 0xFFFFFFFFFFFFFFFFu64
             {

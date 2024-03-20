@@ -464,15 +464,15 @@ pub fn state_permute(s: &mut [u64]) -> ()
             }
         };
         let x: u64 = s[1usize];
-        let mut current: u64 = x;
+        let mut current: [u64; 1] = [x; 1usize];
         for i0 in 0u32..24u32
         {
             let _Y: u32 = (&keccak_piln)[i0 as usize];
             let r: u32 = (&keccak_rotc)[i0 as usize];
             let temp: u64 = s[_Y as usize];
-            let uu____1: u64 = current;
+            let uu____1: u64 = (&mut current)[0usize];
             s[_Y as usize] = uu____1.wrapping_shl(r) | uu____1.wrapping_shr(64u32.wrapping_sub(r));
-            current = temp
+            (&mut current)[0usize] = temp
         };
         for i0 in 0u32..5u32
         {
