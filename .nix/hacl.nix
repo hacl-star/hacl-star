@@ -91,6 +91,7 @@
         time
         runlim
         rustc
+        cargo
       ]
       ++ (with ocamlPackages; [
         ocaml
