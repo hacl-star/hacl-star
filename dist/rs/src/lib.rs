@@ -12,6 +12,7 @@ pub mod test {
    pub mod chacha20;
    pub mod chachapoly;
    pub mod curve;
+   pub mod ecdhp256;
    pub mod ed25519;
    pub mod hmac;
    // incorrect result
