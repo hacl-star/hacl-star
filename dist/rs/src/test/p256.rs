@@ -83,7 +83,7 @@ const sgnt: [u8; 64] = [
 ];
 
 #[test]
-pub fn test_ed() { 
+pub fn test_p256() { 
   let mut sig = [ 0u8; 64 ];
   let mut pk = [ 0u8; 64 ];
 
