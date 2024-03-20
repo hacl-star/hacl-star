@@ -43,7 +43,6 @@ pub fn compute_sha1(
     };
     let mut s: [u32; 5] =
         [0x67452301u32, 0xefcdab89u32, 0x98badcfeu32, 0x10325476u32, 0xc3d2e1f0u32];
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     if data_len == 0u32
     { crate::hacl::hash_sha1::update_last(&mut s, 0u64, &mut ipad, 64u32) }
     else
@@ -74,8 +73,9 @@ pub fn compute_sha1(
             rem_len
         )
     };
+    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_sha1::finish(&mut s, dst1.1);
-    let hash1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
     crate::hacl::hash_sha1::init(&mut s);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 20u32.wrapping_div(block_len);
@@ -146,7 +146,6 @@ pub fn compute_sha2_256(
         os.1[i as usize] = x
     };
     let s: &mut [u32] = &mut st;
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     if data_len == 0u32
     {
         crate::hacl::hash_sha2::sha256_update_last(
@@ -184,8 +183,9 @@ pub fn compute_sha2_256(
             s
         )
     };
+    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_sha2::sha256_finish(s, dst1.1);
-    let hash1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
     crate::hacl::hash_sha2::sha256_init(s);
     let block_len: u32 = 64u32;
     let n_blocks: u32 = 32u32.wrapping_div(block_len);
@@ -256,7 +256,6 @@ pub fn compute_sha2_384(
         os.1[i as usize] = x
     };
     let s: &mut [u64] = &mut st;
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     if data_len == 0u32
     {
         crate::hacl::hash_sha2::sha384_update_last(
@@ -303,8 +302,9 @@ pub fn compute_sha2_384(
             s
         )
     };
+    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_sha2::sha384_finish(s, dst1.1);
-    let hash1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
     crate::hacl::hash_sha2::sha384_init(s);
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 48u32.wrapping_div(block_len);
@@ -381,7 +381,6 @@ pub fn compute_sha2_512(
         os.1[i as usize] = x
     };
     let s: &mut [u64] = &mut st;
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     if data_len == 0u32
     {
         crate::hacl::hash_sha2::sha512_update_last(
@@ -428,8 +427,9 @@ pub fn compute_sha2_512(
             s
         )
     };
+    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_sha2::sha512_finish(s, dst1.1);
-    let hash1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
+    let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
     crate::hacl::hash_sha2::sha512_init(s);
     let block_len: u32 = 128u32;
     let n_blocks: u32 = 64u32.wrapping_div(block_len);
@@ -501,7 +501,6 @@ pub fn compute_blake2s_32(
     let mut s: [u32; 16] = [0u32; 16usize];
     crate::hacl::hash_blake2s::init(&mut s, 0u32, 32u32);
     let s0: &mut [u32] = &mut s;
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     if data_len == 0u32
     {
         let mut wv: [u32; 16] = [0u32; 16usize];
@@ -547,6 +546,7 @@ pub fn compute_blake2s_32(
             rem0.1
         )
     };
+    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_blake2s::finish(32u32, dst1.1, s0);
     let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
     crate::hacl::hash_blake2s::init(s0, 0u32, 32u32);
@@ -626,7 +626,6 @@ pub fn compute_blake2b_32(
     let mut s: [u64; 16] = [0u64; 16usize];
     crate::hacl::hash_blake2b::init(&mut s, 0u32, 64u32);
     let s0: &mut [u64] = &mut s;
-    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     if data_len == 0u32
     {
         let mut wv: [u64; 16] = [0u64; 16usize];
@@ -689,6 +688,7 @@ pub fn compute_blake2b_32(
             rem0.1
         )
     };
+    let dst1: (&mut [u8], &mut [u8]) = (&mut ipad).split_at_mut(0usize);
     crate::hacl::hash_blake2b::finish(64u32, dst1.1, s0);
     let hash1: (&mut [u8], &mut [u8]) = dst1.1.split_at_mut(0usize);
     crate::hacl::hash_blake2b::init(s0, 0u32, 64u32);
