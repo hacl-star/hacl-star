@@ -239,3 +239,20 @@ let point_add out p q =
   let tmp = create (9ul *! nlimb) (u64 0) in
   point_add_no_alloc out p q tmp;
   pop_frame ()
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val point_add_sa (out p q:point) : Stack unit
+  (requires fun h ->
+    live h out /\ live h p /\ live h q /\
+    eq_or_disjoint out p /\ eq_or_disjoint out q /\ eq_or_disjoint p q /\
+    point_inv h p /\ point_inv h q)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_inv h1 out /\
+    point_eval h1 out == S.point_add (point_eval h0 p) (point_eval h0 q))
+
+let point_add_sa out p q =
+  push_frame ();
+  let p_copy = create (size 15) (u64 0) in
+  copy p_copy p;
+  point_add out p_copy q;
+  pop_frame ()
