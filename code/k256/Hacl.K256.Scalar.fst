@@ -297,12 +297,17 @@ let modq_before_final t01 a out =
   push_frame ();
   let m = create 7ul (u64 0) in
   let p = create 5ul (u64 0) in
-  let c0 = mul_pow2_256_minus_q_add 4ul 7ul t01 (sub a 4ul 4ul) (sub a 0ul 4ul) m in
-  let c1 = mul_pow2_256_minus_q_add 3ul 5ul t01 (sub m 4ul 3ul) (sub m 0ul 4ul) p in
-  let c2 = mul_pow2_256_minus_q_add 1ul 4ul t01 (sub p 4ul 1ul) (sub p 0ul 4ul) out in
+  let a0 = sub a 0ul 4ul in
+  let a1 = sub a 4ul 4ul in
+  let c0 = mul_pow2_256_minus_q_add 4ul 7ul t01 a1 a0 m in
+  let m0 = sub m 0ul 4ul in
+  let m1 = sub m 4ul 3ul in
+  let c1 = mul_pow2_256_minus_q_add 3ul 5ul t01 m1 m0 p in
+  let p0 = sub p 0ul 4ul in
+  let p1 = sub p 4ul 1ul in
+  let c2 = mul_pow2_256_minus_q_add 1ul 4ul t01 p1 p0 out in
   pop_frame ();
   c2
-
 
 val modq: out:qelem -> a:lbuffer uint64 (2ul *! qnlimb) -> Stack unit
   (requires fun h ->

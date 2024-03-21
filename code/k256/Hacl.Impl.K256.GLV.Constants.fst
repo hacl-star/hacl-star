@@ -214,7 +214,7 @@ let point_mul_lambda_inplace res =
   let rx, ry, rz = getx res, gety res, getz res in
   let beta = create_felem () in
   make_beta beta;
-  fmul rx beta rx;
+  fmul_a2 rx beta rx;
   pop_frame ()
 
 
