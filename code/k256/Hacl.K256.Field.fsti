@@ -198,6 +198,23 @@ val fadd (out f1 f2:felem) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_felem5 h1 out == BI.add5 (as_felem5 h0 f1) (as_felem5 h0 f2))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fadd_sa1 (out f1 f2:felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_felem5 h1 out == BI.add5 (as_felem5 h0 f1) (as_felem5 h0 f2))
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fadd_sa2 (out f1 f2:felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_felem5 h1 out == BI.add5 (as_felem5 h0 f1) (as_felem5 h0 f2))
 
 val fsub (out f1 f2: felem) (x:uint64) : Stack unit
   (requires fun h ->
@@ -206,6 +223,23 @@ val fsub (out f1 f2: felem) (x:uint64) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_felem5 h1 out == BI.fsub5 (as_felem5 h0 f1) (as_felem5 h0 f2) x)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fsub_sa1 (out f1 f2: felem) (x:uint64) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_felem5 h1 out == BI.fsub5 (as_felem5 h0 f1) (as_felem5 h0 f2) x)
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fsub_sa2 (out f1 f2: felem) (x:uint64) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_felem5 h1 out == BI.fsub5 (as_felem5 h0 f1) (as_felem5 h0 f2) x)
 
 val fmul (out f1 f2: felem) : Stack unit
   (requires fun h ->
@@ -245,6 +279,13 @@ val fnormalize_weak (out f: felem) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_felem5 h1 out == BI.normalize_weak5 (as_felem5 h0 f))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fnormalize_weak_sa (out f: felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_felem5 h1 out == BI.normalize_weak5 (as_felem5 h0 f))
 
 val fnormalize (out f: felem) : Stack unit
   (requires fun h ->

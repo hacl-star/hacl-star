@@ -102,8 +102,8 @@ let to_aff_point p_aff p =
 
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h x);
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h y);
-  fnormalize x x;
-  fnormalize y y;
+  fnormalize_a x x;
+  fnormalize_a y y;
   pop_frame ()
 
 
@@ -117,7 +117,7 @@ let to_aff_point_x x p =
   let h = ST.get () in
   assert (inv_lazy_reduced2 h x);
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h x);
-  fnormalize x x;
+  fnormalize_a x x;
   pop_frame ()
 
 
@@ -140,18 +140,18 @@ let compute_expected_y2 y2 x =
   assert (inv_fully_reduced h0 b /\ as_nat h0 b = S.b);
 
   fsqr y2 x;
-  fmul y2 y2 x;
+  fmul_a y2 y2 x;
   let h1 = ST.get () in
   assert (inv_lazy_reduced2 h1 y2);
   assert (let xn = as_nat h0 x in
     feval h1 y2 == S.fmul (S.fmul xn xn) xn);
 
   BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,1) (as_felem5 h1 y2) (as_felem5 h1 b);
-  fadd y2 y2 b;
+  fadd_sa1 y2 y2 b;
   let h1 = ST.get () in
   assert (felem_fits5 (as_felem5 h1 y2) (2,2,2,2,3));
 
-  fnormalize y2 y2;
+  fnormalize_a y2 y2;
   BL.normalize5_lemma (2,2,2,2,3) (as_felem5 h1 y2);
   pop_frame ()
 
@@ -171,7 +171,7 @@ let is_y_sqr_is_y2_vartime y2 y =
   fsqr y2_comp y;
   let h0 = ST.get () in
   assert (inv_lazy_reduced2 h0 y2);
-  fnormalize y2_comp y2_comp;
+  fnormalize_a y2_comp y2_comp;
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h0 y2_comp);
 
   let res = is_felem_eq_vartime y2 y2_comp in
@@ -220,7 +220,7 @@ let point_negate out p =
   assert (felem_fits5 (as_felem5 h1 oy) (4,4,4,4,4));
   assert (as_nat h1 oy == 4 * S.prime - as_nat h0 py);
   BL.normalize_weak5_lemma (4,4,4,4,4) (as_felem5 h1 oy);
-  fnormalize_weak oy oy;
+  fnormalize_weak_sa oy oy;
   let h2 = ST.get () in
   assert (feval h2 ox == feval h0 px);
   assert (feval h2 oz == feval h0 pz);
@@ -229,10 +229,16 @@ let point_negate out p =
   Math.Lemmas.lemma_mod_sub_distr 0 (as_nat h0 py) S.prime;
   assert (feval h2 oy == (- feval h0 py) % S.prime)
 
+let point_negate_sa out p =
+  push_frame ();
+  let p_copy = create 15ul (u64 0) in
+  copy p_copy p;
+  point_negate out p_copy;
+  pop_frame()
 
 [@CInline]
 let point_negate_conditional_vartime p is_negate =
-  if is_negate then point_negate p p
+  if is_negate then point_negate_sa p p
 
 
 ///  Point load and store functions
@@ -329,7 +335,7 @@ let recover_y_vartime_candidate y x =
   fsqrt y y2;
   let h = ST.get () in
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h y);
-  fnormalize y y;
+  fnormalize_a y y;
 
   let is_y_valid = is_y_sqr_is_y2_vartime y2 y in
   pop_frame ();

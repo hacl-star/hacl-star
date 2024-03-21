@@ -1,4 +1,4 @@
-module Hacl.K256.Field
+ module Hacl.K256.Field
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -180,12 +180,39 @@ let fadd out f1 f2 =
     (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul), f1.(4ul))
     (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul), f2.(4ul)))
 
+let fadd_sa1 out f1 f2 =
+  push_frame ();
+  let f1_copy = create 5ul (u64 0) in
+  copy f1_copy f1;
+  fadd out f1_copy f2;
+  pop_frame ()
+
+let fadd_sa2 out f1 f2 =
+  push_frame ();
+  let f2_copy = create 5ul (u64 0) in
+  copy f2_copy f2;
+  fadd out f1 f2_copy;
+  pop_frame ()
 
 [@CInline]
 let fsub out f1 f2 x =
   make_u52_5 out (BI.fsub5
     (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul), f1.(4ul))
     (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul), f2.(4ul)) x)
+
+let fsub_sa1 out f1 f2 x =
+  push_frame ();
+  let f1_copy = create 5ul (u64 0) in
+  copy f1_copy f1;
+  fsub out f1_copy f2 x;
+  pop_frame ()
+
+let fsub_sa2 out f1 f2 x =
+  push_frame ();
+  let f2_copy = create 5ul (u64 0) in
+  copy f2_copy f2;
+  fsub out f1 f2_copy x;
+  pop_frame ()
 
 
 [@CInline]
@@ -213,6 +240,14 @@ let fsqr out f =
 [@CInline]
 let fnormalize_weak out f =
   make_u52_5 out (BI.normalize_weak5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))
+
+(* HACL-RS *)
+let fnormalize_weak_sa out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fnormalize_weak out f_copy;
+  pop_frame ()
 
 
 [@CInline]

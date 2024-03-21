@@ -203,6 +203,15 @@ val point_negate (out p:point) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\ point_eval h1 out == S.point_negate (point_eval h0 p))
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val point_negate_sa (out p:point) : Stack unit
+  (requires fun h ->
+    live h p /\ live h out /\ eq_or_disjoint p out /\
+    point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    point_inv h1 out /\ point_eval h1 out == S.point_negate (point_eval h0 p))
+
 
 val point_negate_conditional_vartime: p:point -> is_negate:bool -> Stack unit
   (requires fun h -> live h p /\ point_inv h p)
