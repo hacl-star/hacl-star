@@ -80,8 +80,8 @@ let ecdsa_sign_s s k r d_a m =
   QI.qinv kinv k;
 
   qmul s r d_a; // s = r * d_a
-  qadd s z s; // s = z + s
-  qmul s kinv s; // s = kinv * s
+  qadd_sa2 s z s; // s = z + s
+  qmul_sa2 s kinv s; // s = kinv * s
   pop_frame ()
 
 

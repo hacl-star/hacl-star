@@ -80,15 +80,15 @@ val ab_plus_cd (a b c d tmp:felem) : Stack unit
 
 let ab_plus_cd a b c d tmp =
   fmul tmp a b;
-  fmul c c d;
+  fmul_a c c d;
   let h1 = ST.get () in
   assert (inv_lazy_reduced2 h1 tmp);
   assert (inv_lazy_reduced2 h1 c);
   BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h1 tmp) (as_felem5 h1 c);
-  fadd c tmp c;
+  fadd_sa2 c tmp c;
   let h2 = ST.get () in
   assert (felem_fits5 (as_felem5 h2 c) (2,2,2,2,4));
-  fnormalize_weak c c;
+  fnormalize_weak_sa c c;
   BL.normalize_weak5_lemma (2,2,2,2,4) (as_felem5 h2 c)
 
 
@@ -112,15 +112,15 @@ val ab_minus_cd (a b c d tmp:felem) : Stack unit
 
 let ab_minus_cd a b c d tmp =
   fmul tmp a b;
-  fmul c c d;
+  fmul_a c c d;
   let h1 = ST.get () in
   assert (inv_lazy_reduced2 h1 tmp);
   assert (inv_lazy_reduced2 h1 c);
   BL.fsub5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h1 tmp) (as_felem5 h1 c) (u64 2);
-  fsub c tmp c (u64 2);
+  fsub_sa2 c tmp c (u64 2);
   let h2 = ST.get () in
   assert (felem_fits5 (as_felem5 h2 c) (5,5,5,5,6));
-  fnormalize_weak c c;
+  fnormalize_weak_sa c c;
   BL.normalize_weak5_lemma (5,5,5,5,6) (as_felem5 h2 c)
 
 

@@ -39,7 +39,7 @@ let calc_z3 y1 z1 z3 yy tmp =
   //assert (inv_lazy_reduced2 h1 tmp);
   //assert (inv_lazy_reduced2 h1 z3);
 
-  fmul_8_normalize_weak z3 z3 //z3 = z3*8=yy*y*z*8
+  fmul_8_normalize_weak_sa z3 z3 //z3 = z3*8=yy*y*z*8
 
 
 inline_for_extraction noextract
@@ -69,7 +69,7 @@ let calc_bzz9_tmp yy zz bzz3 bzz9 tmp =
   //assert (felem_fits5 (as_felem5 h2 bzz9) (3,3,3,3,6));
 
   BL.fsub5_lemma (1,1,1,1,2) (3,3,3,3,6) (as_felem5 h1 yy) (as_felem5 h2 bzz9) (u64 6);
-  fsub bzz9 yy bzz9 (u64 6); //bzz9 = yy_m_bzz9 = yy-bzz9
+  fsub_sa2 bzz9 yy bzz9 (u64 6); //bzz9 = yy_m_bzz9 = yy-bzz9
   let h3 = ST.get () in
   //assert (felem_fits5 (as_felem5 h3 bzz9) (13,13,13,13,14));
 
@@ -78,7 +78,7 @@ let calc_bzz9_tmp yy zz bzz3 bzz9 tmp =
   BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h1 yy) (as_felem5 h1 bzz3);
   //assert (felem_fits5 (as_felem5 h4 tmp) (2,2,2,2,4));
 
-  fmul tmp bzz9 tmp //tmp = bzz9*tmp = yy_m_bzz9*yy_p_bzz3
+  fmul_a2 tmp bzz9 tmp //tmp = bzz9*tmp = yy_m_bzz9*yy_p_bzz3
 
 
 inline_for_extraction noextract
@@ -92,16 +92,16 @@ val calc_y3 (y3 tmp: felem) : Stack unit
 
 let calc_y3 y3 tmp =
   let h0 = ST.get () in
-  fmul_small_num y3 y3 (u64 168); //y3 = t = (24*b)*y3 = (24*b)*yy_zz
+  fmul_small_num_sa y3 y3 (u64 168); //y3 = t = (24*b)*y3 = (24*b)*yy_zz
   let h1 = ST.get () in
   BL.fmul15_lemma (1,1,1,1,2) 168 (as_felem5 h0 y3) (u64 168);
   //assert (felem_fits5 (as_felem5 h1 y3) (168,168,168,168,336));
 
-  fadd y3 tmp y3;  //y3 = tmp+y3 = yy_m_bzz9*yy_p_bzz3+t
+  fadd_sa2 y3 tmp y3;  //y3 = tmp+y3 = yy_m_bzz9*yy_p_bzz3+t
   let h2 = ST.get () in
   BL.fadd5_lemma (1,1,1,1,2) (168,168,168,168,336) (as_felem5 h0 tmp) (as_felem5 h1 y3);
   //assert (felem_fits5 (as_felem5 h2 y3) (169,169,169,169,338));
-  fnormalize_weak y3 y3;
+  fnormalize_weak_sa y3 y3;
   BL.normalize_weak5_lemma (169,169,169,169,338) (as_felem5 h2 y3)
 
 
@@ -136,12 +136,12 @@ let point_double_no_alloc out p tmp =
   BL.fmul15_lemma (1,1,1,1,2) 2 (as_felem5 h1 x1) (u64 2);
   //assert (felem_fits5 (as_felem5 h2 x3) (2,2,2,2,4));
 
-  fmul x3 x3 y1; //x3 = xy2 = x3*y = (2*x)*y
+  fmul_a x3 x3 y1; //x3 = xy2 = x3*y = (2*x)*y
   calc_z3 y1 z1 z3 yy tmp;
   calc_bzz9_tmp yy zz bzz3 bzz9 tmp;
 
   fmul y3 yy zz; //y3 = yy_zz = yy*zz
-  fmul x3 x3 bzz9; //x3 = x3*bzz9 = xy2*yy_m_bzz9
+  fmul_a x3 x3 bzz9; //x3 = x3*bzz9 = xy2*yy_m_bzz9
   calc_y3 y3 tmp
 
 

@@ -174,6 +174,13 @@ let copy_felem f1 f2 =
 let fmul_small_num out f num =
   make_u52_5 out (BI.mul15 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)) num)
 
+let fmul_small_num_sa out f num =
+  push_frame ();
+  let f_copy = create 5ul (u64 0) in
+  copy f_copy f;
+  fmul_small_num out f_copy num;
+  pop_frame ()
+
 [@CInline]
 let fadd out f1 f2 =
   make_u52_5 out (BI.add5
@@ -230,6 +237,14 @@ let fmul_a out f1 f2 =
   fmul out f1_copy f2;
   pop_frame()
 
+let fmul_a2 out f1 f2 =
+  push_frame ();
+  let f2_copy = create nlimb (u64 0) in
+  copy f2_copy f2;
+  fmul out f1 f2_copy;
+  pop_frame()
+
+
 [@CInline]
 let fsqr out f =
   let h0 = ST.get () in
@@ -281,6 +296,14 @@ let fmul_8_normalize_weak out f =
   assert (felem_fits5 (as_felem5 h1 out) (8,8,8,8,16));
   fnormalize_weak out out;
   BL.normalize_weak5_lemma (8,8,8,8,16) (as_felem5 h1 out)
+
+(* HACL-RS *)
+let fmul_8_normalize_weak_sa out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fmul_8_normalize_weak out f_copy;
+  pop_frame ()
 
 
 [@CInline]

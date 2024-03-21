@@ -234,6 +234,21 @@ let qadd out f1 f2 =
   pop_frame ()
 
 
+let qadd_sa1 out f1 f2 =
+  push_frame();
+  let f1_copy = create 4ul (u64 0) in
+  copy f1_copy f1;
+  qadd out f1_copy f2;
+  pop_frame ()
+
+let qadd_sa2 out f1 f2 =
+  push_frame();
+  let f2_copy = create 4ul (u64 0) in
+  copy f2_copy f2;
+  qadd out f1 f2_copy;
+  pop_frame ()
+
+
 val mul_pow2_256_minus_q_add:
     len:size_t
   -> resLen:size_t{2 + v len <= v resLen /\ 4 <= v resLen}

@@ -190,6 +190,14 @@ val fmul_small_num (out f:felem) (num:uint64) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_felem5 h1 out == BI.mul15 (as_felem5 h0 f) num)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_small_num_sa (out f:felem) (num:uint64) : Stack unit
+  (requires fun h -> // v num <= 8 is a maximum value for point addition and doubling
+    live h f /\ live h out /\ eq_or_disjoint out f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_felem5 h1 out == BI.mul15 (as_felem5 h0 f) num)
+
 
 val fadd (out f1 f2:felem) : Stack unit
   (requires fun h ->
@@ -263,6 +271,18 @@ val fmul_a (out f1 f2: felem) : Stack unit
     feval h1 out == feval h0 f1 * feval h0 f2 % S.prime /\
     inv_lazy_reduced2 h1 out)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_a2 (out f1 f2: felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
+    felem_fits5 (as_felem5 h f1) (64,64,64,64,64) /\
+    felem_fits5 (as_felem5 h f2) (64,64,64,64,64))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    feval h1 out == feval h0 f1 * feval h0 f2 % S.prime /\
+    inv_lazy_reduced2 h1 out)
+
 
 val fsqr (out f: felem) : Stack unit
   (requires fun h ->
@@ -313,6 +333,16 @@ val fmul_3b_normalize_weak (out f:felem) : Stack unit
 
 inline_for_extraction noextract
 val fmul_8_normalize_weak (out f:felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f /\
+    inv_lazy_reduced2 h f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    feval h1 out == S.fmul 8 (feval h0 f) /\
+    inv_lazy_reduced2 h1 out)
+
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_8_normalize_weak_sa (out f:felem) : Stack unit
   (requires fun h ->
     live h out /\ live h f /\ eq_or_disjoint out f /\
     inv_lazy_reduced2 h f)
