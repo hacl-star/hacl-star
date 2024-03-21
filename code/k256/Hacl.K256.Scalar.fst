@@ -326,6 +326,19 @@ let qmul out f1 f2 =
   modq out tmp;
   pop_frame ()
 
+let qmul_sa1 out f1 f2 =
+  push_frame();
+  let f1_copy = create 4ul (u64 0) in
+  copy f1_copy f1;
+  qmul out f1_copy f2;
+  pop_frame ()
+
+let qmul_sa2 out f1 f2 =
+  push_frame();
+  let f2_copy = create 4ul (u64 0) in
+  copy f2_copy f2;
+  qmul out f1 f2_copy;
+  pop_frame ()
 
 [@CInline]
 let qsqr out f =

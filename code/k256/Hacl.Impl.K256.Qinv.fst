@@ -178,17 +178,17 @@ val qinv2 (x_11 x_1011 x_1101 x6 x8 x14: qelem) : Stack unit
 let qinv2 x_11 x_1011 x_1101 x6 x8 x14 =
   let h0 = ST.get () in
   qsquare_times x6 x_1101 2ul;
-  qmul x6 x6 x_1011;
+  qmul_sa1 x6 x6 x_1011;
   let h1 = ST.get () in
   assert (qas_nat h1 x6 == S.qmul (SI.qsquare_times (qas_nat h0 x_1101) 2) (qas_nat h0 x_1011));
 
   qsquare_times x8 x6 2ul;
-  qmul x8 x8 x_11;
+  qmul_sa1 x8 x8 x_11;
   let h2 = ST.get () in
   assert (qas_nat h2 x8 == S.qmul (SI.qsquare_times (qas_nat h1 x6) 2) (qas_nat h0 x_11));
 
   qsquare_times x14 x8 6ul;
-  qmul x14 x14 x6;
+  qmul_sa1 x14 x14 x6;
   let h3 = ST.get () in
   assert (qas_nat h3 x14 == S.qmul (SI.qsquare_times (qas_nat h2 x8) 6) (qas_nat h1 x6))
 
@@ -208,22 +208,22 @@ let qinv3 tmp x14 =
 
   let h0 = ST.get () in
   qsquare_times tmp x14 14ul;
-  qmul tmp tmp x14; //tmp = x28
+  qmul_sa1 tmp tmp x14; //tmp = x28
   let h1 = ST.get () in
   assert (qas_nat h1 tmp == S.qmul (SI.qsquare_times (qas_nat h0 x14) 14) (qas_nat h0 x14));
 
   qsquare_times x56 tmp 28ul;
-  qmul x56 x56 tmp;
+  qmul_sa1 x56 x56 tmp;
   let h2 = ST.get () in
   assert (qas_nat h2 x56 == S.qmul (SI.qsquare_times (qas_nat h1 tmp) 28) (qas_nat h1 tmp));
 
   qsquare_times tmp x56 56ul; //tmp = r0
-  qmul tmp tmp x56;
+  qmul_sa1 tmp tmp x56;
   let h3 = ST.get () in
   assert (qas_nat h3 tmp == S.qmul (SI.qsquare_times (qas_nat h2 x56) 56) (qas_nat h2 x56));
 
   qsquare_times_in_place tmp 14ul; //tmp = r1
-  qmul tmp tmp x14;
+  qmul_sa1 tmp tmp x14;
   let h4 = ST.get () in
   assert (qas_nat h4 tmp == S.qmul (SI.qsquare_times (qas_nat h3 tmp) 14) (qas_nat h0 x14));
   pop_frame ()
@@ -244,37 +244,37 @@ val qinv4 (tmp x_101 x_111 x_1011: qelem) : Stack unit
 let qinv4 tmp x_101 x_111 x_1011 =
   let h0 = ST.get () in
   qsquare_times_in_place tmp 3ul;
-  qmul tmp tmp x_101; //tmp = r2
+  qmul_sa1 tmp tmp x_101; //tmp = r2
   let h1 = ST.get () in
   assert (qas_nat h1 tmp == S.qmul (SI.qsquare_times (qas_nat h0 tmp) 3) (qas_nat h0 x_101));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_111; //tmp = r3
+  qmul_sa1 tmp tmp x_111; //tmp = r3
   let h2 = ST.get () in
   assert (qas_nat h2 tmp == S.qmul (SI.qsquare_times (qas_nat h1 tmp) 4) (qas_nat h0 x_111));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_101; //tmp = r4
+  qmul_sa1 tmp tmp x_101; //tmp = r4
   let h3 = ST.get () in
   assert (qas_nat h3 tmp == S.qmul (SI.qsquare_times (qas_nat h2 tmp) 4) (qas_nat h0 x_101));
 
   qsquare_times_in_place tmp 5ul;
-  qmul tmp tmp x_1011; //tmp = r5
+  qmul_sa1 tmp tmp x_1011; //tmp = r5
   let h4 = ST.get () in
   assert (qas_nat h4 tmp == S.qmul (SI.qsquare_times (qas_nat h3 tmp) 5) (qas_nat h0 x_1011));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_1011; //tmp = r6
+  qmul_sa1 tmp tmp x_1011; //tmp = r6
   let h5 = ST.get () in
   assert (qas_nat h5 tmp == S.qmul (SI.qsquare_times (qas_nat h4 tmp) 4) (qas_nat h0 x_1011));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_111; //tmp = r7
+  qmul_sa1 tmp tmp x_111; //tmp = r7
   let h6 = ST.get () in
   assert (qas_nat h6 tmp == S.qmul (SI.qsquare_times (qas_nat h5 tmp) 4) (qas_nat h0 x_111));
 
   qsquare_times_in_place tmp 5ul;
-  qmul tmp tmp x_111; //tmp = r8
+  qmul_sa1 tmp tmp x_111; //tmp = r8
   let h7 = ST.get () in
   assert (qas_nat h7 tmp == S.qmul (SI.qsquare_times (qas_nat h6 tmp) 5) (qas_nat h0 x_111))
 
@@ -296,37 +296,37 @@ val qinv5 (tmp x_101 x_111 x_1001 x_1101: qelem) : Stack unit
 let qinv5 tmp x_101 x_111 x_1001 x_1101 =
   let h0 = ST.get () in
   qsquare_times_in_place tmp 6ul;
-  qmul tmp tmp x_1101; //tmp = r9
+  qmul_sa1 tmp tmp x_1101; //tmp = r9
   let h1 = ST.get () in
   assert (qas_nat h1 tmp == S.qmul (SI.qsquare_times (qas_nat h0 tmp) 6) (qas_nat h0 x_1101));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_101; //tmp = r10
+  qmul_sa1 tmp tmp x_101; //tmp = r10
   let h2 = ST.get () in
   assert (qas_nat h2 tmp == S.qmul (SI.qsquare_times (qas_nat h1 tmp) 4) (qas_nat h0 x_101));
 
   qsquare_times_in_place tmp 3ul;
-  qmul tmp tmp x_111; //tmp = r11
+  qmul_sa1 tmp tmp x_111; //tmp = r11
   let h3 = ST.get () in
   assert (qas_nat h3 tmp == S.qmul (SI.qsquare_times (qas_nat h2 tmp) 3) (qas_nat h0 x_111));
 
   qsquare_times_in_place tmp 5ul;
-  qmul tmp tmp x_1001; //tmp = r12
+  qmul_sa1 tmp tmp x_1001; //tmp = r12
   let h4 = ST.get () in
   assert (qas_nat h4 tmp == S.qmul (SI.qsquare_times (qas_nat h3 tmp) 5) (qas_nat h0 x_1001));
 
   qsquare_times_in_place tmp 6ul;
-  qmul tmp tmp x_101; //tmp = r13
+  qmul_sa1 tmp tmp x_101; //tmp = r13
   let h5 = ST.get () in
   assert (qas_nat h5 tmp == S.qmul (SI.qsquare_times (qas_nat h4 tmp) 6) (qas_nat h0 x_101));
 
   qsquare_times_in_place tmp 10ul;
-  qmul tmp tmp x_111; //tmp = r14
+  qmul_sa1 tmp tmp x_111; //tmp = r14
   let h6 = ST.get () in
   assert (qas_nat h6 tmp == S.qmul (SI.qsquare_times (qas_nat h5 tmp) 10) (qas_nat h0 x_111));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_111; //tmp = r15
+  qmul_sa1 tmp tmp x_111; //tmp = r15
   let h7 = ST.get () in
   assert (qas_nat h7 tmp == S.qmul (SI.qsquare_times (qas_nat h6 tmp) 4) (qas_nat h0 x_111))
 
@@ -349,42 +349,42 @@ val qinv6 (tmp x8 x_11 x_1001 x_1011 x_1101: qelem) : Stack unit
 let qinv6 tmp x8 x_11 x_1001 x_1011 x_1101 =
   let h0 = ST.get () in
   qsquare_times_in_place tmp 9ul;
-  qmul tmp tmp x8; //tmp = r16
+  qmul_sa1 tmp tmp x8; //tmp = r16
   let h1 = ST.get () in
   assert (qas_nat h1 tmp == S.qmul (SI.qsquare_times (qas_nat h0 tmp) 9) (qas_nat h0 x8));
 
   qsquare_times_in_place tmp 5ul;
-  qmul tmp tmp x_1001; //tmp = r17
+  qmul_sa1 tmp tmp x_1001; //tmp = r17
   let h2 = ST.get () in
   assert (qas_nat h2 tmp == S.qmul (SI.qsquare_times (qas_nat h1 tmp) 5) (qas_nat h0 x_1001));
 
   qsquare_times_in_place tmp 6ul;
-  qmul tmp tmp x_1011; //tmp = r18
+  qmul_sa1 tmp tmp x_1011; //tmp = r18
   let h3 = ST.get () in
   assert (qas_nat h3 tmp == S.qmul (SI.qsquare_times (qas_nat h2 tmp) 6) (qas_nat h0 x_1011));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_1101; //tmp = r19
+  qmul_sa1 tmp tmp x_1101; //tmp = r19
   let h4 = ST.get () in
   assert (qas_nat h4 tmp == S.qmul (SI.qsquare_times (qas_nat h3 tmp) 4) (qas_nat h0 x_1101));
 
   qsquare_times_in_place tmp 5ul;
-  qmul tmp tmp x_11; //tmp = r20
+  qmul_sa1 tmp tmp x_11; //tmp = r20
   let h5 = ST.get () in
   assert (qas_nat h5 tmp == S.qmul (SI.qsquare_times (qas_nat h4 tmp) 5) (qas_nat h0 x_11));
 
   qsquare_times_in_place tmp 6ul;
-  qmul tmp tmp x_1101; //tmp = r21
+  qmul_sa1 tmp tmp x_1101; //tmp = r21
   let h6 = ST.get () in
   assert (qas_nat h6 tmp == S.qmul (SI.qsquare_times (qas_nat h5 tmp) 6) (qas_nat h0 x_1101));
 
   qsquare_times_in_place tmp 10ul;
-  qmul tmp tmp x_1101; //tmp = r22
+  qmul_sa1 tmp tmp x_1101; //tmp = r22
   let h7 = ST.get () in
   assert (qas_nat h7 tmp == S.qmul (SI.qsquare_times (qas_nat h6 tmp) 10) (qas_nat h0 x_1101));
 
   qsquare_times_in_place tmp 4ul;
-  qmul tmp tmp x_1001; //tmp = r23
+  qmul_sa1 tmp tmp x_1001; //tmp = r23
   let h8 = ST.get () in
   assert (qas_nat h8 tmp == S.qmul (SI.qsquare_times (qas_nat h7 tmp) 4) (qas_nat h0 x_1001))
 
@@ -403,12 +403,12 @@ val qinv7 (tmp f x6: qelem) : Stack unit
 let qinv7 tmp f x6 =
   let h0 = ST.get () in
   qsquare_times_in_place tmp 6ul;
-  qmul tmp tmp f; //tmp = r23
+  qmul_sa1 tmp tmp f; //tmp = r23
   let h1 = ST.get () in
   assert (qas_nat h1 tmp == S.qmul (SI.qsquare_times (qas_nat h0 tmp) 6) (qas_nat h0 f));
 
   qsquare_times_in_place tmp 8ul;
-  qmul tmp tmp x6; //tmp = r24
+  qmul_sa1 tmp tmp x6; //tmp = r24
   let h2 = ST.get () in
   assert (qas_nat h2 tmp == S.qmul (SI.qsquare_times (qas_nat h1 tmp) 8) (qas_nat h0 x6))
 
