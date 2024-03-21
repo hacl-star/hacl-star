@@ -315,6 +315,35 @@ let bn_add #t aLen a bLen b res =
 
 
 inline_for_extraction noextract
+val bn_add_in_place:
+    #t:limb_t
+  -> aLen:size_t
+  -> bLen:size_t{v bLen <= v aLen}
+  -> b:lbignum t bLen
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h ->
+    live h b /\ live h res /\ disjoint b res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_add (as_seq h0 res) (as_seq h0 b) in
+    c_out == c /\ as_seq h1 res == r))
+
+let bn_add_in_place #t aLen bLen b res =
+  let h0 = ST.get () in
+  let res0 = sub res 0ul bLen in
+  let c0 = bn_add_eq_len bLen res0 b res0 in
+  let h1 = ST.get () in
+  if bLen <. aLen then begin
+    [@inline_let] let rLen = aLen -! bLen in
+    let res1 = sub res bLen rLen in
+    let c1 = bn_add_carry rLen res1 c0 res1 in
+    let h2 = ST.get () in
+    LSeq.lemma_concat2 (v bLen) (as_seq h1 res0) (v rLen) (as_seq h2 res1) (as_seq h2 res);
+    c1 end
+  else c0
+
+
+inline_for_extraction noextract
 val bn_add1:
     #t:limb_t
   -> aLen:size_t{0 < v aLen}

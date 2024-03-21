@@ -19,6 +19,9 @@ let bn_sub_eq_len #t aLen a b res =
 let bn_add #t aLen a bLen b res =
   Hacl.Bignum.Addition.bn_add aLen a bLen b res
 
+let bn_add_in_place #t aLen bLen b res =
+  Hacl.Bignum.Addition.bn_add_in_place aLen bLen b res
+
 let bn_sub #t aLen a bLen b res =
   Hacl.Bignum.Addition.bn_sub aLen a bLen b res
 

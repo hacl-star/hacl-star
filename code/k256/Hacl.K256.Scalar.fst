@@ -30,6 +30,9 @@ include Hacl.Spec.K256.Scalar
 [@CInline]
 let bn_add : BN.bn_add_st U64 = BN.bn_add
 
+[@CInline]
+let bn_add_sa : BN.bn_add_in_place_st U64 = BN.bn_add_in_place
+
 //inline_for_extraction noextract
 //let kn = BN.mk_runtime_bn U64 qnlimb
 
@@ -255,8 +258,8 @@ let mul_pow2_256_minus_q_add len resLen t01 a e res =
   let tmp = create (len +! 2ul) (u64 0) in
   BN.bn_mul len 2ul a t01 tmp;
   update_sub res 2ul len a;
-  let _ = bn_add resLen res (len +! 2ul) tmp res in
-  let c = bn_add resLen res 4ul e res in
+  let _ = bn_add_sa resLen (len +! 2ul) tmp res in
+  let c = bn_add_sa resLen 4ul e res in
   pop_frame ();
   c
 
