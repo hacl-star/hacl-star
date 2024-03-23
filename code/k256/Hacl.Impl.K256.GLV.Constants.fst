@@ -180,11 +180,11 @@ let scalar_split_lambda r1 r2 k =
 
   make_minus_b1 tmp1; // tmp1 = minus_b1
   make_minus_b2 tmp2; // tmp2 = minus_b2
-  qmul r1 r1 tmp1; // r1 = c1 = c1 * minus_b1
-  qmul r2 r2 tmp2; // r2 = c2 = c2 * minus_b2
+  qmul_sa1 r1 r1 tmp1; // r1 = c1 = c1 * minus_b1
+  qmul_sa1 r2 r2 tmp2; // r2 = c2 = c2 * minus_b2
 
   make_minus_lambda tmp1; // tmp1 = minus_lambda
-  qadd r2 r1 r2; // r2 = r2 = c1 + c2
+  qadd_sa2 r2 r1 r2; // r2 = r2 = c1 + c2
   qmul tmp2 r2 tmp1; // tmp2 = r2 * minus_lambda
   qadd r1 k tmp2; // r1 = r1 = k + r2 * minus_lambda
   pop_frame ()

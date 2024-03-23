@@ -46,7 +46,7 @@ let point_add_xy_pairs x1 y1 x2 y2 xx yy tmp xy_pairs =
   let h1 = ST.get () in
   assert (felem_fits5 (as_felem5 h1 xy_pairs) (2,2,2,2,4));
   assert (felem_fits5 (as_felem5 h1 tmp) (2,2,2,2,4));
-  fmul xy_pairs xy_pairs tmp;
+  fmul_a xy_pairs xy_pairs tmp;
   let h2 = ST.get () in
   assert (felem_fits5 (as_felem5 h2 xy_pairs) (1,1,1,1,2));
   BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h2 xx) (as_felem5 h2 yy);
@@ -54,7 +54,7 @@ let point_add_xy_pairs x1 y1 x2 y2 xx yy tmp xy_pairs =
   let h3 = ST.get () in
   assert (felem_fits5 (as_felem5 h3 tmp) (2,2,2,2,4));
 
-  fsub xy_pairs xy_pairs tmp (u64 4);
+  fsub_sa1 xy_pairs xy_pairs tmp (u64 4);
   let h4 = ST.get () in
   BL.fsub5_lemma (1,1,1,1,2) (2,2,2,2,4) (as_felem5 h3 xy_pairs) (as_felem5 h3 tmp) (u64 4);
   assert (felem_fits5 (as_felem5 h4 xy_pairs) (9,9,9,9,10))
