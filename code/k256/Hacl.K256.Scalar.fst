@@ -48,6 +48,15 @@ let add_mod4: BN.bn_add_mod_n_st U64 qnlimb =
 let sub_mod4: BN.bn_sub_mod_n_st U64 qnlimb =
   BN.bn_sub_mod_n qnlimb
 
+(* HACL-RS *)
+inline_for_extraction noextract
+let sub_mod4_a: BN.bn_sub_mod_n_st U64 qnlimb = fun n a b res ->
+  push_frame();
+  let b_copy = create qnlimb (u64 0) in
+  copy b_copy b;
+  sub_mod4 n a b_copy res;
+  pop_frame ()
+
 let mul4 (a:BD.lbignum U64 qnlimb) : BN.bn_karatsuba_mul_st U64 qnlimb a =
   BN.bn_mul qnlimb qnlimb a
 
@@ -60,7 +69,7 @@ instance kn: BN.bn U64 = {
   BN.add = add4;
   BN.sub = sub4;
   BN.add_mod_n = add_mod4;
-  BN.sub_mod_n = sub_mod4;
+  BN.sub_mod_n = sub_mod4_a;
   BN.mul = mul4;
   BN.sqr = sqr4
 }
@@ -374,6 +383,12 @@ let qsqr out f =
   modq out tmp;
   pop_frame ()
 
+let qsqr_sa out f =
+  push_frame();
+  let f_copy = create 4ul (u64 0) in
+  copy f_copy f;
+  qsqr out f_copy;
+  pop_frame ()
 
 [@CInline]
 let qnegate_conditional_vartime f is_negate =

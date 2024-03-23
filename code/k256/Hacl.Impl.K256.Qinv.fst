@@ -54,7 +54,7 @@ let mul_mod ctx x y xy = qmul xy x y
 
 inline_for_extraction noextract
 val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_k256_scalar_comm_monoid
-let sqr_mod ctx x xx = qsqr xx x
+let sqr_mod ctx x xx = qsqr_sa xx x
 
 
 inline_for_extraction noextract

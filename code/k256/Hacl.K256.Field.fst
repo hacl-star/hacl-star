@@ -284,9 +284,16 @@ let fmul_3b_normalize_weak out f =
   let h1 = ST.get () in
   BL.fmul15_lemma (9,9,9,9,10) 21 (as_felem5 h0 f) (u64 21);
   assert (felem_fits5 (as_felem5 h1 out) (189,189,189,189,210));
-  fnormalize_weak out out;
+  fnormalize_weak_sa out out;
   BL.normalize_weak5_lemma (189,189,189,189,210) (as_felem5 h1 out)
 
+(* HACL-RS *)
+let fmul_3b_normalize_weak_sa out f =
+  push_frame ();
+  let f_copy = create nlimb (u64 0) in
+  copy f_copy f;
+  fmul_3b_normalize_weak out f_copy;
+  pop_frame ()
 
 let fmul_8_normalize_weak out f =
   let h0 = ST.get () in
@@ -294,7 +301,7 @@ let fmul_8_normalize_weak out f =
   let h1 = ST.get () in
   BL.fmul15_lemma (1,1,1,1,2) 8 (as_felem5 h0 f) (u64 8);
   assert (felem_fits5 (as_felem5 h1 out) (8,8,8,8,16));
-  fnormalize_weak out out;
+  fnormalize_weak_sa out out;
   BL.normalize_weak5_lemma (8,8,8,8,16) (as_felem5 h1 out)
 
 (* HACL-RS *)

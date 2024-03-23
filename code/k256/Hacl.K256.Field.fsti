@@ -330,6 +330,15 @@ val fmul_3b_normalize_weak (out f:felem) : Stack unit
     feval h1 out == S.fmul (S.fmul 3 S.b) (feval h0 f) /\
     inv_lazy_reduced2 h1 out)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val fmul_3b_normalize_weak_sa (out f:felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f /\
+    felem_fits5 (as_felem5 h f) (9,9,9,9,10))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    feval h1 out == S.fmul (S.fmul 3 S.b) (feval h0 f) /\
+    inv_lazy_reduced2 h1 out)
 
 inline_for_extraction noextract
 val fmul_8_normalize_weak (out f:felem) : Stack unit

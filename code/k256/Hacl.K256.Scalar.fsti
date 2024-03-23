@@ -217,6 +217,16 @@ val qsqr (out f: qelem) : Stack unit
     qas_nat h1 out == S.qmul (qas_nat h0 f) (qas_nat h0 f) /\
     qe_lt_q h1 out)
 
+(* HACL-RS *)
+inline_for_extraction noextract
+val qsqr_sa (out f: qelem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f /\
+    qe_lt_q h f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == S.qmul (qas_nat h0 f) (qas_nat h0 f) /\
+    qe_lt_q h1 out)
+
 
 val qnegate_conditional_vartime (f:qelem) (is_negate:bool) : Stack unit
   (requires fun h -> live h f /\ qe_lt_q h f)
