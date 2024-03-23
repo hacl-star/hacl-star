@@ -38,7 +38,7 @@ pub mod p256_precomptable;
 pub mod p256;
 pub mod bignum_k256;
 pub mod k256_precomptable;
-// pub mod k256_ecdsa; // TODO: same as p256
+pub mod k256_ecdsa;
 // pub mod frodo_kem; // TODO: missing randomness implementation
 pub mod hpke_interface_hacl_impl_hpke_hacl_meta_hpke;
 pub mod rsapss;
