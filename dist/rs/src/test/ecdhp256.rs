@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const px0_0: [u8; 32] = [
   0x70, 0x0c, 0x48, 0xf7, 0x7f, 0x56, 0x58, 0x4c,
@@ -235,6 +236,7 @@ pub fn test_ecdhp256 () {
   (pk[32usize..64usize]).copy_from_slice(&mut py0_0);
   let mut result = [0u8; 64];
   let valid = crate::hacl::p256::dh_responder(&mut result, &mut pk, &mut scalar0);
+  assert!(valid);
   assert_eq!(result[0usize..32usize], result_0);
 
   // Test 1
@@ -251,6 +253,7 @@ pub fn test_ecdhp256 () {
   (pk[32usize..64usize]).copy_from_slice(&mut py0_1);
   let mut result = [0u8; 64];
   let valid = crate::hacl::p256::dh_responder(&mut result, &mut pk, &mut scalar1);
+  assert!(valid);
   assert_eq!(result[0usize..32usize], result_1);
 
   // Test 2
@@ -267,6 +270,7 @@ pub fn test_ecdhp256 () {
   (pk[32usize..64usize]).copy_from_slice(&mut py0_2);
   let mut result = [0u8; 64];
   let valid = crate::hacl::p256::dh_responder(&mut result, &mut pk, &mut scalar2);
+  assert!(valid);
   assert_eq!(result[0usize..32usize], result_2);
 
   // Test 3
@@ -283,6 +287,7 @@ pub fn test_ecdhp256 () {
   (pk[32usize..64usize]).copy_from_slice(&mut py0_3);
   let mut result = [0u8; 64];
   let valid = crate::hacl::p256::dh_responder(&mut result, &mut pk, &mut scalar3);
+  assert!(valid);
   assert_eq!(result[0usize..32usize], result_3);
 
   // Test 4
@@ -299,6 +304,7 @@ pub fn test_ecdhp256 () {
   (pk[32usize..64usize]).copy_from_slice(&mut py0_4);
   let mut result = [0u8; 64];
   let valid = crate::hacl::p256::dh_responder(&mut result, &mut pk, &mut scalar4);
+  assert!(valid);
   assert_eq!(result[0usize..32usize], result_4);
 
   // Test 5
@@ -315,5 +321,6 @@ pub fn test_ecdhp256 () {
   (pk[32usize..64usize]).copy_from_slice(&mut py0_5);
   let mut result = [0u8; 64];
   let valid = crate::hacl::p256::dh_responder(&mut result, &mut pk, &mut scalar5);
+  assert!(valid);
   assert_eq!(result[0usize..32usize], result_5);
 }

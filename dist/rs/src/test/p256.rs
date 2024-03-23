@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const msg: [u8; 128] = [
   89u8,  5u8,   35u8,  136u8, 119u8,

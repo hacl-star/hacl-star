@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const input1: [u8; 114] = [
   0x4c, 0x61, 0x64, 0x69, 0x65, 0x73, 0x20, 0x61, 0x6e, 0x64, 0x20, 0x47, 0x65,
@@ -36,7 +37,7 @@ const nonce1: [u8; 12] = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4a, 0x00,
 #[test]
 pub fn test_chacha20() {
   let mut cipher = [ 0u8; input1.len() ];
-  let mut ctr = 1u32;
+  let ctr = 1u32;
   crate::hacl::chacha20::chacha20_encrypt(input1.len() as u32, &mut cipher, &mut input1, &mut key1, &mut nonce1, ctr);
   assert_eq!(cipher, cipher1);
 } 

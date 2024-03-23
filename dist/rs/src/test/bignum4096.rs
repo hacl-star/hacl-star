@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const test1_nBytes: [u8; 512] = [
   0xf6, 0x1,  0xbe, 0xd,  0xcc, 0xd0, 0x4a, 0xa4, 0xb,  0x12, 0xf3, 0xf1, 0x91,
@@ -273,43 +274,43 @@ const test1_res: [u64; 64] = [
   13441964274290108391u64
 ];
 
-fn mod_exp_bytes_be_precomp(nBytes: &mut [u8], aBytes: &mut [u8], bBits: u32, bBytes: &mut [u8], resBytes: &mut [u8]) {
+fn mod_exp_bytes_be_precomp(n_bytes: &mut [u8], a_bytes: &mut [u8], b_bits: u32, b_bytes: &mut [u8], res_bytes: &mut [u8]) {
   let mut res = [ 0u64; 64 ];
-  let mut bBytesLen = (bBits - 1u32) / 8u32 + 1u32;
+  let b_bytes_len = (b_bits - 1u32) / 8u32 + 1u32;
 
-  let mut a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, aBytes);
-  let mut n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, nBytes);
-  let mut b = crate::hacl::bignum4096::new_bn_from_bytes_be(bBytesLen, bBytes);
+  let mut a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, a_bytes);
+  let mut n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, n_bytes);
+  let mut b = crate::hacl::bignum4096::new_bn_from_bytes_be(b_bytes_len, b_bytes);
   let mut k = crate::hacl::bignum4096::mont_ctx_init(&mut n);
 
-  crate::hacl::bignum4096::mod_exp_vartime_precomp(&mut k, &mut a, bBits, &mut b, &mut res);
-  crate::hacl::bignum4096::bn_to_bytes_be(&mut res, resBytes);
+  crate::hacl::bignum4096::mod_exp_vartime_precomp(&mut k, &mut a, b_bits, &mut b, &mut res);
+  crate::hacl::bignum4096::bn_to_bytes_be(&mut res, res_bytes);
 }
 
-fn mod_exp_bytes_be(nBytes: &mut [u8], aBytes: &mut [u8], bBits: u32, bBytes: &mut [u8], resBytes: &mut [u8]) {
+fn mod_exp_bytes_be(n_bytes: &mut [u8], a_bytes: &mut [u8], b_bits: u32, b_bytes: &mut [u8], res_bytes: &mut [u8]) {
   let mut res = [ 0u64; 64 ];
-  let mut bBytesLen = (bBits - 1u32) / 8u32 + 1u32;
+  let b_bytes_len = (b_bits - 1u32) / 8u32 + 1u32;
 
-  let mut a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, aBytes);
-  let mut n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, nBytes);
-  let mut b = crate::hacl::bignum4096::new_bn_from_bytes_be(bBytesLen, bBytes);
+  let mut a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, a_bytes);
+  let mut n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, n_bytes);
+  let mut b = crate::hacl::bignum4096::new_bn_from_bytes_be(b_bytes_len, b_bytes);
 
-  crate::hacl::bignum4096::mod_exp_vartime(&mut n, &mut a, bBits, &mut b, &mut res);
-  crate::hacl::bignum4096::bn_to_bytes_be(&mut res, resBytes);
+  crate::hacl::bignum4096::mod_exp_vartime(&mut n, &mut a, b_bits, &mut b, &mut res);
+  crate::hacl::bignum4096::bn_to_bytes_be(&mut res, res_bytes);
 }
 
 #[test]
 pub fn test_bignum () {
 
   // test bytes_be_precomp
-  let mut resBytes = [ 0u8; 512 ];
-  mod_exp_bytes_be_precomp(&mut test1_nBytes, &mut test1_aBytes, 4096, &mut test1_bBytes, &mut resBytes);
-  assert_eq!(resBytes, test1_resBytes);
+  let mut res_bytes = [ 0u8; 512 ];
+  mod_exp_bytes_be_precomp(&mut test1_nBytes, &mut test1_aBytes, 4096, &mut test1_bBytes, &mut res_bytes);
+  assert_eq!(res_bytes, test1_resBytes);
 
   // test bytes_be
-  let mut resBytes = [ 0u8; 512 ];
-  mod_exp_bytes_be(&mut test1_nBytes, &mut test1_aBytes, 4096, &mut test1_bBytes, &mut resBytes);
-  assert_eq!(resBytes, test1_resBytes);
+  let mut res_bytes = [ 0u8; 512 ];
+  mod_exp_bytes_be(&mut test1_nBytes, &mut test1_aBytes, 4096, &mut test1_bBytes, &mut res_bytes);
+  assert_eq!(res_bytes, test1_resBytes);
 
   // test mod_exp_vartime
   let mut res = [ 0u64; 64 ];
