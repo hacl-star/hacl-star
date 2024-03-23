@@ -15,8 +15,7 @@ pub mod test {
    pub mod ecdhp256;
    pub mod ed25519;
    pub mod hmac;
-   // incorrect result
-   // pub mod ffdhe;
+   pub mod ffdhe;
    pub mod p256;
    pub mod poly1305;
    pub mod rsapss;
