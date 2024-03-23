@@ -275,7 +275,7 @@ const test1_res: [u64; 64] = [
 
 fn mod_exp_bytes_be_precomp(nBytes: &mut [u8], aBytes: &mut [u8], bBits: u32, bBytes: &mut [u8], resBytes: &mut [u8]) {
   let mut res = [ 0u64; 64 ];
-  let mut bBytesLen = (bBits - 1u32) / 8u32 + 1u32;
+  let bBytesLen = (bBits - 1u32) / 8u32 + 1u32;
 
   let mut a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, aBytes);
   let mut n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, nBytes);
@@ -288,7 +288,7 @@ fn mod_exp_bytes_be_precomp(nBytes: &mut [u8], aBytes: &mut [u8], bBits: u32, bB
 
 fn mod_exp_bytes_be(nBytes: &mut [u8], aBytes: &mut [u8], bBits: u32, bBytes: &mut [u8], resBytes: &mut [u8]) {
   let mut res = [ 0u64; 64 ];
-  let mut bBytesLen = (bBits - 1u32) / 8u32 + 1u32;
+  let bBytesLen = (bBits - 1u32) / 8u32 + 1u32;
 
   let mut a = crate::hacl::bignum4096::new_bn_from_bytes_be(512, aBytes);
   let mut n = crate::hacl::bignum4096::new_bn_from_bytes_be(512, nBytes);
