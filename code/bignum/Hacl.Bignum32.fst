@@ -42,7 +42,7 @@ let sqr len a res =
 let bn_slow_precomp (len:BN.meta_len t_limbs) : BR.bn_mod_slow_precomp_st t_limbs len =
   BR.bn_mod_slow_precomp (kam len)
 
-let mod_op len n a res =
+let mod len n a res =
   BS.mk_bn_mod_slow_safe len (BR.mk_bn_mod_slow len (kam len).AM.precomp (bn_slow_precomp len)) n a res
 
 let mod_exp_vartime len n a bBits b res =

@@ -85,7 +85,7 @@ val sqr: len:BN.meta_len t_limbs -> a:lbignum t_limbs len -> BN.bn_karatsuba_sqr
   true otherwise.
    • 1 < n
    • n % 2 = 1 "]
-val mod_op: len:BN.meta_len t_limbs -> BS.bn_mod_slow_safe_st t_limbs len
+val mod: len:BN.meta_len t_limbs -> BS.bn_mod_slow_safe_st t_limbs len
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
