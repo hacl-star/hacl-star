@@ -117,11 +117,16 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-hpke
+test-unstaged: test-handwritten test-c test-ml test-rust test-hpke
 
 ifeq ($(shell uname -m),x86_64)
 test-unstaged: vale_testInline
 endif
+
+# potentially racing with compile-rust but cargo has a built-in lock, so we're
+# cool
+test-rust: dist/rs/src/Makefile.basic
+	cd dist/rs && cargo test
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
