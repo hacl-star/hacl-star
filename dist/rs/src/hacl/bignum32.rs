@@ -57,7 +57,7 @@ pub fn sqr(len: u32, a: &mut [u32], res: &mut [u32]) -> ()
     crate::hacl::bignum::bn_to_mont_u32(len, n, mu, r2, &mut a_mod, res)
 }
 
-pub fn mod_op(len: u32, n: &mut [u32], a: &mut [u32], res: &mut [u32]) -> bool
+pub fn r#mod(len: u32, n: &mut [u32], a: &mut [u32], res: &mut [u32]) -> bool
 {
     let mut one: Vec<u32> = vec![0u32; len as usize];
     ((&mut one)[0usize..len as usize]).copy_from_slice(&vec![0u32; len as usize]);

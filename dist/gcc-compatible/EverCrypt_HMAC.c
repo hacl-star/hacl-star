@@ -124,7 +124,6 @@ EverCrypt_HMAC_compute_sha1(
     opad[i] = (uint32_t)xi ^ (uint32_t)yi;
   }
   uint32_t s[5U] = { 0x67452301U, 0xefcdab89U, 0x98badcfeU, 0x10325476U, 0xc3d2e1f0U };
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA1_update_last(s, 0ULL, ipad, 64U);
@@ -153,6 +152,7 @@ EverCrypt_HMAC_compute_sha1(
     Hacl_Hash_SHA1_update_multi(s, full_blocks, n_blocks);
     Hacl_Hash_SHA1_update_last(s, (uint64_t)64U + (uint64_t)full_blocks_len, rem, rem_len);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_SHA1_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA1_init(s);
@@ -240,7 +240,6 @@ EverCrypt_HMAC_compute_sha2_256(
     uint32_t *os = st;
     os[i] = x;);
   uint32_t *s = st;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA2_sha256_update_last(0ULL + (uint64_t)64U, 64U, ipad, s);
@@ -272,6 +271,7 @@ EverCrypt_HMAC_compute_sha2_256(
       rem,
       s);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_SHA2_sha256_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA2_sha256_init(s);
@@ -362,7 +362,6 @@ EverCrypt_HMAC_compute_sha2_384(
     uint64_t *os = st;
     os[i] = x;);
   uint64_t *s = st;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA2_sha384_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
@@ -400,6 +399,7 @@ EverCrypt_HMAC_compute_sha2_384(
       rem,
       s);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_SHA2_sha384_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA2_sha384_init(s);
@@ -492,7 +492,6 @@ EverCrypt_HMAC_compute_sha2_512(
     uint64_t *os = st;
     os[i] = x;);
   uint64_t *s = st;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     Hacl_Hash_SHA2_sha512_update_last(FStar_UInt128_add(FStar_UInt128_uint64_to_uint128(0ULL),
@@ -530,6 +529,7 @@ EverCrypt_HMAC_compute_sha2_512(
       rem,
       s);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_SHA2_sha512_finish(s, dst1);
   uint8_t *hash1 = ipad;
   Hacl_Hash_SHA2_sha512_init(s);
@@ -616,7 +616,6 @@ EverCrypt_HMAC_compute_blake2s(
   uint32_t s[16U] = { 0U };
   Hacl_Hash_Blake2s_init(s, 0U, 32U);
   uint32_t *s0 = s;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     uint32_t wv[16U] = { 0U };
@@ -659,6 +658,7 @@ EverCrypt_HMAC_compute_blake2s(
       rem_len,
       rem);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_Blake2s_finish(32U, dst1, s0);
   uint8_t *hash1 = ipad;
   Hacl_Hash_Blake2s_init(s0, 0U, 32U);
@@ -753,7 +753,6 @@ EverCrypt_HMAC_compute_blake2b(
   uint64_t s[16U] = { 0U };
   Hacl_Hash_Blake2b_init(s, 0U, 64U);
   uint64_t *s0 = s;
-  uint8_t *dst1 = ipad;
   if (data_len == 0U)
   {
     uint64_t wv[16U] = { 0U };
@@ -797,6 +796,7 @@ EverCrypt_HMAC_compute_blake2b(
       rem_len,
       rem);
   }
+  uint8_t *dst1 = ipad;
   Hacl_Hash_Blake2b_finish(64U, dst1, s0);
   uint8_t *hash1 = ipad;
   Hacl_Hash_Blake2b_init(s0, 0U, 64U);

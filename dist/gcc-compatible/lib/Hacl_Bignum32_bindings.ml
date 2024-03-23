@@ -36,8 +36,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Bignum32_sqr"
         (uint32_t @->
            ((ptr uint32_t) @-> ((ptr uint32_t) @-> (returning void))))
-    let hacl_Bignum32_mod_op =
-      foreign "Hacl_Bignum32_mod_op"
+    let hacl_Bignum32_mod =
+      foreign "Hacl_Bignum32_mod"
         (uint32_t @->
            ((ptr uint32_t) @->
               ((ptr uint32_t) @-> ((ptr uint32_t) @-> (returning bool)))))

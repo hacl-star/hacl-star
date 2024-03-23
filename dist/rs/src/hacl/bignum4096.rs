@@ -462,7 +462,7 @@ pub fn sqr(a: &mut [u64], res: &mut [u64]) -> ()
     to(n, mu, r2, &mut a_mod, res)
 }
 
-pub fn mod_op(n: &mut [u64], a: &mut [u64], res: &mut [u64]) -> bool
+pub fn r#mod(n: &mut [u64], a: &mut [u64], res: &mut [u64]) -> bool
 {
     let mut one: [u64; 64] = [0u64; 64usize];
     ((&mut one)[0usize..64usize]).copy_from_slice(&[0u64; 64usize]);

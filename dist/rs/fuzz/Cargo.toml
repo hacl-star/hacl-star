@@ -1,0 +1,42 @@
+[package]
+name = "hacl-rs-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.hacl-rs]
+path = ".."
+
+[[bin]]
+name = "fuzz_target_1"
+path = "fuzz_targets/fuzz_target_1.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sha3"
+path = "fuzz_targets/sha3.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "curve25519"
+path = "fuzz_targets/curve25519.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "p256"
+path = "fuzz_targets/p256.rs"
+test = false
+doc = false
+bench = false

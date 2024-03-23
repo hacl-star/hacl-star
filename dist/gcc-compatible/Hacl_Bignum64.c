@@ -164,7 +164,7 @@ Write `a mod n` in `res`.
    • 1 < n
    • n % 2 = 1 
 */
-bool Hacl_Bignum64_mod_op(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
+bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t one[len];

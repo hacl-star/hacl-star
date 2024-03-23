@@ -125,36 +125,32 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
     uint32_t *y = m_st + 4U;
     uint32_t *z = m_st + 8U;
     uint32_t *w = m_st + 12U;
-    uint32_t a = 0U;
-    uint32_t b0 = 1U;
-    uint32_t c0 = 2U;
-    uint32_t d10 = 3U;
-    uint32_t *wv_a0 = wv + a * 4U;
-    uint32_t *wv_b0 = wv + b0 * 4U;
+    uint32_t *wv_a = wv;
+    uint32_t *wv_b0 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint32_t x1 = wv_a0[i] + wv_b0[i];
+      uint32_t x1 = wv_a[i] + wv_b0[i];
+      uint32_t *os = wv_a;
+      os[i] = x1;);
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint32_t x1 = wv_a[i] + x[i];
+      uint32_t *os = wv_a;
+      os[i] = x1;);
+    uint32_t *wv_a0 = wv + 12U;
+    uint32_t *wv_b1 = wv;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint32_t x1 = wv_a0[i] ^ wv_b1[i];
       uint32_t *os = wv_a0;
       os[i] = x1;);
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint32_t x1 = wv_a0[i] + x[i];
-      uint32_t *os = wv_a0;
-      os[i] = x1;);
-    uint32_t *wv_a1 = wv + d10 * 4U;
-    uint32_t *wv_b1 = wv + a * 4U;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint32_t x1 = wv_a1[i] ^ wv_b1[i];
-      uint32_t *os = wv_a1;
-      os[i] = x1;);
-    uint32_t *r10 = wv_a1;
+    uint32_t *r10 = wv_a0;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -163,25 +159,25 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x10 = x1 >> 16U | x1 << 16U;
       uint32_t *os = r10;
       os[i] = x10;);
-    uint32_t *wv_a2 = wv + c0 * 4U;
-    uint32_t *wv_b2 = wv + d10 * 4U;
+    uint32_t *wv_a1 = wv + 8U;
+    uint32_t *wv_b2 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint32_t x1 = wv_a2[i] + wv_b2[i];
+      uint32_t x1 = wv_a1[i] + wv_b2[i];
+      uint32_t *os = wv_a1;
+      os[i] = x1;);
+    uint32_t *wv_a2 = wv + 4U;
+    uint32_t *wv_b3 = wv + 8U;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint32_t x1 = wv_a2[i] ^ wv_b3[i];
       uint32_t *os = wv_a2;
       os[i] = x1;);
-    uint32_t *wv_a3 = wv + b0 * 4U;
-    uint32_t *wv_b3 = wv + c0 * 4U;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint32_t x1 = wv_a3[i] ^ wv_b3[i];
-      uint32_t *os = wv_a3;
-      os[i] = x1;);
-    uint32_t *r12 = wv_a3;
+    uint32_t *r12 = wv_a2;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -190,32 +186,32 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x10 = x1 >> 12U | x1 << 20U;
       uint32_t *os = r12;
       os[i] = x10;);
-    uint32_t *wv_a4 = wv + a * 4U;
-    uint32_t *wv_b4 = wv + b0 * 4U;
+    uint32_t *wv_a3 = wv;
+    uint32_t *wv_b4 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint32_t x1 = wv_a4[i] + wv_b4[i];
+      uint32_t x1 = wv_a3[i] + wv_b4[i];
+      uint32_t *os = wv_a3;
+      os[i] = x1;);
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint32_t x1 = wv_a3[i] + y[i];
+      uint32_t *os = wv_a3;
+      os[i] = x1;);
+    uint32_t *wv_a4 = wv + 12U;
+    uint32_t *wv_b5 = wv;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint32_t x1 = wv_a4[i] ^ wv_b5[i];
       uint32_t *os = wv_a4;
       os[i] = x1;);
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint32_t x1 = wv_a4[i] + y[i];
-      uint32_t *os = wv_a4;
-      os[i] = x1;);
-    uint32_t *wv_a5 = wv + d10 * 4U;
-    uint32_t *wv_b5 = wv + a * 4U;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint32_t x1 = wv_a5[i] ^ wv_b5[i];
-      uint32_t *os = wv_a5;
-      os[i] = x1;);
-    uint32_t *r13 = wv_a5;
+    uint32_t *r13 = wv_a4;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -224,25 +220,25 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x10 = x1 >> 8U | x1 << 24U;
       uint32_t *os = r13;
       os[i] = x10;);
-    uint32_t *wv_a6 = wv + c0 * 4U;
-    uint32_t *wv_b6 = wv + d10 * 4U;
+    uint32_t *wv_a5 = wv + 8U;
+    uint32_t *wv_b6 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint32_t x1 = wv_a6[i] + wv_b6[i];
+      uint32_t x1 = wv_a5[i] + wv_b6[i];
+      uint32_t *os = wv_a5;
+      os[i] = x1;);
+    uint32_t *wv_a6 = wv + 4U;
+    uint32_t *wv_b7 = wv + 8U;
+    KRML_MAYBE_FOR4(i,
+      0U,
+      4U,
+      1U,
+      uint32_t x1 = wv_a6[i] ^ wv_b7[i];
       uint32_t *os = wv_a6;
       os[i] = x1;);
-    uint32_t *wv_a7 = wv + b0 * 4U;
-    uint32_t *wv_b7 = wv + c0 * 4U;
-    KRML_MAYBE_FOR4(i,
-      0U,
-      4U,
-      1U,
-      uint32_t x1 = wv_a7[i] ^ wv_b7[i];
-      uint32_t *os = wv_a7;
-      os[i] = x1;);
-    uint32_t *r14 = wv_a7;
+    uint32_t *r14 = wv_a6;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -281,28 +277,24 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
     r112[1U] = x12;
     r112[2U] = x22;
     r112[3U] = x32;
-    uint32_t a0 = 0U;
-    uint32_t b = 1U;
-    uint32_t c = 2U;
-    uint32_t d1 = 3U;
-    uint32_t *wv_a = wv + a0 * 4U;
-    uint32_t *wv_b8 = wv + b * 4U;
+    uint32_t *wv_a7 = wv;
+    uint32_t *wv_b8 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint32_t x1 = wv_a[i] + wv_b8[i];
-      uint32_t *os = wv_a;
+      uint32_t x1 = wv_a7[i] + wv_b8[i];
+      uint32_t *os = wv_a7;
       os[i] = x1;);
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
       1U,
-      uint32_t x1 = wv_a[i] + z[i];
-      uint32_t *os = wv_a;
+      uint32_t x1 = wv_a7[i] + z[i];
+      uint32_t *os = wv_a7;
       os[i] = x1;);
-    uint32_t *wv_a8 = wv + d1 * 4U;
-    uint32_t *wv_b9 = wv + a0 * 4U;
+    uint32_t *wv_a8 = wv + 12U;
+    uint32_t *wv_b9 = wv;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -319,8 +311,8 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x13 = x1 >> 16U | x1 << 16U;
       uint32_t *os = r16;
       os[i] = x13;);
-    uint32_t *wv_a9 = wv + c * 4U;
-    uint32_t *wv_b10 = wv + d1 * 4U;
+    uint32_t *wv_a9 = wv + 8U;
+    uint32_t *wv_b10 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -328,8 +320,8 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x1 = wv_a9[i] + wv_b10[i];
       uint32_t *os = wv_a9;
       os[i] = x1;);
-    uint32_t *wv_a10 = wv + b * 4U;
-    uint32_t *wv_b11 = wv + c * 4U;
+    uint32_t *wv_a10 = wv + 4U;
+    uint32_t *wv_b11 = wv + 8U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -346,8 +338,8 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x13 = x1 >> 12U | x1 << 20U;
       uint32_t *os = r17;
       os[i] = x13;);
-    uint32_t *wv_a11 = wv + a0 * 4U;
-    uint32_t *wv_b12 = wv + b * 4U;
+    uint32_t *wv_a11 = wv;
+    uint32_t *wv_b12 = wv + 4U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -362,8 +354,8 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x1 = wv_a11[i] + w[i];
       uint32_t *os = wv_a11;
       os[i] = x1;);
-    uint32_t *wv_a12 = wv + d1 * 4U;
-    uint32_t *wv_b13 = wv + a0 * 4U;
+    uint32_t *wv_a12 = wv + 12U;
+    uint32_t *wv_b13 = wv;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -380,8 +372,8 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x13 = x1 >> 8U | x1 << 24U;
       uint32_t *os = r18;
       os[i] = x13;);
-    uint32_t *wv_a13 = wv + c * 4U;
-    uint32_t *wv_b14 = wv + d1 * 4U;
+    uint32_t *wv_a13 = wv + 8U;
+    uint32_t *wv_b14 = wv + 12U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -389,8 +381,8 @@ update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, uint8_t *
       uint32_t x1 = wv_a13[i] + wv_b14[i];
       uint32_t *os = wv_a13;
       os[i] = x1;);
-    uint32_t *wv_a14 = wv + b * 4U;
-    uint32_t *wv_b = wv + c * 4U;
+    uint32_t *wv_a14 = wv + 4U;
+    uint32_t *wv_b = wv + 8U;
     KRML_MAYBE_FOR4(i,
       0U,
       4U,
@@ -665,6 +657,7 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
   uint32_t *row1 = hash + 4U;
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store32_le(first + i * 4U, row0[i]););
   KRML_MAYBE_FOR4(i, 0U, 4U, 1U, store32_le(second + i * 4U, row1[i]););
+  KRML_MAYBE_UNUSED_VAR(b);
   uint8_t *final = b;
   memcpy(output, final, nn * sizeof (uint8_t));
   Lib_Memzero0_memzero(b, 32U, uint8_t, void *);

@@ -129,7 +129,7 @@ Write `a mod n` in `res`.
    • 1 < n
    • n % 2 = 1
 */
-bool Hacl_Bignum256_mod_op(uint64_t *n, uint64_t *a, uint64_t *res);
+bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
 
 /**
 Write `a ^ b mod n` in `res`.

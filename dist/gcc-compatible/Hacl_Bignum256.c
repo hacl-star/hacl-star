@@ -512,7 +512,7 @@ Write `a mod n` in `res`.
    • 1 < n
    • n % 2 = 1
 */
-bool Hacl_Bignum256_mod_op(uint64_t *n, uint64_t *a, uint64_t *res)
+bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
 {
   uint64_t one[4U] = { 0U };
   memset(one, 0U, 4U * sizeof (uint64_t));
@@ -628,6 +628,7 @@ exp_vartime_precomp(
     uint64_t *ctx_n0 = ctx;
     uint64_t *ctx_r2 = ctx + 4U;
     from(ctx_n0, mu, ctx_r2, resM);
+    KRML_MAYBE_UNUSED_VAR(ctx);
     for (uint32_t i = 0U; i < bBits; i++)
     {
       uint32_t i1 = i / 64U;
@@ -640,11 +641,13 @@ exp_vartime_precomp(
         memcpy(aM_copy, resM, 4U * sizeof (uint64_t));
         uint64_t *ctx_n = ctx;
         amont_mul(ctx_n, mu, aM_copy, aM, resM);
+        KRML_MAYBE_UNUSED_VAR(ctx);
       }
       uint64_t aM_copy[4U] = { 0U };
       memcpy(aM_copy, aM, 4U * sizeof (uint64_t));
       uint64_t *ctx_n = ctx;
       amont_sqr(ctx_n, mu, aM_copy, aM);
+      KRML_MAYBE_UNUSED_VAR(ctx);
     }
     from(n, mu, resM, res);
     return;
@@ -671,6 +674,7 @@ exp_vartime_precomp(
   uint64_t *ctx_n0 = ctx;
   uint64_t *ctx_r20 = ctx + 4U;
   from(ctx_n0, mu, ctx_r20, t0);
+  KRML_MAYBE_UNUSED_VAR(ctx);
   memcpy(t1, aM, 4U * sizeof (uint64_t));
   KRML_MAYBE_UNUSED_VAR(table);
   KRML_MAYBE_FOR7(i,
@@ -682,12 +686,14 @@ exp_vartime_precomp(
     memcpy(aM_copy0, t11, 4U * sizeof (uint64_t));
     uint64_t *ctx_n1 = ctx;
     amont_sqr(ctx_n1, mu, aM_copy0, tmp);
+    KRML_MAYBE_UNUSED_VAR(ctx);
     memcpy(table + (2U * i + 2U) * 4U, tmp, 4U * sizeof (uint64_t));
     uint64_t *t2 = table + (2U * i + 2U) * 4U;
     uint64_t aM_copy[4U] = { 0U };
     memcpy(aM_copy, aM, 4U * sizeof (uint64_t));
     uint64_t *ctx_n = ctx;
     amont_mul(ctx_n, mu, aM_copy, t2, tmp);
+    KRML_MAYBE_UNUSED_VAR(ctx);
     memcpy(table + (2U * i + 3U) * 4U, tmp, 4U * sizeof (uint64_t)););
   if (bBits % 4U != 0U)
   {
@@ -702,6 +708,7 @@ exp_vartime_precomp(
     uint64_t *ctx_n = ctx;
     uint64_t *ctx_r2 = ctx + 4U;
     from(ctx_n, mu, ctx_r2, resM);
+    KRML_MAYBE_UNUSED_VAR(ctx);
   }
   uint64_t tmp0[4U] = { 0U };
   for (uint32_t i = 0U; i < bBits / 4U; i++)
@@ -713,9 +720,11 @@ exp_vartime_precomp(
       uint64_t aM_copy[4U] = { 0U };
       memcpy(aM_copy, resM, 4U * sizeof (uint64_t));
       uint64_t *ctx_n = ctx;
-      amont_sqr(ctx_n, mu, aM_copy, resM););
+      amont_sqr(ctx_n, mu, aM_copy, resM);
+      KRML_MAYBE_UNUSED_VAR(ctx););
     uint32_t k = bBits - bBits % 4U - 4U * i - 4U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, k, 4U);
+    KRML_MAYBE_UNUSED_VAR(table);
     uint32_t bits_l32 = (uint32_t)bits_l;
     const uint64_t *a_bits_l = table + bits_l32 * 4U;
     memcpy(tmp0, (uint64_t *)a_bits_l, 4U * sizeof (uint64_t));
@@ -723,6 +732,7 @@ exp_vartime_precomp(
     memcpy(aM_copy, resM, 4U * sizeof (uint64_t));
     uint64_t *ctx_n = ctx;
     amont_mul(ctx_n, mu, aM_copy, tmp0, resM);
+    KRML_MAYBE_UNUSED_VAR(ctx);
   }
   from(n, mu, resM, res);
 }
@@ -750,6 +760,7 @@ exp_consttime_precomp(
     uint64_t *ctx_n0 = ctx;
     uint64_t *ctx_r2 = ctx + 4U;
     from(ctx_n0, mu, ctx_r2, resM);
+    KRML_MAYBE_UNUSED_VAR(ctx);
     for (uint32_t i0 = 0U; i0 < bBits; i0++)
     {
       uint32_t i1 = (bBits - i0 - 1U) / 64U;
@@ -768,10 +779,12 @@ exp_consttime_precomp(
       memcpy(aM_copy, aM, 4U * sizeof (uint64_t));
       uint64_t *ctx_n1 = ctx;
       amont_mul(ctx_n1, mu, aM_copy, resM, aM);
+      KRML_MAYBE_UNUSED_VAR(ctx);
       uint64_t aM_copy0[4U] = { 0U };
       memcpy(aM_copy0, resM, 4U * sizeof (uint64_t));
       uint64_t *ctx_n = ctx;
       amont_sqr(ctx_n, mu, aM_copy0, resM);
+      KRML_MAYBE_UNUSED_VAR(ctx);
       sw = bit;
     }
     uint64_t sw0 = sw;
@@ -807,6 +820,7 @@ exp_consttime_precomp(
   uint64_t *ctx_n0 = ctx;
   uint64_t *ctx_r20 = ctx + 4U;
   from(ctx_n0, mu, ctx_r20, t0);
+  KRML_MAYBE_UNUSED_VAR(ctx);
   memcpy(t1, aM, 4U * sizeof (uint64_t));
   KRML_MAYBE_UNUSED_VAR(table);
   KRML_MAYBE_FOR7(i,
@@ -818,12 +832,14 @@ exp_consttime_precomp(
     memcpy(aM_copy0, t11, 4U * sizeof (uint64_t));
     uint64_t *ctx_n1 = ctx;
     amont_sqr(ctx_n1, mu, aM_copy0, tmp);
+    KRML_MAYBE_UNUSED_VAR(ctx);
     memcpy(table + (2U * i + 2U) * 4U, tmp, 4U * sizeof (uint64_t));
     uint64_t *t2 = table + (2U * i + 2U) * 4U;
     uint64_t aM_copy[4U] = { 0U };
     memcpy(aM_copy, aM, 4U * sizeof (uint64_t));
     uint64_t *ctx_n = ctx;
     amont_mul(ctx_n, mu, aM_copy, t2, tmp);
+    KRML_MAYBE_UNUSED_VAR(ctx);
     memcpy(table + (2U * i + 3U) * 4U, tmp, 4U * sizeof (uint64_t)););
   if (bBits % 4U != 0U)
   {
@@ -849,6 +865,7 @@ exp_consttime_precomp(
     uint64_t *ctx_n = ctx;
     uint64_t *ctx_r2 = ctx + 4U;
     from(ctx_n, mu, ctx_r2, resM);
+    KRML_MAYBE_UNUSED_VAR(ctx);
   }
   uint64_t tmp0[4U] = { 0U };
   for (uint32_t i0 = 0U; i0 < bBits / 4U; i0++)
@@ -860,9 +877,11 @@ exp_consttime_precomp(
       uint64_t aM_copy[4U] = { 0U };
       memcpy(aM_copy, resM, 4U * sizeof (uint64_t));
       uint64_t *ctx_n = ctx;
-      amont_sqr(ctx_n, mu, aM_copy, resM););
+      amont_sqr(ctx_n, mu, aM_copy, resM);
+      KRML_MAYBE_UNUSED_VAR(ctx););
     uint32_t k = bBits - bBits % 4U - 4U * i0 - 4U;
     uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, k, 4U);
+    KRML_MAYBE_UNUSED_VAR(table);
     memcpy(tmp0, (uint64_t *)table, 4U * sizeof (uint64_t));
     KRML_MAYBE_FOR15(i1,
       0U,
@@ -881,6 +900,7 @@ exp_consttime_precomp(
     memcpy(aM_copy, resM, 4U * sizeof (uint64_t));
     uint64_t *ctx_n = ctx;
     amont_mul(ctx_n, mu, aM_copy, tmp0, resM);
+    KRML_MAYBE_UNUSED_VAR(ctx);
   }
   from(n, mu, resM, res);
 }

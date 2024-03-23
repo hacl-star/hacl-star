@@ -404,6 +404,7 @@ Hacl_GenericField64_exp_consttime(
         Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, ctx_n, uu____0.mu, resM, resM););
       uint32_t k2 = bBits - bBits % 4U - 4U * i0 - 4U;
       uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, k2, 4U);
+      KRML_MAYBE_UNUSED_VAR(table);
       memcpy(tmp0, (uint64_t *)(table + 0U * len1), len1 * sizeof (uint64_t));
       KRML_MAYBE_FOR15(i1,
         0U,
@@ -549,6 +550,7 @@ Hacl_GenericField64_exp_vartime(
         Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, ctx_n, uu____0.mu, resM, resM););
       uint32_t k2 = bBits - bBits % 4U - 4U * i - 4U;
       uint64_t bits_l = Hacl_Bignum_Lib_bn_get_bits_u64(bLen, b, k2, 4U);
+      KRML_MAYBE_UNUSED_VAR(table);
       uint32_t bits_l32 = (uint32_t)bits_l;
       const uint64_t *a_bits_l = table + bits_l32 * len1;
       memcpy(tmp0, (uint64_t *)a_bits_l, len1 * sizeof (uint64_t));
