@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const msg3: [u8; 2] = [ 0xaf, 0x82 ];
 
@@ -32,7 +33,7 @@ const sig3: [u8; 64] = [
 pub fn test_ed25519() {
   let mut signature = [0u8; 64];
   crate::hacl::ed25519::sign(&mut signature, &mut sk3, 2u32, &mut msg3);
-  let mut res = crate::hacl::ed25519::verify(&mut pk3, 2u32, &mut msg3, &mut sig3);
+  let res = crate::hacl::ed25519::verify(&mut pk3, 2u32, &mut msg3, &mut sig3);
 
   assert_eq!(signature, sig3);
   assert!(res);

@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const input: [u8; 512] = [0u8; 512];
 

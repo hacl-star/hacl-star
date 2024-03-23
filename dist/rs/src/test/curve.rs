@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const scalar1: [u8; 32] = [
     0xa5, 0x46, 0xe3, 0x6b, 0xf0, 0x52, 0x7c, 0x9d,

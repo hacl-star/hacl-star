@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const input1: [u8; 3] = [ 0x61, 0x62, 0x63 ];
 
@@ -74,10 +75,10 @@ const tag2_512: [u8; 64] = [
   0x01, 0x75, 0x85, 0x86, 0x28, 0x1d, 0xcd, 0x26,
 ];
 
-use crate::hacl::streaming_types::hash_alg::{SHA3_224, SHA3_256, SHA3_384, SHA3_512};
 
 #[test]
 pub fn test_sha3() {
+  use crate::hacl::streaming_types::hash_alg::{SHA3_224, SHA3_256, SHA3_384, SHA3_512};
 
   // SHA3-224
   let mut tag_224 = [0u8; 28];

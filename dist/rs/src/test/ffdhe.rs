@@ -1,8 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
-
-use std::io::stdout;
-use std::io::Write;
+#![allow(const_item_mutation)]
 
 const test2048_sk1: [u8; 256] = [
   0x52, 0xb0, 0x3e, 0xaf, 0x37, 0xb5, 0xf2, 0x08, 0x83, 0x7d, 0x1d, 0x90, 0x45,
@@ -1224,15 +1222,16 @@ const test8192_ss: [u8; 1024] = [
   0xb4, 0xe1, 0x8c, 0x3b, 0xed, 0x62, 0x53, 0xf7, 0xf1, 0x0c
 ];
 
-use crate::hacl::spec::ffdhe_alg::{FFDHE2048,FFDHE3072,FFDHE4096,FFDHE6144,FFDHE8192};
 
 #[test]
 pub fn test_ffdhe() {
+  use crate::hacl::spec::ffdhe_alg::{FFDHE2048,FFDHE3072,FFDHE4096,FFDHE6144,FFDHE8192};
+
   let mut pk1 = [0u8; test2048_pk1.len()];
   let mut pk2 = [0u8; test2048_pk2.len()];
   let mut ss1 = [0u8; test2048_ss.len()];
   let mut ss2 = [0u8; test2048_ss.len()];
-  let mut alg = FFDHE2048;
+  let alg = FFDHE2048;
   println!("FFDHE2048");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test2048_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test2048_sk2, &mut pk2); 
@@ -1247,7 +1246,7 @@ pub fn test_ffdhe() {
   let mut pk2 = [0u8; test3072_pk2.len()];
   let mut ss1 = [0u8; test3072_ss.len()];
   let mut ss2 = [0u8; test3072_ss.len()];
-  let mut alg = FFDHE3072;
+  let alg = FFDHE3072;
   println!("FFDHE3072");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test3072_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test3072_sk2, &mut pk2); 
@@ -1262,7 +1261,7 @@ pub fn test_ffdhe() {
   let mut pk2 = [0u8; test4096_pk2.len()];
   let mut ss1 = [0u8; test4096_ss.len()];
   let mut ss2 = [0u8; test4096_ss.len()];
-  let mut alg = FFDHE4096;
+  let alg = FFDHE4096;
   println!("FFDHE4096");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test4096_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test4096_sk2, &mut pk2); 
@@ -1277,7 +1276,7 @@ pub fn test_ffdhe() {
   let mut pk2 = [0u8; test6144_pk2.len()];
   let mut ss1 = [0u8; test6144_ss.len()];
   let mut ss2 = [0u8; test6144_ss.len()];
-  let mut alg = FFDHE6144;
+  let alg = FFDHE6144;
   println!("FFDHE6144");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test6144_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test6144_sk2, &mut pk2); 
@@ -1292,7 +1291,7 @@ pub fn test_ffdhe() {
   let mut pk2 = [0u8; test8192_pk2.len()];
   let mut ss1 = [0u8; test8192_ss.len()];
   let mut ss2 = [0u8; test8192_ss.len()];
-  let mut alg = FFDHE8192;
+  let alg = FFDHE8192;
   println!("FFDHE8192");
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test8192_sk1, &mut pk1); 
   crate::hacl::ffdhe::ffdhe_secret_to_public(alg, &mut test8192_sk2, &mut pk2); 

@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const key1: [u8; 20] = [
   0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,

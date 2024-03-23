@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 #![allow(dead_code)]
+#![allow(const_item_mutation)]
 
 const input1: [u8; 3] = [ 0x61, 0x62, 0x63 ];
 
@@ -18,11 +19,9 @@ const tag2_sha1: [u8; 20] = [
   0xaf, 0xd8, 0x07, 0x09
 ];
 
-use crate::hacl::streaming_types::hash_alg::SHA1;
 
 #[test]
 pub fn test_sha1() {
-
   let mut tag1 = [0u8; 20];
   let mut state1 = crate::hacl::hash_sha1::malloc();
   crate::hacl::hash_sha1::update0(&mut state1, &mut input1, input1.len() as u32);
