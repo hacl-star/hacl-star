@@ -59,7 +59,9 @@
           "dist/Makefile.tmpl"
           "dist/configure"
           "dist/package-mozilla.sh"
-          # Generated with: git ls-files . | egrep -v '(hacl/|evercrypt/|vale.rs|INFO.txt|Makefile.basic)'
+          # Generated with: git ls-files dist/rs | egrep -v '(hacl/|evercrypt/|vale.rs|INFO.txt|Makefile.basic|.gitignore)'
+          "dist/rs/Cargo.lock"
+          "dist/rs/Cargo.toml"
           "dist/rs/src/fstar.rs"
           "dist/rs/src/fstar/uint128.rs"
           "dist/rs/src/fstar/uint16.rs"
