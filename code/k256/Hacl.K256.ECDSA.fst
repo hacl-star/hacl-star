@@ -131,8 +131,8 @@ let public_key_compressed_to_raw pk_raw pk =
   push_frame ();
   let xa = create_felem () in
   let ya = create_felem () in
-  let pk_xb = sub pk 1ul 32ul in
   let b = P.aff_point_decompress_vartime xa ya pk in
+  let pk_xb = sub pk 1ul 32ul in
 
   if b then begin
     let h0 = ST.get () in
