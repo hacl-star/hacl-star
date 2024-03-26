@@ -104,7 +104,7 @@ let max_node_offset (a:alg) =
 /// type for both algorithms in C, we encode it as an uint64, with restricted
 /// length
 inline_for_extraction
-let node_offset_t (a:alg) : Type = n:uint64{v n < max_node_offset a}
+let node_offset_t (a:alg) : Type = n:uint64{v n <= max_node_offset a}
 
 noeq
 type blake2_params (a: alg) = {
