@@ -894,6 +894,20 @@ let test22_expected : lbytes 64 =
   assert_norm (FStar.List.length l = 64);
   of_list l
 
+let test23_params : S.blake2_params S.Blake2S =
+  assert_norm (204217247359946 <= pow2 48 - 1);
+  { S.blake2_default_params S.Blake2S with fanout = u8 23; node_depth = u8 9; node_offset = u64 204217247359946 }
+
+let test23_expected : lbytes 32 =
+  let l = List.Tot.map u8_from_UInt8 [
+    0x6duy; 0xe5uy; 0x66uy; 0xb3uy; 0x79uy; 0x19uy; 0xa9uy; 0x30uy;
+    0x36uy; 0xc9uy; 0xa7uy; 0x6duy; 0x7fuy; 0x93uy; 0x8fuy; 0xdduy;
+    0xb8uy; 0xdauy; 0x24uy; 0x2auy; 0x80uy; 0x47uy; 0xbfuy; 0x94uy;
+    0x34uy; 0x38uy; 0x2cuy; 0xccuy; 0xa2uy; 0xbauy; 0x0auy; 0xb0uy
+    ] in
+  assert_norm (FStar.List.length l = 32);
+  of_list l
+
 let emp_key : lbytes 0 =
   let l = List.Tot.map u8_from_UInt8 [] in
   assert_norm (List.Tot.length l == 0);
@@ -927,6 +941,7 @@ let test_vectors : list vec = [
   Vec S.Blake2S 17 test17_params test1_plaintext emp_key test17_expected;
   Vec S.Blake2S 18 test18_params test2_plaintext test2_key test18_expected;
   Vec S.Blake2S 19 test19_params test2_plaintext emp_key test19_expected;
+  Vec S.Blake2S 23 test23_params test2_plaintext emp_key test23_expected;
 
   Vec S.Blake2B 0 (S.blake2_default_params _) test0_plaintext test0_key test0_expected;
   Vec S.Blake2B 5 (S.blake2_default_params _) test5_plaintext emp_key test5_expected;
