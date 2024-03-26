@@ -953,7 +953,7 @@ let test_vectors : list vec = [
   Vec S.Blake2B 16 (S.blake2_default_params _) test16_plaintext test16_key test16_expected;
   Vec S.Blake2B 20 test20_params test2_plaintext emp_key test20_expected;
   Vec S.Blake2B 21 test21_params test1_plaintext test13_key test21_expected;
-  Vec S.Blake2B 21 test22_params test1_plaintext test13_key test22_expected;
+  Vec S.Blake2B 22 test22_params test1_plaintext test13_key test22_expected;
 ]
 
 #set-options "--ifuel 2"
