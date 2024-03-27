@@ -109,7 +109,7 @@ let node_offset_t (a:alg) : Type = n:uint64{v n <= max_node_offset a}
 noeq
 type blake2_params (a: alg) = {
   digest_length: uint8;
-  key_length: uint8;
+  key_length: (key_length: uint8 { Lib.IntTypes.v key_length <= max_key a });
   fanout: uint8;
   depth: uint8;
   leaf_length: uint32;
