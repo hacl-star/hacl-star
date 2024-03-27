@@ -567,7 +567,8 @@ val serialize_params (al:Spec.alg)
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk)))
+        {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}
+    )
 
 #push-options "--z3rlimit 100 --fuel 0"
 inline_for_extraction noextract
@@ -585,7 +586,8 @@ let serialize_params_blake2s
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk)))
+         {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}
+    )
   = let h0 = ST.get () in
     [@inline_let]
     let kk_shift_8 = shift_left (to_u32 kk) (size 8) in
@@ -598,13 +600,15 @@ let serialize_params_blake2s
     [@inline_let]
     let v1 = p.leaf_length in
     [@inline_let]
-    let v2 = p.node_offset in
+    let v2 = to_u32 p.node_offset in
+    [@inline_let]
+    let node_offset_high = to_u32 (shift_right p.node_offset (size 32)) in
     [@inline_let]
     let node_depth_shift_16 = shift_left (to_u32 p.node_depth) (size 16) in
     [@inline_let]
     let inner_length_shift_16 = shift_left (to_u32 p.inner_length) (size 24) in
     [@inline_let]
-    let v3 = (to_u32 p.xof_length) ^. node_depth_shift_16 ^. inner_length_shift_16 in
+    let v3 = node_offset_high ^. node_depth_shift_16 ^. inner_length_shift_16 in
 
     uints_from_bytes_le (sub b 4ul 2ul) p.salt;
     uints_from_bytes_le (sub b 6ul 2ul) p.personal;
@@ -618,7 +622,7 @@ let serialize_params_blake2s
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2s_params
-        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk))) =
+         {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}) =
       let open Lib.Sequence in
       let open Lib.ByteSequence in
       let s0 = (u32 (v nn)) ^.
@@ -626,14 +630,16 @@ let serialize_params_blake2s
                (u32 (v p.fanout) <<. (size 16)) ^.
                (u32 (v p.depth) <<. (size 24)) in
       let s1 = p.leaf_length in
-      let s2 = p.node_offset in
-      let s3 = (u32 (v p.xof_length)) ^.
+      (* Take the first four bytes *)
+      let s2 = (to_u32 p.node_offset) in
+      (* Take the last four bytes of node_offset *)
+      let s3 = (to_u32 (p.node_offset >>. (size 32))) ^.
                (u32 (v p.node_depth) <<. (size 16)) ^.
                (u32 (v p.inner_length) <<. (size 24)) in
-      let salt_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 (get_salt p)) in
+      let salt_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 p.salt) in
       let s4 = salt_u32.[0] in
       let s5 = salt_u32.[1] in
-      let personal_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 (get_personal p)) in
+      let personal_u32: lseq uint32 2 = uints_from_bytes_le (as_seq h0 p.personal) in
       let s6 = personal_u32.[0] in
       let s7 = personal_u32.[1] in
       [@inline_let]
@@ -678,7 +684,8 @@ let serialize_params_blake2b
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk)))
+         {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}
+    )
   = let h0 = ST.get () in
     [@inline_let]
     let kk_shift_8 = shift_left (to_u64 kk) (size 8) in
@@ -691,9 +698,7 @@ let serialize_params_blake2b
     [@inline_let]
     let v0 = (to_u64 nn) ^. kk_shift_8 ^. fanout_shift_16 ^. depth_shift_24 ^. leaf_length_shift_32 in
     [@inline_let]
-    let xof_length_shift_32 = shift_left (to_u64 p.xof_length) (size 32) in
-    [@inline_let]
-    let v1 = (to_u64 p.node_offset) ^. xof_length_shift_32 in
+    let v1 = p.node_offset in
     [@inline_let]
     let inner_length_shift_8 = shift_left (to_u64 p.inner_length) (size 8) in
     [@inline_let]
@@ -709,7 +714,7 @@ let serialize_params_blake2b
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2b_params
-        (Spec.set_key_length (Spec.set_digest_length (blake2_params_v h0 p) (v nn)) (v kk))) =
+        {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}) =
       let open Lib.Sequence in
       let open Lib.ByteSequence in
       let s0 = (u64 (v nn)) ^.
@@ -717,8 +722,7 @@ let serialize_params_blake2b
                (u64 (v p.fanout) <<. (size 16)) ^.
                (u64 (v p.depth) <<. (size 24)) ^.
                (u64 (v p.leaf_length) <<. (size 32)) in
-      let s1 = (u64 (v p.node_offset)) ^.
-               (u64 (v p.xof_length) <<. (size 32)) in
+      let s1 = p.node_offset in
       // The serialization corresponding to s2 contains node_depth and inner_length,
       // followed by the 14 reserved bytes which always seem to be zeros, and can hence
       // be ignored when building the corresponding uint64 using xor's
@@ -726,10 +730,10 @@ let serialize_params_blake2b
                (u64 (v p.inner_length) <<. (size 8)) in
       // s3 corresponds to the remaining of the reserved bytes
       let s3 = u64 0 in
-      let salt_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 (get_salt p)) in
+      let salt_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 p.salt) in
       let s4 = salt_u64.[0] in
       let s5 = salt_u64.[1] in
-      let personal_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 (get_personal p)) in
+      let personal_u64: lseq uint64 2 = uints_from_bytes_le (as_seq h0 p.personal) in
       let s6 = personal_u64.[0] in
       let s7 = personal_u64.[1] in
       [@inline_let]
