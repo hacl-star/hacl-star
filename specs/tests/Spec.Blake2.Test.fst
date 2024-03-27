@@ -803,8 +803,8 @@ let test16_expected : lbytes 64 =
    cover the different possible parameters, and the results were generated using the Blake2
    implementation in Python 3's hashlib *)
 
-let test17_params : S.blake2s_params =
-  { S.blake2s_default_params with fanout = u8 5; node_depth = u8 3 }
+let test17_params : S.blake2_params S.Blake2S =
+  { S.blake2_default_params S.Blake2S with fanout = u8 5; node_depth = u8 3 }
 
 let test17_expected : lbytes 32 =
   let l = List.Tot.map u8_from_UInt8 [
@@ -816,8 +816,8 @@ let test17_expected : lbytes 32 =
   assert_norm (List.Tot.length l = 32);
   of_list l
 
-let test18_params : S.blake2s_params =
-  { S.blake2s_default_params with leaf_length = u32 43; depth = u8 4; inner_length = u8 9 }
+let test18_params : S.blake2_params S.Blake2S =
+  { S.blake2_default_params S.Blake2S with leaf_length = u32 43; depth = u8 4; inner_length = u8 9 }
 
 let test18_expected : lbytes 32 =
   let l = List.Tot.map u8_from_UInt8 [
@@ -829,9 +829,9 @@ let test18_expected : lbytes 32 =
   assert_norm (List.Tot.length l = 32);
   of_list l
 
-let test19_params : S.blake2s_params =
+let test19_params : S.blake2_params S.Blake2S =
   let s = create 8 (u8_from_UInt8 0x11uy) in
-  { S.blake2s_default_params with salt = s; personal = s }
+  { S.blake2_default_params S.Blake2S with salt = s; personal = s }
 
 let test19_expected : lbytes 32 =
   let l = List.Tot.map u8_from_UInt8 [
@@ -843,8 +843,8 @@ let test19_expected : lbytes 32 =
   assert_norm (List.Tot.length l = 32);
   of_list l
 
-let test20_params : S.blake2b_params =
-  { S.blake2b_default_params with fanout = u8 5; node_depth = u8 3; node_offset = u32 41 }
+let test20_params : S.blake2_params S.Blake2B =
+  { S.blake2_default_params S.Blake2B with fanout = u8 5; node_depth = u8 3; node_offset = u64 41 }
 
 let test20_expected : lbytes 64 =
   let l = List.Tot.map u8_from_UInt8 [
@@ -860,8 +860,8 @@ let test20_expected : lbytes 64 =
   of_list l
 
 
-let test21_params : S.blake2b_params =
-  { S.blake2b_default_params with leaf_length = u32 43; depth = u8 4; inner_length = u8 9 }
+let test21_params : S.blake2_params S.Blake2B =
+  { S.blake2_default_params S.Blake2B with leaf_length = u32 43; depth = u8 4; inner_length = u8 9 }
 
 let test21_expected : lbytes 64 =
   let l = List.Tot.map u8_from_UInt8 [
@@ -876,9 +876,9 @@ let test21_expected : lbytes 64 =
   assert_norm (FStar.List.length l = 64);
   of_list l
 
-let test22_params : S.blake2b_params =
+let test22_params : S.blake2_params S.Blake2B =
   let s = create 16 (u8_from_UInt8 0x11uy) in
-  { S.blake2b_default_params with salt = s; personal = s }
+  { S.blake2_default_params S.Blake2B with salt = s; personal = s }
 
 let test22_expected : lbytes 64 =
   let l = List.Tot.map u8_from_UInt8 [
@@ -892,6 +892,20 @@ let test22_expected : lbytes 64 =
     0xD4uy; 0xDCuy; 0x83uy; 0x6Euy; 0x04uy; 0xA3uy; 0x79uy; 0xD2uy
     ] in
   assert_norm (FStar.List.length l = 64);
+  of_list l
+
+let test23_params : S.blake2_params S.Blake2S =
+  assert_norm (204217247359946 <= pow2 48 - 1);
+  { S.blake2_default_params S.Blake2S with fanout = u8 23; node_depth = u8 9; node_offset = u64 204217247359946 }
+
+let test23_expected : lbytes 32 =
+  let l = List.Tot.map u8_from_UInt8 [
+    0x6duy; 0xe5uy; 0x66uy; 0xb3uy; 0x79uy; 0x19uy; 0xa9uy; 0x30uy;
+    0x36uy; 0xc9uy; 0xa7uy; 0x6duy; 0x7fuy; 0x93uy; 0x8fuy; 0xdduy;
+    0xb8uy; 0xdauy; 0x24uy; 0x2auy; 0x80uy; 0x47uy; 0xbfuy; 0x94uy;
+    0x34uy; 0x38uy; 0x2cuy; 0xccuy; 0xa2uy; 0xbauy; 0x0auy; 0xb0uy
+    ] in
+  assert_norm (FStar.List.length l = 32);
   of_list l
 
 let emp_key : lbytes 0 =
@@ -915,30 +929,31 @@ noeq type vec =
     -> hash:bytes{length hash = blake2_length a} -> vec
 
 let test_vectors : list vec = [
-  Vec S.Blake2S 1 S.blake2s_default_params test1_plaintext emp_key test1_expected;
-  Vec S.Blake2S 2 S.blake2s_default_params test2_plaintext test2_key test2_expected;
-  Vec S.Blake2S 3 S.blake2s_default_params test3_plaintext test3_key test3_expected;
-  Vec S.Blake2S 4 S.blake2s_default_params test4_plaintext test4_key test4_expected;
-  Vec S.Blake2S 7 S.blake2s_default_params test7_plaintext test7_key test7_expected;
-  Vec S.Blake2S 8 S.blake2s_default_params test8_plaintext test8_key test8_expected;
-  Vec S.Blake2S 9 S.blake2s_default_params test9_plaintext test9_key test9_expected;
-  Vec S.Blake2S 10 S.blake2s_default_params test10_plaintext test10_key test10_expected;
-  Vec S.Blake2S 11 S.blake2s_default_params test11_plaintext test11_key test11_expected;
+  Vec S.Blake2S 1 (S.blake2_default_params _) test1_plaintext emp_key test1_expected;
+  Vec S.Blake2S 2 (S.blake2_default_params _) test2_plaintext test2_key test2_expected;
+  Vec S.Blake2S 3 (S.blake2_default_params _) test3_plaintext test3_key test3_expected;
+  Vec S.Blake2S 4 (S.blake2_default_params _) test4_plaintext test4_key test4_expected;
+  Vec S.Blake2S 7 (S.blake2_default_params _) test7_plaintext test7_key test7_expected;
+  Vec S.Blake2S 8 (S.blake2_default_params _) test8_plaintext test8_key test8_expected;
+  Vec S.Blake2S 9 (S.blake2_default_params _) test9_plaintext test9_key test9_expected;
+  Vec S.Blake2S 10 (S.blake2_default_params _) test10_plaintext test10_key test10_expected;
+  Vec S.Blake2S 11 (S.blake2_default_params _) test11_plaintext test11_key test11_expected;
   Vec S.Blake2S 17 test17_params test1_plaintext emp_key test17_expected;
   Vec S.Blake2S 18 test18_params test2_plaintext test2_key test18_expected;
   Vec S.Blake2S 19 test19_params test2_plaintext emp_key test19_expected;
+  Vec S.Blake2S 23 test23_params test2_plaintext emp_key test23_expected;
 
-  Vec S.Blake2B 0 S.blake2b_default_params test0_plaintext test0_key test0_expected;
-  Vec S.Blake2B 5 S.blake2b_default_params test5_plaintext emp_key test5_expected;
-  Vec S.Blake2B 6 S.blake2b_default_params test6_plaintext test6_key test6_expected;
-  Vec S.Blake2B 12 S.blake2b_default_params test12_plaintext test12_key test12_expected;
-  Vec S.Blake2B 13 S.blake2b_default_params test13_plaintext test13_key test13_expected;
-  Vec S.Blake2B 14 S.blake2b_default_params test14_plaintext test14_key test14_expected;
-  Vec S.Blake2B 15 S.blake2b_default_params test15_plaintext test15_key test15_expected;
-  Vec S.Blake2B 16 S.blake2b_default_params test16_plaintext test16_key test16_expected;
+  Vec S.Blake2B 0 (S.blake2_default_params _) test0_plaintext test0_key test0_expected;
+  Vec S.Blake2B 5 (S.blake2_default_params _) test5_plaintext emp_key test5_expected;
+  Vec S.Blake2B 6 (S.blake2_default_params _) test6_plaintext test6_key test6_expected;
+  Vec S.Blake2B 12 (S.blake2_default_params _) test12_plaintext test12_key test12_expected;
+  Vec S.Blake2B 13 (S.blake2_default_params _) test13_plaintext test13_key test13_expected;
+  Vec S.Blake2B 14 (S.blake2_default_params _) test14_plaintext test14_key test14_expected;
+  Vec S.Blake2B 15 (S.blake2_default_params _) test15_plaintext test15_key test15_expected;
+  Vec S.Blake2B 16 (S.blake2_default_params _) test16_plaintext test16_key test16_expected;
   Vec S.Blake2B 20 test20_params test2_plaintext emp_key test20_expected;
   Vec S.Blake2B 21 test21_params test1_plaintext test13_key test21_expected;
-  Vec S.Blake2B 21 test22_params test1_plaintext test13_key test22_expected;
+  Vec S.Blake2B 22 test22_params test1_plaintext test13_key test22_expected;
 ]
 
 #set-options "--ifuel 2"

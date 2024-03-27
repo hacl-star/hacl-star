@@ -474,42 +474,41 @@ update_block(uint64_t *wv, uint64_t *hash, bool flag, FStar_UInt128_uint128 totl
 
 void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
 {
+  uint64_t tmp[8U] = { 0U };
+  uint64_t *r0 = hash;
+  uint64_t *r1 = hash + 4U;
+  uint64_t *r2 = hash + 8U;
+  uint64_t *r3 = hash + 12U;
+  uint64_t iv0 = Hacl_Hash_Blake2s_ivTable_B[0U];
+  uint64_t iv1 = Hacl_Hash_Blake2s_ivTable_B[1U];
+  uint64_t iv2 = Hacl_Hash_Blake2s_ivTable_B[2U];
+  uint64_t iv3 = Hacl_Hash_Blake2s_ivTable_B[3U];
+  uint64_t iv4 = Hacl_Hash_Blake2s_ivTable_B[4U];
+  uint64_t iv5 = Hacl_Hash_Blake2s_ivTable_B[5U];
+  uint64_t iv6 = Hacl_Hash_Blake2s_ivTable_B[6U];
+  uint64_t iv7 = Hacl_Hash_Blake2s_ivTable_B[7U];
+  r2[0U] = iv0;
+  r2[1U] = iv1;
+  r2[2U] = iv2;
+  r2[3U] = iv3;
+  r3[0U] = iv4;
+  r3[1U] = iv5;
+  r3[2U] = iv6;
+  r3[3U] = iv7;
   uint8_t salt[16U] = { 0U };
   uint8_t personal[16U] = { 0U };
-  Hacl_Hash_Blake2s_blake2b_params
+  Hacl_Hash_Blake2s_blake2_params
   p =
     {
-      .digest_length1 = 64U, .key_length1 = 0U, .fanout1 = 1U, .depth1 = 1U, .leaf_length1 = 0U,
-      .node_offset1 = 0U, .xof_length1 = 0U, .node_depth1 = 0U, .inner_length1 = 0U, .salt1 = salt,
-      .personal1 = personal
+      .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
+      .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt, .personal = personal
     };
-  uint64_t tmp[8U] = { 0U };
-  uint64_t *r0 = hash;
-  uint64_t *r1 = hash + 4U;
-  uint64_t *r2 = hash + 8U;
-  uint64_t *r3 = hash + 12U;
-  uint64_t iv0 = Hacl_Hash_Blake2s_ivTable_B[0U];
-  uint64_t iv1 = Hacl_Hash_Blake2s_ivTable_B[1U];
-  uint64_t iv2 = Hacl_Hash_Blake2s_ivTable_B[2U];
-  uint64_t iv3 = Hacl_Hash_Blake2s_ivTable_B[3U];
-  uint64_t iv4 = Hacl_Hash_Blake2s_ivTable_B[4U];
-  uint64_t iv5 = Hacl_Hash_Blake2s_ivTable_B[5U];
-  uint64_t iv6 = Hacl_Hash_Blake2s_ivTable_B[6U];
-  uint64_t iv7 = Hacl_Hash_Blake2s_ivTable_B[7U];
-  r2[0U] = iv0;
-  r2[1U] = iv1;
-  r2[2U] = iv2;
-  r2[3U] = iv3;
-  r3[0U] = iv4;
-  r3[1U] = iv5;
-  r3[2U] = iv6;
-  r3[3U] = iv7;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
     uint64_t *os = tmp + 4U;
-    uint8_t *bj = p.salt1 + i * 8U;
+    uint8_t *bj = p.salt + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -519,7 +518,7 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     2U,
     1U,
     uint64_t *os = tmp + 6U;
-    uint8_t *bj = p.personal1 + i * 8U;
+    uint8_t *bj = p.personal + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -529,88 +528,9 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     ^
       ((uint64_t)kk
       << 8U
-      ^ ((uint64_t)p.fanout1 << 16U ^ ((uint64_t)p.depth1 << 24U ^ (uint64_t)p.leaf_length1 << 32U)));
-  tmp[1U] = (uint64_t)p.node_offset1 ^ (uint64_t)p.xof_length1 << 32U;
-  tmp[2U] = (uint64_t)p.node_depth1 ^ (uint64_t)p.inner_length1 << 8U;
-  tmp[3U] = 0ULL;
-  uint64_t tmp0 = tmp[0U];
-  uint64_t tmp1 = tmp[1U];
-  uint64_t tmp2 = tmp[2U];
-  uint64_t tmp3 = tmp[3U];
-  uint64_t tmp4 = tmp[4U];
-  uint64_t tmp5 = tmp[5U];
-  uint64_t tmp6 = tmp[6U];
-  uint64_t tmp7 = tmp[7U];
-  uint64_t iv0_ = iv0 ^ tmp0;
-  uint64_t iv1_ = iv1 ^ tmp1;
-  uint64_t iv2_ = iv2 ^ tmp2;
-  uint64_t iv3_ = iv3 ^ tmp3;
-  uint64_t iv4_ = iv4 ^ tmp4;
-  uint64_t iv5_ = iv5 ^ tmp5;
-  uint64_t iv6_ = iv6 ^ tmp6;
-  uint64_t iv7_ = iv7 ^ tmp7;
-  r0[0U] = iv0_;
-  r0[1U] = iv1_;
-  r0[2U] = iv2_;
-  r0[3U] = iv3_;
-  r1[0U] = iv4_;
-  r1[1U] = iv5_;
-  r1[2U] = iv6_;
-  r1[3U] = iv7_;
-}
-
-static void
-init_with_params(uint64_t *hash, Hacl_Hash_Blake2s_blake2b_params p, uint32_t kk, uint32_t nn)
-{
-  uint64_t tmp[8U] = { 0U };
-  uint64_t *r0 = hash;
-  uint64_t *r1 = hash + 4U;
-  uint64_t *r2 = hash + 8U;
-  uint64_t *r3 = hash + 12U;
-  uint64_t iv0 = Hacl_Hash_Blake2s_ivTable_B[0U];
-  uint64_t iv1 = Hacl_Hash_Blake2s_ivTable_B[1U];
-  uint64_t iv2 = Hacl_Hash_Blake2s_ivTable_B[2U];
-  uint64_t iv3 = Hacl_Hash_Blake2s_ivTable_B[3U];
-  uint64_t iv4 = Hacl_Hash_Blake2s_ivTable_B[4U];
-  uint64_t iv5 = Hacl_Hash_Blake2s_ivTable_B[5U];
-  uint64_t iv6 = Hacl_Hash_Blake2s_ivTable_B[6U];
-  uint64_t iv7 = Hacl_Hash_Blake2s_ivTable_B[7U];
-  r2[0U] = iv0;
-  r2[1U] = iv1;
-  r2[2U] = iv2;
-  r2[3U] = iv3;
-  r3[0U] = iv4;
-  r3[1U] = iv5;
-  r3[2U] = iv6;
-  r3[3U] = iv7;
-  KRML_MAYBE_FOR2(i,
-    0U,
-    2U,
-    1U,
-    uint64_t *os = tmp + 4U;
-    uint8_t *bj = p.salt1 + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i] = x;);
-  KRML_MAYBE_FOR2(i,
-    0U,
-    2U,
-    1U,
-    uint64_t *os = tmp + 6U;
-    uint8_t *bj = p.personal1 + i * 8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i] = x;);
-  tmp[0U] =
-    (uint64_t)nn
-    ^
-      ((uint64_t)kk
-      << 8U
-      ^ ((uint64_t)p.fanout1 << 16U ^ ((uint64_t)p.depth1 << 24U ^ (uint64_t)p.leaf_length1 << 32U)));
-  tmp[1U] = (uint64_t)p.node_offset1 ^ (uint64_t)p.xof_length1 << 32U;
-  tmp[2U] = (uint64_t)p.node_depth1 ^ (uint64_t)p.inner_length1 << 8U;
+      ^ ((uint64_t)p.fanout << 16U ^ ((uint64_t)p.depth << 24U ^ (uint64_t)p.leaf_length << 32U)));
+  tmp[1U] = p.node_offset;
+  tmp[2U] = (uint64_t)p.node_depth ^ (uint64_t)p.inner_length << 8U;
   tmp[3U] = 0ULL;
   uint64_t tmp0 = tmp[0U];
   uint64_t tmp1 = tmp[1U];
@@ -759,8 +679,6 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
   Lib_Memzero0_memzero(b, 64U, uint8_t, void *);
 }
 
-typedef struct ________s {  } _______;
-
 /**
   State allocation function when there is no key
 */
@@ -779,35 +697,6 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
   return p;
 }
 
-Hacl_Hash_Blake2s_blake2b_params
-*FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2b_params____(
-  Hacl_Hash_Blake2s_blake2b_params *x
-)
-{
-  return x;
-}
-
-/**
-  State allocation function when there are parameters but no key
-*/
-Hacl_Hash_Blake2b_state_t
-*Hacl_Hash_Blake2b_malloc_with_params(Hacl_Hash_Blake2s_blake2b_params *key)
-{
-  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
-  uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-  uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
-  Hacl_Hash_Blake2b_block_state_t block_state = { .fst = wv, .snd = b };
-  Hacl_Hash_Blake2b_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  Hacl_Hash_Blake2b_state_t
-  *p = (Hacl_Hash_Blake2b_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2b_state_t));
-  p[0U] = s;
-  Hacl_Hash_Blake2s_blake2b_params
-  p1 = FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2b_params____(key)[0U];
-  init_with_params(block_state.snd, p1, 0U, 64U);
-  return p;
-}
-
 /**
   Re-initialization function when there is no key
 */
@@ -817,26 +706,6 @@ void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state)
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
   Hacl_Hash_Blake2b_init(block_state.snd, 0U, 64U);
-  Hacl_Hash_Blake2b_state_t
-  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  state[0U] = tmp;
-}
-
-/**
-  Re-initialization function when there are parameters but no key
-*/
-void
-Hacl_Hash_Blake2b_reset_with_params(
-  Hacl_Hash_Blake2b_state_t *state,
-  Hacl_Hash_Blake2s_blake2b_params *key
-)
-{
-  Hacl_Hash_Blake2b_state_t scrut = *state;
-  uint8_t *buf = scrut.buf;
-  Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;
-  Hacl_Hash_Blake2s_blake2b_params
-  p = FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2b_params____(key)[0U];
-  init_with_params(block_state.snd, p, 0U, 64U);
   Hacl_Hash_Blake2b_state_t
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
   state[0U] = tmp;

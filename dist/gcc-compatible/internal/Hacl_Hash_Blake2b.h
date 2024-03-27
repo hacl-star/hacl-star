@@ -38,6 +38,21 @@ extern "C" {
 #include "internal/Hacl_Impl_Blake2_Constants.h"
 #include "../Hacl_Hash_Blake2b.h"
 
+typedef struct Hacl_Hash_Blake2s_blake2_params_s
+{
+  uint8_t digest_length;
+  uint8_t key_length;
+  uint8_t fanout;
+  uint8_t depth;
+  uint32_t leaf_length;
+  uint64_t node_offset;
+  uint8_t node_depth;
+  uint8_t inner_length;
+  uint8_t *salt;
+  uint8_t *personal;
+}
+Hacl_Hash_Blake2s_blake2_params;
+
 void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
 
 void
@@ -61,11 +76,6 @@ Hacl_Hash_Blake2b_update_last(
 );
 
 void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
-
-Hacl_Hash_Blake2s_blake2b_params
-*FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2b_params____(
-  Hacl_Hash_Blake2s_blake2b_params *x
-);
 
 #if defined(__cplusplus)
 }
