@@ -12,9 +12,7 @@ let footprint #a h s =
   B.(loc_union (loc_addr_of_buffer s) (Core.blake2_params_loc (B.deref h s)))
 
 let freeable_s (#a: Spec.alg) (p: Core.blake2_params a) : GTot prop =
-  match a with
-  | Spec.Blake2S -> freeable (Core.Mkblake2s_params?.salt p) /\ freeable (Core.Mkblake2s_params?.personal p)
-  | Spec.Blake2B -> freeable (p.Core.salt) /\ freeable (p.Core.personal)
+  freeable (p.Core.salt) /\ freeable (p.Core.personal)
 
 let freeable #a h s =
   B.freeable s /\ freeable_s (B.deref h s)
@@ -34,88 +32,54 @@ let frame_freeable #a l s h0 h1 = ()
 
 let get_params #a s = B.index s 0ul
 
-let alloca a = match a with
-  | Spec.Blake2S ->
-      let salt = create 8ul (u8 0) in
-      let personal = create 8ul (u8 0) in
-      let p = {
-        digest_length = u8 32;
-        key_length = u8 0;
-        fanout = u8 1;
-        depth = u8 1;
-        leaf_length = u32 0;
-        node_offset = u32 0;
-        xof_length = u16 0;
-        node_depth = u8 0;
-        inner_length = u8 0;
-        salt; personal } <: Core.blake2s_params
-     in B.alloca p 1ul
-
-  | Spec.Blake2B ->
-      let salt = create 16ul (u8 0) in
-      let personal = create 16ul (u8 0) in
-      let p = {
-        digest_length = u8 64;
-        key_length = u8 0;
-        fanout = u8 1;
-        depth = u8 1;
-        leaf_length = u32 0;
-        node_offset = u32 0;
-        xof_length = u32 0;
-        node_depth = u8 0;
-        inner_length = u8 0;
-        salt; personal } <: Core.blake2b_params
-     in B.alloca p 1ul
+let alloca a =
+  let open Core in
+  let salt = create (salt_len a) (u8 0) in
+  let personal = create (personal_len a) (u8 0) in
+  let p = {
+    digest_length = u8 32;
+    key_length = u8 0;
+    fanout = u8 1;
+    depth = u8 1;
+    leaf_length = u32 0;
+    node_offset = u64 0;
+    node_depth = u8 0;
+    inner_length = u8 0;
+    salt; personal }
+ in B.alloca p 1ul
 
 #push-options "--z3rlimit 20"
-let create_in a r = match a with
-  | Spec.Blake2S ->
-      let salt: buffer uint8 = B.malloc r (u8 0) 8ul in
-      let personal: buffer uint8 = B.malloc r (u8 0) 8ul in
-      let p = {
-        digest_length = u8 32;
-        key_length = u8 0;
-        fanout = u8 1;
-        depth = u8 1;
-        leaf_length = u32 0;
-        node_offset = u32 0;
-        xof_length = u16 0;
-        node_depth = u8 0;
-        inner_length = u8 0;
-        salt; personal } <: Core.blake2s_params
-     in B.malloc r p 1ul
-
-  | Spec.Blake2B ->
-      let salt: buffer uint8 = B.malloc r (u8 0) 16ul in
-      let personal: buffer uint8 = B.malloc r (u8 0) 16ul in
-      let p = {
-        digest_length = u8 32;
-        key_length = u8 0;
-        fanout = u8 1;
-        depth = u8 1;
-        leaf_length = u32 0;
-        node_offset = u32 0;
-        xof_length = u32 0;
-        node_depth = u8 0;
-        inner_length = u8 0;
-        salt; personal } <: Core.blake2b_params
-     in B.malloc r p 1ul
+let create_in a r =
+  let open Core in
+  let salt: buffer uint8 = B.malloc r (u8 0) (salt_len a) in
+  let personal: buffer uint8 = B.malloc r (u8 0) (personal_len a) in
+  let p = {
+    digest_length = u8 32;
+    key_length = u8 0;
+    fanout = u8 1;
+    depth = u8 1;
+    leaf_length = u32 0;
+    node_offset = u64 0;
+    node_depth = u8 0;
+    inner_length = u8 0;
+    salt; personal }
+  in B.malloc r p 1ul
 
 let free #a s =
   let p = B.index s 0ul in
-  B.free (Core.get_salt p <: B.buffer uint8);
-  B.free (Core.get_personal p <: B.buffer uint8);
+  B.free (p.salt <: B.buffer uint8);
+  B.free (p.personal <: B.buffer uint8);
   B.free s
 
 let copy #a s_src s_dst =
   let p_src = B.index s_src 0ul in
   let p_dst = B.index s_dst 0ul in
-  B.blit (Core.get_salt p_src <: B.buffer uint8) 0ul
-         (Core.get_salt p_dst <: B.buffer uint8) 0ul
+  B.blit (p_src.salt <: B.buffer uint8) 0ul
+         (p_dst.salt <: B.buffer uint8) 0ul
          (Core.salt_len a);
-  B.blit (Core.get_personal p_src <: B.buffer uint8) 0ul
-         (Core.get_personal p_dst <: B.buffer uint8) 0ul
+  B.blit (p_src.personal <: B.buffer uint8) 0ul
+         (p_dst.personal <: B.buffer uint8) 0ul
          (Core.personal_len a);
 
-  let p' = Core.set_personal (Core.set_salt p_src (Core.get_salt p_dst)) (Core.get_personal p_dst) in
+  let p' = {p_src with salt = p_dst.salt; personal = p_dst.personal} in
   B.upd s_dst 0ul p'
