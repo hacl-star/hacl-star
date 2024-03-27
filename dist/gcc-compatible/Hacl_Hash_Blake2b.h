@@ -38,37 +38,20 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
-typedef struct Hacl_Hash_Blake2s_blake2s_params_s
+typedef struct Hacl_Hash_Blake2s_blake2_params_s
 {
   uint8_t digest_length;
   uint8_t key_length;
   uint8_t fanout;
   uint8_t depth;
   uint32_t leaf_length;
-  uint32_t node_offset;
-  uint16_t xof_length;
+  uint64_t node_offset;
   uint8_t node_depth;
   uint8_t inner_length;
   uint8_t *salt;
   uint8_t *personal;
 }
-Hacl_Hash_Blake2s_blake2s_params;
-
-typedef struct Hacl_Hash_Blake2s_blake2b_params_s
-{
-  uint8_t digest_length1;
-  uint8_t key_length1;
-  uint8_t fanout1;
-  uint8_t depth1;
-  uint32_t leaf_length1;
-  uint32_t node_offset1;
-  uint32_t xof_length1;
-  uint8_t node_depth1;
-  uint8_t inner_length1;
-  uint8_t *salt1;
-  uint8_t *personal1;
-}
-Hacl_Hash_Blake2s_blake2b_params;
+Hacl_Hash_Blake2s_blake2_params;
 
 typedef struct Hacl_Hash_Blake2b_block_state_t_s
 {
@@ -94,7 +77,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
   State allocation function when there are parameters but no key
 */
 Hacl_Hash_Blake2b_state_t
-*Hacl_Hash_Blake2b_malloc_with_params(Hacl_Hash_Blake2s_blake2b_params *key);
+*Hacl_Hash_Blake2b_malloc_with_params(Hacl_Hash_Blake2s_blake2_params *key);
 
 /**
   Re-initialization function when there is no key
@@ -107,7 +90,7 @@ void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state);
 void
 Hacl_Hash_Blake2b_reset_with_params(
   Hacl_Hash_Blake2b_state_t *state,
-  Hacl_Hash_Blake2s_blake2b_params *key
+  Hacl_Hash_Blake2s_blake2_params *key
 );
 
 /**

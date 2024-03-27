@@ -64,7 +64,7 @@ Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(void);
   State allocation function when there are parameters but no key
 */
 Hacl_Hash_Blake2b_Simd256_state_t
-*Hacl_Hash_Blake2b_Simd256_malloc_with_params(Hacl_Hash_Blake2s_blake2b_params *key);
+*Hacl_Hash_Blake2b_Simd256_malloc_with_params(Hacl_Hash_Blake2s_blake2_params *key);
 
 /**
   Re-initialization function when there is no key
@@ -77,7 +77,7 @@ void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state);
 void
 Hacl_Hash_Blake2b_Simd256_reset_with_params(
   Hacl_Hash_Blake2b_Simd256_state_t *state,
-  Hacl_Hash_Blake2s_blake2b_params *key
+  Hacl_Hash_Blake2s_blake2_params *key
 );
 
 /**

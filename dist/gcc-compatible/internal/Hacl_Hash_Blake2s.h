@@ -36,6 +36,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "internal/Hacl_Impl_Blake2_Constants.h"
+#include "internal/Hacl_Hash_Blake2b.h"
 #include "../Hacl_Hash_Blake2s.h"
 
 void Hacl_Hash_Blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn);
@@ -61,11 +62,6 @@ Hacl_Hash_Blake2s_update_last(
 );
 
 void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
-
-Hacl_Hash_Blake2s_blake2s_params
-*FStar_Pervasives_Native_fst___Hacl_Impl_Blake2_Core_blake2s_params____(
-  Hacl_Hash_Blake2s_blake2s_params *x
-);
 
 #if defined(__cplusplus)
 }
