@@ -5,6 +5,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     module Hacl_Streaming_Types_applied =
       (Hacl_Streaming_Types_bindings.Bindings)(Hacl_Streaming_Types_stubs)
     open Hacl_Streaming_Types_applied
+    module Hacl_Hash_Blake2b_applied =
+      (Hacl_Hash_Blake2b_bindings.Bindings)(Hacl_Hash_Blake2b_stubs)
+    open Hacl_Hash_Blake2b_applied
     let hacl_Hash_Blake2s_init =
       foreign "Hacl_Hash_Blake2s_init"
         ((ptr uint32_t) @-> (uint32_t @-> (uint32_t @-> (returning void))))
@@ -50,9 +53,17 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_malloc =
       foreign "Hacl_Hash_Blake2s_malloc"
         (void @-> (returning (ptr hacl_Hash_Blake2s_state_t)))
+    let hacl_Hash_Blake2s_malloc_with_params =
+      foreign "Hacl_Hash_Blake2s_malloc_with_params"
+        ((ptr hacl_Hash_Blake2s_blake2_params) @->
+           (returning (ptr hacl_Hash_Blake2s_state_t)))
     let hacl_Hash_Blake2s_reset =
       foreign "Hacl_Hash_Blake2s_reset"
         ((ptr hacl_Hash_Blake2s_state_t) @-> (returning void))
+    let hacl_Hash_Blake2s_reset_with_params =
+      foreign "Hacl_Hash_Blake2s_reset_with_params"
+        ((ptr hacl_Hash_Blake2s_state_t) @->
+           ((ptr hacl_Hash_Blake2s_blake2_params) @-> (returning void)))
     let hacl_Hash_Blake2s_update =
       foreign "Hacl_Hash_Blake2s_update"
         ((ptr hacl_Hash_Blake2s_state_t) @->

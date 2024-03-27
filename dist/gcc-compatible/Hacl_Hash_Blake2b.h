@@ -38,6 +38,21 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
+typedef struct Hacl_Hash_Blake2s_blake2_params_s
+{
+  uint8_t digest_length;
+  uint8_t key_length;
+  uint8_t fanout;
+  uint8_t depth;
+  uint32_t leaf_length;
+  uint64_t node_offset;
+  uint8_t node_depth;
+  uint8_t inner_length;
+  uint8_t *salt;
+  uint8_t *personal;
+}
+Hacl_Hash_Blake2s_blake2_params;
+
 typedef struct Hacl_Hash_Blake2b_block_state_t_s
 {
   uint64_t *fst;
@@ -59,9 +74,24 @@ Hacl_Hash_Blake2b_state_t;
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
 
 /**
+  State allocation function when there are parameters but no key
+*/
+Hacl_Hash_Blake2b_state_t
+*Hacl_Hash_Blake2b_malloc_with_params(Hacl_Hash_Blake2s_blake2_params *key);
+
+/**
   Re-initialization function when there is no key
 */
 void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state);
+
+/**
+  Re-initialization function when there are parameters but no key
+*/
+void
+Hacl_Hash_Blake2b_reset_with_params(
+  Hacl_Hash_Blake2b_state_t *state,
+  Hacl_Hash_Blake2s_blake2_params *key
+);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded

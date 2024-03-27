@@ -36,6 +36,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
+#include "Hacl_Hash_Blake2b.h"
 
 typedef struct Hacl_Hash_Blake2s_block_state_t_s
 {
@@ -58,9 +59,24 @@ Hacl_Hash_Blake2s_state_t;
 Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc(void);
 
 /**
+  State allocation function when there are parameters but no key
+*/
+Hacl_Hash_Blake2s_state_t
+*Hacl_Hash_Blake2s_malloc_with_params(Hacl_Hash_Blake2s_blake2_params *key);
+
+/**
   Re-initialization function when there is no key
 */
 void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *state);
+
+/**
+  Re-initialization function when there are parameters but no key
+*/
+void
+Hacl_Hash_Blake2s_reset_with_params(
+  Hacl_Hash_Blake2s_state_t *state,
+  Hacl_Hash_Blake2s_blake2_params *key
+);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
