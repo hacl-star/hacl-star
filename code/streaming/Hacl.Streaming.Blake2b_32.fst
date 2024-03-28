@@ -1,12 +1,21 @@
 module Hacl.Streaming.Blake2b_32
 
+// Blake2b_32 is hand-written, other files generated with:
+// sed 's/2B/2S/g;s/2b/2s/g;' Hacl.Streaming.Blake2b_32.fst > Hacl.Streaming.Blake2s_32.fst; sed 's/32/128/g' Hacl.Streaming.Blake2s_32.fst > Hacl.Streaming.Blake2s_128.fst; sed 's/32/256/g' Hacl.Streaming.Blake2b_32.fst > Hacl.Streaming.Blake2b_256.fst
+
+module HS = FStar.HyperStack
 module Blake2b32 = Hacl.Blake2b_32
 module Common = Hacl.Streaming.Blake2.Common
 module Core = Hacl.Impl.Blake2.Core
 module F = Hacl.Streaming.Functor
+module I = Hacl.Streaming.Interface
 module G = FStar.Ghost
+module B = LowStar.Buffer
+module S = FStar.Seq
 module Impl = Hacl.Impl.Blake2.Generic
 module Spec = Spec.Blake2
+
+open FStar.HyperStack.ST
 
 inline_for_extraction noextract
 let blake2b_32 =
@@ -29,9 +38,45 @@ inline_for_extraction noextract
 let alloca_raw (kk: Common.key_size_t Spec.Blake2B): Tot _ =
   F.alloca blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
-[@ (Comment "  State allocation function when there is no key")]
+private
 let malloc_raw (kk: Common.key_size_t Spec.Blake2B): Tot _ =
   F.malloc blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
+
+[@ (Comment "  State allocation function when there is a key")]
+val malloc_with_key:
+  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 ->
+  kk:Common.key_size_t Spec.Blake2B { LowStar.Buffer.len k == kk } -> (
+  let open F in
+  let c = blake2b_32 in
+  let i = kk in
+  let t: Type0 = c.state.s i in
+  let t': Type0 = I.optional_key i c.km c.key in
+  let k: Common.stateful_key_t Spec.Blake2B kk = kk, k in
+  r: HS.rid ->
+  ST (state c i t t')
+  (requires (fun h0 ->
+    c.key.invariant #i h0 k /\
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    invariant c i h1 s /\
+    freeable c i h1 s /\
+    seen c i h1 s == S.empty /\
+    reveal_key c i h1 s == c.key.v i h0 k /\
+    B.(modifies loc_none h0 h1) /\
+    B.fresh_loc (footprint c i h1 s) h0 h1 /\
+    B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
+)
+
+let malloc_with_key k kk r =
+  malloc_raw kk (kk, k) r
+
+// I generally don't like skipping signatures since there's a danger that a
+// partial application generates a GTot that later on gives errors that are hard
+// to debug (hence the Tot _ in this file), but this signature is just too
+// painful to write and the refinement seems to be sufficient, so, there we go.
+[@ (Comment "  State allocation function when there is a key")]
+let malloc (r: HS.rid { HyperStack.ST.is_eternal_region r }) =
+  malloc_with_key B.null 0ul r
 
 [@ (Comment "  Re-initialization function when there is no key")]
 let reset (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
@@ -42,8 +87,8 @@ let update (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
   F.update blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment "  Finish function when there is no key")]
-let digest_raw (kk: Common.key_size_t Spec.Blake2B): Tot _ =
-  F.digest blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
+let digest (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
+  F.digest_erased blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment "  Free state function when there is no key")]
 let free (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =

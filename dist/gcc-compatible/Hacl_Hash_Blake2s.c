@@ -667,11 +667,7 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
   Lib_Memzero0_memzero(b, 32U, uint8_t, void *);
 }
 
-/**
-  State allocation function when there is no key
-*/
-Hacl_Hash_Blake2s_state_t
-*Hacl_Hash_Blake2s_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key)
+static Hacl_Hash_Blake2s_state_t *malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
   uint32_t *wv = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
@@ -705,6 +701,22 @@ Hacl_Hash_Blake2s_state_t
   }
   Hacl_Hash_Blake2s_init(block_state.snd.snd, kk1, 32U);
   return p;
+}
+
+/**
+  State allocation function when there is a key
+*/
+Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc_with_key(uint8_t *k, uint32_t kk)
+{
+  return malloc_raw(kk, ((K___uint32_t__uint8_t_){ .fst = kk, .snd = k }));
+}
+
+/**
+  State allocation function when there is a key
+*/
+Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc(void)
+{
+  return Hacl_Hash_Blake2s_malloc_with_key(NULL, 0U);
 }
 
 static uint32_t fst__uint32_t__uint32_t_____uint32_t_(Hacl_Hash_Blake2s_block_state_t x)
@@ -945,9 +957,10 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
 /**
   Finish function when there is no key
 */
-void
-Hacl_Hash_Blake2s_digest_raw(uint32_t kk, Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
+void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
 {
+  Hacl_Hash_Blake2s_block_state_t block_state0 = (*state).block_state;
+  uint32_t i = fst__uint32_t__uint32_t_____uint32_t_(block_state0);
   Hacl_Hash_Blake2s_state_t scrut = *state;
   Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
@@ -965,7 +978,7 @@ Hacl_Hash_Blake2s_digest_raw(uint32_t kk, Hacl_Hash_Blake2s_state_t *state, uint
   uint32_t wv0[16U] = { 0U };
   uint32_t b[16U] = { 0U };
   Hacl_Hash_Blake2s_block_state_t
-  tmp_block_state = { .fst = kk, .snd = { .fst = wv0, .snd = b } };
+  tmp_block_state = { .fst = i, .snd = { .fst = wv0, .snd = b } };
   uint32_t *src_b = block_state.snd.snd;
   uint32_t *dst_b = tmp_block_state.snd.snd;
   memcpy(dst_b, src_b, 16U * sizeof (uint32_t));

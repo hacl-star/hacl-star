@@ -471,6 +471,7 @@ let digest_st
 /// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
 /// ``state`` is indexed over ``i``, then this function will not compile to C.
 /// (In other words: there's a reason why digest does *NOT* take i ghostly.)
+/// 20240328, JP: actually tried this. It's super ugly C code but it works.
 ///
 /// To work around this, it suffices to apply ``digest`` to each possible
 /// value for the index, then to abstract over ``i`` again if agility is
@@ -485,6 +486,19 @@ val digest:
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
   digest_st c i t t'
+
+/// Variant of the above that performs a runtime lookup via index_of_state,
+/// which in turn prevents specialization, but does not require an additional
+/// runtime parameter. Useful for Blake2.
+inline_for_extraction noextract
+val digest_erased:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index ->
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key (G.reveal i) c.km c.key } ->
+  digest_st c i t t'
+
 
 inline_for_extraction noextract
 let free_st

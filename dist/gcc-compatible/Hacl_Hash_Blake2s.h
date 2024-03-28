@@ -61,10 +61,14 @@ typedef struct Hacl_Hash_Blake2s_state_t_s
 Hacl_Hash_Blake2s_state_t;
 
 /**
-  State allocation function when there is no key
+  State allocation function when there is a key
 */
-Hacl_Hash_Blake2s_state_t
-*Hacl_Hash_Blake2s_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key);
+Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc_with_key(uint8_t *k, uint32_t kk);
+
+/**
+  State allocation function when there is a key
+*/
+Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc(void);
 
 /**
   Re-initialization function when there is no key
@@ -80,8 +84,7 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
 /**
   Finish function when there is no key
 */
-void
-Hacl_Hash_Blake2s_digest_raw(uint32_t kk, Hacl_Hash_Blake2s_state_t *state, uint8_t *output);
+void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output);
 
 /**
   Free state function when there is no key

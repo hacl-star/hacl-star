@@ -521,11 +521,7 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void)
   return buf;
 }
 
-/**
-  State allocation function when there is no key
-*/
-Hacl_Hash_Blake2b_Simd256_state_t
-*Hacl_Hash_Blake2b_Simd256_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key)
+static Hacl_Hash_Blake2b_Simd256_state_t *malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key)
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
@@ -571,6 +567,23 @@ Hacl_Hash_Blake2b_Simd256_state_t
   }
   Hacl_Hash_Blake2b_Simd256_init(block_state.snd.snd, kk1, 64U);
   return p;
+}
+
+/**
+  State allocation function when there is a key
+*/
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_malloc_with_key0(uint8_t *k, uint32_t kk)
+{
+  return malloc_raw(kk, ((K___uint32_t__uint8_t_){ .fst = kk, .snd = k }));
+}
+
+/**
+  State allocation function when there is a key
+*/
+Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(void)
+{
+  return Hacl_Hash_Blake2b_Simd256_malloc_with_key0(NULL, 0U);
 }
 
 static uint32_t
@@ -847,12 +860,12 @@ Hacl_Hash_Blake2b_Simd256_update(
   Finish function when there is no key
 */
 void
-Hacl_Hash_Blake2b_Simd256_digest_raw(
-  uint32_t kk,
-  Hacl_Hash_Blake2b_Simd256_state_t *state,
-  uint8_t *output
-)
+Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *output)
 {
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state0 = (*state).block_state;
+  uint32_t
+  i =
+    fst__uint32_t__Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256_(block_state0);
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
   Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
@@ -870,7 +883,7 @@ Hacl_Hash_Blake2b_Simd256_digest_raw(
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv0[4U] KRML_POST_ALIGN(32) = { 0U };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
   Hacl_Hash_Blake2b_Simd256_block_state_t
-  tmp_block_state = { .fst = kk, .snd = { .fst = wv0, .snd = b } };
+  tmp_block_state = { .fst = i, .snd = { .fst = wv0, .snd = b } };
   Lib_IntVector_Intrinsics_vec256 *src_b = block_state.snd.snd;
   Lib_IntVector_Intrinsics_vec256 *dst_b = tmp_block_state.snd.snd;
   memcpy(dst_b, src_b, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));

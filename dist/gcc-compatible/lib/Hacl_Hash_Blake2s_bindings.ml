@@ -59,11 +59,13 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2s_state_t_total_len =
       field hacl_Hash_Blake2s_state_t "total_len" uint64_t
     let _ = seal hacl_Hash_Blake2s_state_t
-    let hacl_Hash_Blake2s_malloc_raw =
-      foreign "Hacl_Hash_Blake2s_malloc_raw"
-        (uint32_t @->
-           (k___uint32_t__uint8_t_ @->
-              (returning (ptr hacl_Hash_Blake2s_state_t))))
+    let hacl_Hash_Blake2s_malloc_with_key =
+      foreign "Hacl_Hash_Blake2s_malloc_with_key"
+        (ocaml_bytes @->
+           (uint32_t @-> (returning (ptr hacl_Hash_Blake2s_state_t))))
+    let hacl_Hash_Blake2s_malloc =
+      foreign "Hacl_Hash_Blake2s_malloc"
+        (void @-> (returning (ptr hacl_Hash_Blake2s_state_t)))
     let hacl_Hash_Blake2s_reset =
       foreign "Hacl_Hash_Blake2s_reset"
         ((ptr hacl_Hash_Blake2s_state_t) @->
@@ -73,11 +75,10 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr hacl_Hash_Blake2s_state_t) @->
            (ocaml_bytes @->
               (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
-    let hacl_Hash_Blake2s_digest_raw =
-      foreign "Hacl_Hash_Blake2s_digest_raw"
-        (uint32_t @->
-           ((ptr hacl_Hash_Blake2s_state_t) @->
-              (ocaml_bytes @-> (returning void))))
+    let hacl_Hash_Blake2s_digest =
+      foreign "Hacl_Hash_Blake2s_digest"
+        ((ptr hacl_Hash_Blake2s_state_t) @->
+           (ocaml_bytes @-> (returning void)))
     let hacl_Hash_Blake2s_free =
       foreign "Hacl_Hash_Blake2s_free"
         ((ptr hacl_Hash_Blake2s_state_t) @-> (returning void))
