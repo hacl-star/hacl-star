@@ -300,8 +300,21 @@ let aes_dec_key_expansion (v:variant) (key:aes_key v): aes_xkey v =
 		  else (),b) () in
   key_ex
 
+let aes_enc_inner (v:variant) (key:aes_ikey v) (i:size_nat{i < num_rounds v-1}) (state:block) : Tot block =
+  aes_enc (sub key (16*i) 16) state
+
 let aes_enc_rounds (v:variant) (key:aes_ikey v) (state:block) : Tot block =
-  repeati (num_rounds v-1) (fun i -> aes_enc (sub key (16*i) 16)) state
+  repeati (num_rounds v-1) (aes_enc_inner v key) state
+
+let aes_enc_inner_4 (v:variant) (key:aes_ikey v) (i:size_nat{i < num_rounds v-1}) state : Tot (block & block & block & block) =
+  let (s0,s1,s2,s3) = state in
+  (aes_enc (sub key (16*i) 16) s0, aes_enc (sub key (16*i) 16) s1, aes_enc (sub key (16*i) 16) s2, aes_enc (sub key (16*i) 16) s3)
+
+val aes_enc_rounds_4_s: v:variant -> i:size_nat{i <= num_rounds v-1} -> Type0
+let aes_enc_rounds_4_s v i = block & block & block & block
+
+let aes_enc_rounds_4 (v:variant) (key:aes_ikey v) state : Tot (block & block & block & block) =
+  repeat_gen (num_rounds v-1) (aes_enc_rounds_4_s v) (aes_enc_inner_4 v key) state
 
 let aes_encrypt_block (v:variant) (key:aes_xkey v) (input:block) : Tot block =
   let state = input in
@@ -423,3 +436,179 @@ let aes128_ctr_key_block1 key n_len n =
 
 let aes256_ctr_encrypt_bytes key n_len nonce ctr0 msg =
   aes_ctr_encrypt_bytes AES256 key n_len nonce ctr0 msg
+
+(* AES little-endian spec *)
+
+let reverse_bytes (x:lbytes 16): lbytes 16 =
+  create16 x.[15] x.[14] x.[13] x.[12] x.[11] x.[10] x.[9] 
+    x.[8] x.[7] x.[6] x.[5] x.[4] x.[3] x.[2] x.[1] x.[0]
+
+let reverse_bytes_32 (x:lbytes 32): lbytes 32 =
+  concat (reverse_bytes (sub x 0 16)) (reverse_bytes (sub x 16 16))
+
+let key_expansion_step_LE (p:block) (assist:block) : Tot block =
+  let p0 = create 16 (to_elem 0) in
+  let k = p in
+  let k = xor_block k (update_sub p0 0 12 (sub k 4 12)) in
+  let k = xor_block k (update_sub p0 0 12 (sub k 4 12)) in
+  let k = xor_block k (update_sub p0 0 12 (sub k 4 12)) in
+  xor_block k assist
+
+let aes128_key_expansion_step_LE (i:size_nat{i < 10}) kex : Tot (lseq elem (11 * 16)) =
+  let p = sub kex (i * 16) 16 in
+  let a = keygen_assist0 (rcon_spec (i+1)) p in
+  let n = key_expansion_step_LE p a in
+  update_sub kex ((i+1) * 16) 16 n
+
+let aes128_key_expansion_LE (key:lbytes 16) : Tot (lseq elem (11 * 16)) =
+  let kex = create (11 * 16) (to_elem 0) in
+  let kex = update_sub kex 0 16 (reverse_bytes key) in
+  let kex = repeati 10 aes128_key_expansion_step_LE kex in
+  kex
+
+let aes256_key_expansion_step_LE (i:size_nat{i < 6}) kex : Tot (lseq elem (15 * 16)) =
+  let p0 = sub kex (2 * i * 16) 16 in
+  let p1 = sub kex (((2*i)+1) * 16) 16 in
+  let a0 = keygen_assist0 (rcon_spec (i+1)) p1 in
+  let n0 = key_expansion_step_LE p0 a0 in
+  let a1 = keygen_assist1 n0 in
+  let n1 = key_expansion_step_LE p1 a1 in
+  let kex = update_sub kex (((2*i)+2) * 16) 16 n0 in
+  update_sub kex (((2*i)+3) * 16) 16 n1
+
+let aes256_key_expansion_LE (key:lbytes 32) : Tot (lseq elem (15 * 16)) =
+  let kex = create (15 * 16) (to_elem 0) in
+  let kex = update_sub kex 0 32 (reverse_bytes_32 key) in
+  let kex = repeati 6 aes256_key_expansion_step_LE kex in
+  let p0 = sub kex (12 * 16) 16 in
+  let p1 = sub kex (13 * 16) 16 in
+  let a14 = keygen_assist0 (rcon_spec 7) p1 in
+  let n14 = key_expansion_step_LE p0 a14 in
+  let kex = update_sub kex (14 * 16) 16 n14 in
+  kex
+
+let aes_key_expansion_LE (v:variant) (key: aes_key v) : aes_xkey v =
+  match v with
+  | AES128 -> aes128_key_expansion_LE key
+  | AES256 -> aes256_key_expansion_LE key
+
+(* AES CTR-32 little-endian spec, specific version of counter mode of operation for GCM *)
+
+let aes_ctr32_set_counter_LE (nonce:block) (incr:uint32) : Tot block =
+  let c = Lib.ByteBuffer.uint_to_be incr in
+  update_sub nonce 12 4 (nat_to_bytes_be 4 (v c))
+
+let aes_ctr32_init_LE (v:variant) (k:aes_key v) (n:lbytes 12) : Tot (aes_ctr_state v) =
+  let input = create 16 (u8 0) in
+  let input = reverse_bytes (update_sub input 0 12 n) in
+  let key_ex = aes_key_expansion_LE v k in
+  { key_ex = key_ex; block = input}
+
+let aes_ctr32_encrypt_block_LE
+  (v:variant)
+  (key:aes_xkey v)
+  (n:block)
+  (incr:uint32)
+  (b:block) :
+  Tot block =
+
+  let n' = aes_ctr32_set_counter_LE n incr in
+  let kb = aes_encrypt_block v key n' in
+  reverse_bytes (map2 (^.) (reverse_bytes b) kb)
+
+let aes_ctr32_encrypt_block_4_LE
+  (v:variant)
+  (key:aes_xkey v)
+  (n:block)
+  (incr:uint32)
+  (b:lbytes 64):
+  Tot (lbytes 64) =
+
+  let o0 = aes_ctr32_encrypt_block_LE v key n
+    incr (sub b 0 16) in
+  let o1 = aes_ctr32_encrypt_block_LE v key n
+    (incr +. u32 1) (sub b 16 16) in
+  let o2 = aes_ctr32_encrypt_block_LE v key n
+    (incr +. u32 2) (sub b 32 16) in
+  let o3 = aes_ctr32_encrypt_block_LE v key n
+    (incr +. u32 3) (sub b 48 16) in
+  concat (concat (concat o0 o1) o2) o3
+
+let aes_ctr32_encrypt_last_LE
+  (v:variant)
+  (key:aes_xkey v)
+  (n:block)
+  (incr:uint32)
+  (len:size_nat{len < 16})
+  (b:lbytes len):
+  Tot (lbytes len) =
+
+  let plain = create 16 (u8 0) in
+  let plain = update_sub plain 0 (length b) b in
+  let cipher = aes_ctr32_encrypt_block_LE v key n incr plain in
+  sub cipher 0 (length b)
+
+let aes_ctr32_encrypt_last_4_LE
+  (v:variant)
+  (key:aes_xkey v)
+  (n:block)
+  (incr:uint32)
+  (len:size_nat{len < 64})
+  (b:lbytes len):
+  Tot (lbytes len) =
+
+  let last = create 64 (u8 0) in
+  let last = update_sub last 0 (length b) b in
+  let last = aes_ctr32_encrypt_block_4_LE v key n incr last in
+  sub last 0 (length b)
+
+let aes_ctr32_encrypt_block_incr_4_LE
+  (v:variant)
+  (key:aes_xkey v)
+  (n:block)
+  (counter:uint32)
+  (incr:size_nat)
+  (b:lbytes 64):
+  Tot (lbytes 64) =
+
+  aes_ctr32_encrypt_block_4_LE v key n (counter +. (u32 incr *. u32 4)) b
+
+let aes_ctr32_encrypt_last_incr_4_LE
+  (v:variant)
+  (key:aes_xkey v)
+  (n:block)
+  (counter:uint32)
+  (incr:size_nat)
+  (len:size_nat{len < 64})
+  (b:lbytes len):
+  Tot (lbytes len) =
+
+  aes_ctr32_encrypt_last_4_LE v key n (counter +. (u32 incr *. u32 4)) len b
+
+val aes_ctr32_encrypt_stream_LE:
+    v:variant
+  -> key:aes_xkey v
+  -> n:block
+  -> counter:uint32
+  -> msg:bytes{length msg / 64 <= max_size_t} ->
+  Tot (ciphertext:bytes{length ciphertext == length msg})
+let aes_ctr32_encrypt_stream_LE v key n counter msg =
+  map_blocks 64 msg
+    (aes_ctr32_encrypt_block_incr_4_LE v key n counter)
+    (aes_ctr32_encrypt_last_incr_4_LE v key n counter)
+
+val aes_ctr32_encrypt_bytes_LE:
+    v:variant
+  -> key:aes_key v
+  -> nonce:lbytes 12
+  -> c:uint32
+  -> msg:bytes{length msg / 64 <= max_size_t} ->
+  Tot (ciphertext:bytes{length ciphertext == length msg})
+
+let aes_ctr32_encrypt_bytes_LE v key nonce ctr0 msg =
+  let st0 = aes_ctr32_init_LE v key nonce in
+  aes_ctr32_encrypt_stream_LE v st0.key_ex
+    st0.block ctr0 msg
+
+let aes_ctr32_decrypt_bytes_LE v key nonce ctr0 msg =
+  aes_ctr32_encrypt_bytes_LE v key nonce ctr0 msg

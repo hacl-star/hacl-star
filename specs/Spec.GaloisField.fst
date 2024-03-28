@@ -33,18 +33,21 @@ let store_felem_le (#f:field) (e:felem f) : lbytes (numbytes f.t) = store_felem_
 let fadd (#f:field) (a:felem f) (b:felem f) : felem f = a ^. b
 let op_Plus_At #f e1 e2 = fadd #f e1 e2
 
+let fmul_inner (#f:field) (x:(felem f & felem f & felem f)) =
+  let (p,a,b) = x in
+  let b0 = eq_mask #f.t (b &. one) one in
+  let p = p ^. (b0 &. a) in
+  let carry_mask = eq_mask #f.t (a >>. size (bits f.t - 1)) one  in
+  let a = a <<. size 1 in
+  let a = a ^. (carry_mask &. f.irred) in
+  let b = b >>. size 1 in
+  (p,a,b)
+
 let fmul (#f:field) (a:felem f) (b:felem f) : felem f =
   let one = one #f in
   let zero = zero #f in
   let (p,a,b) =
-    repeati (bits f.t - 1) (fun i (p,a,b) ->
-	   let b0 = eq_mask #f.t (b &. one) one in
-	   let p = p ^. (b0 &. a) in
-  	   let carry_mask = eq_mask #f.t (a >>. size (bits f.t - 1)) one  in
-	   let a = a <<. size 1 in
-	   let a = a ^. (carry_mask &. f.irred) in
-	   let b = b >>. size 1 in
-	   (p,a,b)) (zero,a,b) in
+    repeati (bits f.t - 1) (fun i -> fmul_inner) (zero,a,b) in
   let b0 = eq_mask #f.t (b &. one) one in
   let p = p ^. (b0 &. a) in
   p
