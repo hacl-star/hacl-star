@@ -9,14 +9,15 @@ module Impl = Hacl.Impl.Blake2.Generic
 module Spec = Spec.Blake2
 
 inline_for_extraction noextract
-let blake2b_32 kk =
-  Common.blake2 Spec.Blake2B Core.M32 kk Blake2b32.init Blake2b32.update_multi
+let blake2b_32 =
+  Common.blake2 Spec.Blake2B Core.M32 Blake2b32.init Blake2b32.update_multi
          Blake2b32.update_last Blake2b32.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
 
-let block_state_t = Common.s Spec.Blake2B Core.M32
-let state_t = F.state_s (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let block_state_t (kk: G.erased (Common.key_size_t Spec.Blake2B)) = Common.s Spec.Blake2B kk Core.M32
+let state_t (kk: G.erased (Common.key_size_t Spec.Blake2B)) =
+  F.state_s blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 /// The incremental hash functions instantiations. Note that we can't write a
 /// generic one, because the normalization then performed by KaRaMeL explodes.
@@ -25,28 +26,31 @@ let state_t = F.state_s (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Co
 
 inline_for_extraction noextract
 [@ (Comment "  State allocation function when there is no key")]
-let alloca =
-  F.alloca (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let alloca_raw (kk: Common.key_size_t Spec.Blake2B): Tot _ =
+  F.alloca blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment "  State allocation function when there is no key")]
-let malloc =
-  F.malloc (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let malloc_raw (kk: Common.key_size_t Spec.Blake2B): Tot _ =
+  F.malloc blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment "  Re-initialization function when there is no key")]
-let reset =
-  F.reset (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let reset (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
+  F.reset blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
-let update =
-  F.update (blake2b_32 0ul) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let update (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
+  F.update blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment "  Finish function when there is no key")]
-let digest =
-  F.digest (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let digest_raw (kk: Common.key_size_t Spec.Blake2B): Tot _ =
+  F.digest blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 [@ (Comment "  Free state function when there is no key")]
-let free =
-  F.free (blake2b_32 0ul) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let free (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
+  F.free blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
+
+let copy (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
+  F.copy blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
 (* The one-shot hash *)
 [@@ Comment "Write the BLAKE2b digest of message `input` using key `key` into `output`.

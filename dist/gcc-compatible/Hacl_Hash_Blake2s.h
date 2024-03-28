@@ -36,11 +36,19 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
+#include "Hacl_Hash_Blake2b.h"
 
-typedef struct Hacl_Hash_Blake2s_block_state_t_s
+typedef struct K____uint32_t___uint32_t__s
 {
   uint32_t *fst;
   uint32_t *snd;
+}
+K____uint32_t___uint32_t_;
+
+typedef struct Hacl_Hash_Blake2s_block_state_t_s
+{
+  uint32_t fst;
+  K____uint32_t___uint32_t_ snd;
 }
 Hacl_Hash_Blake2s_block_state_t;
 
@@ -55,15 +63,16 @@ Hacl_Hash_Blake2s_state_t;
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc(uint8_t *key);
+Hacl_Hash_Blake2s_state_t
+*Hacl_Hash_Blake2s_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key);
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *state, uint8_t *key);
+void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *state, K___uint32_t__uint8_t_ key);
 
 /**
-  Update function when there is no key; 0ul = success, 1 = max length exceeded
+  Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint32_t chunk_len);
@@ -71,22 +80,25 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
 /**
   Finish function when there is no key
 */
-void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output);
+void
+Hacl_Hash_Blake2s_digest_raw(uint32_t kk, Hacl_Hash_Blake2s_state_t *state, uint8_t *output);
 
 /**
   Free state function when there is no key
 */
 void Hacl_Hash_Blake2s_free(Hacl_Hash_Blake2s_state_t *state);
 
+Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_copy(Hacl_Hash_Blake2s_state_t *state);
+
 /**
 Write the BLAKE2s digest of message `input` using key `key` into `output`.
 
 @param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0ul.
+@param key_len Length of the key. Can be 0.
 */
 void
 Hacl_Hash_Blake2s_hash_with_key(

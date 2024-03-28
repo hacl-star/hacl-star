@@ -51,33 +51,39 @@ let alg = Spec.alg
 inline_for_extraction noextract
 let m_spec = Core.m_spec
 
+inline_for_extraction noextract
+let key_size_t (a : alg) =
+  key_size:U32.t{U32.v key_size <= Spec.max_key a}
+
+let singleton x' = x:U32.t { x == x' }
+
 /// The stateful state: (wv, hash)
 inline_for_extraction noextract
-let s (a : alg) (m : m_spec) = Core.(state_p a m & state_p a m)
+let s (a : alg) (i: key_size_t a) (m : m_spec) = singleton i & Core.(state_p a m & state_p a m)
 
 inline_for_extraction noextract
-let t (a : alg) = Spec.state a
+let t (a : alg) = key_size_t a & Spec.state a
 
 (* In the internal state, we keep wv, the working vector. It's essentially
 temporary scratch space that the Blake2 implementation expects to receive. (Why
 is the implementation not performing its own stack allocations? Don't know!) *)
 inline_for_extraction noextract
-let get_wv (#a : alg) (#m : m_spec) (s : s a m) : Tot (Core.state_p a m) =
-  match s with wv, _ -> wv
+let get_wv (#a : alg) #i (#m : m_spec) (s : s a i m) : Tot (Core.state_p a m) =
+  match s with _, (wv, _) -> wv
 
 inline_for_extraction noextract
-let get_state_p (#a : alg) (#m : m_spec) (s : s a m) : Tot (Core.state_p a m) =
-  match s with _, p -> p
+let get_state_p (#a : alg) (#i: key_size_t a) (#m : m_spec) (s : s a i m) : Tot (Core.state_p a m) =
+  match s with _, (_, p) -> p
 
 (* But the working vector is not reflected in the state at all -- it doesn't
 have meaningful specification contents. *)
 inline_for_extraction noextract
-let state_v (#a : alg) (#m : m_spec) (h : HS.mem) (s : s a m) : GTot (Spec.state a) =
+let state_v (#a : alg) (#i: key_size_t a) (#m : m_spec) (h : HS.mem) (s : s a i m) : GTot (Spec.state a) =
   Core.state_v h (get_state_p s)
 
 inline_for_extraction noextract
-let s_v (#a : alg) (#m : m_spec) (h : HS.mem) (s : s a m) : GTot (t a) =
-  state_v h s
+let s_v (#a : alg) (#i: key_size_t a) (#m : m_spec) (h : HS.mem) (s : s a i m) : GTot (t a) =
+  fst s, state_v h s
 
 /// Small helper which facilitates inferencing implicit arguments for buffer
 /// operations
@@ -87,50 +93,50 @@ let state_to_lbuffer (#a : alg) (#m : m_spec) (s : Core.state_p a m) :
   s
 
 inline_for_extraction noextract
-let stateful_blake2 #i (a : alg) (m : m_spec) : I.stateful i =
+let stateful_blake2 (a : alg) (m : m_spec) : I.stateful (key_size_t a) =
   I.Stateful
-    (fun _ -> s a m) (* s *)
+    (fun i -> s a i m) (* s *)
     (* footprint *)
     (fun #_ _ acc ->
-      let wv, b = acc in
+      let _, (wv, b) = acc in
       B.loc_union
        (B.loc_addr_of_buffer (state_to_lbuffer wv))
        (B.loc_addr_of_buffer (state_to_lbuffer b)))
     (* freeable *)
     (fun #_ _ acc ->
-      let wv, b = acc in
+      let _, (wv, b) = acc in
       B.freeable (state_to_lbuffer wv) /\
       B.freeable (state_to_lbuffer b))
     (* invariant *)
     (fun #_ h acc ->
-      let wv, b = acc in
+      let _, (wv, b) = acc in
       B.live h (state_to_lbuffer wv) /\
       B.live h (state_to_lbuffer b) /\
       B.disjoint (state_to_lbuffer wv) (state_to_lbuffer b))
     (fun _ -> t a) (* t *)
     (fun _ h acc -> s_v h acc) (* v *)
-    (fun #_ h acc -> let wv, b = acc in ()) (* invariant_loc_in_footprint *)
-    (fun #_ l acc h0 h1 -> let wv, b = acc in ()) (* frame_invariant *)
+    (fun #_ h acc -> let _, (wv, b) = acc in ()) (* invariant_loc_in_footprint *)
+    (fun #_ l acc h0 h1 -> let _, (wv, b) = acc in ()) (* frame_invariant *)
     (fun #_ _ _ _ _ -> ()) (* frame_freeable *)
     (* alloca *)
-    (fun _ ->
+    (fun i ->
       let wv = Core.alloc_state a m in
       let b = Core.alloc_state a m in
-      wv, b)
+      i, (wv, b))
     (* create_in *)
-    (fun _ r ->
+    (fun i r ->
       let wv = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
       let b = B.malloc r (Core.zero_element a m) U32.(4ul *^ Core.row_len a m) in
-      wv, b)
+      i, (wv, b))
     (* free *)
     (fun _ acc ->
-      match acc with wv, b ->
+      match acc with _, (wv, b) ->
       B.free (state_to_lbuffer wv);
       B.free (state_to_lbuffer b))
     (* copy *)
     (fun _ src dst ->
-      match src with src_wv, src_b ->
-      match dst with src_wv, dst_b ->
+      match src with _, (src_wv, src_b) ->
+      match dst with _, (src_wv, dst_b) ->
       B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
              U32.(4ul *^ Core.row_len a m))
 
@@ -139,12 +145,6 @@ let stateful_blake2 #i (a : alg) (m : m_spec) : I.stateful i =
 
 inline_for_extraction noextract
 let key_size (a : alg) = kk:nat{kk <= Spec.max_key a}
-
-inline_for_extraction noextract
-let key_size_t (a : alg) =
-  key_size:U32.t{U32.v key_size <= Spec.max_key a}
-
-let singleton x' = x:U32.t { x == x' }
 
 /// Defining stateful keys
 inline_for_extraction noextract
@@ -234,29 +234,29 @@ let blake2_prevlen (a : alg)
 
 noextract
 let init_s (a : alg) (kk : size_nat{kk <= max_key a}) :
-  Tot (t a) =
+  Tot (Spec.state a) =
   Spec.blake2_init_hash a (Spec.blake2_default_params a) kk (output_size a)
 
 noextract
-let update_multi_s (#a : alg) (acc : t a)
+let update_multi_s (#a : alg) (acc : Spec.state a)
                    (prevlen : nat{prevlen % Spec.size_block a = 0})
                    (input : Seq.seq uint8{ prevlen + S.length input <= max_input_length a /\
                                            S.length input % Spec.size_block a = 0 }) :
-  Tot (t a)
+  Tot (Spec.state a)
 =
   let nb = S.length input / U32.v (block_len a) in
   Lib.LoopCombinators.repeati nb (Spec.blake2_update1 a prevlen input) acc
 
 noextract
-let update_last_s (#a : alg) (acc : t a)
+let update_last_s (#a : alg) (acc : Spec.state a)
                   (prevlen : nat{prevlen % Spec.size_block a = 0})
                   (input : Seq.seq uint8{ S.length input + prevlen <= max_input_length a /\
                                           S.length input <= Spec.size_block a }) :
-  Tot (t a) =
+  Tot (Spec.state a) =
   Spec.blake2_update_last a prevlen (S.length input) input acc
 
 noextract
-let finish_s (#a : alg) (acc : t a) :
+let finish_s (#a : alg) (acc : Spec.state a) :
   output : S.seq uint8 { S.length output = U32.v (output_len a) } =
   Spec.blake2_finish a acc (U32.v (output_len a))
 
@@ -272,7 +272,7 @@ let spec_s (a : alg)
 
 val update_multi_zero:
   #a : alg ->
-  acc:t a ->
+  acc:Spec.state a ->
   prevlen:nat{prevlen % Spec.size_block a = 0} ->
   Lemma
   (requires (prevlen <= max_input_length a))
@@ -284,7 +284,7 @@ let update_multi_zero #a acc prevlen =
 #push-options "--z3cliopt smt.arith.nl=false"
 val update_multi_associative:
   #a : alg ->
-  acc: t a ->
+  acc: Spec.state a ->
   prevlen1:nat ->
   prevlen2:nat ->
   input1:S.seq uint8 ->
@@ -314,10 +314,10 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
   let f = Spec.blake2_update1 a prevlen1 input in
   let f1 = Spec.blake2_update1 a prevlen1 input1 in
   let f2 = Spec.blake2_update1 a prevlen2 input2 in
-  let aux1 (i:nat{i < nb1}) (acc:t a) : Lemma (f i acc == f1 i acc)
+  let aux1 (i:nat{i < nb1}) (acc:Spec.state a) : Lemma (f i acc == f1 i acc)
     = assert (Spec.get_blocki a input i `Seq.equal` Spec.get_blocki a input1 i)
   in
-  let aux2 (i:nat{i < nb2}) (acc:t a) : Lemma (f2 i acc == f (i + nb1) acc)
+  let aux2 (i:nat{i < nb2}) (acc:Spec.state a) : Lemma (f2 i acc == f (i + nb1) acc)
     = assert (Spec.get_blocki a input2 i `Seq.equal` Spec.get_blocki a input (i + nb1))
   in
   let open Lib.LoopCombinators in
@@ -333,15 +333,15 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
     repeati nb2 f2 (repeati nb1 f acc);
     (==) {
       repeati_def nb1 f acc;
-      repeati_def nb2 f2 (repeat_right 0 nb1 (fixed_a (t a)) f acc)
+      repeati_def nb2 f2 (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc)
     }
-    repeat_right 0 nb2 (fixed_a (t a)) f2 (repeat_right 0 nb1 (fixed_a (t a)) f acc);
+    repeat_right 0 nb2 (fixed_a (Spec.state a)) f2 (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc);
     (==) {
       Classical.forall_intro_2 aux2;
-      repeat_gen_right_extensionality nb2 nb1 (fixed_a (t a)) (fixed_a (t a)) f2 f (repeat_right 0 nb1 (fixed_a (t a)) f acc)
+      repeat_gen_right_extensionality nb2 nb1 (fixed_a (Spec.state a)) (fixed_a (Spec.state a)) f2 f (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc)
     }
-    repeat_right nb1 (nb1 + nb2) (fixed_a (t a)) f (repeat_right 0 nb1 (fixed_a (t a)) f acc);
-    (==) { repeat_right_plus 0 nb1 nb (fixed_a (t a)) f acc; repeati_def nb f acc }
+    repeat_right nb1 (nb1 + nb2) (fixed_a (Spec.state a)) f (repeat_right 0 nb1 (fixed_a (Spec.state a)) f acc);
+    (==) { repeat_right_plus 0 nb1 nb (fixed_a (Spec.state a)) f acc; repeati_def nb f acc }
     repeati nb f acc;
     (==) { }
     update_multi_s acc prevlen1 input;
@@ -376,7 +376,7 @@ let blake2_hash_incremental_s a kk k input0 =
 #push-options "--z3cliopt smt.arith.nl=false"
 val repeati_split_at_eq :
   a : alg ->
-  s : t a ->
+  s : Spec.state a ->
   input:S.seq uint8 { S.length input <= max_input_length a } ->
   Lemma(
     let n_blocks, l_last = Spec.split a (S.length input) in
@@ -461,14 +461,14 @@ val init_key_block (a : alg) (kk : key_size_t a) (k : stateful_key_t a (G.hide k
   (buf_: B.buffer uint8 { B.length buf_ = Spec.size_block a }) :
   ST.Stack unit
   (requires fun h0 ->
-    let key = stateful_key a (G.hide kk) in
+    let key = stateful_key a in
     key.invariant #(G.hide kk) h0 k /\
     B.live h0 buf_ /\
     B.(loc_disjoint (loc_buffer buf_) (key.footprint #(G.hide kk) h0 k)))
   (ensures fun h0 _ h1 ->
     B.(modifies (loc_buffer buf_) h0 h1) /\
     begin
-    let k = (stateful_key a kk).v kk h0 k in
+    let k = (stateful_key a).v kk h0 k in
     let input_length = if kk <> 0ul then Spec.size_block a else 0 in
     let input = if kk <> 0ul then Spec.blake2_key_block a (U32.v kk) k else S.empty in
     S.equal (S.slice (B.as_seq h1 buf_) 0 input_length) input
@@ -491,7 +491,7 @@ let init_key_block a kk k buf_ =
     Lib.Buffer.update_sub #Lib.Buffer.MUT #uint8 #(U32.uint_to_t (Spec.size_block a)) buf_ 0ul kk (snd k);
     (**) let h2 = ST.get () in
     (**) begin
-    (**) let k : LS.lseq uint8 (U32.v kk) = (stateful_key a kk).v kk h0 k in
+    (**) let k : LS.lseq uint8 (U32.v kk) = (stateful_key a).v kk h0 k in
     (**) let buf_v1 : LS.lseq uint8 (Spec.size_block a) = B.as_seq h1 buf_ in
     (**) let buf_v2 : LS.lseq uint8 (Spec.size_block a) = B.as_seq h2 buf_ in
 
@@ -528,12 +528,12 @@ let blake2 (a : alg)
            (update_multi : blake2_update_multi_st a m)
            (update_last : blake2_update_last_st a m)
            (finish : blake2_finish_st a m) :
-  I.block key_size_t =
+  I.block (key_size_t a) =
   I.Block
     I.Erased (* key management *)
 
-    (stateful_blake2 #key_size_t a m) (* state *)
-    (stateful_key a kk)   (* key *)
+    (stateful_blake2 a m) (* state *)
+    (stateful_key a)   (* key *)
 
     unit (* output_length_t *)
 
@@ -544,44 +544,48 @@ let blake2 (a : alg)
     (fun kk -> if kk <> 0ul then block_len a else 0ul) (* init_input_len *)
 
     (fun kk k -> if kk <> 0ul then Spec.blake2_key_block a (U32.v kk) k else S.empty)
-    (fun kk _k -> init_s a (U32.v kk)) (* init_s *)
+    (fun kk _k -> kk, init_s a (U32.v kk)) (* init_s *)
 
-    (fun _ acc prevlen input -> update_multi_s acc prevlen input) (* update_multi_s *)
-    (fun _ acc prevlen input -> update_last_s acc prevlen input) (* update_last_s *)
-    (fun _ _k acc _ -> finish_s #a acc) (* finish_s *)
+    (fun _ (kk, acc) prevlen input -> kk, update_multi_s acc prevlen input) (* update_multi_s *)
+    (fun _ (kk, acc) prevlen input -> kk, update_last_s acc prevlen input) (* update_last_s *)
+    (fun _ _k (kk, acc) _ -> finish_s #a acc) (* finish_s *)
     (fun kk k input l -> spec_s a (U32.v kk) k input) (* spec_s *)
 
     (* update_multi_zero *)
-    (fun _ acc prevlen -> update_multi_zero #a acc prevlen)
+    (fun _ (kk, acc) prevlen -> update_multi_zero #a acc prevlen)
 
     (* update_multi_associative *)
-    (fun _ acc prevlen1 prevlen2 input1 input2 ->
+    (fun _ (kk, acc) prevlen1 prevlen2 input1 input2 ->
       update_multi_associative acc prevlen1 prevlen2 input1 input2)
-    (fun _ k input _ ->
+    (fun kk k input _ ->
      spec_is_incremental a (U32.v kk) k input) (* spec_is_incremental *)
-    (fun _ acc -> admit ()) (* index_of_state *)
+    (fun _ acc -> fst acc) (* index_of_state *)
 
     (* init *)
     (fun _ (kk, key) buf_ acc ->
-      [@inline_let] let wv = get_wv acc in
-      [@inline_let] let h = get_state_p acc in
+      [@inline_let] let wv = get_wv #a #kk #m acc in
+      [@inline_let] let h = get_state_p #a #kk acc in
       init_key_block a kk (kk, key) buf_;
       init h kk (output_len a))
 
     (* update_multi *)
-    (fun _ acc prevlen blocks len ->
+    (fun _ (kk, acc) prevlen blocks len ->
       let wv, hash = acc in
       let nb = len `U32.div` Core.size_block a in
       update_multi #len wv hash (blake2_prevlen a prevlen) blocks nb)
 
     (* update_last *)
-    (fun _ acc prevlen last last_len ->
+    (fun _ (kk, acc) prevlen last last_len ->
       let wv, hash = acc in
       update_last #last_len wv hash (blake2_prevlen a prevlen) last_len last)
 
     (* finish *)
-    (fun _ k acc dst _ ->
-      [@inline_let] let wv = get_wv acc in
-      [@inline_let] let h = get_state_p acc in
+    (fun _ k s dst _ ->
+      let kk, acc = s in
+      [@inline_let] let wv = get_wv #a #kk #m s in
+      [@inline_let] let h = get_state_p #a #kk s in
       finish (output_len a) dst h)
 #pop-options
+
+
+let blake_key a kk = I.optional_key kk I.Erased (stateful_key a)

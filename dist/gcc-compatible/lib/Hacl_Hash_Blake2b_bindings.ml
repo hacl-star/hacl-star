@@ -37,15 +37,24 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_finish =
       foreign "Hacl_Hash_Blake2b_finish"
         (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
+    type k____uint64_t___uint64_t_ = [ `k____uint64_t___uint64_t_ ] structure
+    let (k____uint64_t___uint64_t_ :
+      [ `k____uint64_t___uint64_t_ ] structure typ) =
+      structure "K____uint64_t___uint64_t__s"
+    let k____uint64_t___uint64_t__fst =
+      field k____uint64_t___uint64_t_ "fst" (ptr uint64_t)
+    let k____uint64_t___uint64_t__snd =
+      field k____uint64_t___uint64_t_ "snd" (ptr uint64_t)
+    let _ = seal k____uint64_t___uint64_t_
     type hacl_Hash_Blake2b_block_state_t =
       [ `hacl_Hash_Blake2b_block_state_t ] structure
     let (hacl_Hash_Blake2b_block_state_t :
       [ `hacl_Hash_Blake2b_block_state_t ] structure typ) =
       structure "Hacl_Hash_Blake2b_block_state_t_s"
     let hacl_Hash_Blake2b_block_state_t_fst =
-      field hacl_Hash_Blake2b_block_state_t "fst" (ptr uint64_t)
+      field hacl_Hash_Blake2b_block_state_t "fst" uint32_t
     let hacl_Hash_Blake2b_block_state_t_snd =
-      field hacl_Hash_Blake2b_block_state_t "snd" (ptr uint64_t)
+      field hacl_Hash_Blake2b_block_state_t "snd" k____uint64_t___uint64_t_
     let _ = seal hacl_Hash_Blake2b_block_state_t
     type hacl_Hash_Blake2b_state_t = [ `hacl_Hash_Blake2b_state_t ] structure
     let (hacl_Hash_Blake2b_state_t :
@@ -59,25 +68,40 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_state_t_total_len =
       field hacl_Hash_Blake2b_state_t "total_len" uint64_t
     let _ = seal hacl_Hash_Blake2b_state_t
-    let hacl_Hash_Blake2b_malloc =
-      foreign "Hacl_Hash_Blake2b_malloc"
-        (ocaml_bytes @-> (returning (ptr hacl_Hash_Blake2b_state_t)))
+    type k___uint32_t__uint8_t_ = [ `k___uint32_t__uint8_t_ ] structure
+    let (k___uint32_t__uint8_t_ : [ `k___uint32_t__uint8_t_ ] structure typ)
+      = structure "K___uint32_t__uint8_t__s"
+    let k___uint32_t__uint8_t__fst =
+      field k___uint32_t__uint8_t_ "fst" uint32_t
+    let k___uint32_t__uint8_t__snd =
+      field k___uint32_t__uint8_t_ "snd" (ptr uint8_t)
+    let _ = seal k___uint32_t__uint8_t_
+    let hacl_Hash_Blake2b_malloc_raw =
+      foreign "Hacl_Hash_Blake2b_malloc_raw"
+        (uint32_t @->
+           (k___uint32_t__uint8_t_ @->
+              (returning (ptr hacl_Hash_Blake2b_state_t))))
     let hacl_Hash_Blake2b_reset =
       foreign "Hacl_Hash_Blake2b_reset"
         ((ptr hacl_Hash_Blake2b_state_t) @->
-           (ocaml_bytes @-> (returning void)))
+           (k___uint32_t__uint8_t_ @-> (returning void)))
     let hacl_Hash_Blake2b_update =
       foreign "Hacl_Hash_Blake2b_update"
         ((ptr hacl_Hash_Blake2b_state_t) @->
            (ocaml_bytes @->
               (uint32_t @-> (returning hacl_Streaming_Types_error_code))))
-    let hacl_Hash_Blake2b_digest =
-      foreign "Hacl_Hash_Blake2b_digest"
-        ((ptr hacl_Hash_Blake2b_state_t) @->
-           (ocaml_bytes @-> (returning void)))
+    let hacl_Hash_Blake2b_digest_raw =
+      foreign "Hacl_Hash_Blake2b_digest_raw"
+        (uint32_t @->
+           ((ptr hacl_Hash_Blake2b_state_t) @->
+              (ocaml_bytes @-> (returning void))))
     let hacl_Hash_Blake2b_free =
       foreign "Hacl_Hash_Blake2b_free"
         ((ptr hacl_Hash_Blake2b_state_t) @-> (returning void))
+    let hacl_Hash_Blake2b_copy =
+      foreign "Hacl_Hash_Blake2b_copy"
+        ((ptr hacl_Hash_Blake2b_state_t) @->
+           (returning (ptr hacl_Hash_Blake2b_state_t)))
     let hacl_Hash_Blake2b_hash_with_key =
       foreign "Hacl_Hash_Blake2b_hash_with_key"
         (ocaml_bytes @->

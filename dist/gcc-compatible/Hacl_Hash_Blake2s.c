@@ -670,45 +670,95 @@ void Hacl_Hash_Blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc(uint8_t *key)
+Hacl_Hash_Blake2s_state_t
+*Hacl_Hash_Blake2s_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key)
 {
-  KRML_MAYBE_UNUSED_VAR(key);
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
   uint32_t *wv = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
   uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
-  Hacl_Hash_Blake2s_block_state_t block_state = { .fst = wv, .snd = b };
+  Hacl_Hash_Blake2s_block_state_t block_state = { .fst = kk, .snd = { .fst = wv, .snd = b } };
+  uint32_t ite;
+  if (kk != 0U)
+  {
+    ite = 64U;
+  }
+  else
+  {
+    ite = 0U;
+  }
   Hacl_Hash_Blake2s_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
   Hacl_Hash_Blake2s_state_t
   *p = (Hacl_Hash_Blake2s_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2s_state_t));
   p[0U] = s;
-  Hacl_Hash_Blake2s_init(block_state.snd, 0U, 32U);
+  uint32_t kk1 = key.fst;
+  uint8_t *key1 = key.snd;
+  if (!(kk1 == 0U))
+  {
+    uint8_t *sub_b = buf + kk1;
+    memset(sub_b, 0U, (64U - kk1) * sizeof (uint8_t));
+    memcpy(buf,
+      FStar_Pervasives_Native_snd__uint32_t__uint8_t_((
+          (K___uint32_t__uint8_t_){ .fst = kk1, .snd = key1 }
+        )),
+      kk1 * sizeof (uint8_t));
+  }
+  Hacl_Hash_Blake2s_init(block_state.snd.snd, kk1, 32U);
   return p;
+}
+
+static uint32_t fst__uint32_t__uint32_t_____uint32_t_(Hacl_Hash_Blake2s_block_state_t x)
+{
+  return x.fst;
 }
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *state, uint8_t *key)
+void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *state, K___uint32_t__uint8_t_ key)
 {
-  KRML_MAYBE_UNUSED_VAR(key);
   Hacl_Hash_Blake2s_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
-  Hacl_Hash_Blake2s_init(block_state.snd, 0U, 32U);
+  uint32_t i = fst__uint32_t__uint32_t_____uint32_t_(block_state);
+  KRML_MAYBE_UNUSED_VAR(i);
+  uint32_t kk1 = key.fst;
+  uint8_t *key1 = key.snd;
+  if (!(kk1 == 0U))
+  {
+    uint8_t *sub_b = buf + kk1;
+    memset(sub_b, 0U, (64U - kk1) * sizeof (uint8_t));
+    memcpy(buf,
+      FStar_Pervasives_Native_snd__uint32_t__uint8_t_((
+          (K___uint32_t__uint8_t_){ .fst = kk1, .snd = key1 }
+        )),
+      kk1 * sizeof (uint8_t));
+  }
+  Hacl_Hash_Blake2s_init(block_state.snd.snd, kk1, 32U);
+  uint32_t ite;
+  if (i != 0U)
+  {
+    ite = 64U;
+  }
+  else
+  {
+    ite = 0U;
+  }
   Hacl_Hash_Blake2s_state_t
-  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
   state[0U] = tmp;
 }
 
 /**
-  Update function when there is no key; 0ul = success, 1 = max length exceeded
+  Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint32_t chunk_len)
 {
   Hacl_Hash_Blake2s_state_t s = *state;
+  Hacl_Hash_Blake2s_block_state_t block_state = s.block_state;
   uint64_t total_len = s.total_len;
+  fst__uint32_t__uint32_t_____uint32_t_(block_state);
   if ((uint64_t)chunk_len > 0xffffffffffffffffULL - total_len)
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
@@ -768,8 +818,9 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint32_t *wv = block_state1.fst;
-      uint32_t *hash = block_state1.snd;
+      K____uint32_t___uint32_t_ acc = block_state1.snd;
+      uint32_t *wv = acc.fst;
+      uint32_t *hash = acc.snd;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2s_update_multi(64U, wv, hash, prevlen, buf, nb);
     }
@@ -787,8 +838,9 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    uint32_t *wv = block_state1.fst;
-    uint32_t *hash = block_state1.snd;
+    K____uint32_t___uint32_t_ acc = block_state1.snd;
+    uint32_t *wv = acc.fst;
+    uint32_t *hash = acc.snd;
     uint32_t nb = data1_len / 64U;
     Hacl_Hash_Blake2s_update_multi(data1_len, wv, hash, total_len1, data1, nb);
     uint8_t *dst = buf;
@@ -849,8 +901,9 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      uint32_t *wv = block_state1.fst;
-      uint32_t *hash = block_state1.snd;
+      K____uint32_t___uint32_t_ acc = block_state1.snd;
+      uint32_t *wv = acc.fst;
+      uint32_t *hash = acc.snd;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2s_update_multi(64U, wv, hash, prevlen, buf, nb);
     }
@@ -869,8 +922,9 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    uint32_t *wv = block_state1.fst;
-    uint32_t *hash = block_state1.snd;
+    K____uint32_t___uint32_t_ acc = block_state1.snd;
+    uint32_t *wv = acc.fst;
+    uint32_t *hash = acc.snd;
     uint32_t nb = data1_len / 64U;
     Hacl_Hash_Blake2s_update_multi(data1_len, wv, hash, total_len1, data1, nb);
     uint8_t *dst = buf;
@@ -891,7 +945,8 @@ Hacl_Hash_Blake2s_update(Hacl_Hash_Blake2s_state_t *state, uint8_t *chunk, uint3
 /**
   Finish function when there is no key
 */
-void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
+void
+Hacl_Hash_Blake2s_digest_raw(uint32_t kk, Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
 {
   Hacl_Hash_Blake2s_state_t scrut = *state;
   Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
@@ -909,9 +964,10 @@ void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
   uint8_t *buf_1 = buf_;
   uint32_t wv0[16U] = { 0U };
   uint32_t b[16U] = { 0U };
-  Hacl_Hash_Blake2s_block_state_t tmp_block_state = { .fst = wv0, .snd = b };
-  uint32_t *src_b = block_state.snd;
-  uint32_t *dst_b = tmp_block_state.snd;
+  Hacl_Hash_Blake2s_block_state_t
+  tmp_block_state = { .fst = kk, .snd = { .fst = wv0, .snd = b } };
+  uint32_t *src_b = block_state.snd.snd;
+  uint32_t *dst_b = tmp_block_state.snd.snd;
   memcpy(dst_b, src_b, 16U * sizeof (uint32_t));
   uint64_t prev_len = total_len - (uint64_t)r;
   uint32_t ite;
@@ -925,15 +981,17 @@ void Hacl_Hash_Blake2s_digest(Hacl_Hash_Blake2s_state_t *state, uint8_t *output)
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
-  uint32_t *wv1 = tmp_block_state.fst;
-  uint32_t *hash0 = tmp_block_state.snd;
+  K____uint32_t___uint32_t_ acc0 = tmp_block_state.snd;
+  uint32_t *wv1 = acc0.fst;
+  uint32_t *hash0 = acc0.snd;
   uint32_t nb = 0U;
   Hacl_Hash_Blake2s_update_multi(0U, wv1, hash0, prev_len, buf_multi, nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  uint32_t *wv = tmp_block_state.fst;
-  uint32_t *hash = tmp_block_state.snd;
+  K____uint32_t___uint32_t_ acc = tmp_block_state.snd;
+  uint32_t *wv = acc.fst;
+  uint32_t *hash = acc.snd;
   Hacl_Hash_Blake2s_update_last(r, wv, hash, prev_len_last, r, buf_last);
-  Hacl_Hash_Blake2s_finish(32U, output, tmp_block_state.snd);
+  Hacl_Hash_Blake2s_finish(32U, output, tmp_block_state.snd.snd);
 }
 
 /**
@@ -944,23 +1002,46 @@ void Hacl_Hash_Blake2s_free(Hacl_Hash_Blake2s_state_t *state)
   Hacl_Hash_Blake2s_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2s_block_state_t block_state = scrut.block_state;
-  uint32_t *wv = block_state.fst;
-  uint32_t *b = block_state.snd;
+  uint32_t *b = block_state.snd.snd;
+  uint32_t *wv = block_state.snd.fst;
   KRML_HOST_FREE(wv);
   KRML_HOST_FREE(b);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(state);
 }
 
+Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_copy(Hacl_Hash_Blake2s_state_t *state)
+{
+  Hacl_Hash_Blake2s_state_t scrut = *state;
+  Hacl_Hash_Blake2s_block_state_t block_state0 = scrut.block_state;
+  uint8_t *buf0 = scrut.buf;
+  uint64_t total_len0 = scrut.total_len;
+  uint32_t i = fst__uint32_t__uint32_t_____uint32_t_(block_state0);
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
+  memcpy(buf, buf0, 64U * sizeof (uint8_t));
+  uint32_t *wv = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
+  uint32_t *b = (uint32_t *)KRML_HOST_CALLOC(16U, sizeof (uint32_t));
+  Hacl_Hash_Blake2s_block_state_t block_state = { .fst = i, .snd = { .fst = wv, .snd = b } };
+  uint32_t *src_b = block_state0.snd.snd;
+  uint32_t *dst_b = block_state.snd.snd;
+  memcpy(dst_b, src_b, 16U * sizeof (uint32_t));
+  Hacl_Hash_Blake2s_state_t
+  s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
+  Hacl_Hash_Blake2s_state_t
+  *p = (Hacl_Hash_Blake2s_state_t *)KRML_HOST_MALLOC(sizeof (Hacl_Hash_Blake2s_state_t));
+  p[0U] = s;
+  return p;
+}
+
 /**
 Write the BLAKE2s digest of message `input` using key `key` into `output`.
 
 @param output Pointer to `output_len` bytes of memory where the digest is written to.
-@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 32.
+@param output_len Length of the to-be-generated digest with 1 <= `output_len` <= 64.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0ul.
+@param key_len Length of the key. Can be 0.
 */
 void
 Hacl_Hash_Blake2s_hash_with_key(

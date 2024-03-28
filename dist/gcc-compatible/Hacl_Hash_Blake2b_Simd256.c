@@ -524,9 +524,9 @@ Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_Simd256_malloc_with_key(void)
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(uint8_t *key)
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key)
 {
-  KRML_MAYBE_UNUSED_VAR(key);
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
   *wv =
@@ -538,36 +538,94 @@ Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(uint8_t *key
     (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
       sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
   memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
-  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = { .fst = wv, .snd = b };
+  Hacl_Hash_Blake2b_Simd256_block_state_t
+  block_state = { .fst = kk, .snd = { .fst = wv, .snd = b } };
+  uint32_t ite;
+  if (kk != 0U)
+  {
+    ite = 128U;
+  }
+  else
+  {
+    ite = 0U;
+  }
   Hacl_Hash_Blake2b_Simd256_state_t
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
   Hacl_Hash_Blake2b_Simd256_state_t
   *p =
     (Hacl_Hash_Blake2b_Simd256_state_t *)KRML_HOST_MALLOC(sizeof (
         Hacl_Hash_Blake2b_Simd256_state_t
       ));
   p[0U] = s;
-  Hacl_Hash_Blake2b_Simd256_init(block_state.snd, 0U, 64U);
+  uint32_t kk1 = key.fst;
+  uint8_t *key1 = key.snd;
+  if (!(kk1 == 0U))
+  {
+    uint8_t *sub_b = buf + kk1;
+    memset(sub_b, 0U, (128U - kk1) * sizeof (uint8_t));
+    memcpy(buf,
+      FStar_Pervasives_Native_snd__uint32_t__uint8_t_((
+          (K___uint32_t__uint8_t_){ .fst = kk1, .snd = key1 }
+        )),
+      kk1 * sizeof (uint8_t));
+  }
+  Hacl_Hash_Blake2b_Simd256_init(block_state.snd.snd, kk1, 64U);
   return p;
+}
+
+static uint32_t
+fst__uint32_t__Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256_(
+  Hacl_Hash_Blake2b_Simd256_block_state_t x
+)
+{
+  return x.fst;
 }
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *key)
+void
+Hacl_Hash_Blake2b_Simd256_reset(
+  Hacl_Hash_Blake2b_Simd256_state_t *state,
+  K___uint32_t__uint8_t_ key
+)
 {
-  KRML_MAYBE_UNUSED_VAR(key);
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
-  Hacl_Hash_Blake2b_Simd256_init(block_state.snd, 0U, 64U);
+  uint32_t
+  i =
+    fst__uint32_t__Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256_(block_state);
+  KRML_MAYBE_UNUSED_VAR(i);
+  uint32_t kk1 = key.fst;
+  uint8_t *key1 = key.snd;
+  if (!(kk1 == 0U))
+  {
+    uint8_t *sub_b = buf + kk1;
+    memset(sub_b, 0U, (128U - kk1) * sizeof (uint8_t));
+    memcpy(buf,
+      FStar_Pervasives_Native_snd__uint32_t__uint8_t_((
+          (K___uint32_t__uint8_t_){ .fst = kk1, .snd = key1 }
+        )),
+      kk1 * sizeof (uint8_t));
+  }
+  Hacl_Hash_Blake2b_Simd256_init(block_state.snd.snd, kk1, 64U);
+  uint32_t ite;
+  if (i != 0U)
+  {
+    ite = 128U;
+  }
+  else
+  {
+    ite = 0U;
+  }
   Hacl_Hash_Blake2b_Simd256_state_t
-  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
   state[0U] = tmp;
 }
 
 /**
-  Update function when there is no key; 0ul = success, 1 = max length exceeded
+  Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2b_Simd256_update(
@@ -577,7 +635,9 @@ Hacl_Hash_Blake2b_Simd256_update(
 )
 {
   Hacl_Hash_Blake2b_Simd256_state_t s = *state;
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state = s.block_state;
   uint64_t total_len = s.total_len;
+  fst__uint32_t__Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256_(block_state);
   if ((uint64_t)chunk_len > 0xffffffffffffffffULL - total_len)
   {
     return Hacl_Streaming_Types_MaximumLengthExceeded;
@@ -637,8 +697,10 @@ Hacl_Hash_Blake2b_Simd256_update(
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
-      Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
+      K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
+      acc = block_state1.snd;
+      Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
+      Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2b_Simd256_update_multi(128U,
         wv,
@@ -661,8 +723,9 @@ Hacl_Hash_Blake2b_Simd256_update(
     uint32_t data2_len = chunk_len - data1_len;
     uint8_t *data1 = chunk;
     uint8_t *data2 = chunk + data1_len;
-    Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
-    Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
+    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ acc = block_state1.snd;
+    Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
+    Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
     Hacl_Hash_Blake2b_Simd256_update_multi(data1_len,
       wv,
@@ -728,8 +791,10 @@ Hacl_Hash_Blake2b_Simd256_update(
     if (!(sz1 == 0U))
     {
       uint64_t prevlen = total_len1 - (uint64_t)sz1;
-      Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
-      Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
+      K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
+      acc = block_state1.snd;
+      Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
+      Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
       uint32_t nb = 1U;
       Hacl_Hash_Blake2b_Simd256_update_multi(128U,
         wv,
@@ -753,8 +818,9 @@ Hacl_Hash_Blake2b_Simd256_update(
     uint32_t data2_len = chunk_len - diff - data1_len;
     uint8_t *data1 = chunk2;
     uint8_t *data2 = chunk2 + data1_len;
-    Lib_IntVector_Intrinsics_vec256 *wv = block_state1.fst;
-    Lib_IntVector_Intrinsics_vec256 *hash = block_state1.snd;
+    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ acc = block_state1.snd;
+    Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
+    Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
     uint32_t nb = data1_len / 128U;
     Hacl_Hash_Blake2b_Simd256_update_multi(data1_len,
       wv,
@@ -781,7 +847,11 @@ Hacl_Hash_Blake2b_Simd256_update(
   Finish function when there is no key
 */
 void
-Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *output)
+Hacl_Hash_Blake2b_Simd256_digest_raw(
+  uint32_t kk,
+  Hacl_Hash_Blake2b_Simd256_state_t *state,
+  uint8_t *output
+)
 {
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
   Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
@@ -799,9 +869,10 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
   uint8_t *buf_1 = buf_;
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 wv0[4U] KRML_POST_ALIGN(32) = { 0U };
   KRML_PRE_ALIGN(32) Lib_IntVector_Intrinsics_vec256 b[4U] KRML_POST_ALIGN(32) = { 0U };
-  Hacl_Hash_Blake2b_Simd256_block_state_t tmp_block_state = { .fst = wv0, .snd = b };
-  Lib_IntVector_Intrinsics_vec256 *src_b = block_state.snd;
-  Lib_IntVector_Intrinsics_vec256 *dst_b = tmp_block_state.snd;
+  Hacl_Hash_Blake2b_Simd256_block_state_t
+  tmp_block_state = { .fst = kk, .snd = { .fst = wv0, .snd = b } };
+  Lib_IntVector_Intrinsics_vec256 *src_b = block_state.snd.snd;
+  Lib_IntVector_Intrinsics_vec256 *dst_b = tmp_block_state.snd.snd;
   memcpy(dst_b, src_b, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
   uint64_t prev_len = total_len - (uint64_t)r;
   uint32_t ite;
@@ -815,8 +886,10 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
   }
   uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
-  Lib_IntVector_Intrinsics_vec256 *wv1 = tmp_block_state.fst;
-  Lib_IntVector_Intrinsics_vec256 *hash0 = tmp_block_state.snd;
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
+  acc0 = tmp_block_state.snd;
+  Lib_IntVector_Intrinsics_vec256 *wv1 = acc0.fst;
+  Lib_IntVector_Intrinsics_vec256 *hash0 = acc0.snd;
   uint32_t nb = 0U;
   Hacl_Hash_Blake2b_Simd256_update_multi(0U,
     wv1,
@@ -825,15 +898,17 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
     buf_multi,
     nb);
   uint64_t prev_len_last = total_len - (uint64_t)r;
-  Lib_IntVector_Intrinsics_vec256 *wv = tmp_block_state.fst;
-  Lib_IntVector_Intrinsics_vec256 *hash = tmp_block_state.snd;
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
+  acc = tmp_block_state.snd;
+  Lib_IntVector_Intrinsics_vec256 *wv = acc.fst;
+  Lib_IntVector_Intrinsics_vec256 *hash = acc.snd;
   Hacl_Hash_Blake2b_Simd256_update_last(r,
     wv,
     hash,
     FStar_UInt128_uint64_to_uint128(prev_len_last),
     r,
     buf_last);
-  Hacl_Hash_Blake2b_Simd256_finish(64U, output, tmp_block_state.snd);
+  Hacl_Hash_Blake2b_Simd256_finish(64U, output, tmp_block_state.snd.snd);
 }
 
 /**
@@ -844,12 +919,50 @@ void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state)
   Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2b_Simd256_block_state_t block_state = scrut.block_state;
-  Lib_IntVector_Intrinsics_vec256 *wv = block_state.fst;
-  Lib_IntVector_Intrinsics_vec256 *b = block_state.snd;
+  Lib_IntVector_Intrinsics_vec256 *b = block_state.snd.snd;
+  Lib_IntVector_Intrinsics_vec256 *wv = block_state.snd.fst;
   KRML_ALIGNED_FREE(wv);
   KRML_ALIGNED_FREE(b);
   KRML_HOST_FREE(buf);
   KRML_HOST_FREE(state);
+}
+
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_copy(Hacl_Hash_Blake2b_Simd256_state_t *state)
+{
+  Hacl_Hash_Blake2b_Simd256_state_t scrut = *state;
+  Hacl_Hash_Blake2b_Simd256_block_state_t block_state0 = scrut.block_state;
+  uint8_t *buf0 = scrut.buf;
+  uint64_t total_len0 = scrut.total_len;
+  uint32_t
+  i =
+    fst__uint32_t__Lib_IntVector_Intrinsics_vec256_____Lib_IntVector_Intrinsics_vec256_(block_state0);
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
+  memcpy(buf, buf0, 128U * sizeof (uint8_t));
+  Lib_IntVector_Intrinsics_vec256
+  *wv =
+    (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
+      sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
+  memset(wv, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  Lib_IntVector_Intrinsics_vec256
+  *b =
+    (Lib_IntVector_Intrinsics_vec256 *)KRML_ALIGNED_MALLOC(32,
+      sizeof (Lib_IntVector_Intrinsics_vec256) * 4U);
+  memset(b, 0U, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  Hacl_Hash_Blake2b_Simd256_block_state_t
+  block_state = { .fst = i, .snd = { .fst = wv, .snd = b } };
+  Lib_IntVector_Intrinsics_vec256 *src_b = block_state0.snd.snd;
+  Lib_IntVector_Intrinsics_vec256 *dst_b = block_state.snd.snd;
+  memcpy(dst_b, src_b, 4U * sizeof (Lib_IntVector_Intrinsics_vec256));
+  Hacl_Hash_Blake2b_Simd256_state_t
+  s = { .block_state = block_state, .buf = buf, .total_len = total_len0 };
+  Hacl_Hash_Blake2b_Simd256_state_t
+  *p =
+    (Hacl_Hash_Blake2b_Simd256_state_t *)KRML_HOST_MALLOC(sizeof (
+        Hacl_Hash_Blake2b_Simd256_state_t
+      ));
+  p[0U] = s;
+  return p;
 }
 
 /**
@@ -860,7 +973,7 @@ Write the BLAKE2b digest of message `input` using key `key` into `output`.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0ul.
+@param key_len Length of the key. Can be 0.
 */
 void
 Hacl_Hash_Blake2b_Simd256_hash_with_key(

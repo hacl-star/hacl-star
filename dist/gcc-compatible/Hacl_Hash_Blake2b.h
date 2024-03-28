@@ -38,10 +38,17 @@ extern "C" {
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
 
-typedef struct Hacl_Hash_Blake2b_block_state_t_s
+typedef struct K____uint64_t___uint64_t__s
 {
   uint64_t *fst;
   uint64_t *snd;
+}
+K____uint64_t___uint64_t_;
+
+typedef struct Hacl_Hash_Blake2b_block_state_t_s
+{
+  uint32_t fst;
+  K____uint64_t___uint64_t_ snd;
 }
 Hacl_Hash_Blake2b_block_state_t;
 
@@ -53,15 +60,23 @@ typedef struct Hacl_Hash_Blake2b_state_t_s
 }
 Hacl_Hash_Blake2b_state_t;
 
+typedef struct K___uint32_t__uint8_t__s
+{
+  uint32_t fst;
+  uint8_t *snd;
+}
+K___uint32_t__uint8_t_;
+
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(uint8_t *key);
+Hacl_Hash_Blake2b_state_t
+*Hacl_Hash_Blake2b_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key);
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, uint8_t *key);
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, K___uint32_t__uint8_t_ key);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
@@ -72,12 +87,15 @@ Hacl_Hash_Blake2b_update(Hacl_Hash_Blake2b_state_t *state, uint8_t *chunk, uint3
 /**
   Finish function when there is no key
 */
-void Hacl_Hash_Blake2b_digest(Hacl_Hash_Blake2b_state_t *state, uint8_t *output);
+void
+Hacl_Hash_Blake2b_digest_raw(uint32_t kk, Hacl_Hash_Blake2b_state_t *state, uint8_t *output);
 
 /**
   Free state function when there is no key
 */
 void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state);
+
+Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *state);
 
 /**
 Write the BLAKE2b digest of message `input` using key `key` into `output`.

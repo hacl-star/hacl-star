@@ -37,12 +37,20 @@ extern "C" {
 
 #include "Hacl_Streaming_Types.h"
 #include "Hacl_Krmllib.h"
+#include "Hacl_Hash_Blake2b.h"
 #include "libintvector.h"
 
-typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
+typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s
 {
   Lib_IntVector_Intrinsics_vec256 *fst;
   Lib_IntVector_Intrinsics_vec256 *snd;
+}
+K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_;
+
+typedef struct Hacl_Hash_Blake2b_Simd256_block_state_t_s
+{
+  uint32_t fst;
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ snd;
 }
 Hacl_Hash_Blake2b_Simd256_block_state_t;
 
@@ -57,15 +65,20 @@ Hacl_Hash_Blake2b_Simd256_state_t;
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(uint8_t *key);
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_malloc_raw(uint32_t kk, K___uint32_t__uint8_t_ key);
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *key);
+void
+Hacl_Hash_Blake2b_Simd256_reset(
+  Hacl_Hash_Blake2b_Simd256_state_t *state,
+  K___uint32_t__uint8_t_ key
+);
 
 /**
-  Update function when there is no key; 0ul = success, 1 = max length exceeded
+  Update function when there is no key; 0 = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2b_Simd256_update(
@@ -78,12 +91,19 @@ Hacl_Hash_Blake2b_Simd256_update(
   Finish function when there is no key
 */
 void
-Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *output);
+Hacl_Hash_Blake2b_Simd256_digest_raw(
+  uint32_t kk,
+  Hacl_Hash_Blake2b_Simd256_state_t *state,
+  uint8_t *output
+);
 
 /**
   Free state function when there is no key
 */
 void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state);
+
+Hacl_Hash_Blake2b_Simd256_state_t
+*Hacl_Hash_Blake2b_Simd256_copy(Hacl_Hash_Blake2b_Simd256_state_t *state);
 
 /**
 Write the BLAKE2b digest of message `input` using key `key` into `output`.
@@ -93,7 +113,7 @@ Write the BLAKE2b digest of message `input` using key `key` into `output`.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0ul.
+@param key_len Length of the key. Can be 0.
 */
 void
 Hacl_Hash_Blake2b_Simd256_hash_with_key(
