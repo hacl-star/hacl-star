@@ -8,7 +8,7 @@ module Spec = Spec.SHA3
 module BSeq = Lib.ByteSequence
 module Lemmas = Hacl.Spec.SHA3.Lemmas
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 120 --fuel 0 --ifuel 0"
 
 (* state_theta0 *)
 
