@@ -517,8 +517,9 @@ Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_Simd128_malloc_with_key(void)
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(void)
+Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(uint8_t *key)
 {
+  KRML_MAYBE_UNUSED_VAR(key);
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec128
   *wv =
@@ -546,8 +547,9 @@ Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(void)
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state)
+void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state, uint8_t *key)
 {
+  KRML_MAYBE_UNUSED_VAR(key);
   Hacl_Hash_Blake2s_Simd128_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2s_Simd128_block_state_t block_state = scrut.block_state;
@@ -558,7 +560,7 @@ void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *state)
 }
 
 /**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
+  Update function when there is no key; 0ul = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2s_Simd128_update(
@@ -821,7 +823,7 @@ Write the BLAKE2s digest of message `input` using key `key` into `output`.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0.
+@param key_len Length of the key. Can be 0ul.
 */
 void
 Hacl_Hash_Blake2s_Simd128_hash_with_key(

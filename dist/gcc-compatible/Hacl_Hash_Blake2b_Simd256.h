@@ -57,15 +57,15 @@ Hacl_Hash_Blake2b_Simd256_state_t;
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(void);
+Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(uint8_t *key);
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state);
+void Hacl_Hash_Blake2b_Simd256_reset(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8_t *key);
 
 /**
-  Update function when there is no key; 0 = success, 1 = max length exceeded
+  Update function when there is no key; 0ul = success, 1 = max length exceeded
 */
 Hacl_Streaming_Types_error_code
 Hacl_Hash_Blake2b_Simd256_update(
@@ -93,7 +93,7 @@ Write the BLAKE2b digest of message `input` using key `key` into `output`.
 @param input Pointer to `input_len` bytes of memory where the input message is read from.
 @param input_len Length of the input message.
 @param key Pointer to `key_len` bytes of memory where the key is read from.
-@param key_len Length of the key. Can be 0.
+@param key_len Length of the key. Can be 0ul.
 */
 void
 Hacl_Hash_Blake2b_Simd256_hash_with_key(

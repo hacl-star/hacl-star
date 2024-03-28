@@ -682,8 +682,9 @@ void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
+Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(uint8_t *key)
 {
+  KRML_MAYBE_UNUSED_VAR(key);
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC(128U, sizeof (uint8_t));
   uint64_t *wv = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
   uint64_t *b = (uint64_t *)KRML_HOST_CALLOC(16U, sizeof (uint64_t));
@@ -700,8 +701,9 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state)
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, uint8_t *key)
 {
+  KRML_MAYBE_UNUSED_VAR(key);
   Hacl_Hash_Blake2b_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
   Hacl_Hash_Blake2b_block_state_t block_state = scrut.block_state;

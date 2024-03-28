@@ -56,12 +56,12 @@ Hacl_Hash_Blake2b_state_t;
 /**
   State allocation function when there is no key
 */
-Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
+Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(uint8_t *key);
 
 /**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state);
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, uint8_t *key);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded
