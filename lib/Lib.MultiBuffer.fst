@@ -65,7 +65,7 @@ let loc_multi8 (#lanes:flen{lanes = 8}) (#len:size_t) (b:multibuf lanes len)  :
 #pop-options
 
 let disjoint_multi_multi #lanes #len #len' (b:multibuf lanes len) (b':multibuf lanes len') =
-  forall i. i < lanes ==> disjoint b.(|i|) b'.(|i|)
+  forall i j. (i < lanes /\ j < lanes) ==> disjoint b.(|i|) b'.(|j|)
 
 let live_multi #lanes #len (h:mem) (b:multibuf lanes len) =
   forall i. i < lanes ==> live h b.(|i|)

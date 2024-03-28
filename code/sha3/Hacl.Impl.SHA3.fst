@@ -121,7 +121,7 @@ val state_theta1:
     (requires fun h0 -> live h0 s /\ live h0 _C /\ disjoint _C s)
     (ensures  fun h0 _ h1 ->
       modifies (loc s) h0 h1 /\
-      as_seq h1 s == S.state_theta1 (as_seq h0 s) (as_seq h0 _C))
+      as_seq h1 s == S.state_theta1 (as_seq h0 _C) (as_seq h0 s))
 let state_theta1 s _C =
   [@ inline_let]
   let spec h0 = S.state_theta_inner_s (as_seq h0 _C) in

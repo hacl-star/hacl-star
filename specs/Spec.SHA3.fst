@@ -38,13 +38,13 @@ let state_theta_inner_s (_C:lseq uint64 5) (x:index) (s:state) : Tot state =
   let _D = _C.[(x + 4) % 5] ^. (rotl _C.[(x + 1) % 5] (size 1)) in
   repeati 5 (state_theta_inner_s_inner x _D) s
 
-let state_theta1 (s:state) (_C:lseq uint64 5) : Tot state =
+let state_theta1 (_C:lseq uint64 5) (s:state) : Tot state =
   repeati 5 (state_theta_inner_s _C) s
 
 let state_theta (s:state) : Tot state =
   let _C = create 5 (u64 0) in
   let _C = state_theta0 s _C in
-  state_theta1 s _C
+  state_theta1 _C s
 
 let state_pi_rho_inner (i:size_nat{i < 24}) (current, s) : (uint64 & state) =
   let r = keccak_rotc.[i] in
