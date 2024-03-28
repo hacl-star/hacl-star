@@ -61,10 +61,11 @@ module Bindings(F:Cstubs.FOREIGN) =
     let _ = seal hacl_Hash_Blake2b_state_t
     let hacl_Hash_Blake2b_malloc =
       foreign "Hacl_Hash_Blake2b_malloc"
-        (void @-> (returning (ptr hacl_Hash_Blake2b_state_t)))
+        (ocaml_bytes @-> (returning (ptr hacl_Hash_Blake2b_state_t)))
     let hacl_Hash_Blake2b_reset =
       foreign "Hacl_Hash_Blake2b_reset"
-        ((ptr hacl_Hash_Blake2b_state_t) @-> (returning void))
+        ((ptr hacl_Hash_Blake2b_state_t) @->
+           (ocaml_bytes @-> (returning void)))
     let hacl_Hash_Blake2b_update =
       foreign "Hacl_Hash_Blake2b_update"
         ((ptr hacl_Hash_Blake2b_state_t) @->

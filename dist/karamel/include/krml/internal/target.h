@@ -19,14 +19,6 @@
 #  define inline __inline__
 #endif
 
-#define DEBUG_ARRAY(w, x, l) do { \
-  printf("%s: [", #x); \
-  for (uint32_t i = 0; i < l; ++i) { \
-    printf("%"PRIx##w"%s", x[i], i == l - 1 ? "" : ", "); \
-  } \
-  printf("]\n"); \
-} while (0)
-
 /******************************************************************************/
 /* Macros that KaRaMeL will generate.                                         */
 /******************************************************************************/

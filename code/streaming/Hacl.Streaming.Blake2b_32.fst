@@ -16,7 +16,7 @@ let blake2b_32 kk =
 /// Type abbreviations - makes Karamel use pretty names in the generated code
 
 let block_state_t = Common.s Spec.Blake2B Core.M32
-let state_t = F.state_s (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+let state_t = F.state_s (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 /// The incremental hash functions instantiations. Note that we can't write a
 /// generic one, because the normalization then performed by KaRaMeL explodes.
@@ -26,27 +26,27 @@ let state_t = F.state_s (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Comm
 inline_for_extraction noextract
 [@ (Comment "  State allocation function when there is no key")]
 let alloca =
-  F.alloca (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+  F.alloca (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  State allocation function when there is no key")]
 let malloc =
-  F.malloc (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+  F.malloc (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Re-initialization function when there is no key")]
 let reset =
-  F.reset (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+  F.reset (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let update =
-  F.update (blake2b_32 0) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+  F.update (blake2b_32 0ul) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Finish function when there is no key")]
 let digest =
-  F.digest (blake2b_32 0) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+  F.digest (blake2b_32 0ul) () (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Free state function when there is no key")]
 let free =
-  F.free (blake2b_32 0) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
+  F.free (blake2b_32 0ul) (G.hide ()) (Common.s Spec.Blake2B Core.M32) (Common.empty_key Spec.Blake2B)
 
 (* The one-shot hash *)
 [@@ Comment "Write the BLAKE2b digest of message `input` using key `key` into `output`.
