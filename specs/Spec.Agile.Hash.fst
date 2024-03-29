@@ -17,8 +17,8 @@ let init a =
       Spec.MD5.init
   | SHA1 ->
       Spec.SHA1.init
-  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S (Spec.Blake2.blake2_default_params _) 0 32
-  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B (Spec.Blake2.blake2_default_params _) 0 64
+  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S (Spec.Blake2.blake2_default_params _)
+  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B (Spec.Blake2.blake2_default_params _)
   | SHA3_224 | SHA3_256 | SHA3_384 | SHA3_512 | Shake128 | Shake256 ->
       Lib.Sequence.create 25 (u64 0)
 
@@ -76,14 +76,14 @@ let finish (a:hash_alg) (hashw:words_state a) (l: output_length a): Tot (bytes_h
   else
     finish_md a hashw
 
-#push-options "--fuel 0 --ifuel 0"
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 // MD hashes are by definition the application of init / update_multi / pad / finish.
 // Blake2 does its own thing, and there is a slightly more involved proof that the hash is incremental.
 // Same deal with the SHA3 family.
 let hash' a input l =
   if is_blake a then
-    Spec.Blake2.blake2 (to_blake_alg a) input (Spec.Blake2.blake2_default_params (to_blake_alg a)) 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))
+    Spec.Blake2.blake2 (to_blake_alg a) input (Spec.Blake2.blake2_default_params (to_blake_alg a)) Seq.empty
   else if is_md a then
     (* As defined in the NIST standard; pad, then update, then finish. *)
     let padding = pad a (S.length input) in

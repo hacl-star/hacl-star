@@ -121,7 +121,7 @@ type blake2_params (a: alg) = {
 }
 
 let blake2_default_params (a: alg) : blake2_params a =
-  { digest_length = 32uy;
+  { digest_length = (match a with Blake2B -> 64uy | Blake2S -> 32uy);
     key_length = 0uy;
     fanout = u8 1;
     depth = u8 1;

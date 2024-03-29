@@ -238,12 +238,60 @@ Hacl_Hash_Blake2s_Simd128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t k
       .digest_length = 32U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
       .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt, .personal = personal
     };
+  uint8_t
+  kk1 =
+    (
+      (Hacl_Hash_Blake2s_blake2_params){
+        .digest_length = (uint8_t)nn,
+        .key_length = (uint8_t)kk,
+        .fanout = p.fanout,
+        .depth = p.depth,
+        .leaf_length = p.leaf_length,
+        .node_offset = p.node_offset,
+        .node_depth = p.node_depth,
+        .inner_length = p.inner_length,
+        .salt = p.salt,
+        .personal = p.personal
+      }
+    ).key_length;
+  uint8_t
+  nn1 =
+    (
+      (Hacl_Hash_Blake2s_blake2_params){
+        .digest_length = (uint8_t)nn,
+        .key_length = (uint8_t)kk,
+        .fanout = p.fanout,
+        .depth = p.depth,
+        .leaf_length = p.leaf_length,
+        .node_offset = p.node_offset,
+        .node_depth = p.node_depth,
+        .inner_length = p.inner_length,
+        .salt = p.salt,
+        .personal = p.personal
+      }
+    ).digest_length;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
     uint32_t *os = tmp + 4U;
-    uint8_t *bj = p.salt + i * 4U;
+    uint8_t
+    *bj =
+      (
+        (Hacl_Hash_Blake2s_blake2_params){
+          .digest_length = (uint8_t)nn,
+          .key_length = (uint8_t)kk,
+          .fanout = p.fanout,
+          .depth = p.depth,
+          .leaf_length = p.leaf_length,
+          .node_offset = p.node_offset,
+          .node_depth = p.node_depth,
+          .inner_length = p.inner_length,
+          .salt = p.salt,
+          .personal = p.personal
+        }
+      ).salt
+      + i * 4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -253,17 +301,142 @@ Hacl_Hash_Blake2s_Simd128_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t k
     2U,
     1U,
     uint32_t *os = tmp + 6U;
-    uint8_t *bj = p.personal + i * 4U;
+    uint8_t
+    *bj =
+      (
+        (Hacl_Hash_Blake2s_blake2_params){
+          .digest_length = (uint8_t)nn,
+          .key_length = (uint8_t)kk,
+          .fanout = p.fanout,
+          .depth = p.depth,
+          .leaf_length = p.leaf_length,
+          .node_offset = p.node_offset,
+          .node_depth = p.node_depth,
+          .inner_length = p.inner_length,
+          .salt = p.salt,
+          .personal = p.personal
+        }
+      ).personal
+      + i * 4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
     os[i] = x;);
-  tmp[0U] = nn ^ (kk << 8U ^ ((uint32_t)p.fanout << 16U ^ (uint32_t)p.depth << 24U));
-  tmp[1U] = p.leaf_length;
-  tmp[2U] = (uint32_t)p.node_offset;
+  tmp[0U] =
+    (uint32_t)nn1
+    ^
+      ((uint32_t)kk1
+      << 8U
+      ^
+        ((uint32_t)(
+          (Hacl_Hash_Blake2s_blake2_params){
+            .digest_length = (uint8_t)nn,
+            .key_length = (uint8_t)kk,
+            .fanout = p.fanout,
+            .depth = p.depth,
+            .leaf_length = p.leaf_length,
+            .node_offset = p.node_offset,
+            .node_depth = p.node_depth,
+            .inner_length = p.inner_length,
+            .salt = p.salt,
+            .personal = p.personal
+          }
+        ).fanout
+        << 16U
+        ^
+          (uint32_t)(
+            (Hacl_Hash_Blake2s_blake2_params){
+              .digest_length = (uint8_t)nn,
+              .key_length = (uint8_t)kk,
+              .fanout = p.fanout,
+              .depth = p.depth,
+              .leaf_length = p.leaf_length,
+              .node_offset = p.node_offset,
+              .node_depth = p.node_depth,
+              .inner_length = p.inner_length,
+              .salt = p.salt,
+              .personal = p.personal
+            }
+          ).depth
+          << 24U));
+  tmp[1U] =
+    (
+      (Hacl_Hash_Blake2s_blake2_params){
+        .digest_length = (uint8_t)nn,
+        .key_length = (uint8_t)kk,
+        .fanout = p.fanout,
+        .depth = p.depth,
+        .leaf_length = p.leaf_length,
+        .node_offset = p.node_offset,
+        .node_depth = p.node_depth,
+        .inner_length = p.inner_length,
+        .salt = p.salt,
+        .personal = p.personal
+      }
+    ).leaf_length;
+  tmp[2U] =
+    (uint32_t)(
+      (Hacl_Hash_Blake2s_blake2_params){
+        .digest_length = (uint8_t)nn,
+        .key_length = (uint8_t)kk,
+        .fanout = p.fanout,
+        .depth = p.depth,
+        .leaf_length = p.leaf_length,
+        .node_offset = p.node_offset,
+        .node_depth = p.node_depth,
+        .inner_length = p.inner_length,
+        .salt = p.salt,
+        .personal = p.personal
+      }
+    ).node_offset;
   tmp[3U] =
-    (uint32_t)(p.node_offset >> 32U)
-    ^ ((uint32_t)p.node_depth << 16U ^ (uint32_t)p.inner_length << 24U);
+    (uint32_t)((
+      (Hacl_Hash_Blake2s_blake2_params){
+        .digest_length = (uint8_t)nn,
+        .key_length = (uint8_t)kk,
+        .fanout = p.fanout,
+        .depth = p.depth,
+        .leaf_length = p.leaf_length,
+        .node_offset = p.node_offset,
+        .node_depth = p.node_depth,
+        .inner_length = p.inner_length,
+        .salt = p.salt,
+        .personal = p.personal
+      }
+    ).node_offset
+    >> 32U)
+    ^
+      ((uint32_t)(
+        (Hacl_Hash_Blake2s_blake2_params){
+          .digest_length = (uint8_t)nn,
+          .key_length = (uint8_t)kk,
+          .fanout = p.fanout,
+          .depth = p.depth,
+          .leaf_length = p.leaf_length,
+          .node_offset = p.node_offset,
+          .node_depth = p.node_depth,
+          .inner_length = p.inner_length,
+          .salt = p.salt,
+          .personal = p.personal
+        }
+      ).node_depth
+      << 16U
+      ^
+        (uint32_t)(
+          (Hacl_Hash_Blake2s_blake2_params){
+            .digest_length = (uint8_t)nn,
+            .key_length = (uint8_t)kk,
+            .fanout = p.fanout,
+            .depth = p.depth,
+            .leaf_length = p.leaf_length,
+            .node_offset = p.node_offset,
+            .node_depth = p.node_depth,
+            .inner_length = p.inner_length,
+            .salt = p.salt,
+            .personal = p.personal
+          }
+        ).inner_length
+        << 24U);
   uint32_t tmp0 = tmp[0U];
   uint32_t tmp1 = tmp[1U];
   uint32_t tmp2 = tmp[2U];

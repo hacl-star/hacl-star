@@ -923,9 +923,9 @@ noeq type vec =
   | Vec :
     a:S.alg
     -> num:nat
-    -> params: S.blake2_params a
+    -> params: S.blake2_params a { UInt8.v params.digest_length == blake2_length a }
     -> plain:bytes{length plain <= max_size_t}
-    -> key:bytes{length key <= blake2_length a}
+    -> key:bytes{length key <= S.max_key a}
     -> hash:bytes{length hash = blake2_length a} -> vec
 
 let test_vectors : list vec = [
@@ -963,8 +963,9 @@ let test_one (v:vec) =
   let expected = tag in
   let computed =
     match a with
-    | S.Blake2S -> S.blake2s plain params (Seq.length key) key 32
-    | S.Blake2B -> S.blake2b plain params (Seq.length key) key 64 in
+    | S.Blake2S -> S.blake2 S.Blake2S plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
+    | S.Blake2B -> S.blake2 S.Blake2B plain ({ params with S.key_length = UInt8.uint_to_t (Seq.length key) }) key
+   in
 
   IO.print_string ("\n\nTEST Blake2 "^(string_of_int num)^":");
   PS.print_compare true (length expected) expected computed
