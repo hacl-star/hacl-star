@@ -76,7 +76,7 @@ let malloc_with_key k kk r =
 // partial application generates a GTot that later on gives errors that are hard
 // to debug (hence the Tot _ in this file), but this signature is just too
 // painful to write and the refinement seems to be sufficient, so, there we go.
-[@ (Comment "  State allocation function when there is a key")]
+[@ (Comment "  State allocation function when there is no key")]
 let malloc (r: HS.rid { HyperStack.ST.is_eternal_region r }) =
   malloc_with_key B.null 0ul r
 
@@ -157,6 +157,7 @@ let digest (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
 let free (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
   F.free blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 
+[@ (Comment "  Copying. The key length (or absence thereof) must match between source and destination.")]
 let copy (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =
   F.copy blake2b_32 kk (Common.s Spec.Blake2B kk Core.M32) (Common.blake_key Spec.Blake2B kk)
 

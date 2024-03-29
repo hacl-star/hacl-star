@@ -729,7 +729,7 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint32_
 }
 
 /**
-  State allocation function when there is a key
+  State allocation function when there is no key
 */
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void)
 {
@@ -1093,6 +1093,9 @@ void Hacl_Hash_Blake2b_free(Hacl_Hash_Blake2b_state_t *state)
   KRML_HOST_FREE(state);
 }
 
+/**
+  Copying. The key length (or absence thereof) must match between source and destination.
+*/
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_copy(Hacl_Hash_Blake2b_state_t *state)
 {
   Hacl_Hash_Blake2b_state_t scrut = *state;

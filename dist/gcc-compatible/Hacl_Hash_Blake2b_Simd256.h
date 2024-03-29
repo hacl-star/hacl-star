@@ -68,7 +68,7 @@ Hacl_Hash_Blake2b_Simd256_state_t
 *Hacl_Hash_Blake2b_Simd256_malloc_with_key0(uint8_t *k, uint32_t kk);
 
 /**
-  State allocation function when there is a key
+  State allocation function when there is no key
 */
 Hacl_Hash_Blake2b_Simd256_state_t *Hacl_Hash_Blake2b_Simd256_malloc(void);
 
@@ -107,6 +107,9 @@ Hacl_Hash_Blake2b_Simd256_digest(Hacl_Hash_Blake2b_Simd256_state_t *state, uint8
 */
 void Hacl_Hash_Blake2b_Simd256_free(Hacl_Hash_Blake2b_Simd256_state_t *state);
 
+/**
+  Copying. The key length (or absence thereof) must match between source and destination.
+*/
 Hacl_Hash_Blake2b_Simd256_state_t
 *Hacl_Hash_Blake2b_Simd256_copy(Hacl_Hash_Blake2b_Simd256_state_t *state);
 
