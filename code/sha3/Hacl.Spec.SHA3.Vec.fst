@@ -153,14 +153,6 @@ let state_chi_inner0 (m:m_spec) (s_pi_rho:state_spec m) (y:index) (x:index) (s:s
 let state_chi_inner1 (m:m_spec) (s_pi_rho:state_spec m) (y:index) (s:state_spec m) : Tot (state_spec m) =
   repeati 5 (state_chi_inner0 m s_pi_rho y) s
 
-let state_chi (m:m_spec) (s_pi_rho:state_spec m) : Tot (state_spec m)  =
-  repeati 5 (state_chi_inner1 m s_pi_rho) s_pi_rho
-
-let state_iota (m:m_spec) (s:state_spec m) (round:size_nat{round < 24}) : Tot (state_spec m) =
-  set m s 0 0 (get m s 0 0 ^| (load_element m (secret keccak_rndc.[round])))
-
-(* Equivalence *)
-
 let state_chi_inner (m:m_spec) (y:index) (s:state_spec m) : Tot (state_spec m) =
   let v0  = get m s 0 y ^| ((~| (get m s 1 y)) &| get m s 2 y) in
   let v1  = get m s 1 y ^| ((~| (get m s 2 y)) &| get m s 3 y) in
@@ -173,6 +165,12 @@ let state_chi_inner (m:m_spec) (y:index) (s:state_spec m) : Tot (state_spec m) =
   let s = set m s 3 y v3 in
   let s = set m s 4 y v4 in
   s
+
+let state_chi (m:m_spec) (s_pi_rho:state_spec m) : Tot (state_spec m)  =
+  repeati 5 (state_chi_inner1 m s_pi_rho) s_pi_rho
+
+let state_iota (m:m_spec) (s:state_spec m) (round:size_nat{round < 24}) : Tot (state_spec m) =
+  set m s 0 0 (get m s 0 0 ^| (load_element m (secret keccak_rndc.[round])))
 
 let state_chi_equiv (m:m_spec) (s_pi_rho:state_spec m) : Tot (state_spec m)  =
   repeati 5 (state_chi_inner m) s_pi_rho
@@ -283,24 +281,24 @@ noextract
 let multiseq (lanes:lanes_t) (len:nat) =
   ntuple (Seq.lseq uint8 len) lanes
 
-unfold let multiblock_spec (a:keccak_alg) (m:m_spec) =
+unfold let multiblock_spec (m:m_spec) =
   multiseq (lanes m) 256
 
 noextract
-let load_elementi (#a:keccak_alg) (#m:m_spec) (b:lseq uint8 256) (bi:nat{bi < 32 / lanes m}) : element_t m =
+let load_elementi (#m:m_spec) (b:lseq uint8 256) (bi:nat{bi < 32 / lanes m}) : element_t m =
   let l = lanes m in
-  vec_from_bytes_le (word_t a) l (sub b (bi * l * word_length a) (l * word_length a))
+  vec_from_bytes_le U64 l (sub b (bi * l * 8) (l * 8))
 
 noextract
-let get_wsi (#a:keccak_alg) (#m:m_spec) (b:multiblock_spec a m) (i:nat{i < 32}) : element_t m =
+let get_wsi (#m:m_spec) (b:multiblock_spec m) (i:nat{i < 32}) : element_t m =
   let l = lanes m in
   let idx_i = i % l in
   let idx_j = i / l in
-  load_elementi #a #m b.(|idx_i|) idx_j
+  load_elementi #m b.(|idx_i|) idx_j
 
 noextract
-let load_blocks (#a:keccak_alg) (#m:m_spec) (b:multiblock_spec a m) : ws_spec m =
-  createi 32 (get_wsi #a #m b)
+let load_blocks (#m:m_spec) (b:multiblock_spec m) : ws_spec m =
+  createi 32 (get_wsi #m b)
 
 noextract
 let transpose_ws1 (#m:m_spec{lanes m == 1}) (ws:ws_spec m) : ws_spec m = ws
@@ -365,18 +363,17 @@ let transpose_ws (#m:m_spec{is_supported m}) (ws:ws_spec m) : ws_spec m =
   | 4 -> transpose_ws4 #m ws
 
 noextract
-let load_ws (#a:keccak_alg) (#m:m_spec{is_supported m}) (b:multiblock_spec a m) : ws_spec m =
-  let ws = load_blocks #a #m b in
+let load_ws (#m:m_spec{is_supported m}) (b:multiblock_spec m) : ws_spec m =
+  let ws = load_blocks #m b in
   transpose_ws #m ws
 
 let loadState_inner (m:m_spec) (ws:ws_spec m) (j:size_nat{j < 25}) (s:state_spec m) : Tot (state_spec m) =
   s.[j] <- s.[j] ^| ws.[j]
 
 let loadState
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
-  (b:multiblock_spec a m{forall l. l < lanes m ==> 
+  (b:multiblock_spec m{forall l. l < lanes m ==> 
     (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
   (s:state_spec m) :
   Tot (state_spec m) =
@@ -399,8 +396,8 @@ let transpose_s_ws (#m:m_spec{is_supported m}) (ws:ws_spec m) : ws_spec m =
   | 4 -> transpose_s_ws4 #m ws
 
 noextract
-let storeState (#a:keccak_alg) (#m:m_spec{is_supported m}) (s:state_spec m) :
-                lseq uint8 (lanes m * 32 * word_length a) =
+let storeState (#m:m_spec{is_supported m}) (s:state_spec m) :
+                lseq uint8 (lanes m * 32 * 8) =
   let ws = create 32 (zero_element m) in
   let ws = update_sub ws 0 25 s in
   let ws = transpose_s_ws #m ws in
@@ -444,11 +441,11 @@ let next_block (#m:m_spec{is_supported m})
   | 1 -> next_block1 #m rateInBytes b
   | 4 -> next_block4 #m rateInBytes b
 
-let absorb_next (#a:keccak_alg) (#m:m_spec{is_supported m})
+let absorb_next (#m:m_spec{is_supported m})
                 (rateInBytes:size_nat{rateInBytes > 0 /\ rateInBytes <= 200})
                 (s:state_spec m) : Tot (state_spec m) =
   let nextBlock = next_block #m rateInBytes (next_block_seq_zero m) in
-  let s = loadState #a #m rateInBytes nextBlock s in
+  let s = loadState #m rateInBytes nextBlock s in
   state_permute m s
 
 noextract
@@ -502,8 +499,7 @@ let load_last_block (#m:m_spec{is_supported m})
   | 4 -> load_last_block4 #m rateInBytes rem delimitedSuffix b
 
 val absorb_last:
-    #a:keccak_alg
-  -> #m:m_spec{is_supported m}
+    #m:m_spec{is_supported m}
   -> delimitedSuffix:byte_t
   -> rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200}
   -> rem:size_nat{rem < rateInBytes}
@@ -512,20 +508,19 @@ val absorb_last:
   -> s:state_spec m ->
   Tot (state_spec m)
 
-let absorb_last #a #m delimitedSuffix rateInBytes rem input s =
+let absorb_last #m delimitedSuffix rateInBytes rem input s =
   let lastBlock = load_last_block #m rateInBytes rem delimitedSuffix input in
-  let s = loadState #a #m rateInBytes lastBlock s in
+  let s = loadState #m rateInBytes lastBlock s in
   let s =
     if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
        (rem = rateInBytes - 1)
     then state_permute m s else s in
-  absorb_next #a #m rateInBytes s
+  absorb_next #m rateInBytes s
 
 let absorb_inner
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
-  (b:multiblock_spec a m{forall l. l < lanes m ==> 
+  (b:multiblock_spec m{forall l. l < lanes m ==> 
      (forall i. (i >= rateInBytes /\ i < 256) ==> Seq.index b.(|l|) i == u8 0)})
   (s:state_spec m) :
   Tot (state_spec m) =
@@ -584,7 +579,6 @@ let get_multilast_spec (#m:m_spec)
     b'
 
 let absorb_inner_block
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
@@ -593,10 +587,9 @@ let absorb_inner_block
   (s:state_spec m) :
   Tot (state_spec m) =
   let mb = get_multiblock_spec #m rateInBytes inputByteLen input i in
-  absorb_inner #a #m rateInBytes mb s
+  absorb_inner #m rateInBytes mb s
 
 let absorb_inner_nblocks
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (inputByteLen:nat)
@@ -604,11 +597,10 @@ let absorb_inner_nblocks
   (s:state_spec m) :
   Tot (state_spec m) =
   let blocks = inputByteLen / rateInBytes in
-  let s = repeati blocks (absorb_inner_block #a #m rateInBytes inputByteLen input) s in
+  let s = repeati blocks (absorb_inner_block #m rateInBytes inputByteLen input) s in
   s
 
 let absorb_final
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
@@ -619,11 +611,10 @@ let absorb_final
 
   let rem = inputByteLen % rateInBytes in
   let mb = get_multilast_spec #m rateInBytes inputByteLen input in
-  let s = absorb_last #a #m delimitedSuffix rateInBytes rem mb s in
+  let s = absorb_last #m delimitedSuffix rateInBytes rem mb s in
   s
 
 let absorb
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
@@ -632,8 +623,8 @@ let absorb
   (delimitedSuffix:byte_t) :
   Tot (state_spec m) =
 
-  let s = absorb_inner_nblocks #a #m rateInBytes inputByteLen input s in
-  absorb_final #a #m s rateInBytes inputByteLen input delimitedSuffix
+  let s = absorb_inner_nblocks #m rateInBytes inputByteLen input s in
+  absorb_final #m s rateInBytes inputByteLen input delimitedSuffix
 
 noextract
 let update_b1 (#m:m_spec{lanes m == 1})
@@ -732,7 +723,6 @@ let update_b_last (#m:m_spec{is_supported m})
   | 4 -> update_b_last4 #m block rateInBytes outputByteLen outRem b
 
 let squeeze_inner
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
@@ -740,7 +730,7 @@ let squeeze_inner
   (s, b) :
   ((state_spec m) & (multiseq (lanes m) outputByteLen)) =
 
-  let block = storeState #a #m s in
+  let block = storeState #m s in
   let b = update_b #m block rateInBytes outputByteLen i b in
   let s = state_permute m s in
   s, b
@@ -751,7 +741,6 @@ val squeeze_s:
 let squeeze_s m rateInBytes outputByteLen i = (state_spec m) & (multiseq (lanes m) outputByteLen)
 
 let squeeze_nblocks
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
@@ -759,10 +748,9 @@ let squeeze_nblocks
   ((state_spec m) & (multiseq (lanes m) outputByteLen)) =
   let outBlocks = outputByteLen / rateInBytes in
   repeat_gen outBlocks (squeeze_s m rateInBytes outputByteLen)
-    (squeeze_inner #a #m rateInBytes outputByteLen) (s, b)
+    (squeeze_inner #m rateInBytes outputByteLen) (s, b)
 
 let squeeze_last
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
@@ -770,23 +758,21 @@ let squeeze_last
   (b:multiseq (lanes m) outputByteLen) :
   Tot (multiseq (lanes m) outputByteLen) =
   let remOut = outputByteLen % rateInBytes in
-  let block = storeState #a #m s in
+  let block = storeState #m s in
   update_b_last #m block rateInBytes outputByteLen remOut b
 
 let squeeze
-  (#a:keccak_alg)
   (#m:m_spec{is_supported m})
   (s:state_spec m)
   (rateInBytes:size_nat{0 < rateInBytes /\ rateInBytes <= 200})
   (outputByteLen:size_nat)
   (b:multiseq (lanes m) outputByteLen) :
   Tot (multiseq (lanes m) outputByteLen) =
-  let s, b = squeeze_nblocks #a #m rateInBytes outputByteLen (s, b) in
-  squeeze_last #a #m s rateInBytes outputByteLen b
+  let s, b = squeeze_nblocks #m rateInBytes outputByteLen (s, b) in
+  squeeze_last #m s rateInBytes outputByteLen b
 
 val keccak:
-    #a:keccak_alg
-  -> #m:m_spec{is_supported m}
+    #m:m_spec{is_supported m}
   -> rate:size_nat{rate % 8 == 0 /\ rate / 8 > 0 /\ rate <= 1600}
   -> inputByteLen:nat
   -> input:multiseq (lanes m) inputByteLen
@@ -795,11 +781,11 @@ val keccak:
   -> b:multiseq (lanes m) outputByteLen ->
   Tot (multiseq (lanes m) outputByteLen)
 
-let keccak #a #m rate inputByteLen input delimitedSuffix outputByteLen b =
+let keccak #m rate inputByteLen input delimitedSuffix outputByteLen b =
   let rateInBytes = rate / 8 in
   let s = create 25 (zero_element m) in
-  let s = absorb #a #m s rateInBytes inputByteLen input delimitedSuffix in
-  squeeze #a #m s rateInBytes outputByteLen b
+  let s = absorb #m s rateInBytes inputByteLen input delimitedSuffix in
+  squeeze #m s rateInBytes outputByteLen b
 
 let shake128
   (m:m_spec{is_supported m})
@@ -809,7 +795,7 @@ let shake128
   (output:multiseq (lanes m) outputByteLen) :
   Tot (multiseq (lanes m) outputByteLen) =
 
-  keccak #Shake128 #m 1344 inputByteLen input (byte 0x1F) outputByteLen output
+  keccak #m 1344 inputByteLen input (byte 0x1F) outputByteLen output
 
 let shake256
   (m:m_spec{is_supported m})
@@ -819,7 +805,7 @@ let shake256
   (output:multiseq (lanes m) outputByteLen) :
   Tot (multiseq (lanes m) outputByteLen) =
 
-  keccak #Shake256 #m 1088 inputByteLen input (byte 0x1F) outputByteLen output
+  keccak #m 1088 inputByteLen input (byte 0x1F) outputByteLen output
 
 let sha3_224
   (m:m_spec{is_supported m})
@@ -828,7 +814,7 @@ let sha3_224
   (output:multiseq (lanes m) 28) :
   Tot (multiseq (lanes m) 28) =
 
-  keccak #SHA3_224 #m 1152 inputByteLen input (byte 0x06) 28 output
+  keccak #m 1152 inputByteLen input (byte 0x06) 28 output
 
 let sha3_256
   (m:m_spec{is_supported m})
@@ -837,7 +823,7 @@ let sha3_256
   (output:multiseq (lanes m) 32) :
   Tot (multiseq (lanes m) 32) =
 
-  keccak #SHA3_256 #m 1088 inputByteLen input (byte 0x06) 32 output
+  keccak #m 1088 inputByteLen input (byte 0x06) 32 output
 
 let sha3_384
   (m:m_spec{is_supported m})
@@ -846,7 +832,7 @@ let sha3_384
   (output:multiseq (lanes m) 48) :
   Tot (multiseq (lanes m) 48) =
 
-  keccak #SHA3_384 #m 832 inputByteLen input (byte 0x06) 48 output
+  keccak #m 832 inputByteLen input (byte 0x06) 48 output
 
 let sha3_512
   (m:m_spec{is_supported m})
@@ -855,4 +841,4 @@ let sha3_512
   (output:multiseq (lanes m) 64) :
   Tot (multiseq (lanes m) 64) =
 
-  keccak #SHA3_512 #m 576 inputByteLen input (byte 0x06) 64 output
+  keccak #m 576 inputByteLen input (byte 0x06) 64 output

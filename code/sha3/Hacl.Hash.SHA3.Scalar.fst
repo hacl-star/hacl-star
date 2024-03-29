@@ -43,7 +43,7 @@ let shake128 output outputByteLen input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #Shake128 #M32 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  keccak #M32 1344ul (* 256ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
   shake128_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0
 
 val shake256:
@@ -62,7 +62,7 @@ let shake256 output outputByteLen input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #Shake256 #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
+  keccak #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x1F) outputByteLen rb;
   shake256_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (v outputByteLen) (as_seq_multi h0 rb) 0
 
 val sha3_224:
@@ -80,7 +80,7 @@ let sha3_224 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #SHA3_224 #M32 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
+  keccak #M32 1152ul (* 448ul *) inputByteLen ib (byte 0x06) 28ul rb;
   sha3_224_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_256:
@@ -98,7 +98,7 @@ let sha3_256 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #SHA3_256 #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
+  keccak #M32 1088ul (* 512ul *) inputByteLen ib (byte 0x06) 32ul rb;
   sha3_256_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_384:
@@ -116,7 +116,7 @@ let sha3_384 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #SHA3_384 #M32 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
+  keccak #M32 832ul (* 768ul *) inputByteLen ib (byte 0x06) 48ul rb;
   sha3_384_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 val sha3_512:
@@ -134,7 +134,7 @@ let sha3_512 output input inputByteLen =
   let ib = ntup1 input in
   let rb = ntup1 output in
   let h0 = ST.get () in
-  keccak #SHA3_512 #M32 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
+  keccak #M32 576ul (* 1024ul *) inputByteLen ib (byte 0x06) 64ul rb;
   sha3_512_lemma_l M32 (v inputByteLen) (as_seq_multi h0 ib) (as_seq_multi h0 rb) 0
 
 [@@ Comment "Allocate state buffer of 200-bytes"]
@@ -185,9 +185,9 @@ val shake128_absorb_nblocks:
      (ensures  fun h0 _ h1 ->
        modifies (loc state) h0 h1 /\
        as_seq h1 state ==
-          V.absorb_inner_nblocks #Shake128 #M32 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (as_seq h0 state))
+          V.absorb_inner_nblocks #M32 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (as_seq h0 state))
 let shake128_absorb_nblocks state input inputByteLen =
-  absorb_inner_nblocks #Shake128 #M32 168ul inputByteLen (ntup1 input) state
+  absorb_inner_nblocks #M32 168ul inputByteLen (ntup1 input) state
 
 [@@ Comment "Absorb a final partial block of input and write the output state
 
@@ -212,9 +212,9 @@ val shake128_absorb_final:
      (ensures  fun h0 _ h1 ->
        modifies (loc state) h0 h1 /\
        as_seq h1 state ==
-         V.absorb_final #Shake128 #M32 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (byte 0x1F))
+         V.absorb_final #M32 (as_seq h0 state) 168 (v inputByteLen) (as_seq_multi h0 (ntup1 input)) (byte 0x1F))
 let shake128_absorb_final state input inputByteLen =
-  absorb_final #Shake128 #M32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
+  absorb_final #M32 168ul inputByteLen (ntup1 input) (byte 0x1F) state
 
 [@@ Comment "Squeeze a hash state to output buffer
 
@@ -235,8 +235,8 @@ val shake128_squeeze_nblocks:
      (ensures  fun h0 _ h1 ->
        modifies (loc state |+| loc output) h0 h1 /\
        (let s', b' = 
-          V.squeeze_nblocks #Shake128 #M32 168 (v outputByteLen) (as_seq h0 state, as_seq_multi h0 (ntup1 output)) in
+          V.squeeze_nblocks #M32 168 (v outputByteLen) (as_seq h0 state, as_seq_multi h0 (ntup1 output)) in
           as_seq h1 state == s' /\
           as_seq_multi h1 (ntup1 output) == b'))
 let shake128_squeeze_nblocks state output outputByteLen =
-  squeeze_nblocks #Shake128 #M32 state 168ul outputByteLen (ntup1 output)
+  squeeze_nblocks #M32 state 168ul outputByteLen (ntup1 output)

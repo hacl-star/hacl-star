@@ -19,7 +19,7 @@ inline_for_extraction noextract
 let state_t (m:m_spec) = lbuffer (element_t m) 25ul
 
 inline_for_extraction noextract
-val absorb_inner_nblocks: #a:keccak_alg -> #m:m_spec{is_supported m}
+val absorb_inner_nblocks: #m:m_spec{is_supported m}
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
@@ -27,10 +27,10 @@ val absorb_inner_nblocks: #a:keccak_alg -> #m:m_spec{is_supported m}
   Stack unit
   (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == V.absorb_inner_nblocks #a #m (v rateInBytes) (v len) (as_seq_multi h0 b) (as_seq h0 s))
+    as_seq h1 s == V.absorb_inner_nblocks #m (v rateInBytes) (v len) (as_seq_multi h0 b) (as_seq h0 s))
 
 inline_for_extraction noextract
-val absorb_final: #a:keccak_alg -> #m:m_spec{is_supported m}
+val absorb_final: #m:m_spec{is_supported m}
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
@@ -40,10 +40,10 @@ val absorb_final: #a:keccak_alg -> #m:m_spec{is_supported m}
   (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
     as_seq h1 s ==
-      V.absorb_final #a #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
+      V.absorb_final #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
 
 inline_for_extraction noextract
-val absorb: #a:keccak_alg -> #m:m_spec{is_supported m}
+val absorb: #m:m_spec{is_supported m}
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> len:size_t
   -> b:multibuf (lanes m) len
@@ -52,10 +52,10 @@ val absorb: #a:keccak_alg -> #m:m_spec{is_supported m}
   Stack unit
   (requires fun h -> live_multi h b /\ live h s /\ disjoint_multi b s)
   (ensures  fun h0 _ h1 -> modifies (loc s) h0 h1 /\
-    as_seq h1 s == V.absorb #a #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
+    as_seq h1 s == V.absorb #m (as_seq h0 s) (v rateInBytes) (v len) (as_seq_multi h0 b) delimitedSuffix)
 
 inline_for_extraction noextract
-val squeeze_nblocks:# a:keccak_alg -> #m:m_spec{is_supported m}
+val squeeze_nblocks: #m:m_spec{is_supported m}
   -> s:state_t m
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
@@ -66,12 +66,12 @@ val squeeze_nblocks:# a:keccak_alg -> #m:m_spec{is_supported m}
     (ensures  fun h0 _ h1 ->
       modifies (loc s |+| loc_multi b) h0 h1 /\
       (let s', b' = 
-        V.squeeze_nblocks #a #m (v rateInBytes) (v outputByteLen) (as_seq h0 s, as_seq_multi h0 b) in
+        V.squeeze_nblocks #m (v rateInBytes) (v outputByteLen) (as_seq h0 s, as_seq_multi h0 b) in
         as_seq h1 s == s' /\
         as_seq_multi h1 b == b'))
 
 inline_for_extraction noextract
-val squeeze_last:# a:keccak_alg -> #m:m_spec{is_supported m}
+val squeeze_last: #m:m_spec{is_supported m}
   -> s:state_t m
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
@@ -81,10 +81,10 @@ val squeeze_last:# a:keccak_alg -> #m:m_spec{is_supported m}
       disjoint_multi b s)
     (ensures  fun h0 _ h1 ->
       modifies_multi b h0 h1 /\
-      as_seq_multi h1 b == V.squeeze_last #a #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
+      as_seq_multi h1 b == V.squeeze_last #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
 
 inline_for_extraction noextract
-val squeeze:# a:keccak_alg -> #m:m_spec{is_supported m}
+val squeeze: #m:m_spec{is_supported m}
   -> s:state_t m
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
@@ -94,10 +94,10 @@ val squeeze:# a:keccak_alg -> #m:m_spec{is_supported m}
       disjoint_multi b s)
     (ensures  fun h0 _ h1 ->
       modifies (loc s |+| loc_multi b) h0 h1 /\
-      as_seq_multi h1 b == V.squeeze #a #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
+      as_seq_multi h1 b == V.squeeze #m (as_seq h0 s) (v rateInBytes) (v outputByteLen) (as_seq_multi h0 b))
 
 inline_for_extraction noextract
-val keccak:# a:keccak_alg -> #m:m_spec{is_supported m}
+val keccak: #m:m_spec{is_supported m}
   -> rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
   -> inputByteLen:size_t
   -> input:multibuf (lanes m) inputByteLen
@@ -110,4 +110,4 @@ val keccak:# a:keccak_alg -> #m:m_spec{is_supported m}
     (ensures  fun h0 _ h1 ->
       modifies_multi output h0 h1 /\
       as_seq_multi h1 output ==
-        V.keccak #a #m (v rate) (v inputByteLen) (as_seq_multi h0 input) delimitedSuffix (v outputByteLen) (as_seq_multi h0 output))
+        V.keccak #m (v rate) (v inputByteLen) (as_seq_multi h0 input) delimitedSuffix (v outputByteLen) (as_seq_multi h0 output))
