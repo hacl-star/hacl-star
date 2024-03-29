@@ -15,7 +15,7 @@ open FStar.Integers
 
 friend Lib.IntTypes
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 600 --z3seed 42"
 let poly1305_vale
     (dst:B.buffer UInt8.t { B.length dst = 16 })
     (src:B.buffer UInt8.t)
