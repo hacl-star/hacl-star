@@ -584,7 +584,9 @@ let serialize_params_blake2s
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\ as_seq h1 b == Spec.serialize_blake2_params (blake2_params_v h0 p))
   = let h0 = ST.get () in
+    [@inline_let]
     let kk: int_t U8 PUB = p.key_length in
+    [@inline_let]
     let nn: int_t U8 PUB = p.digest_length in
     [@inline_let]
     let kk_shift_8 = shift_left (to_u32 kk) (size 8) in

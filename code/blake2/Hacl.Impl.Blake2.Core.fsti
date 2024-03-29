@@ -66,6 +66,7 @@ let personal_len (a:Spec.alg) : size_t =
   | Spec.Blake2B -> 16ul
 
 noeq
+inline_for_extraction // projectors
 type blake2_params (a:Spec.alg) = {
   digest_length: digest_length: UInt8.t { 1 <= UInt8.v digest_length /\ UInt8.v digest_length <= Spec.max_output a };
   key_length: key_length: UInt8.t { UInt8.v key_length <= Spec.max_key a };

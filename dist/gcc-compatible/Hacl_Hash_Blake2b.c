@@ -503,60 +503,14 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
       .digest_length = 64U, .key_length = 0U, .fanout = 1U, .depth = 1U, .leaf_length = 0U,
       .node_offset = 0ULL, .node_depth = 0U, .inner_length = 0U, .salt = salt, .personal = personal
     };
-  uint8_t
-  kk1 =
-    (
-      (Hacl_Hash_Blake2s_blake2_params){
-        .digest_length = (uint8_t)nn,
-        .key_length = (uint8_t)kk,
-        .fanout = p.fanout,
-        .depth = p.depth,
-        .leaf_length = p.leaf_length,
-        .node_offset = p.node_offset,
-        .node_depth = p.node_depth,
-        .inner_length = p.inner_length,
-        .salt = p.salt,
-        .personal = p.personal
-      }
-    ).key_length;
-  uint8_t
-  nn1 =
-    (
-      (Hacl_Hash_Blake2s_blake2_params){
-        .digest_length = (uint8_t)nn,
-        .key_length = (uint8_t)kk,
-        .fanout = p.fanout,
-        .depth = p.depth,
-        .leaf_length = p.leaf_length,
-        .node_offset = p.node_offset,
-        .node_depth = p.node_depth,
-        .inner_length = p.inner_length,
-        .salt = p.salt,
-        .personal = p.personal
-      }
-    ).digest_length;
+  uint8_t kk1 = (uint8_t)kk;
+  uint8_t nn1 = (uint8_t)nn;
   KRML_MAYBE_FOR2(i,
     0U,
     2U,
     1U,
     uint64_t *os = tmp + 4U;
-    uint8_t
-    *bj =
-      (
-        (Hacl_Hash_Blake2s_blake2_params){
-          .digest_length = (uint8_t)nn,
-          .key_length = (uint8_t)kk,
-          .fanout = p.fanout,
-          .depth = p.depth,
-          .leaf_length = p.leaf_length,
-          .node_offset = p.node_offset,
-          .node_depth = p.node_depth,
-          .inner_length = p.inner_length,
-          .salt = p.salt,
-          .personal = p.personal
-        }
-      ).salt
-      + i * 8U;
+    uint8_t *bj = p.salt + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -566,23 +520,7 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     2U,
     1U,
     uint64_t *os = tmp + 6U;
-    uint8_t
-    *bj =
-      (
-        (Hacl_Hash_Blake2s_blake2_params){
-          .digest_length = (uint8_t)nn,
-          .key_length = (uint8_t)kk,
-          .fanout = p.fanout,
-          .depth = p.depth,
-          .leaf_length = p.leaf_length,
-          .node_offset = p.node_offset,
-          .node_depth = p.node_depth,
-          .inner_length = p.inner_length,
-          .salt = p.salt,
-          .personal = p.personal
-        }
-      ).personal
-      + i * 8U;
+    uint8_t *bj = p.personal + i * 8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -592,100 +530,9 @@ void Hacl_Hash_Blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn)
     ^
       ((uint64_t)kk1
       << 8U
-      ^
-        ((uint64_t)(
-          (Hacl_Hash_Blake2s_blake2_params){
-            .digest_length = (uint8_t)nn,
-            .key_length = (uint8_t)kk,
-            .fanout = p.fanout,
-            .depth = p.depth,
-            .leaf_length = p.leaf_length,
-            .node_offset = p.node_offset,
-            .node_depth = p.node_depth,
-            .inner_length = p.inner_length,
-            .salt = p.salt,
-            .personal = p.personal
-          }
-        ).fanout
-        << 16U
-        ^
-          ((uint64_t)(
-            (Hacl_Hash_Blake2s_blake2_params){
-              .digest_length = (uint8_t)nn,
-              .key_length = (uint8_t)kk,
-              .fanout = p.fanout,
-              .depth = p.depth,
-              .leaf_length = p.leaf_length,
-              .node_offset = p.node_offset,
-              .node_depth = p.node_depth,
-              .inner_length = p.inner_length,
-              .salt = p.salt,
-              .personal = p.personal
-            }
-          ).depth
-          << 24U
-          ^
-            (uint64_t)(
-              (Hacl_Hash_Blake2s_blake2_params){
-                .digest_length = (uint8_t)nn,
-                .key_length = (uint8_t)kk,
-                .fanout = p.fanout,
-                .depth = p.depth,
-                .leaf_length = p.leaf_length,
-                .node_offset = p.node_offset,
-                .node_depth = p.node_depth,
-                .inner_length = p.inner_length,
-                .salt = p.salt,
-                .personal = p.personal
-              }
-            ).leaf_length
-            << 32U)));
-  tmp[1U] =
-    (
-      (Hacl_Hash_Blake2s_blake2_params){
-        .digest_length = (uint8_t)nn,
-        .key_length = (uint8_t)kk,
-        .fanout = p.fanout,
-        .depth = p.depth,
-        .leaf_length = p.leaf_length,
-        .node_offset = p.node_offset,
-        .node_depth = p.node_depth,
-        .inner_length = p.inner_length,
-        .salt = p.salt,
-        .personal = p.personal
-      }
-    ).node_offset;
-  tmp[2U] =
-    (uint64_t)(
-      (Hacl_Hash_Blake2s_blake2_params){
-        .digest_length = (uint8_t)nn,
-        .key_length = (uint8_t)kk,
-        .fanout = p.fanout,
-        .depth = p.depth,
-        .leaf_length = p.leaf_length,
-        .node_offset = p.node_offset,
-        .node_depth = p.node_depth,
-        .inner_length = p.inner_length,
-        .salt = p.salt,
-        .personal = p.personal
-      }
-    ).node_depth
-    ^
-      (uint64_t)(
-        (Hacl_Hash_Blake2s_blake2_params){
-          .digest_length = (uint8_t)nn,
-          .key_length = (uint8_t)kk,
-          .fanout = p.fanout,
-          .depth = p.depth,
-          .leaf_length = p.leaf_length,
-          .node_offset = p.node_offset,
-          .node_depth = p.node_depth,
-          .inner_length = p.inner_length,
-          .salt = p.salt,
-          .personal = p.personal
-        }
-      ).inner_length
-      << 8U;
+      ^ ((uint64_t)p.fanout << 16U ^ ((uint64_t)p.depth << 24U ^ (uint64_t)p.leaf_length << 32U)));
+  tmp[1U] = p.node_offset;
+  tmp[2U] = (uint64_t)p.node_depth ^ (uint64_t)p.inner_length << 8U;
   tmp[3U] = 0ULL;
   uint64_t tmp0 = tmp[0U];
   uint64_t tmp1 = tmp[1U];
