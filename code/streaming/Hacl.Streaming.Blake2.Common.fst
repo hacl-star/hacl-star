@@ -55,6 +55,7 @@ inline_for_extraction noextract
 let key_size_t (a : alg) =
   key_size:U32.t{U32.v key_size <= Spec.max_key a}
 
+inline_for_extraction noextract
 let singleton x' = x:U32.t { x == x' }
 
 /// The stateful state: (wv, hash)
@@ -588,4 +589,5 @@ let blake2 (a : alg)
 #pop-options
 
 
+inline_for_extraction noextract
 let blake_key a kk = I.optional_key kk I.Erased (stateful_key a)

@@ -71,9 +71,12 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint32_
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
 
 /**
-  Re-initialization function when there is a key
+ Re-initialization function when there is a key. Note that the key
+size is not allowed to change, which is why this function does not take a key
+length -- the key has to be same key size that was originally passed to
+`malloc_with_key`
 */
-void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k, uint32_t kk);
+void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k);
 
 /**
   Re-initialization function when there is no key

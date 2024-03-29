@@ -758,11 +758,21 @@ static void reset_raw(Hacl_Hash_Blake2s_state_t *state, K___uint32_t__uint8_t_ k
   state[0U] = tmp;
 }
 
-/**
-  Re-initialization function when there is a key
-*/
-void Hacl_Hash_Blake2s_reset_with_key(Hacl_Hash_Blake2s_state_t *s, uint8_t *k, uint32_t kk)
+static uint32_t index_of_state(Hacl_Hash_Blake2s_state_t *s)
 {
+  Hacl_Hash_Blake2s_block_state_t block_state = (*s).block_state;
+  return fst__uint32_t__uint32_t_____uint32_t_(block_state);
+}
+
+/**
+ Re-initialization function when there is a key. Note that the key
+size is not allowed to change, which is why this function does not take a key
+length -- the key has to be same key size that was originally passed to
+`malloc_with_key`
+*/
+void Hacl_Hash_Blake2s_reset_with_key(Hacl_Hash_Blake2s_state_t *s, uint8_t *k)
+{
+  uint32_t kk = index_of_state(s);
   reset_raw(s, ((K___uint32_t__uint8_t_){ .fst = kk, .snd = k }));
 }
 
@@ -771,7 +781,7 @@ void Hacl_Hash_Blake2s_reset_with_key(Hacl_Hash_Blake2s_state_t *s, uint8_t *k, 
 */
 void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *s)
 {
-  Hacl_Hash_Blake2s_reset_with_key(s, NULL, 0U);
+  Hacl_Hash_Blake2s_reset_with_key(s, NULL);
 }
 
 /**
