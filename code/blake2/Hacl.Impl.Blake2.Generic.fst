@@ -549,12 +549,13 @@ let blake2_init_st  (al:Spec.alg) (ms:m_spec) =
   Stack unit
     (requires (fun h -> live h hash))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-			   state_v h1 hash == Spec.blake2_init_hash al (Spec.blake2_default_params al) (v kk) (v nn)))
+      state_v h1 hash ==
+        Spec.blake2_init_hash al ({ Spec.blake2_default_params al with
+          key_length = UInt8.uint_to_t (v kk);
+          digest_length = UInt8.uint_to_t (v nn)})))
 
 inline_for_extraction noextract
 val serialize_params (al:Spec.alg)
-  (kk:size_t{v kk <= Spec.max_key al})
-  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al})
   (p: blake2_params al)
   (b: lbuffer (word_t al) 8ul)
   : Stack unit
@@ -567,15 +568,11 @@ val serialize_params (al:Spec.alg)
     (ensures fun h0 _ h1 ->
       let _ = allow_inversion Spec.alg in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == Spec.serialize_blake2_params
-        {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}
-    )
+      as_seq h1 b == Spec.serialize_blake2_params (blake2_params_v h0 p))
 
 #push-options "--z3rlimit 100 --fuel 0"
 inline_for_extraction noextract
 let serialize_params_blake2s
-  (kk:size_t{v kk <= Spec.max_key Spec.Blake2S})
-  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2S})
   (p: blake2_params Spec.Blake2S)
   (b: lbuffer (word_t Spec.Blake2S) 8ul)
   : Stack unit
@@ -585,11 +582,10 @@ let serialize_params_blake2s
       as_seq h b == Seq.create 8 (u32 0)
     )
     (ensures fun h0 _ h1 ->
-      modifies (loc b) h0 h1 /\
-      as_seq h1 b == Spec.serialize_blake2_params
-         {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}
-    )
+      modifies (loc b) h0 h1 /\ as_seq h1 b == Spec.serialize_blake2_params (blake2_params_v h0 p))
   = let h0 = ST.get () in
+    let kk: int_t U8 PUB = p.key_length in
+    let nn: int_t U8 PUB = p.digest_length in
     [@inline_let]
     let kk_shift_8 = shift_left (to_u32 kk) (size 8) in
     [@inline_let]
@@ -672,8 +668,6 @@ let serialize_params_blake2s
 
 inline_for_extraction noextract
 let serialize_params_blake2b
-  (kk:size_t{v kk <= Spec.max_key Spec.Blake2B})
-  (nn: size_t{1 <= v nn /\ v nn <= Spec.max_output Spec.Blake2B})
   (p: blake2_params Spec.Blake2B)
   (b: lbuffer (word_t Spec.Blake2B) 8ul)
   : Stack unit
@@ -684,10 +678,10 @@ let serialize_params_blake2b
     )
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == Spec.serialize_blake2_params
-         {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}
-    )
+      as_seq h1 b == Spec.serialize_blake2_params (blake2_params_v h0 p))
   = let h0 = ST.get () in
+    let kk: int_t U8 PUB = p.key_length in
+    let nn: int_t U8 PUB = p.digest_length in
     [@inline_let]
     let kk_shift_8 = shift_left (to_u64 kk) (size 8) in
     [@inline_let]
@@ -765,10 +759,10 @@ let serialize_params_blake2b
     aux()
 #pop-options
 
-let serialize_params al kk nn p b =
+let serialize_params al p b =
   match al with
-  | Spec.Blake2S -> serialize_params_blake2s kk nn p b
-  | Spec.Blake2B -> serialize_params_blake2b kk nn p b
+  | Spec.Blake2S -> serialize_params_blake2s p b
+  | Spec.Blake2B -> serialize_params_blake2b p b
 
 inline_for_extraction noextract
 val blake2_init:
@@ -797,7 +791,9 @@ let blake2_init #al #ms hash kk nn =
   let salt = create (salt_len al) (u8 0) in
   let personal = create (personal_len al) (u8 0) in
   let p = create_default_params al salt personal in
-  serialize_params al kk nn p tmp;
+  FStar.Math.Lemmas.small_mod (UInt32.v kk) (pow2 8);
+  FStar.Math.Lemmas.small_mod (UInt32.v nn) (pow2 8);
+  serialize_params al { p with key_length = FStar.Int.Cast.uint32_to_uint8 kk; digest_length = FStar.Int.Cast.uint32_to_uint8 nn } tmp;
   let tmp0 = tmp.(0ul) in
   let tmp1 = tmp.(1ul) in
   let tmp2 = tmp.(2ul) in
@@ -819,7 +815,8 @@ let blake2_init #al #ms hash kk nn =
   let h1 = ST.get() in
   assert (disjoint hash tmp);
   assert (modifies (loc hash `union` loc tmp) h0 h1);
-  Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al (Spec.blake2_default_params al) (v kk) (v nn));
+  Lib.Sequence.eq_intro (state_v h1 hash) (Spec.blake2_init_hash al ({
+    Spec.blake2_default_params al with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}));
   pop_frame ()
 
 #push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
@@ -1015,7 +1012,11 @@ let blake2_st (al:Spec.alg) (ms:m_spec) =
     (requires (fun h -> live h output /\ live h input /\ live h key
                    /\ disjoint output input /\ disjoint output key /\ disjoint input key))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
-                         /\ h1.[|(output <: lbuffer uint8 output_len)|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (Spec.blake2_default_params al) (v key_len) h0.[|(key <: lbuffer uint8 key_len)|] (v output_len)))
+      /\ h1.[|(output <: lbuffer uint8 output_len)|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|]
+        ({ Spec.blake2_default_params al with
+          key_length = UInt8.uint_to_t (v key_len);
+          digest_length = UInt8.uint_to_t (v output_len)})
+        h0.[|(key <: lbuffer uint8 key_len)|]))
 
 inline_for_extraction noextract
 val blake2:
@@ -1034,7 +1035,9 @@ let blake2 #al #ms blake2_init blake2_update blake2_finish output output_len inp
   let stzero = zero_element al ms in
   let h0 = ST.get() in
   [@inline_let]
-  let spec _ h1 = h1.[|output|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] (Spec.blake2_default_params al) (v key_len) h0.[|key|] (v output_len) in
+  let spec _ h1 = h1.[|output <: lbuffer uint8 output_len|] == Spec.blake2 al h0.[|(input <: lbuffer uint8 input_len)|] ({ Spec.blake2_default_params al with
+          key_length = UInt8.uint_to_t (v key_len);
+          digest_length = UInt8.uint_to_t (v output_len)}) h0.[|key <: lbuffer uint8 key_len|] in
   salloc1 h0 stlen stzero (Ghost.hide (loc output)) spec
   (fun h ->
     assert (max_size_t <= Spec.max_limb al);
