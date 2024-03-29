@@ -741,10 +741,7 @@ static uint32_t fst__uint32_t__uint64_t_____uint64_t_(Hacl_Hash_Blake2b_block_st
   return x.fst;
 }
 
-/**
-  Re-initialization function when there is no key
-*/
-void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, K___uint32_t__uint8_t_ key)
+static void reset_raw(Hacl_Hash_Blake2b_state_t *state, K___uint32_t__uint8_t_ key)
 {
   Hacl_Hash_Blake2b_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
@@ -776,6 +773,22 @@ void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, K___uint32_t__uin
   Hacl_Hash_Blake2b_state_t
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
   state[0U] = tmp;
+}
+
+/**
+  Re-initialization function when there is a key
+*/
+void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k, uint32_t kk)
+{
+  reset_raw(s, ((K___uint32_t__uint8_t_){ .fst = kk, .snd = k }));
+}
+
+/**
+  Re-initialization function when there is no key
+*/
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *s)
+{
+  Hacl_Hash_Blake2b_reset_with_key(s, NULL, 0U);
 }
 
 /**

@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Hash_Blake2b.h"
 
 typedef struct K____uint32_t___uint32_t__s
 {
@@ -71,9 +70,14 @@ Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc_with_key(uint8_t *k, uint32_
 Hacl_Hash_Blake2s_state_t *Hacl_Hash_Blake2s_malloc(void);
 
 /**
+  Re-initialization function when there is a key
+*/
+void Hacl_Hash_Blake2s_reset_with_key(Hacl_Hash_Blake2s_state_t *s, uint8_t *k, uint32_t kk);
+
+/**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *state, K___uint32_t__uint8_t_ key);
+void Hacl_Hash_Blake2s_reset(Hacl_Hash_Blake2s_state_t *s);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded

@@ -17,6 +17,8 @@ module Spec = Spec.Blake2
 
 open FStar.HyperStack.ST
 
+#set-options "--fuel 0 --ifuel 0"
+
 inline_for_extraction noextract
 let blake2s_128 =
   Common.blake2 Spec.Blake2S Core.M128 Blake2s128.init Blake2s128.update_multi
@@ -78,9 +80,63 @@ let malloc_with_key k kk r =
 let malloc (r: HS.rid { HyperStack.ST.is_eternal_region r }) =
   malloc_with_key B.null 0ul r
 
-[@ (Comment "  Re-initialization function when there is no key")]
-let reset (kk: G.erased (Common.key_size_t Spec.Blake2S)): Tot _ =
+[@ (Comment "  Re-initialization function when there is a key")]
+val reset_with_key: (i: G.erased (Common.key_size_t Spec.Blake2S)) -> (
+  let open F in
+  let c = blake2s_128 in
+  let t: Type0 = c.state.s (G.reveal i) in
+  let t': Type0 = I.optional_key (G.reveal i) c.km c.key in
+  state:state c (G.reveal i) t t' ->
+  k:LowStar.Buffer.buffer Lib.IntTypes.uint8 ->
+  kk:Common.key_size_t Spec.Blake2S { LowStar.Buffer.len k == kk /\ kk == G.reveal i} -> (
+  let key: Common.stateful_key_t Spec.Blake2S kk = kk, k in
+  unit ->
+  Stack unit
+  (requires (fun h0 ->
+    c.key.invariant #i h0 key /\
+    B.loc_disjoint (c.key.footprint #i h0 key) (footprint c i h0 state) /\
+    invariant c i h0 state))
+  (ensures (fun h0 _ h1 ->
+    invariant c i h1 state /\
+    seen c i h1 state == S.empty /\
+    reveal_key c i h1 state == c.key.v i h0 key /\
+    footprint c i h0 state == footprint c i h1 state /\
+    B.(modifies (footprint c i h0 state) h0 h1) /\
+    preserves_freeable c i state h0 h1))))
+
+private
+let reset_raw (kk: G.erased (Common.key_size_t Spec.Blake2S)): Tot _ =
   F.reset blake2s_128 kk (Common.s Spec.Blake2S kk Core.M128) (Common.blake_key Spec.Blake2S kk)
+
+let reset_with_key (i: G.erased (Common.key_size_t Spec.Blake2S)) s k kk () =
+  reset_raw i s (kk, k)
+
+[@ (Comment "  Re-initialization function when there is no key")]
+val reset: (
+  let i: Common.key_size_t Spec.Blake2S = 0ul in
+  let open F in
+  let c = blake2s_128 in
+  let t: Type0 = c.state.s i in
+  let t': Type0 = I.optional_key i c.km c.key in
+  let k:LowStar.Buffer.buffer Lib.IntTypes.uint8 = B.null in
+  let key: Common.stateful_key_t Spec.Blake2S i = i, k in
+  state:state c i t t' ->
+  Stack unit
+  (requires (fun h0 ->
+    // WHAT THE HECK. Using `c` here breaks typing?!!!
+    blake2s_128.key.invariant #i h0 key /\
+    B.loc_disjoint (blake2s_128.key.footprint #i h0 key) (footprint c i h0 state) /\
+    invariant c i h0 state))
+  (ensures (fun h0 _ h1 ->
+    invariant c i h1 state /\
+    seen c i h1 state == S.empty /\
+    reveal_key c i h1 state == blake2s_128.key.v i h0 key /\
+    footprint c i h0 state == footprint c i h1 state /\
+    B.(modifies (footprint c i h0 state) h0 h1) /\
+    preserves_freeable c i state h0 h1)))
+
+let reset s =
+  reset_with_key (G.hide 0ul) s B.null 0ul ()
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let update (kk: G.erased (Common.key_size_t Spec.Blake2S)): Tot _ =

@@ -60,13 +60,6 @@ typedef struct Hacl_Hash_Blake2b_state_t_s
 }
 Hacl_Hash_Blake2b_state_t;
 
-typedef struct K___uint32_t__uint8_t__s
-{
-  uint32_t fst;
-  uint8_t *snd;
-}
-K___uint32_t__uint8_t_;
-
 /**
   State allocation function when there is a key
 */
@@ -78,9 +71,14 @@ Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc_with_key(uint8_t *k, uint32_
 Hacl_Hash_Blake2b_state_t *Hacl_Hash_Blake2b_malloc(void);
 
 /**
+  Re-initialization function when there is a key
+*/
+void Hacl_Hash_Blake2b_reset_with_key(Hacl_Hash_Blake2b_state_t *s, uint8_t *k, uint32_t kk);
+
+/**
   Re-initialization function when there is no key
 */
-void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *state, K___uint32_t__uint8_t_ key);
+void Hacl_Hash_Blake2b_reset(Hacl_Hash_Blake2b_state_t *s);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded

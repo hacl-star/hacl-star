@@ -75,18 +75,13 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Blake2b_malloc =
       foreign "Hacl_Hash_Blake2b_malloc"
         (void @-> (returning (ptr hacl_Hash_Blake2b_state_t)))
-    type k___uint32_t__uint8_t_ = [ `k___uint32_t__uint8_t_ ] structure
-    let (k___uint32_t__uint8_t_ : [ `k___uint32_t__uint8_t_ ] structure typ)
-      = structure "K___uint32_t__uint8_t__s"
-    let k___uint32_t__uint8_t__fst =
-      field k___uint32_t__uint8_t_ "fst" uint32_t
-    let k___uint32_t__uint8_t__snd =
-      field k___uint32_t__uint8_t_ "snd" (ptr uint8_t)
-    let _ = seal k___uint32_t__uint8_t_
+    let hacl_Hash_Blake2b_reset_with_key =
+      foreign "Hacl_Hash_Blake2b_reset_with_key"
+        ((ptr hacl_Hash_Blake2b_state_t) @->
+           (ocaml_bytes @-> (uint32_t @-> (returning void))))
     let hacl_Hash_Blake2b_reset =
       foreign "Hacl_Hash_Blake2b_reset"
-        ((ptr hacl_Hash_Blake2b_state_t) @->
-           (k___uint32_t__uint8_t_ @-> (returning void)))
+        ((ptr hacl_Hash_Blake2b_state_t) @-> (returning void))
     let hacl_Hash_Blake2b_update =
       foreign "Hacl_Hash_Blake2b_update"
         ((ptr hacl_Hash_Blake2b_state_t) @->

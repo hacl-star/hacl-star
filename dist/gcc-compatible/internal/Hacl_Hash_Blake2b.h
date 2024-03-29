@@ -77,6 +77,13 @@ Hacl_Hash_Blake2b_update_last(
 
 void Hacl_Hash_Blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
+typedef struct K___uint32_t__uint8_t__s
+{
+  uint32_t fst;
+  uint8_t *snd;
+}
+K___uint32_t__uint8_t_;
+
 uint8_t *FStar_Pervasives_Native_snd__uint32_t__uint8_t_(K___uint32_t__uint8_t_ x);
 
 #if defined(__cplusplus)

@@ -36,7 +36,6 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Hash_Blake2b.h"
 #include "libintvector.h"
 
 typedef struct K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
@@ -73,13 +72,19 @@ Hacl_Hash_Blake2s_Simd128_state_t
 Hacl_Hash_Blake2s_Simd128_state_t *Hacl_Hash_Blake2s_Simd128_malloc(void);
 
 /**
-  Re-initialization function when there is no key
+  Re-initialization function when there is a key
 */
 void
-Hacl_Hash_Blake2s_Simd128_reset(
-  Hacl_Hash_Blake2s_Simd128_state_t *state,
-  K___uint32_t__uint8_t_ key
+Hacl_Hash_Blake2s_Simd128_reset_with_key(
+  Hacl_Hash_Blake2s_Simd128_state_t *s,
+  uint8_t *k,
+  uint32_t kk
 );
+
+/**
+  Re-initialization function when there is no key
+*/
+void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *s);
 
 /**
   Update function when there is no key; 0 = success, 1 = max length exceeded

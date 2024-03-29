@@ -587,14 +587,7 @@ fst__uint32_t__Lib_IntVector_Intrinsics_vec128_____Lib_IntVector_Intrinsics_vec1
   return x.fst;
 }
 
-/**
-  Re-initialization function when there is no key
-*/
-void
-Hacl_Hash_Blake2s_Simd128_reset(
-  Hacl_Hash_Blake2s_Simd128_state_t *state,
-  K___uint32_t__uint8_t_ key
-)
+static void reset_raw(Hacl_Hash_Blake2s_Simd128_state_t *state, K___uint32_t__uint8_t_ key)
 {
   Hacl_Hash_Blake2s_Simd128_state_t scrut = *state;
   uint8_t *buf = scrut.buf;
@@ -628,6 +621,27 @@ Hacl_Hash_Blake2s_Simd128_reset(
   Hacl_Hash_Blake2s_Simd128_state_t
   tmp = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)ite };
   state[0U] = tmp;
+}
+
+/**
+  Re-initialization function when there is a key
+*/
+void
+Hacl_Hash_Blake2s_Simd128_reset_with_key(
+  Hacl_Hash_Blake2s_Simd128_state_t *s,
+  uint8_t *k,
+  uint32_t kk
+)
+{
+  reset_raw(s, ((K___uint32_t__uint8_t_){ .fst = kk, .snd = k }));
+}
+
+/**
+  Re-initialization function when there is no key
+*/
+void Hacl_Hash_Blake2s_Simd128_reset(Hacl_Hash_Blake2s_Simd128_state_t *s)
+{
+  Hacl_Hash_Blake2s_Simd128_reset_with_key(s, NULL, 0U);
 }
 
 /**
