@@ -32,8 +32,8 @@ let row_v #a #m h r =
 let row_v_lemma #a #m h0 h1 r1 r2 = ()
 
 let create_default_params a salt personal = {
-      digest_length = u8 32;
-      key_length = u8 0;
+      digest_length = 32uy;
+      key_length = 0uy;
       fanout = u8 1;
       depth = u8 1;
       leaf_length = u32 0;

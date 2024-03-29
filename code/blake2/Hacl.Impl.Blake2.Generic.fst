@@ -565,9 +565,10 @@ val serialize_params (al:Spec.alg)
       as_seq h b == Seq.create 8 (Spec.nat_to_word al 0)
     )
     (ensures fun h0 _ h1 ->
+      let _ = allow_inversion Spec.alg in
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-        {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}
+        {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}
     )
 
 #push-options "--z3rlimit 100 --fuel 0"
@@ -586,7 +587,7 @@ let serialize_params_blake2s
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-         {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}
+         {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}
     )
   = let h0 = ST.get () in
     [@inline_let]
@@ -622,7 +623,7 @@ let serialize_params_blake2s
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2s_params
-         {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}) =
+         {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}) =
       let open Lib.Sequence in
       let open Lib.ByteSequence in
       let s0 = (u32 (v nn)) ^.
@@ -684,7 +685,7 @@ let serialize_params_blake2b
     (ensures fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
       as_seq h1 b == Spec.serialize_blake2_params
-         {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}
+         {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}
     )
   = let h0 = ST.get () in
     [@inline_let]
@@ -714,7 +715,7 @@ let serialize_params_blake2b
 
     let h1 = ST.get () in
     let aux () : Lemma (as_seq h1 b `Seq.equal` Spec.serialize_blake2b_params
-        {blake2_params_v h0 p with key_length = u8 (v kk); digest_length = u8 (v nn)}) =
+        {blake2_params_v h0 p with key_length = UInt8.uint_to_t (v kk); digest_length = UInt8.uint_to_t (v nn)}) =
       let open Lib.Sequence in
       let open Lib.ByteSequence in
       let s0 = (u64 (v nn)) ^.

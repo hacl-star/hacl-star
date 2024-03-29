@@ -67,8 +67,8 @@ let personal_len (a:Spec.alg) : size_t =
 
 noeq
 type blake2_params (a:Spec.alg) = {
-  digest_length: uint8;
-  key_length: uint8;
+  digest_length: digest_length: UInt8.t { 1 <= UInt8.v digest_length /\ UInt8.v digest_length <= Spec.max_output a };
+  key_length: key_length: UInt8.t { UInt8.v key_length <= Spec.max_key a };
   fanout: uint8;
   depth: uint8;
   leaf_length: uint32;
