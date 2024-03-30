@@ -159,6 +159,33 @@ inline_for_extraction noextract
 let stateful_key_t (a : alg) (kk: key_size_t a): Type =
   singleton kk & P.params a & (b:B.buffer uint8 { B.len b == kk})
 
+let key_footprint =
+  fun #a (#i: index a) h (s: stateful_key_t a (fst i)) ->
+    let kk, p, s = s in
+    P.footprint #a h p `B.loc_union` (
+    if kk = 0ul then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
+
+let key_invariant =
+  fun #a (#i: index a) h (s: stateful_key_t a (fst i)) ->
+      let kk, p, s = s in
+      P.invariant #a h p /\ (
+      kk <> 0ul ==>
+        B.live h (s <: B.buffer uint8) /\
+        B.loc_disjoint (B.loc_addr_of_buffer (s <: B.buffer uint8)) (P.footprint #a h p))
+
+let key_freeable =
+  fun #a (#i: index a) h (s: stateful_key_t a (fst i)) ->
+    let kk, p, s = s in
+    P.freeable #a h p /\ (
+    if kk = 0ul then True else B.freeable (s <: B.buffer uint8))
+
+let key_t #a (i: index a) =
+  Spec.blake2_params a & s:S.seq uint8 { S.length s == U32.v (fst i) }
+
+let key_v #a (i: index a) h (s: stateful_key_t a (fst i)): GTot (key_t i) =
+    let kk', p, s = s in
+    P.v #a h p, (if fst i = 0ul then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8))
+
 /// Keeps the key and its length at run-time, for extraction, but makes sure the
 /// parameter is ghost to let the functor decide, via the index, which APIs need
 /// a run-time key and which don't.
@@ -169,31 +196,18 @@ let stateful_key (a : alg):
   I.Stateful
     (fun i -> stateful_key_t a (fst i))
     (* footprint *)
-    (fun #i h (s: stateful_key_t a (fst i)) ->
-      let kk, p, s = s in
-      P.footprint #a h p `B.loc_union` (
-      if kk = 0ul then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8)))
+    (key_footprint #a)
     (* freeable *)
-    (fun #i h (s: stateful_key_t a (fst i)) ->
-      let kk, p, s = s in
-      P.freeable #a h p /\ (
-      if kk = 0ul then True else B.freeable (s <: B.buffer uint8)))
+    (key_freeable #a)
     (* invariant *)
-    (fun #i h (s: stateful_key_t a (fst i)) ->
-      let kk, p, s = s in
-      P.invariant #a h p /\ (
-      kk <> 0ul ==>
-        B.live h (s <: B.buffer uint8) /\
-        B.loc_disjoint (B.loc_addr_of_buffer (s <: B.buffer uint8)) (P.footprint #a h p)))
+    (key_invariant #a)
     (* t *)
     (fun i ->
       // WARNING: do not destruct kk, e.g. let kk, nn = kk whatsoever, here or
       // below -- leads to intractable unification errors
       Spec.blake2_params a & s:S.seq uint8 { S.length s == U32.v (fst i) })
     (* v *)
-    (fun i h (s: stateful_key_t a (fst i)) ->
-      let kk', p, s = s in
-      P.v #a h p, (if fst i = 0ul then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8)))
+    (key_v #a)
     (fun #i h s ->
       let kk, p, s = s in
       P.invariant_loc_in_footprint #a h p) (* invariant_loc_in_footprint *)
@@ -206,24 +220,48 @@ let stateful_key (a : alg):
 
     (* alloca *)
     (fun i ->
-      admit ();
       if fst i = 0ul then
-        0ul, P.alloca a, B.null #uint8
+        let h0 = ST.get () in
+        let p = P.alloca a in
+        let s = B.null #uint8 in
+        let s = 0ul, p, s in
+        let h1 = ST.get () in
+        assert (key_footprint #a #i h1 s == P.footprint h1 p);
+        s
       else
-        fst i, P.alloca a, B.alloca (Lib.IntTypes.u8 0) (fst i))
+        let h0 = ST.get () in
+        let p = P.alloca a in
+        let s_ = B.alloca (Lib.IntTypes.u8 0) (fst i) in
+        let s = fst i, p, s_ in
+        let h1 = ST.get () in
+        assert B.(key_footprint #a #i h1 s == P.footprint h1 p `loc_union` (loc_addr_of_buffer (s_ <: B.buffer uint8)));
+        assert (key_invariant #a #i h1 s);
+        assert B.(fresh_loc (key_footprint #a #i h1 s) h0 h1);
+        assert B.(loc_includes (loc_region_only true (HS.get_tip h1)) (key_footprint #a #i h1 s));
+        s)
 
     (* create_in *)
     (fun i r ->
       if fst i = 0ul then
+        let h0 = ST.get () in
         let p = P.create_in a r in
         let s = B.null #uint8 in
-        admit ();
-        0ul, p, s
+        let s = 0ul, p, s in
+        let h1 = ST.get () in
+        assert (key_footprint #a #i h1 s == P.footprint h1 p);
+        s
       else
+        let h0 = ST.get () in
         let p = P.create_in a r in
-        let s = B.malloc r (Lib.IntTypes.u8 0) (fst i) in
-        admit ();
-        fst i, p, s)
+        let s_ = B.malloc r (Lib.IntTypes.u8 0) (fst i) in
+        let s = fst i, p, s_ in
+        let h1 = ST.get () in
+        assert B.(key_footprint #a #i h1 s == P.footprint h1 p `loc_union` (loc_addr_of_buffer (s_ <: B.buffer uint8)));
+        assert (key_invariant #a #i h1 s);
+        assert B.(fresh_loc (key_footprint #a #i h1 s) h0 h1);
+        assert B.(loc_includes (loc_region_only true r) (key_footprint #a #i h1 s));
+        assert (key_freeable #a #i h1 s);
+        s)
 
     (* free *)
     (fun i (s: stateful_key_t a (fst i)) ->
@@ -232,17 +270,18 @@ let stateful_key (a : alg):
       if i = 0ul then () else B.free (s <: B.buffer uint8))
 
     (* copy *)
-    (fun i (s_src: stateful_key_t a (fst i)) (s_dst: stateful_key_t a (fst i)) ->
-      admit ();
-      let kk, p_src, s_src = s_src in
-      let _, p_dst, s_dst = s_dst in
+    (fun i (s_src': stateful_key_t a (fst i)) (s_dst': stateful_key_t a (fst i)) ->
+      let kk, p_src, s_src = s_src' in
+      let _, p_dst, s_dst = s_dst' in
       if kk <> 0ul then begin
         let h0 = ST.get () in
         B.blit (s_src <: B.buffer uint8) 0ul
           (s_dst <: B.buffer uint8) 0ul kk;
         let h1 = ST.get () in
         P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_src h0 h1;
-        P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_dst h0 h1
+        P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_dst h0 h1;
+        assert (key_invariant #a #i h1 s_dst');
+        assume (key_v #a i h1 s_dst' == key_v #a i h0 s_src')
       end;
       P.copy p_src p_dst)
 
