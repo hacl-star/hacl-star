@@ -35,15 +35,13 @@ let lbytes = Lib.ByteSequence.lbytes
 
 module Spec = Spec.Blake2
 module Core = Hacl.Impl.Blake2.Core
+module P = Hacl.Streaming.Blake2.Params
 open Hacl.Impl.Blake2.Generic
 
 /// An instance of the stateful type class for blake2
 /// =================================================
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
-
-inline_for_extraction noextract
-let index = unit
 
 inline_for_extraction noextract
 let alg = Spec.alg
@@ -147,45 +145,106 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful (key_size_t a) =
 inline_for_extraction noextract
 let key_size (a : alg) = kk:nat{kk <= Spec.max_key a}
 
+inline_for_extraction noextract
+let output_size (a : alg) : nat = Spec.max_output a
+
+inline_for_extraction noextract
+let output_size_t (a : alg) = s:Lib.IntTypes.size_t { Lib.IntTypes.v s <= Spec.max_output a }
+
+inline_for_extraction noextract
+let index a = key_size_t a & output_size_t a
+
 /// Defining stateful keys
 inline_for_extraction noextract
 let stateful_key_t (a : alg) (kk: key_size_t a): Type =
-  singleton kk & (b:B.buffer uint8 { B.len b == kk})
+  singleton kk & P.params a & (b:B.buffer uint8 { B.len b == kk})
 
 /// Keeps the key and its length at run-time, for extraction, but makes sure the
 /// parameter is ghost to let the functor decide, via the index, which APIs need
 /// a run-time key and which don't.
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 400"
 inline_for_extraction noextract
 let stateful_key (a : alg):
-  I.stateful (key_size_t a) =
+  I.stateful (index a) =
   I.Stateful
-    (fun kk -> stateful_key_t a kk)
+    (fun i -> stateful_key_t a (fst i))
     (* footprint *)
-    (fun #kk h s -> if kk = 0ul then B.loc_none else B.loc_addr_of_buffer ((snd s) <: B.buffer uint8))
+    (fun #i h (s: stateful_key_t a (fst i)) ->
+      let kk, p, s = s in
+      P.footprint #a h p `B.loc_union` (
+      if kk = 0ul then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8)))
     (* freeable *)
-    (fun #kk h s -> if kk = 0ul then True else B.freeable ((snd s) <: B.buffer uint8))
+    (fun #i h (s: stateful_key_t a (fst i)) ->
+      let kk, p, s = s in
+      P.freeable #a h p /\ (
+      if kk = 0ul then True else B.freeable (s <: B.buffer uint8)))
     (* invariant *)
-    (fun #kk h s -> if kk = 0ul then True else B.live h ((snd s) <: B.buffer uint8))
-    (fun kk -> s:S.seq uint8 { S.length s == U32.v kk })
-    (fun kk h s -> if kk = 0ul then S.empty else B.as_seq h ((snd s) <: B.buffer uint8))
-    (fun #_ h s -> ()) (* invariant_loc_in_footprint *)
-    (fun #_ l s h0 h1 -> ()) (* frame_invariant *)
-    (fun #_ l s h0 h1 -> ()) (* frame_freeable *)
+    (fun #i h (s: stateful_key_t a (fst i)) ->
+      let kk, p, s = s in
+      P.invariant #a h p /\ (
+      kk <> 0ul ==>
+        B.live h (s <: B.buffer uint8) /\
+        B.loc_disjoint (B.loc_addr_of_buffer (s <: B.buffer uint8)) (P.footprint #a h p)))
+    (* t *)
+    (fun i ->
+      // WARNING: do not destruct kk, e.g. let kk, nn = kk whatsoever, here or
+      // below -- leads to intractable unification errors
+      Spec.blake2_params a & s:S.seq uint8 { S.length s == U32.v (fst i) })
+    (* v *)
+    (fun i h (s: stateful_key_t a (fst i)) ->
+      let kk', p, s = s in
+      P.v #a h p, (if fst i = 0ul then S.empty #uint8 else B.as_seq h (s <: B.buffer uint8)))
+    (fun #i h s ->
+      let kk, p, s = s in
+      P.invariant_loc_in_footprint #a h p) (* invariant_loc_in_footprint *)
+    (fun #kk l (s: stateful_key_t a (fst kk)) h0 h1 ->
+      let _, p, _ = s in
+      P.frame_invariant #a l p h0 h1) (* frame_invariant *)
+    (fun #_ l s h0 h1 ->
+      let _, p, _ = s in
+      P.frame_freeable #a l p h0 h1) (* frame_freeable *)
 
     (* alloca *)
-    (fun kk -> if kk = 0ul then (0ul, B.null) else (kk, B.alloca (Lib.IntTypes.u8 0) kk))
+    (fun i ->
+      admit ();
+      if fst i = 0ul then
+        0ul, P.alloca a, B.null #uint8
+      else
+        fst i, P.alloca a, B.alloca (Lib.IntTypes.u8 0) (fst i))
 
     (* create_in *)
-    (fun kk r -> if kk = 0ul then (0ul, B.null) else (kk, B.malloc r (Lib.IntTypes.u8 0) kk))
+    (fun i r ->
+      if fst i = 0ul then
+        let p = P.create_in a r in
+        let s = B.null #uint8 in
+        admit ();
+        0ul, p, s
+      else
+        let p = P.create_in a r in
+        let s = B.malloc r (Lib.IntTypes.u8 0) (fst i) in
+        admit ();
+        fst i, p, s)
 
     (* free *)
-    (fun _ (kk, s) -> if kk = 0ul then () else B.free (s <: B.buffer uint8))
+    (fun i (s: stateful_key_t a (fst i)) ->
+      let i, p, s = s in
+      P.free #a p;
+      if i = 0ul then () else B.free (s <: B.buffer uint8))
 
     (* copy *)
-    (fun _ (kk, s_src) (_, s_dst) ->
-       if kk <> 0ul then
+    (fun i (s_src: stateful_key_t a (fst i)) (s_dst: stateful_key_t a (fst i)) ->
+      admit ();
+      let kk, p_src, s_src = s_src in
+      let _, p_dst, s_dst = s_dst in
+      if kk <> 0ul then begin
+        let h0 = ST.get () in
         B.blit (s_src <: B.buffer uint8) 0ul
-               (s_dst <: B.buffer uint8) 0ul kk)
+          (s_dst <: B.buffer uint8) 0ul kk;
+        let h1 = ST.get () in
+        P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_src h0 h1;
+        P.frame_invariant #a (B.loc_addr_of_buffer s_dst) p_dst h0 h1
+      end;
+      P.copy p_src p_dst)
 
 inline_for_extraction noextract
 let k = stateful_key
@@ -209,9 +268,6 @@ let block (a : alg) = (block: S.seq uint8 { S.length block = Spec.size_block a }
 
 inline_for_extraction noextract
 let block_len (a : alg) : U32.t = Core.size_block a
-
-inline_for_extraction noextract
-let output_size (a : alg) : nat = Spec.max_output a
 
 inline_for_extraction noextract
 let output_len (a : alg) = U32.uint_to_t (output_size a)
@@ -264,6 +320,7 @@ let finish_s (#a : alg) (acc : Spec.state a) :
 
 noextract
 let spec_s (a : alg)
+  (p: Spec.blake2_params a)
   (kk : size_nat{kk <= max_key a})
   (key : lbytes kk)
   (input : S.seq uint8{if kk = 0 then S.length input <= max_input_length a else S.length input + Spec.size_block a <= max_input_length a}) =
@@ -355,20 +412,21 @@ let update_multi_associative #a acc prevlen1 prevlen2 input1 input2 =
 noextract
 val blake2_hash_incremental_s :
   a : alg ->
+  p: Spec.blake2_params a ->
   kk: size_nat{kk <= max_key a} ->
   k: lbytes kk ->
   input:S.seq uint8 { if kk = 0 then S.length input <= max_input_length a else S.length input + (Spec.size_block a) <= max_input_length a } ->
   output:S.seq uint8 { S.length output = output_size a }
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_hash_incremental_s a kk k input0 =
+let blake2_hash_incremental_s a p kk k input0 =
   let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
   let key_block_len = S.length key_block in
   let input = Seq.append key_block input0 in
   assert (key_block_len = (if kk = 0 then 0 else Spec.size_block a));
   (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len a));
   let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-  let acc1 = init_s a kk in
+  let acc1 = init_s a p kk in
   let acc2 = update_multi_s #a acc1 0 bs in
   let acc3 = update_last_s #a acc2 (S.length bs) l in
   let acc4 = finish_s #a acc3 in
@@ -429,6 +487,7 @@ let repeati_split_at_eq a s input =
 
 val spec_is_incremental :
   a : alg ->
+  p: Spec.blake2_params a ->
   kk: size_nat{kk <= max_key a} ->
   k: lbytes kk ->
   input:S.seq uint8 { if kk = 0 then S.length input <= max_input_length a else  S.length input + (Spec.size_block a) <= max_input_length a } ->
@@ -437,14 +496,14 @@ val spec_is_incremental :
       Spec.blake2 a input ({ Spec.blake2_default_params a with key_length = UInt8.uint_to_t kk }) k)
 
 #restart-solver
-#push-options "--z3cliopt smt.arith.nl=false"
-let spec_is_incremental a kk k input0 =
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 100"
+let spec_is_incremental a p kk k input0 =
   let key_block = if kk > 0 then Spec.blake2_key_block a kk k else S.empty in
   let key_block_len = S.length key_block in
   let input = Seq.append key_block input0 in
   let n_blocks, l_last = Spec.split a (S.length input) in
   let blocks, last = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-  let s = init_s a kk in
+  let s = init_s a p kk in
   repeati_split_at_eq a s input;
   let f = Spec.blake2_update1 a 0 input in
   let g = Spec.blake2_update1 a 0 blocks in
@@ -522,7 +581,7 @@ let init_key_block a kk k buf_ =
 /// Runtime
 /// -------
 
-#push-options "--ifuel 1"// --z3cliopt smt.arith.nl=false"
+#push-options "--ifuel 2 --fuel 2 --z3rlimit 300"// --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
 let blake2 (a : alg)
            (m : valid_m_spec a)

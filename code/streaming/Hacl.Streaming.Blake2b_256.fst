@@ -20,8 +20,18 @@ open FStar.HyperStack.ST
 #set-options "--fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
+<<<<<<< HEAD
 let blake2b_256 =
   Common.blake2 Spec.Blake2B Core.M256 Blake2b256.init Blake2b256.update_multi
+=======
+let blake2b_256 kk =
+  Common.blake2 Spec.Blake2B Core.M256 false kk Blake2b256.init Blake2b256.update_multi
+         Blake2b256.update_last Blake2b256.finish
+
+inline_for_extraction noextract
+let blake2b_256_params kk =
+  Common.blake2 Spec.Blake2B Core.M256 true kk Blake2b256.init_with_params Blake2b256.update_multi
+>>>>>>> origin/afromher_blake
          Blake2b256.update_last Blake2b256.finish
 
 /// Type abbreviations - makes Karamel use pretty names in the generated code
@@ -118,6 +128,10 @@ let reset_with_key (i: G.erased (Common.key_size_t Spec.Blake2B)) s k () =
   let kk = index_of_state i s in
   reset_raw i s (kk, k)
 
+[@ (Comment "  State allocation function when there are parameters but no key")]
+let malloc_with_params =
+  F.malloc (blake2b_256_params 0) () (Common.s Spec.Blake2B Core.M256) (Common.empty_key Spec.Blake2B)
+
 [@ (Comment "  Re-initialization function when there is no key")]
 val reset: (
   let i: Common.key_size_t Spec.Blake2B = 0ul in
@@ -144,6 +158,10 @@ val reset: (
 
 let reset s =
   reset_with_key (G.hide 0ul) s B.null ()
+
+[@ (Comment "  Re-initialization function when there are parameters but no key")]
+let reset_with_params =
+  F.reset (blake2b_256_params 0) () (Common.s Spec.Blake2B Core.M256) (Common.empty_key Spec.Blake2B)
 
 [@ (Comment "  Update function when there is no key; 0 = success, 1 = max length exceeded")]
 let update (kk: G.erased (Common.key_size_t Spec.Blake2B)): Tot _ =

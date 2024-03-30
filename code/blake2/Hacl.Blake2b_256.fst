@@ -13,6 +13,9 @@ let update_block : Impl.blake2_update_block_st Spec.Blake2B Core.M256 =
 let init : Impl.blake2_init_st Spec.Blake2B Core.M256 =
   Impl.blake2_init #Spec.Blake2B #Core.M256
 
+let init_with_params : Impl.blake2_init_with_params_st Spec.Blake2B Core.M256 =
+  Impl.blake2_init_with_params #Spec.Blake2B #Core.M256
+
 let update_key : Impl.blake2_update_key_st Spec.Blake2B Core.M256 =
   Impl.blake2_update_key #Spec.Blake2B #Core.M256 update_block
 
