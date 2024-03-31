@@ -81,11 +81,11 @@ let i2osp len n = nat_to_intseq_be len n
 
 type modBits_t = modBits:size_nat{1 < modBits}
 
-noeq type rsapss_pkey (modBits:modBits_t) =
-  | Mk_rsapss_pkey: n:pos{pow2 (modBits - 1) < n /\ n < pow2 modBits} -> e:pos -> rsapss_pkey modBits
+noeq type rsa_pkey (modBits:modBits_t) =
+  | Mk_rsa_pkey: n:pos{pow2 (modBits - 1) < n /\ n < pow2 modBits} -> e:pos -> rsa_pkey modBits
 
-noeq type rsapss_skey (modBits:modBits_t) =
-  | Mk_rsapss_skey: pkey:rsapss_pkey modBits -> d:pos -> rsapss_skey modBits
+noeq type rsa_skey (modBits:modBits_t) =
+  | Mk_rsa_skey: pkey:rsa_pkey modBits -> d:pos -> rsa_skey modBits
 
 
 val db_zero: #len:size_pos -> db:lbytes len -> emBits:size_nat ->
@@ -114,7 +114,7 @@ val pss_encode:
   -> emBits:size_pos{Hash.hash_length a + sLen + 2 <= blocks emBits 8} ->
   Pure (lbytes (blocks emBits 8))
   (requires True)
-  (ensures fun em -> if emBits % 8 > 0 then v em.[0] < pow2 (emBits % 8) else v em.[0] < pow2 8)
+  (ensures fun em ->  if emBits % 8 > 0 then v em.[0] < pow2 (emBits % 8) else v em.[0] < pow2 8)
 
 let pss_encode a sLen salt msgLen msg emBits =
   let mHash = Hash.hash a msg in
@@ -248,7 +248,7 @@ let os2ip_lemma emBits em =
 val rsapss_sign_:
     a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
-  -> skey:rsapss_skey modBits
+  -> skey:rsa_skey modBits
   -> sLen:size_nat{
     sLen + Hash.hash_length a + 8 <= max_size_t /\
     (sLen + Hash.hash_length a + 8) `Hash.less_than_max_input_length` a /\
@@ -259,10 +259,10 @@ val rsapss_sign_:
   tuple2 bool (lbytes (blocks modBits 8))
 
 let rsapss_sign_ a modBits skey sLen salt msgLen msg =
-  let pkey = Mk_rsapss_skey?.pkey skey in
-  let n = Mk_rsapss_pkey?.n pkey in
-  let e = Mk_rsapss_pkey?.e pkey in
-  let d = Mk_rsapss_skey?.d skey in
+  let pkey = Mk_rsa_skey?.pkey skey in
+  let n = Mk_rsa_pkey?.n pkey in
+  let e = Mk_rsa_pkey?.e pkey in
+  let d = Mk_rsa_skey?.d skey in
 
   let k = blocks modBits 8 in
   FStar.Math.Lemmas.pow2_le_compat (8 * k) modBits;
@@ -283,7 +283,7 @@ let rsapss_sign_ a modBits skey sLen salt msgLen msg =
 val rsapss_sign:
     a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
-  -> skey:rsapss_skey modBits
+  -> skey:rsa_skey modBits
   -> sLen:size_nat
   -> salt:lbytes sLen
   -> msgLen:nat
@@ -307,7 +307,7 @@ let rsapss_sign a modBits skey sLen salt msgLen msg =
 val rsapss_verify_:
     a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
-  -> pkey:rsapss_pkey modBits
+  -> pkey:rsa_pkey modBits
   -> sLen:size_nat{
     sLen + Hash.hash_length a + 8 <= max_size_t /\
     (sLen + Hash.hash_length a + 8) `Hash.less_than_max_input_length` a}
@@ -317,8 +317,8 @@ val rsapss_verify_:
   Tot bool
 
 let rsapss_verify_ a modBits pkey sLen sgnt msgLen msg =
-  let n = Mk_rsapss_pkey?.n pkey in
-  let e = Mk_rsapss_pkey?.e pkey in
+  let n = Mk_rsa_pkey?.n pkey in
+  let e = Mk_rsa_pkey?.e pkey in
   let k = blocks modBits 8 in
   FStar.Math.Lemmas.pow2_le_compat (8 * k) modBits;
 
@@ -338,7 +338,7 @@ let rsapss_verify_ a modBits pkey sLen sgnt msgLen msg =
 val rsapss_verify:
     a:Hash.hash_alg{hash_is_supported a}
   -> modBits:modBits_t
-  -> pkey:rsapss_pkey modBits
+  -> pkey:rsa_pkey modBits
   -> sLen:size_nat
   -> k:size_nat
   -> sgnt:lbytes k
@@ -359,40 +359,40 @@ let rsapss_verify a modBits pkey sLen k sgnt msgLen msg =
     false
 
 
-val rsapss_load_pkey:
+val rsa_load_pkey:
     modBits:modBits_t
   -> eBits:size_pos
   -> nb:lseq uint8 (blocks modBits 8)
   -> eb:lseq uint8 (blocks eBits 8) ->
-  option (rsapss_pkey modBits)
+  option (rsa_pkey modBits)
 
-let rsapss_load_pkey modBits eBits nb eb =
+let rsa_load_pkey modBits eBits nb eb =
   let n = os2ip #(blocks modBits 8) nb in
   let e = os2ip #(blocks eBits 8) eb in
 
   //`n % 2 = 1` is needed to store `r2 = r * r % n` as a part of pkey
   if (n % 2 = 1 && pow2 (modBits - 1) < n && n < pow2 modBits &&
       0 < e && e < pow2 eBits) then
-    Some (Mk_rsapss_pkey n e)
+    Some (Mk_rsa_pkey n e)
   else
     None
 
 
-val rsapss_load_skey:
+val rsa_load_skey:
     modBits:modBits_t
   -> eBits:size_pos
   -> dBits:size_pos
   -> nb:lseq uint8 (blocks modBits 8)
   -> eb:lseq uint8 (blocks eBits 8)
   -> db:lseq uint8 (blocks dBits 8) ->
-  option (rsapss_skey modBits)
+  option (rsa_skey modBits)
 
-let rsapss_load_skey modBits eBits dBits nb eb db =
-  let pkey = rsapss_load_pkey modBits eBits nb eb in
+let rsa_load_skey modBits eBits dBits nb eb db =
+  let pkey = rsa_load_pkey modBits eBits nb eb in
   let d = os2ip #(blocks dBits 8) db in
 
   if (Some? pkey && 0 < d && d < pow2 dBits) then
-    Some (Mk_rsapss_skey (Some?.v pkey) d)
+    Some (Mk_rsa_skey (Some?.v pkey) d)
   else
     None
 
@@ -412,7 +412,7 @@ val rsapss_skey_sign:
   option (lbytes (blocks modBits 8))
 
 let rsapss_skey_sign a modBits eBits dBits nb eb db sLen salt msgLen msg =
-  let skey = rsapss_load_skey modBits eBits dBits nb eb db in
+  let skey = rsa_load_skey modBits eBits dBits nb eb db in
   match skey with
   | Some vskey -> rsapss_sign a modBits vskey sLen salt msgLen msg
   | None -> None
@@ -432,7 +432,7 @@ val rsapss_pkey_verify:
   Tot bool
 
 let rsapss_pkey_verify a modBits eBits nb eb sLen k sgnt msgLen msg =
-  let pkey = rsapss_load_pkey modBits eBits nb eb in
+  let pkey = rsa_load_pkey modBits eBits nb eb in
   match pkey with
   | Some vpkey -> rsapss_verify a modBits vpkey sLen k sgnt msgLen msg
   | None -> false

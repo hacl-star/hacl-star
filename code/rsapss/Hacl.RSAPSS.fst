@@ -7,7 +7,8 @@ module S = Spec.RSAPSS
 module Hash = Spec.Agile.Hash
 
 module RI = Hacl.Impl.RSAPSS
-module RK = Hacl.Impl.RSAPSS.Keys
+module RK = Hacl.Impl.RSA.Keys
+module RR = Hacl.Impl.RSA
 
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
@@ -20,7 +21,7 @@ inline_for_extraction noextract
 let t_limbs = U64
 
 inline_for_extraction noextract
-let modBits_t = RI.modBits_t t_limbs
+let modBits_t = RR.modBits_t t_limbs
 
 inline_for_extraction noextract
 let ke (modBits:modBits_t) =
@@ -29,13 +30,13 @@ let ke (modBits:modBits_t) =
 
 private
 [@CInline]
-let load_pkey (modBits:modBits_t) : RK.rsapss_load_pkey_st t_limbs (ke modBits) modBits =
-  RK.rsapss_load_pkey (ke modBits) modBits RK.mk_runtime_rsapss_checks
+let load_pkey (modBits:modBits_t) : RK.rsa_load_pkey_st t_limbs (ke modBits) modBits =
+  RK.rsa_load_pkey (ke modBits) modBits RK.mk_runtime_rsa_checks
 
 private
 [@CInline]
-let load_skey (modBits:modBits_t) : RK.rsapss_load_skey_st t_limbs (ke modBits) modBits =
-  RK.rsapss_load_skey (ke modBits) modBits RK.mk_runtime_rsapss_checks (load_pkey modBits)
+let load_skey (modBits:modBits_t) : RK.rsa_load_skey_st t_limbs (ke modBits) modBits =
+  RK.rsa_load_skey (ke modBits) modBits RK.mk_runtime_rsa_checks (load_pkey modBits)
 
 
 [@@ Comment "Sign a message `msg` and write the signature to `sgnt`.
@@ -61,8 +62,7 @@ val rsapss_sign:
   RI.rsapss_sign_st t_limbs (ke modBits) a modBits
 
 let rsapss_sign a modBits eBits dBits skey saltLen salt msgLen msg sgnt =
-  RI.rsapss_sign (ke modBits) a modBits eBits dBits skey saltLen salt msgLen msg sgnt
-
+  RI.rsapss_sign (ke modBits) a modBits (Hacl.RSA.rsa_dec modBits) eBits dBits skey saltLen salt msgLen msg sgnt
 
 [@@ Comment "Verify the signature `sgnt` of a message `msg`.
 
@@ -86,35 +86,7 @@ val rsapss_verify:
   RI.rsapss_verify_st t_limbs (ke modBits) a modBits
 
 let rsapss_verify a modBits eBits pkey saltLen sgntLen sgnt msgLen msg =
-  RI.rsapss_verify (ke modBits) a modBits eBits pkey saltLen sgntLen sgnt msgLen msg
-
-
-[@@ Comment "Load a public key from key parts.
-
-@param modBits Count of bits in modulus (`n`).
-@param eBits Count of bits in `e` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
-
-@return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key."]
-val new_rsapss_load_pkey: modBits:modBits_t -> RK.new_rsapss_load_pkey_st t_limbs (ke modBits) modBits
-let new_rsapss_load_pkey modBits r eBits nb eb =
-  RK.new_rsapss_load_pkey (ke modBits) modBits RK.mk_runtime_rsapss_checks r eBits nb eb
-
-
-[@@ Comment "Load a secret key from key parts.
-
-@param modBits Count of bits in modulus (`n`).
-@param eBits Count of bits in `e` value.
-@param dBits Count of bits in `d` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
-@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
-
-@return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key."]
-val new_rsapss_load_skey: modBits:modBits_t -> RK.new_rsapss_load_skey_st t_limbs (ke modBits) modBits
-let new_rsapss_load_skey modBits r eBits dBits nb eb db =
-  RK.new_rsapss_load_skey (ke modBits) modBits RK.mk_runtime_rsapss_checks r eBits dBits nb eb db
+  RI.rsapss_verify (ke modBits) a modBits (Hacl.RSA.rsa_enc modBits) eBits pkey saltLen sgntLen sgnt msgLen msg
 
 
 [@@ Comment "Sign a message `msg` and write the signature to `sgnt`.

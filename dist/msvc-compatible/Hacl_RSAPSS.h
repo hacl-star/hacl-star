@@ -36,7 +36,7 @@ extern "C" {
 #include "krml/internal/target.h"
 
 #include "Hacl_Streaming_Types.h"
-#include "Hacl_Krmllib.h"
+#include "Hacl_RSA.h"
 #include "Hacl_Hash_SHA2.h"
 
 /**
@@ -101,41 +101,6 @@ Hacl_RSAPSS_rsapss_verify(
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg
-);
-
-/**
-Load a public key from key parts.
-
-@param modBits Count of bits in modulus (`n`).
-@param eBits Count of bits in `e` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
-
-@return Returns an allocated public key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
-*/
-uint64_t
-*Hacl_RSAPSS_new_rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb);
-
-/**
-Load a secret key from key parts.
-
-@param modBits Count of bits in modulus (`n`).
-@param eBits Count of bits in `e` value.
-@param dBits Count of bits in `d` value.
-@param nb Pointer to `ceil(modBits / 8)` bytes where the modulus (`n`), in big-endian byte order, is read from.
-@param eb Pointer to `ceil(modBits / 8)` bytes where the `e` value, in big-endian byte order, is read from.
-@param db Pointer to `ceil(modBits / 8)` bytes where the `d` value, in big-endian byte order, is read from.
-
-@return Returns an allocated secret key upon success, otherwise, `NULL` if key part arguments are invalid or memory allocation fails. Note: caller must take care to `free()` the created key.
-*/
-uint64_t
-*Hacl_RSAPSS_new_rsapss_load_skey(
-  uint32_t modBits,
-  uint32_t eBits,
-  uint32_t dBits,
-  uint8_t *nb,
-  uint8_t *eb,
-  uint8_t *db
 );
 
 /**

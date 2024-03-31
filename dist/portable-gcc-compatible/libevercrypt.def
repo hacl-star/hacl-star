@@ -417,10 +417,14 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   Hacl_IntTypes_Intrinsics_128_add_carry_u64
   Hacl_IntTypes_Intrinsics_128_sub_borrow_u64
+  Hacl_Impl_RSA_Keys_check_modulus_u64
+  Hacl_Impl_RSA_Keys_check_exponent_u64
+  Hacl_RSA_rsa_dec
+  Hacl_RSA_rsa_enc
+  Hacl_RSA_new_rsa_load_pkey
+  Hacl_RSA_new_rsa_load_skey
   Hacl_RSAPSS_rsapss_sign
   Hacl_RSAPSS_rsapss_verify
-  Hacl_RSAPSS_new_rsapss_load_pkey
-  Hacl_RSAPSS_new_rsapss_load_skey
   Hacl_RSAPSS_rsapss_skey_sign
   Hacl_RSAPSS_rsapss_pkey_verify
   Hacl_RSAPSS_mgf_hash
@@ -508,13 +512,13 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
   Hacl_Bignum4096_eq_mask
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
   Hacl_Bignum4096_32_add_mod

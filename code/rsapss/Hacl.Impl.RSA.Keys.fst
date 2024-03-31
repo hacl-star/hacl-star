@@ -1,4 +1,4 @@
-module Hacl.Impl.RSAPSS.Keys
+module Hacl.Impl.RSA.Keys
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -24,13 +24,13 @@ module BE = Hacl.Bignum.Exponentiation
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val rsapss_check_pkey_len:
+val rsa_check_pkey_len:
     #t:limb_t
   -> modBits:size_t
   -> eBits:size_t ->
   res:bool{res <==> LS.pkey_len_pre t (v modBits) (v eBits)}
 
-let rsapss_check_pkey_len #t modBits eBits =
+let rsa_check_pkey_len #t modBits eBits =
   if 1ul <. modBits && 0ul <. eBits then begin
     [@inline_let] let bits = size (bits t) in
     let nLen = blocks modBits bits in
@@ -42,15 +42,15 @@ let rsapss_check_pkey_len #t modBits eBits =
 
 
 inline_for_extraction noextract
-val rsapss_check_skey_len:
+val rsa_check_skey_len:
     #t:limb_t
   -> modBits:size_t
   -> eBits:size_t
   -> dBits:size_t ->
   res:bool{res <==> LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
 
-let rsapss_check_skey_len #t modBits eBits dBits =
-  if rsapss_check_pkey_len #t modBits eBits && 0ul <. dBits then begin
+let rsa_check_skey_len #t modBits eBits dBits =
+  if rsa_check_pkey_len #t modBits eBits && 0ul <. dBits then begin
     [@inline_let] let bits = size (bits t) in
     let nLen = blocks modBits bits in
     let eLen = blocks eBits bits in
@@ -80,22 +80,22 @@ let bn_check_num_bits #t bs b =
 
 
 inline_for_extraction noextract
-let rsapss_check_modulus_st (t:limb_t) =
+let rsa_check_modulus_st (t:limb_t) =
     modBits:size_t{0 < v modBits /\ bits t * v (blocks modBits (size (bits t))) <= max_size_t}
   -> n:lbignum t (blocks modBits (size (bits t))) ->
   Stack (limb t)
   (requires fun h -> live h n)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == LS.rsapss_check_modulus (v modBits) (as_seq h0 n))
+    r == LS.rsa_check_modulus (v modBits) (as_seq h0 n))
 
 
 inline_for_extraction noextract
-val rsapss_check_modulus:
+val rsa_check_modulus:
     #t:limb_t
   -> bn_check_num_bits:bn_check_num_bits_st t ->
-  rsapss_check_modulus_st t
+  rsa_check_modulus_st t
 
-let rsapss_check_modulus #t bn_check_num_bits modBits n =
+let rsa_check_modulus #t bn_check_num_bits modBits n =
   let nLen = blocks modBits (size (bits t)) in
   let bits0 = BN.bn_is_odd nLen n in
   let m0 = uint #t 0 -. bits0 in
@@ -105,22 +105,22 @@ let rsapss_check_modulus #t bn_check_num_bits modBits n =
 
 
 inline_for_extraction noextract
-let rsapss_check_exponent_st (t:limb_t) =
+let rsa_check_exponent_st (t:limb_t) =
     eBits:size_t{0 < v eBits /\ bits t * v (blocks eBits (size (bits t))) <= max_size_t}
   -> e:lbignum t (blocks eBits (size (bits t))) ->
   Stack (limb t)
   (requires fun h -> live h e)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == LS.rsapss_check_exponent (v eBits) (as_seq h0 e))
+    r == LS.rsa_check_exponent (v eBits) (as_seq h0 e))
 
 
 inline_for_extraction noextract
-val rsapss_check_exponent:
+val rsa_check_exponent:
   #t:limb_t
   -> bn_check_num_bits:bn_check_num_bits_st t ->
-  rsapss_check_exponent_st t
+  rsa_check_exponent_st t
 
-let rsapss_check_exponent #t bn_check_num_bits eBits e =
+let rsa_check_exponent #t bn_check_num_bits eBits e =
   let eLen = blocks eBits (size (bits t)) in
   let m0 = BN.bn_is_zero_mask eLen e in
   let m1 = bn_check_num_bits eBits e in
@@ -128,26 +128,26 @@ let rsapss_check_exponent #t bn_check_num_bits eBits e =
 
 
 inline_for_extraction noextract
-class rsapss_checks (t:limb_t) = {
+class rsa_checks (t:limb_t) = {
   check_num_bits: bn_check_num_bits_st t;
-  check_modulus: rsapss_check_modulus_st t;
-  check_exponent: rsapss_check_exponent_st t;
+  check_modulus: rsa_check_modulus_st t;
+  check_exponent: rsa_check_exponent_st t;
 }
 
 [@CInline]
 let check_num_bits_u32 : bn_check_num_bits_st U32 =
   bn_check_num_bits
 [@CInline]
-let check_modulus_u32 : rsapss_check_modulus_st U32 =
-  rsapss_check_modulus check_num_bits_u32
+let check_modulus_u32 : rsa_check_modulus_st U32 =
+  rsa_check_modulus check_num_bits_u32
 [@CInline]
-let check_exponent_u32 : rsapss_check_exponent_st U32 =
-  rsapss_check_exponent check_num_bits_u32
+let check_exponent_u32 : rsa_check_exponent_st U32 =
+  rsa_check_exponent check_num_bits_u32
 
 
 inline_for_extraction noextract
-val mk_runtime_rsapss_checks_uint32: rsapss_checks U32
-let mk_runtime_rsapss_checks_uint32 = {
+val mk_runtime_rsa_checks_uint32: rsa_checks U32
+let mk_runtime_rsa_checks_uint32 = {
   check_num_bits = check_num_bits_u32;
   check_modulus = check_modulus_u32;
   check_exponent = check_exponent_u32;
@@ -157,31 +157,31 @@ let mk_runtime_rsapss_checks_uint32 = {
 let check_num_bits_u64 : bn_check_num_bits_st U64 =
   bn_check_num_bits
 [@CInline]
-let check_modulus_u64 : rsapss_check_modulus_st U64 =
-  rsapss_check_modulus check_num_bits_u64
+let check_modulus_u64 : rsa_check_modulus_st U64 =
+  rsa_check_modulus check_num_bits_u64
 [@CInline]
-let check_exponent_u64 : rsapss_check_exponent_st U64 =
-  rsapss_check_exponent check_num_bits_u64
+let check_exponent_u64 : rsa_check_exponent_st U64 =
+  rsa_check_exponent check_num_bits_u64
 
 
 inline_for_extraction noextract
-val mk_runtime_rsapss_checks_uint64: rsapss_checks U64
-let mk_runtime_rsapss_checks_uint64 = {
+val mk_runtime_rsa_checks_uint64: rsa_checks U64
+let mk_runtime_rsa_checks_uint64 = {
   check_num_bits = check_num_bits_u64;
   check_modulus = check_modulus_u64;
   check_exponent = check_exponent_u64;
 }
 
 inline_for_extraction noextract
-let mk_runtime_rsapss_checks (#t:limb_t) : rsapss_checks t =
+let mk_runtime_rsa_checks (#t:limb_t) : rsa_checks t =
   match t with
-  | U32 -> mk_runtime_rsapss_checks_uint32
-  | U64 -> mk_runtime_rsapss_checks_uint64
+  | U32 -> mk_runtime_rsa_checks_uint32
+  | U64 -> mk_runtime_rsa_checks_uint64
 
 
 //pkey = [n; r2; e]
 inline_for_extraction noextract
-let rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
+let rsa_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     eBits:size_t{LS.pkey_len_pre t (v modBits) (v eBits)}
   -> nb:lbuffer uint8 (blocks modBits 8ul)
   -> eb:lbuffer uint8 (blocks eBits 8ul)
@@ -192,18 +192,18 @@ let rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     live h nb /\ live h eb /\ live h pkey /\
     disjoint pkey nb /\ disjoint pkey eb)
   (ensures  fun h0 b h1 -> modifies (loc pkey) h0 h1 /\
-   (b, as_seq h1 pkey) == LS.rsapss_load_pkey (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb))
+   (b, as_seq h1 pkey) == LS.rsa_load_pkey (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb))
 
 
 inline_for_extraction noextract
-val rsapss_load_pkey:
+val rsa_load_pkey:
     #t:limb_t
   -> ke:BE.exp t
   -> modBits:size_t
-  -> kc:rsapss_checks t ->
-  rsapss_load_pkey_st t ke modBits
+  -> kc:rsa_checks t ->
+  rsa_load_pkey_st t ke modBits
 
-let rsapss_load_pkey #t ke modBits kc eBits nb eb pkey =
+let rsa_load_pkey #t ke modBits kc eBits nb eb pkey =
   let h0 = ST.get () in
   [@inline_let] let bits = size (bits t) in
   [@inline_let] let numb = size (numbytes t) in
@@ -241,7 +241,7 @@ let rsapss_load_pkey #t ke modBits kc eBits nb eb pkey =
 
 //skey = [pkey; d]
 inline_for_extraction noextract
-let rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
+let rsa_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     eBits:size_t
   -> dBits:size_t{LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
   -> nb:lbuffer uint8 (blocks modBits 8ul)
@@ -254,20 +254,20 @@ let rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     live h nb /\ live h eb /\ live h db /\ live h skey /\
     disjoint skey nb /\ disjoint skey eb /\ disjoint skey db)
   (ensures  fun h0 b h1 -> modifies (loc skey) h0 h1 /\
-    (b, as_seq h1 skey) == LS.rsapss_load_skey (v modBits) (v eBits) (v dBits)
+    (b, as_seq h1 skey) == LS.rsa_load_skey (v modBits) (v eBits) (v dBits)
       (as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db))
 
 
 inline_for_extraction noextract
-val rsapss_load_skey:
+val rsa_load_skey:
     #t:limb_t
   -> ke:BE.exp t
   -> modBits:size_t
-  -> kc:rsapss_checks t
-  -> rsapss_load_pkey:rsapss_load_pkey_st t ke modBits ->
-  rsapss_load_skey_st t ke modBits
+  -> kc:rsa_checks t
+  -> rsa_load_pkey:rsa_load_pkey_st t ke modBits ->
+  rsa_load_skey_st t ke modBits
 
-let rsapss_load_skey #t ke modBits kc rsapss_load_pkey eBits dBits nb eb db skey =
+let rsa_load_skey #t ke modBits kc rsa_load_pkey eBits dBits nb eb db skey =
   let h0 = ST.get () in
   [@inline_let] let bits = size (bits t) in
   [@inline_let] let numb = size (numbytes t) in
@@ -288,7 +288,7 @@ let rsapss_load_skey #t ke modBits kc rsapss_load_pkey eBits dBits nb eb db skey
   let pkey = sub skey 0ul pkeyLen in
   let d = sub skey pkeyLen dLen in
 
-  let b = rsapss_load_pkey eBits nb eb pkey in
+  let b = rsa_load_pkey eBits nb eb pkey in
   BN.bn_from_bytes_be dbLen db d;
   let h1 = ST.get () in
   LSeq.lemma_concat2 (v pkeyLen) (as_seq h1 pkey) (v dLen) (as_seq h1 d) (as_seq h1 skey);
@@ -299,7 +299,7 @@ let rsapss_load_skey #t ke modBits kc rsapss_load_pkey eBits dBits nb eb db skey
 
 
 inline_for_extraction noextract
-let new_rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
+let new_rsa_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     r:HS.rid
   -> eBits:size_t
   -> nb:lbuffer uint8 (blocks0 modBits 8ul)
@@ -321,22 +321,22 @@ let new_rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
       B.len pkey == pkeyLen /\
      (let pkey = pkey <: lbignum t pkeyLen in
 
-      LS.rsapss_load_pkey_post (v modBits) (v eBits)
+      LS.rsa_load_pkey_post (v modBits) (v eBits)
 	(as_seq h0 nb) (as_seq h0 eb) (as_seq h1 pkey)))))
 
 
 inline_for_extraction noextract
-val new_rsapss_load_pkey:
+val new_rsa_load_pkey:
     #t:limb_t
   -> ke:BE.exp t
   -> modBits:size_t
-  -> kc:rsapss_checks t ->
-  new_rsapss_load_pkey_st t ke modBits
+  -> kc:rsa_checks t ->
+  new_rsa_load_pkey_st t ke modBits
 
-let new_rsapss_load_pkey #t ke modBits kc r eBits nb eb =
+let new_rsa_load_pkey #t ke modBits kc r eBits nb eb =
   [@inline_let] let bits = size (bits t) in
 
-  if not (rsapss_check_pkey_len #t modBits eBits) then
+  if not (rsa_check_pkey_len #t modBits eBits) then
    B.null
   else
     let h0 = ST.get () in
@@ -353,17 +353,17 @@ let new_rsapss_load_pkey #t ke modBits kc r eBits nb eb =
       let pkey: Lib.Buffer.buffer (limb t) = pkey in
       assert (B.length pkey == FStar.UInt32.v pkeyLen);
       let pkey: lbignum t pkeyLen = pkey in
-      let b = rsapss_load_pkey ke modBits kc eBits nb eb pkey in
+      let b = rsa_load_pkey ke modBits kc eBits nb eb pkey in
       let h2 = ST.get () in
       B.(modifies_only_not_unused_in loc_none h0 h2);
-      LS.rsapss_load_pkey_lemma #t (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb);
+      LS.rsa_load_pkey_lemma #t (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb);
       if b then pkey else begin
         B.free (pkey <: buffer (limb t));
         B.null end
 
 
 inline_for_extraction noextract
-let new_rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
+let new_rsa_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     r:HS.rid
   -> eBits:size_t
   -> dBits:size_t
@@ -389,24 +389,24 @@ let new_rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
 
       B.len skey == skeyLen /\
      (let skey = skey <: lbignum t skeyLen in
-      LS.rsapss_load_skey_post (v modBits) (v eBits) (v dBits)
+      LS.rsa_load_skey_post (v modBits) (v eBits) (v dBits)
 	(as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db) (as_seq h1 skey)))))
 
 
 #set-options "--z3rlimit 100"
 
 inline_for_extraction noextract
-val new_rsapss_load_skey:
+val new_rsa_load_skey:
     #t:limb_t
   -> ke:BE.exp t
   -> modBits:size_t
-  -> kc:rsapss_checks t ->
-  new_rsapss_load_skey_st t ke modBits
+  -> kc:rsa_checks t ->
+  new_rsa_load_skey_st t ke modBits
 
-let new_rsapss_load_skey #t ke modBits kc r eBits dBits nb eb db =
+let new_rsa_load_skey #t ke modBits kc r eBits dBits nb eb db =
   [@inline_let] let bits = size (bits t) in
 
-  if not (rsapss_check_skey_len #t modBits eBits dBits) then
+  if not (rsa_check_skey_len #t modBits eBits dBits) then
    B.null
   else begin
     assert (LS.skey_len_pre t (v modBits) (v eBits) (v dBits));
@@ -425,10 +425,10 @@ let new_rsapss_load_skey #t ke modBits kc r eBits dBits nb eb db =
       let skey: Lib.Buffer.buffer (limb t) = skey in
       assert (B.length skey == FStar.UInt32.v skeyLen);
       let skey: lbignum t skeyLen = skey in
-      let b = rsapss_load_skey ke modBits kc (rsapss_load_pkey ke modBits kc) eBits dBits nb eb db skey in
+      let b = rsa_load_skey ke modBits kc (rsa_load_pkey ke modBits kc) eBits dBits nb eb db skey in
       let h2 = ST.get () in
       B.(modifies_only_not_unused_in loc_none h0 h2);
-      LS.rsapss_load_skey_lemma #t (v modBits) (v eBits) (v dBits)
+      LS.rsa_load_skey_lemma #t (v modBits) (v eBits) (v dBits)
 	(as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db);
       if b then skey else begin
         B.free (skey <: buffer (limb t));
