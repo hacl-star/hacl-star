@@ -87,6 +87,32 @@ val free: #a: Spec.alg -> s:params a -> ST unit
       B.(modifies (footprint h0 s) h0 h1))
 
 inline_for_extraction noextract
+val set_digest_length: #a:Spec.alg -> s:params a ->
+  d:Spec.digest_length_t a ->
+    Stack unit
+      (requires (fun h0 ->
+        invariant h0 s))
+      (ensures fun h0 _ h1 ->
+        B.(modifies (footprint h0 s) h0 h1) /\
+        footprint h0 s == footprint h1 s /\
+        (freeable h0 s ==> freeable h1 s) /\
+        invariant h1 s /\
+        v h1 s == { v h0 s with Spec.digest_length = d })
+
+inline_for_extraction noextract
+val set_key_length: #a:Spec.alg -> s:params a ->
+  d:Spec.key_length_t a ->
+    Stack unit
+      (requires (fun h0 ->
+        invariant h0 s))
+      (ensures fun h0 _ h1 ->
+        B.(modifies (footprint h0 s) h0 h1) /\
+        footprint h0 s == footprint h1 s /\
+        (freeable h0 s ==> freeable h1 s) /\
+        invariant h1 s /\
+        v h1 s == { v h0 s with Spec.key_length = d })
+
+inline_for_extraction noextract
 val copy: #a:Spec.alg -> s_src:params a -> s_dst:params a ->
     Stack unit
       (requires (fun h0 ->

@@ -2,6 +2,7 @@ module Hacl.Streaming.Blake2.Params
 
 open Lib.IntTypes
 open Lib.Buffer
+open LowStar.BufferOps
 
 module B = LowStar.Buffer
 
@@ -36,9 +37,10 @@ let alloca a =
   let open Core in
   let salt = create (salt_len a) (u8 0) in
   let personal = create (personal_len a) (u8 0) in
+  let _ = allow_inversion Spec.Blake2.alg in
   let p = {
-    digest_length = u8 32;
-    key_length = u8 0;
+    digest_length = 32uy;
+    key_length = 0uy;
     fanout = u8 1;
     depth = u8 1;
     leaf_length = u32 0;
@@ -54,8 +56,8 @@ let create_in a r =
   let salt: buffer uint8 = B.malloc r (u8 0) (salt_len a) in
   let personal: buffer uint8 = B.malloc r (u8 0) (personal_len a) in
   let p = {
-    digest_length = u8 32;
-    key_length = u8 0;
+    digest_length = 32uy;
+    key_length = 0uy;
     fanout = u8 1;
     depth = u8 1;
     leaf_length = u32 0;
@@ -70,6 +72,17 @@ let free #a s =
   B.free (p.salt <: B.buffer uint8);
   B.free (p.personal <: B.buffer uint8);
   B.free s
+
+let set_digest_length #a s d =
+  let open Core in
+  let uu__ = !*s in
+  s *= { uu__ with digest_length = d }
+
+let set_key_length #a s d =
+  let open Core in
+  let uu__ = !*s in
+  s *= { uu__ with key_length = d }
+
 
 let copy #a s_src s_dst =
   let p_src = B.index s_src 0ul in
